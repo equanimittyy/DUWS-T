@@ -19,7 +19,7 @@ https://steamcommunity.com/sharedfiles/filedetails/?id=3685431219
 
 - **No hard mod dependency.** The mission must run stand-alone. Anything that would
   force a mod, or break the faction auto-detection / ALIVE support, is the wrong call.
-- **The unpacked source is the source of truth.** Edit the unpacked `DUWS_T.altis/`
+- **The unpacked source is the source of truth.** Edit the mission under `src/`
   and repack; never hand-edit the packed `.pbo`. Workflow: [`README.md`](README.md).
 
 ## Always-loaded working rules

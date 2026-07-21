@@ -15,7 +15,7 @@ Play it on the Steam Workshop:
 
 This repo version-controls the **unpacked** mission source. `DUWS_T.altis.pbo` is
 build output — repacked from the source — and is **not** tracked (see `.gitignore`).
-Commit the unpacked `DUWS_T.altis/` source; leave the regenerated `.pbo` untracked.
+Commit the unpacked `src/` source; leave the regenerated `.pbo` untracked.
 
 ## Developer setup
 
@@ -33,23 +33,17 @@ copy at that path:
 
 ### 2. Unpack / repack the mission
 
-We use the console CLI, `pboc.exe` — not the `pbom.exe` GUI (it ships in the same
-download; we don't use it). It's a Windows executable, so run it on a Windows host,
-not in the Linux devcontainer.
+Two Windows batch scripts wrap the CLI (Windows only — they call `pboc.exe`, which
+won't run in the Linux devcontainer):
 
-Unpack the packed mission into editable source:
+- **`unpack.cmd`** — extracts `DUWS_T.altis.pbo` into a flat `src/` folder. Run it
+  once to seed `src/`, then commit `src/`. It asks for confirmation first and warns
+  that re-running replaces `src/` and discards edits.
+- **`repack.cmd`** — packs `src/` back into `DUWS_T.altis.pbo` at the repo root, asking
+  before it overwrites the `.pbo`. The result is ready to load in Arma.
 
-```console
-pboc.exe unpack DUWS_T.altis.pbo -o .
-```
-
-Repack the source back into a `.pbo`:
-
-```console
-pboc.exe pack DUWS_T.altis -o .
-```
-
-`-o/--output-directory` sets the output location; `-h/--help` lists every flag.
+Edit the mission as `.sqf` / `.hpp` / etc. under `src/`; the packed `.pbo` stays
+build output (git-ignored).
 
 ## Conventions
 
