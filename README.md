@@ -29,14 +29,27 @@ binaries won't run in the Linux devcontainer, so each environment supplies its o
 copy at that path:
 
 1. Download a release from https://github.com/winseros/pboman3.
-2. Unzip it into `tools/PBO Manager/`, so that `tools/PBO Manager/pbom.exe` exists.
+2. Unzip it into `tools/PBO Manager/`, so that `tools/PBO Manager/pboc.exe` exists.
 
 ### 2. Unpack / repack the mission
 
-- **GUI:** open `pbom.exe`; drag in `DUWS_T.altis.pbo` to unpack, or drag a source
-  folder onto it to repack.
-- **Console:** `pboc.exe` does the same for scripted pack/unpack (run it with no
-  arguments for usage).
+We use the console CLI, `pboc.exe` — not the `pbom.exe` GUI (it ships in the same
+download; we don't use it). It's a Windows executable, so run it on a Windows host,
+not in the Linux devcontainer.
+
+Unpack the packed mission into editable source:
+
+```console
+pboc.exe unpack DUWS_T.altis.pbo -o .
+```
+
+Repack the source back into a `.pbo`:
+
+```console
+pboc.exe pack DUWS_T.altis -o .
+```
+
+`-o/--output-directory` sets the output location; `-h/--help` lists every flag.
 
 ## Conventions
 
