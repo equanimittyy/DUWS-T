@@ -1,0 +1,221 @@
+/*
+    fnc_dyna_mission_mortarspotter.sqf
+    功能：猎杀迫击炮观察员任务
+    流程：
+        1. 随机选择一个玩家，在其周围100-120米空中生成2发迫击炮弹（间隔5秒）
+        2. 在距离该玩家300-1200米范围内寻找建筑安置观察员（opfor_MARK_SOLDIER_X，蹲姿，禁止移动）
+        3. 观察员无敌10秒后创建任务，标记范围50米
+        4. 观察员存活时每30秒在玩家周围生成1发迫击炮弹
+        5. 观察员死亡则任务成功，奖励10CP和5AP
+    参数：
+        _nameKey: 任务名称的本地化键（来自主循环）
+*/
+
+params ["_nameKey"];
+
+// 清理函数：重置全局活动标志
+private _fnc_cleanup = {
+    missionNamespace setVariable ["dyna_mission_active", false];
+};
+
+diag_log format ["[MORTAR] Mission started with key: %1", _nameKey];
+
+// ---------- 1. 随机选择一名玩家 ----------
+private _allPlayers = call BIS_fnc_listPlayers;
+if (_allPlayers isEqualTo []) exitWith {
+    diag_log "[MORTAR] No players, aborting.";
+    call _fnc_cleanup;
+};
+private _targetPlayer = selectRandom _allPlayers;
+private _playerPos = getPos _targetPlayer;
+
+// ---------- 2. 生成两发下落的迫击炮弹（间隔5秒） ----------
+private _spawnShell = {
+    params ["_pos", "_target"];
+    private _shell = createVehicle ["Sh_82mm_AMOS", _pos, [], 0, "NONE"];
+    _shell setPos _pos;
+    _shell setVelocity [0, 0, -30]; // 快速下落
+    // 可添加音效或提示
+};
+
+private _shellPos1 = _playerPos getPos [100 + random 20, random 360];
+_shellPos1 set [2, 150]; // 空中高度
+[_shellPos1] call _spawnShell;
+sleep 5;
+private _shellPos2 = _playerPos getPos [100 + random 20, random 360];
+_shellPos2 set [2, 150];
+[_shellPos2] call _spawnShell;
+
+// ---------- 3. 寻找观察员位置（300-1200米范围内，优先建筑） ----------
+private _spotterPos = [];
+private _building = objNull;
+
+// 获取该范围内的所有建筑（扩大建筑类型）
+private _nearBuildings = nearestObjects [_playerPos, ["House","Building","Strategic","Ruins"], 1200];
+_nearBuildings = _nearBuildings select { _x distance _playerPos >= 300 && _x distance _playerPos <= 1200 };
+
+// 过滤掉太靠近HQ或战区的建筑，同时排除FOB附近
+private _allZones = [];
+{
+    _allZones append (missionNamespace getVariable [_x, []]);
+} forEach ["WARCOM_zones_controled_by_BLUFOR", "WARCOM_zones_controled_by_OPFOR"];
+private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", [0,0,0]];
+private _fobPositions = [];
+{
+    if (!isNull _x) then { _fobPositions pushBack (getPos _x); };
+} forEach (missionNamespace getVariable ["Array_of_FOBS", []]);
+
+_nearBuildings = _nearBuildings select {
+    private _bPos = getPos _x;
+    // 距离HQ至少500米（原为200米，可调）
+    (_bPos distance _hqPos >= 500) &&
+    // 距离任何战区至少300米
+    { { _bPos distance _x >= 300 } count _allZones == 0 } &&
+    // 距离任何FOB至少300米
+    { { _bPos distance _x >= 300 } count _fobPositions == 0 }
+};
+
+// 调试输出
+diag_log format ["[MORTAR] Near buildings count: %1", count _nearBuildings];
+
+// 如果有合适的建筑，随机选择一个并获取其位置
+if (count _nearBuildings > 0) then {
+    _building = selectRandom _nearBuildings;
+    _spotterPos = getPos _building;
+    // 尝试获取建筑内的位置
+    private _buildingPositions = [_building] call BIS_fnc_buildingPositions;
+    if (count _buildingPositions > 0) then {
+        _spotterPos = selectRandom _buildingPositions;
+    };
+    diag_log format ["[MORTAR] Selected building at %1", _spotterPos];
+} else {
+    // 无合适建筑：尝试在随机位置附近寻找最近建筑
+    diag_log "[MORTAR] No suitable building found, trying fallback.";
+    private _randomPos = [_playerPos, 300, 1200, 5, 0, 0.2, 0, [], [_playerPos, _playerPos]] call BIS_fnc_findSafePos;
+    if (_randomPos isEqualTo [0,0,0]) then {
+        _randomPos = _playerPos getPos [300 + random 700, random 360];
+    };
+    private _nearestBuilding = nearestBuilding _randomPos;
+    if (!isNull _nearestBuilding) then {
+        _building = _nearestBuilding;
+        _spotterPos = getPos _building;
+        private _buildingPositions = [_building] call BIS_fnc_buildingPositions;
+        if (count _buildingPositions > 0) then {
+            _spotterPos = selectRandom _buildingPositions;
+        };
+        diag_log format ["[MORTAR] Fallback: found building at %1", _spotterPos];
+    } else {
+        // 实在没有建筑，使用随机位置
+        _spotterPos = _randomPos;
+        diag_log format ["[MORTAR] Fallback: no building, using random pos %1", _spotterPos];
+    };
+};
+
+// 如果找不到任何合适位置，退出任务
+if (_spotterPos isEqualTo []) exitWith {
+    diag_log "[MORTAR] No valid spotter position found, aborting.";
+    call _fnc_cleanup;
+};
+
+// ---------- 4. 生成观察员（opfor_MARK_SOLDIER_X） ----------
+private _spotterGroup = [_spotterPos, EAST, [opfor_MARK_SOLDIER_X], [], [], [0.5,0.6]] call BIS_fnc_spawnGroup;
+private _spotter = leader _spotterGroup;
+_spotterGroup deleteGroupWhenEmpty true;
+
+// 设置位置（如果之前找到的是建筑内部位置，已经设置好了，否则手动设置）
+_spotter setPos _spotterPos;
+
+// 设置行为：蹲姿、禁止移动、允许战斗
+_spotter setUnitPos "MIDDLE"; // 蹲姿
+_spotter disableAI "PATH";    // 禁止移动
+_spotter setBehaviour "COMBAT";
+_spotter setCombatMode "RED";
+_spotter setSkill 0.7;
+_spotter setDir (_spotter getDir _targetPlayer);
+// 无敌10秒
+_spotter allowDamage false;
+[_spotter] spawn {
+    params ["_unit"];
+    sleep 10;
+    _unit allowDamage true;
+};
+sleep 6;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_mortarspotter3"] remoteExec ["BIS_fnc_showSubtitle", 0];
+sleep 4;
+[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_mortarspotter4"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[] remoteExec ["fnc_broadcastRadioChatter", 0];
+sleep 8;
+// ---------- 5. 创建任务和标记 ----------
+private _taskID = format ["dyna_mortar_%1", round time];
+[
+    west,
+    _taskID,
+    [localize "STR_DUWS_T_mortarspotter2", localize _nameKey, _spotterPos],
+    objNull,
+    true
+] call BIS_fnc_taskCreate;
+
+// 生成一个在观察员位置周围50米内的随机偏移点
+private _offsetPos = [_spotterPos, 0, 50, 5, 0, 0.2, 0, [], [_spotterPos, _spotterPos]] call BIS_fnc_findSafePos;
+if (_offsetPos isEqualTo [0,0,0]) then {
+    // 如果找不到安全位置，使用随机方向距离
+    _offsetPos = _spotterPos getPos [random 50, random 360];
+    _offsetPos set [2, 0]; // 确保地面高度
+};
+
+// 创建标记（图标和椭圆区域都以偏移点为中心）
+private _markerData = [_offsetPos, "hd_unknown", localize _nameKey, 50] call fnc_missionMarkerData;
+_markerData params ["_markerIcon", "_markerArea"];
+
+// ---------- 6. 启动周期性炮击（每30秒一发，直到观察员死亡） ----------
+[_targetPlayer, _spotter] spawn {
+    params ["_player", "_spotter"];
+    while {alive _spotter} do {
+        sleep 30;
+        if (!alive _spotter) exitWith {};
+        private _pos = getPos _player;
+        private _shellPos = _pos getPos [100 + random 20, random 360];
+        _shellPos set [2, 150];
+        private _shell = createVehicle ["Sh_82mm_AMOS", _shellPos, [], 0, "NONE"];
+        _shell setVelocity [0, 0, -30];
+    };
+};
+
+// ---------- 7. 等待观察员死亡 ----------
+waitUntil {
+    sleep 2;
+    !alive _spotter
+};
+sleep 4;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_mortarspotter5"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[] remoteExec ["fnc_broadcastRadioChatter", 0];
+sleep 4;
+// ---------- 8. 任务成功，奖励 ----------
+[_taskID, "SUCCEEDED"] call BIS_fnc_taskSetState;
+// 使用 fnc_mission_reward 发放奖励（CP 乘数自动应用，并触发特战队员技能提升）
+
+private _missionName = localize _nameKey; // 获取本地化任务名称
+[10, 5, _missionName] spawn fnc_mission_reward;
+
+// 清理标记
+deleteMarker _markerIcon;
+deleteMarker _markerArea;
+deleteMarker str(_markerIcon);
+deleteMarker str(_markerArea);
+// ---------- 清理标记 ----------
+if (!isNil "_markerIcon" && {_markerIcon != ""}) then {
+    deleteMarker _markerIcon;
+    diag_log format ["[MORTAR] Deleted marker icon: %1", _markerIcon];
+} else {
+    diag_log "[MORTAR] _markerIcon is nil or empty, cannot delete.";
+};
+
+if (!isNil "_markerArea" && {_markerArea != ""}) then {
+    deleteMarker _markerArea;
+    diag_log format ["[MORTAR] Deleted marker area: %1", _markerArea];
+} else {
+    diag_log "[MORTAR] _markerArea is nil or empty, cannot delete.";
+};
+
+// 清除任务运行标志
+call _fnc_cleanup;

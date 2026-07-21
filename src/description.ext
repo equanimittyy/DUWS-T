@@ -1,0 +1,77 @@
+OnLoadMission = "WAR IS TACTICS";
+onLoadName = "DUWS_T v1.6";
+dev = "dev";
+author = "5U5 DUWS_T (Killa Tomata DUWS_X) - orig by Kibot/DUWS-R Team";
+overviewText = "Evolved from the renowned DUWS_X campaign created by Killa Tomata, DUWS_T is a long-term, persistent campaign system. Players must earn resources, carry out side missions, and lead Blufor forces to seize enemy-held zones, finally achieve victory in the campaign.";
+overviewPicture = "DUWS_T.jpg";
+LoadScreen = "DUWS_T.jpg";
+
+//--------------------------------------------------------------
+//------------------------AIS INJURY----------------------------
+//--------------------------------------------------------------
+respawn = 3;
+respawnDialog = 1;
+respawndelay = 10;
+disabledAI = 1;
+enableDebugConsole = 1;
+allowFunctionsLog = 1;
+respawnOnStart=-1;
+
+#include "AIS\Effects\BarDlg.hpp"
+
+//--------------------------------------------------------------
+
+// TAW INIT BEGIN --
+#include "taw_vd\GUI.h"
+// TAW INIT END --
+
+class CfgFunctions
+{
+	#include "AIS\cfgFunctions.hpp"
+	#include "taw_vd\CfgFunctions.hpp"
+	#include "vcom\cfgFunctions.hpp"
+};
+
+//////////////////////////
+//////////////////////////
+
+#include "includes\debriefing.hpp"
+#include "includes\defines.hpp"
+#include "includes\squadmng.hpp"
+#include "includes\renamesquad.hpp"
+#include "includes\request_menu.hpp"
+#include "includes\request_fob_menu.hpp"
+#include "includes\fobmanager.hpp"
+#include "includes\notifications.hpp"
+#include "includes\enviro_menu.hpp"
+#include "includes\campaign_menu.hpp"
+#include "includes\hq_placement.hpp"
+#include "includes\sounds.hpp"
+#include "includes\custom_faction.hpp"
+#include "R3F_LOG\desc_include.h"
+#include "includes\remoteExec.hpp"
+#include "includes\operative_menu.hpp"
+
+#include "includes\params_modern.hpp"
+#include "includes\supports_radio_modern.hpp"
+#include "includes\oper_identities_modern.hpp"
+
+class RscTitles {
+    class DUWST {
+        idd = -1;
+        movingEnable = false;
+        duration = 5;
+        class controls {
+            class splash: RscPicture
+		    {			
+			idc = 1002;
+			text = "soundsNpics\support\DUWS_T.paa";
+			x = 0.15 * safezoneW + safezoneX;
+			y = 0.0 * safezoneH + safezoneY;
+			w = 0.7 * safezoneW;
+			h = 1 * safezoneH;
+			fade = 0;
+		    };	
+        };
+    };
+};

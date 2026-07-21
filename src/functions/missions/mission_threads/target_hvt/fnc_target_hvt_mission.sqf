@@ -1,0 +1,319 @@
+// 任务冷却检查
+private _missionType = 2;
+private _cooldownVar = missionNamespace getVariable [format ["mission_cooldown_%1", _missionType], 0];
+if (_cooldownVar > diag_tickTime) then {
+    private _remaining = _cooldownVar - diag_tickTime;
+    private _minutes = floor (_remaining / 60);
+    private _seconds = _remaining % 60;
+    hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _minutes, _seconds];
+    if (isNil "fnc_scriptName") then {
+        breakOut "main";
+    } else {
+        if (true) exitWith {};
+    };
+};
+mission_cooldown_2 = diag_tickTime + 3600;
+publicVariable format ["mission_cooldown_2", _missionType];
+params ["_MissionPos", "_mission_name"];
+
+// ========== 增援系统变量 ==========
+private _varSuffix = format ["%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
+private _initialCountVar = format ["opf_initial_%1", _varSuffix];
+private _triggeredVar = format ["opf_reinforce_%1", _varSuffix];
+// ====================================
+
+Mission_available = false;
+publicVariable "Mission_available";
+_radius = 600;
+_cpreward = 35;
+_apreward = 35;
+_speaker = localize "STR_DUWS_T_OVERLORD";
+_speaker1 = localize "STR_DUWS_T_Viper";
+_message = localize "STR_DUWS_T_hvtletsdothis";
+_message0 = localize "STR_DUWS_T_hvtseen";
+_message1 = localize "STR_DUWS_T_hvtend";
+
+_taskTimeout = 480;
+_missionStartTime = time;
+
+_randomPos = [];
+_Building = [];
+_Posfound = false;
+_targetpos = [];
+_failSafe = 0;
+_markerText = "hvt";
+_markerText2 = localize "STR_DUWS_T_c2";
+
+_POSdata = [_MissionPos, _radius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
+
+_randomPos = _POSdata select 0;
+_Building = _POSdata select 1;
+_Posfound = _POSdata select 2;
+_targetpos = _POSdata select 3;
+_failSafe = _POSdata select 4;
+
+if (_failsafe > 5 && _Posfound == false) exitWith {
+    Mission_available = true;
+    publicVariable "Mission_available";
+    [{hint localize "STR_DUWS_T_crtzxs0j"}] remoteExec ["BIS_fnc_Spawn", 0];
+};
+
+[_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  player1];
+
+_vehpos = [_targetpos, 10, 30,10,0,0.1,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
+
+_markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
+_markername = _markerData select 0;
+_markername2 = _markerData select 1;
+
+private _missionObjects = [];
+
+sleep 1;
+[_targetpos, _radius] spawn fnc_missionPatrolswithintel;
+
+// Create Statics
+_apc = opfor_APC1_X createVehicle (_vehpos);
+// 注意：APC 不加入 _missionObjects，因此不会被延迟删除线程清理
+
+_static1 = "";
+_static2 = "";
+_static3 = "";
+switch (VERSION_X) do {
+    case "MODERN": {
+        _static1 = "VirtualReammoBox_camonet_F";
+        _static2 = "CargoNet_01_barrels_F";
+        _static3 = "CamoNet_INDP_open_F";
+    };
+};
+_obj1 = createVehicle [_static1, [(_targetpos select 0)+1, (_targetpos select 1)+1], [], 0, "CAN_COLLIDE"];
+_missionObjects pushBack _obj1;
+sleep 1;
+_obj2 = createVehicle [_static2, [(_targetpos select 0)-2, (_targetpos select 1)-2], [], 0, "CAN_COLLIDE"];
+_missionObjects pushBack _obj2;
+sleep 1;
+_obj3 = createVehicle [_static3, _targetpos, [], 0, "CAN_COLLIDE"];
+_missionObjects pushBack _obj3;
+sleep 1;
+
+// 建筑驻军
+private _buildingSearchRadius = _radius;
+private _usableBuildings = [_targetpos, 2, _buildingSearchRadius] call fnc_usableBuildings;
+private _desiredBldgCount = 6;
+private _actualBldgCount = count _usableBuildings;
+private _buildingGroup = grpNull;
+
+if (_actualBldgCount > 0) then {
+    private _maxBuildingsToUse = (_actualBldgCount min _desiredBldgCount);
+    private _selectedBuildings = [];
+    if (_actualBldgCount == _maxBuildingsToUse) then {
+        _selectedBuildings = _usableBuildings;
+    } else {
+        private _tempArray = +_usableBuildings;
+        for "_i" from 1 to _maxBuildingsToUse do {
+            private _index = floor (random (count _tempArray));
+            _selectedBuildings pushBack (_tempArray select _index);
+            _tempArray deleteAt _index;
+        };
+    };
+
+    private _unitsPerBuilding = 4;
+    private _totalUnitsToSpawn = _maxBuildingsToUse * _unitsPerBuilding;
+
+    private _possibleUnitTypes = [];
+    {
+        if (!isNil "_x" && {_x != ""}) then {
+            _possibleUnitTypes pushBack _x;
+        };
+    } forEach [
+        opfor_SOLDIER_X,
+        opfor_AA_SOLDIER_X,
+        opfor_AR_SOLDIER_X,
+        opfor_AT_SOLDIER_X,
+        opfor_LAT_SOLDIER_X,
+        opfor_SL_SOLDIER_X
+    ];
+    if (count _possibleUnitTypes == 0) then {
+        _possibleUnitTypes = [opfor_SOLDIER_X];
+    };
+
+    private _bldgUnits = [];
+    for "_i" from 1 to _totalUnitsToSpawn do {
+        _bldgUnits pushBack (selectRandom _possibleUnitTypes);
+    };
+    _buildingGroup = [[0,0], EAST, _bldgUnits,[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
+    _buildingGroup deleteGroupWhenEmpty true;
+
+    {
+        if (_forEachIndex >= _maxBuildingsToUse) exitWith {};
+        private _building = _x;
+        private _positions = [_building] call BIS_fnc_buildingPositions;
+        for "_j" from 0 to (_unitsPerBuilding - 1) do {
+            private _unitIndex = _forEachIndex * _unitsPerBuilding + _j;
+            if (_unitIndex >= count (units _buildingGroup)) exitWith {};
+            private _unit = units _buildingGroup select _unitIndex;
+            if (count _positions > 0) then {
+                private _randPosIndex = floor (random (count _positions));
+                _unit setPosATL (_building buildingPos _randPosIndex);
+                _unit setUnitPos "AUTO";
+                _unit setBehaviour "AWARE";
+                [_unit, _building, _positions] spawn {
+                    params ["_unit", "_building", "_positions"];
+                    sleep 2 + random 5;
+                    private _buildingPos = getPosATL _building;
+                    while {alive _unit} do {
+                        if (_unit distance _buildingPos > 15 && count _positions > 0) then {
+                            private _returnPos = selectRandom _positions;
+                            _unit doMove _returnPos;
+                        };
+                        if (count _positions > 0) then {
+                            private _targetPosIndex = floor (random (count _positions));
+                            private _targetPos = _building buildingPos _targetPosIndex;
+                            _unit doMove _targetPos;
+                            _unit setUnitPos "AUTO";
+                            private _timeout = time + 30;
+                            waitUntil {
+                                sleep 5;
+                                (unitReady _unit) ||
+                                (!alive _unit) ||
+                                (_unit distance _targetPos < 2) ||
+                                (time > _timeout)
+                            };
+                            sleep 5 + random 5;
+                        } else {
+                            sleep 5 + random 5;
+                        };
+                    };
+                };
+            };
+        };
+    } forEach _selectedBuildings;
+};
+
+// TASK AND NOTIFICATION
+private "_VARtaskgeneratedName";
+_VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
+[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[] remoteExec ["fnc_broadcastRadioChatter", 0];
+sleep 8;
+[west, [_VARtaskgeneratedName],
+ [localize "STR_DUWS_T_19ajhe1d", _mission_name, str (getMarkerPos _markername)], objNull, true] call BIS_fnc_taskCreate;
+ [_speaker1, _message0] remoteExec ["BIS_fnc_showSubtitle", 0];
+[] remoteExec ["fnc_broadcastRadioChatter", 0];
+
+// CREATE THE HVT GROUP
+_group = [_targetpos, EAST, [opfor_OFFICER_X, opfor_OPERATOR_X, opfor_MARK_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
+_group deleteGroupWhenEmpty true;
+_target = units _group select 0;
+
+// 为军官添加黑贝雷帽
+[_target] spawn {
+    params ["_unit"];
+    sleep 5;
+    _unit addHeadgear "H_Beret_blk";
+};
+// 为军官添加机密情报
+[_target] spawn {
+    params ["_unit"];
+    sleep 5;
+    _unit addMagazineGlobal "FileTopSecret";
+};
+_wp = _group addWaypoint [_vehpos, 0];
+_wp setWaypointType "MOVE";
+_wp setWaypointBehaviour "SAFE";
+_wp setWaypointTimeout [30, 45, 60];
+
+_wp = _group addWaypoint [_targetpos, 0];
+_wp setWaypointType "MOVE";
+_wp setWaypointBehaviour "SAFE";
+_wp setWaypointTimeout [30, 45, 60];
+
+// 检查 _Building 是否为对象，如果是数组则跳过此路点
+if (_Building isEqualType objNull) then {
+    _posBuilding = getpos _Building;
+    _wp = _group addWaypoint [_posBuilding, 0];
+    _wp setWaypointType "MOVE";
+    _wp setWaypointBehaviour "SAFE";
+    _wp setWaypointTimeout [30, 45, 60];
+} else {
+    diag_log format ["[HVT Mission] _Building is not an object, skipping waypoint."];
+};
+
+_wp2 = _group addWaypoint [[(_targetpos select 0)+10, (_targetpos select 1)+10], 0];
+_wp2 setWaypointType "CYCLE";
+_wp2 setWaypointBehaviour "SAFE";
+_wp2 setWaypointTimeout [30, 45, 60];
+
+// ========== 添加死亡情报动作 ==========
+{
+    if (!isNull _x) then {
+        [_x] call fnc_add_intel_to_group;
+    };
+} forEach [_group, _buildingGroup];
+// ====================================
+
+{
+    [_x] call fnc_addRandomLoot;
+} forEach units _group;
+
+{
+    [_x] call fnc_addRandomLoot;
+} forEach units _buildingGroup;
+
+// 设置任务目标位置（HVT 位置）
+missionNamespace setVariable ["current_mission_target_pos", getPos _target];
+["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", 0];
+
+// ========== 统计初始敌军数量 ==========
+sleep 5; // 等待巡逻队生成完毕
+private _nearbyEnemies = _targetpos nearEntities [["CAManBase", "LandVehicle", "Air"], _radius * 1.5] select { side _x == EAST };
+private _initialEnemyCount = count _nearbyEnemies;
+missionNamespace setVariable [_initialCountVar, _initialEnemyCount, true];
+missionNamespace setVariable [_triggeredVar, false, true];
+diag_log format ["[Reinforce] %1: Initial enemy count = %2", _mission_name, _initialEnemyCount];
+
+// ========== 启动直升机增援监控 ==========
+[_targetpos, _radius, _initialCountVar, _triggeredVar, _VARtaskgeneratedName] spawn fnc_opf_heli_reinforce;
+// ======================================
+
+waitUntil {sleep 0.5; !alive _target || (time - _missionStartTime) > _taskTimeout};
+
+if (alive _target && (time - _missionStartTime) > _taskTimeout) exitWith {
+    [{hint localize "STR_DUWS_T_abc1abc2"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+    [] spawn fnc_missionTimer;
+    deleteMarker str(_markername2);
+    deleteMarker str(_markername);
+    missionNamespace setVariable [_triggeredVar, true, true];
+    [_targetpos,_radius] spawn fnc_mission_cleanup;
+    missionNamespace setVariable ["current_mission_target_pos", nil];
+};
+
+sleep 120;
+
+[_speaker, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
+[] remoteExec ["fnc_broadcastRadioChatter", 0];
+deleteMarker str(_markername2);
+deleteMarker str(_markername);
+
+[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+
+sleep 1;
+
+[_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
+[] spawn fnc_missionTimer;
+
+// 清理其他任务物体（APC 不在其中）
+[_missionObjects] spawn {
+    params ["_objects"];
+    sleep 360;
+    {
+        if (!isNull _x) then {
+            deleteVehicle _x;
+        };
+    } forEach _objects;
+};
+
+missionNamespace setVariable [_triggeredVar, true, true];
+[_targetpos,_radius] spawn fnc_mission_cleanup;
+
+missionNamespace setVariable ["current_mission_target_pos", nil];
