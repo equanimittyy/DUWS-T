@@ -17,44 +17,44 @@ enableDebugConsole = 1;
 allowFunctionsLog = 1;
 respawnOnStart=-1;
 
-#include "AIS\Effects\BarDlg.hpp"
+#include "modules\AIS\Effects\BarDlg.hpp"
 
 //--------------------------------------------------------------
 
 // TAW INIT BEGIN --
-#include "taw_vd\GUI.h"
+#include "modules\taw_vd\GUI.h"
 // TAW INIT END --
 
 class CfgFunctions
 {
-	#include "AIS\cfgFunctions.hpp"
-	#include "taw_vd\CfgFunctions.hpp"
-	#include "vcom\cfgFunctions.hpp"
+	#include "modules\AIS\cfgFunctions.hpp"
+	#include "modules\taw_vd\CfgFunctions.hpp"
+	#include "modules\vcom\cfgFunctions.hpp"
 };
 
 //////////////////////////
 //////////////////////////
 
-#include "includes\debriefing.hpp"
-#include "includes\defines.hpp"
-#include "includes\squadmng.hpp"
-#include "includes\renamesquad.hpp"
-#include "includes\request_menu.hpp"
-#include "includes\request_fob_menu.hpp"
-#include "includes\fobmanager.hpp"
-#include "includes\notifications.hpp"
-#include "includes\enviro_menu.hpp"
-#include "includes\campaign_menu.hpp"
-#include "includes\hq_placement.hpp"
-#include "includes\sounds.hpp"
-#include "includes\custom_faction.hpp"
-#include "R3F_LOG\desc_include.h"
-#include "includes\remoteExec.hpp"
-#include "includes\operative_menu.hpp"
+#include "duws\includes\debriefing.hpp"
+#include "duws\includes\defines.hpp"
+#include "duws\includes\squadmng.hpp"
+#include "duws\includes\renamesquad.hpp"
+#include "duws\includes\request_menu.hpp"
+#include "duws\includes\request_fob_menu.hpp"
+#include "duws\includes\fobmanager.hpp"
+#include "duws\includes\notifications.hpp"
+#include "duws\includes\enviro_menu.hpp"
+#include "duws\includes\campaign_menu.hpp"
+#include "duws\includes\hq_placement.hpp"
+#include "duws\includes\sounds.hpp"
+#include "duws\includes\custom_faction.hpp"
+#include "modules\R3F_LOG\desc_include.h"
+#include "duws\includes\remoteExec.hpp"
+#include "duws\includes\operative_menu.hpp"
 
-#include "includes\params_modern.hpp"
-#include "includes\supports_radio_modern.hpp"
-#include "includes\oper_identities_modern.hpp"
+#include "duws\includes\params_modern.hpp"
+#include "duws\includes\supports_radio_modern.hpp"
+#include "duws\includes\oper_identities_modern.hpp"
 
 class RscTitles {
     class DUWST {
@@ -65,7 +65,7 @@ class RscTitles {
             class splash: RscPicture
 		    {			
 			idc = 1002;
-			text = "soundsNpics\support\DUWS_T.paa";
+			text = "duws\soundsNpics\support\DUWS_T.paa";
 			x = 0.15 * safezoneW + safezoneX;
 			y = 0.0 * safezoneH + safezoneY;
 			w = 0.7 * safezoneW;
