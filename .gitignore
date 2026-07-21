@@ -1,0 +1,64 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# DUWS_T — Arma 3 mission repo
+#
+# We version-control the UNPACKED mission source. Packed .pbo files are build
+# output (repacked from the source with PBO Manager) and are not tracked.
+# See README.md for the unpack/repack workflow and the required tool.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Arma build artifacts ─────────────────────────────────────────────────────
+# Packed / binarized missions and addons — rebuildable from the unpacked source.
+*.pbo
+*.ebo
+# Binarize + editor leftovers.
+texHeaders.bin
+*.bak
+
+# ── Arma runtime logs & crash dumps ──────────────────────────────────────────
+*.rpt
+*.bidmp
+*.mdmp
+
+# ── Vendored tooling (see README.md) ─────────────────────────────────────────
+# Third-party Windows tool for unpacking/repacking the .pbo. Not project source,
+# and the Windows binaries won't run in the Linux devcontainer — each environment
+# supplies its own copy at this path.
+# https://github.com/winseros/pboman3
+/tools/PBO Manager/
+
+# ── Secrets & local env ──────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.local
+
+# ── Claude Code (keep shared agents/skills; drop per-user overrides) ──────────
+.claude/settings.local.json
+
+# ── Editor / IDE ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+
+# ── OS cruft ─────────────────────────────────────────────────────────────────
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+# Linux
+.directory
+.Trash-*
+
+# ── Node tooling (eslint/prettier from the devcontainer) ─────────────────────
+node_modules/
+npm-debug.log*

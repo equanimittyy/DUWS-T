@@ -1,0 +1,65 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Line endings & diff behavior for the DUWS_T Arma 3 mission repo.
+# Default: normalize all text to LF so files are stable across Windows hosts and
+# the Linux devcontainer. Binary game assets are marked so git never rewrites
+# their bytes or tries to diff them.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Auto-detect text vs binary; normalize detected text to LF in the repo.
+# Auto-detection keeps a *binarized* mission.sqm (contains NUL bytes) safe while
+# still normalizing a plain-text mission.sqm — so .sqm needs no explicit rule.
+* text=auto eol=lf
+
+# ── Arma / SQF source (text, LF) ─────────────────────────────────────────────
+*.sqf     text
+*.sqs     text
+*.fsm     text
+*.hpp     text
+*.h       text
+*.cpp     text
+*.ext     text
+*.cfg     text
+*.inc     text
+*.rvmat   text
+*.bisurf  text
+*.bikb    text
+*.xml     text
+*.txt     text
+*.md      text
+*.json    text
+
+# ── Scripts: pin platform-correct endings ────────────────────────────────────
+*.sh      text eol=lf
+*.bat     text eol=crlf
+*.cmd     text eol=crlf
+*.ps1     text eol=crlf
+
+# ── Arma binary assets: never normalize, never diff ──────────────────────────
+*.pbo     binary
+*.ebo     binary
+*.bin     binary
+*.p3d     binary
+*.wrp     binary
+*.paa     binary
+*.pac     binary
+*.rtm     binary
+*.lip     binary
+*.wss     binary
+*.ogg     binary
+*.wav     binary
+
+# ── Generic binaries ─────────────────────────────────────────────────────────
+*.exe     binary
+*.dll     binary
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.tga     binary
+*.bmp     binary
+*.ico     binary
+*.7z      binary
+*.zip     binary
+*.gz      binary
+*.rar     binary
+*.pdf     binary
