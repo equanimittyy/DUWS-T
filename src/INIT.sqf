@@ -13,17 +13,17 @@ if (isNil "serverinit_complete") then {
 
 if (_duwst_isServer || _duwst_isHostedserver || _duwst_isHeadless) then 
 {
-	[] execVM "init\server_init.sqf"; 
+	[] execVM "duws\init\server_init.sqf"; 
 };
 
 if (_duwst_isClient) then 
 {
-    [] execVM "init\client_init.sqf"; 
+    [] execVM "duws\init\client_init.sqf"; 
 };
 setGroupIconsVisible [true,false]; //now everyone can see enemies on map
 // INIT R3F Logistics
 // - has to be run by client and server
 waitUntil {sleep 5;serverinit_complete};
 waituntil {sleep 5;WARCOM_init_done;};
-execVM "R3F_LOG\init.sqf";
+execVM "modules\R3F_LOG\init.sqf";
 
