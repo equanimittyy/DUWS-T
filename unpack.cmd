@@ -4,6 +4,15 @@ rem Wraps the vendored PBO Manager console CLI (Windows only). See README.md.
 setlocal EnableExtensions
 cd /d "%~dp0"
 
+rem Run the work in :main so one pause fires on every exit path (double-click
+rem leaves the window open until a key is pressed, whatever the outcome).
+call :main
+set "RC=%ERRORLEVEL%"
+echo(
+pause
+exit /b %RC%
+
+:main
 set "PBOC=tools\PBO Manager\pboc.exe"
 set "PBO=DUWS_T.altis.pbo"
 set "MISSION=DUWS_T.altis"
