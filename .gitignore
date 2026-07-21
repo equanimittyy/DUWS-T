@@ -58,7 +58,3 @@ $RECYCLE.BIN/
 # Linux
 .directory
 .Trash-*
-
-# ── Node tooling (eslint/prettier from the devcontainer) ─────────────────────
-node_modules/
-npm-debug.log*
