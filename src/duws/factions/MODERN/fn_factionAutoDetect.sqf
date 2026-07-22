@@ -673,9 +673,11 @@ fnc_factionSelector = compileFinal {
 		private _guiEditorOutput = [
 			1.063,
 			["quickgui",[[0,0,1,1],0.025,0.04,"GUI_GRID"],0,0,0],
+			[1450,"RscText",[1,"",["0.312812 * safezoneW + safezoneX","0.256 * safezoneH + safezoneY","0.157812 * safezoneW+0.5","0.636 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
 			[1500,"RscListBox",[1,"",["0.322812 * safezoneW + safezoneX","0.276 * safezoneH + safezoneY","0.137812 * safezoneW+0.5","0.224 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
 			[1600,"RscButton",[1,_prompt,["0.322812 * safezoneW + safezoneX","0.514 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.028 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
-			[1200,"RscPicture",[1,"#(argb,8,8,3)color(0,0,0,0.5)",["0.322812 * safezoneW + safezoneX","0.552 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.20 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]]
+			[1200,"RscPicture",[1,"#(argb,8,8,3)color(0,0,0,0.5)",["0.322812 * safezoneW + safezoneX","0.552 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.32 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
+			[1201,"RscStructuredText",[1,"",["0.322812 * safezoneW + safezoneX","0.672 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.08 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]]
 		];
 
 		sleep 0.5;
@@ -685,15 +687,17 @@ fnc_factionSelector = compileFinal {
 		{
 			private _control = _display ctrlCreate [_x # 1, _x # 0];
 			_control ctrlSetText (_x # 2 # 1);
-			// DUWS setup-dialog palette: red action button, translucent-black panels.
-			if ((_x # 0) isEqualTo 1600) then {
-				_control ctrlSetBackgroundColor [1,0,0,0.5];
-			} else {
-				_control ctrlSetBackgroundColor [0,0,0,0.3];
+			// DUWS setup-dialog palette: green backdrop, red action button, translucent-black
+			// panels, transparent overlay for the "no units" caption over the preview.
+			switch (_x # 0) do {
+				case 1450: { _control ctrlSetBackgroundColor [0.2,0.4,0.2,1]; };
+				case 1600: { _control ctrlSetBackgroundColor [1,0,0,0.5]; };
+				case 1201: { _control ctrlSetBackgroundColor [0,0,0,0]; };
+				default { _control ctrlSetBackgroundColor [0,0,0,0.3]; };
 			};
 			_control ctrlSetPosition ((_x # 2 # 2) apply {call compile _x});
 			_control ctrlCommit 0;
-		} forEach (_guiEditorOutput select [2, 4]);
+		} forEach (_guiEditorOutput select [2, 5]);
 
 		{
 			lbAdd [1500, _x # 0];
@@ -708,7 +712,8 @@ fnc_factionSelector = compileFinal {
 
 			if (_units isEqualTo []) exitWith {
 				(displayCtrl 1200) ctrlSetText "";
-				titleText ["<t size='5' font='PuristaMedium' color='#ff0000'>FACTION HAS NO UNITS</t><", "PLAIN", 0.1, true, true];
+				// caption centred over the preview window, not a screen-centre titleText
+				(displayCtrl 1201) ctrlSetText "<t align='center' size='2' font='PuristaMedium' color='#ff0000'>FACTION HAS NO UNITS</t>";
 			};
 
 			// Random-cycle only units that have a preview image, so re-selecting keeps showing
@@ -719,6 +724,7 @@ fnc_factionSelector = compileFinal {
 				_preview = getText (configFile >> "CfgVehicles" >> _factionRandomUnit >> "editorPreview");
 			};
 			(displayCtrl 1200) ctrlSetText _preview;
+			(displayCtrl 1201) ctrlSetText "";	// clear any stale "no units" caption
 		}];
 
 		(displayCtrl 1600) ctrlAddEventHandler ["ButtonClick", {
@@ -749,6 +755,7 @@ fnc_factionSelector = compileFinal {
 		ctrlEnable [1600, true];
 		ctrlEnable [1500, true];
 		(displayCtrl 1200) ctrlSetText "";
+		(displayCtrl 1201) ctrlSetText "";
 	};
 
 	waitUntil {uiSleep 0.5;  !isNil "selectionDone" };
