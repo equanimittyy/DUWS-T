@@ -26,3 +26,17 @@ Read with a default and null-check — `isNull (uiNamespace getVariable ["myDisp
 displayNull])` — which also detects a dialog closed elsewhere. The faction selector holds
 its reused dialog handle this way, in `fnc_factionSelector`
 (`src/duws/factions/MODERN/fn_factionAutoDetect.sqf`).
+
+## Structured-text controls need a parsed object, not `ctrlSetText`
+
+**Set a `CT_STRUCTURED_TEXT` (type 13 / `RscStructuredText`) control with
+`ctrlSetStructuredText (parseText "<t ...>...</t>")`, never `ctrlSetText`.**
+
+`ctrlSetText` on a structured-text control stores the string verbatim, so `<t>` markup
+renders as literal on-screen text — and it fails silently, with no error to point at the
+cause (the wasted time goes into suspecting a missing class definition instead). Only
+`parseText` turns the markup into the structured-text object the control draws.
+
+**How to apply:** `_ctrl ctrlSetStructuredText (parseText _markup)` to set, `parseText ""`
+to clear. The faction selector's "no units" caption uses this, in `fnc_factionSelector`
+(`src/duws/factions/MODERN/fn_factionAutoDetect.sqf`).
