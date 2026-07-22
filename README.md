@@ -1,8 +1,8 @@
 # DUWS_T
 
-**DUWS_T** (*Dynamic Universal War System — Tactic*) is a single-player / co-op
+**DUWS_T** (*Dynamic Universal War System: Tactic*) is a single-player / co-op
 dynamic campaign mission for **Arma 3**. It procedurally
-generates a persistent war — capture zones, run side missions, call in support, and
+generates a persistent war: capture zones, run side missions, call in support, and
 fight an AI opposition that reacts to your moves. It descends from Tomata's DUWS_X
 (originally Kibot's DUWS), reworked here with new side missions, a revised
 support/economy system, and automatic faction detection (with ALIVE support), so it
@@ -14,7 +14,7 @@ Play it on the Steam Workshop:
 ## Repo layout
 
 This repo version-controls the **unpacked** mission source. `DUWS_T.altis.pbo` is
-build output — repacked from the source — and is **not** tracked (see `.gitignore`).
+build output, repacked from the source, and is **not** tracked (see `.gitignore`).
 Commit the unpacked `src/` source; leave the regenerated `.pbo` untracked.
 
 The mission's internal structure (the `modules/` vs `duws/` split, boot flow, and
@@ -27,7 +27,7 @@ subsystems) is mapped in [`docs/architecture.md`](docs/architecture.md).
 The mission ships as a packed `.pbo`. Editing it means unpack → change files →
 repack, and both steps use **PBO Manager**, a third-party Windows tool.
 
-`tools/PBO Manager/` is **git-ignored** — it's not project source, and its Windows
+`tools/PBO Manager/` is **git-ignored**: it's not project source, and its Windows
 binaries won't run in the Linux devcontainer, so each environment supplies its own
 copy at that path:
 
@@ -36,13 +36,13 @@ copy at that path:
 
 ### 2. Unpack / repack the mission
 
-Two Windows batch scripts wrap the CLI (Windows only — they call `pboc.exe`, which
+Two Windows batch scripts wrap the CLI (Windows only; they call `pboc.exe`, which
 won't run in the Linux devcontainer):
 
-- **`unpack.cmd`** — extracts `DUWS_T.altis.pbo` into a flat `src/` folder. Run it
+- **`unpack.cmd`**: extracts `DUWS_T.altis.pbo` into a flat `src/` folder. Run it
   once to seed `src/`, then commit `src/`. It asks for confirmation first and warns
   that re-running replaces `src/` and discards edits.
-- **`repack.cmd`** — packs `src/` back into `DUWS_T.altis.pbo` at the repo root, asking
+- **`repack.cmd`**: packs `src/` back into `DUWS_T.altis.pbo` at the repo root, asking
   before it overwrites the `.pbo`, then normalizes the PBO's internal paths to Arma's
   backslash convention via `normalize_pbo.ps1`. The result is ready to load in Arma.
 
@@ -51,10 +51,10 @@ build output (git-ignored).
 
 ### 3. Load it in Arma for testing
 
-Copy `DUWS_T.altis.pbo` into the Arma 3 **install** folder's `MPMissions\` — e.g.
+Copy `DUWS_T.altis.pbo` into the Arma 3 **install** folder's `MPMissions\`, e.g.
 `...\steamapps\common\Arma 3\MPMissions\`, **not** `Documents\Arma 3\MPMissions\`
 (local hosting reads the install folder). Then host a LAN / multiplayer game and select
-it from the list. The `<name>.<world>.pbo` filename is required — Arma reads the terrain
+it from the list. The `<name>.<world>.pbo` filename is required: Arma reads the terrain
 from it.
 
 ## Tests
