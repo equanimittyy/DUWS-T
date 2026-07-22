@@ -17,6 +17,9 @@ This repo version-controls the **unpacked** mission source. `DUWS_T.altis.pbo` i
 build output — repacked from the source — and is **not** tracked (see `.gitignore`).
 Commit the unpacked `src/` source; leave the regenerated `.pbo` untracked.
 
+The mission's internal structure (the `modules/` vs `duws/` split, boot flow, and
+subsystems) is mapped in [`docs/architecture.md`](docs/architecture.md).
+
 ## Developer setup
 
 ### 1. Obtain PBO Manager
