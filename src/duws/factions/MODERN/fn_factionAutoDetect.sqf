@@ -674,8 +674,9 @@ fnc_factionSelector = compileFinal {
 			1.063,
 			["quickgui",[[0,0,1,1],0.025,0.04,"GUI_GRID"],0,0,0],
 			[1450,"RscText",[1,"",["0.312812 * safezoneW + safezoneX","0.256 * safezoneH + safezoneY","0.157812 * safezoneW+0.5","0.636 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
+			[1451,"RscText",[1,"",["0.312812 * safezoneW + safezoneX","0.256 * safezoneH + safezoneY","0.157812 * safezoneW+0.5","0.636 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
 			[1500,"RscListBox",[1,"",["0.322812 * safezoneW + safezoneX","0.276 * safezoneH + safezoneY","0.137812 * safezoneW+0.5","0.224 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
-			[1600,"RscButton",[1,_prompt,["0.322812 * safezoneW + safezoneX","0.514 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.028 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
+			[1600,"RscButton",[1,toUpper _prompt,["0.322812 * safezoneW + safezoneX","0.514 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.028 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
 			[1200,"RscPicture",[1,"#(argb,8,8,3)color(0,0,0,0.5)",["0.322812 * safezoneW + safezoneX","0.552 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.32 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
 			[1201,"RscStructuredText",[1,"",["0.322812 * safezoneW + safezoneX","0.672 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.08 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]]
 		];
@@ -687,8 +688,9 @@ fnc_factionSelector = compileFinal {
 		{
 			private _control = _display ctrlCreate [_x # 1, _x # 0];
 			_control ctrlSetText (_x # 2 # 1);
-			// DUWS setup-dialog palette: green backdrop, red action button, translucent-black
-			// panels, transparent overlay for the "no units" caption over the preview.
+			// DUWS setup-dialog palette: green backdrop (1450) under a translucent-black inner
+			// panel (1451) so the red action button reads crisp, plus a transparent overlay
+			// (1201) for the "no units" caption. Everything else takes the translucent black.
 			switch (_x # 0) do {
 				case 1450: { _control ctrlSetBackgroundColor [0.2,0.4,0.2,1]; };
 				case 1600: { _control ctrlSetBackgroundColor [1,0,0,0.5]; };
@@ -697,7 +699,7 @@ fnc_factionSelector = compileFinal {
 			};
 			_control ctrlSetPosition ((_x # 2 # 2) apply {call compile _x});
 			_control ctrlCommit 0;
-		} forEach (_guiEditorOutput select [2, 5]);
+		} forEach (_guiEditorOutput select [2, 6]);
 
 		{
 			lbAdd [1500, _x # 0];
@@ -712,8 +714,9 @@ fnc_factionSelector = compileFinal {
 
 			if (_units isEqualTo []) exitWith {
 				(displayCtrl 1200) ctrlSetText "";
-				// caption centred over the preview window, not a screen-centre titleText
-				(displayCtrl 1201) ctrlSetText "<t align='center' size='2' font='PuristaMedium' color='#ff0000'>FACTION HAS NO UNITS</t>";
+				// Structured-text control: ctrlSetText would show the markup raw, so feed it a
+				// parsed object. Caption sits centred over the preview, not a screen-centre titleText.
+				(displayCtrl 1201) ctrlSetStructuredText (parseText "<t align='center' size='2' font='PuristaMedium' color='#ff0000'>FACTION HAS NO UNITS</t>");
 			};
 
 			// Random-cycle only units that have a preview image, so re-selecting keeps showing
@@ -724,7 +727,7 @@ fnc_factionSelector = compileFinal {
 				_preview = getText (configFile >> "CfgVehicles" >> _factionRandomUnit >> "editorPreview");
 			};
 			(displayCtrl 1200) ctrlSetText _preview;
-			(displayCtrl 1201) ctrlSetText "";	// clear any stale "no units" caption
+			(displayCtrl 1201) ctrlSetStructuredText (parseText "");	// clear any stale "no units" caption
 		}];
 
 		(displayCtrl 1600) ctrlAddEventHandler ["ButtonClick", {
@@ -745,17 +748,17 @@ fnc_factionSelector = compileFinal {
 			} else {
 				ctrlEnable [1500, false];
 				ctrlEnable [1600, false];
-				ctrlSetText [1600, "Please wait..."];
+				ctrlSetText [1600, "PLEASE WAIT..."];
 			};
 		}];
 
 	} else {
 		// Reuse round: relabel + re-enable the controls the previous round locked.
-		ctrlSetText [1600, _prompt];
+		ctrlSetText [1600, toUpper _prompt];
 		ctrlEnable [1600, true];
 		ctrlEnable [1500, true];
 		(displayCtrl 1200) ctrlSetText "";
-		(displayCtrl 1201) ctrlSetText "";
+		(displayCtrl 1201) ctrlSetStructuredText (parseText "");
 	};
 
 	waitUntil {uiSleep 0.5;  !isNil "selectionDone" };
