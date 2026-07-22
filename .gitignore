@@ -25,6 +25,9 @@ texHeaders.bin
 # supplies its own copy at this path.
 # https://github.com/winseros/pboman3
 /tools/PBO Manager/
+# SQF VM for the unit tests (fetched by tests/get_sqfvm.sh); per-environment binary.
+/tools/sqfvm
+/tools/sqfvm.exe
 
 # ── Secrets & local env ──────────────────────────────────────────────────────
 .env

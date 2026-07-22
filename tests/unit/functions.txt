@@ -1,0 +1,6 @@
+# Pure functions extracted from real source for the unit tests below.
+# Format: <path relative to src/>::<FunctionName>
+# Only genuinely pure helpers (no CfgVehicles / BIS_fnc_ / spawning) belong here —
+# ~95% of the mission needs the Arma engine and can't be unit-tested in sqf-vm.
+initPlayerLocal.sqf::DUWS_fnc_extractLoadoutItems
+initPlayerLocal.sqf::DUWS_fnc_countLoadoutChanges
