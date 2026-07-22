@@ -44,7 +44,7 @@ quits.
 fall off the end of the loop body); reserve `exitWith` for when you genuinely want the loop
 to stop. The zone locator hit this: an origin keep-out used `exitWith` to "re-roll" a
 position but instead dropped the zone entirely — see
-[`dynamic_zone_placement.md`](dynamic_zone_placement.md#origin-keep-out-drops-the-zone-instead-of-retrying-it).
+[`zone_and_town_generation.md`](zone_and_town_generation.md#defects-subsystem-a).
 
 ## Structured-text controls need a parsed object, not `ctrlSetText`
 
