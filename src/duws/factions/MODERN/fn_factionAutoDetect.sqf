@@ -649,73 +649,110 @@ fnc_getAllFactionsClean = compileFinal {
 	_factions
 };
 
-// list box with faction selector
+// list box with faction selector.
+// One dialog is reused across the BLUFOR then OPFOR rounds: the first round builds
+// it, later rounds relabel and re-enable the same display. It never closes between
+// picks, so the settings/campaign menus stacked underneath stay unreachable until
+// both factions are chosen (closing it early exposed the map for a few seconds).
 fnc_factionSelector = compileFinal {
-	params [ ["_prompt", "Select Faction"] ];
+	params [ ["_prompt", "Select Faction"], ["_finalRound", true] ];
 
 	// init
 	selectionDone = nil;
-	
+	DUWS_factionSelectFinal = _finalRound;	// read by the ButtonClick handler at click time
+
 	// Listbox
 	factionList = [] call fnc_getAllFactionsClean;
-	
-	private _guiEditorOutput = [
-		1.063,
-		["quickgui",[[0,0,1,1],0.025,0.04,"GUI_GRID"],0,0,0],
-		[1500,"RscListBox",[1,"",["0.322812 * safezoneW + safezoneX","0.276 * safezoneH + safezoneY","0.137812 * safezoneW+0.5","0.224 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
-		[1600,"RscButton",[1,_prompt,["0.322812 * safezoneW + safezoneX","0.514 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.028 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
-		[1200,"RscPicture",[1,"#(argb,8,8,3)color(0,0,0,0.5)",["0.322812 * safezoneW + safezoneX","0.276 * safezoneH+0.5 + safezoneY+0.1","0.136 * safezoneW+0.5","0.224 * safezoneH+0.35"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]]	
-	];
-	
-	sleep 0.5;
+
 	disableSerialization;
-	private _display = createDialog ["RscDisplayEmpty", false];
-	
-	{
-		private _control = _display ctrlCreate [_x # 1, _x # 0];
-		_control ctrlSetText (_x # 2 # 1);
-		_control ctrlSetBackgroundColor [0,0,0,0.5];
-		_control ctrlSetPosition ((_x # 2 # 2) apply {call compile _x});
-		_control ctrlCommit 0;
-	} forEach (_guiEditorOutput select [2, 4]);
-	
-	{
-		lbAdd [1500, _x # 0];
-	} forEach factionList;
-	
-	(displayCtrl 1500) ctrlAddEventHandler ["LBSelChanged", {
-		private _index = _this # 1;
-		// set editor image
-		_faction = ((factionList # _index) # 1);
-		// https://community.bistudio.com/wiki/CfgVehicles_Config_Reference#scope - some factions have misconfigured scopes for their units, so also search for hidden units
-		_factionRandomUnit = selectRandom (("(configname _x iskindOf 'CAManBase') && (getNumber(_x >> 'scope') in  [1,2]) && (gettext (_x >> 'faction') == _faction)" configClasses (configfile >> "CfgVehicles")) apply {configName _x});
-		_editorPreview = getText (configFile >> "CfgVehicles" >> _factionRandomUnit >> "editorPreview");
-		
-		if (!isNil "_factionRandomUnit") then {
-			(displayCtrl 1200) ctrlSetText _editorPreview;
-		} else {
-			(displayCtrl 1200) ctrlSetText "";
-			titleText ["<t size='5' font='PuristaMedium' color='#ff0000'>FACTION HAS NO UNITS</t><", "PLAIN", 0.1, true, true];
-		};
-		//systemChat str [_faction, _factionRandomUnit];
-	}];
 
-	(displayCtrl 1600) ctrlAddEventHandler ["ButtonClick", {
-		//systemChat str (lbCurSel 1500); // index
-		_selected = factionList # (lbCurSel 1500);	// get selection by using index to select element from array directly ;)
-		//systemChat str selectionDone;
-		missionNamespace setVariable ["selectedFaction", _selected#1, true];
+	// Display handle lives in uiNamespace: DISPLAY is non-serializable and the mission
+	// namespace is saved, so storing it there errors on save.
+	if (isNull (uiNamespace getVariable ["DUWS_factionSelectDisplay", displayNull])) then {
 
-		// parse selected faction, call do not spawn, once task done, dialog is closed and mission proceeds
-		selectedFaction call fnc_factionGen;
-		selectionDone = true;
-		publicVariable "selectedFaction";
-		publicVariable "selectionDone";
-		closeDialog 0;
-	}];
-		
+		private _guiEditorOutput = [
+			1.063,
+			["quickgui",[[0,0,1,1],0.025,0.04,"GUI_GRID"],0,0,0],
+			[1500,"RscListBox",[1,"",["0.322812 * safezoneW + safezoneX","0.276 * safezoneH + safezoneY","0.137812 * safezoneW+0.5","0.224 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
+			[1600,"RscButton",[1,_prompt,["0.322812 * safezoneW + safezoneX","0.514 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.028 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
+			[1200,"RscPicture",[1,"#(argb,8,8,3)color(0,0,0,0.5)",["0.322812 * safezoneW + safezoneX","0.552 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.20 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]]
+		];
+
+		sleep 0.5;
+		private _display = createDialog ["RscDisplayEmpty", false];
+		uiNamespace setVariable ["DUWS_factionSelectDisplay", _display];
+
+		{
+			private _control = _display ctrlCreate [_x # 1, _x # 0];
+			_control ctrlSetText (_x # 2 # 1);
+			// DUWS setup-dialog palette: red action button, translucent-black panels.
+			if ((_x # 0) isEqualTo 1600) then {
+				_control ctrlSetBackgroundColor [1,0,0,0.5];
+			} else {
+				_control ctrlSetBackgroundColor [0,0,0,0.3];
+			};
+			_control ctrlSetPosition ((_x # 2 # 2) apply {call compile _x});
+			_control ctrlCommit 0;
+		} forEach (_guiEditorOutput select [2, 4]);
+
+		{
+			lbAdd [1500, _x # 0];
+		} forEach factionList;
+
+		(displayCtrl 1500) ctrlAddEventHandler ["LBSelChanged", {
+			private _index = _this # 1;
+			// set editor image
+			_faction = ((factionList # _index) # 1);
+			// https://community.bistudio.com/wiki/CfgVehicles_Config_Reference#scope - some factions have misconfigured scopes for their units, so also search for hidden units
+			private _units = ("(configname _x iskindOf 'CAManBase') && (getNumber(_x >> 'scope') in  [1,2]) && (gettext (_x >> 'faction') == _faction)" configClasses (configfile >> "CfgVehicles")) apply {configName _x};
+
+			if (_units isEqualTo []) exitWith {
+				(displayCtrl 1200) ctrlSetText "";
+				titleText ["<t size='5' font='PuristaMedium' color='#ff0000'>FACTION HAS NO UNITS</t><", "PLAIN", 0.1, true, true];
+			};
+
+			// Random-cycle only units that have a preview image, so re-selecting keeps showing
+			// different units instead of blanking whenever it lands on a preview-less unit.
+			_factionRandomUnit = selectRandom (_units select { getText (configFile >> "CfgVehicles" >> _x >> "editorPreview") != "" });
+			private _preview = "";
+			if (!isNil "_factionRandomUnit") then {
+				_preview = getText (configFile >> "CfgVehicles" >> _factionRandomUnit >> "editorPreview");
+			};
+			(displayCtrl 1200) ctrlSetText _preview;
+		}];
+
+		(displayCtrl 1600) ctrlAddEventHandler ["ButtonClick", {
+			_selected = factionList # (lbCurSel 1500);	// get selection by using index to select element from array directly ;)
+			missionNamespace setVariable ["selectedFaction", _selected#1, true];
+
+			// parse selected faction, call do not spawn
+			selectedFaction call fnc_factionGen;
+			selectionDone = true;
+			publicVariable "selectedFaction";
+			publicVariable "selectionDone";
+
+			// Final round closes; earlier rounds lock the controls and wait so the
+			// map/menus behind the dialog stay unreachable until the next round.
+			if (DUWS_factionSelectFinal) then {
+				closeDialog 0;
+				uiNamespace setVariable ["DUWS_factionSelectDisplay", displayNull];
+			} else {
+				ctrlEnable [1500, false];
+				ctrlEnable [1600, false];
+				ctrlSetText [1600, "Please wait..."];
+			};
+		}];
+
+	} else {
+		// Reuse round: relabel + re-enable the controls the previous round locked.
+		ctrlSetText [1600, _prompt];
+		ctrlEnable [1600, true];
+		ctrlEnable [1500, true];
+		(displayCtrl 1200) ctrlSetText "";
+	};
+
 	waitUntil {uiSleep 0.5;  !isNil "selectionDone" };
-	
+
 };
 
 ["fnc_selectNonEmpty","fnc_vehiclePostInit","fnc_padZero","fnc_enumCost","fnc_enumCostFormatted","fnc_evalVehicleCost","fnc_getEditorCategory","fnc_factionGetFilteredByEditorSubcat","fnc_filterByDisplayName","fnc_filterByClassName","fnc_factionGetFilteredByType","fnc_filterBySeats","fnc_filterByUtility","fnc_filterByPylons","fnc_filterByWeapons","fnc_isThreatTo","fnc_vehicleWeaponType","fnc_unitParseRoles","fnc_parseFaction","fnc_getAllFactionsClean","fnc_factionSelector"] apply { publicVariable _x };

@@ -272,7 +272,7 @@ publicVariable "selectionDone";
 // Listbox
 _admin = objNull;
 if (!isDedicated) then {
-	["Select Blufor Faction"] call  fnc_factionSelector;
+	["Select Blufor Faction", false] call  fnc_factionSelector;	// keep dialog open for the OPFOR round
 } else {
 	diag_log format ["Waiting for adming to select autodetected faction"];
 	
@@ -280,7 +280,7 @@ if (!isDedicated) then {
 	_admin = allPlayers select {admin owner _x > 0 || {_x isEqualTo player1}} select 0;
 	diag_log format ["Admin %1 logged in, sending dialog", name _admin];
 	sleep 0.5;
-	["Select Blufor Faction"] remoteExec ["fnc_factionSelector", _admin];
+	["Select Blufor Faction", false] remoteExec ["fnc_factionSelector", _admin];	// keep dialog open for the OPFOR round
 
 	diag_log format ["Admin %1 selected blufor faction: %2", name _admin, selectedFaction];
 };
