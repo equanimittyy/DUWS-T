@@ -1,0 +1,5 @@
+# Files with pre-existing, benign structural quirks (all vendored, frozen code).
+# Both are a trailing /* ... */-less block that comments out dead code to EOF —
+# Arma tolerates it, and we don't edit vendored frameworks. Format: src-relative path.
+modules/VCOM/Functions/fn_IdleAnimations.sqf
+modules/VCOM/Functions/fn_MinePlant.sqf

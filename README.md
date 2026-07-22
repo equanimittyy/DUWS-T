@@ -48,6 +48,11 @@ won't run in the Linux devcontainer):
 Edit the mission as `.sqf` / `.hpp` / etc. under `src/`; the packed `.pbo` stays
 build output (git-ignored).
 
+## Tests
+
+Static checks (SQF syntax + path resolution) and pure-function unit tests live in
+[`tests/`](tests/); run `bash tests/run.sh`. Details in [`docs/testing.md`](docs/testing.md).
+
 ## Conventions
 
 Working rules for contributors and agents (voice, comments, docs) live in
