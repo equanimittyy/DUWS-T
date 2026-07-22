@@ -1,0 +1,122 @@
+# Editing the HQ layout
+
+The player's Main Base is built once, server-side, by
+`src/duws/functions/init_hq/fnc_BluHQinit.sqf` (compiled at
+`src/duws/init/server_fnc_init.sqf:5`, spawned at `src/duws/init/server_init.sqf:95`).
+It anchors on `PosOfBLUHQ`, the base spot chosen during placement
+(`fnc_HQ_random_place.sqf:39` or `fnc_HQ_manual_place.sqf:64`).
+
+All **static props** (the HQ building, walls, towers, tents, crates, lights, furniture)
+come from one data array. Everything else — weapons and the garrison — is code-driven and
+is *not* editable through that array. This doc covers how to rearrange the static layout,
+including a round-trip through the Eden editor, and where the line is drawn.
+
+## The composition array is the layout
+
+`_allObjectsData` (`fnc_BluHQinit.sqf:34-175`) is an Eden-exported object list. Each row:
+
+```text
+[classname, X, Y, Z, direction, isWeapon]
+     0      1  2  3      4          5
+```
+
+A loop (`fnc_BluHQinit.sqf:211-248`) walks it: `createVehicle`, then
+`setPosATL [X, Y, 0]`, then `setDir`. Two traps in that row format:
+
+- **The Z column (index 3) is ignored.** Every object snaps to terrain via
+  `setPosATL` with z=0 (`:218`). You cannot float a prop by editing the array; elevated
+  objects (tower MGs and the like) are placed separately, see below.
+- **Direction is index 4, not 3.** Z sits between position and direction, so an
+  off-by-one lands the angle in the ignored column.
+
+## The anchor math
+
+The `_compCenterX/Y` constants (`fnc_BluHQinit.sqf:7-8`, the `1041.x / 6115.x` values)
+look load-bearing but **cancel out algebraically**. The placement reduces to:
+
+```text
+object world pos = PosOfBLUHQ + (row X/Y  -  HQ-building row X/Y)
+```
+
+So the `Land_Cargo_HQ_V1_F` row (`:36`) lands exactly on `PosOfBLUHQ` and every other
+object is positioned relative to it. The array numbers are a local grid where the HQ
+building sits at ~(10, 11).
+
+One invariant holds this together: **`_hqInCompX/_hqInCompY` (`:5-6`) must equal the
+`Land_Cargo_HQ_V1_F` row's X/Y.** They are the reference the offsets subtract from; if they
+drift apart, the whole base mis-anchors. Keep them in lockstep when replacing the array.
+
+## Rearranging: two paths
+
+**Small nudges** (shift a tent, rotate a wall): edit the row numbers directly. Change
+indices 1/2 to move, index 4 to rotate. Nothing else to touch.
+
+**A real re-layout**: build it visually in the Eden editor and round-trip through the array
+with the snippets below, rather than hand-typing coordinates.
+
+## Eden round-trip
+
+The load-bearing trap: `create3DENEntity` **only runs in Eden's own debug console** — the
+`{ }` console in the 3D editor toolbar, not the in-game debug console. Run it in-game and it
+silently no-ops.
+
+Objects take their heading from a single-Number `rotation` attribute (yaw, degrees), which
+matches the array's one `direction` column. `_origin` is cosmetic: everything anchors to the
+HQ building, so wherever you build it, the offset washes out on export.
+
+**Import** — run `scripts/gen_eden_hq_import.ps1` rather than assembling the script by hand:
+
+```text
+powershell -ExecutionPolicy Bypass -File scripts\gen_eden_hq_import.ps1 [originX originY]
+```
+
+It extracts the current array from `fnc_BluHQinit.sqf` by pattern (surviving the array
+changing size across round-trips), takes the anchor from the source's own `_hqInComp*`, wraps
+them in the `create3DENEntity` placement loop, writes `temp\eden_hq_import.sqf`, and copies
+the result to the clipboard. Paste that into the Eden console; the optional `originX originY`
+arguments override the default flat spot. If the base doesn't spread out (the emitted hint
+reads `created 1 of N`), nothing pasted; if props look missing, `_origin` isn't flat, so pass
+a flatter one.
+
+**Export** — after rearranging, `Ctrl+A` to select, run to put a ready array on the clipboard:
+
+```sqf
+// Select the composition first (Ctrl+A), then run from the Eden console.
+private _hqRef = [10.0413, 11.3066];
+private _objs  = get3DENSelected "Object";
+private _hqObj = (_objs select { typeOf _x == "Land_Cargo_HQ_V1_F" }) param [0, objNull];
+if (isNull _hqObj) exitWith { systemChat "No Land_Cargo_HQ_V1_F selected to anchor to."; };
+private _hqPos = getPosATL _hqObj;
+
+private _rows = _objs apply {
+    private _p = getPosATL _x;
+    format ["    [""%1"", %2, %3, %4, %5, false],",
+        typeOf _x,
+        (_p select 0) - (_hqPos select 0) + (_hqRef select 0),
+        (_p select 1) - (_hqPos select 1) + (_hqRef select 1),
+        _p select 2,
+        getDir _x]
+};
+copyToClipboard ("private _allObjectsData = [" + (_rows joinString "") + endl + "];");
+```
+
+Export re-references every object to the HQ building, so the `_origin` you imported at is
+irrelevant on the way back. Verify a new snippet once by import -> export -> re-import and
+confirming the base is identical before trusting it.
+
+## What the array does not govern
+
+Weapons (HMG, AA gun) and the whole garrison — tower guards, med-tent medics, the officer
+with the laptop, the patrol — are placed by code (`fnc_BluHQinit.sqf:253-632`) at
+`modelToWorld` offsets *off the spawned structures*, not from array rows. Consequences:
+
+- Rows flagged `isWeapon` carry coordinates but are skipped by the placement loop (`:213`);
+  moving them in Eden and re-exporting changes nothing in-game.
+- To move a weapon or unit, move its **anchor structure** (the sandbag, HQ building, or a
+  tower) in the array — dependents follow — or edit its inline block.
+- The redeploy/rebuild path reads `HQ_redeploy_*` mission-namespace variables set in this
+  same file (e.g. `:630-632`) and consumed by
+  `src/duws/functions/misc/fnc_redeployHQUnits.sqf`, so editing here keeps rebuild consistent.
+
+Player-deployed FOBs are a separate system (`src/duws/functions/init_hq/fnc_fortifyFOB.sqf`,
+inline offset calls, no shared array) and share nothing with the Main Base layout.

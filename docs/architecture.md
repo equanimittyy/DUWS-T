@@ -77,7 +77,7 @@ the ongoing side-mission spawner, cleanup loops, and event scripts.
 | Subdir | Role |
 |---|---|
 | `init_zones/` | Procedural zone generation: garrisons, patrols, fortifications, capture logic. Where zones are sited (the "More Urban" town detection) and the separate civilian "Dynamic Town" system are in [`zone_and_town_generation.md`](zone_and_town_generation.md) |
-| `init_hq/` | HQ and FOB setup: base init, fortify/guard, FOB patrols |
+| `init_hq/` | HQ and FOB setup: base init, fortify/guard, FOB patrols. How the Main Base layout is built and how to rearrange it (including an Eden round-trip) are in [`hq_layout_editing.md`](hq_layout_editing.md) |
 | `missions/` | Side missions: spawner (`fnc_missionLocator`), rewards, timers; `mission_threads/` holds one folder per mission type |
 | `supports/` | Support requests: CAS, artillery, UAV, paradrop, heli-lift, vehicle drop, FOB deploy, transport |
 | `warcom/` | War Command — the dynamic AI director for both sides (assault / patrol / QRF task forces reacting to the front line) |
