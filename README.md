@@ -43,7 +43,8 @@ won't run in the Linux devcontainer):
   once to seed `src/`, then commit `src/`. It asks for confirmation first and warns
   that re-running replaces `src/` and discards edits.
 - **`repack.cmd`** — packs `src/` back into `DUWS_T.altis.pbo` at the repo root, asking
-  before it overwrites the `.pbo`. The result is ready to load in Arma.
+  before it overwrites the `.pbo`, then normalizes the PBO's internal paths to Arma's
+  backslash convention via `normalize_pbo.ps1`. The result is ready to load in Arma.
 
 Edit the mission as `.sqf` / `.hpp` / etc. under `src/`; the packed `.pbo` stays
 build output (git-ignored).
