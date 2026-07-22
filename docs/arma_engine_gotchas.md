@@ -27,6 +27,25 @@ displayNull])` — which also detects a dialog closed elsewhere. The faction sel
 its reused dialog handle this way, in `fnc_factionSelector`
 (`src/duws/factions/MODERN/fn_factionAutoDetect.sqf`).
 
+## `exitWith` exits the nearest loop or call scope, not the enclosing if/then
+
+**Inside a loop, `if (cond) exitWith {...}` terminates the whole loop — even when the
+`exitWith` is nested several `if/then` blocks deep. `if/then`/`switch` blocks are
+transparent to it.**
+
+`exitWith` unwinds to the nearest enclosing scope created by a loop (`while`, `for`,
+`forEach`, `count`) or by `call`/`spawn`/`execVM`; the standard `if (done) exitWith {}`
+break relies on exactly this. The trap is writing `if (a) then { if (b) exitWith {...} }`
+expecting the `exitWith` to abandon only the inner block and let the loop keep iterating —
+it does not, it exits the loop. A loop that was meant to retry then silently runs once and
+quits.
+
+**How to apply:** to skip-and-retry the current iteration use `continue` (or let control
+fall off the end of the loop body); reserve `exitWith` for when you genuinely want the loop
+to stop. The zone locator hit this: an origin keep-out used `exitWith` to "re-roll" a
+position but instead dropped the zone entirely — see
+[`dynamic_zone_placement.md`](dynamic_zone_placement.md#origin-keep-out-drops-the-zone-instead-of-retrying-it).
+
 ## Structured-text controls need a parsed object, not `ctrlSetText`
 
 **Set a `CT_STRUCTURED_TEXT` (type 13 / `RscStructuredText`) control with
