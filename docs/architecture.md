@@ -91,7 +91,7 @@ the ongoing side-mission spawner, cleanup loops, and event scripts.
 |---|---|---|
 | Economy | `functions/dialog/` (`fnc_convertAPtoCP`) | Two currencies, CP and AP, earned by capturing zones and completing side missions |
 | Persistence | `functions/misc/fnc_autoSave.sqf` | Vanilla `saveGame` only — no custom serialization; save/continue relies entirely on the engine's campaign save |
-| Faction detection | `functions/misc/fnc_factions_check_modern.sqf`, `factions/MODERN/AUTODETECT_*` | Adapts to installed faction mods and runs mod-free. `VERSION_X` (value `"MODERN"`) selects the faction set, doubles as the `factions/` subfolder name, and is game state — so its value is not safe to change |
+| Faction detection | `functions/misc/fnc_factions_check_modern.sqf`, `factions/MODERN/AUTODETECT_*` | Adapts to installed faction mods and runs mod-free. `VERSION_X` (value `"MODERN"`) selects the faction set, doubles as the `factions/` subfolder name, and is game state — so its value is not safe to change. Full detail in [`faction_system.md`](faction_system.md) |
 | Revive | `initPlayerLocal.sqf` | Chosen at start: AIS, vanilla, or auto-disabled when ACE medical is present |
 | Performance | `modules/zbe_cache`, `modules/taw_vd`, `functions/misc/fnc_repetitive_cleanup.sqf` | Distant-AI caching, view-distance control, and aggressive zone cleanup keep a whole-map persistent war affordable |
 
