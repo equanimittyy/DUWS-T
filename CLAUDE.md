@@ -21,6 +21,10 @@ https://steamcommunity.com/sharedfiles/filedetails/?id=3685431219
   force a mod, or break the faction auto-detection / ALIVE support, is the wrong call.
 - **The unpacked source is the source of truth.** Edit the mission under `src/`
   and repack; never hand-edit the packed `.pbo`. Workflow: [`README.md`](README.md).
+- **Mind the engine's traps.** Arma-specific behaviours that aren't visible in the SQF
+  (e.g. what may be stored in the mission namespace) are collected in
+  [`docs/arma_engine_gotchas.md`](docs/arma_engine_gotchas.md); check it before chasing a
+  strange engine error.
 
 ## Always-loaded working rules
 

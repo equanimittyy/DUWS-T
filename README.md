@@ -66,3 +66,6 @@ Static checks (SQF syntax + path resolution) and pure-function unit tests live i
 
 Working rules for contributors and agents (voice, comments, docs) live in
 [`docs/claude/`](docs/claude/) and load each session via [`CLAUDE.md`](CLAUDE.md).
+
+Arma engine traps that aren't visible in the SQF (e.g. what may be stored in the mission
+namespace) are collected in [`docs/arma_engine_gotchas.md`](docs/arma_engine_gotchas.md).
