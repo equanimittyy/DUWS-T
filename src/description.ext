@@ -65,7 +65,7 @@ class RscTitles {
             class splash: RscPicture
 		    {			
 			idc = 1002;
-			text = "duws\soundsNpics\support\DUWS_T.paa";
+			text = "duws\sounds_npics\support\DUWS_T.paa";
 			x = 0.15 * safezoneW + safezoneX;
 			y = 0.0 * safezoneH + safezoneY;
 			w = 0.7 * safezoneW;

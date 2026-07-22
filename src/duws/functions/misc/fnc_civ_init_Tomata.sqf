@@ -32,7 +32,7 @@ diag_log format ["[CIV] Total locations: %1 (static: %2, dynamic: %3)", count _l
 // 读取平民阵营单位
 if (isNil "CIV_PRESENCE") then { CIV_PRESENCE = "NONE"; };
 diag_log format ["[CIV] CIV_PRESENCE = %1", CIV_PRESENCE];
-[] call compile preprocessFileLineNumbers "duws\FACTIONS\CIV_FACTIONS.sqf";
+[] call compile preprocessFileLineNumbers "duws\factions\CIV_FACTIONS.sqf";
 missionNamespace setVariable ["civ_array", civ_array];
 diag_log format ["[CIV] civ_array loaded, count: %1", count civ_array];
 
