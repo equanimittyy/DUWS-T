@@ -2,7 +2,8 @@
 rem Unpack DUWS_T.altis.pbo into a flat src\ folder for editing.
 rem Wraps the vendored PBO Manager console CLI (Windows only). See README.md.
 setlocal EnableExtensions
-cd /d "%~dp0"
+rem Operate from the repo root (parent of scripts\), where src\ and the .pbo live.
+cd /d "%~dp0.."
 
 rem Run the work in :main so one pause fires on every exit path (double-click
 rem leaves the window open until a key is pressed, whatever the outcome).

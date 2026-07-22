@@ -71,9 +71,9 @@ if not exist "%OUT%" (
 rem pboc stores forward-slash PBO paths; Arma's convention and the mission's own
 rem backslash load paths require '\'. Normalize them (and recompute the SHA1).
 echo [repack] Normalizing PBO paths to backslashes ...
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0normalize_pbo.ps1" "%OUT%"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\normalize_pbo.ps1" "%OUT%"
 if errorlevel 1 (
-  echo [repack] ERROR: path normalization failed ^(%~dp0normalize_pbo.ps1^).
+  echo [repack] ERROR: path normalization failed ^(%~dp0scripts\normalize_pbo.ps1^).
   exit /b 1
 )
 
