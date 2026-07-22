@@ -1,7 +1,7 @@
 # DUWS_T
 
 **DUWS_T** (*Dynamic Universal War System — Tactic*) is a single-player / co-op
-dynamic campaign mission for **Arma 3**, built on the **Altis** map. It procedurally
+dynamic campaign mission for **Arma 3**. It procedurally
 generates a persistent war — capture zones, run side missions, call in support, and
 fight an AI opposition that reacts to your moves. It descends from Tomata's DUWS_X
 (originally Kibot's DUWS), reworked here with new side missions, a revised
@@ -48,6 +48,14 @@ won't run in the Linux devcontainer):
 
 Edit the mission as `.sqf` / `.hpp` / etc. under `src/`; the packed `.pbo` stays
 build output (git-ignored).
+
+### 3. Load it in Arma for testing
+
+Copy `DUWS_T.altis.pbo` into the Arma 3 **install** folder's `MPMissions\` — e.g.
+`...\steamapps\common\Arma 3\MPMissions\`, **not** `Documents\Arma 3\MPMissions\`
+(local hosting reads the install folder). Then host a LAN / multiplayer game and select
+it from the list. The `<name>.<world>.pbo` filename is required — Arma reads the terrain
+from it.
 
 ## Tests
 
