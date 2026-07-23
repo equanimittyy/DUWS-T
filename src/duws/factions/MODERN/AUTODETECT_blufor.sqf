@@ -27,20 +27,6 @@ fnc_filterPilotCrew = {
 };
 
 
-_factions = (call BIS_fnc_getFactions) select {
-	getNumber (configFile >> "CfgFactionClasses" >> _x >> "side") in [0,1,2] &&  
-	!(getNumber (configFile >> "CfgFactionClasses" >> _x >> "priority") in [4])
-};
-
-_factions2d = (_factions apply {[getText (configFile >> "CfgFactionClasses" >> _x >> "displayName"), _x]} select { _x#0 != "" });
-factionList = [];
-{ if !( _x#0 in flatten factionList ) then { factionList append [_x]} } forEach _factions2d;	// sanitize factions with multiple sides (duplicates)
-factionList;	// for listbox
-
-//_factionData = ("(gettext (_x >> 'faction') == _faction ) && !('base' in toLower configname _x)" configClasses (configfile >> "CfgVehicles")) apply {configName _x};
-//[_faction, [_factionData, "apcs"] call fnc_factionGetFiltered ];
-
- 
 fnc_factionGen = {
 	_faction = _this;
 	//systemChat str _faction;
