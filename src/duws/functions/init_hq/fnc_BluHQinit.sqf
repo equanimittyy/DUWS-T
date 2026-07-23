@@ -155,7 +155,7 @@ private _allObjectsData = [
     ["Land_WoodenCrate_01_F",              18.1987,   1.8188,  0.3482, 270.0, false],
     ["Land_WoodenCrate_01_stack_x5_F",     -2.6919,  17.4453,  0.9620,  90.0, false],
     ["Land_LampShabby_F",                  19.3660,  -0.3594,  3.7720,  90.0, false],
-    ["Land_LampShabby_F",                 -13.6755,  23.6240,  3.7720,   0.0, false],
+    ["Land_LampShabby_F",                   4.2074,  23.3569,  3.7720,   0.0, false],
     ["Land_LampShabby_F",                 -28.6045,  11.6953,  3.7720, 270.0, false],
     ["Land_LampShabby_F",                 -10.6672, -18.2373,  3.7720, 180.0, false],
     ["Land_LampShabby_F",                  13.2351, -18.1797,  3.7720, 180.0, false],
