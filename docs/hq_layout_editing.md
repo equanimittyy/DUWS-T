@@ -95,6 +95,7 @@ comments, so they are inert at runtime. Attributes:
 | `schema=A\|B\|C` | which row format (below) — explicit, since A and B look alike |
 | `anchor=hqInComp` | HQ only: its array stores original composition coords, so the tool subtracts `_hqInCompX/Y`. Omit elsewhere (offsets are already relative to `[0,0]`) |
 | `z=snap\|keep` | optional override; default `keep` for schema B, `snap` otherwise |
+| `zbase=<var>` | reads that source constant as the origin's Z, so the composition keeps its native altitude instead of ground. Killhouse uses `zbase=_centerSpawnZ` |
 
 The adapters normalize all three row formats to `[class, offX, offY, offZ, dir°]`:
 
@@ -104,9 +105,10 @@ The adapters normalize all three row formats to `[class, offX, offY, offZ, dir°
 | B | `[class, dX, dY, dZ, yaw_rad, atl, isTarget]` — **yaw in radians** | killhouse objects/targets |
 | C | `[class, [x,y,z], dir°, 1,0,[],"","",true,false]` — position nested at index 1 | `simple_zone` + 4 mission statics |
 
-`snap` drops objects onto the terrain (ground layouts); `keep` preserves each object's Z (the
-killhouse is a multi-floor structure that collapses if snapped). Fifteen compositions are
-marked today.
+`snap` drops objects onto the terrain (ground layouts); `keep` preserves each object's Z. The
+killhouse is a multi-floor structure that would collapse if snapped, so it pairs `keep` with
+`zbase=_centerSpawnZ` to sit at its original off-map altitude (~1000). Fifteen compositions
+are marked today.
 
 **Export** — after rearranging, `Ctrl+A` to select, run to put a ready array on the clipboard:
 

@@ -11,7 +11,7 @@ private _centerSpawnZ = 1000;
 private _fnc_radToDeg = { (_this * 180) / 3.1415926535 };
 
 // ========== 普通物体数据 (不含靶子) ==========
-// --DUWS-COMPOSITION BEGIN name="Killhouse: Objects" schema=B--
+// --DUWS-COMPOSITION BEGIN name="Killhouse: Objects" schema=B zbase=_centerSpawnZ--
 private _objectsData = [
 
 // ---- Walk-Over-Range 层 ----
@@ -723,7 +723,7 @@ private _objectsData = [
 // --DUWS-COMPOSITION END--
 
 // ========== 靶子数据 ==========
-// --DUWS-COMPOSITION BEGIN name="Killhouse: Targets" schema=B--
+// --DUWS-COMPOSITION BEGIN name="Killhouse: Targets" schema=B zbase=_centerSpawnZ--
 private _targetsData = [
 ["TargetP_Civ_F", -29.881226, -3.3609619, 3.1395636, 3.1355252, 0, false],
 ["TargetP_Civ_F", -25.003784, 11.969604, 3.1395636, 6.1571732, 0, false],
