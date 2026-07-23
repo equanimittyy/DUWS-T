@@ -77,3 +77,22 @@ please wait...") — a latent collision where one string never displays.
 affecting; keep the duplicate copies byte-identical, or consolidate to one on purpose and
 test in-game. When a string edit appears to do nothing, grep for a second `<Key ID>` with
 the same ID before assuming the change didn't take.
+
+## Diary records display newest-first, so add them bottom-up
+
+**`createDiaryRecord` prepends: the record created last is drawn at the TOP of its
+subject. To lay a manual out top-to-bottom, create the entries in reverse.**
+
+The map's Notes (diary) is built for a running log, so the newest entry sits on top.
+A manual that should read intro-first therefore has to be written last-line-first, which
+inverts the obvious reading of the source. The trap is adding a new section at the end of
+the script and finding it on top in-game, or assuming source order equals screen order.
+
+Record text is parsed as structured text, so `<br/>`, `<t ...>` and `<font>` work — but
+in `stringtable.xml` the markup must be entity-escaped (`&lt;br/&gt;`), or the XML parser
+eats the tag as an element.
+
+**How to apply:** the manual (`fnc_duws_help.sqf`) keeps its entries in an array in
+display order and calls `reverse` once before the `forEach`, so the source reads the way
+the player sees it and only that array changes when reordering. Reuse that pattern for any
+new diary subject rather than hand-ordering `createDiaryRecord` calls.
