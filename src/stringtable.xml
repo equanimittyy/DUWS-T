@@ -1965,7 +1965,7 @@
                 <Chinesesimp>所有单位注意，发现敌方渗透部队！自由接敌！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ohno">
-                <Original>Uh-oh, we're cooked...</Original>
+                <Original>Damn. We're blown...</Original>
                 <Chinesesimp>操！糟了...</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_RADIO_1">
@@ -2199,7 +2199,7 @@
                 <Chinesesimp>无法伪装：你身上携带有钱币或情报物品。请先将它们存入基地的补给箱内，或先扔到地上。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_1">
-                <Original>Hey, you! What are you sneaking around for...</Original>
+                <Original>Hey, you! What are you doing sneaking around here?</Original>
                 <Chinesesimp>嘿...你！你在那鬼鬼祟祟的干什么呢...</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_2">
@@ -2789,8 +2789,8 @@
                 <Chinesesimp>对不住了，只是为了维护治安。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_LOOT2">
-                <Original>Heh... you bastard... Hey! I found something interesting here!</Original>
-                <English>Heh... you bastard... Hey! I found something interesting here!</English>
+                <Original>Well, well... what have we here?</Original>
+                <English>Well, well... what have we here?</English>
                 <German>Heh... du Bastard... Hey! Ich habe etwas Interessantes gefunden!</German>
                 <Spanish>Je... hijo de puta... Oye! He encontrado algo interesante!</Spanish>
                 <Chinesesimp>哈哈...你这狗杂碎...嘿！我这儿找到了点有意思的！</Chinesesimp>
@@ -2852,8 +2852,8 @@
                 <Chinesesimp>没什么有用的...</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_LOOT_REVENGE">
-                <Original>Go to hell!!!</Original>
-                <English>Go to hell!!!</English>
+                <Original>Go to hell!</Original>
+                <English>Go to hell!</English>
                 <German>Zur Hölle!!!</German>
                 <Spanish>¡Ve al infierno!!!</Spanish>
                 <Chinesesimp>去死吧！！！</Chinesesimp>
@@ -3018,8 +3018,8 @@
                 <German>Danke... danke!!!</German>
                 <Spanish>Gracias... gracias!!!</Spanish>
                 <Chinesesimp>谢谢...谢谢！！！</Chinesesimp>
-                <Original>Thank you... thank you!!!</Original>
-                <English>Thank you... thank you!!!</English>
+                <Original>Thank you... thank you!</Original>
+                <English>Thank you... thank you!</English>
             </Key>
             <Key ID="STR_DUWS_T_RECRUITconv6">
                 <German>Ich glaube euch nicht... Ihr seht nicht wie gute Menschen aus...</German>
@@ -3302,8 +3302,8 @@
                 <German>Hier spricht das HQ. Wir haben Kontakt zu einem Informanten in deiner Nähe. Überprüfe seine letzte bekannte Position auf deiner Karte.</German>
                 <Spanish>Este es el Cuartel general. Tenemos contacto con un informante en tu área. Revisa en tu mapa su ultima posición conocida.</Spanish>
                 <Chinesesimp>这里是"霸王"。我们需要与在你所在区域的一位线人进行联络，他的位置已标识到你的GPS终端上。</Chinesesimp>
-                <Original>This is "Overlord". We've made contact with an informant in your area. Check your map for his last known location.</Original>
-                <English>This is "Overlord". We've made contact with an informant in your area. Check your map for his last known location.</English>
+                <Original>This is Overlord. We've made contact with an informant in your area. Check your map for his last known location.</Original>
+                <English>This is Overlord. We've made contact with an informant in your area. Check your map for his last known location.</English>
             </Key>
             <Key ID="STR_DUWS_T_rtv3i48t">
                 <German>Informant</German>
@@ -3377,7 +3377,7 @@
                 <Chinesesimp>在敌人带着情报撤离前带回越多情报越好。另外，搞几辆载具过去最好————那个临时指挥部覆盖的范围相当大。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING5">
-                <Original>Roger that, we'll head out asap.</Original>
+                <Original>Roger that, moving out now.</Original>
                 <Chinesesimp>明白了，我们待会就出发。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING6">
@@ -3501,8 +3501,8 @@
                 <Chinesesimp>这里是"霸王"—— 收到，继续执行任务。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_FOUND_x">
-                <Original>Hey! Found something interesting!</Original>
-                <English>Hey! Found something interesting!</English>
+                <Original>Got something useful here.</Original>
+                <English>Got something useful here.</English>
                 <German>Hey! Etwas Interessantes gefunden!</German>
                 <Spanish>¡Oye! Encontré algo interesante!</Spanish>
                 <Chinesesimp>嘿！我这找到点有意思的！</Chinesesimp>
@@ -3857,8 +3857,8 @@
                 <German>Hier ist "Overlord 1-1". Achtung, freundliche Einheiten haben eine Zone verloren.</German>
                 <Spanish>Aquí es "Overlord 1-1". Atención, las fuerzas amigas han perdido una zona.</Spanish>
                 <Chinesesimp>这里是"霸王1-1"，注意，友军丢失了一个据点。</Chinesesimp>
-                <Original>This is "Overlord". Be advised, friendly forces have lost a zone.</Original>
-                <English>This is "Overlord". Be advised, friendly forces have lost a zone.</English>
+                <Original>This is Overlord. Be advised, friendly forces have lost a zone.</Original>
+                <English>This is Overlord. Be advised, friendly forces have lost a zone.</English>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_APPROACHING">
                 <German>Hier spricht "Oberherr 1-1", unser taktisches Mittel hat gerade die Beweglichkeit verloren. Die nahe gelegene Aufklärungsgruppe "Kurier 2-1" ist als Soforteinsatztruppe dorthin entsandt, um es zu schützen, braucht aber weitere Unterstützung. Vergiss nicht, das Toolkit mitzubringen, um bei Beschädigung des Mittels feldreparaturen durchzuführen.</German>
@@ -3913,8 +3913,8 @@
                 <German>„Delta 3-2“ an „Kurier 2-1“, wir sind in Ihrer Umgebung eingetroffen und bekämpfen die Feinde! Ihr könnt euch kurz durchatmen!</German>
                 <Spanish>"Delta 3-2" a "Envío Rápido 2-1", hemos llegado a vuestras proximidades y estamos combatiendo contra los enemigos! ¡Podéis respirar un momento!</Spanish>
                 <Chinesesimp>"德尔塔3-2"呼叫"速递2-1"，我们已经到达你们周围，正与敌军交战！你们可以歇口气了！</Chinesesimp>
-                <Original>Delta 3-2 to Express 2-1, we're on station and engaging. Catch your breath, we've got this.</Original>
-                <English>Delta 3-2 to Express 2-1, we're on station and engaging. Catch your breath, we've got this.</English>
+                <Original>Delta 3-2 to Express 2-1, we're on station and engaging. Ease off, we've got them.</Original>
+                <English>Delta 3-2 to Express 2-1, we're on station and engaging. Ease off, we've got them.</English>
             </Key>
             <Key ID="STR_DUWS_T_9dt4d8rm">
                 <German>Mission erfolgreich!</German>
@@ -4781,8 +4781,8 @@
                 <German>Endlich zurück! Vielen Dank an euch!</German>
                 <Spanish>¡Finalmente de vuelta! ¡Muchas gracias a todos!</Spanish>
                 <Chinesesimp>终于回来了！谢谢你们！以后你们呼叫近空支援我一定第一个响应！</Chinesesimp>
-                <Original>Finally back! Thanks a lot, guys!</Original>
-                <English>Finally back! Thanks a lot, guys!</English>
+                <Original>Finally back! I owe you all one.</Original>
+                <English>Finally back! I owe you all one.</English>
             </Key>
             <Key ID="STR_DUWS_T_pilotend2">
                 <German>„Overlord“ an Einsatztrupp, gut gemacht. Ich wette, dieser Pilot vergisst euch sein ganzes Leben lang nicht.</German>
@@ -5208,8 +5208,8 @@
                 <German>Sieht so aus, als wäre dies der letzte von ihnen...</German>
                 <Spanish>Parece que este es el último de ellos...</Spanish>
                 <Chinesesimp>看起来这是他们的最后一个了...</Chinesesimp>
-                <Original>Looks like this is their last one...</Original>
-                <English>Looks like this is their last one...</English>
+                <Original>Looks like that's the last of them...</Original>
+                <English>Looks like that's the last of them...</English>
             </Key>
         </Container>
         <Container name="Support &amp; Radio">
@@ -6362,8 +6362,8 @@
                 <German>Ich bin fast da. Führe Schleppladeberechnungen durch. Bewegen Sie das Zielfahrzeug nicht.</German>
                 <Spanish>Ya casi llego. Estoy realizando cálculos de carga con eslinga. No muevas el vehículo objetivo.</Spanish>
                 <Chinesesimp>我快到了，正在进行吊装计算，注意不要移动目标载具。</Chinesesimp>
-                <Original>I'm almost there. Performing slingload calculations. Do not move the target vehicle.</Original>
-                <English>I'm almost there. Performing slingload calculations. Do not move the target vehicle.</English>
+                <Original>I'm almost there. Lining up the sling-load now. Keep the vehicle still.</Original>
+                <English>I'm almost there. Lining up the sling-load now. Keep the vehicle still.</English>
             </Key>
             <Key ID="STR_DUWS_T_helolift3">
                 <German>Kabel wird deployiert... Wer eine Mitfahrgelegenheit braucht, kann jetzt ins Fahrzeug steigen!</German>
@@ -6397,8 +6397,8 @@
                 <German>Hier ist "Overlord". Achtung, Aufklärungseinheiten haben feindliche schnelle Eingreiftruppen (QRF) entdeckt, die sich um das Einsatzgebiet herum aufstellen. Bleibt wachsam.</German>
                 <Spanish>Aquí "Overlord". Atención, unidades de reconocimiento han detectado fuerzas de respuesta rápida enemigas desplegándose alrededor del área de operaciones. Mantengan la vigilancia.</Spanish>
                 <Chinesesimp>这里是"霸王"，注意，侦查单位发现敌人正在战区周围部署快反部队。注意警惕。</Chinesesimp>
-                <Original>This is "Overlord". Be advised, reconnaissance elements have spotted enemy QRF deploying around the AO. Stay alert.</Original>
-                <English>This is "Overlord". Be advised, reconnaissance elements have spotted enemy QRF deploying around the AO. Stay alert.</English>
+                <Original>This is Overlord. Be advised, reconnaissance elements have spotted enemy QRF deploying around the AO. Stay alert.</Original>
+                <English>This is Overlord. Be advised, reconnaissance elements have spotted enemy QRF deploying around the AO. Stay alert.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxidamaged">
                 <German>Hier ist die Leitstelle. %1 %2-%2 hat schweren Schaden erlitten und kann den geplanten Auftrag nicht erfüllen. Ersatzeinheit ist unterwegs, voraussichtliche Ankunftszeit: 1 Minute.</German>
@@ -6922,8 +6922,8 @@
                 <Spanish>"Overlord" llama a todas las unidades, unidades aéreas enemigas detectadas en la zona de operaciones. ¡Mantengan la vigilancia!</Spanish>
                 <German>"Overlord" an alle Einheiten, feindliche Luftfahrzeuge im Einsatzgebiet erkannt. Bleibt wachsam!</German>
                 <Chinesesimp>"霸王"呼叫全体单位，敌区内发现敌人空中单位。保持警惕！</Chinesesimp>
-                <Original>"Overlord" to all units, enemy air units detected in the enemy zones. Stay alert!</Original>
-                <English>"Overlord" to all units, enemy air units detected in the enemy zones. Stay alert!</English>
+                <Original>Overlord to all units, enemy air units detected in the enemy zones. Stay alert!</Original>
+                <English>Overlord to all units, enemy air units detected in the enemy zones. Stay alert!</English>
             </Key>
         </Container>
         <Container name="Callsigns">
@@ -6973,8 +6973,8 @@
                 <German>"Allseer"</German>
                 <Spanish>"Allseer"</Spanish>
                 <Chinesesimp>"全视眼"</Chinesesimp>
-                <Original>"Allseer"</Original>
-                <English>"Allseer"</English>
+                <Original>Allseer</Original>
+                <English>Allseer</English>
             </Key>
             <Key ID="STR_DUWS_T_ammospotted">
                 <German>Einsatzgruppe, hier ist "Allseer". Wir haben einen feindlichen Versorgungstruck entdeckt, der zwischen feindlichen Zonen fährt. Sichern Sie ihn, falls erforderlich!</German>
@@ -7022,15 +7022,15 @@
                 <German>"Longbow" Pilot</German>
                 <Spanish>Piloto de "Longbow"</Spanish>
                 <Chinesesimp>"长弓"飞行员</Chinesesimp>
-                <Original>"Longbow" Pilot</Original>
-                <English>"Longbow" Pilot</English>
+                <Original>Longbow Pilot</Original>
+                <English>Longbow Pilot</English>
             </Key>
             <Key ID="STR_DUWS_T_koipilot">
                 <German>"Koi" Pilot</German>
                 <Spanish>Piloto de "Koi"</Spanish>
                 <Chinesesimp>"鲤鱼"飞行员</Chinesesimp>
-                <Original>"Koi" Pilot</Original>
-                <English>"Koi" Pilot</English>
+                <Original>Koi Pilot</Original>
+                <English>Koi Pilot</English>
             </Key>
             <Key ID="STR_DUWS_T_dispatcher">
                 <German>Dispatcher</German>
@@ -7392,8 +7392,8 @@
                 <German>"Overlord 1-1" an alle Einheiten, Einsatztruppe %1 betritt den Operationsbereich.</German>
                 <Spanish>"Overlord 1-1" a todas las unidades, el grupo de tareas %1 está entrando en la zona de operaciones.</Spanish>
                 <Chinesesimp>“霸王 1-1”呼叫所有单位， %1 特遣队正进入行动区域。</Chinesesimp>
-                <Original>"Overlord" to all units, Task Force %1 is entering the AO.</Original>
-                <English>"Overlord" to all units, Task Force %1 is entering the AO.</English>
+                <Original>Overlord to all units, Task Force %1 is entering the AO.</Original>
+                <English>Overlord to all units, Task Force %1 is entering the AO.</English>
             </Key>
             <Key ID="STR_DUWS_T_8mtxjfj3">
                 <Spanish>Escuadrón de ataque áereo %1</Spanish>
@@ -7469,8 +7469,8 @@
                 <Spanish>Atención todas las unidades, aquí es "Overlord". La Fuerza de Tarea %1 ha dejado de informar su estado…</Spanish>
                 <German>Alle Einheiten, hier ist "Overlord". Task Force %1 hat die Statusmeldung eingestellt…</German>
                 <Chinesesimp>所有单位注意，这里是"霸王"，特遣部队%1刚刚停止了情况报告...</Chinesesimp>
-                <Original>All units, this is "Overlord". Task Force %1 has stopped reporting status…</Original>
-                <English>All units, this is "Overlord". Task Force %1 has stopped reporting status…</English>
+                <Original>All units, this is Overlord. Task Force %1 has stopped reporting status…</Original>
+                <English>All units, this is Overlord. Task Force %1 has stopped reporting status…</English>
             </Key>
             <Key ID="STR_DUWS_T_3azcote7">
                 <Spanish>Fuerza de ataque %2 - Objetivo primario cambiado a: %1</Spanish>
@@ -8035,8 +8035,8 @@
                 <German>DUWS_T verfügt über ein immersives Untertitelsystem, das auf fast jede Aktion des Spielers reagiert. „Overlord 1-1“ ist der Gesamtkommandant der BLUFOR-Kampagne und „Action Squad“ die Sammelbezeichnung für alle Spieler.</German>
                 <Spanish>DUWS_T cuenta con un sistema de subtítulos inmersivo que responde a casi todas las acciones del jugador. «Overlord 1-1» es el comandante general de la campaña BLUFOR y «Action Squad» el término colectivo para todos los jugadores.</Spanish>
                 <Chinesesimp>DUWS_T配备了沉浸式字幕系统，玩家的每一个举动几乎都会有字幕响应。"霸王1-1"为蓝方战役总指挥，"行动组"为所有玩家的统称。</Chinesesimp>
-                <Original>DUWS_T features an immersive subtitle system that responds to nearly every player action. "Overlord" is the overall BLUFOR commander, and "Alpha 1-1" is the shared callsign for the players.</Original>
-                <English>DUWS_T features an immersive subtitle system that responds to nearly every player action. "Overlord" is the overall BLUFOR commander, and "Alpha 1-1" is the shared callsign for the players.</English>
+                <Original>DUWS_T features an immersive subtitle system that responds to nearly every player action. Overlord is the overall BLUFOR commander, and Alpha 1-1 is the shared callsign for the players.</Original>
+                <English>DUWS_T features an immersive subtitle system that responds to nearly every player action. Overlord is the overall BLUFOR commander, and Alpha 1-1 is the shared callsign for the players.</English>
             </Key>
             <Key ID="STR_DUWS_T_m267zqr7">
                 <German>Jeder Spieler (muss Gruppenführer sein) kann Einsatzkräfte über das Rekrutierungsmenü im Hauptquartier und an der Forward Operating Base (FOB) rekrutieren. Der erste Kauf kostet 8 CP (10 CP in DUWS_X). Falls eine Einsatzkraft im Kampf getötet wird, kann der Spieler die gefallene Einsatzkraft nach einer Minute kostenlos über das Rekrutierungsmenü neu einsetzen.</German>
@@ -8394,8 +8394,8 @@
                 <German>Hier ist "Overlord 1-1". Einer unserer FOBs wurde zerstört.</German>
                 <Spanish>Aquí es "Overlord 1-1". Una de nuestras FOBs ha sido destruida.</Spanish>
                 <Chinesesimp>这里是"霸王1-1"，我们的一个FOB被摧毁了。</Chinesesimp>
-                <Original>This is "Overlord". One of our FOBs has been destroyed.</Original>
-                <English>This is "Overlord". One of our FOBs has been destroyed.</English>
+                <Original>This is Overlord. One of our FOBs has been destroyed.</Original>
+                <English>This is Overlord. One of our FOBs has been destroyed.</English>
             </Key>
             <Key ID="STR_DUWS_T_u18xeu4p">
                 <German>Hier ist das 'Overlord 1-1'. Sieht so aus als hätten wir ein paar Infos zu feindlichen Positionen erhalten. Gute Arbeit.</German>
