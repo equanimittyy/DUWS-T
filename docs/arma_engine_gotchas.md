@@ -59,3 +59,21 @@ cause (the wasted time goes into suspecting a missing class definition instead).
 **How to apply:** `_ctrl ctrlSetStructuredText (parseText _markup)` to set, `parseText ""`
 to clear. The faction selector's "no units" caption uses this, in `fnc_factionSelector`
 (`src/duws/factions/MODERN/fn_factionAutoDetect.sqf`).
+
+## Duplicate `<Key ID>` in stringtable.xml resolve to one definition, silently
+
+**`src/stringtable.xml` repeats several `STR_` IDs. The engine loads the table without
+error and keeps only one definition per ID; the other copies are dead. Editing a dead
+copy changes nothing in-game, and reordering keys can flip which copy wins.**
+
+The table is split into `<Container>` sections purely for navigation — IDs resolve
+globally across all containers, so which duplicate the engine keeps is decided by file
+order, not by section. Nine IDs are currently duplicated; most pairs are identical (or
+differ only in tag order), but `STR_DUWS_T_FAST_TRAVEL_BUSY` has two genuinely different
+English strings ("You are already placing a waypoint." vs "The map is already opening,
+please wait...") — a latent collision where one string never displays.
+
+**How to apply:** treat any reordering or removal of a duplicate key as behaviour-
+affecting; keep the duplicate copies byte-identical, or consolidate to one on purpose and
+test in-game. When a string edit appears to do nothing, grep for a second `<Key ID>` with
+the same ID before assuming the change didn't take.
