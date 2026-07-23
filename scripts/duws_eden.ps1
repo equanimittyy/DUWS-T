@@ -124,10 +124,15 @@ function Save-And-Copy($script) {
 }
 
 function Read-Origin {
-    $in = Read-Host "Origin X Y (blank = 23100 18700)"
-    if ([string]::IsNullOrWhiteSpace($in)) { return ,@(23100.0, 18700.0) }
-    $p = $in -split '\s+'
-    return ,@([double]$p[0], [double]$p[1])
+    # Accepts "X Y" or a pasted Arma position like [1689.31,5603.31,0]: pull the first
+    # two numbers and ignore any Z. Brackets/commas/spaces are all just separators.
+    while ($true) {
+        $in = Read-Host "Origin (X Y, or paste [x,y,z]; blank = 23100 18700)"
+        if ([string]::IsNullOrWhiteSpace($in)) { return ,@(23100.0, 18700.0) }
+        $nums = @([regex]::Matches($in, '-?\d+(?:\.\d+)?') | ForEach-Object { [double]$_.Value })
+        if ($nums.Count -ge 2) { return ,@($nums[0], $nums[1]) }
+        Write-Host "Enter at least X and Y (e.g. 23100 18700 or [1689.31,5603.31,0])." -ForegroundColor Yellow
+    }
 }
 
 function Invoke-Generate($comp) {
