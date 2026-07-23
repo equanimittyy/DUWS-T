@@ -111,31 +111,41 @@ killhouse is a multi-floor structure that would collapse if snapped, so it pairs
 `zbase=_centerSpawnZ` to sit at its original off-map altitude (~1000). Fifteen compositions
 are marked today.
 
-**Export** — after rearranging, `Ctrl+A` to select, run to put a ready array on the clipboard:
+**Export** — after rearranging, copies a schema-agnostic block of `[class, dx, dy, dz, dir°]`
+rows (offsets from the import origin) to re-integrate into the composition's source array:
 
 ```sqf
-// Select the composition first (Ctrl+A), then run from the Eden console.
-private _hqRef = [10.0413, 11.3066];
-private _objs  = get3DENSelected "Object";
-private _hqObj = (_objs select { typeOf _x == "Land_Cargo_HQ_V1_F" }) param [0, objNull];
-if (isNull _hqObj) exitWith { systemChat "No Land_Cargo_HQ_V1_F selected to anchor to."; };
-private _hqPos = getPosATL _hqObj;
+// Set _origin to the SAME origin you imported at (the TUI default is shown).
+private _origin = [23100, 18700, 0];
+
+private _objs = get3DENSelected "Object";
+if (_objs isEqualTo []) exitWith { systemChat "Select the composition: click an object in the 3D view, then Ctrl+A."; };
 
 private _rows = _objs apply {
-    private _p = getPosATL _x;
-    format ["    [""%1"", %2, %3, %4, %5, false],",
+    private _p = getPosWorld _x;
+    format ["[""%1"", %2, %3, %4, %5]",
         typeOf _x,
-        (_p select 0) - (_hqPos select 0) + (_hqRef select 0),
-        (_p select 1) - (_hqPos select 1) + (_hqRef select 1),
-        _p select 2,
+        (_p select 0) - (_origin select 0),
+        (_p select 1) - (_origin select 1),
+        (_p select 2) - (_origin select 2),
         getDir _x]
 };
-copyToClipboard ("private _allObjectsData = [" + (_rows joinString "") + endl + "];");
+copyToClipboard (_rows joinString ("," + endl));
+systemChat format ["Copied %1 objects.", count _objs];
 ```
 
-Export re-references every object to the HQ building, so the `_origin` you imported at is
-irrelevant on the way back. Verify a new snippet once by import -> export -> re-import and
-confirming the base is identical before trusting it.
+`getDir` reads each heading in the convention the import wrote (`[0,0,dir]` yaw), so rotation
+round-trips. To fold the rows back into a composition's array:
+
+- offsets are the source coordinates (X/Y for schema A; the nested `[x,y,z]` for C). For the
+  **HQ**, add `_hqInComp` (10.0413, 11.3066) to X/Y — its array stores original composition
+  coordinates, not offsets.
+- keep dir in degrees for A/C; for the **killhouse** (B), convert back to radians (`dir * pi / 180`).
+- carry each row's flags (`isWeapon`, `isTarget`, the Eden-export tail) over from the original
+  rows by class — rearranging doesn't change them. Z is only load-bearing for the killhouse;
+  ground layouts ignore the Z column.
+
+Verify once by import -> export -> re-import and confirming the layout is identical.
 
 ## What the array does not govern
 
