@@ -139,8 +139,8 @@
                 <German>10000   dummer Cheater</German>
                 <Spanish>10000   Tramposos ¬¬</Spanish>
                 <Chinesesimp>选这个干啥？？？</Chinesesimp>
-                <Original>10000   fuckin cheaters</Original>
-                <English>10000   fuckin cheaters</English>
+                <Original>10000   (basically cheating)</Original>
+                <English>10000   (basically cheating)</English>
             </Key>
             <Key ID="STR_DUWS_T_57jjx7d6">
                 <German>110 (Panzer)</German>
@@ -2207,7 +2207,7 @@
                 <Chinesesimp>我发现了个怪人...所有人向我靠拢！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_3">
-                <Original>This is a warzone, get away! Or I’ll shoot!</Original>
+                <Original>This is a warzone! Get back or I’ll shoot!</Original>
                 <Chinesesimp>这里是战区，滚开！不然我就开枪了！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_4">
@@ -2371,7 +2371,7 @@
                 <Chinesesimp>你的声望太低，平民拒绝提供帮助。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_TOOLKIT_hi">
-                <Original>Hey, friend. We're BLUFOR. One of our vehicles got shot up on a peacekeeping run. You got a toolkit, or know anyone who does? We can pay.</Original>
+                <Original>We're BLUFOR, on a peacekeeping patrol. One of our vehicles is damaged. Do you have a toolkit, or know where we can find one? We'll pay.</Original>
                 <Chinesesimp>嘿...你好朋友，我们是蓝军的。我们的车辆在维和行动里受损了...你，或者你周围的人有工具箱吗？我们可以出钱买一套。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_TOOLKIT_REFUSE">
@@ -2391,7 +2391,7 @@
                 <Chinesesimp>获得工具箱！已放在附近。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_TOOLKIT_GRANT">
-                <Original>Here, take this toolbox. Hope it helps. (taking the money)</Original>
+                <Original>Here, take this toolbox. Hope it helps.</Original>
                 <Chinesesimp>给你这个工具箱，希望能帮上忙。(收下货币)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_FOR_AID">
@@ -2403,7 +2403,7 @@
                 <Chinesesimp>你的声望太低，平民拒绝提供帮助。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_AID_hi">
-                <Original>Hey, friend. We're BLUFOR. Took some casualties on a peacekeeping run. You got any medical supplies at home? We can pay.</Original>
+                <Original>We're BLUFOR, on a peacekeeping patrol. We've taken casualties. Can you spare any medical supplies? We'll pay for them.</Original>
                 <Chinesesimp>你好老乡，我们是蓝军的...我们在维和行动里受了伤，你家里有医疗物资吗？我们可以付钱。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_AID_REFUSE">
@@ -2452,8 +2452,8 @@
                 <Chinesesimp>&lt;t color='#00ff00'&gt;请求快速旅行 (1货币)&lt;/t&gt;</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_FAST_TRAVEL_hey">
-                <Original>Hey, friend. We're BLUFOR. Know a shortcut to the next town? (hands over a thick stack of cash)</Original>
-                <English>Hey, friend. We're BLUFOR. Know a shortcut to the next town? (hands over a thick stack of cash)</English>
+                <Original>We're BLUFOR. Do you know a safe route to the next town? We'll pay for it.</Original>
+                <English>We're BLUFOR. Do you know a safe route to the next town? We'll pay for it.</English>
                 <Chinesesimp>嘿，朋友。我们是蓝军的人，这个镇子有什么到附近镇子的捷径吗？(递给他一叠厚钞票)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_FAST_TRAVEL_idk">
@@ -2467,13 +2467,13 @@
                 <Chinesesimp>你已快速旅行至目标城镇附近。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_FAST_TRAVEL_ik">
-                <Original>Around here? I know a few paths… where are you headed? (Tentatively takes the money)</Original>
-                <English>Around here? I know a few paths… where are you headed? (Tentatively takes the money)</English>
+                <Original>Around here? I know a few paths… where are you headed?</Original>
+                <English>Around here? I know a few paths… where are you headed?</English>
                 <Chinesesimp>附近吗？我倒是知道几条...你想去哪？(试探性地收下了钞票)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_FAST_TRAVEL_fkoff">
-                <Original>Get lost… you bastard… (spits on the ground)</Original>
-                <English>Get lost… you bastard… (spits on the ground)</English>
+                <Original>Get lost… you bastard…</Original>
+                <English>Get lost… you bastard…</English>
                 <Chinesesimp>滚远点...你这畜生...(往地上吐了口唾沫)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_FAST_TRAVEL_ne">
@@ -2482,8 +2482,8 @@
                 <Chinesesimp>抱歉...为你们指路风险太大了...</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_FAST_TRAVEL_nvm">
-                <Original>Never mind… I've changed my mind. Keep the money, consider it a favor.</Original>
-                <English>Never mind… I've changed my mind. Keep the money, consider it a favor.</English>
+                <Original>Never mind. We'll find our own way. Keep the money.</Original>
+                <English>Never mind. We'll find our own way. Keep the money.</English>
                 <Chinesesimp>算了...我改变主意了，钱你收下吧，当个人情。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_FAST_TRAVEL_BUSY">
@@ -2527,15 +2527,15 @@
                 <Chinesesimp>一位玩家已离开 %1 且 %1 将在 60 秒后重置。若想继续在 %1 活动，则需立刻返回。\n(为节约性能，同一时间只能有一个城镇生成平民)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_ENEMY">
-                <Original>&lt;t color='#fffb00ff'&gt;Ask about enemy(1 cash)&lt;/t&gt;</Original>
-                <English>&lt;t color='#fffb00ff'&gt;Ask about enemy(1 cash)&lt;/t&gt;</English>
+                <Original>&lt;t color='#fffb00ff'&gt;Ask about Enemy (1 cash)&lt;/t&gt;</Original>
+                <English>&lt;t color='#fffb00ff'&gt;Ask about Enemy (1 cash)&lt;/t&gt;</English>
                 <German>&lt;t color='#fffb00ff'&gt;Nach Feinden fragen(1 cash)&lt;/t&gt;</German>
                 <Spanish>&lt;t color='#fffb00ff'&gt;Preguntar sobre el enemigo(1 cash)&lt;/t&gt;</Spanish>
                 <Chinesesimp>&lt;t color='#fffb00ff'&gt;打听敌人动向(1货币)&lt;/t&gt;</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_NOT_ENOUGH_CP">
-                <Original>This war's left us with barely enough to eat... (mutters, like he thinks you're paying too little)</Original>
-                <English>This war's left us with barely enough to eat... (mutters, like he thinks you're paying too little)</English>
+                <Original>This war's left us with barely enough to eat...</Original>
+                <English>This war's left us with barely enough to eat...</English>
                 <Chinesesimp>我们因为打仗连肚子都填不饱...(自言自语地嘟囔，貌似觉得你的钱给少了。)</Chinesesimp>
                 <German>Wegen des Krieges können wir nicht einmal unseren Hunger stillen... (murmelt vor sich hin, offenbar weil er meint, du zahlst zu wenig)</German>
                 <Spanish>No podemos ni llenarnos el estómago por la guerra... (murmura para sí mismo, pareciendo pensar que le das poco dinero)</Spanish>
@@ -2572,15 +2572,15 @@
                 <Chinesesimp>你没有医疗包或ACE食物</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_providemed">
-                <Original>Hey, friend! We're the BLUFOR humanitarian relief team. Take this.</Original>
-                <English>Hey, friend! We're the BLUFOR humanitarian relief team. Take this.</English>
+                <Original>We're the BLUFOR relief team. Here, these supplies are for you.</Original>
+                <English>We're the BLUFOR relief team. Here, these supplies are for you.</English>
                 <German>Hey, Kumpel! Wir sind das humanitäre Hilfsteam von BLUFOR. Nimm das.</German>
                 <Spanish>Oye, amigo! Somos el equipo de ayuda humanitaria de BLUFOR. Toma esto.</Spanish>
                 <Chinesesimp>嘿，朋友，我们是蓝军的人道救援小组，拿上这个吧。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_providemedtks">
-                <Original>Thanks... thank you. (takes the supplies)</Original>
-                <English>Thanks... thank you. (takes the supplies)</English>
+                <Original>Thanks... thank you.</Original>
+                <English>Thanks... thank you.</English>
                 <German>Danke... danke. (nimmt die Vorräte entgegen)</German>
                 <Spanish>Gracias... gracias. (coge los suministros)</Spanish>
                 <Chinesesimp>谢谢...谢谢。(收下了物资)</Chinesesimp>
@@ -2593,8 +2593,8 @@
                 <Chinesesimp>谢谢你！这很有帮助。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HEAL_FAIL">
-                <Original>(A short silence)...Who the hell wants your stuff?</Original>
-                <English>(A short silence)...Who the hell wants your stuff?</English>
+                <Original>...Who the hell wants your stuff?</Original>
+                <English>...Who the hell wants your stuff?</English>
                 <German>(Kurze Stille)...Wer zum Teufel will euer Zeug?</German>
                 <Spanish>(Breve silencio)...¿Quién demonios quiere vuestras cosas?</Spanish>
                 <Chinesesimp>(短暂的沉默)...谁他妈要你们的东西？？</Chinesesimp>
@@ -2628,8 +2628,8 @@
                 <Chinesesimp>好的长官！别开枪！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_STOP">
-                <Original>Hey you! Get over here!</Original>
-                <English>Hey you! Get over here!</English>
+                <Original>You there, stop. Come here.</Original>
+                <English>You there, stop. Come here.</English>
                 <German>Hey du! Komm her!</German>
                 <Spanish>¡Oye tú! Ven aquí!</Spanish>
                 <Chinesesimp>嘿，你！给我过来！</Chinesesimp>
@@ -2656,15 +2656,15 @@
                 <Chinesesimp>&lt;t color='#15ff00'&gt;招募 (2货币)&lt;/t&gt;</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_fight4freedom">
-                <Original>Hey, pal... We're from BLUFOR. Will you fight for freedom? (handing him a few banknotes)</Original>
-                <English>Hey, pal... We're from BLUFOR. Will you fight for freedom? (handing him a few banknotes)</English>
+                <Original>We're BLUFOR. We're hiring locals willing to take up arms, and the pay is good. Will you fight with us?</Original>
+                <English>We're BLUFOR. We're hiring locals willing to take up arms, and the pay is good. Will you fight with us?</English>
                 <German>Hey, Kumpel... Wir sind von BLUFOR. Willst du für die Freiheit kämpfen? (reicht ihm ein paar Geldscheine)</German>
                 <Spanish>Oye, amigo... Somos de BLUFOR. ¿Quieres luchar por la libertad? (dándole unos billetes)</Spanish>
                 <Chinesesimp>嘿，朋友...我们是蓝军的，你愿意为了自由而战吗？(递过去几张纸币)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_RECRUIT_FAIL_REP">
-                <Original>...Who the hell wants to go with you? You're just a bunch of bandits! (slamming your money on the ground)</Original>
-                <English>...Who the hell wants to go with you? You're just a bunch of bandits! (slamming your money on the ground)</English>
+                <Original>...Who the hell wants to go with you? You're just a bunch of bandits!</Original>
+                <English>...Who the hell wants to go with you? You're just a bunch of bandits!</English>
                 <German>...Wer zum Teufel will mit euch gehen? Ihr seid nur ein Haufen Banditen! (schlägt dein Geld auf den Boden)</German>
                 <Spanish>...¿Quién demonios quiere ir con vosotros? Solo sois un montón de bandidos! (golpeando tu dinero contra el suelo)</Spanish>
                 <Chinesesimp>...谁他妈要跟你们走？一帮匪徒！(把你的钱拍在地上)</Chinesesimp>
@@ -2677,8 +2677,8 @@
                 <Chinesesimp>因声望过低，招募失败。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_RECRUIT_SUCCESS">
-                <Original>Fine! I've always wanted to kill those bastards! (taking the banknotes)</Original>
-                <English>Fine! I've always wanted to kill those bastards! (taking the banknotes)</English>
+                <Original>Fine! I've always wanted to kill those bastards!</Original>
+                <English>Fine! I've always wanted to kill those bastards!</English>
                 <German>Na gut! Ich wollte diese Bastarde schon immer abschlachten! (nimmt die Geldscheine entgegen)</German>
                 <Spanish>¡Bien! ¡Siempre he querido matar a esos bastardos! (recibiendo los billetes)</Spanish>
                 <Chinesesimp>行，我一直都很想杀光那帮杂碎！(接过纸币)</Chinesesimp>
@@ -2754,8 +2754,8 @@
                 <Chinesesimp>举起手来！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HANDSUP2">
-                <Original>...? What did I do?? (raises hands slowly)</Original>
-                <English>...? What did I do?? (raises hands slowly)</English>
+                <Original>...? What did I do??</Original>
+                <English>...? What did I do??</English>
                 <German>...? Was habe ich getan?? (hebt langsam die Hände)</German>
                 <Spanish>...? ¿Qué he hecho?? (levanta las manos despacio)</Spanish>
                 <Chinesesimp>...？我干什么了？？(缓缓举起手)</Chinesesimp>
@@ -2803,8 +2803,8 @@
                 <Chinesesimp>嗯？这些设备谁给你的？</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_LOOT4">
-                <Original>This is fucking war, brother... you don't need this.</Original>
-                <English>This is fucking war, brother... you don't need this.</English>
+                <Original>It's war. You won't be needing this.</Original>
+                <English>It's war. You won't be needing this.</English>
                 <German>Das ist verdammter Krieg, Bruder... du brauchst das nicht.</German>
                 <Spanish>Es una puta guerra, hermano... no necesitas esto.</Spanish>
                 <Chinesesimp>这他妈是战争，兄弟...你不需要这些东西。</Chinesesimp>
@@ -2894,29 +2894,29 @@
                 <Chinesesimp>城镇内的居民提供多种交互选项。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_askopforloc">
-                <Original>Hello! Have you seen any of the enemy scum? (pulls out a stack of local currency)</Original>
-                <English>Hello! Have you seen any of the enemy scum? (pulls out a stack of local currency)</English>
+                <Original>We're BLUFOR. Have you seen any enemy activity in the area? We'll pay for good information.</Original>
+                <English>We're BLUFOR. Have you seen any enemy activity in the area? We'll pay for good information.</English>
                 <German>Hallo! Hast du die Position des feindlichen Abschaums gesehen? (zieht einen Stapel lokaler Geldscheine heraus)</German>
                 <Spanish>¡Hola! ¿Has visto la ubicación de los enemigos escoria? (saca un montón de dinero local)</Spanish>
                 <Chinesesimp>你好老乡！最近有见到匪军的位置吗？(掏出一叠当地货币)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_askopforlocyes">
-                <Original>Yeah, I know a few. Go give those bastards hell, they're right here on the map... (takes the cash as he talks)</Original>
-                <English>Yeah, I know a few. Go give those bastards hell, they're right here on the map... (takes the cash as he talks)</English>
+                <Original>Yeah, I know a few. Go give those bastards hell, they're right here on the map...</Original>
+                <English>Yeah, I know a few. Go give those bastards hell, they're right here on the map...</English>
                 <German>Äh... Ich weiß! Tritt diesen Abschaum richtig in den Arsch! Sie sind genau hier auf der Karte...(spricht, während er die Geldscheine nimmt)</German>
                 <Spanish>Eh... ¡Lo sé! ¡Dales una buena paliza a esos escoria! Están justo aquí en el mapa...(hablando mientras coge los billetes)</Spanish>
                 <Chinesesimp>呃...我知道！帮我狠狠踢那群杂碎的屁股！他们在地图的这里...(边说边收下纸币)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_askopforlocno">
-                <Original>I don't know... Don't ask me...(leaves in fear, not taking the money at all)</Original>
-                <English>I don't know... Don't ask me...(leaves in fear, not taking the money at all)</English>
+                <Original>I don't know... Don't ask me...</Original>
+                <English>I don't know... Don't ask me...</English>
                 <German>Ich weiß nicht... Frag mich nicht...(geht ängstlich weg und nimmt das Geld nicht einmal mit)</German>
                 <Spanish>No sé... No me preguntes...(se va asustado, sin siquiera coger el dinero)</Spanish>
                 <Chinesesimp>不知道...别问我...(害怕地走了，连钱都没拿)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_askopforlocno2">
-                <Original>Doesn't seem like it. Nothing out of the ordinary around here lately. (taking the banknotes and putting them into his pocket)</Original>
-                <English>Doesn't seem like it. Nothing out of the ordinary around here lately. (taking the banknotes and putting them into his pocket)</English>
+                <Original>Doesn't seem like it. Nothing out of the ordinary around here lately.</Original>
+                <English>Doesn't seem like it. Nothing out of the ordinary around here lately.</English>
                 <German>Scheint nicht so. In letzter Zeit ist hier nichts Ungewöhnliches passiert. (nimmt die Geldscheine und steckt sie in seine Tasche)</German>
                 <Spanish>Parece que no. Nada fuera de lo común por aquí últimamente. (coge los billetes y los mete en el bolsillo)</Spanish>
                 <Chinesesimp>貌似没有，最近周围没什么异常。(收下纸币塞进兜里)</Chinesesimp>
@@ -2983,8 +2983,8 @@
                 <German>Hey! Es ist hier gefährlich. Wir bringen dich an einen sicheren Ort!</German>
                 <Spanish>¡Oye! Es peligroso aquí. Te llevaremos a un lugar seguro!</Spanish>
                 <Chinesesimp>嘿！这里很危险，我们带你去安全的地方！</Chinesesimp>
-                <Original>Hey! It's dangerous here. We'll take you to safety!</Original>
-                <English>Hey! It's dangerous here. We'll take you to safety!</English>
+                <Original>It's not safe here. We'll get you to safety.</Original>
+                <English>It's not safe here. We'll get you to safety.</English>
             </Key>
             <Key ID="STR_DUWS_T_survivor">
                 <German>Überlebende</German>
@@ -3032,8 +3032,8 @@
                 <German>Ich kann nicht glauben, dass es Idioten gibt, die freiwillig an diesem gefährlichen Ort bleiben...</German>
                 <Spanish>No puedo creer que haya idiotas que se queden voluntariamente en este lugar peligroso...</Spanish>
                 <Chinesesimp>不敢相信还有蠢货自愿留在这危险的地方...</Chinesesimp>
-                <Original>I can't believe there are idiots who'd stay in a place this dangerous...</Original>
-                <English>I can't believe there are idiots who'd stay in a place this dangerous...</English>
+                <Original>Hard to believe anyone would stay in a place this dangerous...</Original>
+                <English>Hard to believe anyone would stay in a place this dangerous...</English>
             </Key>
             <Key ID="STR_DUWS_T_rqwho9bq">
                 <German>Ansehen erhöht !</German>
@@ -3115,7 +3115,7 @@
                 <Chinesesimp>货币不足</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DEVELOP_INFORMANT">
-                <English>&lt;t color='#fffb00ff'&gt;Develop Informant(5 cash)&lt;/t&gt;</English>
+                <English>&lt;t color='#fffb00ff'&gt;Develop Informant (5 cash)&lt;/t&gt;</English>
                 <Chinesesimp>&lt;t color='#fffb00ff'&gt;发展线人(5货币)&lt;/t&gt;</Chinesesimp>
                 <German>&lt;t color='#fffb00ff'&gt;Informanten entwickeln(5 Geld)&lt;/t&gt;</German>
                 <Spanish>&lt;t color='#fffb00ff'&gt;Desarrollar informante(5 dinero)&lt;/t&gt;</Spanish>
@@ -3127,7 +3127,7 @@
                 <Spanish>Un pueblo local ahora cuenta con un informante. La información de los enemigos alrededor del pueblo se actualiza cada minuto.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_askinf">
-                <English>Hey... Times have been tough lately, right? We're BLUFOR. We need you to keep an eye out around the town for any OPFOR activity these days... (slips a thick stack of local cash and a locator into his hand)</English>
+                <English>We're BLUFOR. We'll pay you to watch the town and report any OPFOR movement. Can you do that?</English>
                 <Chinesesimp>嘿...最近日子过得不太好，对吧？我们是蓝方的，需要你这几天在镇子看看周围有没有红方的踪迹...(塞入一大叠当地纸币和定位器)</Chinesesimp>
                 <German>Hey... Die letzten Tage waren hart, nicht wahr? Wir sind von BLUFOR. Wir brauchen dich, dass du in diesen Tagen in der Stadt nach Spuren von OPFOR Ausschau hältst... (steckt einen dicken Stapel lokaler Geldscheine und einen Ortungsempfänger ein)</German>
                 <Spanish>Oye... Los últimos tiempos han sido duros, ¿verdad? Somos de BLUFOR. Necesitamos que vigiles los alrededores del pueblo estos días por si hay rastro de OPFOR... (mete un montón de billetes locales y un localizador)</Spanish>
@@ -3139,13 +3139,13 @@
                 <Spanish>…¡Fuera!</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_failinf">
-                <English>...I'll think about it... (it's clear he doesn't want to do this at all, didn't even take the money.)</English>
+                <English>...I'll think about it...</English>
                 <Chinesesimp>...我考虑考虑...(很明显他不愿意干这个事，连钱都没拿)</Chinesesimp>
                 <German>...Ich überlege es mir... (Es ist offensichtlich, dass er das nicht tun will, hat das Geld nicht einmal mitgenommen.)</German>
                 <Spanish>...Lo pensaré... (Es obvio que no quiere hacer esto, hi siquiera cogió el dinero.)</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_successinf">
-                <English>...(pauses briefly) Alright, I'll keep an eye around here from time to time. (takes the money and the locator)</English>
+                <English>...Alright, I'll keep an eye on things around here from time to time.</English>
                 <Chinesesimp>...(短暂迟疑)好，我会时不时在周围看看的。(拿走钱和定位器)</Chinesesimp>
                 <German>...(zögert kurz) Gut, ich werde ab und zu hier in der Umgebung Ausschau halten. (nimmt das Geld und den Ortungsempfänger)</German>
                 <Spanish>...(se detiene brevemente) Vale, estaré vigilando los alrededores de vez en cuando. (coge el dinero y el localizador)</Spanish>
@@ -3187,8 +3187,8 @@
                 <Spanish>El informante en una de tus ciudades ha dejado de informar. Probablemente ha sido capturado por el enemigo.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_stfu">
-                <Original>...(short silence) Fuck off! (slaps the money away)</Original>
-                <English>...(short silence) Fuck off! (slaps the money away)</English>
+                <Original>...Fuck off!</Original>
+                <English>...Fuck off!</English>
                 <German>...(kurze Stille) Verpiss dich! (schlägt das Geld weg)</German>
                 <Spanish>...(breve silencio) ¡Jódete! (golpea el dinero y lo envía volando)</Spanish>
                 <Chinesesimp>...(短暂沉默)滚开！(将钱打飞出去)</Chinesesimp>
@@ -3576,8 +3576,8 @@
                 <Chinesesimp>%1 购买了面部装备：%2</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_BOUGHT_sent">
-                <Original>This is Overlord. The local black market just dropped something at HQ. Who ordered this?... Actually, nice taste.</Original>
-                <English>This is Overlord. The local black market just dropped something at HQ. Who ordered this?... Actually, nice taste.</English>
+                <Original>This is Overlord. Your black market order has been delivered to HQ.</Original>
+                <English>This is Overlord. Your black market order has been delivered to HQ.</English>
                 <Chinesesimp>这里是"霸王1-1"，战区的黑市刚刚派人送了点东西到总部。谁买的？...我是说，好品味。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_BOUGHT_PISTOL">
@@ -3843,8 +3843,8 @@
                 <German>Hier ist "Overlord 1-1". Eure harte Arbeit hat sich ausgezahlt.</German>
                 <Spanish>Aquí es "Overlord 1-1". Vuestro duro trabajo ha dado frutos.</Spanish>
                 <Chinesesimp>这里是"霸王1-1"，看来你们的辛苦工作有了回报。</Chinesesimp>
-                <Original>This is Overlord. Looks like the hard work paid off.</Original>
-                <English>This is Overlord. Looks like the hard work paid off.</English>
+                <Original>This is Overlord. The zones you hold are paying out command points. Keep them secure.</Original>
+                <English>This is Overlord. The zones you hold are paying out command points. Keep them secure.</English>
             </Key>
             <Key ID="STR_DUWS_T_takencontrol">
                 <German>Alle Einheiten im Einsatzgebiet, Achtung. Wir haben eine feindliche Zone eingenommen. Gut gemacht.</German>
@@ -4775,7 +4775,7 @@
                 <Spanish>Joder... Me he lastimado la pierna. ¿Tienes un botiquín?</Spanish>
                 <Chinesesimp>该死...我腿伤了。你有医疗包吗？</Chinesesimp>
                 <Original>Damn... I hurt my leg. Do you have a medkit?</Original>
-                <English> Damn... I hurt my leg. Do you have a medkit?</English>
+                <English>Damn... I hurt my leg. Do you have a medkit?</English>
             </Key>
             <Key ID="STR_DUWS_T_pilotend">
                 <German>Endlich zurück! Vielen Dank an euch!</German>
@@ -4788,8 +4788,8 @@
                 <German>„Overlord“ an Einsatztrupp, gut gemacht. Ich wette, dieser Pilot vergisst euch sein ganzes Leben lang nicht.</German>
                 <Spanish>"Overlord" al escuadrón de acción, bien hecho. Apuesto a que ese piloto nunca os olvida en toda su vida.</Spanish>
                 <Chinesesimp>"霸王"呼叫行动组，干得漂亮。我估计那个飞行员这辈子忘不掉你们了。</Chinesesimp>
-                <Original>Overlord to Alpha 1-1, well done. That pilot won't forget you for the rest of his life.</Original>
-                <English>Overlord to Alpha 1-1, well done. That pilot won't forget you for the rest of his life.</English>
+                <Original>Overlord to Alpha 1-1, well done. The pilot has been recovered safe.</Original>
+                <English>Overlord to Alpha 1-1, well done. The pilot has been recovered safe.</English>
             </Key>
             <Key ID="STR_DUWS_T_armorend">
                 <German>"Overlord" an Action Squad, Überwachungstrupp bestätigt die Eliminierung des Panzerzugskommandanten. Fehlerlose Operation.</German>
@@ -5040,8 +5040,8 @@
                 <German>Dies ist „Oberherr 1-1“. Aufklärer haben gerade das feindliche Arsenal lokalisiert. Ihr wisst, was zu tun ist.</German>
                 <Spanish>Este es "Imperador 1-1". Los exploradores han localizado recientemente el arsenal enemigo. Saben lo que tienen que hacer.</Spanish>
                 <Chinesesimp>这里是"霸王1-1"，侦察兵刚刚定位到了敌人的军火库，你知道该怎么做。</Chinesesimp>
-                <Original>This is Overlord. Scouts have pinpointed the enemy arsenal. You know what to do.</Original>
-                <English>This is Overlord. Scouts have pinpointed the enemy arsenal. You know what to do.</English>
+                <Original>This is Overlord. Scouts have pinpointed the enemy arsenal. You have your orders.</Original>
+                <English>This is Overlord. Scouts have pinpointed the enemy arsenal. You have your orders.</English>
             </Key>
             <Key ID="STR_DUWS_T_cachecopy">
                 <German>Action Squad, verstanden. Zum Ziel unterwegs.</German>
@@ -6187,8 +6187,8 @@
                 <German>"Overlord 1-1" an Action Squad – wir haben gerade eine Voroperationsbasis im AO eingerichtet. Geht dort vorbei und macht eine Pause, solange ihr bereitsteht.</German>
                 <Spanish>"Overlord 1-1" a Action Squad – acabamos de establecer una base operativa avanzada en el AO. Pásate por allí y reposa mientras estás en espera.</Spanish>
                 <Chinesesimp>"霸王1-1"呼叫行动组，我们刚刚在战区部署了前线作战基地。待命的时候去那里坐坐吧。</Chinesesimp>
-                <Original>Overlord to Alpha 1-1, we've established a forward operating base in the AO. Swing by and hole up there while you're standing by.</Original>
-                <English>Overlord to Alpha 1-1, we've established a forward operating base in the AO. Swing by and hole up there while you're standing by.</English>
+                <Original>Overlord to Alpha 1-1, we've established a forward operating base in the AO. Use it to regroup while you stand by.</Original>
+                <English>Overlord to Alpha 1-1, we've established a forward operating base in the AO. Use it to regroup while you stand by.</English>
             </Key>
             <Key ID="STR_DUWS_T_paradropcall">
                 <German>Hier ist "Overlord 1-1" – Achtung, eine Fallschirmjägertruppe steht Ihnen jetzt untergeordnet.</German>
@@ -6390,8 +6390,8 @@
                 <German>Wir sind da. Bereitet Aufprall-Gegenmaßnahmen vor.</German>
                 <Spanish>Hemos llegado. Prepara medidas de respuesta al impacto.</Spanish>
                 <Chinesesimp>我们到了。注意部署冲击应对措施。</Chinesesimp>
-                <Original>We've arrived. Prepare impact countermeasures.</Original>
-                <English>We've arrived. Prepare impact countermeasures.</English>
+                <Original>We've arrived. Stand clear, setting the vehicle down now.</Original>
+                <English>We've arrived. Stand clear, setting the vehicle down now.</English>
             </Key>
             <Key ID="STR_DUWS_T_opforqrf1">
                 <German>Hier ist "Overlord". Achtung, Aufklärungseinheiten haben feindliche schnelle Eingreiftruppen (QRF) entdeckt, die sich um das Einsatzgebiet herum aufstellen. Bleibt wachsam.</German>
@@ -8401,8 +8401,8 @@
                 <German>Hier ist das 'Overlord 1-1'. Sieht so aus als hätten wir ein paar Infos zu feindlichen Positionen erhalten. Gute Arbeit.</German>
                 <Spanish>Éste es el CG. Parece que tenemos algo de información sobre las zonas enemigas. Buen trabajo.</Spanish>
                 <Chinesesimp>这里是'霸王1-1'，看起来我们获取了敌方位置的一些信息。干的好。</Chinesesimp>
-                <Original>This is Overlord. Looks like we pulled some enemy positions off that. Good work.</Original>
-                <English>This is Overlord. Looks like we pulled some enemy positions off that. Good work.</English>
+                <Original>This is Overlord. Copy that. We're pulling an enemy position off that intel, stand by.</Original>
+                <English>This is Overlord. Copy that. We're pulling an enemy position off that intel, stand by.</English>
             </Key>
             <Key ID="STR_DUWS_T_8skllpyx">
                 <German>Hier ist das 'Overlord 1-1'. Nichts das wir schon wüssten.</German>
