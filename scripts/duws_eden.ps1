@@ -13,9 +13,10 @@
 #   B: [class, dX, dY, dZ, yaw_RAD, atl, isTarget]             (killhouse; yaw in radians)
 #   C: [class, [x,y,z], dir_deg, 1,0,[],"","",true,false]      (mission statics; pos nested)
 #
-# Run from the repo root, or double-click duws_eden.cmd. See docs/hq_layout_editing.md.
+# Launch via duws_eden.cmd at the repo root, or run scripts\duws_eden.ps1 directly.
+# See docs/hq_layout_editing.md.
 $ErrorActionPreference = "Stop"
-$root    = $PSScriptRoot
+$root    = Split-Path -Parent $PSScriptRoot   # script lives in scripts/; repo root is its parent
 $srcDir  = Join-Path $root "src"
 $outFile = Join-Path $root "temp\eden_import.sqf"
 

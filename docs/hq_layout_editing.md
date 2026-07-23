@@ -67,7 +67,7 @@ decides where the composition lands.
 **Import** — run the composition TUI at the repo root (double-click `duws_eden.cmd`, or):
 
 ```text
-powershell -ExecutionPolicy Bypass -File duws_eden.ps1
+powershell -ExecutionPolicy Bypass -File scripts\duws_eden.ps1
 ```
 
 It scans `src/` for marked compositions (below), lists all of them, and on selection prompts
