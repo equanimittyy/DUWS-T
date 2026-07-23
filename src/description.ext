@@ -2,7 +2,7 @@ OnLoadMission = "WAR IS TACTICS";
 onLoadName = "DUWS_T v1.6";
 dev = "dev";
 author = "5U5 DUWS_T (Killa Tomata DUWS_X) - orig by Kibot/DUWS-R Team";
-overviewText = "Evolved from the renowned DUWS_X campaign created by Killa Tomata, DUWS_T is a long-term, persistent campaign system. Players must earn resources, carry out side missions, and lead Blufor forces to seize enemy-held zones, finally achieve victory in the campaign.";
+overviewText = "Evolved from the renowned DUWS_X scenario created by Killa Tomata, DUWS_T is a long-term, persistent scenario. Players must earn resources, carry out side missions, and lead BLUFOR forces to seize enemy-held zones and finally achieve victory over the designated zones.";
 overviewPicture = "DUWS_T.jpg";
 LoadScreen = "DUWS_T.jpg";
 

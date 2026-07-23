@@ -11,7 +11,7 @@ while {_timer>0} do {
 	waituntil {sleep 0.5;visiblemap};
 	_playerClosed_map = false;
 
-	titleText ["<t color='#00ff00' size='2'>Pilot: Give me 2 waypoints and an LZ, I'll see what i can do.</t>", "PLAIN DOWN", -1, true, true];
+	titleText ["<t color='#00ff00' size='2'>Pilot: Give me 2 waypoints and an LZ, I'll see what I can do.</t>", "PLAIN DOWN", -1, true, true];
 	_helo removeAction _actionID;
 
 	// TIMER & MAPCLICK

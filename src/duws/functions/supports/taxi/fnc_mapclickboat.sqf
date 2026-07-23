@@ -17,7 +17,7 @@ while {_timer>0} do {
     if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) then {
 		if (ClickedTaxiPos distance player < 100) exitWith {
 		clicked = false;
-		titleText ["Driver: This is too close from our position", "PLAIN DOWN"];
+		titleText ["Driver: This is too close to our position", "PLAIN DOWN"];
 		};
 	clicked = false;
 	titleText ["Driver: I can't go there", "PLAIN DOWN"];

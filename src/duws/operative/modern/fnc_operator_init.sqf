@@ -56,7 +56,7 @@ DUWS_operator_add_aim = {
 	_selected_soldier_pts_new = _selected_soldier_points - 1;
 	_selected_soldier set [13,_selected_soldier_pts_new];
 	[] spawn fnc_LBselected;
-	hint "New stats will be applied at the next deployment of this operative";
+	hint "New stats will apply the next time this operative deploys";
 	};
 	
 DUWS_operator_add_reflexes = {
@@ -74,7 +74,7 @@ DUWS_operator_add_reflexes = {
 	_selected_soldier_pts_new = _selected_soldier_points - 1;
 	_selected_soldier set [13,_selected_soldier_pts_new];
 	[] spawn fnc_LBselected;
-	hint "New stats will be applied at the next deployment of this operative";
+	hint "New stats will apply the next time this operative deploys";
 	};	
 	
 DUWS_operator_add_spotting = {
@@ -92,7 +92,7 @@ DUWS_operator_add_spotting = {
 	_selected_soldier_pts_new = _selected_soldier_points - 1;
 	_selected_soldier set [13,_selected_soldier_pts_new];
 	[] spawn fnc_LBselected;
-	hint "New stats will be applied at the next deployment of this operative";
+	hint "New stats will apply the next time this operative deploys";
 	};
 	
 DUWS_operator_add_courage = {
@@ -110,7 +110,7 @@ DUWS_operator_add_courage = {
 	_selected_soldier_pts_new = _selected_soldier_points - 1;
 	_selected_soldier set [13,_selected_soldier_pts_new];
 	[] spawn fnc_LBselected;
-	hint "New stats will be applied at the next deployment of this operative";
+	hint "New stats will apply the next time this operative deploys";
 	};
 	
 DUWS_operator_add_comms = {
@@ -128,7 +128,7 @@ DUWS_operator_add_comms = {
 	_selected_soldier_pts_new = _selected_soldier_points - 1;
 	_selected_soldier set [13,_selected_soldier_pts_new];
 	[] spawn fnc_LBselected;
-	hint "New stats will be applied at the next deployment of this operative";
+	hint "New stats will apply the next time this operative deploys";
 	};
 	
 DUWS_operator_add_reload = {
@@ -146,5 +146,5 @@ DUWS_operator_add_reload = {
 	_selected_soldier_pts_new = _selected_soldier_points - 1;
 	_selected_soldier set [13,_selected_soldier_pts_new];
 	[] spawn fnc_LBselected;
-	hint "New stats will be applied at the next deployment of this operative";
+	hint "New stats will apply the next time this operative deploys";
 	};

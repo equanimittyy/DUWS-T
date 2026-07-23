@@ -10,7 +10,7 @@ _music = [] call fnc_taxi_music;
 _foundPickupPos = [_posplayer, 0,_radius,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos; // find a valid pos
 
 // try to find a pos, if no pos is found exit the script
-if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint "You must be near a clear shore or in the sea"; sleep 5; _art = [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;};
+if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint "You must be near a clear shoreline or out at sea"; sleep 5; _art = [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;};
 
 // A POS NEAR THE PLAYER HAS BEEN FOUND, GUNBOAT EN ROUTE
 commandpointsblu1 = commandpointsblu1 - _cost;
