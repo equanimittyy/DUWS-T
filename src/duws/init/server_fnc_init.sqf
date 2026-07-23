@@ -357,6 +357,7 @@ fnc_request_unit_fob = compile preprocessFileLineNumbers "duws\functions\dialog\
 fnc_request_squad_fob = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_request_squad_fob.sqf";publicVariable "fnc_request_squad_fob";
 fnc_request_vehicle_fob = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_request_vehicle_fob.sqf";publicVariable "fnc_request_vehicle_fob";
 fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_custom_faction_capture.sqf";publicVariable "fnc_custom_faction_capture";
+fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_custom_faction_parse.sqf";publicVariable "fnc_custom_faction_parse";
 fnc_custom_faction_init = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_custom_faction_init.sqf";publicVariable "fnc_custom_faction_init";
 fnc_HQ_Request_Menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_HQ_Request_Menu.sqf";publicVariable "fnc_HQ_Request_Menu";
 fnc_FOB_Request_Menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_FOB_Request_Menu.sqf";publicVariable "fnc_FOB_Request_Menu";
