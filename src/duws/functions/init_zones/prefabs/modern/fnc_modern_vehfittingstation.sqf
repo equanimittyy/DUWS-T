@@ -14,6 +14,7 @@ private _keepSimulation = [
 ];
 
 // 所有物体 [类名, 偏移X, 偏移Y, Z海拔, 方向(度), 是否为武器]
+// --DUWS-COMPOSITION BEGIN name="Vehicle Refit Station" schema=A--
 private _allObjectsData = [
     // ===== 子层 "Camp Courage" (34个) =====
     ["Land_PortableLight_double_F", -0.1337, 12.2014, 1.0838, 228.3, false],
@@ -63,6 +64,7 @@ private _allObjectsData = [
     ["Land_HBarrier_3_F",            10.9054,-18.2459, 0.7983,   0.0, false],
     ["Land_HBarrier_3_F",             7.4816,-17.1033, 0.7983, 213.2, false]
 ];
+// --DUWS-COMPOSITION END--
 
 // 需要贴合地形的工事类型
 private _tiltTypes = [

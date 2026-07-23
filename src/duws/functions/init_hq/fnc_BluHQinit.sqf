@@ -31,6 +31,7 @@ private _allTowersList = [];
 
 // ========================= 全部静态物体数据 =========================
 // 格式: [类名, 世界X, 世界Y, 世界Z海拔, 方向度, 是否武器]
+// --DUWS-COMPOSITION BEGIN name="HQ Main Base" schema=A anchor=hqInComp--
 private _allObjectsData = [
     ["Land_TimberPile_05_F",                17.9016,   7.8813,  0.5821, 179.9, false],
     ["Land_Cargo_HQ_V1_F",                  10.0413,  11.3066,  3.8754, 269.8, false],
@@ -173,6 +174,7 @@ private _allObjectsData = [
     ["Land_BarGate_F",                     21.2584,  -7.3345,  4.0503,  89.2, false],
     ["B_supplyCrate_F",                    -7.0382,  -4.4521,  1.1657, 116.9, false]
 ];
+// --DUWS-COMPOSITION END--
 
 private _lightTypes = ["Land_PortableLight_double_F", "Land_LampShabby_F"];
 

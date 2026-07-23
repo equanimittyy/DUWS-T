@@ -14,9 +14,11 @@ deleteVehicle _vehicle_0;
 
 ///////////////////////////////////////////////////////////////////////
 
+// --DUWS-COMPOSITION BEGIN name="Simple Zone" schema=C--
 _staticsArray = [
 	["CamoNet_INDP_open_F",[0,0,0],0,1,0,[],"","",true,false] 
 ];
+// --DUWS-COMPOSITION END--
 
 // PLACE STATICS WITHOUT INTERACTION
 _vehicle = objNull;

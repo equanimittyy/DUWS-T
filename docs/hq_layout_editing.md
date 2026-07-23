@@ -52,7 +52,7 @@ drift apart, the whole base mis-anchors. Keep them in lockstep when replacing th
 indices 1/2 to move, index 4 to rotate. Nothing else to touch.
 
 **A real re-layout**: build it visually in the Eden editor and round-trip through the array
-with the snippets below, rather than hand-typing coordinates.
+with the tooling below, rather than hand-typing coordinates.
 
 ## Eden round-trip
 
@@ -60,23 +60,53 @@ The load-bearing trap: `create3DENEntity` **only runs in Eden's own debug consol
 `{ }` console in the 3D editor toolbar, not the in-game debug console. Run it in-game and it
 silently no-ops.
 
-Objects take their heading from a single-Number `rotation` attribute (yaw, degrees), which
-matches the array's one `direction` column. `_origin` is cosmetic: everything anchors to the
-HQ building, so wherever you build it, the offset washes out on export.
+Objects take their heading from a single-Number `rotation` attribute (yaw, degrees), which is
+all any composition stores. Pick a flat `_origin`; it only decides where the composition lands.
 
-**Import** — run `scripts/gen_eden_hq_import.ps1` rather than assembling the script by hand:
+**Import** — run the composition TUI at the repo root (double-click `duws_eden.cmd`, or):
 
 ```text
-powershell -ExecutionPolicy Bypass -File scripts\gen_eden_hq_import.ps1 [originX originY]
+powershell -ExecutionPolicy Bypass -File duws_eden.ps1
 ```
 
-It extracts the current array from `fnc_BluHQinit.sqf` by pattern (surviving the array
-changing size across round-trips), takes the anchor from the source's own `_hqInComp*`, wraps
-them in the `create3DENEntity` placement loop, writes `temp\eden_hq_import.sqf`, and copies
-the result to the clipboard. Paste that into the Eden console; the optional `originX originY`
-arguments override the default flat spot. If the base doesn't spread out (the emitted hint
-reads `created 1 of N`), nothing pasted; if props look missing, `_origin` isn't flat, so pass
-a flatter one.
+It scans `src/` for marked compositions (below), lists all of them, and on selection prompts
+for an origin, normalizes the rows, writes `temp\eden_import.sqf`, and copies a paste-ready
+import to the clipboard. Paste that into the Eden console. There is also a "paste your own
+array" option. It reports `created N of M objects` and warns if any row-like line failed to
+parse, so a silent drop is visible.
+
+### Marking a composition
+
+The TUI discovers compositions by scanning for marker comments; adding one is data-only, no
+code change. Wrap the array literal in the source:
+
+```sqf
+// --DUWS-COMPOSITION BEGIN name="My Thing" schema=A--
+private _allObjectsData = [ ... ];
+// --DUWS-COMPOSITION END--
+```
+
+The markers are a cross-system contract the TUI parses; Arma's preprocessor strips `//`
+comments, so they are inert at runtime. Attributes:
+
+| Attr | Meaning |
+|---|---|
+| `name="..."` | label shown in the TUI |
+| `schema=A\|B\|C` | which row format (below) — explicit, since A and B look alike |
+| `anchor=hqInComp` | HQ only: its array stores original composition coords, so the tool subtracts `_hqInCompX/Y`. Omit elsewhere (offsets are already relative to `[0,0]`) |
+| `z=snap\|keep` | optional override; default `keep` for schema B, `snap` otherwise |
+
+The adapters normalize all three row formats to `[class, offX, offY, offZ, dir°]`:
+
+| Schema | Row shape | Used by |
+|---|---|---|
+| A | `[class, X, Y, Z, dir°, isWeapon]` | HQ + the 7 clean zone prefabs |
+| B | `[class, dX, dY, dZ, yaw_rad, atl, isTarget]` — **yaw in radians** | killhouse objects/targets |
+| C | `[class, [x,y,z], dir°, 1,0,[],"","",true,false]` — position nested at index 1 | `simple_zone` + 4 mission statics |
+
+`snap` drops objects onto the terrain (ground layouts); `keep` preserves each object's Z (the
+killhouse is a multi-floor structure that collapses if snapped). Fifteen compositions are
+marked today.
 
 **Export** — after rearranging, `Ctrl+A` to select, run to put a ready array on the clipboard:
 

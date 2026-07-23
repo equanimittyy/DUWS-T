@@ -128,6 +128,7 @@ _radarOperator disableAI "WEAPONAIM";
 _samOperator setVariable ["BIS_fnc_setUnitInsignia_class", "StayInVehicle", true];
 _radarOperator setVariable ["BIS_fnc_setUnitInsignia_class", "StayInVehicle", true];
 
+// --DUWS-COMPOSITION BEGIN name="Mission: Hold Position" schema=C--
 _staticsArray = [
 	["Land_HBarrier_5_F",[-6.48291,-3.77783,0],49.5237,1,0,[],"","",true,false], 
 	["Land_HBarrier_5_F",[-8.11426,1.68848,0],88.8804,1,0,[],"","",true,false], 
@@ -138,6 +139,7 @@ _staticsArray = [
 	["Land_BagBunker_Small_F",[-7.08691,7.32031,0],134.261,1,0,[],"","",true,false], 
 	["Land_BagBunker_Small_F",[8.24512,-6.67188,0],314.617,1,0,[],"","",true,false]
 ];
+// --DUWS-COMPOSITION END--
 
 _vehicle = objNull;
 {

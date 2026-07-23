@@ -75,6 +75,7 @@ deleteVehicle _vehicle_0;
 
 private _missionObjects = [];
 
+// --DUWS-COMPOSITION BEGIN name="Mission: Destroy Radar" schema=C--
 _staticsArray = [
     ["Box_FIA_Ammo_F",[3.23633,-0.296875,0],0,1,0,[],"","",true,false],
     ["Land_CratesWooden_F",[3.46631,-3.19775,1],0,1,0,[],"","",true,false],
@@ -85,6 +86,7 @@ _staticsArray = [
     ["Land_HBarrier_5_F",[3.80957,6.41455,0],45.2709,1,0,[],"","",true,false],
     ["Land_HBarrier_5_F",[9.2251,-1.25684,0],269.491,1,0,[],"","",true,false]
 ];
+// --DUWS-COMPOSITION END--
 
 _vehicle = objNull;
 {

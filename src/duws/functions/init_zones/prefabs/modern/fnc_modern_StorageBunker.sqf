@@ -12,6 +12,7 @@ if (_newCenterZ <= 0) then { _newCenterZ = 0; };
 private _keepSimulation = [];
 
 // 所有物体: [类名, X偏移, Y偏移, Z海拔, 方向度数, 是否为武器]
+// --DUWS-COMPOSITION BEGIN name="Storage Bunker" schema=A--
 private _allObjectsData = [
     // === 子层 "Improvised Bunker 05" (29个物体) ===
     ["Land_HouseWallRuin_Corner_01_F",  0.2312,  -4.9382, 1.4370,   0.0, false],
@@ -54,6 +55,7 @@ private _allObjectsData = [
     ["B_Mortar_01_F",                  -5.1575,  -8.0242, 2.2792, 211.9, true],
     ["Land_BagFence_Round_F",          -6.0637,  -9.5222, 1.0443,  25.2, false]
 ];
+// --DUWS-COMPOSITION END--
 
 // 需要贴合地形的工事类型
 private _tiltTypes = [

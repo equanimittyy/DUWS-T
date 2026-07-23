@@ -16,6 +16,7 @@ private _keepSimulation = [
 ];
 
 // 所有物体 [类名, X偏移, Y偏移, Z海拔, 方向度, 是否武器]
+// --DUWS-COMPOSITION BEGIN name="Field Hospital" schema=A--
 private _allObjectsData = [
     // ===== 子层 "Camp Defiance" (36个) =====
     ["Land_HBarrier_5_F",           -7.1416,  17.8892, 0.7405,   0.0, false],
@@ -76,6 +77,7 @@ private _allObjectsData = [
     ["Land_BagFence_Round_F",        0.8296, -24.9683, 0.4193,   0.0, false],
     ["I_HMG_02_high_F",              0.5581, -23.5117, 2.2937, 176.3, true]
 ];
+// --DUWS-COMPOSITION END--
 
 // 需要贴合地形的工事类型
 private _tiltTypes = [

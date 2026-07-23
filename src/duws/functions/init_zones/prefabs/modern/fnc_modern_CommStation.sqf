@@ -8,6 +8,7 @@ private _newCenterZ = getTerrainHeightASL [_centerSpawnX, _centerSpawnY];
 if (_newCenterZ <= 0) then { _newCenterZ = 0; };
 
 // 全部物体 [类名, 偏移X, 偏移Y, 原Z海拔, 方向度, 是否武器]
+// --DUWS-COMPOSITION BEGIN name="Comm Station" schema=A--
 private _allObjectsData = [
     // ===== 子层 "Camp Endurance" (50个) =====
     ["Land_HBarrier_5_F",           -11.3762,  -6.4556, 0.7405, 268.1, false],
@@ -73,6 +74,7 @@ private _allObjectsData = [
     ["Land_BagFence_Round_F",       -17.4053,   6.4526, 0.4193, 107.3, false],
     ["I_HMG_02_high_F",            -15.6263,   6.0654, 2.4627, 290.6, true]
 ];
+// --DUWS-COMPOSITION END--
 
 // 需要贴合地形的工事类型
 private _tiltTypes = [

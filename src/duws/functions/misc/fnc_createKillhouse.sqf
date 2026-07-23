@@ -11,6 +11,7 @@ private _centerSpawnZ = 1000;
 private _fnc_radToDeg = { (_this * 180) / 3.1415926535 };
 
 // ========== 普通物体数据 (不含靶子) ==========
+// --DUWS-COMPOSITION BEGIN name="Killhouse: Objects" schema=B--
 private _objectsData = [
 
 // ---- Walk-Over-Range 层 ----
@@ -719,8 +720,10 @@ private _objectsData = [
 ["Land_Shoot_House_Tunnel_F", -22.704956, 23.744995, 3.8714924, -0, 0, false],
 ["Land_Shoot_House_Tunnel_F", -22.704468, 20.748901, 3.8714924, 3.1415927, 0, false]
 ];
+// --DUWS-COMPOSITION END--
 
 // ========== 靶子数据 ==========
+// --DUWS-COMPOSITION BEGIN name="Killhouse: Targets" schema=B--
 private _targetsData = [
 ["TargetP_Civ_F", -29.881226, -3.3609619, 3.1395636, 3.1355252, 0, false],
 ["TargetP_Civ_F", -25.003784, 11.969604, 3.1395636, 6.1571732, 0, false],
@@ -832,6 +835,7 @@ private _targetsData = [
 ["TargetP_Inf4_F", 28.807251, -16.694702, 3.1447077, 6.1519003, 0, false],
 ["TargetP_Inf4_F", 28.574463, -6.5517578, 3.1372042, 2.9354448, 0, false]
 ];
+// --DUWS-COMPOSITION END--
 
 // ========== 存储关键数据到 missionNamespace（供客户端交互使用） ==========
 missionNamespace setVariable ["killhouse_centerX", _centerSpawnX];

@@ -81,6 +81,7 @@ deleteVehicle _vehicle_0;
 
 private _missionObjects = [];
 
+// --DUWS-COMPOSITION BEGIN name="Mission: Destroy Tower" schema=C--
 _staticsArray = [];
 switch (VERSION_X) do {
     case "MODERN": {
@@ -99,6 +100,7 @@ switch (VERSION_X) do {
             ["Land_HBarrier_5_F",[-10.5269,-3.28467,0],271.593,1,0,[],"","",true,false],
             ["Land_TBox_F",[-0.117676,-14.9492,0],182.221,1,0,[],"","",true,false]
         ];
+// --DUWS-COMPOSITION END--
     };
 };
 

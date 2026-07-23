@@ -9,6 +9,7 @@ private _newCenterZ = getTerrainHeightASL [_centerSpawnX, _centerSpawnY];
 if (_newCenterZ <= 0) then { _newCenterZ = 0; };
 
 // 所有物体数据: [类名, 中心X偏移, 中心Y偏移, 原Z海拔, 方向(度), 是否武器]
+// --DUWS-COMPOSITION BEGIN name="Outpost 1" schema=A--
 private _allObjectsData = [
     // === 武器（外层） ===
     ["I_HMG_02_high_F",  -7.4336,  25.0707, 2.3202,   0.0, true],
@@ -66,6 +67,7 @@ private _allObjectsData = [
     ["Land_Pallets_F",         14.9492,   6.5317, 0.3183, 354.9, false],
     ["Land_MetalBarrel_F",    -10.8008,  -7.9273, 0.4227, 297.4, false]
 ];
+// --DUWS-COMPOSITION END--
 
 // 需要贴合地形的工事类型
 private _tiltTypes = [

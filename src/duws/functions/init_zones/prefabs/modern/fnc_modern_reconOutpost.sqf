@@ -18,6 +18,7 @@ private _keepSimulation = [
 ];
 
 // 所有物体: [类名, X偏移, Y偏移, Z海拔, 方向度数, 是否为武器]
+// --DUWS-COMPOSITION BEGIN name="Recon Outpost" schema=A--
 private _allObjectsData = [
     // === 内层 Layer (72个物体) ===
     ["Land_Campfire_F",             2.0784,   0.4236, 0.2196, 210.0, false],
@@ -98,6 +99,7 @@ private _allObjectsData = [
     ["B_static_AA_F",             6.1526,  -2.4729, 1.9200,   0.0, true],
     ["B_Mortar_01_F",             3.2151,  -5.8928, 1.7602,  76.2, true]
 ];
+// --DUWS-COMPOSITION END--
 
 // 地形倾斜类型
 private _tiltTypes = [

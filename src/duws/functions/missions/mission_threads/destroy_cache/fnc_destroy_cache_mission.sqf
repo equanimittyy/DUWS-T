@@ -74,6 +74,7 @@ _this setPos _centerSpawn;
 _centerSpawnZ = (getpos _vehicle_0 select 2);
 deleteVehicle _vehicle_0;
 
+// --DUWS-COMPOSITION BEGIN name="Mission: Destroy Cache" schema=C--
 _staticsArray = [
     ["CamoNet_INDP_open_F",[0.942383,-0.640625,0],342.004,1,0,[],"","",true,false],
     ["Land_GarbageHeap_02_F",[-1.71191,-1.54443,3.33786e-006],93.4817,1,0,[],"","",true,false],
@@ -89,6 +90,7 @@ _staticsArray = [
     ["Land_BagBunker_Small_F",[-7.08691,7.32031,0],134.261,1,0,[],"","",true,false],
     ["Land_BagBunker_Small_F",[8.24512,-6.67188,0],314.617,1,0,[],"","",true,false]
 ];
+// --DUWS-COMPOSITION END--
 
 _vehicle = objNull;
 {
