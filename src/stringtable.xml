@@ -2363,7 +2363,7 @@
                 <Chinese>你已经在选择传送位置。</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_ASK_FOR_TOOLKIT">
-                <Original>&lt;t color='#ffaa00'&gt;Request Toolbox (2 cash)&lt;/t&gt;</Original>
+                <Original>&lt;t color='#ffaa00'&gt;Request toolbox (2 cash)&lt;/t&gt;</Original>
                 <Chinesesimp>&lt;t color='#ffaa00'&gt;请求工具箱 (2货币)&lt;/t&gt;</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_TOOLKIT_FAIL_REP">
@@ -2395,7 +2395,7 @@
                 <Chinesesimp>给你这个工具箱，希望能帮上忙。(收下货币)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_FOR_AID">
-                <Original>&lt;t color='#ffaa00'&gt;Ask for Medical Aid (1 cash)&lt;/t&gt;</Original>
+                <Original>&lt;t color='#ffaa00'&gt;Ask for medical aid (1 cash)&lt;/t&gt;</Original>
                 <Chinesesimp>&lt;t color='#ffaa00'&gt;请求医疗援助 (1货币)&lt;/t&gt;</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_AID_FAIL_REP">
@@ -2447,8 +2447,8 @@
                 <Chinesesimp>你在重生时损失了以下物品：%1</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_FAST_TRAVEL_CIV">
-                <Original>&lt;t color='#00ff00'&gt;Fast Travel (1 cash)&lt;/t&gt;</Original>
-                <English>&lt;t color='#00ff00'&gt;Fast Travel (1 cash)&lt;/t&gt;</English>
+                <Original>&lt;t color='#00ff00'&gt;Fast travel (1 cash)&lt;/t&gt;</Original>
+                <English>&lt;t color='#00ff00'&gt;Fast travel (1 cash)&lt;/t&gt;</English>
                 <Chinesesimp>&lt;t color='#00ff00'&gt;请求快速旅行 (1货币)&lt;/t&gt;</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_FAST_TRAVEL_hey">
@@ -2527,8 +2527,8 @@
                 <Chinesesimp>一位玩家已离开 %1 且 %1 将在 60 秒后重置。若想继续在 %1 活动，则需立刻返回。\n(为节约性能，同一时间只能有一个城镇生成平民)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_ENEMY">
-                <Original>&lt;t color='#fffb00ff'&gt;Ask about Enemy (1 cash)&lt;/t&gt;</Original>
-                <English>&lt;t color='#fffb00ff'&gt;Ask about Enemy (1 cash)&lt;/t&gt;</English>
+                <Original>&lt;t color='#fffb00ff'&gt;Ask about enemy (1 cash)&lt;/t&gt;</Original>
+                <English>&lt;t color='#fffb00ff'&gt;Ask about enemy (1 cash)&lt;/t&gt;</English>
                 <German>&lt;t color='#fffb00ff'&gt;Nach Feinden fragen(1 cash)&lt;/t&gt;</German>
                 <Spanish>&lt;t color='#fffb00ff'&gt;Preguntar sobre el enemigo(1 cash)&lt;/t&gt;</Spanish>
                 <Chinesesimp>&lt;t color='#fffb00ff'&gt;打听敌人动向(1货币)&lt;/t&gt;</Chinesesimp>
@@ -3115,7 +3115,7 @@
                 <Chinesesimp>货币不足</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DEVELOP_INFORMANT">
-                <English>&lt;t color='#fffb00ff'&gt;Develop Informant (5 cash)&lt;/t&gt;</English>
+                <English>&lt;t color='#fffb00ff'&gt;Develop informant (5 cash)&lt;/t&gt;</English>
                 <Chinesesimp>&lt;t color='#fffb00ff'&gt;发展线人(5货币)&lt;/t&gt;</Chinesesimp>
                 <German>&lt;t color='#fffb00ff'&gt;Informanten entwickeln(5 Geld)&lt;/t&gt;</German>
                 <Spanish>&lt;t color='#fffb00ff'&gt;Desarrollar informante(5 dinero)&lt;/t&gt;</Spanish>
