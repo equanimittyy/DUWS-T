@@ -7022,15 +7022,15 @@
                 <German>"Longbow" Pilot</German>
                 <Spanish>Piloto de "Longbow"</Spanish>
                 <Chinesesimp>"长弓"飞行员</Chinesesimp>
-                <Original>Longbow Pilot</Original>
-                <English>Longbow Pilot</English>
+                <Original>Longbow</Original>
+                <English>Longbow</English>
             </Key>
             <Key ID="STR_DUWS_T_koipilot">
                 <German>"Koi" Pilot</German>
                 <Spanish>Piloto de "Koi"</Spanish>
                 <Chinesesimp>"鲤鱼"飞行员</Chinesesimp>
-                <Original>Koi Pilot</Original>
-                <English>Koi Pilot</English>
+                <Original>Koi</Original>
+                <English>Koi</English>
             </Key>
             <Key ID="STR_DUWS_T_dispatcher">
                 <German>Dispatcher</German>
