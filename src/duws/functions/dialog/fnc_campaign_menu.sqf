@@ -121,10 +121,13 @@ if (!isNil "duws_campaign_sel") then {
 };
 
 // Hardcore hides the zones, so hand-placing them would defeat the mode: force
-// random by disabling START-M (idc 1601). Re-evaluated on every entry, so a Back
-// to the environment screen that turns hardcore off re-enables it.
+// random by disabling START-M (idc 1601) and greying it to the "previous" button
+// scheme so it reads as non-actionable. The dialog is rebuilt on every entry, so
+// a Back that turns hardcore off restores the button's default red/enabled state.
 if (hardcore_mode_enable) then {
-    ctrlEnable [1601, false];
+    private _startM = displayCtrl 1601;
+    _startM ctrlEnable false;
+    _startM ctrlSetBackgroundColor [0.35, 0.35, 0.35, 0.5];  // same grey as the Back button
 };
 
 
