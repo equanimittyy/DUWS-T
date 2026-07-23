@@ -8603,19 +8603,12 @@
                 <Original>SITREP received, we have %1 command points and our army power is at %2. OPFOR army power is at %3.</Original>
                 <English>SITREP received, we have %1 command points and our army power is at %2. OPFOR army power is at %3.</English>
             </Key>
-            <Key ID="STR_DUWS_T_1lhmuan7">
-                <Spanish>Esperando a que el anfitrión encuentre un CG...</Spanish>
-                <German>Warte auf das Auswählen einer HQ Position durch den Host...</German>
-                <Chinesesimp>等待主机建立总部...</Chinesesimp>
-                <Original>Waiting for the host to find an HQ...</Original>
-                <English>Waiting for the host to find an HQ...</English>
-            </Key>
-            <Key ID="STR_DUWS_T_8dztgj1i">
-                <Spanish>Esperando a que el anfitrión seleccione los parámetros de la campaña...</Spanish>
-                <German>Warte auf das Auswählen der Missions-Parameter durch den Host...</German>
-                <Chinesesimp>等待主机选择战役参数...</Chinesesimp>
-                <Original>Waiting for the host to select the campaign parameters...</Original>
-                <English>Waiting for the host to select the campaign parameters...</English>
+            <Key ID="STR_DUWS_T_waithostsetup">
+                <Spanish>Esperando a que el anfitrión termine la configuración de la misión...</Spanish>
+                <German>Warte, bis der Host die Missionseinrichtung abgeschlossen hat...</German>
+                <Chinesesimp>等待主机完成任务设置...</Chinesesimp>
+                <Original>Waiting for the host to finish mission setup...</Original>
+                <English>Waiting for the host to finish mission setup...</English>
             </Key>
             <Key ID="STR_DUWS_T_gut0c4f8">
                 <Spanish>Tapones para oídos removidos</Spanish>

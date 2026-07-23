@@ -128,14 +128,9 @@ if (((vehiclevarname player) in game_master)) then {
 		hintsilent "Waiting for serverinit_complete";
 		waitUntil {sleep 0.1;serverinit_complete};
 		waitUntil {
-			hintsilent localize "STR_DUWS_T_1lhmuan7";
+			hintsilent localize "STR_DUWS_T_waithostsetup";
 			sleep 5;
-			HQ_pos_found_generated
-		};
-		waitUntil {
-			hintsilent localize "STR_DUWS_T_8dztgj1i";
-			sleep 5;
-			chosen_settings
+			HQ_pos_found_generated && chosen_settings
 		};
 	};
 };
