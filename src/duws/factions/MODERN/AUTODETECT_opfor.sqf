@@ -195,19 +195,6 @@ o_arraysToRandomize = [
     "opfor_SPECOPS_ENG_X"
 ];
 
-// ========== 备份原始数组（用于伪装成敌人）==========
-{
-    private _varName = _x;
-    private _varValue = missionNamespace getVariable [_varName, []];
-    if (_varValue isEqualType []) then {
-        missionNamespace setVariable [_varName + "_array", +_varValue, true];
-    } else {
-        missionNamespace setVariable [_varName + "_array", [_varValue], true];
-    };
-    diag_log format ["[EnemyGear] Backup created: %1_array", _varName];
-} forEach o_arraysToRandomize;
-// =================================================
-
 // 随机化循环
 {
     private _factionUnitVarName = _x;
