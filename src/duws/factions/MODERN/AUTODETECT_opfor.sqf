@@ -161,29 +161,10 @@ publicVariable "fnc_factionGen";
 
 //selectRandom factionList select 1 call fnc_factionGen;
 
-// init selection vars
-selectedFaction = nil;
-selectionDone = nil;
-publicVariable "selectedFaction";
-publicVariable "selectionDone";
-
-// Listbox
-_admin = objNull;
-if (!isDedicated) then {
-	["Select Opfor Faction"] call  fnc_factionSelector;
-} else {
-	diag_log format ["Waiting for admin to select autodetected faction"];
-	
-	waitUntil { {admin owner _x > 0 || {_x isEqualTo player1}} count allPlayers > 0 };	// wait for admin
-	_admin = allPlayers select {admin owner _x > 0 || {_x isEqualTo player1}} select 0;
-	diag_log format ["Admin %1 logged in, sending dialog", name _admin];
-	sleep 0.5;
-	["Select Opfor Faction"] remoteExec ["fnc_factionSelector", _admin];
-
-	diag_log format ["Admin %1 selected opfor faction: %2", name _admin, selectedFaction];
-};
-
-waitUntil { !isNil "selectionDone" };	// selectedFaction
+// The faction was chosen during setup (fnc_startup_autodetect_faction) and
+// broadcast as selectedFaction_OPF; generate its data now, at the deferred commit.
+waitUntil { sleep 0.1; !isNil "selectedFaction_OPF" };
+selectedFaction_OPF call fnc_factionGen;
 sleep 0.5;
 
 // use predefined array for improved performance

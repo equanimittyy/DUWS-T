@@ -263,29 +263,10 @@ allVariables missionNamespace select {
 publicVariable "fnc_factionGen";
 //selectRandom factionList select 1 call fnc_factionGen;
 
-// init selection vars
-selectedFaction = nil;
-selectionDone = nil;
-publicVariable "selectedFaction";
-publicVariable "selectionDone";
-
-// Listbox
-_admin = objNull;
-if (!isDedicated) then {
-	["Select Blufor Faction", false] call  fnc_factionSelector;	// keep dialog open for the OPFOR round
-} else {
-	diag_log format ["Waiting for adming to select autodetected faction"];
-	
-	waitUntil { {admin owner _x > 0 || {_x isEqualTo player1}} count allPlayers > 0 };	// wait for admin
-	_admin = allPlayers select {admin owner _x > 0 || {_x isEqualTo player1}} select 0;
-	diag_log format ["Admin %1 logged in, sending dialog", name _admin];
-	sleep 0.5;
-	["Select Blufor Faction", false] remoteExec ["fnc_factionSelector", _admin];	// keep dialog open for the OPFOR round
-
-	diag_log format ["Admin %1 selected blufor faction: %2", name _admin, selectedFaction];
-};
-
-waitUntil { !isNil "selectionDone" };	// selectedFaction
+// The faction was chosen during setup (fnc_startup_autodetect_faction) and
+// broadcast as selectedFaction_BLU; generate its data now, at the deferred commit.
+waitUntil { sleep 0.1; !isNil "selectedFaction_BLU" };
+selectedFaction_BLU call fnc_factionGen;
 sleep 0.5;
 
 // use predefined array for improved performance

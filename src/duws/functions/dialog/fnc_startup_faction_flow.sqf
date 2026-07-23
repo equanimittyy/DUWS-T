@@ -26,4 +26,8 @@ if (BLUFOR_Faction_X == "CUSTOM" || OPFOR_Faction_X == "CUSTOM") then {
     if (OPFOR_Faction_X == "CUSTOM") then { waitUntil {sleep 0.1; OPFfactionDataTemp != ""}; };
 };
 
+// AutoDetect factions: run the interactive picker here so it lands during setup,
+// not after START. Captures the choice only; the data-gen stays deferred.
+[] call fnc_startup_autodetect_faction;
+
 [] spawn fnc_enviro_menu;

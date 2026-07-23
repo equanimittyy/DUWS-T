@@ -734,8 +734,9 @@ fnc_factionSelector = compileFinal {
 			_selected = factionList # (lbCurSel 1500);	// get selection by using index to select element from array directly ;)
 			missionNamespace setVariable ["selectedFaction", _selected#1, true];
 
-			// parse selected faction, call do not spawn
-			selectedFaction call fnc_factionGen;
+			// Selection only: the per-side fnc_factionGen is run later, at the
+			// deferred commit, so the picker can show during setup without building
+			// faction data before the player has locked settings in.
 			selectionDone = true;
 			publicVariable "selectedFaction";
 			publicVariable "selectionDone";
