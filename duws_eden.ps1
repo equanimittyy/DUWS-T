@@ -109,7 +109,7 @@ function New-ImportScript($name, $schema, $rows, $originX, $originY, $originZ, $
     [void]$sb.AppendLine('    _x params ["_class","_ox","_oy","_oz","_dir"];')
     [void]$sb.AppendLine('    private _z = if (_zKeep) then { (_origin select 2) + _oz } else { 0 };')
     [void]$sb.AppendLine('    private _ent = create3DENEntity ["Object", _class, [(_origin select 0) + _ox, (_origin select 1) + _oy, _z]];')
-    [void]$sb.AppendLine('    _ent set3DENAttribute ["rotation", _dir];   // Objects: rotation is one Number (yaw)')
+    [void]$sb.AppendLine('    _ent set3DENAttribute ["rotation", [0, 0, _dir]];   // [pitch, roll, yaw]; a bare number sets pitch, not heading')
     [void]$sb.AppendLine('    _made = _made + 1;')
     [void]$sb.AppendLine('} forEach _rows;')
     [void]$sb.AppendLine('hint format ["DUWS import: created %1 of %2 objects.", _made, count _rows];')

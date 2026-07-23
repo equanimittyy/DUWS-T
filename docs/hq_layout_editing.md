@@ -60,8 +60,9 @@ The load-bearing trap: `create3DENEntity` **only runs in Eden's own debug consol
 `{ }` console in the 3D editor toolbar, not the in-game debug console. Run it in-game and it
 silently no-ops.
 
-Objects take their heading from a single-Number `rotation` attribute (yaw, degrees), which is
-all any composition stores. Pick a flat `_origin`; it only decides where the composition lands.
+Objects take their heading from the yaw slot of the `rotation` attribute (`[pitch, roll,
+yaw]`, degrees) — a bare number sets pitch, not heading. Pick a flat `_origin`; it only
+decides where the composition lands.
 
 **Import** — run the composition TUI at the repo root (double-click `duws_eden.cmd`, or):
 
