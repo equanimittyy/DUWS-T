@@ -632,6 +632,13 @@
                 <Original>PREV. PAGE</Original>
                 <English>PREV. PAGE</English>
             </Key>
+            <Key ID="STR_DUWS_T_startup_back_faction">
+                <German>Zurück zur Fraktions- und HQ-Auswahl</German>
+                <Spanish>Volver a la selección de facción y cuartel general</Spanish>
+                <Chinesesimp>返回阵营与总部选择</Chinesesimp>
+                <Original>Return to faction &amp; HQ selection</Original>
+                <English>Return to faction &amp; HQ selection</English>
+            </Key>
             <Key ID="STR_DUWS_T_ref5pt72">
                 <German>DEFINIERE DIE UMWELT-PARAMETER</German>
                 <Spanish>DEFINE LOS PARÁMETROS AMBIENTALES</Spanish>

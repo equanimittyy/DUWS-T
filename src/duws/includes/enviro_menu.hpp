@@ -5,6 +5,7 @@ class startup_dialog
     movingenable = false;
     // Disable ESC key
     onLoad = "(_this select 0) displayAddEventhandler ['KeyDown', {(_this select 1) isEqualTo 1}];";
+    onUnload = "[] spawn fnc_startup_enviro_closed"; // Back button routes to faction re-pick
 
     class ControlsBackground
     {
@@ -293,6 +294,19 @@ class startup_dialog
             colorBackground[] = {1, 0, 0,0.5};
             tooltip = "$STR_DUWS_T_iumlwewp";
             action = "[] spawn fnc_process_enviro_menu;";
+        };
+        class back_button: RscButton
+        {
+            idc = 1601;
+            text = "$STR_DUWS_T_startup_back";
+            x = 3.5 * GUI_GRID_W + GUI_GRID_X;
+            y = 26 * GUI_GRID_H + GUI_GRID_Y;
+            w = 8 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
+            sizeEx = 0.05;
+            colorBackground[] = {0.35, 0.35, 0.35, 0.5};
+            tooltip = "$STR_DUWS_T_startup_back_faction";
+            action = "[] spawn fnc_enviro_back;";
         };
     };
 };

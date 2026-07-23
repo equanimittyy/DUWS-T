@@ -38,6 +38,12 @@ publicVariable "serverinit_complete";
 // wait for HQ placement
 waitUntil {sleep 0.1;chosen_hq_placement};
 
+// Faction init + HQ build are deferred to final commit (createzone_server) so
+// the setup screens' Back navigation can re-pick faction/HQ with nothing yet
+// built. Everything below consumes only PosOfBLUHQ (set at placement) until
+// this gate; verified no faction-array or HQ-object read sits before it.
+waitUntil {sleep 0.1;createzone_server};
+
 // wait for CUSTOM FACTIONS to be pasted
 diag_log format ["Server waiting for BLU faction Data Temp"];
 if (BLUFOR_Faction_X == "CUSTOM") then {waitUntil {sleep 0.1;BLUfactionDataTemp != ""}};
@@ -106,14 +112,6 @@ enableSaving [false, false];
 diag_log "SERVER HQ_pos_found_generated";
 waitUntil {sleep 0.1;HQ_pos_found_generated};
 
-//////////////////////////////////////////////
-/////  WAIT FOR MISSION SETTINGS DIALOG
-//////////////////////////////////////////////
-
-diag_log "SERVER chosen_settings";
-waitUntil {sleep 0.1;chosen_settings}; 
-diag_log "SERVER createzone_server";
-waitUntil {sleep 0.1;createzone_server};
 // use weapons instead items, some factions bork on items
 diag_log "SERVER opfor_ammobox_weapons";
 waitUntil {sleep 0.1;(count opfor_ammobox_weapons) > 0};

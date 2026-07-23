@@ -84,26 +84,9 @@ if (isMultiplayer) then {
 //////////////////////
 if (((vehiclevarname player) in game_master) && !HQ_pos_found_generated) then {
 
-	// First Menu
-	[] call fnc_HQ_faction_dialog;
-
-	//titleCut ["", "BLACK IN", 10];
-	
-	waitUntil {sleep 0.1;chosen_hq_placement};
-	
-	// Custom FACTION Dialog
-	if (BLUFOR_Faction_X == "CUSTOM" || OPFOR_Faction_X == "CUSTOM") then {
-		//titleCut ["", "BLACK FADED", 999];
-		_handle = createDialog "startup_faction";
-		waitUntil {dialog};
-		// wait for the Factions to be pasted
-		if (BLUFOR_Faction_X == "CUSTOM") then {
-			waitUntil {sleep 0.1;BLUfactionDataTemp != ""};
-		}; 
-		if (OPFOR_Faction_X == "CUSTOM") then {
-			waitUntil {sleep 0.1;OPFfactionDataTemp != ""};
-		};
-	};
+	// Faction + HQ placement + custom-faction paste + environment menu are owned
+	// by fnc_startup_faction_flow (called at the enviro spawn point below) so the
+	// environment screen's Back button can re-enter them to re-pick faction/HQ.
 
 	//  ZONE SETTINGS DIALOG
 	if (!zones_created) then {
@@ -113,7 +96,7 @@ if (((vehiclevarname player) in game_master) && !HQ_pos_found_generated) then {
 		// SHOW THE STARTUP ENVIRO MENU
 		if (!zones_created) then {
 			sleep 0.1;
-			[] spawn fnc_enviro_menu;
+			[] call fnc_startup_faction_flow;
 			waitUntil {sleep 0.1;chosen_settings};  // WAIT UNTIL THE PLAYER HAS CHOSEN THE SETTINGS
 			//titleCut ["", "BLACK IN", 10];
 		};
