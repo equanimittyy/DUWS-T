@@ -120,5 +120,12 @@ if (!isNil "duws_campaign_sel") then {
     { lbSetCurSel [2100 + _forEachIndex, _x]; } forEach duws_campaign_sel;
 };
 
+// Hardcore hides the zones, so hand-placing them would defeat the mode: force
+// random by disabling START-M (idc 1601). Re-evaluated on every entry, so a Back
+// to the environment screen that turns hardcore off re-enables it.
+if (hardcore_mode_enable) then {
+    ctrlEnable [1601, false];
+};
+
 
 
