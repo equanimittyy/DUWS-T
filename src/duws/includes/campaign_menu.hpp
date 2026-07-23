@@ -345,6 +345,7 @@ class startup_dialog2
             h = 1.5 * GUI_GRID_H;
             sizeEx = 0.05;
             colorBackground[] = {1, 0, 0,0.5};
+            colorBackgroundDisabled[] = {0.35, 0.35, 0.35, 0.5};  // grey when hardcore disables it (matches Back)
             tooltip = "$STR_DUWS_T_7zexk7d5";
             action = "[] spawn fnc_startup_manual_zones;";
         };

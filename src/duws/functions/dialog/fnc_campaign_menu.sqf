@@ -120,14 +120,13 @@ if (!isNil "duws_campaign_sel") then {
     { lbSetCurSel [2100 + _forEachIndex, _x]; } forEach duws_campaign_sel;
 };
 
-// Hardcore hides the zones, so hand-placing them would defeat the mode: force
-// random by disabling START-M (idc 1601) and greying it to the "previous" button
-// scheme so it reads as non-actionable. The dialog is rebuilt on every entry, so
-// a Back that turns hardcore off restores the button's default red/enabled state.
+// Hardcore hides the zones, so hand-placing them defeats the mode: force random by
+// disabling START-M (idc 1601). Its greyed look is the button's colorBackgroundDisabled
+// (set in campaign_menu.hpp to match Back), NOT a runtime ctrlSetBackgroundColor -- a
+// disabled RscButton paints colorBackgroundDisabled and ignores the enabled slot.
+// Rebuilt each entry, so turning hardcore off via Back restores the default button.
 if (hardcore_mode_enable) then {
-    private _startM = displayCtrl 1601;
-    _startM ctrlEnable false;
-    _startM ctrlSetBackgroundColor [0.35, 0.35, 0.35, 0.5];  // same grey as the Back button
+    ctrlEnable [1601, false];
 };
 
 
