@@ -115,5 +115,10 @@ index_enemyunit_multiplier_2 = lbAdd [2113, localize "STR_DUWS_T_xuanxiang13"];
 index_enemyunit_multiplier_3 = lbAdd [2113, localize "STR_DUWS_T_xuanxiang14"];
 lbSetCurSel [2113, index_enemyunit_multiplier_2];
 
+// Restore selections when the player returns to this screen via the Back button.
+if (!isNil "duws_campaign_sel") then {
+    { lbSetCurSel [2100 + _forEachIndex, _x]; } forEach duws_campaign_sel;
+};
+
 
 

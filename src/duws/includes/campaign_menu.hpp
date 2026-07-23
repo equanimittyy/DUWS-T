@@ -348,5 +348,18 @@ class startup_dialog2
             tooltip = "$STR_DUWS_T_7zexk7d5";
             action = "[] spawn fnc_startup_manual_zones;";
         };
+        class back_button: RscButton
+        {
+            idc = 1602;
+            text = "$STR_DUWS_T_startup_back";
+            x = 3.5 * GUI_GRID_W + GUI_GRID_X;
+            y = 26 * GUI_GRID_H + GUI_GRID_Y;
+            w = 8 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
+            sizeEx = 0.05;
+            colorBackground[] = {0.35, 0.35, 0.35, 0.5};
+            tooltip = "$STR_DUWS_T_g6bmrxtn";
+            action = "[] spawn fnc_startup_back;";
+        };
     };
 };

@@ -476,6 +476,21 @@ blufor_ai_skill_random = (random _skill) + _min;
 publicVariable "blufor_ai_skill";
 publicVariable "blufor_ai_skill_random";
 
+// Apocalypse and civilian init fire here, at final commit, rather than between
+// the two setup screens -- otherwise returning via Back and re-confirming would
+// re-run them: apocalypse re-scans the whole map, and civ init would lock in
+// whichever faction was chosen on the first pass.
+if (apocalypse_mode) then {
+    if (isServer) then {
+        [] spawn fnc_apocalypse_buildings;
+    } else {
+        [] remoteExec ["fnc_apocalypse_buildings", 2];
+    };
+};
+if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then {
+    [] remoteExec ["fnc_civ_init_Tomata", 2];
+};
+
 // TELL WARCOM THE ZONE VARIABLES ARE SET
 createzone_server = true;
 publicVariable "createzone_server";

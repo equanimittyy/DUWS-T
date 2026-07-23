@@ -625,6 +625,13 @@
                 <Original>Go to the Environment Parameters page</Original>
                 <English>Go to the Environment Parameters page</English>
             </Key>
+            <Key ID="STR_DUWS_T_startup_back">
+                <German>ZURÜCK</German>
+                <Spanish>PÁG. ANT.</Spanish>
+                <Chinesesimp>上一页</Chinesesimp>
+                <Original>PREV. PAGE</Original>
+                <English>PREV. PAGE</English>
+            </Key>
             <Key ID="STR_DUWS_T_ref5pt72">
                 <German>DEFINIERE DIE UMWELT-PARAMETER</German>
                 <Spanish>DEFINE LOS PARÁMETROS AMBIENTALES</Spanish>

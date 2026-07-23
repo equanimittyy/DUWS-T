@@ -124,3 +124,8 @@ lbSetCurSel [2111, index_insurgent_off];
 // 将两个选项的文字颜色设为红色
 lbSetColor [2111, index_insurgent_off, [1,0,0,1]];
 lbSetColor [2111, index_insurgent_on, [1,0,0,1]];
+
+// Restore selections when returning here via the campaign screen's Back button.
+if (!isNil "duws_enviro_sel") then {
+    { lbSetCurSel [2100 + _forEachIndex, _x]; } forEach duws_enviro_sel;
+};

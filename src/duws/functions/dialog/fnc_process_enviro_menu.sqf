@@ -1,3 +1,7 @@
+// Snapshot selections so the campaign screen's Back button can restore them.
+// Must read before closeDialog while the controls still exist.
+duws_enviro_sel = [2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2110,2111] apply { lbCurSel _x };
+
 closeDialog 0;
 
 // Weather type
@@ -78,14 +82,6 @@ switch (_index) do
     case index_apocalypse_false: { apocalypse_mode = false; };
 };
 publicVariable "apocalypse_mode";
-
-if (apocalypse_mode) then {
-    if (isServer) then {
-        [] spawn fnc_apocalypse_buildings;
-    } else {
-        [] remoteExec ["fnc_apocalypse_buildings", 2];
-    };
-};
 
 // ========== 焦土模式 ==========
 _index = lbCurSel 2106;
@@ -182,12 +178,6 @@ switch (_index) do
     case index_insurgent_on: { insurgent_mode_enable = true; };
 };
 publicVariable "insurgent_mode_enable";
-
-// 如果平民模式开启，立即在服务器上启动平民初始化
-if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then {
-    diag_log "[CIV] Triggering civilian initialization from environment menu.";
-    [] remoteExec ["fnc_civ_init_Tomata", 2];
-};
 
 // OPEN THE NEXT MENU
 [] spawn fnc_campaign_menu;
