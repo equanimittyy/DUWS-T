@@ -78,6 +78,24 @@ affecting; keep the duplicate copies byte-identical, or consolidate to one on pu
 test in-game. When a string edit appears to do nothing, grep for a second `<Key ID>` with
 the same ID before assuming the change didn't take.
 
+## `hint` renders beneath the open map, so map-phase prompts are invisible
+
+**A `hint` (or `hintSilent`) issued while the map is open — `forceMap true` /
+`openMap` — draws into the hint box on the mission UI layer, which sits *under*
+`findDisplay 12` (the map). The prompt fires (the hint sound plays) but the player
+never sees it.**
+
+The trap is a "click on the map"-style instruction shown with `hint` right before an
+`onMapSingleClick` wait: the click handler works, but nothing tells the player to click,
+so the step looks broken or gets skipped. `titleText`/`cutText` share the problem — those
+layers are also below the map.
+
+**How to apply:** draw the prompt on the map display itself. Create a static
+`RscStructuredText` control on `findDisplay 12` and set it with `ctrlSetStructuredText` —
+static controls are click-transparent, so the underlying `onMapSingleClick` still fires.
+`fnc_map_prompt` (`src/duws/functions/dialog/fnc_map_prompt.sqf`) does this for the HQ /
+AO-direction prompts; pass `""` to clear it before `openMap [false, false]`.
+
 ## Diary records display newest-first, so add them bottom-up
 
 **`createDiaryRecord` prepends: the record created last is drawn at the TOP of its

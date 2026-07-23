@@ -74,7 +74,7 @@ while {true} do {
             sleep 2;
 
             forceMap false;
-            hint parseText localize "STR_DUWS_T_k9kxtm85";
+            [localize "STR_DUWS_T_k9kxtm85"] call fnc_map_prompt;
             OnMapSingleClick "ClickedPos2 = _pos; clicked = true;";
             waituntil {sleep 0.1; clicked or !(visiblemap)};
             if (clicked) then {
@@ -90,6 +90,7 @@ while {true} do {
             };  
             deletemarker str(_markername);
             hint "";
+            [""] call fnc_map_prompt;
             openMap [false, false];
             titleCut ["", "BLACK FADED", 999];
             chosen_hq_placement = true;

@@ -62,7 +62,7 @@ sleep 2;
 
 // wait for AO direction or "ESC"
 forceMap false;
-hint parseText localize "STR_DUWS_T_k9kxtm85";OnMapSingleClick "ClickedPos2 = _pos; clicked = true;";
+[localize "STR_DUWS_T_k9kxtm85"] call fnc_map_prompt;OnMapSingleClick "ClickedPos2 = _pos; clicked = true;";
 waituntil {sleep 0.1;clicked or !(visiblemap)};
 if (clicked) then {
 	AO_direction = ClickedPos2;
@@ -78,6 +78,7 @@ if (clicked) then {
 };	
 deletemarker str(_markername);
 hint "";
+[""] call fnc_map_prompt;
 openMap [false, false];
 titleCut ["", "BLACK FADED", 999];
 
