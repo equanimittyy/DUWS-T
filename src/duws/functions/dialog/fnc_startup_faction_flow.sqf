@@ -10,6 +10,7 @@
 chosen_hq_placement = false;
 player_is_choosing_hqpos = false;
 random_placement = false;
+duws_custom_faction_back = false;   // set by the paste screen's Back button
 
 [] call fnc_HQ_faction_dialog;
 waitUntil {sleep 0.1; chosen_hq_placement};
@@ -22,9 +23,19 @@ if (BLUFOR_Faction_X == "CUSTOM" || OPFOR_Faction_X == "CUSTOM") then {
     OPFfactionDataTemp = ""; publicVariable "OPFfactionDataTemp";
     createDialog "startup_faction";
     waitUntil {dialog};
-    if (BLUFOR_Faction_X == "CUSTOM") then { waitUntil {sleep 0.1; BLUfactionDataTemp != ""}; };
-    if (OPFOR_Faction_X == "CUSTOM") then { waitUntil {sleep 0.1; OPFfactionDataTemp != ""}; };
+
+    // Wait until every CUSTOM side has non-empty data (the submit handler rejects
+    // blanks, so this can't fall through on empty input) or the player hits Back.
+    waitUntil {
+        sleep 0.1;
+        duws_custom_faction_back
+        || { (BLUFOR_Faction_X != "CUSTOM" || {BLUfactionDataTemp != ""})
+             && {OPFOR_Faction_X != "CUSTOM" || {OPFfactionDataTemp != ""}} }
+    };
 };
+
+// Back from the paste screen restarts the whole faction/HQ selection.
+if (duws_custom_faction_back) exitWith { [] spawn fnc_startup_faction_flow; };
 
 // AutoDetect factions: run the interactive picker here so it lands during setup,
 // not after START. Captures the choice only; the data-gen stays deferred.
