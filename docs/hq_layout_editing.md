@@ -135,15 +135,22 @@ systemChat format ["Copied %1 objects.", count _objs];
 ```
 
 `getDir` reads each heading in the convention the import wrote (`[0,0,dir]` yaw), so rotation
-round-trips. To fold the rows back into a composition's array:
+round-trips. Fold the rows back into the composition's array by these rules:
 
-- offsets are the source coordinates (X/Y for schema A; the nested `[x,y,z]` for C). For the
+- **Match by order.** The export returns rows in source order (creation order), so line them up
+  1:1 with the existing array by index, confirm the class matches at each row, and change only
+  the rows whose X/Y (or dir) actually moved.
+- **X/Y** are the source coordinates (X/Y for schema A; the nested `[x,y,z]` for C). For the
   **HQ**, add `_hqInComp` (10.0413, 11.3066) to X/Y — its array stores original composition
   coordinates, not offsets.
-- keep dir in degrees for A/C; for the **killhouse** (B), convert back to radians (`dir * pi / 180`).
-- carry each row's flags (`isWeapon`, `isTarget`, the Eden-export tail) over from the original
-  rows by class — rearranging doesn't change them. Z is only load-bearing for the killhouse;
-  ground layouts ignore the Z column.
+- **Direction** stays in degrees for A/C; for the **killhouse** (B) convert back to radians
+  (`dir * pi / 180`).
+- **Ignore the exported Z for ground layouts.** It is just the terrain baseline of wherever you
+  dropped the composition in Eden, not a real coordinate — keep each row's original Z (the
+  runtime ignores the Z column anyway). Only the **killhouse** uses Z, as the floor offset:
+  export it with `_origin`'s Z set to its `_centerSpawnZ` (1000) so the values come back raw.
+- **Keep the flags.** Carry each row's `isWeapon` / `isTarget` / Eden-export tail from the
+  original row; a rearrange never changes them.
 
 Verify once by import -> export -> re-import and confirming the layout is identical.
 
