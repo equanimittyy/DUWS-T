@@ -167,7 +167,7 @@ sleep 1;
 cutRsc ["DUWST", "PLAIN", 0, true] remoteExec ["call", 0];
 sleep 8;
 // 显示
-titleText ["In memory of KillaTomata, the creator of orig DUWS_X", "PLAIN", -1] remoteExec ["call", 0];
+titleText ["In memory of KillaTomata, the creator of the original DUWS_X", "PLAIN", -1] remoteExec ["call", 0];
 sleep 5;
 // 清除
 titleText ["", "PLAIN", 5] remoteExec ["call", 0];
