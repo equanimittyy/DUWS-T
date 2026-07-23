@@ -19,7 +19,7 @@
 //	 - they are DEFAULTs
 if (!isServer) exitWith {};
 _faction_files_BLUFOR = [
-["O_T_Soldier_F", "BLU_AUTO", "AutoDetect Manual - [RECOMMENDED]","AUTODETECT"],    // classnames for check are units that're always available,csat
+["O_T_Soldier_F", "BLU_AUTO", "AutoDetect - [RECOMMENDED]","AUTODETECT"],    // classnames for check are units that're always available,csat
 ["O_R_Patrol_Soldier_A_F", "OPF_R_F_Spetsnaz", "Spetsnaz","OPF_R_F_Spetsnaz"],
 
 ["B_T_Soldier_F", "BLU_F_T", "NATO (Pacific)","BLU_F_PACIFIC"],
@@ -147,7 +147,7 @@ _faction_files_BLUFOR = [
 
 _faction_files_OPFOR = [
 
-["O_T_Soldier_F", "OPFOR_AUTO", "AutoDetect Manual - [RECOMMENDED]","AUTODETECT"],    // classnames for check are units that're always available,csat
+["O_T_Soldier_F", "OPFOR_AUTO", "AutoDetect - [RECOMMENDED]","AUTODETECT"],    // classnames for check are units that're always available,csat
 ["O_T_Soldier_F", "OPFOR_AUTO_RANDOM", "AutoDetect - RANDOM","AUTODETECT_RANDOM"],    // classnames for check are units that're always available,csat
 ["O_R_Patrol_Soldier_A_F", "OPF_R_F_Spetsnaz", "Spetsnaz","OPF_R_F_Spetsnaz"],
 
