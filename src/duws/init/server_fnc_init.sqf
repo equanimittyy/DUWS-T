@@ -795,14 +795,26 @@ fnc_broadcastRadioChatter = {
         10   // RadioAmbient30
     ];
 
-    // 随机选取一个索引
-    private _index = floor random 30;   // 0 ~ 29
-    private _soundName = format ["RadioAmbient%1", _index + 1];
-    private _duration = _durations select _index;
+    // RadioAmbient1..30 are vanilla CfgSounds, not shipped by the mission. A game
+    // build may define fewer than 30, so a blind random pick can name a sound the
+    // engine lacks and error out ("RadioAmbientN missing"). Pick only from names
+    // that resolve, pairing each with its duration.
+    private _pool = [];
+    {
+        private _name = format ["RadioAmbient%1", _forEachIndex + 1];
+        if (isClass (configFile >> "CfgSounds" >> _name)) then {
+            _pool pushBack [_name, _x];
+        };
+    } forEach _durations;
+
+    if (_pool isEqualTo []) exitWith {
+        missionNamespace setVariable ["DUWS_radioChatterRunning", false];
+    };
 
     // 播放选中的无线电杂音
-    playSound _soundName;
-    sleep _duration;   // 等待音效自然播完
+    private _pick = selectRandom _pool;
+    playSound (_pick select 0);
+    sleep (_pick select 1);   // 等待音效自然播完
     // 释放锁
     missionNamespace setVariable ["DUWS_radioChatterRunning", false];
 };
