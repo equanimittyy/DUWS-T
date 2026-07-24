@@ -93,7 +93,7 @@ _trg setTriggerStatements ["this", "", ""];
         sleep 60;
         private _eastUnits = list _trg;
         if (count _eastUnits > 0 && {time - _lastNotifyTime >= 600}) then {
-            ["info", [localize "STR_DUWS_T_DEVELOP_INFORMANT", localize "STR_DUWS_T_infosts"]] remoteExec ["BIS_fnc_showNotification", 0];
+            ["info", [localize "STR_DUWS_T_infomat", localize "STR_DUWS_T_infosts"]] remoteExec ["BIS_fnc_showNotification", 0];
             _lastNotifyTime = time;
         };
         {
