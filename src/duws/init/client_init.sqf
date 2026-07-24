@@ -183,8 +183,7 @@ PlayerKilledEH = player addEventHandler ["killed", {
         };
     };
     if (!_inKillhouse) then {
-        commandpointsblu1 = commandpointsblu1 - DUWSMP_CP_death_cost;
-        publicVariable "commandpointsblu1";
+        [-DUWSMP_CP_death_cost] remoteExec ["fnc_cp_adjust", 2];
     };
     [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_playerdown"] remoteExec ["BIS_fnc_showSubtitle", 0];
 }];

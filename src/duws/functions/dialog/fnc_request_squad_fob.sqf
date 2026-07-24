@@ -86,9 +86,7 @@ if (commandpointsblu1 >= _cost) then {
 		_group deleteGroupWhenEmpty true;
 	};
 	
-	commandpointsblu1 = commandpointsblu1 - _cost;
-	ctrlSetText [1000, format["%1",commandpointsblu1]];
-publicVariable "commandpointsblu1";
+	[-_cost] remoteExec ["fnc_cp_adjust", 2];
 	
 	if (_task_force == true) exitWith {hint localize "STR_DUWS_T_0a6o9dsm"};
 
@@ -127,7 +125,6 @@ publicVariable "commandpointsblu1";
 };
 
 if (_not_enough) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-publicVariable "commandpointsblu1";
 
 if (_task_force == true) exitWith {};
 // SQUADS NEED TO SPAWN AWAY FROM HQ THEN MOVE CLOSER

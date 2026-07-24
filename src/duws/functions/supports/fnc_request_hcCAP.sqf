@@ -21,9 +21,7 @@ if (commandpointsblu1 < _cost) exitWith
 _group = [_spawnPos, WEST, _grouptype, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 player hcsetgroup [_group,""];
-commandpointsblu1 = commandpointsblu1 - _cost;
-publicVariable "commandpointsblu1";
-ctrlSetText [1000, format["%1",commandpointsblu1]];
+[-_cost] remoteExec ["fnc_cp_adjust", 2];
 DUWS_number_CAS = DUWS_number_CAS + 1;
 _group setGroupId [format[localize "STR_DUWS_T_8mtxjfj3",DUWS_number_CAS]];
 hint localize "STR_DUWS_T_gu6cbc5f";

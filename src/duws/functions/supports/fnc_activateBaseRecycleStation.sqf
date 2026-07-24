@@ -99,8 +99,7 @@ if (isNil "fnc_veh_recycle_action") then {
         if (_count > 0) then {
             private _totalReward = 0;
             { _totalReward = _totalReward + ([_x] call DUWS_fnc_calculateVehicleValue); deleteVehicle _x; } forEach _recyclableVehicles;
-            commandpointsblu1 = commandpointsblu1 + _totalReward;
-            publicVariable "commandpointsblu1";
+            [_totalReward] remoteExec ["fnc_cp_adjust", 2];
             [format [localize "STR_DUWS_T_chenggonghuishou", _count, _totalReward]] remoteExec ["hint", _caller];
         } else {
             if (_hasExcluded) then { [localize "STR_DUWS_T_gaizaijvwufahuishou"] remoteExec ["hint", _caller]; }

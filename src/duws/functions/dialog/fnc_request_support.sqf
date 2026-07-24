@@ -11,7 +11,7 @@ switch (_index2) do {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then {
             if (!support_supplydrop_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_dispatcher";
                 _message = localize "STR_DUWS_T_supplydropunlock";
@@ -34,7 +34,7 @@ switch (_index2) do {
 		_cost = 10;
         if (commandpointsblu1 >= _cost) then {
             if (!support_armory_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
                 _speaker = localize "STR_DUWS_T_OVERLORD";
                 _message = localize "STR_DUWS_T_arsenalunlock";
                 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
@@ -64,7 +64,7 @@ switch (_index2) do {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then {
             if (!support_veh_drop_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_OVERLORD";
                 _message = localize "STR_DUWS_T_vehicledropunlock";
@@ -92,7 +92,7 @@ switch (_index2) do {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then {
             if (!support_siva_drop_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_dispatcher";
                 _message = localize "STR_DUWS_T_sivaunlock";
@@ -120,7 +120,7 @@ switch (_index2) do {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then {
             if (!support_sawp_drop_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_OVERLORD";
                 _message = localize "STR_DUWS_T_sawpunlock";
@@ -146,7 +146,7 @@ case 5: {
     _cost = 15;
     if (commandpointsblu1 >= _cost) then {
         if (!support_halo_available) then {
-            commandpointsblu1 = commandpointsblu1 - _cost;
+            [-_cost] remoteExec ["fnc_cp_adjust", 2];
             _speaker = localize "STR_DUWS_T_dispatcher";
             _message = localize "STR_DUWS_T_HALOunlock";
             [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
@@ -190,7 +190,7 @@ case 5: {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then {
             if (!support_uav_recon_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_dispatcher";
                 _message = localize "STR_DUWS_T_uavunlock";
@@ -215,7 +215,7 @@ case 5: {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then  {
             if (!support_helotaxi_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_dispatcher";
                 _message = localize "STR_DUWS_T_helotaxiunlock";
@@ -243,7 +243,7 @@ case 8: {
     if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
     if (commandpointsblu1 >= _cost) then  {
         if (!support_helolift_available) then {
-            commandpointsblu1 = commandpointsblu1 - _cost;
+            [-_cost] remoteExec ["fnc_cp_adjust", 2];
             support_count = support_count + 1;
             _speaker = localize "STR_DUWS_T_dispatcher";
             _message = localize "STR_DUWS_T_heloliftunlock";
@@ -268,7 +268,7 @@ case 8: {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then {
             if (!support_boattaxi_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_dispatcher";
                 _message = localize "STR_DUWS_T_boattaxiunlock";
@@ -291,8 +291,7 @@ case 10: {
     _cost = 5;
     if (commandpointsblu1 < _cost) exitWith { hint localize "STR_DUWS_T_e95mc4lv"; };
     if (support_veh_recycle_available) exitWith { hint localize "STR_DUWS_T_8c1i4vga"; };
-    commandpointsblu1 = commandpointsblu1 - _cost;
-    publicVariable "commandpointsblu1";
+    [-_cost] remoteExec ["fnc_cp_adjust", 2];
     support_veh_recycle_available = true;
     publicVariable "support_veh_recycle_available";
     ctrlSetText [1000, format["%1",commandpointsblu1]];
@@ -306,8 +305,7 @@ case 11: {
     _cost = 5;
     if (commandpointsblu1 < _cost) exitWith { hint localize "STR_DUWS_T_e95mc4lv"; };
     if (support_veh_repair_available) exitWith { hint localize "STR_DUWS_T_8c1i4vga"; };
-    commandpointsblu1 = commandpointsblu1 - _cost;
-    publicVariable "commandpointsblu1";
+    [-_cost] remoteExec ["fnc_cp_adjust", 2];
     support_veh_repair_available = true;
     publicVariable "support_veh_repair_available";
     ctrlSetText [1000, format["%1",commandpointsblu1]];
@@ -326,7 +324,7 @@ case 11: {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then {
             if (!support_arty_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_OVERLORD";
                 _message = localize "STR_DUWS_T_artyunlock";
@@ -351,7 +349,7 @@ case 11: {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then {
             if (!support_mortar_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_slingshot";
                 _message = localize "STR_DUWS_T_mtrunlock";
@@ -379,7 +377,7 @@ case 11: {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then {
             if (!support_jdam_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_dispatcher";
                 _message = localize "STR_DUWS_T_jdamunlock";
@@ -407,7 +405,7 @@ case 11: {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then  {
             if (!support_laser_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_dispatcher";
                 _message = localize "STR_DUWS_T_laserguidedunlock";
@@ -435,7 +433,7 @@ case 11: {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then  {
             if (!support_cluster_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_OVERLORD";
                 _message = localize "STR_DUWS_T_clusterunlock";
@@ -463,7 +461,7 @@ case 11: {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then  {
             if (!support_napalm_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_OVERLORD";
                 _message = localize "STR_DUWS_T_napalmunlock";
@@ -491,7 +489,7 @@ case 11: {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (!support_hcAttChop_available) then {
             if (commandpointsblu1 >= _cost) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_changgongpilot";
                 _message = localize "STR_DUWS_T_hcchopperunlock";
@@ -507,7 +505,7 @@ case 11: {
             };
         } else {
             if (AttChopInUse) exitWith {hint localize "STR_DUWS_T_dvbox9ay"};
-			commandpointsblu1 = commandpointsblu1 + (floor _cost/2);
+			[floor _cost / 2] remoteExec ["fnc_cp_adjust", 2];
 			ctrlSetText [1000, format["%1",commandpointsblu1]];
 			[player,hcAttChop] call BIS_fnc_removeCommMenuItem;
 			lbSetColor [2103, index_support_hcAttChop, [1, 0, 0, 1]];
@@ -527,7 +525,7 @@ case 11: {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (!support_hcCAS_available) then {
 			if (commandpointsblu1 >= _cost) then {
-				commandpointsblu1 = commandpointsblu1 - _cost;
+				[-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_koipilot";
                 _message = localize "STR_DUWS_T_hcjetunlock";
@@ -543,7 +541,7 @@ case 11: {
             };
         } else {
             if (CASInUse) exitWith {hint localize "STR_DUWS_T_dvbox9ay"};
-				commandpointsblu1 = commandpointsblu1 + (floor _cost/2);
+				[floor _cost / 2] remoteExec ["fnc_cp_adjust", 2];
 				ctrlSetText [1000, format["%1",commandpointsblu1]];
 				[player,hcCAS] call BIS_fnc_removeCommMenuItem;
 				lbSetColor [2103, index_support_hcCAS, [1, 0, 0, 1]];
@@ -563,7 +561,7 @@ case 11: {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (commandpointsblu1 >= _cost) then {
             if (!support_paradrop_available) then {
-                commandpointsblu1 = commandpointsblu1 - _cost;
+                [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_OVERLORD";
                 _message = localize "STR_DUWS_T_paradropunlock";
@@ -592,7 +590,7 @@ case 21: {
     if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
     if (commandpointsblu1 >= _cost) then {
         if (support_mobile_HQ_available) then {
-            commandpointsblu1 = commandpointsblu1 - _cost;
+            [-_cost] remoteExec ["fnc_cp_adjust", 2];
             _speaker = localize "STR_DUWS_T_dispatcher";
             _message = localize "STR_DUWS_T_mhqunlock";
             [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
@@ -620,7 +618,7 @@ case 21: {
 		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
         if (!support_hcCAP_available) then {
 			if (commandpointsblu1 >= _cost) then {
-				commandpointsblu1 = commandpointsblu1 - _cost;
+				[-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
 				ctrlSetText [1000, format["%1",commandpointsblu1]];
                 _hcCAP = [player,"hc_CAP"] call BIS_fnc_addCommMenuItem;
@@ -633,7 +631,7 @@ case 21: {
             };
         } else {
             if (CAPInUse) exitWith {hint localize "STR_DUWS_T_dvbox9ay"};
-				commandpointsblu1 = commandpointsblu1 + (floor _cost/2);
+				[floor _cost / 2] remoteExec ["fnc_cp_adjust", 2];
 				ctrlSetText [1000, format["%1",commandpointsblu1]];
 				[player,hcCAS] call BIS_fnc_removeCommMenuItem;
 				lbSetColor [2103, 16, [1, 0, 0, 1]];
@@ -646,5 +644,4 @@ case 21: {
 };
 
 //hint format["index: %1",_index2];
-publicVariable "commandpointsblu1";
 

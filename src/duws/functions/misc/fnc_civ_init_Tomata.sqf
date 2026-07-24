@@ -231,8 +231,7 @@ diag_log "[CIV] Civilian system initialized.";
         private _rep = Player_Reputation;
         if (_rep > 0) then {
             private _cpReward = ceil(_rep / 2);
-            commandpointsblu1 = commandpointsblu1 + _cpReward;
-            publicVariable "commandpointsblu1";
+            [_cpReward] remoteExec ["fnc_cp_adjust", 2];
             // CP 提醒（使用 cpaddedciv 格式，显示获得的 CP）
             ["CPaddedciv", [_cpReward]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
             [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_cpcivbonus"] remoteExec ["BIS_fnc_showSubtitle", 0];

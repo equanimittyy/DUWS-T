@@ -61,8 +61,7 @@ sleep 5;
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 5;
 private _finalCP = floor _totalCP;
-commandpointsblu1 = commandpointsblu1 + _finalCP;
-publicVariable "commandpointsblu1";
+[_finalCP] remoteExec ["fnc_cp_adjust", 2];
 
 private _itemsList = _removedItems joinString ", ";
 private _title = localize "STR_DUWS_T_INTEL_ANALYSIS_TITLE";

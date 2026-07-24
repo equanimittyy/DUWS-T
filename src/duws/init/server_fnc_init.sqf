@@ -1,6 +1,23 @@
 
 // SERVER FUNCTIONS
 
+// Server-authoritative command-point mutation. Every CP change routes here via
+// remoteExec [..., 2] with a signed delta; nothing else may assign
+// commandpointsblu1 or publicVariable it. The engine runs each delta as one
+// uninterruptible statement on the single server copy, so concurrent changes
+// from different machines serialize instead of clobbering each other with stale
+// absolute values (a client's read-modify-write of its local copy otherwise
+// duplicated or lost CP for the whole session in co-op).
+fnc_cp_adjust = {
+	if (!isServer) exitWith {};
+	params [["_delta", 0]];
+	commandpointsblu1 = commandpointsblu1 + _delta;
+	publicVariable "commandpointsblu1";
+	// PV handler updates ctrl 1000 on remote clients; do it here for the host,
+	// whose own publicVariableEventHandler does not fire for its own broadcast.
+	if (hasInterface) then { ctrlSetText [1000, format ["%1", commandpointsblu1]]; };
+};
+
 // STARTUP FUNCTIONS
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\functions\init_hq\fnc_BluHQinit.sqf";
 fnc_factions_check = compile preprocessFileLineNumbers "duws\functions\misc\fnc_factions_check_modern.sqf";
@@ -725,8 +742,7 @@ fnc_pylon_set_with_cost = {
     };
 
     // 扣除 CP 并广播
-    commandpointsblu1 = commandpointsblu1 - _cost;
-    publicVariable "commandpointsblu1";
+    [-_cost] remoteExec ["fnc_cp_adjust", 2];
 
     // 执行挂架设置
     private _veh = objectFromNetId _netId;

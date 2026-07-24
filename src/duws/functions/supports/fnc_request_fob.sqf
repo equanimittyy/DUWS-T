@@ -50,8 +50,7 @@ _newpos = [_position, 20, _direction] call BIS_fnc_relPos;
 //	exitWith {hint localize "STR_DUWS_T_lqsyni7b"; sleep 5; _art = [player,"fob_support"] call BIS_fnc_addCommMenuItem;};
 _foundPickupPos = _newpos;
 // FOUND GOOD LOCATION
-commandpointsblu1 = commandpointsblu1 - _cost;
-publicVariable "commandpointsblu1";
+[-_cost] remoteExec ["fnc_cp_adjust", 2];
 [localize "STR_DUWS_T_1k60dqrv"] spawn fnc_sideChat_filter;
 
 // SPAWN FOB ON SERVER

@@ -1016,8 +1016,7 @@ killhouse_srv_spawn_enemies = {
             private _kills = missionNamespace getVariable ["killhouse_training_kills", 0];
             _kills = _kills + 1;
             missionNamespace setVariable ["killhouse_training_kills", _kills];
-            commandpointsblu1 = commandpointsblu1 + 0.05;
-            publicVariable "commandpointsblu1";
+            [0.05] remoteExec ["fnc_cp_adjust", 2];
         }];
         _newEnemies pushBack _unit;
     } forEach _selected;

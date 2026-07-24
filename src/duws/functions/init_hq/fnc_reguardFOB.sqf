@@ -7,8 +7,7 @@ _id = (_this select 3) select 4;
 _cost = 15;
 
 if (commandpointsblu1 > _cost) then {
-    commandpointsblu1 = commandpointsblu1 - _cost;
-    publicVariable "commandpointsblu1";
+    [-_cost] remoteExec ["fnc_cp_adjust", 2];
     
     playSound "loadgun";
 

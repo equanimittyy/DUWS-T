@@ -65,8 +65,7 @@ str(_markername2) setMarkerColor "ColorGreen";
 
 // ADD POINTS
 _points = round(_points/3);
-commandpointsblu1 = commandpointsblu1 + _points;
-publicVariable "commandpointsblu1";
+[_points] remoteExec ["fnc_cp_adjust", 2];
 
 ["CPadded",[_points,""]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated,false];
 

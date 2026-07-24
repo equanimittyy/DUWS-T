@@ -73,8 +73,7 @@ str(_markername2) setMarkerColor "ColorOrange";
 str(_markername2) setMarkerSize [.8,.8]; 
 str(_markername2) setMarkerText " " + _ord;
 
-commandpointsblu1 = commandpointsblu1 - _cost;
-publicVariable "commandpointsblu1";
+[-_cost] remoteExec ["fnc_cp_adjust", 2];
 
 sleep 20;
 

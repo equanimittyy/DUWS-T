@@ -6,8 +6,7 @@ if (commandpointsblu1 < _cost) exitWith
 {
   ["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
 };
-commandpointsblu1 = commandpointsblu1 - _cost;
-publicVariable "commandpointsblu1";
+[-_cost] remoteExec ["fnc_cp_adjust", 2];
 hint localize "STR_DUWS_T_sawpdown";
 _speaker = localize "STR_DUWS_T_actionteam";
 _speaker1 = localize "STR_DUWS_T_pilot";

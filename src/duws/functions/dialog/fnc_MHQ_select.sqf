@@ -15,8 +15,7 @@ if (!_goodVeh) exitWith {
 	[player,"mobile_HQ"] call BIS_fnc_addCommMenuItem;
 };
 
-commandpointsblu1 = commandpointsblu1 - _cost;
-publicVariable "commandpointsblu1";
+[-_cost] remoteExec ["fnc_cp_adjust", 2];
 
 // Give MHQ a name with public variable
 _Varname = "MHQ1";

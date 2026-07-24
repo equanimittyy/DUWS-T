@@ -147,3 +147,31 @@ rounding — then loop `to _n`. The OPFOR unit-multiplier options are kept integ
 (`enemyunitMultiplier` 1/2/3) for this reason: the enemy-spawn builders in
 `src/duws/functions/init_zones/fnc_createop*.sqf` loop `for "_i" from 0 to
 enemyunitMultiplier`, so a fractional option there would not change the unit count.
+
+## A shared global mutated as `x = x - c; publicVariable "x"` loses concurrent writes
+
+**`publicVariable` broadcasts an absolute value, and there is no network lock. When two
+machines each read a shared global, compute a new value, and `publicVariable` it, the
+later broadcast overwrites the earlier — the two changes do not add up. Read-modify-write
+of a networked global from more than one machine silently drops updates (and can *create*
+resource from nothing).**
+
+Each machine keeps its own copy; `publicVariable` overwrites every remote copy with the
+sender's number. So `x = x - cost; publicVariable "x"` run on two clients against a
+shared pool of 50 both read 50, both write 30 — net spend 20 instead of 40, and 20 units
+appear from nowhere. Local `x = x + n` is itself atomic (SQF yields only at suspension
+points), so the loss is specifically the stale *base* a second machine read before the
+first machine's broadcast landed. A save game persists the corrupted value for the rest of
+the session. In single-player there is one machine and the bug is invisible, so it only
+surfaces in co-op.
+
+**How to apply:** never `publicVariable` a shared resource from a non-authoritative
+machine. Route every change through one server-side function that takes a signed *delta*
+and applies it (`x = x + _delta; publicVariable "x"`); callers send the delta via
+`[_delta] remoteExec ["fn", 2]` and never touch the global directly. The server serialises
+the deltas as ordinary atomic statements, so nothing is lost regardless of who fires when
+— a delta cannot carry a stale base the way an absolute can. Command points use exactly
+this: `fnc_cp_adjust` (`src/duws/init/server_fnc_init.sqf`) is the sole writer of
+`commandpointsblu1`; the host's own `publicVariableEventHandler` does not fire for its own
+broadcast, so that function also refreshes the on-screen counter locally when
+`hasInterface`.

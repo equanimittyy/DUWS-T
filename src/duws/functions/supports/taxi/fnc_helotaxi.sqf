@@ -17,8 +17,7 @@ _foundPickupPos = [_posplayer, 20,_radius,20,0,0.5,0,[],[[0,0],[0,0]]] call BIS_
 if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_nolz"; sleep 1; _art = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;};
 
 // A POS NEAR THE PLAYER HAS BEEN FOUND, CHOPPA EN ROUTE
-commandpointsblu1 = commandpointsblu1 - _cost;
-publicVariable "commandpointsblu1";
+[-_cost] remoteExec ["fnc_cp_adjust", 2];
 _speakeracteam = localize "STR_DUWS_T_actionteam";
 _message = localize "STR_DUWS_T_helotaxicall0";
 [_speakeracteam, _message] remoteExec ["BIS_fnc_showSubtitle", 0];

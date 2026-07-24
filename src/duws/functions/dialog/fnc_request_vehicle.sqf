@@ -23,16 +23,14 @@ if (commandpointsblu1 >= _vehicle select 2) then {
     _message = localize "STR_DUWS_T_vehicleready";
     [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
-    commandpointsblu1 = commandpointsblu1 - (_vehicle select 2);
+    [-(_vehicle select 2)] remoteExec ["fnc_cp_adjust", 2];
     ctrlSetText [1000, format["%1",commandpointsblu1]];      
-    publicVariable "commandpointsblu1";
     _vehic = _vehicle select 0 createVehicle _spawnPos;
 	_setmrkr = true;
 } else {
 	hint localize "STR_DUWS_T_e95mc4lv";
 };
 
-publicVariable "commandpointsblu1";
 //hint format["index: %1",_index];
 
 // give vehicle a marker
@@ -49,5 +47,3 @@ if (_setmrkr) then {
 	sleep 60;
 	deletemarker _markername;
 };
-      
-    publicVariable "commandpointsblu1";

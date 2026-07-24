@@ -1,8 +1,7 @@
 if (commandpointsblu1 >= 1) exitWith  
 {
     // 扣除 CP 并同步
-    commandpointsblu1 = commandpointsblu1 - 1;
-    publicVariable "commandpointsblu1";
+    [-1] remoteExec ["fnc_cp_adjust", 2];
 
     // 如果当前是服务器，则显示确认对话框（对话框始终在服务器上显示，无需广播）
     if (isServer) then {

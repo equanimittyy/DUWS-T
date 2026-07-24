@@ -4,8 +4,7 @@ if (commandpointsblu1 < 2) exitWith {
     [localize "STR_DUWS_T_REDEPLOY_COST_TITLE", format [localize "STR_DUWS_T_REDEPLOY_COST", 2]] remoteExec ["BIS_fnc_showNotification", 0];
 };
 
-commandpointsblu1 = commandpointsblu1 - 2;
-publicVariable "commandpointsblu1";
+[-2] remoteExec ["fnc_cp_adjust", 2];
 
 // ---------- 清理旧对象 ----------
 // 武器

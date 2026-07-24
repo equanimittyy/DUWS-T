@@ -13,8 +13,7 @@ _foundPickupPos = [_posplayer, 0,_radius,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc
 if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint "You must be near a clear shoreline or out at sea"; sleep 5; _art = [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;};
 
 // A POS NEAR THE PLAYER HAS BEEN FOUND, GUNBOAT EN ROUTE
-commandpointsblu1 = commandpointsblu1 - _cost;
-publicVariable "commandpointsblu1";
+[-_cost] remoteExec ["fnc_cp_adjust", 2];
 
 // create marker on LZ
 _markerpickup = format["lz%1%2",_foundPickupPos]; // Define marker name

@@ -131,8 +131,7 @@ if (_mode == "cleanup") exitWith {
             missionNamespace setVariable [format ["civ_pop_%1", _locIndex], 0];
         };
         if (scorched_earth_enabled) then {
-            commandpointsblu1 = commandpointsblu1 + 15;
-            publicVariable "commandpointsblu1";
+            [15] remoteExec ["fnc_cp_adjust", 2];
             private _bluApPenalty = - (3 + floor random 3);
             WARCOM_blufor_ap = WARCOM_blufor_ap + _bluApPenalty;
             publicVariable "WARCOM_blufor_ap";

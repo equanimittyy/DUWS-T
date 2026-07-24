@@ -24,9 +24,8 @@ if (commandpointsblu1 >= (_unitType select 2)) then {
     _message = localize "STR_DUWS_T_unitready";
     [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
-	commandpointsblu1 = commandpointsblu1 - (_unitType select 2);
+	[-(_unitType select 2)] remoteExec ["fnc_cp_adjust", 2];
 	ctrlSetText [1000, format["%1",commandpointsblu1]];        
-    publicVariable "commandpointsblu1";
 	_group = group player ;
 	(_unitType select 0) createUnit [_spawnpos, _group, "if (player_fatigue == 0) then {this enablefatigue false};", _skill, "private"];
 	{
@@ -39,7 +38,3 @@ if (commandpointsblu1 >= (_unitType select 2)) then {
 } else {
 	hint localize "STR_DUWS_T_e95mc4lv";
 };
-
-
-//hint format["AI skill: %1",_skill];            
-publicVariable "commandpointsblu1";

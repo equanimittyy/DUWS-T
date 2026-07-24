@@ -129,8 +129,7 @@ if (_mode == "cleanup") exitWith {
         };
         // 焦土模式效果
         if (scorched_earth_enabled) then {
-            commandpointsblu1 = commandpointsblu1 + 15;
-            publicVariable "commandpointsblu1";
+            [15] remoteExec ["fnc_cp_adjust", 2];
             private _bluApPenalty = - (3 + floor random 3);
             WARCOM_blufor_ap = WARCOM_blufor_ap + _bluApPenalty;
             publicVariable "WARCOM_blufor_ap";
@@ -357,8 +356,7 @@ if (_mode == "spawn") then {
                         _titleKey = "STR_DUWS_T_GOLIAPH_KILL_TITLE";
                         _msgKey = "STR_DUWS_T_GOLIAPH_KILL_MSG";
                     };
-                    commandpointsblu1 = commandpointsblu1 + _reward;
-                    publicVariable "commandpointsblu1";
+                    [_reward] remoteExec ["fnc_cp_adjust", 2];
                     private _title = localize _titleKey;
                     private _msg = format [localize _msgKey, _reward];
                     ["repup", [_title, _msg]] remoteExec ["BIS_fnc_showNotification", 0];

@@ -23,8 +23,7 @@ switch (_selected_soldier_status) do
 {
   case "Ready": {
 	if (commandpointsblu1<8) exitWith {_proceed = false;};
-	commandpointsblu1 = commandpointsblu1 - 8;
-	publicVariable "commandpointsblu1";
+	[-8] remoteExec ["fnc_cp_adjust", 2];
   };
 
   case "Healed": {

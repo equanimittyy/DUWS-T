@@ -61,9 +61,8 @@ _corpse setVariable ["corpse_target_pos", _targetPos];
         } else {
             if (_rand < 0.6) then {
                 // 20% 额外情报：+1 CP, +1 AP
-                commandpointsblu1 = commandpointsblu1 + 1;
+                [1] remoteExec ["fnc_cp_adjust", 2];
                 WARCOM_blufor_ap = WARCOM_blufor_ap + 1;
-                publicVariable "commandpointsblu1";
                 publicVariable "WARCOM_blufor_ap";
                 [_playerName, localize "STR_DUWS_T_INTEL_FOUND_x"] remoteExec ["BIS_fnc_showSubtitle", 0];
 	            [] remoteExec ["fnc_broadcastRadioChatter", 0];

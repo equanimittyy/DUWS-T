@@ -234,4 +234,3 @@ if (!isNil "insurgent_mode_enable" && {insurgent_mode_enable}) then {
 };
 
 //hint format["index: %1",_index2];
-publicVariable "commandpointsblu1";

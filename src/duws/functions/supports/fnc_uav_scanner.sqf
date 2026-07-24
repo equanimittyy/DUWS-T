@@ -2,8 +2,7 @@ _centerPos = _this select 0;
 _checkedRadius = _this select 1;
 _cost = _this select 2;
 
-commandpointsblu1 = commandpointsblu1 - _cost;
-publicVariable "commandpointsblu1";
+[-_cost] remoteExec ["fnc_cp_adjust", 2];
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = localize "STR_DUWS_T_requestuavscan";
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];

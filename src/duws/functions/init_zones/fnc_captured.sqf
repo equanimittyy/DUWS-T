@@ -45,8 +45,7 @@ if (hardcore_mode_enable) then {
 
 // ADD COMMAND POINTS  1000m zone = 100 / 2 = 50 pts available
 _points = round(_points/2);
-commandpointsblu1 = commandpointsblu1 + _points;
-publicVariable "commandpointsblu1";
+[_points] remoteExec ["fnc_cp_adjust", 2];
 
 // ADD NUMBER OF CONTROLLED ZONES
 zoneundercontrolblu = zoneundercontrolblu + 1;
