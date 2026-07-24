@@ -60,6 +60,21 @@ cause (the wasted time goes into suspecting a missing class definition instead).
 to clear. The faction selector's "no units" caption uses this, in `fnc_factionSelector`
 (`src/duws/factions/MODERN/fn_factionAutoDetect.sqf`).
 
+## Listbox rows show `<t>` markup literally; `addAction` titles render it
+
+**`lbAdd` / `lbSetText` store a row's text verbatim, so `<t color=...>...</t>` shows as
+literal tag characters. `addAction` titles, by contrast, are drawn as structured text and
+render the same markup — so a label is fine in a scroll action but breaks in a listbox.**
+
+The trap is moving a label from a scroll-wheel action into a listbox menu: several DUWS
+strings bake the colour markup into the string itself (e.g. `STR_DUWS_T_HIRE_PMC`), so they
+render clean as action titles but expose raw `<t ...>` tags the moment they populate a
+listbox row. Row colour has its own channel anyway — `lbSetColor [idc, index, [r,g,b,a]]`.
+
+**How to apply:** strip `<...>` tags before `lbAdd` and colour the row via `lbSetColor`.
+The reusable action menu does this for every row, in `fnc_open_action_menu`
+(`src/duws/functions/dialog/fnc_open_action_menu.sqf`).
+
 ## Duplicate `<Key ID>` in stringtable.xml resolve to one definition, silently
 
 **`src/stringtable.xml` repeats several `STR_` IDs. The engine loads the table without
