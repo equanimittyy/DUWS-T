@@ -208,7 +208,9 @@ _index = lbCurSel 2104;
 switch (_index) do
 {
 	case index_amount_cp_0:   { commandpointsblu1 = 0 };
+	case index_amount_cp_10:  { commandpointsblu1 = 10 };
 	case index_amount_cp_20:  { commandpointsblu1 = 20 };
+	case index_amount_cp_30:  { commandpointsblu1 = 30 };
 	case index_amount_cp_50:  { commandpointsblu1 = 50 };
 	case index_amount_cp_100: { commandpointsblu1 = 100 };
 	case index_amount_cp_200: { commandpointsblu1 = 200 };

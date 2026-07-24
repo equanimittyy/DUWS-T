@@ -62,7 +62,9 @@ index_more_urban_no = lbAdd [2105, localize "STR_DUWS_T_x4zs3lsg1"];
 
 // STARTING CP AVAILABLE
 index_amount_cp_0 = lbAdd [2104, "0"];
+index_amount_cp_10 = lbAdd [2104, "10"];
 index_amount_cp_20 = lbAdd [2104, "20"];
+index_amount_cp_30 = lbAdd [2104, "30"];
 index_amount_cp_50 = lbAdd [2104, "50"];
 index_amount_cp_100 = lbAdd [2104, "100"];
 index_amount_cp_200 = lbAdd [2104, "200"];
