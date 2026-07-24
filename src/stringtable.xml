@@ -4175,29 +4175,29 @@
                 <German>Versorgungstruck stehlen</German>
                 <Spanish>Robar camión de suministros</Spanish>
                 <Chinesesimp>偷取补给卡</Chinesesimp>
-                <Original>Steal supply truck</Original>
-                <English>Steal supply truck</English>
+                <Original>Steal Supply Truck</Original>
+                <English>Steal Supply Truck</English>
             </Key>
             <Key ID="STR_DUWS_T_c2">
                 <German>Hochwertiges Ziel eliminieren</German>
                 <Spanish>Eliminar objetivo de alto valor</Spanish>
                 <Chinesesimp>击杀高价值目标</Chinesesimp>
-                <Original>Eliminate high-value target</Original>
-                <English>Eliminate high-value target</English>
+                <Original>Eliminate High-Value Target</Original>
+                <English>Eliminate High-Value Target</English>
             </Key>
             <Key ID="STR_DUWS_T_c3">
                 <German>Sendemast zerstören</German>
                 <Spanish>Destruir torre de señal</Spanish>
                 <Chinesesimp>摧毁信号塔</Chinesesimp>
-                <Original>Destroy signal tower</Original>
-                <English>Destroy signal tower</English>
+                <Original>Destroy Signal Tower</Original>
+                <English>Destroy Signal Tower</English>
             </Key>
             <Key ID="STR_DUWS_T_c4">
                 <German>Pilot retten</German>
                 <Spanish>Rescatar piloto</Spanish>
                 <Chinesesimp>营救飞行员</Chinesesimp>
-                <Original>Rescue pilot</Original>
-                <English>Rescue pilot</English>
+                <Original>Rescue Pilot</Original>
+                <English>Rescue Pilot</English>
             </Key>
             <Key ID="STR_DUWS_T_c5">
                 <German>Scharfschützenjagd</German>
