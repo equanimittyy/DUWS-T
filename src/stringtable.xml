@@ -121,34 +121,6 @@
                 <Original>3km (Skirmish)</Original>
                 <English>3km (Skirmish)</English>
             </Key>
-            <Key ID="STR_DUWS_T_xsni194e">
-                <German>10      schwieriger Start</German>
-                <Spanish>10   Inicio difícil</Spanish>
-                <Chinesesimp>10    困难的开始</Chinesesimp>
-                <Original>10      difficult start</Original>
-                <English>10      difficult start</English>
-            </Key>
-            <Key ID="STR_DUWS_T_rnxjzjos">
-                <German>50     (Standard)</German>
-                <Spanish>50   (por defecto)</Spanish>
-                <Chinesesimp>50   (默认)</Chinesesimp>
-                <Original>50     (default)</Original>
-                <English>50     (default)</English>
-            </Key>
-            <Key ID="STR_DUWS_T_9pfd6w8o">
-                <German>100 (Standardstart)</German>
-                <Spanish>100 (Inicio predeterminado)</Spanish>
-                <Chinesesimp>100 (默认开局)</Chinesesimp>
-                <Original>100 (Default Start)</Original>
-                <English>100 (Default Start)</English>
-            </Key>
-            <Key ID="STR_DUWS_T_pwv2bie1">
-                <German>10000   dummer Cheater</German>
-                <Spanish>10000   Tramposos ¬¬</Spanish>
-                <Chinesesimp>选这个干啥？？？</Chinesesimp>
-                <Original>10000   (basically cheating)</Original>
-                <English>10000   (basically cheating)</English>
-            </Key>
             <Key ID="STR_DUWS_T_57jjx7d6">
                 <German>110 (Panzer)</German>
                 <Spanish>110 (Blindados)</Spanish>
@@ -275,41 +247,6 @@
                 <Original>400 (Easier)</Original>
                 <English>400 (Easier)</English>
             </Key>
-            <Key ID="STR_DUWS_T_xuanxiang6">
-                <German>Originaler (Standard)</German>
-                <Spanish>Original (Predeterminado)</Spanish>
-                <Chinesesimp>原倍数 (默认)</Chinesesimp>
-                <Original>Original (Default)</Original>
-                <English>Original (Default)</English>
-            </Key>
-            <Key ID="STR_DUWS_T_xuanxiang7">
-                <German>Doppelt (Einfacher)</German>
-                <Spanish>Doble (Más Fácil)</Spanish>
-                <Chinesesimp>双倍 (更容易)</Chinesesimp>
-                <Original>Double (Easier)</Original>
-                <English>Double (Easier)</English>
-            </Key>
-            <Key ID="STR_DUWS_T_xuanxiang8">
-                <German>5 (Standard)</German>
-                <Spanish>5 (Predeterminado)</Spanish>
-                <Chinesesimp>5 (默认)</Chinesesimp>
-                <Original>5 (Default)</Original>
-                <English>5 (Default)</English>
-            </Key>
-            <Key ID="STR_DUWS_T_xuanxiang9">
-                <German>8 (Schwieriger)</German>
-                <Spanish>8 (Más Difícil)</Spanish>
-                <Chinesesimp>8 (较难)</Chinesesimp>
-                <Original>8 (Harder)</Original>
-                <English>8 (Harder)</English>
-            </Key>
-            <Key ID="STR_DUWS_T_xuanxiang10">
-                <German>10 (Am Schwierigsten)</German>
-                <Spanish>10 (El Más Difícil)</Spanish>
-                <Chinesesimp>10 (最难)</Chinesesimp>
-                <Original>10 (Hardest)</Original>
-                <English>10 (Hardest)</English>
-            </Key>
             <Key ID="STR_DUWS_T_xuanxiang11">
                 <German>50</German>
                 <Spanish>50</Spanish>
@@ -323,20 +260,6 @@
                 <Chinesesimp>80</Chinesesimp>
                 <Original>80</Original>
                 <English>80</English>
-            </Key>
-            <Key ID="STR_DUWS_T_xuanxiang13">
-                <German>Normal (Standard)</German>
-                <Spanish>Normal (Predeterminado)</Spanish>
-                <Chinesesimp>正常 (默认)</Chinesesimp>
-                <Original>Normal (Default)</Original>
-                <English>Normal (Default)</English>
-            </Key>
-            <Key ID="STR_DUWS_T_xuanxiang14">
-                <German>Mehr (Schwierig/Verursacht Verzögerungen)</German>
-                <Spanish>Más (Difícil/Provoca Retrasos)</Spanish>
-                <Chinesesimp>较多 (困难/会引起卡顿)</Chinesesimp>
-                <Original>More (Hard/Causes Lag)</Original>
-                <English>More (Hard/Causes Lag)</English>
             </Key>
             <Key ID="STR_DUWS_T_default_suffix">
                 <German>(Standard)</German>
