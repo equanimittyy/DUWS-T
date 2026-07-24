@@ -1942,6 +1942,10 @@
                 <Original>Active disguise: enemy soldier.</Original>
                 <English>Active disguise: enemy soldier.</English>
             </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_COOLDOWN">
+                <Original>Cooldown: %1</Original>
+                <English>Cooldown: %1</English>
+            </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_SAME_GEAR">
                 <Original>Your vest and helmet are already known to the enemy. Use different gear and try again</Original>
                 <English>Your vest and helmet are already known to the enemy. Use different gear and try again</English>

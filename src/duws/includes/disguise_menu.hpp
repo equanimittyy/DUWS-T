@@ -58,10 +58,21 @@ class disguise_dialog
             x = 6.6 * GUI_GRID_W + GUI_GRID_X;
             y = 9 * GUI_GRID_H + GUI_GRID_Y;
             w = 11.8 * GUI_GRID_W;
-            h = 5.6 * GUI_GRID_H;
+            h = 4.6 * GUI_GRID_H;
             style = ST_MULTI;
             colorText[] = {1, 1, 1, 1};
             sizeEx = 0.032;
+        };
+        class disguise_civ_cooldown: RscText
+        {
+            idc = 8102;
+            x = 6.6 * GUI_GRID_W + GUI_GRID_X;
+            y = 13.7 * GUI_GRID_H + GUI_GRID_Y;
+            w = 11.8 * GUI_GRID_W;
+            h = 1.2 * GUI_GRID_H;
+            style = ST_CENTER;
+            colorText[] = {1, 1, 1, 1};
+            sizeEx = 0.033;
         };
         class disguise_civ_activate: RscButton
         {
@@ -93,10 +104,21 @@ class disguise_dialog
             x = 21.6 * GUI_GRID_W + GUI_GRID_X;
             y = 9 * GUI_GRID_H + GUI_GRID_Y;
             w = 11.8 * GUI_GRID_W;
-            h = 5.6 * GUI_GRID_H;
+            h = 4.6 * GUI_GRID_H;
             style = ST_MULTI;
             colorText[] = {1, 1, 1, 1};
             sizeEx = 0.032;
+        };
+        class disguise_enemy_cooldown: RscText
+        {
+            idc = 8105;
+            x = 21.6 * GUI_GRID_W + GUI_GRID_X;
+            y = 13.7 * GUI_GRID_H + GUI_GRID_Y;
+            w = 11.8 * GUI_GRID_W;
+            h = 1.2 * GUI_GRID_H;
+            style = ST_CENTER;
+            colorText[] = {1, 1, 1, 1};
+            sizeEx = 0.033;
         };
         class disguise_enemy_activate: RscButton
         {

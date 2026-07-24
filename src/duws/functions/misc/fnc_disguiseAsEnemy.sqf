@@ -85,6 +85,9 @@ _caller setVariable ["DUWS_enemyDisguise_uniform", _selectedUniform];
 
 // ========== 开启伪装 ==========
 _caller setVariable ["DUWS_enemyDisguise_lastUse", diag_tickTime];
+// Cooldown end in serverTime (synced across machines), broadcast for the panel countdown
+// on host and clients. The gate above stays on server-local diag_tickTime.
+_caller setVariable ["DUWS_enemyDisguise_cdEnd", serverTime + 600, true];
 _caller setVariable ["DUWS_enemyDisguised", true, true];
 _caller setCaptive true;
 [true] remoteExec ["fnc_disguise_setCaptiveLocal", _caller];

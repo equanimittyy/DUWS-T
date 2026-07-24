@@ -100,6 +100,9 @@ if (_currentBackpack != "" && {!(_currentBackpack in _civBackpacks)}) exitWith {
 
 // ========== 检查通过，开启伪装 ==========
 _player setVariable ["DUWS_disguise_lastUse", diag_tickTime];
+// Cooldown end in serverTime (same clock on every machine), broadcast so the disguise
+// panel countdown is correct on host and clients. The gate above stays on diag_tickTime.
+_player setVariable ["DUWS_disguise_cdEnd", serverTime + 300, true];
 _player setVariable ["DUWS_disguise_startRep", missionNamespace getVariable ["Player_Reputation", 0]];
 _player setVariable ["DUWS_disguised", true, true];
 _player setCaptive true;
