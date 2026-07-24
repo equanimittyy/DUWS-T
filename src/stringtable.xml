@@ -7832,6 +7832,51 @@
                 <Original>Everything you need to run a DUWS_T campaign is collected here. Each section is summarised below; scroll down for the full entry.&lt;br/&gt;&lt;br/&gt;About DUWS_T: what the mission is and how it builds on DUWS_X.&lt;br/&gt;Command Points (CP): the currency for units, vehicles and support.&lt;br/&gt;Army Power (AP): your army's strength and the enemy's attack waves.&lt;br/&gt;Economy System: the cash and intel you loot in the field.&lt;br/&gt;Capturing Zones: how to take enemy-held zones.&lt;br/&gt;Supports: where to buy and call support options.&lt;br/&gt;Reworked Support Options: every support type and what it costs.&lt;br/&gt;Arsenal System: the rebuilt loadout system and its limits.&lt;br/&gt;About Arsenal: why it's restricted and how to unlock it.&lt;br/&gt;Request Menu: requesting units, vehicles, missions and support.&lt;br/&gt;Recruiting Operatives: hiring AI squadmates.&lt;br/&gt;Reworked Side Mission System: how side missions work and pay out.&lt;br/&gt;Establish a FOB: setting up a forward operating base.&lt;br/&gt;Task Forces: the AI commander's assaults and how to steer them.&lt;br/&gt;Reworked Reputation System: how civilians react to what you do.&lt;br/&gt;Time Management System: when and how you can skip time.&lt;br/&gt;Hardcore Mode: hidden zones and intel-driven play.&lt;br/&gt;Subtitle System: radio callsigns and on-screen subtitles.&lt;br/&gt;Saving the Game: how to trigger a save.&lt;br/&gt;Death Penalty: why dying costs you, and how to play around it.&lt;br/&gt;MP Notes: what's shared and what's host-only in co-op.&lt;br/&gt;Credits: who made DUWS_T and its parts.&lt;br/&gt;Feedback / Bug Report: where to report problems.</Original>
                 <English>Everything you need to run a DUWS_T campaign is collected here. Each section is summarised below; scroll down for the full entry.&lt;br/&gt;&lt;br/&gt;About DUWS_T: what the mission is and how it builds on DUWS_X.&lt;br/&gt;Command Points (CP): the currency for units, vehicles and support.&lt;br/&gt;Army Power (AP): your army's strength and the enemy's attack waves.&lt;br/&gt;Economy System: the cash and intel you loot in the field.&lt;br/&gt;Capturing Zones: how to take enemy-held zones.&lt;br/&gt;Supports: where to buy and call support options.&lt;br/&gt;Reworked Support Options: every support type and what it costs.&lt;br/&gt;Arsenal System: the rebuilt loadout system and its limits.&lt;br/&gt;About Arsenal: why it's restricted and how to unlock it.&lt;br/&gt;Request Menu: requesting units, vehicles, missions and support.&lt;br/&gt;Recruiting Operatives: hiring AI squadmates.&lt;br/&gt;Reworked Side Mission System: how side missions work and pay out.&lt;br/&gt;Establish a FOB: setting up a forward operating base.&lt;br/&gt;Task Forces: the AI commander's assaults and how to steer them.&lt;br/&gt;Reworked Reputation System: how civilians react to what you do.&lt;br/&gt;Time Management System: when and how you can skip time.&lt;br/&gt;Hardcore Mode: hidden zones and intel-driven play.&lt;br/&gt;Subtitle System: radio callsigns and on-screen subtitles.&lt;br/&gt;Saving the Game: how to trigger a save.&lt;br/&gt;Death Penalty: why dying costs you, and how to play around it.&lt;br/&gt;MP Notes: what's shared and what's host-only in co-op.&lt;br/&gt;Credits: who made DUWS_T and its parts.&lt;br/&gt;Feedback / Bug Report: where to report problems.</English>
             </Key>
+            <Key ID="STR_DUWS_T_MAN_HOWTO">
+                <Original>How to Play</Original>
+                <English>How to Play</English>
+                <Chinesesimp>游戏玩法</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_FORCES">
+                <Original>Forces &amp; Support</Original>
+                <English>Forces &amp; Support</English>
+                <Chinesesimp>部队与支援</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_CIV">
+                <Original>Civilian System</Original>
+                <English>Civilian System</English>
+                <Chinesesimp>平民系统</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_CONFIG">
+                <Original>Configuration &amp; Options</Original>
+                <English>Configuration &amp; Options</English>
+                <Chinesesimp>配置与选项</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_CREDITS">
+                <Original>Credits &amp; Feedback</Original>
+                <English>Credits &amp; Feedback</English>
+                <Chinesesimp>制作与反馈</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_ECONOMY">
+                <Original>Economy &amp; Resources</Original>
+                <English>Economy &amp; Resources</English>
+                <Chinesesimp>经济与资源</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_REQFORCES">
+                <Original>Requesting Forces</Original>
+                <English>Requesting Forces</English>
+                <Chinesesimp>请求部队</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_SUPPARS">
+                <Original>Supports &amp; Arsenal</Original>
+                <English>Supports &amp; Arsenal</English>
+                <Chinesesimp>支援与军械库</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_CIV_BODY">
+                <Original>Civilians are optional and are switched on from the mission setup screen. In Environment Options, set Enable Civilians to a population type; the first option (Off) disables them entirely. The available population types depend on the civilian mod detected, with the vanilla Altis/Tanoa sets always available.&lt;br/&gt;&lt;br/&gt;When enabled, towns and zones are populated with non-combatants. At close range you can ask them for aid, request a toolkit, or recruit them to your side, and Protect Civilian side missions may appear. Harming or killing civilians costs you reputation, so watch your fire near populated areas.&lt;br/&gt;&lt;br/&gt;Two special modes replace the normal interaction with a survivor-evacuation objective: the Zombie Apocalypse (Ravage) and the WBK Incident. In these modes the weather is locked to permanent mist and your only civilian task is to recruit survivors and bring them back to base for extraction, each rescue awarding Command Points.</Original>
+                <English>Civilians are optional and are switched on from the mission setup screen. In Environment Options, set Enable Civilians to a population type; the first option (Off) disables them entirely. The available population types depend on the civilian mod detected, with the vanilla Altis/Tanoa sets always available.&lt;br/&gt;&lt;br/&gt;When enabled, towns and zones are populated with non-combatants. At close range you can ask them for aid, request a toolkit, or recruit them to your side, and Protect Civilian side missions may appear. Harming or killing civilians costs you reputation, so watch your fire near populated areas.&lt;br/&gt;&lt;br/&gt;Two special modes replace the normal interaction with a survivor-evacuation objective: the Zombie Apocalypse (Ravage) and the WBK Incident. In these modes the weather is locked to permanent mist and your only civilian task is to recruit survivors and bring them back to base for extraction, each rescue awarding Command Points.</English>
+                <Chinesesimp>平民为可选内容，在任务设置界面开启。在环境选项中，将“启用平民”设为某种人群类型；第一个选项（关闭）会完全禁用平民。可用的人群类型取决于检测到的平民模组，原版阿尔蒂斯/塔诺亚人群始终可用。&lt;br/&gt;&lt;br/&gt;启用后，城镇和区域会有非战斗人员。近距离时你可以向他们请求援助、索取工具包，或将其招募到己方，并可能出现“保护平民”支线任务。伤害或杀死平民会损失声望，因此在有人区域请注意火力。&lt;br/&gt;&lt;br/&gt;两种特殊模式会以幸存者撤离目标取代常规互动：丧尸末日（Ravage）与WBK事件。在这些模式中天气锁定为永久薄雾，你对平民的唯一任务是招募幸存者并带回基地撤离，每次营救都会奖励指挥点。</Chinesesimp>
+            </Key>
             <Key ID="STR_DUWS_T_getwuiuy">
                 <German>Feedback/Bug Reports</German>
                 <Spanish>Retroalimentación/Reporte de bugs</Spanish>
