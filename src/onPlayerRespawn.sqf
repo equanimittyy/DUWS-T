@@ -76,7 +76,7 @@ player setVariable ["DUWS_disguiseMenu_actionAdded", nil];
     { [] spawn fnc_disguise_menu; },
     {},
     [],
-    1.5,
+    1,
     0,
     false,
     false

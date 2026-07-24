@@ -491,7 +491,7 @@ if (isNil {player getVariable "DUWS_disguiseMenu_actionAdded"}) then {
         { [] spawn fnc_disguise_menu; },
         {},
         [],
-        1.5,
+        1,
         0,
         false,
         false
