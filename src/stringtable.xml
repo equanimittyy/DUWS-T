@@ -2097,10 +2097,6 @@
                 <Original>Disguise broken: Too close to an enemy zone center</Original>
                 <Chinesesimp>伪装暴露：距离战区中心过近。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_BINOCULAR">
-                <Original>Disguise broken: Binoculars in hand</Original>
-                <Chinesesimp>伪装暴露：拿着望远镜。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_NVG">
                 <Original>Disguise broken: Night vision goggles detected</Original>
                 <Chinesesimp>伪装暴露：佩戴夜视仪。</Chinesesimp>

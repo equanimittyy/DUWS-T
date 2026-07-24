@@ -113,7 +113,6 @@ _player setVariable ["DUWS_disguise_validVests", _civVests];
 _player setVariable ["DUWS_disguise_validHeadgear", _civHeadgear];
 _player setVariable ["DUWS_disguise_validBackpacks", _civBackpacks];
 _player setVariable ["DUWS_disguise_civilianVehicles", _civilianVehicles];
-_player setVariable ["DUWS_disguise_myBinocular", binocular _player];
 
 ["weizhuang", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_DISGUISE_ACTIVATED_DESC"]] remoteExec ["BIS_fnc_showNotification", _player];
 [localize "STR_DUWS_T_DISGUISE_SUCCESS_HINT"] remoteExec ["hint", _player];
@@ -168,12 +167,7 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
                 ["STR_DUWS_T_DISGUISE_BROKEN_WEAPON"] call _fnc_breakDisguise;
             };
             
-            // 2. 手持望远镜
-            private _currentWeapon = currentWeapon _player;
-            private _myBinocular = _player getVariable ["DUWS_disguise_myBinocular", ""];
-            if (_myBinocular != "" && _currentWeapon == _myBinocular) exitWith {
-                ["STR_DUWS_T_DISGUISE_BROKEN_BINOCULAR"] call _fnc_breakDisguise;
-            };
+            // 2. 手持望远镜 ———— 已移除 ————
             
             // 3. 夜视仪
             private _assigned = assignedItems _player;
