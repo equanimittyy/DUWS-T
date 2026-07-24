@@ -1585,6 +1585,10 @@
                 <English>Vehicle Customization</English>
                 <Chinese>载具改装</Chinese>
             </Key>
+            <Key ID="STR_DUWS_T_VEHICLE_RECYCLING">
+                <English>Vehicle Recycling</English>
+                <Chinese>载具回收</Chinese>
+            </Key>
             <Key ID="STR_DUWS_T_MENU_SELECT">
                 <English>Select</English>
                 <Chinese>选择</Chinese>

@@ -4,7 +4,8 @@
     place of a cluster of scroll-wheel actions.
 
     Call:  ["<title>", [[_label, _code, _args, _color], ...]] call fnc_open_action_menu
-      _label  STRING  row text (structured-text markup allowed)
+      _label  STRING  row text; any <t> markup is stripped (listbox rows show it
+                      literally), so colour the row via _color instead
       _code   CODE    run as (_args call _code) when the row is chosen
       _args   ANY     optional, default []
       _color  ARRAY   optional [r,g,b,a] applied to the row
@@ -35,9 +36,18 @@ private _lb = _display ctrlCreate ["RscListBox", 9502];
 _lb ctrlSetPosition [0.31, 0.28, 0.38, 0.30];
 _lb ctrlCommit 0;
 
+// Several source strings bake in <t color=...> markup, harmless in a scroll
+// action but shown as literal tags in a listbox row. Strip tags for display.
+private _fnc_stripTags = {
+    params ["_s"];
+    while { (_s find "<") >= 0 && { (_s find ">") > (_s find "<") } } do {
+        _s = (_s select [0, _s find "<"]) + (_s select [(_s find ">") + 1]);
+    };
+    _s
+};
 {
     _x params [["_label", ""], ["_code", {}], ["_args", []], ["_color", []]];
-    private _i = _lb lbAdd _label;
+    private _i = _lb lbAdd ([_label] call _fnc_stripTags);
     if (count _color == 4) then { _lb lbSetColor [_i, _color]; };
 } forEach _entries;
 _lb lbSetCurSel 0;
