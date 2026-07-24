@@ -950,25 +950,11 @@
                 <English>Air NO / Tanks NO</English>
             </Key>
             <Key ID="STR_DUWS_T_ow2fwl24">
-                <German>BLUFOR Klassennamen Fehler. EIGENE BLUFOR FRAKTION FEHLGESCHLAGEN. Überprüfe die Logs und starte die Mission neu.</German>
-                <Spanish>BLUFOR ClassName error. Facción BLUFOR personalizada falló</Spanish>
-                <Chinesesimp>蓝方类名错误。蓝方自定义阵营失败。检查日志并重新开始任务。</Chinesesimp>
-                <Original>BLUFOR ClassName error.  BLUFOR CUSTOM FACTION FAILED.  Check the log and Restart the Mission</Original>
-                <English>BLUFOR ClassName error.  BLUFOR CUSTOM FACTION FAILED.  Check the log and Restart the Mission</English>
-            </Key>
-            <Key ID="STR_DUWS_T_1vnq5jb7">
-                <German>OPFOR Klassennamen Fehler. EIGENE OPFOR FRAKTION FEHLGESCHLAGEN. Überprüfe die Logs und starte die Mission neu.</German>
-                <Spanish>OPFOR ClassName error. Facción OPFOR personalizada falló.</Spanish>
-                <Chinesesimp>敌方类名错误。敌方自定义阵营失败。检查日志并重新开始任务。</Chinesesimp>
-                <Original>OPFOR ClassName error.  OPFOR CUSTOM FACTION FAILED.  Check the log and Restart the Mission</Original>
-                <English>OPFOR ClassName error.  OPFOR CUSTOM FACTION FAILED.  Check the log and Restart the Mission</English>
-            </Key>
-            <Key ID="STR_DUWS_T_customfaction_missing">
-                <German>Fehlende erforderliche Fraktionseinträge: %1</German>
-                <Spanish>Faltan entradas de facción requeridas: %1</Spanish>
-                <Chinesesimp>缺少必需的阵营条目：%1</Chinesesimp>
-                <Original>Missing required faction entries: %1</Original>
-                <English>Missing required faction entries: %1</English>
+                <German>Fehlende oder ungültige Fraktionseinträge: %1</German>
+                <Spanish>Entradas de facción faltantes o no válidas: %1</Spanish>
+                <Chinesesimp>缺失或无效的阵营条目：%1</Chinesesimp>
+                <Original>Missing or invalid faction entries: %1</Original>
+                <English>Missing or invalid faction entries: %1</English>
             </Key>
             <Key ID="STR_DUWS_T_ex41rpdu">
                 <German>Tropisch</German>

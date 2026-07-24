@@ -1,7 +1,7 @@
 // Parse pasted custom-faction text into ["<var> = <class>", ...] assignment
-// fragments, then report which required faction keys the paste failed to define.
-// Shared by the paste screen's submit validation (client) and the deferred faction
-// build (server).
+// fragments, then report which required faction keys the paste left missing or
+// pointing at a class that doesn't exist. Shared by the paste screen's submit
+// validation (client) and the deferred faction build (server).
 //
 // Side effect: compiling the fragments assigns the faction globals. That is the
 // intent server-side; on the client it is a transient pre-check, overwritten when
@@ -10,10 +10,11 @@
 // a misspelled key (blufor_SOLDER_X) leaves its canonical name (blufor_SOLDIER_X)
 // cleared, so it is reported missing rather than silently accepted.
 //
-// Returns [_pairs, _valid, _missing]:
+// Returns [_pairs, _valid, _bad]:
 //   _pairs   - compiled assignment fragments (consumed by the server build)
-//   _valid   - true when no required key is missing
-//   _missing - full names of required keys left unset (e.g. "blufor_SOLDIER_X")
+//   _valid   - true when every required key is set to a class that exists
+//   _bad     - full names of required keys that are missing or resolve to a
+//              non-existent class (e.g. "blufor_SOLDIER_X")
 
 params ["_side", "_text"];
 
@@ -56,15 +57,18 @@ _pairs = _pairs select { !(["/", _x] call BIS_fnc_inString) };
 { missionNamespace setVariable [_x, ""]; } forEach _requiredKeys;
 { call compile _x; } forEach _pairs;
 
-// "Set" = a non-empty string or a non-empty array (faction authors may list
-// several classnames for a role, as the AutoDetect path does).
-private _fnc_isSet = {
+// A key is OK if it holds at least one classname and every classname it holds
+// exists (a role may be a single class or an array of classes, as AutoDetect does).
+// An unset key reads as "" here, which fails the class check -> reported as bad.
+private _fnc_isOk = {
     private _v = missionNamespace getVariable [_this, ""];
-    if (_v isEqualType []) exitWith { count _v > 0 };
-    (_v isEqualType "") && {_v != ""}
+    private _classes = if (_v isEqualType []) then {_v} else {[_v]};
+    (count _classes > 0) && {(_classes findIf {
+        !(_x isEqualType "") || {_x isEqualTo ""} || {!isClass (configFile >> "CfgVehicles" >> _x)}
+    }) < 0}
 };
 
-private _missing = _requiredKeys select { !(_x call _fnc_isSet) };
-private _valid = _missing isEqualTo [];
+private _bad = _requiredKeys select { !(_x call _fnc_isOk) };
+private _valid = _bad isEqualTo [];
 
-[_pairs, _valid, _missing]
+[_pairs, _valid, _bad]
