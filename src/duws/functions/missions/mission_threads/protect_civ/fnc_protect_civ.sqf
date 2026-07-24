@@ -225,7 +225,10 @@ Mission_Failed = false;
         // 平民死亡 → 失败
         [_taskID, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, true];
         // Reputation is a civilian-system currency: skip its change (and value notification) when off.
-        if (CIV_PRESENCE != "NONE") then { Player_Reputation = Player_Reputation - 1; };
+        if (CIV_PRESENCE != "NONE") then {
+            Player_Reputation = Player_Reputation - 1;
+            publicVariable "Player_Reputation";
+        };
         ["info", [localize "STR_DUWS_T_cycuqbvj", localize "STR_DUWS_T_ayhemuj4"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
         if (CIV_PRESENCE != "NONE") then {
             sleep 5;
