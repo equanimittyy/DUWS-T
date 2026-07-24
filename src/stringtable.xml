@@ -31,11 +31,11 @@
                 <Chinesesimp>是</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_x4zs3lsg0">
-                <German>Nein (Standard)</German>
-                <Spanish>No (Predeterminado)</Spanish>
-                <Chinesesimp>否 (默认)</Chinesesimp>
-                <Original>No (Default)</Original>
-                <English>No (Default)</English>
+                <German>Nein</German>
+                <Spanish>No</Spanish>
+                <Chinesesimp>否</Chinesesimp>
+                <Original>No</Original>
+                <English>No</English>
             </Key>
             <Key ID="STR_DUWS_T_x4zs3lsg1">
                 <German>Nein</German>
@@ -45,11 +45,11 @@
                 <English>No</English>
             </Key>
             <Key ID="STR_DUWS_T_x4zs3lsg2">
-                <German>Ja (Standard)</German>
-                <Spanish>Sí (Predeterminado)</Spanish>
-                <Chinesesimp>是 (默认)</Chinesesimp>
-                <Original>Yes (Default)</Original>
-                <English>Yes (Default)</English>
+                <German>Ja</German>
+                <Spanish>Sí</Spanish>
+                <Chinesesimp>是</Chinesesimp>
+                <Original>Yes</Original>
+                <English>Yes</English>
             </Key>
             <Key ID="STR_DUWS_T_inson">
                 <German>Ein</German>
@@ -59,18 +59,18 @@
                 <English>On</English>
             </Key>
             <Key ID="STR_DUWS_T_insoff">
-                <German>Aus (Standard)</German>
-                <Spanish>Desactivado (Predeterminado)</Spanish>
-                <Chinesesimp>关闭 (默认)</Chinesesimp>
-                <Original>Off (Default)</Original>
-                <English>Off (Default)</English>
+                <German>Aus</German>
+                <Spanish>Desactivado</Spanish>
+                <Chinesesimp>关闭</Chinesesimp>
+                <Original>Off</Original>
+                <English>Off</English>
             </Key>
             <Key ID="STR_DUWS_T_civoff">
-                <German>Aus (Standard)</German>
-                <Spanish>Desactivado (Predeterminado)</Spanish>
-                <Chinesesimp>关闭 (默认)</Chinesesimp>
-                <Original>Off (Default)</Original>
-                <English>Off (Default)</English>
+                <German>Aus</German>
+                <Spanish>Desactivado</Spanish>
+                <Chinesesimp>关闭</Chinesesimp>
+                <Original>Off</Original>
+                <English>Off</English>
             </Key>
             <Key ID="STR_DUWS_T_inssupport">
                 <German>Diese Unterstützungsoption ist im Aufständischen-Modus nicht verfügbar.</German>
@@ -108,11 +108,11 @@
                 <English>40 (Not recommended)</English>
             </Key>
             <Key ID="STR_DUWS_T_8gqzfdui">
-                <German>10   (max. empfohlen)</German>
-                <Spanish>10   (máximo recomendado)</Spanish>
+                <German>10 (max. empfohlen)</German>
+                <Spanish>10 (máximo recomendado)</Spanish>
                 <Chinesesimp>10(推荐最大)</Chinesesimp>
-                <Original>10   (max recommended)</Original>
-                <English>10   (max recommended)</English>
+                <Original>10 (max recommended)</Original>
+                <English>10 (max recommended)</English>
             </Key>
             <Key ID="STR_DUWS_T_blqblz86">
                 <German>3km (Gefecht)</German>
@@ -241,32 +241,32 @@
                 <English>No Visibility</English>
             </Key>
             <Key ID="STR_DUWS_T_xuanxiang1">
-                <German>500m (Standard)</German>
-                <Spanish>500m (Predeterminado)</Spanish>
-                <Chinesesimp>500m (默认)</Chinesesimp>
-                <Original>500m (Default)</Original>
-                <English>500m (Default)</English>
+                <German>500m</German>
+                <Spanish>500m</Spanish>
+                <Chinesesimp>500m</Chinesesimp>
+                <Original>500m</Original>
+                <English>500m</English>
             </Key>
             <Key ID="STR_DUWS_T_xuanxiang2">
-                <German>350m (Standard)</German>
-                <Spanish>350m (Predeterminado)</Spanish>
-                <Chinesesimp>350m (默认)</Chinesesimp>
-                <Original>350m (Default)</Original>
-                <English>350m (Default)</English>
+                <German>350m</German>
+                <Spanish>350m</Spanish>
+                <Chinesesimp>350m</Chinesesimp>
+                <Original>350m</Original>
+                <English>350m</English>
             </Key>
             <Key ID="STR_DUWS_T_xuanxiang3">
-                <German>4 (Standard)</German>
-                <Spanish>4 (Predeterminado)</Spanish>
-                <Chinesesimp>4 (默认)</Chinesesimp>
-                <Original>4 (Default)</Original>
-                <English>4 (Default)</English>
+                <German>4</German>
+                <Spanish>4</Spanish>
+                <Chinesesimp>4</Chinesesimp>
+                <Original>4</Original>
+                <English>4</English>
             </Key>
             <Key ID="STR_DUWS_T_xuanxiang4">
-                <German>15km (Standard)</German>
-                <Spanish>15km (Predeterminado)</Spanish>
-                <Chinesesimp>15km (默认)</Chinesesimp>
-                <Original>15km (Default)</Original>
-                <English>15km (Default)</English>
+                <German>15km</German>
+                <Spanish>15km</Spanish>
+                <Chinesesimp>15km</Chinesesimp>
+                <Original>15km</Original>
+                <English>15km</English>
             </Key>
             <Key ID="STR_DUWS_T_xuanxiang5">
                 <German>400 (Einfacher)</German>
@@ -311,18 +311,18 @@
                 <English>10 (Hardest)</English>
             </Key>
             <Key ID="STR_DUWS_T_xuanxiang11">
-                <German>50 (Standard)</German>
-                <Spanish>50 (Predeterminado)</Spanish>
-                <Chinesesimp>50 (默认)</Chinesesimp>
-                <Original>50 (Default)</Original>
-                <English>50 (Default)</English>
+                <German>50</German>
+                <Spanish>50</Spanish>
+                <Chinesesimp>50</Chinesesimp>
+                <Original>50</Original>
+                <English>50</English>
             </Key>
             <Key ID="STR_DUWS_T_xuanxiang12">
-                <German>80 (Standard)</German>
-                <Spanish>80 (Predeterminado)</Spanish>
-                <Chinesesimp>80 (默认)</Chinesesimp>
-                <Original>80 (Default)</Original>
-                <English>80 (Default)</English>
+                <German>80</German>
+                <Spanish>80</Spanish>
+                <Chinesesimp>80</Chinesesimp>
+                <Original>80</Original>
+                <English>80</English>
             </Key>
             <Key ID="STR_DUWS_T_xuanxiang13">
                 <German>Normal (Standard)</German>
@@ -337,6 +337,13 @@
                 <Chinesesimp>较多 (困难/会引起卡顿)</Chinesesimp>
                 <Original>More (Hard/Causes Lag)</Original>
                 <English>More (Hard/Causes Lag)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_default_suffix">
+                <German>(Standard)</German>
+                <Spanish>(Predeterminado)</Spanish>
+                <Chinesesimp>(默认)</Chinesesimp>
+                <Original>(Default)</Original>
+                <English>(Default)</English>
             </Key>
             <Key ID="STR_DUWS_T_i565mofh">
                 <German>DEFINIERE DIE PARAMETER FÜR DEINE KAMPAGNE</German>

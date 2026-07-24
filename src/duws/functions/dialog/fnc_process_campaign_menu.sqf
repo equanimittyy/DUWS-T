@@ -207,46 +207,55 @@ switch (_index) do
 _index = lbCurSel 2104;
 switch (_index) do
 {
-
-	case index_amount_cp_400:
-    {
-    commandpointsblu1 = 400
-    };
-
-	case index_amount_cp_200:
-    {
-    commandpointsblu1 = 200
-    };
-
-	case index_amount_cp_100:
-    {
-    commandpointsblu1 = 100
-    };
-
+	case index_amount_cp_0:   { commandpointsblu1 = 0 };
+	case index_amount_cp_20:  { commandpointsblu1 = 20 };
+	case index_amount_cp_50:  { commandpointsblu1 = 50 };
+	case index_amount_cp_100: { commandpointsblu1 = 100 };
+	case index_amount_cp_200: { commandpointsblu1 = 200 };
+	case index_amount_cp_300: { commandpointsblu1 = 300 };
+	case index_amount_cp_400: { commandpointsblu1 = 400 };
 };
 
 // CP REWARD
 _index = lbCurSel 2106;
 switch (_index) do {
-    case index_cp_reward_multiplier_one:{
+    case index_cp_reward_multiplier_1:{
         cp_reward_multiplier = 1;
     };
-    case index_cp_reward_multiplier_two:{
+    case index_cp_reward_multiplier_2:{
         cp_reward_multiplier = 2;
+    };
+    case index_cp_reward_multiplier_3:{
+        cp_reward_multiplier = 3;
+    };
+    case index_cp_reward_multiplier_4:{
+        cp_reward_multiplier = 4;
+    };
+    case index_cp_reward_multiplier_5:{
+        cp_reward_multiplier = 5;
     };
 };
 
 // CP DEATH PENALTY
 _index = lbCurSel 2107;
 switch (_index) do {
-    case index_cp_death_penalty_five:{
+    case index_cp_death_penalty_0:{
+        DUWSMP_CP_death_cost = 0;
+    };
+    case index_cp_death_penalty_1:{
+        DUWSMP_CP_death_cost = 1;
+    };
+    case index_cp_death_penalty_2:{
+        DUWSMP_CP_death_cost = 2;
+    };
+    case index_cp_death_penalty_3:{
+        DUWSMP_CP_death_cost = 3;
+    };
+    case index_cp_death_penalty_4:{
+        DUWSMP_CP_death_cost = 4;
+    };
+    case index_cp_death_penalty_5:{
         DUWSMP_CP_death_cost = 5;
-    };
-    case index_cp_death_penalty_eight:{
-        DUWSMP_CP_death_cost = 8;
-    };
-    case index_cp_death_penalty_ten:{
-        DUWSMP_CP_death_cost = 10;
     };
 };
 
@@ -280,6 +289,11 @@ switch (_index) do
     WARCOM_blufor_ap = 150;
     };
 
+	case index_blufor_ap_170:
+    {
+    WARCOM_blufor_ap = 170;
+    };
+
 	case index_blufor_ap_200:
     {
     WARCOM_blufor_ap = 200;
@@ -291,6 +305,11 @@ switch (_index) do
 _index = lbCurSel 2109;
 switch (_index) do
 {
+    case index_opfor_ap_10:
+    {
+    WARCOM_opfor_ap = 10;
+    };
+
     case index_opfor_ap_50:
     {
     WARCOM_opfor_ap = 50;
@@ -304,6 +323,11 @@ switch (_index) do
     case index_opfor_ap_110:
     {
     WARCOM_opfor_ap = 110;
+    };
+
+	case index_opfor_ap_150:
+    {
+    WARCOM_opfor_ap = 150;
     };
 
 	case index_opfor_ap_170:
@@ -418,6 +442,11 @@ switch (_index) do
 _index = lbCurSel 2113;
 switch (_index) do
 {
+    case index_enemyunit_multiplier_1:
+    {
+    enemyunitMultiplier = 1;
+    };
+
     case index_enemyunit_multiplier_2:
     {
     enemyunitMultiplier = 2;

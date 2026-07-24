@@ -48,9 +48,9 @@ switch (_index) do {
 };
 
 // CIVILIAN MAX SPAWN PER VISIT
-private _civSpawnValues = [20, 35, 50, 65, 80];
+private _civSpawnValues = [5, 10, 20, 35, 50, 65, 80];
 private _index = lbCurSel 2102;
-private _selectedValue = 50; // 默认
+private _selectedValue = 35; // 默认
 if (_index >= 0 && _index < count _civSpawnValues) then {
     _selectedValue = _civSpawnValues select _index;
 };

@@ -1,6 +1,14 @@
 _handle = createDialog "startup_dialog";
 waitUntil {dialog};
 
+// Marks a combo's default entry with a localised "(Default)" suffix at runtime, not
+// in the stringtable, so shared Yes/No labels stay unchanged elsewhere.
+private _setDefault = {
+    params ["_idc", "_i"];
+    lbSetCurSel [_idc, _i];
+    lbSetText [_idc, _i, (lbText [_idc, _i]) + " " + (localize "STR_DUWS_T_default_suffix")];
+};
+
 // WEATHER TYPE
 index_weather_type_tropical = lbAdd [2100, localize "STR_DUWS_T_ex41rpdu"];
 index_weather_type_arid = lbAdd [2100, localize "STR_DUWS_T_jf8jtvt7"];
@@ -9,43 +17,43 @@ index_weather_type_temperate_cold = lbAdd [2100, localize "STR_DUWS_T_jr6krtcn"]
 index_weather_type_mediterranean = lbAdd [2100, localize "STR_DUWS_T_1777ggdk"];
 index_weather_type_varied = lbAdd [2100, localize "STR_DUWS_T_pa387ndd"];
 index_weather_type_disable = lbAdd [2100, localize "STR_DUWS_T_6dgte6s0"];
-lbSetCurSel [2100, index_weather_type_disable];
+[2100, index_weather_type_disable] call _setDefault;
 
 // TIME OF DAY
 time_of_day_dawn = lbAdd [2101, localize "STR_DUWS_T_4hmx1wzd"];
 time_of_day_noon = lbAdd [2101, localize "STR_DUWS_T_95vrzwsq"];
 time_of_day_evening = lbAdd [2101, localize "STR_DUWS_T_pshlpqdy"];
 time_of_day_midnite = lbAdd [2101, localize "STR_DUWS_T_wmhmoeqt"];
-lbSetCurSel [2101, time_of_day_dawn];
+[2101, time_of_day_dawn] call _setDefault;
 
 // CIVILIAN MAX SPAWN PER VISIT
-// 选项值：20, 35, 50, 65, 80，默认 35
-private _civSpawnValues = [20, 35, 50, 65, 80];
+// 选项值：5, 10, 20, 35, 50, 65, 80，默认 35
+private _civSpawnValues = [5, 10, 20, 35, 50, 65, 80];
 {
     private _index = lbAdd [2102, format ["%1", _x]];
-    if (_x == 35) then { lbSetCurSel [2102, _index]; };
+    if (_x == 35) then { [2102, _index] call _setDefault; };
 } forEach _civSpawnValues;
 
 // FOB FAST TRAVEL
 index_fast_travel_true = lbAdd [2103, localize "STR_DUWS_T_x4zs3lsg2"];
 index_fast_travel_false = lbAdd [2103, localize "STR_DUWS_T_x4zs3lsg1"];
-lbSetCurSel [2103, index_fast_travel_true];
+[2103, index_fast_travel_true] call _setDefault;
 
 // ZEUS PARAMS
 index_zeus_params_full = lbAdd [2104, localize "STR_DUWS_T_m4bqnyut"];
 index_zeus_params_blufor = lbAdd [2104, localize "STR_DUWS_T_nque25op"];
 index_zeus_params_none = lbAdd [2104, localize "STR_DUWS_T_3i1vcc0n"];
-lbSetCurSel [2104, index_zeus_params_blufor];
+[2104, index_zeus_params_blufor] call _setDefault;
 
 // APOCALYPSE MODE
 index_apocalypse_true = lbAdd [2105, localize "STR_DUWS_T_vk37aebo"];
 index_apocalypse_false = lbAdd [2105, localize "STR_DUWS_T_x4zs3lsg0"];
-lbSetCurSel [2105, index_apocalypse_false];
+[2105, index_apocalypse_false] call _setDefault;
 
 // ========== 焦土模式（替换 VCOM） ==========
 index_scorched_earth_false = lbAdd [2106, localize "STR_DUWS_T_x4zs3lsg0"];
 index_scorched_earth_true = lbAdd [2106, localize "STR_DUWS_T_vk37aebo"];
-lbSetCurSel [2106, index_scorched_earth_false];
+[2106, index_scorched_earth_false] call _setDefault;
 // =========================================
 
 // TIME MULITPLIER
@@ -57,12 +65,12 @@ index_timemult_16 = lbAdd [2107, "16x"];
 index_timemult_24 = lbAdd [2107, "24x"];
 index_timemult_32 = lbAdd [2107, "32x"];
 index_timemult_60 = lbAdd [2107, "60x"];
-lbSetCurSel [2107, index_timemult_1];
+[2107, index_timemult_1] call _setDefault;
 
 // ENABLE SIMPLE ZONES
 index_simpzones_false = lbAdd [2108, localize "STR_DUWS_T_x4zs3lsg0"];
 index_simpzones_true = lbAdd [2108, localize "STR_DUWS_T_vk37aebo"];
-lbSetCurSel [2108, index_simpzones_false];
+[2108, index_simpzones_false] call _setDefault;
 
 // ENABLE CIVILIANS
 index_civtype_off = lbAdd [2109, localize "STR_DUWS_T_civoff"];
@@ -111,17 +119,17 @@ missionNamespace setVariable ["index_civtype_wbk", _index_wbk];
 lbSetColor [2109, _index_ravage, [1,0,0,1]];
 missionNamespace setVariable ["index_civtype_ravage", _index_ravage];
 
-lbSetCurSel [2109, index_civtype_off];
+[2109, index_civtype_off] call _setDefault;
 
 // ENABLE HARDCORE MODE
 index_hardcore_false = lbAdd [2110, localize "STR_DUWS_T_x4zs3lsg0"];
 index_hardcore_true = lbAdd [2110, localize "STR_DUWS_T_vk37aebo"];
-lbSetCurSel [2110, index_hardcore_false];
+[2110, index_hardcore_false] call _setDefault;
 
 // 原来的限制军火库代码替换为叛军模式
 index_insurgent_off = lbAdd [2111, localize "STR_DUWS_T_insoff"];
 index_insurgent_on = lbAdd [2111, localize "STR_DUWS_T_inson"];
-lbSetCurSel [2111, index_insurgent_off];
+[2111, index_insurgent_off] call _setDefault;
 // 将两个选项的文字颜色设为红色
 lbSetColor [2111, index_insurgent_off, [1,0,0,1]];
 lbSetColor [2111, index_insurgent_on, [1,0,0,1]];

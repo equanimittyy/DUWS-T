@@ -114,3 +114,21 @@ eats the tag as an element.
 display order and calls `reverse` once before the `forEach`, so the source reads the way
 the player sees it and only that array changes when reordering. Reuse that pattern for any
 new diary subject rather than hand-ordering `createDiaryRecord` calls.
+
+## `for "_i" from A to N step 1` runs `floor(N)+1` times, truncating a fractional bound
+
+**The counter advances in whole steps while `counter <= N`, so a fractional `N` (e.g.
+`1.5`) stops at `floor N` and iterates exactly as many times as `to floor N` would. A
+fractional value fed straight into such a loop as a "multiplier" is silently rounded
+down — `1.5` behaves identically to `1`.**
+
+The endpoint is inclusive-by-comparison, not by count; there is no partial iteration, and
+no error or warning marks the truncation. It reads as if the fractional setting works while
+producing the integer result.
+
+**How to apply:** resolve a fractional multiplier to an integer *before* the loop — e.g.
+`_n = floor _m; if (random 1 < (_m - _n)) then { _n = _n + 1 }` for probabilistic
+rounding — then loop `to _n`. The OPFOR unit-multiplier options are kept integer
+(`enemyunitMultiplier` 1/2/3) for this reason: the enemy-spawn builders in
+`src/duws/functions/init_zones/fnc_createop*.sqf` loop `for "_i" from 0 to
+enemyunitMultiplier`, so a fractional option there would not change the unit count.
