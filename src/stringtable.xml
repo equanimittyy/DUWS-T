@@ -738,11 +738,11 @@
                 <English>Select your FACTIONS above then select HQ PLACEMENT</English>
             </Key>
             <Key ID="STR_DUWS_T_civamount2">
-                <German>Anzahl der spawnenden Zivilisten, wenn der Spieler eine Stadt betritt (Höhere Werte beeinträchtigen die Leistung stärker)</German>
-                <Chinesesimp>玩家进入城镇时，平民的生成数量(越高越影响性能)</Chinesesimp>
-                <Spanish>Cantidad de civiles generados al entrar el jugador en un pueblo (Mayor valor, mayor impacto en el rendimiento)</Spanish>
-                <Original>Number of civilians spawned when the player enters a town (Higher values impact performance)</Original>
-                <English>Number of civilians spawned when the player enters a town (Higher values impact performance)</English>
+                <German>Anzahl der spawnenden Zivilisten, wenn der Spieler eine Stadt betritt (Höhere Werte beeinträchtigen die Leistung stärker). Ohne Wirkung, wenn das Zivilisten / Ansehenssystem auf AUS steht.</German>
+                <Chinesesimp>玩家进入城镇时，平民的生成数量(越高越影响性能)。当“平民及声望系统”关闭时，此项无效。</Chinesesimp>
+                <Spanish>Cantidad de civiles generados al entrar el jugador en un pueblo (Mayor valor, mayor impacto en el rendimiento). No tiene efecto cuando el Sistema de civiles y reputación está desactivado.</Spanish>
+                <Original>Number of civilians spawned when the player enters a town (Higher values impact performance). Has no effect when the Civilian / Reputation System is set to OFF.</Original>
+                <English>Number of civilians spawned when the player enters a town (Higher values impact performance). Has no effect when the Civilian / Reputation System is set to OFF.</English>
             </Key>
             <Key ID="STR_DUWS_T_civamount">
                 <German>Zivilistendichte</German>
