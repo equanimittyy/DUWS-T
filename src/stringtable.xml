@@ -1673,9 +1673,9 @@
                 <Chinesesimp>载具改装站(5CP)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_repair_vehicle">
-                <Original>Repair and Refuel Vehicle (2 CP)</Original>
-                <English>Repair and Refuel Vehicle (2 CP)</English>
-                <Chinesesimp>修理并加油 (2CP)</Chinesesimp>
+                <Original>Repair and Refuel Vehicle</Original>
+                <English>Repair and Refuel Vehicle</English>
+                <Chinesesimp>修理并加油</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_repair_no_vehicle">
                 <Original>No vehicle on the helipad</Original>
