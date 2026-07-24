@@ -1491,6 +1491,10 @@
                 <English>Teleport to Killhouse (B)</English>
                 <Chinese>传送至入口 (B)</Chinese>
             </Key>
+            <Key ID="STR_DUWS_T_KILLHOUSE_CONTROLS">
+                <English>Killhouse Controls</English>
+                <Chinese>训练场控制</Chinese>
+            </Key>
             <Key ID="STR_DUWS_KILLHOUSE_ARRIVE">
     <English>Welcome to the high-altitude Killhouse.
     \nYou can train or take on challenges here. Completing challenges earns you CP.
@@ -1576,6 +1580,18 @@
             <Key ID="STR_DUWS_T_vehicle_pylons">
                 <English>Adjust Vehicle Pylons</English>
                 <Chinese>调整载具挂架</Chinese>
+            </Key>
+            <Key ID="STR_DUWS_T_VEHICLE_CUSTOMIZATION">
+                <English>Vehicle Customization</English>
+                <Chinese>载具改装</Chinese>
+            </Key>
+            <Key ID="STR_DUWS_T_MENU_SELECT">
+                <English>Select</English>
+                <Chinese>选择</Chinese>
+            </Key>
+            <Key ID="STR_DUWS_T_MENU_CLOSE">
+                <English>Close</English>
+                <Chinese>关闭</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_REDEPLOY_ACTION">
                 <Original>&lt;t color='#ff1111'&gt;Redeploy Base Units (2 CP)&lt;/t&gt;</Original>
@@ -1694,6 +1710,11 @@
                 <English>Quick gear up</English>
                 <German>Schnelles Ausrüsten</German>
                 <Spanish>Equipamiento rápido</Spanish>
+                <Chinesesimp>快速整备</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_QUICK_KITS">
+                <Original>Quick Kits</Original>
+                <English>Quick Kits</English>
                 <Chinesesimp>快速整备</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_CHANGE_TO">

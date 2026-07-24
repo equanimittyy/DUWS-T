@@ -1071,14 +1071,23 @@ killhouse_srv_cleanup = {
 };
 publicVariable "killhouse_srv_cleanup";
 
-// ========== 为多屏幕电脑添加交互动作 ==========
+// ========== 为多屏幕电脑添加交互菜单 ==========
 if (count _computerObjects > 0) then {
     {
-        // 动作1：随机生成目标
         [_x, [
-            "<t color='#00FF00'>" + localize "STR_DUWS_T_SPAWN_TARGETS" + "</t>",
+            "<t color='#00FF00'>" + localize "STR_DUWS_T_KILLHOUSE_CONTROLS" + "</t>",
             {
-                [] remoteExec ["killhouse_srv_spawn_targets", 2];
+                [localize "STR_DUWS_T_KILLHOUSE_CONTROLS", [
+                    [localize "STR_DUWS_T_SPAWN_TARGETS", { [] remoteExec ["killhouse_srv_spawn_targets", 2]; }, [], [0,1,0,1]],
+                    [localize "STR_DUWS_T_SPAWN_ENEMIES", { [] remoteExec ["killhouse_srv_spawn_enemies", 2]; }, [], [1,0,0,1]],
+                    [localize "STR_DUWS_T_CLEANUP",       { [] remoteExec ["killhouse_srv_cleanup", 2]; }, [], [1,1,0,1]],
+                    [localize "STR_DUWS_KILLHOUSE_EXIT_TRAINING", {
+                        private _respawnPos = getMarkerPos "respawn_west";
+                        if (_respawnPos isEqualTo [0,0,0]) then { _respawnPos = PosOfBLUHQ; };
+                        player setPos _respawnPos;
+                        hint localize "STR_DUWS_KILLHOUSE_EXIT_MSG";
+                    }, [], [1,0.533,0,1]]
+                ]] call fnc_open_action_menu;
             },
             nil,
             6,
@@ -1087,52 +1096,6 @@ if (count _computerObjects > 0) then {
             "",
             "true"
         ]] remoteExec ["addAction", 0];
-
-        // 动作2：随机生成敌人
-        [_x, [
-            "<t color='#FF0000'>" + localize "STR_DUWS_T_SPAWN_ENEMIES" + "</t>",
-            {
-                [] remoteExec ["killhouse_srv_spawn_enemies", 2];
-            },
-            nil,
-            6,
-            true,
-            true,
-            "",
-            "true"
-        ]] remoteExec ["addAction", 0];
-
-        // 动作3：清理场景
-        [_x, [
-            "<t color='#FFFF00'>" + localize "STR_DUWS_T_CLEANUP" + "</t>",
-            {
-                [] remoteExec ["killhouse_srv_cleanup", 2];
-            },
-            nil,
-            6,
-            true,
-            true,
-            "",
-            "true"
-        ]] remoteExec ["addAction", 0];
-
-        // 动作4：退出训练
-        [_x, [
-            "<t color='#FF8800'>" + localize "STR_DUWS_KILLHOUSE_EXIT_TRAINING" + "</t>",
-            {
-                private _respawnPos = getMarkerPos "respawn_west";
-                if (_respawnPos isEqualTo [0,0,0]) then { _respawnPos = PosOfBLUHQ; };
-                player setPos _respawnPos;
-                hint localize "STR_DUWS_KILLHOUSE_EXIT_MSG";
-            },
-            nil,
-            6,
-            true,
-            true,
-            "",
-            "true"
-        ]] remoteExec ["addAction", 0];
-
     } forEach _computerObjects;
 };
 
