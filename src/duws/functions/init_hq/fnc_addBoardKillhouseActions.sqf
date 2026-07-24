@@ -17,7 +17,7 @@ _board addAction [
         player setPosWorld _tp;
         hint localize "STR_DUWS_KILLHOUSE_ARRIVE";
     },
-    nil, 6, true, true, "", "true"
+    nil, 65, true, true, "", "true"
 ];
 _board addAction [
     "<t color='#00AAFF'>" + localize "STR_DUWS_KILLHOUSE_TELEPORT_B" + "</t>",
@@ -27,7 +27,7 @@ _board addAction [
         player setPosWorld _tp;
         hint localize "STR_DUWS_KILLHOUSE_ARRIVE";
     },
-    nil, 6, true, true, "", "true"
+    nil, 65, true, true, "", "true"
 ];
 
 // 添加基地快速移动动作（在白板地图上）

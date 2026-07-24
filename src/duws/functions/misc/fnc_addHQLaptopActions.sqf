@@ -14,7 +14,7 @@ if (!isNil {_laptop getVariable "laptop_actions_done"}) exitWith {};
 _laptop setVariable ["laptop_actions_done", true];
 
 // 添加招募菜单
-_laptop addAction [localize "STR_DUWS_T_vw32hahc", fnc_HQ_Request_Menu, "", 6, true, true, "", "_this == player"];
+_laptop addAction [localize "STR_DUWS_T_vw32hahc", fnc_HQ_Request_Menu, "", 100, true, true, "", "_this == player"];
 
 // 添加显示任务冷却
 _laptop addAction [

@@ -34,7 +34,7 @@ _actionAID = _crate addAction [
         [localize "STR_DUWS_T_QUICK_KITS", _entries] call fnc_open_action_menu;
     },
     nil,
-    6,
+    80,
     true,
     true,
     "",

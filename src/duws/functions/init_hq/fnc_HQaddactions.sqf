@@ -6,7 +6,7 @@ if (isMultiplayer) then {
     _hq setVariable ["HQ_actions_done", true];
     // ============================================
     if (support_armory_available) then {
-        bluHQ_object addaction [localize "STR_DUWS_T_160jkc3a",fnc_duws_Arsenal, [_this], 0, true, true, "", "_this == player"];
+        bluHQ_object addaction [localize "STR_DUWS_T_160jkc3a",fnc_duws_Arsenal, [_this], 90, true, true, "", "_this == player"];
     };
 
 if (support_halo_available) then {
@@ -18,9 +18,9 @@ if (support_halo_available) then {
 };
 
     "support_armory_available" addPublicVariableEventHandler {
-        bluHQ_object addaction [localize "STR_DUWS_T_160jkc3a",fnc_duws_Arsenal, [_this], 0, true, true, "", "_this == player"];
+        bluHQ_object addaction [localize "STR_DUWS_T_160jkc3a",fnc_duws_Arsenal, [_this], 90, true, true, "", "_this == player"];
         {
-            _x addaction [localize "STR_DUWS_T_160jkc3a",fnc_duws_Arsenal, [_this], 0, true, true, "", "_this == player"];
+            _x addaction [localize "STR_DUWS_T_160jkc3a",fnc_duws_Arsenal, [_this], 90, true, true, "", "_this == player"];
         } forEach (Array_of_FOBS);
         lbSetColor [2103, 5, [0, 1, 0, 1]];
     };

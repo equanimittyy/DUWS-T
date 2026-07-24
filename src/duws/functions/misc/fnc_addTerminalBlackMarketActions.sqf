@@ -21,7 +21,7 @@ _terminal addAction [
         ]] call fnc_open_action_menu;
     },
     nil,
-    6,
+    85,
     true,
     true,
     "",
