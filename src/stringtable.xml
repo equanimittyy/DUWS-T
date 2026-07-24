@@ -2396,22 +2396,22 @@
                 <Chinesesimp>你的面部已随机更换为：%1</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ARSENAL_ENTER_TITLE">
-                <Original>军火库提示</Original>
+                <Original>Arsenal Notice</Original>
                 <English>Arsenal Notice</English>
                 <Chinesesimp>军火库提示</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ARSENAL_ENTER_DESC">
-                <Original>你已将 %1 丢弃在地上，请离开军火库后捡起。</Original>
+                <Original>You have dropped %1 on the ground. Please pick them up after leaving the arsenal</Original>
                 <English>You have dropped %1 on the ground. Please pick them up after leaving the arsenal</English>
                 <Chinesesimp>你已将 %1 丢弃在地上，请离开军火库后捡起。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_RESPAWN_LOSS_TITLE">
-                <Original>重生损失</Original>
+                <Original>Respawn Loss</Original>
                 <English>Respawn Loss</English>
                 <Chinesesimp>重生损失</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_RESPAWN_LOSS_DESC">
-                <Original>你在重生时损失了以下物品：%1</Original>
+                <Original>You lost the following on respawn: %1</Original>
                 <English>You lost the following on respawn: %1</English>
                 <Chinesesimp>你在重生时损失了以下物品：%1</Chinesesimp>
             </Key>
@@ -3394,17 +3394,17 @@
                 <Chinesesimp>"霸王1-1"收到，数据分析小组会好好看看它们的。干得漂亮。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_NO_ITEMS">
-                <Original>你没有可分析的情报物品！</Original>
+                <Original>You have no intel items to analyze!</Original>
                 <English>You have no intel items to analyze!</English>
                 <Chinesesimp>你没有可分析的情报物品！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_BROADCAST">
-                <Original>%1 分析了情报物品：%2</Original>
+                <Original>%1 analyzed intel items: %2</Original>
                 <English>%1 analyzed intel items: %2</English>
                 <Chinesesimp>%1 分析了情报物品：%2</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_HINT">
-                <Original>分析完成！获得 %1 CP。\n已分析物品：%2</Original>
+                <Original>Analysis complete! Gained %1 CP.\nAnalyzed items: %2</Original>
                 <English>Analysis complete! Gained %1 CP.\nAnalyzed items: %2</English>
                 <Chinesesimp>分析完成！获得 %1 CP。\n已分析物品：%2</Chinesesimp>
             </Key>
@@ -3500,7 +3500,7 @@
         </Container>
         <Container name="Black Market">
             <Key ID="STR_DUWS_T_BLACKMARKET_TITLE">
-                <Original>黑市</Original>
+                <Original>Black Market</Original>
                 <English>Black Market</English>
                 <Chinesesimp>黑市</Chinesesimp>
             </Key>
@@ -3510,37 +3510,37 @@
                 <Chinesesimp>物品已掉落在地面 (玩家没有充足的库存空间)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_BUY_GOGGLES">
-                <Original>购买随机面部装备 (1 纸币)</Original>
+                <Original>Buy Random Facewear (1 Money Roll)</Original>
                 <English>Buy Random Facewear (1 Money Roll)</English>
                 <Chinesesimp>购买随机面部装备 (1 纸币)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_BUY_PISTOL">
-                <Original>购买随机副手武器 (5 纸币)</Original>
+                <Original>Buy Random Sidearm (5 Money Rolls)</Original>
                 <English>Buy Random Sidearm (5 Money Rolls)</English>
                 <Chinesesimp>购买随机副手武器 (5 纸币)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_BUY_OPTIC">
-                <Original>购买随机瞄具 (5 纸币)</Original>
+                <Original>Buy Random Optic (5 Money Rolls)</Original>
                 <English>Buy Random Optic (5 Money Rolls)</English>
                 <Chinesesimp>购买随机瞄具 (5 纸币)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_BOUGHT_OPTIC">
-                <Original>%1 购买了瞄具：%2</Original>
+                <Original>%1 bought an optic: %2</Original>
                 <English>%1 bought an optic: %2</English>
                 <Chinesesimp>%1 购买了瞄具：%2</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_NO_MONEY">
-                <Original>你没有纸币，无法购买！</Original>
+                <Original>You don't have any money</Original>
                 <English>You don't have any money</English>
                 <Chinesesimp>你没有纸币，无法购买！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_NOT_ENOUGH_MONEY">
-                <Original>需要 %1 个纸币，你只有 %2 个</Original>
+                <Original>Need %1 money rolls; you have %2</Original>
                 <English>Need %1 money rolls; you have %2</English>
                 <Chinesesimp>需要 %1 个纸币，你只有 %2 个</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_BOUGHT_GOGGLES">
-                <Original>%1 购买了面部装备：%2</Original>
+                <Original>%1 bought facewear: %2</Original>
                 <English>%1 bought facewear: %2</English>
                 <Chinesesimp>%1 购买了面部装备：%2</Chinesesimp>
             </Key>
@@ -3550,7 +3550,7 @@
                 <Chinesesimp>这里是"霸王1-1"，战区的黑市刚刚派人送了点东西到总部。谁买的？...我是说，好品味。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_BOUGHT_PISTOL">
-                <Original>%1 购买了副手武器：%2</Original>
+                <Original>%1 bought a sidearm: %2</Original>
                 <English>%1 bought a sidearm: %2</English>
                 <Chinesesimp>%1 购买了副手武器：%2</Chinesesimp>
             </Key>
@@ -3585,71 +3585,71 @@
                 <Chinesesimp>你的小队因此获得了%1CP</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_KILL_CAR_TITLE">
-                <Original>敌军车辆被击毁</Original>
+                <Original>Enemy Vehicle Destroyed</Original>
                 <English>Enemy Vehicle Destroyed</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_CAR_MSG">
-                <Original>%1 的小队击毁了敌军车辆，获得了 %2 CP</Original>
+                <Original>%1's squad destroyed an enemy light vehicle and gained %2 CP</Original>
                 <English>%1's squad destroyed an enemy light vehicle and gained %2 CP</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_APC_TITLE">
-                <Original>敌军步战车被击毁</Original>
+                <Original>Enemy APC Destroyed</Original>
                 <English>Enemy APC Destroyed</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_APC_MSG">
-                <Original>%1 的小队刚刚干掉了敌方装甲车，获得 %2 CP</Original>
+                <Original>%1's squad destroyed an enemy APC and gained %2 CP</Original>
                 <English>%1's squad destroyed an enemy APC and gained %2 CP</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_TANK_TITLE">
-                <Original>敌军坦克被击毁</Original>
+                <Original>Enemy Tank Destroyed</Original>
                 <English>Enemy Tank Destroyed</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_TANK_MSG">
-                <Original>%1 的小队击毁了敌方的坦克，获得 %2 CP</Original>
+                <Original>%1's squad destroyed an enemy tank and gained %2 CP</Original>
                 <English>%1's squad destroyed an enemy tank and gained %2 CP</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_HELI_TITLE">
-                <Original>敌军直升机被击落</Original>
+                <Original>Enemy Helicopter Destroyed</Original>
                 <English>Enemy Helicopter Destroyed</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_HELI_MSG">
-                <Original>%1 的小队刚击落了敌方直升机，获得 %2 CP</Original>
+                <Original>%1's squad destroyed an enemy helicopter and gained %2 CP</Original>
                 <English>%1's squad destroyed an enemy helicopter and gained %2 CP</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_PLANE_TITLE">
-                <Original>敌军固定翼被击落</Original>
+                <Original>Enemy Plane Destroyed</Original>
                 <English>Enemy Plane Destroyed</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_PLANE_MSG">
-                <Original>一架敌方固定翼被%1的小队击毁，获得 %2 CP</Original>
+                <Original>%1's squad destroyed an enemy plane and gained %2 CP</Original>
                 <English>%1's squad destroyed an enemy plane and gained %2 CP</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_STREAK_TITLE">
-                <Original>连杀奖励</Original>
+                <Original>Kill Streak</Original>
                 <English>Kill Streak</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_STREAK_MSG">
-                <Original>%1 的小队累计击杀 %2 人，获得 %3 CP</Original>
+                <Original>%1's squad reached %2 kills and earned a %3 CP bonus!</Original>
                 <English>%1's squad reached %2 kills and earned a %3 CP bonus!</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_CAR_SUBTITLE">
-                <Original>击毁敌军车辆！</Original>
+                <Original>Enemy light vehicle down!</Original>
                 <English>Enemy light vehicle down!</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_APC_SUBTITLE">
-                <Original>击毁敌方装甲车！</Original>
+                <Original>Enemy APC down!</Original>
                 <English>Enemy APC down!</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_TANK_SUBTITLE">
-                <Original>敌方坦克被干掉了！</Original>
+                <Original>Tank destroyed!</Original>
                 <English>Tank destroyed!</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_HELI_SUBTITLE">
-                <Original>敌方直升机已击落！</Original>
+                <Original>Got one enemy choppa!</Original>
                 <English>Got one enemy choppa!</English>
             </Key>
             <Key ID="STR_DUWS_T_KILL_PLANE_SUBTITLE">
-                <Original>敌方固定翼已击毁！</Original>
+                <Original>Enemy plane down!</Original>
                 <English>Enemy plane down!</English>
             </Key>
             <Key ID="STR_DUWS_T_killconfirm">
@@ -7678,11 +7678,11 @@
                 <Chinesesimp>启用末日视觉效果并损坏所有建筑。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HORDE_TASK_TITLE">
-                <Original>防御总部</Original>
+                <Original>Defend HQ</Original>
                 <English>Defend HQ</English>
             </Key>
             <Key ID="STR_DUWS_T_HORDE_TASK_DESC">
-                <Original>大量僵尸正在向总部移动！准备防御！</Original>
+                <Original>A massive zombie horde is moving towards the HQ! Prepare to defend!</Original>
                 <English>A massive zombie horde is moving towards the HQ! Prepare to defend!</English>
             </Key>
             <Key ID="STR_DUWS_T_hordealert1">
@@ -8162,15 +8162,15 @@
                 <Spanish>Hilo de limpieza de misión agresivo iniciado — Este hilo eliminará todas las unidades BLUFOR y OPFOR y vehículos desocupados dentro del área de misión (excepto las unidades del escuadrón del jugador). Por favor, evacúa los objetos valiosos antes de la limpieza. Podrás continuar con la siguiente misión cuando termine el hilo de limpieza.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_MISSION_READY">
-                <Original>%1任务已就绪</Original>
+                <Original>%1 mission is ready</Original>
                 <English>%1 mission is ready</English>
             </Key>
             <Key ID="STR_DUWS_T_MISSION_READY1">
-                <Original>任务已就绪</Original>
+                <Original>mission is ready</Original>
                 <English>mission is ready</English>
             </Key>
             <Key ID="STR_DUWS_T_UNKNOWN_MISSION">
-                <Original>未知任务 %1</Original>
+                <Original>Unknown Mission %1</Original>
                 <English>Unknown Mission %1</English>
             </Key>
             <Key ID="STR_DUWS_T_shiyanxinggongneng">
@@ -8209,8 +8209,13 @@
                 <English>Your squad members have been fully Healed and Re-Armed</English>
             </Key>
             <Key ID="STR_DUWS_T_SHOW_MISSION_COOLDOWNS">
-                <Original>&lt;t color='#15ff00'&gt;显示任务冷却&lt;/t&gt;</Original>
+                <Original>&lt;t color='#15ff00'&gt;Show Mission Cooldowns&lt;/t&gt;</Original>
                 <English>&lt;t color='#15ff00'&gt;Show Mission Cooldowns&lt;/t&gt;</English>
+            </Key>
+            <Key ID="STR_DUWS_T_COOLDOWN_READY">
+                <Original>Ready</Original>
+                <English>Ready</English>
+                <Chinesesimp>就绪</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_sitrep">
                 <German>"Allseer" an alle Einheiten im Einsatzgebiet. Der Sitrep wurde an das Terminal hochgeladen.</German>

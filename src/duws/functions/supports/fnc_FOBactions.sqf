@@ -119,7 +119,11 @@ _fob addaction [
                 default { _missionName = format [localize "STR_DUWS_T_UNKNOWN_MISSION", _type]; };
             };
 
-            private _line = format ["%1: %2min%3sec", _missionName, _minutes, _seconds];
+            private _line = if (_remaining <= 0) then {
+                format ["%1: %2", _missionName, localize "STR_DUWS_T_COOLDOWN_READY"]
+            } else {
+                format ["%1: %2min%3sec", _missionName, _minutes, _seconds]
+            };
             _lines pushBack _line;
         } forEach _missionTypes;
 
