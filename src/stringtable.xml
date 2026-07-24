@@ -7837,11 +7837,6 @@
                 <English>How to Play</English>
                 <Chinesesimp>游戏玩法</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_MAN_FORCES">
-                <Original>Forces &amp; Support</Original>
-                <English>Forces &amp; Support</English>
-                <Chinesesimp>部队与支援</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_MAN_CIV">
                 <Original>Civilian System</Original>
                 <English>Civilian System</English>
@@ -7851,11 +7846,6 @@
                 <Original>Configuration &amp; Options</Original>
                 <English>Configuration &amp; Options</English>
                 <Chinesesimp>配置与选项</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_MAN_CREDITS">
-                <Original>Credits &amp; Feedback</Original>
-                <English>Credits &amp; Feedback</English>
-                <Chinesesimp>制作与反馈</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_MAN_ECONOMY">
                 <Original>Economy &amp; Resources</Original>
@@ -7877,6 +7867,46 @@
                 <English>Civilians are optional and are switched on from the mission setup screen. In Environment Options, set Enable Civilians to a population type; the first option (Off) disables them entirely. The available population types depend on the civilian mod detected, with the vanilla Altis/Tanoa sets always available.&lt;br/&gt;&lt;br/&gt;When enabled, towns and zones are populated with non-combatants. At close range you can ask them for aid, request a toolkit, or recruit them to your side, and Protect Civilian side missions may appear. Harming or killing civilians costs you reputation, so watch your fire near populated areas.&lt;br/&gt;&lt;br/&gt;Two special modes replace the normal interaction with a survivor-evacuation objective: the Zombie Apocalypse (Ravage) and the WBK Incident. In these modes the weather is locked to permanent mist and your only civilian task is to recruit survivors and bring them back to base for extraction, each rescue awarding Command Points.</English>
                 <Chinesesimp>平民为可选内容，在任务设置界面开启。在环境选项中，将“启用平民”设为某种人群类型；第一个选项（关闭）会完全禁用平民。可用的人群类型取决于检测到的平民模组，原版阿尔蒂斯/塔诺亚人群始终可用。&lt;br/&gt;&lt;br/&gt;启用后，城镇和区域会有非战斗人员。近距离时你可以向他们请求援助、索取工具包，或将其招募到己方，并可能出现“保护平民”支线任务。伤害或杀死平民会损失声望，因此在有人区域请注意火力。&lt;br/&gt;&lt;br/&gt;两种特殊模式会以幸存者撤离目标取代常规互动：丧尸末日（Ravage）与WBK事件。在这些模式中天气锁定为永久薄雾，你对平民的唯一任务是招募幸存者并带回基地撤离，每次营救都会奖励指挥点。</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_MAN_L_OBJECTIVE">
+                <Original>Objective</Original>
+                <English>Objective</English>
+                <Chinesesimp>目标</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_B_OBJECTIVE">
+                <Original>Altis is under enemy control, and your job is to take it back: capture every enemy-held zone to win the campaign.&lt;br/&gt;&lt;br/&gt;You command a small task force and earn Command Points to request units, vehicles and support, while an AI commander reacts and counter-attacks. Capture zones, run side missions, and spend your resources wisely to tip the balance in your favour.</Original>
+                <English>Altis is under enemy control, and your job is to take it back: capture every enemy-held zone to win the campaign.&lt;br/&gt;&lt;br/&gt;You command a small task force and earn Command Points to request units, vehicles and support, while an AI commander reacts and counter-attacks. Capture zones, run side missions, and spend your resources wisely to tip the balance in your favour.</English>
+                <Chinesesimp>阿尔蒂斯被敌军控制，你的任务是夺回它：占领每一个敌方控制的区域即可赢得战役。&lt;br/&gt;&lt;br/&gt;你指挥一支小型特遣队，通过赚取指挥点来请求兵员、载具与支援，同时敌方AI指挥官会做出反应并发动反击。占领区域、执行支线任务，并合理运用资源来扭转战局。</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_ZONES">
+                <Original>Capturing Zones</Original>
+                <English>Capturing Zones</English>
+                <Chinesesimp>占领区域</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_SUPPDETAIL">
+                <Original>Support Options (Detailed)</Original>
+                <English>Support Options (Detailed)</English>
+                <Chinesesimp>支援选项（详解）</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_SIDEMISSIONS">
+                <Original>Side Missions</Original>
+                <English>Side Missions</English>
+                <Chinesesimp>支线任务</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_REPUTATION">
+                <Original>Reputation</Original>
+                <English>Reputation</English>
+                <Chinesesimp>声望</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_OVERVIEW">
+                <Original>Overview</Original>
+                <English>Overview</English>
+                <Chinesesimp>概述</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_L_ABOUTCRED">
+                <Original>About &amp; Credits</Original>
+                <English>About &amp; Credits</English>
+                <Chinesesimp>关于与制作</Chinesesimp>
+            </Key>
             <Key ID="STR_DUWS_T_getwuiuy">
                 <German>Feedback/Bug Reports</German>
                 <Spanish>Retroalimentación/Reporte de bugs</Spanish>
@@ -7892,11 +7922,11 @@
                 <English>Death Penalty</English>
             </Key>
             <Key ID="STR_DUWS_T_siwang2">
-                <German>Ich habe die Todesstrafe in DUWS_T zwangsmäßig aktiviert, weil ich glaube, dass dies die Kampagne interessanter macht. Denke taktisch über jeden deiner Schritte nach, versuche keine Fehler zu machen und nutze kostengünstige Unterstützungsoptionen und spezielle Nebenmissionen, um dir einen Vorteil zu verschaffen.</German>
-                <Spanish>He habilitado la penalización por muerte de forma obligatoria en DUWS_T porque creo que hace la campaña más interesante. Piensa tácticamente en cada uno de tus pasos, intenta no cometer errores y utiliza las opciones de apoyo de bajo coste y las misiones secundarias especiales para crear ventaja.</Spanish>
-                <Chinesesimp>我在DUWS_T中强制开启了死亡惩罚，因为我觉得这让战役变得更加有趣。请战术地思考你的每一步，试着不犯错误，并利用低价支援选项和特殊的支线任务为你创造优势。</Chinesesimp>
-                <Original>I have force-enabled the death penalty in DUWS_T because I believe it makes the campaign more interesting. Think tactically about every step you take, try not to make mistakes, and use low-cost support options and special side missions to gain an advantage for yourself.</Original>
-                <English>I have force-enabled the death penalty in DUWS_T because I believe it makes the campaign more interesting. Think tactically about every step you take, try not to make mistakes, and use low-cost support options and special side missions to gain an advantage for yourself.</English>
+                <German>Die Todesstrafe macht die Kampagne fordernder: Denke taktisch über jeden deiner Schritte nach, versuche keine Fehler zu machen und nutze kostengünstige Unterstützungsoptionen und spezielle Nebenmissionen, um dir einen Vorteil zu verschaffen. In den Kampagneneinstellungen kannst du festlegen, wie viel sie kostet, oder sie ausschalten.</German>
+                <Spanish>La penalización por muerte hace la campaña más exigente: piensa tácticamente en cada uno de tus pasos, intenta no cometer errores y utiliza las opciones de apoyo de bajo coste y las misiones secundarias especiales para crear ventaja. En las opciones de configuración de la campaña puedes ajustar cuánto cuesta, o desactivarla.</Spanish>
+                <Chinesesimp>死亡惩罚让战役更具挑战性：请战术地思考你的每一步，试着不犯错误，并利用低价支援选项和特殊的支线任务为你创造优势。你可以在战役设置选项中调整它的代价，或将其关闭。</Chinesesimp>
+                <Original>The death penalty makes the campaign more demanding: think tactically about every step you take, try not to make mistakes, and use low-cost support options and special side missions to gain an advantage. You can adjust how much it costs, or turn it off, from the campaign setup options.</Original>
+                <English>The death penalty makes the campaign more demanding: think tactically about every step you take, try not to make mistakes, and use low-cost support options and special side missions to gain an advantage. You can adjust how much it costs, or turn it off, from the campaign setup options.</English>
             </Key>
             <Key ID="STR_DUWS_T_6ku0lc19">
                 <German>Bitte melde alle Bugs auf dem Discord oder im Steam Diskussion Tab der Mission.</German>

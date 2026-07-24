@@ -1,10 +1,11 @@
 // fnc_duws_help.sqf
-// Builds the "DUWS-T Manual" in the map's Notes (diary), split into a few focused
-// subjects (tabs) so each page stays short instead of one long list of records.
+// Builds the single "DUWS-T Manual" subject in the map's Notes (diary) as a numbered
+// outline: category headers (1., 2., ...) and their sub-topics (1.1, 1.2, ...), with
+// a blank divider record between categories.
 //
-// Two engine constraints shape this file (see docs/arma_engine_gotchas.md):
-//  - The diary displays newest-first, so both the subject list and each subject's
-//    records are reversed before creation (the first entry ends up on top).
+// Engine notes (docs/arma_engine_gotchas.md):
+//  - The diary displays records newest-first, so the list is built top-down then
+//    reversed before creation (the first row ends up on top).
 //  - Record bodies are structured text: <br/> and <t ...> render, so records that
 //    fold several topics separate them with inline <t> sub-headers.
 
@@ -32,53 +33,45 @@ private _suppArsBody = [
     ["STR_DUWS_T_HELP_SUPPORTS", "STR_DUWS_T_HELP_SUPPORTS_HINT"] call _sec  // Unlocking the Arsenal
 ] joinString "<br/><br/>";
 
-// Creates the tab and its records; records reversed so the list reads top-down.
-private _fnc_subject = {
-    params ["_id", "_title", "_records"];
-    player createDiarySubject [_id, _title];
-    reverse _records;
-    { player createDiaryRecord [_id, _x] } forEach _records;
+// Outline row: ["<n>", labelId, body] -> ["<n> <localized label>", body].
+private _rec = {
+    params ["_num", "_labelId", "_body"];
+    [_num + " " + (localize _labelId), _body]
 };
+private _divider = ["", ""];
 
-// Civilian System: overview plus both special modes, always listed so players know
-// the Ravage/WBK modes exist even when they are not the active civilian setting.
-private _civRecords = [
-    [localize "STR_DUWS_T_MAN_CIV", localize "STR_DUWS_T_MAN_CIV_BODY"],
-    [localize "STR_DUWS_T_RAVAGE_HELP_TITLE", localize "STR_DUWS_T_RAVAGE_HELP_DESC"],
-    [localize "STR_DUWS_T_WBK_HELP_TITLE", localize "STR_DUWS_T_WBK_HELP_DESC"]
+// Records in display order, top first.
+private _records = [
+    ["1.",  "STR_DUWS_T_MAN_HOWTO",           ""] call _rec,
+    ["1.1", "STR_DUWS_T_MAN_L_OBJECTIVE",     localize "STR_DUWS_T_MAN_B_OBJECTIVE"] call _rec,
+    ["1.2", "STR_DUWS_T_MAN_ECONOMY",         _economyBody] call _rec,
+    ["1.3", "STR_DUWS_T_MAN_L_ZONES",         localize "STR_DUWS_T_HELP_ZONES_HINT"] call _rec,
+    ["1.4", "STR_DUWS_T_MAN_REQFORCES",       _reqForcesBody] call _rec,
+    ["1.5", "STR_DUWS_T_4yxb8s2k",            localize "STR_DUWS_T_4elv35h6"] call _rec,       // Establish a FOB
+    ["1.6", "STR_DUWS_T_MAN_SUPPARS",         _suppArsBody] call _rec,
+    ["1.7", "STR_DUWS_T_MAN_L_SUPPDETAIL",    localize "STR_DUWS_T_zhiyuan1"] call _rec,
+    ["1.8", "STR_DUWS_T_MAN_L_SIDEMISSIONS",  localize "STR_DUWS_T_617kjc41"] call _rec,
+    ["1.9", "STR_DUWS_T_MAN_L_REPUTATION",    localize "STR_DUWS_T_m204wqqq"] call _rec,
+    _divider,
+    ["2.",  "STR_DUWS_T_MAN_CIV",             ""] call _rec,
+    ["2.1", "STR_DUWS_T_MAN_L_OVERVIEW",      localize "STR_DUWS_T_MAN_CIV_BODY"] call _rec,
+    ["2.2", "STR_DUWS_T_RAVAGE_HELP_TITLE",   localize "STR_DUWS_T_RAVAGE_HELP_DESC"] call _rec,
+    ["2.3", "STR_DUWS_T_WBK_HELP_TITLE",      localize "STR_DUWS_T_WBK_HELP_DESC"] call _rec,
+    _divider,
+    ["3.",  "STR_DUWS_T_MAN_CONFIG",          ""] call _rec,
+    ["3.1", "STR_DUWS_T_shijianguanli",       localize "STR_DUWS_T_shijianguanli2"] call _rec, // Time Management
+    ["3.2", "STR_DUWS_T_ojav7yf4",            localize "STR_DUWS_T_d38s8oac"] call _rec,        // Hardcore Mode
+    ["3.3", "STR_DUWS_T_siwang",              localize "STR_DUWS_T_siwang2"] call _rec,         // Death Penalty
+    ["3.4", "STR_DUWS_T_zimuxitong",          localize "STR_DUWS_T_zimuxitong2"] call _rec,     // Subtitles
+    ["3.5", "STR_DUWS_T_ty006zz4",            localize "STR_DUWS_T_8o0fomss"] call _rec,         // Saving
+    ["3.6", "STR_DUWS_T_ljw9ndqz",            localize "STR_DUWS_T_nk0wa9zo"] call _rec,         // Multiplayer
+    _divider,
+    ["4.",  "STR_DUWS_T_MAN_L_ABOUTCRED",     ""] call _rec,
+    ["4.1", "STR_DUWS_T_0f4f5uo2",            localize "STR_DUWS_T_q4wns5y7"] call _rec,          // About DUWS-T
+    ["4.2", "STR_DUWS_T_7vfkrl61",            localize "STR_DUWS_T_zho04a1k"] call _rec,          // Credits
+    ["4.3", "STR_DUWS_T_getwuiuy",            localize "STR_DUWS_T_6ku0lc19"] call _rec           // Feedback / bug report
 ];
 
-// Subjects in display order, top first. The diary prepends both records and
-// subjects, so reverse before creating (same reason the records are reversed above).
-private _subjects = [
-    ["duws_about", localize "STR_DUWS_T_0f4f5uo2", [
-        [localize "STR_DUWS_T_0f4f5uo2", localize "STR_DUWS_T_q4wns5y7"]             // About DUWS-T
-    ]],
-    ["duws_howto", localize "STR_DUWS_T_MAN_HOWTO", [
-        [localize "STR_DUWS_T_MAN_ECONOMY", _economyBody],
-        [localize "STR_DUWS_T_HELP_ZONES", localize "STR_DUWS_T_HELP_ZONES_HINT"],   // Capturing Zones
-        [localize "STR_DUWS_T_ryhnop2g", localize "STR_DUWS_T_617kjc41"],            // Side Missions
-        [localize "STR_DUWS_T_n4yjyv9x", localize "STR_DUWS_T_m204wqqq"]             // Reputation
-    ]],
-    ["duws_forces", localize "STR_DUWS_T_MAN_FORCES", [
-        [localize "STR_DUWS_T_MAN_REQFORCES", _reqForcesBody],
-        [localize "STR_DUWS_T_4yxb8s2k", localize "STR_DUWS_T_4elv35h6"],            // Establish a FOB
-        [localize "STR_DUWS_T_MAN_SUPPARS", _suppArsBody],
-        [localize "STR_DUWS_T_zhiyuan", localize "STR_DUWS_T_zhiyuan1"]              // Support Options (detailed)
-    ]],
-    ["duws_civ", localize "STR_DUWS_T_MAN_CIV", _civRecords],
-    ["duws_config", localize "STR_DUWS_T_MAN_CONFIG", [
-        [localize "STR_DUWS_T_shijianguanli", localize "STR_DUWS_T_shijianguanli2"], // Time Management
-        [localize "STR_DUWS_T_ojav7yf4", localize "STR_DUWS_T_d38s8oac"],            // Hardcore Mode
-        [localize "STR_DUWS_T_siwang", localize "STR_DUWS_T_siwang2"],               // Death Penalty
-        [localize "STR_DUWS_T_zimuxitong", localize "STR_DUWS_T_zimuxitong2"],       // Subtitles
-        [localize "STR_DUWS_T_ty006zz4", localize "STR_DUWS_T_8o0fomss"],            // Saving
-        [localize "STR_DUWS_T_ljw9ndqz", localize "STR_DUWS_T_nk0wa9zo"]             // Multiplayer notes
-    ]],
-    ["duws_credits", localize "STR_DUWS_T_MAN_CREDITS", [
-        [localize "STR_DUWS_T_7vfkrl61", localize "STR_DUWS_T_zho04a1k"],            // Credits
-        [localize "STR_DUWS_T_getwuiuy", localize "STR_DUWS_T_6ku0lc19"]             // Feedback / bug report
-    ]]
-];
-reverse _subjects;
-{ _x call _fnc_subject } forEach _subjects;
+player createDiarySubject ["duws_manual", localize "STR_DUWS_T_3feql12c"];
+reverse _records;
+{ player createDiaryRecord ["duws_manual", _x] } forEach _records;
