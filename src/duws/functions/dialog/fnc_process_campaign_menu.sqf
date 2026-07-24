@@ -257,6 +257,12 @@ switch (_index) do {
     case index_cp_death_penalty_5:{
         DUWSMP_CP_death_cost = 5;
     };
+    case index_cp_death_penalty_8:{
+        DUWSMP_CP_death_cost = 8;
+    };
+    case index_cp_death_penalty_10:{
+        DUWSMP_CP_death_cost = 10;
+    };
 };
 
 // ARMY POWER BLUFOR

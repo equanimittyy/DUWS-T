@@ -85,6 +85,8 @@ index_cp_death_penalty_2 = lbAdd [2107, "2"];
 index_cp_death_penalty_3 = lbAdd [2107, "3"];
 index_cp_death_penalty_4 = lbAdd [2107, "4"];
 index_cp_death_penalty_5 = lbAdd [2107, "5"];
+index_cp_death_penalty_8 = lbAdd [2107, "8"];
+index_cp_death_penalty_10 = lbAdd [2107, "10"];
 [2107, index_cp_death_penalty_1] call _setDefault;
 
 // BLUFOR AP
