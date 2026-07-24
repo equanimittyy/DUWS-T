@@ -963,6 +963,13 @@
                 <Original>OPFOR ClassName error.  OPFOR CUSTOM FACTION FAILED.  Check the log and Restart the Mission</Original>
                 <English>OPFOR ClassName error.  OPFOR CUSTOM FACTION FAILED.  Check the log and Restart the Mission</English>
             </Key>
+            <Key ID="STR_DUWS_T_customfaction_missing">
+                <German>Fehlende erforderliche Fraktionseinträge: %1</German>
+                <Spanish>Faltan entradas de facción requeridas: %1</Spanish>
+                <Chinesesimp>缺少必需的阵营条目：%1</Chinesesimp>
+                <Original>Missing required faction entries: %1</Original>
+                <English>Missing required faction entries: %1</English>
+            </Key>
             <Key ID="STR_DUWS_T_ex41rpdu">
                 <German>Tropisch</German>
                 <Spanish>Tropical</Spanish>
