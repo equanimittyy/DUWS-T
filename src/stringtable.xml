@@ -10,10 +10,6 @@
                 <English>Empty</English>
                 <Chinese>空</Chinese>
             </Key>
-            <Key ID="STR_DUWS_T_unknown">
-                <Original>???</Original>
-                <Chinesesimp>???</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_OPFOR_SPEAKER">
                 <Original>OPFOR</Original>
                 <English>OPFOR</English>
@@ -1955,31 +1951,9 @@
                 <Original>Disguise as OPFOR</Original>
                 <Chinesesimp>伪装成敌人</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_START">
-    <Original>To start a disguise, you need:\n An enemy vest and helmet, and an enemy primary weapon in hand.\n A backpack, sidearm and NVGs are optional, but any you equip must be enemy issue.\n You don't need an enemy uniform. Arma restricts enemy uniforms by side, so once the gear above is right, the uniform is applied for you.\n\n To stay disguised, you must keep:\n An enemy uniform (added automatically once the disguise succeeds), vest, helmet, and an enemy primary weapon in hand.\n Any backpack, sidearm or NVGs you carry must be enemy issue.\n Your distance from enemies: don't get too close.\n Note: there's a 10-minute cooldown between successful disguises.</Original>
-    <Chinesesimp>   
-	                要开始伪装，你必须满足以下条件:
-					\n你必须穿着完整的敌军背心、头盔，并手持敌军主武器(你可以在敌军尸体上获取它们);
-					\n背包、副手武器和夜视仪可以不装备，但若装备则必须是敌军的款式。(你可以在敌军尸体上获取它们)
-					\n不需要敌军的制服，因为ARMA3有对制服的阵营限制。当你有了上方的正确配装时，制服会自动添加给你。
-
-					\n而要保持伪装状态，你必须：
-					\n你必须穿着完整的敌军制服(动作成功后自动添加)、背心、头盔，并手持敌军主武器(你可以在敌军尸体上获取它们);
-					\n背包、副手武器和夜视仪可以不装备，但若装备则必须是敌军的款式。(你可以在敌军尸体上获取它们);
-					\n不距离敌人过近;
-					\n两次成功伪装之间的冷却时间为10分钟</Chinesesimp>
-</Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_START_SUB">
-                <Original>Ah hell, this guy's uniform is way too tight...</Original>
-                <Chinesesimp>操...这人的衣服太紧了...</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ACTIVATED">
                 <Original>Enemy disguise activated. Stay away from enemies and do not fire until needed</Original>
                 <Chinesesimp>敌人伪装已激活。远离敌人，非必要情况下不要随意开火。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_spotted">
-                <Original>Attention! Enemy infil team spotted! Engage at will!</Original>
-                <Chinesesimp>所有单位注意，发现敌方渗透部队！自由接敌！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ohno">
                 <Original>Damn. We're blown...</Original>
@@ -2151,61 +2125,6 @@
                 <Original>Disguise activated. Stay low</Original>
                 <Chinesesimp>伪装已激活。保持低调。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_START">
-    <Original>      
-	                To start your disguise, you must meet the following conditions:
-					\n Do not hold any weapons/binoculars in your hands, do not equip night vision devices;
-					\n Clothes, vests and helmets must be the same as civilian outfits in the current civilian mode (Get them from the Arsenal or civilians);
-					\n Backpack must be civilian style (available from the Arsenal)
-
-					\n To maintain your disguise status, you must:
-					\n Do not hold any weapons/binoculars in your hands, do not equip night vision devices (you can hide whatever you want in a civilian backpack);
-					\n Clothes, vests and helmets must be the same as civilian outfits in the current civilian mode (available from the Arsenal);
-					\n Backpack must be civilian style (available from the Arsenal);
-					\n Do not take out binoculars while in disguise;
-					\n Do not get too close to enemies;
-					\n Do not enter non-civilian vehicles;
-					\n Do not take actions that lower your reputation;
-					\n Do not enter towns when your reputation is negative;
-					\n 1-minute cooldown between two successful disguises</Original>
-    <English> 
-	                To start your disguise, you must meet the following conditions:
-					\n Do not hold any weapons/binoculars in your hands, do not equip night vision devices;
-					\n Clothes, vests and helmets must be the same as civilian outfits in the current civilian mode (Get them from the Arsenal or civilians);
-					\n Backpack must be civilian style (available from the Arsenal)
-
-					\n To maintain your disguise status, you must:
-					\n Do not hold any weapons/binoculars in your hands, do not equip night vision devices (you can hide whatever you want in a civilian backpack);
-					\n Clothes, vests and helmets must be the same as civilian outfits in the current civilian mode (available from the Arsenal);
-					\n Backpack must be civilian style (available from the Arsenal);
-					\n Do not take out binoculars while in disguise;
-					\n Do not get too close to enemies;
-					\n Do not enter non-civilian vehicles;
-					\n Do not take actions that lower your reputation;
-					\n Do not enter towns when your reputation is negative;
-					\n 5-minute cooldown between two successful disguises</English>
-    <Chinesesimp>
-					要开始伪装，你必须满足以下条件:
-					\n不拿着任何武器/望远镜，不装备任何夜视仪;
-					\n衣服/背心/头盔必须为当前模式下平民的同款装束(你可以在军火库或平民身上获取它们);
-					\n背包需要为民用款式(你可以在军火库获取它们)
-
-					\n而要保持伪装状态，你必须：
-					\n不拿着任何武器/望远镜，不装备任何夜视仪(你可以将想使用的东西塞进民用背包内隐蔽携带);
-					\n衣服/背心/头盔必须为当前模式下平民的同款装束(你可以在军火库获取它们);
-					\n背包需要为民用款式(你可以在军火库获取它们);
-					\n不在伪装时掏出望远镜;
-					\n不距离敌人过近;
-					\n不进入非民用载具;
-					\n不做让声望下降的事情;
-					\n不在声望为负数时进入城镇;
-					\n两次成功伪装之间的冷却时间为5分钟</Chinesesimp>
-</Key>
-            <Key ID="STR_DUWS_T_DISGUISE_START_SUB">
-                <Original>This doesn't fit... Guess I've got no other choice.</Original>
-                <English>This doesn't fit... Guess I've got no other choice.</English>
-                <Chinesesimp>这衣服太不合身...也没别的选择了。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_RENEWED_DESC">
                 <Original>Your disguise has been refreshed with new clothing and a backpack</Original>
                 <Chinesesimp>你的伪装已更新，换上了新的服装和背包。</Chinesesimp>
@@ -2239,11 +2158,6 @@
                 <Original>Disguise broken: No civilian clothing</Original>
                 <English>Disguise broken: No civilian clothing</English>
                 <Chinesesimp>伪装暴露：未穿着平民衣物。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_CIV">
-                <Original>Disguise as Civilian</Original>
-                <English>Disguise as Civilian</English>
-                <Chinesesimp>伪装成平民</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_ACTIVATED">
                 <Original>Disguise</Original>
