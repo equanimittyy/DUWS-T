@@ -62,7 +62,7 @@ if (count _removedList > 0) then {
 };
 sleep 10;
 // onPlayerRespawn.sqf 末尾添加
-if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK") then {
+if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK" && CIV_PRESENCE != "NONE") then {
     // 清除旧防重标记，允许重新添加
     player setVariable ["DUWS_disguise_actionAdded", nil];
     

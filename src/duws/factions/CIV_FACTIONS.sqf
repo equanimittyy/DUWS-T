@@ -93,6 +93,12 @@ if (CIV_PRESENCE == "RAVAGE") then {
     };
 };
 
+// Fallback for an unmatched CIV_PRESENCE (e.g. "NONE" when civilians are off): PMC and
+// partisan hiring still draw their body models from civ_array, so it must never be nil.
+if (isNil "civ_array") then {
+	civ_array = ["C_man_p_beggar_F","C_Man_casual_1_F","C_Man_casual_3_F","C_Man_casual_8_F","C_Man_casual_6_v2_F","C_Man_casual_2_F","C_Man_UtilityWorker_01_F","C_Man_Fisherman_01_F","C_Man_casual_2_F","C_Man_p_shorts_1_F","C_Man_w_worker_F"];
+};
+
 publicVariable "civ_array";
 
 

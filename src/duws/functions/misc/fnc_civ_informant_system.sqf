@@ -5,6 +5,9 @@
 */
 if (!isServer) exitWith {};
 
+// Civilians off: no populated towns for informants to appear in.
+if (CIV_PRESENCE == "NONE") exitWith {};
+
     // 仅在硬核模式开启时生成线人
     if (!hardcore_mode_enable) then { continue; };
 while {true} do {

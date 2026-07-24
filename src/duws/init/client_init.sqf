@@ -476,7 +476,7 @@ fnc_disguise_addGear = {
 };
 publicVariable "fnc_disguise_addGear";
 // ========== 为玩家添加伪装长按动作（带防重，不自动移除） ==========
-if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK") then {
+if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK" && CIV_PRESENCE != "NONE") then {
     if (isNil {player getVariable "DUWS_disguise_actionAdded"}) then {
         [
             player,

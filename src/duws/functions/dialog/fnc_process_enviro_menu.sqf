@@ -114,6 +114,7 @@ switch (_index) do
 _index = lbCurSel 2109;
 switch (_index) do
 {
+    case index_civtype_off: { CIV_PRESENCE = "NONE"; };
     case index_civtype_med: { CIV_PRESENCE = "med"; };
     case index_civtype_tanoa: { CIV_PRESENCE = "tanoa"; };
     case index_civtype_Vafrica: { CIV_PRESENCE = "Vafrica"; };

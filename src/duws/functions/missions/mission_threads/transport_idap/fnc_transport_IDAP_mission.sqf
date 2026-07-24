@@ -247,9 +247,12 @@ if (getdammage _truck1>0.95) exitWith {
     _truck1 setDamage 1;
     [{hint localize "STR_DUWS_T_jsg7ys0w"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
-    Player_Reputation = Player_Reputation - 5;
-    publicVariable "Player_Reputation";
-    ["info", [localize "STR_DUWS_T_shengwangjianshao", format [localize "STR_DUWS_T_0pluxey2", Player_Reputation]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+    // Reputation is a civilian-system currency: skip its change (and notification) when civilians are off.
+    if (CIV_PRESENCE != "NONE") then {
+        Player_Reputation = Player_Reputation - 5;
+        publicVariable "Player_Reputation";
+        ["info", [localize "STR_DUWS_T_shengwangjianshao", format [localize "STR_DUWS_T_0pluxey2", Player_Reputation]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+    };
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos,_radius] spawn fnc_mission_cleanup;
@@ -262,9 +265,11 @@ deleteMarker _deliveryMarkerName;
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
-Player_Reputation = Player_Reputation + 5;
-publicVariable "Player_Reputation";
-["repup", [localize "STR_DUWS_T_rqwho9bq", format [localize "STR_DUWS_T_0pluxey2", Player_Reputation]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+if (CIV_PRESENCE != "NONE") then {
+    Player_Reputation = Player_Reputation + 5;
+    publicVariable "Player_Reputation";
+    ["repup", [localize "STR_DUWS_T_rqwho9bq", format [localize "STR_DUWS_T_0pluxey2", Player_Reputation]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+};
 sleep 2;
 deleteVehicle _box2;
 sleep 2;

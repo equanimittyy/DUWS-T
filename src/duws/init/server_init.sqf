@@ -503,7 +503,7 @@ sleep 15;
 diag_log "[SERVER] Starting helicopter intro sequence...";
 [] spawn fnc_intro_heli;
 // 仅在非僵尸/非WBK模式下扫描平民装备
-if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK") then {
+if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK" && CIV_PRESENCE != "NONE") then {
     [] spawn fnc_scanCivilianGear;
 };
 // 延迟一段时间后调用扫描，确保阵营变量已初始化

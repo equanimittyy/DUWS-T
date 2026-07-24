@@ -41,6 +41,7 @@ if (_veh != _player) then {
     };
 };
 
+if (CIV_PRESENCE == "NONE") exitWith {};
 if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {
     [_player, "STR_DUWS_T_DISGUISE_ZOMBIE_MODE"] call fnc_disguise_hintFail;
 };

@@ -81,6 +81,7 @@ fnc_intel_gathering_mission = compile preprocessFileLineNumbers "duws\functions\
 publicVariable "fnc_intel_gathering_mission";
 // CIVILIAN FUNCTIONS
 fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_init_Tomata.sqf";
+fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_setup_array.sqf";
 fnc_civ_locator_Tomata = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_locator_Tomata.sqf";
 fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_wp_Tomata.sqf";
 fnc_civ_rep_Tomata = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_rep_Tomata.sqf";

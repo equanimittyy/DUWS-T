@@ -65,6 +65,7 @@ index_simpzones_true = lbAdd [2108, localize "STR_DUWS_T_vk37aebo"];
 lbSetCurSel [2108, index_simpzones_false];
 
 // ENABLE CIVILIANS
+index_civtype_off = lbAdd [2109, localize "STR_DUWS_T_civoff"];
 switch (civ_mod) do {
     case "cup" : {
         index_civtype_CUPslav = lbAdd [2109, localize "STR_DUWS_T_CUPslfr"];
@@ -110,7 +111,7 @@ missionNamespace setVariable ["index_civtype_wbk", _index_wbk];
 lbSetColor [2109, _index_ravage, [1,0,0,1]];
 missionNamespace setVariable ["index_civtype_ravage", _index_ravage];
 
-lbSetCurSel [2109, index_civtype_med];
+lbSetCurSel [2109, index_civtype_off];
 
 // ENABLE HARDCORE MODE
 index_hardcore_false = lbAdd [2110, localize "STR_DUWS_T_x4zs3lsg0"];

@@ -489,6 +489,9 @@ if (apocalypse_mode) then {
 };
 if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then {
     [] remoteExec ["fnc_civ_init_Tomata", 2];
+} else {
+    // Civilians off: no ambient population, but PMC/partisan hiring still needs civ_array as a body pool.
+    [] remoteExec ["fnc_civ_setup_array", 2];
 };
 
 // TELL WARCOM THE ZONE VARIABLES ARE SET

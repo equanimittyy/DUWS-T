@@ -65,6 +65,13 @@
                 <Original>Off (Default)</Original>
                 <English>Off (Default)</English>
             </Key>
+            <Key ID="STR_DUWS_T_civoff">
+                <German>Aus (Standard)</German>
+                <Spanish>Desactivado (Predeterminado)</Spanish>
+                <Chinesesimp>关闭 (默认)</Chinesesimp>
+                <Original>Off (Default)</Original>
+                <English>Off (Default)</English>
+            </Key>
             <Key ID="STR_DUWS_T_inssupport">
                 <German>Diese Unterstützungsoption ist im Aufständischen-Modus nicht verfügbar.</German>
                 <Spanish>Esta opción de apoyo no está disponible en el Modo Insurgente.</Spanish>

@@ -224,10 +224,13 @@ Mission_Failed = false;
     if (!alive _civ) then {
         // 平民死亡 → 失败
         [_taskID, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, true];
-        Player_Reputation = Player_Reputation - 1;
+        // Reputation is a civilian-system currency: skip its change (and value notification) when off.
+        if (CIV_PRESENCE != "NONE") then { Player_Reputation = Player_Reputation - 1; };
         ["info", [localize "STR_DUWS_T_cycuqbvj", localize "STR_DUWS_T_ayhemuj4"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
-        sleep 5;
-        ["info", [localize "STR_DUWS_T_cycuqbvj", format [localize "STR_DUWS_T_0pluxey2", Player_Reputation]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+        if (CIV_PRESENCE != "NONE") then {
+            sleep 5;
+            ["info", [localize "STR_DUWS_T_cycuqbvj", format [localize "STR_DUWS_T_0pluxey2", Player_Reputation]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+        };
         [_speaker, _message3] remoteExec ["BIS_fnc_showSubtitle", 0];
         [] remoteExec ["fnc_broadcastRadioChatter", 0];
     } else {
@@ -247,9 +250,11 @@ Mission_Failed = false;
                 publicVariable "CommandPoints";
                 publicVariable "ActionPoints";
             };
-            Player_Reputation = Player_Reputation + _rep;
-            publicVariable "Player_Reputation";
-            ["repup", [localize "STR_DUWS_T_rqwho9bq", format [localize "STR_DUWS_T_0pluxey2", Player_Reputation]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+            if (CIV_PRESENCE != "NONE") then {
+                Player_Reputation = Player_Reputation + _rep;
+                publicVariable "Player_Reputation";
+                ["repup", [localize "STR_DUWS_T_rqwho9bq", format [localize "STR_DUWS_T_0pluxey2", Player_Reputation]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+            };
     };
 
     // ----- 任务结束，统一清理 -----
