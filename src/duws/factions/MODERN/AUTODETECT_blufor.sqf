@@ -249,8 +249,8 @@ allVariables missionNamespace select {
 publicVariable "fnc_factionGen";
 //selectRandom factionList select 1 call fnc_factionGen;
 
-// The faction was chosen during setup (fnc_startup_autodetect_faction) and
-// broadcast as selectedFaction_BLU; generate its data now, at the deferred commit.
+// The faction was chosen during setup (fnc_startup_faction_resolve) and broadcast
+// as selectedFaction_BLU; generate its data now, at the deferred commit.
 waitUntil { sleep 0.1; !isNil "selectedFaction_BLU" };
 selectedFaction_BLU call fnc_factionGen;
 sleep 0.5;

@@ -1,4 +1,7 @@
-// TODO: Localize text in source/dialog/startup/startup.hpp
+// Single-side custom-faction paste window. Reused for BLUFOR then OPFOR as needed:
+// fnc_startup_faction_resolve sets duws_custom_side before opening it and fills the
+// side-specific frame/info labels (1801/1000) at runtime, so only the side the
+// player marked CUSTOM ever appears.
 class startup_faction
 {
     idd = -1;
@@ -19,7 +22,7 @@ class startup_faction
             colorBackground[] = {0.2, 0.4, 0.2, 1};
 
 		};
- 
+
 	};
 
     class controls
@@ -32,7 +35,7 @@ class startup_faction
             w = 41 * GUI_GRID_W;
             h = 29 * GUI_GRID_H;
             colorBackground[] = {0,0,0,0.3};
-			
+
         };
         class campaign_definer_mainframe: RscFrame
         {
@@ -42,50 +45,29 @@ class startup_faction
             y = 0.02 * GUI_GRID_H + GUI_GRID_Y;
             w = 40 * GUI_GRID_W;
             h = 28 * GUI_GRID_H;
-			
+
         };
-        class blufor_faction_frame: RscFrame
+        class faction_frame: RscFrame
         {
             idc = 1801;
-            text = "$STR_DUWS_T_rqdziaei";
+            text = "";  // set per side (BLUFOR/OPFOR) by fnc_startup_faction_resolve
             x = 1 * GUI_GRID_W + GUI_GRID_X;
             y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 18.5 * GUI_GRID_W;
+            w = 38 * GUI_GRID_W;
             h = 20 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_y3jv4fm6";
         };
-        class blufor_faction_window: RscEditMulti
+        class faction_window: RscEditMulti
         {
             idc = 2100;
             x = 1.5 * GUI_GRID_W + GUI_GRID_X;
             y = 2.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 17.5 * GUI_GRID_W;
+            w = 37 * GUI_GRID_W;
             h = 18 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_y3jv4fm6";
-        };
-        class opfor_faction_frame: RscFrame
-        {
-            idc = 1802;
-            text = "$STR_DUWS_T_1m1bl9nd";
-            x = 20.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 18.5 * GUI_GRID_W;
-            h = 20 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_13p2iheb";
-        };
-        class opfor_faction_window: RscEditMulti
-        {
-            idc = 2101;
-            x = 21 * GUI_GRID_W + GUI_GRID_X;
-            y = 2.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 17.5 * GUI_GRID_W;
-            h = 18 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_13p2iheb";
         };
         class text_information: RscText
         {
             idc = 1000;
-            text = "$STR_DUWS_T_vho23y9e";
+            text = "";  // set per side by fnc_startup_faction_resolve
             x = 0.5 * GUI_GRID_W + GUI_GRID_X;
             y = 22.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 39 * GUI_GRID_W;
@@ -121,6 +103,3 @@ class startup_faction
         };
     };
 };
-
-
-

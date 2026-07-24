@@ -15,30 +15,12 @@ duws_custom_faction_back = false;   // set by the paste screen's Back button
 [] call fnc_HQ_faction_dialog;
 waitUntil {sleep 0.1; chosen_hq_placement};
 
-// Custom factions: clear the pasted-data holders so the flow waits for a fresh
-// paste. On a re-entry they'd still hold the previous run's text and the wait
-// would fall through instantly, skipping the paste dialog.
-if (BLUFOR_Faction_X == "CUSTOM" || OPFOR_Faction_X == "CUSTOM") then {
-    BLUfactionDataTemp = ""; publicVariable "BLUfactionDataTemp";
-    OPFfactionDataTemp = ""; publicVariable "OPFfactionDataTemp";
-    createDialog "startup_faction";
-    waitUntil {dialog};
+// Per-side faction prompts (custom paste window and/or AutoDetect picker), shown
+// BLUFOR then OPFOR and only for the side that needs one. Runs during setup so the
+// popups land before START; the heavy build stays deferred to the commit.
+[] call fnc_startup_faction_resolve;
 
-    // Wait until every CUSTOM side has non-empty data (the submit handler rejects
-    // blanks, so this can't fall through on empty input) or the player hits Back.
-    waitUntil {
-        sleep 0.1;
-        duws_custom_faction_back
-        || { (BLUFOR_Faction_X != "CUSTOM" || {BLUfactionDataTemp != ""})
-             && {OPFOR_Faction_X != "CUSTOM" || {OPFfactionDataTemp != ""}} }
-    };
-};
-
-// Back from the paste screen restarts the whole faction/HQ selection.
+// Back from a paste window restarts the whole faction/HQ selection.
 if (duws_custom_faction_back) exitWith { [] spawn fnc_startup_faction_flow; };
-
-// AutoDetect factions: run the interactive picker here so it lands during setup,
-// not after START. Captures the choice only; the data-gen stays deferred.
-[] call fnc_startup_autodetect_faction;
 
 [] spawn fnc_enviro_menu;
