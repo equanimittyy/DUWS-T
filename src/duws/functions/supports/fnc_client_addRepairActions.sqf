@@ -321,10 +321,10 @@ _depot addAction [
         params ["_t", "_c", "_i", "_args"];
         _args params ["_trg", "_fnc_appearance", "_fnc_pylons"];
         [localize "STR_DUWS_T_VEHICLE_CUSTOMIZATION", [
-            [localize "STR_DUWS_T_repair_vehicle",       { params ["_trg"]; [player, _trg] remoteExec ["fnc_veh_repair_action", 2]; }, [_trg]],
-            [localize "STR_DUWS_T_check_vehicle_status", { params ["_trg"]; [player, netId _trg] remoteExec ["fnc_veh_repair_check_status", 2]; }, [_trg]],
-            [localize "STR_DUWS_T_vehicle_appearance",   _fnc_appearance, [_trg]],
-            [localize "STR_DUWS_T_vehicle_pylons",       _fnc_pylons, [_trg]]
+            [format ["%1 (2 CP)", localize "STR_DUWS_T_repair_vehicle"],       { params ["_trg"]; [player, _trg] remoteExec ["fnc_veh_repair_action", 2]; }, [_trg]],
+            [localize "STR_DUWS_T_check_vehicle_status",                       { params ["_trg"]; [player, netId _trg] remoteExec ["fnc_veh_repair_check_status", 2]; }, [_trg]],
+            [localize "STR_DUWS_T_vehicle_appearance",                        _fnc_appearance, [_trg]],
+            [format ["%1 (5 CP)", localize "STR_DUWS_T_vehicle_pylons"],       _fnc_pylons, [_trg]]
         ]] call fnc_open_action_menu;
     },
     [_trg, _fnc_appearance, _fnc_pylons],
