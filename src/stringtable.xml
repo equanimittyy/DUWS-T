@@ -14,6 +14,10 @@
                 <Original>???</Original>
                 <Chinesesimp>???</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_OPFOR_SPEAKER">
+                <Original>OPFOR</Original>
+                <English>OPFOR</English>
+            </Key>
             <Key ID="STR_DUWS_T_26hvx0yt">
                 <Spanish>Cancelado</Spanish>
                 <German>Abgebrochen</German>
@@ -1998,7 +2002,7 @@
                 <Chinesesimp>"德尔塔1-3，我们看到你的GPS终端方位在不停更新，那是你的单位吗？确认情况！完毕！"</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_RADIO_5">
-                <Original>All units, this is HQ. Delta 1-3 is presumed KIA. Assume BLUFOR infiltrators are in the area. Stay sharp.</Original>
+                <Original>All units, this is HQ. Delta 1-3 is presumed KIA. Assume BLUFOR saboteurs are in the area. Stay sharp.</Original>
                 <Chinesesimp>"总部呼叫所有单位，德尔塔1-3疑似已经在行动中阵亡！蓝军的渗透部队很可能在周围活动！保持警惕！"</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_RADIO_TITLE">
