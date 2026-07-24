@@ -17,7 +17,7 @@ addMissionEventHandler ["EntityCreated", {
 }];
 
 
-#include "fn_factionAutoDetect.sqf"
+// fn_factionAutoDetect.sqf helpers are compiled once at init (fnc_factions_check).
 
 
 _factions = (call BIS_fnc_getFactions) select {

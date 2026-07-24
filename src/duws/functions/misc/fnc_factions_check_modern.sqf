@@ -18,6 +18,13 @@
 //  Don't need a BLUFOR (BLU_F_ARID) or OPFOR (OPF_F_ARID)
 //	 - they are DEFAULTs
 if (!isServer) exitWith {};
+
+// Publish the AutoDetect helpers (fnc_factionSelector, fnc_getAllFactionsClean,
+// fnc_parseFaction, ...) up front so the setup-screen faction picker can use them
+// before START. Otherwise they only come into existence when an AUTODETECT faction
+// file is compiled at the post-START commit, and the picker fires too late.
+call compile preprocessFileLineNumbers "duws\factions\MODERN\fn_factionAutoDetect.sqf";
+
 _faction_files_BLUFOR = [
 ["O_T_Soldier_F", "BLU_AUTO", "AutoDetect - [RECOMMENDED]","AUTODETECT"],    // classnames for check are units that're always available,csat
 ["O_R_Patrol_Soldier_A_F", "OPF_R_F_Spetsnaz", "Spetsnaz","OPF_R_F_Spetsnaz"],

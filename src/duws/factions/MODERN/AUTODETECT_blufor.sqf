@@ -16,7 +16,7 @@ addMissionEventHandler ["EntityCreated", {
 }];
 
 
-#include "fn_factionAutoDetect.sqf"
+// fn_factionAutoDetect.sqf helpers are compiled once at init (fnc_factions_check).
 
 
 // ========== 新增：过滤飞行员/乘员的通用函数 ==========
