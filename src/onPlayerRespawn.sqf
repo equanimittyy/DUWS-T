@@ -61,67 +61,25 @@ if (count _removedList > 0) then {
     ["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", player];
 };
 sleep 10;
-// onPlayerRespawn.sqf 末尾添加
-if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK" && CIV_PRESENCE != "NONE") then {
-    // 清除旧防重标记，允许重新添加
-    player setVariable ["DUWS_disguise_actionAdded", nil];
-    
-    // 重新添加长按动作
-    [
-        player,
-        localize "STR_DUWS_T_DISGUISE_CIV",
-        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
-        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
-        "alive _target && vehicle _target == _target",
-        "alive _target && vehicle _target == _target",
-        {
-                params ["_target", "_caller", "_actionId", "_arguments"];
-                [localize "STR_DUWS_T_DISGUISE_START"] remoteExec ["hint", _caller];
-                [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_DISGUISE_START_SUB"] remoteExec ["BIS_fnc_showSubtitle", _caller];
-        },
-        {},
-        {
-            params ["_target", "_caller", "_actionId", "_arguments"];
-            [_caller] remoteExec ["fnc_disguiseAsCivilian", 2];
-        },
-        {},
-        [],
-        3,
-        0,
-        false,  // 完成后不移除动作
-        false
-    ] call BIS_fnc_holdActionAdd;
-    
-    player setVariable ["DUWS_disguise_actionAdded", true];
-};
-// ========== 重新添加伪装敌人动作（重生后） ==========
-// 清除旧防重标记，允许重新添加
-player setVariable ["DUWS_enemyDisguise_actionAdded", nil];
-
-// 添加长按动作
+// Single hold-action opens the disguise panel (fnc_disguise_menu), which fronts
+// both modes -- replaces the two per-mode re-adds. Guard cleared so respawn re-adds.
+player setVariable ["DUWS_disguiseMenu_actionAdded", nil];
 [
     player,
-    localize "STR_DUWS_T_ENEMY_DISGUISE_ACTION",
+    localize "STR_DUWS_T_DISGUISE_MENU_ACTION",
     "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
     "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
-    "alive _target",
-    "alive _target",
-    {
-        params ["_target", "_caller", "_actionId", "_arguments"];
-        [localize "STR_DUWS_T_ENEMY_DISGUISE_START"] remoteExec ["hint", _caller];
-        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_ENEMY_DISGUISE_START_SUB"] remoteExec ["BIS_fnc_showSubtitle", _caller];
-    },
+    "alive _target && vehicle _target == _target",
+    "alive _target && vehicle _target == _target",
     {},
-    {
-        params ["_target", "_caller", "_actionId", "_arguments"];
-        [_caller] remoteExec ["fnc_disguiseAsEnemy", 2];
-    },
+    {},
+    { [] spawn fnc_disguise_menu; },
     {},
     [],
-    3,
+    1.5,
     0,
     false,
     false
 ] call BIS_fnc_holdActionAdd;
-player setVariable ["DUWS_enemyDisguise_actionAdded", true];
+player setVariable ["DUWS_disguiseMenu_actionAdded", true];
 player setCaptive false;

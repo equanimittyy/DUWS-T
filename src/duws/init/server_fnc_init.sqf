@@ -364,6 +364,7 @@ fnc_HQ_Request_Menu = compile preprocessFileLineNumbers "duws\functions\dialog\f
 fnc_FOB_Request_Menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_FOB_Request_Menu.sqf";publicVariable "fnc_FOB_Request_Menu";
 fnc_squad_manage = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_squad_manage.sqf";publicVariable "fnc_squad_manage";
 fnc_open_action_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_open_action_menu.sqf";publicVariable "fnc_open_action_menu";
+fnc_disguise_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_disguise_menu.sqf";publicVariable "fnc_disguise_menu";
 fnc_dismissHC = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_dismissHC.sqf";publicVariable "fnc_dismissHC";
 fnc_dismiss_playerAI = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_dismiss_playerAI.sqf";publicVariable "fnc_dismiss_playerAI";
 fnc_squad_rename = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_squad_rename.sqf";publicVariable "fnc_squad_rename";

@@ -1898,6 +1898,50 @@
             </Key>
         </Container>
         <Container name="Enemy Disguise">
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_ACTION">
+                <Original>Disguise</Original>
+                <English>Disguise</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_TITLE">
+                <Original>Disguise</Original>
+                <English>Disguise</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_CIV_TITLE">
+                <Original>Civilian</Original>
+                <English>Civilian</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_CIV_DESC">
+                <Original>Blend into the population. Needs civilian clothing and no weapons or NVGs; on foot or in a civilian vehicle. Cover breaks if you arm up, change gear, or linger near enemies.</Original>
+                <English>Blend into the population. Needs civilian clothing and no weapons or NVGs; on foot or in a civilian vehicle. Cover breaks if you arm up, change gear, or linger near enemies.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_CIV_UNAVAIL">
+                <Original>Not available in this campaign - there is no civilian population to blend into.</Original>
+                <English>Not available in this campaign - there is no civilian population to blend into.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_ENEMY_TITLE">
+                <Original>Enemy</Original>
+                <English>Enemy</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_ENEMY_DESC">
+                <Original>Pass as an enemy soldier for a short window. Needs a full set of enemy vest, helmet and primary weapon; the uniform is applied for you. Cover breaks if you fire, change gear, or get too close.</Original>
+                <English>Pass as an enemy soldier for a short window. Needs a full set of enemy vest, helmet and primary weapon; the uniform is applied for you. Cover breaks if you fire, change gear, or get too close.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_ACTIVATE">
+                <Original>Activate</Original>
+                <English>Activate</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_STATUS_NONE">
+                <Original>You are not currently disguised.</Original>
+                <English>You are not currently disguised.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_STATUS_CIV">
+                <Original>Active disguise: civilian.</Original>
+                <English>Active disguise: civilian.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_MENU_STATUS_ENEMY">
+                <Original>Active disguise: enemy soldier.</Original>
+                <English>Active disguise: enemy soldier.</English>
+            </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_SAME_GEAR">
                 <Original>Your vest and helmet are already known to the enemy. Use different gear and try again</Original>
                 <English>Your vest and helmet are already known to the enemy. Use different gear and try again</English>

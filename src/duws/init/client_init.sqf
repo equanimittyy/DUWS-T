@@ -475,35 +475,28 @@ fnc_disguise_addGear = {
     { player addItem _x; player assignItem _x; } forEach ["ItemMap", "ItemGPS", "ItemRadio", "ItemCompass", "ItemWatch"];
 };
 publicVariable "fnc_disguise_addGear";
-// ========== 为玩家添加伪装长按动作（带防重，不自动移除） ==========
-if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK" && CIV_PRESENCE != "NONE") then {
-    if (isNil {player getVariable "DUWS_disguise_actionAdded"}) then {
-        [
-            player,
-            localize "STR_DUWS_T_DISGUISE_CIV",
-            "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
-            "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
-            "alive _target && vehicle _target == _target",
-            "alive _target && vehicle _target == _target",
-            {
-                params ["_target", "_caller", "_actionId", "_arguments"];
-                [localize "STR_DUWS_T_DISGUISE_START"] remoteExec ["hint", _caller];
-                [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_DISGUISE_START_SUB"] remoteExec ["BIS_fnc_showSubtitle", _caller];
-            },
-            {},
-            {
-                params ["_target", "_caller", "_actionId", "_arguments"];
-                [_caller] remoteExec ["fnc_disguiseAsCivilian", 2];
-            },
-            {},
-            [],
-            3,
-            0,
-            false,  // 改为 false，完成后不移除动作
-            false
-        ] call BIS_fnc_holdActionAdd;
-        player setVariable ["DUWS_disguise_actionAdded", true];
-    };
+// Single hold-action opens the disguise panel (fnc_disguise_menu), which fronts
+// both modes. Replaces the two per-mode hold-actions that triggered each disguise
+// directly; the civ-mode CIV_PRESENCE gate now lives inside the panel.
+if (isNil {player getVariable "DUWS_disguiseMenu_actionAdded"}) then {
+    [
+        player,
+        localize "STR_DUWS_T_DISGUISE_MENU_ACTION",
+        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
+        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
+        "alive _target && vehicle _target == _target",
+        "alive _target && vehicle _target == _target",
+        {},
+        {},
+        { [] spawn fnc_disguise_menu; },
+        {},
+        [],
+        1.5,
+        0,
+        false,
+        false
+    ] call BIS_fnc_holdActionAdd;
+    player setVariable ["DUWS_disguiseMenu_actionAdded", true];
 };
 // 伪装专用：本地设置俘虏状态
 fnc_disguise_setCaptiveLocal = {
@@ -513,31 +506,5 @@ fnc_disguise_setCaptiveLocal = {
 };
 publicVariable "fnc_disguise_setCaptiveLocal";
 
-// ========== 为玩家添加伪装成敌人长按动作 ==========
-if (isNil {player getVariable "DUWS_enemyDisguise_actionAdded"}) then {
-    [
-        player,
-        localize "STR_DUWS_T_ENEMY_DISGUISE_ACTION",
-        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_unbind_ca.paa",
-        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_unbind_ca.paa",
-        "alive _target && vehicle _target == _target",
-        "alive _target && vehicle _target == _target",
-        {
-            params ["_target", "_caller", "_actionId", "_arguments"];
-            [localize "STR_DUWS_T_ENEMY_DISGUISE_START"] remoteExec ["hint", _caller];
-            [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_ENEMY_DISGUISE_START_SUB"] remoteExec ["BIS_fnc_showSubtitle", _caller];
-        },
-        {},
-        {
-            params ["_target", "_caller", "_actionId", "_arguments"];
-            [_caller] remoteExec ["fnc_disguiseAsEnemy", 2];
-        },
-        {},
-        [],
-        3,
-        0,
-        false,
-        false
-    ] call BIS_fnc_holdActionAdd;
-    player setVariable ["DUWS_enemyDisguise_actionAdded", true];
-};
+// Enemy disguise is now reached through the disguise panel above (fnc_disguise_menu),
+// not its own hold-action.

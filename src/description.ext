@@ -51,6 +51,7 @@ class CfgFunctions
 #include "modules\R3F_LOG\desc_include.h"
 #include "duws\includes\remoteExec.hpp"
 #include "duws\includes\operative_menu.hpp"
+#include "duws\includes\disguise_menu.hpp"
 
 #include "duws\includes\params_modern.hpp"
 #include "duws\includes\supports_radio_modern.hpp"
