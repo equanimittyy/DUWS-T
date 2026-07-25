@@ -14,7 +14,10 @@ the `blufor_RQST_*` variables and `fnc_evalVehicleCost` — see
 `commandpointsblu1` is a networked global, so every change routes through a single
 server-side function, `fnc_cp_adjust` (`src/duws/init/server_fnc_init.sqf`), invoked as
 `[delta] remoteExec ["fnc_cp_adjust", 2]`. Callers send a signed *delta*; nothing else
-assigns or `publicVariable`s the pool. This is a hard concurrency requirement, not a style
+assigns or `publicVariable`s the pool — bar one inert exception,
+`operative/modern/fnc_operator_recruit.sqf:31`, which assigns the pool directly but subtracts
+`0` and never broadcasts. It is worth deleting precisely because the next edit to that line
+would not be inert. This is a hard concurrency requirement, not a style
 choice: mutating a networked global as `x = x - c; publicVariable "x"` from a client drops
 concurrent co-op changes and can duplicate CP — see the gotchas entry *"A shared global
 mutated as `x = x - c; publicVariable` loses concurrent writes"* in
@@ -96,6 +99,19 @@ training also adds 0.05 per kill (`fnc_createKillhouse.sqf:1019`). Neither is ex
 (the refund is still a net loss on cancel), but the pool and HUD then show values like
 `32.05`. Wrapping the refund in `floor(...)` and rounding the training reward keeps CP
 integer.
+
+**Client-side affordability checks allow a co-op overdraft.** Purchase paths read the pool
+from the buying client's own copy and apply the effect unconditionally — ~45 comparisons
+across 22 files, with `fnc_pylon_set_with_cost` (`init/server_fnc_init.sqf:770-773`) the only
+server-side check. Two players buying inside one network round-trip against a pool that funds
+a single purchase therefore both succeed, leaving it negative by the overspend. This is an
+overdraft, not a leak: both deltas are debited in full, so unlike the read-modify-write hazard
+above no CP is created, and the player must earn back to zero before buying again. Nor is it
+reliably in the player's favour — a one-shot unlock gated on its own flag
+(`dialog/fnc_request_support.sqf:12-19`) charges both buyers for one unlock. Closing it means
+the server gating the *effect* rather than the deduction, and `remoteExec` returns no value,
+so every site would need a hand-rolled reply channel and an async wait. Not worth it for an
+overdraft in a pool `client_init.sqf:186` can already drive negative on its own.
 
 **Death cost can drive CP negative.** `client_init.sqf:186` subtracts
 `DUWSMP_CP_death_cost` (up to 10) with no lower bound. Functionally harmless — the `>= cost`
