@@ -840,9 +840,12 @@ private _targetsData = [
 // --DUWS-COMPOSITION END--
 
 // ========== 存储关键数据到 missionNamespace（供客户端交互使用） ==========
-missionNamespace setVariable ["killhouse_centerX", _centerSpawnX];
-missionNamespace setVariable ["killhouse_centerY", _centerSpawnY];
-missionNamespace setVariable ["killhouse_centerZ", _centerSpawnZ];
+// Broadcast: clients test their own distance to the killhouse, for the contact markers and for
+// the death-penalty exemption in client_init. Left server-local, both silently fail everywhere
+// except a hosting player's machine, which is also the server.
+missionNamespace setVariable ["killhouse_centerX", _centerSpawnX, true];
+missionNamespace setVariable ["killhouse_centerY", _centerSpawnY, true];
+missionNamespace setVariable ["killhouse_centerZ", _centerSpawnZ, true];
 missionNamespace setVariable ["killhouse_targetData", _targetsData];
 missionNamespace setVariable ["killhouse_run_active", false];
 // ========== 第一步：生成普通物体 ==========
@@ -934,6 +937,7 @@ killhouse_area_radius            = 80;  // 3D from the composition centre, and t
                                         // hears hints and which enemies are still in play. The
                                         // structure reaches ~55 m from centre and floats at
                                         // 1000 m, so it cannot catch anyone standing underneath
+publicVariable "killhouse_area_radius"; // clients gate their contact markers on the same value
 
 // Players currently inside the killhouse. Position rather than a flag set by the teleport
 // actions: players also arrive by other routes and leave by dying, respawning or the exit
