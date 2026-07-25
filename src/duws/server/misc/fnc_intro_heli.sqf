@@ -11,26 +11,9 @@ if (!isServer) exitWith {};
 if (!isNil "intro_heli_executed") exitWith { ["WARN", "INTRO", "Already executed, skipping."] call fnc_log; };
 missionNamespace setVariable ["intro_heli_executed", true, true];
 
-// ==================== JIP 处理（流程结束后） ====================
-// exitWith, not then + return: SQF has no return keyword, so the original read as an
-// undefined variable and fell through into the intro sequence instead of stopping after
-// placing the JIP players. The file is spawned, so exitWith here ends the script.
-if (!isNil "intro_heli_done" && {intro_heli_done}) exitWith {
-    private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", []];
-    if !(_hqPos isEqualTo []) then {
-        {
-            if (!(_x getVariable ["intro_completed", false])) then {
-                private _landPos = [_hqPos, 5, 50, 3, 0, 0.2, 0] call BIS_fnc_findSafePos;
-                if (_landPos isEqualTo [0,0,0]) then {
-                    _landPos = _hqPos getPos [random 30, random 360];
-                };
-                _x setPos _landPos;
-                _x setVariable ["intro_completed", true];
-            };
-        } forEach (call BIS_fnc_listPlayers);
-    };
-    ["INFO", "INTRO", "intro already run, JIP players placed at the HQ"] call fnc_log;
-};
+// Late joiners are placed by the client, not here: client_init waits on intro_heli_done and
+// teleports any player whose intro_completed is false. That path also clears the black screen,
+// which the server never did.
 
 // 等待所有玩家就绪
 waitUntil { sleep 0.5; count allPlayers > 0 };
@@ -183,10 +166,7 @@ private _processedPlayers = _boardedPlayers + _unboardedPlayers;
 } forEach _allPlayersNow;
 
 // ==================== 索降模拟 ====================
-private _descentDuration = 10;      // 下降总时长（秒）
-
-// 获取直升机当前位置（ASL）和正下方地面点 ASL
-private _heliPosASL = getPosASL _heli;
+// 获取直升机正下方地面点 ASL
 private _heliPos2D = getPos _heli;
 private _groundPosASL = [(_heliPos2D select 0), (_heliPos2D select 1), getTerrainHeightASL [_heliPos2D select 0, _heliPos2D select 1]];
 
