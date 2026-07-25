@@ -534,7 +534,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
                 private _enemyRemaining = 610 - (diag_tickTime - _lastEnemy);
                 if (_enemyRemaining > 610 || _enemyRemaining < -610) then {
                     _player setVariable ["DUWS_enemyDisguise_lastUse", diag_tickTime - 305, true];
-                    if (duws_log_level >= 4) then { ["DEBUG", "MISSION", format ["Server fixed enemy disguise for %1", name _player]] call fnc_log; };
+                    if (duws_log_level >= 4) then { ["DEBUG", "SUPPORT", format ["Server fixed enemy disguise for %1", name _player]] call fnc_log; };
                 };
                 
                 // ----------------- 平民伪装冷却（最大 300 秒）-----------------
@@ -542,7 +542,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
                 private _civRemaining = 310 - (diag_tickTime - _lastCiv);
                 if (_civRemaining > 310 || _civRemaining < -310) then {
                     _player setVariable ["DUWS_disguise_lastUse", diag_tickTime - 155, true];
-                    if (duws_log_level >= 4) then { ["DEBUG", "MISSION", format ["Server fixed civilian disguise for %1", name _player]] call fnc_log; };
+                    if (duws_log_level >= 4) then { ["DEBUG", "SUPPORT", format ["Server fixed civilian disguise for %1", name _player]] call fnc_log; };
                 };
                 
                 // ----------------- 雇佣游击队冷却（最大 1800 秒）-----------------
@@ -550,7 +550,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
                 private _partisanRemaining = 1810 - (diag_tickTime - _lastPartisan);
                 if (_partisanRemaining > 1810 || _partisanRemaining < -1810) then {
                     _player setVariable ["DUWS_hirePartisans_lastUse", diag_tickTime - 905, true];
-                    if (duws_log_level >= 4) then { ["DEBUG", "MISSION", format ["Server fixed partisans for %1", name _player]] call fnc_log; };
+                    if (duws_log_level >= 4) then { ["DEBUG", "SUPPORT", format ["Server fixed partisans for %1", name _player]] call fnc_log; };
                 };
                 
                 // ----------------- 雇佣 PMC 冷却（最大 900 秒）-----------------
@@ -558,7 +558,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
                 private _pmcRemaining = 910 - (diag_tickTime - _lastPMC);
                 if (_pmcRemaining > 910 || _pmcRemaining < -910) then {
                     _player setVariable ["DUWS_hirePMC_lastUse", diag_tickTime - 455, true];
-                    ["INFO", "MISSION", format ["Server fixed PMC for %1", name _player]] call fnc_log;
+                    if (duws_log_level >= 4) then { ["DEBUG", "SUPPORT", format ["Server fixed PMC for %1", name _player]] call fnc_log; };
                 };
                 
                 // ----------------- GM 休息治疗冷却（最大 600 秒）-----------------
@@ -567,7 +567,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
                 if (_gmRemaining > 610 || _gmRemaining < -610) then {
                     missionNamespace setVariable ["GM_Heal_LastUsedTime", diag_tickTime - 305];
                     publicVariable "GM_Heal_LastUsedTime";
-                    ["INFO", "MISSION", "Server fixed GM heal cooldown"] call fnc_log;
+                    if (duws_log_level >= 4) then { ["DEBUG", "SUPPORT", "Server fixed GM heal cooldown"] call fnc_log; };
                 };
                 
             } forEach (call BIS_fnc_listPlayers);
