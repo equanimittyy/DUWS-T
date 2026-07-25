@@ -525,6 +525,8 @@ fnc_duws_help = compile preprocessFileLineNumbers "duws\functions\misc\fnc_duws_
 fnc_bottom_right_message = compile preprocessFileLineNumbers "duws\functions\misc\fnc_bottom_right_message.sqf";publicVariable "fnc_bottom_right_message";
 fnc_autoSave = compile preprocessFileLineNumbers "duws\functions\misc\fnc_autoSave.sqf";publicVariable "fnc_autoSave";
 fnc_playerTF_spawn = compile preprocessFileLineNumbers "duws\functions\misc\fnc_playerTF_spawn.sqf";publicVariable "fnc_playerTF_spawn";
+// Not broadcast: server-only, so an accidental client call fails loud.
+fnc_HCsquad_spawn = compile preprocessFileLineNumbers "duws\functions\misc\fnc_HCsquad_spawn.sqf";
 fnc_sideChat_filter = compile preprocessFileLineNumbers "duws\functions\misc\fnc_sideChat_filter.sqf";publicVariable "fnc_sideChat_filter";
 fnc_sitrep_display = compile preprocessFileLineNumbers "duws\functions\misc\fnc_sitrep_display.sqf";publicVariable "fnc_sitrep_display";
 fnc_fill_ammobox = compile preprocessFileLineNumbers "duws\functions\misc\fnc_fill_ammobox.sqf";publicVariable "fnc_fill_ammobox";
