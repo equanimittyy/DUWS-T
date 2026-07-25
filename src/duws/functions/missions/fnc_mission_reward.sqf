@@ -13,8 +13,7 @@ _cp_multiplied_reward = (_cpreward * cp_reward_multiplier);
 [_cp_multiplied_reward] remoteExec ["fnc_cp_adjust", 2];
 
 // MODIFY ARMY POWER - OPF loses 1/2 the points, BLU gains full points
-WARCOM_blufor_ap = WARCOM_blufor_ap + _apreward;
-publicVariable "WARCOM_blufor_ap";
+["BLU", _apreward] remoteExec ["fnc_ap_adjust", 2];
 
 //_opfreward = round(_apreward/2);
 //WARCOM_opfor_ap = WARCOM_opfor_ap - _opfreward;

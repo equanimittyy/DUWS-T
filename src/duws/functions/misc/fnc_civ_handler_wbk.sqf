@@ -131,14 +131,12 @@ if (_mode == "cleanup") exitWith {
         if (scorched_earth_enabled) then {
             [15] remoteExec ["fnc_cp_adjust", 2];
             private _bluApPenalty = - (3 + floor random 3);
-            WARCOM_blufor_ap = WARCOM_blufor_ap + _bluApPenalty;
-            publicVariable "WARCOM_blufor_ap";
+            ["BLU", _bluApPenalty] remoteExec ["fnc_ap_adjust", 2];
             private _repPenalty = - (3 + floor random 3);
             Player_Reputation = Player_Reputation + _repPenalty;
             publicVariable "Player_Reputation";
             private _opfApPenalty = - (3 + floor random 3);
-            WARCOM_opfor_ap = WARCOM_opfor_ap + _opfApPenalty;
-            publicVariable "WARCOM_opfor_ap";
+            ["OPF", _opfApPenalty] remoteExec ["fnc_ap_adjust", 2];
             private _msg = format [localize "STR_DUWS_T_scorched_earth_effect2", _repPenalty, _bluApPenalty, _opfApPenalty];
             ["SE", [localize "STR_DUWS_T_scorched_earth_effect1", _msg]] remoteExec ["BIS_fnc_showNotification", 0];
         };

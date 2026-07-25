@@ -18,6 +18,19 @@ fnc_cp_adjust = {
 	if (hasInterface) then { ctrlSetText [1000, format ["%1", commandpointsblu1]]; };
 };
 
+// Server-authoritative Army Power mutation -- same delta contract as fnc_cp_adjust:
+// callers remoteExec a signed delta, nothing else assigns the pools. No default case
+// so an unrecognised side is a no-op, not a silent credit to the wrong pool; no clamp
+// (fnc_opfor_cap legitimately drives BLU AP down); no HUD counter to refresh.
+fnc_ap_adjust = {
+	if (!isServer) exitWith {};
+	params ["_side", ["_delta", 0]];
+	switch (_side) do {
+		case "OPF": { WARCOM_opfor_ap = WARCOM_opfor_ap + _delta; publicVariable "WARCOM_opfor_ap"; };
+		case "BLU": { WARCOM_blufor_ap = WARCOM_blufor_ap + _delta; publicVariable "WARCOM_blufor_ap"; };
+	};
+};
+
 // Player-callsign substitution for radio/subtitle dialogue. The stringtable bakes
 // the default callsign "Alpha 1-1" into the English lines; this swaps it for the
 // host-chosen duws_callsign at display time, so wrapping every localize is safe:

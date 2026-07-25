@@ -51,10 +51,8 @@ zoneundercontrolblu = zoneundercontrolblu - 1;
 publicVariable "zoneundercontrolblu";
 
 // MODIFY ARMY POWER - OPF gains full points, BLU loses full points
-WARCOM_opfor_ap = WARCOM_opfor_ap + _points;
-WARCOM_blufor_ap = WARCOM_blufor_ap - _points;
-publicVariable "WARCOM_opfor_ap";
-publicVariable "WARCOM_blufor_ap";
+["OPF", _points] remoteExec ["fnc_ap_adjust", 2];
+["BLU", -_points] remoteExec ["fnc_ap_adjust", 2];
 
 // MODIFY MARKER ICON
 str(_markername) setMarkerColor "ColorRed";

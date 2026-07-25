@@ -52,11 +52,9 @@ zoneundercontrolblu = zoneundercontrolblu + 1;
 publicVariable "zoneundercontrolblu";
 
 // MODIFY ARMY POWER - OPF gains 1/2 the points, BLU gains full points
-_opfreward = round(_points/2);  
-WARCOM_opfor_ap = WARCOM_opfor_ap + _opfreward;
-WARCOM_blufor_ap = WARCOM_blufor_ap + _points;
-publicVariable "WARCOM_opfor_ap";
-publicVariable "WARCOM_blufor_ap";
+_opfreward = round(_points/2);
+["OPF", _opfreward] remoteExec ["fnc_ap_adjust", 2];
+["BLU", _points] remoteExec ["fnc_ap_adjust", 2];
 
 // 将战区旗杆改为蓝色
 if (VERSION_X == "MODERN" || simple_zones_enable) then {
