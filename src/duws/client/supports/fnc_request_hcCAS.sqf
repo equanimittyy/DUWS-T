@@ -59,7 +59,7 @@ _vehicle addEventHandler ["Killed", {
         HC_CAS_killedPending = true;  // 标记Killed正在处理，让Deleted跳过
 
         // 坠毁广播
-        _speaker = localize "STR_DUWS_T_dispatcher";
+        _speaker = localize "STR_DUWS_T_OVERLORD";
         _message = localize "STR_DUWS_T_casdownkoi";
         [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
         [] remoteExec ["fnc_broadcastRadioChatter", 0];
@@ -79,7 +79,7 @@ _vehicle addEventHandler ["Killed", {
         HC_CAS_killedPending = false;
 
         // 广播可用消息
-        _speaker = localize "STR_DUWS_T_dispatcher";
+        _speaker = localize "STR_DUWS_T_OVERLORD";
         _message1 = ([localize "STR_DUWS_T_casreservekoi"] call fnc_cs);
         [_speaker, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
         [] remoteExec ["fnc_broadcastRadioChatter", 0];
@@ -102,7 +102,7 @@ _vehicle addEventHandler ["Deleted", {
     HC_CAS_active = false;
     HC_CAS_currentVehicle = nil;
     HC_CAS_currentGroup = nil;
-    _speaker = localize "STR_DUWS_T_dispatcher";
+    _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = ([localize "STR_DUWS_T_casreservekoi"] call fnc_cs);  // 复用“可用”提示
     [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];

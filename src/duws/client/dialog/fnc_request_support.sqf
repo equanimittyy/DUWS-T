@@ -16,7 +16,7 @@ switch (_index2) do {
 		if (support_supplydrop_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
 		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
 		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_dispatcher";
+		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = ([localize "STR_DUWS_T_supplydropunlock"] call fnc_cs);
 		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
@@ -76,7 +76,7 @@ switch (_index2) do {
 		if (support_siva_drop_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
 		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
 		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_dispatcher";
+		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_sivaunlock";
 		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
@@ -115,7 +115,7 @@ case 5: {
     _cost = 15;
     if (support_halo_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
     if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-    _speaker = localize "STR_DUWS_T_dispatcher";
+    _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = localize "STR_DUWS_T_HALOunlock";
     [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
     ctrlSetText [1000, format["%1",commandpointsblu1]];
@@ -153,7 +153,7 @@ case 5: {
 		if (support_uav_recon_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
 		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
 		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_dispatcher";
+		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_uavunlock";
 		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
@@ -171,7 +171,7 @@ case 5: {
 		if (support_helotaxi_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
 		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
 		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_dispatcher";
+		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_helotaxiunlock";
 		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
@@ -189,7 +189,7 @@ case 8: {
     if (support_helolift_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
     if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
     support_count = support_count + 1;
-    _speaker = localize "STR_DUWS_T_dispatcher";
+    _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = localize "STR_DUWS_T_heloliftunlock";
     [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
     ctrlSetText [1000, format["%1",commandpointsblu1]];
@@ -207,7 +207,7 @@ case 8: {
 		if (support_boattaxi_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
 		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
 		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_dispatcher";
+		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_boattaxiunlock";
 		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
@@ -293,7 +293,7 @@ case 11: {
 		if (support_jdam_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
 		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
 		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_dispatcher";
+		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = ([localize "STR_DUWS_T_jdamunlock"] call fnc_cs);
 		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
@@ -314,7 +314,7 @@ case 11: {
 		if (support_laser_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
 		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
 		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_dispatcher";
+		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_laserguidedunlock";
 		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
@@ -463,7 +463,7 @@ case 21: {
     // The flag reads "still unclaimed" here, unlike every other support flag in this file.
     if (!support_mobile_HQ_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
     if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-    _speaker = localize "STR_DUWS_T_dispatcher";
+    _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = localize "STR_DUWS_T_mhqunlock";
     [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
     ctrlSetText [1000, format["%1",commandpointsblu1]];

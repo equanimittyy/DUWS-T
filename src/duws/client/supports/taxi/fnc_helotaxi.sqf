@@ -23,7 +23,7 @@ _message = ([localize "STR_DUWS_T_helotaxicall0"] call fnc_cs);
 [_speakeracteam, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
-_speaker = localize "STR_DUWS_T_dispatcher";
+_speaker = localize "STR_DUWS_T_OVERLORD";
 _message = format[localize "STR_DUWS_T_helotaxicall1",_taxiName,_random1,_random2];
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
@@ -98,7 +98,7 @@ _something_happened = {
 	deleteVehicle _helipad1;
 	deleteMarker str(_markerpickup);
 	_message = format[localize "STR_DUWS_T_helotaxidamaged",_taxiName,_random1,_random2];
-	_speaker = localize "STR_DUWS_T_dispatcher";
+	_speaker = localize "STR_DUWS_T_OVERLORD";
 	[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 	_helo land "LAND";
@@ -302,7 +302,7 @@ sleep 1;
 // IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
 	_message = format[localize "STR_DUWS_T_helotaxidamaged",_taxiName,_random1,_random2];
-	_speaker = localize "STR_DUWS_T_dispatcher";
+	_speaker = localize "STR_DUWS_T_OVERLORD";
 	[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 	[] remoteExec ["fnc_broadcastRadioChatter", 0];
 	sleep 200;

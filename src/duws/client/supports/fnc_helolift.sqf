@@ -80,7 +80,7 @@ missionNamespace setVariable [_moveCompletedVar, false]; // 初始化（客户�
 [player, "setInitial", [_targetVehicle]] remoteExec ["fnc_helolift_waypoints", 2];
 
 sleep 8;
-_speaker = localize "STR_DUWS_T_dispatcher";
+_speaker = localize "STR_DUWS_T_OVERLORD";
 _message = format[localize "STR_DUWS_T_helolift1"];
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];

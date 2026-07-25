@@ -19,7 +19,7 @@ _message = ([localize "STR_DUWS_T_requestuavscan"] call fnc_cs);
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
-_speaker = localize "STR_DUWS_T_dispatcher";
+_speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_requestuavscan1";
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];

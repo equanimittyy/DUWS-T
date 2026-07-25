@@ -109,6 +109,24 @@ to do nothing in-game, grep for a second `<Key ID>` with the same ID before assu
 change didn't take, and fold any new duplicate into one copy on purpose rather than
 leaving a dead twin.
 
+## `format` discards surplus arguments, so a missing `%N` never errors
+
+**`format` matches placeholders to the supplied array positionally and drops any argument
+with no matching `%N` — no error, no rpt warning. A string that references fewer
+placeholders than its call site passes renders plausible-but-wrong text forever.**
+
+A *duplicated* placeholder hides best of all: `"%1 %2-%2"` against
+`[_name, _digit1, _digit2]` (`src/duws/client/supports/taxi/fnc_helotaxi.sqf:11-12`)
+yields a well-formed callsign on every call, just never one whose two digits differ — so
+the output looks right unless you know the second digit is random. Localisation multiplies
+the exposure: every language holds its own copy of the format string, so one locale can
+drop a placeholder while the rest are correct, and only players in that locale ever see it.
+
+**How to apply:** treat the placeholder set as a contract between the call site and *every*
+language variant of the key. When editing a `%N`-bearing string, grep the ID for its
+`format[...]` call, count the arguments, and confirm the highest `%N` matches in each
+language tag — the engine will not tell you when they diverge.
+
 ## `hint` renders beneath the open map, so map-phase prompts are invisible
 
 **A `hint` (or `hintSilent`) issued while the map is open — `forceMap true` /

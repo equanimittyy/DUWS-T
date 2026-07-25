@@ -19,7 +19,7 @@ _vehicle = call (compile _var); // Get the vehicle variable
 
 if !(["CP", _vehicle select 2] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv"};
 
-_speaker = localize "STR_DUWS_T_dispatcher";
+_speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_vehicleready";
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
