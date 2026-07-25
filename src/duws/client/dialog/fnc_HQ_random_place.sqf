@@ -37,7 +37,11 @@ while {!_found} do {
 	};		
 };
 
+// Broadcast with the assignment, not at the end of this script. The AO-direction wait below
+// blocks on a human map click, and until this lands every other machine still holds the
+// server_var_init default of []. Manual placement already publishes at its assignment.
 PosOfBLUHQ = _foundSafePos;
+publicVariable "PosOfBLUHQ";
 
 titleCut ["", "BLACK IN", 10];
 clicked = false;
@@ -83,7 +87,8 @@ hint "";
 openMap [false, false];
 titleCut ["", "BLACK FADED", 999];
 
+// server_init.sqf gates the whole campaign on this flag, so it must be the last thing sent:
+// everything it implies is already published above.
 chosen_hq_placement = true;
 publicVariable "chosen_hq_placement";
-publicVariable "PosOfBLUHQ";
 
