@@ -42,12 +42,10 @@ publicVariable "createzone_server";
 // Give the go! WARCOM can continue execution
 chosen_settings = true;publicVariable "chosen_settings";
 
-diag_log format["----- DUWS_T CHOSEN SETTINGS --------- Callsign: %10-------Manual zones: %11-------Max radius: %1-------Min radius: %2-------Zones number: %3-------Command points: %4-------BLU AP: %5-------OPF AP: %6-------Weather type: %7-------BLU AI skill: %8-------OPF AI skill: %9",zones_max_radius,zones_min_radius,zones_number,commandpointsblu1,WARCOM_opfor_ap,WARCOM_blufor_ap,weather_type,blufor_ai_skill,opfor_ai_skill,duws_callsign,manually_chosen];
-
-// Full setup snapshot, one key=value per line so two runs can be diffed directly. The line
-// above predates this and omits the settings that drive generation cost -- max distance,
-// urban filter, AO arc, zone spacing -- which is exactly what you need when comparing a
-// fast run against a slow one.
+// Full setup snapshot, one key=value per line so two runs can be diffed directly. A single
+// packed line cannot carry the settings that drive generation cost -- max distance, urban
+// filter, AO arc, zone spacing -- which is exactly what you need when comparing a fast run
+// against a slow one.
 {
     ["INFO", "SETUP", format ["%1 = %2", _x,
         (if (isNil _x) then {"<nil>"} else {missionNamespace getVariable _x})]] call fnc_log;

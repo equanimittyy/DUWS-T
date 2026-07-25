@@ -188,7 +188,6 @@ if (moreUrban == 1) then {
 
 ["INFO", "ZONES", format ["moreUrban filters done. allLocations=%1 allTowns=%2, building pass %3s",
     count _allLocations, count _allTowns, round (diag_tickTime - _tStage)]] call fnc_log;
-diag_log "BUILDING MASTER_allLocations_filtered";
 _temp_Locations_Master = _allLocations call BIS_fnc_arrayShuffle;
 _temp_allTowns = _allTowns call BIS_fnc_arrayShuffle;
 MASTER_allLocations_filtered = _temp_allTowns + _temp_Locations_Master;

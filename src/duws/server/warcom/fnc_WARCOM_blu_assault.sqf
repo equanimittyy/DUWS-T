@@ -7,7 +7,6 @@ WARCOM_blu_attack_wave_avalaible = false;
 [] spawn {
 // 使用本地化字符串（从stringtable.xml加载
 
-	diag_log format ["WARCOM_blufor_ap_assault: %1", WARCOM_blufor_ap];
 		  
     waitUntil {sleep 30; WARCOM_blufor_ap>=10};
     WARCOM_blu_attack_wave_avalaible = true;

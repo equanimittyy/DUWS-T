@@ -80,7 +80,6 @@ fnc_factionGen = {
 
 	_grunt = [_grunt, ["pilot", "crew", "camo", "officer"], false] call fnc_filterByClassName;
 
-	diag_log format ["Populating faction data: %1", _grunt];
 
 //////////////////////////////////////////////////////////////////////
 /////  UNITS, VEHICLES WITH FIXED, ONE-OFF ROLES

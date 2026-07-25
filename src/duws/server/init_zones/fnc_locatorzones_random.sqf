@@ -3,9 +3,7 @@
 //////////////////
 // Random Zones
 //////////////////
-diag_log "WAITING FOR MASTER_allLocations_filtered";
 while {!(["ZONES", "MASTER_allLocations_filtered from fnc_moreUrban_locations", {count(MASTER_allLocations_filtered) > 0}, 300] call fnc_waitLogged)} do {};
-diag_log "RECEIVED MASTER_allLocations_filtered";
 
 _radius = _this select 0;
 _diff = _this select 1;
@@ -180,7 +178,6 @@ if (_found_distance) then {
     trap = _i;
     publicVariable "trap";
     _zonePos = [round(_zonePos select 0), round(_zonePos select 1)];
-    diag_log format ["Create Zone start: %1", _i];
     private _prefabFlag = true;
     if (simple_zones_enable) then { _prefabFlag = false };
     [format[localize "STR_DUWS_T_39z6pg7y",_i], _points_zone, _zone_radius, _zonePos, _fortified, _prefabFlag, _i] spawn fnc_createZone;

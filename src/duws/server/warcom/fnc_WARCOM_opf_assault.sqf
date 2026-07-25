@@ -1,7 +1,6 @@
 if (!isServer) exitWith {};
 WARCOM_opf_attack_wave_type = "";
 WARCOM_opf_attack_wave_avalaible = false;
-diag_log format ["WARCOM_opfor_ap_assault: %1", WARCOM_opfor_ap];
 
 // Type of attack wave
 [] spawn {

@@ -2,7 +2,6 @@ if (!isServer) exitWith {};
 _loop = true;
 
 WARCOM_blu_patrol_type = "";
-diag_log format ["WARCOM_blufor_ap_patrol: %1", WARCOM_blufor_ap];
 
 // Type of patrol
 [] spawn {

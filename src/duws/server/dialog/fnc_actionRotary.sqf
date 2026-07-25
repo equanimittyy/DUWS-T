@@ -8,7 +8,6 @@
 params ["_object", "_display", "_iconType", "_code"];
 
 _icon = "";
-//diag_log format ["Action Rotary on HQ: %1", str _code];
 
 switch (_iconType) do {
 	case "connect": {

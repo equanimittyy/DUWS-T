@@ -15,7 +15,6 @@ _zone_num = _this select 6;
 _visible = true;
 if (hardcore_mode_enable) then {_visible = false};
 
-diag_log format ["Create Zone variables: %1", str [_name,_points,_size,_zonePos,_fortified,_prefab,_zone_num]];
 
 amount_zones_created = amount_zones_created + 1;
 publicVariable "amount_zones_created";

@@ -20,8 +20,6 @@ _listREMOV = [];
 
 _index = lbCurSel 2101;
 
-diag_log format ["_listREMOV: %1", _listREMOV];
-diag_log format ["_index: %1", _index];
 
 _selected_fob = _listREMOV select _index;
 _selected_fob_pos = _selected_fob select 0;

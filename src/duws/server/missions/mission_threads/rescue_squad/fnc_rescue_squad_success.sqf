@@ -21,7 +21,6 @@ if (isMultiplayer) then {
 		};
 	};
 
-	diag_log format ["Nearest Units: %1", _nearestUnits];
 
 	{
 		if (_x in _nearestUnits) then {_trigger = _x}; 

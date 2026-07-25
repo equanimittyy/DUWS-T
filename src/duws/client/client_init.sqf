@@ -73,7 +73,6 @@ if (isMultiplayer) then {
 	
 	if (((vehiclevarname player) != "player1" && !WARCOM_init_done) || WARCOM_init_done) then {
 		//titleCut ["", "BLACK FADED", 999];
-		diag_log format ["%1 Init %2", profileName,(vehiclevarname player)];
 		titleCut ["", "BLACK IN", 10];
 		forceMap true;
 		mapAnimAdd [3, 1, [5000,5000]];

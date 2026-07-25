@@ -13,7 +13,6 @@ switch (weather_type) do {
 		sleep 0.1;
 		forceWeatherChange;
 		sleep 0.1;
-		diag_log format ["DUWS_X DEBUG: _firstWeather: %1", _firstWeather];
 		[] spawn {
 			while {true} do {
 				_wait_after = random [3000,3900,4200];   // cloud patterns take 50min to fully change
@@ -28,7 +27,6 @@ switch (weather_type) do {
 				_fog_height = (_fog_height / 10); // transforme en centiemes
 				if (_fog_height<0.1) then {_fog_height = 0.1};
 
-				diag_log format ["DUWS_X DEBUG: %3 setFog [%1, %2, 10]", _fog_intensity, _fog_height, _fog_time];
 				FogArray = [_fog_intensity, _fog_height, 10];
 				_fog_time setFog FogArray;
 
@@ -37,7 +35,6 @@ switch (weather_type) do {
 				_overcast_intensity = (_overcast_intensity + 0.2);  // base weather
 				OvercastVar = _overcast_intensity;
 				0 setOvercast OvercastVar;
-				diag_log format ["DUWS_X DEBUG: setOvercast: %1 waitSecs: %2", _overcast_intensity, _wait_after];
 
 				_wait_total = _fog_time + _wait_after;
 				_wait_total_minute = _wait_total / 60;
@@ -53,7 +50,6 @@ switch (weather_type) do {
 		sleep 0.1;
 		forceWeatherChange;
 		sleep 0.1;
-		diag_log format ["DUWS_X DEBUG: _firstWeather: %1", _firstWeather];
 		[] spawn {
 			while {true} do {
 				_wait_after = random [3000,3900,4200];   // cloud patterns take 50min to fully change
@@ -68,7 +64,6 @@ switch (weather_type) do {
 				_overcast_intensity = (_overcast_intensity / 10); 
 				OvercastVar = _overcast_intensity;
 				0 setOvercast OvercastVar;
-				diag_log format ["DUWS_X DEBUG: setOvercast: %1 waitSecs: %2", _overcast_intensity, _wait_after];
 				
 				_fog_time = 0;
 				_wait_total = _fog_time + _wait_after;
@@ -86,7 +81,6 @@ switch (weather_type) do {
 		sleep 0.1;
 		forceWeatherChange;
 		sleep 0.1;
-		diag_log format ["DUWS_X DEBUG: _firstWeather: %1", _firstWeather];
 		[] spawn {
 			while {true} do {
 				_wait_after = random [3000,3900,4200];   // cloud patterns take 50min to fully change
@@ -100,7 +94,6 @@ switch (weather_type) do {
 				_fog_height = (_fog_height / 10); 
 				if (_fog_height<0.1) then {_fog_height = 0.1};
 				
-				diag_log format ["DUWS_X DEBUG: %3 setFog [%1, %2, 10]", _fog_intensity, _fog_height, _fog_time];
 				FogArray = [_fog_intensity, _fog_height, 10];
 				_fog_time setFog FogArray;
 				
@@ -109,7 +102,6 @@ switch (weather_type) do {
 				_overcast_intensity = (_overcast_intensity + 0.3);  
 				OvercastVar = _overcast_intensity;
 				0 setOvercast OvercastVar;
-				diag_log format ["DUWS_X DEBUG: setOvercast: %1 waitSecs: %2", _overcast_intensity, _wait_after];
 
 				_wait_total = _fog_time + _wait_after;
 				_wait_total_minute = _wait_total / 60;
@@ -126,7 +118,6 @@ switch (weather_type) do {
 		sleep 0.1;
 		forceWeatherChange;
 		sleep 0.1;
-		diag_log format ["DUWS_X DEBUG: _firstWeather: %1", _firstWeather];
 		[] spawn {
 			while {true} do {
 				_wait_after = random [3000,3900,4200];   // cloud patterns take 50min to fully change
@@ -139,7 +130,6 @@ switch (weather_type) do {
 				_fog_height = random 1;
 				_fog_height = (_fog_height / 10); 
 				if (_fog_height<0.1) then {_fog_height = 0.1};
-				diag_log format ["DUWS_X DEBUG: %3 setFog [%1, %2, 10]", _fog_intensity, _fog_height, _fog_time];
 				FogArray = [_fog_intensity, _fog_height, 10];
 				_fog_time setFog FogArray;
 				
@@ -148,7 +138,6 @@ switch (weather_type) do {
 				_overcast_intensity = (_overcast_intensity + 0.4);  // base weather is 0.4
 				OvercastVar = _overcast_intensity;
 				0 setOvercast OvercastVar;
-				diag_log format ["DUWS_X DEBUG: setOvercast: %1 waitSecs: %2", _overcast_intensity, _wait_after];
 
 				_wait_total = _fog_time + _wait_after;
 				_wait_total_minute = _wait_total / 60;
@@ -164,7 +153,6 @@ switch (weather_type) do {
 		sleep 0.1;
 		forceWeatherChange;
 		sleep 0.1;
-		diag_log format ["DUWS_X DEBUG: _firstWeather: %1", _firstWeather];
 		[] spawn {
 			while {true} do {
 				_wait_after = random [3000,3900,4200];   // cloud patterns take 50min to fully change
@@ -178,7 +166,6 @@ switch (weather_type) do {
 				_fog_height = (_fog_height / 10); 
 				if (_fog_height<0.1) then {_fog_height = 0.1};
 
-				diag_log format ["DUWS_X DEBUG: %3 setFog [%1, %2, 10]", _fog_intensity, _fog_height, _fog_time];
 				FogArray = [_fog_intensity, _fog_height, 10];
 				_fog_time setFog FogArray;
 
@@ -186,7 +173,6 @@ switch (weather_type) do {
 				_overcast_intensity = (_overcast_intensity / 10); 
 				OvercastVar = _overcast_intensity;
 				0 setOvercast OvercastVar;
-				diag_log format ["DUWS_X DEBUG: setOvercast: %1 waitSecs: %2", _overcast_intensity, _wait_after];
 				_wait_total = _fog_time + _wait_after;
 				_wait_total_minute = _wait_total / 60;
 				sleep _wait_after;
@@ -203,7 +189,6 @@ switch (weather_type) do {
 		sleep 0.1;
 		forceWeatherChange;
 		sleep 0.1;
-		diag_log format ["DUWS_X DEBUG: firstWeather: %1", firstWeather];
 		_wait_after = random [3000,3900,4200];   // cloud patterns take 50min to fully change
 		sleep _wait_after;
         [] spawn {
@@ -212,7 +197,6 @@ switch (weather_type) do {
 				_overcast_intensity = random 1;
 				OvercastVar = _overcast_intensity;
 				0 setOvercast OvercastVar;
-				diag_log format ["DUWS_X DEBUG: setOvercast: %1 waitSecs: %2", _overcast_intensity, _wait_after];
 				sleep _wait_after;
 			}; //end while
 		};
@@ -226,14 +210,12 @@ switch (weather_type) do {
 				_fog_time = 0;
 				_fog_intensity = 0;
 				_fog_height = 0;
-				diag_log format ["DUWS_X DEBUG: %3 setFog [%1, %2, 10]", _fog_intensity, _fog_height, _fog_time];
 				FogArray = [_fog_intensity, _fog_height, 10];
 				_fog_time setFog FogArray;
 
 				_overcast_intensity = 0;
 				OvercastVar = _overcast_intensity;
 				0 setOvercast OvercastVar;
-				diag_log format ["DUWS_X DEBUG: setOvercast: %1 waitSecs: %2", _overcast_intensity, _wait_after];
 			
 				_wait_total = _fog_time + _wait_after;
 				_wait_total_minute = _wait_total / 60;

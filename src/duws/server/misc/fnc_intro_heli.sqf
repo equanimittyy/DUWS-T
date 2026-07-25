@@ -5,16 +5,14 @@
     依赖：PosOfBLUHQ, blufor_HELI_TRANS_UNARM_X
 */
 
-if (!isServer) exitWith { diag_log "[INTRO] Not server, exit."; };
+if (!isServer) exitWith {};
 
 // ==================== 单次执行锁 ====================
 if (!isNil "intro_heli_executed") exitWith { diag_log "[INTRO] Already executed, skipping."; };
 missionNamespace setVariable ["intro_heli_executed", true, true];
-diag_log "[INTRO] Script started, execution locked.";
 
 // ==================== JIP 处理（流程结束后） ====================
 if (!isNil "intro_heli_done" && {intro_heli_done}) then {
-    diag_log "[INTRO] Detected intro_heli_done = true, handling JIP players.";
     private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", []];
     if !(_hqPos isEqualTo []) then {
         {
@@ -25,18 +23,14 @@ if (!isNil "intro_heli_done" && {intro_heli_done}) then {
                 };
                 _x setPos _landPos;
                 _x setVariable ["intro_completed", true];
-                diag_log format ["[INTRO] JIP player %1 teleported to base.", name _x];
             };
         } forEach (call BIS_fnc_listPlayers);
     };
-    diag_log "[INTRO] JIP handling complete.";
     return;
 };
 
 // 等待所有玩家就绪
-diag_log "[INTRO] Waiting for players to connect...";
 waitUntil { sleep 0.5; count allPlayers > 0 };
-diag_log format ["[INTRO] Players ready: %1", count allPlayers];
 
 private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", []];
 if (_hqPos isEqualTo []) exitWith { diag_log "[INTRO] PosOfBLUHQ not defined." };
@@ -55,7 +49,6 @@ if (_spawnPos isEqualTo [0,0,0]) then {
 _spawnPos set [2, 50];
 
 private _heliType = missionNamespace getVariable ["blufor_HELI_TRANS_UNARM_X", "B_Heli_Transport_01_F"];
-diag_log format ["[INTRO] Helicopter type: %1", _heliType];
 private _veh = [_spawnPos, 0, _heliType, WEST] call BIS_fnc_spawnVehicle;
 private _heli = _veh select 0;
 private _heliGroup = _veh select 2;
@@ -65,21 +58,18 @@ diag_log format ["[INTRO] Helicopter spawned, group ID: %1", groupId _heliGroup]
 // 确保有驾驶员
 private _pilot = driver _heli;
 if (isNull _pilot) then {
-    diag_log "[INTRO] No pilot, creating one.";
     private _driverGroup = createGroup WEST;
     _pilot = _driverGroup createUnit [blufor_SOLDIER_X, [0,0,0], [], 0, "NONE"];
     _pilot moveInDriver _heli;
     _pilot joinSilent _heliGroup;
     deleteGroup _driverGroup;
 };
-diag_log format ["[INTRO] Pilot: %1", _pilot];
 
 // 设置直升机属性
 _heli allowDamage false;
 _heli setVehicleAmmo 0;
 _heli engineOn true;
 _heli flyInHeight 50;
-diag_log "[INTRO] Helicopter properties set.";
 
 _pilot allowDamage false;
 _pilot setCaptive true;
@@ -88,14 +78,11 @@ _pilot disableAI "AUTOTARGET";
 _pilot disableAI "AUTOCOMBAT";
 _pilot setBehaviour "CARELESS";
 _pilot allowFleeing 0;
-diag_log "[INTRO] Pilot configured.";
 
 { _x setVariable ["Vcm_Disable", true] } forEach units _heliGroup;
-diag_log "[INTRO] VCOM disabled for helicopter crew.";
 
 // ==================== 座位分配（客户端本地登机）====================
 missionNamespace setVariable ["intro_heli_object", _heli, true];
-diag_log "[INTRO] Helicopter object stored in missionNamespace.";
 private _players = call BIS_fnc_listPlayers;
 private _boardedPlayers = [];
 private _unboardedPlayers = [];
@@ -104,9 +91,6 @@ private _cargoSeats = _heli emptyPositions "cargo";
 private _gunnerSeats = _heli emptyPositions "gunner";
 private _commanderSeats = _heli emptyPositions "commander";
 private _availableSeats = _cargoSeats + _gunnerSeats + _commanderSeats;
-
-diag_log format ["[INTRO] Available seats: %1 (cargo: %2, gunner: %3, commander: %4)", 
-    _availableSeats, _cargoSeats, _gunnerSeats, _commanderSeats];
 
 {
     if (count _boardedPlayers < _availableSeats) then {
@@ -128,25 +112,20 @@ diag_log format ["[INTRO] Available seats: %1 (cargo: %2, gunner: %3, commander:
         if (_seatType != "") then {
             [netId _heli, _seatType, _x] remoteExec ["fnc_remoteBoard", _x];
             _boardedPlayers pushBack _x;
-            diag_log format ["[INTRO] Remote boarding command sent to %1 (seat: %2)", name _x, _seatType];
         } else {
             _unboardedPlayers pushBack _x;
-            diag_log format ["[INTRO] %1 no seat available", name _x];
         };
     } else {
         _unboardedPlayers pushBack _x;
-        diag_log format ["[INTRO] %1 no seat left", name _x];
     };
 } forEach _players;
 
 // 等待客户端登机
-diag_log "[INTRO] Waiting 5 seconds for players to board...";
 sleep 5;
 diag_log format ["[INTRO] Boarded players: %1, Unboarded: %2", count _boardedPlayers, count _unboardedPlayers];
 
 // 通知客户端可以开始（但不执行淡入，避免干扰）
 missionNamespace setVariable ["intro_heli_fadein", true, true];
-diag_log "[INTRO] Set intro_heli_fadein = true.";
 [["", "BLACK IN", 1]] remoteExec ["titleCut", 0];
 [] spawn fnc_bottom_right_message;
 sleep 0.5;
@@ -159,7 +138,6 @@ _wp setWaypointBehaviour "CARELESS";
 _wp setWaypointSpeed "FULL";
 _wp setWaypointCompletionRadius 30;
 _wp setWaypointStatements ["true", "missionNamespace setVariable ['intro_heli_arrived', true, true];"];
-diag_log format ["[INTRO] Helicopter waypoint set to %1", _hoverPos];
 
 [localize "STR_DUWS_T_pilot", localize "STR_DUWS_T_heli_moving"] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
@@ -180,7 +158,6 @@ missionNamespace setVariable [_arrivedVar, false];
 private _startTime = time;
 private _timeout = 120; // 超时时间（秒），可根据需要调整
 
-diag_log "[INTRO] Waiting for helicopter to reach waypoint...";
 waitUntil {
     sleep 0.5;
     private _arrived = missionNamespace getVariable [_arrivedVar, false];
@@ -191,7 +168,6 @@ waitUntil {
     };
     _arrived || !alive _heli || _timeoutReached
 };
-diag_log "[INTRO] Helicopter arrived at waypoint (or timeout forced).";
 
 [localize "STR_DUWS_T_pilot", localize "STR_DUWS_T_heli_inpos"] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
@@ -200,11 +176,9 @@ sleep 3;
 // ==================== 处理脚本执行过程中加入的 JIP 玩家 ====================
 private _allPlayersNow = call BIS_fnc_listPlayers;
 private _processedPlayers = _boardedPlayers + _unboardedPlayers;
-diag_log format ["[INTRO] Current players after arrival: %1", count _allPlayersNow];
 {
     if (!(_x in _processedPlayers) && !(_x getVariable ["intro_completed", false])) then {
         _unboardedPlayers pushBack _x;
-        diag_log format ["[INTRO] JIP player %1 detected, will be teleported directly.", name _x];
     };
 } forEach _allPlayersNow;
 
@@ -215,13 +189,10 @@ private _descentDuration = 10;      // 下降总时长（秒）
 private _heliPosASL = getPosASL _heli;
 private _heliPos2D = getPos _heli;
 private _groundPosASL = [(_heliPos2D select 0), (_heliPos2D select 1), getTerrainHeightASL [_heliPos2D select 0, _heliPos2D select 1]];
-diag_log format ["[INTRO] Helicopter ASL: %1, Ground ASL: %2", _heliPosASL, _groundPosASL];
 
 // 登机玩家：直接传送（取消分段下降）
-diag_log format ["[INTRO] Starting descent for %1 boarded players...", count _boardedPlayers];
 {
     private _player = _x;
-    diag_log format ["[INTRO] Processing boarded player %1", name _player];
 
     // 1. 对该玩家单独黑屏
     [["", "BLACK OUT", 1.5]] remoteExec ["titleCut", _player];
@@ -238,27 +209,21 @@ diag_log format ["[INTRO] Starting descent for %1 boarded players...", count _bo
     // 4. 直接传送到直升机正下方地面点
     _player setPosASL _groundPosASL;
     _player setVariable ["intro_completed", true, true];
-    diag_log format ["[INTRO] Player %1 teleported to %2", name _player, _groundPosASL];
 
     // 5. 对该玩家单独淡入
     [["", "BLACK IN", 1]] remoteExec ["titleCut", _player];
     [([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_ground_reached"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", _player];
-    diag_log format ["[INTRO] Player %1 received fade-in and subtitle.", name _player];
 } forEach _boardedPlayers;
 // 未登机玩家：等待相同时间后直接传送到直升机正下方
-diag_log format ["[INTRO] Starting direct teleport for %1 unboarded players...", count _unboardedPlayers];
 {
     private _player = _x;
-    diag_log format ["[INTRO] Processing unboarded player %1", name _player];
     sleep 3; // 等待时间
     moveOut _player;
     sleep 0.5;
     _player setPosASL _groundPosASL;
     _player setVariable ["intro_completed", true, true];
-    diag_log format ["[INTRO] Player %1 teleported to %2", name _player, _groundPosASL];
     [["", "BLACK IN", 1]] remoteExec ["titleCut", _player];
     [([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_ground_reached"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", _player];
-    diag_log format ["[INTRO] Player %1 received fade-in and subtitle.", name _player];
 } forEach _unboardedPlayers;
 
 missionNamespace setVariable ["intro_heli_done", true, true];
@@ -282,7 +247,6 @@ private _wp2 = _heliGroup addWaypoint [_flyAwayPos, 0];
 _wp2 setWaypointType "MOVE";
 _wp2 setWaypointBehaviour "CARELESS";
 _wp2 setWaypointStatements ["true", "missionNamespace setVariable ['intro_heli_leave', true, true];"];
-diag_log format ["[INTRO] Helicopter flying away to %1", _flyAwayPos];
 sleep 10;
 // ========== 焦土模式字幕 ==========
 if (!isNil "scorched_earth_enabled" && scorched_earth_enabled) then {
@@ -293,7 +257,6 @@ waitUntil {
     sleep 1;
     missionNamespace getVariable ["intro_heli_leave", false] || !alive _heli
 };
-diag_log "[INTRO] Helicopter left the area.";
 
 sleep 30;
 { deleteVehicle _x } forEach units _heliGroup;

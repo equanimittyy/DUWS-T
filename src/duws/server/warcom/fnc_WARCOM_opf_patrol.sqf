@@ -1,6 +1,5 @@
 if (!isServer) exitWith {};
 WARCOM_opf_patrol_type = "";
-diag_log format ["WARCOM_opfor_ap_patrol: %1", WARCOM_opfor_ap];
 
 sleep 20;  // Give time for WARCOM variables to init
 

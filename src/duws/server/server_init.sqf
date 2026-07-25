@@ -116,11 +116,9 @@ enableSaving [false, false];
 /////  WAIT FOR HQ SPAWNS
 //////////////////////////////////////////////
 
-diag_log "SERVER HQ_pos_found_generated";
 while {!(["BOOT", "HQ_pos_found_generated", {HQ_pos_found_generated}, 300] call fnc_waitLogged)} do {};
 
 // use weapons instead items, some factions bork on items
-diag_log "SERVER opfor_ammobox_weapons";
 while {!(["BOOT", "opfor_ammobox_weapons built", {(count opfor_ammobox_weapons) > 0}, 180] call fnc_waitLogged)} do {};
 
 
