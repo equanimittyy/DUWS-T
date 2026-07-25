@@ -5,6 +5,24 @@ Each entry states the rule, why the engine forces it, and how to apply it. Add a
 when an Arma-specific trap — not a plain SQF bug — burns a debugging session. For where
 the mission's subsystems live see [`architecture.md`](architecture.md).
 
+## `remoteExec` to your own machine still runs a frame later
+
+**`remoteExec` never executes inline, not even when the target is the machine already running
+the code. It queues the call, which runs in the scheduled environment on a later frame. Two
+statements that must not be separated cannot be split across a `remoteExec` to self.**
+
+The trap is a server-side function that validates then acts: `if (pool < cost) exitWith {};`
+followed by `[-cost] remoteExec ["fnc_pool_writer", 2]` looks atomic, and on one machine it
+reads as ordinary sequential code — but the debit lands in a later frame, so a second request
+arriving in between passes the same check against the same undebited pool. The command also
+returns nothing, so there is no handle to wait on and nothing to reveal the gap.
+
+**How to apply:** on the server, invoke a server-side function with `call`, which runs it
+inline. Reserve `remoteExec [..., 2]` for callers that are genuinely remote. When the verdict
+has to travel back to a client, `remoteExec` a reply function at the requesting player rather
+than trying to return a value — `fnc_pool_try_spend` and `fnc_pool_spend`
+(`src/duws/init/server_fnc_init.sqf`) are the two halves of that handshake.
+
 ## Non-serializable handles must not live in the mission namespace
 
 **Never store a `DISPLAY`, `CONTROL`, `SCRIPT`, `LOCATION`, or other handle type in a
@@ -162,6 +180,11 @@ points), so the loss is specifically the stale *base* a second machine read befo
 first machine's broadcast landed. A save game persists the corrupted value for the rest of
 the session. In single-player there is one machine and the bug is invisible, so it only
 surfaces in co-op.
+
+A delta writer fixes the arithmetic but not the authorisation: the *caller* still decides
+whether to spend, and on a client that decision reads a snapshot the server has already moved
+past. Both have to be server-side. See
+[`cp_economy.md`](cp_economy.md#authority-the-server-decides-a-purchase-not-the-buyer).
 
 **How to apply:** never `publicVariable` a shared resource from a non-authoritative
 machine. Route every change through one server-side function that takes a signed *delta*

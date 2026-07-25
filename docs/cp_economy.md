@@ -48,6 +48,47 @@ call sites that name the new total in a notification compute it locally as
 `Player_Reputation + delta` rather than re-reading the global, which is still pre-change at
 that point.
 
+## Authority: the server decides a purchase, not the buyer
+
+Owning the arithmetic is not the same as owning the decision. A client testing
+`commandpointsblu1 >= cost` against its own copy is reading a broadcast snapshot that is a
+network round trip out of date, so two players buying at once both pass a gate the pool funds
+once. The debits are then applied in full and the floor absorbs the overshoot, which makes the
+second purchase free.
+
+Every purchase therefore routes through a request/reply handshake, both halves in
+`init/server_fnc_init.sqf`. `fnc_pool_spend` runs on the buyer, sends the request and blocks;
+`fnc_pool_try_spend` runs on the server, tests and debits as adjacent statements against the
+one server copy, and replies with the verdict. Call sites read as a guard clause:
+
+```sqf
+if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv"};
+```
+
+Three properties are load-bearing:
+
+- **The debit is `call fnc_cp_adjust`, not `remoteExec [..., 2]`.** Even on the server,
+  remoteExec queues a scheduled job for a later frame, which would split the test from the
+  debit and reopen the gap. The same applies to the server-side purchase paths that never used
+  the handshake — `misc/fnc_redeployHQUnits.sqf`, `supports/fnc_activateBaseRepairStation.sqf`,
+  `supports/fnc_uav_scanner.sqf`, `fnc_pylon_set_with_cost`.
+- **The caller blocks, so it must be scheduled.** `waitUntil` throws in unscheduled code. Every
+  purchase entry point is `spawn`ed today — the dialog `action =` fields, the comm-menu
+  `expression =` fields, `addAction` bodies — so any new one must be too.
+- **A timeout refuses.** Silence must not let an effect through. It logs, because a dropped
+  reply is otherwise indistinguishable in-game from a genuine refusal.
+
+Three client-side comparisons survive as *advisory* pre-filters, and are commented as such:
+`supports/fnc_mapclickarty.sqf`, `supports/fnc_mapclickuav.sqf`,
+`misc/fnc_addRedeployAction.sqf`, plus the opening check in `supports/fnc_request_fob.sqf`.
+Each spares the player a wait — a 45 s map-click window, a 10 s site survey — that they
+provably cannot pay for. None of them decides anything; the charge happens later, on the
+server, against a balance the pre-filter's read has long since stopped describing.
+
+Where a comm-menu support passes `_cost = 0` the charge already happened at unlock time, so the
+handshake short-circuits and the site is left alone: `dialog/fnc_MHQ_select.sqf` and both taxis
+in `supports/taxi/` spend nothing.
+
 ## Faucets
 
 | Source | File | Amount |
@@ -140,18 +181,6 @@ source — the support refunds now wrap the division (`floor (_cost / 2)`), wher
 `floor _cost / 2` parsed as `(floor _cost) / 2` and refunded half-points. Rounding the training
 reward would delete it rather than fix it, so bounding it means accumulating whole points
 instead.
-
-**Client-side affordability checks allow a free purchase in co-op.** Purchase paths read the
-pool from the buying client's own copy and apply the effect unconditionally — ~45 comparisons
-across 22 files, with `fnc_pylon_set_with_cost` (`init/server_fnc_init.sqf:863-865`) the only
-server-side check. Two players buying inside one network round-trip against a pool that funds a
-single purchase therefore both succeed. Both deltas are debited in full, so nothing is created
-from nothing — but with the pool now floored at zero the excess debit is absorbed rather than
-carried, so the second purchase is effectively free instead of a debt the player earns back.
-Nor is it reliably in the player's favour: a one-shot unlock gated on its own flag
-(`dialog/fnc_request_support.sqf:13-20`) charges both buyers for one unlock. Closing it means
-the server gating the *effect* rather than the deduction, and `remoteExec` returns no value, so
-every site would need a hand-rolled reply channel and an async wait.
 
 **AP→CP merges the two economies.** `fnc_convertAPtoCP.sqf` trades 15 AP → 10 CP,
 repeatable with no cooldown. It is one-way (there is no CP→AP path), so it cannot loop, but

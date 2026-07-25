@@ -27,19 +27,24 @@ keeps the four consistent with each other as well as individually atomic).
 
 The two pools the player sees are floored at zero. That is not arithmetic tidiness: the
 purchase gates all read *"can I afford this"*, so a negative pool behaves like an empty one
-anyway, and the floor keeps the HUD honest. It has one consequence worth knowing — a negative
-balance used to be a debt the player had to earn back, so flooring forgives it, which makes
-the client-side affordability window below a genuinely free purchase rather than an overdraft.
+anyway, and the floor keeps the HUD honest.
+
+A delta writer settles *who computes the new value*; it does not settle *who may spend*. Those
+are separate problems and the second needs its own mechanism, because a client's affordability
+test reads a snapshot the server has already moved past. `fnc_pool_spend` /
+`fnc_pool_try_spend` are that mechanism — the buyer asks and blocks, the server tests and
+debits in one breath and replies. The contract, the surviving advisory pre-filters and the
+scheduled-caller requirement are in
+[`cp_economy.md`](cp_economy.md#authority-the-server-decides-a-purchase-not-the-buyer).
 
 Where a function is *intended* to be server-only and its locality is not provable from the
 code, assert it: `init_zones/fnc_captured.sqf` and its two peers open with
 `if (!isServer) exitWith {}` because they are driven by a `createTrigger` whose evaluation
 locality is not proven.
 
-Two hazards the invariant does **not** address, both recorded under *Balance concerns* in
-[`cp_economy.md`](cp_economy.md#balance-concerns): affordability checks read the pool on the
-buying client, so the server cannot refuse a purchase; and one direct `setVariable`-form write
-existed for years without matching the `x = x + n` shape any grep for it would find.
+One hazard the invariant does **not** address: a direct `setVariable`-form write existed for
+years without matching the `x = x + n` shape any grep for it would find. Auditing this by
+pattern misses that idiom entirely.
 
 ## Locality is decided by the caller, so line 1 states it
 
@@ -168,8 +173,8 @@ scroll action in a co-op mission:
   had already deleted. The server reads the live set off the FOB object instead, so the action
   never goes stale and never needs removing and re-adding.
 - **A per-FOB busy flag serialises rebuilds.** Two players can now fire the same action at once,
-  which would have spawned a duplicate ring over the first. The loser is refunded, because the
-  charge is still taken client-side before the request arrives.
+  which would have spawned a duplicate ring over the first. The loser is refunded: the charge
+  is settled before the rebuild request arrives, so the busy check cannot decline it in time.
 
 That last point is the one worth generalising: opening an action to every player converts a
 "only one machine can do this" assumption into a race, and the object the action hangs on is
