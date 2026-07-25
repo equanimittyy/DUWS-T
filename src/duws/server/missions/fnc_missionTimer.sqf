@@ -9,6 +9,7 @@ sleep 360;   // 6 min
 if (Mission_available) exitWith {};
 Mission_available = true;
 publicVariable "Mission_available";
+["INFO", "MISSION", "mission slot released, a new side mission can generate"] call fnc_log;
 _speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
 _message = ([localize "STR_DUWS_T_missiontimer"] call fnc_cs);
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];

@@ -713,6 +713,7 @@ if (!isNull _helipad) then { missionNamespace setVariable ["HQ_helipad_netId", n
 [_hqObj] remoteExec ["fnc_addRedeployAction", 0, true];
 
 HQ_pos_found_generated = true; publicVariable "HQ_pos_found_generated";
+["INFO", "BOOT", format ["BLUFOR HQ built at %1", PosOfBLUHQ]] call fnc_log;
 // 基地100米范围标记（半透明蓝色）
 private _baseMarkerName = format ["base_range_%1_%2", round (PosOfBLUHQ select 0), round (PosOfBLUHQ select 1)];
 private _baseRangeMarker = createMarker [_baseMarkerName, PosOfBLUHQ];

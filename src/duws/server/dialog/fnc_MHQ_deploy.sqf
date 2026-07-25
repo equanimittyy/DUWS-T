@@ -70,6 +70,8 @@ publicVariable "MHQ_respawn";
 MHQ_deployed = true;
 publicVariable "MHQ_deployed";
 
+["INFO", "SUPPORT", format ["MHQ deployed at %1", getPos MHQ1]] call fnc_log;
+
 ["undeploy"] remoteExec ["fnc_MHQ_addActions", [0,-2] select isDedicated,true];
 
 // Lock vehicle

@@ -31,6 +31,9 @@ publicVariable "zone_namePOS_pairs";
 // Add zone to the spawn/despawn array [number, blufor_close, noDespawn]
 zone_spawn_array = zone_spawn_array + [[_zone_num,false,false]];
 
+["INFO", "ZONES", format ["zone %1 registered at %2, worth %3, size %4, fortified=%5, prefab=%6",
+	_zone_num, _zonePos, _points, _size, _fortified, _prefab]] call fnc_log;
+
 // CREATE MARKER (ICON)
 _markername = format["%1%2",round(_zonePos select 0),round(_zonePos select 1)]; // Define marker name
 _markerstr = createMarker [str(_markername),_zonePos];

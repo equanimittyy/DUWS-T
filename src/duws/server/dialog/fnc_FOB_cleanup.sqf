@@ -5,6 +5,8 @@ _markername = format["fob%1%2",round (_fob_pos select 0),round (_fob_pos select 
 deleteMarker _markername;
 FOB_removed = true;
 
+["INFO", "SUPPORT", format ["FOB '%1' removed by player at %2", _fob_name, _fob_pos]] call fnc_log;
+
 ["info",[format[localize "STR_DUWS_T_mrmg6qui",_fob_name],localize "STR_DUWS_T_f28nbzbw"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 
 // Delete the FOB triggers

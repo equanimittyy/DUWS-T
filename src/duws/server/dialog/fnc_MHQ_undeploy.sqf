@@ -39,6 +39,8 @@ if (isServer) then {
 MHQ_deployed = false;
 publicVariable "MHQ_deployed";
 
+["INFO", "SUPPORT", "MHQ undeployed"] call fnc_log;
+
 // Unlock vehicle
 MHQ1 setVehicleLock "UNLOCKED";
 

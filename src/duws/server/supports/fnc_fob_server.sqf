@@ -81,6 +81,9 @@ publicVariable "Array_of_FOBS";
 Array_of_FOBname = Array_of_FOBname + [_fobname];
 publicVariable "Array_of_FOBname";
 
+["INFO", "SUPPORT", format ["FOB '%1' built at %2, %3 now standing",
+	_fobname, _foundPickupPos, count Array_of_FOBS]] call fnc_log;
+
 _spawnPos = [west, _fob] call BIS_fnc_addRespawnPosition;
 
 // spawn loop to detect FOB destroyed

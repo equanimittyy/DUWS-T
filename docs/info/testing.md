@@ -88,10 +88,48 @@ Neither lint nor the unit layer can see a running mission. Arma writes one `.rpt
 |---|---|
 | level | `ERROR` `WARN` `INFO` `DEBUG`, gated by `duws_log_level` (default 3 = INFO; set it to 4 before init for DEBUG) |
 | machine | `SRV` dedicated, `HOST` server-and-player, `CLI` player, `HC` headless — a hosted session interleaves two of these in one file |
-| tag | subsystem: `BOOT` `ZONES` `FACTION` `WARCOM` `REGISTRY` |
+| tag | one of the fixed set below |
+
+Nothing in `src/duws/` calls `diag_log` directly; a raw call is a bug, because it lands in the
+`.rpt` outside this shape and every grep below misses it. `DUWS` is the outer prefix `fnc_log`
+emits, so it must never be used as a tag — `[DUWS][INFO][SRV][DUWS]` breaks tag filtering.
+
+| Tag | Covers |
+|---|---|
+| `BOOT` | server/client init, HQ placement and construction, setup handshake |
+| `SETUP` | the per-global setup snapshot at the callsign screen |
+| `REGISTRY` | the compiled-empty self-check in `server_fnc_init.sqf` |
+| `FACTION` | BLUFOR/OPFOR resolution, custom and autodetected factions |
+| `ZONES` | generation, registration, capture and loss |
+| `MISSION` | side-mission start, reward, cleanup, slot release, dynamic missions |
+| `WARCOM` | OPFOR assault targeting, QRF, reinforcement |
+| `ECON` | every CP / AP / reputation mutation, with the reason that caused it |
+| `SUPPORT` | FOB, MHQ, repair and recycle stations, killhouse |
+| `CIV` | civilian presence, recruitment, reputation events |
+| `WBK` | the WBK survivor system |
+| `GEAR` | arsenal scans, loadout collection, disguise |
+| `INTRO` | the opening helicopter sequence |
+| `HALO` | AI HALO insertion |
+| `MARKERS` | the vendored unit-marker pack |
 
 Useful greps: `\[DUWS\]\[ERROR\]` for failures only, `\[DUWS\]\[[A-Z]*\]\[HOST\]` to separate
-the host's two halves, `\[DUWS\]\[.*\]\[ZONES\]` to follow campaign generation end to end.
+the host's two halves, `\[DUWS\]\[.*\]\[ZONES\]` to follow campaign generation end to end,
+`\[DUWS\]\[INFO\]` alone to read a whole campaign as a timeline.
+
+### Hot paths are DEBUG, and the guard goes at the call site
+
+`fnc_log` checks the level *after* its arguments are built, so `format` has already run and
+allocated by the time a `DEBUG` line is discarded. Anything on a per-unit, per-frame or
+per-trigger path must therefore test the level itself:
+
+```sqf
+if (duws_log_level >= 4) then {
+    ["DEBUG", "CIV", format ["spawn lock acquired for %1", _locIndex]] call fnc_log;
+};
+```
+
+The civilian handlers, the QuickChange arsenal scan and the disguise monitor are written this
+way because they fire for the whole session; their guard failures stay `ERROR` and ungated.
 
 ### Why the wait wrapper exists
 

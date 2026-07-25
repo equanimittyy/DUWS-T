@@ -95,6 +95,10 @@ fnc_zone_control_set = {
 			[WARCOM_zones_controled_by_OPFOR, _zonePos] call _fnc_dropFrom;
 			amount_zones_captured = amount_zones_captured + 1;
 			zoneundercontrolblu = zoneundercontrolblu + 1;
+			// Position is the only stable zone id here: the capture path never receives the
+			// generation index, and the prefab name it does carry is not unique.
+			["INFO", "ZONES", format ["captured by BLUFOR at %1, now holding %2",
+				_zonePos, zoneundercontrolblu]] call fnc_log;
 		};
 		case "OPF": {
 			[WARCOM_zones_controled_by_BLUFOR, _zonePos] call _fnc_dropFrom;
@@ -104,6 +108,8 @@ fnc_zone_control_set = {
 			WARCOM_zones_controled_by_OPFOR insert [0, [_zonePos]];
 			amount_zones_captured = amount_zones_captured - 1;
 			zoneundercontrolblu = zoneundercontrolblu - 1;
+			["INFO", "ZONES", format ["lost to OPFOR at %1, now holding %2, primary assault target",
+				_zonePos, zoneundercontrolblu]] call fnc_log;
 		};
 		default { ["ERROR", "ZONES", format ["fnc_zone_control_set: unrecognised side '%1'", _side]] call fnc_log; };
 	};

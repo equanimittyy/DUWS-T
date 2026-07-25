@@ -1,6 +1,7 @@
 // Locality: server -- callers remoteExec to target 2.
 // CLEANUP - 删除红方单位
 params ["_targetpos","_radius"];
+["INFO", "MISSION", format ["cleanup queued for %1 within %2 m", _targetpos, _radius]] call fnc_log;
 sleep 20;
 private _hintMsg = localize "STR_DUWS_T_MISSION_CLEANUP_START";
 [_hintMsg] remoteExec ["hint", 0];

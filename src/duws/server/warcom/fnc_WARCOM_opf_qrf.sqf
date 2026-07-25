@@ -25,6 +25,7 @@ _players_close = false;
 if (!_players_close) exitWith {};
 
 WARCOM_qrf_ready = false;
+["INFO", "WARCOM", format ["QRF triggered near %1", _unitPos]] call fnc_log;
 
 _spawnLoc = "";
 

@@ -6,6 +6,7 @@ _group setCombatMode "YELLOW";
 // check if at least 1 zone is under BLU control, if not, attack HQ.
 
 if (count WARCOM_zones_controled_by_BLUFOR == 0) exitWith {
+    ["INFO", "WARCOM", "no BLUFOR zones left, assault group retargeted on the HQ"] call fnc_log;
     _wp = _group addWaypoint [WARCOM_blu_hq_pos, 50];
     _wp setWaypointType "MOVE";     // MUST BE MOVE FOR FOR VEH SQUADS
 	_wp setWaypointBehaviour "AWARE";
@@ -16,6 +17,11 @@ if (count WARCOM_zones_controled_by_BLUFOR == 0) exitWith {
 _groupLeader = leader _group;
 _group_pos = getPos _groupLeader;
 _sorted_zones = [WARCOM_zones_controled_by_BLUFOR,[_group_pos],{_input0 distance _x},"ASCEND"] call BIS_fnc_sortBy;
+
+// The nearest entry is where the group actually goes first -- this is the "OPFOR is
+// attacking zone X" decision, not the wave-size ladder that spawned the group.
+["INFO", "WARCOM", format ["assault group at %1 targeting %2 (%3 BLUFOR zones queued)",
+	_group_pos, _sorted_zones select 0, count _sorted_zones]] call fnc_log;
 
 {
     _wp1 = _group addWaypoint [_x, 50];

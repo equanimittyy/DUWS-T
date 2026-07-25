@@ -121,6 +121,8 @@ _zones_array = [_zones_array, 0] call BIS_fnc_removeIndex;
 serv_zones_array = [] + _zones_array;
 publicVariable "serv_zones_array";
 
+["INFO", "ZONES", format ["manual placement complete: %1 zones", count serv_zones_array]] call fnc_log;
+
 sleep 1;
 [
 	[

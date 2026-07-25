@@ -64,6 +64,7 @@ while {true} do {
             hint localize "STR_DUWS_T_ml7p89yd";
             PosOfBLUHQ = _foundPickupPos;
             publicVariable "PosOfBLUHQ";
+            ["INFO", "BOOT", format ["HQ placed manually at %1", PosOfBLUHQ]] call fnc_log;
 
             // 创建临时 HQ 标记
             _markername = "foo";
