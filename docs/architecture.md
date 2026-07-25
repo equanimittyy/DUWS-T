@@ -94,6 +94,16 @@ the ongoing side-mission spawner, cleanup loops, and event scripts.
 | Faction detection | `functions/misc/fnc_factions_check_modern.sqf`, `factions/MODERN/AUTODETECT_*` | Adapts to installed faction mods and runs mod-free. `VERSION_X` (value `"MODERN"`) selects the faction set, doubles as the `factions/` subfolder name, and is game state — so its value is not safe to change. Full detail in [`faction_system.md`](faction_system.md) |
 | Revive | `initPlayerLocal.sqf` | Chosen at start: AIS, vanilla, or auto-disabled when ACE medical is present |
 | Performance | `modules/zbe_cache`, `modules/taw_vd`, `functions/misc/fnc_repetitive_cleanup.sqf` | Distant-AI caching, view-distance control, and aggressive zone cleanup keep a whole-map persistent war affordable |
+| Hardcore mode | `hardcore_mode_enable`, chosen in the environment menu (`functions/dialog/fnc_process_enviro_menu.sqf:160`), gating ~22 sites across `functions/init_zones/`, `functions/missions/`, `functions/warcom/` | Zone markers are created at alpha 0 and revealed by entering a zone or finding intel (`functions/init_zones/fnc_zone_reveal.sqf`); `hardcore_visibleZone_found` then releases WARCOM waves and task-force squads. See the gap below |
+
+**Known gap: hardcore does not hide zone positions from Zeus.** Under the BLUFOR curator option
+(`ZeusStatus == 1`), `functions/misc/fnc_zeus_objects_init.sqf` adds every WEST and CIVILIAN unit
+and vehicle to the curator on a 30 s loop. Arma counts static weapons as vehicles, so a curator
+can read a hidden zone's defences straight off the map. A branch there once narrowed the civilian
+half to aircraft for exactly this reason, but it tested `DUWS_MODE == "HARDCORE"` — a value
+nothing ever assigned — so it never ran once, and it has been removed rather than left as dead
+code. Restoring the intent means gating on `hardcore_mode_enable` instead, and applying the same
+guard to the civilian *unit* loop above it, which never had one.
 
 ## Vendored frameworks — `modules/`
 
