@@ -18,7 +18,7 @@ if (_duwst_isServer || _duwst_isHostedserver || _duwst_isHeadless) then
 
 if (_duwst_isClient) then 
 {
-    [] execVM "duws\init\client_init.sqf"; 
+    [] execVM "duws\client\client_init.sqf"; 
 };
 setGroupIconsVisible [true,false]; //now everyone can see enemies on map
 // INIT R3F Logistics

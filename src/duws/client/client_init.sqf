@@ -1,6 +1,6 @@
 // Locality: client -- see callers.
 diag_log format ["Client_init: %1", profileName];
-fnc_hirePartisans_clientMap = compile preprocessFileLineNumbers "duws\functions\misc\fnc_hirePartisans_clientMap.sqf";
+fnc_hirePartisans_clientMap = compile preprocessFileLineNumbers "duws\client\misc\fnc_hirePartisans_clientMap.sqf";
 publicVariable "fnc_hirePartisans_clientMap";
 ///////////////////////
 // DUWS_T Client INIT
@@ -49,8 +49,8 @@ if (!isMultiplayer) then {
 	game_master = vehiclevarname player;
 };
 
-#include "..\includes\supports_init.hpp"
-#include "..\includes\squad_number_init.hpp"
+#include "includes\supports_init.hpp"
+#include "includes\squad_number_init.hpp"
 
 // VERSION specific inits
 switch (VERSION_X) do {

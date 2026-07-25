@@ -208,14 +208,14 @@ fnc_missionLocator = compile preprocessFileLineNumbers "duws\server\missions\fnc
 fnc_create_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_create_ammo_lists.sqf";
 fnc_basic_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_basic_ammo_lists.sqf";
 fnc_warcrimes_script = compile preprocessFileLineNumbers "duws\server\misc\fnc_warcrimes_script.sqf";
-fnc_ai_rearm = compile preprocessFileLineNumbers "duws\functions\misc\fnc_ai_rearm.sqf";publicVariable "fnc_ai_rearm";
+fnc_ai_rearm = compile preprocessFileLineNumbers "duws\client\misc\fnc_ai_rearm.sqf";publicVariable "fnc_ai_rearm";
 fnc_addRandomLoot = compile preprocessFileLineNumbers "duws\server\misc\fnc_addRandomLoot.sqf";
 publicVariable "fnc_addRandomLoot";
-fnc_addFaceChangeAction = compile preprocessFileLineNumbers "duws\functions\misc\fnc_addFaceChangeAction.sqf";
+fnc_addFaceChangeAction = compile preprocessFileLineNumbers "duws\client\misc\fnc_addFaceChangeAction.sqf";
 publicVariable "fnc_addFaceChangeAction";
 fnc_hirePartisans_spawnDeployed = compile preprocessFileLineNumbers "duws\server\misc\fnc_hirePartisans_spawnDeployed.sqf";
 publicVariable "fnc_hirePartisans_spawnDeployed";
-fnc_addBoardKillhouseActions = compile preprocessFileLineNumbers "duws\functions\init_hq\fnc_addBoardKillhouseActions.sqf";
+fnc_addBoardKillhouseActions = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_addBoardKillhouseActions.sqf";
 publicVariable "fnc_addBoardKillhouseActions";
 // SIDE MISSION FUNCTIONS
 fnc_mission_reward = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_reward.sqf";
@@ -251,7 +251,7 @@ fnc_protect_civ_mission = compile preprocessFileLineNumbers "duws\server\mission
 fnc_steal_builder_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\steal_builder\fnc_steal_builder_mission.sqf";
 fnc_target_armor_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_armor\fnc_target_armor_mission.sqf";
 fnc_sabotage_laptop_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_mission.sqf";
-fnc_sabotage_laptop_success = compile preprocessFileLineNumbers "duws\functions\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_success.sqf";
+fnc_sabotage_laptop_success = compile preprocessFileLineNumbers "duws\client\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_success.sqf";
 fnc_destroy_cache_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_cache\fnc_destroy_cache_mission.sqf";
 fnc_destroy_radar_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_radar\fnc_destroy_radar_mission.sqf";
 fnc_dyna_mission_mortarspotter = compile preprocessFileLineNumbers "duws\server\missions\dyna\fnc_dyna_mission_mortarspotter.sqf";
@@ -260,7 +260,7 @@ fnc_dyna_mission_supply_recovery = compile preprocessFileLineNumbers "duws\serve
 publicVariable "fnc_dyna_mission_supply_recovery";
 fnc_add_intel_on_death = compile preprocessFileLineNumbers "duws\server\misc\fnc_add_intel_on_death.sqf";
 publicVariable "fnc_add_intel_on_death";
-fnc_corpse_search_action = compile preprocessFileLineNumbers "duws\functions\misc\fnc_corpse_search_action.sqf";
+fnc_corpse_search_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_corpse_search_action.sqf";
 publicVariable "fnc_corpse_search_action";
 fnc_add_intel_to_group = compile preprocessFileLineNumbers "duws\server\misc\fnc_add_intel_to_group.sqf";
 publicVariable "fnc_add_intel_to_group";
@@ -306,9 +306,9 @@ fnc_civ_handler = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_ha
 publicVariable "fnc_civ_handler";
 fnc_civ_handler_wbk = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler_wbk.sqf";
 publicVariable "fnc_civ_handler_wbk";
-fnc_civ_fast_travel_add_action = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_fast_travel_add_action.sqf";
+fnc_civ_fast_travel_add_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_civ_fast_travel_add_action.sqf";
 publicVariable "fnc_civ_fast_travel_add_action";
-fnc_civ_fast_travel_request = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_fast_travel_request.sqf";
+fnc_civ_fast_travel_request = compile preprocessFileLineNumbers "duws\client\misc\fnc_civ_fast_travel_request.sqf";
 publicVariable "fnc_civ_fast_travel_request";
 fnc_civ_fast_travel_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_fast_travel_server.sqf";
 publicVariable "fnc_civ_fast_travel_server";
@@ -482,87 +482,87 @@ switch (VERSION_X) do {
 //////////////////////////////
 // GLOBAL FUNCTIONS
 //////////////////////////////
-fnc_ambient_musicloop = compile preprocessFileLineNumbers "duws\functions\sounds\fnc_ambient_musicloop.sqf";publicVariable "fnc_ambient_musicloop";
-fnc_duws_Arsenal = compile preprocessFileLineNumbers "duws\functions\misc\fnc_duws_Arsenal.sqf";publicVariable "fnc_duws_Arsenal";
-fnc_ghst_halo = compile preprocessFileLineNumbers "duws\functions\misc\fnc_ghst_halo.sqf";publicVariable "fnc_ghst_halo";
+fnc_ambient_musicloop = compile preprocessFileLineNumbers "duws\client\sounds\fnc_ambient_musicloop.sqf";publicVariable "fnc_ambient_musicloop";
+fnc_duws_Arsenal = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_Arsenal.sqf";publicVariable "fnc_duws_Arsenal";
+fnc_ghst_halo = compile preprocessFileLineNumbers "duws\client\misc\fnc_ghst_halo.sqf";publicVariable "fnc_ghst_halo";
 fnc_WARCOM_blu_assault = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_blu_assault.sqf";publicVariable "fnc_WARCOM_blu_assault";
 fnc_random_name = compile preprocessFileLineNumbers "duws\shared\functions\fnc_random_name.sqf";publicVariable "fnc_random_name";
 fnc_BLUFOR_squad_init = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BLUFOR_squad_init.sqf";publicVariable "fnc_BLUFOR_squad_init";
 fnc_BLUFOR_faction_init = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BLUFOR_faction_init.sqf";publicVariable "fnc_BLUFOR_faction_init";
 fnc_fortifyFOB = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_fortifyFOB.sqf";publicVariable "fnc_fortifyFOB";
-fnc_refortifyFOB = compile preprocessFileLineNumbers "duws\functions\init_hq\fnc_refortifyFOB.sqf";publicVariable "fnc_refortifyFOB";
+fnc_refortifyFOB = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_refortifyFOB.sqf";publicVariable "fnc_refortifyFOB";
 fnc_guardsFOB = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_guardsFOB.sqf";publicVariable "fnc_guardsFOB";
-fnc_reguardFOB = compile preprocessFileLineNumbers "duws\functions\init_hq\fnc_reguardFOB.sqf";publicVariable "fnc_reguardFOB";
+fnc_reguardFOB = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_reguardFOB.sqf";publicVariable "fnc_reguardFOB";
 fnc_createpatrolFOB = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_createpatrolFOB.sqf";publicVariable "fnc_createpatrolFOB";
 fnc_locatorZones_manual = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_manual.sqf";publicVariable "fnc_locatorZones_manual";
 fnc_createZone = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createZone.sqf";publicVariable "fnc_createZone";
-fnc_found_intel = compile preprocessFileLineNumbers "duws\functions\misc\fnc_found_intel.sqf";publicVariable "fnc_found_intel";
-fnc_addHQSatelliteActions = compile preprocessFileLineNumbers "duws\functions\misc\fnc_addHQSatelliteActions.sqf";
+fnc_found_intel = compile preprocessFileLineNumbers "duws\client\misc\fnc_found_intel.sqf";publicVariable "fnc_found_intel";
+fnc_addHQSatelliteActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addHQSatelliteActions.sqf";
 publicVariable "fnc_addHQSatelliteActions";
 fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_restHealServer.sqf";
 publicVariable "fnc_restHealServer";
 
 // 如果实现了 HQ 建筑动作，也需添加：
-fnc_addHQLaptopActions = compile preprocessFileLineNumbers "duws\functions\misc\fnc_addHQLaptopActions.sqf";
+fnc_addHQLaptopActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addHQLaptopActions.sqf";
 publicVariable "fnc_addHQLaptopActions";
-fnc_addHQOfficerActions = compile preprocessFileLineNumbers "duws\functions\misc\fnc_addHQOfficerActions.sqf";
+fnc_addHQOfficerActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addHQOfficerActions.sqf";
 publicVariable "fnc_addHQOfficerActions";
-fnc_addTerminalBlackMarketActions = compile preprocessFileLineNumbers "duws\functions\misc\fnc_addTerminalBlackMarketActions.sqf";
+fnc_addTerminalBlackMarketActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addTerminalBlackMarketActions.sqf";
 publicVariable "fnc_addTerminalBlackMarketActions";
 fnc_blackMarketPurchase = compile preprocessFileLineNumbers "duws\server\misc\fnc_blackMarketPurchase.sqf";
 publicVariable "fnc_blackMarketPurchase";
 fnc_intelAnalysis = compile preprocessFileLineNumbers "duws\server\misc\fnc_intelAnalysis.sqf";
 publicVariable "fnc_intelAnalysis";
 // MISSION FUNCTIONS
-fnc_stratmap = compile preprocessFileLineNumbers "duws\functions\missions\fnc_stratmap.sqf";publicVariable "fnc_stratmap";
+fnc_stratmap = compile preprocessFileLineNumbers "duws\client\missions\fnc_stratmap.sqf";publicVariable "fnc_stratmap";
 fnc_missionLocator = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionLocator.sqf";publicVariable "fnc_missionLocator";
 
 
 // DIALOG FUNCTIONS
-fnc_HQ_faction_dialog = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_HQ_faction_dialog.sqf";publicVariable "fnc_HQ_faction_dialog";
-fnc_HQ_manual_place = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_HQ_manual_place.sqf";publicVariable "fnc_HQ_manual_place";
-fnc_HQ_random_place = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_HQ_random_place.sqf";publicVariable "fnc_HQ_random_place";
-fnc_map_prompt = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_map_prompt.sqf";publicVariable "fnc_map_prompt";
-fnc_enviro_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_enviro_menu.sqf";publicVariable "fnc_enviro_menu";
-fnc_campaign_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_campaign_menu.sqf";publicVariable "fnc_campaign_menu";
-fnc_process_campaign_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_process_campaign_menu.sqf";publicVariable "fnc_process_campaign_menu";
-fnc_callsign_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_callsign_menu.sqf";publicVariable "fnc_callsign_menu";
-fnc_callsign_back = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_callsign_back.sqf";publicVariable "fnc_callsign_back";
-fnc_callsign_confirm = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_callsign_confirm.sqf";publicVariable "fnc_callsign_confirm";
-fnc_process_enviro_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_process_enviro_menu.sqf";publicVariable "fnc_process_enviro_menu";
-fnc_startup_closed = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_startup_closed.sqf";publicVariable "fnc_startup_closed";
-fnc_startup_next = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_startup_next.sqf";publicVariable "fnc_startup_next";
-fnc_startup_back = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_startup_back.sqf";publicVariable "fnc_startup_back";
-fnc_startup_faction_flow = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_startup_faction_flow.sqf";publicVariable "fnc_startup_faction_flow";
-fnc_startup_faction_resolve = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_startup_faction_resolve.sqf";publicVariable "fnc_startup_faction_resolve";
-fnc_enviro_back = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_enviro_back.sqf";publicVariable "fnc_enviro_back";
-fnc_startup_enviro_closed = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_startup_enviro_closed.sqf";publicVariable "fnc_startup_enviro_closed";
-fnc_request_unit = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_request_unit.sqf";publicVariable "fnc_request_unit";
-fnc_request_squad = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_request_squad.sqf";publicVariable "fnc_request_squad";
-fnc_request_vehicle = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_request_vehicle.sqf";publicVariable "fnc_request_vehicle";
-fnc_request_support = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_request_support.sqf";publicVariable "fnc_request_support";
-fnc_convertAPtoCP = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_convertAPtoCP.sqf";publicVariable "fnc_convertAPtoCP";
-fnc_request_unit_fob = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_request_unit_fob.sqf";publicVariable "fnc_request_unit_fob";
-fnc_request_squad_fob = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_request_squad_fob.sqf";publicVariable "fnc_request_squad_fob";
-fnc_request_vehicle_fob = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_request_vehicle_fob.sqf";publicVariable "fnc_request_vehicle_fob";
-fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_custom_faction_capture.sqf";publicVariable "fnc_custom_faction_capture";
+fnc_HQ_faction_dialog = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_faction_dialog.sqf";publicVariable "fnc_HQ_faction_dialog";
+fnc_HQ_manual_place = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_manual_place.sqf";publicVariable "fnc_HQ_manual_place";
+fnc_HQ_random_place = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_random_place.sqf";publicVariable "fnc_HQ_random_place";
+fnc_map_prompt = compile preprocessFileLineNumbers "duws\client\dialog\fnc_map_prompt.sqf";publicVariable "fnc_map_prompt";
+fnc_enviro_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_enviro_menu.sqf";publicVariable "fnc_enviro_menu";
+fnc_campaign_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_campaign_menu.sqf";publicVariable "fnc_campaign_menu";
+fnc_process_campaign_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_process_campaign_menu.sqf";publicVariable "fnc_process_campaign_menu";
+fnc_callsign_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_callsign_menu.sqf";publicVariable "fnc_callsign_menu";
+fnc_callsign_back = compile preprocessFileLineNumbers "duws\client\dialog\fnc_callsign_back.sqf";publicVariable "fnc_callsign_back";
+fnc_callsign_confirm = compile preprocessFileLineNumbers "duws\client\dialog\fnc_callsign_confirm.sqf";publicVariable "fnc_callsign_confirm";
+fnc_process_enviro_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_process_enviro_menu.sqf";publicVariable "fnc_process_enviro_menu";
+fnc_startup_closed = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_closed.sqf";publicVariable "fnc_startup_closed";
+fnc_startup_next = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_next.sqf";publicVariable "fnc_startup_next";
+fnc_startup_back = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_back.sqf";publicVariable "fnc_startup_back";
+fnc_startup_faction_flow = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_faction_flow.sqf";publicVariable "fnc_startup_faction_flow";
+fnc_startup_faction_resolve = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_faction_resolve.sqf";publicVariable "fnc_startup_faction_resolve";
+fnc_enviro_back = compile preprocessFileLineNumbers "duws\client\dialog\fnc_enviro_back.sqf";publicVariable "fnc_enviro_back";
+fnc_startup_enviro_closed = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_enviro_closed.sqf";publicVariable "fnc_startup_enviro_closed";
+fnc_request_unit = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_unit.sqf";publicVariable "fnc_request_unit";
+fnc_request_squad = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_squad.sqf";publicVariable "fnc_request_squad";
+fnc_request_vehicle = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_vehicle.sqf";publicVariable "fnc_request_vehicle";
+fnc_request_support = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_support.sqf";publicVariable "fnc_request_support";
+fnc_convertAPtoCP = compile preprocessFileLineNumbers "duws\client\dialog\fnc_convertAPtoCP.sqf";publicVariable "fnc_convertAPtoCP";
+fnc_request_unit_fob = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_unit_fob.sqf";publicVariable "fnc_request_unit_fob";
+fnc_request_squad_fob = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_squad_fob.sqf";publicVariable "fnc_request_squad_fob";
+fnc_request_vehicle_fob = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_vehicle_fob.sqf";publicVariable "fnc_request_vehicle_fob";
+fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dialog\fnc_custom_faction_capture.sqf";publicVariable "fnc_custom_faction_capture";
 fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\functions\fnc_custom_faction_parse.sqf";publicVariable "fnc_custom_faction_parse";
 fnc_custom_faction_init = compile preprocessFileLineNumbers "duws\server\dialog\fnc_custom_faction_init.sqf";publicVariable "fnc_custom_faction_init";
-fnc_HQ_Request_Menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_HQ_Request_Menu.sqf";publicVariable "fnc_HQ_Request_Menu";
-fnc_FOB_Request_Menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_FOB_Request_Menu.sqf";publicVariable "fnc_FOB_Request_Menu";
-fnc_squad_manage = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_squad_manage.sqf";publicVariable "fnc_squad_manage";
-fnc_open_action_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_open_action_menu.sqf";publicVariable "fnc_open_action_menu";
-fnc_disguise_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_disguise_menu.sqf";publicVariable "fnc_disguise_menu";
-fnc_dismissHC = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_dismissHC.sqf";publicVariable "fnc_dismissHC";
-fnc_dismiss_playerAI = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_dismiss_playerAI.sqf";publicVariable "fnc_dismiss_playerAI";
-fnc_squad_rename = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_squad_rename.sqf";publicVariable "fnc_squad_rename";
-fnc_groupReset = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_groupReset.sqf";publicVariable "fnc_groupReset";
+fnc_HQ_Request_Menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_Request_Menu.sqf";publicVariable "fnc_HQ_Request_Menu";
+fnc_FOB_Request_Menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_FOB_Request_Menu.sqf";publicVariable "fnc_FOB_Request_Menu";
+fnc_squad_manage = compile preprocessFileLineNumbers "duws\client\dialog\fnc_squad_manage.sqf";publicVariable "fnc_squad_manage";
+fnc_open_action_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_open_action_menu.sqf";publicVariable "fnc_open_action_menu";
+fnc_disguise_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_disguise_menu.sqf";publicVariable "fnc_disguise_menu";
+fnc_dismissHC = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismissHC.sqf";publicVariable "fnc_dismissHC";
+fnc_dismiss_playerAI = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismiss_playerAI.sqf";publicVariable "fnc_dismiss_playerAI";
+fnc_squad_rename = compile preprocessFileLineNumbers "duws\client\dialog\fnc_squad_rename.sqf";publicVariable "fnc_squad_rename";
+fnc_groupReset = compile preprocessFileLineNumbers "duws\client\dialog\fnc_groupReset.sqf";publicVariable "fnc_groupReset";
 fnc_rest_heal = compile preprocessFileLineNumbers "duws\server\dialog\fnc_rest_heal.sqf";publicVariable "fnc_rest_heal";
-fnc_FOBmanager = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_FOBmanager.sqf";publicVariable "fnc_FOBmanager";
-fnc_FOB_remove = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_FOB_remove.sqf";publicVariable "fnc_FOB_remove";
+fnc_FOBmanager = compile preprocessFileLineNumbers "duws\client\dialog\fnc_FOBmanager.sqf";publicVariable "fnc_FOBmanager";
+fnc_FOB_remove = compile preprocessFileLineNumbers "duws\client\dialog\fnc_FOB_remove.sqf";publicVariable "fnc_FOB_remove";
 fnc_FOB_cleanup = compile preprocessFileLineNumbers "duws\server\dialog\fnc_FOB_cleanup.sqf";publicVariable "fnc_FOB_cleanup";
-fnc_FOB_fast_travel = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_FOB_fast_travel.sqf";publicVariable "fnc_FOB_fast_travel";
-fnc_MHQ_select = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_MHQ_select.sqf";publicVariable "fnc_MHQ_select";
+fnc_FOB_fast_travel = compile preprocessFileLineNumbers "duws\client\dialog\fnc_FOB_fast_travel.sqf";publicVariable "fnc_FOB_fast_travel";
+fnc_MHQ_select = compile preprocessFileLineNumbers "duws\client\dialog\fnc_MHQ_select.sqf";publicVariable "fnc_MHQ_select";
 fnc_MHQ_addActions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_MHQ_addActions.sqf";publicVariable "fnc_MHQ_addActions";
 fnc_MHQ_deploy = compile preprocessFileLineNumbers "duws\server\dialog\fnc_MHQ_deploy.sqf";publicVariable "fnc_MHQ_deploy";
 fnc_MHQ_undeploy = compile preprocessFileLineNumbers "duws\server\dialog\fnc_MHQ_undeploy.sqf";publicVariable "fnc_MHQ_undeploy";
@@ -571,34 +571,34 @@ fnc_actionRotary = compile preprocessFileLineNumbers "duws\server\dialog\fnc_act
 
 
 // HQ & FOB FUNCTIONS
-fnc_draw_HQicon = compile preprocessFileLineNumbers "duws\functions\init_hq\fnc_draw_HQicon.sqf";publicVariable "fnc_draw_HQicon";
-fnc_HQaddactions = compile preprocessFileLineNumbers "duws\functions\init_hq\fnc_HQaddactions.sqf";publicVariable "fnc_HQaddactions";
+fnc_draw_HQicon = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_draw_HQicon.sqf";publicVariable "fnc_draw_HQicon";
+fnc_HQaddactions = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_HQaddactions.sqf";publicVariable "fnc_HQaddactions";
 fnc_FOBactions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_FOBactions.sqf";publicVariable "fnc_FOBactions";
 fnc_fob_server = compile preprocessFileLineNumbers "duws\server\supports\fnc_fob_server.sqf";publicVariable "fnc_fob_server";
 
 
 // SUPPORTS FUNCTIONS
-fnc_ammobox = compile preprocessFileLineNumbers "duws\functions\supports\fnc_ammobox.sqf";publicVariable "fnc_ammobox";
-fnc_arty = compile preprocessFileLineNumbers "duws\functions\supports\fnc_arty.sqf";publicVariable "fnc_arty";
-fnc_mapclickarty = compile preprocessFileLineNumbers "duws\functions\supports\fnc_mapclickarty.sqf";publicVariable "fnc_mapclickarty";
-fnc_mapclickuav = compile preprocessFileLineNumbers "duws\functions\supports\fnc_mapclickuav.sqf";publicVariable "fnc_mapclickuav";
+fnc_ammobox = compile preprocessFileLineNumbers "duws\client\supports\fnc_ammobox.sqf";publicVariable "fnc_ammobox";
+fnc_arty = compile preprocessFileLineNumbers "duws\client\supports\fnc_arty.sqf";publicVariable "fnc_arty";
+fnc_mapclickarty = compile preprocessFileLineNumbers "duws\client\supports\fnc_mapclickarty.sqf";publicVariable "fnc_mapclickarty";
+fnc_mapclickuav = compile preprocessFileLineNumbers "duws\client\supports\fnc_mapclickuav.sqf";publicVariable "fnc_mapclickuav";
 fnc_uav_scanner = compile preprocessFileLineNumbers "duws\server\supports\fnc_uav_scanner.sqf";publicVariable "fnc_uav_scanner";
-fnc_paradrop = compile preprocessFileLineNumbers "duws\functions\supports\fnc_paradrop.sqf";publicVariable "fnc_paradrop";
-fnc_request_fob = compile preprocessFileLineNumbers "duws\functions\supports\fnc_request_fob.sqf";publicVariable "fnc_request_fob";
-fnc_request_hcATTchop = compile preprocessFileLineNumbers "duws\functions\supports\fnc_request_hcATTchop.sqf";publicVariable "fnc_request_hcATTchop";
-fnc_request_hcCAS = compile preprocessFileLineNumbers "duws\functions\supports\fnc_request_hcCAS.sqf";publicVariable "fnc_request_hcCAS";
+fnc_paradrop = compile preprocessFileLineNumbers "duws\client\supports\fnc_paradrop.sqf";publicVariable "fnc_paradrop";
+fnc_request_fob = compile preprocessFileLineNumbers "duws\client\supports\fnc_request_fob.sqf";publicVariable "fnc_request_fob";
+fnc_request_hcATTchop = compile preprocessFileLineNumbers "duws\client\supports\fnc_request_hcATTchop.sqf";publicVariable "fnc_request_hcATTchop";
+fnc_request_hcCAS = compile preprocessFileLineNumbers "duws\client\supports\fnc_request_hcCAS.sqf";publicVariable "fnc_request_hcCAS";
 fnc_sitrep_support = compile preprocessFileLineNumbers "duws\server\supports\fnc_sitrep_support.sqf";publicVariable "fnc_sitrep_support";
-fnc_veh_drop = compile preprocessFileLineNumbers "duws\functions\supports\fnc_veh_drop.sqf";publicVariable "fnc_veh_drop";
-fnc_sawp_drop = compile preprocessFileLineNumbers "duws\functions\supports\fnc_sawp_drop.sqf";publicVariable "fnc_sawp_drop";
-fnc_siva_drop = compile preprocessFileLineNumbers "duws\functions\supports\fnc_siva_drop.sqf";publicVariable "fnc_siva_drop";
-fnc_helotaxi = compile preprocessFileLineNumbers "duws\functions\supports\taxi\fnc_helotaxi.sqf";publicVariable "fnc_helotaxi";
-fnc_helolift = compile preprocessFileLineNumbers "duws\functions\supports\fnc_helolift.sqf";publicVariable "fnc_helolift";
-fnc_mapclicklift = compile preprocessFileLineNumbers "duws\functions\supports\fnc_mapclicklift.sqf";publicVariable "fnc_mapclicklift";
+fnc_veh_drop = compile preprocessFileLineNumbers "duws\client\supports\fnc_veh_drop.sqf";publicVariable "fnc_veh_drop";
+fnc_sawp_drop = compile preprocessFileLineNumbers "duws\client\supports\fnc_sawp_drop.sqf";publicVariable "fnc_sawp_drop";
+fnc_siva_drop = compile preprocessFileLineNumbers "duws\client\supports\fnc_siva_drop.sqf";publicVariable "fnc_siva_drop";
+fnc_helotaxi = compile preprocessFileLineNumbers "duws\client\supports\taxi\fnc_helotaxi.sqf";publicVariable "fnc_helotaxi";
+fnc_helolift = compile preprocessFileLineNumbers "duws\client\supports\fnc_helolift.sqf";publicVariable "fnc_helolift";
+fnc_mapclicklift = compile preprocessFileLineNumbers "duws\client\supports\fnc_mapclicklift.sqf";publicVariable "fnc_mapclicklift";
 
-fnc_mapclickhelo = compile preprocessFileLineNumbers "duws\functions\supports\taxi\fnc_mapclickhelo.sqf";publicVariable "fnc_mapclickhelo";
-fnc_boattaxi = compile preprocessFileLineNumbers "duws\functions\supports\taxi\fnc_boattaxi.sqf";publicVariable "fnc_boattaxi";
-fnc_mapclickboat = compile preprocessFileLineNumbers "duws\functions\supports\taxi\fnc_mapclickboat.sqf";publicVariable "fnc_mapclickboat";
-fnc_taxi_music = compile preprocessFileLineNumbers "duws\functions\supports\taxi\fnc_taxi_music.sqf";publicVariable "fnc_taxi_music";
+fnc_mapclickhelo = compile preprocessFileLineNumbers "duws\client\supports\taxi\fnc_mapclickhelo.sqf";publicVariable "fnc_mapclickhelo";
+fnc_boattaxi = compile preprocessFileLineNumbers "duws\client\supports\taxi\fnc_boattaxi.sqf";publicVariable "fnc_boattaxi";
+fnc_mapclickboat = compile preprocessFileLineNumbers "duws\client\supports\taxi\fnc_mapclickboat.sqf";publicVariable "fnc_mapclickboat";
+fnc_taxi_music = compile preprocessFileLineNumbers "duws\client\supports\taxi\fnc_taxi_music.sqf";publicVariable "fnc_taxi_music";
 
 
 // MISC FUNCTIONS
@@ -611,23 +611,23 @@ publicVariable "fnc_scanEnemyGear";
 fnc_disguiseAsEnemy = compile preprocessFileLineNumbers "duws\server\misc\fnc_disguiseAsEnemy.sqf";
 publicVariable "fnc_disguiseAsEnemy";
 fnc_moreUrban_locations = compile preprocessFileLineNumbers "duws\server\misc\fnc_moreUrban_locations.sqf";publicVariable "fnc_moreUrban_locations";
-fnc_hc_init = compile preprocessFileLineNumbers "duws\functions\misc\fnc_hc_init.sqf";publicVariable "fnc_hc_init";
-fnc_zones_bonus = compile preprocessFileLineNumbers "duws\functions\misc\fnc_zones_bonus.sqf";publicVariable "fnc_zones_bonus";
-fnc_kndr_unit_markers = compile preprocessFileLineNumbers "duws\functions\misc\fnc_kndr_unit_markers.sqf";publicVariable "fnc_kndr_unit_markers";
-fnc_player_markers = compile preprocessFileLineNumbers "duws\functions\misc\fnc_player_markers.sqf";publicVariable "fnc_player_markers";
-fnc_earplugs = compile preprocessFileLineNumbers "duws\functions\misc\fnc_earplugs.sqf";publicVariable "fnc_earplugs";
-fnc_duws_help = compile preprocessFileLineNumbers "duws\functions\misc\fnc_duws_help.sqf";publicVariable "fnc_duws_help";
-fnc_bottom_right_message = compile preprocessFileLineNumbers "duws\functions\misc\fnc_bottom_right_message.sqf";publicVariable "fnc_bottom_right_message";
+fnc_hc_init = compile preprocessFileLineNumbers "duws\client\misc\fnc_hc_init.sqf";publicVariable "fnc_hc_init";
+fnc_zones_bonus = compile preprocessFileLineNumbers "duws\client\misc\fnc_zones_bonus.sqf";publicVariable "fnc_zones_bonus";
+fnc_kndr_unit_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_kndr_unit_markers.sqf";publicVariable "fnc_kndr_unit_markers";
+fnc_player_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_player_markers.sqf";publicVariable "fnc_player_markers";
+fnc_earplugs = compile preprocessFileLineNumbers "duws\client\misc\fnc_earplugs.sqf";publicVariable "fnc_earplugs";
+fnc_duws_help = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_help.sqf";publicVariable "fnc_duws_help";
+fnc_bottom_right_message = compile preprocessFileLineNumbers "duws\client\misc\fnc_bottom_right_message.sqf";publicVariable "fnc_bottom_right_message";
 fnc_autoSave = compile preprocessFileLineNumbers "duws\server\misc\fnc_autoSave.sqf";publicVariable "fnc_autoSave";
 fnc_playerTF_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_playerTF_spawn.sqf";publicVariable "fnc_playerTF_spawn";
 // Not broadcast: server-only, so an accidental client call fails loud.
 fnc_HCsquad_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_HCsquad_spawn.sqf";
 fnc_sideChat_filter = compile preprocessFileLineNumbers "duws\shared\functions\fnc_sideChat_filter.sqf";publicVariable "fnc_sideChat_filter";
-fnc_sitrep_display = compile preprocessFileLineNumbers "duws\functions\misc\fnc_sitrep_display.sqf";publicVariable "fnc_sitrep_display";
+fnc_sitrep_display = compile preprocessFileLineNumbers "duws\client\misc\fnc_sitrep_display.sqf";publicVariable "fnc_sitrep_display";
 fnc_fill_ammobox = compile preprocessFileLineNumbers "duws\server\misc\fnc_fill_ammobox.sqf";publicVariable "fnc_fill_ammobox";
 fnc_fill_sawpbox = compile preprocessFileLineNumbers "duws\server\misc\fnc_fill_sawpbox.sqf";publicVariable "fnc_fill_sawpbox";
 fnc_delete_napalm = compile preprocessFileLineNumbers "duws\server\misc\fnc_delete_napalm.sqf";publicVariable "fnc_delete_napalm";
-fnc_addQuickChangeActions = compile preprocessFileLineNumbers "duws\functions\misc\fnc_addQuickChangeActions.sqf";
+fnc_addQuickChangeActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addQuickChangeActions.sqf";
 publicVariable "fnc_addQuickChangeActions";
 fnc_addNearbyUnitsGearToArsenal = compile preprocessFileLineNumbers "duws\server\misc\fnc_addNearbyUnitsGearToArsenal.sqf";
 publicVariable "fnc_addNearbyUnitsGearToArsenal";
@@ -639,24 +639,24 @@ fnc_activateBaseRecycleStation = compile preprocessFileLineNumbers "duws\server\
 publicVariable "fnc_activateBaseRecycleStation";
 fnc_activateBaseRepairStation = compile preprocessFileLineNumbers "duws\server\supports\fnc_activateBaseRepairStation.sqf";
 publicVariable "fnc_activateBaseRepairStation";
-fnc_client_addRecycleActions = compile preprocessFileLineNumbers "duws\functions\supports\fnc_client_addRecycleActions.sqf";
+fnc_client_addRecycleActions = compile preprocessFileLineNumbers "duws\client\supports\fnc_client_addRecycleActions.sqf";
 publicVariable "fnc_client_addRecycleActions";
-fnc_client_addRepairActions = compile preprocessFileLineNumbers "duws\functions\supports\fnc_client_addRepairActions.sqf";
+fnc_client_addRepairActions = compile preprocessFileLineNumbers "duws\client\supports\fnc_client_addRepairActions.sqf";
 publicVariable "fnc_client_addRepairActions";
 fnc_redeployHQUnits = compile preprocessFileLineNumbers "duws\server\misc\fnc_redeployHQUnits.sqf";
 publicVariable "fnc_redeployHQUnits";
-fnc_addRedeployAction = compile preprocessFileLineNumbers "duws\functions\misc\fnc_addRedeployAction.sqf";
+fnc_addRedeployAction = compile preprocessFileLineNumbers "duws\client\misc\fnc_addRedeployAction.sqf";
 publicVariable "fnc_addRedeployAction";
 fnc_createKillhouse = compile preprocessFileLineNumbers "duws\server\misc\fnc_createKillhouse.sqf";
 publicVariable "fnc_createKillhouse";
 // WARCOM FUNCTIONS
-fnc_WARCOM_mapclick_assault = compile preprocessFileLineNumbers "duws\functions\warcom\fnc_WARCOM_mapclick_assault.sqf";publicVariable "fnc_WARCOM_mapclick_assault";
+fnc_WARCOM_mapclick_assault = compile preprocessFileLineNumbers "duws\client\warcom\fnc_WARCOM_mapclick_assault.sqf";publicVariable "fnc_WARCOM_mapclick_assault";
 
-fnc_lbselected = compile preprocessFileLineNumbers "duws\operative\modern\fnc_lbselected.sqf";publicVariable "fnc_lbselected";
+fnc_lbselected = compile preprocessFileLineNumbers "duws\client\operative\fnc_lbselected.sqf";publicVariable "fnc_lbselected";
 fnc_operative_mission_complete = compile preprocessFileLineNumbers "duws\server\misc\fnc_operative_mission_complete.sqf";publicVariable "fnc_operative_mission_complete";
-fnc_operator_init = compile preprocessFileLineNumbers "duws\operative\modern\fnc_operator_init.sqf";publicVariable "fnc_operator_init";
-fnc_operator_open = compile preprocessFileLineNumbers "duws\operative\modern\fnc_operator_open.sqf";publicVariable "fnc_operator_open";
-fnc_operator_recruit = compile preprocessFileLineNumbers "duws\operative\modern\fnc_operator_recruit.sqf";publicVariable "fnc_operator_recruit";
+fnc_operator_init = compile preprocessFileLineNumbers "duws\client\operative\fnc_operator_init.sqf";publicVariable "fnc_operator_init";
+fnc_operator_open = compile preprocessFileLineNumbers "duws\client\operative\fnc_operator_open.sqf";publicVariable "fnc_operator_open";
+fnc_operator_recruit = compile preprocessFileLineNumbers "duws\client\operative\fnc_operator_recruit.sqf";publicVariable "fnc_operator_recruit";
 fnc_blu_taskforces_launch = compile preprocessFileLineNumbers "duws\server\warcom\fnc_blu_taskforces_launch.sqf";
 publicVariable "fnc_blu_taskforces_launch";
 fnc_apocalypse_buildings = {
