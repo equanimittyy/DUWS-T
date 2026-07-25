@@ -183,9 +183,6 @@ case 5: {
 
 // HELO LIFT
 case 8: {
-    // 如果是客户端（非服务器），拒绝并显示提示
-    if (!isServer) exitWith { hint localize "STR_DUWS_T_shiyanxinggongneng"; };
-
     _cost = 10;
     // Check if Radio Support
     if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};

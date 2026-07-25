@@ -196,3 +196,27 @@ this: `fnc_cp_adjust` (`src/duws/server/server_fnc_init.sqf`) is the sole writer
 `commandpointsblu1`; the host's own `publicVariableEventHandler` does not fire for its own
 broadcast, so that function also refreshes the on-screen counter locally when
 `hasInterface`.
+
+## Waypoint and flight commands are ignored unless the group is local to that machine
+
+**`addWaypoint`, `deleteWaypoint`, `flyInHeight`, `setMass` and `ropeCreate` take effect only
+on the machine where the group or object is local. Issued anywhere else they fail silently —
+no error, no log line, the AI simply never moves. A hosting player is also the server, so the
+mistake works perfectly for whoever is testing and for nobody else.**
+
+Locality follows the creator: a group spawned by a client belongs to that client, and the
+server holds only a remote reference to it. `remoteExec [..., 2]` then delivers the call to a
+machine that cannot act on it. The pair fails in both directions — a client-spawned group
+whose orders are issued server-side, and a server-spawned group ordered from a client.
+
+`fnc_helolift` had both halves at once: it spawned the transport helicopter client-side, then
+`remoteExec`'d its waypoints to the server. It also defined its two server-side helper
+functions inline in a file that only clients run, so on a dedicated server those names were
+never assigned and the calls hit a nil variable. Both defects were invisible to a hosting
+player and the feature was simply disabled for everyone else.
+
+**How to apply:** decide which machine owns an AI group before writing anything that commands
+it, spawn it there, and route every order back to that machine. Server ownership is the safe
+default for anything a mission thread steers. A function invoked through `remoteExec` by name
+must be in the registry so the receiving machine actually has it; defining it inline in the
+caller only works when caller and target happen to be the same machine.
