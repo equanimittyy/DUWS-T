@@ -89,7 +89,7 @@ the ongoing side-mission spawner, cleanup loops, and event scripts.
 
 | System | Where | Note |
 |---|---|---|
-| Economy | `functions/dialog/` (`fnc_convertAPtoCP`) | Two currencies, CP and AP, earned by capturing zones and completing side missions |
+| Economy | `functions/dialog/`, `functions/supports/` | Two currencies, CP and AP, earned by capturing zones and completing side missions. CP faucets, sinks, and balance concerns in [`cp_economy.md`](cp_economy.md) |
 | Persistence | `functions/misc/fnc_autoSave.sqf` | Vanilla `saveGame` only — no custom serialization; save/continue relies entirely on the engine's campaign save |
 | Faction detection | `functions/misc/fnc_factions_check_modern.sqf`, `factions/MODERN/AUTODETECT_*` | Adapts to installed faction mods and runs mod-free. `VERSION_X` (value `"MODERN"`) selects the faction set, doubles as the `factions/` subfolder name, and is game state — so its value is not safe to change. Full detail in [`faction_system.md`](faction_system.md) |
 | Revive | `initPlayerLocal.sqf` | Chosen at start: AIS, vanilla, or auto-disabled when ACE medical is present |
