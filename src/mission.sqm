@@ -70,7 +70,7 @@ randomSeed=16586231;
 class ScenarioData
 {
 	author="5U5 (modified) Killa Tomata (origin)";
-	overviewText="DUWS_T is a long-term, persistent campaign system. Players must earn resources, carry out side missions, and lead Blufor forces to seize enemy-held zones, finally achieve victory in the campaign.";
+	overviewText="Evolved from the renowned DUWS_X scenario created by Killa Tomata, DUWS_T is a long-term, persistent scenario. Players must earn resources, carry out side missions, and lead BLUFOR forces to seize enemy-held zones, achieving total victory.";
 	overViewPicture="DUWS_T.jpg";
 	onLoadMission="WAR IS TACTICS";
 	loadScreen="DUWS_T.jpg";
@@ -238,7 +238,7 @@ class Mission
 	class Intel
 	{
 		briefingName="[SP/COOP] DUWS_T v1.6";
-		overviewText="DUWS_T is a long-term, persistent campaign system. Players must earn resources, carry out side missions, and lead Blufor forces to seize enemy-held zones, finally achieve victory in the campaign.";
+		overviewText="Evolved from the renowned DUWS_X scenario created by Killa Tomata, DUWS_T is a long-term, persistent scenario. Players must earn resources, carry out side missions, and lead BLUFOR forces to seize enemy-held zones, achieving total victory.";
 		resistanceWest=0;
 		startWeather=0;
 		startWind=0;
