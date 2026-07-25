@@ -909,7 +909,10 @@ killhouse_srv_target_hit = {
     private _targets = missionNamespace getVariable ["killhouse_targets", []];
     if !(_target in _targets) exitWith {};
     missionNamespace setVariable ["killhouse_targets", _targets - [_target], true];
-    deleteVehicle _target;
+    // Off the list at once but off the map a beat later: the list drives wave pacing and must
+    // react immediately, while deleting under the player's crosshair reads as the round
+    // missing. The two are deliberately not the same moment.
+    _target spawn { sleep killhouse_corpse_linger; deleteVehicle _this; };
 };
 publicVariable "killhouse_srv_target_hit";
 
@@ -923,11 +926,14 @@ killhouse_wave_timeout_threshold = 10;  // at or below this, so a stalled run ca
                                         // wave on wave onto a course nobody is clearing
 killhouse_reward_training        = 1;
 killhouse_reward_challenge       = 10;
-killhouse_progress_period        = 1;   // seconds between progress hints; cannot resolve
-                                        // finer than the wave loop's own tick below
-killhouse_area_radius            = 80;  // 3D from the composition centre: the structure spans
-                                        // ~70 m and floats at 1000 m, so the check cannot
-                                        // confuse it with anyone standing underneath
+killhouse_progress_period        = 10;  // seconds between progress hints; a faster refresh
+                                        // restarts the hint fade and makes it unreadable
+killhouse_corpse_linger          = 2;   // seconds a hit target or body stays before deletion
+killhouse_area_radius            = 80;  // 3D from the composition centre, and the one
+                                        // definition of "inside the killhouse": it picks who
+                                        // hears hints and which enemies are still in play. The
+                                        // structure reaches ~55 m from centre and floats at
+                                        // 1000 m, so it cannot catch anyone standing underneath
 
 // Players currently inside the killhouse. Position rather than a flag set by the teleport
 // actions: players also arrive by other routes and leave by dying, respawning or the exit
@@ -1018,21 +1024,20 @@ killhouse_srv_spawn_wave = {
             _group deleteGroupWhenEmpty true;
             private _unit = leader _group;
             _unit setPosWorld _posATL;
-            _unit disableAI "PATH";
-            _unit setUnitPos (selectRandom ["UP", "MIDDLE", "DOWN"]);
             _unit setDir (random 360);
             _unit setBehaviour "COMBAT";
             _unit setCombatMode "RED";
             _unit allowFleeing 0;
             // Drop from the list before deleting, not after: the wave loop counts this array
             // to decide when the next wave is due and when the run is finished, and a
-            // deleted unit no longer matches for removal.
+            // deleted unit no longer matches for removal. The body then lingers, so a kill
+            // is something the player sees rather than a unit blinking out of existence.
             _unit addEventHandler ["Killed", {
                 params ["_unit"];
                 if (!isServer) exitWith {};
                 private _live = missionNamespace getVariable ["killhouse_enemies", []];
                 missionNamespace setVariable ["killhouse_enemies", _live - [_unit], true];
-                deleteVehicle _unit;
+                _unit spawn { sleep killhouse_corpse_linger; deleteVehicle _this; };
             }];
             _enemies pushBack _unit;
         } forEach _slots;
@@ -1052,8 +1057,9 @@ killhouse_srv_start_run = {
     call killhouse_srv_clear_all;
 
     // One shuffled composition row per spawn, walked in order, so no row is reused within a
-    // run and two objects can never end up in one spot. That is also why the total is capped
-    // at the row count instead of wrapping.
+    // run and nothing is ever spawned on top of anything already placed. That is also why the
+    // total is capped at the row count instead of wrapping. It is a guarantee about the moment
+    // of spawning only -- enemies path away afterwards and may bunch up wherever they like.
     private _slots = _allSlots call BIS_fnc_arrayShuffle;
     private _total = killhouse_run_total min (count _slots);
     // Without this an empty composition would read as "all spawned, none alive" on the first
@@ -1075,10 +1081,26 @@ killhouse_srv_start_run = {
         private _lastWave = time;
         private _lastProgress = time;
         private _complete = false;
+        private _centre = [
+            missionNamespace getVariable ["killhouse_centerX", 0],
+            missionNamespace getVariable ["killhouse_centerY", 0],
+            missionNamespace getVariable ["killhouse_centerZ", 0]
+        ];
 
         while { !_complete
                 && { missionNamespace getVariable ["killhouse_run_active", false] }
                 && { (missionNamespace getVariable ["killhouse_run_id", 0]) isEqualTo _runId } } do {
+            // Anything outside the volume has left the course, which in practice means it
+            // pathed off an edge. The drop is 1000 m onto open sea, and a unit that survives
+            // the water would swim about forever without ever firing its Killed handler --
+            // the run could then never reach zero alive and would hang. Killing it here routes
+            // it through the same handler as a shot enemy, so the count stays honest.
+            {
+                if ((getPosWorld _x) distance _centre > killhouse_area_radius) then {
+                    _x setDamage 1;
+                };
+            } forEach (missionNamespace getVariable ["killhouse_enemies", []]);
+
             private _alive = count (missionNamespace getVariable [_listVar, []]);
             if (_spawned >= _total) then {
                 _complete = (_alive == 0);

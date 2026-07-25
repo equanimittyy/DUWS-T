@@ -238,3 +238,25 @@ it, spawn it there, and route every order back to that machine. Server ownership
 default for anything a mission thread steers. A function invoked through `remoteExec` by name
 must be in the registry so the receiving machine actually has it; defining it inline in the
 caller only works when caller and target happen to be the same machine.
+
+## Practice targets ignore damage entirely; `HitPart` fires on the shooter, not the owner
+
+**The `TargetP_*` range targets (`TargetP_Civ_F`, `TargetP_Inf2_F`, `TargetP_HVT1_F` and the
+rest) do not process bullet damage. `Hit` and `HandleDamage` never fire on them no matter what
+`allowDamage` is set to, so a server-side damage handler waits forever. `HitPart` does fire —
+but on the machine that fired the round, not the machine where the object is local.**
+
+Clearing `allowDamage false` on one of these looks like the whole fix and changes nothing
+observable: they have no damage-driven destroyed state to reach. Detecting a shot means
+listening for the *impact* rather than the damage, which is what `HitPart` reports.
+
+That event's locality is the second half of the trap, and it is the opposite of every other
+damage handler. `Hit` and `HandleDamage` run where the object is local; `HitPart` runs where
+the *projectile* came from. An EH added only on the server therefore stays silent for every
+shot a client fires — and, once again, works perfectly for a hosting player, who is both.
+
+**How to apply:** add the handler on every machine with `remoteExec ["addEventHandler", 0]`
+and have its body send the result back to whichever machine owns the state. Pass the object as
+the `remoteExec` JIP parameter so joining clients receive it and the queued message is dropped
+automatically when the object is deleted. The killhouse does this in
+`server/misc/fnc_createKillhouse.sqf`, bouncing each hit to `killhouse_srv_target_hit`.
