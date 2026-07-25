@@ -9,7 +9,7 @@ goes, and the balance properties worth knowing. Faction-specific purchase prices
 the `blufor_RQST_*` variables and `fnc_evalVehicleCost` — see
 [`faction_system.md`](faction_system.md).
 
-## Authority: one server-side writer
+## Authority: one server-side writer per pool
 
 `commandpointsblu1` is a networked global, so every change routes through a single
 server-side function, `fnc_cp_adjust` (`src/duws/init/server_fnc_init.sqf`), invoked as
@@ -22,8 +22,19 @@ choice: mutating a networked global as `x = x - c; publicVariable "x"` from a cl
 concurrent co-op changes and can duplicate CP — see the gotchas entry *"A shared global
 mutated as `x = x - c; publicVariable` loses concurrent writes"* in
 [`arma_engine_gotchas.md`](arma_engine_gotchas.md). The only absolute assignments left are
-the pre-game starting value (`server_var_init.sqf:82`, default 20; campaign menu offers
+the pre-game starting value (`server_var_init.sqf:87`, default 20; campaign menu offers
 0–400 in `fnc_process_campaign_menu.sqf:210-218`), which run on the host before play.
+
+Army Power carries the same contract. `fnc_ap_adjust` (same file) is the sole writer of both
+`WARCOM_blufor_ap` and `WARCOM_opfor_ap`, invoked as `[side, delta] remoteExec
+["fnc_ap_adjust", 2]` with side `"BLU"` or `"OPF"`; its pre-play absolutes are
+`server_var_init.sqf:180-181`, `fnc_WARCOM_init.sqf:22-28`, and the campaign-menu presets in
+`fnc_process_campaign_menu.sqf:277-348`. Two deliberate differences from `fnc_cp_adjust`: the
+`switch` has no default case, so an unrecognised side string is a no-op rather than a silent
+credit to the wrong pool; and there is no display refresh, because AP has no HUD counter and
+no `publicVariableEventHandler` — which is why `fnc_convertAPtoCP.sqf` paints control 1002
+from its own expected post-spend total instead of re-reading the pool, whose local copy is
+still pre-spend at that point.
 
 ## Faucets
 
@@ -121,9 +132,4 @@ intentional negative delta).
 
 **AP→CP merges the two economies.** `fnc_convertAPtoCP.sqf` trades 15 AP → 10 CP,
 repeatable with no cooldown. It is one-way (there is no CP→AP path), so it cannot loop, but
-it means any AP income route — mission rewards, corpse search — ultimately feeds CP. Note
-also that `WARCOM_blufor_ap` is still mutated with the non-atomic `x = x + n;
-publicVariable` pattern that CP was moved off of, so the AP pool carries the co-op
-lost-update hazard CP no longer has; the plan to give AP the same server authority — one
-`fnc_ap_adjust` delta writer, mirroring CP — is in
-[`army_power_remediation.md`](army_power_remediation.md).
+it means any AP income route — mission rewards, corpse search — ultimately feeds CP.
