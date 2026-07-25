@@ -47,6 +47,7 @@ Background on the locality rule: [`docs/info/arma_engine_gotchas.md`](docs/info/
 | Two registered functions are never called from anywhere | `server/missions/fnc_missionPatrolsSmall.sqf`, `server/misc/fnc_findSafeMissionPos.sqf` | Dead weight; both carry a `Locality: unreferenced` header saying so |
 | Two script paths in `paths_baseline.txt` point at files that do not exist | `client/misc/fnc_player_markers.sqf`, `server/misc/fnc_repetitive_cleanup.sqf` | Pre-dates the test suite; baselined so the linter gates regressions without being blocked by it |
 | Six `format[...]` calls wrap a single literal with no placeholders | `client/supports/fnc_helolift.sqf` | Cosmetic — a wasted call per invocation |
+| `fnc_log` calls itself instead of writing the line | `shared/functions/fnc_log_init.sqf:25` | Unbounded recursion on every line at or below the active level: nothing reaches the RPT and the first logged milestone kills the boot. The `diag_log` -> `fnc_log` sweep has to skip this one file — it is where `diag_log` lives |
 
 ## Zone generation is slow at large radii, cause unresolved
 
