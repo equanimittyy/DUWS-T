@@ -66,7 +66,10 @@ blufor_patrol_count = 0;
 				_failSafe = 0;
 				while {!_found} do {
 					_randomZone = WARCOM_zones_controled_by_BLUFOR call BIS_fnc_selectRandom;
-					if (_randomZone distance player > 500) then {_found=true;};
+					// Nearest of all players, not `player`: this loop runs on the server,
+					// where player is objNull on a dedicated host so the keep-out always
+					// passed, and on a hosted server it only ever measured the host.
+					if ((allPlayers findIf {_randomZone distance _x <= 500}) < 0) then {_found=true;};
 					sleep 0.2;
 					_failSafe = _failSafe + 1;
 					if (_failsafe > 10) then {sleep 300; _failsafe = 0;}
