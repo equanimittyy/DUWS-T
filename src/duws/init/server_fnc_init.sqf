@@ -12,7 +12,9 @@
 fnc_cp_adjust = {
 	if (!isServer) exitWith {};
 	params [["_delta", 0]];
-	commandpointsblu1 = commandpointsblu1 + _delta;
+	// Floored at 0: the pool is a count, and the death penalty plus the co-op
+	// double-spend window could otherwise leave it reading negative.
+	commandpointsblu1 = (commandpointsblu1 + _delta) max 0;
 	publicVariable "commandpointsblu1";
 	// PV handler updates ctrl 1000 on remote clients; do it here for the host,
 	// whose own publicVariableEventHandler does not fire for its own broadcast.
@@ -21,14 +23,16 @@ fnc_cp_adjust = {
 
 // Server-authoritative Army Power mutation -- same delta contract as fnc_cp_adjust:
 // callers remoteExec a signed delta, nothing else assigns the pools. An unrecognised
-// side drops the delta and logs rather than crediting the wrong pool; no clamp
-// (fnc_opfor_cap legitimately drives BLU AP down); no HUD counter to refresh.
+// side drops the delta and logs rather than crediting the wrong pool; no HUD counter
+// to refresh. Floored at 0 like CP: losing a zone subtracts the zone's full worth, so
+// an unclamped pool could sit deeply negative, and every WARCOM wave threshold reads
+// "above N" anyway, so 0 and -45 already behave identically.
 fnc_ap_adjust = {
 	if (!isServer) exitWith {};
 	params [["_side", ""], ["_delta", 0]];
 	switch (_side) do {
-		case "OPF": { WARCOM_opfor_ap = WARCOM_opfor_ap + _delta; publicVariable "WARCOM_opfor_ap"; };
-		case "BLU": { WARCOM_blufor_ap = WARCOM_blufor_ap + _delta; publicVariable "WARCOM_blufor_ap"; };
+		case "OPF": { WARCOM_opfor_ap = (WARCOM_opfor_ap + _delta) max 0; publicVariable "WARCOM_opfor_ap"; };
+		case "BLU": { WARCOM_blufor_ap = (WARCOM_blufor_ap + _delta) max 0; publicVariable "WARCOM_blufor_ap"; };
 		default { diag_log format ["fnc_ap_adjust: unrecognised side '%1', dropped delta %2", _side, _delta]; };
 	};
 };

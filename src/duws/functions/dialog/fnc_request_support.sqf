@@ -506,7 +506,7 @@ case 11: {
             };
         } else {
             if (AttChopInUse) exitWith {hint localize "STR_DUWS_T_dvbox9ay"};
-			[floor _cost / 2] remoteExec ["fnc_cp_adjust", 2];
+			[floor (_cost / 2)] remoteExec ["fnc_cp_adjust", 2];
 			ctrlSetText [1000, format["%1",commandpointsblu1]];
 			[player,hcAttChop] call BIS_fnc_removeCommMenuItem;
 			lbSetColor [2103, index_support_hcAttChop, [1, 0, 0, 1]];
@@ -542,7 +542,7 @@ case 11: {
             };
         } else {
             if (CASInUse) exitWith {hint localize "STR_DUWS_T_dvbox9ay"};
-				[floor _cost / 2] remoteExec ["fnc_cp_adjust", 2];
+				[floor (_cost / 2)] remoteExec ["fnc_cp_adjust", 2];
 				ctrlSetText [1000, format["%1",commandpointsblu1]];
 				[player,hcCAS] call BIS_fnc_removeCommMenuItem;
 				lbSetColor [2103, index_support_hcCAS, [1, 0, 0, 1]];
@@ -632,7 +632,7 @@ case 21: {
             };
         } else {
             if (CAPInUse) exitWith {hint localize "STR_DUWS_T_dvbox9ay"};
-				[floor _cost / 2] remoteExec ["fnc_cp_adjust", 2];
+				[floor (_cost / 2)] remoteExec ["fnc_cp_adjust", 2];
 				ctrlSetText [1000, format["%1",commandpointsblu1]];
 				[player,hcCAS] call BIS_fnc_removeCommMenuItem;
 				lbSetColor [2103, 16, [1, 0, 0, 1]];
