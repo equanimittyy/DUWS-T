@@ -14,28 +14,13 @@ if (!isServer) exitWith {};
 
 if (_triggerPos in WARCOM_zones_controled_by_OPFOR) exitWith {};
 
-amount_zones_captured = amount_zones_captured - 1;
-publicVariable "amount_zones_captured";
+// Hands the zone back to OPFOR: both side lists and both counters move together,
+// and the lost zone becomes the primary assault target.
+["OPF", _triggerPos] call fnc_zone_control_set;
 
 ["us_lostcontrol",[_place,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_lostcontrol"] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
-
-// REMOVE A ZONE FROM BLUFOR CONTROL
-_index = 0;
-{
-	if ((_x select 0 == _triggerPos select 0) && (_x select 1 == _triggerPos select 1)) exitWith {
-		WARCOM_zones_controled_by_BLUFOR deleteAt _index;
-	}; 
-	_index = _index + 1;
-} forEach WARCOM_zones_controled_by_BLUFOR;
-publicVariable "WARCOM_zones_controled_by_BLUFOR";
-
-// SORT THE ZONES BY DIST TO BLUHQ
-WARCOM_zones_controled_by_OPFOR = [WARCOM_zones_controled_by_OPFOR,[WARCOM_blu_hq_pos],{_input0 distance _x},"ASCEND"] call BIS_fnc_sortBy;
-// SET THE ZONE AS PRIMARY
-WARCOM_zones_controled_by_OPFOR insert [0, [_triggerPos]];
-publicVariable "WARCOM_zones_controled_by_OPFOR";
 
 // Pause TFs if no opfor zones are visible
 if (hardcore_mode_enable) then {
@@ -52,9 +37,6 @@ if (hardcore_mode_enable) then {
 	publicVariable "hardcore_visibleZone_found";
 };
 
-// MODIFY NUMBER OF CONTROLLED ZONES
-zoneundercontrolblu = zoneundercontrolblu - 1;
-publicVariable "zoneundercontrolblu";
 
 // MODIFY ARMY POWER - OPF gains full points, BLU loses full points
 ["OPF", _points] remoteExec ["fnc_ap_adjust", 2];

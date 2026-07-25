@@ -15,26 +15,12 @@ if (!isServer) exitWith {};
 
 if (_triggerPos in WARCOM_zones_controled_by_BLUFOR) exitWith {};
 
-amount_zones_captured = amount_zones_captured + 1;
-publicVariable "amount_zones_captured";
+// Hands the zone to BLUFOR: both side lists and both counters move together.
+["BLU", _triggerPos] call fnc_zone_control_set;
 
 ["us_takencontrol",[_place,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_takencontrol"] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
-
-// TELL THE ZONE IS UNDER BLU CONTROL
-WARCOM_zones_controled_by_BLUFOR = WARCOM_zones_controled_by_BLUFOR + [_triggerPos];
-publicVariable "WARCOM_zones_controled_by_BLUFOR";
-
-// REMOVE A ZONE FROM OPFOR CONTROL
-_index = 0;
-{
-    if ((_x select 0 == _triggerPos select 0) && (_x select 1 == _triggerPos select 1)) exitWith {
-		WARCOM_zones_controled_by_OPFOR deleteAt _index;
-    }; 
-    _index = _index + 1;
-} forEach WARCOM_zones_controled_by_OPFOR;
-publicVariable "WARCOM_zones_controled_by_OPFOR";
 
 // Pause TFs if no opfor zones are visible
 if (hardcore_mode_enable) then {
@@ -54,10 +40,6 @@ if (hardcore_mode_enable) then {
 // ADD COMMAND POINTS  1000m zone = 100 / 2 = 50 pts available
 _points = round(_points/2);
 [_points] remoteExec ["fnc_cp_adjust", 2];
-
-// ADD NUMBER OF CONTROLLED ZONES
-zoneundercontrolblu = zoneundercontrolblu + 1;
-publicVariable "zoneundercontrolblu";
 
 // MODIFY ARMY POWER - OPF gains 1/2 the points, BLU gains full points
 _opfreward = round(_points/2);
