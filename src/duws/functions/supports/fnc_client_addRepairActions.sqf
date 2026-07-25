@@ -1,3 +1,4 @@
+// Locality: client; the addAction/event-handler bodies below run on the machine that triggers them, not here.
 if (!hasInterface) exitWith {};
 params ["_depot", "_trgNetId"];
 if (isNull _depot) exitWith {};

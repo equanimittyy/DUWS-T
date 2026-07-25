@@ -1,3 +1,4 @@
+// Locality: all machines -- callers remoteExec to target 0.
 
 // Add Action for "Squad Leads" to End or Extend (Domination mode) the campaign
 

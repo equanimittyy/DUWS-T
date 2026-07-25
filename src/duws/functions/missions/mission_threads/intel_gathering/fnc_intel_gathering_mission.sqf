@@ -1,3 +1,4 @@
+// Locality: server -- callers remoteExec to target 2.
 // ========== 任务冷却检查 ==========
 params ["_MissionPos", "_mission_name"];
 

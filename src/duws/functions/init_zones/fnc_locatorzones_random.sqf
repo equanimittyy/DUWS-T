@@ -1,3 +1,4 @@
+// Locality: server -- inherited from warcom/fnc_init_OPFOR_WARCOM.sqf.
 // fnc_locatorZones_random.sqf
 //////////////////
 // Random Zones

@@ -1,3 +1,4 @@
+// Locality: server -- inherited from missions/mission_threads/domination/fnc_domination_mission.sqf.
 // CLEANUP - 增强版，保留玩家相关对象，删除蓝方单位
 params ["_targetpos","_radius"];
 sleep 20;

@@ -1,3 +1,4 @@
+// Locality: client -- invoked from a dialog action.
 // Snapshot selections so the campaign screen's Back button can restore them.
 // Must read before closeDialog while the controls still exist.
 duws_enviro_sel = [2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2110,2111] apply { lbCurSel _x };

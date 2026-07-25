@@ -1,3 +1,4 @@
+// Locality: client; the addAction bodies below run on the machine that triggers them, not here.
 /*
     fnc_addHQLaptopActions.sqf
     参数: _laptop - 笔记本电脑对象

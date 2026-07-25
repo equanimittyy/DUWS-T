@@ -1,3 +1,4 @@
+// Locality: server -- callers remoteExec to target 2.
 // CLEANUP - 删除红方单位
 params ["_targetpos","_radius"];
 sleep 20;

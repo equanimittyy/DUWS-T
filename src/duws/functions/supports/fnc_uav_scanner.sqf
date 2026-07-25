@@ -1,3 +1,4 @@
+// Locality: client; the trigger bodies below run on the machine that triggers them, not here (inherited from supports/fnc_mapclickuav.sqf).
 _centerPos = _this select 0;
 _checkedRadius = _this select 1;
 _cost = _this select 2;

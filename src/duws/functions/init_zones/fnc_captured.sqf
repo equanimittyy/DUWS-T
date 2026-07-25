@@ -1,3 +1,4 @@
+// Locality: server; the trigger bodies below run on the machine that triggers them, not here.
 _place   =   _this select 0; 
 _points =   _this select 1;
 _markername = _this select 2;

@@ -1,3 +1,4 @@
+// Locality: server -- inherited from init_zones/fnc_createzone.sqf.
 // fnc_createopfortified.sqf
 // Spawn guards around prefab and random units in buildings
 _position = _this select 0;

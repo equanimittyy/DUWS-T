@@ -1,3 +1,4 @@
+// Locality: server; the addAction/trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
 // 任务冷却检查
 private _missionType = 4;
 private _cooldownVar = missionNamespace getVariable [format ["mission_cooldown_%1", _missionType], 0];

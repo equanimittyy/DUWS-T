@@ -1,3 +1,4 @@
+// Locality: server -- inherited from missions/mission_threads/destroy_cache/fnc_destroy_cache_mission.sqf.
 params ["_missionPos", "_radius"];
 
 // 原有的巡逻生成代码（保持不变）

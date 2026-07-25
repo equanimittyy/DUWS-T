@@ -1,3 +1,4 @@
+// Locality: server -- inherited from misc/fnc_create_ammo_lists.sqf.
 
 // LIST OF ALL ITEMS TO SUPPLEMENT RESTRICTED ARSENAL
 // SOME FACTIONS DON'T HAVE GOOD BASIC GEAR

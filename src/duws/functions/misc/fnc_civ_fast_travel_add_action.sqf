@@ -1,3 +1,4 @@
+// Locality: client; the addAction bodies below run on the machine that triggers them, not here.
 /*
     fnc_civ_fast_travel_add_action.sqf
     为平民添加快速传送动作（始终显示，但声望不足时会失败）

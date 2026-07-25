@@ -1,3 +1,4 @@
+// Locality: client -- inherited from dialog/fnc_startup_next.sqf.
 _handle = createDialog "startup_dialog3";
 waitUntil {dialog};
 

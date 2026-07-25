@@ -1,3 +1,4 @@
+// Locality: server -- callers remoteExec to target 2.
 // 任务冷却检查
 private _missionType = 5;
 private _cooldownVar = missionNamespace getVariable [format ["mission_cooldown_%1", _missionType], 0];

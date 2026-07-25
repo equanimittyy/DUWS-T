@@ -1,3 +1,4 @@
+// Locality: server; the addAction bodies below run on the machine that triggers them, not here.
 // fnc_createKillhouse.sqf
 // 生成基于 composition 偏移的 Killhouse 训练场 (所有物体、正确朝向、高空)
 // 初始不生成靶子，通过多屏幕电脑动作来生成目标和敌人

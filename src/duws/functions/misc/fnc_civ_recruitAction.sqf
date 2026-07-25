@@ -1,3 +1,4 @@
+// Locality: all machines; the addAction bodies below run on the machine that triggers them, not here (callers remoteExec to target 0).
 params ["_unit"];
 
 if (isNull _unit) exitWith {};

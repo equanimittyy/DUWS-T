@@ -1,3 +1,4 @@
+// Locality: client; the addAction/map-click bodies below run on the machine that triggers them, not here.
 // fnc_addBoardKillhouseActions.sqf
 // 客户端执行：为 MapBoard_altis_F 添加 Killhouse 传送动作与基地快速移动
 if (!hasInterface) exitWith {};

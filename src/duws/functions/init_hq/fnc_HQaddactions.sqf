@@ -1,3 +1,4 @@
+// Locality: client -- inherited from init/client_init.sqf.
 _hq = _this select 0;
 
 if (isMultiplayer) then {

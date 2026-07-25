@@ -1,3 +1,4 @@
+// Locality: client -- inherited from init/client_init.sqf.
 _loop = true;
 
 playmusic selectRandom["wasteland","fallout","Track11_StageB_stealth","Track09_Night_percussions","BackgroundTrack01a_F","LeadTrack01_F_EPA","LeadTrack02_F"];

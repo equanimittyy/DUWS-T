@@ -1,3 +1,4 @@
+// Locality: client -- see callers.
 diag_log format ["Client_init: %1", profileName];
 fnc_hirePartisans_clientMap = compile preprocessFileLineNumbers "duws\functions\misc\fnc_hirePartisans_clientMap.sqf";
 publicVariable "fnc_hirePartisans_clientMap";

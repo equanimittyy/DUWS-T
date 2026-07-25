@@ -1,3 +1,4 @@
+// Locality: server -- callers remoteExec to target 2.
 
 {deleteVehicle _x} forEach allDeadMen;
 

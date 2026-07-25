@@ -1,3 +1,4 @@
+// Locality: all machines -- some callers remoteExec to target 0, others to target 2, so it can run anywhere.
 
 _addAction = _this select 0;
 

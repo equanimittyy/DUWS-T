@@ -1,3 +1,4 @@
+// Locality: server -- inherited from init/server_init.sqf.
 /*
     NAME: misc\repetitive_cleanup.sqf
     VERSION: 1.9

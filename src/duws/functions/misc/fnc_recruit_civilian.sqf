@@ -1,3 +1,4 @@
+// Locality: all machines -- inherited from misc/fnc_addRecruitAction.sqf.
 /*
     fnc_recruit_civilian.sqf
     参数: _civilian - 平民单位, _caller - 发起交互的玩家

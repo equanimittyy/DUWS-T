@@ -1,3 +1,4 @@
+// Locality: server; the trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
 // fnc_createZone.sqf
 //  _generatezonescript = [format["Zone %1",_i],_points_zone,_zone_radius,_MissionPos,_fortified,true,_i] spawn fnc_createzone
 //  Name of the place,pts,radius,position,fortified,prefab,zone#

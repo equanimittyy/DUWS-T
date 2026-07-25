@@ -1,3 +1,4 @@
+// Locality: server -- inherited from init/server_init.sqf.
 _weather_loop = true;
 
 // 确保 CIV_PRESENCE 已从环境菜单同步

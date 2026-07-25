@@ -2,7 +2,7 @@
 
 The player's Main Base is built once, server-side, by
 `src/duws/functions/init_hq/fnc_BluHQinit.sqf` (compiled at
-`src/duws/init/server_fnc_init.sqf:5`, spawned at `src/duws/init/server_init.sqf:95`).
+`src/duws/init/server_fnc_init.sqf:6`, spawned at `src/duws/init/server_init.sqf:96`).
 It anchors on `PosOfBLUHQ`, the base spot chosen during placement
 (`fnc_HQ_random_place.sqf:39` or `fnc_HQ_manual_place.sqf:64`).
 

@@ -1,3 +1,4 @@
+// Locality: client; the addAction bodies below run on the machine that triggers them, not here (invoked from a dialog action).
 
 
 _index2 = lbCurSel 2103;

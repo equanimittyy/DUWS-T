@@ -1,3 +1,4 @@
+// Locality: client -- invoked from a dialog action.
 // Submit handler for the single-side custom-faction paste window. duws_custom_side
 // (set by fnc_startup_faction_resolve before the dialog opens) says which side this
 // is. A blank box, or one missing required keys / naming a class that doesn't exist,

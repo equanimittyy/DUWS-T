@@ -1,3 +1,4 @@
+// Locality: server -- inherited from init_zones/fnc_createzone.sqf.
 // LOOP TO WAIT UNTIL BLUFOR CLOSE - SPAWN /DESPAWN 
 // AFTER 10 min of BLUFOR CLOSE, NO DESPAWN
 

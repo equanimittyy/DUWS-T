@@ -39,7 +39,7 @@ decorated, not overhauled; the substantial new system is civilian population.
 
 ## Subsystem A: enemy zone siting ("More Urban")
 
-Default-on (`moreUrban = 1`, `src/duws/init/server_var_init.sqf:137`; campaign menu can set
+Default-on (`moreUrban = 1`, `src/duws/init/server_var_init.sqf:138`; campaign menu can set
 `0`, `fnc_process_campaign_menu.sqf:188-203`). Three stages during `server_init.sqf`.
 
 | Stage | File | Produces |

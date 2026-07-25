@@ -1,3 +1,4 @@
+// Locality: server -- callers remoteExec to target 2.
 // fnc_MHQ_undeploy.sqf
 // 取消部署机动指挥部，清理弹药箱、帐篷、复活点，解锁载具
 

@@ -1,3 +1,4 @@
+// Locality: client; the map-click bodies below run on the machine that triggers them, not here (invoked from a dialog action).
 diag_log format ["Placement BLUFOR Faction: %1", BLUFOR_Faction_X];
 diag_log format ["Placement OPFOR Faction: %1", OPFOR_Faction_X];
 

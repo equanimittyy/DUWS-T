@@ -1,3 +1,4 @@
+// Locality: all machines; the addAction bodies below run on the machine that triggers them, not here (callers remoteExec to target 0).
 /*
     fnc_civ_stopCommand.sqf
     参数: _unit - 平民单位

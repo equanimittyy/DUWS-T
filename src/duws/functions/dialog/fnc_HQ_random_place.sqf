@@ -1,3 +1,4 @@
+// Locality: client; the map-click bodies below run on the machine that triggers them, not here (invoked from a dialog action).
 
 ["info",[localize "STR_DUWS_T_ci827d0e",localize "STR_DUWS_T_uof7n8iu"]] call bis_fnc_showNotification;
 hint localize "STR_DUWS_T_fcdu8ct2";

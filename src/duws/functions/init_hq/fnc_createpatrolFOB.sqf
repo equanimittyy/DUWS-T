@@ -1,3 +1,4 @@
+// Locality: server -- inherited from supports/fnc_fob_server.sqf.
 // usage: [_foundPickupPos, _size] spawn fnc_createpatrolFOB;
 // radius: 50 for patrol inside and around FOB, 500 for medium, 1300 for island
 

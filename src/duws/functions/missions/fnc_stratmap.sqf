@@ -1,3 +1,4 @@
+// Locality: client -- invoked from a dialog action.
 
 
 ///// DUWS_T  RERUN THE OPFOR FACTION FILE FOR JIP SIDE MISSION GEN

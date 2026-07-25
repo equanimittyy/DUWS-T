@@ -1,3 +1,4 @@
+// Locality: server; the trigger bodies below run on the machine that triggers them, not here.
 /*
     fnc_civ_developInformantServer.sqf
     参数: [_unit, _caller, _locIndex]

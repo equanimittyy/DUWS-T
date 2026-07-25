@@ -1,3 +1,4 @@
+// Locality: server -- inherited from init_zones/fnc_zone_spawn_sizes.sqf.
 // usage: [position, radius, setQRF] spawn fnc_createopwpteam
 // radius: 50 for patrol inside and around base, 500 for medium, 1300 for island
 

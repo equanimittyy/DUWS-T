@@ -1,3 +1,4 @@
+// Locality: server -- inherited from missions/mission_threads/clearthearea_cqb/fnc_clearthearea_cqb_mission.sqf.
 
 params ["_missionpos", "_radius", "_Posfound", "_targetpos", "_failSafe"];
 

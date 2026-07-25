@@ -1,3 +1,4 @@
+// Locality: client; the event-handler bodies below run on the machine that triggers them, not here.
 /*
     fnc_open_action_menu.sqf
     Reusable list menu: one titled dialog with a selectable listbox, opened in

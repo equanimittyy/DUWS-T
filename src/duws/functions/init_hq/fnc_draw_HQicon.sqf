@@ -1,3 +1,4 @@
+// Locality: client -- inherited from init/client_init.sqf.
 
 HQ_draw_icon = {
 	drawIcon3D ["\a3\ui_f\data\gui\cfg\hints\Commanding_ca.paa", [0.2,1,0.2,1], [PosOfBLUHQ select 0,PosOfBLUHQ select 1,2.5], 1, 1, 0, "Headquarters", 1, 0.025, "TahomaB"];

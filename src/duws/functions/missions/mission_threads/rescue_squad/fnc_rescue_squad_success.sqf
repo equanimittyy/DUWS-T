@@ -1,3 +1,4 @@
+// Locality: server -- inherited from missions/mission_threads/rescue_squad/fnc_rescue_squad_mission.sqf.
 params ["_markername","_markername2","_sol1","_sol2","_sol3","_MissionPos","_targetPos","_radius","_mission_name"];
 
 

@@ -1,3 +1,4 @@
+// Locality: client -- invoked from a dialog action.
 if (WARCOM_blufor_ap < 15) exitWith {hint localize "STR_DUWS_T_nysmk8sa";};
 
 [10] remoteExec ["fnc_cp_adjust", 2];

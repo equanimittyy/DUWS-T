@@ -1,3 +1,4 @@
+// Locality: client; the addAction bodies below run on the machine that triggers them, not here.
 /*
     fnc_addQuickChangeActions.sqf
     参数: _crate - 补给箱对象

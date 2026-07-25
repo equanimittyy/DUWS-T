@@ -1,3 +1,4 @@
+// Locality: client -- invoked from a dialog action.
 // Callsign screen (startup_dialog3) START-R / START-M -> lock in the squad callsign
 // and commit the campaign with the chosen zone-placement mode (_manual: false = random
 // zones, true = hand-placed). This is the single final-commit point for the whole

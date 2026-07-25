@@ -1,3 +1,4 @@
+// Locality: server; the addAction bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
 
 // MHQ must be empty to Deploy
 _empty = (count (crew MHQ1)) == 0;

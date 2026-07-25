@@ -1,3 +1,4 @@
+// Locality: client -- invoked from a dialog action.
 // Resolve each side's faction choice during setup, BLUFOR first then OPFOR, showing
 // only the prompt that side needs: CUSTOM -> its own paste window; AUTODETECT -> its
 // picker; a preset or AUTODETECT_RANDOM -> no prompt at all. Captures the paste text

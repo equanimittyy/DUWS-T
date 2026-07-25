@@ -1,3 +1,4 @@
+// Locality: client; the map-click bodies below run on the machine that triggers them, not here.
 /*
     fnc_civ_fast_travel_request.sqf
     客户端：请求快速传送，服务器验证后打开地图

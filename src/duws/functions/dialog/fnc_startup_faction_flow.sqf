@@ -1,3 +1,4 @@
+// Locality: client -- inherited from dialog/fnc_startup_enviro_closed.sqf.
 // Faction + HQ placement -> custom-faction paste (if any) -> environment menu.
 // Runs on first setup (from client_init) and whenever the environment screen's
 // Back button routes back here to re-pick faction and HQ.

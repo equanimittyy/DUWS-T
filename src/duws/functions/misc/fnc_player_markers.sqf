@@ -1,3 +1,4 @@
+// Locality: client; the map-click bodies below run on the machine that triggers them, not here (inherited from init/client_init.sqf).
 /*
 	
 	AUTHOR: aeroson

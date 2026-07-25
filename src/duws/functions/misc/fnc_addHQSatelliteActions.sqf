@@ -1,3 +1,4 @@
+// Locality: client; the addAction bodies below run on the machine that triggers them, not here.
 /*
     fnc_addHQSatelliteActions.sqf
     参数: _satellite - 卫星电话对象

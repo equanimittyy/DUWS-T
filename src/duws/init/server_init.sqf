@@ -1,3 +1,4 @@
+// Locality: server -- see callers.
 diag_log format ["Server_init: %1", profileName];
 
 // DEFINE SERVER VARIABLES and FUNCTIONS

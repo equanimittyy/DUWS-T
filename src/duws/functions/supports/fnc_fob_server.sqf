@@ -1,3 +1,4 @@
+// Locality: server; the trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
 
 _foundPickupPos = _this select 0;
 _size = _this select 1;
