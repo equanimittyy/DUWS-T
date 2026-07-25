@@ -3,7 +3,6 @@
 
 _posplayer = _this select 0;
 _radius = _this select 1;
-_cost = _this select 2;
 _foundPickupPos = [];
 taxiCanTakeOff = false;
 _helo_maxDamage = 0.7;
@@ -19,7 +18,6 @@ _foundPickupPos = [_posplayer, 20,_radius,20,0,0.5,0,[],[[0,0],[0,0]]] call BIS_
 if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_nolz"; sleep 1; _art = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;};
 
 // A POS NEAR THE PLAYER HAS BEEN FOUND, CHOPPA EN ROUTE
-[-_cost] remoteExec ["fnc_cp_adjust", 2];
 _speakeracteam = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
 _message = ([localize "STR_DUWS_T_helotaxicall0"] call fnc_cs);
 [_speakeracteam, _message] remoteExec ["BIS_fnc_showSubtitle", 0];

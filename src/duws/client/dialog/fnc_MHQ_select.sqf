@@ -1,6 +1,5 @@
 // Locality: client -- invoked from a comm-menu expression (shared/includes/supports_radio_modern.hpp:209).
 
-_cost = _this select 0;
 
 _target = cursorObject;
 if (_target == objNull) exitWith {
@@ -16,7 +15,6 @@ if (!_goodVeh) exitWith {
 	[player,"mobile_HQ"] call BIS_fnc_addCommMenuItem;
 };
 
-[-_cost] remoteExec ["fnc_cp_adjust", 2];
 
 // Give MHQ a name with public variable
 _Varname = "MHQ1";
