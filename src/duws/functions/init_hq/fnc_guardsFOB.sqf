@@ -99,13 +99,14 @@ _fob setVariable ["FOB_guardGroups", [_groupGuard, _groupPatrol]];
 _fob setVariable ["FOB_guard_busy", false];
 
 // 添加守卫重置动作（防重）
-// Added once, on every machine and for JIP, so any player can reguard rather than only whoever
-// built the FOB. The flag is what makes "once" hold; it works because the action is never
-// removed now, where before a reguard removed it and relied on the flag being invisible from
-// the acting client to get it back.
+// Added once, on every machine and for JIP, so it is no longer tied to whoever built the FOB.
+// The flag is what makes "once" hold; it works because the action is never removed now, where
+// before a reguard removed it and relied on the flag being invisible from the acting client to
+// get it back. The Request_Players gate is the same forward-looking restriction described in
+// init_hq/fnc_fortifyFOB.sqf, and admits every playable slot as things stand.
 if (isNil {_fob getVariable "FOB_guard_action_done"}) then {
     _fob setVariable ["FOB_guard_action_done", true];
-    [_fob,[localize "STR_DUWS_T_p5i8fe14", fnc_reguardFOB, [], 0, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
+    [_fob,[localize "STR_DUWS_T_p5i8fe14", fnc_reguardFOB, [], 0, true, true, "", "_this == player && ((vehiclevarname player) in Request_Players)"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
 };
 
 

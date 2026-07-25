@@ -202,12 +202,18 @@ _turret5 allowdamage false;
 _fob setVariable ["FOB_turrets", [_turret1, _turret2, _turret3, _turret4, _turret5]];
 _fob setVariable ["FOB_fortify_busy", false];
 
-// Added once, to every machine that has a player and to JIP joiners, so any player can
-// refortify rather than only whoever built the FOB. Same targeting as supports/fnc_FOBactions.
-// It carries no arguments: the action's target is the FOB itself and the server reads the
-// rest, so it never needs removing and re-adding.
+// Added once, to every machine that has a player and to JIP joiners, so it is no longer tied
+// to whoever built the FOB. Same targeting as supports/fnc_FOBactions. It carries no
+// arguments: the action's target is the FOB itself and the server reads the rest, so it never
+// needs removing and re-adding.
+//
+// Request_Players currently lists every playable slot, so the gate admits everyone today. It
+// is here so a dedicated server can later restrict FOB upkeep to particular slots -- squad
+// leaders, say -- by trimming that one array. The check lives in the action's condition rather
+// than wrapping addAction the way fnc_FOBactions does, because this runs on the server where
+// `player` is objNull; a condition string is evaluated per client, where it resolves.
 if (!_refortify) then {
-	[_fob,[localize "STR_DUWS_T_qxrh9fws", fnc_refortifyFOB, [], 0, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
+	[_fob,[localize "STR_DUWS_T_qxrh9fws", fnc_refortifyFOB, [], 0, true, true, "", "_this == player && ((vehiclevarname player) in Request_Players)"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
 };
 
 
