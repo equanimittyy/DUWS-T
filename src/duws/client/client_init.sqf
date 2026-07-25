@@ -232,15 +232,10 @@ if (_difficulty_setting < 2 || (difficultyOption "mapContentFriendly") == 1) the
 	};
 };
 
-// INIT Earplugs
-AddEarplugsEH = player addEventHandler ["GetinMan", {
-    toggle_earplugs = player addaction [localize "STR_DUWS_T_2rc0nvug",fnc_earplugs, "", 0, true, true, "", "_this == player"];
-}];
-RemoveEarplugsEH = player addEventHandler ["GetoutMan", {
-    player removeAction toggle_earplugs;
-if (soundVolume == 0.3) then {hint localize "STR_DUWS_T_gut0c4f8"};
-	5 fadesound 1;
-}];
+// INIT Earplugs -- available on foot as well as mounted; fadeSound is a client-wide setting,
+// so nothing about the toggle was ever vehicle-specific. The action dies with the body, so
+// onPlayerRespawn.sqf re-adds it.
+player addaction [localize "STR_DUWS_T_2rc0nvug",fnc_earplugs, "", 0, true, true, "", "_this == player"];
 
 // Create Diary/Help entry on the Map
 [] spawn fnc_duws_help;

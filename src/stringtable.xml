@@ -8689,13 +8689,6 @@
                 <Original>Waiting for the host to finish mission setup...</Original>
                 <English>Waiting for the host to finish mission setup...</English>
             </Key>
-            <Key ID="STR_DUWS_T_gut0c4f8">
-                <Spanish>Tapones para oídos removidos</Spanish>
-                <German>Ohrenstöpsel entfernt</German>
-                <Chinesesimp>耳塞已移除</Chinesesimp>
-                <Original>Earplugs Removed</Original>
-                <English>Earplugs Removed</English>
-            </Key>
             <Key ID="STR_DUWS_T_2rc0nvug">
                 <Spanish>&lt;t color='#00FF00'&gt;Alternar tapones &lt;/t&gt;</Spanish>
                 <German>&lt;t color='#00FF00'&gt;Ohrenstöpsel umschalten &lt;/t&gt;</German>

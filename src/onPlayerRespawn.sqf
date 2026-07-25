@@ -11,6 +11,10 @@ player enableStamina true;
 player_fatigue = 1;
 player addRating 10000000;
 
+// The earplug action was attached to the old body, but fadeSound survives respawn: without
+// this re-add a player who died with earplugs in has no way to turn the volume back up.
+player addaction [localize "STR_DUWS_T_2rc0nvug",fnc_earplugs, "", 0, true, true, "", "_this == player"];
+
 if (!isNil "apocalypse_mode" && apocalypse_mode) then {
     call DUWS_fnc_applyApocalypseFilter;
 };
