@@ -11,7 +11,7 @@ _music = [] call fnc_taxi_music;
 _foundPickupPos = [_posplayer, 0,_radius,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos; // find a valid pos
 
 // try to find a pos, if no pos is found exit the script
-if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint "You must be near a clear shoreline or out at sea"; sleep 5; [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;};
+if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_boattaxi_noshore"; sleep 5; [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;};
 
 // A POS NEAR THE PLAYER HAS BEEN FOUND, GUNBOAT EN ROUTE
 
@@ -49,7 +49,7 @@ waitUntil {_foundpickuppos distance _boat < 350 or (getdammage _boat > 0.7 or !a
 // IF THE PILOT IS DEAD OR BOAT SUNK ******************
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith {
 deleteMarker str(_markerpickup);
-hint "Swordfish 1-1 is too damaged to continue the mission";
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_boattaxi_damaged"] remoteExec ["BIS_fnc_showSubtitle", 0];
 // --- AJOUTER DE NOUVEAU LE SUPPORT
 sleep 15;
 [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
@@ -63,7 +63,7 @@ if (getdammage _boat > 0.7 or !alive _pilot) exitWith {}; // get out of the loop
 // check if player is inside choppa
 if (vehicle player != _boat) then {
 	taxiCanTakeOff = false; 
-	["This is Swordfish 1-1, get back in, I can't transport you're not inside the boat !"] spawn fnc_sideChat_filter; 
+	[localize "STR_DUWS_T_boattaxi_notaboard"] spawn fnc_sideChat_filter; 
 	_boat addAction ["<t color='#00b7ff'>Give a location to the pilot</t>", fnc_mapclickboat, "", 0, true, true, "", "vehicle _this == _target"];
 } else {
 	_inVehCheck = false;};
@@ -72,7 +72,7 @@ if (vehicle player != _boat) then {
 // IF THE PILOT IS DEAD OR GUNBOAT DOWN  **************
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith {
 deleteMarker str(_markerpickup);
-hint "Swordfish 1-1 is too damaged to continue the mission";
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_boattaxi_damaged"] remoteExec ["BIS_fnc_showSubtitle", 0];
 sleep 15;
 [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
 // --- AJOUTER DE NOUVEAU LE SUPPORT
@@ -83,7 +83,7 @@ sleep 15;
 // everything is ok, player is in boat
 playMusic [_music, 0];
 _boat lock true;
-titleText ["Driver: Roger that, we're oscar mike...", "PLAIN DOWN"];
+titleText [localize "STR_DUWS_T_boattaxi_oscarmike", "PLAIN DOWN"];
 str(_markerpickup) setMarkerPos ClickedTaxiPos; 
 str(_markerpickup) setMarkerText "Drop point";
 
@@ -94,7 +94,7 @@ str(_markerpickup) setMarkerText "Drop point";
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith {
 	_boat lock false;
 	deleteMarker str(_markerpickup);
-	hint "Swordfish 1-1 is too damaged to continue the mission";
+	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_boattaxi_damaged"] remoteExec ["BIS_fnc_showSubtitle", 0];
 	// --- AJOUTER DE NOUVEAU LE SUPPORT
 	sleep 15;
 	[player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
@@ -102,7 +102,7 @@ if (getdammage _boat > 0.7 or !alive _pilot) exitWith {
 // *****************************
 
 // TELEPORT BOAT NEAR DROP POINT
-titleText ["En route to drop point...", "BLACK OUT", 3];
+titleText [localize "STR_DUWS_T_boattaxi_enroute", "BLACK OUT", 3];
 _teleportPoint = [ClickedTaxiPos, 400,500,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 sleep 3.5;
 _boat setpos _teleportPoint;
@@ -111,7 +111,7 @@ _wp = _boatgroup addWaypoint [ClickedTaxiPos,0];
 _wp setWaypointType "MOVE";
 [_boatgroup, 1] setWaypointCombatMode "BLUE";
 sleep 3;
-titleText ["En route to drop point...", "BLACK IN", 4];
+titleText [localize "STR_DUWS_T_boattaxi_enroute", "BLACK IN", 4];
 _boat lock false;
 
 
@@ -120,7 +120,7 @@ waitUntil {sleep 0.5;ClickedTaxiPos distance _boat < 200  or (getdammage _boat >
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith {
 _boat lock false;
 deleteMarker str(_markerpickup);
-hint "Swordfish 1-1 is too damaged to continue the mission";
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_boattaxi_damaged"] remoteExec ["BIS_fnc_showSubtitle", 0];
 // --- AJOUTER DE NOUVEAU LE SUPPORT
 sleep 15;
 [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
@@ -133,18 +133,18 @@ waitUntil {sleep 0.5;(getpos _boat select 2 < 4 && _boat distance ClickedTaxiPos
 // IF THE PILOT IS DEAD OR GUNBOAT DOWN  **************
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith {
 _boat lock false;
-hint "Swordfish 1-1 is too damaged to continue the mission";
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_boattaxi_damaged"] remoteExec ["BIS_fnc_showSubtitle", 0];
 // --- AJOUTER DE NOUVEAU LE SUPPORT
 sleep 15;
 [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
 }; 
 // *****************************
-titleText ["Driver: We've arrived at the drop point", "PLAIN DOWN"];
+titleText [localize "STR_DUWS_T_boattaxi_arrived", "PLAIN DOWN"];
 
 {doGetOut _x; sleep 1;} forEach units group player;
 
 sleep 40;
-["This is Swordfish 1-1, I'm RTB"] spawn fnc_sideChat_filter;
+[localize "STR_DUWS_T_boattaxi_rtb"] spawn fnc_sideChat_filter;
 _wp = _boatgroup addWaypoint [_teleportPoint,0];   // tell the helo to leave
 _wp setWaypointType "MOVE";
 deleteMarker str(_markerpickup);
@@ -153,7 +153,7 @@ deleteMarker str(_markerpickup);
 waitUntil {_boat distance player>100 or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the helo is near the ground
 // IF THE PILOT IS DEAD OR GUNBOAT DOWN  **************
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith {
-hint "Swordfish 1-1 is too damaged to continue the mission";
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_boattaxi_damaged"] remoteExec ["BIS_fnc_showSubtitle", 0];
 // --- AJOUTER DE NOUVEAU LE SUPPORT
 sleep 15;
 [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;

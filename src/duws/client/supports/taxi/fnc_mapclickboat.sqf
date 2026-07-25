@@ -5,7 +5,7 @@ clicked = false;
 _helo = _this select 0;
 _actionID = _this select 2;
   
-titleText ["Driver: Click somewhere on your map, I'll drop you there", "PLAIN DOWN"];
+titleText [localize "STR_DUWS_T_boattaxiwp_brief", "PLAIN DOWN"];
 OnMapSingleClick "ClickedTaxiPos = _pos; clicked = true;";
 _helo removeAction _actionID;
 
@@ -19,10 +19,10 @@ while {_timer>0} do {
     if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) then {
 		if (ClickedTaxiPos distance player < 100) exitWith {
 		clicked = false;
-		titleText ["Driver: This is too close to our position", "PLAIN DOWN"];
+		titleText [localize "STR_DUWS_T_boattaxiwp_close", "PLAIN DOWN"];
 		};
 	clicked = false;
-	titleText ["Driver: I can't go there", "PLAIN DOWN"];
+	titleText [localize "STR_DUWS_T_boattaxiwp_bad", "PLAIN DOWN"];
 	}
 	else
 	{onMapSingleClick "";_timer = 0;taxiCanTakeOff = true;}  

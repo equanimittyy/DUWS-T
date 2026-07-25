@@ -2899,9 +2899,9 @@
             <Key ID="STR_DUWS_T_LOOT_REVENGE">
                 <Original>Go to hell!</Original>
                 <English>Go to hell!</English>
-                <German>Zur Hölle!!!</German>
-                <Spanish>¡Ve al infierno!!!</Spanish>
-                <Chinesesimp>去死吧！！！</Chinesesimp>
+                <German>Zur Hölle!</German>
+                <Spanish>¡Ve al infierno!</Spanish>
+                <Chinesesimp>去死吧！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_LOOT_REVENGE_HINT">
                 <Original>Civilian pulled out a hidden weapon!</Original>
@@ -3060,9 +3060,9 @@
                 <English>This is it. An evacuation helicopter will pick you up shortly.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECRUITconv5">
-                <German>Danke... danke!!!</German>
-                <Spanish>Gracias... gracias!!!</Spanish>
-                <Chinesesimp>谢谢...谢谢！！！</Chinesesimp>
+                <German>Danke... danke!</German>
+                <Spanish>Gracias... gracias!</Spanish>
+                <Chinesesimp>谢谢...谢谢！</Chinesesimp>
                 <Original>Thank you... thank you!</Original>
                 <English>Thank you... thank you!</English>
             </Key>
@@ -3944,11 +3944,11 @@
                 <English>You're finally here. There's a mortar on the position. Any of you know how to work it?</English>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_APPROACHING1p1">
-                <German>Feindkontakt!!</German>
-                <Spanish>¡Contacto!!</Spanish>
-                <Chinesesimp>接敌！！！</Chinesesimp>
-                <Original>Contact!!</Original>
-                <English>Contact!!</English>
+                <German>Feindkontakt!</German>
+                <Spanish>¡Contacto!</Spanish>
+                <Chinesesimp>接敌！</Chinesesimp>
+                <Original>Contact!</Original>
+                <English>Contact!</English>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_APPROACHING2">
                 <German>„Allseher“ an „Kurier 2-1“, Warnung: Starkere Feindinfanteriebewegungen in Ihrer Umgebung erfasst, Stärke ca. eine Kompanie. Auf Kontakt vorbereiten, aus.</German>
@@ -4406,11 +4406,11 @@
                 <English>Move immediately to eliminate the enemy mortar observer.</English>
             </Key>
             <Key ID="STR_DUWS_T_mortarspotter3">
-                <German>Mörser!!!</German>
-                <Spanish>Mortero!!!</Spanish>
-                <Chinesesimp>迫击炮！！！</Chinesesimp>
-                <Original>Mortar!!!</Original>
-                <English>Mortar!!!</English>
+                <German>Mörser!</German>
+                <Spanish>Mortero!</Spanish>
+                <Chinesesimp>迫击炮！</Chinesesimp>
+                <Original>Mortar!</Original>
+                <English>Mortar!</English>
             </Key>
             <Key ID="STR_DUWS_T_mortarspotter4">
                 <German>Action Squad, hier ist "Allseer". Radar hat gerade einen feindlichen Mörserbeobachter in eurer Nähe entdeckt. Rückt sofort aus, um ihn zu eliminieren.</German>
@@ -6512,6 +6512,58 @@
             <Key ID="STR_DUWS_T_liftwp_abort">
                 <Original>No route received. Mule 1-1 aborting the tasking.</Original>
                 <English>No route received. Mule 1-1 aborting the tasking.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_helotaxiwp_brief">
+                <Original>Chariot 1-1, ready to copy your route. Two waypoints and an LZ, over.</Original>
+                <English>Chariot 1-1, ready to copy your route. Two waypoints and an LZ, over.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_helotaxiwp_nolz">
+                <Original>Chariot 1-1, no clear LZ at that grid. Send another, over.</Original>
+                <English>Chariot 1-1, no clear LZ at that grid. Send another, over.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_helotaxiwp_reopen">
+                <Original>Chariot 1-1 standing by. Open your map to continue, over.</Original>
+                <English>Chariot 1-1 standing by. Open your map to continue, over.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxi_noshore">
+                <Original>Swordfish 1-1, no clear shoreline at your position. Move to open water or a clear beach, over.</Original>
+                <English>Swordfish 1-1, no clear shoreline at your position. Move to open water or a clear beach, over.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxi_damaged">
+                <Original>This is Overlord. Swordfish 1-1 is out of action and aborting the tasking. Regret we can't complete your extraction, Alpha 1-1. Another boat available shortly. Out.</Original>
+                <English>This is Overlord. Swordfish 1-1 is out of action and aborting the tasking. Regret we can't complete your extraction, Alpha 1-1. Another boat available shortly. Out.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxi_notaboard">
+                <Original>Swordfish 1-1 to Alpha 1-1, you are not aboard. Get in and we'll move out, over.</Original>
+                <English>Swordfish 1-1 to Alpha 1-1, you are not aboard. Get in and we'll move out, over.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxi_oscarmike">
+                <Original>Swordfish 1-1, roger. We are oscar mike.</Original>
+                <English>Swordfish 1-1, roger. We are oscar mike.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxi_enroute">
+                <Original>En route to the drop point</Original>
+                <English>En route to the drop point</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxi_arrived">
+                <Original>Swordfish 1-1, we are at the drop point. Disembark.</Original>
+                <English>Swordfish 1-1, we are at the drop point. Disembark.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxi_rtb">
+                <Original>Swordfish 1-1 is returning to base.</Original>
+                <English>Swordfish 1-1 is returning to base.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxiwp_brief">
+                <Original>Swordfish 1-1, ready to copy. Mark your drop point on the map, over.</Original>
+                <English>Swordfish 1-1, ready to copy. Mark your drop point on the map, over.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxiwp_close">
+                <Original>Swordfish 1-1, that grid is too close to our position. Send another, over.</Original>
+                <English>Swordfish 1-1, that grid is too close to our position. Send another, over.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxiwp_bad">
+                <Original>Swordfish 1-1, we cannot reach that grid. Send another, over.</Original>
+                <English>Swordfish 1-1, we cannot reach that grid. Send another, over.</English>
             </Key>
      </Key>
             <Key ID="STR_DUWS_T_helotaxi2wp">
