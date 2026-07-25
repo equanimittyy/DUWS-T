@@ -14,10 +14,7 @@ the `blufor_RQST_*` variables and `fnc_evalVehicleCost` — see
 `commandpointsblu1` is a networked global, so every change routes through a single
 server-side function, `fnc_cp_adjust` (`src/duws/init/server_fnc_init.sqf`), invoked as
 `[delta] remoteExec ["fnc_cp_adjust", 2]`. Callers send a signed *delta*; nothing else
-assigns or `publicVariable`s the pool — bar one inert exception,
-`operative/modern/fnc_operator_recruit.sqf:31`, which assigns the pool directly but subtracts
-`0` and never broadcasts. It is worth deleting precisely because the next edit to that line
-would not be inert. This is a hard concurrency requirement, not a style
+assigns or `publicVariable`s the pool. This is a hard concurrency requirement, not a style
 choice: mutating a networked global as `x = x - c; publicVariable "x"` from a client drops
 concurrent co-op changes and can duplicate CP — see the gotchas entry *"A shared global
 mutated as `x = x - c; publicVariable` loses concurrent writes"* in

@@ -15,23 +15,19 @@ _selected_soldier_class = _selected_soldier select 10;
 _selected_soldier_headgear = _selected_soldier select 11;
 _selected_soldier_points = _selected_soldier select 13;
 
-_proceed = true;
-
 hint _selected_soldier_identity;
 
+// Re-deploying an already-recruited, healed operative is free, so only "Ready"
+// costs CP. The hint lives inside the guard because exitWith is transparent to
+// switch and unwinds to the spawn scope: a flag checked after the switch could
+// never be read.
 switch (_selected_soldier_status) do
 {
   case "Ready": {
-	if (commandpointsblu1<8) exitWith {_proceed = false;};
+	if (commandpointsblu1<8) exitWith {hint "You don't have enough Command Points"};
 	[-8] remoteExec ["fnc_cp_adjust", 2];
   };
-
-  case "Healed": {
-	if (commandpointsblu1<-9999) exitWith {_proceed = false;};
-	commandpointsblu1 = commandpointsblu1 - 0;
-  };  
 };
-if (!_proceed) exitWith {hint "You don't have enough Command Points"};
 
 _spawnPos = getpos player;
 _spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],200,300,15,0,0.3,0,[],[]] call BIS_fnc_findSafePos;
