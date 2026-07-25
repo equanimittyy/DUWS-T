@@ -10,7 +10,7 @@ if (!hasInterface) exitWith {};
 killhouse_marker_max_range = 150;  // not drawn at all past this. The default clears the far
                                    // corner of the structure, so nothing is hidden until this
                                    // is deliberately tightened
-killhouse_marker_fade_near = 5;    // fully transparent at or inside this range
+killhouse_marker_fade_near = 1;    // fully transparent at or inside this range
 killhouse_marker_fade_far  = 30;   // fully opaque at or beyond it
 killhouse_marker_icon      = "\A3\ui_f\data\map\markers\military\dot_CA.paa";
 
