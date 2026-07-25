@@ -388,7 +388,7 @@ case 11: {
             support_hcAttChop_available = true;
         } else {
             if (AttChopInUse) exitWith {hint localize "STR_DUWS_T_dvbox9ay"};
-			[floor (_cost / 2)] remoteExec ["fnc_cp_adjust", 2];
+			[floor (_cost / 2), "hc_attack_heli_refund"] remoteExec ["fnc_cp_adjust", 2];
 			ctrlSetText [1000, format["%1",commandpointsblu1]];
 			[player,hcAttChop] call BIS_fnc_removeCommMenuItem;
 			lbSetColor [2103, index_support_hcAttChop, [1, 0, 0, 1]];
@@ -420,7 +420,7 @@ case 11: {
             support_hcCAS_available = true;
         } else {
             if (CASInUse) exitWith {hint localize "STR_DUWS_T_dvbox9ay"};
-				[floor (_cost / 2)] remoteExec ["fnc_cp_adjust", 2];
+				[floor (_cost / 2), "hc_cas_refund"] remoteExec ["fnc_cp_adjust", 2];
 				ctrlSetText [1000, format["%1",commandpointsblu1]];
 				[player,hcCAS] call BIS_fnc_removeCommMenuItem;
 				lbSetColor [2103, index_support_hcCAS, [1, 0, 0, 1]];

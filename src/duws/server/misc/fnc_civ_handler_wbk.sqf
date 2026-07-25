@@ -129,13 +129,13 @@ if (_mode == "cleanup") exitWith {
         };
         // 焦土模式效果
         if (scorched_earth_enabled) then {
-            [15] remoteExec ["fnc_cp_adjust", 2];
+            [15, "scorched_earth"] remoteExec ["fnc_cp_adjust", 2];
             private _bluApPenalty = - (3 + floor random 3);
-            ["BLU", _bluApPenalty] remoteExec ["fnc_ap_adjust", 2];
+            ["BLU", _bluApPenalty, "scorched_earth"] remoteExec ["fnc_ap_adjust", 2];
             private _repPenalty = - (3 + floor random 3);
-            [_repPenalty] remoteExec ["fnc_rep_adjust", 2];
+            [_repPenalty, "scorched_earth"] remoteExec ["fnc_rep_adjust", 2];
             private _opfApPenalty = - (3 + floor random 3);
-            ["OPF", _opfApPenalty] remoteExec ["fnc_ap_adjust", 2];
+            ["OPF", _opfApPenalty, "scorched_earth"] remoteExec ["fnc_ap_adjust", 2];
             private _msg = format [localize "STR_DUWS_T_scorched_earth_effect2", _repPenalty, _bluApPenalty, _opfApPenalty];
             ["SE", [localize "STR_DUWS_T_scorched_earth_effect1", _msg]] remoteExec ["BIS_fnc_showNotification", 0];
         };
@@ -353,7 +353,7 @@ if (_mode == "spawn") then {
                         _titleKey = "STR_DUWS_T_GOLIAPH_KILL_TITLE";
                         _msgKey = "STR_DUWS_T_GOLIAPH_KILL_MSG";
                     };
-                    [_reward] remoteExec ["fnc_cp_adjust", 2];
+                    [_reward, "wbk_survivor_rescued"] remoteExec ["fnc_cp_adjust", 2];
                     private _title = localize _titleKey;
                     private _msg = format [localize _msgKey, _reward];
                     ["repup", [_title, _msg]] remoteExec ["BIS_fnc_showNotification", 0];

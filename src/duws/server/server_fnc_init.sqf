@@ -11,18 +11,22 @@
 // duplicated or lost CP for the whole session in co-op).
 fnc_cp_adjust = {
 	if (!isServer) exitWith {};
-	params [["_delta", 0]];
+	// _reason is a short label naming what caused the change. It exists only for the log:
+	// a bare "CP -5" cannot be told apart from a death penalty, a purchase or a lost zone
+	// after the fact. Optional so a missed call site still works.
+	params [["_delta", 0], ["_reason", ""]];
 	// Integer invariant: the HUD prints the pool raw, so a fraction reaching it renders
 	// as "32.05". Round the total rather than the delta -- that also normalises a pool
 	// already holding one. Sub-point payouts must accumulate whole points at the caller;
 	// rounding here would swallow them silently, so a fractional delta is logged.
 	if (_delta != round _delta) then {
-		diag_log format ["fnc_cp_adjust: fractional delta %1 rounded into the pool", _delta];
+		["WARN", "ECON", format ["fractional CP delta %1 rounded into the pool (%2)", _delta, _reason]] call fnc_log;
 	};
 	// Floored at 0: the pool is a count, and the death penalty plus the co-op
 	// double-spend window could otherwise leave it reading negative.
 	commandpointsblu1 = round ((commandpointsblu1 + _delta) max 0);
 	publicVariable "commandpointsblu1";
+	["INFO", "ECON", format ["CP %1 -> %2 (%3)", _delta, commandpointsblu1, _reason]] call fnc_log;
 	// PV handler updates ctrl 1000 on remote clients; do it here for the host,
 	// whose own publicVariableEventHandler does not fire for its own broadcast.
 	if (hasInterface) then { ctrlSetText [1000, format ["%1", commandpointsblu1]]; };
@@ -36,11 +40,17 @@ fnc_cp_adjust = {
 // "above N" anyway, so 0 and -45 already behave identically.
 fnc_ap_adjust = {
 	if (!isServer) exitWith {};
-	params [["_side", ""], ["_delta", 0]];
+	params [["_side", ""], ["_delta", 0], ["_reason", ""]];
 	switch (_side) do {
-		case "OPF": { WARCOM_opfor_ap = (WARCOM_opfor_ap + _delta) max 0; publicVariable "WARCOM_opfor_ap"; };
-		case "BLU": { WARCOM_blufor_ap = (WARCOM_blufor_ap + _delta) max 0; publicVariable "WARCOM_blufor_ap"; };
-		default { diag_log format ["fnc_ap_adjust: unrecognised side '%1', dropped delta %2", _side, _delta]; };
+		case "OPF": {
+			WARCOM_opfor_ap = (WARCOM_opfor_ap + _delta) max 0; publicVariable "WARCOM_opfor_ap";
+			["INFO", "ECON", format ["OPF AP %1 -> %2 (%3)", _delta, WARCOM_opfor_ap, _reason]] call fnc_log;
+		};
+		case "BLU": {
+			WARCOM_blufor_ap = (WARCOM_blufor_ap + _delta) max 0; publicVariable "WARCOM_blufor_ap";
+			["INFO", "ECON", format ["BLU AP %1 -> %2 (%3)", _delta, WARCOM_blufor_ap, _reason]] call fnc_log;
+		};
+		default { ["ERROR", "ECON", format ["fnc_ap_adjust: unrecognised side '%1', dropped delta %2", _side, _delta]] call fnc_log; };
 	};
 };
 
@@ -109,11 +119,12 @@ fnc_zone_control_set = {
 // two callers rounding differently would compound drift into AI behaviour.
 fnc_rep_adjust = {
 	if (!isServer) exitWith {};
-	params [["_delta", 0]];
+	params [["_delta", 0], ["_reason", ""]];
 	Player_Reputation = Player_Reputation + _delta;
 	Player_Reputation = (round (Player_Reputation * 100)) / 100;
 	if (abs Player_Reputation < 0.01) then { Player_Reputation = 0 };
 	publicVariable "Player_Reputation";
+	["INFO", "ECON", format ["REP %1 -> %2 (%3)", _delta, Player_Reputation, _reason]] call fnc_log;
 };
 
 // Server-authoritative purchase. The writers above own the arithmetic but not the
@@ -129,6 +140,10 @@ fnc_pool_try_spend = {
 	if (!isServer) exitWith {};
 	params [["_pool", ""], ["_cost", 0], ["_requester", objNull], ["_replyVar", ""]];
 	private _ok = false;
+	// Attribution comes from _requester rather than a threaded-through label: the 40 client
+	// purchase sites all reach here via fnc_pool_spend, which knows the cost but not what
+	// the player was buying.
+	private _who = format ["purchase by %1", name _requester];
 	switch (_pool) do {
 		case "CP": { if (commandpointsblu1 >= _cost) then { [-_cost, _who] call fnc_cp_adjust; _ok = true; }; };
 		case "AP": { if (WARCOM_blufor_ap >= _cost) then { ["BLU", -_cost, _who] call fnc_ap_adjust; _ok = true; }; };
@@ -958,7 +973,7 @@ fnc_pylon_set_with_cost = {
     // 扣除 CP 并广播
     // call, not remoteExec to self: a queued debit runs a frame later, leaving the check
     // above and the deduction split across frames for a second request to slip between.
-    [-_cost] call fnc_cp_adjust;
+    [-_cost, "pylon_purchase"] call fnc_cp_adjust;
 
     // 执行挂架设置
     private _veh = objectFromNetId _netId;

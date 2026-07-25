@@ -23,7 +23,7 @@ if (isNil "fnc_veh_repair_action") then {
         if (commandpointsblu1 < 2) exitWith { [localize "STR_DUWS_T_repair_not_enough_cp"] remoteExec ["hint", _caller]; };
         // call, not remoteExec to self: a queued debit runs a frame later and splits the
         // check above from the deduction.
-        [-2] call fnc_cp_adjust;
+        [-2, "repair_station"] call fnc_cp_adjust;
         if (_needsFuel) then { _veh setFuel 1; };
         if (_needsRepair) then {
             {

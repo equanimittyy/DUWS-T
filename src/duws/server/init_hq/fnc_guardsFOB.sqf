@@ -8,7 +8,7 @@ params ["_centerPos", "_fob", ["_refundOnBusy", 0]];
 // One reguard at a time, for the same reason as fnc_fortifyFOB: the scroll action is on every
 // machine, so two players can fire it at once, and the charge is taken client-side first.
 if (_fob getVariable ["FOB_guard_busy", false]) exitWith {
-	if (_refundOnBusy > 0) then { [_refundOnBusy] remoteExec ["fnc_cp_adjust", 2]; };
+	if (_refundOnBusy > 0) then { [_refundOnBusy, "fob_guards_busy_refund"] remoteExec ["fnc_cp_adjust", 2]; };
 };
 _fob setVariable ["FOB_guard_busy", true];
 

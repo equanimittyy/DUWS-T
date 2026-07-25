@@ -6,7 +6,7 @@ if (commandpointsblu1 < 2) exitWith {
 
 // call, not remoteExec to self: a queued debit runs a frame later and splits the check
 // above from the deduction.
-[-2] call fnc_cp_adjust;
+[-2, "hq_redeploy"] call fnc_cp_adjust;
 
 // ---------- 清理旧对象 ----------
 // 武器

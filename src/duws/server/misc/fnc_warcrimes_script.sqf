@@ -43,7 +43,7 @@ while {true} do {
     };
 
     if (_repLoss > 0) then {
-        [-_repLoss] remoteExec ["fnc_rep_adjust", 2];
+        [-_repLoss, "war_crime"] remoteExec ["fnc_rep_adjust", 2];
 
         // 总损坏建筑数提示
         private _msg = format[localize "STR_DUWS_T_5445z2bn", _currentTotal];

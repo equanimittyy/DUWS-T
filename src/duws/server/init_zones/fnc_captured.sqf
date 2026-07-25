@@ -39,12 +39,12 @@ if (hardcore_mode_enable) then {
 
 // ADD COMMAND POINTS  1000m zone = 100 / 2 = 50 pts available
 _points = round(_points/2);
-[_points] remoteExec ["fnc_cp_adjust", 2];
+[_points, "zone_first_capture"] remoteExec ["fnc_cp_adjust", 2];
 
 // MODIFY ARMY POWER - OPF gains 1/2 the points, BLU gains full points
 _opfreward = round(_points/2);
-["OPF", _opfreward] remoteExec ["fnc_ap_adjust", 2];
-["BLU", _points] remoteExec ["fnc_ap_adjust", 2];
+["OPF", _opfreward, "zone_first_capture"] remoteExec ["fnc_ap_adjust", 2];
+["BLU", _points, "zone_first_capture"] remoteExec ["fnc_ap_adjust", 2];
 
 // 将战区旗杆改为蓝色
 if (VERSION_X == "MODERN" || simple_zones_enable) then {

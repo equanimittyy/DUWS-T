@@ -210,7 +210,7 @@ missionNamespace setVariable ["civ_radii", _radii];
                 // The comparison above needs the live global, so read it before the
                 // change is queued; the display then uses the expected total.
                 private _expectedRep = Player_Reputation + 1;
-                [1] remoteExec ["fnc_rep_adjust", 2];
+                [1, "reputation_recovery"] remoteExec ["fnc_rep_adjust", 2];
                 ["repup",[localize "STR_DUWS_T_rqwho9bq",format[localize "STR_DUWS_T_0pluxey2",_expectedRep]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated,false];
                 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_repup"] remoteExec ["BIS_fnc_showSubtitle", 0];
                 [] remoteExec ["fnc_broadcastRadioChatter", 0];
@@ -234,7 +234,7 @@ missionNamespace setVariable ["civ_spawn_enabled_time", time + 120, true];
         private _rep = Player_Reputation;
         if (_rep > 0) then {
             private _cpReward = ceil(_rep / 2);
-            [_cpReward] remoteExec ["fnc_cp_adjust", 2];
+            [_cpReward, "civ_reward"] remoteExec ["fnc_cp_adjust", 2];
             // CP 提醒（使用 cpaddedciv 格式，显示获得的 CP）
             ["CPaddedciv", [_cpReward]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
             [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_cpcivbonus"] remoteExec ["BIS_fnc_showSubtitle", 0];

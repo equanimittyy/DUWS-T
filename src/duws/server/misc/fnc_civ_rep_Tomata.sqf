@@ -24,7 +24,7 @@ if (!_players_close) exitWith {};
 
 // 蓝方击杀 → 扣声望
 if (side _killer == WEST || side _instigator == WEST) then {
-    [-0.3] remoteExec ["fnc_rep_adjust", 2];
+    [-0.3, "civilian_harmed"] remoteExec ["fnc_rep_adjust", 2];
     ["info", [
         localize "STR_DUWS_T_cycuqbvj",
         format [localize "STR_DUWS_T_0pluxey2", Player_Reputation - 0.3]

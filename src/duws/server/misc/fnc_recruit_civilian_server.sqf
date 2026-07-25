@@ -124,7 +124,7 @@ if (random 1 < 0.95) then {
             if (CIV_PRESENCE == "WBK") then {
                 _reward = 8;
             };
-            [_reward] remoteExec ["fnc_cp_adjust", 2];
+            [_reward, "civilian_recruited"] remoteExec ["fnc_cp_adjust", 2];
             
             // 构建动态描述文本，显示实际奖励值
             private _desc = format [localize "STR_DUWS_T_RECRUIT_gainCP", _reward];

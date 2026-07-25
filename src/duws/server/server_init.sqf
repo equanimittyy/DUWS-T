@@ -338,7 +338,7 @@ if (isServer) then {
 
         // ========== 发放载具奖励（完全独立） ==========
         if (_points > 0) then {
-            [_points] remoteExec ["fnc_cp_adjust", 2];
+            [_points, "vehicle_kill_bounty"] remoteExec ["fnc_cp_adjust", 2];
 
             private _name = name _shooter;
             private _messageTitle = localize _titleKey;
@@ -353,7 +353,7 @@ if (isServer) then {
         // ========== 连杀奖励（每10击杀 +1CP，独立于载具类型） ==========
         if (_currentKills % 10 == 0) then {
             private _extraPoints = 1;
-            [_extraPoints] remoteExec ["fnc_cp_adjust", 2];
+            [_extraPoints, "kill_streak"] remoteExec ["fnc_cp_adjust", 2];
             private _name = name _shooter;
             private _msg = format [localize "STR_DUWS_T_KILL_STREAK_MSG", _name, _currentKills, _extraPoints];
             ["killstreak", [localize "STR_DUWS_T_KILL_STREAK_TITLE", _msg]] remoteExec ["BIS_fnc_showNotification", 0];

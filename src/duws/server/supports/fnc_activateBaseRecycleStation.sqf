@@ -104,7 +104,7 @@ if (isNil "fnc_veh_recycle_action") then {
             // Half-point seat values and the 0.8/1.1/1.5 class multipliers make this a float;
             // round once here so the hint and the credited amount cannot disagree.
             _totalReward = round _totalReward;
-            [_totalReward] remoteExec ["fnc_cp_adjust", 2];
+            [_totalReward, "recycle_station"] remoteExec ["fnc_cp_adjust", 2];
             [format [localize "STR_DUWS_T_chenggonghuishou", _count, _totalReward]] remoteExec ["hint", _caller];
         } else {
             if (_hasExcluded) then { [localize "STR_DUWS_T_gaizaijvwufahuishou"] remoteExec ["hint", _caller]; }

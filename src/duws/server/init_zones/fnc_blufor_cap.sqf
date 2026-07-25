@@ -38,8 +38,8 @@ if (hardcore_mode_enable) then {
 
 // MODIFY ARMY POWER - OPF gains 1/2 the points, BLU gains full points
 _opfreward = round(_points/2);
-["OPF", _opfreward] remoteExec ["fnc_ap_adjust", 2];
-["BLU", _points] remoteExec ["fnc_ap_adjust", 2];
+["OPF", _opfreward, "zone_recapture"] remoteExec ["fnc_ap_adjust", 2];
+["BLU", _points, "zone_recapture"] remoteExec ["fnc_ap_adjust", 2];
 
 // ADD Skill to operatives
 [] spawn fnc_operative_mission_complete; 
@@ -52,7 +52,7 @@ str(_markername2) setMarkerColor "ColorGreen";
 
 // ADD POINTS
 _points = round(_points/3);
-[_points] remoteExec ["fnc_cp_adjust", 2];
+[_points, "zone_recapture"] remoteExec ["fnc_cp_adjust", 2];
 
 ["CPadded",[_points,""]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated,false];
 

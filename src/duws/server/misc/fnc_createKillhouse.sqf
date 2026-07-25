@@ -1135,7 +1135,7 @@ killhouse_srv_start_run = {
         if (_complete) then {
             missionNamespace setVariable ["killhouse_run_active", false];
             private _reward = [killhouse_reward_challenge, killhouse_reward_training] select (_mode == "TRAINING");
-            [_reward] call fnc_cp_adjust;
+            [_reward, "killhouse_score"] call fnc_cp_adjust;
             [format [localize "STR_DUWS_KILLHOUSE_RESULT", _total, _reward]] call killhouse_srv_hint;
         };
     };

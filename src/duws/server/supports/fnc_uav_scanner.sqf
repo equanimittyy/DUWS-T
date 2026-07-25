@@ -13,7 +13,7 @@ if (commandpointsblu1 < _cost) exitWith {
 		["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] remoteExec ["bis_fnc_showNotification", _caller];
 	};
 };
-[-_cost] call fnc_cp_adjust;
+[-_cost, "uav_scan"] call fnc_cp_adjust;
 _speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
 _message = ([localize "STR_DUWS_T_requestuavscan"] call fnc_cs);
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];

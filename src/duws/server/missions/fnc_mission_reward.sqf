@@ -12,10 +12,12 @@ _apreward = _this select 1;
 _mission_name = _this select 2;
 
 _cp_multiplied_reward = (_cpreward * cp_reward_multiplier);
-[_cp_multiplied_reward] remoteExec ["fnc_cp_adjust", 2];
+["INFO", "MISSION", format ["'%1' succeeded, paying %2 CP and %3 AP",
+	_mission_name, _cp_multiplied_reward, _apreward]] call fnc_log;
+[_cp_multiplied_reward, format ["mission %1", _mission_name]] remoteExec ["fnc_cp_adjust", 2];
 
 // MODIFY ARMY POWER - OPF loses 1/2 the points, BLU gains full points
-["BLU", _apreward] remoteExec ["fnc_ap_adjust", 2];
+["BLU", _apreward, format ["mission %1", _mission_name]] remoteExec ["fnc_ap_adjust", 2];
 
 //_opfreward = round(_apreward/2);
 //WARCOM_opfor_ap = WARCOM_opfor_ap - _opfreward;

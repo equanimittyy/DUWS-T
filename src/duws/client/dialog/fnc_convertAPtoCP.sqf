@@ -4,7 +4,7 @@
 // be credited 10 CP while the floor absorbed the second debit -- CP from nothing.
 if !(["AP", 15] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_nysmk8sa";};
 
-[10] remoteExec ["fnc_cp_adjust", 2];
+[10, "ap_to_cp_conversion"] remoteExec ["fnc_cp_adjust", 2];
 
 ctrlSetText [1000, format["%1",commandpointsblu1]];
 // Read the pool rather than subtracting: fnc_pool_spend only returns once the server has

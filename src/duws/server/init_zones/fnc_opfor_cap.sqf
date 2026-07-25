@@ -39,8 +39,8 @@ if (hardcore_mode_enable) then {
 
 
 // MODIFY ARMY POWER - OPF gains full points, BLU loses full points
-["OPF", _points] remoteExec ["fnc_ap_adjust", 2];
-["BLU", -_points] remoteExec ["fnc_ap_adjust", 2];
+["OPF", _points, "zone_lost"] remoteExec ["fnc_ap_adjust", 2];
+["BLU", -_points, "zone_lost"] remoteExec ["fnc_ap_adjust", 2];
 
 // MODIFY MARKER ICON
 str(_markername) setMarkerColor "ColorRed";

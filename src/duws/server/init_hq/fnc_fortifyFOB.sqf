@@ -9,7 +9,7 @@ params ["_centerPos", "_fob", ["_refortify", false], ["_refundOnBusy", 0]];
 // at once; without this the second would spawn a duplicate ring over the first. The charge is
 // still taken client-side before the request arrives, so the loser is refunded here.
 if (_fob getVariable ["FOB_fortify_busy", false]) exitWith {
-	if (_refundOnBusy > 0) then { [_refundOnBusy] remoteExec ["fnc_cp_adjust", 2]; };
+	if (_refundOnBusy > 0) then { [_refundOnBusy, "fob_fortify_busy_refund"] remoteExec ["fnc_cp_adjust", 2]; };
 };
 _fob setVariable ["FOB_fortify_busy", true];
 
