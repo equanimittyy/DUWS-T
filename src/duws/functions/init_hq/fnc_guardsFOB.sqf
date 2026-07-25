@@ -1,3 +1,6 @@
+// Locality: server when a FOB is built (supports/fnc_fob_server.sqf), but CLIENT when
+// reguarded via fnc_reguardFOB's addAction -- so the guards it spawns are then local to
+// that player and orphaned if they disconnect.
 _centerPos = _this select 0;
 _safe = [(_centerPos select 0)+10, (_centerPos select 1)+10];
 

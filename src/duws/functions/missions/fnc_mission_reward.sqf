@@ -1,3 +1,5 @@
+// Locality: server -- all 20 callers are mission threads running server-side, and it
+// credits the shared CP and AP pools, so it must stay that way.
 //event handler for mission complete
 // PARAMS:
 // 1: command points reward

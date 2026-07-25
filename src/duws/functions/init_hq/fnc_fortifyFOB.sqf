@@ -1,3 +1,6 @@
+// Locality: server when a FOB is built (supports/fnc_fob_server.sqf), but CLIENT when
+// refortified via fnc_refortifyFOB's addAction -- so the turrets it spawns are then local
+// to that player and orphaned if they disconnect.
 
 params ["_centerPos", "_fob", "_refortify", "_id"];
 

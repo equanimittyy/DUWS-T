@@ -1,3 +1,5 @@
+// Locality: server -- called by every mission thread; those are spawned server-side or
+// remoteExec'd to target 2.
 
 params ["_randomPos", "_markerText", "_markerText2", "_radius"];
 

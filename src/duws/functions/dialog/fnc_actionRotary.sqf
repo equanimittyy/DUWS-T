@@ -1,3 +1,5 @@
+// Locality: server -- every caller is a zone builder or mission thread, all server-side.
+// Despite the dialog/ folder it draws no UI.
 
 // [{hint "LAPTOP HACKED."}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 

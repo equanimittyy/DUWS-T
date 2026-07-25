@@ -1,3 +1,5 @@
+// Locality: server or client -- called from both. It only picks a string, touching no
+// shared state, so either is safe.
 _length = _this select 0;
 
 _operation = "Operation ";

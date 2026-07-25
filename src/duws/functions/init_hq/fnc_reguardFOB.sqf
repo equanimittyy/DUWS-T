@@ -1,3 +1,5 @@
+// Locality: client -- an addAction function value, so it runs on the player who reguards.
+// It calls fnc_guardsFOB, which spawns; see that file.
 _groupGuard = (_this select 3) select 0;
 _groupPatrol = (_this select 3) select 1;
 _centerPos = (_this select 3) select 2;

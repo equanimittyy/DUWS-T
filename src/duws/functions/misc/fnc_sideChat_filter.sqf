@@ -1,3 +1,5 @@
+// Locality: server or client -- called from both. It only formats and shows chat, so either
+// is safe.
 // fnc_sideChat_filter.sqf
 // Use this to decide how to transmit chat messages
 // Modified to accept a sender parameter for multiplayer compatibility.

@@ -1,3 +1,5 @@
+// Locality: server -- called from the zone spawn sizing and mission patrol builders, all
+// server-side.
 // usage: [position, radius] spawn fnc_createopteam2
 // radius: 50 for patrol inside and around base, 500 for medium, 1300 for island
 

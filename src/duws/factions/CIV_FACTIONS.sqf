@@ -1,3 +1,5 @@
+// Locality: server -- compiled by fnc_civ_setup_array, reached via remoteExec target 2 or
+// the server-guarded fnc_civ_init_Tomata.
 
 // VANILLA CIVs
 if (CIV_PRESENCE == "med") then {

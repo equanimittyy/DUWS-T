@@ -1,3 +1,4 @@
+// Locality: server -- called from fnc_blufor_cap and fnc_mission_reward, both server-side.
 // update the values of the array
 
 {

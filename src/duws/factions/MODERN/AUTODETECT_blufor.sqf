@@ -1,3 +1,5 @@
+// Locality: server -- compiled by fnc_factions_check from init/server_init.sqf:31; defines
+// faction helpers rather than running logic of its own.
 ///////////
 ///////////	"BLU_F", "E X P E R I M E N T A L", "BLU_F_ARID"
 ///////////

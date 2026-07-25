@@ -1,3 +1,5 @@
+// Locality: server -- compiled as fnc_QRF_test and fired by a FiredNear handler on a
+// vehicle created in fnc_createzone, so it runs where that vehicle is local.
 
 if (!WARCOM_qrf_ready) exitWith {};
 

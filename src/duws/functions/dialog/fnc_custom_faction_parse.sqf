@@ -1,3 +1,6 @@
+// Locality: server or client -- fnc_custom_faction_init calls it on the server,
+// fnc_custom_faction_capture on a client. It only parses text into locals, so either is
+// safe.
 // Parse pasted custom-faction text into ["<var> = <class>", ...] assignment
 // fragments, then report which required faction keys the paste left missing or
 // pointing at a class that doesn't exist. Shared by the paste screen's submit

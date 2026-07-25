@@ -1,3 +1,5 @@
+// Locality: server -- compiled by fnc_factions_check from init/server_init.sqf:31. The
+// functions it defines run wherever their own callers do, including client dialogs.
 // selects first non empty array
 fnc_selectNonEmpty = compileFinal {
 	_this select {_x isNotEqualTo []} select 0

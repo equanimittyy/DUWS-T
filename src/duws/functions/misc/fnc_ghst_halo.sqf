@@ -1,3 +1,5 @@
+// Locality: client -- passed as an addAction function value in
+// dialog/fnc_request_support.sqf, so it runs on whoever activates it.
 /*
 fnc_ghst_halo
 --------------

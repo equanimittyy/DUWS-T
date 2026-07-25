@@ -17,11 +17,19 @@ mutated as `x = x - c; publicVariable` loses concurrent writes"*
 ([`arma_engine_gotchas.md`](arma_engine_gotchas.md)). A delta cannot carry a stale base, and the
 server applies each as one uninterruptible statement.
 
-Four writers implement it, all in `init/server_fnc_init.sqf`, and they are the templates to
+Five writers implement it, all in `init/server_fnc_init.sqf`, and they are the templates to
 copy: `fnc_cp_adjust` (signed numeric delta), `fnc_ap_adjust` (delta plus a target-pool
-selector), `fnc_rep_adjust` (delta plus ownership of rounding), and
+selector), `fnc_rep_adjust` (delta plus ownership of rounding),
 `fnc_warcom_set_primary_zone` (an operation on a shared list, matched by value so a stale
-caller finds nothing rather than corrupting state).
+caller finds nothing rather than corrupting state), and `fnc_zone_control_set` (a whole
+transition — a capture moves both side lists and both counters, and applying them together
+keeps the four consistent with each other as well as individually atomic).
+
+The two pools the player sees are floored at zero. That is not arithmetic tidiness: the
+purchase gates all read *"can I afford this"*, so a negative pool behaves like an empty one
+anyway, and the floor keeps the HUD honest. It has one consequence worth knowing — a negative
+balance used to be a debt the player had to earn back, so flooring forgives it, which makes
+the client-side affordability window below a genuinely free purchase rather than an overdraft.
 
 Where a function is *intended* to be server-only and its locality is not provable from the
 code, assert it: `init_zones/fnc_captured.sqf` and its two peers open with
@@ -62,14 +70,31 @@ inherits from — so a reader can re-check it rather than trust it. Of 211 load-
 
 | Count | Treatment |
 |---|---|
-| 95 | header states the locality, which nothing in the code otherwise reveals |
-| 18 | header states a **split**: the file runs on one machine, its callback bodies on another |
-| 75 | no header — a top-level `isServer`/`hasInterface` guard already says it, and a comment would restate code |
-| 23 | no header — locality did not resolve; see below |
+| 137 | header states the locality, which nothing in the code otherwise reveals |
+| 74 | no header — a top-level `isServer`/`hasInterface` guard already says it, and a comment would restate code |
 
-The 18 split entries are the highest-value ones. A guard tells you where the file runs and is
-then actively misleading about the `addAction`, trigger and map-click bodies inside it, which
-run elsewhere.
+Of the 137, **49 record a split** rather than one answer: the file runs on one machine and its
+`addAction`, trigger, button or map-click bodies run on whichever machine triggers them. Those
+are the highest-value headers, because a guard tells you where the file runs and is then
+actively misleading about the callbacks inside it. Three more record that the function is
+called from both sides and is safe either way, because it touches no shared state.
+
+Nothing load-bearing is left undocumented. Getting there needed hand-tracing for 28 files that
+automated resolution could not reach, and the reasons are worth knowing:
+
+- **Function names are referenced in mixed case.** `init/server_init.sqf:102` spawns
+  `fnc_bluHQinit` while the registry defines `fnc_BluHQinit`; `includes/operative_menu.hpp:70`
+  calls `fnc_LBselected` against a registered `fnc_lbselected`. SQF does not care, but any
+  exact-match search over the source does, so a grep for callers silently comes back empty.
+- **A function passed as a value has no call site to find.** `addAction`, `onLBSelChanged` and
+  the dyna-mission table all take a bare function reference, so the invocation never appears as
+  `spawn`/`call`/`remoteExec` next to the name.
+- **One file is compiled under a different name than the file suggests.**
+  `warcom/fnc_WARCOM_opf_qrf.sqf` is registered as `fnc_QRF_test`
+  (`init/server_var_init.sqf:167`) and fired from a `FiredNear` handler.
+
+`missions/fnc_missionPatrolsSmall.sqf` is registered and never called from anywhere. Its header
+records that rather than inventing a locality for it.
 
 ## Dedicated-server compatibility
 
@@ -121,24 +146,28 @@ client-authority problem. It mostly is not — locality has to be judged per sit
 | `dialog/fnc_request_unit.sqf`, `fnc_request_unit_fob.sqf` | client, `createUnit` into `group player` | correct by design — a player's AI subordinates belong on the commanding machine |
 | `operative/modern/fnc_operator_recruit.sqf` | client, then `joinSilent (group player)` | same |
 | `dialog/fnc_request_vehicle.sqf`, `fnc_request_vehicle_fob.sqf` | client, `createVehicle` | low risk — locality transfers when a player enters |
+| `init_hq/fnc_fortifyFOB.sqf`, `fnc_guardsFOB.sqf` | **both** — server when the FOB is built, client when refortified | inconsistent; see below |
 
 The distinction that matters: a group the player *commands* belongs on the commanding machine,
 because that is where orders originate. A group the campaign *owns* belongs on the server,
 because it must survive that player disconnecting.
 
-## Where locality is still unknown
+By that test the FOB defences are wrong half the time. `supports/fnc_fob_server.sqf` builds a
+new FOB's turrets and guards on the server, correctly — but the refortify and reguard scroll
+actions (`init_hq/fnc_refortifyFOB.sqf`, `fnc_reguardFOB.sqf`) are `addAction` function values,
+so they re-spawn those same defences on the machine of whoever used the action. A FOB's
+garrison is campaign property, not a player's squad, so after a refortify it is simulated by
+that client and orphaned when they disconnect. The fix is the shape `misc/fnc_HCsquad_spawn.sqf`
+already uses: send the request to the server, hand back only what needs the caller's `player`.
 
-Twenty-three load-bearing files carry no header because locality could not be established,
-and they are the ones to treat with suspicion:
+## Adding a function
 
-- **Reached from both server and client paths** — `missions/fnc_mission_reward.sqf`,
-  `misc/fnc_random_name.sqf`, `misc/fnc_sideChat_filter.sqf`, `init_hq/fnc_fortifyFOB.sqf`,
-  `operative/modern/fnc_operative_mission_complete.sqf` and eight more. These genuinely have
-  two localities; resolving them means deciding which is intended, not just observing.
-- **No discoverable caller** — the faction autodetect set (`factions/MODERN/AUTODETECT_*.sqf`,
-  `fn_factionAutoDetect.sqf`, `CIV_FACTIONS.sqf`), which is reached by `execVM`/`#include`
-  rather than the function registry, plus `init_hq/fnc_BluHQinit.sqf`,
-  `misc/fnc_ghst_halo.sqf` and `warcom/fnc_WARCOM_wp_opf_qrf.sqf`.
+State the locality on line one, and name the evidence rather than the conclusion — "callers
+remoteExec to target 2" can be re-checked, "server only" cannot. If a top-level
+`isServer`/`hasInterface` guard already says it and the file creates no callbacks, that guard
+is the statement and a header would restate code.
 
-A header on any of these would be a guess. Leaving them bare is the honest signal, and it
-narrows what a future reader has to work out from scratch.
+Then check the failure modes that produced every wrong answer here: an indented guard governs
+its block, not the file; an `addAction` or `onLBSelChanged` body runs on whoever triggers it
+regardless of where the surrounding file ran; and `player` is `objNull` wherever the server is
+the one executing.

@@ -1,3 +1,5 @@
+// Locality: client -- wired to onLBSelChanged in includes/operative_menu.hpp:70, which
+// spells it fnc_LBselected.
 _selected_index = lbCurSel 1500;
 
 _selected_soldier = duws_operator_list select _selected_index; // get the selected soldier from the array of soldier using the selected index

@@ -1,3 +1,5 @@
+// Locality: unreferenced -- registered in server_fnc_init.sqf but never called from
+// anywhere, so it has no locality until someone wires it up.
 params ["_missionPos", "_radius"];
 
 // 原有的巡逻生成代码（保持不变）

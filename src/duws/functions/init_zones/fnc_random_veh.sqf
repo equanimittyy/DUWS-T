@@ -1,3 +1,5 @@
+// Locality: server -- called from the zone spawn sizing and mission patrol builders, all
+// server-side.
 
 //faction = "OPF_F"; faction = "BLU_F"; faction = "IND_F"; faction = "CIV_F";
 //vehicleClass = "Armored" "Car" "Ship" "Static" "Air"

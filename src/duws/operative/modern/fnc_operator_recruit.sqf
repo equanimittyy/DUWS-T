@@ -1,3 +1,5 @@
+// Locality: client -- reached from the operative menu's onLBSelChanged via fnc_lbselected,
+// and it reads lbCurSel and group player.
 _selected_soldier = duws_operator_list select lbCurSel 1500;
 _selected_soldier_index = lbCurSel 1500;
 

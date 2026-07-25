@@ -1,3 +1,5 @@
+// Locality: client -- an addAction function value, so it runs on the player who
+// refortifies. It calls fnc_fortifyFOB, which spawns; see that file.
 _aaPod = (_this select 3) select 0;
 _glPod1 = (_this select 3) select 1;
 _glPod2 = (_this select 3) select 2;

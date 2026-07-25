@@ -1,3 +1,4 @@
+// Locality: server -- called only from fnc_WARCOM_opf_qrf, which runs on the server.
 _group =_this select 0;
 _leader = units _group select 0;
 _unitPos = _this select 1;

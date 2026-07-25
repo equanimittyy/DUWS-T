@@ -1,3 +1,4 @@
+// Locality: server -- called by mission threads only, all server-side.
 params ["_missionPos", "_radius"];
 
 // 原有的巡逻生成代码（保持不变）
