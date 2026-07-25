@@ -929,8 +929,10 @@ killhouse_wave_timeout_threshold = 10;  // at or below this, so a stalled run ca
                                         // wave on wave onto a course nobody is clearing
 killhouse_reward_training        = 1;
 killhouse_reward_challenge       = 10;
-killhouse_progress_period        = 10;  // seconds between progress hints; a faster refresh
-                                        // restarts the hint fade and makes it unreadable
+killhouse_progress_delay         = 10;  // before the first progress hint, so the opening
+                                        // briefing is readable before the counter overwrites it
+killhouse_progress_period        = 1;   // between progress hints after that; cannot resolve
+                                        // finer than the wave loop's own tick below
 killhouse_corpse_linger          = 2;   // seconds a hit target or body stays before deletion
 killhouse_area_radius            = 80;  // 3D from the composition centre, and the one
                                         // definition of "inside the killhouse": it picks who
@@ -1083,7 +1085,7 @@ killhouse_srv_start_run = {
         private _listVar = ["killhouse_enemies", "killhouse_targets"] select (_mode == "TRAINING");
         private _spawned = 0;
         private _lastWave = time;
-        private _lastProgress = time;
+        private _nextProgress = time + killhouse_progress_delay;
         private _complete = false;
         private _centre = [
             missionNamespace getVariable ["killhouse_centerX", 0],
@@ -1121,10 +1123,10 @@ killhouse_srv_start_run = {
             };
             // Re-read rather than reuse _alive: a wave may have gone up this pass, and the
             // count the player is told should include it.
-            if (!_complete && { time - _lastProgress >= killhouse_progress_period }) then {
+            if (!_complete && { time >= _nextProgress }) then {
                 private _up = count (missionNamespace getVariable [_listVar, []]);
                 [format [localize "STR_DUWS_KILLHOUSE_PROGRESS", _total - (_spawned - _up), _total, _up]] call killhouse_srv_hint;
-                _lastProgress = time;
+                _nextProgress = time + killhouse_progress_period;
             };
 
             if (!_complete) then { sleep 1; };
