@@ -1,96 +1,63 @@
 # Changelog
 
-What has changed in this repo and why, at the level of features and architectural
-decisions. Inherited DUWS / DUWS_X behaviour is not covered — see
-[`README.md`](README.md) for the fork lineage and
-[`docs/info/architecture.md`](docs/info/architecture.md) for how the mission is put together.
+Changes made in this repo, newest first. Inherited DUWS / DUWS_X behaviour is not covered —
+see [`README.md`](README.md) for the fork lineage. `git log` has the detail.
 
-Newest first. This is deliberately not exhaustive; `git log` is.
+## Supports and transports
 
-## Support transports
+- Heli-lift aircraft moved to server ownership; the support works for non-host players again
+- One failure handler per transport, replacing 9 and 6 copies that had drifted apart
+- One cooldown scheme: 10s rejected, 120s completed, 300s destroyed — every timer spoken
+- Fixed callsigns per support, replacing a random name and two random digits per call
+- Boat taxi and both route pickers localised; the boat taxi had been English-only
+- FOB refortify/reguard rebuilt server-side and gated on Squad_Leaders
 
-The three transports — helo taxi, boat taxi, heli-lift — had drifted into three different
-shapes. They now share one.
+## Multiplayer authority
 
-- **The heli-lift aircraft is server-owned.** It used to be created by the calling client,
-  which then asked the server to give it waypoints. Group commands are only honoured where
-  the group is local, so this worked for a hosting player and silently did nothing for
-  anyone else — the feature had been disabled for non-host players rather than fixed.
-- **One failure handler per transport.** Nine and six copies of the abort block collapsed
-  to one each. The copies had drifted: one boat branch had lost its marker cleanup and
-  stranded a drop point on the map, and three had kept a `deleteVehicle` for a helipad the
-  boat never creates.
-- **One cooldown scheme** — 10 s on a rejected request, 120 s after a completed run, 300 s
-  when the aircraft is destroyed, so losing an asset costs more than using one. Every timer
-  is spoken; the lift previously had no pause at all on its error paths.
-- **Fixed callsigns.** Transports rolled a random name and two random digits per call.
-  Each support now answers as a fixed element lead (Chariot 1-1, Swordfish 1-1, Mule 1-1,
-  Courier 1-1/2-1/3-1, Ranger 1-1, Slingshot 1-1, Longbow 1-1, Koi 1-1, Allseer 1-1).
+- CP, AP and reputation changes made server-authoritative; pools floored at zero
+- The server decides a purchase, not the buying client
+- Zone capture and loss applied as one server-side transition
+- High Command squads spawn on the server
+- Two silent WARCOM multiplayer bugs repaired
+- Locality stated on line 1 of every load-bearing function
 
-## Source layout by execution locality
+## Source layout
 
-`duws/` was reorganised from topical folders into `server/`, `client/` and `shared/`, so a
-file's execution locality is readable from its path. Every `.sqf` outside `factions/`
-carries a `// Locality:` header naming the evidence.
-
-A folder states where a file's *own top-level body* runs — not where its callbacks run, and
-not where its code is broadcast. `shared/` is therefore narrow. Rationale and the placement
-rule: [`docs/info/server_client_authority.md`](docs/info/server_client_authority.md).
+- `duws/` reorganised into `server/`, `client/` and `shared/` by execution locality
+- `src/` split into `modules/` (vendored, frozen) and `duws/` (owned)
+- Subfolder names normalised to `lower_snake_case`
+- Stringtable deduplicated; orphaned keys dropped
 
 ## Runtime logging
 
-Arma reports nothing when a script simply stops, which cost two playtests chasing a stall.
-
-- `fnc_log` gives every line a `[DUWS][level][machine][tag]` shape; the machine field
-  separates a host's server and client halves, which share one `.rpt`.
-- `fnc_waitLogged` wraps a `waitUntil` with a label and timeout, warning every 10 s naming
-  the condition it is blocked on. An unbounded wait can no longer stall in silence.
-- The function registry self-checks after compiling: an unresolved path makes
-  `preprocessFile` return `""`, which compiles to an empty `{}` and then no-ops at every
-  call site with no error anywhere.
-
-How to read the output: [`docs/info/testing.md`](docs/info/testing.md#runtime-logging-reading-the-rpt).
-
-## Command-point economy
-
-- **The server decides a purchase, not the buyer.** A client testing its own copy of a pool
-  is a network round trip out of date, so two clients each seeing 10 CP both passed a 10 CP
-  gate. The test and the debit are now adjacent statements against the one server copy.
-- **One server-side writer per pool**, taking signed deltas. A shared global mutated as
-  `x = x - c; publicVariable "x"` loses concurrent writes and can create resource from
-  nothing.
-
-Faucets, sinks and balance: [`docs/info/cp_economy.md`](docs/info/cp_economy.md).
+- `fnc_log` — tagged, level-gated lines that identify which machine emitted them
+- `fnc_waitLogged` — a `waitUntil` that names what it is blocked on instead of hanging silently
+- Function registry self-checks for entries that compiled empty from an unresolved path
+- Zone generation reports progress on the map layer
 
 ## Campaign setup
 
-- Squad-callsign screen, threaded through the radio dialogue by substitution at display
-  time rather than baked into each string.
-- Back navigation through the setup screens, re-picking faction and HQ with nothing yet
-  built — faction and HQ init are deferred to a single commit point for this reason.
-- Custom-faction paste validates every required key and its class, per side.
-- The campaign ends on full capture; Domination mode was dropped.
-- Civilian system gained an OFF option.
+- Squad-callsign screen, threaded through the radio dialogue
+- Back navigation through the setup screens; faction and HQ re-pickable
+- Custom-faction paste split per side, with every required key and class validated
+- AutoDetect faction picker moved into setup rather than after START
+- Hardcore mode forces random zones
+- Civilian system gained an OFF option; more starting-CP and death-penalty options
+- Campaign ends on full capture; Domination mode dropped
 
-## HQ and player-facing menus
+## Player-facing
 
-- HQ and FOB interactions route through one reusable list menu, with primary actions
-  pinned, CP costs shown, and live cooldown labels.
-- Both disguise modes front a panel menu showing per-mode cooldowns.
-- The diary manual is a single subject with a numbered outline.
-- `Squad_Leaders` (formerly `Request_Players`) is permission-only, gating FOB refortify
-  and reguard.
+- HQ and FOB interactions route through one reusable list menu with CP costs and cooldowns
+- Both disguise modes front a panel menu; civ-disguised players may use binoculars
+- Diary manual reworked into a single subject with a numbered outline
+- Killhouse reworked into waves, with free enemy movement and see-through contact markers
+- Earplugs always available
+- Two full passes over user-facing prose, radio dialogue and notifications
 
-## Killhouse
-
-Reworked from a timed free-for-all into waves, with integer CP rewards, free enemy
-movement, culling for units that fall out of the course, and see-through contact markers
-that fade at close range.
-
-## Tooling
+## Tooling and docs
 
 - `unpack.cmd` / `repack.cmd` wrap the vendored PBO Manager; `src/` is the source of truth
-  and the `.pbo` is build output.
-- `duws_eden.ps1` imports Eden compositions by scanning for marker comments.
-- `tests/run.sh` gates SQF syntax, static path resolution, and a thin sqf-vm unit layer.
-  Details: [`docs/info/testing.md`](docs/info/testing.md).
+- `duws_eden.ps1` imports Eden compositions by marker comment
+- `tests/run.sh` — SQF syntax, static path resolution, sqf-vm unit layer
+- Reference docs in `docs/info/`; `docs/` holds feature plans
+- [`KNOWN_ISSUES.md`](KNOWN_ISSUES.md) tracks open defects and untested surface
