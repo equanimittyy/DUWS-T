@@ -22,7 +22,7 @@ fnc_log = {
     private _n = ["OFF", "ERROR", "WARN", "INFO", "DEBUG"] find (toUpper _level);
     if (_n < 0) then { _n = 3 };
     if (_n > duws_log_level) exitWith {};
-    diag_log format ["[DUWS][%1][%2][%3] %4", toUpper _level, duws_log_where, _tag, _msg];
+    ["INFO", "HALO", format ["[%1][%2][%3] %4", toUpper _level, duws_log_where, _tag, _msg]] call fnc_log;
 };
 
 // A waitUntil that cannot stall silently. An unbounded `waitUntil {cond}` whose condition

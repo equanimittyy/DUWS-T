@@ -22,7 +22,7 @@ if (isNull _caller) then {
 
 // 有效性检查
 if (isNull _civilian || isNull _caller) exitWith {
-    diag_log "[RECRUIT] Error: civilian or caller is null";
+    ["ERROR", "CIV", "Error: civilian or caller is null"] call fnc_log;
 };
 if (!alive _civilian) exitWith {
     [localize "STR_DUWS_T_RECRUIT_DEAD"] remoteExec ["hint", _caller];
@@ -77,7 +77,7 @@ if (random 1 < 0.95) then {
             missionNamespace setVariable [_popVar, _curPop - 1];
             private _iconName = format ["civ_icon_%1", _locIndex];
             _iconName setMarkerText format ["%1", _curPop - 1];
-            diag_log format ["[RECRUIT] Location %1 population decreased from %2 to %3 due to recruitment", _locIndex, _curPop, _curPop - 1];
+            ["INFO", "CIV", format ["Location %1 population decreased from %2 to %3 due to recruitment", _locIndex, _curPop, _curPop - 1]] call fnc_log;
         };
     };
     // ============================================
@@ -98,7 +98,7 @@ if (random 1 < 0.95) then {
         };
     };
     
-    diag_log format ["[RECRUIT] Civilian %1 successfully recruited by %2", _civilian, name _caller];
+    ["INFO", "CIV", format ["Civilian %1 successfully recruited by %2", _civilian, name _caller]] call fnc_log;
     
     sleep 3;
     [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_RECRUITconv3"] remoteExec ["BIS_fnc_showSubtitle", _caller];

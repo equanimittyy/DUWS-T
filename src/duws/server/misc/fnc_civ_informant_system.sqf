@@ -22,7 +22,7 @@ while {true} do {
         if (random 1 < _chance) then {
             // 获取所有城镇位置
             private _locations = missionNamespace getVariable ["civ_locations", []];
-            if (count _locations == 0) exitWith { diag_log "[CIV] No locations found for informant spawn."; };
+            if (count _locations == 0) exitWith { ["INFO", "CIV", "No locations found for informant spawn."] call fnc_log; };
 
             // 获取所有存活玩家
             private _players = allPlayers select { alive _x };
@@ -110,7 +110,7 @@ while {true} do {
                 [_group, _usableBuildings] spawn fnc_civ_informant_wp_Tomata;
             };
 
-            diag_log format ["[CIV] Informant generated at %1 (rep %2, distance to nearest player %3m)", _centerPos, _rep, _minDist];
+            ["INFO", "CIV", format ["Informant generated at %1 (rep %2, distance to nearest player %3m)", _centerPos, _rep, _minDist]] call fnc_log;
 
             // 30分钟后自动删除线人
             [_unit, _group] spawn {

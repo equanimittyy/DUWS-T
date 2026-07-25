@@ -117,7 +117,7 @@ if (isNil "fnc_veh_recycle_action") then {
 // ====== 主逻辑 ======
 private _helipad = objectFromNetId (missionNamespace getVariable ["HQ_helipad_netId", ""]);
 private _depot = objectFromNetId (missionNamespace getVariable ["HQ_repairDepot_netId", ""]);
-if (isNull _helipad || isNull _depot) exitWith { diag_log "[RECYCLE] Helipad/Depot not found"; };
+if (isNull _helipad || isNull _depot) exitWith { ["ERROR", "SUPPORT", "Helipad/Depot not found"] call fnc_log; };
 
 if (missionNamespace getVariable ["HQ_recycleStation_active", false]) exitWith {};
 missionNamespace setVariable ["HQ_recycleStation_active", true, true];

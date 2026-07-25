@@ -15,7 +15,7 @@ while {true} do {
 
     // 如果已经有任务在运行，跳过本次循环
     if (missionNamespace getVariable ["dyna_mission_active", false]) then {
-        diag_log "[DYNA] A mission is already active, skipping this cycle.";
+        ["WARN", "MISSION", "A mission is already active, skipping this cycle."] call fnc_log;
         continue;
     };
 

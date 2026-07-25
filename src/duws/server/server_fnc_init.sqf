@@ -95,7 +95,7 @@ fnc_zone_control_set = {
 			amount_zones_captured = amount_zones_captured - 1;
 			zoneundercontrolblu = zoneundercontrolblu - 1;
 		};
-		default { diag_log format ["fnc_zone_control_set: unrecognised side '%1'", _side]; };
+		default { ["ERROR", "ZONES", format ["fnc_zone_control_set: unrecognised side '%1'", _side]] call fnc_log; };
 	};
 	publicVariable "WARCOM_zones_controled_by_BLUFOR";
 	publicVariable "WARCOM_zones_controled_by_OPFOR";
@@ -130,9 +130,9 @@ fnc_pool_try_spend = {
 	params [["_pool", ""], ["_cost", 0], ["_requester", objNull], ["_replyVar", ""]];
 	private _ok = false;
 	switch (_pool) do {
-		case "CP": { if (commandpointsblu1 >= _cost) then { [-_cost] call fnc_cp_adjust; _ok = true; }; };
-		case "AP": { if (WARCOM_blufor_ap >= _cost) then { ["BLU", -_cost] call fnc_ap_adjust; _ok = true; }; };
-		default { diag_log format ["fnc_pool_try_spend: unrecognised pool '%1', refused %2", _pool, _cost]; };
+		case "CP": { if (commandpointsblu1 >= _cost) then { [-_cost, _who] call fnc_cp_adjust; _ok = true; }; };
+		case "AP": { if (WARCOM_blufor_ap >= _cost) then { ["BLU", -_cost, _who] call fnc_ap_adjust; _ok = true; }; };
+		default { ["ERROR", "ECON", format ["fnc_pool_try_spend: unrecognised pool '%1', refused %2", _pool, _cost]] call fnc_log; };
 	};
 	[_replyVar, _ok] remoteExec ["fnc_pool_reply", _requester];
 };
@@ -155,7 +155,7 @@ fnc_pool_spend = {
 	missionNamespace setVariable [_replyVar, nil];
 	// A timeout and a refusal look identical to the caller, so log the difference: without
 	// it a dropped reply reads in-game as "not enough CP" with a full pool.
-	if (!_replied) then { diag_log format ["fnc_pool_spend: no reply for %1 %2, refused", _cost, _pool]; };
+	if (!_replied) then { ["WARN", "ECON", format ["fnc_pool_spend: no reply for %1 %2, refused", _cost, _pool]] call fnc_log; };
 	_ok
 };
 publicVariable "fnc_pool_spend";
@@ -390,14 +390,14 @@ fnc_recruitSuccessServer = {
     };
     if (isNull _caller) exitWith {};
     if (isNull _target || !alive _target) exitWith {
-        diag_log "[RECRUIT] Server: target is null or dead";
+        ["ERROR", "CIV", "Server: target is null or dead"] call fnc_log;
     };
     
     // ========== 扣除 2 个 Money_roll ==========
     private _moneyCount = { _x == "Money_roll" } count (magazines _caller);
     if (_moneyCount < 2) exitWith {
         [localize "STR_DUWS_T_nocpinf2"] remoteExec ["hint", _caller];
-        diag_log "[RECRUIT] Server: Money roll insufficient, recruitment aborted";
+        ["ERROR", "CIV", "Server: Money roll insufficient, recruitment aborted"] call fnc_log;
     };
     for "_i" from 1 to 2 do {
         _caller removeMagazineGlobal "Money_roll";
@@ -702,7 +702,7 @@ fnc_operator_recruit = compile preprocessFileLineNumbers "duws\client\operative\
 fnc_blu_taskforces_launch = compile preprocessFileLineNumbers "duws\server\warcom\fnc_blu_taskforces_launch.sqf";
 publicVariable "fnc_blu_taskforces_launch";
 fnc_apocalypse_buildings = {
-    diag_log "[Apocalypse] Starting building destruction with asset protection.";
+    ["INFO", "SUPPORT", "Starting building destruction with asset protection."] call fnc_log;
 
     // ---------- 1. 收集所有需要保护的对象 ----------
     private _protected = [];
@@ -735,7 +735,7 @@ fnc_apocalypse_buildings = {
         _protected pushBack MHQ_ammobox;
     };
 
-    diag_log format ["[Apocalypse] Protected %1 key assets.", count _protected];
+    ["INFO", "SUPPORT", format ["Protected %1 key assets.", count _protected]] call fnc_log;
 
     // ---------- 2. 获取地图中心点（用于全图扫描） ----------
     private _center = getArray (configFile >> "CfgWorlds" >> worldName >> "centerPosition");
@@ -745,7 +745,7 @@ fnc_apocalypse_buildings = {
 
     // ---------- 3. 施加随机伤害（跳过保护对象） ----------
     private _buildings = nearestObjects [_center, ["Building", "House", "Ruins"], worldSize];
-    diag_log format ["[Apocalypse] Found %1 potential buildings.", count _buildings];
+    ["INFO", "SUPPORT", format ["Found %1 potential buildings.", count _buildings]] call fnc_log;
 
     private _damagedCount = 0;
     {
@@ -757,7 +757,7 @@ fnc_apocalypse_buildings = {
         };
     } forEach _buildings;
 
-    diag_log format ["[Apocalypse] Successfully damaged %1 buildings.", _damagedCount];
+    ["INFO", "SUPPORT", format ["Successfully damaged %1 buildings.", _damagedCount]] call fnc_log;
 };
 publicVariable "fnc_apocalypse_buildings";
 fnc_removeArsenalAction = {
@@ -851,10 +851,10 @@ fnc_wbk_survivorKilled_server = {
         
         // 减少剩余人口
         missionNamespace setVariable [_remainingVar, _remaining - 1];
-        diag_log format ["[WBK] Replacement spawned at location %1, remaining now %2", _idx, _remaining - 1];
+        if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Replacement spawned at location %1, remaining now %2", _idx, _remaining - 1]] call fnc_log; };
     };
     
-    diag_log format ["[WBK] Survivor killed at location %1, pop now %2", _idx, _newPop];
+    if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Survivor killed at location %1, pop now %2", _idx, _newPop]] call fnc_log; };
 };
 publicVariable "fnc_wbk_survivorKilled_server";
 
@@ -891,10 +891,10 @@ fnc_wbk_unitKilled_server = {
         _areaMarker setMarkerColor "ColorBlack";
         _areaMarker setMarkerAlpha 0.3;
         _iconName setMarkerText "X";
-        diag_log format ["[WBK] Town %1 is now depopulated.", _townName];
+        if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Town %1 is now depopulated.", _townName]] call fnc_log; };
     };
 
-    diag_log format ["[WBK] Unit killed at location %1, remaining total pop: %2", _idx, _newPop];
+    if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Unit killed at location %1, remaining total pop: %2", _idx, _newPop]] call fnc_log; };
 };
 publicVariable "fnc_wbk_unitKilled_server";
 
@@ -915,7 +915,7 @@ fnc_changeFaceServer = {
     {
         if (getPlayerUID _x == _callerUID) exitWith { _player = _x; };
     } forEach allPlayers;
-    if (isNull _player) exitWith { diag_log "[FACE] Player not found"; };
+    if (isNull _player) exitWith { ["ERROR", "GEAR", "Player not found"] call fnc_log; };
     
     // 获取所有可用面部
     private _faces = getArray (configFile >> "CfgFaces" >> "Man" >> "faces");
@@ -948,7 +948,7 @@ fnc_pylon_set_with_cost = {
     // 查找请求玩家
     private _player = objNull;
     { if (getPlayerUID _x == _requestingPlayerUID) exitWith { _player = _x } } forEach allPlayers;
-    if (isNull _player) exitWith { diag_log "fnc_pylon_set_with_cost: player not found" };
+    if (isNull _player) exitWith { ["ERROR", "BOOT", "fnc_pylon_set_with_cost: player not found"] call fnc_log;};
 
     // CP 检查
     if (commandpointsblu1 < _cost) exitWith {
@@ -962,7 +962,7 @@ fnc_pylon_set_with_cost = {
 
     // 执行挂架设置
     private _veh = objectFromNetId _netId;
-    if (isNull _veh) exitWith { diag_log "fnc_pylon_set_with_cost: invalid netId" };
+    if (isNull _veh) exitWith { ["ERROR", "BOOT", "fnc_pylon_set_with_cost: invalid netId"] call fnc_log;};
     _veh setPylonLoadout [_pylonIndex, _magazine, true, _turret];
 
     // 成功提示 → 仅通知操作者

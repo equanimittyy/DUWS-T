@@ -29,11 +29,11 @@ if (_error isEqualTo "") then {
     if (_side isEqualTo "blufor") then {
         BLUfactionDataTemp = _text;
         publicVariable "BLUfactionDataTemp";
-        diag_log format ["BLUFOR Faction data pasted: %1", BLUfactionDataTemp];
+        ["INFO", "FACTION", format ["BLUFOR Faction data pasted: %1", BLUfactionDataTemp]] call fnc_log;
     } else {
         OPFfactionDataTemp = _text;
         publicVariable "OPFfactionDataTemp";
-        diag_log format ["OPFOR Faction data pasted: %1", OPFfactionDataTemp];
+        ["INFO", "FACTION", format ["OPFOR Faction data pasted: %1", OPFfactionDataTemp]] call fnc_log;
     };
     closeDialog 0;
 } else {

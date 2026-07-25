@@ -11,14 +11,14 @@ if (!isServer) exitWith {};
 sleep 10;
 // 获取 HQ 位置
 private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", []];
-if (_hqPos isEqualTo []) exitWith { diag_log "[QuickChange] PosOfBLUHQ not defined, abort."; };
+if (_hqPos isEqualTo []) exitWith { ["ERROR", "GEAR", "PosOfBLUHQ not defined, abort."] call fnc_log; };
 
 // 收集 HQ 附近 500 米内的所有蓝方 AI 单位（排除玩家）
 private _nearbyUnits = nearestObjects [_hqPos, ["CAManBase"], 500] select {
     alive _x && side _x == WEST && !isPlayer _x
 };
 
-diag_log format ["[QuickChange] Found %1 BLUFOR AI units near HQ.", count _nearbyUnits];
+["INFO", "GEAR", format ["Found %1 BLUFOR AI units near HQ.", count _nearbyUnits]] call fnc_log;
 
 private _loadouts = [];
 
@@ -44,7 +44,7 @@ private _uniqueLoadouts = [];
 blufor_quickChange_loadouts_scanned = _uniqueLoadouts;
 publicVariable "blufor_quickChange_loadouts_scanned";
 
-diag_log format ["[QuickChange] Collected %1 unique unit types.", count _uniqueLoadouts];
+["INFO", "GEAR", format ["Collected %1 unique unit types.", count _uniqueLoadouts]] call fnc_log;
 
 // ========== 新增：将扫描到的装备动态加入虚拟军火库 ==========
 private _addedWeapons = [];
@@ -84,7 +84,7 @@ private _extractStrings = {
                     if !(_class in _addedWeapons) then {
                         [missionNamespace, [_class], true] call BIS_fnc_addVirtualWeaponCargo;
                         _addedWeapons pushBack _class;
-                        diag_log format ["[QuickChange] Added weapon: %1", _class];
+                        if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["Added weapon: %1", _class]] call fnc_log; };
                     };
                 };
                 case "Equipment": {
@@ -92,14 +92,14 @@ private _extractStrings = {
                     if !(_class in _addedItems) then {
                         [missionNamespace, [_class], true] call BIS_fnc_addVirtualItemCargo;
                         _addedItems pushBack _class;
-                        diag_log format ["[QuickChange] Added equipment: %1", _class];
+                        if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["Added equipment: %1", _class]] call fnc_log; };
                     };
                 };
                 default {
                     if !(_class in _addedItems) then {
                         [missionNamespace, [_class], true] call BIS_fnc_addVirtualItemCargo;
                         _addedItems pushBack _class;
-                        diag_log format ["[QuickChange] Added item: %1", _class];
+                        if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["Added item: %1", _class]] call fnc_log; };
                     };
                 };
             };
@@ -109,7 +109,7 @@ private _extractStrings = {
                 if !(_class in _addedMagazines) then {
                     [missionNamespace, [_class], true] call BIS_fnc_addVirtualMagazineCargo;
                     _addedMagazines pushBack _class;
-                    diag_log format ["[QuickChange] Added magazine: %1", _class];
+                    if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["Added magazine: %1", _class]] call fnc_log; };
                 };
             } else {
                 // 检查是否为背包
@@ -117,14 +117,14 @@ private _extractStrings = {
                     if !(_class in _addedBackpacks) then {
                         [missionNamespace, [_class], true] call BIS_fnc_addVirtualBackpackCargo;
                         _addedBackpacks pushBack _class;
-                        diag_log format ["[QuickChange] Added backpack: %1", _class];
+                        if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["Added backpack: %1", _class]] call fnc_log; };
                     };
                 } else {
                     // 其他物品（如 FirstAidKit、Medikit 等）
                     if !(_class in _addedItems) then {
                         [missionNamespace, [_class], true] call BIS_fnc_addVirtualItemCargo;
                         _addedItems pushBack _class;
-                        diag_log format ["[QuickChange] Added misc item: %1", _class];
+                        if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["Added misc item: %1", _class]] call fnc_log; };
                     };
                 };
             };
@@ -132,6 +132,6 @@ private _extractStrings = {
     } forEach _allClasses;
 } forEach _uniqueLoadouts;
 
-diag_log format ["[QuickChange] Arsenal update complete: %1 weapons, %2 magazines, %3 items, %4 backpacks added.", 
-    count _addedWeapons, count _addedMagazines, count _addedItems, count _addedBackpacks];
+["INFO", "GEAR", format ["arsenal updated: %1 weapons, %2 magazines, %3 items, %4 backpacks added",
+    count _addedWeapons, count _addedMagazines, count _addedItems, count _addedBackpacks]] call fnc_log;
 // ========== 新增部分结束 ==========

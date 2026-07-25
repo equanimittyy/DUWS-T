@@ -22,7 +22,7 @@ params [
     ["_maxClusters", 100]
 ];
 
-diag_log "===== fnc_civ_detectClusters (DCWR优化版 - 随机采样) 开始 =====";
+["INFO", "CIV", "cluster detection start (random sampling)"] call fnc_log;
 private _startTime = diag_tickTime;
 private _clusters = [];
 ["dc",[localize "STR_DUWS_T_dc1",localize "STR_DUWS_T_dc2"]] remoteExec ["bis_fnc_showNotification", 0];
@@ -30,19 +30,19 @@ try {
     // 获取地图尺寸（确保正确）
     private _worldSize = getNumber (configfile >> "CfgWorlds" >> worldName >> "mapSize");
     if (_worldSize == 0) then { _worldSize = 8192; };
-    diag_log format ["[CIV] 地图尺寸: %1", _worldSize];
+    ["INFO", "CIV", format ["map size: %1", _worldSize]] call fnc_log;
 
     // 使用 nearestTerrainObjects 全图扫描建筑（比 allMissionObjects 更可靠）
     private _center = [_worldSize/2, _worldSize/2, 0];
     private _allBuildings = nearestTerrainObjects [_center, ["House"], _worldSize * 1.5, true];
-    diag_log format ["[CIV] 通过地形对象获取的建筑数: %1", count _allBuildings];
+    ["INFO", "CIV", format ["buildings from terrain objects: %1", count _allBuildings]] call fnc_log;
 
     // 筛选有建筑位置的建筑（可进入）
     _allBuildings = _allBuildings select { count ([_x] call BIS_fnc_buildingPositions) > 0 };
-    diag_log format ["[CIV] 其中有建筑位置的建筑: %1", count _allBuildings];
+    ["INFO", "CIV", format ["of those, with building positions: %1", count _allBuildings]] call fnc_log;
 
     if (count _allBuildings == 0) exitWith {
-        diag_log "[CIV] 错误：没有找到任何可进入建筑！";
+        ["ERROR", "CIV", "no enterable buildings found"] call fnc_log;
     };
 
     private _buildingPositions = _allBuildings apply { getPos _x };
@@ -60,7 +60,7 @@ try {
         if (!isNil "Array_of_FOBS") then {
             { if (!isNull _x) then { _excludePositions pushBack (getPos _x) } } forEach Array_of_FOBS;
         };
-        diag_log format ["[CIV] 军事排除点: %1", count _excludePositions];
+        ["INFO", "CIV", format ["military exclusion points: %1", count _excludePositions]] call fnc_log;
     };
 
     // 生成候选点（网格采样）
@@ -78,7 +78,7 @@ try {
             _candidatePositions pushBack _pos;
         };
     };
-    diag_log format ["[CIV] 候选点总数: %1", count _candidatePositions];
+    ["INFO", "CIV", format ["candidate positions: %1", count _candidatePositions]] call fnc_log;
 
     // 随机打乱候选点顺序
     _candidatePositions = _candidatePositions call BIS_fnc_arrayShuffle;
@@ -87,7 +87,7 @@ try {
     {
         // 如果已达到最大聚落数量，提前结束
         if (count _clusters >= _maxClusters) exitWith {
-            diag_log format ["[CIV] 已达到最大聚落数量 %1，停止搜索。", _maxClusters];
+            if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["reached max cluster count %1, stopping search", _maxClusters]] call fnc_log; };
         };
 
         private _pos = _x;
@@ -146,13 +146,13 @@ try {
             _loc setVariable ["buildingCount", _bestCount];
             _loc setVariable ["clusterRadius", _bestRadius];
             _clusters pushBack _loc;
-            diag_log format ["[CIV] 聚落 %2: 中心 %1, %3 栋, 半径 %4", _pos, count _clusters, _bestCount, _bestRadius];
+            if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["cluster %2: centre %1, %3 buildings, radius %4", _pos, count _clusters, _bestCount, _bestRadius]] call fnc_log; };
         };
     } forEach _candidatePositions;
 
 } catch {
-    diag_log format ["[CIV] 检测出错: %1", _exception];
+    ["ERROR", "CIV", format ["detection failed: %1", _exception]] call fnc_log;
 };
 ["dcb",[localize "STR_DUWS_T_dc1",localize "STR_DUWS_T_dc3"]] remoteExec ["bis_fnc_showNotification", 0];
-diag_log format ["===== 检测完成，共 %1 个聚落，耗时 %2 秒 =====", count _clusters, diag_tickTime - _startTime];
+["INFO", "CIV", format ["detection done: %1 clusters in %2s", count _clusters, diag_tickTime - _startTime]] call fnc_log;
 _clusters

@@ -15,14 +15,14 @@ Params: [typehalo, althalo, altchute, excludePlayer]
 // ========== 定义AI跳伞处理函数（确保服务器可用）==========
 DUWS_fnc_aiHalo = {
     params ["_aiNetIds", "_dropPos", "_startAlt", "_chuteAlt"];
-    diag_log format ["[DUWS] AI Halo started on server with %1 units", count _aiNetIds];
+    ["INFO", "HALO", format ["AI Halo started on server with %1 units", count _aiNetIds]] call fnc_log;
     private _aiUnits = [];
     {
         private _unit = objectFromNetId _x;
         if (!isNull _unit) then {
             _aiUnits pushBack _unit;
         } else {
-            diag_log format ["[DUWS] AI unit with netId %1 is null, skipping", _x];
+            ["ERROR", "HALO", format ["AI unit with netId %1 is null, skipping", _x]] call fnc_log;
         };
     } forEach _aiNetIds;
 
@@ -31,7 +31,7 @@ DUWS_fnc_aiHalo = {
         private _offsetX = random [10, 50, 100];
         private _offsetY = random [10, 50, 100];
         _x setPos [(_dropPos select 0) + _offsetX, (_dropPos select 1) - _offsetY, _startAlt];
-        diag_log format ["[DUWS] AI %1 setPos to %2", _x, getPos _x];
+        if (duws_log_level >= 4) then { ["DEBUG", "HALO", format ["AI %1 setPos to %2", _x, getPos _x]] call fnc_log; };
         // 设置无敌
         _x allowDamage false;
     } forEach _aiUnits;
@@ -42,7 +42,7 @@ DUWS_fnc_aiHalo = {
             params ["_unit", "_alt"];
             // 等待高度降低到开伞高度
             waitUntil {sleep 0.1; (getPosATL _unit select 2) <= _alt};
-            diag_log format ["[DUWS] AI %1 deploying chute via createVehicle and moveInDriver", _unit];
+            if (duws_log_level >= 4) then { ["DEBUG", "HALO", format ["AI %1 deploying chute via createVehicle and moveInDriver", _unit]] call fnc_log; };
             // 创建降落伞并放置于 AI 当前位置
             private _chute = createVehicle ["Steerable_Parachute_F", (getPosATL _unit), [], 0, "FLY"];
             _chute setPosATL (getPosATL _unit);
@@ -67,7 +67,7 @@ DUWS_fnc_aiHalo = {
             };
         };
     } forEach _aiUnits;
-    diag_log "[DUWS] AI Halo processing complete";
+    ["INFO", "HALO", "AI Halo processing complete"] call fnc_log;
 };
 
 // 公开函数以便 remoteExec 调用
@@ -113,7 +113,7 @@ if (_typehalo) then {
     };
     if (count _aiUnits > 0) then {
         private _aiNetIds = _aiUnits apply {netId _x};
-        diag_log format ["[DUWS] Client sending AI Halo request for %1 units", count _aiNetIds];
+        ["INFO", "HALO", format ["Client sending AI Halo request for %1 units", count _aiNetIds]] call fnc_log;
         if (isServer) then {
             // 单机模式，直接调用
             [_aiNetIds, _pos, _althalo, _altchute] call DUWS_fnc_aiHalo;
@@ -122,7 +122,7 @@ if (_typehalo) then {
             [_aiNetIds, _pos, _althalo, _altchute] remoteExec ["DUWS_fnc_aiHalo", 2];
         };
     } else {
-        diag_log "[DUWS] No AI units to jump";
+        ["INFO", "HALO", "No AI units to jump"] call fnc_log;
     };
 };
 

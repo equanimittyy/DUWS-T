@@ -172,7 +172,7 @@ kndr_assignMarker =
 	} 
 	else
 	{
-		diag_log "kndr_markers: entry object is null!";
+		["ERROR", "MARKERS", "kndr_markers: entry object is null!"] call fnc_log;
 	};
 };
 

@@ -18,14 +18,14 @@ switch (VERSION_X) do {
 	};
 } foreach Factions_Available_BLUFOR_X;
 
-diag_log format ["Faction init: %1", BLUFOR_FactionFile_X];
+["INFO", "FACTION", format ["Faction init: %1", BLUFOR_FactionFile_X]] call fnc_log;
 
 _factionFile = "duws\shared\factions\" + VERSION_X + "\" + BLUFOR_FactionFile_X + "_blufor.sqf";
 fnc_BLUFOR_FactionFile_X = compile preprocessFileLineNumbers _factionFile;
 [] call fnc_BLUFOR_FactionFile_X;
 sleep 1;
 
-diag_log format ["Faction init Faction file done"];
+["INFO", "FACTION", "Faction init Faction file done"] call fnc_log;
 
 publicVariable "BLUFOR_Faction_X";
 publicVariable "BLUFOR_FactionFile_X";

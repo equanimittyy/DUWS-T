@@ -48,14 +48,14 @@ _isBackpackWithCapacity = {
 
 // 获取 HQ 位置
 private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", []];
-if (_hqPos isEqualTo []) exitWith { diag_log "[Arsenal] PosOfBLUHQ not defined, abort."; };
+if (_hqPos isEqualTo []) exitWith { ["ERROR", "GEAR", "PosOfBLUHQ not defined, abort."] call fnc_log; };
 
 // 收集 HQ 附近 500 米内的所有蓝方人员
 private _nearbyUnits = nearestObjects [_hqPos, ["CAManBase"], 500] select {
     alive _x && side _x == WEST
 };
 
-diag_log format ["[Arsenal] Found %1 BLUFOR units near HQ.", count _nearbyUnits];
+["INFO", "GEAR", format ["Found %1 BLUFOR units near HQ.", count _nearbyUnits]] call fnc_log;
 
 // 收集所有装备类名（去重）
 private _allGear = [];
@@ -76,7 +76,7 @@ private _allGear = [];
     [_loadout] call _extractStrings;
 } forEach _nearbyUnits;
 
-diag_log format ["[Arsenal] Extracted %1 unique gear classnames.", count _allGear];
+["INFO", "GEAR", format ["Extracted %1 unique gear classnames.", count _allGear]] call fnc_log;
 
 // 过滤并添加到虚拟军火库
 {
@@ -100,4 +100,4 @@ diag_log format ["[Arsenal] Extracted %1 unique gear classnames.", count _allGea
     };
 } forEach _allGear;
 
-diag_log "[Arsenal] Nearby units gear added to arsenal.";
+["INFO", "GEAR", "Nearby units gear added to arsenal."] call fnc_log;

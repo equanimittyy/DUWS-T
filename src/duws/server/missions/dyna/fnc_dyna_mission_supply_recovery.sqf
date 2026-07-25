@@ -28,12 +28,12 @@ private _fnc_cleanup = {
     missionNamespace setVariable ["dyna_mission_objects", nil];
 };
 
-diag_log format ["[SUPPLY] Mission started with key: %1", _nameKey];
+["INFO", "MISSION", format ["Mission started with key: %1", _nameKey]] call fnc_log;
 
 // ---------- 随机选择一名玩家 ----------
 private _allPlayers = call BIS_fnc_listPlayers;
 if (_allPlayers isEqualTo []) exitWith {
-    diag_log "[SUPPLY] No players, aborting.";
+    ["ERROR", "MISSION", "No players, aborting."] call fnc_log;
     call _fnc_cleanup;
 };
 
@@ -85,7 +85,7 @@ while {_attempts < _maxAttempts && _foundPos isEqualTo []} do {
 };
 
 if (_foundPos isEqualTo []) exitWith {
-    diag_log "[SUPPLY] No safe position found.";
+    ["INFO", "MISSION", "No safe position found."] call fnc_log;
     call _fnc_cleanup;
 };
 

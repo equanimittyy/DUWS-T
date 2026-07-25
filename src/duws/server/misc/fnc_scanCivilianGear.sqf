@@ -1,7 +1,7 @@
 // functions\misc\fnc_scanCivilianGear.sqf
 if (!isServer) exitWith {};
 
-diag_log "[CIVGEAR] Starting civilian gear scan...";
+["INFO", "CIV", "Starting civilian gear scan..."] call fnc_log;
 
 // 等待平民数组可用
 waitUntil { !isNil "civ_array" && {count civ_array > 0} };
@@ -87,5 +87,5 @@ publicVariable "DUWS_civVests";
 publicVariable "DUWS_civHeadgear";
 publicVariable "DUWS_civBackpacks";
 
-diag_log format ["[CIVGEAR] Cached %1 uniforms, %2 vests, %3 headgear, %4 backpacks", 
-    count _civUniforms, count _civVests, count _civHeadgear, count _civBackpacks];
+["INFO", "CIV", format ["cached %1 uniforms, %2 vests, %3 headgear, %4 backpacks",
+    count _civUniforms, count _civVests, count _civHeadgear, count _civBackpacks]] call fnc_log;

@@ -170,7 +170,7 @@ for "_i" from 1 to zones_number do {
 if (_found_distance) then {
     // ========== 原点防护：禁止在距离 [0,0,0] 500 米内生成战区 ==========
     if (_zonePos distance2D [0,0,0] < 500) exitWith {
-        diag_log format ["[Zone] Zone %1 position %2 is within 500m of origin, retrying...", _i, _zonePos];
+        ["WARN", "ZONES", format ["Zone %1 position %2 is within 500m of origin, retrying...", _i, _zonePos]] call fnc_log;
         // 不设置 _found = true，让外层循环继续寻找新位置
     };
     // ================================================================

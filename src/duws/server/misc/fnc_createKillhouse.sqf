@@ -868,7 +868,7 @@ private _computerObjects = [];
     };
 } forEach _objectsData;
 
-diag_log format ["[KILLHOUSE] 已生成 %1 个普通物体, %2 个靶子待生成, %3 台电脑", count _objectsData, count _targetsData, count _computerObjects];
+["INFO", "SUPPORT", format ["spawned %1 props, %2 targets pending, %3 computers", count _objectsData, count _targetsData, count _computerObjects]] call fnc_log;
 // ========== 计算传送点 A/B 并广播 ==========
 private _flagBlueking = objNull;
 private _flagRedstone = objNull;
@@ -896,7 +896,7 @@ if (!isNull _flagRedstone) then {
     _tpB set [2, (getPosWorld _flagRedstone select 2) + (-1.05688)];
     missionNamespace setVariable ["killhouse_tpB", _tpB, true];
 };
-diag_log format ["[KILLHOUSE] Teleport A: %1, Teleport B: %2", missionNamespace getVariable "killhouse_tpA", missionNamespace getVariable "killhouse_tpB"];
+["INFO", "SUPPORT", format ["Teleport A: %1, Teleport B: %2", missionNamespace getVariable "killhouse_tpA", missionNamespace getVariable "killhouse_tpB"]] call fnc_log;
 // ========== 交互功能定义 ==========
 missionNamespace setVariable ["killhouse_targets", []];
 missionNamespace setVariable ["killhouse_enemies", []];
@@ -1192,4 +1192,4 @@ if (count _computerObjects > 0) then {
     } forEach _computerObjects;
 };
 
-diag_log "[KILLHOUSE] 交互功能已添加。Killhouse 训练场生成完毕。";
+["INFO", "SUPPORT", "interactions added, killhouse ready"] call fnc_log;

@@ -20,13 +20,13 @@ if (isNil "civ_current_active_location") then {
 private _locations = missionNamespace getVariable ["civ_locations", []];
 private _radii = missionNamespace getVariable ["civ_radii", []];
 if (_locIndex >= count _locations) exitWith {
-    diag_log format ["[CIV] Invalid location index %1", _locIndex];
+    ["ERROR", "CIV", format ["Invalid location index %1", _locIndex]] call fnc_log;
 };
 private _location = _locations select _locIndex;
 private _centerPos = getPos _location;
 private _triggerRadius = _radii param [_locIndex, 500];
 if (_centerPos isEqualTo [0,0,0]) exitWith {
-    diag_log format ["[CIV] Location %1 has zero position", _locIndex];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["Location %1 has zero position", _locIndex]] call fnc_log; };
 };
 private _locationName = if (text _location != "") then { text _location } else { format ["Unnamed%1", _locIndex] };
 
@@ -34,7 +34,7 @@ private _locationName = if (text _location != "") then { text _location } else {
 // 清理模式（延迟 60 秒）
 // ============================================
 if (_mode == "cleanup") exitWith {
-    diag_log format ["[CIV] [Cleanup] Requested for location %1, will execute in 60 seconds", _locIndex];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Requested for location %1, will execute in 60 seconds", _locIndex]] call fnc_log; };
     private _currentPop = missionNamespace getVariable [format ["civ_pop_%1", _locIndex], 0];
     if (_currentPop > 1) then {
         private _message = format [localize "STR_DUWS_T_CIV_CLEANUP_WARNING", _locationName];
@@ -45,25 +45,25 @@ if (_mode == "cleanup") exitWith {
 
     private _threadVar = format ["civ_monitor_%1", _locIndex];
     missionNamespace setVariable [_threadVar, false];
-    diag_log format ["[CIV] Cleanup stopped monitor for %1", _locIndex];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["Cleanup stopped monitor for %1", _locIndex]] call fnc_log; };
 
     sleep 60;
 
     if (!(missionNamespace getVariable [_pendingVar, false])) exitWith {
-        diag_log format ["[CIV] [Cleanup] Pending cleanup cancelled for %1", _locIndex];
+        if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Pending cleanup cancelled for %1", _locIndex]] call fnc_log; };
     };
 
     private _playersInArea = allPlayers select { _x distance _centerPos < _triggerRadius };
     if (count _playersInArea > 0) exitWith {
-        diag_log format ["[CIV] [Cleanup] Cleanup aborted for %1 because players are still in area", _locIndex];
+        ["ERROR", "CIV", format ["[Cleanup] Cleanup aborted for %1 because players are still in area", _locIndex]] call fnc_log;
         missionNamespace setVariable [_pendingVar, false];
     };
 
-    diag_log format ["[CIV] [Cleanup] Executing cleanup for location %1", _locIndex];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Executing cleanup for location %1", _locIndex]] call fnc_log; };
 
     private _spawnedKey = format ["civ_spawned_%1", _locIndex];
     if (!(missionNamespace getVariable [_spawnedKey, false])) exitWith {
-        diag_log format ["[CIV] [Cleanup] Location %1 not spawned, ignoring", _locIndex];
+        if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Location %1 not spawned, ignoring", _locIndex]] call fnc_log; };
         missionNamespace setVariable [_pendingVar, false];
         // 即使未生成也释放锁
         if (civ_current_active_location == _locIndex) then {
@@ -86,7 +86,7 @@ if (_mode == "cleanup") exitWith {
             };
         };
     } forEach _allUnits;
-    diag_log format ["[CIV] [Cleanup] Deleted %1 units via allUnits scan", _deletedUnits];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Deleted %1 units via allUnits scan", _deletedUnits]] call fnc_log; };
 
     private _groups = missionNamespace getVariable [format ["civ_groups_%1", _locIndex], []];
     private _deletedGroups = 0;
@@ -97,7 +97,7 @@ if (_mode == "cleanup") exitWith {
             _deletedGroups = _deletedGroups + 1;
         };
     } forEach _groups;
-    diag_log format ["[CIV] [Cleanup] Deleted %1 groups from civ_groups list", _deletedGroups];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Deleted %1 groups from civ_groups list", _deletedGroups]] call fnc_log; };
     missionNamespace setVariable [format ["civ_groups_%1", _locIndex], nil];
 
     private _allDead = allDeadMen;
@@ -109,14 +109,14 @@ if (_mode == "cleanup") exitWith {
             _deletedCorpses = _deletedCorpses + 1;
         };
     } forEach _allDead;
-    diag_log format ["[CIV] [Cleanup] Deleted %1 corpses", _deletedCorpses];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Deleted %1 corpses", _deletedCorpses]] call fnc_log; };
 
     missionNamespace setVariable [_spawnedKey, false];
     missionNamespace setVariable [_pendingVar, false];
 
     private _iconName = format ["civ_icon_%1", _locIndex];
     private _currentPop = missionNamespace getVariable [format ["civ_pop_%1", _locIndex], 0];
-    diag_log format ["[CIV] [Cleanup] Current population: %1", _currentPop];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Current population: %1", _currentPop]] call fnc_log; };
 
     if (_currentPop <= 1) then {
         private _townName = text _location;
@@ -149,17 +149,17 @@ if (_mode == "cleanup") exitWith {
     if (civ_current_active_location == _locIndex) then {
         civ_current_active_location = -1;
         publicVariable "civ_current_active_location";
-        diag_log format ["[CIV] [Cleanup] Lock released for location %1", _locIndex];
+        if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Lock released for location %1", _locIndex]] call fnc_log; };
     };
 
-    diag_log format ["[CIV] [Cleanup] Finished for location %1, final pop: %2", _locIndex, _currentPop];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Finished for location %1, final pop: %2", _locIndex, _currentPop]] call fnc_log; };
 };
 
 // ============================================
 // 生成模式
 // ============================================
 if (_mode == "spawn") then {
-    diag_log format ["[CIV] [Spawn] Function called for location %1", _locIndex];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Function called for location %1", _locIndex]] call fnc_log; };
 
     // 互斥等待：只有锁空闲或本城镇已持锁才能继续
     private _timeout = diag_tickTime + 600; // 10分钟超时
@@ -168,29 +168,29 @@ if (_mode == "spawn") then {
         (civ_current_active_location == -1 || civ_current_active_location == _locIndex) || diag_tickTime > _timeout
     };
     if (diag_tickTime > _timeout) then {
-        diag_log format ["[CIV] [Spawn] Location %1 wait timeout, forcing spawn.", _locIndex];
+        if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Location %1 wait timeout, forcing spawn.", _locIndex]] call fnc_log; };
     };
 
     // 原子性获取锁：只有锁空闲时才设置为当前索引
     if (civ_current_active_location == -1) then {
         civ_current_active_location = _locIndex;
         publicVariable "civ_current_active_location";
-        diag_log format ["[CIV] [Spawn] Lock acquired for location %1", _locIndex];
+        if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Lock acquired for location %1", _locIndex]] call fnc_log; };
     } else {
         if (civ_current_active_location == _locIndex) then {
-            diag_log format ["[CIV] [Spawn] Location %1 already holds lock, continuing.", _locIndex];
+            if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Location %1 already holds lock, continuing.", _locIndex]] call fnc_log; };
         } else {
             // 理论上不会走到这里，但如果超时后锁仍被占用，则强制抢占
             civ_current_active_location = _locIndex;
             publicVariable "civ_current_active_location";
-            diag_log format ["[CIV] [Spawn] Location %1 force-acquired lock after timeout.", _locIndex];
+            if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Location %1 force-acquired lock after timeout.", _locIndex]] call fnc_log; };
         };
     };
 
     // 二次验证：玩家是否仍在区域内？
     private _playersNow = allPlayers select { _x distance _centerPos < _triggerRadius };
     if (count _playersNow == 0) exitWith {
-        diag_log format ["[CIV] [Spawn] No players in location %1 after acquiring lock, aborting.", _locIndex];
+        ["ERROR", "CIV", format ["[Spawn] No players in location %1 after acquiring lock, aborting.", _locIndex]] call fnc_log;
         if (civ_current_active_location == _locIndex) then {
             civ_current_active_location = -1;
             publicVariable "civ_current_active_location";
@@ -201,7 +201,7 @@ if (_mode == "spawn") then {
     private _pendingVar = format ["civ_pending_cleanup_%1", _locIndex];
     if (missionNamespace getVariable [_pendingVar, false]) then {
         missionNamespace setVariable [_pendingVar, false];
-        diag_log format ["[CIV] [Spawn] Cancelled pending cleanup for %1 due to player re-entry", _locIndex];
+        if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Cancelled pending cleanup for %1 due to player re-entry", _locIndex]] call fnc_log; };
     };
 
     // 等待生成启用时间
@@ -211,7 +211,7 @@ if (_mode == "spawn") then {
     private _enableTime = missionNamespace getVariable ["civ_spawn_enabled_time", 0];
     if (_enableTime > time) then {
         private _wait = _enableTime - time;
-        diag_log format ["[CIV] Delaying spawn for location %1 for %2 seconds", _locIndex, _wait];
+        if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["Delaying spawn for location %1 for %2 seconds", _locIndex, _wait]] call fnc_log; };
         sleep _wait;
     };
 
@@ -220,7 +220,7 @@ if (_mode == "spawn") then {
     private _spawnedKey = format ["civ_spawned_%1", _locIndex];
 
     if (missionNamespace getVariable [_spawningKey, false]) exitWith {
-        diag_log format ["[CIV] [Spawn] Location %1 is already spawning, skipping duplicate request", _locIndex];
+        if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Location %1 is already spawning, skipping duplicate request", _locIndex]] call fnc_log; };
         if (civ_current_active_location == _locIndex) then {
             civ_current_active_location = -1;
             publicVariable "civ_current_active_location";
@@ -229,7 +229,7 @@ if (_mode == "spawn") then {
     missionNamespace setVariable [_spawningKey, true];
 
     if (missionNamespace getVariable [_spawnedKey, false]) exitWith {
-        diag_log format ["[CIV] [Spawn] Location %1 already spawned, skipping", _locIndex];
+        if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Location %1 already spawned, skipping", _locIndex]] call fnc_log; };
         missionNamespace setVariable [_spawningKey, false];
         if (civ_current_active_location == _locIndex) then {
             civ_current_active_location = -1;
@@ -241,7 +241,7 @@ if (_mode == "spawn") then {
     // 读取人口
     private _targetPop = missionNamespace getVariable [format ["civ_pop_%1", _locIndex], 0];
     if (_targetPop <= 0) exitWith {
-        diag_log format ["[CIV] [Spawn] Target population for location %1 is %2, skipping spawn", _locIndex, _targetPop];
+        if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Target population for location %1 is %2, skipping spawn", _locIndex, _targetPop]] call fnc_log; };
         missionNamespace setVariable [_spawnedKey, false];
         missionNamespace setVariable [_spawningKey, false];
         if (civ_current_active_location == _locIndex) then {
@@ -254,14 +254,14 @@ if (_mode == "spawn") then {
     private _spawnCount = _targetPop min _maxSpawnPerVisit;
     private _remaining = _targetPop - _spawnCount;
     missionNamespace setVariable [format ["civ_remaining_%1", _locIndex], _remaining];
-    diag_log format ["[CIV] [Spawn] Location %1: total pop %2, spawning %3, remaining %4", _locIndex, _targetPop, _spawnCount, _remaining];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Location %1: total pop %2, spawning %3, remaining %4", _locIndex, _targetPop, _spawnCount, _remaining]] call fnc_log; };
 
     private _usableBuildings = [_centerPos, 2, _triggerRadius] call fnc_usableBuildings;
-    diag_log format ["[CIV] [Spawn] Usable buildings count: %1", count _usableBuildings];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Usable buildings count: %1", count _usableBuildings]] call fnc_log; };
 
     private _civArray = missionNamespace getVariable ["civ_array", []];
     if (_civArray isEqualTo []) exitWith {
-        diag_log "[CIV] [Spawn] civ_array is empty!";
+        ["ERROR", "CIV", "[Spawn] civ_array is empty!"] call fnc_log;
         missionNamespace setVariable [_spawnedKey, false];
         missionNamespace setVariable [_spawningKey, false];
         if (civ_current_active_location == _locIndex) then {
@@ -616,10 +616,10 @@ if (_mode == "spawn") then {
     private _groupList = missionNamespace getVariable [format ["civ_groups_%1", _locIndex], []];
     _groupList append _groups;
     missionNamespace setVariable [format ["civ_groups_%1", _locIndex], _groupList];
-    diag_log format ["[CIV] [Spawn] Spawned %1 civilians at location %2 (target population %3)", count _groups, _locIndex, _targetPop];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Spawned %1 civilians at location %2 (target population %3)", count _groups, _locIndex, _targetPop]] call fnc_log; };
 
     missionNamespace setVariable [_spawningKey, false];
-    diag_log format ["[CIV] [Spawn] Spawning flag cleared for location %1", _locIndex];
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Spawning flag cleared for location %1", _locIndex]] call fnc_log; };
 
     [_locIndex, _centerPos, _triggerRadius] spawn {
         params ["_locIndex", "_centerPos", "_triggerRadius"];

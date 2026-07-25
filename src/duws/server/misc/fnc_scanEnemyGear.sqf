@@ -3,7 +3,7 @@
 // 执行端：服务器
 if (!isServer) exitWith {};
 
-diag_log "[EnemyGear] Starting fixed enemy gear scan (global function + delayed init).";
+["INFO", "GEAR", "Starting fixed enemy gear scan (global function + delayed init)."] call fnc_log;
 
 // 初始化全局变量
 if (isNil "DUWS_enemyUniforms") then { DUWS_enemyUniforms = []; };
@@ -57,18 +57,18 @@ publicVariable "DUWS_enemyGear_scannedUnits";
 // 一次性扫描（等待 WARCOM 初始化完成，并额外延迟 15 秒确保单位已生成）
 [] spawn {
     waitUntil { sleep 5; !isNil "WARCOM_init_done" && {WARCOM_init_done} };
-    diag_log "[EnemyGear] WARCOM init done, waiting 15s for units to spawn...";
+    ["INFO", "GEAR", "WARCOM init done, waiting 15s for units to spawn..."] call fnc_log;
     sleep 15;
 
-    diag_log "[EnemyGear] Performing initial gear collection from all EAST units.";
+    ["INFO", "GEAR", "Performing initial gear collection from all EAST units."] call fnc_log;
     {
         if (side _x == EAST && {alive _x} && {_x isKindOf "CAManBase"}) then {
             [_x] call DUWS_fnc_extractEnemyGear;
         };
     } forEach allUnits;
 
-    diag_log format ["[EnemyGear] Initial collection complete. Uniforms=%1 Vests=%2 Headgear=%3 Backpacks=%4",
-        count DUWS_enemyUniforms, count DUWS_enemyVests, count DUWS_enemyHeadgear, count DUWS_enemyBackpacks];
+    ["INFO", "GEAR", format ["enemy gear collected. Uniforms=%1 Vests=%2 Headgear=%3 Backpacks=%4",
+        count DUWS_enemyUniforms, count DUWS_enemyVests, count DUWS_enemyHeadgear, count DUWS_enemyBackpacks]] call fnc_log;
 };
 
 // 事件监听：后续新单位

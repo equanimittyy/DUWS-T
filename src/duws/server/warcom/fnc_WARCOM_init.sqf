@@ -47,19 +47,19 @@ publicVariable "WARCOM_zones_controled_by_OPFOR";
 [{player globalChat localize "STR_DUWS_T_42esdbvb"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
 // Init BLU patrols
-diag_log "Init BLU patrols";
+["INFO", "WARCOM", "Init BLU patrols"] call fnc_log;
 [] spawn fnc_WARCOM_blu_patrol;
 
 // Init OPF patrols and QRF type
-diag_log "Init OPF patrols";
+["INFO", "WARCOM", "Init OPF patrols"] call fnc_log;
 [] spawn fnc_WARCOM_opf_patrol;
 
 // Initialize the BLU attack waves
-diag_log "Initialize the BLU attack waves";
+["INFO", "WARCOM", "Initialize the BLU attack waves"] call fnc_log;
 [] spawn fnc_WARCOM_blu_assault;
 
 // Init the OPF attack waves
-diag_log "Init the OPF attack waves";
+["INFO", "WARCOM", "Init the OPF attack waves"] call fnc_log;
 [] spawn fnc_WARCOM_opf_assault;
 
 // Initialize the OPF Random Air if not already spawned

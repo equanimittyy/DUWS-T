@@ -80,4 +80,4 @@ _corpse setVariable ["corpse_target_pos", _targetPos];
     false                                                               // 不在昏迷状态显示
 ] call BIS_fnc_holdActionAdd;
 
-diag_log format ["[INTEL] HoldAction added to corpse %1", _corpse];
+["INFO", "MISSION", format ["HoldAction added to corpse %1", _corpse]] call fnc_log;

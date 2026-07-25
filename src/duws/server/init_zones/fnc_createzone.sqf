@@ -81,7 +81,7 @@ if (_prefab) then {
         };
     } forEach _allObjects;
     if (_deletedCount > 0 || _hiddenCount > 0) then {
-        diag_log format ["[Zone] Cleaned up %1 objects at zone center %2", _deletedCount + _hiddenCount, _zonePos];
+        ["INFO", "ZONES", format ["Cleaned up %1 objects at zone center %2", _deletedCount + _hiddenCount, _zonePos]] call fnc_log;
     };
     sleep 0.5;
 };
@@ -172,7 +172,7 @@ for "_i" from 1 to _fortificationCount do {
     };
     // 如果最终位置仍在水面，跳过该建筑
     if (surfaceIsWater _safePos) then {
-        diag_log format ["[Zone] Skipping fortification due to water at %1", _safePos];
+        ["WARN", "ZONES", format ["Skipping fortification due to water at %1", _safePos]] call fnc_log;
         continue;
     };
     
@@ -190,7 +190,7 @@ for "_i" from 1 to _fortificationCount do {
     _fort setVectorUp [0,0,1];
     _fort allowDamage true;
     _zoneFortifications pushBack _fort;
-    diag_log format ["[Zone] Placed fortification %1 at %2 for zone %3", _fortClass, _safePos, _zone_num];
+    ["INFO", "ZONES", format ["Placed fortification %1 at %2 for zone %3", _fortClass, _safePos, _zone_num]] call fnc_log;
 };
 missionNamespace setVariable [format ["ZoneFortifications_%1", _zone_num], _zoneFortifications];
 // ================================================
@@ -306,7 +306,7 @@ while {true} do {
 		missionNamespace setVariable [_initialCountVar, _initialEnemyCount, true];
 		missionNamespace setVariable [_triggeredVar, false, true];
 		
-		diag_log format ["[Zone Reinforce] Zone %1: Initial enemy count reset to %2", _zone_num, _initialEnemyCount];
+		["INFO", "ZONES", format ["Zone %1: Initial enemy count reset to %2", _zone_num, _initialEnemyCount]] call fnc_log;
 		
 		[_spawnPos, _size, _initialCountVar, _triggeredVar, "", true] spawn fnc_opf_heli_reinforce;
 		// ==============================================

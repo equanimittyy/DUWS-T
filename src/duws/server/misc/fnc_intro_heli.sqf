@@ -8,7 +8,7 @@
 if (!isServer) exitWith {};
 
 // ==================== 单次执行锁 ====================
-if (!isNil "intro_heli_executed") exitWith { diag_log "[INTRO] Already executed, skipping."; };
+if (!isNil "intro_heli_executed") exitWith { ["WARN", "INTRO", "Already executed, skipping."] call fnc_log; };
 missionNamespace setVariable ["intro_heli_executed", true, true];
 
 // ==================== JIP 处理（流程结束后） ====================
@@ -33,8 +33,7 @@ if (!isNil "intro_heli_done" && {intro_heli_done}) then {
 waitUntil { sleep 0.5; count allPlayers > 0 };
 
 private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", []];
-if (_hqPos isEqualTo []) exitWith { diag_log "[INTRO] PosOfBLUHQ not defined." };
-diag_log format ["[INTRO] HQ position: %1", _hqPos];
+if (_hqPos isEqualTo []) exitWith { ["INFO", "INTRO", "PosOfBLUHQ not defined."] call fnc_log;};
 
 // ==================== 生成直升机 ====================
 private _spawnPos = [_hqPos, 700, 1000, 10, 0, 0.2, 0] call BIS_fnc_findSafePos;
@@ -42,9 +41,7 @@ if (_spawnPos isEqualTo [0,0,0]) then {
     private _angle = random 360;
     private _dist = 250 + random 50;
     _spawnPos = _hqPos getPos [_dist, _angle];
-    diag_log format ["[INTRO] Using fallback spawn position: %1", _spawnPos];
-} else {
-    diag_log format ["[INTRO] Found safe spawn position: %1", _spawnPos];
+    ["WARN", "INTRO", format ["Using fallback spawn position: %1", _spawnPos]] call fnc_log;
 };
 _spawnPos set [2, 50];
 
@@ -53,7 +50,7 @@ private _veh = [_spawnPos, 0, _heliType, WEST] call BIS_fnc_spawnVehicle;
 private _heli = _veh select 0;
 private _heliGroup = _veh select 2;
 _heliGroup deleteGroupWhenEmpty true;
-diag_log format ["[INTRO] Helicopter spawned, group ID: %1", groupId _heliGroup];
+["INFO", "INTRO", format ["Helicopter spawned, group ID: %1", groupId _heliGroup]] call fnc_log;
 
 // 确保有驾驶员
 private _pilot = driver _heli;
@@ -122,7 +119,7 @@ private _availableSeats = _cargoSeats + _gunnerSeats + _commanderSeats;
 
 // 等待客户端登机
 sleep 5;
-diag_log format ["[INTRO] Boarded players: %1, Unboarded: %2", count _boardedPlayers, count _unboardedPlayers];
+["INFO", "INTRO", format ["Boarded players: %1, Unboarded: %2", count _boardedPlayers, count _unboardedPlayers]] call fnc_log;
 
 // 通知客户端可以开始（但不执行淡入，避免干扰）
 missionNamespace setVariable ["intro_heli_fadein", true, true];
@@ -163,7 +160,7 @@ waitUntil {
     private _arrived = missionNamespace getVariable [_arrivedVar, false];
     private _timeoutReached = (time - _startTime) > _timeout;
     if (_timeoutReached) then {
-        diag_log format ["[INTRO] Helicopter waypoint timeout after %1 seconds, forcing arrival.", _timeout];
+        ["WARN", "INTRO", format ["Helicopter waypoint timeout after %1 seconds, forcing arrival.", _timeout]] call fnc_log;
         missionNamespace setVariable [_arrivedVar, true]; // 强制标记为到达
     };
     _arrived || !alive _heli || _timeoutReached
@@ -261,4 +258,4 @@ waitUntil {
 sleep 30;
 { deleteVehicle _x } forEach units _heliGroup;
 deleteVehicle _heli;
-diag_log "[INTRO] Helicopter and crew deleted.";
+["INFO", "INTRO", "Helicopter and crew deleted."] call fnc_log;

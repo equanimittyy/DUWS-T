@@ -15,7 +15,7 @@ _apreward = 5;
 private _usableBuildings = [_MissionPos, 3, _radius] call fnc_usableBuildings;
 
 if (count _usableBuildings < _minBuildings) exitWith {
-    diag_log format ["[Intel Mission] Not enough usable buildings (%1), aborting.", count _usableBuildings];
+    ["ERROR", "MISSION", format ["Not enough usable buildings (%1), aborting.", count _usableBuildings]] call fnc_log;
     hint localize "STR_DUWS_T_INTEL_GATHERING_NO_BUILDINGS";
     // 不设置冷却，直接退出
 };
@@ -36,7 +36,7 @@ if (count _usableBuildings <= _maxBuildings) then {
         _tempArray deleteAt _index;
     };
 };
-diag_log format ["[Intel Mission] Selected %1 buildings.", count _selectedBuildings];
+["INFO", "MISSION", format ["Selected %1 buildings.", count _selectedBuildings]] call fnc_log;
 
 // ========== 定义敌方单位类型池 ==========
 private _possibleUnitTypes = [];
@@ -354,7 +354,7 @@ private _nearbyEnemies = _MissionPos nearEntities [["CAManBase", "LandVehicle", 
 private _initialEnemyCount = count _nearbyEnemies;
 missionNamespace setVariable [_initialCountVar, _initialEnemyCount, true];
 missionNamespace setVariable [_triggeredVar, false, true];
-diag_log format ["[Reinforce] %1: Initial enemy count = %2", _mission_name, _initialEnemyCount];
+["INFO", "ZONES", format ["%1: Initial enemy count = %2", _mission_name, _initialEnemyCount]] call fnc_log;
 
 // ========== 启动直升机增援监控 ==========
 [_MissionPos, _radius, _initialCountVar, _triggeredVar, _taskID] spawn fnc_opf_heli_reinforce;

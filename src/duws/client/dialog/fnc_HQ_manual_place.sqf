@@ -1,6 +1,6 @@
 // Locality: client; the map-click bodies below run on the machine that triggers them, not here (invoked from a dialog action).
-diag_log format ["Placement BLUFOR Faction: %1", BLUFOR_Faction_X];
-diag_log format ["Placement OPFOR Faction: %1", OPFOR_Faction_X];
+["INFO", "FACTION", format ["Placement BLUFOR Faction: %1", BLUFOR_Faction_X]] call fnc_log;
+["INFO", "FACTION", format ["Placement OPFOR Faction: %1", OPFOR_Faction_X]] call fnc_log;
 
 player_is_choosing_hqpos = true;
 publicVariable "player_is_choosing_hqpos";

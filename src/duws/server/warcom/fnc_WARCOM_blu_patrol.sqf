@@ -54,7 +54,7 @@ blufor_patrol_count = 0;
 			// make sure blufor is controlling at least 1 zones and blufor_patrol_count <= total zones
 			if (count WARCOM_zones_controled_by_BLUFOR > 0 && blufor_patrol_count <= ((count WARCOM_zones_controled_by_BLUFOR)-1)) then { 
 				sleep 2;
-				diag_log format ["WARCOM blufor patrol active: %1", str WARCOM_blu_patrol_type];
+				["INFO", "WARCOM", format ["WARCOM blufor patrol active: %1", str WARCOM_blu_patrol_type]] call fnc_log;
 
 				// find a zone where to spawn BLU wave *** BEGIN
 				_found = false;
@@ -83,7 +83,7 @@ blufor_patrol_count = 0;
 				_veh = vehicle _groupLeader;
 				_group addVehicle _veh;
 				_group deleteGroupWhenEmpty true;
-				diag_log format ["WARCOM blufor patrol spawned: %1", str WARCOM_blu_patrol_type];
+				["INFO", "WARCOM", format ["WARCOM blufor patrol spawned: %1", str WARCOM_blu_patrol_type]] call fnc_log;
 
 				sleep 10; // give squads a chance to mount up
 				[_group] spawn fnc_WARCOM_wp_blu_patrol;

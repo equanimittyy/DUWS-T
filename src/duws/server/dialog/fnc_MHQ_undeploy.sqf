@@ -24,7 +24,7 @@ sleep 0.2;
 if (isServer) then {
     if (!isNil "MHQ_respawn") then {
         MHQ_respawn call BIS_fnc_removeRespawnPosition;
-        diag_log format ["[MHQ] Respawn position %1 removed", MHQ_respawn];
+        ["INFO", "SUPPORT", format ["Respawn position %1 removed", MHQ_respawn]] call fnc_log;
         MHQ_respawn = nil;
         publicVariable "MHQ_respawn";
     };

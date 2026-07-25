@@ -70,7 +70,7 @@ _unit doMove _runPos;
 ["info", [localize "STR_DUWS_T_infomat", localize "STR_DUWS_T_DEV_INFORMANT_SUCCESS"]] remoteExec ["BIS_fnc_showNotification", 0];
 
 private _locations = missionNamespace getVariable ["civ_locations", []];
-if (_locIndex >= count _locations) exitWith { diag_log "Invalid locIndex"; };
+if (_locIndex >= count _locations) exitWith { ["ERROR", "CIV", "Invalid locIndex"] call fnc_log; };
 private _centerPos = getPos (_locations select _locIndex);
 
 private _markerArea = createMarker [format ["informant_area_%1", _locIndex], _centerPos];

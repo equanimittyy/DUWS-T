@@ -6,7 +6,7 @@
 */
 params ["_civilian", "_caller"];
 
-diag_log format ["[RECRUIT] Client called by %1 on %2", _caller, _civilian];
+["INFO", "CIV", format ["Client called by %1 on %2", _caller, _civilian]] call fnc_log;
 
 // 本地防重（避免玩家快速多次点击）
 if (_civilian getVariable ["recruit_processed_local", false]) exitWith {

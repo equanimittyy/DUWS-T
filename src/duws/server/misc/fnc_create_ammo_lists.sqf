@@ -407,4 +407,4 @@ private _opfFaction = "";
     break;
 } forEach [opfor_SOLDIER_X, opfor_SPECOPS_X, opfor_SPECOPS_MEDIC_X];
 
-diag_log format ["[CIV] Detected factions: BLU=%1, OPF=%2", _bluFaction, _opfFaction];
+["INFO", "CIV", format ["Detected factions: BLU=%1, OPF=%2", _bluFaction, _opfFaction]] call fnc_log;

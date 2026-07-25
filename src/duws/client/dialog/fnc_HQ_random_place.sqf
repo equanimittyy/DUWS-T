@@ -8,7 +8,7 @@ random_placement = true;
 _found = false;
 _foundSafePos = [];
 
-diag_log format ["Start fnc_HQ_random_place"];
+["INFO", "BOOT", "Start fnc_HQ_random_place"] call fnc_log;
 
 _half = worldSize / 2;
 _safehalf = worldSize / 2.2;  //STAY OFF THE EDGES OF SMALL MAPS
@@ -51,7 +51,9 @@ mapAnimCommit;
 sleep 3;
 openMap [true, false]; 
 
-diag_log format [localize "STR_DUWS_T_1dd56l85", _foundSafePos];
+// Literal, not localize: a translated log line makes the rpt unreadable to anyone whose
+// client language differs from the reader's.
+["INFO", "BOOT", format ["HQ random placement found safe pos %1", _foundSafePos]] call fnc_log;
 player globalChat format ["foundSafePos: %1", _foundSafePos];
 
 onMapSingleClick "";

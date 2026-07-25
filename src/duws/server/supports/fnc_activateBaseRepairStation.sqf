@@ -109,7 +109,7 @@ if (isNil "fnc_veh_repair_check_status") then {
 // ====== 主逻辑 ======
 private _helipad = objectFromNetId (missionNamespace getVariable ["HQ_helipad_netId", ""]);
 private _depot = objectFromNetId (missionNamespace getVariable ["HQ_repairDepot_netId", ""]);
-if (isNull _helipad || isNull _depot) exitWith { diag_log "[REPAIR] Helipad/Depot not found"; };
+if (isNull _helipad || isNull _depot) exitWith { ["ERROR", "SUPPORT", "Helipad/Depot not found"] call fnc_log; };
 
 if (missionNamespace getVariable ["HQ_repairStation_active", false]) exitWith {};
 missionNamespace setVariable ["HQ_repairStation_active", true, true];

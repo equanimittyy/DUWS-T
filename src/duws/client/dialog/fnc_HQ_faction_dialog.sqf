@@ -1,6 +1,6 @@
 // Locality: client; the event-handler bodies below run on the machine that triggers them, not here (inherited from client/dialog/fnc_startup_faction_flow.sqf).
 
-diag_log format ["HQ Faction Dialog Init: %1", profileName];
+["INFO", "FACTION", format ["HQ Faction Dialog Init: %1", profileName]] call fnc_log;
 
 ///////////////////////////////////////////
 // Create the FACTION Dialog

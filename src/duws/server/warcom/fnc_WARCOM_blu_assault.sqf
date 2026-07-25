@@ -52,7 +52,7 @@ WARCOM_blu_attack_wave_avalaible = false;
 			// WAIT for Hardcore to find a zone
 			if (hardcore_mode_enable) then {
 				waitUntil {sleep 5;hardcore_visibleZone_found};
-				diag_log format ["BLUFOR ASSAULT. WARCOM_blu_attack_wave_type: %1", WARCOM_blu_attack_wave_type];
+				["INFO", "WARCOM", format ["BLUFOR ASSAULT. WARCOM_blu_attack_wave_type: %1", WARCOM_blu_attack_wave_type]] call fnc_log;
 				sleep 30;
 			};
 		  

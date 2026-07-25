@@ -9,11 +9,11 @@ if (!isServer) exitWith {};
 params ["_center", "_radius", "_initialCountVar", "_triggeredVar", ["_taskID", ""], ["_isZone", false]];
 
 private _initialCount = missionNamespace getVariable [_initialCountVar, -1];
-if (_initialCount < 0) exitWith { diag_log format ["[Reinforce] Initial count not set (%1)", _initialCountVar]; };
+if (_initialCount < 0) exitWith { ["WARN", "ZONES", format ["Initial count not set (%1)", _initialCountVar]] call fnc_log; };
 
 // 初始敌军少于20则直接退出
 if (_initialCount < 20) exitWith {
-    diag_log format ["[Reinforce] Initial enemy count (%1) < 20, reinforcement disabled.", _initialCount];
+    ["INFO", "ZONES", format ["Initial enemy count (%1) < 20, reinforcement disabled.", _initialCount]] call fnc_log;
 };
 
 private _threshold = floor (_initialCount / 4);
@@ -98,7 +98,7 @@ missionNamespace setVariable [_triggeredVar, true, true];
     waitUntil { sleep 10; (!alive _heli) || (_heli distance _flyoverPos < 300) };
     
     if (!alive _heli) exitWith {
-        diag_log "[Reinforce] Helicopter destroyed before drop.";
+        ["INFO", "ZONES", "Helicopter destroyed before drop."] call fnc_log;
     };
     
     private _unitTypes = [];
@@ -161,5 +161,5 @@ missionNamespace setVariable [_triggeredVar, true, true];
         deleteVehicle _heli;
     };
     
-    diag_log format ["[Reinforce] Reinforcement completed. Troops dropped: %1 (isZone=%2)", _troopsSpawned, _isZone];
+    ["INFO", "ZONES", format ["Reinforcement completed. Troops dropped: %1 (isZone=%2)", _troopsSpawned, _isZone]] call fnc_log;
 };

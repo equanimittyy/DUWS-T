@@ -19,12 +19,12 @@ private _fnc_cleanup = {
     missionNamespace setVariable ["dyna_mission_active", false];
 };
 
-diag_log format ["[MORTAR] Mission started with key: %1", _nameKey];
+["INFO", "MISSION", format ["Mission started with key: %1", _nameKey]] call fnc_log;
 
 // ---------- 1. 随机选择一名玩家 ----------
 private _allPlayers = call BIS_fnc_listPlayers;
 if (_allPlayers isEqualTo []) exitWith {
-    diag_log "[MORTAR] No players, aborting.";
+    ["ERROR", "MISSION", "No players, aborting."] call fnc_log;
     call _fnc_cleanup;
 };
 private _targetPlayer = selectRandom _allPlayers;
@@ -77,7 +77,7 @@ _nearBuildings = _nearBuildings select {
 };
 
 // 调试输出
-diag_log format ["[MORTAR] Near buildings count: %1", count _nearBuildings];
+["INFO", "MISSION", format ["Near buildings count: %1", count _nearBuildings]] call fnc_log;
 
 // 如果有合适的建筑，随机选择一个并获取其位置
 if (count _nearBuildings > 0) then {
@@ -88,10 +88,10 @@ if (count _nearBuildings > 0) then {
     if (count _buildingPositions > 0) then {
         _spotterPos = selectRandom _buildingPositions;
     };
-    diag_log format ["[MORTAR] Selected building at %1", _spotterPos];
+    ["INFO", "MISSION", format ["Selected building at %1", _spotterPos]] call fnc_log;
 } else {
     // 无合适建筑：尝试在随机位置附近寻找最近建筑
-    diag_log "[MORTAR] No suitable building found, trying fallback.";
+    ["WARN", "MISSION", "No suitable building found, trying fallback."] call fnc_log;
     private _randomPos = [_playerPos, 300, 1200, 5, 0, 0.2, 0, [], [_playerPos, _playerPos]] call BIS_fnc_findSafePos;
     if (_randomPos isEqualTo [0,0,0]) then {
         _randomPos = _playerPos getPos [300 + random 700, random 360];
@@ -104,17 +104,17 @@ if (count _nearBuildings > 0) then {
         if (count _buildingPositions > 0) then {
             _spotterPos = selectRandom _buildingPositions;
         };
-        diag_log format ["[MORTAR] Fallback: found building at %1", _spotterPos];
+        ["WARN", "MISSION", format ["Fallback: found building at %1", _spotterPos]] call fnc_log;
     } else {
         // 实在没有建筑，使用随机位置
         _spotterPos = _randomPos;
-        diag_log format ["[MORTAR] Fallback: no building, using random pos %1", _spotterPos];
+        ["WARN", "MISSION", format ["Fallback: no building, using random pos %1", _spotterPos]] call fnc_log;
     };
 };
 
 // 如果找不到任何合适位置，退出任务
 if (_spotterPos isEqualTo []) exitWith {
-    diag_log "[MORTAR] No valid spotter position found, aborting.";
+    ["ERROR", "MISSION", "No valid spotter position found, aborting."] call fnc_log;
     call _fnc_cleanup;
 };
 
@@ -206,16 +206,16 @@ deleteMarker str(_markerArea);
 // ---------- 清理标记 ----------
 if (!isNil "_markerIcon" && {_markerIcon != ""}) then {
     deleteMarker _markerIcon;
-    diag_log format ["[MORTAR] Deleted marker icon: %1", _markerIcon];
+    ["INFO", "MISSION", format ["Deleted marker icon: %1", _markerIcon]] call fnc_log;
 } else {
-    diag_log "[MORTAR] _markerIcon is nil or empty, cannot delete.";
+    ["ERROR", "MISSION", "_markerIcon is nil or empty, cannot delete."] call fnc_log;
 };
 
 if (!isNil "_markerArea" && {_markerArea != ""}) then {
     deleteMarker _markerArea;
-    diag_log format ["[MORTAR] Deleted marker area: %1", _markerArea];
+    ["INFO", "MISSION", format ["Deleted marker area: %1", _markerArea]] call fnc_log;
 } else {
-    diag_log "[MORTAR] _markerArea is nil or empty, cannot delete.";
+    ["ERROR", "MISSION", "_markerArea is nil or empty, cannot delete."] call fnc_log;
 };
 
 // 清除任务运行标志

@@ -437,7 +437,7 @@ _fn_validateOpforAngle = {
     // 如果10次尝试后仍未找到合适角度，则返回原始角度
     if (!_foundValidAngle) then {
         _currentAngle = _initialAngle;
-        diag_log format ["WARNING: NO suitable attack angle found, using original one: %1", _currentAngle];
+        ["INFO", "MISSION", format ["WARNING: NO suitable attack angle found, using original one: %1", _currentAngle]] call fnc_log;
     };
     
     _currentAngle

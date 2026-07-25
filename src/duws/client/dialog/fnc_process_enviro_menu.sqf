@@ -56,7 +56,7 @@ if (_index >= 0 && _index < count _civSpawnValues) then {
     _selectedValue = _civSpawnValues select _index;
 };
 missionNamespace setVariable ["civ_maxSpawnPerVisit", _selectedValue, true];
-diag_log format ["[ENVIRO] Civ max spawn per visit set to: %1", _selectedValue];
+["INFO", "SUPPORT", format ["Civ max spawn per visit set to: %1", _selectedValue]] call fnc_log;
 
 // FAST TRAVEL
 _index = lbCurSel 2103;

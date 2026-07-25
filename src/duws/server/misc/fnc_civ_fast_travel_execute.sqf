@@ -61,7 +61,7 @@ if ((_spawnPos isEqualTo [0,0,0]) || {surfaceIsWater _spawnPos}) then {
 
 _spawnPos = [_spawnPos select 0, _spawnPos select 1, 0];
 
-diag_log format ["[FAST TRAVEL] %1 teleported from %2 to %3 (target: %4, radius: %5, dir: %6)", name _caller, getPos _caller, _spawnPos, _targetPos, _targetRadius, _dirToPlayer];
+["INFO", "CIV", format ["%1 teleported from %2 to %3 (target: %4, radius: %5, dir: %6)", name _caller, getPos _caller, _spawnPos, _targetPos, _targetRadius, _dirToPlayer]] call fnc_log;
 
 // 临时无敌
 _caller allowDamage false;

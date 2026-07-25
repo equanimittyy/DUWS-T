@@ -225,7 +225,7 @@ private _nearbyEnemies = _targetpos nearEntities [["CAManBase", "LandVehicle", "
 private _initialEnemyCount = count _nearbyEnemies;
 missionNamespace setVariable [_initialCountVar, _initialEnemyCount, true];
 missionNamespace setVariable [_triggeredVar, false, true];
-diag_log format ["[Reinforce] %1: Initial enemy count = %2", _mission_name, _initialEnemyCount];
+["INFO", "ZONES", format ["%1: Initial enemy count = %2", _mission_name, _initialEnemyCount]] call fnc_log;
 
 // ========== 启动直升机增援监控 ==========
 [_targetpos, _radius, _initialCountVar, _triggeredVar, _VARtaskgeneratedName] spawn fnc_opf_heli_reinforce;

@@ -9,7 +9,7 @@ if (!isServer) exitWith {};
 //   _index = lbCurSel 2121;
 //////////////////////////////////////////
 
-diag_log format ["Squad File Init"];
+["INFO", "BOOT", "Squad File Init"] call fnc_log;
 
 switch (VERSION_X) do {
 	case "MODERN": {
@@ -46,7 +46,7 @@ switch (VERSION_X) do {
 	};
 };
 
-diag_log format ["Squad file Armor Section: %1", str blufor_ARMOR_SECTION_X];
+["INFO", "BOOT", format ["Squad file Armor Section: %1", str blufor_ARMOR_SECTION_X]] call fnc_log;
 
 
 

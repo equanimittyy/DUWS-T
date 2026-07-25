@@ -8,7 +8,7 @@ if (_depot getVariable ["repair_actions_done", false]) exitWith {};
 _depot setVariable ["repair_actions_done", true, true];
 
 private _trg = objectFromNetId _trgNetId;
-if (isNull _trg) exitWith { diag_log "[REPAIR] Trigger null on client"; };
+if (isNull _trg) exitWith { ["ERROR", "SUPPORT", "Trigger null on client"] call fnc_log; };
 
 // 外观/挂件是较大的对话框，作为局部代码值随动作参数传入菜单，避免污染全局命名空间
 private _fnc_appearance = {

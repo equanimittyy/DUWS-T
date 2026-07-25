@@ -7,34 +7,34 @@
 */
 if (!isServer) exitWith {};
 
-if (!isNil "civ_init_done") exitWith { diag_log "[CIV] Already initialized, skipping."; };
+if (!isNil "civ_init_done") exitWith { ["WARN", "CIV", "Already initialized, skipping."] call fnc_log; };
 civ_init_done = true;
-diag_log "[CIV] Initializing civilian system (persistent population with map icons)";
+["INFO", "CIV", "Initializing civilian system (persistent population with map icons)"] call fnc_log;
 
 // 等待 CIV_PRESENCE 确定（环境菜单选择后才会同步）
 waitUntil { sleep 0.1; !isNil "CIV_PRESENCE" };
 
 // 获取城镇位置（地图预定义）
 private _locations = [] call fnc_civ_locator_Tomata;
-diag_log format ["[CIV] fnc_civ_locator_Tomata returned %1 locations", count _locations];
+["INFO", "CIV", format ["fnc_civ_locator_Tomata returned %1 locations", count _locations]] call fnc_log;
 _locations = _locations select { (getPos _x) distance2D [0,0] > 100 };
-diag_log format ["[CIV] After filtering near origin, remaining %1 locations", count _locations];
+["INFO", "CIV", format ["After filtering near origin, remaining %1 locations", count _locations]] call fnc_log;
 
 private _dynamicLocs = [_locations, 3, true, 800, 100, 50, 100] call fnc_civ_detectClusters;
-diag_log format ["[CIV] Dynamic detection returned %1 clusters", count _dynamicLocs];
+["INFO", "CIV", format ["Dynamic detection returned %1 clusters", count _dynamicLocs]] call fnc_log;
 _locations append _dynamicLocs;
-diag_log format ["[CIV] Total locations after adding dynamics: %1", count _locations];
+["INFO", "CIV", format ["Total locations after adding dynamics: %1", count _locations]] call fnc_log;
 
 missionNamespace setVariable ["civ_locations", _locations];
 private _staticCount = count _locations - count _dynamicLocs;
 private _dynamicCount = count _dynamicLocs;
-diag_log format ["[CIV] Total locations: %1 (static: %2, dynamic: %3)", count _locations, _staticCount, _dynamicCount];
+["INFO", "CIV", format ["Total locations: %1 (static: %2, dynamic: %3)", count _locations, _staticCount, _dynamicCount]] call fnc_log;
 
 // 读取平民阵营单位
 if (isNil "CIV_PRESENCE") then { CIV_PRESENCE = "NONE"; };
-diag_log format ["[CIV] CIV_PRESENCE = %1", CIV_PRESENCE];
+["INFO", "CIV", format ["CIV_PRESENCE = %1", CIV_PRESENCE]] call fnc_log;
 [] call fnc_civ_setup_array;
-diag_log format ["[CIV] civ_array loaded, count: %1", count civ_array];
+["INFO", "CIV", format ["civ_array loaded, count: %1", count civ_array]] call fnc_log;
 
 // ========== 第一阶段：计算每个位置的半径、人口并临时存储 ==========
 private _radii = [];
@@ -65,7 +65,7 @@ private _maxs = [];
     
     if (CIV_PRESENCE == "RAVAGE") then {
         _initialPop = round (_initialPop * 2.0) min 280;
-        diag_log format ["[CIV] RAVAGE mode: adjusted pop to %1", _initialPop];
+        ["INFO", "CIV", format ["RAVAGE mode: adjusted pop to %1", _initialPop]] call fnc_log;
     };
     
     // 确保至少1人
@@ -74,7 +74,7 @@ private _maxs = [];
     _pops pushBack _initialPop;
     _maxs pushBack _buildingCount;
     
-    diag_log format ["[CIV] Location %1: %2, buildings=%3, initialPop=%4, radius=%5", _locIndex, _locationName, _buildingCount, _initialPop, _radius];
+    ["INFO", "CIV", format ["Location %1: %2, buildings=%3, initialPop=%4, radius=%5", _locIndex, _locationName, _buildingCount, _initialPop, _radius]] call fnc_log;
 } forEach _locations;
 
 // ========== 第二阶段：重叠检测，优化距离过近且较小的城镇 ==========
@@ -140,7 +140,7 @@ _locations = _newLocations;
 _radii = _newRadii;
 missionNamespace setVariable ["civ_locations", _locations];
 missionNamespace setVariable ["civ_radii", _radii];
-diag_log format ["[CIV] After overlap cleanup: %1 locations remaining.", count _locations];
+["INFO", "CIV", format ["After overlap cleanup: %1 locations remaining.", count _locations]] call fnc_log;
 
 // ========== 第三阶段：为保留的城镇创建触发器、地图标记，并存储人口变量 ==========
 {
@@ -189,12 +189,12 @@ diag_log format ["[CIV] After overlap cleanup: %1 locations remaining.", count _
     _icon setMarkerSize [1.2, 1.2];
     _icon setMarkerText format ["%1", _initialPop];
     
-    diag_log format ["[CIV] Created markers for location %1 (%2) pop %3", _locIndex, _locationName, _initialPop];
+    ["INFO", "CIV", format ["Created markers for location %1 (%2) pop %3", _locIndex, _locationName, _initialPop]] call fnc_log;
 } forEach _locations;
 
 // 声誉恢复线程（保持不变）
 [] spawn {
-    diag_log "[CIV] Reputation recovery thread started";
+    ["INFO", "CIV", "Reputation recovery thread started"] call fnc_log;
     while {true} do {
         waitUntil {sleep 10; CIV_deaths > 0};
         private _rep = Player_Reputation;
@@ -214,7 +214,7 @@ diag_log format ["[CIV] After overlap cleanup: %1 locations remaining.", count _
                 ["repup",[localize "STR_DUWS_T_rqwho9bq",format[localize "STR_DUWS_T_0pluxey2",_expectedRep]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated,false];
                 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_repup"] remoteExec ["BIS_fnc_showSubtitle", 0];
                 [] remoteExec ["fnc_broadcastRadioChatter", 0];
-                diag_log format ["[CIV] Reputation increased to %1", _expectedRep];
+                ["INFO", "CIV", format ["Reputation increased to %1", _expectedRep]] call fnc_log;
             };
         };
     };
@@ -222,9 +222,9 @@ diag_log format ["[CIV] After overlap cleanup: %1 locations remaining.", count _
 
 // 平民系统初始化完成，设置全局启用时间（120秒后）
 missionNamespace setVariable ["civ_spawn_enabled_time", time + 120, true];
-diag_log format ["[CIV] Civilian system initialized. Spawns will be enabled at %1 (in %2 seconds)", time + 120, 120];
+["INFO", "CIV", format ["Civilian system initialized. Spawns will be enabled at %1 (in %2 seconds)", time + 120, 120]] call fnc_log;
 
-diag_log "[CIV] Civilian system initialized.";
+["INFO", "CIV", "Civilian system initialized."] call fnc_log;
 // ========== 声望奖励循环（每15分钟） ==========
 [] spawn {
     waitUntil { sleep 1; !isNil "Player_Reputation" };

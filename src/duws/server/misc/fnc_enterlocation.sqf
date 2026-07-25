@@ -8,7 +8,7 @@ _markername2 =	_this select 3;
 _trigger =		_this select 4;
 _firstBlu =		_trigger select 0;
 
-diag_log format ["Enter Zone: %1  POS: %2  markers: %3  %4", _name, _zonePos, _markername, _markername2];
+["INFO", "ZONES", format ["Enter Zone: %1  POS: %2  markers: %3  %4", _name, _zonePos, _markername, _markername2]] call fnc_log;
 
 sleep 0.5;
 

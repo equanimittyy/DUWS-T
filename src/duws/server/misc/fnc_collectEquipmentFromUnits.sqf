@@ -1,7 +1,7 @@
 // fnc_collectEquipmentFromUnits.sqf
 if (!isServer) exitWith {};
 
-diag_log "[Equipment] Collecting equipment from nearby units...";
+["INFO", "GEAR", "Collecting equipment from nearby units..."] call fnc_log;
 
 // 初始化列表
 blufor_helmets = [];
@@ -13,7 +13,7 @@ opfor_uniforms = [];
 
 // 获取 HQ 位置
 private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", []];
-if (_hqPos isEqualTo []) exitWith { diag_log "[Equipment] No HQ position, abort."; };
+if (_hqPos isEqualTo []) exitWith { ["ERROR", "GEAR", "No HQ position, abort."] call fnc_log; };
 
 // 收集 HQ 附近 500 米内的蓝方单位
 private _bluUnits = nearestObjects [_hqPos, ["CAManBase"], 500] select { alive _x && side _x == WEST };
@@ -41,8 +41,8 @@ private _opfZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPF
     } forEach _opfUnits;
 } forEach _opfZones;
 
-diag_log format ["[Equipment] BLUFOR collected: H=%1 V=%2 U=%3", count blufor_helmets, count blufor_vests, count blufor_uniforms];
-diag_log format ["[Equipment] OPFOR collected: H=%1 V=%2 U=%3", count opfor_helmets, count opfor_vests, count opfor_uniforms];
+["INFO", "GEAR", format ["BLUFOR collected: H=%1 V=%2 U=%3", count blufor_helmets, count blufor_vests, count blufor_uniforms]] call fnc_log;
+["INFO", "GEAR", format ["OPFOR collected: H=%1 V=%2 U=%3", count opfor_helmets, count opfor_vests, count opfor_uniforms]] call fnc_log;
 
 // 公开变量
 publicVariable "blufor_helmets";

@@ -2,7 +2,7 @@
 // Logging first, so anything that fails below is visible. The server compiles this too;
 // on a dedicated server the client half needs its own copy before the registry arrives.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_log_init.sqf";
-diag_log format ["Client_init: %1", profileName];
+["INFO", "BOOT", format ["Client_init: %1", profileName]] call fnc_log;
 ["INFO", "BOOT", format ["client_init start, player %1", profileName]] call fnc_log;
 fnc_hirePartisans_clientMap = compile preprocessFileLineNumbers "duws\client\misc\fnc_hirePartisans_clientMap.sqf";
 publicVariable "fnc_hirePartisans_clientMap";
@@ -30,7 +30,7 @@ fnc_remoteBoard = {
     params ["_heliNetId", "_seatType", "_player"];
     if (_player != player) exitWith {}; // 确保是自己
     private _heli = objectFromNetId _heliNetId;
-    if (isNull _heli) exitWith { diag_log "[INTRO] Remote board: helicopter not found."; };
+    if (isNull _heli) exitWith { ["ERROR", "INTRO", "Remote board: helicopter not found."] call fnc_log; };
     switch (_seatType) do {
         case "cargo": {
             player assignAsCargo _heli;
@@ -45,7 +45,7 @@ fnc_remoteBoard = {
             player moveInCommander _heli;
         };
     };
-    diag_log format ["[INTRO] Client %1 boarded helicopter as %2", name player, _seatType];
+    ["INFO", "INTRO", format ["Client %1 boarded helicopter as %2", name player, _seatType]] call fnc_log;
 };
 publicVariable "fnc_remoteBoard";
 // Set GameMaster
@@ -163,7 +163,7 @@ if (isMultiplayer) then {
 	///////////////////////////////////////////
 	// Initialize the BLUFOR FACTION for JIP
 	///////////////////////////////////////////
-	diag_log format ["BLUFOR Faction init for JIP: %1", BLUFOR_Faction_X];
+	["INFO", "BOOT", format ["BLUFOR Faction init for JIP: %1", BLUFOR_Faction_X]] call fnc_log;
 	if (BLUFOR_Faction_X == "CUSTOM") then {
 		while {!(["FACTION", "BLUfactionData (JIP custom faction)", {count BLUfactionData > 0}, 300] call fnc_waitLogged)} do {};
 		{
@@ -173,7 +173,7 @@ if (isMultiplayer) then {
 		[] call fnc_BLUFOR_FactionFile_X;
 	};
 	sleep 1;
-	diag_log format ["Blufor Faction init for JIP complete.  Rifleman: %1", blufor_SOLDIER_X];
+	["INFO", "BOOT", format ["Blufor Faction init for JIP complete.  Rifleman: %1", blufor_SOLDIER_X]] call fnc_log;
 
 };
 
@@ -214,7 +214,7 @@ if ((vehiclevarname player) in Squad_Leaders) then {
 	// INIT the max support variable
 	support_count = 0;
 	//INIT HC module
-	diag_log "HC init";
+	["INFO", "BOOT", "HC init"] call fnc_log;
 	[] spawn fnc_hc_init;
 };
 
@@ -304,7 +304,7 @@ if (CIV_PRESENCE == "RAVAGE") then {
     0 setFog [0.5, 0.1, 10];
     0 setOvercast 0.8;
     forceWeatherChange;
-    diag_log "[CLIENT INIT] RAVAGE mode: Client-side fog forced.";
+    ["INFO", "BOOT", "RAVAGE mode: Client-side fog forced."] call fnc_log;
 };if (CIV_PRESENCE == "WBK") then {
     // 等待玩家完全就绪
     waitUntil {!isNull player};
@@ -312,7 +312,7 @@ if (CIV_PRESENCE == "RAVAGE") then {
     0 setFog [0.5, 0.1, 10];
     0 setOvercast 0.8;
     forceWeatherChange;
-    diag_log "[CLIENT INIT] WBK mode: Client-side fog forced.";
+    ["INFO", "BOOT", "WBK mode: Client-side fog forced."] call fnc_log;
 };
 // 等待末日模式变量同步
 waitUntil {!isNil "apocalypse_mode"};
@@ -347,7 +347,7 @@ DUWS_fnc_applyApocalypseFilter = {
     _blur ppEffectAdjust [0.02];
     _blur ppEffectCommit 0;
 
-    diag_log "[Apocalypse] Aggressive filters applied.";
+    ["INFO", "SUPPORT", "Aggressive filters applied."] call fnc_log;
 };
 
 // 如果开启末日模式，立即应用滤镜
@@ -390,7 +390,7 @@ if !(player getVariable ["intro_completed", false]) then {
     player setPos _safePos;
 	[["", "BLACK IN", 2]] remoteExec ["titleCut", player];
     player setVariable ["intro_completed", true];
-    diag_log format ["[JIP] Teleported %1 to base.", name player];
+    ["INFO", "BOOT", format ["Teleported %1 to base.", name player]] call fnc_log;
 };
 
 // 空降完成后，播放音乐和欢迎信息
@@ -509,7 +509,7 @@ if (isNil {player getVariable "DUWS_disguiseMenu_actionAdded"}) then {
 fnc_disguise_setCaptiveLocal = {
     params ["_state"];
     player setCaptive _state;
-    diag_log format ["[DISGUISE] Client setCaptive %1 for %2", _state, name player];
+    ["INFO", "GEAR", format ["Client setCaptive %1 for %2", _state, name player]] call fnc_log;
 };
 publicVariable "fnc_disguise_setCaptiveLocal";
 

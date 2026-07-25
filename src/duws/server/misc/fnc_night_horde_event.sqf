@@ -21,7 +21,7 @@ if (!isClass (configFile >> "CfgVehicles" >> "zombie_runner")) then {
     _zombieClasses = [
         "C_Man_casual_1_F"  // 后备：使用单一平民类名
     ];
-    diag_log "[HORDE] Ravage mod not found, using default civilian for horde.";
+    ["ERROR", "MISSION", "Ravage mod not found, using default civilian for horde."] call fnc_log;
 };
 
 // 主循环
@@ -119,7 +119,7 @@ while {true} do {
                     if (_wave < _waveCount) then { sleep 40 };
                 };
 
-                diag_log "[HORDE] Event triggered successfully.";
+                ["INFO", "MISSION", "Event triggered successfully."] call fnc_log;
 
                 // 最后一波生成后等待60秒，任务成功
                 [_taskID] spawn {

@@ -13,12 +13,12 @@ switch (_side) do {
     case "blufor": {
         if (BLUfactionDataTemp != "" && {BLUFOR_Faction_X == "CUSTOM"}) then {
             (["blufor", BLUfactionDataTemp] call fnc_custom_faction_parse) params ["_pairs", "_valid", "_bad"];
-            diag_log format ["BLUFOR CUSTOM FACTION: %1", str _pairs];
+            ["INFO", "FACTION", format ["BLUFOR CUSTOM FACTION: %1", str _pairs]] call fnc_log;
             if (_valid) then {
                 BLUfactionData = _pairs;
                 publicVariable "BLUfactionData";
             } else {
-                diag_log format ["BLUFOR CUSTOM FACTION: invalid on server (missing/unresolved: %1); build aborted.", _bad];
+                ["ERROR", "FACTION", format ["BLUFOR CUSTOM FACTION: invalid on server (missing/unresolved: %1); build aborted.", _bad]] call fnc_log;
             };
         };
     };
@@ -26,11 +26,11 @@ switch (_side) do {
     case "opfor": {
         if (OPFfactionDataTemp != "" && {OPFOR_Faction_X == "CUSTOM"}) then {
             (["opfor", OPFfactionDataTemp] call fnc_custom_faction_parse) params ["_pairs", "_valid", "_bad"];
-            diag_log format ["OPFOR CUSTOM FACTION: %1", str _pairs];
+            ["INFO", "FACTION", format ["OPFOR CUSTOM FACTION: %1", str _pairs]] call fnc_log;
             if (_valid) then {
                 OPFfactionData = _pairs;
             } else {
-                diag_log format ["OPFOR CUSTOM FACTION: invalid on server (missing/unresolved: %1); build aborted.", _bad];
+                ["ERROR", "FACTION", format ["OPFOR CUSTOM FACTION: invalid on server (missing/unresolved: %1); build aborted.", _bad]] call fnc_log;
             };
         };
     };

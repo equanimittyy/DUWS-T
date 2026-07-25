@@ -207,6 +207,6 @@ private _fortPossibleUnitTypes = [
         };
     } forEach units _fortGroup;
     
-    diag_log format ["[Zone] Added %1 garrison units to fortification %2", _unitCount, typeOf _building];
+    ["INFO", "ZONES", format ["Added %1 garrison units to fortification %2", _unitCount, typeOf _building]] call fnc_log;
 } forEach _uniqueBuildings;
 // =============================================

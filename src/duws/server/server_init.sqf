@@ -2,7 +2,7 @@
 // Logging first: the registry self-check and every milestone below need fnc_log, and a
 // failure in server_var_init/server_fnc_init is exactly what has to be visible.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_log_init.sqf";
-diag_log format ["Server_init: %1", profileName];
+["INFO", "BOOT", format ["Server_init: %1", profileName]] call fnc_log;
 ["INFO", "BOOT", format ["server_init start, player %1", profileName]] call fnc_log;
 
 // DEFINE SERVER VARIABLES and FUNCTIONS
@@ -52,7 +52,7 @@ while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_place
 while {!(["BOOT", "createzone_server (setup screens committed)", {createzone_server}, 300] call fnc_waitLogged)} do {};
 
 // wait for CUSTOM FACTIONS to be pasted
-diag_log format ["Server waiting for BLU faction Data Temp"];
+["INFO", "BOOT", "Server waiting for BLU faction Data Temp"] call fnc_log;
 if (BLUFOR_Faction_X == "CUSTOM") then { while {!(["FACTION", "BLUfactionDataTemp pasted", {BLUfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
 if (OPFOR_Faction_X == "CUSTOM") then { while {!(["FACTION", "OPFfactionDataTemp pasted", {OPFfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
 
@@ -61,7 +61,7 @@ if (OPFOR_Faction_X == "CUSTOM") then { while {!(["FACTION", "OPFfactionDataTemp
 ///////////////////////
 
 // BLUFOR
-diag_log format ["BLUFOR Faction init on server: %1", BLUFOR_Faction_X];
+["INFO", "BOOT", format ["BLUFOR Faction init on server: %1", BLUFOR_Faction_X]] call fnc_log;
 
 if (BLUFOR_Faction_X == "CUSTOM") then {
 	["blufor"] call fnc_custom_faction_init;
@@ -69,17 +69,17 @@ if (BLUFOR_Faction_X == "CUSTOM") then {
 } else {
 	[] call fnc_BLUFOR_faction_init;
 };
-diag_log format ["Blufor Faction init on server complete.  Rifleman: %1", blufor_SOLDIER_X];
-diag_log format ["Blufor Faction init on server complete.  blufor RQST VEHICLE 01: %1", blufor_RQST_VEHICLE_01_X];
+["INFO", "BOOT", format ["Blufor Faction init on server complete.  Rifleman: %1", blufor_SOLDIER_X]] call fnc_log;
+["INFO", "BOOT", format ["Blufor Faction init on server complete.  blufor RQST VEHICLE 01: %1", blufor_RQST_VEHICLE_01_X]] call fnc_log;
 
 // create the BLUFOR squads
 [] call fnc_BLUFOR_squad_init;
-diag_log format ["blufor RECON_TEAM: %1", str blufor_RECON_TEAM_X];
+["INFO", "BOOT", format ["blufor RECON_TEAM: %1", str blufor_RECON_TEAM_X]] call fnc_log;
 
 
 // OPFOR
 if (opfor_SOLDIER_X == "") then {
-	diag_log format ["OPFOR Faction init on server: %1", OPFOR_Faction_X];
+	["INFO", "BOOT", format ["OPFOR Faction init on server: %1", OPFOR_Faction_X]] call fnc_log;
 
 	if (OPFOR_Faction_X == "CUSTOM") then {
 		["opfor"] call fnc_custom_faction_init;
@@ -87,12 +87,12 @@ if (opfor_SOLDIER_X == "") then {
 	} else {
 		[] call fnc_OPFOR_faction_init;
 	};
-	diag_log format ["Opfor Warcom Faction init on server complete.  Rifleman: %1", opfor_SOLDIER_X];
-	diag_log format ["Opfor Warcom Faction init on server complete.  Spec Ops: %1", opfor_SPECOPS_X];
+	["INFO", "BOOT", format ["Opfor Warcom Faction init on server complete.  Rifleman: %1", opfor_SOLDIER_X]] call fnc_log;
+	["INFO", "BOOT", format ["Opfor Warcom Faction init on server complete.  Spec Ops: %1", opfor_SPECOPS_X]] call fnc_log;
 
 	// create the BLUFOR squads
 	[] call fnc_OPFOR_squad_init;
-	diag_log format ["opfor INF_TEAM: %1", str opfor_INFTEAM_X];
+	["INFO", "BOOT", format ["opfor INF_TEAM: %1", str opfor_INFTEAM_X]] call fnc_log;
 
 };
 
@@ -104,7 +104,7 @@ if (opfor_SOLDIER_X == "") then {
 ////////////////////
 // Init the BLU HQ
 ////////////////////
-diag_log format ["bluHQ Position: %1", str PosOfBLUHQ];
+["INFO", "BOOT", format ["bluHQ Position: %1", str PosOfBLUHQ]] call fnc_log;
 [] spawn fnc_bluHQinit;
 
 // Initialize the Dynamic Groups framework
@@ -125,7 +125,7 @@ while {!(["BOOT", "opfor_ammobox_weapons built", {(count opfor_ammobox_weapons) 
 ////////////////////////////////////
 //  INIT OPFOR Faction & WARCOM
 ////////////////////////////////////
-diag_log format ["WARCOM INIT"];
+["INFO", "BOOT", "WARCOM INIT"] call fnc_log;
 [] spawn fnc_init_OPFOR_WARCOM;
 
 
@@ -438,7 +438,7 @@ if (isServer) then {
         } forEach (call BIS_fnc_listPlayers);
         
         if (_anyPlayerNear) then {
-            diag_log "[Arsenal] Player detected within 50m of HQ. Scanning nearby units' gear...";
+            ["INFO", "GEAR", "Player detected within 50m of HQ. Scanning nearby units' gear..."] call fnc_log;
             [] call fnc_addNearbyUnitsGearToArsenal;
             _executed = true;
         } else {
@@ -461,7 +461,7 @@ if (isServer) then {
         } forEach (call BIS_fnc_listPlayers);
         
         if (_anyPlayerNear) then {
-            diag_log "[QuickChange] Player detected within 50m of HQ. Scanning nearby units...";
+            ["INFO", "GEAR", "Player detected within 50m of HQ. Scanning nearby units..."] call fnc_log;
             [] call fnc_scanNearbyUnitsForQuickChange;
             _executed = true;
         } else {
@@ -472,7 +472,7 @@ if (isServer) then {
 "apocalypse_mode" addPublicVariableEventHandler {
     params ["_var", "_value"];
     if (_value) then {
-        diag_log "[Apocalypse] Public variable detected, launching destruction.";
+        ["INFO", "SUPPORT", "Public variable detected, launching destruction."] call fnc_log;
         [] spawn fnc_apocalypse_buildings;
     };
 };
@@ -503,7 +503,7 @@ waitUntil { sleep 1.0; chosen_settings };
 waitUntil { sleep 1.0; HQ_pos_found_generated };
 // 再等待十几秒，确保所有玩家已连接并同步
 sleep 15;
-diag_log "[SERVER] Starting helicopter intro sequence...";
+["INFO", "BOOT", "Starting helicopter intro sequence..."] call fnc_log;
 [] spawn fnc_intro_heli;
 // 仅在非僵尸/非WBK模式下扫描平民装备
 if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK" && CIV_PRESENCE != "NONE") then {
@@ -534,7 +534,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
                 private _enemyRemaining = 610 - (diag_tickTime - _lastEnemy);
                 if (_enemyRemaining > 610 || _enemyRemaining < -610) then {
                     _player setVariable ["DUWS_enemyDisguise_lastUse", diag_tickTime - 305, true];
-                    diag_log format ["[COOLDOWN] Server fixed enemy disguise for %1", name _player];
+                    if (duws_log_level >= 4) then { ["DEBUG", "MISSION", format ["Server fixed enemy disguise for %1", name _player]] call fnc_log; };
                 };
                 
                 // ----------------- 平民伪装冷却（最大 300 秒）-----------------
@@ -542,7 +542,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
                 private _civRemaining = 310 - (diag_tickTime - _lastCiv);
                 if (_civRemaining > 310 || _civRemaining < -310) then {
                     _player setVariable ["DUWS_disguise_lastUse", diag_tickTime - 155, true];
-                    diag_log format ["[COOLDOWN] Server fixed civilian disguise for %1", name _player];
+                    if (duws_log_level >= 4) then { ["DEBUG", "MISSION", format ["Server fixed civilian disguise for %1", name _player]] call fnc_log; };
                 };
                 
                 // ----------------- 雇佣游击队冷却（最大 1800 秒）-----------------
@@ -550,7 +550,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
                 private _partisanRemaining = 1810 - (diag_tickTime - _lastPartisan);
                 if (_partisanRemaining > 1810 || _partisanRemaining < -1810) then {
                     _player setVariable ["DUWS_hirePartisans_lastUse", diag_tickTime - 905, true];
-                    diag_log format ["[COOLDOWN] Server fixed partisans for %1", name _player];
+                    if (duws_log_level >= 4) then { ["DEBUG", "MISSION", format ["Server fixed partisans for %1", name _player]] call fnc_log; };
                 };
                 
                 // ----------------- 雇佣 PMC 冷却（最大 900 秒）-----------------
@@ -558,7 +558,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
                 private _pmcRemaining = 910 - (diag_tickTime - _lastPMC);
                 if (_pmcRemaining > 910 || _pmcRemaining < -910) then {
                     _player setVariable ["DUWS_hirePMC_lastUse", diag_tickTime - 455, true];
-                    diag_log format ["[COOLDOWN] Server fixed PMC for %1", name _player];
+                    ["INFO", "MISSION", format ["Server fixed PMC for %1", name _player]] call fnc_log;
                 };
                 
                 // ----------------- GM 休息治疗冷却（最大 600 秒）-----------------
@@ -567,7 +567,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
                 if (_gmRemaining > 610 || _gmRemaining < -610) then {
                     missionNamespace setVariable ["GM_Heal_LastUsedTime", diag_tickTime - 305];
                     publicVariable "GM_Heal_LastUsedTime";
-                    diag_log "[COOLDOWN] Server fixed GM heal cooldown";
+                    ["INFO", "MISSION", "Server fixed GM heal cooldown"] call fnc_log;
                 };
                 
             } forEach (call BIS_fnc_listPlayers);

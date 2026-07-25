@@ -7,7 +7,7 @@ if (_depot getVariable ["recycle_actions_done", false]) exitWith {};
 _depot setVariable ["recycle_actions_done", true, true];
 
 private _trg = objectFromNetId _trgNetId;
-if (isNull _trg) exitWith { diag_log "[RECYCLE] Trigger null on client"; };
+if (isNull _trg) exitWith { ["ERROR", "SUPPORT", "Trigger null on client"] call fnc_log; };
 
 _depot addAction [
     localize "STR_DUWS_T_VEHICLE_RECYCLING",
