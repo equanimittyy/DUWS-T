@@ -111,14 +111,54 @@ answer differs:
 | `dialog/fnc_request_unit.sqf:30`, `dialog/fnc_request_unit_fob.sqf:29` | client, `createUnit` into `group player` | correct by design — a player's AI subordinates belong on the commanding machine |
 | `operative/modern/fnc_operator_recruit.sqf:34,59` | client, then `joinSilent (group player)` | same, ends up in the player's group |
 | `dialog/fnc_request_vehicle.sqf:28`, `dialog/fnc_request_vehicle_fob.sqf:28` | client, `createVehicle` | low risk — locality transfers when a player enters |
-| `dialog/fnc_request_squad.sqf:102`, `dialog/fnc_request_squad_fob.sqf:85` non-task-force path | client, independent High Command group | the one open question |
+| `dialog/fnc_request_squad.sqf:102`, `dialog/fnc_request_squad_fob.sqf:85` non-task-force path | client, independent High Command group | move to the server |
 
-Only the last row is arguable. An independent High Command group created on a client is
-simulated by that client and orphaned if the player disconnects, which matters because HC
-squads are meant to persist as campaign assets. Against that, the player commands them, and
-locality on the commanding machine is what keeps orders responsive. `fnc_playerTF_spawn`
-already does the server-side version for task-force squads, so the decision is which
-behaviour is wanted rather than how to implement it.
+High Command squads move to the server. They are campaign assets meant to outlive any one
+player's session, and a group created on a client is simulated there and orphaned when that
+player disconnects — which a dedicated server turns from an edge case into the normal way the
+mission runs. `misc/fnc_playerTF_spawn.sqf` is the spawn half of the pattern; the assignment
+half has to stay on the client, for the reason below.
+
+## Dedicated-server compatibility
+
+**`player` is `objNull` on a dedicated server.** Nothing that touches it can run server-side,
+so any operation that is inherently about *one player's* view — High Command assignment,
+comm-menu entries, teleports, addActions — has to execute on that player's machine even when
+the server decides it should happen. The pattern is to hand a code block back to the
+requesting client, and `misc/fnc_hirePartisans_spawnDeployed.sqf:113-118` already does it:
+
+```sqf
+[[_group], {
+    params ["_group"];
+    if (isNull _group) exitWith {};
+    player hcSetGroup [_group, ""];
+}] remoteExec ["call", _caller];
+```
+
+The server spawns, names, and registers the group; the client performs the one step that
+needs its own `player`. Copy this for the HC squad move rather than inventing a second shape.
+
+Two places still get this wrong, and both are silent rather than loud:
+
+| Site | On a dedicated server |
+|---|---|
+| `misc/fnc_createKillhouse.sqf:1086` | `player setPos _respawnPos` targets `objNull`, so the respawn move never happens |
+| `warcom/fnc_WARCOM_blu_patrol.sqf:69` | `_randomZone distance player` measures against `objNull`, which returns a huge value, so `> 500` is always true and patrol placement silently loses its keep-out |
+
+**The squad-name counters exist only on clients.** `init/client_init.sqf:52` includes
+`includes/squad_number_init.hpp`, which is never broadcast, so every client keeps its own
+`DUWS_number_*` set and two players buying infantry both mint "Inf 1" today. The server has no
+copy at all, so moving spawn and naming there without moving the counters would read nil.
+They have to move to server-side init as part of the same change, which also collapses the
+duplicate-name problem — one counter, one namer.
+
+**Pre-play configuration is authored on a client, deliberately.** The game master runs the
+campaign menu and broadcasts the result; everyone else waits on `HQ_pos_found_generated &&
+chosen_settings` (`init/client_init.sqf:123-137`). That survives a dedicated server because
+game master is a *client* role rather than the host, but it is a genuine exception to the
+one-writer rule: roughly 18 globals in `dialog/fnc_process_campaign_menu.sqf` are set from a
+client and broadcast. It is safe only because it happens once, before any other writer exists.
+Keep it as a stated exception; do not let it become the precedent for anything mid-mission.
 
 ## Client-side permission checks
 
@@ -142,16 +182,21 @@ rather than repair it.
 
 ## Sequence
 
-Reputation is the only phase with a live defect and a settled shape, so it goes first and
-carries the `CIV_deaths` decision with it. The dead `protect_civ` branch is independent, a
-deletion, and can ride along. The High Command spawn question comes last because it needs a
-behaviour decision before any code — and if the answer is "leave it", the remaining work is
-the locality convention rather than any further conversion.
+Reputation first: it is the only phase with a live defect and a settled shape, and it carries
+the `CIV_deaths` decision with it. The dead `protect_civ` branch is a deletion and can ride
+along.
 
-That convention is the highest-value item left once reputation lands, and it is the cheapest:
-a one-line header on each function stating where it is meant to run. Every wrong assessment
-made while writing this doc came from trusting a file's folder over its call sites, including
-for `fnc_MHQ_deploy`, which lives under `dialog/` and runs on the server.
+High Command squads second, together with moving the `DUWS_number_*` counters, since the two
+cannot be separated. The two bare-`player` bugs above belong here too — they are the same
+mistake in a different place, and fixing them alongside means the dedicated-server rule gets
+applied once rather than rediscovered.
+
+The locality convention is last and is the cheapest thing in this doc: a one-line header on
+each function stating where it is meant to run. Every wrong assessment made while writing this
+plan came from trusting a file's folder over its call sites — `fnc_MHQ_deploy` lives under
+`dialog/` and runs on the server; `fnc_helolift` carries an inner `isServer` guard while being
+a client function throughout. Dedicated-server support raises the cost of each such mistake,
+because the host stops being a machine that happens to satisfy both roles.
 
 ## Verification
 
