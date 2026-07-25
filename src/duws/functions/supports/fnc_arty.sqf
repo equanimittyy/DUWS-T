@@ -12,7 +12,7 @@ _cost = _this select 6;
 _ammotype = _this select 7;
 _rpsinit = _rps;
 _fireObjects = [];  // for napalm flames
-_speaker = localize "STR_DUWS_T_actionteam";
+_speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
 _message = localize "STR_DUWS_T_artycall";
 
 // make sure blufor has someone in range

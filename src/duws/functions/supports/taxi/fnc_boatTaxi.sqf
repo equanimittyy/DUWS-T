@@ -23,7 +23,7 @@ str(_markerpickup) setMarkerType "hd_end";
 str(_markerpickup) setMarkerColor "ColorGreen";
 str(_markerpickup) setMarkerText "Pickup";
 _speaker = localize "STR_DUWS_T_dispatcher";
-_message = localize "STR_DUWS_T_boattaxicall";
+_message = ([localize "STR_DUWS_T_boattaxicall"] call fnc_cs);
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 

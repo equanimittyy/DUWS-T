@@ -30,7 +30,7 @@ _cpreward = 15;
 _apreward = 15;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_armorletsdothis";
-_message1 = localize "STR_DUWS_T_armorend";
+_message1 = ([localize "STR_DUWS_T_armorend"] call fnc_cs);
 
 _randomPos = [];
 _Building = [];

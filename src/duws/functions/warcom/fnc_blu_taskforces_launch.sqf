@@ -6,7 +6,7 @@ if (count _standby == 0) exitWith {
     ["info", [localize "STR_DUWS_T_no_standby_tf", localize "STR_DUWS_T_no_standby_tf_desc"]] remoteExec ["BIS_fnc_showNotification", 0];
 };
 // 提示玩家
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_taskforces_launchrqst"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_taskforces_launchrqst"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_taskforces_launched"] remoteExec ["BIS_fnc_showSubtitle", 0];

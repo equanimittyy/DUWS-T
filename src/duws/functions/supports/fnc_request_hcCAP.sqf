@@ -26,7 +26,7 @@ DUWS_number_CAS = DUWS_number_CAS + 1;
 _group setGroupId [format[localize "STR_DUWS_T_8mtxjfj3",DUWS_number_CAS]];
 hint localize "STR_DUWS_T_gu6cbc5f";
     _speaker = localize "STR_DUWS_T_OVERLORD";
-    _message = localize "STR_DUWS_T_squadready";
+    _message = ([localize "STR_DUWS_T_squadready"] call fnc_cs);
     [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 			 

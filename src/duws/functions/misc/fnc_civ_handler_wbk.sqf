@@ -563,7 +563,7 @@ if (_mode == "spawn") then {
         _wp setWaypointCompletionRadius 15;
     } forEach _survivorGroups;
 
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_civpopR"] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_civpopR"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
     sleep 2;
     ["biohazard", [localize "STR_DUWS_T_civrescuetitle", localize "STR_DUWS_T_civrescue"]] remoteExec ["BIS_fnc_showNotification", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];

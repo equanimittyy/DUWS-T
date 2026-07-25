@@ -30,7 +30,7 @@ private _actionID = _unit addAction [
         // 移除所有客户端上该平民的所有动作
         removeAllActions _target;
         [_target] remoteExec ["removeAllActions", 0];
-        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_askopforloc"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+        [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_askopforloc"] remoteExec ["BIS_fnc_showSubtitle", _caller];
         
         private _rep = missionNamespace getVariable ["Player_Reputation", 0];
         if (_rep > 0) then {
@@ -63,7 +63,7 @@ private _actionID = _unit addAction [
                     hint (localize "STR_DUWS_T_NO_ENEMY_GROUPS");
                     [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_askopforlocno2"] remoteExec ["BIS_fnc_showSubtitle", _caller];
                     sleep 4;
-                    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_askopforlocno3"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+                    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_askopforlocno3"] remoteExec ["BIS_fnc_showSubtitle", _caller];
                 };
             } else {
                 hint (localize "STR_DUWS_T_ASK_FAIL");

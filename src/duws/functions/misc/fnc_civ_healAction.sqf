@@ -52,7 +52,7 @@ private _actionID = _unit addAction [
         removeAllActions _target;
         [_target] remoteExec ["removeAllActions", 0];
         
-        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_providemed"] call BIS_fnc_showSubtitle;
+        [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_providemed"] call BIS_fnc_showSubtitle;
         sleep 3;
         
         // 70% 成功率

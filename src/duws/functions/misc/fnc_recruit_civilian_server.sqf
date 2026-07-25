@@ -39,7 +39,7 @@ private _locIndex = _civilian getVariable ["civ_locIndex", -1];
 
 // 95%成功率
 if (random 1 < 0.95) then {
-    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_RECRUITconv1"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_RECRUITconv1"] remoteExec ["BIS_fnc_showSubtitle", _caller];
     sleep 3;
     [localize "STR_DUWS_T_survivor", localize "STR_DUWS_T_RECRUITconv2"] remoteExec ["BIS_fnc_showSubtitle", _caller];
     
@@ -101,7 +101,7 @@ if (random 1 < 0.95) then {
     diag_log format ["[RECRUIT] Civilian %1 successfully recruited by %2", _civilian, name _caller];
     
     sleep 3;
-    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_RECRUITconv3"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_RECRUITconv3"] remoteExec ["BIS_fnc_showSubtitle", _caller];
     [_civilian] joinSilent (group _caller);
     _civilian setVariable ["civ_locIndex", nil];
     
@@ -114,7 +114,7 @@ if (random 1 < 0.95) then {
             (!alive _unit) || (_unit distance _hqPos < 50)
         };
         if (alive _unit && _unit distance _hqPos < 50) then {
-            [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_RECRUITconv4"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+            [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_RECRUITconv4"] remoteExec ["BIS_fnc_showSubtitle", _caller];
             sleep 3;
             [localize "STR_DUWS_T_survivor", localize "STR_DUWS_T_RECRUITconv5"] remoteExec ["BIS_fnc_showSubtitle", _caller];
             deleteVehicle _unit;
@@ -139,10 +139,10 @@ if (random 1 < 0.95) then {
     // ---- 招募失败 ----
     _civilian setBehaviour "CARELESS";
     _civilian doMove (getPos _civilian getPos [random 50, random 360]);
-    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_RECRUITconv1"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_RECRUITconv1"] remoteExec ["BIS_fnc_showSubtitle", _caller];
     sleep 3;
     [localize "STR_DUWS_T_survivor", localize "STR_DUWS_T_RECRUITconv6"] remoteExec ["BIS_fnc_showSubtitle", _caller];
     [localize "STR_DUWS_T_RECRUIT_FAIL_MSG"] remoteExec ["hint", _caller];
     sleep 3;
-    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_RECRUITconv7"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_RECRUITconv7"] remoteExec ["BIS_fnc_showSubtitle", _caller];
 };

@@ -47,7 +47,7 @@ while {true} do {
                 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_hordealert1"] remoteExec ["BIS_fnc_showSubtitle", 0];
                 [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 sleep 6;
-                [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_hordealert2"] remoteExec ["BIS_fnc_showSubtitle", 0];
+                [([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_hordealert2"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
                 [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 sleep 6;
 

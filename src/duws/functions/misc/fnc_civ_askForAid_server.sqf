@@ -9,7 +9,7 @@ params ["_civilian", "_caller"];
 
 if (isNull _civilian || isNull _caller) exitWith {};
 
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_ASK_AID_hi"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+[([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_ASK_AID_hi"] remoteExec ["BIS_fnc_showSubtitle", _caller];
 sleep 5;
 // 获取玩家声望
 private _rep = missionNamespace getVariable ["Player_Reputation", 0];

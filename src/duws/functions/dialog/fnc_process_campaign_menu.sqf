@@ -513,24 +513,8 @@ blufor_ai_skill_random = (random _skill) + _min;
 publicVariable "blufor_ai_skill";
 publicVariable "blufor_ai_skill_random";
 
-// Apocalypse and civilian init fire here, at final commit, rather than between
-// the two setup screens -- otherwise returning via Back and re-confirming would
-// re-run them: apocalypse re-scans the whole map, and civ init would lock in
-// whichever faction was chosen on the first pass.
-if (apocalypse_mode) then {
-    if (isServer) then {
-        [] spawn fnc_apocalypse_buildings;
-    } else {
-        [] remoteExec ["fnc_apocalypse_buildings", 2];
-    };
-};
-if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then {
-    [] remoteExec ["fnc_civ_init_Tomata", 2];
-} else {
-    // Civilians off: no ambient population, but PMC/partisan hiring still needs civ_array as a body pool.
-    [] remoteExec ["fnc_civ_setup_array", 2];
-};
-
-// TELL WARCOM THE ZONE VARIABLES ARE SET
-createzone_server = true;
-publicVariable "createzone_server";
+// This reads the live campaign combos, so it runs while startup_dialog2 is still
+// open (from START-R / START-M) and is safe to re-run when the player steps Back
+// and forward. The fire-once commit (apocalypse scan, civ init, createzone_server,
+// chosen_settings) is deferred to the callsign screen's Confirm (fnc_callsign_confirm)
+// so it never repeats on a Back/re-confirm.

@@ -18,6 +18,35 @@ fnc_cp_adjust = {
 	if (hasInterface) then { ctrlSetText [1000, format ["%1", commandpointsblu1]]; };
 };
 
+// Player-callsign substitution for radio/subtitle dialogue. The stringtable bakes
+// the default callsign "Alpha 1-1" into the English lines; this swaps it for the
+// host-chosen duws_callsign at display time, so wrapping every localize is safe:
+// it is a no-op when the callsign is unset, still the default, or the line has no
+// callsign token. Only the literal "Alpha 1-1" is touched -- other callsigns
+// (Overlord, Allseer, Dispatch) and non-English translations are left as-is, which
+// is why localised callsigns intentionally lag the English one.
+fnc_cs = {
+	params [["_s", ""]];
+	if (isNil "duws_callsign") exitWith {_s};
+	if (duws_callsign isEqualTo "Alpha 1-1") exitWith {_s};
+	private _find = "Alpha 1-1";
+	private _flen = count _find;
+	private _n = count _s;
+	private _out = "";
+	private _i = 0;
+	while {_i < _n} do {
+		if ((_s select [_i, _flen]) isEqualTo _find) then {
+			_out = _out + duws_callsign;
+			_i = _i + _flen;
+		} else {
+			_out = _out + (_s select [_i, 1]);
+			_i = _i + 1;
+		};
+	};
+	_out
+};
+publicVariable "fnc_cs";
+
 // STARTUP FUNCTIONS
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\functions\init_hq\fnc_BluHQinit.sqf";
 fnc_factions_check = compile preprocessFileLineNumbers "duws\functions\misc\fnc_factions_check_modern.sqf";
@@ -357,10 +386,12 @@ fnc_HQ_endCampaign = compile preprocessFileLineNumbers "duws\functions\dialog\fn
 fnc_enviro_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_enviro_menu.sqf";publicVariable "fnc_enviro_menu";
 fnc_campaign_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_campaign_menu.sqf";publicVariable "fnc_campaign_menu";
 fnc_process_campaign_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_process_campaign_menu.sqf";publicVariable "fnc_process_campaign_menu";
+fnc_callsign_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_callsign_menu.sqf";publicVariable "fnc_callsign_menu";
+fnc_callsign_back = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_callsign_back.sqf";publicVariable "fnc_callsign_back";
+fnc_callsign_confirm = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_callsign_confirm.sqf";publicVariable "fnc_callsign_confirm";
 fnc_process_enviro_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_process_enviro_menu.sqf";publicVariable "fnc_process_enviro_menu";
 fnc_startup_closed = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_startup_closed.sqf";publicVariable "fnc_startup_closed";
-fnc_startup_manual_zones = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_startup_manual_zones.sqf";publicVariable "fnc_startup_manual_zones";
-fnc_startup_random_zones = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_startup_random_zones.sqf";publicVariable "fnc_startup_random_zones";
+fnc_startup_next = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_startup_next.sqf";publicVariable "fnc_startup_next";
 fnc_startup_back = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_startup_back.sqf";publicVariable "fnc_startup_back";
 fnc_startup_faction_flow = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_startup_faction_flow.sqf";publicVariable "fnc_startup_faction_flow";
 fnc_startup_faction_resolve = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_startup_faction_resolve.sqf";publicVariable "fnc_startup_faction_resolve";

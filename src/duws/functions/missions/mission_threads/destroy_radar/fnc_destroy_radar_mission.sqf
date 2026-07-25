@@ -30,7 +30,7 @@ _cpreward = 25;
 _apreward = 20;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_radarletsdothis";
-_message1 = localize "STR_DUWS_T_radarend";
+_message1 = ([localize "STR_DUWS_T_radarend"] call fnc_cs);
 
 _randomPos = [];
 _Building = [];
@@ -262,8 +262,8 @@ _VARtaskgeneratedName = format ["cache%1%2",round(_MissionPos select 0),round(_M
 sleep 8;
 [west, [_VARtaskgeneratedName],
 [localize "STR_DUWS_T_n4uc7t2x", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate;
-_speaker = localize "STR_DUWS_T_actionteam";
-_message = localize "STR_DUWS_T_radarcopy";
+_speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_message = ([localize "STR_DUWS_T_radarcopy"] call fnc_cs);
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 

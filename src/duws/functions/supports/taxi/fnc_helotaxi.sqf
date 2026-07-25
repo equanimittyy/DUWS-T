@@ -18,8 +18,8 @@ if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hi
 
 // A POS NEAR THE PLAYER HAS BEEN FOUND, CHOPPA EN ROUTE
 [-_cost] remoteExec ["fnc_cp_adjust", 2];
-_speakeracteam = localize "STR_DUWS_T_actionteam";
-_message = localize "STR_DUWS_T_helotaxicall0";
+_speakeracteam = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_message = ([localize "STR_DUWS_T_helotaxicall0"] call fnc_cs);
 [_speakeracteam, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
@@ -29,7 +29,7 @@ _message = format[localize "STR_DUWS_T_helotaxicall1",_taxiName,_random1,_random
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 _speaker = localize "STR_DUWS_T_pilot";
-_message = localize "STR_DUWS_T_helotaxicall";
+_message = ([localize "STR_DUWS_T_helotaxicall"] call fnc_cs);
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 

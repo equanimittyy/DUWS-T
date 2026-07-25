@@ -60,6 +60,11 @@ chosen_hq_placement = false;publicVariable "chosen_hq_placement";
 // chosen_settings
 chosen_settings = false;publicVariable "chosen_settings";
 
+// Player squad callsign, set on the callsign setup screen and substituted into
+// English radio dialogue by fnc_cs. Default matches the "Alpha 1-1" literal baked
+// into the stringtable, so an unchanged callsign leaves every line untouched.
+duws_callsign = "Alpha 1-1";publicVariable "duws_callsign";
+
 // CIV_deaths
 CIV_deaths = 0;publicVariable "CIV_deaths";
 

@@ -138,10 +138,10 @@ _generatedObjects append _newUnits;
 // ---------- 创建地图标记 ----------
 private _markerData = [_foundPos, "Supply Cache", localize _nameKey, 200] call fnc_missionMarkerData;
 _markerData params ["_markerIcon", "_markerArea"];
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_supply_start"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_supply_start"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_supply_start2"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_supply_start2"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // ---------- 创建任务 ----------
@@ -175,7 +175,7 @@ if (!alive _box) then {
     deleteMarker _markerArea;
     deleteMarker str(_markerIcon);
     deleteMarker str(_markerArea);
-    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_supply_fail"] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_supply_fail"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
     sleep 5;
     [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_supply_fail2"] remoteExec ["BIS_fnc_showSubtitle", 0];
@@ -200,7 +200,7 @@ if (!alive _box) then {
     private _missionName = localize _nameKey;
     [15, 15, _missionName] spawn fnc_mission_reward;
     
-    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_supply_success"] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_supply_success"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
     sleep 5;
     // 任务成功

@@ -32,12 +32,12 @@ _cpreward = 10;
 _apreward = 25;
 _speaker = localize "STR_DUWS_T_hound";
 _speaker1 = localize "STR_DUWS_T_OVERLORD";
-_speakeracteam = localize "STR_DUWS_T_actionteam";
+_speakeracteam = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
 _message = localize "STR_DUWS_T_dominationletsdothis";
-_message1 = localize "STR_DUWS_T_dominationoverlord";
-_message2 = localize "STR_DUWS_T_dominationcopy";
-_message3 = localize "STR_DUWS_T_dominationend";
-_messagehoundlost = localize "STR_DUWS_T_dominationhoundlost";
+_message1 = ([localize "STR_DUWS_T_dominationoverlord"] call fnc_cs);
+_message2 = ([localize "STR_DUWS_T_dominationcopy"] call fnc_cs);
+_message3 = ([localize "STR_DUWS_T_dominationend"] call fnc_cs);
+_messagehoundlost = ([localize "STR_DUWS_T_dominationhoundlost"] call fnc_cs);
 _markerText = "Hound Pos";
 _markerText2 = localize "STR_DUWS_T_c13";
 

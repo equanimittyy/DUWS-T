@@ -576,6 +576,21 @@
                 <Original>Return to faction &amp; HQ selection</Original>
                 <English>Return to faction &amp; HQ selection</English>
             </Key>
+            <Key ID="STR_DUWS_T_callsign_frame">
+                <Chinesesimp>命名你的小队</Chinesesimp>
+                <Original>NAME YOUR SQUAD</Original>
+                <English>NAME YOUR SQUAD</English>
+            </Key>
+            <Key ID="STR_DUWS_T_callsign_prompt">
+                <Chinesesimp>输入你的小队呼号，指挥部和队员会在无线电通讯中使用它。默认：Alpha 1-1。</Chinesesimp>
+                <Original>Enter your squad's callsign. Command and your squad will use it over the radio. Default: Alpha 1-1.</Original>
+                <English>Enter your squad's callsign. Command and your squad will use it over the radio. Default: Alpha 1-1.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_callsign_next_tt">
+                <Chinesesimp>前往小队呼号页面</Chinesesimp>
+                <Original>Go to the squad callsign page</Original>
+                <English>Go to the squad callsign page</English>
+            </Key>
             <Key ID="STR_DUWS_T_ref5pt72">
                 <German>DEFINIERE DIE UMWELT-PARAMETER</German>
                 <Spanish>DEFINE LOS PARÁMETROS AMBIENTALES</Spanish>

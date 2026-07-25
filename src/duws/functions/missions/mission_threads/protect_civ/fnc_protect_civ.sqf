@@ -35,15 +35,15 @@ _repReward      = 5;        // 成功时声望增加量
 
 _speaker        = localize "STR_DUWS_T_OVERLORD";
 _speakerinfomat = localize "STR_DUWS_T_infomat";
-_speakeracteam  = localize "STR_DUWS_T_actionteam";
+_speakeracteam  = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
 _message        = localize "STR_DUWS_T_pcletsdothis";
 _messagewhoau   = localize "STR_DUWS_T_pcwhoau";
 _messageiminfo  = localize "STR_DUWS_T_pciminfo";
-_messageoverlord= localize "STR_DUWS_T_pcoverlord";
-_messageroger   = localize "STR_DUWS_T_pcroger";
+_messageoverlord= ([localize "STR_DUWS_T_pcoverlord"] call fnc_cs);
+_messageroger   = ([localize "STR_DUWS_T_pcroger"] call fnc_cs);
 _message1       = localize "STR_DUWS_T_pcbequick";
-_message2       = localize "STR_DUWS_T_pcend";
-_message3       = localize "STR_DUWS_T_pcfail";
+_message2       = ([localize "STR_DUWS_T_pcend"] call fnc_cs);
+_message3       = ([localize "STR_DUWS_T_pcfail"] call fnc_cs);
 
 // ----- 1. 寻找合适的任务目标位置（含建筑物）--------------------------------
 _randomPos = [];
@@ -238,8 +238,8 @@ Mission_Failed = false;
         [] remoteExec ["fnc_broadcastRadioChatter", 0];
     } else {
             // 时间到且平民存活 → 成功
-            _speakeracteam  = localize "STR_DUWS_T_actionteam";
-            _message2       = localize "STR_DUWS_T_pcend";
+            _speakeracteam  = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+            _message2       = ([localize "STR_DUWS_T_pcend"] call fnc_cs);
             [_speakeracteam, _message2] remoteExec ["BIS_fnc_showSubtitle", 0];
             [] remoteExec ["fnc_broadcastRadioChatter", 0];
             sleep 8;

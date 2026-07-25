@@ -173,7 +173,7 @@ sleep 5;
 titleText ["", "PLAIN", 5] remoteExec ["call", 0];
 sleep 3;
 cutText ["", "PLAIN", 5] remoteExec ["call", 0];
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_heli_ttgtw"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_heli_ttgtw"] remoteExec ["BIS_fnc_showSubtitle", 0];
 // 等待直升机到达航点，超时 120 秒后强制继续
 private _arrivedVar = "intro_heli_arrived";
 missionNamespace setVariable [_arrivedVar, false];
@@ -242,7 +242,7 @@ diag_log format ["[INTRO] Starting descent for %1 boarded players...", count _bo
 
     // 5. 对该玩家单独淡入
     [["", "BLACK IN", 1]] remoteExec ["titleCut", _player];
-    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_ground_reached"] remoteExec ["BIS_fnc_showSubtitle", _player];
+    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_ground_reached"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", _player];
     diag_log format ["[INTRO] Player %1 received fade-in and subtitle.", name _player];
 } forEach _boardedPlayers;
 // 未登机玩家：等待相同时间后直接传送到直升机正下方
@@ -257,7 +257,7 @@ diag_log format ["[INTRO] Starting direct teleport for %1 unboarded players...",
     _player setVariable ["intro_completed", true, true];
     diag_log format ["[INTRO] Player %1 teleported to %2", name _player, _groundPosASL];
     [["", "BLACK IN", 1]] remoteExec ["titleCut", _player];
-    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_ground_reached"] remoteExec ["BIS_fnc_showSubtitle", _player];
+    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_ground_reached"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", _player];
     diag_log format ["[INTRO] Player %1 received fade-in and subtitle.", name _player];
 } forEach _unboardedPlayers;
 

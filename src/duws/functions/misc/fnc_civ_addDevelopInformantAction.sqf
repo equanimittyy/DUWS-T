@@ -30,7 +30,7 @@ private _actionID = _unit addAction [
         };
         
         [_target, _caller, _locIndex] remoteExec ["fnc_civ_developInformantServer", 2];
-        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_askinf"] call BIS_fnc_showSubtitle;
+        [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_askinf"] call BIS_fnc_showSubtitle;
     },
     nil,
     6,

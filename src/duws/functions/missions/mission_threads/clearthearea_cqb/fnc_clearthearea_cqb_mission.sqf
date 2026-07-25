@@ -24,11 +24,11 @@ _radius = 200;
 _cpreward = 15;
 _apreward = 15;
 _speaker = localize "STR_DUWS_T_OVERLORD";
-_speakeracteam = localize "STR_DUWS_T_actionteam";
+_speakeracteam = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
 _message = localize "STR_DUWS_T_cqbletsdothis";
-_messageroger = localize "STR_DUWS_T_cqbroger";
+_messageroger = ([localize "STR_DUWS_T_cqbroger"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_cqblookslike";
-_message2 = localize "STR_DUWS_T_cqbend";
+_message2 = ([localize "STR_DUWS_T_cqbend"] call fnc_cs);
 _message3 = localize "STR_DUWS_T_cqboverlordcopy";
 _markerText = "Clear houses";
 _markerText2 = localize "STR_DUWS_T_clearhouse_desc";
@@ -191,7 +191,7 @@ _buildingUnitsList = [];
     _markerName = _buildingMarkers select _forEachIndex;
     [_x, _buildingIndex, _markerName] spawn {
         params ["_units", "_idx", "_mrk"];
-        private _speaker = localize "STR_DUWS_T_actionteam";
+        private _speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
         waitUntil {
             sleep 2;
             ({alive _x} count _units) == 0

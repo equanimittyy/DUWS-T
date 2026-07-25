@@ -16,8 +16,8 @@ if (_currentTime - _lastUsedTime >= _coolDownSeconds) then {
     [] remoteExec ["fnc_rest_heal", 2];
     missionNamespace setVariable [_coolDownVar, _currentTime];
     publicVariable _coolDownVar;
-    _speakeracteam = localize "STR_DUWS_T_actionteam";
-    _message = localize "STR_DUWS_T_restsuccess";
+    _speakeracteam = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+    _message = ([localize "STR_DUWS_T_restsuccess"] call fnc_cs);
     [_speakeracteam, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 } else {

@@ -34,7 +34,7 @@ switch (VERSION_X) do {
 	};
 };
 _speaker = localize "STR_DUWS_T_koipilot";
-_message = localize "STR_DUWS_T_koiin";
+_message = ([localize "STR_DUWS_T_koiin"] call fnc_cs);
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
@@ -43,7 +43,7 @@ DUWS_number_CAS = DUWS_number_CAS + 1;
 _group setGroupId [format[localize "STR_DUWS_T_8mtxjfj3",DUWS_number_CAS]];
 hint localize "STR_DUWS_T_gu6cbc5f";
 _speaker = localize "STR_DUWS_T_OVERLORD";
-_message = localize "STR_DUWS_T_squadready";
+_message = ([localize "STR_DUWS_T_squadready"] call fnc_cs);
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
@@ -78,7 +78,7 @@ _vehicle addEventHandler ["Killed", {
 
         // 广播可用消息
         _speaker = localize "STR_DUWS_T_dispatcher";
-        _message1 = localize "STR_DUWS_T_casreservekoi";
+        _message1 = ([localize "STR_DUWS_T_casreservekoi"] call fnc_cs);
         [_speaker, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
         [] remoteExec ["fnc_broadcastRadioChatter", 0];
     };
@@ -101,7 +101,7 @@ _vehicle addEventHandler ["Deleted", {
     HC_CAS_currentVehicle = nil;
     HC_CAS_currentGroup = nil;
     _speaker = localize "STR_DUWS_T_dispatcher";
-    _message = localize "STR_DUWS_T_casreservekoi";  // 复用“可用”提示
+    _message = ([localize "STR_DUWS_T_casreservekoi"] call fnc_cs);  // 复用“可用”提示
     [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 }];

@@ -204,7 +204,7 @@ if (isNil "fnc_intel_container_search_server") then {
                 private _title = localize "STR_DUWS_T_TOPSECRET_TITLE";
                 private _desc = format [localize "STR_DUWS_T_TOPSECRET_DESC", name _caller];
                 ["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", 0];
-                [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_INTEL_GATHERINGTS1"] remoteExec ["BIS_fnc_showSubtitle", 0];
+                [([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_INTEL_GATHERINGTS1"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
                 [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 sleep 6;
                 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_GATHERINGTS2"] remoteExec ["BIS_fnc_showSubtitle", 0];
@@ -331,7 +331,7 @@ if (isNil "fnc_intel_container_search_server") then {
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_GATHERING1"] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_GATHERING2"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_INTEL_GATHERING2"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // ========== 创建任务标记 ==========
@@ -351,13 +351,13 @@ private _taskID = format ["intel_gathering_%1", round time];
     true
 ] call BIS_fnc_taskCreate;
 
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_INTEL_GATHERING3"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_INTEL_GATHERING3"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_GATHERING4"] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_INTEL_GATHERING5"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_INTEL_GATHERING5"] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // ========== 统计初始敌军数量 ==========

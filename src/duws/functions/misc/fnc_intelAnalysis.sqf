@@ -54,7 +54,7 @@ private _playerItems = items _caller;
 if (_totalCP == 0) exitWith {
     [localize "STR_DUWS_T_INTEL_ANALYSIS_NO_ITEMS"] remoteExec ["hint", _caller];
 };
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_INTEL_ANALYSIS_rqst"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_INTEL_ANALYSIS_rqst"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 5;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_ANALYSIS_roger"] remoteExec ["BIS_fnc_showSubtitle", 0];

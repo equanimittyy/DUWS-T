@@ -20,7 +20,7 @@ _unitType = call (compile _var); // Get the vehicle variable
 
 if (commandpointsblu1 >= (_unitType select 2)) then {
     _speaker = localize "STR_DUWS_T_OVERLORD";
-    _message = localize "STR_DUWS_T_unitready";
+    _message = ([localize "STR_DUWS_T_unitready"] call fnc_cs);
     [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 	[-(_unitType select 2)] remoteExec ["fnc_cp_adjust", 2];

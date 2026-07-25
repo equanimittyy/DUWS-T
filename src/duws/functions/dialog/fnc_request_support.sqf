@@ -14,7 +14,7 @@ switch (_index2) do {
                 [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_dispatcher";
-                _message = localize "STR_DUWS_T_supplydropunlock";
+                _message = ([localize "STR_DUWS_T_supplydropunlock"] call fnc_cs);
                 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
                 ctrlSetText [1000, format["%1",commandpointsblu1]];
                 _supplydrop = [player,"ammo"] call BIS_fnc_addCommMenuItem;
@@ -67,7 +67,7 @@ switch (_index2) do {
                 [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_OVERLORD";
-                _message = localize "STR_DUWS_T_vehicledropunlock";
+                _message = ([localize "STR_DUWS_T_vehicledropunlock"] call fnc_cs);
                 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
                 ctrlSetText [1000, format["%1",commandpointsblu1]];
                 _vehdrop = [player,"veh_drop"] call BIS_fnc_addCommMenuItem;
@@ -380,7 +380,7 @@ case 11: {
                 [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_dispatcher";
-                _message = localize "STR_DUWS_T_jdamunlock";
+                _message = ([localize "STR_DUWS_T_jdamunlock"] call fnc_cs);
                 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
                 ctrlSetText [1000, format["%1",commandpointsblu1]];
                 _jdam = [player,"jdam"] call BIS_fnc_addCommMenuItem;
@@ -436,7 +436,7 @@ case 11: {
                 [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_OVERLORD";
-                _message = localize "STR_DUWS_T_clusterunlock";
+                _message = ([localize "STR_DUWS_T_clusterunlock"] call fnc_cs);
                 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
                 ctrlSetText [1000, format["%1",commandpointsblu1]];
                 _cluster = [player,"cluster"] call BIS_fnc_addCommMenuItem;
@@ -464,7 +464,7 @@ case 11: {
                 [-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_OVERLORD";
-                _message = localize "STR_DUWS_T_napalmunlock";
+                _message = ([localize "STR_DUWS_T_napalmunlock"] call fnc_cs);
                 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
                 ctrlSetText [1000, format["%1",commandpointsblu1]];
                 _cluster = [player,"napalm"] call BIS_fnc_addCommMenuItem;
@@ -528,7 +528,7 @@ case 11: {
 				[-_cost] remoteExec ["fnc_cp_adjust", 2];
 				support_count = support_count + 1;
                 _speaker = localize "STR_DUWS_T_koipilot";
-                _message = localize "STR_DUWS_T_hcjetunlock";
+                _message = ([localize "STR_DUWS_T_hcjetunlock"] call fnc_cs);
                 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 				ctrlSetText [1000, format["%1",commandpointsblu1]];
                 _hcCAS = [player,"hc_CAS"] call BIS_fnc_addCommMenuItem;

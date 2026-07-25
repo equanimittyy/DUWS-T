@@ -322,32 +322,18 @@ class startup_dialog2
             colorText[] = {1,1,1,1};
             style = ST_MULTI;
         };
-        class start_button1: RscButton
+        class next_button: RscButton
         {
             idc = 1600;
-            text = "$STR_DUWS_T_aphcxbq2";
-            x = 12 * GUI_GRID_W + GUI_GRID_X;
+            text = "$STR_DUWS_T_xxci6q7d";
+            x = 16 * GUI_GRID_W + GUI_GRID_X;
             y = 26 * GUI_GRID_H + GUI_GRID_Y;
             w = 8 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             sizeEx = 0.05;
             colorBackground[] = {1, 0, 0,0.5};
-            tooltip = "$STR_DUWS_T_ytu0ovg2";
-            action = "[] spawn fnc_startup_random_zones;";
-        };
-        class start_button2: RscButton
-        {
-            idc = 1601;
-            text = "$STR_DUWS_T_yvdmalcu";
-            x = 20.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 26 * GUI_GRID_H + GUI_GRID_Y;
-            w = 8 * GUI_GRID_W;
-            h = 1.5 * GUI_GRID_H;
-            sizeEx = 0.05;
-            colorBackground[] = {1, 0, 0,0.5};
-            colorBackgroundDisabled[] = {0.35, 0.35, 0.35, 0.5};  // grey when hardcore disables it (matches Back)
-            tooltip = "$STR_DUWS_T_7zexk7d5";
-            action = "[] spawn fnc_startup_manual_zones;";
+            tooltip = "$STR_DUWS_T_callsign_next_tt";
+            action = "[] spawn fnc_startup_next;";
         };
         class back_button: RscButton
         {

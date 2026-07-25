@@ -56,7 +56,7 @@ if (!(alive _sol1) && !(alive _sol2) && !(alive _sol3)) exitWith {
 
 	[{hint localize "STR_DUWS_T_1sp94d75"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     _speaker = localize "STR_DUWS_T_OVERLORD";
-    _message = localize "STR_DUWS_T_squadfail";
+    _message = ([localize "STR_DUWS_T_squadfail"] call fnc_cs);
     [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 
 	[_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];

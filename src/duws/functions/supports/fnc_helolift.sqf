@@ -250,8 +250,8 @@ _helo_minFuel = 0.4;
 _check_damage = compile format ["(isNull _helo) or (damage _helo > %1) or (fuel _helo < %2) or (vehicle _pilot == _pilot)", _helo_maxDamage, _helo_minFuel];
 
 // ========== 4. 通知并飞往载具位置 ==========
-_speaker = localize "STR_DUWS_T_actionteam";
-_message = format[localize "STR_DUWS_T_heloliftcall"];
+_speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_message = format[([localize "STR_DUWS_T_heloliftcall"] call fnc_cs)];
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 

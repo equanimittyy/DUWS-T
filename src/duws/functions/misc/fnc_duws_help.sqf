@@ -62,7 +62,7 @@ private _records = [
     ["3.1", "STR_DUWS_T_shijianguanli",       localize "STR_DUWS_T_shijianguanli2"] call _rec, // Time Management
     ["3.2", "STR_DUWS_T_ojav7yf4",            localize "STR_DUWS_T_d38s8oac"] call _rec,        // Hardcore Mode
     ["3.3", "STR_DUWS_T_siwang",              localize "STR_DUWS_T_siwang2"] call _rec,         // Death Penalty
-    ["3.4", "STR_DUWS_T_zimuxitong",          localize "STR_DUWS_T_zimuxitong2"] call _rec,     // Subtitles
+    ["3.4", "STR_DUWS_T_zimuxitong",          ([localize "STR_DUWS_T_zimuxitong2"] call fnc_cs)] call _rec,     // Subtitles
     ["3.5", "STR_DUWS_T_ty006zz4",            localize "STR_DUWS_T_8o0fomss"] call _rec,         // Saving
     ["3.6", "STR_DUWS_T_ljw9ndqz",            localize "STR_DUWS_T_nk0wa9zo"] call _rec,         // Multiplayer
     _divider,

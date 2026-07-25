@@ -32,7 +32,7 @@ _cpreward = 30;
 _apreward = 30;
 _speaker = localize "STR_DUWS_T_Viper";
 _message = localize "STR_DUWS_T_sniperletsdothis";
-_message1 = localize "STR_DUWS_T_sniperend";
+_message1 = ([localize "STR_DUWS_T_sniperend"] call fnc_cs);
 
 _randomPos = [];
 _Building = [];

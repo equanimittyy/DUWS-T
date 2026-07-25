@@ -332,8 +332,8 @@ _VARtaskgeneratedName = format ["cache%1%2",round(_MissionPos select 0),round(_M
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
-_speaker = localize "STR_DUWS_T_actionteam";
-_message = localize "STR_DUWS_T_cachecopy";
+_speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_message = ([localize "STR_DUWS_T_cachecopy"] call fnc_cs);
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 [west, [_VARtaskgeneratedName],

@@ -43,8 +43,8 @@ if ((vehiclevarname player) in game_master) then {
                 
                 // 5. 强制同步该变量到所有联机端
                 publicVariable _coolDownVar;
-                _speakeracteam = localize "STR_DUWS_T_actionteam";
-                _message = localize "STR_DUWS_T_restsuccess";
+                _speakeracteam = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+                _message = ([localize "STR_DUWS_T_restsuccess"] call fnc_cs);
                 [_speakeracteam, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
                 [] remoteExec ["fnc_broadcastRadioChatter", 0];
             } else {

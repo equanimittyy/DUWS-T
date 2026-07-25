@@ -28,8 +28,8 @@ _apreward = 25;
 _speaker = localize "STR_DUWS_T_Signal2";
 _message = localize "STR_DUWS_T_supplytruckletsdothis";
 _speaker1 = localize "STR_DUWS_T_OVERLORD";
-_message1 = localize "STR_DUWS_T_supplytruckoverlord";
-_message2 = localize "STR_DUWS_T_supplytruckfail";
+_message1 = ([localize "STR_DUWS_T_supplytruckoverlord"] call fnc_cs);
+_message2 = ([localize "STR_DUWS_T_supplytruckfail"] call fnc_cs);
 
 _taskTimeLimit = 1200;
 _taskStartTime = time;

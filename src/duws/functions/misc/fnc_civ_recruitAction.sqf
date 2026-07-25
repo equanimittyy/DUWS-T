@@ -6,7 +6,7 @@ private _actionID = _unit addAction [
     localize "STR_DUWS_T_CIV_RECRUIT",
     {
         params ["_target", "_caller", "_actionId"];
-        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_fight4freedom"] call BIS_fnc_showSubtitle;
+        [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_fight4freedom"] call BIS_fnc_showSubtitle;
         sleep 3;
         // --- 前置检查：检查玩家是否有至少 2 个 Money_roll ---
         private _moneyCount = { _x == "Money_roll" } count (magazines _caller);

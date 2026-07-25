@@ -9,9 +9,9 @@ if (commandpointsblu1 < _cost) exitWith
 [-_cost] remoteExec ["fnc_cp_adjust", 2];
 
 hint localize "STR_DUWS_T_q76uei82";
-_speaker = localize "STR_DUWS_T_actionteam";
+_speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
 _speaker1 = localize "STR_DUWS_T_OVERLORD";
-_message = localize "STR_DUWS_T_vehdropcall";
+_message = ([localize "STR_DUWS_T_vehdropcall"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_vehdropcallend";
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];

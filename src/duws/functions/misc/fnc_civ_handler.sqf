@@ -519,13 +519,13 @@ if (_mode == "spawn") then {
     };
 
     if (CIV_PRESENCE == "RAVAGE") then {
-        [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_civpopR"] remoteExec ["BIS_fnc_showSubtitle", 0];
+        [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_civpopR"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
         sleep 2;
         ["biohazard", [localize "STR_DUWS_T_civrescuetitle", localize "STR_DUWS_T_civrescue"]] remoteExec ["BIS_fnc_showNotification", 0];
     } else {
         private _townName = text _location;
         private _enterMsg = format [localize "STR_DUWS_T_townenter", _townName];
-        [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_civpop"] remoteExec ["BIS_fnc_showSubtitle", 0];
+        [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_civpop"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
         ["info", [_enterMsg, localize "STR_DUWS_T_towninteract"]] remoteExec ["BIS_fnc_showNotification", 0];
     };
     [] remoteExec ["fnc_broadcastRadioChatter", 0];

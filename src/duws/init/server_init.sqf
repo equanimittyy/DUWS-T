@@ -397,9 +397,9 @@ if (isServer) then {
         // 白天可见
         _light setLightDayLight true;
 
-        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_opforflare"] remoteExec ["BIS_fnc_showSubtitle", 0];
+        [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_opforflare"] remoteExec ["BIS_fnc_showSubtitle", 0];
         sleep 6;
-        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_opforflare2"] remoteExec ["BIS_fnc_showSubtitle", 0];
+        [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_opforflare2"] remoteExec ["BIS_fnc_showSubtitle", 0];
         // 3. 40秒后删除光源（照明弹此时已燃尽）
         [_light] spawn {
             params ["_light"];

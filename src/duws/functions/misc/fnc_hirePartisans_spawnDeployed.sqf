@@ -116,7 +116,7 @@ missionNamespace setVariable [_var, _HCgroups, true];
     player hcSetGroup [_group, ""];
 }] remoteExec ["call", _caller];
 
-private _successMsg = format [localize "STR_DUWS_T_HIRE_PARTISANS_SUCCESS", _count];
+private _successMsg = format [([localize "STR_DUWS_T_HIRE_PARTISANS_SUCCESS"] call fnc_cs), _count];
 ["info", [localize "STR_DUWS_T_HIRE_PARTISANS_TITLE", _successMsg]] remoteExec ["BIS_fnc_showNotification", 0];
 [localize "STR_DUWS_T_OVERLORD", _successMsg] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];

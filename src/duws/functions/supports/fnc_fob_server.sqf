@@ -19,7 +19,7 @@ str(_markername) setMarkerSize [2.5, 2.5];
 
 sleep 5;
 _speaker = localize "STR_DUWS_T_OVERLORD";
-_message = localize "STR_DUWS_T_fobcall";
+_message = ([localize "STR_DUWS_T_fobcall"] call fnc_cs);
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 

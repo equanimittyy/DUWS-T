@@ -3,8 +3,8 @@ _checkedRadius = _this select 1;
 _cost = _this select 2;
 
 [-_cost] remoteExec ["fnc_cp_adjust", 2];
-_speaker = localize "STR_DUWS_T_actionteam";
-_message = localize "STR_DUWS_T_requestuavscan";
+_speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_message = ([localize "STR_DUWS_T_requestuavscan"] call fnc_cs);
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;

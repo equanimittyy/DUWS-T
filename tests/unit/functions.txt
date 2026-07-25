@@ -4,3 +4,4 @@
 # ~95% of the mission needs the Arma engine and can't be unit-tested in sqf-vm.
 initPlayerLocal.sqf::DUWS_fnc_extractLoadoutItems
 initPlayerLocal.sqf::DUWS_fnc_countLoadoutChanges
+duws/init/server_fnc_init.sqf::fnc_cs

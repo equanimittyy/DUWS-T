@@ -31,7 +31,7 @@ _speaker = localize "STR_DUWS_T_OVERLORD";
 _speaker1 = localize "STR_DUWS_T_Viper";
 _message = localize "STR_DUWS_T_hvtletsdothis";
 _message0 = localize "STR_DUWS_T_hvtseen";
-_message1 = localize "STR_DUWS_T_hvtend";
+_message1 = ([localize "STR_DUWS_T_hvtend"] call fnc_cs);
 
 _taskTimeout = 480;
 _missionStartTime = time;

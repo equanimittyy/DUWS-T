@@ -45,6 +45,7 @@ class CfgFunctions
 #include "duws\includes\notifications.hpp"
 #include "duws\includes\enviro_menu.hpp"
 #include "duws\includes\campaign_menu.hpp"
+#include "duws\includes\callsign_menu.hpp"
 #include "duws\includes\hq_placement.hpp"
 #include "duws\includes\sounds.hpp"
 #include "duws\includes\custom_faction.hpp"
