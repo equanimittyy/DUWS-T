@@ -20,7 +20,7 @@ switch (VERSION_X) do {
 
 diag_log format ["Faction init: %1", BLUFOR_FactionFile_X];
 
-_factionFile = "duws\factions\" + VERSION_X + "\" + BLUFOR_FactionFile_X + "_blufor.sqf";
+_factionFile = "duws\shared\factions\" + VERSION_X + "\" + BLUFOR_FactionFile_X + "_blufor.sqf";
 fnc_BLUFOR_FactionFile_X = compile preprocessFileLineNumbers _factionFile;
 [] call fnc_BLUFOR_FactionFile_X;
 sleep 1;

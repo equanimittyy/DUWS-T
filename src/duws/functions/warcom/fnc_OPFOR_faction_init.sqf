@@ -14,7 +14,7 @@ OPFOR_FactionFile_X = "OPF_F_ARID";
 	};
 } foreach Factions_Available_OPFOR_X;
 
-_factionFile = "duws\factions\" + VERSION_X + "\" + OPFOR_FactionFile_X + "_opfor.sqf";
+_factionFile = "duws\shared\factions\" + VERSION_X + "\" + OPFOR_FactionFile_X + "_opfor.sqf";
 fnc_OPFOR_FactionFile_X = compile preprocessFileLineNumbers _factionFile;
 [] call fnc_OPFOR_FactionFile_X;
 sleep 1;

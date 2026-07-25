@@ -6,5 +6,5 @@
 */
 if (!isServer) exitWith {};
 
-[] call compile preprocessFileLineNumbers "duws\factions\CIV_FACTIONS.sqf";
+[] call compile preprocessFileLineNumbers "duws\shared\factions\CIV_FACTIONS.sqf";
 missionNamespace setVariable ["civ_array", civ_array];

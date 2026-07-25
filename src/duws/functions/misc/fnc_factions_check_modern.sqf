@@ -23,7 +23,7 @@ if (!isServer) exitWith {};
 // fnc_parseFaction, ...) up front so the setup-screen faction picker can use them
 // before START. Otherwise they only come into existence when an AUTODETECT faction
 // file is compiled at the post-START commit, and the picker fires too late.
-call compile preprocessFileLineNumbers "duws\factions\MODERN\fn_factionAutoDetect.sqf";
+call compile preprocessFileLineNumbers "duws\shared\factions\MODERN\fn_factionAutoDetect.sqf";
 
 _faction_files_BLUFOR = [
 ["O_T_Soldier_F", "BLU_AUTO", "AutoDetect - [RECOMMENDED]","AUTODETECT"],    // classnames for check are units that're always available,csat

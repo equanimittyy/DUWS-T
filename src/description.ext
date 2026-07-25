@@ -35,28 +35,28 @@ class CfgFunctions
 //////////////////////////
 //////////////////////////
 
-#include "duws\includes\debriefing.hpp"
-#include "duws\includes\defines.hpp"
-#include "duws\includes\squadmng.hpp"
-#include "duws\includes\renamesquad.hpp"
-#include "duws\includes\request_menu.hpp"
-#include "duws\includes\request_fob_menu.hpp"
-#include "duws\includes\fobmanager.hpp"
-#include "duws\includes\notifications.hpp"
-#include "duws\includes\enviro_menu.hpp"
-#include "duws\includes\campaign_menu.hpp"
-#include "duws\includes\callsign_menu.hpp"
-#include "duws\includes\hq_placement.hpp"
-#include "duws\includes\sounds.hpp"
-#include "duws\includes\custom_faction.hpp"
+#include "duws\shared\includes\debriefing.hpp"
+#include "duws\shared\includes\defines.hpp"
+#include "duws\shared\includes\squadmng.hpp"
+#include "duws\shared\includes\renamesquad.hpp"
+#include "duws\shared\includes\request_menu.hpp"
+#include "duws\shared\includes\request_fob_menu.hpp"
+#include "duws\shared\includes\fobmanager.hpp"
+#include "duws\shared\includes\notifications.hpp"
+#include "duws\shared\includes\enviro_menu.hpp"
+#include "duws\shared\includes\campaign_menu.hpp"
+#include "duws\shared\includes\callsign_menu.hpp"
+#include "duws\shared\includes\hq_placement.hpp"
+#include "duws\shared\includes\sounds.hpp"
+#include "duws\shared\includes\custom_faction.hpp"
 #include "modules\R3F_LOG\desc_include.h"
-#include "duws\includes\remoteExec.hpp"
-#include "duws\includes\operative_menu.hpp"
-#include "duws\includes\disguise_menu.hpp"
+#include "duws\shared\includes\remoteExec.hpp"
+#include "duws\shared\includes\operative_menu.hpp"
+#include "duws\shared\includes\disguise_menu.hpp"
 
-#include "duws\includes\params_modern.hpp"
-#include "duws\includes\supports_radio_modern.hpp"
-#include "duws\includes\oper_identities_modern.hpp"
+#include "duws\shared\includes\params_modern.hpp"
+#include "duws\shared\includes\supports_radio_modern.hpp"
+#include "duws\shared\includes\oper_identities_modern.hpp"
 
 class RscTitles {
     class DUWST {
@@ -67,7 +67,7 @@ class RscTitles {
             class splash: RscPicture
 		    {			
 			idc = 1002;
-			text = "duws\sounds_npics\support\DUWS_T.paa";
+			text = "duws\shared\sounds_npics\support\DUWS_T.paa";
 			x = 0.15 * safezoneW + safezoneX;
 			y = 0.0 * safezoneH + safezoneY;
 			w = 0.7 * safezoneW;

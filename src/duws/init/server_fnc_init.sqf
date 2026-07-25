@@ -273,30 +273,30 @@ fnc_civ_locator_Tomata = compile preprocessFileLineNumbers "duws\functions\misc\
 fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_wp_Tomata.sqf";
 fnc_civ_rep_Tomata = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_rep_Tomata.sqf";
 fnc_civ_informant_wp_Tomata = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_informant_wp_Tomata.sqf";
-fnc_recruit_civilian = compile preprocessFileLineNumbers "duws\functions\misc\fnc_recruit_civilian.sqf";
+fnc_recruit_civilian = compile preprocessFileLineNumbers "duws\shared\functions\fnc_recruit_civilian.sqf";
 publicVariable "fnc_recruit_civilian";
 fnc_recruit_civilian_server = compile preprocessFileLineNumbers "duws\functions\misc\fnc_recruit_civilian_server.sqf";
 publicVariable "fnc_recruit_civilian_server";
-fnc_addRecruitAction = compile preprocessFileLineNumbers "duws\functions\misc\fnc_addRecruitAction.sqf";
+fnc_addRecruitAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_addRecruitAction.sqf";
 publicVariable "fnc_addRecruitAction";
 fnc_night_horde_event = compile preprocessFileLineNumbers "duws\functions\misc\fnc_night_horde_event.sqf";
 publicVariable "fnc_night_horde_event";
-fnc_addAskEnemyAction = compile preprocessFileLineNumbers "duws\functions\misc\fnc_addAskEnemyAction.sqf";
+fnc_addAskEnemyAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_addAskEnemyAction.sqf";
 publicVariable "fnc_addAskEnemyAction";
 fnc_civ_informant_system = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_informant_system.sqf";
-fnc_civ_healAction = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_healAction.sqf";
+fnc_civ_healAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_healAction.sqf";
 publicVariable "fnc_civ_healAction";
-fnc_civ_stopCommand = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_stopCommand.sqf";
+fnc_civ_stopCommand = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_stopCommand.sqf";
 publicVariable "fnc_civ_stopCommand";
-fnc_civ_recruitAction = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_recruitAction.sqf";
+fnc_civ_recruitAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_recruitAction.sqf";
 publicVariable "fnc_civ_recruitAction";
-fnc_civ_addDevelopInformantAction = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_addDevelopInformantAction.sqf";
+fnc_civ_addDevelopInformantAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_addDevelopInformantAction.sqf";
 publicVariable "fnc_civ_addDevelopInformantAction";
 fnc_civ_developInformantServer = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_developInformantServer.sqf";
 publicVariable "fnc_civ_developInformantServer";
-fnc_civ_lootAction = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_lootAction.sqf";
+fnc_civ_lootAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_lootAction.sqf";
 publicVariable "fnc_civ_lootAction";
-fnc_civ_lootAction_handleArmed = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_lootAction.sqf";
+fnc_civ_lootAction_handleArmed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_lootAction.sqf";
 publicVariable "fnc_civ_lootAction_handleArmed";
 fnc_civ_detectClusters = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_detectClusters.sqf";
 publicVariable "fnc_civ_detectClusters";
@@ -316,11 +316,11 @@ fnc_civ_fast_travel_execute = compile preprocessFileLineNumbers "duws\functions\
 publicVariable "fnc_civ_fast_travel_execute";
 fnc_addCivilianMoney = compile preprocessFileLineNumbers "duws\functions\misc\fnc_addCivilianMoney.sqf";
 publicVariable "fnc_addCivilianMoney";
-fnc_civ_askForAid = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_askForAid.sqf";
+fnc_civ_askForAid = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_askForAid.sqf";
 publicVariable "fnc_civ_askForAid";
 fnc_civ_askForAid_server = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_askForAid_server.sqf";
 publicVariable "fnc_civ_askForAid_server";
-fnc_civ_askForToolkit = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_askForToolkit.sqf";
+fnc_civ_askForToolkit = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_askForToolkit.sqf";
 publicVariable "fnc_civ_askForToolkit";
 fnc_civ_askForToolkit_server = compile preprocessFileLineNumbers "duws\functions\misc\fnc_civ_askForToolkit_server.sqf";
 publicVariable "fnc_civ_askForToolkit_server";
@@ -486,7 +486,7 @@ fnc_ambient_musicloop = compile preprocessFileLineNumbers "duws\functions\sounds
 fnc_duws_Arsenal = compile preprocessFileLineNumbers "duws\functions\misc\fnc_duws_Arsenal.sqf";publicVariable "fnc_duws_Arsenal";
 fnc_ghst_halo = compile preprocessFileLineNumbers "duws\functions\misc\fnc_ghst_halo.sqf";publicVariable "fnc_ghst_halo";
 fnc_WARCOM_blu_assault = compile preprocessFileLineNumbers "duws\functions\warcom\fnc_WARCOM_blu_assault.sqf";publicVariable "fnc_WARCOM_blu_assault";
-fnc_random_name = compile preprocessFileLineNumbers "duws\functions\misc\fnc_random_name.sqf";publicVariable "fnc_random_name";
+fnc_random_name = compile preprocessFileLineNumbers "duws\shared\functions\fnc_random_name.sqf";publicVariable "fnc_random_name";
 fnc_BLUFOR_squad_init = compile preprocessFileLineNumbers "duws\functions\init_hq\fnc_BLUFOR_squad_init.sqf";publicVariable "fnc_BLUFOR_squad_init";
 fnc_BLUFOR_faction_init = compile preprocessFileLineNumbers "duws\functions\init_hq\fnc_BLUFOR_faction_init.sqf";publicVariable "fnc_BLUFOR_faction_init";
 fnc_fortifyFOB = compile preprocessFileLineNumbers "duws\functions\init_hq\fnc_fortifyFOB.sqf";publicVariable "fnc_fortifyFOB";
@@ -546,7 +546,7 @@ fnc_request_unit_fob = compile preprocessFileLineNumbers "duws\functions\dialog\
 fnc_request_squad_fob = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_request_squad_fob.sqf";publicVariable "fnc_request_squad_fob";
 fnc_request_vehicle_fob = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_request_vehicle_fob.sqf";publicVariable "fnc_request_vehicle_fob";
 fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_custom_faction_capture.sqf";publicVariable "fnc_custom_faction_capture";
-fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_custom_faction_parse.sqf";publicVariable "fnc_custom_faction_parse";
+fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\functions\fnc_custom_faction_parse.sqf";publicVariable "fnc_custom_faction_parse";
 fnc_custom_faction_init = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_custom_faction_init.sqf";publicVariable "fnc_custom_faction_init";
 fnc_HQ_Request_Menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_HQ_Request_Menu.sqf";publicVariable "fnc_HQ_Request_Menu";
 fnc_FOB_Request_Menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_FOB_Request_Menu.sqf";publicVariable "fnc_FOB_Request_Menu";
@@ -563,17 +563,17 @@ fnc_FOB_remove = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_FO
 fnc_FOB_cleanup = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_FOB_cleanup.sqf";publicVariable "fnc_FOB_cleanup";
 fnc_FOB_fast_travel = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_FOB_fast_travel.sqf";publicVariable "fnc_FOB_fast_travel";
 fnc_MHQ_select = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_MHQ_select.sqf";publicVariable "fnc_MHQ_select";
-fnc_MHQ_addActions = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_MHQ_addActions.sqf";publicVariable "fnc_MHQ_addActions";
+fnc_MHQ_addActions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_MHQ_addActions.sqf";publicVariable "fnc_MHQ_addActions";
 fnc_MHQ_deploy = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_MHQ_deploy.sqf";publicVariable "fnc_MHQ_deploy";
 fnc_MHQ_undeploy = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_MHQ_undeploy.sqf";publicVariable "fnc_MHQ_undeploy";
-fnc_MHQ_destroyed = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_MHQ_destroyed.sqf";publicVariable "fnc_MHQ_destroyed";
+fnc_MHQ_destroyed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_MHQ_destroyed.sqf";publicVariable "fnc_MHQ_destroyed";
 fnc_actionRotary = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_actionRotary.sqf";publicVariable "fnc_actionRotary";
 
 
 // HQ & FOB FUNCTIONS
 fnc_draw_HQicon = compile preprocessFileLineNumbers "duws\functions\init_hq\fnc_draw_HQicon.sqf";publicVariable "fnc_draw_HQicon";
 fnc_HQaddactions = compile preprocessFileLineNumbers "duws\functions\init_hq\fnc_HQaddactions.sqf";publicVariable "fnc_HQaddactions";
-fnc_FOBactions = compile preprocessFileLineNumbers "duws\functions\supports\fnc_FOBactions.sqf";publicVariable "fnc_FOBactions";
+fnc_FOBactions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_FOBactions.sqf";publicVariable "fnc_FOBactions";
 fnc_fob_server = compile preprocessFileLineNumbers "duws\functions\supports\fnc_fob_server.sqf";publicVariable "fnc_fob_server";
 
 
@@ -622,7 +622,7 @@ fnc_autoSave = compile preprocessFileLineNumbers "duws\functions\misc\fnc_autoSa
 fnc_playerTF_spawn = compile preprocessFileLineNumbers "duws\functions\misc\fnc_playerTF_spawn.sqf";publicVariable "fnc_playerTF_spawn";
 // Not broadcast: server-only, so an accidental client call fails loud.
 fnc_HCsquad_spawn = compile preprocessFileLineNumbers "duws\functions\misc\fnc_HCsquad_spawn.sqf";
-fnc_sideChat_filter = compile preprocessFileLineNumbers "duws\functions\misc\fnc_sideChat_filter.sqf";publicVariable "fnc_sideChat_filter";
+fnc_sideChat_filter = compile preprocessFileLineNumbers "duws\shared\functions\fnc_sideChat_filter.sqf";publicVariable "fnc_sideChat_filter";
 fnc_sitrep_display = compile preprocessFileLineNumbers "duws\functions\misc\fnc_sitrep_display.sqf";publicVariable "fnc_sitrep_display";
 fnc_fill_ammobox = compile preprocessFileLineNumbers "duws\functions\misc\fnc_fill_ammobox.sqf";publicVariable "fnc_fill_ammobox";
 fnc_fill_sawpbox = compile preprocessFileLineNumbers "duws\functions\misc\fnc_fill_sawpbox.sqf";publicVariable "fnc_fill_sawpbox";
