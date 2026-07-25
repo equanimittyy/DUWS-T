@@ -1,6 +1,6 @@
 // Locality: server; the trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
 params ["_MissionPos", "_mission_name"];
-if (!([14, _MissionPos, _mission_name] call fnc_mission_begin)) exitWith {};
+if (!([14, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 // ----- 任务参数 --------------------------------------------------------------
 _searchRadius   = 250;      // 搜索建筑物半径

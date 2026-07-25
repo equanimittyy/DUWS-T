@@ -1,6 +1,6 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
-if (!([11, _MissionPos, _mission_name] call fnc_mission_begin)) exitWith {};
+if (!([11, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 _radius = 200;
 _cpreward = 15;

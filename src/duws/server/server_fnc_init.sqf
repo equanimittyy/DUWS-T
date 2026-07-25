@@ -271,15 +271,23 @@ publicVariable "fnc_dynamicAtmosphere_init";
 // The 17 copies this replaces tried to, via `breakOut "main"` into a scope no thread
 // declares, so a mission on cooldown unwound through an undefined scope name.
 fnc_mission_begin = {
-	params ["_missionType", "_MissionPos", "_mission_name", ["_cooldown", 3600]];
+	// _requester is remoteExecutedOwner read in the calling thread -- it must be sampled
+	// there, in the scope remoteExec actually entered. 0 means the thread was called
+	// locally, in which case a plain hint is the only machine there is to reach.
+	params ["_missionType", "_MissionPos", "_mission_name", ["_requester", 0], ["_cooldown", 3600]];
 	private _var = format ["mission_cooldown_%1", _missionType];
 	private _until = missionNamespace getVariable [_var, 0];
 	if (_until > diag_tickTime) exitWith {
 		private _remaining = _until - diag_tickTime;
-		// Runs on the server, so only a hosting player sees it; a remote client's request is
-		// refused silently. Carried over unchanged from the copies -- routing the refusal
-		// back to the requester is a behaviour fix, not part of consolidating the preamble.
-		hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", floor (_remaining / 60), _remaining % 60];
+		private _parts = [floor (_remaining / 60), _remaining % 60];
+		// Localised on the receiving machine: the server's language is not the player's.
+		if (_requester > 0) then {
+			[_parts, {
+				hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _this select 0, _this select 1];
+			}] remoteExec ["spawn", _requester];
+		} else {
+			hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _parts select 0, _parts select 1];
+		};
 		["DEBUG", "MISSION", format ["type=%1 refused, %2s of cooldown left",
 			_missionType, round _remaining]] call fnc_log;
 		false

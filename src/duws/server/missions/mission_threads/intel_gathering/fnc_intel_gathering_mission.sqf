@@ -21,7 +21,7 @@ if (count _usableBuildings < _minBuildings) exitWith {
 };
 
 // Gated after the building check on purpose: too few buildings must not burn the cooldown.
-if (!([16, _MissionPos, _mission_name] call fnc_mission_begin)) exitWith {};
+if (!([16, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 // ========== 随机选取最多30个建筑 ==========
 private _maxBuildings = 30;

@@ -1,6 +1,6 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
-if (!([5, _MissionPos, _mission_name] call fnc_mission_begin)) exitWith {};
+if (!([5, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 // ========== 增援系统变量 ==========
 private _varSuffix = format ["%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];

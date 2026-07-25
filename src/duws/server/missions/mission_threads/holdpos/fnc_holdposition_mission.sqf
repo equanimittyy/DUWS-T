@@ -1,6 +1,6 @@
 // Locality: server; the trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
 params ["_MissionPos", "_mission_name"];
-if (!([12, _MissionPos, _mission_name] call fnc_mission_begin)) exitWith {};
+if (!([12, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 _radius = 300;
 _cpreward = 30;

@@ -9,7 +9,7 @@ if (!isNil "BLD1" && {alive BLD1}) exitWith {
     ["INFO", "MISSION", "steal_builder refused: previous builder still alive"] call fnc_log;
 };
 
-if (!([6, _MissionPos, _mission_name] call fnc_mission_begin)) exitWith {};
+if (!([6, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 _cpreward = 15;
 _apreward = 15;
