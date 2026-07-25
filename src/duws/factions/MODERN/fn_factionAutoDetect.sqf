@@ -95,7 +95,6 @@ fnc_evalVehicleCost = {
 		default {1};
 	};
 	
-	_cp = ( missionNamespace getVariable "commandpointsblu1" );
 	_cost = 5;	// base cost
 	_costModifier = 0;
 	_threatModifier = 0;
