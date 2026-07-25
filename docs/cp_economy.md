@@ -33,24 +33,35 @@ refresh, because AP has no HUD counter and no `publicVariableEventHandler` — w
 `fnc_convertAPtoCP.sqf` paints control 1002 from its own expected post-spend total instead of
 re-reading the pool, whose local copy is still pre-spend at that point.
 
+Reputation follows the same contract, with one addition: `fnc_rep_adjust` (same file) owns the
+rounding as well as the write. It is the only pool taking fractional deltas (`+0.5`, `-0.3`),
+and `abs Player_Reputation` is multiplied into a hostile-civilian spawn count
+(`misc/fnc_civ_handler.sqf:532-534`), so float drift would compound into AI behaviour rather
+than just a display. The writer snaps to two decimals and zeroes anything below `0.01`; callers
+send a plain delta and never normalise, or two of them would round differently. Its pre-play
+absolute is `server_var_init.sqf:158`. Like AP it has no HUD control and no event handler, so
+call sites that name the new total in a notification compute it locally as
+`Player_Reputation + delta` rather than re-reading the global, which is still pre-change at
+that point.
+
 ## Faucets
 
 | Source | File | Amount |
 |---|---|---|
-| Zone capture (first time) | `init_zones/fnc_captured.sqf:47` | `round(points/2)` — ≈50 for a 1000 m zone |
-| Zone recapture (after loss) | `init_zones/fnc_blufor_cap.sqf:67` | `round(points/3)` — ≈33; intentionally lower |
+| Zone capture (first time) | `init_zones/fnc_captured.sqf:48` | `round(points/2)` — ≈50 for a 1000 m zone |
+| Zone recapture (after loss) | `init_zones/fnc_blufor_cap.sqf:68` | `round(points/3)` — ≈33; intentionally lower |
 | Passive territory hold | `misc/fnc_zonesundercontrol.sqf:6,11` | `zones_held × 6`, every 30 min |
 | Side-mission reward | `missions/fnc_mission_reward.sqf` | `reward × cp_reward_multiplier` (multiplier default 1) |
-| Reputation tick | `misc/fnc_civ_init_Tomata.sqf:234` | `ceil(rep/2)`, every 15 min |
+| Reputation tick | `misc/fnc_civ_init_Tomata.sqf:237` | `ceil(rep/2)`, every 15 min |
 | Recruit rescued civilian | `misc/fnc_recruit_civilian_server.sqf` | +5 (+8 in WBK mode) |
 | Intel analysis (terminal) | `misc/fnc_intelAnalysis.sqf` | 1.5–8 per item; `FileTopSecret`/`FilesSecret` = 8 |
 | Enemy corpse loot | `misc/fnc_addRandomLoot.sqf` → analysis | ~80% of enemies carry 0–2 of Money/Files/Wallet |
 | Corpse search | `misc/fnc_corpse_search_action.sqf` | 20% chance of +1 CP (+1 AP) per corpse |
 | Vehicle recycle | `supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle |
-| Vehicle-kill / kill-streak | `init/server_init.sqf:336,352` | per-kill points; +1 per 10 kills |
-| Killhouse training | `misc/fnc_createKillhouse.sqf:1019` | +0.05 per kill, inside a 180 s window |
+| Vehicle-kill / kill-streak | `init/server_init.sqf:337,353` | per-kill points; +1 per 10 kills |
+| Killhouse training | `misc/fnc_createKillhouse.sqf:1020` | +0.05 per kill, inside a 180 s window |
 | Scorched-earth town razing | `misc/fnc_civ_handler.sqf`, `fnc_civ_handler_wbk.sqf` | +15 (with AP + reputation penalties) |
-| Rare-zombie kill (WBK) | `misc/fnc_civ_handler_wbk.sqf:360` | +10, or +30 for the Goliath |
+| Rare-zombie kill (WBK) | `misc/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | AP→CP conversion | `dialog/fnc_convertAPtoCP.sqf` | 15 AP → 10 CP, one-way |
 
 The passive-hold loop is spawned exactly once (`warcom/fnc_init_OPFOR_WARCOM.sqf:20`), so
@@ -70,7 +81,7 @@ territory income does not stack per zone captured.
 | FOB refortify / reguard | `init_hq/fnc_refortifyFOB.sqf`, `fnc_reguardFOB.sqf` | 5 / 15 |
 | Heli / boat taxi | `supports/taxi/` | fixed |
 | Base repair, HQ redeploy, sitrep | `supports/fnc_activateBaseRepairStation.sqf`, `misc/fnc_redeployHQUnits.sqf`, `supports/fnc_sitrep_support.sqf` | 2 / 2 / 1 |
-| Death | `init/client_init.sqf:186` | `DUWSMP_CP_death_cost` (0–10) |
+| Death | `init/client_init.sqf:187` | `DUWSMP_CP_death_cost` (0–10) |
 
 ## Balance concerns
 
@@ -110,13 +121,13 @@ integer.
 
 **Client-side affordability checks allow a co-op overdraft.** Purchase paths read the pool
 from the buying client's own copy and apply the effect unconditionally — ~45 comparisons
-across 22 files, with `fnc_pylon_set_with_cost` (`init/server_fnc_init.sqf:801-803`) the only
+across 22 files, with `fnc_pylon_set_with_cost` (`init/server_fnc_init.sqf:817-819`) the only
 server-side check. Two players buying inside one network round-trip against a pool that funds
 a single purchase therefore both succeed, leaving it negative by the overspend. This is an
 overdraft, not a leak: both deltas are debited in full, so unlike the read-modify-write hazard
 above no CP is created, and the player must earn back to zero before buying again. Nor is it
 reliably in the player's favour — a one-shot unlock gated on its own flag
-(`dialog/fnc_request_support.sqf:12-19`) charges both buyers for one unlock. Closing it means
+(`dialog/fnc_request_support.sqf:13-20`) charges both buyers for one unlock. Closing it means
 the server gating the *effect* rather than the deduction, and `remoteExec` returns no value,
 so every site would need a hand-rolled reply channel and an async wait. Not worth it for an
 overdraft in a pool `client_init.sqf:186` can already drive negative on its own.

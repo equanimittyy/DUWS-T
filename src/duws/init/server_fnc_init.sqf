@@ -1,3 +1,4 @@
+// Locality: server -- see callers.
 
 // SERVER FUNCTIONS
 
@@ -46,6 +47,19 @@ fnc_warcom_set_primary_zone = {
 	WARCOM_zones_controled_by_OPFOR = [WARCOM_zones_controled_by_OPFOR,[WARCOM_blu_hq_pos],{_input0 distance _x},"ASCEND"] call BIS_fnc_sortBy;
 	WARCOM_zones_controled_by_OPFOR insert [0, [_zonePos]];
 	publicVariable "WARCOM_zones_controled_by_OPFOR";
+};
+
+// Server-authoritative reputation mutation, same delta contract as fnc_cp_adjust.
+// The writer owns the rounding rather than the callers: deltas are fractional
+// (+0.5, -0.3) and abs(rep) is multiplied into a hostile-civilian spawn count, so
+// two callers rounding differently would compound drift into AI behaviour.
+fnc_rep_adjust = {
+	if (!isServer) exitWith {};
+	params [["_delta", 0]];
+	Player_Reputation = Player_Reputation + _delta;
+	Player_Reputation = (round (Player_Reputation * 100)) / 100;
+	if (abs Player_Reputation < 0.01) then { Player_Reputation = 0 };
+	publicVariable "Player_Reputation";
 };
 
 // Player-callsign substitution for radio/subtitle dialogue. The stringtable bakes

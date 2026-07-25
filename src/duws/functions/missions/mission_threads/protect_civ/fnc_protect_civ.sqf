@@ -1,3 +1,4 @@
+// Locality: server; the trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
 // 任务冷却检查
 private _missionType = 14; // 请替换为实际编号（0~16）
 private _cooldownVar = missionNamespace getVariable [format ["mission_cooldown_%1", _missionType], 0];
@@ -226,8 +227,7 @@ Mission_Failed = false;
         [_taskID, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, true];
         // Reputation is a civilian-system currency: skip its change (and value notification) when off.
         if (CIV_PRESENCE != "NONE") then {
-            Player_Reputation = Player_Reputation - 1;
-            publicVariable "Player_Reputation";
+            [-1] remoteExec ["fnc_rep_adjust", 2];
         };
         ["info", [localize "STR_DUWS_T_cycuqbvj", localize "STR_DUWS_T_ayhemuj4"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
         if (CIV_PRESENCE != "NONE") then {
@@ -245,18 +245,11 @@ Mission_Failed = false;
             sleep 8;
             [_taskID, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, true];
 
-            if (!isNil "fnc_mission_reward") then {
-                [_cp, _ap, "Protect Civilian"] call fnc_mission_reward;
-            } else {
-                CommandPoints = CommandPoints + _cp;
-                ActionPoints  = ActionPoints  + _ap;
-                publicVariable "CommandPoints";
-                publicVariable "ActionPoints";
-            };
+            [_cp, _ap, "Protect Civilian"] call fnc_mission_reward;
             if (CIV_PRESENCE != "NONE") then {
-                Player_Reputation = Player_Reputation + _rep;
-                publicVariable "Player_Reputation";
-                ["repup", [localize "STR_DUWS_T_rqwho9bq", format [localize "STR_DUWS_T_0pluxey2", Player_Reputation]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+                private _expectedRep = Player_Reputation + _rep;
+                [_rep] remoteExec ["fnc_rep_adjust", 2];
+                ["repup", [localize "STR_DUWS_T_rqwho9bq", format [localize "STR_DUWS_T_0pluxey2", _expectedRep]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
             };
     };
 

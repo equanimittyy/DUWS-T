@@ -1,3 +1,4 @@
+// Locality: all machines; the addAction bodies below run on the machine that triggers them, not here (some callers remoteExec to target 0, others to target 2, so it can run anywhere).
 /*
     fnc_civ_lootAction.sqf
     参数: _unit - 平民单位
@@ -37,10 +38,10 @@ private _actionAID = _unit addAction [
         [_target] remoteExec ["fnc_removeAllActions", 0];
         
         // 无论成功失败，声望降低0.5
-        private _rep = missionNamespace getVariable ["Player_Reputation", 0];
-        _rep = _rep - 0.5;
-        missionNamespace setVariable ["Player_Reputation", _rep];
-        publicVariable "Player_Reputation";
+        // Applied on the server, so _rep is the expected total for the message below
+        // rather than a value read back from the global.
+        private _rep = (missionNamespace getVariable ["Player_Reputation", 0]) - 0.5;
+        [-0.5] remoteExec ["fnc_rep_adjust", 2];
         ["info", [localize "STR_DUWS_T_civloot", format [localize "STR_DUWS_T_civloot2", _rep]]] remoteExec ["BIS_fnc_showNotification", 0];
         sleep 3;
         

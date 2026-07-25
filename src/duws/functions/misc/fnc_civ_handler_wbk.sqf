@@ -133,8 +133,7 @@ if (_mode == "cleanup") exitWith {
             private _bluApPenalty = - (3 + floor random 3);
             ["BLU", _bluApPenalty] remoteExec ["fnc_ap_adjust", 2];
             private _repPenalty = - (3 + floor random 3);
-            Player_Reputation = Player_Reputation + _repPenalty;
-            publicVariable "Player_Reputation";
+            [_repPenalty] remoteExec ["fnc_rep_adjust", 2];
             private _opfApPenalty = - (3 + floor random 3);
             ["OPF", _opfApPenalty] remoteExec ["fnc_ap_adjust", 2];
             private _msg = format [localize "STR_DUWS_T_scorched_earth_effect2", _repPenalty, _bluApPenalty, _opfApPenalty];

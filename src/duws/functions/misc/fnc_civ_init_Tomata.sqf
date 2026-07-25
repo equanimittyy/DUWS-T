@@ -1,3 +1,4 @@
+// Locality: server; the trigger bodies below run on the machine that triggers them, not here.
 /*
     fnc_civ_init_Tomata.sqf
     功能: 初始化平民系统，为每个城镇创建触发器，计算初始人口，添加地图标记
@@ -206,12 +207,14 @@ diag_log format ["[CIV] After overlap cleanup: %1 locations remaining.", count _
         if (!_resetTimer) then {
             if (_rep == Player_Reputation) then {
                 if (Player_Reputation == 1) exitWith {};
-                Player_Reputation = Player_Reputation + 1;
-                publicVariable "Player_Reputation";
-                ["repup",[localize "STR_DUWS_T_rqwho9bq",format[localize "STR_DUWS_T_0pluxey2",Player_Reputation]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated,false];
+                // The comparison above needs the live global, so read it before the
+                // change is queued; the display then uses the expected total.
+                private _expectedRep = Player_Reputation + 1;
+                [1] remoteExec ["fnc_rep_adjust", 2];
+                ["repup",[localize "STR_DUWS_T_rqwho9bq",format[localize "STR_DUWS_T_0pluxey2",_expectedRep]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated,false];
                 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_repup"] remoteExec ["BIS_fnc_showSubtitle", 0];
                 [] remoteExec ["fnc_broadcastRadioChatter", 0];
-                diag_log format ["[CIV] Reputation increased to %1", Player_Reputation];
+                diag_log format ["[CIV] Reputation increased to %1", _expectedRep];
             };
         };
     };

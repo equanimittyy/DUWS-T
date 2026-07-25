@@ -43,11 +43,7 @@ while {true} do {
     };
 
     if (_repLoss > 0) then {
-        Player_Reputation = Player_Reputation - _repLoss;
-// 消除浮点误差，防止极小数值
-Player_Reputation = (round (Player_Reputation * 100)) / 100;
-if (abs Player_Reputation < 0.01) then { Player_Reputation = 0; };
-publicVariable "Player_Reputation";
+        [-_repLoss] remoteExec ["fnc_rep_adjust", 2];
 
         // 总损坏建筑数提示
         private _msg = format[localize "STR_DUWS_T_5445z2bn", _currentTotal];

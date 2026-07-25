@@ -1,3 +1,4 @@
+// Locality: server -- inherited from misc/fnc_civ_handler.sqf.
 // fnc_civ_rep_Tomata.sqf (修复版：避免在事件上下文中直接 sleep)
 if (!canSuspend) exitWith {
     _this spawn fnc_civ_rep_Tomata;
@@ -23,13 +24,13 @@ if (!_players_close) exitWith {};
 
 // 蓝方击杀 → 扣声望
 if (side _killer == WEST || side _instigator == WEST) then {
-    Player_Reputation = Player_Reputation - 0.3;
-    publicVariable "Player_Reputation";
+    [-0.3] remoteExec ["fnc_rep_adjust", 2];
     ["info", [
         localize "STR_DUWS_T_cycuqbvj",
-        format [localize "STR_DUWS_T_0pluxey2", Player_Reputation]
+        format [localize "STR_DUWS_T_0pluxey2", Player_Reputation - 0.3]
     ]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
 
     // 增加平民死亡计数（立即，无需延时）
     CIV_deaths = CIV_deaths + 1;
+    publicVariable "CIV_deaths";
 };
