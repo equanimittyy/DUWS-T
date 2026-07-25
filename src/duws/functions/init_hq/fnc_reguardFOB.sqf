@@ -1,23 +1,17 @@
-// Locality: client -- an addAction function value, so it runs on the player who reguards.
-// It calls fnc_guardsFOB, which spawns; see that file.
-_groupGuard = (_this select 3) select 0;
-_groupPatrol = (_this select 3) select 1;
-_centerPos = (_this select 3) select 2;
-_fob = (_this select 3) select 3;
-_id = (_this select 3) select 4;
+// Locality: client -- an addAction function value, so it runs on whoever reguards. The action
+// is added on every machine, so it carries no group references: the server reads the current
+// garrison off the FOB, which keeps every player's copy valid after someone rebuilds.
+// Only the affordability check and the sound are local; the server owns the rest.
+params ["_fob"];
 
-_cost = 15;
+private _cost = 15;
 
-if (commandpointsblu1 > _cost) then {
-    [-_cost] remoteExec ["fnc_cp_adjust", 2];
-    
-    playSound "loadgun";
-
-    {deletevehicle _x} foreach units _groupGuard;
-    {deletevehicle _x} foreach units _groupPatrol;
-
-    (_this select 0) removeaction (_this select 2);
-    [_centerPos, _fob, _id] spawn fnc_guardsFOB;    
-} else {
+if (commandpointsblu1 <= _cost) exitWith {
     hint format [localize "STR_DUWS_T_p6sb3ply", _cost];
 };
+
+[-_cost] remoteExec ["fnc_cp_adjust", 2];
+playSound "loadgun";
+
+// The cost travels so the server can refund it if another player's rebuild is already running.
+[getPos _fob, _fob, _cost] remoteExec ["fnc_guardsFOB", 2];

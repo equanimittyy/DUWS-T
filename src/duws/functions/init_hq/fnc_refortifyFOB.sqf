@@ -1,31 +1,17 @@
-// Locality: client -- an addAction function value, so it runs on the player who
-// refortifies. It calls fnc_fortifyFOB, which spawns; see that file.
-_aaPod = (_this select 3) select 0;
-_glPod1 = (_this select 3) select 1;
-_glPod2 = (_this select 3) select 2;
-_atPod1 = (_this select 3) select 3;
-_hmgPod1 = (_this select 3) select 4;
-_centerPos = (_this select 3) select 5;
-_fob = (_this select 3) select 6;
-_id = (_this select 3) select 7;
+// Locality: client -- an addAction function value, so it runs on whoever refortifies. The
+// action is added on every machine, so it carries no turret references: the server reads the
+// current ring off the FOB, which keeps every player's copy valid after someone rebuilds.
+// Only the affordability check and the sound are local; the server owns the rest.
+params ["_fob"];
 
-_cost = 5;
+private _cost = 5;
 
-if (commandpointsblu1 > _cost) then {
-    [-_cost] remoteExec ["fnc_cp_adjust", 2];
-    
-    playSound "loadgun";
-
-    {deletevehicle _x} foreach crew _aaPod + [_aaPod];
-    {deletevehicle _x} foreach crew _glPod1 + [_glPod1];
-    {deletevehicle _x} foreach crew _glPod2 + [_glPod2];
-    {deletevehicle _x} foreach crew _atPod1 + [_atPod1];
-    {deletevehicle _x} foreach crew _hmgPod1 + [_hmgPod1];
-
-	_object = _this select 0;
-    _object removeaction (_this select 2);
-	_refortify = true;
-    [(getpos _fob), _fob, _refortify, _id] spawn fnc_fortifyFOB;
-} else {
+if (commandpointsblu1 <= _cost) exitWith {
     hint format [localize "STR_DUWS_T_p6sb3ply", _cost];
 };
+
+[-_cost] remoteExec ["fnc_cp_adjust", 2];
+playSound "loadgun";
+
+// The cost travels so the server can refund it if another player's rebuild is already running.
+[getPos _fob, _fob, true, _cost] remoteExec ["fnc_fortifyFOB", 2];

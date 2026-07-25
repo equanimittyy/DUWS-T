@@ -1,11 +1,22 @@
-// Locality: server when a FOB is built (supports/fnc_fob_server.sqf), but CLIENT when
-// reguarded via fnc_reguardFOB's addAction -- so the guards it spawns are then local to
-// that player and orphaned if they disconnect.
-_centerPos = _this select 0;
-_safe = [(_centerPos select 0)+10, (_centerPos select 1)+10];
+// Locality: server only -- supports/fnc_fob_server.sqf on build, fnc_reguardFOB via
+// remoteExec target 2 on reguard. A FOB's garrison is campaign property, so spawning it on
+// the reguarding client would leave it simulated there and orphaned on disconnect.
+if (!isServer) exitWith {};
 
-_fob = _this select 1;
-_id = _this select 2;
+params ["_centerPos", "_fob", ["_refundOnBusy", 0]];
+
+// One reguard at a time, for the same reason as fnc_fortifyFOB: the scroll action is on every
+// machine, so two players can fire it at once, and the charge is taken client-side first.
+if (_fob getVariable ["FOB_guard_busy", false]) exitWith {
+	if (_refundOnBusy > 0) then { [_refundOnBusy] remoteExec ["fnc_cp_adjust", 2]; };
+};
+_fob setVariable ["FOB_guard_busy", true];
+
+// Reguard replaces the previous garrison rather than adding to it. Read off the FOB rather
+// than passed in, so no copy of the scroll action holds stale groups. Server-local.
+{ { deleteVehicle _x } forEach units _x; } forEach (_fob getVariable ["FOB_guardGroups", []]);
+
+_safe = [(_centerPos select 0)+10, (_centerPos select 1)+10];
 
 _size = 500;
 
@@ -84,10 +95,17 @@ _wp setWaypointBehaviour "SAFE";
 _wp setWaypointSpeed "LIMITED";
 
 
+_fob setVariable ["FOB_guardGroups", [_groupGuard, _groupPatrol]];
+_fob setVariable ["FOB_guard_busy", false];
+
 // 添加守卫重置动作（防重）
+// Added once, on every machine and for JIP, so any player can reguard rather than only whoever
+// built the FOB. The flag is what makes "once" hold; it works because the action is never
+// removed now, where before a reguard removed it and relied on the flag being invisible from
+// the acting client to get it back.
 if (isNil {_fob getVariable "FOB_guard_action_done"}) then {
     _fob setVariable ["FOB_guard_action_done", true];
-    [_fob,[localize "STR_DUWS_T_p5i8fe14", fnc_reguardFOB, [_groupGuard, _groupPatrol, _centerPos, _fob, _id], 0, true, true, "", "_this == player"]] remoteExec ["addAction",_id,[false,true] select isDedicated];
+    [_fob,[localize "STR_DUWS_T_p5i8fe14", fnc_reguardFOB, [], 0, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
 };
 
 

@@ -3,7 +3,6 @@
 _foundPickupPos = _this select 0;
 _size = _this select 1;
 _fob_owner = _this select 2;
-_id = _this select 3;
 
 _fobname = [1] call fnc_random_name;
 
@@ -38,7 +37,7 @@ switch (VERSION_X) do {
 
 // Add the fortifications
 _refortify = false;
-[(getpos _fob), _fob, _refortify, _id] spawn fnc_fortifyFOB;
+[(getpos _fob), _fob, _refortify] spawn fnc_fortifyFOB;
 
 // create the patrols
 [_foundPickupPos, _size] spawn fnc_createpatrolFOB;
@@ -48,7 +47,7 @@ _refortify = false;
 [localize "STR_DUWS_T_26nbk6p8"] spawn fnc_sideChat_filter;
 
 // create some patrols
-[_foundPickupPos, _fob, _id] spawn fnc_guardsFOB;
+[_foundPickupPos, _fob] spawn fnc_guardsFOB;
 
 // CREATE ZONE NOTIFICATION TRIGGER
 _size = 75;

@@ -1,7 +1,6 @@
 _position = _this select 0;
 _size = _this select 1;
 _cost  = _this select 2;
-_id = clientOwner;
 
 if (commandpointsblu1 < _cost) exitWith {
   ["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
@@ -54,7 +53,7 @@ _foundPickupPos = _newpos;
 [localize "STR_DUWS_T_1k60dqrv"] spawn fnc_sideChat_filter;
 
 // SPAWN FOB ON SERVER
-[_foundPickupPos, _size, (vehicleVarname player), _id] remoteExec ["fnc_fob_server", 2];
+[_foundPickupPos, _size, (vehicleVarname player)] remoteExec ["fnc_fob_server", 2];
 
 sleep 600;
 _null = [player,"fob_support"] call BIS_fnc_addCommMenuItem;

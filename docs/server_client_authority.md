@@ -146,19 +146,34 @@ client-authority problem. It mostly is not — locality has to be judged per sit
 | `dialog/fnc_request_unit.sqf`, `fnc_request_unit_fob.sqf` | client, `createUnit` into `group player` | correct by design — a player's AI subordinates belong on the commanding machine |
 | `operative/modern/fnc_operator_recruit.sqf` | client, then `joinSilent (group player)` | same |
 | `dialog/fnc_request_vehicle.sqf`, `fnc_request_vehicle_fob.sqf` | client, `createVehicle` | low risk — locality transfers when a player enters |
-| `init_hq/fnc_fortifyFOB.sqf`, `fnc_guardsFOB.sqf` | **both** — server when the FOB is built, client when refortified | inconsistent; see below |
+| `init_hq/fnc_fortifyFOB.sqf`, `fnc_guardsFOB.sqf` | server, on build and on refortify alike | correct |
 
 The distinction that matters: a group the player *commands* belongs on the commanding machine,
 because that is where orders originate. A group the campaign *owns* belongs on the server,
 because it must survive that player disconnecting.
 
-By that test the FOB defences are wrong half the time. `supports/fnc_fob_server.sqf` builds a
-new FOB's turrets and guards on the server, correctly — but the refortify and reguard scroll
-actions (`init_hq/fnc_refortifyFOB.sqf`, `fnc_reguardFOB.sqf`) are `addAction` function values,
-so they re-spawn those same defences on the machine of whoever used the action. A FOB's
-garrison is campaign property, not a player's squad, so after a refortify it is simulated by
-that client and orphaned when they disconnect. The fix is the shape `misc/fnc_HCsquad_spawn.sqf`
-already uses: send the request to the server, hand back only what needs the caller's `player`.
+FOB defences are campaign property by that test, so both spawn functions are server-only. The
+refortify and reguard scroll actions still run on the acting player and keep the affordability
+check and the sound, but the teardown and respawn go to the server, which owns the entities on
+both ends of the swap.
+
+Getting there needed three linked changes, and the reasoning generalises to any per-object
+scroll action in a co-op mission:
+
+- **The action is added to every machine, not the builder's.** It used to target the
+  `clientOwner` captured when the FOB was built, so only that player ever saw the option. It now
+  targets `[0,-2] select isDedicated` with JIP, matching `supports/fnc_FOBactions.sqf`.
+- **It carries no arguments.** Baking the current turrets into the action was only safe while one
+  machine held it; broadcast, every other player's copy would still reference the ring a rebuild
+  had already deleted. The server reads the live set off the FOB object instead, so the action
+  never goes stale and never needs removing and re-adding.
+- **A per-FOB busy flag serialises rebuilds.** Two players can now fire the same action at once,
+  which would have spawned a duplicate ring over the first. The loser is refunded, because the
+  charge is still taken client-side before the request arrives.
+
+That last point is the one worth generalising: opening an action to every player converts a
+"only one machine can do this" assumption into a race, and the object the action hangs on is
+the natural place to hold the lock.
 
 ## Adding a function
 

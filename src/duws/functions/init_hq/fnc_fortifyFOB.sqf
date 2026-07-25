@@ -1,8 +1,22 @@
-// Locality: server when a FOB is built (supports/fnc_fob_server.sqf), but CLIENT when
-// refortified via fnc_refortifyFOB's addAction -- so the turrets it spawns are then local
-// to that player and orphaned if they disconnect.
+// Locality: server only -- supports/fnc_fob_server.sqf on build, fnc_refortifyFOB via
+// remoteExec target 2 on refortify. A FOB's turrets are campaign property, so spawning them
+// on the refortifying client would leave them simulated there and orphaned on disconnect.
+if (!isServer) exitWith {};
 
-params ["_centerPos", "_fob", "_refortify", "_id"];
+params ["_centerPos", "_fob", ["_refortify", false], ["_refundOnBusy", 0]];
+
+// One rebuild at a time. The scroll action lives on every machine, so two players can fire it
+// at once; without this the second would spawn a duplicate ring over the first. The charge is
+// still taken client-side before the request arrives, so the loser is refunded here.
+if (_fob getVariable ["FOB_fortify_busy", false]) exitWith {
+	if (_refundOnBusy > 0) then { [_refundOnBusy] remoteExec ["fnc_cp_adjust", 2]; };
+};
+_fob setVariable ["FOB_fortify_busy", true];
+
+// Refortify replaces the previous ring rather than adding to it. The current turrets are read
+// off the FOB instead of passed in, so no copy of the scroll action can hold stale references
+// after another player rebuilds. Server-local: only this machine ever reads them.
+{ { deleteVehicle _x } forEach (crew _x); deleteVehicle _x; } forEach (_fob getVariable ["FOB_turrets", []]);
 
 _safe = [(_centerPos select 0)+10, (_centerPos select 1)+10];
 
@@ -185,7 +199,16 @@ _turret5 allowdamage false;
 
 [_groupGuard, _centerPos] call bis_fnc_taskDefend;
 
-[_fob,[localize "STR_DUWS_T_qxrh9fws", fnc_refortifyFOB, [_turret1, _turret2, _turret3, _turret4, _turret5, _centerPos, _fob, _id], 0, true, true, "", "_this == player"]] remoteExec ["addAction",_id,[false,true] select isDedicated];
+_fob setVariable ["FOB_turrets", [_turret1, _turret2, _turret3, _turret4, _turret5]];
+_fob setVariable ["FOB_fortify_busy", false];
+
+// Added once, to every machine that has a player and to JIP joiners, so any player can
+// refortify rather than only whoever built the FOB. Same targeting as supports/fnc_FOBactions.
+// It carries no arguments: the action's target is the FOB itself and the server reads the
+// rest, so it never needs removing and re-adding.
+if (!_refortify) then {
+	[_fob,[localize "STR_DUWS_T_qxrh9fws", fnc_refortifyFOB, [], 0, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
+};
 
 
 
