@@ -1,6 +1,13 @@
 
 diag_log format ["------------------ DUWS_T START ----v0------ player: %1", profileName];
 
+// Lobby log level, read on every machine because each keeps its own copy of the global.
+// Must land before server_init/client_init compile fnc_log_init, which only defaults the
+// level when it is still nil. Left unset if the parameter is missing, so a mission built
+// without it still gets fnc_log_init's default rather than a hard-coded one from here.
+private _logLevel = "DUWS_LogLevel" call BIS_fnc_getParamValue;
+if (_logLevel isEqualType 0) then { duws_log_level = _logLevel };
+
 
 _duwst_isHostedserver = if (isServer && !isDedicated) then {true} else {false};
 _duwst_isServer = if (isDedicated || _duwst_isHostedserver) then {true} else {false};

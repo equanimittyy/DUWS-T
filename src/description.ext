@@ -20,6 +20,24 @@ respawnOnStart=-1;
 #include "modules\AIS\Effects\BarDlg.hpp"
 
 //--------------------------------------------------------------
+//--------------------------PARAMETERS--------------------------
+//--------------------------------------------------------------
+
+class Params
+{
+	// Read by INIT.sqf into duws_log_level before either init script compiles
+	// fnc_log_init. No default is repeated here on purpose -- fnc_log_init owns it and
+	// only applies it when the variable is still nil, so the two cannot drift apart.
+	class DUWS_LogLevel
+	{
+		title = "RPT log level";
+		values[] = {0, 1, 2, 3, 4};
+		texts[] = {"Off", "Errors only", "Errors + warnings", "Normal", "Debug (verbose)"};
+		default = 3;
+	};
+};
+
+//--------------------------------------------------------------
 
 // TAW INIT BEGIN --
 #include "modules\taw_vd\GUI.h"
