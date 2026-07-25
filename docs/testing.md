@@ -75,3 +75,43 @@ Remove an entry once the underlying issue is fixed; a genuinely new failure is n
 - **Unit:** add `path/from/src::FunctionName` to `unit/functions.txt` and assertions to
   `unit/cases.sqf`. Only genuinely pure helpers (no config / `BIS_fnc_` / spawning) can run
   in the VM.
+
+## Runtime logging: reading the `.rpt`
+
+Neither lint nor the unit layer can see a running mission. Arma writes one `.rpt` per launch
+(`%LOCALAPPDATA%\Arma 3\` on Windows; a dedicated server writes its own), and
+`src/duws/shared/functions/fnc_log_init.sqf` gives that log a structure worth grepping.
+
+`fnc_log` emits a fixed shape, `[DUWS][<level>][<machine>][<tag>] <message>`:
+
+| Field | Values |
+|---|---|
+| level | `ERROR` `WARN` `INFO` `DEBUG`, gated by `duws_log_level` (default 3 = INFO; set it to 4 before init for DEBUG) |
+| machine | `SRV` dedicated, `HOST` server-and-player, `CLI` player, `HC` headless — a hosted session interleaves two of these in one file |
+| tag | subsystem: `BOOT` `ZONES` `FACTION` `WARCOM` `REGISTRY` |
+
+Useful greps: `\[DUWS\]\[ERROR\]` for failures only, `\[DUWS\]\[[A-Z]*\]\[HOST\]` to separate
+the host's two halves, `\[DUWS\]\[.*\]\[ZONES\]` to follow campaign generation end to end.
+
+### Why the wait wrapper exists
+
+An unbounded `waitUntil {cond}` whose condition never comes true produces **no output at
+all** — the campaign stops and the only evidence is a later log line that never appears.
+`fnc_waitLogged` takes a tag, a label, a condition and a timeout; it warns every 10 s naming
+the condition it is still blocked on, and returns `false` at the timeout rather than hanging.
+
+It never aborts its caller: a slow-but-working wait on a loaded host must not kill a campaign
+in progress, so the call site decides. Boot preconditions wrap it in
+`while {!([...] call fnc_waitLogged)} do {}`, which re-waits forever — loud, but it will never
+let the server proceed without an HQ position or a faction table.
+
+`fnc_waitLogged` sleeps, so it is scheduled-only: callers must be inside `spawn`/`execVM`,
+never `call`.
+
+### The registry self-check
+
+`preprocessFile` on a path that does not resolve returns `""`, which compiles to an empty `{}`
+and then no-ops at every call site with no error anywhere. The end of `server_fnc_init.sqf`
+scans every `fnc_*` in the mission namespace for that empty-body signature and logs
+`[DUWS][ERROR][…][REGISTRY] … compiled EMPTY`. A mistyped or moved script path is otherwise
+invisible until some later stage silently never happens.

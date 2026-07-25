@@ -1,9 +1,15 @@
 // Locality: server -- see callers.
+// Logging first: the registry self-check and every milestone below need fnc_log, and a
+// failure in server_var_init/server_fnc_init is exactly what has to be visible.
+[] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_log_init.sqf";
 diag_log format ["Server_init: %1", profileName];
+["INFO", "BOOT", format ["server_init start, player %1", profileName]] call fnc_log;
 
 // DEFINE SERVER VARIABLES and FUNCTIONS
 [] call compile preprocessFileLineNumbers "duws\server\server_var_init.sqf";
+["INFO", "BOOT", "server_var_init done"] call fnc_log;
 [] call compile preprocessFileLineNumbers "duws\server\server_fnc_init.sqf";
+["INFO", "BOOT", "server_fnc_init done"] call fnc_log;
 setGroupIconsVisible [true,false]; //now everyone can see enemies on map
 // Init the URBAN LOCATION FINDER
 [] spawn fnc_moreUrban_locations;
@@ -37,18 +43,18 @@ serverinit_complete = true;
 publicVariable "serverinit_complete";
 
 // wait for HQ placement
-waitUntil {sleep 0.1;chosen_hq_placement};
+while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_placement}, 300] call fnc_waitLogged)} do {};
 
 // Faction init + HQ build are deferred to final commit (createzone_server) so
 // the setup screens' Back navigation can re-pick faction/HQ with nothing yet
 // built. Everything below consumes only PosOfBLUHQ (set at placement) until
 // this gate; verified no faction-array or HQ-object read sits before it.
-waitUntil {sleep 0.1;createzone_server};
+while {!(["BOOT", "createzone_server (setup screens committed)", {createzone_server}, 300] call fnc_waitLogged)} do {};
 
 // wait for CUSTOM FACTIONS to be pasted
 diag_log format ["Server waiting for BLU faction Data Temp"];
-if (BLUFOR_Faction_X == "CUSTOM") then {waitUntil {sleep 0.1;BLUfactionDataTemp != ""}};
-if (OPFOR_Faction_X == "CUSTOM") then {waitUntil {sleep 0.1;OPFfactionDataTemp != ""}};
+if (BLUFOR_Faction_X == "CUSTOM") then { while {!(["FACTION", "BLUfactionDataTemp pasted", {BLUfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
+if (OPFOR_Faction_X == "CUSTOM") then { while {!(["FACTION", "OPFfactionDataTemp pasted", {OPFfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
 
 ///////////////////////
 // INIT THE FACTIONS
@@ -59,7 +65,7 @@ diag_log format ["BLUFOR Faction init on server: %1", BLUFOR_Faction_X];
 
 if (BLUFOR_Faction_X == "CUSTOM") then {
 	["blufor"] call fnc_custom_faction_init;
-	waitUntil {sleep 0.1;count BLUfactionData > 0};
+	while {!(["FACTION", "BLUfactionData populated", {count BLUfactionData > 0}, 300] call fnc_waitLogged)} do {};
 } else {
 	[] call fnc_BLUFOR_faction_init;
 };
@@ -77,7 +83,7 @@ if (opfor_SOLDIER_X == "") then {
 
 	if (OPFOR_Faction_X == "CUSTOM") then {
 		["opfor"] call fnc_custom_faction_init;
-		waitUntil {sleep 0.1;count OPFfactionData > 0};
+		while {!(["FACTION", "OPFfactionData populated", {count OPFfactionData > 0}, 300] call fnc_waitLogged)} do {};
 	} else {
 		[] call fnc_OPFOR_faction_init;
 	};
@@ -111,11 +117,11 @@ enableSaving [false, false];
 //////////////////////////////////////////////
 
 diag_log "SERVER HQ_pos_found_generated";
-waitUntil {sleep 0.1;HQ_pos_found_generated};
+while {!(["BOOT", "HQ_pos_found_generated", {HQ_pos_found_generated}, 300] call fnc_waitLogged)} do {};
 
 // use weapons instead items, some factions bork on items
 diag_log "SERVER opfor_ammobox_weapons";
-waitUntil {sleep 0.1;(count opfor_ammobox_weapons) > 0};
+while {!(["BOOT", "opfor_ammobox_weapons built", {(count opfor_ammobox_weapons) > 0}, 180] call fnc_waitLogged)} do {};
 
 
 ////////////////////////////////////

@@ -95,7 +95,7 @@ it deliberately cannot express, both recorded in the file's `// Locality:` heade
 - **Reachability.** `server_fnc_init.sqf` broadcasts most of what it compiles with
   `publicVariable`, so the code exists on every machine. Having a copy is not running there.
 
-`shared/` is therefore narrow: `shared/functions/` holds only the 16 files whose top-level
+`shared/` is therefore narrow: `shared/functions/` holds only the files whose top-level
 body genuinely runs on more than one machine, alongside data, config and assets that have no
 locality at all. A file passed to `remoteExec` *by value* rather than by name needs no
 broadcast, so "never `publicVariable`'d" does not imply server-only.
@@ -112,6 +112,7 @@ broadcast, so "never `publicVariable`'d" does not imply server-only.
 | `sounds/` | Ambient music loop |
 | `operative/` | Operative recruit/deploy menu |
 | `includes/` | Dialog and config `.hpp` under `shared/`; the two `#include`d SQF bodies under `client/` |
+| `functions/` | Under `shared/`: the runs-anywhere bodies, plus `fnc_log_init.sqf`, which defines `fnc_log` and `fnc_waitLogged` |
 
 ## Cross-cutting systems
 

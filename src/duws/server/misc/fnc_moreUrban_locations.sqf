@@ -37,9 +37,19 @@ publicVariable "MASTER_allLocationsPos";
 
 //[{player globalChat "ALL MAP LOCATIONS FOUND."}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
-// make sure zones_max_dist has a value
-waitUntil {sleep 0.1;zones_max_dist_from_hq > 0};
-waitUntil {sleep 0.1;chosen_settings};
+// These two come from the client's setup screens. Until both land the whole campaign is
+// blocked behind this function, so a silent stall here reads as "zones never generated".
+["INFO", "ZONES", format ["moreUrban gates: dist=%1 chosen=%2 towns=%3 locs=%4",
+    zones_max_dist_from_hq, chosen_settings, count _temp_allTowns, count _temp_allLocations]] call fnc_log;
+while {!(["ZONES", "zones_max_dist_from_hq from the campaign menu",
+    {zones_max_dist_from_hq > 0}, 300] call fnc_waitLogged)} do {};
+while {!(["ZONES", "chosen_settings from the callsign screen",
+    {chosen_settings}, 300] call fnc_waitLogged)} do {};
+["INFO", "ZONES", format ["moreUrban filtering. dist=%1 AO_direction=%2 moreUrban=%3 hq=%4",
+    zones_max_dist_from_hq,
+    (if (isNil "AO_direction") then {"<nil>"} else {count AO_direction}),
+    (if (isNil "moreUrban") then {"<nil>"} else {moreUrban}),
+    (if (isNil "PosOfBLUHQ") then {"<nil>"} else {PosOfBLUHQ})]] call fnc_log;
 
 // Exit if zones manually chosen ???  what about missions
 //if (manually_chosen) exitWith {};
@@ -141,6 +151,8 @@ if (moreUrban == 1) then {
 	[{player globalChat localize "STR_DUWS_T_rb6rlg1b"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 };
 
+["INFO", "ZONES", format ["moreUrban filters done. allLocations=%1 allTowns=%2",
+    count _allLocations, count _allTowns]] call fnc_log;
 diag_log "BUILDING MASTER_allLocations_filtered";
 _temp_Locations_Master = _allLocations call BIS_fnc_arrayShuffle;
 _temp_allTowns = _allTowns call BIS_fnc_arrayShuffle;

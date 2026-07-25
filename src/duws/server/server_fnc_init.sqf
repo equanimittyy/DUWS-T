@@ -1019,3 +1019,19 @@ fnc_broadcastRadioChatter = {
     missionNamespace setVariable ["DUWS_radioChatterRunning", false];
 };
 publicVariable "fnc_broadcastRadioChatter";
+// Registry self-check. preprocessFile on a path that does not resolve returns "", which
+// compiles to an empty {} and then no-ops at every call site with no error anywhere -- a
+// mistyped or moved path is otherwise invisible until some later stage silently never
+// happens. Runs once, right after the last entry above.
+private _fncs = (allVariables missionNamespace) select {(_x select [0, 4]) == "fnc_"};
+private _empty = _fncs select {
+    private _v = missionNamespace getVariable _x;
+    // An empty body stringifies to "" or "{}" depending on how it was produced; strip
+    // whitespace and treat both as the missing-file signature.
+    _v isEqualType {} && {((str _v) splitString " " joinString "") in ["", "{}"]}
+};
+["INFO", "REGISTRY", format ["%1 fnc_* defined", count _fncs]] call fnc_log;
+if (count _empty > 0) then {
+    ["ERROR", "REGISTRY", format ["%1 compiled EMPTY -- missing or unresolved file: %2",
+        count _empty, _empty]] call fnc_log;
+};

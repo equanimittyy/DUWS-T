@@ -4,7 +4,7 @@
 // Random Zones
 //////////////////
 diag_log "WAITING FOR MASTER_allLocations_filtered";
-waitUntil {sleep 0.1;count(MASTER_allLocations_filtered) > 0};
+while {!(["ZONES", "MASTER_allLocations_filtered from fnc_moreUrban_locations", {count(MASTER_allLocations_filtered) > 0}, 300] call fnc_waitLogged)} do {};
 diag_log "RECEIVED MASTER_allLocations_filtered";
 
 _radius = _this select 0;

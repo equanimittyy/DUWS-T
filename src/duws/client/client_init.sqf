@@ -1,5 +1,9 @@
 // Locality: client -- see callers.
+// Logging first, so anything that fails below is visible. The server compiles this too;
+// on a dedicated server the client half needs its own copy before the registry arrives.
+[] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_log_init.sqf";
 diag_log format ["Client_init: %1", profileName];
+["INFO", "BOOT", format ["client_init start, player %1", profileName]] call fnc_log;
 fnc_hirePartisans_clientMap = compile preprocessFileLineNumbers "duws\client\misc\fnc_hirePartisans_clientMap.sqf";
 publicVariable "fnc_hirePartisans_clientMap";
 ///////////////////////
@@ -11,7 +15,7 @@ titleCut ["", "BLACK FADED", 999];
 waitUntil {sleep 0.1;!isNull player};
 // Host waits for Server init
 //if (isServer) then {
-	waitUntil {sleep 0.1;serverinit_complete};
+	while {!(["BOOT", "serverinit_complete from the server", {serverinit_complete}, 300] call fnc_waitLogged)} do {};
 //};
 player addRating 10000000;
 // KEEP DIPSHITS FROM DROWNING
@@ -98,7 +102,7 @@ if (((vehiclevarname player) in game_master) && !HQ_pos_found_generated) then {
 		if (!zones_created) then {
 			sleep 0.1;
 			[] call fnc_startup_faction_flow;
-			waitUntil {sleep 0.1;chosen_settings};  // WAIT UNTIL THE PLAYER HAS CHOSEN THE SETTINGS
+			while {!(["BOOT", "chosen_settings (player still in setup screens)", {chosen_settings}, 600] call fnc_waitLogged)} do {};
 			//titleCut ["", "BLACK IN", 10];
 		};
 	};
@@ -122,12 +126,12 @@ waitUntil {isPlayer Player};
 // or JIP: update map screen
 ///////////////////////////////////////////////
 if (((vehiclevarname player) in game_master)) then {
-	waitUntil {sleep 0.1;count serv_zones_array > 0};
+	while {!(["ZONES", "serv_zones_array broadcast by the server", {count serv_zones_array > 0}, 300] call fnc_waitLogged)} do {};
 	//titleCut ["", "BLACK FADED", 999];
 } else {
 	if (!WARCOM_init_done) then {
 		hintsilent "Waiting for serverinit_complete";
-		waitUntil {sleep 0.1;serverinit_complete};
+		while {!(["BOOT", "serverinit_complete (JIP)", {serverinit_complete}, 300] call fnc_waitLogged)} do {};
 		waitUntil {
 			hintsilent localize "STR_DUWS_T_waithostsetup";
 			sleep 5;
@@ -159,7 +163,7 @@ if (isMultiplayer) then {
 	///////////////////////////////////////////
 	diag_log format ["BLUFOR Faction init for JIP: %1", BLUFOR_Faction_X];
 	if (BLUFOR_Faction_X == "CUSTOM") then {
-		waitUntil {sleep 0.1;count BLUfactionData > 0};
+		while {!(["FACTION", "BLUfactionData (JIP custom faction)", {count BLUfactionData > 0}, 300] call fnc_waitLogged)} do {};
 		{
 			call compile _x;
 		} forEach BLUfactionData;
