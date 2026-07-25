@@ -150,8 +150,8 @@
                 <German>Variables Wetter (kein Nebel)</German>
                 <Spanish>Clima variable (sin niebla)</Spanish>
                 <Chinesesimp>多变的天气(无雾)</Chinesesimp>
-                <Original>Variable Weather  (No Fog)</Original>
-                <English>Variable Weather  (No Fog)</English>
+                <Original>Variable Weather (No Fog)</Original>
+                <English>Variable Weather (No Fog)</English>
             </Key>
             <Key ID="STR_DUWS_T_6dgte6s0">
                 <German>Deaktiviere dynamisches Wetter</German>
@@ -283,8 +283,8 @@
                 <German>Maximal möglicher Radius einer feindlichen Zone. Feind nutzt Lufteinheiten ab 500m Radius</German>
                 <Spanish>Radio máximo posible de una zona enemiga. El enemigo obtienen unidades áeras cuando está sobre 500 m</Spanish>
                 <Chinesesimp>敌区的最大可能半径。敌人在超过500米的战区会获得空军。</Chinesesimp>
-                <Original>Maximum possible radius of an enemy zone.  Enemy gets Air Units over 500m</Original>
-                <English>Maximum possible radius of an enemy zone.  Enemy gets Air Units over 500m</English>
+                <Original>Maximum possible radius of an enemy zone. Enemy gets Air Units over 500m</Original>
+                <English>Maximum possible radius of an enemy zone. Enemy gets Air Units over 500m</English>
             </Key>
             <Key ID="STR_DUWS_T_mijl4ykv">
                 <German>Minimaler Radius einer Zone</German>
@@ -297,8 +297,8 @@
                 <German>Minimal möglicher Radius einer feindlichen Zone. Feind nutzt Lufteinheiten ab 500m Radius</German>
                 <Spanish>Radio mínimo posible de las zonas. El enemigo obtiene unidades áeres cuando está sobre 500 m</Spanish>
                 <Chinesesimp>敌区的最小可能半径，敌人在超过500m的战区会获得空军。</Chinesesimp>
-                <Original>Minimum possible radius of an enemy zone.  Enemy gets Air Units over 500m</Original>
-                <English>Minimum possible radius of an enemy zone.  Enemy gets Air Units over 500m</English>
+                <Original>Minimum possible radius of an enemy zone. Enemy gets Air Units over 500m</Original>
+                <English>Minimum possible radius of an enemy zone. Enemy gets Air Units over 500m</English>
             </Key>
             <Key ID="STR_DUWS_T_byc79mjg">
                 <German>Anzahl der feindlichen Zonen</German>
@@ -451,8 +451,8 @@
                 <German>Definiere ob OPFOR Lufteinheiten/Panzer bei höherer AP und größeren Zonen nutzt. Überschreibt AP/Zonen Einstellung.</German>
                 <Spanish>Defina si OPFOR gana unidades áeres/Blindados pesados entre más alto sea su poder militar y entre más grandes sean las zonas. Sobrepasa la configuración de AP/zona.</Spanish>
                 <Chinesesimp>定义敌方是否在更高的AP级别和更大的区域获得空军/重型装甲。覆盖AP/区域设置。</Chinesesimp>
-                <Original>Define if OPFOR gets Air Units/Heavy Armor at higher AP levels and larger zones.  Overrides AP/zone settings.</Original>
-                <English>Define if OPFOR gets Air Units/Heavy Armor at higher AP levels and larger zones.  Overrides AP/zone settings.</English>
+                <Original>Define if OPFOR gets Air Units/Heavy Armor at higher AP levels and larger zones. Overrides AP/zone settings.</Original>
+                <English>Define if OPFOR gets Air Units/Heavy Armor at higher AP levels and larger zones. Overrides AP/zone settings.</English>
             </Key>
             <Key ID="STR_DUWS_T_7ymqziim">
                 <German>OPFOR Einheiten-Multiplikator</German>
@@ -1086,8 +1086,8 @@
                 <German>Die Zonen werden generiert. Bitte warte bis die Initialisierung der Mission abgeschlossen wurde.</German>
                 <Spanish>Las zonas están siendo generadas.  Por favor espere a que la inicialización de la misión termine.</Spanish>
                 <Chinesesimp>战区正在创建中，请等待任务初始化完成。</Chinesesimp>
-                <Original>The zones are being generated.  Please wait for mission initialization to complete</Original>
-                <English>The zones are being generated.  Please wait for mission initialization to complete</English>
+                <Original>The zones are being generated. Please wait for mission initialization to complete</Original>
+                <English>The zones are being generated. Please wait for mission initialization to complete</English>
             </Key>
             <Key ID="STR_DUWS_T_dkajkn5v">
                 <German>Suche nach Position für Zone #%1...</German>
@@ -1142,8 +1142,8 @@
                 <German>Alle Zonen gefunden. Willkommen in %1, %2</German>
                 <Spanish>Todas las zonas encontradas.  Bienvenido a %1, %2</Spanish>
                 <Chinesesimp>所有战区都已创建， 欢迎来到 %1, %2</Chinesesimp>
-                <Original>All Zones Found.  Welcome to %1, %2</Original>
-                <English>All Zones Found.  Welcome to %1, %2</English>
+                <Original>All Zones Found. Welcome to %1, %2</Original>
+                <English>All Zones Found. Welcome to %1, %2</English>
             </Key>
             <Key ID="STR_DUWS_T_518bqchj">
                 <German>MISSIONS INITIALISIERUNG ABGESCHLOSSEN!</German>
@@ -1153,7 +1153,7 @@
                 <English>MISSION INITIALIZATION COMPLETE!</English>
             </Key>
             <Key ID="STR_DUWS_T_7mog9k78">
-				<German>MISSIONS INITIALISIERUNG ABGESCHLOSSEN!
+                <German>MISSIONS INITIALISIERUNG ABGESCHLOSSEN!
 					\nKampagne generiert
 					\nZonen: %1
 					\nMax. Radius: %2m
@@ -1169,7 +1169,7 @@
 					\nZeit Multiplikator: %11
 					\nZivile Präsenz: %12
 				</German>
-				<Spanish>					
+                <Spanish>					
 					INICIALIZACIÓN DE MISIÓN COMPLETA
 					\nCampaña generada
 					\nZonas: %1
@@ -1186,7 +1186,7 @@
 					\nMultiplicador de tiempo: %11
 					\nPresencia civil: %12
 				</Spanish>
-				<Chinesesimp>
+                <Chinesesimp>
 					任务初始化成功！
 					\n生成战役
 					\n战区数: %1
@@ -1347,8 +1347,8 @@
                 <German>Die Zonen werden manuell generiert. Klicke auf eine Position auf der Karte um feindliche Zonen zu platzieren.</German>
                 <Spanish>Las zonas están siendo generadas manualmente. Haz clic en el mapa para colocar las zonas enemigas.</Spanish>
                 <Chinesesimp>这些战区正在手动生成的。点击岛上的某个地方放置敌人区域。</Chinesesimp>
-                <Original>The zones are being generated manually.  Click somewhere on the island to place enemy zones</Original>
-                <English>The zones are being generated manually.  Click somewhere on the island to place enemy zones</English>
+                <Original>The zones are being generated manually. Click somewhere on the island to place enemy zones</Original>
+                <English>The zones are being generated manually. Click somewhere on the island to place enemy zones</English>
             </Key>
             <Key ID="STR_DUWS_T_shuo4nyn">
                 <German>Die Zonen werden manuell generiert...</German>
@@ -1396,22 +1396,22 @@
                 <German>Wir haben eine der feindlichen Zonen aufgeklärt. Überprüfe die Position auf deiner Karte.</German>
                 <Spanish>Encontramos una de las zonas enemigas. Revise su mapa.</Spanish>
                 <Chinesesimp>我们发现了一个敌区。查看地图。</Chinesesimp>
-                <Original>We found one of the enemy zones.  Check your map</Original>
-                <English>We found one of the enemy zones.  Check your map</English>
+                <Original>We found one of the enemy zones. Check your map</Original>
+                <English>We found one of the enemy zones. Check your map</English>
             </Key>
             <Key ID="STR_DUWS_T_eggxrcci">
                 <German>Die Zonen werden generiert. Wenn eine max. Distanz über 10km (Urban) gewählt wurde, kann dies länger als 30 Sekunden dauern. Bitte warte bis die Initialisierung der Mission abgeschlossen wurde.</German>
                 <Spanish>Las zonas están siendo generadas. Si la distancia máxima está sobre 10 Km (Urbano) esto podría tomar más de 30 segundos. Por favor espere a que la inicialización de la misión se complete.</Spanish>
                 <Chinesesimp>战区正在生成。如果最大距离超过10公里(市区)，这可能需要30秒以上。请等待任务初始化完成。</Chinesesimp>
-                <Original>The zones are being generated.  If max distance is over 10km (Urban) this may take longer than 30 sec. Please wait for mission initialization to complete</Original>
-                <English>The zones are being generated.  If max distance is over 10km (Urban) this may take longer than 30 sec. Please wait for mission initialization to complete</English>
+                <Original>The zones are being generated. If max distance is over 10km (Urban) this may take longer than 30 sec. Please wait for mission initialization to complete</Original>
+                <English>The zones are being generated. If max distance is over 10km (Urban) this may take longer than 30 sec. Please wait for mission initialization to complete</English>
             </Key>
             <Key ID="STR_DUWS_T_3kascuws">
                 <German>Die Zonen werden generiert. Bitte ware bis die Initialisierung der Mission abgeschlossen wurde.</German>
                 <Spanish>Las zonas están siendo generadas. Por favor espere a que la inicialización se complete.</Spanish>
                 <Chinesesimp>战区正在生成。请等待任务初始化完成。</Chinesesimp>
-                <Original>The zones are being generated.  Please wait for mission initialization to complete</Original>
-                <English>The zones are being generated.  Please wait for mission initialization to complete</English>
+                <Original>The zones are being generated. Please wait for mission initialization to complete</Original>
+                <English>The zones are being generated. Please wait for mission initialization to complete</English>
             </Key>
             <Key ID="STR_DUWS_T_8q8zqlf0">
                 <German>ZONEN DISTANZ FILTER WURDE ANGEWENDET.</German>
@@ -1466,8 +1466,8 @@
                 <Spanish>Prepárese. Teletransportando jugador.</Spanish>
                 <German>Bereitmachen. Spieler wird teleportiert.</German>
                 <Chinesesimp>准备完毕，传送玩家。</Chinesesimp>
-                <Original>Get Ready.  Teleporting player</Original>
-                <English>Get Ready.  Teleporting player</English>
+                <Original>Get Ready. Teleporting player</Original>
+                <English>Get Ready. Teleporting player</English>
             </Key>
         </Container>
         <Container name="Killhouse Training">
@@ -1517,19 +1517,19 @@
                 <Chinese>训练场控制</Chinese>
             </Key>
             <Key ID="STR_DUWS_KILLHOUSE_ARRIVE">
-    <Original>Welcome to the high-altitude Killhouse.
+                <Original>Welcome to the high-altitude Killhouse.
     \nYou can train or take on challenges here. Completing challenges earns you CP.
     \nMind the edge, it's a long way down.
     \nDying in the killhouse costs you nothing, except any currency or intel items you're carrying.</Original>
-    <English>Welcome to the high-altitude Killhouse.
+                <English>Welcome to the high-altitude Killhouse.
     \nYou can train or take on challenges here. Completing challenges earns you CP.
     \nMind the edge, it's a long way down.
     \nDying in the killhouse costs you nothing, except any currency or intel items you're carrying.</English>
-    <Chinese>已抵达高空杀人屋训练场。
+                <Chinese>已抵达高空杀人屋训练场。
 	\n你可以在这里训练或进行挑战，挑战可以给你微小的CP奖励。
 	\n你可以携带降落伞来一场刺激的高空跳伞。
     \n在训练场死亡不受死亡惩罚，但仍会丢失钱币/情报。</Chinese>
-</Key>
+            </Key>
             <Key ID="STR_DUWS_T_SPAWN_TARGETS">
                 <Original>Random Spawn Targets</Original>
                 <English>Random Spawn Targets</English>
@@ -1551,12 +1551,12 @@
                 <Chinesesimp>已生成 %1 个目标。它们不会造成威胁，你可以在这样的安全环境里进行训练。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMIES_SPAWNED">
-            <Original>%1 enemies have been deployed. They will try to kill you.\nThe more enemies you eliminate within 3 minutes, the more CP you earn when the time runs out.\nDeath in the killhouse carries no penalty, but you will still lose currency and intel items.</Original>
-            <English>%1 enemies have been deployed. They will try to kill you.\nThe more enemies you eliminate within 3 minutes, the more CP you earn when the time runs out.\nDeath in the killhouse carries no penalty, but you will still lose currency and intel items.</English>
-            <Chinesesimp>已部署 %1 名敌人。它们有可能击杀你。
+                <Original>%1 enemies have been deployed. They will try to kill you.\nThe more enemies you eliminate within 3 minutes, the more CP you earn when the time runs out.\nDeath in the killhouse carries no penalty, but you will still lose currency and intel items.</Original>
+                <English>%1 enemies have been deployed. They will try to kill you.\nThe more enemies you eliminate within 3 minutes, the more CP you earn when the time runs out.\nDeath in the killhouse carries no penalty, but you will still lose currency and intel items.</English>
+                <Chinesesimp>已部署 %1 名敌人。它们有可能击杀你。
 			\n在三分钟之内击杀越多敌人，你在时间结束时获得的CP奖励就越多。
 			\n在训练场死亡不受死亡惩罚，但仍会丢失钱币/情报。</Chinesesimp>
-        </Key>
+            </Key>
             <Key ID="STR_DUWS_T_CLEANUP_DONE">
                 <Original>Scene cleaned up. All targets and enemies removed</Original>
                 <English>Scene cleaned up. All targets and enemies removed</English>
@@ -2198,8 +2198,8 @@
                 <Chinesesimp>敌人开始怀疑你的身份，迅速离开敌人到安全距离以继续伪装。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_FAIL_HINT">
-                <Original>Cannot disguise   %1</Original>
-                <English>Cannot disguise   %1</English>
+                <Original>Cannot disguise %1</Original>
+                <English>Cannot disguise %1</English>
                 <Chinesesimp>无法伪装   %1</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_SUCCESS_HINT">
@@ -4094,8 +4094,8 @@
                 <German>Alle Einheiten im Einsatzgebiet, Achtung. Wir haben eine feindliche Zone ausgemacht. Sie ist nun auf euren GPS-Terminals einsehbar.</German>
                 <Spanish>Todas las unidades en la zona de operaciones, atención. Hemos localizado una zona enemiga. Ya es visible en vuestros terminales GPS.</Spanish>
                 <Chinesesimp>战区所有单位注意，我们发现了一个敌区。现可在GPS终端查看。</Chinesesimp>
-                <Original>All units in the AO, be advised. We have located an enemy zone. It is now visible on your GPS terminals.</Original>
-                <English>All units in the AO, be advised. We have located an enemy zone. It is now visible on your GPS terminals.</English>
+                <Original>All units in the AO, be advised. We have located an enemy zone. It is now marked on your map.</Original>
+                <English>All units in the AO, be advised. We have located an enemy zone. It is now marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_daqqfq5j">
                 <German>==AUFKLÄRUNGSDATEN GEFUNDEN==\n\nPosition aller Zonen wurden auf der Karte aufgedeckt.</German>
@@ -4112,21 +4112,21 @@
                 <English>Saving Enabled</English>
             </Key>
             <Key ID="STR_DUWS_T_92465yls">
-				<German>
+                <German>
 					Der Feind kontrolliert einige strategisch wichtige Zonen. Wir müssen diese Gebiete zurückerobern! Erobere für einen erfolgreichen Missionsabschluss alle vom Feind besetzten Zonen. &lt;br /&gt;
 					Du kannst BLUFOR helfen die Zonen zurückzuerobern und/oder sekundäre Missionen abschließen um die verfügbaren BLUFOR Ressourcen zu erhöhen. Während die Kampagne fortschreitet wird der Krieg eskalieren und die Armeen besseres Equipment nutzen und stärker werden. &lt;br /&gt;
 					Um eine Zone zu erobern muss unsere Präsenz der des Feindes überlegen sein. &lt;br /&gt;&lt;br /&gt;
 					Es liegt in deiner Hand, wie du die Mission spielen möchtest. &lt;br /&gt;
 					Viel Glück Soldat!
 				</German>
-				<Spanish>
+                <Spanish>
 					El enemigo controla zonas críticas en el área ¡debemos retomarlas! Capture todas las zonas bajo control enemigo y la misión será un éxito. &lt;br /&gt;
 					Puede ayudar a BLUFOR a tomar las zonas y/o realizar misiones secundarias para incrementar los recursos de BLUFOR. Con el progreso de la campaña la guerra escalará y los ejércitos serán más fuertes &lt;br /&gt;
 					Para capturar una zona, necesitará una mayor presencia en la zona que el enemigo. &lt;br /&gt;&lt;br /&gt;
 					Depende de usted como quiera juagr esto. &lt;br /&gt;
 					¡Buena suerte, soldado!
 				</Spanish>
-				<Chinesesimp>
+                <Chinesesimp>
 					敌人控制着该地区的一些关键地带，我们必须把它们夺回！占领敌人控制下的每个区域，任务就会成功。 &lt;br /&gt;
 					你可以帮助BLUFOR占领区域和/或完成支线任务，以增加BLUFOR的资源。随着战役的推进，战争将升级，军队将变得更强大，并开始使用更大的资产。 &lt;br /&gt;
 					要占领一个区域，你需要在该区域有比敌人更强大的存在。 &lt;br /&gt;&lt;br /&gt;
@@ -4472,8 +4472,8 @@
                 <German>Eine verbündete Angriffstruppe wurde überfallen! Sie verbirgt sich in einem Gebäude in diesem Gebiet, mit feindlichen Truppen ringsherum. Hilf ihnen, sich durchzubrechen!  (Very high CP, low AP)</German>
                 <Spanish>Un escuadrón de asalto aliado ha sido emboscado! Se oculta en un edificio de esta zona, con fuerzas enemigas a su alrededor. Ayúdalos a romper el cerco!  (Very high CP, low AP)</Spanish>
                 <Chinesesimp>友军的一支突击小队被伏击了，他们藏在这片区域的某个建筑内，且周围全是敌军。去帮他们突围！(极高CP，低AP)</Chinesesimp>
-                <Original>An allied assault squad has been ambushed! They’re hiding in a building in this area, with enemy forces all around them. Help them break out!  (Very high CP, low AP)</Original>
-                <English>An allied assault squad has been ambushed! They’re hiding in a building in this area, with enemy forces all around them. Help them break out!  (Very high CP, low AP)</English>
+                <Original>An allied assault squad has been ambushed! They’re hiding in a building in this area, with enemy forces all around them. Help them break out! (Very high CP, low AP)</Original>
+                <English>An allied assault squad has been ambushed! They’re hiding in a building in this area, with enemy forces all around them. Help them break out! (Very high CP, low AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_xdbfx123">
                 <German>Die Truppe wurde vom Feind entdeckt! Beeilt euch, sie zu retten!</German>
@@ -4745,8 +4745,8 @@
                 <German>Nicht genung sichere Positionen für die Generierung der Mission gefunden. Versuche es erneut.</German>
                 <Spanish>No hay suficientes posiciones seguras para la generación de misiones. Intente de nuevo.</Spanish>
                 <Chinesesimp>没有足够的安全位置来生成任务。再试一次。</Chinesesimp>
-                <Original>Not enough safe positions to generate the mission.  Try again</Original>
-                <English>Not enough safe positions to generate the mission.  Try again</English>
+                <Original>Not enough safe positions to generate the mission. Try again</Original>
+                <English>Not enough safe positions to generate the mission. Try again</English>
             </Key>
             <Key ID="STR_DUWS_T_MISSION_COOLDOWN">
                 <Chinesesimp>这个任务正处于冷却状态，剩余时间 %1 分 %2 秒</Chinesesimp>
@@ -5037,8 +5037,8 @@
                 <German>Dies ist „Oberherr 1-1“. Ein feindliches Infiltrationskommando wurde in den Gebäuden am Zielort gesichtet. Die genaue Position des Kommandos wurde auf Ihren Positionsterminals aktualisiert. Beseitigen Sie sie.</German>
                 <Spanish>Este es "Imperador 1-1". Un equipo de infiltración enemigo ha sido detectado dentro de los edificios en el lugar objetivo. La posición exacta del equipo ha sido actualizada en sus terminales de posición. Acaben con ellos.</Spanish>
                 <Chinesesimp>这里是"霸王1-1"，一支敌人渗透小队被发现位于目标地点的建筑物内，小队的精确位置已经在你的位置终端上更新，去干掉他们。</Chinesesimp>
-                <Original>This is Overlord. Enemy infiltration team's in the objective buildings, exact positions are on your tactical terminals. Take them out.</Original>
-                <English>This is Overlord. Enemy infiltration team's in the objective buildings, exact positions are on your tactical terminals. Take them out.</English>
+                <Original>This is Overlord. Enemy infiltration team's in the objective buildings, exact positions are on your map. Take them out.</Original>
+                <English>This is Overlord. Enemy infiltration team's in the objective buildings, exact positions are on your map. Take them out.</English>
             </Key>
             <Key ID="STR_DUWS_T_cqbroger">
                 <German>Action Squad, verstanden. Bewege dich zum Ziel.</German>
@@ -5233,8 +5233,8 @@
                 <German>Dies ist "Overlord 1-1". Wir haben die Position der feindlichen elektronischen Kampfgeräte ermittelt. Ihre Einheit soll sich zum Standort begeben und alle verfügbaren Informationen beschaffen. Falls keine gefunden werden, lade das kürzlich an Ihre Terminals übermittelte Hacking-Programm hoch. Nach Abschluss der Mission können Sie sich sofort abziehen.</German>
                 <Spanish>Este es "Imperador 1-1". Hemos localizado la posición del equipo de guerra electrónica enemigo. Tu unidad debe acudir al lugar y recuperar toda la inteligencia disponible. Si no se encuentra ninguna, sube el programa de hacking enviado recientemente a tus terminales. Puedes retirarte en cualquier momento tras completar la misión.</Spanish>
                 <Chinesesimp>这里是"霸王1-1"，我们发现了敌人电子战设备的位置。现在需要你的单位去设备处寻找一切可用情报，如果没有就上传刚刚发到终端上的骇客程序。任务完成后随时可以撤离。</Chinesesimp>
-                <Original>This is Overlord. We've located the enemy's electronic warfare gear. Move to the site and pull all the intel you can. If there's nothing, upload the hacking program we just sent to your terminals. Extract as soon as it's done.</Original>
-                <English>This is Overlord. We've located the enemy's electronic warfare gear. Move to the site and pull all the intel you can. If there's nothing, upload the hacking program we just sent to your terminals. Extract as soon as it's done.</English>
+                <Original>This is Overlord. We've located the enemy's electronic warfare gear. Move to the site and pull all the intel you can. If there's nothing, upload the hacking program we just sent you. Extract as soon as it's done.</Original>
+                <English>This is Overlord. We've located the enemy's electronic warfare gear. Move to the site and pull all the intel you can. If there's nothing, upload the hacking program we just sent you. Extract as soon as it's done.</English>
             </Key>
             <Key ID="STR_DUWS_T_pilotletsdothis">
                 <German>Dies ist „Oberherr 1-1“. Ein verbündetes Hubschrauber stürzte vor zehn Minuten an der markierten Position ab. Glücklicherweise steht der Pilot noch mit dem Kommando in Verbindung. Ihre Einheit soll als Soforteinsatztruppe vorgehen und den Piloten evakuieren.</German>
@@ -6059,8 +6059,8 @@
                 <German>Der Nachschub wurde mit grünem Rauch markiert. Prüfe deine Karte.</German>
                 <Spanish>Las cajas de suministros ha sido marcadas con humo verde. Revise su mapa.</Spanish>
                 <Chinesesimp>补给被标上了绿色烟雾。查看地图。</Chinesesimp>
-                <Original>The Supply Drop has been marked with green smoke.  Check your map</Original>
-                <English>The Supply Drop has been marked with green smoke.  Check your map</English>
+                <Original>The Supply Drop has been marked with green smoke. Check your map</Original>
+                <English>The Supply Drop has been marked with green smoke. Check your map</English>
             </Key>
             <Key ID="STR_DUWS_T_jg5oh7nw">
                 <German>Artillerie</German>
@@ -6164,8 +6164,8 @@
                 <German>Flugzeug wurde abgeschossen. Luftschlag fehlgeschlagen.</German>
                 <Spanish>Avión de ataque derribado. Ataque áereo fallido.</Spanish>
                 <Chinesesimp>攻击机被击落。空袭失败。</Chinesesimp>
-                <Original>Attack Plane was shot down.  Airstrike failed</Original>
-                <English>Attack Plane was shot down.  Airstrike failed</English>
+                <Original>Attack Plane was shot down. Airstrike failed</Original>
+                <English>Attack Plane was shot down. Airstrike failed</English>
             </Key>
             <Key ID="STR_DUWS_T_l6wdrhei">
                 <German>Laserziel NICHT erfasst</German>
@@ -6374,8 +6374,8 @@
                 <German>Ein Transportflugzeug Ihrem Trupp zugewiesen – rufen Sie es über Ihr Unterstützungsterminal an.</German>
                 <Spanish>Un avión de transporte asignado a tu unidad – llámalo por tu terminal de apoyo.</Spanish>
                 <Chinesesimp>一架运输机已被配给至你的单位，在你的支援终端呼叫它。</Chinesesimp>
-                <Original>A transport aircraft's been assigned to you. Call it in from your support terminal</Original>
-                <English>A transport aircraft's been assigned to you. Call it in from your support terminal</English>
+                <Original>A transport aircraft's been assigned to you. Call it in from your Support Radio</Original>
+                <English>A transport aircraft's been assigned to you. Call it in from your Support Radio</English>
             </Key>
             <Key ID="STR_DUWS_T_heloliftunlock">
                 <German>Freundliche Kräfte haben gerade das örtliche zivile Hangar gesichert und ein schweres Transportflugzeug gefunden, das nun schwere Fahrzeuge sling-loaden kann.</German>
@@ -6423,8 +6423,8 @@
                 <German>Alles klar! Markiere einfach den Wegpunkt für mich auf dem GPS-Terminal.</German>
                 <Spanish>¡Listo! Solo indícame el punto de ruta en el terminal GPS.</Spanish>
                 <Chinesesimp>好了！在GPS终端上为我指明航点即可。</Chinesesimp>
-                <Original>Alright! Just mark the waypoint for me on the GPS terminal.</Original>
-                <English>Alright! Just mark the waypoint for me on the GPS terminal.</English>
+                <Original>Alright! Just mark the waypoint for me on your map.</Original>
+                <English>Alright! Just mark the waypoint for me on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_helolift6">
                 <German>Wir sind da. Bereitet Aufprall-Gegenmaßnahmen vor.</German>
@@ -6689,8 +6689,8 @@
                 <German>Ein BLUFOR Spieler muss in Sichtweite zum Ziel sein (750m). Versuche es erneut.</German>
                 <Spanish>Un jugador de BLUFOR debe estar dentro del alcance visual (750 m) del objetivo. Intente de nuevo.</Spanish>
                 <Chinesesimp>BLUFOR玩家必须在距离目标750米的可视范围内。再试一次。</Chinesesimp>
-                <Original>A BLUFOR Player must be within visual range (750m) of the target.  Try again</Original>
-                <English>A BLUFOR Player must be within visual range (750m) of the target.  Try again</English>
+                <Original>A BLUFOR Player must be within visual range (750m) of the target. Try again</Original>
+                <English>A BLUFOR Player must be within visual range (750m) of the target. Try again</English>
             </Key>
             <Key ID="STR_DUWS_T_346eazcm">
                 <German>Anforderung abgebrochen</German>
@@ -6822,22 +6822,22 @@
                 <Spanish>En estación. Reciviendo datos del VANT...</Spanish>
                 <German>Im Einsatzgebiet. Erhalte Aufklärungsdaten von der Drohne...</German>
                 <Chinesesimp>就绪，从UAV获取数据。</Chinesesimp>
-                <Original>On Station.  Collecting data from the UAV...</Original>
-                <English>On Station.  Collecting data from the UAV...</English>
+                <Original>On Station. Collecting data from the UAV...</Original>
+                <English>On Station. Collecting data from the UAV...</English>
             </Key>
             <Key ID="STR_DUWS_T_xaibwohn">
                 <Spanish>En estación. Reciviendo posiciones enemigas del Aeroplano...</Spanish>
                 <German>Im Einsatzgebiet. Erhalte Daten des Aufklärungsflugzeugs zu feindlichen Positionen...</German>
                 <Chinesesimp>就绪，从侦察机处接收敌人位置...</Chinesesimp>
-                <Original>On Station.  Receiving enemy positions from the Recon Plane...</Original>
-                <English>On Station.  Receiving enemy positions from the Recon Plane...</English>
+                <Original>On Station. Receiving enemy positions from the Recon Plane...</Original>
+                <English>On Station. Receiving enemy positions from the Recon Plane...</English>
             </Key>
             <Key ID="STR_DUWS_T_2ncoq1yy">
                 <Spanish>Revise su mapa. Las últimas posiciones enemigas están en estas coordenadas.</Spanish>
                 <German>Prüfe deine Karte. Die letzten bekannten Feindpositionen befinden sich auf diesen Koordinaten.</German>
                 <Chinesesimp>查看地图。最后已知的敌人位置在这些网格位置。</Chinesesimp>
-                <Original>Check your map. The last known enemy positions are at these grid locations</Original>
-                <English>Check your map. The last known enemy positions are at these grid locations</English>
+                <Original>Check your map. The last known enemy positions are marked</Original>
+                <English>Check your map. The last known enemy positions are marked</English>
             </Key>
             <Key ID="STR_DUWS_T_rfcxa2ku">
                 <Spanish>El VANT está regresando a base.</Spanish>
@@ -7810,9 +7810,9 @@
                 <English>Extract Survivors</English>
             </Key>
             <Key ID="STR_DUWS_T_zhxdjj">
-				<German>Die Plague Zero hat diesen Ort durchzogen — doch der Konflikt endet nicht aufgrund der Seuche. Dein Team muss die Offensive in den feindlichen Kriegsgebieten aufrechterhalten, während es in den Städten nach Überlebenden sucht und sie zum HQ zurückbringt. Dies ist entscheidend für den Ruf unserer Streitkräfte hier. Je mehr Überlebende ihr extrahiert, desto besser — für jeden Überlebenden, den ihr extrahiert, erhält dein Team Belohnungen.</German>
-				<Spanish>La Plaga Cero ha arrasado este lugar — pero el conflicto no terminará a causa de la plaga. Tu escuadra debe mantener la ofensiva en las zonas de guerra enemigas mientras busca supervivientes en los pueblos y los lleva al HQ. Esto es crucial para mantener la reputación de nuestro ejército aquí. Cuantos más supervivientes extraigas, mejor — tu equipo recibirá recompensas por cada superviviente que extraigas.</Spanish>
-				<Chinesesimp>
+                <German>Die Plague Zero hat diesen Ort durchzogen — doch der Konflikt endet nicht aufgrund der Seuche. Dein Team muss die Offensive in den feindlichen Kriegsgebieten aufrechterhalten, während es in den Städten nach Überlebenden sucht und sie zum HQ zurückbringt. Dies ist entscheidend für den Ruf unserer Streitkräfte hier. Je mehr Überlebende ihr extrahiert, desto besser — für jeden Überlebenden, den ihr extrahiert, erhält dein Team Belohnungen.</German>
+                <Spanish>La Plaga Cero ha arrasado este lugar — pero el conflicto no terminará a causa de la plaga. Tu escuadra debe mantener la ofensiva en las zonas de guerra enemigas mientras busca supervivientes en los pueblos y los lleva al HQ. Esto es crucial para mantener la reputación de nuestro ejército aquí. Cuantos más supervivientes extraigas, mejor — tu equipo recibirá recompensas por cada superviviente que extraigas.</Spanish>
+                <Chinesesimp>
 				零号瘟疫席卷了这里————但是冲突不会因为瘟疫而结束。你的小队需要在保持对敌军战区进攻性的同时，在各个城镇寻找幸存者，并将他们带回基地。这对维持我军在此处的声誉至关重要。 &lt;br /&gt;带走越多的幸存者越好————每带走一个幸存者，你的队伍都会收到奖励。</Chinesesimp>
                 <Original>Plague Zero has swept through this area, but it won't end the conflict. Your squad must keep up the offensive in the enemy war zones while searching towns for survivors and bringing them back to HQ. This matters for our reputation here. The more survivors you extract, the better; your team is rewarded for each one.</Original>
                 <English>Plague Zero has swept through this area, but it won't end the conflict. Your squad must keep up the offensive in the enemy war zones while searching towns for survivors and bringing them back to HQ. This matters for our reputation here. The more survivors you extract, the better; your team is rewarded for each one.</English>
@@ -8170,8 +8170,8 @@
                 <German>Supply Drop (5CP zum Freischalten, 2CP pro Einsatz. Enthält Haupt-Infanterieausrüstung von BLUFOR.) Virtual Arsenal (10CP zum Freischalten. Das virtuelle Arsenal kann an Hauptquartieren, Mobilen Kommandoposten, Vorwärtsoperationbasen (FOBs) und Luftabwurf-Versorgungskisten genutzt werden.) Notfahrzeug-Airdrop (5CP zum Freischalten, 5CP pro Einsatz. Nach dem Ruf wirft ein freundlicher Hubschrauber ein ziviles Transportfahrzeug für den Anrufer ab.) Squad Infil Vehicle Airdrop (10CP zum Freischalten, 10CP pro Einsatz. Nach dem Ruf wirft ein freundlicher Hubschrauber ein leicht bewaffnetes Fahrzeug der BLUFOR-Fraktion für den Anrufer ab.) Squad Assault Weapon Pack (10CP zum Freischalten, 10CP pro Einsatz. Nach dem Ruf wirft ein freundlicher Hubschrauber ein Paket für den Anrufer ab mit: 2 automatischen Granatentürmen, 1 Drohnenterminal, 1 ED-1D, 1 Laserdesignator.) HALO (15CP zum Freischalten.) Fahrzeug-Recycling-Station (5 CP zum Kauf, kostenlos pro Abruf. Nach der Bereitstellung erhält der Spieler die Fähigkeit zur Fahrzeugbergung.) Spezialaufklärungsdrohne (10CP zum Freischalten, 5CP pro Einsatz. Nach dem Ruf scannt eine freundliche Aufklärungsdrohne befreundete und feindliche Einheiten in Reichweite und synchronisiert ihre Positionen auf deiner Karte.) Hubschraubertransport (5CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf holt ein freundlicher Transporthubschrauber die Squad des Anrufers ab und transportiert sie.) Schwertransporthubschrauber-Fahrzeugtransport (10 CP zum Kauf des Zugangs, kostenlos pro Abruf. Nach dem Abruf holen befreundete Schwertransporthubschrauber das festgelegte Fahrzeug an den Zielort.)  Bootsverkehr (2CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf holt ein freundliches Bootsteam die Squad des Anrufers ab und transportiert sie. Diese Funktion hat manchmal Bugs.) 155mm-Artillerieunterstützung (20CP zum Freischalten, 10CP pro Einsatz. Nach dem Ruf bombardiert eine außerhalb der Karte liegende 155mm-Artilleriegruppe den angegebenen Ort des Anrufers eine Minute lang ununterbrochen.) Mörserunterstützung (10CP zum Freischalten, 5CP pro Einsatz. Nach dem Ruf bombardiert eine außerhalb der Karte liegende Mörsergruppe den angegebenen Ort des Anrufers eine Minute lang ununterbrochen.) JDAM-Bombe (10CP zum Freischalten, 3CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine JDAM-Bombe auf den angegebenen Ort des Anrufers ab.) Lasergelenkte Bombe (10CP zum Freischalten, 1CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine lasergelenkte Bombe auf den angegebenen Ort des Anrufers ab. Der Anrufer muss den Laserdesignator ständig auf das Ziel richten.) Mk.20-Clustergleitbombe (25CP zum Freischalten, 20CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine Mk.20-Clustergleitbombe auf den angegebenen Ort ab, die Flächenschaden verursacht.) Napalm-Bombe (20CP zum Freischalten, 15CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine Napalm-Bombe auf den angegebenen Ort ab, die anhaltendes Feuer verursacht und die KI-Pfadfindung stört.) High Command: Angriffshubschrauber (20CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf wird ein Angriffshubschrauber zum High-Command-System des Anrufers hinzugefügt. Der Anrufer kann nicht erneut rufen, bis der Angriffshubschrauber zerstört ist.) High Command: CAS-Starrflügelflugzeug (25CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf wird ein Close-Air-Support-Starrflügelflugzeug zum High-Command-System des Anrufers hinzugefügt. Der Anrufer kann nicht erneut rufen, bis das Flugzeug zerstört ist.) Airborne (20CP zum Freischalten, 12CP pro Einsatz. Nach dem Ruf wird eine Squad freundlicher Infanterie um den Anrufer abgeworfen und schließt sich seiner Squad an.) Mobiles HQ errichten (10CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf wird das Fahrzeug vor dem Anrufer in ein Mobiles HQ umgewandelt. Das Mobile HQ dient als Respawn-Punkt, wenn es eingesetzt ist.)</German>
                 <Spanish>Supply Drop (5CP para desbloquear, 2CP por uso. Contiene el equipo de infantería principal de BLUFOR.) Arsenal Virtual (10CP para desbloquear. El arsenal virtual se puede utilizar en el Cuartel General, los Puestos de Mando Móviles, las Bases de Operaciones Avanzadas (FOBs) y las cajas de suministro por airdrop.) Lanzamiento Aéreo de Vehículo de Emergencia (5CP para desbloquear, 5CP por uso. Al llamar, un helicóptero amigante lanzará un vehículo de transporte civil para el solicitante.) Lanzamiento Aéreo de Vehículo de Infiltración de Escuadra (10CP para desbloquear, 10CP por uso. Al llamar, un helicóptero amigante lanzará un vehículo ligero armado de la facción BLUFOR para el solicitante.) Paquete de Armas de Asalto de Escuadra (10CP para desbloquear, 10CP por uso. Al llamar, un helicóptero amigante lanzará un paquete para el solicitante que contiene: 2 torretas granaderas automáticas, 1 terminal de dron, 1 ED-1D, 1 designador láser.) Estación de Reciclaje de Vehículos (5 CP para comprar, gratuita cada llamada. Una vez desplegada, otorga al jugador la capacidad de recuperar vehículos.) HALO (15CP para desbloquear.) Dron de Reconocimiento Especial (10CP para desbloquear, 5CP por uso. Al llamar, un dron de reconocimiento amigante escaneará unidades amigantes y enemigas en rango y sincronizará sus posiciones en tu mapa.) Transporte en Helicóptero (5CP para desbloquear, uso gratuito. Al llamar, un helicóptero de transporte amigante recogerá y transportará al escuadra del solicitante.) Transporte de Vehículos con Helicóptero Pesado (10 CP para comprar acceso, gratuito cada llamada. Después de llamar, helicópteros pesados amigos izarán el vehículo designado hasta la ubicación objetivo.) Transporte en Barco (2CP para desbloquear, uso gratuito. Al llamar, un equipo de embarcaciones amigante recogerá y transportará al escuadra del solicitante. Esta función a veces tiene errores.) Apoyo de Artillería de 155mm (20CP para desbloquear, 10CP por uso. Al llamar, una batería de artillería de 155mm fuera del mapa bombardeará la ubicación designada por el solicitante de forma continua durante un minuto.) Apoyo de Mortero (10CP para desbloquear, 5CP por uso. Al llamar, un equipo de morteros fuera del mapa bombardeará la ubicación designada por el solicitante de forma continua durante un minuto.) Bomba JDAM (10CP para desbloquear, 3CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba JDAM en la ubicación designada por el solicitante.) Bomba Guiada por Láser (10CP para desbloquear, 1CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba guiada por láser en la ubicación designada por el solicitante. El solicitante debe mantener el designador láser apuntando al objetivo de forma continua.) Bomba de Racimo Mk.20 (25CP para desbloquear, 20CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba de racimo Mk.20 en la ubicación designada, causando daño en área amplia.) Bomba Napalm (20CP para desbloquear, 15CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba napalm en la ubicación designada, causando fuego continuo y perturbando la navegación de la IA.) Alto Mando: Helicóptero de Ataque (20CP para desbloquear, uso gratuito. Al llamar, un helicóptero de ataque se añadirá al sistema de Alto Mando del solicitante. El solicitante no podrá volver a llamar hasta que el helicóptero de ataque sea destruido.) Alto Mando: Avión de Ala Fija de Apoyo Aéreo Cercano (25CP para desbloquear, uso gratuito. Al llamar, un avión de ala fija de apoyo aéreo cercano se añadirá al sistema de Alto Mando del solicitante. El solicitante no podrá volver a llamar hasta que el avión sea destruido.) Airborne (20CP para desbloquear, 12CP por uso. Al llamar, un escuadra de infantería amigante será lanzada por paracaídas alrededor del solicitante y se unirá a su escuadra.) Establecer Cuartel General Móvil (10CP para desbloquear, uso gratuito. Al llamar, el vehículo frente al solicitante se convertirá en un Cuartel General Móvil. El Cuartel General Móvil actúa como punto de reaparición cuando está desplegado.)</Spanish>
                 <Chinesesimp>空投补给(5CP购买使用权，每次呼叫消耗2CP。补给内含一个受限制的虚拟军火库。)  虚拟军火库(10CP购买使用权。虚拟军火库可以在总部、机动指挥部、前线作战基地以及空投的补给箱里使用。)  紧急载具空投(5CP购买使用权，每次呼叫消耗5CP。呼叫后友军直升机会为呼叫者投放一辆民用运输载具。)  班组渗透载具空投(10CP购买使用权，每次呼叫消耗10CP。呼叫后友军直升机会为呼叫者投放一辆蓝方阵营的轻型武装车辆)  班组突击武器包(10CP购买使用权，每次呼叫消耗10CP。呼叫后友军直升机会为呼叫者投放包裹，内含：两架自动化榴弹机枪，一个无人机终端，一个ED-1D，一个激光指示器。)   空降(15CP购买使用权。)  特种无人侦察机(10CP购买使用权，每次呼叫消耗5CP。呼叫后友军无人侦察机会扫描范围内的友军和敌军单位，并同步位置到你的地图上。)  直升机运输(5CP购买使用权，每次呼叫免费。呼叫后友军运输直升机可以来接送呼叫者的小队。)  重型直升机载具运输 ( 10CP 购买使用权，每次呼叫免费。呼叫后友军重型直升机会来吊装指定载具到目标位置。) 船运(2CP购买使用权，每次呼叫免费。呼叫后友军舟艇小队可以来接送呼叫者的小队。有时这个功能会出bug。)  载具回收站 (5CP 购买，每次呼叫免费。部署后使玩家拥有载具回收能力。) 155毫米炮支援(20CP购买使用权，每次呼叫10CP。呼叫后地图外的155毫米炮炮组会朝着呼叫者给出的地点持续炮击一分钟。)  迫击炮支援(10CP购买使用权，每次呼叫5CP。呼叫后地图外的迫击炮炮组会朝着呼叫者给出的地点持续炮击一分钟。)  杰达姆炸弹(10CP购买使用权，每次呼叫3CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚杰达姆炸弹)  激光指导炸弹(10CP购买使用权，每次呼叫1CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚激光制导炸弹。呼叫者需要使用激光指示器持续对准目标。)  Mk.20集束炸弹(25CP购买使用权，每次呼叫20CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚Mk.20集束炸弹，造成大面积伤害。)  凝固汽油弹(20CP购买使用权，每次呼叫15CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚凝固汽油弹，造成持续性的燃烧并扰乱AI寻路。)  高级指挥攻击直升机(20CP购买使用权，每次呼叫免费。呼叫后，一架攻击直升机会添加到呼叫者的高级指挥系统里。呼叫者将无法再次呼叫，直到攻击直升机被摧毁。)  高级指挥近空支援固定翼飞机(25CP购买使用权，每次呼叫免费。呼叫后，一架近空支援固定翼飞机会添加到呼叫者的高级指挥系统里。呼叫者将无法再次呼叫，直到近空支援固定翼飞机被摧毁。)  空降部队(20CP购买使用权，每次呼叫消耗12CP。呼叫后，一队友军步兵将被空降到呼叫者周围并加入呼叫者的班组。)  建立机动指挥部(10CP购买使用权，每次呼叫免费。呼叫后，呼叫者面前的车辆会被改造为机动指挥部。机动指挥部部署时可以作为复活点。)</Chinesesimp>
-                <Original>Supply Drop (5 CP to unlock, 2 CP per use. Contains some equipment and an Arsenal)&lt;br/&gt;&lt;br/&gt;Virtual Arsenal (10 CP to unlock. Can be used at Headquarters, MHQ, Forward Operating Bases (FOBs) and airdrop supply crates.)&lt;br/&gt;&lt;br/&gt;Emergency Vehicle Airdrop (5 CP to unlock, 5 CP per use. After calling, a friendly helicopter will drop a civilian transport vehicle for the caller.)&lt;br/&gt;&lt;br/&gt;Squad Infil Vehicle Airdrop (10 CP to unlock, 10 CP per use. After calling, a friendly helicopter will drop a light armed vehicle of the BLUFOR faction for the caller.)&lt;br/&gt;&lt;br/&gt;Squad Assault Weapon Pack (10 CP to unlock, 10 CP per use. After calling, a friendly helicopter will drop a package for the caller containing: 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D, 1 laser designator.)&lt;br/&gt;&lt;br/&gt;HALO (15 CP to unlock.)&lt;br/&gt;&lt;br/&gt;Special Recon Drone (10 CP to unlock, 5 CP per use. After calling, a friendly reconnaissance drone will scan friendly and enemy units in range and sync their positions to your map.)&lt;br/&gt;&lt;br/&gt;Helicopter Transport (5 CP to unlock, free per use. After calling, a friendly transport helicopter will pick up and transport the caller’s squad.)&lt;br/&gt;&lt;br/&gt;Heavy Helicopter Vehicle Transport (10 CP to purchase access, free per call. After calling, friendly heavy helicopters will lift the designated vehicle to the target location.)&lt;br/&gt;&lt;br/&gt;Boat Transport (2 CP to unlock, free per use. After calling, a friendly boat team will pick up and transport the caller’s squad. This feature may sometimes have bugs.)&lt;br/&gt;&lt;br/&gt;Vehicle Recycling Station (5 CP to purchase, free per call. Once deployed, grants the player vehicle recovery capabilities.)&lt;br/&gt;&lt;br/&gt;155mm Artillery Support (20 CP to unlock, 10 CP per use. After calling, off-map 155mm artillery will bombard the caller’s designated location continuously for one minute.)&lt;br/&gt;&lt;br/&gt;Mortar Support (10 CP to unlock, 5 CP per use. After calling, an off-map mortar team will bombard the caller’s designated location continuously for one minute.)&lt;br/&gt;&lt;br/&gt;JDAM Bomb (10 CP to unlock, 3 CP per use. After calling, a friendly fixed-wing aircraft will drop one JDAM bomb on the caller’s designated location.)&lt;br/&gt;&lt;br/&gt;Laser-Guided Bomb (10 CP to unlock, 1 CP per use. After calling, a friendly fixed-wing aircraft will drop one laser-guided bomb on the caller’s designated location. The caller must keep the laser designator pointed at the target continuously.)&lt;br/&gt;&lt;br/&gt;Mk.20 Cluster Bomb (25 CP to unlock, 20 CP per use. After calling, a friendly fixed-wing aircraft will drop one Mk.20 cluster bomb on the designated location, dealing large-area damage.)&lt;br/&gt;&lt;br/&gt;Napalm Bomb (20 CP to unlock, 15 CP per use. After calling, a friendly fixed-wing aircraft will drop one napalm bomb on the designated location, causing continuous fire and disrupting AI pathfinding.)&lt;br/&gt;&lt;br/&gt;High Command: Attack Helicopter (20 CP to unlock, free per use. After calling, one attack helicopter will be added to the caller’s high command system. The caller cannot call again until the attack helicopter is destroyed.)&lt;br/&gt;&lt;br/&gt;High Command: CAS Fixed-Wing Aircraft (25 CP to unlock, free per use. After calling, one close air support fixed-wing aircraft will be added to the caller’s high command system. The caller cannot call again until the aircraft is destroyed.)&lt;br/&gt;&lt;br/&gt;Airborne (20 CP to unlock, 12 CP per use. After calling, a squad of friendly infantry will be airdropped around the caller and join the caller’s squad.)&lt;br/&gt;&lt;br/&gt;Establish Mobile HQ (10 CP to unlock, free per use. After calling, the vehicle in front of the caller will be converted into a Mobile HQ. The Mobile HQ acts as a respawn point when deployed.)</Original>
-                <English>Supply Drop (5 CP to unlock, 2 CP per use. Contains some equipment and an Arsenal)&lt;br/&gt;&lt;br/&gt;Virtual Arsenal (10 CP to unlock. Can be used at Headquarters, MHQ, Forward Operating Bases (FOBs) and airdrop supply crates.)&lt;br/&gt;&lt;br/&gt;Emergency Vehicle Airdrop (5 CP to unlock, 5 CP per use. After calling, a friendly helicopter will drop a civilian transport vehicle for the caller.)&lt;br/&gt;&lt;br/&gt;Squad Infil Vehicle Airdrop (10 CP to unlock, 10 CP per use. After calling, a friendly helicopter will drop a light armed vehicle of the BLUFOR faction for the caller.)&lt;br/&gt;&lt;br/&gt;Squad Assault Weapon Pack (10 CP to unlock, 10 CP per use. After calling, a friendly helicopter will drop a package for the caller containing: 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D, 1 laser designator.)&lt;br/&gt;&lt;br/&gt;HALO (15 CP to unlock.)&lt;br/&gt;&lt;br/&gt;Special Recon Drone (10 CP to unlock, 5 CP per use. After calling, a friendly reconnaissance drone will scan friendly and enemy units in range and sync their positions to your map.)&lt;br/&gt;&lt;br/&gt;Helicopter Transport (5 CP to unlock, free per use. After calling, a friendly transport helicopter will pick up and transport the caller’s squad.)&lt;br/&gt;&lt;br/&gt;Heavy Helicopter Vehicle Transport (10 CP to purchase access, free per call. After calling, friendly heavy helicopters will lift the designated vehicle to the target location.)&lt;br/&gt;&lt;br/&gt;Boat Transport (2 CP to unlock, free per use. After calling, a friendly boat team will pick up and transport the caller’s squad. This feature may sometimes have bugs.)&lt;br/&gt;&lt;br/&gt;Vehicle Recycling Station (5 CP to purchase, free per call. Once deployed, grants the player vehicle recovery capabilities.)&lt;br/&gt;&lt;br/&gt;155mm Artillery Support (20 CP to unlock, 10 CP per use. After calling, off-map 155mm artillery will bombard the caller’s designated location continuously for one minute.)&lt;br/&gt;&lt;br/&gt;Mortar Support (10 CP to unlock, 5 CP per use. After calling, an off-map mortar team will bombard the caller’s designated location continuously for one minute.)&lt;br/&gt;&lt;br/&gt;JDAM Bomb (10 CP to unlock, 3 CP per use. After calling, a friendly fixed-wing aircraft will drop one JDAM bomb on the caller’s designated location.)&lt;br/&gt;&lt;br/&gt;Laser-Guided Bomb (10 CP to unlock, 1 CP per use. After calling, a friendly fixed-wing aircraft will drop one laser-guided bomb on the caller’s designated location. The caller must keep the laser designator pointed at the target continuously.)&lt;br/&gt;&lt;br/&gt;Mk.20 Cluster Bomb (25 CP to unlock, 20 CP per use. After calling, a friendly fixed-wing aircraft will drop one Mk.20 cluster bomb on the designated location, dealing large-area damage.)&lt;br/&gt;&lt;br/&gt;Napalm Bomb (20 CP to unlock, 15 CP per use. After calling, a friendly fixed-wing aircraft will drop one napalm bomb on the designated location, causing continuous fire and disrupting AI pathfinding.)&lt;br/&gt;&lt;br/&gt;High Command: Attack Helicopter (20 CP to unlock, free per use. After calling, one attack helicopter will be added to the caller’s high command system. The caller cannot call again until the attack helicopter is destroyed.)&lt;br/&gt;&lt;br/&gt;High Command: CAS Fixed-Wing Aircraft (25 CP to unlock, free per use. After calling, one close air support fixed-wing aircraft will be added to the caller’s high command system. The caller cannot call again until the aircraft is destroyed.)&lt;br/&gt;&lt;br/&gt;Airborne (20 CP to unlock, 12 CP per use. After calling, a squad of friendly infantry will be airdropped around the caller and join the caller’s squad.)&lt;br/&gt;&lt;br/&gt;Establish Mobile HQ (10 CP to unlock, free per use. After calling, the vehicle in front of the caller will be converted into a Mobile HQ. The Mobile HQ acts as a respawn point when deployed.)</English>
+                <Original>Supply Drop (5 CP to unlock, 2 CP per use. Contains some equipment and an Arsenal)&lt;br/&gt;&lt;br/&gt;Virtual Arsenal (10 CP to unlock. Can be used at Headquarters, MHQ, Forward Operating Bases (FOBs) and airdrop supply crates.)&lt;br/&gt;&lt;br/&gt;Emergency Vehicle Airdrop (5 CP to unlock, 5 CP per use. After calling, a friendly helicopter will drop a civilian transport vehicle for the caller.)&lt;br/&gt;&lt;br/&gt;Squad Infil Vehicle Airdrop (10 CP to unlock, 10 CP per use. After calling, a friendly helicopter will drop a light armed vehicle of the BLUFOR faction for the caller.)&lt;br/&gt;&lt;br/&gt;Squad Assault Weapon Pack (10 CP to unlock, 10 CP per use. After calling, a friendly helicopter will drop a package for the caller containing: 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D, 1 laser designator.)&lt;br/&gt;&lt;br/&gt;HALO (15 CP to unlock.)&lt;br/&gt;&lt;br/&gt;Special Recon Drone (10 CP to unlock, 5 CP per use. After calling, a friendly reconnaissance drone will scan friendly and enemy units in range and mark their positions on your map.)&lt;br/&gt;&lt;br/&gt;Helicopter Transport (5 CP to unlock, free per use. After calling, a friendly transport helicopter will pick up and transport the caller’s squad.)&lt;br/&gt;&lt;br/&gt;Heavy Helicopter Vehicle Transport (10 CP to purchase access, free per call. After calling, friendly heavy helicopters will lift the designated vehicle to the target location.)&lt;br/&gt;&lt;br/&gt;Boat Transport (2 CP to unlock, free per use. After calling, a friendly boat team will pick up and transport the caller’s squad. This feature may sometimes have bugs.)&lt;br/&gt;&lt;br/&gt;Vehicle Recycling Station (5 CP to purchase, free per call. Once deployed, grants the player vehicle recovery capabilities.)&lt;br/&gt;&lt;br/&gt;155mm Artillery Support (20 CP to unlock, 10 CP per use. After calling, off-map 155mm artillery will bombard the caller’s designated location continuously for one minute.)&lt;br/&gt;&lt;br/&gt;Mortar Support (10 CP to unlock, 5 CP per use. After calling, an off-map mortar team will bombard the caller’s designated location continuously for one minute.)&lt;br/&gt;&lt;br/&gt;JDAM Bomb (10 CP to unlock, 3 CP per use. After calling, a friendly fixed-wing aircraft will drop one JDAM bomb on the caller’s designated location.)&lt;br/&gt;&lt;br/&gt;Laser-Guided Bomb (10 CP to unlock, 1 CP per use. After calling, a friendly fixed-wing aircraft will drop one laser-guided bomb on the caller’s designated location. The caller must keep the laser designator pointed at the target continuously.)&lt;br/&gt;&lt;br/&gt;Mk.20 Cluster Bomb (25 CP to unlock, 20 CP per use. After calling, a friendly fixed-wing aircraft will drop one Mk.20 cluster bomb on the designated location, dealing large-area damage.)&lt;br/&gt;&lt;br/&gt;Napalm Bomb (20 CP to unlock, 15 CP per use. After calling, a friendly fixed-wing aircraft will drop one napalm bomb on the designated location, causing continuous fire and disrupting AI pathfinding.)&lt;br/&gt;&lt;br/&gt;High Command: Attack Helicopter (20 CP to unlock, free per use. After calling, one attack helicopter will be added to the caller’s high command system. The caller cannot call again until the attack helicopter is destroyed.)&lt;br/&gt;&lt;br/&gt;High Command: CAS Fixed-Wing Aircraft (25 CP to unlock, free per use. After calling, one close air support fixed-wing aircraft will be added to the caller’s high command system. The caller cannot call again until the aircraft is destroyed.)&lt;br/&gt;&lt;br/&gt;Airborne (20 CP to unlock, 12 CP per use. After calling, a squad of friendly infantry will be airdropped around the caller and join the caller’s squad.)&lt;br/&gt;&lt;br/&gt;Establish Mobile HQ (10 CP to unlock, free per use. After calling, the vehicle in front of the caller will be converted into a Mobile HQ. The Mobile HQ acts as a respawn point when deployed.)</Original>
+                <English>Supply Drop (5 CP to unlock, 2 CP per use. Contains some equipment and an Arsenal)&lt;br/&gt;&lt;br/&gt;Virtual Arsenal (10 CP to unlock. Can be used at Headquarters, MHQ, Forward Operating Bases (FOBs) and airdrop supply crates.)&lt;br/&gt;&lt;br/&gt;Emergency Vehicle Airdrop (5 CP to unlock, 5 CP per use. After calling, a friendly helicopter will drop a civilian transport vehicle for the caller.)&lt;br/&gt;&lt;br/&gt;Squad Infil Vehicle Airdrop (10 CP to unlock, 10 CP per use. After calling, a friendly helicopter will drop a light armed vehicle of the BLUFOR faction for the caller.)&lt;br/&gt;&lt;br/&gt;Squad Assault Weapon Pack (10 CP to unlock, 10 CP per use. After calling, a friendly helicopter will drop a package for the caller containing: 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D, 1 laser designator.)&lt;br/&gt;&lt;br/&gt;HALO (15 CP to unlock.)&lt;br/&gt;&lt;br/&gt;Special Recon Drone (10 CP to unlock, 5 CP per use. After calling, a friendly reconnaissance drone will scan friendly and enemy units in range and mark their positions on your map.)&lt;br/&gt;&lt;br/&gt;Helicopter Transport (5 CP to unlock, free per use. After calling, a friendly transport helicopter will pick up and transport the caller’s squad.)&lt;br/&gt;&lt;br/&gt;Heavy Helicopter Vehicle Transport (10 CP to purchase access, free per call. After calling, friendly heavy helicopters will lift the designated vehicle to the target location.)&lt;br/&gt;&lt;br/&gt;Boat Transport (2 CP to unlock, free per use. After calling, a friendly boat team will pick up and transport the caller’s squad. This feature may sometimes have bugs.)&lt;br/&gt;&lt;br/&gt;Vehicle Recycling Station (5 CP to purchase, free per call. Once deployed, grants the player vehicle recovery capabilities.)&lt;br/&gt;&lt;br/&gt;155mm Artillery Support (20 CP to unlock, 10 CP per use. After calling, off-map 155mm artillery will bombard the caller’s designated location continuously for one minute.)&lt;br/&gt;&lt;br/&gt;Mortar Support (10 CP to unlock, 5 CP per use. After calling, an off-map mortar team will bombard the caller’s designated location continuously for one minute.)&lt;br/&gt;&lt;br/&gt;JDAM Bomb (10 CP to unlock, 3 CP per use. After calling, a friendly fixed-wing aircraft will drop one JDAM bomb on the caller’s designated location.)&lt;br/&gt;&lt;br/&gt;Laser-Guided Bomb (10 CP to unlock, 1 CP per use. After calling, a friendly fixed-wing aircraft will drop one laser-guided bomb on the caller’s designated location. The caller must keep the laser designator pointed at the target continuously.)&lt;br/&gt;&lt;br/&gt;Mk.20 Cluster Bomb (25 CP to unlock, 20 CP per use. After calling, a friendly fixed-wing aircraft will drop one Mk.20 cluster bomb on the designated location, dealing large-area damage.)&lt;br/&gt;&lt;br/&gt;Napalm Bomb (20 CP to unlock, 15 CP per use. After calling, a friendly fixed-wing aircraft will drop one napalm bomb on the designated location, causing continuous fire and disrupting AI pathfinding.)&lt;br/&gt;&lt;br/&gt;High Command: Attack Helicopter (20 CP to unlock, free per use. After calling, one attack helicopter will be added to the caller’s high command system. The caller cannot call again until the attack helicopter is destroyed.)&lt;br/&gt;&lt;br/&gt;High Command: CAS Fixed-Wing Aircraft (25 CP to unlock, free per use. After calling, one close air support fixed-wing aircraft will be added to the caller’s high command system. The caller cannot call again until the aircraft is destroyed.)&lt;br/&gt;&lt;br/&gt;Airborne (20 CP to unlock, 12 CP per use. After calling, a squad of friendly infantry will be airdropped around the caller and join the caller’s squad.)&lt;br/&gt;&lt;br/&gt;Establish Mobile HQ (10 CP to unlock, free per use. After calling, the vehicle in front of the caller will be converted into a Mobile HQ. The Mobile HQ acts as a respawn point when deployed.)</English>
             </Key>
             <Key ID="STR_DUWS_T_m204wqqq">
                 <German>Das nervige Kriegsverbrechersystem aus DUWS_X wurde entfernt und überarbeitet. Die Anzahl an Zivilisten (einschließlich bewaffneter Zivilisten) wurde ebenfalls stark erhöht. In DUWS_T führt ein zu niedriger Ruf nicht zu einer Reduzierung der CP/AP-Punkte oder einem Spielende. BLUFOR startet mit 1 Rufpunkt. Der Ruf sinkt, wenn Zivilisten sterben (aus irgendeinem Grund) oder Gebäude zerstört werden. Ist der Ruf negativ, bewaffnen sich Zivilisten und greifen BLUFOR an. Der Ruf erholt sich nicht automatisch; Spieler müssen Nebenmissionen zur Hilfe von Zivilisten erledigen, um Ruf zu erhalten. (Schätze deinen Ruf! Bewaffnete Zivilisten können extrem tödlich sein!)</German>
@@ -8361,8 +8361,8 @@
                 <German>"Allseer" an alle Einheiten im Einsatzgebiet. Der Sitrep wurde an das Terminal hochgeladen.</German>
                 <Spanish>"Allseer" a todas las unidades en la zona de operaciones. El sitrep ha sido subido al terminal.</Spanish>
                 <Chinesesimp>"全视眼"呼叫战区单位，情况报告已经上传到终端。</Chinesesimp>
-                <Original>Allseer to all units in the AO. Sitrep's uploaded to your terminals.</Original>
-                <English>Allseer to all units in the AO. Sitrep's uploaded to your terminals.</English>
+                <Original>Allseer to all units in the AO. Sitrep incoming.</Original>
+                <English>Allseer to all units in the AO. Sitrep incoming.</English>
             </Key>
             <Key ID="STR_DUWS_T_puy8tdeb">
                 <German>SITREP (1 CP)</German>
@@ -8396,8 +8396,8 @@
                 <German>Es muss mindestens eine feindliche Zone auf der Karte sichtbar sein. Versuche es später erneut.</German>
                 <Spanish>Debe de haber al menos una zona enemiga visible en el mapa. Intente más tarde.</Spanish>
                 <Chinesesimp>地图上必须至少有一个敌人战区可见，请稍后重试。</Chinesesimp>
-                <Original>There must be at least one enemy zone visible on the map.  Try again later</Original>
-                <English>There must be at least one enemy zone visible on the map.  Try again later</English>
+                <Original>There must be at least one enemy zone visible on the map. Try again later</Original>
+                <English>There must be at least one enemy zone visible on the map. Try again later</English>
             </Key>
             <Key ID="STR_DUWS_T_n66cx0eh">
                 <German>SCHLIESSEN</German>
@@ -8512,7 +8512,7 @@
                 <English>This is Overlord. Nothing useful here.</English>
             </Key>
             <Key ID="STR_DUWS_T_jjl0pm74">
-				<German>
+                <German>
 					SITREP:
 					\n\nEINHEITEN GESAMT: %1
 					\nGEPANZERTE FAHRZEUGE: %5
@@ -8535,7 +8535,7 @@
 					\nSimple Zonen: %19
 					\nZivile Präsenz: %20
 				</German>
-				<Spanish>
+                <Spanish>
 					REPSIT:
 					\n\nUNIDADES TOTALES: %1
 					\nVEHÍCULOS BLINDADOS: %5
@@ -8558,7 +8558,7 @@
 					\nZonas simples: %19
 					\nPresencia civil: %20
 				</Spanish>
-				<Chinesesimp>
+                <Chinesesimp>
 					报告:
 					\n\n总单位数: %1
 					\n装甲载具: %5
@@ -8658,8 +8658,8 @@
                 <Spanish>Precione Ok para guardar - Precione cancel para solo ver inteligencia</Spanish>
                 <German>Drücke OK für einen SITREP (Speichern)  -  Drücke Abbrechen um aktuelle Infos abzurufen</German>
                 <Chinesesimp>按 确定 来 保存游戏  -  按 取消 来只获取情报</Chinesesimp>
-                <Original>Press OK to save the SITREP  -  press Cancel for Intel Only</Original>
-                <English>Press OK to save the SITREP  -  press Cancel for Intel Only</English>
+                <Original>Press OK to save the SITREP - press Cancel for Intel Only</Original>
+                <English>Press OK to save the SITREP - press Cancel for Intel Only</English>
             </Key>
             <Key ID="STR_DUWS_T_5xcfatn0">
                 <Spanish>¿Quiere Guardar/Activar el guardado?</Spanish>
