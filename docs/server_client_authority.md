@@ -63,35 +63,73 @@ will round differently.
 The remaining 11 sites are already server-side; routing them too is what makes the
 "no direct assignment" rule greppable, which is the property that keeps it true.
 
-## Purchases create entities on the buyer's machine
+The writer has to own the rounding, because reputation is the only pool with fractional
+deltas and `misc/fnc_warcrimes_script.sqf:48-49` currently normalises after its own
+subtraction. Left at the call sites, two callers would round differently:
 
-The reinforcement and vehicle menus run as dialog button actions
-(`includes/request_menu.hpp:74,85,97`), so their spawn calls execute on the requesting
-player's machine:
+```sqf
+fnc_rep_adjust = {
+    if (!isServer) exitWith {};
+    params [["_delta", 0]];
+    Player_Reputation = Player_Reputation + _delta;
+    // Snap to 2dp and clear float dust: deltas are fractional (+0.5, -0.3) and
+    // abs(rep) is multiplied into a spawn count, so drift would compound there.
+    Player_Reputation = (round (Player_Reputation * 100)) / 100;
+    if (abs Player_Reputation < 0.01) then { Player_Reputation = 0 };
+    publicVariable "Player_Reputation";
+};
+```
 
-| Site | Creates |
-|---|---|
-| `dialog/fnc_request_unit.sqf:30`, `dialog/fnc_request_unit_fob.sqf:29` | `createUnit` |
-| `dialog/fnc_request_squad.sqf:102`, `dialog/fnc_request_squad_fob.sqf:85` | `BIS_fnc_spawnGroup` |
-| `dialog/fnc_request_vehicle.sqf:28`, `dialog/fnc_request_vehicle_fob.sqf:28` | `createVehicle` |
-| `dialog/fnc_MHQ_deploy.sqf:12,36,52` | group plus two vehicles |
-| `operative/modern/fnc_operator_recruit.sqf:34` | `BIS_fnc_spawnGroup` |
+No display refresh: reputation has no HUD control, so the writer stays simpler than
+`fnc_cp_adjust`. Notifications already fan out via `remoteExec` at each call site and can
+stay there, but they read `Player_Reputation` for the message text, so on a client they will
+show the pre-change value — the same staleness `dialog/fnc_convertAPtoCP.sqf` solved by
+printing the expected total.
 
-An entity created on a client is local to it: that machine simulates the AI, and the group is
-orphaned if the player disconnects. Moving creation to the server also closes the
-client-side-permission-check problem below for free, because the server then owns both the
-charge and the effect — which is why this is the higher-value change of the two even though
-the authority violation is less direct.
+Two traps when converting. At `misc/fnc_warcrimes_script.sqf:45-50` the normalisation and
+broadcast sit at column zero but are syntactically inside `if (_repLoss > 0) then {`;
+indentation there does not reflect scope. And `misc/fnc_civ_init_Tomata.sqf:199-207` samples
+`Player_Reputation` into `_rep` and later compares the two to detect whether it changed
+during a wait, so that read must not be folded into the writer.
+
+`CIV_deaths` is a smaller instance of the same inconsistency: broadcast once at
+`init/server_var_init.sqf:69`, then incremented at `misc/fnc_civ_rep_Tomata.sqf:34` with no
+broadcast. Both writer and reader are server-side today, so nothing is broken — either
+broadcast it on change or stop broadcasting it at init, rather than leaving a networked
+global that silently is not.
+
+## Entity creation is mostly already correct
+
+Purchase menus spawn units and vehicles, and it is tempting to read all of that as a
+client-authority problem. It mostly is not. Locality has to be judged per site, and the
+answer differs:
+
+| Site | Runs on | Assessment |
+|---|---|---|
+| `dialog/fnc_MHQ_deploy.sqf:12,36,52` | server — the action at `dialog/fnc_MHQ_addActions.sqf:20` sends it to target 2 | already correct |
+| `dialog/fnc_request_squad.sqf:100`, `dialog/fnc_request_squad_fob.sqf:83` task-force path | server — `misc/fnc_playerTF_spawn.sqf` | already correct, and the template for server-side spawning |
+| `dialog/fnc_request_unit.sqf:30`, `dialog/fnc_request_unit_fob.sqf:29` | client, `createUnit` into `group player` | correct by design — a player's AI subordinates belong on the commanding machine |
+| `operative/modern/fnc_operator_recruit.sqf:34,59` | client, then `joinSilent (group player)` | same, ends up in the player's group |
+| `dialog/fnc_request_vehicle.sqf:28`, `dialog/fnc_request_vehicle_fob.sqf:28` | client, `createVehicle` | low risk — locality transfers when a player enters |
+| `dialog/fnc_request_squad.sqf:102`, `dialog/fnc_request_squad_fob.sqf:85` non-task-force path | client, independent High Command group | the one open question |
+
+Only the last row is arguable. An independent High Command group created on a client is
+simulated by that client and orphaned if the player disconnects, which matters because HC
+squads are meant to persist as campaign assets. Against that, the player commands them, and
+locality on the commanding machine is what keeps orders responsive. `fnc_playerTF_spawn`
+already does the server-side version for task-force squads, so the decision is which
+behaviour is wanted rather than how to implement it.
 
 ## Client-side permission checks
 
 Roughly 45 affordability comparisons across 22 files read the pool from the buying client's
 copy and apply the effect unconditionally, so the server cannot refuse. The consequences and
 the reasoning for leaving it are recorded under *Client-side affordability checks allow a
-co-op overdraft* in [`cp_economy.md`](cp_economy.md#balance-concerns); this is not scheduled
-work on its own, and the entity-creation change above dissolves most of it as a side effect.
+co-op overdraft* in [`cp_economy.md`](cp_economy.md#balance-concerns).
 `init/server_fnc_init.sqf:801-803` (`fnc_pylon_set_with_cost`) is the one purchase that
-already checks server-side, and is the pattern for the rest.
+already checks server-side, and is the pattern if this is ever scheduled. Note that it does
+not dissolve as a side effect of moving spawns: the sites that spawn on a client are the ones
+that are correct to, so the charge and the effect stay split regardless.
 
 ## Dead shared state
 
@@ -104,10 +142,16 @@ rather than repair it.
 
 ## Sequence
 
-Reputation first: it is the same shape as the finished CP and AP work, it has a live
-client-side writer, and it feeds AI spawning. Entity creation second, as it is the larger
-structural change and subsumes the permission-check problem. The dead branch is independent
-and can ride with either.
+Reputation is the only phase with a live defect and a settled shape, so it goes first and
+carries the `CIV_deaths` decision with it. The dead `protect_civ` branch is independent, a
+deletion, and can ride along. The High Command spawn question comes last because it needs a
+behaviour decision before any code — and if the answer is "leave it", the remaining work is
+the locality convention rather than any further conversion.
+
+That convention is the highest-value item left once reputation lands, and it is the cheapest:
+a one-line header on each function stating where it is meant to run. Every wrong assessment
+made while writing this doc came from trusting a file's folder over its call sites, including
+for `fnc_MHQ_deploy`, which lives under `dialog/` and runs on the server.
 
 ## Verification
 
