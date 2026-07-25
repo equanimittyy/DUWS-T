@@ -5,6 +5,11 @@
 // finding is assisted and the shooting is not.
 if (!hasInterface) exitWith {};
 
+// Marker tuning. Distances in metres, player to contact. Whether the markers run at all is a
+// separate question, gated on killhouse_area_radius (server side) measuring player to centre.
+killhouse_marker_max_range = 150;  // not drawn at all past this. The default clears the far
+                                   // corner of the structure, so nothing is hidden until this
+                                   // is deliberately tightened
 killhouse_marker_fade_near = 5;    // fully transparent at or inside this range
 killhouse_marker_fade_far  = 30;   // fully opaque at or beyond it
 killhouse_marker_icon      = "\A3\ui_f\data\map\markers\military\dot_CA.paa";
@@ -29,10 +34,11 @@ addMissionEventHandler ["Draw3D", {
             // Null-guarded because a hit contact leaves the list a couple of seconds before the
             // object is deleted, and a client's copy of the list can lag the server's either way.
             if (!isNull _x) then {
+                private _dist = player distance _x;
                 private _alpha = linearConversion [
-                    killhouse_marker_fade_near, killhouse_marker_fade_far, player distance _x, 0, 1, true
+                    killhouse_marker_fade_near, killhouse_marker_fade_far, _dist, 0, 1, true
                 ];
-                if (_alpha > 0) then {
+                if (_alpha > 0 && { _dist <= killhouse_marker_max_range }) then {
                     drawIcon3D [
                         killhouse_marker_icon,
                         _rgb + [_alpha],
