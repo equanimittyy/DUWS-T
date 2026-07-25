@@ -12,7 +12,7 @@ private _myUID = getPlayerUID player;
 
 // 如果锁已被其他玩家占用且未超时，则提示并退出
 if (_lockOwner != "" && {_lockOwner != _myUID} && {diag_tickTime < _lockExpiry}) exitWith {
-    titleText ["<t color='#ff0000' size='2'>Another player is already setting waypoints. Please wait.</t>", "PLAIN DOWN", -1, true, true];
+    titleText [format ["<t color='#ff0000' size='2'>%1</t>", localize "STR_DUWS_T_liftwp_busy"], "PLAIN DOWN", -1, true, true];
 };
 
 // 否则，尝试占用锁（可能存在极小概率的竞态，但可接受）
@@ -27,7 +27,6 @@ private _clickPos = [];                      // 本次点击位置
 private _safePos = [];                        // 安全位置检查结果
 private _markerName = "";                     // 标记名称
 private _marker = "";                          // 标记对象
-private _color = "";                            // 标记颜色
 
 // 初始化该玩家的变量（如果尚未存在）
 if (isNil {player getVariable "LiftTakeOff"}) then {player setVariable ["LiftTakeOff", false]};
@@ -36,6 +35,7 @@ if (isNil {player getVariable "LiftWaypointMarkers"}) then {player setVariable [
 
 // 打开地图
 openMap true;
+hint parseText localize "STR_DUWS_T_liftwp_brief";
 
 while {_timer > 0 && count _waypoints < 3} do {
     // 确保地图始终打开（如果玩家关闭，立即重新打开）
@@ -69,18 +69,28 @@ while {_timer > 0 && count _waypoints < 3} do {
         // 有效位置，添加到航点列表
         _waypoints pushBack _safePos;
 
-        // 创建临时地图图标（加入UID使名称更唯一）
+        // Same marker convention as the helo taxi: yellow objective icons for the route
+        // legs, a green end icon for the destination. The two supports draw on the same
+        // map and a player should not have to learn two symbol sets.
         _markerName = format ["liftwp_%1_%2_%3", _myUID, floor random 10000, count _waypoints];
         _marker = createMarker [_markerName, _safePos];
         if ((count _waypoints) == 3) then {
-            _marker setMarkerType "hd_flag";      // 终点用旗帜
+            _marker setMarkerType "hd_end";
+            _marker setMarkerColor "ColorGreen";
+            _marker setMarkerText localize "STR_DUWS_T_liftwp_drop";
         } else {
-            _marker setMarkerType "hd_dot";       // 中间点用圆点
+            _marker setMarkerType "hd_objective";
+            _marker setMarkerColor "ColorYellow";
+            _marker setMarkerText format ["LiftWP%1", count _waypoints];
         };
-        _color = ["ColorGreen", "ColorYellow", "ColorRed"] select ((count _waypoints) - 1);
-        _marker setMarkerColor _color;
-        _marker setMarkerText format ["Waypoint %1", count _waypoints];
         _markers pushBack _marker;
+
+        // Per-leg confirmation, as the taxi picker gives.
+        if ((count _waypoints) < 3) then {
+            hint localize ([
+                "STR_DUWS_T_liftwp1marked", "STR_DUWS_T_liftwp2marked"
+            ] select ((count _waypoints) - 1));
+        };
     };
 
     _timer = _timer - 1;
@@ -94,12 +104,12 @@ player setVariable ["LiftWaypoints", _waypoints];
 if (count _waypoints == 3) then {
     // 三个点已选完，将标记数组保存到玩家变量，由主脚本在释放后清理
     player setVariable ["LiftWaypointMarkers", _markers];
-    titleText ["<t color='#00ff00' size='2'>Route set! Helicopter inbound.</t>", "PLAIN DOWN", -1, true, true];
+    titleText [format ["<t color='#00ff00' size='2'>%1</t>", localize "STR_DUWS_T_liftwp_set"], "PLAIN DOWN", -1, true, true];
 } else {
     // 未完成选择（超时），立即删除标记
     { deleteMarker _x } forEach _markers;
     player setVariable ["LiftWaypointMarkers", []];
-    titleText ["<t color='#ff0000' size='2'>Waypoint selection incomplete or timed out. Mission aborted.</t>", "PLAIN DOWN", -1, true, true];
+    titleText [format ["<t color='#ff0000' size='2'>%1</t>", localize "STR_DUWS_T_liftwp_abort"], "PLAIN DOWN", -1, true, true];
 };
 
 // 标记完成，让主脚本继续

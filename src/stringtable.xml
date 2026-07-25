@@ -6390,48 +6390,52 @@
                 <Chinesesimp>这里是行动组，我们在当前位置有一辆载具需要吊装，请求派遣重型运输机。</Chinesesimp>
                 <Original>This is Alpha 1-1, we've got a vehicle here that needs sling-loading. Requesting heavy transport.</Original>
                 <English>This is Alpha 1-1, we've got a vehicle here that needs sling-loading. Requesting heavy transport.</English>
+                   <Key ID="STR_DUWS_T_heloliftabort">
+                <Original>This is Overlord. Mule 1-1 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1. Another bird available shortly. Out.</Original>
+                <English>This is Overlord. Mule 1-1 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1. Another bird available shortly. Out.</English>
             </Key>
+     </Key>
             <Key ID="STR_DUWS_T_helolift1">
                 <German>Hier ist die Leitstelle. Anfrage erhalten. Schwertransporter ETA: 40 Sekunden.</German>
                 <Spanish>Aquí la central de mando. Solicitud recibida. Avión de transporte pesado ETA: 40 segundos.</Spanish>
                 <Chinesesimp>这里是调度，请求已收到。重型运输机预计到达时间：40秒。</Chinesesimp>
-                <Original>This is Overlord. Request received. Heavy transport ETA: 40 seconds.</Original>
-                <English>This is Overlord. Request received. Heavy transport ETA: 40 seconds.</English>
+                <Original>This is Overlord. Request received, heavy transport en route to your grid. Callsign Mule 1-1, ETA forty seconds. Out.</Original>
+                <English>This is Overlord. Request received, heavy transport en route to your grid. Callsign Mule 1-1, ETA forty seconds. Out.</English>
             </Key>
             <Key ID="STR_DUWS_T_helolift2">
                 <German>Ich bin fast da. Führe Schleppladeberechnungen durch. Bewegen Sie das Zielfahrzeug nicht.</German>
                 <Spanish>Ya casi llego. Estoy realizando cálculos de carga con eslinga. No muevas el vehículo objetivo.</Spanish>
                 <Chinesesimp>我快到了，正在进行吊装计算，注意不要移动目标载具。</Chinesesimp>
-                <Original>Mule 1-1 here, almost there. Lining up the sling-load now. Keep the vehicle still.</Original>
-                <English>Mule 1-1 here, almost there. Lining up the sling-load now. Keep the vehicle still.</English>
+                <Original>Mule 1-1, one minute out. Lining up on the load, keep the vehicle stationary.</Original>
+                <English>Mule 1-1, one minute out. Lining up on the load, keep the vehicle stationary.</English>
             </Key>
             <Key ID="STR_DUWS_T_helolift3">
                 <German>Kabel wird deployiert... Wer eine Mitfahrgelegenheit braucht, kann jetzt ins Fahrzeug steigen!</German>
                 <Spanish>Desplegando cable... Quien necesite un aventón puede subir al vehículo ahora!</Spanish>
                 <Chinesesimp>正在部署绳索...需要搭便车的可以先坐上载具了！</Chinesesimp>
-                <Original>Deploying cable... Anyone needing a ride can board the vehicle now!</Original>
-                <English>Deploying cable... Anyone needing a ride can board the vehicle now!</English>
+                <Original>Cable deployed. Any personnel riding the load, board now.</Original>
+                <English>Cable deployed. Any personnel riding the load, board now.</English>
             </Key>
             <Key ID="STR_DUWS_T_helolift4">
                 <German>Seile werden gespannt, um das Fahrzeug zu heben… Habt ihr etwa Höhenangst?</German>
                 <Spanish>Apretando los cables para levantar el vehículo… ¿Nadie aquí tiene miedo a las alturas?</Spanish>
                 <Chinesesimp>正在收紧绳索以抬升载具...你们没人恐高吧？</Chinesesimp>
-                <Original>Securing cables to lift the vehicle… Nobody here’s afraid of heights, right?</Original>
-                <English>Securing cables to lift the vehicle… Nobody here’s afraid of heights, right?</English>
+                <Original>Cables secured, taking up the slack. All personnel stand clear of the load.</Original>
+                <English>Cables secured, taking up the slack. All personnel stand clear of the load.</English>
             </Key>
             <Key ID="STR_DUWS_T_helolift5">
                 <German>Alles klar! Markiere einfach den Wegpunkt für mich auf dem GPS-Terminal.</German>
                 <Spanish>¡Listo! Solo indícame el punto de ruta en el terminal GPS.</Spanish>
                 <Chinesesimp>好了！在GPS终端上为我指明航点即可。</Chinesesimp>
-                <Original>Alright! Just mark the waypoint for me on your map.</Original>
-                <English>Alright! Just mark the waypoint for me on your map.</English>
+                <Original>Load is secure. Mark your route on the map, over.</Original>
+                <English>Load is secure. Mark your route on the map, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_helolift6">
                 <German>Wir sind da. Bereitet Aufprall-Gegenmaßnahmen vor.</German>
                 <Spanish>Hemos llegado. Prepara medidas de respuesta al impacto.</Spanish>
                 <Chinesesimp>我们到了。注意部署冲击应对措施。</Chinesesimp>
-                <Original>We've arrived. Stand clear, setting the vehicle down now.</Original>
-                <English>We've arrived. Stand clear, setting the vehicle down now.</English>
+                <Original>Mule 1-1 on station. Stand clear, setting the load down.</Original>
+                <English>Mule 1-1 on station. Stand clear, setting the load down.</English>
             </Key>
             <Key ID="STR_DUWS_T_opforqrf1">
                 <German>Hier ist "Overlord". Achtung, Aufklärungseinheiten haben feindliche schnelle Eingreiftruppen (QRF) entdeckt, die sich um das Einsatzgebiet herum aufstellen. Bleibt wachsam.</German>
@@ -6481,7 +6485,35 @@
                 <Chinesesimp>%1 %2-%3呼叫调度，我们已到达预定坐标位置。</Chinesesimp>
                 <Original>%1 %2-%3 to Overlord, we're at the LZ.</Original>
                 <English>%1 %2-%3 to Overlord, we're at the LZ.</English>
+                   <Key ID="STR_DUWS_T_liftwp_brief">
+                <Original>Mark three points on the map: two route legs, then the drop point.</Original>
+                <English>Mark three points on the map: two route legs, then the drop point.</English>
             </Key>
+            <Key ID="STR_DUWS_T_liftwp1marked">
+                <Original>Waypoint 1 set. Set next waypoint</Original>
+                <English>Waypoint 1 set. Set next waypoint</English>
+            </Key>
+            <Key ID="STR_DUWS_T_liftwp2marked">
+                <Original>Waypoint 2 set. Set the drop point</Original>
+                <English>Waypoint 2 set. Set the drop point</English>
+            </Key>
+            <Key ID="STR_DUWS_T_liftwp_drop">
+                <Original>Drop point</Original>
+                <English>Drop point</English>
+            </Key>
+            <Key ID="STR_DUWS_T_liftwp_busy">
+                <Original>Mule 1-1, another element is transmitting a route. Stand by.</Original>
+                <English>Mule 1-1, another element is transmitting a route. Stand by.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_liftwp_set">
+                <Original>Route received. Mule 1-1 inbound.</Original>
+                <English>Route received. Mule 1-1 inbound.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_liftwp_abort">
+                <Original>No route received. Mule 1-1 aborting the tasking.</Original>
+                <English>No route received. Mule 1-1 aborting the tasking.</English>
+            </Key>
+     </Key>
             <Key ID="STR_DUWS_T_helotaxi2wp">
                 <German>Klicke 3 beliebige Positionen auf Karte, um sichere Route zu erstellen. Erste zwei sind Flugpunkte, letzter ist Landeplatz. Drücke ESC zum Abbrechen unvollständiger Route.</German>
                 <Spanish>Haz clic en 3 posiciones arbitrarias en mapa para crear ruta segura. Las dos primeras son puntos de vuelo, la última es zona de aterrizaje. Pulsa ESC para cancelar ruta sin terminar.</Spanish>
