@@ -7,6 +7,10 @@ _triggerPos = _this select 4;
 _flagPos = _triggerPos;
 _radius = _this select 5;
 
+// Server-only, same reason as fnc_captured: shared-pool credits plus
+// read-modify-write of networked globals, on a trigger of unproven locality.
+if (!isServer) exitWith {};
+
 if (_triggerPos in WARCOM_zones_controled_by_OPFOR) exitWith {};
 
 amount_zones_captured = amount_zones_captured - 1;
@@ -44,6 +48,7 @@ if (hardcore_mode_enable) then {
 			};
 		} forEach zone_namePOS_pairs;
 	} forEach WARCOM_zones_controled_by_OPFOR;
+	publicVariable "hardcore_visibleZone_found";
 };
 
 // MODIFY NUMBER OF CONTROLLED ZONES
