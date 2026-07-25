@@ -1,5 +1,5 @@
 // Locality: client -- passed as an addAction function value in
-// misc/fnc_addHQLaptopActions.sqf and supports/fnc_FOBactions.sqf, so it runs on
+// client/misc/fnc_addHQLaptopActions.sqf and shared/functions/fnc_FOBactions.sqf, so it runs on
 // whoever opens the manager.
 
 

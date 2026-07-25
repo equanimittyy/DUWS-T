@@ -1,4 +1,4 @@
-// Locality: client -- invoked from a dialog action (includes/campaign_menu.hpp:349).
+// Locality: client -- invoked from a dialog action (shared/includes/campaign_menu.hpp:349).
 // Campaign screen (startup_dialog2) Back button -> return to the environment screen.
 // Snapshot the combo selections first so fnc_campaign_menu restores them when the
 // player comes forward again; then closeDialog. startup_dialog2's onUnload

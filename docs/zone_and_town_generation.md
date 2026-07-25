@@ -39,14 +39,14 @@ decorated, not overhauled; the substantial new system is civilian population.
 
 ## Subsystem A: enemy zone siting ("More Urban")
 
-Default-on (`moreUrban = 1`, `src/duws/init/server_var_init.sqf:140`; campaign menu can set
+Default-on (`moreUrban = 1`, `src/duws/server/server_var_init.sqf:140`; campaign menu can set
 `0`, `fnc_process_campaign_menu.sqf:188-203`). Three stages during `server_init.sqf`.
 
 | Stage | File | Produces |
 |---|---|---|
-| 1. Survey | `functions/misc/fnc_moreUrban_locations.sqf` | `MASTER_allLocations_filtered` (Locations, town-weighted, shuffled) |
-| 2. Siting | `functions/init_zones/fnc_locatorzones_random.sqf` | one `_zonePos` per zone -> `fnc_createZone` |
-| 3. Build-out | `functions/init_zones/fnc_createzone.sqf` | markers, prefab, fortifications, triggers |
+| 1. Survey | `server/misc/fnc_moreUrban_locations.sqf` | `MASTER_allLocations_filtered` (Locations, town-weighted, shuffled) |
+| 2. Siting | `server/init_zones/fnc_locatorzones_random.sqf` | one `_zonePos` per zone -> `fnc_createZone` |
+| 3. Build-out | `server/init_zones/fnc_createzone.sqf` | markers, prefab, fortifications, triggers |
 
 **Survey** enumerates `CfgLocationTypes`, pulls map Locations and towns within
 `zones_max_dist_from_hq` of HQ (optionally a 135-degree arc), and requires non-town

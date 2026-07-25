@@ -1,5 +1,5 @@
 // Locality: client; the map-click bodies below run on the machine that triggers them, not
-// here (passed as an addAction function value in supports/taxi/fnc_helotaxi.sqf).
+// here (passed as an addAction function value in client/supports/taxi/fnc_helotaxi.sqf).
 
 _timer = 9999999;
 clicked = false;

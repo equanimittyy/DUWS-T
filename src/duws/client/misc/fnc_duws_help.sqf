@@ -1,4 +1,4 @@
-// Locality: client -- inherited from init/client_init.sqf.
+// Locality: client -- inherited from client/client_init.sqf.
 // fnc_duws_help.sqf
 // Builds the single "DUWS-T Manual" subject in the map's Notes (diary) as a numbered
 // outline: category headers (1., 2., ...) and their sub-topics (1.1, 1.2, ...), with

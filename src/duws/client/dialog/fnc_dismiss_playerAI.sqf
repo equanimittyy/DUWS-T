@@ -1,4 +1,4 @@
-// Locality: client -- invoked from a dialog action (includes/squadmng.hpp:49).
+// Locality: client -- invoked from a dialog action (shared/includes/squadmng.hpp:49).
 
 // dismiss players AI
 

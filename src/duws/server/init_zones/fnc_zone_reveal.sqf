@@ -1,4 +1,4 @@
-// Locality: server -- inherited from misc/fnc_enterlocation.sqf.
+// Locality: server -- inherited from server/misc/fnc_enterlocation.sqf.
 
 // ZONE REVEAL
 params ["_one_or_all","_zonePos"];

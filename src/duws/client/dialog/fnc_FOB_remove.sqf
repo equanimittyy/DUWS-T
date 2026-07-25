@@ -1,4 +1,4 @@
-// Locality: client -- invoked from a dialog action (includes/fobmanager.hpp:59).
+// Locality: client -- invoked from a dialog action (shared/includes/fobmanager.hpp:59).
 
 //// CREATE THE ARRAY OF FOBS w/ POSITION
 _array_of_fobs_list = [];  // init the array of fobs

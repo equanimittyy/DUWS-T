@@ -1,4 +1,4 @@
-// Locality: server only -- supports/fnc_fob_server.sqf on build, fnc_refortifyFOB via
+// Locality: server only -- server/supports/fnc_fob_server.sqf on build, fnc_refortifyFOB via
 // remoteExec target 2 on refortify. A FOB's turrets are campaign property, so spawning them
 // on the refortifying client would leave them simulated there and orphaned on disconnect.
 if (!isServer) exitWith {};

@@ -1,4 +1,4 @@
-// Locality: server -- the map-click handler in supports/fnc_mapclickuav.sqf remoteExecs to
+// Locality: server -- the map-click handler in client/supports/fnc_mapclickuav.sqf remoteExecs to
 // target 2. The trigger bodies below run on whichever machine trips them.
 _centerPos = _this select 0;
 _checkedRadius = _this select 1;

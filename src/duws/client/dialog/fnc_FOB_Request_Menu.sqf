@@ -1,5 +1,5 @@
 // Locality: client -- passed as an addAction function value in
-// supports/fnc_FOBactions.sqf, so it runs on whoever opens the menu.
+// shared/functions/fnc_FOBactions.sqf, so it runs on whoever opens the menu.
 // case #
 
 _handle = createDialog "ressourceheader2";

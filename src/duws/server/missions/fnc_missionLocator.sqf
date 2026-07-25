@@ -1,4 +1,4 @@
-// Locality: server -- inherited from init/server_init.sqf.
+// Locality: server -- inherited from server/server_init.sqf.
 ////////////////////////////////
 /// DUWS_T "More Urban" changes
 ////////////////////////////////

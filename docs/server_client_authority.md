@@ -17,7 +17,7 @@ mutated as `x = x - c; publicVariable` loses concurrent writes"*
 ([`arma_engine_gotchas.md`](arma_engine_gotchas.md)). A delta cannot carry a stale base, and the
 server applies each as one uninterruptible statement.
 
-Five writers implement it, all in `init/server_fnc_init.sqf`, and they are the templates to
+Five writers implement it, all in `server/server_fnc_init.sqf`, and they are the templates to
 copy: `fnc_cp_adjust` (signed numeric delta), `fnc_ap_adjust` (delta plus a target-pool
 selector), `fnc_rep_adjust` (delta plus ownership of rounding),
 `fnc_warcom_set_primary_zone` (an operation on a shared list, matched by value so a stale
@@ -38,7 +38,7 @@ scheduled-caller requirement are in
 [`cp_economy.md`](cp_economy.md#authority-the-server-decides-a-purchase-not-the-buyer).
 
 Where a function is *intended* to be server-only and its locality is not provable from the
-code, assert it: `init_zones/fnc_captured.sqf` and its two peers open with
+code, assert it: `server/init_zones/fnc_captured.sqf` and its two peers open with
 `if (!isServer) exitWith {}` because they are driven by a `createTrigger` whose evaluation
 locality is not proven.
 
@@ -58,9 +58,9 @@ Three files in the tree make the point:
 
 | File | Reads as | Actually |
 |---|---|---|
-| `dialog/fnc_MHQ_deploy.sqf` | client, from its folder | server — the action at `dialog/fnc_MHQ_addActions.sqf:21` sends it to target 2 |
-| `supports/fnc_helolift.sqf` | server, from an early `isServer` guard | client throughout; that guard is *indented*, governing an inner block only |
-| `misc/fnc_createKillhouse.sqf` | server, and it is | but its `addAction` body runs on the activating client, so `player` resolves there |
+| `server/dialog/fnc_MHQ_deploy.sqf` | client, from its folder | server — the action at `shared/functions/fnc_MHQ_addActions.sqf:21` sends it to target 2 |
+| `client/supports/fnc_helolift.sqf` | server, from an early `isServer` guard | client throughout; that guard is *indented*, governing an inner block only |
+| `server/misc/fnc_createKillhouse.sqf` | server, and it is | but its `addAction` body runs on the activating client, so `player` resolves there |
 
 So each load-bearing function states its locality on line one:
 
@@ -87,18 +87,18 @@ called from both sides and is safe either way, because it touches no shared stat
 Nothing load-bearing is left undocumented. Getting there needed hand-tracing for 28 files that
 automated resolution could not reach, and the reasons are worth knowing:
 
-- **Function names are referenced in mixed case.** `init/server_init.sqf:102` spawns
-  `fnc_bluHQinit` while the registry defines `fnc_BluHQinit`; `includes/operative_menu.hpp:70`
+- **Function names are referenced in mixed case.** `server/server_init.sqf:102` spawns
+  `fnc_bluHQinit` while the registry defines `fnc_BluHQinit`; `shared/includes/operative_menu.hpp:70`
   calls `fnc_LBselected` against a registered `fnc_lbselected`. SQF does not care, but any
   exact-match search over the source does, so a grep for callers silently comes back empty.
 - **A function passed as a value has no call site to find.** `addAction`, `onLBSelChanged` and
   the dyna-mission table all take a bare function reference, so the invocation never appears as
   `spawn`/`call`/`remoteExec` next to the name.
 - **One file is compiled under a different name than the file suggests.**
-  `warcom/fnc_WARCOM_opf_qrf.sqf` is registered as `fnc_QRF_test`
-  (`init/server_var_init.sqf:164`) and fired from a `FiredNear` handler.
+  `server/warcom/fnc_WARCOM_opf_qrf.sqf` is registered as `fnc_QRF_test`
+  (`server/server_var_init.sqf:164`) and fired from a `FiredNear` handler.
 
-`missions/fnc_missionPatrolsSmall.sqf` is registered and never called from anywhere. Its header
+`server/missions/fnc_missionPatrolsSmall.sqf` is registered and never called from anywhere. Its header
 records that rather than inventing a locality for it.
 
 ## Dedicated-server compatibility
@@ -106,8 +106,8 @@ records that rather than inventing a locality for it.
 **`player` is `objNull` on a dedicated server.** Anything inherently about one player's view —
 High Command assignment, comm-menu entries, teleports, addActions — must execute on that
 player's machine even when the server decides it should happen. The pattern is to hand a code
-block back to the requesting client; `misc/fnc_hirePartisans_spawnDeployed.sqf:113-118` and
-`misc/fnc_HCsquad_spawn.sqf` both do it:
+block back to the requesting client; `server/misc/fnc_hirePartisans_spawnDeployed.sqf:113-118` and
+`server/misc/fnc_HCsquad_spawn.sqf` both do it:
 
 ```sqf
 [[_group], {
@@ -119,22 +119,22 @@ block back to the requesting client; `misc/fnc_hirePartisans_spawnDeployed.sqf:1
 
 The corollary is that a bare `player` read in server-side code is a latent dedicated-server
 bug, and a silent one — `objNull` yields no error, just wrong behaviour.
-`warcom/fnc_WARCOM_blu_patrol.sqf` measured `_randomZone distance player` to keep patrol waves
+`server/warcom/fnc_WARCOM_blu_patrol.sqf` measured `_randomZone distance player` to keep patrol waves
 away from players; that returned a huge value against `objNull` so the keep-out always passed,
 and on a hosted server it only ever measured the host. It now tests `allPlayers`.
 
 Counters that name things must live server-side for the same reason. `DUWS_number_*` were
-initialised only in `includes/squad_number_init.hpp` via `init/client_init.sqf:53`, so each
+initialised only in `client/includes/squad_number_init.hpp` via `client/client_init.sqf:53`, so each
 client kept its own and two players both minted "Inf 1". The High Command counters now live in
-`misc/fnc_HCsquad_spawn.sqf`, read as `missionNamespace getVariable [key, 0]` so they
+`server/misc/fnc_HCsquad_spawn.sqf`, read as `missionNamespace getVariable [key, 0]` so they
 self-initialise wherever the server first needs them; the remaining entries in that include are
 still client-local.
 
 **One deliberate exception.** Pre-play configuration is authored on a *client*: the game master
 runs the campaign menu and broadcasts the result, and everyone else waits on
-`HQ_pos_found_generated && chosen_settings` (`init/client_init.sqf:124-138`). That survives a
+`HQ_pos_found_generated && chosen_settings` (`client/client_init.sqf:124-138`). That survives a
 dedicated server because game master is a client role rather than the host, but roughly 18
-globals in `dialog/fnc_process_campaign_menu.sqf` are set from a client and broadcast. It is
+globals in `client/dialog/fnc_process_campaign_menu.sqf` are set from a client and broadcast. It is
 safe only because it happens once, before any other writer exists. Do not let it become the
 precedent for anything mid-mission.
 
@@ -145,13 +145,13 @@ client-authority problem. It mostly is not — locality has to be judged per sit
 
 | Site | Runs on | Assessment |
 |---|---|---|
-| `dialog/fnc_MHQ_deploy.sqf` | server, via target 2 | correct |
-| `dialog/fnc_request_squad.sqf` task-force path | server, `misc/fnc_playerTF_spawn.sqf` | correct |
-| `dialog/fnc_request_squad.sqf` High Command path | server, `misc/fnc_HCsquad_spawn.sqf` | correct; campaign assets must outlive one player's session |
-| `dialog/fnc_request_unit.sqf`, `fnc_request_unit_fob.sqf` | client, `createUnit` into `group player` | correct by design — a player's AI subordinates belong on the commanding machine |
-| `operative/modern/fnc_operator_recruit.sqf` | client, then `joinSilent (group player)` | same |
-| `dialog/fnc_request_vehicle.sqf`, `fnc_request_vehicle_fob.sqf` | client, `createVehicle` | low risk — locality transfers when a player enters |
-| `init_hq/fnc_fortifyFOB.sqf`, `fnc_guardsFOB.sqf` | server, on build and on refortify alike | correct |
+| `server/dialog/fnc_MHQ_deploy.sqf` | server, via target 2 | correct |
+| `client/dialog/fnc_request_squad.sqf` task-force path | server, `server/misc/fnc_playerTF_spawn.sqf` | correct |
+| `client/dialog/fnc_request_squad.sqf` High Command path | server, `server/misc/fnc_HCsquad_spawn.sqf` | correct; campaign assets must outlive one player's session |
+| `client/dialog/fnc_request_unit.sqf`, `fnc_request_unit_fob.sqf` | client, `createUnit` into `group player` | correct by design — a player's AI subordinates belong on the commanding machine |
+| `client/operative/fnc_operator_recruit.sqf` | client, then `joinSilent (group player)` | same |
+| `client/dialog/fnc_request_vehicle.sqf`, `fnc_request_vehicle_fob.sqf` | client, `createVehicle` | low risk — locality transfers when a player enters |
+| `server/init_hq/fnc_fortifyFOB.sqf`, `fnc_guardsFOB.sqf` | server, on build and on refortify alike | correct |
 
 The distinction that matters: a group the player *commands* belongs on the commanding machine,
 because that is where orders originate. A group the campaign *owns* belongs on the server,
@@ -167,7 +167,7 @@ scroll action in a co-op mission:
 
 - **The action is added to every machine, not the builder's.** It used to target the
   `clientOwner` captured when the FOB was built, so only that player ever saw the option. It now
-  targets `[0,-2] select isDedicated` with JIP, matching `supports/fnc_FOBactions.sqf`.
+  targets `[0,-2] select isDedicated` with JIP, matching `shared/functions/fnc_FOBactions.sqf`.
 - **It carries no arguments.** Baking the current turrets into the action was only safe while one
   machine held it; broadcast, every other player's copy would still reference the ring a rebuild
   had already deleted. The server reads the live set off the FOB object instead, so the action

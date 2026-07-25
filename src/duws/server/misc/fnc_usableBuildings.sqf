@@ -1,4 +1,4 @@
-// Locality: server -- inherited from init_zones/fnc_createopfortified.sqf.
+// Locality: server -- inherited from server/init_zones/fnc_createopfortified.sqf.
 
 //find buildings with a minimum of 2 positions to avoid "unenterable" buildings
 

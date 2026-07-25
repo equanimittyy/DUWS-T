@@ -1,4 +1,4 @@
-// Locality: client -- inherited from supports/taxi/fnc_boatTaxi.sqf.
+// Locality: client -- inherited from client/supports/taxi/fnc_boatTaxi.sqf.
 
 _music_list = ["Track12_StageC_action","Track12_StageC_negative","Track08_Night_ambient","Track09_Night_percussions","LeadTrack06_F","mad"];
 

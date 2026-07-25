@@ -1,4 +1,4 @@
-// Locality: client -- inherited from init/client_init.sqf.
+// Locality: client -- inherited from client/client_init.sqf.
 
 duws_operator_list=[
 [0.57,0.39,0.49,0.28,0.51,0.35,"Rifle Scout","Ready","Erik 'Ghost' Stefan","ghost",blufor_SPECOPS_X,"H_Shemag_olive_hs",0,50],			

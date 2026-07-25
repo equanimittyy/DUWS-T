@@ -1,4 +1,4 @@
-// Locality: all machines -- inherited from dialog/fnc_MHQ_addActions.sqf.
+// Locality: all machines -- inherited from shared/functions/fnc_MHQ_addActions.sqf.
 
 // BEGIN OF SPAWN "IF MHQ DESTROYED"
 

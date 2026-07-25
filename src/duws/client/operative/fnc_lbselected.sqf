@@ -1,4 +1,4 @@
-// Locality: client -- wired to onLBSelChanged in includes/operative_menu.hpp:70, which
+// Locality: client -- wired to onLBSelChanged in shared/includes/operative_menu.hpp:70, which
 // spells it fnc_LBselected.
 _selected_index = lbCurSel 1500;
 

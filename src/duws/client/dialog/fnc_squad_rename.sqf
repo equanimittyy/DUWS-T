@@ -1,4 +1,4 @@
-// Locality: client -- invoked from a dialog action (includes/renamesquad.hpp:40).
+// Locality: client -- invoked from a dialog action (shared/includes/renamesquad.hpp:40).
 _editbox_squad_name = "blank";
 _editbox_squad_name = ctrlText 1400;
 closeDialog 0;

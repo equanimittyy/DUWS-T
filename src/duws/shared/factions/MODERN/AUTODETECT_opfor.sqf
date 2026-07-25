@@ -1,4 +1,4 @@
-// Locality: server -- compiled by fnc_factions_check from init/server_init.sqf:31; defines
+// Locality: server -- compiled by fnc_factions_check from server/server_init.sqf:31; defines
 // faction helpers rather than running logic of its own.
 ///////////
 ///////////	"OPF_F", "E X P E R I M E N T A L", "OPF_F_ARID"

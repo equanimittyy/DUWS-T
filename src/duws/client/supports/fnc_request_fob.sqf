@@ -1,4 +1,4 @@
-// Locality: client -- invoked from the comm menu (includes/supports_radio_modern.hpp:147).
+// Locality: client -- invoked from the comm menu (shared/includes/supports_radio_modern.hpp:147).
 _position = _this select 0;
 _size = _this select 1;
 _cost  = _this select 2;

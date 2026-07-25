@@ -1,4 +1,4 @@
-// Locality: server -- inherited from misc/fnc_civ_handler.sqf.
+// Locality: server -- inherited from server/misc/fnc_civ_handler.sqf.
 // fnc_civ_rep_Tomata.sqf (修复版：避免在事件上下文中直接 sleep)
 if (!canSuspend) exitWith {
     _this spawn fnc_civ_rep_Tomata;

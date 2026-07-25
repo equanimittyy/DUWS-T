@@ -1,5 +1,5 @@
-// Locality: server only (remoteExec target 2). Callers: dialog/fnc_request_squad.sqf,
-// dialog/fnc_request_squad_fob.sqf.
+// Locality: server only (remoteExec target 2). Callers: client/dialog/fnc_request_squad.sqf,
+// client/dialog/fnc_request_squad_fob.sqf.
 //
 // High Command squads are campaign assets, so the group has to be server-local: a
 // group created on the buying client is simulated by that machine and orphaned when

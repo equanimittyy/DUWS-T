@@ -1,4 +1,4 @@
-// Locality: server -- inherited from misc/fnc_civ_init_Tomata.sqf.
+// Locality: server -- inherited from server/misc/fnc_civ_init_Tomata.sqf.
 /*
     fnc_civ_locator_Tomata.sqf
     功能：获取地图上所有适合平民生成的城镇位置（无距离限制）

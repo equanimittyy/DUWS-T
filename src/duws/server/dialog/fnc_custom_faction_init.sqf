@@ -1,4 +1,4 @@
-// Locality: server -- inherited from init/server_init.sqf.
+// Locality: server -- inherited from server/server_init.sqf.
 // Server-side build of a CUSTOM faction from the pasted text. The paste screen's
 // submit handler (fnc_custom_faction_capture) validates required keys and their
 // classes before the player can leave that screen, so invalid data normally never

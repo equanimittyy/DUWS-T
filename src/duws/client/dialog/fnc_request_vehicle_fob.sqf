@@ -1,4 +1,4 @@
-// Locality: client -- invoked from a dialog action (includes/request_fob_menu.hpp:100).
+// Locality: client -- invoked from a dialog action (shared/includes/request_fob_menu.hpp:100).
 _index = lbCurSel 2122;
 
 _spawnPos = getpos player;

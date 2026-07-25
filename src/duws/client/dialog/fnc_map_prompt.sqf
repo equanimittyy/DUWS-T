@@ -1,4 +1,4 @@
-// Locality: client; the map-click bodies below run on the machine that triggers them, not here (inherited from dialog/fnc_HQ_manual_place.sqf).
+// Locality: client; the map-click bodies below run on the machine that triggers them, not here (inherited from client/dialog/fnc_HQ_manual_place.sqf).
 // Draw a prompt banner on the open map (findDisplay 12).
 // The engine's hint box renders *beneath* the map, so any prompt issued while
 // the map is open (forceMap/openMap) is invisible. A static structured-text

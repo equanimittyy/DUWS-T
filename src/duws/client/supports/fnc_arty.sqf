@@ -1,4 +1,4 @@
-// Locality: client -- inherited from supports/fnc_mapclickarty.sqf.
+// Locality: client -- inherited from client/supports/fnc_mapclickarty.sqf.
 // [position,salvos, radius, interval between salvos, rounds per salvo, supportType, cost, ammoType] spawn fnc_arty
 // AMMO TYPES:  Arty (Sh_120mm_HE) / Laser (Bo_Mk82) / Mortar(R_80mm_HE) / JDAM (Bo_Mk82) / Cluster(R_60mm_HE)
 // SUPPORT TYPE: 1 = arty, 2 = mortar, 3 = jdam, 4 = laser, 5 = cluster, 6 = napalm

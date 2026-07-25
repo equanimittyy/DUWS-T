@@ -1,4 +1,4 @@
-// Locality: server -- inherited from missions/dyna/fnc_dynamicAtmosphere_init.sqf.
+// Locality: server -- inherited from server/missions/dyna/fnc_dynamicAtmosphere_init.sqf.
 /*
     fnc_dyna_mission_supply_recovery.sqf
     功能：回收补给箱任务

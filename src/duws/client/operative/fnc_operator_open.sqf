@@ -1,5 +1,5 @@
-// Locality: client -- invoked from a dialog action (includes/request_menu.hpp:247 and
-// includes/request_fob_menu.hpp:250).
+// Locality: client -- invoked from a dialog action (shared/includes/request_menu.hpp:247 and
+// shared/includes/request_fob_menu.hpp:250).
   _handle = createDialog "operativemaingui";
   waitUntil {dialog};
  

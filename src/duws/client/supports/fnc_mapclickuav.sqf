@@ -1,5 +1,5 @@
 // Locality: client; the map-click body below runs on the machine that triggers it, not
-// here (invoked from the comm menu, includes/supports_radio_modern.hpp:137).
+// here (invoked from the comm menu, shared/includes/supports_radio_modern.hpp:137).
 
 _cost = _this select 0;
 _timer = 60;

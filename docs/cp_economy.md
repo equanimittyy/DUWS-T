@@ -12,7 +12,7 @@ the `blufor_RQST_*` variables and `fnc_evalVehicleCost` — see
 ## Authority: one server-side writer per pool
 
 `commandpointsblu1` is a networked global, so every change routes through a single
-server-side function, `fnc_cp_adjust` (`src/duws/init/server_fnc_init.sqf`), invoked as
+server-side function, `fnc_cp_adjust` (`src/duws/server/server_fnc_init.sqf`), invoked as
 `[delta] remoteExec ["fnc_cp_adjust", 2]`. Callers send a signed *delta*; nothing else
 assigns or `publicVariable`s the pool, and the result is floored at 0 — the purchase gates all
 ask *"can I afford this"*, so a negative pool behaves like an empty one and the floor only
@@ -40,7 +40,7 @@ re-reading the pool, whose local copy is still pre-spend at that point.
 Reputation follows the same contract, with one addition: `fnc_rep_adjust` (same file) owns the
 rounding as well as the write. It is the only pool taking fractional deltas (`+0.5`, `-0.3`),
 and `abs Player_Reputation` is multiplied into a hostile-civilian spawn count
-(`misc/fnc_civ_handler.sqf:532-534`), so float drift would compound into AI behaviour rather
+(`server/misc/fnc_civ_handler.sqf:532-534`), so float drift would compound into AI behaviour rather
 than just a display. The writer snaps to two decimals and zeroes anything below `0.01`; callers
 send a plain delta and never normalise, or two of them would round differently. Its pre-play
 absolute is `server_var_init.sqf:155`. Like AP it has no HUD control and no event handler, so
@@ -57,7 +57,7 @@ once. The debits are then applied in full and the floor absorbs the overshoot, w
 second purchase free.
 
 Every purchase therefore routes through a request/reply handshake, both halves in
-`init/server_fnc_init.sqf`. `fnc_pool_spend` runs on the buyer, sends the request and blocks;
+`server/server_fnc_init.sqf`. `fnc_pool_spend` runs on the buyer, sends the request and blocks;
 `fnc_pool_try_spend` runs on the server, tests and debits as adjacent statements against the
 one server copy, and replies with the verdict. Call sites read as a guard clause:
 
@@ -70,8 +70,8 @@ Three properties are load-bearing:
 - **The debit is `call fnc_cp_adjust`, not `remoteExec [..., 2]`.** Even on the server,
   remoteExec queues a scheduled job for a later frame, which would split the test from the
   debit and reopen the gap. The same applies to the server-side purchase paths that never used
-  the handshake — `misc/fnc_redeployHQUnits.sqf`, `supports/fnc_activateBaseRepairStation.sqf`,
-  `supports/fnc_uav_scanner.sqf`, `fnc_pylon_set_with_cost`.
+  the handshake — `server/misc/fnc_redeployHQUnits.sqf`, `server/supports/fnc_activateBaseRepairStation.sqf`,
+  `server/supports/fnc_uav_scanner.sqf`, `fnc_pylon_set_with_cost`.
 - **The caller blocks, so it must be scheduled.** `waitUntil` throws in unscheduled code. Every
   purchase entry point is `spawn`ed today — the dialog `action =` fields, the comm-menu
   `expression =` fields, `addAction` bodies — so any new one must be too.
@@ -79,63 +79,63 @@ Three properties are load-bearing:
   reply is otherwise indistinguishable in-game from a genuine refusal.
 
 Three client-side comparisons survive as *advisory* pre-filters, and are commented as such:
-`supports/fnc_mapclickarty.sqf`, `supports/fnc_mapclickuav.sqf`,
-`misc/fnc_addRedeployAction.sqf`, plus the opening check in `supports/fnc_request_fob.sqf`.
+`client/supports/fnc_mapclickarty.sqf`, `client/supports/fnc_mapclickuav.sqf`,
+`client/misc/fnc_addRedeployAction.sqf`, plus the opening check in `client/supports/fnc_request_fob.sqf`.
 Each spares the player a wait — a 45 s map-click window, a 10 s site survey — that they
 provably cannot pay for. None of them decides anything; the charge happens later, on the
 server, against a balance the pre-filter's read has long since stopped describing.
 
 Where a comm-menu support passes `_cost = 0` the charge already happened at unlock time, so the
-handshake short-circuits and the site is left alone: `dialog/fnc_MHQ_select.sqf` and both taxis
+handshake short-circuits and the site is left alone: `client/dialog/fnc_MHQ_select.sqf` and both taxis
 in `supports/taxi/` spend nothing.
 
 ## Faucets
 
 | Source | File | Amount |
 |---|---|---|
-| Zone capture (first time) | `init_zones/fnc_captured.sqf:42` | `round(points/2)` — ≈50 for a 1000 m zone |
-| Zone recapture (after loss) | `init_zones/fnc_blufor_cap.sqf:55` | `round(points/3)` — ≈33; intentionally lower |
-| Passive territory hold | `misc/fnc_zonesundercontrol.sqf:6,11` | `zones_held × 6`, every 30 min |
-| Side-mission reward | `missions/fnc_mission_reward.sqf` | `reward × cp_reward_multiplier` (multiplier default 1) |
-| Reputation tick | `misc/fnc_civ_init_Tomata.sqf:237` | `ceil(rep/2)`, every 15 min |
-| Recruit rescued civilian | `misc/fnc_recruit_civilian_server.sqf` | +5 (+8 in WBK mode) |
-| Intel analysis (terminal) | `misc/fnc_intelAnalysis.sqf` | 1.5–8 per item; `FileTopSecret`/`FilesSecret` = 8 |
-| Enemy corpse loot | `misc/fnc_addRandomLoot.sqf` → analysis | ~80% of enemies carry 0–2 of Money/Files/Wallet |
-| Corpse search | `misc/fnc_corpse_search_action.sqf` | 20% chance of +1 CP (+1 AP) per corpse |
-| Vehicle recycle | `supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle |
-| Vehicle-kill / kill-streak | `init/server_init.sqf:337,353` | per-kill points; +1 per 10 kills |
-| Killhouse training | `misc/fnc_createKillhouse.sqf:1020` | +0.05 per kill, inside a 180 s window |
-| Scorched-earth town razing | `misc/fnc_civ_handler.sqf`, `fnc_civ_handler_wbk.sqf` | +15 (with AP + reputation penalties) |
-| Rare-zombie kill (WBK) | `misc/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
-| AP→CP conversion | `dialog/fnc_convertAPtoCP.sqf` | 15 AP → 10 CP, one-way |
+| Zone capture (first time) | `server/init_zones/fnc_captured.sqf:42` | `round(points/2)` — ≈50 for a 1000 m zone |
+| Zone recapture (after loss) | `server/init_zones/fnc_blufor_cap.sqf:55` | `round(points/3)` — ≈33; intentionally lower |
+| Passive territory hold | `server/misc/fnc_zonesundercontrol.sqf:6,11` | `zones_held × 6`, every 30 min |
+| Side-mission reward | `server/missions/fnc_mission_reward.sqf` | `reward × cp_reward_multiplier` (multiplier default 1) |
+| Reputation tick | `server/misc/fnc_civ_init_Tomata.sqf:237` | `ceil(rep/2)`, every 15 min |
+| Recruit rescued civilian | `server/misc/fnc_recruit_civilian_server.sqf` | +5 (+8 in WBK mode) |
+| Intel analysis (terminal) | `server/misc/fnc_intelAnalysis.sqf` | 1.5–8 per item; `FileTopSecret`/`FilesSecret` = 8 |
+| Enemy corpse loot | `server/misc/fnc_addRandomLoot.sqf` → analysis | ~80% of enemies carry 0–2 of Money/Files/Wallet |
+| Corpse search | `client/misc/fnc_corpse_search_action.sqf` | 20% chance of +1 CP (+1 AP) per corpse |
+| Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle |
+| Vehicle-kill / kill-streak | `server/server_init.sqf:337,353` | per-kill points; +1 per 10 kills |
+| Killhouse training | `server/misc/fnc_createKillhouse.sqf:1020` | +0.05 per kill, inside a 180 s window |
+| Scorched-earth town razing | `server/misc/fnc_civ_handler.sqf`, `fnc_civ_handler_wbk.sqf` | +15 (with AP + reputation penalties) |
+| Rare-zombie kill (WBK) | `server/misc/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
+| AP→CP conversion | `client/dialog/fnc_convertAPtoCP.sqf` | 15 AP → 10 CP, one-way |
 
-The passive-hold loop is spawned exactly once (`warcom/fnc_init_OPFOR_WARCOM.sqf:20`), so
+The passive-hold loop is spawned exactly once (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:20`), so
 territory income does not stack per zone captured.
 
 ## Sinks
 
 | Category | Where | Cost |
 |---|---|---|
-| Radio-support unlocks | `dialog/fnc_request_support.sqf` | 5–25 (supply 5 … CAS/CAP 25) |
+| Radio-support unlocks | `client/dialog/fnc_request_support.sqf` | 5–25 (supply 5 … CAS/CAP 25) |
 | Reinforcement units | `dialog/fnc_request_unit*.sqf` | 2–4 (from `blufor_RQST_UNIT_*`) |
 | Vehicles | `dialog/fnc_request_vehicle*.sqf` | 5–100 (from `fnc_evalVehicleCost`, clamped) |
 | Squads | `dialog/fnc_request_squad*.sqf` | per squad table |
-| FOB deploy | `supports/fnc_request_fob.sqf` | fixed |
-| Operatives | `operative/modern/fnc_operator_recruit.sqf:30` | 8 (re-deploying a healed one is free) |
-| Mobile HQ | `dialog/fnc_MHQ_select.sqf` | 10 |
-| FOB refortify / reguard | `init_hq/fnc_refortifyFOB.sqf`, `fnc_reguardFOB.sqf` | 5 / 15 |
+| FOB deploy | `client/supports/fnc_request_fob.sqf` | fixed |
+| Operatives | `client/operative/fnc_operator_recruit.sqf:30` | 8 (re-deploying a healed one is free) |
+| Mobile HQ | `client/dialog/fnc_MHQ_select.sqf` | 10 |
+| FOB refortify / reguard | `client/init_hq/fnc_refortifyFOB.sqf`, `fnc_reguardFOB.sqf` | 5 / 15 |
 | Heli / boat taxi | `supports/taxi/` | fixed |
-| Base repair, HQ redeploy, sitrep | `supports/fnc_activateBaseRepairStation.sqf`, `misc/fnc_redeployHQUnits.sqf`, `supports/fnc_sitrep_support.sqf` | 2 / 2 / 1 |
-| Death | `init/client_init.sqf:187` | `DUWSMP_CP_death_cost` (0–10) |
+| Base repair, HQ redeploy, sitrep | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/misc/fnc_redeployHQUnits.sqf`, `server/supports/fnc_sitrep_support.sqf` | 2 / 2 / 1 |
+| Death | `client/client_init.sqf:187` | `DUWSMP_CP_death_cost` (0–10) |
 
 ## Who may spend
 
 Two permission lists of playable slot names, defined together at
-`init/server_var_init.sqf:225-258` and checked as `(vehiclevarname player) in <list>`:
+`server/server_var_init.sqf:225-258` and checked as `(vehiclevarname player) in <list>`:
 
 | List | Owns |
 |---|---|
-| `game_master` | campaign-level control — the setup flow, side-mission requests (`missions/fnc_stratmap.sqf:24`), the global heal |
+| `game_master` | campaign-level control — the setup flow, side-mission requests (`client/missions/fnc_stratmap.sqf:24`), the global heal |
 | `Squad_Leaders` | everything that spends CP — request menus, radio supports, MHQ, FOB refortify and reguard — plus High Command |
 
 `Squad_Leaders` lists every playable slot as shipped, so it restricts nothing today. It exists to
@@ -143,7 +143,7 @@ be trimmed: on a dedicated server, cutting it to the real squad-lead slots restr
 above in a single edit.
 
 That only holds while **nothing outside a permission check reads it**. Personal kit — the medic,
-engineer and UAV traits — is granted unconditionally at `init/client_init.sqf:199-201` for exactly
+engineer and UAV traits — is granted unconditionally at `client/client_init.sqf:199-201` for exactly
 this reason. Gating a *capability* rather than a *privilege* on this array would mean trimming it
 silently removed revives from the rest of the team, with no error to point at.
 

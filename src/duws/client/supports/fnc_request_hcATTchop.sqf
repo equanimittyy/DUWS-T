@@ -1,5 +1,5 @@
 // Locality: client; the event-handler bodies below run on the machine that triggers them,
-// not here (invoked from the comm menu, includes/supports_radio_modern.hpp:187).
+// not here (invoked from the comm menu, shared/includes/supports_radio_modern.hpp:187).
 _cost = 0;
 _index = lbCurSel 2103;
 AttChopInUse = true;

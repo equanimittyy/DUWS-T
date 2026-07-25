@@ -21,7 +21,7 @@ returns nothing, so there is no handle to wait on and nothing to reveal the gap.
 inline. Reserve `remoteExec [..., 2]` for callers that are genuinely remote. When the verdict
 has to travel back to a client, `remoteExec` a reply function at the requesting player rather
 than trying to return a value — `fnc_pool_try_spend` and `fnc_pool_spend`
-(`src/duws/init/server_fnc_init.sqf`) are the two halves of that handshake.
+(`src/duws/server/server_fnc_init.sqf`) are the two halves of that handshake.
 
 ## Non-serializable handles must not live in the mission namespace
 
@@ -43,7 +43,7 @@ in `uiNamespace`, which is never saved and is the engine's intended home for UI 
 Read with a default and null-check — `isNull (uiNamespace getVariable ["myDisplay",
 displayNull])` — which also detects a dialog closed elsewhere. The faction selector holds
 its reused dialog handle this way, in `fnc_factionSelector`
-(`src/duws/factions/MODERN/fn_factionAutoDetect.sqf`).
+(`src/duws/shared/factions/MODERN/fn_factionAutoDetect.sqf`).
 
 ## `exitWith` exits the nearest loop or call scope, not the enclosing if/then
 
@@ -76,7 +76,7 @@ cause (the wasted time goes into suspecting a missing class definition instead).
 
 **How to apply:** `_ctrl ctrlSetStructuredText (parseText _markup)` to set, `parseText ""`
 to clear. The faction selector's "no units" caption uses this, in `fnc_factionSelector`
-(`src/duws/factions/MODERN/fn_factionAutoDetect.sqf`).
+(`src/duws/shared/factions/MODERN/fn_factionAutoDetect.sqf`).
 
 ## Listbox rows show `<t>` markup literally; `addAction` titles render it
 
@@ -91,7 +91,7 @@ listbox row. Row colour has its own channel anyway — `lbSetColor [idc, index, 
 
 **How to apply:** strip `<...>` tags before `lbAdd` and colour the row via `lbSetColor`.
 The reusable action menu does this for every row, in `fnc_open_action_menu`
-(`src/duws/functions/dialog/fnc_open_action_menu.sqf`).
+(`src/duws/client/dialog/fnc_open_action_menu.sqf`).
 
 ## Duplicate `<Key ID>` in stringtable.xml resolve to one definition, silently
 
@@ -124,7 +124,7 @@ layers are also below the map.
 **How to apply:** draw the prompt on the map display itself. Create a static
 `RscStructuredText` control on `findDisplay 12` and set it with `ctrlSetStructuredText` —
 static controls are click-transparent, so the underlying `onMapSingleClick` still fires.
-`fnc_map_prompt` (`src/duws/functions/dialog/fnc_map_prompt.sqf`) does this for the HQ /
+`fnc_map_prompt` (`src/duws/client/dialog/fnc_map_prompt.sqf`) does this for the HQ /
 AO-direction prompts; pass `""` to clear it before `openMap [false, false]`.
 
 ## Diary records display newest-first, so add them bottom-up
@@ -161,7 +161,7 @@ producing the integer result.
 `_n = floor _m; if (random 1 < (_m - _n)) then { _n = _n + 1 }` for probabilistic
 rounding — then loop `to _n`. The OPFOR unit-multiplier options are kept integer
 (`enemyunitMultiplier` 1/2/3) for this reason: the enemy-spawn builders in
-`src/duws/functions/init_zones/fnc_createop*.sqf` loop `for "_i" from 0 to
+`src/duws/server/init_zones/fnc_createop*.sqf` loop `for "_i" from 0 to
 enemyunitMultiplier`, so a fractional option there would not change the unit count.
 
 ## A shared global mutated as `x = x - c; publicVariable "x"` loses concurrent writes
@@ -192,7 +192,7 @@ and applies it (`x = x + _delta; publicVariable "x"`); callers send the delta vi
 `[_delta] remoteExec ["fn", 2]` and never touch the global directly. The server serialises
 the deltas as ordinary atomic statements, so nothing is lost regardless of who fires when
 — a delta cannot carry a stale base the way an absolute can. Command points use exactly
-this: `fnc_cp_adjust` (`src/duws/init/server_fnc_init.sqf`) is the sole writer of
+this: `fnc_cp_adjust` (`src/duws/server/server_fnc_init.sqf`) is the sole writer of
 `commandpointsblu1`; the host's own `publicVariableEventHandler` does not fire for its own
 broadcast, so that function also refreshes the on-screen counter locally when
 `hasInterface`.

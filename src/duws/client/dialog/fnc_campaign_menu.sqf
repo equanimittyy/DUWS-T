@@ -1,4 +1,4 @@
-// Locality: client -- inherited from dialog/fnc_callsign_back.sqf.
+// Locality: client -- inherited from client/dialog/fnc_callsign_back.sqf.
   _handle = createDialog "startup_dialog2";
   waitUntil {dialog};
 

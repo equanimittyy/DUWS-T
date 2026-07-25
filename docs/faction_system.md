@@ -2,7 +2,7 @@
 
 How DUWS_T decides which units and vehicles each side fields. See
 [`architecture.md`](architecture.md) for the wider mission structure. All faction code
-lives under `src/duws/factions/` (data) and `src/duws/functions/` (logic); paths below
+lives under `src/duws/shared/factions/` (data) and the `server/` / `client/` trees (logic); paths below
 are relative to `src/`.
 
 ## The core abstraction: a faction variable schema
@@ -31,14 +31,14 @@ The schema can be populated three ways, all selected at campaign start:
 | Path | Code | How it fills the schema |
 |---|---|---|
 | **Static template** | `factions/MODERN/<file>_{blufor,opfor}.sqf` (254 files) | Hand-authored direct assignments, one file per supported mod faction |
-| **Procedural (autodetect)** | `factions/MODERN/fn_factionAutoDetect.sqf` + `AUTODETECT_*` | Classifies any installed faction's `CfgVehicles` at runtime |
-| **Custom (user text)** | `functions/dialog/fnc_custom_faction_{capture,init}.sqf` | Parses and compiles a faction definition the player pastes in |
+| **Procedural (autodetect)** | `shared/factions/MODERN/fn_factionAutoDetect.sqf` + `AUTODETECT_*` | Classifies any installed faction's `CfgVehicles` at runtime |
+| **Custom (user text)** | `client/dialog/fnc_custom_faction_capture.sqf`, `server/dialog/fnc_custom_faction_init.sqf` | Parses and compiles a faction definition the player pastes in |
 
 ## Selection and availability
 
 Which factions the player can pick is discovered at start, not hard-wired.
 
-`functions/misc/fnc_factions_check_modern.sqf` (`fnc_factions_check`) holds two master
+`server/misc/fnc_factions_check_modern.sqf` (`fnc_factions_check`) holds two master
 lists — `_faction_files_BLUFOR` and `_faction_files_OPFOR` (~130 entries each). Each entry is:
 
 ```text
@@ -53,12 +53,12 @@ Arid and CSAT Arid are always-present defaults). The same file probes signature 
 classes to set `civ_mod`. The `AUTODETECT`, `AUTODETECT_RANDOM`, and `CUSTOM` pseudo-factions
 are appended to the lists as always-available options.
 
-`functions/dialog/fnc_HQ_faction_dialog.sqf` renders two dropdowns from those arrays (blue
+`client/dialog/fnc_HQ_faction_dialog.sqf` renders two dropdowns from those arrays (blue
 BLUFOR, red OPFOR) and, on selection, sets `BLUFOR_Faction_X` / `OPFOR_Faction_X` to the
 chosen faction-file token, then hands off to HQ placement.
 
-`functions/init_hq/fnc_BLUFOR_faction_init.sqf` and
-`functions/warcom/fnc_OPFOR_faction_init.sqf` resolve the choice to a file, build the path
+`server/init_hq/fnc_BLUFOR_faction_init.sqf` and
+`server/warcom/fnc_OPFOR_faction_init.sqf` resolve the choice to a file, build the path
 `duws\factions\MODERN\<file>_<side>.sqf`, then `compile preprocessFileLineNumbers` and call
 it — populating the schema. (This dynamic path build is why the faction folder can't be
 renamed without care.) `AUTODETECT*`/`CUSTOM` route to the generator or the paste parser
@@ -105,7 +105,7 @@ hand-authored file:
 ## Custom factions
 
 The `CUSTOM` option lets a player define a faction by pasting text. `fnc_custom_faction_capture.sqf`
-reads two dialog text boxes (controls 2100/2101, defined in `includes/custom_faction.hpp`) into
+reads two dialog text boxes (controls 2100/2101, defined in `shared/includes/custom_faction.hpp`) into
 `BLUfactionDataTemp` / `OPFfactionDataTemp`. `fnc_custom_faction_init.sqf` then splits the pasted
 text on newlines, keeps lines containing `blufor_` / `opfor_`, strips path-like lines, and
 `call compile`s each `variable = "classname";` pair — so the paste is executed as SQF. It
@@ -115,7 +115,7 @@ dialog.
 
 ## Squads
 
-`functions/init_hq/fnc_BLUFOR_squad_init.sqf` and `functions/warcom/fnc_OPFOR_squad_init.sqf`
+`server/init_hq/fnc_BLUFOR_squad_init.sqf` and `server/warcom/fnc_OPFOR_squad_init.sqf`
 compose higher-order groups from the role variables — recon team, infantry squad, motorized /
 mechanized / armor sections — each tagged with a CP price (e.g. `blufor_INF_SQUAD_X =
 [_squad, "Infantry Squad (12CP)", 12]`). Autodetect re-runs squad init every five minutes so
@@ -123,10 +123,10 @@ squads track the re-rolled unit types.
 
 ## Civilians
 
-Civilians are templated separately. `factions/CIV_FACTIONS.sqf` sets `civ_array` from the
+Civilians are templated separately. `shared/factions/CIV_FACTIONS.sqf` sets `civ_array` from the
 `CIV_PRESENCE` parameter, choosing a classname list per source: vanilla (regional variants),
 CUP, CFP, PrOpfor/LOP, Unsung, IFA3, and a Ravage-zombie set (which falls back to vanilla civs
-if Ravage is absent). `civ_array` feeds the civilian/informant system in `functions/misc/`.
+if Ravage is absent). `civ_array` feeds the civilian/informant system in `server/misc/`.
 
 ## Adding a faction
 

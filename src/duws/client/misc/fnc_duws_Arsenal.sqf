@@ -1,5 +1,5 @@
-// Locality: client -- passed as an addAction function value in dialog/fnc_MHQ_deploy.sqf,
-// dialog/fnc_request_support.sqf and init_hq/fnc_HQaddactions.sqf, so it runs on whoever
+// Locality: client -- passed as an addAction function value in server/dialog/fnc_MHQ_deploy.sqf,
+// client/dialog/fnc_request_support.sqf and client/init_hq/fnc_HQaddactions.sqf, so it runs on whoever
 // opens the arsenal.
 /*
 if (isClass (configFile >> "CfgPatches" >> "ace_main")) then {

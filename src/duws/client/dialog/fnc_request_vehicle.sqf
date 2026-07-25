@@ -1,4 +1,4 @@
-// Locality: client -- invoked from a dialog action (includes/request_menu.hpp:97).
+// Locality: client -- invoked from a dialog action (shared/includes/request_menu.hpp:97).
 _index = lbCurSel 2102;
 
 _spawnPos = getpos bluHQ_object;

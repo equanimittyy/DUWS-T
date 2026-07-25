@@ -19,20 +19,20 @@ The mission root splits into two trees plus the engine-pinned root files.
 | Path | Contents | Ownership |
 |---|---|---|
 | `src/modules/` | `AIS`, `R3F_LOG`, `VCOM`, `taw_vd`, `zbe_cache` | Vendored third-party — **frozen** |
-| `src/duws/` | `functions`, `includes`, `init`, `operative`, `factions`, `sounds_npics` | DUWS_T (Kibot/Tomata/5U5 lineage) |
+| `src/duws/` | `server`, `client`, `shared` | DUWS_T (Kibot/Tomata/5U5 lineage) |
 | `src/` (root) | `mission.sqm`, `description.ext`, `stringtable.xml`, root event scripts, `DUWS_T.jpg` | Engine-pinned |
 
 The engine loads a fixed set of scripts by name from the mission root and they cannot
 move: `INIT.sqf`, `initPlayerLocal.sqf`, `onPlayerKilled.sqf`, `onPlayerRespawn.sqf`.
-Note the root `INIT.sqf` (an entry script) is distinct from the `duws/init/` folder
-(the server/client init scripts it delegates to).
+Note the root `INIT.sqf` (an entry script) is distinct from `duws/server/server_init.sqf`
+and `duws/client/client_init.sqf` (the init scripts it delegates to by role).
 
 **The `modules/` boundary is load-bearing.** Editing a vendored framework forfeits the
 ability to pull upstream fixes and inherits its bugs permanently. Change code in
 `duws/`; leave `modules/` alone.
 
 Folder names under `duws/` follow `lower_snake_case`. The one intentional exception is
-`duws/factions/MODERN`: `MODERN` mirrors the `VERSION_X` logic constant (see
+`duws/shared/factions/MODERN`: `MODERN` mirrors the `VERSION_X` logic constant (see
 [§Cross-cutting systems](#cross-cutting-systems)), so it is uppercase like a constant,
 not a naming slip.
 
@@ -52,7 +52,7 @@ Two function-loading mechanisms coexist, which is not inferable from any single 
   [`../src/description.ext`](../src/description.ext), producing namespaced globals
   (`AIS_*_fnc_*`, `TAWVD_fnc_*`, `VCM_fnc_*`).
 - **The DUWS core** compiles its `fnc_*` globals from a hand-maintained registry in
-  `src/duws/init/server_fnc_init.sqf` (~250 entries). There is no manifest of these
+  `src/duws/server/server_fnc_init.sqf` (~250 entries). There is no manifest of these
   functions beyond that file.
 
 ## Boot flow
@@ -62,8 +62,8 @@ is binarized world state.
 
 ```text
 INIT.sqf ── detects role (server / hosted / client / headless)
-  ├─ server → duws/init/server_init.sqf   campaign generator
-  ├─ client → duws/init/client_init.sqf   UI, actions, menus
+  ├─ server → duws/server/server_init.sqf   campaign generator
+  ├─ client → duws/client/client_init.sqf   UI, actions, menus
   └─ both   → modules/R3F_LOG/init.sqf    logistics, after WARCOM is ready
 ```
 
@@ -72,9 +72,35 @@ faction detection and BLUFOR/OPFOR init → place HQ (blocks on the player) → 
 enemy zones → start the WARCOM AI director → register the capture-zones win task → then
 the ongoing side-mission spawner, cleanup loops, and event scripts.
 
-## The DUWS engine — `duws/functions/`
+## The DUWS engine — `duws/`
 
-| Subdir | Role |
+The top level is execution locality, the level below it is subsystem:
+
+```text
+src/duws/
+  server/   server_init.sqf  server_var_init.sqf  server_fnc_init.sqf
+            init_zones/ warcom/ missions/ misc/ init_hq/ dialog/ supports/
+  client/   client_init.sqf
+            dialog/ supports/ misc/ init_hq/ operative/ missions/ warcom/ sounds/ includes/
+  shared/   functions/ factions/ includes/ sounds_npics/
+```
+
+**A folder states where the file's own top-level body executes. Nothing more.** Two things
+it deliberately cannot express, both recorded in the file's `// Locality:` header instead:
+
+- **Callbacks.** ~49 files hang an `addAction`, trigger, button or map-click body that runs
+  on whichever machine triggers it, not where the file ran. `server/init_zones/fnc_createzone.sqf`
+  builds a zone on the server *and* attaches actions that fire on a player's machine; it lives
+  in `server/` because that is where its own body runs.
+- **Reachability.** `server_fnc_init.sqf` broadcasts most of what it compiles with
+  `publicVariable`, so the code exists on every machine. Having a copy is not running there.
+
+`shared/` is therefore narrow: `shared/functions/` holds only the 16 files whose top-level
+body genuinely runs on more than one machine, alongside data, config and assets that have no
+locality at all. A file passed to `remoteExec` *by value* rather than by name needs no
+broadcast, so "never `publicVariable`'d" does not imply server-only.
+
+| Subsystem | Role |
 |---|---|
 | `init_zones/` | Procedural zone generation: garrisons, patrols, fortifications, capture logic. Where zones are sited (the "More Urban" town detection) and the separate civilian "Dynamic Town" system are in [`zone_and_town_generation.md`](zone_and_town_generation.md) |
 | `init_hq/` | HQ and FOB setup: base init, fortify/guard, FOB patrols. How the Main Base layout is built and how to rearrange it (including an Eden round-trip) are in [`hq_layout_editing.md`](hq_layout_editing.md) |
@@ -84,20 +110,22 @@ the ongoing side-mission spawner, cleanup loops, and event scripts.
 | `dialog/` | Runtime UI: HQ/FOB request menus, mobile-HQ deploy, campaign menu, faction dialog, the CP/AP economy |
 | `misc/` | Autosave, recruiting, black market, civilian/informant system, intel-on-death, fast travel, AI master control |
 | `sounds/` | Ambient music loop |
+| `operative/` | Operative recruit/deploy menu |
+| `includes/` | Dialog and config `.hpp` under `shared/`; the two `#include`d SQF bodies under `client/` |
 
 ## Cross-cutting systems
 
 | System | Where | Note |
 |---|---|---|
-| Economy | `functions/dialog/`, `functions/supports/` | Two currencies, CP and AP, earned by capturing zones and completing side missions. CP faucets, sinks, and balance concerns in [`cp_economy.md`](cp_economy.md) |
-| Persistence | `functions/misc/fnc_autoSave.sqf` | Vanilla `saveGame` only — no custom serialization; save/continue relies entirely on the engine's campaign save |
-| Faction detection | `functions/misc/fnc_factions_check_modern.sqf`, `factions/MODERN/AUTODETECT_*` | Adapts to installed faction mods and runs mod-free. `VERSION_X` (value `"MODERN"`) selects the faction set, doubles as the `factions/` subfolder name, and is game state — so its value is not safe to change. Full detail in [`faction_system.md`](faction_system.md) |
+| Economy | `client/dialog/`, `client/supports/` | Two currencies, CP and AP, earned by capturing zones and completing side missions. CP faucets, sinks, and balance concerns in [`cp_economy.md`](cp_economy.md) |
+| Persistence | `server/misc/fnc_autoSave.sqf` | Vanilla `saveGame` only — no custom serialization; save/continue relies entirely on the engine's campaign save |
+| Faction detection | `server/misc/fnc_factions_check_modern.sqf`, `shared/factions/MODERN/AUTODETECT_*` | Adapts to installed faction mods and runs mod-free. `VERSION_X` (value `"MODERN"`) selects the faction set, doubles as the `shared/factions/` subfolder name, and is game state — so its value is not safe to change. Full detail in [`faction_system.md`](faction_system.md) |
 | Revive | `initPlayerLocal.sqf` | Chosen at start: AIS, vanilla, or auto-disabled when ACE medical is present |
-| Performance | `modules/zbe_cache`, `modules/taw_vd`, `functions/misc/fnc_repetitive_cleanup.sqf` | Distant-AI caching, view-distance control, and aggressive zone cleanup keep a whole-map persistent war affordable |
-| Hardcore mode | `hardcore_mode_enable`, chosen in the environment menu (`functions/dialog/fnc_process_enviro_menu.sqf:160`), gating ~22 sites across `functions/init_zones/`, `functions/missions/`, `functions/warcom/` | Zone markers are created at alpha 0 and revealed by entering a zone or finding intel (`functions/init_zones/fnc_zone_reveal.sqf`); `hardcore_visibleZone_found` then releases WARCOM waves and task-force squads. See the gap below |
+| Performance | `modules/zbe_cache`, `modules/taw_vd`, `server/misc/fnc_repetitive_cleanup.sqf` | Distant-AI caching, view-distance control, and aggressive zone cleanup keep a whole-map persistent war affordable |
+| Hardcore mode | `hardcore_mode_enable`, chosen in the environment menu (`client/dialog/fnc_process_enviro_menu.sqf:160`), gating ~22 sites across `server/init_zones/`, `server/missions/`, `server/warcom/` | Zone markers are created at alpha 0 and revealed by entering a zone or finding intel (`server/init_zones/fnc_zone_reveal.sqf`); `hardcore_visibleZone_found` then releases WARCOM waves and task-force squads. See the gap below |
 
 **Known gap: hardcore does not hide zone positions from Zeus.** Under the BLUFOR curator option
-(`ZeusStatus == 1`), `functions/misc/fnc_zeus_objects_init.sqf` adds every WEST and CIVILIAN unit
+(`ZeusStatus == 1`), `server/misc/fnc_zeus_objects_init.sqf` adds every WEST and CIVILIAN unit
 and vehicle to the curator on a 30 s loop. Arma counts static weapons as vehicles, so a curator
 can read a hidden zone's defences straight off the map. A branch there once narrowed the civilian
 half to aircraft for exactly this reason, but it tested `DUWS_MODE == "HARDCORE"` — a value

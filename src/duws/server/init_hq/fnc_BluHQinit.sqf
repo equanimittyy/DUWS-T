@@ -1,4 +1,4 @@
-// Locality: server -- spawned from init/server_init.sqf:102, which spells it fnc_bluHQinit;
+// Locality: server -- spawned from server/server_init.sqf:102, which spells it fnc_bluHQinit;
 // SQF names are case-insensitive.
 // fnc_BluHQinit.sqf (最终修复版：增加更多无敌物体)
 if (isNil "PosOfBLUHQ") exitWith {};

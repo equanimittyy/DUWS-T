@@ -1,4 +1,4 @@
-// Locality: client -- inherited from dialog/fnc_startup_next.sqf.
+// Locality: client -- inherited from client/dialog/fnc_startup_next.sqf.
 
 // MAX RADIUS
 _index = lbCurSel 2100;

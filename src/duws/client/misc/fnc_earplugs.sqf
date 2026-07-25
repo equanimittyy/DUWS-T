@@ -1,4 +1,4 @@
-// Locality: client -- passed as an addAction function value in init/client_init.sqf:233,
+// Locality: client -- passed as an addAction function value in client/client_init.sqf:233,
 // so it runs on whoever toggles their earplugs.
 
 if (soundVolume == 0.3) then {

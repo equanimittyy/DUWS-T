@@ -1,8 +1,8 @@
 # Editing the HQ layout
 
 The player's Main Base is built once, server-side, by
-`src/duws/functions/init_hq/fnc_BluHQinit.sqf` (compiled at
-`src/duws/init/server_fnc_init.sqf:6`, spawned at `src/duws/init/server_init.sqf:96`).
+`src/duws/server/init_hq/fnc_BluHQinit.sqf` (compiled at
+`src/duws/server/server_fnc_init.sqf:6`, spawned at `src/duws/server/server_init.sqf:96`).
 It anchors on `PosOfBLUHQ`, the base spot chosen during placement
 (`fnc_HQ_random_place.sqf:39` or `fnc_HQ_manual_place.sqf:64`).
 
@@ -166,7 +166,7 @@ with the laptop, the patrol — are placed by code (`fnc_BluHQinit.sqf:253-632`)
   tower) in the array — dependents follow — or edit its inline block.
 - The redeploy/rebuild path reads `HQ_redeploy_*` mission-namespace variables set in this
   same file (e.g. `:630-632`) and consumed by
-  `src/duws/functions/misc/fnc_redeployHQUnits.sqf`, so editing here keeps rebuild consistent.
+  `src/duws/server/misc/fnc_redeployHQUnits.sqf`, so editing here keeps rebuild consistent.
 
-Player-deployed FOBs are a separate system (`src/duws/functions/init_hq/fnc_fortifyFOB.sqf`,
+Player-deployed FOBs are a separate system (`src/duws/server/init_hq/fnc_fortifyFOB.sqf`,
 inline offset calls, no shared array) and share nothing with the Main Base layout.

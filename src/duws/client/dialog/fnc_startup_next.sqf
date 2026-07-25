@@ -1,4 +1,4 @@
-// Locality: client -- invoked from a dialog action (includes/campaign_menu.hpp:336).
+// Locality: client -- invoked from a dialog action (shared/includes/campaign_menu.hpp:336).
 // NEXT on the campaign screen (startup_dialog2): read the campaign combos into their
 // vars while the dialog is still open, snapshot the selections so the screen can
 // restore them if the player returns via the callsign screen's Back, then advance to

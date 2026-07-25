@@ -1,5 +1,5 @@
 // Locality: client -- passed as an addAction function value in
-// misc/fnc_addHQLaptopActions.sqf, so it runs on whoever opens the menu.
+// client/misc/fnc_addHQLaptopActions.sqf, so it runs on whoever opens the menu.
 // case #
 
 _handle = createDialog "ressourceheader";

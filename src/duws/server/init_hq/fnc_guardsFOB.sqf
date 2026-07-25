@@ -1,4 +1,4 @@
-// Locality: server only -- supports/fnc_fob_server.sqf on build, fnc_reguardFOB via
+// Locality: server only -- server/supports/fnc_fob_server.sqf on build, fnc_reguardFOB via
 // remoteExec target 2 on reguard. A FOB's garrison is campaign property, so spawning it on
 // the reguarding client would leave it simulated there and orphaned on disconnect.
 if (!isServer) exitWith {};

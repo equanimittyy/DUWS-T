@@ -1,5 +1,5 @@
 // Locality: client -- passed as an addAction function value in
-// missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_mission.sqf, so it runs on
+// server/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_mission.sqf, so it runs on
 // whoever sabotages the laptop. Rewards and cleanup are remoteExec'd to the server.
 _object = _this select 0;
 

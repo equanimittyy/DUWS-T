@@ -1,4 +1,4 @@
-// Locality: client -- invoked from the comm menu (includes/supports_radio_modern.hpp:87).
+// Locality: client -- invoked from the comm menu (shared/includes/supports_radio_modern.hpp:87).
 // The addAction bodies it attaches via BIS_fnc_MP run on the machine that triggers them.
 /*
  * fnc_ammobox.sqf
