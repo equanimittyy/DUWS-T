@@ -1,3 +1,4 @@
+// Locality: client -- invoked from a dialog action (includes/squadmng.hpp:93).
 for "_timer" from 10 to 1 step -1 do {
     hint format[localize "STR_DUWS_T_1bntq9ke",_timer];
     sleep 1;

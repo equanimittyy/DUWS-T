@@ -1,3 +1,4 @@
+// Locality: server -- inherited from init_zones/fnc_createzone.sqf.
 // fnc_modern_Outpost2.sqf (基于 composition 偏移量重构版)
 // 原始 Composition 中心: [1523.1245, 4.9986, 2312.0906] (x, z, y)
 _centerSpawn = _this select 0;

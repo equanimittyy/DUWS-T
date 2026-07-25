@@ -1,3 +1,6 @@
+// Locality: client -- invoked from the comm menu (includes/supports_radio_modern.hpp:167).
+// The isServer guards at lines 12 and 137 are indented inside sub-function bodies, so they
+// gate those bodies, not this file; the addAction body below runs on whoever triggers it.
 // 现有严重bug————客户端呼叫的直升机无法生成路点。已经在fnc_request_support里为客户端禁用了直升机吊装功能。
 // 修改说明：将所有 setMass 和 allowDamage 操作移到服务器；故障处理改为远程调用服务器清理。
 // 二次修改：在 setMass 和 allowDamage 后添加 remoteExec 广播，使状态同步到所有客户端。

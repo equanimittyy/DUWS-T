@@ -1,3 +1,4 @@
+// Locality: client -- invoked from a dialog action (includes/request_fob_menu.hpp:77).
 _index = lbCurSel 2120;
 
 _skill = (blufor_ai_skill select 0)+0.2;

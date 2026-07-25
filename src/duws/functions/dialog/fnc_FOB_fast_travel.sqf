@@ -1,3 +1,4 @@
+// Locality: client -- invoked from a dialog action (includes/fobmanager.hpp:79).
 if (!enable_fast_travel) exitWith {hint localize "STR_DUWS_T_gogv37ur"};
 
 //// CREATE THE ARRAY OF FOBS w/ POSITION

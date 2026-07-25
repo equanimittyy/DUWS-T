@@ -1,3 +1,4 @@
+// Locality: client -- invoked from the comm menu (includes/supports_radio_modern.hpp:117).
 _target = _this select 0;
 _cost = _this select 1;
 _location = getpos _target;

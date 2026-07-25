@@ -113,7 +113,8 @@ Regenerating the classification, so no stale list has to live in this doc:
 ```sh
 python3 - <<'PY'
 import re, os
-for root, _, fs in os.walk('src/duws/functions'):
+for root, _, fs in os.walk('src/duws'):
+    if os.sep + 'factions' in root: continue   # spawn tables, not code with a locality
     for f in sorted(fs):
         if not f.endswith('.sqf'): continue
         p = os.path.join(root, f)

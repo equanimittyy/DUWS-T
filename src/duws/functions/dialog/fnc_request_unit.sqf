@@ -1,3 +1,4 @@
+// Locality: client -- invoked from a dialog action (includes/request_menu.hpp:74).
 _index = lbCurSel 2100;
 
 _skill = blufor_ai_skill_random;

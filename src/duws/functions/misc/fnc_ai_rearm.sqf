@@ -1,3 +1,6 @@
+// Locality: client -- passed as an addAction function value in dialog/fnc_MHQ_deploy.sqf,
+// supports/fnc_ammobox.sqf and supports/fnc_FOBactions.sqf, so it runs on whoever rearms.
+// The unit rearm itself is remoteExec'd to the server.
 // fnc_ai_rearm.sqf
 private _result = [localize "STR_DUWS_T_ij1nh3gu", localize "STR_DUWS_T_d7eqef75", true, true] call BIS_fnc_guiMessage;
 if (_result) then {

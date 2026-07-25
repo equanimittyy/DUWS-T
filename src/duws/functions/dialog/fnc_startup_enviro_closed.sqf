@@ -1,3 +1,4 @@
+// Locality: client -- startup_dialog's onUnload handler (includes/enviro_menu.hpp:8).
 // startup_dialog onUnload. Fires on any close of the environment screen.
 // NEXT leaves duws_faction_reselect false and fnc_process_enviro_menu opens the
 // campaign screen; Back sets it, so re-enter the faction/HQ flow instead.

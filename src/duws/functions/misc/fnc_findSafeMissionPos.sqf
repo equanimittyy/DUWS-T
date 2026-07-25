@@ -1,3 +1,5 @@
+// Locality: unreferenced -- registered in server_fnc_init.sqf but never called from
+// anywhere, so it has no locality until someone wires it up.
 /*
     fnc_findSafeMissionPos.sqf
     功能：查找一个安全的任务生成位置，远离所有战区、HQ和其他已激活任务区域

@@ -1,3 +1,4 @@
+// Locality: server -- inherited from init_zones/fnc_createzone.sqf.
 // fnc_modern_vehfittingstation.sqf (基于 composition 偏移量重构版)
 _centerSpawn = _this select 0;
 _centerSpawnX = _centerSpawn select 0;

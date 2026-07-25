@@ -1,3 +1,4 @@
+// Locality: server -- inherited from init_zones/fnc_createzone.sqf.
 _centerSpawn = _this select 0;
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;

@@ -1,3 +1,6 @@
+// Locality: client -- passed as an addAction function value in dialog/fnc_MHQ_deploy.sqf,
+// dialog/fnc_request_support.sqf and init_hq/fnc_HQaddactions.sqf, so it runs on whoever
+// opens the arsenal.
 /*
 if (isClass (configFile >> "CfgPatches" >> "ace_main")) then {
 	[player, player, true] call ace_arsenal_fnc_openBox;

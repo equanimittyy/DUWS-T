@@ -1,3 +1,4 @@
+// Locality: client -- invoked from a dialog action (includes/enviro_menu.hpp:309).
 // Environment screen (startup_dialog) Back button -> re-pick faction + HQ.
 // Snapshot selections (restored when the flow returns to this screen), flag the
 // reopen, then close. startup_dialog's onUnload (fnc_startup_enviro_closed)

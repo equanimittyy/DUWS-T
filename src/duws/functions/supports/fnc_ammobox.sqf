@@ -1,3 +1,5 @@
+// Locality: client -- invoked from the comm menu (includes/supports_radio_modern.hpp:87).
+// The addAction bodies it attaches via BIS_fnc_MP run on the machine that triggers them.
 /*
  * fnc_ammobox.sqf
  * 功能：呼叫空投补给箱，消耗指挥点，空中载具运送并投放。

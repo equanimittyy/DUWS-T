@@ -1,3 +1,5 @@
+// Locality: client -- passed as an addAction function value in init/client_init.sqf:233,
+// so it runs on whoever toggles their earplugs.
 
 if (soundVolume == 0.3) then {
 	1 fadesound 1;

@@ -1,3 +1,4 @@
+// Locality: client -- invoked from a comm-menu expression (includes/supports_radio_modern.hpp:209).
 
 _cost = _this select 0;
 

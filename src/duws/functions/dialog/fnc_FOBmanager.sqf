@@ -1,3 +1,6 @@
+// Locality: client -- passed as an addAction function value in
+// misc/fnc_addHQLaptopActions.sqf and supports/fnc_FOBactions.sqf, so it runs on
+// whoever opens the manager.
 
 
 if (count Array_of_FOBname < 1) exitWith {hint localize "STR_DUWS_T_2q33n8h7"};

@@ -1,3 +1,4 @@
+// Locality: client -- invoked from a dialog action (includes/request_fob_menu.hpp:88).
 
 _index = lbCurSel 2121;
 

@@ -1,3 +1,5 @@
+// Locality: client; the addAction bodies below run on the machine that triggers them, not
+// here (invoked from the comm menu, includes/supports_radio_modern.hpp:157).
 
 _posplayer = _this select 0;
 _radius = _this select 1;
