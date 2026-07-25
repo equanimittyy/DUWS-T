@@ -16,7 +16,12 @@ server-side function, `fnc_cp_adjust` (`src/duws/server/server_fnc_init.sqf`), i
 `[delta] remoteExec ["fnc_cp_adjust", 2]`. Callers send a signed *delta*; nothing else
 assigns or `publicVariable`s the pool, and the result is floored at 0 — the purchase gates all
 ask *"can I afford this"*, so a negative pool behaves like an empty one and the floor only
-keeps the HUD honest. This is a hard concurrency requirement, not a style
+keeps the HUD honest. The writer also **rounds the running total**, which is what makes CP an
+integer currency: the HUD prints the pool raw, so any fraction reaching it renders as `32.05`.
+Rounding the total rather than the delta additionally normalises a pool that already holds a
+fraction. A caller that wants to pay out sub-point amounts must therefore accumulate whole
+points itself — the writer would swallow a `0.05` delta silently, so it logs one to the RPT
+instead. This is a hard concurrency requirement, not a style
 choice: mutating a networked global as `x = x - c; publicVariable "x"` from a client drops
 concurrent co-op changes and can duplicate CP — see the gotchas entry *"A shared global
 mutated as `x = x - c; publicVariable` loses concurrent writes"* in
@@ -102,9 +107,9 @@ in `supports/taxi/` spend nothing.
 | Intel analysis (terminal) | `server/misc/fnc_intelAnalysis.sqf` | 1.5–8 per item; `FileTopSecret`/`FilesSecret` = 8 |
 | Enemy corpse loot | `server/misc/fnc_addRandomLoot.sqf` → analysis | ~80% of enemies carry 0–2 of Money/Files/Wallet |
 | Corpse search | `client/misc/fnc_corpse_search_action.sqf` | 20% chance of +1 CP (+1 AP) per corpse |
-| Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle |
+| Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle, summed then rounded |
 | Vehicle-kill / kill-streak | `server/server_init.sqf:337,353` | per-kill points; +1 per 10 kills |
-| Killhouse training | `server/misc/fnc_createKillhouse.sqf:1020` | +0.05 per kill, inside a 180 s window |
+| Killhouse training | `server/misc/fnc_createKillhouse.sqf:1072` | +1 (targets) or +10 (challenge), once, on clearing all 100 |
 | Scorched-earth town razing | `server/misc/fnc_civ_handler.sqf`, `fnc_civ_handler_wbk.sqf` | +15 (with AP + reputation penalties) |
 | Rare-zombie kill (WBK) | `server/misc/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | AP→CP conversion | `client/dialog/fnc_convertAPtoCP.sqf` | 15 AP → 10 CP, one-way |
@@ -174,13 +179,6 @@ vehicles convert to free CP. It is *not* a buy-then-recycle loop: purchase cost
 (`DUWS_fnc_calculateVehicleValue`, small and uncapped), so buying to recycle always loses.
 The two formulas are simply not on the same scale, and recycle has no floor tying reward to
 what a vehicle cost.
-
-**Killhouse training still awards fractional CP.** `fnc_createKillhouse.sqf:1020` adds 0.05
-per kill inside a 180 s window, so the pool and HUD can read `32.05`. It is the last fractional
-source — the support refunds now wrap the division (`floor (_cost / 2)`), where the old
-`floor _cost / 2` parsed as `(floor _cost) / 2` and refunded half-points. Rounding the training
-reward would delete it rather than fix it, so bounding it means accumulating whole points
-instead.
 
 **AP→CP merges the two economies.** `fnc_convertAPtoCP.sqf` trades 15 AP → 10 CP,
 repeatable with no cooldown. It is one-way (there is no CP→AP path), so it cannot loop, but

@@ -71,6 +71,8 @@ if (isNil "fnc_veh_recycle_preview_server") then {
 
         private _totalValue = 0;
         { _totalValue = _totalValue + ([_x] call DUWS_fnc_calculateVehicleValue); } forEach _recyclableVehicles;
+        // Rounded as the payout is, or the preview quotes a figure the credit contradicts.
+        _totalValue = round _totalValue;
 
         private _msg = format [localize "STR_DUWS_T_PREVIEW_VALUE", count _recyclableVehicles, _totalValue];
         [_msg] remoteExec ["hint", _caller];
@@ -99,6 +101,9 @@ if (isNil "fnc_veh_recycle_action") then {
         if (_count > 0) then {
             private _totalReward = 0;
             { _totalReward = _totalReward + ([_x] call DUWS_fnc_calculateVehicleValue); deleteVehicle _x; } forEach _recyclableVehicles;
+            // Half-point seat values and the 0.8/1.1/1.5 class multipliers make this a float;
+            // round once here so the hint and the credited amount cannot disagree.
+            _totalReward = round _totalReward;
             [_totalReward] remoteExec ["fnc_cp_adjust", 2];
             [format [localize "STR_DUWS_T_chenggonghuishou", _count, _totalReward]] remoteExec ["hint", _caller];
         } else {

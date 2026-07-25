@@ -1,4 +1,5 @@
-// Locality: server; the addAction bodies below run on the machine that triggers them, not here.
+// Locality: server; the addAction and HitPart bodies below run on the machine that triggers
+// them, not here.
 // fnc_createKillhouse.sqf
 // 生成基于 composition 偏移的 Killhouse 训练场 (所有物体、正确朝向、高空)
 // 初始不生成靶子，通过多屏幕电脑动作来生成目标和敌人
@@ -843,8 +844,7 @@ missionNamespace setVariable ["killhouse_centerX", _centerSpawnX];
 missionNamespace setVariable ["killhouse_centerY", _centerSpawnY];
 missionNamespace setVariable ["killhouse_centerZ", _centerSpawnZ];
 missionNamespace setVariable ["killhouse_targetData", _targetsData];
-missionNamespace setVariable ["killhouse_training_running", false];
-missionNamespace setVariable ["killhouse_training_thread", nil];
+missionNamespace setVariable ["killhouse_run_active", false];
 // ========== 第一步：生成普通物体 ==========
 private _computerObjects = [];
 {
@@ -899,175 +899,240 @@ missionNamespace setVariable ["killhouse_targets", []];
 missionNamespace setVariable ["killhouse_enemies", []];
 
 // ========== 定义服务器端生成/清理逻辑 ==========
-// 生成目标
-killhouse_srv_spawn_targets = {
+// Deletes a shot target. Called from each target's HitPart handler, which runs on the
+// shooting client, so the delete has to come back here -- the server owns the list.
+// The membership test keeps that list authoritative and stops a remote call deleting
+// anything that is not a killhouse target. Repeat hits on one target are no-ops.
+killhouse_srv_target_hit = {
     if (!isServer) exitWith {};
-    private _centerX = missionNamespace getVariable "killhouse_centerX";
-    private _centerY = missionNamespace getVariable "killhouse_centerY";
-    private _centerZ = missionNamespace getVariable "killhouse_centerZ";
-    private _allTargets = missionNamespace getVariable "killhouse_targetData";
-    if (isNil "_allTargets") exitWith {};
+    params [["_target", objNull]];
+    private _targets = missionNamespace getVariable ["killhouse_targets", []];
+    if !(_target in _targets) exitWith {};
+    missionNamespace setVariable ["killhouse_targets", _targets - [_target], true];
+    deleteVehicle _target;
+};
+publicVariable "killhouse_srv_target_hit";
 
-    // 终止正在运行的训练计时（如果有）
-    if (missionNamespace getVariable ["killhouse_training_running", false]) then {
-        private _thread = missionNamespace getVariable "killhouse_training_thread";
-        if (!isNil "_thread") then { terminate _thread; };
-        missionNamespace setVariable ["killhouse_training_running", false];
-    };
+// Run shape. Globals rather than file-scope privates: the killhouse_srv_* bodies run later,
+// from remoteExec, where a private declared here is long out of scope.
+killhouse_run_total              = 100;
+killhouse_wave_size              = 10;
+killhouse_wave_threshold         = 3;   // next wave once this many or fewer are alive
+killhouse_wave_timeout           = 30;  // ...or this long after the last wave, but only while
+killhouse_wave_timeout_threshold = 10;  // at or below this, so a stalled run cannot stack
+                                        // wave on wave onto a course nobody is clearing
+killhouse_reward_training        = 1;
+killhouse_reward_challenge       = 10;
+killhouse_progress_period        = 1;   // seconds between progress hints; cannot resolve
+                                        // finer than the wave loop's own tick below
+killhouse_area_radius            = 80;  // 3D from the composition centre: the structure spans
+                                        // ~70 m and floats at 1000 m, so the check cannot
+                                        // confuse it with anyone standing underneath
 
-    // 清除所有目标与敌人
+// Players currently inside the killhouse. Position rather than a flag set by the teleport
+// actions: players also arrive by other routes and leave by dying, respawning or the exit
+// action, and none of those would clear a flag.
+killhouse_srv_occupants = {
+    if (!isServer) exitWith { [] };
+    private _centre = [
+        missionNamespace getVariable ["killhouse_centerX", 0],
+        missionNamespace getVariable ["killhouse_centerY", 0],
+        missionNamespace getVariable ["killhouse_centerZ", 0]
+    ];
+    allPlayers select { (getPosWorld _x) distance _centre < killhouse_area_radius }
+};
+
+// Every killhouse hint goes through here, so the drill never talks to players out in the
+// field. Targeting the occupant units also drops the dedicated-server case for free: it owns
+// no player unit, so it is never in the list and needs no isDedicated special case.
+killhouse_srv_hint = {
+    if (!isServer) exitWith {};
+    params ["_msg"];
+    private _who = call killhouse_srv_occupants;
+    if (_who isEqualTo []) exitWith {};
+    [_msg] remoteExec ["hint", _who];
+};
+
+// Three call sites need exactly this, and a half-cleared killhouse leaks objects at 1000 m
+// where nobody will ever see them to notice.
+killhouse_srv_clear_all = {
+    if (!isServer) exitWith {};
     { deleteVehicle _x; } forEach (missionNamespace getVariable ["killhouse_targets", []]);
     { deleteVehicle _x; } forEach (missionNamespace getVariable ["killhouse_enemies", []]);
     missionNamespace setVariable ["killhouse_targets", [], true];
     missionNamespace setVariable ["killhouse_enemies", [], true];
+};
 
-    // 随机选取 50%-70% 目标
-    private _total = count _allTargets;
-    private _percent = 0.5 + random 0.2;
-    private _count = floor (_total * _percent);
-    if (_count < 1) then { _count = 1; };
-    private _selected = _allTargets call BIS_fnc_arrayShuffle;
-    _selected resize _count;
+// Clearing the flag is the whole cancel mechanism -- the wave loop polls it and returns
+// within a tick. Holding the script handle to terminate would be the obvious alternative,
+// but SCRIPT has no serialized form and the mission namespace is written into save games.
+killhouse_srv_end_run = {
+    if (!isServer) exitWith {};
+    params [["_announce", true]];
+    if !(missionNamespace getVariable ["killhouse_run_active", false]) exitWith {};
+    missionNamespace setVariable ["killhouse_run_active", false];
+    if (_announce) then {
+        [localize "STR_DUWS_KILLHOUSE_TRAINING_CANCELLED"] call killhouse_srv_hint;
+    };
+};
 
-    private _newTargets = [];
-    {
-        _x params ["_class", "_dX", "_dY", "_dZ", "_yaw"];
-        private _obj = createVehicle [_class, [0,0,0], [], 0, "CAN_COLLIDE"];
-        _obj setPosWorld [
-            _centerX + _dX,
-            _centerY + _dY,
-            _centerZ + _dZ
+// Spawns one wave onto the composition rows it is handed.
+killhouse_srv_spawn_wave = {
+    if (!isServer) exitWith {};
+    params ["_mode", "_slots"];
+    private _centerX = missionNamespace getVariable "killhouse_centerX";
+    private _centerY = missionNamespace getVariable "killhouse_centerY";
+    private _centerZ = missionNamespace getVariable "killhouse_centerZ";
+
+    if (_mode == "TRAINING") then {
+        private _targets = missionNamespace getVariable ["killhouse_targets", []];
+        {
+            _x params ["_class", "_dX", "_dY", "_dZ", "_yaw"];
+            private _obj = createVehicle [_class, [0,0,0], [], 0, "CAN_COLLIDE"];
+            _obj setPosWorld [_centerX + _dX, _centerY + _dY, _centerZ + _dZ];
+            _obj setDir ((_yaw * 180) / 3.1415926535);
+            // These range targets ignore bullet damage, so a server-side Hit/HandleDamage EH
+            // never fires on them. HitPart is a physical-impact event instead, and it runs on
+            // the machine that fired the round, so it goes on every machine and bounces the
+            // delete back here. Keyed to _obj: JIP clients get it, and the queued message is
+            // dropped when the target is deleted.
+            [_obj, ["HitPart", {
+                [((_this select 0) select 0)] remoteExec ["killhouse_srv_target_hit", 2];
+            }]] remoteExec ["addEventHandler", 0, _obj];
+            _targets pushBack _obj;
+        } forEach _slots;
+        missionNamespace setVariable ["killhouse_targets", _targets, true];
+        [format [localize "STR_DUWS_T_TARGETS_SPAWNED", count _slots]] call killhouse_srv_hint;
+    } else {
+        private _unitPool = [
+            opfor_SOLDIER_X, opfor_AA_SOLDIER_X, opfor_AR_SOLDIER_X, opfor_AT_SOLDIER_X,
+            opfor_GL_SOLDIER_X, opfor_LAT_SOLDIER_X, opfor_SL_SOLDIER_X, opfor_TL_SOLDIER_X,
+            opfor_MARK_SOLDIER_X, opfor_ENG_SOLDIER_X, opfor_SNIPER_SOLDIER_X,
+            opfor_OPERATOR_X, opfor_OFFICER_X
         ];
-        _obj setDir ((_yaw * 180) / 3.1415926535);
-        _obj allowDamage false;
-        _newTargets pushBack _obj;
-    } forEach _selected;
+        private _enemies = missionNamespace getVariable ["killhouse_enemies", []];
+        {
+            _x params ["_class", "_dX", "_dY", "_dZ"];
+            private _posATL = [_centerX + _dX, _centerY + _dY, _centerZ + _dZ];
+            private _group = [_posATL, EAST, [selectRandom _unitPool], [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
+            _group deleteGroupWhenEmpty true;
+            private _unit = leader _group;
+            _unit setPosWorld _posATL;
+            _unit disableAI "PATH";
+            _unit setUnitPos (selectRandom ["UP", "MIDDLE", "DOWN"]);
+            _unit setDir (random 360);
+            _unit setBehaviour "COMBAT";
+            _unit setCombatMode "RED";
+            _unit allowFleeing 0;
+            // Drop from the list before deleting, not after: the wave loop counts this array
+            // to decide when the next wave is due and when the run is finished, and a
+            // deleted unit no longer matches for removal.
+            _unit addEventHandler ["Killed", {
+                params ["_unit"];
+                if (!isServer) exitWith {};
+                private _live = missionNamespace getVariable ["killhouse_enemies", []];
+                missionNamespace setVariable ["killhouse_enemies", _live - [_unit], true];
+                deleteVehicle _unit;
+            }];
+            _enemies pushBack _unit;
+        } forEach _slots;
+        missionNamespace setVariable ["killhouse_enemies", _enemies, true];
+        [format [localize "STR_DUWS_T_ENEMIES_SPAWNED", count _slots]] call killhouse_srv_hint;
+    };
+};
 
-    missionNamespace setVariable ["killhouse_targets", _newTargets, true];
-    [format [localize "STR_DUWS_T_TARGETS_SPAWNED", _count]] remoteExec ["hint", [0,-2] select isDedicated];
+// Drives one run to completion in either mode, and supersedes whatever was running.
+killhouse_srv_start_run = {
+    if (!isServer) exitWith {};
+    params ["_mode"];
+    private _allSlots = missionNamespace getVariable "killhouse_targetData";
+    if (isNil "_allSlots") exitWith {};
+
+    [false] call killhouse_srv_end_run;   // silent: a new run supersedes, it does not cancel
+    call killhouse_srv_clear_all;
+
+    // One shuffled composition row per spawn, walked in order, so no row is reused within a
+    // run and two objects can never end up in one spot. That is also why the total is capped
+    // at the row count instead of wrapping.
+    private _slots = _allSlots call BIS_fnc_arrayShuffle;
+    private _total = killhouse_run_total min (count _slots);
+    // Without this an empty composition would read as "all spawned, none alive" on the first
+    // pass and pay the reward for a run that never happened.
+    if (_total < 1) exitWith {};
+
+    // Supersede token. Clearing the active flag alone does not stop the outgoing thread: it
+    // can wake from its sleep after this function has set the flag back to true and carry on
+    // spawning alongside the new run. Each run captures its own id and stops the moment it is
+    // no longer the current one. A number, so it still serializes into a save.
+    private _runId = (missionNamespace getVariable ["killhouse_run_id", 0]) + 1;
+    missionNamespace setVariable ["killhouse_run_id", _runId];
+    missionNamespace setVariable ["killhouse_run_active", true];
+
+    [_mode, _slots, _total, _runId] spawn {
+        params ["_mode", "_slots", "_total", "_runId"];
+        private _listVar = ["killhouse_enemies", "killhouse_targets"] select (_mode == "TRAINING");
+        private _spawned = 0;
+        private _lastWave = time;
+        private _lastProgress = time;
+        private _complete = false;
+
+        while { !_complete
+                && { missionNamespace getVariable ["killhouse_run_active", false] }
+                && { (missionNamespace getVariable ["killhouse_run_id", 0]) isEqualTo _runId } } do {
+            private _alive = count (missionNamespace getVariable [_listVar, []]);
+            if (_spawned >= _total) then {
+                _complete = (_alive == 0);
+            } else {
+                private _due = (_alive <= killhouse_wave_threshold)
+                    || { _alive <= killhouse_wave_timeout_threshold
+                         && { time - _lastWave >= killhouse_wave_timeout } };
+                if (_due) then {
+                    private _size = killhouse_wave_size min (_total - _spawned);
+                    [_mode, _slots select [_spawned, _size]] call killhouse_srv_spawn_wave;
+                    _spawned = _spawned + _size;
+                    _lastWave = time;
+                };
+            };
+            // Re-read rather than reuse _alive: a wave may have gone up this pass, and the
+            // count the player is told should include it.
+            if (!_complete && { time - _lastProgress >= killhouse_progress_period }) then {
+                private _up = count (missionNamespace getVariable [_listVar, []]);
+                [format [localize "STR_DUWS_KILLHOUSE_PROGRESS", _total - (_spawned - _up), _total, _up]] call killhouse_srv_hint;
+                _lastProgress = time;
+            };
+
+            if (!_complete) then { sleep 1; };
+        };
+
+        if (_complete) then {
+            missionNamespace setVariable ["killhouse_run_active", false];
+            private _reward = [killhouse_reward_challenge, killhouse_reward_training] select (_mode == "TRAINING");
+            [_reward] call fnc_cp_adjust;
+            [format [localize "STR_DUWS_KILLHOUSE_RESULT", _total, _reward]] call killhouse_srv_hint;
+        };
+    };
+};
+
+// 生成目标
+killhouse_srv_spawn_targets = {
+    if (!isServer) exitWith {};
+    ["TRAINING"] call killhouse_srv_start_run;
 };
 publicVariable "killhouse_srv_spawn_targets";
 
 // 生成敌人
 killhouse_srv_spawn_enemies = {
     if (!isServer) exitWith {};
-    private _centerX = missionNamespace getVariable "killhouse_centerX";
-    private _centerY = missionNamespace getVariable "killhouse_centerY";
-    private _centerZ = missionNamespace getVariable "killhouse_centerZ";
-    private _allTargets = missionNamespace getVariable "killhouse_targetData";
-    if (isNil "_allTargets") exitWith {};
-
-    // 终止正在运行的训练计时（如果有）
-    if (missionNamespace getVariable ["killhouse_training_running", false]) then {
-        private _thread = missionNamespace getVariable "killhouse_training_thread";
-        if (!isNil "_thread") then { terminate _thread; };
-        missionNamespace setVariable ["killhouse_training_running", false];
-        [localize "STR_DUWS_KILLHOUSE_TRAINING_CANCELLED"] remoteExec ["hint", [0,-2] select isDedicated];
-    };
-
-    // 统一清除所有目标与敌人
-    { deleteVehicle _x; } forEach (missionNamespace getVariable ["killhouse_targets", []]);
-    { deleteVehicle _x; } forEach (missionNamespace getVariable ["killhouse_enemies", []]);
-    missionNamespace setVariable ["killhouse_targets", [], true];
-    missionNamespace setVariable ["killhouse_enemies", [], true];
-
-    // 随机选取 50%-70%
-    private _total = count _allTargets;
-    private _percent = 0.5 + random 0.2;
-    private _count = floor (_total * _percent);
-    if (_count < 1) then { _count = 1; };
-    private _selected = _allTargets call BIS_fnc_arrayShuffle;
-    _selected resize _count;
-
-    private _unitPool = [
-        opfor_SOLDIER_X, opfor_AA_SOLDIER_X, opfor_AR_SOLDIER_X, opfor_AT_SOLDIER_X,
-        opfor_GL_SOLDIER_X, opfor_LAT_SOLDIER_X, opfor_SL_SOLDIER_X, opfor_TL_SOLDIER_X,
-        opfor_MARK_SOLDIER_X, opfor_ENG_SOLDIER_X, opfor_SNIPER_SOLDIER_X,
-        opfor_OPERATOR_X, opfor_OFFICER_X
-    ];
-
-    private _newEnemies = [];
-    {
-        _x params ["_class", "_dX", "_dY", "_dZ"];
-        private _posATL = [_centerX + _dX, _centerY + _dY, _centerZ + _dZ];
-        private _uType = selectRandom _unitPool;
-        private _group = [_posATL, EAST, [_uType], [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
-        _group deleteGroupWhenEmpty true;
-        private _unit = leader _group;
-        _unit setPosWorld _posATL;
-        _unit disableAI "PATH";
-        _unit setUnitPos (selectRandom ["UP", "MIDDLE", "DOWN"]);
-        _unit setDir (random 360);
-        _unit setBehaviour "COMBAT";
-        _unit setCombatMode "RED";
-        _unit allowFleeing 0;
-
-        // 击杀事件 (与之前相同)
-        _unit addEventHandler ["Killed", {
-            params ["_unit", "_killer", "_instigator"];
-            if (!isServer) exitWith {};
-            deleteVehicle _unit;
-            // 从数组中移除
-            private _enemies = missionNamespace getVariable ["killhouse_enemies", []];
-            _enemies = _enemies - [_unit];
-            missionNamespace setVariable ["killhouse_enemies", _enemies, true];
-            // 训练计时与奖励
-            if (!(missionNamespace getVariable ["killhouse_training_running", false])) exitWith {};
-            if (time - (missionNamespace getVariable ["killhouse_training_startTime", time]) > 180) exitWith {};
-            private _kills = missionNamespace getVariable ["killhouse_training_kills", 0];
-            _kills = _kills + 1;
-            missionNamespace setVariable ["killhouse_training_kills", _kills];
-            [0.05] remoteExec ["fnc_cp_adjust", 2];
-        }];
-        _newEnemies pushBack _unit;
-    } forEach _selected;
-
-    missionNamespace setVariable ["killhouse_enemies", _newEnemies, true];
-    [format [localize "STR_DUWS_T_ENEMIES_SPAWNED", _count]] remoteExec ["hint", [0,-2] select isDedicated];
-
-    // 启动训练计时 (与之前相同)
-    missionNamespace setVariable ["killhouse_training_running", true];
-    missionNamespace setVariable ["killhouse_training_startTime", time];
-    missionNamespace setVariable ["killhouse_training_kills", 0];
-
-    private _thread = [] spawn {
-        private _startTime = missionNamespace getVariable "killhouse_training_startTime";
-        private _running = true;
-        while {_running && {time - _startTime < 180}} do {
-            sleep 5;
-            if (!(missionNamespace getVariable ["killhouse_training_running", false])) exitWith { _running = false; };
-            private _remaining = 180 - (time - _startTime);
-            private _minutes = floor (_remaining / 60);
-            private _seconds = floor (_remaining % 60);
-            private _kills = missionNamespace getVariable ["killhouse_training_kills", 0];
-            [format [localize "STR_DUWS_KILLHOUSE_TIMER_REMAINING", _minutes, _seconds, _kills]] remoteExec ["hint", [0,-2] select isDedicated];
-        };
-        if (_running) then {
-            missionNamespace setVariable ["killhouse_training_running", false];
-            private _kills = missionNamespace getVariable ["killhouse_training_kills", 0];
-            [format [localize "STR_DUWS_KILLHOUSE_RESULT", _kills, _kills * 0.05]] remoteExec ["hint", [0,-2] select isDedicated];
-            { deleteVehicle _x; } forEach (missionNamespace getVariable ["killhouse_enemies", []]);
-            missionNamespace setVariable ["killhouse_enemies", [], true];
-        };
-    };
-    missionNamespace setVariable ["killhouse_training_thread", _thread];
+    ["CHALLENGE"] call killhouse_srv_start_run;
 };
 publicVariable "killhouse_srv_spawn_enemies";
 
 // 清理场景
 killhouse_srv_cleanup = {
     if (!isServer) exitWith {};
-    if (missionNamespace getVariable ["killhouse_training_running", false]) then {
-        private _thread = missionNamespace getVariable "killhouse_training_thread";
-        if (!isNil "_thread") then { terminate _thread; };
-        missionNamespace setVariable ["killhouse_training_running", false];
-        [localize "STR_DUWS_KILLHOUSE_TRAINING_CANCELLED"] remoteExec ["hint", [0,-2] select isDedicated];
-    };
-    { deleteVehicle _x; } forEach (missionNamespace getVariable ["killhouse_targets", []]);
-    { deleteVehicle _x; } forEach (missionNamespace getVariable ["killhouse_enemies", []]);
-    missionNamespace setVariable ["killhouse_targets", [], true];
-    missionNamespace setVariable ["killhouse_enemies", [], true];
-    [localize "STR_DUWS_T_CLEANUP_DONE"] remoteExec ["hint", [0,-2] select isDedicated];
+    [true] call killhouse_srv_end_run;
+    call killhouse_srv_clear_all;
+    [localize "STR_DUWS_T_CLEANUP_DONE"] call killhouse_srv_hint;
 };
 publicVariable "killhouse_srv_cleanup";
 

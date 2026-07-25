@@ -1481,10 +1481,10 @@
                 <English>Returned to base. Remember to clean up targets/enemies to save performance</English>
                 <Chinese>已返回基地。记得返回基地前清除冗余的目标/敌人以节约性能。</Chinese>
             </Key>
-            <Key ID="STR_DUWS_KILLHOUSE_TIMER_REMAINING">
-                <Original>Time remaining: %1 min %2 sec | Kills: %3</Original>
-                <English>Time remaining: %1 min %2 sec | Kills: %3</English>
-                <Chinese>剩余时间: %1分 %2秒 | 击杀: %3</Chinese>
+            <Key ID="STR_DUWS_KILLHOUSE_PROGRESS">
+                <Original>Killhouse: %1 of %2 remaining | %3 currently up</Original>
+                <English>Killhouse: %1 of %2 remaining | %3 currently up</English>
+                <Chinesesimp>训练场: 剩余 %1 / %2 | 当前场上 %3</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_KILLHOUSE_RESULT">
                 <Original>Training finished! Kills: %1 | CP earned: %2</Original>
@@ -1531,14 +1531,14 @@
     \n在训练场死亡不受死亡惩罚，但仍会丢失钱币/情报。</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_SPAWN_TARGETS">
-                <Original>Random Spawn Targets</Original>
-                <English>Random Spawn Targets</English>
-                <Chinesesimp>随机生成目标</Chinesesimp>
+                <Original>Start Target Training</Original>
+                <English>Start Target Training</English>
+                <Chinesesimp>开始靶场训练</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_SPAWN_ENEMIES">
-                <Original>Random Spawn Enemies (challenge)</Original>
-                <English>Random Spawn Enemies (challenge)</English>
-                <Chinesesimp>随机生成敌人(挑战)</Chinesesimp>
+                <Original>Start Challenge</Original>
+                <English>Start Challenge</English>
+                <Chinesesimp>开始挑战</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_CLEANUP">
                 <Original>Cleanup Scene</Original>
@@ -1546,15 +1546,15 @@
                 <Chinesesimp>清理场景</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_TARGETS_SPAWNED">
-                <Original>%1 targets spawned. Check your surroundings. They pose no threat, so you can train safely</Original>
-                <English>%1 targets spawned. Check your surroundings. They pose no threat, so you can train safely</English>
-                <Chinesesimp>已生成 %1 个目标。它们不会造成威胁，你可以在这样的安全环境里进行训练。</Chinesesimp>
+                <Original>%1 targets up. They pose no threat, so you can train safely. Clear the whole course to earn CP -- the next wave goes up as you work through this one</Original>
+                <English>%1 targets up. They pose no threat, so you can train safely. Clear the whole course to earn CP -- the next wave goes up as you work through this one</English>
+                <Chinesesimp>已生成 %1 个目标。它们不会造成威胁，你可以安全训练。清空整个训练场才能获得CP奖励——当前波次被清理得差不多时，下一波就会出现。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMIES_SPAWNED">
-                <Original>%1 enemies have been deployed. They will try to kill you.\nThe more enemies you eliminate within 3 minutes, the more CP you earn when the time runs out.\nDeath in the killhouse carries no penalty, but you will still lose currency and intel items.</Original>
-                <English>%1 enemies have been deployed. They will try to kill you.\nThe more enemies you eliminate within 3 minutes, the more CP you earn when the time runs out.\nDeath in the killhouse carries no penalty, but you will still lose currency and intel items.</English>
+                <Original>%1 enemies deployed. They will try to kill you.\nClear the whole course to earn CP -- the next wave arrives as you thin this one out.\nDeath in the killhouse carries no penalty, but you will still lose currency and intel items.</Original>
+                <English>%1 enemies deployed. They will try to kill you.\nClear the whole course to earn CP -- the next wave arrives as you thin this one out.\nDeath in the killhouse carries no penalty, but you will still lose currency and intel items.</English>
                 <Chinesesimp>已部署 %1 名敌人。它们有可能击杀你。
-			\n在三分钟之内击杀越多敌人，你在时间结束时获得的CP奖励就越多。
+			\n清空整个训练场才能获得CP奖励——当前波次被消灭得差不多时，下一波就会到来。
 			\n在训练场死亡不受死亡惩罚，但仍会丢失钱币/情报。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_CLEANUP_DONE">

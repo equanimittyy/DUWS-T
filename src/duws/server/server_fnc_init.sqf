@@ -12,9 +12,16 @@
 fnc_cp_adjust = {
 	if (!isServer) exitWith {};
 	params [["_delta", 0]];
+	// Integer invariant: the HUD prints the pool raw, so a fraction reaching it renders
+	// as "32.05". Round the total rather than the delta -- that also normalises a pool
+	// already holding one. Sub-point payouts must accumulate whole points at the caller;
+	// rounding here would swallow them silently, so a fractional delta is logged.
+	if (_delta != round _delta) then {
+		diag_log format ["fnc_cp_adjust: fractional delta %1 rounded into the pool", _delta];
+	};
 	// Floored at 0: the pool is a count, and the death penalty plus the co-op
 	// double-spend window could otherwise leave it reading negative.
-	commandpointsblu1 = (commandpointsblu1 + _delta) max 0;
+	commandpointsblu1 = round ((commandpointsblu1 + _delta) max 0);
 	publicVariable "commandpointsblu1";
 	// PV handler updates ctrl 1000 on remote clients; do it here for the host,
 	// whose own publicVariableEventHandler does not fire for its own broadcast.
