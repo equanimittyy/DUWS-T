@@ -587,9 +587,9 @@
                 <English>Enter your squad's callsign. Command and your squad will use it over the radio. Default: Alpha 1-1.</English>
             </Key>
             <Key ID="STR_DUWS_T_callsign_next_tt">
-                <Chinesesimp>前往小队呼号页面</Chinesesimp>
-                <Original>Go to the squad callsign page</Original>
-                <English>Go to the squad callsign page</English>
+                <Chinesesimp>下一步</Chinesesimp>
+                <Original>Next</Original>
+                <English>Next</English>
             </Key>
             <Key ID="STR_DUWS_T_ref5pt72">
                 <German>DEFINIERE DIE UMWELT-PARAMETER</German>
@@ -3307,7 +3307,7 @@
                 <Chinesesimp>战区所有单位注意，这里是"霸王1-1"。半小时前，我们的攻击行动击溃了敌人位于某城镇的临时指挥部，他们现在正在抢救他们部署在当地的情报设施。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING2">
-                <Original>Alpha 1-1, you're running the follow-up assault on the post. Allseer, you'll process whatever intel Alpha recovers and handle the rest.</Original>
+                <Original>Alpha 1-1, you're running the follow-up assault on the post. Allseer, you'll process whatever intel Alpha 1-1 recovers and handle the rest.</Original>
                 <Chinesesimp>行动组，你们负责稍后对于临时指挥部的再次进攻，"全视眼"，你们负责处理行动组带回来的情报以及任务后续工作。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING3">
