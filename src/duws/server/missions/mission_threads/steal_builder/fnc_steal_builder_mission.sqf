@@ -1,19 +1,18 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
-if (!([6, _MissionPos, _mission_name] call fnc_mission_begin)) exitWith {};
 
-_exiting = false;
-_cpreward = 15;
-_apreward = 15;
-
-if (!isNil "BLD1") then {
-    if (alive BLD1) exitWith {
-        _exiting = true;
-        [{hint localize "STR_DUWS_T_mfxb090t"}] remoteExec ["BIS_fnc_Spawn", 0];
-    };
+// Ahead of fnc_mission_begin: a builder still standing means the last one was never
+// collected, and refusing after the launcher would stamp a full hour of cooldown for a
+// mission that never started.
+if (!isNil "BLD1" && {alive BLD1}) exitWith {
+    [{hint localize "STR_DUWS_T_mfxb090t"}] remoteExec ["BIS_fnc_Spawn", 0];
+    ["INFO", "MISSION", "steal_builder refused: previous builder still alive"] call fnc_log;
 };
 
-if (_exiting) exitWith {true};
+if (!([6, _MissionPos, _mission_name] call fnc_mission_begin)) exitWith {};
+
+_cpreward = 15;
+_apreward = 15;
 
 // ========== 增援系统变量 ==========
 private _varSuffix = format ["%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
