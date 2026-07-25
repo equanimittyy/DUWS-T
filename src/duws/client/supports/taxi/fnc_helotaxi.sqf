@@ -7,9 +7,11 @@ _foundPickupPos = [];
 taxiCanTakeOff = false;
 _helo_maxDamage = 0.7;
 _helo_minFuel = 0.4;
-_taxiName = [1] call fnc_random_name;
-_random1 = round random 9;
-_random2 = round random 9;
+// Dedicated callsign, not a random roll. A support you request answers as the element
+// lead, so the digits are fixed at 1-1 and stay the same every time it is called.
+_taxiName = "Chariot";
+_random1 = 1;
+_random2 = 1;
 _music = [] call fnc_taxi_music;
 
 _foundPickupPos = [_posplayer, 20,_radius,20,0,0.5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos; // find a valid pos
@@ -97,7 +99,7 @@ _something_happened = {
 	params ["_helo","_helogroup","_helipad1","_markerpickup","_taxiName","_random1","_random2"];
 	deleteVehicle _helipad1;
 	deleteMarker str(_markerpickup);
-	_message = format[localize "STR_DUWS_T_helotaxidamaged",_taxiName,_random1,_random2];
+	_message = format[([localize "STR_DUWS_T_helotaxidamaged"] call fnc_cs),_taxiName,_random1,_random2];
 	_speaker = localize "STR_DUWS_T_OVERLORD";
 	[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
@@ -301,7 +303,7 @@ sleep 1;
 
 // IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
-	_message = format[localize "STR_DUWS_T_helotaxidamaged",_taxiName,_random1,_random2];
+	_message = format[([localize "STR_DUWS_T_helotaxirtbdown"] call fnc_cs),_taxiName,_random1,_random2];
 	_speaker = localize "STR_DUWS_T_OVERLORD";
 	[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 	[] remoteExec ["fnc_broadcastRadioChatter", 0];

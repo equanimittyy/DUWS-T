@@ -3417,8 +3417,8 @@
                 <Chinesesimp>战区所有单位注意，这里是"霸王1-1"。半小时前，我们的攻击行动击溃了敌人位于某城镇的临时指挥部，他们现在正在抢救他们部署在当地的情报设施。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING2">
-                <Original>Alpha 1-1, you're running the follow-up assault on the post. Allseer, you'll process whatever intel Alpha 1-1 recovers and handle the rest.</Original>
-                <English>Alpha 1-1, you're running the follow-up assault on the post. Allseer, you'll process whatever intel Alpha 1-1 recovers and handle the rest.</English>
+                <Original>Alpha 1-1, you're running the follow-up assault on the post. Allseer 1-1, you'll process whatever intel Alpha 1-1 recovers and handle the rest.</Original>
+                <English>Alpha 1-1, you're running the follow-up assault on the post. Allseer 1-1, you'll process whatever intel Alpha 1-1 recovers and handle the rest.</English>
                 <Chinesesimp>行动组，你们负责稍后对于临时指挥部的再次进攻，"全视眼"，你们负责处理行动组带回来的情报以及任务后续工作。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING3">
@@ -3437,8 +3437,8 @@
                 <Chinesesimp>明白了，我们待会就出发。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING6">
-                <Original>Allseer here. Drone feeds show most of the enemy has pulled out of the post. Once you've got enough intel, extract and we'll call it a success.</Original>
-                <English>Allseer here. Drone feeds show most of the enemy has pulled out of the post. Once you've got enough intel, extract and we'll call it a success.</English>
+                <Original>Allseer 1-1 here. Drone feeds show most of the enemy has pulled out of the post. Once you've got enough intel, extract and we'll call it a success.</Original>
+                <English>Allseer 1-1 here. Drone feeds show most of the enemy has pulled out of the post. Once you've got enough intel, extract and we'll call it a success.</English>
                 <Chinesesimp>这里是"全视眼"，无人机显示大部分敌人都从临时指挥部撤离了。如果你们带回了足够多的情报就离开那里吧，任务可以宣布成功。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERINGTS1">
@@ -3954,8 +3954,8 @@
                 <German>„Allseher“ an „Kurier 2-1“, Warnung: Starkere Feindinfanteriebewegungen in Ihrer Umgebung erfasst, Stärke ca. eine Kompanie. Auf Kontakt vorbereiten, aus.</German>
                 <Spanish>"Ojo Omnisciente" a "Envío Rápido 2-1", advertencia: detectados intensos movimientos de infantería enemiga alrededor de tu posición, fuerza de aproximadamente un pelotón. Prepárense para el contacto, fin.</Spanish>
                 <Chinesesimp>"全视眼"呼叫"速递2-1"，注意，我在你的位置周围发现大量敌人步兵活动，一个排左右，准备接战，完毕。</Chinesesimp>
-                <Original>Allseer to Express 2-1, be advised: heavy infantry moving on your position, roughly platoon strength. Prepare for contact, over.</Original>
-                <English>Allseer to Express 2-1, be advised: heavy infantry moving on your position, roughly platoon strength. Prepare for contact, over.</English>
+                <Original>Allseer 1-1 to Express 2-1, be advised: heavy infantry moving on your position, roughly platoon strength. Prepare for contact, over.</Original>
+                <English>Allseer 1-1 to Express 2-1, be advised: heavy infantry moving on your position, roughly platoon strength. Prepare for contact, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_APPROACHING3">
                 <German>„Kurier 2-1“ an „Oberherr“, wir und die Verbündeten leiden schwere Verluste! Wo zur Hölle ist die Verstärkung?!</German>
@@ -4087,8 +4087,8 @@
                 <German>Alle Einheiten im Einsatzgebiet, Achtung. Hier ist "Allseer". Wir haben gerade feindliche Angriffstruppen in der feindlichen Zone ausgemacht. Sie könnten auf das HQ oder freundliche Stellungen vorrücken. Bleibt wachsam!</German>
                 <Spanish>Todas las unidades en la zona de operaciones, atención. Aquí es "Allseer". Acabamos de detectar fuerzas de asalto enemigas en la zona enemiga. Podrían avanzar hacia el HQ o las posiciones amigas. ¡Mantengan la alerta!</Spanish>
                 <Chinesesimp>战区所有单位注意，这里是"全视眼"。我们刚刚在敌区发现了敌军的进攻部队。他们可能会朝总部或是友军据点进攻。注意警惕！</Chinesesimp>
-                <Original>All units in the AO, this is Allseer. We've detected enemy assault forces staging in the zone. They may push toward HQ or friendly positions. Stay alert.</Original>
-                <English>All units in the AO, this is Allseer. We've detected enemy assault forces staging in the zone. They may push toward HQ or friendly positions. Stay alert.</English>
+                <Original>All units in the AO, this is Allseer 1-1. We've detected enemy assault forces staging in the zone. They may push toward HQ or friendly positions. Stay alert.</Original>
+                <English>All units in the AO, this is Allseer 1-1. We've detected enemy assault forces staging in the zone. They may push toward HQ or friendly positions. Stay alert.</English>
             </Key>
             <Key ID="STR_DUWS_T_zonereveal">
                 <German>Alle Einheiten im Einsatzgebiet, Achtung. Wir haben eine feindliche Zone ausgemacht. Sie ist nun auf euren GPS-Terminals einsehbar.</German>
@@ -4416,8 +4416,8 @@
                 <German>Action Squad, hier ist "Allseer". Radar hat gerade einen feindlichen Mörserbeobachter in eurer Nähe entdeckt. Rückt sofort aus, um ihn zu eliminieren.</German>
                 <Spanish>Action Squad, aquí es "Allseer". El radar acaba de detectar a un observador de mortero enemigo en vuestra proximidad. Salid inmediatamente para eliminarlo.</Spanish>
                 <Chinesesimp>行动组，这里是"全视眼"。就在刚刚，雷达在你们周边发现了敌人的迫击炮观察员。你们需要立刻出发歼灭他。</Chinesesimp>
-                <Original>Alpha 1-1, this is Allseer. Radar's picked up an enemy mortar observer near your position. Move out and take him down.</Original>
-                <English>Alpha 1-1, this is Allseer. Radar's picked up an enemy mortar observer near your position. Move out and take him down.</English>
+                <Original>Alpha 1-1, this is Allseer 1-1. Radar's picked up an enemy mortar observer near your position. Move out and take him down.</Original>
+                <English>Alpha 1-1, this is Allseer 1-1. Radar's picked up an enemy mortar observer near your position. Move out and take him down.</English>
             </Key>
             <Key ID="STR_DUWS_T_mortarspotter5">
                 <German>Action Squad hier, Mörserbeobachter ausgeschaltet.</German>
@@ -6269,8 +6269,8 @@
                 <German>Hier ist "Overlord 1-1" – Anfrage empfangen. ETA für den Abwurf: 40 Sekunden.</German>
                 <Spanish>Este es "Overlord 1-1" – solicitud recibida. ETA del lanzamiento: 40 segundos.</Spanish>
                 <Chinesesimp>这里是"霸王1-1"，请求收到了。投送预计到达时间40秒。</Chinesesimp>
-                <Original>This is Overlord, request received. Drop ETA forty seconds.</Original>
-                <English>This is Overlord, request received. Drop ETA forty seconds.</English>
+                <Original>This is Courier 2-1, request received. Drop ETA forty seconds.</Original>
+                <English>This is Courier 2-1, request received. Drop ETA forty seconds.</English>
             </Key>
             <Key ID="STR_DUWS_T_paradropcallend">
                 <German>Hier ist Fallschirmjäger-Einsatz – ich habe den LZ im Blick, achte auf die Verbindung.</German>
@@ -6283,22 +6283,22 @@
                 <German>Hier ist SIVA Einsatz – ETA 30 Sekunden, bereite dich auf die Verbindung vor.</German>
                 <Spanish>Este es SIVA Despliegue – ETA 30 segundos, prepárate para el acoplamiento.</Spanish>
                 <Chinesesimp>这里是SIVA投送，预计到达时间30秒，准备对接。</Chinesesimp>
-                <Original>This is Ranger 3-4, ETA thirty seconds. Stand by for linkup.</Original>
-                <English>This is Ranger 3-4, ETA thirty seconds. Stand by for linkup.</English>
+                <Original>This is Ranger 1-1, ETA thirty seconds. Stand by for linkup.</Original>
+                <English>This is Ranger 1-1, ETA thirty seconds. Stand by for linkup.</English>
             </Key>
             <Key ID="STR_DUWS_T_sawpcallend">
                 <German>Action Squad, hier ist SAWP Einsatz – ETA 40 Sekunden, achte auf die Verbindung.</German>
                 <Spanish>Action Squad, este es SAWP Despliegue – ETA 40 segundos, prepárate para el acoplamiento.</Spanish>
                 <Chinesesimp>行动组注意，这里是SAWP投送，预计到达时间40秒，注意对接。</Chinesesimp>
-                <Original>Alpha 1-1, this is Courier 2-2, ETA forty seconds. Stand by for linkup.</Original>
-                <English>Alpha 1-1, this is Courier 2-2, ETA forty seconds. Stand by for linkup.</English>
+                <Original>Alpha 1-1, this is Courier 3-1, ETA forty seconds. Stand by for linkup.</Original>
+                <English>Alpha 1-1, this is Courier 3-1, ETA forty seconds. Stand by for linkup.</English>
             </Key>
             <Key ID="STR_DUWS_T_supplydropcallend">
-                <German>Hier ist "Courier 1-3" – Lieferkiste per Luftabwurf zu Ihrer Position unterwegs, ETA: 40 Sekunden.</German>
-                <Spanish>Este es "Courier 1-3" – lanzando caja de suministros por aire a su posición, ETA: 40 segundos.</Spanish>
+                <German>Hier ist "Courier 1-1" – Lieferkiste per Luftabwurf zu Ihrer Position unterwegs, ETA: 40 Sekunden.</German>
+                <Spanish>Este es "Courier 1-1" – lanzando caja de suministros por aire a su posición, ETA: 40 segundos.</Spanish>
                 <Chinesesimp>这里是"速递1-3"，正在朝你的位置空投补给包，预计到达时间：40秒。</Chinesesimp>
-                <Original>This is Courier 1-3, deploying a supply crate to your position. ETA forty seconds.</Original>
-                <English>This is Courier 1-3, deploying a supply crate to your position. ETA forty seconds.</English>
+                <Original>This is Courier 1-1, deploying a supply crate to your position. ETA forty seconds.</Original>
+                <English>This is Courier 1-1, deploying a supply crate to your position. ETA forty seconds.</English>
             </Key>
             <Key ID="STR_DUWS_T_missionlook">
                 <German>Überprüfung des Auftragsstatus im Einsatzgebiet...</German>
@@ -6402,8 +6402,8 @@
                 <German>Ich bin fast da. Führe Schleppladeberechnungen durch. Bewegen Sie das Zielfahrzeug nicht.</German>
                 <Spanish>Ya casi llego. Estoy realizando cálculos de carga con eslinga. No muevas el vehículo objetivo.</Spanish>
                 <Chinesesimp>我快到了，正在进行吊装计算，注意不要移动目标载具。</Chinesesimp>
-                <Original>I'm almost there. Lining up the sling-load now. Keep the vehicle still.</Original>
-                <English>I'm almost there. Lining up the sling-load now. Keep the vehicle still.</English>
+                <Original>Mule 1-1 here, almost there. Lining up the sling-load now. Keep the vehicle still.</Original>
+                <English>Mule 1-1 here, almost there. Lining up the sling-load now. Keep the vehicle still.</English>
             </Key>
             <Key ID="STR_DUWS_T_helolift3">
                 <German>Kabel wird deployiert... Wer eine Mitfahrgelegenheit braucht, kann jetzt ins Fahrzeug steigen!</German>
@@ -6444,8 +6444,8 @@
                 <German>Hier ist die Leitstelle. %1 %2-%3 hat schweren Schaden erlitten und kann den geplanten Auftrag nicht erfüllen. Ersatzeinheit ist unterwegs, voraussichtliche Ankunftszeit: 1 Minute.</German>
                 <Spanish>Aquí es el despacho. %1 %2-%3 ha sufrido daños graves y no puede completar la misión programada. Unidad de reemplazo en camino, tiempo estimado de llegada: 1 minuto.</Spanish>
                 <Chinesesimp>这里是调度。%1 %2-%3严重损伤，无法完成预定任务。替补单位正在进场，预计到达时间：1分钟。</Chinesesimp>
-                <Original>This is Overlord. %1 %2-%3 has taken severe damage and can't complete the mission. A replacement is en route, ETA one minute.</Original>
-                <English>This is Overlord. %1 %2-%3 has taken severe damage and can't complete the mission. A replacement is en route, ETA one minute.</English>
+                <Original>This is Overlord. %1 %2-%3 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1 — you're on your own. Another bird available in one minute. Out.</Original>
+                <English>This is Overlord. %1 %2-%3 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1 — you're on your own. Another bird available in one minute. Out.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxicall">
                 <German>Action Squad, meine ETA beträgt 40 Sekunden – räume die LZ sofort.</German>
@@ -6524,33 +6524,37 @@
                 <Original>%1 %2-%3 is returning to base.</Original>
                 <English>%1 %2-%3 is returning to base.</English>
             </Key>
+            <Key ID="STR_DUWS_T_helotaxirtbdown">
+                <Original>This is Overlord. %1 %2-%3 went down on the return leg. Your lift is complete, Alpha 1-1 — no further action required. Air taxi unavailable for the next three minutes. Out.</Original>
+                <English>This is Overlord. %1 %2-%3 went down on the return leg. Your lift is complete, Alpha 1-1 — no further action required. Air taxi unavailable for the next three minutes. Out.</English>
+            </Key>
             <Key ID="STR_DUWS_T_casdownkoi">
                 <German>Leitstelle hier, Nahluftunterstützungseinheit „Koi“ bestätigt im Einsatz gefallen. Ersatzeinheit wird im Einsatzgebiet eingesetzt, ETA: 10 Minuten.</German>
                 <Spanish>Despacho aquí, unidad de apoyo aéreo cercano «Koi» confirmada KIA en acción. Unidad de respaldo desplegando hacia la zona de operaciones, ETA: 10 minutos.</Spanish>
                 <Chinesesimp>这里是调度，近空支援单位"鲤鱼"被确认在行动中阵亡。后备单位正在部署到战区，预计到达时间：10分钟后</Chinesesimp>
-                <Original>Overlord here. Close air support Koi is down. A reserve unit is deploying to the AO, ETA ten minutes.</Original>
-                <English>Overlord here. Close air support Koi is down. A reserve unit is deploying to the AO, ETA ten minutes.</English>
+                <Original>Overlord here. Close air support Koi 1-1 is down. A reserve unit is deploying to the AO, ETA ten minutes.</Original>
+                <English>Overlord here. Close air support Koi 1-1 is down. A reserve unit is deploying to the AO, ETA ten minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_casdownlb">
                 <German>Leitstelle hier, Nahluftunterstützungseinheit „Longbow“ bestätigt im Einsatz gefallen. Ersatzeinheit wird im Einsatzgebiet eingesetzt, ETA: 10 Minuten.</German>
                 <Spanish>Despacho aquí, unidad de apoyo aéreo cercano «Longbow» confirmada KIA en acción. Unidad de respaldo desplegando hacia la zona de operaciones, ETA: 10 minutos.</Spanish>
                 <Chinesesimp>这里是调度，近空支援单位"长弓"被确认在行动中阵亡。后备单位正在部署到战区，预计到达时间：10分钟后</Chinesesimp>
-                <Original>Overlord here. Close air support Longbow is down. A reserve unit is deploying to the AO, ETA ten minutes.</Original>
-                <English>Overlord here. Close air support Longbow is down. A reserve unit is deploying to the AO, ETA ten minutes.</English>
+                <Original>Overlord here. Close air support Longbow 1-1 is down. A reserve unit is deploying to the AO, ETA ten minutes.</Original>
+                <English>Overlord here. Close air support Longbow 1-1 is down. A reserve unit is deploying to the AO, ETA ten minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_casreservekoi">
                 <German>Einsatzteam, beachten Sie, Leitstelle hier. Neue Nahluftunterstützungseinheit im Anflug. Rufzeichen: "Koi".</German>
                 <Spanish>Equipo de acción, atención, despacho aquí. Nueva unidad de apoyo aéreo cercano entrando. Indicativo: "Koi".</Spanish>
                 <Chinesesimp>行动组注意，这里是调度，新的近空支援单位入场了。呼号："鲤鱼"</Chinesesimp>
-                <Original>Alpha 1-1, this is Overlord. New close air support inbound, callsign Koi.</Original>
-                <English>Alpha 1-1, this is Overlord. New close air support inbound, callsign Koi.</English>
+                <Original>Alpha 1-1, this is Overlord. New close air support inbound, callsign Koi 1-1.</Original>
+                <English>Alpha 1-1, this is Overlord. New close air support inbound, callsign Koi 1-1.</English>
             </Key>
             <Key ID="STR_DUWS_T_casreservelb">
                 <German>Einsatzteam, beachten Sie, Leitstelle hier. Neue Nahluftunterstützungseinheit im Anflug. Rufzeichen: "Longbow".</German>
                 <Spanish>Equipo de acción, atención, despacho aquí. Nueva unidad de apoyo aéreo cercano entrando. Indicativo: "Longbow".</Spanish>
                 <Chinesesimp>行动组注意，这里是调度，新的近空支援单位入场了。呼号："长弓"</Chinesesimp>
-                <Original>Alpha 1-1, this is Overlord. New close air support inbound, callsign Longbow.</Original>
-                <English>Alpha 1-1, this is Overlord. New close air support inbound, callsign Longbow.</English>
+                <Original>Alpha 1-1, this is Overlord. New close air support inbound, callsign Longbow 1-1.</Original>
+                <English>Alpha 1-1, this is Overlord. New close air support inbound, callsign Longbow 1-1.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxiunlock">
                 <German>Hier ist die Disposition – nahe gelegenes Bootsteam ist transportbereit.</German>
@@ -6574,11 +6578,11 @@
                 <English>Be advised, friendly 155mm artillery team standing by.</English>
             </Key>
             <Key ID="STR_DUWS_T_mtrunlock">
-                <German>Hier ist Slingshot 4-4 – wir sind bereit, indirekten Feuerschutz zu leisten.</German>
-                <Spanish>Este es Slingshot 4-4 – estamos listos para brindar apoyo de fuego indirecto.</Spanish>
-                <Chinesesimp>这里是"弹弓4-4"，我们已经准备好提供曲射火力支援。</Chinesesimp>
-                <Original>This is Slingshot 4-4, standing by to provide indirect fire support.</Original>
-                <English>This is Slingshot 4-4, standing by to provide indirect fire support.</English>
+                <German>Hier ist Slingshot 1-1 – wir sind bereit, indirekten Feuerschutz zu leisten.</German>
+                <Spanish>Este es Slingshot 1-1 – estamos listos para brindar apoyo de fuego indirecto.</Spanish>
+                <Chinesesimp>这里是"弹弓 1-1"，我们已经准备好提供曲射火力支援。</Chinesesimp>
+                <Original>This is Slingshot 1-1, standing by to provide indirect fire support.</Original>
+                <English>This is Slingshot 1-1, standing by to provide indirect fire support.</English>
             </Key>
             <Key ID="STR_DUWS_T_jdamunlock">
                 <German>Disposition an Action Squad – Sie sind berechtigt, JDAM-Bombenabwürfe anzufordern.</German>
@@ -6619,8 +6623,8 @@
                 <German>"Longbow" an Einsatzteam, ich habe den HQ-Luftraum erreicht. Bereit zur Nahluftunterstützung jederzeit.</German>
                 <Spanish>"Longbow" al equipo de acción, he llegado al espacio aéreo del cuartel general. Listo para apoyo aéreo cercano en cualquier momento.</Spanish>
                 <Chinesesimp>"长弓"呼叫行动组，我已到达总部空域。随时可以执行近空支援任务。</Chinesesimp>
-                <Original>Longbow to Alpha 1-1, I'm on station over HQ. Ready for close air support.</Original>
-                <English>Longbow to Alpha 1-1, I'm on station over HQ. Ready for close air support.</English>
+                <Original>Longbow 1-1 to Alpha 1-1, I'm on station over HQ. Ready for close air support.</Original>
+                <English>Longbow 1-1 to Alpha 1-1, I'm on station over HQ. Ready for close air support.</English>
             </Key>
             <Key ID="STR_DUWS_T_requestuavscan">
                 <German>Einsatzteam an Leitstelle, fordert Aufklärungs-UAV zur Scanung des Zielorts an. Koordinaten synchronisiert, over.</German>
@@ -6640,8 +6644,8 @@
                 <German>"Koi" an Einsatzteam, ich habe den HQ-Luftraum erreicht. Bereit, alle entdeckten feindlichen Fahrzeuge zu vernichten.</German>
                 <Spanish>"Koi" al equipo de acción, he llegado al espacio aéreo del cuartel general. Listo para eliminar cualquier vehículo enemigo detectado.</Spanish>
                 <Chinesesimp>"鲤鱼"呼叫行动组，我已到达总部位置。准备好抹除任何已发现的敌人载具。</Chinesesimp>
-                <Original>Koi to Alpha 1-1, I'm on station over HQ. Ready to hit any enemy vehicles you spot.</Original>
-                <English>Koi to Alpha 1-1, I'm on station over HQ. Ready to hit any enemy vehicles you spot.</English>
+                <Original>Koi 1-1 to Alpha 1-1, I'm on station over HQ. Ready to hit any enemy vehicles you spot.</Original>
+                <English>Koi 1-1 to Alpha 1-1, I'm on station over HQ. Ready to hit any enemy vehicles you spot.</English>
             </Key>
             <Key ID="STR_DUWS_T_hcjetunlock">
                 <German>"Koi" an Action Squad – ich bin im AO-Luftraum eingetroffen.</German>
@@ -6672,11 +6676,11 @@
                 <English>Overlord to all AO units, a paratrooper unit is on station and standing by.</English>
             </Key>
             <Key ID="STR_DUWS_T_slingshot">
-                <German>Schleuder4-4</German>
-                <Spanish>Honda4-4</Spanish>
-                <Chinesesimp>弹弓4-4</Chinesesimp>
-                <Original>Slingshot 4-4</Original>
-                <English>Slingshot 4-4</English>
+                <German>Schleuder 1-1</German>
+                <Spanish>Honda 1-1</Spanish>
+                <Chinesesimp>弹弓 1-1</Chinesesimp>
+                <Original>Slingshot 1-1</Original>
+                <English>Slingshot 1-1</English>
             </Key>
             <Key ID="STR_DUWS_T_4sqljq58">
                 <German>Klicke auf die Karte um Koordinaten zu übermitteln oder warte 60 Sekunden um den Schlag abzubrechen</German>
@@ -7010,18 +7014,18 @@
                 <English>Delta 3-2</English>
             </Key>
             <Key ID="STR_DUWS_T_allseer">
-                <German>"Allseer"</German>
-                <Spanish>"Allseer"</Spanish>
-                <Chinesesimp>"全视眼"</Chinesesimp>
-                <Original>Allseer</Original>
-                <English>Allseer</English>
+                <German>"Allseer 1-1"</German>
+                <Spanish>"Allseer 1-1"</Spanish>
+                <Chinesesimp>"全视眼 1-1"</Chinesesimp>
+                <Original>Allseer 1-1</Original>
+                <English>Allseer 1-1</English>
             </Key>
             <Key ID="STR_DUWS_T_ammospotted">
                 <German>Einsatzgruppe, hier ist "Allseer". Wir haben einen feindlichen Versorgungstruck entdeckt, der zwischen feindlichen Zonen fährt. Sichern Sie ihn, falls erforderlich!</German>
                 <Spanish>Equipo de Acción, aquí es "Allseer". Hemos detectado un camión de suministros enemigo que circula entre zonas enemigas. Asegúrenlo si es necesario!</Spanish>
                 <Chinesesimp>行动组，这里是"全视眼"。我们发现了在敌军战区之间运输补给的敌方卡车，可以的话务必将它抢过来！</Chinesesimp>
-                <Original>Alpha 1-1, this is Allseer. We've spotted an enemy supply truck moving between zones. Grab it if you can.</Original>
-                <English>Alpha 1-1, this is Allseer. We've spotted an enemy supply truck moving between zones. Grab it if you can.</English>
+                <Original>Alpha 1-1, this is Allseer 1-1. We've spotted an enemy supply truck moving between zones. Grab it if you can.</Original>
+                <English>Alpha 1-1, this is Allseer 1-1. We've spotted an enemy supply truck moving between zones. Grab it if you can.</English>
             </Key>
             <Key ID="STR_DUWS_T_Cobra">
                 <German>Kobra 1-3</German>
@@ -7052,18 +7056,18 @@
                 <English>Signal 2-2</English>
             </Key>
             <Key ID="STR_DUWS_T_changgongpilot">
-                <German>"Longbow" Pilot</German>
-                <Spanish>Piloto de "Longbow"</Spanish>
-                <Chinesesimp>"长弓"飞行员</Chinesesimp>
-                <Original>Longbow</Original>
-                <English>Longbow</English>
+                <German>"Longbow 1-1" Pilot</German>
+                <Spanish>Piloto de "Longbow 1-1"</Spanish>
+                <Chinesesimp>"长弓 1-1"飞行员</Chinesesimp>
+                <Original>Longbow 1-1</Original>
+                <English>Longbow 1-1</English>
             </Key>
             <Key ID="STR_DUWS_T_koipilot">
-                <German>"Koi" Pilot</German>
-                <Spanish>Piloto de "Koi"</Spanish>
-                <Chinesesimp>"鲤鱼"飞行员</Chinesesimp>
-                <Original>Koi</Original>
-                <English>Koi</English>
+                <German>"Koi 1-1" Pilot</German>
+                <Spanish>Piloto de "Koi 1-1"</Spanish>
+                <Chinesesimp>"鲤鱼 1-1"飞行员</Chinesesimp>
+                <Original>Koi 1-1</Original>
+                <English>Koi 1-1</English>
             </Key>
         </Container>
         <Container name="Task Forces &amp; High Command">
@@ -8361,8 +8365,8 @@
                 <German>"Allseer" an alle Einheiten im Einsatzgebiet. Der Sitrep wurde an das Terminal hochgeladen.</German>
                 <Spanish>"Allseer" a todas las unidades en la zona de operaciones. El sitrep ha sido subido al terminal.</Spanish>
                 <Chinesesimp>"全视眼"呼叫战区单位，情况报告已经上传到终端。</Chinesesimp>
-                <Original>Allseer to all units in the AO. Sitrep incoming.</Original>
-                <English>Allseer to all units in the AO. Sitrep incoming.</English>
+                <Original>Allseer 1-1 to all units in the AO. Sitrep incoming.</Original>
+                <English>Allseer 1-1 to all units in the AO. Sitrep incoming.</English>
             </Key>
             <Key ID="STR_DUWS_T_puy8tdeb">
                 <German>SITREP (1 CP)</German>

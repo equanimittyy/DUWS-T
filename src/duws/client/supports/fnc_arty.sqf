@@ -44,9 +44,11 @@ if (_supportype == 4) then {_ord = localize "STR_DUWS_T_4o24llvl"};		//laser
 if (_supportype == 5) then {_ord = localize "STR_DUWS_T_a31378y0"};		//cluster
 if (_supportype == 6) then {_ord = localize "STR_DUWS_T_7sgon7jn"};		//napalm
 
-_taxiName = [1] call fnc_random_name;
-_random1 = round random 9;
-_random2 = round random 9;
+// Dedicated callsign, not a random roll. A support you request answers as the element
+// lead, so the digits are fixed at 1-1 and stay the same every time it is called.
+_taxiName = "Slingshot";
+_random1 = 1;
+_random2 = 1;
 
 hint localize "STR_DUWS_T_fqeghaut";
 //hint format["Position: %1\nSalvos:%2\nRadius:%3\nInterval:%4\nRPS:%5\nSupport type:%6\nCost:%7\nAmmo type:%8", _position, _salvos, _radius, _interval, _rps,_supportype,_cost,_ammotype];
