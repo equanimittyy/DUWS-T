@@ -29,12 +29,12 @@ Army Power carries the same contract. `fnc_ap_adjust` (same file) is the sole wr
 `WARCOM_blufor_ap` and `WARCOM_opfor_ap`, invoked as `[side, delta] remoteExec
 ["fnc_ap_adjust", 2]` with side `"BLU"` or `"OPF"`; its pre-play absolutes are
 `server_var_init.sqf:180-181`, `fnc_WARCOM_init.sqf:22-28`, and the campaign-menu presets in
-`fnc_process_campaign_menu.sqf:277-348`. Two deliberate differences from `fnc_cp_adjust`: the
-`switch` has no default case, so an unrecognised side string is a no-op rather than a silent
-credit to the wrong pool; and there is no display refresh, because AP has no HUD counter and
-no `publicVariableEventHandler` — which is why `fnc_convertAPtoCP.sqf` paints control 1002
-from its own expected post-spend total instead of re-reading the pool, whose local copy is
-still pre-spend at that point.
+`fnc_process_campaign_menu.sqf:277-348`. Two deliberate differences from `fnc_cp_adjust`: an
+unrecognised side drops the delta and logs it rather than crediting the wrong pool, so a bad
+call shows up in the RPT instead of corrupting a pool or throwing; and there is no display
+refresh, because AP has no HUD counter and no `publicVariableEventHandler` — which is why
+`fnc_convertAPtoCP.sqf` paints control 1002 from its own expected post-spend total instead of
+re-reading the pool, whose local copy is still pre-spend at that point.
 
 ## Faucets
 

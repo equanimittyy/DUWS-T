@@ -19,15 +19,16 @@ fnc_cp_adjust = {
 };
 
 // Server-authoritative Army Power mutation -- same delta contract as fnc_cp_adjust:
-// callers remoteExec a signed delta, nothing else assigns the pools. No default case
-// so an unrecognised side is a no-op, not a silent credit to the wrong pool; no clamp
+// callers remoteExec a signed delta, nothing else assigns the pools. An unrecognised
+// side drops the delta and logs rather than crediting the wrong pool; no clamp
 // (fnc_opfor_cap legitimately drives BLU AP down); no HUD counter to refresh.
 fnc_ap_adjust = {
 	if (!isServer) exitWith {};
-	params ["_side", ["_delta", 0]];
+	params [["_side", ""], ["_delta", 0]];
 	switch (_side) do {
 		case "OPF": { WARCOM_opfor_ap = WARCOM_opfor_ap + _delta; publicVariable "WARCOM_opfor_ap"; };
 		case "BLU": { WARCOM_blufor_ap = WARCOM_blufor_ap + _delta; publicVariable "WARCOM_blufor_ap"; };
+		default { diag_log format ["fnc_ap_adjust: unrecognised side '%1', dropped delta %2", _side, _delta]; };
 	};
 };
 
