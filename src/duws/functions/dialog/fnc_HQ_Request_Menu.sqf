@@ -223,13 +223,9 @@ if (support_paradrop_available) then {
 if (!support_mobile_HQ_available) then {
     lbSetColor [2103, 21, [0, 1, 0, 1]];
 };
-if (support_hcCAP_available) then {
-	lbSetColor [2103, 22, [0, 1, 0, 1]];	
-};
-
 // 叛军模式下禁用部分支援（置灰显示）
 if (!isNil "insurgent_mode_enable" && {insurgent_mode_enable}) then {
-    private _disabledIndices = [3,4,5,6,12,14,15,16,17,18,19,20,22];
+    private _disabledIndices = [3,4,5,6,12,14,15,16,17,18,19,20];
     { lbSetColor [2103, _x, [0.5,0.5,0.5,1]]; } forEach _disabledIndices;
 };
 

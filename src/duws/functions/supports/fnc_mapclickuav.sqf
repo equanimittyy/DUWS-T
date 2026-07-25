@@ -5,6 +5,8 @@ _pos = [];
 clicked = false;
 
 // IF NOT ENOUGH PTS
+// Advisory only -- it skips a map-click window the player cannot pay for. fnc_uav_scanner
+// makes the real decision on the server, up to 60 s later.
 if (commandpointsblu1 < _cost) exitWith {
 	["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
 	sleep 30;
@@ -18,7 +20,7 @@ switch (VERSION_X) do {
 };	
 
 //_cost OnMapSingleClick "[_pos,500,_this] spawn fnc_uav_scanner;
-_cost OnMapSingleClick "[_pos,500,_this] remoteExec ['fnc_uav_scanner', 2];
+_cost OnMapSingleClick "[_pos,500,_this,player] remoteExec ['fnc_uav_scanner', 2];
 	clicked=true;
 	onMapSingleClick ''; 
 	hint localize 'STR_DUWS_T_6u8qilfh'";

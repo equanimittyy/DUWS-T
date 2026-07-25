@@ -109,6 +109,56 @@ fnc_rep_adjust = {
 	publicVariable "Player_Reputation";
 };
 
+// Server-authoritative purchase. The writers above own the arithmetic but not the
+// decision: a client testing its own copy of a pool is a network round trip out of date,
+// so two clients each seeing 10 CP both pass a 10 CP gate and the floor absorbs the
+// second debit, making it free. Here the test and the debit are adjacent statements
+// against the one server copy, so no other machine's request lands between them.
+// remoteExec returns nothing, so the verdict goes back as a named reply the caller waits
+// on -- fnc_pool_spend is the other half of the handshake.
+// The debit is `call`, not remoteExec to self: that would queue a scheduled job for a
+// later frame and reopen the gap this function exists to close.
+fnc_pool_try_spend = {
+	if (!isServer) exitWith {};
+	params [["_pool", ""], ["_cost", 0], ["_requester", objNull], ["_replyVar", ""]];
+	private _ok = false;
+	switch (_pool) do {
+		case "CP": { if (commandpointsblu1 >= _cost) then { [-_cost] call fnc_cp_adjust; _ok = true; }; };
+		case "AP": { if (WARCOM_blufor_ap >= _cost) then { ["BLU", -_cost] call fnc_ap_adjust; _ok = true; }; };
+		default { diag_log format ["fnc_pool_try_spend: unrecognised pool '%1', refused %2", _pool, _cost]; };
+	};
+	[_replyVar, _ok] remoteExec ["fnc_pool_reply", _requester];
+};
+
+// Client half of the purchase handshake: blocks until the server rules on the request,
+// so callers must already be scheduled -- every purchase entry point is spawned. Refuses
+// on timeout rather than falling through: silence must not let a purchase happen.
+// A zero cost short-circuits, because several comm-menu supports are charged at unlock
+// time and pass 0 here.
+fnc_pool_spend = {
+	params [["_pool", "CP"], ["_cost", 0]];
+	if (_cost <= 0) exitWith { true };
+	duws_spend_seq = (missionNamespace getVariable ["duws_spend_seq", 0]) + 1;
+	private _replyVar = format ["duws_spend_reply_%1", duws_spend_seq];
+	[_pool, _cost, player, _replyVar] remoteExec ["fnc_pool_try_spend", 2];
+	private _deadline = diag_tickTime + 5;
+	waitUntil { !isNil _replyVar || {diag_tickTime > _deadline} };
+	private _replied = !isNil _replyVar;
+	private _ok = missionNamespace getVariable [_replyVar, false];
+	missionNamespace setVariable [_replyVar, nil];
+	// A timeout and a refusal look identical to the caller, so log the difference: without
+	// it a dropped reply reads in-game as "not enough CP" with a full pool.
+	if (!_replied) then { diag_log format ["fnc_pool_spend: no reply for %1 %2, refused", _cost, _pool]; };
+	_ok
+};
+publicVariable "fnc_pool_spend";
+
+fnc_pool_reply = {
+	params [["_replyVar", ""], ["_ok", false]];
+	missionNamespace setVariable [_replyVar, _ok];
+};
+publicVariable "fnc_pool_reply";
+
 // Player-callsign substitution for radio/subtitle dialogue. The stringtable bakes
 // the default callsign "Alpha 1-1" into the English lines; this swaps it for the
 // host-chosen duws_callsign at display time, so wrapping every localize is safe:
@@ -537,7 +587,6 @@ fnc_paradrop = compile preprocessFileLineNumbers "duws\functions\supports\fnc_pa
 fnc_request_fob = compile preprocessFileLineNumbers "duws\functions\supports\fnc_request_fob.sqf";publicVariable "fnc_request_fob";
 fnc_request_hcATTchop = compile preprocessFileLineNumbers "duws\functions\supports\fnc_request_hcATTchop.sqf";publicVariable "fnc_request_hcATTchop";
 fnc_request_hcCAS = compile preprocessFileLineNumbers "duws\functions\supports\fnc_request_hcCAS.sqf";publicVariable "fnc_request_hcCAS";
-fnc_request_hcCAP = compile preprocessFileLineNumbers "duws\functions\supports\fnc_request_hcCAP.sqf";publicVariable "fnc_request_hcCAP";
 fnc_sitrep_support = compile preprocessFileLineNumbers "duws\functions\supports\fnc_sitrep_support.sqf";publicVariable "fnc_sitrep_support";
 fnc_veh_drop = compile preprocessFileLineNumbers "duws\functions\supports\fnc_veh_drop.sqf";publicVariable "fnc_veh_drop";
 fnc_sawp_drop = compile preprocessFileLineNumbers "duws\functions\supports\fnc_sawp_drop.sqf";publicVariable "fnc_sawp_drop";
@@ -865,7 +914,9 @@ fnc_pylon_set_with_cost = {
     };
 
     // 扣除 CP 并广播
-    [-_cost] remoteExec ["fnc_cp_adjust", 2];
+    // call, not remoteExec to self: a queued debit runs a frame later, leaving the check
+    // above and the deduction split across frames for a second request to slip between.
+    [-_cost] call fnc_cp_adjust;
 
     // 执行挂架设置
     private _veh = objectFromNetId _netId;

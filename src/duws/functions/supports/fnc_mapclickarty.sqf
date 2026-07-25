@@ -15,6 +15,8 @@ _timer = 45;
 clicked = false;
 
 // IF NOT ENOUGH PTS
+// Advisory only -- it skips a map-click window the player cannot pay for. fnc_arty makes
+// the real decision, up to 45 s later.
 if (commandpointsblu1 < _cost) exitWith {
 	["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
 	sleep 30;

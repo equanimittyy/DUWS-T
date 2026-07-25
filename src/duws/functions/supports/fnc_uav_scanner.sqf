@@ -1,9 +1,19 @@
-// Locality: client; the trigger bodies below run on the machine that triggers them, not here (inherited from supports/fnc_mapclickuav.sqf).
+// Locality: server -- the map-click handler in supports/fnc_mapclickuav.sqf remoteExecs to
+// target 2. The trigger bodies below run on whichever machine trips them.
 _centerPos = _this select 0;
 _checkedRadius = _this select 1;
 _cost = _this select 2;
+_caller = _this param [3, objNull];
 
-[-_cost] remoteExec ["fnc_cp_adjust", 2];
+// Check and debit as adjacent statements on the server. fnc_mapclickuav read the balance
+// before a map-click window of up to 60 s, so its answer cannot be trusted by now; call
+// rather than remoteExec to self so the two do not land in different frames.
+if (commandpointsblu1 < _cost) exitWith {
+	if (!isNull _caller) then {
+		["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] remoteExec ["bis_fnc_showNotification", _caller];
+	};
+};
+[-_cost] call fnc_cp_adjust;
 _speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
 _message = ([localize "STR_DUWS_T_requestuavscan"] call fnc_cs);
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];

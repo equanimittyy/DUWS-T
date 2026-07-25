@@ -24,6 +24,15 @@ _message = localize "STR_DUWS_T_artycall";
 	
 if (isNil "arty_Blufor_close") exitWith {arty_Blufor_close = false};
 
+// Charged here, ahead of every side effect, rather than after the target markers are
+// drawn: the balance was last read in fnc_mapclickarty before a map-click window of up to
+// 45 s, so this is the first point the answer can be trusted. arty_Blufor_close stays
+// true on refusal, which routes the caller down its ordinary post-strike path and gives
+// the comm-menu item back after the cooldown.
+if !(["CP", _cost] call fnc_pool_spend) exitWith {
+	["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
+};
+
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
@@ -73,8 +82,6 @@ str(_markername2) setMarkerType "hd_warning";
 str(_markername2) setMarkerColor "ColorOrange";
 str(_markername2) setMarkerSize [.8,.8]; 
 str(_markername2) setMarkerText " " + _ord;
-
-[-_cost] remoteExec ["fnc_cp_adjust", 2];
 
 sleep 20;
 

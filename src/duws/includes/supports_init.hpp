@@ -22,7 +22,6 @@ support_hcCAS_available = false;
 CASInUse = false;
 support_paradrop_available = false;
 support_mobile_HQ_available = true;
-support_hcCAP_available = false;
 support_veh_repair_available = false;
 if (isNil "support_armory_available") then {
     support_armory_available = false;

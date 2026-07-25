@@ -18,22 +18,19 @@ if (_index > 10) then {
 };	
 _unitType = call (compile _var); // Get the vehicle variable
 
-if (commandpointsblu1 >= (_unitType select 2)) then {
-    _speaker = localize "STR_DUWS_T_OVERLORD";
-    _message = ([localize "STR_DUWS_T_unitready"] call fnc_cs);
-    [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
-	[-(_unitType select 2)] remoteExec ["fnc_cp_adjust", 2];
-	ctrlSetText [1000, format["%1",commandpointsblu1]];      
-	_group = group player ;
-	(_unitType select 0) createUnit [_spawnpos, _group, "if (player_fatigue == 0) then {this enablefatigue false};", _skill, "private"];
-	{
-		_x allowDamage false;
-	} forEach (units _group);
-	sleep 15;
-	{
-		_x allowDamage true;
-	} forEach (units _group);
-} else {
-	hint localize "STR_DUWS_T_e95mc4lv";
-};
+if !(["CP", _unitType select 2] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv"};
+
+_speaker = localize "STR_DUWS_T_OVERLORD";
+_message = ([localize "STR_DUWS_T_unitready"] call fnc_cs);
+[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[] remoteExec ["fnc_broadcastRadioChatter", 0];
+ctrlSetText [1000, format["%1",commandpointsblu1]];
+_group = group player ;
+(_unitType select 0) createUnit [_spawnpos, _group, "if (player_fatigue == 0) then {this enablefatigue false};", _skill, "private"];
+{
+	_x allowDamage false;
+} forEach (units _group);
+sleep 15;
+{
+	_x allowDamage true;
+} forEach (units _group);

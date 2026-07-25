@@ -26,8 +26,7 @@ hint _selected_soldier_identity;
 switch (_selected_soldier_status) do
 {
   case "Ready": {
-	if (commandpointsblu1<8) exitWith {hint "You don't have enough Command Points"};
-	[-8] remoteExec ["fnc_cp_adjust", 2];
+	if !(["CP", 8] call fnc_pool_spend) exitWith {hint "You don't have enough Command Points"};
   };
 };
 

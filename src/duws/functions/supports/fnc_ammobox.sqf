@@ -8,11 +8,10 @@ _target = _this select 0;
 _cost = _this select 1;
 _location = getpos _target;
 
-if (commandpointsblu1 < _cost) exitWith  
+if !(["CP", _cost] call fnc_pool_spend) exitWith  
 {
   ["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
 };
-[-_cost] remoteExec ["fnc_cp_adjust", 2];
 
 hint localize "STR_DUWS_T_y91vei53";
 

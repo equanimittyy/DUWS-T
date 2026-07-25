@@ -6,11 +6,10 @@ params ["_fob"];
 
 private _cost = 5;
 
-if (commandpointsblu1 <= _cost) exitWith {
+if !(["CP", _cost] call fnc_pool_spend) exitWith {
     hint format [localize "STR_DUWS_T_p6sb3ply", _cost];
 };
 
-[-_cost] remoteExec ["fnc_cp_adjust", 2];
 playSound "loadgun";
 
 // The cost travels so the server can refund it if another player's rebuild is already running.

@@ -4,7 +4,6 @@ _index = lbCurSel 2101;
 _grouptype = "";
 _HCsquadtype = "";
 _cost = 0;
-_not_enough = false;
 _task_force = false;
 
 ///////////////////////////////////
@@ -91,29 +90,23 @@ sleep 2;
 ////////////////////////
 // Spawn the SQUAD
 ////////////////////////
-if (commandpointsblu1 >= _cost) then {
+// Charge before spawning: the server rules on affordability, so a refused request must
+// not leave a squad standing.
+if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
 
-	if (_task_force == true) then {
-		[_spawnPos,_grouptype, _TFname] remoteExec ["fnc_playerTF_spawn", 2, false];
-	} else {
-		// Spawn, name, register and muster all happen on the server; it hands
-		// hcSetGroup back here, since that needs this machine's own player.
-		[_spawnPos, _grouptype, _HCsquadtype, player] remoteExec ["fnc_HCsquad_spawn", 2];
-	};
-
-	[-_cost] remoteExec ["fnc_cp_adjust", 2];
-
-	// if TF squad, exit
-	if (_task_force == true) exitWith {hint localize "STR_DUWS_T_0a6o9dsm"+_TFname};
-
-	hint localize "STR_DUWS_T_gu6cbc5f";
-    _speaker = localize "STR_DUWS_T_OVERLORD";
-    _message = ([localize "STR_DUWS_T_squadready"] call fnc_cs);
-    [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
-
+if (_task_force == true) then {
+	[_spawnPos,_grouptype, _TFname] remoteExec ["fnc_playerTF_spawn", 2, false];
 } else {
-	_not_enough = true;
+	// Spawn, name, register and muster all happen on the server; it hands
+	// hcSetGroup back here, since that needs this machine's own player.
+	[_spawnPos, _grouptype, _HCsquadtype, player] remoteExec ["fnc_HCsquad_spawn", 2];
 };
 
-if (_not_enough) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
+// if TF squad, exit
+if (_task_force == true) exitWith {hint localize "STR_DUWS_T_0a6o9dsm"+_TFname};
+
+hint localize "STR_DUWS_T_gu6cbc5f";
+_speaker = localize "STR_DUWS_T_OVERLORD";
+_message = ([localize "STR_DUWS_T_squadready"] call fnc_cs);
+[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[] remoteExec ["fnc_broadcastRadioChatter", 0];
