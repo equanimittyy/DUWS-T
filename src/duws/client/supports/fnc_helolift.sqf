@@ -13,11 +13,13 @@
 // ========== 1. 目标检查与初始化 ==========
 _target = cursorObject;
 if (isNull _target) exitWith {
-    hint localize "STR_DUWS_T_imz98waj";
+    hint localize "STR_DUWS_T_helolift_notarget";
+    sleep 10;
     [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
 };
 if !(_target isKindOf "Car" || _target isKindOf "Tank" || _target isKindOf "Helicopter" || _target isKindOf "Plane") exitWith {
-    hint localize "STR_DUWS_T_1gk907or";
+    hint localize "STR_DUWS_T_helolift_badtarget";
+    sleep 10;
     [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
 };
 
@@ -44,7 +46,8 @@ waitUntil {
 _helo = missionNamespace getVariable [_varPrefix + "_helo", objNull];
 _heloGroup = missionNamespace getVariable [_varPrefix + "_heloGroup", grpNull];
 if (isNull _helo) exitWith {
-    hint localize "STR_DUWS_T_7h0bmzi7";
+    hint localize "STR_DUWS_T_helolift_noheli";
+    sleep 10;
     [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
 };
 _pilot = currentPilot _helo;
@@ -52,6 +55,20 @@ _pilot = currentPilot _helo;
 // ========== 3. 保存目标引用 ==========
 _targetVehicle = _target;
 _originalMass = getMass _targetVehicle;
+
+// Single teardown for every failure below, replacing nine near-identical copies. The
+// server owns the aircraft, so the rope/mass/landing cleanup is its call -- this half only
+// clears the player's own map markers and hands the support back.
+_abort = {
+    private _markers = player getVariable ["LiftWaypointMarkers", []];
+    { deleteMarker _x } forEach _markers;
+    player setVariable ["LiftWaypointMarkers", []];
+    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heloliftabort"] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
+    sleep 300;
+    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
+};
+
 
 // ========== 添加直升机损坏检测 ==========
 _helo_maxDamage = 0.7;
@@ -94,18 +111,7 @@ waitUntil {
     sleep 1.5;
     (missionNamespace getVariable [_moveCompletedVar, false]) or (call _check_damage)
 };
-if (call _check_damage) exitWith {
-    // 客户端清理标记
-    private _markers = player getVariable ["LiftWaypointMarkers", []];
-    { deleteMarker _x } forEach _markers;
-    player setVariable ["LiftWaypointMarkers", []];
-    // 远程调用服务器 abort 模式清理
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heloliftabort"]
-    remoteExec ["BIS_fnc_showSubtitle", 0];
-    [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
-    sleep 160;
-    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
-};
+if (call _check_damage) exitWith { call _abort };
 
 [player, "height", [10]] remoteExec ["fnc_helolift_waypoints", 2];
 deleteMarker _hookMarkerName;
@@ -114,16 +120,7 @@ _message = format[localize "STR_DUWS_T_helolift3"];
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
-if (call _check_damage) exitWith {
-    private _markers = player getVariable ["LiftWaypointMarkers", []];
-    { deleteMarker _x } forEach _markers;
-    player setVariable ["LiftWaypointMarkers", []];
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heloliftabort"]
-    remoteExec ["BIS_fnc_showSubtitle", 0];
-    [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
-    sleep 160;
-    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
-};
+if (call _check_damage) exitWith { call _abort };
 
 // ========== 定义直升机连接点 ==========
 private _heliPoints = [
@@ -204,16 +201,7 @@ waitUntil {
     sleep 1.5;
     (missionNamespace getVariable [_ropesTightVar, false]) or (call _check_damage)
 };
-if (call _check_damage) exitWith {
-    private _markers = player getVariable ["LiftWaypointMarkers", []];
-    { deleteMarker _x } forEach _markers;
-    player setVariable ["LiftWaypointMarkers", []];
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heloliftabort"]
-    remoteExec ["BIS_fnc_showSubtitle", 0];
-    [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
-    sleep 160;
-    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
-};
+if (call _check_damage) exitWith { call _abort };
 sleep 6;
 _speaker = localize "STR_DUWS_T_pilot";
 _message = format[localize "STR_DUWS_T_helolift5"];
@@ -222,16 +210,7 @@ _message = format[localize "STR_DUWS_T_helolift5"];
 
 // ========== 6. 请求航点 ==========
 [player, "height", [60]] remoteExec ["fnc_helolift_waypoints", 2];
-if (call _check_damage) exitWith {
-    private _markers = player getVariable ["LiftWaypointMarkers", []];
-    { deleteMarker _x } forEach _markers;
-    player setVariable ["LiftWaypointMarkers", []];
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heloliftabort"]
-    remoteExec ["BIS_fnc_showSubtitle", 0];
-    [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
-    sleep 160;
-    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
-};
+if (call _check_damage) exitWith { call _abort };
 
 _liftActionID = player addAction [
     "<t color='#00ff00' size='2'>Give Waypoints to pilot</t>",
@@ -243,45 +222,14 @@ _liftActionID = player addAction [
     "",
     "true"
 ];
-if (call _check_damage) exitWith {
-    player removeAction _liftActionID;
-    private _markers = player getVariable ["LiftWaypointMarkers", []];
-    { deleteMarker _x } forEach _markers;
-    player setVariable ["LiftWaypointMarkers", []];
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heloliftabort"]
-    remoteExec ["BIS_fnc_showSubtitle", 0];
-    [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
-    sleep 160;
-    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
-};
+if (call _check_damage) exitWith { player removeAction _liftActionID; call _abort };
 
 waitUntil {sleep 1.5; (player getVariable ["LiftTakeOff", false]) or (call _check_damage)};
 player removeAction _liftActionID;
-if (call _check_damage) exitWith {
-    private _markers = player getVariable ["LiftWaypointMarkers", []];
-    { deleteMarker _x } forEach _markers;
-    player setVariable ["LiftWaypointMarkers", []];
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heloliftabort"]
-    remoteExec ["BIS_fnc_showSubtitle", 0];
-    [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
-    sleep 160;
-    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
-};
+if (call _check_damage) exitWith { call _abort };
 
 private _waypoints = player getVariable ["LiftWaypoints", []];
-if (count _waypoints < 3) exitWith {
-    hint "Waypoints not fully set. Mission aborted.";
-    // 清理标记
-    private _markers = player getVariable ["LiftWaypointMarkers", []];
-    { deleteMarker _x } forEach _markers;
-    player setVariable ["LiftWaypointMarkers", []];
-    // 远程调用服务器 abort 清理
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heloliftabort"]
-    remoteExec ["BIS_fnc_showSubtitle", 0];
-    [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
-    sleep 160;
-    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
-};
+if (count _waypoints < 3) exitWith { hint localize "STR_DUWS_T_liftwp_incomplete"; call _abort };
 
 // ========== 7. 飞往航点路线 ==========
 // 更新最终航点标记位置（客户端视觉反馈）
@@ -305,16 +253,7 @@ waitUntil {
     sleep 0.5;
     (missionNamespace getVariable [_finalReachedVar, false]) or (call _check_damage)
 };
-if (call _check_damage) exitWith {
-    private _markers = player getVariable ["LiftWaypointMarkers", []];
-    { deleteMarker _x } forEach _markers;
-    player setVariable ["LiftWaypointMarkers", []];
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heloliftabort"]
-    remoteExec ["BIS_fnc_showSubtitle", 0];
-    [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
-    sleep 160;
-    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
-};
+if (call _check_damage) exitWith { call _abort };
 
 [player, "height", [60]] remoteExec ["fnc_helolift_waypoints", 2];
 _speaker = localize "STR_DUWS_T_pilot";
@@ -322,16 +261,7 @@ _message = format[localize "STR_DUWS_T_helolift6"];
 [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
-if (call _check_damage) exitWith {
-    private _markers = player getVariable ["LiftWaypointMarkers", []];
-    { deleteMarker _x } forEach _markers;
-    player setVariable ["LiftWaypointMarkers", []];
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heloliftabort"]
-    remoteExec ["BIS_fnc_showSubtitle", 0];
-    [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
-    sleep 160;
-    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
-};
+if (call _check_damage) exitWith { call _abort };
 
 // ========== 8. 执行释放（远程调用服务器放松并销毁绳索，并恢复质量）==========
 [player, "release", [_helo, _ropeLength, _targetVehicle, _originalMass]] remoteExec ["fnc_helolift_ropes", 2];
@@ -350,5 +280,5 @@ player setVariable ["LiftWaypointMarkers", []];
 { deleteMarker _x } forEach _markers;
 player setVariable ["LiftWaypointMarkers", []];
 [player, "cleanup", [_helo]] remoteExec ["fnc_helolift_ropes", 2];
-sleep 200;
+sleep 120;
 [player, "helo_lift"] call BIS_fnc_addCommMenuItem;

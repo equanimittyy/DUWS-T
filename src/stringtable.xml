@@ -6391,8 +6391,8 @@
                 <Original>This is Alpha 1-1, we've got a vehicle here that needs sling-loading. Requesting heavy transport.</Original>
                 <English>This is Alpha 1-1, we've got a vehicle here that needs sling-loading. Requesting heavy transport.</English>
                    <Key ID="STR_DUWS_T_heloliftabort">
-                <Original>This is Overlord. Mule 1-1 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1. Another bird available shortly. Out.</Original>
-                <English>This is Overlord. Mule 1-1 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1. Another bird available shortly. Out.</English>
+                <Original>This is Overlord. Mule 1-1 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1. Another bird available in five minutes. Out.</Original>
+                <English>This is Overlord. Mule 1-1 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1. Another bird available in five minutes. Out.</English>
             </Key>
      </Key>
             <Key ID="STR_DUWS_T_helolift1">
@@ -6434,8 +6434,8 @@
                 <German>Wir sind da. Bereitet Aufprall-Gegenmaßnahmen vor.</German>
                 <Spanish>Hemos llegado. Prepara medidas de respuesta al impacto.</Spanish>
                 <Chinesesimp>我们到了。注意部署冲击应对措施。</Chinesesimp>
-                <Original>Mule 1-1 on station. Stand clear, setting the load down.</Original>
-                <English>Mule 1-1 on station. Stand clear, setting the load down.</English>
+                <Original>Mule 1-1 on station. Stand clear, setting the load down. Heavy transport available again in two minutes.</Original>
+                <English>Mule 1-1 on station. Stand clear, setting the load down. Heavy transport available again in two minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_opforqrf1">
                 <German>Hier ist "Overlord". Achtung, Aufklärungseinheiten haben feindliche schnelle Eingreiftruppen (QRF) entdeckt, die sich um das Einsatzgebiet herum aufstellen. Bleibt wachsam.</German>
@@ -6445,11 +6445,11 @@
                 <English>This is Overlord. Be advised, reconnaissance elements have spotted enemy QRF deploying around the AO. Stay alert.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxidamaged">
-                <German>Hier ist die Leitstelle. %1 %2-%3 hat schweren Schaden erlitten und kann den geplanten Auftrag nicht erfüllen. Ersatzeinheit ist unterwegs, voraussichtliche Ankunftszeit: 1 Minute.</German>
-                <Spanish>Aquí es el despacho. %1 %2-%3 ha sufrido daños graves y no puede completar la misión programada. Unidad de reemplazo en camino, tiempo estimado de llegada: 1 minuto.</Spanish>
-                <Chinesesimp>这里是调度。%1 %2-%3严重损伤，无法完成预定任务。替补单位正在进场，预计到达时间：1分钟。</Chinesesimp>
-                <Original>This is Overlord. %1 %2-%3 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1 — you're on your own. Another bird available in one minute. Out.</Original>
-                <English>This is Overlord. %1 %2-%3 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1 — you're on your own. Another bird available in one minute. Out.</English>
+                <German>Hier ist die Leitstelle. %1 %2-%3 hat schweren Schaden erlitten und kann den geplanten Auftrag nicht erfüllen. Ersatzeinheit ist unterwegs, voraussichtliche Ankunftszeit: 5 Minuten.</German>
+                <Spanish>Aquí es el despacho. %1 %2-%3 ha sufrido daños graves y no puede completar la misión programada. Unidad de reemplazo en camino, tiempo estimado de llegada: 5 minutos.</Spanish>
+                <Chinesesimp>这里是调度。%1 %2-%3严重损伤，无法完成预定任务。替补单位正在进场，预计到达时间：5分钟。</Chinesesimp>
+                <Original>This is Overlord. %1 %2-%3 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1 — you're on your own. Another bird available in five minutes. Out.</Original>
+                <English>This is Overlord. %1 %2-%3 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1 — you're on your own. Another bird available in five minutes. Out.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxicall">
                 <German>Action Squad, meine ETA beträgt 40 Sekunden – räume die LZ sofort.</German>
@@ -6485,6 +6485,22 @@
                 <Chinesesimp>%1 %2-%3呼叫调度，我们已到达预定坐标位置。</Chinesesimp>
                 <Original>%1 %2-%3 to Overlord, we're at the LZ.</Original>
                 <English>%1 %2-%3 to Overlord, we're at the LZ.</English>
+                   <Key ID="STR_DUWS_T_liftwp_incomplete">
+                       <Original>Mule 1-1, route incomplete. Aborting the tasking. Heavy transport available again in five minutes.</Original>
+                       <English>Mule 1-1, route incomplete. Aborting the tasking. Heavy transport available again in five minutes.</English>
+                   </Key>
+                   <Key ID="STR_DUWS_T_helolift_notarget">
+                       <Original>You must pick a target vehicle. Heavy transport available again in ten seconds.</Original>
+                       <English>You must pick a target vehicle. Heavy transport available again in ten seconds.</English>
+                   </Key>
+                   <Key ID="STR_DUWS_T_helolift_badtarget">
+                       <Original>Target must be a car, tank, helicopter or fixed-wing aircraft. Heavy transport available again in ten seconds.</Original>
+                       <English>Target must be a car, tank, helicopter or fixed-wing aircraft. Heavy transport available again in ten seconds.</English>
+                   </Key>
+                   <Key ID="STR_DUWS_T_helolift_noheli">
+                       <Original>Mule 1-1 failed to reach your position. Heavy transport available again in ten seconds.</Original>
+                       <English>Mule 1-1 failed to reach your position. Heavy transport available again in ten seconds.</English>
+                   </Key>
                    <Key ID="STR_DUWS_T_liftwp_brief">
                 <Original>Mark three points on the map: two route legs, then the drop point.</Original>
                 <English>Mark three points on the map: two route legs, then the drop point.</English>
@@ -6526,12 +6542,16 @@
                 <English>Chariot 1-1 standing by. Open your map to continue, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxi_noshore">
-                <Original>Swordfish 1-1, no clear shoreline at your position. Move to open water or a clear beach, over.</Original>
-                <English>Swordfish 1-1, no clear shoreline at your position. Move to open water or a clear beach, over.</English>
+                <Original>Swordfish 1-1, no clear shoreline at your position. Move to open water or a clear beach. Boat taxi available again in ten seconds, over.</Original>
+                <English>Swordfish 1-1, no clear shoreline at your position. Move to open water or a clear beach. Boat taxi available again in ten seconds, over.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxi_rtbdown">
+                <Original>This is Overlord. Swordfish 1-1 went down on the return leg. Your extraction is complete, Alpha 1-1 — no further action required. Boat taxi available again in five minutes. Out.</Original>
+                <English>This is Overlord. Swordfish 1-1 went down on the return leg. Your extraction is complete, Alpha 1-1 — no further action required. Boat taxi available again in five minutes. Out.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxi_damaged">
-                <Original>This is Overlord. Swordfish 1-1 is out of action and aborting the tasking. Regret we can't complete your extraction, Alpha 1-1. Another boat available shortly. Out.</Original>
-                <English>This is Overlord. Swordfish 1-1 is out of action and aborting the tasking. Regret we can't complete your extraction, Alpha 1-1. Another boat available shortly. Out.</English>
+                <Original>This is Overlord. Swordfish 1-1 is out of action and aborting the tasking. Regret we can't complete your extraction, Alpha 1-1. Another boat available in five minutes. Out.</Original>
+                <English>This is Overlord. Swordfish 1-1 is out of action and aborting the tasking. Regret we can't complete your extraction, Alpha 1-1. Another boat available in five minutes. Out.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxi_notaboard">
                 <Original>Swordfish 1-1 to Alpha 1-1, you are not aboard. Get in and we'll move out, over.</Original>
@@ -6550,8 +6570,8 @@
                 <English>Swordfish 1-1, we are at the drop point. Disembark.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxi_rtb">
-                <Original>Swordfish 1-1 is returning to base.</Original>
-                <English>Swordfish 1-1 is returning to base.</English>
+                <Original>Swordfish 1-1 is returning to base. Boat taxi available again in two minutes.</Original>
+                <English>Swordfish 1-1 is returning to base. Boat taxi available again in two minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxiwp_brief">
                 <Original>Swordfish 1-1, ready to copy. Mark your drop point on the map, over.</Original>
@@ -6584,8 +6604,8 @@
                 <German>Kein ausreichend großer Platz in der Nähe zur Helikopterlandung.</German>
                 <Spanish>No hay zona amplia cercana para aterrizaje de helicóptero.</Spanish>
                 <Chinesesimp>附近没有宽阔地点用于直升机降落</Chinesesimp>
-                <Original>No open area nearby for the helicopter to land</Original>
-                <English>No open area nearby for the helicopter to land</English>
+                <Original>No open area nearby for the helicopter to land. Air taxi available again in ten seconds.</Original>
+                <English>No open area nearby for the helicopter to land. Air taxi available again in ten seconds.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxi2wpmarked">
                 <German>Wegpunkt 2 gesetzt. Endlandezone festlegen.</German>
@@ -6605,12 +6625,12 @@
                 <German>%1 %2-%3 kehrt zurück.</German>
                 <Spanish>%1 %2-%3 está regresando.</Spanish>
                 <Chinesesimp>%1 %2-%3正在返航。</Chinesesimp>
-                <Original>%1 %2-%3 is returning to base.</Original>
-                <English>%1 %2-%3 is returning to base.</English>
+                <Original>%1 %2-%3 is returning to base. Air taxi available again in two minutes.</Original>
+                <English>%1 %2-%3 is returning to base. Air taxi available again in two minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxirtbdown">
-                <Original>This is Overlord. %1 %2-%3 went down on the return leg. Your lift is complete, Alpha 1-1 — no further action required. Air taxi unavailable for the next three minutes. Out.</Original>
-                <English>This is Overlord. %1 %2-%3 went down on the return leg. Your lift is complete, Alpha 1-1 — no further action required. Air taxi unavailable for the next three minutes. Out.</English>
+                <Original>This is Overlord. %1 %2-%3 went down on the return leg. Your lift is complete, Alpha 1-1 — no further action required. Air taxi unavailable for the next five minutes. Out.</Original>
+                <English>This is Overlord. %1 %2-%3 went down on the return leg. Your lift is complete, Alpha 1-1 — no further action required. Air taxi unavailable for the next five minutes. Out.</English>
             </Key>
             <Key ID="STR_DUWS_T_casdownkoi">
                 <German>Leitstelle hier, Nahluftunterstützungseinheit „Koi“ bestätigt im Einsatz gefallen. Ersatzeinheit wird im Einsatzgebiet eingesetzt, ETA: 10 Minuten.</German>

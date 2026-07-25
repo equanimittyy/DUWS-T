@@ -17,7 +17,7 @@ _music = [] call fnc_taxi_music;
 _foundPickupPos = [_posplayer, 20,_radius,20,0,0.5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos; // find a valid pos
 
 // try to find a pos, if no pos is found exit the script
-if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_nolz"; sleep 1; _art = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;};
+if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_nolz"; sleep 10; _art = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;};
 
 // A POS NEAR THE PLAYER HAS BEEN FOUND, CHOPPA EN ROUTE
 _speakeracteam = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
@@ -95,7 +95,7 @@ hint localize "STR_DUWS_T_helotaxichopperinbound";
 
 // check damage and exit function
 _check_damage = compile "((vehicle _pilot == _pilot) or (damage _helo > _helo_maxDamage) or (fuel _helo < _helo_minFuel))";
-_something_happened = {
+_abort = {
 	params ["_helo","_helogroup","_helipad1","_markerpickup","_taxiName","_random1","_random2"];
 	deleteVehicle _helipad1;
 	deleteMarker str(_markerpickup);
@@ -105,7 +105,7 @@ _something_happened = {
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 	_helo land "LAND";
 	_helo engineOn false;
-	sleep 60;
+	sleep 300;
 	_art = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;
 	{deleteVehicle _x;} foreach units _helogroup;
 	deleteVehicle _helo;
@@ -116,7 +116,7 @@ waitUntil {sleep 0.5;(_foundpickuppos distance _helo < 350) or (call _check_dama
 
 // IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
-	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _something_happened;
+	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _abort;
 }; 
 
 ////////////////////
@@ -173,7 +173,7 @@ while {_inVehCheck} do {
 
 // IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
-	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _something_happened;
+	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _abort;
 }; 
 
 // *****************************
@@ -187,7 +187,7 @@ _helo setEffectiveCommander player;  // turn helo "blue" while player is on boar
 	_speaker = localize "STR_DUWS_T_pilot";
 	[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 str(_markerpickup) setMarkerPos ClickedTaxiPos; 
-sleep 2;
+sleep 2;   // spacer: 118 + 2 = the 120s success cooldown
 openMap false;
 hint "";
 
@@ -220,7 +220,7 @@ sleep 1;
 
 // IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
-	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _something_happened;
+	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _abort;
 	deleteVehicle _helipad;
 	_helo lock false;
 	deleteMarker str(Taximarker1);
@@ -235,7 +235,7 @@ sleep 1;
 
 // IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
-	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _something_happened;
+	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _abort;
 	deleteVehicle _helipad;
 	_helo lock false;
 	deleteMarker str(Taximarker1);
@@ -263,7 +263,7 @@ _helo setEffectiveCommander _pilot;
 
 // IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
-	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _something_happened;
+	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _abort;
 	deleteVehicle _helipad;
 	_helo lock false;
 	deleteMarker str(Taximarker1);
@@ -307,7 +307,7 @@ if (call _check_damage) exitWith {
 	_speaker = localize "STR_DUWS_T_OVERLORD";
 	[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 	[] remoteExec ["fnc_broadcastRadioChatter", 0];
-	sleep 200;
+	sleep 300;
 	_art = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;
 	{deleteVehicle _x;} foreach units _helogroup;
 	deleteVehicle _helo;
@@ -319,7 +319,7 @@ if (call _check_damage) exitWith {
 	[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
-sleep 200;
+sleep 118;
 
 terminate _pickupSpawnopen;
 terminate _pickupSpawnclose;

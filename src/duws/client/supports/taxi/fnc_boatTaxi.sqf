@@ -11,7 +11,7 @@ _music = [] call fnc_taxi_music;
 _foundPickupPos = [_posplayer, 0,_radius,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos; // find a valid pos
 
 // try to find a pos, if no pos is found exit the script
-if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_boattaxi_noshore"; sleep 5; [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;};
+if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_boattaxi_noshore"; sleep 10; [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;};
 
 // A POS NEAR THE PLAYER HAS BEEN FOUND, GUNBOAT EN ROUTE
 
@@ -40,6 +40,21 @@ _pilot setcaptive true;
 _pilot moveindriver _boat;
 
 
+// Single teardown for every failure below. The six copies this replaces had drifted: two
+// forgot to clear the pickup marker, so a boat lost on the run-in left it on the map for
+// the rest of the campaign. Unlock and deleteMarker are no-ops when already done, so one
+// handler is safe on every path.
+_abort = {
+    // Message is a parameter so the return leg can report a completed extraction rather
+    // than apologise for one; everything else about the teardown is identical.
+    params [["_msg", "STR_DUWS_T_boattaxi_damaged"]];
+    _boat lock false;
+    deleteMarker str(_markerpickup);
+    [localize "STR_DUWS_T_OVERLORD", localize _msg] remoteExec ["BIS_fnc_showSubtitle", 0];
+    sleep 300;
+    [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
+};
+
 _wp = _boatgroup addWaypoint [[_foundPickupPos select 0, (_foundPickupPos select 1)-75], 0];
 _wp setWaypointType "MOVE";
 [_boatgroup, 1] setWaypointCombatMode "BLUE";
@@ -47,13 +62,7 @@ _wp setWaypointType "MOVE";
 
 waitUntil {_foundpickuppos distance _boat < 350 or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the helo is near the lz
 // IF THE PILOT IS DEAD OR BOAT SUNK ******************
-if (getdammage _boat > 0.7 or !alive _pilot) exitWith {
-deleteMarker str(_markerpickup);
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_boattaxi_damaged"] remoteExec ["BIS_fnc_showSubtitle", 0];
-// --- AJOUTER DE NOUVEAU LE SUPPORT
-sleep 15;
-[player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
-}; 
+if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 // ****************************************************
 
 _inVehCheck = true;
@@ -70,13 +79,7 @@ if (vehicle player != _boat) then {
 };
 
 // IF THE PILOT IS DEAD OR GUNBOAT DOWN  **************
-if (getdammage _boat > 0.7 or !alive _pilot) exitWith {
-deleteMarker str(_markerpickup);
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_boattaxi_damaged"] remoteExec ["BIS_fnc_showSubtitle", 0];
-sleep 15;
-[player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
-// --- AJOUTER DE NOUVEAU LE SUPPORT
-}; 
+if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 // *****************************
 
 
@@ -91,14 +94,7 @@ str(_markerpickup) setMarkerText "Drop point";
 
 
 // IF THE PILOT IS DEAD OR BOAT SUNK  **************
-if (getdammage _boat > 0.7 or !alive _pilot) exitWith {
-	_boat lock false;
-	deleteMarker str(_markerpickup);
-	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_boattaxi_damaged"] remoteExec ["BIS_fnc_showSubtitle", 0];
-	// --- AJOUTER DE NOUVEAU LE SUPPORT
-	sleep 15;
-	[player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
-}; 
+if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 // *****************************
 
 // TELEPORT BOAT NEAR DROP POINT
@@ -117,27 +113,14 @@ _boat lock false;
 
 waitUntil {sleep 0.5;ClickedTaxiPos distance _boat < 200  or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the boat is near the shore
 // IF THE PILOT IS DEAD OR GUNBOAT DOWN  **************
-if (getdammage _boat > 0.7 or !alive _pilot) exitWith {
-_boat lock false;
-deleteMarker str(_markerpickup);
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_boattaxi_damaged"] remoteExec ["BIS_fnc_showSubtitle", 0];
-// --- AJOUTER DE NOUVEAU LE SUPPORT
-sleep 15;
-[player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
-}; 
+if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 // *****************************
 
 
 // time to move ppl out of the boat;
 waitUntil {sleep 0.5;(getpos _boat select 2 < 4 && _boat distance ClickedTaxiPos<20)  or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the boat is near shore
 // IF THE PILOT IS DEAD OR GUNBOAT DOWN  **************
-if (getdammage _boat > 0.7 or !alive _pilot) exitWith {
-_boat lock false;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_boattaxi_damaged"] remoteExec ["BIS_fnc_showSubtitle", 0];
-// --- AJOUTER DE NOUVEAU LE SUPPORT
-sleep 15;
-[player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
-}; 
+if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 // *****************************
 titleText [localize "STR_DUWS_T_boattaxi_arrived", "PLAIN DOWN"];
 
@@ -152,20 +135,15 @@ deleteMarker str(_markerpickup);
 
 waitUntil {_boat distance player>100 or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the helo is near the ground
 // IF THE PILOT IS DEAD OR GUNBOAT DOWN  **************
-if (getdammage _boat > 0.7 or !alive _pilot) exitWith {
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_boattaxi_damaged"] remoteExec ["BIS_fnc_showSubtitle", 0];
-// --- AJOUTER DE NOUVEAU LE SUPPORT
-sleep 15;
-[player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
-}; 
+if (getdammage _boat > 0.7 or !alive _pilot) exitWith { ["STR_DUWS_T_boattaxi_rtbdown"] call _abort };
 // *****************************
 
 
-sleep 200;
+sleep 118;
 
 deleteVehicle _pilot;
 deleteVehicle _boat;
 
 
-sleep 2;
+sleep 2;   // spacer: 118 + 2 = the 120s success cooldown
 [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
