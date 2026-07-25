@@ -148,6 +148,9 @@ waituntil {sleep 1;WARCOM_init_done;};
 // Draw the HQ icon on map
 [] spawn fnc_draw_HQicon;
 
+// Registers a Draw3D handler and returns, so call rather than spawn.
+[] call fnc_killhouse_markers;
+
 
 //////////////////////////
 //  JIP CODE

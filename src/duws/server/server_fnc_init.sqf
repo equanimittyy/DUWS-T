@@ -224,6 +224,8 @@ fnc_hirePartisans_spawnDeployed = compile preprocessFileLineNumbers "duws\server
 publicVariable "fnc_hirePartisans_spawnDeployed";
 fnc_addBoardKillhouseActions = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_addBoardKillhouseActions.sqf";
 publicVariable "fnc_addBoardKillhouseActions";
+fnc_killhouse_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_killhouse_markers.sqf";
+publicVariable "fnc_killhouse_markers";
 // SIDE MISSION FUNCTIONS
 fnc_mission_reward = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_reward.sqf";
 fnc_missionTimer = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTimer.sqf";
