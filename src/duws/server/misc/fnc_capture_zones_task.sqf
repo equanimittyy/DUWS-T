@@ -34,9 +34,13 @@ waitUntil {sleep 30; zoneundercontrolblu >= amount_zones_created};
 
 // Every zone is BLUFOR: the campaign is over. The pause only lets the notification and the
 // task update land before the outro card replaces them.
+// The notification takes title and body as separate fields; the hint and side-chat take one
+// string, so they need the separator the `+` concatenation was missing -- it ran the headline
+// straight into the sentence as "Mission Completed!Every zone...".
+private _endLine = format ["%1 %2", localize "STR_DUWS_T_fo1ihi1n", localize "STR_DUWS_T_CAMPAIGN_WON"];
 ["info",[localize "STR_DUWS_T_fo1ihi1n", localize "STR_DUWS_T_CAMPAIGN_WON"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
-[localize "STR_DUWS_T_fo1ihi1n" + localize "STR_DUWS_T_CAMPAIGN_WON",{hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-[localize "STR_DUWS_T_fo1ihi1n" + localize "STR_DUWS_T_CAMPAIGN_WON"] spawn fnc_sideChat_filter;
+[_endLine,{hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+[_endLine] spawn fnc_sideChat_filter;
 
 ["Campaign", "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", 0];
 sleep 10;

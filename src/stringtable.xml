@@ -4170,9 +4170,9 @@
                 <English>Mission Completed!</English>
             </Key>
             <Key ID="STR_DUWS_T_CAMPAIGN_WON">
-                <Original>Every zone is under our control. The island is ours - standing down.</Original>
-                <English>Every zone is under our control. The island is ours - standing down.</English>
-                <Chinesesimp>所有战区已被我方占领。任务即将结束。</Chinesesimp>
+                <Original>Every zone is under our control. The island is ours. All units, stand down.</Original>
+                <English>Every zone is under our control. The island is ours. All units, stand down.</English>
+                <Chinesesimp>所有战区已被我方占领。全体单位，停止行动。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_6p70rgp4">
                 <German>Sichere alle besetzten Zonen oder verliere deine Assets.</German>
