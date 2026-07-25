@@ -77,21 +77,19 @@ The reusable action menu does this for every row, in `fnc_open_action_menu`
 
 ## Duplicate `<Key ID>` in stringtable.xml resolve to one definition, silently
 
-**`src/stringtable.xml` repeats several `STR_` IDs. The engine loads the table without
-error and keeps only one definition per ID; the other copies are dead. Editing a dead
-copy changes nothing in-game, and reordering keys can flip which copy wins.**
+**A `STR_` ID repeated in `src/stringtable.xml` loads without error, but the engine keeps
+only one definition and the other copies are dead: editing a dead copy changes nothing
+in-game, and reordering keys can flip which copy wins.**
 
 The table is split into `<Container>` sections purely for navigation — IDs resolve
 globally across all containers, so which duplicate the engine keeps is decided by file
-order, not by section. Nine IDs are currently duplicated; most pairs are identical (or
-differ only in tag order), but `STR_DUWS_T_FAST_TRAVEL_BUSY` has two genuinely different
-English strings ("You are already placing a waypoint." vs "The map is already opening,
-please wait...") — a latent collision where one string never displays.
+order, not by section. When two copies of an ID differ in more than tag order, one string
+silently never displays — a latent wrong-message bug.
 
-**How to apply:** treat any reordering or removal of a duplicate key as behaviour-
-affecting; keep the duplicate copies byte-identical, or consolidate to one on purpose and
-test in-game. When a string edit appears to do nothing, grep for a second `<Key ID>` with
-the same ID before assuming the change didn't take.
+**How to apply:** the table is deduplicated — keep it that way. When a string edit appears
+to do nothing in-game, grep for a second `<Key ID>` with the same ID before assuming the
+change didn't take, and fold any new duplicate into one copy on purpose rather than
+leaving a dead twin.
 
 ## `hint` renders beneath the open map, so map-phase prompts are invisible
 

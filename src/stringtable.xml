@@ -6,10 +6,6 @@
                 <English>Empty</English>
                 <Chinese>空</Chinese>
             </Key>
-            <Key ID="STR_DUWS_T_empty">
-                <English>Empty</English>
-                <Chinese>空</Chinese>
-            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_OPFOR_SPEAKER">
                 <Original>OPFOR</Original>
                 <English>OPFOR</English>
@@ -1520,10 +1516,6 @@
 	\n你可以携带降落伞来一场刺激的高空跳伞。
     \n在训练场死亡不受死亡惩罚，但仍会丢失钱币/情报。</Chinese>
 </Key>
-            <Key ID="STR_DUWS_KILLHOUSE_TRAINING_CANCELLED">
-                <English>Training cancelled. No rewards granted</English>
-                <Chinese>训练已取消，不获得奖励。</Chinese>
-            </Key>
             <Key ID="STR_DUWS_T_SPAWN_TARGETS">
                 <English>Random Spawn Targets</English>
                 <Chinesesimp>随机生成目标</Chinesesimp>
@@ -2300,10 +2292,6 @@
             </Key>
         </Container>
         <Container name="Civilian Interaction &amp; Reputation">
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_BUSY">
-                <English>You are already placing a waypoint</English>
-                <Chinese>你已经在选择传送位置。</Chinese>
-            </Key>
             <Key ID="STR_DUWS_T_ASK_FOR_TOOLKIT">
                 <Original>&lt;t color='#ffaa00'&gt;Request toolbox (2 cash)&lt;/t&gt;</Original>
                 <Chinesesimp>&lt;t color='#ffaa00'&gt;请求工具箱 (2货币)&lt;/t&gt;</Chinesesimp>
@@ -2990,20 +2978,6 @@
                 <Chinesesimp>声望降低！</Chinesesimp>
                 <Original>Reputation Decreased!</Original>
                 <English>Reputation Decreased!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_0pluxey2">
-                <German>Dein Ansehen liegt jetzt bei: %1</German>
-                <Spanish>Su reputación es de: %1</Spanish>
-                <Chinesesimp>你的声望目前是: %1</Chinesesimp>
-                <Original>Your Reputation is now: %1</Original>
-                <English>Your Reputation is now: %1</English>
-            </Key>
-            <Key ID="STR_DUWS_T_cycuqbvj">
-                <German>Zivilist getötet !</German>
-                <Spanish>Civil asesinado</Spanish>
-                <Chinesesimp>平民被杀了！</Chinesesimp>
-                <Original>Civilian Killed!</Original>
-                <English>Civilian Killed!</English>
             </Key>
             <Key ID="STR_DUWS_T_b16p8tvz">
                 <German>Ansehen negativ !</German>
@@ -6932,13 +6906,6 @@
                 <Original>Cobra 1-3</Original>
                 <English>Cobra 1-3</English>
             </Key>
-            <Key ID="STR_DUWS_T_actionteam">
-                <German>Action Squad</German>
-                <Spanish>Action Squad</Spanish>
-                <Chinesesimp>行动组</Chinesesimp>
-                <Original>Alpha 1-1</Original>
-                <English>Alpha 1-1</English>
-            </Key>
             <Key ID="STR_DUWS_T_Viper">
                 <German>Viper 1-5</German>
                 <Spanish>Viper 1-5</Spanish>
@@ -8369,27 +8336,6 @@
                 <Spanish>Música por DANG's DUWS-R Music Mod (si está cargado)</Spanish>
                 <Original>Soundtrack for DANG's DUWS-R Music Mod (if loaded)</Original>
                 <English>Soundtrack for DANG's DUWS-R Music Mod (if loaded)</English>
-            </Key>
-            <Key ID="STR_DUWS_T_d7eqef75">
-                <German>BESTÄTIGEN</German>
-                <Chinesesimp>确认</Chinesesimp>
-                <Spanish>Confirmar</Spanish>
-                <Original>Confirm</Original>
-                <English>Confirm</English>
-            </Key>
-            <Key ID="STR_DUWS_T_ij1nh3gu">
-                <German>AI Aufmunitionierung setzt deine Gruppen AI auf ihr gespeichertes oder ursprüngliches Loadout zurück. Die Einheiten werden vollständig geheilt.</German>
-                <Spanish>El rearmado de IA repondrá el equipo de las IAs de tu escuadrón a su equipamiento guardado o por defecto y las curará por completo.</Spanish>
-                <Chinesesimp>AI重新武装会重置你小队AI保存或生成的装备并且回满血量。</Chinesesimp>
-                <Original>AI Re-Arm will reset your squad AI to their saved or spawned loadout and fully heal them</Original>
-                <English>AI Re-Arm will reset your squad AI to their saved or spawned loadout and fully heal them</English>
-            </Key>
-            <Key ID="STR_DUWS_T_3y5r8lzq">
-                <German>Deine Gruppenmitglieder wurden vollständig geheilt und aufmunitioniert.</German>
-                <Spanish>Los miembros de tu escuadrón han sido rearmados y curados en su totalidad.</Spanish>
-                <Chinesesimp>你的小队成员已经完全治愈和重新武装。</Chinesesimp>
-                <Original>Your squad members have been fully Healed and Re-Armed</Original>
-                <English>Your squad members have been fully Healed and Re-Armed</English>
             </Key>
             <Key ID="STR_DUWS_T_b5ri931u">
                 <German>Ohrenstöpsel entfernt</German>
