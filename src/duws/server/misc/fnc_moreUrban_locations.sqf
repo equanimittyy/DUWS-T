@@ -59,6 +59,7 @@ if (zones_max_dist_from_hq > 10000) then {
 } else {
 	[{hint localize "STR_DUWS_T_3kascuws"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 };
+private _tStage = diag_tickTime;
 // Create a list of locations on the map using distance from HQ
 {
 	if (PosOfBLUHQ distance _x < zones_max_dist_from_hq) then {
@@ -73,6 +74,10 @@ if (zones_max_dist_from_hq > 10000) then {
 	};
 } forEach _temp_allTowns;
 
+["INFO", "ZONES", format ["moreUrban distance filter: %1 -> %2 locs, %3 -> %4 towns, %5s",
+    count _temp_allLocations, count _allLocations, count _temp_allTowns, count _allTowns,
+    round (diag_tickTime - _tStage)]] call fnc_log;
+_tStage = diag_tickTime;
 // ZONE DISTANCE FILTER APPLIED.
 [{player globalChat localize "STR_DUWS_T_8q8zqlf0"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
@@ -136,9 +141,18 @@ if (count(AO_direction) > 0) then {
 };
 
 
+["INFO", "ZONES", format ["moreUrban arc filter: %1 locs, %2 towns, %3s",
+    count _allLocations, count _allTowns, round (diag_tickTime - _tStage)]] call fnc_log;
+_tStage = diag_tickTime;
+
 /////////////////////////////////////////////////
 // Only use locations with enough buildings
 /////////////////////////////////////////////////
+// The dominant cost of zone generation: one nearestTerrainObjects sweep per surviving
+// candidate. It scales with zones_max_dist_from_hq, so the count logged here is what to
+// compare when one run generates zones in seconds and another takes minutes.
+["INFO", "ZONES", format ["moreUrban building filter over %1 candidates -- the slow pass",
+    count _allLocations]] call fnc_log;
 _temp_allLocations = _allLocations;
 _allLocations = [];
 {
@@ -151,8 +165,8 @@ if (moreUrban == 1) then {
 	[{player globalChat localize "STR_DUWS_T_rb6rlg1b"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 };
 
-["INFO", "ZONES", format ["moreUrban filters done. allLocations=%1 allTowns=%2",
-    count _allLocations, count _allTowns]] call fnc_log;
+["INFO", "ZONES", format ["moreUrban filters done. allLocations=%1 allTowns=%2, building pass %3s",
+    count _allLocations, count _allTowns, round (diag_tickTime - _tStage)]] call fnc_log;
 diag_log "BUILDING MASTER_allLocations_filtered";
 _temp_Locations_Master = _allLocations call BIS_fnc_arrayShuffle;
 _temp_allTowns = _allTowns call BIS_fnc_arrayShuffle;

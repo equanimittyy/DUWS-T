@@ -43,3 +43,23 @@ publicVariable "createzone_server";
 chosen_settings = true;publicVariable "chosen_settings";
 
 diag_log format["----- DUWS_T CHOSEN SETTINGS --------- Callsign: %10-------Manual zones: %11-------Max radius: %1-------Min radius: %2-------Zones number: %3-------Command points: %4-------BLU AP: %5-------OPF AP: %6-------Weather type: %7-------BLU AI skill: %8-------OPF AI skill: %9",zones_max_radius,zones_min_radius,zones_number,commandpointsblu1,WARCOM_opfor_ap,WARCOM_blufor_ap,weather_type,blufor_ai_skill,opfor_ai_skill,duws_callsign,manually_chosen];
+
+// Full setup snapshot, one key=value per line so two runs can be diffed directly. The line
+// above predates this and omits the settings that drive generation cost -- max distance,
+// urban filter, AO arc, zone spacing -- which is exactly what you need when comparing a
+// fast run against a slow one.
+{
+    ["INFO", "SETUP", format ["%1 = %2", _x,
+        (if (isNil _x) then {"<nil>"} else {missionNamespace getVariable _x})]] call fnc_log;
+} forEach [
+    "VERSION_X", "duws_callsign", "manually_chosen",
+    "zones_number", "zones_max_radius", "zones_min_radius", "zones_spacing",
+    "zones_max_dist_from_hq", "moreUrban", "AO_direction", "PosOfBLUHQ",
+    "BLUFOR_Faction_X", "OPFOR_Faction_X",
+    "commandpointsblu1", "WARCOM_blufor_ap", "WARCOM_opfor_ap", "cp_reward_multiplier",
+    "DUWSMP_CP_death_cost", "blufor_ai_skill", "opfor_ai_skill", "enemyunitMultiplier",
+    "HeavyArmor", "AttackHeli",
+    "weather_type", "dynamic_weather_enable", "restricted_arsenal", "scorched_earth_enabled",
+    "hardcore_mode_enable", "insurgent_mode_enable", "enable_fast_travel",
+    "CIV_PRESENCE", "ZeusStatus", "time_of_day", "time_Multiplier", "player_fatigue"
+];

@@ -39,13 +39,18 @@ fnc_waitLogged = {
 
     private _start = diag_tickTime;
     private _deadline = _start + _timeout;
-    private _nextWarn = _start + 10;
+    // Back off 10 -> 30 -> 60 -> 120s. A legitimately slow stage (zone generation over a
+    // large radius runs minutes) would otherwise bury the rest of the log in repeats, while
+    // a fast wait that trips once still gets its warning immediately.
+    private _gap = 10;
+    private _nextWarn = _start + _gap;
     ["DEBUG", _tag, format ["waiting for: %1", _label]] call fnc_log;
 
     waitUntil {
         sleep 0.1;
         if (diag_tickTime > _nextWarn) then {
-            _nextWarn = diag_tickTime + 10;
+            _gap = 120 min (_gap * 2);
+            _nextWarn = diag_tickTime + _gap;
             ["WARN", _tag, format ["still waiting %1s for: %2",
                 round (diag_tickTime - _start), _label]] call fnc_log;
         };
