@@ -185,7 +185,12 @@ if (_found_distance) then {
     if (simple_zones_enable) then { _prefabFlag = false };
     [format[localize "STR_DUWS_T_39z6pg7y",_i], _points_zone, _zone_radius, _zonePos, _fortified, _prefabFlag, _i] spawn fnc_createZone;
     _found = true;
-    _zones_array pushBack _zonePos; 
+    _zones_array pushBack _zonePos;
+    // Same map-layer constraint as the terrain survey: the globalChat lines below are
+    // invisible while the map is open, so mirror the progress onto the map prompt.
+    [format ["Generating zones...<br/>placing zone %1 of %2", _i, zones_number]]
+        remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+ 
     [{player globalChat format[localize "STR_DUWS_T_vai9q3po",trap]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     sleep 1;
     [{player globalChat format[localize "STR_DUWS_T_1lfvd9iw",trap]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
@@ -195,6 +200,7 @@ if (_found_distance) then {
 };
 
 sleep 1;
+[""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 trap = _worldName;
 publicVariable "trap";
 [{player globalChat format[localize "STR_DUWS_T_d5e848d8",trap,profileName]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];

@@ -17,11 +17,21 @@ if (_text isEqualTo "") exitWith {
     if (!isNull _ctrl) then { ctrlDelete _ctrl };
 };
 
+private _x = safezoneX + safezoneW * 0.15;
+private _y = safezoneY + safezoneH * 0.045;
+private _w = safezoneW * 0.7;
+
 if (isNull _ctrl) then {
     _ctrl = _disp ctrlCreate ["RscStructuredText", _idc];
-    _ctrl ctrlSetPosition [safezoneX + safezoneW * 0.15, safezoneY + safezoneH * 0.045, safezoneW * 0.7, safezoneH * 0.2];
     _ctrl ctrlSetBackgroundColor [0, 0, 0, 0.75];
-    _ctrl ctrlCommit 0;
 };
 
+// Fit the box to its content. Callers range from a two-line generation counter to a
+// multi-line AO briefing, and RscStructuredText clips rather than grows: one fixed height
+// either truncates the long prompt or leaves a slab of black over the map for the short one.
+// Width has to be committed before measuring, because ctrlTextHeight depends on wrapping.
+_ctrl ctrlSetPosition [_x, _y, _w, safezoneH * 0.2];
+_ctrl ctrlCommit 0;
 _ctrl ctrlSetStructuredText parseText format ["<t align='center'>%1</t>", _text];
+_ctrl ctrlSetPosition [_x, _y, _w, (ctrlTextHeight _ctrl) + (safezoneH * 0.012)];
+_ctrl ctrlCommit 0;

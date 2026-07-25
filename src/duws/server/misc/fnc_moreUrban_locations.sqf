@@ -63,14 +63,14 @@ private _tStage = diag_tickTime;
 // Create a list of locations on the map using distance from HQ
 {
 	if (PosOfBLUHQ distance _x < zones_max_dist_from_hq) then {
-		_allLocations = _allLocations + [_x];
+		_allLocations pushBack _x;
 	};
 } forEach _temp_allLocations;
 
 // Create a list of Cities and Towns using distance from HQ
 {
 	if (PosOfBLUHQ distance _x < zones_max_dist_from_hq) then {
-		_allTowns = _allTowns + [_x];
+		_allTowns pushBack _x;
 	};
 } forEach _temp_allTowns;
 
@@ -119,7 +119,7 @@ if (count(AO_direction) > 0) then {
 
 	{
 		_inArc = [ PosOfBLUHQ, _direction, 135, position _x ] call BIS_fnc_inAngleSector;
-		if (_inArc == true) then {_allLocations = _allLocations + [_x]};
+		if (_inArc) then {_allLocations pushBack _x};
 	} forEach _temp_allLocations;
 	// if not enough locations in the arc, use 360
 	if (count _allLocations < 10) then {
@@ -132,7 +132,7 @@ if (count(AO_direction) > 0) then {
 
 	{
 		_inArc = [ PosOfBLUHQ, _direction, 135, position _x ] call BIS_fnc_inAngleSector;
-		if (_inArc == true) then {_allTowns = _allTowns + [_x]};
+		if (_inArc) then {_allTowns pushBack _x};
 	} forEach _temp_allTowns;
 
 	// AO DIRECTION FILTER APPLIED
@@ -155,10 +155,31 @@ _tStage = diag_tickTime;
     count _allLocations]] call fnc_log;
 _temp_allLocations = _allLocations;
 _allLocations = [];
+// The setup phase forces the map open, and hint/globalChat both render *beneath* it -- a
+// progress message sent that way is invisible until the map closes, then the whole run
+// arrives as one burst. fnc_map_prompt draws on findDisplay 12 itself, so it is the only
+// channel a player actually sees during this pass.
+private _total = count _temp_allLocations;
+private _lastPing = 0;
 {
-	_numBuildings = count (nearestTerrainObjects [position _x, ["House"], 100, true]);
-	if (_numBuildings > 5) then {_allLocations = _allLocations + [_x]};
+	// sorted=false: only the count is read, so ranking every hit by distance is pure waste
+	// on the hottest call in zone generation -- one sweep per surviving candidate.
+	_numBuildings = count (nearestTerrainObjects [position _x, ["House"], 100, false]);
+	if (_numBuildings > 5) then {_allLocations pushBack _x};
+
+	// Throttled by time, not by index: candidate counts swing by an order of magnitude with
+	// the chosen radius, so a fixed every-Nth would be silent on small maps and spam on big.
+	if (diag_tickTime - _lastPing > 1.5) then {
+		_lastPing = diag_tickTime;
+		[format ["Generating zones...<br/>surveying terrain  %1%2  (%3 of %4 sites)",
+			round (100 * _forEachIndex / (1 max _total)), "%", _forEachIndex, _total]]
+			remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+	};
 } forEach _temp_allLocations;
+
+// Each phase owns its own banner: the zone locator sets its own progress next, and the
+// manual placement path sets none at all, so leave nothing of ours on screen either way.
+[""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
 if (moreUrban == 1) then {
 	// URBAN FILTER APPLIED
