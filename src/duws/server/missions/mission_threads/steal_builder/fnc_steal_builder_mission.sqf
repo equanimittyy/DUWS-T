@@ -1,20 +1,7 @@
 // Locality: server -- callers remoteExec to target 2.
-// 任务冷却检查
-private _missionType = 6;
-private _cooldownVar = missionNamespace getVariable [format ["mission_cooldown_%1", _missionType], 0];
-if (_cooldownVar > diag_tickTime) then {
-    private _remaining = _cooldownVar - diag_tickTime;
-    private _minutes = floor (_remaining / 60);
-    private _seconds = _remaining % 60;
-    hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _minutes, _seconds];
-    if (isNil "fnc_scriptName") then {
-        breakOut "main";
-    } else {
-        if (true) exitWith {};
-    };
-};
-mission_cooldown_6 = diag_tickTime + 3600;
-publicVariable format ["mission_cooldown_6", _missionType];
+params ["_MissionPos", "_mission_name"];
+if (!([6, _MissionPos, _mission_name] call fnc_mission_begin)) exitWith {};
+
 _exiting = false;
 _cpreward = 15;
 _apreward = 15;
@@ -28,16 +15,11 @@ if (!isNil "BLD1") then {
 
 if (_exiting) exitWith {true};
 
-params ["_MissionPos", "_mission_name"];
-
 // ========== 增援系统变量 ==========
 private _varSuffix = format ["%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
 private _initialCountVar = format ["opf_initial_%1", _varSuffix];
 private _triggeredVar = format ["opf_reinforce_%1", _varSuffix];
 // ====================================
-
-Mission_available = false;
-publicVariable "Mission_available";
 
 _radius = 500;
 

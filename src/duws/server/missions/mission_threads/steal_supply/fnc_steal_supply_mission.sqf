@@ -1,21 +1,6 @@
 // Locality: server; the addAction bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
-// 任务冷却检查
-private _missionType = 1;
-private _cooldownVar = missionNamespace getVariable [format ["mission_cooldown_%1", _missionType], 0];
-if (_cooldownVar > diag_tickTime) then {
-    private _remaining = _cooldownVar - diag_tickTime;
-    private _minutes = floor (_remaining / 60);
-    private _seconds = _remaining % 60;
-    hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _minutes, _seconds];
-    if (isNil "fnc_scriptName") then {
-        breakOut "main";
-    } else {
-        if (true) exitWith {};
-    };
-};
-Mission_available = false;
-publicVariable "Mission_available";
 params ["_MissionPos", "_mission_name"];
+if (!([1, _MissionPos, _mission_name] call fnc_mission_begin)) exitWith {};
 
 // ========== 增援系统变量 ==========
 private _varSuffix = format ["%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];

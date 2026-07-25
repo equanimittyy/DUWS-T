@@ -1,5 +1,4 @@
 // Locality: server -- callers remoteExec to target 2.
-// ========== 任务冷却检查 ==========
 params ["_MissionPos", "_mission_name"];
 
 // ========== 增援系统变量（必须提前声明，避免提前退出时未定义） ==========
@@ -21,20 +20,8 @@ if (count _usableBuildings < _minBuildings) exitWith {
     // 不设置冷却，直接退出
 };
 
-// ========== 建筑数量足够，设置任务冷却和锁定 ==========
-private _missionType = 16;
-private _cooldownVar = missionNamespace getVariable [format ["mission_cooldown_%1", _missionType], 0];
-if (_cooldownVar > diag_tickTime) exitWith {
-    private _remaining = _cooldownVar - diag_tickTime;
-    private _minutes = floor (_remaining / 60);
-    private _seconds = _remaining % 60;
-    hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _minutes, _seconds];
-};
-missionNamespace setVariable [format ["mission_cooldown_%1", _missionType], diag_tickTime + 3600, true];
-publicVariable format ["mission_cooldown_%1", _missionType];
-
-Mission_available = false;
-publicVariable "Mission_available";
+// Gated after the building check on purpose: too few buildings must not burn the cooldown.
+if (!([16, _MissionPos, _mission_name] call fnc_mission_begin)) exitWith {};
 
 // ========== 随机选取最多30个建筑 ==========
 private _maxBuildings = 30;

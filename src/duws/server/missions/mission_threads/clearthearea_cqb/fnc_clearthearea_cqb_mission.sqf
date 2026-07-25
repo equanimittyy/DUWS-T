@@ -1,25 +1,6 @@
 // Locality: server -- callers remoteExec to target 2.
-// 任务冷却检查
-private _missionType = 11; // 请替换为实际编号（0~16）
-private _cooldownVar = missionNamespace getVariable [format ["mission_cooldown_%1", _missionType], 0];
-if (_cooldownVar > diag_tickTime) then {
-    private _remaining = _cooldownVar - diag_tickTime;
-    private _minutes = floor (_remaining / 60);
-    private _seconds = _remaining % 60;
-    hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _minutes, _seconds];
-
-    if (isNil "fnc_scriptName") then {
-        breakOut "main";
-    } else {
-        if (true) exitWith {};
-    };
-};
-mission_cooldown_11 = diag_tickTime + 3600;
-publicVariable format ["mission_cooldown_11", _missionType];
 params ["_MissionPos", "_mission_name"];
-
-Mission_available = false;
-publicVariable "Mission_available";
+if (!([11, _MissionPos, _mission_name] call fnc_mission_begin)) exitWith {};
 
 _radius = 200;
 _cpreward = 15;

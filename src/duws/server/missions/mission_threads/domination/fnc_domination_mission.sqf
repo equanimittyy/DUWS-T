@@ -1,31 +1,6 @@
 // Locality: server -- callers remoteExec to target 2.
-// 任务冷却检查
-private _missionType = 13; // 请替换为实际编号（0~16）
-private _cooldownVar = missionNamespace getVariable [format ["mission_cooldown_%1", _missionType], 0];
-if (_cooldownVar > diag_tickTime) then {
-    private _remaining = _cooldownVar - diag_tickTime;
-    private _minutes = floor (_remaining / 60);
-    private _seconds = _remaining % 60;
-    hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _minutes, _seconds];
-
-    // 根据脚本类型选择退出方式
-    if (isNil "fnc_scriptName") then {
-        // 直接执行的脚本：使用 breakOut 退出到标记 "main"（需要外层有 scope）
-        breakOut "main";
-    } else {
-        // 函数：安全退出
-        if (true) exitWith {};
-    };
-};
-// 设置冷却（任务开始）
-mission_cooldown_13 = diag_tickTime + 3600;
-publicVariable format ["mission_cooldown_13", _missionType];
-// 任务参数：任务中心位置和任务名称
 params ["_MissionPos", "_mission_name"];
-
-// 设置任务不可用状态，防止同时生成多个任务
-Mission_available = false;
-publicVariable "Mission_available";
+if (!([13, _MissionPos, _mission_name] call fnc_mission_begin)) exitWith {};
 
 // 定义任务基本参数
 _radius = 800;

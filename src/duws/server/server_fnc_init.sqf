@@ -244,6 +244,34 @@ publicVariable "fnc_findSafeMissionPos";
 fnc_dynamicAtmosphere_init = compile preprocessFileLineNumbers "duws\server\missions\dyna\fnc_dynamicAtmosphere_init.sqf";
 publicVariable "fnc_dynamicAtmosphere_init";
 
+// Opens every side-mission thread: cooldown gate, cooldown stamp, and the mission lock.
+// Returns false when the caller must abort -- the caller has to exit itself, because
+// neither exitWith nor breakOut inside a called function can terminate its caller's scope.
+// The 17 copies this replaces tried to, via `breakOut "main"` into a scope no thread
+// declares, so a mission on cooldown unwound through an undefined scope name.
+fnc_mission_begin = {
+	params ["_missionType", "_MissionPos", "_mission_name", ["_cooldown", 3600]];
+	private _var = format ["mission_cooldown_%1", _missionType];
+	private _until = missionNamespace getVariable [_var, 0];
+	if (_until > diag_tickTime) exitWith {
+		private _remaining = _until - diag_tickTime;
+		// Runs on the server, so only a hosting player sees it; a remote client's request is
+		// refused silently. Carried over unchanged from the copies -- routing the refusal
+		// back to the requester is a behaviour fix, not part of consolidating the preamble.
+		hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", floor (_remaining / 60), _remaining % 60];
+		["DEBUG", "MISSION", format ["type=%1 refused, %2s of cooldown left",
+			_missionType, round _remaining]] call fnc_log;
+		false
+	};
+	missionNamespace setVariable [_var, diag_tickTime + _cooldown, true];
+	// Holds off the next mission until this thread finishes; each thread clears it on exit.
+	Mission_available = false;
+	publicVariable "Mission_available";
+	["INFO", "MISSION", format ["start type=%1 name=%2 pos=%3",
+		_missionType, _mission_name, _MissionPos]] call fnc_log;
+	true
+};
+
 // SIDE MISSION THREADS
 fnc_rescue_squad_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_mission.sqf";
 fnc_rescue_squad_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_success.sqf";
