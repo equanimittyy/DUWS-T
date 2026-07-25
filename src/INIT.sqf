@@ -13,7 +13,7 @@ if (isNil "serverinit_complete") then {
 
 if (_duwst_isServer || _duwst_isHostedserver || _duwst_isHeadless) then 
 {
-	[] execVM "duws\init\server_init.sqf"; 
+	[] execVM "duws\server\server_init.sqf"; 
 };
 
 if (_duwst_isClient) then 

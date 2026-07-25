@@ -2,8 +2,8 @@
 diag_log format ["Server_init: %1", profileName];
 
 // DEFINE SERVER VARIABLES and FUNCTIONS
-[] call compile preprocessFileLineNumbers "duws\init\server_var_init.sqf";
-[] call compile preprocessFileLineNumbers "duws\init\server_fnc_init.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\server_var_init.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\server_fnc_init.sqf";
 setGroupIconsVisible [true,false]; //now everyone can see enemies on map
 // Init the URBAN LOCATION FINDER
 [] spawn fnc_moreUrban_locations;
@@ -476,7 +476,7 @@ if (isServer) then {
 [] spawn {
     waitUntil { sleep 1; WARCOM_init_done }; // 等待 WARCOM 初始化完成，确保单位已生成
     sleep 5; // 稍等片刻，让单位稳定
-    [] execVM "duws\functions\misc\fnc_collectEquipmentFromUnits.sqf"; // 执行装备收集
+    [] execVM "duws\server\misc\fnc_collectEquipmentFromUnits.sqf"; // 执行装备收集
 };
 [] spawn {
     scriptName "Add to InitServer.sqf -> Prevent AI Abandoning Vehicles";

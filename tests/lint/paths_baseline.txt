@@ -4,4 +4,4 @@
 # Remove an entry once the dead code is deleted or the missing script is supplied.
 onPlayerKilled.sqf|misc/SP_respawn.sqf
 duws/functions/misc/fnc_player_markers.sqf|player_markers.sqf
-duws/functions/misc/fnc_repetitive_cleanup.sqf|misc/repetitive_cleanup.sqf
+duws/server/misc/fnc_repetitive_cleanup.sqf|misc/repetitive_cleanup.sqf
