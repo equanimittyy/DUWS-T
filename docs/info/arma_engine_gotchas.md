@@ -115,12 +115,18 @@ leaving a dead twin.
 with no matching `%N` — no error, no rpt warning. A string that references fewer
 placeholders than its call site passes renders plausible-but-wrong text forever.**
 
-A *duplicated* placeholder hides best of all: `"%1 %2-%2"` against
-`[_name, _digit1, _digit2]` (`src/duws/client/supports/taxi/fnc_helotaxi.sqf:11-12`)
-yields a well-formed callsign on every call, just never one whose two digits differ — so
-the output looks right unless you know the second digit is random. Localisation multiplies
-the exposure: every language holds its own copy of the format string, so one locale can
-drop a placeholder while the rest are correct, and only players in that locale ever see it.
+A *duplicated* placeholder hides best of all: `"%1 %2-%2"` against `[_name, _d1, _d2]`
+yields a well-formed callsign on every call, just never one whose two digits differ — the
+output reads correctly unless you already know the second digit is supposed to vary.
+
+The reverse shape is as quiet and has bitten this mission: the boat taxi carried eight
+`format` calls handing three arguments to strings containing no placeholders at all, and
+all three names were undefined in that file. Every call formatted nothing from three nil
+lookups, for as long as the code existed, and no player or log ever saw a complaint.
+
+Localisation multiplies the exposure: every language holds its own copy of the format
+string, so one locale can drop a placeholder while the rest are correct, and only players
+in that locale ever see it.
 
 **How to apply:** treat the placeholder set as a contract between the call site and *every*
 language variant of the key. When editing a `%N`-bearing string, grep the ID for its

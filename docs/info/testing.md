@@ -50,7 +50,7 @@ SQF has no compiler and cannot run outside Arma, which bounds what is testable:
 
 ## sqf-vm
 
-The unit tests use [`SQFvm/runtime`](https://github.com/SQFvm/runtime). `get_sqfvm.sh`
+The unit tests use [`https://github.com/SQFvm/runtime`](https://github.com/SQFvm/runtime). `get_sqfvm.sh`
 fetches the pinned **1.3.2 Linux** build into the repo-root `tools/` (git-ignored, per-environment
 like `tools/PBO Manager/`): it links against an older glibc so it runs in the devcontainer,
 where the current official build needs glibc 2.38+. Because 1.3.2 predates the modern `#`

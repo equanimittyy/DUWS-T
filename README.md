@@ -18,7 +18,10 @@ build output, repacked from the source, and is **not** tracked (see `.gitignore`
 Commit the unpacked `src/` source; leave the regenerated `.pbo` untracked.
 
 The mission's internal structure (the `modules/` vs `duws/` split, boot flow, and
-subsystems) is mapped in [`docs/architecture.md`](docs/architecture.md).
+subsystems) is mapped in [`docs/info/architecture.md`](docs/info/architecture.md).
+
+Feature changes and architectural decisions made in this repo are summarised in
+[`CHANGELOG.md`](CHANGELOG.md).
 
 ## Developer setup
 
@@ -60,11 +63,11 @@ from it.
 ## Tests
 
 Static checks (SQF syntax + path resolution) and pure-function unit tests live in
-[`tests/`](tests/); run `bash tests/run.sh`. Details in [`docs/testing.md`](docs/testing.md).
+[`tests/`](tests/); run `bash tests/run.sh`. Details in [`docs/info/testing.md`](docs/info/testing.md).
 
 Neither layer can see a running mission. What still needs an in-game pass, what is known
 broken, and what the previous developer worked around rather than fixed are listed in
-[`docs/known_issues.md`](docs/known_issues.md).
+[`KNOWN_ISSUES.md`](KNOWN_ISSUES.md).
 
 ## Conventions
 
@@ -72,4 +75,4 @@ Working rules for contributors and agents (voice, comments, docs) live in
 [`docs/claude/`](docs/claude/) and load each session via [`CLAUDE.md`](CLAUDE.md).
 
 Arma engine traps that aren't visible in the SQF (e.g. what may be stored in the mission
-namespace) are collected in [`docs/arma_engine_gotchas.md`](docs/arma_engine_gotchas.md).
+namespace) are collected in [`docs/info/arma_engine_gotchas.md`](docs/info/arma_engine_gotchas.md).

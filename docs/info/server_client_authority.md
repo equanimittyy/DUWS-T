@@ -87,7 +87,7 @@ called from both sides and is safe either way, because it touches no shared stat
 Nothing load-bearing is left undocumented. Getting there needed hand-tracing for 28 files that
 automated resolution could not reach, and the reasons are worth knowing:
 
-- **Function names are referenced in mixed case.** `server/server_init.sqf:102` spawns
+- **Function names are referenced in mixed case.** `server/server_init.sqf:108` spawns
   `fnc_bluHQinit` while the registry defines `fnc_BluHQinit`; `shared/includes/operative_menu.hpp:70`
   calls `fnc_LBselected` against a registered `fnc_lbselected`. SQF does not care, but any
   exact-match search over the source does, so a grep for callers silently comes back empty.

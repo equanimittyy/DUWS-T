@@ -36,7 +36,7 @@ that gate is gone. **The host case is confirmed working; the non-host case is no
 be tested solo** — it needs a second player or a dedicated server. If it misbehaves in co-op,
 restoring the `!isServer` gate re-hides the feature without reverting the rewrite.
 
-Background on the locality rule: [`arma_engine_gotchas.md`](arma_engine_gotchas.md).
+Background on the locality rule: [`docs/info/arma_engine_gotchas.md`](docs/info/arma_engine_gotchas.md).
 
 ## Open defects
 
@@ -61,7 +61,18 @@ full setup is snapshotted at commit time under `SETUP`. Comparing a fast run aga
 one on those two figures distinguishes "more candidates" from "each lookup got slower";
 until someone does, the cause is genuinely unknown.
 
-Reading those logs: [`testing.md`](testing.md#runtime-logging-reading-the-rpt).
+Reading those logs: [`docs/info/testing.md`](docs/info/testing.md#runtime-logging-reading-the-rpt).
+
+## Zone and civilian siting defects
+
+Thirteen defects in the zone-siting and Dynamic Town subsystems are catalogued with their
+failure modes alongside the explanation of how those systems work, rather than restated
+here: [`docs/info/zone_and_town_generation.md`](docs/info/zone_and_town_generation.md#defects-subsystem-a).
+
+The two worth knowing before a long campaign: the origin keep-out uses `exitWith` inside a
+loop, so a rejected candidate silently costs a zone slot and you get fewer zones than
+requested; and dynamic towns can spawn on top of enemy zones because the exclusion wait
+never actually blocks.
 
 ## Worked around, not fixed
 

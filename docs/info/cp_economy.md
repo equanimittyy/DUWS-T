@@ -126,12 +126,12 @@ territory income does not stack per zone captured.
 | Vehicles | `dialog/fnc_request_vehicle*.sqf` | 5–100 (from `fnc_evalVehicleCost`, clamped) |
 | Squads | `dialog/fnc_request_squad*.sqf` | per squad table |
 | FOB deploy | `client/supports/fnc_request_fob.sqf` | fixed |
-| Operatives | `client/operative/fnc_operator_recruit.sqf:30` | 8 (re-deploying a healed one is free) |
+| Operatives | `client/operative/fnc_operator_recruit.sqf:29` | 8 (re-deploying a healed one is free) |
 | Mobile HQ | `client/dialog/fnc_MHQ_select.sqf` | 10 |
 | FOB refortify / reguard | `client/init_hq/fnc_refortifyFOB.sqf`, `fnc_reguardFOB.sqf` | 5 / 15 |
 | Heli / boat taxi | `supports/taxi/` | fixed |
 | Base repair, HQ redeploy, sitrep | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/misc/fnc_redeployHQUnits.sqf`, `server/supports/fnc_sitrep_support.sqf` | 2 / 2 / 1 |
-| Death | `client/client_init.sqf:187` | `DUWSMP_CP_death_cost` (0–10) |
+| Death | `client/client_init.sqf:194` | `DUWSMP_CP_death_cost` (0–10) |
 
 ## Who may spend
 
