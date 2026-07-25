@@ -110,7 +110,7 @@ integer.
 
 **Client-side affordability checks allow a co-op overdraft.** Purchase paths read the pool
 from the buying client's own copy and apply the effect unconditionally — ~45 comparisons
-across 22 files, with `fnc_pylon_set_with_cost` (`init/server_fnc_init.sqf:770-773`) the only
+across 22 files, with `fnc_pylon_set_with_cost` (`init/server_fnc_init.sqf:801-803`) the only
 server-side check. Two players buying inside one network round-trip against a pool that funds
 a single purchase therefore both succeed, leaving it negative by the overspend. This is an
 overdraft, not a leak: both deltas are debited in full, so unlike the read-modify-write hazard
