@@ -23,13 +23,9 @@ if (clicked) then {
 	{
 		if ((ClickedPos distance _x) < 150) then {
 			
-			// Remove the clicked zone
-			WARCOM_zones_controled_by_OPFOR deleteAt _forEachIndex;
-			// Sort the rest of the zones by distance to HQ
-			WARCOM_zones_controled_by_OPFOR = [WARCOM_zones_controled_by_OPFOR,[WARCOM_blu_hq_pos],{_input0 distance _x},"ASCEND"] call BIS_fnc_sortBy;
-			// Insert the clicked zone at index 0
-			WARCOM_zones_controled_by_OPFOR insert [0, [_x]];
-			publicVariable "WARCOM_zones_controled_by_OPFOR";
+			// Reorder on the server: this runs on the clicking player's machine, and
+			// it would otherwise iterate the very list it mutates and rebroadcast it.
+			[_x] remoteExec ["fnc_warcom_set_primary_zone", 2];
 			// tell GPS marker loop to change primary
 			BLUFOR_primary_chg = true;
 			publicVariable "BLUFOR_primary_chg";

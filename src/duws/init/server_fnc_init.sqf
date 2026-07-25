@@ -32,6 +32,22 @@ fnc_ap_adjust = {
 	};
 };
 
+// Server-authoritative reorder of the OPFOR assault queue. The map-click picker runs
+// on the clicking player's machine, so mutating this shared list there and
+// broadcasting the absolute array would drop a concurrent capture's edit to it.
+// Matches by position value: the caller passes an entry it read from this same list,
+// so a stale pick simply finds nothing rather than resurrecting a captured zone.
+fnc_warcom_set_primary_zone = {
+	if (!isServer) exitWith {};
+	params [["_zonePos", []]];
+	private _i = WARCOM_zones_controled_by_OPFOR findIf {_x isEqualTo _zonePos};
+	if (_i < 0) exitWith {};
+	WARCOM_zones_controled_by_OPFOR deleteAt _i;
+	WARCOM_zones_controled_by_OPFOR = [WARCOM_zones_controled_by_OPFOR,[WARCOM_blu_hq_pos],{_input0 distance _x},"ASCEND"] call BIS_fnc_sortBy;
+	WARCOM_zones_controled_by_OPFOR insert [0, [_zonePos]];
+	publicVariable "WARCOM_zones_controled_by_OPFOR";
+};
+
 // Player-callsign substitution for radio/subtitle dialogue. The stringtable bakes
 // the default callsign "Alpha 1-1" into the English lines; this swaps it for the
 // host-chosen duws_callsign at display time, so wrapping every localize is safe:
