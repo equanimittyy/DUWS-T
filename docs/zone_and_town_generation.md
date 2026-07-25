@@ -39,7 +39,7 @@ decorated, not overhauled; the substantial new system is civilian population.
 
 ## Subsystem A: enemy zone siting ("More Urban")
 
-Default-on (`moreUrban = 1`, `src/duws/init/server_var_init.sqf:138`; campaign menu can set
+Default-on (`moreUrban = 1`, `src/duws/init/server_var_init.sqf:140`; campaign menu can set
 `0`, `fnc_process_campaign_menu.sqf:188-203`). Three stages during `server_init.sqf`.
 
 | Stage | File | Produces |
@@ -54,11 +54,11 @@ locations to hold >5 `House` objects within 100 m (`:132-137`). Result is
 `towns ++ filtered-locations` (`:147`); towns can appear in both lists, which is the only
 real "weighting" (the concatenation order is inert — siting picks uniformly at random).
 
-**Siting** loops `zones_number` times. The `moreUrban` branch (`:92-142`): pick a random
+**Siting** loops `zones_number` times. The `moreUrban` branch (`:92-126`): pick a random
 anchor, take the centroid of `House`/`Building` objects within 400 m (`:96-117`),
 `findSafePos` 0-10 m around it (`:113`), nudge 5 m off the nearest road (`:119-123`). Then
-distance-from-HQ (`:184`), spacing (`:188-198`), and 500 m origin keep-out (`:200-206`)
-gates, then `spawn fnc_createZone` (`:214`). The `else` branch (`:144-179`) is the older
+distance-from-HQ (`:155`), spacing (`:159-169`), and 500 m origin keep-out (`:171-177`)
+gates, then `spawn fnc_createZone` (`:185`). The `else` branch (`:127-150`) is the older
 random-then-snap-to-building behaviour, with a 10-try validation loop.
 
 **Build-out** places markers, clears obstacles for prefab zones (`:61-87`), spawns a
@@ -67,7 +67,7 @@ QRF, spawn-wait, and capture triggers.
 
 ### Defects (Subsystem A)
 
-**Origin keep-out drops the zone instead of retrying it.** `fnc_locatorzones_random.sqf:200-206`.
+**Origin keep-out drops the zone instead of retrying it.** `fnc_locatorzones_random.sqf:172-177`.
 When a candidate lands within 500 m of `[0,0,0]`, the guard runs `exitWith`. In SQF
 `exitWith` exits the nearest enclosing **loop** (`if/then` is transparent to it), so it
 terminates `while {!_found}` with `_found` still false and the `for` loop advances — the
@@ -75,7 +75,7 @@ zone slot is silently lost, yielding **fewer than `zones_number` zones**. The co
 ("let the outer loop keep searching") describes what a plain `if/then` would do. Fix:
 re-roll inside the loop instead of exiting it.
 
-**The `moreUrban` branch can emit `[0,0,0]`.** `:92-142`. It sets `_Posfound = true`
+**The `moreUrban` branch can emit `[0,0,0]`.** `:92-126`. It sets `_Posfound = true`
 unconditionally with no validity retry; its no-buildings fallback takes
 `getPos (nearestBuilding …)` (`:100-102`), which is `[0,0,0]` when `nearestBuilding`
 returns `objNull`. That `[0,0,0]` is exactly what the origin guard then eats, so the two
@@ -93,7 +93,7 @@ zones it deletes/hides everything within 35 m of centre except men/pads/flags/HQ
 what actually clears them — a global, unrestored change to the town just selected for being
 dense. The `_deletedCount`/`_hiddenCount` counters double-count (both ops per object).
 
-**Unbounded, no-yield retry with a heavy per-iteration cost.** `:62-184`. Rejected
+**Unbounded, no-yield retry with a heavy per-iteration cost.** `:62-155`. Rejected
 positions re-roll with no `sleep`, and each `moreUrban` pass calls `nearestTerrainObjects`
 over 400 m plus a centroid pass; on a cramped map or large `zones_spacing` this can busy-spin
 until the 90 s failsafe. Needs a yield and/or an attempt cap.
@@ -130,7 +130,7 @@ labels and a persistent, per-town civilian population with map markers.
 
 **The military-exclusion wait is a no-op.** `fnc_civ_detectClusters.sqf:56`:
 `waitUntil { sleep 0.1; !isNil "createzone_server" || time > time + 5 }`. `createzone_server`
-is initialised to `false` at boot (`server_var_init.sqf:85`), so `!isNil` is true from the
+is initialised to `false` at boot (`server_var_init.sqf:88`), so `!isNil` is true from the
 start and the wait returns immediately; the `time > time + 5` "timeout" is always false
 (dead code). The intent was `waitUntil { createzone_server }` with a real timeout. Because
 it doesn't wait, the WARCOM zone arrays read for exclusion (`:57-58,129-134`) may still be

@@ -38,28 +38,6 @@ _dropdownBLU ctrlAddEventHandler ["LBSelChanged",
 }];
 
 //////////////////////////////////////
-/*
-_dropdownMODE = _display ctrlCreate ["RscCombo", 1002];
-_dropdownMODE ctrlSetPosition [0.4, .15, .25, 0.04];
-_dropdownMODE ctrlSetTooltip "Choose how DUWS generates the campaign.";
-_dropdownMODE ctrlCommit 0;
-
-{
-	_itemMODE = _dropdownMODE lbAdd format ["%1", _x select 0];
-	_dropdownMODE lbSetData [_itemMODE, _x select 1];
-	_dropdownMODE lbSetColor [_itemMODE, [.2,1,.2,1]];
-	_dropdownMODE lbSetTooltip [0,"Classic DUWS Campaign."];
-	_dropdownMODE lbSetTooltip [1,"Invisible Zones. Recon Missions to Reveal Campaign."];
-} forEach [["DUWS CAMPAIGN","CAMPAIGN"],["HARDCORE MODE","HARDCORE"]];
-
-_dropdownMODE lbSetCurSel 0;
-_dropdownMODE ctrlAddEventHandler ["LBSelChanged",
-{
-	params ["_control", "_selectedIndex"];
-	DUWS_MODE = (_control lbData (lbCurSel _control));
-}];
-*/
-//////////////////////////////////////
 
 _dropdownOPF = _display ctrlCreate ["RscCombo", 1003];
 _dropdownOPF ctrlSetPosition [0.75, .15, .5, 0.04];
@@ -107,20 +85,8 @@ if (player_is_choosing_hqpos) then {
 //titleCut ["", "BLACK IN", 5];
 //waitUntil {chosen_hq_placement};
 
-/*
-if (DUWS_MODE == "HARDCORE") then {
-	DUWS_MODE == "CAMPAIGN";
-    hardcore_mode_enable = true;
-	hardcore_visibleZone_found = false;
-} else {
-    hardcore_mode_enable = false;
-};
-*/
-
-DUWS_MODE == "CAMPAIGN";
 publicVariable "BLUFOR_Faction_X";
 publicVariable "OPFOR_Faction_X";
-publicVariable "DUWS_MODE";
 //publicVariable "hardcore_visibleZone_found";
 //publicVariable "hardcore_mode_enable";
 

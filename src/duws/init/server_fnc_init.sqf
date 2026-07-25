@@ -473,7 +473,6 @@ fnc_HQ_faction_dialog = compile preprocessFileLineNumbers "duws\functions\dialog
 fnc_HQ_manual_place = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_HQ_manual_place.sqf";publicVariable "fnc_HQ_manual_place";
 fnc_HQ_random_place = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_HQ_random_place.sqf";publicVariable "fnc_HQ_random_place";
 fnc_map_prompt = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_map_prompt.sqf";publicVariable "fnc_map_prompt";
-fnc_HQ_endCampaign = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_HQ_endCampaign.sqf";publicVariable "fnc_HQ_endCampaign";
 fnc_enviro_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_enviro_menu.sqf";publicVariable "fnc_enviro_menu";
 fnc_campaign_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_campaign_menu.sqf";publicVariable "fnc_campaign_menu";
 fnc_process_campaign_menu = compile preprocessFileLineNumbers "duws\functions\dialog\fnc_process_campaign_menu.sqf";publicVariable "fnc_process_campaign_menu";

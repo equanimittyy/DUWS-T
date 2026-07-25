@@ -68,9 +68,7 @@ opfor_patrol_count = 0;
 [] spawn {
     while {true} do {
         // ===== 原有普通巡逻生成逻辑 =====
-        // As soon as extended Campaign (DOMINATION) starts, stop creating patrols 
-        if (DUWS_MODE == "DOMINATION") exitWith {};
-        // make sure opfor is controlling at least 2 zones 
+        // make sure opfor is controlling at least 2 zones
         // and opfor_patrol_count <= (total zones / 2) + 1   (5 zones = 3 patrol spawns max)
         
         if (count WARCOM_zones_controled_by_OPFOR > 1 && opfor_patrol_count <= (floor ((count serv_zones_array) / 2)) + 1) then { 

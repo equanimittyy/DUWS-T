@@ -21,13 +21,13 @@ choice: mutating a networked global as `x = x - c; publicVariable "x"` from a cl
 concurrent co-op changes and can duplicate CP — see the gotchas entry *"A shared global
 mutated as `x = x - c; publicVariable` loses concurrent writes"* in
 [`arma_engine_gotchas.md`](arma_engine_gotchas.md). The only absolute assignments left are
-the pre-game starting value (`server_var_init.sqf:87`, default 20; campaign menu offers
+the pre-game starting value (`server_var_init.sqf:85`, default 20; campaign menu offers
 0–400 in `fnc_process_campaign_menu.sqf:210-218`), which run on the host before play.
 
 Army Power carries the same contract. `fnc_ap_adjust` (same file) is the sole writer of both
 `WARCOM_blufor_ap` and `WARCOM_opfor_ap`, invoked as `[side, delta] remoteExec
 ["fnc_ap_adjust", 2]` with side `"BLU"` or `"OPF"`; its pre-play absolutes are
-`server_var_init.sqf:180-181`, `fnc_WARCOM_init.sqf:22-28`, and the campaign-menu presets in
+`server_var_init.sqf:178-179`, `fnc_WARCOM_init.sqf:22-28`, and the campaign-menu presets in
 `fnc_process_campaign_menu.sqf:277-348`. Both pools floor at 0 as CP does; losing a zone
 subtracts its full worth, so an unclamped pool could sit deeply negative, and every WARCOM wave
 threshold reads *"above N"* anyway. Two deliberate differences from `fnc_cp_adjust`: an
@@ -43,7 +43,7 @@ and `abs Player_Reputation` is multiplied into a hostile-civilian spawn count
 (`misc/fnc_civ_handler.sqf:532-534`), so float drift would compound into AI behaviour rather
 than just a display. The writer snaps to two decimals and zeroes anything below `0.01`; callers
 send a plain delta and never normalise, or two of them would round differently. Its pre-play
-absolute is `server_var_init.sqf:158`. Like AP it has no HUD control and no event handler, so
+absolute is `server_var_init.sqf:155`. Like AP it has no HUD control and no event handler, so
 call sites that name the new total in a notification compute it locally as
 `Player_Reputation + delta` rather than re-reading the global, which is still pre-change at
 that point.
@@ -90,7 +90,7 @@ territory income does not stack per zone captured.
 ## Who may spend
 
 Two permission lists of playable slot names, defined together at
-`init/server_var_init.sqf:228-261` and checked as `(vehiclevarname player) in <list>`:
+`init/server_var_init.sqf:225-258` and checked as `(vehiclevarname player) in <list>`:
 
 | List | Owns |
 |---|---|
@@ -143,7 +143,7 @@ instead.
 
 **Client-side affordability checks allow a free purchase in co-op.** Purchase paths read the
 pool from the buying client's own copy and apply the effect unconditionally — ~45 comparisons
-across 22 files, with `fnc_pylon_set_with_cost` (`init/server_fnc_init.sqf:864-866`) the only
+across 22 files, with `fnc_pylon_set_with_cost` (`init/server_fnc_init.sqf:863-865`) the only
 server-side check. Two players buying inside one network round-trip against a pool that funds a
 single purchase therefore both succeed. Both deltas are debited in full, so nothing is created
 from nothing — but with the pool now floored at zero the excess debit is absorbed rather than

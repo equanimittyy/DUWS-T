@@ -16,9 +16,8 @@ diag_log format ["Opfor Warcom Start Zone Placement. Manual: %1",  manually_chos
  };
 
 //Execution Order requires zone bonus and reward before WARCOM INIT
-if (DUWS_MODE != "DOMINATION") then {
-	[] spawn fnc_zonesundercontrol;
-};
+// Spawned exactly once, so territory income does not stack per zone captured.
+[] spawn fnc_zonesundercontrol;
 
 waitUntil {sleep 0.1;count serv_zones_array > 0};
 sleep 1;

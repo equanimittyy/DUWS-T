@@ -123,23 +123,6 @@ for "_i" from 1 to zones_number do {
 					_zonePos = [_zonePos, 5, random 360] call BIS_fnc_relPos;
 				};
 				
-				// 检查是否靠近已有战区或 FOB（DOMINATION 模式）
-				if (DUWS_MODE == "DOMINATION") then {
-					private _too_close = false;
-					{
-						private _dist = _zonePos distance (getPos _x);
-						if (_dist < 1500) exitWith { _too_close = true; };
-					} forEach Array_of_FOBS;
-					{
-						private _dist = _zonePos distance _x;
-						if (_dist < 1500) exitWith { _too_close = true; };
-					} forEach serv_zones_array_temp;
-					if (_too_close) then {
-						_Posfound = false;
-						continue;
-					};
-				};
-				
 				_Posfound = true;
 				
 			} else {
@@ -156,18 +139,6 @@ for "_i" from 1 to zones_number do {
 						} else {
 							_inArc = true;
 						};
-					};
-					if (DUWS_MODE == "DOMINATION") then {
-						private _too_close = false;
-						{
-							private _dist = _ZnLocation distance (getPos _x);
-							if (_dist < 1500) exitWith { _too_close = true; };
-						} forEach Array_of_FOBS;
-						{
-							private _dist = _ZnLocation distance _x;
-							if (_dist < 1500) exitWith { _too_close = true; };
-						} forEach serv_zones_array_temp;
-						if (_too_close) then { _count = 11; };
 					};
 					if (_count == 11) exitWith {}; 
 					private _building = nearestBuilding _ZnLocation;

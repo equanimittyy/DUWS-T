@@ -46,24 +46,21 @@ publicVariable "WARCOM_zones_controled_by_OPFOR";
 
 [{player globalChat localize "STR_DUWS_T_42esdbvb"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
-// If Extended-Domination don't restart the patrols/assaults
-if (DUWS_MODE != "DOMINATION") then {
-	// Init BLU patrols
-	diag_log "Init BLU patrols";
-	[] spawn fnc_WARCOM_blu_patrol;
+// Init BLU patrols
+diag_log "Init BLU patrols";
+[] spawn fnc_WARCOM_blu_patrol;
 
-	// Init OPF patrols and QRF type
-	diag_log "Init OPF patrols";
-	[] spawn fnc_WARCOM_opf_patrol;
+// Init OPF patrols and QRF type
+diag_log "Init OPF patrols";
+[] spawn fnc_WARCOM_opf_patrol;
 
-	// Initialize the BLU attack waves
-	diag_log "Initialize the BLU attack waves";
-	[] spawn fnc_WARCOM_blu_assault;
+// Initialize the BLU attack waves
+diag_log "Initialize the BLU attack waves";
+[] spawn fnc_WARCOM_blu_assault;
 
-	// Init the OPF attack waves
-	diag_log "Init the OPF attack waves";
-	[] spawn fnc_WARCOM_opf_assault;
-};
+// Init the OPF attack waves
+diag_log "Init the OPF attack waves";
+[] spawn fnc_WARCOM_opf_assault;
 
 // Initialize the OPF Random Air if not already spawned
 if (WARCOM_opf_air == false) then {

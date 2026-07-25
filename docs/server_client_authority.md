@@ -91,7 +91,7 @@ automated resolution could not reach, and the reasons are worth knowing:
   `spawn`/`call`/`remoteExec` next to the name.
 - **One file is compiled under a different name than the file suggests.**
   `warcom/fnc_WARCOM_opf_qrf.sqf` is registered as `fnc_QRF_test`
-  (`init/server_var_init.sqf:167`) and fired from a `FiredNear` handler.
+  (`init/server_var_init.sqf:164`) and fired from a `FiredNear` handler.
 
 `missions/fnc_missionPatrolsSmall.sqf` is registered and never called from anywhere. Its header
 records that rather than inventing a locality for it.

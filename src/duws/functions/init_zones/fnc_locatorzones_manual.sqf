@@ -36,29 +36,6 @@ for [{_i=1}, {_i<=zones_number}, {_i=_i+1}] do  // BEGIN "FOR" LOOP --
         man_missionPos = []; publicVariable "man_missionPos";
 		_Posfound = false;
 
-		// Make sure no previous zones or FOBs are nearby
-		if (DUWS_MODE == "DOMINATION") then {
-			_fob_locations = [];
-			_too_close = [];
-			{
-				_fob_locations = _fob_locations + [getPos _x];
-			} forEach Array_of_FOBS;
-
-			if (count(_fob_locations) > 0) then {
-				{
-					_too_close = serv_zones_array_temp + [_x];
-				} forEach _fob_locations;
-			} else {
-				_too_close = serv_zones_array_temp ;
-			};
-			{
-				if ((_x distance ClickedPos) < 1500) then {
-					_Posfound = true;  // trick the _Posfound loop
-					hint localize "STR_DUWS_T_bsxj4ef9";
-				};
-			} forEach _too_close;
-		};
-				
         if (clicked) then {
 
 			while {!_Posfound} do {
@@ -153,8 +130,4 @@ sleep 1;
 	]
 ] spawn BIS_fnc_typeText;  
 
-if (DUWS_MODE == "DOMINATION") then {
-	sleep 5;
-	openMap [false, false];
-};
 

@@ -75,9 +75,6 @@ cp_reward_multiplier = 1;publicVariable "cp_reward_multiplier";
 // Damaged Buildings for the Warcrimes Script
 damagedBuildings = [];
 
-// SET DEFAULT DUWS MODE
-DUWS_MODE = "CAMPAIGN";publicVariable "DUWS_MODE";
-
 // Death Penalty
 DUWSMP_CP_death_cost = 0;publicVariable "DUWSMP_CP_death_cost";
 

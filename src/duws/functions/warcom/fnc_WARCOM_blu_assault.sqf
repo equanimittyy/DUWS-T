@@ -48,11 +48,6 @@ WARCOM_blu_attack_wave_avalaible = false;
 [] spawn {
 		  // WAIT 5 min before launching first assault
           waitUntil {sleep 300; WARCOM_blu_attack_wave_avalaible};  
-		  // WAIT for Domination to reset zones
-		  if (DUWS_MODE == "DOMINATION") then {
-			  waitUntil {sleep 30; count WARCOM_zones_controled_by_OPFOR > 0};
-		  };
-
           while {true} do {
 
 			// WAIT for Hardcore to find a zone

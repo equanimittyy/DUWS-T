@@ -3874,20 +3874,6 @@
                 <Original>You completely botched the operation. The mission has failed and you will be evacuated shortly</Original>
                 <English>You completely botched the operation. The mission has failed and you will be evacuated shortly</English>
             </Key>
-            <Key ID="STR_DUWS_T_xh2xta45">
-                <German>&lt;t color='#15ff00'&gt;BEENDE KAMPAGNE>>&lt;/t&gt;</German>
-                <Spanish>&lt;t color='#15ff00'&gt;TERMINAR CAMPAÑA>>&lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#15ff00'&gt;结束战役>>&lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#15ff00'&gt;END CAMPAIGN>>&lt;/t&gt;</Original>
-                <English>&lt;t color='#15ff00'&gt;END CAMPAIGN>>&lt;/t&gt;</English>
-            </Key>
-            <Key ID="STR_DUWS_T_9eomgiq6">
-                <German>&lt;t color='#00ffff'&gt;VERLÄNGERE KAMPAGNE>>&lt;/t&gt;</German>
-                <Spanish>&lt;t color='#00ffff'&gt;EXTENDER CAMPAÑA>>&lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#00ffff'&gt;扩大战役>>&lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#00ffff'&gt;EXTEND CAMPAIGN>>&lt;/t&gt;</Original>
-                <English>&lt;t color='#00ffff'&gt;EXTEND CAMPAIGN>>&lt;/t&gt;</English>
-            </Key>
             <Key ID="STR_DUWS_T_cpcivbonus">
                 <German>Hier ist "Overlord". Einige Zivilisten haben uns gerade dafür gedankt, dass wir die Ordnung aufrechterhalten. Gut gemacht, weiter so.</German>
                 <Chinesesimp>这里是"霸王"，刚刚有几个平民对我们维持秩序表达了感谢。干得不错，继续保持。</Chinesesimp>
@@ -4037,19 +4023,9 @@
                 <Original>Mission Completed!</Original>
                 <English>Mission Completed!</English>
             </Key>
-            <Key ID="STR_DUWS_T_h6xmg512">
-                <German>Kehre zum HQ Offizier zurück um die Mission zu beenden.</German>
-                <Spanish>Regrese con el oficial del CG para acabar la misión.</Spanish>
-                <Chinesesimp>回到总部指挥官处来结束任务。</Chinesesimp>
-                <Original>Return to the HQ OFFICER to End the Mission</Original>
-                <English>Return to the HQ OFFICER to End the Mission</English>
-            </Key>
-            <Key ID="STR_DUWS_T_6tjd7a6q">
-                <German>Kehre zum HQ Offizier zurück um die Kampagne zu verlängern oder die Mission zu beenden.</German>
-                <Spanish>Regrese con el oficial del CG para extender o acabar la misión.</Spanish>
-                <Chinesesimp>回到总部指挥官处扩展战役或结束任务。</Chinesesimp>
-                <Original>Return to the HQ OFFICER to Extend the Campaign or End the Mission</Original>
-                <English>Return to the HQ OFFICER to Extend the Campaign or End the Mission</English>
+            <Key ID="STR_DUWS_T_CAMPAIGN_WON">
+                <Original>Every zone is under our control. The island is ours - standing down.</Original>
+                <Chinesesimp>所有战区已被我方占领。任务即将结束。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_6p70rgp4">
                 <German>Sichere alle besetzten Zonen oder verliere deine Assets.</German>

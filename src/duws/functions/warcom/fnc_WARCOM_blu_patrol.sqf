@@ -52,9 +52,6 @@ blufor_patrol_count = 0;
 
         while {true} do {
 		  
-			// As soon as extended Campaign (DOMINATION) starts, stop creating patrols 
-			if (DUWS_MODE == "DOMINATION") exitWith {};
-
 			// make sure blufor is controlling at least 1 zones and blufor_patrol_count <= total zones
 			if (count WARCOM_zones_controled_by_BLUFOR > 0 && blufor_patrol_count <= ((count WARCOM_zones_controled_by_BLUFOR)-1)) then { 
 				sleep 2;
