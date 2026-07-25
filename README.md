@@ -62,6 +62,10 @@ from it.
 Static checks (SQF syntax + path resolution) and pure-function unit tests live in
 [`tests/`](tests/); run `bash tests/run.sh`. Details in [`docs/testing.md`](docs/testing.md).
 
+Neither layer can see a running mission. What still needs an in-game pass, what is known
+broken, and what the previous developer worked around rather than fixed are listed in
+[`docs/known_issues.md`](docs/known_issues.md).
+
 ## Conventions
 
 Working rules for contributors and agents (voice, comments, docs) live in
