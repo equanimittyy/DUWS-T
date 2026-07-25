@@ -157,14 +157,14 @@ case 5: {
 
             // 添加三个 HALO 动作：单人、全组、仅 AI
             bluHQ_object addAction [localize "STR_DUWS_T_foldimok", fnc_ghst_halo, [false,600,70], 0, true, true, "","alive player"];
-            if ((vehiclevarname player) in Request_Players) then {
+            if ((vehiclevarname player) in Squad_Leaders) then {
                 bluHQ_object addAction [localize "STR_DUWS_T_u6btu73i", fnc_ghst_halo, [true,600,70], 0, true, true, "","alive player"];
                 bluHQ_object addAction [localize "STR_DUWS_T_halo_ai_only", fnc_ghst_halo, [true,600,70,true], 0, true, true, "","alive player"];
             };
 
             {
                 _x addAction [localize "STR_DUWS_T_foldimok", fnc_ghst_halo, [false,600,70], 0, true, true, "","alive player"];
-                if ((vehiclevarname player) in Request_Players) then {
+                if ((vehiclevarname player) in Squad_Leaders) then {
                     _x addAction [localize "STR_DUWS_T_u6btu73i", fnc_ghst_halo, [true,600,70], 0, true, true, "","alive player"];
                     _x addAction [localize "STR_DUWS_T_halo_ai_only", fnc_ghst_halo, [true,600,70,true], 0, true, true, "","alive player"];
                 };

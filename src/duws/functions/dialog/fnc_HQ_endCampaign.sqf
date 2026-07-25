@@ -4,7 +4,7 @@
 
 campaign_status = "CAMPAIGN";
 
-if ((vehiclevarname player) in Request_Players) then {
+if ((vehiclevarname player) in Squad_Leaders) then {
 	hq_blu1 addaction [localize "STR_DUWS_T_xh2xta45",{campaign_status = "FINISH"}, "", 6, true, true, "", "_this == player"];
 	// if less than 5, allow extended
 	if (amount_zones_created < 3) then{

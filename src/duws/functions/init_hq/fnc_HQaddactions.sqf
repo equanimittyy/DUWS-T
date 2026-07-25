@@ -12,7 +12,7 @@ if (isMultiplayer) then {
 
 if (support_halo_available) then {
     bluHQ_object addaction [localize "STR_DUWS_T_foldimok", fnc_ghst_halo, [false,600,70], 0, true, true, "","alive player"];
-    if ((vehiclevarname player) in Request_Players) then {
+    if ((vehiclevarname player) in Squad_Leaders) then {
         bluHQ_object addaction [localize "STR_DUWS_T_u6btu73i", fnc_ghst_halo, [true,600,70], 0, true, true, "","alive player"];
         bluHQ_object addaction [localize "STR_DUWS_T_halo_ai_only", fnc_ghst_halo, [true,600,70,true], 0, true, true, "","alive player"];
     };  
@@ -29,13 +29,13 @@ if (support_halo_available) then {
 // 公共变量事件处理器
 "support_halo_available" addPublicVariableEventHandler {
     bluHQ_object addaction [localize "STR_DUWS_T_foldimok", fnc_ghst_halo, [false,600,70], 0, true, true, "","alive player"];
-    if ((vehiclevarname player) in Request_Players) then {
+    if ((vehiclevarname player) in Squad_Leaders) then {
         bluHQ_object addaction [localize "STR_DUWS_T_u6btu73i", fnc_ghst_halo, [true,600,70], 0, true, true, "","alive player"];
         bluHQ_object addaction [localize "STR_DUWS_T_halo_ai_only", fnc_ghst_halo, [true,600,70,true], 0, true, true, "","alive player"];
     };  
     {
         _x addaction [localize "STR_DUWS_T_foldimok", fnc_ghst_halo, [false,600,70], 0, true, true, "","alive player"];
-        if ((vehiclevarname player) in Request_Players) then {
+        if ((vehiclevarname player) in Squad_Leaders) then {
             _x addaction [localize "STR_DUWS_T_u6btu73i", fnc_ghst_halo, [true,600,70], 0, true, true, "","alive player"];
             _x addaction [localize "STR_DUWS_T_halo_ai_only", fnc_ghst_halo, [true,600,70,true], 0, true, true, "","alive player"];
         };  

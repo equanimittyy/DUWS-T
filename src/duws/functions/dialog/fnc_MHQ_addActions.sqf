@@ -16,14 +16,14 @@ if (_addAction == "select") then {
 };
 
 if (_addAction == "deploy") then {
-	if ((vehiclevarname player) in Request_Players) then {
+	if ((vehiclevarname player) in Squad_Leaders) then {
 		removeAllActions MHQ1;
 		MHQ1 addaction [localize "STR_DUWS_T_rqzxlvf4",{[] remoteExec ["fnc_MHQ_deploy",2]}];
 	};
 };
 
 if (_addAction == "undeploy") then {
-	if ((vehiclevarname player) in Request_Players) then {
+	if ((vehiclevarname player) in Squad_Leaders) then {
 		removeAllActions MHQ1;
 		MHQ1 addaction [localize "STR_DUWS_T_fjpyu3zb",{[] remoteExec ["fnc_MHQ_undeploy",2]}];
 	};

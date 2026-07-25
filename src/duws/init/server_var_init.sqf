@@ -225,10 +225,19 @@ insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
 //	if (isServer) then {[1000,-1,false,1500,1500,1500]execvm "modules\zbe_cache\main.sqf"};
 //};
 
-// CREATE THE ARRAYS FOR GAME MASTER and REQUEST PLAYERS
+// Two permission lists of playable slot names, both checked as
+// (vehiclevarname player) in <list>. game_master owns campaign-level controls -- the setup
+// flow, side-mission requests, the global heal. Squad_Leaders owns anything that spends the
+// shared CP pool -- the request menus, radio supports, MHQ, FOB upkeep -- plus High Command.
+//
+// Squad_Leaders lists every playable slot today, so it restricts nothing as shipped. It exists
+// to be trimmed: on a dedicated server, cutting it to the actual squad-lead slots restricts all
+// of the above in one edit. Nothing outside a permission check may read it -- personal kit such
+// as the medic/engineer/UAV traits is granted unconditionally in client_init.sqf, precisely so
+// that trimming this cannot take basic capability away from the rest of the team.
 game_master = ["player1"];publicVariable "game_master";
 
-Request_Players = [
+Squad_Leaders = [
 	"player1",
 	"player2",
 	"player3",
@@ -249,4 +258,4 @@ Request_Players = [
 	"player18",
 	"player19",
 	"player20"
-]; publicVariable "Request_Players";
+]; publicVariable "Squad_Leaders";

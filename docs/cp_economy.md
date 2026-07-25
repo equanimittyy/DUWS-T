@@ -87,6 +87,25 @@ territory income does not stack per zone captured.
 | Base repair, HQ redeploy, sitrep | `supports/fnc_activateBaseRepairStation.sqf`, `misc/fnc_redeployHQUnits.sqf`, `supports/fnc_sitrep_support.sqf` | 2 / 2 / 1 |
 | Death | `init/client_init.sqf:187` | `DUWSMP_CP_death_cost` (0–10) |
 
+## Who may spend
+
+Two permission lists of playable slot names, defined together at
+`init/server_var_init.sqf:228-261` and checked as `(vehiclevarname player) in <list>`:
+
+| List | Owns |
+|---|---|
+| `game_master` | campaign-level control — the setup flow, side-mission requests (`missions/fnc_stratmap.sqf:24`), the global heal |
+| `Squad_Leaders` | everything that spends CP — request menus, radio supports, MHQ, FOB refortify and reguard — plus High Command |
+
+`Squad_Leaders` lists every playable slot as shipped, so it restricts nothing today. It exists to
+be trimmed: on a dedicated server, cutting it to the real squad-lead slots restricts all of the
+above in a single edit.
+
+That only holds while **nothing outside a permission check reads it**. Personal kit — the medic,
+engineer and UAV traits — is granted unconditionally at `init/client_init.sqf:199-201` for exactly
+this reason. Gating a *capability* rather than a *privilege* on this array would mean trimming it
+silently removed revives from the rest of the team, with no error to point at.
+
 ## Balance concerns
 
 Open observations from an economy review. Each is a design or correctness property, not a

@@ -207,13 +207,13 @@ _fob setVariable ["FOB_fortify_busy", false];
 // arguments: the action's target is the FOB itself and the server reads the rest, so it never
 // needs removing and re-adding.
 //
-// Request_Players currently lists every playable slot, so the gate admits everyone today. It
+// Squad_Leaders currently lists every playable slot, so the gate admits everyone today. It
 // is here so a dedicated server can later restrict FOB upkeep to particular slots -- squad
 // leaders, say -- by trimming that one array. The check lives in the action's condition rather
 // than wrapping addAction the way fnc_FOBactions does, because this runs on the server where
 // `player` is objNull; a condition string is evaluated per client, where it resolves.
 if (!_refortify) then {
-	[_fob,[localize "STR_DUWS_T_qxrh9fws", fnc_refortifyFOB, [], 0, true, true, "", "_this == player && ((vehiclevarname player) in Request_Players)"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
+	[_fob,[localize "STR_DUWS_T_qxrh9fws", fnc_refortifyFOB, [], 0, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
 };
 
 

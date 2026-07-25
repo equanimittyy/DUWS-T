@@ -4,7 +4,7 @@ _fob_owner = _this select 1;
 // 防重
 if (_fob getVariable ["FOB_actions_done", false]) exitWith {};
 _fob setVariable ["FOB_actions_done", true];
-if ((vehiclevarname player) in Request_Players) then {
+if ((vehiclevarname player) in Squad_Leaders) then {
     _fob addaction [localize "STR_DUWS_T_vw32hahc",fnc_FOB_Request_Menu, "", 100, true, true, "", "_this == player"];
     _fob addaction [localize "STR_DUWS_T_l0xark5g",fnc_squad_manage, "", 95, true, true, "", "_this == player"];
 };
@@ -17,7 +17,7 @@ if (support_armory_available) then {
 
 if (support_halo_available) then {
     _fob addAction [localize "STR_DUWS_T_foldimok", fnc_ghst_halo, [false,600,70], 0, true, true, "","_this == player"];
-    if ((vehiclevarname player) in Request_Players) then {
+    if ((vehiclevarname player) in Squad_Leaders) then {
         _fob addAction [localize "STR_DUWS_T_u6btu73i", fnc_ghst_halo, [true,600,70], 0, true, true, "","_this == player"];
         _fob addAction [localize "STR_DUWS_T_halo_ai_only", fnc_ghst_halo, [true,600,70,true], 0, true, true, "","_this == player"];
     };  

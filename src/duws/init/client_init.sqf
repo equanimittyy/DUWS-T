@@ -192,11 +192,17 @@ PlayerKilledEH = player addEventHandler ["killed", {
 // ENABLE STAMINA (forced on)
 player_fatigue = 1;
 player enableStamina true;
-// init the extras for REQUEST players (squad leads)
-if ((vehiclevarname player) in Request_Players) then {
-	player setUnitTrait ["Medic",true];
-	player setUnitTrait ["Engineer",true];
-	player setUnitTrait ["uavHacker",true];
+// Traits go to everyone, deliberately not gated: any player should be able to use a medkit or
+// toolkit on a squadmate, and a UAV terminal is a personal tool rather than a command
+// privilege. Keeping these out of Squad_Leaders is what lets that array be trimmed to a few
+// slots without silently taking revives away from the rest of the team.
+player setUnitTrait ["Medic",true];
+player setUnitTrait ["Engineer",true];
+player setUnitTrait ["uavHacker",true];
+
+// Squad-lead extras: High Command, and the per-player FOB support unlock that arrives once
+// BLUFOR holds a zone. support_count bounds the radio supports, which only leads can request.
+if ((vehiclevarname player) in Squad_Leaders) then {
 	// wait until blu captures at least one zone
 	[] spawn fnc_zones_bonus;
 	// INIT the max support variable
