@@ -22,7 +22,9 @@ fnc_log = {
     private _n = ["OFF", "ERROR", "WARN", "INFO", "DEBUG"] find (toUpper _level);
     if (_n < 0) then { _n = 3 };
     if (_n > duws_log_level) exitWith {};
-    ["INFO", "HALO", format ["[%1][%2][%3] %4", toUpper _level, duws_log_where, _tag, _msg]] call fnc_log;
+    // The one diag_log the mission keeps: this is the sink every other log line funnels
+    // into. Routing it through fnc_log makes fnc_log call itself and nothing reaches the rpt.
+    diag_log format ["[DUWS][%1][%2][%3] %4", toUpper _level, duws_log_where, _tag, _msg];
 };
 
 // A waitUntil that cannot stall silently. An unbounded `waitUntil {cond}` whose condition
