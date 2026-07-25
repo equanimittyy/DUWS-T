@@ -12,7 +12,10 @@ if (!isNil "intro_heli_executed") exitWith { ["WARN", "INTRO", "Already executed
 missionNamespace setVariable ["intro_heli_executed", true, true];
 
 // ==================== JIP 处理（流程结束后） ====================
-if (!isNil "intro_heli_done" && {intro_heli_done}) then {
+// exitWith, not then + return: SQF has no return keyword, so the original read as an
+// undefined variable and fell through into the intro sequence instead of stopping after
+// placing the JIP players. The file is spawned, so exitWith here ends the script.
+if (!isNil "intro_heli_done" && {intro_heli_done}) exitWith {
     private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", []];
     if !(_hqPos isEqualTo []) then {
         {
@@ -26,7 +29,7 @@ if (!isNil "intro_heli_done" && {intro_heli_done}) then {
             };
         } forEach (call BIS_fnc_listPlayers);
     };
-    return;
+    ["INFO", "INTRO", "intro already run, JIP players placed at the HQ"] call fnc_log;
 };
 
 // 等待所有玩家就绪
