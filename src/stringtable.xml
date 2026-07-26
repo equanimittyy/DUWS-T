@@ -2194,6 +2194,22 @@
                 <English>Disguise broken: Night vision goggles detected</English>
                 <Chinesesimp>伪装暴露：佩戴夜视仪。</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_UNIFORM">
+                <Original>Disguise broken: Non-civilian uniform</Original>
+                <English>Disguise broken: Non-civilian uniform</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_VEST">
+                <Original>Disguise broken: Non-civilian vest</Original>
+                <English>Disguise broken: Non-civilian vest</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_HEADGEAR">
+                <Original>Disguise broken: Non-civilian headgear</Original>
+                <English>Disguise broken: Non-civilian headgear</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_BACKPACK">
+                <Original>Disguise broken: Non-civilian backpack</Original>
+                <English>Disguise broken: Non-civilian backpack</English>
+            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_COOLDOWN_FMT">
                 <Original>Disguise cooldown: %1 min %2 sec remaining</Original>
                 <English>Disguise cooldown: %1 min %2 sec remaining</English>
@@ -2208,11 +2224,6 @@
                 <Original>The enemy is getting suspicious of you. Move away to a safe distance to maintain your disguise</Original>
                 <English>The enemy is getting suspicious of you. Move away to a safe distance to maintain your disguise</English>
                 <Chinesesimp>敌人开始怀疑你的身份，迅速离开敌人到安全距离以继续伪装。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_FAIL_HINT">
-                <Original>Cannot disguise %1</Original>
-                <English>Cannot disguise %1</English>
-                <Chinesesimp>无法伪装   %1</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_SUCCESS_HINT">
                 <Original>Disguise activated. Stay low</Original>
@@ -2309,35 +2320,47 @@
                 <English>Disguise Error</English>
                 <Chinesesimp>伪装错误</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_NO_CIV">
-                <Original>Unable to load civilian clothing data</Original>
-                <English>Unable to load civilian clothing data</English>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_NOCIVDATA">
+                <Original>Cannot disguise: Civilian clothing data hasn't loaded yet</Original>
+                <English>Cannot disguise: Civilian clothing data hasn't loaded yet</English>
                 <Chinesesimp>无法获取平民服装数据。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_ZOMBIE_MODE">
-                <Original>Disguise not available in zombie mode</Original>
-                <English>Disguise not available in zombie mode</English>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_ZOMBIE">
+                <Original>Cannot disguise: Not available in zombie mode</Original>
+                <English>Cannot disguise: Not available in zombie mode</English>
                 <Chinesesimp>丧尸模式下无法伪装成平民。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_IN_VEHICLE">
-                <Original>while you are in a non-civilian vehicle</Original>
-                <English>while you are in a non-civilian vehicle</English>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_VEHICLE">
+                <Original>Cannot disguise: You are in a non-civilian vehicle</Original>
+                <English>Cannot disguise: You are in a non-civilian vehicle</English>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_UNIFORM">
-                <Original>while you are wearing a military uniform</Original>
-                <English>while you are wearing a military uniform</English>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_WEAPON">
+                <Original>Cannot disguise: You are carrying a weapon</Original>
+                <English>Cannot disguise: You are carrying a weapon</English>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_VEST">
-                <Original>while you are wearing a military vest</Original>
-                <English>while you are wearing a military vest</English>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_NVG">
+                <Original>Cannot disguise: You are carrying night vision goggles</Original>
+                <English>Cannot disguise: You are carrying night vision goggles</English>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_HEADGEAR">
-                <Original>while you are wearing military headgear</Original>
-                <English>while you are wearing military headgear</English>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_NAKED">
+                <Original>Cannot disguise: You aren't wearing any clothing</Original>
+                <English>Cannot disguise: You aren't wearing any clothing</English>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_BACKPACK">
-                <Original>while you are carrying a military backpack</Original>
-                <English>while you are carrying a military backpack</English>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_UNIFORM">
+                <Original>Cannot disguise: You are wearing a military uniform</Original>
+                <English>Cannot disguise: You are wearing a military uniform</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_VEST">
+                <Original>Cannot disguise: You are wearing a military vest</Original>
+                <English>Cannot disguise: You are wearing a military vest</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_HEADGEAR">
+                <Original>Cannot disguise: You are wearing military headgear</Original>
+                <English>Cannot disguise: You are wearing military headgear</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_BACKPACK">
+                <Original>Cannot disguise: You are carrying a military backpack</Original>
+                <English>Cannot disguise: You are carrying a military backpack</English>
             </Key>
         </Container>
         <Container name="Hiring Auxiliaries">

@@ -5,12 +5,11 @@ params ["_player"];
 if (isNull _player) exitWith {};
 
 // ========== 辅助函数：发送失败提示 ==========
-// _reasonKey's text must be a bare clause ("while you are wearing a military vest"): the
-// wrapper prepends "Cannot disguise". Keys shared with the break path below read
-// "Disguise broken: ..." and compose wrongly here.
+// Refusals take DISGUISE_CANT_*, breaks take DISGUISE_BROKEN_* -- the two read as whole
+// sentences from different frames, so a key never serves both paths.
 fnc_disguise_hintFail = {
     params ["_player", "_reasonKey"];
-    [format [localize "STR_DUWS_T_DISGUISE_FAIL_HINT", localize _reasonKey]] remoteExec ["hint", _player];
+    [localize _reasonKey] remoteExec ["hint", _player];
 };
 publicVariable "fnc_disguise_hintFail";
 
@@ -40,13 +39,13 @@ private _veh = vehicle _player;
 if (_veh != _player) then {
     private _vehType = typeOf _veh;
     if (!(_vehType in _civilianVehicles)) exitWith {
-        [_player, "STR_DUWS_T_DISGUISE_IN_VEHICLE"] call fnc_disguise_hintFail;
+        [_player, "STR_DUWS_T_DISGUISE_CANT_VEHICLE"] call fnc_disguise_hintFail;
     };
 };
 
 if (CIV_PRESENCE == "NONE") exitWith {};
 if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_ZOMBIE_MODE"] call fnc_disguise_hintFail;
+    [_player, "STR_DUWS_T_DISGUISE_CANT_ZOMBIE"] call fnc_disguise_hintFail;
 };
 
 // ========== 钱币和情报检查已移除 ==========
@@ -60,7 +59,7 @@ waitUntil {
 };
 
 if (isNil "DUWS_civUniforms" || isNil "DUWS_civVests" || isNil "DUWS_civHeadgear" || isNil "DUWS_civBackpacks") exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_NO_CIV"] call fnc_disguise_hintFail;
+    [_player, "STR_DUWS_T_DISGUISE_CANT_NOCIVDATA"] call fnc_disguise_hintFail;
 };
 
 private _civUniforms = DUWS_civUniforms;
@@ -70,35 +69,35 @@ private _civBackpacks = DUWS_civBackpacks;
 
 // ========== 检查当前装束 ==========
 if (primaryWeapon _player != "" || secondaryWeapon _player != "" || handgunWeapon _player != "") exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_BROKEN_WEAPON"] call fnc_disguise_hintFail;
+    [_player, "STR_DUWS_T_DISGUISE_CANT_WEAPON"] call fnc_disguise_hintFail;
 };
 
 private _assignedItems = assignedItems _player;
 if ("NVGoggles" in _assignedItems || "NVGoggles_OPFOR" in _assignedItems || "NVGoggles_INDEP" in _assignedItems) exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_BROKEN_NVG"] call fnc_disguise_hintFail;
+    [_player, "STR_DUWS_T_DISGUISE_CANT_NVG"] call fnc_disguise_hintFail;
 };
 
 private _currentUniform = uniform _player;
 if (_currentUniform == "") exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_BROKEN_NAKED"] call fnc_disguise_hintFail;
+    [_player, "STR_DUWS_T_DISGUISE_CANT_NAKED"] call fnc_disguise_hintFail;
 };
 if (!(_currentUniform in _civUniforms)) exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_BROKEN_UNIFORM"] call fnc_disguise_hintFail;
+    [_player, "STR_DUWS_T_DISGUISE_CANT_UNIFORM"] call fnc_disguise_hintFail;
 };
 
 private _currentVest = vest _player;
 if (_currentVest != "" && {!(_currentVest in _civVests)}) exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_BROKEN_VEST"] call fnc_disguise_hintFail;
+    [_player, "STR_DUWS_T_DISGUISE_CANT_VEST"] call fnc_disguise_hintFail;
 };
 
 private _currentHeadgear = headgear _player;
 if (_currentHeadgear != "" && {!(_currentHeadgear in _civHeadgear)}) exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_BROKEN_HEADGEAR"] call fnc_disguise_hintFail;
+    [_player, "STR_DUWS_T_DISGUISE_CANT_HEADGEAR"] call fnc_disguise_hintFail;
 };
 
 private _currentBackpack = backpack _player;
 if (_currentBackpack != "" && {!(_currentBackpack in _civBackpacks)}) exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_BROKEN_BACKPACK"] call fnc_disguise_hintFail;
+    [_player, "STR_DUWS_T_DISGUISE_CANT_BACKPACK"] call fnc_disguise_hintFail;
 };
 
 // ========== 检查通过，开启伪装 ==========
@@ -187,19 +186,19 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
             private _invalidGear = false;
             private _breakReason = "";
             if (!(uniform _player in (_player getVariable ["DUWS_disguise_validUniforms", []]))) then {
-                _invalidGear = true; _breakReason = "STR_DUWS_T_DISGUISE_BROKEN_NAKED";
+                _invalidGear = true; _breakReason = "STR_DUWS_T_DISGUISE_BROKEN_UNIFORM";
             };
             private _vest = vest _player;
             if (!_invalidGear && _vest != "" && {!(_vest in (_player getVariable ["DUWS_disguise_validVests", []]))}) then {
-                _invalidGear = true; _breakReason = "STR_DUWS_T_DISGUISE_BROKEN_NAKED";
+                _invalidGear = true; _breakReason = "STR_DUWS_T_DISGUISE_BROKEN_VEST";
             };
             private _headgear = headgear _player;
             if (!_invalidGear && _headgear != "" && {!(_headgear in (_player getVariable ["DUWS_disguise_validHeadgear", []]))}) then {
-                _invalidGear = true; _breakReason = "STR_DUWS_T_DISGUISE_BROKEN_NAKED";
+                _invalidGear = true; _breakReason = "STR_DUWS_T_DISGUISE_BROKEN_HEADGEAR";
             };
             private _backpack = backpack _player;
             if (!_invalidGear && _backpack != "" && {!(_backpack in (_player getVariable ["DUWS_disguise_validBackpacks", []]))}) then {
-                _invalidGear = true; _breakReason = "STR_DUWS_T_DISGUISE_BROKEN_NAKED";
+                _invalidGear = true; _breakReason = "STR_DUWS_T_DISGUISE_BROKEN_BACKPACK";
             };
             if (_invalidGear) exitWith {
                 [_breakReason] call _fnc_breakDisguise;
