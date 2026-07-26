@@ -519,7 +519,6 @@ removeBackpackGlobal _officer;
 _officer switchMove "acts_StandingSpeakingUnarmed";
 hq_blu1 = _officer; publicVariable "hq_blu1";
 blu_officer_object = _officer; publicVariable "blu_officer_object";
-[_officer] remoteExec ["fnc_addHQOfficerActions", 0, true];
 [_officer] spawn {
     waitUntil {sleep 10; !alive hq_blu1};
     ["TaskFailed", ["", localize "STR_DUWS_T_amiszycs"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
@@ -646,9 +645,11 @@ if (!isNull _supplyCrate) then {
 };
 
 if (!isNull _mapBoard) then {
-    [_mapBoard] remoteExec ["fnc_addHQLaptopActions", 0, true];
-    // 原笔记本电脑保持原样，白板地图新增训练动作
     [_mapBoard] remoteExec ["fnc_addBoardKillhouseActions", 0, true];
+};
+
+if (!isNull _hqObj) then {
+    [_hqObj] remoteExec ["fnc_addHQBuildingActions", 0, true];
 };
 
 if (!isNull _medTent) then {

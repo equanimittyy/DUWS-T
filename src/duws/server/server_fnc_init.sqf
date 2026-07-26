@@ -570,10 +570,8 @@ fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_res
 publicVariable "fnc_restHealServer";
 
 // 如果实现了 HQ 建筑动作，也需添加：
-fnc_addHQLaptopActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addHQLaptopActions.sqf";
-publicVariable "fnc_addHQLaptopActions";
-fnc_addHQOfficerActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addHQOfficerActions.sqf";
-publicVariable "fnc_addHQOfficerActions";
+fnc_addHQBuildingActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addHQBuildingActions.sqf";
+publicVariable "fnc_addHQBuildingActions";
 fnc_addTerminalBlackMarketActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addTerminalBlackMarketActions.sqf";
 publicVariable "fnc_addTerminalBlackMarketActions";
 fnc_blackMarketPurchase = compile preprocessFileLineNumbers "duws\server\misc\fnc_blackMarketPurchase.sqf";

@@ -1,24 +1,28 @@
 // Locality: client; the addAction bodies below run on the machine that triggers them, not here.
-/*
-    fnc_addHQLaptopActions.sqf
-    参数: _laptop - 笔记本电脑对象
-    由服务器远程调用，在每个客户端为笔记本电脑添加交互动作
-*/
+// Every command action hangs off the HQ structure, mirroring shared/functions/fnc_FOBactions.sqf.
+// Splitting them across the commander and the map board meant a player who lost track of either
+// prop lost the menu with it, and the commander is a killable unit.
 if (!hasInterface) exitWith {};
 
-params ["_laptop"];
+params ["_hqBuilding"];
 
-if (isNull _laptop) exitWith {};
+if (isNull _hqBuilding) exitWith {};
 
-// 去重：检查是否已添加过动作
-if (!isNil {_laptop getVariable "laptop_actions_done"}) exitWith {};
-_laptop setVariable ["laptop_actions_done", true];
+// 防重
+if (_hqBuilding getVariable ["HQ_building_actions_done", false]) exitWith {};
+_hqBuilding setVariable ["HQ_building_actions_done", true];
 
-// 添加招募菜单
-_laptop addAction [localize "STR_DUWS_T_vw32hahc", fnc_HQ_Request_Menu, "", 100, true, true, "", "_this == player"];
+_hqBuilding addAction [localize "STR_DUWS_T_vw32hahc", fnc_HQ_Request_Menu, "", 100, true, true, "", "_this == player"];
+
+if ((vehiclevarname player) in Squad_Leaders) then {
+    _hqBuilding addAction [localize "STR_DUWS_T_l0xark5g", fnc_squad_manage, "", 95, true, true, "", "_this == player"];
+    _hqBuilding addAction [localize "STR_DUWS_T_4jabuvz6", fnc_groupReset, "", 0, true, true, "", "_this == player"];
+};
+
+_hqBuilding addAction [localize "STR_DUWS_T_iggpsdqo", fnc_FOBmanager, "", 0, true, true, "", "_this == player"];
 
 // 添加显示任务冷却
-_laptop addAction [
+_hqBuilding addAction [
     localize "STR_DUWS_T_SHOW_MISSION_COOLDOWNS",
     {
         private _lines = [];
@@ -91,6 +95,3 @@ _laptop addAction [
     "",
     "(vehiclevarname player) == 'player1'"
 ];
-
-// 添加 FOB 管理
-_laptop addAction [localize "STR_DUWS_T_iggpsdqo", fnc_FOBmanager, "", 0, true, true, "", "_this == player"];
