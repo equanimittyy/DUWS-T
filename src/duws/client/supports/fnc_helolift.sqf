@@ -213,7 +213,7 @@ _message = format[localize "STR_DUWS_T_helolift5"];
 if (call _check_damage) exitWith { call _abort };
 
 _liftActionID = player addAction [
-    "<t color='#00ff00' size='2'>Give Waypoints to pilot</t>",
+    "<t color='#00ff00'>Give Waypoints to pilot</t>",
     fnc_mapclicklift,
     nil,
     0,

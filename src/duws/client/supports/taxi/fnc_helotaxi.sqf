@@ -59,7 +59,7 @@ _helo setPos [_vehpos select 0, _vehpos select 1, 200];// set height
 //_helo setvelocity [0,0,200];
 
 _helo flyInHeight 50;
-_helo addAction ["<t color='#00ff00' size='2'>Give Waypoints to the pilot</t>", fnc_mapclickhelo, "", 0, true, true, "", "vehicle _this == _target"];
+_helo addAction ["<t color='#00ff00'>Give Waypoints to the pilot</t>", fnc_mapclickhelo, "", 0, true, true, "", "vehicle _this == _target"];
  
 _heloGroup = _veh select 2;
 _heloGroup deleteGroupWhenEmpty true;
