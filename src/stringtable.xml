@@ -1260,11 +1260,11 @@
                 <English>Welcome to DUWS_T. If the built-in faction has bugs, try the auto-detect faction option instead</English>
             </Key>
             <Key ID="STR_DUWS_T_ahq99ew0">
-                <German>Klicke auf die Karte, um dein HQ zu platzieren. Das Update v1.3 erlaubt es, das HQ in Gebäudekomplexen zu platzieren. Zur reibungslosen Platzierung werden hindernde Gebäude entfernt.\n Mit v1.4 wurde die Hauptquartierstruktur überarbeitet. Platzieren Sie Ihr Hauptquartier möglichst in flachen Gebieten!</German>
-                <Spanish>Haz clic en el mapa para colocar tu HQ. La actualización v1.3 permite colocar el HQ en complejos de edificios. Para garantizar una colocación exitosa, los edificios que lo obstaculicen serán eliminados.\n La v1.4 incorpora una estructura de cuartel general rediseñada. ¡Coloca tu base en zonas llanas siempre que sea posible!</Spanish>
-                <Chinesesimp>在地图上点击来放置总部，v1.3的更新使得总部可以被放置于建筑群之中 (为保证总部的顺利放置，影响总部放置的建筑将被删除)\n v1.4引入了重构的总部结构，请尽量选择平缓的地区放置总部！</Chinesesimp>
-                <Original>Click on the map to place your HQ. The v1.3 update allows the HQ to be placed within building complexes. To ensure successful placement, any structures blocking the HQ will be removed.\n v1.4 features a restructured HQ system. Place your HQ on flat terrain if possible!</Original>
-                <English>Click on the map to place your HQ. The v1.3 update allows the HQ to be placed within building complexes. To ensure successful placement, any structures blocking the HQ will be removed.\n v1.4 features a restructured HQ system. Place your HQ on flat terrain if possible!</English>
+                <German>Klicke auf die Karte, um dein HQ zu platzieren. Das Update v1.3 erlaubt es, das HQ in Gebäudekomplexen zu platzieren. Zur reibungslosen Platzierung werden hindernde Gebäude entfernt.&lt;br/&gt;Mit v1.4 wurde die Hauptquartierstruktur überarbeitet. Platzieren Sie Ihr Hauptquartier möglichst in flachen Gebieten!</German>
+                <Spanish>Haz clic en el mapa para colocar tu HQ. La actualización v1.3 permite colocar el HQ en complejos de edificios. Para garantizar una colocación exitosa, los edificios que lo obstaculicen serán eliminados.&lt;br/&gt;La v1.4 incorpora una estructura de cuartel general rediseñada. ¡Coloca tu base en zonas llanas siempre que sea posible!</Spanish>
+                <Chinesesimp>在地图上点击来放置总部，v1.3的更新使得总部可以被放置于建筑群之中 (为保证总部的顺利放置，影响总部放置的建筑将被删除)&lt;br/&gt;v1.4引入了重构的总部结构，请尽量选择平缓的地区放置总部！</Chinesesimp>
+                <Original>Click on the map to place your HQ. The v1.3 update allows the HQ to be placed within building complexes. To ensure successful placement, any structures blocking the HQ will be removed.&lt;br/&gt;v1.4 features a restructured HQ system. Place your HQ on flat terrain if possible!</Original>
+                <English>Click on the map to place your HQ. The v1.3 update allows the HQ to be placed within building complexes. To ensure successful placement, any structures blocking the HQ will be removed.&lt;br/&gt;v1.4 features a restructured HQ system. Place your HQ on flat terrain if possible!</English>
             </Key>
             <Key ID="STR_DUWS_T_SELECT_HQ">
                 <Original>SELECT HQ</Original>

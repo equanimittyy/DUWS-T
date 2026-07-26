@@ -47,6 +47,10 @@ sleep 1;
 
     while {!(["CIV", "all zones built out",
         {zones_buildout_done >= count serv_zones_array}, 300] call fnc_waitLogged)} do {};
+    // The ticker exits on its own condition without redrawing, so clear its last frame here.
+    // With civilians on the pass below overwrites it immediately; with civilians off nothing
+    // would, and a stale "3 of 4 complete" would sit there until the map closed.
+    [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
     if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then { [] call fnc_civ_init_Tomata; };
 
     // Every completion announcement lives here rather than at the end of the zone locators:
