@@ -50,7 +50,7 @@ _abort = {
     params [["_msg", "STR_DUWS_T_boattaxi_damaged"]];
     _boat lock false;
     deleteMarker str(_markerpickup);
-    [localize "STR_DUWS_T_OVERLORD", localize _msg] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [localize "STR_DUWS_T_OVERLORD", ([localize _msg] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
     sleep 300;
     [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
 };
@@ -72,7 +72,7 @@ if (getdammage _boat > 0.7 or !alive _pilot) exitWith {}; // get out of the loop
 // check if player is inside choppa
 if (vehicle player != _boat) then {
 	taxiCanTakeOff = false; 
-	[localize "STR_DUWS_T_boattaxi_notaboard"] spawn fnc_sideChat_filter; 
+	[([localize "STR_DUWS_T_boattaxi_notaboard"] call fnc_cs)] spawn fnc_sideChat_filter;
 	_boat addAction [format ["<t color='#00b7ff'>%1</t>", localize "STR_DUWS_T_boattaxi_action_loc"], fnc_mapclickboat, "", 0, true, true, "", "vehicle _this == _target"];
 } else {
 	_inVehCheck = false;};

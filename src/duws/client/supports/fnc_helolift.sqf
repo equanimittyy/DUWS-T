@@ -63,7 +63,7 @@ _abort = {
     private _markers = player getVariable ["LiftWaypointMarkers", []];
     { deleteMarker _x } forEach _markers;
     player setVariable ["LiftWaypointMarkers", []];
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heloliftabort"] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_heloliftabort"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
     [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
     sleep 300;
     [player, "helo_lift"] call BIS_fnc_addCommMenuItem;

@@ -85,7 +85,7 @@ switch (VERSION_X) do {
 };
 _cargo attachTo [_parachute,[0,0,0]];
 
-hint localize "STR_DUWS_T_jjztkt04";
+hint localize "STR_DUWS_T_jjzzkt04";
 
 sleep 30;
 

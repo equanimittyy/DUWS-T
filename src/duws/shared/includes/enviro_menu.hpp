@@ -152,7 +152,7 @@ class startup_dialog
             y = 8.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 17.5 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_a7covgvj";
+            tooltip = "$STR_DUWS_T_APOCALYPSE_TOOLTIP";
         };
         // ========== 焦土模式（原 VCOM 控件） ==========
         class SE_frame: RscFrame

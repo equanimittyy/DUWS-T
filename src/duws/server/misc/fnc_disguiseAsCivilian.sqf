@@ -5,6 +5,9 @@ params ["_player"];
 if (isNull _player) exitWith {};
 
 // ========== 辅助函数：发送失败提示 ==========
+// _reasonKey's text must be a bare clause ("while you are wearing a military vest"): the
+// wrapper prepends "Cannot disguise". Keys shared with the break path below read
+// "Disguise broken: ..." and compose wrongly here.
 fnc_disguise_hintFail = {
     params ["_player", "_reasonKey"];
     [format [localize "STR_DUWS_T_DISGUISE_FAIL_HINT", localize _reasonKey]] remoteExec ["hint", _player];

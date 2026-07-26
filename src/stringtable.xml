@@ -1031,6 +1031,14 @@
                 <Original>CFP African</Original>
                 <English>CFP African</English>
             </Key>
+            <Key ID="STR_DUWS_T_5kow9zoj">
+                <Original>Unsung Vietnamese</Original>
+                <English>Unsung Vietnamese</English>
+            </Key>
+            <Key ID="STR_DUWS_T_7yc3uncm">
+                <Original>IFA3 WWII European</Original>
+                <English>IFA3 WWII European</English>
+            </Key>
             <Key ID="STR_DUWS_T_2j83vkge">
                 <German>Tanoa</German>
                 <Spanish>Tanoanos</Spanish>
@@ -2311,6 +2319,26 @@
                 <English>Disguise not available in zombie mode</English>
                 <Chinesesimp>丧尸模式下无法伪装成平民。</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_IN_VEHICLE">
+                <Original>while you are in a non-civilian vehicle</Original>
+                <English>while you are in a non-civilian vehicle</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_UNIFORM">
+                <Original>while you are wearing a military uniform</Original>
+                <English>while you are wearing a military uniform</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_VEST">
+                <Original>while you are wearing a military vest</Original>
+                <English>while you are wearing a military vest</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_HEADGEAR">
+                <Original>while you are wearing military headgear</Original>
+                <English>while you are wearing military headgear</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_BACKPACK">
+                <Original>while you are carrying a military backpack</Original>
+                <English>while you are carrying a military backpack</English>
+            </Key>
         </Container>
         <Container name="Hiring Auxiliaries">
             <Key ID="STR_DUWS_T_HIRE_PARTISANS_choseMap">
@@ -3022,6 +3050,10 @@
                 <Original>This civilian has already been approached</Original>
                 <English>This civilian has already been approached</English>
                 <Chinesesimp>该平民已被接触过。</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_RECRUIT_DEAD">
+                <Original>This civilian is dead</Original>
+                <English>This civilian is dead</English>
             </Key>
             <Key ID="STR_DUWS_T_RECRUIT_gainCP">
                 <Original>Each evacuated civilian grants your team %1 CP</Original>
@@ -4462,20 +4494,6 @@
                 <Original>Ten seconds until mission cleanup</Original>
                 <English>Ten seconds until mission cleanup</English>
             </Key>
-            <Key ID="STR_DUWS_T_i44ddgrq">
-                <German>Mission Regenerierung</German>
-                <Spanish>Regenerando misión</Spanish>
-                <Chinesesimp>重建任务</Chinesesimp>
-                <Original>Mission Regen</Original>
-                <English>Mission Regen</English>
-            </Key>
-            <Key ID="STR_DUWS_T_dlzkc4c2">
-                <German>Bitte warte einige Minuten, während wir die Kampagne neu generieren.</German>
-                <Spanish>Por favor espere unos minutos mientras regreneramos la campaña.</Spanish>
-                <Chinesesimp>请等待几分钟重建战役。</Chinesesimp>
-                <Original>Please wait a few minutes while we regenerate the campaign</Original>
-                <English>Please wait a few minutes while we regenerate the campaign</English>
-            </Key>
             <Key ID="STR_DUWS_T_kievbwmd">
                 <German>Eine verbündete Angriffstruppe wurde überfallen! Sie verbirgt sich in einem Gebäude in diesem Gebiet, mit feindlichen Truppen ringsherum. Hilf ihnen, sich durchzubrechen!  (Very high CP, low AP)</German>
                 <Spanish>Un escuadrón de asalto aliado ha sido emboscado! Se oculta en un edificio de esta zona, con fuerzas enemigas a su alrededor. Ayúdalos a romper el cerco!  (Very high CP, low AP)</Spanish>
@@ -4524,20 +4542,6 @@
                 <Chinesesimp>==SIDE MISSION FAILED==\n\n太晚了，关键信息被敌人破译了......</Chinesesimp>
                 <Original>==SIDE MISSION FAILED==\n\nThe enemy finished decoding before the tower came down.</Original>
                 <English>==SIDE MISSION FAILED==\n\nThe enemy finished decoding before the tower came down.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_lh5dhnjp">
-                <German>Ein  feindliche Funk-LKW befindet sich in diesem Gebiet. Wir müssen ihn zerstören.</German>
-                <Spanish>El enemigo tiene un camión de comunicaciones en ésta área. Debe destruírlo.</Spanish>
-                <Chinesesimp>敌人在这个地区有一辆通讯车。你必须摧毁它。</Chinesesimp>
-                <Original>The enemy has a Communications Truck in this area. You must destroy it.</Original>
-                <English>The enemy has a Communications Truck in this area. You must destroy it.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_zcp4hrzg">
-                <German>Aufklärungsdaten lassen vermuten, dass sich in diesem Gebiet eine feindliche SAM-Stellung befindet. Du musst die Stellung zerstören. Denk daran einige Sprengladungen mitzunehmen.</German>
-                <Spanish>Inteligencia sugiere que hay baterías SAM en ésta área. Debe destruírlas. Asegurese de llevar explosivos.</Spanish>
-                <Chinesesimp>情报显示这附近有一个敌人的SAM站点。你必须摧毁它。一定要带些炸药。</Chinesesimp>
-                <Original>Intel suggests that there is an enemy SAM site in this area. You must destroy it. Be sure to bring some explosives.</Original>
-                <English>Intel suggests that there is an enemy SAM site in this area. You must destroy it. Be sure to bring some explosives.</English>
             </Key>
             <Key ID="STR_DUWS_T_njsu8ofz">
                 <German>Eines unserer Flugzeuge wurde in der Nähe dieses Ortes abgeschossen. Satellitenmeldungen zeigen, dass der Pilot schwere Verletzungen erlitten hat und stark blutet – beeil dich zum Absturzort und bring ihn sicher zurück zur Basis. (Nur noch 10 Minuten, bis der Pilot an Blutverlust stirbt!) (Avg CP, very high AP)</German>
@@ -4608,13 +4612,6 @@
                 <Chinesesimp>你已经背着一名飞行员</Chinesesimp>
                 <Original>You're already carrying the pilot</Original>
                 <English>You're already carrying the pilot</English>
-            </Key>
-            <Key ID="STR_DUWS_T_failed_take_out">
-                <German>Pilot kann nicht aus dem Fahrzeug entfernt werden</German>
-                <Spanish>No se puede sacar al piloto del vehículo</Spanish>
-                <Chinesesimp>无法将飞行员移出载具</Chinesesimp>
-                <Original>Cannot move the pilot out of the vehicle</Original>
-                <English>Cannot move the pilot out of the vehicle</English>
             </Key>
             <Key ID="STR_DUWS_T_auto_drop_hint">
                 <German>Du trägst einen Piloten, Pilot wurde automatisch abgesetzt</German>
@@ -4733,13 +4730,6 @@
                 <Original>Scouts report enemy electronic warfare gear set up here — a field laptop that may hold their deployment positions. Find it, pull whatever intel is on it, and destroy it if there's nothing worth taking. (Very low CP, high AP)</Original>
                 <English>Scouts report enemy electronic warfare gear set up here — a field laptop that may hold their deployment positions. Find it, pull whatever intel is on it, and destroy it if there's nothing worth taking. (Very low CP, high AP)</English>
             </Key>
-            <Key ID="STR_DUWS_T_euhsfj7z">
-                <German>Der Feind hat eines unserer verschlüsselten Funkgeräte gefunden, wir müssen das Funkgerät finden und zerstören.</German>
-                <Spanish>El enemigo ha capturado una de nuestras radios codificadas. Necesitamos que encuentre dicha radio y la destruya.</Spanish>
-                <Chinesesimp>敌人俘获了我们的一台加密收音机。我们需要你找到有问题的收音机并摧毁它。</Chinesesimp>
-                <Original>The enemy has captured one of our encrypted radios. Find that radio and destroy it.</Original>
-                <English>The enemy has captured one of our encrypted radios. Find that radio and destroy it.</English>
-            </Key>
             <Key ID="STR_DUWS_T_geryeddp">
                 <German>Der kleine feindliche Waffenschatz befindet sich hier. Sprenge ihn! (Slightly high CP, low AP)</German>
                 <Spanish>El pequeño depósito de armas enemigo está aquí. Destrúyelo con explosivos! (Slightly high CP, low AP)</Spanish>
@@ -4772,41 +4762,6 @@
                 <Chinesesimp>这个任务正处于冷却状态，剩余时间 %1 分 %2 秒</Chinesesimp>
                 <Original>This mission is on cooldown, %1 min %2 sec remaining</Original>
                 <English>This mission is on cooldown, %1 min %2 sec remaining</English>
-            </Key>
-            <Key ID="STR_DUWS_T_g0up7agm">
-                <German>Zerstöre Munition</German>
-                <Spanish>Destruir munición</Spanish>
-                <Chinesesimp>摧毁弹药</Chinesesimp>
-                <Original>Destroy Ammo</Original>
-                <English>Destroy Ammo</English>
-            </Key>
-            <Key ID="STR_DUWS_T_r8fz5xuh">
-                <German>Zerstöre Radar</German>
-                <Spanish>Destruir radar</Spanish>
-                <Chinesesimp>摧毁雷达</Chinesesimp>
-                <Original>Destroy Radar</Original>
-                <English>Destroy Radar</English>
-            </Key>
-            <Key ID="STR_DUWS_T_8odg2zbl">
-                <German>Zerstöre SAM</German>
-                <Spanish>Destruir SAM</Spanish>
-                <Chinesesimp>摧毁SAM</Chinesesimp>
-                <Original>Destroy SAM</Original>
-                <English>Destroy SAM</English>
-            </Key>
-            <Key ID="STR_DUWS_T_yn5me1h4">
-                <German>Zerstöre Turm</German>
-                <Spanish>Destruir torre</Spanish>
-                <Chinesesimp>摧毁塔</Chinesesimp>
-                <Original>Destroy Tower</Original>
-                <English>Destroy Tower</English>
-            </Key>
-            <Key ID="STR_DUWS_T_rudc9s55">
-                <German>Rette Pilot</German>
-                <Spanish>Rescatar piloto</Spanish>
-                <Chinesesimp>营救飞行员</Chinesesimp>
-                <Original>Rescue Pilot</Original>
-                <English>Rescue Pilot</English>
             </Key>
             <Key ID="STR_DUWS_T_q3iy1vcz">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer Pilot wurde getötet !</German>
@@ -4871,13 +4826,6 @@
                 <Original>Alpha 1-1, this is Overlord. Enemy field commander confirmed down. Good work.</Original>
                 <English>Alpha 1-1, this is Overlord. Enemy field commander confirmed down. Good work.</English>
             </Key>
-            <Key ID="STR_DUWS_T_g8dfn556">
-                <German>Rette Aufklärungspatrouille</German>
-                <Spanish>Rescatar patrulla de reconocimiento</Spanish>
-                <Chinesesimp>营救特种小队</Chinesesimp>
-                <Original>Rescue Recon Patrol</Original>
-                <English>Rescue Recon Patrol</English>
-            </Key>
             <Key ID="STR_DUWS_T_1sp94d75">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDie Aufklärungspatrouille wurde getötet!</German>
                 <Spanish>==MISIÓN SECUNDARIA FALLIDA==\n\n ¡La patrulla de reconocimiento ha muerto!</Spanish>
@@ -4898,20 +4846,6 @@
                 <Chinesesimp>==支线任务完成==\n\n特种小队成功被解救!</Chinesesimp>
                 <Original>==SIDE MISSION COMPLETED==\n\nThe assault squad is out.</Original>
                 <English>==SIDE MISSION COMPLETED==\n\nThe assault squad is out.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_0rh5ayby">
-                <German>Sabotiere Laptop</German>
-                <Spanish>Sabotear laptop</Spanish>
-                <Chinesesimp>破坏笔记本电脑</Chinesesimp>
-                <Original>Sabotage Laptop</Original>
-                <English>Sabotage Laptop</English>
-            </Key>
-            <Key ID="STR_DUWS_T_nc4v4zma">
-                <German>Sabotiere Funkgerät</German>
-                <Spanish>Sabotear radio</Spanish>
-                <Chinesesimp>破坏收音机</Chinesesimp>
-                <Original>Sabotage Radio</Original>
-                <English>Sabotage Radio</English>
             </Key>
             <Key ID="STR_DUWS_T_p3200mf5">
                 <German>Sabotage</German>
@@ -4941,13 +4875,6 @@
                 <Original>==BUILDER VEHICLE ALREADY IN SERVICE==\n\nOnly one builder vehicle can be on the map at a time. Pick a different mission.</Original>
                 <English>==BUILDER VEHICLE ALREADY IN SERVICE==\n\nOnly one builder vehicle can be on the map at a time. Pick a different mission.</English>
             </Key>
-            <Key ID="STR_DUWS_T_63pnqj4l">
-                <German>Stehle Bau-Fahrzeug</German>
-                <Spanish>Robar vehículo constructor</Spanish>
-                <Chinesesimp>偷建筑载具</Chinesesimp>
-                <Original>Steal Builder Vehicle</Original>
-                <English>Steal Builder Vehicle</English>
-            </Key>
             <Key ID="STR_DUWS_T_obc4591x">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDas Bau-Fahrzeug wurde zerstört</German>
                 <Spanish>==MISIÓN SECUNDARIA FALLIDA==\n\n El vehículo constructor ha sido destruído</Spanish>
@@ -4968,13 +4895,6 @@
                 <Chinesesimp>载具改装完成！\n你可以把载具变成建造工厂！</Chinesesimp>
                 <Original>Conversion complete.\nThe vehicle now works as a building factory</Original>
                 <English>Conversion complete.\nThe vehicle now works as a building factory</English>
-            </Key>
-            <Key ID="STR_DUWS_T_ceg3mxxc">
-                <German>Stehle Nachschub-LKW</German>
-                <Spanish>Robar camión de suministros</Spanish>
-                <Chinesesimp>偷补给车</Chinesesimp>
-                <Original>Steal Supply Truck</Original>
-                <English>Steal Supply Truck</English>
             </Key>
             <Key ID="STR_DUWS_T_jsg7ys0w">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer LKW wurde zerstört!</German>
@@ -5011,27 +4931,6 @@
                 <Original>Unloading the truck and disarming the charge...</Original>
                 <English>Unloading the truck and disarming the charge...</English>
             </Key>
-            <Key ID="STR_DUWS_T_1cc4kj4s">
-                <German>Töte Panzerkommandanten</German>
-                <Spanish>Eliminar un comandante de tanque</Spanish>
-                <Chinesesimp>消灭坦克指挥官</Chinesesimp>
-                <Original>Eliminate Tank Commander</Original>
-                <English>Eliminate Tank Commander</English>
-            </Key>
-            <Key ID="STR_DUWS_T_90dn44w4">
-                <German>Target officer</German>
-                <Spanish>Target officer</Spanish>
-                <Chinesesimp>猎杀军官</Chinesesimp>
-                <Original>Target officer</Original>
-                <English>Target officer</English>
-            </Key>
-            <Key ID="STR_DUWS_T_tq053mvh">
-                <German>Scharfschützen Jagd</German>
-                <Spanish>Cacería de francotiradores</Spanish>
-                <Chinesesimp>猎杀狙击手</Chinesesimp>
-                <Original>Sniper Hunt</Original>
-                <English>Sniper Hunt</English>
-            </Key>
             <Key ID="STR_DUWS_T_clearhouse_desc">
                 <German>Das Zielgebiet säubern</German>
                 <Spanish>Despejar la zona objetivo</Spanish>
@@ -5045,13 +4944,6 @@
                 <Chinesesimp>坚守目标区域</Chinesesimp>
                 <Original>Hold the objective area</Original>
                 <English>Hold the objective area</English>
-            </Key>
-            <Key ID="STR_DUWS_T_armorhunting">
-                <German>Feindliche Panzer Einheiten jagen.</German>
-                <Spanish>Cazar unidades de blindaje enemigas.</Spanish>
-                <Chinesesimp>猎杀装甲单位</Chinesesimp>
-                <Original>Hunt down enemy armor</Original>
-                <English>Hunt down enemy armor</English>
             </Key>
             <Key ID="STR_DUWS_T_cqbletsdothis">
                 <German>Dies ist „Oberherr 1-1“. Ein feindliches Infiltrationskommando wurde in den Gebäuden am Zielort gesichtet. Die genaue Position des Kommandos wurde auf Ihren Positionsterminals aktualisiert. Beseitigen Sie sie.</German>
@@ -7701,12 +7593,20 @@
                 <Original>Removing FOB %1</Original>
                 <English>Removing FOB %1</English>
             </Key>
+            <Key ID="STR_DUWS_T_f28nbzbw">
+                <Original>Its marker is gone; the structures clear in five minutes</Original>
+                <English>Its marker is gone; the structures clear in five minutes</English>
+            </Key>
             <Key ID="STR_DUWS_T_gogv37ur">
                 <German>Schnellreise ist deaktiviert</German>
                 <Spanish>El viaje rápido está deshabilitado</Spanish>
                 <Chinesesimp>快速移动被禁止</Chinesesimp>
                 <Original>Fast travel is disabled</Original>
                 <English>Fast travel is disabled</English>
+            </Key>
+            <Key ID="STR_DUWS_T_s4i32jjh">
+                <Original>You have arrived at the FOB</Original>
+                <English>You have arrived at the FOB</English>
             </Key>
             <Key ID="STR_DUWS_T_z54ibhvi">
                 <German>Drücke OK um zu entfernen, oder Abbrechen</German>
