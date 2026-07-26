@@ -164,9 +164,3 @@ positions, so a civilian town may sit on one. At negative reputation
 **Ranking has no spatial spread rule.** Top-N by score can cluster the whole selection
 around anchors in dense terrain, leaving a remote zone with no civilian town near it. The
 fix, if it shows up in play, is a per-anchor quota rather than a global ranking.
-
-**Reputation recovery stops permanently at reputation 1.** `fnc_civ_rep_economy.sqf`, in the
-recovery thread: the `if (Player_Reputation == 1) exitWith {}` guard sits inside
-`if/then` nested in `while {true}`, and `exitWith` exits the nearest enclosing *loop*, so it
-kills the thread rather than skipping the cycle. Once reputation returns to 1 the recovery
-never runs again for the rest of the campaign. Predates the town rewrite.

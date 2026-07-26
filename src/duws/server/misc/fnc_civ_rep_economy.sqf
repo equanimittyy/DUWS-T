@@ -21,8 +21,10 @@ if (!isServer) exitWith {};
             if (CIV_deaths > _civdeaths) exitWith {_resetTimer = true};
         };
         if (!_resetTimer) then {
-            if (_rep == Player_Reputation) then {
-                if (Player_Reputation == 1) exitWith {};
+            // The reputation==1 baseline is folded into the condition rather than tested with
+            // an early exitWith: exitWith leaves the enclosing while loop, which ended passive
+            // recovery for the rest of the campaign the first time reputation returned to 1.
+            if (_rep == Player_Reputation && {Player_Reputation != 1}) then {
                 // The comparison above needs the live global, so read it before the
                 // change is queued; the display then uses the expected total.
                 private _expectedRep = Player_Reputation + 1;
