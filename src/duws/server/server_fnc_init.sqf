@@ -279,7 +279,9 @@ fnc_mission_begin = {
 	private _until = missionNamespace getVariable [_var, 0];
 	if (_until > diag_tickTime) exitWith {
 		private _remaining = _until - diag_tickTime;
-		private _parts = [floor (_remaining / 60), _remaining % 60];
+		// Floor the seconds too: diag_tickTime is fractional, so an unfloored remainder reaches
+		// format at full precision and the hint reads "59 min 0.000381 sec".
+		private _parts = [floor (_remaining / 60), floor (_remaining % 60)];
 		// Localised on the receiving machine: the server's language is not the player's.
 		if (_requester > 0) then {
 			[_parts, {
