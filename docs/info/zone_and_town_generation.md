@@ -180,6 +180,12 @@ The completion announcements were moved out of both zone locators to get this. L
 they fired as soon as zone *positions* were final, telling the player the campaign was ready
 while towns were still being placed.
 
+The Capture the Zones task (`fnc_capture_zones_task.sqf`) sits one step further out again: it
+waits on `mission_init_complete`, then on `intro_heli_done`, so orders reach the player after
+the fast-rope rather than during generation. Only the first wait is retried — `fnc_intro_heli`
+has exit paths that never publish the second, and a campaign with no main task has no win
+condition at all, so that wait falls through on timeout with the earlier gate holding the line.
+
 ### Defects (Subsystem B)
 
 **Towns inside enemy zones can block capture.** No keep-out is applied against zone

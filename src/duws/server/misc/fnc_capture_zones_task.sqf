@@ -7,7 +7,15 @@ if (isNil "ZombieTaskCreated") then {
     ZombieTaskCreated = false;
 };
 
-sleep 60;
+// Orders arrive with the player, not on a timer: the fixed 60s wait this replaces expired
+// part-way through zone build-out, and manual placement runs minutes past it, so the task told
+// the player to capture zones that did not exist yet.
+while {!(["ZONES", "mission_init_complete (zones built, civilians registered)",
+    {mission_init_complete}, 300] call fnc_waitLogged)} do {};
+// Then the fast-rope. Not retried on timeout, unlike the wait above -- fnc_intro_heli has early
+// exits that never publish this, and a campaign with no main task has no win condition at all.
+// The gate above is what keeps that fall-through from landing back at mission start.
+["ZONES", "intro_heli_done (players landed)", {!isNil "intro_heli_done"}, 420] call fnc_waitLogged;
 
 // 创建主要任务（占领所有区域）
 [west, [localize "STR_DUWS_T_347ohzwn"],
@@ -30,7 +38,10 @@ if (CIV_PRESENCE == "WBK" && !ZombieTaskCreated) then {
 
 // 等待区域生成完成和区域被全部占领
 waitUntil {sleep 10; WARCOM_init_done};
-waitUntil {sleep 30; zoneundercontrolblu >= amount_zones_created};
+// The zone count has to be checked, not assumed: with none created the comparison reads 0 >= 0
+// and wins the campaign on its first evaluation. Ordering alone is not enough of a guard --
+// every zone slot can be dropped by the origin keep-out in fnc_locatorzones_random.
+waitUntil {sleep 30; amount_zones_created > 0 && {zoneundercontrolblu >= amount_zones_created}};
 
 // Every zone is BLUFOR: the campaign is over. The pause only lets the notification and the
 // task update land before the outro card replaces them.
