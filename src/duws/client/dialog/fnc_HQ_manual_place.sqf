@@ -13,8 +13,12 @@ forceMap true;
 mapAnimAdd [3, 1, [5000,5000]];
 mapAnimCommit;
 sleep 3;
-openMap [true, false]; 
-hint localize "STR_DUWS_T_ahq99ew0";
+openMap [true, false];
+// Banner, not hint: the engine draws the hint box beneath the open map, so the placement
+// instruction was invisible for the whole click phase. Same treatment the AO step gets below.
+private _hqPrompt = format ["<t size='2' color='#00ffff'>%1 </t><br/>%2",
+    localize "STR_DUWS_T_SELECT_HQ", localize "STR_DUWS_T_ahq99ew0"];
+[_hqPrompt] call fnc_map_prompt;
 OnMapSingleClick "ClickedPos = _pos; clicked = true;";
 
 while {true} do {
@@ -57,7 +61,7 @@ while {true} do {
 
         if ((!isNull _nearRoad) || (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1)) then {  
             clicked = false;
-            hint localize "STR_DUWS_T_2pcapkjo";
+            [format ["%1<br/><t color='#ff1111'>%2</t>", _hqPrompt, localize "STR_DUWS_T_2pcapkjo"]] call fnc_map_prompt;
         } else {  
             clicked = false;
             onMapSingleClick "";

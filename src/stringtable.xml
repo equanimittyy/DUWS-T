@@ -1266,6 +1266,10 @@
                 <Original>Click on the map to place your HQ. The v1.3 update allows the HQ to be placed within building complexes. To ensure successful placement, any structures blocking the HQ will be removed.\n v1.4 features a restructured HQ system. Place your HQ on flat terrain if possible!</Original>
                 <English>Click on the map to place your HQ. The v1.3 update allows the HQ to be placed within building complexes. To ensure successful placement, any structures blocking the HQ will be removed.\n v1.4 features a restructured HQ system. Place your HQ on flat terrain if possible!</English>
             </Key>
+            <Key ID="STR_DUWS_T_SELECT_HQ">
+                <Original>SELECT HQ</Original>
+                <English>SELECT HQ</English>
+            </Key>
             <Key ID="STR_DUWS_T_2pcapkjo">
                 <German>Ungültige Position, die Position muss flach und frei von Objekten sein</German>
                 <Spanish>Posición inválida, la posición debe ser plana y no debe tener objetos cerca.</Spanish>
