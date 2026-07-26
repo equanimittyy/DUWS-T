@@ -3,7 +3,9 @@
     fnc_civ_init_Tomata.sqf
     功能: 初始化平民系统，为每个城镇创建触发器，计算初始人口，添加地图标记
     执行端: 服务器
-    修改: 触发器使用统一处理函数 fnc_civ_handler，通过 "spawn"/"cleanup" 参数区分
+    Invoked from fnc_init_OPFOR_WARCOM once zone build-out finishes: the towns come from
+    fnc_civ_selectTowns, which ranks map towns against the HQ and the enemy zones, so this
+    cannot run before zone placement.
 */
 if (!isServer) exitWith {};
 
@@ -11,71 +13,77 @@ if (!isNil "civ_init_done") exitWith { ["WARN", "CIV", "Already initialized, ski
 civ_init_done = true;
 ["INFO", "CIV", "Initializing civilian system (persistent population with map icons)"] call fnc_log;
 
-// 等待 CIV_PRESENCE 确定（环境菜单选择后才会同步）
-waitUntil { sleep 0.1; !isNil "CIV_PRESENCE" };
+// The campaign start blocks on civ_init_complete, so every way out of this function has to
+// go through here -- an unflagged abort hangs every client on an open map. The parameter is
+// the parting map banner: "" clears it, anything else stays up until the map closes.
+private _fnc_finish = {
+    params [["_prompt", ""]];
+    [_prompt] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+    civ_init_complete = true;
+    publicVariable "civ_init_complete";
+    ["INFO", "CIV", "Civilian system initialized."] call fnc_log;
+};
 
-// 获取城镇位置（地图预定义）
-private _locations = [] call fnc_civ_locator_Tomata;
-["INFO", "CIV", format ["fnc_civ_locator_Tomata returned %1 locations", count _locations]] call fnc_log;
-_locations = _locations select { (getPos _x) distance2D [0,0] > 100 };
-["INFO", "CIV", format ["After filtering near origin, remaining %1 locations", count _locations]] call fnc_log;
-
-private _dynamicLocs = [_locations, 3, true, 800, 100, 50, 100] call fnc_civ_detectClusters;
-["INFO", "CIV", format ["Dynamic detection returned %1 clusters", count _dynamicLocs]] call fnc_log;
-_locations append _dynamicLocs;
-["INFO", "CIV", format ["Total locations after adding dynamics: %1", count _locations]] call fnc_log;
-
-missionNamespace setVariable ["civ_locations", _locations];
-private _staticCount = count _locations - count _dynamicLocs;
-private _dynamicCount = count _dynamicLocs;
-["INFO", "CIV", format ["Total locations: %1 (static: %2, dynamic: %3)", count _locations, _staticCount, _dynamicCount]] call fnc_log;
-
-// 读取平民阵营单位
-if (isNil "CIV_PRESENCE") then { CIV_PRESENCE = "NONE"; };
+// 读取平民阵营单位. Runs before any abort below: PMC/partisan hiring uses civ_array as a
+// body pool even when no town is ever registered.
 ["INFO", "CIV", format ["CIV_PRESENCE = %1", CIV_PRESENCE]] call fnc_log;
 [] call fnc_civ_setup_array;
 ["INFO", "CIV", format ["civ_array loaded, count: %1", count civ_array]] call fnc_log;
 
-// ========== 第一阶段：计算每个位置的半径、人口并临时存储 ==========
+private _locations = [] call fnc_civ_selectTowns;
+
+// ========== 第一阶段：计算每个位置的半径、人口 ==========
+private _kept = [];
 private _radii = [];
 private _pops = [];
-private _maxs = [];
 
 {
-    private _locIndex = _forEachIndex;
-    private _pos = getPos _x;
-    private _locationName = if (text _x != "") then { text _x } else { format ["Unnamed%1", _locIndex] };
-    
-    // 获取建筑数量：如果是动态区域，直接使用存储的数值，否则重新计算
-    private _buildingCount = _x getVariable ["buildingCount", 0];
-    if (_buildingCount == 0) then {
-        private _usableBuildings = [_pos, 2, 350] call fnc_usableBuildings;
-        _buildingCount = count _usableBuildings;
+    private _loc = _x;
+    private _pos = getPos _loc;
+    private _locationName = if (text _loc != "") then { text _loc } else { format ["Unnamed%1", _forEachIndex] };
+
+    [format ["Placing civilians...<br/>town %1 of %2", _forEachIndex + 1, count _locations]]
+        remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+
+    private _buildingCount = count ([_pos, 2, 350] call fnc_usableBuildings);
+
+    // NameLocal covers quarries and salt flats as well as settlements on some maps. Without
+    // this the population floor below would still put a dozen civilians in an empty field.
+    if (_buildingCount < 3) then {
+        ["INFO", "CIV", format ["Skipping %1: only %2 usable buildings", _locationName, _buildingCount]] call fnc_log;
+    } else {
+        // 区域半径：每个建筑10米，最小100米，最大500米
+        private _radius = (_buildingCount * 10) min 500 max 100;
+
+        // 人口计算：按建筑数×2，上限280
+        private _initialPop = (_buildingCount * 2) min 280;
+        // 为每个城镇生成独立的最低人口（6~12 随机整数）
+        private _minPop = 6 + floor random 7;
+        _initialPop = _initialPop max _minPop;
+
+        if (CIV_PRESENCE == "RAVAGE") then {
+            _initialPop = round (_initialPop * 2.0) min 280;
+            ["INFO", "CIV", format ["RAVAGE mode: adjusted pop to %1", _initialPop]] call fnc_log;
+        };
+
+        _initialPop = _initialPop max 1;
+
+        _kept pushBack _loc;
+        _radii pushBack _radius;
+        _pops pushBack _initialPop;
+
+        ["INFO", "CIV", format ["Location %1: buildings=%2, initialPop=%3, radius=%4", _locationName, _buildingCount, _initialPop, _radius]] call fnc_log;
     };
-    
-    // 区域半径：每个建筑10米，最小100米，最大500米
-    private _radius = (_buildingCount * 10) min 500 max 100;
-    _radii pushBack _radius;
-    
-    // 人口计算：无论静态动态，均按建筑数×2，上限280
-    _initialPop = (_buildingCount * 2) min 280;
-    // 为每个城镇生成独立的最低人口（6~12 随机整数）
-    private _minPop = 6 + floor random 7;  // 取值范围 6.12
-    _initialPop = _initialPop max _minPop; // 确保人口不低于该随机最小值
-    
-    if (CIV_PRESENCE == "RAVAGE") then {
-        _initialPop = round (_initialPop * 2.0) min 280;
-        ["INFO", "CIV", format ["RAVAGE mode: adjusted pop to %1", _initialPop]] call fnc_log;
-    };
-    
-    // 确保至少1人
-    _initialPop = _initialPop max 1;
-    
-    _pops pushBack _initialPop;
-    _maxs pushBack _buildingCount;
-    
-    ["INFO", "CIV", format ["Location %1: %2, buildings=%3, initialPop=%4, radius=%5", _locIndex, _locationName, _buildingCount, _initialPop, _radius]] call fnc_log;
 } forEach _locations;
+
+_locations = _kept;
+
+// Warn on the map banner rather than by hint or notification: the map is still open at this
+// point, and the engine draws both of those underneath it.
+if (count _locations == 0) exitWith {
+    ["ERROR", "CIV", "No civilian towns registered. Civilian population is disabled for this campaign."] call fnc_log;
+    [format ["%1<br/>%2", localize "STR_DUWS_T_CIV_NO_TOWNS_TITLE", localize "STR_DUWS_T_CIV_NO_TOWNS"]] call _fnc_finish;
+};
 
 // ========== 第二阶段：重叠检测，优化距离过近且较小的城镇 ==========
 private _count = count _locations;
@@ -120,24 +128,24 @@ for "_i" from 0 to (_count - 1) do {
 
 _toDelete = _toDelete arrayIntersect _toDelete;
 
+// The losers are dropped from the registry only. These are the map's own Locations now, and
+// deleteLocation would remove them from the engine for the rest of the mission -- side
+// mission siting (fnc_findSafeMissionPos) and the player's location readout both read them
+// back out of nearestLocations.
 private _newLocations = [];
 private _newRadii = [];
 private _newPops = [];
-private _newMaxs = [];
 for "_i" from 0 to (_count - 1) do {
     if (!(_i in _toDelete)) then {
         _newLocations pushBack (_locations select _i);
         _newRadii pushBack (_radii select _i);
         _newPops pushBack (_pops select _i);
-        _newMaxs pushBack (_maxs select _i);
     };
 };
 
-// 删除被淘汰的 Location 对象（避免残留）
-{ deleteLocation (_locations select _x); } forEach _toDelete;
-
 _locations = _newLocations;
 _radii = _newRadii;
+_pops = _newPops;
 missionNamespace setVariable ["civ_locations", _locations];
 missionNamespace setVariable ["civ_radii", _radii];
 ["INFO", "CIV", format ["After overlap cleanup: %1 locations remaining.", count _locations]] call fnc_log;
@@ -147,19 +155,16 @@ missionNamespace setVariable ["civ_radii", _radii];
     private _locIndex = _forEachIndex;
     private _pos = getPos _x;
     private _radius = _radii select _locIndex;
-    private _initialPop = _newPops select _locIndex;
-    private _buildingCount = _newMaxs select _locIndex;
+    private _initialPop = _pops select _locIndex;
     private _locationName = if (text _x != "") then { text _x } else { format ["Unnamed%1", _locIndex] };
-    
-    // 存储人口和最大建筑数（用于后续生成和清理）
+
     missionNamespace setVariable [format ["civ_pop_%1", _locIndex], _initialPop];
-    missionNamespace setVariable [format ["civ_max_%1", _locIndex], _buildingCount];
-    
+
     // 创建触发器
     private _trg = createTrigger ["EmptyDetector", _pos];
     _trg setTriggerArea [_radius, _radius, 0, false, 80];
     _trg setTriggerActivation ["ANYPLAYER", "PRESENT", true];
-    
+
     // 根据 CIV_PRESENCE 选择处理函数
     private _handlerFunc = "fnc_civ_handler";
     if (CIV_PRESENCE == "WBK") then {
@@ -170,7 +175,7 @@ missionNamespace setVariable ["civ_radii", _radii];
     format ["[%1, 'spawn'] spawn %2", _locIndex, _handlerFunc],
     format ["[%1, 'cleanup'] spawn %2", _locIndex, _handlerFunc]
     ];
-    
+
     // 创建区域标记（半透明椭圆）
     private _markerName = format ["civ_area_%1", _locIndex];
     private _marker = createMarker [_markerName, _pos];
@@ -178,7 +183,7 @@ missionNamespace setVariable ["civ_radii", _radii];
     _marker setMarkerBrush "SolidBorder";
     _marker setMarkerColor "#(0.5,0,0.5,0.3)";
     _marker setMarkerSize [_radius, _radius];
-    
+
     // 创建人口图标（位于区域下方）
     private _iconPos = [(_pos select 0), (_pos select 1) - 80];
     private _iconName = format ["civ_icon_%1", _locIndex];
@@ -188,58 +193,14 @@ missionNamespace setVariable ["civ_radii", _radii];
     _icon setMarkerColor "ColorBlack";
     _icon setMarkerSize [1.2, 1.2];
     _icon setMarkerText format ["%1", _initialPop];
-    
+
     ["INFO", "CIV", format ["Created markers for location %1 (%2) pop %3", _locIndex, _locationName, _initialPop]] call fnc_log;
 } forEach _locations;
 
-// 声誉恢复线程（保持不变）
-[] spawn {
-    ["INFO", "CIV", "Reputation recovery thread started"] call fnc_log;
-    while {true} do {
-        waitUntil {sleep 10; CIV_deaths > 0};
-        private _rep = Player_Reputation;
-        private _civdeaths = CIV_deaths;
-        private _resetTimer = false;
-        for "_i" from 1 to 6 do {
-            sleep 150;
-            if (CIV_deaths > _civdeaths) exitWith {_resetTimer = true};
-        };
-        if (!_resetTimer) then {
-            if (_rep == Player_Reputation) then {
-                if (Player_Reputation == 1) exitWith {};
-                // The comparison above needs the live global, so read it before the
-                // change is queued; the display then uses the expected total.
-                private _expectedRep = Player_Reputation + 1;
-                [1, "reputation_recovery"] remoteExec ["fnc_rep_adjust", 2];
-                ["repup",[localize "STR_DUWS_T_rqwho9bq",format[localize "STR_DUWS_T_0pluxey2",_expectedRep]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated,false];
-                [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_repup"] remoteExec ["BIS_fnc_showSubtitle", 0];
-                [] remoteExec ["fnc_broadcastRadioChatter", 0];
-                ["INFO", "CIV", format ["Reputation increased to %1", _expectedRep]] call fnc_log;
-            };
-        };
-    };
-};
+// No start-up delay: this function now runs after zone build-out rather than alongside a
+// map-wide scan, so there is nothing left for the spawns to wait out.
+missionNamespace setVariable ["civ_spawn_enabled_time", time, true];
 
-// 平民系统初始化完成，设置全局启用时间（120秒后）
-missionNamespace setVariable ["civ_spawn_enabled_time", time + 120, true];
-["INFO", "CIV", format ["Civilian system initialized. Spawns will be enabled at %1 (in %2 seconds)", time + 120, 120]] call fnc_log;
+[] call fnc_civ_rep_economy;
 
-["INFO", "CIV", "Civilian system initialized."] call fnc_log;
-// ========== 声望奖励循环（每15分钟） ==========
-[] spawn {
-    waitUntil { sleep 1; !isNil "Player_Reputation" };
-    sleep 180; // 开局延迟3分钟
-    while {true} do {
-        sleep 900; // 15分钟
-        private _rep = Player_Reputation;
-        if (_rep > 0) then {
-            private _cpReward = ceil(_rep / 2);
-            [_cpReward, "civ_reward"] remoteExec ["fnc_cp_adjust", 2];
-            // CP 提醒（使用 cpaddedciv 格式，显示获得的 CP）
-            ["CPaddedciv", [_cpReward]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
-            [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_cpcivbonus"] remoteExec ["BIS_fnc_showSubtitle", 0];
-            [] remoteExec ["fnc_broadcastRadioChatter", 0];
-        };
-    };
-};
-// ==============================================
+call _fnc_finish;

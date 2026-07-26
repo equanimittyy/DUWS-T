@@ -36,6 +36,11 @@ Factions_Available_BLUFOR_X = [];publicVariable "Factions_Available_BLUFOR_X";
 // amount_zones_created
 amount_zones_created = 0;publicVariable "amount_zones_created";
 
+// Zones whose build-out finished, as opposed to amount_zones_created, which fnc_createZone
+// bumps on entry. Civilian generation needs "built", not "started": it counts buildings,
+// and prefab zones hide everything within 35 m of their centre partway through build-out.
+zones_buildout_done = 0;publicVariable "zones_buildout_done";
+
 // amount_zones_captured
 amount_zones_captured = 0;publicVariable "amount_zones_captured";
 
@@ -83,6 +88,10 @@ dynamic_weather_enable = true;publicVariable "dynamic_weather_enable";
 
 // commandpointsblu1
 commandpointsblu1 = 20;publicVariable "commandpointsblu1";
+
+// Civilian registration finished, successfully or not. The campaign start waits on this, so
+// every exit path in fnc_civ_init_Tomata must set it -- including the aborts.
+civ_init_complete = false;publicVariable "civ_init_complete";
 
 // zone settings complete
 createzone_server = false;publicVariable "createzone_server";

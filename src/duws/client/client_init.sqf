@@ -287,6 +287,11 @@ hint localize "STR_DUWS_T_zu4bxt24";
     };
 };
 
+// Hold the map open until the towns are registered. The zone locator's progress banner
+// renders on the map display, so closing here would hide the civilian pass mid-run.
+while {!(["CIV", "civ_init_complete from the civilian system",
+    {civ_init_complete}, 300] call fnc_waitLogged)} do {};
+
 sleep 5;
 _currVolume = musicVolume;
 titleCut ["", "BLACK FADED", 999];

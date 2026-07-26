@@ -7834,13 +7834,6 @@
                 <Spanish>LyfeDuringWarTime</Spanish>
                 <Chinesesimp>战时生活</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DYNAMIC_TOWN">
-                <Original>Dynamic Town %1</Original>
-                <English>Dynamic Town %1</English>
-                <German>Dynamische Stadt %1</German>
-                <Spanish>Pueblo Dinámico %1</Spanish>
-                <Chinesesimp>动态城镇 %1</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_APOCALYPSE_TOOLTIP">
                 <Original>Enable apocalyptic visuals and damage all buildings on the map</Original>
                 <English>Enable apocalyptic visuals and damage all buildings on the map</English>
@@ -7925,26 +7918,13 @@
                 <Original>Plague Zero has swept through this area, but it won't end the conflict. Your squad must keep up the offensive in the enemy war zones while searching towns for survivors and bringing them back to HQ. This matters for our reputation here. The more survivors you extract, the better; your team is rewarded for each one.</Original>
                 <English>Plague Zero has swept through this area, but it won't end the conflict. Your squad must keep up the offensive in the enemy war zones while searching towns for survivors and bringing them back to HQ. This matters for our reputation here. The more survivors you extract, the better; your team is rewarded for each one.</English>
             </Key>
-            <Key ID="STR_DUWS_T_dc1">
-                <Spanish>Sistema de Ciudades Dinámico</Spanish>
-                <German>Dynamisches StadtSystem</German>
-                <Chinesesimp>动态城镇系统</Chinesesimp>
-                <Original>Dynamic Town System</Original>
-                <English>Dynamic Town System</English>
+            <Key ID="STR_DUWS_T_CIV_NO_TOWNS_TITLE">
+                <Original>Civilian System</Original>
+                <English>Civilian System</English>
             </Key>
-            <Key ID="STR_DUWS_T_dc2">
-                <Spanish>Escaneando estructuras del mapa para formar pueblos dinámicos. Este proceso puede durar varios minutos.</Spanish>
-                <German>Gebäude der Karte werden gescannt, um dynamische Städte zu bilden. Dieser Vorgang kann mehrere Minuten dauern.</German>
-                <Chinesesimp>正在检测地图建筑以形成动态城镇，过程可能花费数分钟。</Chinesesimp>
-                <Original>Scanning map structures to form dynamic towns. May take minutes</Original>
-                <English>Scanning map structures to form dynamic towns. May take minutes</English>
-            </Key>
-            <Key ID="STR_DUWS_T_dc3">
-                <Spanish>Sistema de Ciudades Dinámico desplegado correctamente. Entrará en vigor en 120 segundos.</Spanish>
-                <German>Dynamisches StadtSystem erfolgreich bereitgestellt. Tritt in 120 Sekunden in Kraft.</German>
-                <Chinesesimp>动态城镇系统已完成部署。120秒后生效。</Chinesesimp>
-                <Original>Dynamic Town System deployment complete. Activates in 120 sec</Original>
-                <English>Dynamic Town System deployment complete. Activates in 120 sec</English>
+            <Key ID="STR_DUWS_T_CIV_NO_TOWNS">
+                <Original>No civilian towns could be placed. Restart the scenario.</Original>
+                <English>No civilian towns could be placed. Restart the scenario.</English>
             </Key>
         </Container>
         <Container name="Manual, Help &amp; Credits">

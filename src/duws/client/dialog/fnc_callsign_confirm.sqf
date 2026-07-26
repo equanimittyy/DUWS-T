@@ -18,9 +18,8 @@ if (manually_chosen) then {
     [{hint localize "STR_DUWS_T_2amacebc"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
 };
 
-// Apocalypse and civilian init fire here, at final commit, rather than between the
-// setup screens -- otherwise stepping Back and re-confirming would re-run them:
-// apocalypse re-scans the whole map, and civ init would lock in a stale faction.
+// Apocalypse fires here, at final commit, rather than between the setup screens --
+// otherwise stepping Back and re-confirming would re-run its whole-map rescan.
 if (apocalypse_mode) then {
     if (isServer) then {
         [] spawn fnc_apocalypse_buildings;
@@ -28,11 +27,15 @@ if (apocalypse_mode) then {
         [] remoteExec ["fnc_apocalypse_buildings", 2];
     };
 };
-if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then {
-    [] remoteExec ["fnc_civ_init_Tomata", 2];
-} else {
+// Only the civilians-off case is handled here. With civilians on, generation is kicked off
+// from fnc_init_OPFOR_WARCOM once zone build-out finishes, because the towns are selected
+// from the zones and cannot be chosen before they exist.
+if (isNil "CIV_PRESENCE" || {CIV_PRESENCE == "NONE"}) then {
     // Civilians off: no ambient population, but PMC/partisan hiring still needs civ_array as a body pool.
     [] remoteExec ["fnc_civ_setup_array", 2];
+    // Nothing else will ever set the flag the campaign start waits on. Set it server-side:
+    // a value a client publishes does not reach players who join later.
+    [{civ_init_complete = true; publicVariable "civ_init_complete";}] remoteExec ["BIS_fnc_Spawn", 2];
 };
 
 // TELL WARCOM THE ZONE VARIABLES ARE SET

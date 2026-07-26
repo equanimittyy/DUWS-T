@@ -337,7 +337,8 @@ publicVariable "fnc_intel_gathering_mission";
 // CIVILIAN FUNCTIONS
 fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_init_Tomata.sqf";
 fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_setup_array.sqf";
-fnc_civ_locator_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_locator_Tomata.sqf";
+fnc_civ_selectTowns = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_selectTowns.sqf";
+fnc_civ_rep_economy = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_rep_economy.sqf";
 fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_wp_Tomata.sqf";
 fnc_civ_rep_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_rep_Tomata.sqf";
 fnc_civ_informant_wp_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_informant_wp_Tomata.sqf";
@@ -366,8 +367,6 @@ fnc_civ_lootAction = compile preprocessFileLineNumbers "duws\shared\functions\fn
 publicVariable "fnc_civ_lootAction";
 fnc_civ_lootAction_handleArmed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_lootAction.sqf";
 publicVariable "fnc_civ_lootAction_handleArmed";
-fnc_civ_detectClusters = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_detectClusters.sqf";
-publicVariable "fnc_civ_detectClusters";
 fnc_civ_suicideBomberBehaviour = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_suicideBomberBehaviour.sqf";
 publicVariable "fnc_civ_suicideBomberBehaviour";
 fnc_civ_handler = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler.sqf";

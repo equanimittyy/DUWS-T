@@ -215,6 +215,12 @@ _zonePosName2 = format["trigger2%1%2",round (_zonePos select 0),round (_zonePos 
 call compile format["%1 = _trg2",_zonePosName2];
 _spawnPos = _zonePos;
 
+// Build-out ends here: markers, prefab, fortifications and triggers are all placed. What
+// follows is OPFOR spawning and then a permanent despawn monitor, so this is the last point
+// at which this function can report completion -- it never returns.
+zones_buildout_done = zones_buildout_done + 1;
+publicVariable "zones_buildout_done";
+
 ///////////////////////////////////////////////
 // CREATE OPFOR
 ///////////////////////////////////////////////

@@ -1,16 +1,16 @@
 # Zone and town generation
 
-Two independent placement subsystems that both "put things at towns" and are easy to
-confuse — the map even labels one of them "Dynamic Town N":
+Two placement subsystems that both "put things at towns". They are no longer independent:
+civilian selection consumes the zone system's output, and the dependency runs one way.
 
 - **Enemy zone siting** ("More Urban"): chooses where OPFOR objectives spawn. These are
   the red `"N. Outpost"` markers you capture.
-- **Civilian Dynamic Town system**: at runtime, scans the map for building clusters,
-  drops a `NameVillage` location labelled `"Dynamic Town N"` on each, and seeds a
-  civilian population there. Purely civilian — not an objective.
+- **Civilian town selection**: picks a subset of the map's real towns near the fighting and
+  seeds a persistent civilian population in each. Purely civilian — not an objective.
 
-Both are server-only and run near campaign start. This doc covers what each does, who
-authored it, and the defects to fix. For the `exitWith` trap cited below see
+Both are server-only and run near campaign start; civilians are registered once zone
+build-out has finished. This doc covers what each does, who authored it, and the defects to
+fix. For the `exitWith` trap cited below see
 [`arma_engine_gotchas.md`](arma_engine_gotchas.md#exitwith-exits-the-nearest-loop-or-call-scope-not-the-enclosing-ifthen);
 for the boot order see [`architecture.md`](architecture.md#boot-flow).
 
@@ -29,10 +29,10 @@ and the failsafes are inherited. Manual placement is untouched. `fnc_createzone.
 its inherited core (markers, prefab, triggers, spawn loop) with 5U5 features *bolted on*:
 obstacle clearing, the fortification ring, heli reinforcement, and the offset flag.
 
-**The civilian Dynamic Town system is 5U5's own work**, layered on Tomata's
-civilian-presence concept. `fnc_civ_detectClusters.sqf` is new; `fnc_civ_init_Tomata.sqf`
-and `fnc_civ_locator_Tomata.sqf` are heavily reworked. This is where the "Dynamic Town N"
-labels come from — nothing in the enemy-zone path produces them.
+**The civilian population system is 5U5's own work**, layered on Tomata's
+civilian-presence concept, and rewritten again since: the map-wide building-cluster scan
+and the synthetic "Dynamic Town N" locations it invented are gone, replaced by the
+selection pass in `fnc_civ_selectTowns.sqf`.
 
 So the honest summary for a reviewer: the classic DUWS objective placement was tweaked and
 decorated, not overhauled; the substantial new system is civilian population.
@@ -103,59 +103,70 @@ sub-clusters inside 400 m yields a point between them (possibly an empty field),
 the 0-10 m `findSafePos`; the single 5 m `relPos` road nudge is never re-validated.
 Placement-quality only.
 
-> Correction to an earlier draft: `getPos` on a Location is *not* a bug. 5U5 relies on it
-> throughout (`fnc_civ_detectClusters.sqf:51,139`) and the towns render, so it resolves a
-> Location's position fine; it is only stylistically inconsistent with the
-> `position`/`locationPosition` used elsewhere.
+> `getPos` on a Location is *not* a bug. The civilian system relies on it throughout
+> (`fnc_civ_selectTowns.sqf`, `fnc_civ_init_Tomata.sqf`, `fnc_civ_handler.sqf:26`) and the
+> towns render, so it resolves a Location's position fine; it is only stylistically
+> inconsistent with the `position`/`locationPosition` used elsewhere. Whichever is chosen,
+> selection and the runtime must use the *same* one or a town's trigger and its eligibility
+> test measure different points.
 
-## Subsystem B: civilian Dynamic Town system
+## Subsystem B: civilian town selection
 
-Runs from `fnc_civ_init_Tomata.sqf` (gated on `CIV_PRESENCE`). Produces the "Dynamic Town N"
-labels and a persistent, per-town civilian population with map markers.
+Selects real map towns near the fighting and gives each a persistent civilian population
+with map markers. Gated on `CIV_PRESENCE`; no synthetic locations are created.
 
-1. **Static towns** — `fnc_civ_locator_Tomata.sqf` returns all map city/village Locations
-   plus special `FACTORY`/`AIRFIELD`/`MILITARY` points (`:12-40`).
-2. **Dynamic towns** — `fnc_civ_detectClusters.sqf` grid-samples the map every 800 m
-   (`:68-80`) and, at each candidate, grows a 50->100 m radius looking for >=3 enterable
-   buildings (`:104-120`), excluding existing towns and military positions. Each hit becomes
-   `createLocation ["NameVillage", …]` labelled `"Dynamic Town N"` (`:143-144`), tagged
-   `isDynamic`/`buildingCount`/`clusterRadius` (`:145-147`).
-3. **Population setup** — `fnc_civ_init_Tomata.sqf` merges both lists (`:24`), sizes each
-   town (radius and initial pop from building count, `:57-64`), resolves overlaps by
-   shrinking/deleting the smaller town (`:80-137`), then per town creates a presence
-   trigger, an ellipse area marker, and a population-count icon (`:145-193`). Civilian
-   spawning enables 120 s after init (`:222`) — the "Activates in 120 sec" notification.
+| Stage | File | Produces |
+|---|---|---|
+| 1. Selection | `server/misc/fnc_civ_selectTowns.sqf` | ranked shortlist of map Locations |
+| 2. Registration | `server/misc/fnc_civ_init_Tomata.sqf` | `civ_locations` / `civ_radii`, per-town trigger and markers |
+| 3. Runtime | `server/misc/fnc_civ_handler.sqf` (`_wbk` twin) | spawn on entry, cleanup, population tracking |
+
+**Selection** takes the BLUFOR HQ plus every entry of `serv_zones_array` as anchors, pulls
+city/village/local Locations with one `nearestLocations` call, keeps those within 5,000 m of
+*any* anchor, and — when more qualify than the cap of three per anchor — ranks them on an
+even blend of town extent and closeness to an anchor. It has no side effects; the caller
+owns everything else.
+
+**Registration** counts usable buildings per shortlisted town, drops any with fewer than
+three, derives radius and starting population from that count, resolves overlapping towns by
+shrinking or dropping the smaller, then creates the presence trigger, ellipse marker and
+population icon. The overlap loser is dropped from the registry only — never
+`deleteLocation`d, because these are the map's own Locations and removing one takes it away
+from side-mission siting (`fnc_findSafeMissionPos.sqf:30`) and the player's location readout
+(`fnc_bottom_right_message.sqf:152`) for the rest of the mission.
+
+### Ordering
+
+Civilian generation is a step of zone generation, not a parallel system racing it. The
+kick-off lives in `fnc_init_OPFOR_WARCOM.sqf` after its `serv_zones_array` wait and fires
+once `zones_buildout_done >= count serv_zones_array`.
+
+That counter exists because `amount_zones_created` cannot answer the question:
+`fnc_createzone.sqf:19` bumps it on entry, so it counts zones *started*, and the function
+never returns — its tail is a permanent despawn monitor. The comparison is against
+`count serv_zones_array` rather than `zones_number` because the origin keep-out
+(`fnc_locatorzones_random.sqf:171-177`) can silently drop a zone slot, and a `zones_number`
+target would then never be reached.
+
+Nothing in this chain times out. The campaign start blocks on `civ_init_complete`
+(`client_init.sqf` before the map closes, `server_init.sqf` before the intro helicopter), so
+every exit path in `fnc_civ_init_Tomata.sqf` must publish that flag — including the aborts.
+An unflagged abort hangs every client on an open map.
 
 ### Defects (Subsystem B)
 
-**The military-exclusion wait is a no-op.** `fnc_civ_detectClusters.sqf:56`:
-`waitUntil { sleep 0.1; !isNil "createzone_server" || time > time + 5 }`. `createzone_server`
-is initialised to `false` at boot (`server_var_init.sqf:88`), so `!isNil` is true from the
-start and the wait returns immediately; the `time > time + 5` "timeout" is always false
-(dead code). The intent was `waitUntil { createzone_server }` with a real timeout. Because
-it doesn't wait, the WARCOM zone arrays read for exclusion (`:57-58,129-134`) may still be
-empty, so **dynamic towns can spawn on top of enemy zones**. Note that even fixed, the flag
-only means "settings confirmed," not "zones placed" (zones spawn asynchronously with
-`sleep`s), so the exclusion is inherently racy against zone generation.
+**Towns inside enemy zones can block capture.** No keep-out is applied against zone
+positions, so a civilian town may sit on one. At negative reputation
+`fnc_civ_handler.sqf:532-560` re-sides a share of civilians to `resistance`, which
+`server_init.sqf:28-31` sets hostile to west, and a zone's capture trigger is `WEST SEIZED`
+(`fnc_createzone.sqf:259`) — hostile civilians standing inside the zone therefore hold it.
 
-**O(candidates x buildings) brute force, no yield.** `:104-120`. For each of ~1,400 grid
-candidates on a large map, it distance-tests every enterable house (tens of thousands on
-Altis) at each radius step — tens of millions of checks on the server with no `sleep`. This
-is the "may take minutes" scan and can stall the server; the `_maxClusters` early-exit only
-helps after 100 towns are found. Replace the inner loop with a per-candidate
-`nearestTerrainObjects`.
+**Ranking has no spatial spread rule.** Top-N by score can cluster the whole selection
+around anchors in dense terrain, leaving a remote zone with no civilian town near it. The
+fix, if it shows up in play, is a per-anchor quota rather than a global ranking.
 
-**`createLocation` labels may not reach clients in MP.** `:143`. The "Dynamic Town N" text
-is a location created server-side; locations are not broadcast, so on a dedicated server
-clients may see the ellipse and population markers (made with `createMarker`, which is
-global) but not the town-name label. Cosmetic MP asymmetry — verify on a dedicated host.
-
-**Origin/`[0,0,0]` proximity keeps recurring.** The civ init filters locations with
-`distance2D [0,0] > 100` (`fnc_civ_init_Tomata.sqf:19`) and detectClusters skips
-near-origin/near-town candidates — the same corner-of-map hazard the enemy-zone origin
-guard exists for. Worth tracing why placement drifts to origin rather than patching each
-site.
-
-_Minor:_ inside the grid loops `_x`/`_y` are rebound by nested `forEach` (`:74,110`); it
-works only because `_pos` captures the coordinates first — a foot-gun if edited. Dedup uses
-the `arr arrayIntersect arr` idiom (`:121`, `fnc_civ_locator_Tomata.sqf:40`).
+**Reputation recovery stops permanently at reputation 1.** `fnc_civ_rep_economy.sqf`, in the
+recovery thread: the `if (Player_Reputation == 1) exitWith {}` guard sits inside
+`if/then` nested in `while {true}`, and `exitWith` exits the nearest enclosing *loop*, so it
+kills the thread rather than skipping the cycle. Once reputation returns to 1 the recovery
+never runs again for the rest of the campaign. Predates the town rewrite.
