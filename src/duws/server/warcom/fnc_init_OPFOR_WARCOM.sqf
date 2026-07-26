@@ -32,9 +32,47 @@ sleep 1;
 // zones_number -- the origin keep-out in fnc_locatorzones_random can drop a zone slot, and a
 // zones_number target would then never be reached.
 [] spawn {
+    // Build-out threads keep running after the locator publishes positions and clears its
+    // counter, so the map would otherwise sit blank until the civilian pass starts. Ticks on
+    // its own rather than inside the wait below, whose condition is polled far too often to
+    // hang a remoteExec off. Self-terminating on the same condition that wait gates on.
+    [] spawn {
+        while {zones_buildout_done < count serv_zones_array} do {
+            [format ["Building zones...<br/>%1 of %2 complete",
+                zones_buildout_done, count serv_zones_array]]
+                remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+            sleep 2;
+        };
+    };
+
     while {!(["CIV", "all zones built out",
         {zones_buildout_done >= count serv_zones_array}, 300] call fnc_waitLogged)} do {};
     if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then { [] call fnc_civ_init_Tomata; };
+
+    // Every completion announcement lives here rather than at the end of the zone locators:
+    // there they fired while civilian towns were still being placed, telling the player the
+    // campaign was ready before it was. Wrapped in BIS_fnc_Spawn so profileName, the map
+    // description and the settings all read on each client -- the random locator ran the
+    // typeText server-side, which showed nobody anything on a dedicated host.
+    [{player globalChat format[localize "STR_DUWS_T_d5e848d8",
+        getText(configFile >> "cfgWorlds" >> worldName >> "description"), profileName]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+    [{player globalChat localize "STR_DUWS_T_518bqchj"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+    [{hint format[localize "STR_DUWS_T_7mog9k78",
+        zones_number,zones_max_radius,zones_min_radius,zones_max_dist_from_hq,
+        weather_type,time_of_day,enable_fast_travel,
+        ZeusStatus,staminaEnabled,VCOM_AI_enable,time_Multiplier,simple_zones_enable,CIV_PRESENCE
+    ]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+    [{[
+        [
+            [localize "STR_DUWS_T_518bqchj","<t align = 'center' shadow = '1' size = '0.7'>%1</t><br/>"],
+            [localize "STR_DUWS_T_37xxl2nt","<t align = 'center' shadow = '1' size = '0.7'>%1</t><br/>"],
+            [format[localize "STR_DUWS_T_dqxeffa2",getText(configFile >> "cfgWorlds" >> worldName >> "description"),profileName],"<t align = 'center' shadow = '1' size = '0.7'>%1</t><br/>"]
+        ]
+    ] spawn BIS_fnc_typeText}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+
+    ["INFO", "BOOT", "Mission initialization complete: zones built and civilians registered."] call fnc_log;
+    mission_init_complete = true;
+    publicVariable "mission_init_complete";
 };
 
 ////////////////////////////////////////

@@ -33,9 +33,6 @@ if (apocalypse_mode) then {
 if (isNil "CIV_PRESENCE" || {CIV_PRESENCE == "NONE"}) then {
     // Civilians off: no ambient population, but PMC/partisan hiring still needs civ_array as a body pool.
     [] remoteExec ["fnc_civ_setup_array", 2];
-    // Nothing else will ever set the flag the campaign start waits on. Set it server-side:
-    // a value a client publishes does not reach players who join later.
-    [{civ_init_complete = true; publicVariable "civ_init_complete";}] remoteExec ["BIS_fnc_Spawn", 2];
 };
 
 // TELL WARCOM THE ZONE VARIABLES ARE SET

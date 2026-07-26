@@ -501,10 +501,10 @@ if (isServer) then {
 // 等待玩家完成参数选择和 HQ 放置
 waitUntil { sleep 1.0; chosen_settings };
 waitUntil { sleep 1.0; HQ_pos_found_generated };
-// Civilians are registered after zone build-out, so the intro must not fly players in while
-// towns are still being placed.
-while {!(["CIV", "civ_init_complete from the civilian system",
-    {civ_init_complete}, 300] call fnc_waitLogged)} do {};
+// Zones and civilians both finish well after HQ placement, so the intro must not fly players
+// in while the campaign is still being built around them.
+while {!(["BOOT", "mission_init_complete (zones built, civilians registered)",
+    {mission_init_complete}, 300] call fnc_waitLogged)} do {};
 // 再等待十几秒，确保所有玩家已连接并同步
 sleep 15;
 ["INFO", "BOOT", "Starting helicopter intro sequence..."] call fnc_log;

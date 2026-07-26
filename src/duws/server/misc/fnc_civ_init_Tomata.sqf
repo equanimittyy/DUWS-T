@@ -13,14 +13,12 @@ if (!isNil "civ_init_done") exitWith { ["WARN", "CIV", "Already initialized, ski
 civ_init_done = true;
 ["INFO", "CIV", "Initializing civilian system (persistent population with map icons)"] call fnc_log;
 
-// The campaign start blocks on civ_init_complete, so every way out of this function has to
-// go through here -- an unflagged abort hangs every client on an open map. The parameter is
-// the parting map banner: "" clears it, anything else stays up until the map closes.
+// The parameter is the parting map banner: "" clears it, anything else stays up until the
+// map closes. The caller publishes mission_init_complete once this returns, so an abort here
+// still releases the campaign start.
 private _fnc_finish = {
     params [["_prompt", ""]];
     [_prompt] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
-    civ_init_complete = true;
-    publicVariable "civ_init_complete";
     ["INFO", "CIV", "Civilian system initialized."] call fnc_log;
 };
 

@@ -7,8 +7,6 @@ _diff = _this select 1;
 
 // ON WATER ? >> FLAT ? >> DISTANCE BETWEEN ZONES ? >> OK !
 
-_worldName = getText(configFile >> "cfgWorlds" >> worldName >> "description");
-
 titleCut ["", "BLACK IN", 10];
 man_fortified = true; publicVariable "man_fortified";
 openMap [true, true];
@@ -103,16 +101,9 @@ if (isNull _nearRoad) then {
 
 //openMap [false, false]; 
 
-trap = _worldname;
-publicVariable "trap";
-
-[{player globalChat format[localize "STR_DUWS_T_d5e848d8",trap,profileName]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-[{player globalChat localize "STR_DUWS_T_518bqchj"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-[{hint format[localize "STR_DUWS_T_7mog9k78",
-	zones_number,zones_max_radius,zones_min_radius,zones_max_dist_from_hq,
-	weather_type,time_of_day,enable_fast_travel,
-	ZeusStatus,staminaEnabled,VCOM_AI_enable,time_Multiplier,simple_zones_enable,CIV_PRESENCE
-]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+// No completion announcement here: every one of them fires from fnc_init_OPFOR_WARCOM once
+// civilians are registered too. Announcing at this point told the player the campaign was
+// ready while towns were still being placed.
 
 // For some reasons I had to add a zone [0,0,0] in _zones_array, now I must remove it:
 _zones_array = [_zones_array, 0] call BIS_fnc_removeIndex;
@@ -123,13 +114,5 @@ publicVariable "serv_zones_array";
 
 ["INFO", "ZONES", format ["manual placement complete: %1 zones", count serv_zones_array]] call fnc_log;
 
-sleep 1;
-[
-	[
-		[localize "STR_DUWS_T_518bqchj","<t align = 'center' shadow = '1' size = '0.7'>%1</t><br/>"],
-		[localize "STR_DUWS_T_37xxl2nt","<t align = 'center' shadow = '1' size = '0.7'>%1</t><br/>"],
-		[format[localize "STR_DUWS_T_dqxeffa2",_worldName,profilename],"<t align = 'center' shadow = '1' size = '0.7'>%1</t><br/>"]
-	]
-] spawn BIS_fnc_typeText;  
 
 

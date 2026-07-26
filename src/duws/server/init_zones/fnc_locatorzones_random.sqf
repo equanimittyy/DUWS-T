@@ -33,8 +33,6 @@ _mapcenter = [_half, _half, 0];
 
 [{hint localize "STR_DUWS_T_2amacebc"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
-_worldName = getText(configFile >> "cfgWorlds" >> worldName >> "description");
-
 _fortified = false;
 
 _zones_array = [[-9999,-9999,-9999]];
@@ -198,26 +196,11 @@ if (_found_distance) then {
 
 sleep 1;
 [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
-trap = _worldName;
-publicVariable "trap";
-[{player globalChat format[localize "STR_DUWS_T_d5e848d8",trap,profileName]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-[{player globalChat localize "STR_DUWS_T_518bqchj"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-[{hint format[localize "STR_DUWS_T_7mog9k78",
-	zones_number,zones_max_radius,zones_min_radius,zones_max_dist_from_hq,
-	weather_type,time_of_day,enable_fast_travel,
-	ZeusStatus,staminaEnabled,VCOM_AI_enable,time_Multiplier,simple_zones_enable,CIV_PRESENCE
-]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-
+// No completion announcement here: every one of them fires from fnc_init_OPFOR_WARCOM once
+// civilians are registered too. Announcing at this point told the player the campaign was
+// ready while towns were still being placed.
 _zones_array = [_zones_array, 0] call BIS_fnc_removeIndex;
 serv_zones_array = [] + _zones_array;
 publicVariable "serv_zones_array";
 
 ["INFO", "ZONES", format ["random generation complete: %1 zones", count serv_zones_array]] call fnc_log;
-
-[
-	[
-		[localize "STR_DUWS_T_518bqchj","<t align = 'center' shadow = '1' size = '0.7'>%1</t><br/>"],
-		[localize "STR_DUWS_T_37xxl2nt","<t align = 'center' shadow = '1' size = '0.7'>%1</t><br/>"],
-		[format[localize "STR_DUWS_T_dqxeffa2",_worldName,profilename],"<t align = 'center' shadow = '1' size = '0.7'>%1</t><br/>"]
-	]
-] spawn BIS_fnc_typeText;

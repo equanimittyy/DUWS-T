@@ -89,9 +89,10 @@ dynamic_weather_enable = true;publicVariable "dynamic_weather_enable";
 // commandpointsblu1
 commandpointsblu1 = 20;publicVariable "commandpointsblu1";
 
-// Civilian registration finished, successfully or not. The campaign start waits on this, so
-// every exit path in fnc_civ_init_Tomata must set it -- including the aborts.
-civ_init_complete = false;publicVariable "civ_init_complete";
+// Zones built out and civilians registered, successfully or not. Everything the player sees
+// as "the campaign has started" -- the completion banner, the intro helicopter, the map
+// closing -- waits on this, so generation never runs on under a player already in the field.
+mission_init_complete = false;publicVariable "mission_init_complete";
 
 // zone settings complete
 createzone_server = false;publicVariable "createzone_server";

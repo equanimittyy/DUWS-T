@@ -148,10 +148,16 @@ never returns — its tail is a permanent despawn monitor. The comparison is aga
 (`fnc_locatorzones_random.sqf:171-177`) can silently drop a zone slot, and a `zones_number`
 target would then never be reached.
 
-Nothing in this chain times out. The campaign start blocks on `civ_init_complete`
-(`client_init.sqf` before the map closes, `server_init.sqf` before the intro helicopter), so
-every exit path in `fnc_civ_init_Tomata.sqf` must publish that flag — including the aborts.
-An unflagged abort hangs every client on an open map.
+Nothing in this chain times out. Everything the player reads as "the campaign has started"
+blocks on `mission_init_complete`: the MISSION INITIALIZATION COMPLETE banner and settings
+summary, the map closing (`client_init.sqf`), and the intro helicopter
+(`server_init.sqf`). The flag is published by the same spawn that runs the kick-off, once
+civilian registration returns, so an abort inside the civilian pass still releases the
+start — no exit-path discipline required inside `fnc_civ_init_Tomata.sqf`.
+
+The completion announcements were moved out of both zone locators to get this. Left there
+they fired as soon as zone *positions* were final, telling the player the campaign was ready
+while towns were still being placed.
 
 ### Defects (Subsystem B)
 
