@@ -8,9 +8,11 @@
 if (!isServer) exitWith {[]};
 
 // Tuning knobs. Raising _WEIGHT_PROX pulls civilians onto the front line; raising
-// _WEIGHT_SIZE sends players to the population centres wherever they happen to be.
-private _WEIGHT_SIZE = 0.5;
-private _WEIGHT_PROX = 0.5;
+// _WEIGHT_SIZE sends players to the population centres wherever they happen to be. Size
+// leads: an even split kept picking hamlets that happened to sit nearer an anchor over the
+// cities behind them, which is the opposite of where a population belongs.
+private _WEIGHT_SIZE = 0.7;
+private _WEIGHT_PROX = 0.3;
 // Union of discs around each anchor, not their intersection: a strict intersection is empty
 // in any campaign whose zones sit more than twice this apart, which is most of them.
 private _ANCHOR_RADIUS = 5000;
