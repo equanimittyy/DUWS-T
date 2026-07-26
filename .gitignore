@@ -10,6 +10,10 @@
 # Packed / binarized missions and addons — rebuildable from the unpacked source.
 *.pbo
 *.ebo
+# PBO Manager's in-progress write, renamed to *.pbo on success. Untracked and
+# short-lived, so a repack running during a `git add -A` aborts the whole stage
+# when the file disappears between git's scan and its stat.
+*.pbo.b
 # Binarize + editor leftovers.
 texHeaders.bin
 *.bak
