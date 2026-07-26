@@ -6410,11 +6410,11 @@
                 <Chinesesimp>这里是行动组，我们在当前位置有一辆载具需要吊装，请求派遣重型运输机。</Chinesesimp>
                 <Original>This is Alpha 1-1, we've got a vehicle here that needs sling-loading. Requesting heavy transport.</Original>
                 <English>This is Alpha 1-1, we've got a vehicle here that needs sling-loading. Requesting heavy transport.</English>
-                   <Key ID="STR_DUWS_T_heloliftabort">
+            </Key>
+            <Key ID="STR_DUWS_T_heloliftabort">
                 <Original>This is Overlord. Mule 1-1 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1. Another bird available in five minutes. Out.</Original>
                 <English>This is Overlord. Mule 1-1 is out of action and aborting the tasking. Regret we can't complete your lift, Alpha 1-1. Another bird available in five minutes. Out.</English>
             </Key>
-     </Key>
             <Key ID="STR_DUWS_T_helolift1">
                 <German>Hier ist die Leitstelle. Anfrage erhalten. Schwertransporter ETA: 40 Sekunden.</German>
                 <Spanish>Aquí la central de mando. Solicitud recibida. Avión de transporte pesado ETA: 40 segundos.</Spanish>
@@ -6505,10 +6505,11 @@
                 <Chinesesimp>%1 %2-%3呼叫调度，我们已到达预定坐标位置。</Chinesesimp>
                 <Original>%1 %2-%3 to Overlord, we're at the LZ.</Original>
                 <English>%1 %2-%3 to Overlord, we're at the LZ.</English>
-                   <Key ID="STR_DUWS_T_liftwp_incomplete">
-                       <Original>Mule 1-1, route incomplete. Aborting the tasking. Heavy transport available again in five minutes.</Original>
-                       <English>Mule 1-1, route incomplete. Aborting the tasking. Heavy transport available again in five minutes.</English>
-                   </Key>
+            </Key>
+            <Key ID="STR_DUWS_T_liftwp_incomplete">
+                <Original>Mule 1-1, route incomplete. Aborting the tasking. Heavy transport available again in five minutes.</Original>
+                <English>Mule 1-1, route incomplete. Aborting the tasking. Heavy transport available again in five minutes.</English>
+            </Key>
                    <Key ID="STR_DUWS_T_helolift_notarget">
                        <Original>You must pick a target vehicle. Heavy transport available again in ten seconds.</Original>
                        <English>You must pick a target vehicle. Heavy transport available again in ten seconds.</English>
@@ -6605,7 +6606,30 @@
                 <Original>Swordfish 1-1, we cannot reach that grid. Send another, over.</Original>
                 <English>Swordfish 1-1, we cannot reach that grid. Send another, over.</English>
             </Key>
-     </Key>
+            <Key ID="STR_DUWS_T_helotaxi_action_wp">
+                <Original>Give waypoints to the pilot</Original>
+                <English>Give waypoints to the pilot</English>
+            </Key>
+            <Key ID="STR_DUWS_T_helotaxi_action_lz">
+                <Original>Give an LZ to the pilot</Original>
+                <English>Give an LZ to the pilot</English>
+            </Key>
+            <Key ID="STR_DUWS_T_helotaxi_notaboard">
+                <Original>%1 %2-%3 to Alpha 1-1, you are not aboard. Get in and we'll move out, over.</Original>
+                <English>%1 %2-%3 to Alpha 1-1, you are not aboard. Get in and we'll move out, over.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_helolift_action_wp">
+                <Original>Give waypoints to the pilot</Original>
+                <English>Give waypoints to the pilot</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxi_action_dest">
+                <Original>Tell the driver where to go</Original>
+                <English>Tell the driver where to go</English>
+            </Key>
+            <Key ID="STR_DUWS_T_boattaxi_action_loc">
+                <Original>Give a location to the driver</Original>
+                <English>Give a location to the driver</English>
+            </Key>
             <Key ID="STR_DUWS_T_helotaxi2wp">
                 <German>Klicke 3 beliebige Positionen auf Karte, um sichere Route zu erstellen. Erste zwei sind Flugpunkte, letzter ist Landeplatz. Drücke ESC zum Abbrechen unvollständiger Route.</German>
                 <Spanish>Haz clic en 3 posiciones arbitrarias en mapa para crear ruta segura. Las dos primeras son puntos de vuelo, la última es zona de aterrizaje. Pulsa ESC para cancelar ruta sin terminar.</Spanish>

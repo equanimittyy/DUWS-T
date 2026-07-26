@@ -59,7 +59,7 @@ _helo setPos [_vehpos select 0, _vehpos select 1, 200];// set height
 //_helo setvelocity [0,0,200];
 
 _helo flyInHeight 50;
-_helo addAction ["<t color='#00ff00'>Give Waypoints to the pilot</t>", fnc_mapclickhelo, "", 0, true, true, "", "vehicle _this == _target"];
+_helo addAction [format ["<t color='#00ff00'>%1</t>", localize "STR_DUWS_T_helotaxi_action_wp"], fnc_mapclickhelo, "", 0, true, true, "", "vehicle _this == _target"];
  
 _heloGroup = _veh select 2;
 _heloGroup deleteGroupWhenEmpty true;
@@ -163,8 +163,8 @@ while {_inVehCheck} do {
 	// check if player is inside choppa
 	if (vehicle player != _helo) then {
 		taxiCanTakeOff = false; 
-		player globalChat format["This is %1 %2-%3, get back in, I can't transport if you're not inside the chopper !",_taxiName,_random1,_random2];
-		_helo addAction ["<t color='#00ff00'>Give an LZ to the pilot</t>", fnc_mapclickhelo, "", 0, true, true, "", "vehicle _this == _target"];
+		player globalChat format[([localize "STR_DUWS_T_helotaxi_notaboard"] call fnc_cs),_taxiName,_random1,_random2];
+		_helo addAction [format ["<t color='#00ff00'>%1</t>", localize "STR_DUWS_T_helotaxi_action_lz"], fnc_mapclickhelo, "", 0, true, true, "", "vehicle _this == _target"];
 		[] remoteExec ["fnc_broadcastRadioChatter", 0];
 	} else {
 		_inVehCheck = false;

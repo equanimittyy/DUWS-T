@@ -35,7 +35,7 @@ _boat = createVehicle ["B_Boat_Transport_01_F", _spawnPos,[], 0, "FLY"];
 _boatgroup = createGroup west; 
 _pilot = _boatgroup createUnit [blufor_MARKSMAN_X, [5,5,5], [], 0, "NONE"];
 _boatgroup deleteGroupWhenEmpty true;
-_boat addAction ["<t color='#00b7ff'>Tell the driver where to go</t>", fnc_mapclickboat, "", 0, true, true, "", "vehicle _this == _target"];
+_boat addAction [format ["<t color='#00b7ff'>%1</t>", localize "STR_DUWS_T_boattaxi_action_dest"], fnc_mapclickboat, "", 0, true, true, "", "vehicle _this == _target"];
 _pilot setcaptive true; 
 _pilot moveindriver _boat;
 
@@ -73,7 +73,7 @@ if (getdammage _boat > 0.7 or !alive _pilot) exitWith {}; // get out of the loop
 if (vehicle player != _boat) then {
 	taxiCanTakeOff = false; 
 	[localize "STR_DUWS_T_boattaxi_notaboard"] spawn fnc_sideChat_filter; 
-	_boat addAction ["<t color='#00b7ff'>Give a location to the pilot</t>", fnc_mapclickboat, "", 0, true, true, "", "vehicle _this == _target"];
+	_boat addAction [format ["<t color='#00b7ff'>%1</t>", localize "STR_DUWS_T_boattaxi_action_loc"], fnc_mapclickboat, "", 0, true, true, "", "vehicle _this == _target"];
 } else {
 	_inVehCheck = false;};
 };
