@@ -55,7 +55,9 @@ fetches the pinned **1.3.2 Linux** build into the repo-root `tools/` (git-ignore
 like `tools/PBO Manager/`): it links against an older glibc so it runs in the devcontainer,
 where the current official build needs glibc 2.38+. Because 1.3.2 predates the modern `#`
 selector the mission uses, we do **not** use its parser for the syntax check (it
-false-positives) — the python balancer is used instead.
+false-positives) — the python balancer is used instead. It also returns an empty array for
+`array select [start]` with the count omitted, so pass the count explicitly in code you
+intend to exercise here.
 
 The unit tests avoid drift by **extracting the function under test from real source at run
 time** (`lib/extract_fn.py`) rather than copying it, so they always exercise current code.
