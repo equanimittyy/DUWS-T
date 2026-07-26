@@ -362,7 +362,7 @@ private _fncScript = {
                     if (isNull _pilot) exitWith {};
                     if (!alive _pilot) exitWith { hint localize "STR_DUWS_T_pilot_dead"; };
                     if (_pilot getVariable ["inVehicle", objNull] != _target) exitWith {};
-                    if (!isNull (_caller getVariable ["carriedPilot", objNull])) exitWith { hint localize "STR_DUWS_T_already_carrying"; };
+                    if (!isNull (_caller getVariable ["carriedPilot", objNull])) exitWith { hint localize "STR_DUWS_T_already_carrying_other"; };
                     [_caller, _pilot] call DUWS_fnc_takeOutFromVehicle;
                 },
                 [],

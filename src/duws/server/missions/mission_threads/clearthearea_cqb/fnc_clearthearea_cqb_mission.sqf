@@ -205,7 +205,7 @@ _markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionM
 _markername = _markerData select 0;
 _markername2 = _markerData select 1;
 [west, [_VARtaskgeneratedName], 
-[localize "STR_DUWS_T_clearhouse_task", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate; 
+[localize "STR_DUWS_T_shentouxiaodui", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate;
 
 waitUntil {
     sleep 3;

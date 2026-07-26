@@ -1926,15 +1926,15 @@
                 <Spanish>Los objetos clave de esta misión incluyen un arsenal completo de un solo uso. ¡No olvides usarlos!</Spanish>
                 <German>Die Schlüsselgegenstände dieser Mission haben ein einmaliges Vollarsenal – vergiss nicht, es zu nutzen!</German>
                 <Chinesesimp>该任务的关键物品配备了一次性的完整军火库，别忘了使用它们</Chinesesimp>
-                <Original>Key items in this mission come with a one-time full arsenal, so don't forget to use it</Original>
-                <English>Key items in this mission come with a one-time full arsenal, so don't forget to use it</English>
+                <Original>This mission's objective carries a one-time full arsenal. Use it before you leave</Original>
+                <English>This mission's objective carries a one-time full arsenal. Use it before you leave</English>
             </Key>
             <Key ID="STR_DUWS_T_dakaijunhuoku2">
                 <Spanish>Un jugador ha usado el arsenal completo de un solo uso, y este ha sido consumido.</Spanish>
                 <German>Ein Spieler hat das Einmal-Vollarsenal benutzt, es wurde verbraucht.</German>
                 <Chinesesimp>有玩家使用了一次性军火库，该军火库已被消耗。</Chinesesimp>
-                <Original>A player has used the one-time full arsenal; it has been consumed</Original>
-                <English>A player has used the one-time full arsenal; it has been consumed</English>
+                <Original>Someone has used the one-time full arsenal. It's gone now</Original>
+                <English>Someone has used the one-time full arsenal. It's gone now</English>
             </Key>
             <Key ID="STR_DUWS_T_dakaijunhuoku">
                 <Spanish>El arsenal de un solo uso ha sido consumido.</Spanish>
@@ -3251,8 +3251,8 @@
                 <German>(Zzzzt...) Hallo? Kann mich jemand hören? Ich bin kompromittiert! Hilf mir, irgendjemand! Ich will nicht hier wegen ein bisschen Geld sterben!</German>
                 <Spanish>(Zzzzt...) ¿Hola? ¿Alguien puede oírme? Estoy comprometido! Venid a ayudarme, cualquiera! No quiero morir aquí por algo de dinero!</Spanish>
                 <Chinesesimp>(Zzzzt...)喂？谁能听见我说话？我被发现了！快来帮帮我，谁都行！我不想为了点儿钱死在这！</Chinesesimp>
-                <Original>(Zzzzt...) Hello? Can anyone hear me? I'm compromised! Come help me, anybody! I don't wanna die here for some money!</Original>
-                <English>(Zzzzt...) Hello? Can anyone hear me? I'm compromised! Come help me, anybody! I don't wanna die here for some money!</English>
+                <Original>(Zzzzt...) Hello? Is anyone on this channel? They know who I am. Somebody get out here — I'm not dying for your money.</Original>
+                <English>(Zzzzt...) Hello? Is anyone on this channel? They know who I am. Somebody get out here — I'm not dying for your money.</English>
             </Key>
             <Key ID="STR_DUWS_T_pcwhoau">
                 <German>Hier ist Overlord 1-1, identifizieren Sie sich, over.</German>
@@ -3265,50 +3265,50 @@
                 <German>Ich bin in eurer Nähe! Passt auf! Sie kommen gleich hinterher!</German>
                 <Spanish>Estoy cerca de vosotros! ¡Cuidado! Vendrán justo detrás!</Spanish>
                 <Chinesesimp>我在你们附近！看着点！他们马上就要跟过来了！</Chinesesimp>
-                <Original>I'm near you! Watch out! They're right behind me!</Original>
-                <English>I'm near you! Watch out! They're right behind me!</English>
+                <Original>I'm close to you now. Watch out, they're right behind me.</Original>
+                <English>I'm close to you now. Watch out, they're right behind me.</English>
             </Key>
             <Key ID="STR_DUWS_T_pciminfo">
                 <German>Ich bin euer Informant! Mein Rufname ist… Ich weiß es nicht mehr! Scheiße, kommt sofort her! Ich riskiere mein Leben für euch! Ihr habt gesagt, dass ihr mich am Leben erhaltet!</German>
                 <Spanish>¡Soy vuestro informante! Mi indicativo es… ¡No lo recuerdo! Mierda, venid ya! ¡Me juego la vida por vosotros! Dijisteis que me mantendríais con vida!</Spanish>
                 <Chinesesimp>我是你们的线人！我的代号是...我忘了！妈的，你们快点过来！我是为你们卖命的，你们之前说过可以保我不死！</Chinesesimp>
-                <Original>I’m your informant! My callsign’s… I can’t remember! Shit, hurry up and get here! I’m risking my life for you! You said you’d keep me alive!</Original>
-                <English>I’m your informant! My callsign’s… I can’t remember! Shit, hurry up and get here! I’m risking my life for you! You said you’d keep me alive!</English>
+                <Original>I'm your informant! My callsign is... I can't remember it. Just get someone out here. You told me you'd keep me alive.</Original>
+                <English>I'm your informant! My callsign is... I can't remember it. Just get someone out here. You told me you'd keep me alive.</English>
             </Key>
             <Key ID="STR_DUWS_T_pcoverlord">
                 <German>Diese Einheimischen machen einem immer das Leben schwer… Einsatztrupp, hier ist "Overlord". Ich brauche, dass ihr sofort aufbrecht und den Informanten beschützt, mit dem wir gerade gesprochen haben. Wenn er vom Feind gefangen genommen wird, gerät die Sache völlig außer Kontrolle.</German>
                 <Spanish>Estos locales nunca dejan uno tranquilo… Equipo de Acción, aquí es "Overlord". Necesito que salgan inmediatamente para proteger al informante con el que acabamos de hablar. Si es capturado por el enemigo, el asunto se pondrá muy feo.</Spanish>
                 <Chinesesimp>这些当地人总是不让人省心...行动组，这里是"霸王"，我需要你们立刻出发保护好刚刚的线人。万一他被敌人抓住，事情就闹大了。</Chinesesimp>
-                <Original>These locals never make it easy... Alpha 1-1, this is Overlord. Move out now and protect the informant we just spoke to. If the enemy takes him, this gets out of hand fast.</Original>
-                <English>These locals never make it easy... Alpha 1-1, this is Overlord. Move out now and protect the informant we just spoke to. If the enemy takes him, this gets out of hand fast.</English>
+                <Original>Alpha 1-1, this is Overlord. Move now and get to the informant we just heard. If the enemy takes him alive, everything he knows goes with him.</Original>
+                <English>Alpha 1-1, this is Overlord. Move now and get to the informant we just heard. If the enemy takes him alive, everything he knows goes with him.</English>
             </Key>
             <Key ID="STR_DUWS_T_transIDAP">
                 <German>Ein Lieferwagen einer internationalen humanitären Organisation wurde von feindlichen Kräften beschlagnahmt. Wir müssen den Wagen zurückerobern und zur nahen Übergabestelle der internationalen humanitären Organisation bringen. (Low CP, no AP, high rep)</German>
                 <Spanish>Un camión de suministros de una organización humanitaria internacional ha sido robado por las fuerzas enemigas. Tenemos que recuperar el camión y devolverlo al punto de entrega de la organización humanitaria internacional cercano. (Low CP, no AP, high rep)</Spanish>
                 <Chinesesimp>国际公益组织的补给卡车被敌人抢走了，我们需要把卡车抢回来，并还给不远处的国际公益组织交付点。(低CP，无AP，高声望)</Chinesesimp>
-                <Original>A supply truck belonging to an international humanitarian organization has been seized by enemy forces. We need to recover the truck and return it to the nearby humanitarian delivery point. (Low CP, no AP, high rep)</Original>
-                <English>A supply truck belonging to an international humanitarian organization has been seized by enemy forces. We need to recover the truck and return it to the nearby humanitarian delivery point. (Low CP, no AP, high rep)</English>
+                <Original>Enemy forces have seized a truck belonging to an international aid organization. Recover it and drive it to the aid delivery point nearby. (Low CP, no AP, high reputation)</Original>
+                <English>Enemy forces have seized a truck belonging to an international aid organization. Recover it and drive it to the aid delivery point nearby. (Low CP, no AP, high reputation)</English>
             </Key>
             <Key ID="STR_DUWS_T_idapletsdothis">
                 <German>Hallo? Kann mich jemand hören? Hier ist IDAP. Vor einer Stunde wurde einer unserer Lieferwagen mit humanitärer Hilfe von OPFOR beschlagnahmt... Wir bitten Sie um Hilfe bei der Rückeroberung des Wagens. Seine ungefähre Richtung und der Übergabepunkt wurden auf dem GPS aktualisiert.</German>
                 <Spanish>¿Hola? ¿Alguien me oye? Soy IDAP. Hace una hora, uno de nuestros camiones de suministros cargado de ayuda humanitaria fue robado por OPFOR... Les pedimos ayuda para recuperar el camión. Su dirección aproximada y el punto de entrega han sido actualizados en el GPS.</Spanish>
                 <Chinesesimp>喂？可以听到吗？我是IDAP的工作人员，一小时之前我们的一辆装满人道主义物资的补给卡车被红方抢走了...我们请求你们帮忙将卡车夺回来，卡车的大致去向和交付点已经在GPS上更新。</Chinesesimp>
-                <Original>Hello? Can anyone hear me? This is IDAP. An hour ago OPFOR seized one of our trucks loaded with humanitarian aid... We need your help to get it back. Its rough heading and the delivery point are marked on your GPS.</Original>
-                <English>Hello? Can anyone hear me? This is IDAP. An hour ago OPFOR seized one of our trucks loaded with humanitarian aid... We need your help to get it back. Its rough heading and the delivery point are marked on your GPS.</English>
+                <Original>Hello? Can anyone hear me? This is IDAP. An hour ago OPFOR seized one of our trucks loaded with humanitarian aid... We need help getting it back. Its last known position and our delivery point are on your map.</Original>
+                <English>Hello? Can anyone hear me? This is IDAP. An hour ago OPFOR seized one of our trucks loaded with humanitarian aid... We need help getting it back. Its last known position and our delivery point are on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_idapcopy">
                 <German>Hier ist BLUFOR-Kommando. Wir haben Ihre Anfrage erhalten. Einheiten sind zum markierten Ort unterwegs ———— "Overlord 1-1" an Einsatzteam, habt ihr die Übertragung alle verstanden?</German>
                 <Spanish>Aquí mando BLUFOR. Hemos recibido su solicitud. Unidades en camino a la ubicación marcada ———— "Overlord 1-1" llamando al Equipo de Acción, ¿escuchasteis esa transmisión?</Spanish>
                 <Chinesesimp>这里是蓝方指挥，我们收到了你的请求。正在派出部队前往标记位置————"霸王1-1"呼叫行动组，刚刚的通话你们都听到了吧。</Chinesesimp>
-                <Original>This is BLUFOR Command, we've received your request. Units are en route to the marked location. Overlord to Alpha 1-1, you copy all that?</Original>
-                <English>This is BLUFOR Command, we've received your request. Units are en route to the marked location. Overlord to Alpha 1-1, you copy all that?</English>
+                <Original>This is Overlord, we have your request. Units are moving to the marked location. Overlord to Alpha 1-1, you copy all that?</Original>
+                <English>This is Overlord, we have your request. Units are moving to the marked location. Overlord to Alpha 1-1, you copy all that?</English>
             </Key>
             <Key ID="STR_DUWS_T_idapacteamgo">
                 <German>Einsatzteam verstanden, wir beginnen die Operation sobald der Plan festgelegt ist, Ende.</German>
                 <Spanish>Equipo de Acción recibe, comenzaremos la operación una vez planificado, fuera.</Spanish>
                 <Chinesesimp>行动组收到，我们规划完方案后就开始行动，完毕。</Chinesesimp>
-                <Original>Alpha 1-1 copies. We'll move out once the plan's set, out.</Original>
-                <English>Alpha 1-1 copies. We'll move out once the plan's set, out.</English>
+                <Original>Alpha 1-1 copies. We'll move once we've got a plan. Out.</Original>
+                <English>Alpha 1-1 copies. We'll move once we've got a plan. Out.</English>
             </Key>
             <Key ID="STR_DUWS_T_idapend">
                 <German>Vielen Dank! Zivilisten im Kriegsgebiet schätzen, was Sie getan haben!</German>
@@ -3335,15 +3335,15 @@
                 <German>Verdammt, beeilt euch verdammt noch mal! Wenn ich gefangen werde, werden es auch eure Truppen hier bereuen!</German>
                 <Spanish>Mierda, ¡apresúrense de una vez! Si me capturan, ¡vuestras tropas aquí también lo van a lamentar!</Spanish>
                 <Chinesesimp>求求你们他妈的快点！我要是被抓到了，你们在这的部队也不会有好日子过了！</Chinesesimp>
-                <Original>God damn it, hurry up! If they catch me, you'll regret it too!</Original>
-                <English>God damn it, hurry up! If they catch me, you'll regret it too!</English>
+                <Original>Hurry up, damn it. If they take me, you lose everything I've got for you.</Original>
+                <English>Hurry up, damn it. If they take me, you lose everything I've got for you.</English>
             </Key>
             <Key ID="STR_DUWS_T_protectciv">
                 <German>Wir haben einen Informanten, dessen Identität aufgeflogen ist. Er versteckt sich irgendwo in einem Gebäude. Geh dorthin und beschütze ihn, bevor der Feind ihn einholt und verhaftet — ja, wir können ihn noch nicht aus dem Gebiet evakuieren, weil wir ihn brauchen, um weiterhin vor Ort Informationen für uns zu sammeln. (Slightly low CP, no AP, high Rep)</German>
                 <Spanish>Tenemos un informante cuya identidad ha sido expuesta. Se está ocultando dentro de un edificio en algún lugar. Ve allí y protégelo antes de que el enemigo lo alcance y lo arresta — sí, aún no podemos sacarlo de la zona, porque necesitamos que siga recopilando información para nosotros localmente. (Slightly low CP, no AP, high Rep)</Spanish>
                 <Chinesesimp>我们有一个线人暴露了身份，他现在躲在某地的建筑物内。在敌人追上并逮捕他之前赶到那里保护他————是的，他还不能离开当地，我们需要他继续为我们收集情报。(稍低CP，无AP，高声望)</Chinesesimp>
-                <Original>One of our informants has been made. He's holed up in a building somewhere in the area. Get to him and hold the enemy off before they run him down. We can't pull him out yet; we still need him gathering intel here. (Slightly low CP, no AP, high Rep)</Original>
-                <English>One of our informants has been made. He's holed up in a building somewhere in the area. Get to him and hold the enemy off before they run him down. We can't pull him out yet; we still need him gathering intel here. (Slightly low CP, no AP, high Rep)</English>
+                <Original>One of our informants has been made. He's holed up in a building somewhere in the area. Get to him and hold the enemy off before they run him down. We can't pull him out yet; we still need him gathering intel here. (Slightly low CP, no AP, high reputation)</Original>
+                <English>One of our informants has been made. He's holed up in a building somewhere in the area. Get to him and hold the enemy off before they run him down. We can't pull him out yet; we still need him gathering intel here. (Slightly low CP, no AP, high reputation)</English>
             </Key>
             <Key ID="STR_DUWS_T_v7djsfoq">
                 <German>Hier spricht das HQ. Wir haben Kontakt zu einem Informanten in deiner Nähe. Überprüfe seine letzte bekannte Position auf deiner Karte.</German>
@@ -3370,14 +3370,18 @@
                 <German>"Overlord 1-1" an Einsatztrupp. Der Informant ist tot. Zieht euch sofort zurück. Wir können nichts mehr tun.</German>
                 <Spanish>"Overlord 1-1" a Equipo de Acción. El informante está muerto. Retrocedan de inmediato. No podemos hacer nada más.</Spanish>
                 <Chinesesimp>"霸王1-1"呼叫行动组，线人死掉了你们就撤出来吧。我们也做不了更多了。</Chinesesimp>
-                <Original>Overlord to Alpha 1-1. The informant's dead. Extract immediately, there's nothing more we can do.</Original>
-                <English>Overlord to Alpha 1-1. The informant's dead. Extract immediately, there's nothing more we can do.</English>
+                <Original>Overlord to Alpha 1-1, the informant's dead. Nothing more we can do there — extract.</Original>
+                <English>Overlord to Alpha 1-1, the informant's dead. Nothing more we can do there — extract.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ayhemuj4">
+                <Original>The informant is dead</Original>
+                <English>The informant is dead</English>
             </Key>
         </Container>
         <Container name="Intel &amp; Search">
             <Key ID="STR_DUWS_T_TOPSECRET_TITLE">
-                <Original>Top Secret Document Found!</Original>
-                <English>Top Secret Document Found!</English>
+                <Original>Top Secret Document Recovered</Original>
+                <English>Top Secret Document Recovered</English>
                 <Chinesesimp>发现绝密文件！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_TOPSECRET_DESC">
@@ -3396,8 +3400,8 @@
                 <Chinesesimp>容器里什么也没有。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ITEMS_FOUND">
-                <Original>Found %1 items! Check your inventory</Original>
-                <English>Found %1 items! Check your inventory</English>
+                <Original>Found %1 items. Check your inventory</Original>
+                <English>Found %1 items. Check your inventory</English>
                 <Chinesesimp>发现 %1 件物品！请检查你的背包。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ITEMS_DROPPED">
@@ -3461,8 +3465,8 @@
                 <Chinesesimp>情报搜集</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING_DESC">
-                <Original>An enemy command post was scattered by our assault. They are collecting intel and trying to escape. Your squad must search buildings in the area to retrieve intel items. The mission ends automatically in 15 minutes. (Very low CP, very low AP)</Original>
-                <English>An enemy command post was scattered by our assault. They are collecting intel and trying to escape. Your squad must search buildings in the area to retrieve intel items. The mission ends automatically in 15 minutes. (Very low CP, very low AP)</English>
+                <Original>Our assault scattered an enemy command post. What's left of them is bagging up their intel and pulling out. Search the buildings in the area and take whatever they haven't carried off yet. Allseer closes the mission out in 15 minutes. (Very low CP, very low AP)</Original>
+                <English>Our assault scattered an enemy command post. What's left of them is bagging up their intel and pulling out. Search the buildings in the area and take whatever they haven't carried off yet. Allseer closes the mission out in 15 minutes. (Very low CP, very low AP)</English>
                 <Chinesesimp>敌人一个指挥部在我们的一次攻击行动后被打散了，他们正在收拾区域内的各类情报并逃脱。你的小队需要搜索区域内的建筑以获取情报物品。任务在15分钟后自动结束。(极低CP，极低AP)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING_NO_BUILDINGS">
@@ -3506,8 +3510,8 @@
                 <Chinesesimp>分析完成！获得 %1 CP。\n已分析物品：%2</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_sidemissionloc">
-                <Original>You can reveal this mission's objective location by searching enemy bodies</Original>
-                <English>You can reveal this mission's objective location by searching enemy bodies</English>
+                <Original>Search enemy bodies to reveal the objective's exact location</Original>
+                <English>Search enemy bodies to reveal the objective's exact location</English>
                 <German>Der Zielort dieser Mission kann durchsuchen von feindlichen Leichen aufgedeckt werden.</German>
                 <Spanish>La ubicación del objetivo de esta misión se puede revelar buscando en los cuerpos enemigos.</Spanish>
                 <Chinesesimp>此任务的目标位置可以通过搜索敌军尸体来揭露</Chinesesimp>
@@ -3965,15 +3969,15 @@
                 <German>„Kurier 2-1“ an „Oberherr“, wir und die Verbündeten leiden schwere Verluste! Wo zur Hölle ist die Verstärkung?!</German>
                 <Spanish>"Envío Rápido 2-1" a "Imperador", nosotros y las fuerzas aliadas sufrimos bajas graves! ¿Dónde carajo está el refuerzo?!</Spanish>
                 <Chinesesimp>"速递2-1"呼叫"霸王"，我们和友军严重减员！援军他妈的在哪？</Chinesesimp>
-                <Original>Express 2-1 to Overlord, we're taking heavy casualties out here. Where the hell are those reinforcements?!</Original>
-                <English>Express 2-1 to Overlord, we're taking heavy casualties out here. Where the hell are those reinforcements?!</English>
+                <Original>Express 2-1 to Overlord, we're taking heavy casualties out here. Where the hell are those reinforcements?</Original>
+                <English>Express 2-1 to Overlord, we're taking heavy casualties out here. Where the hell are those reinforcements?</English>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_APPROACHING4">
                 <German>„Delta 3-2“ an „Kurier“, wir bewegen uns als Soforteinsatztruppe zur Unterstützung Eurer Seite, voraussichtliche Ankunftszeit: 1 Minute!</German>
                 <Spanish>"Delta 3-2" a "Envío Rápido", nos dirigimos a apoyarlos como fuerza de respuesta rápida, TEA: 1 minuto!</Spanish>
                 <Chinesesimp>"德尔塔3-2"呼叫"速递"，我们正作为快反部队前往支援你们，预计到达时间：1分钟</Chinesesimp>
-                <Original>Delta 3-2 to Express, moving to support you as QRF. ETA one minute.</Original>
-                <English>Delta 3-2 to Express, moving to support you as QRF. ETA one minute.</English>
+                <Original>Delta 3-2 to Express 2-1, moving to support you as QRF. ETA one minute.</Original>
+                <English>Delta 3-2 to Express 2-1, moving to support you as QRF. ETA one minute.</English>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_APPROACHING5">
                 <German>„Delta 3-2“ an „Kurier 2-1“, wir sind in Ihrer Umgebung eingetroffen und bekämpfen die Feinde! Ihr könnt euch kurz durchatmen!</German>
@@ -4273,8 +4277,8 @@
                 <German>Verstanden. Zieht euch zurück. Sicherheit geht vor.</German>
                 <Spanish>Recibido. Retroceded. La seguridad es lo primero.</Spanish>
                 <Chinesesimp>收到，你们撤出来吧。安全第一。</Chinesesimp>
-                <Original>Copy... fall back. Safety first.</Original>
-                <English>Copy... fall back. Safety first.</English>
+                <Original>Overlord copies. Break contact and come home.</Original>
+                <English>Overlord copies. Break contact and come home.</English>
             </Key>
             <Key ID="STR_DUWS_T_c0">
                 <German>Rettungs-Sturmtrupp</German>
@@ -4315,15 +4319,15 @@
                 <German>Scharfschützenjagd</German>
                 <Spanish>Caza de Francotiradores</Spanish>
                 <Chinesesimp>猎杀狙击手</Chinesesimp>
-                <Original>Sniper Hunting</Original>
-                <English>Sniper Hunting</English>
+                <Original>Hunt Sniper Team</Original>
+                <English>Hunt Sniper Team</English>
             </Key>
             <Key ID="STR_DUWS_T_c6">
                 <German>Bau-Lkw stehlen</German>
                 <Spanish>Robar camión de construcción</Spanish>
                 <Chinesesimp>偷取工程车</Chinesesimp>
-                <Original>Steal Builder Truck</Original>
-                <English>Steal Builder Truck</English>
+                <Original>Steal Builder Vehicle</Original>
+                <English>Steal Builder Vehicle</English>
             </Key>
             <Key ID="STR_DUWS_T_c7">
                 <German>Panzerkommandant eliminieren</German>
@@ -4343,8 +4347,8 @@
                 <German>Arsenal zerstören</German>
                 <Spanish>Destruir el arsenal</Spanish>
                 <Chinesesimp>摧毁军火库</Chinesesimp>
-                <Original>Destroy Arsenal</Original>
-                <English>Destroy Arsenal</English>
+                <Original>Destroy Ammo Cache</Original>
+                <English>Destroy Ammo Cache</English>
             </Key>
             <Key ID="STR_DUWS_T_c10">
                 <German>Radar zerstören</German>
@@ -4406,8 +4410,8 @@
                 <German>Bewege dich sofort, um den feindlichen Mörserbeobachter zu eliminieren.</German>
                 <Spanish>Muévete inmediatamente para eliminar al observador de mortero enemigo.</Spanish>
                 <Chinesesimp>立刻前往消灭敌人的迫击炮观察员。</Chinesesimp>
-                <Original>Move immediately to eliminate the enemy mortar observer.</Original>
-                <English>Move immediately to eliminate the enemy mortar observer.</English>
+                <Original>Kill the enemy mortar observer</Original>
+                <English>Kill the enemy mortar observer</English>
             </Key>
             <Key ID="STR_DUWS_T_mortarspotter3">
                 <German>Mörser!</German>
@@ -4427,8 +4431,8 @@
                 <German>Action Squad hier, Mörserbeobachter ausgeschaltet.</German>
                 <Spanish>Equipo de Acción aquí, observador de mortero eliminado.</Spanish>
                 <Chinesesimp>这里是行动组，迫击炮观察员已被歼灭。</Chinesesimp>
-                <Original>Alpha 1-1, mortar observer down.</Original>
-                <English>Alpha 1-1, mortar observer down.</English>
+                <Original>Alpha 1-1 to Overlord, mortar observer is down.</Original>
+                <English>Alpha 1-1 to Overlord, mortar observer is down.</English>
             </Key>
             <Key ID="STR_DUWS_T_renwuqingli">
                 <German>Missionsbereiniger</German>
@@ -4441,22 +4445,22 @@
                 <German>Stellen Sie sicher, dass wertvolle stuff das Missionsgebiet innerhalb von 6 Minuten evakuieren.</German>
                 <Spanish>Asegúrate de que los stuff valiosos abandonen el área de misión en 6 minutos.</Spanish>
                 <Chinesesimp>请确保有价值的资产/武器/人员在6分钟内离开任务区域。</Chinesesimp>
-                <Original>Recover any valuable items from the mission area within 6 minutes.</Original>
-                <English>Recover any valuable items from the mission area within 6 minutes.</English>
+                <Original>Strip anything useful from the mission area. You have about five minutes</Original>
+                <English>Strip anything useful from the mission area. You have about five minutes</English>
             </Key>
             <Key ID="STR_DUWS_T_renwuqingli4">
                 <German>Noch eine Minute bis zur Aufräumaktion.</German>
                 <Spanish>Queda un minuto para la limpieza de la misión.</Spanish>
                 <Chinesesimp>还有最后一分钟执行任务清理。</Chinesesimp>
-                <Original>One minute left until mission cleanup</Original>
-                <English>One minute left until mission cleanup</English>
+                <Original>One minute until mission cleanup</Original>
+                <English>One minute until mission cleanup</English>
             </Key>
             <Key ID="STR_DUWS_T_renwuqingli5">
                 <German>Noch 10 Sekunden bis zur Missionsbereinigung.</German>
                 <Spanish>Quedan 10 segundos para la limpieza de misión.</Spanish>
                 <Chinesesimp>还有最后十秒钟执行任务清理。</Chinesesimp>
-                <Original>10 seconds remaining until mission cleanup</Original>
-                <English>10 seconds remaining until mission cleanup</English>
+                <Original>Ten seconds until mission cleanup</Original>
+                <English>Ten seconds until mission cleanup</English>
             </Key>
             <Key ID="STR_DUWS_T_i44ddgrq">
                 <German>Mission Regenerierung</German>
@@ -4476,50 +4480,50 @@
                 <German>Eine verbündete Angriffstruppe wurde überfallen! Sie verbirgt sich in einem Gebäude in diesem Gebiet, mit feindlichen Truppen ringsherum. Hilf ihnen, sich durchzubrechen!  (Very high CP, low AP)</German>
                 <Spanish>Un escuadrón de asalto aliado ha sido emboscado! Se oculta en un edificio de esta zona, con fuerzas enemigas a su alrededor. Ayúdalos a romper el cerco!  (Very high CP, low AP)</Spanish>
                 <Chinesesimp>友军的一支突击小队被伏击了，他们藏在这片区域的某个建筑内，且周围全是敌军。去帮他们突围！(极高CP，低AP)</Chinesesimp>
-                <Original>An allied assault squad has been ambushed! They’re hiding in a building in this area, with enemy forces all around them. Help them break out! (Very high CP, low AP)</Original>
-                <English>An allied assault squad has been ambushed! They’re hiding in a building in this area, with enemy forces all around them. Help them break out! (Very high CP, low AP)</English>
+                <Original>A friendly assault squad was ambushed in this area and is holed up in a building with hostiles all around it. Break the cordon and get them out. (Very high CP, low AP)</Original>
+                <English>A friendly assault squad was ambushed in this area and is holed up in a building with hostiles all around it. Break the cordon and get them out. (Very high CP, low AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_xdbfx123">
                 <German>Die Truppe wurde vom Feind entdeckt! Beeilt euch, sie zu retten!</German>
                 <Spanish>El escuadrón ha sido detectado por el enemigo! Apresúrense a rescatarlos!</Spanish>
                 <Chinesesimp>小队被敌人发现了！快去营救他们！</Chinesesimp>
-                <Original>The squad has been spotted by the enemy! Move, now!</Original>
-                <English>The squad has been spotted by the enemy! Move, now!</English>
+                <Original>The enemy's found the squad. Move now</Original>
+                <English>The enemy's found the squad. Move now</English>
             </Key>
             <Key ID="STR_DUWS_T_p7qawzl4">
                 <German>Wir haben derzeit akute Versorgungsmängel, und unser Satellit hat in diesem Gebiet die grobe Position eines feindlichen Versorgungslasters grob ermittelt. Im Laster befindet sich eine große Menge an Versorgungsgütern und ein Waffenschrank. Bring es zurück zur Basis, bevor der Feind unsere Absichten erkennt und es vernichtet. Du hast 20 Minuten Zeit. (High CP, avg AP)</German>
                 <Spanish>Actualmente tenemos escasez de suministros, y nuestro satélite ha localizado aproximadamente la posición general de un camión de suministros enemigo en esta zona. En el camión hay una gran cantidad de suministros y un arsenal. Tráelo de vuelta a la base antes de que el enemigo descubra nuestra intención y lo destruya. Tienes 20 minutos. (High CP, avg AP)</Spanish>
                 <Chinesesimp>我们现在物资紧缺，刚好我们的卫星在这片地区粗略定位到了敌人补给卡车的大概方位，卡车里面有着大量物资和一个武器库，在敌人发现我们的意图并将它销毁前带它回基地。(你有20分钟时间)(高CP，平均AP)</Chinesesimp>
-                <Original>We’re currently low on supplies, and our satellite has roughly located an enemy supply truck in this area. The truck is carrying a large stockpile of supplies and an Arsenal cache. Get it back to base before the enemy uncovers our plan and destroys it. You have 20 minutes. (High CP, avg AP)</Original>
-                <English>We’re currently low on supplies, and our satellite has roughly located an enemy supply truck in this area. The truck is carrying a large stockpile of supplies and an Arsenal cache. Get it back to base before the enemy uncovers our plan and destroys it. You have 20 minutes. (High CP, avg AP)</English>
+                <Original>We're low on supplies. Satellite has an enemy supply truck somewhere in this area, loaded with stores and an arsenal cache. Take it and drive it back to base before the enemy works out what we're doing and destroys it. You have 20 minutes. (High CP, average AP)</Original>
+                <English>We're low on supplies. Satellite has an enemy supply truck somewhere in this area, loaded with stores and an arsenal cache. Take it and drive it back to base before the enemy works out what we're doing and destroys it. You have 20 minutes. (High CP, average AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_19ajhe1d">
                 <German>Der Nachrichtendienst hat gerade ermittelt, dass eine feindliche vorläufige Kommandotruppe sich hier vorübergehend versammelt hat – eliminiere den Offizier in der Truppe! Nach der Eliminierung des Offiziers braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Zielerfüllung zu bestätigen.(Diese Mission ist extrem zeitsensitiv; sie schlägt fehl, falls sie innerhalb von 8 Minuten nicht abgeschlossen wird.) (High CP, high AP)</German>
                 <Spanish>El servicio de inteligencia acaba de detectar que un equipo de comando temporal enemigo se ha reunido aquí temporalmente — elimína al oficial del equipo! Después de que el oficial sea eliminado, el servicio de inteligencia necesitará unos minutos adicionales para confirmar la consecución del objetivo.(Esta misión es extremadamente sensible al tiempo; fracasará si no se completa dentro de 8 minutos.) (High CP, high AP)</Spanish>
                 <Chinesesimp>情报部门刚刚发现，敌军的临时指挥班组在这里短暂聚集，去干掉班组里的军官！军官死亡后，情报部门需要额外几分钟确认目标完成。(此任务具有极强时效性，若未在8分钟内完成任务则会失败。)(高CP，高AP)</Chinesesimp>
-                <Original>The Intel Unit has picked up an enemy command team gathered here. Take out the officer. Once he's down, the Intel Unit needs a few minutes to confirm the mission is complete. (This one's extremely time-sensitive: it fails if not done within 8 minutes.) (High CP, high AP)</Original>
-                <English>The Intel Unit has picked up an enemy command team gathered here. Take out the officer. Once he's down, the Intel Unit needs a few minutes to confirm the mission is complete. (This one's extremely time-sensitive: it fails if not done within 8 minutes.) (High CP, high AP)</English>
+                <Original>Allseer has an enemy command team assembled here. Kill the officer, then hold a few minutes while Allseer confirms the kill. The team disperses in 8 minutes, so move now. (High CP, high AP)</Original>
+                <English>Allseer has an enemy command team assembled here. Kill the officer, then hold a few minutes while Allseer confirms the kill. The team disperses in 8 minutes, so move now. (High CP, high AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_dgpqenyw">
                 <German>Ein freundlicher Signalturm in diesem Gebiet wurde von feindlichen Truppen eingenommen. Feindliche Truppen sind in der Nähe stationiert und entschlüsseln kritische Informationen. Sprenge den Turm, bevor die Feinde das Entschlüsseln abschließen! (Nur noch 15 Minuten, bis kritische Informationen an die Feinde gelangen!) (Slightly low CP, avg AP)</German>
                 <Spanish>Una torre de señales aliada en esta zona ha sido tomada por fuerzas enemigas. Las tropas enemigas están acantonadas cerca y descifrando información crítica. Destruye la torre con explosivos antes de que terminen el descifrado! (¡Quedan solo 15 minutos para que la información crítica se filtre!) (Slightly low CP, avg AP)</Spanish>
                 <Chinesesimp>友军部队在该地的一座信号塔被占领了，敌军正在旁边驻扎并破译关键信息。在敌军完成破译前去把塔炸掉！(距离关键信息泄露仅剩15分钟)(稍低CP，平均AP)</Chinesesimp>
-                <Original>A friendly signal tower in this area has been seized by OPFOR, who are stationed nearby decoding critical intel. Destroy the tower with explosives before they finish decoding! (Only 15 minutes left until critical intel is leaked!) (Slightly low CP, avg AP)</Original>
-                <English>A friendly signal tower in this area has been seized by OPFOR, who are stationed nearby decoding critical intel. Destroy the tower with explosives before they finish decoding! (Only 15 minutes left until critical intel is leaked!) (Slightly low CP, avg AP)</English>
+                <Original>OPFOR has taken a friendly signal tower in this area and is decoding the traffic they pulled off it from a position nearby. Bring explosives and drop the tower. They finish decoding in 15 minutes. (Slightly low CP, average AP)</Original>
+                <English>OPFOR has taken a friendly signal tower in this area and is decoding the traffic they pulled off it from a position nearby. Bring explosives and drop the tower. They finish decoding in 15 minutes. (Slightly low CP, average AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_xinhaopy">
                 <German>Unsere kritischen Informationen werden gerade entschlüsselt! Du und deine Truppe müsst euch beeilen!</German>
                 <Spanish>Nuestra información crítica está siendo descifrada! Tú y tu escuadrón debéis apresuraros!</Spanish>
                 <Chinesesimp>我们的关键信息正被破译！你和你的小队需要加快脚步了！</Chinesesimp>
-                <Original>Our critical intel is being decoded! You're out of time, move!</Original>
-                <English>Our critical intel is being decoded! You're out of time, move!</English>
+                <Original>They're nearly through the intel. Two minutes left</Original>
+                <English>They're nearly through the intel. Two minutes left</English>
             </Key>
             <Key ID="STR_DUWS_T_xhtbpyl1">
                 <German>==SIDE MISSION FAILED==\n\nZu spät – die kritischen Informationen wurden von den Feinden entschlüsselt......</German>
                 <Spanish>==SIDE MISSION FAILED==\n\nDemasiado tarde – la información crítica ha sido descifrada por el enemigo......</Spanish>
                 <Chinesesimp>==SIDE MISSION FAILED==\n\n太晚了，关键信息被敌人破译了......</Chinesesimp>
-                <Original>==SIDE MISSION FAILED==\n\nToo late. The enemy has finished decoding the critical intel...</Original>
-                <English>==SIDE MISSION FAILED==\n\nToo late. The enemy has finished decoding the critical intel...</English>
+                <Original>==SIDE MISSION FAILED==\n\nThe enemy finished decoding before the tower came down.</Original>
+                <English>==SIDE MISSION FAILED==\n\nThe enemy finished decoding before the tower came down.</English>
             </Key>
             <Key ID="STR_DUWS_T_lh5dhnjp">
                 <German>Ein  feindliche Funk-LKW befindet sich in diesem Gebiet. Wir müssen ihn zerstören.</German>
@@ -4539,22 +4543,22 @@
                 <German>Eines unserer Flugzeuge wurde in der Nähe dieses Ortes abgeschossen. Satellitenmeldungen zeigen, dass der Pilot schwere Verletzungen erlitten hat und stark blutet – beeil dich zum Absturzort und bring ihn sicher zurück zur Basis. (Nur noch 10 Minuten, bis der Pilot an Blutverlust stirbt!) (Avg CP, very high AP)</German>
                 <Spanish>Uno de nuestros aviones fue derribado cerca de esta posición. Los informes satelitales indican que el piloto sufre graves heridas y hemorragia intensa – apúrate al lugar del accidente aéreo y tráelo seguro de vuelta a la base. (¡Quedan solo 10 minutos hasta que el piloto muera por hemorragia!) (Avg CP, very high AP)</Spanish>
                 <Chinesesimp>我们的一架飞机在这个位置附近被击落。卫星报告显示飞行员重伤失血，快到坠机地点把他安全带回基地。(距离飞行员失血而死仅有10分钟)(平均CP，极高AP)</Chinesesimp>
-                <Original>One of our aircraft went down near this position. Satellite reports say the pilot is badly injured and losing blood. Get to the crash site and bring him back to base safely. (Only 10 minutes until the pilot bleeds out.) (Avg CP, very high AP)</Original>
-                <English>One of our aircraft went down near this position. Satellite reports say the pilot is badly injured and losing blood. Get to the crash site and bring him back to base safely. (Only 10 minutes until the pilot bleeds out.) (Avg CP, very high AP)</English>
+                <Original>One of our aircraft went down near this position. The pilot's alive but bleeding badly. Get to the crash site and carry him back to base — he has about 10 minutes. (Average CP, very high AP)</Original>
+                <English>One of our aircraft went down near this position. The pilot's alive but bleeding badly. Get to the crash site and carry him back to base — he has about 10 minutes. (Average CP, very high AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_drop_pilot">
                 <German>Pilot absetzen</German>
                 <Spanish>Soltar al piloto</Spanish>
                 <Chinesesimp>放下飞行员</Chinesesimp>
-                <Original>Drop the pilot</Original>
-                <English>Drop the pilot</English>
+                <Original>Put the pilot down</Original>
+                <English>Put the pilot down</English>
             </Key>
             <Key ID="STR_DUWS_T_put_in_vehicle">
                 <German>Ins Fahrzeug setzen</German>
                 <Spanish>Poner en el vehículo</Spanish>
                 <Chinesesimp>放入载具</Chinesesimp>
-                <Original>Put into vehicle</Original>
-                <English>Put into vehicle</English>
+                <Original>Load the pilot into the vehicle</Original>
+                <English>Load the pilot into the vehicle</English>
             </Key>
             <Key ID="STR_DUWS_T_carry_pilot">
                 <German>Pilot tragen</German>
@@ -4567,43 +4571,43 @@
                 <German>Pilot heraus tragen</German>
                 <Spanish>Sacar piloto fuera</Spanish>
                 <Chinesesimp>背出飞行员</Chinesesimp>
-                <Original>Carry pilot out</Original>
-                <English>Carry pilot out</English>
+                <Original>Take the pilot out</Original>
+                <English>Take the pilot out</English>
             </Key>
             <Key ID="STR_DUWS_T_cant_put_not_carried">
                 <German>Du kannst keinen Piloten absetzen, den du nicht trägst</German>
                 <Spanish>No puedes poner a un piloto que no estás cargando</Spanish>
                 <Chinesesimp>你不能放入未被你携带的飞行员</Chinesesimp>
-                <Original>You cannot put down a pilot you are not carrying</Original>
-                <English>You cannot put down a pilot you are not carrying</English>
+                <Original>You aren't carrying the pilot</Original>
+                <English>You aren't carrying the pilot</English>
             </Key>
             <Key ID="STR_DUWS_T_pilot_already_in_vehicle">
                 <German>Pilot befindet sich bereits im Fahrzeug</German>
                 <Spanish>El piloto ya está dentro del vehículo</Spanish>
                 <Chinesesimp>飞行员已经在载具内</Chinesesimp>
-                <Original>Pilot is already inside the vehicle</Original>
-                <English>Pilot is already inside the vehicle</English>
+                <Original>The pilot is already in the vehicle</Original>
+                <English>The pilot is already in the vehicle</English>
             </Key>
             <Key ID="STR_DUWS_T_failed_put_vehicle">
                 <German>Kann Pilot nicht in Fahrzeug setzen, bitte versuche es erneut</German>
                 <Spanish>No se puede poner al piloto en el vehículo, inténtalo de nuevo</Spanish>
                 <Chinesesimp>无法将飞行员放入载具，请重试</Chinesesimp>
-                <Original>Cannot put the pilot into the vehicle. Please try again</Original>
-                <English>Cannot put the pilot into the vehicle. Please try again</English>
+                <Original>Couldn't load the pilot into the vehicle. Try again</Original>
+                <English>Couldn't load the pilot into the vehicle. Try again</English>
             </Key>
             <Key ID="STR_DUWS_T_pilot_not_in_vehicle">
                 <German>Pilot ist nicht in diesem Fahrzeug</German>
                 <Spanish>El piloto no está en este vehículo</Spanish>
                 <Chinesesimp>飞行员不在该载具内</Chinesesimp>
-                <Original>Pilot is not in this vehicle</Original>
-                <English>Pilot is not in this vehicle</English>
+                <Original>The pilot isn't in this vehicle</Original>
+                <English>The pilot isn't in this vehicle</English>
             </Key>
             <Key ID="STR_DUWS_T_already_carrying_other">
                 <German>Du trägst bereits einen Piloten</German>
                 <Spanish>Ya estás cargando un piloto</Spanish>
                 <Chinesesimp>你已经背着一名飞行员</Chinesesimp>
-                <Original>You are already carrying a pilot</Original>
-                <English>You are already carrying a pilot</English>
+                <Original>You're already carrying the pilot</Original>
+                <English>You're already carrying the pilot</English>
             </Key>
             <Key ID="STR_DUWS_T_failed_take_out">
                 <German>Pilot kann nicht aus dem Fahrzeug entfernt werden</German>
@@ -4616,43 +4620,55 @@
                 <German>Du trägst einen Piloten, Pilot wurde automatisch abgesetzt</German>
                 <Spanish>Estás cargando un piloto, el piloto ha sido soltado automáticamente</Spanish>
                 <Chinesesimp>因为你背着飞行员，飞行员已被自动放下。</Chinesesimp>
-                <Original>You were already carrying a pilot, so that pilot has been dropped automatically</Original>
-                <English>You were already carrying a pilot, so that pilot has been dropped automatically</English>
+                <Original>You were already carrying the pilot, so he's been set down here</Original>
+                <English>You were already carrying the pilot, so he's been set down here</English>
+            </Key>
+            <Key ID="STR_DUWS_T_no_vehicle_near">
+                <Original>No vehicle close enough to load the pilot into</Original>
+                <English>No vehicle close enough to load the pilot into</English>
+            </Key>
+            <Key ID="STR_DUWS_T_no_available_seat">
+                <Original>No free seat in that vehicle for the pilot</Original>
+                <English>No free seat in that vehicle for the pilot</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pilot_dead">
+                <Original>The pilot is dead</Original>
+                <English>The pilot is dead</English>
             </Key>
             <Key ID="STR_DUWS_T_16dh939j">
                 <German>Der Nachrichtendienst hat zwei feindliche Scharfschützen in diesem Bereich gesichtet – eliminiere sie! (Nach der Eliminierung der Scharfschützen braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Mission abschließend zu bestätigen.) (Slightly high CP, Slightly high AP)</German>
                 <Spanish>El servicio de inteligencia ha detectado a dos francotiradores enemigos en esta zona — elimínalos! (Después de que los francotiradores sean eliminados, el servicio de inteligencia necesitará unos minutos adicionales para confirmar la finalización de la misión.) (Slightly high CP, Slightly high AP)</Spanish>
                 <Chinesesimp>这个区域有敌军的两名狙击手，干掉他们。(狙击手死亡后，情报部门需要额外几分钟确认目标完成。)(稍高CP，稍高AP)</Chinesesimp>
-                <Original>The Intel Unit has detected two enemy snipers in this area. Take them out. Once they're down, the Intel Unit needs a few extra minutes to confirm the mission is complete. (Slightly high CP, slightly high AP)</Original>
-                <English>The Intel Unit has detected two enemy snipers in this area. Take them out. Once they're down, the Intel Unit needs a few extra minutes to confirm the mission is complete. (Slightly high CP, slightly high AP)</English>
+                <Original>Allseer has two enemy snipers working this area. Kill both, then hold a few minutes while Allseer confirms the area's clear. (Slightly high CP, slightly high AP)</Original>
+                <English>Allseer has two enemy snipers working this area. Kill both, then hold a few minutes while Allseer confirms the area's clear. (Slightly high CP, slightly high AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_shentouxiaodui">
                 <German>Ein feindliches Eindringlungsteam ist hier blockiert! Vernichtet sie! (Low CP, Low AP)</German>
                 <Spanish>Hay un equipo de infiltración enemigo atrapado aquí! ¡Elimínalos! (Low CP, Low AP)</Spanish>
                 <Chinesesimp>敌人的渗透小队被困在这里了！去干掉他们！(低CP，低AP)</Chinesesimp>
-                <Original>An enemy infiltration team is pinned down here! Take them out! (Low CP, low AP)</Original>
-                <English>An enemy infiltration team is pinned down here! Take them out! (Low CP, low AP)</English>
+                <Original>An enemy infiltration team is holed up in the buildings here. Clear them out. (Low CP, low AP)</Original>
+                <English>An enemy infiltration team is holed up in the buildings here. Clear them out. (Low CP, low AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_jianshouzhendi">
                 <German>Unser hochwertiges taktisches Asset befindet sich hier. Du musst das Ziel schnell erreichen und es für eine Weile halten, bis die Verstärkung eintrifft. (Slightly high CP, high AP)</German>
                 <Spanish>Nuestro activo táctico de alto valor está aquí. Debes llegar al destino con prisa y mantener la posición durante un tiempo hasta que lleguen los refuerzos. (Slightly high CP, high AP)</Spanish>
                 <Chinesesimp>我方高价值战术资产在这里，你需要快点到达目的地并坚守一段时间，直到援军抵达。(稍高CP，高AP)</Chinesesimp>
-                <Original>Our high-value tactical asset is here. You need to reach the destination at once and hold your position until reinforcements arrive. (Slightly high CP, high AP)</Original>
-                <English>Our high-value tactical asset is here. You need to reach the destination at once and hold your position until reinforcements arrive. (Slightly high CP, high AP)</English>
+                <Original>One of our high-value assets has broken down here, with recon fireteam Express 2-1 holding a thin perimeter around it. Get there and hold the position until reinforcements arrive. Bring a toolkit in case the asset needs repairs. (Slightly high CP, high AP)</Original>
+                <English>One of our high-value assets has broken down here, with recon fireteam Express 2-1 holding a thin perimeter around it. Get there and hold the position until reinforcements arrive. Bring a toolkit in case the asset needs repairs. (Slightly high CP, high AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_domination">
                 <German>Freundliche mechanisierte Infanteriestrupp kämpft gegen feindliche schwere Panzerverbände. Eure Einheit muss sofort reagieren und alle feindlichen Panzer-Einheiten im Zielbereich um jeden Preis eliminieren. Hinweis: Bei der Auswahl des AO für diese Mission sollten vorzugsweise wasserfreie Binnenbereiche gewählt werden. (Very low CP, avg AP)</German>
                 <Spanish>Escuadrón de infantería mecanizada aliado está en combate con unidades de blindaje pesado enemigas. Tu unidad debe responder inmediatamente y eliminar todas las unidades de blindaje enemigas en el área objetivo a cualquier costo. Nota: al seleccionar el AO para esta misión, es preferible elegir zonas interiores sin agua. (Very low CP, avg AP)</Spanish>
                 <Chinesesimp>友军机械化步兵班正与敌人重型装甲单位交火，你的单位需要立即响应，不惜代价歼灭目标区域所有敌军装甲单位。(注意，此任务的行动区域在选取时最好在无水的内陆) (极低CP，平均AP)</Chinesesimp>
-                <Original>Friendly mechanized infantry squad is engaging enemy heavy armor units. Your unit is to respond immediately and eliminate all enemy armor units in the objective area at all costs. Note: when selecting the AO for this mission, it is preferable to choose inland areas without water. (Very low CP, avg AP)</Original>
-                <English>Friendly mechanized infantry squad is engaging enemy heavy armor units. Your unit is to respond immediately and eliminate all enemy armor units in the objective area at all costs. Note: when selecting the AO for this mission, it is preferable to choose inland areas without water. (Very low CP, avg AP)</English>
+                <Original>A friendly mechanized squad has run into an enemy heavy armor platoon and is coming apart. Move in and destroy every enemy armored vehicle in the objective area. Take this one when the objective sits inland — armor can't fight its way across water. (Very low CP, average AP)</Original>
+                <English>A friendly mechanized squad has run into an enemy heavy armor platoon and is coming apart. Move in and destroy every enemy armored vehicle in the objective area. Take this one when the objective sits inland — armor can't fight its way across water. (Very low CP, average AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_hound">
                 <German>Hund</German>
                 <Spanish>Sabueso</Spanish>
                 <Chinesesimp>猎狗</Chinesesimp>
-                <Original>HOUND</Original>
-                <English>HOUND</English>
+                <Original>Hound 2-2</Original>
+                <English>Hound 2-2</English>
             </Key>
             <Key ID="STR_DUWS_T_dominationletsdothis">
                 <German>"Hund 2-2" an alle Einheiten im Einsatzgebiet, wir haben an der markierten Position eine komplette feindliche Panzerzug! Sofortige Verstärkung erforderlich!</German>
@@ -4665,8 +4681,8 @@
                 <German>"Overlord 1-1" an Action Squad, "Hund 2-2" braucht eure Unterstützung. Rüstet sofort eure Feuerkraft auf und brecht auf!</German>
                 <Spanish>"Overlord 1-1" al Action Squad, "Sabueso 2-2" necesita vuestro apoyo. Preparad vuestro fuego inmediatamente y salid.</Spanish>
                 <Chinesesimp>"霸王1-1"呼叫行动组，"猎狗2-2"需要你们的支援，立刻整理手上的火力，然后出发。</Chinesesimp>
-                <Original>Overlord to Alpha 1-1, Hound 2-2 needs support. Get your firepower together and move out.</Original>
-                <English>Overlord to Alpha 1-1, Hound 2-2 needs support. Get your firepower together and move out.</English>
+                <Original>Overlord to Alpha 1-1, Hound 2-2 needs support. Bring anything that can kill armor and move out.</Original>
+                <English>Overlord to Alpha 1-1, Hound 2-2 needs support. Bring anything that can kill armor and move out.</English>
             </Key>
             <Key ID="STR_DUWS_T_dominationcopy">
                 <German>Hier ist Action Squad, verstanden. ETA: 5 Minute.</German>
@@ -4679,8 +4695,8 @@
                 <German>"Overlord" an Action Squad, wir haben gerade den Kontakt zur "Hund" Einheit verloren. Fahrt weiter zum Ziel und stellt sicher, dass alle feindlichen Panzer-Einheiten vernichtet werden.</German>
                 <Spanish>"Overlord" al Action Squad, acabamos de perder el contacto con el elemento "Sabueso". Continúen hacia el objetivo y asegúrense de destruir todas las unidades de blindaje enemigas.</Spanish>
                 <Chinesesimp>"霸王"呼叫行动组，我们刚刚失去了与"猎狗"车组的联系。继续前往目标地点，确保摧毁所有敌军装甲单位。</Chinesesimp>
-                <Original>Overlord to Alpha 1-1, we've lost contact with Hound. Continue to the objective and make sure every enemy armor unit is destroyed.</Original>
-                <English>Overlord to Alpha 1-1, we've lost contact with Hound. Continue to the objective and make sure every enemy armor unit is destroyed.</English>
+                <Original>Overlord to Alpha 1-1, we've lost contact with Hound 2-2. Continue to the objective and make sure every enemy armored vehicle is destroyed.</Original>
+                <English>Overlord to Alpha 1-1, we've lost contact with Hound 2-2. Continue to the objective and make sure every enemy armored vehicle is destroyed.</English>
             </Key>
             <Key ID="STR_DUWS_T_dominationarrow">
                 <German>Feindliche Angriffsrichtung</German>
@@ -4693,29 +4709,29 @@
                 <German>"Overlord" an alle Einheiten im AO, Lagebericht: Feindlicher Panzerzug hat keine Kampfwirksamkeit mehr. Gute Arbeit, Action Squad.</German>
                 <Spanish>"Overlord" a todas las unidades en el AO, informe de situación: la sección de blindaje enemiga ha perdido su efectividad de combate. Muy bien hecho, Action Squad.</Spanish>
                 <Chinesesimp>"霸王"呼叫战区全体单位，情况报告：敌方装甲排已失去战斗效力。干得漂亮，行动组。</Chinesesimp>
-                <Original>Overlord to all units in the AO, sitrep: the enemy armor platoon is combat ineffective. Good work, Alpha 1-1.</Original>
-                <English>Overlord to all units in the AO, sitrep: the enemy armor platoon is combat ineffective. Good work, Alpha 1-1.</English>
+                <Original>Overlord to all units in the AO, be advised: the enemy armor platoon is combat ineffective. Good work, Alpha 1-1.</Original>
+                <English>Overlord to all units in the AO, be advised: the enemy armor platoon is combat ineffective. Good work, Alpha 1-1.</English>
             </Key>
             <Key ID="STR_DUWS_T_czpvn5z1">
                 <German>Der Nachrichtendienst hat angegeben, dass die Feinde hier ein Ingenieurfahrzeug aufgestellt haben. Ergreife es und bring es zurück zur Basis. Es kann zu einer mobilen Fabrik umgewandelt werden. (Low CP, low AP)</German>
                 <Spanish>El servicio de inteligencia ha indicado que el enemigo ha desplegado un vehículo de ingeniería aquí. Aprópialo y tráelo de vuelta a la base. Puede ser convertido en una fábrica móvil. (Low CP, low AP)</Spanish>
                 <Chinesesimp>情报部门指出，敌人在这里部署了一辆工程载具。去把它抢回基地。它可以被改造为移动工厂。(低CP，低AP)</Chinesesimp>
-                <Original>The Intel Unit has indicated the enemy has deployed an engineering vehicle here. Seize it and bring it back to base. It can be converted into a mobile factory. (Low CP, low AP)</Original>
-                <English>The Intel Unit has indicated the enemy has deployed an engineering vehicle here. Seize it and bring it back to base. It can be converted into a mobile factory. (Low CP, low AP)</English>
+                <Original>Allseer has an enemy engineering vehicle parked here. Take it and drive it back to base — our engineers can convert it into a mobile factory. (Low CP, low AP)</Original>
+                <English>Allseer has an enemy engineering vehicle parked here. Take it and drive it back to base — our engineers can convert it into a mobile factory. (Low CP, low AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_y7z1cx6j">
                 <German>Die feindliche Panzerbesatzung legt hier eine kurze Pause ein – eliminiere ihren Kommandanten! (Nach der Eliminierung des Panzerkommandanten braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Mission abschließend zu bestätigen.) (Low CP, low AP)</German>
                 <Spanish>La tripulación de tanque enemiga está tomando un descanso breve aquí — elimína a su comandante! (Después de que el comandante de tanque sea eliminado, el servicio de inteligencia necesitará unos minutos adicionales para confirmar la finalización de la misión.) (Low CP, low AP)</Spanish>
                 <Chinesesimp>敌人的坦克车组正在这里稍作休息，干掉他们的车长！(车长死亡后，情报部门需要额外几分钟确认目标完成。)(低CP，低AP)</Chinesesimp>
-                <Original>The enemy tank crew is taking a short break here. Take out their commander. Once he's down, the Intel Unit needs a few extra minutes to confirm the mission is complete. (Low CP, low AP)</Original>
-                <English>The enemy tank crew is taking a short break here. Take out their commander. Once he's down, the Intel Unit needs a few extra minutes to confirm the mission is complete. (Low CP, low AP)</English>
+                <Original>An enemy tank crew is stood down here. Kill their commander, then hold a few minutes while Allseer confirms the kill. (Low CP, low AP)</Original>
+                <English>An enemy tank crew is stood down here. Kill their commander, then hold a few minutes while Allseer confirms the kill. (Low CP, low AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_j97ecrsh">
                 <German>Die Späher melden, dass die Feinde hier laptopartige elektronische Kampfgeräte aufgestellt haben, in denen möglicherweise Informationen über die Standorte feindlicher Truppenstellungen enthalten sind. Suchen Sie das Gerät auf, laden Sie alle nützlichen Informationen herunter und zerstören Sie es, falls es keine gibt. (Very low CP, high AP)</German>
                 <Spanish>Los exploradores informan de que el enemigo ha desplegado un dispositivo de guerra electrónica de estilo portátil aquí, que puede contener información sobre las posiciones de despliegue enemigo. Localiza el dispositivo, descarga toda la información útil y destrúyelo si no hay ninguna. (Very low CP, high AP)</Spanish>
                 <Chinesesimp>侦察兵报告了敌人在这里部署了笔记本样式的电子战设备，里面可能有关于敌军部署位置的信息。找到设备，下载一切有用信息，没有的话就把它毁掉。(极低CP，高AP)</Chinesesimp>
-                <Original>Scouts report the enemy has deployed laptop-style electronic warfare equipment here, which may contain intel on enemy deployment positions. Locate the equipment, download all useful intel, and destroy it if there is none. (Very low CP, high AP)</Original>
-                <English>Scouts report the enemy has deployed laptop-style electronic warfare equipment here, which may contain intel on enemy deployment positions. Locate the equipment, download all useful intel, and destroy it if there is none. (Very low CP, high AP)</English>
+                <Original>Scouts report enemy electronic warfare gear set up here — a field laptop that may hold their deployment positions. Find it, pull whatever intel is on it, and destroy it if there's nothing worth taking. (Very low CP, high AP)</Original>
+                <English>Scouts report enemy electronic warfare gear set up here — a field laptop that may hold their deployment positions. Find it, pull whatever intel is on it, and destroy it if there's nothing worth taking. (Very low CP, high AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_euhsfj7z">
                 <German>Der Feind hat eines unserer verschlüsselten Funkgeräte gefunden, wir müssen das Funkgerät finden und zerstören.</German>
@@ -4728,15 +4744,15 @@
                 <German>Der kleine feindliche Waffenschatz befindet sich hier. Sprenge ihn! (Slightly high CP, low AP)</German>
                 <Spanish>El pequeño depósito de armas enemigo está aquí. Destrúyelo con explosivos! (Slightly high CP, low AP)</Spanish>
                 <Chinesesimp>敌人的小型军火库储存在这里，去炸了它。(稍高CP，低AP)</Chinesesimp>
-                <Original>The enemy's small Arsenal is located here. Destroy it with explosives! (Slightly high CP, low AP)</Original>
-                <English>The enemy's small Arsenal is located here. Destroy it with explosives! (Slightly high CP, low AP)</English>
+                <Original>The enemy keeps a small ammo cache here. Bring explosives and level it. (Slightly high CP, low AP)</Original>
+                <English>The enemy keeps a small ammo cache here. Bring explosives and level it. (Slightly high CP, low AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_n4uc7t2x">
                 <German>Der Feind hat in diesem Gebiet ein Luftverteidigungsradar aufgestellt, und es stört unsere Luftoperationen. Du musst es zerstören. (Nach der Zerstörung des Radars braucht der Nachrichtendienst noch ein paar Minuten, um zu bestätigen, dass das Radar neutralisiert wurde.) (Avg CP, slightly low AP)</German>
                 <Spanish>El enemigo ha desplegado un radar de defensa aérea en esta área, y está interrumpiendo nuestras operaciones aéreas. Debes destruirlo. (Después de que el radar sea destruido, el servicio de inteligencia necesitará unos minutos para confirmar que el radar ha sido neutralizado.) (Avg CP, slightly low AP)</Spanish>
                 <Chinesesimp>敌人在这一地区部署了防空雷达，它正在骚扰我们的空中行动。你必须摧毁它。(雷达被摧毁后，情报部门需要几分钟确认雷达已被无效化。)(平均CP，稍低AP)</Chinesesimp>
-                <Original>The enemy has an AA radar in this area, and it is disrupting our air operations. You must destroy it. (After the radar is destroyed, the Intel Unit will need a few minutes to confirm the radar has been neutralized.) (Avg CP, slightly low AP)</Original>
-                <English>The enemy has an AA radar in this area, and it is disrupting our air operations. You must destroy it. (After the radar is destroyed, the Intel Unit will need a few minutes to confirm the radar has been neutralized.) (Avg CP, slightly low AP)</English>
+                <Original>An enemy AA radar in this area is shutting our aircraft out of the sky. Destroy it, then hold a few minutes while Allseer confirms the site is off the air. (Average CP, slightly low AP)</Original>
+                <English>An enemy AA radar in this area is shutting our aircraft out of the sky. Destroy it, then hold a few minutes while Allseer confirms the site is off the air. (Average CP, slightly low AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_dmfmwmfp">
                 <German>Lade Missions-Positionen...</German>
@@ -4796,36 +4812,36 @@
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer Pilot wurde getötet !</German>
                 <Spanish>== MISIÓN SECUNDARIA FALLIDA==\n\n ¡El piloto ha muerto!</Spanish>
                 <Chinesesimp>==支线任务失败==\n\n飞行员阵亡 !</Chinesesimp>
-                <Original>==SIDE MISSION FAILED==\n\nThe Pilot was killed!</Original>
-                <English>==SIDE MISSION FAILED==\n\nThe Pilot was killed!</English>
+                <Original>==SIDE MISSION FAILED==\n\nThe pilot was killed.</Original>
+                <English>==SIDE MISSION FAILED==\n\nThe pilot was killed.</English>
             </Key>
             <Key ID="STR_DUWS_T_fxysw123">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer Pilot hat gerade seinen Lagebericht eingestellt... er ist wahrscheinlich bereits an Blutverlust gestorben.</German>
                 <Spanish>== MISIÓN SECUNDARIA FALLIDA==\n\n El piloto acaba de interrumpir su informe de situación... probablemente ha muerto por hemorragia ya.</Spanish>
                 <Chinesesimp>==支线任务失败==\n\n飞行员刚刚停止了情况报告......可能他已经失血而死了。</Chinesesimp>
-                <Original>==SIDE MISSION FAILED==\n\nThe pilot just stopped responding... he may have bled out already.</Original>
-                <English>==SIDE MISSION FAILED==\n\nThe pilot just stopped responding... he may have bled out already.</English>
+                <Original>==SIDE MISSION FAILED==\n\nThe pilot stopped answering the radio. He's most likely bled out.</Original>
+                <English>==SIDE MISSION FAILED==\n\nThe pilot stopped answering the radio. He's most likely bled out.</English>
             </Key>
             <Key ID="STR_DUWS_T_fxyys123">
                 <German>Der Bericht besagt, der Pilot verliert seine Lebenszeichen! Eure Truppe muss sich beeilen!</German>
                 <Spanish>El informe indica que el piloto está perdiendo signos vitales! Tu escuadrón debe apresurarse!</Spanish>
                 <Chinesesimp>报告说飞行员正失去生命体征！你的小队需要加快速度了！</Chinesesimp>
-                <Original>The pilot's vital signs are fading! Push, now!</Original>
-                <English>The pilot's vital signs are fading! Push, now!</English>
+                <Original>The pilot's fading fast. Two minutes, maybe less</Original>
+                <English>The pilot's fading fast. Two minutes, maybe less</English>
             </Key>
             <Key ID="STR_DUWS_T_pilotfound">
                 <German>Scheiße... Mein Bein ist verletzt. Hast du ein Sanitätspaket?</German>
                 <Spanish>Joder... Me he lastimado la pierna. ¿Tienes un botiquín?</Spanish>
                 <Chinesesimp>该死...我腿伤了。你有医疗包吗？</Chinesesimp>
-                <Original>Damn... I hurt my leg. Do you have a medkit?</Original>
-                <English>Damn... I hurt my leg. Do you have a medkit?</English>
+                <Original>My leg's in bad shape. Have you got a medkit?</Original>
+                <English>My leg's in bad shape. Have you got a medkit?</English>
             </Key>
             <Key ID="STR_DUWS_T_pilotend">
                 <German>Endlich zurück! Vielen Dank an euch!</German>
                 <Spanish>¡Finalmente de vuelta! ¡Muchas gracias a todos!</Spanish>
                 <Chinesesimp>终于回来了！谢谢你们！以后你们呼叫近空支援我一定第一个响应！</Chinesesimp>
-                <Original>Finally back! I owe you all one.</Original>
-                <English>Finally back! I owe you all one.</English>
+                <Original>We made it. I owe you all one.</Original>
+                <English>We made it. I owe you all one.</English>
             </Key>
             <Key ID="STR_DUWS_T_pilotend2">
                 <German>„Overlord“ an Einsatztrupp, gut gemacht. Ich wette, dieser Pilot vergisst euch sein ganzes Leben lang nicht.</German>
@@ -4866,22 +4882,22 @@
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDie Aufklärungspatrouille wurde getötet!</German>
                 <Spanish>==MISIÓN SECUNDARIA FALLIDA==\n\n ¡La patrulla de reconocimiento ha muerto!</Spanish>
                 <Chinesesimp>==支线任务失败==\n\n特种小队全体阵亡!</Chinesesimp>
-                <Original>==SIDE MISSION FAILED==\n\nThe Recon patrol was killed!</Original>
-                <English>==SIDE MISSION FAILED==\n\nThe Recon patrol was killed!</English>
+                <Original>==SIDE MISSION FAILED==\n\nThe assault squad was wiped out.</Original>
+                <English>==SIDE MISSION FAILED==\n\nThe assault squad was wiped out.</English>
             </Key>
             <Key ID="STR_DUWS_T_lyjjiteq">
                 <German>Ihr seid endlich da! Evakuiert sofort – Feinde sind überall um uns herum! </German>
                 <Spanish>¡Finalmente llegaron! ¡Evacuense rápido! Hay enemigos por todas partes a nuestro alrededor.</Spanish>
                 <Chinesesimp>你们终于来了，快撤离吧，周围全是敌人。</Chinesesimp>
-                <Original>You're finally here! Get us out, hostiles all around us!</Original>
-                <English>You're finally here! Get us out, hostiles all around us!</English>
+                <Original>You're here. Get us out — they're all around us.</Original>
+                <English>You're here. Get us out — they're all around us.</English>
             </Key>
             <Key ID="STR_DUWS_T_q9yne5ax">
                 <German>==SEKUNDÄRE MISSION ERFOLGREICH==\n\nDie Aufklärungspatrouille wurde erfolgreich gerettet!</German>
                 <Spanish>==MISIÓN SECUNDARIA COMPLETADA==\n\n ¡La patrulla de reconocimiento fue rescatada con éxito!</Spanish>
                 <Chinesesimp>==支线任务完成==\n\n特种小队成功被解救!</Chinesesimp>
-                <Original>==SIDE MISSION COMPLETED==\n\nThe Recon patrol was successfully rescued!</Original>
-                <English>==SIDE MISSION COMPLETED==\n\nThe Recon patrol was successfully rescued!</English>
+                <Original>==SIDE MISSION COMPLETED==\n\nThe assault squad is out.</Original>
+                <English>==SIDE MISSION COMPLETED==\n\nThe assault squad is out.</English>
             </Key>
             <Key ID="STR_DUWS_T_0rh5ayby">
                 <German>Sabotiere Laptop</German>
@@ -4922,8 +4938,8 @@
                 <German>==DEIN BAU-FAHRZEUG IST NOCH INTAKT==\n\nEs ist nur 1 Bau-Fahrzeug gleichzeitig in der Mission erlaubt! Bitte wähle eine andere Mission.</German>
                 <Spanish>==SU VEHÍCULO CONSTRUCTOR SIGUE INTACTO==\n\n ¡Solo se permite un vehículo constructor a la vez en el mapa! Por favor escoja otra misión.</Spanish>
                 <Chinesesimp>==你的建筑汽车还完好无损==\n\n地图上只允许同时有一辆建筑载具！请选择另一个任务。</Chinesesimp>
-                <Original>==YOUR BUILDER VEHICLE IS STILL INTACT==\n\nOnly one builder vehicle is allowed on the map at a time! Please choose another mission.</Original>
-                <English>==YOUR BUILDER VEHICLE IS STILL INTACT==\n\nOnly one builder vehicle is allowed on the map at a time! Please choose another mission.</English>
+                <Original>==BUILDER VEHICLE ALREADY IN SERVICE==\n\nOnly one builder vehicle can be on the map at a time. Pick a different mission.</Original>
+                <English>==BUILDER VEHICLE ALREADY IN SERVICE==\n\nOnly one builder vehicle can be on the map at a time. Pick a different mission.</English>
             </Key>
             <Key ID="STR_DUWS_T_63pnqj4l">
                 <German>Stehle Bau-Fahrzeug</German>
@@ -4936,22 +4952,22 @@
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDas Bau-Fahrzeug wurde zerstört</German>
                 <Spanish>==MISIÓN SECUNDARIA FALLIDA==\n\n El vehículo constructor ha sido destruído</Spanish>
                 <Chinesesimp>==支线任务失败==\n\n建筑载具被毁</Chinesesimp>
-                <Original>==SIDE MISSION FAILED==\n\nThe builder vehicle was destroyed</Original>
-                <English>==SIDE MISSION FAILED==\n\nThe builder vehicle was destroyed</English>
+                <Original>==SIDE MISSION FAILED==\n\nThe builder vehicle was destroyed.</Original>
+                <English>==SIDE MISSION FAILED==\n\nThe builder vehicle was destroyed.</English>
             </Key>
             <Key ID="STR_DUWS_T_125f39s4">
                 <German>==SEKUNDÄRE MISSION ABGESCHLOSSEN==\n\nDas Bau-Fahrzeug wurde sicher zur Basis zurückgebracht!</German>
                 <Spanish>==MISIÓN SECUNDARIA FALLIDA==\n\n ¡El vehículo constructor ha sido retornado a la base!</Spanish>
                 <Chinesesimp>==支线任务成功==\n\n建筑载具已安全返回基地!</Chinesesimp>
-                <Original>==SIDE MISSION COMPLETED==\n\nThe builder vehicle was safely returned to base!</Original>
-                <English>==SIDE MISSION COMPLETED==\n\nThe builder vehicle was safely returned to base!</English>
+                <Original>==SIDE MISSION COMPLETED==\n\nThe builder vehicle is back at base.</Original>
+                <English>==SIDE MISSION COMPLETED==\n\nThe builder vehicle is back at base.</English>
             </Key>
             <Key ID="STR_DUWS_T_rw65exr8">
                 <German>Anpassung des Fahrzeugs abgeschlossen!\nDu kannst das Fahrzeug jetzt zum Bauen von Befestigungen nutzen!</German>
                 <Spanish>¡Modificaciónes al vehículo completadas!\n ¡Ahora puede usar el vehículo como una fábrica de estructuras!</Spanish>
                 <Chinesesimp>载具改装完成！\n你可以把载具变成建造工厂！</Chinesesimp>
-                <Original>Vehicle modifications complete!\nYou can now use it as a building factory!</Original>
-                <English>Vehicle modifications complete!\nYou can now use it as a building factory!</English>
+                <Original>Conversion complete.\nThe vehicle now works as a building factory</Original>
+                <English>Conversion complete.\nThe vehicle now works as a building factory</English>
             </Key>
             <Key ID="STR_DUWS_T_ceg3mxxc">
                 <German>Stehle Nachschub-LKW</German>
@@ -4964,36 +4980,36 @@
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer LKW wurde zerstört!</German>
                 <Spanish>==MISIÓN SECUNDARIA FALLIDA==\n\n ¡El camión ha sido destruído!</Spanish>
                 <Chinesesimp>==支线任务失败==\n\n卡车严重损毁！</Chinesesimp>
-                <Original>==SIDE MISSION FAILED==\n\nThe truck was destroyed!</Original>
-                <English>==SIDE MISSION FAILED==\n\nThe truck was destroyed!</English>
+                <Original>==SIDE MISSION FAILED==\n\nThe truck was destroyed.</Original>
+                <English>==SIDE MISSION FAILED==\n\nThe truck was destroyed.</English>
             </Key>
             <Key ID="STR_DUWS_T_fxkczy00">
                 <German>Scheiße... die Feinde haben eine zeitgesteuerte Sprengladung in den LKW gesteckt! Wir können sie im Moment nicht sofort entschärfen – bring ihn schnell zurück zur Basis für die professionellen Ingenieure!</German>
                 <Spanish>¡Joder... los enemigos pusieron un explosivo cronometrado en el camión! No tenemos capacidad para desactivarlo inmediatamente, llévalo de regreso a la base rápido para que lo hagan los ingenieros profesionales!</Spanish>
                 <Chinesesimp>我操...敌人往卡车里塞了个定时炸药！我们现在没有能力立刻拆除它，快开回基地让专业的工程师来！</Chinesesimp>
-                <Original>Damn it, the enemy rigged the truck with a timed charge. We can't disarm it out here. Get it back to base fast so the engineers can deal with it.</Original>
-                <English>Damn it, the enemy rigged the truck with a timed charge. We can't disarm it out here. Get it back to base fast so the engineers can deal with it.</English>
+                <Original>The enemy rigged the truck with a timed charge and there's no disarming it in the field. Get it back to base and let the engineers deal with it</Original>
+                <English>The enemy rigged the truck with a timed charge and there's no disarming it in the field. Get it back to base and let the engineers deal with it</English>
             </Key>
             <Key ID="STR_DUWS_T_abc1abc2">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nHochwertiges Gelegenheitsfenster abgelaufen!</German>
                 <Spanish>==MISIÓN SECUNDARIA FALLIDA==\n\n Ventana de oportunidad de alto valor expirada!</Spanish>
                 <Chinesesimp>==支线任务失败==\n\n高价值窗口期已过！</Chinesesimp>
-                <Original>==SIDE MISSION FAILED==\n\nThe window of opportunity has closed!</Original>
-                <English>==SIDE MISSION FAILED==\n\nThe window of opportunity has closed!</English>
+                <Original>==SIDE MISSION FAILED==\n\nThe command team dispersed before the officer went down.</Original>
+                <English>==SIDE MISSION FAILED==\n\nThe command team dispersed before the officer went down.</English>
             </Key>
             <Key ID="STR_DUWS_T_3jmpthvi">
                 <German>Entladen abgeschlossen! Du kannst den LKW nun verwenden.</German>
                 <Spanish>Descagra completa, ya puede usar el camión como lo desee.</Spanish>
                 <Chinesesimp>卸货完成，你可以随意使用卡车了。</Chinesesimp>
-                <Original>Unloading complete. The truck is yours to use</Original>
-                <English>Unloading complete. The truck is yours to use</English>
+                <Original>Unloading complete. The truck's yours</Original>
+                <English>Unloading complete. The truck's yours</English>
             </Key>
             <Key ID="STR_DUWS_T_po7fmmoa">
                 <German>Entladen des LKWs und Entschärfen der Sprengladung...</German>
                 <Spanish>Descargando el camión y desactivando el explosivo...</Spanish>
                 <Chinesesimp>为卡车卸货并拆除炸药...</Chinesesimp>
-                <Original>Unloading the truck and disarming the explosive...</Original>
-                <English>Unloading the truck and disarming the explosive...</English>
+                <Original>Unloading the truck and disarming the charge...</Original>
+                <English>Unloading the truck and disarming the charge...</English>
             </Key>
             <Key ID="STR_DUWS_T_1cc4kj4s">
                 <German>Töte Panzerkommandanten</German>
@@ -5020,8 +5036,8 @@
                 <German>Das Zielgebiet säubern</German>
                 <Spanish>Despejar la zona objetivo</Spanish>
                 <Chinesesimp>清理目标区域</Chinesesimp>
-                <Original>Clear the area</Original>
-                <English>Clear the area</English>
+                <Original>Clear Area</Original>
+                <English>Clear Area</English>
             </Key>
             <Key ID="STR_DUWS_T_jianshouzhendi2">
                 <German>Haltet den Zielbereich</German>
@@ -5055,8 +5071,8 @@
                 <German>"Overlord 1-1", verstanden, gute Arbeit. Nun extrahieren aus dem AO.</German>
                 <Spanish>"Overlord 1-1", entendido, buen trabajo. Ahora extraer del AO.</Spanish>
                 <Chinesesimp>"霸王1-1"收到，干得漂亮。现在从行动区域撤离吧。</Chinesesimp>
-                <Original>Overlord copies. Good work, now extract from the AO.</Original>
-                <English>Overlord copies. Good work, now extract from the AO.</English>
+                <Original>Overlord copies. Good work — extract from the AO.</Original>
+                <English>Overlord copies. Good work — extract from the AO.</English>
             </Key>
             <Key ID="STR_DUWS_T_supplytruckletsdothis">
                 <German>Signal 2-2 an alle Einheiten, gute Nachricht: Wir haben gerade den feindlichen Versorgungslaster entdeckt, Koordinaten wurden ins Informationssystem hochgeladen.</German>
@@ -5076,15 +5092,15 @@
                 <German>"Overlord" an Action Squad, Mission fehlgeschlagen, verlasse den Zielbereich sofort!</German>
                 <Spanish>"Overlord" al Action Squad, misión fallida, retirese del área objetivo lo antes posible!</Spanish>
                 <Chinesesimp>"霸王"呼叫行动组，任务失败，尽快撤出目标区域！</Chinesesimp>
-                <Original>Overlord to Alpha 1-1, mission failed. Extract from the objective immediately.</Original>
-                <English>Overlord to Alpha 1-1, mission failed. Extract from the objective immediately.</English>
+                <Original>Overlord to Alpha 1-1, the truck's gone. Extract from the objective.</Original>
+                <English>Overlord to Alpha 1-1, the truck's gone. Extract from the objective.</English>
             </Key>
             <Key ID="STR_DUWS_T_cacheletsdothis">
                 <German>Dies ist „Oberherr 1-1“. Aufklärer haben gerade das feindliche Arsenal lokalisiert. Ihr wisst, was zu tun ist.</German>
                 <Spanish>Este es "Imperador 1-1". Los exploradores han localizado recientemente el arsenal enemigo. Saben lo que tienen que hacer.</Spanish>
                 <Chinesesimp>这里是"霸王1-1"，侦察兵刚刚定位到了敌人的军火库，你知道该怎么做。</Chinesesimp>
-                <Original>This is Overlord. Scouts have pinpointed the enemy arsenal. You have your orders.</Original>
-                <English>This is Overlord. Scouts have pinpointed the enemy arsenal. You have your orders.</English>
+                <Original>This is Overlord. Scouts have pinpointed the enemy ammo cache. Bring explosives and level it.</Original>
+                <English>This is Overlord. Scouts have pinpointed the enemy ammo cache. Bring explosives and level it.</English>
             </Key>
             <Key ID="STR_DUWS_T_cachecopy">
                 <German>Action Squad, verstanden. Zum Ziel unterwegs.</German>
@@ -5097,15 +5113,15 @@
                 <German>"Overlord 1-1" an alle Einheiten, Notfall! Wir haben gerade die vorläufige feindliche Kommandomannschaft gesichtet – alle Bereitschaftseinheiten sollen sich bewegen und den vorläufigen Kommandanten sofort eliminieren!</German>
                 <Spanish>"Overlord 1-1" a todas las unidades, emergencia! Acabamos de localizar el equipo de comando temporal enemigo – todas las unidades en espera deben desplazarse y eliminar al comandante temporal de inmediato!</Spanish>
                 <Chinesesimp>"霸王1-1"呼叫全体单位，紧急情况！我们刚刚发现了敌人的临时指挥小组，现在需要所有待命单位前往消灭临时指挥官！</Chinesesimp>
-                <Original>Overlord to all units, priority: we've spotted the enemy's field command team. All standby units move in and take out the commander now.</Original>
-                <English>Overlord to all units, priority: we've spotted the enemy's field command team. All standby units move in and take out the commander now.</English>
+                <Original>Overlord to all units, be advised: we have the enemy's field command team in the open. Any element on standby, move in and take the commander down.</Original>
+                <English>Overlord to all units, be advised: we have the enemy's field command team in the open. Any element on standby, move in and take the commander down.</English>
             </Key>
             <Key ID="STR_DUWS_T_armorletsdothis">
                 <German>Hier spricht "Overlord", gute Nachricht: Eine feindliche Panzerzug wurde gerade von unserer Nahluftunterstützung vernichtet, der Führerpanzer liegt im Gelände defekt. Ihre Einheit hat die Aufgabe, ihren Zugführer zu eliminieren, solange sie Feldreparaturen durchführen – sein Panzer zu beschlagnahmen, falls möglich.</German>
                 <Spanish>Aquí "Overlord", buenas noticias: Un pelotón de blindados enemigos acaba de ser destruido por nuestro apoyo aéreo cercano, el tanque líder se averió en el campo. La misión de tu unidad es eliminar a su pelotón comandante mientras realizan reparaciones de campo; roba su tanque si es posible.</Spanish>
                 <Chinesesimp>这里是"霸王"，好消息：敌人的一个装甲排刚刚被我们的近空支援摧毁，领头的坦克在野外抛锚了。你单位的任务是在他们实施野战修理的时候干掉他们的排长，最好也把他的坦克抢过来。</Chinesesimp>
-                <Original>This is Overlord. Our close air support just tore up an enemy armor platoon, and their lead tank is stranded in the field. Take out the platoon leader while they attempt repairs, and seize his tank if you can.</Original>
-                <English>This is Overlord. Our close air support just tore up an enemy armor platoon, and their lead tank is stranded in the field. Take out the platoon leader while they attempt repairs, and seize his tank if you can.</English>
+                <Original>This is Overlord. Our close air support tore up an enemy armor platoon and their lead tank is stranded in the field. Take out the platoon leader while they're still working on repairs, and seize his tank if you can.</Original>
+                <English>This is Overlord. Our close air support tore up an enemy armor platoon and their lead tank is stranded in the field. Take out the platoon leader while they're still working on repairs, and seize his tank if you can.</English>
             </Key>
             <Key ID="STR_DUWS_T_sniperletsdothis">
                 <German>Hier ist Viper 1-5. Wir haben das feindliche Scharfschützenteam lokalisiert — sie tragen Ghillie-Anzüge. Deine Einheit kann handeln! Vorsicht, in ihrer Nähe sind viele Feinde.</German>
@@ -5118,8 +5134,8 @@
                 <German>Hier ist "Viper 1-5". Dieser Hurensohn trägt eine schwarze Barett – damit solltest du erkennen, welches das hochwertige Ziel ist.</German>
                 <Spanish>Aquí "Viper 1-5". Ese hijo de puta lleva una boina negra — eso debería permitirles distinguir cuál es el objetivo de alto valor.</Spanish>
                 <Chinesesimp>这里是"毒蛇1-5"，那个狗杂碎戴着顶黑色贝雷帽————这应该能让你们分辨出哪个是高价值目标。</Chinesesimp>
-                <Original>This is Viper 1-5. Your HVT's the one in the black beret. That's how you'll know him.</Original>
-                <English>This is Viper 1-5. Your HVT's the one in the black beret. That's how you'll know him.</English>
+                <Original>This is Viper 1-5. Your target's the one in the black beret. That's how you'll know him.</Original>
+                <English>This is Viper 1-5. Your target's the one in the black beret. That's how you'll know him.</English>
             </Key>
             <Key ID="STR_DUWS_T_sniperend">
                 <German>"Viper 1-5" an Action Squad, gut gemacht! Wir haben bestätigt, dass der feindliche Scharfschütze vollständig eliminiert wurde!</German>
@@ -5181,8 +5197,8 @@
                 <German>"Overlord 1-1" an "Signal 3-1"! Eine Soforteinsatztruppe ist auf dem Weg zu Ihrer Position. Halten Sie durch!</German>
                 <Spanish>"Imperador 1-1" a "Signal 3-1"! Una fuerza de reacción rápida está de camino a tu posición. Resiste!</Spanish>
                 <Chinesesimp>"霸王1-1"呼叫"信号3-1"，现已派出快反部队前往你所在的位置，坚持住！</Chinesesimp>
-                <Original>Overlord to Signal 3-1, a quick reaction force is en route to you. Hold on.</Original>
-                <English>Overlord to Signal 3-1, a quick reaction force is en route to you. Hold on.</English>
+                <Original>Overlord to Signal 3-1, a quick reaction force is en route. Hold what you have.</Original>
+                <English>Overlord to Signal 3-1, a quick reaction force is en route. Hold what you have.</English>
             </Key>
             <Key ID="STR_DUWS_T_squadfail">
                 <German>Action Squad, hier ist "Overlord". Wir haben den Kontakt zu "Signal 3-1" verloren... Verlasse das AO.</German>
@@ -5195,15 +5211,15 @@
                 <German>"Kobra" an Kommando! Wir bekämpfen feindliches schweres Feuer am verbündeten Funkturm! Ich wiederhole...</German>
                 <Spanish>"Cobra" al Mando! Estamos combatiendo contra fuego pesado enemigo en la torre de señales aliada! Repito...</Spanish>
                 <Chinesesimp>"眼镜蛇"呼叫总部！我们正在友军信号塔处与敌人重火力交战！重复...</Chinesesimp>
-                <Original>Cobra to Command, we're under heavy fire at the friendly signal tower. I say again...</Original>
-                <English>Cobra to Command, we're under heavy fire at the friendly signal tower. I say again...</English>
+                <Original>Cobra 1-3 to Overlord, we're taking heavy fire at the signal tower. I say again, heavy fire—</Original>
+                <English>Cobra 1-3 to Overlord, we're taking heavy fire at the signal tower. I say again, heavy fire—</English>
             </Key>
             <Key ID="STR_DUWS_T_towerfail">
                 <German>"Overlord 1-1" an Action Squad, verlasse das AO! Der Feind hat unsere Kommunikation gekapert!</German>
                 <Spanish>"Overlord 1-1" al Action Squad, retirese del AO! El enemigo ha interceptado nuestras comunicaciones!</Spanish>
                 <Chinesesimp>"霸王1-1"呼叫行动组，撤出行动区域！敌人已经截获了我们的信号！</Chinesesimp>
-                <Original>Overlord to Alpha 1-1, extract from the AO. The enemy's compromised our comms.</Original>
-                <English>Overlord to Alpha 1-1, extract from the AO. The enemy's compromised our comms.</English>
+                <Original>Overlord to Alpha 1-1, the enemy has our traffic. Nothing more to do there — extract from the AO.</Original>
+                <English>Overlord to Alpha 1-1, the enemy has our traffic. Nothing more to do there — extract from the AO.</English>
             </Key>
             <Key ID="STR_DUWS_T_towersignallost">
                 <German>Zzzzt...(Funkstörgeräusch)</German>
@@ -5216,15 +5232,15 @@
                 <German>Dies ist „Oberherr 1-1“. „Cobra 1-3“ (Funkturm-Verteidigung) bestätigt tot. Feinde dürfen unsere Signale nicht abfangen. Funkturm mit allen Mitteln unbrauchbar machen!</German>
                 <Spanish>Este es "Imperador 1-1". "Cobra 1-3" (defensa torre de señales) caída en combate confirmada. El enemigo no interceptará nuestras señales. Neutraliza la torre por cualquier medio!</Spanish>
                 <Chinesesimp>这里是"霸王1-1"，驻守信号塔的"眼镜蛇1-3"刚刚已经确认全体阵亡，但我们不能让敌人在信号塔截获我们的信号。你的单位需要以一切手段使信号塔无效化。</Chinesesimp>
-                <Original>This is Overlord. Cobra 1-3, the element defending the signal tower, is confirmed KIA. We can't let the enemy keep intercepting our comms through that tower. Destroy it by any means necessary.</Original>
-                <English>This is Overlord. Cobra 1-3, the element defending the signal tower, is confirmed KIA. We can't let the enemy keep intercepting our comms through that tower. Destroy it by any means necessary.</English>
+                <Original>This is Overlord. Cobra 1-3, the element holding the signal tower, is confirmed KIA. The enemy is reading our traffic through that tower. Bring it down.</Original>
+                <English>This is Overlord. Cobra 1-3, the element holding the signal tower, is confirmed KIA. The enemy is reading our traffic through that tower. Bring it down.</English>
             </Key>
             <Key ID="STR_DUWS_T_radarletsdothis">
                 <German>Dies ist „Oberherr 1-1“. Gerade eben haben wir ein verborgenes feindliches Flakradar lokalisiert. Mehrere unserer Luftverbände wurden ihm zum Opfer gefallen. Also, zur Rache ziehen!</German>
                 <Spanish>Este es "Imperador 1-1". Acabamos de localizar un radar antiaéreo enemigo oculto. Éste es el responsable de la pérdida de muchas de nuestras unidades aéreas. Así que, vayan a vengarse.</Spanish>
                 <Chinesesimp>这里是"霸王1-1"，就在刚才，我们定位到了敌人藏匿着的一个防空雷达，我们多个空中单位的损失都与它有关。所以，去复仇吧。</Chinesesimp>
-                <Original>This is Overlord. We've pinpointed a hidden enemy AA radar. It's cost us several aircraft already. Go take it out.</Original>
-                <English>This is Overlord. We've pinpointed a hidden enemy AA radar. It's cost us several aircraft already. Go take it out.</English>
+                <Original>This is Overlord. We've pinpointed a hidden enemy AA radar. It's cost us several aircraft already. Take it out.</Original>
+                <English>This is Overlord. We've pinpointed a hidden enemy AA radar. It's cost us several aircraft already. Take it out.</English>
             </Key>
             <Key ID="STR_DUWS_T_radarcopy">
                 <German>Action Squad, verstanden. Wir brechen sofort auf.</German>
@@ -7111,8 +7127,8 @@
                 <German>Naher Späher</German>
                 <Spanish>Explorador Cercano</Spanish>
                 <Chinesesimp>附近的侦察兵</Chinesesimp>
-                <Original>Nearby Scout</Original>
-                <English>Nearby Scout</English>
+                <Original>Allseer 1-1</Original>
+                <English>Allseer 1-1</English>
             </Key>
             <Key ID="STR_DUWS_T_Rein">
                 <German>Delta 3-2</German>
@@ -8366,8 +8382,8 @@
         </Container>
         <Container name="System &amp; Multiplayer">
             <Key ID="STR_DUWS_T_HOUSE_CLEARED">
-                <Original>House %1 has been cleared!</Original>
-                <English>House %1 has been cleared!</English>
+                <Original>House %1 cleared</Original>
+                <English>House %1 cleared</English>
                 <German>Haus %1 wurde gesäubert!</German>
                 <Spanish>La casa %1 ha sido limpiada!</Spanish>
                 <Chinesesimp>第%1个房屋已被清理！</Chinesesimp>
@@ -8380,8 +8396,8 @@
                 <Chinesesimp>一名自杀式炸弹袭击者引爆了！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_MISSION_CLEANUP_START">
-                <Original>Mission cleanup started. This removes all enemy units and empty vehicles in the mission area. Grab any empty vehicles you want first. Once cleanup finishes, you can move on to the next mission</Original>
-                <English>Mission cleanup started. This removes all enemy units and empty vehicles in the mission area. Grab any empty vehicles you want first. Once cleanup finishes, you can move on to the next mission</English>
+                <Original>Mission cleanup has started. It removes every enemy unit and empty vehicle in the mission area, so take anything you want to keep now. The next mission unlocks once cleanup finishes</Original>
+                <English>Mission cleanup has started. It removes every enemy unit and empty vehicle in the mission area, so take anything you want to keep now. The next mission unlocks once cleanup finishes</English>
                 <Chinesesimp>任务清理线程开始————该线程会清理任务范围内所有敌军单位与空载具，请在清理前带走想要的空载具。清理线程结束后便可进行下一个任务。</Chinesesimp>
                 <German>Missionsbereinigungs-Thread gestartet — Dieser Thread entfernt alle feindlichen Einheiten und unbewohnten Fahrzeuge im Missionsbereich. Bitte nehme alle gewünschten unbewohnten Fahrzeuge vor der Bereinigung mit. Du kannst zur nächsten Mission fortfahren, sobald der Bereinigungs-Thread beendet ist.</German>
                 <Spanish>Hilo de limpieza de misión iniciado — Este hilo eliminará todas las unidades enemigas y vehículos desocupados dentro del área de misión. Por favor, toma los vehículos desocupados que quieras antes de la limpieza. Podrás continuar con la siguiente misión cuando termine el hilo de limpieza.</Spanish>
@@ -8722,8 +8738,8 @@
                 <German>Wir haben aktuell keine Missionen für dich. Es kann nur eine Mission aktiv sein und es müssen 6 min zwischen den Missionen liegen.</German>
                 <Spanish>Ahora mismo no contamos con misiones secundarias para que tome. Solo 1 misión puede estar activa a la vez y tiene un enfríamiento de 6 minutos.</Spanish>
                 <Chinesesimp>我们现在没有任务给你。只有一个任务可以激活，两个任务之间有6分钟的冷却时间。</Chinesesimp>
-                <Original>We don't have any missions for you right now. Only 1 mission can be active at a time, with a 6-min cooldown between missions</Original>
-                <English>We don't have any missions for you right now. Only 1 mission can be active at a time, with a 6-min cooldown between missions</English>
+                <Original>No missions available right now. Only one mission can be active at a time, with a 6-minute cooldown between them</Original>
+                <English>No missions available right now. Only one mission can be active at a time, with a 6-minute cooldown between them</English>
             </Key>
             <Key ID="STR_DUWS_T_missioncooldown">
                 <German>Einsatztrupp an "Overlord", wir sind wieder kampfbereit und warten an der Basis.</German>
