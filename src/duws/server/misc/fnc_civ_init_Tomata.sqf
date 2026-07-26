@@ -28,19 +28,30 @@ private _fnc_finish = {
 [] call fnc_civ_setup_array;
 ["INFO", "CIV", format ["civ_array loaded, count: %1", count civ_array]] call fnc_log;
 
-private _locations = [] call fnc_civ_selectTowns;
+([] call fnc_civ_selectTowns) params [["_queue", []], ["_spare", []]];
+
+// The base composition spans about 30 m; the rest is margin for its guards, patrols and
+// spawn points. Enemy zones are deliberately not gated -- a contested town is the point --
+// but a civilian area sitting over the player's own base is not.
+private _HQ_RADIUS = 100;
+private _hq = missionNamespace getVariable ["PosOfBLUHQ", []];
+private _hqPos = if (count _hq >= 2) then { [_hq select 0, _hq select 1, 0] } else { [] };
 
 // ========== 第一阶段：计算每个位置的半径、人口 ==========
 private _kept = [];
 private _radii = [];
 private _pops = [];
+private _done = 0;
 
-{
-    private _loc = _x;
+// A queue, not a forEach: an HQ overlap can only be judged once the radius is known here, and
+// rejecting a town pushes its replacement back on for the same treatment.
+while { count _queue > 0 } do {
+    private _loc = _queue deleteAt 0;
     private _pos = getPos _loc;
-    private _locationName = if (text _loc != "") then { text _loc } else { format ["Unnamed%1", _forEachIndex] };
+    private _locationName = if (text _loc != "") then { text _loc } else { format ["Unnamed%1", _done] };
+    _done = _done + 1;
 
-    [format ["Placing civilians...<br/>town %1 of %2", _forEachIndex + 1, count _locations]]
+    [format ["Placing civilians...<br/>town %1 of %2", _done, _done + count _queue]]
         remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
     private _buildingCount = count ([_pos, 2, 350] call fnc_usableBuildings);
@@ -52,29 +63,38 @@ private _pops = [];
     } else {
         // 区域半径：每个建筑10米，最小100米，最大500米
         private _radius = (_buildingCount * 10) min 500 max 100;
+        private _hqDist = if (count _hqPos > 0) then { _pos distance2D _hqPos } else { -1 };
 
-        // 人口计算：按建筑数×2，上限280
-        private _initialPop = (_buildingCount * 2) min 280;
-        // 为每个城镇生成独立的最低人口（6~12 随机整数）
-        private _minPop = 6 + floor random 7;
-        _initialPop = _initialPop max _minPop;
+        // Areas, not centres: a civilian disc that merely reaches the HQ's still spawns
+        // civilians inside the base. The selection pass cannot pre-filter this -- the radius
+        // is derived here -- so drop the town and take the next stand-in it handed over.
+        if (_hqDist >= 0 && { _hqDist < _radius + _HQ_RADIUS }) then {
+            ["INFO", "CIV", format ["Skipping %1: area (r=%2) overlaps the BLUFOR HQ at %3m", _locationName, _radius, round _hqDist]] call fnc_log;
+            if (count _spare > 0) then { _queue pushBack (_spare deleteAt 0) };
+        } else {
+            // 人口计算：按建筑数×2，上限280
+            private _initialPop = (_buildingCount * 2) min 280;
+            // 为每个城镇生成独立的最低人口（6~12 随机整数）
+            private _minPop = 6 + floor random 7;
+            _initialPop = _initialPop max _minPop;
 
-        if (CIV_PRESENCE == "RAVAGE") then {
-            _initialPop = round (_initialPop * 2.0) min 280;
-            ["INFO", "CIV", format ["RAVAGE mode: adjusted pop to %1", _initialPop]] call fnc_log;
+            if (CIV_PRESENCE == "RAVAGE") then {
+                _initialPop = round (_initialPop * 2.0) min 280;
+                ["INFO", "CIV", format ["RAVAGE mode: adjusted pop to %1", _initialPop]] call fnc_log;
+            };
+
+            _initialPop = _initialPop max 1;
+
+            _kept pushBack _loc;
+            _radii pushBack _radius;
+            _pops pushBack _initialPop;
+
+            ["INFO", "CIV", format ["Location %1: buildings=%2, initialPop=%3, radius=%4", _locationName, _buildingCount, _initialPop, _radius]] call fnc_log;
         };
-
-        _initialPop = _initialPop max 1;
-
-        _kept pushBack _loc;
-        _radii pushBack _radius;
-        _pops pushBack _initialPop;
-
-        ["INFO", "CIV", format ["Location %1: buildings=%2, initialPop=%3, radius=%4", _locationName, _buildingCount, _initialPop, _radius]] call fnc_log;
     };
-} forEach _locations;
+};
 
-_locations = _kept;
+private _locations = _kept;
 
 // Warn on the map banner rather than by hint or notification: the map is still open at this
 // point, and the engine draws both of those underneath it.

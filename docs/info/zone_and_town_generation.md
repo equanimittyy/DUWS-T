@@ -121,19 +121,33 @@ with map markers. Gated on `CIV_PRESENCE`; no synthetic locations are created.
 | 2. Registration | `server/misc/fnc_civ_init_Tomata.sqf` | `civ_locations` / `civ_radii`, per-town trigger and markers |
 | 3. Runtime | `server/misc/fnc_civ_handler.sqf` (`_wbk` twin) | spawn on entry, cleanup, population tracking |
 
-**Selection** takes the BLUFOR HQ plus every entry of `serv_zones_array` as anchors, pulls
-city/village/local Locations with one `nearestLocations` call, keeps those within 5,000 m of
-*any* anchor, and — when more qualify than the cap of three per anchor — ranks them on an
-even blend of town extent and closeness to an anchor. It has no side effects; the caller
-owns everything else.
+**Selection** takes the BLUFOR HQ plus every entry of `serv_zones_array` as anchors and pulls
+city/village/local Locations with one `nearestLocations` call, keeping those within 5,000 m of
+*any* anchor. Anchors then draw in turn: each ranks its own disc on a 0.7/0.3 blend of town
+extent and closeness to *itself*, takes three, and skips whatever earlier anchors took. A
+second wave adds `count serv_zones_array` more, drawn at random across the whole union. What
+is left over comes back alongside the selection as a replacement queue. No side effects; the
+caller owns everything else.
+
+Anchors draw in turn rather than from one ranking over the union because a global top-N let
+the densest cluster of anchors win every slot, leaving a remote zone with no civilian town in
+reach. The random second wave exists so the result does not read as exactly three towns
+ringing every objective.
 
 **Registration** counts usable buildings per shortlisted town, drops any with fewer than
-three, derives radius and starting population from that count, resolves overlapping towns by
-shrinking or dropping the smaller, then creates the presence trigger, ellipse marker and
-population icon. The overlap loser is dropped from the registry only — never
+three, derives radius and starting population from that count, drops any whose disc overlaps
+the 100 m keep-out around `PosOfBLUHQ` and pulls a stand-in off the replacement queue in its
+place, resolves overlapping towns by shrinking or dropping the smaller, then creates the
+presence trigger, ellipse marker and population icon. The overlap loser is dropped from the
+registry only — never
 `deleteLocation`d, because these are the map's own Locations and removing one takes it away
 from side-mission siting (`fnc_findSafeMissionPos.sqf:30`) and the player's location readout
 (`fnc_bottom_right_message.sqf:152`) for the rest of the mission.
+
+The HQ keep-out is disc-against-disc, not centre-against-centre: a civilian area whose edge
+reaches the base still spawns civilians inside it. It has to live in registration because the
+civilian radius is derived there, from the building count — selection has no radius to test.
+Enemy zones get no such gate; a contested town is the point.
 
 ### Ordering
 
@@ -166,7 +180,3 @@ positions, so a civilian town may sit on one. At negative reputation
 `fnc_civ_handler.sqf:532-560` re-sides a share of civilians to `resistance`, which
 `server_init.sqf:28-31` sets hostile to west, and a zone's capture trigger is `WEST SEIZED`
 (`fnc_createzone.sqf:259`) — hostile civilians standing inside the zone therefore hold it.
-
-**Ranking has no spatial spread rule.** Top-N by score can cluster the whole selection
-around anchors in dense terrain, leaving a remote zone with no civilian town near it. The
-fix, if it shows up in play, is a per-anchor quota rather than a global ranking.
