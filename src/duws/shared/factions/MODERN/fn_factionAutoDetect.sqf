@@ -505,6 +505,11 @@ fnc_unitParseRoles = compileFinal {
 		_primaryWeaponHasLongRangeOptic = _primaryWeaponOpticMaxZero > 1000 && {_primaryWeaponOpticMaxZoom > 700};
 		_secondaryWeaponDamageCost = if (count _secondaryWeapon > 3) then [{getNumber (configFile >> "CfgAmmo" >> getText (configFile >> "CfgMagazines" >> (_secondaryWeapon # 4 # 0 ) >> "ammo") >> "cost")}, {-1}];	// LAT < 400, HAT > 400
 		_hasUAVterminal = "uav" in toLowerANSI (_assignedItems # 1);
+		// param, not # 0: an unarmed unit has an empty weapon array, and indexing that handed
+		// the role predicates below nothing at all -- one config lookup per weaponless unit,
+		// erroring on every pass of the faction scan.
+		_primaryType = _primaryWeapon param [0, ""];
+		_secondaryType = _secondaryWeapon param [0, ""];
 		
 		if (_primaryWeaponIsSuppressed) then {
 			_spec pushBackUnique _x;
@@ -513,16 +518,16 @@ fnc_unitParseRoles = compileFinal {
 				case ( [_x] call fnc_IsMedic && {"Medikit" in flatten _backpack} ) : { _spec_medic pushBackUnique _x };
 				case ( [_x] call fnc_IsEngineer ) : { _spec_eng pushBackUnique _x };
 				case ( [_x] call fnc_IsEOD ) : { _exp pushBackUnique _x };
-				case ( [_secondaryWeapon # 0] call fnc_IsAA ) : { _spec_aa pushBackUnique _x };
-				case ( [_secondaryWeapon # 0] call fnc_IsAT && {_secondaryWeaponDamageCost > 400} ) : { _spec_hat pushBackUnique _x };
-				case ( [_secondaryWeapon # 0] call fnc_IsAT && {_secondaryWeaponDamageCost < 400} ) : { _spec_lat pushBackUnique _x };
+				case ( [_secondaryType] call fnc_IsAA ) : { _spec_aa pushBackUnique _x };
+				case ( [_secondaryType] call fnc_IsAT && {_secondaryWeaponDamageCost > 400} ) : { _spec_hat pushBackUnique _x };
+				case ( [_secondaryType] call fnc_IsAT && {_secondaryWeaponDamageCost < 400} ) : { _spec_lat pushBackUnique _x };
 				case ( [_x] call fnc_IsSquadLead ) : { _spec_sl pushBackUnique _x };
 				case ( [_x] call fnc_IsTeamLead ) : { _spec_tl pushBackUnique _x };
-				case ( [_primaryWeapon # 0] call fnc_IsSniper ) : { _spec_sniper pushBackUnique _x };
+				case ( [_primaryType] call fnc_IsSniper ) : { _spec_sniper pushBackUnique _x };
 				case ( [_x] call fnc_IsMarksman || {_primaryWeaponHasLongRangeOptic} ) : { _spec_marksman pushBackUnique _x };
-				case ( [_primaryWeapon # 0] call fnc_IsGrenadier ) : { _spec_gl pushBackUnique _x };
-				case ( [_primaryWeapon # 0] call fnc_IsMG && "rifleman" in toLowerANSI ([configFile >> "CfgVehicles" >> _x] call BIS_fnc_displayName) ) : { _spec_ar pushBackUnique _x };
-				case ( [_primaryWeapon # 0] call fnc_IsMG && !("rifleman" in toLowerANSI ([configFile >> "CfgVehicles" >> _x] call BIS_fnc_displayName)) ) : { _spec_mg pushBackUnique _x };
+				case ( [_primaryType] call fnc_IsGrenadier ) : { _spec_gl pushBackUnique _x };
+				case ( [_primaryType] call fnc_IsMG && "rifleman" in toLowerANSI ([configFile >> "CfgVehicles" >> _x] call BIS_fnc_displayName) ) : { _spec_ar pushBackUnique _x };
+				case ( [_primaryType] call fnc_IsMG && !("rifleman" in toLowerANSI ([configFile >> "CfgVehicles" >> _x] call BIS_fnc_displayName)) ) : { _spec_mg pushBackUnique _x };
 			};
 		};	// units with suprressed weapons seen as spec ops
 		
@@ -531,19 +536,19 @@ fnc_unitParseRoles = compileFinal {
 			case ( [_x] call fnc_IsMedic && {"Medikit" in flatten _backpack} ) : { _medic pushBackUnique _x };
 			case ( [_x] call fnc_IsEngineer ) : { _eng pushBackUnique _x };
 			case ( [_x] call fnc_IsEOD ) : { _exp pushBackUnique _x };
-			case ( [_secondaryWeapon # 0] call fnc_IsAA ) : { _aa pushBackUnique _x };
-			case ( [_secondaryWeapon # 0] call fnc_IsAT && {_secondaryWeaponDamageCost > 400} ) : { _hat pushBackUnique _x };
-			case ( [_secondaryWeapon # 0] call fnc_IsAT && {_secondaryWeaponDamageCost < 400} ) : { _lat pushBackUnique _x };
+			case ( [_secondaryType] call fnc_IsAA ) : { _aa pushBackUnique _x };
+			case ( [_secondaryType] call fnc_IsAT && {_secondaryWeaponDamageCost > 400} ) : { _hat pushBackUnique _x };
+			case ( [_secondaryType] call fnc_IsAT && {_secondaryWeaponDamageCost < 400} ) : { _lat pushBackUnique _x };
 			case ( [_x] call fnc_IsOfficer ) : { _officer pushBackUnique _x };
 			case ( [_x] call fnc_IsSquadLead ) : { _sl pushBackUnique _x };
 			case ( [_x] call fnc_IsTeamLead ) : { _tl pushBackUnique _x };
 			case ( [_x] call fnc_IsPilot ) : { _pilot pushBackUnique _x };
 			case ( [_x] call fnc_IsCrewman ) : { _crew pushBackUnique _x };
-			case ( [_primaryWeapon # 0] call fnc_IsSniper ) : { _sniper pushBackUnique _x };
+			case ( [_primaryType] call fnc_IsSniper ) : { _sniper pushBackUnique _x };
 			case ( [_x] call fnc_IsMarksman || {_primaryWeaponHasLongRangeOptic} ) : { _marksman pushBackUnique _x };
-			case ( [_primaryWeapon # 0] call fnc_IsGrenadier ) : { _gl pushBackUnique _x };
-			case ( ([_primaryWeapon # 0] call fnc_IsMG || {getText(configFile >> "CfgVehicles" >> _x >> "icon") isEqualTo "iconManMG"}) && "rifleman" in toLowerANSI ([configFile >> "CfgVehicles" >> _x] call BIS_fnc_displayName) ) : { _ar pushBackUnique _x };
-			case ( ([_primaryWeapon # 0] call fnc_IsMG || {getText(configFile >> "CfgVehicles" >> _x >> "icon") isEqualTo "iconManMG"}) && !("rifleman" in toLowerANSI ([configFile >> "CfgVehicles" >> _x] call BIS_fnc_displayName)) ) : { _mg pushBackUnique _x };
+			case ( [_primaryType] call fnc_IsGrenadier ) : { _gl pushBackUnique _x };
+			case ( ([_primaryType] call fnc_IsMG || {getText(configFile >> "CfgVehicles" >> _x >> "icon") isEqualTo "iconManMG"}) && "rifleman" in toLowerANSI ([configFile >> "CfgVehicles" >> _x] call BIS_fnc_displayName) ) : { _ar pushBackUnique _x };
+			case ( ([_primaryType] call fnc_IsMG || {getText(configFile >> "CfgVehicles" >> _x >> "icon") isEqualTo "iconManMG"}) && !("rifleman" in toLowerANSI ([configFile >> "CfgVehicles" >> _x] call BIS_fnc_displayName)) ) : { _mg pushBackUnique _x };
 			case ( _hasUAVterminal ) : { _uavOp pushBackUnique _x };
 			case ( getText(configFile >> "CfgVehicles" >> _x >> "icon") isEqualTo "iconMan" ) : {_grunt pushBackUnique _x};
 			default { _grunt pushBackUnique _x };
