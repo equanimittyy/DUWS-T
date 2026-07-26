@@ -117,27 +117,35 @@ with map markers. Gated on `CIV_PRESENCE`; no synthetic locations are created.
 
 | Stage | File | Produces |
 |---|---|---|
-| 1. Selection | `server/misc/fnc_civ_selectTowns.sqf` | ranked shortlist of map Locations |
+| 1. Selection | `server/misc/fnc_civ_selectTowns.sqf` | ranked shortlist of `[Location, buildingCount]` |
 | 2. Registration | `server/misc/fnc_civ_init_Tomata.sqf` | `civ_locations` / `civ_radii`, per-town trigger and markers |
 | 3. Runtime | `server/misc/fnc_civ_handler.sqf` (`_wbk` twin) | spawn on entry, cleanup, population tracking |
 
 **Selection** takes the BLUFOR HQ plus every entry of `serv_zones_array` as anchors and pulls
 city/village/local Locations with one `nearestLocations` call, keeping those within 5,000 m of
-*any* anchor. Anchors then draw in turn: each ranks its own disc on a 0.7/0.3 blend of town
-extent and closeness to *itself*, takes three, and skips whatever earlier anchors took. A
-second wave adds `count serv_zones_array` more, drawn at random across the whole union. What
-is left over comes back alongside the selection as a replacement queue. No side effects; the
-caller owns everything else.
+*any* anchor that holds at least three usable buildings within 350 m. Anchors then draw in
+turn: each ranks its own disc by that building count, takes three, and skips whatever earlier
+anchors took. A second wave adds `count serv_zones_array` more, drawn at random across the
+whole union. What is left over comes back alongside the selection as a replacement queue. No
+side effects; the caller owns everything else.
 
-Anchors draw in turn rather than from one ranking over the union because a global top-N let
-the densest cluster of anchors win every slot, leaving a remote zone with no civilian town in
-reach. The random second wave exists so the result does not read as exactly three towns
-ringing every objective.
+Size is measured in standing buildings, not `size _loc`: a Location's `radiusA`/`radiusB` come
+out of `CfgWorlds`, are hand-authored per map, and routinely put a hamlet level with a city, so
+an extent-ranked pass spent slots on empty ground. Distance is a gate only — inside a disc the
+bigger town wins however far back it sits, because blending in closeness let roadside hamlets
+outrank the cities behind them. Anchors draw in turn rather than from one ranking over the
+union because a global top-N let the densest cluster of anchors win every slot, leaving a
+remote zone with no civilian town in reach. The random second wave exists so the result does
+not read as exactly three towns ringing every objective.
 
-**Registration** counts usable buildings per shortlisted town, drops any with fewer than
-three, derives radius and starting population from that count, drops any whose disc overlaps
-the 100 m keep-out around `PosOfBLUHQ` and pulls a stand-in off the replacement queue in its
-place, resolves overlapping towns by shrinking or dropping the smaller, then creates the
+The count travels with the location rather than being recounted downstream: it is the heaviest
+engine work in the civilian pass, and both stages need the same figure over the same `getPos`
+centre.
+
+**Registration** derives radius and starting population from the count selection handed over,
+drops any town whose disc overlaps the 100 m keep-out around `PosOfBLUHQ` and pulls a stand-in
+off the replacement queue in its place, resolves overlapping towns by shrinking or dropping the
+smaller, then creates the
 presence trigger, ellipse marker and population icon. The overlap loser is dropped from the
 registry only — never
 `deleteLocation`d, because these are the map's own Locations and removing one takes it away
@@ -145,9 +153,8 @@ from side-mission siting (`fnc_findSafeMissionPos.sqf:30`) and the player's loca
 (`fnc_bottom_right_message.sqf:152`) for the rest of the mission.
 
 The HQ keep-out is disc-against-disc, not centre-against-centre: a civilian area whose edge
-reaches the base still spawns civilians inside it. It has to live in registration because the
-civilian radius is derived there, from the building count — selection has no radius to test.
-Enemy zones get no such gate; a contested town is the point.
+reaches the base still spawns civilians inside it. It sits in registration because that is
+where the radius formula lives. Enemy zones get no such gate; a contested town is the point.
 
 ### Ordering
 

@@ -28,6 +28,9 @@ private _fnc_finish = {
 [] call fnc_civ_setup_array;
 ["INFO", "CIV", format ["civ_array loaded, count: %1", count civ_array]] call fnc_log;
 
+// Banner first: selection counts the buildings of every town near the fighting, which is the
+// slowest step of the civilian pass, and the caller cleared the map before handing over.
+["Surveying towns..."] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 ([] call fnc_civ_selectTowns) params [["_queue", []], ["_spare", []]];
 
 // The base composition spans about 30 m; the rest is margin for its guards, patrols and
@@ -46,7 +49,8 @@ private _done = 0;
 // A queue, not a forEach: an HQ overlap can only be judged once the radius is known here, and
 // rejecting a town pushes its replacement back on for the same treatment.
 while { count _queue > 0 } do {
-    private _loc = _queue deleteAt 0;
+    // The count rides along from selection: it is the heaviest engine call in this pass.
+    (_queue deleteAt 0) params ["_loc", "_buildingCount"];
     private _pos = getPos _loc;
     private _locationName = if (text _loc != "") then { text _loc } else { format ["Unnamed%1", _done] };
     _done = _done + 1;
@@ -54,43 +58,35 @@ while { count _queue > 0 } do {
     [format ["Placing civilians...<br/>town %1 of %2", _done, _done + count _queue]]
         remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
-    private _buildingCount = count ([_pos, 2, 350] call fnc_usableBuildings);
+    // 区域半径：每个建筑10米，最小100米，最大500米
+    private _radius = (_buildingCount * 10) min 500 max 100;
+    private _hqDist = if (count _hqPos > 0) then { _pos distance2D _hqPos } else { -1 };
 
-    // NameLocal covers quarries and salt flats as well as settlements on some maps. Without
-    // this the population floor below would still put a dozen civilians in an empty field.
-    if (_buildingCount < 3) then {
-        ["INFO", "CIV", format ["Skipping %1: only %2 usable buildings", _locationName, _buildingCount]] call fnc_log;
+    // Areas, not centres: a civilian disc that merely reaches the HQ's still spawns civilians
+    // inside the base. The radius formula lives here, not in selection, so the test cannot run
+    // before this point -- drop the town and take the next stand-in selection handed over.
+    if (_hqDist >= 0 && { _hqDist < _radius + _HQ_RADIUS }) then {
+        ["INFO", "CIV", format ["Skipping %1: area (r=%2) overlaps the BLUFOR HQ at %3m", _locationName, _radius, round _hqDist]] call fnc_log;
+        if (count _spare > 0) then { _queue pushBack (_spare deleteAt 0) };
     } else {
-        // 区域半径：每个建筑10米，最小100米，最大500米
-        private _radius = (_buildingCount * 10) min 500 max 100;
-        private _hqDist = if (count _hqPos > 0) then { _pos distance2D _hqPos } else { -1 };
+        // 人口计算：按建筑数×2，上限280
+        private _initialPop = (_buildingCount * 2) min 280;
+        // 为每个城镇生成独立的最低人口（6~12 随机整数）
+        private _minPop = 6 + floor random 7;
+        _initialPop = _initialPop max _minPop;
 
-        // Areas, not centres: a civilian disc that merely reaches the HQ's still spawns
-        // civilians inside the base. The selection pass cannot pre-filter this -- the radius
-        // is derived here -- so drop the town and take the next stand-in it handed over.
-        if (_hqDist >= 0 && { _hqDist < _radius + _HQ_RADIUS }) then {
-            ["INFO", "CIV", format ["Skipping %1: area (r=%2) overlaps the BLUFOR HQ at %3m", _locationName, _radius, round _hqDist]] call fnc_log;
-            if (count _spare > 0) then { _queue pushBack (_spare deleteAt 0) };
-        } else {
-            // 人口计算：按建筑数×2，上限280
-            private _initialPop = (_buildingCount * 2) min 280;
-            // 为每个城镇生成独立的最低人口（6~12 随机整数）
-            private _minPop = 6 + floor random 7;
-            _initialPop = _initialPop max _minPop;
-
-            if (CIV_PRESENCE == "RAVAGE") then {
-                _initialPop = round (_initialPop * 2.0) min 280;
-                ["INFO", "CIV", format ["RAVAGE mode: adjusted pop to %1", _initialPop]] call fnc_log;
-            };
-
-            _initialPop = _initialPop max 1;
-
-            _kept pushBack _loc;
-            _radii pushBack _radius;
-            _pops pushBack _initialPop;
-
-            ["INFO", "CIV", format ["Location %1: buildings=%2, initialPop=%3, radius=%4", _locationName, _buildingCount, _initialPop, _radius]] call fnc_log;
+        if (CIV_PRESENCE == "RAVAGE") then {
+            _initialPop = round (_initialPop * 2.0) min 280;
+            ["INFO", "CIV", format ["RAVAGE mode: adjusted pop to %1", _initialPop]] call fnc_log;
         };
+
+        _initialPop = _initialPop max 1;
+
+        _kept pushBack _loc;
+        _radii pushBack _radius;
+        _pops pushBack _initialPop;
+
+        ["INFO", "CIV", format ["Location %1: buildings=%2, initialPop=%3, radius=%4", _locationName, _buildingCount, _initialPop, _radius]] call fnc_log;
     };
 };
 

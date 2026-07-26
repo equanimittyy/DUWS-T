@@ -2,20 +2,19 @@
 /*
     fnc_civ_selectTowns.sqf
     Picks the map towns that should carry a civilian population: real Locations near the
-    fighting, ranked by size and proximity. Returns [selected, spare] -- the towns to
-    register, and a replacement queue for those the caller rejects. No side effects; the
-    caller does the sizing and registration.
+    fighting, ranked by how many usable buildings they hold. Returns [selected, spare] as
+    [location, buildingCount] pairs -- the towns to register, and a replacement queue for those
+    the caller rejects. No side effects; the caller does the registration.
 */
 if (!isServer) exitWith {[[], []]};
 
-// Tuning knobs. Raising _WEIGHT_PROX pulls civilians onto the front line; raising
-// _WEIGHT_SIZE sends players to the population centres wherever they happen to be. Size
-// leads: an even split kept picking hamlets that happened to sit nearer an anchor over the
-// cities behind them, which is the opposite of where a population belongs.
-private _WEIGHT_SIZE = 0.7;
-private _WEIGHT_PROX = 0.3;
+// Tuning knobs. _COUNT_RADIUS is the disc a town's buildings are counted over, and the caller
+// derives each town's civilian area and starting population from that same count, so moving it
+// moves civilian density as well as the ranking.
 private _ANCHOR_RADIUS = 5000;
 private _PER_ANCHOR_CAP = 3;
+private _COUNT_RADIUS = 350;
+private _MIN_BUILDINGS = 3;
 
 // An anchor is a point the fighting revolves around. FOBs are excluded: they are built after
 // generation and would mean re-selecting. PosOfBLUHQ defaults to [] rather than nil, so
@@ -37,17 +36,18 @@ if (count _anchors == 0) exitWith {
 };
 
 // One config-backed engine call, not a terrain scan. NameLocal is kept for portability to
-// maps that use it for settlements; on Altis it also names quarries and salt flats, which
-// the caller's building-count filter removes.
+// maps that use it for settlements; on Altis it also names quarries and salt flats, which the
+// building floor below removes.
 private _candidates = nearestLocations [
     [worldSize / 2, worldSize / 2, 0],
     ["NameCityCapital", "NameCity", "NameVillage", "NameLocal"],
     worldSize
 ];
 
-// [location, position, extent] for every town inside some anchor's disc. The union of the
-// discs, not their intersection: a strict intersection is empty in any campaign whose zones
-// sit more than twice _ANCHOR_RADIUS apart, which is most of them.
+// [location, position, buildings] for every town inside some anchor's disc that holds enough
+// buildings to populate. The union of the discs, not their intersection: a strict intersection
+// is empty in any campaign whose zones sit more than twice _ANCHOR_RADIUS apart, which is most
+// of them.
 private _pool = [];
 {
     private _loc = _x;
@@ -56,55 +56,32 @@ private _pool = [];
     private _pos = getPos _loc;
 
     if ((_anchors findIf { _pos distance2D _x <= _ANCHOR_RADIUS }) >= 0) then {
-        // radiusA/radiusB out of CfgWorlds, already half-extents, so no halving. Typed
-        // defensively because the engine's return shape here is easy to get wrong, and a
-        // wrong assumption would silently flatten every size score to the fallback.
-        private _sz = size _loc;
-        private _extent = 0;
-        if (_sz isEqualType []) then {
-            if (count _sz >= 2) then { _extent = (_sz select 0) max (_sz select 1) };
-        } else {
-            if (_sz isEqualType 0) then { _extent = _sz };
+        // Ranked on standing buildings rather than `size _loc`: the radiusA/radiusB in
+        // CfgWorlds are hand-authored per map and routinely put a hamlet level with a city, so
+        // an extent-ranked pass kept spending slots on empty ground. Counted once here and
+        // carried out with the location, because the caller needs the same figure and this is
+        // the heaviest engine work in the whole civilian pass.
+        private _buildings = count ([_pos, 2, _COUNT_RADIUS] call fnc_usableBuildings);
+        // Below the floor there is nothing for a civilian to walk into, and the caller's
+        // population floor would still drop a dozen of them in an empty field.
+        if (_buildings >= _MIN_BUILDINGS) then {
+            _pool pushBack [_loc, _pos, _buildings];
         };
-        // Some map entries define no radius. The type is always present.
-        if (_extent <= 0) then {
-            _extent = switch (type _loc) do {
-                case "NameCityCapital": { 300 };
-                case "NameCity": { 200 };
-                case "NameVillage": { 120 };
-                default { 80 };
-            };
-        };
-        _pool pushBack [_loc, _pos, _extent];
     };
 } forEach _candidates;
 
-private _maxExtent = 0;
-{ if ((_x select 2) > _maxExtent) then { _maxExtent = _x select 2 } } forEach _pool;
-if (_maxExtent <= 0) then { _maxExtent = 1 };
-
-// Scores one pool entry against one anchor; -1 means out of that anchor's reach. Both terms
-// normalise to 0..1 so neither can dominate by unit choice, and _maxExtent is global so the
-// size term stays comparable between anchors.
-private _fnc_score = {
-    params ["_entry", "_anchor"];
-    private _dist = (_entry select 1) distance2D _anchor;
-    if (_dist > _ANCHOR_RADIUS) then { -1 } else {
-        (_WEIGHT_SIZE * ((_entry select 2) / _maxExtent)) + (_WEIGHT_PROX * (1 - (_dist / _ANCHOR_RADIUS)))
-    }
-};
-
-// Wave 1: each anchor ranks its own disc and takes its own quota, in turn, skipping what
-// earlier anchors already took. A single ranking over the whole union let one dense cluster
-// win every slot and left remote zones with no civilians within reach.
+// Wave 1: each anchor ranks its own disc by building count and takes its own quota, in turn,
+// skipping what earlier anchors already took. A single ranking over the whole union let one
+// dense cluster win every slot and left remote zones with no civilians within reach. Distance
+// only gates -- inside a disc the bigger town always wins, however far back it sits, because
+// blending in closeness let roadside hamlets outrank the cities behind them.
 private _taken = [];
 {
     private _anchor = _x;
     private _scored = [];
     {
-        if (!(_forEachIndex in _taken)) then {
-            private _score = [_x, _anchor] call _fnc_score;
-            if (_score >= 0) then { _scored pushBack [_score, _forEachIndex] };
+        if (!(_forEachIndex in _taken) && { (_x select 1) distance2D _anchor <= _ANCHOR_RADIUS }) then {
+            _scored pushBack [_x select 2, _forEachIndex];
         };
     } forEach _pool;
     _scored sort false;
@@ -123,27 +100,30 @@ _taken append _topUp;
 _remaining = _remaining select [count _topUp, count _remaining];
 
 // Replacement queue for registration, which rejects towns this pass cannot judge (it alone
-// derives the civilian radius). HQ leftovers lead, best first: the rejection registration
+// derives the civilian radius). HQ leftovers lead, biggest first: the rejection registration
 // can act on is an overlap with the HQ, so the stand-in should come from the same disc.
 private _spare = [];
 if (count _hqPos > 0) then {
     private _hqScored = [];
     {
-        private _score = [_pool select _x, _hqPos] call _fnc_score;
-        if (_score >= 0) then { _hqScored pushBack [_score, _x] };
+        private _entry = _pool select _x;
+        if ((_entry select 1) distance2D _hqPos <= _ANCHOR_RADIUS) then {
+            _hqScored pushBack [_entry select 2, _x];
+        };
     } forEach _remaining;
     _hqScored sort false;
     _spare = _hqScored apply { _x select 1 };
 };
 _spare append (_remaining select { !(_x in _spare) });
 
-private _selected = _taken apply { (_pool select _x) select 0 };
-private _spareLocs = _spare apply { (_pool select _x) select 0 };
+private _fnc_pair = { private _entry = _pool select _x; [_entry select 0, _entry select 2] };
+private _selected = _taken apply _fnc_pair;
+private _spareTowns = _spare apply _fnc_pair;
 
-["INFO", "CIV", format ["Town selection: %1 anchors over %2 zones, %3 of %4 map towns within %5m; %6 selected (%7 quota + %8 top-up), %9 spare",
-    count _anchors, count _zones, count _pool, count _candidates, _ANCHOR_RADIUS,
-    count _selected, (count _taken) - (count _topUp), count _topUp, count _spareLocs]] call fnc_log;
-["INFO", "CIV", format ["Town selection returned %1 towns: %2",
-    count _selected, _selected apply { text _x }]] call fnc_log;
+["INFO", "CIV", format ["Town selection: %1 anchors over %2 zones, %3 of %4 map towns within %5m holding %6+ buildings; %7 selected (%8 quota + %9 top-up), %10 spare",
+    count _anchors, count _zones, count _pool, count _candidates, _ANCHOR_RADIUS, _MIN_BUILDINGS,
+    count _selected, (count _taken) - (count _topUp), count _topUp, count _spareTowns]] call fnc_log;
+["INFO", "CIV", format ["Town selection returned %1 towns (name/buildings): %2",
+    count _selected, _selected apply { format ["%1 %2", text (_x select 0), _x select 1] }]] call fnc_log;
 
-[_selected, _spareLocs]
+[_selected, _spareTowns]
