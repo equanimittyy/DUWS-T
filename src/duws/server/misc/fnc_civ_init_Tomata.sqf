@@ -28,9 +28,9 @@ private _fnc_finish = {
 [] call fnc_civ_setup_array;
 ["INFO", "CIV", format ["civ_array loaded, count: %1", count civ_array]] call fnc_log;
 
-// Banner first: selection counts the buildings of every town near the fighting, which is the
-// slowest step of the civilian pass, and the caller cleared the map before handing over.
-["Surveying towns..."] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+// Banner first: the caller cleared the map before handing over, and selection cannot ping its
+// own progress until it has enumerated the map's towns.
+["Placing civilians...<br/>surveying towns"] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 ([] call fnc_civ_selectTowns) params [["_queue", []], ["_spare", []]];
 
 // The base composition spans about 30 m; the rest is margin for its guards, patrols and

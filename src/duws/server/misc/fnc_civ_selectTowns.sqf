@@ -4,7 +4,8 @@
     Picks the map towns that should carry a civilian population: real Locations near the
     fighting, ranked by how many usable buildings they hold. Returns [selected, spare] as
     [location, buildingCount] pairs -- the towns to register, and a replacement queue for those
-    the caller rejects. No side effects; the caller does the registration.
+    the caller rejects. Draws its own survey progress on the map prompt; otherwise no side
+    effects, and the caller does the registration.
 */
 if (!isServer) exitWith {[[], []]};
 
@@ -44,31 +45,49 @@ private _candidates = nearestLocations [
     worldSize
 ];
 
-// [location, position, buildings] for every town inside some anchor's disc that holds enough
-// buildings to populate. The union of the discs, not their intersection: a strict intersection
-// is empty in any campaign whose zones sit more than twice _ANCHOR_RADIUS apart, which is most
-// of them.
-private _pool = [];
+// Towns inside some anchor's disc. The union of the discs, not their intersection: a strict
+// intersection is empty in any campaign whose zones sit more than twice _ANCHOR_RADIUS apart,
+// which is most of them. Split off from the building sweep below so that sweep runs over a
+// known total and its progress reads linearly -- this pass is only distance checks.
+private _inReach = [];
 {
-    private _loc = _x;
     // getPos, not locationPosition: the runtime centres triggers and markers on
     // getPos (fnc_civ_handler.sqf:26), and eligibility must measure the same point.
-    private _pos = getPos _loc;
-
+    private _pos = getPos _x;
     if ((_anchors findIf { _pos distance2D _x <= _ANCHOR_RADIUS }) >= 0) then {
-        // Ranked on standing buildings rather than `size _loc`: the radiusA/radiusB in
-        // CfgWorlds are hand-authored per map and routinely put a hamlet level with a city, so
-        // an extent-ranked pass kept spending slots on empty ground. Counted once here and
-        // carried out with the location, because the caller needs the same figure and this is
-        // the heaviest engine work in the whole civilian pass.
-        private _buildings = count ([_pos, 2, _COUNT_RADIUS] call fnc_usableBuildings);
-        // Below the floor there is nothing for a civilian to walk into, and the caller's
-        // population floor would still drop a dozen of them in an empty field.
-        if (_buildings >= _MIN_BUILDINGS) then {
-            _pool pushBack [_loc, _pos, _buildings];
-        };
+        _inReach pushBack [_x, _pos];
     };
 } forEach _candidates;
+
+// [location, position, buildings] for every town in reach holding enough buildings to populate.
+// Ranked on standing buildings rather than `size _loc`: the radiusA/radiusB in CfgWorlds are
+// hand-authored per map and routinely put a hamlet level with a city, so an extent-ranked pass
+// kept spending slots on empty ground. Counted once here and carried out with the location,
+// because the caller needs the same figure and this is the heaviest engine work in the whole
+// civilian pass.
+private _pool = [];
+private _total = count _inReach;
+private _lastPing = 0;
+{
+    _x params ["_loc", "_pos"];
+    private _buildings = count ([_pos, 2, _COUNT_RADIUS] call fnc_usableBuildings);
+    // Below the floor there is nothing for a civilian to walk into, and the caller's population
+    // floor would still drop a dozen of them in an empty field.
+    if (_buildings >= _MIN_BUILDINGS) then {
+        _pool pushBack [_loc, _pos, _buildings];
+    };
+
+    // The setup phase forces the map open and hint/globalChat both render beneath it, so the
+    // map prompt is the only channel a player sees during this pass. Throttled by time, not by
+    // index: the candidate count swings with the anchor spread, so a fixed every-Nth would be
+    // silent on a tight campaign and spam on a spread one.
+    if (diag_tickTime - _lastPing > 1.5) then {
+        _lastPing = diag_tickTime;
+        [format ["Placing civilians...<br/>surveying towns  %1%2  (%3 of %4 sites)",
+            round (100 * _forEachIndex / (1 max _total)), "%", _forEachIndex, _total]]
+            remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+    };
+} forEach _inReach;
 
 // Wave 1: each anchor ranks its own disc by building count and takes its own quota, in turn,
 // skipping what earlier anchors already took. A single ranking over the whole union let one
