@@ -18,6 +18,13 @@ _zones_array = [[-9999,-9999,-9999]];
 for [{_i=1}, {_i<=zones_number}, {_i=_i+1}] do  // BEGIN "FOR" LOOP --
 {
     player globalChat format[localize "STR_DUWS_T_6izloqi3",_i];
+    // Banner, not hint/globalChat: this whole loop runs with the map forced open above, and
+    // the engine draws both of those beneath it -- every instruction and every rejection
+    // below was invisible, so a click that failed validation looked like no click at all.
+    // Held in a variable because the outcome messages append to it.
+    private _zonePrompt = format ["<t size='2' color='#00ffff'>%1 </t><br/>%2",
+        format [localize "STR_DUWS_T_6izloqi3", _i], localize "STR_DUWS_T_5ve9v8c0"];
+    [_zonePrompt] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
     _found = false;
     man_zone_radius = 0; publicVariable "man_zone_radius";
     man_points_zone = 0; publicVariable "man_points_zone"; 
@@ -49,26 +56,26 @@ for [{_i=1}, {_i<=zones_number}, {_i=_i+1}] do  // BEGIN "FOR" LOOP --
 
 				if (0 == _posDeMeilleurTruc select 0 && 0 == _posDeMeilleurTruc select 1) then {
 					clicked = false;
-					hint localize "STR_DUWS_T_blz9jyju";
+					[format ["%1<br/><t color='#ff1111'>%2</t>", _zonePrompt, localize "STR_DUWS_T_blz9jyju"]] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 				} else {
 					// DON'T SPAWN ON ROADS
 if (isNull _nearRoad) then {
     // ========== 原点防护：禁止在距离 [0,0,0] 500 米内生成战区 ==========
     if (_posDeMeilleurTruc distance2D [0,0,0] < 500) then {
         clicked = false;
-        hint "Position too close to map origin [0,0,0]. Please choose another location at least 500m away.";
+        [format ["%1<br/><t color='#ff1111'>%2</t>", _zonePrompt, "Position too close to map origin [0,0,0]. Please choose another location at least 500m away."]] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
         _Posfound = false;
         _found_distance = false;
     } else {
         onMapSingleClick "";
-        hint localize "STR_DUWS_T_7o4m3o2t";
+        [format ["%1<br/><t color='#66ff66'>%2</t>", _zonePrompt, localize "STR_DUWS_T_7o4m3o2t"]] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
         man_missionPos = _posDeMeilleurTruc;
         _Posfound = true;
         _found_distance = true;
     };
 } else {
     clicked = false;
-    hint localize "STR_DUWS_T_wwegpr4y";
+    [format ["%1<br/><t color='#ff1111'>%2</t>", _zonePrompt, localize "STR_DUWS_T_wwegpr4y"]] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 };
 				};
 			};
@@ -99,7 +106,9 @@ if (isNull _nearRoad) then {
     };
 };
 
-//openMap [false, false]; 
+//openMap [false, false];
+
+[""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
 // No completion announcement here: every one of them fires from fnc_init_OPFOR_WARCOM once
 // civilians are registered too. Announcing at this point told the player the campaign was
