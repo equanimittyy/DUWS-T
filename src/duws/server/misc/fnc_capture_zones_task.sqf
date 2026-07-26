@@ -18,7 +18,11 @@ while {!(["ZONES", "mission_init_complete (zones built, civilians registered)",
 ["ZONES", "intro_heli_done (players landed)", {!isNil "intro_heli_done"}, 420] call fnc_waitLogged;
 
 // 创建主要任务（占领所有区域）
-[west, [localize "STR_DUWS_T_347ohzwn"],
+// The task ID is a fixed key and must never be localized: the SUCCEEDED update at the end of
+// this file looks the task up by this exact string, so a localized ID silently stops matching
+// the moment the server is not English and the campaign task never completes. The player-facing
+// name comes from the description array below, not from the ID.
+[west, ["Campaign"],
     [localize "STR_DUWS_T_92465yls", localize "STR_DUWS_T_q5xntd8z", localize "STR_DUWS_T_q5xntd8z"], objNull, true] call BIS_fnc_taskCreate;
 sleep 2;
 // 如果是丧尸模式且尚未创建额外任务，则创建
