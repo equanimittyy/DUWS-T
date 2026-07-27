@@ -43,15 +43,22 @@ refresh, because AP has no HUD counter and no `publicVariableEventHandler` — w
 re-reading the pool, whose local copy is still pre-spend at that point.
 
 Reputation follows the same contract, with one addition: `fnc_rep_adjust` (same file) owns the
-rounding as well as the write. It is the only pool taking fractional deltas (`+0.5`, `-0.3`),
-and `abs Player_Reputation` is multiplied into a hostile-civilian spawn count
-(`server/misc/fnc_civ_handler.sqf:532-534`), so float drift would compound into AI behaviour rather
-than just a display. The writer snaps to two decimals and zeroes anything below `0.01`; callers
-send a plain delta and never normalise, or two of them would round differently. Its pre-play
-absolute is `server_var_init.sqf:155`. Like AP it has no HUD control and no event handler, so
-call sites that name the new total in a notification compute it locally as
-`Player_Reputation + delta` rather than re-reading the global, which is still pre-change at
-that point.
+rounding as well as the write. It is the only pool taking fractional deltas (`+0.5`, `-1`), and
+partisan hiring gates on the running total, so float drift would compound into what the player
+can buy rather than just a display. The writer snaps to two decimals and zeroes anything below
+`0.01`; callers send a plain delta and never normalise, or two of them would round differently.
+Its pre-play absolute is `server_var_init.sqf`.
+
+**Reputation has two writers and one of them is per-town.** Anything that happens inside a
+civilian area goes through `fnc_town_rep_adjust`, which clamps that town to `[-20, 20]` and then
+forwards the *absorbed* delta — the clamped total minus the old total — to `fnc_rep_adjust`. The
+global therefore stays the running sum of what actually happened, and a town pinned at `-20`
+stops dragging it down. The global itself is not clamped: it is the sum of N town pools, so a
+cap that meant the same thing would have to be `20 x town count`, which is not a cap.
+
+**No call site prints a reputation total.** A caller computes its figure before the write lands,
+and the clamp means the writer may apply less than was asked, so any number a caller names is a
+prediction. The town's own marker carries `Rep:` and SITREP carries the campaign figure.
 
 ## Authority: the server decides a purchase, not the buyer
 
@@ -94,6 +101,24 @@ Where a comm-menu support passes `_cost = 0` the charge already happened at unlo
 handshake short-circuits and the site is left alone: `client/dialog/fnc_MHQ_select.sqf` and both taxis
 in `supports/taxi/` spend nothing.
 
+## Escalation scales every price
+
+`fnc_escalation_cost` (`server/server_fnc_init.sqf`) multiplies a base cost by
+`escalation_multiplier` and rounds up, so a scaled price is never cheaper than the base one.
+`fnc_pool_try_spend` applies it on entry, which covers every `fnc_pool_spend` site at once; the
+four paths listed above as handshake exceptions each apply it themselves, and are the only
+places that have to remember to. It is defined beside the pool writers rather than in
+`fnc_escalation.sqf` so the purchase path does not depend on whether escalation ever started —
+with no multiplier published it is the identity.
+
+The multiplier is `publicVariable`d because the request menu displays it. Base costs are baked
+into each row's stringtable label (`"Supply Drop (5CP) Radio"`), so
+`client/dialog/fnc_HQ_Request_Menu.sqf` appends the scaled figure rather than substituting it,
+against a cost table it keeps for that purpose. Stripping the numbers out and re-formatting from
+a `%1` placeholder is the tidier shape and is rejected on localisation grounds: a placeholder
+added to English but not to the other four languages leaves them printing the stale baked
+figure, which is a wrong number rather than an untranslated one.
+
 ## Faucets
 
 | Source | File | Amount |
@@ -102,7 +127,8 @@ in `supports/taxi/` spend nothing.
 | Zone recapture (after loss) | `server/init_zones/fnc_blufor_cap.sqf:55` | `round(points/3)` — ≈33; intentionally lower |
 | Passive territory hold | `server/misc/fnc_zonesundercontrol.sqf:6,11` | `zones_held × 6`, every 30 min |
 | Side-mission reward | `server/missions/fnc_mission_reward.sqf` | `reward × cp_reward_multiplier` (multiplier default 1) |
-| Reputation tick | `server/misc/fnc_civ_init_Tomata.sqf:237` | `ceil(rep/2)`, every 15 min |
+| Reputation tick | `server/misc/fnc_civ_rep_economy.sqf` | `ceil(rep/2)`, every 15 min |
+| Town Army Power | `server/misc/fnc_civ_rep_economy.sqf` | AP, not CP: each banded town's worth of 1–3 to whichever side holds it, every 30 min |
 | Recruit rescued civilian | `server/misc/fnc_recruit_civilian_server.sqf` | +5 (+8 in WBK mode) |
 | Intel analysis (terminal) | `server/misc/fnc_intelAnalysis.sqf` | 1.5–8 per item; `FileTopSecret`/`FilesSecret` = 8 |
 | Enemy corpse loot | `server/misc/fnc_addRandomLoot.sqf` → analysis | ~80% of enemies carry 0–2 of Money/Files/Wallet |
@@ -110,7 +136,6 @@ in `supports/taxi/` spend nothing.
 | Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle, summed then rounded |
 | Vehicle-kill / kill-streak | `server/server_init.sqf:337,353` | per-kill points; +1 per 10 kills |
 | Killhouse training | `server/misc/fnc_createKillhouse.sqf:1072` | +1 (targets) or +10 (challenge), once, on clearing all 100 |
-| Scorched-earth town razing | `server/misc/fnc_civ_handler.sqf`, `fnc_civ_handler_wbk.sqf` | +15 (with AP + reputation penalties) |
 | Rare-zombie kill (WBK) | `server/misc/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | AP→CP conversion | `client/dialog/fnc_convertAPtoCP.sqf` | 15 AP → 10 CP, one-way |
 

@@ -156,6 +156,14 @@ The HQ keep-out is disc-against-disc, not centre-against-centre: a civilian area
 reaches the base still spawns civilians inside it. It sits in registration because that is
 where the radius formula lives. Enemy zones get no such gate; a contested town is the point.
 
+Registration also decides each town's starting reputation and its Army Power worth. Both run
+after the overlap cull has finalised every radius, for the same reason the HQ keep-out does: the
+enemy-zone test is disc-against-disc, and it reads radii out of `zone_meta_array` (entry index 2)
+rather than `serv_zones_array`, which stores positions only. A town whose disc reaches into an
+enemy zone opens at `-20` — the enemy already holds that ground and the civilians there start
+with them. Worth is a rank within the campaign's own kept set rather than an absolute building
+count, so Altis cities and a sparse map's hamlets both span 1 to 3.
+
 ### Ordering
 
 Civilian generation is a step of zone generation, not a parallel system racing it. The
@@ -186,10 +194,9 @@ the fast-rope rather than during generation. Only the first wait is retried — 
 has exit paths that never publish the second, and a campaign with no main task has no win
 condition at all, so that wait falls through on timeout with the earlier gate holding the line.
 
-### Defects (Subsystem B)
-
-**Towns inside enemy zones can block capture.** No keep-out is applied against zone
-positions, so a civilian town may sit on one. At negative reputation
-`fnc_civ_handler.sqf:532-560` re-sides a share of civilians to `resistance`, which
-`server_init.sqf:28-31` sets hostile to west, and a zone's capture trigger is `WEST SEIZED`
-(`fnc_createzone.sqf:259`) — hostile civilians standing inside the zone therefore hold it.
+A town in the OPFOR band carries a garrison, spawned by `fnc_civ_garrison.sqf` on the same
+arrival test zones use (`fnc_duws_bluforNear`). It is units only — no fortification ring and no
+prefab, because the static emplacements are what make a zone an objective and a town must not
+compete with one. Clearing it resets that town's reputation to 0, decided by a `WEST SEIZED`
+trigger rather than by counting the garrison: the three spawners are fire-and-forget and
+register nothing, so no group handle exists to watch die.
