@@ -23,9 +23,9 @@ class Params {
     // Anything tagged persistent ignores this, so the HQ and side-mission objectives are not
     // affected by shortening it.
     class DUWS_CleanupLifetime {
-        title = "Map Cleanup";
-        values[] = {0,600,1800,3600};
-        texts[] = {"Off","10 minutes","30 minutes","60 minutes"};
+        title = "Garbage Collection";
+        values[] = {0,600,1200,1800,2400,3000,3600};
+        texts[] = {"Off","10 minutes","20 minutes","30 minutes","40 minutes","50 minutes","60 minutes"};
         default = 1800;
     };
 
