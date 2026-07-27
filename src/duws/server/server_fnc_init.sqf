@@ -269,6 +269,39 @@ fnc_duws_disposeAfter = {
 };
 publicVariable "fnc_duws_disposeAfter";
 
+// Mark an object as part of a standing composition -- the BLUFOR HQ, a FOB, a zone prefab, a
+// hardpoint. Tagged persistent so no cleanup sweep touches it, and filed under _key so the
+// whole composition can be released together.
+// Membership is tracked rather than inferred, because inference cannot work: when a hardpoint
+// is wrecked its sandbags and camo net are undamaged props, and no test applied to those
+// objects -- dead, immobile, litter class -- would ever collect them. Only the key knows they
+// belonged to something that is now gone.
+fnc_duws_keep = {
+    params ["_obj", ["_key", "world"]];
+    if (!isServer) exitWith { _this remoteExec ["fnc_duws_keep", 2] };
+    _obj setVariable ["persistent", true, true];
+    // Nulls pruned on the way in: a FOB rebuild deletes its old ring outright rather than
+    // releasing it, so without this the key accumulates dead references for the whole campaign.
+    private _members = (DUWS_compositions getOrDefault [_key, []]) select {!isNull _x};
+    _members pushBackUnique _obj;
+    DUWS_compositions set [_key, _members];
+};
+publicVariable "fnc_duws_keep";
+
+// The composition is gone: drop the protection from every part and hand the lot to the sweep.
+// Deletion still respects the keep-radius, so a hardpoint wrecked under the player's nose
+// clears once they leave rather than in front of them.
+fnc_duws_release = {
+    params ["_key", ["_ttd", 300]];
+    if (!isServer) exitWith { _this remoteExec ["fnc_duws_release", 2] };
+    {
+        _x setVariable ["persistent", false, true];
+        [_x, _ttd] call fnc_duws_disposeAfter;
+    } forEach (DUWS_compositions getOrDefault [_key, []]);
+    DUWS_compositions deleteAt _key;
+};
+publicVariable "fnc_duws_release";
+
 // STARTUP FUNCTIONS
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BluHQinit.sqf";
 fnc_factions_check = compile preprocessFileLineNumbers "duws\server\misc\fnc_factions_check_modern.sqf";

@@ -97,6 +97,13 @@ damagedBuildings = [];
 // reach it by remoteExec.
 DUWS_disposables = [];
 
+// composition key -> the objects it owns, written through fnc_duws_keep. Every member is
+// tagged persistent so no sweep touches a standing composition, and the key exists so
+// fnc_duws_release can bin all of it at once. Tracking is what makes that possible: the
+// sandbags and camo net of a wrecked hardpoint are undamaged props, so no test of the objects
+// themselves -- dead, immobile, littered -- would ever collect them.
+DUWS_compositions = createHashMap;
+
 // Death Penalty
 DUWSMP_CP_death_cost = 0;publicVariable "DUWSMP_CP_death_cost";
 

@@ -149,12 +149,11 @@ while{true} do {
 
     if (_ttdVehiclesImmobile>0) then {
         {
-            // Statics are excluded, matching fnc_spawnWait.sqf:110. This clause means "a vehicle
-            // that was immobilised", and a static weapon satisfies !canMove merely by being one --
-            // so unmanned HQ, FOB and zone turrets were all on a timer. Hardpoint cores are static
-            // weapons too, and their design takes "no cleanup sweep deletes a core" as an
-            // invariant: a deleted core leaves its zone permanently uncapturable.
-            if(!(_x isKindOf "StaticWeapon") && !canMove _x && {alive _x}count crew _x==0) then {
+            // A static weapon satisfies !canMove merely by being one, so every unmanned turret
+            // matches this clause. They survive by being tagged through fnc_duws_keep, not by a
+            // class exemption here -- an exemption would also spare a turret whose composition
+            // has been released, which is exactly the case that should be collected.
+            if(!canMove _x && {alive _x}count crew _x==0) then {
                 [_x, _ttdVehiclesImmobile] call _addToCleanup;
             } else {
                 [_x] call _removeFromCleanup;
