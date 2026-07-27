@@ -97,7 +97,8 @@ table above: anything the replay rebuilds must not also be restored, or it is do
 | Settings | input | `zones_number`, radii, spacing, `moreUrban`, `hardcore_mode_enable`, `enemyunitMultiplier`, `CIV_PRESENCE` |
 | Placement | input | `PosOfBLUHQ`, `AO_direction`, `serv_zones_array`, `zone_meta_array` |
 | Player build | input | `Array_of_FOBpos`, `Array_of_FOBname`, the support-unlock mirror |
-| Civilians | input | town positions, names, radii and populations; `civ_town_rep` if [`per_town_reputation_plan.md`](per_town_reputation_plan.md) has landed |
+| Civilians | input | town positions, names, radii and populations; `civ_town_rep` and `civ_town_ap` if [`per_town_reputation_plan.md`](per_town_reputation_plan.md) has landed |
+| Escalation | outcome | the destroyed-building count, if [`per_town_reputation_plan.md`](per_town_reputation_plan.md) has landed. One integer; the census re-runs on the restored world |
 | Hardpoints | input | `hardpoint_pos_array`, `hardpoint_type_array`, `hardpoint_zone_array`, `hardpoint_state_array` and the `zone_hp_left_<n>` counters, if [`hardpoint_system_plan.md`](hardpoint_system_plan.md) has landed |
 | Pools | outcome | `commandpointsblu1`, `WARCOM_blufor_ap`, `WARCOM_opfor_ap`, `Player_Reputation` |
 | Ownership | outcome | the positions of BLUFOR-held zones, and nothing else |
@@ -106,6 +107,16 @@ table above: anything the replay rebuilds must not also be restored, or it is do
 Hardpoints are an input for the same reason zones are: that plan sites them inside
 `fnc_createZone`, so the siting pass has to accept a restored registry instead of rolling fresh
 positions, or a restore moves every hardpoint and orphans its cleared state.
+
+`civ_town_ap` is stored rather than recomputed, against this plan's usual preference for
+rebuilding derived state. It is a rank within the kept set's building counts, so recomputing it
+needs the whole set to rank against and produces the right answer only while the ranking
+function is unchanged — a tuning edit between the save and the load would silently repay every
+town differently. It is one integer per town beside a number array the save already carries.
+
+None of these three exists under `CIV_PRESENCE` of `RAVAGE` or `WBK`, where per-town reputation
+and escalation do not run at all. `CIV_PRESENCE` is already an input in the Settings row, so a
+restore knows which shape to expect and reads the group as absent rather than empty.
 
 **Zone names are not stored.** `fnc_locatorzones_random.sqf:181` builds them as
 `format [localize "STR_DUWS_T_39z6pg7y", _i]`, so storing the string pins a restored campaign to

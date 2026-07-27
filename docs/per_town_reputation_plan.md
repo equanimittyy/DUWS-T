@@ -29,6 +29,28 @@ garrison now and a planning director later, documented in
 
 ## Design
 
+### None of this runs in RAVAGE or WBK
+
+Per-town reputation and escalation are both off when `CIV_PRESENCE` is `RAVAGE` or `WBK`. No
+`civ_town_rep` or `civ_town_ap` arrays, no enemy-zone `-20`, no bands, no ellipse recolouring,
+no garrison, no AP tick, and no escalation at all — no census, no counter, no cost multiplier,
+no level-11 loss.
+
+This preserves current behaviour rather than changing it. Both modes already bail out of every
+reputation path they can reach: `fnc_civ_rep_Tomata.sqf:12` exits for both, and
+`fnc_warcrimes_script.sqf:10-11` does the same. A zombie apocalypse has no civil standing to
+lose and nobody to install an OPFOR garrison, so a reputation number there would be a dial with
+nothing on the other end of it.
+
+What still applies in those modes is civilian *generation*, which is not reputation: the static
+`civ_pop_%1` building count, the density scaling that follows from it, and the removal of the
+depopulation blocks. Their towns keep the `Pop:` marker field and hold the neutral ellipse
+colour permanently, since the band is the only thing that would ever have repainted it.
+
+Skipping the census is also the one place this saves real time — `nearestTerrainObjects` over
+the whole world is the most expensive call the escalation system makes, and these modes never
+pay it.
+
 ### State
 
 Two index-parallel arrays beside `civ_locations`, not N separate globals. `publicVariable`
@@ -179,7 +201,8 @@ printing a bonus it does not grant would be a lie — this is the general form o
 rep 0".
 
 `Pop` is the town's usable-building count and never changes. It is a size figure, not a head
-count.
+count. In RAVAGE and WBK it is the only field, because those modes carry no reputation to
+print.
 
 Reputation prints as stored, with no rounding at the display. `fnc_rep_adjust` already snaps to
 two decimals and zeroes anything under `0.01`, so a whole number prints whole. Rounding to an
@@ -396,7 +419,7 @@ clearing the garrison discharges the debt in full.
 
 | Property | Value |
 |---|---|
-| Counter | non-military `House` objects destroyed, anywhere, campaign-wide |
+| Counter | one integer: non-military `House` objects destroyed, anywhere, campaign-wide, with no location or attribution test |
 | Budget | 10 % of the map's total `House` count, censused once at init |
 | Tier size | budget divided by 11 |
 | Level | `floor (destroyed / tierSize)`, 0 to 11 |
@@ -456,7 +479,8 @@ worked in dedicated MP and neither will its replacement. Test before building on
 ### Towns overlapping an enemy zone start enemy-held
 
 A town whose civilian disc overlaps an enemy zone's disc is initialised at `-20` instead of `0`.
-The enemy already holds that ground; the civilians there start out with them.
+The enemy already holds that ground; the civilians there start out with them. Like everything
+else here, this does not apply in RAVAGE or WBK.
 
 The test runs in registration, after the overlap cull has finalised every radius — the same
 reason the HQ keep-out lives there and not in selection. Radii come from `zone_meta_array`
@@ -537,7 +561,8 @@ internals to every machine to serve two `addAction` conditions.
 | `server/misc/fnc_civ_init_Tomata.sqf` | Initialise `civ_town_rep` at 0; compute `civ_town_ap` from the kept set's building counts; `-20` for enemy-zone overlaps; delete the `_initialPop` derivation `:72-83` and store the building count as `civ_pop_%1`; three-field marker text at `:209`. |
 | `server/misc/fnc_civ_rep_economy.sqf` | Delete the recovery thread `:12-38`; add the 30-minute AP tick; rewrite the file docstring. |
 | `server/misc/fnc_civ_rep_Tomata.sqf` | Civilian death goes from `-0.3` to `-1` and routes through the town writer, resolving the town from the victim's `civ_locIndex` `:27`. Both existing gates stay, one retuned: the charge rate `:15` drops from 50 % to 30 % (`random 10 < 7`), and the 200 m player-present test `:17-23` is unchanged — so three in ten of the deaths a player is near are charged, an effective `-0.3` per death against `-0.15` today. Drop the notification `:28-31` and the `CIV_deaths` bump `:34-35`. |
-| `server/server_var_init.sqf:79,93` | Remove `CIV_deaths`; `damagedBuildings` becomes per-town. |
+| `server/server_var_init.sqf:79,93` | Remove `CIV_deaths`. Replace the `damagedBuildings` array with a single escalation counter: nothing reads the objects back, and an array holding a reference per destroyed house grows for the whole session — [`info/performance_hotspots.md`](info/performance_hotspots.md) already lists it as unbounded session state. |
+| `info/performance_hotspots.md` | Drop the `damagedBuildings` entry from the session-growth section once the array is gone. |
 | `server/misc/fnc_civ_handler.sqf` | Delete hostile conversion `:531-558`, hostile replacement `:381-383`, suicide bombers `:563-588`, and the depopulation block `:121-142` with its scorched-earth reward. Density from building count `:253-254`. Drop the pop decrement `:344-347`. Garrison spawn on the town's tier. |
 | `server/misc/fnc_civ_handler_wbk.sqf` | Delete the depopulation block `:118-139`; drop the marker-text writes `:126,143,384`. Density `:251`. |
 | `server/misc/fnc_civ_suicideBomberBehaviour.sqf` | Delete; behaviour preserved in `opfor_commander_plan.md`. |
@@ -580,8 +605,9 @@ internals to every machine to serve two `addAction` conditions.
 - [ ] Add the level-11 loss condition and the enviro-menu toggle in the vacated slot. Verify: the menu reads Escalation with the shared enabled/disabled pair; disabling it stops both the multiplier and the loss.
 - [ ] Add the enemy garrison with its three tiers, and the clear-to-reset rule on a `WEST SEIZED` trigger. Verify: a town at `-20` spawns the armour tier; holding the town clear for the timeout sets it to 0 with the marker returning to purple; one surviving OPFOR unit inside the radius keeps it from firing, and civilians inside the radius do not.
 - [ ] Add the 30-minute AP tick. Verify: the RPT shows one BLU and one OPF `fnc_ap_adjust` entry per tick, and the totals match the sum of the banded towns' worth.
+- [ ] Gate the whole system off under `CIV_PRESENCE` of `RAVAGE` or `WBK`. Verify: those campaigns register towns with a `Pop:`-only marker and a permanently neutral ellipse, no `civ_town_rep` or `civ_town_ap` exists, no garrison spawns at any town, prices never scale, and the RPT shows no census line.
 - [ ] In-game: confirm the global still gates partisan hiring and the CP tick as before.
-- [ ] Update `info/cp_economy.md` and `info/zone_and_town_generation.md`.
+- [ ] Update `info/cp_economy.md`, `info/zone_and_town_generation.md` and `info/performance_hotspots.md`.
 
 ## Decided trade-offs
 
