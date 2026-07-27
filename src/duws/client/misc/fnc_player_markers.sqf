@@ -217,7 +217,11 @@ player_markers_main_loop_handle = _this spawn {
 				_markerText setMarkerTextLocal _text;
 			};
 			
-		} forEach ((allUnits - allPlayers) + allPlayers); // BUG? its possible that allUnits does not contain allPlayers
+		// With AI markers off, nothing outside allPlayers can pass the filter above -- the test
+		// is literally `_this in allPlayers` -- so iterating every unit builds a 300-element
+		// union twice a second to act on a handful. Array subtraction is O(n*m) on top.
+		// The union stays for the AI case, where it guards allUnits omitting a player.
+		} forEach (if (_showAIs) then {(allUnits - allPlayers) + allPlayers} else {allPlayers});
 
 
 		// show player controlled uavs
