@@ -1,45 +1,29 @@
 // Locality: server -- inherited from server/server_init.sqf.
 /*
-    NAME: misc\repetitive_cleanup.sqf
-    VERSION: 1.9
+    NAME: misc\fnc_repetitive_cleanup.sqf
 
     DESCRIPTION:
-    Can delete everything that is not really needed
-    dead bodies, dropped items, smokes, chemlights, explosives, empty groups
-    Nothing is deleted within KEEP_RADIUS of a player, whatever its age.
+    Deletes what play leaves behind: bodies, wrecks, vehicles abandoned where they broke down,
+    dropped weapons, spent smoke, supply crates and parachutes. One lifetime covers all of it,
+    set by the DUWS_CleanupLifetime parameter.
 
     USAGE:
-    in server's init
-    [
-        60, // seconds to delete dead bodies (0 means don't delete)
-        5*60, // seconds to delete dead vehicles (0 means don't delete)
-        3*60, // seconds to delete immobile vehicles (0 means don't delete)
-        2*60, // seconds to delete dropped weapons (0 means don't delete)
-        10*60, // seconds to deleted planted explosives (0 means don't delete)
-        0 // seconds to delete dropped smokes/chemlights (0 means don't delete)
-    ] execVM 'misc\repetitive_cleanup.sqf';
+        [1800] spawn fnc_repetitive_cleanup;   // seconds; 0 or less disables the sweep
 
-    will delete dead bodies after 60 seconds (1 minute)
-    will delete dead vehicles after 5*60 seconds (5 minutes)
-    will delete immobile vehicles after 3*60 seconds (3 minutes)
-    will delete weapons after 2*60 seconds (2 minutes)
-    will delete planted explosives after 10*60 seconds (10 minutes)
-    will not delete any smokes/chemlights since its disabled (set to 0)
+    Anything carrying the persistent flag is never touched, whatever its age. fnc_duws_keep
+    sets that flag and files the object under a composition -- the HQ, a FOB, a zone prefab, a
+    side-mission objective -- and fnc_duws_release drops it and hands the parts back here.
 
-    If you want something to withstand the clean up, paste this into it's init:
-    this setVariable["persistent",true];
+    Planted explosives are deliberately absent. They were listed and disabled; folding them
+    into the shared lifetime would start deleting charges a player placed and meant to return
+    to, which is a gameplay change rather than a cleanup one.
 */
 
-if (!isServer) exitWith {}; // isn't server         
-
-#define PUSH(A,B) A set [count (A),B];
-#define REM(A,B) A=A-[B];
-
-private ["_ttdBodies","_ttdVehiclesDead","_ttdVehiclesImmobile","_ttdWeapons","_ttdPlanted","_ttdSmokes","_addToCleanup","_objectsToCleanup","_timesWhenToCleanup","_removeFromCleanup","_census","_pass","_ttdDroppedGear"];
+if (!isServer) exitWith {};
 
 // Nothing inside this of a player is deleted, however old it is. A wreck or a body blinking
-// out on screen reads as a bug, and the whole point of a lifetime is that it expires out of
-// sight. Every category funnels through one deletion point, so this is enforced in one place.
+// out on screen reads as a bug, and the point of a lifetime is that it expires out of sight.
+// Expired but watched stays and is retried, so it goes once they leave rather than never.
 #define KEEP_RADIUS 300
 
 // Passes between census log lines. The census is the one part of this that cannot be checked
@@ -48,173 +32,100 @@ private ["_ttdBodies","_ttdVehiclesDead","_ttdVehiclesImmobile","_ttdWeapons","_
 // census does not see them and discovery has to go back to searching from unit positions.
 #define LOG_EVERY 30
 
-_ttdBodies=[_this,0,0,[0]] call BIS_fnc_param;
-_ttdVehiclesDead=[_this,1,0,[0]] call BIS_fnc_param;
-_ttdVehiclesImmobile=[_this,2,0,[0]] call BIS_fnc_param;
-_ttdWeapons=[_this,3,0,[0]] call BIS_fnc_param;
-_ttdPlanted=[_this,4,0,[0]] call BIS_fnc_param;
-_ttdSmokes=[_this,5,0,[0]] call BIS_fnc_param;
-_ttdDroppedGear=[_this,6,0,[0]] call BIS_fnc_param;
+private _lifetime = [_this, 0, 0, [0]] call BIS_fnc_param;
+if (_lifetime <= 0) exitWith {};
 
-if({_x>0}count _this==0) exitWith {}; // all times are 0, we do not want to run this script at all
+// Collected by class, and spared only by the persistent flag. Opt out rather than opt in, so a
+// drop added later is swept without anyone having to remember to register it.
+private _litterClasses = ["WeaponHolder", "GroundWeaponHolder", "WeaponHolderSimulated",
+    "SmokeShell", "ReammoBox_F", "ParachuteBase"];
 
-_objectsToCleanup=[];
-_timesWhenToCleanup=[];
+// Objects handed over explicitly, chiefly by fnc_duws_release retiring a composition. A standing
+// list rather than part of the census: a released hardpoint core is a static weapon, and the
+// abandoned-vehicle clause below deliberately never collects those, so nothing would look at it
+// again. Small by nature -- it holds retired compositions, not litter.
+private _disposed = [];
+private _pass = 0;
 
-_addToCleanup = {
-    _object = _this select 0;
-    if(!(_object getVariable["persistent",false])) then {
-        _newTime = (_this select 1)+time;
-        _index = _objectsToCleanup find _object;
-        if(_index == -1) then {
-            PUSH(_objectsToCleanup,_object)
-            PUSH(_timesWhenToCleanup,_newTime)
-        } else {
-            _currentTime = _timesWhenToCleanup select _index;
-            if(_currentTime>_newTime) then {
-                _timesWhenToCleanup set[_index, _newTime];
-            };
-        };
-    };
-};
-
-_removeFromCleanup = {
-    _object = _this select 0;
-    _index = _objectsToCleanup find _object;
-    if(_index != -1) then {
-        _objectsToCleanup set[_index, 0];
-        _timesWhenToCleanup set[_index, 0];
-    };
-};
-
-_pass = 0;
-
-while{true} do {
-    // Interruptible interval, not a flat sleep 10: a forced sweep asked for just after a pass
-    // began waiting would otherwise sit out the whole interval, and a debug button that does
-    // nothing for ten seconds reads as broken. Gated on time rather than a counted poll so the
-    // interval still tracks setTimeMultiplier exactly as the sleep it replaces did. Polling one
-    // boolean twice a second is free next to the census below.
+while {true} do {
+    // Interruptible interval, not a flat sleep: a forced sweep asked for just after a pass began
+    // waiting would otherwise sit out the whole interval, and a debug button that does nothing
+    // for ten seconds reads as broken. Gated on time rather than a counted poll so the interval
+    // still tracks setTimeMultiplier exactly as the sleep it replaces did.
     private _nextPass = time + 10;
     waitUntil { sleep 0.5; DUWS_cleanup_force || {time >= _nextPass} };
-    _census = 0;
 
-    // A census, not a search. nearObjects only answers "what is within X of here", so finding
-    // this junk used to mean sweeping a 100 m radius from every unit in the mission -- four
-    // sweeps each, every 10 s, with squadmates re-asking about the same ground. That was both
-    // the largest sustained cost here and incomplete: litter from a firefight nobody survived
-    // was never near a unit again, so it was never found and never deleted.
-    if (_ttdWeapons>0) then {
-        // Deduped across the three names: if allMissionObjects matches subclasses they overlap,
-        // and the census below is only worth logging if it counts holders rather than queries.
-        private _holders = [];
-        {
-            private _type = _x;
-            { _holders pushBackUnique _x } forEach (allMissionObjects _type);
-        } forEach ["WeaponHolder","GroundWeaponHolder","WeaponHolderSimulated"];
-        _census = count _holders;
-        { [_x, _ttdWeapons] call _addToCleanup; } forEach _holders;
-    };
+    private _now = time;
+    private _candidates = [];
 
-    if (_ttdPlanted>0) then {
-        { [_x, _ttdPlanted] call _addToCleanup; } forEach (allMissionObjects "TimeBombCore");
-    };
+    {
+        private _type = _x;
+        { _candidates pushBackUnique _x } forEach (allMissionObjects _type);
+    } forEach _litterClasses;
+    private _census = count _candidates;
 
-    if (_ttdSmokes>0) then {
-        { [_x, _ttdSmokes] call _addToCleanup; } forEach (allMissionObjects "SmokeShell");
-    };
+    { _candidates pushBackUnique _x } forEach allDeadMen;
+    { if (_x == vehicle _x) then { _candidates pushBackUnique _x } } forEach (allDead - allDeadMen);
 
-    // Crates and parachutes are collected by class like everything else, and survive only by
-    // being tagged. That is the same polarity as every other category here -- opt out, not opt
-    // in -- so a drop added later is cleaned without anyone remembering to register it. It only
-    // became safe once compositions were tagged: the HQ arsenal crate and a supply drop are both
-    // B_supplyCrate_F, and three side missions use crate classes for their objectives.
-    if (_ttdDroppedGear>0) then {
-        { [_x, _ttdDroppedGear] call _addToCleanup; } forEach (allMissionObjects "ReammoBox_F");
-        { [_x, _ttdDroppedGear] call _addToCleanup; } forEach (allMissionObjects "ParachuteBase");
-    };
+    // Abandoned vehicles. Statics are excluded because the clause means "could be driven and no
+    // longer can" -- a turret satisfies !canMove by being a turret, which made every unmanned
+    // emplacement a false positive. One that regains crew or mobility has its clock cleared,
+    // unless it was retired deliberately, whose deadline is not this clause's to reset.
+    {
+        if (!(_x isKindOf "StaticWeapon") && !canMove _x && {alive _x} count crew _x == 0) then {
+            _candidates pushBackUnique _x;
+        } else {
+            if !(_x in _disposed) then { _x setVariable ["DUWS_binAt", nil] };
+        };
+    } forEach vehicles;
 
-    // Explicit one-off lifetimes, chiefly from fnc_duws_release retiring a composition. Drained
-    // rather than re-read, so each object is scheduled once with the lifetime it asked for.
+    { if (count units _x == 0) then { deleteGroup _x } } forEach allGroups;
+
+    // Explicit lifetimes win over the shared one: fnc_duws_release asks for its own.
     {
         _x params ["_obj", "_ttd"];
-        [_obj, _ttd] call _addToCleanup;
+        if (!isNull _obj) then {
+            _obj setVariable ["DUWS_binAt", _now + _ttd];
+            _disposed pushBackUnique _obj;
+        };
     } forEach DUWS_disposables;
     DUWS_disposables = [];
+    _disposed = _disposed select {!isNull _x};
 
-    {
-        if ((count units _x)==0) then {
-            deleteGroup _x;
-        };
-    } forEach allGroups;
-
-    if (_ttdBodies>0) then {
-        {
-            [_x, _ttdBodies] call _addToCleanup;
-        } forEach allDeadMen;
-    };
-
-    if (_ttdVehiclesDead>0) then {
-        {
-            if(_x == vehicle _x) then { // make sure its vehicle
-                [_x, _ttdVehiclesDead] call _addToCleanup;
-            };
-        } forEach (allDead - allDeadMen); // all dead without dead men == mostly dead vehicles
-    };
-
-    if (_ttdVehiclesImmobile>0) then {
-        {
-            // A static weapon satisfies !canMove merely by being one, so every unmanned turret
-            // matches this clause. They survive by being tagged through fnc_duws_keep, not by a
-            // class exemption here -- an exemption would also spare a turret whose composition
-            // has been released, which is exactly the case that should be collected.
-            if(!canMove _x && {alive _x}count crew _x==0) then {
-                [_x, _ttdVehiclesImmobile] call _addToCleanup;
-            } else {
-                [_x] call _removeFromCleanup;
-            };
-        } forEach vehicles;
-    };
-
-    REM(_objectsToCleanup,0)
-    REM(_timesWhenToCleanup,0)
-
-    // Debug-menu request, cleared here rather than by the setter: the pass it woke is the only
-    // place that knows it was served, and leaving it set would wake every pass from now on. It
-    // brings this pass forward and nothing else -- lifetimes and KEEP_RADIUS still decide what
-    // goes, so an early pass deletes exactly what the pass it pre-empted would have.
+    // Read before the walk and cleared here rather than by the setter: the pass it woke is the
+    // only place that knows it was served, and leaving it set would wake every pass from now on.
+    // It brings this pass forward and nothing else -- the lifetime and KEEP_RADIUS still decide
+    // what goes, so an early pass deletes exactly what the pass it pre-empted would have.
     private _force = DUWS_cleanup_force;
     DUWS_cleanup_force = false;
-    private _tracked = count _objectsToCleanup;
+    private _tracked = 0;
 
+    // The deadline lives on the object rather than in a list beside it. A list costs a linear
+    // search per object per pass to find its entry, and has to be compacted afterwards; a
+    // variable is a direct read and is deleted along with the object it belongs to.
     {
-        if(isNull(_x)) then {
-            _objectsToCleanup set[_forEachIndex, 0];
-            _timesWhenToCleanup set[_forEachIndex, 0];
-        } else {
-            // Expired but in view stays on the list and is retried next pass, so it goes as
-            // soon as the player moves off rather than never.
-            private _obj = _x;
-            if(_timesWhenToCleanup select _forEachIndex < time
-                && {(allPlayers findIf {_x distance _obj < KEEP_RADIUS}) < 0}) then {
-                deleteVehicle _obj;
-                _objectsToCleanup set[_forEachIndex, 0];
-                _timesWhenToCleanup set[_forEachIndex, 0];
+        private _obj = _x;
+        if (!isNull _obj && {!(_obj getVariable ["persistent", false])}) then {
+            private _binAt = _obj getVariable "DUWS_binAt";
+            if (isNil "_binAt") then {
+                _obj setVariable ["DUWS_binAt", _now + _lifetime];
+                _tracked = _tracked + 1;
+            } else {
+                if (_binAt > _now || {(allPlayers findIf {_x distance _obj < KEEP_RADIUS}) >= 0}) then {
+                    _tracked = _tracked + 1;
+                } else {
+                    deleteVehicle _obj;
+                };
             };
         };
-    } forEach _objectsToCleanup;
-
-    REM(_objectsToCleanup,0)
-    REM(_timesWhenToCleanup,0)
+    } forEach (_candidates + _disposed);
 
     if (_force) then {
-        ["INFO", "CLEANUP", format ["forced pass: %1 tracked, %2 still pending",
-            _tracked, count _objectsToCleanup]] call fnc_log;
+        ["INFO", "CLEANUP", format ["forced pass: %1 still tracked", _tracked]] call fnc_log;
     };
 
     _pass = _pass + 1;
     if (_pass % LOG_EVERY == 0) then {
-        ["INFO", "CLEANUP", format ["weapon-holder census %1, %2 pending deletion",
-            _census, count _objectsToCleanup]] call fnc_log;
+        ["INFO", "CLEANUP", format ["litter census %1, %2 tracked", _census, _tracked]] call fnc_log;
     };
 };

@@ -149,15 +149,9 @@ if (dynamic_weather_enable) then {
 /////////////////////////////////
 //  MAP OBJECT CLEANING SCRIPT
 /////////////////////////////////
-[
-	10*60,   // seconds to delete dead bodies (0 means don't delete)
-	5*60,    // seconds to delete dead vehicles (0 means don't delete)
-	30*60,   // seconds to delete immobile vehicles (0 means don't delete)
-	10*60,   // seconds to delete dropped weapons (0 means don't delete)
-	0,       // seconds to delete planted explosives (0 means don't delete)
-	10*60,   // seconds to delete dropped smokes/chemlights (0 means don't delete)
-	30*60    // seconds to delete dropped crates and parachutes (0 means don't delete)
-] spawn fnc_repetitive_cleanup;
+// One lifetime for every category the sweep collects; 0 turns it off. The default lives in
+// the parameter, not here, so the two cannot drift apart.
+[["DUWS_CleanupLifetime", 1800] call BIS_fnc_getParamValue] spawn fnc_repetitive_cleanup;
 
 // Cleanup unused players slots.
 for[{_x = 2},{_x <= 36},{_x = _x + 1}] do {

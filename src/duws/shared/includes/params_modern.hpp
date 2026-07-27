@@ -17,6 +17,18 @@ class Params {
         default = 0;
     };
 
+    // How long litter survives before the map sweep deletes it -- one lifetime for bodies,
+    // wrecks, abandoned vehicles, dropped weapons, smoke, crates and parachutes alike. Off
+    // stops the sweep entirely; on a long campaign that trades framerate for tidiness.
+    // Anything tagged persistent ignores this, so the HQ and side-mission objectives are not
+    // affected by shortening it.
+    class DUWS_CleanupLifetime {
+        title = "Map Cleanup";
+        values[] = {0,600,1800,3600};
+        texts[] = {"Off","10 minutes","30 minutes","60 minutes"};
+        default = 1800;
+    };
+
     // Read by INIT.sqf into duws_log_level before either init script compiles fnc_log_init.
     // No default is repeated on the script side -- fnc_log_init owns it and only applies it
     // when the variable is still nil, so the two cannot drift apart.
