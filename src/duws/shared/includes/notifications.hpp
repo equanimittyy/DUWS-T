@@ -135,6 +135,27 @@ class CfgNotifications
         difficulty[] = {};
     };
 
+    class CPaddedvehicle
+    {
+        title = "$STR_DUWS_T_CPKILL_TITLE";
+        iconText = "+%1";
+        // Which vehicle class was killed is passed in: one class covers all five tiers.
+        description = "%2";
+        color[] = {0.5,1,1,1};
+        priority = 0;
+        difficulty[] = {};
+    };
+
+    class CPaddedattrition
+    {
+        title = "$STR_DUWS_T_CPATTRITION_TITLE";
+        iconText = "+%1";
+        description = "$STR_DUWS_T_CPATTRITION_MSG";
+        color[] = {0.5,1,1,1};
+        priority = 0;
+        difficulty[] = {};
+    };
+
     class APaddedmission
     {
         title = "$STR_DUWS_T_elszwwpc2";
@@ -294,18 +315,6 @@ class CfgNotifications
         iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
         description = "%2 %3"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
         color[] = {1,0,0,1}; // Icon and text color
-        duration = 4; // How many seconds will the notification be displayed
-        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
-        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
-    };	
-
-    class killstreak
-    {
-        title = "%1"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Voice_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
-        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
-        description = "%2 %3"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {0,1,0,1}; // Icon and text color
         duration = 4; // How many seconds will the notification be displayed
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled

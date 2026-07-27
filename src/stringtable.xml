@@ -3740,80 +3740,37 @@
                 <Spanish>Demonio élite eliminado</Spanish>
                 <Chinesesimp>你的小队因此获得了%1CP</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_KILL_CAR_TITLE">
-                <Original>Enemy Vehicle Destroyed</Original>
-                <English>Enemy Vehicle Destroyed</English>
+            <Key ID="STR_DUWS_T_CPKILL_TITLE">
+                <Original>CP Bonus: Enemy vehicle destroyed</Original>
+                <English>CP Bonus: Enemy vehicle destroyed</English>
             </Key>
-            <Key ID="STR_DUWS_T_KILL_CAR_MSG">
-                <Original>%1's squad destroyed an enemy light vehicle and gained %2 CP</Original>
-                <English>%1's squad destroyed an enemy light vehicle and gained %2 CP</English>
+            <Key ID="STR_DUWS_T_CPKILL_CAR_MSG">
+                <Original>Received CP for destroying an enemy light vehicle</Original>
+                <English>Received CP for destroying an enemy light vehicle</English>
             </Key>
-            <Key ID="STR_DUWS_T_KILL_APC_TITLE">
-                <Original>Enemy APC Destroyed</Original>
-                <English>Enemy APC Destroyed</English>
+            <Key ID="STR_DUWS_T_CPKILL_APC_MSG">
+                <Original>Received CP for destroying an enemy APC</Original>
+                <English>Received CP for destroying an enemy APC</English>
             </Key>
-            <Key ID="STR_DUWS_T_KILL_APC_MSG">
-                <Original>%1's squad destroyed an enemy APC and gained %2 CP</Original>
-                <English>%1's squad destroyed an enemy APC and gained %2 CP</English>
+            <Key ID="STR_DUWS_T_CPKILL_TANK_MSG">
+                <Original>Received CP for destroying an enemy tank</Original>
+                <English>Received CP for destroying an enemy tank</English>
             </Key>
-            <Key ID="STR_DUWS_T_KILL_TANK_TITLE">
-                <Original>Enemy Tank Destroyed</Original>
-                <English>Enemy Tank Destroyed</English>
+            <Key ID="STR_DUWS_T_CPKILL_HELI_MSG">
+                <Original>Received CP for destroying an enemy helicopter</Original>
+                <English>Received CP for destroying an enemy helicopter</English>
             </Key>
-            <Key ID="STR_DUWS_T_KILL_TANK_MSG">
-                <Original>%1's squad destroyed an enemy tank and gained %2 CP</Original>
-                <English>%1's squad destroyed an enemy tank and gained %2 CP</English>
+            <Key ID="STR_DUWS_T_CPKILL_PLANE_MSG">
+                <Original>Received CP for destroying an enemy aircraft</Original>
+                <English>Received CP for destroying an enemy aircraft</English>
             </Key>
-            <Key ID="STR_DUWS_T_KILL_HELI_TITLE">
-                <Original>Enemy Helicopter Destroyed</Original>
-                <English>Enemy Helicopter Destroyed</English>
+            <Key ID="STR_DUWS_T_CPATTRITION_TITLE">
+                <Original>CP Bonus: Enemy attrition</Original>
+                <English>CP Bonus: Enemy attrition</English>
             </Key>
-            <Key ID="STR_DUWS_T_KILL_HELI_MSG">
-                <Original>%1's squad destroyed an enemy helicopter and gained %2 CP</Original>
-                <English>%1's squad destroyed an enemy helicopter and gained %2 CP</English>
-            </Key>
-            <Key ID="STR_DUWS_T_KILL_PLANE_TITLE">
-                <Original>Enemy Plane Destroyed</Original>
-                <English>Enemy Plane Destroyed</English>
-            </Key>
-            <Key ID="STR_DUWS_T_KILL_PLANE_MSG">
-                <Original>%1's squad destroyed an enemy plane and gained %2 CP</Original>
-                <English>%1's squad destroyed an enemy plane and gained %2 CP</English>
-            </Key>
-            <Key ID="STR_DUWS_T_KILL_STREAK_TITLE">
-                <Original>Kill Streak</Original>
-                <English>Kill Streak</English>
-            </Key>
-            <Key ID="STR_DUWS_T_KILL_STREAK_MSG">
-                <Original>%1's squad reached %2 kills and earned a %3 CP bonus!</Original>
-                <English>%1's squad reached %2 kills and earned a %3 CP bonus!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_KILL_CAR_SUBTITLE">
-                <Original>Enemy light vehicle down!</Original>
-                <English>Enemy light vehicle down!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_KILL_APC_SUBTITLE">
-                <Original>Enemy APC down!</Original>
-                <English>Enemy APC down!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_KILL_TANK_SUBTITLE">
-                <Original>Tank destroyed!</Original>
-                <English>Tank destroyed!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_KILL_HELI_SUBTITLE">
-                <Original>Got one enemy choppa!</Original>
-                <English>Got one enemy choppa!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_KILL_PLANE_SUBTITLE">
-                <Original>Enemy plane down!</Original>
-                <English>Enemy plane down!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_killconfirm">
-                <German>Feind KIA!</German>
-                <Spanish>Enemigo KIA!</Spanish>
-                <Chinesesimp>确认毙敌！</Chinesesimp>
-                <Original>Enemy KIA confirmed!</Original>
-                <English>Enemy KIA confirmed!</English>
+            <Key ID="STR_DUWS_T_CPATTRITION_MSG">
+                <Original>Received CP for sustained enemy losses</Original>
+                <English>Received CP for sustained enemy losses</English>
             </Key>
             <Key ID="STR_DUWS_T_668shcf1">
                 <German>Punkte Bonus</German>

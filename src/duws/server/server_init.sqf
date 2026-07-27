@@ -201,7 +201,7 @@ if (CIV_PRESENCE == "RAVAGE") then {
 // NO VCOM WAYPOINTS
 VCM_ADVANCEDMOVEMENT = false;
 publicVariable "VCM_ADVANCEDMOVEMENT";
-//连杀奖励机制
+//击杀奖励机制
 if (isServer) then {
     if (isNil "playerKillCount") then { playerKillCount = createHashMap; };
     addMissionEventHandler ["EntityKilled", {
@@ -227,9 +227,7 @@ if (isServer) then {
 
         private _type = typeOf _killed;
         private _points = 0;
-        private _titleKey = "";
         private _msgKey = "";
-        private _subtitleKey = "";
 
         // ========== 原有载具类型判断（完全保留） ==========
         // 辅助函数：检查单位类型是否匹配给定的变量（可能是字符串或数组）
@@ -288,40 +286,30 @@ if (isServer) then {
              [_type, "opfor_ARMED_CAR1_X"] call _fnc_match ||
              ({_type isKindOf _x} count _carClasses) > 0 ) then {
             _points = 1;
-            _titleKey = "STR_DUWS_T_KILL_CAR_TITLE";
-            _msgKey = "STR_DUWS_T_KILL_CAR_MSG";
-            _subtitleKey = "STR_DUWS_T_KILL_CAR_SUBTITLE";
+            _msgKey = "STR_DUWS_T_CPKILL_CAR_MSG";
         } else {
             if ( [_type, "opfor_APC1_X"] call _fnc_match ||
                  [_type, "opfor_APC2_X"] call _fnc_match ||
                  [_type, "opfor_AA_APC_X"] call _fnc_match ||
                  ({_type isKindOf _x} count _apcClasses) > 0 ) then {
                 _points = 3;
-                _titleKey = "STR_DUWS_T_KILL_APC_TITLE";
-                _msgKey = "STR_DUWS_T_KILL_APC_MSG";
-                _subtitleKey = "STR_DUWS_T_KILL_APC_SUBTITLE";
+                _msgKey = "STR_DUWS_T_CPKILL_APC_MSG";
             } else {
                 if ( [_type, "opfor_MBT_TANK1_X"] call _fnc_match ||
                      ({_type isKindOf _x} count _tankClasses) > 0 ) then {
                     _points = 5;
-                    _titleKey = "STR_DUWS_T_KILL_TANK_TITLE";
-                    _msgKey = "STR_DUWS_T_KILL_TANK_MSG";
-                    _subtitleKey = "STR_DUWS_T_KILL_TANK_SUBTITLE";
+                    _msgKey = "STR_DUWS_T_CPKILL_TANK_MSG";
                 } else {
                     if ( [_type, "opfor_TRANS_HELI_X"] call _fnc_match ||
                          [_type, "opfor_ATTACK_HELI_X"] call _fnc_match ||
                          ({_type isKindOf _x} count _heliClasses) > 0 ) then {
                         _points = 5;
-                        _titleKey = "STR_DUWS_T_KILL_HELI_TITLE";
-                        _msgKey = "STR_DUWS_T_KILL_HELI_MSG";
-                        _subtitleKey = "STR_DUWS_T_KILL_HELI_SUBTITLE";
+                        _msgKey = "STR_DUWS_T_CPKILL_HELI_MSG";
                     } else {
                         if ( [_type, "opfor_MISC_AIR_X"] call _fnc_match ||
                              ({_type isKindOf _x} count _planeClasses) > 0 ) then {
                             _points = 8;
-                            _titleKey = "STR_DUWS_T_KILL_PLANE_TITLE";
-                            _msgKey = "STR_DUWS_T_KILL_PLANE_MSG";
-                            _subtitleKey = "STR_DUWS_T_KILL_PLANE_SUBTITLE";
+                            _msgKey = "STR_DUWS_T_CPKILL_PLANE_MSG";
                         };
                     };
                 };
@@ -329,7 +317,7 @@ if (isServer) then {
         };
         // =================================================
 
-        // ========== 击杀计数（用于连杀奖励） ==========
+        // ========== 击杀计数（用于累计击杀奖励） ==========
         private _playerUID = getPlayerUID _shooter;
         private _currentKills = playerKillCount getOrDefault [_playerUID, 0];
         _currentKills = _currentKills + 1;
@@ -337,28 +325,21 @@ if (isServer) then {
         // =============================================
 
         // ========== 发放载具奖励（完全独立） ==========
+        // Presented as a CP award in the same notification family as a zone capture, so
+        // kill income reads as campaign economy rather than a scoreboard. Notification
+        // only -- no subtitle or radio chatter: kills are frequent enough that an
+        // Overlord line per kill drowns out the mission's own radio traffic.
         if (_points > 0) then {
             [_points, "vehicle_kill_bounty"] remoteExec ["fnc_cp_adjust", 2];
-
-            private _name = name _shooter;
-            private _messageTitle = localize _titleKey;
-            private _messageBody = format [localize _msgKey, _name, _points];
-
-            ["killstreak", [_messageTitle, _messageBody]] remoteExec ["BIS_fnc_showNotification", 0];
-            [_name, localize _subtitleKey] remoteExec ["BIS_fnc_showSubtitle", 0];
-            [] remoteExec ["fnc_broadcastRadioChatter", 0];
+            ["CPaddedvehicle", [_points, localize _msgKey]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
         };
         // ============================================
 
-        // ========== 连杀奖励（每10击杀 +1CP，独立于载具类型） ==========
+        // ========== 累计击杀奖励（每10击杀 +1CP，独立于载具类型） ==========
         if (_currentKills % 10 == 0) then {
             private _extraPoints = 1;
-            [_extraPoints, "kill_streak"] remoteExec ["fnc_cp_adjust", 2];
-            private _name = name _shooter;
-            private _msg = format [localize "STR_DUWS_T_KILL_STREAK_MSG", _name, _currentKills, _extraPoints];
-            ["killstreak", [localize "STR_DUWS_T_KILL_STREAK_TITLE", _msg]] remoteExec ["BIS_fnc_showNotification", 0];
-            [_name, localize "STR_DUWS_T_killconfirm"] remoteExec ["BIS_fnc_showSubtitle", 0];
-            [] remoteExec ["fnc_broadcastRadioChatter", 0];
+            [_extraPoints, "kill_attrition"] remoteExec ["fnc_cp_adjust", 2];
+            ["CPaddedattrition", [_extraPoints]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
         };
         // ============================================================
     }];
