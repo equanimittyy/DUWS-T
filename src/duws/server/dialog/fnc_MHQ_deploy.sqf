@@ -35,6 +35,7 @@ MHQ_ammobox = objNull;
 switch (VERSION_X) do {
 	case "MODERN": {
 		MHQ_ammobox = createVehicle ["O_supplyCrate_F", _ammoPOS, [], 0, "CAN_COLLIDE"];
+		[MHQ_ammobox, "MHQ"] call fnc_duws_keep;
 	};
 };	
 

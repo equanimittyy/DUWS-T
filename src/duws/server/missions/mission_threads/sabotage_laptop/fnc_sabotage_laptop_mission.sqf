@@ -57,6 +57,7 @@ switch (VERSION_X) do {
         _missionObjects pushBack _table;
         sleep 1;
         _pallet = createVehicle ["VirtualReammoBox_camonet_F", [(_tableLoc select 0)+3, (_tableLoc select 1)+3], [], 0, "CAN_COLLIDE"];
+        [_pallet, "mission_sabotage_laptop"] call fnc_duws_keep;
         _missionObjects pushBack _pallet;
         sleep 1;
         _laptop = createVehicle ["Land_Laptop_unfolded_F", _tableLoc, [], 0, "CAN_COLLIDE"];

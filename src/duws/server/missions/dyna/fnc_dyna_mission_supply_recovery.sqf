@@ -91,6 +91,7 @@ if (_foundPos isEqualTo []) exitWith {
 
 // ---------- 生成补给箱（无敌20秒）----------
 _box = createVehicle ["Box_NATO_AmmoVeh_F", _foundPos, [], 0, "NONE"];
+[_box, "mission_supply_recovery"] call fnc_duws_keep;
 _box allowDamage false;
 [_box] spawn {
     params ["_box"];

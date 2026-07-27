@@ -63,6 +63,7 @@ switch (VERSION_X) do {
     case "MODERN": {
         _box1 = "Land_FoodSacks_01_cargo_white_idap_F" createVehicle (_missionpos);
         _box2 = "Land_FoodSacks_01_cargo_white_idap_F" createVehicle (_missionpos);
+        { [_x, "mission_transport_idap"] call fnc_duws_keep; } forEach [_box1, _box2];
         _box1 attachTo [_truck1,[0,-0.5,0]];
         _box1 setDir 90;
         _box2 attachTo [_truck1,[0,-2.2,0]];

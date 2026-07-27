@@ -87,6 +87,7 @@ _vehicle = objNull;
 } forEach _staticsArray;
 
 _vehicle_7 = createVehicle ["Box_FIA_Ammo_F", [0,0,0], [], 0, "CAN_COLLIDE"];
+[_vehicle_7, "mission_destroy_cache"] call fnc_duws_keep;
 _vehicle_7 setDir 0;
 _vehicle_7 setPosATL [(_centerSpawnX), (_centerSpawnY), 0];
 _vehicle_7 setDamage 0.5;
@@ -121,6 +122,7 @@ _missionObjects pushBack _vehicle_7;
 _vehicle_7 setVariable ["arsenalUsed", false, true];
 
 _vehicle_8 = createVehicle ["Box_FIA_Ammo_F", [0,0,0], [], 0, "CAN_COLLIDE"];
+[_vehicle_8, "mission_destroy_cache"] call fnc_duws_keep;
 _vehicle_8 setDir 0;
 _vehicle_8 setPosATL [(_centerSpawnX)+2.23633, (_centerSpawnY)-0.296875, 0];
 _vehicle_8 setDamage 0.5;

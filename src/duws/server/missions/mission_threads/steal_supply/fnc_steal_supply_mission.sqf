@@ -98,6 +98,7 @@ switch (VERSION_X) do {
     case "MODERN": {
         _box1 = "O_supplyCrate_F" createVehicle _vehPos;
         _box2 = "O_supplyCrate_F" createVehicle _vehPos;
+        { [_x, "mission_steal_supply"] call fnc_duws_keep; } forEach [_box1, _box2];
         _box1 attachTo [_truck1, [0, -0.5, 0]];
         _box1 setDir 90;
         _box2 attachTo [_truck1, [0, -2.2, 0]];
