@@ -63,6 +63,28 @@ private _manStatics = {
 	[_grp, _pos] call bis_fnc_taskDefend;
 };
 
+// Crewing out has to happen here rather than in the loop below: that loop's man clause tests
+// vehicle _x == _x, so a gunner sitting in a static keeps his seat, and stow refuses while any
+// member is crewed. Shared by the opening stow and the despawn one so the two cannot drift.
+private _stowZone = {
+	params ["_key"];
+	{
+		if (_x isKindOf "StaticWeapon") then { deleteVehicleCrew _x };
+	} forEach ((DUWS_compositions getOrDefault [_key, []]) select {!isNull _x});
+	if ([_key] call fnc_duws_stow) then {
+		["INFO", "STREAM", format ["stowed %1", _key]] call fnc_log;
+	};
+};
+
+// Zones are built deployed, and the prefab mans their turrets at build time, so without this a
+// fresh campaign carries every zone's props and gunners for the whole session -- the exact cost
+// streaming exists to remove. The despawn branch below cannot do it: it is only reachable once a
+// zone has been spawned, and a zone nobody has visited never has been.
+if ((count ([_spawnPos, _size + _AI_buffer] call _westMenNear) == 0)
+	&& {((call BIS_fnc_ListPlayers) findIf {_spawnPos distance _x < _size + _player_buffer}) < 0}) then {
+	[_zoneKey] call _stowZone;
+};
+
 while {true} do {
 	
 	if (!_blufor_close) then {
@@ -154,18 +176,7 @@ while {true} do {
 				
 			} foreach _zoneObj;
 
-			// The loop above cannot reach a turret gunner: its man clause tests vehicle _x == _x,
-			// so a crewed static keeps its crew. Stow refuses while any member is crewed, so
-			// without this pass the zone's props would never leave the map. Players are not
-			// deleted by deleteVehicleCrew, so one sitting in a captured gun holds the zone
-			// deployed until they get out, which is the direction that failure should go.
-			{
-				if (_x isKindOf "StaticWeapon") then { deleteVehicleCrew _x };
-			} forEach ((DUWS_compositions getOrDefault [_zoneKey, []]) select {!isNull _x});
-
-			if ([_zoneKey] call fnc_duws_stow) then {
-				["INFO", "STREAM", format ["stowed %1", _zoneKey]] call fnc_log;
-			};
+			[_zoneKey] call _stowZone;
 		};
 	};
 
