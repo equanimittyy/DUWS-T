@@ -214,6 +214,11 @@ weather_type = "none";publicVariable "weather_type";
 // Zeus visibility
 ZeusStatus = 2;publicVariable "ZeusStatus";
 
+// Civilian faction. Defaulted here like every other environment setting: six subsystems
+// read it with no isNil guard, so leaving it unset makes each of them error separately and
+// civilians never generate, with nothing in the log naming the cause.
+CIV_PRESENCE = "NONE";publicVariable "CIV_PRESENCE";
+
 // zone_namePOS_pairs
 zone_namePOS_pairs = [];publicVariable "zone_namePOS_pairs";
 // zone_meta_array: [zone number, position, radius, capture points, fortified, prefab] per zone.

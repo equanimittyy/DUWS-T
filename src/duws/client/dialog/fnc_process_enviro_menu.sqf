@@ -150,6 +150,15 @@ switch (_index) do
     case (missionNamespace getVariable ["index_civtype_tanoaw", -1]): { CIV_PRESENCE = "MAX_WOMENt"; };
     case (missionNamespace getVariable ["index_civtype_asiaw", -1]): { CIV_PRESENCE = "MAX_WOMENa"; };
     case (missionNamespace getVariable ["index_civtype_sumeurow", -1]): { CIV_PRESENCE = "MAX_WOMENs"; };
+    // Falling through is a bug, not a mode: every row the menu adds should map to a value,
+    // and the mod-gated rows above only register when civ_mod matches what it was when the
+    // list was built. Log the index rather than leaving the previous value standing -- a
+    // silent fall-through reads in game as "civilians on, none ever spawn".
+    default {
+        CIV_PRESENCE = "NONE";
+        ["ERROR", "SETUP", format ["civ type index %1 matched no case, civilians off (civ_mod=%2)",
+            _index, if (isNil "civ_mod") then {"<nil>"} else {civ_mod}]] call fnc_log;
+    };
 };
 
 // ENABLE HARDCORE MODE
