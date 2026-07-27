@@ -2600,58 +2600,6 @@
                 <Spanish>Civil</Spanish>
                 <Chinesesimp>平民</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_CIV_HEAL">
-                <Original>&lt;t color='#00ffff'&gt;Provide supplies and aid (Requires a FirstAidKit or ACE foods)&lt;/t&gt;</Original>
-                <English>&lt;t color='#00ffff'&gt;Provide supplies and aid (Requires a FirstAidKit or ACE foods)&lt;/t&gt;</English>
-                <Chinesesimp>&lt;t color='#00ffff'&gt;提供物资救助(需要医疗包或ACE食物)&lt;/t&gt;</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_NO_FirstAidKit">
-                <Original>You don't have a FAK or any ACE food</Original>
-                <English>You don't have a FAK or any ACE food</English>
-                <Chinesesimp>你没有医疗包或ACE食物</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_providemed">
-                <Original>We're the BLUFOR relief team. Here, these supplies are for you.</Original>
-                <English>We're the BLUFOR relief team. Here, these supplies are for you.</English>
-                <German>Hey, Kumpel! Wir sind das humanitäre Hilfsteam von BLUFOR. Nimm das.</German>
-                <Spanish>Oye, amigo! Somos el equipo de ayuda humanitaria de BLUFOR. Toma esto.</Spanish>
-                <Chinesesimp>嘿，朋友，我们是蓝军的人道救援小组，拿上这个吧。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_providemedtks">
-                <Original>Thanks... thank you.</Original>
-                <English>Thanks... thank you.</English>
-                <German>Danke... danke. (nimmt die Vorräte entgegen)</German>
-                <Spanish>Gracias... gracias. (coge los suministros)</Spanish>
-                <Chinesesimp>谢谢...谢谢。(收下了物资)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_HEAL_SUCCESS">
-                <Original>Thank you! That helps.</Original>
-                <English>Thank you! That helps.</English>
-                <German>Danke! Das hilft.</German>
-                <Spanish>¡Gracias! Eso ayuda.</Spanish>
-                <Chinesesimp>谢谢你！这很有帮助。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_HEAL_FAIL">
-                <Original>...Who the hell wants your stuff?</Original>
-                <English>...Who the hell wants your stuff?</English>
-                <German>(Kurze Stille)...Wer zum Teufel will euer Zeug?</German>
-                <Spanish>(Breve silencio)...¿Quién demonios quiere vuestras cosas?</Spanish>
-                <Chinesesimp>(短暂的沉默)...谁他妈要你们的东西？？</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_HEAL_SUCCESS_HINT">
-                <Original>Reputation increased</Original>
-                <English>Reputation increased</English>
-                <German>Ruf gestiegen.</German>
-                <Spanish>Reputación aumentada.</Spanish>
-                <Chinesesimp>声望提高了。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_HEAL_FAIL_HINT">
-                <Original>The civilian refused your supplies</Original>
-                <English>The civilian refused your supplies</English>
-                <German>Der Zivilist lehnte deine Vorräte ab.</German>
-                <Spanish>El civil rechazó tus suministros.</Spanish>
-                <Chinesesimp>平民拒绝了你的物资提供。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_CIV_STOP">
                 <Original>&lt;t color='#00FF00'&gt;Come here!&lt;/t&gt;</Original>
                 <English>&lt;t color='#00FF00'&gt;Come here!&lt;/t&gt;</English>

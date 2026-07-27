@@ -345,6 +345,7 @@ if (_mode == "spawn") then {
                 _newUnit setVariable ["civ_locIndex", _idx];
                 [_newUnit] call fnc_addCivilianMoney;
                 _newUnit addEventHandler ["Killed", missionNamespace getVariable "CIV_KILLED_HANDLER"];
+                _newUnit addEventHandler ["HandleHeal", fnc_civ_healed];
                 if (_idx < count _locData && _idx < count _radData) then {
                     private _centerPos = getPos (_locData select _idx);
                     private _radius = _radData select _idx;
@@ -363,7 +364,6 @@ if (_mode == "spawn") then {
                 };
                 if (CIV_PRESENCE != "RAVAGE") then {
                     [_newUnit] remoteExec ["fnc_addAskEnemyAction", 0, true];
-                    [_newUnit] remoteExec ["fnc_civ_healAction", 0, true];
                     [_newUnit] remoteExec ["fnc_civ_stopCommand", 0, true];
                     [_newUnit] remoteExec ["fnc_civ_recruitAction", 0, true];
                     [_newUnit] remoteExec ["fnc_civ_lootAction", 0, true];
@@ -420,6 +420,7 @@ if (_mode == "spawn") then {
         [_unit] call fnc_addCivilianMoney;
         [_unit, _isZombie, _unitType, _i] call fnc_applyEquipment;
         _unit addEventHandler ["Killed", missionNamespace getVariable "CIV_KILLED_HANDLER"];
+        _unit addEventHandler ["HandleHeal", fnc_civ_healed];
 
         if (CIV_PRESENCE == "RAVAGE" && !_isZombie) then {
             [_unit] remoteExec ["fnc_addRecruitAction", 0, true];
@@ -429,7 +430,6 @@ if (_mode == "spawn") then {
         };
         if (CIV_PRESENCE != "RAVAGE" && side _unit == CIVILIAN) then {
             [_unit] remoteExec ["fnc_addAskEnemyAction", 0, true];
-            [_unit] remoteExec ["fnc_civ_healAction", 0, true];
             [_unit] remoteExec ["fnc_civ_stopCommand", 0, true];
             [_unit] remoteExec ["fnc_civ_recruitAction", 0, true];
             [_unit] remoteExec ["fnc_civ_lootAction", 0, true];
