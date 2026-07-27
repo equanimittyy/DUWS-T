@@ -103,8 +103,8 @@ Order of work, all of it inside the writer:
 
 Seven notification sites predict the post-write total and print it: `STR_DUWS_T_0pluxey2`
 ("Your Reputation is now: %1") at `fnc_civ_rep_Tomata.sqf:30`, `fnc_civ_rep_economy.sqf:32`,
-`fnc_protect_civ.sqf:204,219`, `fnc_transport_IDAP_mission.sqf:235,251` and
-`fnc_civ_healAction.sqf:72`, plus the same pattern under a different key at
+`fnc_protect_civ.sqf:204,219`, `fnc_transport_IDAP_mission.sqf:235,251` and the heal path,
+plus the same pattern under a different key at
 `fnc_civ_lootAction.sqf:43-45`. Every one is deleted; the titles above them survive, so the
 player still learns a civilian died or an informant was won.
 
@@ -575,8 +575,8 @@ Two things this orphans, both to be removed in the same change:
   The recovery thread's quiet-period test is its only reader; without it the counter is
   write-only.
 - `STR_DUWS_T_repup`, whose only use is the recovery announcement at
-  `fnc_civ_rep_economy.sqf:33`. `STR_DUWS_T_rqwho9bq` and `STR_DUWS_T_0pluxey2` stay — the
-  mission and heal paths still use them.
+  `fnc_civ_rep_economy.sqf:33`. `STR_DUWS_T_rqwho9bq` stays — the mission and heal paths still
+  use it.
 
 The CP tick at `:41-55` stays as it is. Deleting recovery is what bounds it: the global now
 moves only on events, so `ceil(rep/2)` every 15 minutes stops being an unbounded faucet without
@@ -634,7 +634,7 @@ internals to every machine to serve two `addAction` conditions.
 | `server/misc/fnc_civ_fast_travel_server.sqf:13` | Destination town's rep. |
 | `server/misc/fnc_disguiseAsCivilian.sqf` | Delete the `DUWS_disguise_startRep` snapshot `:105` and the fell-since-you-put-it-on test `:253-255`. The town test `:257-268` keeps its shape but gates on the OPFOR band instead of any negative value, and its lookup becomes the shared helper. |
 | `shared/functions/fnc_civ_recruitAction.sqf`, `fnc_addAskEnemyAction.sqf` | Move the gate server-side, then read town rep. |
-| `shared/functions/fnc_civ_lootAction.sqf:43-45`, `fnc_civ_healAction.sqf:69,72` | Resolve the town from the civilian acted on; drop the predicted-total line from both notifications. |
+| `shared/functions/fnc_civ_lootAction.sqf:43-45` | Resolve the town from the civilian acted on; drop the predicted-total line. The heal action is replaced outright by a `HandleHeal` listener, `server/misc/fnc_civ_healed.sqf`. |
 | `server/missions/mission_threads/protect_civ/fnc_protect_civ.sqf:199,204,218-219` | Resolve from the escorted civilian; fall back to global. Drop both predicted-total notifications. |
 | `server/missions/mission_threads/transport_idap/fnc_transport_IDAP_mission.sqf:231-233,247-249` | Resolve from delivery position; fall back to global. Drop both predicted-total notifications. |
 | `shared/includes/enviro_menu.hpp:157-176` | Retitle `SE_frame` and `SE_combo` to the escalation toggle. Geometry and idcs are untouched, so no row below moves. |
@@ -689,8 +689,14 @@ negative is incidental and cheap: a civilian death at `-1` (`fnc_civ_rep_Tomata.
 three times in ten and only with a player inside 200 m, so about thirty-three kills) puts a town
 on the band edge, a building at `-2` under the same 200 m guard gets there in five, and a failed
 IDAP at `-5` covers half the distance on its own. Going positive is deliberate and slow: healing
-a civilian at `+0.5` needs twenty heals to reach the BLUFOR band, against IDAP success at `+5`
-and protect-civ success.
+is worth `+1` but is capped at one credit per town per 30-minute window
+(`server/misc/fnc_civ_healed.sqf`), so the BLUFOR band is five hours of visits away on healing
+alone, against IDAP success at `+5` and protect-civ success.
+
+That cap is the whole point of listening to the engine rather than offering an action. The
+action it replaces credited any civilian whether hurt or not, consumed nothing when its roll
+failed, and drew FirstAidKits from an arsenal with no limit — so the "twenty heals" this
+paragraph used to call slow was one walk around one town.
 
 Both negative routes require the player to be present, so a town only changes hands over things
 that happened in front of them. Demolition is much the faster of the two — five buildings
