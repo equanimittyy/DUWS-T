@@ -29,6 +29,6 @@ closedialog 0;
 
 private _result = [localize "STR_DUWS_T_z54ibhvi", format [localize "STR_DUWS_T_dnbpdk0f", _selected_fob_name], true, true] call BIS_fnc_guiMessage;
 if (_result) then {
-	[_selected_fob,_selected_fob_pos,_selected_fob_name] remoteExec ["fnc_FOB_cleanup", 2, false];
+	[_selected_fob_pos,_selected_fob_name] remoteExec ["fnc_FOB_cleanup", 2, false];
 };	
 

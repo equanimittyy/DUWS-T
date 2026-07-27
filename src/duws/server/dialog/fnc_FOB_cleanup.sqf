@@ -1,5 +1,5 @@
 // Locality: server -- callers remoteExec to target 2.
-params ["_fob","_fob_pos","_fob_name"];
+params ["_fob_pos","_fob_name"];
 
 _markername = format["fob%1%2",round (_fob_pos select 0),round (_fob_pos select 1)]; // Define marker name
 deleteMarker _markername;
