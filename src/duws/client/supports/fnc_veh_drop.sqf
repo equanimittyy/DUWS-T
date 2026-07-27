@@ -56,7 +56,6 @@ if (!alive _vehicle) exitWith {hint localize "STR_DUWS_T_7h0bmzi7"};
 
 _parachute = "Steerable_Parachute_F" CreateVehicle _location;
 _parachute setPos [_location select 0, _location select 1, (_location select 2)+100];
-[_parachute] call fnc_duws_disposeAfter;
 _cargo = "";
 switch (VERSION_X) do {
 	case "MODERN": {

@@ -130,7 +130,6 @@ missionNamespace setVariable [_triggeredVar, true, true];
         };
         
         private _chute = createVehicle ["Steerable_Parachute_F", getPos _unit, [], 0, "FLY"];
-        [_chute] call fnc_duws_disposeAfter;
         _unit moveInDriver _chute;
         _unit allowDamage true;
         _troopsSpawned = _troopsSpawned + 1;

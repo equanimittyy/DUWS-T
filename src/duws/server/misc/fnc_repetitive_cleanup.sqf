@@ -35,7 +35,7 @@ if (!isServer) exitWith {}; // isn't server
 #define PUSH(A,B) A set [count (A),B];
 #define REM(A,B) A=A-[B];
 
-private ["_ttdBodies","_ttdVehiclesDead","_ttdVehiclesImmobile","_ttdWeapons","_ttdPlanted","_ttdSmokes","_addToCleanup","_objectsToCleanup","_timesWhenToCleanup","_removeFromCleanup","_census","_pass"];
+private ["_ttdBodies","_ttdVehiclesDead","_ttdVehiclesImmobile","_ttdWeapons","_ttdPlanted","_ttdSmokes","_addToCleanup","_objectsToCleanup","_timesWhenToCleanup","_removeFromCleanup","_census","_pass","_ttdDroppedGear"];
 
 // Nothing inside this of a player is deleted, however old it is. A wreck or a body blinking
 // out on screen reads as a bug, and the whole point of a lifetime is that it expires out of
@@ -54,6 +54,7 @@ _ttdVehiclesImmobile=[_this,2,0,[0]] call BIS_fnc_param;
 _ttdWeapons=[_this,3,0,[0]] call BIS_fnc_param;
 _ttdPlanted=[_this,4,0,[0]] call BIS_fnc_param;
 _ttdSmokes=[_this,5,0,[0]] call BIS_fnc_param;
+_ttdDroppedGear=[_this,6,0,[0]] call BIS_fnc_param;
 
 if({_x>0}count _this==0) exitWith {}; // all times are 0, we do not want to run this script at all
 
@@ -123,9 +124,17 @@ while{true} do {
         { [_x, _ttdSmokes] call _addToCleanup; } forEach (allMissionObjects "SmokeShell");
     };
 
-    // Registered by their creator through fnc_duws_disposeAfter, never matched by class: a
-    // supply drop and the HQ arsenal crate are both B_supplyCrate_F, and steal_supply,
-    // destroy_cache and supply_recovery all use crate classes for their objectives. Drained
+    // Crates and parachutes are collected by class like everything else, and survive only by
+    // being tagged. That is the same polarity as every other category here -- opt out, not opt
+    // in -- so a drop added later is cleaned without anyone remembering to register it. It only
+    // became safe once compositions were tagged: the HQ arsenal crate and a supply drop are both
+    // B_supplyCrate_F, and three side missions use crate classes for their objectives.
+    if (_ttdDroppedGear>0) then {
+        { [_x, _ttdDroppedGear] call _addToCleanup; } forEach (allMissionObjects "ReammoBox_F");
+        { [_x, _ttdDroppedGear] call _addToCleanup; } forEach (allMissionObjects "ParachuteBase");
+    };
+
+    // Explicit one-off lifetimes, chiefly from fnc_duws_release retiring a composition. Drained
     // rather than re-read, so each object is scheduled once with the lifetime it asked for.
     {
         _x params ["_obj", "_ttd"];

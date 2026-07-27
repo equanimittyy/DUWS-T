@@ -166,11 +166,6 @@ _parachute12 setPos [(_lz select 0)+(random _radius)-(random _radius), (_lz sele
 _soldier12 moveindriver _parachute12;
 if (player_fatigue == 0) then {_soldier12 enablefatigue false;};
 
-// Twelve chutes per drop, and nothing else deletes them once the squad is on the ground.
-{ [_x] call fnc_duws_disposeAfter } forEach [_parachute1, _parachute2, _parachute3, _parachute4,
-    _parachute5, _parachute6, _parachute7, _parachute8, _parachute9, _parachute10, _parachute11,
-    _parachute12];
-
 hint localize "STR_DUWS_T_zm99dbgu";
 
 sleep 5;
