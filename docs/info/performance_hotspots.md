@@ -158,16 +158,17 @@ callers pass the object and are correct; only the internal update path is wrong.
 Separately, `shared/functions/fnc_MHQ_addActions.sqf:11` assigns a marker with no preceding
 remove, so re-running it stacks a second marker on the same object.
 
-### `damagedBuildings` holds an object reference per damaged house
+### Escalation's `BuildingChanged` handler runs per damage event, mission-wide
 
-`src/duws/server/misc/fnc_warcrimes_script.sqf:21` pushes every damaged non-military house near
-a player, and only `count` is ever read (`:35`). The array is cleared in WBK mode (`:30`) and
-never otherwise, so it holds one object reference per building for the whole session where an
-integer would carry the same information.
+`src/duws/server/misc/fnc_escalation.sqf` does a config read and a `BIS_fnc_objectType` call for
+every building damaged anywhere on the map, and a player-distance scan for each one that passes
+those filters, so the cost arrives as a burst under artillery rather than as a trickle. The
+session-growth problem it replaced is gone: the counter is an integer, where the array it
+replaces held one object reference per damaged house for the whole session.
 
-Its `BuildingChanged` handler also does a config read, a `BIS_fnc_objectType` call and a
-player-distance scan per damage event mission-wide, so it arrives as a burst under artillery
-rather than as a trickle.
+Its one-off census (`nearestTerrainObjects` over `worldSize`) is the single most expensive call
+the system makes. It runs once during generation behind the progress banner and logs its own
+wall-clock cost to the RPT; check that line on a new map before assuming it is free.
 
 ### Unverified: paradrop canopies
 

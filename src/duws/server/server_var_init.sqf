@@ -87,9 +87,6 @@ kill_cp_interval = 1800;
 kill_cp_kills = 10;
 kill_cp_award = 1;
 
-// Damaged Buildings for the Warcrimes Script
-damagedBuildings = [];
-
 // [object, seconds] pairs awaiting pickup by the map cleanup, written through
 // fnc_duws_disposeAfter and drained every pass. Server-only: the sweep runs here and clients
 // reach it by remoteExec.

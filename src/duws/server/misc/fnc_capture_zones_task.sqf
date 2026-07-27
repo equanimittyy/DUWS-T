@@ -45,17 +45,28 @@ waitUntil {sleep 10; WARCOM_init_done};
 // The zone count has to be checked, not assumed: with none created the comparison reads 0 >= 0
 // and wins the campaign on its first evaluation. Ordering alone is not enough of a guard --
 // every zone slot can be dropped by the origin keep-out in fnc_locatorzones_random.
-waitUntil {sleep 30; amount_zones_created > 0 && {zoneundercontrolblu >= amount_zones_created}};
+// Both endings are waited on together and the branch below picks which fired. A second thread
+// watching for the loss is not an option: this wait blocks for the whole campaign, so anything
+// appended after it is unreachable until the win lands.
+waitUntil {
+    sleep 30;
+    (amount_zones_created > 0 && {zoneundercontrolblu >= amount_zones_created})
+    || {!isNil "escalation_lost"}
+};
 
-// Every zone is BLUFOR: the campaign is over. The pause only lets the notification and the
-// task update land before the outro card replaces them.
-// The notification takes title and body as separate fields; the hint and side-chat take one
-// string, so they need the separator the `+` concatenation was missing -- it ran the headline
-// straight into the sentence as "Mission Completed!Every zone...".
-private _endLine = format ["%1 %2", localize "STR_DUWS_T_fo1ihi1n", localize "STR_DUWS_T_CAMPAIGN_WON"];
-["info",[localize "STR_DUWS_T_fo1ihi1n", localize "STR_DUWS_T_CAMPAIGN_WON"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
-[_endLine,{hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+// The pause only lets the notification and the task update land before the outro card replaces
+// them. The notification takes title and body as separate fields; the hint and side-chat take
+// one string, so they need the separator the `+` concatenation was missing -- it ran the
+// headline straight into the sentence as "Mission Completed!Every zone...".
+private _won = isNil "escalation_lost";
+private _title = [localize "STR_DUWS_T_CAMPAIGN_LOST_TITLE", localize "STR_DUWS_T_fo1ihi1n"] select _won;
+private _body = [localize "STR_DUWS_T_CAMPAIGN_LOST", localize "STR_DUWS_T_CAMPAIGN_WON"] select _won;
 
-["Campaign", "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", 0];
+["info", [_title, _body]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
+[format ["%1 %2", _title, _body], {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+
+["Campaign", ["FAILED", "SUCCEEDED"] select _won] remoteExec ["BIS_fnc_taskSetState", 0];
 sleep 10;
-"island_captured_win" call BIS_fnc_endMissionServer;
+// Two-argument form: the one-argument call defaults victory to true, which would end a
+// flattened Altis on the winning card.
+["island_captured_win", _won] call BIS_fnc_endMissionServer;

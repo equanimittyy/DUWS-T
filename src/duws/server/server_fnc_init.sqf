@@ -260,6 +260,16 @@ fnc_town_rep_adjust = {
 	["INFO", "CIV", format ["TOWNREP %1: %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 };
 
+// A cost with escalation applied, rounded up so a scaled price is never cheaper than the base
+// one. Defined here rather than in fnc_escalation so the purchase path does not depend on
+// whether escalation ever started -- with no multiplier published this is the identity.
+// Available on clients too: the request menus display what a purchase will actually cost.
+fnc_escalation_cost = {
+	params [["_cost", 0]];
+	ceil (_cost * (missionNamespace getVariable ["escalation_multiplier", 1]))
+};
+publicVariable "fnc_escalation_cost";
+
 // Server-authoritative purchase. The writers above own the arithmetic but not the
 // decision: a client testing its own copy of a pool is a network round trip out of date,
 // so two clients each seeing 10 CP both pass a 10 CP gate and the floor absorbs the
@@ -277,6 +287,10 @@ fnc_pool_try_spend = {
 	// purchase sites all reach here via fnc_pool_spend, which knows the cost but not what
 	// the player was buying.
 	private _who = format ["purchase by %1", name _requester];
+	// One application point for the escalation multiplier: every fnc_pool_spend site reaches
+	// here, so scaling on entry covers all of them. The four server-side paths that call
+	// fnc_cp_adjust directly bypass this handshake and apply it themselves.
+	_cost = [_cost] call fnc_escalation_cost;
 	switch (_pool) do {
 		case "CP": { if (commandpointsblu1 >= _cost) then { [-_cost, _who] call fnc_cp_adjust; _ok = true; }; };
 		case "AP": { if (WARCOM_blufor_ap >= _cost) then { ["BLU", -_cost, _who] call fnc_ap_adjust; _ok = true; }; };
@@ -572,7 +586,7 @@ fnc_fob_destroyed = compile preprocessFileLineNumbers "duws\server\misc\fnc_fob_
 fnc_missionLocator = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionLocator.sqf";
 fnc_create_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_create_ammo_lists.sqf";
 fnc_basic_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_basic_ammo_lists.sqf";
-fnc_warcrimes_script = compile preprocessFileLineNumbers "duws\server\misc\fnc_warcrimes_script.sqf";
+fnc_escalation = compile preprocessFileLineNumbers "duws\server\misc\fnc_escalation.sqf";
 fnc_ai_rearm = compile preprocessFileLineNumbers "duws\client\misc\fnc_ai_rearm.sqf";publicVariable "fnc_ai_rearm";
 fnc_addRandomLoot = compile preprocessFileLineNumbers "duws\server\misc\fnc_addRandomLoot.sqf";
 publicVariable "fnc_addRandomLoot";
@@ -1270,7 +1284,8 @@ fnc_pylon_set_with_cost = {
     if (!isServer) exitWith {};
     params ["_netId", "_pylonIndex", "_magazine", ["_turret", []], "_requestingPlayerUID"];
 
-    private _cost = 5;
+    // Escalation applied here: this path never reaches the purchase handshake.
+    private _cost = [5] call fnc_escalation_cost;
 
     // 查找请求玩家
     private _player = objNull;

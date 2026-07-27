@@ -1705,6 +1705,22 @@
                 <Original>Escalation</Original>
                 <English>Escalation</English>
             </Key>
+            <Key ID="STR_DUWS_T_CAMPAIGN_LOST_TITLE">
+                <Original>Campaign Lost</Original>
+                <English>Campaign Lost</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CAMPAIGN_LOST">
+                <Original>Altis is in ruins. Command has withdrawn its mandate; there is nothing left here worth holding.</Original>
+                <English>Altis is in ruins. Command has withdrawn its mandate; there is nothing left here worth holding.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_escalation_row">
+                <Original>%1  -&gt;  %2 CP</Original>
+                <English>%1  -&gt;  %2 CP</English>
+            </Key>
+            <Key ID="STR_DUWS_T_escalation_level">
+                <Original>The war has worsened. Escalation level %1: all support costs are now %2x.</Original>
+                <English>The war has worsened. Escalation level %1: all support costs are now %2x.</English>
+            </Key>
             <Key ID="STR_DUWS_T_escalation_tooltip">
                 <Original>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of Altis and the campaign is lost.</Original>
                 <English>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of Altis and the campaign is lost.</English>

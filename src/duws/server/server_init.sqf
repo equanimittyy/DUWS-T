@@ -185,11 +185,9 @@ if (time_Multiplier > 1) then {
 	setTimeMultiplier time_Multiplier;
 };
 	
-// CIV and WARCRIMES Spawn
-if (CIV_PRESENCE != "NONE") then {
-	// START THE WARCRIMES SCRIPT
-	[] spawn fnc_warcrimes_script;
-};
+// Outside the civilians-off gate: the escalation counter never depends on the civilian system.
+// Only the town reputation charge inside it does, and that degrades to charging nothing.
+[] spawn fnc_escalation;
 if (CIV_PRESENCE == "RAVAGE") then {
     [] spawn fnc_night_horde_event;
 };
@@ -223,8 +221,8 @@ if (isServer) then {
         // =====================================================
 
         // Only hostiles pay: EntityKilled fires for civilians, friendlies and empty
-        // vehicles too, and paying for civilian kills rewards exactly what the warcrimes
-        // script penalises. 0.6 is the engine's hostile/friendly cutoff, and the mission
+        // vehicles too, and paying for civilian kills rewards exactly what the town
+        // reputation charge penalises. 0.6 is the engine's hostile/friendly cutoff, and the mission
         // sets every playable side pair to 0, so INDEPENDENT zombies still count.
         if ((side _shooter) getFriend (side _killed) >= 0.6) exitWith {};
 

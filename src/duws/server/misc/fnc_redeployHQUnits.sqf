@@ -5,8 +5,9 @@ if (commandpointsblu1 < 2) exitWith {
 };
 
 // call, not remoteExec to self: a queued debit runs a frame later and splits the check
-// above from the deduction.
-[-2, "hq_redeploy"] call fnc_cp_adjust;
+// above from the deduction. Escalation is applied here rather than in fnc_pool_try_spend
+// because this path never reaches the purchase handshake.
+[-([2] call fnc_escalation_cost), "hq_redeploy"] call fnc_cp_adjust;
 
 // ---------- 清理旧对象 ----------
 // 武器

@@ -2,7 +2,8 @@
 // target 2. The trigger bodies below run on whichever machine trips them.
 _centerPos = _this select 0;
 _checkedRadius = _this select 1;
-_cost = _this select 2;
+// Escalation applied here: this path never reaches the purchase handshake.
+_cost = [_this select 2] call fnc_escalation_cost;
 _caller = _this param [3, objNull];
 
 // Check and debit as adjacent statements on the server. fnc_mapclickuav read the balance

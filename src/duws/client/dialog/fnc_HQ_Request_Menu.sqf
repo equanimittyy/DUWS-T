@@ -156,6 +156,43 @@ if (!isNil "insurgent_mode_enable" && insurgent_mode_enable) then {
 };
 index_mobile_HQ = lbAdd [2103, _mhqText];
 
+// Escalation surcharge, appended rather than substituted. Each label carries its base cost
+// inside its own stringtable text ("Supply Drop (5CP) Radio"), so the written number stays as
+// the base and the scaled figure follows it. Stripping the numbers out and re-formatting from
+// a placeholder is tidier and rejected: a %1 added to English but not to the other four
+// languages leaves them printing the stale baked figure, which is a wrong number rather than
+// an untranslated one.
+// Rows are conditional on VERSION_X, so entries are looked up by name and skipped when absent.
+if ((missionNamespace getVariable ["escalation_multiplier", 1]) > 1) then {
+    private _baseCosts = [
+        ["index_support_supply", 5],     ["index_support_armory", 10],
+        ["index_support_veh_supply", 5], ["index_support_siva_supply", 10],
+        ["index_support_sawp", 10],      ["index_support_halo", 15],
+        ["index_support_uavrecon", 10],  ["index_support_helotaxi", 5],
+        ["index_support_helolift", 10],  ["index_support_boattaxi", 2],
+        ["index_support_recycle", 5],    ["index_support_repair", 5],
+        ["index_support_arty", 20],      ["index_support_mortar", 10],
+        ["index_support_jdam", 10],      ["index_support_laser", 10],
+        ["index_support_cluster", 25],   ["index_support_napalm", 20],
+        ["index_support_hcAttChop", 20], ["index_support_hcCAS", 25],
+        ["index_support_paradrop", 20]
+    ];
+    // Free under insurgent mode, and its label already says so.
+    if (isNil "insurgent_mode_enable" || {!insurgent_mode_enable}) then {
+        _baseCosts pushBack ["index_mobile_HQ", 10];
+    };
+    {
+        _x params ["_name", "_base"];
+        if (!isNil _name) then {
+            private _row = missionNamespace getVariable [_name, -1];
+            if (_row >= 0) then {
+                lbSetText [2103, _row, format [localize "STR_DUWS_T_escalation_row",
+                    lbText [2103, _row], [_base] call fnc_escalation_cost]];
+            };
+        };
+    } forEach _baseCosts;
+};
+
 ////////////////////////////////////////////
 // Change menu colors
 //  lbSetCurSel [2103, 0];
