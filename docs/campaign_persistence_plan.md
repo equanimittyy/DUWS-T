@@ -7,17 +7,23 @@ back through the **existing** builders rather than through a second construction
 Live units are not persisted. Zones, the HQ and FOBs are rebuilt and re-garrisoned from scratch;
 what carries over is campaign state — pools, zone ownership, placement, reputation, unlocks.
 
-## Why the current save does not work
+## What the current save does not cover
+
+Whether `saveGame` produces anything in a multiplayer session is **untested** — see
+[`KNOWN_ISSUES.md`](../KNOWN_ISSUES.md#does-a-multiplayer-save-happen-at-all). This plan takes no
+position on it. Every row below is read off the source and holds either way.
 
 | Problem | Where |
 |---|---|
-| The only save is vanilla `saveGame`, which is single-player and a no-op in multiplayer | `server/misc/fnc_autoSave.sqf:11` |
+| The only save is vanilla `saveGame`, reached from one place: the SITREP support | `server/misc/fnc_autoSave.sqf:11`, sole caller `server/supports/fnc_sitrep_support.sqf` |
 | Engine autosave and the save menu are switched off at boot | `server/server_init.sqf:113` |
 | `civ_locations` stores Location objects in the mission namespace, which the mission's own rule forbids because the namespace is what a save serialises | `server/misc/fnc_civ_init_Tomata.sqf:163-164`, rule in [`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md) |
 | Support unlocks are client-local by design — *"Supports are local to players. No need for publicVariable"* — so there is no server-side copy of what the player paid for | `client/includes/supports_init.hpp` |
 
-`KNOWN_ISSUES.md` already lists "Save and reload mid-campaign" as untested. It is not untested;
-it cannot work.
+The last two rows are why an engine save cannot be the mechanism even in the case where it
+works. A server-side save has no access to unlocks the client paid for and never broadcast, and
+a namespace holding Location handles is a serialisation hazard *because* something is trying to
+serialise it. A working `saveGame` would make those two worse, not better.
 
 ## What a naive restore gets wrong
 
@@ -68,7 +74,9 @@ returns what it stored.
 
 `missionProfileNamespace` with `saveMissionProfileNamespace`. It is server-side, per-mission,
 and survives a restart. `profileNamespace` would work but pollutes the server profile shared by
-every mission on the box. `saveGame` is a dead end in multiplayer.
+every mission on the box. `saveGame` is not a candidate: it saves a whole session rather than a
+data snapshot, so it cannot be replayed through the builders, which is what the restore below
+depends on. That holds whether or not it works in multiplayer.
 
 Only serialisable types go in: numbers, strings, booleans and arrays of those. No objects, no
 groups, no triggers, no Locations, no netIds — netIds are strings but resolve to nothing after a

@@ -12,7 +12,7 @@ generation has been exercised; the rest has not.
 
 - [ ] Capture a zone and confirm the marker flips **on a second machine**, not just the host
 - [ ] Run a side mission to completion and confirm the CP/AP reward lands
-- [ ] Save and reload mid-campaign
+- [ ] Save and reload mid-campaign — but settle whether a save happens at all first (see below)
 - [ ] Call heli-lift **as a non-host player** (see below)
 - [ ] Request one support of each family: drop, artillery, UAV, FOB
 
@@ -37,6 +37,41 @@ be tested solo** — it needs a second player or a dedicated server. If it misbe
 restoring the `!isServer` gate re-hides the feature without reverting the rewrite.
 
 Background on the locality rule: [`docs/info/arma_engine_gotchas.md`](docs/info/arma_engine_gotchas.md).
+
+## Does a multiplayer save happen at all?
+
+Unverified in **either** direction, and worth settling before anyone builds on top of it.
+
+`server/misc/fnc_autoSave.sqf` is the only save in the mission: it re-enables saving if
+`savingEnabled` is false, then calls `saveGame`. Its one caller is the SITREP support. The
+common understanding is that `saveGame` does nothing in multiplayer, which would make the
+whole path dead in co-op — but nothing in this tree demonstrates that. No RPT in `temp/`
+contains a single save-related line, and the mission disables saving itself at
+`server/server_init.sqf:113` (`enableSaving [false, false]`), which is a mission decision and
+says nothing about what the engine would do. Treating "saveGame is a no-op in MP" as
+established fact is how an assumption gets promoted to a premise.
+
+Two failure modes are being conflated and need separating, because `fnc_autoSave.sqf:5-8`
+actively tries to undo the second one:
+
+- the engine refuses to save in a multiplayer session at all
+- saving was switched off at boot and the re-enable does not take
+
+**The test.** Host the mission in multiplayer — hosted counts, `isMultiplayer` is true — call
+SITREP, then check whether a resumable save appears. That distinguishes "no save" from "save
+works and reload is the untested half". For the diagnosis rather than the symptom, log
+`isMultiplayer` and `savingEnabled` either side of the `enableSaving` call, plus a line after
+`saveGame` proving it was reached.
+
+Until that runs, the SITREP notification is unsound in one direction or the other: it
+broadcasts *"The game has been saved"* to every player unconditionally
+(`server/supports/fnc_sitrep_support.sqf`). If MP saves do not work, that message is a lie to
+everyone; if they do, it is correct as written. Do not gate it on `isMultiplayer` before
+knowing which — the gate would suppress a true message in the case where saving works.
+
+This matters beyond the save button: [`docs/campaign_persistence_plan.md`](docs/campaign_persistence_plan.md)
+opens by asserting the current save cannot work, and that assertion rests on the same
+unverified premise.
 
 ## Open defects
 
