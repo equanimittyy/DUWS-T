@@ -122,6 +122,9 @@ _wp setWaypointSpeed "FULL";
 _wp setWaypointCompletionRadius 30;
 _wp setWaypointStatements ["true", "missionNamespace setVariable ['intro_heli_arrived', true, true];"];
 
+// The body says "Knight 1-5 to HQ" under a "Pilot" slot on purpose: the insertion flight has
+// its own callsign, but the player is in the cabin hearing a person rather than on the net
+// hearing a callsign. Do not reconcile the two -- it is intro flavour, not an attribution bug.
 [localize "STR_DUWS_T_pilot_intro", localize "STR_DUWS_T_heli_moving"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 1;
 cutRsc ["DUWST", "PLAIN", 0, true] remoteExec ["call", 0];

@@ -10,7 +10,7 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith
 
 hint localize "STR_DUWS_T_r8ubc9jy";
 _speaker = localize "STR_DUWS_T_OVERLORD";
-_speaker1 = localize "STR_DUWS_T_stork";
+_speaker1 = localize "STR_DUWS_T_chalk";
 _message = localize "STR_DUWS_T_paradropcall";
 _message1 = localize "STR_DUWS_T_paradropcallend";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];

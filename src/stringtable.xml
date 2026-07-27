@@ -3612,8 +3612,8 @@
                 <Chinesesimp>你发现了额外的情报，获得了%1 CP, %2 AP</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_FOUND_TARGET">
-                <Original>Alpha 1-1 to Overlord, we've got the exact objective location. Uploading it to the GPS now.</Original>
-                <English>Alpha 1-1 to Overlord, we've got the exact objective location. Uploading it to the GPS now.</English>
+                <Original>Alpha 1-1 to Overlord, we've got the exact objective location. Uploading it to your map now.</Original>
+                <English>Alpha 1-1 to Overlord, we've got the exact objective location. Uploading it to your map now.</English>
                 <German>Action Squad an "Overlord", wir haben den genauen Standort des Missionsziels erfasst und auf das GPS-Terminal übermittelt.</German>
                 <Spanish>Action Squad llamando a "Overlord", hemos obtenido la ubicación detallada del objetivo de la misión y la hemos subido al terminal GPS.</Spanish>
                 <Chinesesimp>行动组呼叫"霸王"，我们获取了任务目标的详细位置，已经上传到GPS终端。</Chinesesimp>
@@ -7088,10 +7088,21 @@
                 <Original>Crane 1-1</Original>
                 <English>Crane 1-1</English>
             </Key>
-            <Key ID="STR_DUWS_T_stork">
-                <Chinesesimp>鹳鸟1-1</Chinesesimp>
-                <Original>Stork 1-1</Original>
-                <English>Stork 1-1</English>
+            <Key ID="STR_DUWS_T_chalk">
+                <Original>Chalk 2-1</Original>
+                <English>Chalk 2-1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_courier">
+                <Original>Courier 1-1</Original>
+                <English>Courier 1-1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_courier3">
+                <Original>Courier 3-1</Original>
+                <English>Courier 3-1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ranger">
+                <Original>Ranger 1-1</Original>
+                <English>Ranger 1-1</English>
             </Key>
             <Key ID="STR_DUWS_T_koipilot">
                 <German>"Koi 1-1" Pilot</German>

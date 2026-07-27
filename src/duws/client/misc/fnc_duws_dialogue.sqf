@@ -23,8 +23,10 @@ if (isNil "DUWS_netSpeakers") then {
         "STR_DUWS_T_DISGUISE_OPFOR_SPEAKER",
         // Supports the player calls and then listens to. The two Pilot keys are absent on
         // purpose: the intro and downed pilots are in the room, not on the net.
-        "STR_DUWS_T_chariot", "STR_DUWS_T_crane", "STR_DUWS_T_stork",
-        "STR_DUWS_T_swordfish"
+        "STR_DUWS_T_chariot", "STR_DUWS_T_crane", "STR_DUWS_T_swordfish",
+        // One callsign per air drop rather than one shared across all four: each body already
+        // introduces its own, so a shared slot contradicted the line it was attached to.
+        "STR_DUWS_T_chalk", "STR_DUWS_T_courier", "STR_DUWS_T_courier3", "STR_DUWS_T_ranger"
     ] apply { localize _x };
 
     // VOICE speakers who are nonetheless on the radio. The squelch marks an incoming

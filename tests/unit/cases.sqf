@@ -43,10 +43,11 @@ duws_callsign = "Reaper";
 // --- fnc_duws_dialogue_channel: which surface a speaker lands on ---
 // Fed English literals because sqf-vm has no stringtable. What is under test is the
 // lookup, not what localize returns -- the router builds the real table from the same keys.
-// Twelve strings for thirteen keys: allseer and Scout share an English value.
+// Nineteen strings for twenty keys: allseer and Scout share an English value.
 private _net = ["Allseer 1-1", "Express 2-1", "Viper 1-5", "Delta 3-2", "Koi 1-1",
     "Longbow 1-1", "Slingshot 1-1", "Cobra 1-3", "Hound 2-2", "Signal 3-1", "Signal 2-2",
-    "OPFOR", "Chariot 1-1", "Crane 1-1", "Stork 1-1", "Swordfish 1-1"];
+    "OPFOR", "Chariot 1-1", "Crane 1-1", "Swordfish 1-1",
+    "Chalk 2-1", "Courier 1-1", "Courier 3-1", "Ranger 1-1"];
 
 {
     [format ["dialogue_channel: %1 is NET", _x],
