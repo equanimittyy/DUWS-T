@@ -108,7 +108,11 @@ while {true} do {
     // variable is a direct read and is deleted along with the object it belongs to.
     {
         private _obj = _x;
-        if (!isNull _obj && {!(_obj getVariable ["persistent", false])}) then {
+        // Destruction outranks the flag. Persistence protects a standing composition, and a
+        // wreck is not one -- a burnt-out turret left forever is worse than the gap where it
+        // stood. This does not replace composition tracking: the undamaged sandbags around
+        // that turret are still collected by their key on release, never by their own state.
+        if (!isNull _obj && {!alive _obj || {!(_obj getVariable ["persistent", false])}}) then {
             // Stamped even on a forced pass, so litter spared by KEEP_RADIUS still carries a
             // deadline and expires normally once the player moves off.
             private _binAt = _obj getVariable "DUWS_binAt";
