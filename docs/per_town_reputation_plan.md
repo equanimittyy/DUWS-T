@@ -13,19 +13,16 @@ suicide bombers are deleted; the enemy's answer to a town that hates the player 
 garrison now and a planning director later, documented in
 [`opfor_commander_plan.md`](opfor_commander_plan.md).
 
-This plan lands **after** the civilian town-generation rewrite. That rewrite re-keys the town
-registry, and per-town reputation keys on the same index.
-
 ## Why the current system is replaced
 
 | Problem | Where |
 |---|---|
-| One global scalar carries all reputation. Every civilian death anywhere moves the same number | `server/server_var_init.sqf:177`, sole writer `server/server_fnc_init.sqf:151-159` |
+| One global scalar carries all reputation. Every civilian death anywhere moves the same number | `server/server_var_init.sqf:194`, sole writer `server/server_fnc_init.sqf:151-159` |
 | Six consumers act on one town but read the campaign-wide number — informants, aid, toolkits, recruitment, fast travel, disguise | table below |
 | Two reputation gates run on clients, so they cannot read server-local town state | `shared/functions/fnc_addAskEnemyAction.sqf:36`, `shared/functions/fnc_civ_recruitAction.sqf:18` |
 | Passive recovery walks reputation back up on its own, so nothing the player did stays done | `server/misc/fnc_civ_rep_economy.sqf:12-38` |
 | That recovery feeds an uncapped CP faucet at `ceil(rep/2)` every 15 minutes | `:41-55` |
-| Building damage is charged anywhere on the map and never checks who caused it, so an enemy tank wrecking a house bills the player | `server/misc/fnc_warcrimes_script.sqf:8-23` |
+| Building damage is charged campaign-wide off a 750 m proximity test, so a house wrecked half a map from the town it stood in still moved the same number | `server/misc/fnc_warcrimes_script.sqf:8-23` |
 | Its curve dampens rather than escalates, its threshold never resets, and sub-threshold damage is discarded, so paced demolition is free forever | `:36-43,61` |
 | Spawn density saturates at the player's cap from 25 buildings up, so most towns present identically | `server/misc/fnc_civ_handler.sqf:253-254` |
 | Civilian towns are inert scenery: holding one changes no campaign number | — |
@@ -44,7 +41,7 @@ the lost-update surface described in
 | `civ_town_rep` | numbers, index-parallel to `civ_locations` | `[-20, 20]` |
 | `civ_town_ap` | numbers, index-parallel | `[1, 3]`, integer |
 
-Initial reputation **0**, not the global's default of 1 (`server/server_var_init.sqf:177`).
+Initial reputation **0**, not the global's default of 1 (`server/server_var_init.sqf:194`).
 Towns overlapping an enemy zone are the exception, below. Zero makes the bands symmetric — ten
 points either way — so neither side is closer to owning a fresh town than the other. The global
 keeps its own baseline of 1; it is a different number with different consumers, and moving it
@@ -76,9 +73,27 @@ Order of work, all of it inside the writer:
 2. Write `civ_town_rep`.
 3. Forward the **applied** delta — the clamped total minus the old total, not the requested
    delta — to `fnc_rep_adjust`, so the global stays the sum of what actually happened. A town
-   pinned at `-20` absorbing repeated `-0.3` hits would otherwise drag the global down forever
+   pinned at `-20` absorbing repeated `-2` hits would otherwise drag the global down forever
    while nothing on the map changed.
 4. Repaint the town's two markers if the band changed.
+
+### No caller announces a reputation total
+
+Seven notification sites predict the post-write total and print it: `STR_DUWS_T_0pluxey2`
+("Your Reputation is now: %1") at `fnc_civ_rep_Tomata.sqf:30`, `fnc_civ_rep_economy.sqf:32`,
+`fnc_protect_civ.sqf:204,219`, `fnc_transport_IDAP_mission.sqf:235,251` and
+`fnc_civ_healAction.sqf:72`, plus the same pattern under a different key at
+`fnc_civ_lootAction.sqf:43-45`. Every one is deleted; the titles above them survive, so the
+player still learns a civilian died or an informant was won.
+
+They cannot be made correct, only relocated. A caller computes its number *before* the write
+lands, so it is a prediction, and the clamp means the writer may apply less than was asked — a
+town at `-20` absorbing another `-2` announces a change that did not happen. Two of them are
+already wrong today for a simpler reason: `fnc_protect_civ.sqf:204` re-reads the global after
+firing an asynchronous `remoteExec`, so it prints the *pre-change* value. Rewriting seven sites
+to display a number the writer would have to hand back, in a system where the meaningful number
+is now the town's rather than the campaign's, buys a worse readout than the map already gives.
+The marker carries `Rep:` per town and SITREP carries the global.
 
 ### Resolving the town
 
@@ -171,12 +186,14 @@ two decimals and zeroes anything under `0.01`, so a whole number prints whole. R
 integer for display would print `Rep: 10` for a town sitting at `9.7`, which is neutral — the
 number on screen would contradict the colour under it.
 
-**Ten call sites write this text today** and nine of them are deleted outright, because they
+**Eleven call sites write this text today** and ten of them are deleted outright, because they
 exist only to decrement a live head count: `fnc_civ_handler.sqf:129,145,347`,
 `fnc_civ_handler_wbk.sqf:126,143,384`, `fnc_recruit_civilian_server.sqf:79`, and
-`server_fnc_init.sqf:963` plus `fnc_updateIcon` at `:975,977`. What remains is the creation
-write at `fnc_civ_init_Tomata.sqf:209` and one repaint helper called by the reputation writer.
-Nothing else touches the marker, so the fields cannot be partially overwritten.
+`server_fnc_init.sqf:1020` plus `fnc_updateIcon` at `:1032,1034`. `fnc_updateIcon` is
+`publicVariable`d and reached by `remoteExec` from `:918` and `:1009`, so both call sites go
+with it. What remains is the creation write at `fnc_civ_init_Tomata.sqf:209` and one repaint
+helper called by the reputation writer. Nothing else touches the marker, so the fields cannot be
+partially overwritten.
 
 ### Static population, scaled civilian density
 
@@ -323,22 +340,59 @@ The garrison spawns and despawns on the town's existing presence trigger, like t
 do; nothing persistent sits on the map. A town whose reputation is driven back below `-10`
 after being cleared gets a new garrison — the band is the condition, not a one-shot flag.
 
+**Cleared is decided by a trigger, not by counting the garrison.** The three spawners are
+fire-and-forget: they are `spawn`ed, and none of them returns or registers the group it built,
+so there is no handle to watch die. The zone capture trigger has the same problem and solves it
+by testing the ground instead of the units — `setTriggerActivation ["WEST SEIZED", "PRESENT",
+true]` with `setTriggerTimeout [30, 40, 50, true]` (`server/init_zones/fnc_createzone.sqf:271-276`).
+`SEIZED` is the engine's own "this side present, the opposing side absent" test, and the
+interruptable timeout restarts the clock if OPFOR walk back in, so the player must hold the town
+clear rather than sprint through it. The town gets the same construction sized to its civilian
+radius, and the spawners stay untouched.
+
+**Verify that civilian presence does not block `SEIZED`.** Zones carry no civilians, so the
+existing use of this activation proves nothing about a town full of CIVILIAN-side units. If they
+block it, the fallback is a plain condition trigger counting hostile units in `thisList`.
+
 ### Escalation replaces war crimes
 
 `fnc_warcrimes_script.sqf` is retired whole. It charged reputation for any non-military `House`
 destroyed within 750 m of a player, anywhere on the map, on a curve that was a dampener rather
 than the escalator it looked like — the threshold starts at 1 and rises by 2 per charge, so
 total reputation lost worked out at `0.4 × sqrt(buildings)`, and levelling a hundred buildings
-cost four points. It also never checked *who* destroyed the building, so an enemy tank wrecking
-a house during a firefight billed the player, and it discarded any remainder below the threshold
-each tick, so one building a minute was free forever.
+cost four points. Its 750 m proximity test also meant a house charged the campaign-wide number
+from wherever it happened to fall, and it discarded any remainder below the threshold each tick,
+so one building a minute was free forever.
 
 **Escalation is a plain counter with no attribution.** Every non-military building destroyed
 anywhere on the map increments it. Not who did it, not whether anyone was watching, not whether
 it stood in a town — the war is getting worse and both sides are making it worse. That is the
 whole simplification: attribution via `setShotParents` and per-building damage handlers is
-unnecessary if nobody is being blamed, and a proximity test is unnecessary if location does not
-matter.
+unnecessary if nobody is being blamed.
+
+**A building inside a town also costs that town `-2`.** The destruction handler resolves the
+town by position, exactly as §Resolving the town describes, and charges it through
+`fnc_town_rep_adjust` on top of the escalation increment. Both, not either: escalation counts
+the map's total ruin and reputation records who has to live in it, so the same collapsed house
+is legitimately two different facts. Counting it once and splitting by location would also
+desynchronise the census from the counter — the budget is 10 % of every `House` on the terrain,
+and buildings that could never reach the counter would leave escalation permanently slower than
+its own budget claims.
+
+**The reputation charge is gated on a player being there; the counter is not.** A building
+charges its town only if a player is within 200 m of it when it falls. That is the same test
+the civilian-death path applies (`fnc_civ_rep_Tomata.sqf:17-23`), and the two share one helper
+rather than each carrying its own `BIS_fnc_ListPlayers` sweep. The escalation increment is
+ungated and lands either way, so a building levelled in empty country still advances the war
+without moving anyone's standing.
+
+Presence is a proxy for fault, not a replacement for it. Inside 200 m the charge still does not
+ask who fired, so an enemy tank wrecking a house in a firefight the player is standing in costs
+the player standing with that town. What the guard buys is the case that actually mattered: a
+WARCOM assault or a side mission fought in a town the player is nowhere near can no longer hand
+it to the enemy. The garrison's own armour does still charge the town while it is being cleared,
+because the player is present by definition for that fight — the clamp bounds it at `-20`, and
+clearing the garrison discharges the debt in full.
 
 | Property | Value |
 |---|---|
@@ -348,11 +402,13 @@ matter.
 | Level | `floor (destroyed / tierSize)`, 0 to 11 |
 | Effect | CP and AP costs multiply by `1 + (level / 10)` — level 1 is 1.1x, level 10 is 2.0x |
 | Level 11 | campaign lost |
+| Town charge | `-2` to the containing town, and only with a player inside 200 m; nothing if the building stood outside every civilian radius |
 
-**It does not touch the civilian system at all.** No town lookup, no civilian-zone dependency,
-no reason for civilian generation to run when `CIV_PRESENCE == "NONE"` — the existing gate at
-`server/warcom/fnc_init_OPFOR_WARCOM.sqf:54` stays exactly as it is, and a civilians-off
-campaign generates no towns, as today.
+**The counter never depends on the civilian system.** Only the reputation charge does, and it
+degrades the way every other town lookup does: no town resolves, so nothing is charged and the
+increment still lands. A campaign with `CIV_PRESENCE == "NONE"` therefore escalates normally
+while registering no towns, and the existing gate at
+`server/warcom/fnc_init_OPFOR_WARCOM.sqf:54` stays exactly as it is.
 
 **`ESCALATION_FRACTION` is 10 %.** A whole-map census counts every `House` on the terrain, the
 overwhelming majority of which sit in settlements no campaign ever visits, so the raw total is
@@ -399,7 +455,7 @@ worked in dedicated MP and neither will its replacement. Test before building on
 
 ### Towns overlapping an enemy zone start enemy-held
 
-A town whose civilian disc overlaps an enemy zone's disc is initialised at `-20` instead of `1`.
+A town whose civilian disc overlaps an enemy zone's disc is initialised at `-20` instead of `0`.
 The enemy already holds that ground; the civilians there start out with them.
 
 The test runs in registration, after the overlap cull has finalised every radius — the same
@@ -454,14 +510,15 @@ the tick itself changing.
 | Suicide bombers | `:563-588` | deleted |
 | Hostile replacement spawn | `:381-383` | deleted |
 | Enemy garrison tier | new, in the town spawn path | **town** |
-| Building damage | `server/misc/fnc_warcrimes_script.sqf` | neither — becomes escalation, which touches no reputation |
+| Building damage | `server/misc/fnc_warcrimes_script.sqf` | **town** at `-2` inside a radius with a player within 200 m, and the escalation counter either way |
 | Informant spawn chance | `server/misc/fnc_civ_informant_system.sqf:16` | **town** |
 | Develop informant | `server/misc/fnc_civ_developInformantServer.sqf:15` | **town** |
 | Ask for aid | `server/misc/fnc_civ_askForAid_server.sqf:15` | **town** |
 | Ask for toolkit | `server/misc/fnc_civ_askForToolkit_server.sqf:15` | **town** |
 | Recruit civilian | `shared/functions/fnc_civ_recruitAction.sqf:18` | **town** — must move server-side first |
 | Ask enemy location | `shared/functions/fnc_addAskEnemyAction.sqf:36` | **town** — must move server-side first |
-| Disguise break inside a town | `server/misc/fnc_disguiseAsCivilian.sqf:253-268` | **town** |
+| Disguise break: reputation fell since the disguise went on | `server/misc/fnc_disguiseAsCivilian.sqf:105,253-255` | deleted, both ends of the chain |
+| Disguise break inside an enemy-held town | `:257-268` | **town**, and the gate becomes the OPFOR band rather than any negative value |
 | Fast travel | `server/misc/fnc_civ_fast_travel_server.sqf:13` | **town** (destination) |
 | Hire partisans | `server/misc/fnc_hirePartisans.sqf:22` | global |
 | CP income tick | `server/misc/fnc_civ_rep_economy.sqf:46-48` | global |
@@ -476,31 +533,31 @@ internals to every machine to serve two `addAction` conditions.
 
 | File | Change |
 |---|---|
-| `server/server_fnc_init.sqf` | New `fnc_town_rep_adjust` beside `fnc_rep_adjust:151-159`; new `fnc_civ_townAt` position→index helper; new `fnc_civ_townRender` marker repaint; registry lines. Delete the WBK depopulation block `:955-968` and `fnc_updateIcon` `:971-979` with the live counter; drop the pop decrements at `:856-861,:941-943`, keeping the `civ_remaining_%1` increment that feeds WBK replacements. |
+| `server/server_fnc_init.sqf` | New `fnc_town_rep_adjust` beside `fnc_rep_adjust:151-159`; new `fnc_civ_townAt` position→index helper; new `fnc_civ_townRender` marker repaint; registry lines. Delete the WBK depopulation block `:1008-1022` and `fnc_updateIcon` `:1029-1037` with the live counter, plus its two `remoteExec` call sites `:918,:1009`; drop the pop decrements at `:907-918,:994-1001`, keeping the `civ_remaining_%1` increment that feeds WBK replacements. |
 | `server/misc/fnc_civ_init_Tomata.sqf` | Initialise `civ_town_rep` at 0; compute `civ_town_ap` from the kept set's building counts; `-20` for enemy-zone overlaps; delete the `_initialPop` derivation `:72-83` and store the building count as `civ_pop_%1`; three-field marker text at `:209`. |
 | `server/misc/fnc_civ_rep_economy.sqf` | Delete the recovery thread `:12-38`; add the 30-minute AP tick; rewrite the file docstring. |
-| `server/misc/fnc_civ_rep_Tomata.sqf:27,34-35` | Route the civilian-death `-0.3` through the town writer, resolving the town from the victim's `civ_locIndex`; drop the `CIV_deaths` bump. |
+| `server/misc/fnc_civ_rep_Tomata.sqf` | Civilian death goes from `-0.3` to `-1` and routes through the town writer, resolving the town from the victim's `civ_locIndex` `:27`. Both existing gates stay, one retuned: the charge rate `:15` drops from 50 % to 30 % (`random 10 < 7`), and the 200 m player-present test `:17-23` is unchanged — so three in ten of the deaths a player is near are charged, an effective `-0.3` per death against `-0.15` today. Drop the notification `:28-31` and the `CIV_deaths` bump `:34-35`. |
 | `server/server_var_init.sqf:79,93` | Remove `CIV_deaths`; `damagedBuildings` becomes per-town. |
 | `server/misc/fnc_civ_handler.sqf` | Delete hostile conversion `:531-558`, hostile replacement `:381-383`, suicide bombers `:563-588`, and the depopulation block `:121-142` with its scorched-earth reward. Density from building count `:253-254`. Drop the pop decrement `:344-347`. Garrison spawn on the town's tier. |
 | `server/misc/fnc_civ_handler_wbk.sqf` | Delete the depopulation block `:118-139`; drop the marker-text writes `:126,143,384`. Density `:251`. |
 | `server/misc/fnc_civ_suicideBomberBehaviour.sqf` | Delete; behaviour preserved in `opfor_commander_plan.md`. |
 | `server/misc/fnc_recruit_civilian_server.sqf:78-79` | Drop the population decrement and marker write. |
-| `server/misc/fnc_warcrimes_script.sqf` | Delete; replaced by `fnc_escalation.sqf` — whole-map census, counter, level, cost multiplier and the level-11 loss. |
+| `server/misc/fnc_warcrimes_script.sqf` | Delete; replaced by `fnc_escalation.sqf` — whole-map census, counter, level, cost multiplier, the level-11 loss, and the `-2` town charge when the building stood inside a civilian radius with a player within 200 m. The player-proximity test moves out of `fnc_civ_rep_Tomata.sqf:17-23` into a helper both paths call. |
 | `server/server_fnc_init.sqf:170-184` | Scale `_cost` by the escalation multiplier in `fnc_pool_try_spend`. |
 | `server/misc/fnc_civ_informant_system.sqf:16`, `fnc_civ_developInformantServer.sqf:15` | Town rep. |
 | `server/misc/fnc_civ_askForAid_server.sqf:15`, `fnc_civ_askForToolkit_server.sqf:15` | Town rep. |
 | `server/misc/fnc_civ_fast_travel_server.sqf:13` | Destination town's rep. |
-| `server/misc/fnc_disguiseAsCivilian.sqf:253-268` | Town rep; the town lookup here becomes the shared helper. |
+| `server/misc/fnc_disguiseAsCivilian.sqf` | Delete the `DUWS_disguise_startRep` snapshot `:105` and the fell-since-you-put-it-on test `:253-255`. The town test `:257-268` keeps its shape but gates on the OPFOR band instead of any negative value, and its lookup becomes the shared helper. |
 | `shared/functions/fnc_civ_recruitAction.sqf`, `fnc_addAskEnemyAction.sqf` | Move the gate server-side, then read town rep. |
-| `shared/functions/fnc_civ_lootAction.sqf:44`, `fnc_civ_healAction.sqf:69` | Resolve the town from the civilian acted on. |
-| `server/missions/mission_threads/protect_civ/fnc_protect_civ.sqf:199,218` | Resolve from the escorted civilian; fall back to global. |
-| `server/missions/mission_threads/transport_idap/fnc_transport_IDAP_mission.sqf:233,249` | Resolve from delivery position; fall back to global. |
-| `shared/includes/enviro_menu.hpp:157-176` | Delete the scorched-earth frame and combo; shift every row below up two grid units. |
+| `shared/functions/fnc_civ_lootAction.sqf:43-45`, `fnc_civ_healAction.sqf:69,72` | Resolve the town from the civilian acted on; drop the predicted-total line from both notifications. |
+| `server/missions/mission_threads/protect_civ/fnc_protect_civ.sqf:199,204,218-219` | Resolve from the escorted civilian; fall back to global. Drop both predicted-total notifications. |
+| `server/missions/mission_threads/transport_idap/fnc_transport_IDAP_mission.sqf:233-235,249-251` | Resolve from delivery position; fall back to global. Drop both predicted-total notifications. |
+| `shared/includes/enviro_menu.hpp:157-176` | Retitle `SE_frame` and `SE_combo` to the escalation toggle. Geometry and idcs are untouched, so no row below moves. |
 | `shared/includes/notifications.hpp:347` | Delete the `SE` notification class. |
 | `client/dialog/fnc_enviro_menu.sqf:55-57`, `fnc_process_enviro_menu.sqf:89-90`, `fnc_callsign_confirm.sqf:60` | Drop the scorched-earth setting. |
 | `client/client_init.sqf:387-389`, `server/misc/fnc_intro_heli.sqf:226-229` | Drop the scorched-earth announcements. |
 | `src/description.ext` | New `CfgMarkerColors` with the three town-band colours. |
-| `src/stringtable.xml` | Remove `STR_DUWS_T_repup`, the six scorched-earth keys, and the suicide-bomber / ghost-town keys orphaned by the deletions; add the marker field labels. Keep the shared enabled/disabled pair. |
+| `src/stringtable.xml` | Remove `STR_DUWS_T_repup`, `STR_DUWS_T_0pluxey2`, the six scorched-earth keys, and the suicide-bomber / ghost-town keys orphaned by the deletions; add the marker field labels and a numberless replacement body for the loot notification. Keep the shared enabled/disabled pair. |
 | `info/cp_economy.md` | Second reputation writer, the `±20` clamp, the town AP faucet, recovery removed. Its reputation-tick row still points at `fnc_civ_init_Tomata.sqf:237`; the loop moved to `fnc_civ_rep_economy.sqf`. |
 | `info/zone_and_town_generation.md` | The enemy-zone overlap rule, and its Defects-B entry on towns blocking capture, which removing hostile civilians resolves. |
 
@@ -508,7 +565,7 @@ internals to every machine to serve two `addAction` conditions.
 
 - [ ] Delete hostile conversion, hostile replacement, suicide bombers and `fnc_civ_suicideBomberBehaviour.sqf`. Verify: `bash tests/run.sh`; a campaign driven deeply negative spawns no `resistance` unit from any town.
 - [ ] Make `civ_pop_%1` static from the building count; delete the `_initialPop` derivation and the depopulation blocks. Verify: towns between 25 and 50 buildings now spawn visibly different counts instead of all hitting the cap, and no town reaches a ghost-town state.
-- [ ] Retire scorched earth across all nine sites, relaying out the environment menu. Verify: `bash tests/run.sh`; the menu has no gap where the combo was, and `grep -r scorched src/` returns nothing.
+- [ ] Retire scorched earth across all nine sites, retitling `SE_frame` / `SE_combo` rather than removing them. Verify: `bash tests/run.sh`; the environment menu lays out exactly as before with the slot renamed, and `grep -ri scorched src/` returns nothing.
 - [ ] Add `civ_town_rep` at baseline 0 and `civ_town_ap`. Verify: `bash tests/run.sh`; both array lengths match `count civ_locations` after the overlap cull; AP values span 1–3 across an Altis campaign in the RPT, in roughly equal thirds.
 - [ ] Apply `-20` to towns overlapping an enemy zone. Verify: the RPT names them, and their markers are red at campaign start.
 - [ ] Write `fnc_town_rep_adjust`, `fnc_civ_townAt`, `fnc_civ_townRender`. Verify: a civilian killed in town A moves only town A's entry; a town driven to `-20` stops moving and the global stops moving with it.
@@ -516,11 +573,12 @@ internals to every machine to serve two `addAction` conditions.
 - [ ] Three-field marker text and band repaint. Verify: a town crossing 10 turns pale blue with its AP field appearing, crossing back to 9 turns purple with it gone; neither shade competes with a zone marker at map zoom-out.
 - [ ] Delete the recovery thread; remove `CIV_deaths` and the orphaned stringtable keys. Verify: `bash tests/run.sh`; a campaign left idle after one civilian death shows no reputation movement.
 - [ ] Move the two client-side gates server-side, unchanged in behaviour, before touching what they read. Verify: recruit and ask-enemy still work for a non-host player.
-- [ ] Convert the per-town consumers in the table above.
-- [ ] Replace `fnc_warcrimes_script.sqf` with `fnc_escalation.sqf`: whole-map census, counter, level 0–11, and the `1 + level/10` multiplier applied in `fnc_pool_try_spend`. Verify: the census total and its wall-clock cost are logged to the RPT; destroying a tier's worth of buildings moves prices from 1.0x to 1.1x; reputation does not move; a civilians-off campaign escalates normally.
+- [ ] Convert the per-town consumers in the table above, including the disguise break's move to the OPFOR band and the deletion of its `DUWS_disguise_startRep` chain. Verify: a disguise survives a neutral town and breaks on entering one at `-10` or below.
+- [ ] Raise the civilian-death cost to `-1` and drop the charge rate to 30 %, keeping the 200 m gate; delete the seven predicted-total notifications with `STR_DUWS_T_0pluxey2`. Verify: `bash tests/run.sh`; the RPT logs `-1` against the victim's town, roughly seven in ten deaths with a player inside 200 m produce no entry at all, and no notification anywhere prints a reputation figure.
+- [ ] Replace `fnc_warcrimes_script.sqf` with `fnc_escalation.sqf`: whole-map census, counter, level 0–11, the `1 + level/10` multiplier applied in `fnc_pool_try_spend`, and the `-2` town charge for a building inside a civilian radius. Verify: the census total and its wall-clock cost are logged to the RPT; destroying a tier's worth of buildings moves prices from 1.0x to 1.1x; a building dropped inside a town with a player within 200 m charges that town and increments the counter, the same building with no player near charges nothing and still increments, and one outside every radius never charges; a civilians-off campaign escalates normally and charges nothing.
 - [ ] Confirm 10 % holds against the measured Altis census. Verify: a single fire mission cannot advance a level.
 - [ ] Add the level-11 loss condition and the enviro-menu toggle in the vacated slot. Verify: the menu reads Escalation with the shared enabled/disabled pair; disabling it stops both the multiplier and the loss.
-- [ ] Add the enemy garrison with its three tiers, and the clear-to-reset rule. Verify: a town at `-20` spawns the armour tier, and killing the garrison sets it to 0 with the marker returning to purple.
+- [ ] Add the enemy garrison with its three tiers, and the clear-to-reset rule on a `WEST SEIZED` trigger. Verify: a town at `-20` spawns the armour tier; holding the town clear for the timeout sets it to 0 with the marker returning to purple; one surviving OPFOR unit inside the radius keeps it from firing, and civilians inside the radius do not.
 - [ ] Add the 30-minute AP tick. Verify: the RPT shows one BLU and one OPF `fnc_ap_adjust` entry per tick, and the totals match the sum of the banded towns' worth.
 - [ ] In-game: confirm the global still gates partisan hiring and the CP tick as before.
 - [ ] Update `info/cp_economy.md` and `info/zone_and_town_generation.md`.
@@ -550,14 +608,28 @@ one, and reaching the 136 top rung on towns alone takes hours of holding most of
 ladder still only goes up, so the escalation is permanent once earned; the 1–3 scale sets how
 long that takes.
 
-**The routes into each band are not symmetric, even though the thresholds are.** From the
-baseline of 0 both bands are ten points away, but the ways to travel are not alike. Going
-negative is incidental: civilian deaths at `-0.3` (`fnc_civ_rep_Tomata.sqf:27`, applied half the
-time and only with a player inside 200 m, so about 67 kills), building damage inside the town,
-a failed IDAP at `-5`. Going positive is deliberate: healing a civilian at `+0.5`, IDAP success
-at `+5`, protect-civ success. A town therefore drifts toward the enemy through ordinary
-fighting and only comes back through work aimed at it — or through clearing its garrison, which
-is the fast path and the reason the garrison exists.
+**The routes into each band are not symmetric, and the negative one is far shorter.** From the
+baseline of 0 both bands are ten points away, but the travel costs are nothing alike. Going
+negative is incidental and cheap: a civilian death at `-1` (`fnc_civ_rep_Tomata.sqf:27`, charged
+three times in ten and only with a player inside 200 m, so about thirty-three kills) puts a town
+on the band edge, a building at `-2` under the same 200 m guard gets there in five, and a failed
+IDAP at `-5` covers half the distance on its own. Going positive is deliberate and slow: healing
+a civilian at `+0.5` needs twenty heals to reach the BLUFOR band, against IDAP success at `+5`
+and protect-civ success.
+
+Both negative routes require the player to be present, so a town only changes hands over things
+that happened in front of them. Demolition is much the faster of the two — five buildings
+against thirty-odd deaths — because the building charge carries no rate roll at all. That gap is
+intended. The rate roll is what stops a firefight in a populated town from turning it on stray
+rounds, and it can sit as low as 30 % precisely because reputation is localised now: a bad
+engagement costs the campaign nothing outside the town it happened in. Deliberate demolition
+carries no such excuse, so it is charged every time.
+
+That gap is the mechanic, not an oversight. Ordinary fighting drags a town toward the enemy and
+no amount of ordinary fighting drags it back, so the routes out of the OPFOR band are the ones
+built for it: clearing the garrison, which discharges the whole debt at once, and the aid
+missions. The `-0.3` civilian cost this replaces was small enough that a town could absorb
+sixty-odd deaths without changing hands, which is what made civilian ground inert.
 
 **Reputation now has a floor, and the floor is what tiers the garrison.** Previously unbounded
 on the negative side, on the grounds that negative reputation is the mechanic. With hostile
@@ -573,7 +645,10 @@ which is what passive recovery used to prevent. The garrison is the price, and i
 are the dial. If the reset proves too cheap, raising the tier strengths is the lever, not
 partial resets.
 
-**Towns are re-keyed by the civilian rewrite.** `civ_town_rep` and `civ_town_ap` key on the
-array index, and the town-generation rewrite replaces the selector and caps towns at 21.
-Landing this plan first means re-keying it twice. Keying on town name instead would survive the
-rewrite but breaks the moment two map towns share a name, which Altis does not guarantee.
+**Towns key on the array index, not on their name.** `civ_town_rep` and `civ_town_ap` are
+index-parallel to `civ_locations`, which is what every existing civilian consumer already keys
+on. Keying on the town name would read better in the RPT but breaks the moment two map towns
+share a name, which Altis does not guarantee. The registry has no fixed length: the selector
+takes `_PER_ANCHOR_CAP` towns per anchor plus a top-up sized to the zone count
+(`server/misc/fnc_civ_selectTowns.sqf:16,107,115`), and the overlap cull then shortens it, so
+both arrays are built against `count civ_locations` rather than any assumed town count.
