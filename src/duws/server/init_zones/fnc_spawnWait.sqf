@@ -14,29 +14,35 @@ _player_buffer = 400;
 _despawn_timer = 300;
 _startTime = time;
 
+// nearEntities, not a filter over allUnits: the engine's spatial index answers "who is near
+// this zone" directly, so the cost tracks nearby units instead of every unit in the mission.
+// One of these runs per zone every 10 s for the whole campaign, so the scan it replaces was
+// O(zones x all units) forever.
+// Vehicles are queried alongside men and their crew resolved, matching what the mission
+// threads do -- a CAManBase-only query is not relied on to report units riding in something.
+private _westMenNear = {
+	params ["_pos", "_radius"];
+	private _out = [];
+	{
+		if (_x isKindOf "CAManBase") then {
+			if (side _x == WEST) then { _out pushBackUnique _x };
+		} else {
+			{ if (side _x == WEST) then { _out pushBackUnique _x } } forEach crew _x;
+		};
+	} forEach (_pos nearEntities [["CAManBase", "LandVehicle", "Air"], _radius]);
+	_out
+};
+
 while {true} do {
 	
 	if (!_blufor_close) then {
 
 		while {true} do {
-			_count_blu = 0;
-			_westUnits = [];
-			{
-				if ((side _x) == WEST) then {
-					_westUnits pushBack _x;
-				};
-			} forEach allUnits;
+			// CHECK FOR 2x ANY UNIT -- wait until BLUFOR are within the perimeter buffer
+			if (count ([_spawnPos, _size + _AI_buffer] call _westMenNear) > 1) then {
+				_blufor_close = true;
+			};
 
-			// CHECK FOR 2x ANY UNIT
-			{
-				if ((_spawnPos distance _x) < (_size + _AI_buffer)) then {  // wait until BLUFOR are within 500m of perimeter
-					_count_blu = _count_blu + 1;
-					if (_count_blu > 1) then {
-						_blufor_close = true;
-					};  
-				};
-			} forEach _westUnits;
-			
 			// CHECK FOR 1x PLAYERS
 			{
 				if ((_spawnPos distance _x) < (_size + _player_buffer)) then {
@@ -65,20 +71,10 @@ while {true} do {
 			};
 
 			// after 10 min check if BLUFOR still close
-			_westUnits = [];
-			{
-				if ((side _x) == WEST) then {
-					_westUnits pushBack _x;
-				};
-			} forEach allUnits;
-			
 			//CHECK FOR AI (500m)
-			{
-				if ((_spawnPos distance _x) < (_size + _AI_buffer)) then {  
-					_blufor_close = true;
-				};  
-				if (_blufor_close == true) exitWith {};
-			} forEach _westUnits;
+			if (count ([_spawnPos, _size + _AI_buffer] call _westMenNear) > 0) then {
+				_blufor_close = true;
+			};
 
 			// CHECK FOR PLAYERS (1000m)
 			{
