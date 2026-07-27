@@ -137,6 +137,7 @@ _vehicle = objNull;
 
 _vehicle_9 = objNull;
 _vehicle_9 = createVehicle ["I_HMG_02_high_F", [0,0,0], [], 0, "CAN_COLLIDE"];
+[_vehicle_9, "mission_holdpos"] call fnc_duws_keep;
 _vehicle_9 setDir 314.218;
 _vehicle_9 setPosATL [(_centerSpawnX)-5.52539, (_centerSpawnY)+5.98193, 0];
 _vehicle_9 setdamage 0;
@@ -144,6 +145,7 @@ _missionObjects pushBack _vehicle_9;
 
 _vehicle_10 = objNull;
 _vehicle_10 = createVehicle ["I_HMG_02_high_F", [0,0,0], [], 0, "CAN_COLLIDE"];
+[_vehicle_10, "mission_holdpos"] call fnc_duws_keep;
 _vehicle_10 setDir 136.703;
 _vehicle_10 setPosATL [(_centerSpawnX)+6.7168, (_centerSpawnY)-5.49365, 0];
 _vehicle_10 setdamage 0;
@@ -151,6 +153,7 @@ _missionObjects pushBack _vehicle_10;
 
 _vehicle_11 = objNull;
 _vehicle_11 = createVehicle ["B_Mortar_01_F", [0,0,0], [], 0, "CAN_COLLIDE"];
+[_vehicle_11, "mission_holdpos"] call fnc_duws_keep;
 _vehicle_11 setDir 136.703;
 _vehicle_11 setPosATL [(_centerSpawnX)+0.01, (_centerSpawnY)-4.49365, 0];
 _vehicle_11 setdamage 0;

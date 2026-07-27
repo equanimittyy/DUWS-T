@@ -96,6 +96,7 @@ _missionObjects pushBack _vehicle_7;
 
 _vehicle_9 = objNull;
 _vehicle_9 = createVehicle ["B_static_AA_F", [0,0,0], [], 0, "CAN_COLLIDE"];
+[_vehicle_9, "mission_destroy_radar"] call fnc_duws_keep;
 _vehicle_9 setDir 314.218;
 _vehicle_9 setPosATL [(_centerSpawnX)-5.52539, (_centerSpawnY)+5.98193, 0];
 _vehicle_9 allowdamage false;
@@ -104,6 +105,7 @@ _missionObjects pushBack _vehicle_9;
 
 _vehicle_10 = objNull;
 _vehicle_10 = createVehicle ["B_static_AA_F", [0,0,0], [], 0, "CAN_COLLIDE"];
+[_vehicle_10, "mission_destroy_radar"] call fnc_duws_keep;
 _vehicle_10 setDir 136.703;
 _vehicle_10 setPosATL [(_centerSpawnX)+6.7168, (_centerSpawnY)-5.49365, 0];
 _vehicle_10 allowdamage false;
