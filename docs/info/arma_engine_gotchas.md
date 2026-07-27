@@ -212,6 +212,11 @@ than an iteration count — per-iteration cost is rarely uniform — and yield b
 so the server still services clients. `sleep`/`waitUntil` cannot be used inside the block:
 unscheduled code cannot suspend.
 
+Batching that survey to a 15 ms budget took it from ~50 to ~259 candidates/second, which is
+the scale of the effect when a loop is scheduler-bound rather than genuinely expensive. To
+tell the two apart afterwards, accumulate the time spent inside the batches and log it
+against wall-clock: converged means the engine calls are now the floor.
+
 ## A shared global mutated as `x = x - c; publicVariable "x"` loses concurrent writes
 
 **`publicVariable` broadcasts an absolute value, and there is no network lock. When two

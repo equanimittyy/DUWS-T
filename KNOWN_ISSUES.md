@@ -94,14 +94,16 @@ count and not lookup speed. What moves the count is the arc filter, whose yield 
 where HQ landed relative to the map — the same radius left 1144 of 6145 candidates in one
 run and 5909 of 6064 in another.
 
-A flat rate that tracks frame rate rather than workload is the scheduler rationing the pass,
-so the sweeps are now batched unscheduled
-([§scheduled scripts](docs/info/arma_engine_gotchas.md#scheduled-scripts-share-3-ms-per-frame-so-a-long-loop-runs-at-frame-rate)).
-**Unmeasured in game so far**: the `ZONES` line now reports the pass as wall-clock versus
-time spent sweeping, and those two figures decide whether anything further is worth doing.
-If they converge, the engine lookups are the floor and only cutting the candidate count
-helps — capping the survivor pool would do it, at the cost of variety in zone siting and in
-the side-mission locations that reuse the same pool.
+A flat rate that tracks frame rate rather than workload was the scheduler rationing the pass,
+so the sweeps are batched unscheduled
+([§scheduled scripts](docs/info/arma_engine_gotchas.md#scheduled-scripts-share-3-ms-per-frame-so-a-long-loop-runs-at-frame-rate)),
+which measured 2589 candidates in 10 s — ~259/second against the ~50 before it.
+
+That is as far as batching goes: the same run reports 10 s wall against 10.2 s sweeping, so
+the pass now spends all of its time inside the engine lookups at roughly 4 ms each and none
+of it waiting for frames. Cost is `candidates x 4 ms`, and the only remaining lever is
+sweeping fewer candidates. The `ZONES` line keeps reporting both figures because a future
+boot script that starves the pass again would show up as the two diverging.
 
 Reading those logs: [`docs/info/testing.md`](docs/info/testing.md#runtime-logging-reading-the-rpt).
 
