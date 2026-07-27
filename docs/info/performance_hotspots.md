@@ -51,20 +51,37 @@ zone AI, not run both.
 ## Map object count is bounded by proximity, not campaign length
 
 The same gate cycles a zone's props. `fnc_duws_stow` records each composition member and deletes
-it; `fnc_duws_deploy` rebuilds from the record when BLUFOR return
-([`composition_streaming_plan.md`](../composition_streaming_plan.md)). A zone prefab is 37-72
-objects plus crates, a light and the fortification ring, so what stays resident tracks where the
-players are rather than how many zones were generated.
+it; `fnc_duws_deploy` rebuilds from the record when BLUFOR return. What stays resident therefore
+tracks where the players are rather than how many zones were generated.
 
-This is why props are *deleted* rather than hidden. A hidden object is still a network entity,
-still returned by `allMissionObjects`, still walked by `nearObjects`, and still added to the
-curator's editable set by `misc/fnc_zeus_objects_init.sqf:26` every 30 s at `ZeusStatus == 2`.
-Rendering was never the cost — the engine culls that by view distance already, and the prefabs
-ship with simulation off.
+The arithmetic is what forces it. A zone prefab places 37-72 objects
+(`server/init_zones/prefabs/modern/*.sqf`) plus five crates, a light, 3-4 fortification buildings
+and a flagpole (`fnc_createzone.sqf:151-206`) — call it 65. Zones alone are bounded, since
+`zones_number` tops out at 40, so roughly 2,600. [`hardpoint_system_plan.md`](../hardpoint_system_plan.md)
+is what breaks that: one composition of the same size per hardpoint, 1-6 per zone, plus
+director-built normals with no ceiling, reaches five figures on a large campaign.
+
+**Deleted rather than hidden.** A hidden object is still a network entity, still returned by
+`allMissionObjects`, still walked by `nearObjects`, and still added to the curator's editable set
+by `misc/fnc_zeus_objects_init.sqf:26` every 30 s at `ZeusStatus == 2`. Rendering was never the
+cost — the engine culls that by view distance already, and the prefabs ship with simulation off.
+Only deleting the entity moves the number.
+
+**Replayed from a record rather than rebuilt by the builder.** `fnc_createzone.sqf:157-198` rolls
+the fortification ring live — count, angle, distance, class and heading are all `random` — so
+calling the builder a second time produces a different zone. Recording the placed result sidesteps
+determinism entirely, and it is why a composition needs no streaming code of its own beyond filing
+its objects through `fnc_duws_keep`.
+
+Because the record is built when a composition is stowed rather than when it is placed, damage,
+looted crates and player-moved props are captured as they actually are, and nothing outlives the
+session — [`campaign_persistence_plan.md`](../campaign_persistence_plan.md) gains no save input.
 
 Order matters at the despawn end: the garrison pass runs first, then static weapons are crewed
-out, then the composition stows. `fnc_duws_stow` refuses while any member has living crew, so a
-zone whose turret still holds a gunner stays on the map and retries next cycle.
+out, then the composition stows. `fnc_duws_stow` refuses while a streamable member has living crew,
+so a zone whose turret still holds a gunner stays on the map and retries next cycle. Members whose
+effect depends on existing at all — an artillery, mortar or AA core — are pinned at
+`fnc_duws_keep` time and stay resident while the furniture around them streams.
 
 ## The enemy gear table never shrinks
 

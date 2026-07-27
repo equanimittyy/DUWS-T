@@ -196,7 +196,8 @@ damage. Zone garrisons and composition props both spawn and despawn on player di
 player approaches — the same code path a fresh campaign uses.
 
 Composition streaming adds nothing here. Its stow records are built when a composition leaves the
-map and dropped when it returns ([`composition_streaming_plan.md`](composition_streaming_plan.md)),
+map and dropped when it returns
+([§Map object count](info/performance_hotspots.md#map-object-count-is-bounded-by-proximity-not-campaign-length)),
 so they never outlive the session and a restore rebuilds every composition deployed.
 
 This is the decision that keeps the plan finite. The server runs 40 `while {true}` loops across 23

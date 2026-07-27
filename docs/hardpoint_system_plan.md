@@ -362,9 +362,10 @@ There is no ceiling on how many normal hardpoints exist. Two things bound them i
   distance, so the cost tracks where the player is rather than how long the campaign has run.
 
 Props cycle with the garrison, per
-[`composition_streaming_plan.md`](composition_streaming_plan.md). A hardpoint composition the size
-of a zone prefab is what forces this: at 1-6 per zone against 65 objects each, leaving them
-standing puts a large campaign into five figures of map objects. Filing them under a key with
+[§Map object count](info/performance_hotspots.md#map-object-count-is-bounded-by-proximity-not-campaign-length).
+A hardpoint composition the size of a zone prefab is what forces this: at 1-6 per zone against 65
+objects each, leaving them standing puts a large campaign into five figures of map objects. Filing
+them under a key with
 `fnc_duws_keep` is the whole integration — streaming reads the registry, so no hardpoint code
 places or removes an object itself.
 
@@ -404,9 +405,10 @@ no-ops — correct by accident, and only because `fnc_duws_stow` tests membershi
 that leaves one idle loop per cleared hardpoint running for the rest of the campaign, and any
 future change to that guard turns a resource cost into a correctness bug.
 
-Release must also clear `DUWS_stowed`, which it does not today
-([`composition_streaming_plan.md`](composition_streaming_plan.md)). Retiring a stowed composition
-currently succeeds while changing nothing, and the composition redeploys intact.
+Release must also clear `DUWS_stowed`. `fnc_duws_release` walks `DUWS_compositions` and deletes
+that key without ever looking at the stow map, so retiring a stowed composition currently succeeds
+while changing nothing, and the composition redeploys intact on the next approach. Unreachable
+while zones are the only thing that streams, because nothing releases a zone.
 
 ### Types whose effect depends on existing are not stowed
 

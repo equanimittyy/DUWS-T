@@ -22,6 +22,22 @@ server-commanded inversion that made heli-lift unusable cannot occur there, so t
 risk is narrower: a `publicVariable` that never lands. That is only visible with a second
 player connected, which is why the first item above says so explicitly.
 
+## Composition streaming: the record fields are unexercised
+
+Zone props are deleted when no player is near and rebuilt from a record on return
+(`server/server_fnc_init.sqf`, `fnc_duws_stow` and `fnc_duws_deploy`). Stow and deploy have been
+seen to run, but the six fields a record carries have not been checked against what comes back.
+
+`tests/run.sh` cannot reach this: it proves brackets balance and paths resolve, not that a command
+takes the arguments given. Each field below fails silently and differently, so the symptom is the
+quickest way to tell which one is wrong.
+
+- [ ] Deploy a stowed zone and compare it against a screenshot taken before — props in the same places, facing the same way. Wrong headings or objects sunk into a slope means `getPosWorld` / `setVectorDirAndUp`
+- [ ] Watch server FPS after a deploy. A drop with no other cause means `simulationEnabled` did not round-trip and the whole composition came back simulated
+- [ ] Shoot a prop that was invulnerable before the cycle. Damage taken means `isDamageAllowed` did not survive
+- [ ] Empty an ammo crate, stow, deploy, reopen it. A refilled crate means the four `get*Cargo` / `add*CargoGlobal` pairs are wrong, and is an infinite ammo source until fixed
+- [ ] Destroy a bunker, stow, deploy. Its return means the alive test at stow time is not filtering
+
 ## Heli-lift for non-host players
 
 `client/supports/fnc_helolift.sqf` used to create the transport helicopter on the calling
