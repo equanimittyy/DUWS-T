@@ -135,17 +135,6 @@ class CfgNotifications
         difficulty[] = {};
     };
 
-    class CPaddedvehicle
-    {
-        title = "$STR_DUWS_T_CPKILL_TITLE";
-        iconText = "+%1";
-        // Which vehicle class was killed is passed in: one class covers all five tiers.
-        description = "%2";
-        color[] = {0.5,1,1,1};
-        priority = 0;
-        difficulty[] = {};
-    };
-
     class CPaddedattrition
     {
         title = "$STR_DUWS_T_CPATTRITION_TITLE";

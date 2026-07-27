@@ -3740,37 +3740,13 @@
                 <Spanish>Demonio élite eliminado</Spanish>
                 <Chinesesimp>你的小队因此获得了%1CP</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_CPKILL_TITLE">
-                <Original>CP Bonus: Enemy vehicle destroyed</Original>
-                <English>CP Bonus: Enemy vehicle destroyed</English>
-            </Key>
-            <Key ID="STR_DUWS_T_CPKILL_CAR_MSG">
-                <Original>Received CP for destroying an enemy light vehicle</Original>
-                <English>Received CP for destroying an enemy light vehicle</English>
-            </Key>
-            <Key ID="STR_DUWS_T_CPKILL_APC_MSG">
-                <Original>Received CP for destroying an enemy APC</Original>
-                <English>Received CP for destroying an enemy APC</English>
-            </Key>
-            <Key ID="STR_DUWS_T_CPKILL_TANK_MSG">
-                <Original>Received CP for destroying an enemy tank</Original>
-                <English>Received CP for destroying an enemy tank</English>
-            </Key>
-            <Key ID="STR_DUWS_T_CPKILL_HELI_MSG">
-                <Original>Received CP for destroying an enemy helicopter</Original>
-                <English>Received CP for destroying an enemy helicopter</English>
-            </Key>
-            <Key ID="STR_DUWS_T_CPKILL_PLANE_MSG">
-                <Original>Received CP for destroying an enemy aircraft</Original>
-                <English>Received CP for destroying an enemy aircraft</English>
-            </Key>
             <Key ID="STR_DUWS_T_CPATTRITION_TITLE">
                 <Original>CP Bonus: Enemy attrition</Original>
                 <English>CP Bonus: Enemy attrition</English>
             </Key>
             <Key ID="STR_DUWS_T_CPATTRITION_MSG">
-                <Original>Received CP for sustained enemy losses</Original>
-                <English>Received CP for sustained enemy losses</English>
+                <Original>Due to your efforts, BLUFOR was awarded %1 CP</Original>
+                <English>Due to your efforts, BLUFOR was awarded %1 CP</English>
             </Key>
             <Key ID="STR_DUWS_T_668shcf1">
                 <German>Punkte Bonus</German>

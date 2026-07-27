@@ -204,6 +204,8 @@ publicVariable "VCM_ADVANCEDMOVEMENT";
 //击杀奖励机制
 if (isServer) then {
     if (isNil "playerKillCount") then { playerKillCount = createHashMap; };
+    // CP owed for kills by players who have already left, banked until the next sweep.
+    departedKillCP = 0;
     addMissionEventHandler ["EntityKilled", {
         params ["_killed", "_killer", "_instigator"];
 
@@ -225,124 +227,54 @@ if (isServer) then {
         if (isNull _shooter) exitWith {};
         // =====================================================
 
-        private _type = typeOf _killed;
-        private _points = 0;
-        private _msgKey = "";
-
-        // ========== 原有载具类型判断（完全保留） ==========
-        // 辅助函数：检查单位类型是否匹配给定的变量（可能是字符串或数组）
-        private _fnc_match = {
-            params ["_type", "_varName"];
-            private _value = missionNamespace getVariable [_varName, []];
-            if (_value isEqualType "") then {
-                _type isKindOf _value
-            } else {
-                if (_value isEqualType []) then {
-                    ({_type isKindOf _x} count _value) > 0
-                } else {
-                    false
-                }
-            };
-        };
-
-        private _carClasses = [
-            "C_Truck_02_covered_F",
-            "C_Truck_02_transport_F",
-            "C_Van_01_transport_F",
-            "I_G_Van_01_transport_F",
-            "C_Van_02_transport_F",
-            "C_Offroad_02_unarmed_F",
-            "C_Offroad_01_F",
-            "B_Truck_01_ammo_F",
-            "C_Truck_02_box_F",
-            "C_Offroad_01_repair_F",
-            "I_G_Offroad_01_repair_F",
-            "C_Van_02_service_F",
-            "I_G_Offroad_01_armed_F",
-            "I_G_Offroad_01_lat_F",
-            "I_C_Offroad_02_LMG_F",
-            "I_C_Offroad_02_lat_F"
-        ];
-        private _apcClasses = [
-            "I_C_Offroad_02_LMG_F",
-            "I_C_Offroad_01_AT_F",
-            "I_C_Offroad_02_LMG_F"
-        ];
-        private _tankClasses = [
-            "I_C_Offroad_02_AT_F"
-        ];
-        private _heliClasses = [
-            "C_Heli_Light_01_civil_F",
-            "I_Heli_light_03_unarmed_F"
-        ];
-        private _planeClasses = [
-            "I_C_Plane_Civil_01_F"
-        ];
-
-        if ( [_type, "opfor_COVERED_TRUCK_X"] call _fnc_match ||
-             [_type, "opfor_TRANS_TRUCK_X"] call _fnc_match ||
-             [_type, "opfor_AMMO_TRUCK_X"] call _fnc_match ||
-             [_type, "opfor_REPAIR_TRUCK_X"] call _fnc_match ||
-             [_type, "opfor_ARMED_CAR1_X"] call _fnc_match ||
-             ({_type isKindOf _x} count _carClasses) > 0 ) then {
-            _points = 1;
-            _msgKey = "STR_DUWS_T_CPKILL_CAR_MSG";
-        } else {
-            if ( [_type, "opfor_APC1_X"] call _fnc_match ||
-                 [_type, "opfor_APC2_X"] call _fnc_match ||
-                 [_type, "opfor_AA_APC_X"] call _fnc_match ||
-                 ({_type isKindOf _x} count _apcClasses) > 0 ) then {
-                _points = 3;
-                _msgKey = "STR_DUWS_T_CPKILL_APC_MSG";
-            } else {
-                if ( [_type, "opfor_MBT_TANK1_X"] call _fnc_match ||
-                     ({_type isKindOf _x} count _tankClasses) > 0 ) then {
-                    _points = 5;
-                    _msgKey = "STR_DUWS_T_CPKILL_TANK_MSG";
-                } else {
-                    if ( [_type, "opfor_TRANS_HELI_X"] call _fnc_match ||
-                         [_type, "opfor_ATTACK_HELI_X"] call _fnc_match ||
-                         ({_type isKindOf _x} count _heliClasses) > 0 ) then {
-                        _points = 5;
-                        _msgKey = "STR_DUWS_T_CPKILL_HELI_MSG";
-                    } else {
-                        if ( [_type, "opfor_MISC_AIR_X"] call _fnc_match ||
-                             ({_type isKindOf _x} count _planeClasses) > 0 ) then {
-                            _points = 8;
-                            _msgKey = "STR_DUWS_T_CPKILL_PLANE_MSG";
-                        };
-                    };
-                };
-            };
-        };
-        // =================================================
-
-        // ========== 击杀计数（用于累计击杀奖励） ==========
-        private _playerUID = getPlayerUID _shooter;
-        private _currentKills = playerKillCount getOrDefault [_playerUID, 0];
-        _currentKills = _currentKills + 1;
-        playerKillCount set [_playerUID, _currentKills];
-        // =============================================
-
-        // ========== 发放载具奖励（完全独立） ==========
-        // Presented as a CP award in the same notification family as a zone capture, so
-        // kill income reads as campaign economy rather than a scoreboard. Notification
-        // only -- no subtitle or radio chatter: kills are frequent enough that an
-        // Overlord line per kill drowns out the mission's own radio traffic.
-        if (_points > 0) then {
-            [_points, "vehicle_kill_bounty"] remoteExec ["fnc_cp_adjust", 2];
-            ["CPaddedvehicle", [_points, localize _msgKey]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
-        };
-        // ============================================
-
-        // ========== 累计击杀奖励（每10击杀 +1CP，独立于载具类型） ==========
-        if (_currentKills % 10 == 0) then {
-            private _extraPoints = 1;
-            [_extraPoints, "kill_attrition"] remoteExec ["fnc_cp_adjust", 2];
-            ["CPaddedattrition", [_extraPoints]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
-        };
-        // ============================================================
+        // Every kill attributed to this player counts the same; the tally converts to CP
+        // on the periodic sweep below, not here.
+        private _uid = getPlayerUID _shooter;
+        playerKillCount set [_uid, (playerKillCount getOrDefault [_uid, 0]) + 1];
     }];
+
+    // A rejoining player starts from zero: the tally is keyed by UID and outlives the
+    // session that earned it, so without this a returning player resumes an old count.
+    addMissionEventHandler ["PlayerConnected", {
+        params ["", "_uid"];
+        playerKillCount set [_uid, 0];
+    }];
+
+    // A leaver's whole batches are banked here and paid on the next sweep; the remainder
+    // dies with the entry rather than waiting for a session that may never return.
+    addMissionEventHandler ["PlayerDisconnected", {
+        params ["", "_uid"];
+        private _kills = playerKillCount getOrDefault [_uid, 0];
+        departedKillCP = departedKillCP + (floor (_kills / kill_cp_kills)) * kill_cp_award;
+        playerKillCount deleteAt _uid;
+    }];
+
+    // Kill income is paid in one periodic sweep rather than per kill: a tally the player
+    // watches build reads as campaign economy, where a payout per body reads as a score
+    // feed. Each player is told only about their own award, so the credit stays personal.
+    [] spawn {
+        while {true} do {
+            sleep kill_cp_interval;
+            {
+                private _uid = getPlayerUID _x;
+                private _kills = playerKillCount getOrDefault [_uid, 0];
+                private _batches = floor (_kills / kill_cp_kills);
+                if (_batches > 0) then {
+                    private _award = _batches * kill_cp_award;
+                    // Server-side caller: call runs inline, where remoteExec [...,2] would
+                    // land a frame later.
+                    [_award, "kill_income"] call fnc_cp_adjust;
+                    playerKillCount set [_uid, _kills - _batches * kill_cp_kills];
+                    ["CPaddedattrition", [_award]] remoteExec ["BIS_fnc_showNotification", _x, false];
+                };
+            } forEach allPlayers;
+
+            if (departedKillCP > 0) then {
+                [departedKillCP, "kill_income_departed"] call fnc_cp_adjust;
+                departedKillCP = 0;
+            };
+        };
+    };
 };
 if (isServer) then {
     // 全局冷却（可选，按需保留或调整）
