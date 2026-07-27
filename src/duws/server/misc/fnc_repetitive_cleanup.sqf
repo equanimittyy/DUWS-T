@@ -26,6 +26,13 @@ if (!isServer) exitWith {};
 // Expired but watched stays and is retried, so it goes once they leave rather than never.
 #define KEEP_RADIUS 300
 
+// Bases are cleanup exclusion zones: an intact vehicle parked this close to the HQ, a FOB or the
+// MHQ is never collected. This is the supported way to keep a vehicle, which is why no vehicle
+// carries the persistence flag any more -- drive it home instead of tagging it in script.
+// Deliberately narrower than "nothing inside is collected": wrecks, bodies and dropped kit still
+// go, or a base that gets attacked would silt up with exactly what the sweep exists to remove.
+#define BASE_RADIUS 250
+
 // Passes between census log lines. The census is the one part of this that cannot be checked
 // offline -- allMissionObjects is documented around mission- and script-created objects, and a
 // dropped rifle's holder is created by the engine. A zero here with combat behind you means the
@@ -79,6 +86,14 @@ while {true} do {
 
     private _now = time;
     private _candidates = [];
+
+    // Rebuilt every pass rather than cached: FOBs are raised and lost mid-campaign, and the MHQ
+    // is a vehicle that drives around. PosOfBLUHQ is empty until the player places the HQ.
+    private _bases = [];
+    if (count PosOfBLUHQ > 0) then { _bases pushBack PosOfBLUHQ };
+    { _bases pushBack _x } forEach Array_of_FOBpos;
+    private _mhq = missionNamespace getVariable ["MHQ1", objNull];
+    if (!isNull _mhq) then { _bases pushBack (getPos _mhq) };
 
     {
         private _type = _x;
@@ -148,8 +163,17 @@ while {true} do {
             if ((_force || {_binAt <= _now})
                 && {(allPlayers findIf {_x distance _obj < KEEP_RADIUS}) < 0}
                 && {({alive _x} count crew _obj) == 0}) then {
-                deleteVehicle _obj;
-                _binned = _binned + 1;
+                // Checked last: it is the only test that walks a list, and by here everything
+                // else has already agreed the object should go. Intact vehicles only, so a
+                // player can park anything driveable at a base and keep it.
+                private _parked = alive _obj && {_obj isKindOf "AllVehicles"}
+                    && {(_bases findIf {_obj distance _x < BASE_RADIUS}) >= 0};
+                if (_parked) then {
+                    _tracked = _tracked + 1;
+                } else {
+                    deleteVehicle _obj;
+                    _binned = _binned + 1;
+                };
             } else {
                 _tracked = _tracked + 1;
             };

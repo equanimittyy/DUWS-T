@@ -127,14 +127,18 @@ private _tiltTypes = [
     // 载具特殊处理：贴地，保留模拟
     if (_class isKindOf "AllVehicles") then {
         private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
-        [_obj, _zoneKey] call fnc_duws_keep;
         _obj setPosATL [_newX, _newY, 0];
         _obj setDir _dir;
         continue;
     };
 
     private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
-    [_obj, _zoneKey] call fnc_duws_keep;
+    // Anything that can drive itself away is left out of the composition: a base exclusion zone
+    // is how a player keeps a vehicle now, so a zone quadbike abandoned at a captured outpost
+    // clears like anything else. Tested on the object rather than the class because a slung
+    // cargo container is cargo, not transport, and must stay tagged -- canMove tells them apart
+    // without depending on which config branch each one hangs off.
+    if !(canMove _obj) then { [_obj, _zoneKey] call fnc_duws_keep };
     _obj setPosATL [_newX, _newY, 0];
 
     // 工事倾斜
