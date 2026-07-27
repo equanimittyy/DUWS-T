@@ -211,7 +211,14 @@ if (!alive _box) then {
     missionNamespace setVariable ["dyna_mission_objects", nil];
 };
 
+// The crate expires with the rest of the mission. It was the objective rather than a keepsake,
+// and leaving it tagged made this the one composition in the mission that never came back --
+// a crate per run, accumulating on the map for the whole campaign.
+["mission_supply_recovery", 360] call fnc_duws_release;
+
 // ---------- 延迟 360 秒后执行清理（保留补给箱）----------
+// The crate is still skipped here: release gives it to the map sweep, which holds it while a
+// player is within the keep-radius. Deleting it outright would take it from under them.
 [_generatedObjects] spawn {
     params ["_objects"];
     private _box = _objects select 0;
