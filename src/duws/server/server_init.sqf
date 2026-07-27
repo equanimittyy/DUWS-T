@@ -227,6 +227,12 @@ if (isServer) then {
         if (isNull _shooter) exitWith {};
         // =====================================================
 
+        // Only hostiles pay: EntityKilled fires for civilians, friendlies and empty
+        // vehicles too, and paying for civilian kills rewards exactly what the warcrimes
+        // script penalises. 0.6 is the engine's hostile/friendly cutoff, and the mission
+        // sets every playable side pair to 0, so INDEPENDENT zombies still count.
+        if ((side _shooter) getFriend (side _killed) >= 0.6) exitWith {};
+
         // Every kill attributed to this player counts the same; the tally converts to CP
         // on the periodic sweep below, not here.
         private _uid = getPlayerUID _shooter;
