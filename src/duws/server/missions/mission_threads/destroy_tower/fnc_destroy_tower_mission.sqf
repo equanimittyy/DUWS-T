@@ -62,8 +62,6 @@ _this setPos _centerSpawn;
 _centerSpawnZ = (getpos _vehicle_0 select 2);
 deleteVehicle _vehicle_0;
 
-private _missionObjects = [];
-
 // --DUWS-COMPOSITION BEGIN name="Mission: Destroy Tower" schema=C--
 _staticsArray = [];
 switch (VERSION_X) do {
@@ -96,7 +94,7 @@ _vehicle = objNull;
     _vehicle = createVehicle [(_x select 0), [0,0,0], [], 0, "CAN_COLLIDE"];
     _vehicle setDir (_x select 2);
     _vehicle setPosATL [(_centerSpawnX)+_posX,(_centerSpawnY)+_posY,0];
-    _missionObjects pushBack _vehicle;
+    [_vehicle, "mission_destroy_tower"] call fnc_duws_keep;
 } forEach _staticsArray;
 
 _vehicle_7 = objNull;
@@ -107,7 +105,7 @@ switch (VERSION_X) do {
         _vehicle_7 setPosATL [(_centerSpawnX), (_centerSpawnY), 0];
         _vehicle_7 setDamage 0.8;
         _vehicle_7 setVectorUp [0,0,1];
-        _missionObjects pushBack _vehicle_7;
+        [_vehicle_7, "mission_destroy_tower"] call fnc_duws_keep;
     };
 };
 
@@ -251,10 +249,6 @@ waitUntil {
     !alive _vehicle_7 || (damage _vehicle_7) == 1 || (time - _missionStartTime) > _taskTimeout_tower
 };
 
-// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
-// the sweep holds anything a player is still standing near, so a finished objective does
-// not dissolve in front of whoever is looting it.
-{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
 
 if ((alive _vehicle_7 && (damage _vehicle_7) < 1) && (time - _missionStartTime) > _taskTimeout_tower) exitWith {
     [{hint localize "STR_DUWS_T_xhtbpyl1"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
@@ -266,7 +260,7 @@ if ((alive _vehicle_7 && (damage _vehicle_7) < 1) && (time - _missionStartTime) 
     deleteMarker str(_markername);
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
-    [_targetpos,_radius] spawn fnc_mission_cleanup;
+    [_targetpos,_radius, "mission_destroy_tower"] spawn fnc_mission_cleanup;
     missionNamespace setVariable ["current_mission_target_pos", nil];
 };
 
@@ -278,6 +272,6 @@ deleteMarker str(_markername);
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;
 missionNamespace setVariable [_triggeredVar, true, true];
-[_targetpos,_radius] spawn fnc_mission_cleanup;
+[_targetpos,_radius, "mission_destroy_tower"] spawn fnc_mission_cleanup;
 
 missionNamespace setVariable ["current_mission_target_pos", nil];

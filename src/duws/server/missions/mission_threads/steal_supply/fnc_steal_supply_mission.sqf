@@ -50,8 +50,6 @@ _markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionM
 _markername = _markerData select 0;
 _markername2 = _markerData select 1;
 
-private _missionObjects = [];
-
 // 创建卡车
 // The objective itself: kept for the mission's duration so the abandoned-vehicle clause
 // cannot collect it. A player who disables it and takes half an hour would otherwise find
@@ -62,7 +60,6 @@ clearMagazineCargoGlobal _truck1;
 clearWeaponCargoGlobal _truck1;
 clearItemCargoGlobal _truck1;
 clearBackpackCargoGlobal _truck1;
-_missionObjects pushBack _truck1;
 
 [_truck1, {
     private _actionID = _this addAction [
@@ -122,16 +119,16 @@ clearItemCargoGlobal _box2;
 clearBackpackCargoGlobal _box2;
 
 _obj1 = createVehicle [_static1, [(_vehPos select 0)-12, (_vehPos select 1)-10], [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj1;
+[_obj1, "mission_steal_supply"] call fnc_duws_keep;
 sleep 1;
 _obj2 = createVehicle [_static1, [(_vehPos select 0)-10, (_vehPos select 1)-10], [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj2;
+[_obj2, "mission_steal_supply"] call fnc_duws_keep;
 sleep 1;
 _obj3 = createVehicle [_static1, [(_vehPos select 0)-8, (_vehPos select 1)-10], [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj3;
+[_obj3, "mission_steal_supply"] call fnc_duws_keep;
 sleep 1;
 _obj4 = createVehicle [_static2, [(_vehPos select 0)-10, (_vehPos select 1)-10], [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj4;
+[_obj4, "mission_steal_supply"] call fnc_duws_keep;
 sleep 1;
 
 // 守卫
@@ -306,10 +303,6 @@ sleep 2;
 deleteVehicle _box1;
 [{hint localize "STR_DUWS_T_3jmpthvi"}] remoteExec ["BIS_fnc_Spawn", player1];
 
-// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
-// the sweep holds anything a player is still standing near, so a finished objective does
-// not dissolve in front of whoever is looting it.
-{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;

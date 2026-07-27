@@ -47,27 +47,24 @@ _markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionM
 _markername = _markerData select 0;
 _markername2 = _markerData select 1;
 
-private _missionObjects = [];
-
 _laptop = "";
 switch (VERSION_X) do {
     case "MODERN": {
         _table = createVehicle ["Land_WoodenTable_large_F", _tableLoc, [], 0, "CAN_COLLIDE"];
         _table setDir 0;
-        _missionObjects pushBack _table;
+        [_table, "mission_sabotage_laptop"] call fnc_duws_keep;
         sleep 1;
         _pallet = createVehicle ["VirtualReammoBox_camonet_F", [(_tableLoc select 0)+3, (_tableLoc select 1)+3], [], 0, "CAN_COLLIDE"];
         [_pallet, "mission_sabotage_laptop"] call fnc_duws_keep;
-        _missionObjects pushBack _pallet;
         sleep 1;
         _laptop = createVehicle ["Land_Laptop_unfolded_F", _tableLoc, [], 0, "CAN_COLLIDE"];
         _laptop setpos [(_tableLoc select 0),(_tableLoc select 1),1.0];
         _laptop setDir 270;
-        _missionObjects pushBack _laptop;
+        [_laptop, "mission_sabotage_laptop"] call fnc_duws_keep;
         sleep 1;
         _camonet = createVehicle ["CamoNet_INDP_open_F", _tableLoc, [], 0, "CAN_COLLIDE"];
         _camonet setDir 0;
-        _missionObjects pushBack _camonet;
+        [_camonet, "mission_sabotage_laptop"] call fnc_duws_keep;
     };
 };
 

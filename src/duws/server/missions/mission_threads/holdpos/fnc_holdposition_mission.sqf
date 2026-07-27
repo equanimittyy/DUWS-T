@@ -65,31 +65,31 @@ if (count _intersections > 0) then {
 };
 
 // ========== 初始化数组记录任务生成的物体 ==========
-_missionObjects = [];
+_missionUnits = [];
 
 _samSystem = createVehicle ["B_SAM_System_03_F", [0,0,0], [], 0, "CAN_COLLIDE"];
 _samSystem setDir 0;
 _samSystem setPosATL [(_centerSpawnX)-3.23633, (_centerSpawnY)+1.296875, 0];
 _samSystem setVariable ["R3F_LOG_disabled", true];
-_missionObjects pushBack _samSystem;
+[_samSystem, "mission_holdpos"] call fnc_duws_keep;
 
 _radarSystem = createVehicle ["B_Radar_System_01_F", [0,0,0], [], 0, "CAN_COLLIDE"];
 _radarSystem setDir 0;
 _radarSystem setPosATL [(_centerSpawnX)+3.23633, (_centerSpawnY)-1.296875, 0];
 _radarSystem setVariable ["R3F_LOG_disabled", true];
-_missionObjects pushBack _radarSystem;
+[_radarSystem, "mission_holdpos"] call fnc_duws_keep;
 
 _samGroup = createGroup WEST;
 _samOperator = _samGroup createUnit ["B_UAV_AI", [0,0,0], [], 0, "CAN_COLLIDE"];
 _samOperator moveInGunner _samSystem;
 _samGroup deleteGroupWhenEmpty true;
-_missionObjects pushBack _samOperator;
+_missionUnits pushBack _samOperator;
 
 _radarGroup = createGroup WEST;
 _radarOperator = _radarGroup createUnit ["B_UAV_AI", [0,0,0], [], 0, "CAN_COLLIDE"];
 _radarOperator moveInGunner _radarSystem;
 _radarGroup deleteGroupWhenEmpty true;
-_missionObjects pushBack _radarOperator;
+_missionUnits pushBack _radarOperator;
 
 _samOperator setBehaviour "AWARE";
 _samOperator setCombatMode "RED";
@@ -132,7 +132,7 @@ _vehicle = objNull;
 	_vehicle = createVehicle [(_x select 0), [0,0,0], [], 0, "CAN_COLLIDE"];
 	_vehicle setDir (_x select 2);
 	_vehicle setPosATL [(_centerSpawnX)+_posX,(_centerSpawnY)+_posY,0];
-	_missionObjects pushBack _vehicle;
+	[_vehicle, "mission_holdpos"] call fnc_duws_keep;
 } forEach _staticsArray;
 
 _vehicle_9 = objNull;
@@ -141,7 +141,6 @@ _vehicle_9 = createVehicle ["I_HMG_02_high_F", [0,0,0], [], 0, "CAN_COLLIDE"];
 _vehicle_9 setDir 314.218;
 _vehicle_9 setPosATL [(_centerSpawnX)-5.52539, (_centerSpawnY)+5.98193, 0];
 _vehicle_9 setdamage 0;
-_missionObjects pushBack _vehicle_9;
 
 _vehicle_10 = objNull;
 _vehicle_10 = createVehicle ["I_HMG_02_high_F", [0,0,0], [], 0, "CAN_COLLIDE"];
@@ -149,7 +148,6 @@ _vehicle_10 = createVehicle ["I_HMG_02_high_F", [0,0,0], [], 0, "CAN_COLLIDE"];
 _vehicle_10 setDir 136.703;
 _vehicle_10 setPosATL [(_centerSpawnX)+6.7168, (_centerSpawnY)-5.49365, 0];
 _vehicle_10 setdamage 0;
-_missionObjects pushBack _vehicle_10;
 
 _vehicle_11 = objNull;
 _vehicle_11 = createVehicle ["B_Mortar_01_F", [0,0,0], [], 0, "CAN_COLLIDE"];
@@ -158,7 +156,6 @@ _vehicle_11 setDir 136.703;
 _vehicle_11 setPosATL [(_centerSpawnX)+0.01, (_centerSpawnY)-4.49365, 0];
 _vehicle_11 setdamage 0;
 _vehicle_11 setVehicleAmmo 0.3;
-_missionObjects pushBack _vehicle_11;
 
 _groupBunker1 = [getpos _vehicle_9, WEST, [blufor_SOLDIER_X],[],[],blufor_ai_skill] call BIS_fnc_spawnGroup;
 _groupBunker1 deleteGroupWhenEmpty true;
@@ -170,8 +167,8 @@ _guard1 moveinGunner _vehicle_9;
 _guard2 moveinGunner _vehicle_10;
 _vehicle_9 setDir( [_centerSpawnX,_centerSpawnY] getDir getPosWorld _vehicle_9);
 _vehicle_10 setDir( [_centerSpawnX,_centerSpawnY] getDir getPosWorld _vehicle_10);
-_missionObjects pushBack _guard1;
-_missionObjects pushBack _guard2;
+_missionUnits pushBack _guard1;
+_missionUnits pushBack _guard2;
 
 [_guard2] joinSilent _groupBunker1;
 
@@ -210,7 +207,7 @@ _friendlyUnits = units _friendlyGroup;
     _x setPosATL _unitPos;
     _x setDir random 360;
     _x disableAI "PATH";
-    _missionObjects pushBack _x;   // 记录友军单位
+    _missionUnits pushBack _x;   // 记录友军单位
 } forEach _friendlyUnits;
 
 _friendlyGroup setFormation "DIAMOND";
@@ -240,8 +237,8 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
 Mission_Active = true;
 publicVariable "Mission_Active";
 
-_conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markername, _markername2, _VARtaskgeneratedName, _cpreward, _apreward, _mission_name, _targetpos, _radius, _missionObjects] spawn {
-    params ["_samSystem", "_radarSystem", "_countdownDuration", "_markername", "_markername2", "_VARtaskgeneratedName", "_cpreward", "_apreward", "_mission_name", "_targetpos", "_radius", "_missionObjects"];
+_conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markername, _markername2, _VARtaskgeneratedName, _cpreward, _apreward, _mission_name, _targetpos, _radius, _missionUnits] spawn {
+    params ["_samSystem", "_radarSystem", "_countdownDuration", "_markername", "_markername2", "_VARtaskgeneratedName", "_cpreward", "_apreward", "_mission_name", "_targetpos", "_radius", "_missionUnits"];
 
     waitUntil { sleep 1; missionNamespace getVariable [format ["%1_started", _VARtaskgeneratedName], false] };
     private _missionStartTime = missionNamespace getVariable [format ["%1_startTime", _VARtaskgeneratedName], time];
@@ -260,7 +257,7 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
             // Handed to the map cleanup instead of deleted on a private timer: the same wait, but
             // the sweep holds anything a player is still standing near, so a finished objective does
             // not dissolve in front of whoever is looting it.
-            { [_x, 300] call fnc_duws_disposeAfter } forEach _missionObjects;
+            { deleteVehicle _x } forEach _missionUnits;
         };
         if ((time - _missionStartTime) >= _countdownDuration) exitWith {
             deleteMarker str(_markername2);
@@ -276,7 +273,7 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
             // Handed to the map cleanup instead of deleted on a private timer: the same wait, but
             // the sweep holds anything a player is still standing near, so a finished objective does
             // not dissolve in front of whoever is looting it.
-            { [_x, 300] call fnc_duws_disposeAfter } forEach _missionObjects;
+            { deleteVehicle _x } forEach _missionUnits;
         };
     };
 };

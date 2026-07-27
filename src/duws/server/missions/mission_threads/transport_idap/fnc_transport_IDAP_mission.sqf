@@ -48,11 +48,9 @@ _markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionM
 _markername = _markerData select 0;
 _markername2 = _markerData select 1;
 
-private _missionObjects = [];
-
 // 生成卡车
 _truck1 = "C_IDAP_Truck_02_Transport_F" createVehicle (_vehpos);
-_missionObjects pushBack _truck1;
+[_truck1, "mission_transport_idap"] call fnc_duws_keep;
 
 // 生成补给箱
 _box1 = "";
@@ -74,16 +72,16 @@ switch (VERSION_X) do {
 };
 
 _obj1 = createVehicle [_static1, [(_vehpos select 0)-12, (_vehpos select 1)-10], [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj1;
+[_obj1, "mission_transport_idap"] call fnc_duws_keep;
 sleep 1;
 _obj2 = createVehicle [_static1, [(_vehpos select 0)-10, (_vehpos select 1)-10], [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj2;
+[_obj2, "mission_transport_idap"] call fnc_duws_keep;
 sleep 1;
 _obj3 = createVehicle [_static1, [(_vehpos select 0)-8, (_vehpos select 1)-10], [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj3;
+[_obj3, "mission_transport_idap"] call fnc_duws_keep;
 sleep 1;
 _obj4 = createVehicle [_static2, [(_vehpos select 0)-10, (_vehpos select 1)-10], [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj4;
+[_obj4, "mission_transport_idap"] call fnc_duws_keep;
 sleep 1;
 
 // Vehicle guards
@@ -258,10 +256,6 @@ sleep 8;
 deleteVehicle _truck1;
 call _cleanupDelivery;
 
-// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
-// the sweep holds anything a player is still standing near, so a finished objective does
-// not dissolve in front of whoever is looting it.
-{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;

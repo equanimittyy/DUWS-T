@@ -8,7 +8,7 @@ private _initialCountVar = format ["opf_initial_%1", _varSuffix];
 private _triggeredVar = format ["opf_reinforce_%1", _varSuffix];
 // ====================================
 
-private _missionObjects = [];
+private _missionUnits = [];
 
 _radius = 400;
 _cpreward = 30;
@@ -83,7 +83,7 @@ _vehicle = objNull;
     _vehicle = createVehicle [(_x select 0), [0,0,0], [], 0, "CAN_COLLIDE"];
     _vehicle setDir (_x select 2);
     _vehicle setPosATL [(_centerSpawnX)+_posX,(_centerSpawnY)+_posY,0];
-    _missionObjects pushBack _vehicle;
+    [_vehicle, "mission_destroy_cache"] call fnc_duws_keep;
 } forEach _staticsArray;
 
 _vehicle_7 = createVehicle ["Box_FIA_Ammo_F", [0,0,0], [], 0, "CAN_COLLIDE"];
@@ -96,7 +96,6 @@ clearMagazineCargoGlobal _vehicle_7;
 clearWeaponCargoGlobal _vehicle_7;
 clearItemCargoGlobal _vehicle_7;
 clearBackpackCargoGlobal _vehicle_7;
-_missionObjects pushBack _vehicle_7;
 
 [_vehicle_7, {
     private _actionID = _this addAction [
@@ -131,7 +130,6 @@ clearMagazineCargoGlobal _vehicle_8;
 clearWeaponCargoGlobal _vehicle_8;
 clearItemCargoGlobal _vehicle_8;
 clearBackpackCargoGlobal _vehicle_8;
-_missionObjects pushBack _vehicle_8;
 
 [_vehicle_8, {
     private _actionID = _this addAction [
@@ -161,14 +159,14 @@ _vehicle_9 setDir 314.218;
 _vehicle_9 setPosATL [(_centerSpawnX)-5.52539, (_centerSpawnY)+5.98193, 0];
 _vehicle_9 allowdamage false;
 _vehicle_9 setdamage 0;
-_missionObjects pushBack _vehicle_9;
+[_vehicle_9, "mission_destroy_cache"] call fnc_duws_keep;
 
 _vehicle_10 = createVehicle [blufor_TURRET_HMG, [0,0,0], [], 0, "CAN_COLLIDE"];
 _vehicle_10 setDir 136.703;
 _vehicle_10 setPosATL [(_centerSpawnX)+6.7168, (_centerSpawnY)-5.49365, 0];
 _vehicle_10 allowdamage false;
 _vehicle_10 setdamage 0;
-_missionObjects pushBack _vehicle_10;
+[_vehicle_10, "mission_destroy_cache"] call fnc_duws_keep;
 
 _groupBunker1 = [getpos _vehicle_9, EAST, [opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _groupBunker1 deleteGroupWhenEmpty true;
@@ -182,13 +180,13 @@ _vehicle_9 setDir( [_centerSpawnX,_centerSpawnY] getDir getPosWorld _vehicle_9);
 _vehicle_10 setDir( [_centerSpawnX,_centerSpawnY] getDir getPosWorld _vehicle_10);
 
 [_guard2] joinSilent _groupBunker1;
-_missionObjects pushBack _guard1;
-_missionObjects pushBack _guard2;
+_missionUnits pushBack _guard1;
+_missionUnits pushBack _guard2;
 {
-    _missionObjects pushBack _x;
+    _missionUnits pushBack _x;
 } forEach (units _groupBunker1);
 {
-    _missionObjects pushBack _x;
+    _missionUnits pushBack _x;
 } forEach (units _groupBunker2);
 
 // ========== 添加随机战利品（炮塔守卫）==========
@@ -343,10 +341,10 @@ waitUntil {
     ( (!alive _vehicle_7 || damage _vehicle_7 == 1) && (!alive _vehicle_8 || damage _vehicle_8 == 1) )
 };
 
-// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
-// the sweep holds anything a player is still standing near, so a finished objective does
-// not dissolve in front of whoever is looting it.
-{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
+// Units only, and deleted rather than handed to the sweep: they are not composition, and
+// the sweep spares anything with living crew -- a man's crew is himself. The mission's
+// props leave through fnc_duws_release, which its own cleanup call triggers.
+{ deleteVehicle _x } forEach _missionUnits;
 
 _bomb = "grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
 sleep 0.5;

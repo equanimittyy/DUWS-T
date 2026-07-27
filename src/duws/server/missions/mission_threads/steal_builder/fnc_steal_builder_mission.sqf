@@ -62,8 +62,6 @@ _Varname = "BLD1";
 _bld1 SetVehicleVarName _VarName;
 _bld1 Call Compile Format ["%1=_This ; PublicVariable ""%1""",_VarName];
 
-private _missionObjects = [];
-
 _static1 = "";
 _static2 = "";
 switch (VERSION_X) do {
@@ -74,16 +72,16 @@ switch (VERSION_X) do {
 };
 
 _obj1 = createVehicle [_static1, [(_vehpos select 0)-12, (_vehpos select 1)], [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj1;
+[_obj1, "mission_steal_builder"] call fnc_duws_keep;
 sleep 1;
 _obj2 = createVehicle [_static1, [(_vehpos select 0)-10, (_vehpos select 1)], [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj2;
+[_obj2, "mission_steal_builder"] call fnc_duws_keep;
 sleep 1;
 _obj3 = createVehicle [_static1, [(_vehpos select 0)-8, (_vehpos select 1)], [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj3;
+[_obj3, "mission_steal_builder"] call fnc_duws_keep;
 sleep 1;
 _obj4 = createVehicle [_static2, [(_vehpos select 0)-10, (_vehpos select 1)], [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj4;
+[_obj4, "mission_steal_builder"] call fnc_duws_keep;
 sleep 1;
 
 // Vehicle Guards
@@ -250,10 +248,6 @@ sleep 5;
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;
 
-// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
-// the sweep holds anything a player is still standing near, so a finished objective does
-// not dissolve in front of whoever is looting it.
-{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
 missionNamespace setVariable [_triggeredVar, true, true];
 [_targetpos,_radius, "mission_steal_builder"] spawn fnc_mission_cleanup;
 

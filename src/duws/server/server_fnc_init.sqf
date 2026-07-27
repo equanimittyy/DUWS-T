@@ -265,6 +265,10 @@ publicVariable "fnc_duws_dialogue_channel";
 fnc_duws_disposeAfter = {
     params ["_obj", ["_ttd", 1800]];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_disposeAfter", 2] };
+    // Living entities are out of scope here -- they have their own spawn and despawn logic.
+    // Refused rather than trusted to callers: the sweep spares anything with living crew, and
+    // crew of a man on foot is the man, so one reaching the disposal list would never leave it.
+    if (_obj isKindOf "CAManBase") exitWith {};
     DUWS_disposables pushBack [_obj, _ttd];
 };
 publicVariable "fnc_duws_disposeAfter";
@@ -282,6 +286,10 @@ publicVariable "fnc_duws_disposeAfter";
 fnc_duws_keep = {
     params ["_obj", ["_key", "world"]];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_keep", 2] };
+    // Props and vehicles only. A unit's presence on the map is decided by its own spawn and
+    // despawn logic, and a composition that owned one could not release it without fighting
+    // that logic for control of the same entity.
+    if (_obj isKindOf "CAManBase") exitWith {};
     _obj setVariable ["persistent", true, true];
     // Nulls pruned on the way in: a FOB rebuild deletes its old ring outright rather than
     // releasing it, so without this the key accumulates dead references for the whole campaign.

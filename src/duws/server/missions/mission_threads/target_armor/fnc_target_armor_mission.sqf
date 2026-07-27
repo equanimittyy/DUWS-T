@@ -45,8 +45,6 @@ _markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionM
 _markername = _markerData select 0;
 _markername2 = _markerData select 1;
 
-private _missionObjects = [];
-
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 
 // Damaged Tank
@@ -56,12 +54,11 @@ private _missionObjects = [];
 _vehicle_1 = opfor_MBT_TANK1_X createVehicle (_vehpos);
 [_vehicle_1, "mission_target_armor"] call fnc_duws_keep;
 _vehicle_1 setDamage 0.8;
-_missionObjects pushBack _vehicle_1;
 
 _obj1 = createVehicle ["CamoNet_OPFOR_open_F", _targetpos, [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj1;
+[_obj1, "mission_target_armor"] call fnc_duws_keep;
 _obj2 = createVehicle ["Land_WoodenTable_large_F", [(_targetpos select 0)+1, (_targetpos select 1)+1], [], 0, "CAN_COLLIDE"];
-_missionObjects pushBack _obj2;
+[_obj2, "mission_target_armor"] call fnc_duws_keep;
 
 // 建筑驻军
 private _buildingSearchRadius = _radius;
@@ -250,10 +247,6 @@ sleep 1;
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;
 
-// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
-// the sweep holds anything a player is still standing near, so a finished objective does
-// not dissolve in front of whoever is looting it.
-{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
 missionNamespace setVariable [_triggeredVar, true, true];
 [_targetpos,_radius, "mission_target_armor"] spawn fnc_mission_cleanup;
 

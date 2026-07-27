@@ -56,8 +56,6 @@ _this setPos _centerSpawn;
 _centerSpawnZ = (getpos _vehicle_0 select 2);
 deleteVehicle _vehicle_0;
 
-private _missionObjects = [];
-
 // --DUWS-COMPOSITION BEGIN name="Mission: Destroy Radar" schema=C--
 _staticsArray = [
     ["Box_FIA_Ammo_F",[3.23633,-0.296875,0],0,1,0,[],"","",true,false],
@@ -80,7 +78,7 @@ _vehicle = objNull;
     _vehicle = createVehicle [(_x select 0), [0,0,0], [], 0, "CAN_COLLIDE"];
     _vehicle setDir (_x select 2);
     _vehicle setPosATL [(_centerSpawnX)+_posX,(_centerSpawnY)+_posY,0];
-    _missionObjects pushBack _vehicle;
+    [_vehicle, "mission_destroy_radar"] call fnc_duws_keep;
 } forEach _staticsArray;
 
 _vehicle_7 = objNull;
@@ -92,7 +90,7 @@ clearMagazineCargoGlobal _vehicle_7;
 clearWeaponCargoGlobal _vehicle_7;
 clearItemCargoGlobal _vehicle_7;
 clearBackpackCargoGlobal _vehicle_7;
-_missionObjects pushBack _vehicle_7;
+[_vehicle_7, "mission_destroy_radar"] call fnc_duws_keep;
 
 _vehicle_9 = objNull;
 _vehicle_9 = createVehicle ["B_static_AA_F", [0,0,0], [], 0, "CAN_COLLIDE"];
@@ -101,7 +99,6 @@ _vehicle_9 setDir 314.218;
 _vehicle_9 setPosATL [(_centerSpawnX)-5.52539, (_centerSpawnY)+5.98193, 0];
 _vehicle_9 allowdamage false;
 _vehicle_9 setdamage 0;
-_missionObjects pushBack _vehicle_9;
 
 _vehicle_10 = objNull;
 _vehicle_10 = createVehicle ["B_static_AA_F", [0,0,0], [], 0, "CAN_COLLIDE"];
@@ -110,7 +107,6 @@ _vehicle_10 setDir 136.703;
 _vehicle_10 setPosATL [(_centerSpawnX)+6.7168, (_centerSpawnY)-5.49365, 0];
 _vehicle_10 allowdamage false;
 _vehicle_10 setdamage 0;
-_missionObjects pushBack _vehicle_10;
 
 _groupBunker1 = [getpos _vehicle_9, EAST, [opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _groupBunker1 deleteGroupWhenEmpty true;
@@ -267,10 +263,6 @@ missionNamespace setVariable [_triggeredVar, false, true];
 
 waitUntil {sleep 5; !alive _vehicle_7 || (damage _vehicle_7) == 1};
 
-// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
-// the sweep holds anything a player is still standing near, so a finished objective does
-// not dissolve in front of whoever is looting it.
-{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
 
 sleep 120;
 

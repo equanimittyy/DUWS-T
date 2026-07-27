@@ -457,11 +457,12 @@ _spawnPos = ((vectorNormalized _vec) vectorMultiply _dist) vectorAdd _spawnPos;
 
 sleep 1;
 [_spawnPos, _radius] spawn fnc_missionPatrols;
-// ========== 记录任务生成的物体 ==========
-private _missionObjects = [];
 _choppa = "";
 switch (VERSION_X) do {
-    case "MODERN": { _choppa = "Land_Wreck_Heli_Attack_01_F" createVehicle (_vehPos); };
+    case "MODERN": {
+        _choppa = "Land_Wreck_Heli_Attack_01_F" createVehicle (_vehPos);
+        [_choppa, "mission_rescue_pilot"] call fnc_duws_keep;
+    };
 };
 _group = [ [_vehPos select 0, (_vehPos select 1)+2], WEST, [blufor_HELI_PILOT_X] ] call BIS_fnc_spawnGroup;
 _pilot = units _group select 0;
@@ -525,12 +526,6 @@ waitUntil {
 #define CLEANUP_PILOT(pilot) \
     [pilot] call DUWS_fnc_cleanupPilotActions; \
     [pilot] remoteExec ["DUWS_fnc_cleanupPilotActions", 0];
-// ========== 延迟清理线程（只删除静态物体） ==========
-// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
-// the sweep holds anything a player is still standing near, so a finished objective does
-// not dissolve in front of whoever is looting it.
-{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
-// ================================================
 if (!pilot_west_close && (time - _missionStartTime) > _taskTimeout_approach) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
@@ -541,7 +536,7 @@ if (!pilot_west_close && (time - _missionStartTime) > _taskTimeout_approach) exi
     [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
-    [_targetpos,_radius] spawn fnc_mission_cleanup;
+    [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
 };
 
 if (!(alive _pilot)) exitWith {
@@ -553,7 +548,7 @@ if (!(alive _pilot)) exitWith {
     [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
-    [_targetpos,_radius] spawn fnc_mission_cleanup;   
+    [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;   
 };
 
 _trigger = player1;
@@ -581,7 +576,7 @@ if (!(alive _pilot)) exitWith {
     [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
-    [_targetpos,_radius] spawn fnc_mission_cleanup;
+    [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
 };
 
 deleteMarker str(_markername2);
@@ -606,6 +601,6 @@ _message = ([localize "STR_DUWS_T_pilotend2"] call fnc_cs);
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;
 missionNamespace setVariable [_triggeredVar, true, true];
-[_targetpos,_radius] spawn fnc_mission_cleanup;
+[_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
 
 if (hardcore_mode_enable && (random 10) < (master_Intel_chance + master_Intel_boost)) then {[] spawn fnc_found_intel};
