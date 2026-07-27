@@ -76,11 +76,17 @@ addMissionEventHandler ["EntityCreated", {
     params ["_entity"];
     if (!isServer) exitWith {};
     if (isNull _entity) exitWith {};
+    // Class filter before the spawn, not inside it. This fires for every entity in the mission
+    // -- vehicles, crates, and one weapon holder per rifle dropped in a firefight -- and the
+    // handler runs unscheduled, so spawning a script per entity only to discover it is not a
+    // soldier puts that allocation on the frame. Side stays inside: it comes from the group and
+    // is not worth trusting this early, whereas the class is fixed at creation.
+    if !(_entity isKindOf "CAManBase") exitWith {};
     [_entity] spawn {
         params ["_entity"];
         sleep 0.5;
         if (isNull _entity || {!alive _entity}) exitWith {};
-        if (side _entity != EAST || {!(_entity isKindOf "CAManBase")}) exitWith {};
+        if (side _entity != EAST) exitWith {};
         [_entity] call DUWS_fnc_extractEnemyGear;
     };
 }];
