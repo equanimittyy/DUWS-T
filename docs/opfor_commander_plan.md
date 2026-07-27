@@ -16,7 +16,7 @@ Both spawned `resistance`-sided fighters out of the civilian population, and tha
 hostile to west (`server/server_init.sqf:28-32`). Three problems, none fixable in place:
 
 - **They could make a zone uncapturable.** A zone is captured on a `WEST SEIZED` trigger
-  (`server/init_zones/fnc_createzone.sqf:274`). Civilian towns sit on enemy zones by design, so
+  (`server/init_zones/fnc_createzone.sqf:277`). Civilian towns sit on enemy zones by design, so
   hostile civilians standing in one hold it against the player indefinitely.
 - **They fired off the global reputation**, so misbehaviour anywhere armed civilians
   everywhere. Per-town reputation fixes the input; it does not fix the fact that the response

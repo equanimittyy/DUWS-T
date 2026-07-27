@@ -313,3 +313,20 @@ and have its body send the result back to whichever machine owns the state. Pass
 the `remoteExec` JIP parameter so joining clients receive it and the queued message is dropped
 automatically when the object is deleted. The killhouse does this in
 `server/misc/fnc_createKillhouse.sqf`, bouncing each hit to `killhouse_srv_target_hit`.
+
+## `setMarkerColor` accepts an inline `#(r,g,b,a)` string, not only a `CfgMarkerColors` class
+
+**A marker colour does not have to be a class name. Passing a literal
+`"#(0.5,0,0.5,0.3)"` works and renders that colour, so a mission needing shades outside the
+stock `Color*` set does not need a `CfgMarkerColors` block in `description.ext`.**
+
+The trap is reading the documented signature — "class from `CfgMarkerColors`" — and concluding
+that a `#(...)` string in existing code must be broken, because it looks like the procedural
+texture syntax used by `setObjectTexture` and nothing in the config tree matches it. The
+civilian town ellipses in `server/misc/fnc_civ_init_Tomata.sqf` are painted this way and have
+always rendered purple; the config block that would "fix" them is dead weight.
+
+**How to apply:** use the inline form for one-off shades and keep `CfgMarkerColors` for colours
+the player picks in the editor, which is what the `name` field on those classes is for. Set
+translucency with `setMarkerAlpha` rather than trusting the string's fourth channel — the
+channel's effect is unconfirmed, and a marker created without an explicit alpha sits at 1.
