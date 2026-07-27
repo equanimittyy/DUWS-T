@@ -84,18 +84,24 @@ unverified premise.
 | Six `format[...]` calls wrap a single literal with no placeholders | `client/supports/fnc_helolift.sqf` | Cosmetic — a wasted call per invocation |
 | `fnc_log` calls itself instead of writing the line | `shared/functions/fnc_log_init.sqf:25` | Unbounded recursion on every line at or below the active level: nothing reaches the RPT and the first logged milestone kills the boot. The `diag_log` -> `fnc_log` sweep has to skip this one file — it is where `diag_log` lives |
 
-## Zone generation is slow at large radii, cause unresolved
+## Zone generation is slow at large radii
 
 `server/misc/fnc_moreUrban_locations.sqf` filters candidate zone sites by asking the engine
 how many buildings sit within 100 m of each — one `nearestTerrainObjects` sweep per
-candidate. One recorded run took 140 s at `zones_max_dist_from_hq = 15000`; an earlier run
-completed the same handshake in 12 s. The file is byte-identical between those two runs, so
-the difference is in its input or its environment, not the code.
+candidate. Logged runs at `zones_max_dist_from_hq = 15000` took 20 s, 70 s and 114 s for
+1144, 3392 and 5909 candidates: a flat ~50 candidates/second, so the spread is candidate
+count and not lookup speed. What moves the count is the arc filter, whose yield depends on
+where HQ landed relative to the map — the same radius left 1144 of 6145 candidates in one
+run and 5909 of 6064 in another.
 
-The pass now logs its candidate count and per-stage timings under the `ZONES` tag, and the
-full setup is snapshotted at commit time under `SETUP`. Comparing a fast run against a slow
-one on those two figures distinguishes "more candidates" from "each lookup got slower";
-until someone does, the cause is genuinely unknown.
+A flat rate that tracks frame rate rather than workload is the scheduler rationing the pass,
+so the sweeps are now batched unscheduled
+([§scheduled scripts](docs/info/arma_engine_gotchas.md#scheduled-scripts-share-3-ms-per-frame-so-a-long-loop-runs-at-frame-rate)).
+**Unmeasured in game so far**: the `ZONES` line now reports the pass as wall-clock versus
+time spent sweeping, and those two figures decide whether anything further is worth doing.
+If they converge, the engine lookups are the floor and only cutting the candidate count
+helps — capping the survivor pool would do it, at the cost of variety in zone siting and in
+the side-mission locations that reuse the same pool.
 
 Reading those logs: [`docs/info/testing.md`](docs/info/testing.md#runtime-logging-reading-the-rpt).
 

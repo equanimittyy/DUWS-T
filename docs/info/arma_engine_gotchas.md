@@ -188,6 +188,30 @@ rounding — then loop `to _n`. The OPFOR unit-multiplier options are kept integ
 `src/duws/server/init_zones/fnc_createop*.sqf` loop `for "_i" from 0 to
 enemyunitMultiplier`, so a fractional option there would not change the unit count.
 
+## Scheduled scripts share ~3 ms per frame, so a long loop runs at frame rate
+
+**Everything started with `spawn`/`execVM` runs in the scheduled environment, where the
+engine gives *all* such scripts about 3 ms of execution per frame between them. A loop
+whose body costs more than that slice gets one iteration per frame, so its wall-clock time
+is set by the frame rate and by how many other scripts are competing — not by how much work
+it actually does.**
+
+Boot is the worst case: a dozen scripts are spawned at once, and a loop calling a
+mid-cost engine command per iteration settles at roughly one iteration per frame however
+many iterations there are. The terrain survey in
+`src/duws/server/misc/fnc_moreUrban_locations.sqf` measured ~50 candidates/second across
+runs of 1144, 3392 and 5909 candidates — a flat rate that tracks frame rate rather than
+workload, which is the signature to look for. Nothing in the SQF hints at it; the loop
+simply appears to hang.
+
+**How to apply:** batch the work inside `isNil { ... }`, whose code the engine runs
+unscheduled and therefore uninterrupted. It shares the calling scope for both reads and
+writes, so a cursor and an output array declared outside are visible inside and no state
+has to be threaded through a namespace. Bound each batch by a wall-clock deadline rather
+than an iteration count — per-iteration cost is rarely uniform — and yield between batches
+so the server still services clients. `sleep`/`waitUntil` cannot be used inside the block:
+unscheduled code cannot suspend.
+
 ## A shared global mutated as `x = x - c; publicVariable "x"` loses concurrent writes
 
 **`publicVariable` broadcasts an absolute value, and there is no network lock. When two

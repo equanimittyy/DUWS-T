@@ -149,8 +149,9 @@ _tStage = diag_tickTime;
 // Only use locations with enough buildings
 /////////////////////////////////////////////////
 // The dominant cost of zone generation: one nearestTerrainObjects sweep per surviving
-// candidate. It scales with zones_max_dist_from_hq, so the count logged here is what to
-// compare when one run generates zones in seconds and another takes minutes.
+// candidate, and the pass is linear in that count. What swings it is the arc filter, whose
+// yield depends on where HQ landed -- the same 15 km radius has produced both 1144 and 5909
+// candidates, so this count is the figure to compare across a fast and a slow run.
 ["INFO", "ZONES", format ["moreUrban building filter over %1 candidates -- the slow pass",
     count _allLocations]] call fnc_log;
 _temp_allLocations = _allLocations;
@@ -161,21 +162,42 @@ _allLocations = [];
 // channel a player actually sees during this pass.
 private _total = count _temp_allLocations;
 private _lastPing = 0;
-{
-	// sorted=false: only the count is read, so ranking every hit by distance is pure waste
-	// on the hottest call in zone generation -- one sweep per surviving candidate.
-	_numBuildings = count (nearestTerrainObjects [position _x, ["House"], 100, false]);
-	if (_numBuildings > 5) then {_allLocations pushBack _x};
+private _next = 0;
+private _sweepTime = 0;
+while {_next < _total} do {
+	// Batched inside isNil, whose code the engine runs unscheduled and uninterrupted. A
+	// scheduled loop only gets the ~3 ms per frame rationed across every script running at
+	// boot, which measured out at about one candidate per frame -- 5909 took 114 s. isNil
+	// shares this scope, so the cursor and output array are the ones declared above.
+	private _t0 = diag_tickTime;
+	isNil {
+		// Frame budget, not a candidate count: per-sweep cost varies with the terrain around
+		// each site, and clients sit in the setup screens waiting on the server.
+		private _deadline = diag_tickTime + 0.015;
+		while {_next < _total && {diag_tickTime < _deadline}} do {
+			private _location = _temp_allLocations select _next;
+			// sorted=false: only the count is read, so ranking every hit by distance is pure
+			// waste on the hottest call in zone generation -- one sweep per candidate.
+			if (count (nearestTerrainObjects [position _location, ["House"], 100, false]) > 5)
+				then {_allLocations pushBack _location};
+			_next = _next + 1;
+		};
+	};
+	_sweepTime = _sweepTime + (diag_tickTime - _t0);
 
 	// Throttled by time, not by index: candidate counts swing by an order of magnitude with
 	// the chosen radius, so a fixed every-Nth would be silent on small maps and spam on big.
 	if (diag_tickTime - _lastPing > 1.5) then {
 		_lastPing = diag_tickTime;
 		[format ["Generating zones...<br/>surveying terrain  %1%2  (%3 of %4 sites)",
-			round (100 * _forEachIndex / (1 max _total)), "%", _forEachIndex, _total]]
+			round (100 * _next / (1 max _total)), "%", _next, _total]]
 			remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 	};
-} forEach _temp_allLocations;
+
+	// Hand the frame back explicitly: the scheduler would suspend us anyway once a batch blew
+	// its slice, but relying on that makes a server freeze the failure mode if it ever won't.
+	sleep 0;
+};
 
 // Each phase owns its own banner: the zone locator sets its own progress next, and the
 // manual placement path sets none at all, so leave nothing of ours on screen either way.
@@ -186,8 +208,11 @@ if (moreUrban == 1) then {
 	[{player globalChat localize "STR_DUWS_T_rb6rlg1b"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 };
 
-["INFO", "ZONES", format ["moreUrban filters done. allLocations=%1 allTowns=%2, building pass %3s",
-    count _allLocations, count _allTowns, round (diag_tickTime - _tStage)]] call fnc_log;
+// Wall vs sweeping splits the two possible costs: converging means the engine lookups are
+// the floor and only cutting candidates helps; a wide gap means frames still go elsewhere.
+["INFO", "ZONES", format ["moreUrban filters done. allLocations=%1 allTowns=%2, building pass %3s wall / %4s sweeping",
+    count _allLocations, count _allTowns, round (diag_tickTime - _tStage),
+    round (_sweepTime * 10) / 10]] call fnc_log;
 _temp_Locations_Master = _allLocations call BIS_fnc_arrayShuffle;
 _temp_allTowns = _allTowns call BIS_fnc_arrayShuffle;
 MASTER_allLocations_filtered = _temp_allTowns + _temp_Locations_Master;
