@@ -9,8 +9,10 @@ if (!isServer) exitWith {};
 params ["_caller", "_requestId"];
 private _varName = format ["fast_travel_req_%1", _requestId];
 
-// 检查声望
-private _rep = missionNamespace getVariable ["Player_Reputation", 0];
+// The town the player is standing in, not the one they are travelling to: the destination is
+// chosen on a map click after this gate has already passed and taken payment, so it does not
+// exist yet. What is being gated is whether the locals here will arrange the trip.
+private _rep = [[getPos _caller] call fnc_civ_townAt] call fnc_civ_repAt;
 if (_rep < 1) exitWith {
     [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_FAST_TRAVEL_hey"] remoteExec ["fnc_duws_dialogue", _caller];
     sleep 4;

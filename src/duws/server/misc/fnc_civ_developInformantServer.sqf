@@ -12,7 +12,7 @@ if (missionNamespace getVariable [format ["civ_informant_active_%1", _locIndex],
     [localize "STR_DUWS_T_INFORMANT_ALREADY_ACTIVE"] remoteExec ["hint", _caller];
 };
 
-private _rep = missionNamespace getVariable ["Player_Reputation", 0];
+private _rep = [_locIndex] call fnc_civ_repAt;
 if (_rep <= 0) exitWith {
     sleep 4;
     [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_norepinf"] remoteExec ["fnc_duws_dialogue", _caller];

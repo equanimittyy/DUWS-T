@@ -177,6 +177,29 @@ fnc_civ_townAt = {
 	_found
 };
 
+// A player within _radius of a position. Shared by the civilian-death charge and the building
+// destruction charge rather than each carrying its own sweep, so the two cannot drift: presence
+// is the proxy for the player having been involved and both must mean the same thing by it.
+fnc_civ_playerNear = {
+	if (!isServer) exitWith { false };
+	params ["_pos", ["_radius", 200]];
+	((call BIS_fnc_ListPlayers) findIf { (_x distance _pos) < _radius }) >= 0
+};
+
+// The reputation a town-local consumer acts on: that town's if it has one, the campaign-wide
+// figure otherwise. Every civilian gate degrades this way rather than refusing to act, because
+// civilians can be switched off and RAVAGE/WBK register no town reputation at all.
+fnc_civ_repAt = {
+	if (!isServer) exitWith { 0 };
+	params [["_townIndex", -1]];
+	private _reps = missionNamespace getVariable ["civ_town_rep", []];
+	if (_townIndex >= 0 && _townIndex < count _reps) then {
+		_reps select _townIndex
+	} else {
+		missionNamespace getVariable ["Player_Reputation", 0]
+	}
+};
+
 // Repaints one town's ellipse and icon from civ_town_rep. The band is the only writer of the
 // ellipse colour -- depopulation used to paint it black and that path is gone -- so nothing
 // races this. setMarkerColor takes an inline #(r,g,b,a) string as well as a CfgMarkerColors
@@ -665,6 +688,10 @@ fnc_night_horde_event = compile preprocessFileLineNumbers "duws\server\misc\fnc_
 publicVariable "fnc_night_horde_event";
 fnc_addAskEnemyAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_addAskEnemyAction.sqf";
 publicVariable "fnc_addAskEnemyAction";
+fnc_civ_askEnemy_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_askEnemy_server.sqf";
+publicVariable "fnc_civ_askEnemy_server";
+fnc_civ_askEnemy_reveal = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_askEnemy_reveal.sqf";
+publicVariable "fnc_civ_askEnemy_reveal";
 fnc_civ_informant_system = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_informant_system.sqf";
 fnc_civ_healAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_healAction.sqf";
 publicVariable "fnc_civ_healAction";
@@ -672,6 +699,10 @@ fnc_civ_stopCommand = compile preprocessFileLineNumbers "duws\shared\functions\f
 publicVariable "fnc_civ_stopCommand";
 fnc_civ_recruitAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_recruitAction.sqf";
 publicVariable "fnc_civ_recruitAction";
+fnc_civ_recruit_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_recruit_server.sqf";
+publicVariable "fnc_civ_recruit_server";
+fnc_civ_recruit_reveal = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_recruit_reveal.sqf";
+publicVariable "fnc_civ_recruit_reveal";
 fnc_civ_addDevelopInformantAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_addDevelopInformantAction.sqf";
 publicVariable "fnc_civ_addDevelopInformantAction";
 fnc_civ_developInformantServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_developInformantServer.sqf";

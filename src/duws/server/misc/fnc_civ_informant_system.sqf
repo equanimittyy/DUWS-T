@@ -13,17 +13,13 @@ if (CIV_PRESENCE == "NONE") exitWith {};
 while {true} do {
     sleep 1800; // 30分钟
 
-    private _rep = missionNamespace getVariable ["Player_Reputation", 0];
-    if (_rep > 2) then {
-        // 声望大于2时才有概率，每点声望增加5%概率，上限50%
-        private _chance = (_rep - 2) * 0.05;
-        if (_chance > 0.5) then { _chance = 0.5; };
-
-        if (random 1 < _chance) then {
-            // 获取所有城镇位置
-            private _locations = missionNamespace getVariable ["civ_locations", []];
-            if (count _locations == 0) exitWith { ["INFO", "CIV", "No locations found for informant spawn."] call fnc_log; };
-
+    // 获取所有城镇位置
+    private _locations = missionNamespace getVariable ["civ_locations", []];
+    // A plain condition, not exitWith: the nearest enclosing scope is the while loop above, so
+    // one tick with no registered towns would have ended the informant system for the campaign.
+    if (count _locations == 0) then {
+        ["INFO", "CIV", "No locations found for informant spawn."] call fnc_log;
+    } else {
             // 获取所有存活玩家
             private _players = allPlayers select { alive _x };
             private _hasPlayers = (count _players > 0);
@@ -85,6 +81,16 @@ while {true} do {
             private _selectedLoc = _candidateLocations select _selectedIndex;
             private _centerPos = getPos _selectedLoc;
 
+            // An informant appears in a town that will talk to you, so the chance is that town's
+            // standing. This is why the town is picked first: the shape it replaces rolled once
+            // against the campaign-wide figure and only then chose somewhere to put the result.
+            // _candidateLocations is a filtered subset, so the registry index comes from a
+            // lookup rather than _selectedIndex.
+            private _rep = [_locations find _selectedLoc] call fnc_civ_repAt;
+            // 声望大于2时才有概率，每点声望增加5%概率，上限50%
+            private _chance = ((_rep - 2) * 0.05) min 0.5;
+            if (_rep > 2 && {random 1 < _chance}) then {
+
             // 在城镇附近找一个安全位置
             private _spawnPos = [_centerPos, 0, 50, 3, 0, 0.2, 0] call BIS_fnc_findSafePos;
             if (_spawnPos isEqualTo [0,0,0]) then { _spawnPos = _centerPos; };
@@ -110,7 +116,7 @@ while {true} do {
                 [_group, _usableBuildings] spawn fnc_civ_informant_wp_Tomata;
             };
 
-            ["INFO", "CIV", format ["Informant generated at %1 (rep %2, distance to nearest player %3m)", _centerPos, _rep, _minDist]] call fnc_log;
+            ["INFO", "CIV", format ["Informant generated at %1 (town rep %2)", _centerPos, _rep]] call fnc_log;
 
             // 30分钟后自动删除线人
             [_unit, _group] spawn {

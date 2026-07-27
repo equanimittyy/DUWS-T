@@ -37,12 +37,12 @@ private _actionAID = _unit addAction [
         removeAllActions _target;
         [_target] remoteExec ["fnc_removeAllActions", 0];
         
-        // 无论成功失败，声望降低0.5
-        // Applied on the server, so _rep is the expected total for the message below
-        // rather than a value read back from the global.
-        private _rep = (missionNamespace getVariable ["Player_Reputation", 0]) - 0.5;
-        [-0.5, "looted_civilian"] remoteExec ["fnc_rep_adjust", 2];
-        ["info", [localize "STR_DUWS_T_civloot", format [localize "STR_DUWS_T_civloot2", _rep]]] remoteExec ["BIS_fnc_showNotification", 0];
+        // 无论成功失败，被搜身城镇声望降低0.5
+        // No total is printed. A caller computes its figure before the write lands, and the
+        // writer's clamp means it may apply less than was asked, so any number here is a
+        // prediction. The town marker carries Rep and SITREP carries the campaign figure.
+        [_target getVariable ["civ_locIndex", -1], -0.5, "looted_civilian"] remoteExec ["fnc_town_rep_adjust", 2];
+        ["info", [localize "STR_DUWS_T_civloot", localize "STR_DUWS_T_civloot2"]] remoteExec ["BIS_fnc_showNotification", 0];
         sleep 3;
         
         // 90%成功率

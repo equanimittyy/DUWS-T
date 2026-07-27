@@ -11,22 +11,20 @@ _instigator = _this select 2;
 // 丧尸/WBK模式不处理
 if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {};
 
-// 有50%概率不受惩罚
-if (random 10 < 5) exitWith {};
+// 只有30%的死亡会被计入。The roll can sit this low because reputation is localised now: a bad
+// engagement costs the campaign nothing outside the town it happened in, and the roll is what
+// stops a firefight in a populated town turning it over on stray rounds.
+if (random 10 < 7) exitWith {};
 
 // 必须有玩家在附近（200米内）
-private _players_close = false;
-{
-    if ((_x distance _unit) < 200) exitWith { _players_close = true };
-} forEach call BIS_fnc_ListPlayers;
+if !([getPos _unit] call fnc_civ_playerNear) exitWith {};
 
-if (!_players_close) exitWith {};
-
-// 蓝方击杀 → 扣声望
+// 蓝方击杀 → 扣该城镇声望。No total is printed: the caller cannot know what the writer's clamp
+// will actually apply, and the town marker carries the figure.
 if (side _killer == WEST || side _instigator == WEST) then {
-    [-0.3, "civilian_harmed"] remoteExec ["fnc_rep_adjust", 2];
+    [_unit getVariable ["civ_locIndex", -1], -1, "civilian_harmed"] call fnc_town_rep_adjust;
     ["info", [
         localize "STR_DUWS_T_cycuqbvj",
-        format [localize "STR_DUWS_T_0pluxey2", Player_Reputation - 0.3]
+        localize "STR_DUWS_T_civ_rep_down"
     ]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
 };

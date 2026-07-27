@@ -226,11 +226,11 @@ if (getdammage _truck1>0.95) exitWith {
     _truck1 setDamage 1;
     [{hint localize "STR_DUWS_T_jsg7ys0w"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
-    // Reputation is a civilian-system currency: skip its change (and notification) when civilians are off.
+    // Reputation is a civilian-system currency: skip its change when civilians are off. The
+    // town is resolved from the delivery point, falling back to the global outside every radius.
     if (CIV_PRESENCE != "NONE") then {
-        private _expectedRep = Player_Reputation - 5;
-        [-5, "idap_failed"] remoteExec ["fnc_rep_adjust", 2];
-        ["info", [localize "STR_DUWS_T_shengwangjianshao", format [localize "STR_DUWS_T_0pluxey2", _expectedRep]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+        [[_targetpos] call fnc_civ_townAt, -5, "idap_failed"] call fnc_town_rep_adjust;
+        ["info", [localize "STR_DUWS_T_shengwangjianshao", localize "STR_DUWS_T_civ_rep_down"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
     };
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
@@ -244,9 +244,8 @@ deleteMarker _deliveryMarkerName;
 sleep 8;
 [_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
 if (CIV_PRESENCE != "NONE") then {
-    private _expectedRep = Player_Reputation + 5;
-    [5, "idap_success"] remoteExec ["fnc_rep_adjust", 2];
-    ["repup", [localize "STR_DUWS_T_rqwho9bq", format [localize "STR_DUWS_T_0pluxey2", _expectedRep]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+    [[_targetpos] call fnc_civ_townAt, 5, "idap_success"] call fnc_town_rep_adjust;
+    ["repup", [localize "STR_DUWS_T_rqwho9bq", localize "STR_DUWS_T_civ_rep_up"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
 };
 sleep 2;
 deleteVehicle _box2;

@@ -194,15 +194,12 @@ Mission_Failed = false;
     if (!alive _civ) then {
         // 平民死亡 → 失败
         [_taskID, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, true];
-        // Reputation is a civilian-system currency: skip its change (and value notification) when off.
+        // Reputation is a civilian-system currency: skip its change when off. Charged against
+        // the town the escorted civilian belonged to, falling back to the global outside one.
         if (CIV_PRESENCE != "NONE") then {
-            [-1, "protect_civ_casualty"] remoteExec ["fnc_rep_adjust", 2];
+            [_civ getVariable ["civ_locIndex", -1], -1, "protect_civ_casualty"] call fnc_town_rep_adjust;
         };
         ["info", [localize "STR_DUWS_T_cycuqbvj", localize "STR_DUWS_T_ayhemuj4"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
-        if (CIV_PRESENCE != "NONE") then {
-            sleep 5;
-            ["info", [localize "STR_DUWS_T_cycuqbvj", format [localize "STR_DUWS_T_0pluxey2", Player_Reputation]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
-        };
         [_speaker, _message3] remoteExec ["fnc_duws_dialogue", 0];
     } else {
             // 时间到且平民存活 → 成功
@@ -214,9 +211,8 @@ Mission_Failed = false;
 
             [_cp, _ap, "Protect Civilian"] call fnc_mission_reward;
             if (CIV_PRESENCE != "NONE") then {
-                private _expectedRep = Player_Reputation + _rep;
-                [_rep, "protect_civ_success"] remoteExec ["fnc_rep_adjust", 2];
-                ["repup", [localize "STR_DUWS_T_rqwho9bq", format [localize "STR_DUWS_T_0pluxey2", _expectedRep]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+                [_civ getVariable ["civ_locIndex", -1], _rep, "protect_civ_success"] call fnc_town_rep_adjust;
+                ["repup", [localize "STR_DUWS_T_rqwho9bq", localize "STR_DUWS_T_civ_rep_up"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
             };
     };
 

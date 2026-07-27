@@ -102,7 +102,6 @@ if (_currentBackpack != "" && {!(_currentBackpack in _civBackpacks)}) exitWith {
 
 // ========== 检查通过，开启伪装 ==========
 _player setVariable ["DUWS_disguise_lastUse", diag_tickTime];
-_player setVariable ["DUWS_disguise_startRep", missionNamespace getVariable ["Player_Reputation", 0]];
 _player setVariable ["DUWS_disguised", true, true];
 _player setCaptive true;
 [true] remoteExec ["fnc_disguise_setCaptiveLocal", _player];
@@ -249,23 +248,12 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
                 };
             };
             
-            // 10. 声望下降
-            private _currentRep = missionNamespace getVariable ["Player_Reputation", 0];
-            if (_currentRep < (_player getVariable ["DUWS_disguise_startRep", 0])) exitWith {
-                ["STR_DUWS_T_DISGUISE_BROKEN_REP"] call _fnc_breakDisguise;
-            };
-            
-            // 11. 负声望城镇
-            if (_currentRep < 0) then {
-                private _locations = missionNamespace getVariable ["civ_locations", []];
-                private _radii = missionNamespace getVariable ["civ_radii", []];
-                {
-                    private _center = getPos _x;
-                    private _radius = _radii param [_forEachIndex, 200];
-                    if (_player distance _center < _radius) exitWith {
-                        ["STR_DUWS_T_DISGUISE_BROKEN_REP_TOWN"] call _fnc_breakDisguise;
-                    };
-                } forEach _locations;
+            // 10. 敌占城镇
+            // The OPFOR band, not any negative figure: a town the enemy holds is where a
+            // disguise gets you recognised, and with reputation localised a campaign-wide
+            // negative says nothing about the ground the player is standing on.
+            if (([[getPos _player] call fnc_civ_townAt] call fnc_civ_repAt) <= -10) then {
+                ["STR_DUWS_T_DISGUISE_BROKEN_REP_TOWN"] call _fnc_breakDisguise;
             };
             
             sleep 5;

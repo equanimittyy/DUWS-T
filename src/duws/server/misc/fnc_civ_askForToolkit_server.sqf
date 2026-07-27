@@ -12,7 +12,8 @@ if (isNull _civilian || isNull _caller) exitWith {};
 
 sleep 5;
 
-private _rep = missionNamespace getVariable ["Player_Reputation", 0];
+// 该城镇声望（平民自带城镇编号，无需距离判定）
+private _rep = [_civilian getVariable ["civ_locIndex", -1]] call fnc_civ_repAt;
 
 if (_rep <= 0) exitWith {
     [localize "STR_DUWS_T_ASK_TOOLKIT_FAIL_REP"] remoteExec ["hint", _caller];

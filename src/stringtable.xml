@@ -1681,6 +1681,14 @@
                 <English>Check Vehicle Status</English>
                 <Chinesesimp>查看载具状态</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_civ_rep_up">
+                <Original>This town's standing with BLUFOR has improved.</Original>
+                <English>This town's standing with BLUFOR has improved.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_rep_down">
+                <Original>This town's standing with BLUFOR has suffered.</Original>
+                <English>This town's standing with BLUFOR has suffered.</English>
+            </Key>
             <Key ID="STR_DUWS_T_civ_marker_pop">
                 <Original>Pop: %1</Original>
                 <English>Pop: %1</English>
@@ -2290,11 +2298,6 @@
                 <English>Disguise broken: Entered a non-civilian vehicle</English>
                 <Chinesesimp>伪装暴露：进入非民用载具。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_REP">
-                <Original>Disguise broken: reputation dropped. Angry civilians reported you</Original>
-                <English>Disguise broken: reputation dropped. Angry civilians reported you</English>
-                <Chinesesimp>伪装暴露：声望降低——愤怒的民众举报了你。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_REP_TOWN">
                 <Original>Disguise broken: negative reputation in a civilian area. Your disguise is useless against the locals here</Original>
                 <English>Disguise broken: negative reputation in a civilian area. Your disguise is useless against the locals here</English>
@@ -2809,18 +2812,11 @@
                 <Chinesesimp>一个平民正被玩家搜身</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_civloot2">
-                <Original>Due to hostile actions, reputation decreased. Current reputation: %1</Original>
-                <English>Due to hostile actions, reputation decreased. Current reputation: %1</English>
-                <German>Wegen der feindseligen Handlungen von BLUFOR ist der Ruf gesunken. Aktueller Ruf: %1</German>
-                <Spanish>Debido a las acciones hostiles de BLUFOR, la reputación ha disminuido. Reputación actual: %1</Spanish>
-                <Chinesesimp>由于蓝军的恶劣行径，声望降低。目前声望：%1</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_0pluxey2">
-                <Original>Your Reputation is now: %1</Original>
-                <English>Your Reputation is now: %1</English>
-                <German>Dein Ansehen liegt jetzt bei: %1</German>
-                <Spanish>Su reputación es de: %1</Spanish>
-                <Chinesesimp>你的声望目前是: %1</Chinesesimp>
+                <Original>Due to hostile actions, this town's reputation decreased.</Original>
+                <English>Due to hostile actions, this town's reputation decreased.</English>
+                <German>Wegen der feindseligen Handlungen von BLUFOR ist der Ruf gesunken.</German>
+                <Spanish>Debido a las acciones hostiles de BLUFOR, la reputación ha disminuido.</Spanish>
+                <Chinesesimp>由于蓝军的恶劣行径，声望降低。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HANDSUP">
                 <Original>Restrain</Original>

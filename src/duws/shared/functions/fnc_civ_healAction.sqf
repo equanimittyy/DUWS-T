@@ -66,10 +66,7 @@ private _actionID = _unit addAction [
             };
             
             [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_providemedtks"] call fnc_duws_dialogue;
-            [0.5, "healed_civilian"] remoteExec ["fnc_rep_adjust", 2];
-            // The change is applied on the server, so the local copy is still the old
-            // value here; show the expected total rather than re-reading the global.
-            ["info", [localize "STR_DUWS_T_rqwho9bq", format [localize "STR_DUWS_T_0pluxey2", Player_Reputation + 0.5]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+            [_target getVariable ["civ_locIndex", -1], 0.5, "healed_civilian"] remoteExec ["fnc_town_rep_adjust", 2];
             [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_HEAL_SUCCESS"] call fnc_duws_dialogue;
             hint (localize "STR_DUWS_T_HEAL_SUCCESS_HINT");
         } else {
