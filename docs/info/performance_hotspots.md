@@ -40,13 +40,31 @@ Caching is normally the largest single lever in a dynamic Arma campaign, so the 
 to switch it on. The reason not to do that blind: `src/duws/server/init_zones/fnc_spawnWait.sqf`
 already implements a coarser version of the same idea, one instance per zone. It waits for
 BLUFOR within the zone radius plus 400 m, holds the zone spawned for a 5-minute grace period
-after they leave, and then **deletes** the units outright (`:111-123`).
+after they leave, and then **deletes** the units outright (`:144-155`).
 
 Two systems that both despawn and restore AI, one deleting and one caching, do not compose.
 The failure modes to check for before enabling anything are a zone that never repopulates
 because the cache restored units the zone logic had already deleted, and a garrison that
 doubles because both systems restored it. Any evaluation has to decide which system owns
 zone AI, not run both.
+
+## Map object count is bounded by proximity, not campaign length
+
+The same gate cycles a zone's props. `fnc_duws_stow` records each composition member and deletes
+it; `fnc_duws_deploy` rebuilds from the record when BLUFOR return
+([`composition_streaming_plan.md`](../composition_streaming_plan.md)). A zone prefab is 37-72
+objects plus crates, a light and the fortification ring, so what stays resident tracks where the
+players are rather than how many zones were generated.
+
+This is why props are *deleted* rather than hidden. A hidden object is still a network entity,
+still returned by `allMissionObjects`, still walked by `nearObjects`, and still added to the
+curator's editable set by `misc/fnc_zeus_objects_init.sqf:26` every 30 s at `ZeusStatus == 2`.
+Rendering was never the cost — the engine culls that by view distance already, and the prefabs
+ship with simulation off.
+
+Order matters at the despawn end: the garrison pass runs first, then static weapons are crewed
+out, then the composition stows. `fnc_duws_stow` refuses while any member has living crew, so a
+zone whose turret still holds a gunner stays on the map and retries next cycle.
 
 ## The enemy gear table never shrinks
 
@@ -85,7 +103,7 @@ array shrinks only on launch (`fnc_blu_taskforces_launch.sqf`) or when the group
 (`fnc_WARCOM_gps_marker.sqf:54-58`). Nothing bounds how many may be standing by at once.
 
 Nothing else will collect them either: zone despawn deletes `side _x == EAST` only
-(`init_zones/fnc_spawnWait.sqf:110-117`) and mission cleanup skips WEST
+(`init_zones/fnc_spawnWait.sqf:144-155`) and mission cleanup skips WEST
 (`missions/fnc_mission_cleanup.sqf`). So a task force the player ignores is permanently
 simulated AI parked next to the base — inside view distance, never a despawn candidate. Live AI
 count is what Arma's frame time tracks, which makes this the mission's largest growth term at

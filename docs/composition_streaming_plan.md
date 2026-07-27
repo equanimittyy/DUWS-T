@@ -83,6 +83,16 @@ Stow therefore runs after the garrison pass, and the garrison pass gains a `dele
 over the composition's static weapons. Getting this backwards produces an AI standing in the air
 where its turret used to be, which is the failure mode to watch for when testing step 3.
 
+### And comes back separately
+
+Turret gunners are assigned by the prefab at build time (`fnc_modern_outpost1.sqf:146-156`), and
+the prefab never runs again — so a deployed composition returns with empty guns unless something
+re-crews them. `fnc_spawnWait` owns that, not `fnc_duws_deploy`: deploy is generic and also
+rebuilds the HQ and FOBs, which must not acquire OPFOR gunners.
+
+Re-crewing is skipped once the zone is BLUFOR's, for the same reason zone compositions are
+persistent rather than released on capture — the emplacements are the player's to use.
+
 ## Interactions
 
 **The sweep needs no change.** Stowed members are deleted outright rather than handed to
