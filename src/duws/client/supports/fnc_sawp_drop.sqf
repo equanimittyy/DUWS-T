@@ -89,6 +89,8 @@ switch (VERSION_X) do {
 };
 _ammobox attachTo [_parachute,[0,0,0]];
 
+{ [_x] call fnc_duws_disposeAfter } forEach [_parachute, _ammobox];
+
 hint localize "STR_DUWS_T_sawpnts1";
 
 waitUntil {sleep 1; getpos _ammobox select 2 < 0.2};

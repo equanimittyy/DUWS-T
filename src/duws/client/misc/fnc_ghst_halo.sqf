@@ -46,6 +46,7 @@ DUWS_fnc_aiHalo = {
             // 创建降落伞并放置于 AI 当前位置
             private _chute = createVehicle ["Steerable_Parachute_F", (getPosATL _unit), [], 0, "FLY"];
             _chute setPosATL (getPosATL _unit);
+            [_chute] call fnc_duws_disposeAfter;
             // 降落伞也设置无敌
             _chute allowDamage false;
             // 强制 AI 进入降落伞驾驶员位置

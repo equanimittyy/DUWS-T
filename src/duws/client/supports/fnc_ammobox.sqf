@@ -83,6 +83,10 @@ switch (VERSION_X) do {
 };
 _ammobox attachTo [_parachute,[0,0,0]];
 
+// Litter, not fixtures. The crate is the same class as the HQ arsenal crate, so the cleanup
+// cannot tell them apart on its own -- it deletes only what was handed to it here.
+{ [_x] call fnc_duws_disposeAfter } forEach [_parachute, _ammobox];
+
 hint localize "STR_DUWS_T_wdttb5b8";
 
 waitUntil {sleep 1; getpos _ammobox select 2 < 0.2};
