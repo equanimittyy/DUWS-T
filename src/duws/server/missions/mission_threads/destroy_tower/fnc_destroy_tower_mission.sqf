@@ -251,15 +251,10 @@ waitUntil {
     !alive _vehicle_7 || (damage _vehicle_7) == 1 || (time - _missionStartTime) > _taskTimeout_tower
 };
 
-[_missionObjects] spawn {
-    params ["_objects"];
-    sleep 360;
-    {
-        if (!isNull _x) then {
-            deleteVehicle _x;
-        };
-    } forEach _objects;
-};
+// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
+// the sweep holds anything a player is still standing near, so a finished objective does
+// not dissolve in front of whoever is looting it.
+{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
 
 if ((alive _vehicle_7 && (damage _vehicle_7) < 1) && (time - _missionStartTime) > _taskTimeout_tower) exitWith {
     [{hint localize "STR_DUWS_T_xhtbpyl1"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];

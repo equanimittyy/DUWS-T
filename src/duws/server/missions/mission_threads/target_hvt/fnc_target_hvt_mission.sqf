@@ -55,7 +55,11 @@ sleep 1;
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 
 // Create Statics
+// The objective itself: kept for the mission's duration so the abandoned-vehicle clause
+// cannot collect it. A player who disables it and takes half an hour would otherwise find
+// the thing they were sent for gone, with no way left to finish.
 _apc = opfor_APC1_X createVehicle (_vehpos);
+[_apc, "mission_target_hvt"] call fnc_duws_keep;
 // 注意：APC 不加入 _missionObjects，因此不会被延迟删除线程清理
 
 _static1 = "";
@@ -265,7 +269,7 @@ if (alive _target && (time - _missionStartTime) > _taskTimeout) exitWith {
     deleteMarker str(_markername2);
     deleteMarker str(_markername);
     missionNamespace setVariable [_triggeredVar, true, true];
-    [_targetpos,_radius] spawn fnc_mission_cleanup;
+    [_targetpos,_radius, "mission_target_hvt"] spawn fnc_mission_cleanup;
     missionNamespace setVariable ["current_mission_target_pos", nil];
 };
 
@@ -283,17 +287,12 @@ sleep 1;
 [] spawn fnc_missionTimer;
 
 // 清理其他任务物体（APC 不在其中）
-[_missionObjects] spawn {
-    params ["_objects"];
-    sleep 360;
-    {
-        if (!isNull _x) then {
-            deleteVehicle _x;
-        };
-    } forEach _objects;
-};
+// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
+// the sweep holds anything a player is still standing near, so a finished objective does
+// not dissolve in front of whoever is looting it.
+{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
 
 missionNamespace setVariable [_triggeredVar, true, true];
-[_targetpos,_radius] spawn fnc_mission_cleanup;
+[_targetpos,_radius, "mission_target_hvt"] spawn fnc_mission_cleanup;
 
 missionNamespace setVariable ["current_mission_target_pos", nil];

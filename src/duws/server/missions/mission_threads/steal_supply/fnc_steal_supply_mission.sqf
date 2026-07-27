@@ -53,7 +53,11 @@ _markername2 = _markerData select 1;
 private _missionObjects = [];
 
 // 创建卡车
+// The objective itself: kept for the mission's duration so the abandoned-vehicle clause
+// cannot collect it. A player who disables it and takes half an hour would otherwise find
+// the thing they were sent for gone, with no way left to finish.
 _truck1 = opfor_TRANS_TRUCK_X createVehicle _vehPos;
+[_truck1, "mission_steal_supply"] call fnc_duws_keep;
 clearMagazineCargoGlobal _truck1;
 clearWeaponCargoGlobal _truck1;
 clearItemCargoGlobal _truck1;
@@ -288,7 +292,7 @@ if (!alive _truck1 || (time - _taskStartTime > _taskTimeLimit)) exitWith {
     [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, true];
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
-    [_targetpos, _radius] spawn fnc_mission_cleanup;
+    [_targetpos, _radius, "mission_steal_supply"] spawn fnc_mission_cleanup;
     missionNamespace setVariable ["current_mission_target_pos", nil];
 };
 
@@ -302,19 +306,14 @@ sleep 2;
 deleteVehicle _box1;
 [{hint localize "STR_DUWS_T_3jmpthvi"}] remoteExec ["BIS_fnc_Spawn", player1];
 
-[_missionObjects] spawn {
-    params ["_objects"];
-    sleep 360;
-    {
-        if (!isNull _x) then {
-            deleteVehicle _x;
-        };
-    } forEach _objects;
-};
+// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
+// the sweep holds anything a player is still standing near, so a finished objective does
+// not dissolve in front of whoever is looting it.
+{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;
 missionNamespace setVariable [_triggeredVar, true, true];
-[_targetpos, _radius] spawn fnc_mission_cleanup;
+[_targetpos, _radius, "mission_steal_supply"] spawn fnc_mission_cleanup;
 
 missionNamespace setVariable ["current_mission_target_pos", nil];

@@ -526,15 +526,10 @@ waitUntil {
     [pilot] call DUWS_fnc_cleanupPilotActions; \
     [pilot] remoteExec ["DUWS_fnc_cleanupPilotActions", 0];
 // ========== 延迟清理线程（只删除静态物体） ==========
-[_missionObjects] spawn {
-    params ["_objects"];
-    sleep 360;
-    {
-        if (!isNull _x) then {
-            deleteVehicle _x;
-        };
-    } forEach _objects;
-};
+// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
+// the sweep holds anything a player is still standing near, so a finished objective does
+// not dissolve in front of whoever is looting it.
+{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
 // ================================================
 if (!pilot_west_close && (time - _missionStartTime) > _taskTimeout_approach) exitWith {
     CLEANUP_PILOT(_pilot);

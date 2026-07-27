@@ -50,7 +50,11 @@ private _missionObjects = [];
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 
 // Damaged Tank
+// The objective itself: kept for the mission's duration so the abandoned-vehicle clause
+// cannot collect it. A player who disables it and takes half an hour would otherwise find
+// the thing they were sent for gone, with no way left to finish.
 _vehicle_1 = opfor_MBT_TANK1_X createVehicle (_vehpos);
+[_vehicle_1, "mission_target_armor"] call fnc_duws_keep;
 _vehicle_1 setDamage 0.8;
 _missionObjects pushBack _vehicle_1;
 
@@ -246,16 +250,11 @@ sleep 1;
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;
 
-[_missionObjects] spawn {
-    params ["_objects"];
-    sleep 360;
-    {
-        if (!isNull _x) then {
-            deleteVehicle _x;
-        };
-    } forEach _objects;
-};
+// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
+// the sweep holds anything a player is still standing near, so a finished objective does
+// not dissolve in front of whoever is looting it.
+{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
 missionNamespace setVariable [_triggeredVar, true, true];
-[_targetpos,_radius] spawn fnc_mission_cleanup;
+[_targetpos,_radius, "mission_target_armor"] spawn fnc_mission_cleanup;
 
 missionNamespace setVariable ["current_mission_target_pos", nil];

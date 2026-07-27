@@ -228,7 +228,7 @@ Mission_Failed = false;
     };
 
     // 调用通用清理函数（清除敌方单位、残骸等）
-    [_targetPos, _radius] spawn fnc_mission_cleanup_agressive;
+    [_targetPos, _radius, "", true] spawn fnc_mission_cleanup;
     // Spawn the "next mission" wait
     [] spawn fnc_missionTimer;
 };

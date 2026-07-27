@@ -267,15 +267,10 @@ missionNamespace setVariable [_triggeredVar, false, true];
 
 waitUntil {sleep 5; !alive _vehicle_7 || (damage _vehicle_7) == 1};
 
-[_missionObjects] spawn {
-    params ["_objects"];
-    sleep 360;
-    {
-        if (!isNull _x) then {
-            deleteVehicle _x;
-        };
-    } forEach _objects;
-};
+// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
+// the sweep holds anything a player is still standing near, so a finished objective does
+// not dissolve in front of whoever is looting it.
+{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
 
 sleep 120;
 
@@ -290,6 +285,6 @@ deleteMarker str(_markername);
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;
 missionNamespace setVariable [_triggeredVar, true, true];
-[_targetpos,_radius] spawn fnc_mission_cleanup;
+[_targetpos,_radius, "mission_destroy_radar"] spawn fnc_mission_cleanup;
 
 missionNamespace setVariable ["current_mission_target_pos", nil];

@@ -808,4 +808,4 @@ sleep 1;
 // 启动下一个任务计时器
 [] spawn fnc_missionTimer;
 // 启动清理程序
-[_MissionPos, _radius] spawn fnc_mission_cleanup_agressive;
+[_MissionPos, _radius, "", true] spawn fnc_mission_cleanup;

@@ -43,7 +43,7 @@ missionNamespace setVariable [_triggeredVar, true, true];
 // 发放奖励
 [_cpreward, _apreward, _mission_name] remoteExec ["fnc_mission_reward", 2];
 [] remoteExec ["fnc_missionTimer", 2];
-[_targetPos,_radius] remoteExec ["fnc_mission_cleanup", 2];
+[_targetPos,_radius, "mission_sabotage_laptop"] remoteExec ["fnc_mission_cleanup", 2];
 
 sleep 340;
 private _nearObjects = nearestObjects [_targetPos, ["Land_WoodenTable_large_F","VirtualReammoBox_camonet_F","Land_Laptop_unfolded_F","CamoNet_INDP_open_F"], 20];

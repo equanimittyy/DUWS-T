@@ -236,7 +236,7 @@ if (getdammage _truck1>0.95) exitWith {
     };
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
-    [_targetpos,_radius] spawn fnc_mission_cleanup;
+    [_targetpos,_radius, "mission_transport_idap"] spawn fnc_mission_cleanup;
     missionNamespace setVariable ["current_mission_target_pos", nil];
 };
 
@@ -258,19 +258,14 @@ sleep 8;
 deleteVehicle _truck1;
 call _cleanupDelivery;
 
-[_missionObjects] spawn {
-    params ["_objects"];
-    sleep 360;
-    {
-        if (!isNull _x) then {
-            deleteVehicle _x;
-        };
-    } forEach _objects;
-};
+// Handed to the map cleanup instead of deleted on a private timer: the same wait, but
+// the sweep holds anything a player is still standing near, so a finished objective does
+// not dissolve in front of whoever is looting it.
+{ [_x, 360] call fnc_duws_disposeAfter } forEach _missionObjects;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;
 missionNamespace setVariable [_triggeredVar, true, true];
-[_targetpos,_radius] spawn fnc_mission_cleanup_agressive;
+[_targetpos,_radius, "mission_transport_idap", true] spawn fnc_mission_cleanup;
 
 missionNamespace setVariable ["current_mission_target_pos", nil];

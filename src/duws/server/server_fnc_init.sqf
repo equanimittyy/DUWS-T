@@ -356,7 +356,6 @@ fnc_missionPatrols = compile preprocessFileLineNumbers "duws\server\missions\fnc
 fnc_missionPatrolswithintel = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrolswithintel.sqf";
 fnc_missionPatrolsSmall = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrolsSmall.sqf";
 fnc_mission_cleanup = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_cleanup.sqf";
-fnc_mission_cleanup_agressive = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_cleanup_agressive.sqf";
 fnc_opf_heli_reinforce = compile preprocessFileLineNumbers "duws\server\missions\fnc_opf_heli_reinforce.sqf";
 publicVariable "fnc_opf_heli_reinforce";
 // 动态氛围任务系统

@@ -253,19 +253,14 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
             deleteMarker str(_markername);
             [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
             [] spawn fnc_missionTimer;
-            [_targetpos,_radius] spawn fnc_mission_cleanup_agressive;
+            [_targetpos,_radius, "mission_holdpos", true] spawn fnc_mission_cleanup;
             Mission_Active = false;
             publicVariable "Mission_Active";
             // 延迟 300 秒删除所有任务物体和单位
-            [_missionObjects] spawn {
-                params ["_objs"];
-                sleep 300;
-                {
-                    if (!isNull _x) then {
-                        deleteVehicle _x;
-                    };
-                } forEach _objs;
-            };
+            // Handed to the map cleanup instead of deleted on a private timer: the same wait, but
+            // the sweep holds anything a player is still standing near, so a finished objective does
+            // not dissolve in front of whoever is looting it.
+            { [_x, 300] call fnc_duws_disposeAfter } forEach _missionObjects;
         };
         if ((time - _missionStartTime) >= _countdownDuration) exitWith {
             deleteMarker str(_markername2);
@@ -274,19 +269,14 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
             sleep 1;
             [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
             [] spawn fnc_missionTimer;
-            [_targetpos,_radius] spawn fnc_mission_cleanup_agressive;
+            [_targetpos,_radius, "mission_holdpos", true] spawn fnc_mission_cleanup;
             Mission_Active = false;
             publicVariable "Mission_Active";
             // 延迟 300 秒删除所有任务物体和单位
-            [_missionObjects] spawn {
-                params ["_objs"];
-                sleep 300;
-                {
-                    if (!isNull _x) then {
-                        deleteVehicle _x;
-                    };
-                } forEach _objs;
-            };
+            // Handed to the map cleanup instead of deleted on a private timer: the same wait, but
+            // the sweep holds anything a player is still standing near, so a finished objective does
+            // not dissolve in front of whoever is looting it.
+            { [_x, 300] call fnc_duws_disposeAfter } forEach _missionObjects;
         };
     };
 };
