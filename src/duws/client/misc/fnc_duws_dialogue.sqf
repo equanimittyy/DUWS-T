@@ -34,10 +34,20 @@ if (_channel isEqualTo "") then {
     _channel = [_speaker, DUWS_netSpeakers] call fnc_duws_dialogue_channel;
 };
 
-// Local, like every other surface here: the tone is per-listener, and remoteExec would play
-// it once per client per line. Decided before substitution so it reads the roster name.
+// Which lines get a tone is decided here; when it actually plays is not. Playing it inline
+// on this call path froze the client during the post-landing load spike, where a mission-PBO
+// sound load competes with unit spawning and the arsenal config scan on the same frame. The
+// chatter function this replaced always dispatched the tone as its own scheduled script
+// behind this mutex, and never did that -- the routing rule is what changed here, not the
+// dispatch shape. Bisected to these lines: disabling them alone clears the freeze.
 if (_channel isEqualTo "NET" || {_speaker in DUWS_voiceSquelchSpeakers}) then {
-    playSound "DUWS_Radio_Start";
+    [] spawn {
+        if (missionNamespace getVariable ["DUWS_squelchRunning", false]) exitWith {};
+        missionNamespace setVariable ["DUWS_squelchRunning", true];
+        playSound "DUWS_Radio_Start";
+        sleep 0.5;
+        missionNamespace setVariable ["DUWS_squelchRunning", false];
+    };
 };
 
 // Callsign substitution belongs here rather than at the call site, and below the decision
