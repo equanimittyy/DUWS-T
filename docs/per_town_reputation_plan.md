@@ -647,30 +647,17 @@ internals to every machine to serve two `addAction` conditions.
 | `info/zone_and_town_generation.md` | The enemy-zone overlap rule, and its Defects-B entry on towns blocking capture, which removing hostile civilians resolves. |
 | `info/arma_engine_gotchas.md` | `setMarkerColor` accepts an inline `#(r,g,b,a)` string, not only a `CfgMarkerColors` class name. |
 
-## Task list
+## Remaining verification
 
-- [ ] Delete hostile conversion, hostile replacement, suicide bombers and `fnc_civ_suicideBomberBehaviour.sqf`. Verify: `bash tests/run.sh`; a campaign driven deeply negative spawns no `resistance` unit from any town.
-- [ ] Make `civ_pop_%1` static from the building count; delete the `_initialPop` derivation and the depopulation blocks. Verify: towns between 25 and 50 buildings now spawn visibly different counts instead of all hitting the cap, and no town reaches a ghost-town state.
-- [ ] Retire scorched earth across all nine sites, retitling `SE_frame` / `SE_combo` rather than removing them. Verify: `bash tests/run.sh`; the environment menu lays out exactly as before with the slot renamed, and `grep -ri scorched src/` returns nothing.
-- [ ] Add `civ_town_rep` at baseline 0 and `civ_town_ap`. Verify: `bash tests/run.sh`; both array lengths match `count civ_locations` after the overlap cull; AP values span 1–3 across an Altis campaign in the RPT, in roughly equal thirds.
-- [ ] Apply `-20` to towns overlapping an enemy zone. Verify: the RPT names them, and their markers are red at campaign start.
-- [ ] Write `fnc_town_rep_adjust`, `fnc_civ_townAt`, `fnc_civ_townRender`. Verify: a civilian killed in town A moves only town A's entry; a town driven to `-20` stops moving and the global stops moving with it.
-- [ ] Repaint the ellipse from the three inline `#(r,g,b,a)` strings at creation, with `setMarkerAlpha 0.3`. Verify: a neutral town renders translucent, which settles whether the string's alpha channel does anything or `setMarkerAlpha` is carrying it.
-- [ ] Three-field marker text and band repaint. Verify: a town crossing 10 turns pale blue with its AP field appearing, crossing back to 9 turns purple with it gone; neither shade competes with a zone marker at map zoom-out.
-- [ ] Delete the recovery thread; remove `CIV_deaths` and the orphaned stringtable keys. Verify: `bash tests/run.sh`; a campaign left idle after one civilian death shows no reputation movement.
-- [ ] Move the two client-side gates server-side, unchanged in behaviour, before touching what they read. Verify: recruit and ask-enemy still work for a non-host player.
-- [ ] Convert the per-town consumers in the table above, including the disguise break's move to the OPFOR band and the deletion of its `DUWS_disguise_startRep` chain. Verify: a disguise survives a neutral town and breaks on entering one at `-10` or below.
-- [ ] Raise the civilian-death cost to `-1` and drop the charge rate to 30 %, keeping the 200 m gate; delete the seven predicted-total notifications with `STR_DUWS_T_0pluxey2`. Verify: `bash tests/run.sh`; the RPT logs `-1` against the victim's town, roughly seven in ten deaths with a player inside 200 m produce no entry at all, and no notification anywhere prints a reputation figure.
-- [ ] Replace `fnc_warcrimes_script.sqf` with `fnc_escalation.sqf`: whole-map census, counter, level 0–11, the `1 + level/10` multiplier applied in `fnc_pool_try_spend` and in the four direct-`fnc_cp_adjust` callers, and the `-2` town charge for a building inside a civilian radius. Verify: the census total and its wall-clock cost are logged to the RPT; destroying a tier's worth of buildings moves prices from 1.0x to 1.1x; a building dropped inside a town with a player within 200 m charges that town and increments the counter, the same building with no player near charges nothing and still increments, and one outside every radius never charges; a civilians-off campaign escalates normally and charges nothing.
-- [ ] Confirm the dedicated server receives `BuildingChanged` for damage a client caused. Verify: a client-destroyed house increments the counter on a dedicated host; if it does not, escalation is single-player-only and that is recorded rather than worked around.
-- [ ] Confirm 10 % holds against the measured Altis census. Verify: a single fire mission cannot advance a level.
-- [ ] Lift the support costs into a base-cost table and suffix the menu rows with the escalated price. Verify: at multiplier 1 the menu is byte-identical to today; at 1.4x a 5 CP row reads `→ 7 CP` and charges 7; no stringtable key is touched, so DE/ES/ZH still render.
-- [ ] Add the level-11 loss and the enviro-menu toggle in the vacated slot. Restructure `fnc_capture_zones_task.sqf:48` to wait on win or loss and branch. Verify: the menu reads Escalation with the shared enabled/disabled pair; reaching level 11 sets the `Campaign` task `FAILED` and ends the mission as a defeat; capturing every zone still wins; disabling the toggle stops the counter, the multiplier and the loss but leaves the `-2` town building charge working.
-- [ ] Add the enemy garrison with its three tiers, driven by `fnc_spawnWait`'s arrival re-test and despawn grace period, and the clear-to-reset rule on a `WEST SEIZED` trigger. Verify: a town at `-20` spawns the armour tier and no props; grazing the radius does not spawn it; holding the town clear for the timeout sets it to 0 with the marker returning to purple; one surviving OPFOR unit inside the radius keeps it from firing, and civilians inside the radius do not.
-- [ ] Add the 30-minute AP tick. Verify: the RPT shows one BLU and one OPF `fnc_ap_adjust` entry per tick, and the totals match the sum of the banded towns' worth.
-- [ ] Gate the whole system off under `CIV_PRESENCE` of `RAVAGE` or `WBK`. Verify: those campaigns register towns with a `Pop:`-only marker and a permanently neutral ellipse, no `civ_town_rep` or `civ_town_ap` exists, no garrison spawns at any town, prices never scale, and the RPT shows no census line.
-- [ ] In-game: confirm the global still gates partisan hiring and the CP tick as before.
-- [ ] Update `info/cp_economy.md`, `info/zone_and_town_generation.md`, `info/performance_hotspots.md` and `info/arma_engine_gotchas.md`.
+The code is in; these are the play-test checks that cannot be settled from the source. Two of
+them can invalidate a section, so run them before tuning anything downstream.
+
+- [ ] Confirm a dedicated server receives `BuildingChanged` for damage a client caused. Verify: a client-destroyed house increments the counter on a dedicated host. If it does not, escalation is single-player-only and that gets recorded rather than worked around.
+- [ ] Confirm CIVILIAN-side units do not block `WEST SEIZED`. Verify: a garrison cleared in a populated town fires its trigger. If civilians block it, swap to a condition trigger counting hostile units in `thisList`.
+- [ ] Confirm `ESCALATION_FRACTION` at 10 % against the measured Altis census, and that the census cost is tolerable. Both are logged to the RPT on the first run. Verify: a single fire mission cannot advance a level.
+- [ ] Confirm the neutral ellipse renders translucent, which settles whether the inline string's alpha channel does anything or `setMarkerAlpha` is carrying it alone.
+- [ ] Confirm the global still gates partisan hiring and the CP tick as before.
+- [ ] Confirm RAVAGE and WBK register towns with a `Pop:`-only marker and a permanently neutral ellipse, spawn no garrison, never scale prices, and log no census line.
 
 ## Decided trade-offs
 
