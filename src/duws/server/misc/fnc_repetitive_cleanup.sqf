@@ -37,8 +37,13 @@ if (_lifetime <= 0) exitWith {};
 
 // Collected by class, and spared only by the persistent flag. Opt out rather than opt in, so a
 // drop added later is swept without anyone having to remember to register it.
+// Bodybags are listed by every name they go by rather than one base class, and the ACE one is
+// listed unconditionally: a class no loaded mod defines simply censuses to nothing, so naming it
+// costs a query when ACE is absent and catches the bags when it is not.
 private _litterClasses = ["WeaponHolder", "GroundWeaponHolder", "WeaponHolderSimulated",
-    "SmokeShell", "ReammoBox_F", "ParachuteBase"];
+    "SmokeShell", "ReammoBox_F", "ParachuteBase",
+    "Land_BodyBag_01_base_F", "Land_BodyBag_01_F", "Land_BodyBag_01_black_F",
+    "Land_BodyBag_01_blue_F", "ACE_bodyBagObject"];
 
 // Objects handed over explicitly, chiefly by fnc_duws_release retiring a composition. A standing
 // list rather than part of the census: a released hardpoint core is a static weapon, and the
