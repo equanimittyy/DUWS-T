@@ -20,17 +20,19 @@ SRC = os.path.normpath(
 )
 EXTS = (".sqf", ".hpp", ".h", ".ext", ".inc", ".sqs")
 
+# fnc_sideChat_filter must precede sideChat: alternation takes the first match, and the
+# bare name would otherwise swallow the wrapper and report the wrong reason.
 RETIRED = {
     "BIS_fnc_showSubtitle": "route the line through fnc_duws_dialogue",
     "fnc_broadcastRadioChatter": "the squelch is decided in fnc_duws_dialogue",
     "fnc_sideChat_filter": "use fnc_duws_dialogue with a real speaker",
+    "sideChat": "spoken dialogue goes on the subtitle, not the chat box",
 }
 PAT = re.compile("|".join(re.escape(k) for k in RETIRED))
 
-# The router draws VOICE with the engine subtitle, so it holds the single sanctioned call.
-# Pinned to one file rather than dropped from the ban: that is what keeps the other 273
-# sites from creeping back.
-ALLOWED = {"BIS_fnc_showSubtitle": "client/misc/fnc_duws_dialogue.sqf"}
+# The drain loop owns the screen, so it holds the single sanctioned call. Pinned to one file
+# rather than dropped from the ban: that is what keeps the other 273 sites from creeping back.
+ALLOWED = {"BIS_fnc_showSubtitle": "client/misc/fnc_duws_dialogue_drain.sqf"}
 
 
 def main():

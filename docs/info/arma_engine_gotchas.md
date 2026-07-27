@@ -93,6 +93,24 @@ listbox row. Row colour has its own channel anyway — `lbSetColor [idc, index, 
 The reusable action menu does this for every row, in `fnc_open_action_menu`
 (`src/duws/client/dialog/fnc_open_action_menu.sqf`).
 
+## `BIS_fnc_showSubtitle` is one slot: the next call wipes the line mid-read
+
+**A second `BIS_fnc_showSubtitle` replaces whatever is on screen immediately. There is no
+queue, and the function reports neither how long it holds a line nor when it clears — so
+nothing can wait for the current line to finish except a timer you write yourself.**
+
+This bites without any unusual play. `fnc_arty.sqf:36` and `:49` post two lines in the same
+frame, and supports are independent comm-menu items with no shared lock, so two of them
+narrating at once is ordinary. Whichever line lands second is the only one anybody reads.
+
+The absent duration is the harder half: a queue in front of it has to guess. Erring short is
+the safe direction — release early and the next line replaces this one cleanly, release late
+and the screen sits blank in between.
+
+**How to apply:** never call it from more than one place. `fnc_duws_dialogue` queues,
+`fnc_duws_dialogue_drain` (`src/duws/client/misc/`) holds the single call and spaces lines by
+`1.5 + 0.045 × length` seconds; a lint pins that call to that one file.
+
 ## Duplicate `<Key ID>` in stringtable.xml resolve to one definition, silently
 
 **A `STR_` ID repeated in `src/stringtable.xml` loads without error, but the engine keeps

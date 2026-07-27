@@ -1,7 +1,10 @@
-// Locality: every machine the call site addressed. Each site reaches this through
-// remoteExec, so the fan-out is already done when the body runs -- every surface picked
-// below must be a local call, or N clients each re-broadcast to N clients.
+// Locality: every machine the call site addressed. Each site reaches this through remoteExec,
+// so the fan-out is already done when the body runs -- nothing here or in the drain loop may
+// re-broadcast, or N clients each send to N clients.
 // [_speaker, _text, _channel] -- _channel "" means decide from the speaker.
+//
+// Nothing is drawn here. The line is queued and fnc_duws_dialogue_drain owns the screen: ten
+// sites reach this through a synchronous call, so the body must return without waiting.
 
 params [["_speaker", ""], ["_text", ""], ["_channel", ""]];
 
@@ -34,21 +37,9 @@ if (_channel isEqualTo "") then {
     _channel = [_speaker, DUWS_netSpeakers] call fnc_duws_dialogue_channel;
 };
 
-// Which lines get a tone is decided here; when it actually plays is not. Playing it inline
-// on this call path froze the client during the post-landing load spike, where a mission-PBO
-// sound load competes with unit spawning and the arsenal config scan on the same frame. The
-// chatter function this replaced always dispatched the tone as its own scheduled script
-// behind this mutex, and never did that -- the routing rule is what changed here, not the
-// dispatch shape. Bisected to these lines: disabling them alone clears the freeze.
-if (_channel isEqualTo "NET" || {_speaker in DUWS_voiceSquelchSpeakers}) then {
-    [] spawn {
-        if (missionNamespace getVariable ["DUWS_squelchRunning", false]) exitWith {};
-        missionNamespace setVariable ["DUWS_squelchRunning", true];
-        playSound "DUWS_Radio_Start";
-        sleep 0.5;
-        missionNamespace setVariable ["DUWS_squelchRunning", false];
-    };
-};
+// Decided here, played by the drain loop when the line actually reaches the screen: the tone
+// marks a transmission arriving, and this line may sit behind others before it gets there.
+private _squelch = (_channel isEqualTo "NET") || {_speaker in DUWS_voiceSquelchSpeakers};
 
 // Callsign substitution belongs here rather than at the call site, and below the decision
 // above: the table holds the stringtable's "Alpha 1-1", so a host who has renamed the team
@@ -57,13 +48,18 @@ if (_channel isEqualTo "NET" || {_speaker in DUWS_voiceSquelchSpeakers}) then {
 if (_speaker isEqualType "") then { _speaker = [_speaker] call fnc_cs; };
 _text = [_text] call fnc_cs;
 
-if (_channel isEqualTo "NET") exitWith {
-    // Local, never remoteExec: see the locality note at the top. The [side, identity] form
-    // is what puts the speaker in the sender slot so the engine renders "Speaker: line".
-    [west, _speaker] sideChat _text;
+// Two queues rather than one with a priority insert: the drain loop empties VOICE first, which
+// is the same ordering with nothing but pushBack to get wrong. Anything that is not NET queues
+// as VOICE, so a channel that ever arrives malformed lands on the surface the player watches.
+// uiNamespace, not missionNamespace: pending lines are display state, and the mission namespace
+// is serialized into save games -- a queue held there would replay on load.
+private _queueVar = ["DUWS_dialogueQueueVoice", "DUWS_dialogueQueueNet"] select (_channel isEqualTo "NET");
+private _queue = uiNamespace getVariable _queueVar;
+if (isNil "_queue") then {
+    _queue = [];
+    uiNamespace setVariable [_queueVar, _queue];
 };
 
-// The engine's own subtitle. A two-line queue drawn into a custom RscTitles was tried and
-// reverted: it read worse than this does, and the routing above is what the change was for.
-// The one sanctioned call -- the retired-name lint bans it everywhere else.
-[_speaker, _text] call BIS_fnc_showSubtitle;
+// Appended in place rather than read-modify-written back: the drain loop edits the same array,
+// and a get/set pair either side of its deleteAt would silently drop whichever line lost.
+_queue pushBack [_speaker, _text, time, _squelch];

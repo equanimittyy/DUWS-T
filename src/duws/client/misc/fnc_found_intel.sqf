@@ -18,6 +18,8 @@ if ((random 10) < (master_Intel_chance + master_Intel_boost)) then {
 } else {
 
 	sleep 2;
-	player globalChat localize "STR_DUWS_T_b22m11b0";
+	// Local call, unlike the two lines above: this answers one player's search, and the
+	// globalChat it replaced reached only that player's machine.
+	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_b22m11b0"] call fnc_duws_dialogue;
 
 };

@@ -8530,9 +8530,9 @@
             <Key ID="STR_DUWS_T_b22m11b0">
                 <German>Hier ist das 'Overlord 1-1'. Nichts nützliches gefunden.</German>
                 <Spanish>Éste es el CG. Nada útil aquí.</Spanish>
-                <Chinesesimp>这里是'霸王1-1'，这里没有任何有用的。</Chinesesimp>
-                <Original>This is Overlord. Nothing useful here.</Original>
-                <English>This is Overlord. Nothing useful here.</English>
+                <Chinesesimp>这里没有任何有用的。</Chinesesimp>
+                <Original>Nothing useful here.</Original>
+                <English>Nothing useful here.</English>
             </Key>
             <Key ID="STR_DUWS_T_jjl0pm74">
                 <German>

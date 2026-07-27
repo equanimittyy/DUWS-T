@@ -5,8 +5,7 @@ Two changes behind one entry point:
 1. **Route** every spoken line to a surface chosen by *who is speaking*, not by which file
    the line happens to live in. Today the same character reaches the player through three
    different surfaces depending on the script that raised the line.
-2. **Replace** `BIS_fnc_showSubtitle` with a renderer that does not let a reply wipe the
-   line it answers.
+2. **Serialise** those lines onto one surface, so a reply cannot wipe the line it answers.
 
 The two are one change because the router is the wrapper: 274 call sites already pass
 `[speaker, text]` — speaker first, which is exactly what a router keyed on speaker needs —
@@ -19,7 +18,7 @@ Three surfaces, named so a new line has an obvious home.
 | Category | Surface | Squelch | Rule |
 |---|---|---|---|
 | **VOICE** | Large bottom-centre subtitle | No | An exchange the player is *a party to* |
-| **NET** | Native Arma chat, upper left | Yes | Radio traffic the player *listens in on* |
+| **NET** | Same subtitle, queued behind VOICE | Yes | Radio traffic the player *listens in on* |
 | **SYSTEM** | Notification / hint / OSD | n/a | Nobody is speaking |
 
 The VOICE/NET line is drawn by participation, not by whether a radio is involved. Overlord
@@ -99,23 +98,13 @@ placeholders, and `_taxiName`, `_random1` and `_random2` are left orphaned in `f
 a spawned abort handler (`fnc_helotaxi.sqf:99,119,176,223,238,266`), so that removal is a
 small unpick rather than a one-line delete.
 
-### Where native chat draws
-
-Upper left, where the mission already puts its side-chat lines. The player can move the Chat
-element in Options → Game → Layout; the mission cannot, and does not try to. Drawing NET
-anywhere else means writing a second custom renderer, at which point nothing about it is
-native — and the bottom-right corner is in any case taken by
-`client/misc/fnc_bottom_right_message.sqf`, the location/date OSD.
-
 ## What the split does and does not fix
 
-Of the 274 subtitle sites, **40 move to NET and 234 stay on VOICE** — 15%. The dense
-back-and-forth that gets clobbered is Overlord <-> Alpha 1-1 <-> civilian, and every one of
-those stays on the large subtitle by the rule above. So the channel split fixes
-*attribution*, not *legibility*: a reply still replaces the line it answers.
-
-That second half is left unfixed on purpose. See
-[§VOICE keeps the engine subtitle](#voice-keeps-the-engine-subtitle).
+Of the 274 subtitle sites, **40 are NET and 234 are VOICE** — 15%. The dense back-and-forth
+that gets clobbered is Overlord <-> Alpha 1-1 <-> civilian, and every one of those is VOICE
+by the rule above. So the channel split fixes *attribution* on its own; both categories now
+share one surface, and what keeps a reply from replacing the line it answers is the drain
+loop rather than the split. See [§One surface, drained by one loop](#one-surface-drained-by-one-loop).
 
 ## Inconsistencies to fix
 
@@ -181,10 +170,10 @@ audio paths below, and re-broadcasting from inside the router is the mistake it 
 prevent: N clients each sending to N clients is N² copies of the line, and it overrides the
 per-site targeting that the 54 `_caller`/`_player` sites depend on.
 
-**NET is the explicit list; VOICE is the default.** A speaker the table does not know
-renders as a subtitle — visible and wrong — rather than disappearing into a chat box
-nobody is looking at. That is the fail-loud direction, and it means adding a callsign later
-without touching the table degrades gracefully.
+**NET is the explicit list; VOICE is the default.** A speaker the table does not know is
+shown ahead of the radio and never dropped — visible and wrong — rather than queued behind
+it and expired under load. That is the fail-loud direction, and it means adding a callsign
+later without touching the table degrades gracefully.
 
 The table is built once per client from stringtable keys, not from literals, so it holds in
 every language:
@@ -230,10 +219,36 @@ a second pass finds nothing left to match. The one input that breaks that is a h
 which itself contains `"Alpha 1-1"` — `"Alpha 1-1 Actual"` would expand twice. Accepting
 that beats stripping the body wraps inside a phase whose whole value is being mechanical.
 
-### VOICE keeps the engine subtitle
+### One surface, drained by one loop
 
-VOICE draws through `BIS_fnc_showSubtitle`, called locally from the router. That is the one
-sanctioned use of the name; the retired-name lint bans it at all 273 other sites.
+Both categories draw through `BIS_fnc_showSubtitle`. That is the one sanctioned use of the
+name; the retired-name lint bans it at all 273 other sites, and `sideChat` with it.
+
+**The router never draws.** It resolves the channel, decides the squelch, substitutes the
+callsign and appends to one of two queues in `uiNamespace`;
+`client/misc/fnc_duws_dialogue_drain.sqf` — spawned once from `client_init.sqf`, below the
+`serverinit_complete` wait that guarantees the registry has arrived — shows one line at a
+time. Ten sites reach the router through a synchronous `call`, so its body must return
+without waiting.
+
+**VOICE drains before NET, and NET expires.** The engine subtitle is a single slot: whatever
+arrives next replaces whatever is on screen. Serialising alone would fix that by converting
+it into lag, and would then apply the lag to the lines that can least afford it — a wounded
+pilot answering a player action must not wait behind an artillery fire mission. So the drain
+loop empties VOICE first and entirely, and drops any NET line it reaches more than 8 s late.
+Radio starving under a long face-to-face exchange is the intended trade: the shells have
+landed by then, and a stale "rounds out" reads worse than silence.
+
+Two queues rather than one with a priority insert. The ordering is identical and nothing but
+`pushBack` can go wrong; `insert` is also absent from sqf-vm, so a priority index could not
+be checked anywhere before it shipped. Both queues live in `uiNamespace`, not
+`missionNamespace`, which is serialized into save games — pending lines held there would
+replay on load.
+
+**The hold time is a guess.** `BIS_fnc_showSubtitle` reports neither how long it holds a line
+nor when it clears, so the loop waits `1.5 + 0.045 × length`, clamped to 2.5-7 s. Erring
+short is deliberate: releasing early lets the next line replace this one cleanly, releasing
+late leaves the screen blank in between.
 
 **A two-line replacement was built and reverted.** A client-side queue of two lines with
 independent expiry, dimming the older rather than dropping it, rendered into its own
@@ -242,7 +257,7 @@ it replaced — so the legibility complaint stands unfixed rather than fixed bad
 retrying it should know the constraints that shaped it, because they are the non-obvious
 part:
 
-- **It must return immediately.** Nine sites reach the router through `call`, which is
+- **It must return immediately.** Ten sites reach the router through `call`, which is
   synchronous, and `BIS_fnc_showSubtitle` returns straight away. A queue that sleeps for its
   own expiry stalls those callers. `fnc_civ_healAction.sqf:56,68` fires two `call` subtitles
   either side of a `sleep 3`. Expiry belongs to a ticker or a frame handler, never the call
@@ -258,34 +273,23 @@ part:
 driving `BIS_fnc_showNotification`, a separate BI queue with its own rendering. That is the
 SYSTEM surface and it stays where it is.
 
-### The NET path
+### What retiring the chat surface changed
 
-```sqf
-[west, _speaker] sideChat _text;   // local, no remoteExec — the router is already there
-```
+NET went to `sideChat` first and moved onto the subtitle afterwards. Three things about the
+old `fnc_sideChat_filter` path did not survive either step:
 
-The `[side, identity]` left operand is the local-effect form of `sideChat`, and the speaker
-string is the chat identity, so the engine renders `Speaker: line`. It is not an untested
-assumption: `fnc_sideChat_filter.sqf:18` ships this exact form today as
-`[[West,"OVERLORD"], _message] remoteExec ["sideChat", 0]`, and its `remoteExec` wrapper is
-what makes one machine's call reach the room — which is precisely the wrapper the router
-must *not* repeat. `CfgRemoteExec` needs no change either way:
-`shared/includes/remoteExec.hpp:10` sets `mode = 2` for Functions and `:44` for Commands, so
-the whitelist is ignored.
-
-Four things about the existing side-chat path change:
-
-- **The fan-out moves to the call site.** `fnc_sideChat_filter` is invoked once and
-  broadcasts; the router is invoked everywhere and must not. Dispatching locally is also
+- **The fan-out moves to the call site.** `fnc_sideChat_filter` was invoked once and
+  broadcast; the router is invoked everywhere and must not. Dispatching locally is also
   what preserves per-site targeting — `fnc_disguiseAsEnemy.sqf:127` sends the intercepted
   OPFOR traffic to `_caller` alone, and a re-broadcast would leak one player's eavesdrop to
-  the whole server.
-- **The radio gate goes.** `fnc_sideChat_filter` currently checks `"ItemRadio" in
-  assignedItems _sender` and falls back to `globalChat` — a *wider* channel — when the
-  check fails. A gate whose failure mode is broadcasting more loudly is not a gate. NET goes
-  to the side channel unconditionally.
+  the whole server. `CfgRemoteExec` needs no change: `shared/includes/remoteExec.hpp:10`
+  sets `mode = 2` for Functions and `:44` for Commands, so the whitelist is ignored.
+- **The radio gate goes.** It checked `"ItemRadio" in assignedItems _sender` and fell back
+  to `globalChat` — a *wider* channel — when the check failed. A gate whose failure mode is
+  broadcasting more loudly is not a gate.
 - **The sender is the real speaker**, not the hardcoded `"OVERLORD"` literal.
-- **`fnc_sideChat_filter` is deleted** once its 15 live call sites are re-pointed:
+
+Its 15 live call sites were re-pointed and the file deleted:
 
 | Sites | Where | Goes to |
 |---|---|---|
@@ -294,22 +298,11 @@ Four things about the existing side-chat path change:
 | 1 | `fnc_zone_reveal:18` | Deleted — duplicates the subtitle on the next line |
 | 1 | `fnc_capture_zones_task:58` | SYSTEM — campaign-won, already has a notification and a hint |
 
-Swordfish 1-1 needs a stringtable key; it exists only inside message bodies today.
-
-**The engine owns the colour, so the callsign has to carry the distinction.** Side-channel
-text is coloured by the channel, not by us — there is no per-line colour on `sideChat`, and
-routing hostile traffic through `[east, …]` instead would put it on a channel BLUFOR players
-do not receive at all. Intercepted OPFOR traffic is therefore told apart by its sender name
-("Siren 1-4", "HQ") and by reading as enemy procedure, not by being tinted.
-
-**A server that disables the side channel silences NET, and that is an accepted risk.**
-`disableChannels[]` in `server.cfg` is common on co-op servers that push radio traffic into
-TFAR or ACRE. The mission cannot see or override it, and the failure is silent: 46 lines
-simply never appear. The alternative is `systemChat`, which cannot be disabled but has no
-sender field — the speaker would have to be prefixed into the text by hand, giving up the
-one thing the native channel does well. Nothing in `src` disables channels, the mission
-ships mod-free, and a server that has deliberately moved radio into a mod is not a
-configuration to design the default around.
+Leaving the chat surface also retired a failure mode the mission could not see: `disableChannels[]`
+in `server.cfg` is common on co-op servers that push radio into TFAR or ACRE, and it silenced
+NET outright with nothing in the log. Colour goes with it — the channel used to tint the text,
+so intercepted OPFOR traffic is now told apart only by its sender name ("Siren 1-4", "HQ") and
+by reading as enemy procedure.
 
 ### Two malformed inputs the renderer must survive
 
@@ -460,6 +453,7 @@ attribution and quiet civilians regardless.
 | 4 | Squelch into the router; delete the 166 `fnc_broadcastRadioChatter` calls and the function | Yes | Greps to zero; registry stays clean |
 | 5 | Retire `fnc_sideChat_filter`: re-point 15 sites, delete the file and its registry line | Yes | `check_paths.py` fails if the registry line outlives the file |
 | 6 | Stringtable pass | Yes | No line renders as "Overlord: This is Overlord" |
+| 7 | NET off the chat box and onto the subtitle, behind the two-queue drain loop | Yes | `sideChat` greps to zero; a single artillery call shows both its lines |
 
 Phase 2 has to precede phase 3, not follow it. The router matches the speaker *before*
 callsign substitution; while the 68 sites still pre-substitute, a host who renames their team
@@ -553,26 +547,26 @@ now; the router just should not make it awkward to add.
 Ordered by the migration phases above. Everything through phase 2 must be invisible in play;
 the first three boxes are done when nothing has changed on screen.
 
-- [ ] In-game: run a side mission with dense dialogue and confirm no line is lost; call a support and confirm it lands in chat, not on the subtitle; go disguised and confirm the intercepted OPFOR traffic does not displace dialogue.
+- [ ] In-game: call artillery and confirm both its lines show in full rather than the second wiping the first; call two supports a few seconds apart and confirm neither is cut off; talk to a civilian or the downed pilot with a support in flight and confirm the reply is not left waiting behind radio traffic; go disguised and confirm the 20 s eavesdrop does not displace dialogue.
 
 ## Decided trade-offs
 
-**NET bodies are not shortened for the chat box.** Some run past 100 characters — *"Alpha 1-1,
-this is Allseer 1-1. We've spotted an enemy supply truck moving between zones…"* — which
-reads fine as a subtitle and long in chat. Rewriting them for length is a separate editorial
-pass on top of the ~214 edits the sender-strip already costs, and stripping the sender takes
-the worst offenders down on its own. Judge the remainder in play, with the real box.
+**NET bodies are not shortened.** Some run past 100 characters — *"Alpha 1-1, this is
+Allseer 1-1. We've spotted an enemy supply truck moving between zones…"* — which the hold
+formula already gives more time to read. Rewriting them for length is a separate editorial
+pass on top of the ~214 edits the sender-strip already costs, and stripping the sender took
+the worst offenders down on its own.
 
 **Legibility is left unfixed rather than fixed badly.** The custom two-line renderer read
-worse in play than the engine subtitle, so it was reverted and VOICE went back to
-`BIS_fnc_showSubtitle`. A reply can still wipe the line it answers. That is the known cost
-of this change stopping where it does, and it is recoverable: the router owns the VOICE
-surface, so a future renderer is a one-line swap at the bottom of `fnc_duws_dialogue`.
+worse in play than the engine subtitle, so it was reverted. The drain loop addresses the
+symptom that motivated it — a reply wiping the line it answers — by serialising rather than
+by rendering two lines at once. A future renderer remains a one-line swap in
+`fnc_duws_dialogue_drain`, which now owns the surface outright.
 
 **NET is the explicit list, VOICE the default.** The inverse — listing VOICE speakers and
-defaulting to NET — would silently swallow any callsign added later into a chat box the
-player is not watching. Defaulting to the loud surface makes a missing table entry visible
-in the first minute of play instead of never.
+defaulting to NET — would silently push any callsign added later behind the priority queue
+and expire it under load. Defaulting to the never-dropped category makes a missing table
+entry visible in the first minute of play instead of intermittently.
 
 **Squelch by category, not by call site.** The 166 hand-placed `fnc_broadcastRadioChatter`
 calls are the reason radio hiss plays over face-to-face civilian dialogue in `protect_civ`
@@ -601,10 +595,10 @@ derived from it.
 **The disguise eavesdrop goes to NET.** `fnc_disguiseAsEnemy` posts intercepted OPFOR radio
 traffic every 20 s while the player is disguised. It is radio and it is not addressed to the
 player, so the category rule places it without an exception. It is also the only feedback
-that the disguise is still holding, which is an argument for the loud surface — but a line
-arriving every 20 s for the full disguise duration would monopolise a two-line subtitle
-queue and bury the dialogue it exists to protect. The chat box absorbs a repeating line
-without cost, and the enemy callsign in the sender slot keeps it distinguishable.
+that the disguise is still holding, which is an argument for the loud surface. Putting it
+there is only safe because NET yields: at 20 s apart the queue is normally empty and each
+line shows at once, and one arriving mid-conversation waits behind the VOICE line and then
+expires rather than burying the dialogue it exists to protect.
 
 **The squelch marks incoming, not radio-ness.** Attaching it to "is this a radio line"
 leaves the player callsign undecidable, because the same key covers both halves of a

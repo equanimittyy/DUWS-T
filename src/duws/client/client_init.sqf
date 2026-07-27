@@ -17,6 +17,10 @@ waitUntil {sleep 0.1;!isNull player};
 //if (isServer) then {
 	while {!(["BOOT", "serverinit_complete from the server", {serverinit_complete}, 300] call fnc_waitLogged)} do {};
 //};
+// Exactly one drain loop per client, and only below the wait above -- the function arrives
+// with the registry the server publishes, so starting it any earlier races that. A line
+// posted before this point is not lost: fnc_duws_dialogue queues without needing the loop.
+[] spawn fnc_duws_dialogue_drain;
 player addRating 10000000;
 // KEEP DIPSHITS FROM DROWNING
 [] spawn {
