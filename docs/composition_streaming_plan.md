@@ -34,8 +34,13 @@ Two new verbs beside the existing pair, sharing the registry:
 | `fnc_duws_stow` | Record each live member, `deleteVehicle` it, move the key to `DUWS_stowed` |
 | `fnc_duws_deploy` | Recreate from the record, re-file through `fnc_duws_keep`, drop the record |
 
-A key lives in exactly one of `DUWS_compositions` and `DUWS_stowed`. That invariant is what makes
-"is this composition on the map" answerable without touching an object.
+`DUWS_compositions` holds whatever is currently on the map; `DUWS_stowed` holds a key exactly
+while that composition's streamable members are off it. Presence in `DUWS_stowed` is therefore the
+answer to "is this stowed", without touching an object.
+
+The two are not mutually exclusive, because pinned members stay behind when the rest of their
+composition leaves. A hardpoint whose gun never stows keeps that gun in `DUWS_compositions` while
+its sandbags sit in `DUWS_stowed`.
 
 **Records are built at stow time, not at build-out.** Capturing the live objects as they are
 means damage, looted crates and player-moved props are caught for free, and there is no standing
@@ -73,6 +78,22 @@ act and crossing a 600 m boundary is not, so the reset is newly visible even tho
 Recording destruction rather than health is what keeps that from reading as a bug: the case a
 player notices is the wall they blew open, not the wall they scratched.
 
+### Members that must never be stowed
+
+Some objects earn their keep by existing rather than by being looked at, and stowing those removes
+a capability instead of deferring a cost. The artillery, mortar and AA hardpoint cores are the
+known cases ([`hardpoint_system_plan.md`](hardpoint_system_plan.md)) — all three act at ranges far
+beyond the gate that would stow them, and an AA gun is the sharpest illustration: a jet crosses a
+450 m trigger in about three seconds, so deploy cannot finish before the aircraft is past.
+
+The exemption is per member, not per composition. A pinned core stays resident while the sandbags
+and netting around it stream normally, which is where the saving was anyway — one object against
+roughly 65.
+
+Marked at `fnc_duws_keep` time rather than tested by class at stow time: only the code that placed
+the object knows whether its presence is the point, and a class test would have to be kept in step
+with every faction mod's turret names.
+
 ## Ordering: the garrison leaves first
 
 `fnc_spawnWait.sqf:111-119` deletes EAST vehicles and EAST men on foot, but its second clause
@@ -109,6 +130,21 @@ never added in the first place, so nothing changes there.
 **Player property is untouched.** Stow deletes recorded members only, so a vehicle parked or a
 crate dropped inside a zone is not swept up with the prefab.
 
+**Release has to clear the stow record, and does not.** `fnc_duws_release`
+(`server_fnc_init.sqf:305-313`) walks `DUWS_compositions` and deletes that key; it never looks at
+`DUWS_stowed`. Retiring a stowed composition therefore succeeds while changing nothing, and the
+composition redeploys intact on the next approach.
+
+Unreachable while zones are the only thing that streams, because nothing releases a zone. It goes
+live with normal hardpoints, which release on clear — so it has to be closed before that lands,
+not after. Retiring a composition should be terminal whichever map its key is in.
+
+**A retired composition's gate must be stopped explicitly.** After release the key is absent from
+`DUWS_compositions`, so `fnc_duws_stow` returns false and does nothing. That is the right outcome
+reached the wrong way: it depends on a membership test rather than on anything knowing the
+composition is finished. Left alone it also leaks one idle loop per retired composition for the
+rest of the campaign.
+
 ## Files touched
 
 | File | Change |
@@ -126,3 +162,6 @@ crate dropped inside a zone is not swept up with the prefab.
 - [ ] Cargo and destruction capture. Verify: empty a crate and blow a bunker, stow, deploy — the crate stays empty and the bunker stays gone.
 - [ ] Wire into `fnc_spawnWait`, garrison pass first. Verify: the 300 s timer cycles props with AI and leaves no gunner standing where a turret was.
 - [ ] Confirm the census and curator numbers move. Verify: `allMissionObjects "All"` and the cleanup census log both drop when zones stow.
+- [ ] Per-member stow exemption, set through `fnc_duws_keep`. Verify: a pinned member survives a stow that removes everything around it.
+- [ ] `fnc_duws_release` clears `DUWS_stowed` as well. Verify: release a stowed composition, approach it, nothing comes back.
+- [ ] Terminal retirement a gate can read, so a released composition's loop exits. Verify: no thread survives its composition.

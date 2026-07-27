@@ -372,13 +372,62 @@ Only the map marker stays. A cleared hardpoint's marker is the record the player
 and it costs nothing to keep.
 
 Thresholds match the zone gate so the two feel the same: spawn at 600 m from any player, despawn
-after 300 s with nobody inside 600 m (`fnc_spawnWait.sqf:11-13` uses a 400 m buffer on the zone
+after 300 s with nobody inside 600 m (`fnc_spawnWait.sqf:12-14` uses a 400 m buffer on the zone
 radius and the same 300 s timer).
 
-**Indirect-fire hardpoints keep their crew permanently.** A gun that only works when a player is
-standing next to it cannot shell a FOB across the valley, which is the entire reason those types
-exist. The campaign-wide cap of three such guns is what makes that affordable: six or so units
-that never despawn, fixed, rather than growing with the campaign.
+### Which key a hardpoint files under decides its whole lifecycle
+
+The two flavours land in different persistence buckets, and the line between them is whether the
+player ends up owning the ground it sits on.
+
+| Flavour | Key | Bucket | On clear |
+|---|---|---|---|
+| Zone | the zone's own `zone_<x>_<y>` | persistent | nothing — it is inside territory the player is taking, and stays like the rest of the zone's furniture |
+| Normal | its own `hardpoint_<x>_<y>` | semi-persistent | `fnc_duws_release`, then the sweep collects on the configured lifetime |
+
+Zone hardpoints filing under the zone key is what keeps this cheap: they stream with the zone,
+stay persistent with the zone and survive its capture with it, so they need no key, no gate and
+no release path of their own. Siting puts them at `0.35-0.9 * _size`, comfortably inside the
+zone's own `_size + 400` trigger, so one gate covers both. The only per-hardpoint state left is
+whether it has been cleared, and that is a number in `hardpoint_state_array`, not an object.
+
+Releasing them instead would leave a captured zone where the prefab's furniture stayed and the
+hardpoints' vanished, inside the same circle. Normal hardpoints have the opposite problem: they
+sit on ground nobody holds, the director keeps building more, and a spent turret left in an empty
+field forever is the accumulation this tier would otherwise create.
+
+### Retirement has to be explicit
+
+A cleared normal hardpoint's gate must be told to stop, not left to discover it has nothing to do.
+After `fnc_duws_release` the key is gone from `DUWS_compositions`, so a stow call silently
+no-ops — correct by accident, and only because `fnc_duws_stow` tests membership first. Relying on
+that leaves one idle loop per cleared hardpoint running for the rest of the campaign, and any
+future change to that guard turns a resource cost into a correctness bug.
+
+Release must also clear `DUWS_stowed`, which it does not today
+([`composition_streaming_plan.md`](composition_streaming_plan.md)). Retiring a stowed composition
+currently succeeds while changing nothing, and the composition redeploys intact.
+
+### Types whose effect depends on existing are not stowed
+
+Three types act at ranges far beyond the gate that would stow them, so streaming their core
+removes the capability rather than deferring it:
+
+| Type | Why the core stays resident |
+|---|---|
+| Artillery battery | Shells a region. A gun that exists only while a player stands next to it cannot shell a FOB across the valley, which is the entire reason the type exists |
+| Mortar pit | Same, at shorter range |
+| AA position | Denies an air corridor. A jet crosses a 450 m trigger in about three seconds — deploy cannot finish before the aircraft is past, so a streamed AA gun never engages anything |
+
+**The core and its crew stay; the furniture around it streams normally.** That is the split worth
+having — the gun is one object against roughly 65 in the composition, so pinning it costs about
+1.5% of what pinning the whole hardpoint would.
+
+Indirect fire is already capped at three guns campaign-wide
+([§The indirect-fire types are capped](#the-indirect-fire-types-are-capped-campaign-wide)), and
+that cap exists precisely because permanent crews are the expensive part. **AA needs its own cap
+for the same reason**: an uncapped type with a resident crew reintroduces exactly the unbounded
+live-AI growth the indirect-fire cap was written to prevent.
 
 ## Indirect-fire hardpoints
 
