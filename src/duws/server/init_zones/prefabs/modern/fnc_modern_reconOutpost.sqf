@@ -113,21 +113,13 @@ private _tiltTypes = [
     "Land_BagBunker_Tower_F"
 ];
 
-// ========= 第一步：非武器/非载具物体贴地；载具贴地保留模拟 =========
+// ========= 第一步：非武器物体贴地 =========
 {
     _x params ["_class", "_offsetX", "_offsetY", "_offsetZ", "_dir", "_isWeapon"];
     if (_isWeapon) then { continue; };
 
     private _newX = _centerSpawnX + _offsetX;
     private _newY = _centerSpawnY + _offsetY;
-
-    // 载具特殊处理：贴地，保留模拟
-    if (_class isKindOf "AllVehicles") then {
-        private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
-        _obj setPosATL [_newX, _newY, 0];
-        _obj setDir _dir;
-        continue;
-    };
 
     private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
     [_obj, _zoneKey] call fnc_duws_keep;
