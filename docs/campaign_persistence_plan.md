@@ -191,9 +191,13 @@ saved name — rather than reimplementing what it builds.
 ### What is deliberately not saved
 
 Live AI, spawned garrisons, active side missions, in-flight support, vehicle positions and
-damage. Zone garrisons already spawn and despawn on player distance
+damage. Zone garrisons and composition props both spawn and despawn on player distance
 (`server/init_zones/fnc_spawnWait.sqf`), so a restored campaign regenerates them the first time a
 player approaches — the same code path a fresh campaign uses.
+
+Composition streaming adds nothing here. Its stow records are built when a composition leaves the
+map and dropped when it returns ([`composition_streaming_plan.md`](composition_streaming_plan.md)),
+so they never outlive the session and a restore rebuilds every composition deployed.
 
 This is the decision that keeps the plan finite. The server runs 40 `while {true}` loops across 23
 files, each holding script locals; persisting live state would mean relaunching every one with

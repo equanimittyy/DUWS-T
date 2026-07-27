@@ -358,13 +358,18 @@ There is no ceiling on how many normal hardpoints exist. Two things bound them i
 - **AP is the real cap.** At 8-25 AP each against income the enemy also spends on assault waves,
   and one build attempt every 20-30 min, the director cannot run away with it. A constant would
   only be overriding a budget that already says no.
-- **Only what a player is near is rendered.** Garrisons spawn and despawn on player distance, so
-  the AI cost tracks where the player is rather than how long the campaign has run.
+- **Only what a player is near exists.** Garrisons and props both spawn and despawn on player
+  distance, so the cost tracks where the player is rather than how long the campaign has run.
 
-Cores, cover and markers are **not** despawned — they are static objects and a marker, and the
-player was promised they stay on the map. What cycles is the garrison. That is the same split
-`fnc_spawnWait.sqf:107-121` already produces for zones, where the cleanup skips `StaticWeapon`
-and leaves gunners inside statics alone.
+Props cycle with the garrison, per
+[`composition_streaming_plan.md`](composition_streaming_plan.md). A hardpoint composition the size
+of a zone prefab is what forces this: at 1-6 per zone against 65 objects each, leaving them
+standing puts a large campaign into five figures of map objects. Filing them under a key with
+`fnc_duws_keep` is the whole integration — streaming reads the registry, so no hardpoint code
+places or removes an object itself.
+
+Only the map marker stays. A cleared hardpoint's marker is the record the player was promised,
+and it costs nothing to keep.
 
 Thresholds match the zone gate so the two feel the same: spawn at 600 m from any player, despawn
 after 300 s with nobody inside 600 m (`fnc_spawnWait.sqf:11-13` uses a 400 m buffer on the zone
