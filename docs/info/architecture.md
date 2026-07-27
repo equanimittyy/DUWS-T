@@ -108,7 +108,7 @@ broadcast, so "never `publicVariable`'d" does not imply server-only.
 | `supports/` | Support requests: CAS, artillery, UAV, paradrop, heli-lift, vehicle drop, FOB deploy, transport |
 | `warcom/` | War Command — the dynamic AI director for both sides (assault / patrol / QRF task forces reacting to the front line) |
 | `dialog/` | Runtime UI: HQ/FOB request menus, mobile-HQ deploy, campaign menu, faction dialog, the CP/AP economy |
-| `misc/` | Autosave, recruiting, black market, civilian/informant system, intel-on-death, fast travel, AI master control |
+| `misc/` | Autosave, recruiting, black market, civilian/informant system, intel-on-death, AI master control |
 | `sounds/` | Ambient music loop |
 | `operative/` | Operative recruit/deploy menu |
 | `includes/` | Dialog and config `.hpp` under `shared/`; the two `#include`d SQF bodies under `client/` |

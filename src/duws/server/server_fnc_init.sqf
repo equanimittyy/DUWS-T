@@ -754,14 +754,6 @@ fnc_civ_handler = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_ha
 publicVariable "fnc_civ_handler";
 fnc_civ_handler_wbk = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler_wbk.sqf";
 publicVariable "fnc_civ_handler_wbk";
-fnc_civ_fast_travel_add_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_civ_fast_travel_add_action.sqf";
-publicVariable "fnc_civ_fast_travel_add_action";
-fnc_civ_fast_travel_request = compile preprocessFileLineNumbers "duws\client\misc\fnc_civ_fast_travel_request.sqf";
-publicVariable "fnc_civ_fast_travel_request";
-fnc_civ_fast_travel_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_fast_travel_server.sqf";
-publicVariable "fnc_civ_fast_travel_server";
-fnc_civ_fast_travel_execute = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_fast_travel_execute.sqf";
-publicVariable "fnc_civ_fast_travel_execute";
 fnc_addCivilianMoney = compile preprocessFileLineNumbers "duws\server\misc\fnc_addCivilianMoney.sqf";
 publicVariable "fnc_addCivilianMoney";
 fnc_civ_askForAid = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_askForAid.sqf";

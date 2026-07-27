@@ -6,7 +6,7 @@ in exchange, a town's standing now feeds Army Power to whichever side it favours
 ground becomes territory the campaign fights over — held by an enemy garrison when it turns,
 taken back by clearing that garrison. `Player_Reputation` survives as the global readout so the
 campaign-wide consumers keep working unchanged; the consumers that are already local —
-informants, aid, recruitment, fast travel — read the town they are acting in.
+informants, aid, recruitment — read the town they are acting in.
 
 Civilian *hostility* leaves with this change rather than becoming per-town. Armed civilians and
 suicide bombers are deleted; the enemy's answer to a town that hates the player becomes a
@@ -18,7 +18,7 @@ garrison now and a planning director later, documented in
 | Problem | Where |
 |---|---|
 | One global scalar carries all reputation. Every civilian death anywhere moves the same number | `server/server_var_init.sqf:215`, sole writer `server/server_fnc_init.sqf:151-159` |
-| Six consumers act on one town but read the campaign-wide number — informants, aid, toolkits, recruitment, fast travel, disguise | table below |
+| Six consumers act on one town but read the campaign-wide number — informants, aid, toolkits, recruitment, disguise | table below |
 | Two reputation gates run on clients, so they cannot read server-local town state | `shared/functions/fnc_addAskEnemyAction.sqf:36`, `shared/functions/fnc_civ_recruitAction.sqf:18` |
 | Passive recovery walks reputation back up on its own, so nothing the player did stays done | `server/misc/fnc_civ_rep_economy.sqf:12-38` |
 | That recovery feeds an uncapped CP faucet at `ceil(rep/2)` every 15 minutes | `:41-55` |
@@ -599,7 +599,6 @@ the tick itself changing.
 | Ask enemy location | `shared/functions/fnc_addAskEnemyAction.sqf:36` | **town** — must move server-side first |
 | Disguise break: reputation fell since the disguise went on | `server/misc/fnc_disguiseAsCivilian.sqf:105,253-255` | deleted, both ends of the chain |
 | Disguise break inside an enemy-held town | `:257-268` | **town**, and the gate becomes the OPFOR band rather than any negative value |
-| Fast travel | `server/misc/fnc_civ_fast_travel_server.sqf:13` | **town** (destination) |
 | Hire partisans | `server/misc/fnc_hirePartisans.sqf:22` | global |
 | CP income tick | `server/misc/fnc_civ_rep_economy.sqf:46-48` | global |
 | SITREP display | `client/misc/fnc_sitrep_display.sqf:28` | global |

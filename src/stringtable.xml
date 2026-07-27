@@ -2555,80 +2555,10 @@
                 <English>You lost the following on respawn: %1</English>
                 <Chinesesimp>你在重生时损失了以下物品：%1</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_CIV">
-                <Original>&lt;t color='#00ff00'&gt;Fast travel (1 cash)&lt;/t&gt;</Original>
-                <English>&lt;t color='#00ff00'&gt;Fast travel (1 cash)&lt;/t&gt;</English>
-                <Chinesesimp>&lt;t color='#00ff00'&gt;请求快速旅行 (1货币)&lt;/t&gt;</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_hey">
-                <Original>We're BLUFOR. Do you know a safe route to the next town? We'll pay for it.</Original>
-                <English>We're BLUFOR. Do you know a safe route to the next town? We'll pay for it.</English>
-                <Chinesesimp>嘿，朋友。我们是蓝军的人，这个镇子有什么到附近镇子的捷径吗？(递给他一叠厚钞票)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_idk">
-                <Original>I'm not really sure…</Original>
-                <English>I'm not really sure…</English>
-                <Chinesesimp>我不太清楚...</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_there">
-                <Original>You've been teleported near the target town</Original>
-                <English>You've been teleported near the target town</English>
-                <Chinesesimp>你已快速旅行至目标城镇附近。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_ik">
-                <Original>Around here? I know a few paths… where are you headed?</Original>
-                <English>Around here? I know a few paths… where are you headed?</English>
-                <Chinesesimp>附近吗？我倒是知道几条...你想去哪？(试探性地收下了钞票)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_fkoff">
-                <Original>Get lost… you bastard…</Original>
-                <English>Get lost… you bastard…</English>
-                <Chinesesimp>滚远点...你这畜生...(往地上吐了口唾沫)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_ne">
-                <Original>Sorry… showing you the way is too risky…</Original>
-                <English>Sorry… showing you the way is too risky…</English>
-                <Chinesesimp>抱歉...为你们指路风险太大了...</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_nvm">
-                <Original>Never mind. We'll find our own way. Keep the money.</Original>
-                <English>Never mind. We'll find our own way. Keep the money.</English>
-                <Chinesesimp>算了...我改变主意了，钱你收下吧，当个人情。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_FAST_TRAVEL_BUSY">
                 <Original>The map is already opening, please wait...</Original>
                 <English>The map is already opening, please wait...</English>
                 <Chinesesimp>正在打开地图，请稍等...</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_FAIL">
-                <Original>Fast travel request failed</Original>
-                <English>Fast travel request failed</English>
-                <Chinesesimp>快速传送请求失败。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_CLICK_MAP">
-                <Original>Click on the map to select a civilian area (within 5km)</Original>
-                <English>Click on the map to select a civilian area (within 5km)</English>
-                <Chinesesimp>在地图上点击选择一个平民区域（5公里内）。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_LOW_REP">
-                <Original>Your reputation is too low to request fast travel</Original>
-                <English>Your reputation is too low to request fast travel</English>
-                <Chinesesimp>你的声望太低，无法请求快速旅行。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_FAIL_ROLL">
-                <Original>The civilian refused to help</Original>
-                <English>The civilian refused to help</English>
-                <Chinesesimp>平民拒绝帮忙。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_NO_AREAS">
-                <Original>No civilian areas found on the map</Original>
-                <English>No civilian areas found on the map</English>
-                <Chinesesimp>地图上没有平民区域。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_TOO_FAR">
-                <Original>Target area is too far (%1 km away, max 5 km)</Original>
-                <English>Target area is too far (%1 km away, max 5 km)</English>
-                <Chinesesimp>目标区域太远（%1 公里，最大 5 公里）。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_CIV_CLEANUP_WARNING">
                 <Original>A player has left %1 and %1 will reset in 60 seconds. Return immediately to resume operations at %1.\n(To save performance, only one town can generate civilians at a time)</Original>
