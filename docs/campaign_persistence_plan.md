@@ -52,9 +52,11 @@ substitute for it. That dead parameter pre-dates this plan and is left alone her
 None of these is persistence work, and all of them must land first. Each is independently
 worth doing.
 
-1. **Make `fnc_fob_server` replayable.** It needs an optional name and a silent flag, for the
-   naming and announcement reasons in the table above. The position registry it needs is already
-   in place: `Array_of_FOBpos` (`server/supports/fnc_fob_server.sqf:84`).
+1. **Make `fnc_fob_server` replayable.** It needs an optional name, for the naming reason in the
+   table above. Silencing its announcement belongs on `fnc_duws_dialogue`, not here: a restore
+   replays several builders, and a per-function flag has to be re-invented at every one of them.
+   The position registry it needs is already in place: `Array_of_FOBpos`
+   (`server/supports/fnc_fob_server.sqf:84`).
 2. **Mirror support unlocks server-side.** One broadcast array; the client keeps its local copy
    as the fast path. Players spend CP on these, so losing them across a restart is losing
    currency.
@@ -214,7 +216,8 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 | `server/supports/fnc_sitrep_support.sqf:8-11` | Remove the server-side dialog gate. |
 | `server/server_init.sqf` | Early restore gate before `:15`, skipping the setup-screen waits at `:46,52`. Keep `enableSaving [false,false]` at `:113`; the engine save is no longer the mechanism. |
 | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:7-15,54,88` | Branch to the restore path for zones; feed saved towns to civilian init; replay ownership after `WARCOM_init_done`. |
-| `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name and a silent flag. |
+| `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name; the announcement is silenced by the router, not a flag here. |
+| `client/misc/fnc_duws_dialogue.sqf` | Suppress mode, so replayed builders announce nothing at boot. |
 | `server/misc/fnc_civ_init_Tomata.sqf:163-164` | Accept a restored town set in place of the `fnc_civ_selectTowns` roll. |
 | `client/client_init.sqf:408` | Loadout save keys on player UID, not the player object. |
 | `server/server_fnc_init.sqf` | Registry lines; support-unlock mirror writer. |
