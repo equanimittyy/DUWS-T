@@ -27,6 +27,12 @@ Array_of_OPFOR_zones = Array_of_OPFOR_zones + [_zonePos];
 // Add the zone name, position, and visibility(hardcore) to zone_namePOS_pairs 
 zone_namePOS_pairs = zone_namePOS_pairs + [[_name,_zonePos,_visible]];
 publicVariable "zone_namePOS_pairs";
+// Everything needed to rebuild this zone through this same function: radius and points reach the
+// triggers only as compiled strings, so nothing outside can read them. Must stay above the prefab
+// block, which reassigns _fortified and _prefab to the chosen decoration. The name is re-derived
+// from the zone number on rebuild, not stored -- it is localised at creation.
+zone_meta_array = zone_meta_array + [[_zone_num,_zonePos,_size,_points,_fortified,_prefab]];
+publicVariable "zone_meta_array";
 
 // Add zone to the spawn/despawn array [number, blufor_close, noDespawn]
 zone_spawn_array = zone_spawn_array + [[_zone_num,false,false]];

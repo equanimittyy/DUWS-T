@@ -18,18 +18,7 @@ call compile format["_trg2 = trigfob2%1%2",round (_fob_pos select 0),round (_fob
 deleteVehicle _trg2;
 
 // Remove FOB from Array_of_FOBS
-{
-    if (str (getPos _x) == str (_fob_pos)) then {
-        Array_of_FOBS deleteAt _forEachIndex;
-        publicVariable "Array_of_FOBS";
-    };
-} forEach Array_of_FOBS;
-{
-    if (_x == _fob_name) then {
-        Array_of_FOBname deleteAt _forEachIndex;
-        publicVariable "Array_of_FOBname";
-    };
-} forEach Array_of_FOBname;
+[_fob_pos] call fnc_fob_deregister;
 
 // CLEANUP OBJECTS AFTER 5 min (保留平民)
 [_fob_pos, _fob_name] spawn {  

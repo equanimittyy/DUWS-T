@@ -168,11 +168,10 @@ mod faction, so its fallback earns its keep.
 Inside `fnc_createZone`, not in a separate siting pass off `serv_zones_array`. Three reasons,
 all decisive:
 
-- **Radius only exists there.** `serv_zones_array` entries are two-element `[x,y]`
-  (`fnc_locatorzones_random.sqf:180`); the radius is a script local, rolled at `:52-56` and
-  never stored. Scaling the count to radius from outside is impossible until the
-  `zone_meta_array` prerequisite in
-  [`campaign_persistence_plan.md`](campaign_persistence_plan.md) lands.
+- **Radius is in hand there.** `serv_zones_array` entries are two-element `[x,y]`
+  (`fnc_locatorzones_random.sqf:180`), so a pass driven off that array would have to read the
+  radius back out of `zone_meta_array` (`fnc_createzone.sqf:30-36`); inside `fnc_createZone` it
+  is the `_size` argument.
 - **Both locators already funnel through it.** Random placement `spawn`s it (`:185`); manual
   placement `remoteExec`s it to target 2 (`fnc_locatorzones_manual.sqf:94`). A pass inside
   `fnc_createZone` is server-side in both cases and needs no wait on a client-published array.
@@ -277,10 +276,9 @@ Anchored on a *pair*: an OPFOR zone (`WARCOM_zones_controled_by_OPFOR`) and the 
 BLUFOR-held position. Placed 35-65% along the segment between them with lateral jitter, so
 hardpoints appear on the ground the player has to cross rather than at either end.
 
-BLUFOR anchors available today: `WARCOM_zones_controled_by_BLUFOR`, `PosOfBLUHQ`, and FOBs.
-`Array_of_FOBS` holds *objects*, not positions (`server/supports/fnc_fob_server.sqf:78`), so
-read it as `Array_of_FOBS apply {getPos _x}` until the `Array_of_FOBpos` prerequisite in
-[`campaign_persistence_plan.md`](campaign_persistence_plan.md) lands.
+BLUFOR anchors available today: `WARCOM_zones_controled_by_BLUFOR`, `PosOfBLUHQ`, and
+`Array_of_FOBpos` (`server/supports/fnc_fob_server.sqf:84`), which is index-parallel to
+`Array_of_FOBS` and holds positions rather than building objects.
 
 Rejection rules: 800 m from `PosOfBLUHQ` and from any FOB, `zones_max_radius * 0.9` from any
 zone centre (a hardpoint inside a zone would be a zone hardpoint that does not gate it), 400 m
@@ -587,7 +585,7 @@ already-cleared index, because two clauses of the clear rule can become true in 
 
 **One monitor thread for all hardpoints**, ticking every 20-30 s over the registry: clear
 detection, garrison spawn and despawn on player distance, artillery cadence. Not one thread each.
-The server already runs 39 `while {true}` loops across 23 files
+The server already runs 40 `while {true}` loops across 23 files
 ([`campaign_persistence_plan.md`](campaign_persistence_plan.md)), and one thread per hardpoint
 would grow that without bound, for work that is a single pass over a few short arrays. A pass over
 50 hardpoints against 8 players is 400 distance tests every 20-30 s, which is noise.

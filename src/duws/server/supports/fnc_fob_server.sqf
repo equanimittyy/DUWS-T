@@ -81,11 +81,17 @@ publicVariable "Array_of_FOBS";
 Array_of_FOBname = Array_of_FOBname + [_fobname];
 publicVariable "Array_of_FOBname";
 
+// getPos _fob, not _foundPickupPos: createVehicle can nudge the building off the requested
+// spot, and the removal dialog identifies a FOB by reading getPos back off Array_of_FOBS.
+// Storing the request would leave the two describing positions that never quite match.
+Array_of_FOBpos = Array_of_FOBpos + [getPos _fob];
+publicVariable "Array_of_FOBpos";
+
 ["INFO", "SUPPORT", format ["FOB '%1' built at %2, %3 now standing",
 	_fobname, _foundPickupPos, count Array_of_FOBS]] call fnc_log;
 
 _spawnPos = [west, _fob] call BIS_fnc_addRespawnPosition;
 
 // spawn loop to detect FOB destroyed
-[_fob,_markerstr, _spawnPos, _fobname] spawn fnc_fob_destroyed;
+[_fob,_markerstr, _spawnPos, _fobname, getPos _fob] spawn fnc_fob_destroyed;
 

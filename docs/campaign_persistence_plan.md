@@ -12,35 +12,55 @@ what carries over is campaign state — pools, zone ownership, placement, reputa
 | Problem | Where |
 |---|---|
 | The only save is vanilla `saveGame`, which is single-player and a no-op in multiplayer | `server/misc/fnc_autoSave.sqf:11` |
-| Its one call site charges 1 CP, then gates the save behind `BIS_fnc_guiMessage` inside `if (isServer)`. A dedicated server has no display, so the dialog never resolves: the player is charged and nothing is saved | `server/supports/fnc_sitrep_support.sqf:1,8-11` |
 | Engine autosave and the save menu are switched off at boot | `server/server_init.sqf:113` |
-| `civ_locations` stores Location objects in the mission namespace, which the mission's own rule forbids because the namespace is what a save serialises | `server/misc/fnc_civ_init_Tomata.sqf:28,141`, rule in [`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md) |
-| Per-zone radius, CP worth and prefab type exist only as script locals, baked into compiled trigger strings. Nothing can rebuild a zone correctly from stored data | `server/init_zones/fnc_createzone.sqf:7-13,213,263` |
-| `Array_of_FOBS` holds objects, not positions. `fnc_FOB_cleanup.sqf:22` already works around this by comparing `str (getPos _x)` | `server/supports/fnc_fob_server.sqf:78` |
+| `civ_locations` stores Location objects in the mission namespace, which the mission's own rule forbids because the namespace is what a save serialises | `server/misc/fnc_civ_init_Tomata.sqf:163-164`, rule in [`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md) |
 | Support unlocks are client-local by design — *"Supports are local to players. No need for publicVariable"* — so there is no server-side copy of what the player paid for | `client/includes/supports_init.hpp` |
 
 `KNOWN_ISSUES.md` already lists "Save and reload mid-campaign" as untested. It is not untested;
 it cannot work.
+
+## What a naive restore gets wrong
+
+Writing the snapshot is the easy half. These are the properties of the existing builders that
+punish a restore which simply assigns the saved globals and lets boot proceed. Each is current
+behaviour, correct for a fresh campaign, and each is resolved in the design below.
+
+| Problem | Where | Consequence for a restore |
+|---|---|---|
+| `fnc_createZone` appends to `zone_namePOS_pairs`, `Array_of_OPFOR_zones` and `zone_spawn_array`, and increments `amount_zones_created` | `server/init_zones/fnc_createzone.sqf:19-32` | Restoring those globals *and* replaying the builder counts every zone twice |
+| `fnc_WARCOM_init` clears the BLUFOR zone list and hands every zone back to OPFOR | `server/warcom/fnc_WARCOM_init.sqf:38-45` | Ownership applied before it runs is wiped; every capture is lost |
+| The setup-screen waits block on globals a *client* publishes | `server/server_init.sqf:46,52` | A restore has no player at those screens, so boot never gets past them |
+| The locator `spawn`s `fnc_createZone` per zone, so builds finish out of order | `server/init_zones/fnc_locatorzones_random.sqf:181` | Registration order is not zone order, so anything keyed by array position is keyed to the wrong zone. `zone_meta_array` carries `_zone_num` for this reason |
+| `fnc_fob_server` rolls a fresh name and announces the FOB over radio behind a 5 s sleep | `server/supports/fnc_fob_server.sqf:7,20-24` | Replaying it renames every FOB and queues one callout per FOB at boot |
+| Zone names are localised at creation | `server/init_zones/fnc_locatorzones_random.sqf:181` | A stored name pins a restored campaign to the language it was created in |
+| Campaign settings are set *and* broadcast by a client | `client/dialog/fnc_process_enviro_menu.sqf:118-122,172` | A restore that only assigns them server-side leaves every client on defaults |
+| Arsenal contents are resolved at boot from whatever mods are loaded | `server/misc/fnc_create_ammo_lists.sqf` | Storing the resolved classnames pins the campaign to that mod set |
+| Hardpoints are sited inside `fnc_createZone`, if [`hardpoint_system_plan.md`](hardpoint_system_plan.md) lands | — | Replaying zones re-rolls every hardpoint position and orphans its cleared state |
+
+One thing that looks like a blocker and is not: `fnc_fob_server` takes a `_fob_owner` object
+(`:5`) and hands it to `fnc_FOBactions.sqf:3`, which reads it and never uses it. Restore needs no
+substitute for it. That dead parameter pre-dates this plan and is left alone here.
 
 ## Prerequisites
 
 None of these is persistence work, and all of them must land first. Each is independently
 worth doing.
 
-1. **Take Location objects out of the mission namespace.** Store town positions and names as
-   arrays; consumers already only call `getPos` and `text`.
-   [`civilian_town_generation_plan.md`](civilian_town_generation_plan.md) drops `createLocation`
-   for other reasons and is the natural place to finish the job.
-2. **Store per-zone metadata.** Add radius, points and prefab to a `zone_meta_array` parallel to
-   `zone_namePOS_pairs` (`server/init_zones/fnc_createzone.sqf:28-29`). Without it a restored zone
-   has the wrong trigger area and pays the wrong capture CP.
-3. **Store FOB positions.** A `Array_of_FOBpos` beside `Array_of_FOBS`, written at
-   `server/supports/fnc_fob_server.sqf:78`. This also removes the `str (getPos _x)` workaround.
-4. **Mirror support unlocks server-side.** One broadcast array; the client keeps its local copy
+1. **Make `fnc_fob_server` replayable.** It needs an optional name and a silent flag, for the
+   naming and announcement reasons in the table above. The position registry it needs is already
+   in place: `Array_of_FOBpos` (`server/supports/fnc_fob_server.sqf:84`).
+2. **Mirror support unlocks server-side.** One broadcast array; the client keeps its local copy
    as the fast path. Players spend CP on these, so losing them across a restart is losing
    currency.
-5. **Fix the sitrep save path.** `server/supports/fnc_sitrep_support.sqf:8` must not gate a
-   server-side action on a server-side dialog.
+
+**Taking Locations out of `civ_locations` is not one of them.** The civilian rewrite has landed
+and deliberately kept them: the entries are the map's own Locations, never deleted so that the
+`nearestLocations` consumers keep seeing them (`server/misc/fnc_civ_init_Tomata.sqf:145-164`).
+That still breaks the mission-namespace rule and is still worth fixing, but it does not block
+this plan. The snapshot stores town positions, and restore re-resolves each one to a Location
+through the same `nearestLocations` filter the selector uses
+(`server/misc/fnc_civ_selectTowns.sqf:42-44`); the world guard pins the map, so the lookup
+returns what it stored.
 
 ## Design
 
@@ -59,16 +79,40 @@ restart, which is worse than a type error because it fails silently.
 One key, `DUWST_save`, holding a single array with a version number first so a future format
 change can be detected rather than misread.
 
-| Group | Contents |
-|---|---|
-| Identity | format version, world name, campaign settings (`zones_number`, radii, spacing, `moreUrban`, `hardcore_mode_enable`, `enemyunitMultiplier`, `CIV_PRESENCE`) |
-| Pools | `commandpointsblu1`, `WARCOM_blufor_ap`, `WARCOM_opfor_ap`, `Player_Reputation` |
-| Placement | `PosOfBLUHQ`, `AO_direction`, `serv_zones_array`, `zone_namePOS_pairs`, the new `zone_meta_array` |
-| Ownership | `WARCOM_zones_controled_by_BLUFOR`, `WARCOM_zones_controled_by_OPFOR`, `zoneundercontrolblu`, `amount_zones_created`, `amount_zones_captured` |
-| Player build | `Array_of_FOBpos`, `Array_of_FOBname`, the support-unlock mirror |
-| Civilians | town positions, names, radii and populations; `civ_town_rep` if [`per_town_reputation_plan.md`](per_town_reputation_plan.md) has landed |
-| Loadouts | `getUnitLoadout` per player UID. Already data — `client/client_init.sqf:403` stores it on the player object, which dies with the session |
-| Arsenal | virtual cargo classname arrays from `BIS_fnc_addVirtualItemCargo` / `WeaponCargo` |
+Entries split into **inputs**, fed to the builders before they run, and **outcomes**, applied
+after the builders have run and reset what they own. The split answers the first two rows of the
+table above: anything the replay rebuilds must not also be restored, or it is double-counted.
+
+| Group | Kind | Contents |
+|---|---|---|
+| Identity | — | format version, world name |
+| Settings | input | `zones_number`, radii, spacing, `moreUrban`, `hardcore_mode_enable`, `enemyunitMultiplier`, `CIV_PRESENCE` |
+| Placement | input | `PosOfBLUHQ`, `AO_direction`, `serv_zones_array`, `zone_meta_array` |
+| Player build | input | `Array_of_FOBpos`, `Array_of_FOBname`, the support-unlock mirror |
+| Civilians | input | town positions, names, radii and populations; `civ_town_rep` if [`per_town_reputation_plan.md`](per_town_reputation_plan.md) has landed |
+| Hardpoints | input | `hardpoint_pos_array`, `hardpoint_type_array`, `hardpoint_zone_array`, `hardpoint_state_array` and the `zone_hp_left_<n>` counters, if [`hardpoint_system_plan.md`](hardpoint_system_plan.md) has landed |
+| Pools | outcome | `commandpointsblu1`, `WARCOM_blufor_ap`, `WARCOM_opfor_ap`, `Player_Reputation` |
+| Ownership | outcome | the positions of BLUFOR-held zones, and nothing else |
+| Loadouts | — | `getUnitLoadout` per player UID. Already data — `client/client_init.sqf:408` stores it on the player object, which dies with the session |
+
+Hardpoints are an input for the same reason zones are: that plan sites them inside
+`fnc_createZone`, so the siting pass has to accept a restored registry instead of rolling fresh
+positions, or a restore moves every hardpoint and orphans its cleared state.
+
+**Zone names are not stored.** `fnc_locatorzones_random.sqf:181` builds them as
+`format [localize "STR_DUWS_T_39z6pg7y", _i]`, so storing the string pins a restored campaign to
+the language it was created in. The index is already in `zone_meta_array`; the name re-localises
+from it.
+
+**The arsenal is not stored.** Faction init rebuilds the virtual cargo from scratch
+(`server/misc/fnc_create_ammo_lists.sqf`), so all a restore loses is gear added during play by
+`server/misc/fnc_addNearbyUnitsGearToArsenal.sqf`. Storing those classnames would pin the
+campaign to the mod set that produced them, which is exactly what the faction trade-off below
+refuses to do.
+
+**The settings group has to be re-broadcast, not just assigned.** Those globals are normally set
+*and* `publicVariable`'d by the setup screens on a client
+(`client/dialog/fnc_process_enviro_menu.sqf:118-122,172`), and restore skips those screens.
 
 Written by one function, on a timer and on the sitrep action. The server is the only writer.
 
@@ -77,8 +121,16 @@ Written by one function, on a timer and on the sitrep action. The server is the 
 The restore path must not rebuild anything itself. It sets state, then lets the normal builders
 run. There is exactly one code path that builds a zone, and it stays that way.
 
-The insertion point already exists — `server/warcom/fnc_init_OPFOR_WARCOM.sqf:8-14` is guarded on
-`if (!zones_created)`:
+Three hooks, in boot order.
+
+**An early gate in `server_init.sqf`, between `:9` and `:15`.** After `server_var_init` so the
+snapshot overwrites the defaults, before the terrain survey so it can be skipped. It decides
+whether a valid snapshot exists, publishes the settings and placement inputs, and raises a
+`DUWST_restoring` flag the later hooks read. It has to sit this early because the setup-screen
+waits at `:46,52` block on globals a *client* publishes, and on a restore no client is coming to
+publish them.
+
+**Zone replay, at `server/warcom/fnc_init_OPFOR_WARCOM.sqf:7-15`,** where the guard already is:
 
 ```sqf
 if (!manually_chosen) then {
@@ -86,8 +138,23 @@ if (!manually_chosen) then {
 } else { … };
 ```
 
-Restore sets `zones_created = true` and calls `fnc_createZone` once per saved zone with the saved
-metadata. The locator never runs, so no new placement is rolled.
+Restore branches past it and spawns `fnc_createZone` once per saved zone with the saved metadata.
+The locator never runs, so no new placement is rolled. Note that `zones_created` is set by
+`fnc_createZone` itself (`:21-22`), not by the locator — but `serv_zones_array` *is* the locator's
+(`fnc_locatorzones_random.sqf:203`), so the wait at `fnc_init_OPFOR_WARCOM.sqf:22` only clears
+because the snapshot restored it.
+
+**Ownership replay, after the `WARCOM_init_done` wait at `fnc_init_OPFOR_WARCOM.sqf:88`.**
+`fnc_WARCOM_init.sqf:38-45` hands every zone back to OPFOR, so ownership can only be applied
+after it has run. Apply it as `["BLU", _pos] call fnc_zone_control_set` per saved BLUFOR zone
+rather than assigning the arrays directly: that writer moves both side lists and both counters
+together and broadcasts them atomically (`server/server_fnc_init.sqf:81-120`), which is why the
+snapshot stores held positions and nothing derived from them.
+
+Civilians restore inside the same file at `:54`, where `fnc_civ_init_Tomata` is called: the saved
+towns replace the `fnc_civ_selectTowns` roll — which is not deterministic, it shuffles its
+top-up wave (`fnc_civ_selectTowns.sqf:110-115`) and rolls population (`fnc_civ_init_Tomata.sqf:75`)
+— and the rest of that function runs unchanged.
 
 | Boot step | On restore |
 |---|---|
@@ -97,10 +164,10 @@ metadata. The locator never runs, so no new placement is rolled.
 | Faction init (`:70,88`) | Runs — classnames must be re-resolved against whatever mods are loaded now |
 | `fnc_bluHQinit` (`:108`) | Runs, from the saved `PosOfBLUHQ`. It rebuilds the whole HQ deterministically, which is why persisting one position is enough |
 | `fnc_init_OPFOR_WARCOM` (`:129`) | Runs, with the locator bypassed as above |
-| `fnc_intro_heli` (`:507`) | **Skipped** |
+| `fnc_intro_heli` (`:430`) | **Skipped** |
 
-FOBs restore the same way: call `fnc_fob_server` per saved position rather than reimplementing
-what it builds.
+FOBs restore the same way: call `fnc_fob_server` per saved position — silently, and with the
+saved name — rather than reimplementing what it builds.
 
 ### What is deliberately not saved
 
@@ -109,7 +176,7 @@ damage. Zone garrisons already spawn and despawn on player distance
 (`server/init_zones/fnc_spawnWait.sqf`), so a restored campaign regenerates them the first time a
 player approaches — the same code path a fresh campaign uses.
 
-This is the decision that keeps the plan finite. The server runs 39 `while {true}` loops across 23
+This is the decision that keeps the plan finite. The server runs 40 `while {true}` loops across 23
 files, each holding script locals; persisting live state would mean relaunching every one with
 reconstructed arguments. Regenerating instead means they start the way they always do.
 
@@ -121,23 +188,23 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 | `server/misc/fnc_campaign_restore.sqf` | New. Reads it, validates version and world, sets globals, replays builders. |
 | `server/misc/fnc_autoSave.sqf` | Rewritten to call the new save; drop `saveGame`. |
 | `server/supports/fnc_sitrep_support.sqf:8-11` | Remove the server-side dialog gate. |
-| `server/server_init.sqf:113` | Keep `enableSaving [false,false]`; the engine save is no longer the mechanism. |
-| `server/warcom/fnc_init_OPFOR_WARCOM.sqf:8-14` | Branch to the restore path when a snapshot exists. |
-| `server/init_zones/fnc_createzone.sqf:28-29` | Write `zone_meta_array`. |
-| `server/supports/fnc_fob_server.sqf:78` | Write `Array_of_FOBpos`. |
-| `client/client_init.sqf:403` | Loadout save keys on player UID, not the player object. |
+| `server/server_init.sqf` | Early restore gate before `:15`, skipping the setup-screen waits at `:46,52`. Keep `enableSaving [false,false]` at `:113`; the engine save is no longer the mechanism. |
+| `server/warcom/fnc_init_OPFOR_WARCOM.sqf:7-15,54,88` | Branch to the restore path for zones; feed saved towns to civilian init; replay ownership after `WARCOM_init_done`. |
+| `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name and a silent flag. |
+| `server/misc/fnc_civ_init_Tomata.sqf:163-164` | Accept a restored town set in place of the `fnc_civ_selectTowns` roll. |
+| `client/client_init.sqf:408` | Loadout save keys on player UID, not the player object. |
 | `server/server_fnc_init.sqf` | Registry lines; support-unlock mirror writer. |
 | `info/architecture.md:122` | Replace the "vanilla `saveGame` only" line. |
 | `KNOWN_ISSUES.md` | Drop the save/reload row once it passes. |
 
 ## Task list
 
-- [ ] Prerequisites 1-5 above, each as its own change.
+- [ ] Prerequisites 1-2 above, each as its own change.
 - [ ] Write `fnc_campaign_save.sqf` and dump a snapshot to the log without restoring. Verify: every value in it is a number, string, boolean or array of those.
 - [ ] Write `fnc_campaign_restore.sqf` covering pools and ownership only. Verify: restart mid-campaign and confirm CP, AP and reputation return.
-- [ ] Add zone replay through `fnc_createZone`. Verify: restored zones sit in the same places with the same radii, and a captured zone comes back captured.
-- [ ] Add HQ and FOB replay. Verify: HQ actions work and FOB triggers fire after a restore.
-- [ ] Add loadouts, arsenal and support unlocks.
+- [ ] Add zone replay through `fnc_createZone`, then the ownership pass after `WARCOM_init_done`. Verify: restored zones sit in the same places with the same radii, a captured zone comes back captured, and `amount_zones_created` matches the zone count instead of double it.
+- [ ] Add HQ, FOB and civilian-town replay. Verify: HQ actions work, FOB triggers fire, FOB names and towns come back where they were, and the restore replays no FOB radio announcements.
+- [ ] Add loadouts and support unlocks.
 - [ ] Version and world guards: refuse a snapshot from a different map or format version and start fresh with a logged warning.
 - [ ] On a dedicated server: play, restart, confirm the campaign continues. This cannot be validated by a hosted session — a host is both server and client and will mask locality faults.
 

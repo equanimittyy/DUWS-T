@@ -1,20 +1,17 @@
+// Locality: client -- the comm-menu item runs on the machine that activated it, which is why
+// the debit below goes through fnc_pool_spend and every line after it broadcasts outward.
 if !(["CP", 1] call fnc_pool_spend) exitWith
 {
     // CP 不足时的处理：同样广播给所有玩家
     ["sitrepinfo", [localize "STR_DUWS_T_qkkva9tk", format [localize "STR_DUWS_T_p6sb3ply", 1]]] remoteExec ["BIS_fnc_showNotification", 0];
 };
 
-// 如果当前是服务器，则显示确认对话框（对话框始终在服务器上显示，无需广播）
-if (isServer) then {
-    private _result = [localize "STR_DUWS_T_ylnwrgad", localize "STR_DUWS_T_5xcfatn0", true, true] call BIS_fnc_guiMessage;
-    if (_result) then {
-        [] call fnc_autoSave; // 自动保存（已在服务器执行，无需广播）
-        sleep 0.5;
-        // 将通知广播给所有玩家
-        ["sitrepinfo", [localize "STR_DUWS_T_qkkva9tk", localize "STR_DUWS_T_biham0s3"]] remoteExec ["BIS_fnc_showNotification", 0];
-        sleep 5;
-    };
-};
+// Saving is server work, so it is asked for rather than confirmed. This sat behind an
+// if (isServer) test wrapping a BIS_fnc_guiMessage prompt: on a dedicated server no client
+// passes that test, so the save never ran at all, and on a hosted game only the host was ever
+// asked for it. Everyone pays the same CP, so everyone gets the same save.
+[] remoteExec ["fnc_autoSave", 2];
+["sitrepinfo", [localize "STR_DUWS_T_qkkva9tk", localize "STR_DUWS_T_biham0s3"]] remoteExec ["BIS_fnc_showNotification", 0];
 
 // 广播简短战况消息（侧信道或系统消息）
 private _shortMsg = format [localize "STR_DUWS_T_10dzingj", commandpointsblu1, WARCOM_blufor_ap, WARCOM_opfor_ap];

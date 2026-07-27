@@ -48,8 +48,12 @@ amount_zones_captured = 0;publicVariable "amount_zones_captured";
 AO_direction = [];
 
 // Array_of_FOBS
+// The three arrays are index-parallel: entry i of each describes one FOB. Every writer must
+// append to all three and every remover must delete the same index from all three, or a FOB's
+// name and position separate from its building.
 Array_of_FOBS = [];publicVariable "Array_of_FOBS";
 Array_of_FOBname = [];publicVariable "Array_of_FOBname";
+Array_of_FOBpos = [];publicVariable "Array_of_FOBpos";
 
 // Opfor gets Air
 AttackHeli = 1;publicVariable "AttackHeli";
@@ -212,6 +216,10 @@ ZeusStatus = 2;publicVariable "ZeusStatus";
 
 // zone_namePOS_pairs
 zone_namePOS_pairs = [];publicVariable "zone_namePOS_pairs";
+// zone_meta_array: [zone number, position, radius, capture points, fortified, prefab] per zone.
+// Keyed by the zone number it carries, not by array position -- the locator spawns fnc_createZone
+// per zone, so build-out finishes out of order and registration order is not zone order.
+zone_meta_array = [];publicVariable "zone_meta_array";
 // zone_spawn_array
 zone_spawn_array = [];
 // zones_created

@@ -8642,20 +8642,6 @@
                 <Original>Only the host (Alpha 1-1) can request side missions for now</Original>
                 <English>Only the host (Alpha 1-1) can request side missions for now</English>
             </Key>
-            <Key ID="STR_DUWS_T_ylnwrgad">
-                <Spanish>Precione Ok para guardar - Precione cancel para solo ver inteligencia</Spanish>
-                <German>Drücke OK für einen SITREP (Speichern)  -  Drücke Abbrechen um aktuelle Infos abzurufen</German>
-                <Chinesesimp>按 确定 来 保存游戏  -  按 取消 来只获取情报</Chinesesimp>
-                <Original>Press OK to save the SITREP - press Cancel for Intel Only</Original>
-                <English>Press OK to save the SITREP - press Cancel for Intel Only</English>
-            </Key>
-            <Key ID="STR_DUWS_T_5xcfatn0">
-                <Spanish>¿Quiere Guardar/Activar el guardado?</Spanish>
-                <German>Möchtest du speichern/Speichern aktivieren?</German>
-                <Chinesesimp>你想保存/启用保存吗？</Chinesesimp>
-                <Original>Do you want to save / enable saving?</Original>
-                <English>Do you want to save / enable saving?</English>
-            </Key>
             <Key ID="STR_DUWS_T_qkkva9tk">
                 <Spanish>REPSIT</Spanish>
                 <German>SITREP</German>
