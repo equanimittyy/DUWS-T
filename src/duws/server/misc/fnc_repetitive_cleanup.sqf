@@ -116,8 +116,12 @@ while {true} do {
                 _binAt = _now + _lifetime;
                 _obj setVariable ["DUWS_binAt", _binAt];
             };
+            // Living crew spares it as surely as a nearby player does. A released emplacement
+            // can be manned by an AI squadmate, and allPlayers cannot see one. Corpses, wrecks
+            // and litter all report no living crew, so this only ever spares something in use.
             if ((_force || {_binAt <= _now})
-                && {(allPlayers findIf {_x distance _obj < KEEP_RADIUS}) < 0}) then {
+                && {(allPlayers findIf {_x distance _obj < KEEP_RADIUS}) < 0}
+                && {({alive _x} count crew _obj) == 0}) then {
                 deleteVehicle _obj;
                 _binned = _binned + 1;
             } else {

@@ -6,6 +6,9 @@ _markername2 = _this select 3;
 _triggerPos = _this select 4;
 _flagPos = _triggerPos;
 _radius = _this select 5;
+// Defaulted rather than indexed: a save resumed from before the emplacements were split off the
+// zone composition carries a trigger statement built with six arguments.
+private _gunsKey = _this param [6, ""];
 
 // Server-only: this credits the shared CP/AP pools and read-modify-writes several
 // networked globals, so a second machine running it would double-credit a capture.
@@ -17,6 +20,12 @@ if (_triggerPos in WARCOM_zones_controled_by_BLUFOR) exitWith {};
 
 // Hands the zone to BLUFOR: both side lists and both counters move together.
 ["BLU", _triggerPos] call fnc_zone_control_set;
+
+// The position is the player's, so its cover, crates and camp kit stay -- but the emplacements
+// that were pointed at them are no longer campaign property. Released to the map cleanup rather
+// than deleted outright, so the keep-radius applies and nothing dissolves in front of the squad
+// still standing in the zone it just took.
+if (_gunsKey != "") then { [_gunsKey] call fnc_duws_release };
 
 ["us_takencontrol",[_place,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_takencontrol"] remoteExec ["fnc_duws_dialogue", 0];

@@ -6,6 +6,9 @@ _centerSpawn = _this select 0;
 // turret leaves its undamaged surroundings behind, and nothing about those props marks them
 // as garbage; only the key knows they belonged to something.
 private _zoneKey = format ["zone_%1_%2", round (_centerSpawn select 0), round (_centerSpawn select 1)];
+// Emplacements are filed apart from the rest of the composition: capture releases the guns,
+// while the cover, crates and camp kit stay with the position.
+private _gunsKey = "guns_" + _zoneKey;
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
@@ -129,7 +132,7 @@ private _weaponList = [];
     private _newZ = _newCenterZ + _offsetZ;
 
     private _obj = createVehicle [_class, [_newX, _newY, _newZ], [], 0, "CAN_COLLIDE"];
-    [_obj, _zoneKey] call fnc_duws_keep;
+    [_obj, _gunsKey] call fnc_duws_keep;
     _obj enableSimulation false;
     _obj setPosWorld [_newX, _newY, _newZ];
     _obj setDir (_centerSpawn getDir [_newX, _newY]);

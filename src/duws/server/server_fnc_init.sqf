@@ -276,6 +276,9 @@ publicVariable "fnc_duws_disposeAfter";
 // is wrecked its sandbags and camo net are undamaged props, and no test applied to those
 // objects -- dead, immobile, litter class -- would ever collect them. Only the key knows they
 // belonged to something that is now gone.
+// One object, one key. Nothing enforces it, but release drops the persistent flag
+// unconditionally, so filing something under two keys means retiring either of them strips the
+// protection while the other still lists it as a member.
 fnc_duws_keep = {
     params ["_obj", ["_key", "world"]];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_keep", 2] };
