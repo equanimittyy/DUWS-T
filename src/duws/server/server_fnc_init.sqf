@@ -283,14 +283,25 @@ publicVariable "fnc_duws_disposeAfter";
 // One object, one key. Nothing enforces it, but release drops the persistent flag
 // unconditionally, so filing something under two keys means retiring either of them strips the
 // protection while the other still lists it as a member.
+// _pinned marks a member whose effect depends on its existing rather than on being looked at --
+// an artillery piece, a mortar, an AA gun. Streaming those removes a capability instead of
+// deferring a cost: an aircraft crosses the gate's radius in a few seconds, so a stowed AA gun
+// would never engage anything. Declared by the caller rather than tested by class at stow time,
+// because only the code that placed the object knows why it is there, and a class test would have
+// to be kept in step with every faction mod's turret names. Local: only the server stows.
 fnc_duws_keep = {
-    params ["_obj", ["_key", "world"]];
+    params ["_obj", ["_key", "world"], ["_pinned", false]];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_keep", 2] };
     // Props and vehicles only. A unit's presence on the map is decided by its own spawn and
     // despawn logic, and a composition that owned one could not release it without fighting
     // that logic for control of the same entity.
     if (_obj isKindOf "CAManBase") exitWith {};
     _obj setVariable ["persistent", true, true];
+    if (_pinned) then { _obj setVariable ["DUWS_noStow", true] };
+    // Filing anything under a retired key revives it, so a hardpoint rebuilt at the same rounded
+    // coordinates as a cleared one does not inherit its predecessor's retirement.
+    private _wasRetired = DUWS_retired find _key;
+    if (_wasRetired >= 0) then { DUWS_retired deleteAt _wasRetired };
     // Nulls pruned on the way in: a FOB rebuild deletes its old ring outright rather than
     // releasing it, so without this the key accumulates dead references for the whole campaign.
     private _members = (DUWS_compositions getOrDefault [_key, []]) select {!isNull _x};
@@ -310,24 +321,34 @@ fnc_duws_release = {
         [_x, _ttd] call fnc_duws_disposeAfter;
     } forEach (DUWS_compositions getOrDefault [_key, []]);
     DUWS_compositions deleteAt _key;
+    // Stowed members do not exist, so there is nothing to hand the sweep -- but the records have to
+    // go, or a retired composition redeploys intact the next time someone walks up to it.
+    DUWS_stowed deleteAt _key;
+    // Terminal, and readable as such. A gate cycling this composition needs to know it is finished
+    // rather than infer it from the key being absent, which is equally true before build-out ran.
+    DUWS_retired pushBackUnique _key;
 };
 publicVariable "fnc_duws_release";
 
 // Take a composition off the map, holding the data needed to put it back. Distinct from
 // fnc_duws_release: release retires a composition for good and drops its key, where stow keeps the
-// key so the same one can return. A key sits in DUWS_compositions or DUWS_stowed, never both.
+// key so the same one can return.
 // Deletion is immediate rather than handed to the sweep, because removing the entity is the whole
 // point -- a stowed member has to leave allMissionObjects, the curator's editable set and the
 // spatial index at once, and the sweep's keep-radius would hold it instead.
-// Refuses while any member is crewed. fnc_spawnWait leaves gunners sitting in static weapons alive
-// (its despawn pass tests vehicle _x == _x), so stowing regardless would delete a manned gun and
-// strand the AI where its turret was. Retrying on the next cycle is the safe failure.
+// Refuses while a streamable member is crewed. fnc_spawnWait leaves gunners sitting in static
+// weapons alive (its despawn pass tests vehicle _x == _x), so stowing regardless would delete a
+// manned gun and strand the AI where its turret was. Retrying on the next cycle is the safe
+// failure. Pinned members are excluded from that test on purpose: they keep their crew by design,
+// so counting them would block their composition from ever stowing.
 fnc_duws_stow = {
     params ["_key"];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_stow", 2] };
     if !(_key in DUWS_compositions) exitWith { false };
     private _members = (DUWS_compositions getOrDefault [_key, []]) select {!isNull _x};
-    if ((_members findIf {({alive _x} count crew _x) > 0}) >= 0) exitWith { false };
+    private _pinned = _members select {_x getVariable ["DUWS_noStow", false]};
+    private _streamable = _members - _pinned;
+    if ((_streamable findIf {({alive _x} count crew _x) > 0}) >= 0) exitWith { false };
     private _records = [];
     {
         // Dead members go unrecorded, so what a player destroyed stays destroyed. A ruined
@@ -347,8 +368,14 @@ fnc_duws_stow = {
                 simulationEnabled _x, isDamageAllowed _x, _cargo];
         };
         deleteVehicle _x;
-    } forEach _members;
-    DUWS_compositions deleteAt _key;
+    } forEach _streamable;
+    // Pinned members never left, so the key keeps its place in DUWS_compositions holding just
+    // them. Dropped entirely when nothing was pinned, so the common case stays a single entry.
+    if (count _pinned == 0) then {
+        DUWS_compositions deleteAt _key;
+    } else {
+        DUWS_compositions set [_key, _pinned];
+    };
     DUWS_stowed set [_key, _records];
     true
 };
