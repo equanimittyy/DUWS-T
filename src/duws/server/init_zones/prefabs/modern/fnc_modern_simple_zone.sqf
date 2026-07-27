@@ -5,9 +5,6 @@ _centerSpawn = _this select 0;
 // turret leaves its undamaged surroundings behind, and nothing about those props marks them
 // as garbage; only the key knows they belonged to something.
 private _zoneKey = format ["zone_%1_%2", round (_centerSpawn select 0), round (_centerSpawn select 1)];
-// Emplacements are filed apart from the rest of the composition: capture releases the guns,
-// while the cover, crates and camp kit stay with the position.
-private _gunsKey = "guns_" + _zoneKey;
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
@@ -73,7 +70,7 @@ if (true) then
   };
   if (!_found) then { _pos = [_rX, _rY, 0]; };
   _this = createVehicle ["B_Mortar_01_F", _pos, [], 0, "CAN_COLLIDE"];
-  [_this, _gunsKey] call fnc_duws_keep;
+  [_this, _zoneKey] call fnc_duws_keep;
   _vehicle_999 = _this;
   _this setDir 215.154;
 };
@@ -101,7 +98,7 @@ if (true) then
   };
   if (!_found) then { _pos = [_rX, _rY, 0]; };
   _this = createVehicle ["B_static_AA_F", _pos, [], 0, "CAN_COLLIDE"];
-  [_this, _gunsKey] call fnc_duws_keep;
+  [_this, _zoneKey] call fnc_duws_keep;
   _vehicle_1000 = _this;
   _this setDir 215.154;
 };
@@ -129,7 +126,7 @@ if (true) then
   };
   if (!_found) then { _pos = [_rX, _rY, 0]; };
   _this = createVehicle ["B_static_AA_F", _pos, [], 0, "CAN_COLLIDE"];
-  [_this, _gunsKey] call fnc_duws_keep;
+  [_this, _zoneKey] call fnc_duws_keep;
   _vehicle_1002 = _this;
   _this setDir 215.154;
 };

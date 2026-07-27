@@ -269,16 +269,10 @@ missionNamespace setVariable [_zonePosName, [_initialCountVar, _triggeredVar, _z
 // ✅ 修复：将占领触发器和旗杆创建代码移到 while 循环之前，确保它们能够执行
 
 // CREATE ZONE CAPTURABLE TRIGGER
-// The emplacement key is derived here and passed as a string, not rebuilt from the position on
-// the far side: the statement is a compiled format string, and Arma truncates a float to about
-// six significant digits when it stringifies one. A coordinate sitting near a .5 boundary would
-// round to a different integer there than the prefab rounded to here, and fnc_duws_release
-// silently does nothing when handed a key nobody registered.
-private _zoneGunsKey = format ["guns_zone_%1_%2", round (_zonePos select 0), round (_zonePos select 1)];
 _trg = createTrigger ["EmptyDetector", _zonePos];
 _trg setTriggerArea [_size, _size, 0, false];
 _trg setTriggerActivation ["WEST SEIZED", "PRESENT", true];
-_trg setTriggerStatements ["this", format["[""%1"",%2,""%3"",""%4"",%5,%6,""%7""] spawn fnc_captured", _name, _points, _markername, _markername2, _zonePos, _size, _zoneGunsKey], ""];
+_trg setTriggerStatements ["this", format["[""%1"",%2,""%3"",""%4"",%5,%6] spawn fnc_captured", _name, _points, _markername, _markername2, _zonePos, _size], ""];
 _trg setTriggerTimeout [30, 40, 50, true];
 
 // 存储触发器变量（统一使用 floor abs 避免负号）
