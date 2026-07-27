@@ -18,6 +18,11 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
         hint "Map cleanup: sweeping now.\n\nLifetimes are treated as elapsed, so all litter goes\nexcept: within 300 m of a player, flagged persistent,\nor an intact vehicle parked within 250 m of the HQ,\na FOB or the MHQ. Counts land in the log.";
     }, [], [1,0.667,0,1]],
 
+    ["Stow / deploy nearest zone", {
+        [getPos player] remoteExec ["fnc_duws_toggleNearestZone", 2];
+        hint "Composition streaming: toggling the nearest zone.\n\nStowed compositions are deleted and rebuilt from a record,\nso destroyed parts stay gone and crates keep what is left\nin them. Refused while a gun still has its gunner.";
+    }, [], [1,0.667,0,1]],
+
     // Stub. Planned: a local overlay onto OPFOR-side WARCOM -- commander AP with its
     // income and spend, the wave thresholds it is holding at, a map marker per enemy asset.
     // Deferred assets are the point: zone garrisons still virtual behind fnc_spawnWait, queued

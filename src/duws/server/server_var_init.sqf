@@ -104,6 +104,14 @@ DUWS_disposables = [];
 // themselves -- dead, immobile, littered -- would ever collect them.
 DUWS_compositions = createHashMap;
 
+// composition key -> the records needed to rebuild it, written through fnc_duws_stow. A key is in
+// this map or in DUWS_compositions, never both: a composition is either standing on the map or
+// held here as data, and that invariant is what answers "is this one deployed" without an object.
+// Records are built when a composition is stowed rather than when it is built, so damage, looted
+// crates and moved props are captured as they actually are. Transient by design -- nothing here
+// outlives the session, and a campaign restore replays the builders instead.
+DUWS_stowed = createHashMap;
+
 // One-shot request for the map cleanup to sweep now, treating every lifetime as already elapsed.
 // Set through fnc_duws_forceCleanup and cleared by the pass it wakes. A testing tool: it skips
 // the wait for a 30 min deadline, but not KEEP_RADIUS and not the persistent flag.

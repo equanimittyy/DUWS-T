@@ -313,6 +313,82 @@ fnc_duws_release = {
 };
 publicVariable "fnc_duws_release";
 
+// Take a composition off the map, holding the data needed to put it back. Distinct from
+// fnc_duws_release: release retires a composition for good and drops its key, where stow keeps the
+// key so the same one can return. A key sits in DUWS_compositions or DUWS_stowed, never both.
+// Deletion is immediate rather than handed to the sweep, because removing the entity is the whole
+// point -- a stowed member has to leave allMissionObjects, the curator's editable set and the
+// spatial index at once, and the sweep's keep-radius would hold it instead.
+// Refuses while any member is crewed. fnc_spawnWait leaves gunners sitting in static weapons alive
+// (its despawn pass tests vehicle _x == _x), so stowing regardless would delete a manned gun and
+// strand the AI where its turret was. Retrying on the next cycle is the safe failure.
+fnc_duws_stow = {
+    params ["_key"];
+    if (!isServer) exitWith { _this remoteExec ["fnc_duws_stow", 2] };
+    if !(_key in DUWS_compositions) exitWith { false };
+    private _members = (DUWS_compositions getOrDefault [_key, []]) select {!isNull _x};
+    if ((_members findIf {({alive _x} count crew _x) > 0}) >= 0) exitWith { false };
+    private _records = [];
+    {
+        // Dead members go unrecorded, so what a player destroyed stays destroyed. A ruined
+        // building is a separate object the BuildingChanged handler has already claimed.
+        if (alive _x) then {
+            // Cargo travels with the crate. Contents are rolled by fnc_fill_ammobox and drawn down
+            // by players, so replaying the classname alone hands back a crate someone emptied.
+            private _cargo = [];
+            if (_x isKindOf "ReammoBox_F") then {
+                _cargo = [getWeaponCargo _x, getMagazineCargo _x,
+                    getItemCargo _x, getBackpackCargo _x];
+            };
+            // Simulation and damage state are recorded because the prefabs set them per object --
+            // props ship with simulation off and several are invulnerable. A deploy that guessed
+            // would quietly re-simulate every prop on the map.
+            _records pushBack [typeOf _x, getPosWorld _x, [vectorDir _x, vectorUp _x],
+                simulationEnabled _x, isDamageAllowed _x, _cargo];
+        };
+        deleteVehicle _x;
+    } forEach _members;
+    DUWS_compositions deleteAt _key;
+    DUWS_stowed set [_key, _records];
+    true
+};
+publicVariable "fnc_duws_stow";
+
+// Rebuild a stowed composition. Members come back as new objects, so nothing holding a reference
+// to the old ones survives a stow -- the key is the only identity a composition has across one,
+// which is why membership is re-filed through fnc_duws_keep rather than restored.
+fnc_duws_deploy = {
+    params ["_key"];
+    if (!isServer) exitWith { _this remoteExec ["fnc_duws_deploy", 2] };
+    {
+        _x params ["_class", "_pos", "_vectorDirUp", "_sim", "_damageAllowed", "_cargo"];
+        private _obj = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
+        // Placed again after creation: createVehicle reads its position as AGL, and the record
+        // holds world coordinates. Without this a prop on a slope returns metres into the hill.
+        _obj setPosWorld _pos;
+        _obj setVectorDirAndUp _vectorDirUp;
+        _obj enableSimulationGlobal _sim;
+        _obj allowDamage _damageAllowed;
+        if (count _cargo > 0) then {
+            clearWeaponCargoGlobal _obj;
+            clearMagazineCargoGlobal _obj;
+            clearItemCargoGlobal _obj;
+            clearBackpackCargoGlobal _obj;
+            (_cargo select 0) params ["_wTypes", "_wCounts"];
+            (_cargo select 1) params ["_mTypes", "_mCounts"];
+            (_cargo select 2) params ["_iTypes", "_iCounts"];
+            (_cargo select 3) params ["_bTypes", "_bCounts"];
+            { _obj addWeaponCargoGlobal [_x, _wCounts select _forEachIndex] } forEach _wTypes;
+            { _obj addMagazineCargoGlobal [_x, _mCounts select _forEachIndex] } forEach _mTypes;
+            { _obj addItemCargoGlobal [_x, _iCounts select _forEachIndex] } forEach _iTypes;
+            { _obj addBackpackCargoGlobal [_x, _bCounts select _forEachIndex] } forEach _bTypes;
+        };
+        [_obj, _key] call fnc_duws_keep;
+    } forEach (DUWS_stowed getOrDefault [_key, []]);
+    DUWS_stowed deleteAt _key;
+};
+publicVariable "fnc_duws_deploy";
+
 // Debug-menu entry point for the map cleanup: sweep now, with every lifetime treated as elapsed,
 // so a tester does not wait 30 min to see collection happen. The sweep's interval wait breaks on
 // this flag, so it lands within half a second. Bounded by what it cannot skip -- KEEP_RADIUS and
@@ -322,6 +398,30 @@ publicVariable "fnc_duws_release";
 fnc_duws_forceCleanup = {
     DUWS_cleanup_force = true;
     ["INFO", "CLEANUP", "Forced sweep requested from the debug menu."] call fnc_log;
+};
+
+// Debug-menu entry point for composition streaming: stow the nearest zone, or deploy it if it is
+// already stowed. Takes the caller's position because the server has no player of its own to
+// measure from. Not published, for the same reason fnc_duws_forceCleanup is not.
+fnc_duws_toggleNearestZone = {
+    params ["_pos"];
+    if (count zone_meta_array == 0) exitWith {};
+    private _best = [];
+    {
+        private _zonePos = _x select 1;
+        if (_best isEqualTo [] || {_pos distance _zonePos < _pos distance _best}) then {
+            _best = _zonePos;
+        };
+    } forEach zone_meta_array;
+    private _key = format ["zone_%1_%2", round (_best select 0), round (_best select 1)];
+    if (_key in DUWS_stowed) then {
+        [_key] call fnc_duws_deploy;
+        ["INFO", "STREAM", format ["deployed %1", _key]] call fnc_log;
+    } else {
+        private _stowed = [_key] call fnc_duws_stow;
+        ["INFO", "STREAM", format ["stow %1: %2", _key,
+            ["refused", "done"] select _stowed]] call fnc_log;
+    };
 };
 
 // STARTUP FUNCTIONS
