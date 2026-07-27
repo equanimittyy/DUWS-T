@@ -490,7 +490,6 @@ publicVariable "currentMissionPilot";
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [west, [_VARtaskgeneratedName], 
 [localize "STR_DUWS_T_njsu8ofz", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate; 
@@ -573,7 +572,6 @@ _pilot setcaptive false;
 _pilot disableAI "PATH";
 [_pilot, "Acts_InjuredLyingRifle01"] remoteExec ["switchMove", 0];
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 sleep 55;
 
@@ -603,7 +601,6 @@ if (!isNull attachedTo _pilot) then {
 sleep 1;
 
 [_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 deleteVehicle _pilot;
 missionNamespace setVariable ["currentMissionPilot", nil];
 publicVariable "currentMissionPilot";

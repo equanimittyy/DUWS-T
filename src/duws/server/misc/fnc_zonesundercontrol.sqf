@@ -10,5 +10,4 @@ while {_undercontrol} do {
 
     [zoneundercontrolblu*6, "territory_income"] remoteExec ["fnc_cp_adjust", 2];
     [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_zonesundercontrol"] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
 };

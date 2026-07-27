@@ -40,7 +40,6 @@ if (clicked) then {
 	_speaker = localize "STR_DUWS_T_OVERLORD";
     _message = localize "STR_DUWS_T_astchange";
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 } else {
 	hint "Cancelled";	

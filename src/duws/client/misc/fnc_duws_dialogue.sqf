@@ -23,16 +23,34 @@ if (isNil "DUWS_netSpeakers") then {
         "STR_DUWS_T_chariot", "STR_DUWS_T_crane", "STR_DUWS_T_stork",
         "STR_DUWS_T_swordfish"
     ] apply { localize _x };
+
+    // VOICE speakers who are nonetheless on the radio. The squelch marks an incoming
+    // transmission, not a category, so Overlord earns one and the player callsign does not
+    // -- you do not hear your own key-up. Everyone else in VOICE is in the room with you.
+    DUWS_voiceSquelchSpeakers = ["STR_DUWS_T_OVERLORD"] apply { localize _x };
 };
 
-// Callsign substitution belongs here rather than at the call site, and below any decision
-// keyed on the speaker: the table holds the stringtable's "Alpha 1-1", so a host who has
-// renamed the team must not reach that decision already renamed. The speaker is guarded
-// because fnc_fob_server interpolates a position array where the name belongs.
+if (_channel isEqualTo "") then {
+    _channel = [_speaker, DUWS_netSpeakers] call fnc_duws_dialogue_channel;
+};
+
+// Local, like every other surface here: the tone is per-listener, and remoteExec would play
+// it once per client per line. Decided before substitution so it reads the roster name.
+if (_channel isEqualTo "NET" || {_speaker in DUWS_voiceSquelchSpeakers}) then {
+    playSound "DUWS_Radio_Start";
+};
+
+// Callsign substitution belongs here rather than at the call site, and below the decision
+// above: the table holds the stringtable's "Alpha 1-1", so a host who has renamed the team
+// must not reach that decision already renamed. The speaker is guarded because
+// fnc_fob_server interpolates a position array where the name belongs.
 if (_speaker isEqualType "") then { _speaker = [_speaker] call fnc_cs; };
 _text = [_text] call fnc_cs;
 
-// Pass-through until NET routing is switched on. Landing the wrapper and the 274-site
-// rename with nothing changing on screen is what makes the surface change reviewable on
-// its own afterwards.
-[_speaker, _text] call BIS_fnc_showSubtitle;
+if (_channel isEqualTo "NET") exitWith {
+    // Local, never remoteExec: see the locality note at the top. The [side, identity] form
+    // is what puts the speaker in the sender slot so the engine renders "Speaker: line".
+    [west, _speaker] sideChat _text;
+};
+
+[_speaker, _text] call fnc_duws_voice_render;

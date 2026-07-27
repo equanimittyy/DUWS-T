@@ -9,16 +9,14 @@ if (hasInterface && isMultiplayer)	then {
 
 if (isnil ("Mission_available")) then {Mission_available = true;publicVariable "Mission_available"};
 if (!Mission_available) exitWith {
-_speaker = localize "STR_DUWS_T_overlord";
+_speaker = localize "STR_DUWS_T_OVERLORD";
 _speakeracteam = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_missioncooldown"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_missioncooldown2";
 [localize "STR_DUWS_T_b68ftbvf",{hint _this}] remoteExec ["BIS_fnc_Spawn", player1];
 [_speakeracteam, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 4;
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 };
 
 if (!((vehiclevarname player) in game_master)) exitWith {hint ([localize "STR_DUWS_T_eck4xh9m"] call fnc_cs)};

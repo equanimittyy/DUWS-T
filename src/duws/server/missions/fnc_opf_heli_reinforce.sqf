@@ -38,7 +38,6 @@ missionNamespace setVariable [_triggeredVar, true, true];
 ["INFO", "WARCOM", format ["heli reinforcement launched for %1 (defenders fell to %2 or fewer of %3)",
 	_center, _threshold, _initialCount]] call fnc_log;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_HELIQRF1"] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 [_center, _taskID, _isZone] spawn {
     params ["_center", "_taskID", "_isZone"];

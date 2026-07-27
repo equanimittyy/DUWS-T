@@ -28,9 +28,4 @@ class CfgSounds
         sound[] = {"duws\shared\sounds_npics\support\radioinnout.ogg", 1.7, 1};
         titles[] = {};
     };
-    class DUWS_Radio_End {
-        name = "DUWS_Radio_End";
-        sound[] = {"duws\shared\sounds_npics\support\radioinnout.ogg", 1.5, 1.1};
-        titles[] = {};
-    };
 };

@@ -696,13 +696,10 @@ while {_attempts < 10 && !_validMarkerPos} do {
 };
 
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 12;
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 12;
 [_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 12;
 
 // 计算箭头指向任务中心的方向
@@ -776,7 +773,6 @@ sleep 90;
     _x setDamage 1;
 } forEach _bluforAPCs;
 [_speaker1, _messagehoundlost] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 // ================ 任务完成条件 ================
 // 等待条件：红方载具乘员组全部死亡 或 任务被取消
 waitUntil {
@@ -802,7 +798,6 @@ deleteMarker _arrowMarkerName;
 { deleteMarker _x; } forEach _apcMarkers;
 
 [_speaker1, _message3] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 12;
 [_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
 

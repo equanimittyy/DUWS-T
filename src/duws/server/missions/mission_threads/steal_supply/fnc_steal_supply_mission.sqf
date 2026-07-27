@@ -246,10 +246,8 @@ sleep 1;
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["rescue%1%2", round(_MissionPos select 0), round(_MissionPos select 1)];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [west, [_VARtaskgeneratedName],
 [localize "STR_DUWS_T_p7qawzl4", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate;
@@ -286,7 +284,6 @@ if (!alive _truck1 || (time - _taskStartTime > _taskTimeLimit)) exitWith {
     _truck1 setDamage 1;
     [{hint localize "STR_DUWS_T_jsg7ys0w"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
     [_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
     [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, true];
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];

@@ -21,7 +21,6 @@ sleep 5;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_fobcall"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // Create the building
 _fob = "";
@@ -44,7 +43,7 @@ _refortify = false;
 [_foundPickupPos, _size] spawn fnc_createpatrolFOB;
 [_foundPickupPos, _size] spawn fnc_createpatrolFOB;
 
-[localize "STR_DUWS_T_26nbk6p8"] spawn fnc_sideChat_filter;
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_26nbk6p8"] remoteExec ["fnc_duws_dialogue", 0];
 
 // create some patrols
 [_foundPickupPos, _fob] spawn fnc_guardsFOB;

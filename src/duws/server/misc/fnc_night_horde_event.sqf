@@ -45,10 +45,8 @@ while {true} do {
                 _lastHordeDate = _currentDay; // 记录触发日
                 missionNamespace setVariable ["Horde_LastDay", _lastHordeDate]; // 保存到存档
                 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_hordealert1"] remoteExec ["fnc_duws_dialogue", 0];
-                [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 sleep 6;
                 [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_hordealert2"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-                [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 sleep 6;
 
                 // 创建任务

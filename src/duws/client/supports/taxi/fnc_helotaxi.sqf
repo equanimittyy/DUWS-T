@@ -7,11 +7,6 @@ _foundPickupPos = [];
 taxiCanTakeOff = false;
 _helo_maxDamage = 0.7;
 _helo_minFuel = 0.4;
-// Dedicated callsign, not a random roll. A support you request answers as the element
-// lead, so the digits are fixed at 1-1 and stay the same every time it is called.
-_taxiName = "Chariot";
-_random1 = 1;
-_random2 = 1;
 _music = [] call fnc_taxi_music;
 
 _foundPickupPos = [_posplayer, 20,_radius,20,0,0.5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos; // find a valid pos
@@ -23,17 +18,14 @@ if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hi
 _speakeracteam = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_helotaxicall0"] call fnc_cs);
 [_speakeracteam, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 _speaker = localize "STR_DUWS_T_OVERLORD";
-_message = format[localize "STR_DUWS_T_helotaxicall1",_taxiName,_random1,_random2];
+_message = format[localize "STR_DUWS_T_helotaxicall1", localize "STR_DUWS_T_chariot"];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 _speaker = localize "STR_DUWS_T_chariot";
 _message = ([localize "STR_DUWS_T_helotaxicall"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // create marker on LZ
 _markerpickup = format["lz%1%2",_foundPickupPos]; // Define marker name
@@ -96,13 +88,12 @@ hint localize "STR_DUWS_T_helotaxichopperinbound";
 // check damage and exit function
 _check_damage = compile "((vehicle _pilot == _pilot) or (damage _helo > _helo_maxDamage) or (fuel _helo < _helo_minFuel))";
 _abort = {
-	params ["_helo","_helogroup","_helipad1","_markerpickup","_taxiName","_random1","_random2"];
+	params ["_helo","_helogroup","_helipad1","_markerpickup"];
 	deleteVehicle _helipad1;
 	deleteMarker str(_markerpickup);
-	_message = format[([localize "STR_DUWS_T_helotaxidamaged"] call fnc_cs),_taxiName,_random1,_random2];
+	_message = format[localize "STR_DUWS_T_helotaxidamaged", localize "STR_DUWS_T_chariot"];
 	_speaker = localize "STR_DUWS_T_OVERLORD";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
 	_helo land "LAND";
 	_helo engineOn false;
 	sleep 300;
@@ -116,7 +107,7 @@ waitUntil {sleep 0.5;(_foundpickuppos distance _helo < 350) or (call _check_dama
 
 // IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
-	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _abort;
+	[_helo,_helogroup,_helipad1,_markerpickup] spawn _abort;
 }; 
 
 ////////////////////
@@ -154,7 +145,6 @@ while {_inVehCheck} do {
 	_message = localize "STR_DUWS_T_pilotwhere";
 	_speaker = localize "STR_DUWS_T_chariot";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
 	// wait until the player has given a validpos or pilot not in choppa
 	waitUntil {sleep 0.5;taxiCanTakeOff or (call _check_damage)};
 	sleep 1;
@@ -163,9 +153,8 @@ while {_inVehCheck} do {
 	// check if player is inside choppa
 	if (vehicle player != _helo) then {
 		taxiCanTakeOff = false; 
-		player globalChat format[([localize "STR_DUWS_T_helotaxi_notaboard"] call fnc_cs),_taxiName,_random1,_random2];
+		[localize "STR_DUWS_T_chariot", localize "STR_DUWS_T_helotaxi_notaboard"] remoteExec ["fnc_duws_dialogue", 0];
 		_helo addAction [format ["<t color='#00ff00'>%1</t>", localize "STR_DUWS_T_helotaxi_action_lz"], fnc_mapclickhelo, "", 0, true, true, "", "vehicle _this == _target"];
-		[] remoteExec ["fnc_broadcastRadioChatter", 0];
 	} else {
 		_inVehCheck = false;
 	};
@@ -173,7 +162,7 @@ while {_inVehCheck} do {
 
 // IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
-	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _abort;
+	[_helo,_helogroup,_helipad1,_markerpickup] spawn _abort;
 }; 
 
 // *****************************
@@ -220,7 +209,7 @@ sleep 1;
 
 // IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
-	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _abort;
+	[_helo,_helogroup,_helipad1,_markerpickup] spawn _abort;
 	deleteVehicle _helipad;
 	_helo lock false;
 	deleteMarker str(Taximarker1);
@@ -235,7 +224,7 @@ sleep 1;
 
 // IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
-	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _abort;
+	[_helo,_helogroup,_helipad1,_markerpickup] spawn _abort;
 	deleteVehicle _helipad;
 	_helo lock false;
 	deleteMarker str(Taximarker1);
@@ -263,14 +252,14 @@ _helo setEffectiveCommander _pilot;
 
 // IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
-	[_helo,_helogroup,_helipad1,_markerpickup,_taxiName,_random1,_random2] spawn _abort;
+	[_helo,_helogroup,_helipad1,_markerpickup] spawn _abort;
 	deleteVehicle _helipad;
 	_helo lock false;
 	deleteMarker str(Taximarker1);
 	deleteMarker str(Taximarker2);
 }; 
 
-	_message = format[localize "STR_DUWS_T_helotaxiarrival",_taxiName,_random1,_random2];
+	_message = localize "STR_DUWS_T_helotaxiarrival";
 	_speaker = localize "STR_DUWS_T_chariot";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 _helo lock false;
@@ -303,10 +292,9 @@ sleep 1;
 
 // IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
-	_message = format[([localize "STR_DUWS_T_helotaxirtbdown"] call fnc_cs),_taxiName,_random1,_random2];
+	_message = format[localize "STR_DUWS_T_helotaxirtbdown", localize "STR_DUWS_T_chariot"];
 	_speaker = localize "STR_DUWS_T_OVERLORD";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-	[] remoteExec ["fnc_broadcastRadioChatter", 0];
 	sleep 300;
 	_art = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;
 	{deleteVehicle _x;} foreach units _helogroup;
@@ -314,10 +302,9 @@ if (call _check_damage) exitWith {
 }; 
 
 // *****************************
-	_message = format[localize "STR_DUWS_T_helotaxirtb",_taxiName,_random1,_random2];
+	_message = localize "STR_DUWS_T_helotaxirtb";
 	_speaker = localize "STR_DUWS_T_chariot";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 sleep 118;
 

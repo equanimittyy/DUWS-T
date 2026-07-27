@@ -31,7 +31,6 @@ if (!isServer) exitWith {};
                 [1, "reputation_recovery"] remoteExec ["fnc_rep_adjust", 2];
                 ["repup",[localize "STR_DUWS_T_rqwho9bq",format[localize "STR_DUWS_T_0pluxey2",_expectedRep]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated,false];
                 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_repup"] remoteExec ["fnc_duws_dialogue", 0];
-                [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 ["INFO", "CIV", format ["Reputation increased to %1", _expectedRep]] call fnc_log;
             };
         };
@@ -51,7 +50,6 @@ if (!isServer) exitWith {};
             // CP 提醒（使用 cpaddedciv 格式，显示获得的 CP）
             ["CPaddedciv", [_cpReward]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
             [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_cpcivbonus"] remoteExec ["fnc_duws_dialogue", 0];
-            [] remoteExec ["fnc_broadcastRadioChatter", 0];
         };
     };
 };

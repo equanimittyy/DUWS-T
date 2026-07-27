@@ -47,12 +47,10 @@ if ((vehiclevarname player) in game_master) then {
                 _speakeracteam = localize "STR_DUWS_T_actionteam";
                 _message = ([localize "STR_DUWS_T_restsuccess"] call fnc_cs);
                 [_speakeracteam, _message] remoteExec ["fnc_duws_dialogue", 0];
-                [] remoteExec ["fnc_broadcastRadioChatter", 0];
             } else {
                 _speaker = localize "STR_DUWS_T_OVERLORD";
                 _message1 = localize "STR_DUWS_T_restcooldown";
                 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-                [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 hint (localize "STR_DUWS_T_restcooldownhint");
             };
         },

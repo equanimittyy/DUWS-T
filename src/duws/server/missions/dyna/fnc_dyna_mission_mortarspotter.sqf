@@ -144,7 +144,6 @@ sleep 6;
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_mortarspotter3"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 4;
 [localize "STR_DUWS_T_allseer", ([localize "STR_DUWS_T_mortarspotter4"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 // ---------- 5. 创建任务和标记 ----------
 private _taskID = format ["dyna_mortar_%1", round time];
@@ -189,7 +188,6 @@ waitUntil {
 };
 sleep 4;
 [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_mortarspotter5"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 4;
 // ---------- 8. 任务成功，奖励 ----------
 [_taskID, "SUCCEEDED"] call BIS_fnc_taskSetState;

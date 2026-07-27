@@ -12,6 +12,9 @@ echo
 echo "== lint: paths (execVM / #include -> real file) =="
 python3 "$HERE/lint/check_paths.py" || rc=1
 echo
+echo "== lint: retired dialogue functions =="
+python3 "$HERE/lint/check_retired.py" || rc=1
+echo
 
 if [ "${1:-}" = "--no-unit" ]; then
   echo "== unit tests (skipped: --no-unit) =="

@@ -193,10 +193,8 @@ if (isNil "fnc_intel_container_search_server") then {
                 private _desc = format [localize "STR_DUWS_T_TOPSECRET_DESC", name _caller];
                 ["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", 0];
                 [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_INTEL_GATHERINGTS1"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-                [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 sleep 6;
                 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_GATHERINGTS2"] remoteExec ["fnc_duws_dialogue", 0];
-                [] remoteExec ["fnc_broadcastRadioChatter", 0];
             };
         } else {
             [localize "STR_DUWS_T_CONTAINER_EMPTY"] remoteExec ["hint", _caller];
@@ -317,10 +315,8 @@ if (isNil "fnc_intel_container_search_server") then {
 // 在任务区域周围生成额外巡逻队
 [_MissionPos, _radius] spawn fnc_missionPatrols;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_GATHERING1"] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_INTEL_GATHERING2"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // ========== 创建任务标记 ==========
 private _randomPos = [_MissionPos, 0, _radius, 5, 0, 0.2, 0] call BIS_fnc_findSafePos;
@@ -340,13 +336,10 @@ private _taskID = format ["intel_gathering_%1", round time];
 ] call BIS_fnc_taskCreate;
 
 [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_INTEL_GATHERING3"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_GATHERING4"] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_INTEL_GATHERING5"] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // ========== 统计初始敌军数量 ==========
 sleep 5;
@@ -376,7 +369,6 @@ missionNamespace setVariable [_triggeredVar, false, true];
     } forEach _bldgMarkers;
 
     [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_INTEL_GATHERING6"] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];

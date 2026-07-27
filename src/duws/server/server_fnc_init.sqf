@@ -729,12 +729,12 @@ fnc_player_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_pla
 fnc_earplugs = compile preprocessFileLineNumbers "duws\client\misc\fnc_earplugs.sqf";publicVariable "fnc_earplugs";
 fnc_duws_help = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_help.sqf";publicVariable "fnc_duws_help";
 fnc_bottom_right_message = compile preprocessFileLineNumbers "duws\client\misc\fnc_bottom_right_message.sqf";publicVariable "fnc_bottom_right_message";
+fnc_duws_voice_render = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_voice_render.sqf";publicVariable "fnc_duws_voice_render";
 fnc_duws_dialogue = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_dialogue.sqf";publicVariable "fnc_duws_dialogue";
 fnc_autoSave = compile preprocessFileLineNumbers "duws\server\misc\fnc_autoSave.sqf";publicVariable "fnc_autoSave";
 fnc_playerTF_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_playerTF_spawn.sqf";publicVariable "fnc_playerTF_spawn";
 // Not broadcast: server-only, so an accidental client call fails loud.
 fnc_HCsquad_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_HCsquad_spawn.sqf";
-fnc_sideChat_filter = compile preprocessFileLineNumbers "duws\shared\functions\fnc_sideChat_filter.sqf";publicVariable "fnc_sideChat_filter";
 fnc_sitrep_display = compile preprocessFileLineNumbers "duws\client\misc\fnc_sitrep_display.sqf";publicVariable "fnc_sitrep_display";
 fnc_fill_ammobox = compile preprocessFileLineNumbers "duws\server\misc\fnc_fill_ammobox.sqf";publicVariable "fnc_fill_ammobox";
 fnc_fill_sawpbox = compile preprocessFileLineNumbers "duws\server\misc\fnc_fill_sawpbox.sqf";publicVariable "fnc_fill_sawpbox";
@@ -1053,79 +1053,6 @@ fnc_pylon_hint_success = {
 };
 publicVariable "fnc_pylon_hint_success";
 
-fnc_broadcastRadioChatter = {
-    // 仅客户端执行
-    if (!hasInterface) exitWith {};
-
-    // ===== 互斥锁：防止多个广播重叠 =====
-    if (missionNamespace getVariable ["DUWS_radioChatterRunning", false]) exitWith {};
-    missionNamespace setVariable ["DUWS_radioChatterRunning", true];
-
-    // ===== 自定义开头音效 =====
-    private _startSound = "DUWS_Radio_Start";
-    if (_startSound != "") then {
-        playSound _startSound;
-        sleep 0.2;   // 占位音效很短，等 0.2 秒足够（后续可根据实际音效长度调整）
-    };
-
-    // ===== 音效时长对照表（索引 0 对应 RadioAmbient1） =====
-    private _durations = [
-        18,  // RadioAmbient1
-        11,  // RadioAmbient2
-        12,  // RadioAmbient3
-        8,   // RadioAmbient4
-        10,  // RadioAmbient5
-        8,   // RadioAmbient6
-        8,   // RadioAmbient7
-        13,  // RadioAmbient8
-        9,   // RadioAmbient9
-        10,  // RadioAmbient10
-        7,   // RadioAmbient11
-        19,  // RadioAmbient12
-        8,   // RadioAmbient13
-        9,   // RadioAmbient14
-        9,   // RadioAmbient15
-        13,  // RadioAmbient16
-        8,   // RadioAmbient17
-        11,  // RadioAmbient18
-        12,  // RadioAmbient19
-        7,   // RadioAmbient20
-        4,   // RadioAmbient21
-        5,   // RadioAmbient22
-        10,  // RadioAmbient23
-        9,   // RadioAmbient24
-        11,  // RadioAmbient25
-        10,  // RadioAmbient26
-        10,  // RadioAmbient27
-        11,  // RadioAmbient28
-        20,  // RadioAmbient29
-        10   // RadioAmbient30
-    ];
-
-    // RadioAmbient1..30 are vanilla CfgSounds, not shipped by the mission. A game
-    // build may define fewer than 30, so a blind random pick can name a sound the
-    // engine lacks and error out ("RadioAmbientN missing"). Pick only from names
-    // that resolve, pairing each with its duration.
-    private _pool = [];
-    {
-        private _name = format ["RadioAmbient%1", _forEachIndex + 1];
-        if (isClass (configFile >> "CfgSounds" >> _name)) then {
-            _pool pushBack [_name, _x];
-        };
-    } forEach _durations;
-
-    if (_pool isEqualTo []) exitWith {
-        missionNamespace setVariable ["DUWS_radioChatterRunning", false];
-    };
-
-    // 播放选中的无线电杂音
-    private _pick = selectRandom _pool;
-    playSound (_pick select 0);
-    sleep (_pick select 1);   // 等待音效自然播完
-    // 释放锁
-    missionNamespace setVariable ["DUWS_radioChatterRunning", false];
-};
-publicVariable "fnc_broadcastRadioChatter";
 // Registry self-check. preprocessFile on a path that does not resolve returns "", which
 // compiles to an empty {} and then no-ops at every call site with no error anywhere -- a
 // mistyped or moved path is otherwise invisible until some later stage silently never

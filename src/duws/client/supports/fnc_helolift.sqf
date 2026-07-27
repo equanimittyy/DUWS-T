@@ -79,7 +79,6 @@ _check_damage = compile format ["(isNull _helo) or (damage _helo > %1) or (fuel 
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = format[([localize "STR_DUWS_T_heloliftcall"] call fnc_cs)];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // 创建临时吊装点标记
 _hookMarkerName = format ["hook_%1", floor random 10000];
@@ -100,12 +99,10 @@ sleep 8;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = format[localize "STR_DUWS_T_helolift1"];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 _speaker = localize "STR_DUWS_T_crane";
 _message = format[localize "STR_DUWS_T_helolift2"];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 waitUntil {
     sleep 1.5;
@@ -118,7 +115,6 @@ deleteMarker _hookMarkerName;
 _speaker = localize "STR_DUWS_T_crane";
 _message = format[localize "STR_DUWS_T_helolift3"];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 if (call _check_damage) exitWith { call _abort };
 
@@ -206,7 +202,6 @@ sleep 6;
 _speaker = localize "STR_DUWS_T_crane";
 _message = format[localize "STR_DUWS_T_helolift5"];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // ========== 6. 请求航点 ==========
 [player, "height", [60]] remoteExec ["fnc_helolift_waypoints", 2];
@@ -259,7 +254,6 @@ if (call _check_damage) exitWith { call _abort };
 _speaker = localize "STR_DUWS_T_crane";
 _message = format[localize "STR_DUWS_T_helolift6"];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 if (call _check_damage) exitWith { call _abort };
 

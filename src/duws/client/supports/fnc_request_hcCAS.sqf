@@ -38,7 +38,6 @@ switch (VERSION_X) do {
 _speaker = localize "STR_DUWS_T_koipilot";
 _message = ([localize "STR_DUWS_T_koiin"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 player hcsetgroup [_group,""];
 DUWS_number_CAS = DUWS_number_CAS + 1;
@@ -47,7 +46,6 @@ hint localize "STR_DUWS_T_gu6cbc5f";
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_squadready"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // 为飞机添加Killed事件处理器（使用spawn以允许sleep，并增加状态控制）
 _vehicle addEventHandler ["Killed", {
@@ -62,7 +60,6 @@ _vehicle addEventHandler ["Killed", {
         _speaker = localize "STR_DUWS_T_OVERLORD";
         _message = localize "STR_DUWS_T_casdownkoi";
         [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-        [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
         sleep 600;
 
@@ -82,7 +79,6 @@ _vehicle addEventHandler ["Killed", {
         _speaker = localize "STR_DUWS_T_OVERLORD";
         _message1 = ([localize "STR_DUWS_T_casreservekoi"] call fnc_cs);
         [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-        [] remoteExec ["fnc_broadcastRadioChatter", 0];
     };
 }];
 
@@ -105,5 +101,4 @@ _vehicle addEventHandler ["Deleted", {
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = ([localize "STR_DUWS_T_casreservekoi"] call fnc_cs);  // 复用“可用”提示
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
 }];

@@ -563,7 +563,6 @@ if (_mode == "spawn") then {
     [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_civpopR"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
     sleep 2;
     ["biohazard", [localize "STR_DUWS_T_civrescuetitle", localize "STR_DUWS_T_civrescue"]] remoteExec ["BIS_fnc_showNotification", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", "[Spawn] WBK broadcast messages sent"] call fnc_log; };
 
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Spawned %1 groups at location %2 (target population %3)", count _allGroups, _locIndex, _targetPop]] call fnc_log; };

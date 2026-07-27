@@ -241,14 +241,12 @@ private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["cache%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [west, [_VARtaskgeneratedName],
 [localize "STR_DUWS_T_n4uc7t2x", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate;
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_radarcopy"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 missionNamespace setVariable ["current_mission_target_pos", getPos _vehicle_7];
 ["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", 0];
@@ -279,8 +277,9 @@ waitUntil {sleep 5; !alive _vehicle_7 || (damage _vehicle_7) == 1};
 
 sleep 120;
 
-[_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
+// Overlord's line, not the player's: _speaker was reassigned to the player callsign above
+// for the intervening exchange, which left this congratulation attributed to Alpha 1-1.
+[localize "STR_DUWS_T_OVERLORD", _message1] remoteExec ["fnc_duws_dialogue", 0];
 deleteMarker str(_markername2);
 deleteMarker str(_markername);
 

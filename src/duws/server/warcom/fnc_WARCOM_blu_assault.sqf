@@ -76,7 +76,6 @@ WARCOM_blu_attack_wave_avalaible = false;
 			waitUntil {sleep 0.1;!isNil "_TFname"};
 			sleep 2;
 			[localize "STR_DUWS_T_OVERLORD", format[localize "STR_DUWS_T_7y9is2hm", _TFname]] remoteExec ["fnc_duws_dialogue", 0];
-            [] remoteExec ["fnc_broadcastRadioChatter", 0];
 			[{hint localize "STR_DUWS_T_7y9is2hm2"}] remoteExec ["BIS_fnc_Spawn", 0];
 			sleep 10; // give squads a chance to mount up
 			// 让特遣队在基地附近待命（移动到基地附近但不攻击）

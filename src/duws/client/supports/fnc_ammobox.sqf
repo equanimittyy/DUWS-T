@@ -33,7 +33,6 @@ _speaker1 = localize "STR_DUWS_T_stork";
 _message = ([localize "STR_DUWS_T_supplydropcall"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_supplydropcallend";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 switch (VERSION_X) do {
 	case "MODERN": {
@@ -65,7 +64,6 @@ _wp2 setWaypointType "MOVE";
 _wp2 setWaypointBehaviour "CARELESS";
 sleep 8;
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 hint localize "STR_DUWS_T_17hh9rx4";
 sleep 30;

@@ -7,10 +7,8 @@ if (count _standby == 0) exitWith {
 };
 // 提示玩家
 [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_taskforces_launchrqst"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_taskforces_launched"] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 {
     if (!isNull _x) then {
         // 清除现有路点（待命路点）

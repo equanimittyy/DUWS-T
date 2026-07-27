@@ -568,19 +568,6 @@ now; the router just should not make it awkward to add.
 Ordered by the migration phases above. Everything through phase 2 must be invisible in play;
 the first three boxes are done when nothing has changed on screen.
 
-- [ ] **P0** Land `fnc_duws_dialogue` as a pass-through, with the NET table built but unused, and `fnc_duws_dialogue_channel` as a separate pure lookup. Verify: boot log reports both non-empty in the registry count; add the lookup to `tests/unit/functions.txt` and assert every roster entry plus the blank and non-string speakers in `cases.sqf` — it is the one thing the lint cannot check.
-- [ ] **P1** Sweep the 274 call sites. Verify: pre-counts matched 263 + 2 + 9; `BIS_fnc_showSubtitle` greps to zero under `src/duws`; `bash tests/run.sh`; the two single-quoted sites edited by hand.
-- [ ] **P2** Move `fnc_cs` into the wrapper and strip it from the 68 speaker slots — the 44 inline ones are the half a `_speaker` grep misses. Verify: a host-chosen callsign still appears, and a renamed team still routes to VOICE.
-- [ ] Split `STR_DUWS_T_pilot`. Two VOICE keys (`_pilot_intro`, `_pilot_downed`, 4 sites); the other 14 move to support callsigns — Chariot 1-1, Crane 1-1, Stork 1-1 and the existing `_slingshot`. Verify: no `_speaker` assignment anywhere is a bare SQF literal, which is what the router relies on.
-- [ ] **P3a** Turn on NET routing; VOICE keeps calling `BIS_fnc_showSubtitle`. Verify: a support call lands in chat under its own callsign; the subtitle is unchanged from before; in a two-client session each NET line appears **once** per player, not twice — that is the local-dispatch check.
-- [ ] **P3b** Write the two-line VOICE renderer and switch VOICE to it. Verify: two VOICE lines fired 1 s apart are both visible, the older dimmed, a third bumps the oldest.
-- [ ] **P4** Fold the squelch into the router as a local `playSound`; delete the 166 `fnc_broadcastRadioChatter` sites and the inline function. Verify: two NET lines 2 s apart both get a squelch, once each; a civilian conversation gets none; a `_caller`-targeted line no longer squelches for the rest of the server.
-- [ ] **P5** Re-point the 15 `fnc_sideChat_filter` sites; delete the file, its registry line and its `publicVariable`. Verify: grep returns nothing; `check_paths.py` passes; the boot log shows no `ERROR REGISTRY`.
-- [ ] Drop the four duplicate-surface postings (sitrep, disguise, zone reveal, campaign won).
-- [ ] Convert the four `fnc_arty.sqf` `globalChat` calls. Verify: a non-host player sees a fire mission called by the host.
-- [ ] `fnc_WARCOM_gps_marker.sqf:25` hardcoded English → a stringtable key.
-- [ ] **P6** Stringtable pass, English and Chinesesimp; strip the quote marks from the three Chinesesimp callsign values. Verify: no line renders as "Overlord: This is Overlord", no sender name renders inside quotes, and no body names a callsign its speaker slot contradicts.
-- [ ] Add the lint rule banning the three retired names under `src/duws`.
 - [ ] In-game: run a side mission with dense dialogue and confirm no line is lost; call a support and confirm it lands in chat, not on the subtitle; go disguised and confirm the intercepted OPFOR traffic does not displace dialogue.
 
 ## Decided trade-offs

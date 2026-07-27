@@ -34,7 +34,6 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith {
 };
 
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 _ord = "";
 if (_supportype == 1) then {_ord = localize "STR_DUWS_T_jg5oh7nw"};	//arty
@@ -44,20 +43,13 @@ if (_supportype == 4) then {_ord = localize "STR_DUWS_T_4o24llvl"};		//laser
 if (_supportype == 5) then {_ord = localize "STR_DUWS_T_a31378y0"};		//cluster
 if (_supportype == 6) then {_ord = localize "STR_DUWS_T_7sgon7jn"};		//napalm
 
-// Dedicated callsign, not a random roll. A support you request answers as the element
-// lead, so the digits are fixed at 1-1 and stay the same every time it is called.
-_taxiName = "Slingshot";
-_random1 = 1;
-_random2 = 1;
-
 hint localize "STR_DUWS_T_fqeghaut";
 //hint format["Position: %1\nSalvos:%2\nRadius:%3\nInterval:%4\nRPS:%5\nSupport type:%6\nCost:%7\nAmmo type:%8", _position, _salvos, _radius, _interval, _rps,_supportype,_cost,_ammotype];
 if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
-	player globalChat format[localize "STR_DUWS_T_stmeajce",_taxiName,_random1,_random2];
+	[localize "STR_DUWS_T_slingshot", localize "STR_DUWS_T_stmeajce"] remoteExec ["fnc_duws_dialogue", 0];
 } else {
-	player globalChat format[localize "STR_DUWS_T_77l9izur",_taxiName,_random1,_random2];
+	[localize "STR_DUWS_T_slingshot", localize "STR_DUWS_T_77l9izur"] remoteExec ["fnc_duws_dialogue", 0];
 };
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // CREATE A MARKER ON TARGET
 
@@ -124,11 +116,10 @@ if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || 
 
 hint localize "STR_DUWS_T_moassj3z";
 if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
-	player globalChat format[localize "STR_DUWS_T_0jegiaf4",_taxiName,_random1,_random2];
+	[localize "STR_DUWS_T_slingshot", localize "STR_DUWS_T_0jegiaf4"] remoteExec ["fnc_duws_dialogue", 0];
 } else {	
-	player globalChat format[localize "STR_DUWS_T_hf9bhgvb",_taxiName,_random1,_random2];
+	[localize "STR_DUWS_T_slingshot", localize "STR_DUWS_T_hf9bhgvb"] remoteExec ["fnc_duws_dialogue", 0];
 };
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 _veh_alive = true;
 if (_ammotype == "Laser") then {

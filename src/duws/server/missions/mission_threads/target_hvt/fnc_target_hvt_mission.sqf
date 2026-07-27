@@ -176,12 +176,10 @@ if (_actualBldgCount > 0) then {
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [west, [_VARtaskgeneratedName],
  [localize "STR_DUWS_T_19ajhe1d", _mission_name, str (getMarkerPos _markername)], objNull, true] call BIS_fnc_taskCreate;
  [_speaker1, _message0] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // CREATE THE HVT GROUP
 _group = [_targetpos, EAST, [opfor_OFFICER_X, opfor_OPERATOR_X, opfor_MARK_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
@@ -274,7 +272,6 @@ if (alive _target && (time - _missionStartTime) > _taskTimeout) exitWith {
 sleep 120;
 
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 deleteMarker str(_markername2);
 deleteMarker str(_markername);
 

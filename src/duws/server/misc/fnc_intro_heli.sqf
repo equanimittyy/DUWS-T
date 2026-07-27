@@ -123,7 +123,6 @@ _wp setWaypointCompletionRadius 30;
 _wp setWaypointStatements ["true", "missionNamespace setVariable ['intro_heli_arrived', true, true];"];
 
 [localize "STR_DUWS_T_pilot_intro", localize "STR_DUWS_T_heli_moving"] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 1;
 cutRsc ["DUWST", "PLAIN", 0, true] remoteExec ["call", 0];
 sleep 8;
@@ -153,7 +152,6 @@ waitUntil {
 };
 
 [localize "STR_DUWS_T_pilot_intro", localize "STR_DUWS_T_heli_inpos"] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 3;
 
 // ==================== 处理脚本执行过程中加入的 JIP 玩家 ====================
@@ -211,13 +209,10 @@ publicVariable "intro_heli_done";
 
 sleep 6;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heli_roger"] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_vzjqx5tp"] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heli_money"] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // 直升机飞离
 _heli flyInHeight 100;
@@ -231,7 +226,6 @@ sleep 10;
 // ========== 焦土模式字幕 ==========
 if (!isNil "scorched_earth_enabled" && scorched_earth_enabled) then {
     [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_SEEsub"] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
 };
 waitUntil {
     sleep 1;

@@ -44,7 +44,6 @@ if (side _object == CIVILIAN) then {
      _speaker = localize "STR_DUWS_T_OVERLORD";
      _message = localize "STR_DUWS_T_v7djsfoq";
      [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 	["info",[localize "STR_DUWS_T_rtv3i48t",localize "STR_DUWS_T_j94223ip"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 	_markername = format["Informant%1",str (getpos _object)]; // Define marker name
 	_markerstr = createMarker [str(_markername), getpos _object];

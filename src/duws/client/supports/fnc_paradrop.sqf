@@ -14,7 +14,6 @@ _speaker1 = localize "STR_DUWS_T_stork";
 _message = localize "STR_DUWS_T_paradropcall";
 _message1 = localize "STR_DUWS_T_paradropcallend";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // SEND A PLANE
 _group = "";
@@ -87,7 +86,6 @@ _group2 = creategroup WEST;
 _radius = 130;
 _group2 deleteGroupWhenEmpty true;
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 private ["_soldier1","_soldier2","_soldier3","_soldier4","_soldier5","_soldier6","_soldier7","_soldier8","_soldier9","_soldier10","_soldier11","_soldier12"];
 switch (VERSION_X) do {

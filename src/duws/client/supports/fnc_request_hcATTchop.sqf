@@ -38,7 +38,6 @@ switch (VERSION_X) do {
 _speaker = localize "STR_DUWS_T_changgongpilot";
 _message = ([localize "STR_DUWS_T_longbowin"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 hint localize "STR_DUWS_T_rjuehu36";
 
 // 为直升机/飞机添加Killed事件处理器（保留原有时序，但增加冲突控制）
@@ -54,7 +53,6 @@ _vehicle addEventHandler ["Killed", {
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = localize "STR_DUWS_T_casdownlb";
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
     sleep 580;
 
@@ -74,7 +72,6 @@ _vehicle addEventHandler ["Killed", {
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message1 = ([localize "STR_DUWS_T_casreservelb"] call fnc_cs);
     [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
     };
 }];
 
@@ -97,5 +94,4 @@ _vehicle addEventHandler ["Deleted", {
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = ([localize "STR_DUWS_T_casreservelb"] call fnc_cs);  // 复用“可用”提示
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
 }];

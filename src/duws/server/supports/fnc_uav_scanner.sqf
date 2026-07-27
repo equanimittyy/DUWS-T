@@ -17,12 +17,10 @@ if (commandpointsblu1 < _cost) exitWith {
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_requestuavscan"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_requestuavscan1";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 // CREATE MARKER FOR CHECKED SIZE
 _markername = format["%1%2vc",round(_centerPos select 0),round(_centerPos select 1)]; // Define marker name
 _markerstr = createMarker [str(_markername), _centerPos];
@@ -70,7 +68,7 @@ _wp2 setWaypointBehaviour "CARELESS";
 
 switch (VERSION_X) do {
 	case "MODERN": {
-		[localize "STR_DUWS_T_45np59yv"] spawn fnc_sideChat_filter;
+		[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_45np59yv"] remoteExec ["fnc_duws_dialogue", 0];
 	};
 };
 
@@ -79,16 +77,15 @@ if (!alive _vehicle) exitWith {hint localize "STR_DUWS_T_l01sbx6n"};
 
 switch (VERSION_X) do {
 	case "MODERN": {
-		[localize "STR_DUWS_T_7vt59ge6"] spawn fnc_sideChat_filter;
+		[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_7vt59ge6"] remoteExec ["fnc_duws_dialogue", 0];
 	};
 };
 
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_uavscancall";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 5;
-[localize "STR_DUWS_T_2ncoq1yy"] spawn fnc_sideChat_filter;
+[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_2ncoq1yy"] remoteExec ["fnc_duws_dialogue", 0];
 
 
 // CREATE EAST TRIGGER
@@ -159,7 +156,7 @@ _tlistwest = list _trgwest;
 } forEach _tlistwest;
 
 sleep 20; 
-[localize "STR_DUWS_T_rfcxa2ku"] spawn fnc_sideChat_filter;
+[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_rfcxa2ku"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 20;
 
 //DELETE THE UAV

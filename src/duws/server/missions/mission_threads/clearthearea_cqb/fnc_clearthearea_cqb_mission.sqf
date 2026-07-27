@@ -196,10 +196,8 @@ private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["clearhouse%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [_speakeracteam, _messageroger] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 _markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
 _markername = _markerData select 0;
@@ -222,13 +220,10 @@ deleteMarker str(_markername2);
 deleteMarker str(_markername);
 
 [_speakeracteam, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 5;
 [_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 [_speaker, _message3] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 [_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
 

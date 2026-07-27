@@ -525,7 +525,6 @@ if (_mode == "spawn") then {
         [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_civpop"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
         ["info", [_enterMsg, localize "STR_DUWS_T_towninteract"]] remoteExec ["BIS_fnc_showNotification", 0];
     };
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
     [_groups, _usableBuildings] spawn fnc_civ_wp_Tomata;
 
@@ -559,7 +558,6 @@ if (_mode == "spawn") then {
             };
         };
         [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_hoscivpop"] remoteExec ["fnc_duws_dialogue", 0];
-        [] remoteExec ["fnc_broadcastRadioChatter", 0];
     };
 
     if (CIV_PRESENCE != "RAVAGE" && Player_Reputation < 0 && _spawnCount > 0) then {

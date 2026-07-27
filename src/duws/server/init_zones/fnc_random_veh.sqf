@@ -95,7 +95,6 @@ if (_vehClass == "air" && AttackHeli == 1) then {
 			private _speaker = localize "STR_DUWS_T_OVERLORD";
             private _message = localize "STR_DUWS_T_opforairspotted";
             [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-            [] remoteExec ["fnc_broadcastRadioChatter", 0];
 		};
 	};
 

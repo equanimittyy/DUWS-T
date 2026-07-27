@@ -53,10 +53,8 @@ _corpse setVariable ["corpse_target_pos", _targetPos];
                 ["info", [localize "STR_DUWS_T_INTEL_FOUND_TARGETtitle", localize "STR_DUWS_T_INTEL_FOUND_TARGETdesc"]] remoteExec ["BIS_fnc_showNotification", 0];
                 // 使用玩家名字作为说话者
                 [_playerName, ([localize "STR_DUWS_T_INTEL_FOUND_TARGET"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-	            [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 sleep 8;
                 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_FOUND_TARGET2"] remoteExec ["fnc_duws_dialogue", 0];
-	            [] remoteExec ["fnc_broadcastRadioChatter", 0];
             };
         } else {
             if (_rand < 0.6) then {
@@ -64,7 +62,6 @@ _corpse setVariable ["corpse_target_pos", _targetPos];
                 [1, "corpse_intel"] remoteExec ["fnc_cp_adjust", 2];
                 ["BLU", 1, "corpse_intel"] remoteExec ["fnc_ap_adjust", 2];
                 [_playerName, localize "STR_DUWS_T_INTEL_FOUND_x"] remoteExec ["fnc_duws_dialogue", 0];
-	            [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 ["infosearch", [localize "STR_DUWS_T_INTEL_BONUS_TITLE", format [localize "STR_DUWS_T_INTEL_BONUS_DESC", 1, 1]]] remoteExec ["BIS_fnc_showNotification", 0];
             } else {
                 // 40% 无收获s

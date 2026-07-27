@@ -55,7 +55,6 @@ waitUntil {sleep 30; amount_zones_created > 0 && {zoneundercontrolblu >= amount_
 private _endLine = format ["%1 %2", localize "STR_DUWS_T_fo1ihi1n", localize "STR_DUWS_T_CAMPAIGN_WON"];
 ["info",[localize "STR_DUWS_T_fo1ihi1n", localize "STR_DUWS_T_CAMPAIGN_WON"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 [_endLine,{hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-[_endLine] spawn fnc_sideChat_filter;
 
 ["Campaign", "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", 0];
 sleep 10;

@@ -25,7 +25,6 @@ str(_markerpickup) setMarkerText "Pickup";
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_boattaxicall"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // find a pos where to create the boat
 _spawnPos = [_posplayer, 400,500,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
@@ -72,7 +71,7 @@ if (getdammage _boat > 0.7 or !alive _pilot) exitWith {}; // get out of the loop
 // check if player is inside choppa
 if (vehicle player != _boat) then {
 	taxiCanTakeOff = false; 
-	[([localize "STR_DUWS_T_boattaxi_notaboard"] call fnc_cs)] spawn fnc_sideChat_filter;
+	[localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_notaboard"] remoteExec ["fnc_duws_dialogue", 0];
 	_boat addAction [format ["<t color='#00b7ff'>%1</t>", localize "STR_DUWS_T_boattaxi_action_loc"], fnc_mapclickboat, "", 0, true, true, "", "vehicle _this == _target"];
 } else {
 	_inVehCheck = false;};
@@ -127,7 +126,7 @@ titleText [localize "STR_DUWS_T_boattaxi_arrived", "PLAIN DOWN"];
 {doGetOut _x; sleep 1;} forEach units group player;
 
 sleep 40;
-[localize "STR_DUWS_T_boattaxi_rtb"] spawn fnc_sideChat_filter;
+[localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_rtb"] remoteExec ["fnc_duws_dialogue", 0];
 _wp = _boatgroup addWaypoint [_teleportPoint,0];   // tell the helo to leave
 _wp setWaypointType "MOVE";
 deleteMarker str(_markerpickup);

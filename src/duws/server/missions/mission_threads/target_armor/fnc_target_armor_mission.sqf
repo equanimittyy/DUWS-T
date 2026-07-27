@@ -210,7 +210,6 @@ _wp2 setWaypointTimeout [30, 45, 60];
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["targetarmor%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [west, [_VARtaskgeneratedName],
 [localize "STR_DUWS_T_y7z1cx6j", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate;
@@ -237,7 +236,6 @@ waitUntil {sleep 2; !alive _target};
 sleep 120;
 
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 deleteMarker str(_markername2);
 deleteMarker str(_markername);
 

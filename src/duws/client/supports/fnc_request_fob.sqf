@@ -25,7 +25,7 @@ if (_tooMany) exitWith {};
 
 // CHECK FOR GOOD LOCATION
 Hint localize "STR_DUWS_T_cp9cw550";
-[localize "STR_DUWS_T_cp9cw550"] spawn fnc_sideChat_filter;
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_cp9cw550"] remoteExec ["fnc_duws_dialogue", 0];
 _triggerSize = _size / 4;
 _trg=createTrigger["EmptyDetector",_position];
 _trg setTriggerArea[_triggerSize,_triggerSize,0,false];
@@ -38,7 +38,7 @@ deleteVehicle _trg;
 
 if (_amountOPFOR > 0) exitWith {
 	Hint localize "STR_DUWS_T_8zn96920";
-	[localize "STR_DUWS_T_8zn96920"] spawn fnc_sideChat_filter;
+	[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_8zn96920"] remoteExec ["fnc_duws_dialogue", 0];
 	sleep 15;
 	_art = [player,"fob_support"] call BIS_fnc_addCommMenuItem;
 };
@@ -59,7 +59,7 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith {
   sleep 15;
   _art = [player,"fob_support"] call BIS_fnc_addCommMenuItem;
 };
-[localize "STR_DUWS_T_1k60dqrv"] spawn fnc_sideChat_filter;
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_1k60dqrv"] remoteExec ["fnc_duws_dialogue", 0];
 
 // SPAWN FOB ON SERVER
 [_foundPickupPos, _size, (vehicleVarname player)] remoteExec ["fnc_fob_server", 2];

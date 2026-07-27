@@ -13,7 +13,6 @@ _speaker1 = localize "STR_DUWS_T_stork";
 _message = ([localize "STR_DUWS_T_sawpcall"] call fnc_cs);
 _message1 = ([localize "STR_DUWS_T_sawpcallend"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 sleep 8;
 // SEND A PLANE
@@ -56,7 +55,6 @@ _wp2 setWaypointBehaviour "CARELESS";
 sleep 8;
 hint localize "STR_DUWS_T_sawpibnd";
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 18;
 hint localize "STR_DUWS_T_sawposdt";
 

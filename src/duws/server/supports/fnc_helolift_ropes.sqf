@@ -50,7 +50,6 @@ switch (_mode) do {
 
         [localize "STR_DUWS_T_crane", localize "STR_DUWS_T_helolift4"]
             remoteExec ["fnc_duws_dialogue", 0];
-        [] remoteExec ["fnc_broadcastRadioChatter", 0];
         [_targetVehicle, _originalMass] call _pinPhysics;
 
         { ropeUnwind [_x, 3.5, _ropeLength * 0.2]; } forEach _ropes;

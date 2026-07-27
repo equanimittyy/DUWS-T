@@ -13,7 +13,6 @@ publicVariable "Mission_available";
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_missiontimer"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 skiptime 3;
 [] remoteExec ["fnc_bottom_right_message", [0,-2] select isDedicated,true];
 {deleteVehicle _x} forEach allDeadMen;

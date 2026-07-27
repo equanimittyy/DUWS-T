@@ -128,16 +128,12 @@ _civGroup deleteGroupWhenEmpty true;
 
 // ----- 任务前对话（广播）----------------------------------------------------
 [_speakerinfomat, _message] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [_speaker, _messagewhoau] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [_speakerinfomat, _messageiminfo] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [_speaker, _messageoverlord] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 3;
 
 // ----- 4. 创建任务条目（使用线人标记作为任务位置标记）----------------------
@@ -146,10 +142,8 @@ _VARtaskgeneratedName = format ["protectciv_%1_%2", round(_MissionPos select 0),
 [localize "STR_DUWS_T_protectciv", _mission_name, _civilianMarker], objNull, true] call BIS_fnc_taskCreate; 
 sleep 5;
 [_speakeracteam, _messageroger] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [_speakerinfomat, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // ========== 新增：创建触发器，等待任意玩家进入任务区域 ==========
 _startTrigger = createTrigger ["EmptyDetector", _targetpos];
@@ -167,7 +161,6 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
     missionNamespace setVariable [format ["%1_startTime", _taskName], time];
     missionNamespace setVariable [format ["%1_started", _taskName], true];
     [localize "STR_DUWS_T_infomat", localize "STR_DUWS_T_pcyh"] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
     deleteVehicle _trg;
 };
 
@@ -211,13 +204,11 @@ Mission_Failed = false;
             ["info", [localize "STR_DUWS_T_cycuqbvj", format [localize "STR_DUWS_T_0pluxey2", Player_Reputation]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
         };
         [_speaker, _message3] remoteExec ["fnc_duws_dialogue", 0];
-        [] remoteExec ["fnc_broadcastRadioChatter", 0];
     } else {
             // 时间到且平民存活 → 成功
             _speakeracteam  = localize "STR_DUWS_T_actionteam";
             _message2       = ([localize "STR_DUWS_T_pcend"] call fnc_cs);
             [_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
-            [] remoteExec ["fnc_broadcastRadioChatter", 0];
             sleep 8;
             [_taskID, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, true];
 

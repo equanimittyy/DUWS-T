@@ -140,10 +140,8 @@ _generatedObjects append _newUnits;
 private _markerData = [_foundPos, "Supply Cache", localize _nameKey, 200] call fnc_missionMarkerData;
 _markerData params ["_markerIcon", "_markerArea"];
 [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_supply_start"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_supply_start2"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-[] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // ---------- 创建任务 ----------
 private _taskID = format ["dyna_supplyrecover_%1", round time];
@@ -177,10 +175,8 @@ if (!alive _box) then {
     deleteMarker str(_markerIcon);
     deleteMarker str(_markerArea);
     [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_supply_fail"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
     sleep 5;
     [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_supply_fail2"] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
     sleep 4;
     // 任务失败
     [_taskID, "FAILED"] call BIS_fnc_taskSetState;
@@ -202,7 +198,6 @@ if (!alive _box) then {
     [15, 15, _missionName] spawn fnc_mission_reward;
     
     [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_supply_success"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-    [] remoteExec ["fnc_broadcastRadioChatter", 0];
     sleep 5;
     // 任务成功
     [_taskID, "SUCCEEDED"] call BIS_fnc_taskSetState;

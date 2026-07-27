@@ -22,7 +22,7 @@ if (hardcore_mode_enable) then {
 
 {
 	if (str (_x select 1) == str (_primary_waypoint select 0)) then {
-		[format["TF Primary Target: %1", _x select 0]] spawn fnc_sideChat_filter;
+		[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_tf_primary_target", _x select 0]] remoteExec ["fnc_duws_dialogue", 0];
 	};
 } foreach zone_namePOS_pairs;
 
@@ -91,7 +91,6 @@ while {true} do {
 						_speaker = localize "STR_DUWS_T_OVERLORD";
 						_message = format[localize "STR_DUWS_T_3azcote7",_x select 0,_TFname];
 						[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-						[] remoteExec ["fnc_broadcastRadioChatter", 0];
 					};
 				} foreach zone_namePOS_pairs;
 			};
