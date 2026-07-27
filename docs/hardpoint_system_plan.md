@@ -58,10 +58,78 @@ Garrison size is not per type — it comes from the AP ladder
 ([§The director and the escalation ladder](#the-director-and-the-escalation-ladder)). Crewed
 cores add their gunner on top.
 
-Siting preference is what makes a hardpoint read as *placed* rather than scattered, and it is
-cheap: each type gets a preferred-terrain test that runs before the generic rejection rules and
-falls through to them after a few tries. A mortar pit that lands on a hilltop is not wrong, just
-worse.
+### Choosing a type
+
+**Site first, then type.** Find a position that passes the generic rejection rules, read what the
+ground there is good for, and roll a type weighted by that. The reverse order — roll a type, then
+hunt for terrain that suits it — can fail to place anything, and zone hardpoints must place
+reliably because the capture gate counts them.
+
+Base weights differ by flavour, because the two exist for different reasons. A zone hardpoint
+guards an objective; a normal hardpoint is infrastructure feeding the wider war, which is why the
+observation post leads there and trails inside a zone, where the player is already in contact and
+being seen changes little.
+
+| Type | Zone | Normal |
+|---|---|---|
+| MG nest | 1.0 | 0.7 |
+| AT position | 0.6 | 0.6 |
+| Observation post | 0.4 | 1.0 |
+| AA position | 0.3 | 0.4 |
+| Mortar pit | 0.15 | 0.25 |
+| Artillery battery | 0.05 | 0.1 |
+
+Terrain then multiplies what the site actually supports: AT roughly triples with a road inside
+30 m and all but disappears without one (`BIS_fnc_nearestRoad`, as `fnc_createzone.sqf:182` uses
+it), AA doubles on open high ground, mortar doubles in defilade, OP doubles with sightlines. The
+weights are a starting point to tune in play; the *shape* — common infantry positions, uncommon
+specialised ones, rare guns — is the part that matters.
+
+Three exclusions drop an entry from the array before the roll rather than zeroing it, since a
+zero weight relies on `selectRandomWeighted` semantics that are not worth depending on:
+
+- the type is at its campaign cap ([below](#the-indirect-fire-types-are-capped-campaign-wide));
+- a specialised type (AA, mortar, battery) is already in this zone, so a five-hardpoint zone
+  cannot be five AA guns;
+- for director builds only, OPFOR AP has not unlocked it.
+
+`selectRandomWeighted` is the mission's idiom for exactly this — `fnc_createzone.sqf:113-121`
+picks prefabs with it and the WARCOM wave tables pick vehicles with it
+(`fnc_WARCOM_opf_assault.sqf:23-28`).
+
+### The indirect-fire types are capped campaign-wide
+
+**One artillery battery and two mortar pits, alive at once, across the whole map.** The cap spans
+both flavours: a zone that rolls a mortar pit consumes one of the two, and the director cannot
+build a battery while one already stands. Clearing one frees its slot, so destroying the battery
+buys quiet until the enemy fields another rather than ending indirect fire for the campaign.
+
+Three reasons the number is this small:
+
+- **Indirect fire is the only threat that reaches past the fight the player chose.** Rare enough
+  to be an event, and destroying one should feel like removing something from the war.
+- **These are the only hardpoints with permanent crews**
+  ([§Distance gating](#distance-gating-replaces-a-live-cap)). Three guns is six or so units that
+  never despawn — a bounded cost, where an uncapped count would not be.
+- **The other five types are already bounded by the player's own movement.** Only these act at
+  range, so only these need a number.
+
+Counting is a filter over `hardpoint_type_array` where `hardpoint_state_array` is `0`; no new
+state. **Claim the slot in the same unsuspended block that reads the count.** Zones build
+concurrently — `fnc_locatorzones_random.sqf:180` spawns one `fnc_createZone` per zone, and each
+siting loop sleeps — so a read, a `sleep`, then a placement lets two zones both see an empty slot
+and both take it. SQF only yields where the script says so, which is what makes decide-and-claim
+in one block sufficient.
+
+At cap the type simply leaves the weighted array, so the site gets whatever else fits it and the
+hardpoint is still placed. There is no separate substitution rule to keep in step with the weights
+— one mechanism decides every type, and the capture gate counts what the player expects.
+
+Because generation is not AP-gated, the caps are usually spent before the director draws breath:
+if zone build-out rolls the battery, the enemy cannot field another until the player destroys that
+one. That is the intended shape — the guns are part of the world the player walks into, and the
+director's job is replacing them. It is also why the guns sit at the bottom of the weight table: without
+that, the first three zones would hold every interesting emplacement in the campaign.
 
 Unit classnames come from the `opfor_*_X` faction globals exactly as
 `server/init_zones/fnc_createopfortified.sqf:14,23,43` does. Hardcoding unit or turret
@@ -241,16 +309,27 @@ enemy's escalation ladder — patrol and assault composition step up at 10/40/65
 (`fnc_WARCOM_opf_assault.sqf:8-21`, `fnc_WARCOM_opf_patrol.sqf:8-14`) — so hardpoints join the
 ladder every other OPFOR element is already on:
 
-| OPFOR AP | Garrison | Types the director will build |
+| OPFOR AP | Garrison, any hardpoint | Types the *director* may build |
 |---|---|---|
 | < 40 | 2-3 infantry | OP, MG |
 | 40-99 | 3-4 infantry, one armed car in support | + AT |
-| 100-135 | 4-5 infantry, an APC parked on the position | + AA, mortar pit |
-| 136+ | 4-5 infantry, MBT if `HeavyArmor == 1`, else APC | + artillery battery |
+| 100-135 | 4-5 infantry, an APC parked on the position | + AA, mortar pit (max 2 alive) |
+| 136+ | 4-5 infantry, MBT if `HeavyArmor == 1`, else APC | + artillery battery (max 1 alive) |
 
 The unlock order tracks what the player fields. AT arrives once they are buying vehicles, AA once
 they are flying, and the artillery battery only at the top, because it is the one type whose
 position barely constrains what it can reach.
+
+**The unlock column binds the director only.** Everything placed at generation — every zone
+hardpoint and the seed subset — rolls from the full type list whatever OPFOR AP happens to be at
+campaign start. AP gates what the enemy can *newly field*, not what was already dug in when the
+player arrived, and gating generation would make the first hours of every campaign a tour of
+identical MG nests.
+
+The garrison column still applies to all of them, because composition is read at spawn rather than
+at placement. So an AA position generated in hour one is a real gun with a thin crew, and the same
+position revisited in hour five has armour parked next to it. The emplacement is what the map
+rolled; the troops around it are what the war has become.
 
 Vehicle classes come from the same `opfor_ARMED_CAR1_X` / `opfor_APC1_X` / `opfor_MBT_TANK1_X`
 globals the wave tables use, so a hardpoint late in a campaign is defended by whatever the enemy
@@ -264,7 +343,7 @@ costs nothing to implement, because the spawn already happens on approach.
 
 | Knob | Value | Why |
 |---|---|---|
-| Seed subset | 2-3 at WARCOM init | The player meets the mechanic before the director has produced anything |
+| Seed subset | 2-3 at WARCOM init, any type | The player meets the mechanic before the director has produced anything |
 | Build tick | one candidate every 20-30 min | Slower than the 45-90 min patrol cadence (`fnc_WARCOM_opf_patrol.sqf:178`), faster than the 30 min assault cycle |
 | Build gate | OPFOR AP above 10 | A suppressed enemy stops fortifying; matches the threshold its first assault wave uses |
 | Live cap | none | ([§Distance gating](#distance-gating-replaces-a-live-cap)) |
@@ -295,8 +374,8 @@ radius and the same 300 s timer).
 
 **Indirect-fire hardpoints keep their crew permanently.** A gun that only works when a player is
 standing next to it cannot shell a FOB across the valley, which is the entire reason those types
-exist. One or two permanent units per mortar pit or battery is the cost, and the AP thresholds
-that unlock them limit how many exist at all.
+exist. The campaign-wide cap of three such guns is what makes that affordable: six or so units
+that never despawn, fixed, rather than growing with the campaign.
 
 ## Indirect-fire hardpoints
 
@@ -578,6 +657,7 @@ is.
 - [ ] Add the AP-scaled garrison ladder. Verify: the same hardpoint spawns 2-3 infantry early and infantry plus armour late; composition is read at spawn, so leaving and returning to one changes what defends it.
 - [ ] Add garrison distance gating to the monitor. Verify: garrisons disappear 300 s after the last player leaves 600 m and come back on approach; cores, cover and markers never disappear; a re-crewed hardpoint has one turret, not two.
 - [ ] Let a campaign run several hours without visiting the corridors, then count units. Verify: live AI tracks player position rather than campaign length — this is the test that replaces the live cap.
+- [ ] Enforce the indirect-fire caps. Verify: never more than one live battery or two live mortar pits with every zone generated and the director running for hours; a zone at cap places a substitute type rather than nothing; clearing one lets another be built.
 - [ ] Add mortar-pit fire missions against fixed positions. Verify: rounds land only on BLU-held zones and FOBs within `inRangeOfArtillery`, the warning precedes impact, and a dry tube stops.
 - [ ] Add the artillery battery on the same implementation. Verify: it stays put, reaches as far as its own gun does, and killing its crew leaves a capturable gun that counts as cleared.
 - [ ] Add the observation gate, scatter and the fire roll. Verify: a gun with no spotter in the area never fires however long it sits; killing the OP that overlooks a FOB stops fire on that FOB; scatter widens with range and tightens under direct observation.
