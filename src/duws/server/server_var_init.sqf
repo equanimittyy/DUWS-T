@@ -278,6 +278,10 @@ zones_min_radius = 200;publicVariable "zones_min_radius";
 // zoneundercontrolblu
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
 
+// Sequence number of the 30-minute campaign economy tick (fnc_zonesundercontrol.sqf).
+// Not broadcast: only server-side payout caps read it.
+econ_tick = 0;
+
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
 
 // enable ZBE units caching

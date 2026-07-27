@@ -11,6 +11,11 @@ if (!isServer) exitWith {};
 while {true} do {
     sleep 1800;
 
+    // The tick's own sequence number, so anything that wants a "once per payout window" cap can
+    // key off this clock rather than start a second one that drifts out of phase with it --
+    // which is the failure this loop was merged to end. Server-local: no client reads it.
+    econ_tick = econ_tick + 1;
+
     // AP is not gated on zone holdings: the enemy banking its towns while the player holds
     // nothing is exactly the case the town economy exists to model.
     private _reps = missionNamespace getVariable ["civ_town_rep", []];

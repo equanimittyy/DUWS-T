@@ -689,9 +689,9 @@ negative is incidental and cheap: a civilian death at `-1` (`fnc_civ_rep_Tomata.
 three times in ten and only with a player inside 200 m, so about thirty-three kills) puts a town
 on the band edge, a building at `-2` under the same 200 m guard gets there in five, and a failed
 IDAP at `-5` covers half the distance on its own. Going positive is deliberate and slow: healing
-is worth `+1` but is capped at one credit per town per 30-minute window
-(`server/misc/fnc_civ_healed.sqf`), so the BLUFOR band is five hours of visits away on healing
-alone, against IDAP success at `+5` and protect-civ success.
+is worth `+1` but is capped at one credit per town per campaign economy tick
+(`server/misc/fnc_civ_healed.sqf`, keyed to `econ_tick`), so the BLUFOR band is five hours of
+visits away on healing alone, against IDAP success at `+5` and protect-civ success.
 
 That cap is the whole point of listening to the engine rather than offering an action. The
 action it replaces credited any civilian whether hurt or not, consumed nothing when its roll

@@ -3,7 +3,7 @@
 /*
     fnc_civ_healed.sqf
     参数: [_unit, _healer, _isMedic] —— HandleHeal 事件参数
-    玩家用原版医疗系统救治平民时，为该城镇加 1 点声望。每个城镇每 30 分钟只计一次。
+    玩家用原版医疗系统救治平民时，为该城镇加 1 点声望。每个城镇每个经济周期只计一次。
     返回 false，绝不接管原版治疗流程。
 
     Listening to the engine rather than offering an action removes the farm the custom heal
@@ -20,11 +20,11 @@ if (isNull _healer || {!isPlayer _healer}) exitWith { false };
 private _idx = _unit getVariable ["civ_locIndex", -1];
 if (_idx < 0) exitWith { false };
 
-// Aligned to a 30-minute boundary off mission time, not 30 minutes from this town's last heal.
-// Every town therefore rolls over together and in step with the economy ticks, instead of each
-// carrying its own drifting clock. HandleHeal can fire more than once for a single treatment,
-// which the same window absorbs.
-private _window = floor (time / 1800);
+// Keyed to the campaign economy tick's own sequence number rather than a clock of its own, so
+// every town rolls over on the same payout the CP and AP income lands on. A second timer here
+// would drift out of phase with it, which is the failure that merged those two in the first
+// place. HandleHeal can fire more than once for a single treatment; the same window absorbs it.
+private _window = econ_tick;
 private _key = format ["civ_heal_window_%1", _idx];
 if ((missionNamespace getVariable [_key, -1]) == _window) exitWith { false };
 

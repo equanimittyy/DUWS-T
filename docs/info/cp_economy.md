@@ -146,6 +146,11 @@ of nominally equal period drift apart the moment either one stalls. Only the CP 
 `zoneundercontrolblu > 0` — AP pays unconditionally, since the enemy banking its towns while the
 player holds nothing is the case the town economy exists to model.
 
+Each iteration bumps `econ_tick`, the clock's sequence number. Anything wanting a "once per
+payout window" cap keys off that rather than starting a timer of its own — `fnc_civ_healed.sqf`
+is the one caller today, capping what a town can pay out for treating its wounded. Server-local
+and unbroadcast: only server-side caps read it.
+
 ## Sinks
 
 | Category | Where | Cost |
