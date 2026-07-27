@@ -125,10 +125,10 @@ figure, which is a wrong number rather than an untranslated one.
 |---|---|---|
 | Zone capture (first time) | `server/init_zones/fnc_captured.sqf:42` | `round(points/2)` — ≈50 for a 1000 m zone |
 | Zone recapture (after loss) | `server/init_zones/fnc_blufor_cap.sqf:55` | `round(points/3)` — ≈33; intentionally lower |
-| Passive territory hold | `server/misc/fnc_zonesundercontrol.sqf:6,11` | `zones_held × 6`, every 30 min |
+| Passive territory hold | `server/misc/fnc_zonesundercontrol.sqf:11,32` | `zones_held × 6`, every 30 min |
 | Side-mission reward | `server/missions/fnc_mission_reward.sqf` | `reward × cp_reward_multiplier` (multiplier default 1) |
 | Reputation tick | `server/misc/fnc_civ_rep_economy.sqf` | `ceil(rep/2)`, every 15 min |
-| Town Army Power | `server/misc/fnc_civ_rep_economy.sqf` | AP, not CP: each banded town's worth of 1–3 to whichever side holds it, every 30 min |
+| Town Army Power | `server/misc/fnc_zonesundercontrol.sqf:15-28` | AP, not CP: each banded town's worth of 1–3 to whichever side holds it, every 30 min |
 | Recruit rescued civilian | `server/misc/fnc_recruit_civilian_server.sqf` | +5 (+8 in WBK mode) |
 | Intel analysis (terminal) | `server/misc/fnc_intelAnalysis.sqf` | 1.5–8 per item; `FileTopSecret`/`FilesSecret` = 8 |
 | Enemy corpse loot | `server/misc/fnc_addRandomLoot.sqf` → analysis | ~80% of enemies carry 0–2 of Money/Files/Wallet |
@@ -140,7 +140,11 @@ figure, which is a wrong number rather than an untranslated one.
 | AP→CP conversion | `client/dialog/fnc_convertAPtoCP.sqf` | 15 AP → 10 CP, one-way |
 
 The passive-hold loop is spawned exactly once (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:20`), so
-territory income does not stack per zone captured.
+territory income does not stack per zone captured. It is also the campaign's single economy
+clock: territory CP and town AP are paid from the same 30-minute iteration, because two timers
+of nominally equal period drift apart the moment either one stalls. Only the CP half is gated on
+`zoneundercontrolblu > 0` — AP pays unconditionally, since the enemy banking its towns while the
+player holds nothing is the case the town economy exists to model.
 
 ## Sinks
 
@@ -183,7 +187,7 @@ Open observations from an economy review. Each is a design or correctness proper
 crash; none is currently scheduled.
 
 **Territory income snowballs with no upkeep.** Passive hold pays `zones_held × 6` every
-30 min (`fnc_zonesundercontrol.sqf:11`) on top of lump capture rewards, and holding a zone
+30 min (`fnc_zonesundercontrol.sqf:32`) on top of lump capture rewards, and holding a zone
 costs nothing thereafter. That is a positive feedback loop — hold → CP → buy → hold more —
 with no attrition pulling the other way, so late-game CP outruns anything to spend it on.
 This is the central design lever, not a bug: if a demanding economy is the goal, the levers

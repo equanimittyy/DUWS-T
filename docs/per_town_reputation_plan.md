@@ -551,9 +551,9 @@ area whose edge reaches into the zone still puts civilians inside it.
 
 ### The AP income tick
 
-A third loop in `server/misc/fnc_civ_rep_economy.sqf`, on the same 30-minute cadence as the
-territory-hold CP tick (`server/misc/fnc_zonesundercontrol.sqf`) so the two land together and
-the marker's `/30min` stays honest.
+Paid from the territory-hold CP tick itself (`server/misc/fnc_zonesundercontrol.sqf`), so the
+two land together on one clock and the marker's `/30min` stays honest. Only the CP half is
+gated on holding a zone; AP pays every tick regardless.
 
 Each tick sums `civ_town_ap` over the towns in each band and makes **two** `fnc_ap_adjust`
 calls, one per side — not one per town. The writer `publicVariable`s and logs on every call
@@ -614,7 +614,7 @@ internals to every machine to serve two `addAction` conditions.
 |---|---|
 | `server/server_fnc_init.sqf` | New `fnc_town_rep_adjust` beside `fnc_rep_adjust:151-159`; new `fnc_civ_townAt` position→index helper; new `fnc_civ_townRender` marker repaint; registry lines. Delete the WBK depopulation block `:1150-1160` and `fnc_updateIcon` `:1167-1175` with the live counter, plus its two `remoteExec` call sites `:1056,:1147`; drop the pop decrements in `fnc_wbk_survivorKilled_server` `:1040-1124` and `fnc_wbk_unitKilled_server` `:1127-1164`, keeping the `civ_remaining_%1` increment that feeds WBK replacements. |
 | `server/misc/fnc_civ_init_Tomata.sqf` | Initialise `civ_town_rep` at 0; compute `civ_town_ap` from the kept set's building counts; `-20` for enemy-zone overlaps; delete the `_initialPop` derivation `:72-83` and store the building count as `civ_pop_%1`; three-field marker text at `:209`. |
-| `server/misc/fnc_civ_rep_economy.sqf` | Delete the recovery thread `:12-38`; add the 30-minute AP tick; rewrite the file docstring. |
+| `server/misc/fnc_civ_rep_economy.sqf` | Delete the recovery thread `:12-38`; rewrite the file docstring. The AP tick lands in `fnc_zonesundercontrol.sqf` instead, sharing its clock. |
 | `server/misc/fnc_civ_rep_Tomata.sqf` | Civilian death goes from `-0.3` to `-1` and routes through the town writer, resolving the town from the victim's `civ_locIndex` `:27`. Both existing gates stay, one retuned: the charge rate `:15` drops from 50 % to 30 % (`random 10 < 7`), and the 200 m player-present test `:17-23` is unchanged — so three in ten of the deaths a player is near are charged, an effective `-0.3` per death against `-0.15` today. Drop the notification `:28-31` and the `CIV_deaths` bump `:34-35`. |
 | `server/server_var_init.sqf:79,93` | Remove `CIV_deaths`. Replace the `damagedBuildings` array with a single escalation counter: nothing reads the objects back, and an array holding a reference per destroyed house grows for the whole session — [`info/performance_hotspots.md`](info/performance_hotspots.md) already lists it as unbounded session state. |
 | `info/performance_hotspots.md` | Drop the `damagedBuildings` entry from the session-growth section once the array is gone. |
