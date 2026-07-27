@@ -192,6 +192,10 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     missionNamespace setVariable ["civ_town_rep", _townRep];
     missionNamespace setVariable ["civ_town_ap", _townAp];
     ["INFO", "CIV", format ["Town reputation registered for %1 towns, AP worth %2", _n, _townAp]] call fnc_log;
+
+    // One garrison thread per town, watching its own band. Started after both arrays exist,
+    // since the first thing each does is read its town's reputation.
+    for "_i" from 0 to (_n - 1) do { [_i] spawn fnc_civ_garrison };
 };
 
 // ========== 第三阶段：为保留的城镇创建触发器、地图标记，并存储人口变量 ==========

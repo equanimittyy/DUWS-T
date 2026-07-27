@@ -10,7 +10,6 @@ _index = _this select 2;
 _blufor_close = false;
 
 _AI_buffer = 400;
-_player_buffer = 400;
 _despawn_timer = 300;
 
 // The key the prefab and the fortification ring both file their objects under
@@ -18,37 +17,12 @@ _despawn_timer = 300;
 // use rather than passed in, so the three cannot drift apart without the zone itself moving.
 _zoneKey = format ["zone_%1_%2", round (_spawnPos select 0), round (_spawnPos select 1)];
 
-// nearEntities, not a filter over allUnits: the engine's spatial index answers "who is near
-// this zone" directly, so the cost tracks nearby units instead of every unit in the mission.
 // One of these runs per zone every 10 s for the whole campaign, so the scan it replaces was
-// O(zones x all units) forever.
-// Vehicles are queried alongside men and their crew resolved, matching what the mission
-// threads do -- a CAManBase-only query is not relied on to report units riding in something.
-private _westMenNear = {
-	params ["_pos", "_radius"];
-	private _out = [];
-	{
-		if (_x isKindOf "CAManBase") then {
-			if (side _x == WEST) then { _out pushBackUnique _x };
-		} else {
-			{ if (side _x == WEST) then { _out pushBackUnique _x } } forEach crew _x;
-		};
-	} forEach (_pos nearEntities [["CAManBase", "LandVehicle", "Air"], _radius]);
-	_out
-};
-
-// One player, or _minAI friendly AI, inside the perimeter. The AI threshold is a parameter because
-// raising a zone and holding one deliberately differ: two AI to bring it up, one to keep it there.
-// That hysteresis stops a zone flickering off around the edges of the force that just took it.
+// O(zones x all units) forever. The test itself lives in fnc_duws_bluforNear, shared with the
+// town garrison; the two buffers below are equal, so one radius covers both halves of it.
 private _bluforNear = {
 	params [["_minAI", 2]];
-	private _near = (count ([_spawnPos, _size + _AI_buffer] call _westMenNear)) >= _minAI;
-	if (!_near) then {
-		_near = ((call BIS_fnc_ListPlayers) findIf {
-			(_spawnPos distance _x) < (_size + _player_buffer)
-		}) >= 0;
-	};
-	_near
+	[_spawnPos, _size + _AI_buffer, _minAI] call fnc_duws_bluforNear
 };
 
 // Zone turrets get their gunners from the prefab at build time, and the prefab never runs again --
@@ -93,8 +67,9 @@ private _stowZone = {
 // fresh campaign carries every zone's props and gunners for the whole session -- the exact cost
 // streaming exists to remove. The despawn branch below cannot do it: it is only reachable once a
 // zone has been spawned, and a zone nobody has visited never has been.
-if ((count ([_spawnPos, _size + _AI_buffer] call _westMenNear) == 0)
-	&& {((call BIS_fnc_ListPlayers) findIf {_spawnPos distance _x < _size + _player_buffer}) < 0}) then {
+// One AI is enough to keep it deployed here: this is the opening test, and stowing a zone
+// somebody is already standing in would deploy it again on the next pass.
+if !([1] call _bluforNear) then {
 	[_zoneKey] call _stowZone;
 };
 
