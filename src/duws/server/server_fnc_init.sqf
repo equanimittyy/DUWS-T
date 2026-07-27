@@ -302,14 +302,15 @@ fnc_duws_release = {
 };
 publicVariable "fnc_duws_release";
 
-// Debug-menu entry point for the map cleanup: bring the next pass forward to now. The sweep's
-// interval wait breaks on this flag, so it lands within half a second. Deliberately not a
-// deletion path -- it cannot delete anything a scheduled pass would not, so a client reaching
-// it can at most pull one pass forward. Not published, because nothing calls it locally: the
-// menu remoteExecs it to the server, the only machine holding the object list.
+// Debug-menu entry point for the map cleanup: sweep now, with every lifetime treated as elapsed,
+// so a tester does not wait 30 min to see collection happen. The sweep's interval wait breaks on
+// this flag, so it lands within half a second. Bounded by what it cannot skip -- KEEP_RADIUS and
+// the persistent flag -- so the worst a client reaching it can do is bin distant litter early.
+// Not published, because nothing calls it locally: the menu remoteExecs it to the server, the
+// only machine holding the deadlines.
 fnc_duws_forceCleanup = {
     DUWS_cleanup_force = true;
-    ["INFO", "CLEANUP", "Early pass requested from the debug menu."] call fnc_log;
+    ["INFO", "CLEANUP", "Forced sweep requested from the debug menu."] call fnc_log;
 };
 
 // STARTUP FUNCTIONS

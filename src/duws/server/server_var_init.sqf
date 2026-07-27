@@ -104,9 +104,9 @@ DUWS_disposables = [];
 // themselves -- dead, immobile, littered -- would ever collect them.
 DUWS_compositions = createHashMap;
 
-// One-shot request for the map cleanup to run its next pass now instead of waiting out the
-// interval. Set through fnc_duws_forceCleanup and cleared by the pass it wakes. It changes only
-// when a pass happens, never what a pass deletes: lifetimes and the keep-radius still decide.
+// One-shot request for the map cleanup to sweep now, treating every lifetime as already elapsed.
+// Set through fnc_duws_forceCleanup and cleared by the pass it wakes. A testing tool: it skips
+// the wait for a 30 min deadline, but not KEEP_RADIUS and not the persistent flag.
 DUWS_cleanup_force = false;
 
 // Death Penalty

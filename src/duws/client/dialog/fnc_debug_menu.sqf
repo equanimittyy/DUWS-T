@@ -15,7 +15,7 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
 ["Debug", [
     ["Force garbage clean", {
         [] remoteExec ["fnc_duws_forceCleanup", 2];
-        hint "Map cleanup: pass run now.\n\nNormal rules still apply, so only junk past its\nlifetime with no player inside 300 m goes. Nothing\nvisibly changing is the expected result.";
+        hint "Map cleanup: sweeping now.\n\nLifetimes are treated as elapsed, so all litter goes\nexcept what is within 300 m of a player or flagged\npersistent. Counts land in the log.";
     }, [], [1,0.667,0,1]],
 
     // Stub. Planned: a local overlay onto OPFOR-side WARCOM -- commander AP with its

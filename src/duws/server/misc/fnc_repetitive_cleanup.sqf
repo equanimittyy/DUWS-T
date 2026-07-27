@@ -94,11 +94,14 @@ while {true} do {
 
     // Read before the walk and cleared here rather than by the setter: the pass it woke is the
     // only place that knows it was served, and leaving it set would wake every pass from now on.
-    // It brings this pass forward and nothing else -- the lifetime and KEEP_RADIUS still decide
-    // what goes, so an early pass deletes exactly what the pass it pre-empted would have.
+    // A forced pass treats every deadline as elapsed, which is the whole point of it -- waiting
+    // out the lifetime is what the tester is trying to skip. KEEP_RADIUS and persistent still
+    // hold: the first is what stops litter blinking out in front of someone, and the second is
+    // what tells a supply drop from the HQ crate of the same class.
     private _force = DUWS_cleanup_force;
     DUWS_cleanup_force = false;
     private _tracked = 0;
+    private _binned = 0;
 
     // The deadline lives on the object rather than in a list beside it. A list costs a linear
     // search per object per pass to find its entry, and has to be compacted afterwards; a
@@ -106,22 +109,26 @@ while {true} do {
     {
         private _obj = _x;
         if (!isNull _obj && {!(_obj getVariable ["persistent", false])}) then {
+            // Stamped even on a forced pass, so litter spared by KEEP_RADIUS still carries a
+            // deadline and expires normally once the player moves off.
             private _binAt = _obj getVariable "DUWS_binAt";
             if (isNil "_binAt") then {
-                _obj setVariable ["DUWS_binAt", _now + _lifetime];
-                _tracked = _tracked + 1;
+                _binAt = _now + _lifetime;
+                _obj setVariable ["DUWS_binAt", _binAt];
+            };
+            if ((_force || {_binAt <= _now})
+                && {(allPlayers findIf {_x distance _obj < KEEP_RADIUS}) < 0}) then {
+                deleteVehicle _obj;
+                _binned = _binned + 1;
             } else {
-                if (_binAt > _now || {(allPlayers findIf {_x distance _obj < KEEP_RADIUS}) >= 0}) then {
-                    _tracked = _tracked + 1;
-                } else {
-                    deleteVehicle _obj;
-                };
+                _tracked = _tracked + 1;
             };
         };
     } forEach (_candidates + _disposed);
 
     if (_force) then {
-        ["INFO", "CLEANUP", format ["forced pass: %1 still tracked", _tracked]] call fnc_log;
+        ["INFO", "CLEANUP", format ["forced sweep: %1 deleted, %2 held inside %3 m",
+            _binned, _tracked, KEEP_RADIUS]] call fnc_log;
     };
 
     _pass = _pass + 1;
