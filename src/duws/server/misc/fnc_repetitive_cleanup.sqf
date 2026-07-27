@@ -179,9 +179,10 @@ while{true} do {
     REM(_objectsToCleanup,0)
     REM(_timesWhenToCleanup,0)
 
-    // Debug-menu request, read after discovery so junk found on this same pass goes too.
-    // Cleared here rather than by the setter: the pass that honours it is the only place that
-    // knows the request was served, and leaving it set would sweep every pass from now on.
+    // Debug-menu request, cleared here rather than by the setter: the pass it woke is the only
+    // place that knows it was served, and leaving it set would wake every pass from now on. It
+    // brings this pass forward and nothing else -- lifetimes and KEEP_RADIUS still decide what
+    // goes, so an early pass deletes exactly what the pass it pre-empted would have.
     private _force = DUWS_cleanup_force;
     DUWS_cleanup_force = false;
     private _tracked = count _objectsToCleanup;
@@ -192,11 +193,10 @@ while{true} do {
             _timesWhenToCleanup set[_forEachIndex, 0];
         } else {
             // Expired but in view stays on the list and is retried next pass, so it goes as
-            // soon as the player moves off rather than never. A forced sweep skips both tests:
-            // waiting out a 30 min timer, or walking 300 m off, defeats the point of the tool.
+            // soon as the player moves off rather than never.
             private _obj = _x;
-            if(_force || {_timesWhenToCleanup select _forEachIndex < time
-                && {(allPlayers findIf {_x distance _obj < KEEP_RADIUS}) < 0}}) then {
+            if(_timesWhenToCleanup select _forEachIndex < time
+                && {(allPlayers findIf {_x distance _obj < KEEP_RADIUS}) < 0}) then {
                 deleteVehicle _obj;
                 _objectsToCleanup set[_forEachIndex, 0];
                 _timesWhenToCleanup set[_forEachIndex, 0];
@@ -208,7 +208,7 @@ while{true} do {
     REM(_timesWhenToCleanup,0)
 
     if (_force) then {
-        ["INFO", "CLEANUP", format ["forced sweep: %1 tracked, %2 survived",
+        ["INFO", "CLEANUP", format ["forced pass: %1 tracked, %2 still pending",
             _tracked, count _objectsToCleanup]] call fnc_log;
     };
 
