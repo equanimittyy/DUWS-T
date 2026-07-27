@@ -30,6 +30,7 @@ switch (VERSION_X) do {
 	};
 
 };
+[_fob, format ["FOB_%1", netId _fob]] call fnc_duws_keep;
 
 // FOB ADD ACTION MENU
 [_fob, _fob_owner] remoteExec ["fnc_FOBactions", [0,-2] select isDedicated,true];

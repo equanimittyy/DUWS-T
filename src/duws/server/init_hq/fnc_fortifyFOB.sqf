@@ -31,6 +31,10 @@ _fobGuard3 = units _groupGuard select 2;
 _fobGuard4 = units _groupGuard select 3;
 _fobGuard5 = units _groupGuard select 4;
 
+// Everything this FOB owns is filed under one key, so tearing the FOB down can hand the whole
+// ring to the cleanup at once -- the turrets and the sandbags around them alike.
+_fobKey = format ["FOB_%1", netId _fob];
+
 _forty_spawn = {
 	_name = _this select 0;
 	_center = _this select 1;
@@ -41,6 +45,7 @@ _forty_spawn = {
 	_newz = (_offset select 2);
 
 	_new = createVehicle [_name, [0,0,0], [], 0, "CAN_COLLIDE"];
+	[_new, _fobKey] call fnc_duws_keep;
 	_new allowdamage false;
 	_new setpos [_newx, _newy, _newz];
 	_new setdamage 0;

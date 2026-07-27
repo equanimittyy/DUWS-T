@@ -2,6 +2,11 @@
 // fnc_modern_reconOutpost.sqf (基于 composition 偏移量重构版)
 // 原始 Composition 中心: [1540.2646, 5, 2299.9314] (x, z, y)
 _centerSpawn = _this select 0;
+// Zone construction is campaign property, filed under the zone it stands in so the whole
+// composition -- turret, sandbag and camo net alike -- can be released together. A wrecked
+// turret leaves its undamaged surroundings behind, and nothing about those props marks them
+// as garbage; only the key knows they belonged to something.
+private _zoneKey = format ["zone_%1_%2", round (_centerSpawn select 0), round (_centerSpawn select 1)];
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
@@ -122,12 +127,14 @@ private _tiltTypes = [
     // 载具特殊处理：贴地，保留模拟
     if (_class isKindOf "AllVehicles") then {
         private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
+        [_obj, _zoneKey] call fnc_duws_keep;
         _obj setPosATL [_newX, _newY, 0];
         _obj setDir _dir;
         continue;
     };
 
     private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
+    [_obj, _zoneKey] call fnc_duws_keep;
     _obj setPosATL [_newX, _newY, 0];
 
     // 工事倾斜
@@ -161,6 +168,7 @@ private _weaponList = [];
     private _newZ = _newCenterZ + _offsetZ;
 
     private _obj = createVehicle [_class, [_newX, _newY, _newZ], [], 0, "CAN_COLLIDE"];
+    [_obj, _zoneKey] call fnc_duws_keep;
     _obj enableSimulation false;
     _obj setPosWorld [_newX, _newY, _newZ];
     _obj setDir (_centerSpawn getDir [_newX, _newY]);
@@ -196,6 +204,7 @@ if (count _allWeapons > 0) then {
 _lightDefault = nearestObject [_centerSpawn, "Land_Camping_Light_F"];
 if (isNull _lightDefault) then {
     private _light1 = createVehicle ["Land_Camping_Light_F", [_centerSpawnX, _centerSpawnY, 0], [], 0, "NONE"];
+    [_light1, _zoneKey] call fnc_duws_keep;
     _light1 setPosATL [_centerSpawnX, _centerSpawnY, 0];
     _light1 allowdamage false;
     _light1 setdamage 0;

@@ -1,5 +1,10 @@
 // Locality: server -- inherited from server/init_zones/fnc_createzone.sqf.
 _centerSpawn = _this select 0;
+// Zone construction is campaign property, filed under the zone it stands in so the whole
+// composition -- turret, sandbag and camo net alike -- can be released together. A wrecked
+// turret leaves its undamaged surroundings behind, and nothing about those props marks them
+// as garbage; only the key knows they belonged to something.
+private _zoneKey = format ["zone_%1_%2", round (_centerSpawn select 0), round (_centerSpawn select 1)];
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
@@ -7,6 +12,7 @@ _vehicle_0 = objNull;
 if (true) then
 {
   _this = createVehicle ["Land_MultiMeter_F", [0, 0, 0], [], 0, "CAN_COLLIDE"];
+  [_this, _zoneKey] call fnc_duws_keep;
   _vehicle_0 = _this;
   _this setPos _centerSpawn;
 };
@@ -29,6 +35,7 @@ _vehicle = objNull;
 	_posY = (_xyz select 1);
 	_posZ = (_xyz select 2);
 	_vehicle = createVehicle [(_x select 0), [0,0,0], [], 0, "CAN_COLLIDE"];
+	[_vehicle, _zoneKey] call fnc_duws_keep;
 	_vehicle setDir (_x select 2);
 	_vehicle setPosATL [(_centerSpawnX)+_posX,(_centerSpawnY)+_posY,0];
 	_vehicle enableSimulationGlobal false;
@@ -37,6 +44,7 @@ _vehicle = objNull;
 // PLACE STATICS WITH INTERACTION
 _vehicle_20 = objNull;
 _this = createVehicle ["Box_FIA_Ammo_F", [0,0,0], [], 0, "CAN_COLLIDE"];
+[_this, _zoneKey] call fnc_duws_keep;
 _vehicle_20 = _this;
 _this setDir 0;
 _this setPosATL [(_centerSpawnX)-0.1, (_centerSpawnY)-0.2, 0];
@@ -62,6 +70,7 @@ if (true) then
   };
   if (!_found) then { _pos = [_rX, _rY, 0]; };
   _this = createVehicle ["B_Mortar_01_F", _pos, [], 0, "CAN_COLLIDE"];
+  [_this, _zoneKey] call fnc_duws_keep;
   _vehicle_999 = _this;
   _this setDir 215.154;
 };
@@ -89,6 +98,7 @@ if (true) then
   };
   if (!_found) then { _pos = [_rX, _rY, 0]; };
   _this = createVehicle ["B_static_AA_F", _pos, [], 0, "CAN_COLLIDE"];
+  [_this, _zoneKey] call fnc_duws_keep;
   _vehicle_1000 = _this;
   _this setDir 215.154;
 };
@@ -116,6 +126,7 @@ if (true) then
   };
   if (!_found) then { _pos = [_rX, _rY, 0]; };
   _this = createVehicle ["B_static_AA_F", _pos, [], 0, "CAN_COLLIDE"];
+  [_this, _zoneKey] call fnc_duws_keep;
   _vehicle_1002 = _this;
   _this setDir 215.154;
 };
@@ -137,6 +148,7 @@ _guardMTR1 moveinGunner _vehicle_999;
 
 
 _light1 = createVehicle ["Land_Camping_Light_F", [0,0,0], [], 0, "NONE"];
+[_light1, _zoneKey] call fnc_duws_keep;
 _light1 allowdamage false;
 _light1 setdamage 0;
 _light1 setpos _flagPos;

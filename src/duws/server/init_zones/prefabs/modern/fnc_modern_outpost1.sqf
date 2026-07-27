@@ -2,6 +2,11 @@
 // fnc_modern_outpost1.sqf (基于 composition 偏移量重构版)
 // 原始 Composition 中心: [3302.7124, 5, 707.04645] (x, z, y)
 _centerSpawn = _this select 0;
+// Zone construction is campaign property, filed under the zone it stands in so the whole
+// composition -- turret, sandbag and camo net alike -- can be released together. A wrecked
+// turret leaves its undamaged surroundings behind, and nothing about those props marks them
+// as garbage; only the key knows they belonged to something.
+private _zoneKey = format ["zone_%1_%2", round (_centerSpawn select 0), round (_centerSpawn select 1)];
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
@@ -87,6 +92,7 @@ private _tiltTypes = [
     private _newY = _centerSpawnY + _offsetY;
 
     private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
+    [_obj, _zoneKey] call fnc_duws_keep;
     _obj setPosATL [_newX, _newY, 0];
 
     if (_class in _tiltTypes) then {
@@ -117,6 +123,7 @@ private _weaponList = [];
     private _newZ = _newCenterZ + _offsetZ;   // 相对海拔直接累加
 
     private _obj = createVehicle [_class, [_newX, _newY, _newZ], [], 0, "CAN_COLLIDE"];
+    [_obj, _zoneKey] call fnc_duws_keep;
     _obj enableSimulation false;
     _obj setPosWorld [_newX, _newY, _newZ];
     // 枪口方向：从中心指向武器位置
@@ -154,6 +161,7 @@ if (count _allWeapons > 0) then {
 {
     _x params ["_class", "_offsetX", "_offsetY", "_dir"];
     private _obj = createVehicle [_class, [_centerSpawnX + _offsetX, _centerSpawnY + _offsetY, 0], [], 0, "CAN_COLLIDE"];
+    [_obj, _zoneKey] call fnc_duws_keep;
     _obj setPosATL [_centerSpawnX + _offsetX, _centerSpawnY + _offsetY, 0];
     _obj setDir _dir;
     [_obj, "opfor"] spawn fnc_fill_ammobox;
@@ -167,6 +175,7 @@ if (count _allWeapons > 0) then {
 
 // 营地灯
 private _light1 = createVehicle ["Land_Camping_Light_F", [_centerSpawnX, _centerSpawnY, 0], [], 0, "NONE"];
+[_light1, _zoneKey] call fnc_duws_keep;
 _light1 setPosATL [_centerSpawnX, _centerSpawnY, 0];
 _light1 allowdamage false;
 _light1 setdamage 0;

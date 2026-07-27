@@ -1,6 +1,11 @@
 // Locality: server -- inherited from server/init_zones/fnc_createzone.sqf.
 // fnc_modern_vehfittingstation.sqf (基于 composition 偏移量重构版)
 _centerSpawn = _this select 0;
+// Zone construction is campaign property, filed under the zone it stands in so the whole
+// composition -- turret, sandbag and camo net alike -- can be released together. A wrecked
+// turret leaves its undamaged surroundings behind, and nothing about those props marks them
+// as garbage; only the key knows they belonged to something.
+private _zoneKey = format ["zone_%1_%2", round (_centerSpawn select 0), round (_centerSpawn select 1)];
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
@@ -84,6 +89,7 @@ private _tiltTypes = [
     private _newY = _centerSpawnY + _offsetY;
 
     private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
+    [_obj, _zoneKey] call fnc_duws_keep;
     _obj setPosATL [_newX, _newY, 0];
 
     if (_class in _tiltTypes) then {
@@ -115,6 +121,7 @@ private _weaponList = [];
     private _newZ = _newCenterZ + _offsetZ;
 
     private _obj = createVehicle [_class, [_newX, _newY, _newZ], [], 0, "CAN_COLLIDE"];
+    [_obj, _zoneKey] call fnc_duws_keep;
     _obj enableSimulation false;
     _obj setPosWorld [_newX, _newY, _newZ];
     _obj setDir (_centerSpawn getDir [_newX, _newY]);
@@ -148,6 +155,7 @@ if (count _allWeapons > 0) then {
 
 // 营地灯（备用）
 private _light1 = createVehicle ["Land_Camping_Light_F", [_centerSpawnX, _centerSpawnY, 0], [], 0, "NONE"];
+[_light1, _zoneKey] call fnc_duws_keep;
 _light1 setPosATL [_centerSpawnX, _centerSpawnY, 0];
 _light1 allowdamage false;
 _light1 setdamage 0;

@@ -219,6 +219,7 @@ private _invulnerableTypes = [
     private _newX = _spawnBaseX + (_origX - _compCenterX);
     private _newY = _spawnBaseY + (_origY - _compCenterY);
     private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
+    [_obj, "HQ"] call fnc_duws_keep;
     _obj setPosATL [_newX, _newY, 0];
     _obj setDir _dir;
     
@@ -269,6 +270,7 @@ if (!isNull _mgAnchor) then {
         (getPosWorld _mgAnchor select 2) + (1.21321)  // 原 -1.28679，加2.5米
     ];
     private _obj = createVehicle ["I_HMG_02_high_F", _worldPos, [], 0, "CAN_COLLIDE"];
+    [_obj, "HQ"] call fnc_duws_keep;
     _obj enableSimulation false;
     _obj setPosWorld _worldPos;
     private _dirToAnchor = [_worldPos, getPosWorld _mgAnchor] call BIS_fnc_dirTo;
@@ -289,6 +291,7 @@ private _aaData = [
         (getPosWorld _hqObj select 2) + _hOffset
     ];
     private _obj = createVehicle [_class, _worldPos, [], 0, "CAN_COLLIDE"];
+    [_obj, "HQ"] call fnc_duws_keep;
     _obj enableSimulation false;
     _obj setPosWorld _worldPos;
     _obj setDir (getDir _hqObj);
