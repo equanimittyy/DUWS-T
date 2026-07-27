@@ -63,7 +63,7 @@ _abort = {
     private _markers = player getVariable ["LiftWaypointMarkers", []];
     { deleteMarker _x } forEach _markers;
     player setVariable ["LiftWaypointMarkers", []];
-    [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_heloliftabort"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_heloliftabort"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
     [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
     sleep 300;
     [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
@@ -76,9 +76,9 @@ _helo_minFuel = 0.4;
 _check_damage = compile format ["(isNull _helo) or (damage _helo > %1) or (fuel _helo < %2) or (vehicle _pilot == _pilot)", _helo_maxDamage, _helo_minFuel];
 
 // ========== 4. 通知并飞往载具位置 ==========
-_speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_speaker = localize "STR_DUWS_T_actionteam";
 _message = format[([localize "STR_DUWS_T_heloliftcall"] call fnc_cs)];
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // 创建临时吊装点标记
@@ -99,12 +99,12 @@ missionNamespace setVariable [_moveCompletedVar, false]; // 初始化（客户�
 sleep 8;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = format[localize "STR_DUWS_T_helolift1"];
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
-_speaker = localize "STR_DUWS_T_pilot";
+_speaker = localize "STR_DUWS_T_crane";
 _message = format[localize "STR_DUWS_T_helolift2"];
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 waitUntil {
@@ -115,9 +115,9 @@ if (call _check_damage) exitWith { call _abort };
 
 [player, "height", [10]] remoteExec ["fnc_helolift_waypoints", 2];
 deleteMarker _hookMarkerName;
-_speaker = localize "STR_DUWS_T_pilot";
+_speaker = localize "STR_DUWS_T_crane";
 _message = format[localize "STR_DUWS_T_helolift3"];
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 if (call _check_damage) exitWith { call _abort };
@@ -203,9 +203,9 @@ waitUntil {
 };
 if (call _check_damage) exitWith { call _abort };
 sleep 6;
-_speaker = localize "STR_DUWS_T_pilot";
+_speaker = localize "STR_DUWS_T_crane";
 _message = format[localize "STR_DUWS_T_helolift5"];
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // ========== 6. 请求航点 ==========
@@ -256,9 +256,9 @@ waitUntil {
 if (call _check_damage) exitWith { call _abort };
 
 [player, "height", [60]] remoteExec ["fnc_helolift_waypoints", 2];
-_speaker = localize "STR_DUWS_T_pilot";
+_speaker = localize "STR_DUWS_T_crane";
 _message = format[localize "STR_DUWS_T_helolift6"];
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 if (call _check_damage) exitWith { call _abort };

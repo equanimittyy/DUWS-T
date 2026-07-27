@@ -20,7 +20,7 @@ private _actionID = _unit addAction [
         private _moneyCount = { _x == "Money_roll" } count (magazines _caller);
         if (_moneyCount < 1) exitWith {
             hint (localize "STR_DUWS_T_nocpinf2");
-            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_NOT_ENOUGH_CP"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_NOT_ENOUGH_CP"] remoteExec ["fnc_duws_dialogue", _caller];
             removeAllActions _target;
             [_target] remoteExec ["removeAllActions", 0];
         };
@@ -31,7 +31,7 @@ private _actionID = _unit addAction [
         // 移除所有客户端上该平民的所有动作
         removeAllActions _target;
         [_target] remoteExec ["removeAllActions", 0];
-        [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_askopforloc"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_askopforloc"] remoteExec ["fnc_duws_dialogue", _caller];
         
         private _rep = missionNamespace getVariable ["Player_Reputation", 0];
         if (_rep > 0) then {
@@ -58,13 +58,13 @@ private _actionID = _unit addAction [
                     _markerName setMarkerSizeLocal [0.8, 0.8];
                     
                     [_markerName] spawn { sleep 60; deleteMarker (_this select 0); };
-                    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_askopforlocyes"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+                    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_askopforlocyes"] remoteExec ["fnc_duws_dialogue", _caller];
                     hint (localize "STR_DUWS_T_ASK_SUCCESS");
                 } else {
                     hint (localize "STR_DUWS_T_NO_ENEMY_GROUPS");
-                    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_askopforlocno2"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+                    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_askopforlocno2"] remoteExec ["fnc_duws_dialogue", _caller];
                     sleep 4;
-                    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_askopforlocno3"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+                    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_askopforlocno3"] remoteExec ["fnc_duws_dialogue", _caller];
                 };
             } else {
                 hint (localize "STR_DUWS_T_ASK_FAIL");
@@ -73,7 +73,7 @@ private _actionID = _unit addAction [
                 private _runDist = 50 + random 50;
                 private _runPos = (getPos _unit) getPos [_runDist, _runDir];
                 _unit doMove _runPos;
-                [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_askopforlocno"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+                [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_askopforlocno"] remoteExec ["fnc_duws_dialogue", _caller];
             };
         } else {
             sleep 5;
@@ -82,7 +82,7 @@ private _actionID = _unit addAction [
             private _runDist = 50 + random 50;
             private _runPos = (getPos _unit) getPos [_runDist, _runDir];
             _unit doMove _runPos;
-            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_stfu"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_stfu"] remoteExec ["fnc_duws_dialogue", _caller];
         };
         
         // 恢复平民移动（如果还活着）

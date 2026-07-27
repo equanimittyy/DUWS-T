@@ -113,7 +113,7 @@ WARCOM_opf_attack_wave_avalaible = false;
 			sleep 10; // give squads a chance to mount up
 			[_group,_spawnLoc] spawn fnc_WARCOM_wp_opf_assault;
 			if (count WARCOM_zones_controled_by_BLUFOR == 0) exitWith {};  // 2 assault squads for BLU zones, 1 for BLUHQ
-			[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_opfast"] remoteExec ["BIS_fnc_showSubtitle", 0];
+			[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_opfast"] remoteExec ["fnc_duws_dialogue", 0];
             [] remoteExec ["fnc_broadcastRadioChatter", 0];
 			sleep 120;
 		  } forEach [1,2];

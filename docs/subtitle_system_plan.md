@@ -224,9 +224,10 @@ the wrapper means the router matches on the pre-substitution string and substitu
 afterwards. This is the same reordering the stringtable pass needs, for a different reason —
 see below — so it is one task serving both.
 
-Stripping `call fnc_cs` from the 68 speaker slots is a mechanical find-and-replace; the
-remaining 74 `fnc_cs` calls — message bodies, hints, notifications, marker text — stay where
-they are until the wrapper takes the dialogue half over too.
+Stripping `call fnc_cs` from the 68 speaker slots is a mechanical find-and-replace — all 68
+are one exact spelling — and leaves 85 of the 153 `call fnc_cs` occurrences in place:
+message bodies, hints, notifications and marker text stay where they are until the wrapper
+takes the dialogue half over too.
 
 **The wrapper substitutes both the speaker and the text, and the surviving body wraps
 double-apply harmlessly.** `fnc_cs` scans for the literal `"Alpha 1-1"` and replaces it, so

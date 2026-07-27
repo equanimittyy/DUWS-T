@@ -27,11 +27,11 @@ private _actionID = _unit addAction [
         if (_moneyCount < 5) exitWith {
             // 复用原有 CP 不足提示（本地化不变）
             hint localize "STR_DUWS_T_nocpinf2";
-            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_nocpinf"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_nocpinf"] remoteExec ["fnc_duws_dialogue", _caller];
         };
         
         [_target, _caller, _locIndex] remoteExec ["fnc_civ_developInformantServer", 2];
-        [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_askinf"] call BIS_fnc_showSubtitle;
+        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_askinf"] call fnc_duws_dialogue;
     },
     nil,
     6,

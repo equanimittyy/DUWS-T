@@ -29,7 +29,7 @@ private _actionAID = _unit addAction [
     format ["<t color='#ff0000'>%1</t>", localize "STR_DUWS_T_HANDSUP"],
     {
         params ["_target", "_caller", "_actionId"];
-        [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_HANDSUP1"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_HANDSUP1"] remoteExec ["fnc_duws_dialogue", _caller];
         
         // 让平民停止移动（临时禁用AI路径）
         _target disableAI "PATH";
@@ -50,7 +50,7 @@ private _actionAID = _unit addAction [
             // 成功：播放举手投降动画
             [_target, "AmovPercMstpSsurWnonDnon"] remoteExec ["playMoveNow", 0];
             _target setVariable ["isSurrendered", true];
-            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_HANDSUP2"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_HANDSUP2"] remoteExec ["fnc_duws_dialogue", _caller];
             
             [localize "STR_DUWS_T_HANDSUP_SUCCESS"] remoteExec ["hint", _caller];
             
@@ -63,7 +63,7 @@ private _actionAID = _unit addAction [
             private _runDist = 50 + random 50;
             private _runPos = getPos _target getPos [_runDist, _runDir];
             _target doMove _runPos;
-            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_HANDSUP3"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_HANDSUP3"] remoteExec ["fnc_duws_dialogue", _caller];
             [localize "STR_DUWS_T_HANDSUP_FAIL"] remoteExec ["hint", _caller];
             
             // 10秒后恢复AI（如果还活着）
@@ -100,7 +100,7 @@ if (isNil "fnc_civ_lootAction_addActionB") then {
             format ["<t color='#ffaa00'>%1</t>", localize "STR_DUWS_T_LOOT"],
             {
                 params ["_target", "_caller", "_actionId"];
-                [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_LOOT1"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+                [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT1"] remoteExec ["fnc_duws_dialogue", _caller];
                 
                 // 移除动作B本身，防止重复搜身
                 _target removeAction _actionId;
@@ -119,7 +119,7 @@ if (isNil "fnc_civ_lootAction_addActionB") then {
                     for "_i" from 1 to _dropCount do {
                         _items pushBack (selectRandom _intelPool);
                     };
-                    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_LOOT2"] remoteExec ["BIS_fnc_showSubtitle", 0];
+                    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT2"] remoteExec ["fnc_duws_dialogue", 0];
                     _hintMsg = localize "STR_DUWS_T_LOOT_INTEL";
                 } else {
                     if (_roll < 0.30) then {
@@ -130,24 +130,24 @@ if (isNil "fnc_civ_lootAction_addActionB") then {
                         for "_i" from 1 to _dropCount do {
                             _items pushBack (selectRandom _elecPool);
                         };
-                        [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_LOOT3"] remoteExec ["BIS_fnc_showSubtitle", 0];
+                        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT3"] remoteExec ["fnc_duws_dialogue", 0];
                         _hintMsg = localize "STR_DUWS_T_LOOT_ELECTRONICS";
                     } else {
                         if (_roll < 0.60) then {
                             // 30% 获得8个钱币
                             _items = ["Item_Money_roll", "Item_Money_roll", "Item_Money_roll", "Item_Money_roll","Item_Money_roll", "Item_Money_roll", "Item_Money_roll", "Item_Money_roll"];
-                            [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_LOOT4"] remoteExec ["BIS_fnc_showSubtitle", 0];
+                            [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT4"] remoteExec ["fnc_duws_dialogue", 0];
                             _hintMsg = localize "STR_DUWS_T_LOOT_MONEY2";
                         } else {
                             if (_roll < 0.85) then {
                                 // 25% 获得2个钱币
                                 _items = ["Item_Money_roll","Item_Money_roll"];
-                                [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_LOOT5"] remoteExec ["BIS_fnc_showSubtitle", 0];
+                                [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT5"] remoteExec ["fnc_duws_dialogue", 0];
                                 _hintMsg = localize "STR_DUWS_T_LOOT_MONEY1";
                             } else {
                                 // 15% 无奖励
                                 _items = [];
-                                [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_LOOT6"] remoteExec ["BIS_fnc_showSubtitle", 0];
+                                [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT6"] remoteExec ["fnc_duws_dialogue", 0];
                                 _hintMsg = localize "STR_DUWS_T_LOOT_NOTHING";
                             };
                         };
@@ -235,7 +235,7 @@ if (isNil "fnc_civ_lootAction_addActionB") then {
             _unit doWatch _caller;
             _unit doTarget _caller;
             // 提示（发送给发起者）
-            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_LOOT_REVENGE"] remoteExec ["BIS_fnc_showSubtitle", 0];
+            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_LOOT_REVENGE"] remoteExec ["fnc_duws_dialogue", 0];
             [localize "STR_DUWS_T_LOOT_REVENGE_HINT"] remoteExec ["hint", 0];
             sleep 2;
             _unit commandFire _caller;

@@ -5,3 +5,4 @@
 initPlayerLocal.sqf::DUWS_fnc_extractLoadoutItems
 initPlayerLocal.sqf::DUWS_fnc_countLoadoutChanges
 duws/server/server_fnc_init.sqf::fnc_cs
+duws/server/server_fnc_init.sqf::fnc_duws_dialogue_channel

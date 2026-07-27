@@ -48,8 +48,8 @@ switch (_mode) do {
         _helo flyInHeight 10;
         [_targetVehicle, _originalMass] call _pinPhysics;
 
-        [localize "STR_DUWS_T_pilot", localize "STR_DUWS_T_helolift4"]
-            remoteExec ["BIS_fnc_showSubtitle", 0];
+        [localize "STR_DUWS_T_crane", localize "STR_DUWS_T_helolift4"]
+            remoteExec ["fnc_duws_dialogue", 0];
         [] remoteExec ["fnc_broadcastRadioChatter", 0];
         [_targetVehicle, _originalMass] call _pinPhysics;
 

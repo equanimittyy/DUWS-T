@@ -9,6 +9,6 @@ while {_undercontrol} do {
 	["CPzonehold",[(zoneundercontrolblu*6),zoneundercontrolblu]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated,false];
 
     [zoneundercontrolblu*6, "territory_income"] remoteExec ["fnc_cp_adjust", 2];
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_zonesundercontrol"] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_zonesundercontrol"] remoteExec ["fnc_duws_dialogue", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 };

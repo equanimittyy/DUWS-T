@@ -24,7 +24,7 @@ str(_markerpickup) setMarkerColor "ColorGreen";
 str(_markerpickup) setMarkerText "Pickup";
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_boattaxicall"] call fnc_cs);
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // find a pos where to create the boat
@@ -50,7 +50,7 @@ _abort = {
     params [["_msg", "STR_DUWS_T_boattaxi_damaged"]];
     _boat lock false;
     deleteMarker str(_markerpickup);
-    [localize "STR_DUWS_T_OVERLORD", ([localize _msg] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [localize "STR_DUWS_T_OVERLORD", ([localize _msg] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
     sleep 300;
     [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
 };

@@ -180,7 +180,7 @@ sleep 1;
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 switch (VERSION_X) do {

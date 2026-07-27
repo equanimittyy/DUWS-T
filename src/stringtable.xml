@@ -7058,6 +7058,36 @@
                 <Original>Longbow 1-1</Original>
                 <English>Longbow 1-1</English>
             </Key>
+            <Key ID="STR_DUWS_T_pilot_intro">
+                <Chinesesimp>飞行员</Chinesesimp>
+                <Original>Pilot</Original>
+                <English>Pilot</English>
+            </Key>
+            <Key ID="STR_DUWS_T_pilot_downed">
+                <Chinesesimp>飞行员</Chinesesimp>
+                <Original>Pilot</Original>
+                <English>Pilot</English>
+            </Key>
+            <Key ID="STR_DUWS_T_swordfish">
+                <Chinesesimp>旗鱼1-1</Chinesesimp>
+                <Original>Swordfish 1-1</Original>
+                <English>Swordfish 1-1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_chariot">
+                <Chinesesimp>战车1-1</Chinesesimp>
+                <Original>Chariot 1-1</Original>
+                <English>Chariot 1-1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_crane">
+                <Chinesesimp>吊车1-1</Chinesesimp>
+                <Original>Crane 1-1</Original>
+                <English>Crane 1-1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_stork">
+                <Chinesesimp>鹳鸟1-1</Chinesesimp>
+                <Original>Stork 1-1</Original>
+                <English>Stork 1-1</English>
+            </Key>
             <Key ID="STR_DUWS_T_koipilot">
                 <German>"Koi 1-1" Pilot</German>
                 <Spanish>Piloto de "Koi 1-1"</Spanish>

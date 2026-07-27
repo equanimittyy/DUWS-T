@@ -21,7 +21,7 @@ if !(["CP", _vehicle select 2] call fnc_pool_spend) exitWith {hint localize "STR
 
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_vehicleready";
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 ctrlSetText [1000, format["%1",commandpointsblu1]];
 _vehic = _vehicle select 0 createVehicle _spawnPos;

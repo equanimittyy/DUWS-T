@@ -18,7 +18,7 @@ switch (_index2) do {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = ([localize "STR_DUWS_T_supplydropunlock"] call fnc_cs);
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		_supplydrop = [player,"ammo"] call BIS_fnc_addCommMenuItem;
 		lbSetColor [2103, index_support_supply, [0, 1, 0, 1]];
@@ -33,7 +33,7 @@ switch (_index2) do {
 		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_arsenalunlock";
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		lbSetColor [2103, index_support_armory, [0, 1, 0, 1]];
 		support_armory_available = true;
@@ -57,7 +57,7 @@ switch (_index2) do {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = ([localize "STR_DUWS_T_vehicledropunlock"] call fnc_cs);
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		_vehdrop = [player,"veh_drop"] call BIS_fnc_addCommMenuItem;
 		lbSetColor [2103, index_support_veh_supply, [0, 1, 0, 1]];
@@ -78,7 +78,7 @@ switch (_index2) do {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_sivaunlock";
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		_sivadrop = [player,"siva_drop"] call BIS_fnc_addCommMenuItem;
 		lbSetColor [2103, index_support_siva_supply, [0, 1, 0, 1]];
@@ -99,7 +99,7 @@ switch (_index2) do {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_sawpunlock";
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		_sawpdrop = [player,"sawp_drop"] call BIS_fnc_addCommMenuItem;
 		lbSetColor [2103, index_support_sawp, [0, 1, 0, 1]];
@@ -117,7 +117,7 @@ case 5: {
     if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = localize "STR_DUWS_T_HALOunlock";
-    [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
     ctrlSetText [1000, format["%1",commandpointsblu1]];
     lbSetColor [2103, 15, [0, 1, 0, 1]];
     support_halo_available = true;
@@ -155,7 +155,7 @@ case 5: {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_uavunlock";
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		_uav_recon = [player,"uav_recon"] call BIS_fnc_addCommMenuItem;
 		lbSetColor [2103, index_support_uavrecon, [0, 1, 0, 1]];
@@ -173,7 +173,7 @@ case 5: {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_helotaxiunlock";
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		_helo = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;
 		lbSetColor [2103, index_support_helotaxi, [0, 1, 0, 1]];
@@ -191,7 +191,7 @@ case 8: {
     support_count = support_count + 1;
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = localize "STR_DUWS_T_heloliftunlock";
-    [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
     ctrlSetText [1000, format["%1",commandpointsblu1]];
     _helo = [player,"helo_lift"] call BIS_fnc_addCommMenuItem;
     lbSetColor [2103, index_support_helolift, [0, 1, 0, 1]];
@@ -209,7 +209,7 @@ case 8: {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_boattaxiunlock";
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		lbSetColor [2103, index_support_boattaxi, [0, 1, 0, 1]];
 		support_boattaxi_available = true;
@@ -256,7 +256,7 @@ case 11: {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_artyunlock";
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		_arty = [player,"artillery"] call BIS_fnc_addCommMenuItem;
 		lbSetColor [2103, index_support_arty, [0, 1, 0, 1]];
@@ -274,7 +274,7 @@ case 11: {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_slingshot";
 		_message = localize "STR_DUWS_T_mtrunlock";
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		_mortar = [player,"mortar"] call BIS_fnc_addCommMenuItem;
 		lbSetColor [2103, index_support_mortar, [0, 1, 0, 1]];
@@ -295,7 +295,7 @@ case 11: {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = ([localize "STR_DUWS_T_jdamunlock"] call fnc_cs);
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		_jdam = [player,"jdam"] call BIS_fnc_addCommMenuItem;
 		lbSetColor [2103, index_support_jdam, [0, 1, 0, 1]];
@@ -316,7 +316,7 @@ case 11: {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_laserguidedunlock";
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		_laser = [player,"laser"] call BIS_fnc_addCommMenuItem;
 		lbSetColor [2103, index_support_laser, [0, 1, 0, 1]];
@@ -337,7 +337,7 @@ case 11: {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = ([localize "STR_DUWS_T_clusterunlock"] call fnc_cs);
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		_cluster = [player,"cluster"] call BIS_fnc_addCommMenuItem;
 		lbSetColor [2103, index_support_cluster, [0, 1, 0, 1]];
@@ -358,7 +358,7 @@ case 11: {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = ([localize "STR_DUWS_T_napalmunlock"] call fnc_cs);
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		_cluster = [player,"napalm"] call BIS_fnc_addCommMenuItem;
 		lbSetColor [2103, index_support_napalm, [0, 1, 0, 1]];
@@ -379,7 +379,7 @@ case 11: {
 			support_count = support_count + 1;
             _speaker = localize "STR_DUWS_T_changgongpilot";
             _message = localize "STR_DUWS_T_hcchopperunlock";
-            [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+            [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
             ctrlSetText [1000, format["%1",commandpointsblu1]];
             _hcAttChop = [player,"hc_ATTchop"] call BIS_fnc_addCommMenuItem;
 			hcAttChop = _hcAttChop;
@@ -411,7 +411,7 @@ case 11: {
 			support_count = support_count + 1;
             _speaker = localize "STR_DUWS_T_koipilot";
             _message = ([localize "STR_DUWS_T_hcjetunlock"] call fnc_cs);
-            [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+            [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 			ctrlSetText [1000, format["%1",commandpointsblu1]];
             _hcCAS = [player,"hc_CAS"] call BIS_fnc_addCommMenuItem;
 			hcCAS = _hcCAS;
@@ -443,7 +443,7 @@ case 11: {
 		support_count = support_count + 1;
 		_speaker = localize "STR_DUWS_T_OVERLORD";
 		_message = localize "STR_DUWS_T_paradropunlock";
-		[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		_supplydrop = [player,"paradrop"] call BIS_fnc_addCommMenuItem;
 		lbSetColor [2103, index_support_paradrop, [0, 1, 0, 1]];
@@ -465,7 +465,7 @@ case 21: {
     if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = localize "STR_DUWS_T_mhqunlock";
-    [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
     ctrlSetText [1000, format["%1",commandpointsblu1]];
     _mhq = [player,"mobile_HQ"] call BIS_fnc_addCommMenuItem;
     lbSetColor [2103, index_mobile_HQ, [0, 1, 0, 1]];

@@ -44,6 +44,6 @@ private _count = 6 + floor ((_rep - 2) / 2);
 _count = _count max 6 min 12;
 
 // ========== 通知客户端打开地图选择部署位置 ==========
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_HIRE_PARTISANS_choseMap"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_HIRE_PARTISANS_choseMap"] remoteExec ["fnc_duws_dialogue", _caller];
 [_caller, _count] remoteExec ["fnc_hirePartisans_clientMap", _caller];
 // 服务器不再做更多事情，后续由客户端调用 spawnDeployed

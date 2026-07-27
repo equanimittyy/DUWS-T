@@ -219,12 +219,12 @@ sleep 1;
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["tower%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 
-[_speaker1, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker1, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 12;
-["", _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
+["", _message1] remoteExec ["fnc_duws_dialogue", 0];
 sleep 12;
-[_speaker, _message2] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message2] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 [west, [_VARtaskgeneratedName],
 [localize "STR_DUWS_T_dgpqenyw", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate;
@@ -268,7 +268,7 @@ if ((alive _vehicle_7 && (damage _vehicle_7) < 1) && (time - _missionStartTime) 
     [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = ([localize "STR_DUWS_T_towerfail"] call fnc_cs);
-    [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
     deleteMarker str(_markername2);
     deleteMarker str(_markername);
     [] spawn fnc_missionTimer;

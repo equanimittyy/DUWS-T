@@ -99,7 +99,7 @@ _vehpos = [_vehpos select 0, _vehpos select 1, (_vehpos select 2)+800];
 	};
      _speaker = localize "STR_DUWS_T_OVERLORD";
      _message = localize "STR_DUWS_T_opforairspotted";
-     [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
      [] remoteExec ["fnc_broadcastRadioChatter", 0];
 	 sleep floor (random [1200,1800,2400]);	// next air delay Rand 20-40 min
 

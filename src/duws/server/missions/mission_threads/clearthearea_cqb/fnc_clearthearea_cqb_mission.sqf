@@ -6,7 +6,7 @@ _radius = 200;
 _cpreward = 15;
 _apreward = 15;
 _speaker = localize "STR_DUWS_T_OVERLORD";
-_speakeracteam = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_speakeracteam = localize "STR_DUWS_T_actionteam";
 _message = localize "STR_DUWS_T_cqbletsdothis";
 _messageroger = ([localize "STR_DUWS_T_cqbroger"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_cqblookslike";
@@ -173,13 +173,13 @@ _buildingUnitsList = [];
     _markerName = _buildingMarkers select _forEachIndex;
     [_x, _buildingIndex, _markerName] spawn {
         params ["_units", "_idx", "_mrk"];
-        private _speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+        private _speaker = localize "STR_DUWS_T_actionteam";
         waitUntil {
             sleep 2;
             ({alive _x} count _units) == 0
         };
         private _msg = format [localize "STR_DUWS_T_HOUSE_CLEARED", _idx];
-        [_speaker, _msg] remoteExec ["BIS_fnc_showSubtitle", 0];
+        [_speaker, _msg] remoteExec ["fnc_duws_dialogue", 0];
         deleteMarker _mrk;
     };
 } forEach _buildingUnitsList;
@@ -195,10 +195,10 @@ if (hardcore_mode_enable && (random 10) < (master_Intel_chance + master_Intel_bo
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["clearhouse%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
-[_speakeracteam, _messageroger] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speakeracteam, _messageroger] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 _markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
@@ -221,13 +221,13 @@ waitUntil {
 deleteMarker str(_markername2);
 deleteMarker str(_markername);
 
-[_speakeracteam, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speakeracteam, _message1] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 5;
-[_speakeracteam, _message2] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
-[_speaker, _message3] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message3] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
 [_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];

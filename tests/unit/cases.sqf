@@ -39,3 +39,33 @@ duws_callsign = "Reaper";
 ["cs: leaves lines without the callsign untouched",
     (["Overlord to all units in the AO."] call fnc_cs),
     "Overlord to all units in the AO."] call fnc_assertEq;
+
+// --- fnc_duws_dialogue_channel: which surface a speaker lands on ---
+// Fed English literals because sqf-vm has no stringtable. What is under test is the
+// lookup, not what localize returns -- the router builds the real table from the same keys.
+// Twelve strings for thirteen keys: allseer and Scout share an English value.
+private _net = ["Allseer 1-1", "Express 2-1", "Viper 1-5", "Delta 3-2", "Koi 1-1",
+    "Longbow 1-1", "Slingshot 1-1", "Cobra 1-3", "Hound 2-2", "Signal 3-1", "Signal 2-2",
+    "OPFOR", "Chariot 1-1", "Crane 1-1", "Stork 1-1", "Swordfish 1-1"];
+
+{
+    [format ["dialogue_channel: %1 is NET", _x],
+        ([_x, _net] call fnc_duws_dialogue_channel), "NET"] call fnc_assertEq;
+} forEach _net;
+
+{
+    [format ["dialogue_channel: %1 is VOICE", _x],
+        ([_x, _net] call fnc_duws_dialogue_channel), "VOICE"] call fnc_assertEq;
+} forEach ["Overlord", "Alpha 1-1", "Civilian", "informant", "Survivor", "IDAP staff",
+    "Pilot"];
+
+["dialogue_channel: a blank speaker is VOICE",
+    (["", _net] call fnc_duws_dialogue_channel), "VOICE"] call fnc_assertEq;
+
+// fnc_fob_server builds its call with format and interpolates a position array here.
+["dialogue_channel: a non-string speaker is VOICE, never a table lookup",
+    ([[1234.5, 6789, 0], _net] call fnc_duws_dialogue_channel), "VOICE"] call fnc_assertEq;
+
+// Fail loud: an unlisted callsign must reach the surface the player is looking at.
+["dialogue_channel: an unknown callsign defaults to VOICE",
+    (["Havoc 6-1", _net] call fnc_duws_dialogue_channel), "VOICE"] call fnc_assertEq;

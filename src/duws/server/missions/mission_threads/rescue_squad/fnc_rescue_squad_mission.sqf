@@ -70,10 +70,10 @@ fnc_rescue_squad_uncaptive = {
 // TASK AND NOTIFICATION
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
-[_speaker1, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker1, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
-[_speaker, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [west, [_VARtaskgeneratedName], 

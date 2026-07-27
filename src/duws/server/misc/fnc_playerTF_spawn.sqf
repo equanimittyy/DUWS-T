@@ -13,7 +13,7 @@ sleep 15;
 } forEach (units _group);
 
 //[format[localize "STR_DUWS_T_32ci6fa1",_TFname]] spawn fnc_sideChat_filter;
-[localize "STR_DUWS_T_OVERLORD", format[localize "STR_DUWS_T_32ci6fa1", _TFname]] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_OVERLORD", format[localize "STR_DUWS_T_32ci6fa1", _TFname]] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 10; // give squads a chance to mount up
 [_group] spawn fnc_WARCOM_wp_blu_assault;

@@ -23,7 +23,7 @@ if !(["CP", _unitType select 2] call fnc_pool_spend) exitWith {hint localize "ST
 
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_unitready"] call fnc_cs);
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 ctrlSetText [1000, format["%1",commandpointsblu1]];
 _group = group player ;

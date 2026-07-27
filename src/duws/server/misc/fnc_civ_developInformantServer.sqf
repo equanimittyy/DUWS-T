@@ -15,14 +15,14 @@ if (missionNamespace getVariable [format ["civ_informant_active_%1", _locIndex],
 private _rep = missionNamespace getVariable ["Player_Reputation", 0];
 if (_rep <= 0) exitWith {
     sleep 4;
-    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_norepinf"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_norepinf"] remoteExec ["fnc_duws_dialogue", _caller];
     [localize "STR_DUWS_T_DEV_INFORMANT_FAIL_REP"] remoteExec ["hint", _caller];
 };
 
 private _chance = (_rep min 3) * 0.05;
 if (random 1 > _chance) exitWith {
     sleep 4;
-    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_failinf"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_failinf"] remoteExec ["fnc_duws_dialogue", _caller];
     [localize "STR_DUWS_T_DEV_INFORMANT_FAIL"] remoteExec ["hint", _caller];
 };
 
@@ -45,12 +45,12 @@ if (_moneyRemoved < 5) then {
 
 if (_moneyRemoved < 5) exitWith {
     sleep 4;
-    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_nocpinf"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_nocpinf"] remoteExec ["fnc_duws_dialogue", _caller];
     [localize "STR_DUWS_T_nocpinf2"] remoteExec ["hint", _caller];
 };
 
 sleep 4;
-[localize "STR_DUWS_T_civ", localize "STR_DUWS_T_successinf"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+[localize "STR_DUWS_T_civ", localize "STR_DUWS_T_successinf"] remoteExec ["fnc_duws_dialogue", _caller];
 
 missionNamespace setVariable [format ["civ_informant_active_%1", _locIndex], true];
 publicVariable format ["civ_informant_active_%1", _locIndex];

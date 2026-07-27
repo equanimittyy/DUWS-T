@@ -690,7 +690,7 @@ str(_markername) setMarkerText "Main Base";
 _trgWarning = createTrigger["EmptyDetector",PosOfBLUHQ];
 _trgWarning setTriggerArea[200,200,0,false];
 _trgWarning setTriggerActivation["EAST","PRESENT",true];
-_trgWarning setTriggerStatements["this", "[localize 'STR_DUWS_T_OVERLORD', localize 'STR_DUWS_T_hqwarning'] remoteExec ['BIS_fnc_showSubtitle', 0];", ""];
+_trgWarning setTriggerStatements["this", "[localize 'STR_DUWS_T_OVERLORD', localize 'STR_DUWS_T_hqwarning'] remoteExec ['fnc_duws_dialogue', 0];", ""];
 _trgWarning setTriggerTimeout [10, 10, 10, true];
 
 // 重生点：帐篷门口 (测量坐标)

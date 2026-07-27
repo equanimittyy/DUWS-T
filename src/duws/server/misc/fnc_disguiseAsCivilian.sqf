@@ -222,7 +222,7 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
                     _player setVariable ["DUWS_disguise_warningPos", getPos _player, true];
                     
                     private _warningKey = selectRandom _warningKeys;
-                    [localize "STR_DUWS_T_DISGUISE_OPFOR_SPEAKER", localize _warningKey] remoteExec ["BIS_fnc_showSubtitle", _player];
+                    [localize "STR_DUWS_T_DISGUISE_OPFOR_SPEAKER", localize _warningKey] remoteExec ["fnc_duws_dialogue", _player];
                     [localize "STR_DUWS_T_DISGUISE_WARNING_HINT"] remoteExec ["hint", _player];
                 } else {
                     private _warningPos = _player getVariable ["DUWS_disguise_warningPos", [0,0,0]];

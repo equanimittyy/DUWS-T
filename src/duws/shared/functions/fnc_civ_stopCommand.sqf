@@ -28,14 +28,14 @@ private _actionID = _unit addAction [
     params ["_target", "_caller", "_actionId"];
     
     [_target] remoteExec ["fnc_removeStopCommandAction", 0];
-    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_STOP"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_STOP"] remoteExec ["fnc_duws_dialogue", _caller];
     
     // 发送服务器请求，让平民移动到玩家位置
     [_target, _caller] remoteExec ["fnc_civ_moveToPlayerServer", 2];
     sleep 4;
     // 提示成功
     hint localize "STR_DUWS_T_STOP_SUCCESS_HINT";
-    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_STOP_SUCCESS"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_STOP_SUCCESS"] remoteExec ["fnc_duws_dialogue", _caller];
 },
     nil,
     6,

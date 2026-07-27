@@ -118,7 +118,7 @@ missionNamespace setVariable [_var, _HCgroups, true];
 
 private _successMsg = format [([localize "STR_DUWS_T_HIRE_PARTISANS_SUCCESS"] call fnc_cs), _count];
 ["info", [localize "STR_DUWS_T_HIRE_PARTISANS_TITLE", _successMsg]] remoteExec ["BIS_fnc_showNotification", 0];
-[localize "STR_DUWS_T_OVERLORD", _successMsg] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_OVERLORD", _successMsg] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 private _hintMsg = format [localize "STR_DUWS_T_HIRE_PARTISANS_HINT", _count];

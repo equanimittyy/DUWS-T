@@ -166,7 +166,7 @@ opfor_patrol_count = 0;
                     private _group = _created select 2;
                     _group deleteGroupWhenEmpty true;
                     [_group] spawn fnc_WARCOM_wp_opf_patrol;
-                    [localize "STR_DUWS_T_allseer", ([localize "STR_DUWS_T_ammospotted"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
+                    [localize "STR_DUWS_T_allseer", ([localize "STR_DUWS_T_ammospotted"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
                     [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 };
                 // 无论是否成功生成，更新计时器（避免频繁尝试）

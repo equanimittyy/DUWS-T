@@ -24,5 +24,5 @@ private _shortMsg = format [localize "STR_DUWS_T_10dzingj", commandpointsblu1, W
 // 让所有玩家显示底部 OSD 信息
 [] remoteExec ["fnc_bottom_right_message", 0];
 // 字幕和电台声音已经是全局广播，无需修改
-[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_sitrep"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_sitrep"] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];

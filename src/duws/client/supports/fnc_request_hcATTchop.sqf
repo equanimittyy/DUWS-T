@@ -37,7 +37,7 @@ switch (VERSION_X) do {
 };
 _speaker = localize "STR_DUWS_T_changgongpilot";
 _message = ([localize "STR_DUWS_T_longbowin"] call fnc_cs);
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 hint localize "STR_DUWS_T_rjuehu36";
 
@@ -53,7 +53,7 @@ _vehicle addEventHandler ["Killed", {
     // 原有坠毁广播
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = localize "STR_DUWS_T_casdownlb";
-    [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
     sleep 580;
@@ -73,7 +73,7 @@ _vehicle addEventHandler ["Killed", {
     // 广播可用消息
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message1 = ([localize "STR_DUWS_T_casreservelb"] call fnc_cs);
-    [_speaker, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
     };
 }];
@@ -96,6 +96,6 @@ _vehicle addEventHandler ["Deleted", {
     HC_ATTchop_currentGroup = nil;
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = ([localize "STR_DUWS_T_casreservelb"] call fnc_cs);  // 复用“可用”提示
-    [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 }];

@@ -59,7 +59,7 @@ while {true} do {
 		if (_units_alive == 1) then {deleteVehicle (leader _group)};
 		str(_markername) setMarkerColor "ColorRed";
 		str(_markername) setMarkerType "waypoint";
-        [localize "STR_DUWS_T_OVERLORD", format[localize "STR_DUWS_T_y6pvcegu", _TFname]] remoteExec ["BIS_fnc_showSubtitle", 0];
+        [localize "STR_DUWS_T_OVERLORD", format[localize "STR_DUWS_T_y6pvcegu", _TFname]] remoteExec ["fnc_duws_dialogue", 0];
 		sleep 600;
 		deleteMarker str(_markername);
 	};
@@ -90,7 +90,7 @@ while {true} do {
 					if (str (_x select 1) == str (_primary_waypoint select 0)) then {
 						_speaker = localize "STR_DUWS_T_OVERLORD";
 						_message = format[localize "STR_DUWS_T_3azcote7",_x select 0,_TFname];
-						[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+						[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 						[] remoteExec ["fnc_broadcastRadioChatter", 0];
 					};
 				} foreach zone_namePOS_pairs;

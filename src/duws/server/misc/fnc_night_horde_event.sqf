@@ -44,10 +44,10 @@ while {true} do {
             if (random 1 < 0.1) then {
                 _lastHordeDate = _currentDay; // 记录触发日
                 missionNamespace setVariable ["Horde_LastDay", _lastHordeDate]; // 保存到存档
-                [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_hordealert1"] remoteExec ["BIS_fnc_showSubtitle", 0];
+                [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_hordealert1"] remoteExec ["fnc_duws_dialogue", 0];
                 [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 sleep 6;
-                [([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_hordealert2"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
+                [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_hordealert2"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
                 [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 sleep 6;
 

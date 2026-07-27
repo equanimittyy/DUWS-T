@@ -18,7 +18,7 @@ _spawnPos call BIS_fnc_removeRespawnPosition;
 ["WARN", "SUPPORT", format ["FOB '%1' destroyed, respawn point withdrawn", _fobname]] call fnc_log;
 
 ["info2",[localize "STR_DUWS_T_r17nker3",_fobname]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_fobdown"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_fobdown"] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 [_fobPos] call fnc_fob_deregister;
 

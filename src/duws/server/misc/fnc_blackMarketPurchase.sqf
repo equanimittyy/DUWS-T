@@ -79,7 +79,7 @@ if (_type == "goggles") then {
     };
 };
 
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_BLACKMARKET_BOUGHT_sent"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_BLACKMARKET_BOUGHT_sent"] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 5;
 // ========== 尝试添加到库存/装备，若失败则掉落在地面 ==========

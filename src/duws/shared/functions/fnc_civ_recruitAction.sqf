@@ -7,18 +7,18 @@ private _actionID = _unit addAction [
     localize "STR_DUWS_T_CIV_RECRUIT",
     {
         params ["_target", "_caller", "_actionId"];
-        [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_fight4freedom"] call BIS_fnc_showSubtitle;
+        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_fight4freedom"] call fnc_duws_dialogue;
         sleep 3;
         // --- 前置检查：检查玩家是否有至少 2 个 Money_roll ---
         private _moneyCount = { _x == "Money_roll" } count (magazines _caller);
         if (_moneyCount < 2) exitWith {
             hint (localize "STR_DUWS_T_nocpinf2"); // 复用原有提示
-            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_NOT_ENOUGH_CP"] call BIS_fnc_showSubtitle;
+            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_NOT_ENOUGH_CP"] call fnc_duws_dialogue;
         };
         private _rep = missionNamespace getVariable ["Player_Reputation", 0];
         if (_rep <= 0) exitWith {
             hint (localize "STR_DUWS_T_RECRUIT_FAIL_REP_HINT");
-            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_RECRUIT_FAIL_REP"] call BIS_fnc_showSubtitle;
+            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_RECRUIT_FAIL_REP"] call fnc_duws_dialogue;
             // 让平民随机跑离
             private _runDir = random 360;
             private _runDist = 50 + random 50;
@@ -44,7 +44,7 @@ private _actionID = _unit addAction [
             private _runDist = 50 + random 50;
             private _runPos = (getPos _target) getPos [_runDist, _runDir];
             _target doMove _runPos;
-            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_RECRUIT_FAIL"] call BIS_fnc_showSubtitle;
+            [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_RECRUIT_FAIL"] call fnc_duws_dialogue;
             hint (localize "STR_DUWS_T_RECRUIT_FAIL_HINT");
         };
     },

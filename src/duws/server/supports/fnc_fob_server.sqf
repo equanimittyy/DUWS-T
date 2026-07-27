@@ -20,7 +20,7 @@ str(_markername) setMarkerSize [2.5, 2.5];
 sleep 5;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_fobcall"] call fnc_cs);
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // Create the building
@@ -67,7 +67,7 @@ _trgWarning setTriggerActivation["EAST","PRESENT",true];
 // 使用 format 将 FOB 坐标写入字符串，确保触发时能正确传递位置参数
 _trgWarning setTriggerStatements[
     "this", 
-    format["[%1, enemy_near_fob] remoteExec ['BIS_fnc_showSubtitle', 0];", str(_foundPickupPos)], 
+    format["[%1, enemy_near_fob] remoteExec ['fnc_duws_dialogue', 0];", str(_foundPickupPos)],
     ""
 ];
 // CREATE VARNAME FOR WARNING TRIGGER --> use the pos of the trigger

@@ -8,11 +8,11 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith
   ["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
 };
 hint localize "STR_DUWS_T_sawpdown";
-_speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
-_speaker1 = localize "STR_DUWS_T_pilot";
+_speaker = localize "STR_DUWS_T_actionteam";
+_speaker1 = localize "STR_DUWS_T_stork";
 _message = ([localize "STR_DUWS_T_sawpcall"] call fnc_cs);
 _message1 = ([localize "STR_DUWS_T_sawpcallend"] call fnc_cs);
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 sleep 8;
@@ -55,7 +55,7 @@ _wp2 setWaypointType "MOVE";
 _wp2 setWaypointBehaviour "CARELESS";
 sleep 8;
 hint localize "STR_DUWS_T_sawpibnd";
-[_speaker1, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 18;
 hint localize "STR_DUWS_T_sawposdt";

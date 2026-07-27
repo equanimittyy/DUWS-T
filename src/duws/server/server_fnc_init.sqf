@@ -241,6 +241,22 @@ fnc_cs = {
 };
 publicVariable "fnc_cs";
 
+// Speaker -> surface, for fnc_duws_dialogue. NET is the explicit list and VOICE the
+// default, so a callsign added later without a table entry lands on the loud surface where
+// it is visible in the first minute of play, rather than disappearing into a chat box
+// nobody is watching.
+// Kept pure and out of the router because the router touches localize, chat and UI, none
+// of which exist in the headless test VM -- this is the one part the lint cannot check.
+fnc_duws_dialogue_channel = {
+    params [["_speaker", ""], ["_netSpeakers", []]];
+    // fnc_fob_server builds its speaker with format and interpolates a position array.
+    // That is pre-existing; it must not reach `in` against a table of strings.
+    if !(_speaker isEqualType "") exitWith {"VOICE"};
+    if (_speaker in _netSpeakers) exitWith {"NET"};
+    "VOICE"
+};
+publicVariable "fnc_duws_dialogue_channel";
+
 // STARTUP FUNCTIONS
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BluHQinit.sqf";
 fnc_factions_check = compile preprocessFileLineNumbers "duws\server\misc\fnc_factions_check_modern.sqf";
@@ -513,7 +529,7 @@ fnc_recruitSuccessServer = {
     [_target] joinSilent (group _caller);
     
     // 提示执行者
-    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_RECRUIT_SUCCESS"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_RECRUIT_SUCCESS"] remoteExec ["fnc_duws_dialogue", _caller];
     [localize "STR_DUWS_T_RECRUIT_SUCCESS_HINT"] remoteExec ["hint", _caller];
     [_target] joinSilent (group _caller);
 };
@@ -713,6 +729,7 @@ fnc_player_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_pla
 fnc_earplugs = compile preprocessFileLineNumbers "duws\client\misc\fnc_earplugs.sqf";publicVariable "fnc_earplugs";
 fnc_duws_help = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_help.sqf";publicVariable "fnc_duws_help";
 fnc_bottom_right_message = compile preprocessFileLineNumbers "duws\client\misc\fnc_bottom_right_message.sqf";publicVariable "fnc_bottom_right_message";
+fnc_duws_dialogue = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_dialogue.sqf";publicVariable "fnc_duws_dialogue";
 fnc_autoSave = compile preprocessFileLineNumbers "duws\server\misc\fnc_autoSave.sqf";publicVariable "fnc_autoSave";
 fnc_playerTF_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_playerTF_spawn.sqf";publicVariable "fnc_playerTF_spawn";
 // Not broadcast: server-only, so an accidental client call fails loud.

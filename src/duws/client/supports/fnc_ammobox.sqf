@@ -28,11 +28,11 @@ _dist = 1600;
 _spawnPos = ((vectorNormalized _vec) vectorMultiply _dist) vectorAdd _spawnPos;
 _grouptype = "";
 // 移除全局变量 onStation，改为在载具上存储状态
-_speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
-_speaker1 = localize "STR_DUWS_T_pilot";
+_speaker = localize "STR_DUWS_T_actionteam";
+_speaker1 = localize "STR_DUWS_T_stork";
 _message = ([localize "STR_DUWS_T_supplydropcall"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_supplydropcallend";
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 switch (VERSION_X) do {
@@ -64,7 +64,7 @@ _wp2 = _group addWaypoint [[0,0], 100];
 _wp2 setWaypointType "MOVE";
 _wp2 setWaypointBehaviour "CARELESS";
 sleep 8;
-[_speaker1, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 hint localize "STR_DUWS_T_17hh9rx4";

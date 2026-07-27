@@ -312,12 +312,12 @@ sleep 1;
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["cache%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 6;
-_speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_speaker = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_cachecopy"] call fnc_cs);
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 [west, [_VARtaskgeneratedName],
 [localize "STR_DUWS_T_geryeddp", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate;

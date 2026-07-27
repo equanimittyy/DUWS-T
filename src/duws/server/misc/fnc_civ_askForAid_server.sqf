@@ -9,14 +9,14 @@ params ["_civilian", "_caller"];
 
 if (isNull _civilian || isNull _caller) exitWith {};
 
-[([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_ASK_AID_hi"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_ASK_AID_hi"] remoteExec ["fnc_duws_dialogue", _caller];
 sleep 5;
 // 获取玩家声望
 private _rep = missionNamespace getVariable ["Player_Reputation", 0];
 if (_rep <= 0) exitWith {
     // 声望不足，失败提示
     [localize "STR_DUWS_T_ASK_AID_FAIL_REP"] remoteExec ["hint", _caller];
-    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_ASK_AID_REFUSE"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_ASK_AID_REFUSE"] remoteExec ["fnc_duws_dialogue", _caller];
 };
 
 // 检查并扣除 1 个 Money_roll
@@ -38,7 +38,7 @@ if (_moneyRemoved < 1) then {
 
 if (_moneyRemoved < 1) exitWith {
     [localize "STR_DUWS_T_nocpinf2"] remoteExec ["hint", _caller];
-    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_NOT_ENOUGH_CP"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_NOT_ENOUGH_CP"] remoteExec ["fnc_duws_dialogue", _caller];
 };
 
 // 成功：在平民周围地面生成医疗箱
@@ -56,4 +56,4 @@ _medikit enableSimulation true;
 
 // 成功提示
 [localize "STR_DUWS_T_ASK_AID_SUCCESS"] remoteExec ["hint", _caller];
-[localize "STR_DUWS_T_civ", localize "STR_DUWS_T_ASK_AID_GRANT"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+[localize "STR_DUWS_T_civ", localize "STR_DUWS_T_ASK_AID_GRANT"] remoteExec ["fnc_duws_dialogue", _caller];

@@ -108,7 +108,7 @@ _spawnLoc = "";
 	};			  
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_opforqrf1";
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 900;  // 15 min
 

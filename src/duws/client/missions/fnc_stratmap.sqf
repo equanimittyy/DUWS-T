@@ -10,14 +10,14 @@ if (hasInterface && isMultiplayer)	then {
 if (isnil ("Mission_available")) then {Mission_available = true;publicVariable "Mission_available"};
 if (!Mission_available) exitWith {
 _speaker = localize "STR_DUWS_T_overlord";
-_speakeracteam = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_speakeracteam = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_missioncooldown"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_missioncooldown2";
 [localize "STR_DUWS_T_b68ftbvf",{hint _this}] remoteExec ["BIS_fnc_Spawn", player1];
-[_speakeracteam, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speakeracteam, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 4;
-[_speaker, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 };
 
@@ -106,7 +106,7 @@ _failsafe2 = [] spawn {  // Spawn the secondary failsafe
 _handle = [] spawn {  // Spawn the MAIN SEARCH
 
   _counter = 0;
-  [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_missionlook"] remoteExec ["BIS_fnc_showSubtitle", 0];
+  [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_missionlook"] remoteExec ["fnc_duws_dialogue", 0];
   _kibot_pos_array_missionPos = [[-99999,-99999,-99999]];
 
   // CURRENTLY 15 MISSIONS AVAILABLE, 0 indexed

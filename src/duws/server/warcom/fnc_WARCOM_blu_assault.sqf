@@ -75,7 +75,7 @@ WARCOM_blu_attack_wave_avalaible = false;
 			_TFname = [1] call fnc_random_name;
 			waitUntil {sleep 0.1;!isNil "_TFname"};
 			sleep 2;
-			[localize "STR_DUWS_T_OVERLORD", format[localize "STR_DUWS_T_7y9is2hm", _TFname]] remoteExec ["BIS_fnc_showSubtitle", 0];
+			[localize "STR_DUWS_T_OVERLORD", format[localize "STR_DUWS_T_7y9is2hm", _TFname]] remoteExec ["fnc_duws_dialogue", 0];
             [] remoteExec ["fnc_broadcastRadioChatter", 0];
 			[{hint localize "STR_DUWS_T_7y9is2hm2"}] remoteExec ["BIS_fnc_Spawn", 0];
 			sleep 10; // give squads a chance to mount up

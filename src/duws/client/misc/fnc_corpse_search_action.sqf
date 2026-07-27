@@ -29,7 +29,7 @@ _corpse setVariable ["corpse_target_pos", _targetPos];
     {                                                                   // 开始代码
         params ["_target", "_caller", "_actionId", "_arguments"];
         private _playerName = name _caller;
-        [_playerName, localize "STR_DUWS_T_SEARCH_START_SUBTITLE"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+        [_playerName, localize "STR_DUWS_T_SEARCH_START_SUBTITLE"] remoteExec ["fnc_duws_dialogue", _caller];
     },
     {},                                                                 // 每帧代码
     {                                                                   // 完成代码
@@ -52,10 +52,10 @@ _corpse setVariable ["corpse_target_pos", _targetPos];
                 // 单行通知（标题 + 描述）
                 ["info", [localize "STR_DUWS_T_INTEL_FOUND_TARGETtitle", localize "STR_DUWS_T_INTEL_FOUND_TARGETdesc"]] remoteExec ["BIS_fnc_showNotification", 0];
                 // 使用玩家名字作为说话者
-                [_playerName, ([localize "STR_DUWS_T_INTEL_FOUND_TARGET"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", 0];
+                [_playerName, ([localize "STR_DUWS_T_INTEL_FOUND_TARGET"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
 	            [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 sleep 8;
-                [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_FOUND_TARGET2"] remoteExec ["BIS_fnc_showSubtitle", 0];
+                [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_FOUND_TARGET2"] remoteExec ["fnc_duws_dialogue", 0];
 	            [] remoteExec ["fnc_broadcastRadioChatter", 0];
             };
         } else {
@@ -63,12 +63,12 @@ _corpse setVariable ["corpse_target_pos", _targetPos];
                 // 20% 额外情报：+1 CP, +1 AP
                 [1, "corpse_intel"] remoteExec ["fnc_cp_adjust", 2];
                 ["BLU", 1, "corpse_intel"] remoteExec ["fnc_ap_adjust", 2];
-                [_playerName, localize "STR_DUWS_T_INTEL_FOUND_x"] remoteExec ["BIS_fnc_showSubtitle", 0];
+                [_playerName, localize "STR_DUWS_T_INTEL_FOUND_x"] remoteExec ["fnc_duws_dialogue", 0];
 	            [] remoteExec ["fnc_broadcastRadioChatter", 0];
                 ["infosearch", [localize "STR_DUWS_T_INTEL_BONUS_TITLE", format [localize "STR_DUWS_T_INTEL_BONUS_DESC", 1, 1]]] remoteExec ["BIS_fnc_showNotification", 0];
             } else {
                 // 40% 无收获s
-                [_playerName, localize "STR_DUWS_T_INTEL_FOUND_n"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+                [_playerName, localize "STR_DUWS_T_INTEL_FOUND_n"] remoteExec ["fnc_duws_dialogue", _caller];
             };
         };
     },

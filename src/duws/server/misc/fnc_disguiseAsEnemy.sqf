@@ -124,7 +124,7 @@ private _subtitleHandle = [_caller, _startTime, _duration, _fixedPhrases] spawn 
         private _msgKey = _phrases select (_idx % count _phrases);
         _idx = _idx + 1;
         [localize _msgKey] remoteExec ["systemChat", _caller];
-        [localize "STR_DUWS_T_DISGUISE_OPFOR_SPEAKER", localize _msgKey] remoteExec ["BIS_fnc_showSubtitle", _caller];
+        [localize "STR_DUWS_T_DISGUISE_OPFOR_SPEAKER", localize _msgKey] remoteExec ["fnc_duws_dialogue", _caller];
     };
 };
 _caller setVariable ["DUWS_enemyDisguise_subtitleHandle", _subtitleHandle];

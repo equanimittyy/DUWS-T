@@ -47,9 +47,9 @@ private _fncScript = {
             if (_dropAction != -1) then { _caller removeAction _dropAction; };
             private _putAction = _caller getVariable ["putInVehicleAction", -1];
             if (_putAction != -1) then { _caller removeAction _putAction; };
-            _speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+            _speaker = localize "STR_DUWS_T_actionteam";
             _message = localize "STR_DUWS_T_stayhere";
-            [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+            [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
             
             [_caller, "AcinPknlMstpSnonWnonDnon_AcinPercMrunSnonWnonDnon"] remoteExec ["switchMove", 0];
             sleep 1.5;
@@ -155,9 +155,9 @@ private _fncScript = {
             _pilot setVariable ["carrier", nil, true];
             _pilot setVariable ["inVehicle", _vehicle, true];
             _pilot disableAI "ALL";
-            _speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+            _speaker = localize "STR_DUWS_T_actionteam";
             _message = localize "STR_DUWS_T_pilotinveh";
-            [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+            [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
             [_caller] remoteExec ["DUWS_fnc_clearCarrierActions", _caller];
             [_vehicle] remoteExec ["DUWS_fnc_addVehicleTakeOutAction", 0];
@@ -192,9 +192,9 @@ private _fncScript = {
                 [_caller, ""] remoteExec ["switchMove", 0];
             };
             [_caller, "AcinPercMstpSrasWrflDnon"] remoteExec ["switchMove", 0];
-            _speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+            _speaker = localize "STR_DUWS_T_actionteam";
             _message = localize "STR_DUWS_T_comeonout";
-            [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+            [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
             _pilot attachTo [_caller, [0.17,0.1,0.11]];
             [_pilot, -180] remoteExec ["setDir", 0];
@@ -301,9 +301,9 @@ private _fncScript = {
                         params ["_target", "_caller", "_actionId"];
                         if (_target getVariable ["isCarried", false]) exitWith {};
                         if (!alive _target) exitWith {};
-                        _speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+                        _speaker = localize "STR_DUWS_T_actionteam";
                         _message = localize "STR_DUWS_T_i_got_u";
-                        [_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+                        [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
                         
                         [_caller, "AcinPknlMstpSnonWnonDnon_AcinPercMrunSnonWnonDnon"] remoteExec ["switchMove", 0];
                         
@@ -411,7 +411,7 @@ _radius = 300;
 _cpreward = 25;
 _apreward = 45;
 _speaker = localize "STR_DUWS_T_OVERLORD";
-_speaker1 = localize "STR_DUWS_T_pilot";
+_speaker1 = localize "STR_DUWS_T_pilot_downed";
 _message = localize "STR_DUWS_T_pilotletsdothis";
 _message1 = localize "STR_DUWS_T_pilotfound";
 _message2 = localize "STR_DUWS_T_pilotend";
@@ -489,7 +489,7 @@ publicVariable "currentMissionPilot";
 
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [west, [_VARtaskgeneratedName], 
@@ -572,7 +572,7 @@ sleep 5;
 _pilot setcaptive false;
 _pilot disableAI "PATH";
 [_pilot, "Acts_InjuredLyingRifle01"] remoteExec ["switchMove", 0];
-[_speaker1, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 sleep 55;
@@ -602,7 +602,7 @@ if (!isNull attachedTo _pilot) then {
 [_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
 sleep 1;
 
-[_speaker1, _message2] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 deleteVehicle _pilot;
 missionNamespace setVariable ["currentMissionPilot", nil];
@@ -610,7 +610,7 @@ publicVariable "currentMissionPilot";
 sleep 5;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_pilotend2"] call fnc_cs);
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;
 missionNamespace setVariable [_triggeredVar, true, true];

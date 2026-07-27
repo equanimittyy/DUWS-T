@@ -122,7 +122,7 @@ _wp setWaypointSpeed "FULL";
 _wp setWaypointCompletionRadius 30;
 _wp setWaypointStatements ["true", "missionNamespace setVariable ['intro_heli_arrived', true, true];"];
 
-[localize "STR_DUWS_T_pilot", localize "STR_DUWS_T_heli_moving"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_pilot_intro", localize "STR_DUWS_T_heli_moving"] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 1;
 cutRsc ["DUWST", "PLAIN", 0, true] remoteExec ["call", 0];
@@ -134,7 +134,7 @@ sleep 5;
 titleText ["", "PLAIN", 5] remoteExec ["call", 0];
 sleep 3;
 cutText ["", "PLAIN", 5] remoteExec ["call", 0];
-[([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_heli_ttgtw"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_heli_ttgtw"] remoteExec ["fnc_duws_dialogue", 0];
 // 等待直升机到达航点，超时 120 秒后强制继续
 private _arrivedVar = "intro_heli_arrived";
 missionNamespace setVariable [_arrivedVar, false];
@@ -152,7 +152,7 @@ waitUntil {
     _arrived || !alive _heli || _timeoutReached
 };
 
-[localize "STR_DUWS_T_pilot", localize "STR_DUWS_T_heli_inpos"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_pilot_intro", localize "STR_DUWS_T_heli_inpos"] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 3;
 
@@ -192,7 +192,7 @@ private _groundPosASL = [(_heliPos2D select 0), (_heliPos2D select 1), getTerrai
 
     // 5. 对该玩家单独淡入
     [["", "BLACK IN", 1]] remoteExec ["titleCut", _player];
-    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_ground_reached"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", _player];
+    [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_ground_reached"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", _player];
 } forEach _boardedPlayers;
 // 未登机玩家：等待相同时间后直接传送到直升机正下方
 {
@@ -203,20 +203,20 @@ private _groundPosASL = [(_heliPos2D select 0), (_heliPos2D select 1), getTerrai
     _player setPosASL _groundPosASL;
     _player setVariable ["intro_completed", true, true];
     [["", "BLACK IN", 1]] remoteExec ["titleCut", _player];
-    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), ([localize "STR_DUWS_T_ground_reached"] call fnc_cs)] remoteExec ["BIS_fnc_showSubtitle", _player];
+    [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_ground_reached"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", _player];
 } forEach _unboardedPlayers;
 
 missionNamespace setVariable ["intro_heli_done", true, true];
 publicVariable "intro_heli_done";
 
 sleep 6;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heli_roger"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heli_roger"] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_vzjqx5tp"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_vzjqx5tp"] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heli_money"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heli_money"] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // 直升机飞离
@@ -230,7 +230,7 @@ _wp2 setWaypointStatements ["true", "missionNamespace setVariable ['intro_heli_l
 sleep 10;
 // ========== 焦土模式字幕 ==========
 if (!isNil "scorched_earth_enabled" && scorched_earth_enabled) then {
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_SEEsub"] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_SEEsub"] remoteExec ["fnc_duws_dialogue", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 };
 waitUntil {

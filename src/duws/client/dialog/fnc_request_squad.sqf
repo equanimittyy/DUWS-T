@@ -109,5 +109,5 @@ if (_task_force == true) exitWith {hint localize "STR_DUWS_T_0a6o9dsm"+_TFname};
 hint localize "STR_DUWS_T_gu6cbc5f";
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_squadready"] call fnc_cs);
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];

@@ -9,11 +9,11 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith
 };
 
 hint localize "STR_DUWS_T_q76uei82";
-_speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_speaker = localize "STR_DUWS_T_actionteam";
 _speaker1 = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_vehdropcall"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_vehdropcallend";
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // SEND A PLANE
@@ -49,7 +49,7 @@ _wp2 setWaypointBehaviour "CARELESS";
 
 hint localize "STR_DUWS_T_6cwj6h8z";
 sleep 18;
-[_speaker1, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 hint localize "STR_DUWS_T_9tpm5uf6";
 waitUntil {sleep 0.5;onStation||!alive _vehicle};

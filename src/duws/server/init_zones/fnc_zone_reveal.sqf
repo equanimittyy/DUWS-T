@@ -16,7 +16,7 @@ switch (_one_or_all) do {
 				str(_markername2) setMarkerAlpha 0.3; 
 				_x set [2,true];
 				[localize "STR_DUWS_T_1vp3mgnc"] spawn fnc_sideChat_filter;
-				[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_zonereveal"] remoteExec ["BIS_fnc_showSubtitle", 0];
+				[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_zonereveal"] remoteExec ["fnc_duws_dialogue", 0];
                 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 				
 			};

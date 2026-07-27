@@ -8,7 +8,7 @@ _cpreward = 10;
 _apreward = 25;
 _speaker = localize "STR_DUWS_T_hound";
 _speaker1 = localize "STR_DUWS_T_OVERLORD";
-_speakeracteam = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_speakeracteam = localize "STR_DUWS_T_actionteam";
 _message = localize "STR_DUWS_T_dominationletsdothis";
 _message1 = ([localize "STR_DUWS_T_dominationoverlord"] call fnc_cs);
 _message2 = ([localize "STR_DUWS_T_dominationcopy"] call fnc_cs);
@@ -695,13 +695,13 @@ while {_attempts < 10 && !_validMarkerPos} do {
     sleep 0.5;
 };
 
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 12;
-[_speaker1, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 12;
-[_speakeracteam, _message2] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 12;
 
@@ -775,7 +775,7 @@ sleep 90;
 {
     _x setDamage 1;
 } forEach _bluforAPCs;
-[_speaker1, _messagehoundlost] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker1, _messagehoundlost] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 // ================ 任务完成条件 ================
 // 等待条件：红方载具乘员组全部死亡 或 任务被取消
@@ -801,7 +801,7 @@ deleteMarker _arrowMarkerName;
 // [MOD] 删除蓝方 APC 标记
 { deleteMarker _x; } forEach _apcMarkers;
 
-[_speaker1, _message3] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker1, _message3] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 12;
 [_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];

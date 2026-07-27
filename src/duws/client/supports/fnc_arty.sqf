@@ -13,7 +13,7 @@ _cost = _this select 6;
 _ammotype = _this select 7;
 _rpsinit = _rps;
 _fireObjects = [];  // for napalm flames
-_speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_speaker = localize "STR_DUWS_T_actionteam";
 _message = localize "STR_DUWS_T_artycall";
 
 // make sure blufor has someone in range
@@ -33,7 +33,7 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith {
 	["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
 };
 
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 _ord = "";

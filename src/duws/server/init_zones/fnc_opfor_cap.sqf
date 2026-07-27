@@ -19,7 +19,7 @@ if (_triggerPos in WARCOM_zones_controled_by_OPFOR) exitWith {};
 ["OPF", _triggerPos] call fnc_zone_control_set;
 
 ["us_lostcontrol",[_place,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_lostcontrol"] remoteExec ["BIS_fnc_showSubtitle", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_lostcontrol"] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // Pause TFs if no opfor zones are visible

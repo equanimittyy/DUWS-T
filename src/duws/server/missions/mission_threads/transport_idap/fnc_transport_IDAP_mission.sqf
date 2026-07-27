@@ -13,7 +13,7 @@ _cpreward = 20;
 _apreward = 0;
 _speakerIDAP = localize "STR_DUWS_T_IDAP";
 _speaker = localize "STR_DUWS_T_OVERLORD";
-_speakeracteam  = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_speakeracteam  = localize "STR_DUWS_T_actionteam";
 _message = localize "STR_DUWS_T_idapletsdothis";
 _message1 = ([localize "STR_DUWS_T_idapcopy"] call fnc_cs);
 _message2 = ([localize "STR_DUWS_T_idapacteamgo"] call fnc_cs);
@@ -181,13 +181,13 @@ _deliverySmokeScript = [_targetDeliveryPos, _smokeObjects] spawn {
 };
 
 // 任务前对话
-[_speakerIDAP, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speakerIDAP, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 12;
-[_speaker, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
-[_speakeracteam, _message2] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 5;
 
@@ -244,7 +244,7 @@ if (getdammage _truck1>0.95) exitWith {
 
 // 成功分支
 deleteMarker _deliveryMarkerName;
-[_speakerIDAP, _message3] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speakerIDAP, _message3] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 [_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];

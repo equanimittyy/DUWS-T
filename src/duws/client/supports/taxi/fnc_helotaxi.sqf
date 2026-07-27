@@ -20,19 +20,19 @@ _foundPickupPos = [_posplayer, 20,_radius,20,0,0.5,0,[],[[0,0],[0,0]]] call BIS_
 if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_nolz"; sleep 10; _art = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;};
 
 // A POS NEAR THE PLAYER HAS BEEN FOUND, CHOPPA EN ROUTE
-_speakeracteam = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_speakeracteam = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_helotaxicall0"] call fnc_cs);
-[_speakeracteam, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speakeracteam, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = format[localize "STR_DUWS_T_helotaxicall1",_taxiName,_random1,_random2];
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
-_speaker = localize "STR_DUWS_T_pilot";
+_speaker = localize "STR_DUWS_T_chariot";
 _message = ([localize "STR_DUWS_T_helotaxicall"] call fnc_cs);
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 // create marker on LZ
@@ -101,7 +101,7 @@ _abort = {
 	deleteMarker str(_markerpickup);
 	_message = format[([localize "STR_DUWS_T_helotaxidamaged"] call fnc_cs),_taxiName,_random1,_random2];
 	_speaker = localize "STR_DUWS_T_OVERLORD";
-	[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 	_helo land "LAND";
 	_helo engineOn false;
@@ -152,8 +152,8 @@ while {_inVehCheck} do {
 
 	hint localize "STR_DUWS_T_pilotwp";
 	_message = localize "STR_DUWS_T_pilotwhere";
-	_speaker = localize "STR_DUWS_T_pilot";
-	[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+	_speaker = localize "STR_DUWS_T_chariot";
+	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 	// wait until the player has given a validpos or pilot not in choppa
 	waitUntil {sleep 0.5;taxiCanTakeOff or (call _check_damage)};
@@ -184,8 +184,8 @@ _helo setEffectiveCommander player;  // turn helo "blue" while player is on boar
 
 //_helo lock true;
 	_message = localize "STR_DUWS_T_helotaxioscmk";
-	_speaker = localize "STR_DUWS_T_pilot";
-	[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+	_speaker = localize "STR_DUWS_T_chariot";
+	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 str(_markerpickup) setMarkerPos ClickedTaxiPos; 
 sleep 2;   // spacer: 118 + 2 = the 120s success cooldown
 openMap false;
@@ -271,8 +271,8 @@ if (call _check_damage) exitWith {
 }; 
 
 	_message = format[localize "STR_DUWS_T_helotaxiarrival",_taxiName,_random1,_random2];
-	_speaker = localize "STR_DUWS_T_pilot";
-	[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+	_speaker = localize "STR_DUWS_T_chariot";
+	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 _helo lock false;
 {
 	if (vehicle _x == _helo) then {
@@ -305,7 +305,7 @@ sleep 1;
 if (call _check_damage) exitWith {
 	_message = format[([localize "STR_DUWS_T_helotaxirtbdown"] call fnc_cs),_taxiName,_random1,_random2];
 	_speaker = localize "STR_DUWS_T_OVERLORD";
-	[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 	[] remoteExec ["fnc_broadcastRadioChatter", 0];
 	sleep 300;
 	_art = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;
@@ -315,8 +315,8 @@ if (call _check_damage) exitWith {
 
 // *****************************
 	_message = format[localize "STR_DUWS_T_helotaxirtb",_taxiName,_random1,_random2];
-	_speaker = localize "STR_DUWS_T_pilot";
-	[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+	_speaker = localize "STR_DUWS_T_chariot";
+	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 
 sleep 118;

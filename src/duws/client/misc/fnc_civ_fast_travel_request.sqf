@@ -59,11 +59,11 @@ if (_result isEqualType []) then {
         if (fast_travel_map_open) then {
             fast_travel_map_open = false;
             onMapSingleClick "";
-            [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_FAST_TRAVEL_nvm"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+            [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_FAST_TRAVEL_nvm"] remoteExec ["fnc_duws_dialogue", _caller];
         };
     };
 } else {
     fast_travel_map_open = false;
     onMapSingleClick "";
-    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_FAST_TRAVEL_nvm"] remoteExec ["BIS_fnc_showSubtitle", _caller];
+    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_FAST_TRAVEL_nvm"] remoteExec ["fnc_duws_dialogue", _caller];
 };

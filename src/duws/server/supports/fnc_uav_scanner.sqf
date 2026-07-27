@@ -14,14 +14,14 @@ if (commandpointsblu1 < _cost) exitWith {
 	};
 };
 [-_cost, "uav_scan"] call fnc_cp_adjust;
-_speaker = ([localize "STR_DUWS_T_actionteam"] call fnc_cs);
+_speaker = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_requestuavscan"] call fnc_cs);
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 8;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_requestuavscan1";
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 // CREATE MARKER FOR CHECKED SIZE
 _markername = format["%1%2vc",round(_centerPos select 0),round(_centerPos select 1)]; // Define marker name
@@ -85,7 +85,7 @@ switch (VERSION_X) do {
 
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_uavscancall";
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 5;
 [localize "STR_DUWS_T_2ncoq1yy"] spawn fnc_sideChat_filter;

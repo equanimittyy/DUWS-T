@@ -192,7 +192,7 @@ PlayerKilledEH = player addEventHandler ["killed", {
     if (!_inKillhouse) then {
         [-DUWSMP_CP_death_cost, "death_penalty"] remoteExec ["fnc_cp_adjust", 2];
     };
-    [([localize "STR_DUWS_T_actionteam"] call fnc_cs), localize "STR_DUWS_T_playerdown"] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_playerdown"] remoteExec ["fnc_duws_dialogue", 0];
 }];
 
 // ENABLE STAMINA (forced on)

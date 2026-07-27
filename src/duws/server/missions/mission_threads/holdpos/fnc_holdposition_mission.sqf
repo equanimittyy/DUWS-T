@@ -179,7 +179,7 @@ sleep 2;
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["HOLDPOSITION%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 
-[_speaker, _message] remoteExec ["BIS_fnc_showSubtitle", 0];
+[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [] remoteExec ["fnc_broadcastRadioChatter", 0];
 sleep 10;
 
@@ -378,13 +378,13 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
         _bluforGroup
     };
 
-    [_speaker1, _message1] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
     sleep 10;
-    [localize "STR_DUWS_T_Express", localize "STR_DUWS_T_ENEMY_APPROACHINGcm"] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [localize "STR_DUWS_T_Express", localize "STR_DUWS_T_ENEMY_APPROACHINGcm"] remoteExec ["fnc_duws_dialogue", 0];
     sleep 10;
     if (!Mission_Active) exitWith {};
-    [_speaker2, _message2] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [_speaker2, _message2] remoteExec ["fnc_duws_dialogue", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
     sleep 30;
     for "_i" from 1 to 3 do {
@@ -393,7 +393,7 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
         sleep 1;
     };
     sleep 20;
-    [_speaker1, localize "STR_DUWS_T_ENEMY_APPROACHING1p1"] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [_speaker1, localize "STR_DUWS_T_ENEMY_APPROACHING1p1"] remoteExec ["fnc_duws_dialogue", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
     sleep 50;
     if (!Mission_Active) exitWith {};
@@ -406,7 +406,7 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
     };
     sleep 30;
     if (!Mission_Active) exitWith {};
-    [_speaker1, _message3] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [_speaker1, _message3] remoteExec ["fnc_duws_dialogue", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
     sleep 70;
     if (!Mission_Active) exitWith {};
@@ -423,7 +423,7 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
         sleep 1;
     };
     if (!Mission_Active) exitWith {};
-    [_speaker3, _message4] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [_speaker3, _message4] remoteExec ["fnc_duws_dialogue", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
     sleep 30;
     if (!Mission_Active) exitWith {};
@@ -432,6 +432,6 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
         [_targetpos, 300] call _fn_waterproofBluforGroup;
         sleep 2;
     };
-    [_speaker3, _message5] remoteExec ["BIS_fnc_showSubtitle", 0];
+    [_speaker3, _message5] remoteExec ["fnc_duws_dialogue", 0];
     [] remoteExec ["fnc_broadcastRadioChatter", 0];
 };
