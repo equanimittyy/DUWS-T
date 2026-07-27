@@ -1681,6 +1681,18 @@
                 <English>Check Vehicle Status</English>
                 <Chinesesimp>查看载具状态</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_civ_marker_pop">
+                <Original>Pop: %1</Original>
+                <English>Pop: %1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_marker_town">
+                <Original>Pop: %1 | Rep: %2%3</Original>
+                <English>Pop: %1 | Rep: %2%3</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_marker_ap">
+                <Original> | +%1AP/30min</Original>
+                <English> | +%1AP/30min</English>
+            </Key>
             <Key ID="STR_DUWS_T_escalation_title">
                 <Original>Escalation</Original>
                 <English>Escalation</English>
@@ -3144,13 +3156,6 @@
                 <Chinesesimp>行动组。你的区域已被证实发生感染，你被允许对感染者自由开火。不过还是小心点————出现幸存者的可能尚未被排除。</Chinesesimp>
                 <Original>Alpha 1-1. Infection confirmed in your area. You're cleared to engage the infected at will, but stay sharp: there may still be survivors.</Original>
                 <English>Alpha 1-1. Infection confirmed in your area. You're cleared to engage the infected at will, but stay sharp: there may still be survivors.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_repup">
-                <Spanish>Todas las unidades, atención. Aquí es "Overlord 1-1". El equipo de daños colaterales ha progresado localmente. No arruinen la reputación ganada con esfuerzo de BLUFOR.</Spanish>
-                <German>Alle Einheiten, Achtung. Hier ist "Overlord 1-1". Das Kollateralschaden-Team hat Fortschritte lokal erzielt. Ruiniert nicht den hart erarbeiteten Ruf von BLUFOR.</German>
-                <Chinesesimp>所有单位。连带损伤处理小组在当地取得了进展。不要再把他们辛苦经营的我军名声毁了。</Chinesesimp>
-                <Original>All units. We've been making headway with the locals. Don't throw away the reputation BLUFOR has worked for.</Original>
-                <English>All units. We've been making headway with the locals. Don't throw away the reputation BLUFOR has worked for.</English>
             </Key>
         </Container>
         <Container name="Informants">

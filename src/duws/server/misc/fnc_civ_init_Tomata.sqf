@@ -154,6 +154,46 @@ missionNamespace setVariable ["civ_locations", _locations];
 missionNamespace setVariable ["civ_radii", _radii];
 ["INFO", "CIV", format ["After overlap cleanup: %1 locations remaining.", count _locations]] call fnc_log;
 
+// Per-town reputation and Army Power worth. Neither array is broadcast: nothing on a client
+// reads them, and the markers they drive are painted with global-effect commands.
+// Off entirely in RAVAGE and WBK -- a zombie apocalypse has no civil standing to lose and
+// nobody to install an OPFOR garrison, so the number would be a dial with nothing on the other
+// end of it. Those towns keep the size-only marker and the neutral ellipse permanently.
+if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
+    private _n = count _locations;
+    private _townRep = [];
+    private _townAp = [];
+    // Runs here rather than in selection because the overlap cull above has only just finalised
+    // every radius, and the enemy-zone test is disc against disc.
+    private _zoneMeta = missionNamespace getVariable ["zone_meta_array", []];
+    {
+        private _civPos = getPos _x;
+        private _civRad = _radii select _forEachIndex;
+        private _buildings = _pops select _forEachIndex;
+
+        // Rank within the campaign's own kept set, not an absolute building count: Altis cities
+        // and a small map's hamlets both have to span 1 to 3. Counting strictly smaller towns
+        // means ties pay equally and the expression cannot reach 4.
+        private _smaller = { _x < _buildings } count _pops;
+        _townAp pushBack (1 + floor (3 * _smaller / _n));
+
+        // A civilian area whose edge reaches into an enemy zone still puts civilians inside it,
+        // so the town starts on the enemy's books rather than neutral.
+        private _rep = 0;
+        {
+            _x params ["", "_zonePos", "_zoneRad"];
+            if ((_civPos distance2D _zonePos) < _civRad + _zoneRad) exitWith { _rep = -20 };
+        } forEach _zoneMeta;
+        if (_rep < 0) then {
+            ["INFO", "CIV", format ["Location %1 overlaps an enemy zone: starting at %2", _forEachIndex, _rep]] call fnc_log;
+        };
+        _townRep pushBack _rep;
+    } forEach _locations;
+    missionNamespace setVariable ["civ_town_rep", _townRep];
+    missionNamespace setVariable ["civ_town_ap", _townAp];
+    ["INFO", "CIV", format ["Town reputation registered for %1 towns, AP worth %2", _n, _townAp]] call fnc_log;
+};
+
 // ========== 第三阶段：为保留的城镇创建触发器、地图标记，并存储人口变量 ==========
 {
     private _locIndex = _forEachIndex;
@@ -185,7 +225,8 @@ missionNamespace setVariable ["civ_radii", _radii];
     private _marker = createMarker [_markerName, _pos];
     _marker setMarkerShape "ELLIPSE";
     _marker setMarkerBrush "SolidBorder";
-    _marker setMarkerColor "#(0.5,0,0.5,0.3)";
+    _marker setMarkerColor "#(0.6,0.35,0.7,1)";
+    _marker setMarkerAlpha 0.3;
     _marker setMarkerSize [_radius, _radius];
 
     // 创建人口图标（位于区域下方）
@@ -196,7 +237,9 @@ missionNamespace setVariable ["civ_radii", _radii];
     _icon setMarkerType "loc_tourism";
     _icon setMarkerColor "ColorBlack";
     _icon setMarkerSize [1.2, 1.2];
-    _icon setMarkerText format ["%1", _initialPop];
+    // Text and band colour come from the one renderer the reputation writer also uses, so a
+    // town cannot be created reading differently from how it repaints.
+    [_locIndex] call fnc_civ_townRender;
 
     ["INFO", "CIV", format ["Created markers for location %1 (%2) pop %3", _locIndex, _locationName, _initialPop]] call fnc_log;
 } forEach _locations;

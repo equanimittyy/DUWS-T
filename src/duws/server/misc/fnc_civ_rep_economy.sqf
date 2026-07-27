@@ -1,41 +1,18 @@
 // Locality: server -- lifted out of server/misc/fnc_civ_init_Tomata.sqf.
 /*
     fnc_civ_rep_economy.sqf
-    The two civilian background economy loops: reputation recovery after a quiet period, and
-    the 15-minute CP reward scaled by reputation. Neither has anything to do with town
-    placement, which is why they no longer live in civilian init.
-    Launches both threads and returns; safe to `call`.
+    The civilian background economy loop: a 15-minute CP reward scaled by reputation. It has
+    nothing to do with town placement, which is why it no longer lives in civilian init.
+    Launches its thread and returns; safe to `call`.
+
+    Passive reputation recovery used to run here and is deliberately gone. Reputation is
+    territory now: ground that walks itself back to neutral while the player is elsewhere means
+    nothing either side did stays done, and it would fight the OPFOR town capture directly --
+    the enemy taking a town and the town un-taking itself fifteen minutes later. Removing it is
+    also what bounds the reward loop below, which was an unbounded faucet while something else
+    kept pushing reputation back up.
 */
 if (!isServer) exitWith {};
-
-// 声誉恢复线程（保持不变）
-[] spawn {
-    ["INFO", "CIV", "Reputation recovery thread started"] call fnc_log;
-    while {true} do {
-        waitUntil {sleep 10; CIV_deaths > 0};
-        private _rep = Player_Reputation;
-        private _civdeaths = CIV_deaths;
-        private _resetTimer = false;
-        for "_i" from 1 to 6 do {
-            sleep 150;
-            if (CIV_deaths > _civdeaths) exitWith {_resetTimer = true};
-        };
-        if (!_resetTimer) then {
-            // The reputation==1 baseline is folded into the condition rather than tested with
-            // an early exitWith: exitWith leaves the enclosing while loop, which ended passive
-            // recovery for the rest of the campaign the first time reputation returned to 1.
-            if (_rep == Player_Reputation && {Player_Reputation != 1}) then {
-                // The comparison above needs the live global, so read it before the
-                // change is queued; the display then uses the expected total.
-                private _expectedRep = Player_Reputation + 1;
-                [1, "reputation_recovery"] remoteExec ["fnc_rep_adjust", 2];
-                ["repup",[localize "STR_DUWS_T_rqwho9bq",format[localize "STR_DUWS_T_0pluxey2",_expectedRep]]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated,false];
-                [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_repup"] remoteExec ["fnc_duws_dialogue", 0];
-                ["INFO", "CIV", format ["Reputation increased to %1", _expectedRep]] call fnc_log;
-            };
-        };
-    };
-};
 
 // ========== 声望奖励循环（每15分钟） ==========
 [] spawn {

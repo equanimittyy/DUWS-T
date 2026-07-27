@@ -29,8 +29,4 @@ if (side _killer == WEST || side _instigator == WEST) then {
         localize "STR_DUWS_T_cycuqbvj",
         format [localize "STR_DUWS_T_0pluxey2", Player_Reputation - 0.3]
     ]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
-
-    // 增加平民死亡计数（立即，无需延时）
-    CIV_deaths = CIV_deaths + 1;
-    publicVariable "CIV_deaths";
 };

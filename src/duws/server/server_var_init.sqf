@@ -75,8 +75,6 @@ chosen_settings = false;publicVariable "chosen_settings";
 // into the stringtable, so an unchanged callsign leaves every line untouched.
 duws_callsign = "Alpha 1-1";publicVariable "duws_callsign";
 
-// CIV_deaths
-CIV_deaths = 0;publicVariable "CIV_deaths";
 
 // cp_reward_multiplier
 cp_reward_multiplier = 1;publicVariable "cp_reward_multiplier";

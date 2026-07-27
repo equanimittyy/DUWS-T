@@ -146,8 +146,10 @@ fnc_fob_deregister = {
 
 // Server-authoritative reputation mutation, same delta contract as fnc_cp_adjust.
 // The writer owns the rounding rather than the callers: deltas are fractional
-// (+0.5, -0.3) and abs(rep) is multiplied into a hostile-civilian spawn count, so
-// two callers rounding differently would compound drift into AI behaviour.
+// (+0.5, -0.3) and partisan hiring gates on the running total, so two callers
+// rounding differently would compound drift into what the player can buy.
+// This is the campaign-wide readout. Anything that happens in a town goes through
+// fnc_town_rep_adjust, which forwards here.
 fnc_rep_adjust = {
 	if (!isServer) exitWith {};
 	params [["_delta", 0], ["_reason", ""]];
@@ -156,6 +158,83 @@ fnc_rep_adjust = {
 	if (abs Player_Reputation < 0.01) then { Player_Reputation = 0 };
 	publicVariable "Player_Reputation";
 	["INFO", "ECON", format ["REP %1 -> %2 (%3)", _delta, Player_Reputation, _reason]] call fnc_log;
+};
+
+// Position to town index, -1 when the point sits outside every civilian radius. Open country,
+// a civilians-off campaign and RAVAGE/WBK all land on -1, and that is the degradation path
+// every caller takes: charge the global alone rather than treat it as an error.
+fnc_civ_townAt = {
+	if (!isServer) exitWith { -1 };
+	params [["_pos", [0,0,0]]];
+	private _locs = missionNamespace getVariable ["civ_locations", []];
+	private _radii = missionNamespace getVariable ["civ_radii", []];
+	private _found = -1;
+	{
+		if ((_pos distance2D (getPos _x)) < (_radii param [_forEachIndex, 0])) exitWith {
+			_found = _forEachIndex;
+		};
+	} forEach _locs;
+	_found
+};
+
+// Repaints one town's ellipse and icon from civ_town_rep. The band is the only writer of the
+// ellipse colour -- depopulation used to paint it black and that path is gone -- so nothing
+// races this. setMarkerColor takes an inline #(r,g,b,a) string as well as a CfgMarkerColors
+// class name; alpha is set explicitly because a marker created without it sits at 1.
+// With no civ_town_rep (RAVAGE, WBK) the icon carries the size figure alone and the ellipse is
+// left at whatever creation gave it, since no band will ever repaint it.
+fnc_civ_townRender = {
+	if (!isServer) exitWith {};
+	params ["_townIndex"];
+	private _icon = format ["civ_icon_%1", _townIndex];
+	private _pop = missionNamespace getVariable [format ["civ_pop_%1", _townIndex], 0];
+	private _reps = missionNamespace getVariable ["civ_town_rep", []];
+	if (_townIndex < 0 || _townIndex >= count _reps) exitWith {
+		_icon setMarkerText format [localize "STR_DUWS_T_civ_marker_pop", _pop];
+	};
+
+	private _rep = _reps select _townIndex;
+	private _ap = (missionNamespace getVariable ["civ_town_ap", []]) param [_townIndex, 1];
+	// Pale, so a town never competes with a zone marker at map zoom-out, and blue/red rather
+	// than green: the engine reads green as Independent, which this mission sets hostile to west.
+	private _colour = "#(0.6,0.35,0.7,1)";
+	private _apField = "";
+	if (_rep >= 10) then { _colour = "#(0.45,0.62,1.0,1)" };
+	if (_rep <= -10) then { _colour = "#(1.0,0.45,0.45,1)" };
+	// A neutral town pays nobody, so printing a bonus it does not grant would be a lie.
+	if (_rep >= 10 || _rep <= -10) then {
+		_apField = format [localize "STR_DUWS_T_civ_marker_ap", _ap];
+	};
+
+	private _area = format ["civ_area_%1", _townIndex];
+	_area setMarkerColor _colour;
+	_area setMarkerAlpha 0.3;
+	// Printed as stored, not rounded: a town at 9.7 displayed as 10 would contradict the
+	// neutral colour under it.
+	_icon setMarkerText format [localize "STR_DUWS_T_civ_marker_town", _pop, _rep, _apField];
+};
+
+// Per-town reputation, same contract as fnc_rep_adjust above: server-only, signed delta, the
+// writer owns the rounding, callers never assign. A town index of -1 charges the global alone.
+fnc_town_rep_adjust = {
+	if (!isServer) exitWith {};
+	params [["_townIndex", -1], ["_delta", 0], ["_reason", ""]];
+	private _reps = missionNamespace getVariable ["civ_town_rep", []];
+	if (_townIndex < 0 || _townIndex >= count _reps) exitWith {
+		[_delta, _reason] call fnc_rep_adjust;
+	};
+	private _old = _reps select _townIndex;
+	private _new = ((_old + _delta) max -20) min 20;
+	_new = (round (_new * 100)) / 100;
+	if (abs _new < 0.01) then { _new = 0 };
+	_reps set [_townIndex, _new];
+	// The global receives what the town absorbed, not what was asked for. A town pinned at -20
+	// taking repeated hits would otherwise drag the global down forever while nothing on the
+	// map changed. Not broadcast: no client reads civ_town_rep, and the markers below are
+	// painted with global-effect commands.
+	[_new - _old, _reason] call fnc_rep_adjust;
+	[_townIndex] call fnc_civ_townRender;
+	["INFO", "CIV", format ["TOWNREP %1: %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 };
 
 // Server-authoritative purchase. The writers above own the arithmetic but not the
