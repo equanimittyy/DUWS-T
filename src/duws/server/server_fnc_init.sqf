@@ -257,6 +257,18 @@ fnc_duws_dialogue_channel = {
 };
 publicVariable "fnc_duws_dialogue_channel";
 
+// Hand an object to the map cleanup, to be deleted _ttd seconds from now once no player is
+// near it. Opt-in by whoever created the object, because class cannot tell these apart: a
+// supply drop and the HQ arsenal crate are both B_supplyCrate_F, and three side missions use
+// crate classes for their objectives. Only the code that made the thing knows it is litter.
+// Callable from anywhere -- a client call forwards itself to the server, which owns the sweep.
+fnc_duws_disposeAfter = {
+    params ["_obj", ["_ttd", 1800]];
+    if (!isServer) exitWith { _this remoteExec ["fnc_duws_disposeAfter", 2] };
+    DUWS_disposables pushBack [_obj, _ttd];
+};
+publicVariable "fnc_duws_disposeAfter";
+
 // STARTUP FUNCTIONS
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BluHQinit.sqf";
 fnc_factions_check = compile preprocessFileLineNumbers "duws\server\misc\fnc_factions_check_modern.sqf";

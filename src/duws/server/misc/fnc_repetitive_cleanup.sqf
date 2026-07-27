@@ -117,6 +117,16 @@ while{true} do {
         { [_x, _ttdSmokes] call _addToCleanup; } forEach (allMissionObjects "SmokeShell");
     };
 
+    // Registered by their creator through fnc_duws_disposeAfter, never matched by class: a
+    // supply drop and the HQ arsenal crate are both B_supplyCrate_F, and steal_supply,
+    // destroy_cache and supply_recovery all use crate classes for their objectives. Drained
+    // rather than re-read, so each object is scheduled once with the lifetime it asked for.
+    {
+        _x params ["_obj", "_ttd"];
+        [_obj, _ttd] call _addToCleanup;
+    } forEach DUWS_disposables;
+    DUWS_disposables = [];
+
     {
         if ((count units _x)==0) then {
             deleteGroup _x;

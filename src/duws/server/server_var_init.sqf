@@ -92,6 +92,11 @@ kill_cp_award = 1;
 // Damaged Buildings for the Warcrimes Script
 damagedBuildings = [];
 
+// [object, seconds] pairs awaiting pickup by the map cleanup, written through
+// fnc_duws_disposeAfter and drained every pass. Server-only: the sweep runs here and clients
+// reach it by remoteExec.
+DUWS_disposables = [];
+
 // Death Penalty
 DUWSMP_CP_death_cost = 0;publicVariable "DUWSMP_CP_death_cost";
 
