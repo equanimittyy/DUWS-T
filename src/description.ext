@@ -59,35 +59,6 @@ class CfgFunctions
 #include "duws\shared\includes\oper_identities_modern.hpp"
 
 class RscTitles {
-    // Two-line dialogue subtitle. Drawn by client/misc/fnc_duws_voice_render.sqf on a named
-    // layer, so it never contends with the intro splash below or the engine's own titleText.
-    // duration is effectively unbounded: the renderer owns expiry per line and clears the
-    // layer itself, because two lines with independent timers cannot share one class timer.
-    class DUWS_VOICE {
-        idd = -1;
-        movingEnable = false;
-        duration = 1e11;
-        fadein = 0;
-        fadeout = 0;
-        onLoad = "uiNamespace setVariable ['DUWS_voice_display', _this select 0]";
-        class controls {
-            class lines: RscStructuredText {
-                idc = 1101;
-                x = 0.15 * safezoneW + safezoneX;
-                y = 0.74 * safezoneH + safezoneY;
-                w = 0.7 * safezoneW;
-                h = 0.12 * safezoneH;
-                size = 0.045;
-                class Attributes {
-                    font = "PuristaMedium";
-                    color = "#FFFFFF";
-                    align = "center";
-                    shadow = 2;
-                    size = "1.0";
-                };
-            };
-        };
-    };
     class DUWST {
         idd = -1;
         movingEnable = false;

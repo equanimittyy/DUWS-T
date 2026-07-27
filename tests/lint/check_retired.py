@@ -27,6 +27,11 @@ RETIRED = {
 }
 PAT = re.compile("|".join(re.escape(k) for k in RETIRED))
 
+# The router draws VOICE with the engine subtitle, so it holds the single sanctioned call.
+# Pinned to one file rather than dropped from the ban: that is what keeps the other 273
+# sites from creeping back.
+ALLOWED = {"BIS_fnc_showSubtitle": "client/misc/fnc_duws_dialogue.sqf"}
+
 
 def main():
     failures = []
@@ -43,6 +48,8 @@ def main():
             with open(fp, encoding="utf-8", errors="surrogateescape") as fh:
                 for ln, line in enumerate(fh, 1):
                     for m in PAT.finditer(line):
+                        if ALLOWED.get(m.group(0)) == rel:
+                            continue
                         failures.append((rel, ln, m.group(0)))
 
     print(f"[retired] checked {checked} files for {len(RETIRED)} retired names")

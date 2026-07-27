@@ -729,7 +729,6 @@ fnc_player_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_pla
 fnc_earplugs = compile preprocessFileLineNumbers "duws\client\misc\fnc_earplugs.sqf";publicVariable "fnc_earplugs";
 fnc_duws_help = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_help.sqf";publicVariable "fnc_duws_help";
 fnc_bottom_right_message = compile preprocessFileLineNumbers "duws\client\misc\fnc_bottom_right_message.sqf";publicVariable "fnc_bottom_right_message";
-fnc_duws_voice_render = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_voice_render.sqf";publicVariable "fnc_duws_voice_render";
 fnc_duws_dialogue = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_dialogue.sqf";publicVariable "fnc_duws_dialogue";
 fnc_autoSave = compile preprocessFileLineNumbers "duws\server\misc\fnc_autoSave.sqf";publicVariable "fnc_autoSave";
 fnc_playerTF_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_playerTF_spawn.sqf";publicVariable "fnc_playerTF_spawn";

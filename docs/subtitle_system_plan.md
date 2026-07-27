@@ -107,20 +107,15 @@ anywhere else means writing a second custom renderer, at which point nothing abo
 native — and the bottom-right corner is in any case taken by
 `client/misc/fnc_bottom_right_message.sqf`, the location/date OSD.
 
-## Why the split does not remove the need for a new renderer
-
-The complaint driving the original plan is behavioural: a new subtitle clobbers the
-previous one the instant it appears, so a two-line exchange cannot be read. It is tempting
-to assume that moving radio traffic to a scrolling chat box fixes that. It does not.
+## What the split does and does not fix
 
 Of the 274 subtitle sites, **40 move to NET and 234 stay on VOICE** — 15%. The dense
-back-and-forth that actually gets clobbered is Overlord ↔ Alpha 1-1 ↔ civilian, and every
-one of those stays on the large subtitle by the rule above. The channel split fixes
-*attribution*; it does not fix *legibility*.
+back-and-forth that gets clobbered is Overlord <-> Alpha 1-1 <-> civilian, and every one of
+those stays on the large subtitle by the rule above. So the channel split fixes
+*attribution*, not *legibility*: a reply still replaces the line it answers.
 
-What it does change is the shape of the fix. With the net traffic gone, the subtitle stream
-is a conversation between at most two people, so the renderer needs to hold **two lines**,
-not a four-line feed. See [§Two lines, not four](#decided-trade-offs).
+That second half is left unfixed on purpose. See
+[§VOICE keeps the engine subtitle](#voice-keeps-the-engine-subtitle).
 
 ## Inconsistencies to fix
 
@@ -235,38 +230,29 @@ a second pass finds nothing left to match. The one input that breaks that is a h
 which itself contains `"Alpha 1-1"` — `"Alpha 1-1 Actual"` would expand twice. Accepting
 that beats stripping the body wraps inside a phase whose whole value is being mechanical.
 
-### The VOICE renderer
+### VOICE keeps the engine subtitle
 
-A client-side queue of at most **two** lines, each with its own expiry, rendered into a new
-`RscTitles` class beside `DUWST`. The newer line sits below the older; the older dims rather
-than vanishing, and expires on its own timer.
+VOICE draws through `BIS_fnc_showSubtitle`, called locally from the router. That is the one
+sanctioned use of the name; the retired-name lint bans it at all 273 other sites.
 
-**A third line bumps the oldest immediately — it does not wait its turn.** Dialogue is
-narrating events the player is watching, so a queue that holds lines back drifts out of sync
-with what is happening on screen, and the backlog arrives describing a firefight that has
-already ended. Bumping keeps the text tied to the moment and still solves the actual defect:
-a reply no longer erases the line it answers, because the question is still on screen beneath
-it. What bumping costs is the third line of a rapid three-line burst, and there is no such
-burst in the source — the tightest run is the intro's `sleep 8` between Overlord lines.
+**A two-line replacement was built and reverted.** A client-side queue of two lines with
+independent expiry, dimming the older rather than dropping it, rendered into its own
+`RscTitles` class on a named layer. It worked, and it looked worse than the engine subtitle
+it replaced — so the legibility complaint stands unfixed rather than fixed badly. Anyone
+retrying it should know the constraints that shaped it, because they are the non-obvious
+part:
 
-The UI ground is clear: `RscTitles` is defined in exactly one place, `description.ext:61-79`,
-holding a single class (`DUWST`, the intro splash shown once from
-`server/misc/fnc_intro_heli.sqf:128`). `BIS_fnc_rscLayer` appears nowhere in `src/duws`, so
-no layer number is claimed and a fresh named layer cannot collide. The only care needed is
-not fighting the default title layer during the intro, which runs `cutRsc`, `titleText` and
-`titleCut` within seconds of two pilot lines.
-
-The display handle goes in `uiNamespace`, never `missionNamespace`: the mission namespace is
-serialized into save games and rejects handle types. See
-[§Non-serializable handles](info/arma_engine_gotchas.md#non-serializable-handles-must-not-live-in-the-mission-namespace).
-
-**The renderer must return immediately — expiry cannot be a `sleep` in the call path.** Nine
-sites reach the router through `call`, which is synchronous, and `BIS_fnc_showSubtitle`
-returns straight away today; a queue that suspends for its own timer would stall those
-callers for the duration of the line. `fnc_civ_healAction.sqf:56,68` is the case that makes
-it concrete — two `call` subtitles either side of a `sleep 3`, which is exactly the two-line
-exchange this renderer exists to keep on screen. Expiry belongs to one long-lived ticker or
-a frame handler owned by the renderer, not to the calling script.
+- **It must return immediately.** Nine sites reach the router through `call`, which is
+  synchronous, and `BIS_fnc_showSubtitle` returns straight away. A queue that sleeps for its
+  own expiry stalls those callers. `fnc_civ_healAction.sqf:56,68` fires two `call` subtitles
+  either side of a `sleep 3`. Expiry belongs to a ticker or a frame handler, never the call
+  path.
+- **The display handle goes in `uiNamespace`, never `missionNamespace`** — the mission
+  namespace is serialized into save games and rejects handle types. See
+  [§Non-serializable handles](info/arma_engine_gotchas.md#non-serializable-handles-must-not-live-in-the-mission-namespace).
+- **Take a named layer.** The intro runs `cutRsc`, `titleText` and `titleCut` within seconds
+  of two pilot lines, and all of those take the default title layer. `BIS_fnc_rscLayer`
+  appears nowhere else in `src/duws`, so no number is already claimed.
 
 `shared/includes/notifications.hpp` is not reusable here — it is a `CfgNotifications` block
 driving `BIS_fnc_showNotification`, a separate BI queue with its own rendering. That is the
@@ -459,10 +445,10 @@ no new UI code and nothing new to draw. Everything that follows works against ei
 renderer: the squelch (4) is decided in the router, the `fnc_sideChat_filter` retirement (5)
 only touches NET, and the stringtable pass (6) improves both surfaces.
 
-That makes **3b the only phase that needs in-engine iteration**, and the only one that can be
-deferred or abandoned without stranding the rest. If the two-line renderer turns out to want
-more tuning than expected, the mission still ships with correct attribution and quiet
-civilians.
+That seam paid for itself: **3b was the only phase that needed in-engine iteration, and it
+is the one that was abandoned.** The custom renderer went in, read worse than the engine
+subtitle, and came back out without disturbing anything else. The mission ships with correct
+attribution and quiet civilians regardless.
 
 | Phase | Change | Visible? | Guard |
 |---|---|---|---|
@@ -470,7 +456,7 @@ civilians.
 | 1 | Rename the 274 call sites | No | 263 + 2 + 9 all accounted for; `BIS_fnc_showSubtitle` greps to zero |
 | 2 | `fnc_cs` moves into the wrapper; strip it from the 68 speaker slots | No | A host-chosen callsign still appears |
 | 3a | Turn on NET routing. VOICE still calls `BIS_fnc_showSubtitle` untouched. | **Yes** | 40 lines move to the chat box, each once per player; the subtitle behaves exactly as before |
-| 3b | Replace the VOICE path with the two-line renderer | Yes | Two lines 1 s apart are both readable |
+| 3b | Replace the VOICE path with a two-line renderer | Yes | **Reverted.** Read worse than the engine subtitle; VOICE stays on `BIS_fnc_showSubtitle` |
 | 4 | Squelch into the router; delete the 166 `fnc_broadcastRadioChatter` calls and the function | Yes | Greps to zero; registry stays clean |
 | 5 | Retire `fnc_sideChat_filter`: re-point 15 sites, delete the file and its registry line | Yes | `check_paths.py` fails if the registry line outlives the file |
 | 6 | Stringtable pass | Yes | No line renders as "Overlord: This is Overlord" |
@@ -536,10 +522,9 @@ now; the router just should not make it awkward to add.
 |---|---|
 | `client/misc/fnc_duws_dialogue.sqf` | New. Router, NET table, callsign substitution, local NET and squelch dispatch. |
 | `client/misc/fnc_duws_dialogue_channel.sqf` | New. Pure speaker→channel lookup, including the blank and non-string speaker paths. Separate so `extract_fn.py` can pull it into sqf-vm. |
-| `client/misc/fnc_duws_voice_render.sqf` | New. Two-line queue, expiry, dim-on-supersede. Returns immediately; expiry runs off its own ticker. |
-| `description.ext:61-79` | New `RscTitles` class beside `DUWST`. |
 | `server/server_fnc_init.sqf:222-242` | `fnc_cs` applied inside the wrapper; registry lines for the three new functions. |
 | `server/server_fnc_init.sqf:1039-1111` | Drop `fnc_broadcastRadioChatter` and the `RadioAmbient` pool; the squelch moves into the router. |
+| `tests/lint/check_retired.py` | New. Bans the three retired names; `BIS_fnc_showSubtitle` is allowed only in the router. |
 | `tests/unit/functions.txt`, `tests/unit/cases.sqf` | Register `fnc_duws_dialogue_channel` and assert every roster entry plus the two malformed speakers. |
 | `shared/includes/sounds.hpp:31-35` | Delete the unplayed `DUWS_Radio_End` class. |
 | 265 `remoteExec` sites | `"BIS_fnc_showSubtitle"` → `"fnc_duws_dialogue"`. |
@@ -578,11 +563,11 @@ reads fine as a subtitle and long in chat. Rewriting them for length is a separa
 pass on top of the ~214 edits the sender-strip already costs, and stripping the sender takes
 the worst offenders down on its own. Judge the remainder in play, with the real box.
 
-**Two lines, not four.** The original plan proposed a four-line stacked feed. Four lines is
-a killfeed, and it reads as one. Once NET traffic leaves the subtitle the remaining stream is
-a two-party conversation — Overlord to the player, or a civilian to the player — so two lines
-covers the actual failure (a reply wiping its question) without turning the bottom of the
-screen into a scrolling log. If play shows two is not enough, it is a constant in one file.
+**Legibility is left unfixed rather than fixed badly.** The custom two-line renderer read
+worse in play than the engine subtitle, so it was reverted and VOICE went back to
+`BIS_fnc_showSubtitle`. A reply can still wipe the line it answers. That is the known cost
+of this change stopping where it does, and it is recoverable: the router owns the VOICE
+surface, so a future renderer is a one-line swap at the bottom of `fnc_duws_dialogue`.
 
 **NET is the explicit list, VOICE the default.** The inverse — listing VOICE speakers and
 defaulting to NET — would silently swallow any callsign added later into a chat box the

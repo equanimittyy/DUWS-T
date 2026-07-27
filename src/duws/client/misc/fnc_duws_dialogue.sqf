@@ -53,4 +53,7 @@ if (_channel isEqualTo "NET") exitWith {
     [west, _speaker] sideChat _text;
 };
 
-[_speaker, _text] call fnc_duws_voice_render;
+// The engine's own subtitle. A two-line queue drawn into a custom RscTitles was tried and
+// reverted: it read worse than this does, and the routing above is what the change was for.
+// The one sanctioned call -- the retired-name lint bans it everywhere else.
+[_speaker, _text] call BIS_fnc_showSubtitle;
