@@ -154,12 +154,12 @@ class startup_dialog
             h = 1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_APOCALYPSE_TOOLTIP";
         };
-        // ========== 焦土模式（原 VCOM 控件） ==========
+        // ========== 战争升级（原焦土模式控件） ==========
         class SE_frame: RscFrame
         {
             idc = 1807;
-            text = "$STR_DUWS_T_scorched_earth_title";
-            tooltip = "$STR_DUWS_T_scorched_earth_tooltip";
+            text = "$STR_DUWS_T_escalation_title";
+            tooltip = "$STR_DUWS_T_escalation_tooltip";
             x = 1 * GUI_GRID_W + GUI_GRID_X;
             y = 10.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 18.5 * GUI_GRID_W;
@@ -172,7 +172,7 @@ class startup_dialog
             y = 11.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 17.5 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_scorched_earth_tooltip";
+            tooltip = "$STR_DUWS_T_escalation_tooltip";
         };
         // ============================================
         class time_multiplier_frame: RscFrame

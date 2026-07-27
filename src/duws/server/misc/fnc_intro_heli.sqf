@@ -226,10 +226,6 @@ _wp2 setWaypointType "MOVE";
 _wp2 setWaypointBehaviour "CARELESS";
 _wp2 setWaypointStatements ["true", "missionNamespace setVariable ['intro_heli_leave', true, true];"];
 sleep 10;
-// ========== 焦土模式字幕 ==========
-if (!isNil "scorched_earth_enabled" && scorched_earth_enabled) then {
-    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_SEEsub"] remoteExec ["fnc_duws_dialogue", 0];
-};
 waitUntil {
     sleep 1;
     missionNamespace getVariable ["intro_heli_leave", false] || !alive _heli

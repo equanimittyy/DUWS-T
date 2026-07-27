@@ -84,10 +84,10 @@ switch (_index) do
 };
 publicVariable "apocalypse_mode";
 
-// ========== 焦土模式 ==========
+// ========== 战争升级 ==========
 _index = lbCurSel 2106;
-scorched_earth_enabled = (_index == index_scorched_earth_true);
-publicVariable "scorched_earth_enabled";
+escalation_enabled = (_index == index_escalation_true);
+publicVariable "escalation_enabled";
 
 // ENABLE TIME MULTI
 _index = lbCurSel 2107;

@@ -391,10 +391,6 @@ if (CIV_PRESENCE == "RAVAGE") then {
 if (CIV_PRESENCE == "WBK") then {
     ["biohazard", [localize "STR_DUWS_T_wbk", localize "STR_DUWS_T_WBK_NOREP"]] remoteExec ["BIS_fnc_showNotification", 0];
 };
-// 焦土模式开局提醒
-if (!isNil "scorched_earth_enabled" && scorched_earth_enabled && (vehiclevarname player) == "player1") then {
-    ["SE", [localize "STR_DUWS_T_scorched_earth_effect1", localize "STR_DUWS_T_scorched_earth_effect3"]] remoteExec ["BIS_fnc_showNotification", 0];
-};
 // 等待索降完成标志
 waitUntil { sleep 0.2; !isNil "intro_heli_done" };
 

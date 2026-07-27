@@ -69,24 +69,14 @@ while { count _queue > 0 } do {
         ["INFO", "CIV", format ["Skipping %1: area (r=%2) overlaps the BLUFOR HQ at %3m", _locationName, _radius, round _hqDist]] call fnc_log;
         if (count _spare > 0) then { _queue pushBack (_spare deleteAt 0) };
     } else {
-        // 人口计算：按建筑数×2，上限280
-        private _initialPop = (_buildingCount * 2) min 280;
-        // 为每个城镇生成独立的最低人口（6~12 随机整数）
-        private _minPop = 6 + floor random 7;
-        _initialPop = _initialPop max _minPop;
-
-        if (CIV_PRESENCE == "RAVAGE") then {
-            _initialPop = round (_initialPop * 2.0) min 280;
-            ["INFO", "CIV", format ["RAVAGE mode: adjusted pop to %1", _initialPop]] call fnc_log;
-        };
-
-        _initialPop = _initialPop max 1;
-
+        // A size figure, not a head count: never decremented, and the spawn density derives from
+        // it. The x2 multiplier this replaces put the ceiling at 25 buildings, so every town from
+        // a market village upward presented the same civ_maxSpawnPerVisit crowd.
         _kept pushBack _loc;
         _radii pushBack _radius;
-        _pops pushBack _initialPop;
+        _pops pushBack _buildingCount;
 
-        ["INFO", "CIV", format ["Location %1: buildings=%2, initialPop=%3, radius=%4", _locationName, _buildingCount, _initialPop, _radius]] call fnc_log;
+        ["INFO", "CIV", format ["Location %1: buildings=%2, radius=%3", _locationName, _buildingCount, _radius]] call fnc_log;
     };
 };
 

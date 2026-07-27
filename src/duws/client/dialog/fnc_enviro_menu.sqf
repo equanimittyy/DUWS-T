@@ -51,10 +51,10 @@ index_apocalypse_true = lbAdd [2105, localize "STR_DUWS_T_vk37aebo"];
 index_apocalypse_false = lbAdd [2105, localize "STR_DUWS_T_x4zs3lsg0"];
 [2105, index_apocalypse_false] call _setDefault;
 
-// ========== 焦土模式（替换 VCOM） ==========
-index_scorched_earth_false = lbAdd [2106, localize "STR_DUWS_T_x4zs3lsg0"];
-index_scorched_earth_true = lbAdd [2106, localize "STR_DUWS_T_vk37aebo"];
-[2106, index_scorched_earth_false] call _setDefault;
+// ========== 战争升级（替换焦土模式） ==========
+index_escalation_false = lbAdd [2106, localize "STR_DUWS_T_x4zs3lsg0"];
+index_escalation_true = lbAdd [2106, localize "STR_DUWS_T_vk37aebo"];
+[2106, index_escalation_false] call _setDefault;
 // =========================================
 
 // TIME MULITPLIER

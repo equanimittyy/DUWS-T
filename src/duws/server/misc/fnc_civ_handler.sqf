@@ -114,37 +114,6 @@ if (_mode == "cleanup") exitWith {
     missionNamespace setVariable [_spawnedKey, false];
     missionNamespace setVariable [_pendingVar, false];
 
-    private _iconName = format ["civ_icon_%1", _locIndex];
-    private _currentPop = missionNamespace getVariable [format ["civ_pop_%1", _locIndex], 0];
-    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Current population: %1", _currentPop]] call fnc_log; };
-
-    if (_currentPop <= 1) then {
-        private _townName = text _location;
-        private _title = localize "STR_DUWS_T_TOWN_DEPOPULATED_TITLE";
-        private _desc = format [localize "STR_DUWS_T_TOWN_DEPOPULATED_DESC", _townName];
-        ["biohazard", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", 0];
-        private _areaMarker = format ["civ_area_%1", _locIndex];
-        _areaMarker setMarkerColor "ColorBlack";
-        _areaMarker setMarkerAlpha 0.3;
-        _iconName setMarkerText "X";
-        if (_currentPop == 1) then {
-            missionNamespace setVariable [format ["civ_pop_%1", _locIndex], 0];
-        };
-        if (scorched_earth_enabled) then {
-            [15, "scorched_earth"] remoteExec ["fnc_cp_adjust", 2];
-            private _bluApPenalty = - (3 + floor random 3);
-            ["BLU", _bluApPenalty, "scorched_earth"] remoteExec ["fnc_ap_adjust", 2];
-            private _repPenalty = - (3 + floor random 3);
-            [_repPenalty, "scorched_earth"] remoteExec ["fnc_rep_adjust", 2];
-            private _opfApPenalty = - (3 + floor random 3);
-            ["OPF", _opfApPenalty, "scorched_earth"] remoteExec ["fnc_ap_adjust", 2];
-            private _msg = format [localize "STR_DUWS_T_scorched_earth_effect2", _repPenalty, _bluApPenalty, _opfApPenalty];
-            ["SE", [localize "STR_DUWS_T_scorched_earth_effect1", _msg]] remoteExec ["BIS_fnc_showNotification", 0];
-        };
-    } else {
-        _iconName setMarkerText format ["%1", _currentPop];
-    };
-
     // 释放互斥锁
     if (civ_current_active_location == _locIndex) then {
         civ_current_active_location = -1;
@@ -152,7 +121,7 @@ if (_mode == "cleanup") exitWith {
         if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Lock released for location %1", _locIndex]] call fnc_log; };
     };
 
-    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Finished for location %1, final pop: %2", _locIndex, _currentPop]] call fnc_log; };
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Finished for location %1", _locIndex]] call fnc_log; };
 };
 
 // ============================================
@@ -339,13 +308,6 @@ if (_mode == "spawn") then {
         params ["_dead", "_killer", "_instigator"];
         private _idx = _dead getVariable ["civ_locIndex", -1];
         if (_idx == -1) exitWith {};
-        private _popVar = format ["civ_pop_%1", _idx];
-        private _curPop = missionNamespace getVariable [_popVar, 0];
-        if (_curPop > 0) then {
-            missionNamespace setVariable [_popVar, _curPop - 1];
-            private _iconName = format ["civ_icon_%1", _idx];
-            _iconName setMarkerText format ["%1", _curPop - 1];
-        };
         private _isHostile = _dead getVariable ["isHostile", false];
         if (CIV_PRESENCE != "RAVAGE" && !_isHostile && side _dead != resistance) then {
             [_dead, _killer, _instigator] call fnc_civ_rep_Tomata;
@@ -377,43 +339,9 @@ if (_mode == "spawn") then {
                     private _dist = random _radius;
                     _foundPos = _center getPos [_dist, _angle];
                 };
-                private _spawnHostile = false;
-                if (CIV_PRESENCE != "RAVAGE" && Player_Reputation < 0) then {
-                    _spawnHostile = (random 1 < 0.3);
-                };
-                private _unitType = "";
-                private _newGroup = grpNull;
-                private _newUnit = objNull;
-                if (_spawnHostile) then {
-                    private _weaponPool = [["hgun_PDW2000_F","30Rnd_9x21_Mag"],["arifle_AKS_F","30Rnd_545x39_Mag_F"],["SMG_05_F","30Rnd_9x21_Mag_SMG_02"],["sgun_HunterShotgun_01_F","2Rnd_12Gauge_Pellets"],["sgun_HunterShotgun_01_sawedoff_F","2Rnd_12Gauge_Pellets"],["srifle_DMR_06_hunter_F","10Rnd_762x51_Mag"],["hgun_P07_F","16Rnd_9x21_Mag"],["hgun_Pistol_01_F","10Rnd_9x21_Mag"]];
-                    _unitType = selectRandom _civArr;
-                    _newGroup = [_foundPos, resistance, [_unitType]] call BIS_fnc_spawnGroup;
-                    _newUnit = leader _newGroup;
-                    private _weaponEntry = selectRandom _weaponPool;
-                    private _weapon = _weaponEntry select 0;
-                    private _magazine = _weaponEntry select 1;
-                    for "_i" from 1 to 3 do { _newUnit addMagazineGlobal _magazine; };
-                    _newUnit addWeapon _weapon;
-                    _newUnit setBehaviour "COMBAT";
-                    _newUnit setCombatMode "RED";
-                    removeAllActions _newUnit;
-                    [_newUnit] remoteExec ["removeAllActions", 0];
-                    _newUnit setVariable ["isHostile", true, true];
-                    if (count _players > 0) then {
-                        private _nearestPlayer = [_players, _newUnit] call BIS_fnc_nearestPosition;
-                        _newUnit reveal [_nearestPlayer, 4];
-                        _newUnit doWatch _nearestPlayer;
-                        _newUnit doTarget _nearestPlayer;
-                        _newUnit commandFire _nearestPlayer;
-                        private _wp = _newGroup addWaypoint [getPos _nearestPlayer, 0];
-                        _wp setWaypointType "SAD";
-                        _wp setWaypointSpeed "NORMAL";
-                    };
-                } else {
-                    _unitType = selectRandom _civArr;
-                    _newGroup = createGroup [CIVILIAN, true];
-                    _newUnit = _newGroup createUnit [_unitType, _foundPos, [], 0, "NONE"];
-                };
+                private _unitType = selectRandom _civArr;
+                private _newGroup = createGroup [CIVILIAN, true];
+                private _newUnit = _newGroup createUnit [_unitType, _foundPos, [], 0, "NONE"];
                 _newUnit setVariable ["civ_locIndex", _idx];
                 [_newUnit] call fnc_addCivilianMoney;
                 _newUnit addEventHandler ["Killed", missionNamespace getVariable "CIV_KILLED_HANDLER"];
@@ -433,7 +361,7 @@ if (_mode == "spawn") then {
                     _wp2 setWaypointSpeed "NORMAL";
                     _wp2 setWaypointBehaviour "AWARE";
                 };
-                if (!_spawnHostile && CIV_PRESENCE != "RAVAGE") then {
+                if (CIV_PRESENCE != "RAVAGE") then {
                     [_newUnit] remoteExec ["fnc_addAskEnemyAction", 0, true];
                     [_newUnit] remoteExec ["fnc_civ_healAction", 0, true];
                     [_newUnit] remoteExec ["fnc_civ_stopCommand", 0, true];
@@ -527,65 +455,6 @@ if (_mode == "spawn") then {
     };
 
     [_groups, _usableBuildings] spawn fnc_civ_wp_Tomata;
-
-    if (CIV_PRESENCE != "RAVAGE" && Player_Reputation < 0 && _spawnCount > 1) then {
-        private _totalGroups = count _groups;
-        private _hostileCount = (abs Player_Reputation * 3) min _totalGroups;
-        private _maxHostile = floor (0.7 * _totalGroups);
-        _hostileCount = _hostileCount min _maxHostile;
-        private _weaponPool = [["hgun_PDW2000_F","30Rnd_9x21_Mag"],["arifle_AKS_F","30Rnd_545x39_Mag_F"],["SMG_05_F","30Rnd_9x21_Mag_SMG_02"],["sgun_HunterShotgun_01_F","2Rnd_12Gauge_Pellets"],["sgun_HunterShotgun_01_sawedoff_F","2Rnd_12Gauge_Pellets"],["srifle_DMR_06_hunter_F","10Rnd_762x51_Mag"],["hgun_P07_F","16Rnd_9x21_Mag"],["hgun_Pistol_01_F","10Rnd_9x21_Mag"]];
-        for "_i" from 0 to (_hostileCount - 1) do {
-            private _group = _groups select _i;
-            if (!isNull _group) then {
-                {
-                    removeAllActions _x;
-                    [_x] remoteExec ["removeAllActions", 0];
-                    private _weaponEntry = selectRandom _weaponPool;
-                    private _weapon = _weaponEntry select 0;
-                    private _magazine = _weaponEntry select 1;
-                    _x addMagazineGlobal _magazine;
-                    _x addMagazineGlobal _magazine;
-                    _x addMagazineGlobal _magazine;
-                    _x addWeapon _weapon;
-                    _x setVariable ["isHostile", true, true];
-                    _x removeAllEventHandlers "Killed";
-                    _x addEventHandler ["Killed", missionNamespace getVariable "CIV_KILLED_HANDLER"];
-                } forEach units _group;
-                private _newGroup = createGroup resistance;
-                (units _group) joinSilent _newGroup;
-                deleteGroup _group;
-                _groups set [_i, _newGroup];
-            };
-        };
-        [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_hoscivpop"] remoteExec ["fnc_duws_dialogue", 0];
-    };
-
-    if (CIV_PRESENCE != "RAVAGE" && Player_Reputation < 0 && _spawnCount > 0) then {
-        private _eastUnits = [];
-        { if (side _x == resistance && _x getVariable ["civ_locIndex", -1] == _locIndex) then { _eastUnits pushBack _x }; } forEach allUnits;
-        private _suicideCount = ceil (count _eastUnits * 0.1);
-        if (_suicideCount > 0) then {
-            private _civUnits = [];
-            { if (side _x == CIVILIAN && !(_x getVariable ["isSuicideBomber", false]) && _x getVariable ["civ_locIndex", -1] == _locIndex) then { _civUnits pushBack _x }; } forEach allUnits;
-            _civUnits = _civUnits call BIS_fnc_arrayShuffle;
-            for "_i" from 0 to (_suicideCount - 1) do {
-                if (_i >= count _civUnits) exitWith {};
-                private _unit = _civUnits select _i;
-                private _oldGroup = group _unit;
-                private _newGroup = createGroup CIVILIAN;
-                [_unit] joinSilent _newGroup;
-                _newGroup deleteGroupWhenEmpty true;
-                removeAllActions _unit;
-                [_unit] remoteExec ["removeAllActions", 0];
-                _unit setVariable ["isSuicideBomber", true, true];
-                _unit setVariable ["isHostile", false, true];
-                [_unit] spawn fnc_civ_suicideBomberBehaviour;
-                private _groupList = missionNamespace getVariable [format ["civ_groups_%1", _locIndex], []];
-                _groupList pushBack _newGroup;
-                missionNamespace setVariable [format ["civ_groups_%1", _locIndex], _groupList];
-            };
-        };
-    };
 
     if (CIV_PRESENCE == "RAVAGE") then {
         private _players = call BIS_fnc_listPlayers;

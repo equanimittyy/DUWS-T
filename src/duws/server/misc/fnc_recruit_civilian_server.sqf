@@ -69,19 +69,6 @@ if (random 1 < 0.95) then {
     [_civilian] joinSilent (group _caller);
     _civilian setVariable ["civ_locIndex", nil];
     
-    // ========== 招募时减少城镇人口 ==========
-    if (_locIndex != -1) then {
-        private _popVar = format ["civ_pop_%1", _locIndex];
-        private _curPop = missionNamespace getVariable [_popVar, 0];
-        if (_curPop > 0) then {
-            missionNamespace setVariable [_popVar, _curPop - 1];
-            private _iconName = format ["civ_icon_%1", _locIndex];
-            _iconName setMarkerText format ["%1", _curPop - 1];
-            ["INFO", "CIV", format ["Location %1 population decreased from %2 to %3 due to recruitment", _locIndex, _curPop, _curPop - 1]] call fnc_log;
-        };
-    };
-    // ============================================
-    
     // 清除城镇标记（防止后续清理脚本误删）
     _civilian setVariable ["civ_locIndex", nil];
     

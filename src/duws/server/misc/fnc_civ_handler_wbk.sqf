@@ -111,38 +111,6 @@ if (_mode == "cleanup") exitWith {
     missionNamespace setVariable [_pendingVar, false];
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Spawned key set to false, remaining cleared for %1", _locIndex]] call fnc_log; };
 
-    private _iconName = format ["civ_icon_%1", _locIndex];
-    private _currentPop = missionNamespace getVariable [format ["civ_pop_%1", _locIndex], 0];
-    if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Current total population: %1", _currentPop]] call fnc_log; };
-
-    if (_currentPop <= 1) then {
-        private _townName = text _location;
-        private _title = localize "STR_DUWS_T_TOWN_DEPOPULATED_TITLE";
-        private _desc = format [localize "STR_DUWS_T_TOWN_DEPOPULATED_DESC", _townName];
-        ["biohazard", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", 0];
-        private _areaMarker = format ["civ_area_%1", _locIndex];
-        _areaMarker setMarkerColor "ColorBlack";
-        _areaMarker setMarkerAlpha 0.3;
-        _iconName setMarkerText "X";
-        if (_currentPop == 1) then {
-            missionNamespace setVariable [format ["civ_pop_%1", _locIndex], 0];
-        };
-        // 焦土模式效果
-        if (scorched_earth_enabled) then {
-            [15, "scorched_earth"] remoteExec ["fnc_cp_adjust", 2];
-            private _bluApPenalty = - (3 + floor random 3);
-            ["BLU", _bluApPenalty, "scorched_earth"] remoteExec ["fnc_ap_adjust", 2];
-            private _repPenalty = - (3 + floor random 3);
-            [_repPenalty, "scorched_earth"] remoteExec ["fnc_rep_adjust", 2];
-            private _opfApPenalty = - (3 + floor random 3);
-            ["OPF", _opfApPenalty, "scorched_earth"] remoteExec ["fnc_ap_adjust", 2];
-            private _msg = format [localize "STR_DUWS_T_scorched_earth_effect2", _repPenalty, _bluApPenalty, _opfApPenalty];
-            ["SE", [localize "STR_DUWS_T_scorched_earth_effect1", _msg]] remoteExec ["BIS_fnc_showNotification", 0];
-        };
-    } else {
-        _iconName setMarkerText format ["%1", _currentPop];
-    };
-
     // 释放互斥锁
     if (civ_current_active_location == _locIndex) then {
         civ_current_active_location = -1;
@@ -150,7 +118,7 @@ if (_mode == "cleanup") exitWith {
         if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Lock released for location %1", _locIndex]] call fnc_log; };
     };
 
-    if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Finished for location %1, final pop: %2", _locIndex, _currentPop]] call fnc_log; };
+    if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Finished for location %1", _locIndex]] call fnc_log; };
 };
 
 // ============================================
@@ -360,16 +328,12 @@ if (_mode == "spawn") then {
                 };
             };
 
-            private _popVar = format ["civ_pop_%1", _idx];
+            // Replacement is gated on the unspawned pool alone. The population figure it used to
+            // consult is now the town's static size, so comparing it against the spawn ceiling
+            // gave a constant answer for the whole campaign.
             private _remVar = format ["civ_remaining_%1", _idx];
-            private _curPop = missionNamespace getVariable [_popVar, 0];
             private _remaining = missionNamespace getVariable [_remVar, 0];
-            if (_curPop <= 0) exitWith {};
-
-            private _newPop = _curPop - 1;
-            missionNamespace setVariable [_popVar, _newPop];
-            private _globalMax = missionNamespace getVariable ["civ_maxSpawnPerVisit", 50];
-            if (_newPop > _globalMax && _remaining > 0) then {
+            if (_remaining > 0) then {
                 missionNamespace setVariable [_remVar, _remaining - 1];
                 private _locData = missionNamespace getVariable ["civ_locations", []];
                 private _radData = missionNamespace getVariable ["civ_radii", []];
@@ -379,9 +343,6 @@ if (_mode == "spawn") then {
                     [_center, _radius, _isZombie, _idx] call WBK_fnc_spawnReplacement;
                 };
             };
-
-            private _iconName = format ["civ_icon_%1", _idx];
-            _iconName setMarkerText format ["%1", missionNamespace getVariable [_popVar, 0]];
         };
         publicVariable "WBK_unitKilledHandler";
     };

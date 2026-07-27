@@ -601,8 +601,6 @@ fnc_civ_lootAction = compile preprocessFileLineNumbers "duws\shared\functions\fn
 publicVariable "fnc_civ_lootAction";
 fnc_civ_lootAction_handleArmed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_lootAction.sqf";
 publicVariable "fnc_civ_lootAction_handleArmed";
-fnc_civ_suicideBomberBehaviour = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_suicideBomberBehaviour.sqf";
-publicVariable "fnc_civ_suicideBomberBehaviour";
 fnc_civ_handler = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler.sqf";
 publicVariable "fnc_civ_handler";
 fnc_civ_handler_wbk = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler_wbk.sqf";
@@ -1042,19 +1040,8 @@ fnc_wbk_survivorKilled_server = {
     private _idx = _dead getVariable ["civ_locIndex", -1];
     if (_idx == -1) exitWith {};
     
-    private _popVar = format ["civ_pop_%1", _idx];
     private _remainingVar = format ["civ_remaining_%1", _idx];
-    private _curPop = missionNamespace getVariable [_popVar, 0];
-    if (_curPop <= 0) exitWith {};
-    
-    // 总人口减 1
-    private _newPop = _curPop - 1;
-    missionNamespace setVariable [_popVar, _newPop];
-    
-    // 更新地图图标（所有客户端）
-    private _iconName = format ["civ_icon_%1", _idx];
-    [_iconName, _newPop] remoteExec ["fnc_updateIcon", 0];
-    
+
     // 检查是否有剩余人口可以补充
     private _remaining = missionNamespace getVariable [_remainingVar, 0];
     if (_remaining > 0) then {
@@ -1119,7 +1106,7 @@ fnc_wbk_survivorKilled_server = {
         if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Replacement spawned at location %1, remaining now %2", _idx, _remaining - 1]] call fnc_log; };
     };
     
-    if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Survivor killed at location %1, pop now %2", _idx, _newPop]] call fnc_log; };
+    if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Survivor killed at location %1", _idx]] call fnc_log; };
 };
 publicVariable "fnc_wbk_survivorKilled_server";
 
@@ -1129,50 +1116,15 @@ fnc_wbk_unitKilled_server = {
     private _idx = _dead getVariable ["civ_locIndex", -1];
     if (_idx == -1) exitWith {};
 
-    private _popVar = format ["civ_pop_%1", _idx];
-    private _curPop = missionNamespace getVariable [_popVar, 0];
-    if (_curPop <= 0) exitWith {};
-
-    // 总人口减 1
-    private _newPop = _curPop - 1;
-    missionNamespace setVariable [_popVar, _newPop];
-
     // 增加剩余人口（用于下次补充）
     private _remVar = format ["civ_remaining_%1", _idx];
     private _rem = missionNamespace getVariable [_remVar, 0];
     missionNamespace setVariable [_remVar, _rem + 1];
 
-    // 更新地图图标（所有客户端）
-    private _iconName = format ["civ_icon_%1", _idx];
-    [_iconName, _newPop] remoteExec ["fnc_updateIcon", 0];
-
-    // 如果人口归零，发送鬼城通知，改变区域标记
-    if (_newPop == 0) then {
-        private _townName = text (missionNamespace getVariable ["civ_locations", []] select _idx);
-        private _title = localize "STR_DUWS_T_TOWN_DEPOPULATED_TITLE";
-        private _desc = format [localize "STR_DUWS_T_TOWN_DEPOPULATED_DESC", _townName];
-        ["biohazard", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", 0];
-        private _areaMarker = format ["civ_area_%1", _idx];
-        _areaMarker setMarkerColor "ColorBlack";
-        _areaMarker setMarkerAlpha 0.3;
-        _iconName setMarkerText "X";
-        if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Town %1 is now depopulated.", _townName]] call fnc_log; };
-    };
-
-    if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Unit killed at location %1, remaining total pop: %2", _idx, _newPop]] call fnc_log; };
+    if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Unit killed at location %1", _idx]] call fnc_log; };
 };
 publicVariable "fnc_wbk_unitKilled_server";
 
-// 辅助函数：更新图标
-fnc_updateIcon = {
-    params ["_iconName", "_pop"];
-    if (_pop > 0) then {
-        _iconName setMarkerText format ["%1", _pop];
-    } else {
-        _iconName setMarkerText "X";
-    };
-};
-publicVariable "fnc_updateIcon";
 fnc_changeFaceServer = {
     params ["_callerUID"];
     if (!isServer) exitWith {};

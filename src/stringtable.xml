@@ -1681,35 +1681,13 @@
                 <English>Check Vehicle Status</English>
                 <Chinesesimp>查看载具状态</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_SEEsub">
-                <Original>All units. Execute scorched-earth immediately. Over.</Original>
-                <English>All units. Execute scorched-earth immediately. Over.</English>
-                <Chinesesimp>所有单位。立刻落实焦土政策，完毕。</Chinesesimp>
+            <Key ID="STR_DUWS_T_escalation_title">
+                <Original>Escalation</Original>
+                <English>Escalation</English>
             </Key>
-            <Key ID="STR_DUWS_T_scorched_earth_title">
-                <Original>Scorched Earth Policy</Original>
-                <English>Scorched Earth Policy</English>
-                <Chinesesimp>焦土政策</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_scorched_earth_tooltip">
-                <Original>When enabled, each ghost town grants bonus CP but randomly reduces reputation and AP for both sides</Original>
-                <English>When enabled, each ghost town grants bonus CP but randomly reduces reputation and AP for both sides</English>
-                <Chinesesimp>开启后，每产生一个鬼城会给予CP奖励，但随机降低声望和双方军力。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_scorched_earth_effect1">
-                <Original>Scorched Earth Policy</Original>
-                <English>Scorched Earth Policy</English>
-                <Chinesesimp>焦土政策</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_scorched_earth_effect2">
-                <Original>You implemented SEP: CP +15, Rep %1, BLUFOR AP %2, OPFOR AP %3</Original>
-                <English>You implemented SEP: CP +15, Rep %1, BLUFOR AP %2, OPFOR AP %3</English>
-                <Chinesesimp>你落实了焦土政策：指挥点 +15，声望 %1，蓝方军力 %2，红方军力 %3</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_scorched_earth_effect3">
-                <Original>Scorched Earth Policy active. Leave nothing behind for the enemy</Original>
-                <English>Scorched Earth Policy active. Leave nothing behind for the enemy</English>
-                <Chinesesimp>焦土政策立刻生效————不要给敌人任何可以利用的资源。</Chinesesimp>
+            <Key ID="STR_DUWS_T_escalation_tooltip">
+                <Original>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of Altis and the campaign is lost.</Original>
+                <English>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of Altis and the campaign is lost.</English>
             </Key>
             <Key ID="STR_DUWS_T_repair_purchased">
                 <Original>Vehicle Modification Station can perform minimal repairs on severely damaged vehicles (component damage over 70%) and fully refuel them. For full repairs or additional rearming, you still need a dedicated repair/ammo vehicle.</Original>
@@ -2972,20 +2950,6 @@
                 <Spanish>A player has entered %1.</Spanish>
                 <Chinesesimp>有一名玩家进入了 %1</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_TOWN_DEPOPULATED_TITLE">
-                <Original>Ghost Town</Original>
-                <English>Ghost Town</English>
-                <Chinesesimp>鬼城</Chinesesimp>
-                <Spanish>Pueblo Fantasma</Spanish>
-                <German>Geisterstadt</German>
-            </Key>
-            <Key ID="STR_DUWS_T_TOWN_DEPOPULATED_DESC">
-                <Original>Due to war and humanitarian disaster, %1 has no survivors left</Original>
-                <English>Due to war and humanitarian disaster, %1 has no survivors left</English>
-                <Chinesesimp>由于战争与人道主义灾难，城镇 %1 已无人生还。</Chinesesimp>
-                <Spanish>Debido a la guerra y al desastre humanitario, el pueblo %1 no tiene supervivientes.</Spanish>
-                <German>Aufgrund von Krieg und humanitärer Katastrophe hat die Stadt %1 keine Überlebenden mehr.</German>
-            </Key>
             <Key ID="STR_DUWS_T_towninteract">
                 <Original>The town's residents offer several interaction options</Original>
                 <English>The town's residents offer several interaction options</English>
@@ -3180,13 +3144,6 @@
                 <Chinesesimp>行动组。你的区域已被证实发生感染，你被允许对感染者自由开火。不过还是小心点————出现幸存者的可能尚未被排除。</Chinesesimp>
                 <Original>Alpha 1-1. Infection confirmed in your area. You're cleared to engage the infected at will, but stay sharp: there may still be survivors.</Original>
                 <English>Alpha 1-1. Infection confirmed in your area. You're cleared to engage the infected at will, but stay sharp: there may still be survivors.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_hoscivpop">
-                <Spanish>Todas las unidades, atención. Civiles armados detectados en la zona urbana! Objetivos hostiles confirmados!</Spanish>
-                <German>Alle Einheiten, Achtung. Bewaffnete Zivilisten im Stadtgebiet entdeckt! Als feindliche Ziele bestätigt!</German>
-                <Chinesesimp>所有单位注意，城区发现武装平民！确认他们为敌对目标!</Chinesesimp>
-                <Original>All units, be advised. Armed civilians detected in urban area! Confirmed hostile targets!</Original>
-                <English>All units, be advised. Armed civilians detected in urban area! Confirmed hostile targets!</English>
             </Key>
             <Key ID="STR_DUWS_T_repup">
                 <Spanish>Todas las unidades, atención. Aquí es "Overlord 1-1". El equipo de daños colaterales ha progresado localmente. No arruinen la reputación ganada con esfuerzo de BLUFOR.</Spanish>
