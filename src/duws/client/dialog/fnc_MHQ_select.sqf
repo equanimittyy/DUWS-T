@@ -21,6 +21,11 @@ _Varname = "MHQ1";
 _target SetVehicleVarName _VarName;
 _target Call Compile Format ["%1=_This ; PublicVariable ""%1""",_VarName];
 
+// Exempt from the map cleanup, which deletes an immobilised crewless vehicle after 30 min --
+// a shot-out MHQ parked at base is exactly that. Public, because the sweep runs on the server
+// and this is set on the client that designated it.
+_target setVariable ["persistent", true, true];
+
 // Create MHQ marker
 ["select"] remoteExec ["fnc_MHQ_addActions", 2];
 
