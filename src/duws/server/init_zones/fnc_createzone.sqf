@@ -198,6 +198,10 @@ for "_i" from 1 to _fortificationCount do {
     _fort setDir (random 360);
     _fort setVectorUp [0,0,1];
     _fort allowDamage true;
+    // Filed under the zone like the prefab is. These stood outside the bucket model until now,
+    // surviving only because a building is invisible to the sweep -- which is the same reason
+    // their ruins were never collected either.
+    [_fort, format ["zone_%1_%2", round (_zonePos select 0), round (_zonePos select 1)]] call fnc_duws_keep;
     _zoneFortifications pushBack _fort;
     ["INFO", "ZONES", format ["Placed fortification %1 at %2 for zone %3", _fortClass, _safePos, _zone_num]] call fnc_log;
 };

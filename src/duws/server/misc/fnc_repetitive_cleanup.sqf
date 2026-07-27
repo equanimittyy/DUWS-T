@@ -45,6 +45,23 @@ private _litterClasses = ["WeaponHolder", "GroundWeaponHolder", "WeaponHolderSim
     "Land_BodyBag_01_base_F", "Land_BodyBag_01_F", "Land_BodyBag_01_black_F",
     "Land_BodyBag_01_blue_F", "ACE_bodyBagObject"];
 
+// Buildings reach the sweep only through here. They are Static rather than AllVehicles, so no
+// census query returns them -- and the engine does not damage one in place, it deletes it and
+// spawns a replacement, which is why the tracked member goes null and its flag with it. The ruin
+// therefore has to be claimed as it appears or it is never seen again.
+DUWS_cleanup_lifetime = _lifetime;
+addMissionEventHandler ["BuildingChanged", {
+    params ["_old", "_new", "_isRuin"];
+    if !(_old getVariable ["persistent", false]) exitWith {};
+    if (_isRuin) then {
+        [_new, DUWS_cleanup_lifetime] call fnc_duws_disposeAfter;
+    } else {
+        // A damage stage, not destruction: the replacement is still part of the composition, and
+        // dropping the flag here would leave the eventual ruin unrecognised.
+        _new setVariable ["persistent", true, true];
+    };
+}];
+
 // Objects handed over explicitly, chiefly by fnc_duws_release retiring a composition. A standing
 // list rather than part of the census: a released hardpoint core is a static weapon, and the
 // abandoned-vehicle clause below deliberately never collects those, so nothing would look at it
