@@ -114,6 +114,13 @@ rebuilds the HQ and FOBs, which must not acquire OPFOR gunners.
 Re-crewing is skipped once the zone is BLUFOR's, for the same reason zone compositions are
 persistent rather than released on capture — the emplacements are the player's to use.
 
+### Arrival is confirmed before anything is built
+
+The gate re-tests five seconds after it first sees BLUFOR inside the perimeter, and only then
+deploys and spawns. Grazing the edge — a helicopter transiting, a patrol that turns back — used to
+commit a garrison; now it also commits a 65-object rebuild, which is enough to make a false
+trigger worth waiting out. Garrison and props share the decision because they share the branch.
+
 ## Interactions
 
 **The sweep needs no change.** Stowed members are deleted outright rather than handed to

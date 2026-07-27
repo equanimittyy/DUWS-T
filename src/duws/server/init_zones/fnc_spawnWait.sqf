@@ -38,6 +38,18 @@ private _westMenNear = {
 	_out
 };
 
+// Two AI or one player inside the perimeter, the original thresholds. Shared by the arrival check
+// and the confirmation five seconds later so the two cannot answer differently.
+private _bluforNear = {
+	private _near = (count ([_spawnPos, _size + _AI_buffer] call _westMenNear)) > 1;
+	if (!_near) then {
+		_near = ((call BIS_fnc_ListPlayers) findIf {
+			(_spawnPos distance _x) < (_size + _player_buffer)
+		}) >= 0;
+	};
+	_near
+};
+
 // Zone turrets get their gunners from the prefab at build time, and the prefab never runs again --
 // so a composition that has been stowed comes back with empty guns unless they are re-crewed here.
 // Skipped once the zone is BLUFOR's: the emplacements are then the player's to use, which is the
@@ -90,17 +102,16 @@ while {true} do {
 	if (!_blufor_close) then {
 
 		while {true} do {
-			// CHECK FOR 2x ANY UNIT -- wait until BLUFOR are within the perimeter buffer
-			if (count ([_spawnPos, _size + _AI_buffer] call _westMenNear) > 1) then {
-				_blufor_close = true;
-			};
+			_blufor_close = call _bluforNear;
 
-			// CHECK FOR 1x PLAYERS
-			{
-				if ((_spawnPos distance _x) < (_size + _player_buffer)) then {
-					_blufor_close = true;
-				};
-			} foreach call BIS_fnc_ListPlayers;
+			// Confirmed after a pause rather than acted on the moment anyone clips the perimeter.
+			// A helicopter transiting, or a patrol that turns back at the edge, would otherwise
+			// spawn a garrison and rebuild a whole composition for someone already leaving --
+			// and the pair is expensive enough that a false trigger is worth five seconds.
+			if (_blufor_close) then {
+				sleep 5;
+				_blufor_close = call _bluforNear;
+			};
 
 			// Start the Spawns and start the timer
 			if (_blufor_close) exitWith {
