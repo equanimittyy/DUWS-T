@@ -54,7 +54,7 @@ index_apocalypse_false = lbAdd [2105, localize "STR_DUWS_T_x4zs3lsg0"];
 // ========== 战争升级（替换焦土模式） ==========
 index_escalation_false = lbAdd [2106, localize "STR_DUWS_T_x4zs3lsg0"];
 index_escalation_true = lbAdd [2106, localize "STR_DUWS_T_vk37aebo"];
-[2106, index_escalation_false] call _setDefault;
+[2106, index_escalation_true] call _setDefault;
 // =========================================
 
 // TIME MULITPLIER

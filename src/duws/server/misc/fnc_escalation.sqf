@@ -73,7 +73,9 @@ addMissionEventHandler ["BuildingChanged", {
         };
     };
 
-    if (isNil "escalation_enabled" || {!escalation_enabled}) exitWith {};
+    // Defaults on, matching the menu, so a campaign that never reached the environment screen
+    // escalates rather than silently running without its price and loss pressure.
+    if !(missionNamespace getVariable ["escalation_enabled", true]) exitWith {};
 
     escalation_destroyed = escalation_destroyed + 1;
     private _level = floor (escalation_destroyed / escalation_tier);
