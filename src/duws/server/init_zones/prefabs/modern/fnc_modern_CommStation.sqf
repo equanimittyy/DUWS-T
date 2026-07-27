@@ -99,12 +99,7 @@ private _tiltTypes = [
     private _newY = _centerSpawnY + _offsetY;
 
     private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
-    // Anything that can drive itself away is left out of the composition: a base exclusion zone
-    // is how a player keeps a vehicle now, so a zone quadbike abandoned at a captured outpost
-    // clears like anything else. Tested on the object rather than the class because a slung
-    // cargo container is cargo, not transport, and must stay tagged -- canMove tells them apart
-    // without depending on which config branch each one hangs off.
-    if !(canMove _obj) then { [_obj, _zoneKey] call fnc_duws_keep };
+    [_obj, _zoneKey] call fnc_duws_keep;
     _obj setPosATL [_newX, _newY, 0];
 
     if (_class in _tiltTypes) then {

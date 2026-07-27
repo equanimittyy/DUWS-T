@@ -64,9 +64,6 @@ private _allObjectsData = [
     ["I_G_HMG_02_high_F",        -12.7068,   4.2205, 3.1264, 284.0, true],
     ["I_G_HMG_02_high_F",          4.2288, -12.3499, 2.5396, 175.5, true],
     ["I_G_HMG_02_high_F",         17.1467,   5.1462, 4.8121,  91.2, true],
-    ["B_G_Quadbike_01_F",         10.1975,  -2.4592, 2.2605, 111.8, false],
-    ["B_G_Quadbike_01_F",          8.7561,  -6.0510, 2.4316, 153.4, false],
-    ["B_UAV_01_F",                -0.8142,  -0.6995, 0.7226,   0.0, false],
     ["Land_BagFence_Round_F",     -5.6892,  12.8357, 0.4193,  99.9, false],
     ["Land_BagFence_Round_F",     -3.8044,  14.1951, 0.4193, 187.5, false],
     ["Land_BagFence_Short_F",     -5.1990,  10.8337, 0.4143,  58.2, false],
@@ -133,12 +130,7 @@ private _tiltTypes = [
     };
 
     private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
-    // Anything that can drive itself away is left out of the composition: a base exclusion zone
-    // is how a player keeps a vehicle now, so a zone quadbike abandoned at a captured outpost
-    // clears like anything else. Tested on the object rather than the class because a slung
-    // cargo container is cargo, not transport, and must stay tagged -- canMove tells them apart
-    // without depending on which config branch each one hangs off.
-    if !(canMove _obj) then { [_obj, _zoneKey] call fnc_duws_keep };
+    [_obj, _zoneKey] call fnc_duws_keep;
     _obj setPosATL [_newX, _newY, 0];
 
     // 工事倾斜

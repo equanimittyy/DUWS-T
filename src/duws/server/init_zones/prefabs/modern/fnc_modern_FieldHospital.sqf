@@ -15,7 +15,6 @@ if (_newCenterZ <= 0) then { _newCenterZ = 0; };
 
 // 保留物理模拟的物体（如载具、可互动物体等）
 private _keepSimulation = [
-    "C_Offroad_01_F",
     "B_Slingload_01_Medevac_F",
     "Land_Medevac_house_V1_F",
     "Land_Medevac_HQ_V1_F"
@@ -78,7 +77,6 @@ private _allObjectsData = [
     ["I_HMG_02_high_F",            -10.8438,  13.5112, 5.7147,   0.0, true],
     ["I_Mortar_01_F",              -11.2017,   7.6265, 4.9096,   0.0, true],
     ["B_static_AA_F",                0.6030,   3.5054, 1.6752,   0.0, true],
-    ["C_Offroad_01_F",               3.1694, -16.2651, 1.6115,   0.0, false],
     ["Land_HelipadRescue_F",         6.8320,   0.2212, 0.0,      0.0, false],
     ["Land_BagFence_Round_F",        0.8296, -24.9683, 0.4193,   0.0, false],
     ["I_HMG_02_high_F",              0.5581, -23.5117, 2.2937, 176.3, true]
@@ -102,12 +100,7 @@ private _tiltTypes = [
     private _newY = _centerSpawnY + _offsetY;
 
     private _obj = createVehicle [_class, [_newX, _newY, 0], [], 0, "CAN_COLLIDE"];
-    // Anything that can drive itself away is left out of the composition: a base exclusion zone
-    // is how a player keeps a vehicle now, so a zone quadbike abandoned at a captured outpost
-    // clears like anything else. Tested on the object rather than the class because a slung
-    // cargo container is cargo, not transport, and must stay tagged -- canMove tells them apart
-    // without depending on which config branch each one hangs off.
-    if !(canMove _obj) then { [_obj, _zoneKey] call fnc_duws_keep };
+    [_obj, _zoneKey] call fnc_duws_keep;
     _obj setPosATL [_newX, _newY, 0];
 
     // 工事倾斜
