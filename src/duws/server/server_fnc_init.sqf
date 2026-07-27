@@ -302,6 +302,16 @@ fnc_duws_release = {
 };
 publicVariable "fnc_duws_release";
 
+// Debug-menu entry point for the map cleanup: sweep now, lifetimes and keep-radius ignored.
+// The sweep's interval wait breaks on this flag, so it lands within half a second rather than
+// on the next scheduled pass. Not published, because nothing calls it locally -- the
+// menu remoteExecs it to the server, which is the only machine holding the object list.
+// Sets a flag rather than deleting here: every deletion stays behind the sweep's one gate.
+fnc_duws_forceCleanup = {
+    DUWS_cleanup_force = true;
+    ["INFO", "CLEANUP", "Forced sweep requested from the debug menu."] call fnc_log;
+};
+
 // STARTUP FUNCTIONS
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BluHQinit.sqf";
 fnc_factions_check = compile preprocessFileLineNumbers "duws\server\misc\fnc_factions_check_modern.sqf";
@@ -704,6 +714,7 @@ fnc_FOB_Request_Menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc
 fnc_squad_manage = compile preprocessFileLineNumbers "duws\client\dialog\fnc_squad_manage.sqf";publicVariable "fnc_squad_manage";
 fnc_open_action_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_open_action_menu.sqf";publicVariable "fnc_open_action_menu";
 fnc_disguise_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_disguise_menu.sqf";publicVariable "fnc_disguise_menu";
+fnc_debug_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_menu.sqf";publicVariable "fnc_debug_menu";
 fnc_dismissHC = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismissHC.sqf";publicVariable "fnc_dismissHC";
 fnc_dismiss_playerAI = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismiss_playerAI.sqf";publicVariable "fnc_dismiss_playerAI";
 fnc_squad_rename = compile preprocessFileLineNumbers "duws\client\dialog\fnc_squad_rename.sqf";publicVariable "fnc_squad_rename";

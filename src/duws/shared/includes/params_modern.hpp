@@ -7,6 +7,16 @@ class Params {
         default = 0;
     };
 
+    // Whether the developer menu exists at all, not who may open it: a parameter is mission
+    // config, so every machine in a session reads the same value. client_init.sqf gates the
+    // menu on game_master as well, or this would hand it to every client on the server.
+    class DUWS_Debug {
+        title = "Debug";
+        values[] = {0,1};
+        texts[] = {"Disabled","Enabled"};
+        default = 0;
+    };
+
     // Read by INIT.sqf into duws_log_level before either init script compiles fnc_log_init.
     // No default is repeated on the script side -- fnc_log_init owns it and only applies it
     // when the variable is still nil, so the two cannot drift apart.

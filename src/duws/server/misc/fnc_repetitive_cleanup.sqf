@@ -89,7 +89,13 @@ _removeFromCleanup = {
 _pass = 0;
 
 while{true} do {
-    sleep 10;
+    // Interruptible interval, not a flat sleep 10: a forced sweep asked for just after a pass
+    // began waiting would otherwise sit out the whole interval, and a debug button that does
+    // nothing for ten seconds reads as broken. Gated on time rather than a counted poll so the
+    // interval still tracks setTimeMultiplier exactly as the sleep it replaces did. Polling one
+    // boolean twice a second is free next to the census below.
+    private _nextPass = time + 10;
+    waitUntil { sleep 0.5; DUWS_cleanup_force || {time >= _nextPass} };
     _census = 0;
 
     // A census, not a search. nearObjects only answers "what is within X of here", so finding
@@ -164,16 +170,24 @@ while{true} do {
     REM(_objectsToCleanup,0)
     REM(_timesWhenToCleanup,0)
 
+    // Debug-menu request, read after discovery so junk found on this same pass goes too.
+    // Cleared here rather than by the setter: the pass that honours it is the only place that
+    // knows the request was served, and leaving it set would sweep every pass from now on.
+    private _force = DUWS_cleanup_force;
+    DUWS_cleanup_force = false;
+    private _tracked = count _objectsToCleanup;
+
     {
         if(isNull(_x)) then {
             _objectsToCleanup set[_forEachIndex, 0];
             _timesWhenToCleanup set[_forEachIndex, 0];
         } else {
             // Expired but in view stays on the list and is retried next pass, so it goes as
-            // soon as the player moves off rather than never.
+            // soon as the player moves off rather than never. A forced sweep skips both tests:
+            // waiting out a 30 min timer, or walking 300 m off, defeats the point of the tool.
             private _obj = _x;
-            if(_timesWhenToCleanup select _forEachIndex < time
-                && {(allPlayers findIf {_x distance _obj < KEEP_RADIUS}) < 0}) then {
+            if(_force || {_timesWhenToCleanup select _forEachIndex < time
+                && {(allPlayers findIf {_x distance _obj < KEEP_RADIUS}) < 0}}) then {
                 deleteVehicle _obj;
                 _objectsToCleanup set[_forEachIndex, 0];
                 _timesWhenToCleanup set[_forEachIndex, 0];
@@ -183,6 +197,11 @@ while{true} do {
 
     REM(_objectsToCleanup,0)
     REM(_timesWhenToCleanup,0)
+
+    if (_force) then {
+        ["INFO", "CLEANUP", format ["forced sweep: %1 tracked, %2 survived",
+            _tracked, count _objectsToCleanup]] call fnc_log;
+    };
 
     _pass = _pass + 1;
     if (_pass % LOG_EVERY == 0) then {

@@ -104,6 +104,11 @@ DUWS_disposables = [];
 // themselves -- dead, immobile, littered -- would ever collect them.
 DUWS_compositions = createHashMap;
 
+// One-shot request for the map cleanup to sweep now, ignoring both remaining lifetimes and the
+// keep-radius. Set through fnc_duws_forceCleanup; the sweep waits on this as well as on its
+// interval, and clears it, so a request cannot spill into the pass after the one that served it.
+DUWS_cleanup_force = false;
+
 // Death Penalty
 DUWSMP_CP_death_cost = 0;publicVariable "DUWSMP_CP_death_cost";
 

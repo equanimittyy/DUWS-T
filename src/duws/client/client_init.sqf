@@ -243,6 +243,14 @@ if (_difficulty_setting < 2 || (difficultyOption "mapContentFriendly") == 1) the
 // onPlayerRespawn.sqf re-adds it.
 player addaction [localize "STR_DUWS_T_2rc0nvug",fnc_earplugs, "", 0, true, true, "", "_this == player"];
 
+// Developer tools. Two gates, because the parameter is mission config and so reads the same on
+// every machine: on its own it would give the whole server a button that makes the server work.
+// game_master is the existing campaign-control list. Attached to the player rather than an object
+// so it is reachable anywhere on the map, and it dies with the body, so onPlayerRespawn re-adds.
+if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1 && {(vehiclevarname player) in game_master}) then {
+	player addAction ["<t color='#ff8000'>Debug</t>", fnc_debug_menu, "", 0, true, true, "", "_this == player"];
+};
+
 // Create Diary/Help entry on the Map
 [] spawn fnc_duws_help;
 

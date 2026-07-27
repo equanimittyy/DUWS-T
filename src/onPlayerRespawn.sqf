@@ -15,6 +15,12 @@ player addRating 10000000;
 // this re-add a player who died with earplugs in has no way to turn the volume back up.
 player addaction [localize "STR_DUWS_T_2rc0nvug",fnc_earplugs, "", 0, true, true, "", "_this == player"];
 
+// Same re-add reason as the earplug action: the debug menu was attached to the old body.
+// Both gates repeated from client_init.sqf -- the parameter alone is mission-wide.
+if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1 && {(vehiclevarname player) in game_master}) then {
+    player addAction ["<t color='#ff8000'>Debug</t>", fnc_debug_menu, "", 0, true, true, "", "_this == player"];
+};
+
 if (!isNil "apocalypse_mode" && apocalypse_mode) then {
     call DUWS_fnc_applyApocalypseFilter;
 };
