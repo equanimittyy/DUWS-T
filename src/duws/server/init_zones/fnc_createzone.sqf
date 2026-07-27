@@ -236,7 +236,6 @@ publicVariable "zones_buildout_done";
 ///////////////////////////////////////////////
 _index = zone_spawn_array find [_zone_num,false,false];
 _opfor_spawn = (zone_spawn_array select _index) select 1;
-_noDespawn = (zone_spawn_array select _index) select 2;
 
 sleep 60;
 [_spawnPos,_size,_index] spawn fnc_spawnWait;
@@ -330,21 +329,13 @@ while {true} do {
 		[_spawnPos, _size, _initialCountVar, _triggeredVar, "", true] spawn fnc_opf_heli_reinforce;
 		// ==============================================
 	};
+	// Waits for the next spawn signal from fnc_spawnWait. Slot 2 of the entry used to carry a
+	// "never despawn again" flag; nothing sets it now that despawn is decided by a grace period
+	// that restarts whenever BLUFOR are seen, so a zone always comes back round to this loop.
 	while {true} do {
-		if (_opfor_spawn == true || _noDespawn == true) exitWith {};
+		if (_opfor_spawn == true) exitWith {};
 		sleep 10;
 		_opfor_spawn = (zone_spawn_array select _index) select 1;
-		_noDespawn = (zone_spawn_array select _index) select 2;
-	};
-	if (_noDespawn == true) then {
-		waitUntil {sleep 60;(!(_spawnPos in WARCOM_zones_controled_by_OPFOR) || count WARCOM_zones_controled_by_OPFOR < 1)};
-		if (count WARCOM_zones_controled_by_OPFOR < 1) exitWith {};
-		waitUntil {sleep 60;(_spawnPos in WARCOM_zones_controled_by_OPFOR || count WARCOM_zones_controled_by_OPFOR < 1)};
-		if (count WARCOM_zones_controled_by_OPFOR < 1) exitWith {};
-		_opfor_spawn = false;
-		_noDespawn = false;
-		(zone_spawn_array select _index) set [1,false];
-		(zone_spawn_array select _index) set [2,false];
 	};
 	if (count WARCOM_zones_controled_by_OPFOR < 1) exitWith {};
 };

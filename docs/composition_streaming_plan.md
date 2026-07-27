@@ -121,6 +121,24 @@ deploys and spawns. Grazing the edge — a helicopter transiting, a patrol that 
 commit a garrison; now it also commits a 65-object rebuild, which is enough to make a false
 trigger worth waiting out. Garrison and props share the decision because they share the branch.
 
+Two AI raise a zone, one holds it. The asymmetry is deliberate: a zone that needed two to stay up
+would flicker off around the edges of the force that just took it.
+
+### Departure is a grace period, not a deadline
+
+Presence is re-sampled every 10 s for as long as the zone is up, and the clock restarts each time
+BLUFOR are seen; the zone despawns `_despawn_timer` seconds after the last sighting.
+
+The shape this replaces sampled once, at the timer mark, and pinned the zone permanently if anyone
+happened to be inside at that instant — so an assault that ran longer than the timer left the zone
+standing for the rest of the campaign. Harmless when only AI cycled. With props on the same gate it
+meant streaming helped for zones a player drove past and did nothing for zones they fought over,
+which is the wrong way round.
+
+A zone that changes hands is not despawned — its emplacements are the player's now — and its gate
+idles until OPFOR hold it again rather than re-entering the arrival branch, which would spawn an
+OPFOR garrison inside a zone BLUFOR own.
+
 ## Interactions
 
 **The sweep needs no change.** Stowed members are deleted outright rather than handed to

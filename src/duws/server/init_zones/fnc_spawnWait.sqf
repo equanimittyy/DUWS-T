@@ -1,18 +1,17 @@
 // Locality: server -- inherited from server/init_zones/fnc_createzone.sqf.
-// LOOP TO WAIT UNTIL BLUFOR CLOSE - SPAWN /DESPAWN 
-// AFTER 10 min of BLUFOR CLOSE, NO DESPAWN
+// LOOP TO WAIT UNTIL BLUFOR CLOSE - SPAWN /DESPAWN
+// Despawn is _despawn_timer seconds after BLUFOR were last seen, re-checked for as long as the
+// zone is up. A zone is never pinned: leaving is what starts the clock, not how long you stayed.
 
 _spawnPos = _this select 0;
 _size = _this select 1;
 _index = _this select 2;
 
 _blufor_close = false;
-_noDespawn = false;
 
 _AI_buffer = 400;
 _player_buffer = 400;
 _despawn_timer = 300;
-_startTime = time;
 
 // The key the prefab and the fortification ring both file their objects under
 // (prefabs/modern/*.sqf:9, fnc_createzone.sqf:204). Derived from the same position array they
@@ -38,10 +37,12 @@ private _westMenNear = {
 	_out
 };
 
-// Two AI or one player inside the perimeter, the original thresholds. Shared by the arrival check
-// and the confirmation five seconds later so the two cannot answer differently.
+// One player, or _minAI friendly AI, inside the perimeter. The AI threshold is a parameter because
+// raising a zone and holding one deliberately differ: two AI to bring it up, one to keep it there.
+// That hysteresis stops a zone flickering off around the edges of the force that just took it.
 private _bluforNear = {
-	private _near = (count ([_spawnPos, _size + _AI_buffer] call _westMenNear)) > 1;
+	params [["_minAI", 2]];
+	private _near = (count ([_spawnPos, _size + _AI_buffer] call _westMenNear)) >= _minAI;
 	if (!_near) then {
 		_near = ((call BIS_fnc_ListPlayers) findIf {
 			(_spawnPos distance _x) < (_size + _player_buffer)
@@ -102,7 +103,7 @@ while {true} do {
 	if (!_blufor_close) then {
 
 		while {true} do {
-			_blufor_close = call _bluforNear;
+			_blufor_close = [2] call _bluforNear;
 
 			// Confirmed after a pause rather than acted on the moment anyone clips the perimeter.
 			// A helicopter transiting, or a patrol that turns back at the edge, would otherwise
@@ -110,10 +111,10 @@ while {true} do {
 			// and the pair is expensive enough that a false trigger is worth five seconds.
 			if (_blufor_close) then {
 				sleep 5;
-				_blufor_close = call _bluforNear;
+				_blufor_close = [2] call _bluforNear;
 			};
 
-			// Start the Spawns and start the timer
+			// Start the Spawns
 			if (_blufor_close) exitWith {
 				// Props before the garrison: units must not spawn into ground that is about to
 				// have a bunker on it, and the turrets have to exist before anyone mans them.
@@ -123,7 +124,6 @@ while {true} do {
 				};
 				[_spawnPos, _zoneKey] call _manStatics;
 				(zone_spawn_array select _index) set [1,true];
-				_startTime = time;
 			};
 			
 			sleep 10;
@@ -131,42 +131,22 @@ while {true} do {
 		
 	} else {
 
+		// Presence is re-sampled for as long as the zone is up, and the grace period restarts every
+		// time BLUFOR are seen. The shape this replaces tested once at the despawn_timer mark and
+		// then pinned the zone permanently if anyone happened to be inside at that instant, so an
+		// assault lasting longer than the timer left the zone -- garrison and every prop -- standing
+		// for the rest of the campaign. One AI holds it here against two needed to raise it.
+		private _lastSeen = time;
+		private _despawn = false;
 		while {true} do {
-			
-			_blufor_close = false;  // until timer hits 10 min
-			
-			// Wait 10 min before DESPAWN
-			if (time - _startTime < _despawn_timer || !(_spawnPos in WARCOM_zones_controled_by_OPFOR)) exitWith {
-				_blufor_close = true;
-			};
-
-			// after 10 min check if BLUFOR still close
-			//CHECK FOR AI (500m)
-			if (count ([_spawnPos, _size + _AI_buffer] call _westMenNear) > 0) then {
-				_blufor_close = true;
-			};
-
-			// CHECK FOR PLAYERS (1000m)
-			{
-				if ((_spawnPos distance _x) < (_size + _player_buffer)) then {
-					_blufor_close = true;
-				};
-			} foreach call BIS_fnc_ListPlayers;
-
+			if !(_spawnPos in WARCOM_zones_controled_by_OPFOR) exitWith {};
+			if ([1] call _bluforNear) then { _lastSeen = time };
+			if (time - _lastSeen >= _despawn_timer) exitWith { _despawn = true };
 			sleep 10;
-			
-			// If blufor still close after 10 min, leave the zone as is, no despawn 
-			if (_blufor_close == true) exitWith {
-				_noDespawn = true;
-				(zone_spawn_array select _index) set [2,true];
-			};
-
-			if (_blufor_close == false) exitWith {};
-
 		};
-		
+
 		// CLEANUP ZONE
-		if (_blufor_close == false) then {
+		if (_despawn) then {
 			// ========== 清理前强制终止增援监控 ==========
 			private _triggeredVar = format ["opf_reinforce_%1", _zoneKey];
 			missionNamespace setVariable [_triggeredVar, true, true];
@@ -188,19 +168,16 @@ while {true} do {
 			} foreach _zoneObj;
 
 			[_zoneKey] call _stowZone;
+		} else {
+			// The zone changed hands, so nothing is despawned -- the emplacements are the player's
+			// now. This thread idles until OPFOR hold it again rather than re-entering the arrival
+			// branch, which would spawn an OPFOR garrison inside a zone BLUFOR own.
+			waitUntil {sleep 60; (_spawnPos in WARCOM_zones_controled_by_OPFOR)
+				|| {count WARCOM_zones_controled_by_OPFOR < 1}};
+			(zone_spawn_array select _index) set [1,false];
 		};
-	};
 
-	if (_noDespawn == true) then {
-		waitUntil {sleep 60;(!(_spawnPos in WARCOM_zones_controled_by_OPFOR) || count WARCOM_zones_controled_by_OPFOR < 1)};
-		if (count WARCOM_zones_controled_by_OPFOR < 1) exitWith {};
-		waitUntil {sleep 60;(_spawnPos in WARCOM_zones_controled_by_OPFOR || count WARCOM_zones_controled_by_OPFOR < 1)};
-		if (count WARCOM_zones_controled_by_OPFOR < 1) exitWith {};
-		_opfor_spawn = false;
-		_noDespawn = false;
 		_blufor_close = false;
-		(zone_spawn_array select _index) set [1,false];
-		(zone_spawn_array select _index) set [2,false];
 	};
 	if (count WARCOM_zones_controled_by_OPFOR < 1) exitWith {};
 
