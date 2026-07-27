@@ -6,7 +6,7 @@
     DESCRIPTION:
     Can delete everything that is not really needed
     dead bodies, dropped items, smokes, chemlights, explosives, empty groups
-    Works even on Altis, it eats only items which are/were 100m from all units
+    Nothing is deleted within KEEP_RADIUS of a player, whatever its age.
 
     USAGE:
     in server's init
@@ -35,7 +35,18 @@ if (!isServer) exitWith {}; // isn't server
 #define PUSH(A,B) A set [count (A),B];
 #define REM(A,B) A=A-[B];
 
-private ["_ttdBodies","_ttdVehiclesDead","_ttdVehiclesImmobile","_ttdWeapons","_ttdPlanted","_ttdSmokes","_addToCleanup","_unit","_objectsToCleanup","_timesWhenToCleanup","_removeFromCleanup"];
+private ["_ttdBodies","_ttdVehiclesDead","_ttdVehiclesImmobile","_ttdWeapons","_ttdPlanted","_ttdSmokes","_addToCleanup","_objectsToCleanup","_timesWhenToCleanup","_removeFromCleanup","_census","_pass"];
+
+// Nothing inside this of a player is deleted, however old it is. A wreck or a body blinking
+// out on screen reads as a bug, and the whole point of a lifetime is that it expires out of
+// sight. Every category funnels through one deletion point, so this is enforced in one place.
+#define KEEP_RADIUS 300
+
+// Passes between census log lines. The census is the one part of this that cannot be checked
+// offline -- allMissionObjects is documented around mission- and script-created objects, and a
+// dropped rifle's holder is created by the engine. A zero here with combat behind you means the
+// census does not see them and discovery has to go back to searching from unit positions.
+#define LOG_EVERY 30
 
 _ttdBodies=[_this,0,0,[0]] call BIS_fnc_param;
 _ttdVehiclesDead=[_this,1,0,[0]] call BIS_fnc_param;
@@ -75,35 +86,36 @@ _removeFromCleanup = {
     };
 };
 
+_pass = 0;
+
 while{true} do {
     sleep 10;
-    {
-        _unit = _x;
-        if (_ttdWeapons>0) then {
-            {
-                {
-                    [_x, _ttdWeapons] call _addToCleanup;
-                } forEach (getpos _unit nearObjects [_x, 100]);
-            } forEach ["WeaponHolder","GroundWeaponHolder","WeaponHolderSimulated"];
-        };
+    _census = 0;
 
-        if (_ttdPlanted>0) then {
-            {
-                {
-                    [_x, _ttdPlanted] call _addToCleanup;
-                } forEach (getpos _unit nearObjects [_x, 100]);
-            } forEach ["TimeBombCore"];
-        };
+    // A census, not a search. nearObjects only answers "what is within X of here", so finding
+    // this junk used to mean sweeping a 100 m radius from every unit in the mission -- four
+    // sweeps each, every 10 s, with squadmates re-asking about the same ground. That was both
+    // the largest sustained cost here and incomplete: litter from a firefight nobody survived
+    // was never near a unit again, so it was never found and never deleted.
+    if (_ttdWeapons>0) then {
+        // Deduped across the three names: if allMissionObjects matches subclasses they overlap,
+        // and the census below is only worth logging if it counts holders rather than queries.
+        private _holders = [];
+        {
+            private _type = _x;
+            { _holders pushBackUnique _x } forEach (allMissionObjects _type);
+        } forEach ["WeaponHolder","GroundWeaponHolder","WeaponHolderSimulated"];
+        _census = count _holders;
+        { [_x, _ttdWeapons] call _addToCleanup; } forEach _holders;
+    };
 
-        if (_ttdSmokes>0) then {
-            {
-                {
-                    [_x, _ttdSmokes] call _addToCleanup;
-                } forEach (getpos _unit nearObjects [_x, 100]);
-            } forEach ["SmokeShell"];
-        };
+    if (_ttdPlanted>0) then {
+        { [_x, _ttdPlanted] call _addToCleanup; } forEach (allMissionObjects "TimeBombCore");
+    };
 
-    } forEach allUnits;
+    if (_ttdSmokes>0) then {
+        { [_x, _ttdSmokes] call _addToCleanup; } forEach (allMissionObjects "SmokeShell");
+    };
 
     {
         if ((count units _x)==0) then {
@@ -143,8 +155,12 @@ while{true} do {
             _objectsToCleanup set[_forEachIndex, 0];
             _timesWhenToCleanup set[_forEachIndex, 0];
         } else {
-            if(_timesWhenToCleanup select _forEachIndex < time) then {
-                deleteVehicle _x;
+            // Expired but in view stays on the list and is retried next pass, so it goes as
+            // soon as the player moves off rather than never.
+            private _obj = _x;
+            if(_timesWhenToCleanup select _forEachIndex < time
+                && {(allPlayers findIf {_x distance _obj < KEEP_RADIUS}) < 0}) then {
+                deleteVehicle _obj;
                 _objectsToCleanup set[_forEachIndex, 0];
                 _timesWhenToCleanup set[_forEachIndex, 0];
             };
@@ -153,4 +169,10 @@ while{true} do {
 
     REM(_objectsToCleanup,0)
     REM(_timesWhenToCleanup,0)
+
+    _pass = _pass + 1;
+    if (_pass % LOG_EVERY == 0) then {
+        ["INFO", "CLEANUP", format ["weapon-holder census %1, %2 pending deletion",
+            _census, count _objectsToCleanup]] call fnc_log;
+    };
 };
