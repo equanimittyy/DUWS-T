@@ -268,11 +268,14 @@ Normal hardpoints appear when the director builds them, with a notification. The
 enemy construction as it happens is the point — it is the only feedback that the OPFOR side is
 spending anything.
 
-**In hardcore that splits: the notification fires, the marker does not.** Hardcore's whole
-premise is that the player has to find enemy positions rather than read them off the map, and a
-normal hardpoint appearing on it the moment it is built hands over ground the player has not
-scouted. So in hardcore the marker starts at alpha 0 and the notification still goes out — it
-says OPFOR are building, not where, which keeps the spending feedback without the giveaway.
+**Hardcore is silent: no marker, no notification.** Its premise is that enemy positions are
+found rather than read off the map, and a construction alert is a tell even without coordinates
+— it tells the player a hardpoint now exists to go looking for, and roughly when it appeared.
+So in hardcore the marker starts at alpha 0 and nothing announces the build.
+
+The cost is that hardcore gives up the only feedback that OPFOR are spending anything. That is
+the trade the mode exists to make, and it is the reason the reveal below matters: without it a
+hardcore player has no route to a normal hardpoint except walking into its fire.
 
 A hidden normal hardpoint has no parent zone, so `fnc_zone_reveal`'s spatial filter above cannot
 reach it. It needs its own reveal, and the civilian interaction menu is the intended source:

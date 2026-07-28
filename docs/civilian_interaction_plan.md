@@ -144,9 +144,10 @@ without touching this code again.
 
 **The hardpoint payout only exists in hardcore.** Everywhere else a normal hardpoint is on the
 map from the moment the director builds it, so there is nothing for intel to sell. Hardcore
-hides the marker and keeps the construction notification, which is decided in
-[`hardpoint_system_plan.md`](hardpoint_system_plan.md#reveal) rather than here; this menu is one
-of the two sources that can lift it, alongside the corpse-and-mission intel path.
+builds them silently — no marker, no notification — which is decided in
+[`hardpoint_system_plan.md`](hardpoint_system_plan.md#reveal) rather than here. That makes this
+menu one of only two things that can surface one, alongside the corpse-and-mission intel path,
+and the alternative to both is walking into its fire.
 
 That the pool varies by campaign setting is the reason it is rolled over *available* kinds. In a
 non-hardcore campaign the hardpoint entry simply never enters the draw.
