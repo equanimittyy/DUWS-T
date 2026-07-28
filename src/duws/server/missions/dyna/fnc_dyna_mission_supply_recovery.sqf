@@ -149,7 +149,7 @@ private _taskID = format ["dyna_supplyrecover_%1", round time];
 [
     west,
     _taskID,
-    [localize "STR_DUWS_T_supply_recovery", localize _nameKey, _foundPos],
+    [localize "STR_DUWS_T_supply_recovery_desc", localize _nameKey, _foundPos],
     objNull,
     true
 ] call BIS_fnc_taskCreate;

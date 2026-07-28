@@ -1484,7 +1484,7 @@ fnc_changeFaceServer = {
     private _newFace = selectRandom _faces;
     _player setFace _newFace;
     
-    private _msg = format [localize "STR_DUWS_T_FACE_CHANGED", _newFace];
+    private _msg = localize "STR_DUWS_T_FACE_CHANGED";
     [_msg] remoteExec ["hint", _player];
 };
 publicVariable "fnc_changeFaceServer";

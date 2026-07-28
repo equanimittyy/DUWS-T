@@ -78,7 +78,7 @@ while {_timer > 0 && count _waypoints < 3} do {
         } else {
             _marker setMarkerType "hd_objective";
             _marker setMarkerColor "ColorYellow";
-            _marker setMarkerText format ["LiftWP%1", count _waypoints];
+            _marker setMarkerText format [localize "STR_DUWS_T_liftwp_leg", count _waypoints];
         };
         _markers pushBack _marker;
 
