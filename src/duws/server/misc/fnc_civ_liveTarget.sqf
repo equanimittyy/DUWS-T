@@ -20,7 +20,7 @@ if (_raw <= 0) exitWith { 0 };
 // ceiling of two would put every solo town-to-town transition on the boundary and thin the moment
 // a second player existed. The third town's worth is the co-op headroom.
 //
-// Constraint on raising the density options past 30: every civilian gets its own group so it can
+// Constraint on raising the density options: every civilian gets its own group so it can
 // wander independently, and the engine stops issuing groups at roughly 144 per side. The top
 // option therefore has to stay under 48, or createGroup starts returning grpNull and towns
 // silently spawn nobody.

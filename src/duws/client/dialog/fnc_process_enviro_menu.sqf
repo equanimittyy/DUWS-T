@@ -52,7 +52,7 @@ switch (_index) do {
 // How many civilians one town holds while players are in it, capped by its own building count.
 // One town gets the figure in full; past a campaign-wide soft cap of three towns' worth the rest
 // are thinned proportionally, down to a floor of three apiece (fnc_civ_liveTarget).
-private _civDensityValues = [5, 10, 15, 20, 30];
+private _civDensityValues = [5, 10, 15, 20];
 private _index = lbCurSel 2102;
 private _selectedValue = 15; // 默认
 if (_index >= 0 && _index < count _civDensityValues) then {

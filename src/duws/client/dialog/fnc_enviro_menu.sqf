@@ -28,8 +28,8 @@ time_of_day_midnite = lbAdd [2101, localize "STR_DUWS_T_wmhmoeqt"];
 [2101, time_of_day_dawn] call _setDefault;
 
 // CIVILIAN DENSITY
-// 选项值：5, 10, 15, 20, 30，默认 15
-private _civDensityValues = [5, 10, 15, 20, 30];
+// 选项值：5, 10, 15, 20，默认 15
+private _civDensityValues = [5, 10, 15, 20];
 {
     private _index = lbAdd [2102, format ["%1", _x]];
     if (_x == 15) then { [2102, _index] call _setDefault; };

@@ -215,7 +215,7 @@ private _stage = {
 {
     [format ["liveTarget: density %1 fills three towns", _x],
         ([_x, 0] call fnc_civ_liveTarget), _x] call fnc_assertEq;
-} forEach [5, 10, 15, 20, 30];
+} forEach [5, 10, 15, 20];
 
 // The Altis survey registers two hamlets at 3 and 4 buildings and nothing else below 47, so the
 // population cap only ever binds on those two. Every real town takes the setting whole, and what

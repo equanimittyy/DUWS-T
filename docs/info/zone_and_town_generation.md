@@ -210,7 +210,7 @@ if the reset proves too cheap, raise tier strength rather than introducing parti
 `civ_pop_<n>` is set once at registration to the town's usable building count and never written
 again. It is a ceiling, not a head count: a town holds at most `min(civ_density, civ_pop_<n>)`
 civilians while players are in it, less if the campaign-wide throttle below applies. So
-`civ_density` (5–30, environment menu) is the dial a player turns down for frames, and the
+`civ_density` (5–20, environment menu) is the dial a player turns down for frames, and the
 building count is what stops a hamlet presenting as a city.
 
 Because the figure never decrements, nothing can reach zero, which is why the depopulation
@@ -249,7 +249,9 @@ reads as inhabited, and the overshoot tracks how many towns are occupied at once
 density setting. The grace period is what decides that count, which is why it is 60 s and not 300.
 The bound matters because every civilian holds its own group so it can wander independently, and
 the engine stops issuing groups at roughly 144 per side; past that `createGroup` returns `grpNull`
-and a fill produces nobody.
+and a fill produces nobody. That is why the top option is 20 and not 30: at 30 the tail reaches
+roughly 145 groups across six concurrent towns, which is level with the limit, where 20 tops out
+near 97 and leaves the setting safe at any number of towns a campaign can actually occupy.
 
 The throttle is applied at fill time and never revisited, so the order towns fill in decides who
 is thinned: the first town in keeps its full crowd while later ones are cut. Under the old model
