@@ -28,18 +28,11 @@ private _triggerRadius = _radii param [_locIndex, 500];
 if (_centerPos isEqualTo [0,0,0]) exitWith {
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Location %1 has zero position", _locIndex]] call fnc_log; };
 };
-private _locationName = if (text _location != "") then { text _location } else { format ["Unnamed%1", _locIndex] };
-
 // ============================================
 // 清理模式（延迟 60 秒）
 // ============================================
 if (_mode == "cleanup") exitWith {
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Requested for location %1, will execute in 60 seconds", _locIndex]] call fnc_log; };
-    private _currentPop = missionNamespace getVariable [format ["civ_pop_%1", _locIndex], 0];
-    if (_currentPop > 1) then {
-        private _message = format [localize "STR_DUWS_T_CIV_CLEANUP_WARNING", _locationName];
-        [_message] remoteExec ["hint", 0];
-    };
     private _pendingVar = format ["civ_pending_cleanup_%1", _locIndex];
     missionNamespace setVariable [_pendingVar, true];
 

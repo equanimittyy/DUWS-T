@@ -21,7 +21,12 @@ _buildings = _buildings select {!isNull _x && {_x isKindOf "Building"}};
 
 // Poses that need no prop. The crowd is placed by findSafePos and by building positions, so a
 // pose wanting a chair or a table would be played on open ground.
-private _idlePoses = ["STAND", "STAND_IA", "LEAN", "WATCH", "SMOKING"];
+//
+// Names are exact and unvalidated by the engine: BIS_fnc_ambientAnim has no SMOKING set and no
+// bare WATCH, only WATCH1 and WATCH2, and an unknown name leaves the civilian standing in the
+// default stance with nothing logged. The STAND_U variants are the unarmed idles, which is what
+// a civilian should be playing.
+private _idlePoses = ["STAND", "STAND_IA", "STAND_U1", "STAND_U2", "STAND_U3", "LEAN", "WATCH1", "WATCH2"];
 
 // Water is the one surface worth rejecting: an unreachable waypoint inland is left behind by the
 // timeout, but a coastal town will happily walk someone into the sea.

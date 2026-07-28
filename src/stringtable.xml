@@ -2526,11 +2526,6 @@
                 <English>Sorry, I don't have one.</English>
                 <Chinesesimp>维和？去你妈的！你得有多不要脸才能说出这几个字！</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_ASK_TOOLKIT_SUCCESS">
-                <Original>Toolbox received! Dropped nearby.</Original>
-                <English>Toolbox received! Dropped nearby.</English>
-                <Chinesesimp>获得工具箱！已放在附近。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_ASK_TOOLKIT_GRANT">
                 <Original>Take it. It's the only one we have.</Original>
                 <English>Take it. It's the only one we have.</English>
@@ -2545,11 +2540,6 @@
                 <Original>We've barely enough for our own. I can't help you.</Original>
                 <English>We've barely enough for our own. I can't help you.</English>
                 <Chinesesimp>滚开，你个罪犯！</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ASK_AID_SUCCESS">
-                <Original>Aid received! Medikit and dressings dropped nearby.</Original>
-                <English>Aid received! Medikit and dressings dropped nearby.</English>
-                <Chinesesimp>获得援助！医疗箱已放在附近。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_AID_GRANT">
                 <Original>Take it. It's not much, but it's what we have.</Original>
@@ -2580,13 +2570,6 @@
                 <Original>The map is already opening, please wait...</Original>
                 <English>The map is already opening, please wait...</English>
                 <Chinesesimp>正在打开地图，请稍等...</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_CIV_CLEANUP_WARNING">
-                <Original>%1 has been left unattended. Its people will disperse in 60 seconds — go back now to keep them there.
-(Only one town holds a population at a time.)</Original>
-                <English>%1 has been left unattended. Its people will disperse in 60 seconds — go back now to keep them there.
-(Only one town holds a population at a time.)</English>
-                <Chinesesimp>一位玩家已离开 %1 且 %1 将在 60 秒后重置。若想继续在 %1 活动，则需立刻返回。\n(为节约性能，同一时间只能有一个城镇生成平民)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_civ">
                 <Original>Local</Original>
@@ -2644,13 +2627,6 @@
                 <Spanish>¡Bien! ¡Siempre he querido matar a esos bastardos! (recibiendo los billetes)</Spanish>
                 <Chinesesimp>行，我一直都很想杀光那帮杂碎！(接过纸币)</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_RECRUIT_SUCCESS_HINT">
-                <Original>Civilian recruited successfully.</Original>
-                <English>Civilian recruited successfully.</English>
-                <German>Zivilist erfolgreich angeworben.</German>
-                <Spanish>Civil reclutado con éxito.</Spanish>
-                <Chinesesimp>平民招募成功。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_cycuqbvj">
                 <Original>Civilian Killed!</Original>
                 <English>Civilian Killed!</English>
@@ -2699,20 +2675,6 @@
                 <German>Verpiss dich!</German>
                 <Spanish>¡Jódete!</Spanish>
                 <Chinesesimp>...去你妈的！</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_HANDSUP_SUCCESS">
-                <Original>Civilian surrenders!</Original>
-                <English>Civilian surrenders!</English>
-                <German>Zivilist ergibt sich!</German>
-                <Spanish>¡Civil se rinde!</Spanish>
-                <Chinesesimp>平民举手投降！</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_HANDSUP_FAIL">
-                <Original>Civilian runs away!</Original>
-                <English>Civilian runs away!</English>
-                <German>Zivilist läuft weg!</German>
-                <Spanish>¡Civil huye!</Spanish>
-                <Chinesesimp>平民逃跑！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_LOOT1">
                 <Original>Sorry, just keeping order.</Original>
@@ -2790,13 +2752,6 @@
                 <German>Zur Hölle!</German>
                 <Spanish>¡Ve al infierno!</Spanish>
                 <Chinesesimp>去死吧！</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_LOOT_REVENGE_HINT">
-                <Original>Civilian pulled out a hidden weapon!</Original>
-                <English>Civilian pulled out a hidden weapon!</English>
-                <German>Zivilist zog eine versteckte Waffe!</German>
-                <Spanish>¡El civil sacó un arma oculta!</Spanish>
-                <Chinesesimp>平民掏出了隐藏起来的武器！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_townenter">
                 <Original>A player has entered %1</Original>
@@ -2944,13 +2899,6 @@
                 <Original>You lose 5% of CP and AP per kill</Original>
                 <English>You lose 5% of CP and AP per kill</English>
             </Key>
-            <Key ID="STR_DUWS_T_civpop">
-                <Spanish>Equipo de Acción, aquí es "Overlord". Podrían haber civiles en vuestra zona. Mantened la disciplina de fuego.</Spanish>
-                <German>Einsatzgruppe, hier ist "Overlord". Zivilisten könnten in eurem Bereich anwesend sein. Halten Sie die Feuersdisziplin ein.</German>
-                <Chinesesimp>行动组。你们的位置可能有平民出现，注意开火纪律。</Chinesesimp>
-                <Original>Alpha 1-1. Civilians may be present in your area. Maintain fire discipline.</Original>
-                <English>Alpha 1-1. Civilians may be present in your area. Maintain fire discipline.</English>
-            </Key>
             <Key ID="STR_DUWS_T_civpopR">
                 <Spanish>Action Squad, aquí "Overlord". Infección confirmada en tu zona. Se te permite abrir fuego contra los infectados a voluntad. Pero ten cuidado — la posibilidad de supervivientes no ha sido descartada.</Spanish>
                 <German>Action Squad, hier ist "Overlord". Infektion in Ihrem Gebiet bestätigt. Freies Feuer auf Infizierte genehmigt. Seien Sie vorsichtig — die Möglichkeit von Überlebenden ist nicht ausgeschlossen.</German>
@@ -2965,14 +2913,6 @@
             <Key ID="STR_DUWS_T_CIV_BRIBE_DECLINED">
                 <Original>Then we've got nothing to talk about. Move along.</Original>
                 <English>Then we've got nothing to talk about. Move along.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_CIV_CLOSED">
-                <Original>This local is done talking to you.</Original>
-                <English>This local is done talking to you.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_CIV_TOO_FAR">
-                <Original>Get closer to talk.</Original>
-                <English>Get closer to talk.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIV_MENU_TITLE">
                 <Original>Civilian Interaction</Original>
@@ -3048,13 +2988,6 @@
             </Key>
         </Container>
         <Container name="Informants">
-            <Key ID="STR_DUWS_T_nocpinf2">
-                <Original>Insufficient funds</Original>
-                <English>Insufficient funds</English>
-                <German>Nicht genug Geld</German>
-                <Spanish>Fondos insuficientes</Spanish>
-                <Chinesesimp>货币不足</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_stfu">
                 <Original>I haven't seen anything. Don't ask me again.</Original>
                 <English>I haven't seen anything. Don't ask me again.</English>
