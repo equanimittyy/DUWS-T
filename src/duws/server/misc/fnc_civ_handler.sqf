@@ -393,7 +393,6 @@ if (_mode == "spawn") then {
     } else {
         private _townName = text _location;
         private _enterMsg = format [localize "STR_DUWS_T_townenter", _townName];
-        [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_civpop"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
         ["info", [_enterMsg, localize "STR_DUWS_T_towninteract"]] remoteExec ["BIS_fnc_showNotification", 0];
     };
 

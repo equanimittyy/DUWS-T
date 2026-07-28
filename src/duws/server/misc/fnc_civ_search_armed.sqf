@@ -46,6 +46,5 @@ _unit doWatch _caller;
 _unit doTarget _caller;
 
 [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_LOOT_REVENGE"] remoteExec ["fnc_duws_dialogue", 0];
-[localize "STR_DUWS_T_LOOT_REVENGE_HINT"] remoteExec ["hint", 0];
 sleep 2;
 _unit commandFire _caller;

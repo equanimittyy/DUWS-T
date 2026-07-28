@@ -19,12 +19,8 @@ if (_bribe < 0) exitWith {
 // Both conditions below are the ones the menu greys client-side. Greying spares the player a
 // pointless click and decides nothing; these reads are what actually hold. Conversation range
 // matches the 3 m the menu greys at.
-if (_caller distance _civilian > 3) exitWith {
-    [localize "STR_DUWS_T_CIV_TOO_FAR"] remoteExec ["hint", _caller];
-};
-if (_civilian getVariable ["DUWS_civ_closed", false]) exitWith {
-    [localize "STR_DUWS_T_CIV_CLOSED"] remoteExec ["hint", _caller];
-};
+if (_caller distance _civilian > 3) exitWith {};
+if (_civilian getVariable ["DUWS_civ_closed", false]) exitWith {};
 
 // An offer already on the table is not re-rolled. Without this a player can leave the bribe
 // prompt open, pick the same row again, and roll until it comes back accept.

@@ -31,7 +31,6 @@ if (!_accepted) exitWith {
 // machine and in co-op two players can spend the same coins. fnc_coins_spend is the read that
 // decides, and it tests and deducts in one place so nothing lands between the two.
 if !([_caller, _bribe] call fnc_coins_spend) exitWith {
-    [localize "STR_DUWS_T_nocpinf2"] remoteExec ["hint", _caller];
     [_civilian, _caller, _row] call fnc_civ_close;
 };
 

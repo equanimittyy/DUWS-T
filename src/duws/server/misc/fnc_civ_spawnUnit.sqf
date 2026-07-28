@@ -19,10 +19,22 @@ if (isNull _unit) exitWith {
 // cleanup all find their units through it. Recruitment clears it, which is how a recruited
 // civilian leaves the system without any pass needing an exemption for it.
 _unit setVariable ["civ_locIndex", _locIndex];
+// Read by the waypoint pass and by the panic sweep, both of which have to tell the living from
+// the undead long after the flag that decided it has gone out of scope.
+_unit setVariable ["civ_isZombie", _isZombie];
 [_unit] call fnc_addCivilianMoney;
 [_unit, _isZombie, _unitType, 0] call fnc_applyEquipment;
 _unit addEventHandler ["Killed", missionNamespace getVariable "CIV_KILLED_HANDLER"];
 _unit addEventHandler ["HandleHeal", fnc_civ_healed];
+
+// Added on the server alone, so this is the only copy of the handler that exists. Zombies are
+// left out: a crowd of undead scattering from gunfire is not what the mode spawns them for.
+if (!_isZombie) then {
+    _unit addEventHandler ["FiredNear", {
+        params ["_unit", "_firer"];
+        [_unit, _firer] call fnc_civ_panic;
+    }];
+};
 
 // The unit as the JIP id throughout, never `true`: a recycled town creates and deletes civilians
 // for the whole campaign, and an auto-generated id would leave one queued message per unit for

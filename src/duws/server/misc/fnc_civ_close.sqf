@@ -26,7 +26,6 @@ private _line = switch (toUpper _row) do {
 
 if (!isNull _caller) then {
     [localize "STR_DUWS_T_civ", localize _line] remoteExec ["fnc_duws_dialogue", _caller];
-    [localize "STR_DUWS_T_CIV_CLOSED"] remoteExec ["hint", _caller];
 };
 
 // Walking off is the feedback that this person is finished with the player, and it is why a

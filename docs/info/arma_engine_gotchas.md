@@ -419,3 +419,26 @@ pose, not just the machine where the unit is local. The HQ officer in
 `server/init_hq/fnc_BluHQinit.sqf` does this, as does the barrier engineer in the same file. A
 posed unit left `allowDamage false` never reaches the failure, so the handler only becomes
 load-bearing the moment that unit is made killable — pair the two changes.
+
+## `reverse` returns Nothing, so it cannot be inlined — and `deleteWaypoint` shifts indices
+
+**`reverse` reverses an array in place and evaluates to Nothing, not to the reversed array. Any
+expression that consumes its result — `forEach (reverse _xs)`, `count (reverse _xs)` — is handed
+Nothing rather than a list, so the loop body never runs and no error names `reverse` as the
+cause.**
+
+This bites hardest next to `deleteWaypoint`, which is the usual reason to want a list backwards.
+Waypoints are addressed as `[group, index]`, and deleting one renumbers every later waypoint down
+by one. A forward pass over `waypoints _group` therefore deletes only every other waypoint: index
+0 goes, what was index 1 becomes index 0, and the loop moves on to index 1 — now the old index 2.
+Clearing a civilian's circuit that way leaves half of it in place, and the group walks off again
+mid-conversation.
+
+Both halves fail quietly. The forward-delete leaves a plausible-looking shorter list, and the
+inlined `reverse` leaves an empty loop; neither raises anything in the `.rpt`.
+
+**How to apply:** bind the array first, reverse it as its own statement, then iterate —
+`private _wps = waypoints _group; reverse _wps; { deleteWaypoint _x } forEach _wps;`. Iterating
+`for "_i" from (count _wps - 1) to 0 step -1` is equivalent and avoids `reverse` entirely.
+`fnc_civ_panic.sqf` and the `fnc_civ_moveToPlayerServer` block in `server/server_fnc_init.sqf`
+both do the bind-then-reverse form.

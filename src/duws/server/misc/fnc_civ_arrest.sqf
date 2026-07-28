@@ -1,9 +1,8 @@
 // Locality: server. The hands-up roll, moved off the client action it used to live on: a 90 %
 // chance a client owns is a 90 % chance a client can retry.
 //
-// Arrest is coercion, not a request. It rolls no reaction, takes no bribe, and works on a
-// civilian who has already refused to talk -- a town's opinion does not change whether a person
-// raises their hands.
+// Arrest is coercion, not a request: it rolls no reaction and takes no bribe. It is still one of
+// the exchanges a civilian only has one of, so a person who has already been talked to is spent.
 if (!isServer) exitWith {};
 
 params ["_civilian", "_caller"];
@@ -15,7 +14,12 @@ if (!alive _civilian) exitWith {};
 // clicked, so its 10 % runner could not be retried; a dialog row is redrawn on every open, and
 // without this flag the player holds the row until the 90 % lands, which makes both the
 // reputation hit and the escape free.
+//
+// The closed flag is re-read here and not just greyed client-side: the action is removed on every
+// machine when a civilian is spent, but a dialog already open when the flag lands still has its
+// row live, and the row only ever arrives over the wire.
 if (_civilian getVariable ["DUWS_civ_arrested", false]) exitWith {};
+if (_civilian getVariable ["DUWS_civ_closed", false]) exitWith {};
 _civilian setVariable ["DUWS_civ_arrested", true, true];
 
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_HANDSUP1"] remoteExec ["fnc_duws_dialogue", _caller];
@@ -38,7 +42,6 @@ if (random 1 < 0.9) then {
     // to everyone but the player who ordered the surrender.
     _civilian setVariable ["isSurrendered", true, true];
     [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_HANDSUP2"] remoteExec ["fnc_duws_dialogue", _caller];
-    [localize "STR_DUWS_T_HANDSUP_SUCCESS"] remoteExec ["hint", _caller];
     // PATH stays disabled: a surrendered civilian holds still until fnc_civ_search_armed either
     // releases them or arms them.
     [_civilian] remoteExec ["fnc_civ_search_action", 0];
@@ -46,5 +49,4 @@ if (random 1 < 0.9) then {
     _civilian enableAI "PATH";
     _civilian doMove ((getPos _civilian) getPos [50 + random 50, random 360]);
     [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_HANDSUP3"] remoteExec ["fnc_duws_dialogue", _caller];
-    [localize "STR_DUWS_T_HANDSUP_FAIL"] remoteExec ["hint", _caller];
 };

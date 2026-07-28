@@ -19,7 +19,7 @@ _civilian setVariable ["DUWS_civ_closed", true, true];
 // over to be picked up, and a persistent one would let a single friendly town furnish a squad's
 // repairs for the rest of the campaign. Returns the holder so a caller can load it further.
 private _fnc_hand = {
-    params ["_class", "_line", "_hint"];
+    params ["_class", "_line"];
     private _pos = getPosATL _civilian;
     private _item = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
     _item setPosATL [_pos select 0, _pos select 1, (_pos select 2) + 0.05];
@@ -30,7 +30,6 @@ private _fnc_hand = {
         if (!isNull _box) then { deleteVehicle _box };
     };
     [localize "STR_DUWS_T_civ", localize _line] remoteExec ["fnc_duws_dialogue", _caller];
-    [localize _hint] remoteExec ["hint", _caller];
     _item
 };
 
@@ -52,12 +51,12 @@ switch (toUpper _row) do {
     // Dressings alongside the medikit: a medikit is unusable without the medic trait, so a squad
     // without one got nothing it could actually spend out of the only favour this person does.
     case "AID": {
-        private _box = ["Item_Medikit", "STR_DUWS_T_ASK_AID_GRANT", "STR_DUWS_T_ASK_AID_SUCCESS"] call _fnc_hand;
+        private _box = ["Item_Medikit", "STR_DUWS_T_ASK_AID_GRANT"] call _fnc_hand;
         _box addItemCargoGlobal ["FirstAidKit", 3];
     };
 
     case "TOOLKIT": {
-        ["Item_Toolkit", "STR_DUWS_T_ASK_TOOLKIT_GRANT", "STR_DUWS_T_ASK_TOOLKIT_SUCCESS"] call _fnc_hand;
+        ["Item_Toolkit", "STR_DUWS_T_ASK_TOOLKIT_GRANT"] call _fnc_hand;
     };
 
 };

@@ -33,7 +33,7 @@ private _inRange = (player distance _civilian) <= 3;
     ctrlEnable [_x, !_closed && _inRange];
 } forEach [8340, 8341, 8342, 8343];
 
-// Arrest survives the closed flag: a town's opinion does not change whether a person raises
-// their hands, and refusing to talk is not protection from being detained. Its one-shot is its
-// own, spent on the attempt rather than on the outcome.
-ctrlEnable [8344, !(_civilian getVariable ["DUWS_civ_arrested", false])];
+// Arrest greys on the same flag rather than carrying a second life: one exchange is all a person
+// is worth, so talking to someone and then ordering their hands up is two. No range test, unlike
+// the rows above -- the whole point of the 15 m action is that it can be shouted from a standoff.
+ctrlEnable [8344, !_closed && !(_civilian getVariable ["DUWS_civ_arrested", false])];

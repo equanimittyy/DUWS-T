@@ -820,6 +820,9 @@ fnc_civ_mapView = compile preprocessFileLineNumbers "duws\client\misc\fnc_civ_ma
 publicVariable "fnc_civ_mapView";
 fnc_civ_rep_economy = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_rep_economy.sqf";
 fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_wp_Tomata.sqf";
+// Server-only, and deliberately not broadcast: the FiredNear handler that calls it is added on
+// this machine alone, and a client that could run it could scatter a town at will.
+fnc_civ_panic = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_panic.sqf";
 fnc_civ_rep_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_rep_Tomata.sqf";
 fnc_recruit_civilian = compile preprocessFileLineNumbers "duws\shared\functions\fnc_recruit_civilian.sqf";
 publicVariable "fnc_recruit_civilian";
@@ -882,8 +885,19 @@ fnc_civ_moveToPlayerServer = {
     // body so a client cannot open the menu on a local it never actually stopped.
     _unit setVariable ["DUWS_civ_stopped", true, true];
 
-    // 清除平民所在组的所有路点
-    { deleteWaypoint _x } forEach waypoints (group _unit);
+    // An idler is held in an ambient pose that owns their AI, so the doMove below is silently
+    // ignored until the pose is released -- the civilian stands and smokes through being called.
+    if (_unit getVariable ["civ_posed", false]) then {
+        [_unit] call BIS_fnc_ambientAnim__terminate;
+        _unit setVariable ["civ_posed", false];
+    };
+
+    // Back to front: deleteWaypoint shifts every later index down, so a forward pass over the
+    // list deletes every other waypoint and leaves the rest to pull the civilian away mid-walk.
+    // `reverse` cannot be inlined into the forEach -- it reverses in place and returns Nothing.
+    private _wps = waypoints (group _unit);
+    reverse _wps;
+    { deleteWaypoint _x } forEach _wps;
     _unit doMove (getPos _caller);
     _unit setBehaviour "AWARE";
     _unit setSpeedMode "NORMAL";
@@ -964,7 +978,6 @@ fnc_recruitSuccessServer = {
     
     // 提示执行者
     [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_RECRUIT_SUCCESS"] remoteExec ["fnc_duws_dialogue", _caller];
-    [localize "STR_DUWS_T_RECRUIT_SUCCESS_HINT"] remoteExec ["hint", _caller];
     [_target] joinSilent (group _caller);
 };
 publicVariable "fnc_recruitSuccessServer";

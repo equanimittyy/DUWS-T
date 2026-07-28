@@ -1,70 +1,112 @@
+// Locality: server -- both waypoints and ambient poses are ignored unless the group is local.
+/*
+    fnc_civ_wp_Tomata.sqf
+    Gives a freshly spawned crowd something to do: part of it stands and poses, the rest walks a
+    short circuit near where it spawned. Params: [_groups, _buildings].
+*/
 if (!isServer) exitWith {};
-_bldgUnits = _this select 0;
-_usableBuildings = _this select 1;
 
-// 过滤掉无效建筑（确保每个元素都是有效的建筑物对象）
-_usableBuildings = _usableBuildings select {!isNull _x && {_x isKindOf "Building"}};
+// Share of the crowd that poses instead of walking. A town where everyone is in motion reads as
+// an evacuation; one where nobody is reads as a waxworks.
+#define IDLE_SHARE 0.45
 
-// 如果没有有效建筑，则使用单位当前位置作为路点（避免崩溃）
-if (count _usableBuildings == 0) exitWith {
-    ["WARN", "CIV", "No valid buildings found, skipping waypoint assignment."] call fnc_log;
-    // 可选：给所有组添加一个简单的巡逻路点
-    {
-        _wp = _x addWaypoint [getPos (leader _x), 100];
-        _wp setWaypointType "CYCLE";
-        _wp setWaypointSpeed "NORMAL";
-        _wp setWaypointBehaviour "STEALTH";
-    } forEach _bldgUnits;
+// How far a walker's circuit reaches from where it spawned. Wide enough that two neighbours do
+// not trace the same path, short enough to keep the crowd in the cluster the spawn packed it
+// into -- waypoints drawn across the whole town are what had civilians jogging between postcodes.
+#define ROAM_RADIUS 60
+
+params ["_groups", "_buildings"];
+
+_buildings = _buildings select {!isNull _x && {_x isKindOf "Building"}};
+
+// Poses that need no prop. The crowd is placed by findSafePos and by building positions, so a
+// pose wanting a chair or a table would be played on open ground.
+private _idlePoses = ["STAND", "STAND_IA", "LEAN", "WATCH", "SMOKING"];
+
+// Water is the one surface worth rejecting: an unreachable waypoint inland is left behind by the
+// timeout, but a coastal town will happily walk someone into the sea.
+private _fnc_strollPos = {
+    params ["_origin"];
+    private _pos = _origin;
+    for "_i" from 1 to 6 do {
+        private _try = _origin getPos [10 + random (ROAM_RADIUS - 10), random 360];
+        if (!surfaceIsWater _try) exitWith { _pos = _try };
+    };
+    _pos
+};
+
+// Zombies keep the building-to-building hunt this function used to give everyone: a walking pace
+// and a smoke break are what a living town looks like, and neither reads as undead.
+private _fnc_hunt = {
+    params ["_group", "_buildings"];
+    if !(_buildings isEqualTo []) then {
+        for "_i" from 1 to 2 do {
+            private _building = selectRandom _buildings;
+            private _positions = [_building] call BIS_fnc_buildingPositions;
+            if (count _positions == 0) then { continue };
+            private _wp = _group addWaypoint [_building buildingPos (floor random count _positions), 2];
+            _wp setWaypointType "MOVE";
+            _wp setWaypointSpeed "NORMAL";
+            _wp setWaypointBehaviour "STEALTH";
+            _wp setWaypointCombatMode "GREEN";
+            _wp setWaypointTimeout [60, 90, 120];
+            _wp setWaypointCompletionRadius 15;
+        };
+    };
+    private _cycle = _group addWaypoint [getPos leader _group, 2];
+    _cycle setWaypointType "CYCLE";
+    _cycle setWaypointSpeed "NORMAL";
+    _cycle setWaypointBehaviour "STEALTH";
+    _cycle setWaypointCombatMode "GREEN";
+    _cycle setWaypointCompletionRadius 15;
 };
 
 {
-    // 选择一个有效建筑
-    private _building = selectRandom _usableBuildings;
-    private _positions = [_building] call BIS_fnc_buildingPositions;
-    // 如果建筑没有有效位置，跳过该组（但保留 CYCLE 路点）
-    if (count _positions == 0) then {
-        ["WARN", "CIV", format ["Building %1 has no positions, skipping waypoint for group.", _building]] call fnc_log;
+    private _group = _x;
+    private _unit = leader _group;
+    if (isNull _unit) then { continue };
+
+    if (_unit getVariable ["civ_isZombie", false]) then {
+        [_group, _buildings] call _fnc_hunt;
         continue;
     };
-    // 随机选择一个位置（排除最底层位置，确保在建筑内）
-    private _randPosIndex = floor random count _positions;
-    private _targetPos = _building buildingPos _randPosIndex;
-    
-    private _wp1 = _x addWaypoint [_targetPos, 2];
-    _wp1 setWaypointType "MOVE";
-    _wp1 setWaypointSpeed "NORMAL";
-    _wp1 setWaypointBehaviour "STEALTH";
-    _wp1 setWaypointCombatMode "GREEN";
-    _wp1 setWaypointTimeout [60, 90, 120];
-    _wp1 setWaypointCompletionRadius 15;
-} forEach _bldgUnits;
 
-// 添加第二个路点（同样逻辑）
-{
-    private _building = selectRandom _usableBuildings;
-    private _positions = [_building] call BIS_fnc_buildingPositions;
-    if (count _positions == 0) then {
-        ["WARN", "CIV", format ["Building %1 has no positions, skipping second waypoint.", _building]] call fnc_log;
+    // SAFE and LIMITED are the whole difference from the jog this replaces. SAFE keeps them
+    // upright instead of moving tactically, LIMITED is the walk; the pair was STEALTH and NORMAL,
+    // which is a crouching sprint and the reason the crowd looked panicked before anyone fired.
+    _group setBehaviour "SAFE";
+    _group setSpeedMode "LIMITED";
+
+    if (random 1 < IDLE_SHARE) then {
+        // Ambient poses rather than a raw switchMove: BIS_fnc_ambientAnim installs the handlers
+        // that break the animation on death, where a hand-rolled pose leaves the corpse standing
+        // upright and shrugging off hits. It owns the unit's AI until terminated, which is why
+        // the call-over has to release it before a doMove will take.
+        [_unit, selectRandom _idlePoses] call BIS_fnc_ambientAnim;
+        // Our own flag, not one of the function's internals: the call-over and the panic sweep
+        // both have to know whether there is a pose to release, and keying that on a variable
+        // BI sets privately would break silently the day it is renamed.
+        _unit setVariable ["civ_posed", true];
         continue;
     };
-    private _randPosIndex = floor random count _positions;
-    private _targetPos = _building buildingPos _randPosIndex;
-    
-    private _wp2 = _x addWaypoint [_targetPos, 2];
-    _wp2 setWaypointType "MOVE";
-    _wp2 setWaypointSpeed "NORMAL";
-    _wp2 setWaypointBehaviour "STEALTH";
-    _wp2 setWaypointCombatMode "GREEN";
-    _wp2 setWaypointTimeout [60, 90, 120];
-    _wp2 setWaypointCompletionRadius 15;
-} forEach _bldgUnits;
 
-// 添加循环路点（确保所有组至少有一个有效的循环点）
-{
-    private _wp3 = _x addWaypoint [getpos leader _x, 2];
-    _wp3 setWaypointType "CYCLE";
-    _wp3 setWaypointSpeed "NORMAL";
-    _wp3 setWaypointBehaviour "STEALTH";
-    _wp3 setWaypointCombatMode "GREEN";
-    _wp3 setWaypointCompletionRadius 15;
-} forEach _bldgUnits;
+    private _origin = getPos _unit;
+    for "_i" from 1 to (2 + floor random 2) do {
+        private _wp = _group addWaypoint [[_origin] call _fnc_strollPos, 0];
+        _wp setWaypointType "MOVE";
+        _wp setWaypointSpeed "LIMITED";
+        _wp setWaypointBehaviour "SAFE";
+        _wp setWaypointCombatMode "GREEN";
+        // Short and varied next to the flat minute the old waypoints held: the pause is what
+        // makes a walker read as someone going somewhere rather than a patrol on a loop.
+        _wp setWaypointTimeout [10, 30, 60];
+        _wp setWaypointCompletionRadius 5;
+    };
+
+    private _cycle = _group addWaypoint [_origin, 0];
+    _cycle setWaypointType "CYCLE";
+    _cycle setWaypointSpeed "LIMITED";
+    _cycle setWaypointBehaviour "SAFE";
+    _cycle setWaypointCombatMode "GREEN";
+    _cycle setWaypointCompletionRadius 5;
+} forEach _groups;
