@@ -11,7 +11,7 @@ _position = [_patrolCenter,50,_radius,5,0,0.5,0,[],[]] call BIS_fnc_findSafePos;
 _initGroup = [opfor_AR_SOLDIER_X,opfor_GL_SOLDIER_X];
 _multipliedGroup = [];
 if (enemyunitMultiplier < 0) then {enemyunitMultiplier = 1};
-for "_i" from 0 to (enemyunitMultiplier) step 1 do
+for "_i" from 0 to (enemyunitMultiplier - 1) step 1 do
 {
 	_multipliedGroup = _multipliedGroup + _initGroup;
 };

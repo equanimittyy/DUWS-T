@@ -15,7 +15,7 @@ _initGroup = [opfor_AR_SOLDIER_X,opfor_AT_SOLDIER_X,opfor_GL_SOLDIER_X, opfor_SP
 _multipliedGroup = [];
 if (enemyunitMultiplier < 0) then {enemyunitMultiplier = 1};
 
-for "_i" from 0 to (enemyunitMultiplier) step 1 do
+for "_i" from 0 to (enemyunitMultiplier - 1) step 1 do
     {
         _multipliedGroup = _multipliedGroup + _initGroup;
     };
