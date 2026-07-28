@@ -12,8 +12,10 @@ _position = [_patrolCenter,50,_radius,5,0,0.5,0,[],[]] call BIS_fnc_findSafePos;
 
 _initGroup = [opfor_SOLDIER_X,opfor_AR_SOLDIER_X];
 _multipliedGroup = [];
-if (enemyunitMultiplier < 0) then {enemyunitMultiplier = 1};
-for "_i" from 0 to (enemyunitMultiplier - 1) step 1 do
+// Local clamp: the setup menu broadcasts this once, so writing the global here would
+// corrupt every later build on this machine with no re-broadcast to repair it.
+private _mult = enemyunitMultiplier max 1;
+for "_i" from 0 to (_mult - 1) step 1 do
 {
 	_multipliedGroup = _multipliedGroup + _initGroup;
 };
