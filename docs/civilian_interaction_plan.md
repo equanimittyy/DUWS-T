@@ -240,7 +240,7 @@ twice.
 |---|---:|
 | Intel | 3 |
 | Recruit | 2 |
-| Supplies | 1 |
+| Supplies | 2 |
 | Arrest | — |
 
 **These are placeholders chosen to make the framework testable, not balanced figures.** They
@@ -249,6 +249,11 @@ at 1, pistol and optic at 5 — so intel sits between the two and recruit keeps 
 today. Intel is deliberately *not* inheriting the old ask-enemy price of 1: that bought a marker
 on a group within 700 m, inside spotting range, whereas the row now draws from the campaign-wide
 payout pool.
+
+Supplies is flat at 2 for both rows, which is the toolkit's old price rather than aid's. Aid was
+the cheaper of the two only because it was also the one that despawned, and that asymmetry is
+gone — pricing the pair at the survivor's figure keeps a medikit from being the cheapest thing a
+town can be asked for.
 
 **Expect the coin drain to fall against today's.** Every current action charges every time; here
 a bribe is asked roughly half the time at a neutral town and one time in ten at a friendly one.

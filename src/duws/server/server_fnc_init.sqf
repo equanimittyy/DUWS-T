@@ -264,8 +264,8 @@ fnc_civ_rowSpec = {
 	switch (toUpper _row) do {
 		case "INTEL": { ["INTEL", 3] };
 		case "RECRUIT": { ["RECRUIT", 2] };
-		case "AID": { ["SUPPLIES", 1] };
-		case "TOOLKIT": { ["SUPPLIES", 1] };
+		case "AID": { ["SUPPLIES", 2] };
+		case "TOOLKIT": { ["SUPPLIES", 2] };
 		default { ["", -1] };
 	};
 };

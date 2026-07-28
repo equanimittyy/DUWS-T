@@ -110,9 +110,9 @@ private _pct = { (_this call fnc_civ_reaction_weights) apply { round (_x * 100) 
 
 // The whole point of the pairing: one civilian gives aid or a toolkit, never both.
 ["rowSpec: aid takes the supplies slot",
-    (["AID"] call fnc_civ_rowSpec), ["SUPPLIES", 1]] call fnc_assertEq;
+    (["AID"] call fnc_civ_rowSpec), ["SUPPLIES", 2]] call fnc_assertEq;
 ["rowSpec: toolkit takes the same slot at the same price",
-    (["TOOLKIT"] call fnc_civ_rowSpec), ["SUPPLIES", 1]] call fnc_assertEq;
+    (["TOOLKIT"] call fnc_civ_rowSpec), ["SUPPLIES", 2]] call fnc_assertEq;
 
 ["rowSpec: case-insensitive", (["intel"] call fnc_civ_rowSpec), ["INTEL", 3]] call fnc_assertEq;
 
