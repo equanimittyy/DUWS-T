@@ -42,7 +42,15 @@ private _actionID = _unit addAction [
     true,
     true,
     "",
-    "_this distance _target < 40"
+    // Facing test on top of the range, because a walking crowd stands closer for longer than a
+    // jogging one did and 40 m of it put every passer-by in the scroll menu at once. getRelDir is
+    // 0 straight ahead and wraps through 360, so this is a 30 degree cone either side -- roughly
+    // "on screen" rather than an aim test. Horizontal only: looking over someone's head still
+    // counts, which is the intended slack.
+    //
+    // 20 m sits just outside the 15 m the interaction menu opens at, so calling someone over is
+    // still a thing you do before you can talk to them rather than a second way to do it.
+    "_this distance _target < 20 && {abs (180 - (_this getRelDir _target)) > 150}"
 ];
 
 _unit setVariable ["stopCommandActionID", _actionID];
