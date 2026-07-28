@@ -177,7 +177,7 @@ _target2 = units _group select 2;
 // Put an intel action on leader
 if (hardcore_mode_enable) then {
 	_leader = units _group select 0;
-	_code = {[getPos player] remoteExec ["fnc_intel_payout", 2]};
+	_code = {[getPos player, player] remoteExec ["fnc_intel_payout", 2]};
 	[_leader, "Search for Intel", "search", _code] spawn fnc_actionRotary;
 };
 

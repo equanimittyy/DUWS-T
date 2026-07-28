@@ -188,7 +188,7 @@ _allUnits = units _group;
 
 if (hardcore_mode_enable && count _allUnits > 0) then {
     _intelSoldier = selectRandom _allUnits;
-    _code = {[getPos player] remoteExec ["fnc_intel_payout", 2]};
+    _code = {[getPos player, player] remoteExec ["fnc_intel_payout", 2]};
     [_intelSoldier, "Search for Intel", "search", _code] spawn fnc_actionRotary;
 };
 

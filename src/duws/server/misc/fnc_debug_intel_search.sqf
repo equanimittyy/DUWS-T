@@ -28,7 +28,7 @@ private _hit = _roll < intel_search_chance;
 
 private _outcome = "MISS - no payout";
 if (_hit) then {
-    _outcome = if ([getPos _caller] call fnc_intel_payout) then {
+    _outcome = if ([getPos _caller, _caller] call fnc_intel_payout) then {
         format ["HIT - revealed %1", (_hiddenBefore - (call _fnc_hidden)) param [0, "?"]]
     } else {
         "HIT - but every payout pool is empty"

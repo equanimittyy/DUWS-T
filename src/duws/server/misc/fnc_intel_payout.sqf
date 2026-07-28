@@ -2,9 +2,10 @@
 // missions, and the civilian menu when it lands -- so what one piece of intel is worth is decided
 // in one file rather than at each faucet.
 //
-// Takes the position the intel was earned at, which only the town bucket uses. Returns true if
-// something was awarded, false if there was nothing left to give.
-params [["_origin", []]];
+// Takes the position the intel was earned at, which only the town bucket uses, and who earned it,
+// who is told when there is nothing left. Returns true if something was awarded, false if there
+// was nothing left to give.
+params [["_origin", []], ["_earner", objNull]];
 
 if (!isServer) exitWith {false};
 
@@ -37,7 +38,16 @@ if (count _from >= 2) then {
 };
 if !(_hiddenTowns isEqualTo []) then { _kinds pushBack "CIV" };
 
-if (_kinds isEqualTo []) exitWith {false};
+// The dry-pool line lives here rather than at each faucet because four of the six side-mission
+// sites hand their result to a remoteExec and never see the return value, so they could not speak
+// it. A null earner is a faucet with no one player to tell -- a mission completing is everyone's
+// news -- and Overlord carries it there.
+if (_kinds isEqualTo []) exitWith {
+    private _speaker = if (isNull _earner) then { localize "STR_DUWS_T_OVERLORD" } else { name _earner };
+    private _audience = if (isNull _earner) then { 0 } else { _earner };
+    [_speaker, localize "STR_DUWS_T_8skllpyx"] remoteExec ["fnc_duws_dialogue", _audience];
+    false
+};
 
 private _awarded = false;
 switch (selectRandom _kinds) do {

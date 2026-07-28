@@ -192,7 +192,7 @@ switch (VERSION_X) do {
 
 // Put an intel action on LAPTOP
 if (hardcore_mode_enable) then {
-    _code = {[getPos player] remoteExec ["fnc_intel_payout", 2]};
+    _code = {[getPos player, player] remoteExec ["fnc_intel_payout", 2]};
     [_laptop, localize "STR_DUWS_T_7yec9ifj", "search", _code] spawn fnc_actionRotary;
 };
 ["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", 0];

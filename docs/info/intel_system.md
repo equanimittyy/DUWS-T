@@ -83,6 +83,19 @@ draw. Drawing from every zone and then testing whether it happened to be hidden 
 replaced — makes the real odds decay as a campaign progresses, because late on most winning rolls
 land on ground already found.
 
+**A dry bucket drops out of the draw, not out of the feature.** `_kinds` is rebuilt from what has
+stock on every call, so the last zone being found silently turns the coin flip into towns-only and
+nothing latches. When every bucket is empty the payout speaks *"Nothing we don't already know"*
+itself rather than returning quietly: four of the six side-mission sites hand their result to a
+`remoteExec` and never see the return value, so a line spoken at each faucet is a line four of
+them cannot say. It goes to the earner where there is one, and from Overlord to everyone where
+there is not, because a mission completing is everyone's news.
+
+Only hardpoints can refill a dry pool — they are the one kind OPFOR build during play
+([§What is hidden](#what-is-hidden-depends-on-when-it-came-into-existence)). Zones and towns are
+generated once, so once found they are found for the campaign, and today that means the pool goes
+dry permanently.
+
 The town bucket needs somewhere to measure from, so every faucet passes an origin in. The body
 search and the four hold-action sites have a player to ask; the two rescue missions pay out from
 a server thread that has none, so they pass the mission site, the ground the rescue was fought
