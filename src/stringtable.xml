@@ -1450,8 +1450,8 @@
                 <German>Errichte eine FOB</German>
                 <Spanish>Estableciendo puesto de avanzada</Spanish>
                 <Chinesesimp>建立一个FOB</Chinesesimp>
-                <Original>Establishing a FOB.</Original>
-                <English>Establishing a FOB.</English>
+                <Original>Establishing a FOB</Original>
+                <English>Establishing a FOB</English>
             </Key>
             <Key ID="STR_DUWS_T_pj31ugj0">
                 <German>Das System sucht eine sichere Position für Missionsobjekte. Bitte warten...</German>
@@ -1994,8 +1994,8 @@
                 <Spanish>Arsenal completo disponible.</Spanish>
                 <German>Vollständiges Arsenal verfügbar.</German>
                 <Chinesesimp>有可用的完整军火库</Chinesesimp>
-                <Original>Full arsenal available.</Original>
-                <English>Full arsenal available.</English>
+                <Original>Full arsenal available</Original>
+                <English>Full arsenal available</English>
             </Key>
             <Key ID="STR_DUWS_T_xnjhk2">
                 <Spanish>Los objetos clave de esta misión incluyen un arsenal completo de un solo uso. ¡No olvides usarlos!</Spanish>
@@ -2015,8 +2015,8 @@
                 <Spanish>El arsenal de un solo uso ha sido consumido.</Spanish>
                 <German>Einmal-Arsenal wurde verbraucht.</German>
                 <Chinesesimp>一次性军火库被消耗</Chinesesimp>
-                <Original>One-time arsenal has been consumed.</Original>
-                <English>One-time arsenal has been consumed.</English>
+                <Original>One-time arsenal has been consumed</Original>
+                <English>One-time arsenal has been consumed</English>
             </Key>
         </Container>
         <Container name="Enemy Disguise">
@@ -2070,8 +2070,8 @@
                 <Chinesesimp>你不能使用与上次完全相同的背心和头盔，请更换伪装装备后再试。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ACTION">
-                <Original>Disguise as OPFOR.</Original>
-                <English>Disguise as OPFOR.</English>
+                <Original>Disguise as OPFOR</Original>
+                <English>Disguise as OPFOR</English>
                 <Chinesesimp>伪装成敌人</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ACTIVATED">
@@ -2676,8 +2676,8 @@
                 <Chinesesimp>平民被杀了！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_civloot">
-                <Original>A civilian is being frisked by a player.</Original>
-                <English>A civilian is being frisked by a player.</English>
+                <Original>A civilian is being frisked by a player</Original>
+                <English>A civilian is being frisked by a player</English>
                 <German>Ein Zivilist wird von einem Spieler durchsucht.</German>
                 <Spanish>Un civil está siendo registrado por un jugador.</Spanish>
                 <Chinesesimp>一个平民正被玩家搜身</Chinesesimp>
@@ -2849,8 +2849,8 @@
                 <Chinesesimp>劝说平民撤离</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_RECRUIT_SUCCESS2">
-                <Original>Civilian evacuation successful.</Original>
-                <English>Civilian evacuation successful.</English>
+                <Original>Civilian evacuation successful</Original>
+                <English>Civilian evacuation successful</English>
                 <Chinesesimp>平民撤离成功</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_RECRUIT_SUCCESS_MSG">
@@ -3343,8 +3343,8 @@
                 <English>Search for enemy positions</English>
             </Key>
             <Key ID="STR_DUWS_T_SEARCH_CORPSE">
-                <Original>Search the body.</Original>
-                <English>Search the body.</English>
+                <Original>Search the body</Original>
+                <English>Search the body</English>
                 <German>Nach Geheimdienstinformationen suchen</German>
                 <Spanish>Buscar inteligencia</Spanish>
                 <Chinesesimp>搜索尸体</Chinesesimp>
@@ -4991,8 +4991,8 @@
                 <German>Fahrzeugrecyclingstation</German>
                 <Spanish>Estación de Reciclaje de Vehículos</Spanish>
                 <Chinesesimp>载具回收站</Chinesesimp>
-                <Original>Vehicle Recycling Station.</Original>
-                <English>Vehicle Recycling Station.</English>
+                <Original>Vehicle Recycling Station</Original>
+                <English>Vehicle Recycling Station</English>
             </Key>
             <Key ID="STR_DUWS_T_huishouzaijv">
                 <German>Fahrzeug recyceln</German>
@@ -5355,8 +5355,8 @@
                 <German>Baue Mobiles HQ</German>
                 <Spanish>Construir Cuartel General móvil</Spanish>
                 <Chinesesimp>建立机动指挥部</Chinesesimp>
-                <Original>Build Mobile HQ.</Original>
-                <English>Build Mobile HQ.</English>
+                <Original>Build Mobile HQ</Original>
+                <English>Build Mobile HQ</English>
             </Key>
             <Key ID="STR_DUWS_T_zfwwi081">
                 <German>HC CAP Flugzeug (25CP) Funk</German>
@@ -5397,8 +5397,8 @@
                 <German>MHQ ist nicht leer</German>
                 <Spanish>El CGM no está vacío</Spanish>
                 <Chinesesimp>机动指挥部不是空的</Chinesesimp>
-                <Original>MHQ is not empty.</Original>
-                <English>MHQ is not empty.</English>
+                <Original>MHQ is not empty</Original>
+                <English>MHQ is not empty</English>
             </Key>
             <Key ID="STR_DUWS_T_bnw9muay">
                 <German>Besatzung muss absitzen um das MHQ aufzubauen</German>
@@ -5460,8 +5460,8 @@
                 <German>Zu viele Unterstützungen</German>
                 <Spanish>Demasiados apoyos</Spanish>
                 <Chinesesimp>已有的支援太多了</Chinesesimp>
-                <Original>Too Many Active Supports.</Original>
-                <English>Too Many Active Supports.</English>
+                <Original>Too Many Active Supports</Original>
+                <English>Too Many Active Supports</English>
             </Key>
             <Key ID="STR_DUWS_T_iadwwap5">
                 <German>Du hast keine weiteren Funk-Unterstüztungs Plätze mehr verfügbar. MAX = 8</German>
@@ -6902,8 +6902,8 @@
                 <Chinesesimp>命令所有待命中的特遣队开始进攻</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_no_standby_tf">
-                <Original>No standby task forces.</Original>
-                <English>No standby task forces.</English>
+                <Original>No standby task forces</Original>
+                <English>No standby task forces</English>
                 <Chinesesimp>没有待命的特遣队</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_no_standby_tf_desc">
@@ -6922,8 +6922,8 @@
                 <Chinesesimp>所有待命中的特遣队已收到进攻命令。任务可以开始。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_taskforces_launched_title">
-                <Original>Attack order issued.</Original>
-                <English>Attack order issued.</English>
+                <Original>Attack order issued</Original>
+                <English>Attack order issued</English>
                 <Chinesesimp>进攻命令已下达</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_taskforces_launched_desc">
@@ -7506,8 +7506,8 @@
                 <Spanish>Demaciados PdA</Spanish>
                 <German>Zu viele FOBs</German>
                 <Chinesesimp>FOB太多了</Chinesesimp>
-                <Original>Too many FOBs.</Original>
-                <English>Too many FOBs.</English>
+                <Original>Too many FOBs</Original>
+                <English>Too many FOBs</English>
             </Key>
             <Key ID="STR_DUWS_T_6vjxo4eb">
                 <Spanish>PdA máximos: %1 (50% de las zonas enemigas) - Intenta borrar alguno.</Spanish>
@@ -8312,8 +8312,8 @@
                 <German>Der Feind zerstörte die FOB - </German>
                 <Spanish>El enemigo ha destruído un puesto de avanzada</Spanish>
                 <Chinesesimp>敌军摧毁了FOB</Chinesesimp>
-                <Original>The enemy destroyed a FOB.</Original>
-                <English>The enemy destroyed a FOB.</English>
+                <Original>The enemy destroyed a FOB</Original>
+                <English>The enemy destroyed a FOB</English>
             </Key>
             <Key ID="STR_DUWS_T_fobdown">
                 <German>Hier ist "Overlord 1-1". Einer unserer FOBs wurde zerstört.</German>
