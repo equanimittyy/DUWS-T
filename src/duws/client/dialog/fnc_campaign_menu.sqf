@@ -140,7 +140,7 @@ index_opfor_AT_no_no = lbAdd [2112, localize "STR_DUWS_T_ps661jx6"];
 index_enemyunit_multiplier_1 = lbAdd [2113, "1x"];
 index_enemyunit_multiplier_2 = lbAdd [2113, "2x"];
 index_enemyunit_multiplier_3 = lbAdd [2113, "3x"];
-[2113, index_enemyunit_multiplier_2] call _setDefault;
+[2113, index_enemyunit_multiplier_1] call _setDefault;
 
 // Restore selections when the player returns to this screen via the Back button.
 if (!isNil "duws_campaign_sel") then {

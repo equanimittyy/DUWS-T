@@ -161,7 +161,7 @@ createzone_server = false;publicVariable "createzone_server";
 enable_fast_travel = true;publicVariable "enable_fast_travel";
 
 // Opfor zone/mission patrol size
-enemyunitMultiplier = 2;publicVariable "enemyunitMultiplier";
+enemyunitMultiplier = 1;publicVariable "enemyunitMultiplier";
 
 // failsafe for Random zones
 failsafe_zones_not_found1 = false;//publicVariable "failsafe_zones_not_found1";
