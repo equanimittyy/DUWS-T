@@ -3691,20 +3691,6 @@
                 <Original>AP Bonus received!</Original>
                 <English>AP Bonus received!</English>
             </Key>
-            <Key ID="STR_DUWS_T_xcp0muo6">
-                <German>CP Bonus: Zonen unter Kontrolle</German>
-                <Chinesesimp>CP点：控制战区</Chinesesimp>
-                <Spanish>Bonificación de CP: Zonas bajo control</Spanish>
-                <Original>CP Bonus: Zones under control</Original>
-                <English>CP Bonus: Zones under control</English>
-            </Key>
-            <Key ID="STR_DUWS_T_08rz2z3k">
-                <German>Zusätzliche CP und AP für die Kontrolle über %2 Zonen erhalten</German>
-                <Chinesesimp>收到控制 %2 个战区的额外CP点 </Chinesesimp>
-                <Spanish>Recividos CP adicionales por controlar %2 zonas</Spanish>
-                <Original>Received additional CP for controlling %2 zones</Original>
-                <English>Received additional CP for controlling %2 zones</English>
-            </Key>
         </Container>
         <Container name="Zones &amp; Campaign Flow">
             <Key ID="STR_DUWS_T_heli_moving">
@@ -3748,13 +3734,6 @@
                 <German>Action Squad an "Overlord 1-1", wir sind in Position.</German>
                 <Spanish>Action Squad a "Overlord 1-1", estamos en posición.</Spanish>
                 <Chinesesimp>"霸王1-1"，我们到了。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_zonesundercontrol">
-                <German>Hier ist "Overlord 1-1". Eure harte Arbeit hat sich ausgezahlt.</German>
-                <Spanish>Aquí es "Overlord 1-1". Vuestro duro trabajo ha dado frutos.</Spanish>
-                <Chinesesimp>看来你们的辛苦工作有了回报。</Chinesesimp>
-                <Original>The zones you hold are generating command points. Keep them secure.</Original>
-                <English>The zones you hold are generating command points. Keep them secure.</English>
             </Key>
             <Key ID="STR_DUWS_T_econtickreport">
                 <Original>This is Overlord. We've received %1 CP and %2 AP from held territory. Keep it up.</Original>

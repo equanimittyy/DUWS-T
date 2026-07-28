@@ -123,8 +123,8 @@ figure, which is a wrong number rather than an untranslated one.
 
 | Source | File | Amount |
 |---|---|---|
-| Zone capture (first time) | `server/init_zones/fnc_captured.sqf:42` | `round(points/2)` — ≈50 for a 1000 m zone |
-| Zone recapture (after loss) | `server/init_zones/fnc_blufor_cap.sqf:55` | `round(points/3)` — ≈33; intentionally lower |
+| Zone capture (first time) | `server/init_zones/fnc_captured.sqf:44` | `round(points/2)` — ≈50 for a 1000 m zone |
+| Zone recapture (after loss) | `server/init_zones/fnc_blufor_cap.sqf:56` | `round(points/3)` — ≈33; intentionally lower |
 | Passive territory hold | `server/misc/fnc_zonesundercontrol.sqf:11,32` | `zones_held × 6`, every 30 min |
 | Side-mission reward | `server/missions/fnc_mission_reward.sqf` | `reward × cp_reward_multiplier` (multiplier default 1) |
 | Reputation tick | `server/misc/fnc_civ_rep_economy.sqf` | `ceil(rep/2)`, every 15 min |
@@ -139,16 +139,24 @@ figure, which is a wrong number rather than an untranslated one.
 | Rare-zombie kill (WBK) | `server/misc/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | AP→CP conversion | `client/dialog/fnc_convertAPtoCP.sqf` | 15 AP → 10 CP, one-way |
 
+**A zone's `_points` is its permanent worth, and no owner may reassign it.** The value is seeded
+by `fnc_createzone.sqf:278`, recorded in `zone_meta_array`, and handed to each successive owner's
+trigger — `fnc_captured.sqf` → `fnc_opfor_cap.sqf` → `fnc_blufor_cap.sqf` and round again. Each
+payout therefore derives its own figure (`_cpreward`, `_opfreward`) and leaves `_points` alone.
+Dividing it in place, as the CP awards once did, compounded around that loop: a zone changing
+hands repeatedly decayed toward paying nothing in either currency while the registry still
+recorded its original worth.
+
 The passive-hold loop is spawned exactly once (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:20`), so
 territory income does not stack per zone captured. It is also the campaign's single economy
 clock: territory CP, town AP and kill income are all paid from the same 30-minute iteration.
 Equal nominal periods are not one clock — a suspended thread resumes when the scheduler reaches
 it, so separate loops accrue their own slop and walk apart. The tick reports itself in one
-Overlord line carrying the period's whole BLUFOR take, CP and AP; the only per-faucet popup left
-is the personal kill award, which is the one figure the campaign total cannot show a player.
-Only the territory CP is gated on
-`zoneundercontrolblu > 0` — AP pays unconditionally, since the enemy banking its towns while the
-player holds nothing is the case the town economy exists to model.
+Overlord line carrying the territory take, CP and AP. Kill income is paid on the same tick but
+kept out of that figure and announced only to the player who earned it: naming attrition in a
+campaign-wide report would advertise kill farming as an income route. Only the territory CP is
+gated on `zoneundercontrolblu > 0` — AP pays unconditionally, since the enemy banking its towns
+while the player holds nothing is the case the town economy exists to model.
 
 Each iteration bumps `econ_tick`, the clock's sequence number. Anything wanting a "once per
 payout window" cap keys off that rather than starting a timer of its own — `fnc_civ_healed.sqf`

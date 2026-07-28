@@ -32,19 +32,20 @@ while {true} do {
     if (_blu > 0) then { ["BLU", _blu, "civ_town_income"] call fnc_ap_adjust };
     if (_opf > 0) then { ["OPF", _opf, "civ_town_income"] call fnc_ap_adjust };
 
-    // Each player is notified of their own kill award inside the sweep; what comes back is the
-    // campaign figure for Overlord's tally below.
-    private _cp = call fnc_kill_income_sweep;
+    // Pays and notifies each player its own kill award; deliberately absent from Overlord's
+    // report below, which speaks for territory only. Naming attrition there would advertise
+    // kill farming as an income route.
+    call fnc_kill_income_sweep;
 
+    private _cp = 0;
     if (zoneundercontrolblu > 0) then {
-        private _territory = zoneundercontrolblu * 6;
-        [_territory, "territory_income"] remoteExec ["fnc_cp_adjust", 2];
-        _cp = _cp + _territory;
+        _cp = zoneundercontrolblu * 6;
+        [_cp, "territory_income"] remoteExec ["fnc_cp_adjust", 2];
     };
 
-    // One line for the whole period's take, in place of a notification per faucet: three
-    // popups landing on the same frame read as spam, and only the total tells the player
-    // whether the last thirty minutes were worth anything.
+    // One line for what territory earned, in place of a notification per faucet: popups
+    // landing on the same frame read as spam, and the total is what tells the player whether
+    // holding ground is paying.
     if (_cp > 0 || {_blu > 0}) then {
         [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_econtickreport", _cp, _blu]]
             remoteExec ["fnc_duws_dialogue", 0];

@@ -37,8 +37,11 @@ if (hardcore_mode_enable) then {
 };
 
 // ADD COMMAND POINTS  1000m zone = 100 / 2 = 50 pts available
-_points = round(_points/2);
-[_points, "zone_first_capture"] remoteExec ["fnc_cp_adjust", 2];
+// Derived, never assigned back into _points: the zone's worth is handed to the next owner's
+// trigger below and round-trips through fnc_opfor_cap to fnc_blufor_cap, so dividing it in
+// place shrank the zone every time it changed hands until a contested one paid nothing.
+_cpreward = round(_points/2);
+[_cpreward, "zone_first_capture"] remoteExec ["fnc_cp_adjust", 2];
 
 // MODIFY ARMY POWER - OPF gains 1/2 the points, BLU gains full points
 _opfreward = round(_points/2);
@@ -69,4 +72,4 @@ if (!isNull _trg) then {
     _trg setTriggerStatements ["this", format["[""%1"",%2,""%3"",""%4"",%5,%6] spawn fnc_opfor_cap", _place, _points, _markername, _markername2, _triggerPos, _radius], ""];
 };
 
-["cpadded",[_points,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
+["cpadded",[_cpreward,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];

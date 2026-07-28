@@ -50,10 +50,12 @@ str(_markername) setMarkerColor "ColorGreen";
 str(_markername2) setMarkerColor "ColorGreen";
 
 // ADD POINTS
-_points = round(_points/3);
-[_points, "zone_recapture"] remoteExec ["fnc_cp_adjust", 2];
+// Derived, never assigned back into _points: the zone's worth passes to the trigger below and
+// on to the next owner, so dividing it in place compounded each time the zone changed hands.
+_cpreward = round(_points/3);
+[_cpreward, "zone_recapture"] remoteExec ["fnc_cp_adjust", 2];
 
-["CPadded",[_points,""]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated,false];
+["CPadded",[_cpreward,""]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated,false];
 
 // ========== 修复：使用统一的变量名获取旗杆并变色 ==========
 if (VERSION_X == "MODERN" || simple_zones_enable) then {
