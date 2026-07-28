@@ -103,17 +103,36 @@ only the outcome differs, and that is rolled on the server when a row is picked.
 the question the per-town plan left open about broadcasting town state: nothing has to be
 broadcast, because no client-side decision depends on it.
 
-**Consent to the bribe is the click, not a second prompt.** A row reads `Ask about enemy
-positions (up to 3 coins)`, so picking it agrees to pay if the roll asks. The alternative — a
-reply variable carrying the demand back, a confirm dialog, then a second call — is the purchase
-handshake's shape and doubles the round trips for a decision the player already made by opening
-the menu. Not having enough coins when the roll says bribe is treated as a declined bribe, so
-the civilian closes.
+**Rows carry no price, and a bribe gets its own prompt.** The reaction is unknown until the
+roll, so a price on the row would be a guess at a demand that arrives two thirds of the time at
+best. Picking a row is therefore free of commitment; if the roll comes back `bribe`, a second
+dialog states the amount and the player answers it.
+
+The prompt carries three things: the demand, an **In Inventory: X** readout of the player's
+`Money_roll` count, and Accept / Refuse. Accept is disabled — `ctrlEnable [idc, false]` — when
+the count falls short, so an unaffordable demand reads as unaffordable instead of failing on
+click. The inventory line goes on the main menu too; it is the same count and it is what the
+player needs to decide anything.
+
+Chaining a second dialog is the established shape here: `squadmng.hpp:104` closes itself and
+opens `squad_rename_dialog` the same way.
+
+**The greyed button is advisory, and the server re-checks.** The count comes from
+`magazines player` on the client, which is a snapshot the server has no reason to trust — in
+co-op two players can spend the same coins. The deduction stays server-side and refuses on its
+own read, exactly as [`info/cp_economy.md`](info/cp_economy.md) describes for the client-side CP
+pre-filters. Greying the button spares the player a pointless click; it decides nothing.
+
+Refusing, and being unable to pay, both close the civilian. That rule does not soften now the
+amount is visible: what the prompt buys the player is knowing the price before they lose the
+contact, not a free look.
 
 ## Open questions
 
-- The bribe amount, and whether it is flat or scales with reputation. The curve settles *when*
-  money is asked for, not how much.
+- The bribe amount is a single static constant for now, deliberately not scaled by reputation:
+  the curve already carries the reputation signal by deciding *whether* money is asked for, and
+  a second reputation term in the amount would double-count it. The value itself is unmeasured
+  — the actions it replaces ranged from 1 to 5 coins.
 - The intel offers themselves. Revealing a zone is cheap to build — `fnc_zone_reveal` exists and
   the ambient informant already calls it. Marking a patrol route or warning of an incoming
   WARCOM wave would need hooks into the director that do not exist yet.
