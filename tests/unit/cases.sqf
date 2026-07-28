@@ -70,3 +70,36 @@ private _net = ["Allseer 1-1", "Express 2-1", "Viper 1-5", "Delta 3-2", "Koi 1-1
 // Fail loud: an unlisted callsign must reach the surface the player is looking at.
 ["dialogue_channel: an unknown callsign defaults to VOICE",
     (["Havoc 6-1", _net] call fnc_duws_dialogue_channel), "VOICE"] call fnc_assertEq;
+
+// --- fnc_civ_reaction_weights: the civilian request curve ---
+// Asserted as whole percents: the weights are floats, and str-comparing them would be testing
+// the VM's formatting rather than the curve.
+private _pct = { (_this call fnc_civ_reaction_weights) apply { round (_x * 100) } };
+
+[ "reaction: -20 is 0/10/90",  (-20 call _pct), [0, 10, 90] ] call fnc_assertEq;
+[ "reaction: -10 is 17/22/62", (-10 call _pct), [17, 22, 62] ] call fnc_assertEq;
+[ "reaction: 0 is an even split", (0 call _pct), [33, 33, 33] ] call fnc_assertEq;
+[ "reaction: +10 is 62/22/17", (10 call _pct), [62, 22, 17] ] call fnc_assertEq;
+[ "reaction: +20 is 90/10/0",  (20 call _pct), [90, 10, 0] ] call fnc_assertEq;
+
+// Reputation is clamped to +-20 by fnc_town_rep_adjust, but the global Player_Reputation
+// fallback is not, so out-of-range input must saturate rather than run the line past its ends
+// into a negative weight.
+[ "reaction: below -20 saturates", (-100 call _pct), (-20 call _pct) ] call fnc_assertEq;
+[ "reaction: above +20 saturates", (100 call _pct), (20 call _pct) ] call fnc_assertEq;
+
+// The roll picks by walking the three weights, so anything that fails to sum to 1 silently
+// biases the last branch.
+{
+    private _w = _x call fnc_civ_reaction_weights;
+    [format ["reaction: weights at %1 sum to 1", _x],
+        round (((_w select 0) + (_w select 1) + (_w select 2)) * 1000), 1000] call fnc_assertEq;
+} forEach [-20, -13, -7, 0, 3, 11, 20];
+
+// No weight may go negative: a negative bribe would make the tent an inverted V and hand the
+// remainder to refuse at exactly the reputations the player worked for.
+{
+    private _w = _x call fnc_civ_reaction_weights;
+    [format ["reaction: no negative weight at %1", _x],
+        (_w findIf { _x < 0 }), -1] call fnc_assertEq;
+} forEach [-20, -15, -5, 0, 5, 15, 20];

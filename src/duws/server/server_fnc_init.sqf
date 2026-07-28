@@ -224,6 +224,28 @@ fnc_civ_repAt = {
 	}
 };
 
+// How a town reacts to a request: [accept, bribe, refuse], summing to 1. Split out of the roll
+// that consumes it so the curve is unit-testable -- the rest of the request path needs the
+// engine, this needs nothing.
+//
+// Piecewise linear with a kink at zero, because accept climbs faster above neutral than below
+// it. Bribe is the remainder, a symmetric tent peaking at neutral: a town that neither likes
+// nor hates the player is where money talks loudest, and at both extremes standing decides
+// instead of coins. Neither end is a wall -- a town at -20 still takes a bribe one time in ten,
+// so ground the player has ruined is expensive rather than closed.
+fnc_civ_reaction_weights = {
+	params [["_rep", 0]];
+	private _t = ((_rep / 20) max -1) min 1;
+	private _fnc_accept = {
+		if (_this <= 0) then { (1 + _this) / 3 } else { (1/3) + _this * (0.9 - 1/3) }
+	};
+	private _accept = _t call _fnc_accept;
+	// Refuse is accept's exact mirror, so the curve cannot drift out of symmetry by being
+	// written twice.
+	private _refuse = (-_t) call _fnc_accept;
+	[_accept, 1 - _accept - _refuse, _refuse]
+};
+
 // Repaints one town's ellipse and icon from civ_town_rep. The band is the only writer of the
 // ellipse colour -- depopulation used to paint it black and that path is gone -- so nothing
 // races this. setMarkerColor takes an inline #(r,g,b,a) string as well as a CfgMarkerColors
