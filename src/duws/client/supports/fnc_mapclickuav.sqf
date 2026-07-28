@@ -15,27 +15,40 @@ if (commandpointsblu1 < _cost) exitWith {
 	[player,"uav_recon"] call BIS_fnc_addCommMenuItem;
 };
 
-switch (VERSION_X) do {
-	case "MODERN": {
-		hint localize "STR_DUWS_T_01np5zjk";
-	};
-};	
-
-// _cost rides the binary form so the handler can read the price out of _this.
+// _cost rides the binary form so the handler can read the price out of _this. It releases
+// before closing the map, because the banner the release clears lives on the map display, and
+// hints only after, because the hint box renders behind it.
 if (!(["UAV", "[_pos,500,_this,player] remoteExec ['fnc_uav_scanner', 2];
 	clicked=true;
 	['UAV'] call fnc_mapclick_release;
+	openMap false;
 	hint localize 'STR_DUWS_T_6u8qilfh'", _cost] call fnc_mapclick_claim)) exitWith {
 	// The comm-menu entry is consumed on selection, so a refusal has to hand it back.
 	[player,"uav_recon"] call BIS_fnc_addCommMenuItem;
 };
 
+// Opened here rather than left to the player, so the brief can be drawn on the map like every
+// other click mode: as a hint it was only ever readable in the gap before the player opened
+// the map themselves, and not at all if they called this with the map already up.
+openMap true;
+// A future gamemode adds its own case above the default. The brief sits in the default rather
+// than in a "MODERN" case so that mode inherits one: now that this forces the map open, a
+// version with no line of its own would strand the player on a map saying nothing.
+switch (VERSION_X) do {
+	default { [localize "STR_DUWS_T_01np5zjk"] call fnc_map_prompt; };
+};
+
 // TIMER
+// Closing the map is how the player backs out now that this opens it, so the wait ends there
+// too rather than holding the click slot for the rest of the timer. Tested after the sleep:
+// visibleMap does not read true on the frame openMap is issued.
 while {_timer>0 AND !clicked} do {
 	_timer = _timer-1; // remove 1 to timer
 	sleep 1;
+	if (!visibleMap) exitWith {};
 };
 // TIMER ELLAPSED OR CLICKED
+["UAV"] call fnc_mapclick_release;
+openMap false;
 sleep 80;
 [player,"uav_recon"] call BIS_fnc_addCommMenuItem;
-["UAV"] call fnc_mapclick_release;

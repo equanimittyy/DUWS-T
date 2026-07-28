@@ -39,22 +39,34 @@ if (commandpointsblu1 < _cost) exitWith {
 };
 
 _pos = [];
-if (!(["ARTY", format["[_pos,%2,%3,%4,%5,%6,%7,'%8'] spawn fnc_arty; clicked = true; ['ARTY'] call fnc_mapclick_release",_pos,_salvos,_radius,_interval,_rps,_supportype,_cost,_ammotype]] call fnc_mapclick_claim)) exitWith {
+// The handler releases before closing the map: the banner the release clears is a control on
+// the map display and cannot be reached once it is gone.
+if (!(["ARTY", format["[_pos,%2,%3,%4,%5,%6,%7,'%8'] spawn fnc_arty; clicked = true; ['ARTY'] call fnc_mapclick_release; openMap false",_pos,_salvos,_radius,_interval,_rps,_supportype,_cost,_ammotype]] call fnc_mapclick_claim)) exitWith {
 	call _fnc_restoreCommMenu;
 };
-hint localize "STR_DUWS_T_4sqljq58";
+
+// Opened here rather than left to the player, so the brief can be drawn on the map like every
+// other click mode: as a hint it was only ever readable in the gap before the player opened
+// the map themselves, and not at all if they called this with the map already up.
+openMap true;
+[localize "STR_DUWS_T_4sqljq58"] call fnc_map_prompt;
 //hint format["Position: %1\nSalvos:%2\nRadius:%3\nInterval:%4\nRPS:%5\nSupport type:%6\nCost:%7\nAmmo type:'%8'", _position, _salvos, _radius, _interval, _rps, _supportype, _cost, _ammotype];
 
 // TIMER
+// Closing the map is how the player backs out now that this opens it, so the wait ends there
+// too rather than holding the click slot for the rest of the timer. Tested after the sleep:
+// visibleMap does not read true on the frame openMap is issued.
 while {_timer > 0 AND !clicked} do {
 
 	_timer = _timer - 1; // remove 1 to timer
 	sleep 1;
+	if (!visibleMap) exitWith {};
 };
 
 // TIMER ELLAPSED OR CLICKED
 
 ["ARTY"] call fnc_mapclick_release;
+openMap false;
 
 if (clicked) then {
 	// make sure blufor has someone in range
