@@ -716,7 +716,6 @@ fnc_civ_selectTowns = compile preprocessFileLineNumbers "duws\server\misc\fnc_ci
 fnc_civ_rep_economy = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_rep_economy.sqf";
 fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_wp_Tomata.sqf";
 fnc_civ_rep_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_rep_Tomata.sqf";
-fnc_civ_informant_wp_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_informant_wp_Tomata.sqf";
 fnc_recruit_civilian = compile preprocessFileLineNumbers "duws\shared\functions\fnc_recruit_civilian.sqf";
 publicVariable "fnc_recruit_civilian";
 fnc_recruit_civilian_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_recruit_civilian_server.sqf";
@@ -731,7 +730,6 @@ fnc_civ_askEnemy_server = compile preprocessFileLineNumbers "duws\server\misc\fn
 publicVariable "fnc_civ_askEnemy_server";
 fnc_civ_askEnemy_reveal = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_askEnemy_reveal.sqf";
 publicVariable "fnc_civ_askEnemy_reveal";
-fnc_civ_informant_system = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_informant_system.sqf";
 fnc_civ_healed = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_healed.sqf";
 fnc_civ_stopCommand = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_stopCommand.sqf";
 publicVariable "fnc_civ_stopCommand";

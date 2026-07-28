@@ -3168,27 +3168,6 @@
                 <Original>One of our informants has been made. He's holed up in a building somewhere in the area. Get to him and hold the enemy off before they run him down. We can't pull him out yet; we still need him gathering intel here. (Slightly low CP, no AP, high reputation)</Original>
                 <English>One of our informants has been made. He's holed up in a building somewhere in the area. Get to him and hold the enemy off before they run him down. We can't pull him out yet; we still need him gathering intel here. (Slightly low CP, no AP, high reputation)</English>
             </Key>
-            <Key ID="STR_DUWS_T_v7djsfoq">
-                <German>Hier spricht das HQ. Wir haben Kontakt zu einem Informanten in deiner Nähe. Überprüfe seine letzte bekannte Position auf deiner Karte.</German>
-                <Spanish>Este es el Cuartel general. Tenemos contacto con un informante en tu área. Revisa en tu mapa su ultima posición conocida.</Spanish>
-                <Chinesesimp>我们需要与在你所在区域的一位线人进行联络，他的位置已标识到你的GPS终端上。</Chinesesimp>
-                <Original>We've made contact with an informant in your area. Check your map for his last known location.</Original>
-                <English>We've made contact with an informant in your area. Check your map for his last known location.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_rtv3i48t">
-                <German>Informant</German>
-                <Spanish>Informante</Spanish>
-                <Chinesesimp>联络人</Chinesesimp>
-                <Original>Informant</Original>
-                <English>Informant</English>
-            </Key>
-            <Key ID="STR_DUWS_T_j94223ip">
-                <German>Wir haben Kontakt zu einem Informaten in deiner Nähe.</German>
-                <Spanish>Tenemos contacto con un informante en tu área.</Spanish>
-                <Chinesesimp>我们需要与在你所在区域的一位线人进行联络。</Chinesesimp>
-                <Original>We've made contact with an informant in your area.</Original>
-                <English>We've made contact with an informant in your area.</English>
-            </Key>
             <Key ID="STR_DUWS_T_pcfail">
                 <German>"Overlord 1-1" an Einsatztrupp. Der Informant ist tot. Zieht euch sofort zurück. Wir können nichts mehr tun.</German>
                 <Spanish>"Overlord 1-1" a Equipo de Acción. El informante está muerto. Retrocedan de inmediato. No podemos hacer nada más.</Spanish>

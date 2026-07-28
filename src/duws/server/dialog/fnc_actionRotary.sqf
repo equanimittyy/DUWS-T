@@ -38,27 +38,3 @@ switch (_iconType) do {
 	true,											// Remove on completion
 	true											// Show in unconscious state
 ] remoteExec ["BIS_fnc_holdActionAdd", [0,-2] select isDedicated, _object];
-
-// Set a marker if it's an informant
-if (side _object == CIVILIAN) then {
-     _speaker = localize "STR_DUWS_T_OVERLORD";
-     _message = localize "STR_DUWS_T_v7djsfoq";
-     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-	["info",[localize "STR_DUWS_T_rtv3i48t",localize "STR_DUWS_T_j94223ip"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
-	_markername = format["Informant%1",str (getpos _object)]; // Define marker name
-	_markerstr = createMarker [str(_markername), getpos _object];
-	_markerstr setMarkerShape "ICON";
-	str(_markername) setMarkerType "mil_unknown_noShadow";
-	str(_markername) setMarkerSize [1,1];
-	str(_markername) setMarkerColor "ColorCIV";
-	//str(_markername) setMarkerText format[" TF %1",_TFname];
-
-	while {alive _object} do {
-		str(_markername) setMarkerPos getpos _object; 
-		// after 2 min, set the new marker position
-		sleep 30;
-	};
-
-	deleteMarker str(_markername);
-	
-};

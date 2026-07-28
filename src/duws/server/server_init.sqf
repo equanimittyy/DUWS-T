@@ -328,8 +328,6 @@ if (isServer) then {
     publicVariable "my_fnc_createFlare";
 };
 [] spawn fnc_dynamicAtmosphere_init;
-// 启动线人系统
-[] spawn fnc_civ_informant_system;
 // 服务器端（如 server_init.sqf）
 { 
     [_x] remoteExec ["addRating", _x];
