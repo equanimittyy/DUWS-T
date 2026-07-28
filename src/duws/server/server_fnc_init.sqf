@@ -1056,10 +1056,33 @@ fnc_mapclick_claim = {
 	if (_held isNotEqualTo "" && {_held isNotEqualTo _owner}) exitWith {
 		// The comm menu opens over the map, so a support called while another mode holds the
 		// slot has to be refused on whichever surface is in front of the player: the hint box
-		// renders behind the map. This overwrites the holder's own banner, which is worth it
-		// -- the alternative is the silent theft this whole slot exists to stop.
+		// renders behind the map.
+		// if/then rather than a nested exitWith, which would exit this block and make the
+		// refusal's return value depend on which branch ran.
 		private _msg = localize "STR_DUWS_T_mapclick_busy";
-		if (visibleMap) then { [_msg] call fnc_map_prompt } else { hint _msg };
+		if (visibleMap) then {
+			// Appended to the holder's banner rather than replacing it. The holder's instruction
+			// is still live and the player still has to act on it, so overwriting it would trade
+			// a silent theft for a lost prompt. Restored once the notice has been read.
+			private _prev = missionNamespace getVariable ["DUWS_map_prompt_shown", ""];
+			private _combined = _msg;
+			if (_prev isNotEqualTo "") then {
+				_combined = format ["%1<br/><t color='#ff6666'>%2</t>", _prev, _msg];
+			};
+			[_combined] call fnc_map_prompt;
+			[_prev, _held, _combined] spawn {
+				params ["_prev", "_holder", "_combined"];
+				sleep 4;
+				// Both guards matter: the holder may have finished (restoring would resurrect a
+				// dead instruction) or redrawn its banner (restoring would undo the newer text).
+				if ((uiNamespace getVariable ["DUWS_mapclick_owner", ""]) isEqualTo _holder
+					&& {(missionNamespace getVariable ["DUWS_map_prompt_shown", ""]) isEqualTo _combined}) then {
+					[_prev] call fnc_map_prompt;
+				};
+			};
+		} else {
+			hint _msg;
+		};
 		false
 	};
 	uiNamespace setVariable ["DUWS_mapclick_owner", _owner];
