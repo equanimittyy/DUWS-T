@@ -8,6 +8,15 @@
 */
 if (!isServer) exitWith {};
 
+// How many buildings the crowd is spread over, and the one number that sets how busy a town
+// feels. Fixed, NOT scaled by the density setting: sizing it as a multiple of the crowd made the
+// area grow in step with the head count, so civilians-per-square-metre came out identical at
+// every setting and the slider only widened the populated patch. Held constant, density and
+// crowding rise together, and a town's own building density decides how much ground those 20
+// buildings cover -- 97 m in Kavala against 228 m in a 47-building town. Matched in
+// fnc_civ_recycle, which re-clusters around the player on the same footing.
+#define CLUSTER_BUILDINGS 20
+
 params ["_locIndex", "_mode"];
 
 // ========== 全局互斥锁初始化 ==========
@@ -31,10 +40,10 @@ if (_centerPos isEqualTo [0,0,0]) exitWith {
 private _locationName = if (text _location != "") then { text _location } else { format ["Unnamed%1", _locIndex] };
 
 // ============================================
-// 清理模式（延迟 60 秒）
+// 清理模式（延迟 30 秒）
 // ============================================
 if (_mode == "cleanup") exitWith {
-    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Requested for location %1, will execute in 60 seconds", _locIndex]] call fnc_log; };
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Requested for location %1, will execute in 30 seconds", _locIndex]] call fnc_log; };
     private _currentPop = missionNamespace getVariable [format ["civ_pop_%1", _locIndex], 0];
     if (_currentPop > 1) then {
         private _message = format [localize "STR_DUWS_T_CIV_CLEANUP_WARNING", _locationName];
@@ -43,11 +52,12 @@ if (_mode == "cleanup") exitWith {
     private _pendingVar = format ["civ_pending_cleanup_%1", _locIndex];
     missionNamespace setVariable [_pendingVar, true];
 
-    private _threadVar = format ["civ_monitor_%1", _locIndex];
-    missionNamespace setVariable [_threadVar, false];
-    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["Cleanup stopped monitor for %1", _locIndex]] call fnc_log; };
-
-    sleep 60;
+    // The monitor is deliberately left running through the grace period. Killing it here meant a
+    // player who stepped back in during the grace cancelled the deletion but kept a town with no
+    // monitor: nothing recycled it, and nothing would ever clean it up either, because the
+    // presence trigger only fires on a fresh entry they never made. It exits on its own once
+    // civ_spawned goes false below.
+    sleep 30;
 
     if (!(missionNamespace getVariable [_pendingVar, false])) exitWith {
         if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Cleanup] Pending cleanup cancelled for %1", _locIndex]] call fnc_log; };
@@ -219,13 +229,14 @@ if (_mode == "spawn") then {
         };
     };
 
-    private _maxSpawnPerVisit = missionNamespace getVariable ["civ_maxSpawnPerVisit", 50];
-    private _spawnCount = _targetPop min _maxSpawnPerVisit;
-    private _remaining = _targetPop - _spawnCount;
-    missionNamespace setVariable [format ["civ_remaining_%1", _locIndex], _remaining];
-    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Location %1: total pop %2, spawning %3, remaining %4", _locIndex, _targetPop, _spawnCount, _remaining]] call fnc_log; };
+    private _density = missionNamespace getVariable ["civ_density", 15];
+    private _spawnCount = [_density, _locIndex] call fnc_civ_liveTarget;
+    if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Location %1: pop %2, live target %3", _locIndex, _targetPop, _spawnCount]] call fnc_log; };
 
-    private _usableBuildings = [_centerPos, 2, _triggerRadius] call fnc_usableBuildings;
+    // Surveyed once at campaign generation and kept for the rest of the mission: the terrain sweep
+    // behind it is the heaviest engine call in the civilian system, and every town entry used to
+    // repeat it. Destroyed buildings go null, so the list is filtered rather than trusted.
+    private _usableBuildings = (missionNamespace getVariable [format ["civ_buildings_%1", _locIndex], []]) select { !isNull _x };
     if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Usable buildings count: %1", count _usableBuildings]] call fnc_log; };
 
     private _civArray = missionNamespace getVariable ["civ_array", []];
@@ -312,70 +323,29 @@ if (_mode == "spawn") then {
         if (CIV_PRESENCE != "RAVAGE" && !_isHostile && side _dead != resistance) then {
             [_dead, _killer, _instigator] call fnc_civ_rep_Tomata;
         };
-        private _remVar = format ["civ_remaining_%1", _idx];
-        private _remaining = missionNamespace getVariable [_remVar, 0];
-        if (_remaining > 0) then {
-            private _locData = missionNamespace getVariable ["civ_locations", []];
-            private _radData = missionNamespace getVariable ["civ_radii", []];
-            if (_idx < count _locData && _idx < count _radData) then {
-                private _center = getPos (_locData select _idx);
-                private _radius = _radData param [_idx, 500];
-                private _civArr = missionNamespace getVariable ["civ_array", []];
-                if (_civArr isEqualTo []) exitWith {};
-                private _players = allPlayers select { alive _x && {_x distance _center < _radius} };
-                private _foundPos = [];
-                private _attempts = 0;
-                while {_attempts < 10 && _foundPos isEqualTo []} do {
-                    private _angle = random 360;
-                    private _dist = random _radius;
-                    private _candidate = _center getPos [_dist, _angle];
-                    private _tooClose = false;
-                    { if (_candidate distance _x < 80) exitWith { _tooClose = true }; } forEach _players;
-                    if (!_tooClose) then { _foundPos = _candidate; };
-                    _attempts = _attempts + 1;
-                };
-                if (_foundPos isEqualTo []) then {
-                    private _angle = random 360;
-                    private _dist = random _radius;
-                    _foundPos = _center getPos [_dist, _angle];
-                };
-                private _unitType = selectRandom _civArr;
-                private _newGroup = createGroup [CIVILIAN, true];
-                private _newUnit = _newGroup createUnit [_unitType, _foundPos, [], 0, "NONE"];
-                _newUnit setVariable ["civ_locIndex", _idx];
-                [_newUnit] call fnc_addCivilianMoney;
-                _newUnit addEventHandler ["Killed", missionNamespace getVariable "CIV_KILLED_HANDLER"];
-                _newUnit addEventHandler ["HandleHeal", fnc_civ_healed];
-                if (_idx < count _locData && _idx < count _radData) then {
-                    private _centerPos = getPos (_locData select _idx);
-                    private _radius = _radData select _idx;
-                    private _randomPos = [_centerPos, 0, _radius, 3, 0, 0.2, 0] call BIS_fnc_findSafePos;
-                    if (_randomPos isEqualTo [0,0,0]) then { _randomPos = _centerPos; };
-                    while {count (waypoints _newGroup) > 0} do { deleteWaypoint ((waypoints _newGroup) select 0); };
-                    private _wp = _newGroup addWaypoint [_randomPos, 10];
-                    _wp setWaypointType "MOVE";
-                    _wp setWaypointSpeed "NORMAL";
-                    _wp setWaypointBehaviour "AWARE";
-                    _wp setWaypointTimeout [30, 60, 90];
-                    private _wp2 = _newGroup addWaypoint [_centerPos, 20];
-                    _wp2 setWaypointType "CYCLE";
-                    _wp2 setWaypointSpeed "NORMAL";
-                    _wp2 setWaypointBehaviour "AWARE";
-                };
-                if (CIV_PRESENCE != "RAVAGE") then {
-                    // One menu action in front of what was five requests. Call-over stays separate:
-                    // it is positional and instant, and a dialog would ruin it.
-                    [_newUnit] remoteExec ["fnc_civ_menuAction", 0, true];
-                    [_newUnit] remoteExec ["fnc_civ_stopCommand", 0, true];
-                };
-                missionNamespace setVariable [_remVar, _remaining - 1];
-            };
-        };
+        // No replacement here. The recycle pass restores the town to its live target on its own
+        // schedule and only where no player is standing, so killing a crowd no longer conjures
+        // one back at the killer's feet.
     };
     missionNamespace setVariable ["CIV_KILLED_HANDLER", _killedHandler];
 
+    // The budget goes into the buildings nearest one anchor rather than across the whole disc. A
+    // town's radius grows with its building count, so a fixed crowd spread over the disc made the
+    // big towns the empty ones -- the same people over three times the ground. Clustering on a
+    // fixed number of buildings instead lets the dense town pack them onto a street corner while
+    // the sparse one strings them across a valley, which is the difference the setting exists to
+    // express. Anchored on the centre for the first fill, because the trigger fires at the disc
+    // edge with the player walking inward; the recycle pass re-anchors on where they end up.
+    // Ranked by index rather than by the building itself: sort compares element by element, and
+    // two buildings at an identical distance would leave it comparing objects.
+    private _ranked = [];
+    { _ranked pushBack [_x distance2D _centerPos, _forEachIndex] } forEach _usableBuildings;
+    _ranked sort true;
+    private _cluster = (_ranked select [0, CLUSTER_BUILDINGS]) apply { _usableBuildings select (_x select 1) };
+
     for "_i" from 1 to _spawnCount do {
-        private _building = selectRandom _usableBuildings;
+        // selectRandom returns nil on an empty list, which the isNull below cannot be asked about.
+        private _building = if (_cluster isEqualTo []) then { objNull } else { selectRandom _cluster };
         private _pos = [0,0,0];
         if (isNull _building) then {
             _pos = [_centerPos, 10, _maxOutdoorDist, 3, 0, 0.5, 0] call BIS_fnc_findSafePos;
@@ -411,27 +381,8 @@ if (_mode == "spawn") then {
             _isZombie = false;
         };
 
-        private _group = createGroup [CIVILIAN, true];
-        private _unit = _group createUnit [_unitType, _pos, [], 0, "NONE"];
-        _unit setVariable ["civ_locIndex", _locIndex];
-        [_unit] call fnc_addCivilianMoney;
-        [_unit, _isZombie, _unitType, _i] call fnc_applyEquipment;
-        _unit addEventHandler ["Killed", missionNamespace getVariable "CIV_KILLED_HANDLER"];
-        _unit addEventHandler ["HandleHeal", fnc_civ_healed];
-
-        if (CIV_PRESENCE == "RAVAGE" && !_isZombie) then {
-            [_unit] remoteExec ["fnc_addRecruitAction", 0, true];
-        };
-        if (CIV_PRESENCE == "RAVAGE" && _isZombie) then {
-            [_unit, 2.2] remoteExec ["setAnimSpeedCoef", 0, true];
-        };
-        if (CIV_PRESENCE != "RAVAGE" && side _unit == CIVILIAN) then {
-            // One menu action in front of what was five requests. Call-over stays separate:
-            // it is positional and instant, and a dialog would ruin it.
-            [_unit] remoteExec ["fnc_civ_menuAction", 0, true];
-            [_unit] remoteExec ["fnc_civ_stopCommand", 0, true];
-        };
-        _groups pushBack _group;
+        private _unit = [_locIndex, _pos, _unitType, _isZombie] call fnc_civ_spawnUnit;
+        if (!isNull _unit) then { _groups pushBack (group _unit) };
         sleep 0.2;
     };
 
@@ -446,7 +397,9 @@ if (_mode == "spawn") then {
         ["info", [_enterMsg, localize "STR_DUWS_T_towninteract"]] remoteExec ["BIS_fnc_showNotification", 0];
     };
 
-    [_groups, _usableBuildings] spawn fnc_civ_wp_Tomata;
+    // Patrol targets come from the cluster, not the whole town: waypoints drawn across the full
+    // disc would walk the crowd straight back out of the area it was concentrated into.
+    [_groups, _cluster] spawn fnc_civ_wp_Tomata;
 
     if (CIV_PRESENCE == "RAVAGE") then {
         private _players = call BIS_fnc_listPlayers;
@@ -480,6 +433,15 @@ if (_mode == "spawn") then {
     missionNamespace setVariable [_spawningKey, false];
     if (duws_log_level >= 4) then { ["DEBUG", "CIV", format ["[Spawn] Spawning flag cleared for location %1", _locIndex]] call fnc_log; };
 
+    // Released here rather than at cleanup. The lock only serialises the spawn burst; holding it
+    // for the whole occupancy meant a second town could not fill until the 10-minute wait above
+    // expired, so a co-op pair splitting between two towns left one of them empty. The live count
+    // is bounded by fnc_civ_liveTarget now, which is what the lock was standing in for.
+    if (civ_current_active_location == _locIndex) then {
+        civ_current_active_location = -1;
+        publicVariable "civ_current_active_location";
+    };
+
     [_locIndex, _centerPos, _triggerRadius] spawn {
         params ["_locIndex", "_centerPos", "_triggerRadius"];
         private _threadVar = format ["civ_monitor_%1", _locIndex];
@@ -487,21 +449,28 @@ if (_mode == "spawn") then {
         sleep 1;
         missionNamespace setVariable [_threadVar, true];
         private _noPlayerCount = 0;
-        private _maxNoPlayer = 2;
+        // One quiet tick arms the cleanup, whose own grace period makes up the rest of the minute
+        // between the players leaving and the town emptying. Recycling lands every third tick.
+        private _maxNoPlayer = 1;
+        private _pass = 0;
         while {missionNamespace getVariable [_threadVar, false]} do {
-            sleep 40;
+            sleep 30;
             if (!(missionNamespace getVariable [format ["civ_spawned_%1", _locIndex], false])) exitWith {
                 missionNamespace setVariable [_threadVar, false];
             };
             private _playersInArea = allPlayers select { _x distance _centerPos < _triggerRadius };
             if (count _playersInArea == 0) then {
                 _noPlayerCount = _noPlayerCount + 1;
-                if (_noPlayerCount >= _maxNoPlayer) then {
+                // Armed once, not once per tick: the cleanup owns its own grace period, and this
+                // thread stays alive through it so a player who walks back in resumes recycling.
+                if (_noPlayerCount >= _maxNoPlayer
+                    && {!(missionNamespace getVariable [format ["civ_pending_cleanup_%1", _locIndex], false])}) then {
                     [_locIndex, "cleanup"] spawn fnc_civ_handler;
-                    missionNamespace setVariable [_threadVar, false];
                 };
             } else {
                 _noPlayerCount = 0;
+                _pass = _pass + 1;
+                if (_pass % 3 == 0) then { [_locIndex] call fnc_civ_recycle };
             };
         };
     };

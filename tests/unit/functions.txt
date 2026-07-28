@@ -1,5 +1,6 @@
 # Pure functions extracted from real source for the unit tests below.
-# Format: <path relative to src/>::<FunctionName>
+# Format: <path relative to src/>::<FunctionName>, or <path>::*<FunctionName> when the
+# whole file is the function body (the mission compiles those files directly).
 # Only genuinely pure helpers (no CfgVehicles / BIS_fnc_ / spawning) belong here —
 # ~95% of the mission needs the Arma engine and can't be unit-tested in sqf-vm.
 initPlayerLocal.sqf::DUWS_fnc_extractLoadoutItems
@@ -10,3 +11,4 @@ duws/server/server_fnc_init.sqf::fnc_civ_reaction_weights
 duws/server/server_fnc_init.sqf::fnc_civ_rowPrice
 duws/server/server_fnc_init.sqf::fnc_civ_townBand
 duws/server/server_fnc_init.sqf::fnc_civ_townIncome
+duws/server/misc/fnc_civ_liveTarget.sqf::*fnc_civ_liveTarget

@@ -27,13 +27,13 @@ time_of_day_evening = lbAdd [2101, localize "STR_DUWS_T_pshlpqdy"];
 time_of_day_midnite = lbAdd [2101, localize "STR_DUWS_T_wmhmoeqt"];
 [2101, time_of_day_dawn] call _setDefault;
 
-// CIVILIAN MAX SPAWN PER VISIT
-// 选项值：5, 10, 20, 35, 50, 65, 80，默认 35
-private _civSpawnValues = [5, 10, 20, 35, 50, 65, 80];
+// CIVILIAN DENSITY
+// 选项值：5, 10, 15, 20, 30，默认 15
+private _civDensityValues = [5, 10, 15, 20, 30];
 {
     private _index = lbAdd [2102, format ["%1", _x]];
-    if (_x == 35) then { [2102, _index] call _setDefault; };
-} forEach _civSpawnValues;
+    if (_x == 15) then { [2102, _index] call _setDefault; };
+} forEach _civDensityValues;
 
 // FOB FAST TRAVEL
 index_fast_travel_true = lbAdd [2103, localize "STR_DUWS_T_x4zs3lsg2"];

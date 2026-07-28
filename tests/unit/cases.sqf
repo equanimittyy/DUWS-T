@@ -165,3 +165,64 @@ private _opf = [-10] call fnc_civ_townBand;
 // RAVAGE and WBK register no town worth, so the array read that feeds this comes back short.
 ["townIncome: no worth pays nothing",
     ([20, 0] call fnc_civ_townIncome), [0, "BLU"]] call fnc_assertEq;
+
+// --- fnc_civ_liveTarget: how many civilians one town may hold right now ---
+// Reads per-town state out of the mission namespace, so each case stages the towns it needs.
+// civ_locations is only ever counted, so a list of placeholders stands in for the Locations.
+CIV_PRESENCE = "med";
+private _stage = {
+    params ["_pops", "_occupied"];
+    missionNamespace setVariable ["civ_locations", _pops apply { 0 }];
+    {
+        missionNamespace setVariable [format ["civ_pop_%1", _forEachIndex], _x];
+        missionNamespace setVariable [format ["civ_spawned_%1", _forEachIndex], _forEachIndex in _occupied];
+    } forEach _pops;
+};
+
+[[100, 30, 3], [0]] call _stage;
+["liveTarget: a city alone gets the full density", ([15, 0] call fnc_civ_liveTarget), 15] call fnc_assertEq;
+["liveTarget: the top option is not thinned either", ([30, 0] call fnc_civ_liveTarget), 30] call fnc_assertEq;
+
+// The population is a building count, and a town too small to house the density says so. This is
+// the floor the whole design rests on: three buildings can only ever be three people.
+["liveTarget: a hamlet caps at its own population", ([10, 2] call fnc_civ_liveTarget), 3] call fnc_assertEq;
+["liveTarget: an empty town holds nobody", ([10, 9] call fnc_civ_liveTarget), 0] call fnc_assertEq;
+
+// Two occupied towns is the single-player peak -- walking into the next while the last drains --
+// and it sits well inside the ceiling, so no solo transition is ever thinned.
+[[100, 100, 100, 100], [0, 1]] call _stage;
+["liveTarget: the single-player peak is untouched", ([15, 0] call fnc_civ_liveTarget), 15] call fnc_assertEq;
+
+// Three towns at full density is exactly the ceiling, so the boundary itself is not thinned.
+[[100, 100, 100, 100], [0, 1, 2]] call _stage;
+["liveTarget: three occupied towns still pay in full", ([10, 0] call fnc_civ_liveTarget), 10] call fnc_assertEq;
+
+// A fourth occupied town overruns it. Everyone thins rather than the last one starving.
+[[100, 100, 100, 100], [0, 1, 2, 3]] call _stage;
+["liveTarget: a fourth town thins the share", ([10, 0] call fnc_civ_liveTarget), 7] call fnc_assertEq;
+
+// Only occupied towns count against the ceiling: an unvisited town has nobody in it to pay for.
+[[100, 100, 100, 100], [0]] call _stage;
+["liveTarget: unoccupied towns cost nothing", ([10, 0] call fnc_civ_liveTarget), 10] call fnc_assertEq;
+
+// Past the point where the ceiling can cover a town each, the floor holds and the ceiling gives:
+// a town nobody spawns in reads as broken, where a thin one only reads as quiet.
+[[100, 100, 100, 100, 100, 100, 100, 100, 100, 100], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]] call _stage;
+["liveTarget: the floor outranks the ceiling", ([10, 0] call fnc_civ_liveTarget), 3] call fnc_assertEq;
+
+// The ceiling is three times whatever the setting is, so no option thins any earlier than another.
+[[100, 100, 100], [0, 1, 2]] call _stage;
+{
+    [format ["liveTarget: density %1 fills three towns", _x],
+        ([_x, 0] call fnc_civ_liveTarget), _x] call fnc_assertEq;
+} forEach [5, 10, 15, 20, 30];
+
+// The Altis survey registers two hamlets at 3 and 4 buildings and nothing else below 47, so the
+// population cap only ever binds on those two. Every real town takes the setting whole, and what
+// separates them is how much ground their cluster covers rather than how many people are in it.
+[[3, 4, 47, 260], [0]] call _stage;
+{
+    _x params ["_town", "_pop", "_expected"];
+    [format ["liveTarget: a %1-building town holds %2", _pop, _expected],
+        ([15, _town] call fnc_civ_liveTarget), _expected] call fnc_assertEq;
+} forEach [[0, 3, 3], [1, 4, 4], [2, 47, 15], [3, 260, 15]];

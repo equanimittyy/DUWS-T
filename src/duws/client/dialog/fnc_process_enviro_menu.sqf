@@ -48,15 +48,17 @@ switch (_index) do {
     case time_of_day_midnite:{ time_of_day = 0; };
 };
 
-// CIVILIAN MAX SPAWN PER VISIT
-private _civSpawnValues = [5, 10, 20, 35, 50, 65, 80];
+// CIVILIAN DENSITY
+// How many civilians one town holds at a time, not how many it ever spawns: the stream tops the
+// crowd back up as the player moves through, and the campaign-wide ceiling is three towns' worth.
+private _civDensityValues = [5, 10, 15, 20, 30];
 private _index = lbCurSel 2102;
-private _selectedValue = 35; // 默认
-if (_index >= 0 && _index < count _civSpawnValues) then {
-    _selectedValue = _civSpawnValues select _index;
+private _selectedValue = 15; // 默认
+if (_index >= 0 && _index < count _civDensityValues) then {
+    _selectedValue = _civDensityValues select _index;
 };
-missionNamespace setVariable ["civ_maxSpawnPerVisit", _selectedValue, true];
-["INFO", "SUPPORT", format ["Civ max spawn per visit set to: %1", _selectedValue]] call fnc_log;
+missionNamespace setVariable ["civ_density", _selectedValue, true];
+["INFO", "SUPPORT", format ["Civ density set to: %1", _selectedValue]] call fnc_log;
 
 // FAST TRAVEL
 _index = lbCurSel 2103;

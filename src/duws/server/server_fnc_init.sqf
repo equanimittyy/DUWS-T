@@ -840,6 +840,14 @@ fnc_civ_handler = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_ha
 publicVariable "fnc_civ_handler";
 fnc_civ_handler_wbk = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler_wbk.sqf";
 publicVariable "fnc_civ_handler_wbk";
+// The civilian stream. Server-only: the handler and its monitor thread are the only callers, and
+// the trigger that names them already resolves on the machine that runs the spawn.
+fnc_civ_liveTarget = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_liveTarget.sqf";
+fnc_civ_spawnUnit = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_spawnUnit.sqf";
+fnc_civ_recycle = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_recycle.sqf";
+// Broadcast: the spawn paths remoteExec it to every client to hang the civilian's actions.
+fnc_civ_clientActions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_clientActions.sqf";
+publicVariable "fnc_civ_clientActions";
 fnc_addCivilianMoney = compile preprocessFileLineNumbers "duws\server\misc\fnc_addCivilianMoney.sqf";
 publicVariable "fnc_addCivilianMoney";
 // Civilian menu. Only fnc_civ_request and fnc_civ_bribe_answer are reached from a client, but

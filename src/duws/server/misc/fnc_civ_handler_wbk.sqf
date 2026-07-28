@@ -216,9 +216,13 @@ if (_mode == "spawn") then {
         };
     };
 
-    private _maxSpawnPerVisit = missionNamespace getVariable ["civ_maxSpawnPerVisit", 50];
-    private _spawnCount = _targetPop min _maxSpawnPerVisit;
-    private _remaining = _targetPop - _spawnCount;
+    // Zombies, not civilians: this mode keeps the one-shot fill and the kill-replacement pool the
+    // civilian towns dropped, because a horde that thins out as it is cut down is the mode. It
+    // takes the density setting unscaled: the default lands within a handful of the retired
+    // per-visit cap, so the crowd size a WBK town opens with is unchanged.
+    private _density = missionNamespace getVariable ["civ_density", 15];
+    private _spawnCount = [_density, _locIndex] call fnc_civ_liveTarget;
+    private _remaining = (_targetPop - _spawnCount) max 0;
     missionNamespace setVariable [format ["civ_remaining_%1", _locIndex], _remaining];
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Location %1: total pop %2, spawning %3, remaining %4", _locIndex, _targetPop, _spawnCount, _remaining]] call fnc_log; };
 

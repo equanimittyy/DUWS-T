@@ -45,13 +45,15 @@ private _kept = [];
 private _radii = [];
 private _pops = [];
 private _vis = [];
+private _bldgs = [];
 private _done = 0;
 
 // A queue, not a forEach: an HQ overlap can only be judged once the radius is known here, and
 // rejecting a town pushes its replacement back on for the same treatment.
 while { count _queue > 0 } do {
-    // The count rides along from selection: it is the heaviest engine call in this pass.
-    (_queue deleteAt 0) params ["_loc", "_buildingCount", ["_hqQuota", false]];
+    // The building list rides along from selection: it is the heaviest engine call in this pass,
+    // and running it again per town entry would repeat it for the whole campaign.
+    (_queue deleteAt 0) params ["_loc", "_buildingCount", ["_hqQuota", false], ["_usable", []]];
     private _pos = getPos _loc;
     private _locationName = if (text _loc != "") then { text _loc } else { format ["Unnamed%1", _done] };
     _done = _done + 1;
@@ -70,12 +72,17 @@ while { count _queue > 0 } do {
         ["INFO", "CIV", format ["Skipping %1: area (r=%2) overlaps the BLUFOR HQ at %3m", _locationName, _radius, round _hqDist]] call fnc_log;
         if (count _spare > 0) then { _queue pushBack (_spare deleteAt 0) };
     } else {
-        // A size figure, not a head count: never decremented, and the spawn density derives from
-        // it. The x2 multiplier this replaces put the ceiling at 25 buildings, so every town from
-        // a market village upward presented the same civ_maxSpawnPerVisit crowd.
+        // A size figure, not a head count: never decremented, and it is what caps the crowd a town
+        // can hold. Counted over a fixed 350 m disc in selection, so it doubles as the town's
+        // building density -- which is what makes a clustered spawn feel busier in a bigger town.
         _kept pushBack _loc;
         _radii pushBack _radius;
         _pops pushBack _buildingCount;
+        // Trimmed to the town's own area. Selection surveys a fixed 350 m disc so its ranking is
+        // comparable across towns, but a small town's disc reaches well past where its civilians
+        // belong. The reverse case -- a radius above 350 -- only arises above 35 buildings, and a
+        // town that dense packs the crowd's cluster far inside 350 m anyway.
+        _bldgs pushBack (_usable select { _x distance2D _pos <= _radius });
         // Hardcore hides towns the same way it hides zones, minus the ones the HQ anchor claimed:
         // a player who cannot see a single settlement has nowhere to start looking. A town that
         // was rejected above does not hand its flag to the stand-in that replaces it -- the
@@ -146,12 +153,14 @@ private _newLocations = [];
 private _newRadii = [];
 private _newPops = [];
 private _newVis = [];
+private _newBldgs = [];
 for "_i" from 0 to (_count - 1) do {
     if (!(_i in _toDelete)) then {
         _newLocations pushBack (_locations select _i);
         _newRadii pushBack (_radii select _i);
         _newPops pushBack (_pops select _i);
         _newVis pushBack (_vis select _i);
+        _newBldgs pushBack (_bldgs select _i);
     };
 };
 
@@ -218,6 +227,11 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     private _locationName = if (text _x != "") then { text _x } else { format ["Unnamed%1", _locIndex] };
 
     missionNamespace setVariable [format ["civ_pop_%1", _locIndex], _initialPop];
+    // Trimmed again here, not just at registration: the overlap cull above can have shrunk this
+    // town's radius after the first pass, and a building outside the final disc would pull the
+    // crowd beyond the area the map draws around it.
+    missionNamespace setVariable [format ["civ_buildings_%1", _locIndex],
+        (_newBldgs select _locIndex) select { _x distance2D _pos <= _radius }];
 
     // 创建触发器
     private _trg = createTrigger ["EmptyDetector", _pos];

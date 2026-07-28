@@ -3,9 +3,9 @@
     fnc_civ_selectTowns.sqf
     Picks the map towns that should carry a civilian population: real Locations near the
     fighting, ranked by how many usable buildings they hold. Returns [selected, spare] as
-    [location, buildingCount, hqQuota] triples -- the towns to register, and a replacement queue
-    for those the caller rejects. Draws its own survey progress on the map prompt; otherwise no
-    side effects, and the caller does the registration.
+    [location, buildingCount, hqQuota, buildings] quads -- the towns to register, and a
+    replacement queue for those the caller rejects. Draws its own survey progress on the map
+    prompt; otherwise no side effects, and the caller does the registration.
 */
 if (!isServer) exitWith {[[], []]};
 
@@ -70,11 +70,14 @@ private _total = count _inReach;
 private _lastPing = 0;
 {
     _x params ["_loc", "_pos"];
-    private _buildings = count ([_pos, 2, _COUNT_RADIUS] call fnc_usableBuildings);
+    // The list is carried out with the count, not recomputed later: this sweep is the heaviest
+    // engine work in the whole civilian pass, and the spawn handler needs exactly what it found.
+    private _usable = [_pos, 2, _COUNT_RADIUS] call fnc_usableBuildings;
+    private _buildings = count _usable;
     // Below the floor there is nothing for a civilian to walk into, and the caller's population
     // floor would still drop a dozen of them in an empty field.
     if (_buildings >= _MIN_BUILDINGS) then {
-        _pool pushBack [_loc, _pos, _buildings];
+        _pool pushBack [_loc, _pos, _buildings, _usable];
     };
 
     // The setup phase forces the map open and hint/globalChat both render beneath it, so the
@@ -144,7 +147,7 @@ if (count _hqPos > 0) then {
 _spare append (_remaining select { !(_x in _spare) });
 
 // Spare towns are drawn from what wave 1 left behind, so the HQ flag is always false for them.
-private _fnc_pair = { private _entry = _pool select _x; [_entry select 0, _entry select 2, _x in _hqQuota] };
+private _fnc_pair = { private _entry = _pool select _x; [_entry select 0, _entry select 2, _x in _hqQuota, _entry select 3] };
 private _selected = _taken apply _fnc_pair;
 private _spareTowns = _spare apply _fnc_pair;
 
