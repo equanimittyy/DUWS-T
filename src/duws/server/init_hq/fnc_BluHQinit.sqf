@@ -556,7 +556,7 @@ if (!isNull _barrier) then {
     private _grp = [_worldPos, WEST, [blufor_HELI_PILOT_X], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
     private _unit = (units _grp) select 0;
     private _dirToTent = [_worldPos, getPosWorld _medTent] call BIS_fnc_dirTo;
-    _unit allowDamage false;
+    _unit allowDamage true;
     _unit enableSimulation false;
     _unit setPosWorld _worldPos;
     _unit setUnitPos "UP";
@@ -582,6 +582,11 @@ if (!isNull _barrier) then {
         };
     };
     _unit switchMove "Acts_PointingLeftUnarmed";
+    // Clears the pose on death; the Acts_ animation otherwise holds and the corpse stands.
+    _unit addEventHandler ["Killed", {
+        params ["_u"];
+        [_u, ""] remoteExec ["switchMove", 0];
+    }];
 };
 
 // ========== 生成蓝方巡逻队（8人，绕塔巡逻） ==========

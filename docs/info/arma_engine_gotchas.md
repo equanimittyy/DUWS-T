@@ -416,5 +416,6 @@ re-enables it a fraction of a second later.
 **How to apply:** when posing a unit with a raw `switchMove`, add a `Killed` handler that clears
 the move — `[_unit, ""] remoteExec ["switchMove", 0]`, broadcast so every client's copy drops the
 pose, not just the machine where the unit is local. The HQ officer in
-`server/init_hq/fnc_BluHQinit.sqf` does this; the barrier engineer in the same file
-(`Acts_PointingLeftUnarmed`) does not and still stands when killed.
+`server/init_hq/fnc_BluHQinit.sqf` does this, as does the barrier engineer in the same file. A
+posed unit left `allowDamage false` never reaches the failure, so the handler only becomes
+load-bearing the moment that unit is made killable — pair the two changes.
