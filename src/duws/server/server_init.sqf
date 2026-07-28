@@ -431,64 +431,38 @@ if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK" && CIV_PRESENCE != "NONE")
     sleep 15;  // 等待阵营初始化完成
     [] spawn fnc_scanEnemyGear;
 };
-// ========== 伪装冷却异常监控（服务器端，防重，多人兼容） ==========
+// ========== 冷却时间戳的存档恢复修正（服务器端，防重，多人兼容） ==========
+// These cooldowns stamp diag_tickTime, which counts from Arma process start, not mission
+// start. Resuming an autosave in a fresh Arma session restarts that clock, so every stamp
+// then sits in the future and wedges its action for as long as the old session had run.
+// A stamp ahead of the clock has no other cause, so drop it and let each function's own
+// "never used" default apply. Stamps far in the past are just unused actions -- not faults.
+// GM_Heal_LastUsedTime is deliberately absent: it stamps mission time, which savegames restore.
 if (isNil "DUWS_cooldownMonitor_running") then {
     DUWS_cooldownMonitor_running = true;
     publicVariable "DUWS_cooldownMonitor_running";
-    
+
     [] spawn {
-        // 等待游戏稳定运行
-        waitUntil { sleep 10; time > 10 };
-        
+        private _cooldownVars = [
+            "DUWS_enemyDisguise_lastUse",
+            "DUWS_disguise_lastUse",
+            "DUWS_hirePartisans_lastUse",
+            "DUWS_hirePMC_lastUse"
+        ];
+
         while {true} do {
             {
                 private _player = _x;
-                if (isNull _player) then { continue };
-                if (!alive _player) then { continue };
-                
-                // ----------------- 敌人伪装冷却（最大 600 秒）-----------------
-                private _lastEnemy = _player getVariable ["DUWS_enemyDisguise_lastUse", -610];
-                private _enemyRemaining = 610 - (diag_tickTime - _lastEnemy);
-                if (_enemyRemaining > 610 || _enemyRemaining < -610) then {
-                    _player setVariable ["DUWS_enemyDisguise_lastUse", diag_tickTime - 305, true];
-                    if (duws_log_level >= 4) then { ["DEBUG", "SUPPORT", format ["Server fixed enemy disguise for %1", name _player]] call fnc_log; };
+                if (!isNull _player) then {
+                    {
+                        if ((_player getVariable [_x, 0]) > diag_tickTime) then {
+                            _player setVariable [_x, nil, true];
+                            if (duws_log_level >= 4) then { ["DEBUG", "SUPPORT", format ["Cleared future %1 stamp on %2", _x, name _player]] call fnc_log; };
+                        };
+                    } forEach _cooldownVars;
                 };
-                
-                // ----------------- 平民伪装冷却（最大 300 秒）-----------------
-                private _lastCiv = _player getVariable ["DUWS_disguise_lastUse", -310];
-                private _civRemaining = 310 - (diag_tickTime - _lastCiv);
-                if (_civRemaining > 310 || _civRemaining < -310) then {
-                    _player setVariable ["DUWS_disguise_lastUse", diag_tickTime - 155, true];
-                    if (duws_log_level >= 4) then { ["DEBUG", "SUPPORT", format ["Server fixed civilian disguise for %1", name _player]] call fnc_log; };
-                };
-                
-                // ----------------- 雇佣游击队冷却（最大 1800 秒）-----------------
-                private _lastPartisan = _player getVariable ["DUWS_hirePartisans_lastUse", -1810];
-                private _partisanRemaining = 1810 - (diag_tickTime - _lastPartisan);
-                if (_partisanRemaining > 1810 || _partisanRemaining < -1810) then {
-                    _player setVariable ["DUWS_hirePartisans_lastUse", diag_tickTime - 905, true];
-                    if (duws_log_level >= 4) then { ["DEBUG", "SUPPORT", format ["Server fixed partisans for %1", name _player]] call fnc_log; };
-                };
-                
-                // ----------------- 雇佣 PMC 冷却（最大 900 秒）-----------------
-                private _lastPMC = _player getVariable ["DUWS_hirePMC_lastUse", -910];
-                private _pmcRemaining = 910 - (diag_tickTime - _lastPMC);
-                if (_pmcRemaining > 910 || _pmcRemaining < -910) then {
-                    _player setVariable ["DUWS_hirePMC_lastUse", diag_tickTime - 455, true];
-                    if (duws_log_level >= 4) then { ["DEBUG", "SUPPORT", format ["Server fixed PMC for %1", name _player]] call fnc_log; };
-                };
-                
-                // ----------------- GM 休息治疗冷却（最大 600 秒）-----------------
-                private _lastGMHeal = missionNamespace getVariable ["GM_Heal_LastUsedTime", -610];
-                private _gmRemaining = 610 - (diag_tickTime - _lastGMHeal);
-                if (_gmRemaining > 610 || _gmRemaining < -610) then {
-                    missionNamespace setVariable ["GM_Heal_LastUsedTime", diag_tickTime - 305];
-                    publicVariable "GM_Heal_LastUsedTime";
-                    if (duws_log_level >= 4) then { ["DEBUG", "SUPPORT", "Server fixed GM heal cooldown"] call fnc_log; };
-                };
-                
             } forEach (call BIS_fnc_listPlayers);
-            
+
             sleep 60; // 每分钟检查一次
         };
     };

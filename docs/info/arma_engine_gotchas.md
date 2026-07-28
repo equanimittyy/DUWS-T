@@ -350,3 +350,26 @@ zone icon and its ellipse are built this way in `fnc_createzone.sqf:45,59` and a
 same way in `fnc_zone_reveal.sqf` and `fnc_captured.sqf`. Marker names built without `str` —
 the mission has both conventions — are addressed without it, so the rule is per-marker, not
 mission-wide.
+
+## `diag_tickTime` counts from process start and is not restored by a savegame
+
+**`diag_tickTime` is Arma's uptime, not the mission's: it is already in the thousands when a
+mission begins and it restarts at zero when the game is relaunched. `time` is mission time,
+starts near zero, and is saved and restored with the mission. A stamp taken from one clock is
+meaningless against the other, and neither one is "seconds since this mission started".**
+
+The trap is a cooldown written as `_last = diag_tickTime` and checked as
+`_cd - (diag_tickTime - _last)`. That is correct while the process lives, so it survives every
+test — but the "never used yet" default has to be a *negative* sentinel, and any sanity check
+comparing the elapsed figure against the cooldown length will see values as large as the game's
+uptime and read them as corruption. Resuming an autosave in a fresh session is the real failure:
+the saved stamps are from the old process, the clock is back near zero, and every cooldown is
+suddenly in the future and locked for as long as the previous session ran. Mixing the clocks
+inside one system is worse — the rest-heal cooldown stamps `time`, so writing a `diag_tickTime`
+value into it locks the action out for the remainder of the mission.
+
+**How to apply:** pick one clock per cooldown and keep the sentinel, the stamp, and every check
+on it. Prefer `time` where a savegame must carry the cooldown; `diag_tickTime` only where the
+cooldown is meant to die with the session. The one genuine anomaly worth repairing is a stamp
+*ahead* of its clock — clear it and let the function's own default apply, as the monitor in
+`server/server_init.sqf:434` does. A stamp far in the past is just an action nobody has used.
