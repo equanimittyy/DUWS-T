@@ -16,6 +16,10 @@ while {!(["ZONES", "mission_init_complete (zones built, civilians registered)",
 // exits that never publish this, and a campaign with no main task has no win condition at all.
 // The gate above is what keeps that fall-through from landing back at mission start.
 ["ZONES", "intro_heli_done (players landed)", {!isNil "intro_heli_done"}, 420] call fnc_waitLogged;
+// Then the sitrep radio item, so orders never land before the tool that reports on them.
+// Not retried for the same reason as above: only the game_master slot adds the item, so an
+// MP session with that slot empty would never publish it.
+["ZONES", "sitrep_granted (radio item added)", {!isNil "sitrep_granted"}, 90] call fnc_waitLogged;
 
 // 创建主要任务（占领所有区域）
 // The task ID is a fixed key and must never be localized: the SUCCEEDED update at the end of

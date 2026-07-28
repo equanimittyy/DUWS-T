@@ -428,6 +428,9 @@ if ((vehiclevarname player) in game_master || !isMultiplayer) then {
 	[] spawn {
 		sleep 10;
 		_sitrep = [player,"sitrep"] call BIS_fnc_addCommMenuItem;
+		// The campaign task waits on this so orders never arrive before the radio that
+		// reports on them. Only this machine adds the item, so only it can say when.
+		sitrep_granted = true; publicVariable "sitrep_granted";
 	};
 };
 
