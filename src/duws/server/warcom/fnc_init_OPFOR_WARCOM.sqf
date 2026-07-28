@@ -53,6 +53,15 @@ sleep 1;
     [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
     if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then { [] call fnc_civ_init_Tomata; };
 
+    // Last step of generation, and called rather than spawned so it is: its census is a
+    // multi-second frame stall, and the only way that is not felt as a hitch is for the player
+    // to still be watching the generation banner when it happens. Spawned off WARCOM_init_done
+    // it landed on the frame the banner cleared instead.
+    // Outside the civilians-off gate above: the escalation counter never depends on the
+    // civilian system. Only the town reputation charge inside it does, and with civilians off
+    // that degrades to charging nothing.
+    [] call fnc_escalation;
+
     // Every completion announcement lives here rather than at the end of the zone locators:
     // there they fired while civilian towns were still being placed, telling the player the
     // campaign was ready before it was. Wrapped in BIS_fnc_Spawn so profileName, the map

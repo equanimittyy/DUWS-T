@@ -185,9 +185,6 @@ if (time_Multiplier > 1) then {
 	setTimeMultiplier time_Multiplier;
 };
 	
-// Outside the civilians-off gate: the escalation counter never depends on the civilian system.
-// Only the town reputation charge inside it does, and that degrades to charging nothing.
-[] spawn fnc_escalation;
 if (CIV_PRESENCE == "RAVAGE") then {
     [] spawn fnc_night_horde_event;
 };

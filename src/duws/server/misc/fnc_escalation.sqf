@@ -20,12 +20,31 @@ if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {};
 #define ESCALATION_FRACTION 0.1
 #define ESCALATION_MAX_LEVEL 11
 
+// The census is one engine call that cannot yield -- measured at 5.03 s for Altis's 17472
+// houses -- so it is a frame stall, not 5 s of shared scheduler time, and no amount of
+// rearranging inside this function changes that. What it gets instead is a banner and a place
+// in the generation sequence, so the stall lands inside a wait the player is already watching
+// rather than on the frame they take control.
+//
+// The banner has to reach the clients before the stall starts. fnc_map_prompt is remoteExec'd
+// and a remoteExec to your own machine still runs a frame later, so a blocking call on the next
+// line would freeze before anything drew. The sleep is what buys that frame; it is not a guess
+// at how long drawing takes.
+["Finalising campaign...<br/>surveying structures"] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+sleep 1;
+
+// Radius reaches the map's far corner from its centre, which is worldSize * sqrt(2)/2, not
+// worldSize. The square is fully covered either way; the larger radius just scans twice the
+// area for the same answer.
+//
 // sortByDistance false: ordering an array of many thousands of entries is the bulk of the
 // avoidable cost, and nothing here cares about the order.
 private _censusStart = diag_tickTime;
 private _total = count (nearestTerrainObjects
-    [[worldSize / 2, worldSize / 2, 0], ["House"], worldSize, false]);
+    [[worldSize / 2, worldSize / 2, 0], ["House"], worldSize * 0.7072, false]);
 private _censusCost = diag_tickTime - _censusStart;
+
+[""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
 escalation_budget = round (_total * ESCALATION_FRACTION) max ESCALATION_MAX_LEVEL;
 escalation_tier = escalation_budget / ESCALATION_MAX_LEVEL;
@@ -35,8 +54,9 @@ escalation_level = 0;
 escalation_multiplier = 1;
 publicVariable "escalation_multiplier";
 
-["INFO", "ECON", format ["Escalation census: %1 houses in %2s, budget %3, tier %4",
-    _total, (round (_censusCost * 100)) / 100, escalation_budget, round escalation_tier]] call fnc_log;
+["INFO", "ECON", format ["Escalation census: %1 houses on %2 in %3s, budget %4, tier %5",
+    _total, worldName, (round (_censusCost * 100)) / 100,
+    escalation_budget, round escalation_tier]] call fnc_log;
 
 // The counter is ungated and carries no attribution: not who did it, not whether anyone was
 // watching, not whether it stood in a town. The war is getting worse and both sides are making
