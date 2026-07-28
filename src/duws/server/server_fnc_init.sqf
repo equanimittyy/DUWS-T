@@ -785,21 +785,9 @@ fnc_addRecruitAction = compile preprocessFileLineNumbers "duws\shared\functions\
 publicVariable "fnc_addRecruitAction";
 fnc_night_horde_event = compile preprocessFileLineNumbers "duws\server\misc\fnc_night_horde_event.sqf";
 publicVariable "fnc_night_horde_event";
-fnc_addAskEnemyAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_addAskEnemyAction.sqf";
-publicVariable "fnc_addAskEnemyAction";
-fnc_civ_askEnemy_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_askEnemy_server.sqf";
-publicVariable "fnc_civ_askEnemy_server";
-fnc_civ_askEnemy_reveal = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_askEnemy_reveal.sqf";
-publicVariable "fnc_civ_askEnemy_reveal";
 fnc_civ_healed = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_healed.sqf";
 fnc_civ_stopCommand = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_stopCommand.sqf";
 publicVariable "fnc_civ_stopCommand";
-fnc_civ_recruitAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_recruitAction.sqf";
-publicVariable "fnc_civ_recruitAction";
-fnc_civ_recruit_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_recruit_server.sqf";
-publicVariable "fnc_civ_recruit_server";
-fnc_civ_recruit_reveal = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_recruit_reveal.sqf";
-publicVariable "fnc_civ_recruit_reveal";
 fnc_civ_search_action = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_search_action.sqf";
 publicVariable "fnc_civ_search_action";
 fnc_civ_search_armed = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_search_armed.sqf";
@@ -810,14 +798,6 @@ fnc_civ_handler_wbk = compile preprocessFileLineNumbers "duws\server\misc\fnc_ci
 publicVariable "fnc_civ_handler_wbk";
 fnc_addCivilianMoney = compile preprocessFileLineNumbers "duws\server\misc\fnc_addCivilianMoney.sqf";
 publicVariable "fnc_addCivilianMoney";
-fnc_civ_askForAid = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_askForAid.sqf";
-publicVariable "fnc_civ_askForAid";
-fnc_civ_askForAid_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_askForAid_server.sqf";
-publicVariable "fnc_civ_askForAid_server";
-fnc_civ_askForToolkit = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_askForToolkit.sqf";
-publicVariable "fnc_civ_askForToolkit";
-fnc_civ_askForToolkit_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_askForToolkit_server.sqf";
-publicVariable "fnc_civ_askForToolkit_server";
 // Civilian menu. Only fnc_civ_request and fnc_civ_bribe_answer are reached from a client, but
 // the rest are broadcast too so a headless client running civilian logic resolves them.
 fnc_civ_request = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_request.sqf";
