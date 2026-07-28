@@ -21,7 +21,12 @@ while IFS= read -r line; do
   line="$(echo "$line" | tr -d '[:space:]')"
   [ -z "$line" ] && continue
   file="${line%%::*}"; fn="${line##*::}"
-  if ! python3 "$ROOT/tests/lib/extract_fn.py" "$SRC/$file" "$fn" >> "$DEFS"; then
+  if [ "${fn#\*}" != "$fn" ]; then
+    # A `*name` entry is a whole-file function: the mission compiles the file itself, so there is
+    # no `name = {` for the extractor to match. Wrap the file body under the name it is bound to.
+    fn="${fn#\*}"
+    { printf '%s = {\n' "$fn"; cat "$SRC/$file"; printf '\n};\n'; } >> "$DEFS"
+  elif ! python3 "$ROOT/tests/lib/extract_fn.py" "$SRC/$file" "$fn" >> "$DEFS"; then
     echo "[unit] extract failed: $fn from $file"; exit 2
   fi
 done < "$HERE/functions.txt"
