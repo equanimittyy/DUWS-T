@@ -24,13 +24,17 @@ private _actionID = _unit addAction [
     true,
     true,
     "",
+    // Gated on the call-over: a local who has not been told to stop is walking their waypoints,
+    // and a menu that opens on someone mid-stride lets the player talk to a whole town without
+    // ever announcing themselves. fnc_civ_moveToPlayerServer broadcasts the flag.
+    //
     // 15 m, not the 3 m the conversational rows work at, because the menu carries arrest -- an
     // order shouted from a standoff, and walking into arm's reach to give it defeats the point.
     // fnc_civ_menu greys the four talking rows beyond 3 m.
     //
     // A surrendered civilian drops out entirely: what follows an arrest is the search action,
     // which lives on the scroll wheel, and two entries competing there is what this replaced.
-    "alive _target && {_this distance _target < 15} && {!(_target getVariable ['isSurrendered', false])}"
+    "alive _target && {_target getVariable ['DUWS_civ_stopped', false]} && {_this distance _target < 15} && {!(_target getVariable ['isSurrendered', false])}"
 ];
 
 _unit setVariable ["civ_menuActionID", _actionID];

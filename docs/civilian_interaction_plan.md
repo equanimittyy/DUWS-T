@@ -51,16 +51,16 @@ player can still buy a single answer.
 colour hints at the reception rather than predicting it. That is a deliberate loss of map
 legibility in exchange for reputation mattering continuously instead of at two thresholds.
 
-## One attempt per category, and a refusal closes the civilian
+## One conversation per civilian
 
-The roll is scoped to the individual, not the town:
+The roll is scoped to the individual, not the town, and every outcome ends the conversation:
 
 | Outcome | Effect |
 |---|---|
-| Accept | the request is served; that category is spent on this civilian, other categories stay open |
+| Accept | the request is served, then the civilian walks off and will not talk again |
 | Bribe, paid | as accept |
-| Bribe, declined or unaffordable | the civilian will not talk again, in any category |
-| Refuse | the civilian will not talk again, in any category |
+| Bribe, declined or unaffordable | as refuse |
+| Refuse | the civilian walks off and will not talk again |
 
 This is what stops the curve being decorative. A per-attempt roll with no cost lets a player at
 `-20` work down a fifty-strong town until one civilian says yes, which is the failure the heal
@@ -69,8 +69,9 @@ player simply clicked again. Here a refusal costs a person, so a hostile town bu
 roughly ten civilians per successful deal against one in ten at a friendly one, and the town's
 population is finite until it respawns.
 
-There are three categories — **intel**, **recruit**, **supplies** — and arrest sits outside all
-of them, because it is not a request and rolls nothing.
+A person who has helped is as finished with the player as one who refused, so a town is a finite
+number of favours rather than a menu the player works down row by row on one obliging local.
+Arrest sits outside the rule, because it is not a request and rolls nothing.
 
 ## What moves and what stays
 
@@ -81,7 +82,9 @@ rather than conversation, which is why the dialog is titled *Civilian Interactio
 
 **Stays on the scroll wheel:** call over, and the body search that follows a successful arrest.
 Both are positional and a dialog would ruin them — see [§Arrest](#arrest) for why the second step
-in particular cannot move.
+in particular cannot move. Call over is also the gate on the dialog: the menu action does not
+appear until the local has been told to stop, so a player cannot work a whole town without ever
+announcing themselves to anyone in it.
 
 **Already gone, and not returning as rows:** civilian fast travel (removed), develop-informant
 (deleted outright, for the reason in
@@ -134,7 +137,7 @@ Three client-side conditions decide what a row looks like, and none of them deci
 | Greyed when | Read from | Why the server cannot trust it |
 |---|---|---|
 | The player cannot afford a bribe | `magazines player` | A snapshot; in co-op two players can spend the same coins |
-| The civilian is closed, or the category is spent | the unit's own variables | Broadcast state a client machine holds a copy of |
+| The civilian is closed | the unit's own variables | Broadcast state a client machine holds a copy of |
 | The player is further than conversation range | `player distance _civ` | Read once on open, so it is stale the moment they walk |
 
 The deduction, the spend and the range test all stay server-side, exactly as
@@ -150,26 +153,29 @@ rows grey out beyond 3 m, so walking in and reopening is what a conversation cos
 
 | Variable | Locality | Purpose |
 |---|---|---|
-| `DUWS_civ_closed` | broadcast | Refusal, declined bribe, or an unaffordable one. Greys the four conversational rows; the menu action survives it, because arrest is not a conversation |
-| `DUWS_civ_spent_intel`, `..._recruit`, `..._supplies` | broadcast | One accepted request per category per civilian |
+| `DUWS_civ_stopped` | broadcast | Set when call over is answered. The menu action's condition gates on it, so nothing before it exists as an entry point |
+| `DUWS_civ_closed` | broadcast | One exchange spends it — served, refused, or a bribe declined or unaffordable. Greys the four conversational rows; the menu action survives it, because arrest is not a conversation |
 | `DUWS_civ_arrested` | broadcast | One hands-up attempt per civilian, spent on the attempt |
-| `DUWS_civ_pending` | server only | `[caller, category, amount]`, written when a roll returns `bribe`, cleared when the prompt is answered |
+| `DUWS_civ_pending` | server only | `[caller, row, amount]`, written when a roll returns `bribe`, cleared when the prompt is answered |
 
-The first two are broadcast because the dialog is built on the client and has to know at open
-time which rows are dead. Three booleans pushed when they change beats a request-and-wait
-handshake in front of every open, which would either delay the menu or pop rows grey after the
-player is already looking at them. Same trade as `DUWS_intel_searched`
-([`info/intel_system.md`](info/intel_system.md#the-throttle-is-per-player-and-the-attempt-is-what-it-spends)),
-though not the same pressure: that one is read by an addAction condition several times a second,
-where these are read once per open.
+The first three are broadcast because they are read off the server: the dialog is built on the
+client that opens it and has to know at open time which rows are dead, and `DUWS_civ_stopped` is
+read by an addAction condition on every machine that carries it. A boolean pushed when it changes
+beats a request-and-wait handshake in front of every open, which would either delay the menu or
+pop rows grey after the player is already looking at them — the same trade as `DUWS_intel_searched`
+([`info/intel_system.md`](info/intel_system.md#the-throttle-is-per-player-and-the-attempt-is-what-it-spends)).
+
+`DUWS_civ_stopped` is written server-side, in the call-over's own server function rather than in
+the client action body that triggers it: a client that owns the flag can open the menu on a local
+it never actually stopped.
 
 The menu action's own condition does **not** read `DUWS_civ_closed` — a closed civilian still
-shows the menu, because arrest survives closure. It gates on `alive`, on arrest range, and on the
-civilian not already being surrendered, which is what today's hands-up action gates on
-(`fnc_civ_lootAction.sqf:85`).
+shows the menu, because arrest survives closure. It gates on `alive`, on `DUWS_civ_stopped`, on
+arrest range, and on the civilian not already being surrendered, which is what today's hands-up
+action gates on (`fnc_civ_lootAction.sqf:85`).
 
 `DUWS_civ_pending` is the opposite case and must not be broadcast. The Accept button sends only
-*I accept* — the server reads which category and how much from its own record, so a client cannot
+*I accept* — the server reads which row and how much from its own record, so a client cannot
 claim a bribe it was never offered or name its own price. It records the caller too, so in co-op
 a second player cannot answer someone else's prompt.
 
@@ -188,11 +194,15 @@ the asking player's position — because the town bucket ranks by distance.
 **Recruit** is unchanged behind the row: the accepted path is `fnc_recruitSuccessServer`, which
 clears captive and broadcasts it itself.
 
-**Aid and toolkit are two rows in one category**, so a civilian hands over one or the other and
-never both. That is what fixes the dominance without inventing a number: the price is the same,
-the odds are the same, and the only difference left is which item the player needs — aid for the
+**Aid and toolkit are one choice, not two**, because a civilian answers one request and then
+walks. That is what fixes the dominance without inventing a number: the price is the same, the
+odds are the same, and the only difference left is which item the player needs — aid for the
 wounded, toolkit for the vehicle. The 50 % roll and the 2-coin price on the toolkit both go; they
 were the third gate the whole rework removes.
+
+The aid drop is a medikit *and three first aid kits*. A medikit is a tool with nothing to spend,
+so against a toolkit that repairs a vehicle outright the row was the weaker half of a choice that
+is supposed to be even — and one civilian is now the whole of what a town gives that player.
 
 The one asymmetry that has to go with them is the despawn. The medikit is deleted after 60 s
 (`fnc_civ_askForAid_server.sqf:51-55`) and the toolkit is not (`fnc_civ_askForToolkit_server.sqf:55-57`),
@@ -232,15 +242,15 @@ wipes were buying.
 
 ### What a bribe costs
 
-Per category, and **not** scaled by reputation — the curve already carries that signal by
-deciding whether money is asked for at all, so a reputation term in the amount would count it
-twice.
+Per row, and **not** scaled by reputation — the curve already carries that signal by deciding
+whether money is asked for at all, so a reputation term in the amount would count it twice.
 
-| Category | Bribe |
+| Row | Bribe |
 |---|---:|
 | Intel | 3 |
 | Recruit | 2 |
-| Supplies | 2 |
+| Aid | 2 |
+| Toolkit | 2 |
 | Arrest | — |
 
 **These are placeholders chosen to make the framework testable, not balanced figures.** They
@@ -250,7 +260,7 @@ today. Intel is deliberately *not* inheriting the old ask-enemy price of 1: that
 on a group within 700 m, inside spotting range, whereas the row now draws from the campaign-wide
 payout pool.
 
-Supplies is flat at 2 for both rows, which is the toolkit's old price rather than aid's. Aid was
+Aid and toolkit are flat at 2, which is the toolkit's old price rather than aid's. Aid was
 the cheaper of the two only because it was also the one that despawned, and that asymmetry is
 gone — pricing the pair at the survivor's figure keeps a medikit from being the cheapest thing a
 town can be asked for.

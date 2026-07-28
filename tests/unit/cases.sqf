@@ -104,23 +104,19 @@ private _pct = { (_this call fnc_civ_reaction_weights) apply { round (_x * 100) 
         (_w findIf { _x < 0 }), -1] call fnc_assertEq;
 } forEach [-20, -15, -5, 0, 5, 15, 20];
 
-// --- fnc_civ_rowSpec: which slot a row spends and what it costs ---
-["rowSpec: intel", (["INTEL"] call fnc_civ_rowSpec), ["INTEL", 3]] call fnc_assertEq;
-["rowSpec: recruit", (["RECRUIT"] call fnc_civ_rowSpec), ["RECRUIT", 2]] call fnc_assertEq;
+// --- fnc_civ_rowPrice: what a row costs when the roll comes back bribe ---
+["rowPrice: intel", (["INTEL"] call fnc_civ_rowPrice), 3] call fnc_assertEq;
+["rowPrice: recruit", (["RECRUIT"] call fnc_civ_rowPrice), 2] call fnc_assertEq;
+["rowPrice: aid", (["AID"] call fnc_civ_rowPrice), 2] call fnc_assertEq;
+["rowPrice: toolkit", (["TOOLKIT"] call fnc_civ_rowPrice), 2] call fnc_assertEq;
 
-// The whole point of the pairing: one civilian gives aid or a toolkit, never both.
-["rowSpec: aid takes the supplies slot",
-    (["AID"] call fnc_civ_rowSpec), ["SUPPLIES", 2]] call fnc_assertEq;
-["rowSpec: toolkit takes the same slot at the same price",
-    (["TOOLKIT"] call fnc_civ_rowSpec), ["SUPPLIES", 2]] call fnc_assertEq;
-
-["rowSpec: case-insensitive", (["intel"] call fnc_civ_rowSpec), ["INTEL", 3]] call fnc_assertEq;
+["rowPrice: case-insensitive", (["intel"] call fnc_civ_rowPrice), 3] call fnc_assertEq;
 
 // Fail closed. Rows only ever arrive over the wire, so an unrecognised one is a client sending
 // something the menu never offered; the negative price is what every caller rejects on.
 {
-    [format ["rowSpec: %1 is rejected", str _x],
-        (([_x] call fnc_civ_rowSpec) select 1) < 0, true] call fnc_assertEq;
+    [format ["rowPrice: %1 is rejected", str _x],
+        ([_x] call fnc_civ_rowPrice) < 0, true] call fnc_assertEq;
 } forEach ["", "ARREST", "SUPPLIES", "intel ", "DROP TABLE"];
 
 // --- fnc_civ_townBand: the [ellipse, icon] colour pair a reputation paints ---

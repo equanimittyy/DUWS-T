@@ -33,8 +33,8 @@ private _actionID = _unit addAction [
     // 发送服务器请求，让平民移动到玩家位置
     [_target, _caller] remoteExec ["fnc_civ_moveToPlayerServer", 2];
     sleep 4;
-    // 提示成功
-    hint localize "STR_DUWS_T_STOP_SUCCESS_HINT";
+    // The spoken reply is the whole feedback. A hint on top of it narrated the civilian walking
+    // over, which the player can already see.
     [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_STOP_SUCCESS"] remoteExec ["fnc_duws_dialogue", _caller];
 },
     nil,

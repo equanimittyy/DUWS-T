@@ -246,27 +246,22 @@ fnc_civ_reaction_weights = {
 	[_accept, 1 - _accept - _refuse, _refuse]
 };
 
-// A menu row's [category, bribe]. One table rather than a switch in each consumer: the request
-// roll, the serve and the bribe answer all have to agree on what a row costs and which slot it
-// spends, and three copies would drift.
-//
-// Aid and toolkit share the supplies slot deliberately -- a civilian hands over one or the
-// other, never both, which is what stops aid dominating the toolkit now that neither carries a
-// success roll or a price of its own. The prices are anchored on the black market the player
-// already reads (goggles 1, pistol and optic 5) and are placeholders for balancing, not
-// measured figures.
+// What a menu row costs if the reaction roll comes back bribe. One table rather than a switch in
+// each consumer: the request roll, the serve and the bribe answer all have to agree on the price,
+// and three copies would drift. The prices are anchored on the black market the player already
+// reads (goggles 1, pistol and optic 5) and are placeholders for balancing, not measured figures.
 //
 // An unrecognised row returns a negative price. Callers must treat that as a reject: rows only
 // ever come off the wire, so this is the fail-closed edge for a client sending one the menu
 // never offered.
-fnc_civ_rowSpec = {
+fnc_civ_rowPrice = {
 	params [["_row", ""]];
 	switch (toUpper _row) do {
-		case "INTEL": { ["INTEL", 3] };
-		case "RECRUIT": { ["RECRUIT", 2] };
-		case "AID": { ["SUPPLIES", 2] };
-		case "TOOLKIT": { ["SUPPLIES", 2] };
-		default { ["", -1] };
+		case "INTEL": { 3 };
+		case "RECRUIT": { 2 };
+		case "AID": { 2 };
+		case "TOOLKIT": { 2 };
+		default { -1 };
 	};
 };
 
@@ -875,7 +870,12 @@ fnc_civ_moveToPlayerServer = {
     params ["_unit", "_caller"];
     if (!isServer) exitWith {};
     if (isNull _unit || isNull _caller) exitWith {};
-    
+
+    // Broadcast: the interaction menu's condition is evaluated on every machine that carries the
+    // action, and the call-over is what unlocks it. Set here rather than in the client-side action
+    // body so a client cannot open the menu on a local it never actually stopped.
+    _unit setVariable ["DUWS_civ_stopped", true, true];
+
     // 清除平民所在组的所有路点
     { deleteWaypoint _x } forEach waypoints (group _unit);
     _unit doMove (getPos _caller);

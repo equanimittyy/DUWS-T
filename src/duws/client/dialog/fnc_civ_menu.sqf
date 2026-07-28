@@ -27,12 +27,11 @@ private _closed = _civilian getVariable ["DUWS_civ_closed", false];
 // and reopening is what a conversation costs.
 private _inRange = (player distance _civilian) <= 3;
 
-// Aid and toolkit share the supplies slot, so serving either greys both.
+// All four rows grey together: one exchange -- served or refused -- closes the person for good,
+// so there is no state where one row is still open and another is not.
 {
-    _x params ["_button", "_category"];
-    private _spent = _civilian getVariable [format ["DUWS_civ_spent_%1", _category], false];
-    ctrlEnable [_button, !_closed && !_spent && _inRange];
-} forEach [[8340, "INTEL"], [8341, "SUPPLIES"], [8342, "SUPPLIES"], [8343, "RECRUIT"]];
+    ctrlEnable [_x, !_closed && _inRange];
+} forEach [8340, 8341, 8342, 8343];
 
 // Arrest survives the closed flag: a town's opinion does not change whether a person raises
 // their hands, and refusing to talk is not protection from being detained. Its one-shot is its

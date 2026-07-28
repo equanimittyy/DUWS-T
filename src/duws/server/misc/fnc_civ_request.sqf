@@ -8,7 +8,7 @@ params ["_civilian", "_caller", ["_row", ""]];
 if (isNull _civilian || isNull _caller) exitWith {};
 if (!alive _civilian) exitWith {};
 
-([_row] call fnc_civ_rowSpec) params ["_category", "_bribe"];
+private _bribe = [_row] call fnc_civ_rowPrice;
 
 // Fail closed and say nothing back: rows only ever arrive over the wire, so there is no
 // legitimate path that reaches this with a row the menu never drew.
@@ -16,17 +16,14 @@ if (_bribe < 0) exitWith {
     ["ERROR", "CIV", format ["Menu row '%1' is not a request (from %2)", _row, name _caller]] call fnc_log;
 };
 
-// The three conditions below are the ones the menu greys client-side. Greying spares the player
-// a pointless click and decides nothing; these reads are what actually hold. Conversation range
+// Both conditions below are the ones the menu greys client-side. Greying spares the player a
+// pointless click and decides nothing; these reads are what actually hold. Conversation range
 // matches the 3 m the menu greys at.
 if (_caller distance _civilian > 3) exitWith {
     [localize "STR_DUWS_T_CIV_TOO_FAR"] remoteExec ["hint", _caller];
 };
 if (_civilian getVariable ["DUWS_civ_closed", false]) exitWith {
     [localize "STR_DUWS_T_CIV_CLOSED"] remoteExec ["hint", _caller];
-};
-if (_civilian getVariable [format ["DUWS_civ_spent_%1", _category], false]) exitWith {
-    [localize "STR_DUWS_T_CIV_SPENT"] remoteExec ["hint", _caller];
 };
 
 // An offer already on the table is not re-rolled. Without this a player can leave the bribe

@@ -2547,8 +2547,8 @@
                 <Chinesesimp>滚开，你个罪犯！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_AID_SUCCESS">
-                <Original>Aid received! Medikit dropped nearby.</Original>
-                <English>Aid received! Medikit dropped nearby.</English>
+                <Original>Aid received! Medikit and dressings dropped nearby.</Original>
+                <English>Aid received! Medikit and dressings dropped nearby.</English>
                 <Chinesesimp>获得援助！医疗箱已放在附近。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_AID_GRANT">
@@ -2625,13 +2625,6 @@
                 <German>Hey du! Komm her!</German>
                 <Spanish>¡Oye tú! Ven aquí!</Spanish>
                 <Chinesesimp>嘿，你！给我过来！</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_STOP_SUCCESS_HINT">
-                <Original>Civilian stops</Original>
-                <English>Civilian stops</English>
-                <German>Zivilist bleibt stehen.</German>
-                <Spanish>Civil se detiene.</Spanish>
-                <Chinesesimp>平民朝你走来。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_STOP_FAIL_HINT">
                 <Original>Civilian ignores you</Original>
@@ -2987,10 +2980,6 @@
                 <Original>This local is done talking to you.</Original>
                 <English>This local is done talking to you.</English>
             </Key>
-            <Key ID="STR_DUWS_T_CIV_SPENT">
-                <Original>This local has nothing more to offer there.</Original>
-                <English>This local has nothing more to offer there.</English>
-            </Key>
             <Key ID="STR_DUWS_T_CIV_TOO_FAR">
                 <Original>Get closer to talk.</Original>
                 <English>Get closer to talk.</English>
@@ -3020,16 +3009,16 @@
                 <English>Ask for Medical Aid</English>
             </Key>
             <Key ID="STR_DUWS_T_CIV_ROW_AID_DESC">
-                <Original>A medikit, left at their feet. One local will spare aid or tools, never both.</Original>
-                <English>A medikit, left at their feet. One local will spare aid or tools, never both.</English>
+                <Original>A medikit and three dressings, left at their feet.</Original>
+                <English>A medikit and three dressings, left at their feet.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIV_ROW_TOOLKIT">
                 <Original>Ask for Tools</Original>
                 <English>Ask for Tools</English>
             </Key>
             <Key ID="STR_DUWS_T_CIV_ROW_TOOLKIT_DESC">
-                <Original>A toolkit, left at their feet. One local will spare aid or tools, never both.</Original>
-                <English>A toolkit, left at their feet. One local will spare aid or tools, never both.</English>
+                <Original>A toolkit, left at their feet.</Original>
+                <English>A toolkit, left at their feet.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIV_ROW_RECRUIT">
                 <Original>Offer to Enlist</Original>

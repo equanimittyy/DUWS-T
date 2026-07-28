@@ -14,7 +14,7 @@ if (isNull _civilian) exitWith {};
 // client that opens it.
 _civilian setVariable ["DUWS_civ_closed", true, true];
 
-// Closed in every category, not just the one that was asked. The refusal is the person deciding
+// Closed against every row, not just the one that was asked. The refusal is the person deciding
 // they are done talking, so a second row would be the same answer with extra steps.
 // The line is per row only for flavour -- all four mean the same thing.
 private _line = switch (toUpper _row) do {
