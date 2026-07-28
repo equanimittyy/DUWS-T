@@ -1789,6 +1789,10 @@
                 <English>Quick Kits</English>
                 <Chinesesimp>快速整备</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_QUICK_KITS_NONE">
+                <Original>No kits have been scanned yet.</Original>
+                <English>No kits have been scanned yet.</English>
+            </Key>
             <Key ID="STR_DUWS_T_CHANGE_TO">
                 <Original>Change to %1</Original>
                 <English>Change to %1</English>

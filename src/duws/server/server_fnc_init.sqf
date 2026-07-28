@@ -1072,6 +1072,8 @@ fnc_fill_sawpbox = compile preprocessFileLineNumbers "duws\server\misc\fnc_fill_
 fnc_delete_napalm = compile preprocessFileLineNumbers "duws\server\misc\fnc_delete_napalm.sqf";publicVariable "fnc_delete_napalm";
 fnc_addQuickChangeActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addQuickChangeActions.sqf";
 publicVariable "fnc_addQuickChangeActions";
+fnc_quick_kits_menu = compile preprocessFileLineNumbers "duws\client\misc\fnc_quick_kits_menu.sqf";
+publicVariable "fnc_quick_kits_menu";
 fnc_addNearbyUnitsGearToArsenal = compile preprocessFileLineNumbers "duws\server\misc\fnc_addNearbyUnitsGearToArsenal.sqf";
 publicVariable "fnc_addNearbyUnitsGearToArsenal";
 fnc_scanNearbyUnitsForQuickChange = compile preprocessFileLineNumbers "duws\server\misc\fnc_scanNearbyUnitsForQuickChange.sqf";

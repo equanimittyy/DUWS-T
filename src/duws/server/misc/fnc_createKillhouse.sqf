@@ -921,19 +921,20 @@ publicVariable "killhouse_srv_target_hit";
 
 // Run shape. Globals rather than file-scope privates: the killhouse_srv_* bodies run later,
 // from remoteExec, where a private declared here is long out of scope.
-killhouse_run_total              = 100;
+killhouse_run_total              = 25;
 killhouse_wave_size              = 10;
 killhouse_wave_threshold         = 3;   // next wave once this many or fewer are alive
 killhouse_wave_timeout           = 30;  // ...or this long after the last wave, but only while
 killhouse_wave_timeout_threshold = 10;  // at or below this, so a stalled run cannot stack
                                         // wave on wave onto a course nobody is clearing
 killhouse_reward_training        = 1;
-killhouse_reward_challenge       = 10;
+killhouse_reward_challenge       = 2;
 killhouse_progress_delay         = 10;  // before the first progress hint, so the opening
                                         // briefing is readable before the counter overwrites it
 killhouse_progress_period        = 1;   // between progress hints after that; cannot resolve
                                         // finer than the wave loop's own tick below
-killhouse_corpse_linger          = 2;   // seconds a hit target or body stays before deletion
+killhouse_corpse_linger          = 5;   // seconds a hit target or body stays before deletion
+killhouse_min_spawn_dist         = 5;   // no spawn this close to a player already in the course
 killhouse_area_radius            = 80;  // 3D from the composition centre, and the one
                                         // definition of "inside the killhouse": it picks who
                                         // hears hints and which enemies are still in play. The
@@ -988,6 +989,41 @@ killhouse_srv_end_run = {
     };
 };
 
+// Picks the next _want rows clear of everyone already in the course, walking the shuffled pool
+// from _from. Returns [rows, nextIndex].
+//
+// Rows within killhouse_min_spawn_dist of a player are stepped over rather than used: the rows
+// surround the lanes, so a spawn at arm's length usually lands behind the player and reads as a
+// glitch rather than a drill. Stepping over costs nothing because the pool holds far more rows
+// than a run uses -- the walk simply reaches further down it and the run still fields its full
+// count with someone standing in the lanes.
+//
+// A short return means the pool ran out, which is the caller's signal to finish on what is
+// already down. It must never be read as "try again": every remaining row is blocked or used,
+// so a caller that waited for the rest would wait forever.
+killhouse_srv_pick_slots = {
+    if (!isServer) exitWith {[[], 0]};
+    params ["_pool", "_from", "_want"];
+    private _centerX = missionNamespace getVariable "killhouse_centerX";
+    private _centerY = missionNamespace getVariable "killhouse_centerY";
+    private _centerZ = missionNamespace getVariable "killhouse_centerZ";
+    // Resolved once: the test runs per row, the occupant list does not change within a wave.
+    private _occupied = (call killhouse_srv_occupants) apply { getPosWorld _x };
+
+    private _rows = [];
+    private _i = _from;
+    while { count _rows < _want && { _i < count _pool } } do {
+        private _row = _pool select _i;
+        _row params ["_class", "_dX", "_dY", "_dZ"];
+        private _pos = [_centerX + _dX, _centerY + _dY, _centerZ + _dZ];
+        if (_occupied findIf { _x distance _pos < killhouse_min_spawn_dist } < 0) then {
+            _rows pushBack _row;
+        };
+        _i = _i + 1;
+    };
+    [_rows, _i]
+};
+
 // Spawns one wave onto the composition rows it is handed.
 killhouse_srv_spawn_wave = {
     if (!isServer) exitWith {};
@@ -1034,6 +1070,9 @@ killhouse_srv_spawn_wave = {
             _unit setBehaviour "COMBAT";
             _unit setCombatMode "RED";
             _unit allowFleeing 0;
+            // Read by the kill-income handler in server_init.sqf. A run already pays its own
+            // reward and can be restarted at will, so its bodies must not also feed the tally.
+            _unit setVariable ["killhouse_enemy", true];
             // Drop from the list before deleting, not after: the wave loop counts this array
             // to decide when the next wave is due and when the run is finished, and a
             // deleted unit no longer matches for removal. The body then lingers, so a kill
@@ -1084,6 +1123,7 @@ killhouse_srv_start_run = {
         params ["_mode", "_slots", "_total", "_runId"];
         private _listVar = ["killhouse_enemies", "killhouse_targets"] select (_mode == "TRAINING");
         private _spawned = 0;
+        private _cursor = 0;
         private _lastWave = time;
         private _nextProgress = time + killhouse_progress_delay;
         private _complete = false;
@@ -1115,10 +1155,19 @@ killhouse_srv_start_run = {
                     || { _alive <= killhouse_wave_timeout_threshold
                          && { time - _lastWave >= killhouse_wave_timeout } };
                 if (_due) then {
-                    private _size = killhouse_wave_size min (_total - _spawned);
-                    [_mode, _slots select [_spawned, _size]] call killhouse_srv_spawn_wave;
-                    _spawned = _spawned + _size;
-                    _lastWave = time;
+                    private _want = killhouse_wave_size min (_total - _spawned);
+                    ([_slots, _cursor, _want] call killhouse_srv_pick_slots) params ["_wave", "_next"];
+                    _cursor = _next;
+                    if !(_wave isEqualTo []) then {
+                        [_mode, _wave] call killhouse_srv_spawn_wave;
+                        _spawned = _spawned + (count _wave);
+                        _lastWave = time;
+                    };
+                    // Pool walked to the end without meeting the count: whatever is left is
+                    // blocked or already used, and no later wave can place it. Settle the run
+                    // at what actually went down, so the loop finishes instead of waiting on
+                    // a wave that will never come.
+                    if (_cursor >= count _slots) then { _total = _spawned; };
                 };
             };
             // Re-read rather than reuse _alive: a wave may have gone up this pass, and the
@@ -1170,17 +1219,25 @@ if (count _computerObjects > 0) then {
         [_x, [
             "<t color='#00FF00'>" + localize "STR_DUWS_T_KILLHOUSE_CONTROLS" + "</t>",
             {
-                [localize "STR_DUWS_T_KILLHOUSE_CONTROLS", [
+                // Rows are assembled on the clicking machine each time the terminal is used,
+                // not baked when the killhouse is built: the arsenal is a mid-campaign
+                // purchase, and a list fixed at creation could never grow the row.
+                private _entries = [
                     [localize "STR_DUWS_T_SPAWN_TARGETS", { [] remoteExec ["killhouse_srv_spawn_targets", 2]; }, [], [0,1,0,1]],
                     [localize "STR_DUWS_T_SPAWN_ENEMIES", { [] remoteExec ["killhouse_srv_spawn_enemies", 2]; }, [], [1,0,0,1]],
                     [localize "STR_DUWS_T_CLEANUP",       { [] remoteExec ["killhouse_srv_cleanup", 2]; }, [], [1,1,0,1]],
-                    [localize "STR_DUWS_KILLHOUSE_EXIT_TRAINING", {
-                        private _respawnPos = getMarkerPos "respawn_west";
-                        if (_respawnPos isEqualTo [0,0,0]) then { _respawnPos = PosOfBLUHQ; };
-                        player setPos _respawnPos;
-                        hint localize "STR_DUWS_KILLHOUSE_EXIT_MSG";
-                    }, [], [1,0.533,0,1]]
-                ]] call fnc_open_action_menu;
+                    [localize "STR_DUWS_T_QUICK_KITS",    { [] call fnc_quick_kits_menu; }, [], [0,1,1,1]]
+                ];
+                if (support_armory_available) then {
+                    _entries pushBack [localize "STR_DUWS_T_160jkc3a", fnc_duws_Arsenal, [], [0,1,1,1]];
+                };
+                _entries pushBack [localize "STR_DUWS_KILLHOUSE_EXIT_TRAINING", {
+                    private _respawnPos = getMarkerPos "respawn_west";
+                    if (_respawnPos isEqualTo [0,0,0]) then { _respawnPos = PosOfBLUHQ; };
+                    player setPos _respawnPos;
+                    hint localize "STR_DUWS_KILLHOUSE_EXIT_MSG";
+                }, [], [1,0.533,0,1]];
+                [localize "STR_DUWS_T_KILLHOUSE_CONTROLS", _entries] call fnc_open_action_menu;
             },
             nil,
             6,

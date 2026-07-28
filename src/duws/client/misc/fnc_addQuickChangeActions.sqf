@@ -18,22 +18,7 @@ if (_actionAID != -1) then { _crate removeAction _actionAID; };
 
 _actionAID = _crate addAction [
     format ["<t color='#00ff00'>%1</t>", localize "STR_DUWS_T_QUICK_KITS"],
-    {
-        private _loadouts = missionNamespace getVariable ["blufor_quickChange_loadouts_scanned", []];
-        private _entries = _loadouts apply {
-            _x params ["_className", "_displayName", "_loadout"];
-            [
-                format [localize "STR_DUWS_T_CHANGE_TO", _displayName],
-                {
-                    params ["_loadout", "_displayName"];
-                    player setUnitLoadout _loadout;
-                    hint format [localize "STR_DUWS_T_CHANGED_TO", _displayName];
-                },
-                [_loadout, _displayName]
-            ]
-        };
-        [localize "STR_DUWS_T_QUICK_KITS", _entries] call fnc_open_action_menu;
-    },
+    { [] call fnc_quick_kits_menu; },
     nil,
     80,
     true,

@@ -199,6 +199,12 @@ if (isServer) then {
     addMissionEventHandler ["EntityKilled", {
         params ["_killed", "_killer", "_instigator"];
 
+        // Killhouse bodies never pay. The drill spawns hostile OPFOR on demand and already
+        // awards a fixed sum per completed run, so counting them here would turn an
+        // unlimited training course into an unlimited CP source. Plain (non-public)
+        // setVariable is enough: the tag is written and read on the server.
+        if (_killed getVariable ["killhouse_enemy", false]) exitWith {};
+
         // ========== 识别真正的击杀玩家（支持组员击杀） ==========
         private _shooter = objNull;
         if (isPlayer _instigator) then {
