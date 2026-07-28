@@ -35,7 +35,7 @@ while {_timer>0} do {
 	
 		clicked = false;
 		["TAXI"] call fnc_mapclick_release;
-		hint localize "STR_DUWS_T_helotaxi1wpmarked";
+		[localize "STR_DUWS_T_helotaxi1wpmarked"] call fnc_map_prompt;
 		sleep 2;
 	} else {
 		hint localize "STR_DUWS_T_helotaxiwp_reopen";
@@ -56,7 +56,7 @@ while {_timer>0} do {
 
 			clicked = false;
 			["TAXI"] call fnc_mapclick_release;
-			hint localize "STR_DUWS_T_helotaxi2wpmarked";
+			[localize "STR_DUWS_T_helotaxi2wpmarked"] call fnc_map_prompt;
 			sleep 2;
 		} else {
 			deletemarker str(TaxiMarker1);
@@ -74,7 +74,7 @@ while {_timer>0} do {
 
 			if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) then {
 				clicked = false;
-				titleText [format ["<t color='#ff0000' size='2'>%1</t>", localize "STR_DUWS_T_helotaxiwp_nolz"], "PLAIN DOWN", -1, true, true];
+				[format ["<t color='#ff0000'>%1</t>", localize "STR_DUWS_T_helotaxiwp_nolz"]] call fnc_map_prompt;
 			} else {
 				ClickedTaxiPos = _foundPickupPos;
 				["TAXI"] call fnc_mapclick_release;

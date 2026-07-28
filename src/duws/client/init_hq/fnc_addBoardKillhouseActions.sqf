@@ -50,10 +50,9 @@ if (isNil {_board getVariable "board_fasttravel_actions_done"}) then {
             };
             private _got = ["FASTTRAVEL", {
                 params ["_pos"];
+                // Releasing clears the banner too, and it has to happen while the map is still
+                // up: the banner is a control on that display.
                 ["FASTTRAVEL"] call fnc_mapclick_release;
-                // Cleared while the map is still up: the banner is a control on that display
-                // and fnc_map_prompt cannot reach it once the map is gone.
-                [""] call fnc_map_prompt;
                 openMap false;
                 DUWS_baseTravelMapOpen = false;
                 if (_pos distance PosOfBLUHQ < 200) then {

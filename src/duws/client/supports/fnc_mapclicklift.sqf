@@ -29,7 +29,9 @@ if (isNil {player getVariable "LiftWaypointMarkers"}) then {player setVariable [
 
 // 打开地图
 openMap true;
-hint parseText localize "STR_DUWS_T_liftwp_brief";
+// Drawn on the map rather than hinted: the map is force-open for this whole routine, and
+// the hint box renders beneath it.
+[localize "STR_DUWS_T_liftwp_brief"] call fnc_map_prompt;
 
 while {_timer > 0 && count _waypoints < 3} do {
     // 确保地图始终打开（如果玩家关闭，立即重新打开）
@@ -82,9 +84,9 @@ while {_timer > 0 && count _waypoints < 3} do {
 
         // Per-leg confirmation, as the taxi picker gives.
         if ((count _waypoints) < 3) then {
-            hint localize ([
+            [localize ([
                 "STR_DUWS_T_liftwp1marked", "STR_DUWS_T_liftwp2marked"
-            ] select ((count _waypoints) - 1));
+            ] select ((count _waypoints) - 1))] call fnc_map_prompt;
         };
     };
 
@@ -99,12 +101,10 @@ player setVariable ["LiftWaypoints", _waypoints];
 if (count _waypoints == 3) then {
     // 三个点已选完，将标记数组保存到玩家变量，由主脚本在释放后清理
     player setVariable ["LiftWaypointMarkers", _markers];
-    titleText [format ["<t color='#00ff00' size='2'>%1</t>", localize "STR_DUWS_T_liftwp_set"], "PLAIN DOWN", -1, true, true];
 } else {
     // 未完成选择（超时），立即删除标记
     { deleteMarker _x } forEach _markers;
     player setVariable ["LiftWaypointMarkers", []];
-    titleText [format ["<t color='#ff0000' size='2'>%1</t>", localize "STR_DUWS_T_liftwp_abort"], "PLAIN DOWN", -1, true, true];
 };
 
 // 标记完成，让主脚本继续
@@ -112,6 +112,14 @@ player setVariable ["LiftTakeOff", true];
 
 // 关闭地图
 openMap false;
+
+// Verdict after the map is out of the way, not before: titleText is drawn on a layer the map
+// covers, so both of these used to fire into a screen the player could not see.
+if (count _waypoints == 3) then {
+    titleText [format ["<t color='#00ff00' size='2'>%1</t>", localize "STR_DUWS_T_liftwp_set"], "PLAIN DOWN", -1, true, true];
+} else {
+    titleText [format ["<t color='#ff0000' size='2'>%1</t>", localize "STR_DUWS_T_liftwp_abort"], "PLAIN DOWN", -1, true, true];
+};
 
 // 清理回调及玩家变量
 ["LIFT"] call fnc_mapclick_release;

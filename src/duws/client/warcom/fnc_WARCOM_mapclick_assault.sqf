@@ -6,8 +6,10 @@
 _pos = [];
 clicked = false;
 if (!(["ASSAULT", "ClickedPos = _pos; clicked = true;"] call fnc_mapclick_claim)) exitWith {};
-hint localize "STR_DUWS_T_0v7xnprx";
 openMap true;
+// Drawn on the map: the hint box sits beneath the map display, so this instruction was
+// covered by the map the line after it was issued.
+[localize "STR_DUWS_T_0v7xnprx"] call fnc_map_prompt;
 
 _found_distance = false;
 

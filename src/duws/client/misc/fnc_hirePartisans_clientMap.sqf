@@ -36,8 +36,11 @@ private _got = ["PARTISANS", {
 // stays permanently "already placing a squad".
 if (!_got) exitWith { hirePartisans_mapOpen = false; };
 
-hint "Click on the map to deploy your partisans. You cannot close the map until you choose a location.";
 openMap true;
+// Drawn on the map, not hinted: the hint box renders beneath the map display, so this
+// instruction was issued one line before the map covered it and never reached the player --
+// who was then held in a map that refuses to close, with nothing saying why.
+["Click on the map to deploy your partisans. You cannot close the map until you choose a location."] call fnc_map_prompt;
 
 // 强制保持地图打开，直到点击
 while {hirePartisans_mapOpen} do {

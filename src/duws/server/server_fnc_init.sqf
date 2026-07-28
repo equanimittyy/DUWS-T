@@ -1076,6 +1076,10 @@ fnc_mapclick_release = {
 	if ((uiNamespace getVariable ["DUWS_mapclick_owner", ""]) isNotEqualTo _owner) exitWith { false };
 	uiNamespace setVariable ["DUWS_mapclick_owner", ""];
 	onMapSingleClick (uiNamespace getVariable ["DUWS_mapclick_bg", ""]);
+	// The banner shares the slot's lifetime: a mode that no longer owns the click must not be
+	// left telling the player to click. Multi-stage modes redraw after each re-claim. No-op once
+	// the map has closed, since the control lives on that display.
+	[""] call fnc_map_prompt;
 	true
 };
 publicVariable "fnc_mapclick_release";

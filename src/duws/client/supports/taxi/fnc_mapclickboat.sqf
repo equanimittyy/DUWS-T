@@ -20,10 +20,10 @@ while {_timer>0} do {
     if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) then {
 		if (ClickedTaxiPos distance player < 100) exitWith {
 		clicked = false;
-		titleText [localize "STR_DUWS_T_boattaxiwp_close", "PLAIN DOWN"];
+		[localize "STR_DUWS_T_boattaxiwp_close"] call fnc_map_prompt;
 		};
 	clicked = false;
-	titleText [localize "STR_DUWS_T_boattaxiwp_bad", "PLAIN DOWN"];
+	[localize "STR_DUWS_T_boattaxiwp_bad"] call fnc_map_prompt;
 	}
 	else
 	{["BOATTAXI"] call fnc_mapclick_release;_timer = 0;taxiCanTakeOff = true;}
