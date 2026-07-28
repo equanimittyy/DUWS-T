@@ -2556,16 +2556,6 @@
                 <English>Take it. It's not much, but it's what we have.</English>
                 <Chinesesimp>...拿着这个，别让我再看到你。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_CHANGE_FACE">
-                <Original>Change Appearance</Original>
-                <English>Change Appearance</English>
-                <Chinesesimp>随机更换面容识别</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FACE_CHANGED">
-                <Original>Your appearance has changed.</Original>
-                <English>Your appearance has changed.</English>
-                <Chinesesimp>你的面部已随机更换为：%1</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_ARSENAL_ENTER_TITLE">
                 <Original>Arsenal Notice</Original>
                 <English>Arsenal Notice</English>

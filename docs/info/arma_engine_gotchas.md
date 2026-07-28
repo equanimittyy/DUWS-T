@@ -391,3 +391,30 @@ on it. Prefer `time` where a savegame must carry the cooldown; `diag_tickTime` o
 cooldown is meant to die with the session. The one genuine anomaly worth repairing is a stamp
 *ahead* of its clock — clear it and let the function's own default apply, as the monitor in
 `server/server_init.sqf:434` does. A stamp far in the past is just an action nobody has used.
+
+## An `Acts_` ambient animation survives death, so the corpse stands and shrugs off hits
+
+**A unit put into an `Acts_*`/`acts_*` ambient animation with a raw `switchMove` stays in that
+animation when it dies. No death transition plays, no ragdoll, and the body holds the pose
+standing upright — so incoming fire produces no visible reaction and the unit reads as
+invulnerable even though `alive` has already flipped to `false`.**
+
+The illusion is total from the player's side: they shoot a prop NPC, nothing moves, and they
+conclude `allowDamage false` is set somewhere. Scripts watching the same unit see the opposite,
+because `alive` and the `Killed` event are unaffected — the divergence is purely visual, which
+is why it survives code review. Anything gated on that death (`waitUntil {!alive _x}`, a
+`TaskFailed` notification, an action teardown) fires correctly and looks like it fired for no
+reason.
+
+`BIS_fnc_ambientAnim` and `BIS_fnc_ambientAnimCombat` do not have this problem: they install
+their own handlers to break the animation, which is why a hand-rolled `switchMove` next to
+working `ambientAnim` units looks like it should behave the same and does not. A temporary
+`enableSimulation false` during placement is a separate mechanism and not the cause; simulation
+being off does suppress damage, but the placement pattern in `server/init_hq/fnc_BluHQinit.sqf`
+re-enables it a fraction of a second later.
+
+**How to apply:** when posing a unit with a raw `switchMove`, add a `Killed` handler that clears
+the move — `[_unit, ""] remoteExec ["switchMove", 0]`, broadcast so every client's copy drops the
+pose, not just the machine where the unit is local. The HQ officer in
+`server/init_hq/fnc_BluHQinit.sqf` does this; the barrier engineer in the same file
+(`Acts_PointingLeftUnarmed`) does not and still stands when killed.

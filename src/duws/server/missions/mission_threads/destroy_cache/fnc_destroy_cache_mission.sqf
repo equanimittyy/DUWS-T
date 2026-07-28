@@ -114,6 +114,7 @@ clearBackpackCargoGlobal _vehicle_7;
         6,
         true,
         true,
+        "",
         "!(_target getVariable ['arsenalUsed', false])"
     ];
     _this setVariable ["arsenalActionID", _actionID];
@@ -148,6 +149,7 @@ clearBackpackCargoGlobal _vehicle_8;
         6,
         true,
         true,
+        "",
         "!(_target getVariable ['arsenalUsed', false])"
     ];
     _this setVariable ["arsenalActionID", _actionID];

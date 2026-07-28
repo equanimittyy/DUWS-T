@@ -55,15 +55,10 @@ the commander and the map board, because the commander is a killable unit.
 | REST/HEAL (3hrs) | Satellite phone | `src/duws/client/misc/fnc_addHQSatelliteActions.sqf:19` | 0 | `_this == player`, added only for `game_master` |
 | AI Heal/Re-Arm | Medical tent | `src/duws/server/init_hq/fnc_BluHQinit.sqf:660` | 0 | Within 12 m |
 | Quick Kits (menu) | Supply crate | `src/duws/client/misc/fnc_addQuickChangeActions.sqf:19` | 80 | Within 3 m |
-| Change Appearance | Supply crate | `src/duws/client/misc/fnc_addFaceChangeAction.sqf:13` | 6 | Within 3 m |
 
 The arsenal and HALO entries have a second add path in
 `src/duws/client/dialog/fnc_request_support.sqf:40-42,126-136`, which re-runs the same block when
 a support is unlocked mid-campaign rather than at base build.
-
-`fnc_addFaceChangeAction` is compiled and `publicVariable`'d at
-`src/duws/server/server_fnc_init.sqf:713-714` but never invoked, so Change Appearance does not
-reach a live crate.
 
 ### HQ map board
 
@@ -79,6 +74,8 @@ reach a live crate.
 `src/duws/shared/functions/fnc_FOBactions.sqf` mirrors the HQ command cluster onto each FOB. It
 ends by blocking on `!alive blu_officer_object` and then calling `removeAllActions _fob`, so
 losing the officer strips every entry the FOB carries, including ones added by other files.
+That teardown is intended: the officer is the command element, and losing him is meant to cost
+the player the command menus.
 
 | Entry | Source | Priority | Shown when |
 | --- | --- | --- | --- |
@@ -139,8 +136,8 @@ reuses the helo-taxi title string.
 
 | Entry | Prop | Source | Priority | Shown when |
 | --- | --- | --- | --- | --- |
-| Full Arsenal (one-time use) | Cache ammo boxes | `…/destroy_cache/fnc_destroy_cache_mission.sqf:101,135` | 6 | No condition — see below |
-| Full Arsenal (one-time use) | Supply truck | `…/steal_supply/fnc_steal_supply_mission.sqf:65` | 6 | No condition — see below |
+| Full Arsenal (one-time use) | Cache ammo boxes | `…/destroy_cache/fnc_destroy_cache_mission.sqf:101,136` | 6 | Arsenal unspent |
+| Full Arsenal (one-time use) | Supply truck | `…/steal_supply/fnc_steal_supply_mission.sqf:65` | 6 | Arsenal unspent |
 | Sabotage | Laptop | `…/sabotage_laptop/fnc_sabotage_laptop_mission.sqf:191` | 0 | `_this == player` |
 | Search for Intel (hold, 6 s) | Laptop | `…/sabotage_laptop/fnc_sabotage_laptop_mission.sqf:196` via `src/duws/server/dialog/fnc_actionRotary.sqf` | 6 | Within 3 m, hardcore mode only |
 | Search Container (hold, 1 s) | Intel container | `…/intel_gathering/fnc_intel_gathering_mission.sqf:88-110` | 0 | Within 3 m |
@@ -148,11 +145,6 @@ reuses the helo-taxi title string.
 | Put the pilot down | Carrier | `…:241` | 1 | `player == _target`, `radius` 5 m |
 | Load the pilot into the vehicle | Carrier | `…:254` | 1 | Carrying a live pilot with a vehicle within 5 m, `radius` 5 m |
 | Take the pilot out | Vehicle | `…:357` | 1 | `vehicle _this == _this`, `radius` 5 m |
-
-The three Full Arsenal call sites pass a seven-element array with
-`"!(_target getVariable ['arsenalUsed', false])"` in slot 7. That is the `shortcut` slot, so the
-string is read as a keybind name and the condition never runs; the entry is instead hidden by
-`hideOnUse` and by an explicit `removeAction` in the callback.
 
 The four rescue-pilot entries are the only DUWS actions that use the `radius` slot rather than a
 distance test inside the condition string.
@@ -211,4 +203,4 @@ can be standardised.
 | Attach path | Direct `addAction` behind `if (!hasInterface) exitWith {}`; `remoteExec ["addAction", 0]`; `remoteExec` of a named adder function with the JIP flag; and `BIS_fnc_MP` (deprecated) at four call sites |
 | Duplicate guard | `getVariable ["…_done", false]`; `isNil {getVariable "…"}`; a `setVariable` with no read; or no guard at all |
 | Removal | `removeAction` on a stored id; `removeAllActions`; `hideOnUse`; or a condition reading a spent flag |
-| Slot arity | Two elements (MHQ deploy), seven (Full Arsenal, Open Chute), eight (most), nine (rescue pilot) |
+| Slot arity | Two elements (MHQ deploy), seven (Open Chute), eight (most), nine (rescue pilot) |

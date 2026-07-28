@@ -520,6 +520,14 @@ _officer setVariable ["Vcm_Disable", true];
 _officer setVariable ["lambs_danger_disableAI", true];
 removeBackpackGlobal _officer;
 _officer switchMove "acts_StandingSpeakingUnarmed";
+// An "Acts_" ambient animation holds through death: the corpse keeps the standing pose and
+// never ragdolls, so hits read as having no effect and the officer looks invulnerable. The
+// tower guards escape this because BIS_fnc_ambientAnimCombat breaks its own animation; a raw
+// switchMove has nothing that does. Clearing the move lets the death animation play.
+_officer addEventHandler ["Killed", {
+    params ["_unit"];
+    [_unit, ""] remoteExec ["switchMove", 0];
+}];
 hq_blu1 = _officer; publicVariable "hq_blu1";
 blu_officer_object = _officer; publicVariable "blu_officer_object";
 [_officer] spawn {

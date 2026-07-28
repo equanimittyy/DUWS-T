@@ -710,8 +710,6 @@ fnc_civ_garrison = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_g
 fnc_ai_rearm = compile preprocessFileLineNumbers "duws\client\misc\fnc_ai_rearm.sqf";publicVariable "fnc_ai_rearm";
 fnc_addRandomLoot = compile preprocessFileLineNumbers "duws\server\misc\fnc_addRandomLoot.sqf";
 publicVariable "fnc_addRandomLoot";
-fnc_addFaceChangeAction = compile preprocessFileLineNumbers "duws\client\misc\fnc_addFaceChangeAction.sqf";
-publicVariable "fnc_addFaceChangeAction";
 fnc_hirePartisans_spawnDeployed = compile preprocessFileLineNumbers "duws\server\misc\fnc_hirePartisans_spawnDeployed.sqf";
 publicVariable "fnc_hirePartisans_spawnDeployed";
 fnc_addBoardKillhouseActions = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_addBoardKillhouseActions.sqf";
@@ -1458,36 +1456,6 @@ fnc_wbk_unitKilled_server = {
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Unit killed at location %1", _idx]] call fnc_log; };
 };
 publicVariable "fnc_wbk_unitKilled_server";
-
-fnc_changeFaceServer = {
-    params ["_callerUID"];
-    if (!isServer) exitWith {};
-    private _player = objNull;
-    {
-        if (getPlayerUID _x == _callerUID) exitWith { _player = _x; };
-    } forEach allPlayers;
-    if (isNull _player) exitWith { ["ERROR", "GEAR", "Player not found"] call fnc_log; };
-    
-    // 获取所有可用面部
-    private _faces = getArray (configFile >> "CfgFaces" >> "Man" >> "faces");
-    if (count _faces == 0) then {
-        // 后备列表（原版常用）
-        _faces = [
-            "AfricanHead_01", "AfricanHead_02", "AfricanHead_03",
-            "GreekHead_A3_01", "GreekHead_A3_02", "GreekHead_A3_03", "GreekHead_A3_04", "GreekHead_A3_05", "GreekHead_A3_06", "GreekHead_A3_07", "GreekHead_A3_08", "GreekHead_A3_09",
-            "PersianHead_A3_01", "PersianHead_A3_02", "PersianHead_A3_03",
-            "WhiteHead_01", "WhiteHead_02", "WhiteHead_03", "WhiteHead_04", "WhiteHead_05", "WhiteHead_06", "WhiteHead_07", "WhiteHead_08", "WhiteHead_09", "WhiteHead_10",
-            "WhiteHead_11", "WhiteHead_12", "WhiteHead_13", "WhiteHead_14", "WhiteHead_15", "WhiteHead_16", "WhiteHead_17", "WhiteHead_18", "WhiteHead_19", "WhiteHead_20",
-            "WhiteHead_21", "WhiteHead_22", "WhiteHead_23", "WhiteHead_24", "WhiteHead_25", "WhiteHead_26", "WhiteHead_27", "WhiteHead_28", "WhiteHead_29", "WhiteHead_30"
-        ];
-    };
-    private _newFace = selectRandom _faces;
-    _player setFace _newFace;
-    
-    private _msg = localize "STR_DUWS_T_FACE_CHANGED";
-    [_msg] remoteExec ["hint", _player];
-};
-publicVariable "fnc_changeFaceServer";
 
 // 【新增】挂架设置（消耗 5 CP）
 fnc_pylon_set_with_cost = {

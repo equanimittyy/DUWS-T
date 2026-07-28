@@ -78,6 +78,7 @@ clearBackpackCargoGlobal _truck1;
         6,
         true,
         true,
+        "",
         "!(_target getVariable ['arsenalUsed', false])"
     ];
     _this setVariable ["arsenalActionID", _actionID];
