@@ -136,17 +136,20 @@ as the systems behind it land; two of the four exist today.
 |---|---|---|
 | An unrevealed enemy zone | **buildable** | `zone_namePOS_pairs` carries `[name, pos, revealed]` (`fnc_createzone.sqf:28`); filter for `select 2 == false`, pick one, reveal it |
 | An intel object to carry home | **buildable** | add one of the classes `fnc_intelAnalysis.sqf:8-16` accepts, which the player cashes at a terminal for CP |
-| An unrevealed normal hardpoint | **blocked** | hardpoints are unimplemented — `hardpoint_system_plan.md` is a plan, and nothing in `src/` builds one |
+| An unrevealed normal hardpoint | **blocked**, and hardcore-only | hardpoints are unimplemented — `hardpoint_system_plan.md` is a plan and nothing in `src/` builds one. Outside hardcore they are visible from construction, so there is nothing to reveal |
 | An unrevealed enemy patrol | **blocked** | needs the OPFOR commander's tasking, per [`opfor_commander_plan.md`](opfor_commander_plan.md) |
 
 Rolling over the *available* kinds rather than a fixed list is what lets the other two appear
 without touching this code again.
 
-**The hardpoint entry contradicts the hardpoint plan as it stands.** That plan has normal
-hardpoints appear the moment the director builds them, with a notification, precisely so the
-player can see OPFOR spending — only *zone* hardpoints hide, and only in hardcore. An intel
-payout that reveals a normal hardpoint needs them to start hidden, which is a change to that
-design rather than a consumer of it.
+**The hardpoint payout only exists in hardcore.** Everywhere else a normal hardpoint is on the
+map from the moment the director builds it, so there is nothing for intel to sell. Hardcore
+hides the marker and keeps the construction notification, which is decided in
+[`hardpoint_system_plan.md`](hardpoint_system_plan.md#reveal) rather than here; this menu is one
+of the two sources that can lift it, alongside the corpse-and-mission intel path.
+
+That the pool varies by campaign setting is the reason it is rolled over *available* kinds. In a
+non-hardcore campaign the hardpoint entry simply never enters the draw.
 
 **Revealing a zone through `fnc_zone_reveal` drags two side effects along.** It zeroes
 `master_Intel_chance` for twenty minutes (`fnc_zone_reveal.sqf:44-50`), suppressing the
@@ -167,7 +170,6 @@ would park the caller for twenty minutes.
   — the actions it replaces ranged from 1 to 5 coins.
 - Whether a paid zone reveal carries `fnc_zone_reveal`'s twenty-minute `master_Intel_chance`
   cooldown, or skips it. The cooldown throttles free intel; this intel is not free.
-- Whether normal hardpoints start hidden, which the hardpoint plan currently says they do not.
 - Whether supplies survive the rework, and what gives the toolkit a reason to exist alongside
   aid if they do.
 - What replaces develop-informant. Folding it into the menu removes the 5-coin sink and the

@@ -268,6 +268,23 @@ Normal hardpoints appear when the director builds them, with a notification. The
 enemy construction as it happens is the point — it is the only feedback that the OPFOR side is
 spending anything.
 
+**In hardcore that splits: the notification fires, the marker does not.** Hardcore's whole
+premise is that the player has to find enemy positions rather than read them off the map, and a
+normal hardpoint appearing on it the moment it is built hands over ground the player has not
+scouted. So in hardcore the marker starts at alpha 0 and the notification still goes out — it
+says OPFOR are building, not where, which keeps the spending feedback without the giveaway.
+
+A hidden normal hardpoint has no parent zone, so `fnc_zone_reveal`'s spatial filter above cannot
+reach it. It needs its own reveal, and the civilian interaction menu is the intended source:
+[`civilian_interaction_plan.md`](civilian_interaction_plan.md) lists an unrevealed normal
+hardpoint as one of the payouts an intel request rolls. The corpse-and-mission intel path
+(`client/misc/fnc_found_intel.sqf`) should reach it on the same terms, or hardcore gains a class
+of objective that only one source can ever surface.
+
+Revealing one is a marker alpha change on a single index — the registry is broadcast and
+`hardpoint_zone_array` is `-1` for exactly this set, so a reveal picks from entries with that
+flag and an alpha still at 0. No new state.
+
 ## Normal hardpoints
 
 ### Siting
