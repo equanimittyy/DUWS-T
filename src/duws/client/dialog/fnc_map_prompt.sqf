@@ -13,8 +13,13 @@ if (isNull _disp) exitWith {};          // map not open -> nothing to draw on
 private _idc = 91334;
 private _ctrl = _disp displayCtrl _idc;
 
+// DUWS_map_prompt_shown is what is on this screen right now, for a caller that has to know its
+// banner landed before it does something blocking. Set from inside the draw rather than beside
+// it, so it cannot claim a banner the early exit above skipped. Deliberately not networked: the
+// draw is local, and a broadcast flag would report whichever machine wrote last.
 if (_text isEqualTo "") exitWith {
     if (!isNull _ctrl) then { ctrlDelete _ctrl };
+    DUWS_map_prompt_shown = "";
 };
 
 private _x = safezoneX + safezoneW * 0.15;
@@ -35,3 +40,5 @@ _ctrl ctrlCommit 0;
 _ctrl ctrlSetStructuredText parseText format ["<t align='center'>%1</t>", _text];
 _ctrl ctrlSetPosition [_x, _y, _w, (ctrlTextHeight _ctrl) + (safezoneH * 0.012)];
 _ctrl ctrlCommit 0;
+
+DUWS_map_prompt_shown = _text;

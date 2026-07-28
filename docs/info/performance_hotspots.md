@@ -182,8 +182,13 @@ banner. The stall therefore lands inside a wait the player is already watching. 
 player took control.
 
 The banner is `remoteExec`'d, and a `remoteExec` to your own machine still runs a frame later, so
-the census sleeps once before starting. Without that the frame freezes before anything draws and
-the banner is never seen.
+without a wait the frame freezes before anything draws and the banner is never seen. The census
+waits on the draw rather than on a fixed delay: `fnc_map_prompt` writes `DUWS_map_prompt_shown` as
+it commits the control, and the census blocks until that reads back its own banner. A fixed delay
+is a guess in both directions — too short on a loaded frame, paid in full when the draw was
+instant. A shut map short-circuits the wait, which is what a dedicated server has: it draws
+nothing locally and freezes no player's client. A three-second deadline backstops a draw that
+never arrives, so a failed banner cannot wedge generation.
 
 Two alternatives were rejected. Caching the count per world does not hold: the mission is
 map-portable and mod-tolerant, so a stored figure goes stale silently whenever terrain content
@@ -221,7 +226,7 @@ the kndr defect recorded above. The subtitle queue is also bounded —
 `client/misc/fnc_duws_dialogue_drain.sqf` dequeues on every pass and expires radio lines older
 than 8 s rather than letting them accumulate.
 
-**Unthrottled `waitUntil`.** 35 `waitUntil` blocks contain no `sleep`, so their condition is
+**Unthrottled `waitUntil`.** 36 `waitUntil` blocks contain no `sleep`, so their condition is
 re-evaluated every frame. They are not worth changing: almost all are `{dialog}`,
 `{!isNull player}` or `{!isNil "someVar"}`, which resolve within a frame or two of being
 reached, and every one of the long-lived exceptions tests a single cheap command. Recorded

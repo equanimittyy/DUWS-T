@@ -26,12 +26,25 @@ if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {};
 // in the generation sequence, so the stall lands inside a wait the player is already watching
 // rather than on the frame they take control.
 //
-// The banner has to reach the clients before the stall starts. fnc_map_prompt is remoteExec'd
-// and a remoteExec to your own machine still runs a frame later, so a blocking call on the next
-// line would freeze before anything drew. The sleep is what buys that frame; it is not a guess
-// at how long drawing takes.
-["Finalising campaign...<br/>surveying structures"] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
-sleep 1;
+// The banner has to be up before the stall starts. fnc_map_prompt is remoteExec'd and a
+// remoteExec to your own machine still runs a frame later, so a blocking call on the next line
+// would freeze before anything drew.
+//
+// Waits on the draw itself rather than on a fixed delay: DUWS_map_prompt_shown is written by
+// fnc_map_prompt as it commits the control, so a slow frame extends the wait and a fast one is
+// not charged for it. The map being shut here can never satisfy it and never needs to -- that is
+// a dedicated server, which draws nothing locally and freezes no player's client -- so it
+// short-circuits rather than burning the whole deadline on every dedicated start. The deadline
+// is a backstop against a draw that never arrives wedging generation, not the mechanism.
+private _banner = "Finalising campaign...<br/>surveying structures";
+[_banner] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+
+private _deadline = diag_tickTime + 3;
+waitUntil {
+    isNull (findDisplay 12)
+    || {(missionNamespace getVariable ["DUWS_map_prompt_shown", ""]) isEqualTo _banner}
+    || {diag_tickTime > _deadline}
+};
 
 // Radius reaches the map's far corner from its centre, which is worldSize * sqrt(2)/2, not
 // worldSize. The square is fully covered either way; the larger radius just scans twice the
