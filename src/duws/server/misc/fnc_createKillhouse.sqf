@@ -1093,6 +1093,12 @@ killhouse_srv_spawn_wave = {
             _unit setBehaviour "COMBAT";
             _unit setCombatMode "RED";
             _unit allowFleeing 0;
+            // Static by design: this is a CQB shooting course, so a row holds where it spawned
+            // instead of pathing out to meet the player -- the difficulty is meant to be reading
+            // and clearing rooms, not an open firefight. PATH only, so targeting and firing stay
+            // on and a row still shoots back. UP, not AUTO: a prone static enemy is a pixel hunt.
+            _unit disableAI "PATH";
+            _unit setUnitPos "UP";
             // Read by the kill-income handler in server_init.sqf. A run already pays its own
             // reward and can be restarted at will, so its bodies must not also feed the tally.
             _unit setVariable ["killhouse_enemy", true];
@@ -1160,8 +1166,8 @@ killhouse_srv_start_run = {
         while { !_complete
                 && { missionNamespace getVariable ["killhouse_run_active", false] }
                 && { (missionNamespace getVariable ["killhouse_run_id", 0]) isEqualTo _runId } } do {
-            // Anything outside the volume has left the course, which in practice means it
-            // pathed off an edge. The drop is 1000 m onto open sea, and a unit that survives
+            // Anything outside the volume has left the course -- with movement disabled that
+            // takes blast or ragdoll. The drop is 1000 m onto open sea, and a unit that survives
             // the water would swim about forever without ever firing its Killed handler --
             // the run could then never reach zero alive and would hang. Killing it here routes
             // it through the same handler as a shot enemy, so the count stays honest.
