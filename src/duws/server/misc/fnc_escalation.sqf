@@ -57,8 +57,6 @@ private _total = count (nearestTerrainObjects
     [[worldSize / 2, worldSize / 2, 0], ["House"], worldSize * 0.7072, false]);
 private _censusCost = diag_tickTime - _censusStart;
 
-[""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
-
 escalation_budget = round (_total * ESCALATION_FRACTION) max ESCALATION_MAX_LEVEL;
 escalation_tier = escalation_budget / ESCALATION_MAX_LEVEL;
 escalation_destroyed = 0;
@@ -70,6 +68,13 @@ publicVariable "escalation_multiplier";
 ["INFO", "ECON", format ["Escalation census: %1 houses on %2 in %3s, budget %4, tier %5",
     _total, worldName, (round (_censusCost * 100)) / 100,
     escalation_budget, round escalation_tier]] call fnc_log;
+
+// Every second the census is up is a frozen frame, so the first frame the player can actually
+// see is the one after this clears -- the banner reads as a flash. Held with the game live
+// instead, and after the state above is set so nothing waits on it. uiSleep, not sleep:
+// setTimeMultiplier is applied long before this and would scale a delay this short to nothing.
+uiSleep 1.5;
+[""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
 // The counter is ungated and carries no attribution: not who did it, not whether anyone was
 // watching, not whether it stood in a town. The war is getting worse and both sides are making
