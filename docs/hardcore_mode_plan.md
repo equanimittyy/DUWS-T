@@ -85,6 +85,30 @@ The distinction also settles what does and does not count as a fourth reveal sou
 that marks known enemies locally does not compete with the three below, because it is not
 answering the same question — but it does not belong in an intel channel either.
 
+### What intel reveals depends on what the mode hid
+
+Intel is not hardcore-only. What differs is the pool, and the rule behind it is *when a thing
+came into existence* rather than the difficulty setting: campaign generation puts its output on
+the map in normal mode, and anything OPFOR build during play stays hidden in both.
+
+| | Normal | Hardcore |
+|---|---|---|
+| Zones | visible from the start | hidden |
+| Zone hardpoints | visible from the start | hidden with their parent |
+| Normal hardpoints, generated at start | visible from the start | hidden |
+| Normal hardpoints, built in play | **hidden** | **hidden** |
+| Enemy elements on missions | **hidden** | **hidden** |
+
+So normal mode has a live intel channel — it reveals what OPFOR have built since the campaign
+began — and hardcore has that plus everything generation produced. Hardcore is the mode where
+intel answers "where is the war"; normal is where it answers "what has changed".
+
+**Neither of normal mode's two payouts exists yet.** Hardpoints are unimplemented and the
+OPFOR commander that would generate mission elements is a design note
+([`opfor_commander_plan.md`](opfor_commander_plan.md)). Nothing is lost by shipping the search
+hardcore-only first and widening it when those land — the gate is one condition, and building
+against a payout pool that is empty in that mode would be building against nothing.
+
 ### Reveal state is the system, not a side effect
 
 `zone_namePOS_pairs` entries are `[name, pos, revealed]` (`fnc_createzone.sqf:28`) and every
@@ -224,6 +248,20 @@ Storing the *state* rather than how it was reached is what makes this cheap, and
 source persists for free: a zone the player walked into, bought from a local, or won off a dead
 officer all restore identically, because by then they are one flag.
 
+**Revealed hardpoints need the same treatment, and the persistence plan does not cover them
+yet.** Its snapshot carries `hardpoint_state_array` — live or cleared — but nothing about
+whether a marker has been uncovered, because when it was written hardpoint visibility followed
+the parent zone and nothing else. Intel can now reveal a normal hardpoint on its own, in either
+mode, so revealed-ness is per-hardpoint state that a restore would otherwise discard. Same
+shape: store the indices, re-flag and repaint after build-out.
+
+**And the campaign-start hardpoint batch is builder output, not an outcome.** It is generated
+once, so a restore must accept the stored registry rather than roll a fresh set — the same trap
+the persistence plan already calls out for zones, and the reason hardpoints are an *input*
+there. That plan says hardpoints are sited inside `fnc_createZone`, which is true of zone
+hardpoints; the start batch is a separate pass and needs the same "do not re-roll on restore"
+handling.
+
 `DUWS_intel_searched` is deliberately **not** stored. It is at most one attempt per player
 against a campaign measured in hours, and a restored session where everyone's search is
 available again is the forgiving failure.
@@ -252,8 +290,21 @@ adding a fourth source later shortens hardcore rather than enriching it.
 Only the two *rolled* sources answer to the cooldown; proximity reveals the zone the player is
 standing in and rolls nothing, so there is nothing to throttle.
 
+## Remaining verification
+
+- [ ] Confirm `cursorObject` returns a corpse reliably at 3 m. Ragdolled bodies and ones settled
+  half-inside geometry are the doubt. If it proves fussy, `cursorTarget` or a short
+  `nearestObjects` sweep is the swap — but a scripted sweep must stay behind the cheap clauses,
+  since keeping it out of the common path is what the ordering is for.
+- [ ] Confirm the search action disappears the moment the attempt is spent and returns on the
+  next economy tick, for a non-host player on a dedicated server. The flag is broadcast on the
+  player object precisely so a client-side condition can see it; a host-only test proves nothing.
+- [ ] Confirm both rescue-mission awards now fire on a dedicated server. They are the two sites
+  that never have.
+
 ## Open questions
 
-- Whether the JIP growth in `fnc_add_intel_on_death` is worth fixing on its own account. This
-  plan routes around it rather than through it, so the mission-patrol path keeps leaking JIP
-  entries at its current, much smaller rate. It is pre-existing and unrelated to hardcore.
+None specific to hardcore. The JIP growth this plan routes around is inventoried and costed in
+[`jip_hardening_plan.md`](jip_hardening_plan.md), which found 69 of 70 JIP-flagged calls queue
+under an ID nothing can address — `fnc_add_intel_on_death` among them, at one entry per corpse.
+Fixing it belongs there, not here.

@@ -264,21 +264,34 @@ every marker whose `hardpoint_zone_array` entry is `>= 0` and whose position is 
 `zones_max_radius` of the revealed zone. Both arrays are broadcast, so this needs no new state,
 and normal hardpoints are excluded by the flag rather than by distance.
 
-Normal hardpoints appear when the director builds them, with a notification. The player seeing
-enemy construction as it happens is the point — it is the only feedback that the OPFOR side is
-spending anything.
+**Normal hardpoints are hidden in both modes.** The rule that decides visibility is not the
+difficulty setting but *when the thing came into existence*: what the campaign generated at the
+start is on the map in normal mode, and what OPFOR build during play is not. A hardpoint the
+director raised behind the lines is a position the player has not found yet, and putting it
+straight on the map is the map answering a question intel exists to ask.
 
-**Hardcore is silent: no marker, no notification.** Its premise is that enemy positions are
-found rather than read off the map, and a construction alert is a tell even without coordinates
-— it tells the player a hardpoint now exists to go looking for, and roughly when it appeared.
-So in hardcore the marker starts at alpha 0 and nothing announces the build.
+| | Zone hardpoints | Normal hardpoints, start batch | Normal hardpoints, director-built |
+|---|---|---|---|
+| Normal | visible | visible | hidden, construction announced |
+| Hardcore | hidden with their parent zone | hidden | hidden, nothing announced |
 
-The cost is that hardcore gives up the only feedback that OPFOR are spending anything. That is
-the trade the mode exists to make, and it is the reason the reveal below matters: without it a
-hardcore player has no route to a normal hardpoint except walking into its fire.
+The two normal-hardpoint columns are the same objects in the same registry, differing only in
+when they were created. Nothing needs to record which is which: the start batch exists before
+the campaign begins and is painted from `hardcore_mode_enable` like everything else generation
+produces, and the director's are created at alpha 0 unconditionally.
+
+**Only hardcore goes silent.** In normal mode the build still fires a notification — it says
+OPFOR are fortifying, not where, so the player keeps the one signal that the enemy is spending
+without being handed the location. Hardcore drops even that, because an alert is a tell on its
+own: it says a hardpoint now exists to hunt and roughly when it appeared.
+
+The cost is that hardcore gives up its only OPFOR-spending feedback. That is the trade the mode
+exists to make, and it is the reason the reveal below matters: without it a hardcore player has
+no route to a normal hardpoint except walking into its fire.
 
 A hidden normal hardpoint has no parent zone, so `fnc_zone_reveal`'s spatial filter above cannot
-reach it. It needs its own reveal, and the civilian interaction menu is the intended source:
+reach it. It needs its own reveal in **both** modes now, not only hardcore, and the civilian
+interaction menu is the intended source:
 [`civilian_interaction_plan.md`](civilian_interaction_plan.md) lists an unrevealed normal
 hardpoint as one of the payouts an intel request rolls. The corpse-and-mission intel path
 (`client/misc/fnc_found_intel.sqf`) should reach it on the same terms, or hardcore gains a class
@@ -289,6 +302,28 @@ Revealing one is a marker alpha change on a single index — the registry is bro
 flag and an alpha still at 0. No new state.
 
 ## Normal hardpoints
+
+Two origins, and they behave differently on the map. A small batch is generated once at campaign
+start, fortifying the ground OPFOR already hold; the rest are raised by the director during play
+as the war escalates. Everything below applies to both unless it says otherwise.
+
+### The campaign-start batch
+
+A one-time pass during generation, siting a handful of normal hardpoints across OPFOR-held
+ground so the enemy rear is not bare at hour zero. Without it every normal hardpoint on the map
+is something the player watched appear, and the OPFOR side reads as having built its whole
+defensive depth after the shooting started.
+
+**They follow the generation rule for visibility: shown in normal mode, hidden in hardcore.**
+That is the same line zones and zone hardpoints sit on — what generation produced is on the map
+unless the mode hides everything — and it is what separates them from the director's later work,
+which stays hidden in both ([§Reveal](#reveal)).
+
+Their siting differs from the director's for the same reason their visibility does. The
+director aims at the corridor between OPFOR ground and the player's, because that is where a new
+fortification is a response. The start batch has no engagement to respond to, so it distributes
+around OPFOR-held zones instead. Every rejection rule below still applies, including the HQ and
+player keep-outs — a campaign must not open with a hardpoint overlooking the base.
 
 ### Siting
 

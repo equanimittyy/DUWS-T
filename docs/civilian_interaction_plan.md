@@ -164,21 +164,23 @@ as the systems behind it land; two of the four exist today.
 |---|---|---|
 | An unrevealed enemy zone | **buildable** | `zone_namePOS_pairs` carries `[name, pos, revealed]` (`fnc_createzone.sqf:28`); filter for `select 2 == false`, pick one, reveal it |
 | An intel object to carry home | **buildable** | add one of the classes `fnc_intelAnalysis.sqf:8-16` accepts, which the player cashes at a terminal for CP |
-| An unrevealed normal hardpoint | **blocked**, and hardcore-only | hardpoints are unimplemented — `hardpoint_system_plan.md` is a plan and nothing in `src/` builds one. Outside hardcore they are visible from construction, so there is nothing to reveal |
+| An unrevealed normal hardpoint | **blocked** | hardpoints are unimplemented — `hardpoint_system_plan.md` is a plan and nothing in `src/` builds one. Available in both modes once they exist, though the pool differs: normal mode offers only what the director has built since, hardcore adds the batch generated at campaign start |
 | An unrevealed enemy patrol | **blocked** | needs the OPFOR commander's tasking, per [`opfor_commander_plan.md`](opfor_commander_plan.md) |
 
 Rolling over the *available* kinds rather than a fixed list is what lets the other two appear
 without touching this code again.
 
-**The hardpoint payout only exists in hardcore.** Everywhere else a normal hardpoint is on the
-map from the moment the director builds it, so there is nothing for intel to sell. Hardcore
-builds them silently — no marker, no notification — which is decided in
-[`hardpoint_system_plan.md`](hardpoint_system_plan.md#reveal) rather than here. That makes this
-menu one of only two things that can surface one, alongside the corpse-and-mission intel path,
-and the alternative to both is walking into its fire.
+**The hardpoint payout works in both modes**, because visibility turns on when a thing came into
+existence rather than on the difficulty setting: campaign generation puts its output on the map
+in normal mode, and anything OPFOR build during play stays hidden either way. Decided in
+[`hardpoint_system_plan.md`](hardpoint_system_plan.md#reveal) rather than here. Only the
+announcement differs — normal mode says OPFOR are fortifying without saying where, hardcore says
+nothing — so in both this menu is one of only two things that can surface a location, alongside
+the body-search path, and the alternative to both is walking into its fire.
 
-That the pool varies by campaign setting is the reason it is rolled over *available* kinds. In a
-non-hardcore campaign the hardpoint entry simply never enters the draw.
+The pool still varies with what a campaign has generated and what OPFOR have since built, which
+is why it is rolled over *available* kinds rather than a fixed list. An entry with nothing to
+give simply never enters the draw.
 
 **Revealing a zone through `fnc_zone_reveal` drags two side effects along.** It zeroes
 `master_Intel_chance` for twenty minutes (`fnc_zone_reveal.sqf:44-50`), suppressing the
