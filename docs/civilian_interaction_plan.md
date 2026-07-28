@@ -127,6 +127,34 @@ Refusing, and being unable to pay, both close the civilian. That rule does not s
 amount is visible: what the prompt buys the player is knowing the price before they lose the
 contact, not a free look.
 
+### What a bribe costs
+
+Per category, and **not** scaled by reputation — the curve already carries that signal by
+deciding whether money is asked for at all, so a reputation term in the amount would count it
+twice.
+
+| Row | Bribe |
+|---|---:|
+| Intel | 3 |
+| Recruit | 2 |
+| Supplies | 1 |
+| Loot | — |
+
+**These are placeholders chosen to make the framework testable, not balanced figures.** They
+are anchored on the black market, which is the price scale the player already reads — goggles
+at 1, pistol and optic at 5 — so intel sits between the two and recruit keeps the cost it has
+today. Intel is deliberately *not* inheriting the old ask-enemy price of 1: that bought a marker
+on a group within 700 m, inside spotting range, whereas the row now reveals a zone or a hidden
+hardpoint or hands over an intel object worth up to 8 CP.
+
+Loot takes no bribe and no reaction roll. It is coercion, not a request; a town's opinion does
+not change whether a rifle works. Its existing surrender and reprisal rolls are untouched.
+
+**Expect the coin drain to fall against today's.** Every current action charges every time; here
+a bribe is asked roughly half the time at a neutral town and one time in ten at a friendly one.
+That is the discount for carrying refusal risk and for having earned the town's standing, and it
+pushes coins toward the black market and partisans, which are the underused sinks.
+
 ## What intel buys
 
 An accepted intel request rolls one payout at random from the kinds available. The pool grows
@@ -165,13 +193,17 @@ would park the caller for twenty minutes.
 
 ## Open questions
 
-- The bribe amount is a single static constant for now, deliberately not scaled by reputation:
-  the curve already carries the reputation signal by deciding *whether* money is asked for, and
-  a second reputation term in the amount would double-count it. The value itself is unmeasured
-  — the actions it replaces ranged from 1 to 5 coins.
+- Balancing the bribe figures once the framework runs. The values above exist to make it
+  testable. What is not measured is the coin supply they meet: the HQ crate hands out 20 once
+  and never refills, and enemy infantry drop **0.267 coins each** (80 % carry loot,
+  `floor random 3` items, one class in three) — so a thirty-enemy zone assault yields about
+  eight coins. Whether that pays for a campaign of talking to towns is the first thing to watch.
 - Whether a paid zone reveal carries `fnc_zone_reveal`'s twenty-minute `master_Intel_chance`
   cooldown, or skips it. The cooldown throttles free intel; this intel is not free.
 - Whether supplies survive the rework, and what gives the toolkit a reason to exist alongside
   aid if they do.
-- What replaces develop-informant. Folding it into the menu removes the 5-coin sink and the
-  flag; whether a town can still become a standing intel asset is undecided.
+Develop-informant is not on this list. It is deleted outright — the action, the server
+function, `civ_informant_active_<town>` and twelve strings — rather than folded into a row.
+Nothing consumed the flag it set, so there was no behaviour to preserve, and a town becoming a
+standing intel asset is a feature to design from scratch if it is wanted, not a thing to
+reconstruct from a dead 5-coin sink.
