@@ -367,7 +367,6 @@ if (_mode == "spawn") then {
                     [_newUnit] remoteExec ["fnc_civ_stopCommand", 0, true];
                     [_newUnit] remoteExec ["fnc_civ_recruitAction", 0, true];
                     [_newUnit] remoteExec ["fnc_civ_lootAction", 0, true];
-                    [_newUnit] remoteExec ["fnc_civ_addDevelopInformantAction", 0, true];
                     [_newUnit] remoteExec ["fnc_civ_askForAid", 0, true];
                     [_newUnit] remoteExec ["fnc_civ_askForToolkit", 0, true];
                 };
@@ -433,7 +432,6 @@ if (_mode == "spawn") then {
             [_unit] remoteExec ["fnc_civ_stopCommand", 0, true];
             [_unit] remoteExec ["fnc_civ_recruitAction", 0, true];
             [_unit] remoteExec ["fnc_civ_lootAction", 0, true];
-            [_unit] remoteExec ["fnc_civ_addDevelopInformantAction", 0, true];
             [_unit] remoteExec ["fnc_civ_askForAid", 0, true];
             [_unit] remoteExec ["fnc_civ_askForToolkit", 0, true];
         };

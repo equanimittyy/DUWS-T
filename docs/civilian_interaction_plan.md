@@ -204,6 +204,10 @@ would park the caller for twenty minutes.
   aid if they do.
 Develop-informant is not on this list. It is deleted outright — the action, the server
 function, `civ_informant_active_<town>` and twelve strings — rather than folded into a row.
-Nothing consumed the flag it set, so there was no behaviour to preserve, and a town becoming a
-standing intel asset is a feature to design from scratch if it is wanted, not a thing to
-reconstruct from a dead 5-coin sink.
+
+It worked, and that is not the reason it goes. On success it drew a 700 m disc over the town and
+spent one to three hours marking every enemy unit inside it, refreshed each minute. That is a
+tactical feed about ground the player has already found, and intel here means the opposite:
+discovering positions the player does not yet know exist. See
+[`hardcore_mode_plan.md`](hardcore_mode_plan.md#what-intel-is-for). Rebuilding a local unit
+tracker later is a separate feature with a separate justification, not a row on this menu.

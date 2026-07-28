@@ -69,6 +69,22 @@ Informants spawn in every campaign regardless of the setting.
 
 ## Design
 
+### What intel is for
+
+**Intel reveals positions the player does not know exist.** Unrevealed zones, hidden hardpoints,
+enemy locations somewhere on the general map — strategic discovery, and the answer to "where is
+the war". It is not a live feed about ground already found.
+
+That line is what rules out a mechanic this mission shipped until now: develop-informant drew a
+700 m disc over a town and marked every enemy inside it, refreshed each minute, for one to three
+hours. It functioned, and it was still the wrong shape — a tactical readout of an area the
+player was already standing in, sold as intel. It is deleted rather than reworked
+([`civilian_interaction_plan.md`](civilian_interaction_plan.md)).
+
+The distinction also settles what does and does not count as a fourth reveal source. Something
+that marks known enemies locally does not compete with the three below, because it is not
+answering the same question — but it does not belong in an intel channel either.
+
 ### Reveal state is the system, not a side effect
 
 `zone_namePOS_pairs` entries are `[name, pos, revealed]` (`fnc_createzone.sqf:28`) and every

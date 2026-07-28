@@ -741,10 +741,6 @@ fnc_civ_recruit_server = compile preprocessFileLineNumbers "duws\server\misc\fnc
 publicVariable "fnc_civ_recruit_server";
 fnc_civ_recruit_reveal = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_recruit_reveal.sqf";
 publicVariable "fnc_civ_recruit_reveal";
-fnc_civ_addDevelopInformantAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_addDevelopInformantAction.sqf";
-publicVariable "fnc_civ_addDevelopInformantAction";
-fnc_civ_developInformantServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_developInformantServer.sqf";
-publicVariable "fnc_civ_developInformantServer";
 fnc_civ_lootAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_lootAction.sqf";
 publicVariable "fnc_civ_lootAction";
 fnc_civ_lootAction_handleArmed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_lootAction.sqf";
