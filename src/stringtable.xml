@@ -2459,16 +2459,6 @@
             </Key>
         </Container>
         <Container name="Civilian Interaction &amp; Reputation">
-            <Key ID="STR_DUWS_T_ASK_FOR_TOOLKIT">
-                <Original>&lt;t color='#ffaa00'&gt;Request toolbox (2 cash)&lt;/t&gt;</Original>
-                <English>&lt;t color='#ffaa00'&gt;Request toolbox (2 cash)&lt;/t&gt;</English>
-                <Chinesesimp>&lt;t color='#ffaa00'&gt;请求工具箱 (2货币)&lt;/t&gt;</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ASK_TOOLKIT_FAIL_REP">
-                <Original>Your reputation is too low. The civilian refuses to help</Original>
-                <English>Your reputation is too low. The civilian refuses to help</English>
-                <Chinesesimp>你的声望太低，平民拒绝提供帮助。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_ASK_TOOLKIT_hi">
                 <Original>We're BLUFOR, on a peacekeeping patrol. One of our vehicles is damaged. Do you have a toolkit, or know where we can find one? We'll pay.</Original>
                 <English>We're BLUFOR, on a peacekeeping patrol. One of our vehicles is damaged. Do you have a toolkit, or know where we can find one? We'll pay.</English>
@@ -2479,16 +2469,6 @@
                 <English>Peacekeeping? Screw you. You've got some nerve calling it that.</English>
                 <Chinesesimp>维和？去你妈的！你得有多不要脸才能说出这几个字！</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_ASK_TOOLKIT_REFUSE2">
-                <Original>Sorry, I don't have any tools for you. I'm not a mechanic either.</Original>
-                <English>Sorry, I don't have any tools for you. I'm not a mechanic either.</English>
-                <Chinesesimp>抱歉，我这里没有工具给你。我自己也不是技师。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ASK_TOOLKIT_FAIL">
-                <Original>This guy doesn't have a toolkit</Original>
-                <English>This guy doesn't have a toolkit</English>
-                <Chinesesimp>平民没有工具箱。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_ASK_TOOLKIT_SUCCESS">
                 <Original>Toolbox received! Dropped nearby</Original>
                 <English>Toolbox received! Dropped nearby</English>
@@ -2498,16 +2478,6 @@
                 <Original>Here, take this toolbox. Hope it helps.</Original>
                 <English>Here, take this toolbox. Hope it helps.</English>
                 <Chinesesimp>给你这个工具箱，希望能帮上忙。(收下货币)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ASK_FOR_AID">
-                <Original>&lt;t color='#ffaa00'&gt;Ask for medical aid (1 cash)&lt;/t&gt;</Original>
-                <English>&lt;t color='#ffaa00'&gt;Ask for medical aid (1 cash)&lt;/t&gt;</English>
-                <Chinesesimp>&lt;t color='#ffaa00'&gt;请求医疗援助 (1货币)&lt;/t&gt;</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ASK_AID_FAIL_REP">
-                <Original>Your reputation is too low. The civilian refuses to help</Original>
-                <English>Your reputation is too low. The civilian refuses to help</English>
-                <Chinesesimp>你的声望太低，平民拒绝提供帮助。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_AID_hi">
                 <Original>We're BLUFOR, on a peacekeeping patrol. We've taken casualties. Can you spare any medical supplies? We'll pay for them.</Original>
@@ -2569,34 +2539,6 @@
                 <English>A player has left %1 and %1 will reset in 60 seconds. Return immediately to resume operations at %1.\n(To save performance, only one town can generate civilians at a time)</English>
                 <Chinesesimp>一位玩家已离开 %1 且 %1 将在 60 秒后重置。若想继续在 %1 活动，则需立刻返回。\n(为节约性能，同一时间只能有一个城镇生成平民)</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_ASK_ENEMY">
-                <Original>&lt;t color='#fffb00ff'&gt;Ask about enemy (1 cash)&lt;/t&gt;</Original>
-                <English>&lt;t color='#fffb00ff'&gt;Ask about enemy (1 cash)&lt;/t&gt;</English>
-                <German>&lt;t color='#fffb00ff'&gt;Nach Feinden fragen(1 cash)&lt;/t&gt;</German>
-                <Spanish>&lt;t color='#fffb00ff'&gt;Preguntar sobre el enemigo(1 cash)&lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#fffb00ff'&gt;打听敌人动向(1货币)&lt;/t&gt;</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_NOT_ENOUGH_CP">
-                <Original>This war's left us with barely enough to eat...</Original>
-                <English>This war's left us with barely enough to eat...</English>
-                <Chinesesimp>我们因为打仗连肚子都填不饱...(自言自语地嘟囔，貌似觉得你的钱给少了。)</Chinesesimp>
-                <German>Wegen des Krieges können wir nicht einmal unseren Hunger stillen... (murmelt vor sich hin, offenbar weil er meint, du zahlst zu wenig)</German>
-                <Spanish>No podemos ni llenarnos el estómago por la guerra... (murmura para sí mismo, pareciendo pensar que le das poco dinero)</Spanish>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_GROUP">
-                <Original>Enemy Group</Original>
-                <English>Enemy Group</English>
-                <German>Feindliche Gruppe</German>
-                <Spanish>Grupo enemigo</Spanish>
-                <Chinesesimp>敌人小队</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ASK_SUCCESS">
-                <Original>The civilian gave you intel on enemy position!</Original>
-                <English>The civilian gave you intel on enemy position!</English>
-                <German>Der Zivilist hat Ihnen Informationen über die feindliche Position gegeben!</German>
-                <Spanish>¡El civil te dio información sobre la posición enemiga!</Spanish>
-                <Chinesesimp>平民提供了敌人位置信息！</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_civ">
                 <Original>Civilian</Original>
                 <English>Civilian</English>
@@ -2639,13 +2581,6 @@
                 <Spanish>Civil te ignora.</Spanish>
                 <Chinesesimp>平民不理你。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_CIV_RECRUIT">
-                <Original>&lt;t color='#15ff00'&gt;Recruit to BLUFOR (2 cash)&lt;/t&gt;</Original>
-                <English>&lt;t color='#15ff00'&gt;Recruit to BLUFOR (2 cash)&lt;/t&gt;</English>
-                <German>&lt;t color='#15ff00'&gt;Für BLUFOR anwerben (2 cash)&lt;/t&gt;</German>
-                <Spanish>&lt;t color='#15ff00'&gt;Reclutar para BLUFOR (2 cash)&lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#15ff00'&gt;招募 (2货币)&lt;/t&gt;</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_fight4freedom">
                 <Original>We're BLUFOR. We're hiring locals willing to take up arms, and the pay is good. Will you fight with us?</Original>
                 <English>We're BLUFOR. We're hiring locals willing to take up arms, and the pay is good. Will you fight with us?</English>
@@ -2660,13 +2595,6 @@
                 <Spanish>...¿Quién demonios quiere ir con vosotros? Solo sois un montón de bandidos! (golpeando tu dinero contra el suelo)</Spanish>
                 <Chinesesimp>...谁他妈要跟你们走？一帮匪徒！(把你的钱拍在地上)</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_RECRUIT_FAIL_REP_HINT">
-                <Original>Recruitment failed due to low reputation</Original>
-                <English>Recruitment failed due to low reputation</English>
-                <German>Anwerbung wegen niedrigem Ruf fehlgeschlagen.</German>
-                <Spanish>Reclutamiento fallido por baja reputación.</Spanish>
-                <Chinesesimp>因声望过低，招募失败。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_RECRUIT_SUCCESS">
                 <Original>Fine! I've always wanted to kill those bastards!</Original>
                 <English>Fine! I've always wanted to kill those bastards!</English>
@@ -2680,20 +2608,6 @@
                 <German>Zivilist erfolgreich angeworben.</German>
                 <Spanish>Civil reclutado con éxito.</Spanish>
                 <Chinesesimp>平民招募成功。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_RECRUIT_FAIL">
-                <Original>(Ignores you)</Original>
-                <English>(Ignores you)</English>
-                <German>(Ignoriert Sie)</German>
-                <Spanish>(Te ignora)</Spanish>
-                <Chinesesimp>(不理你)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_RECRUIT_FAIL_HINT">
-                <Original>Recruitment failed</Original>
-                <English>Recruitment failed</English>
-                <German>Anwerbung fehlgeschlagen.</German>
-                <Spanish>Reclutamiento fallido.</Spanish>
-                <Chinesesimp>招募失败。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_cycuqbvj">
                 <Original>Civilian Killed!</Original>
@@ -2715,13 +2629,6 @@
                 <German>Wegen der feindseligen Handlungen von BLUFOR ist der Ruf gesunken.</German>
                 <Spanish>Debido a las acciones hostiles de BLUFOR, la reputación ha disminuido.</Spanish>
                 <Chinesesimp>由于蓝军的恶劣行径，声望降低。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_HANDSUP">
-                <Original>Restrain</Original>
-                <English>Restrain</English>
-                <German>mit Gewalt kontrollieren</German>
-                <Spanish>controlar por la fuerza</Spanish>
-                <Chinesesimp>强行控制</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_LOOT">
                 <Original>Search</Original>
@@ -2876,48 +2783,6 @@
                 <German>Äh... Ich weiß! Tritt diesen Abschaum richtig in den Arsch! Sie sind genau hier auf der Karte...(spricht, während er die Geldscheine nimmt)</German>
                 <Spanish>Eh... ¡Lo sé! ¡Dales una buena paliza a esos escoria! Están justo aquí en el mapa...(hablando mientras coge los billetes)</Spanish>
                 <Chinesesimp>呃...我知道！帮我狠狠踢那群杂碎的屁股！他们在地图的这里...(边说边收下纸币)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_askopforlocno">
-                <Original>I don't know... Don't ask me...</Original>
-                <English>I don't know... Don't ask me...</English>
-                <German>Ich weiß nicht... Frag mich nicht...(geht ängstlich weg und nimmt das Geld nicht einmal mit)</German>
-                <Spanish>No sé... No me preguntes...(se va asustado, sin siquiera coger el dinero)</Spanish>
-                <Chinesesimp>不知道...别问我...(害怕地走了，连钱都没拿)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_askopforlocno2">
-                <Original>Doesn't seem like it. Nothing out of the ordinary around here lately.</Original>
-                <English>Doesn't seem like it. Nothing out of the ordinary around here lately.</English>
-                <German>Scheint nicht so. In letzter Zeit ist hier nichts Ungewöhnliches passiert. (nimmt die Geldscheine und steckt sie in seine Tasche)</German>
-                <Spanish>Parece que no. Nada fuera de lo común por aquí últimamente. (coge los billetes y los mete en el bolsillo)</Spanish>
-                <Chinesesimp>貌似没有，最近周围没什么异常。(收下纸币塞进兜里)</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_askopforlocno3">
-                <Original>Alright... The area should be safe.</Original>
-                <English>Alright... The area should be safe.</English>
-                <German>Na gut... Die Gegend sollte sicher sein.</German>
-                <Spanish>Muy bien... La zona debería estar a salvo.</Spanish>
-                <Chinesesimp>好吧...周围应该是安全的。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ASK_FAIL">
-                <Original>The civilian knows nothing</Original>
-                <English>The civilian knows nothing</English>
-                <German>Der Zivilist weiß nichts.</German>
-                <Spanish>El civil no sabe nada.</Spanish>
-                <Chinesesimp>平民不知道任何消息。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ASK_REFUSE">
-                <Original>The civilian refuses to cooperate</Original>
-                <English>The civilian refuses to cooperate</English>
-                <German>Der Zivilist weigert sich zu kooperieren.</German>
-                <Spanish>El civil se niega a cooperar.</Spanish>
-                <Chinesesimp>平民拒绝合作。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_NO_ENEMY_GROUPS">
-                <Original>No enemy groups found</Original>
-                <English>No enemy groups found</English>
-                <German>Keine feindlichen Gruppen gefunden.</German>
-                <Spanish>No se encontraron grupos enemigos.</Spanish>
-                <Chinesesimp>没有发现任何敌人小队。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_RECRUIT_ACTION">
                 <Original>Offer evacuation</Original>
