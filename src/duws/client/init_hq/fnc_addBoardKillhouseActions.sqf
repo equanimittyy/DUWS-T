@@ -50,10 +50,16 @@ if (isNil {_board getVariable "board_fasttravel_actions_done"}) then {
             };
             DUWS_baseTravelMapOpen = true;
             openMap true;
-            hint localize "STR_DUWS_T_FAST_TRAVEL_BASE_HINT";
+            // Not a hint: the hint box renders beneath the map display, so the instruction to
+            // click near the base played its sound and showed nothing, leaving the player in a
+            // click-to-travel mode with no sign it had started.
+            [localize "STR_DUWS_T_FAST_TRAVEL_BASE_HINT"] call fnc_map_prompt;
             onMapSingleClick {
                 params ["_pos"];
                 onMapSingleClick "";
+                // Cleared while the map is still up: the banner is a control on that display
+                // and fnc_map_prompt cannot reach it once the map is gone.
+                [""] call fnc_map_prompt;
                 openMap false;
                 DUWS_baseTravelMapOpen = false;
                 if (_pos distance PosOfBLUHQ < 200) then {
