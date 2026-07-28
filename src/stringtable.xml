@@ -3051,6 +3051,26 @@
                 <Original>Alpha 1-1. Infection confirmed in your area. You're cleared to engage the infected at will, but stay sharp: there may still be survivors.</Original>
                 <English>Alpha 1-1. Infection confirmed in your area. You're cleared to engage the infected at will, but stay sharp: there may still be survivors.</English>
             </Key>
+            <Key ID="STR_DUWS_T_CIV_BRIBE_ASK">
+                <Original>Talk like that isn't free around here. Make it worth my while.</Original>
+                <English>Talk like that isn't free around here. Make it worth my while.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_BRIBE_DECLINED">
+                <Original>Then we've got nothing to talk about. Move along.</Original>
+                <English>Then we've got nothing to talk about. Move along.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_CLOSED">
+                <Original>This local is done talking to you</Original>
+                <English>This local is done talking to you</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_SPENT">
+                <Original>This local has nothing more to offer there</Original>
+                <English>This local has nothing more to offer there</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_TOO_FAR">
+                <Original>Get closer to talk</Original>
+                <English>Get closer to talk</English>
+            </Key>
         </Container>
         <Container name="Informants">
             <Key ID="STR_DUWS_T_nocpinf2">

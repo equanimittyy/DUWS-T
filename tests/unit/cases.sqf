@@ -103,3 +103,22 @@ private _pct = { (_this call fnc_civ_reaction_weights) apply { round (_x * 100) 
     [format ["reaction: no negative weight at %1", _x],
         (_w findIf { _x < 0 }), -1] call fnc_assertEq;
 } forEach [-20, -15, -5, 0, 5, 15, 20];
+
+// --- fnc_civ_rowSpec: which slot a row spends and what it costs ---
+["rowSpec: intel", (["INTEL"] call fnc_civ_rowSpec), ["INTEL", 3]] call fnc_assertEq;
+["rowSpec: recruit", (["RECRUIT"] call fnc_civ_rowSpec), ["RECRUIT", 2]] call fnc_assertEq;
+
+// The whole point of the pairing: one civilian gives aid or a toolkit, never both.
+["rowSpec: aid takes the supplies slot",
+    (["AID"] call fnc_civ_rowSpec), ["SUPPLIES", 1]] call fnc_assertEq;
+["rowSpec: toolkit takes the same slot at the same price",
+    (["TOOLKIT"] call fnc_civ_rowSpec), ["SUPPLIES", 1]] call fnc_assertEq;
+
+["rowSpec: case-insensitive", (["intel"] call fnc_civ_rowSpec), ["INTEL", 3]] call fnc_assertEq;
+
+// Fail closed. Rows only ever arrive over the wire, so an unrecognised one is a client sending
+// something the menu never offered; the negative price is what every caller rejects on.
+{
+    [format ["rowSpec: %1 is rejected", str _x],
+        (([_x] call fnc_civ_rowSpec) select 1) < 0, true] call fnc_assertEq;
+} forEach ["", "ARREST", "SUPPLIES", "intel ", "DROP TABLE"];

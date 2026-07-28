@@ -246,6 +246,30 @@ fnc_civ_reaction_weights = {
 	[_accept, 1 - _accept - _refuse, _refuse]
 };
 
+// A menu row's [category, bribe]. One table rather than a switch in each consumer: the request
+// roll, the serve and the bribe answer all have to agree on what a row costs and which slot it
+// spends, and three copies would drift.
+//
+// Aid and toolkit share the supplies slot deliberately -- a civilian hands over one or the
+// other, never both, which is what stops aid dominating the toolkit now that neither carries a
+// success roll or a price of its own. The prices are anchored on the black market the player
+// already reads (goggles 1, pistol and optic 5) and are placeholders for balancing, not
+// measured figures.
+//
+// An unrecognised row returns a negative price. Callers must treat that as a reject: rows only
+// ever come off the wire, so this is the fail-closed edge for a client sending one the menu
+// never offered.
+fnc_civ_rowSpec = {
+	params [["_row", ""]];
+	switch (toUpper _row) do {
+		case "INTEL": { ["INTEL", 3] };
+		case "RECRUIT": { ["RECRUIT", 2] };
+		case "AID": { ["SUPPLIES", 1] };
+		case "TOOLKIT": { ["SUPPLIES", 1] };
+		default { ["", -1] };
+	};
+};
+
 // Repaints one town's ellipse and icon from civ_town_rep. The band is the only writer of the
 // ellipse colour -- depopulation used to paint it black and that path is gone -- so nothing
 // races this. setMarkerColor takes an inline #(r,g,b,a) string as well as a CfgMarkerColors
@@ -787,6 +811,18 @@ fnc_civ_askForToolkit = compile preprocessFileLineNumbers "duws\shared\functions
 publicVariable "fnc_civ_askForToolkit";
 fnc_civ_askForToolkit_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_askForToolkit_server.sqf";
 publicVariable "fnc_civ_askForToolkit_server";
+// Civilian menu. Only fnc_civ_request and fnc_civ_bribe_answer are reached from a client, but
+// the rest are broadcast too so a headless client running civilian logic resolves them.
+fnc_civ_request = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_request.sqf";
+publicVariable "fnc_civ_request";
+fnc_civ_serve = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_serve.sqf";
+publicVariable "fnc_civ_serve";
+fnc_civ_close = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_close.sqf";
+publicVariable "fnc_civ_close";
+fnc_civ_bribe_answer = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_bribe_answer.sqf";
+publicVariable "fnc_civ_bribe_answer";
+fnc_civ_arrest = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_arrest.sqf";
+publicVariable "fnc_civ_arrest";
 fnc_disguiseAsCivilian = compile preprocessFileLineNumbers "duws\server\misc\fnc_disguiseAsCivilian.sqf";
 publicVariable "fnc_disguiseAsCivilian";
 fnc_scanCivilianGear = compile preprocessFileLineNumbers "duws\server\misc\fnc_scanCivilianGear.sqf";
@@ -819,17 +855,10 @@ fnc_recruitSuccessServer = {
         ["ERROR", "CIV", "Server: target is null or dead"] call fnc_log;
     };
     
-    // ========== 扣除 2 个 Money_roll ==========
-    private _moneyCount = { _x == "Money_roll" } count (magazines _caller);
-    if (_moneyCount < 2) exitWith {
-        [localize "STR_DUWS_T_nocpinf2"] remoteExec ["hint", _caller];
-        ["ERROR", "CIV", "Server: Money roll insufficient, recruitment aborted"] call fnc_log;
-    };
-    for "_i" from 1 to 2 do {
-        _caller removeMagazineGlobal "Money_roll";
-    };
-    // =========================================
-    
+    // Payment is the caller's business, not this function's. Recruiting through the civilian
+    // menu is free when the town simply agrees and costs a bribe only when it asks for one, so a
+    // fixed charge here would bill an accepted request and double-bill a bribed one.
+
     // 原有代码：设置俘虏状态，广播等
     _target setCaptive false;
     private _netId = netId _target;
