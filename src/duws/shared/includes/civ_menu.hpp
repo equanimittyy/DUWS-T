@@ -1,0 +1,264 @@
+// Civilian interaction panel: the single entry point in front of what a local will do for the
+// player. Five framed rows in the Squad-Manager idiom, each with a description and a button that
+// closeDialog 0 then remoteExecs the work to the server.
+//
+// Rows carry no price. The reaction is rolled on the server when a row is picked, so a price
+// printed here would be a guess at a demand that only arrives some of the time -- if the roll
+// comes back bribe, civ_bribe_dialog below states the amount and the player answers it.
+//
+// idc block 8300-8399 here and 8400-8499 for the prompt; the nearest neighbours are the disguise
+// panel's 8000-8203 and fobmanager's 9745. DUWS_civ_target is set by fnc_civ_menu before the
+// dialog opens -- a dialog action string has no access to the addAction's _target.
+class civ_dialog
+{
+    idd = -1;
+    movingenable = true;
+
+    class controls
+    {
+        class civ_background: RscText
+        {
+            idc = 8300;
+            x = 5 * GUI_GRID_W + GUI_GRID_X;
+            y = 3 * GUI_GRID_H + GUI_GRID_Y;
+            w = 30 * GUI_GRID_W;
+            h = 19.6 * GUI_GRID_H;
+            colorBackground[] = {0, 0, 0, 0.7};
+        };
+        class civ_mainframe: RscFrame
+        {
+            idc = 8301;
+            text = "$STR_DUWS_T_CIV_MENU_TITLE";
+            x = 5 * GUI_GRID_W + GUI_GRID_X;
+            y = 3 * GUI_GRID_H + GUI_GRID_Y;
+            w = 30 * GUI_GRID_W;
+            h = 19.6 * GUI_GRID_H;
+            moving = 1;
+        };
+        class civ_coins: RscText
+        {
+            idc = 8310;
+            text = "";
+            x = 6 * GUI_GRID_W + GUI_GRID_X;
+            y = 4.1 * GUI_GRID_H + GUI_GRID_Y;
+            w = 28 * GUI_GRID_W;
+            h = 1.2 * GUI_GRID_H;
+            style = ST_CENTER;
+            colorText[] = {1, 1, 1, 1};
+            sizeEx = 0.035;
+        };
+
+        class civ_intel_frame: RscFrame
+        {
+            idc = 8320;
+            text = "$STR_DUWS_T_CIV_ROW_INTEL";
+            x = 6 * GUI_GRID_W + GUI_GRID_X;
+            y = 5.4 * GUI_GRID_H + GUI_GRID_Y;
+            w = 28 * GUI_GRID_W;
+            h = 2.8 * GUI_GRID_H;
+        };
+        class civ_intel_desc: RscText
+        {
+            idc = 8330;
+            text = "$STR_DUWS_T_CIV_ROW_INTEL_DESC";
+            x = 6.5 * GUI_GRID_W + GUI_GRID_X;
+            y = 5.7 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18.5 * GUI_GRID_W;
+            h = 2.2 * GUI_GRID_H;
+            style = ST_MULTI;
+            colorText[] = {1, 1, 1, 1};
+            sizeEx = 0.030;
+        };
+        class civ_intel_button: RscButton
+        {
+            idc = 8340;
+            text = "$STR_DUWS_T_CIV_ASK";
+            x = 25.3 * GUI_GRID_W + GUI_GRID_X;
+            y = 6.2 * GUI_GRID_H + GUI_GRID_Y;
+            w = 8.2 * GUI_GRID_W;
+            h = 1.4 * GUI_GRID_H;
+            colorBackground[] = {0.16, 0.3, 0.55, 0.7};
+            colorBackgroundDisabled[] = {0.35, 0.35, 0.35, 0.5};
+            tooltip = "$STR_DUWS_T_CIV_ROW_INTEL_DESC";
+            action = "closeDialog 0; [DUWS_civ_target, player, 'INTEL'] remoteExec ['fnc_civ_request', 2];";
+        };
+
+        class civ_aid_frame: civ_intel_frame
+        {
+            idc = 8321;
+            text = "$STR_DUWS_T_CIV_ROW_AID";
+            y = 8.4 * GUI_GRID_H + GUI_GRID_Y;
+        };
+        class civ_aid_desc: civ_intel_desc
+        {
+            idc = 8331;
+            text = "$STR_DUWS_T_CIV_ROW_AID_DESC";
+            y = 8.7 * GUI_GRID_H + GUI_GRID_Y;
+        };
+        class civ_aid_button: civ_intel_button
+        {
+            idc = 8341;
+            y = 9.2 * GUI_GRID_H + GUI_GRID_Y;
+            tooltip = "$STR_DUWS_T_CIV_ROW_AID_DESC";
+            action = "closeDialog 0; [DUWS_civ_target, player, 'AID'] remoteExec ['fnc_civ_request', 2];";
+        };
+
+        class civ_toolkit_frame: civ_intel_frame
+        {
+            idc = 8322;
+            text = "$STR_DUWS_T_CIV_ROW_TOOLKIT";
+            y = 11.4 * GUI_GRID_H + GUI_GRID_Y;
+        };
+        class civ_toolkit_desc: civ_intel_desc
+        {
+            idc = 8332;
+            text = "$STR_DUWS_T_CIV_ROW_TOOLKIT_DESC";
+            y = 11.7 * GUI_GRID_H + GUI_GRID_Y;
+        };
+        class civ_toolkit_button: civ_intel_button
+        {
+            idc = 8342;
+            y = 12.2 * GUI_GRID_H + GUI_GRID_Y;
+            tooltip = "$STR_DUWS_T_CIV_ROW_TOOLKIT_DESC";
+            action = "closeDialog 0; [DUWS_civ_target, player, 'TOOLKIT'] remoteExec ['fnc_civ_request', 2];";
+        };
+
+        class civ_recruit_frame: civ_intel_frame
+        {
+            idc = 8323;
+            text = "$STR_DUWS_T_CIV_ROW_RECRUIT";
+            y = 14.4 * GUI_GRID_H + GUI_GRID_Y;
+        };
+        class civ_recruit_desc: civ_intel_desc
+        {
+            idc = 8333;
+            text = "$STR_DUWS_T_CIV_ROW_RECRUIT_DESC";
+            y = 14.7 * GUI_GRID_H + GUI_GRID_Y;
+        };
+        class civ_recruit_button: civ_intel_button
+        {
+            idc = 8343;
+            y = 15.2 * GUI_GRID_H + GUI_GRID_Y;
+            tooltip = "$STR_DUWS_T_CIV_ROW_RECRUIT_DESC";
+            action = "closeDialog 0; [DUWS_civ_target, player, 'RECRUIT'] remoteExec ['fnc_civ_request', 2];";
+        };
+
+        // Red, and named for what the player is doing. Arrest is coercion rather than
+        // conversation, so it reaches its own server function: no reaction is rolled, no bribe is
+        // asked, and a civilian who has refused to talk can still be detained.
+        class civ_arrest_frame: civ_intel_frame
+        {
+            idc = 8324;
+            text = "$STR_DUWS_T_CIV_ROW_ARREST";
+            y = 17.4 * GUI_GRID_H + GUI_GRID_Y;
+        };
+        class civ_arrest_desc: civ_intel_desc
+        {
+            idc = 8334;
+            text = "$STR_DUWS_T_CIV_ROW_ARREST_DESC";
+            y = 17.7 * GUI_GRID_H + GUI_GRID_Y;
+        };
+        class civ_arrest_button: civ_intel_button
+        {
+            idc = 8344;
+            text = "$STR_DUWS_T_CIV_ROW_ARREST";
+            y = 18.2 * GUI_GRID_H + GUI_GRID_Y;
+            colorBackground[] = {0.6, 0.13, 0.13, 0.85};
+            tooltip = "$STR_DUWS_T_CIV_ROW_ARREST_DESC";
+            action = "closeDialog 0; [DUWS_civ_target, player] remoteExec ['fnc_civ_arrest', 2];";
+        };
+
+        class civ_close: RscButton
+        {
+            idc = 8350;
+            text = "$STR_DUWS_T_MENU_CLOSE";
+            x = 13 * GUI_GRID_W + GUI_GRID_X;
+            y = 20.8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 14 * GUI_GRID_W;
+            h = 1.3 * GUI_GRID_H;
+            colorBackground[] = {0.35, 0.35, 0.35, 0.5};
+            action = "closeDialog 0;";
+        };
+    };
+};
+
+// The bribe prompt. onUnload rather than a send on each button, so closing with Escape answers
+// too: an offer left hanging would block the civilian silently, and refusing is what Escape
+// means here. Answering twice is harmless -- the server clears its record on the first answer
+// and a second arrives to nothing.
+class civ_bribe_dialog
+{
+    idd = -1;
+    movingenable = true;
+    onUnload = "[DUWS_civ_target, player, DUWS_civ_bribe_accepted] remoteExec ['fnc_civ_bribe_answer', 2];";
+
+    class controls
+    {
+        class civb_background: RscText
+        {
+            idc = 8400;
+            x = 10 * GUI_GRID_W + GUI_GRID_X;
+            y = 8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 20 * GUI_GRID_W;
+            h = 8 * GUI_GRID_H;
+            colorBackground[] = {0, 0, 0, 0.8};
+        };
+        class civb_mainframe: RscFrame
+        {
+            idc = 8401;
+            text = "$STR_DUWS_T_CIV_BRIBE_TITLE";
+            x = 10 * GUI_GRID_W + GUI_GRID_X;
+            y = 8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 20 * GUI_GRID_W;
+            h = 8 * GUI_GRID_H;
+            moving = 1;
+        };
+        class civb_demand: RscText
+        {
+            idc = 8410;
+            text = "";
+            x = 10.6 * GUI_GRID_W + GUI_GRID_X;
+            y = 9.2 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18.8 * GUI_GRID_W;
+            h = 2.4 * GUI_GRID_H;
+            style = ST_MULTI;
+            colorText[] = {1, 1, 1, 1};
+            sizeEx = 0.033;
+        };
+        class civb_coins: RscText
+        {
+            idc = 8411;
+            text = "";
+            x = 10.6 * GUI_GRID_W + GUI_GRID_X;
+            y = 11.8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18.8 * GUI_GRID_W;
+            h = 1.2 * GUI_GRID_H;
+            style = ST_CENTER;
+            colorText[] = {1, 1, 1, 1};
+            sizeEx = 0.033;
+        };
+        class civb_accept: RscButton
+        {
+            idc = 8420;
+            text = "$STR_DUWS_T_CIV_BRIBE_ACCEPT";
+            x = 11 * GUI_GRID_W + GUI_GRID_X;
+            y = 13.6 * GUI_GRID_H + GUI_GRID_Y;
+            w = 8 * GUI_GRID_W;
+            h = 1.4 * GUI_GRID_H;
+            colorBackground[] = {0.16, 0.3, 0.55, 0.7};
+            colorBackgroundDisabled[] = {0.35, 0.35, 0.35, 0.5};
+            action = "DUWS_civ_bribe_accepted = true; closeDialog 0;";
+        };
+        class civb_refuse: RscButton
+        {
+            idc = 8421;
+            text = "$STR_DUWS_T_CIV_BRIBE_REFUSE";
+            x = 21 * GUI_GRID_W + GUI_GRID_X;
+            y = 13.6 * GUI_GRID_H + GUI_GRID_Y;
+            w = 8 * GUI_GRID_W;
+            h = 1.4 * GUI_GRID_H;
+            colorBackground[] = {0.35, 0.35, 0.35, 0.5};
+            action = "closeDialog 0;";
+        };
+    };
+};

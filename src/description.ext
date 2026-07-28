@@ -53,6 +53,7 @@ class CfgFunctions
 #include "duws\shared\includes\remoteExec.hpp"
 #include "duws\shared\includes\operative_menu.hpp"
 #include "duws\shared\includes\disguise_menu.hpp"
+#include "duws\shared\includes\civ_menu.hpp"
 
 #include "duws\shared\includes\params_modern.hpp"
 #include "duws\shared\includes\supports_radio_modern.hpp"

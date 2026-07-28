@@ -3071,6 +3071,78 @@
                 <Original>Get closer to talk</Original>
                 <English>Get closer to talk</English>
             </Key>
+            <Key ID="STR_DUWS_T_CIV_MENU_TITLE">
+                <Original>Civilian Interaction</Original>
+                <English>Civilian Interaction</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_MENU_COINS">
+                <Original>In Inventory: %1 cash</Original>
+                <English>In Inventory: %1 cash</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_ASK">
+                <Original>Ask</Original>
+                <English>Ask</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_ROW_INTEL">
+                <Original>Ask About the Enemy</Original>
+                <English>Ask About the Enemy</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_ROW_INTEL_DESC">
+                <Original>Locals hear things. Whether they tell you depends on what this town thinks of you.</Original>
+                <English>Locals hear things. Whether they tell you depends on what this town thinks of you.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_ROW_AID">
+                <Original>Ask for Medical Aid</Original>
+                <English>Ask for Medical Aid</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_ROW_AID_DESC">
+                <Original>A medikit, left at their feet. One local will spare aid or tools, never both.</Original>
+                <English>A medikit, left at their feet. One local will spare aid or tools, never both.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_ROW_TOOLKIT">
+                <Original>Ask for Tools</Original>
+                <English>Ask for Tools</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_ROW_TOOLKIT_DESC">
+                <Original>A toolkit, left at their feet. One local will spare aid or tools, never both.</Original>
+                <English>A toolkit, left at their feet. One local will spare aid or tools, never both.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_ROW_RECRUIT">
+                <Original>Offer to Enlist</Original>
+                <English>Offer to Enlist</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_ROW_RECRUIT_DESC">
+                <Original>Arm them and take them along. They fight for the town's opinion of you, not for pay.</Original>
+                <English>Arm them and take them along. They fight for the town's opinion of you, not for pay.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_ROW_ARREST">
+                <Original>Arrest</Original>
+                <English>Arrest</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_ROW_ARREST_DESC">
+                <Original>Order them to the ground at gunpoint, then search them. The town will hear about it.</Original>
+                <English>Order them to the ground at gunpoint, then search them. The town will hear about it.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_BRIBE_TITLE">
+                <Original>They Want Paying</Original>
+                <English>They Want Paying</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_BRIBE_DEMAND">
+                <Original>They will do it for %1 cash. Walk away and they are done talking to you.</Original>
+                <English>They will do it for %1 cash. Walk away and they are done talking to you.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_BRIBE_ACCEPT">
+                <Original>Pay</Original>
+                <English>Pay</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_BRIBE_REFUSE">
+                <Original>Refuse</Original>
+                <English>Refuse</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CIV_MENU_ACTION">
+                <Original>Civilian Interaction</Original>
+                <English>Civilian Interaction</English>
+            </Key>
         </Container>
         <Container name="Informants">
             <Key ID="STR_DUWS_T_nocpinf2">
