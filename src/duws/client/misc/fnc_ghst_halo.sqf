@@ -95,11 +95,14 @@ if (not alive _host) exitwith {
 _caller groupchat localize "STR_DUWS_T_vtkkn80v";
 
 // 保存玩家负载并打开地图
+mapclick = false;
+if (!(["HALO", "clickpos = _pos; mapclick = true; ['HALO'] call fnc_mapclick_release; true;"] call fnc_mapclick_claim)) exitWith {};
 openMap true;
 player setVariable["Saved_Loadout", getUnitLoadout player];
-mapclick = false;
-onMapSingleClick "clickpos = _pos; mapclick = true; onMapSingleClick """";true;";
 waituntil {mapclick or !(visiblemap)};
+// Released on the abort path too: the player closing the map ends the jump, and without this
+// the slot would stay owned by a mode that is no longer running.
+["HALO"] call fnc_mapclick_release;
 if (!visibleMap) exitwith {
     _caller groupchat localize "STR_DUWS_T_q639bywa";
     player setUnitLoadout(player getVariable["Saved_Loadout",[]]);

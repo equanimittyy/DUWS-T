@@ -1689,6 +1689,10 @@
                 <Original>This town's standing with BLUFOR has suffered.</Original>
                 <English>This town's standing with BLUFOR has suffered.</English>
             </Key>
+            <Key ID="STR_DUWS_T_mapclick_busy">
+                <Original>The map is already waiting on a click for something else.</Original>
+                <English>The map is already waiting on a click for something else.</English>
+            </Key>
             <Key ID="STR_DUWS_T_civ_mapview_action">
                 <Original>View Map</Original>
                 <English>View Map</English>
@@ -6104,10 +6108,6 @@
             <Key ID="STR_DUWS_T_liftwp_drop">
                 <Original>Drop point</Original>
                 <English>Drop point</English>
-            </Key>
-            <Key ID="STR_DUWS_T_liftwp_busy">
-                <Original>Mule 1-1, another element is transmitting a route. Stand by.</Original>
-                <English>Mule 1-1, another element is transmitting a route. Stand by.</English>
             </Key>
             <Key ID="STR_DUWS_T_liftwp_set">
                 <Original>Route received. Mule 1-1 inbound.</Original>

@@ -77,7 +77,11 @@ player_markers_main_loop_handle = _this spawn {
 	} forEach _this;
 
 	aero_player_markers_pos = [0,0];
-	onMapSingleClick "aero_player_markers_pos=_pos;";
+	// Registered as the background listener, not installed directly: this one wants the clicked
+	// position for the whole mission, and as a plain handler it was overwritten by the first
+	// support call and never came back, leaving marker snapping frozen at the last click before
+	// that. Modes now hand the slot back here when they finish.
+	["aero_player_markers_pos=_pos;"] call fnc_mapclick_background;
 
 	_getNextMarker = {
 		private ["_marker"]; 

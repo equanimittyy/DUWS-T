@@ -4,14 +4,17 @@
 //  THE REST ARE ORDERED BY DISTANCE FROM HQ
 
 _pos = [];
+clicked = false;
+if (!(["ASSAULT", "ClickedPos = _pos; clicked = true;"] call fnc_mapclick_claim)) exitWith {};
 hint localize "STR_DUWS_T_0v7xnprx";
 openMap true;
 
-clicked = false;
-OnMapSingleClick "ClickedPos = _pos; clicked = true;";	
 _found_distance = false;
 
 waituntil {sleep 0.1;clicked or !(visiblemap)};
+// Released on both exits. This handler used to be left installed on every path, so the slot
+// still held a live "set the assault target" click long after the dialog had closed.
+["ASSAULT"] call fnc_mapclick_release;
 if (!visibleMap) exitwith {
 	hint localize "STR_DUWS_T_26hvx0yt";
 };

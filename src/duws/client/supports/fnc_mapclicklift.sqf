@@ -5,19 +5,13 @@
 
 params ["_target", "_caller", "_actionId", "_arguments"];
 
-// ========== 互斥锁检查：防止多个玩家同时使用地图点击 ==========
-private _lockOwner = missionNamespace getVariable ["LIFT_MAPCLICK_OWNER", ""];
-private _lockExpiry = missionNamespace getVariable ["LIFT_MAPCLICK_EXPIRY", 0];
-private _myUID = getPlayerUID player;
-
-// 如果锁已被其他玩家占用且未超时，则提示并退出
-if (_lockOwner != "" && {_lockOwner != _myUID} && {diag_tickTime < _lockExpiry}) exitWith {
-    titleText [format ["<t color='#ff0000' size='2'>%1</t>", localize "STR_DUWS_T_liftwp_busy"], "PLAIN DOWN", -1, true, true];
-};
-
-// 否则，尝试占用锁（可能存在极小概率的竞态，但可接受）
-missionNamespace setVariable ["LIFT_MAPCLICK_OWNER", _myUID];
-missionNamespace setVariable ["LIFT_MAPCLICK_EXPIRY", diag_tickTime + 600]; // 10分钟超时
+// The map-click slot is the thing actually being contended, so this takes the shared claim
+// rather than the private lock it used to keep here. That lock was per-machine despite being
+// written as a player mutex (the owner was never broadcast) and its timeout was measured with
+// diag_tickTime, which a savegame does not restore -- a campaign loaded after the stamp was
+// taken saw the lock as either permanently held or permanently free.
+private _liftClickHandler = "player setVariable ['LIFT_TMPPOS', _pos]; player setVariable ['LIFT_CLICKED', true];";
+if (!(["LIFT", _liftClickHandler] call fnc_mapclick_claim)) exitWith {};
 
 // ========== 私有化所有临时变量 ==========
 private _timer = 3000;                     // 超时计数器（5分钟 = 3000 * 0.1秒）
@@ -44,8 +38,9 @@ while {_timer > 0 && count _waypoints < 3} do {
     };
 
     // 重置并设置点击回调（使用玩家变量传递数据）
-    onMapSingleClick "";
-    onMapSingleClick "player setVariable ['LIFT_TMPPOS', _pos]; player setVariable ['LIFT_CLICKED', true];";
+    // Re-claiming as the current holder, which the slot allows: each waypoint reinstalls the
+    // same handler.
+    ["LIFT", _liftClickHandler] call fnc_mapclick_claim;
 
     // 等待点击，期间若地图被关闭则立即重新打开
     waitUntil {
@@ -119,10 +114,6 @@ player setVariable ["LiftTakeOff", true];
 openMap false;
 
 // 清理回调及玩家变量
-onMapSingleClick "";
+["LIFT"] call fnc_mapclick_release;
 player setVariable ["LIFT_CLICKED", nil];
 player setVariable ["LIFT_TMPPOS", nil];
-
-// ========== 释放互斥锁 ==========
-missionNamespace setVariable ["LIFT_MAPCLICK_OWNER", nil];
-missionNamespace setVariable ["LIFT_MAPCLICK_EXPIRY", nil];

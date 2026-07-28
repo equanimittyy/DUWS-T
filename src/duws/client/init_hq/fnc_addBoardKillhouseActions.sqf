@@ -48,15 +48,9 @@ if (isNil {_board getVariable "board_fasttravel_actions_done"}) then {
             if (!isNil "DUWS_baseTravelMapOpen" && {DUWS_baseTravelMapOpen}) exitWith {
                 hint localize "STR_DUWS_T_FAST_TRAVEL_BUSY";
             };
-            DUWS_baseTravelMapOpen = true;
-            openMap true;
-            // Not a hint: the hint box renders beneath the map display, so the instruction to
-            // click near the base played its sound and showed nothing, leaving the player in a
-            // click-to-travel mode with no sign it had started.
-            [localize "STR_DUWS_T_FAST_TRAVEL_BASE_HINT"] call fnc_map_prompt;
-            onMapSingleClick {
+            private _got = ["FASTTRAVEL", {
                 params ["_pos"];
-                onMapSingleClick "";
+                ["FASTTRAVEL"] call fnc_mapclick_release;
                 // Cleared while the map is still up: the banner is a control on that display
                 // and fnc_map_prompt cannot reach it once the map is gone.
                 [""] call fnc_map_prompt;
@@ -69,13 +63,22 @@ if (isNil {_board getVariable "board_fasttravel_actions_done"}) then {
                     hint localize "STR_DUWS_T_FAST_TRAVEL_BASE_FAIL";
                 };
                 true;
-            };
+            }] call fnc_mapclick_claim;
+            if (!_got) exitWith {};
+
+            DUWS_baseTravelMapOpen = true;
+            openMap true;
+            // Not a hint: the hint box renders beneath the map display, so the instruction to
+            // click near the base played its sound and showed nothing, leaving the player in a
+            // click-to-travel mode with no sign it had started.
+            [localize "STR_DUWS_T_FAST_TRAVEL_BASE_HINT"] call fnc_map_prompt;
+
             // 地图被强制关闭时的清理
             [] spawn {
                 waitUntil { !visibleMap };
                 if (!isNil "DUWS_baseTravelMapOpen" && {DUWS_baseTravelMapOpen}) then {
                     DUWS_baseTravelMapOpen = nil;
-                    onMapSingleClick "";
+                    ["FASTTRAVEL"] call fnc_mapclick_release;
                 };
             };
         },

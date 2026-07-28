@@ -14,12 +14,9 @@ hirePartisans_mapOpen = true;
 player setVariable ["DUWS_partisan_caller", _caller];
 player setVariable ["DUWS_partisan_count", _count];
 
-hint "Click on the map to deploy your partisans. You cannot close the map until you choose a location.";
-openMap true;
-
-onMapSingleClick {
+private _got = ["PARTISANS", {
     params ["_pos"];
-    onMapSingleClick "";
+    ["PARTISANS"] call fnc_mapclick_release;
     openMap false;
     hirePartisans_mapOpen = false;
 
@@ -34,7 +31,13 @@ onMapSingleClick {
         [_caller, _pos, _count] remoteExec ["fnc_hirePartisans_spawnDeployed", 2];
     };
     true;
-};
+}] call fnc_mapclick_claim;
+// The flag is raised above this point, so a refused claim has to lower it again or the action
+// stays permanently "already placing a squad".
+if (!_got) exitWith { hirePartisans_mapOpen = false; };
+
+hint "Click on the map to deploy your partisans. You cannot close the map until you choose a location.";
+openMap true;
 
 // 强制保持地图打开，直到点击
 while {hirePartisans_mapOpen} do {

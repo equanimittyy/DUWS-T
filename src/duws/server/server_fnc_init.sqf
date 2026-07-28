@@ -1016,6 +1016,70 @@ switch (VERSION_X) do {
 
 
 
+// --- Map-click slot ------------------------------------------------------------------
+// The engine keeps exactly one onMapSingleClick handler per machine and offers no way to read
+// back what is installed, so two features that each install one silently disarm each other and
+// the loser waits on a click that never arrives. Everything mid-mission that wants a map click
+// goes through these three instead of touching the command.
+//
+// Held in uiNamespace rather than missionNamespace because a claim must not be serialized into
+// a savegame: restored from one, the slot would come back owned by a mode that no longer
+// exists and every map click for the rest of the session would be dead.
+//
+// Mission generation (HQ placement, manual zone placement) still calls the command directly.
+// Those run to completion before the player has a comm menu or a board to click, so they
+// cannot collide with anything, and routing them through a function the server publishes would
+// make map placement depend on the broadcast having landed.
+
+// A listener with no mode behind it, live whenever no mode holds the slot. The player-marker
+// system needs the clicked position permanently, and before this it lost the slot to the first
+// support call of the mission and never got it back.
+fnc_mapclick_background = {
+	params [["_handler", ""]];
+	uiNamespace setVariable ["DUWS_mapclick_bg", _handler];
+	if ((uiNamespace getVariable ["DUWS_mapclick_owner", ""]) isEqualTo "") then {
+		onMapSingleClick _handler;
+	};
+};
+publicVariable "fnc_mapclick_background";
+
+// Takes the slot for a named mode, refusing if a different one already holds it -- which is the
+// point: a collision becomes a message the player reads instead of a feature that dies quietly.
+// Re-claiming as the current holder succeeds, because multi-stage modes (the helicopter taxi
+// takes three points) swap handlers between stages.
+// An optional third element is passed to the binary form of the command, which sets _this in
+// the handler. Not defaulted to []: the unary form leaves the click itself in _this, and every
+// site that reads its position out of `params ["_pos"]` would break if that were blanked.
+fnc_mapclick_claim = {
+	params [["_owner", ""], ["_handler", ""]];
+	private _held = uiNamespace getVariable ["DUWS_mapclick_owner", ""];
+	if (_held isNotEqualTo "" && {_held isNotEqualTo _owner}) exitWith {
+		// The comm menu opens over the map, so a support called while another mode holds the
+		// slot has to be refused on whichever surface is in front of the player: the hint box
+		// renders behind the map. This overwrites the holder's own banner, which is worth it
+		// -- the alternative is the silent theft this whole slot exists to stop.
+		private _msg = localize "STR_DUWS_T_mapclick_busy";
+		if (visibleMap) then { [_msg] call fnc_map_prompt } else { hint _msg };
+		false
+	};
+	uiNamespace setVariable ["DUWS_mapclick_owner", _owner];
+	if (count _this > 2) then { (_this select 2) onMapSingleClick _handler } else { onMapSingleClick _handler };
+	true
+};
+publicVariable "fnc_mapclick_claim";
+
+// Hands the slot back to the background listener. A release from anyone but the holder is a
+// no-op: several modes clear themselves from inside their own handler and again on the way out,
+// and that second clear must not disarm whoever claimed in between.
+fnc_mapclick_release = {
+	params [["_owner", ""]];
+	if ((uiNamespace getVariable ["DUWS_mapclick_owner", ""]) isNotEqualTo _owner) exitWith { false };
+	uiNamespace setVariable ["DUWS_mapclick_owner", ""];
+	onMapSingleClick (uiNamespace getVariable ["DUWS_mapclick_bg", ""]);
+	true
+};
+publicVariable "fnc_mapclick_release";
+
 //////////////////////////////
 // GLOBAL FUNCTIONS
 //////////////////////////////

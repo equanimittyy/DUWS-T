@@ -21,11 +21,14 @@ switch (VERSION_X) do {
 	};
 };	
 
-//_cost OnMapSingleClick "[_pos,500,_this] spawn fnc_uav_scanner;
-_cost OnMapSingleClick "[_pos,500,_this,player] remoteExec ['fnc_uav_scanner', 2];
+// _cost rides the binary form so the handler can read the price out of _this.
+if (!(["UAV", "[_pos,500,_this,player] remoteExec ['fnc_uav_scanner', 2];
 	clicked=true;
-	onMapSingleClick ''; 
-	hint localize 'STR_DUWS_T_6u8qilfh'";
+	['UAV'] call fnc_mapclick_release;
+	hint localize 'STR_DUWS_T_6u8qilfh'", _cost] call fnc_mapclick_claim)) exitWith {
+	// The comm-menu entry is consumed on selection, so a refusal has to hand it back.
+	[player,"uav_recon"] call BIS_fnc_addCommMenuItem;
+};
 
 // TIMER
 while {_timer>0 AND !clicked} do {
@@ -35,4 +38,4 @@ while {_timer>0 AND !clicked} do {
 // TIMER ELLAPSED OR CLICKED
 sleep 80;
 [player,"uav_recon"] call BIS_fnc_addCommMenuItem;
-OnMapSingleClick "";
+["UAV"] call fnc_mapclick_release;

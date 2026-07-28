@@ -13,14 +13,13 @@ while {_timer>0} do {
 	waituntil {sleep 0.5;visiblemap};
 	_playerClosed_map = false;
 
+	// Claimed before the action is removed: a refusal must leave the player able to try again.
+	if (!(["TAXI", "ClickedPos1 = _pos; clicked = true;"] call fnc_mapclick_claim)) exitWith {};
 	titleText [format ["<t color='#00ff00' size='2'>%1</t>", localize "STR_DUWS_T_helotaxiwp_brief"], "PLAIN DOWN", -1, true, true];
 	_helo removeAction _actionID;
 
 	// TIMER & MAPCLICK
-	onMapSingleClick "";
 	hint parseText localize "STR_DUWS_T_helotaxi2wp";
-
-	OnMapSingleClick "ClickedPos1 = _pos; clicked = true;";
 
 	TaxiMarker1 = "";
 	TaxiMarker2 = "";
@@ -35,7 +34,7 @@ while {_timer>0} do {
 		str(TaxiMarker1) setMarkerText "TaxiWP1";
 	
 		clicked = false;
-		onMapSingleClick "";
+		["TAXI"] call fnc_mapclick_release;
 		hint localize "STR_DUWS_T_helotaxi1wpmarked";
 		sleep 2;
 	} else {
@@ -44,7 +43,7 @@ while {_timer>0} do {
 	};
 	
 	if !(_playerClosed_map) then {
-		OnMapSingleClick "ClickedPos2 = _pos; clicked = true;";
+		["TAXI", "ClickedPos2 = _pos; clicked = true;"] call fnc_mapclick_claim;
 		waituntil {sleep 0.5;clicked or !(visiblemap)};
 		if (clicked) then {
 			// create temp marker on WP2
@@ -56,7 +55,7 @@ while {_timer>0} do {
 			str(TaxiMarker2) setMarkerText "TaxiWP2";
 
 			clicked = false;
-			onMapSingleClick "";
+			["TAXI"] call fnc_mapclick_release;
 			hint localize "STR_DUWS_T_helotaxi2wpmarked";
 			sleep 2;
 		} else {
@@ -67,7 +66,7 @@ while {_timer>0} do {
 	};
 
 	while {!taxiCanTakeOff} do {
-		OnMapSingleClick "ClickedPos3 = _pos; clicked = true;";
+		["TAXI", "ClickedPos3 = _pos; clicked = true;"] call fnc_mapclick_claim;
 		_playerClosed_map = false;
 		waituntil {sleep 0.5;clicked or !(visiblemap)};
 		if (clicked) then {
@@ -78,7 +77,7 @@ while {_timer>0} do {
 				titleText [format ["<t color='#ff0000' size='2'>%1</t>", localize "STR_DUWS_T_helotaxiwp_nolz"], "PLAIN DOWN", -1, true, true];
 			} else {
 				ClickedTaxiPos = _foundPickupPos;
-				onMapSingleClick "";
+				["TAXI"] call fnc_mapclick_release;
 				_timer = 0;
 				taxiCanTakeOff = true;
 			};    
@@ -94,7 +93,12 @@ while {_timer>0} do {
 	_timer = _timer-1; // remove 1 to timer
 	sleep 0.5;
 	if (taxiCanTakeOff) exitWith{};
-};	
+};
+
+// Catch-all for the exits above -- timer expiry and the player closing the map both leave the
+// loops without passing a release. A release from a non-holder is a no-op, so the paths that
+// already released are unaffected.
+["TAXI"] call fnc_mapclick_release;
 		
 		
 		

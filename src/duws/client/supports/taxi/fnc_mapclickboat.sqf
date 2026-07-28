@@ -5,8 +5,9 @@ clicked = false;
 _helo = _this select 0;
 _actionID = _this select 2;
   
+// Claimed before the action is removed: a refusal must leave the player able to try again.
+if (!(["BOATTAXI", "ClickedTaxiPos = _pos; clicked = true;"] call fnc_mapclick_claim)) exitWith {};
 titleText [localize "STR_DUWS_T_boattaxiwp_brief", "PLAIN DOWN"];
-OnMapSingleClick "ClickedTaxiPos = _pos; clicked = true;";
 _helo removeAction _actionID;
 
 
@@ -25,9 +26,12 @@ while {_timer>0} do {
 	titleText [localize "STR_DUWS_T_boattaxiwp_bad", "PLAIN DOWN"];
 	}
 	else
-	{onMapSingleClick "";_timer = 0;taxiCanTakeOff = true;}  
+	{["BOATTAXI"] call fnc_mapclick_release;_timer = 0;taxiCanTakeOff = true;}
     
     };
   _timer = _timer-1; // remove 1 to timer
   sleep 0.5;
 };
+
+// Catch-all: the loop can also fall out on timer expiry, which passes no release.
+["BOATTAXI"] call fnc_mapclick_release;
