@@ -186,9 +186,9 @@ _buildingUnitsList = [];
 
 _allUnits = units _group;
 
-if (hardcore_mode_enable && (random 10) < (master_Intel_chance + master_Intel_boost) && count _allUnits > 0) then {
+if (hardcore_mode_enable && count _allUnits > 0) then {
     _intelSoldier = selectRandom _allUnits;
-    _code = {[] spawn fnc_found_intel};
+    _code = {[] remoteExec ["fnc_intel_payout", 2]};
     [_intelSoldier, "Search for Intel", "search", _code] spawn fnc_actionRotary;
 };
 

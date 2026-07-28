@@ -175,9 +175,9 @@ _target2 = units _group select 2;
     _unit addMagazineGlobal "FileTopSecret";
 };
 // Put an intel action on leader
-if (hardcore_mode_enable && (random 10) < (master_Intel_chance + master_Intel_boost)) then {
+if (hardcore_mode_enable) then {
 	_leader = units _group select 0;
-	_code = {[] spawn fnc_found_intel};
+	_code = {[] remoteExec ["fnc_intel_payout", 2]};
 	[_leader, "Search for Intel", "search", _code] spawn fnc_actionRotary;
 };
 

@@ -7959,8 +7959,8 @@
                 <German>Hardcore-Modus ist eine Kampagne mit versteckten Operationszonen und Geheimdienstinformationen. Feindliche Operationszonen sind verborgen, bis der Spieler eine betritt oder Informationen bei zufälligen zivilen Informanten, feindlichen Gruppenführern, Feuerteamleitern, hochwertigen Zielen, Laptops usw. findet. Zivile Informanten werden auf der Karte als lila Fragezeichen angezeigt.</German>
                 <Spanish>El Modo Hardcore es una campaña con zonas operativas ocultas e inteligencia. Las zonas operativas enemigas están ocultas hasta que el jugador entra en una o encuentra inteligencia en informantes civiles aleatorios, jefes de escuadra y jefes de equipo de fuego enemigos, objetivos de alto valor, ordenadores portátiles, etc. Los informantes civiles aparecerán como signos de interrogación morados en el mapa.</Spanish>
                 <Chinesesimp>硬核模式是带有隐藏战区和情报的战役。敌人的战区是隐藏的，直到玩家走进一个战区或在随机的平民线人、敌人班长和火力组组长、敌人高价值目标、笔记本电脑等上找到情报。平民线人将在地图上显示紫色问号。</Chinesesimp>
-                <Original>Hardcore Mode is a campaign with hidden operational zones and intel. Enemy operational zones are hidden until the player enters one or finds intel on random civilian informants, enemy squad leaders and fireteam leaders, high-value targets, laptops, etc. Civilian informants will appear as purple question marks on the map.</Original>
-                <English>Hardcore Mode is a campaign with hidden operational zones and intel. Enemy operational zones are hidden until the player enters one or finds intel on random civilian informants, enemy squad leaders and fireteam leaders, high-value targets, laptops, etc. Civilian informants will appear as purple question marks on the map.</English>
+                <Original>Hardcore Mode is a campaign with hidden operational zones. Enemy zones stay off the map until you walk into one, search intel off an enemy body, or complete a side mission. Body searches are limited to one attempt per player every 30 minutes.</Original>
+                <English>Hardcore Mode is a campaign with hidden operational zones. Enemy zones stay off the map until you walk into one, search intel off an enemy body, or complete a side mission. Body searches are limited to one attempt per player every 30 minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_ulm497s5">
                 <German>Task Forces</German>
@@ -8257,13 +8257,6 @@
                 <Chinesesimp>我们的一个FOB被摧毁了。</Chinesesimp>
                 <Original>One of our FOBs has been destroyed.</Original>
                 <English>One of our FOBs has been destroyed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_u18xeu4p">
-                <German>Hier ist das 'Overlord 1-1'. Sieht so aus als hätten wir ein paar Infos zu feindlichen Positionen erhalten. Gute Arbeit.</German>
-                <Spanish>Éste es el CG. Parece que tenemos algo de información sobre las zonas enemigas. Buen trabajo.</Spanish>
-                <Chinesesimp>看起来我们获取了敌方位置的一些信息。干的好。</Chinesesimp>
-                <Original>Copy that. We're pulling an enemy position off that intel, stand by.</Original>
-                <English>Copy that. We're pulling an enemy position off that intel, stand by.</English>
             </Key>
             <Key ID="STR_DUWS_T_8skllpyx">
                 <German>Hier ist das 'Overlord 1-1'. Nichts das wir schon wüssten.</German>

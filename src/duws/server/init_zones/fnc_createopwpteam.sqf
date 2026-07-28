@@ -32,10 +32,3 @@ _group deleteGroupWhenEmpty true;
 
 _patrolRadius = round(_radius/1.25);
 [_group, _patrolCenter, _patrolradius] call bis_fnc_taskPatrol;
-
-// Put an intel action on leader
-if (hardcore_mode_enable && (random 10) < (master_Intel_chance + master_Intel_boost)) then {
-	_leader = units _group select 0;
-	_code = {[] spawn fnc_found_intel};
-	[_leader, "Search for Intel", "search", _code] spawn fnc_actionRotary;
-};

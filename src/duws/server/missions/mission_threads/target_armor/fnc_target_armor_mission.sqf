@@ -168,8 +168,8 @@ if !(("OPTRE" in BLUFOR_FactionFile_X)
 };
 
 // Put an intel action on target
-if (hardcore_mode_enable && (random 10) < (master_Intel_chance + master_Intel_boost)) then {
-    _code = {[] spawn fnc_found_intel};
+if (hardcore_mode_enable) then {
+    _code = {[] remoteExec ["fnc_intel_payout", 2]};
     [_target, "Search for Intel", "search", _code] spawn fnc_actionRotary;
 };
 

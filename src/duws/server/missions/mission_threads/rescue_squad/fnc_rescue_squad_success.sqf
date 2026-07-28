@@ -112,5 +112,7 @@ missionNamespace setVariable [_triggeredVar, true, true];
 // Spawn the cleanup
 [_targetpos,_radius] spawn fnc_mission_cleanup;
 
-// If HARDCORE, Rescue = chance of zone Intel
-if (hardcore_mode_enable && (random 10) < (master_Intel_chance + master_Intel_boost)) then {[] spawn fnc_found_intel};
+// If HARDCORE, Rescue pays intel. Guaranteed, and called rather than spawned into a client
+// function: the shape this replaced ran from a server thread through one that began
+// `if (!hasInterface) exitWith {}`, so on a dedicated server the reward evaporated.
+if (hardcore_mode_enable) then {call fnc_intel_payout};

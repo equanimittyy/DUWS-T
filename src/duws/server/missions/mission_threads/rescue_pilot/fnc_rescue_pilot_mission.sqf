@@ -603,4 +603,7 @@ _message = ([localize "STR_DUWS_T_pilotend2"] call fnc_cs);
 missionNamespace setVariable [_triggeredVar, true, true];
 [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
 
-if (hardcore_mode_enable && (random 10) < (master_Intel_chance + master_Intel_boost)) then {[] spawn fnc_found_intel};
+// Guaranteed, and called rather than spawned into a client function: completing the mission is
+// the gate, and the shape this replaces rolled a chance from a server thread through a function
+// that began `if (!hasInterface) exitWith {}`, so on a dedicated server the reward evaporated.
+if (hardcore_mode_enable) then {call fnc_intel_payout};

@@ -192,11 +192,6 @@ HQ_pos_found_generated = false;publicVariable "HQ_pos_found_generated";
 MASTER_allLocations_filtered = [];//publicVariable "MASTER_allLocations_filtered";
 MASTER_allLocationsPos = [];publicVariable "MASTER_allLocationsPos";
 
-// chance of Intel found and useful
-master_Intel_chance = 5;
-// boost is for more "found"
-master_Intel_boost = 2.5;
-
 // Chance a body search turns up a zone. Server-local: the roll is server-side, and a client
 // that can read the number is a client that can be shown to have rolled against it.
 // Deliberately low -- the body search is the trickle and civilians are the intended bulk source,

@@ -191,8 +191,8 @@ switch (VERSION_X) do {
 [_laptop,[localize "STR_DUWS_T_p3200mf5", fnc_sabotage_laptop_success, [_MissionPos,_targetpos,_mission_name,_markername,_markername2,_radius], 0, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated,true];
 
 // Put an intel action on LAPTOP
-if (hardcore_mode_enable && (random 10) < 11) then {
-    _code = {[] spawn fnc_found_intel};
+if (hardcore_mode_enable) then {
+    _code = {[] remoteExec ["fnc_intel_payout", 2]};
     [_laptop, localize "STR_DUWS_T_7yec9ifj", "search", _code] spawn fnc_actionRotary;
 };
 ["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", 0];

@@ -32,12 +32,6 @@ _group deleteGroupWhenEmpty true;
 
 [_group, _position] call bis_fnc_taskDefend;
 
-// Put an intel action on leader
-if (hardcore_mode_enable && (random 10) < (master_Intel_chance + master_Intel_boost)) then {
-	_leader = units _group select 0;
-	_code = {[] spawn fnc_found_intel};
-	[_leader, "Search for Intel", "search", _code] spawn fnc_actionRotary;
-};
 
 // Add a mortar team anyway
 		_group = [_spawn, EAST, [opfor_SOLDIER_X,opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
@@ -201,10 +195,6 @@ private _fortPossibleUnitTypes = [
         };
         
         [_unit] call fnc_addRandomLoot;
-        if (hardcore_mode_enable && (random 10) < (master_Intel_chance + master_Intel_boost)) then {
-            private _code = {[] spawn fnc_found_intel};
-            [_unit, "Search for Intel", "search", _code] spawn fnc_actionRotary;
-        };
     } forEach units _fortGroup;
     
     ["INFO", "ZONES", format ["Added %1 garrison units to fortification %2", _unitCount, typeOf _building]] call fnc_log;
