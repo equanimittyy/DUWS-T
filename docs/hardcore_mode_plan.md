@@ -12,9 +12,9 @@ system, fixes the locality, and gives hardcore a persistence shape it currently 
 |---|---|
 | Zone icon and ellipse created at alpha 0, `zone_namePOS_pairs` entry flagged unrevealed | `fnc_createzone.sqf:16,51,64` |
 | Walking into a zone reveals it | `fnc_enterlocation.sqf:18-20` |
-| Intel reveals one random unrevealed zone | `fnc_found_intel.sqf`, `fnc_zone_reveal.sqf` |
-| "Search for Intel" actions appear on enemy leaders | `fnc_createopteam2.sqf:36-39`, `fnc_createopwpteam.sqf:37-40`, `fnc_createopfortified.sqf:36-39,204-206` |
-| Side missions award intel on success | clearthearea_cqb `:189`, rescue_pilot `:606`, rescue_squad `:116`, sabotage_laptop `:194`, target_armor `:171`, target_sniper `:178` |
+| Intel reveals one random unrevealed zone | `fnc_intel_payout.sqf`, `fnc_zone_reveal.sqf` |
+| A body search appears on the player, once per 30-minute economy tick | `client/misc/fnc_intel_search_action.sqf`, `server/misc/fnc_intel_search.sqf` |
+| Side missions carry intel, guaranteed | clearthearea_cqb `:189`, rescue_pilot `:606`, rescue_squad `:116`, sabotage_laptop `:194`, target_armor `:171`, target_sniper `:178` |
 | Task forces refuse to launch until a revealed OPFOR zone exists | `hardcore_visibleZone_found`, read at `fnc_request_squad.sqf:82`, `fnc_request_squad_fob.sqf:68`, `fnc_WARCOM_blu_assault.sqf:54`, `fnc_WARCOM_opf_air.sqf:25` |
 | Task-force waypoints only target revealed zones | `fnc_WARCOM_gps_marker.sqf:9-19` |
 | Manual zone placement is disabled, since hand-placing defeats the mode | `fnc_callsign_menu.sqf:13-15` |
@@ -61,12 +61,6 @@ client whose copy has not caught up still passes the gate, and nothing server-si
 `hardcore_visibleZone_found` with the same nested loop over `WARCOM_zones_controled_by_OPFOR`
 against `zone_namePOS_pairs`, comparing positions by `str`. One helper, called from three places.
 
-### Informants ignore hardcore
-
-`fnc_civ_informant_system.sqf:12` reads `if (!hardcore_mode_enable) then { continue; }` — but
-that line sits *above* the `while` loop it means to skip, so `continue` has no loop to act on.
-Informants spawn in every campaign regardless of the setting.
-
 ## Design
 
 ### What intel is for
@@ -80,6 +74,12 @@ That line is what rules out a mechanic this mission shipped until now: develop-i
 hours. It functioned, and it was still the wrong shape — a tactical readout of an area the
 player was already standing in, sold as intel. It is deleted rather than reworked
 ([`civilian_interaction_plan.md`](civilian_interaction_plan.md)).
+
+**The informant spawner goes with it**, for the same reason plus two of its own. It handed intel
+out on a 30-minute timer nobody could influence, which is a faucet rather than a thing the player
+does; and it answered to no cap while claiming to be hardcore-only through a `continue` written
+above the loop it meant to skip, so it ran in every campaign. Rebuilding a local unit tracker
+later is a separate feature with a separate justification.
 
 The distinction also settles what does and does not count as a fourth reveal source. Something
 that marks known enemies locally does not compete with the three below, because it is not
@@ -130,6 +130,11 @@ One roll, not two. The shape it replaces gated the action on `random 10 < 7.5` a
 the same gate again inside `fnc_found_intel`, so the real chance was 56 % and neither number
 said so.
 
+**A failed search pays nothing but the line.** No consolation CP, no partial hint. What a search
+costs is the thirty minutes before the next one, and paying out on failure would make that wait
+the only thing separating a hit from a miss. The corpse hold action's 20 % `+1 CP / +1 AP` band
+is not a precedent to copy here: that action is a mission reward and answers to no clock.
+
 `econ_tick` (`server/misc/fnc_zonesundercontrol.sqf`) is the clock, the same one the civilian
 heal cap keys off. Nothing new is timed.
 
@@ -142,7 +147,13 @@ rather than clients inferring it.
 
 ### The search is one action on the player, not one per corpse
 
-Any OPFOR body can be searched, not just a team leader's. The obvious way to do that — extend
+Any OPFOR body can be searched, not just a team leader's. The four spawn-time actions this
+replaces are deleted rather than kept alongside it — one per zone-garrison leader, rolled when
+the garrison spawned (`fnc_createopteam2`, `fnc_createopwpteam`, and `fnc_createopfortified`
+twice). Keeping them would put two searches on one corpse with different odds and different
+caps, and the generic action already covers every body they sat on.
+
+The obvious way to search every body — extend
 `fnc_add_intel_on_death` from mission patrols to every OPFOR unit — is the wrong one: it adds a
 `Killed` handler per unit and then `remoteExec ["fnc_corpse_search_action", 0, true]` per death,
 where the trailing `true` is the JIP flag. Nothing ever removes those entries, so every corpse
@@ -217,18 +228,53 @@ The attempt is spent on the *attempt*, not on success, and the server is what sp
 client cannot be trusted to report having already searched, and a 10 % roll the client makes is
 a 10 % roll the client can retry.
 
+### Every source pays out through one function
+
+`fnc_intel_payout` is where a piece of intel turns into something, and every faucet calls it: the
+body search, all six side-mission sites, and the civilian menu when it lands. Deciding what intel
+is *worth* in one file is the point — a payout added there reaches every source at once, and a
+source cannot quietly become more generous than the others.
+
+It draws at random from the kinds that have something to give **right now**, not from a fixed
+list. Three kinds are designed; one exists:
+
+| Kind | State |
+|---|---|
+| An unrevealed enemy zone | built |
+| An unrevealed normal hardpoint | waiting on [`hardpoint_system_plan.md`](hardpoint_system_plan.md) |
+| An unrevealed enemy patrol | waiting on [`opfor_commander_plan.md`](opfor_commander_plan.md) |
+
+A kind with an empty pool never enters the draw, so a campaign that has been fully uncovered
+reports that rather than silently awarding nothing — and the two unbuilt kinds attach by adding a
+case, without touching a single caller.
+
+The zone draw takes from the unrevealed zones only. The shape it replaces drew from *every* zone
+and then checked whether it happened to be hidden, so the real odds decayed as a campaign
+progressed: late on, most winning rolls landed on ground the player had already found.
+
 ### Which sources answer to the cap
 
 | Source | Capped |
 |---|---|
 | Search-for-intel on an enemy | yes — one attempt per player per tick, 10 % |
-| Side-mission award | no — the mission is its own gate, and a player cannot repeat it |
+| Side-mission intel | no, and no roll either: completing the mission is the gate, so the payout is guaranteed |
 | Walking into a zone | not applicable; it reveals the zone the player is standing in and rolls nothing |
 | Civilian interaction menu | no — see [`civilian_interaction_plan.md`](civilian_interaction_plan.md); the player paid a bribe, and that path is limited by per-civilian consumption |
 
-Side missions leave the cap alone deliberately. The old design rolled the same throttle for them,
-which meant a mission completed during another source's cooldown paid nothing and told the
-player nothing about why.
+Side missions are uncapped *and* unrolled, deliberately. The old design put the campaign-wide
+throttle in front of them, so a mission completed during another source's cooldown paid nothing
+and said nothing about why; and on top of that the roll ran at mission *setup*, deciding whether
+the intel object existed at all before the player had done anything. Both are gone. A mission
+that says it carries intel carries it.
+
+Four of the six plant a hold action on a specific object — a soldier in the CQB group, the armour
+target, the sniper's team leader, the laptop — rather than paying on completion; those keep their
+shape, because reaching that object is the mission. Only the two rescues pay on success, and they
+are the pair that never paid at all on a dedicated server.
+
+A mission target's corpse can therefore carry the mission's own guaranteed search as well as the
+generic body search below. That overlap is intended: one is the reward for the mission, the other
+is the 10 % trickle that any body offers.
 
 ## Persistence
 
@@ -301,6 +347,15 @@ standing in and rolls nothing, so there is nothing to throttle.
   player object precisely so a client-side condition can see it; a host-only test proves nothing.
 - [ ] Confirm both rescue-mission awards now fire on a dedicated server. They are the two sites
   that never have.
+- [ ] Confirm `side group cursorObject == east` still reads `east` on a corpse. A dead unit leaves
+  its group's unit list, and a group set to `deleteGroupWhenEmpty` can be gone before the body is,
+  which would make the last clause of the condition read a null group and hide the action on
+  exactly the bodies it is for. If it proves unreliable, stamp the side on the unit at spawn and
+  read that instead.
+- [ ] Confirm a player who dies gets their spent attempt back, and decide whether that is
+  acceptable. `DUWS_intel_searched` lives on the player object, so a new body starts clean. The
+  incentive is small — respawn strips money and intel items — and the same forgiving-failure
+  reasoning covers a restore, but it is a refund nobody chose.
 
 ## Open questions
 

@@ -104,11 +104,30 @@ table above: anything the replay rebuilds must not also be restored, or it is do
 | Hardpoints | input | `hardpoint_pos_array`, `hardpoint_type_array`, `hardpoint_zone_array`, `hardpoint_state_array` and the `zone_hp_left_<n>` counters, if [`hardpoint_system_plan.md`](hardpoint_system_plan.md) has landed |
 | Pools | outcome | `commandpointsblu1`, `WARCOM_blufor_ap`, `WARCOM_opfor_ap`, `Player_Reputation` |
 | Ownership | outcome | the positions of BLUFOR-held zones, and nothing else |
+| Reveal | outcome | the positions of revealed zones, and the indices of revealed normal hardpoints |
 | Loadouts | — | `getUnitLoadout` per player UID. Already data — `client/client_init.sqf:408` stores it on the player object, which dies with the session |
 
 Hardpoints are an input for the same reason zones are: that plan sites them inside
 `fnc_createZone`, so the siting pass has to accept a restored registry instead of rolling fresh
-positions, or a restore moves every hardpoint and orphans its cleared state.
+positions, or a restore moves every hardpoint and orphans its cleared state. The campaign-start
+batch of normal hardpoints is a second siting pass, outside `fnc_createZone`
+([`hardpoint_system_plan.md`](hardpoint_system_plan.md#the-campaign-start-batch)), and needs the
+same guard for the same reason: it is generated once, so a restore accepts the stored registry
+rather than rolling a fresh set.
+
+**Reveal is an outcome, not an input.** A hardcore campaign's entire progress is which zones the
+player has found, and `fnc_createZone:16` sets every entry's visibility from
+`hardcore_mode_enable`, so a replay re-hides all of them. Store the positions of revealed zones,
+then re-flag the matching `zone_namePOS_pairs` entries and repaint their markers after build-out
+— the same shape and the same reason as Ownership. Whether a hardpoint has been revealed is
+separate state on the same footing, because intel can uncover one without its parent zone; the
+registry in the Hardpoints row says nothing about it. `hardcore_visibleZone_found` is derived
+from reveal plus OPFOR ownership and is recomputed rather than stored. Details in
+[`hardcore_mode_plan.md`](hardcore_mode_plan.md#persistence).
+
+Storing the state rather than how it was reached is what keeps this to one array: a zone the
+player walked into, bought from a local, or found on a dead officer all restore identically,
+because by then they are one flag.
 
 `civ_town_ap` is stored rather than recomputed, against this plan's usual preference for
 rebuilding derived state. It is a rank within the kept set's building counts, so recomputing it
@@ -229,7 +248,7 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 - [ ] Prerequisites 1-2 above, each as its own change.
 - [ ] Write `fnc_campaign_save.sqf` and dump a snapshot to the log without restoring. Verify: every value in it is a number, string, boolean or array of those.
 - [ ] Write `fnc_campaign_restore.sqf` covering pools and ownership only. Verify: restart mid-campaign and confirm CP, AP and reputation return.
-- [ ] Add zone replay through `fnc_createZone`, then the ownership pass after `WARCOM_init_done`. Verify: restored zones sit in the same places with the same radii, a captured zone comes back captured, and `amount_zones_created` matches the zone count instead of double it.
+- [ ] Add zone replay through `fnc_createZone`, then the ownership and reveal passes after `WARCOM_init_done`. Verify: restored zones sit in the same places with the same radii, a captured zone comes back captured, a hardcore campaign's found zones stay found, and `amount_zones_created` matches the zone count instead of double it.
 - [ ] Add HQ, FOB and civilian-town replay. Verify: HQ actions work, FOB triggers fire, FOB names and towns come back where they were, and the restore replays no FOB radio announcements.
 - [ ] Add loadouts and support unlocks.
 - [ ] Version and world guards: refuse a snapshot from a different map or format version and start fresh with a logged warning.

@@ -330,3 +330,23 @@ always rendered purple; the config block that would "fix" them is dead weight.
 the player picks in the editor, which is what the `name` field on those classes is for. Set
 translucency with `setMarkerAlpha` rather than trusting the string's fourth channel — the
 channel's effect is unconfirmed, and a marker created without an explicit alpha sits at 1.
+
+## `str` on a string adds literal quote characters, and this mission's marker names carry them
+
+**`str "12345678"` does not return `12345678`. It returns the source-code representation, so
+the result is eight digits wrapped in a pair of `"` characters. Zone markers are created as
+`createMarker [str(_markername), _zonePos]`, which means the marker's real name includes
+those quotes — and every later `setMarkerAlpha` / `setMarkerColor` / `setMarkerPos` has to
+spell it the same way or it addresses a marker that does not exist.**
+
+The trap is tidying up. `_markername` is already a `String` from `format`, so the `str` looks
+redundant and removing it reads as an obvious cleanup — but creation and access have to agree,
+and dropping it on one side silently does nothing at all. `setMarkerAlpha` on a name that
+matches no marker throws no error and logs nothing; the zone simply stays invisible.
+
+**How to apply:** in `server/init_zones/`, treat `str(_name)` as part of the marker's identity
+rather than a conversion, and grep for the sibling accesses before touching either half. The
+zone icon and its ellipse are built this way in `fnc_createzone.sqf:45,59` and addressed the
+same way in `fnc_zone_reveal.sqf` and `fnc_captured.sqf`. Marker names built without `str` —
+the mission has both conventions — are addressed without it, so the rule is per-marker, not
+mission-wide.
