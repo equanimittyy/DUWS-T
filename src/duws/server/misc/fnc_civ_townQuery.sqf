@@ -39,4 +39,7 @@ private _rep = if (_hasRep) then { _reps select _hit } else { 0 };
 private _ap = (missionNamespace getVariable ["civ_town_ap", []]) param [_hit, 0];
 ([_rep, _ap] call fnc_civ_townIncome) params ["_income", "_side"];
 
-[_name, _pop, _hasRep, _rep, _income, _side] remoteExec ["fnc_civ_townInfo", _caller];
+// Worth travels alongside the income, not instead of it. They are the same number for a town that
+// has picked a side, but a neutral one earns nothing while still being worth something to turn,
+// and the readout has to be able to say both without re-deriving the tick's figure client-side.
+[_name, _pop, _hasRep, _rep, _income, _side, _ap] remoteExec ["fnc_civ_townInfo", _caller];

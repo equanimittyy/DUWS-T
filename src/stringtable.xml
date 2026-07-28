@@ -1730,8 +1730,8 @@
                 <English>Reputation: %1</English>
             </Key>
             <Key ID="STR_DUWS_T_civ_mapview_income_none">
-                <Original>Income: none</Original>
-                <English>Income: none</English>
+                <Original>Income: %1 AP/30min to No-one</Original>
+                <English>Income: %1 AP/30min to No-one</English>
             </Key>
             <Key ID="STR_DUWS_T_civ_mapview_income_blu">
                 <Original>Income: %1 AP/30min to BLUFOR</Original>

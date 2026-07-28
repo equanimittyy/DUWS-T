@@ -4,7 +4,7 @@
 // Empty arguments mean the click missed every revealed town.
 if (!hasInterface) exitWith {};
 
-params [["_name", ""], ["_pop", 0], ["_hasRep", false], ["_rep", 0], ["_income", 0], ["_side", ""]];
+params [["_name", ""], ["_pop", 0], ["_hasRep", false], ["_rep", 0], ["_income", 0], ["_side", ""], ["_ap", 0]];
 
 private _text = localize "STR_DUWS_T_civ_mapview_miss";
 if (_name isNotEqualTo "") then {
@@ -18,12 +18,15 @@ if (_name isNotEqualTo "") then {
 		// Printed as stored, not rounded: a town at 9.7 shown as 10 would contradict the
 		// neutral colour of the icon the player just clicked.
 		_lines pushBack format [localize "STR_DUWS_T_civ_mapview_rep", _rep];
-		private _incomeKey = switch (_side) do {
-			case "BLU": { "STR_DUWS_T_civ_mapview_income_blu" };
-			case "OPF": { "STR_DUWS_T_civ_mapview_income_opf" };
-			default { "STR_DUWS_T_civ_mapview_income_none" };
-		};
-		_lines pushBack format [localize _incomeKey, _income];
+		// A neutral town prints what it is worth, not the nothing it currently pays: reading the
+		// map before moving is how the player picks which town to work on, and a bare "none"
+		// makes every unturned town look equally pointless. _income is what the tick actually
+		// credits, _ap what the town becomes worth once it picks a side.
+		_lines pushBack (switch (_side) do {
+			case "BLU": { format [localize "STR_DUWS_T_civ_mapview_income_blu", _income] };
+			case "OPF": { format [localize "STR_DUWS_T_civ_mapview_income_opf", _income] };
+			default { format [localize "STR_DUWS_T_civ_mapview_income_none", _ap] };
+		});
 	};
 	_text = _lines joinString "<br/>";
 };
