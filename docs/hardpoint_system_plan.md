@@ -292,8 +292,10 @@ no route to a normal hardpoint except walking into its fire.
 A hidden normal hardpoint has no parent zone, so `fnc_zone_reveal`'s spatial filter above cannot
 reach it. It needs its own reveal in **both** modes now, not only hardcore, and the civilian
 interaction menu is the intended source:
-[`civilian_interaction_plan.md`](civilian_interaction_plan.md) lists an unrevealed normal
-hardpoint as one of the payouts an intel request rolls. The corpse-and-mission intel path
+[`info/intel_system.md`](info/intel_system.md#one-writer-per-reveal-flag-one-function-for-payout)
+lists an unrevealed normal hardpoint as one of the kinds `fnc_intel_payout` draws from, and
+[`civilian_interaction_plan.md`](civilian_interaction_plan.md) hands its intel row to that
+function. The corpse-and-mission intel path
 (`client/misc/fnc_found_intel.sqf`) should reach it on the same terms, or hardcore gains a class
 of objective that only one source can ever surface.
 

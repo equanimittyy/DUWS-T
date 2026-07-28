@@ -7,17 +7,16 @@ rather than gated on it, so the `-20 … 20` scale per-town reputation introduce
 finally has a consumer that reads more of it than `> 0`.
 
 Civilians are primarily an **information** channel: locals are how the player learns where the
-enemy is. Supplies stay for now and are marked for rework rather than settled.
+enemy is. Everything else the menu offers is secondary to that.
 
 ## Why the current shape is replaced
 
 | Problem | Where |
 |---|---|
-| Six actions crowd one civilian's scroll menu, each its own file and its own handshake | `fnc_addAskEnemyAction`, `fnc_civ_askForAid`, `fnc_civ_askForToolkit`, `fnc_civ_addDevelopInformantAction`, `fnc_civ_recruitAction`, `fnc_civ_lootAction` |
-| Every request stacks three gates — a `rep > 0` boolean, a coin cost, and a success roll — so paying does not mean getting | the same six |
+| Five actions crowd one civilian's scroll menu, each its own file and its own handshake | `fnc_addAskEnemyAction`, `fnc_civ_askForAid`, `fnc_civ_askForToolkit`, `fnc_civ_recruitAction`, `fnc_civ_lootAction` |
+| Every request stacks three gates — a `rep > 0` boolean, a coin cost, and a success roll — so paying does not mean getting | the same five |
 | Reputation is read as a boolean, so a town at 1 and a town at 19 behave identically | `fnc_civ_repAt` callers |
-| Develop-informant costs 5 coins at a 15 % ceiling to set `civ_informant_active_<town>`, whose only reader is the check that stops you buying it twice | `fnc_civ_developInformantServer.sqf`, `fnc_civ_addDevelopInformantAction.sqf:14` |
-| Ask-enemy reveals a group within 700 m — inside spotting range — while its own docstring claims 1500 m | `fnc_civ_askEnemy_server.sqf` |
+| Ask-enemy reveals a group within 700 m — inside spotting range — while its own docstring claims 1500 m | `fnc_civ_askEnemy_server.sqf:48` |
 | Aid strictly dominates toolkit: 1 coin guaranteed against 2 coins at 50 %, and the cheaper one is the one that despawns | `fnc_civ_askForAid_server.sqf`, `fnc_civ_askForToolkit_server.sqf` |
 
 ## The reaction curve
@@ -70,21 +69,24 @@ player simply clicked again. Here a refusal costs a person, so a hostile town bu
 roughly ten civilians per successful deal against one in ten at a friendly one, and the town's
 population is finite until it respawns.
 
-State lives on the unit — a closed flag, and one spent flag per category — so it dies with the
-civilian and needs no registry.
+There are three categories — **intel**, **recruit**, **supplies** — and arrest sits outside all
+of them, because it is not a request and rolls nothing.
 
 ## What moves and what stays
 
-**Into the dialog:** intel, supplies, recruit, loot. All four are requests *to the settlement*;
-the individual civilian is the doorbell. Loot is the odd one — it is coercion rather than
-conversation, which is why the dialog is titled *Civilian Interaction* and not *Talk to a
-local*. It keeps the orange treatment it already renders with.
+**Into the dialog:** intel, aid, toolkit, recruit, arrest. The first four are requests *to the
+settlement* and the individual civilian is the doorbell. Arrest is the odd one — it is coercion
+rather than conversation, which is why the dialog is titled *Civilian Interaction* and not
+*Talk to a local*.
 
-**Stays on the scroll wheel:** call over. It is positional and instant, and a dialog would ruin
-it.
+**Stays on the scroll wheel:** call over, and the body search that follows a successful arrest.
+Both are positional and a dialog would ruin them — see [§Arrest](#arrest) for why the second step
+in particular cannot move.
 
-**Already gone, and not returning as rows:** civilian fast travel (removed), and the custom
-heal action, replaced by a `HandleHeal` listener that credits the town once per economy tick
+**Already gone, and not returning as rows:** civilian fast travel (removed), develop-informant
+(deleted outright, for the reason in
+[`info/intel_system.md`](info/intel_system.md#what-intel-is-for)), and the custom heal action,
+replaced by a `HandleHeal` listener that credits the town once per economy tick
 (`server/misc/fnc_civ_healed.sqf`). Healing is a give, not a request, so no reaction is rolled
 for it.
 
@@ -96,12 +98,16 @@ then `remoteExec` the work to the server. `request_menu.hpp` supplies the other 
 needs a dropdown — an `RscCombo` whose selection the handler reads with `lbCurSel`.
 
 A new `shared/includes/civ_menu.hpp` and one `#include` in `src/description.ext`. One
-`addAction` on every civilian opens it, replacing six.
+`addAction` on every civilian opens it, replacing five. The main menu takes idc block
+**8300-8399** and the bribe prompt **8400-8499**; both are clear of every idc the mission ships,
+the nearest neighbours being the disguise panel's 8000-8203 below and `fobmanager.hpp`'s lone
+9745 above.
 
 **The client does not need the town's reputation.** The rows are the same whatever the band —
 only the outcome differs, and that is rolled on the server when a row is picked. This settles
-the question the per-town plan left open about broadcasting town state: nothing has to be
-broadcast, because no client-side decision depends on it.
+the question the per-town plan left open about broadcasting town state: `civ_town_rep` stays
+server-side, because no client-side decision reads it. The per-civilian state below is a
+different thing and does go out.
 
 **Rows carry no price, and a bribe gets its own prompt.** The reaction is unknown until the
 roll, so a price on the row would be a guess at a demand that arrives two thirds of the time at
@@ -117,15 +123,112 @@ player needs to decide anything.
 Chaining a second dialog is the established shape here: `squadmng.hpp:104` closes itself and
 opens `squad_rename_dialog` the same way.
 
-**The greyed button is advisory, and the server re-checks.** The count comes from
-`magazines player` on the client, which is a snapshot the server has no reason to trust — in
-co-op two players can spend the same coins. The deduction stays server-side and refuses on its
-own read, exactly as [`info/cp_economy.md`](info/cp_economy.md) describes for the client-side CP
-pre-filters. Greying the button spares the player a pointless click; it decides nothing.
-
 Refusing, and being unable to pay, both close the civilian. That rule does not soften now the
 amount is visible: what the prompt buys the player is knowing the price before they lose the
 contact, not a free look.
+
+### Everything the client greys, the server re-checks
+
+Three client-side conditions decide what a row looks like, and none of them decides anything:
+
+| Greyed when | Read from | Why the server cannot trust it |
+|---|---|---|
+| The player cannot afford a bribe | `magazines player` | A snapshot; in co-op two players can spend the same coins |
+| The civilian is closed, or the category is spent | the unit's own variables | Broadcast state a client machine holds a copy of |
+| The player is further than conversation range | `player distance _civ` | Read once on open, so it is stale the moment they walk |
+
+The deduction, the spend and the range test all stay server-side, exactly as
+[`info/cp_economy.md`](info/cp_economy.md) describes for the client-side CP pre-filters. Greying
+spares the player a pointless click; it decides nothing.
+
+Range is read once on open rather than polled, the same way `fnc_disguise_menu.sqf` reads its
+status line once — a picker does not need a watcher loop. The consequence is deliberate: the menu
+opens at arrest range so the arrest row is reachable from a standoff, and the four conversational
+rows grey out beyond 3 m, so walking in and reopening is what a conversation costs.
+
+### State lives on the civilian
+
+| Variable | Locality | Purpose |
+|---|---|---|
+| `DUWS_civ_closed` | broadcast | Refusal, declined bribe, or an unaffordable one. Greys the four conversational rows; the menu action survives it, because arrest is not a conversation |
+| `DUWS_civ_spent_intel`, `..._recruit`, `..._supplies` | broadcast | One accepted request per category per civilian |
+| `DUWS_civ_arrested` | broadcast | One hands-up attempt per civilian, spent on the attempt |
+| `DUWS_civ_pending` | server only | `[caller, category, amount]`, written when a roll returns `bribe`, cleared when the prompt is answered |
+
+The first two are broadcast because the dialog is built on the client and has to know at open
+time which rows are dead. Three booleans pushed when they change beats a request-and-wait
+handshake in front of every open, which would either delay the menu or pop rows grey after the
+player is already looking at them. Same trade as `DUWS_intel_searched`
+([`info/intel_system.md`](info/intel_system.md#the-throttle-is-per-player-and-the-attempt-is-what-it-spends)),
+though not the same pressure: that one is read by an addAction condition several times a second,
+where these are read once per open.
+
+The menu action's own condition does **not** read `DUWS_civ_closed` — a closed civilian still
+shows the menu, because arrest survives closure. It gates on `alive`, on arrest range, and on the
+civilian not already being surrendered, which is what today's hands-up action gates on
+(`fnc_civ_lootAction.sqf:85`).
+
+`DUWS_civ_pending` is the opposite case and must not be broadcast. The Accept button sends only
+*I accept* — the server reads which category and how much from its own record, so a client cannot
+claim a bribe it was never offered or name its own price. It records the caller too, so in co-op
+a second player cannot answer someone else's prompt.
+
+All of it lives on the unit, so it dies with the civilian and needs no registry.
+
+## What an accepted request pays
+
+**Intel** hands off to `fnc_intel_payout`, the single point where intel becomes something for
+every source in the mission —
+[`info/intel_system.md`](info/intel_system.md#one-writer-per-reveal-flag-one-function-for-payout)
+owns that contract, including which payout kinds exist and which are still waiting on unbuilt
+systems. Nothing about the payout is decided here; the menu is a faucet like the body search, and
+what a faucet pays is not the faucet's business. The one thing this row must pass is an origin —
+the asking player's position — because the town bucket ranks by distance.
+
+**Recruit** is unchanged behind the row: the accepted path is `fnc_recruitSuccessServer`, which
+clears captive and broadcasts it itself.
+
+**Aid and toolkit are two rows in one category**, so a civilian hands over one or the other and
+never both. That is what fixes the dominance without inventing a number: the price is the same,
+the odds are the same, and the only difference left is which item the player needs — aid for the
+wounded, toolkit for the vehicle. The 50 % roll and the 2-coin price on the toolkit both go; they
+were the third gate the whole rework removes.
+
+The one asymmetry that has to go with them is the despawn. The medikit is deleted after 60 s
+(`fnc_civ_askForAid_server.sqf:51-55`) and the toolkit is not (`fnc_civ_askForToolkit_server.sqf:55-57`),
+which under equal cost and equal odds would make aid simply the worse of two equals. Both carry
+the 60 s window: the item is handed over to be picked up, not left as a supply dump, and a
+persistent toolkit lets one friendly town furnish a squad's repairs for the rest of the campaign.
+
+### Arrest
+
+The row orders hands up and nothing else. It rolls no reaction, takes no bribe, and is available
+on a closed civilian: a town's opinion does not change whether a person raises their hands, and
+refusing to talk is not protection from being detained.
+
+**One attempt per civilian, spent on the attempt.** Today the scroll action removes itself when
+clicked (`fnc_civ_lootAction.sqf:78`), so the 10 % that ends in the civilian running cannot be
+retried. A dialog row has no equivalent — it is redrawn every open — so the flag has to carry
+that, on the attempt rather than the outcome, the same rule and for the same reason as the body
+search (`server/misc/fnc_intel_search.sqf:8-12`). Without it the row is a button the player holds
+until the 90 % lands, and the reputation hit and the runner both become free.
+
+**The row is red**, which is what the hands-up action already renders as
+(`fnc_civ_lootAction.sqf:29`), and it names what the player is doing. *Loot* described the second
+step and let the first hide behind it.
+
+**The body search stays a scroll action** and keeps its orange (`fnc_civ_lootAction.sqf:100`). It
+is gated on `isSurrendered` at 3 m, on a civilian now standing still with their hands up — the
+menu that opens at arrest range would have to close, wait for the animation and reopen to offer
+it, and that is a dialog imitating a hold action. The surrender and reprisal rolls behind both
+steps are untouched.
+
+**The action wipes go.** Hands-up clears every action on the civilian on every machine
+(`fnc_civ_lootAction.sqf:37-38`, `:97`) because it was competing with five other scroll actions.
+With one menu action those wipes delete the entry point, and the JIP `remoteExec` that added it
+has already fired, so nothing puts it back. They are deleted rather than worked around: the menu
+action's own condition already excludes a surrendered civilian, which is the only exclusion the
+wipes were buying.
 
 ### What a bribe costs
 
@@ -133,65 +236,24 @@ Per category, and **not** scaled by reputation — the curve already carries tha
 deciding whether money is asked for at all, so a reputation term in the amount would count it
 twice.
 
-| Row | Bribe |
+| Category | Bribe |
 |---|---:|
 | Intel | 3 |
 | Recruit | 2 |
 | Supplies | 1 |
-| Loot | — |
+| Arrest | — |
 
 **These are placeholders chosen to make the framework testable, not balanced figures.** They
 are anchored on the black market, which is the price scale the player already reads — goggles
 at 1, pistol and optic at 5 — so intel sits between the two and recruit keeps the cost it has
 today. Intel is deliberately *not* inheriting the old ask-enemy price of 1: that bought a marker
-on a group within 700 m, inside spotting range, whereas the row now reveals a zone or a hidden
-hardpoint or hands over an intel object worth up to 8 CP.
-
-Loot takes no bribe and no reaction roll. It is coercion, not a request; a town's opinion does
-not change whether a rifle works. Its existing surrender and reprisal rolls are untouched.
+on a group within 700 m, inside spotting range, whereas the row now draws from the campaign-wide
+payout pool.
 
 **Expect the coin drain to fall against today's.** Every current action charges every time; here
 a bribe is asked roughly half the time at a neutral town and one time in ten at a friendly one.
 That is the discount for carrying refusal risk and for having earned the town's standing, and it
 pushes coins toward the black market and partisans, which are the underused sinks.
-
-## What intel buys
-
-An accepted intel request rolls one payout at random from the kinds available. The pool grows
-as the systems behind it land; two of the four exist today.
-
-| Kind | State | Mechanism |
-|---|---|---|
-| An unrevealed enemy zone | **buildable** | `zone_namePOS_pairs` carries `[name, pos, revealed]` (`fnc_createzone.sqf:28`); filter for `select 2 == false`, pick one, reveal it |
-| An intel object to carry home | **buildable** | add one of the classes `fnc_intelAnalysis.sqf:8-16` accepts, which the player cashes at a terminal for CP |
-| An unrevealed normal hardpoint | **blocked** | hardpoints are unimplemented — `hardpoint_system_plan.md` is a plan and nothing in `src/` builds one. Available in both modes once they exist, though the pool differs: normal mode offers only what the director has built since, hardcore adds the batch generated at campaign start |
-| An unrevealed enemy patrol | **blocked** | needs the OPFOR commander's tasking, per [`opfor_commander_plan.md`](opfor_commander_plan.md) |
-
-Rolling over the *available* kinds rather than a fixed list is what lets the other two appear
-without touching this code again.
-
-**The hardpoint payout works in both modes**, because visibility turns on when a thing came into
-existence rather than on the difficulty setting: campaign generation puts its output on the map
-in normal mode, and anything OPFOR build during play stays hidden either way. Decided in
-[`hardpoint_system_plan.md`](hardpoint_system_plan.md#reveal) rather than here. Only the
-announcement differs — normal mode says OPFOR are fortifying without saying where, hardcore says
-nothing — so in both this menu is one of only two things that can surface a location, alongside
-the body-search path, and the alternative to both is walking into its fire.
-
-The pool still varies with what a campaign has generated and what OPFOR have since built, which
-is why it is rolled over *available* kinds rather than a fixed list. An entry with nothing to
-give simply never enters the draw.
-
-**Revealing a zone through `fnc_zone_reveal` drags two side effects along.** It zeroes
-`master_Intel_chance` for twenty minutes (`fnc_zone_reveal.sqf:44-50`), suppressing the
-corpse-and-mission intel drops campaign-wide, and it sets `hardcore_visibleZone_found`, which is
-what unblocks task-force assaults in hardcore (`fnc_request_squad.sqf:82`). The second is
-probably wanted. The first is a throttle on *free* intel and reads wrong on a reveal the player
-paid a bribe for, so the civilian path should either skip the cooldown or accept that buying one
-answer switches off another source for twenty minutes. Undecided.
-
-Its trailing `sleep 1200` also means the function must be `spawn`ed, never `call`ed — a `call`
-would park the caller for twenty minutes.
 
 ## Open questions
 
@@ -200,16 +262,3 @@ would park the caller for twenty minutes.
   and never refills, and enemy infantry drop **0.267 coins each** (80 % carry loot,
   `floor random 3` items, one class in three) — so a thirty-enemy zone assault yields about
   eight coins. Whether that pays for a campaign of talking to towns is the first thing to watch.
-- Whether a paid zone reveal carries `fnc_zone_reveal`'s twenty-minute `master_Intel_chance`
-  cooldown, or skips it. The cooldown throttles free intel; this intel is not free.
-- Whether supplies survive the rework, and what gives the toolkit a reason to exist alongside
-  aid if they do.
-Develop-informant is not on this list. It is deleted outright — the action, the server
-function, `civ_informant_active_<town>` and twelve strings — rather than folded into a row.
-
-It worked, and that is not the reason it goes. On success it drew a 700 m disc over the town and
-spent one to three hours marking every enemy unit inside it, refreshed each minute. That is a
-tactical feed about ground the player has already found, and intel here means the opposite:
-discovering positions the player does not yet know exist. See
-[`info/intel_system.md`](info/intel_system.md#what-intel-is-for). Rebuilding a local unit
-tracker later is a separate feature with a separate justification, not a row on this menu.
