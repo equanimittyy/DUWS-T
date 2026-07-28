@@ -87,6 +87,21 @@ cp_reward_multiplier = 1;publicVariable "cp_reward_multiplier";
 kill_cp_kills = 10;
 kill_cp_award = 1;
 
+// Zone payouts, all shares rather than absolutes so they scale with a zone's size. Two
+// separate figures ride the capture triggers: the zone's *worth*, fixed at generation from
+// its radius and never reassigned, and its *bounty*, the CP the next capture pays.
+//
+// AP is measured against the worth, so taking or losing a zone always swings the same
+// momentum however many times it has changed hands -- a contested zone is still worth
+// holding. The bounty shrinks on every capture instead: ground fought over repeatedly has
+// been looted already, and a zone that keeps flipping should stop being a payday. That decay
+// is deliberate, which is why it is a constant here rather than an artefact of the
+// arithmetic. Server-only: the capture handlers all run server-side.
+zone_cp_capture = 0.5;      // first capture pays this share of the zone's worth
+zone_cp_recapture = 1/3;    // each recapture pays this share of the previous bounty
+zone_ap_swing = 0.5;        // AP the taking side gains, as a share of worth; the loser sheds the same
+zone_ap_consolation = 0.5;  // OPFOR's share of that swing when BLUFOR is the one taking
+
 // [object, seconds] pairs awaiting pickup by the map cleanup, written through
 // fnc_duws_disposeAfter and drained every pass. Server-only: the sweep runs here and clients
 // reach it by remoteExec.

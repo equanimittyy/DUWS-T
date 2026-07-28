@@ -7,6 +7,9 @@ _markername2 = _this select 3;
 _triggerPos = _this select 4;
 _flagPos = _triggerPos;
 _radius = _this select 5;
+// Carried, not spent: losing a zone pays no CP, so the bounty passes straight to whoever
+// takes it back. Only a capture decays it.
+_bounty = _this select 6;
 
 // Server-only, same reason as fnc_captured: shared-pool credits plus
 // read-modify-write of networked globals, on a trigger of unproven locality.
@@ -37,9 +40,12 @@ if (hardcore_mode_enable) then {
 };
 
 
-// MODIFY ARMY POWER - OPF gains full points, BLU loses full points
-["OPF", _points, "zone_lost"] remoteExec ["fnc_ap_adjust", 2];
-["BLU", -_points, "zone_lost"] remoteExec ["fnc_ap_adjust", 2];
+// MODIFY ARMY POWER - the same swing a capture pays, in the other direction. No consolation
+// share for BLUFOR here: losing ground is meant to cost, where OPFOR losing one is what
+// mobilises it.
+_apswing = round(_points * zone_ap_swing);
+["OPF", _apswing, "zone_lost"] remoteExec ["fnc_ap_adjust", 2];
+["BLU", -_apswing, "zone_lost"] remoteExec ["fnc_ap_adjust", 2];
 
 // MODIFY MARKER ICON
 str(_markername) setMarkerColor "ColorRed";
@@ -60,5 +66,5 @@ private _trgVarName = format["trigger_%1_%2", floor abs (_triggerPos select 0), 
 private _trg = missionNamespace getVariable [_trgVarName, objNull];
 if (!isNull _trg) then {
     _trg setTriggerActivation["WEST SEIZED","PRESENT",true];
-    _trg setTriggerStatements["this", format["[""%1"",%2,""%3"",""%4"",%5,%6] spawn fnc_blufor_cap",_place,_points,_markername,_markername2,_triggerPos,_radius], ""];
+    _trg setTriggerStatements["this", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_blufor_cap",_place,_points,_markername,_markername2,_triggerPos,_radius,_bounty], ""];
 };

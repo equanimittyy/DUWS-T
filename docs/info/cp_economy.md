@@ -33,9 +33,9 @@ Army Power carries the same contract. `fnc_ap_adjust` (same file) is the sole wr
 `WARCOM_blufor_ap` and `WARCOM_opfor_ap`, invoked as `[side, delta] remoteExec
 ["fnc_ap_adjust", 2]` with side `"BLU"` or `"OPF"`; its pre-play absolutes are
 `server_var_init.sqf:178-179`, `fnc_WARCOM_init.sqf:22-28`, and the campaign-menu presets in
-`fnc_process_campaign_menu.sqf:277-348`. Both pools floor at 0 as CP does; losing a zone
-subtracts its full worth, so an unclamped pool could sit deeply negative, and every WARCOM wave
-threshold reads *"above N"* anyway. Two deliberate differences from `fnc_cp_adjust`: an
+`fnc_process_campaign_menu.sqf:277-348`. Both pools floor at 0 as CP does; losing a zone sheds
+the same AP swing that taking one pays, so an unclamped pool could sit deeply negative, and every
+WARCOM wave threshold reads *"above N"* anyway. Two deliberate differences from `fnc_cp_adjust`: an
 unrecognised side drops the delta and logs it rather than crediting the wrong pool, so a bad
 call shows up in the RPT instead of corrupting a pool or throwing; and there is no display
 refresh, because AP has no HUD counter and no `publicVariableEventHandler` — which is why
@@ -123,8 +123,8 @@ figure, which is a wrong number rather than an untranslated one.
 
 | Source | File | Amount |
 |---|---|---|
-| Zone capture (first time) | `server/init_zones/fnc_captured.sqf:44` | `round(points/2)` — ≈50 for a 1000 m zone |
-| Zone recapture (after loss) | `server/init_zones/fnc_blufor_cap.sqf:56` | `round(points/3)` — ≈33; intentionally lower |
+| Zone capture (first time) | `server/init_zones/fnc_captured.sqf:46` | the zone's bounty — ≈50 for a 1000 m zone |
+| Zone recapture (after loss) | `server/init_zones/fnc_blufor_cap.sqf:61` | the bounty as decayed by prior captures — ≈17, then ≈6, … |
 | Passive territory hold | `server/misc/fnc_zonesundercontrol.sqf:11,32` | `zones_held × 6`, every 30 min |
 | Side-mission reward | `server/missions/fnc_mission_reward.sqf` | `reward × cp_reward_multiplier` (multiplier default 1) |
 | Reputation tick | `server/misc/fnc_civ_rep_economy.sqf` | `ceil(rep/2)`, every 15 min |
@@ -139,13 +139,27 @@ figure, which is a wrong number rather than an untranslated one.
 | Rare-zombie kill (WBK) | `server/misc/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | AP→CP conversion | `client/dialog/fnc_convertAPtoCP.sqf` | 15 AP → 10 CP, one-way |
 
-**A zone's `_points` is its permanent worth, and no owner may reassign it.** The value is seeded
-by `fnc_createzone.sqf:278`, recorded in `zone_meta_array`, and handed to each successive owner's
-trigger — `fnc_captured.sqf` → `fnc_opfor_cap.sqf` → `fnc_blufor_cap.sqf` and round again. Each
-payout therefore derives its own figure (`_cpreward`, `_opfreward`) and leaves `_points` alone.
-Dividing it in place, as the CP awards once did, compounded around that loop: a zone changing
-hands repeatedly decayed toward paying nothing in either currency while the registry still
-recorded its original worth.
+**A zone carries two figures, and they behave differently on purpose.** Both ride the capture
+triggers — `fnc_createzone.sqf:280` → `fnc_captured.sqf` → `fnc_opfor_cap.sqf` →
+`fnc_blufor_cap.sqf` and round again — as arguments 2 and 7:
+
+| Figure | Set by | Behaviour |
+|---|---|---|
+| **Worth** (`_points`) | zone radius at generation, also stored in `zone_meta_array` | Never reassigned. AP is measured against it, so a zone swings the same momentum however often it changes hands |
+| **Bounty** (`_bounty`) | `round(worth × zone_cp_capture)` at generation | The CP the next capture pays. Multiplied by `zone_cp_recapture` on every capture, so it decays as the zone flips |
+
+The split is the design: ground fought over repeatedly has been looted already and should stop
+being a payday, but it has not become less strategically valuable, so the AP swing must not
+decay with it. Tuning constants are grouped in `server/server_var_init.sqf` — `zone_cp_capture`,
+`zone_cp_recapture`, `zone_ap_swing`, `zone_ap_consolation`.
+
+Losing a zone pays no CP, so `fnc_opfor_cap` passes the bounty through untouched; only a capture
+decays it. Once it rounds to 0 the CP award and its notification are skipped rather than
+announcing a payday of nothing.
+
+Deriving both from one variable is what the earlier code did, and it compounded around the
+ownership loop: a contested zone decayed toward paying nothing in *either* currency while
+`zone_meta_array` still recorded its original worth.
 
 The passive-hold loop is spawned exactly once (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:20`), so
 territory income does not stack per zone captured. It is also the campaign's single economy

@@ -7,6 +7,9 @@ _markername2 = _this select 3;
 _triggerPos = _this select 4;
 _flagPos = _triggerPos;
 _radius = _this select 5;
+// Already decayed by whichever capture handed it on, so this is simply what a recapture is
+// worth now. _points remains the zone's permanent worth.
+_bounty = _this select 6;
 
 // Server-only, same reason as fnc_captured: shared-pool credits plus
 // read-modify-write of networked globals, on a trigger of unproven locality.
@@ -35,10 +38,12 @@ if (hardcore_mode_enable) then {
 	publicVariable "hardcore_visibleZone_found";
 };
 
-// MODIFY ARMY POWER - OPF gains 1/2 the points, BLU gains full points
-_opfreward = round(_points/2);
+// MODIFY ARMY POWER - against the worth, same as a first capture: a zone retaken for the
+// third time is no less strategically valuable, only less profitable.
+_apswing = round(_points * zone_ap_swing);
+_opfreward = round(_apswing * zone_ap_consolation);
 ["OPF", _opfreward, "zone_recapture"] remoteExec ["fnc_ap_adjust", 2];
-["BLU", _points, "zone_recapture"] remoteExec ["fnc_ap_adjust", 2];
+["BLU", _apswing, "zone_recapture"] remoteExec ["fnc_ap_adjust", 2];
 
 // ADD Skill to operatives
 [] spawn fnc_operative_mission_complete; 
@@ -50,12 +55,12 @@ str(_markername) setMarkerColor "ColorGreen";
 str(_markername2) setMarkerColor "ColorGreen";
 
 // ADD POINTS
-// Derived, never assigned back into _points: the zone's worth passes to the trigger below and
-// on to the next owner, so dividing it in place compounded each time the zone changed hands.
-_cpreward = round(_points/3);
-[_cpreward, "zone_recapture"] remoteExec ["fnc_cp_adjust", 2];
-
-["CPadded",[_cpreward,""]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated,false];
+// Skipped once the bounty has decayed away, so a zone flipped enough times stops announcing
+// a payday of zero.
+if (_bounty > 0) then {
+    [_bounty, "zone_recapture"] remoteExec ["fnc_cp_adjust", 2];
+    ["CPadded",[_bounty,""]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated,false];
+};
 
 // ========== 修复：使用统一的变量名获取旗杆并变色 ==========
 if (VERSION_X == "MODERN" || simple_zones_enable) then {
@@ -71,5 +76,6 @@ private _trgVarName = format["trigger_%1_%2", floor abs (_triggerPos select 0), 
 private _trg = missionNamespace getVariable [_trgVarName, objNull];
 if (!isNull _trg) then {
     _trg setTriggerActivation["EAST SEIZED","PRESENT",true];
-    _trg setTriggerStatements["this", format["[""%1"",%2,""%3"",""%4"",%5,%6] spawn fnc_opfor_cap",_place,_points,_markername,_markername2,_triggerPos,_radius], ""];
+    // Decayed on the way out, as in fnc_captured: the next recapture is worth less again.
+    _trg setTriggerStatements["this", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_opfor_cap",_place,_points,_markername,_markername2,_triggerPos,_radius,round(_bounty * zone_cp_recapture)], ""];
 };

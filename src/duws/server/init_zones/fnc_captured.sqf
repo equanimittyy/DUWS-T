@@ -6,6 +6,9 @@ _markername2 = _this select 3;
 _triggerPos = _this select 4;
 _flagPos = _triggerPos;
 _radius = _this select 5;
+// The CP this capture pays. Separate from _points, the zone's permanent worth: the bounty
+// decays as the zone changes hands, the worth never does.
+_bounty = _this select 6;
 
 // Server-only: this credits the shared CP/AP pools and read-modify-writes several
 // networked globals, so a second machine running it would double-credit a capture.
@@ -36,17 +39,19 @@ if (hardcore_mode_enable) then {
 	publicVariable "hardcore_visibleZone_found";
 };
 
-// ADD COMMAND POINTS  1000m zone = 100 / 2 = 50 pts available
-// Derived, never assigned back into _points: the zone's worth is handed to the next owner's
-// trigger below and round-trips through fnc_opfor_cap to fnc_blufor_cap, so dividing it in
-// place shrank the zone every time it changed hands until a contested one paid nothing.
-_cpreward = round(_points/2);
-[_cpreward, "zone_first_capture"] remoteExec ["fnc_cp_adjust", 2];
+// ADD COMMAND POINTS  1000m zone of worth 100 opens at a bounty of 50
+// Skipped once the bounty has decayed to nothing, or a zone flipped enough times announces
+// a payday of zero.
+if (_bounty > 0) then {
+    [_bounty, "zone_first_capture"] remoteExec ["fnc_cp_adjust", 2];
+};
 
-// MODIFY ARMY POWER - OPF gains 1/2 the points, BLU gains full points
-_opfreward = round(_points/2);
+// MODIFY ARMY POWER - measured against the worth, not the bounty, so a zone swings the same
+// momentum however often it has changed hands. OPF gains a consolation share of the swing.
+_apswing = round(_points * zone_ap_swing);
+_opfreward = round(_apswing * zone_ap_consolation);
 ["OPF", _opfreward, "zone_first_capture"] remoteExec ["fnc_ap_adjust", 2];
-["BLU", _points, "zone_first_capture"] remoteExec ["fnc_ap_adjust", 2];
+["BLU", _apswing, "zone_first_capture"] remoteExec ["fnc_ap_adjust", 2];
 
 // 将战区旗杆改为蓝色
 if (VERSION_X == "MODERN" || simple_zones_enable) then {
@@ -69,7 +74,11 @@ private _trgVarName = format["trigger_%1_%2", floor abs (_triggerPos select 0), 
 private _trg = missionNamespace getVariable [_trgVarName, objNull];
 if (!isNull _trg) then {
     _trg setTriggerActivation ["EAST SEIZED", "PRESENT", true];
-    _trg setTriggerStatements ["this", format["[""%1"",%2,""%3"",""%4"",%5,%6] spawn fnc_opfor_cap", _place, _points, _markername, _markername2, _triggerPos, _radius], ""];
+    // The bounty handed on is what the *next* capture pays, so the decay is applied here
+    // rather than on arrival: whoever takes this zone back finds it already devalued.
+    _trg setTriggerStatements ["this", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_opfor_cap", _place, _points, _markername, _markername2, _triggerPos, _radius, round(_bounty * zone_cp_recapture)], ""];
 };
 
-["cpadded",[_cpreward,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
+if (_bounty > 0) then {
+    ["cpadded",[_bounty,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
+};

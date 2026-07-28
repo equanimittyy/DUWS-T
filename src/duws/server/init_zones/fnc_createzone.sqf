@@ -275,7 +275,9 @@ missionNamespace setVariable [_zonePosName, [_initialCountVar, _triggeredVar, _z
 _trg = createTrigger ["EmptyDetector", _zonePos];
 _trg setTriggerArea [_size, _size, 0, false];
 _trg setTriggerActivation ["WEST SEIZED", "PRESENT", true];
-_trg setTriggerStatements ["this", format["[""%1"",%2,""%3"",""%4"",%5,%6] spawn fnc_captured", _name, _points, _markername, _markername2, _zonePos, _size], ""];
+// Seventh argument is the zone's opening CP bounty; _points stays its permanent worth. The
+// two travel together for the rest of the campaign, round the capture handlers and back here.
+_trg setTriggerStatements ["this", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_captured", _name, _points, _markername, _markername2, _zonePos, _size, round(_points * zone_cp_capture)], ""];
 _trg setTriggerTimeout [30, 40, 50, true];
 
 // 存储触发器变量（统一使用 floor abs 避免负号）
