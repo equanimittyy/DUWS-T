@@ -155,16 +155,6 @@ class CfgNotifications
         difficulty[] = {};
     };
 
-    class CPzonehold
-    {
-        title = "$STR_DUWS_T_xcp0muo6";
-        iconText = "+%1";
-        description = "$STR_DUWS_T_08rz2z3k";
-        color[] = {0.5,1,1,1};
-        priority = 0;
-        difficulty[] = {};
-    };
-
     class info
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.

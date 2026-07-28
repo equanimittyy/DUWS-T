@@ -32,11 +32,21 @@ while {true} do {
     if (_blu > 0) then { ["BLU", _blu, "civ_town_income"] call fnc_ap_adjust };
     if (_opf > 0) then { ["OPF", _opf, "civ_town_income"] call fnc_ap_adjust };
 
-    call fnc_kill_income_sweep;
+    // Each player is notified of their own kill award inside the sweep; what comes back is the
+    // campaign figure for Overlord's tally below.
+    private _cp = call fnc_kill_income_sweep;
 
     if (zoneundercontrolblu > 0) then {
-        ["CPzonehold",[(zoneundercontrolblu*6),zoneundercontrolblu]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated,false];
-        [zoneundercontrolblu*6, "territory_income"] remoteExec ["fnc_cp_adjust", 2];
-        [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_zonesundercontrol"] remoteExec ["fnc_duws_dialogue", 0];
+        private _territory = zoneundercontrolblu * 6;
+        [_territory, "territory_income"] remoteExec ["fnc_cp_adjust", 2];
+        _cp = _cp + _territory;
+    };
+
+    // One line for the whole period's take, in place of a notification per faucet: three
+    // popups landing on the same frame read as spam, and only the total tells the player
+    // whether the last thirty minutes were worth anything.
+    if (_cp > 0 || {_blu > 0}) then {
+        [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_econtickreport", _cp, _blu]]
+            remoteExec ["fnc_duws_dialogue", 0];
     };
 };

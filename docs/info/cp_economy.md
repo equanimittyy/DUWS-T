@@ -143,7 +143,10 @@ The passive-hold loop is spawned exactly once (`server/warcom/fnc_init_OPFOR_WAR
 territory income does not stack per zone captured. It is also the campaign's single economy
 clock: territory CP, town AP and kill income are all paid from the same 30-minute iteration.
 Equal nominal periods are not one clock — a suspended thread resumes when the scheduler reaches
-it, so separate loops accrue their own slop and walk apart. Only the territory CP is gated on
+it, so separate loops accrue their own slop and walk apart. The tick reports itself in one
+Overlord line carrying the period's whole BLUFOR take, CP and AP; the only per-faucet popup left
+is the personal kill award, which is the one figure the campaign total cannot show a player.
+Only the territory CP is gated on
 `zoneundercontrolblu > 0` — AP pays unconditionally, since the enemy banking its towns while the
 player holds nothing is the case the town economy exists to model.
 

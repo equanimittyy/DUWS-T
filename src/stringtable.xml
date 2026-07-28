@@ -3756,6 +3756,10 @@
                 <Original>The zones you hold are generating command points. Keep them secure.</Original>
                 <English>The zones you hold are generating command points. Keep them secure.</English>
             </Key>
+            <Key ID="STR_DUWS_T_econtickreport">
+                <Original>This is Overlord. We've received %1 CP and %2 AP from held territory. Keep it up.</Original>
+                <English>This is Overlord. We've received %1 CP and %2 AP from held territory. Keep it up.</English>
+            </Key>
             <Key ID="STR_DUWS_T_takencontrol">
                 <German>Alle Einheiten im Einsatzgebiet, Achtung. Wir haben eine feindliche Zone eingenommen. Gut gemacht.</German>
                 <Spanish>Todas las unidades en la zona de operaciones, atención. Hemos capturado una zona enemiga. Buen trabajo.</Spanish>

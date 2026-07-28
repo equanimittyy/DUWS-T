@@ -254,7 +254,11 @@ if (isServer) then {
     // Defined here beside the handlers that fill the tally, but driven by the campaign
     // economy tick in server/misc/fnc_zonesundercontrol.sqf -- a second timer of the same
     // nominal period still accrues its own scheduler slop and walks out of phase.
+    // Returns the CP it paid, so the tick can fold it into one campaign-wide total. The
+    // per-player notification stays here: the sweep is the only place that knows who earned
+    // what, and Overlord's tally deliberately does not break the take down by player.
     fnc_kill_income_sweep = {
+        private _paid = 0;
         {
             private _uid = getPlayerUID _x;
             private _kills = playerKillCount getOrDefault [_uid, 0];
@@ -265,14 +269,17 @@ if (isServer) then {
                 // land a frame later.
                 [_award, "kill_income"] call fnc_cp_adjust;
                 playerKillCount set [_uid, _kills - _batches * kill_cp_kills];
+                _paid = _paid + _award;
                 ["CPaddedattrition", [_award]] remoteExec ["BIS_fnc_showNotification", _x, false];
             };
         } forEach allPlayers;
 
         if (departedKillCP > 0) then {
             [departedKillCP, "kill_income_departed"] call fnc_cp_adjust;
+            _paid = _paid + departedKillCP;
             departedKillCP = 0;
         };
+        _paid
     };
 };
 if (isServer) then {
