@@ -891,6 +891,7 @@ fnc_createopteam2 = compile preprocessFileLineNumbers "duws\server\init_zones\fn
 fnc_createopwpteam = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createopwpteam.sqf";
 fnc_random_veh = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_random_veh.sqf";
 fnc_zone_reveal = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_reveal.sqf";
+fnc_hardcore_visible_recalc = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardcore_visible_recalc.sqf";
 fnc_zone_spawn_sizes = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_spawn_sizes.sqf";
 
 //////////////////

@@ -16,7 +16,7 @@ sleep 0.5;
 
 // If HARDCORE and Zone entered, make Zone visible
 if (hardcore_mode_enable && "Zone" in _name) then {
-	["ONE",_zonePos] spawn fnc_zone_reveal;
+	["ONE",_zonePos] call fnc_zone_reveal;
 };
 
 waitUntil {

@@ -25,19 +25,7 @@ if (_triggerPos in WARCOM_zones_controled_by_OPFOR) exitWith {};
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_lostcontrol"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Pause TFs if no opfor zones are visible
-if (hardcore_mode_enable) then {
-	hardcore_visibleZone_found = false;
-	{
-		_curr_zone = _x;
-		{
-			// check zone_name_pairs for any opfor zones that are still red
-			if (str (_x select 1) == str (_curr_zone) && (_x select 2 == true)) then {
-				hardcore_visibleZone_found = true;
-			};
-		} forEach zone_namePOS_pairs;
-	} forEach WARCOM_zones_controled_by_OPFOR;
-	publicVariable "hardcore_visibleZone_found";
-};
+call fnc_hardcore_visible_recalc;
 
 
 // MODIFY ARMY POWER - the same swing a capture pays, in the other direction. No consolation
