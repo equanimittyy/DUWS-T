@@ -251,27 +251,27 @@ if (isServer) then {
     // Kill income is paid in one periodic sweep rather than per kill: a tally the player
     // watches build reads as campaign economy, where a payout per body reads as a score
     // feed. Each player is told only about their own award, so the credit stays personal.
-    [] spawn {
-        while {true} do {
-            sleep kill_cp_interval;
-            {
-                private _uid = getPlayerUID _x;
-                private _kills = playerKillCount getOrDefault [_uid, 0];
-                private _batches = floor (_kills / kill_cp_kills);
-                if (_batches > 0) then {
-                    private _award = _batches * kill_cp_award;
-                    // Server-side caller: call runs inline, where remoteExec [...,2] would
-                    // land a frame later.
-                    [_award, "kill_income"] call fnc_cp_adjust;
-                    playerKillCount set [_uid, _kills - _batches * kill_cp_kills];
-                    ["CPaddedattrition", [_award]] remoteExec ["BIS_fnc_showNotification", _x, false];
-                };
-            } forEach allPlayers;
-
-            if (departedKillCP > 0) then {
-                [departedKillCP, "kill_income_departed"] call fnc_cp_adjust;
-                departedKillCP = 0;
+    // Defined here beside the handlers that fill the tally, but driven by the campaign
+    // economy tick in server/misc/fnc_zonesundercontrol.sqf -- a second timer of the same
+    // nominal period still accrues its own scheduler slop and walks out of phase.
+    fnc_kill_income_sweep = {
+        {
+            private _uid = getPlayerUID _x;
+            private _kills = playerKillCount getOrDefault [_uid, 0];
+            private _batches = floor (_kills / kill_cp_kills);
+            if (_batches > 0) then {
+                private _award = _batches * kill_cp_award;
+                // Server-side caller: call runs inline, where remoteExec [...,2] would
+                // land a frame later.
+                [_award, "kill_income"] call fnc_cp_adjust;
+                playerKillCount set [_uid, _kills - _batches * kill_cp_kills];
+                ["CPaddedattrition", [_award]] remoteExec ["BIS_fnc_showNotification", _x, false];
             };
+        } forEach allPlayers;
+
+        if (departedKillCP > 0) then {
+            [departedKillCP, "kill_income_departed"] call fnc_cp_adjust;
+            departedKillCP = 0;
         };
     };
 };

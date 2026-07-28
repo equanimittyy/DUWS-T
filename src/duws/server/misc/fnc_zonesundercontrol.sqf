@@ -1,12 +1,12 @@
 if (!isServer) exitWith {};
 /*
-    The campaign economy tick: one 30-minute clock paying territory CP and town Army Power
-    together. AP used to keep its own timer in server/misc/fnc_civ_rep_economy.sqf and drifted
-    out of phase with this one, which stalls for as long as BLUFOR holds nothing. Merged this
-    way round because this loop is spawned unconditionally by WARCOM init while the civilian
-    economy only runs when CIV_PRESENCE is not "NONE" -- hosting the tick there would delete
-    territory income on a civs-off campaign. Civs off leaves the town arrays empty, so the AP
-    half sums nothing and pays nothing.
+    The campaign economy tick: one 30-minute clock paying territory CP, town Army Power and
+    kill income together. Each used to keep its own timer of the same nominal period, which is
+    not the same clock -- a suspended thread resumes when the scheduler reaches it, so every
+    loop accrues its own slop and they walk apart over a session. Merged this way round because
+    this loop is spawned unconditionally by WARCOM init while the civilian economy only runs
+    when CIV_PRESENCE is not "NONE" -- hosting the tick there would delete territory income on
+    a civs-off campaign. Civs off leaves the town arrays empty, so the AP half pays nothing.
 */
 while {true} do {
     sleep 1800;
@@ -31,6 +31,8 @@ while {true} do {
     // per-town calls would broadcast the same global twenty times a tick for one net change.
     if (_blu > 0) then { ["BLU", _blu, "civ_town_income"] call fnc_ap_adjust };
     if (_opf > 0) then { ["OPF", _opf, "civ_town_income"] call fnc_ap_adjust };
+
+    call fnc_kill_income_sweep;
 
     if (zoneundercontrolblu > 0) then {
         ["CPzonehold",[(zoneundercontrolblu*6),zoneundercontrolblu]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated,false];

@@ -79,11 +79,11 @@ duws_callsign = "Alpha 1-1";publicVariable "duws_callsign";
 // cp_reward_multiplier
 cp_reward_multiplier = 1;publicVariable "cp_reward_multiplier";
 
-// Kill income. Every kill_cp_interval seconds each player's kill tally converts at
+// Kill income. On each campaign economy tick a player's kill tally converts at
 // kill_cp_award CP per kill_cp_kills kills; the paid-for kills are debited and the
-// remainder carries to the next sweep. Server-only: the tally, the sweep and the payout
-// all live on the server, so no client ever reads these.
-kill_cp_interval = 1800;
+// remainder carries to the next sweep. The period is the economy tick's own and is not
+// tunable here -- a second interval would mean a second clock. Server-only: the tally,
+// the sweep and the payout all live on the server, so no client ever reads these.
 kill_cp_kills = 10;
 kill_cp_award = 1;
 

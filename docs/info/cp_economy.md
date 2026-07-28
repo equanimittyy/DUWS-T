@@ -134,15 +134,16 @@ figure, which is a wrong number rather than an untranslated one.
 | Enemy corpse loot | `server/misc/fnc_addRandomLoot.sqf` → analysis | ~80% of enemies carry 0–2 of Money/Files/Wallet |
 | Corpse search | `client/misc/fnc_corpse_search_action.sqf` | 20% chance of +1 CP (+1 AP) per corpse |
 | Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle, summed then rounded |
-| Vehicle-kill / kill-streak | `server/server_init.sqf:337,353` | per-kill points; +1 per 10 kills |
+| Kill income | `server/server_init.sqf:257-276` | +1 per 10 hostile kills, swept on the economy tick; the remainder carries |
 | Killhouse training | `server/misc/fnc_createKillhouse.sqf:1072` | +1 (targets) or +10 (challenge), once, on clearing all 100 |
 | Rare-zombie kill (WBK) | `server/misc/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | AP→CP conversion | `client/dialog/fnc_convertAPtoCP.sqf` | 15 AP → 10 CP, one-way |
 
 The passive-hold loop is spawned exactly once (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:20`), so
 territory income does not stack per zone captured. It is also the campaign's single economy
-clock: territory CP and town AP are paid from the same 30-minute iteration, because two timers
-of nominally equal period drift apart the moment either one stalls. Only the CP half is gated on
+clock: territory CP, town AP and kill income are all paid from the same 30-minute iteration.
+Equal nominal periods are not one clock — a suspended thread resumes when the scheduler reaches
+it, so separate loops accrue their own slop and walk apart. Only the territory CP is gated on
 `zoneundercontrolblu > 0` — AP pays unconditionally, since the enemy banking its towns while the
 player holds nothing is the case the town economy exists to model.
 
