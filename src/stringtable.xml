@@ -2489,8 +2489,8 @@
                 <Chinesesimp>嘿...你好朋友，我们是蓝军的。我们的车辆在维和行动里受损了...你，或者你周围的人有工具箱吗？我们可以出钱买一套。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_TOOLKIT_REFUSE">
-                <Original>Peacekeeping? Screw you. You've got some nerve calling it that.</Original>
-                <English>Peacekeeping? Screw you. You've got some nerve calling it that.</English>
+                <Original>Sorry, I don't have one.</Original>
+                <English>Sorry, I don't have one.</English>
                 <Chinesesimp>维和？去你妈的！你得有多不要脸才能说出这几个字！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_TOOLKIT_SUCCESS">
@@ -2509,8 +2509,8 @@
                 <Chinesesimp>你好老乡，我们是蓝军的...我们在维和行动里受了伤，你家里有医疗物资吗？我们可以付钱。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_AID_REFUSE">
-                <Original>Fuck off, you criminal!</Original>
-                <English>Fuck off, you criminal!</English>
+                <Original>We've barely enough for our own. I can't help you.</Original>
+                <English>We've barely enough for our own. I can't help you.</English>
                 <Chinesesimp>滚开，你个罪犯！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_AID_SUCCESS">
@@ -2519,8 +2519,8 @@
                 <Chinesesimp>获得援助！医疗箱已放在附近。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ASK_AID_GRANT">
-                <Original>...Take this and get out of my sight.</Original>
-                <English>...Take this and get out of my sight.</English>
+                <Original>Take it. It's not much, but it's what we have.</Original>
+                <English>Take it. It's not much, but it's what we have.</English>
                 <Chinesesimp>...拿着这个，别让我再看到你。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_CHANGE_FACE">
@@ -2613,8 +2613,8 @@
                 <Chinesesimp>嘿，朋友...我们是蓝军的，你愿意为了自由而战吗？(递过去几张纸币)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_RECRUIT_FAIL_REP">
-                <Original>...Who the hell wants to go with you? You're just a bunch of bandits!</Original>
-                <English>...Who the hell wants to go with you? You're just a bunch of bandits!</English>
+                <Original>I've got people here who need me. Find someone else.</Original>
+                <English>I've got people here who need me. Find someone else.</English>
                 <German>...Wer zum Teufel will mit euch gehen? Ihr seid nur ein Haufen Banditen! (schlägt dein Geld auf den Boden)</German>
                 <Spanish>...¿Quién demonios quiere ir con vosotros? Solo sois un montón de bandidos! (golpeando tu dinero contra el suelo)</Spanish>
                 <Chinesesimp>...谁他妈要跟你们走？一帮匪徒！(把你的钱拍在地上)</Chinesesimp>
@@ -3042,8 +3042,8 @@
                 <Chinesesimp>货币不足</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_stfu">
-                <Original>...Fuck off!</Original>
-                <English>...Fuck off!</English>
+                <Original>I haven't seen anything. Don't ask me again.</Original>
+                <English>I haven't seen anything. Don't ask me again.</English>
                 <German>...(kurze Stille) Verpiss dich! (schlägt das Geld weg)</German>
                 <Spanish>...(breve silencio) ¡Jódete! (golpea el dinero y lo envía volando)</Spanish>
                 <Chinesesimp>...(短暂沉默)滚开！(将钱打飞出去)</Chinesesimp>
