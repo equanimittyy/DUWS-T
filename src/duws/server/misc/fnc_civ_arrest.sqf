@@ -39,9 +39,9 @@ if (random 1 < 0.9) then {
     _civilian setVariable ["isSurrendered", true, true];
     [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_HANDSUP2"] remoteExec ["fnc_duws_dialogue", _caller];
     [localize "STR_DUWS_T_HANDSUP_SUCCESS"] remoteExec ["hint", _caller];
-    // PATH stays disabled: a surrendered civilian holds still until fnc_civ_lootAction_handleArmed
-    // either releases them or arms them.
-    [_civilian] remoteExec ["fnc_civ_lootAction_addActionB", 0];
+    // PATH stays disabled: a surrendered civilian holds still until fnc_civ_search_armed either
+    // releases them or arms them.
+    [_civilian] remoteExec ["fnc_civ_search_action", 0];
 } else {
     _civilian enableAI "PATH";
     _civilian doMove ((getPos _civilian) getPos [50 + random 50, random 360]);

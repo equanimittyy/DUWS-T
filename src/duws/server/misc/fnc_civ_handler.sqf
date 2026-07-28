@@ -363,12 +363,10 @@ if (_mode == "spawn") then {
                     _wp2 setWaypointBehaviour "AWARE";
                 };
                 if (CIV_PRESENCE != "RAVAGE") then {
-                    [_newUnit] remoteExec ["fnc_addAskEnemyAction", 0, true];
+                    // One menu action in front of what was five requests. Call-over stays separate:
+                    // it is positional and instant, and a dialog would ruin it.
+                    [_newUnit] remoteExec ["fnc_civ_menuAction", 0, true];
                     [_newUnit] remoteExec ["fnc_civ_stopCommand", 0, true];
-                    [_newUnit] remoteExec ["fnc_civ_recruitAction", 0, true];
-                    [_newUnit] remoteExec ["fnc_civ_lootAction", 0, true];
-                    [_newUnit] remoteExec ["fnc_civ_askForAid", 0, true];
-                    [_newUnit] remoteExec ["fnc_civ_askForToolkit", 0, true];
                 };
                 missionNamespace setVariable [_remVar, _remaining - 1];
             };
@@ -428,12 +426,10 @@ if (_mode == "spawn") then {
             [_unit, 2.2] remoteExec ["setAnimSpeedCoef", 0, true];
         };
         if (CIV_PRESENCE != "RAVAGE" && side _unit == CIVILIAN) then {
-            [_unit] remoteExec ["fnc_addAskEnemyAction", 0, true];
+            // One menu action in front of what was five requests. Call-over stays separate:
+            // it is positional and instant, and a dialog would ruin it.
+            [_unit] remoteExec ["fnc_civ_menuAction", 0, true];
             [_unit] remoteExec ["fnc_civ_stopCommand", 0, true];
-            [_unit] remoteExec ["fnc_civ_recruitAction", 0, true];
-            [_unit] remoteExec ["fnc_civ_lootAction", 0, true];
-            [_unit] remoteExec ["fnc_civ_askForAid", 0, true];
-            [_unit] remoteExec ["fnc_civ_askForToolkit", 0, true];
         };
         _groups pushBack _group;
         sleep 0.2;

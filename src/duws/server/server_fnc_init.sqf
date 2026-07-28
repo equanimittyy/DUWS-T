@@ -270,45 +270,52 @@ fnc_civ_rowSpec = {
 	};
 };
 
-// Repaints one town's ellipse and icon from civ_town_rep. The band is the only writer of the
-// ellipse colour -- depopulation used to paint it black and that path is gone -- so nothing
+// A town's band colours as [ellipse, icon], keyed on reputation. One table rather than a
+// literal at each paint site: the two markers must never disagree about which side a town is
+// on, and marker creation needs the neutral pair before any reputation array exists.
+// Blue/red rather than green, because the engine reads green as Independent, which this
+// mission sets hostile to west. The icon is the deeper of each pair -- the ellipse is washed
+// out on purpose so it does not compete with a zone marker at map zoom-out, and an icon drawn
+// at full alpha in that same wash is unreadable against Altis terrain.
+fnc_civ_townBand = {
+	params [["_rep", 0]];
+	if (_rep >= 10) exitWith { ["#(0.45,0.62,1.0,1)", "#(0.15,0.38,0.95,1)"] };
+	if (_rep <= -10) exitWith { ["#(1.0,0.45,0.45,1)", "#(0.85,0.1,0.1,1)"] };
+	["#(0.6,0.35,0.7,1)", "#(0.42,0.15,0.58,1)"]
+};
+
+// What a town pays an economy tick, as [amount, side]. A town inside the neutral band pays
+// nobody, so its worth is not its income. Derived here rather than at each consumer because
+// the map readout and the tick that actually pays must not be able to disagree: a readout
+// promising AP the tick never credits is worse than no readout.
+fnc_civ_townIncome = {
+	params [["_rep", 0], ["_ap", 0]];
+	if (_rep >= 10) exitWith { [_ap, "BLU"] };
+	if (_rep <= -10) exitWith { [_ap, "OPF"] };
+	[0, ""]
+};
+
+// Repaints one town's ellipse and icon from civ_town_rep. The band is the only writer of both
+// colours -- depopulation used to paint the ellipse black and that path is gone -- so nothing
 // races this. setMarkerColor takes an inline #(r,g,b,a) string as well as a CfgMarkerColors
 // class name; alpha is set explicitly because a marker created without it sits at 1.
-// With no civ_town_rep (RAVAGE, WBK) the icon carries the size figure alone and the ellipse is
-// left at whatever creation gave it, since no band will ever repaint it.
+// With no civ_town_rep (RAVAGE, WBK) both markers keep the neutral pair creation gave them,
+// since no band will ever repaint them.
 fnc_civ_townRender = {
 	if (!isServer) exitWith {};
 	params ["_townIndex"];
-	private _icon = format ["civ_icon_%1", _townIndex];
-	private _pop = missionNamespace getVariable [format ["civ_pop_%1", _townIndex], 0];
 	private _reps = missionNamespace getVariable ["civ_town_rep", []];
-	if (_townIndex < 0 || _townIndex >= count _reps) exitWith {
-		_icon setMarkerText format [localize "STR_DUWS_T_civ_marker_pop", _pop];
-	};
+	if (_townIndex < 0 || _townIndex >= count _reps) exitWith {};
 
-	private _rep = _reps select _townIndex;
-	private _ap = (missionNamespace getVariable ["civ_town_ap", []]) param [_townIndex, 1];
-	// Pale, so a town never competes with a zone marker at map zoom-out, and blue/red rather
-	// than green: the engine reads green as Independent, which this mission sets hostile to west.
-	private _colour = "#(0.6,0.35,0.7,1)";
-	private _apField = "";
-	if (_rep >= 10) then { _colour = "#(0.45,0.62,1.0,1)" };
-	if (_rep <= -10) then { _colour = "#(1.0,0.45,0.45,1)" };
-	// A neutral town pays nobody, so printing a bonus it does not grant would be a lie.
-	if (_rep >= 10 || _rep <= -10) then {
-		_apField = format [localize "STR_DUWS_T_civ_marker_ap", _ap];
-	};
-
+	([_reps select _townIndex] call fnc_civ_townBand) params ["_areaColour", "_iconColour"];
 	private _area = format ["civ_area_%1", _townIndex];
-	_area setMarkerColor _colour;
+	_area setMarkerColor _areaColour;
+	(format ["civ_icon_%1", _townIndex]) setMarkerColor _iconColour;
 	// Alpha comes from the reveal flag, not from the band: a hardcore town the player has not
 	// found yet is repainted every time its reputation moves, and a flat 0.3 here would put it
 	// on the map the first time a civilian was harmed in it.
 	private _shown = (missionNamespace getVariable ["civ_visible", []]) param [_townIndex, true];
 	_area setMarkerAlpha ([0, 0.3] select _shown);
-	// Printed as stored, not rounded: a town at 9.7 displayed as 10 would contradict the
-	// neutral colour under it.
-	_icon setMarkerText format [localize "STR_DUWS_T_civ_marker_town", _pop, _rep, _apField];
 };
 
 // Per-town reputation, same contract as fnc_rep_adjust above: server-only, signed delta, the
@@ -793,10 +800,10 @@ fnc_civ_recruit_server = compile preprocessFileLineNumbers "duws\server\misc\fnc
 publicVariable "fnc_civ_recruit_server";
 fnc_civ_recruit_reveal = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_recruit_reveal.sqf";
 publicVariable "fnc_civ_recruit_reveal";
-fnc_civ_lootAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_lootAction.sqf";
-publicVariable "fnc_civ_lootAction";
-fnc_civ_lootAction_handleArmed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_lootAction.sqf";
-publicVariable "fnc_civ_lootAction_handleArmed";
+fnc_civ_search_action = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_search_action.sqf";
+publicVariable "fnc_civ_search_action";
+fnc_civ_search_armed = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_search_armed.sqf";
+publicVariable "fnc_civ_search_armed";
 fnc_civ_handler = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler.sqf";
 publicVariable "fnc_civ_handler";
 fnc_civ_handler_wbk = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler_wbk.sqf";
@@ -823,6 +830,8 @@ fnc_civ_bribe_answer = compile preprocessFileLineNumbers "duws\server\misc\fnc_c
 publicVariable "fnc_civ_bribe_answer";
 fnc_civ_arrest = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_arrest.sqf";
 publicVariable "fnc_civ_arrest";
+fnc_civ_menuAction = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_menuAction.sqf";
+publicVariable "fnc_civ_menuAction";
 fnc_civ_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_civ_menu.sqf";
 publicVariable "fnc_civ_menu";
 fnc_civ_bribe_prompt = compile preprocessFileLineNumbers "duws\client\dialog\fnc_civ_bribe_prompt.sqf";
