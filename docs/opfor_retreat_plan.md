@@ -5,10 +5,10 @@ being deleted where they stand. They move away from the position they were holdi
 once they are clear of it and no player is close enough to watch; a retreat that is still being
 observed keeps going further out rather than vanishing.
 
-This is split out of [`per_town_reputation_plan.md`](per_town_reputation_plan.md), which needed
-an answer for one narrow case — what happens to a town garrison when reputation rises out of
-the OPFOR band while its units are alive — and found the answer was a general behaviour that
-zones want too.
+This is split out of the per-town reputation work, which needed an answer for one narrow case —
+what happens to a town garrison when reputation rises out of the OPFOR band while its units are
+alive ([`info/zone_and_town_generation.md`](info/zone_and_town_generation.md#ownership-bands-and-the-garrison))
+— and found the answer was a general behaviour that zones want too.
 
 ## What it replaces
 

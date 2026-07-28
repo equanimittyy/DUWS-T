@@ -164,6 +164,55 @@ enemy zone opens at `-20` — the enemy already holds that ground and the civili
 with them. Worth is a rank within the campaign's own kept set rather than an absolute building
 count, so Altis cities and a sparse map's hamlets both span 1 to 3.
 
+### Ownership bands and the garrison
+
+A town's reputation runs `-20 … 20` and three consumers read it as a *band* rather than a
+magnitude, so the thresholds are a contract between them:
+
+| Band | Reputation | Pays | Garrison |
+|---|---|---|---|
+| BLUFOR | `>= 10` | BLUFOR AP | — |
+| Neutral | `-9` … `9` | nobody | — |
+| OPFOR | `<= -10` | OPFOR AP | tier 1, rising to 2 at `-15` and 3 at `-20` |
+
+Tier 1 is infantry; tier 2 adds a second team and a light vehicle; tier 3 adds armour
+(`fnc_civ_garrison.sqf`). All three are built from the existing OPFOR spawners, so the garrison
+inherits faction auto-detection for free. It is units only — no fortification ring and no
+prefab, because static emplacements are what make a zone an objective and a town must not
+compete with one.
+
+Presence uses the same arrival test zones use (`fnc_duws_bluforNear`) rather than the town's own
+presence trigger, which fires the instant anyone crosses the radius and whose handle is
+discarded at creation anyway. Clearing the garrison resets that town's reputation to 0, decided
+by a `WEST SEIZED` trigger rather than by counting units: the spawners are fire-and-forget and
+register nothing, so no group handle exists to watch die.
+
+The band is the condition, not a one-shot flag — a town driven back below `-10` gets a new
+garrison, and a town lifted out of the band while its garrison lives loses it.
+
+**Clearing discards the whole debt, deliberately.** A player who ruins a town to `-20` and then
+kills the garrison lands back at neutral having paid nothing for the civilian deaths that got
+them there. The alternative is a town the player can permanently ruin with no route back, which
+is what passive recovery used to prevent. The garrison is the price, and its tiers are the dial:
+if the reset proves too cheap, raise tier strength rather than introducing partial resets.
+
+### Population is a size figure, not a head count
+
+`civ_pop_<n>` is set once at registration to the town's usable building count and never written
+again. Spawn density follows from it directly, capped by `civ_maxSpawnPerVisit` (default 50,
+set from the environment menu).
+
+Where that cap *binds* is the point. The `buildings × 2` derivation this replaced saturated from
+25 buildings upward — most real Altis towns — so every settlement from a market village to
+Kavala presented the same 50 concurrent civilians. Against the raw count the cap binds at 50
+buildings instead, and twice as much of the map's size range shows on the ground before
+flattening. The trade is fewer civilians in mid-size towns; raising `civ_maxSpawnPerVisit` is
+the player's answer if they have the frames for it, which is what the setting is for.
+
+Because the figure never decrements, nothing can reach zero, which is why the depopulation
+path — ghost-town notification, black marker, and the scorched-earth CP reward that rode on it —
+no longer exists.
+
 ### Ordering
 
 Civilian generation is a step of zone generation, not a parallel system racing it. The
@@ -193,10 +242,3 @@ waits on `mission_init_complete`, then on `intro_heli_done`, so orders reach the
 the fast-rope rather than during generation. Only the first wait is retried — `fnc_intro_heli`
 has exit paths that never publish the second, and a campaign with no main task has no win
 condition at all, so that wait falls through on timeout with the earlier gate holding the line.
-
-A town in the OPFOR band carries a garrison, spawned by `fnc_civ_garrison.sqf` on the same
-arrival test zones use (`fnc_duws_bluforNear`). It is units only — no fortification ring and no
-prefab, because the static emplacements are what make a zone an objective and a town must not
-compete with one. Clearing it resets that town's reputation to 0, decided by a `WEST SEIZED`
-trigger rather than by counting the garrison: the three spawners are fire-and-forget and
-register nothing, so no group handle exists to watch die.

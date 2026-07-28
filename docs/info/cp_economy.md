@@ -240,6 +240,31 @@ vehicles convert to free CP. It is *not* a buy-then-recycle loop: purchase cost
 The two formulas are simply not on the same scale, and recycle has no floor tying reward to
 what a vehicle cost.
 
+**AP is a threshold ladder, not a pool, so town income is inflationary.** Nothing spends AP. The
+WARCOM director reads it as gates — BLUFOR wave tiers at 10, 40, 65, 100 and 136
+(`fnc_WARCOM_blu_assault.sqf:11-25`), OPFOR air above 150 (`fnc_WARCOM_opf_air.sqf:11`), OPFOR
+patrols above 100 (`fnc_missionPatrols.sqf:18`) — and the only subtraction anywhere is losing a
+zone. A 20-town campaign averaging 2 AP pays at most 40 AP per 30 min with every town banded,
+against roughly 50 for capturing a 500 m zone, so civilian income reads as a fraction of a
+capture rather than a replacement for one. The ladder only goes up, so escalation is permanent
+once earned; the 1–3 scale sets how long it takes.
+
+**The two routes into a band are not symmetric, and the negative one is far shorter.** Both
+bands sit ten points from neutral, but the travel costs are nothing alike. Going negative is
+incidental and cheap: a civilian death at `-1`, charged three times in ten and only with a
+player inside 200 m, is about thirty-three kills; a building at `-2` under the same proximity
+guard gets there in five, with no rate roll at all; a failed IDAP at `-5` covers half the
+distance alone. Going positive is deliberate and slow: healing is worth `+1` but caps at one
+credit per town per economy tick (`fnc_civ_healed.sqf`), so the BLUFOR band is hours of visits
+away on healing alone, against IDAP success at `+5`.
+
+That gap is the mechanic rather than an oversight. Ordinary fighting drags a town toward the
+enemy and no amount of ordinary fighting drags it back, so the routes out of the OPFOR band are
+the ones built for it: clearing the garrison, which discharges the debt at once, and the aid
+missions. The rate roll on deaths can sit as low as 30 % precisely because reputation is
+localised — a bad engagement costs the campaign nothing outside the town it happened in.
+Deliberate demolition carries no such excuse, which is why it is charged every time.
+
 **AP→CP merges the two economies.** `fnc_convertAPtoCP.sqf` trades 15 AP → 10 CP,
 repeatable with no cooldown. It is one-way (there is no CP→AP path), so it cannot loop, but
 it means any AP income route — mission rewards, corpse search — ultimately feeds CP.

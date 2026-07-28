@@ -5,9 +5,8 @@ a town against them, the enemy uses it: IEDs on the approach roads, ambushes on 
 through, sabotage against nearby FOBs and parked vehicles. Reputation stops being a modifier on
 civilian spawn behaviour and becomes the input to an actor that plans against the player.
 
-This document exists because the per-town reputation change
-([`per_town_reputation_plan.md`](per_town_reputation_plan.md)) deletes the two mechanics that
-did this job badly. They are recorded here in full, because they are the raw material for the
+This document exists because the per-town reputation change deleted the two mechanics that did
+this job badly. They are recorded here in full, because they are the raw material for the
 low-reputation events this feature will generate.
 
 ## Why the old mechanics were removed rather than kept

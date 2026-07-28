@@ -117,6 +117,16 @@ block back to the requesting client; `server/misc/fnc_hirePartisans_spawnDeploye
 }] remoteExec ["call", _caller];
 ```
 
+**The mirror-image bug is a server thread calling a function that opens `if (!hasInterface)
+exitWith {}`.** The guard is correct for the function — it draws markers and hints — but on a
+dedicated server it makes the call a no-op, and on a hosted one it works for exactly the host,
+which is why a listen-server test proves nothing. The old `fnc_found_intel` was reached both
+ways: most callers attached it as an `addAction`, so it ran on the player who used it, but two
+side missions `spawn`ed it straight from a server thread and their reward silently evaporated.
+The fix is not to weaken the guard but to split the function — the decision server-side, the
+presentation `remoteExec`'d at whoever should see it. See
+[`intel_system.md`](intel_system.md#one-writer-for-reveal-one-function-for-payout).
+
 The corollary is that a bare `player` read in server-side code is a latent dedicated-server
 bug, and a silent one — `objNull` yields no error, just wrong behaviour.
 `server/warcom/fnc_WARCOM_blu_patrol.sqf` measured `_randomZone distance player` to keep patrol waves

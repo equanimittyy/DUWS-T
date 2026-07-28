@@ -38,6 +38,23 @@ quickest way to tell which one is wrong.
 - [ ] Empty an ammo crate, stow, deploy, reopen it. A refilled crate means the four `get*Cargo` / `add*CargoGlobal` pairs are wrong, and is an infinite ammo source until fixed
 - [ ] Destroy a bunker, stow, deploy. Its return means the alive test at stow time is not filtering
 
+## Per-town reputation: shipped, not yet exercised
+
+- [ ] Destroy a house as a **client** on a dedicated server and watch the escalation counter. No movement means `BuildingChanged` is local-only and escalation has never worked in dedicated MP — neither did the war-crimes script it replaced. Record it rather than working around it
+- [ ] Clear a garrison in a populated town. If the `WEST SEIZED` trigger never fires, CIVILIAN-side units are blocking it and the fallback is a condition trigger counting hostile units in `thisList`
+- [ ] Check the census line in the RPT on a new map, and confirm a single fire mission cannot advance an escalation level. Both numbers are logged on the first run
+- [ ] Look at a neutral town's ellipse. Opaque rather than translucent means the inline colour string's fourth channel does nothing and `setMarkerAlpha` is carrying the translucency alone
+- [ ] Confirm the campaign-wide reputation still gates partisan hiring and pays its CP tick exactly as before the per-town split
+- [ ] Start a RAVAGE or WBK campaign. Towns should carry a `Pop:`-only marker and a permanently neutral ellipse, spawn no garrison, never scale prices, and log no census line
+
+## Hardcore intel: shipped, not yet exercised
+
+- [ ] Search a corpse and confirm the action appears at all. `side group cursorObject == east` is the last clause of its condition, and a dead unit leaves its group's unit list — a group set to `deleteGroupWhenEmpty` can be gone before the body is, which would hide the action on exactly the bodies it exists for. Fallback is stamping the side on the unit at spawn
+- [ ] Confirm `cursorObject` returns a corpse reliably at 3 m. Ragdolled bodies and ones settled half-inside geometry are the doubt; `cursorTarget` or a short `nearestObjects` sweep is the swap, but a scripted sweep must stay behind the cheap clauses
+- [ ] On a **dedicated** server, as a non-host player: confirm the search action vanishes the moment the attempt is spent and returns on the next economy tick. The flag is broadcast on the player object precisely so a client-side condition can see it, so a host-only test proves nothing
+- [ ] Complete a rescue-pilot and a rescue-squad mission on a dedicated server and confirm each reveals a zone. These are the two sites that never paid out at all
+- [ ] Die with a search attempt spent, respawn, and check whether the action is available again. It will be — the flag lives on the body — and the open question is whether that refund is acceptable rather than whether it happens
+
 ## Heli-lift for non-host players
 
 `client/supports/fnc_helolift.sqf` used to create the transport helicopter on the calling

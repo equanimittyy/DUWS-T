@@ -99,8 +99,8 @@ table above: anything the replay rebuilds must not also be restored, or it is do
 | Settings | input | `zones_number`, radii, spacing, `moreUrban`, `hardcore_mode_enable`, `enemyunitMultiplier`, `CIV_PRESENCE` |
 | Placement | input | `PosOfBLUHQ`, `AO_direction`, `serv_zones_array`, `zone_meta_array` |
 | Player build | input | `Array_of_FOBpos`, `Array_of_FOBname`, the support-unlock mirror |
-| Civilians | input | town positions, names, radii and populations; `civ_town_rep` and `civ_town_ap` if [`per_town_reputation_plan.md`](per_town_reputation_plan.md) has landed |
-| Escalation | outcome | the destroyed-building count, if [`per_town_reputation_plan.md`](per_town_reputation_plan.md) has landed. One integer; the census re-runs on the restored world |
+| Civilians | input | town positions, names, radii and populations; `civ_town_rep` and `civ_town_ap` |
+| Escalation | outcome | the destroyed-building count. One integer; the census re-runs on the restored world |
 | Hardpoints | input | `hardpoint_pos_array`, `hardpoint_type_array`, `hardpoint_zone_array`, `hardpoint_state_array` and the `zone_hp_left_<n>` counters, if [`hardpoint_system_plan.md`](hardpoint_system_plan.md) has landed |
 | Pools | outcome | `commandpointsblu1`, `WARCOM_blufor_ap`, `WARCOM_opfor_ap`, `Player_Reputation` |
 | Ownership | outcome | the positions of BLUFOR-held zones, and nothing else |
@@ -123,7 +123,7 @@ then re-flag the matching `zone_namePOS_pairs` entries and repaint their markers
 separate state on the same footing, because intel can uncover one without its parent zone; the
 registry in the Hardpoints row says nothing about it. `hardcore_visibleZone_found` is derived
 from reveal plus OPFOR ownership and is recomputed rather than stored. Details in
-[`hardcore_mode_plan.md`](hardcore_mode_plan.md#persistence).
+[`info/intel_system.md`](info/intel_system.md#persistence).
 
 Storing the state rather than how it was reached is what keeps this to one array: a zone the
 player walked into, bought from a local, or found on a dead officer all restore identically,

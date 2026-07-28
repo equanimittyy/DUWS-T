@@ -2,9 +2,9 @@
 
 The scroll-wheel actions on a civilian collapse into one dialog, built like the Requests and
 Squad Manager screens. What the town will do for the player is rolled against its reputation
-rather than gated on it, so the `-20 … 20` scale that
-[`per_town_reputation_plan.md`](per_town_reputation_plan.md) introduced finally has a consumer
-that reads more of it than `> 0`.
+rather than gated on it, so the `-20 … 20` scale per-town reputation introduced
+([`info/zone_and_town_generation.md`](info/zone_and_town_generation.md#ownership-bands-and-the-garrison))
+finally has a consumer that reads more of it than `> 0`.
 
 Civilians are primarily an **information** channel: locals are how the player learns where the
 enemy is. Supplies stay for now and are marked for rework rather than settled.
@@ -211,5 +211,5 @@ It worked, and that is not the reason it goes. On success it drew a 700 m disc o
 spent one to three hours marking every enemy unit inside it, refreshed each minute. That is a
 tactical feed about ground the player has already found, and intel here means the opposite:
 discovering positions the player does not yet know exist. See
-[`hardcore_mode_plan.md`](hardcore_mode_plan.md#what-intel-is-for). Rebuilding a local unit
+[`info/intel_system.md`](info/intel_system.md#what-intel-is-for). Rebuilding a local unit
 tracker later is a separate feature with a separate justification, not a row on this menu.
