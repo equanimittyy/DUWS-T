@@ -502,7 +502,7 @@ terminate _handle;
 
 if (failsafe_not_found == true) exitWith {hint localize "STR_DUWS_T_crtzxs0j"};
 
-hint "Mission Selector";
+hint localize "STR_DUWS_T_mission_selector_title";
 
 // NOW OPEN THE MAP
 _isNight = false;

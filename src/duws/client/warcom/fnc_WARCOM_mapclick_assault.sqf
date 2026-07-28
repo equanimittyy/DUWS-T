@@ -47,5 +47,5 @@ if (clicked) then {
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
 } else {
-	hint "Cancelled";	
+	hint localize "STR_DUWS_T_26hvx0yt";	
 };

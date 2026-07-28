@@ -237,7 +237,7 @@ _txtHint ctrlCommit 0;
         if (isNull _veh) exitWith {};
         private _pylonIdx = lbCurSel 1500;
         private _magIdx = lbCurSel 1501;
-        if (_pylonIdx < 0 || _magIdx < 0) exitWith { hint "Select pylon and weapon" };
+        if (_pylonIdx < 0 || _magIdx < 0) exitWith { hint localize "STR_DUWS_T_repair_select_pylon" };
 
         private _pylonIndex = _pylonIdx + 1;
         private _compatibleMags = _veh getCompatiblePylonMagazines _pylonIndex;

@@ -26,7 +26,7 @@ hint _selected_soldier_identity;
 switch (_selected_soldier_status) do
 {
   case "Ready": {
-	if !(["CP", 8] call fnc_pool_spend) exitWith {hint "You don't have enough Command Points"};
+	if !(["CP", 8] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_operative_no_cp"};
   };
 };
 

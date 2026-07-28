@@ -6,7 +6,7 @@ params ["_caller", "_count"];
 
 // 防止重复打开地图
 if (!isNil "hirePartisans_mapOpen" && {hirePartisans_mapOpen}) exitWith {
-    hint "You are already placing a partisan squad.";
+    hint localize "STR_DUWS_T_partisans_placing_busy";
 };
 hirePartisans_mapOpen = true;
 
@@ -40,7 +40,7 @@ openMap true;
 // Drawn on the map, not hinted: the hint box renders beneath the map display, so this
 // instruction was issued one line before the map covered it and never reached the player --
 // who was then held in a map that refuses to close, with nothing saying why.
-["Click on the map to deploy your partisans. You cannot close the map until you choose a location."] call fnc_map_prompt;
+[localize "STR_DUWS_T_partisans_place_brief"] call fnc_map_prompt;
 
 // 强制保持地图打开，直到点击
 while {hirePartisans_mapOpen} do {

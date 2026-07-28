@@ -14,7 +14,7 @@ _board addAction [
     "<t color='#00AAFF'>" + localize "STR_DUWS_KILLHOUSE_TELEPORT_A" + "</t>",
     {
         private _tp = missionNamespace getVariable "killhouse_tpA";
-        if (isNil "_tp") exitWith { hint "Teleport point A not ready"; };
+        if (isNil "_tp") exitWith { hint format [localize "STR_DUWS_T_killhouse_tp_notready", "A"]; };
         player setPosWorld _tp;
         hint localize "STR_DUWS_KILLHOUSE_ARRIVE";
     },
@@ -24,7 +24,7 @@ _board addAction [
     "<t color='#00AAFF'>" + localize "STR_DUWS_KILLHOUSE_TELEPORT_B" + "</t>",
     {
         private _tp = missionNamespace getVariable "killhouse_tpB";
-        if (isNil "_tp") exitWith { hint "Teleport point B not ready"; };
+        if (isNil "_tp") exitWith { hint format [localize "STR_DUWS_T_killhouse_tp_notready", "B"]; };
         player setPosWorld _tp;
         hint localize "STR_DUWS_KILLHOUSE_ARRIVE";
     },

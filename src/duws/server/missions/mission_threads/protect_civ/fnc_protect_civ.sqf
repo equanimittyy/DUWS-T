@@ -39,7 +39,7 @@ _failSafe    = _POSdata select 4;
 if (_failSafe > 10 && !_Posfound) exitWith {
     Mission_available = true;
     publicVariable "Mission_available";
-    [{hint "No suitable location found. Please try again."}] remoteExec ["BIS_fnc_Spawn", 0];
+    [{hint localize "STR_DUWS_T_mission_no_location"}] remoteExec ["BIS_fnc_Spawn", 0];
 };
 
 // ----- 修改点：确保建筑物至少有4个建筑位置 -----
@@ -63,14 +63,14 @@ if (!isNull _Building) then {
         if (!_found) exitWith {
             Mission_available = true;
             publicVariable "Mission_available";
-            [{hint "No building with at least 4 positions found. Please try again."}] remoteExec ["BIS_fnc_Spawn", 0];
+            [{hint localize "STR_DUWS_T_mission_no_building_4pos"}] remoteExec ["BIS_fnc_Spawn", 0];
         };
     };
 } else {
     // 没有建筑物，退出
     Mission_available = true;
     publicVariable "Mission_available";
-    [{hint "No building found. Please try again."}] remoteExec ["BIS_fnc_Spawn", 0];
+    [{hint localize "STR_DUWS_T_mission_no_building"}] remoteExec ["BIS_fnc_Spawn", 0];
 };
 
 // ----- 2. 放置平民（蓝方渔民，持续害怕动画）--------------------------------

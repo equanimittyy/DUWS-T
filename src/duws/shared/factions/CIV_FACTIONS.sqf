@@ -91,7 +91,7 @@ if (CIV_PRESENCE == "RAVAGE") then {
         ];
     } else {
         civ_array = ["C_man_p_beggar_F","C_Man_casual_1_F","C_Man_casual_3_F","C_Man_casual_8_F","C_Man_casual_6_v2_F","C_Man_casual_2_F","C_Man_UtilityWorker_01_F","C_Man_Fisherman_01_F","C_Man_casual_2_F","C_Man_p_shorts_1_F","C_Man_w_worker_F"];
-        hint "Ravage mod not found, using default civs.";
+        hint localize "STR_DUWS_T_ravage_missing";
     };
 };
 

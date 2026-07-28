@@ -63,7 +63,7 @@ if (isNull _nearRoad) then {
     // ========== 原点防护：禁止在距离 [0,0,0] 500 米内生成战区 ==========
     if (_posDeMeilleurTruc distance2D [0,0,0] < 500) then {
         clicked = false;
-        [format ["%1<br/><t color='#ff1111'>%2</t>", _zonePrompt, "Position too close to map origin [0,0,0]. Please choose another location at least 500m away."]] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+        [format ["%1<br/><t color='#ff1111'>%2</t>", _zonePrompt, localize "STR_DUWS_T_zone_too_close_origin"]] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
         _Posfound = false;
         _found_distance = false;
     } else {

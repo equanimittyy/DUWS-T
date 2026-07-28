@@ -38,7 +38,7 @@ _failSafe = _POSdata select 4;
 if (_failsafe > 10 && _Posfound == false) exitWith {
     Mission_available = true; 
     publicVariable "Mission_available"; 
-    [{hint "No suitable location found.  Please try again."}] remoteExec ["BIS_fnc_Spawn", 0];
+    [{hint localize "STR_DUWS_T_mission_no_location"}] remoteExec ["BIS_fnc_Spawn", 0];
 };
 
 [_markerText2, {hint _this}] remoteExec ["BIS_fnc_Spawn", 0];

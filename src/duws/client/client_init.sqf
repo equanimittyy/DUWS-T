@@ -298,7 +298,7 @@ hint localize "STR_DUWS_T_zu4bxt24";
         private _template = selectRandom _combatUnits;
         player setUnitLoadout (getUnitLoadout _template);
     } else {
-        systemChat "未找到可复制的战斗单位，保留默认装备。";
+        systemChat localize "STR_DUWS_T_loadout_copy_none";
     };
 };
 

@@ -30,7 +30,7 @@ private _fnc_finish = {
 
 // Banner first: the caller cleared the map before handing over, and selection cannot ping its
 // own progress until it has enumerated the map's towns.
-["Placing civilians...<br/>surveying towns"] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+[localize "STR_DUWS_T_civ_gen_placing"] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 ([] call fnc_civ_selectTowns) params [["_queue", []], ["_spare", []]];
 
 // The base composition spans about 30 m; the rest is margin for its guards, patrols and
@@ -56,7 +56,7 @@ while { count _queue > 0 } do {
     private _locationName = if (text _loc != "") then { text _loc } else { format ["Unnamed%1", _done] };
     _done = _done + 1;
 
-    [format ["Placing civilians...<br/>town %1 of %2", _done, _done + count _queue]]
+    [format [localize "STR_DUWS_T_civ_gen_progress", _done, _done + count _queue]]
         remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
     // 区域半径：每个建筑10米，最小100米，最大500米
