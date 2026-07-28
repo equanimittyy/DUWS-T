@@ -234,8 +234,8 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
         (_newBldgs select _locIndex) select { _x distance2D _pos <= _radius }];
 
     // RAVAGE and WBK keep the presence trigger and their two-mode handlers. The plain civilian
-    // path runs one streaming thread per town instead, on the same footing as an enemy zone: it
-    // does its own presence polling, so it needs no trigger and no cleanup entry point.
+    // path polls instead, from the single thread started below the loop, so it needs no trigger
+    // and no cleanup entry point.
     if (CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
         private _trg = createTrigger ["EmptyDetector", _pos];
         _trg setTriggerArea [_radius, _radius, 0, false, 80];
@@ -248,8 +248,6 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
         format ["[%1, 'spawn'] spawn %2; [%1] call fnc_civ_town_reveal", _locIndex, _handlerFunc],
         format ["[%1, 'cleanup'] spawn %2", _locIndex, _handlerFunc]
         ];
-    } else {
-        [_locIndex] spawn fnc_civ_handler;
     };
 
     // Alpha is the whole of hiding: a hidden town keeps its trigger, its garrison and its
@@ -283,6 +281,10 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
 
     ["INFO", "CIV", format ["Created markers for location %1 (%2) pop %3", _locIndex, _locationName, _initialPop]] call fnc_log;
 } forEach _locations;
+
+// One thread for every town, started only once the loop above has published each town's radius,
+// population and building list -- it polls all of them off those variables from its first tick.
+if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then { [] spawn fnc_civ_handler };
 
 // No start-up delay: this function now runs after zone build-out rather than alongside a
 // map-wide scan, so there is nothing left for the spawns to wait out.

@@ -208,9 +208,10 @@ if the reset proves too cheap, raise tier strength rather than introducing parti
 ### Population is a size figure, not a head count
 
 `civ_pop_<n>` is set once at registration to the town's usable building count and never written
-again. It is a ceiling, not a head count: a town holds `min(civ_density, civ_pop_<n>)` civilians
-while players are in it. So `civ_density` (5–30, environment menu) is the dial a player turns
-down for frames, and the building count is what stops a hamlet presenting as a city.
+again. It is a ceiling, not a head count: a town holds at most `min(civ_density, civ_pop_<n>)`
+civilians while players are in it, less if the campaign-wide throttle below applies. So
+`civ_density` (5–30, environment menu) is the dial a player turns down for frames, and the
+building count is what stops a hamlet presenting as a city.
 
 Because the figure never decrements, nothing can reach zero, which is why the depopulation
 path — ghost-town notification, black marker, and the scorched-earth CP reward that rode on it —
@@ -218,27 +219,53 @@ no longer exists.
 
 ### A town streams like a zone
 
-`fnc_civ_handler.sqf` runs one thread per town on the same numbers as the enemy zone gate in
-`fnc_spawnWait.sqf`: poll every 10 s, confirm a sighting 5 s later before acting on it, fill the
-town once, then delete everything tagged `civ_locIndex` 300 s after players were last seen. The
-grace period restarts on every sighting, so leaving starts the clock rather than how long you
-stayed, and the confirm delay is what stops a helicopter crossing the disc filling a town for
-someone already past it.
+Per town, `fnc_civ_handler.sqf` is the enemy zone gate from `fnc_spawnWait.sqf`: a town fills once
+it has been occupied on two consecutive polls, and everything tagged `civ_locIndex` is deleted
+once the grace period since the last sighting expires. The grace restarts on every sighting, so
+leaving starts the clock rather than how long you stayed, and the confirmation is what stops a
+helicopter crossing the disc filling a town for someone already past it.
 
-Presence is players only (`fnc_civ_playerNear`) where the zone gate counts friendly AI as well
-(`fnc_duws_bluforNear`): a town fills so there is somebody to talk to, and an AI squad passing
-through has nobody to talk to it.
+Presence is players only, where the zone gate counts friendly AI as well (`fnc_duws_bluforNear`):
+a town fills so there is somebody to talk to, and an AI squad passing through has nobody to talk
+to it.
+
+Two numbers differ from the zone gate's, both because towns outnumber zones.
+
+| | Zone | Town | Why |
+|---|---|---|---|
+| Threads | one per zone | one for all | 3 towns per anchor plus a top-up wave ≈ `4 × zones + 3`, so a 40-zone campaign registers over 160 towns against 40 zones. One thread builds the player list once a tick and tests every town against it. |
+| Grace | 300 s | 60 s | Towns are disjoint, so a player is inside at most one, and a five-minute grace leaves a trail of populated towns behind anyone crossing the map. |
+| Reach | radius + 400 | radius + 200 | `zones_spacing` holds zones 1200 m apart, so 400 is a third of the guaranteed separation. Towns are only culled until their discs stop touching — `(r1 + r2) × 1.05` — so two 100 m towns can sit 210 m apart, and 400 would stream three in at once. 200 is the same fraction of a typical pair's separation. |
+
+The reach buffer applies to arrival only; the fill still uses the town's own radius, or the crowd
+would be spread over the open ground the buffer reaches into. What it does double-trigger is
+self-limiting: radius is `buildings × 10` floored at 100, so the tightly packed pairs are the
+≤10-building towns, and `civ_pop_<n>` caps their population at that same count.
+
+That trail is the thing to keep bounded, because the ceiling only thins it. `fnc_civ_liveTarget`
+gives one town the density setting in full, soft-caps the campaign at three towns' worth, then
+throttles the rest proportionally down to a floor of three apiece — so every occupied town still
+reads as inhabited, and the overshoot tracks how many towns are occupied at once rather than the
+density setting. The grace period is what decides that count, which is why it is 60 s and not 300.
+The bound matters because every civilian holds its own group so it can wander independently, and
+the engine stops issuing groups at roughly 144 per side; past that `createGroup` returns `grpNull`
+and a fill produces nobody.
+
+The throttle is applied at fill time and never revisited, so the order towns fill in decides who
+is thinned: the first town in keeps its full crowd while later ones are cut. Under the old model
+the recycle pass re-ran the same calculation every 90 s; nothing does now.
+
+The single-thread collapse does **not** transfer to zones. It works here because presence is a
+player-list scan — one global list, then a cheap per-town distance test. `fnc_duws_bluforNear` is
+a per-position `nearEntities` query with crew resolution, which cannot be shared across zones at
+different centres; folding it into one pass means a global `allUnits` sweep per tick, the
+`O(zones × all units)` shape `fnc_spawnWait.sqf:20-22` records as deliberately removed.
 
 This replaced a second answer to the same two questions — an engine presence trigger, a
-single-slot global mutex serialising town fills, a campaign-wide head-count ceiling, and a 90 s
-pass that deleted civilians the players had walked away from and re-spawned them nearer. RAVAGE
-and WBK still run on all of it (`fnc_civ_handler_ravage.sqf`, `fnc_civ_handler_wbk.sqf`), which
-is why `fnc_civ_liveTarget.sqf` and `fnc_civ_recycle.sqf` are still in the tree.
-
-One consequence is worth knowing before raising the density options: every civilian gets its own
-group so it can wander independently, the engine stops issuing groups at roughly 144 per side,
-and nothing now bounds the campaign-wide total — the 300 s grace can hold several towns up at
-once. Past that limit `createGroup` returns `grpNull` and a town silently spawns nobody.
+single-slot global mutex serialising town fills, and a 90 s pass that deleted civilians the players
+had walked away from and re-spawned them nearer. The ceiling was not one of those answers and
+stayed. RAVAGE and WBK still run on all of it (`fnc_civ_handler_ravage.sqf`,
+`fnc_civ_handler_wbk.sqf`), which is why `fnc_civ_recycle.sqf` is still in the tree.
 
 ### Ordering
 

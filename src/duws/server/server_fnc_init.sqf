@@ -846,8 +846,9 @@ fnc_civ_handler_ravage = compile preprocessFileLineNumbers "duws\server\misc\fnc
 publicVariable "fnc_civ_handler_ravage";
 fnc_civ_handler_wbk = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler_wbk.sqf";
 publicVariable "fnc_civ_handler_wbk";
-// Server-only: the RAVAGE and WBK handlers are the only callers of the ceiling and the recycle
-// pass, and the trigger that names those already resolves on the machine that runs the spawn.
+// Server-only: every caller is a handler thread or its trigger, and the trigger already resolves
+// on the machine that runs the spawn. The recycle pass is RAVAGE and WBK's alone; the ceiling is
+// shared with the plain path.
 fnc_civ_liveTarget = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_liveTarget.sqf";
 fnc_civ_spawnUnit = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_spawnUnit.sqf";
 fnc_civ_recycle = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_recycle.sqf";
