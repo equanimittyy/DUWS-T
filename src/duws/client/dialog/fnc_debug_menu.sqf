@@ -23,6 +23,10 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
         hint "Composition streaming: toggling the nearest zone.\n\nStowed compositions are deleted and rebuilt from a record,\nso destroyed parts stay gone and crates keep what is left\nin them. Refused while a gun still has its gunner.";
     }, [], [1,0.667,0,1]],
 
+    ["Simulate intel search", {
+        [player] remoteExec ["fnc_debug_intel_search", 2];
+    }, [], [1,0.667,0,1]],
+
     ["Adjust CP / AP", fnc_debug_econ_menu, [], [1,0.667,0,1]],
 
     // Stub. Planned: a local overlay onto OPFOR-side WARCOM -- commander AP with its
