@@ -197,6 +197,12 @@ master_Intel_chance = 5;
 // boost is for more "found"
 master_Intel_boost = 2.5;
 
+// Chance a body search turns up a zone. Server-local: the roll is server-side, and a client
+// that can read the number is a client that can be shown to have rolled against it.
+// Deliberately low -- the body search is the trickle and civilians are the intended bulk source,
+// so raise the civilian side before this or hardcore reverts to a kill count.
+intel_search_chance = 0.1;
+
 // manually_chosen
 manually_chosen = false;publicVariable "manually_chosen";
 

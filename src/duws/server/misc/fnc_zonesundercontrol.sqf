@@ -16,6 +16,11 @@ while {true} do {
     // which is the failure this loop was merged to end. Server-local: no client reads it.
     econ_tick = econ_tick + 1;
 
+    // Hands every player their body search back. Cleared from here rather than compared against
+    // econ_tick on the client, because the action's condition has to read it and broadcasting
+    // one boolean per player is cheaper than broadcasting the clock for clients to subtract.
+    { _x setVariable ["DUWS_intel_searched", false, true] } forEach allPlayers;
+
     // AP is not gated on zone holdings: the enemy banking its towns while the player holds
     // nothing is exactly the case the town economy exists to model.
     private _reps = missionNamespace getVariable ["civ_town_rep", []];

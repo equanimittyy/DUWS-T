@@ -3318,6 +3318,10 @@
                 <Spanish>La ubicación del objetivo de esta misión se puede revelar buscando en los cuerpos enemigos.</Spanish>
                 <Chinesesimp>此任务的目标位置可以通过搜索敌军尸体来揭露</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_INTEL_SEARCH_ACTION">
+                <Original>Search for enemy positions</Original>
+                <English>Search for enemy positions</English>
+            </Key>
             <Key ID="STR_DUWS_T_SEARCH_CORPSE">
                 <Original>Search the body</Original>
                 <English>Search the body</English>

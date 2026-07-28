@@ -931,6 +931,9 @@ fnc_createpatrolFOB = compile preprocessFileLineNumbers "duws\server\init_hq\fnc
 fnc_locatorZones_manual = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_manual.sqf";publicVariable "fnc_locatorZones_manual";
 fnc_createZone = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createZone.sqf";publicVariable "fnc_createZone";
 fnc_found_intel = compile preprocessFileLineNumbers "duws\client\misc\fnc_found_intel.sqf";publicVariable "fnc_found_intel";
+fnc_intel_payout = compile preprocessFileLineNumbers "duws\server\misc\fnc_intel_payout.sqf";
+fnc_intel_search = compile preprocessFileLineNumbers "duws\server\misc\fnc_intel_search.sqf";
+fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
 fnc_addHQSatelliteActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addHQSatelliteActions.sqf";
 publicVariable "fnc_addHQSatelliteActions";
 fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_restHealServer.sqf";
