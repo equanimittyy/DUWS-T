@@ -119,13 +119,13 @@ still has a route.
 
 | Source | Capped |
 |---|---|
-| Body search | yes — one attempt per player per economy tick, 10 % |
+| Body search | yes — one attempt per player per economy tick, 20 % |
 | Side-mission intel | no, and no roll either: completing the mission is the gate |
 | Walking into a zone or town | not applicable; it reveals the ground the player is standing on and rolls nothing |
 | Civilian interaction menu | no — limited instead by per-civilian consumption |
 
 **Civilians are the intended primary source and the body search is a trickle.** That is what
-makes 10 % a deliberate figure rather than a stingy one. Anyone tuning this should raise the
+makes 20 % a deliberate figure rather than a generous one. Anyone tuning this should raise the
 civilian side before touching the body search, or the two stop being different mechanisms and
 hardcore turns back into a kill count.
 
@@ -141,7 +141,7 @@ rather than paying on completion, because reaching that object is the mission.
 
 ## The throttle is per player, and the attempt is what it spends
 
-One search per player per 30-minute economy tick at 10 %. `econ_tick`
+One search per player per 30-minute economy tick at 20 %. `econ_tick`
 (`server/misc/fnc_zonesundercontrol.sqf`) is the clock, shared with the civilian heal cap so
 nothing new is timed.
 
@@ -151,7 +151,7 @@ four-player squad searched at the same rate as a lone operator. Here a squad gen
 four times as fast.
 
 The attempt is spent on the *attempt*, on the server. A client cannot be trusted to report
-having already searched, and a 10 % roll a client makes is a 10 % roll a client can retry. A
+having already searched, and a 20 % roll a client makes is a 20 % roll a client can retry. A
 failed search pays nothing but a line: what it costs is the thirty minutes before the next one,
 and paying out on failure would make that wait the only thing separating a hit from a miss.
 

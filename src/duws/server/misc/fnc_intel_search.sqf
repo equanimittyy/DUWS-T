@@ -1,5 +1,5 @@
 // Locality: server. Both the attempt and the roll are spent here: a client that owns either can
-// retry a 10% chance until it pays.
+// retry a 20% chance until it pays.
 if (!isServer) exitWith {};
 
 params ["_player"];

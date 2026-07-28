@@ -1,6 +1,6 @@
 // Locality: server. Runs the real roll and the real payout, and deliberately ignores the
-// per-player attempt: at one attempt per 30-minute economy tick, exercising a 10% chance the
-// honest way takes about five hours. Nothing else about the path is faked.
+// per-player attempt: at one attempt per 30-minute economy tick, exercising a 20% chance the
+// honest way takes a couple of hours. Nothing else about the path is faked.
 if (!isServer) exitWith {};
 
 params ["_caller"];
