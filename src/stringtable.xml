@@ -3831,6 +3831,10 @@
                 <Original>All units in the AO, be advised. We have located an enemy zone. It is now marked on your map.</Original>
                 <English>All units in the AO, be advised. We have located an enemy zone. It is now marked on your map.</English>
             </Key>
+            <Key ID="STR_DUWS_T_townreveal">
+                <Original>All units in the AO, be advised. We have located a populated settlement. It is now marked on your map.</Original>
+                <English>All units in the AO, be advised. We have located a populated settlement. It is now marked on your map.</English>
+            </Key>
             <Key ID="STR_DUWS_T_daqqfq5j">
                 <German>==AUFKLÄRUNGSDATEN GEFUNDEN==\n\nPosition aller Zonen wurden auf der Karte aufgedeckt.</German>
                 <Spanish>==Inteligencia recuperada==\n Todas las zonas han sido reveladas en el mapa.</Spanish>

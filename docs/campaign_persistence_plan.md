@@ -104,7 +104,7 @@ table above: anything the replay rebuilds must not also be restored, or it is do
 | Hardpoints | input | `hardpoint_pos_array`, `hardpoint_type_array`, `hardpoint_zone_array`, `hardpoint_state_array` and the `zone_hp_left_<n>` counters, if [`hardpoint_system_plan.md`](hardpoint_system_plan.md) has landed |
 | Pools | outcome | `commandpointsblu1`, `WARCOM_blufor_ap`, `WARCOM_opfor_ap`, `Player_Reputation` |
 | Ownership | outcome | the positions of BLUFOR-held zones, and nothing else |
-| Reveal | outcome | the positions of revealed zones, and the indices of revealed normal hardpoints |
+| Reveal | outcome | the positions of revealed zones and of revealed civilian towns, and the indices of revealed normal hardpoints |
 | Loadouts | — | `getUnitLoadout` per player UID. Already data — `client/client_init.sqf:408` stores it on the player object, which dies with the session |
 
 Hardpoints are an input for the same reason zones are: that plan sites them inside
@@ -115,19 +115,25 @@ batch of normal hardpoints is a second siting pass, outside `fnc_createZone`
 same guard for the same reason: it is generated once, so a restore accepts the stored registry
 rather than rolling a fresh set.
 
-**Reveal is an outcome, not an input.** A hardcore campaign's entire progress is which zones the
-player has found, and `fnc_createZone:16` sets every entry's visibility from
-`hardcore_mode_enable`, so a replay re-hides all of them. Store the positions of revealed zones,
-then re-flag the matching `zone_namePOS_pairs` entries and repaint their markers after build-out
-— the same shape and the same reason as Ownership. Whether a hardpoint has been revealed is
+**Reveal is an outcome, not an input.** A hardcore campaign's entire progress is which zones and
+towns the player has found, and a replay re-hides both: `fnc_createZone:16` sets every zone's
+visibility from `hardcore_mode_enable`, and `fnc_civ_init_Tomata` hides every town outside the HQ
+anchor's opening quota. Store the positions of both, then re-flag the matching `zone_namePOS_pairs`
+and `civ_visible` entries and repaint their markers after build-out — the same shape and the same
+reason as Ownership.
+
+Towns go in by position even though the runtime keys them by index into `civ_locations`, because
+that index is not stable across a restore: selection's second wave shuffles before it draws, and
+the registration cull drops towns depending on which radii survive. A Location's position comes
+out of the map's config and does not move. Whether a hardpoint has been revealed is
 separate state on the same footing, because intel can uncover one without its parent zone; the
 registry in the Hardpoints row says nothing about it. `hardcore_visibleZone_found` is derived
 from reveal plus OPFOR ownership and is recomputed rather than stored. Details in
 [`info/intel_system.md`](info/intel_system.md#persistence).
 
-Storing the state rather than how it was reached is what keeps this to one array: a zone the
-player walked into, bought from a local, or found on a dead officer all restore identically,
-because by then they are one flag.
+Storing the state rather than how it was reached is what keeps this to a flat list of positions:
+a zone the player walked into, bought from a local, or found on a dead officer all restore
+identically, because by then they are one flag.
 
 `civ_town_ap` is stored rather than recomputed, against this plan's usual preference for
 rebuilding derived state. It is a rank within the kept set's building counts, so recomputing it

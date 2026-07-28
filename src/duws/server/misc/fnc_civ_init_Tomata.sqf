@@ -44,13 +44,14 @@ private _hqPos = if (count _hq >= 2) then { [_hq select 0, _hq select 1, 0] } el
 private _kept = [];
 private _radii = [];
 private _pops = [];
+private _vis = [];
 private _done = 0;
 
 // A queue, not a forEach: an HQ overlap can only be judged once the radius is known here, and
 // rejecting a town pushes its replacement back on for the same treatment.
 while { count _queue > 0 } do {
     // The count rides along from selection: it is the heaviest engine call in this pass.
-    (_queue deleteAt 0) params ["_loc", "_buildingCount"];
+    (_queue deleteAt 0) params ["_loc", "_buildingCount", ["_hqQuota", false]];
     private _pos = getPos _loc;
     private _locationName = if (text _loc != "") then { text _loc } else { format ["Unnamed%1", _done] };
     _done = _done + 1;
@@ -75,6 +76,11 @@ while { count _queue > 0 } do {
         _kept pushBack _loc;
         _radii pushBack _radius;
         _pops pushBack _buildingCount;
+        // Hardcore hides towns the same way it hides zones, minus the ones the HQ anchor claimed:
+        // a player who cannot see a single settlement has nowhere to start looking. A town that
+        // was rejected above does not hand its flag to the stand-in that replaces it -- the
+        // stand-in is a different place, and the point is what sits around the HQ.
+        _vis pushBack (!hardcore_mode_enable || _hqQuota);
 
         ["INFO", "CIV", format ["Location %1: buildings=%2, radius=%3", _locationName, _buildingCount, _radius]] call fnc_log;
     };
@@ -139,11 +145,13 @@ _toDelete = _toDelete arrayIntersect _toDelete;
 private _newLocations = [];
 private _newRadii = [];
 private _newPops = [];
+private _newVis = [];
 for "_i" from 0 to (_count - 1) do {
     if (!(_i in _toDelete)) then {
         _newLocations pushBack (_locations select _i);
         _newRadii pushBack (_radii select _i);
         _newPops pushBack (_pops select _i);
+        _newVis pushBack (_vis select _i);
     };
 };
 
@@ -152,6 +160,9 @@ _radii = _newRadii;
 _pops = _newPops;
 missionNamespace setVariable ["civ_locations", _locations];
 missionNamespace setVariable ["civ_radii", _radii];
+// Written before the marker loop below, because the renderer it calls reads this to decide
+// whether its repaint is allowed to put a town back on the map.
+missionNamespace setVariable ["civ_visible", _newVis];
 ["INFO", "CIV", format ["After overlap cleanup: %1 locations remaining.", count _locations]] call fnc_log;
 
 // Per-town reputation and Army Power worth. Neither array is broadcast: nothing on a client
@@ -218,11 +229,17 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     if (CIV_PRESENCE == "WBK") then {
     _handlerFunc = "fnc_civ_handler_wbk";
     };
+    // The reveal rides the presence trigger the population already uses rather than a second
+    // trigger of its own, so walking into a town uncovers it exactly as walking into a zone does.
     _trg setTriggerStatements [
     "this",
-    format ["[%1, 'spawn'] spawn %2", _locIndex, _handlerFunc],
+    format ["[%1, 'spawn'] spawn %2; [%1] call fnc_civ_town_reveal", _locIndex, _handlerFunc],
     format ["[%1, 'cleanup'] spawn %2", _locIndex, _handlerFunc]
     ];
+
+    // Alpha is the whole of hiding: a hidden town keeps its trigger, its garrison and its
+    // population, exactly as a hidden zone keeps its OPFOR. Only the map stays quiet.
+    private _shown = _newVis select _locIndex;
 
     // 创建区域标记（半透明椭圆）
     private _markerName = format ["civ_area_%1", _locIndex];
@@ -230,7 +247,7 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     _marker setMarkerShape "ELLIPSE";
     _marker setMarkerBrush "SolidBorder";
     _marker setMarkerColor "#(0.6,0.35,0.7,1)";
-    _marker setMarkerAlpha 0.3;
+    _marker setMarkerAlpha ([0, 0.3] select _shown);
     _marker setMarkerSize [_radius, _radius];
 
     // 创建人口图标（位于区域下方）
@@ -241,6 +258,7 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     _icon setMarkerType "loc_tourism";
     _icon setMarkerColor "ColorBlack";
     _icon setMarkerSize [1.2, 1.2];
+    _icon setMarkerAlpha ([0, 1] select _shown);
     // Text and band colour come from the one renderer the reputation writer also uses, so a
     // town cannot be created reading differently from how it repaints.
     [_locIndex] call fnc_civ_townRender;

@@ -606,4 +606,6 @@ missionNamespace setVariable [_triggeredVar, true, true];
 // Guaranteed, and called rather than spawned into a client function: completing the mission is
 // the gate, and the shape this replaces rolled a chance from a server thread through a function
 // that began `if (!hasInterface) exitWith {}`, so on a dedicated server the reward evaporated.
-if (hardcore_mode_enable) then {call fnc_intel_payout};
+// The mission site stands in for the earner's position: a server thread has no one player to ask,
+// and this is the ground the rescue was fought over.
+if (hardcore_mode_enable) then {[_targetpos] call fnc_intel_payout};

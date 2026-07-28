@@ -1,8 +1,8 @@
 # Intel and hardcore mode
 
-Hardcore hides every enemy zone at campaign start and makes finding them the game. Intel is the
-mechanism that unhides them. It is not hardcore-only — what differs between the modes is the
-pool, not the machinery.
+Hardcore hides every enemy zone, and every civilian town bar the handful around the HQ, at
+campaign start and makes finding them the game. Intel is the mechanism that unhides them. It is
+not hardcore-only — what differs between the modes is the pool, not the machinery.
 
 ## What intel is for
 
@@ -27,6 +27,7 @@ anything OPFOR build during play stays hidden in both.
 | | Normal | Hardcore |
 |---|---|---|
 | Zones | visible from the start | hidden |
+| Civilian towns | visible from the start | hidden, bar the HQ anchor's opening three |
 | Zone hardpoints | visible from the start | hidden with their parent |
 | Normal hardpoints, generated at start | visible from the start | hidden |
 | Normal hardpoints, built in play | **hidden** | **hidden** |
@@ -38,37 +39,63 @@ everything generation produced, answering "where is the war".
 Both of normal mode's payouts are unbuilt today, which is why the body search is gated to
 hardcore: building against a pool that is empty in that mode would be building against nothing.
 
-## One writer for reveal, one function for payout
+## One writer per reveal flag, one function for payout
 
 Two contracts hold the system together, and both exist so that adding a source cannot quietly
 change what intel is worth.
 
-**`fnc_zone_reveal` is the sole writer of the revealed flag** in `zone_namePOS_pairs`, whose
-entries are `[name, pos, revealed]`. It repaints the markers from that flag rather than beside
-it, so no caller can leave the map and the array disagreeing, and it returns whether it changed
-anything so a caller can tell "revealed a zone" from "that was already on the map". Position is
-the key, compared through `str`, because the array carries no index.
+**One writer per flag.** `fnc_zone_reveal` owns the revealed flag in `zone_namePOS_pairs`, whose
+entries are `[name, pos, revealed]`; `fnc_civ_town_reveal` owns `civ_visible`, one boolean per
+entry of `civ_locations`. Both repaint the markers from the flag rather than beside it, so no
+caller can leave the map and the array disagreeing, and both return whether they changed anything
+so a caller can tell "revealed something" from "that was already on the map".
+
+Two functions rather than one switched writer, because the two arrays are keyed differently — a
+zone by position compared through `str`, since that array carries no index; a town by index — and
+their markers follow unrelated naming conventions. The town writer sets its alphas directly
+instead of delegating to `fnc_civ_townRender`, which returns early for RAVAGE and WBK: those
+campaigns register no town reputation, and their towns still have to be revealable. In the other
+direction `fnc_civ_townRender` reads `civ_visible` before it touches the ellipse, so a reputation
+change cannot repaint a hidden town back onto the map.
 
 **`fnc_intel_payout` is the single point where intel becomes something.** Every faucet calls it:
-the body search, all six side-mission sites, and the civilian menu when it lands. It draws at
-random from the kinds that have something to give *right now* rather than from a fixed list, so
-a kind with an empty pool never enters the draw and a fully-uncovered campaign reports that
-instead of silently awarding nothing.
+the body search, all six side-mission sites, and the civilian menu when it lands. It picks a
+*kind* at random from those holding something right now, then lets that kind pick its own member,
+and reports that it had nothing left rather than silently awarding nothing.
 
-| Kind | State |
-|---|---|
-| An unrevealed enemy zone | built |
-| An unrevealed normal hardpoint | waiting on [`../hardpoint_system_plan.md`](../hardpoint_system_plan.md) |
-| An unrevealed enemy patrol | waiting on [`../opfor_commander_plan.md`](../opfor_commander_plan.md) |
+| Kind | Picks | State |
+|---|---|---|
+| An unrevealed enemy zone | at random | built |
+| An unrevealed civilian town | nearest to where the intel was earned | built; contributes nothing outside hardcore, where no town is hidden |
+| An unrevealed normal hardpoint | — | waiting on [`../hardpoint_system_plan.md`](../hardpoint_system_plan.md) |
+| An unrevealed enemy patrol | — | waiting on [`../opfor_commander_plan.md`](../opfor_commander_plan.md) |
 
-The zone draw takes from the unrevealed set only. Drawing from every zone and then testing
-whether it happened to be hidden — the shape this replaced — makes the real odds decay as a
-campaign progresses, because late on most winning rolls land on ground already found.
+**Kinds are separate buckets rather than one merged pool, because they are picked on different
+rules.** A zone is a target the campaign points the player at, so which one comes next is a
+strategic question and random is right — ranked by distance it would march them outward in a
+spiral. A town is somewhere the player goes to *do* something, trade or recruit or ask a local,
+so one on the far side of the map is worth no more to them than nothing happening, and nearest
+wins. One merged pool would force a single rule on both. The consequence to know when tuning: in
+hardcore both buckets usually hold stock, so roughly half of all intel goes to towns.
+
+Every bucket draws from the unrevealed set rather than from everything and filtering after the
+draw. Drawing from every zone and then testing whether it happened to be hidden — the shape this
+replaced — makes the real odds decay as a campaign progresses, because late on most winning rolls
+land on ground already found.
+
+The town bucket needs somewhere to measure from, so every faucet passes an origin in. The body
+search and the four hold-action sites have a player to ask; the two rescue missions pay out from
+a server thread that has none, so they pass the mission site, the ground the rescue was fought
+over. A faucet that passes nothing falls back to the HQ. With neither, the bucket sits out the
+draw rather than picking at random — one feature quietly running on two different rules is worse
+than it paying a zone instead.
 
 `hardcore_visibleZone_found` gates every task-force launch (`fnc_request_squad`,
 `fnc_WARCOM_blu_assault`, `fnc_WARCOM_opf_air`). It is derived from reveal state plus OPFOR
 ownership and recomputed whole by `fnc_hardcore_visible_recalc`, never nudged: capture moves it
 one way and reveal the other, and a delta from either side drifts as soon as they interleave.
+Towns are deliberately outside it — it asks whether the player can see an enemy zone to send a
+task force at, and a town is not capturable.
 
 ## Three sources, three prices
 
@@ -81,7 +108,7 @@ still has a route.
 |---|---|
 | Body search | yes — one attempt per player per economy tick, 10 % |
 | Side-mission intel | no, and no roll either: completing the mission is the gate |
-| Walking into a zone | not applicable; it reveals the zone the player is standing in and rolls nothing |
+| Walking into a zone or town | not applicable; it reveals the ground the player is standing on and rolls nothing |
 | Civilian interaction menu | no — limited instead by per-civilian consumption |
 
 **Civilians are the intended primary source and the body search is a trickle.** That is what
@@ -90,7 +117,7 @@ civilian side before touching the body search, or the two stop being different m
 hardcore turns back into a kill count.
 
 The sources draw from one finite pool, so they compete rather than stack, and the hidden-map
-phase ends when the last zone is found however that happened. That is the intended arc — but it
+phase ends when the last hidden position is found however that happened. That is the intended arc — but it
 means adding a fourth source shortens hardcore rather than enriching it.
 
 Side missions are uncapped *and* unrolled. The old design put a campaign-wide throttle in front
@@ -141,7 +168,7 @@ mission, the other is the trickle any body offers.
 
 ## Persistence
 
-A hardcore campaign's entire progress is which zones it has revealed, and none of it survives a
-restore today. The shape it needs — revealed state as an outcome applied after build-out, the
-same as zone ownership — is specified in
+A hardcore campaign's entire progress is which zones and towns it has revealed, and none of it
+survives a restore today. The shape it needs — revealed state as an outcome applied after
+build-out, the same as zone ownership — is specified in
 [`../campaign_persistence_plan.md`](../campaign_persistence_plan.md#snapshot), which is unbuilt.

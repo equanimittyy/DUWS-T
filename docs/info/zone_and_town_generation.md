@@ -117,7 +117,7 @@ with map markers. Gated on `CIV_PRESENCE`; no synthetic locations are created.
 
 | Stage | File | Produces |
 |---|---|---|
-| 1. Selection | `server/misc/fnc_civ_selectTowns.sqf` | ranked shortlist of `[Location, buildingCount]` |
+| 1. Selection | `server/misc/fnc_civ_selectTowns.sqf` | ranked shortlist of `[Location, buildingCount, hqQuota]` |
 | 2. Registration | `server/misc/fnc_civ_init_Tomata.sqf` | `civ_locations` / `civ_radii`, per-town trigger and markers |
 | 3. Runtime | `server/misc/fnc_civ_handler.sqf` (`_wbk` twin) | spawn on entry, cleanup, population tracking |
 
@@ -163,6 +163,14 @@ rather than `serv_zones_array`, which stores positions only. A town whose disc r
 enemy zone opens at `-20` — the enemy already holds that ground and the civilians there start
 with them. Worth is a rank within the campaign's own kept set rather than an absolute building
 count, so Altis cities and a sparse map's hamlets both span 1 to 3.
+
+In hardcore it also decides what starts on the map: the towns the HQ anchor claimed in selection's
+first wave are visible, and every other one is hidden until it is walked into or bought with
+intel, exactly as an enemy zone is. The flag travels on the shortlist entry rather than being
+recomputed from distance later, because the stand-in swap and the overlap cull both reshuffle the
+registry — the HQ's opening three are a selection fact, not a geometric one. Hiding is marker
+alpha and nothing else: trigger, garrison and population run either way. `civ_visible` holds the
+state; the reveal machinery is in [`intel_system.md`](intel_system.md).
 
 ### Ownership bands and the garrison
 

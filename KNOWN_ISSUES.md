@@ -55,6 +55,14 @@ quickest way to tell which one is wrong.
 - [ ] Complete a rescue-pilot and a rescue-squad mission on a dedicated server and confirm each reveals a zone. These are the two sites that never paid out at all
 - [ ] Die with a search attempt spent, respawn, and check whether the action is available again. It will be — the flag lives on the body — and the open question is whether that refund is acceptable rather than whether it happens
 
+## Hardcore civilian towns: shipped, not yet exercised
+
+- [ ] Open the map on a fresh hardcore campaign. Up to three towns near the HQ should be drawn and every other one dark. None at all means the HQ was not the first anchor when selection ran — the `Town selection:` log line reports the anchor count, and `PosOfBLUHQ` being unset at that moment is the way it happens
+- [ ] Walk into a hidden town and confirm the ellipse and the population icon appear together. One without the other means only half the pair is being repainted, and the two alphas are set in different places (`fnc_civ_town_reveal` on reveal, `fnc_civ_townRender` on every reputation change)
+- [ ] Shoot a civilian in a hidden town, then check the map. The town appearing means the band repaint is overriding the reveal flag rather than reading it
+- [ ] From well away from the HQ, roll the debug payout until it lands on a town rather than a zone — the kind is a coin flip while both buckets hold stock. The town it reveals should be the nearest hidden one to *you*; one near base means the origin never arrived and the HQ fallback is carrying every call
+- [ ] Enter a town as a **client** on a dedicated server and watch that client's RPT. `fnc_civ_town_reveal` is named by the town's presence trigger, which is global, so an undefined-variable error there means the broadcast is not landing before the first player arrives
+
 ## Heli-lift for non-host players
 
 `client/supports/fnc_helolift.sqf` used to create the transport helicopter on the calling
@@ -116,6 +124,7 @@ unverified premise.
 | Two script paths in `paths_baseline.txt` point at files that do not exist | `client/misc/fnc_player_markers.sqf`, `server/misc/fnc_repetitive_cleanup.sqf` | Pre-dates the test suite; baselined so the linter gates regressions without being blocked by it |
 | Six `format[...]` calls wrap a single literal with no placeholders | `client/supports/fnc_helolift.sqf` | Cosmetic — a wasted call per invocation |
 | `fnc_log` calls itself instead of writing the line | `shared/functions/fnc_log_init.sqf:25` | Unbounded recursion on every line at or below the active level: nothing reaches the RPT and the first logged milestone kills the boot. The `diag_log` -> `fnc_log` sweep has to skip this one file — it is where `diag_log` lives |
+| Two functions named by zone triggers are never broadcast | `fnc_captured`, `fnc_enterlocation`, registered in `server/server_fnc_init.sqf` without `publicVariable` | A `createTrigger` statement is global, which is why the civilian town trigger's `fnc_civ_handler` *is* broadcast. One of the two treatments is wrong: if the zone side is, every client spawns a nil on each zone entry and capture. The campaign is unaffected — the server runs its own copy — but a client RPT fills with undefined-variable errors |
 | `staminaEnabled` is read but never assigned anywhere in the mission | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:67` | The whole `format` throws on `Undefined variable in expression: staminaenabled`, so the campaign settings summary hint never displays for any player. Confirmed in an RPT at the moment generation completes. `client/misc/fnc_sitrep_display.sqf:33` reads the same variable behind an `isNil` guard, which is why only this site fails — either assign it at setup or drop it from the hint |
 
 ## Zone generation is slow at large radii

@@ -255,7 +255,11 @@ fnc_civ_townRender = {
 
 	private _area = format ["civ_area_%1", _townIndex];
 	_area setMarkerColor _colour;
-	_area setMarkerAlpha 0.3;
+	// Alpha comes from the reveal flag, not from the band: a hardcore town the player has not
+	// found yet is repainted every time its reputation moves, and a flat 0.3 here would put it
+	// on the map the first time a civilian was harmed in it.
+	private _shown = (missionNamespace getVariable ["civ_visible", []]) param [_townIndex, true];
+	_area setMarkerAlpha ([0, 0.3] select _shown);
 	// Printed as stored, not rounded: a town at 9.7 displayed as 10 would contradict the
 	// neutral colour under it.
 	_icon setMarkerText format [localize "STR_DUWS_T_civ_marker_town", _pop, _rep, _apField];
@@ -713,6 +717,10 @@ publicVariable "fnc_intel_gathering_mission";
 fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_init_Tomata.sqf";
 fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_setup_array.sqf";
 fnc_civ_selectTowns = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_selectTowns.sqf";
+// Broadcast for the same reason fnc_civ_handler is: both are named by the town presence trigger,
+// which is global, so every machine evaluates it and every machine runs the body.
+fnc_civ_town_reveal = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_town_reveal.sqf";
+publicVariable "fnc_civ_town_reveal";
 fnc_civ_rep_economy = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_rep_economy.sqf";
 fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_wp_Tomata.sqf";
 fnc_civ_rep_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_rep_Tomata.sqf";

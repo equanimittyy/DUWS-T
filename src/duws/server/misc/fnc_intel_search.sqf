@@ -24,6 +24,6 @@ if (random 1 >= intel_search_chance) exitWith {
 
 // A win with nothing left to uncover still consumed the attempt: the map being finished is the
 // answer, not a refund.
-if !(call fnc_intel_payout) then {
+if !([getPos _player] call fnc_intel_payout) then {
     [_speaker, localize "STR_DUWS_T_8skllpyx"] remoteExec ["fnc_duws_dialogue", _player];
 };

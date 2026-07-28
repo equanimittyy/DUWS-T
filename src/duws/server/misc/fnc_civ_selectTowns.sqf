@@ -3,9 +3,9 @@
     fnc_civ_selectTowns.sqf
     Picks the map towns that should carry a civilian population: real Locations near the
     fighting, ranked by how many usable buildings they hold. Returns [selected, spare] as
-    [location, buildingCount] pairs -- the towns to register, and a replacement queue for those
-    the caller rejects. Draws its own survey progress on the map prompt; otherwise no side
-    effects, and the caller does the registration.
+    [location, buildingCount, hqQuota] triples -- the towns to register, and a replacement queue
+    for those the caller rejects. Draws its own survey progress on the map prompt; otherwise no
+    side effects, and the caller does the registration.
 */
 if (!isServer) exitWith {[[], []]};
 
@@ -94,9 +94,14 @@ private _lastPing = 0;
 // dense cluster win every slot and left remote zones with no civilians within reach. Distance
 // only gates -- inside a disc the bigger town always wins, however far back it sits, because
 // blending in closeness let roadside hamlets outrank the cities behind them.
+// The HQ's own quota is flagged separately because hardcore starts the player knowing their
+// immediate surroundings and nothing else. Tagged in the loop rather than sliced off the front
+// of _taken afterwards: with no HQ placed the zones lead the anchor list and no town qualifies.
 private _taken = [];
+private _hqQuota = [];
 {
     private _anchor = _x;
+    private _isHQ = count _hqPos > 0 && { _forEachIndex == 0 };
     private _scored = [];
     {
         if (!(_forEachIndex in _taken) && { (_x select 1) distance2D _anchor <= _ANCHOR_RADIUS }) then {
@@ -104,7 +109,10 @@ private _taken = [];
         };
     } forEach _pool;
     _scored sort false;
-    { _taken pushBack (_x select 1) } forEach (_scored select [0, _PER_ANCHOR_CAP]);
+    {
+        _taken pushBack (_x select 1);
+        if (_isHQ) then { _hqQuota pushBack (_x select 1) };
+    } forEach (_scored select [0, _PER_ANCHOR_CAP]);
 } forEach _anchors;
 
 // Wave 2: a flat top-up drawn at random across the union, sized to the zone count, so the
@@ -135,7 +143,8 @@ if (count _hqPos > 0) then {
 };
 _spare append (_remaining select { !(_x in _spare) });
 
-private _fnc_pair = { private _entry = _pool select _x; [_entry select 0, _entry select 2] };
+// Spare towns are drawn from what wave 1 left behind, so the HQ flag is always false for them.
+private _fnc_pair = { private _entry = _pool select _x; [_entry select 0, _entry select 2, _x in _hqQuota] };
 private _selected = _taken apply _fnc_pair;
 private _spareTowns = _spare apply _fnc_pair;
 
