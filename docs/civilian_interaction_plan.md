@@ -127,15 +127,47 @@ Refusing, and being unable to pay, both close the civilian. That rule does not s
 amount is visible: what the prompt buys the player is knowing the price before they lose the
 contact, not a free look.
 
+## What intel buys
+
+An accepted intel request rolls one payout at random from the kinds available. The pool grows
+as the systems behind it land; two of the four exist today.
+
+| Kind | State | Mechanism |
+|---|---|---|
+| An unrevealed enemy zone | **buildable** | `zone_namePOS_pairs` carries `[name, pos, revealed]` (`fnc_createzone.sqf:28`); filter for `select 2 == false`, pick one, reveal it |
+| An intel object to carry home | **buildable** | add one of the classes `fnc_intelAnalysis.sqf:8-16` accepts, which the player cashes at a terminal for CP |
+| An unrevealed normal hardpoint | **blocked** | hardpoints are unimplemented — `hardpoint_system_plan.md` is a plan, and nothing in `src/` builds one |
+| An unrevealed enemy patrol | **blocked** | needs the OPFOR commander's tasking, per [`opfor_commander_plan.md`](opfor_commander_plan.md) |
+
+Rolling over the *available* kinds rather than a fixed list is what lets the other two appear
+without touching this code again.
+
+**The hardpoint entry contradicts the hardpoint plan as it stands.** That plan has normal
+hardpoints appear the moment the director builds them, with a notification, precisely so the
+player can see OPFOR spending — only *zone* hardpoints hide, and only in hardcore. An intel
+payout that reveals a normal hardpoint needs them to start hidden, which is a change to that
+design rather than a consumer of it.
+
+**Revealing a zone through `fnc_zone_reveal` drags two side effects along.** It zeroes
+`master_Intel_chance` for twenty minutes (`fnc_zone_reveal.sqf:44-50`), suppressing the
+corpse-and-mission intel drops campaign-wide, and it sets `hardcore_visibleZone_found`, which is
+what unblocks task-force assaults in hardcore (`fnc_request_squad.sqf:82`). The second is
+probably wanted. The first is a throttle on *free* intel and reads wrong on a reveal the player
+paid a bribe for, so the civilian path should either skip the cooldown or accept that buying one
+answer switches off another source for twenty minutes. Undecided.
+
+Its trailing `sleep 1200` also means the function must be `spawn`ed, never `call`ed — a `call`
+would park the caller for twenty minutes.
+
 ## Open questions
 
 - The bribe amount is a single static constant for now, deliberately not scaled by reputation:
   the curve already carries the reputation signal by deciding *whether* money is asked for, and
   a second reputation term in the amount would double-count it. The value itself is unmeasured
   — the actions it replaces ranged from 1 to 5 coins.
-- The intel offers themselves. Revealing a zone is cheap to build — `fnc_zone_reveal` exists and
-  the ambient informant already calls it. Marking a patrol route or warning of an incoming
-  WARCOM wave would need hooks into the director that do not exist yet.
+- Whether a paid zone reveal carries `fnc_zone_reveal`'s twenty-minute `master_Intel_chance`
+  cooldown, or skips it. The cooldown throttles free intel; this intel is not free.
+- Whether normal hardpoints start hidden, which the hardpoint plan currently says they do not.
 - Whether supplies survive the rework, and what gives the toolkit a reason to exist alongside
   aid if they do.
 - What replaces develop-informant. Folding it into the menu removes the 5-coin sink and the
