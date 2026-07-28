@@ -351,6 +351,49 @@ fnc_escalation_cost = {
 };
 publicVariable "fnc_escalation_cost";
 
+// Coins in hand. Money_roll is added as a magazine, but the ground pickup and the arsenal can
+// land one in either the magazine or the item slots, so both are counted: itemsWithMagazines is
+// the union and cannot report fewer coins than the player is holding. Counting magazines alone
+// -- which two of the four purchase paths used to do -- can only ever undercount, and an
+// undercount tells a player who can afford something that they cannot.
+// Available on clients too: the civilian menu shows the player what they are carrying.
+fnc_coins_count = {
+	params ["_unit"];
+	if (isNull _unit) exitWith { 0 };
+	{ _x == "Money_roll" } count (itemsWithMagazines _unit)
+};
+publicVariable "fnc_coins_count";
+
+// Spends coins and reports whether it could. Server-only, and the caller says nothing about the
+// price until this returns: a client's count is a snapshot, and in co-op two players can spend
+// the same coins, so this read and the removal are adjacent statements on the one machine that
+// owns the inventory -- the same reason fnc_pool_try_spend exists for CP.
+//
+// Both removal commands are needed because both slots are counted, and each ignores the other's.
+// Callers own the refusal message: the four purchase paths word it differently and one of them
+// closes a civilian on top.
+fnc_coins_spend = {
+	if (!isServer) exitWith { false };
+	params ["_unit", ["_amount", 0]];
+	if (([_unit] call fnc_coins_count) < _amount) exitWith { false };
+	private _left = _amount;
+	{
+		if (_x == "Money_roll" && _left > 0) then {
+			_unit removeItem "Money_roll";
+			_left = _left - 1;
+		};
+	} forEach (items _unit);
+	{
+		if (_x == "Money_roll" && _left > 0) then {
+			_unit removeMagazineGlobal "Money_roll";
+			_left = _left - 1;
+		};
+	} forEach (magazines _unit);
+	// Fail loud rather than half-charge: a caller that gets false must not deliver the goods.
+	_left <= 0
+};
+publicVariable "fnc_coins_spend";
+
 // Server-authoritative purchase. The writers above own the arithmetic but not the
 // decision: a client testing its own copy of a pool is a network round trip out of date,
 // so two clients each seeing 10 CP both pass a 10 CP gate and the floor absorbs the

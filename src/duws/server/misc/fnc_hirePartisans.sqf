@@ -26,14 +26,9 @@ if (_rep < 2) exitWith {
 };
 
 // 检查并扣除 10 个 Money_roll
-private _moneyCount = { _x == "Money_roll" } count (magazines _caller);
-if (_moneyCount < 10) exitWith {
+if !([_caller, 10] call fnc_coins_spend) exitWith {
     private _msg = localize "STR_DUWS_T_NOT_ENOUGH_MONEY";
     ["info", [localize "STR_DUWS_T_HIRE_PARTISANS_TITLE", _msg]] remoteExec ["BIS_fnc_showNotification", _caller];
-};
-
-for "_i" from 1 to 10 do {
-    _caller removeMagazineGlobal "Money_roll";
 };
 
 // 记录使用时间

@@ -19,7 +19,7 @@ DUWS_civ_bribe_accepted = false;
 if (!createDialog "civ_bribe_dialog") exitWith {};
 waitUntil { dialog };
 
-private _coins = { _x == "Money_roll" } count (itemsWithMagazines player);
+private _coins = [player] call fnc_coins_count;
 ctrlSetText [8410, format [localize "STR_DUWS_T_CIV_BRIBE_DEMAND", _bribe]];
 ctrlSetText [8411, format [localize "STR_DUWS_T_CIV_MENU_COINS", _coins]];
 

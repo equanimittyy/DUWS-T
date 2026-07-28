@@ -4,32 +4,12 @@ if (!isServer) exitWith {};
 params ["_caller", "_amount", "_type"];
 if (isNull _caller) exitWith {};
 
-private _moneyClass = "Money_roll";
-private _allInventory = itemsWithMagazines _caller;
-private _moneyCount = { _x == _moneyClass } count _allInventory;
+// Read before the spend, because the refusal message quotes what the player actually has.
+private _moneyCount = [_caller] call fnc_coins_count;
 
-if (_moneyCount < _amount) exitWith {
+if !([_caller, _amount] call fnc_coins_spend) exitWith {
     private _msg = format [localize "STR_DUWS_T_BLACKMARKET_NOT_ENOUGH_MONEY", _amount, _moneyCount];
     ["info", [localize "STR_DUWS_T_BLACKMARKET_TITLE", _msg]] remoteExec ["BIS_fnc_showNotification", _caller];
-};
-
-// 扣除纸币
-private _removed = 0;
-private _itemsList = items _caller;
-{
-    if (_x == _moneyClass && _removed < _amount) then {
-        _caller removeItem _moneyClass;
-        _removed = _removed + 1;
-    };
-} forEach _itemsList;
-if (_removed < _amount) then {
-    private _magsList = magazines _caller;
-    {
-        if (_x == _moneyClass && _removed < _amount) then {
-            _caller removeMagazineGlobal _moneyClass;
-            _removed = _removed + 1;
-        };
-    } forEach _magsList;
 };
 
 // ========== 生成随机物品 ==========

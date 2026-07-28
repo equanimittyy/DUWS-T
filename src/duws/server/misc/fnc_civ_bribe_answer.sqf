@@ -27,30 +27,12 @@ if (!_accepted) exitWith {
     [_civilian, _caller, _row] call fnc_civ_close;
 };
 
-// The prompt greys Accept when the player is short, but that count came from magazines player on
-// their machine, and in co-op two players can spend the same coins. This read is the one that
-// decides. Coins land in either slot depending on how they were picked up, so both are counted
-// and both are drained, matching fnc_blackMarketPurchase.
-private _coins = { _x == "Money_roll" } count (itemsWithMagazines _caller);
-if (_coins < _bribe) exitWith {
+// The prompt greys Accept when the player is short, but that count came from the player's own
+// machine and in co-op two players can spend the same coins. fnc_coins_spend is the read that
+// decides, and it tests and deducts in one place so nothing lands between the two.
+if !([_caller, _bribe] call fnc_coins_spend) exitWith {
     [localize "STR_DUWS_T_nocpinf2"] remoteExec ["hint", _caller];
     [_civilian, _caller, _row] call fnc_civ_close;
-};
-
-private _removed = 0;
-{
-    if (_x == "Money_roll" && _removed < _bribe) then {
-        _caller removeItem "Money_roll";
-        _removed = _removed + 1;
-    };
-} forEach (items _caller);
-if (_removed < _bribe) then {
-    {
-        if (_x == "Money_roll" && _removed < _bribe) then {
-            _caller removeMagazineGlobal "Money_roll";
-            _removed = _removed + 1;
-        };
-    } forEach (magazines _caller);
 };
 
 [_civilian, _caller, _row] call fnc_civ_serve;

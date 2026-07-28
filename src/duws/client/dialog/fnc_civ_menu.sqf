@@ -17,7 +17,7 @@ DUWS_civ_target = _civilian;
 if (!createDialog "civ_dialog") exitWith {};
 waitUntil { dialog };
 
-private _coins = { _x == "Money_roll" } count (itemsWithMagazines player);
+private _coins = [player] call fnc_coins_count;
 ctrlSetText [8310, format [localize "STR_DUWS_T_CIV_MENU_COINS", _coins]];
 
 private _closed = _civilian getVariable ["DUWS_civ_closed", false];
