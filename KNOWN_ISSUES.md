@@ -99,6 +99,7 @@ unverified premise.
 | Two script paths in `paths_baseline.txt` point at files that do not exist | `client/misc/fnc_player_markers.sqf`, `server/misc/fnc_repetitive_cleanup.sqf` | Pre-dates the test suite; baselined so the linter gates regressions without being blocked by it |
 | Six `format[...]` calls wrap a single literal with no placeholders | `client/supports/fnc_helolift.sqf` | Cosmetic — a wasted call per invocation |
 | `fnc_log` calls itself instead of writing the line | `shared/functions/fnc_log_init.sqf:25` | Unbounded recursion on every line at or below the active level: nothing reaches the RPT and the first logged milestone kills the boot. The `diag_log` -> `fnc_log` sweep has to skip this one file — it is where `diag_log` lives |
+| `staminaEnabled` is read but never assigned anywhere in the mission | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:67` | The whole `format` throws on `Undefined variable in expression: staminaenabled`, so the campaign settings summary hint never displays for any player. Confirmed in an RPT at the moment generation completes. `client/misc/fnc_sitrep_display.sqf:33` reads the same variable behind an `isNil` guard, which is why only this site fails — either assign it at setup or drop it from the hint |
 
 ## Zone generation is slow at large radii
 

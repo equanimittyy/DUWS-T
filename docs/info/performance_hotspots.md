@@ -166,9 +166,29 @@ those filters, so the cost arrives as a burst under artillery rather than as a t
 session-growth problem it replaced is gone: the counter is an integer, where the array it
 replaces held one object reference per damaged house for the whole session.
 
-Its one-off census (`nearestTerrainObjects` over `worldSize`) is the single most expensive call
-the system makes. It runs once during generation behind the progress banner and logs its own
-wall-clock cost to the RPT; check that line on a new map before assuming it is free.
+Its census (`nearestTerrainObjects` for `"House"` across the whole map) is the single most
+expensive call the system makes, measured at **5.03 s for Altis's 17472 houses**. It is one
+engine call, so it is a frame stall rather than five seconds of shared scheduler time and
+nothing about the 3 ms budget above applies to it: it cannot be sliced, and there is no
+incremental form of the command.
+
+Two things follow from that. The search radius is `worldSize * 0.7072`, the distance from the
+map's centre to its corner, rather than `worldSize` — both cover the square and return the same
+count, but the larger radius scans twice the area for it. And because the remaining cost cannot
+be removed, it is *placed* instead: the census is the last step of generation, called from
+`fnc_init_OPFOR_WARCOM` after civilian towns are registered, behind its own `fnc_map_prompt`
+banner. The stall therefore lands inside a wait the player is already watching. Spawned off
+`WARCOM_init_done`, where it used to sit, it landed on the frame the banner cleared and the
+player took control.
+
+The banner is `remoteExec`'d, and a `remoteExec` to your own machine still runs a frame later, so
+the census sleeps once before starting. Without that the frame freezes before anything draws and
+the banner is never seen.
+
+Two alternatives were rejected. Caching the count per world does not hold: the mission is
+map-portable and mod-tolerant, so a stored figure goes stale silently whenever terrain content
+changes. Tiling the count across frames removes the stall but raises total work for edge
+handling, and it is only worth revisiting if the placement above proves insufficient.
 
 ### Unverified: paradrop canopies
 
