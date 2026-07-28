@@ -2753,20 +2753,6 @@
                 <Spanish>¡Ve al infierno!</Spanish>
                 <Chinesesimp>去死吧！</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_townenter">
-                <Original>A player has entered %1</Original>
-                <English>A player has entered %1</English>
-                <German>A player has entered %1.</German>
-                <Spanish>A player has entered %1.</Spanish>
-                <Chinesesimp>有一名玩家进入了 %1</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_towninteract">
-                <Original>The town's residents offer several interaction options.</Original>
-                <English>The town's residents offer several interaction options.</English>
-                <German>Die Bewohner der Stadt bieten mehrere Interaktionsmöglichkeiten.</German>
-                <Spanish>Los residentes del pueblo ofrecen varias opciones de interacción.</Spanish>
-                <Chinesesimp>城镇内的居民提供多种交互选项。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_askopforloc">
                 <Original>Have you seen any enemy movement around here? We'll pay for anything useful.</Original>
                 <English>Have you seen any enemy movement around here? We'll pay for anything useful.</English>

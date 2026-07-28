@@ -23,7 +23,10 @@ _unit setVariable ["civ_locIndex", _locIndex];
 // the undead long after the flag that decided it has gone out of scope.
 _unit setVariable ["civ_isZombie", _isZombie];
 [_unit] call fnc_addCivilianMoney;
-[_unit, _isZombie, _unitType, 0] call fnc_applyEquipment;
+// Defined by the RAVAGE handler and meaningful only there: salvaged military kit is what tells
+// that mode's crowd from a living one. Gated here rather than inside the function, because the
+// plain path no longer defines it at all and calling a nil throws.
+if (CIV_PRESENCE == "RAVAGE") then { [_unit, _isZombie, _unitType, 0] call fnc_applyEquipment };
 _unit addEventHandler ["Killed", missionNamespace getVariable "CIV_KILLED_HANDLER"];
 _unit addEventHandler ["HandleHeal", fnc_civ_healed];
 

@@ -806,8 +806,8 @@ publicVariable "fnc_intel_gathering_mission";
 fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_init_Tomata.sqf";
 fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_setup_array.sqf";
 fnc_civ_selectTowns = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_selectTowns.sqf";
-// Broadcast for the same reason fnc_civ_handler is: both are named by the town presence trigger,
-// which is global, so every machine evaluates it and every machine runs the body.
+// Broadcast for the same reason the RAVAGE and WBK handlers are: the town presence trigger names
+// it, and that trigger is global, so every machine evaluates it and every machine runs the body.
 fnc_civ_town_reveal = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_town_reveal.sqf";
 publicVariable "fnc_civ_town_reveal";
 // The board's map readout. The query is broadcast because a client is what calls it, and the
@@ -839,12 +839,15 @@ fnc_civ_search_action = compile preprocessFileLineNumbers "duws\shared\functions
 publicVariable "fnc_civ_search_action";
 fnc_civ_search_armed = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_search_armed.sqf";
 publicVariable "fnc_civ_search_armed";
+// Not broadcast, unlike the two below it: the plain civilian path is a server-side thread started
+// at town registration, so no trigger anywhere names it.
 fnc_civ_handler = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler.sqf";
-publicVariable "fnc_civ_handler";
+fnc_civ_handler_ravage = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler_ravage.sqf";
+publicVariable "fnc_civ_handler_ravage";
 fnc_civ_handler_wbk = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler_wbk.sqf";
 publicVariable "fnc_civ_handler_wbk";
-// The civilian stream. Server-only: the handler and its monitor thread are the only callers, and
-// the trigger that names them already resolves on the machine that runs the spawn.
+// Server-only: the RAVAGE and WBK handlers are the only callers of the ceiling and the recycle
+// pass, and the trigger that names those already resolves on the machine that runs the spawn.
 fnc_civ_liveTarget = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_liveTarget.sqf";
 fnc_civ_spawnUnit = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_spawnUnit.sqf";
 fnc_civ_recycle = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_recycle.sqf";

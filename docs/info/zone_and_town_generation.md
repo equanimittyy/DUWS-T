@@ -104,7 +104,7 @@ the 0-10 m `findSafePos`; the single 5 m `relPos` road nudge is never re-validat
 Placement-quality only.
 
 > `getPos` on a Location is *not* a bug. The civilian system relies on it throughout
-> (`fnc_civ_selectTowns.sqf`, `fnc_civ_init_Tomata.sqf`, `fnc_civ_handler.sqf:26`) and the
+> (`fnc_civ_selectTowns.sqf`, `fnc_civ_init_Tomata.sqf`, `fnc_civ_handler.sqf:32`) and the
 > towns render, so it resolves a Location's position fine; it is only stylistically
 > inconsistent with the `position`/`locationPosition` used elsewhere. Whichever is chosen,
 > selection and the runtime must use the *same* one or a town's trigger and its eligibility
@@ -118,8 +118,8 @@ with map markers. Gated on `CIV_PRESENCE`; no synthetic locations are created.
 | Stage | File | Produces |
 |---|---|---|
 | 1. Selection | `server/misc/fnc_civ_selectTowns.sqf` | ranked shortlist of `[Location, buildingCount, hqQuota]` |
-| 2. Registration | `server/misc/fnc_civ_init_Tomata.sqf` | `civ_locations` / `civ_radii`, per-town trigger and markers |
-| 3. Runtime | `server/misc/fnc_civ_handler.sqf` (`_wbk` twin) | spawn on entry, cleanup, population tracking |
+| 2. Registration | `server/misc/fnc_civ_init_Tomata.sqf` | `civ_locations` / `civ_radii`, per-town runtime gate and markers |
+| 3. Runtime | `server/misc/fnc_civ_handler.sqf` (`_ravage` / `_wbk` twins) | fill the town on arrival, empty it after departure |
 
 **Selection** takes the BLUFOR HQ plus every entry of `serv_zones_array` as anchors and pulls
 city/village/local Locations with one `nearestLocations` call, keeping those within 5,000 m of
@@ -145,8 +145,9 @@ centre.
 **Registration** derives radius and starting population from the count selection handed over,
 drops any town whose disc overlaps the 100 m keep-out around `PosOfBLUHQ` and pulls a stand-in
 off the replacement queue in its place, resolves overlapping towns by shrinking or dropping the
-smaller, then creates the
-presence trigger, ellipse marker and population icon. The overlap loser is dropped from the
+smaller, then creates the ellipse
+marker, the population icon, and the town's runtime gate — a streaming thread for plain
+civilians, a presence trigger for RAVAGE and WBK. The overlap loser is dropped from the
 registry only — never
 `deleteLocation`d, because these are the map's own Locations and removing one takes it away
 from side-mission siting (`fnc_findSafeMissionPos.sqf:30`) and the player's location readout
@@ -189,8 +190,8 @@ inherits faction auto-detection for free. It is units only — no fortification 
 prefab, because static emplacements are what make a zone an objective and a town must not
 compete with one.
 
-Presence uses the same arrival test zones use (`fnc_duws_bluforNear`) rather than the town's own
-presence trigger, which fires the instant anyone crosses the radius and whose handle is
+Presence uses the same arrival test zones use (`fnc_duws_bluforNear`) rather than a presence
+trigger of its own, which would fire the instant anyone crossed the radius and whose handle is
 discarded at creation anyway. Clearing the garrison resets that town's reputation to 0, decided
 by a `WEST SEIZED` trigger rather than by counting units: the spawners are fire-and-forget and
 register nothing, so no group handle exists to watch die.
@@ -207,19 +208,37 @@ if the reset proves too cheap, raise tier strength rather than introducing parti
 ### Population is a size figure, not a head count
 
 `civ_pop_<n>` is set once at registration to the town's usable building count and never written
-again. Spawn density follows from it directly, capped by `civ_maxSpawnPerVisit` (default 50,
-set from the environment menu).
-
-Where that cap *binds* is the point. The `buildings × 2` derivation this replaced saturated from
-25 buildings upward — most real Altis towns — so every settlement from a market village to
-Kavala presented the same 50 concurrent civilians. Against the raw count the cap binds at 50
-buildings instead, and twice as much of the map's size range shows on the ground before
-flattening. The trade is fewer civilians in mid-size towns; raising `civ_maxSpawnPerVisit` is
-the player's answer if they have the frames for it, which is what the setting is for.
+again. It is a ceiling, not a head count: a town holds `min(civ_density, civ_pop_<n>)` civilians
+while players are in it. So `civ_density` (5–30, environment menu) is the dial a player turns
+down for frames, and the building count is what stops a hamlet presenting as a city.
 
 Because the figure never decrements, nothing can reach zero, which is why the depopulation
 path — ghost-town notification, black marker, and the scorched-earth CP reward that rode on it —
 no longer exists.
+
+### A town streams like a zone
+
+`fnc_civ_handler.sqf` runs one thread per town on the same numbers as the enemy zone gate in
+`fnc_spawnWait.sqf`: poll every 10 s, confirm a sighting 5 s later before acting on it, fill the
+town once, then delete everything tagged `civ_locIndex` 300 s after players were last seen. The
+grace period restarts on every sighting, so leaving starts the clock rather than how long you
+stayed, and the confirm delay is what stops a helicopter crossing the disc filling a town for
+someone already past it.
+
+Presence is players only (`fnc_civ_playerNear`) where the zone gate counts friendly AI as well
+(`fnc_duws_bluforNear`): a town fills so there is somebody to talk to, and an AI squad passing
+through has nobody to talk to it.
+
+This replaced a second answer to the same two questions — an engine presence trigger, a
+single-slot global mutex serialising town fills, a campaign-wide head-count ceiling, and a 90 s
+pass that deleted civilians the players had walked away from and re-spawned them nearer. RAVAGE
+and WBK still run on all of it (`fnc_civ_handler_ravage.sqf`, `fnc_civ_handler_wbk.sqf`), which
+is why `fnc_civ_liveTarget.sqf` and `fnc_civ_recycle.sqf` are still in the tree.
+
+One consequence is worth knowing before raising the density options: every civilian gets its own
+group so it can wander independently, the engine stops issuing groups at roughly 144 per side,
+and nothing now bounds the campaign-wide total — the 300 s grace can hold several towns up at
+once. Past that limit `createGroup` returns `grpNull` and a town silently spawns nobody.
 
 ### Ordering
 

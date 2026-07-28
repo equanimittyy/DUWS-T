@@ -233,23 +233,24 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     missionNamespace setVariable [format ["civ_buildings_%1", _locIndex],
         (_newBldgs select _locIndex) select { _x distance2D _pos <= _radius }];
 
-    // 创建触发器
-    private _trg = createTrigger ["EmptyDetector", _pos];
-    _trg setTriggerArea [_radius, _radius, 0, false, 80];
-    _trg setTriggerActivation ["ANYPLAYER", "PRESENT", true];
-
-    // 根据 CIV_PRESENCE 选择处理函数
-    private _handlerFunc = "fnc_civ_handler";
-    if (CIV_PRESENCE == "WBK") then {
-    _handlerFunc = "fnc_civ_handler_wbk";
+    // RAVAGE and WBK keep the presence trigger and their two-mode handlers. The plain civilian
+    // path runs one streaming thread per town instead, on the same footing as an enemy zone: it
+    // does its own presence polling, so it needs no trigger and no cleanup entry point.
+    if (CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
+        private _trg = createTrigger ["EmptyDetector", _pos];
+        _trg setTriggerArea [_radius, _radius, 0, false, 80];
+        _trg setTriggerActivation ["ANYPLAYER", "PRESENT", true];
+        private _handlerFunc = ["fnc_civ_handler_ravage", "fnc_civ_handler_wbk"] select (CIV_PRESENCE == "WBK");
+        // The reveal rides the presence trigger the population already uses rather than a second
+        // trigger of its own, so walking into a town uncovers it exactly as walking into a zone does.
+        _trg setTriggerStatements [
+        "this",
+        format ["[%1, 'spawn'] spawn %2; [%1] call fnc_civ_town_reveal", _locIndex, _handlerFunc],
+        format ["[%1, 'cleanup'] spawn %2", _locIndex, _handlerFunc]
+        ];
+    } else {
+        [_locIndex] spawn fnc_civ_handler;
     };
-    // The reveal rides the presence trigger the population already uses rather than a second
-    // trigger of its own, so walking into a town uncovers it exactly as walking into a zone does.
-    _trg setTriggerStatements [
-    "this",
-    format ["[%1, 'spawn'] spawn %2; [%1] call fnc_civ_town_reveal", _locIndex, _handlerFunc],
-    format ["[%1, 'cleanup'] spawn %2", _locIndex, _handlerFunc]
-    ];
 
     // Alpha is the whole of hiding: a hidden town keeps its trigger, its garrison and its
     // population, exactly as a hidden zone keeps its OPFOR. Only the map stays quiet.

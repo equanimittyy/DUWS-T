@@ -49,8 +49,9 @@ switch (_index) do {
 };
 
 // CIVILIAN DENSITY
-// How many civilians one town holds at a time, not how many it ever spawns: the stream tops the
-// crowd back up as the player moves through, and the campaign-wide ceiling is three towns' worth.
+// How many civilians a town holds while players are in it, capped by its own building count. The
+// plain civilian path fills to this figure on arrival and empties on departure; RAVAGE and WBK
+// top the crowd back up as the player moves through and thin it against a campaign-wide ceiling.
 private _civDensityValues = [5, 10, 15, 20, 30];
 private _index = lbCurSel 2102;
 private _selectedValue = 15; // 默认

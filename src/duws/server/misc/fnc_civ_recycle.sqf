@@ -1,4 +1,5 @@
-// Locality: server -- driven by the town monitor thread in fnc_civ_handler.
+// Locality: server -- driven by the town monitor thread in fnc_civ_handler_ravage, the only
+// caller left since the plain civilian path moved onto the enemy-zone streaming model.
 /*
     fnc_civ_recycle.sqf
     One pass of a town's civilian stream: drop the people the players have walked away from, and
@@ -33,9 +34,9 @@ if !(missionNamespace getVariable [format ["civ_spawned_%1", _locIndex], false])
 // thins as it is killed off and does not restock under the killer's nose.
 #define SPAWN_CLEARANCE 120
 
-// Must match fnc_civ_handler: the initial fill and this pass have to spread the crowd over the
-// same footprint, or walking across a town would change how busy it reads for no reason the
-// player can see. Why it is fixed rather than scaled is documented there.
+// Must match fnc_civ_handler_ravage: the initial fill and this pass have to spread the crowd
+// over the same footprint, or walking across a town would change how busy it reads for no
+// reason the player can see. Why it is fixed rather than scaled is documented there.
 #define CLUSTER_BUILDINGS 20
 
 private _locations = missionNamespace getVariable ["civ_locations", []];
