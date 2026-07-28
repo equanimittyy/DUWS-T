@@ -933,8 +933,11 @@ killhouse_progress_delay         = 10;  // before the first progress hint, so th
                                         // briefing is readable before the counter overwrites it
 killhouse_progress_period        = 1;   // between progress hints after that; cannot resolve
                                         // finer than the wave loop's own tick below
-killhouse_corpse_linger          = 5;   // seconds a hit target or body stays before deletion
-killhouse_min_spawn_dist         = 5;   // no spawn this close to a player already in the course
+killhouse_corpse_linger          = 2;   // seconds a hit target or body stays before deletion
+killhouse_min_spawn_dist         = 10;  // no spawn this close to a player already in the course
+killhouse_max_spawn_dist         = 20;  // ...and none further than this from the nearest one, so
+                                        // the drill keeps coming to the player instead of making
+                                        // them walk the course looking for it
 killhouse_area_radius            = 80;  // 3D from the composition centre, and the one
                                         // definition of "inside the killhouse": it picks who
                                         // hears hints and which enemies are still in play. The
@@ -989,39 +992,59 @@ killhouse_srv_end_run = {
     };
 };
 
-// Picks the next _want rows clear of everyone already in the course, walking the shuffled pool
-// from _from. Returns [rows, nextIndex].
+// Picks up to _want rows for the next wave and removes them from _pool. Returns the rows.
 //
-// Rows within killhouse_min_spawn_dist of a player are stepped over rather than used: the rows
-// surround the lanes, so a spawn at arm's length usually lands behind the player and reads as a
-// glitch rather than a drill. Stepping over costs nothing because the pool holds far more rows
-// than a run uses -- the walk simply reaches further down it and the run still fields its full
-// count with someone standing in the lanes.
+// A row is wanted between killhouse_min_spawn_dist and killhouse_max_spawn_dist of the nearest
+// player in the course: closer than the minimum usually lands behind the player and reads as a
+// glitch rather than a drill, further than the maximum turns the drill into a hunt for it.
+// Rejected rows stay in the pool, because the band moves with the player and a row out of reach
+// this wave is often the obvious one two waves later. That is the whole reason the pool is
+// consumed rather than walked by a cursor: most rows fail the band at any given moment, so a
+// cursor would step past nearly the entire composition on the first wave and leave a run of
+// three with nothing to place.
 //
-// A short return means the pool ran out, which is the caller's signal to finish on what is
-// already down. It must never be read as "try again": every remaining row is blocked or used,
-// so a caller that waited for the rest would wait forever.
+// The minimum is hard, the maximum only a preference: when the band around a stationary player
+// has been picked clean the wave falls back to the nearest rows outside it. Honouring the
+// maximum instead would leave the run hanging on a wave that can never come, since nothing
+// short of the player moving would ever refill the band.
+//
+// An empty return therefore means the pool itself is exhausted, which is the caller's signal to
+// finish on what is already down.
 killhouse_srv_pick_slots = {
-    if (!isServer) exitWith {[[], 0]};
-    params ["_pool", "_from", "_want"];
+    if (!isServer) exitWith {[]};
+    params ["_pool", "_want"];
     private _centerX = missionNamespace getVariable "killhouse_centerX";
     private _centerY = missionNamespace getVariable "killhouse_centerY";
     private _centerZ = missionNamespace getVariable "killhouse_centerZ";
     // Resolved once: the test runs per row, the occupant list does not change within a wave.
     private _occupied = (call killhouse_srv_occupants) apply { getPosWorld _x };
 
-    private _rows = [];
-    private _i = _from;
-    while { count _rows < _want && { _i < count _pool } } do {
-        private _row = _pool select _i;
-        _row params ["_class", "_dX", "_dY", "_dZ"];
+    // [rank, index] per usable row: 0 for one inside the band and its distance for one outside,
+    // so sorting puts the whole band first and then the nearest of the rest.
+    private _ranked = [];
+    {
+        _x params ["_class", "_dX", "_dY", "_dZ"];
         private _pos = [_centerX + _dX, _centerY + _dY, _centerZ + _dZ];
-        if (_occupied findIf { _x distance _pos < killhouse_min_spawn_dist } < 0) then {
-            _rows pushBack _row;
+        // Nobody in the course leaves the band without a reference point, so every row counts
+        // as inside it: a run whose players have all left must still place its rows and finish.
+        if (_occupied isEqualTo []) then {
+            _ranked pushBack [0, _forEachIndex];
+        } else {
+            private _near = selectMin (_occupied apply { _x distance _pos });
+            if (_near >= killhouse_min_spawn_dist) then {
+                private _rank = [_near, 0] select (_near <= killhouse_max_spawn_dist);
+                _ranked pushBack [_rank, _forEachIndex];
+            };
         };
-        _i = _i + 1;
-    };
-    [_rows, _i]
+    } forEach _pool;
+    _ranked sort true;
+
+    private _take = (_ranked select [0, _want]) apply { _x select 1 };
+    private _rows = _take apply { _pool select _x };
+    // Highest index first, so each removal leaves the ones still to go where they are.
+    _take sort false;
+    { _pool deleteAt _x } forEach _take;
+    _rows
 };
 
 // Spawns one wave onto the composition rows it is handed.
@@ -1101,11 +1124,13 @@ killhouse_srv_start_run = {
     [false] call killhouse_srv_end_run;   // silent: a new run supersedes, it does not cancel
     call killhouse_srv_clear_all;
 
-    // One shuffled composition row per spawn, walked in order, so no row is reused within a
-    // run and nothing is ever spawned on top of anything already placed. That is also why the
-    // total is capped at the row count instead of wrapping. It is a guarantee about the moment
-    // of spawning only -- enemies path away afterwards and may bunch up wherever they like.
-    private _slots = _allSlots call BIS_fnc_arrayShuffle;
+    // One shuffled composition row per spawn, taken out of the pool as it is used, so no row is
+    // reused within a run and nothing is ever spawned on top of anything already placed. That is
+    // also why the total is capped at the row count instead of wrapping. It is a guarantee about
+    // the moment of spawning only -- enemies path away afterwards and may bunch up wherever they
+    // like. Shuffled from a copy because the pool is consumed: BIS_fnc_arrayShuffle is free to
+    // work in place, which would eat the master row list a run at a time.
+    private _slots = (+_allSlots) call BIS_fnc_arrayShuffle;
     private _total = killhouse_run_total min (count _slots);
     // Without this an empty composition would read as "all spawned, none alive" on the first
     // pass and pay the reward for a run that never happened.
@@ -1123,7 +1148,6 @@ killhouse_srv_start_run = {
         params ["_mode", "_slots", "_total", "_runId"];
         private _listVar = ["killhouse_enemies", "killhouse_targets"] select (_mode == "TRAINING");
         private _spawned = 0;
-        private _cursor = 0;
         private _lastWave = time;
         private _nextProgress = time + killhouse_progress_delay;
         private _complete = false;
@@ -1156,18 +1180,17 @@ killhouse_srv_start_run = {
                          && { time - _lastWave >= killhouse_wave_timeout } };
                 if (_due) then {
                     private _want = killhouse_wave_size min (_total - _spawned);
-                    ([_slots, _cursor, _want] call killhouse_srv_pick_slots) params ["_wave", "_next"];
-                    _cursor = _next;
+                    private _wave = [_slots, _want] call killhouse_srv_pick_slots;
                     if !(_wave isEqualTo []) then {
                         [_mode, _wave] call killhouse_srv_spawn_wave;
                         _spawned = _spawned + (count _wave);
                         _lastWave = time;
                     };
-                    // Pool walked to the end without meeting the count: whatever is left is
-                    // blocked or already used, and no later wave can place it. Settle the run
-                    // at what actually went down, so the loop finishes instead of waiting on
-                    // a wave that will never come.
-                    if (_cursor >= count _slots) then { _total = _spawned; };
+                    // Pool emptied without meeting the count: every row the composition has is
+                    // already down or was down earlier this run. Settle the run at what actually
+                    // went out, so the loop finishes instead of waiting on a wave that will
+                    // never come.
+                    if (_slots isEqualTo []) then { _total = _spawned; };
                 };
             };
             // Re-read rather than reuse _alive: a wave may have gone up this pass, and the
