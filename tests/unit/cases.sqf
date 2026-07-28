@@ -122,3 +122,50 @@ private _pct = { (_this call fnc_civ_reaction_weights) apply { round (_x * 100) 
     [format ["rowSpec: %1 is rejected", str _x],
         (([_x] call fnc_civ_rowSpec) select 1) < 0, true] call fnc_assertEq;
 } forEach ["", "ARREST", "SUPPLIES", "intel ", "DROP TABLE"];
+
+// --- fnc_civ_townBand: the [ellipse, icon] colour pair a reputation paints ---
+private _neutral = [0] call fnc_civ_townBand;
+private _blu = [10] call fnc_civ_townBand;
+private _opf = [-10] call fnc_civ_townBand;
+
+// The bands are inclusive at +-10, which is the same edge fnc_civ_townIncome pays on: a town
+// coloured for a side while paying nothing would contradict the readout drawn beside it.
+["townBand: +10 is the BLUFOR band", ([10] call fnc_civ_townBand), _blu] call fnc_assertEq;
+["townBand: -10 is the OPFOR band", ([-10] call fnc_civ_townBand), _opf] call fnc_assertEq;
+["townBand: 9.9 is still neutral", ([9.9] call fnc_civ_townBand), _neutral] call fnc_assertEq;
+["townBand: -9.9 is still neutral", ([-9.9] call fnc_civ_townBand), _neutral] call fnc_assertEq;
+["townBand: no argument is neutral", ([] call fnc_civ_townBand), _neutral] call fnc_assertEq;
+
+// Three distinct pairs, and within each pair two distinct colours: a band that collapsed onto
+// another would leave two sides indistinguishable on the map, and the icon matching its
+// ellipse would put it back in the wash the deeper colour exists to escape.
+{
+    _x params ["_label", "_pair"];
+    [format ["townBand: %1 icon differs from its ellipse", _label],
+        ((_pair select 0) isEqualTo (_pair select 1)), false] call fnc_assertEq;
+} forEach [["neutral", _neutral], ["blufor", _blu], ["opfor", _opf]];
+
+["townBand: neutral and blufor differ", (_neutral isEqualTo _blu), false] call fnc_assertEq;
+["townBand: neutral and opfor differ", (_neutral isEqualTo _opf), false] call fnc_assertEq;
+["townBand: blufor and opfor differ", (_blu isEqualTo _opf), false] call fnc_assertEq;
+
+// --- fnc_civ_townIncome: what a town pays a tick, and to whom ---
+["townIncome: a BLUFOR town pays its worth west",
+    ([12, 3] call fnc_civ_townIncome), [3, "BLU"]] call fnc_assertEq;
+["townIncome: an OPFOR town pays its worth east",
+    ([-12, 3] call fnc_civ_townIncome), [3, "OPF"]] call fnc_assertEq;
+
+// A neutral town pays nobody, so its worth is not its income. The map readout prints this
+// figure, and printing the worth there would promise AP the economy tick never credits.
+{
+    [format ["townIncome: %1 is neutral and pays nothing", _x],
+        ([_x, 3] call fnc_civ_townIncome), [0, ""]] call fnc_assertEq;
+} forEach [0, 9.9, -9.9];
+
+["townIncome: the band edges pay",
+    [([10, 2] call fnc_civ_townIncome), ([-10, 2] call fnc_civ_townIncome)],
+    [[2, "BLU"], [2, "OPF"]]] call fnc_assertEq;
+
+// RAVAGE and WBK register no town worth, so the array read that feeds this comes back short.
+["townIncome: no worth pays nothing",
+    ([20, 0] call fnc_civ_townIncome), [0, "BLU"]] call fnc_assertEq;

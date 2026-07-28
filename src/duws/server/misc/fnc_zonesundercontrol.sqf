@@ -27,10 +27,12 @@ while {true} do {
     private _worth = missionNamespace getVariable ["civ_town_ap", []];
     private _blu = 0;
     private _opf = 0;
+    // Through fnc_civ_townIncome rather than comparing the bands here, so the figure the map
+    // readout prints for a town is the one this loop actually pays it.
     {
-        private _ap = _worth param [_forEachIndex, 0];
-        if (_x >= 10) then { _blu = _blu + _ap };
-        if (_x <= -10) then { _opf = _opf + _ap };
+        ([_x, _worth param [_forEachIndex, 0]] call fnc_civ_townIncome) params ["_income", "_side"];
+        if (_side isEqualTo "BLU") then { _blu = _blu + _income };
+        if (_side isEqualTo "OPF") then { _opf = _opf + _income };
     } forEach _reps;
     // Two calls, not one per town: fnc_ap_adjust publicVariables and logs every time, so
     // per-town calls would broadcast the same global twenty times a tick for one net change.

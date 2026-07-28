@@ -774,6 +774,14 @@ fnc_civ_selectTowns = compile preprocessFileLineNumbers "duws\server\misc\fnc_ci
 // which is global, so every machine evaluates it and every machine runs the body.
 fnc_civ_town_reveal = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_town_reveal.sqf";
 publicVariable "fnc_civ_town_reveal";
+// The board's map readout. The query is broadcast because a client is what calls it, and the
+// two display halves because the server is what calls them back.
+fnc_civ_townQuery = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_townQuery.sqf";
+publicVariable "fnc_civ_townQuery";
+fnc_civ_townInfo = compile preprocessFileLineNumbers "duws\client\misc\fnc_civ_townInfo.sqf";
+publicVariable "fnc_civ_townInfo";
+fnc_civ_mapView = compile preprocessFileLineNumbers "duws\client\misc\fnc_civ_mapView.sqf";
+publicVariable "fnc_civ_mapView";
 fnc_civ_rep_economy = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_rep_economy.sqf";
 fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_wp_Tomata.sqf";
 fnc_civ_rep_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_rep_Tomata.sqf";

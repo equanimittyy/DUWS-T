@@ -1689,17 +1689,37 @@
                 <Original>This town's standing with BLUFOR has suffered.</Original>
                 <English>This town's standing with BLUFOR has suffered.</English>
             </Key>
-            <Key ID="STR_DUWS_T_civ_marker_pop">
-                <Original>Pop: %1</Original>
-                <English>Pop: %1</English>
+            <Key ID="STR_DUWS_T_civ_mapview_action">
+                <Original>View Map</Original>
+                <English>View Map</English>
             </Key>
-            <Key ID="STR_DUWS_T_civ_marker_town">
-                <Original>Pop: %1 | Rep: %2%3</Original>
-                <English>Pop: %1 | Rep: %2%3</English>
+            <Key ID="STR_DUWS_T_civ_mapview_open">
+                <Original>Click a civilian zone for its details.</Original>
+                <English>Click a civilian zone for its details.</English>
             </Key>
-            <Key ID="STR_DUWS_T_civ_marker_ap">
-                <Original> | +%1AP/30min</Original>
-                <English> | +%1AP/30min</English>
+            <Key ID="STR_DUWS_T_civ_mapview_miss">
+                <Original>Click on a civilian zone.</Original>
+                <English>Click on a civilian zone.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_mapview_pop">
+                <Original>Population: %1</Original>
+                <English>Population: %1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_mapview_rep">
+                <Original>Reputation: %1</Original>
+                <English>Reputation: %1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_mapview_income_none">
+                <Original>Income: none</Original>
+                <English>Income: none</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_mapview_income_blu">
+                <Original>Income: %1 AP/30min to BLUFOR</Original>
+                <English>Income: %1 AP/30min to BLUFOR</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_mapview_income_opf">
+                <Original>Income: %1 AP/30min to OPFOR</Original>
+                <English>Income: %1 AP/30min to OPFOR</English>
             </Key>
             <Key ID="STR_DUWS_T_escalation_title">
                 <Original>Escalation</Original>

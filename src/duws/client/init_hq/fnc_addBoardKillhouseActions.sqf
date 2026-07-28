@@ -31,6 +31,12 @@ _board addAction [
     nil, 65, true, true, "", "true"
 ];
 
+_board addAction [
+    localize "STR_DUWS_T_civ_mapview_action",
+    { call fnc_civ_mapView },
+    nil, 5, true, true, "", "_this == player"
+];
+
 // 添加基地快速移动动作（在白板地图上）
 if (isNil {_board getVariable "board_fasttravel_actions_done"}) then {
     _board setVariable ["board_fasttravel_actions_done", true];

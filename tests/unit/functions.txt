@@ -8,3 +8,5 @@ duws/server/server_fnc_init.sqf::fnc_cs
 duws/server/server_fnc_init.sqf::fnc_duws_dialogue_channel
 duws/server/server_fnc_init.sqf::fnc_civ_reaction_weights
 duws/server/server_fnc_init.sqf::fnc_civ_rowSpec
+duws/server/server_fnc_init.sqf::fnc_civ_townBand
+duws/server/server_fnc_init.sqf::fnc_civ_townIncome

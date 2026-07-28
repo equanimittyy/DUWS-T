@@ -169,7 +169,7 @@ missionNamespace setVariable ["civ_visible", _newVis];
 // reads them, and the markers they drive are painted with global-effect commands.
 // Off entirely in RAVAGE and WBK -- a zombie apocalypse has no civil standing to lose and
 // nobody to install an OPFOR garrison, so the number would be a dial with nothing on the other
-// end of it. Those towns keep the size-only marker and the neutral ellipse permanently.
+// end of it. Those towns keep the neutral band permanently.
 if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     private _n = count _locations;
     private _townRep = [];
@@ -241,26 +241,29 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     // population, exactly as a hidden zone keeps its OPFOR. Only the map stays quiet.
     private _shown = _newVis select _locIndex;
 
+    // Created neutral, then repainted below by the same renderer the reputation writer uses,
+    // so a town cannot be created reading differently from how it repaints. The neutral pair
+    // is what RAVAGE and WBK towns keep: the renderer returns early for them.
+    ([0] call fnc_civ_townBand) params ["_areaColour", "_iconColour"];
+
     // 创建区域标记（半透明椭圆）
     private _markerName = format ["civ_area_%1", _locIndex];
     private _marker = createMarker [_markerName, _pos];
     _marker setMarkerShape "ELLIPSE";
     _marker setMarkerBrush "SolidBorder";
-    _marker setMarkerColor "#(0.6,0.35,0.7,1)";
+    _marker setMarkerColor _areaColour;
     _marker setMarkerAlpha ([0, 0.3] select _shown);
     _marker setMarkerSize [_radius, _radius];
 
-    // 创建人口图标（位于区域下方）
+    // 创建城镇图标（位于区域下方）
     private _iconPos = [(_pos select 0), (_pos select 1) - 80];
     private _iconName = format ["civ_icon_%1", _locIndex];
     private _icon = createMarker [_iconName, _iconPos];
     _icon setMarkerShape "ICON";
     _icon setMarkerType "loc_tourism";
-    _icon setMarkerColor "ColorBlack";
+    _icon setMarkerColor _iconColour;
     _icon setMarkerSize [1.2, 1.2];
     _icon setMarkerAlpha ([0, 1] select _shown);
-    // Text and band colour come from the one renderer the reputation writer also uses, so a
-    // town cannot be created reading differently from how it repaints.
     [_locIndex] call fnc_civ_townRender;
 
     ["INFO", "CIV", format ["Created markers for location %1 (%2) pop %3", _locIndex, _locationName, _initialPop]] call fnc_log;

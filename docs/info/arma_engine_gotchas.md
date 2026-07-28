@@ -169,6 +169,24 @@ static controls are click-transparent, so the underlying `onMapSingleClick` stil
 `fnc_map_prompt` (`src/duws/client/dialog/fnc_map_prompt.sqf`) does this for the HQ /
 AO-direction prompts; pass `""` to clear it before `openMap [false, false]`.
 
+## `onMapSingleClick` is one global slot: the next installer steals the previous one's click
+
+**There is exactly one map-click handler per machine. A second `onMapSingleClick` overwrites
+the first with no error and no way to read back what was replaced, so the feature that
+installed first waits forever for a click it will never receive.**
+
+The trap is two independent features that each open the map and wait on a click — the HQ map
+board alone carries base fast travel and the civilian-zone readout. Nothing warns you: the
+second feature works perfectly and the first simply never completes, which reads as the first
+feature being broken rather than as a collision.
+
+**How to apply:** every map-click mode raises its own "I own the map" global before
+`openMap true` and refuses to start if another mode's flag is up
+(`DUWS_baseTravelMapOpen`, `DUWS_civMapViewOpen`). Clear the flag *and* the handler
+(`onMapSingleClick ""`) from a `waitUntil { !visibleMap }` spawn, because the engine gives no
+callback for the player closing the map and a mode abandoned that way would hold the slot for
+the rest of the mission.
+
 ## Diary records display newest-first, so add them bottom-up
 
 **`createDiaryRecord` prepends: the record created last is drawn at the TOP of its
