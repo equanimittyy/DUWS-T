@@ -100,6 +100,62 @@ condition runs on the client. Broadcasting one boolean per player is far cheaper
 broadcasting `econ_tick` so clients can compare numbers, and it means the tick clears state
 rather than clients inferring it.
 
+### The search is one action on the player, not one per corpse
+
+Any OPFOR body can be searched, not just a team leader's. The obvious way to do that — extend
+`fnc_add_intel_on_death` from mission patrols to every OPFOR unit — is the wrong one: it adds a
+`Killed` handler per unit and then `remoteExec ["fnc_corpse_search_action", 0, true]` per death,
+where the trailing `true` is the JIP flag. Nothing ever removes those entries, so every corpse
+the campaign produces leaves a permanent message in the JIP queue. That is tolerable for the
+handful of mission patrols it runs on today and unbounded at the scale of every kill.
+
+Instead the corpse is never touched at all. Three pieces, all on the player:
+
+| Piece | Lives on | Written when |
+|---|---|---|
+| The action | the player | once, at spawn |
+| Its condition | evaluated on the player's own machine | continuously, while alive |
+| `DUWS_intel_searched` | the player object, broadcast | set on spend, cleared by the economy tick |
+
+So the player carries one action that looks *outward* at whatever is under their cursor, rather
+than every body carrying an action that waits to be looked at. Entries in the JIP queue then
+scale with players — a handful — instead of with deaths.
+
+```sqf
+!(player getVariable ["DUWS_intel_searched", false])
+&& {!isNull cursorObject}
+&& {cursorObject distance player < 3}
+&& {cursorObject isKindOf "CAManBase"}
+&& {!alive cursorObject}
+&& {side group cursorObject == EAST}
+```
+
+The existing corpse hold action (`fnc_corpse_search_action.sqf`) is untouched — it reveals the
+current *mission* target and is a different mechanic that happens to live on the same bodies.
+
+**The clause order is load-bearing.** An action on the player is evaluated far more often than
+one on a distant object, because the player is always in range of themselves. Each `&&` takes a
+code block on the right, so evaluation short-circuits, and the clauses are ordered cheapest and
+most-often-false first:
+
+- attempt already spent — one namespace lookup, and nothing else runs
+- not pointing at anything — one native accessor, then stop
+- pointing at something further than 3 m — one subtraction, then stop
+
+Only a body actually under the cursor and within reach reaches the config lookup in `isKindOf`.
+
+For scale: the mission already attaches six actions to every civilian, each with a
+`"_this distance _target < 3"` condition, and a town spawns up to fifty of them — three hundred
+conditions evaluated while the player stands in a market square. One player-side action is a
+rounding error against what already ships, and it replaces six of those per civilian rather than
+adding to them.
+
+`cursorObject` is a native accessor rather than a scripted raycast, so it costs a read, not a
+sweep. If it proves fussy about ragdolled bodies or ones half-inside geometry, `cursorTarget` or
+a small `nearestObjects` call is the fallback — but a scripted sweep is exactly the thing this
+ordering exists to keep out of the common path, so it would want the cheap clauses in front of
+it.
+
 ### The action hides itself while spent
 
 An action that refuses is worse than no action. The search entry's `condition` tests
@@ -161,10 +217,16 @@ ownership, both of which the restore already has, so the helper above recomputes
 
 ## Three reveal sources, kept deliberately
 
-Proximity, the search-for-intel action on enemy leaders, and the civilian menu all stay. They
-are not redundant with each other: proximity costs the walk in, the enemy action costs a
-firefight, and the menu costs coins and a town's patience. Three prices for the same commodity
-is the point, because a hardcore player who is out of one currency still has a route.
+Proximity, searching OPFOR bodies, and the civilian menu all stay. They are not redundant with
+each other: proximity costs the walk in, the body search costs a firefight, and the menu costs
+coins and a town's patience. Three prices for the same commodity is the point, because a
+hardcore player who is out of one currency still has a route.
+
+**Civilians are the intended primary source, and the body search is a trickle.** That is what
+makes 10 % per player per tick a deliberate figure rather than a stingy one — it is not meant to
+carry a campaign on its own. Anyone tuning this later should raise the civilian side before
+touching the body search, or the two stop being different mechanisms and hardcore turns back
+into a kill-count.
 
 They do draw from one finite pool. A campaign has as many unrevealed zones as it was generated
 with, so the sources compete rather than stack, and the hidden-map phase ends when the last one
@@ -176,13 +238,6 @@ standing in and rolls nothing, so there is nothing to throttle.
 
 ## Open questions
 
-- Which enemies carry the search action. "Not only team leaders" admits two readings: every live
-  OPFOR unit, or every OPFOR corpse. The corpse route reuses `fnc_add_intel_on_death`, which
-  already reaches every body and adds no new `addAction` traffic, and searching a body reads
-  better than searching a living soldier — but it is a different moment in the fight from the
-  action on a live leader that exists today.
-- Whether 10 % per player per tick is generous enough for solo hardcore. One attempt every
-  thirty minutes at 10 % is an expected reveal every five hours alone, against roughly every
-  seventy-five minutes for a four-player squad. Zones are hidden, so intel is the primary way to
-  find the first one at all — the other two sources need a zone you already know about, or a
-  town you have standing with. To be judged in play rather than argued.
+- Whether the JIP growth in `fnc_add_intel_on_death` is worth fixing on its own account. This
+  plan routes around it rather than through it, so the mission-patrol path keeps leaking JIP
+  entries at its current, much smaller rate. It is pre-existing and unrelated to hardcore.
