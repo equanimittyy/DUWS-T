@@ -29,6 +29,8 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
 
     ["Adjust CP / AP", fnc_debug_econ_menu, [], [1,0.667,0,1]],
 
+    ["Force side mission", fnc_debug_mission_menu, [], [1,0.667,0,1]],
+
     // Stub. Planned: a local overlay onto OPFOR-side WARCOM -- commander AP with its
     // income and spend, the wave thresholds it is holding at, a map marker per enemy asset.
     // Deferred assets are the point: zone garrisons still virtual behind fnc_spawnWait, queued
