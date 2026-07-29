@@ -321,6 +321,32 @@ this: `fnc_cp_adjust` (`src/duws/server/server_fnc_init.sqf`) is the sole writer
 broadcast, so that function also refreshes the on-screen counter locally when
 `hasInterface`.
 
+## A joining client is sent every `publicVariable`'d global, then its own init overwrites them
+
+**`publicVariable` is JIP-persistent: the engine keeps the last broadcast value and delivers
+it to a client that joins in progress. A per-client init file that then assigns the same
+global unconditionally clobbers the delivered value — locally, and silently. The joiner now
+disagrees with the rest of the session, and the disagreement becomes everyone's the moment
+that client broadcasts the global back.**
+
+The delivery happens before the mission's own client init runs, so ordering does not save it:
+the joiner genuinely receives the team's value and then throws it away. Nothing errors,
+because assigning a global that already holds a value is legal, and in single-player and on a
+host the fault is invisible — both are the machine that did the broadcasting.
+
+The damage is not the stale local copy but the write-back. A client acting on its wrong copy
+takes an action the team has already taken, and the `publicVariable` that follows pushes the
+wrong state outward, so one joiner's bad read becomes the session's state.
+
+**How to apply:** guard every client-side initialisation of a broadcast global with
+`if (isNil "x") then {x = default};`, so a delivered value survives and only a genuinely fresh
+session installs the default. Assigning unconditionally is correct *only* for globals that are
+never broadcast — which means the decision to `publicVariable` a global and the decision to
+initialise it live in two different files and have to be kept in step by hand. In this mission
+they are not: `client/includes/supports_init.hpp` guards three flags and assigns three others
+unconditionally while `client/dialog/fnc_request_support.sqf` broadcasts all six
+([`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#open-defects)).
+
 ## Waypoint and flight commands are ignored unless the group is local to that machine
 
 **`addWaypoint`, `deleteWaypoint`, `flyInHeight`, `setMass` and `ropeCreate` take effect only
