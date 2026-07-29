@@ -190,7 +190,10 @@ switch (VERSION_X) do {
 };
 
 // ADD SABOTAGE ACTION TO LAPTOP
-[_laptop,[ACT_COMMIT("STR_DUWS_T_p3200mf5"), fnc_sabotage_laptop_success, [_MissionPos,_targetpos,_mission_name,_markername,_markername2,_radius], 10, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated, _laptop];
+// Suffixed JIP id, not the laptop itself: the hardcore intel rotary below hangs off the same
+// object, and an object-keyed id is that object's netId, so the two entries evicted each other
+// and a joining client got the search but never the sabotage. The success path removes this id.
+[_laptop,[ACT_COMMIT("STR_DUWS_T_p3200mf5"), fnc_sabotage_laptop_success, [_MissionPos,_targetpos,_mission_name,_markername,_markername2,_radius], 10, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["sabotage_action_%1", netId _laptop]];
 
 // Put an intel action on LAPTOP
 if (hardcore_mode_enable) then {

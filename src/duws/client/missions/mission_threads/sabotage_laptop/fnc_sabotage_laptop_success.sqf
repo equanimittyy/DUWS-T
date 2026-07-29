@@ -23,6 +23,12 @@ _count = 0;
 
 [_object,0] remoteExec ["removeAction",[0,-2] select isDedicated];
 
+// Dropping the queued copy is what stops a joiner re-hacking a finished mission. The id is a
+// string, so nothing deletes it implicitly, and the laptop outlives the hack anyway -- the
+// delete at the foot of this file waits 340 s and dies with the player if they disconnect
+// first. Run on the server, which owns the queue.
+[format ["sabotage_action_%1", netId _object], { remoteExec ["", _this] }] remoteExec ["call", 2];
+
 hint localize "STR_DUWS_T_v5ylof1e";
 
 private "_VARtaskgeneratedName";
@@ -31,7 +37,7 @@ _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round
 deleteMarker str(_markername2);
 deleteMarker str(_markername);
 
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
 missionNamespace setVariable ["current_mission_target_pos", nil];
 
 // ========== 防止清理时误触发直升机增援 ==========
