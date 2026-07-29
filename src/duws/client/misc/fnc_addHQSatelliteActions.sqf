@@ -23,7 +23,7 @@ if ((vehiclevarname player) in game_master) then {
         {
             params ["_target", "_caller", "_actionId", "_arguments"];
             // 将请求发送到服务器执行实际治疗
-            [_caller] remoteExec ["fnc_restHealServer", 2];
+            [_caller, _target] remoteExec ["fnc_restHealServer", 2];
         },
         [],
         60,

@@ -30,6 +30,7 @@ if ((vehiclevarname player) in game_master) then {
     _fob addaction [
         ACT_AID("STR_DUWS_T_9eiwr3bt"),  // 本地化菜单名称
         {  // 重构匿名函数，添加冷却校验+联机同步逻辑
+            params ["_target"];
             // 1. 定义核心变量
             private _coolDownVar = "GM_Heal_LastUsedTime";  // 全局冷却记录变量名
             private _coolDownSeconds = 600;  // 10分钟=600秒
@@ -39,7 +40,7 @@ if ((vehiclevarname player) in game_master) then {
             // 2. 冷却时间校验
             if (_currentTime - _lastUsedTime >= _coolDownSeconds) then {
                 // 3. 满足条件，执行全局治愈逻辑
-                [] remoteExec ["fnc_rest_heal", 2];
+                [_target] remoteExec ["fnc_rest_heal", 2];
                 
                 // 4. 更新当前端的全局冷却记录变量（先赋值，再同步）
                 MissionNamespace setVariable [_coolDownVar, _currentTime];

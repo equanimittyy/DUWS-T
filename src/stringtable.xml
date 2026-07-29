@@ -8059,8 +8059,8 @@
                 <German>AI Aufmunitionierung setzt deine Gruppen AI auf ihr gespeichertes oder ursprüngliches Loadout zurück. Die Einheiten werden vollständig geheilt.</German>
                 <Spanish>El rearmado de IA repondrá el equipo de las IAs de tu escuadrón a su equipamiento guardado o por defecto y las curará por completo.</Spanish>
                 <Chinesesimp>AI重新武装会重置你小队AI保存或生成的装备并且回满血量。</Chinesesimp>
-                <Original>Re-arm restores your AI squadmates to their last saved loadout — or the kit they deployed with — and treats their wounds.</Original>
-                <English>Re-arm restores your AI squadmates to their last saved loadout — or the kit they deployed with — and treats their wounds.</English>
+                <Original>Re-arm restores your AI squadmates to their last saved loadout, or the kit they deployed with, and treats their wounds.</Original>
+                <English>Re-arm restores your AI squadmates to their last saved loadout, or the kit they deployed with, and treats their wounds.</English>
             </Key>
             <Key ID="STR_DUWS_T_d7eqef75">
                 <German>BESTÄTIGEN</German>

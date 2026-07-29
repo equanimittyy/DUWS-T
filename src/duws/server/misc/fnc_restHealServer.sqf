@@ -5,7 +5,7 @@
 */
 if (!isServer) exitWith {};
 
-params ["_caller"];
+params ["_caller", "_restSite"];
 
 private _coolDownVar = "GM_Heal_LastUsedTime";
 private _coolDownSeconds = 600;
@@ -13,7 +13,7 @@ private _currentTime = time;
 private _lastUsedTime = missionNamespace getVariable [_coolDownVar, 0];
 
 if (_currentTime - _lastUsedTime >= _coolDownSeconds) then {
-    [] remoteExec ["fnc_rest_heal", 2];
+    [_restSite] remoteExec ["fnc_rest_heal", 2];
     missionNamespace setVariable [_coolDownVar, _currentTime];
     publicVariable _coolDownVar;
     _speakeracteam = localize "STR_DUWS_T_actionteam";
