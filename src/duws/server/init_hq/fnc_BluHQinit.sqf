@@ -226,10 +226,14 @@ private _invulnerableTypes = [
     _obj setDir _dir;
     
     // 灯和补给箱开启模拟，其余关闭
+    // Global, not the local form: enableSimulation only affects the machine it runs on, so a
+    // server-side call leaves every client still simulating props the server has frozen. They
+    // then settle, drift and fall differently on each machine, which is how the base ends up
+    // looking different to a joining player than it does to the host.
     if (_class in _lightTypes || _class == "B_supplyCrate_F") then {
-        _obj enableSimulation true;
+        _obj enableSimulationGlobal true;
     } else {
-        _obj enableSimulation false;
+        _obj enableSimulationGlobal false;
     };
 
     // 混凝土墙和伪装网设为无敌（原有逻辑）
@@ -273,7 +277,7 @@ if (!isNull _mgAnchor) then {
     ];
     private _obj = createVehicle ["I_HMG_02_high_F", _worldPos, [], 0, "CAN_COLLIDE"];
     [_obj, "HQ"] call fnc_duws_keep;
-    _obj enableSimulation false;
+    _obj enableSimulationGlobal false;
     _obj setPosWorld _worldPos;
     private _dirToAnchor = [_worldPos, getPosWorld _mgAnchor] call BIS_fnc_dirTo;
     _obj setDir _dirToAnchor;
@@ -294,7 +298,7 @@ private _aaData = [
     ];
     private _obj = createVehicle [_class, _worldPos, [], 0, "CAN_COLLIDE"];
     [_obj, "HQ"] call fnc_duws_keep;
-    _obj enableSimulation false;
+    _obj enableSimulationGlobal false;
     _obj setPosWorld _worldPos;
     _obj setDir (getDir _hqObj);
     _weaponList pushBack _obj;
@@ -308,7 +312,7 @@ if (count _weaponList > 0) then {
     private _guardGroup = [_spawnPos, WEST, _unitTypes, [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
     _guardGroup deleteGroupWhenEmpty true;
     { (units _guardGroup select _forEachIndex) moveInGunner _x; } forEach _weaponList;
-    { _x enableSimulation true; } forEach _weaponList;
+    { _x enableSimulationGlobal true; } forEach _weaponList;
     missionNamespace setVariable ["HQ_redeploy_weaponGroup", _guardGroup, true];
     missionNamespace setVariable ["HQ_redeploy_weaponList", _weaponList, true];
     missionNamespace setVariable ["HQ_redeploy_mgAnchor", _mgAnchor, true];

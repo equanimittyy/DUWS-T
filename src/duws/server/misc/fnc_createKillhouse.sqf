@@ -862,7 +862,9 @@ private _bellObjects = [];
     private _obj = createVehicle [_class, [_newX, _newY, _newZ], [], 0, "CAN_COLLIDE"];
     _obj setPosWorld [_newX, _newY, _newZ];
     _obj setDir ((_yaw * 180) / 3.1415926535);
-    _obj enableSimulation false;
+    // Global: the local form leaves clients simulating props the server froze, and the course
+    // furniture then sits somewhere different on every machine.
+    _obj enableSimulationGlobal false;
     _obj allowDamage false;
     
     // 保存电脑对象引用
