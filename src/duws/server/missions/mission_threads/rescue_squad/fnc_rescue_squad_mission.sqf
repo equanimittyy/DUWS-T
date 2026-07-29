@@ -51,7 +51,10 @@ _safePos = _Building buildingPos _randPos;
 _rand = random 1;
 {
 	_x setPosATL [_safePos select 0,(_safePos select 1)+_rand,_safePos select 2];
-	_x switchMove "acts_CrouchingIdleRifle01";
+	// switchMove is local, so posing from the server held the captives on a hosting player's
+	// screen and left every client a squad standing about. Keyed so a joiner finds them held,
+	// and the key is dropped when they are freed.
+	[_x, "acts_CrouchingIdleRifle01"] remoteExec ["switchMove", 0, format ["rescue_pose_%1", netId _x]];
 	_rand = random 1;
 } forEach units _group;
 
@@ -59,7 +62,11 @@ _rand = random 1;
 fnc_rescue_squad_uncaptive = {
     params ["_markername2","_sol1","_sol2","_sol3","_MissionPos","_targetPos","_radius","_mission_name"];
     
-    { _x setcaptive false; _x switchMove ""; } forEach [_sol1,_sol2,_sol3];
+    {
+        _x setcaptive false;
+        [_x, ""] remoteExec ["switchMove", 0];
+        remoteExec ["", format ["rescue_pose_%1", netId _x]];
+    } forEach [_sol1,_sol2,_sol3];
     [{hint localize "STR_DUWS_T_xdbfx123"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     
 };

@@ -13,12 +13,12 @@ _radius = _arguments select 4;
 _cpreward = 10;
 _apreward = 35;
 
-_count = 0;
-{
-  _object setObjectTexture [_count,"#(rgb,8,8,3)color(0,0,1,1)"];
-  _count = _count + 1;
-  if (_count == 1) exitwith{};
-} foreach getObjectTextures _object;
+// setObjectTexture is local, so the dead screen only ever showed for the player who did the
+// hacking; everyone else kept looking at a live laptop on a finished mission. The global form
+// runs on the server, which owns the object. The loop this replaces only ever set index 0.
+if (count getObjectTextures _object > 0) then {
+  [_object, [0, "#(rgb,8,8,3)color(0,0,1,1)"]] remoteExec ["setObjectTextureGlobal", 2];
+};
 
 [_object,0] remoteExec ["removeAction",[0,-2] select isDedicated];
 

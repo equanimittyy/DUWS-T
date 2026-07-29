@@ -113,8 +113,12 @@ _civilianMarker setMarkerSize [1, 1];
 [_civilian] spawn {
     params ["_unit"];
     sleep 1;
+    // Broadcast: playMoveNow is local, so run from the server the informant only panicked on a
+    // hosting player's screen and stood there calmly for every client. fnc_civ_arrest already
+    // reaches for the same command this way. Unkeyed on purpose -- it reissues every 5 s, so a
+    // joiner picks the animation up on the next pass without a queue entry per repeat.
     while {alive _unit} do {
-        _unit playMoveNow "ApanPpneMstpSnonWnonDnon_G02";
+        [_unit, "ApanPpneMstpSnonWnonDnon_G02"] remoteExec ["playMoveNow", 0];
         sleep 5;
     };
 };

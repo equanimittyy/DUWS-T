@@ -35,9 +35,12 @@ _sol3 setcaptive false;
 //_sol1 switchMove "AmovPpneMstpSnonWnonDnon";
 //_sol2 switchMove "AmovPpneMstpSnonWnonDnon";
 //_sol3 switchMove "AmovPpneMstpSnonWnonDnon";
-_sol1 switchMove "";
-_sol2 switchMove "";
-_sol3 switchMove "";
+// Broadcast, and the queued pose dropped with it: a local clear released the captives on the
+// server alone, leaving every client a squad still crouching after it had walked away.
+{
+	[_x, ""] remoteExec ["switchMove", 0];
+	remoteExec ["", format ["rescue_pose_%1", netId _x]];
+} forEach [_sol1,_sol2,_sol3];
 
 _cpreward = 45;
 _apreward = 15;
