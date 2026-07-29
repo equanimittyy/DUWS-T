@@ -1,23 +1,35 @@
 # Known issues and untested surface
 
 What is broken, what is merely unverified, and what the previous developer worked around
-rather than fixed. Everything below the dump is reproducible from the source; nothing there
+rather than fixed. Everything outside the dump is reproducible from the source; nothing there
 is speculation.
 
-**How this doc is used.** Play-testing produces raw notes in the dump below, written as
-observed and before anyone knows whether they belong to a section further down. A note that
-turns out to name a known issue is folded into that section; a note that gets fixed is deleted
-outright, and no verification section is opened in its place. This doc carries what is still
-wrong or still unproven — not a record of work done, which is what git is for. The rest stay in
-the dump until they are diagnosed or dismissed. Checkboxes are ticked as each check is actually
-run, so an unticked box means untested rather than merely unfixed.
+**How this doc is used.** This doc carries what is still wrong or still unproven — not a record
+of work done, which is what git is for. Checkboxes are ticked as each check is actually run, so
+an unticked box means untested rather than merely unfixed.
 
 ## User dump
 
-- Side Missions should get the nice "mission initialisation" treatment to say "Operation Blue Thunder" for example
-- There needs to be a gap between Camel Cases for side-mission names
-- Limit to 7 missions randomly drawn from the pool of missions
-- Civilian Interaction is spoked as Alpha 1-1 (search bodies is not so copy that pattern)
+Raw play-test notes land between the markers below, written as observed and before anyone knows
+whether they name something further down.
+
+**Triaging the dump empties it.** Every note ends in one of two states, and neither leaves
+anything behind in this section:
+
+- **Fully addressed** — deleted outright. No section is opened for it, no verification checklist
+  is filed, and no note of the fix is kept anywhere in this doc; git carries what was done.
+- **Not fully addressed** — written into the section below that owns it, as the problem that
+  remains rather than as the note that was made. Partly fixed counts as not fully addressed, and
+  what gets recorded is only the part still wrong.
+
+The markers stay so the next round has somewhere to land. An empty block means the last round is
+fully triaged.
+
+_BEGIN-USER_
+-
+
+
+_END-USER_
 
 ## Untested since the client/server split
 
