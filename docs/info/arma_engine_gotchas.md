@@ -23,6 +23,41 @@ has to travel back to a client, `remoteExec` a reply function at the requesting 
 than trying to return a value — `fnc_pool_try_spend` and `fnc_pool_spend`
 (`src/duws/server/server_fnc_init.sqf`) are the two halves of that handshake.
 
+## The JIP queue is append-only unless the message carries an ID you choose
+
+**`remoteExec`'s third parameter decides what a machine joining *later* receives. A bare `true`
+appends the message under an engine-generated ID that nothing can reference, so it stays queued
+for the session and every future joiner runs it. An object or a string is addressable: a repeat
+call with the same ID replaces the first, `remoteExec ["", "thatID"]` deletes it, and an
+object-keyed entry is dropped when the object is deleted.**
+
+| Third parameter | Effect |
+|---|---|
+| absent / `false` | fire and forget, current machines only |
+| `true` | append under an engine-generated ID. Never referenceable, never removable |
+| a string | queue under that ID; a repeat call replaces, `remoteExec ["", id]` deletes |
+| an object | queue under the object's `netId`; dropped when the object is deleted |
+
+The cost of a bare `true` is not wrong state — an entry naming a deleted object is a no-op,
+because the adders guard on `isNull` and `addAction` on `objNull` does nothing. It is that a
+joiner executes the whole backlog before reaching anything that matters, and the backlog grows
+with the campaign rather than with the player count. One `addAction` per corpse the campaign ever
+produced is the shape that bites.
+
+**An object-keyed ID *is* that object's netId**, so two entries on one object evict each other and
+only the survivor reaches joiners. That is silent and it breaks behaviour: the sabotage laptop
+carried its own `addAction` and, in hardcore, the intel rotary from
+`server/dialog/fnc_actionRotary.sqf`, and the rotary evicted the sabotage action, so a joining
+client could not finish the mission.
+
+**How to apply:** key every entry that repeats. Where an object carries exactly one entry, pass
+the object — it self-cleans. Where two entries must both survive on one object, suffix a string
+per entry (`format ["fob_guards_%1", netId _fob]`); the trade is that a string entry naming a
+deleted object lingers, which is bounded and quiet where a collision is neither. Eviction is
+correct only when the later entry is *meant* to supersede the earlier one — a corpse entry
+replacing a spent live-body search on the same unit is right. A transient message (a one-off OSD
+or hint) should not be queued at all.
+
 ## Non-serializable handles must not live in the mission namespace
 
 **Never store a `DISPLAY`, `CONTROL`, `SCRIPT`, `LOCATION`, or other handle type in a
@@ -328,9 +363,10 @@ shot a client fires — and, once again, works perfectly for a hosting player, w
 
 **How to apply:** add the handler on every machine with `remoteExec ["addEventHandler", 0]`
 and have its body send the result back to whichever machine owns the state. Pass the object as
-the `remoteExec` JIP parameter so joining clients receive it and the queued message is dropped
-automatically when the object is deleted. The killhouse does this in
-`server/misc/fnc_createKillhouse.sqf`, bouncing each hit to `killhouse_srv_target_hit`.
+the `remoteExec` JIP parameter so joining clients receive it — see
+[§The JIP queue is append-only](#the-jip-queue-is-append-only-unless-the-message-carries-an-id-you-choose).
+The killhouse does this in `server/misc/fnc_createKillhouse.sqf`, bouncing each hit to
+`killhouse_srv_target_hit`.
 
 ## `setMarkerColor` accepts an inline `#(r,g,b,a)` string, not only a `CfgMarkerColors` class
 

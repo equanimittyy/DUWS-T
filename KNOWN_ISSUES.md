@@ -63,6 +63,20 @@ quickest way to tell which one is wrong.
 - [ ] From well away from the HQ, roll the debug payout until it lands on a town rather than a zone — the kind is a coin flip while both buckets hold stock. The town it reveals should be the nearest hidden one to *you*; one near base means the origin never arrived and the HQ fallback is carrying every call
 - [ ] Enter a town as a **client** on a dedicated server and watch that client's RPT. `fnc_civ_town_reveal` is named by the town's presence trigger, which is global, so an undefined-variable error there means the broadcast is not landing before the first player arrives
 
+## JIP queue: keyed, not yet exercised
+
+The `remoteExec` JIP queue was keyed throughout; the five bare `true` flags left are the
+compiled-code payloads in [Open defects](#open-defects). None of it has been exercised. A single
+hosted session never touches the queue, so every item here needs a host **plus a client that
+connects after the state exists**.
+
+- [ ] Hack a sabotage laptop, then connect a second client. The action must be gone from the laptop and the mission must not be completable twice
+- [ ] Toggle MHQ deploy/undeploy several times, then join. The new client sees the action matching the MHQ's current state, not the toggle history
+- [ ] Run several side missions, then join. The task list shows each once at its latest state, and the corpse-action backlog tracks corpses on the map rather than the campaign's kill count
+- [ ] Join with an HQ built. Every HQ action is present — quick-change, map board, building, satellite, black market, redeploy — not just the last one added per object
+- [ ] Settle whether `BIS_fnc_taskCreate` already delivers task state to joiners by itself. Every call runs server-side under a plain `call` and is never broadcast, yet clients see the tasks — which would make the 27 `BIS_fnc_taskSetState` broadcasts redundant rather than merely keyed
+- [ ] Settle whether `remoteExec ["", _id]` removes a queue entry when issued from a client. The one removal in the tree hands the call to the server rather than rely on it
+
 ## Heli-lift for non-host players
 
 `client/supports/fnc_helolift.sqf` used to create the transport helicopter on the calling
@@ -126,6 +140,9 @@ unverified premise.
 | `fnc_log` calls itself instead of writing the line | `shared/functions/fnc_log_init.sqf:25` | Unbounded recursion on every line at or below the active level: nothing reaches the RPT and the first logged milestone kills the boot. The `diag_log` -> `fnc_log` sweep has to skip this one file — it is where `diag_log` lives |
 | Two functions named by zone triggers are never broadcast | `fnc_captured`, `fnc_enterlocation`, registered in `server/server_fnc_init.sqf` without `publicVariable` | A `createTrigger` statement is global, which is why the civilian town trigger's `fnc_civ_handler_ravage` / `fnc_civ_handler_wbk` *are* broadcast. One of the two treatments is wrong: if the zone side is, every client spawns a nil on each zone entry and capture. The campaign is unaffected — the server runs its own copy — but a client RPT fills with undefined-variable errors |
 | `duws_all_helmets` and `duws_all_vests` are read but assigned nowhere in the mission | `server/misc/fnc_civ_handler_ravage.sqf:260,270` | RAVAGE only, and only on the zombies that draw no uniform — roughly 30%, since the uniform roll is `_isZombie && random 1 < 0.7`. Those two branches are the fallback for a unit with no uniform side to match, so they are the only readers, and `count` on an undefined variable throws where the assigned lists would have been used. Both were carried over untouched when RAVAGE was split out of `fnc_civ_handler` |
+| Five `remoteExec ["call", 0, true]` sites ship a whole `addAction` body as compiled code | `destroy_cache:123,158`, `rescue_pilot:336,407`, `steal_supply:87` | Queued under an engine-generated id nothing can address or remove, and the largest entries a joiner receives. Cannot be keyed until each body becomes a named function taking arguments |
+| `removeAction` takes index `0` rather than a captured `addAction` return | `client/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_success.sqf:24` | Works today because insertion order puts the sabotage add before the hardcore intel rotary, but the laptop carries two actions, which is exactly when index-`0` removal stops being safe |
+| An unbounded `waitUntil` sits on the joiner's branch of the client boot | `client/client_init.sqf:140` | Blocks on `HQ_pos_found_generated && chosen_settings` with no timeout, reached only when `WARCOM_init_done` is false. It hints the player every five seconds, so the stall is visible; proceeding on a timeout would boot a client into a campaign whose settings never arrived. What it lacks is a log line |
 | `staminaEnabled` is read but never assigned anywhere in the mission | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:67` | The whole `format` throws on `Undefined variable in expression: staminaenabled`, so the campaign settings summary hint never displays for any player. Confirmed in an RPT at the moment generation completes. `client/misc/fnc_sitrep_display.sqf:33` reads the same variable behind an `isNil` guard, which is why only this site fails — either assign it at setup or drop it from the hint |
 
 ## Zone generation is slow at large radii
