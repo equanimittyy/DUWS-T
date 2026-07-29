@@ -16,15 +16,16 @@ if (_bribe < 0) exitWith {
     ["ERROR", "CIV", format ["Menu row '%1' is not a request (from %2)", _row, name _caller]] call fnc_log;
 };
 
-// Both conditions below are the ones the menu greys client-side. Greying spares the player a
+// The conditions below are the ones the menu greys client-side. Greying spares the player a
 // pointless click and decides nothing; these reads are what actually hold. Conversation range
 // matches the 3 m the menu greys at.
 if (_caller distance _civilian > 3) exitWith {};
 if (_civilian getVariable ["DUWS_civ_closed", false]) exitWith {};
 
-// An offer already on the table is not re-rolled. Without this a player can leave the bribe
-// prompt open, pick the same row again, and roll until it comes back accept.
-if !((_civilian getVariable ["DUWS_civ_pending", []]) isEqualTo []) exitWith {};
+// An arrest in flight is an exchange in flight. fnc_civ_arrest claims its own flag and never the
+// closed one, so without this a second player whose dialog was already open can still talk to
+// someone who is being held at gunpoint.
+if (_civilian getVariable ["DUWS_civ_arrested", false]) exitWith {};
 
 // Intel alone is capped per player, one ask per 30-minute economy tick -- the same window and
 // the same clock the body search spends, cleared for everyone by fnc_zonesundercontrol. Flat
@@ -37,9 +38,15 @@ private _opener = switch (toUpper _row) do {
     case "TOOLKIT": { "STR_DUWS_T_ASK_TOOLKIT_hi" };
     default { "STR_DUWS_T_askopforloc" };
 };
-// Spent on the attempt, not on the answer, exactly as the body search spends its own. A refusal
-// that cost nothing would let a player work a hostile town asking every local in it until one
-// said yes, which is the farming the reaction curve exists to price.
+// Both spends land on the attempt, not on the answer, exactly as the body search spends its own.
+// A refusal that cost nothing would let a player work a hostile town asking every local in it
+// until one said yes, which is the farming the reaction curve exists to price.
+//
+// The civilian is claimed here rather than where the roll resolves, three seconds below. Two
+// players can be stood at the same local in co-op, and a flag written only on the way out leaves
+// the check above passing for both of them: the same person then answers twice, paying two
+// medikits, two intel drops, or recruiting into one group while already in another.
+_civilian setVariable ["DUWS_civ_closed", true, true];
 if ((toUpper _row) isEqualTo "INTEL") then {
     _caller setVariable ["DUWS_civ_intel_asked", true, true];
 };

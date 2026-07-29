@@ -1,7 +1,7 @@
-// Locality: server. Ends a civilian as a contact: a refusal, a declined bribe, and one the
-// player cannot pay all land here.
+// Locality: server. The refused path: a refusal, a declined bribe, and one the player cannot pay
+// all land here. The civilian was already spent by fnc_civ_request when the row was picked.
 //
-// Closing costs the player a person, which is what stops the reaction curve being decorative. A
+// Refusing costs the player a person, which is what stops the reaction curve being decorative. A
 // roll that consumed nothing would let a player at -20 work down a fifty-strong town until one
 // civilian said yes -- the same failure the heal action had before fnc_civ_healed replaced it.
 if (!isServer) exitWith {};
@@ -9,10 +9,6 @@ if (!isServer) exitWith {};
 params ["_civilian", "_caller", ["_row", ""]];
 
 if (isNull _civilian) exitWith {};
-
-// Broadcast: the menu greys its conversational rows from this, and the dialog is built on the
-// client that opens it.
-_civilian setVariable ["DUWS_civ_closed", true, true];
 
 // Closed against every row, not just the one that was asked. The refusal is the person deciding
 // they are done talking, so a second row would be the same answer with extra steps.

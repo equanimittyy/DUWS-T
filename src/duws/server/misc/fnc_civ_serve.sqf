@@ -8,12 +8,6 @@ if (isNull _civilian || isNull _caller) exitWith {};
 
 if (([_row] call fnc_civ_rowPrice) < 0) exitWith {};
 
-// Closed before the payout, not after. Both the intel payout and the recruit hand-off take time,
-// and a second click inside that window would otherwise be served twice. One favour ends the
-// conversation outright: a person who has helped is done with the player, so a town is a finite
-// number of favours rather than a queue to be worked down one row at a time.
-_civilian setVariable ["DUWS_civ_closed", true, true];
-
 // Both item rows drop their goods at the civilian's feet on the same 60 s timer. The timer is
 // the same for both now that neither carries a price or a roll of its own: the item is handed
 // over to be picked up, and a persistent one would let a single friendly town furnish a squad's

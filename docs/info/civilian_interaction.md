@@ -62,9 +62,19 @@ civilians per successful deal against one in ten at a friendly one, and the popu
 until it respawns.
 
 A person who has helped is as finished with the player as one who refused, so a town is a finite
-number of favours rather than a menu worked down row by row on one obliging local. `fnc_civ_serve`
-sets `DUWS_civ_closed` *before* the payout, because both the intel payout and the recruit hand-off
-take time and a second click inside that window would otherwise be served twice.
+number of favours rather than a menu worked down row by row on one obliging local.
+
+**One per civilian, not one per player, and claimed when the row is picked rather than when the
+roll resolves.** `fnc_civ_request` sets `DUWS_civ_closed` before the three-second pause it spends
+speaking the opener, so the flag is broadcast while the exchange is still in flight. Written on the
+way out instead — in `fnc_civ_serve` or `fnc_civ_close` — it left three seconds in which a second
+player stood at the same local passed the same check, and the person answered both: two medikits,
+two intel drops, or a recruit joining one group while already in another.
+
+An arrest is one of the exchanges a civilian only has one of, so it and a conversation block each
+other. `fnc_civ_arrest` claims `DUWS_civ_arrested` before its own pause and tests
+`DUWS_civ_closed`; `fnc_civ_request` tests both. Neither flag is ever cleared, so a detainee who is
+released stays spent.
 
 ## Range: two distances, on purpose
 
@@ -132,8 +142,8 @@ ever arrives over the wire.
 | Variable | Locality | Purpose |
 |---|---|---|
 | `DUWS_civ_stopped` | broadcast | Set when call over is answered. The menu action's condition gates on it, so nothing before it exists as an entry point |
-| `DUWS_civ_closed` | broadcast | One exchange spends it — served, refused, or a bribe declined or unaffordable |
-| `DUWS_civ_arrested` | broadcast | One hands-up attempt per civilian, spent on the attempt |
+| `DUWS_civ_closed` | broadcast | Claimed when any player picks a conversational row, whatever the roll then answers |
+| `DUWS_civ_arrested` | broadcast | One hands-up attempt per civilian, claimed the same way |
 | `DUWS_civ_panicked` | broadcast | Set by the panic sweep, cleared after a flat 60 s. Suppresses the call-over |
 | `isSurrendered` | broadcast | Held at gunpoint. Gates Search and Release, and makes the panic sweep skip them |
 | `DUWS_civ_pending` | server only | `[caller, row, amount]`, written when a roll returns `bribe`, cleared when the prompt is answered |
