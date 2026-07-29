@@ -21,7 +21,7 @@ _terminal addAction [
         ]] call fnc_open_action_menu;
     },
     [],
-    85,
+    90,
     true,
     true,
     "",
@@ -41,7 +41,7 @@ _terminal addAction [
         ]] call fnc_open_action_menu;
     },
     [],
-    84,
+    90,
     true,
     true,
     "",

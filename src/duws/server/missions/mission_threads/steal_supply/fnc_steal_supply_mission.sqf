@@ -77,7 +77,7 @@ clearBackpackCargoGlobal _truck1;
             };
         },
         [],
-        6,
+        80,
         true,
         true,
         "",

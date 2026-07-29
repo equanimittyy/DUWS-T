@@ -21,7 +21,7 @@ private _actionID = _unit addAction [
         [_target, _caller] remoteExec ["fnc_civ_release", 2];
     },
     [],
-    6,
+    50,
     true,
     true,
     "",

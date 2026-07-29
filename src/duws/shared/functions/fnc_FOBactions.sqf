@@ -8,20 +8,20 @@ if (_fob getVariable ["FOB_actions_done", false]) exitWith {};
 _fob setVariable ["FOB_actions_done", true];
 if ((vehiclevarname player) in Squad_Leaders) then {
     _fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_vw32hahc"),fnc_FOB_Request_Menu, [], 100, true, true, "", "_this == player"];
-    _fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_l0xark5g"),fnc_squad_manage, [], 95, true, true, "", "_this == player"];
+    _fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_l0xark5g"),fnc_squad_manage, [], 100, true, true, "", "_this == player"];
 };
     
-_fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_iggpsdqo"),fnc_FOBmanager, [], 0, true, true, "", "_this == player"];
+_fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_iggpsdqo"),fnc_FOBmanager, [], 100, true, true, "", "_this == player"];
     
 if (support_armory_available) then {
-    _fob addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [], 90, true, true, "", "_this == player"];
+    _fob addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [], 80, true, true, "", "_this == player"];
 };
 
 if (support_halo_available) then {
-    _fob addAction [ACT_MOVE("STR_DUWS_T_foldimok"), fnc_ghst_halo, [false,600,70], 0, true, true, "","_this == player"];
+    _fob addAction [ACT_MOVE("STR_DUWS_T_foldimok"), fnc_ghst_halo, [false,600,70], 70, true, true, "","_this == player"];
     if ((vehiclevarname player) in Squad_Leaders) then {
-        _fob addAction [ACT_MOVE("STR_DUWS_T_u6btu73i"), fnc_ghst_halo, [true,600,70], 0, true, true, "","_this == player"];
-        _fob addAction [ACT_MOVE("STR_DUWS_T_halo_ai_only"), fnc_ghst_halo, [true,600,70,true], 0, true, true, "","_this == player"];
+        _fob addAction [ACT_MOVE("STR_DUWS_T_u6btu73i"), fnc_ghst_halo, [true,600,70], 70, true, true, "","_this == player"];
+        _fob addAction [ACT_MOVE("STR_DUWS_T_halo_ai_only"), fnc_ghst_halo, [true,600,70,true], 70, true, true, "","_this == player"];
     };  
 };
 
@@ -56,13 +56,13 @@ if ((vehiclevarname player) in game_master) then {
                 hint (localize "STR_DUWS_T_restcooldownhint");
             };
         },
-        "",  // 传递参数
-        0,   // 优先级
+        "",         
+        60,         
         true, true, "", "_this == player"
     ];
 };
 
-[[_fob,[ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 0, false, false, "", "_this distance _target < 12"]],"addAction",true,true] call BIS_fnc_MP;
+[[_fob,[ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 60, false, false, "", "_this distance _target < 12"]],"addAction",true,true] call BIS_fnc_MP;
 // === 显示所有任务冷却（仅限 player1） ===
 _fob addaction [
     ACT_UTIL("STR_DUWS_T_SHOW_MISSION_COOLDOWNS"),
@@ -131,7 +131,7 @@ _fob addaction [
         hint (_lines joinString "\n");
     },
     [],
-    0,
+    20,
     true,
     true,
     "",

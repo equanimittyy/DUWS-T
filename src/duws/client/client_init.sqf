@@ -243,7 +243,7 @@ if (_difficulty_setting < 2 || (difficultyOption "mapContentFriendly") == 1) the
 // INIT Earplugs -- available on foot as well as mounted; fadeSound is a client-wide setting,
 // so nothing about the toggle was ever vehicle-specific. The action dies with the body, so
 // onPlayerRespawn.sqf re-adds it.
-player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, [], 0, true, true, "", "_this == player"];
+player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, [], 20, true, true, "", "_this == player"];
 
 // Hardcore body search. Same re-add reason as the earplugs above: it dies with the body.
 [] call fnc_intel_search_action;
@@ -253,7 +253,7 @@ player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, [], 0, true, tru
 // game_master is the existing campaign-control list. Attached to the player rather than an object
 // so it is reachable anywhere on the map, and it dies with the body, so onPlayerRespawn re-adds.
 if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1 && {(vehiclevarname player) in game_master}) then {
-	player addAction [ACT_UTIL("STR_DUWS_T_DEBUG_ACTION"), fnc_debug_menu, [], 0, true, true, "", "_this == player"];
+	player addAction [ACT_UTIL("STR_DUWS_T_DEBUG_ACTION"), fnc_debug_menu, [], 20, true, true, "", "_this == player"];
 };
 
 // Create Diary/Help entry on the Map
@@ -520,7 +520,7 @@ if (isNil {player getVariable "DUWS_disguiseMenu_actionAdded"}) then {
         {},
         [],
         1,
-        0,
+        80,
         false,
         false
     ] call BIS_fnc_holdActionAdd;

@@ -21,7 +21,7 @@ _depot addAction [
         ]] call fnc_open_action_menu;
     },
     _trg,
-    70,
+    90,
     true,
     true,
     "",

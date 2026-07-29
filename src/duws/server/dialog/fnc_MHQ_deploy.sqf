@@ -46,8 +46,8 @@ MHQ_ammobox setDir _mhqDir;
 // Put some crap in the ammobox
 [MHQ_ammobox,"blufor"] spawn fnc_fill_ammobox; 
 
-[[MHQ_ammobox,[ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal,[], 0, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
-[[MHQ_ammobox,[ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 0, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
+[[MHQ_ammobox,[ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal,[], 80, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
+[[MHQ_ammobox,[ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 60, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
 
 sleep 0.2;
 

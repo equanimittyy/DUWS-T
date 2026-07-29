@@ -18,7 +18,7 @@ _unit addAction [
         _target removeAction _actionId;
     },
     [],
-    6,
+    50,
     true,
     true,
     "",

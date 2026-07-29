@@ -104,7 +104,7 @@ if (isNil "fnc_intel_container_addAction") then {
             {},
             [],
             1,
-            0,
+            30,
             true,
             false
         ] call BIS_fnc_holdActionAdd;

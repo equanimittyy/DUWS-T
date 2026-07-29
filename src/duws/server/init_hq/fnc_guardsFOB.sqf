@@ -108,7 +108,7 @@ _fob setVariable ["FOB_guard_busy", false];
 // init_hq/fnc_fortifyFOB.sqf, and admits every playable slot as things stand.
 if (isNil {_fob getVariable "FOB_guard_action_done"}) then {
     _fob setVariable ["FOB_guard_action_done", true];
-    [_fob,[ACT_COMMIT("STR_DUWS_T_p5i8fe14"), fnc_reguardFOB, [], 0, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
+    [_fob,[ACT_COMMIT("STR_DUWS_T_p5i8fe14"), fnc_reguardFOB, [], 10, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
 };
 
 

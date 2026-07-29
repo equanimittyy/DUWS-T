@@ -672,7 +672,7 @@ if (!isNull _hqObj) then {
 
 if (!isNull _medTent) then {
     [_medTent] remoteExec ["fnc_addHQSatelliteActions", 0, true];
-    [_medTent, [ACT_AID("STR_DUWS_T_xfgokhbc"), { [] spawn fnc_AI_rearm; }, [], 0, false, true, "", "_this distance _target < 12"]] remoteExec ["addAction", 0];
+    [_medTent, [ACT_AID("STR_DUWS_T_xfgokhbc"), { [] spawn fnc_AI_rearm; }, [], 60, false, true, "", "_this distance _target < 12"]] remoteExec ["addAction", 0];
 };
 
 if (!isNull _hqObj) then {

@@ -53,7 +53,7 @@ _helo setPos [_vehpos select 0, _vehpos select 1, 200];// set height
 //_helo setvelocity [0,0,200];
 
 _helo flyInHeight 50;
-_helo addAction [ACT_MOVE("STR_DUWS_T_helotaxi_action_wp"), fnc_mapclickhelo, [], 0, true, true, "", "vehicle _this == _target"];
+_helo addAction [ACT_MOVE("STR_DUWS_T_helotaxi_action_wp"), fnc_mapclickhelo, [], 70, true, true, "", "vehicle _this == _target"];
  
 _heloGroup = _veh select 2;
 _heloGroup deleteGroupWhenEmpty true;
@@ -156,7 +156,7 @@ while {_inVehCheck} do {
 	if (vehicle player != _helo) then {
 		taxiCanTakeOff = false; 
 		[localize "STR_DUWS_T_chariot", localize "STR_DUWS_T_helotaxi_notaboard"] remoteExec ["fnc_duws_dialogue", 0];
-		_helo addAction [ACT_MOVE("STR_DUWS_T_helotaxi_action_lz"), fnc_mapclickhelo, [], 0, true, true, "", "vehicle _this == _target"];
+		_helo addAction [ACT_MOVE("STR_DUWS_T_helotaxi_action_lz"), fnc_mapclickhelo, [], 70, true, true, "", "vehicle _this == _target"];
 	} else {
 		_inVehCheck = false;
 	};

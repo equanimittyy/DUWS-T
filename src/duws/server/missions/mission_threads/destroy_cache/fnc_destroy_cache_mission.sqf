@@ -113,7 +113,7 @@ clearBackpackCargoGlobal _vehicle_7;
             };
         },
         [],
-        6,
+        80,
         true,
         true,
         "",
@@ -148,7 +148,7 @@ clearBackpackCargoGlobal _vehicle_8;
             };
         },
         [],
-        6,
+        80,
         true,
         true,
         "",

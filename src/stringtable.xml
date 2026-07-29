@@ -1900,8 +1900,8 @@
                 <German>Ausruhen/Heilen (3 Std.)</German>
                 <Spanish>Descanzar/Curar (3hrs)</Spanish>
                 <Chinesesimp>休息/治愈 (3小时)</Chinesesimp>
-                <Original>Rest &amp; Heal</Original>
-                <English>Rest &amp; Heal</English>
+                <Original>Rest / Heal</Original>
+                <English>Rest / Heal</English>
             </Key>
                     <Key ID="STR_DUWS_T_repair_select_pylon">
                 <Original>Select pylon and weapon.</Original>

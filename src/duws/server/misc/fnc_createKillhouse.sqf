@@ -1268,7 +1268,7 @@ if (count _computerObjects > 0) then {
                 ]] call fnc_open_action_menu;
             },
             [],
-            6,
+            90,
             true,
             true,
             "",
@@ -1281,9 +1281,9 @@ if (count _computerObjects > 0) then {
 // same as every other arsenal point in the mission. Broadcast like the terminal above: the
 // composition spawns server-side, but the entries have to exist on each client.
 {
-    [_x, [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 6, false, false, "",
+    [_x, [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 80, false, false, "",
         "_this distance _target < 3 && support_armory_available"]] remoteExec ["addAction", 0];
-    [_x, [ACT_EQUIP("STR_DUWS_T_QUICK_KITS"), { [] call fnc_quick_kits_menu; }, [], 6, false, false, "",
+    [_x, [ACT_EQUIP("STR_DUWS_T_QUICK_KITS"), { [] call fnc_quick_kits_menu; }, [], 80, false, false, "",
         "_this distance _target < 3"]] remoteExec ["addAction", 0];
 } forEach _arsenalObjects;
 

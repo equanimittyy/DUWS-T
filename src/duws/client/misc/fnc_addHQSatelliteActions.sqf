@@ -26,7 +26,7 @@ if ((vehiclevarname player) in game_master) then {
             [_caller] remoteExec ["fnc_restHealServer", 2];
         },
         [],
-        0,
+        60,
         true,
         true,
         "",

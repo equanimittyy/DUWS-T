@@ -72,7 +72,7 @@ _corpse setVariable ["corpse_target_pos", _targetPos];
     {},                                                                 // 中断代码
     [_targetPos],                                                       // 传递参数
     2,                                                                  // 持续时间（秒）
-    1,                                                                  // 优先级
+    30,                                                                  // 优先级
     true,                                                               // 完成后移除
     false                                                               // 不在昏迷状态显示
 ] call BIS_fnc_holdActionAdd;

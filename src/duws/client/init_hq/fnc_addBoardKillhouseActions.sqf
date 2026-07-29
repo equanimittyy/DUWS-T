@@ -20,7 +20,7 @@ _board addAction [
         player setPosWorld _tp;
         hint localize "STR_DUWS_KILLHOUSE_ARRIVE";
     },
-    [], 65, true, true, "", "true"
+    [], 70, true, true, "", "true"
 ];
 _board addAction [
     ACT_MOVE("STR_DUWS_KILLHOUSE_TELEPORT_B"),
@@ -30,13 +30,13 @@ _board addAction [
         player setPosWorld _tp;
         hint localize "STR_DUWS_KILLHOUSE_ARRIVE";
     },
-    [], 65, true, true, "", "true"
+    [], 70, true, true, "", "true"
 ];
 
 _board addAction [
     ACT_UTIL("STR_DUWS_T_civ_mapview_action"),
     { call fnc_civ_mapView },
-    [], 5, true, true, "", "_this == player"
+    [], 20, true, true, "", "_this == player"
 ];
 
 // 添加基地快速移动动作（在白板地图上）
@@ -84,7 +84,7 @@ if (isNil {_board getVariable "board_fasttravel_actions_done"}) then {
             };
         },
         [],
-        6,
+        70,
         true,
         true,
         "",

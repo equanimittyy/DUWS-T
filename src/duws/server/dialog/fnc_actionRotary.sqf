@@ -34,7 +34,7 @@ switch (_iconType) do {
 	{},												// Code executed on interrupted
 	[],												// Arguments passed to the scripts as _this select 3
 	6,												// Action duration in seconds
-	6,												// Priority
+	30,												// Priority
 	true,											// Remove on completion
 	true											// Show in unconscious state
 ] remoteExec ["BIS_fnc_holdActionAdd", [0,-2] select isDedicated, _object];

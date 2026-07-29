@@ -331,7 +331,7 @@ _depot addAction [
         ]] call fnc_open_action_menu;
     },
     [_trg, _fnc_appearance, _fnc_pylons],
-    75,
+    90,
     true,
     true,
     "",

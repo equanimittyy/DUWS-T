@@ -213,7 +213,7 @@ _liftActionID = player addAction [
     ACT_MOVE("STR_DUWS_T_helolift_action_wp"),
     fnc_mapclicklift,
     [],
-    0,
+    70,
     true,
     true,
     "",

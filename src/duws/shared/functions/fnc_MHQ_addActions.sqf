@@ -20,14 +20,14 @@ if (_addAction == "select") then {
 if (_addAction == "deploy") then {
 	if ((vehiclevarname player) in Squad_Leaders) then {
 		removeAllActions MHQ1;
-		MHQ1 addaction [ACT_COMMIT("STR_DUWS_T_rqzxlvf4"),{[] remoteExec ["fnc_MHQ_deploy",2]},[],1.5,true,true,"","true"];
+		MHQ1 addaction [ACT_COMMIT("STR_DUWS_T_rqzxlvf4"),{[] remoteExec ["fnc_MHQ_deploy",2]},[],10,true,true,"","true"];
 	};
 };
 
 if (_addAction == "undeploy") then {
 	if ((vehiclevarname player) in Squad_Leaders) then {
 		removeAllActions MHQ1;
-		MHQ1 addaction [ACT_COMMIT("STR_DUWS_T_fjpyu3zb"),{[] remoteExec ["fnc_MHQ_undeploy",2]},[],1.5,true,true,"","true"];
+		MHQ1 addaction [ACT_COMMIT("STR_DUWS_T_fjpyu3zb"),{[] remoteExec ["fnc_MHQ_undeploy",2]},[],10,true,true,"","true"];
 	};
 };
 

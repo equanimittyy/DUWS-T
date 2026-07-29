@@ -190,7 +190,7 @@ switch (VERSION_X) do {
 };
 
 // ADD SABOTAGE ACTION TO LAPTOP
-[_laptop,[ACT_COMMIT("STR_DUWS_T_p3200mf5"), fnc_sabotage_laptop_success, [_MissionPos,_targetpos,_mission_name,_markername,_markername2,_radius], 0, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated,true];
+[_laptop,[ACT_COMMIT("STR_DUWS_T_p3200mf5"), fnc_sabotage_laptop_success, [_MissionPos,_targetpos,_mission_name,_markername,_markername2,_radius], 10, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated,true];
 
 // Put an intel action on LAPTOP
 if (hardcore_mode_enable) then {

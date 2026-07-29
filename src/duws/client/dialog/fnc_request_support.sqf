@@ -39,9 +39,9 @@ switch (_index2) do {
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		lbSetColor [2103, index_support_armory, [0, 1, 0, 1]];
 		support_armory_available = true;
-		bluHQ_object addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [], 0, true, true, "", "_this == player"];
+		bluHQ_object addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [], 80, true, true, "", "_this == player"];
 		{
-			_x addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [], 0, true, true, "", "_this == player"];
+			_x addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [], 80, true, true, "", "_this == player"];
 		} forEach (Array_of_FOBS);
 
 		playSound "loadgun";
@@ -125,17 +125,17 @@ case 5: {
     support_halo_available = true;
 
     // 添加三个 HALO 动作：单人、全组、仅 AI
-    bluHQ_object addAction [ACT_MOVE("STR_DUWS_T_foldimok"), fnc_ghst_halo, [false,600,70], 0, true, true, "","alive player"];
+    bluHQ_object addAction [ACT_MOVE("STR_DUWS_T_foldimok"), fnc_ghst_halo, [false,600,70], 70, true, true, "","alive player"];
     if ((vehiclevarname player) in Squad_Leaders) then {
-        bluHQ_object addAction [ACT_MOVE("STR_DUWS_T_u6btu73i"), fnc_ghst_halo, [true,600,70], 0, true, true, "","alive player"];
-        bluHQ_object addAction [ACT_MOVE("STR_DUWS_T_halo_ai_only"), fnc_ghst_halo, [true,600,70,true], 0, true, true, "","alive player"];
+        bluHQ_object addAction [ACT_MOVE("STR_DUWS_T_u6btu73i"), fnc_ghst_halo, [true,600,70], 70, true, true, "","alive player"];
+        bluHQ_object addAction [ACT_MOVE("STR_DUWS_T_halo_ai_only"), fnc_ghst_halo, [true,600,70,true], 70, true, true, "","alive player"];
     };
 
     {
-        _x addAction [ACT_MOVE("STR_DUWS_T_foldimok"), fnc_ghst_halo, [false,600,70], 0, true, true, "","alive player"];
+        _x addAction [ACT_MOVE("STR_DUWS_T_foldimok"), fnc_ghst_halo, [false,600,70], 70, true, true, "","alive player"];
         if ((vehiclevarname player) in Squad_Leaders) then {
-            _x addAction [ACT_MOVE("STR_DUWS_T_u6btu73i"), fnc_ghst_halo, [true,600,70], 0, true, true, "","alive player"];
-            _x addAction [ACT_MOVE("STR_DUWS_T_halo_ai_only"), fnc_ghst_halo, [true,600,70,true], 0, true, true, "","alive player"];
+            _x addAction [ACT_MOVE("STR_DUWS_T_u6btu73i"), fnc_ghst_halo, [true,600,70], 70, true, true, "","alive player"];
+            _x addAction [ACT_MOVE("STR_DUWS_T_halo_ai_only"), fnc_ghst_halo, [true,600,70,true], 70, true, true, "","alive player"];
         };
     } forEach (Array_of_FOBS);
 

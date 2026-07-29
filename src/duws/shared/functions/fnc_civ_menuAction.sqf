@@ -22,7 +22,7 @@ private _actionID = _unit addAction [
         [_target] spawn fnc_civ_menu;
     },
     [],
-    6,
+    50,
     true,
     true,
     "",

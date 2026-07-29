@@ -36,7 +36,7 @@ private _cond =
     {},
     [],
     6,
-    6,
+    30,
     // Not removed on completion: the spent flag in the condition is what hides it, so it returns
     // by itself when the economy tick clears the flag. Removing it here would need a re-add
     // driven from the tick, on every client, for a state the condition already reads.

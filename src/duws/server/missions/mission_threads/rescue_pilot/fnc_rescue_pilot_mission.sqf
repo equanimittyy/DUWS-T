@@ -247,7 +247,7 @@ private _fncScript = {
                     [_caller, _pilot] call DUWS_fnc_dropPilot;
                 },
                 [],
-                1, true, true, "", "player == _target", 5
+                40, true, true, "", "player == _target", 5
             ];
             _caller setVariable ["dropAction", _dropAction];
             
@@ -260,7 +260,7 @@ private _fncScript = {
                     [_caller, _pilot] call DUWS_fnc_putInVehicle;
                 },
                 [],
-                1, true, true, "",
+                40, true, true, "",
                 "player == _target && !isNull (_target getVariable ['carriedPilot', objNull]) && {alive (_target getVariable ['carriedPilot', objNull])} && {count (nearestObjects [_target, ['Car','Tank','Helicopter','Ship'], 5]) > 0}",
                 5
             ];
@@ -328,7 +328,7 @@ private _fncScript = {
                         _caller setVariable ["carriedPilot", _target, true];
                     },
                     [],
-                    1, true, true, "",
+                    40, true, true, "",
                     "!isNull _target && {!(_target getVariable ['isCarried', false])} && {alive _target} && {(_this distance _target) < 2.5}",
                     5
                 ];
@@ -366,7 +366,7 @@ private _fncScript = {
                     [_caller, _pilot] call DUWS_fnc_takeOutFromVehicle;
                 },
                 [],
-                1, true, true, "", "vehicle _this == _this", 5
+                40, true, true, "", "vehicle _this == _this", 5
             ];
             _vehicle setVariable ["takeOutActionID", _actionID];
         };
