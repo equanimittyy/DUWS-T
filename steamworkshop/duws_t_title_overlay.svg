@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2560 1600" width="2560" height="1600">
+  <title>DUWS-T Steam Workshop title overlay</title>
+
+  <!-- Lifted off the v1.6 announcement screenshot, so the coordinates are that shot's
+       pixels (2560x1600, 16:10). For a 16:9 banner set viewBox="0 0 2560 1440", put
+       transform="translate(0,-160)" on #caption to keep its 46 px bottom margin, and
+       drop the gradient radius to 1468 (that frame's half-diagonal).
+
+       The source face is a Futura-style geometric sans - small x-height, single-storey a,
+       round i-dot - and is not redistributable; Jost* (SIL OFL) is the closest free
+       stand-in. Each font-size / letter-spacing pair is solved so the line's inked width
+       matches the screenshot, so they stop being right if the face is swapped. -->
+
+  <defs>
+    <!-- The screenshot's own vignette, fitted against its sky: alpha = 0.30 * r^2, r in
+         half-diagonals from the frame centre. It is not a text backing - the lettering is
+         hard-edged with no shadow or glow - so drop this group when the shot underneath
+         already carries one. -->
+    <radialGradient id="vignette-ramp" gradientUnits="userSpaceOnUse" cx="1280" cy="800" r="1509">
+      <stop offset="0"    stop-color="#000000" stop-opacity="0"/>
+      <stop offset="0.25" stop-color="#000000" stop-opacity="0.019"/>
+      <stop offset="0.5"  stop-color="#000000" stop-opacity="0.075"/>
+      <stop offset="0.7"  stop-color="#000000" stop-opacity="0.147"/>
+      <stop offset="0.85" stop-color="#000000" stop-opacity="0.217"/>
+      <stop offset="1"    stop-color="#000000" stop-opacity="0.30"/>
+    </radialGradient>
+  </defs>
+
+  <g id="vignette">
+    <rect x="0" y="0" width="2560" height="1600" fill="url(#vignette-ramp)"/>
+  </g>
+
+  <g id="title" fill="#FFFFFF"
+     font-family="Jost, Futura, 'Futura PT', 'Twentieth Century', 'Century Gothic', sans-serif"
+     font-weight="400">
+
+    <!-- Cap height 233 px, ink spanning x=47..1246 on the baseline. -->
+    <text id="wordmark" x="20" y="314" font-size="331.43" letter-spacing="12.8">DUWS-<tspan fill="#EE4027">T</tspan></text>
+
+    <!-- Centred block; the source's leading is uneven (154 px then 147 px), hence the
+         per-line baselines. -->
+    <g id="caption" text-anchor="middle" font-size="154">
+      <text x="2052" y="1252" letter-spacing="5.2">v1.6 update</text>
+      <text x="2052" y="1406" letter-spacing="0.7">vehicle</text>
+      <text x="2052" y="1553" letter-spacing="2">customize</text>
+    </g>
+  </g>
+</svg>
