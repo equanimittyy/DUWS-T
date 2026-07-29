@@ -34,16 +34,16 @@ _board addAction [
 ];
 
 _board addAction [
-    ACT_UTIL("STR_DUWS_T_civ_mapview_action"),
+    ACT_SECONDARY_MENU("STR_DUWS_T_civ_mapview_action"),
     { call fnc_civ_mapView },
-    [], 20, true, true, "", "_this == player"
+    [], 90, true, true, "", "_this == player"
 ];
 
 // 添加基地快速移动动作（在白板地图上）
 if !(_board getVariable ["board_fasttravel_actions_done", false]) then {
     _board setVariable ["board_fasttravel_actions_done", true];
     _board addAction [
-        ACT_MOVE("STR_DUWS_T_FAST_TRAVEL_BASE"),
+        ACT_SECONDARY_MENU("STR_DUWS_T_FAST_TRAVEL_BASE"),
         {
             params ["_target", "_caller", "_actionId"];
             // 避免重复打开地图
@@ -84,7 +84,7 @@ if !(_board getVariable ["board_fasttravel_actions_done", false]) then {
             };
         },
         [],
-        70,
+        90,
         true,
         true,
         "",

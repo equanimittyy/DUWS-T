@@ -25,7 +25,7 @@ bucket; call sites pass a stringtable key and never write markup themselves.
 | Bucket | Hex | Priority | Means |
 | --- | --- | --- | --- |
 | `ACT_PRIMARY_MENU` | `#15ff00` | 100 | Command: directs your forces or your base. Uppercased by the macro |
-| `ACT_SECONDARY_MENU` | `#0d9900` | 90 | Services and situational menus — the command hue one tier down |
+| `ACT_SECONDARY_MENU` | `#0d9900` | 90 | Services and situational entries — the command hue one tier down |
 | `ACT_EQUIP` | `#ff8000` | 80 | Gives or swaps gear |
 | `ACT_MOVE` | `#00b7ff` | 70 | Relocates you, or commits a vehicle to a destination |
 | `ACT_AID` | `#00b7ff` | 60 | Heals or rearms |
@@ -73,6 +73,14 @@ Priority and colour follow the bucket, so neither is repeated per row.
 | Killhouse Controls | `STR_DUWS_T_KILLHOUSE_CONTROLS` | Multi-screen computer | 4 |
 | Vehicle Recycling | `STR_DUWS_T_VEHICLE_RECYCLING` | Depot | 2 |
 | Vehicle Customization | `STR_DUWS_T_VEHICLE_CUSTOMIZATION` | Depot | 4 |
+| View Map | `STR_DUWS_T_civ_mapview_action` | HQ map board | — |
+| Fast Travel | `STR_DUWS_T_FAST_TRAVEL_BASE` | HQ map board | — |
+
+The two board entries open a readout and a map-click rather than a listbox, so they carry no row
+count. Fast Travel is a relocation and belongs to `ACT_MOVE` by consequence; it sits here so the
+map board reads as one group and does not disappear into the same blue as the earplugs toggle.
+Both outrank the Killhouse teleports on the same board, and View Map is added first, so it heads
+the list.
 
 ### Equip
 
@@ -89,7 +97,6 @@ Priority and colour follow the bucket, so neither is repeated per row.
 | --- | --- | --- |
 | HALO Solo / Group / Group (AI Only) | `STR_DUWS_T_foldimok`, `…_u6btu73i`, `…_halo_ai_only` | HQ, FOB, squad-leader units |
 | Killhouse A / B | `STR_DUWS_KILLHOUSE_TELEPORT_A` / `_B` | HQ map board |
-| Fast Travel | `STR_DUWS_T_FAST_TRAVEL_BASE` | HQ map board |
 | Set Waypoints | `STR_DUWS_T_helotaxi_action_wp`, `…_boattaxi_action_dest`, `…_helolift_action_wp` | Taxi helo, taxi boat, `player` during a lift |
 | Set LZ | `STR_DUWS_T_helotaxi_action_lz` | Taxi helicopter |
 | Set Destination | `STR_DUWS_T_boattaxi_action_loc` | Taxi boat |
@@ -128,7 +135,6 @@ out the surrender animation and reopening.
 | Debug | `STR_DUWS_T_DEBUG_ACTION` | `player` — needs the `DUWS_Debug` parameter and `game_master` |
 | Reset Squad Leader | `STR_DUWS_T_4jabuvz6` | HQ building |
 | Mission Cooldowns | `STR_DUWS_T_SHOW_MISSION_COOLDOWNS` | HQ building, FOB — `player1` only |
-| View Map | `STR_DUWS_T_civ_mapview_action` | HQ map board |
 
 ### Commit
 
