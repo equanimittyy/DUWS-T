@@ -105,6 +105,8 @@ _civilianMarker setMarkerText "Informant";
 _civilianMarker setMarkerSize [1, 1];
 
 // 任务提示（只保留文字提示，不再重复广播标记）
+// TODO: revisit the channel -- every mission thread announces through a hint box, so moving off
+// it is one pass across all of them rather than a change here.
 [localize "STR_DUWS_T_c14", {hint _this}] remoteExec ["BIS_fnc_Spawn", 0];
 
 // 持续播放惊恐动画

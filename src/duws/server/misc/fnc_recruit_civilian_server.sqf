@@ -6,6 +6,10 @@
           同时立即减少对应城镇的人口并更新图标
           在 WBK 模式下奖励 8 CP，并动态显示奖励值
 */
+// Recruitment reports through a hint box on purpose, not folded into the spoken dialogue the way
+// the other civilian interactions are: stock DUWS confirms a recruit this way and players read it
+// as the confirmation. The RAVAGE/WBK path this sits on is due a wider pass; the channel is not
+// the part to change.
 params ["_civilian", "_caller", "_civNetId", "_callerUID"];
 
 if (!isServer) exitWith {};

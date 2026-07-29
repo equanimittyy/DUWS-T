@@ -23,7 +23,6 @@ private _actionID = _unit addAction [
 
         private _roll = random 1;
         private _items = [];
-        private _hintMsg = "";
         sleep 3;
 
         // Half of all searches turn up nothing and three quarters of what is found is cash, so a
@@ -34,7 +33,6 @@ private _actionID = _unit addAction [
             private _count = 1 + floor random 5;
             for "_i" from 1 to _count do { _items pushBack "Item_Money_roll" };
             [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT4"] remoteExec ["fnc_duws_dialogue", 0];
-            _hintMsg = localize "STR_DUWS_T_LOOT_MONEY2";
         } else {
             if (_roll < 0.5) then {
                 // One item, not the handful this drew: three documents off one person is three
@@ -45,10 +43,8 @@ private _actionID = _unit addAction [
                 ];
                 _items = [selectRandom _intelPool];
                 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT2"] remoteExec ["fnc_duws_dialogue", 0];
-                _hintMsg = localize "STR_DUWS_T_LOOT_INTEL";
             } else {
                 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT6"] remoteExec ["fnc_duws_dialogue", 0];
-                _hintMsg = localize "STR_DUWS_T_LOOT_NOTHING";
             };
         };
 
@@ -68,8 +64,6 @@ private _actionID = _unit addAction [
                 } forEach _items;
             };
         };
-
-        hint _hintMsg;
 
         [_target, _caller] remoteExec ["fnc_civ_search_armed", 2];
     },
