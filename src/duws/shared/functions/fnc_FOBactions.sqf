@@ -62,7 +62,7 @@ if ((vehiclevarname player) in game_master) then {
     ];
 };
 
-[_fob,[ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 60, false, false, "", "_this distance _target < 12"]] remoteExec ["addAction", [0,-2] select isDedicated, _fob];
+_fob addaction [ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 60, false, false, "", "_this distance _target < 12"];
 // === 显示所有任务冷却（仅限 player1） ===
 _fob addaction [
     ACT_UTIL("STR_DUWS_T_SHOW_MISSION_COOLDOWNS"),

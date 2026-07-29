@@ -108,7 +108,9 @@ _fob setVariable ["FOB_guard_busy", false];
 // init_hq/fnc_fortifyFOB.sqf, and admits every playable slot as things stand.
 if (isNil {_fob getVariable "FOB_guard_action_done"}) then {
     _fob setVariable ["FOB_guard_action_done", true];
-    [_fob,[ACT_COMMIT("STR_DUWS_T_p5i8fe14"), fnc_reguardFOB, [], 10, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, _fob];
+    // Suffixed JIP id: an object-keyed id is that object's netId, and the defences entry added by
+    // init_hq/fnc_fortifyFOB.sqf hangs off the same FOB, so a shared id would evict one of the two.
+    [_fob,[ACT_COMMIT("STR_DUWS_T_p5i8fe14"), fnc_reguardFOB, [], 10, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["fob_guards_%1", netId _fob]];
 };
 
 

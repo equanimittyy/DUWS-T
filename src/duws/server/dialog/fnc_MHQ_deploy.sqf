@@ -1,7 +1,8 @@
-// Locality: server; the addAction bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
+// Locality: server (callers remoteExec to target 2). It attaches no entries itself: the deploy and
+// undeploy entries come from fnc_MHQ_addActions and the crate's from fnc_ammobox_actions, both
+// broadcast to every machine and run there.
 
 // MHQ must be empty to Deploy
-#include "..\..\shared\includes\action_style.hpp"
 
 _empty = (count (crew MHQ1)) == 0;
 if (!_empty) exitWith {
@@ -46,8 +47,7 @@ MHQ_ammobox setDir _mhqDir;
 // Put some crap in the ammobox
 [MHQ_ammobox,"blufor"] spawn fnc_fill_ammobox; 
 
-[MHQ_ammobox,[ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal,[], 80, false, false, "", "_this distance _target < 8"]] remoteExec ["addAction", [0,-2] select isDedicated, MHQ_ammobox];
-[MHQ_ammobox,[ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 60, false, false, "", "_this distance _target < 8"]] remoteExec ["addAction", [0,-2] select isDedicated, MHQ_ammobox];
+[MHQ_ammobox] remoteExec ["fnc_ammobox_actions", [0,-2] select isDedicated, MHQ_ammobox];
 
 sleep 0.2;
 

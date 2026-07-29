@@ -180,9 +180,20 @@ without a condition and the Mobile HQ entries without a priority.
 server, which has no interface to draw a scroll menu on. The third argument is the owning object
 rather than `true`: an auto-generated JIP id outlives the object it decorates and leaves a queue
 entry per object forever, where an object-keyed message is dropped when that object is deleted.
-That id *is* the object's netId, so an object carrying more than one entry needs a distinct id per
-entry — the killhouse terminal suffixes it, `format ["killhouse_kits_%1", netId _x]` — otherwise
-the later message silently evicts the earlier one and only late joiners see the gap.
+That id *is* the object's netId, so two broadcasts against one object write the same queue key and
+the later silently evicts the earlier — a gap only a late joiner ever sees. Give an object all its
+entries in a single broadcast where you can: `fnc_ammobox_actions` attaches both the arsenal and
+the rearm entry for the airdropped and Mobile HQ boxes, which keeps the object-keyed id and the
+lifetime that goes with it, and the Mobile HQ depends on that lifetime because undeploy deletes
+its box. Suffix the id only when the entries genuinely cannot share a call — the FOB's defences
+and guards entries are attached from different files at different times, and the killhouse
+terminal's gear is attached after its controls menu.
+
+**A function that is already broadcast must attach locally.** `fnc_FOBactions` and
+`fnc_ammobox_actions` run on every machine, so a plain `_obj addAction` inside them produces
+exactly one entry per machine. A `remoteExec` inside such a function instead fans out once per
+machine that runs it, so an eight-player session gets eight copies of that one entry on every
+screen — and a single-player test shows one, because there is only one machine to multiply by.
 
 **Duplicate guards must stay machine-local.** The adders are broadcast to every client and each
 client adds its own local action, so a guard written with a public `setVariable` lets the first
