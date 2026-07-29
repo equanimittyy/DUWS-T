@@ -1,4 +1,6 @@
 // Locality: server; the addAction bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
+#include "..\..\..\..\shared\includes\action_style.hpp"
+
 params ["_MissionPos", "_mission_name"];
 if (!([8, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
@@ -188,7 +190,7 @@ switch (VERSION_X) do {
 };
 
 // ADD SABOTAGE ACTION TO LAPTOP
-[_laptop,[localize "STR_DUWS_T_p3200mf5", fnc_sabotage_laptop_success, [_MissionPos,_targetpos,_mission_name,_markername,_markername2,_radius], 0, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated,true];
+[_laptop,[ACT_COMMIT("STR_DUWS_T_p3200mf5"), fnc_sabotage_laptop_success, [_MissionPos,_targetpos,_mission_name,_markername,_markername2,_radius], 0, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated,true];
 
 // Put an intel action on LAPTOP
 if (hardcore_mode_enable) then {

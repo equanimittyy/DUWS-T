@@ -5,6 +5,8 @@
     为平民添加“叫过来”动作，平民会移动到玩家位置
     仅非丧尸模式添加
 */
+#include "..\includes\action_style.hpp"
+
 params ["_unit"];
 
 if (isNull _unit) exitWith {};
@@ -23,7 +25,7 @@ if (isNil "fnc_removeStopCommandAction") then {
 };
 
 private _actionID = _unit addAction [
-    localize "STR_DUWS_T_CIV_STOP",
+    ACT_CIVILIAN_INTERACTION("STR_DUWS_T_CIV_STOP"),
 {
     params ["_target", "_caller", "_actionId"];
     

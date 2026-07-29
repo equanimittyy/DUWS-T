@@ -1,3 +1,5 @@
+#include "duws\shared\includes\action_style.hpp"
+
 sleep 1;
 player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
 
@@ -13,7 +15,7 @@ player addRating 10000000;
 
 // The earplug action was attached to the old body, but fadeSound survives respawn: without
 // this re-add a player who died with earplugs in has no way to turn the volume back up.
-player addaction [localize "STR_DUWS_T_2rc0nvug",fnc_earplugs, "", 0, true, true, "", "_this == player"];
+player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, "", 0, true, true, "", "_this == player"];
 
 // Same re-add reason as the earplug action above.
 [] call fnc_intel_search_action;
@@ -21,7 +23,7 @@ player addaction [localize "STR_DUWS_T_2rc0nvug",fnc_earplugs, "", 0, true, true
 // Same re-add reason as the earplug action: the debug menu was attached to the old body.
 // Both gates repeated from client_init.sqf -- the parameter alone is mission-wide.
 if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1 && {(vehiclevarname player) in game_master}) then {
-    player addAction ["<t color='#ff8000'>Debug</t>", fnc_debug_menu, "", 0, true, true, "", "_this == player"];
+    player addAction [ACT_UTIL("STR_DUWS_T_DEBUG_ACTION"), fnc_debug_menu, "", 0, true, true, "", "_this == player"];
 };
 
 if (!isNil "apocalypse_mode" && apocalypse_mode) then {
@@ -79,7 +81,7 @@ sleep 10;
 player setVariable ["DUWS_disguiseMenu_actionAdded", nil];
 [
     player,
-    localize "STR_DUWS_T_DISGUISE_MENU_ACTION",
+    ACT_EQUIP("STR_DUWS_T_DISGUISE_MENU_ACTION"),
     "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
     "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
     "alive _target && vehicle _target == _target",

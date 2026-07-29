@@ -1,4 +1,6 @@
 // Locality: client; the addAction/event-handler bodies below run on the machine that triggers them, not here.
+#include "..\..\shared\includes\action_style.hpp"
+
 if (!hasInterface) exitWith {};
 params ["_depot", "_trgNetId"];
 if (isNull _depot) exitWith {};
@@ -317,7 +319,7 @@ _txtHint ctrlCommit 0;
 
 // 单一"载具改装"动作打开菜单；各条目沿用原有逻辑
 _depot addAction [
-    localize "STR_DUWS_T_VEHICLE_CUSTOMIZATION",
+    ACT_SECONDARY_MENU("STR_DUWS_T_VEHICLE_CUSTOMIZATION"),
     {
         params ["_t", "_c", "_i", "_args"];
         _args params ["_trg", "_fnc_appearance", "_fnc_pylons"];

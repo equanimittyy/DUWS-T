@@ -5,6 +5,8 @@
     功能: 为补给箱添加快速换装菜单（客户端执行）。
           换装列表来自服务器扫描并广播的 loadouts 数据。
 */
+#include "..\..\shared\includes\action_style.hpp"
+
 params ["_crate"];
 if (!hasInterface) exitWith {};
 if (isNull _crate) exitWith {};
@@ -17,7 +19,7 @@ private _actionAID = _crate getVariable ["quickChange_actionA", -1];
 if (_actionAID != -1) then { _crate removeAction _actionAID; };
 
 _actionAID = _crate addAction [
-    format ["<t color='#00ff00'>%1</t>", localize "STR_DUWS_T_QUICK_KITS"],
+    ACT_EQUIP("STR_DUWS_T_QUICK_KITS"),
     { [] call fnc_quick_kits_menu; },
     nil,
     80,

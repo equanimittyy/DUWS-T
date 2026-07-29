@@ -3,6 +3,8 @@
 //
 // One action in front of what was five. Nothing is decided on the machine that opens the menu:
 // picking a row remoteExecs the server, which rolls the town's reaction and owns every spend.
+#include "..\includes\action_style.hpp"
+
 params ["_unit"];
 
 if (isNull _unit) exitWith {};
@@ -13,7 +15,7 @@ if (_unit getVariable ["DUWS_civ_menuAdded", false]) exitWith {};
 _unit setVariable ["DUWS_civ_menuAdded", true];
 
 private _actionID = _unit addAction [
-    localize "STR_DUWS_T_CIV_MENU_ACTION",
+    ACT_CIVILIAN_INTERACTION("STR_DUWS_T_CIV_MENU_ACTION"),
     {
         params ["_target"];
         // Spawned: fnc_civ_menu waits on the dialog before it can fill anything in.

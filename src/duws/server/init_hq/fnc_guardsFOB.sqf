@@ -1,6 +1,8 @@
 // Locality: server only -- server/supports/fnc_fob_server.sqf on build, fnc_reguardFOB via
 // remoteExec target 2 on reguard. A FOB's garrison is campaign property, so spawning it on
 // the reguarding client would leave it simulated there and orphaned on disconnect.
+#include "..\..\shared\includes\action_style.hpp"
+
 if (!isServer) exitWith {};
 
 params ["_centerPos", "_fob", ["_refundOnBusy", 0]];
@@ -106,7 +108,7 @@ _fob setVariable ["FOB_guard_busy", false];
 // init_hq/fnc_fortifyFOB.sqf, and admits every playable slot as things stand.
 if (isNil {_fob getVariable "FOB_guard_action_done"}) then {
     _fob setVariable ["FOB_guard_action_done", true];
-    [_fob,[localize "STR_DUWS_T_p5i8fe14", fnc_reguardFOB, [], 0, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
+    [_fob,[ACT_COMMIT("STR_DUWS_T_p5i8fe14"), fnc_reguardFOB, [], 0, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
 };
 
 

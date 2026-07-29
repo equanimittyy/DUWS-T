@@ -1,6 +1,8 @@
 // Locality: server -- spawned from server/server_init.sqf:102, which spells it fnc_bluHQinit;
 // SQF names are case-insensitive.
 // fnc_BluHQinit.sqf (最终修复版：增加更多无敌物体)
+#include "..\..\shared\includes\action_style.hpp"
+
 if (isNil "PosOfBLUHQ") exitWith {};
 
 // 核心坐标定义
@@ -670,7 +672,7 @@ if (!isNull _hqObj) then {
 
 if (!isNull _medTent) then {
     [_medTent] remoteExec ["fnc_addHQSatelliteActions", 0, true];
-    [_medTent, [localize "STR_DUWS_T_xfgokhbc", { [] spawn fnc_AI_rearm; }, [], 0, false, true, "", "_this distance _target < 12"]] remoteExec ["addAction", 0];
+    [_medTent, [ACT_AID("STR_DUWS_T_xfgokhbc"), { [] spawn fnc_AI_rearm; }, [], 0, false, true, "", "_this distance _target < 12"]] remoteExec ["addAction", 0];
 };
 
 if (!isNull _hqObj) then {

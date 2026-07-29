@@ -5,12 +5,14 @@
 // spares -- keeps their hands up for the rest of the town's occupancy: PATH is disabled from the
 // arrest onwards and fnc_civ_panic refuses to touch anyone surrendered, so nothing else in the
 // mission ever puts them back on their feet.
+#include "..\includes\action_style.hpp"
+
 params ["_unit"];
 
 if (isNull _unit) exitWith {};
 
 private _actionID = _unit addAction [
-    localize "STR_DUWS_T_RELEASE",
+    ACT_CIVILIAN_INTERACTION("STR_DUWS_T_RELEASE"),
     {
         params ["_target", "_caller", "_actionId"];
         // Removed first: the server line below speaks and sleeps, and a second click inside that

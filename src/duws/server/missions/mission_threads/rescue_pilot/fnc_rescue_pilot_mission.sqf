@@ -239,7 +239,7 @@ private _fncScript = {
             _caller setVariable ["carryAutoDropHandle", _autoDropHandle];
             
             private _dropAction = _caller addAction [
-                format ["<t color='#FF0000'>%1</t>", localize "STR_DUWS_T_drop_pilot"],
+                localize "STR_DUWS_T_drop_pilot",
                 {
                     params ["_target", "_caller", "_actionId"];
                     private _pilot = _target getVariable ["carriedPilot", objNull];
@@ -252,7 +252,7 @@ private _fncScript = {
             _caller setVariable ["dropAction", _dropAction];
             
             private _putInVehicleAction = _caller addAction [
-                format ["<t color='#FF0000'>%1</t>", localize "STR_DUWS_T_put_in_vehicle"],
+                localize "STR_DUWS_T_put_in_vehicle",
                 {
                     params ["_target", "_caller", "_actionId"];
                     private _pilot = _target getVariable ["carriedPilot", objNull];
@@ -296,7 +296,7 @@ private _fncScript = {
                 if (!isNil {_pilot getVariable "carryActionAdded"}) exitWith {};
                 _pilot setVariable ["carryActionAdded", true];
                 private _actionID = _pilot addAction [
-                    format ["<t color='#FF0000'>%1</t>", localize "STR_DUWS_T_carry_pilot"],
+                    localize "STR_DUWS_T_carry_pilot",
                     {
                         params ["_target", "_caller", "_actionId"];
                         if (_target getVariable ["isCarried", false]) exitWith {};
@@ -355,7 +355,7 @@ private _fncScript = {
             if (!isNil {_vehicle getVariable "takeOutActionAdded"}) exitWith {};
             _vehicle setVariable ["takeOutActionAdded", true];
             private _actionID = _vehicle addAction [
-                format ["<t color='#FF0000'>%1</t>", localize "STR_DUWS_T_take_out_pilot"],
+                localize "STR_DUWS_T_take_out_pilot",
                 {
                     params ["_target", "_caller", "_actionId"];
                     private _pilot = missionNamespace getVariable ["currentMissionPilot", objNull];

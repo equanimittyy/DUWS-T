@@ -11,6 +11,8 @@
 // ==================== 客户端执行部分 ====================
 
 // ========== 1. 目标检查与初始化 ==========
+#include "..\..\shared\includes\action_style.hpp"
+
 _target = cursorObject;
 if (isNull _target) exitWith {
     hint localize "STR_DUWS_T_helolift_notarget";
@@ -208,7 +210,7 @@ _message = format[localize "STR_DUWS_T_helolift5"];
 if (call _check_damage) exitWith { call _abort };
 
 _liftActionID = player addAction [
-    format ["<t color='#00ff00'>%1</t>", localize "STR_DUWS_T_helolift_action_wp"],
+    ACT_MOVE("STR_DUWS_T_helolift_action_wp"),
     fnc_mapclicklift,
     nil,
     0,

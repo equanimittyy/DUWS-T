@@ -3,6 +3,8 @@
 // fnc_createKillhouse.sqf
 // 生成基于 composition 偏移的 Killhouse 训练场 (所有物体、正确朝向、高空)
 // 初始不生成靶子，通过多屏幕电脑动作来生成目标和敌人
+#include "..\..\shared\includes\action_style.hpp"
+
 if (!isServer) exitWith {};
 
 private _centerSpawnX = worldSize * 0.05;
@@ -1246,7 +1248,7 @@ publicVariable "killhouse_srv_cleanup";
 if (count _computerObjects > 0) then {
     {
         [_x, [
-            "<t color='#00FF00'>" + localize "STR_DUWS_T_KILLHOUSE_CONTROLS" + "</t>",
+            ACT_SECONDARY_MENU("STR_DUWS_T_KILLHOUSE_CONTROLS"),
             {
                 // Rows are assembled on the clicking machine each time the terminal is used,
                 // not baked when the killhouse is built: the arsenal is a mid-campaign

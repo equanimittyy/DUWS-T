@@ -1,6 +1,8 @@
 // Locality: server only -- server/supports/fnc_fob_server.sqf on build, fnc_refortifyFOB via
 // remoteExec target 2 on refortify. A FOB's turrets are campaign property, so spawning them
 // on the refortifying client would leave them simulated there and orphaned on disconnect.
+#include "..\..\shared\includes\action_style.hpp"
+
 if (!isServer) exitWith {};
 
 params ["_centerPos", "_fob", ["_refortify", false], ["_refundOnBusy", 0]];
@@ -218,7 +220,7 @@ _fob setVariable ["FOB_fortify_busy", false];
 // than wrapping addAction the way fnc_FOBactions does, because this runs on the server where
 // `player` is objNull; a condition string is evaluated per client, where it resolves.
 if (!_refortify) then {
-	[_fob,[localize "STR_DUWS_T_qxrh9fws", fnc_refortifyFOB, [], 0, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
+	[_fob,[ACT_COMMIT("STR_DUWS_T_qxrh9fws"), fnc_refortifyFOB, [], 0, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
 };
 
 

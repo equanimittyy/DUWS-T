@@ -1,6 +1,8 @@
 // Locality: client; the addAction/map-click bodies below run on the machine that triggers them, not here.
 // fnc_addBoardKillhouseActions.sqf
 // 客户端执行：为 MapBoard_altis_F 添加 Killhouse 传送动作与基地快速移动
+#include "..\..\shared\includes\action_style.hpp"
+
 if (!hasInterface) exitWith {};
 params ["_board"];
 if (isNull _board) exitWith {};
@@ -11,7 +13,7 @@ _board setVariable ["board_killhouse_actions_done", true];
 
 // 传送点 A/B 常驻显示，不再折叠进"开始训练"抽屉
 _board addAction [
-    "<t color='#00AAFF'>" + localize "STR_DUWS_KILLHOUSE_TELEPORT_A" + "</t>",
+    ACT_MOVE("STR_DUWS_KILLHOUSE_TELEPORT_A"),
     {
         private _tp = missionNamespace getVariable "killhouse_tpA";
         if (isNil "_tp") exitWith { hint format [localize "STR_DUWS_T_killhouse_tp_notready", "A"]; };
@@ -21,7 +23,7 @@ _board addAction [
     nil, 65, true, true, "", "true"
 ];
 _board addAction [
-    "<t color='#00AAFF'>" + localize "STR_DUWS_KILLHOUSE_TELEPORT_B" + "</t>",
+    ACT_MOVE("STR_DUWS_KILLHOUSE_TELEPORT_B"),
     {
         private _tp = missionNamespace getVariable "killhouse_tpB";
         if (isNil "_tp") exitWith { hint format [localize "STR_DUWS_T_killhouse_tp_notready", "B"]; };
@@ -32,7 +34,7 @@ _board addAction [
 ];
 
 _board addAction [
-    localize "STR_DUWS_T_civ_mapview_action",
+    ACT_UTIL("STR_DUWS_T_civ_mapview_action"),
     { call fnc_civ_mapView },
     nil, 5, true, true, "", "_this == player"
 ];
@@ -41,7 +43,7 @@ _board addAction [
 if (isNil {_board getVariable "board_fasttravel_actions_done"}) then {
     _board setVariable ["board_fasttravel_actions_done", true];
     _board addAction [
-        localize "STR_DUWS_T_FAST_TRAVEL_BASE",
+        ACT_MOVE("STR_DUWS_T_FAST_TRAVEL_BASE"),
         {
             params ["_target", "_caller", "_actionId"];
             // 避免重复打开地图

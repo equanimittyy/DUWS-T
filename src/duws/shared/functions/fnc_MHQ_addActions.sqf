@@ -1,5 +1,7 @@
 // Locality: all machines -- some callers remoteExec to target 0, others to target 2, so it can run anywhere.
 
+#include "..\includes\action_style.hpp"
+
 _addAction = _this select 0;
 
 if (_addAction == "select") then {
@@ -18,14 +20,14 @@ if (_addAction == "select") then {
 if (_addAction == "deploy") then {
 	if ((vehiclevarname player) in Squad_Leaders) then {
 		removeAllActions MHQ1;
-		MHQ1 addaction [localize "STR_DUWS_T_rqzxlvf4",{[] remoteExec ["fnc_MHQ_deploy",2]}];
+		MHQ1 addaction [ACT_COMMIT("STR_DUWS_T_rqzxlvf4"),{[] remoteExec ["fnc_MHQ_deploy",2]}];
 	};
 };
 
 if (_addAction == "undeploy") then {
 	if ((vehiclevarname player) in Squad_Leaders) then {
 		removeAllActions MHQ1;
-		MHQ1 addaction [localize "STR_DUWS_T_fjpyu3zb",{[] remoteExec ["fnc_MHQ_undeploy",2]}];
+		MHQ1 addaction [ACT_COMMIT("STR_DUWS_T_fjpyu3zb"),{[] remoteExec ["fnc_MHQ_undeploy",2]}];
 	};
 };
 

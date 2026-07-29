@@ -2,6 +2,8 @@
 // Every command action hangs off the HQ structure, mirroring shared/functions/fnc_FOBactions.sqf.
 // Splitting them across the commander and the map board meant a player who lost track of either
 // prop lost the menu with it, and the commander is a killable unit.
+#include "..\..\shared\includes\action_style.hpp"
+
 if (!hasInterface) exitWith {};
 
 params ["_hqBuilding"];
@@ -12,18 +14,18 @@ if (isNull _hqBuilding) exitWith {};
 if (_hqBuilding getVariable ["HQ_building_actions_done", false]) exitWith {};
 _hqBuilding setVariable ["HQ_building_actions_done", true];
 
-_hqBuilding addAction [localize "STR_DUWS_T_vw32hahc", fnc_HQ_Request_Menu, "", 100, true, true, "", "_this == player"];
+_hqBuilding addAction [ACT_PRIMARY_MENU("STR_DUWS_T_vw32hahc"), fnc_HQ_Request_Menu, "", 100, true, true, "", "_this == player"];
 
 if ((vehiclevarname player) in Squad_Leaders) then {
-    _hqBuilding addAction [localize "STR_DUWS_T_l0xark5g", fnc_squad_manage, "", 95, true, true, "", "_this == player"];
-    _hqBuilding addAction [localize "STR_DUWS_T_4jabuvz6", fnc_groupReset, "", 0, true, true, "", "_this == player"];
+    _hqBuilding addAction [ACT_PRIMARY_MENU("STR_DUWS_T_l0xark5g"), fnc_squad_manage, "", 95, true, true, "", "_this == player"];
+    _hqBuilding addAction [ACT_UTIL("STR_DUWS_T_4jabuvz6"), fnc_groupReset, "", 0, true, true, "", "_this == player"];
 };
 
-_hqBuilding addAction [localize "STR_DUWS_T_iggpsdqo", fnc_FOBmanager, "", 0, true, true, "", "_this == player"];
+_hqBuilding addAction [ACT_PRIMARY_MENU("STR_DUWS_T_iggpsdqo"), fnc_FOBmanager, "", 0, true, true, "", "_this == player"];
 
 // 添加显示任务冷却
 _hqBuilding addAction [
-    localize "STR_DUWS_T_SHOW_MISSION_COOLDOWNS",
+    ACT_UTIL("STR_DUWS_T_SHOW_MISSION_COOLDOWNS"),
     {
         private _lines = [];
         private _missionTypes = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];

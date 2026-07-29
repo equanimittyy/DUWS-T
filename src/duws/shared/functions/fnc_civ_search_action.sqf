@@ -5,12 +5,14 @@
 // it works at 3 m on a civilian standing still with their hands up, and the interaction menu --
 // which opens at arrest range and hides on isSurrendered -- would have to close, wait out the
 // animation and reopen to offer it.
+#include "..\includes\action_style.hpp"
+
 params ["_unit"];
 
 if (isNull _unit) exitWith {};
 
 private _actionID = _unit addAction [
-    format ["<t color='#ffaa00'>%1</t>", localize "STR_DUWS_T_LOOT"],
+    ACT_CIVILIAN_INTERACTION("STR_DUWS_T_LOOT"),
     {
         params ["_target", "_caller", "_actionId"];
         [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT1"] remoteExec ["fnc_duws_dialogue", _caller];

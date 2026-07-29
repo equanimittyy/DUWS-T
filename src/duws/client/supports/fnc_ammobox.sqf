@@ -5,6 +5,8 @@
  * 功能：呼叫空投补给箱，消耗指挥点，空中载具运送并投放。
  * 修改：移除全局变量 onStation，改用载具变量；标记名使用 netId 确保唯一。
  */
+#include "..\..\shared\includes\action_style.hpp"
+
 
 _target = _this select 0;
 _cost = _this select 1;
@@ -103,8 +105,8 @@ waitUntil {sleep 1; getpos _ammobox select 2 < 0.2};
 
 _smoke = "SmokeShellGreen" CreateVehicle (getpos _ammobox);
 ["info",[localize "STR_DUWS_T_lyxq9zpm",localize "STR_DUWS_T_5p6d9535"]] call bis_fnc_showNotification;
-[[_ammobox,[localize "STR_DUWS_T_160jkc3a",fnc_duws_Arsenal,[], 0, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
-[[_ammobox,[localize "STR_DUWS_T_xfgokhbc",fnc_AI_rearm,[], 0, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
+[[_ammobox,[ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal,[], 0, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
+[[_ammobox,[ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 0, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
 // 往补给箱中添加物品
 [_ammobox,"blufor"] spawn fnc_fill_ammobox; 
 

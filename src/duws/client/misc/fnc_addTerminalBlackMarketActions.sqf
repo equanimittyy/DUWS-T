@@ -2,6 +2,8 @@
 /*
     fnc_addTerminalBlackMarketActions.sqf
 */
+#include "..\..\shared\includes\action_style.hpp"
+
 if (!hasInterface) exitWith {};
 
 params ["_terminal"];
@@ -10,7 +12,7 @@ if (_terminal getVariable ["blackMarketActionsDone", false]) exitWith {};
 _terminal setVariable ["blackMarketActionsDone", true];
 
 _terminal addAction [
-    format ["<t color='#00ff00'>%1</t>", localize "STR_DUWS_T_BLACKMARKET_TITLE"],
+    ACT_SECONDARY_MENU("STR_DUWS_T_BLACKMARKET_TITLE"),
     {
         [localize "STR_DUWS_T_BLACKMARKET_TITLE", [
             [localize "STR_DUWS_T_BLACKMARKET_BUY_GOGGLES", { [player, 1, "goggles"] remoteExec ["fnc_blackMarketPurchase", 2]; }, [], [0,1,0,1]],
@@ -30,7 +32,7 @@ _terminal addAction [
 // a crate and what command puts at the player's disposal are two different transactions, and the
 // list had grown long enough that the split is what tells them apart.
 _terminal addAction [
-    format ["<t color='#00ff00'>%1</t>", localize "STR_DUWS_T_INTELRECRUIT_TITLE"],
+    ACT_SECONDARY_MENU("STR_DUWS_T_INTELRECRUIT_TITLE"),
     {
         [localize "STR_DUWS_T_INTELRECRUIT_TITLE", [
             [localize "STR_DUWS_T_INTEL_ANALYSIS_ACTION",   { [player] remoteExec ["fnc_intelAnalysis", 2]; }, [], [1,0.667,0,1]],

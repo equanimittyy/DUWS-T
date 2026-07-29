@@ -1526,13 +1526,13 @@
                 <Chinese>杀人屋训练</Chinese>
             </Key>
             <Key ID="STR_DUWS_KILLHOUSE_TELEPORT_A">
-                <Original>Teleport to Killhouse (A)</Original>
-                <English>Teleport to Killhouse (A)</English>
+                <Original>Killhouse A</Original>
+                <English>Killhouse A</English>
                 <Chinese>传送至入口 (A)</Chinese>
             </Key>
             <Key ID="STR_DUWS_KILLHOUSE_TELEPORT_B">
-                <Original>Teleport to Killhouse (B)</Original>
-                <English>Teleport to Killhouse (B)</English>
+                <Original>Killhouse B</Original>
+                <English>Killhouse B</English>
                 <Chinese>传送至入口 (B)</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_KILLHOUSE_CONTROLS">
@@ -1593,9 +1593,9 @@
 </Container>
         <Container name="Base Services">
             <Key ID="STR_DUWS_T_FAST_TRAVEL_BASE">
-                <Original>&lt;t color='#00ffff'&gt;Fast travel around base&lt;/t&gt;</Original>
-                <English>&lt;t color='#00ffff'&gt;Fast travel around base&lt;/t&gt;</English>
-                <Chinese>&lt;t color='#00ffff'&gt;基地快速移动&lt;/t&gt;</Chinese>
+                <Original>Fast Travel</Original>
+                <English>Fast Travel</English>
+                <Chinese>基地快速移动</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_FAST_TRAVEL_BASE_HINT">
                 <Original>Click on the map within 200m of the HQ (the blue circle) to teleport.</Original>
@@ -1668,9 +1668,9 @@
                 <Chinese>关闭</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_REDEPLOY_ACTION">
-                <Original>&lt;t color='#ff1111'&gt;Redeploy Base Units (2 CP)&lt;/t&gt;</Original>
-                <English>&lt;t color='#ff1111'&gt;Redeploy Base Units (2 CP)&lt;/t&gt;</English>
-                <Chinesesimp>&lt;t color='#ff1111'&gt;重新部署基地单位 (2CP)&lt;/t&gt;</Chinesesimp>
+                <Original>Redeploy Base Units (2 CP)</Original>
+                <English>Redeploy Base Units (2 CP)</English>
+                <Chinesesimp>重新部署基地单位 (2CP)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_REDEPLOY_COST_TITLE">
                 <Original>Not enough CP.</Original>
@@ -1848,11 +1848,11 @@
                 <Chinesesimp>已换装为 %1</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_qxrh9fws">
-                <German>&lt;t color='#ff1111'&gt;Ersetze FOB Verteidung (5CP) &lt;/t&gt;</German>
-                <Spanish>&lt;t color='#ff1111'&gt;Reemplazar defensas del PdA (5CP) &lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#ff1111'&gt;重置FOB防御 (5CP) &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#ff1111'&gt;Replace FOB Defences (5 CP) &lt;/t&gt;</Original>
-                <English>&lt;t color='#ff1111'&gt;Replace FOB Defences (5 CP) &lt;/t&gt;</English>
+                <German>Ersetze FOB Verteidung (5CP)</German>
+                <Spanish>Reemplazar defensas del PdA (5CP)</Spanish>
+                <Chinesesimp>重置FOB防御 (5CP)</Chinesesimp>
+                <Original>Replace FOB Defences (5 CP)</Original>
+                <English>Replace FOB Defences (5 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_xvtn4llz">
                 <German>&lt;t color='#ff1111'&gt;Ersetze Verteidigung (5CP) &lt;/t&gt;</German>
@@ -1862,11 +1862,11 @@
                 <English>&lt;t color='#ff1111'&gt;Replace Defences (5 CP) &lt;/t&gt;</English>
             </Key>
             <Key ID="STR_DUWS_T_p5i8fe14">
-                <German>&lt;t color='#ff1111'&gt;Ersetze Wachen (15CP) &lt;/t&gt;</German>
-                <Spanish>&lt;t color='#ff1111'&gt;Reemplazar guardias (15CP) &lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#ff1111'&gt;重置守军 (15CP) &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#ff1111'&gt;Replace Guards (15 CP) &lt;/t&gt;</Original>
-                <English>&lt;t color='#ff1111'&gt;Replace Guards (15 CP) &lt;/t&gt;</English>
+                <German>Ersetze Wachen (15CP)</German>
+                <Spanish>Reemplazar guardias (15CP)</Spanish>
+                <Chinesesimp>重置守军 (15CP)</Chinesesimp>
+                <Original>Replace Guards (15 CP)</Original>
+                <English>Replace Guards (15 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_qxhure3n">
                 <German>&lt;t color='#ff1111'&gt;Ersetze Wachen (20CP) &lt;/t&gt;</German>
@@ -1876,32 +1876,32 @@
                 <English>&lt;t color='#ff1111'&gt;Replace Guards (20 CP) &lt;/t&gt;</English>
             </Key>
             <Key ID="STR_DUWS_T_vw32hahc">
-                <German>&lt;t color='#15ff00'&gt;ANFORDERUNGS MENÜ &lt;/t&gt;</German>
-                <Spanish>&lt;t color='#15ff00'&gt;MENÚ DE SOLICITUDES &lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#15ff00'&gt;招募菜单 &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#15ff00'&gt;REQUESTS MENU &lt;/t&gt;</Original>
-                <English>&lt;t color='#15ff00'&gt;REQUESTS MENU &lt;/t&gt;</English>
+                <German>ANFORDERUNGS MENÜ</German>
+                <Spanish>MENÚ DE SOLICITUDES</Spanish>
+                <Chinesesimp>招募菜单</Chinesesimp>
+                <Original>Requests</Original>
+                <English>Requests</English>
             </Key>
             <Key ID="STR_DUWS_T_l0xark5g">
-                <German>&lt;t color='#ffb700'&gt;Gruppen Manager &lt;/t&gt;</German>
-                <Spanish>&lt;t color='#ffb700'&gt;Administrador de escuadrones &lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#ffb700'&gt;小队管理 &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#ffb700'&gt;Squad manager &lt;/t&gt;</Original>
-                <English>&lt;t color='#ffb700'&gt;Squad manager &lt;/t&gt;</English>
+                <German>Gruppen Manager</German>
+                <Spanish>Administrador de escuadrones</Spanish>
+                <Chinesesimp>小队管理</Chinesesimp>
+                <Original>Squad Manager</Original>
+                <English>Squad Manager</English>
             </Key>
             <Key ID="STR_DUWS_T_4jabuvz6">
-                <German>&lt;t color='#ffb700'&gt;Gruppenführer zurücksetzen &lt;/t&gt;</German>
-                <Spanish>&lt;t color='#ffb700'&gt;Reiniciar líder de escuadrón &lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#ffb700'&gt;重置队长 &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#ffb700'&gt;Reset Squad Leader &lt;/t&gt;</Original>
-                <English>&lt;t color='#ffb700'&gt;Reset Squad Leader &lt;/t&gt;</English>
+                <German>Gruppenführer zurücksetzen</German>
+                <Spanish>Reiniciar líder de escuadrón</Spanish>
+                <Chinesesimp>重置队长</Chinesesimp>
+                <Original>Reset Squad Leader</Original>
+                <English>Reset Squad Leader</English>
             </Key>
             <Key ID="STR_DUWS_T_9eiwr3bt">
-                <German>&lt;t color='#00b7ff'&gt;Ausruhen/Heilen (3 Std.) &lt;/t&gt;</German>
-                <Spanish>&lt;t color='#00b7ff'&gt;Descanzar/Curar (3hrs) &lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#00b7ff'&gt;休息/治愈 (3小时) &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#00b7ff'&gt;REST/HEAL (3hrs) &lt;/t&gt;</Original>
-                <English>&lt;t color='#00b7ff'&gt;REST/HEAL (3hrs) &lt;/t&gt;</English>
+                <German>Ausruhen/Heilen (3 Std.)</German>
+                <Spanish>Descanzar/Curar (3hrs)</Spanish>
+                <Chinesesimp>休息/治愈 (3小时)</Chinesesimp>
+                <Original>Rest &amp; Heal</Original>
+                <English>Rest &amp; Heal</English>
             </Key>
                     <Key ID="STR_DUWS_T_repair_select_pylon">
                 <Original>Select pylon and weapon.</Original>
@@ -1970,8 +1970,8 @@
                 <Chinesesimp>[完整军火库] 已移除 %1 个钱币/情报物品。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_FULL_ARSENAL_ONCE">
-                <Original>Full Arsenal (one-time use)</Original>
-                <English>Full Arsenal (one-time use)</English>
+                <Original>Full Arsenal</Original>
+                <English>Full Arsenal</English>
                 <Chinesesimp>完整军火库(一次性)</Chinesesimp>
                 <German>Vollständiges Arsenal (einmalig)</German>
                 <Spanish>Arsenal completo (una sola vez)</Spanish>
@@ -2437,9 +2437,9 @@
                 <Chinese>部署已取消。</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_HIRE_PMC">
-                <Original>&lt;t color='#ffaa00'&gt;Hire PMC (15 cash)&lt;/t&gt;</Original>
-                <English>&lt;t color='#ffaa00'&gt;Hire PMC (15 cash)&lt;/t&gt;</English>
-                <Chinesesimp>&lt;t color='#ffaa00'&gt;雇佣军事承包商 (15 纸币)&lt;/t&gt;</Chinesesimp>
+                <Original>Hire PMC (15 cash)</Original>
+                <English>Hire PMC (15 cash)</English>
+                <Chinesesimp>雇佣军事承包商 (15 纸币)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HIRE_PMC_TITLE">
                 <Original>Hire PMC</Original>
@@ -2467,9 +2467,9 @@
                 <Chinesesimp>%1 名军事承包商干员现已听你指挥。注意：干员的装备完全随机。每次雇佣间有15分钟的冷却时间。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HIRE_PARTISANS">
-                <Original>&lt;t color='#ffaa00'&gt;Hire Partisans (10 cash)&lt;/t&gt;</Original>
-                <English>&lt;t color='#ffaa00'&gt;Hire Partisans (10 cash)&lt;/t&gt;</English>
-                <Chinesesimp>&lt;t color='#ffaa00'&gt;雇佣游击队 (10 纸币)&lt;/t&gt;</Chinesesimp>
+                <Original>Hire Partisans (10 cash)</Original>
+                <English>Hire Partisans (10 cash)</English>
+                <Chinesesimp>雇佣游击队 (10 纸币)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HIRE_PARTISANS_COOLDOWN">
                 <Original>Cooldown: %1 min %2 sec remaining</Original>
@@ -2579,11 +2579,11 @@
                 <Chinesesimp>平民</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_CIV_STOP">
-                <Original>Order to Stop</Original>
-                <English>Order to Stop</English>
-                <German>&lt;t color='#00FF00'&gt;Komm her!&lt;/t&gt;</German>
-                <Spanish>&lt;t color='#00FF00'&gt;Ven acá!&lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#00FF00'&gt;过来！&lt;/t&gt;</Chinesesimp>
+                <Original>Halt</Original>
+                <English>Halt</English>
+                <German>Komm her!</German>
+                <Spanish>Ven acá!</Spanish>
+                <Chinesesimp>过来！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_STOP_SUCCESS">
                 <Original>Alright, alright. What is it this time?</Original>
@@ -2752,8 +2752,8 @@
                 <Chinesesimp>呃...我知道！帮我狠狠踢那群杂碎的屁股！他们在地图的这里...(边说边收下纸币)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_RECRUIT_ACTION">
-                <Original>Offer evacuation</Original>
-                <English>Offer evacuation</English>
+                <Original>Evacuate</Original>
+                <English>Evacuate</English>
                 <Chinesesimp>劝说平民撤离</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_RECRUIT_SUCCESS2">
@@ -2953,8 +2953,8 @@
                 <English>Refuse</English>
             </Key>
             <Key ID="STR_DUWS_T_CIV_MENU_ACTION">
-                <Original>Civilian Interaction</Original>
-                <English>Civilian Interaction</English>
+                <Original>Interact</Original>
+                <English>Interact</English>
             </Key>
         </Container>
         <Container name="Informants">
@@ -3225,8 +3225,16 @@
                 <Chinesesimp>此任务的目标位置可以通过搜索敌军尸体来揭露</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_SEARCH_ACTION">
-                <Original>Search for enemy positions</Original>
-                <English>Search for enemy positions</English>
+                <Original>Search For OPFOR Positions</Original>
+                <English>Search For OPFOR Positions</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SEARCH_CORPSE_ACTION">
+                <Original>Search Body</Original>
+                <English>Search Body</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DEBUG_ACTION">
+                <Original>Debug</Original>
+                <English>Debug</English>
             </Key>
             <Key ID="STR_DUWS_T_SEARCH_CORPSE">
                 <Original>Search the body</Original>
@@ -4158,29 +4166,29 @@
                 <German>Pilot absetzen</German>
                 <Spanish>Soltar al piloto</Spanish>
                 <Chinesesimp>放下飞行员</Chinesesimp>
-                <Original>Put the pilot down</Original>
-                <English>Put the pilot down</English>
+                <Original>Drop Pilot</Original>
+                <English>Drop Pilot</English>
             </Key>
             <Key ID="STR_DUWS_T_put_in_vehicle">
                 <German>Ins Fahrzeug setzen</German>
                 <Spanish>Poner en el vehículo</Spanish>
                 <Chinesesimp>放入载具</Chinesesimp>
-                <Original>Load the pilot into the vehicle</Original>
-                <English>Load the pilot into the vehicle</English>
+                <Original>Load Into Vehicle</Original>
+                <English>Load Into Vehicle</English>
             </Key>
             <Key ID="STR_DUWS_T_carry_pilot">
                 <German>Pilot tragen</German>
                 <Spanish>Cargar al piloto</Spanish>
                 <Chinesesimp>背起飞行员</Chinesesimp>
-                <Original>Carry the pilot</Original>
-                <English>Carry the pilot</English>
+                <Original>Carry Pilot</Original>
+                <English>Carry Pilot</English>
             </Key>
             <Key ID="STR_DUWS_T_take_out_pilot">
                 <German>Pilot heraus tragen</German>
                 <Spanish>Sacar piloto fuera</Spanish>
                 <Chinesesimp>背出飞行员</Chinesesimp>
-                <Original>Take the pilot out</Original>
-                <English>Take the pilot out</English>
+                <Original>Unload Pilot</Original>
+                <English>Unload Pilot</English>
             </Key>
             <Key ID="STR_DUWS_T_cant_put_not_carried">
                 <German>Du kannst keinen Piloten absetzen, den du nicht trägst</German>
@@ -4462,8 +4470,8 @@
                 <German>Suche nach Infos</German>
                 <Spanish>Buscar inteligencia</Spanish>
                 <Chinesesimp>搜寻情报</Chinesesimp>
-                <Original>Search for Intel</Original>
-                <English>Search for Intel</English>
+                <Original>Search Intel</Original>
+                <English>Search Intel</English>
             </Key>
             <Key ID="STR_DUWS_T_v5ylof1e">
                 <German>Sabotage erfolgreich</German>
@@ -4794,11 +4802,11 @@
                 <Chinesesimp>注意，行动区域附近监测到敌方空中突击部队。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_halo_ai_only">
-                <German>&lt;t color='#00ffff'&gt;HALO Gruppe (AI only)&lt;/t&gt;</German>
-                <Spanish>&lt;t color='#00ffff'&gt;HALO group (AI only)&lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#00ffff'&gt;班组空降(仅AI成员)&lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#00ffff'&gt;HALO group(AI only)&lt;/t&gt;</Original>
-                <English>&lt;t color='#00ffff'&gt;HALO group(AI only)&lt;/t&gt;</English>
+                <German>HALO Gruppe (AI only)</German>
+                <Spanish>HALO group (AI only)</Spanish>
+                <Chinesesimp>班组空降(仅AI成员)</Chinesesimp>
+                <Original>HALO Group (AI Only)</Original>
+                <English>HALO Group (AI Only)</English>
             </Key>
             <Key ID="STR_DUWS_T_opforflare">
                 <German>Deckung nehmen! Der Feind hat Leuchtkugeln in unserer Nähe abgefeuert!</German>
@@ -5270,18 +5278,18 @@
                 <English>MHQ Undeployed</English>
             </Key>
             <Key ID="STR_DUWS_T_rqzxlvf4">
-                <German>&lt;t color='#99ff00'&gt;Mobiles HQ AUFBAUEN&lt;/t&gt;</German>
-                <Spanish>&lt;t color='#99ff00'&gt;Desplegar CGM &lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#99ff00'&gt;部署机动指挥部 &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#99ff00'&gt;DEPLOY Mobile HQ &lt;/t&gt;</Original>
-                <English>&lt;t color='#99ff00'&gt;DEPLOY Mobile HQ &lt;/t&gt;</English>
+                <German>Mobiles HQ AUFBAUEN</German>
+                <Spanish>Desplegar CGM</Spanish>
+                <Chinesesimp>部署机动指挥部</Chinesesimp>
+                <Original>Deploy Mobile HQ</Original>
+                <English>Deploy Mobile HQ</English>
             </Key>
             <Key ID="STR_DUWS_T_fjpyu3zb">
-                <German>&lt;t color='#99ff00'&gt;Mobile HQ ABBAUEN&lt;/t&gt;</German>
-                <Spanish>&lt;t color='#99ff00'&gt;Replegar CGM &lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#99ff00'&gt;取消部署机动指挥部 &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#99ff00'&gt;UN-DEPLOY Mobile HQ &lt;/t&gt;</Original>
-                <English>&lt;t color='#99ff00'&gt;UN-DEPLOY Mobile HQ &lt;/t&gt;</English>
+                <German>Mobile HQ ABBAUEN</German>
+                <Spanish>Replegar CGM</Spanish>
+                <Chinesesimp>取消部署机动指挥部</Chinesesimp>
+                <Original>Undeploy Mobile HQ</Original>
+                <English>Undeploy Mobile HQ</English>
             </Key>
             <Key ID="STR_DUWS_T_ywl7naen">
                 <German>MHQ ist nicht leer</German>
@@ -5298,11 +5306,11 @@
                 <English>All occupants must exit the MHQ before it can be deployed.</English>
             </Key>
             <Key ID="STR_DUWS_T_160jkc3a">
-                <German>&lt;t color='#00FF00'&gt;Virtuelles Arsenal &lt;/t&gt;</German>
-                <Spanish>&lt;t color='#00FF00'&gt;Arsenal Virtual &lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#00FF00'&gt;虚拟军火库 &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#00FF00'&gt;VA Arsenal &lt;/t&gt;</Original>
-                <English>&lt;t color='#00FF00'&gt;VA Arsenal &lt;/t&gt;</English>
+                <German>Virtuelles Arsenal</German>
+                <Spanish>Arsenal Virtual</Spanish>
+                <Chinesesimp>虚拟军火库</Chinesesimp>
+                <Original>Arsenal</Original>
+                <English>Arsenal</English>
             </Key>
             <Key ID="STR_DUWS_T_cmbq8ut7">
                 <German>MHQ errichtet</German>
@@ -5382,18 +5390,18 @@
                 <English>Access the VA Arsenal at the HQ, MHQ and FOBs.</English>
             </Key>
             <Key ID="STR_DUWS_T_foldimok">
-                <German>&lt;t color='#00ffff'&gt;HALO Solo &lt;/t&gt;</German>
-                <Spanish>&lt;t color='#00ffff'&gt;HALO solo &lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#00ffff'&gt;单人空降 &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#00ffff'&gt;HALO solo &lt;/t&gt;</Original>
-                <English>&lt;t color='#00ffff'&gt;HALO solo &lt;/t&gt;</English>
+                <German>HALO Solo</German>
+                <Spanish>HALO solo</Spanish>
+                <Chinesesimp>单人空降</Chinesesimp>
+                <Original>HALO Solo</Original>
+                <English>HALO Solo</English>
             </Key>
             <Key ID="STR_DUWS_T_u6btu73i">
-                <German>&lt;t color='#00ffff'&gt;HALO Gruppe&lt;/t&gt;</German>
-                <Spanish>&lt;t color='#00ffff'&gt;HALO group&lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#00ffff'&gt;班组空降&lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#00ffff'&gt;HALO group&lt;/t&gt;</Original>
-                <English>&lt;t color='#00ffff'&gt;HALO group&lt;/t&gt;</English>
+                <German>HALO Gruppe</German>
+                <Spanish>HALO group</Spanish>
+                <Chinesesimp>班组空降</Chinesesimp>
+                <Original>HALO Group</Original>
+                <English>HALO Group</English>
             </Key>
             <Key ID="STR_DUWS_T_0m2mxf4u">
                 <German>HALO freigeschaltet</German>
@@ -5487,11 +5495,11 @@
                 <English>Have a nice trip.</English>
             </Key>
             <Key ID="STR_DUWS_T_bd22lcos">
-                <German>&lt;t color='#ff0000'&gt;Fallschirm öffnen &lt;/t&gt;</German>
-                <Spanish>&lt;t color='#ff0000'&gt;Abrir paracaídas &lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#ff0000'&gt;打开降落伞 &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#ff0000'&gt;Open Chute &lt;/t&gt;</Original>
-                <English>&lt;t color='#ff0000'&gt;Open Chute &lt;/t&gt;</English>
+                <German>Fallschirm öffnen</German>
+                <Spanish>Abrir paracaídas</Spanish>
+                <Chinesesimp>打开降落伞</Chinesesimp>
+                <Original>Open Chute</Original>
+                <English>Open Chute</English>
             </Key>
             <Key ID="STR_DUWS_T_o3yt6tzg">
                 <German>Fallschirm wird geöffnet</German>
@@ -6119,28 +6127,28 @@
                 <English>Swordfish 1-1, we cannot reach that grid. Send another, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxi_action_wp">
-                <Original>Give waypoints to the pilot</Original>
-                <English>Give waypoints to the pilot</English>
+                <Original>Set Waypoints</Original>
+                <English>Set Waypoints</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxi_action_lz">
-                <Original>Give an LZ to the pilot</Original>
-                <English>Give an LZ to the pilot</English>
+                <Original>Set LZ</Original>
+                <English>Set LZ</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxi_notaboard">
                 <Original>Alpha 1-1, you are not aboard. Get in and we'll move out, over.</Original>
                 <English>Alpha 1-1, you are not aboard. Get in and we'll move out, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_helolift_action_wp">
-                <Original>Give waypoints to the pilot</Original>
-                <English>Give waypoints to the pilot</English>
+                <Original>Set Waypoints</Original>
+                <English>Set Waypoints</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxi_action_dest">
-                <Original>Tell the driver where to go</Original>
-                <English>Tell the driver where to go</English>
+                <Original>Set Waypoints</Original>
+                <English>Set Waypoints</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxi_action_loc">
-                <Original>Give a location to the driver</Original>
-                <English>Give a location to the driver</English>
+                <Original>Set Destination</Original>
+                <English>Set Destination</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxi2wp">
                 <German>Klicke 3 beliebige Positionen auf Karte, um sichere Route zu erstellen. Erste zwei sind Flugpunkte, letzter ist Landeplatz. Drücke ESC zum Abbrechen unvollständiger Route.</German>
@@ -7323,11 +7331,11 @@
                 <English>You must have at least one FOB to access the FOB manager.</English>
             </Key>
             <Key ID="STR_DUWS_T_iggpsdqo">
-                <German>&lt;t color='#15ff00'&gt;FOB Manager&lt;/t&gt;</German>
-                <Chinesesimp>&lt;t color='#15ff00'&gt;FOB 管理&lt;/t&gt;</Chinesesimp>
-                <Spanish>&lt;t color='#15ff00'&gt;Administrador de puestos de avanzada&lt;/t&gt;</Spanish>
-                <Original>&lt;t color='#15ff00'&gt;FOB Manager&lt;/t&gt;</Original>
-                <English>&lt;t color='#15ff00'&gt;FOB Manager&lt;/t&gt;</English>
+                <German>FOB Manager</German>
+                <Chinesesimp>FOB 管理</Chinesesimp>
+                <Spanish>Administrador de puestos de avanzada</Spanish>
+                <Original>FOB Manager</Original>
+                <English>FOB Manager</English>
             </Key>
             <Key ID="STR_DUWS_T_naaz6hhb">
                 <German>Entferne eine FOB</German>
@@ -8057,11 +8065,11 @@
                 <English>Confirm</English>
             </Key>
             <Key ID="STR_DUWS_T_xfgokhbc">
-                <German>&lt;t color='#ff1011'&gt;AI Heilen/Aufmunitionieren&lt;/t&gt;</German>
-                <Spanish>&lt;t color='#ff1011'&gt;Curar/rearmar IA&lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#ff1011'&gt;AI 治愈/重新武装&lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#ff1011'&gt;AI Heal/Re-Arm&lt;/t&gt;</Original>
-                <English>&lt;t color='#ff1011'&gt;AI Heal/Re-Arm&lt;/t&gt;</English>
+                <German>AI Heilen/Aufmunitionieren</German>
+                <Spanish>Curar/rearmar IA</Spanish>
+                <Chinesesimp>AI 治愈/重新武装</Chinesesimp>
+                <Original>AI Heal / Rearm</Original>
+                <English>AI Heal / Rearm</English>
             </Key>
             <Key ID="STR_DUWS_T_3y5r8lzq">
                 <German>Deine Gruppenmitglieder wurden vollständig geheilt und aufmunitioniert.</German>
@@ -8071,8 +8079,8 @@
                 <English>Your squad members have been fully Healed and Re-Armed.</English>
             </Key>
             <Key ID="STR_DUWS_T_SHOW_MISSION_COOLDOWNS">
-                <Original>&lt;t color='#15ff00'&gt;Show Mission Cooldowns&lt;/t&gt;</Original>
-                <English>&lt;t color='#15ff00'&gt;Show Mission Cooldowns&lt;/t&gt;</English>
+                <Original>Mission Cooldowns</Original>
+                <English>Mission Cooldowns</English>
             </Key>
             <Key ID="STR_DUWS_T_COOLDOWN_READY">
                 <Original>Ready</Original>
@@ -8391,11 +8399,11 @@
                 <English>Waiting for the host to finish mission setup...</English>
             </Key>
             <Key ID="STR_DUWS_T_2rc0nvug">
-                <Spanish>&lt;t color='#00FF00'&gt;Alternar tapones &lt;/t&gt;</Spanish>
-                <German>&lt;t color='#00FF00'&gt;Ohrenstöpsel umschalten &lt;/t&gt;</German>
-                <Chinesesimp>&lt;t color='#00FF00'&gt;切换耳塞 &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#00FF00'&gt;Toggle Earplugs &lt;/t&gt;</Original>
-                <English>&lt;t color='#00FF00'&gt;Toggle Earplugs &lt;/t&gt;</English>
+                <Spanish>Alternar tapones</Spanish>
+                <German>Ohrenstöpsel umschalten</German>
+                <Chinesesimp>切换耳塞</Chinesesimp>
+                <Original>Earplugs</Original>
+                <English>Earplugs</English>
             </Key>
             <Key ID="STR_DUWS_T_ix8g2neb">
                 <Spanish>Unido al juego, bienvenido a %1, %2</Spanish>

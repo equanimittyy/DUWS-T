@@ -1,6 +1,8 @@
 // Locality: client -- see callers.
 // Logging first, so anything that fails below is visible. The server compiles this too;
 // on a dedicated server the client half needs its own copy before the registry arrives.
+#include "..\shared\includes\action_style.hpp"
+
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_log_init.sqf";
 ["INFO", "BOOT", format ["Client_init: %1", profileName]] call fnc_log;
 ["INFO", "BOOT", format ["client_init start, player %1", profileName]] call fnc_log;
@@ -241,7 +243,7 @@ if (_difficulty_setting < 2 || (difficultyOption "mapContentFriendly") == 1) the
 // INIT Earplugs -- available on foot as well as mounted; fadeSound is a client-wide setting,
 // so nothing about the toggle was ever vehicle-specific. The action dies with the body, so
 // onPlayerRespawn.sqf re-adds it.
-player addaction [localize "STR_DUWS_T_2rc0nvug",fnc_earplugs, "", 0, true, true, "", "_this == player"];
+player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, "", 0, true, true, "", "_this == player"];
 
 // Hardcore body search. Same re-add reason as the earplugs above: it dies with the body.
 [] call fnc_intel_search_action;
@@ -251,7 +253,7 @@ player addaction [localize "STR_DUWS_T_2rc0nvug",fnc_earplugs, "", 0, true, true
 // game_master is the existing campaign-control list. Attached to the player rather than an object
 // so it is reachable anywhere on the map, and it dies with the body, so onPlayerRespawn re-adds.
 if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1 && {(vehiclevarname player) in game_master}) then {
-	player addAction ["<t color='#ff8000'>Debug</t>", fnc_debug_menu, "", 0, true, true, "", "_this == player"];
+	player addAction [ACT_UTIL("STR_DUWS_T_DEBUG_ACTION"), fnc_debug_menu, "", 0, true, true, "", "_this == player"];
 };
 
 // Create Diary/Help entry on the Map
@@ -507,7 +509,7 @@ publicVariable "fnc_disguise_addGear";
 if (isNil {player getVariable "DUWS_disguiseMenu_actionAdded"}) then {
     [
         player,
-        localize "STR_DUWS_T_DISGUISE_MENU_ACTION",
+        ACT_EQUIP("STR_DUWS_T_DISGUISE_MENU_ACTION"),
         "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
         "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
         "alive _target && vehicle _target == _target",

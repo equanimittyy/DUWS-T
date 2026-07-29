@@ -1,32 +1,34 @@
 // Locality: all machines; the addAction bodies below run on the machine that triggers them, not here (callers remoteExec to target 0).
+#include "..\includes\action_style.hpp"
+
 _fob = _this select 0;
 _fob_owner = _this select 1;
 // 防重
 if (_fob getVariable ["FOB_actions_done", false]) exitWith {};
 _fob setVariable ["FOB_actions_done", true];
 if ((vehiclevarname player) in Squad_Leaders) then {
-    _fob addaction [localize "STR_DUWS_T_vw32hahc",fnc_FOB_Request_Menu, "", 100, true, true, "", "_this == player"];
-    _fob addaction [localize "STR_DUWS_T_l0xark5g",fnc_squad_manage, "", 95, true, true, "", "_this == player"];
+    _fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_vw32hahc"),fnc_FOB_Request_Menu, "", 100, true, true, "", "_this == player"];
+    _fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_l0xark5g"),fnc_squad_manage, "", 95, true, true, "", "_this == player"];
 };
     
-_fob addaction [localize "STR_DUWS_T_iggpsdqo",fnc_FOBmanager, "", 0, true, true, "", "_this == player"];
+_fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_iggpsdqo"),fnc_FOBmanager, "", 0, true, true, "", "_this == player"];
     
 if (support_armory_available) then {
-    _fob addaction [localize "STR_DUWS_T_160jkc3a",fnc_duws_Arsenal, "", 90, true, true, "", "_this == player"];
+    _fob addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, "", 90, true, true, "", "_this == player"];
 };
 
 if (support_halo_available) then {
-    _fob addAction [localize "STR_DUWS_T_foldimok", fnc_ghst_halo, [false,600,70], 0, true, true, "","_this == player"];
+    _fob addAction [ACT_MOVE("STR_DUWS_T_foldimok"), fnc_ghst_halo, [false,600,70], 0, true, true, "","_this == player"];
     if ((vehiclevarname player) in Squad_Leaders) then {
-        _fob addAction [localize "STR_DUWS_T_u6btu73i", fnc_ghst_halo, [true,600,70], 0, true, true, "","_this == player"];
-        _fob addAction [localize "STR_DUWS_T_halo_ai_only", fnc_ghst_halo, [true,600,70,true], 0, true, true, "","_this == player"];
+        _fob addAction [ACT_MOVE("STR_DUWS_T_u6btu73i"), fnc_ghst_halo, [true,600,70], 0, true, true, "","_this == player"];
+        _fob addAction [ACT_MOVE("STR_DUWS_T_halo_ai_only"), fnc_ghst_halo, [true,600,70,true], 0, true, true, "","_this == player"];
     };  
 };
 
 if ((vehiclevarname player) in game_master) then {
     // 给全局治愈功能添加10分钟（600秒）冷却时间 + 多人联机强制同步
     _fob addaction [
-        localize "STR_DUWS_T_9eiwr3bt",  // 本地化菜单名称
+        ACT_AID("STR_DUWS_T_9eiwr3bt"),  // 本地化菜单名称
         {  // 重构匿名函数，添加冷却校验+联机同步逻辑
             // 1. 定义核心变量
             private _coolDownVar = "GM_Heal_LastUsedTime";  // 全局冷却记录变量名
@@ -60,10 +62,10 @@ if ((vehiclevarname player) in game_master) then {
     ];
 };
 
-[[_fob,[localize "STR_DUWS_T_xfgokhbc",fnc_AI_rearm,[], 0, false, false, "", "_this distance _target < 12"]],"addAction",true,true] call BIS_fnc_MP;
+[[_fob,[ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 0, false, false, "", "_this distance _target < 12"]],"addAction",true,true] call BIS_fnc_MP;
 // === 显示所有任务冷却（仅限 player1） ===
 _fob addaction [
-    localize "STR_DUWS_T_SHOW_MISSION_COOLDOWNS",
+    ACT_UTIL("STR_DUWS_T_SHOW_MISSION_COOLDOWNS"),
     {
         private _lines = [];
         private _missionTypes = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];

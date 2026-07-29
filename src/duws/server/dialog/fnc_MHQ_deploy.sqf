@@ -1,6 +1,8 @@
 // Locality: server; the addAction bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
 
 // MHQ must be empty to Deploy
+#include "..\..\shared\includes\action_style.hpp"
+
 _empty = (count (crew MHQ1)) == 0;
 if (!_empty) exitWith {
 	["info",[localize "STR_DUWS_T_ywl7naen",localize "STR_DUWS_T_bnw9muay"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
@@ -44,8 +46,8 @@ MHQ_ammobox setDir _mhqDir;
 // Put some crap in the ammobox
 [MHQ_ammobox,"blufor"] spawn fnc_fill_ammobox; 
 
-[[MHQ_ammobox,[localize "STR_DUWS_T_160jkc3a",fnc_duws_Arsenal,[], 0, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
-[[MHQ_ammobox,[localize "STR_DUWS_T_xfgokhbc",fnc_AI_rearm,[], 0, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
+[[MHQ_ammobox,[ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal,[], 0, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
+[[MHQ_ammobox,[ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 0, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
 
 sleep 0.2;
 

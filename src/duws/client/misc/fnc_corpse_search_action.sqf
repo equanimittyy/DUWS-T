@@ -21,7 +21,7 @@ _corpse setVariable ["corpse_target_pos", _targetPos];
 // 添加长按动作
 [
     _corpse,                                                            // 目标对象
-    localize "STR_DUWS_T_SEARCH_CORPSE",                                // 动作标题
+    localize "STR_DUWS_T_SEARCH_CORPSE_ACTION",                                // 动作标题
     "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_search_ca.paa",      // 空闲图标
     "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_search_ca.paa",      // 进度图标
     "_this distance _target < 3",                                       // 动作可用条件

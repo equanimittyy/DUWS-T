@@ -1,4 +1,6 @@
 // Locality: client; the addAction bodies below run on the machine that triggers them, not here.
+#include "..\..\shared\includes\action_style.hpp"
+
 if (!hasInterface) exitWith {};
 params ["_depot", "_trgNetId"];
 if (isNull _depot) exitWith {};
@@ -10,7 +12,7 @@ private _trg = objectFromNetId _trgNetId;
 if (isNull _trg) exitWith { ["ERROR", "SUPPORT", "Trigger null on client"] call fnc_log; };
 
 _depot addAction [
-    localize "STR_DUWS_T_VEHICLE_RECYCLING",
+    ACT_SECONDARY_MENU("STR_DUWS_T_VEHICLE_RECYCLING"),
     {
         params ["_t", "_c", "_i", "_trg"];
         [localize "STR_DUWS_T_VEHICLE_RECYCLING", [

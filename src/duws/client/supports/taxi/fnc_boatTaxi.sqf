@@ -1,5 +1,7 @@
 // Locality: client; the addAction bodies below run on the machine that triggers them, not
 // here (invoked from the comm menu, shared/includes/supports_radio_modern.hpp:177).
+#include "..\..\..\shared\includes\action_style.hpp"
+
 _posplayer = _this select 0;
 _radius = _this select 1;
 
@@ -34,7 +36,7 @@ _boat = createVehicle ["B_Boat_Transport_01_F", _spawnPos,[], 0, "FLY"];
 _boatgroup = createGroup west; 
 _pilot = _boatgroup createUnit [blufor_MARKSMAN_X, [5,5,5], [], 0, "NONE"];
 _boatgroup deleteGroupWhenEmpty true;
-_boat addAction [format ["<t color='#00b7ff'>%1</t>", localize "STR_DUWS_T_boattaxi_action_dest"], fnc_mapclickboat, "", 0, true, true, "", "vehicle _this == _target"];
+_boat addAction [ACT_MOVE("STR_DUWS_T_boattaxi_action_dest"), fnc_mapclickboat, "", 0, true, true, "", "vehicle _this == _target"];
 _pilot setcaptive true; 
 _pilot moveindriver _boat;
 
@@ -72,7 +74,7 @@ if (getdammage _boat > 0.7 or !alive _pilot) exitWith {}; // get out of the loop
 if (vehicle player != _boat) then {
 	taxiCanTakeOff = false; 
 	[localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_notaboard"] remoteExec ["fnc_duws_dialogue", 0];
-	_boat addAction [format ["<t color='#00b7ff'>%1</t>", localize "STR_DUWS_T_boattaxi_action_loc"], fnc_mapclickboat, "", 0, true, true, "", "vehicle _this == _target"];
+	_boat addAction [ACT_MOVE("STR_DUWS_T_boattaxi_action_loc"), fnc_mapclickboat, "", 0, true, true, "", "vehicle _this == _target"];
 } else {
 	_inVehCheck = false;};
 };

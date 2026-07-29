@@ -1,4 +1,6 @@
 // Locality: server; the addAction bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
+#include "..\..\..\..\shared\includes\action_style.hpp"
+
 params ["_MissionPos", "_mission_name"];
 if (!([9, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
@@ -99,7 +101,7 @@ clearBackpackCargoGlobal _vehicle_7;
 
 [_vehicle_7, {
     private _actionID = _this addAction [
-        format ["<t color='#00ff00'>%1</t>", localize "STR_DUWS_T_FULL_ARSENAL_ONCE"],
+        ACT_EQUIP("STR_DUWS_T_FULL_ARSENAL_ONCE"),
         {
             params ["_target", "_caller", "_actionId"];
             if (!(_target getVariable ["arsenalUsed", false])) then {
@@ -134,7 +136,7 @@ clearBackpackCargoGlobal _vehicle_8;
 
 [_vehicle_8, {
     private _actionID = _this addAction [
-        format ["<t color='#00ff00'>%1</t>", localize "STR_DUWS_T_FULL_ARSENAL_ONCE"],
+        ACT_EQUIP("STR_DUWS_T_FULL_ARSENAL_ONCE"),
         {
             params ["_target", "_caller", "_actionId"];
             if (!(_target getVariable ["arsenalUsed", false])) then {
