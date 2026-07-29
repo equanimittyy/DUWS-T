@@ -37,23 +37,34 @@ of the four, since it is the one the player cannot see or influence.
 | Flat income, per 30 min | — | one constant, independent of everything |
 | Zone captured (`fnc_captured.sqf:39-42`, `fnc_blufor_cap.sqf:31-34`) | + swing | — |
 | Zone lost (`fnc_opfor_cap.sqf:34-36`) | − swing | + swing |
-| Side mission (`fnc_mission_reward.sqf:20`), corpse search | + reward, +1 | − half the reward |
+| Side mission (`fnc_mission_reward.sqf:20`), corpse search | + reward, +1 | — |
 
-### Both pools need a way down, and only one has it
+### The enemy's pool goes down only by being spent
 
-BLUFOR sheds AP when it loses a zone. OPFOR sheds it nowhere: it gains when it takes ground and,
-until the consolation is removed, gained when it lost ground too. So nothing the player does
-reduces the enemy's pool. That was survivable while AP was only a ladder, because the ladder
-ratchets and a debit would not have un-unlocked anything. It is not survivable now that the pool
-funds garrisons, taskings and hardpoints: with no way down, suppressing enemy activity is
-impossible in principle.
+Nothing the player does subtracts from OPFOR's Army Power. There is no debit anywhere: the
+director's own purchases are the sole way the pool falls. Side missions were the obvious candidate
+for a player-facing debit — the code for one had sat commented out in `fnc_mission_reward.sqf`
+since before this design and has now been deleted — and it is rejected. A debit lets the player
+attack a number rather than the war, and the number is the one thing on the enemy's side that the
+player cannot see.
 
-**Side missions are the way down, and the code for it already exists, disabled.**
-`fnc_mission_reward.sqf:22-24` has the OPFOR debit commented out while the header immediately
-above still documents the contract — *"army power reward (both +BLUFOR and -OPFOR)"*, *"OPF loses
-1/2 the points"*. Restoring it makes a completed side mission cost the enemy half what it pays the
-player, which is a lever the player can pull deliberately, on a cooldown the mission system
-already enforces per type (`client/missions/fnc_stratmap.sqf:24-40`).
+**The lever is forcing the enemy to spend, not taking points off it.** Every hardpoint cleared and
+every town garrison wiped is a purchase destroyed, and no purchase is refunded
+([`hardpoint_system_plan.md`](hardpoint_system_plan.md#the-director-and-the-escalation-ladder)), so
+restoring it costs the enemy again. A player who keeps destroying what the enemy buys keeps the
+enemy buying, and an enemy that is buying is not banking toward the next tier. That is the same
+suppression, expressed as pressure on what the enemy owns rather than on its balance — and it is
+visible, because the player can see the emplacement they just destroyed being rebuilt.
+
+**This makes the never-saturating sink load-bearing rather than a refinement.** If the director
+runs out of things to buy — every town at IV, corridors full — it stops spending, and with no
+debit anywhere the pool then rises monotonically until the ladder tops out, with nothing the
+player can do about it. Under a debit that state was survivable. Without one, a saturated director
+is a campaign whose escalation the player has no purchase on at all.
+
+The two pools are therefore not symmetric, deliberately. BLUFOR's is a wallet the player fills and
+spends, and it drops when ground is lost. OPFOR's is a budget the director burns, and only the
+director burns it.
 
 ### Losing a zone must cost BLUFOR exactly what taking it paid
 
@@ -477,18 +488,19 @@ saturates and can absorb whatever the others leave, rather than an archetype-by-
 - Whether the player can *learn* the archetype, and how. One the player can never perceive is
   variance rather than a mechanic; the intel system is the obvious route
   ([`info/intel_system.md`](info/intel_system.md)), and observed behaviour is the free one.
-- What the never-saturating sink is. Reinforcing an existing garrison rather than upgrading it,
-  or replacing losses, would absorb surplus without an ever-growing map — but any such sink is
-  also the one the enemy spends on when it has run out of ideas, so it has to be something the
-  player still notices.
+- What the never-saturating sink is. This is the first thing to settle after the flat rate, since
+  with no debit anywhere it is the only thing standing between a saturated director and a pool
+  that only rises. Reinforcing an existing garrison rather than upgrading it, or replacing losses,
+  would absorb surplus without an ever-growing map — but any such sink is also the one the enemy
+  spends on when it has run out of ideas, so it has to be something the player still notices.
 - Whether the director should be *required* to spend rather than merely able to. Banking is
   strictly simpler than spending, and a director that banks by default turns "spend or climb"
   into a formality — but a forced-spend rule is a policy, and policies are where AI directors
   become predictable.
-- Whether a player can suppress enemy escalation indefinitely — draining the pool through side
-  missions while clearing hardpoints and towns faster than the director rebuilds. Restoring the
-  mission debit is what makes this reachable at all; whether it is a legitimate strategy or a
-  stalled war depends on the numbers, and only play answers it.
+- Whether clearing hardpoints and garrisons faster than the director rebuilds them holds the enemy
+  below a threshold indefinitely. It is the only suppression route there is, so it wants to work —
+  the question is whether it works so well that a diligent player freezes the war, and only play
+  answers that.
 - The capture swing's new value. It has to stay large enough to read as a windfall and small
   enough that towns outweigh it over a campaign, and both halves of the lose/retake pair move
   together — the swing is one number, not two.
