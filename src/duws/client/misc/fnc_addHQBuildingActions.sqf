@@ -14,14 +14,14 @@ if (isNull _hqBuilding) exitWith {};
 if (_hqBuilding getVariable ["HQ_building_actions_done", false]) exitWith {};
 _hqBuilding setVariable ["HQ_building_actions_done", true];
 
-_hqBuilding addAction [ACT_PRIMARY_MENU("STR_DUWS_T_vw32hahc"), fnc_HQ_Request_Menu, "", 100, true, true, "", "_this == player"];
+_hqBuilding addAction [ACT_PRIMARY_MENU("STR_DUWS_T_vw32hahc"), fnc_HQ_Request_Menu, [], 100, true, true, "", "_this == player"];
 
 if ((vehiclevarname player) in Squad_Leaders) then {
-    _hqBuilding addAction [ACT_PRIMARY_MENU("STR_DUWS_T_l0xark5g"), fnc_squad_manage, "", 95, true, true, "", "_this == player"];
-    _hqBuilding addAction [ACT_UTIL("STR_DUWS_T_4jabuvz6"), fnc_groupReset, "", 0, true, true, "", "_this == player"];
+    _hqBuilding addAction [ACT_PRIMARY_MENU("STR_DUWS_T_l0xark5g"), fnc_squad_manage, [], 95, true, true, "", "_this == player"];
+    _hqBuilding addAction [ACT_UTIL("STR_DUWS_T_4jabuvz6"), fnc_groupReset, [], 0, true, true, "", "_this == player"];
 };
 
-_hqBuilding addAction [ACT_PRIMARY_MENU("STR_DUWS_T_iggpsdqo"), fnc_FOBmanager, "", 0, true, true, "", "_this == player"];
+_hqBuilding addAction [ACT_PRIMARY_MENU("STR_DUWS_T_iggpsdqo"), fnc_FOBmanager, [], 0, true, true, "", "_this == player"];
 
 // 添加显示任务冷却
 _hqBuilding addAction [
@@ -90,7 +90,7 @@ _hqBuilding addAction [
         } forEach _missionTypes;
         hint (_lines joinString "\n");
     },
-    "",
+    [],
     0,
     true,
     true,

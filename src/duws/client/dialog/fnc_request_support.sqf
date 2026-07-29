@@ -39,9 +39,9 @@ switch (_index2) do {
 		ctrlSetText [1000, format["%1",commandpointsblu1]];
 		lbSetColor [2103, index_support_armory, [0, 1, 0, 1]];
 		support_armory_available = true;
-		bluHQ_object addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, "", 0, true, true, "", "_this == player"];
+		bluHQ_object addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [], 0, true, true, "", "_this == player"];
 		{
-			_x addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, "", 0, true, true, "", "_this == player"];
+			_x addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [], 0, true, true, "", "_this == player"];
 		} forEach (Array_of_FOBS);
 
 		playSound "loadgun";

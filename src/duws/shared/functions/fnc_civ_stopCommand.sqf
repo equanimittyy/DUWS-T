@@ -39,7 +39,7 @@ private _actionID = _unit addAction [
     // over, which the player can already see.
     [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_STOP_SUCCESS"] remoteExec ["fnc_duws_dialogue", _caller];
 },
-    nil,
+    [],
     6,
     true,
     true,

@@ -7,14 +7,14 @@ _fob_owner = _this select 1;
 if (_fob getVariable ["FOB_actions_done", false]) exitWith {};
 _fob setVariable ["FOB_actions_done", true];
 if ((vehiclevarname player) in Squad_Leaders) then {
-    _fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_vw32hahc"),fnc_FOB_Request_Menu, "", 100, true, true, "", "_this == player"];
-    _fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_l0xark5g"),fnc_squad_manage, "", 95, true, true, "", "_this == player"];
+    _fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_vw32hahc"),fnc_FOB_Request_Menu, [], 100, true, true, "", "_this == player"];
+    _fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_l0xark5g"),fnc_squad_manage, [], 95, true, true, "", "_this == player"];
 };
     
-_fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_iggpsdqo"),fnc_FOBmanager, "", 0, true, true, "", "_this == player"];
+_fob addaction [ACT_PRIMARY_MENU("STR_DUWS_T_iggpsdqo"),fnc_FOBmanager, [], 0, true, true, "", "_this == player"];
     
 if (support_armory_available) then {
-    _fob addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, "", 90, true, true, "", "_this == player"];
+    _fob addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [], 90, true, true, "", "_this == player"];
 };
 
 if (support_halo_available) then {
@@ -130,7 +130,7 @@ _fob addaction [
 
         hint (_lines joinString "\n");
     },
-    "",
+    [],
     0,
     true,
     true,

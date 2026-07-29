@@ -21,7 +21,7 @@ if (_actionAID != -1) then { _crate removeAction _actionAID; };
 _actionAID = _crate addAction [
     ACT_EQUIP("STR_DUWS_T_QUICK_KITS"),
     { [] call fnc_quick_kits_menu; },
-    nil,
+    [],
     80,
     true,
     true,

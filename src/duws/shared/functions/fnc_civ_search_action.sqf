@@ -73,7 +73,7 @@ private _actionID = _unit addAction [
 
         [_target, _caller] remoteExec ["fnc_civ_search_armed", 2];
     },
-    nil,
+    [],
     6,
     true,
     true,

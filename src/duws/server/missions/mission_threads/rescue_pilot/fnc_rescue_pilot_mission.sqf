@@ -261,7 +261,7 @@ private _fncScript = {
                 },
                 [],
                 1, true, true, "",
-                format ["player == _target && !isNull (_target getVariable ['carriedPilot', objNull]) && {alive (_target getVariable ['carriedPilot', objNull])} && {count (nearestObjects [_target, ['Car','Tank','Helicopter','Ship'], 5]) > 0}"],
+                "player == _target && !isNull (_target getVariable ['carriedPilot', objNull]) && {alive (_target getVariable ['carriedPilot', objNull])} && {count (nearestObjects [_target, ['Car','Tank','Helicopter','Ship'], 5]) > 0}",
                 5
             ];
             _caller setVariable ["putInVehicleAction", _putInVehicleAction];
@@ -329,7 +329,7 @@ private _fncScript = {
                     },
                     [],
                     1, true, true, "",
-                    format ["!isNull _target && {!(_target getVariable ['isCarried', false])} && {alive _target} && {(_this distance _target) < 2.5}"],
+                    "!isNull _target && {!(_target getVariable ['isCarried', false])} && {alive _target} && {(_this distance _target) < 2.5}",
                     5
                 ];
                 _pilot setVariable ["carryActionID", _actionID];

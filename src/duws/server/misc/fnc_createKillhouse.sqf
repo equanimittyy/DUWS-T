@@ -1267,7 +1267,7 @@ if (count _computerObjects > 0) then {
                     }, [], [1,0.533,0,1]]
                 ]] call fnc_open_action_menu;
             },
-            nil,
+            [],
             6,
             true,
             true,

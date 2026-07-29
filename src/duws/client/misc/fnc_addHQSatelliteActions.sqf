@@ -25,7 +25,7 @@ if ((vehiclevarname player) in game_master) then {
             // 将请求发送到服务器执行实际治疗
             [_caller] remoteExec ["fnc_restHealServer", 2];
         },
-        "",
+        [],
         0,
         true,
         true,

@@ -76,7 +76,7 @@ clearBackpackCargoGlobal _truck1;
                 ["Open", true] call BIS_fnc_arsenal;
             };
         },
-        nil,
+        [],
         6,
         true,
         true,

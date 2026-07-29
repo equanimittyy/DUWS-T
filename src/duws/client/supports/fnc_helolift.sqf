@@ -212,7 +212,7 @@ if (call _check_damage) exitWith { call _abort };
 _liftActionID = player addAction [
     ACT_MOVE("STR_DUWS_T_helolift_action_wp"),
     fnc_mapclicklift,
-    nil,
+    [],
     0,
     true,
     true,

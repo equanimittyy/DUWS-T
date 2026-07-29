@@ -21,7 +21,7 @@ private _actionID = _unit addAction [
         // Spawned: fnc_civ_menu waits on the dialog before it can fill anything in.
         [_target] spawn fnc_civ_menu;
     },
-    nil,
+    [],
     6,
     true,
     true,

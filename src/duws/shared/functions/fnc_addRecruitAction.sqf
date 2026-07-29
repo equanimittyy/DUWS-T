@@ -17,7 +17,7 @@ _unit addAction [
         [_target, _caller] spawn fnc_recruit_civilian;
         _target removeAction _actionId;
     },
-    nil,
+    [],
     6,
     true,
     true,

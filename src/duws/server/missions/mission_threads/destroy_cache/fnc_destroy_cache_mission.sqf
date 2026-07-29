@@ -112,7 +112,7 @@ clearBackpackCargoGlobal _vehicle_7;
                 ["Open", true] call BIS_fnc_arsenal;
             };
         },
-        nil,
+        [],
         6,
         true,
         true,
@@ -147,7 +147,7 @@ clearBackpackCargoGlobal _vehicle_8;
                 ["Open", true] call BIS_fnc_arsenal;
             };
         },
-        nil,
+        [],
         6,
         true,
         true,

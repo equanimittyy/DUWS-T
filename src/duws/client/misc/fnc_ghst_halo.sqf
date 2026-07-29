@@ -137,7 +137,7 @@ if (!_excludePlayer) then {
     titleCut ["", "BLACK IN", 5];
     openMap false;
 
-    _bis_fnc_halo_action = _caller addaction [ACT_MOVE("STR_DUWS_T_bd22lcos"),"A3\functions_f\misc\fn_HALO.sqf",[],1,true,true,"Eject"];
+    _bis_fnc_halo_action = _caller addaction [ACT_MOVE("STR_DUWS_T_bd22lcos"),"A3\functions_f\misc\fn_HALO.sqf",[],1,true,true,"Eject","true"];
     sleep 5;
     _caller groupchat localize "STR_DUWS_T_sjk84cdc";
 

@@ -20,7 +20,7 @@ _terminal addAction [
             [localize "STR_DUWS_T_BLACKMARKET_BUY_OPTIC",   { [player, 5, "optic"]   remoteExec ["fnc_blackMarketPurchase", 2]; }, [], [0,1,0,1]]
         ]] call fnc_open_action_menu;
     },
-    nil,
+    [],
     85,
     true,
     true,
@@ -40,7 +40,7 @@ _terminal addAction [
             [localize "STR_DUWS_T_HIRE_PMC",                { [player] remoteExec ["fnc_hirePMC", 2]; }, [], [1,0.667,0,1]]
         ]] call fnc_open_action_menu;
     },
-    nil,
+    [],
     84,
     true,
     true,
