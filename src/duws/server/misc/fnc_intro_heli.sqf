@@ -197,9 +197,11 @@ private _dropping = (_boardedPlayers apply {[_x, true]}) + (_unboardedPlayers ap
 
         // Fanned around the rope point rather than dropped onto it: the serial version arrived
         // 13 s apart and could share one spot, but a stick landing together ends up inside one
-        // another, which the engine resolves by shoving them apart.
+        // another, which the engine resolves by shoving them apart. Sized for a full cabin --
+        // the ring holds a fixed radius, so the more players it seats the tighter the spacing.
+        private _ringRadius = 10;
         private _angle = 360 * _index / _total;
-        private _landing = [(_groundPosASL select 0) + (sin _angle) * 3, (_groundPosASL select 1) + (cos _angle) * 3, 0];
+        private _landing = [(_groundPosASL select 0) + (sin _angle) * _ringRadius, (_groundPosASL select 1) + (cos _angle) * _ringRadius, 0];
         _landing set [2, getTerrainHeightASL [_landing select 0, _landing select 1]];
         _player setPosASL _landing;
         _player setVariable ["intro_completed", true, true];
