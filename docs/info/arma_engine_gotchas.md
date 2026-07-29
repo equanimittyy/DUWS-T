@@ -460,3 +460,23 @@ false` on the intro aircraft removes the `!alive` escape hatch that would otherw
 completion signal for cleanup. Gate deletion on something the engine cannot withhold — distance
 travelled plus a hard time cap — the way `fnc_helotaxi.sqf` does, which waits only for the
 helicopter to clear 100 m of the player and then deletes on a fixed timer.
+
+## `doStop` outlives the orders it was issued against, and new waypoints do not release it
+
+**A unit under `doStop` ignores its group's waypoints until it is given a move order of its own.
+Deleting the group's waypoints and adding a fresh set does not clear the stop — the new circuit
+is issued, is visible to `waypoints`, and is simply never walked.**
+
+This is invisible at the call site because the stop and the re-order live in different functions.
+`fnc_civ_moveToPlayerServer` (`src/duws/server/server_fnc_init.sqf`) ends on `doStop` so a
+civilian called over stands still to be spoken to; every ending of the conversation then routes
+through `fnc_civ_resume` into `fnc_civ_wp_Tomata`, which rebuilds the circuit and nothing more.
+Each civilian is its own group leader, so the stop held the whole group: anyone the player talked
+to stood where the conversation ended for the rest of the town's occupancy. Nothing errors, and
+the group's waypoint list looks correct under inspection — the symptom reads as a stuck `CYCLE`
+waypoint rather than as a stopped unit.
+
+**How to apply:** pair every `doStop` with an explicit release wherever orders are re-issued, not
+where the stop was set. `doMove` to the first waypoint's position is the release —
+`_unit doMove (waypointPosition _first)` — because it is both a move order and the leg the group
+was about to walk anyway, so it costs nothing on paths that were never stopped.

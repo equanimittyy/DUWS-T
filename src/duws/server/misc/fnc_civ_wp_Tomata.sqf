@@ -107,8 +107,10 @@ private _fnc_hunt = {
     };
 
     private _origin = getPos _unit;
+    private _first = [];
     for "_i" from 1 to (2 + floor random 2) do {
         private _wp = _group addWaypoint [[_origin] call _fnc_strollPos, 0];
+        if (_first isEqualTo []) then { _first = _wp };
         _wp setWaypointType "MOVE";
         _wp setWaypointSpeed "LIMITED";
         _wp setWaypointBehaviour "SAFE";
@@ -125,4 +127,11 @@ private _fnc_hunt = {
     _cycle setWaypointBehaviour "SAFE";
     _cycle setWaypointCombatMode "GREEN";
     _cycle setWaypointCompletionRadius 5;
+
+    // The call-over ends on a doStop so the civilian stands still to be spoken to, and a stopped
+    // unit ignores its group's waypoints until it is given a move of its own -- new orders do not
+    // release it. Every civilian is its own group leader, so the stop held the whole circuit and
+    // anyone the player talked to stood where the conversation ended. Harmless on the fill path,
+    // where the first leg is where they were headed anyway.
+    _unit doMove (waypointPosition _first);
 } forEach _groups;

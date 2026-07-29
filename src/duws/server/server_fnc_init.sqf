@@ -932,6 +932,11 @@ fnc_civ_resume = {
 	_civilian spawn {
 		sleep (1 + random 1);
 		if (!alive _this) exitWith {};
+		// A shot fired mid-conversation panics the civilian while the dialog is still open, so the
+		// row the player then picks lands here on someone already running. Re-issuing would draw a
+		// circuit around a fleeing unit and leave its CYCLE in front of the one the calm-down adds
+		// a minute later, which the group never walks past. The panic owns the resume in that case.
+		if (_this getVariable ["DUWS_civ_panicked", false]) exitWith {};
 		private _idx = _this getVariable ["civ_locIndex", -1];
 		private _buildings = if (_idx < 0) then { [] } else {
 			(missionNamespace getVariable [format ["civ_buildings_%1", _idx], []]) select { !isNull _x }
