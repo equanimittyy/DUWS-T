@@ -13,28 +13,68 @@ territory income is unaffected and keeps paying the player CP (`zoneundercontrol
 
 ## Where AP comes from, and why OPFOR leads without trying
 
-A zone's worth is `round(radius/10)` (`server/init_zones/fnc_locatorzones_random.sqf:56`); the
-capture swing is half of it and OPFOR's consolation half again (`zone_ap_swing`,
-`zone_ap_consolation`, `server/server_var_init.sqf:102-103`). So a 500 m zone moves 25 AP and a
-1000 m one 50.
+**Towns are the primary income; captures are a windfall on top.** That ordering is the design, and
+it is not what the numbers currently say: a zone's worth is `round(radius/10)`
+(`server/init_zones/fnc_locatorzones_random.sqf:56`) and the capture swing is half of it
+(`zone_ap_swing`, `server/server_var_init.sqf:102`), so a 500 m zone moves 25 AP, a 1000 m one 50,
+and a zone at the 2000 m ceiling 100 — against 1–3 per town per tick. The swing has to come down
+far enough that a run of towns outweighs a capture over a campaign. It stays a windfall; it stops
+being a substitute for holding ground.
+
+A town pays no lump for entering a band, only its per-tick income. Turning a town is a slow
+deliberate act and paying a bonus for it invites oscillating a town across the boundary, which
+would need a once-per-town flag to close — a guard, a flag and a farm, in exchange for a moment.
+
+**The consolation goes to zero.** `zone_ap_consolation` paid OPFOR half the swing whenever the
+player took a zone, on the reasoning that a losing enemy should not simply stop escalating. With a
+flat income, town income and a swing of its own for retaking, the enemy has enough routes in
+without also being paid for the player's successes — and being paid for them is the least legible
+of the four, since it is the one the player cannot see or influence.
 
 | Faucet | BLUFOR | OPFOR |
 |---|---|---|
-| Flat income, per 30 min | — | one constant, independent of everything |
-| Zone captured (`fnc_captured.sqf:39-42`, `fnc_blufor_cap.sqf:31-34`) | + swing | + half the swing, as consolation |
-| Zone lost (`fnc_opfor_cap.sqf:34-36`) | − swing | + swing |
 | Town income, per 30 min (`fnc_zonesundercontrol.sqf:39-46`) | towns at `>= 10` rep, 1-3 each | towns at `<= -10` rep, 1-3 each |
-| Side mission (`fnc_mission_reward.sqf:20`), corpse search | + reward, +1 | — |
+| Flat income, per 30 min | — | one constant, independent of everything |
+| Zone captured (`fnc_captured.sqf:39-42`, `fnc_blufor_cap.sqf:31-34`) | + swing | — |
+| Zone lost (`fnc_opfor_cap.sqf:34-36`) | − swing | + swing |
+| Side mission (`fnc_mission_reward.sqf:20`), corpse search | + reward, +1 | − half the reward |
 
-Two structural advantages fall out, and neither is a bug:
+### Both pools need a way down, and only one has it
+
+BLUFOR sheds AP when it loses a zone. OPFOR sheds it nowhere: it gains when it takes ground and,
+until the consolation is removed, gained when it lost ground too. So nothing the player does
+reduces the enemy's pool. That was survivable while AP was only a ladder, because the ladder
+ratchets and a debit would not have un-unlocked anything. It is not survivable now that the pool
+funds garrisons, taskings and hardpoints: with no way down, suppressing enemy activity is
+impossible in principle.
+
+**Side missions are the way down, and the code for it already exists, disabled.**
+`fnc_mission_reward.sqf:22-24` has the OPFOR debit commented out while the header immediately
+above still documents the contract — *"army power reward (both +BLUFOR and -OPFOR)"*, *"OPF loses
+1/2 the points"*. Restoring it makes a completed side mission cost the enemy half what it pays the
+player, which is a lever the player can pull deliberately, on a cooldown the mission system
+already enforces per type (`client/missions/fnc_stratmap.sqf:24-40`).
+
+### Losing a zone must cost BLUFOR exactly what taking it paid
+
+The `− swing` on a lost zone is an anti-farm invariant, not a flourish, and it is the one line here
+most likely to read as gratuitous punishment to someone tidying up later. Without it, a player lets
+OPFOR retake a zone for free and recaptures it for another `+ swing`, indefinitely. With it, the
+cycle is exactly net zero and there is nothing to farm.
+
+**Exactly** is load-bearing, and it holds only because both paths measure the zone's *worth*.
+Worth never changes; the CP bounty decays on every capture by design
+([`info/cp_economy.md`](info/cp_economy.md)). An AP swing computed from the bounty on one path and
+worth on the other would leak in whichever direction the mismatch fell. Both
+`fnc_blufor_cap.sqf:31` and `fnc_opfor_cap.sqf:34` derive it from `_points`, and must keep doing so.
+
+The enemy's remaining structural advantage is one the player can see and act on:
 
 - **The enemy's towns are free; the player's are work.** A town whose radius reaches into an enemy
   zone starts at `-20` (`server/misc/fnc_civ_init_Tomata.sqf:200-210`) — already in the OPFOR
   band, already paying, already garrisoned at the top reputation tier. Nothing starts in the
   BLUFOR band. Getting a town to `+10` is the deliberate, slow direction documented in
   [`info/cp_economy.md`](info/cp_economy.md).
-- **The enemy is paid out of the player's progress.** Consolation AP arrives on every zone the
-  player takes, so part of the ladder the enemy climbs is funded by the campaign being played.
 
 ### Held ground pays the enemy nothing, deliberately
 
@@ -111,9 +151,9 @@ With no BLUFOR flat income, town income is the player's only recurring AP faucet
 is a lump paid for an action taken. So these three settings remove a whole income route rather
 than trimming one, and they remove it from the side that has fewer.
 
-The loss is one-sided twice over: OPFOR's flat income is untouched by the setting, and its
-consolation stream keeps paying out of the player's own captures. Turning civilians off should be
-a presentation choice; it must not quietly be a difficulty setting.
+The loss is one-sided: OPFOR's flat income is untouched by the setting, so civilians off costs the
+player a faucet and the enemy nothing. Turning civilians off should be a presentation choice; it
+must not quietly be a difficulty setting.
 
 Decided:
 
@@ -171,15 +211,37 @@ anything spends:
 | `server/missions/fnc_missionPatrolswithintel.sqf:14` | >100 | Same |
 | `server/missions/fnc_opf_heli_reinforce.sqf:81` | `ap/200` | Reinforcement head count, scaled linearly |
 
-**These must read the unlock, not the pool.** A player who watches enemy armour disappear because
-the enemy bought a garrison is being shown an unlock that un-unlocked, which contradicts the one
-rule the ladder has. The fix is a pair of published tier globals that only ever rise, written
+**These must read the unlock, not the pool** — and the tier globals that replace them are save
+state, for the same reason. A reload that restores the pools but not the tiers would re-derive
+them from a pool that has since been spent down, silently downgrading an enemy that had already
+unlocked armour. A ratchet whose only record is a number that goes both ways is not a ratchet.
+
+A player who watches enemy armour disappear because the enemy bought a garrison is being shown an
+unlock that un-unlocked, which contradicts the one rule the ladder has. The fix is a pair of published tier globals that only ever rise, written
 where the `waitUntil` threads already step, and read in place of the comparisons above. The
 `fnc_opf_heli_reinforce.sqf:81` linear scale is the odd one out: it is a curve, not a gate, so it
 takes the highest tier reached rather than a threshold test.
 
 Making the tier explicit is also what lets both sides display it. The pool figure alone stops
 describing capability the moment spending starts.
+
+**The starting-AP presets become the ladder's own rungs, plus zero.** Each side's opening pool is
+picked independently from seven options — 10, 50, 80, 110, 150, 170, 200
+(`client/dialog/fnc_process_campaign_menu.sqf:278-308,319-349`) — none of which except 10 and 150
+lands on a threshold, so today the preset sets a position part-way between tiers and the host
+cannot tell which one they picked. Replacing them with `0, 10, 40, 65, 100, 136, 150` is the same
+seven options expressed as *"start at this tier"*, and it is exact: those are the wave rungs plus
+OPFOR air.
+
+Zero is the one genuinely new option, and it matters more than it used to. The preset is no longer
+only a ladder position — under a spendable pool it is also an opening wallet, so a 200 AP start
+hands a side several permanent purchases before the first shot. Zero is what a campaign that wants
+both economies earned from nothing selects.
+
+The seven values are *derived* from the thresholds rather than chosen alongside them. If the ladder
+is retuned — and it likely will be, since it was set against an economy where only captures paid —
+the presets are regenerated from the new rungs, not re-picked. A preset that no longer lands on a
+threshold has silently gone back to meaning nothing.
 
 ## Spending authority
 
@@ -193,9 +255,96 @@ describing capability the moment spending starts.
   fnc_ap_adjust`. There is no second writer to race — the director is server-side and single —
   so the handshake would only add a frame boundary between its test and its debit.
 
-One inherited behaviour to settle rather than discover: `fnc_pool_try_spend` applies
-`fnc_escalation_cost` to *every* pool on entry, so a BLUFOR AP price is escalation-scaled
-automatically while an OPFOR one is not.
+**Escalation scales CP prices only.** `fnc_pool_try_spend` applies `fnc_escalation_cost` to every
+pool on entry, which would scale BLUFOR AP prices as a side effect; the `"AP"` case has to opt
+out. Two reasons. CP is the player's own purchasing power, so a hardening enemy making the
+shopping list dearer is what escalation is modelling — AP is the war's momentum and belongs to
+more than the player. And AP purchases are permanent, so scaling them would make buying early
+strictly better than buying well, which is the opposite of a decision worth having.
+
+**AP needs a live counter, which it has never had.** Nothing spent AP, so nothing had to display
+it: `fnc_ap_adjust` broadcasts the pool but refreshes no control — its own comment says *"no HUD
+counter to refresh"* — and there is no `publicVariableEventHandler` for either pool, which
+`client/dialog/fnc_convertAPtoCP.sqf:12` notes as the reason it paints control 1002 from its own
+predicted total rather than re-reading. Three dialogs read AP at open time
+(`fnc_FOB_Request_Menu.sqf:9`, `fnc_HQ_Request_Menu.sqf:9`, `fnc_convertAPtoCP.sqf:13`) and none
+updates afterwards. A stale counter was cosmetic when AP was a score; it is a purchase made on
+wrong information once AP is a currency, and worse in co-op, where someone else's spend is exactly
+what the reader cannot see. The map view readout ([below](#reading-the-war-from-the-map)) covers
+the deciding case; a dialog that sits open while another player spends is the residue.
+
+**AP prices must be integers, and nothing will enforce it any more.** `fnc_ap_adjust` does not
+round — CP's writer rounds its running total, AP's simply adds and floors at 0 — so a fractional
+delta persists in the pool. Until now `fnc_escalation_cost` was an accidental guard, since it
+`ceil`s every price on the way through `fnc_pool_try_spend`; taking AP out of escalation removes
+it. A pool resting at 39.97 fails a `>40` gate while a rounded counter prints 40, and the player
+has no way to tell why.
+
+**Who may spend is unsettled, and the leaning is toward `game_master`.** Both pools are shared, any
+squad lead can spend them today, and permanence means a bad AP purchase cannot be worked off the
+way a wasted CP one can. The shape under consideration is moving the support call to `game_master`
+alone, which already owns campaign-level control — the setup flow, side-mission requests, the
+global heal ([`info/cp_economy.md`](info/cp_economy.md)) — and reads naturally as the BLUFOR
+commander. That is a role decision as much as a permissions one: it makes one player answerable for
+the campaign's premium currency rather than making every squad lead trustworthy.
+
+## Reading the war from the map
+
+Garrison levels belong in the click readout, not on the markers. Nothing is added to the map
+itself: the player opens the board's View Map action, clicks a town, and the popup that already
+answers gains a line.
+
+The three additions do not arrive together, and the order is forced rather than chosen. CP and AP
+depend on nothing. A town's garrison level waits on the garrison work in
+[§Town garrisons](#town-garrisons-i-through-iv), which is what turns a tier into something a query
+can read. Zones enter the readout later still, and are not in it at all today.
+
+**The mechanism exists.** `client/misc/fnc_civ_mapView.sqf` claims map clicks, each click goes to
+`fnc_civ_townQuery` on the server, and `fnc_civ_townInfo` draws the answer as a map prompt — name,
+population, reputation, and what the town pays or is worth. A garrison level is one more field on
+the tuple those two pass and one more line in the readout.
+
+The lookup has to stay server-side for the same reason it already is: `civ_locations`, `civ_radii`
+and `civ_town_rep` are none of them broadcast, so the click travels to the server and the readout
+travels back. Nothing about a garrison figure changes that, and it is why this costs no new
+networked state.
+
+**Reveal gating is already correct for towns.** An unrevealed town answers as empty ground rather
+than as a hit the readout declines to describe, so the map cannot be swept for towns the presence
+trigger is keeping hidden. A garrison line inherits that, because the query never reaches the point
+of composing a readout.
+
+**Nothing records a garrison tier today**, which is why the readout cannot lead. In
+`server/misc/fnc_civ_garrison.sqf:72-74` the tier is a local, computed inside the spawn branch,
+used once and discarded. Making it per-town state belongs to the garrison work, not here — the
+effective tier is the higher of the reputation tier and the purchased one, so that feature has to
+record it either way. The readout is a consumer of that state and follows it.
+
+**Zones, when they are added.** `fnc_civ_townQuery` searches `civ_locations` and nothing else, so a
+click on a zone reads as empty ground. Extending it means a second lookup against `zone_meta_array`
+and — the part that has to be got right — a zone reveal test standing in for the `civ_visible` one,
+or the readout becomes the free map sweep the town path was written to avoid. What a zone reports
+needs deciding too: zone garrisons are tier IV by definition, so a constant `IV` says nothing, and
+the useful figure is the strength it will actually spawn at, which comes from the OPFOR tier ladder
+rather than from the zone.
+
+**CP and AP need no round trip.** Both pools are `publicVariable`d, so the client's copies are
+current; the map view can print them directly. That also answers most of the missing-counter
+problem above without a `publicVariableEventHandler`: a readout the player opens is read at the
+moment they are deciding, where a dialog control left open is not.
+
+### SITREP becomes free
+
+It costs 1 CP today (`server/supports/fnc_sitrep_support.sqf:3`) and reports what the player can
+already work out — more so once the map carries the same figures.
+
+**The stronger argument is that SITREP is the only save in the mission.** It is the sole caller of
+`fnc_autoSave` ([`campaign_persistence_plan.md`](campaign_persistence_plan.md)), so the 1 CP is a
+charge for saving the game, and a player who has spent down to nothing cannot save at all.
+
+**The cost is also the only throttle**, since there is no cooldown on the support. Removing the
+price without adding one leaves `saveGame` spammable, and a save is a real frame hitch rather than
+a free call. The cooldown replaces the price; it does not accompany it.
 
 ## Town garrisons: I through IV
 
@@ -336,14 +485,19 @@ saturates and can absorb whatever the others leave, rather than an archetype-by-
   strictly simpler than spending, and a director that banks by default turns "spend or climb"
   into a formality — but a forced-spend rule is a policy, and policies are where AI directors
   become predictable.
-- Whether a player can suppress enemy escalation by clearing hardpoints and towns faster than the
-  director can rebuild, holding it below a threshold indefinitely. That is a legitimate strategy
-  or a stalled war depending on the numbers, and only play answers it.
-- Whether BLUFOR AP prices should be escalation-scaled, given `fnc_pool_try_spend` will scale them
-  by default and OPFOR prices are not scaled at all.
+- Whether a player can suppress enemy escalation indefinitely — draining the pool through side
+  missions while clearing hardpoints and towns faster than the director rebuilds. Restoring the
+  mission debit is what makes this reachable at all; whether it is a legitimate strategy or a
+  stalled war depends on the numbers, and only play answers it.
+- The capture swing's new value. It has to stay large enough to read as a windfall and small
+  enough that towns outweigh it over a campaign, and both halves of the lose/retake pair move
+  together — the swing is one number, not two.
 - Whether the AP→CP converter survives. It is a 15 AP → 10 CP one-way trade with no cooldown
   (`client/dialog/fnc_convertAPtoCP.sqf`); with the player's AP entirely earned and now buying
   garrisons and tiers, selling it for CP competes with both.
+- Whether the support call moves to `game_master` alone, and what a squad lead sees when it does.
+  Restricting it makes one player the BLUFOR commander, which is a role the mission does not
+  currently ask anyone to play; in a two-player session it may just mean one of them cannot buy.
 - Which supports move behind an AP tier, and what the player is told when one is locked.
 - Whether anything bought with AP is consumable after all. The rule admits one exception already
   (a garrison can be cleared), and a second would make "AP buys permanence" a guideline rather

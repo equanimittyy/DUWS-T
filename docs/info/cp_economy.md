@@ -56,9 +56,12 @@ global therefore stays the running sum of what actually happened, and a town pin
 stops dragging it down. The global itself is not clamped: it is the sum of N town pools, so a
 cap that meant the same thing would have to be `20 x town count`, which is not a cap.
 
-**No call site prints a reputation total.** A caller computes its figure before the write lands,
-and the clamp means the writer may apply less than was asked, so any number a caller names is a
-prediction. The town's own marker carries `Rep:` and SITREP carries the campaign figure.
+**No call site prints a reputation total, and neither does the map.** A caller computes its figure
+before the write lands, and the clamp means the writer may apply less than was asked, so any number
+a caller names is a prediction. A town's standing reaches the player as marker *colour* alone —
+`fnc_civ_townRender` sets colour and alpha, the markers are created without text
+(`fnc_civ_init_Tomata.sqf:262-279`), and `civ_town_rep` is never broadcast. SITREP carries the
+campaign figure.
 
 ## Authority: the server decides a purchase, not the buyer
 
