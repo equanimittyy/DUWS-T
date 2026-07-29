@@ -936,8 +936,8 @@ killhouse_progress_delay         = 10;  // before the first progress hint, so th
 killhouse_progress_period        = 1;   // between progress hints after that; cannot resolve
                                         // finer than the wave loop's own tick below
 killhouse_corpse_linger          = 2;   // seconds a hit target or body stays before deletion
-killhouse_min_spawn_dist         = 10;  // no spawn this close to a player already in the course
-killhouse_max_spawn_dist         = 20;  // ...and none further than this from the nearest one, so
+killhouse_min_spawn_dist         = 15;  // no spawn this close to a player already in the course
+killhouse_max_spawn_dist         = 25;  // ...and none further than this from the nearest one, so
                                         // the drill keeps coming to the player instead of making
                                         // them walk the course looking for it
 killhouse_area_radius            = 80;  // 3D from the composition centre, and the one
