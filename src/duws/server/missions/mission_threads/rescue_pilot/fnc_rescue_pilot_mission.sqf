@@ -533,7 +533,7 @@ if (!pilot_west_close && (time - _missionStartTime) > _taskTimeout_approach) exi
     deleteMarker str(_markername);
     _pilot setDamage 1;
     [{hint localize "STR_DUWS_T_fxysw123"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
@@ -545,7 +545,7 @@ if (!(alive _pilot)) exitWith {
     deleteMarker str(_markername2);
     deleteMarker str(_markername);
     [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;   
@@ -573,7 +573,7 @@ if (!(alive _pilot)) exitWith {
     deleteMarker str(_markername2);
     deleteMarker str(_markername);
     [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
@@ -587,7 +587,7 @@ if (!isNull attachedTo _pilot) then {
     CLEANUP_PILOT(_pilot);
 };
 
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
 sleep 1;
 
 [_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0];

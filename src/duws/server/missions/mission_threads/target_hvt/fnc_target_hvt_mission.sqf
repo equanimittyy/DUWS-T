@@ -261,7 +261,7 @@ waitUntil {sleep 0.5; !alive _target || (time - _missionStartTime) > _taskTimeou
 
 if (alive _target && (time - _missionStartTime) > _taskTimeout) exitWith {
     [{hint localize "STR_DUWS_T_abc1abc2"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
     [] spawn fnc_missionTimer;
     deleteMarker str(_markername2);
     deleteMarker str(_markername);
@@ -276,7 +276,7 @@ sleep 120;
 deleteMarker str(_markername2);
 deleteMarker str(_markername);
 
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
 
 sleep 1;
 

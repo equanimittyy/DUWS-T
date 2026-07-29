@@ -799,7 +799,7 @@ deleteMarker _arrowMarkerName;
 
 [_speaker1, _message3] remoteExec ["fnc_duws_dialogue", 0];
 sleep 12;
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
 
 sleep 1;
 

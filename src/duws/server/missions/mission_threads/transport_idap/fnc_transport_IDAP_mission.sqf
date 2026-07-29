@@ -225,7 +225,7 @@ if (getdammage _truck1>0.95) exitWith {
     call _cleanupDelivery;
     _truck1 setDamage 1;
     [{hint localize "STR_DUWS_T_jsg7ys0w"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
     // Reputation is a civilian-system currency: skip its change when civilians are off. The
     // town is resolved from the delivery point, falling back to the global outside every radius.
     if (CIV_PRESENCE != "NONE") then {
@@ -242,7 +242,7 @@ if (getdammage _truck1>0.95) exitWith {
 deleteMarker _deliveryMarkerName;
 [_speakerIDAP, _message3] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
 if (CIV_PRESENCE != "NONE") then {
     [[_targetpos] call fnc_civ_townAt, 5, "idap_success"] call fnc_town_rep_adjust;
     ["repup", [localize "STR_DUWS_T_rqwho9bq", localize "STR_DUWS_T_civ_rep_up"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];

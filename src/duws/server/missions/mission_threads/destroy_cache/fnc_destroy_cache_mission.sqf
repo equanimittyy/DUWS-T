@@ -368,7 +368,7 @@ _bomb = "grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
 deleteMarker str(_markername2);
 deleteMarker str(_markername);
 
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, true];
+[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, _VARtaskgeneratedName];
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;

@@ -248,7 +248,7 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
         if ((!alive _samSystem || !alive _radarSystem) && ((time - _missionStartTime) < _countdownDuration)) exitWith {
             deleteMarker str(_markername2);
             deleteMarker str(_markername);
-            [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+            [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
             [] spawn fnc_missionTimer;
             [_targetpos,_radius, "mission_holdpos", true] spawn fnc_mission_cleanup;
             Mission_Active = false;
@@ -262,7 +262,7 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
         if ((time - _missionStartTime) >= _countdownDuration) exitWith {
             deleteMarker str(_markername2);
             deleteMarker str(_markername);
-            [_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+            [_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
             sleep 1;
             [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
             [] spawn fnc_missionTimer;

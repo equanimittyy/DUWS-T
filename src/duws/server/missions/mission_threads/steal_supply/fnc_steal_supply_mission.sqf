@@ -289,7 +289,7 @@ if (!alive _truck1 || (time - _taskStartTime > _taskTimeLimit)) exitWith {
     _truck1 setDamage 1;
     [{hint localize "STR_DUWS_T_jsg7ys0w"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
     [_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0];
-    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, true];
+    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, _VARtaskgeneratedName];
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos, _radius, "mission_steal_supply"] spawn fnc_mission_cleanup;
@@ -297,7 +297,7 @@ if (!alive _truck1 || (time - _taskStartTime > _taskTimeLimit)) exitWith {
 };
 
 _truck1 removeEventHandler ["GetIn", _truckGetInEH];
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, true];
+[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, _VARtaskgeneratedName];
 
 [{hint localize "STR_DUWS_T_po7fmmoa"}] remoteExec ["BIS_fnc_Spawn", player1];
 sleep 2;

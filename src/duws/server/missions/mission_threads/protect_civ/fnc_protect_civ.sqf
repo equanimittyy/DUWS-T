@@ -195,7 +195,7 @@ Mission_Failed = false;
     // ----- 任务结局判定 -----
     if (!alive _civ) then {
         // 平民死亡 → 失败
-        [_taskID, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, true];
+        [_taskID, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, _taskID];
         // Reputation is a civilian-system currency: skip its change when off. Charged against
         // the town the escorted civilian belonged to, falling back to the global outside one.
         if (CIV_PRESENCE != "NONE") then {
@@ -209,7 +209,7 @@ Mission_Failed = false;
             _message2       = ([localize "STR_DUWS_T_pcend"] call fnc_cs);
             [_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
             sleep 8;
-            [_taskID, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, true];
+            [_taskID, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, _taskID];
 
             [_cp, _ap, "Protect Civilian"] call fnc_mission_reward;
             if (CIV_PRESENCE != "NONE") then {

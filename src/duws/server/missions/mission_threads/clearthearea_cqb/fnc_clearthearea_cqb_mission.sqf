@@ -225,7 +225,7 @@ sleep 5;
 sleep 6;
 [_speaker, _message3] remoteExec ["fnc_duws_dialogue", 0];
 sleep 6;
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
 
 sleep 1;
 

@@ -59,14 +59,14 @@ if (!(alive _sol1) && !(alive _sol2) && !(alive _sol3)) exitWith {
     _message = ([localize "STR_DUWS_T_squadfail"] call fnc_cs);
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
-	[_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+	[_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
 
 	[] spawn fnc_missionTimer;
 
 	[_targetPos,_radius] spawn fnc_mission_cleanup;
 };
 
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,true];
+[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
 
 // Define globalChat source
 _solRadio = "";
