@@ -54,7 +54,7 @@ https://steamcommunity.com/sharedfiles/filedetails/?id=1451755886
 
 Credits:
 
-DUWS_T created by 5U5. (also many, many help by XOR on discord!)
+DUWS_T created by 5U5 and equanimity. (also with the help by XOR on discord!)
 Original DUWS_X by Killa Tomata.
 DUWS by Kibot. DUWS-R edition by Frito and UltraNoobian.
 R3F Logistics System by Madbull, HALO jump script by Ghost, AIS Medical by Phantom, TAW Dynamic View Distance by Tonic, plus plenty of scripting inspiration from talented creators on the Bohemia Forums.
