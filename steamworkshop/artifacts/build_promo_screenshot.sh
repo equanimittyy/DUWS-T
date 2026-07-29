@@ -7,9 +7,9 @@
 # reproduces its cap height and inked width to within 0.3%, so swapping the face
 # invalidates every constant below.
 #
-# Inputs (override by env; none are in-repo, see the notes at the foot of this file):
-#   DUWS_FONT   Jost-var.ttf, or another Futura-class face
-#   DUWS_PLATE  the untitled screenshot to letter
+# Inputs default to the copies beside this script; override by env:
+#   DUWS_FONT   fonts/Jost-var.ttf, or another Futura-class face
+#   DUWS_PLATE  duws_t_v2_plate.png, the untitled screenshot to letter
 #
 # Shipped DUWS-T-v2.png was:
 #   build_promo_screenshot.sh out.png 0.64 0.588 0.30 50 20 181 10 \
@@ -23,7 +23,7 @@ set -euo pipefail
 
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 F=${DUWS_FONT:-$DIR/fonts/Jost-var.ttf}
-SRC=${DUWS_PLATE:-$DIR/plate.png}
+SRC=${DUWS_PLATE:-$DIR/duws_t_v2_plate.png}
 for p in "$F" "$SRC"; do
   [ -r "$p" ] || { echo "missing input: $p (set DUWS_FONT / DUWS_PLATE)" >&2; exit 1; }
 done
@@ -91,7 +91,3 @@ if [ "$VIG" != "0" ]; then
 else cp "$SRC" "$T/base.png"; fi
 
 convert "$T/base.png" "$T/wordmark.png" -composite "$T/sub.png" -composite "$OUT"
-
-# The untitled plate is not in the worktree - HEAD's DUWS-T-v2.png is the lettered
-# result. Recover one with:  git show <commit>:steamworkshop/artifacts/DUWS-T-v2.png
-# from any revision before the wordmark was applied.

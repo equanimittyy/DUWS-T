@@ -12,9 +12,9 @@
 # fading the text with it would dissolve the last word. Left opaque, the title
 # stays readable against the page while the plate dissolves out from under it.
 #
-# Inputs (override by env; neither is in-repo, temp/ is gitignored):
-#   DUWS_FONT   Jost-var.ttf, or another Futura-class face
-#   DUWS_TOPO   the topographic background
+# Inputs default to the copies beside this script; override by env:
+#   DUWS_FONT   fonts/Jost-var.ttf, or another Futura-class face
+#   DUWS_TOPO   topo_background.jpg
 #
 # Shipped strips were built with the defaults below, one per heading:
 #   Features / How to Play / FAQ / Discussions & Community
@@ -26,7 +26,7 @@ set -euo pipefail
 
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 F=${DUWS_FONT:-$DIR/fonts/Jost-var.ttf}
-BG=${DUWS_TOPO:-$DIR/../../temp/backgroundref.jpg}
+BG=${DUWS_TOPO:-$DIR/topo_background.jpg}
 for p in "$F" "$BG"; do
   [ -r "$p" ] || { echo "missing input: $p (set DUWS_FONT / DUWS_TOPO)" >&2; exit 1; }
 done

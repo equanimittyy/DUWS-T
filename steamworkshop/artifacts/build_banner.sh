@@ -13,9 +13,9 @@
 # one reads as a stroke around the glyphs and fails to reach the bright contours
 # sitting further out. Glyph edges stay hard - the halo is strictly behind.
 #
-# Inputs (override by env; neither is in-repo, temp/ is gitignored):
-#   DUWS_FONT   Jost-var.ttf, or another Futura-class face
-#   DUWS_TOPO   the topographic background
+# Inputs default to the copies beside this script; override by env:
+#   DUWS_FONT   fonts/Jost-var.ttf, or another Futura-class face
+#   DUWS_TOPO   topo_background.jpg
 #
 # Shipped duws_t_banner.png was:  build_banner.sh out.png 0.60 55 ticks 32 35
 #
@@ -26,7 +26,7 @@ set -euo pipefail
 
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 F=${DUWS_FONT:-$DIR/fonts/Jost-var.ttf}
-BG=${DUWS_TOPO:-$DIR/../../temp/backgroundref.jpg}
+BG=${DUWS_TOPO:-$DIR/topo_background.jpg}
 for p in "$F" "$BG"; do
   [ -r "$p" ] || { echo "missing input: $p (set DUWS_FONT / DUWS_TOPO)" >&2; exit 1; }
 done
