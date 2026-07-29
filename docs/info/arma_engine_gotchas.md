@@ -456,6 +456,33 @@ pose, not just the machine where the unit is local. The HQ officer in
 posed unit left `allowDamage false` never reaches the failure, so the handler only becomes
 load-bearing the moment that unit is made killable — pair the two changes.
 
+**Broadcast the pose as well as the clear, and key it.** `switchMove` is local in both
+directions, so a server-side pose dresses the unit on a hosting player's screen and on no other.
+Clearing it globally while setting it locally is the shape this mistake takes, because the death
+bug above forces the clear to be noticed and nothing forces the set to be. The set needs a JIP
+key so a joiner is posed too, and the `Killed` handler then has to drop that queue entry —
+`remoteExec ["", _key]` — or a player joining after the death is handed the pose for a corpse,
+which is the state the clear exists to prevent. `playMoveNow` is local the same way.
+
+## `enableSimulation` is local, so a server-side freeze leaves clients simulating
+
+**`enableSimulation` only affects the machine it runs on. `enableSimulationGlobal`, server-only,
+is the one that reaches everybody.** A unit or prop frozen server-side and then hard-placed with
+`setPosWorld` at an absolute Z sits still on the server while every client keeps simulating it,
+fails to resolve it onto ground, and renders it falling — permanently, because the server's
+position updates keep putting it back in the air. Props settle and drift per machine instead,
+so a base looks subtly different to each player.
+
+Both read as correct to a hosting player, whose client is the server. The pattern is therefore
+invisible in single-player and in any host-only test.
+
+**How to apply:** use `enableSimulationGlobal` for anything a client also renders, including the
+transient freeze used to stop fall damage during placement — the window is short but the client
+never gets the matching re-enable, so it never stops simulating at all. `fnc_duws_deploy` in
+`server/server_fnc_init.sqf` is the reference: global simulation, local `allowDamage`, the
+latter because damage on a server-local object is resolved server-side anyway and broadcasting
+it per prop would cost a JIP entry each.
+
 ## `reverse` returns Nothing, so it cannot be inlined — and `deleteWaypoint` shifts indices
 
 **`reverse` reverses an array in place and evaluates to Nothing, not to the reversed array. Any
