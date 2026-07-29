@@ -4136,8 +4136,8 @@
                 <German>Der Nachrichtendienst hat gerade ermittelt, dass eine feindliche vorläufige Kommandotruppe sich hier vorübergehend versammelt hat – eliminiere den Offizier in der Truppe! Nach der Eliminierung des Offiziers braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Zielerfüllung zu bestätigen.(Diese Mission ist extrem zeitsensitiv; sie schlägt fehl, falls sie innerhalb von 8 Minuten nicht abgeschlossen wird.) (High CP, high AP)</German>
                 <Spanish>El servicio de inteligencia acaba de detectar que un equipo de comando temporal enemigo se ha reunido aquí temporalmente — elimína al oficial del equipo! Después de que el oficial sea eliminado, el servicio de inteligencia necesitará unos minutos adicionales para confirmar la consecución del objetivo.(Esta misión es extremadamente sensible al tiempo; fracasará si no se completa dentro de 8 minutos.) (High CP, high AP)</Spanish>
                 <Chinesesimp>情报部门刚刚发现，敌军的临时指挥班组在这里短暂聚集，去干掉班组里的军官！军官死亡后，情报部门需要额外几分钟确认目标完成。(此任务具有极强时效性，若未在8分钟内完成任务则会失败。)(高CP，高AP)</Chinesesimp>
-                <Original>Allseer has an enemy command team assembled here. Kill the officer, then hold a few minutes while Allseer confirms the kill. The team disperses in 8 minutes, so move now. (High CP, high AP)</Original>
-                <English>Allseer has an enemy command team assembled here. Kill the officer, then hold a few minutes while Allseer confirms the kill. The team disperses in 8 minutes, so move now. (High CP, high AP)</English>
+                <Original>Allseer has eyes on an enemy command team assembled here. Kill the officer, then hold a few minutes while Allseer confirms the kill. The team disperses in 8 minutes, so move now. (High CP, high AP)</Original>
+                <English>Allseer has eyes on an enemy command team assembled here. Kill the officer, then hold a few minutes while Allseer confirms the kill. The team disperses in 8 minutes, so move now. (High CP, high AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_dgpqenyw">
                 <German>Ein freundlicher Signalturm in diesem Gebiet wurde von feindlichen Truppen eingenommen. Feindliche Truppen sind in der Nähe stationiert und entschlüsseln kritische Informationen. Sprenge den Turm, bevor die Feinde das Entschlüsseln abschließen! (Nur noch 15 Minuten, bis kritische Informationen an die Feinde gelangen!) (Slightly low CP, avg AP)</German>
@@ -4253,8 +4253,8 @@
                 <German>Der Nachrichtendienst hat zwei feindliche Scharfschützen in diesem Bereich gesichtet – eliminiere sie! (Nach der Eliminierung der Scharfschützen braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Mission abschließend zu bestätigen.) (Slightly high CP, Slightly high AP)</German>
                 <Spanish>El servicio de inteligencia ha detectado a dos francotiradores enemigos en esta zona — elimínalos! (Después de que los francotiradores sean eliminados, el servicio de inteligencia necesitará unos minutos adicionales para confirmar la finalización de la misión.) (Slightly high CP, Slightly high AP)</Spanish>
                 <Chinesesimp>这个区域有敌军的两名狙击手，干掉他们。(狙击手死亡后，情报部门需要额外几分钟确认目标完成。)(稍高CP，稍高AP)</Chinesesimp>
-                <Original>Allseer has two enemy snipers working this area. Kill both, then hold a few minutes while Allseer confirms the area's clear. (Slightly high CP, slightly high AP)</Original>
-                <English>Allseer has two enemy snipers working this area. Kill both, then hold a few minutes while Allseer confirms the area's clear. (Slightly high CP, slightly high AP)</English>
+                <Original>Allseer has tracked two enemy snipers working this area. Kill both, then hold a few minutes while Allseer confirms the area's clear. (Slightly high CP, slightly high AP)</Original>
+                <English>Allseer has tracked two enemy snipers working this area. Kill both, then hold a few minutes while Allseer confirms the area's clear. (Slightly high CP, slightly high AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_shentouxiaodui">
                 <German>Ein feindliches Eindringlungsteam ist hier blockiert! Vernichtet sie! (Low CP, Low AP)</German>
@@ -4330,8 +4330,8 @@
                 <German>Der Nachrichtendienst hat angegeben, dass die Feinde hier ein Ingenieurfahrzeug aufgestellt haben. Ergreife es und bring es zurück zur Basis. Es kann zu einer mobilen Fabrik umgewandelt werden. (Low CP, low AP)</German>
                 <Spanish>El servicio de inteligencia ha indicado que el enemigo ha desplegado un vehículo de ingeniería aquí. Aprópialo y tráelo de vuelta a la base. Puede ser convertido en una fábrica móvil. (Low CP, low AP)</Spanish>
                 <Chinesesimp>情报部门指出，敌人在这里部署了一辆工程载具。去把它抢回基地。它可以被改造为移动工厂。(低CP，低AP)</Chinesesimp>
-                <Original>Allseer has an enemy engineering vehicle parked here. Take it and drive it back to base — our engineers can convert it into a mobile factory. (Low CP, low AP)</Original>
-                <English>Allseer has an enemy engineering vehicle parked here. Take it and drive it back to base — our engineers can convert it into a mobile factory. (Low CP, low AP)</English>
+                <Original>Allseer has spotted an enemy engineering vehicle parked here. Take it and drive it back to base — our engineers can convert it into a mobile factory. (Low CP, low AP)</Original>
+                <English>Allseer has spotted an enemy engineering vehicle parked here. Take it and drive it back to base — our engineers can convert it into a mobile factory. (Low CP, low AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_y7z1cx6j">
                 <German>Die feindliche Panzerbesatzung legt hier eine kurze Pause ein – eliminiere ihren Kommandanten! (Nach der Eliminierung des Panzerkommandanten braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Mission abschließend zu bestätigen.) (Low CP, low AP)</German>
