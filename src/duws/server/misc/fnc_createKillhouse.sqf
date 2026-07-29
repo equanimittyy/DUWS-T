@@ -852,6 +852,8 @@ missionNamespace setVariable ["killhouse_targetData", _targetsData];
 missionNamespace setVariable ["killhouse_run_active", false];
 // ========== 第一步：生成普通物体 ==========
 private _computerObjects = [];
+// Ten NATO boxes share the ammo room; only the virtual-arsenal pair takes interactions.
+private _arsenalObjects = [];
 {
     _x params ["_class", "_dX", "_dY", "_dZ", "_yaw", "_atlOffset", "_isTarget"];
     private _newX = _centerSpawnX + _dX;
@@ -867,6 +869,9 @@ private _computerObjects = [];
     // 保存电脑对象引用
     if (_class == "Land_MultiScreenComputer_01_olive_F") then {
         _computerObjects pushBack _obj;
+    };
+    if (_class == "VirtualReammoBox_small_F") then {
+        _arsenalObjects pushBack _obj;
     };
 } forEach _objectsData;
 
@@ -1250,25 +1255,17 @@ if (count _computerObjects > 0) then {
         [_x, [
             ACT_SECONDARY_MENU("STR_DUWS_T_KILLHOUSE_CONTROLS"),
             {
-                // Rows are assembled on the clicking machine each time the terminal is used,
-                // not baked when the killhouse is built: the arsenal is a mid-campaign
-                // purchase, and a list fixed at creation could never grow the row.
-                private _entries = [
+                [localize "STR_DUWS_T_KILLHOUSE_CONTROLS", [
                     [localize "STR_DUWS_T_SPAWN_TARGETS", { [] remoteExec ["killhouse_srv_spawn_targets", 2]; }, [], [0,1,0,1]],
                     [localize "STR_DUWS_T_SPAWN_ENEMIES", { [] remoteExec ["killhouse_srv_spawn_enemies", 2]; }, [], [1,0,0,1]],
                     [localize "STR_DUWS_T_CLEANUP",       { [] remoteExec ["killhouse_srv_cleanup", 2]; }, [], [1,1,0,1]],
-                    [localize "STR_DUWS_T_QUICK_KITS",    { [] call fnc_quick_kits_menu; }, [], [0,1,1,1]]
-                ];
-                if (support_armory_available) then {
-                    _entries pushBack [localize "STR_DUWS_T_160jkc3a", fnc_duws_Arsenal, [], [0,1,1,1]];
-                };
-                _entries pushBack [localize "STR_DUWS_KILLHOUSE_EXIT_TRAINING", {
-                    private _respawnPos = getMarkerPos "respawn_west";
-                    if (_respawnPos isEqualTo [0,0,0]) then { _respawnPos = PosOfBLUHQ; };
-                    player setPos _respawnPos;
-                    hint localize "STR_DUWS_KILLHOUSE_EXIT_MSG";
-                }, [], [1,0.533,0,1]];
-                [localize "STR_DUWS_T_KILLHOUSE_CONTROLS", _entries] call fnc_open_action_menu;
+                    [localize "STR_DUWS_KILLHOUSE_EXIT_TRAINING", {
+                        private _respawnPos = getMarkerPos "respawn_west";
+                        if (_respawnPos isEqualTo [0,0,0]) then { _respawnPos = PosOfBLUHQ; };
+                        player setPos _respawnPos;
+                        hint localize "STR_DUWS_KILLHOUSE_EXIT_MSG";
+                    }, [], [1,0.533,0,1]]
+                ]] call fnc_open_action_menu;
             },
             nil,
             6,
@@ -1279,5 +1276,15 @@ if (count _computerObjects > 0) then {
         ]] remoteExec ["addAction", 0];
     } forEach _computerObjects;
 };
+
+// Gear sits on the crates rather than inside the terminal menu, so the killhouse reads the
+// same as every other arsenal point in the mission. Broadcast like the terminal above: the
+// composition spawns server-side, but the entries have to exist on each client.
+{
+    [_x, [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 6, false, false, "",
+        "_this distance _target < 3 && support_armory_available"]] remoteExec ["addAction", 0];
+    [_x, [ACT_EQUIP("STR_DUWS_T_QUICK_KITS"), { [] call fnc_quick_kits_menu; }, [], 6, false, false, "",
+        "_this distance _target < 3"]] remoteExec ["addAction", 0];
+} forEach _arsenalObjects;
 
 ["INFO", "SUPPORT", "interactions added, killhouse ready"] call fnc_log;
