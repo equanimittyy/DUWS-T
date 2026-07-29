@@ -176,6 +176,42 @@ This matters beyond the save button: [`docs/campaign_persistence_plan.md`](docs/
 opens by asserting the current save cannot work, and that assertion rests on the same
 unverified premise.
 
+## Does a dedicated server read its profile namespace back?
+
+Unverified here, and [`docs/campaign_persistence_plan.md`](docs/campaign_persistence_plan.md)
+rests on the answer being yes. If it is no, the store changes and much of that plan changes with
+it, so this runs before any of it is built.
+
+The concern is specific rather than general: dedicated servers have historically written
+profile-namespace variables to their `.vars.Arma3Profile` file correctly and then failed to load
+them back at the next mission start. That is reported fixed upstream, which is not the same as
+observed working on the box this mission runs on.
+
+**It has to be a dedicated server.** A hosted session and a singleplayer game use the player's own
+profile and were never subject to the failure, so passing there proves the call shape and the file
+name and nothing about the thing at risk. Run it hosted first if you like — it is thirty seconds
+and rules out a typo — but it does not substitute.
+
+**Restart the server process, not the mission.** `#restart` and a mission change both leave the
+server process alive, and the namespace is still in memory across either, so the probe reads back
+from RAM and passes whether or not the file is ever loaded. Only a full process stop and start
+exercises the load path.
+
+Setup, including the `#login` the debug console needs on a dedicated server, is in
+[`docs/info/dedicated_server_setup.md`](docs/info/dedicated_server_setup.md).
+
+- [ ] With the debug console targeting **Server**, run
+      `missionProfileNamespace setVariable ["DUWST_probe", [1,"alive",true]]; saveMissionProfileNamespace;`
+- [ ] Confirm a `.vars.Arma3Profile` appears under the server's `-profiles` directory
+- [ ] Stop the server process fully, start it again, rejoin
+- [ ] With the console targeting **Server**, run
+      `missionProfileNamespace getVariable ["DUWST_probe", "MISSING"]`
+
+`[1,"alive",true]` means the plan's store works as designed. `"MISSING"` means it does not, and the
+question becomes whether `profileNamespace` behaves any differently — it is the same subsystem, so
+expect not — with the clipboard export left as the only route, which would make persistence on a
+dedicated server a manual act rather than an automatic one.
+
 ## Open defects
 
 | Defect | Where | Effect |

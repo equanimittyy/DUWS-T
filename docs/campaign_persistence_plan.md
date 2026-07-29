@@ -621,7 +621,7 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 - [ ] Add the resume screen and its timeout. Verify: a hosted host is asked and can decline; a dedicated server with nobody connected resumes without waiting on the screen; declining wipes the save only after a confirmation.
 - [ ] Version and world guards: refuse a snapshot from a different map or format version and start fresh with a logged warning.
 - [ ] Add export and import. Verify: a save exported on one machine restores a campaign on another, and an oversized snapshot either survives the edit control or is chunked.
-- [ ] On a dedicated server: play, restart, confirm the campaign continues. This cannot be validated by a hosted session — a host is both server and client and will mask locality faults.
+- [ ] On a dedicated server ([`info/dedicated_server_setup.md`](info/dedicated_server_setup.md)): play, restart, confirm the campaign continues. This cannot be validated by a hosted session — a host is both server and client and will mask locality faults.
 
 ## Decided trade-offs
 

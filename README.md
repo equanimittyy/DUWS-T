@@ -60,6 +60,11 @@ Copy `DUWS_T.altis.pbo` into the Arma 3 **install** folder's `MPMissions\`, e.g.
 it from the list. The `<name>.<world>.pbo` filename is required: Arma reads the terrain
 from it.
 
+Hosting this way runs the server and a client in one process, which hides every
+locality fault. Persistence, JIP and remote execution need a real dedicated server to
+prove anything: [`docs/info/dedicated_server_setup.md`](docs/info/dedicated_server_setup.md)
+sets one up from the executable already in your Arma install.
+
 ## Tests
 
 Static checks (SQF syntax + path resolution) and pure-function unit tests live in
