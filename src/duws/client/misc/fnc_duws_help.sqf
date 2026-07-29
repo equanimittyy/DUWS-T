@@ -2,7 +2,7 @@
 // fnc_duws_help.sqf
 // Builds the single "DUWS-T Manual" subject in the map's Notes (diary) as a numbered
 // outline: category headers (1., 2., ...) and their sub-topics (1.1, 1.2, ...), with
-// a blank divider record between categories.
+// a rule divider record between categories.
 //
 // Engine notes (docs/arma_engine_gotchas.md):
 //  - The diary displays records newest-first, so the list is built top-down then
@@ -39,7 +39,7 @@ private _rec = {
     params ["_num", "_labelId", "_body"];
     [_num + " " + (localize _labelId), _body]
 };
-private _divider = ["", ""];
+private _divider = ["=======", ""];
 
 // Records in display order, top first.
 private _records = [
