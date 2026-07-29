@@ -50,6 +50,20 @@ private _squelch = (_channel isEqualTo "NET") || {_speaker in DUWS_voiceSquelchS
 if (_speaker isEqualType "") then { _speaker = [_speaker] call fnc_cs; };
 _text = [_text] call fnc_cs;
 
+// The team callsign names whoever currently speaks for it: "Alpha 1-1 (steph)".
+//
+// The speaker label only, never the line text -- the callsign also turns up inside dialogue,
+// where Overlord addresses the team, and "Alpha 1-1 (steph), move out" would read as part of
+// the sentence rather than as a transmission header. _text went through fnc_cs on its own line
+// above precisely so the two can be treated differently here.
+if (_speaker isEqualTo ([localize "STR_DUWS_T_actionteam"] call fnc_cs)) then {
+    // Guarded for the same reason the speaker table above is built lazily: the resolver arrives
+    // by publicVariable, and a JIP client can be handed a line before it lands. An unnamed
+    // callsign beats an undefined-variable error taking the whole line with it.
+    private _who = if (isNil "fnc_duws_senior_name") then {"None"} else {call fnc_duws_senior_name};
+    _speaker = format ["%1 (%2)", _speaker, _who];
+};
+
 // Two queues rather than one with a priority insert: the drain loop empties VOICE first, which
 // is the same ordering with nothing but pushBack to get wrong. Anything that is not NET queues
 // as VOICE, so a channel that ever arrives malformed lands on the surface the player watches.
