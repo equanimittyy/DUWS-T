@@ -442,3 +442,21 @@ inlined `reverse` leaves an empty loop; neither raises anything in the `.rpt`.
 `for "_i" from (count _wps - 1) to 0 step -1` is equivalent and avoids `reverse` entirely.
 `fnc_civ_panic.sqf` and the `fnc_civ_moveToPlayerServer` block in `server/server_fnc_init.sqf`
 both do the bind-then-reverse form.
+
+## A waypoint statement never runs if the group cannot reach the waypoint
+
+**`setWaypointStatements` fires only on actual completion. A waypoint the group can never reach
+— an exit point past the map edge, a position closed to the group's movement type — is never
+completed, so its statement never runs and a `waitUntil` on the flag it sets blocks forever.**
+
+The despawn thread in `fnc_intro_heli.sqf` waited on exactly such a flag. Its flyaway waypoint
+sits `15000` m from the HQ on a random bearing, which lands off the map for a large share of HQ
+placements; AI aircraft turn back at the boundary, so the group orbits and the statement is
+never evaluated. Nothing errors and nothing is logged — the thread just never resumes, leaving
+the helicopter and its crew airborne over the base for the rest of the session. `allowDamage
+false` on the intro aircraft removes the `!alive` escape hatch that would otherwise cover it.
+
+**How to apply:** treat a waypoint statement as best-effort notification, never as the sole
+completion signal for cleanup. Gate deletion on something the engine cannot withhold — distance
+travelled plus a hard time cap — the way `fnc_helotaxi.sqf` does, which waits only for the
+helicopter to clear 100 m of the player and then deletes on a fixed timer.

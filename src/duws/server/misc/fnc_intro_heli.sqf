@@ -224,11 +224,18 @@ _flyAwayPos set [2, 100];
 private _wp2 = _heliGroup addWaypoint [_flyAwayPos, 0];
 _wp2 setWaypointType "MOVE";
 _wp2 setWaypointBehaviour "CARELESS";
-_wp2 setWaypointStatements ["true", "missionNamespace setVariable ['intro_heli_leave', true, true];"];
 sleep 10;
+
+// Despawn on distance plus a hard cap, like the helo taxi -- never on the flyaway waypoint
+// completing. The exit point is 15 km out and routinely off-map, so the group can orbit the
+// boundary indefinitely and a completion-gated wait would leave the heli parked over the base.
+private _leaveStart = time;
 waitUntil {
     sleep 1;
-    missionNamespace getVariable ["intro_heli_leave", false] || !alive _heli
+    (_heli distance2D _hqPos > 2000) || !alive _heli || (time - _leaveStart) > 180
+};
+if (alive _heli && {_heli distance2D _hqPos < 2000}) then {
+    ["WARN", "INTRO", "Helicopter never cleared the base; deleting on timeout."] call fnc_log;
 };
 
 sleep 30;
