@@ -3326,8 +3326,8 @@
                 <Chinesesimp>黑市</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTELRECRUIT_TITLE">
-                <Original>Intel &amp; Recruitment</Original>
-                <English>Intel &amp; Recruitment</English>
+                <Original>Mission Control</Original>
+                <English>Mission Control</English>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_DROPPED_ON_GROUND">
                 <Original>Item dropped on the ground (no inventory space left)</Original>
