@@ -12,7 +12,7 @@ an HC to a DUWS_T server does not merely fail to help — it corrupts the campai
 | Problem | Where |
 |---|---|
 | A headless client runs `server_init.sqf` in full — faction init, HQ build, WARCOM, mission locator, 39 background loops — in parallel with the real server | `INIT.sqf:21`, with `_duwst_isHeadless` defined at `:15` |
-| `server_init.sqf` has no early guard. Its `if (!isServer) exitWith {}` is the **last line** of the file, where it does nothing. The two inner `if (isServer)` blocks cover only the kill-income and flare handlers | `server/server_init.sqf:498`, inner guards `:205,279` |
+| `server_init.sqf` has no early guard. Its `if (!isServer) exitWith {}` is the **last line** of the file, where it does nothing. The two inner `if (isServer)` blocks cover only the kill-income and flare handlers | `server/server_init.sqf:472`, inner guards `:195,281` |
 | No ownership transfer exists anywhere. `setGroupOwner` and `setOwner` appear nowhere in `server/`, `client/` or `shared/` | — |
 | No HC is declared: no `headlessClients[]` entry, no HC slot among the 20 playable slots | `description.ext`, `mission.sqm` |
 | Waypoint commands only take effect where the group is local, and every waypoint call runs server-side | `server/warcom/fnc_WARCOM_wp_*.sqf`, rule in [`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md) |

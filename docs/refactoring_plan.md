@@ -39,8 +39,9 @@ A normalised clone detector over `src/duws/` (comments and whitespace stripped, 
 windows extended to maximal blocks) run with the 255-file `shared/factions/` data directory
 excluded, since near-identical data tables are expected there and would swamp the result.
 
-**4,787 of 25,611 non-data lines are duplicated — 18.7%.** All ten of the largest clone blocks
-sit in `server/missions/mission_threads/`, which is why that directory leads the plan.
+**2,348 of 25,168 non-data lines are duplicated — 9.3%.** All ten of the largest clone blocks sit
+in `server/missions/mission_threads/`, which is why that directory leads the plan: they are the
+same 45-line epilogue repeated across nine of the threads.
 
 ## Tier 1: quick wins
 
@@ -57,7 +58,7 @@ reference in the tree is the registration itself.
 
 ### `call (compile _var)` where `getVariable` is meant
 
-Nine sites read a global by reconstructing its name as a string and invoking the compiler on it:
+Eight sites read a global by reconstructing its name as a string and invoking the compiler on it:
 
 ```sqf
 _var = "blufor_RQST_VEHICLE_0" + (str (_index - 1)) + "_X";
@@ -165,17 +166,25 @@ A contract audit across all 17 threads found no thread missing its cleanup — `
 `sabotage_laptop` carry theirs in a separate `_success` file, correctly `remoteExec`'d to the
 server. The contract is currently honoured. Three helpers make it hard to stop honouring.
 
-### Two civilian handlers, 307 shared lines
+### Three civilian handlers, 51 shared lines
 
-`server/misc/fnc_civ_handler.sqf` (511 lines) and `server/misc/fnc_civ_handler_wbk.sqf` (557
-lines) share 307 identical lines. Both take `[_locIndex, _mode]`, both dispatch on
-`"spawn"`/`"cleanup"`, both carry the same mutex-and-revalidation comment block verbatim.
-`server/misc/fnc_civ_init_Tomata.sqf:228-230` picks between them by name at runtime.
+There are three: `fnc_civ_handler.sqf` (185 lines), `fnc_civ_handler_ravage.sqf` (407) and
+`fnc_civ_handler_wbk.sqf` (554). They are no longer one function split in three. The plain path
+was rewritten to a single thread that polls every town —
+`fnc_civ_init_Tomata.sqf:287` starts it as `[] spawn fnc_civ_handler` with no arguments — while
+the two mode handlers kept the original per-town `[_locIndex, _mode]` shape and are still picked
+by name at runtime (`:243`). The plain handler now shares **no** block of five or more lines with
+either mode handler.
 
-That is one function with a mode flag, split into two files. The right shape is the split the
-code already implies: a shared spawn/cleanup skeleton plus a small per-mode strategy for the
-parts that genuinely differ. This is the largest single duplication outside the mission threads
-and the one most likely to produce a "fixed in one, still broken in the other" bug.
+What is left is between the mode handlers alone: 51 lines across seven blocks, the largest nine
+(`fnc_civ_handler_ravage.sqf:90` against `fnc_civ_handler_wbk.sqf:79`). That is small enough that
+extracting it buys little on its own, and the two are the mission's only consumers.
+
+**The merge this section used to propose is off the table.** Mode code stays out of the plain
+civilian path by decision, not by accident: the plain handler is what runs mod-free, and a mode
+strategy threaded through it puts RAVAGE and WBK branches on the path every stock game takes. If
+the mode handlers converge further, the shape is a helper the two of them call — not one entry
+point that all three enter.
 
 ## Tier 3: adding one thing costs N edits
 
@@ -287,29 +296,29 @@ decision can be made deliberately rather than discovered mid-refactor.
 
 ### `server_fnc_init.sqf` is two files wearing one name
 
-1,366 lines: 271 registry entries (`fnc_x = compile preprocessFile "..."`) and **36 full function
+1,576 lines: 270 registry entries (`fnc_x = compile preprocessFile "..."`) and **45 full function
 bodies defined inline**, including `fnc_cp_adjust`, `fnc_ap_adjust`, `fnc_zone_control_set`,
 `fnc_mission_begin`, and the whole composition-streaming set (`fnc_duws_keep`, `fnc_duws_stow`,
 `fnc_duws_deploy`, `fnc_duws_release`).
 
 The inline bodies are the mission's most load-bearing code — every CP mutation in the campaign
 routes through `fnc_cp_adjust` — and they are the hardest to find, because the file reads as a
-manifest. The registry self-check at `:1350-1366` is good engineering and should stay wherever
+manifest. The registry self-check at `:1561-1576` is good engineering and should stay wherever
 the registry ends up.
 
 The counter-argument for leaving it alone is real: these functions have no natural file yet, the
 registry is the only place guaranteed to run before anything calls them, and moving them means
-271 path strings get re-verified. The recommendation is the cheap half — move the 36 bodies into
+270 path strings get re-verified. The recommendation is the cheap half — move the 45 bodies into
 subsystem files (`server/misc/fnc_economy.sqf`, `server/misc/fnc_composition_stream.sqf`) and
 register them like everything else, leaving the registry a pure manifest. That is mechanical, and
 `check_paths.py` verifies it.
 
-### 2,068 globals, 543 broadcasts
+### Globals have no namespace
 
-`src/duws/` assigns 2,068 distinct global names and calls `publicVariable` 543 times on 387
-distinct variables. There is no namespace convention that separates campaign state from scratch
-variables, so nothing prevents a name collision between subsystems and nothing makes it visible
-when one happens.
+`src/duws/` calls `publicVariable` at 547 sites on 390 distinct names, over a global namespace
+several times that size. There is no convention separating campaign state from scratch variables,
+so nothing prevents a name collision between subsystems and nothing makes it visible when one
+happens.
 
 This is not fixable as a refactor, and attempting a sweeping rename would be the single
 highest-risk change available in this codebase — `publicVariable` names are matched as strings by
@@ -348,8 +357,9 @@ after and diff the normalised rows.
 - **Do not mass-rename globals or `publicVariable` keys.** Silent runtime failure, no compiler,
   and `addPublicVariableEventHandler` matches on strings.
 - **Do not touch `src/modules/`.** Vendored and frozen.
-- **Do not merge the two civilian handlers and extract the garrison block in one commit.** Both
-  change civilian and OPFOR spawning; a smoke test that fails should point at one change.
+- **Do not put mode branches back on the plain civilian path.** `fnc_civ_handler.sqf` is what
+  runs mod-free; RAVAGE and WBK behaviour reaches it through nothing but the handler chosen at
+  init.
 - **Do not treat `bash tests/run.sh` as sufficient.** It checks bracket balance, path resolution
   and retired names. It does not execute the mission
   ([`info/testing.md`](info/testing.md#why-static-analysis-plus-only-a-thin-unit-layer)). Every
@@ -362,14 +372,14 @@ not yet made. Lint is `bash tests/run.sh`; "smoke" means repack and play far eno
 the named system.
 
 - [ ] Registry corrections: delete the duplicate `fnc_missionLocator` at `server_fnc_init.sqf:705` and the unreferenced `fnc_missionPatrolsSmall` at `:726`. Verify: lint passes, and the boot-time registry self-check logs no `compiled EMPTY`.
-- [ ] Replace the nine `call (compile _var)` reads with `missionNamespace getVariable`. Verify: HQ and FOB request menus populate identically, and buying a vehicle from each still charges CP.
+- [ ] Replace the eight `call (compile _var)` reads with `missionNamespace getVariable`. Verify: HQ and FOB request menus populate identically, and buying a vehicle from each still charges CP.
 - [ ] Replace the three `call compile format ["%1 = ...]` trigger assignments with `setVariable`. Verify: enter a zone (notification fires), deploy and remove a FOB (trigger cleanup runs).
 - [ ] Decide whether `target_sniper` and `clearthearea_cqb` should drop garrison intel. Record the answer, then extract `fnc_garrisonBuildings` and convert the nine copied call sites. Verify: each of the nine missions spawns building garrisons, and corpse intel matches the decision.
 - [ ] Fold the two reimplementations (`fnc_createopfortified.sqf`, `clearthearea_cqb`) onto the same helper, parameterised by building count. Verify: zone fortification garrisons and CQB garrisons spawn at their existing counts of 8 and 4.
 - [ ] Add `fnc_mission_site` and `fnc_mission_end` alongside the existing `fnc_mission_begin`; convert the threads one at a time. Verify per thread: the `_failSafe` bail-out still releases `Mission_available`, markers are deleted, and the reward pays once.
-- [ ] Collapse `fnc_request_support.sqf` to a declaration table plus a driver. Verify: every one of the 24 supports unlocks once, refuses a second purchase, respects the eight-slot radio cap, and colours its listbox row.
-- [ ] Move the 36 inline bodies out of `server_fnc_init.sqf` into subsystem files, leaving a pure manifest. Verify: lint's path check passes, the registry self-check reports the same function count, and CP/AP mutation plus composition stow/deploy still work.
-- [ ] Merge the two civilian handlers behind one entry point with a mode strategy. Verify: both Tomata and WBK civilian modes spawn, clean up, and respect the spawn mutex.
+- [ ] Collapse `fnc_request_support.sqf` to a declaration table plus a driver. Verify: every one of the 22 supports unlocks once, refuses a second purchase, respects the eight-slot radio cap, and colours its listbox row.
+- [ ] Move the 45 inline bodies out of `server_fnc_init.sqf` into subsystem files, leaving a pure manifest. Verify: lint's path check passes, the registry self-check reports the same function count, and CP/AP mutation plus composition stow/deploy still work.
+- [ ] Extract the 51 lines the RAVAGE and WBK handlers still share into a helper the two of them call, leaving the plain handler untouched. Verify: both modes spawn, clean up, and respect the spawn mutex; the plain path is unchanged.
 - [ ] Side-mission definition table replacing the three switches and 34 numbered globals in `fnc_stratmap.sqf`. Verify: all 17 missions appear on the strategic map, each launches the right thread, and the cooldown hint still names the right mission.
 - [ ] Faction request tables: consumer reads an array global with numbered-global fallback, script-convert the 255 files and `fn_factionAutoDetect.sqf`, then delete the fallback. Verify: a vanilla faction, a modded faction and an auto-detected faction all populate both request menus with the same entries as before.
 - [ ] Normalise the fifteen compositions to schema A and drop the B/C adapters from `duws_eden.ps1`. Verify: import each composition through the tool before and after, and diff the normalised rows.

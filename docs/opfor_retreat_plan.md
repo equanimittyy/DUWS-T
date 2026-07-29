@@ -12,14 +12,15 @@ alive ([`info/zone_and_town_generation.md`](info/zone_and_town_generation.md#own
 
 ## What it replaces
 
-Zone despawn is a deletion sweep. `server/init_zones/fnc_spawnWait.sqf:156-168` takes
+Zone despawn is a deletion sweep. `server/init_zones/fnc_spawnWait.sqf:131-142` takes
 `nearObjects` over the zone radius plus the AI buffer and calls `deleteVehicle` on every EAST
-unit and vehicle it finds. It runs only after the grace period at `:134-146` has confirmed no
-BLUFOR nearby for 300 s, so nobody is normally watching — the units blink out of an empty
-landscape. That is correct as a resource measure and says nothing about what happened to them.
+unit and vehicle it finds. It runs only after the grace period at `:116-121` has confirmed no
+BLUFOR nearby for `_despawn_timer` seconds, so nobody is normally watching — the units blink out
+of an empty landscape. That is correct as a resource measure and says nothing about what happened
+to them.
 
 The gap is the cases where the ground changes hands with the player still on it. A zone
-captured while its garrison is alive falls into `fnc_spawnWait.sqf:171-178`, which despawns
+captured while its garrison is alive falls into `fnc_spawnWait.sqf:146-152`, which despawns
 nothing and idles until OPFOR hold it again; the surviving garrison simply stays. A town
 garrison lifted out of the OPFOR band by aid or heals has no path at all, because the per-town
 plan resets reputation on the garrison dying, not the reverse.

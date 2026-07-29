@@ -33,7 +33,7 @@ Routing a hardpoint through either puts it into every consumer of zone state at 
 | `amount_zones_created` | `server/init_zones/fnc_createzone.sqf:19-20` | The campaign never ends. The win condition is `zoneundercontrolblu >= amount_zones_created` (`server/misc/fnc_capture_zones_task.sqf:33`). FOB cap inflates too (`client/supports/fnc_request_fob.sqf:16`) |
 | `zoneundercontrolblu` | `server/server_fnc_init.sqf:97,110` | Passive income becomes `(zones + hardpoints) * 6` per 30 min (`server/misc/fnc_zonesundercontrol.sqf:32`) — the largest balance blow-up available |
 | `WARCOM_zones_controled_by_OPFOR` | `server/server_fnc_init.sqf:95,107-108` | Index 0 is the OPFOR primary assault target. A lost hardpoint redirects the entire enemy war effort. 25+ read sites |
-| `zone_namePOS_pairs` | `server/init_zones/fnc_createzone.sqf:28-29` | Intel reveals pick a random entry (`client/misc/fnc_found_intel.sqf:5`), so hardpoints dilute what intel is worth |
+| `zone_namePOS_pairs` | `server/init_zones/fnc_createzone.sqf:28-29` | Intel reveals pick a random entry from the unrevealed set (`server/misc/fnc_intel_payout.sqf:20,61-62`), so hardpoints dilute what intel is worth |
 | `zone_spawn_array` | `:32` | Lookup is positional — `find [_zone_num,false,false]` (`:221`) — so a duplicate number matches the wrong entry |
 
 The hardpoint tier therefore gets parallel state built to the same template, and touches none
@@ -295,9 +295,9 @@ interaction menu is the intended source:
 [`info/intel_system.md`](info/intel_system.md#one-writer-per-reveal-flag-one-function-for-payout)
 lists an unrevealed normal hardpoint as one of the kinds `fnc_intel_payout` draws from, and
 [`info/civilian_interaction.md`](info/civilian_interaction.md) hands its intel row to that
-function. The corpse-and-mission intel path
-(`client/misc/fnc_found_intel.sqf`) should reach it on the same terms, or hardcore gains a class
-of objective that only one source can ever surface.
+function. The corpse and side-mission paths already reach it on the same terms
+(`server/misc/fnc_intel_search.sqf:27` and the `fnc_intel_payout` calls in the mission threads),
+so a hardpoint kind added to the payout is surfaced by every source at once.
 
 Revealing one is a marker alpha change on a single index — the registry is broadcast and
 `hardpoint_zone_array` is `-1` for exactly this set, so a reveal picks from entries with that

@@ -28,8 +28,8 @@ them.
 
 ## Preserved: hostile civilian conversion
 
-Ran at town spawn when reputation was negative (`server/misc/fnc_civ_handler.sqf:531-558` before
-removal).
+Ran at town spawn when reputation was negative, in the civilian handler. The code is gone; what it
+did is recorded here because the director is meant to rebuild it.
 
 | Property | Value |
 |---|---|
@@ -45,9 +45,8 @@ only mattered between `0` and `-7`.
 
 ## Preserved: suicide bombers
 
-Ran immediately after conversion, in the same spawn pass
-(`server/misc/fnc_civ_handler.sqf:563-588` and `server/misc/fnc_civ_suicideBomberBehaviour.sqf`
-before removal).
+Ran immediately after conversion, in the same spawn pass, with the behaviour itself in a
+`fnc_civ_suicideBomberBehaviour` helper. Both are gone.
 
 Selection: `ceil (count _resistanceUnitsInTown * 0.1)` — a tenth of the converted hostiles,
 which is why deleting conversion silently zeroed this too. Candidates were civilian-sided units
