@@ -820,10 +820,12 @@ fnc_mission_begin = {
 	// Every mission generates an operation name and, until now, only ever showed it in the task
 	// list. Announced here rather than in the seventeen threads: this is the one line all of
 	// them pass through, so a card added anywhere else would cover some missions and not others.
-	// Arguments are broadcast, not the result -- titleText run server-side returns Nothing and
-	// no client would see the card at all.
-	[format ["%1\n%2", localize "STR_DUWS_T_MISSION_CARD", _mission_name], "PLAIN DOWN", 1]
-		remoteExec ["titleText", [0,-2] select isDedicated];
+	// Typed rather than titleText'd, to match the card the campaign opens with. Spawned on each
+	// client rather than remoteExec'd straight to BIS_fnc_typeText: it sleeps between characters,
+	// which throws in the unscheduled environment remoteExec would call it in.
+	[_mission_name, {
+		[[[toUpper _this, "<t align='center' shadow='1' size='1'>%1</t>"]]] spawn BIS_fnc_typeText;
+	}] remoteExec ["spawn", [0,-2] select isDedicated];
 	true
 };
 
