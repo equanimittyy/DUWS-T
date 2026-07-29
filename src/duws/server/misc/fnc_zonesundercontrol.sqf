@@ -16,10 +16,16 @@ while {true} do {
     // which is the failure this loop was merged to end. Server-local: no client reads it.
     econ_tick = econ_tick + 1;
 
-    // Hands every player their body search back. Cleared from here rather than compared against
-    // econ_tick on the client, because the action's condition has to read it and broadcasting
-    // one boolean per player is cheaper than broadcasting the clock for clients to subtract.
-    { _x setVariable ["DUWS_intel_searched", false, true] } forEach allPlayers;
+    // Hands every player their body search and their one ask of a local back. Cleared from here
+    // rather than compared against econ_tick on the client, because the action condition and the
+    // menu's greying both have to read them, and broadcasting two booleans per player is cheaper
+    // than broadcasting the clock for clients to subtract. Two budgets, not one: a corpse and a
+    // living local are different things to find, and sharing a flag would mean a body search on
+    // the way into a town silently closed the conversation the player walked there to have.
+    {
+        _x setVariable ["DUWS_intel_searched", false, true];
+        _x setVariable ["DUWS_civ_intel_asked", false, true];
+    } forEach allPlayers;
 
     // AP is not gated on zone holdings: the enemy banking its towns while the player holds
     // nothing is exactly the case the town economy exists to model.

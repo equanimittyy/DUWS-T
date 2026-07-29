@@ -22,13 +22,19 @@ ctrlSetText [8310, format [localize "STR_DUWS_T_CIV_MENU_COINS", _coins]];
 
 private _closed = _civilian getVariable ["DUWS_civ_closed", false];
 
-// All four rows grey together: one exchange -- served or refused -- closes the person for good,
-// so there is no state where one row is still open and another is not. No range test any more:
+// These three grey together: one exchange -- served or refused -- closes the person for good, so
+// there is no state where one of them is still open and another is not. No range test any more:
 // the action that opens this menu is itself gated to the 3 m the rows work at, so a row can no
 // longer be reached from further away than it functions.
 {
     ctrlEnable [_x, !_closed];
-} forEach [8340, 8341, 8342, 8343];
+} forEach [8341, 8342, 8343];
+
+// Intel carries a second gate the others do not: one ask per player per 30-minute economy tick,
+// spent on the attempt whatever the local answers. Read off the player because that is where the
+// tick clears it. Advisory like the rest of this file -- fnc_civ_request re-reads the flag, so a
+// dialog left open across a tick boundary cannot spend an ask the server has not granted.
+ctrlEnable [8340, !_closed && !(player getVariable ["DUWS_civ_intel_asked", false])];
 
 // Arrest greys on the same flag rather than carrying a second life: one exchange is all a person
 // is worth, so talking to someone and then ordering their hands up is two.

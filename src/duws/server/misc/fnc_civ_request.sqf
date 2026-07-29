@@ -26,12 +26,24 @@ if (_civilian getVariable ["DUWS_civ_closed", false]) exitWith {};
 // prompt open, pick the same row again, and roll until it comes back accept.
 if !((_civilian getVariable ["DUWS_civ_pending", []]) isEqualTo []) exitWith {};
 
+// Intel alone is capped per player, one ask per 30-minute economy tick -- the same window and
+// the same clock the body search spends, cleared for everyone by fnc_zonesundercontrol. Flat
+// rather than nested: `exitWith` inside a `then` block leaves the block, not this function.
+if (((toUpper _row) isEqualTo "INTEL") && {_caller getVariable ["DUWS_civ_intel_asked", false]}) exitWith {};
+
 private _opener = switch (toUpper _row) do {
     case "RECRUIT": { "STR_DUWS_T_fight4freedom" };
     case "AID": { "STR_DUWS_T_ASK_AID_hi" };
     case "TOOLKIT": { "STR_DUWS_T_ASK_TOOLKIT_hi" };
     default { "STR_DUWS_T_askopforloc" };
 };
+// Spent on the attempt, not on the answer, exactly as the body search spends its own. A refusal
+// that cost nothing would let a player work a hostile town asking every local in it until one
+// said yes, which is the farming the reaction curve exists to price.
+if ((toUpper _row) isEqualTo "INTEL") then {
+    _caller setVariable ["DUWS_civ_intel_asked", true, true];
+};
+
 [localize "STR_DUWS_T_actionteam", localize _opener] remoteExec ["fnc_duws_dialogue", _caller];
 
 // Held still for the exchange, then released by whichever branch below runs. A civilian who

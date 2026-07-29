@@ -117,6 +117,7 @@ Three client-side conditions decide what a row looks like, and none of them deci
 | The player cannot afford a bribe | `magazines player` | A snapshot; in co-op two players can spend the same coins |
 | The civilian is closed | the unit's own variables | Broadcast state a client machine holds a copy of |
 | The player is further than conversation range | `player distance _civ` | Read once on open, so it is stale the moment they walk |
+| The player has already asked a local for intel this tick | `DUWS_civ_intel_asked` on the player | Broadcast state, and a dialog left open across a tick boundary reads the value it opened with |
 
 The deduction, the spend and the range test all stay server-side, exactly as
 [`cp_economy.md`](cp_economy.md) describes for the client-side CP pre-filters.
@@ -165,6 +166,14 @@ contract, including which payout kinds exist. Nothing about the payout is decide
 a faucet like the body search, and what a faucet pays is not the faucet's business. The one thing
 this row must pass is an origin — the asking player's position — because the town bucket ranks by
 distance.
+
+Intel is the one row with a cap on top of the one-conversation rule: **one ask per player per
+30-minute economy tick**, spent on the attempt whatever the local answers, and greyed in the menu
+once spent. It rides the same clock and the same sweep as the body search
+([`intel_system.md`](intel_system.md#the-throttle-is-per-player-and-the-attempt-is-what-it-spends))
+rather than starting a timer of its own. Spending it on the attempt is what stops a player working
+a hostile town local by local until one of them says yes — the reaction curve prices that walk in
+people, and this prices it in time.
 
 **Recruit** reaches `fnc_recruitSuccessServer`, which clears captive and broadcasts it itself.
 

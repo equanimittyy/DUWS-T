@@ -142,8 +142,14 @@ rather than paying on completion, because reaching that object is the mission.
 ## The throttle is per player, and the attempt is what it spends
 
 One search per player per 30-minute economy tick at 20 %. `econ_tick`
-(`server/misc/fnc_zonesundercontrol.sqf`) is the clock, shared with the civilian heal cap so
-nothing new is timed.
+(`server/misc/fnc_zonesundercontrol.sqf`) is the clock, shared with the civilian heal cap and
+with the civilian menu's intel row so nothing new is timed.
+
+**Two budgets on one clock, not one budget.** Asking a local carries its own per-player cap
+(`DUWS_civ_intel_asked`), cleared by the same tick in the same sweep. They are separate because a
+corpse and a living local are different things to find: one flag would mean a body search on the
+way into a town silently closed the conversation the player walked there to have. A player who
+does both gets two chances per window.
 
 Per player rather than campaign-wide is what makes it work in co-op. The throttle it replaces
 was a single global, so the first player to find intel switched it off for everyone and a
@@ -156,8 +162,10 @@ failed search pays nothing but a line: what it costs is the thirty minutes befor
 and paying out on failure would make that wait the only thing separating a hit from a miss.
 
 `DUWS_intel_searched` lives on the player object, broadcast, and is cleared on every player by
-the tick. It goes there rather than in a server-side table keyed by UID because the action's own
-condition reads it, and a condition string is evaluated on the client several times a second.
+the tick — as does `DUWS_civ_intel_asked` beside it. They go there rather than in a server-side
+table keyed by UID because the search action's own condition reads one and the civilian menu greys
+its intel row against the other, and a condition string is evaluated on the client several times a
+second.
 Broadcasting one boolean per player is cheaper than broadcasting the clock for clients to
 subtract.
 
