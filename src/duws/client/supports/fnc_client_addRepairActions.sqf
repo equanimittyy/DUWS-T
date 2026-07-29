@@ -7,7 +7,7 @@ if (isNull _depot) exitWith {};
 
 // 防重添加
 if (_depot getVariable ["repair_actions_done", false]) exitWith {};
-_depot setVariable ["repair_actions_done", true, true];
+_depot setVariable ["repair_actions_done", true];
 
 private _trg = objectFromNetId _trgNetId;
 if (isNull _trg) exitWith { ["ERROR", "SUPPORT", "Trigger null on client"] call fnc_log; };

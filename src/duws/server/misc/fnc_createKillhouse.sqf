@@ -1273,7 +1273,7 @@ if (count _computerObjects > 0) then {
             true,
             "",
             "true"
-        ]] remoteExec ["addAction", 0];
+        ]] remoteExec ["addAction", [0,-2] select isDedicated, _x];
     } forEach _computerObjects;
 };
 
@@ -1282,9 +1282,9 @@ if (count _computerObjects > 0) then {
 // composition spawns server-side, but the entries have to exist on each client.
 {
     [_x, [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 80, false, false, "",
-        "_this distance _target < 3 && support_armory_available"]] remoteExec ["addAction", 0];
+        "_this distance _target < 3 && support_armory_available"]] remoteExec ["addAction", [0,-2] select isDedicated, _x];
     [_x, [ACT_EQUIP("STR_DUWS_T_QUICK_KITS"), { [] call fnc_quick_kits_menu; }, [], 80, false, false, "",
-        "_this distance _target < 3"]] remoteExec ["addAction", 0];
+        "_this distance _target < 3"]] remoteExec ["addAction", [0,-2] select isDedicated, _x];
 } forEach _arsenalObjects;
 
 ["INFO", "SUPPORT", "interactions added, killhouse ready"] call fnc_log;

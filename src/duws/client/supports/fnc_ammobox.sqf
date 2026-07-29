@@ -1,5 +1,5 @@
 // Locality: client -- invoked from the comm menu (shared/includes/supports_radio_modern.hpp:87).
-// The addAction bodies it attaches via BIS_fnc_MP run on the machine that triggers them.
+// The addAction bodies it broadcasts run on the machine that triggers them.
 /*
  * fnc_ammobox.sqf
  * 功能：呼叫空投补给箱，消耗指挥点，空中载具运送并投放。
@@ -105,8 +105,8 @@ waitUntil {sleep 1; getpos _ammobox select 2 < 0.2};
 
 _smoke = "SmokeShellGreen" CreateVehicle (getpos _ammobox);
 ["info",[localize "STR_DUWS_T_lyxq9zpm",localize "STR_DUWS_T_5p6d9535"]] call bis_fnc_showNotification;
-[[_ammobox,[ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal,[], 80, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
-[[_ammobox,[ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 60, false, false, "", "_this distance _target < 8"]],"addAction",true,true] call BIS_fnc_MP;
+[_ammobox,[ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal,[], 80, false, false, "", "_this distance _target < 8"]] remoteExec ["addAction", [0,-2] select isDedicated, _ammobox];
+[_ammobox,[ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 60, false, false, "", "_this distance _target < 8"]] remoteExec ["addAction", [0,-2] select isDedicated, _ammobox];
 // 往补给箱中添加物品
 [_ammobox,"blufor"] spawn fnc_fill_ammobox; 
 

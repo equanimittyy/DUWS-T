@@ -13,7 +13,7 @@ params ["_satellite"];
 if (isNull _satellite) exitWith {};
 
 // 去重
-if (!isNil {_satellite getVariable "satellite_actions_done"}) exitWith {};
+if (_satellite getVariable ["satellite_actions_done", false]) exitWith {};
 _satellite setVariable ["satellite_actions_done", true];
 
 // GM 休息治疗动作（仅限 game_master）

@@ -220,7 +220,7 @@ _fob setVariable ["FOB_fortify_busy", false];
 // than wrapping addAction the way fnc_FOBactions does, because this runs on the server where
 // `player` is objNull; a condition string is evaluated per client, where it resolves.
 if (!_refortify) then {
-	[_fob,[ACT_COMMIT("STR_DUWS_T_qxrh9fws"), fnc_refortifyFOB, [], 10, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, true];
+	[_fob,[ACT_COMMIT("STR_DUWS_T_qxrh9fws"), fnc_refortifyFOB, [], 10, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, _fob];
 };
 
 

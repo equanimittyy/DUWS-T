@@ -40,7 +40,7 @@ _board addAction [
 ];
 
 // 添加基地快速移动动作（在白板地图上）
-if (isNil {_board getVariable "board_fasttravel_actions_done"}) then {
+if !(_board getVariable ["board_fasttravel_actions_done", false]) then {
     _board setVariable ["board_fasttravel_actions_done", true];
     _board addAction [
         ACT_MOVE("STR_DUWS_T_FAST_TRAVEL_BASE"),
