@@ -36,6 +36,12 @@ skiptime 3;
 [["", "BLACK IN", 1.5]] remoteExec ["titleCut", 0];
 sleep 0.3;
 
+// Announced here rather than by the caller: the screen has been black and the clock has moved,
+// so the line lands on a team that has visibly rested instead of on one still standing in
+// daylight waiting for the fade to start.
+[localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_restsuccess"] call fnc_cs)]
+	remoteExec ["fnc_duws_dialogue", 0];
+
 [{hint localize "STR_DUWS_T_437x650k"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 sleep 2;
 [] remoteExec ["fnc_bottom_right_message", [0,-2] select isDedicated,false];
