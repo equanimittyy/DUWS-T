@@ -22,7 +22,7 @@ if (_civilian getVariable ["DUWS_civ_arrested", false]) exitWith {};
 if (_civilian getVariable ["DUWS_civ_closed", false]) exitWith {};
 _civilian setVariable ["DUWS_civ_arrested", true, true];
 
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_HANDSUP1"] remoteExec ["fnc_duws_dialogue", _caller];
+[name _caller, localize "STR_DUWS_T_HANDSUP1"] remoteExec ["fnc_duws_dialogue", _caller];
 
 _civilian disableAI "PATH";
 

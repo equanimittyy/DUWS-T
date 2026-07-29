@@ -51,7 +51,7 @@ if ((toUpper _row) isEqualTo "INTEL") then {
     _caller setVariable ["DUWS_civ_intel_asked", true, true];
 };
 
-[localize "STR_DUWS_T_actionteam", localize _opener] remoteExec ["fnc_duws_dialogue", _caller];
+[name _caller, localize _opener] remoteExec ["fnc_duws_dialogue", _caller];
 
 // Held still for the exchange, then released by whichever branch below runs. A civilian who
 // walks off mid-sentence reads as a bug rather than as an answer.

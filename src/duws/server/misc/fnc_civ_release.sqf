@@ -18,7 +18,7 @@ _civilian setVariable ["isSurrendered", false, true];
 // Out of the surrender pose everywhere, or they walk their circuit with their hands in the air.
 [_civilian, ""] remoteExec ["switchMove", 0];
 
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_RELEASE1"] remoteExec ["fnc_duws_dialogue", _caller];
+[name _caller, localize "STR_DUWS_T_RELEASE1"] remoteExec ["fnc_duws_dialogue", _caller];
 
 // PATH is disabled from the arrest through the surrender, so this is what puts them back on their
 // feet; fnc_civ_resume draws the circuit they walk from wherever they were stopped.
