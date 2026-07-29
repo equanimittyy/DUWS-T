@@ -30,6 +30,7 @@ if (isNil "arty_Blufor_close") exitWith {arty_Blufor_close = false};
 // true on refusal, which routes the caller down its ordinary post-strike path and gives
 // the comm-menu item back after the cooldown.
 if !(["CP", _cost] call fnc_pool_spend) exitWith {
+	[_supportype] remoteExec ["fnc_support_release", 2];
 	["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
 };
 
@@ -140,6 +141,7 @@ if (_ammotype == "Laser") then {
 };
 
 if (!_veh_alive) exitWith {
+	[_supportype] remoteExec ["fnc_support_release", 2];
 	hint localize "STR_DUWS_T_9wu0cgea";
 };
 
@@ -203,6 +205,10 @@ if (_ammotype == "Laser") then {
 		sleep _interval;
 	};
 };	
+
+// Slot handed back the moment the ordnance is off, not after the cleanup sleeps below: those
+// spend a further 90 s deleting markers and the jet, and the battery is free long before that.
+[_supportype] remoteExec ["fnc_support_release", 2];
 
 // MISSED THE LASER
 if (_ammotype == "Laser" && isNull _target) then { 

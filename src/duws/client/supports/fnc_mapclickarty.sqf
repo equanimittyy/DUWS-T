@@ -38,10 +38,20 @@ if (commandpointsblu1 < _cost) exitWith {
 	call _fnc_restoreCommMenu;
 };
 
+// One fire mission per support type across the whole team. The unlock and the 300 s cooldown
+// below are both per player, so two squad leads could otherwise walk mortars onto the map at the
+// same moment and talk over each other on the net for the whole salvo. Claimed before the map
+// opens, so a refusal costs the caller nothing but the hint.
+if !([_supportype] call fnc_support_claim) exitWith {
+	hint localize "STR_DUWS_T_SUPPORT_BUSY";
+	call _fnc_restoreCommMenu;
+};
+
 _pos = [];
 // The handler releases before closing the map: the banner the release clears is a control on
 // the map display and cannot be reached once it is gone.
 if (!(["ARTY", format["[_pos,%2,%3,%4,%5,%6,%7,'%8'] spawn fnc_arty; clicked = true; ['ARTY'] call fnc_mapclick_release; openMap false",_pos,_salvos,_radius,_interval,_rps,_supportype,_cost,_ammotype]] call fnc_mapclick_claim)) exitWith {
+	[_supportype] remoteExec ["fnc_support_release", 2];
 	call _fnc_restoreCommMenu;
 };
 
@@ -68,14 +78,22 @@ while {_timer > 0 AND !clicked} do {
 ["ARTY"] call fnc_mapclick_release;
 openMap false;
 
+// Each path that ends without ordnance hands the slot back. fnc_arty owns the release on the
+// paths it reaches instead -- and the slot expires on its own besides, so a caller that drops
+// out between the two cannot strand its support type for the rest of the campaign.
 if (clicked) then {
 	// make sure blufor has someone in range
 	waitUntil {sleep 0.5;!isNil "arty_Blufor_close"};
-	if !(arty_Blufor_close) exitWith {hint localize "STR_DUWS_T_7yy0wapp";arty_Blufor_close = nil};
+	if !(arty_Blufor_close) exitWith {
+		[_supportype] remoteExec ["fnc_support_release", 2];
+		hint localize "STR_DUWS_T_7yy0wapp";
+		arty_Blufor_close = nil;
+	};
 	arty_Blufor_close = nil;
 	// 5 min until next request
 	sleep 300;
 } else {
+	[_supportype] remoteExec ["fnc_support_release", 2];
 	hint localize "STR_DUWS_T_346eazcm";	
 };
 

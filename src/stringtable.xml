@@ -6650,6 +6650,10 @@
                 <Original>All units in the AO, be advised. Enemy aircraft detected over enemy zones.</Original>
                 <English>All units in the AO, be advised. Enemy aircraft detected over enemy zones.</English>
             </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_BUSY">
+                <Original>That battery is already firing for another element. Stand by.</Original>
+                <English>That battery is already firing for another element. Stand by.</English>
+            </Key>
                     <Key ID="STR_DUWS_T_liftwp_leg">
                 <Original>Route leg %1</Original>
                 <English>Route leg %1</English>
