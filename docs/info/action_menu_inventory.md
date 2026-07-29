@@ -213,8 +213,8 @@ auto-generated id would outlive the civilian and leave one queue entry per unit 
 
 | Entry | Source | Colour | Priority | Shown when |
 | --- | --- | --- | --- | --- |
-| Order to Stop | `src/duws/shared/functions/fnc_civ_stopCommand.sqf:25` | — | 6 | Within 40 m |
-| Civilian Interaction (5-row dialog) | `src/duws/shared/functions/fnc_civ_menuAction.sqf:15` | — | 6 | Alive, called over, within 15 m, not surrendered |
+| Order to Stop | `src/duws/shared/functions/fnc_civ_stopCommand.sqf:25` | — | 6 | Within 3 m, inside a 15° facing cone, not panicking |
+| Civilian Interaction (5-row dialog) | `src/duws/shared/functions/fnc_civ_menuAction.sqf:15` | — | 6 | Alive, called over, within 3 m, not surrendered, not spent |
 | Search | `src/duws/shared/functions/fnc_civ_search_action.sqf:12` | `#ffaa00` call | 6 | Within 3 m and surrendered |
 | Offer evacuation | `src/duws/shared/functions/fnc_addRecruitAction.sqf:11` | — | 6 | `true` |
 

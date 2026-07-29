@@ -82,7 +82,18 @@ private _fnc_hunt = {
     _group setBehaviour "SAFE";
     _group setSpeedMode "LIMITED";
 
-    if (random 1 < IDLE_SHARE) then {
+    // Rolled once per civilian and then remembered. This function is what re-issues orders after
+    // a conversation and after a panic, and re-rolling each time meant someone who had stood on
+    // the same corner all afternoon wandered off the moment they were spoken to. The share above
+    // therefore decides the composition of a town once, at its fill, rather than every time
+    // anything happens to anyone in it.
+    private _idler = _unit getVariable "civ_idler";
+    if (isNil "_idler") then {
+        _idler = random 1 < IDLE_SHARE;
+        _unit setVariable ["civ_idler", _idler];
+    };
+
+    if (_idler) then {
         // Ambient poses rather than a raw switchMove: BIS_fnc_ambientAnim installs the handlers
         // that break the animation on death, where a hand-rolled pose leaves the corpse standing
         // upright and shrugging off hits. It owns the unit's AI until terminated, which is why

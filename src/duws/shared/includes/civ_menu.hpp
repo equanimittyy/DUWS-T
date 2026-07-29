@@ -51,6 +51,12 @@ class civ_dialog
         // Rows are pitched 3.5 apart on a 3.0 frame. The description is the row's tallest part and
         // wraps to three lines at 0.030 on a narrow window, so the frame has to clear three lines
         // plus its own border -- at the 2.8 this was, the third line drew over the bottom edge.
+        //
+        // The description sits 0.65 below its frame, not the 0.35 it did: RscFrame centres its
+        // title on the top border, so the title's lower half reaches about 0.44 into the frame and
+        // the first line of description was drawing through it. Height came down by the same
+        // amount to hold the bottom edge where it was, which is the margin the note above is
+        // about -- so the box gained clearance at the top and spent it, rather than growing.
         class civ_intel_frame: RscFrame
         {
             idc = 8320;
@@ -65,9 +71,9 @@ class civ_dialog
             idc = 8330;
             text = "$STR_DUWS_T_CIV_ROW_INTEL_DESC";
             x = 6.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 4.85 * GUI_GRID_H + GUI_GRID_Y;
+            y = 5.15 * GUI_GRID_H + GUI_GRID_Y;
             w = 18.5 * GUI_GRID_W;
-            h = 2.3 * GUI_GRID_H;
+            h = 2 * GUI_GRID_H;
             style = ST_MULTI;
             colorText[] = {1, 1, 1, 1};
             sizeEx = 0.030;
@@ -96,7 +102,7 @@ class civ_dialog
         {
             idc = 8331;
             text = "$STR_DUWS_T_CIV_ROW_AID_DESC";
-            y = 8.35 * GUI_GRID_H + GUI_GRID_Y;
+            y = 8.65 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_aid_button: civ_intel_button
         {
@@ -116,7 +122,7 @@ class civ_dialog
         {
             idc = 8332;
             text = "$STR_DUWS_T_CIV_ROW_TOOLKIT_DESC";
-            y = 11.85 * GUI_GRID_H + GUI_GRID_Y;
+            y = 12.15 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_toolkit_button: civ_intel_button
         {
@@ -136,7 +142,7 @@ class civ_dialog
         {
             idc = 8333;
             text = "$STR_DUWS_T_CIV_ROW_RECRUIT_DESC";
-            y = 15.35 * GUI_GRID_H + GUI_GRID_Y;
+            y = 15.65 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_recruit_button: civ_intel_button
         {
@@ -159,7 +165,7 @@ class civ_dialog
         {
             idc = 8334;
             text = "$STR_DUWS_T_CIV_ROW_ARREST_DESC";
-            y = 18.85 * GUI_GRID_H + GUI_GRID_Y;
+            y = 19.15 * GUI_GRID_H + GUI_GRID_Y;
         };
         class civ_arrest_button: civ_intel_button
         {

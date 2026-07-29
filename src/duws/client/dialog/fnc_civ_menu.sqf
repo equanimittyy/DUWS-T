@@ -22,18 +22,14 @@ ctrlSetText [8310, format [localize "STR_DUWS_T_CIV_MENU_COINS", _coins]];
 
 private _closed = _civilian getVariable ["DUWS_civ_closed", false];
 
-// The menu opens at arrest range so a standoff can still order hands up, which leaves the four
-// conversational rows reachable from further than they work. Read once, deliberately: walking in
-// and reopening is what a conversation costs.
-private _inRange = (player distance _civilian) <= 3;
-
 // All four rows grey together: one exchange -- served or refused -- closes the person for good,
-// so there is no state where one row is still open and another is not.
+// so there is no state where one row is still open and another is not. No range test any more:
+// the action that opens this menu is itself gated to the 3 m the rows work at, so a row can no
+// longer be reached from further away than it functions.
 {
-    ctrlEnable [_x, !_closed && _inRange];
+    ctrlEnable [_x, !_closed];
 } forEach [8340, 8341, 8342, 8343];
 
 // Arrest greys on the same flag rather than carrying a second life: one exchange is all a person
-// is worth, so talking to someone and then ordering their hands up is two. No range test, unlike
-// the rows above -- the whole point of the 15 m action is that it can be shouted from a standoff.
+// is worth, so talking to someone and then ordering their hands up is two.
 ctrlEnable [8344, !_closed && !(_civilian getVariable ["DUWS_civ_arrested", false])];

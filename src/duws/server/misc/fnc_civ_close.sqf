@@ -28,10 +28,7 @@ if (!isNull _caller) then {
     [localize "STR_DUWS_T_civ", localize _line] remoteExec ["fnc_duws_dialogue", _caller];
 };
 
-// Walking off is the feedback that this person is finished with the player, and it is why a
-// hostile town visibly empties out. doMove is ignored unless the group is local, and civilians
-// belong to the server -- running it on the asking client, as the actions this replaces once
-// did, was a silent no-op.
-if (alive _civilian) then {
-    _civilian doMove ((getPos _civilian) getPos [50 + random 50, random 360]);
-};
+// Back to whatever they were doing before being called over. The scroll entry going away is what
+// tells the player this person is finished with them -- it used to be a walk-off as well, which
+// also emptied a hostile town on sight, but it moved every local the player so much as spoke to.
+[_civilian] call fnc_civ_resume;

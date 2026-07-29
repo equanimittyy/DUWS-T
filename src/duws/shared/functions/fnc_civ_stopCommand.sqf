@@ -42,15 +42,20 @@ private _actionID = _unit addAction [
     true,
     true,
     "",
-    // Facing test on top of the range, because a walking crowd stands closer for longer than a
-    // jogging one did and 40 m of it put every passer-by in the scroll menu at once. getRelDir is
-    // 0 straight ahead and wraps through 360, so this is a 30 degree cone either side -- roughly
-    // "on screen" rather than an aim test. Horizontal only: looking over someone's head still
-    // counts, which is the intended slack.
+    // Facing test on top of the range. getRelDir is 0 straight ahead and wraps through 360, so
+    // this is a 15 degree cone either side -- close to an aim test, where the 30 it was read as
+    // "roughly on screen" and picked up whoever was standing beside the person meant. Horizontal
+    // only: looking over someone's head still counts, which is the intended slack.
     //
-    // 20 m sits just outside the 15 m the interaction menu opens at, so calling someone over is
-    // still a thing you do before you can talk to them rather than a second way to do it.
-    "_this distance _target < 20 && {abs (180 - (_this getRelDir _target)) > 150}"
+    // 3 m, the range the conversational rows work at, so halting someone is done at arm's length
+    // rather than shouted across a square. The menu still opens at 15 m because it carries arrest,
+    // but it is gated on this having happened -- so the reach here is what sets the range of the
+    // whole exchange, and a crowd fifteen deep no longer fills the scroll menu.
+    //
+    // Panicking civilians drop out: someone running from gunfire is not stopping to be called,
+    // and the entry coming back is what tells the player the town has settled. fnc_civ_panic
+    // broadcasts the flag and clears it once they are pathing normally again.
+    "_this distance _target < 3 && {abs (180 - (_this getRelDir _target)) > 165} && {!(_target getVariable ['DUWS_civ_panicked', false])}"
 ];
 
 _unit setVariable ["stopCommandActionID", _actionID];

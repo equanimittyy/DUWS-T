@@ -61,9 +61,8 @@ switch (toUpper _row) do {
 
 };
 
-// Walking off is the feedback that this person is finished with the player -- the same exit a
-// refusal takes, so an accepted request does not leave a spent local standing there inviting a
-// second click. A recruit is excluded: they have just joined the player's group.
-if ((toUpper _row) != "RECRUIT" && {alive _civilian}) then {
-    _civilian doMove ((getPos _civilian) getPos [50 + random 50, random 360]);
+// Back to what they were doing, the same exit a refusal takes. A recruit is excluded: they have
+// just joined the player's group and take their orders from it.
+if ((toUpper _row) != "RECRUIT") then {
+    [_civilian] call fnc_civ_resume;
 };

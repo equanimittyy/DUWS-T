@@ -47,6 +47,6 @@ if (random 1 < 0.9) then {
     [_civilian] remoteExec ["fnc_civ_search_action", 0];
 } else {
     _civilian enableAI "PATH";
-    _civilian doMove ((getPos _civilian) getPos [50 + random 50, random 360]);
+    [_civilian] call fnc_civ_resume;
     [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_HANDSUP3"] remoteExec ["fnc_duws_dialogue", _caller];
 };
