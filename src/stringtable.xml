@@ -2702,26 +2702,12 @@
                 <Spanish>Je... hijo de puta... Oye! He encontrado algo interesante!</Spanish>
                 <Chinesesimp>哈哈...你这狗杂碎...嘿！我这儿找到了点有意思的！</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_LOOT3">
-                <Original>Huh? Who gave you these devices?</Original>
-                <English>Huh? Who gave you these devices?</English>
-                <German>Hm? Wer hat dir diese Geräte gegeben?</German>
-                <Spanish>¿Eh? ¿Quién te dio estos equipos?</Spanish>
-                <Chinesesimp>嗯？这些设备谁给你的？</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_LOOT4">
                 <Original>It's war. You won't be needing this.</Original>
                 <English>It's war. You won't be needing this.</English>
                 <German>Das ist verdammter Krieg, Bruder... du brauchst das nicht.</German>
                 <Spanish>Es una puta guerra, hermano... no necesitas esto.</Spanish>
                 <Chinesesimp>这他妈是战争，兄弟...你不需要这些东西。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_LOOT5">
-                <Original>I knew we'd find something good...</Original>
-                <English>I knew we'd find something good...</English>
-                <German>Ich wusste, wir finden etwas Gutes...</German>
-                <Spanish>Sabía que encontraríamos algo bueno...</Spanish>
-                <Chinesesimp>我就说总归能找到点好东西...</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_LOOT6">
                 <Original>Nothing? Alright.</Original>
@@ -2730,26 +2716,12 @@
                 <Spanish>Nada? Vale.</Spanish>
                 <Chinesesimp>什么都没有？好吧。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_LOOT_ELECTRONICS">
-                <Original>Found electronics!</Original>
-                <English>Found electronics!</English>
-                <German>Elektronik gefunden!</German>
-                <Spanish>¡Electrónica encontrada!</Spanish>
-                <Chinesesimp>发现电子设备！</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_LOOT_MONEY2">
                 <Original>Found some cash!</Original>
                 <English>Found some cash!</English>
                 <German>Bargeld gefunden!</German>
                 <Spanish>¡Dinero encontrado!</Spanish>
                 <Chinesesimp>发现一些现金！</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_LOOT_MONEY1">
-                <Original>Found a little cash.</Original>
-                <English>Found a little cash.</English>
-                <German>Etwas Geld gefunden</German>
-                <Spanish>Un poco de dinero</Spanish>
-                <Chinesesimp>发现一点钱</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_LOOT_NOTHING">
                 <Original>Nothing useful...</Original>
@@ -3332,8 +3304,8 @@
                 <Chinesesimp>情报目标</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_LOOT_INTEL">
-                <Original>Important documents found!</Original>
-                <English>Important documents found!</English>
+                <Original>Something for the analysts!</Original>
+                <English>Something for the analysts!</English>
                 <German>Wichtige Dokumente gefunden!</German>
                 <Spanish>¡Documentos importantes encontrados!</Spanish>
                 <Chinesesimp>发现重要文件！</Chinesesimp>

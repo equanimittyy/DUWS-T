@@ -46,28 +46,14 @@ sit in `server/missions/mission_threads/`, which is why that directory leads the
 
 Small, self-contained, and each one is a strict improvement with no design argument attached.
 
-### The registry has two wrong entries and one dead one
+### The registry has one duplicate entry and one dead one
 
-`server/server_fnc_init.sqf:752` reads:
+`fnc_missionLocator` is registered twice from the same path — `server/server_fnc_init.sqf:705`
+and `:1200` — and only the second broadcasts it, so the first is doing nothing the second does
+not redo.
 
-```sqf
-fnc_civ_lootAction_handleArmed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_lootAction.sqf";
-```
-
-That path's top-level body is the *action-adder* — `params ["_unit"]`, adds two `addAction`
-entries to a civilian. The real `fnc_civ_lootAction_handleArmed` is `params ["_unit", "_caller"]`
-and is defined at `shared/functions/fnc_civ_lootAction.sqf:195`, *inside* that top-level body,
-then broadcast at `:244`. So from boot until the first civilian gets loot actions, the global
-holds a function with the wrong arity and the wrong behaviour; the first real call to
-`fnc_civ_lootAction` overwrites it with the correct one.
-
-It self-heals, which is why it has never been seen. It is still two functions sharing one name
-and a registry entry that documents a lie. Delete `:752-753` and let the defining file own it —
-`fnc_civ_lootAction` is already broadcast, so the handler arrives with it.
-
-The other two are trivial: `fnc_missionLocator` is registered twice (`:614` and `:961`, same
-path), and `fnc_missionPatrolsSmall` is registered but called from nowhere in `src/` — it is the
-only one of the 270 registry entries with no reference outside the registry.
+`fnc_missionPatrolsSmall` (`:726`) is registered and then called from nowhere in `src/`: its only
+reference in the tree is the registration itself.
 
 ### `call (compile _var)` where `getVariable` is meant
 
@@ -375,7 +361,7 @@ Sequenced so that each step is independently verifiable and nothing later depend
 not yet made. Lint is `bash tests/run.sh`; "smoke" means repack and play far enough to exercise
 the named system.
 
-- [ ] Registry corrections: delete `server_fnc_init.sqf:752-753`, the duplicate `fnc_missionLocator` at `:961`, and the unreferenced `fnc_missionPatrolsSmall`. Verify: lint passes, the boot-time registry self-check logs no `compiled EMPTY`, and a civilian loot action still triggers the armed-revenge path.
+- [ ] Registry corrections: delete the duplicate `fnc_missionLocator` at `server_fnc_init.sqf:705` and the unreferenced `fnc_missionPatrolsSmall` at `:726`. Verify: lint passes, and the boot-time registry self-check logs no `compiled EMPTY`.
 - [ ] Replace the nine `call (compile _var)` reads with `missionNamespace getVariable`. Verify: HQ and FOB request menus populate identically, and buying a vehicle from each still charges CP.
 - [ ] Replace the three `call compile format ["%1 = ...]` trigger assignments with `setVariable`. Verify: enter a zone (notification fires), deploy and remove a FOB (trigger cleanup runs).
 - [ ] Decide whether `target_sniper` and `clearthearea_cqb` should drop garrison intel. Record the answer, then extract `fnc_garrisonBuildings` and convert the nine copied call sites. Verify: each of the nine missions spawns building garrisons, and corpse intel matches the decision.

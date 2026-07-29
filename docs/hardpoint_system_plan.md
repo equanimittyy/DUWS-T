@@ -294,7 +294,7 @@ reach it. It needs its own reveal in **both** modes now, not only hardcore, and 
 interaction menu is the intended source:
 [`info/intel_system.md`](info/intel_system.md#one-writer-per-reveal-flag-one-function-for-payout)
 lists an unrevealed normal hardpoint as one of the kinds `fnc_intel_payout` draws from, and
-[`civilian_interaction_plan.md`](civilian_interaction_plan.md) hands its intel row to that
+[`info/civilian_interaction.md`](info/civilian_interaction.md) hands its intel row to that
 function. The corpse-and-mission intel path
 (`client/misc/fnc_found_intel.sqf`) should reach it on the same terms, or hardcore gains a class
 of objective that only one source can ever surface.
