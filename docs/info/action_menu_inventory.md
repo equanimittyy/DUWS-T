@@ -79,8 +79,8 @@ Priority and colour follow the bucket, so neither is repeated per row.
 The two board entries open a readout and a map-click rather than a listbox, so they carry no row
 count. Fast Travel is a relocation and belongs to `ACT_MOVE` by consequence; it sits here so the
 map board reads as one group and does not disappear into the same blue as the earplugs toggle.
-Both outrank the Killhouse teleports on the same board, and View Map is added first, so it heads
-the list.
+Both outrank the Killhouse teleports attached to the same board, and View Map is added before Fast
+Travel, so it heads the pair.
 
 ### Equip
 
@@ -110,22 +110,36 @@ the lift request are independently translatable but present the same choice to t
 | Entry | Key | Attached by |
 | --- | --- | --- |
 | AI Heal / Rearm | `STR_DUWS_T_xfgokhbc` | Medical tent, FOB, MHQ ammobox, airdropped ammobox |
-| Rest / Heal | `STR_DUWS_T_9eiwr3bt` | Satellite phone, FOB — `game_master` only, 600 s cooldown in the callback |
+| Rest / Heal | `STR_DUWS_T_9eiwr3bt` | Satellite phone, FOB — `game_master` only |
+
+The two Rest / Heal entries share one 600 s cooldown through `GM_Heal_LastUsedTime` but test it in
+different places: the satellite entry defers to `fnc_restHealServer`, where the check is serialised
+on one machine, while the FOB entry checks and stamps in its own client callback and then
+`publicVariable`s the result. Two players triggering the FOB copy inside one propagation window
+both pass.
 
 ### Civilian interaction
 
 | Entry | Key | Shown when |
 | --- | --- | --- |
-| Halt | `STR_DUWS_T_CIV_STOP` | Within 3 m, inside a 15° facing cone, not panicking |
-| Interact | `STR_DUWS_T_CIV_MENU_ACTION` | Alive, called over, within 3 m, not surrendered, not spent |
+| Halt | `STR_DUWS_T_CIV_STOP` | Within 6 m, inside a ±15° facing cone, not panicking |
+| Interact | `STR_DUWS_T_CIV_MENU_ACTION` | Alive, called over, within 3 m, not surrendered, not arrested, not spent |
 | Search | `STR_DUWS_T_LOOT` | Within 3 m and surrendered |
 | Release | `STR_DUWS_T_RELEASE` | Within 3 m, surrendered, still civilian-side |
-| Evacuate | `STR_DUWS_T_RECRUIT_ACTION` | Always |
+| Evacuate | `STR_DUWS_T_RECRUIT_ACTION` | Always, but only on RAVAGE/WBK civilians |
 
 Interact opens `civ_dialog` rather than `fnc_open_action_menu`, because its rows need per-row
 greying against coin count, town state and range. Search stays a scroll entry rather than becoming
 a dialog row: the menu hides on `isSurrendered`, so offering it there would mean closing, waiting
 out the surrender animation and reopening.
+
+The gap between Halt's reach and the 3 m everything it gates works at is deliberate: the walk in
+between is part of the interaction, not two ranges that drifted.
+
+**Evacuate never shares a civilian with the other four.** `fnc_civ_spawnUnit` branches on
+`CIV_PRESENCE`: the vanilla path attaches Halt and Interact through `fnc_civ_clientActions`, and
+the RAVAGE/WBK path attaches this instead — as do the WBK survivor spawns. A survivor you can
+recruit is not a local you can question, so no civilian ever carries both sets.
 
 ### Util
 
@@ -159,13 +173,19 @@ signal the player already has.
 | Search Body | `STR_DUWS_T_SEARCH_CORPSE_ACTION` | `holdAction_search_ca.paa` |
 | Search Container | `STR_DUWS_T_SEARCH_CONTAINER` | `holdAction_search_ca.paa` |
 | Search Intel | `STR_DUWS_T_7yec9ifj` | `holdAction_search_ca.paa` |
+| Search for Intel | none — an English literal | `holdAction_search_ca.paa` |
 
 `STR_DUWS_T_SEARCH_CORPSE_ACTION` exists separately from `STR_DUWS_T_SEARCH_CORPSE`, which titles
 the "bodies may carry intel" notification in nine side missions. They were one key; the action
 needed a label and the notification needed a sentence.
 
-`fnc_actionRotary` also serves `holdAction_connect_ca.paa` and `holdAction_talk_ca.paa` props —
-the talk icon is the one not from `\a3\ui_f\data\IGUI\Cfg\holdactions\`.
+The last row is the same `fnc_actionRotary` entry as Search Intel, but `clearthearea_cqb`,
+`target_armor` and `target_sniper` pass its title as a hardcoded English string where the sabotage
+laptop passes `STR_DUWS_T_7yec9ifj`. Three call sites reach no translation at all.
+
+`fnc_actionRotary` switches on three icon names, but every DUWS caller asks for `search`: the
+`connect` and `talk` branches are unreached. The talk icon is also the one not from
+`\a3\ui_f\data\IGUI\Cfg\holdactions\`.
 
 ## Call-site conventions
 
@@ -201,9 +221,9 @@ client through and locks every other one out permanently.
 
 ## Menu rows
 
-`fnc_open_action_menu` takes `[r,g,b,a]` floats per row. Row labels are plain text — a listbox
-renders `<t>` markup literally rather than applying it — so a scroll-entry colour and a row colour
-cannot share a definition.
+`fnc_open_action_menu` takes an optional `[r,g,b,a]` float array per row; a row without one renders
+in the listbox default. Row labels are plain text — a listbox renders `<t>` markup literally rather
+than applying it — so a scroll-entry colour and a row colour cannot share a definition.
 
 | Menu | Row colours |
 | --- | --- |
@@ -212,11 +232,18 @@ cannot share a definition.
 | Killhouse Controls | `[0,1,0,1]` spawn targets, `[1,0,0,1]` spawn enemies, `[1,1,0,1]` cleanup, `[1,0.533,0,1]` exit |
 | Vehicle Recycling | None — both rows default |
 | Vehicle Customization | None — all four rows default |
+| Quick Kits | None — one row per scanned loadout, all default |
+| Debug | `[1,0.667,0,1]` on the four working tools, `[0.6,0.6,0.6,1]` on the unimplemented WARCOM row |
+
+Quick Kits is the only menu whose row count is not fixed: the rows come from the loadout list the
+server scans and broadcasts, and the entry refuses to open when that list is empty. Debug rows are
+deliberately unlocalised English — a dev surface no player reads.
 
 ## Vendored module entries
 
 Not DUWS-authored, but they share the same scroll menu, the same priority space, and the same
-`<t>` markup. DUWS now bands from 10 to 100, so every vendored entry sits below every DUWS entry.
+`<t>` markup. DUWS bands from 10 to 100, and no vendored entry rises above that floor — R3F's
+release entry ties `ACT_COMMIT` at 10 and everything else sits under it.
 
 | Module | Entries | Source and formatting |
 | --- | --- | --- |
