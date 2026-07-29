@@ -839,6 +839,10 @@ fnc_civ_search_action = compile preprocessFileLineNumbers "duws\shared\functions
 publicVariable "fnc_civ_search_action";
 fnc_civ_search_armed = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_search_armed.sqf";
 publicVariable "fnc_civ_search_armed";
+fnc_civ_release_action = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_release_action.sqf";
+publicVariable "fnc_civ_release_action";
+fnc_civ_release = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_release.sqf";
+publicVariable "fnc_civ_release";
 // Not broadcast, unlike the two below it: the plain civilian path is a server-side thread started
 // at town registration, so no trigger anywhere names it.
 fnc_civ_handler = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler.sqf";
@@ -855,8 +859,6 @@ fnc_civ_recycle = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_re
 // Broadcast: the spawn paths remoteExec it to every client to hang the civilian's actions.
 fnc_civ_clientActions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_clientActions.sqf";
 publicVariable "fnc_civ_clientActions";
-fnc_addCivilianMoney = compile preprocessFileLineNumbers "duws\server\misc\fnc_addCivilianMoney.sqf";
-publicVariable "fnc_addCivilianMoney";
 // Civilian menu. Only fnc_civ_request and fnc_civ_bribe_answer are reached from a client, but
 // the rest are broadcast too so a headless client running civilian logic resolves them.
 fnc_civ_request = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_request.sqf";

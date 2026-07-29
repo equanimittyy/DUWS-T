@@ -56,7 +56,8 @@ literally. A scroll-entry colour and a row colour therefore cannot share a defin
 
 | Menu | Row colours |
 | --- | --- |
-| Black Market | `[0,1,0,1]` on the three purchases, `[1,0.667,0,1]` on the three hires |
+| Black Market | `[0,1,0,1]` on all three purchases |
+| Intel & Recruitment | `[1,0.667,0,1]` on all three rows |
 | Killhouse Controls | `[0,1,0,1]` spawn targets, `[1,0,0,1]` spawn enemies, `[1,1,0,1]` cleanup, `[0,1,1,1]` kits and arsenal, `[1,0.533,0,1]` exit |
 | Vehicle Recycling | None — both rows default |
 | Vehicle Customization | None — all four rows default |
@@ -90,7 +91,8 @@ the commander and the map board, because the commander is a killable unit.
 | Reset Squad Leader | HQ building | `…:19` | `#ffb700` str | 0 | `_this == player`, added only for `Squad_Leaders` |
 | FOB Manager | HQ building | `…:22` | `#15ff00` str | 0 | `_this == player` |
 | Show Mission Cooldowns | HQ building | `…:25` | `#15ff00` str | 0 | `(vehiclevarname player) == 'player1'` |
-| Black Market (6-row menu) | HQ terminal | `src/duws/client/misc/fnc_addTerminalBlackMarketActions.sqf:12` | `#00ff00` call | 85 | `true` |
+| Black Market (3-row menu) | HQ terminal | `src/duws/client/misc/fnc_addTerminalBlackMarketActions.sqf:12` | `#00ff00` call | 85 | `true` |
+| Intel & Recruitment (3-row menu) | HQ terminal | `…:32` | `#00ff00` call | 84 | `true` |
 | Redeploy Base Units (2 CP) | HQ building | `src/duws/client/misc/fnc_addRedeployAction.sqf:4` | `#ff1111` str | 6 | `true` |
 | VA Arsenal | `bluHQ_object`, squad-leader units | `src/duws/client/init_hq/fnc_HQaddactions.sqf:10,22,24` | `#00FF00` str | 90 | `_this == player`, gated on `support_armory_available` |
 | HALO solo / HALO group / HALO group (AI only) | `bluHQ_object`, squad-leader units | `src/duws/client/init_hq/fnc_HQaddactions.sqf:14-40` | `#00ffff` str | 0 | `alive player`, gated on `support_halo_available`; the two group variants need `Squad_Leaders` |
@@ -213,17 +215,24 @@ auto-generated id would outlive the civilian and leave one queue entry per unit 
 
 | Entry | Source | Colour | Priority | Shown when |
 | --- | --- | --- | --- | --- |
-| Order to Stop | `src/duws/shared/functions/fnc_civ_stopCommand.sqf:25` | — | 6 | Within 3 m, inside a 15° facing cone, not panicking |
+| Order to Stop | `src/duws/shared/functions/fnc_civ_stopCommand.sqf:25` | — | 6 | Within 6 m, inside a 15° facing cone, not panicking |
 | Civilian Interaction (5-row dialog) | `src/duws/shared/functions/fnc_civ_menuAction.sqf:15` | — | 6 | Alive, called over, within 3 m, not surrendered, not spent |
 | Search | `src/duws/shared/functions/fnc_civ_search_action.sqf:12` | `#ffaa00` call | 6 | Within 3 m and surrendered |
+| Release | `src/duws/shared/functions/fnc_civ_release_action.sqf:12` | — | 6 | Within 3 m, surrendered, still on the civilian side |
 | Offer evacuation | `src/duws/shared/functions/fnc_addRecruitAction.sqf:11` | — | 6 | `true` |
 
-This is the least formatted category: three of four entries are plain text, and Search is the only
+This is the least formatted category: four of five entries are plain text, and Search is the only
 entry anywhere on `#ffaa00`. Civilian Interaction opens `civ_dialog` rather than
 `fnc_open_action_menu`, because its rows need per-row greying against coin count, town state and
 range. Search stays a scroll entry rather than becoming a dialog row: the menu hides on
 `isSurrendered`, so offering it there would mean closing, waiting out the surrender animation and
 reopening.
+
+The call-over reaches twice as far as everything it gates, which is the one deliberate range
+mismatch here: halting a local is done at a distance, and the player then walks in to the 3 m the
+menu and both arrest follow-ups work at. Search and Release are the two ways an arrest ends, and
+Release tests side as well as `isSurrendered` — the reprisal roll moves a civilian who turns on the
+player into a resistance group without clearing the flag.
 
 ## Vendored module entries
 

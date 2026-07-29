@@ -2642,8 +2642,8 @@
                 <Chinesesimp>一个平民正被玩家搜身</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_civloot2">
-                <Original>Due to hostile actions, this town's reputation decreased.</Original>
-                <English>Due to hostile actions, this town's reputation decreased.</English>
+                <Original>Due to hostile actions, this town's reputation dropped by 1.</Original>
+                <English>Due to hostile actions, this town's reputation dropped by 1.</English>
                 <German>Wegen der feindseligen Handlungen von BLUFOR ist der Ruf gesunken.</German>
                 <Spanish>Debido a las acciones hostiles de BLUFOR, la reputación ha disminuido.</Spanish>
                 <Chinesesimp>由于蓝军的恶劣行径，声望降低。</Chinesesimp>
@@ -2675,6 +2675,18 @@
                 <German>Verpiss dich!</German>
                 <Spanish>¡Jódete!</Spanish>
                 <Chinesesimp>...去你妈的！</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_RELEASE">
+                <Original>Release</Original>
+                <English>Release</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RELEASE1">
+                <Original>Alright, you're clear. Go on.</Original>
+                <English>Alright, you're clear. Go on.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RELEASE2">
+                <Original>...Next time, try asking.</Original>
+                <English>...Next time, try asking.</English>
             </Key>
             <Key ID="STR_DUWS_T_LOOT1">
                 <Original>Sorry, just keeping order.</Original>
@@ -3229,6 +3241,10 @@
                 <English>Analysis complete! Gained %1 CP.\nAnalyzed items: %2.</English>
                 <Chinesesimp>分析完成！获得 %1 CP。\n已分析物品：%2</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_INTEL_ANALYSIS_REVEAL">
+                <Original>%1 turned in intel: %2. The analysts pulled a location out of it.</Original>
+                <English>%1 turned in intel: %2. The analysts pulled a location out of it.</English>
+            </Key>
             <Key ID="STR_DUWS_T_sidemissionloc">
                 <Original>Search enemy bodies to reveal the objective's exact location.</Original>
                 <English>Search enemy bodies to reveal the objective's exact location.</English>
@@ -3328,6 +3344,10 @@
                 <Original>Black Market</Original>
                 <English>Black Market</English>
                 <Chinesesimp>黑市</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_INTELRECRUIT_TITLE">
+                <Original>Intel &amp; Recruitment</Original>
+                <English>Intel &amp; Recruitment</English>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_DROPPED_ON_GROUND">
                 <Original>Item dropped on the ground (no inventory space left)</Original>

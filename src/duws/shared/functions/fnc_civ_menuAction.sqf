@@ -28,11 +28,12 @@ private _actionID = _unit addAction [
     // and a menu that opens on someone mid-stride lets the player talk to a whole town without
     // ever announcing themselves. fnc_civ_moveToPlayerServer broadcasts the flag.
     //
-    // 3 m, the same reach as the call-over that gates it, so everything a local will do for the
+    // 3 m, half the reach of the call-over that gates it, so everything a local will do for the
     // player happens at arm's length -- arrest included. The 15 m this was existed to let arrest
     // be shouted from a standoff, which skipped walking up to the person, and walking up is what
-    // puts the player in the town rather than over it. fnc_civ_menu no longer range-tests its
-    // rows: nothing can open this menu from outside the range they work at.
+    // puts the player in the town rather than over it: the call-over halts someone at 6 m and the
+    // player closes the rest. fnc_civ_menu no longer range-tests its rows: nothing can open this
+    // menu from outside the range they work at.
     //
     // A surrendered civilian drops out entirely: what follows an arrest is the search action,
     // which lives on the scroll wheel, and two entries competing there is what this replaced.

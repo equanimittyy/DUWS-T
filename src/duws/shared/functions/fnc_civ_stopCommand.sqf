@@ -47,15 +47,16 @@ private _actionID = _unit addAction [
     // "roughly on screen" and picked up whoever was standing beside the person meant. Horizontal
     // only: looking over someone's head still counts, which is the intended slack.
     //
-    // 3 m, the range the conversational rows work at, so halting someone is done at arm's length
-    // rather than shouted across a square. The menu still opens at 15 m because it carries arrest,
-    // but it is gated on this having happened -- so the reach here is what sets the range of the
-    // whole exchange, and a crowd fifteen deep no longer fills the scroll menu.
+    // 6 m, twice the reach of the menu this gates. Calling someone over and then talking to them
+    // are two different distances: halting a local you can see, walking up to them and only then
+    // getting an exchange is the shape of the interaction, where matching the two meant standing
+    // close enough to talk before you were allowed to ask for their attention. The menu still
+    // holds at 3 m, so the walk is what earns it.
     //
     // Panicking civilians drop out: someone running from gunfire is not stopping to be called,
     // and the entry coming back is what tells the player the town has settled. fnc_civ_panic
     // broadcasts the flag and clears it once they are pathing normally again.
-    "_this distance _target < 3 && {abs (180 - (_this getRelDir _target)) > 165} && {!(_target getVariable ['DUWS_civ_panicked', false])}"
+    "_this distance _target < 6 && {abs (180 - (_this getRelDir _target)) > 165} && {!(_target getVariable ['DUWS_civ_panicked', false])}"
 ];
 
 _unit setVariable ["stopCommandActionID", _actionID];

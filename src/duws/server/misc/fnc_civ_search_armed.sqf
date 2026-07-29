@@ -10,6 +10,9 @@ params ["_unit", "_caller"];
 sleep 5;
 
 if (isNull _unit || !alive _unit) exitWith {};
+// Release stays clickable across the sleep above, so a player who frisks someone and then lets
+// them go can still be shot by them seconds later unless the roll is called off here.
+if (!(_unit getVariable ["isSurrendered", false])) exitWith {};
 if (random 1 >= 0.5) exitWith {};
 
 private _weaponPool = [

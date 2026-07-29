@@ -11,7 +11,8 @@ private _intelItems = [
     ["FlashDisk", 2.5],
     ["Files", 2],
     ["FilesSecret", 8],
-    ["Wallet_ID", 1.5],
+    ["Wallet_ID", 1],
+    ["Wallet_traitor", 1],
     ["FileTopSecret", 8]
 ];
 
@@ -58,11 +59,21 @@ if (_totalCP == 0) exitWith {
 sleep 5;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_ANALYSIS_roger"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 5;
-private _finalCP = floor _totalCP;
-[_finalCP, "intel_analysis"] remoteExec ["fnc_cp_adjust", 2];
-
 private _itemsList = _removedItems joinString ", ";
 private _title = localize "STR_DUWS_T_INTEL_ANALYSIS_TITLE";
+
+// One roll per delivery, the same 10 % a body search pays intel on, so what a document is worth
+// is a draw rather than a rate: most turn-ins buy command points, and now and then the analysts
+// pull a location out of them instead -- the one a local would have given up for free. The
+// payout is only reached when the roll lands, and a dry pool falls through to CP rather than
+// swallowing the delivery for nothing.
+if (random 1 < 0.10 && {[getPos _caller, _caller] call fnc_intel_payout}) exitWith {
+    private _revealDesc = format [localize "STR_DUWS_T_INTEL_ANALYSIS_REVEAL", name _caller, _itemsList];
+    ["info", [_title, _revealDesc]] remoteExec ["BIS_fnc_showNotification", 0];
+};
+
+private _finalCP = floor _totalCP;
+[_finalCP, "intel_analysis"] remoteExec ["fnc_cp_adjust", 2];
 private _desc = format [localize "STR_DUWS_T_INTEL_ANALYSIS_BROADCAST", name _caller, _itemsList, _finalCP];
 ["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", 0];
 

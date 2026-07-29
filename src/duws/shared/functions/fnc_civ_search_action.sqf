@@ -24,43 +24,29 @@ private _actionID = _unit addAction [
         private _hintMsg = "";
         sleep 3;
 
-        if (_roll < 0.10) then {
-            // Intel and electronics drop a random subset rather than the whole pool, so two
-            // searches of the same tier are not the same haul.
-            private _intelPool = ["Item_Files", "Item_Wallet_traitor", "Item_FlashDisk"];
-            private _dropCount = 1 + floor random (count _intelPool);
-            for "_i" from 1 to _dropCount do {
-                _items pushBack (selectRandom _intelPool);
-            };
-            [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT2"] remoteExec ["fnc_duws_dialogue", 0];
-            _hintMsg = localize "STR_DUWS_T_LOOT_INTEL";
+        // Half of all searches turn up nothing and three quarters of what is found is cash, so a
+        // frisk is a gamble on pocket change rather than a way to farm intel. Phones share the
+        // intel pool with the documents: both exist only to be turned in at the terminal, which
+        // prices a phone above a file, so a branch of their own was two names for one outcome.
+        if (_roll < 0.375) then {
+            private _count = 1 + floor random 5;
+            for "_i" from 1 to _count do { _items pushBack "Item_Money_roll" };
+            [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT4"] remoteExec ["fnc_duws_dialogue", 0];
+            _hintMsg = localize "STR_DUWS_T_LOOT_MONEY2";
         } else {
-            if (_roll < 0.30) then {
-                // Weighted by repetition, not by a second roll: a plain phone is twice as likely
-                // as a smartphone because it appears twice.
-                private _elecPool = ["Item_SmartPhone", "Item_MobilePhone", "Item_MobilePhone"];
-                private _dropCount = 1 + floor random (count _elecPool);
-                for "_i" from 1 to _dropCount do {
-                    _items pushBack (selectRandom _elecPool);
-                };
-                [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT3"] remoteExec ["fnc_duws_dialogue", 0];
-                _hintMsg = localize "STR_DUWS_T_LOOT_ELECTRONICS";
+            if (_roll < 0.5) then {
+                // One item, not the handful this drew: three documents off one person is three
+                // searches' worth of CP for a single frisk.
+                private _intelPool = [
+                    "Item_Files", "Item_Wallet_traitor", "Item_FlashDisk",
+                    "Item_SmartPhone", "Item_MobilePhone"
+                ];
+                _items = [selectRandom _intelPool];
+                [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT2"] remoteExec ["fnc_duws_dialogue", 0];
+                _hintMsg = localize "STR_DUWS_T_LOOT_INTEL";
             } else {
-                if (_roll < 0.60) then {
-                    _items = ["Item_Money_roll", "Item_Money_roll", "Item_Money_roll", "Item_Money_roll","Item_Money_roll", "Item_Money_roll", "Item_Money_roll", "Item_Money_roll"];
-                    [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT4"] remoteExec ["fnc_duws_dialogue", 0];
-                    _hintMsg = localize "STR_DUWS_T_LOOT_MONEY2";
-                } else {
-                    if (_roll < 0.85) then {
-                        _items = ["Item_Money_roll","Item_Money_roll"];
-                        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT5"] remoteExec ["fnc_duws_dialogue", 0];
-                        _hintMsg = localize "STR_DUWS_T_LOOT_MONEY1";
-                    } else {
-                        _items = [];
-                        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT6"] remoteExec ["fnc_duws_dialogue", 0];
-                        _hintMsg = localize "STR_DUWS_T_LOOT_NOTHING";
-                    };
-                };
+                [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_LOOT6"] remoteExec ["fnc_duws_dialogue", 0];
+                _hintMsg = localize "STR_DUWS_T_LOOT_NOTHING";
             };
         };
 

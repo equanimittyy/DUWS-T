@@ -26,10 +26,10 @@ _civilian setVariable ["DUWS_civ_arrested", true, true];
 
 _civilian disableAI "PATH";
 
-// Charged whether or not they comply: the town saw the weapon raised either way. No total is
-// printed -- the writer's clamp means it may apply less than was asked, so any figure here would
-// be a prediction. The town marker carries Rep and SITREP carries the campaign figure.
-[_civilian getVariable ["civ_locIndex", -1], -0.5, "looted_civilian"] call fnc_town_rep_adjust;
+// Charged whether or not they comply: the town saw the weapon raised either way. The figure in the
+// notification is what was asked for, not necessarily what landed -- a town already at the -20
+// floor absorbs less -- and the town marker carries the standing that actually resulted.
+[_civilian getVariable ["civ_locIndex", -1], -1, "looted_civilian"] call fnc_town_rep_adjust;
 ["info", [localize "STR_DUWS_T_civloot", localize "STR_DUWS_T_civloot2"]] remoteExec ["BIS_fnc_showNotification", 0];
 
 sleep 3;
@@ -42,9 +42,11 @@ if (random 1 < 0.9) then {
     // to everyone but the player who ordered the surrender.
     _civilian setVariable ["isSurrendered", true, true];
     [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_HANDSUP2"] remoteExec ["fnc_duws_dialogue", _caller];
-    // PATH stays disabled: a surrendered civilian holds still until fnc_civ_search_armed either
-    // releases them or arms them.
+    // PATH stays disabled: a surrendered civilian holds still until they are let go or armed.
+    // Both endings are offered at once -- searching them is a second decision, not the only one,
+    // and a detainee left with neither stands there until the town is recycled.
     [_civilian] remoteExec ["fnc_civ_search_action", 0];
+    [_civilian] remoteExec ["fnc_civ_release_action", 0];
 } else {
     _civilian enableAI "PATH";
     [_civilian] call fnc_civ_resume;

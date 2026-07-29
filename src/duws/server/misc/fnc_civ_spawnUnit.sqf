@@ -22,7 +22,6 @@ _unit setVariable ["civ_locIndex", _locIndex];
 // Read by the waypoint pass and by the panic sweep, both of which have to tell the living from
 // the undead long after the flag that decided it has gone out of scope.
 _unit setVariable ["civ_isZombie", _isZombie];
-[_unit] call fnc_addCivilianMoney;
 // Defined by the RAVAGE handler and meaningful only there: salvaged military kit is what tells
 // that mode's crowd from a living one. Gated here rather than inside the function, because the
 // plain path no longer defines it at all and calling a nil throws.
