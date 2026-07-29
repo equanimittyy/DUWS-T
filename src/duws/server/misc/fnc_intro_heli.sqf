@@ -129,11 +129,12 @@ _wp setWaypointStatements ["true", "missionNamespace setVariable ['intro_heli_ar
 sleep 1;
 cutRsc ["DUWST", "PLAIN", 0, true] remoteExec ["call", 0];
 sleep 8;
-// 显示
-titleText ["In memory of KillaTomata, the creator of the original DUWS_X", "PLAIN", -1] remoteExec ["call", 0];
-sleep 5;
-// 清除
-titleText ["", "PLAIN", 5] remoteExec ["call", 0];
+// Broadcast the arguments to titleText itself. `titleText [...] remoteExec ["call", 0]` evaluates
+// the command on the server and sends the resulting Nothing, so on a dedicated server no client
+// ever sees the memorial.
+["In memory of KillaTomata, the creator of the original DUWS_X.", "PLAIN", 3] remoteExec ["titleText", 0];
+sleep 12;
+["", "PLAIN", 5] remoteExec ["titleText", 0];
 sleep 3;
 cutText ["", "PLAIN", 5] remoteExec ["call", 0];
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_heli_ttgtw"] remoteExec ["fnc_duws_dialogue", 0];

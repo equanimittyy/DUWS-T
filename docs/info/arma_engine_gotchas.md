@@ -480,3 +480,22 @@ waypoint rather than as a stopped unit.
 where the stop was set. `doMove` to the first waypoint's position is the release —
 `_unit doMove (waypointPosition _first)` — because it is both a move order and the leg the group
 was about to walk anyway, so it costs nothing on paths that were never stopped.
+
+## `cmd [...] remoteExec ["call", 0]` broadcasts the return value, not the command
+
+**A unary command binds tighter than the binary `remoteExec`, so `titleText [...] remoteExec
+["call", 0]` runs `titleText` on the calling machine and then broadcasts what it evaluated to —
+Nothing. Every other machine receives an empty payload and shows nothing.**
+
+The missing piece is a pair of braces: `"call"` expects code as its argument, so the intended
+form is `{titleText [...]} remoteExec ["call", 0]`. Without them the statement still reads as a
+broadcast and still runs the command, which is why it survives review. It also survives testing:
+in single-player and on a hosted server the caller is a player's machine, so the local execution
+produces exactly the intended visual and the dead broadcast is invisible. Only a dedicated
+server, or a second client in a co-op session, exposes it — and nothing reaches the `.rpt`.
+
+**How to apply:** prefer passing the argument array to the command by name —
+`[_text, "PLAIN", 3] remoteExec ["titleText", 0]` — over wrapping code in braces.
+Both work, but the by-name form has no silent-failure mode, since dropping the array leaves an
+expression that cannot parse. The intro flight (`src/duws/server/misc/fnc_intro_heli.sqf`) uses
+it for the memorial card and for its `titleCut` fades.
