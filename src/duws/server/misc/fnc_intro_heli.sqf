@@ -172,41 +172,46 @@ private _processedPlayers = _boardedPlayers + _unboardedPlayers;
 private _heliPos2D = getPos _heli;
 private _groundPosASL = [(_heliPos2D select 0), (_heliPos2D select 1), getTerrainHeightASL [_heliPos2D select 0, _heliPos2D select 1]];
 
-// 登机玩家：直接传送（取消分段下降）
+// The whole stick ropes at once. These waits used to sit inside a forEach on the server, so a
+// player's black screen only began once the player before them was already on the ground --
+// about 13.5 s each, most of a minute of nothing for the last man of a four.
+private _dropThreads = [];
+private _dropping = (_boardedPlayers apply {[_x, true]}) + (_unboardedPlayers apply {[_x, false]});
 {
-    private _player = _x;
+    _x params ["_dropPlayer", "_wasBoarded"];
+    _dropThreads pushBack ([_dropPlayer, _wasBoarded, _groundPosASL, _forEachIndex, count _dropping] spawn {
+        params ["_player", "_wasBoarded", "_groundPosASL", "_index", "_total"];
 
-    // 1. 对该玩家单独黑屏
-    [["", "BLACK OUT", 1.5]] remoteExec ["titleCut", _player];
-    sleep 3; // 短暂等待，确保黑屏指令已发送
+        // 登机玩家：黑屏 + 索降音效；未登机玩家只等待相同的节奏
+        if (_wasBoarded) then {
+            [["", "BLACK OUT", 1.5]] remoteExec ["titleCut", _player];
+            sleep 3;
+            "rappel" remoteExec ["playSound", _player];
+            sleep 10;
+        } else {
+            sleep 3;
+        };
 
-    // 2. 播放音效（仅该玩家）
-    "rappel" remoteExec ["playSound", _player];
-    sleep 10; // 等待音效播放和黑屏持续
+        moveOut _player;
+        sleep 0.5;
 
-    // 3. 强制移出载具
-    moveOut _player;
-    sleep 0.5;
+        // Fanned around the rope point rather than dropped onto it: the serial version arrived
+        // 13 s apart and could share one spot, but a stick landing together ends up inside one
+        // another, which the engine resolves by shoving them apart.
+        private _angle = 360 * _index / _total;
+        private _landing = [(_groundPosASL select 0) + (sin _angle) * 3, (_groundPosASL select 1) + (cos _angle) * 3, 0];
+        _landing set [2, getTerrainHeightASL [_landing select 0, _landing select 1]];
+        _player setPosASL _landing;
+        _player setVariable ["intro_completed", true, true];
 
-    // 4. 直接传送到直升机正下方地面点
-    _player setPosASL _groundPosASL;
-    _player setVariable ["intro_completed", true, true];
+        [["", "BLACK IN", 1]] remoteExec ["titleCut", _player];
+        [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_ground_reached"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", _player];
+    });
+} forEach _dropping;
 
-    // 5. 对该玩家单独淡入
-    [["", "BLACK IN", 1]] remoteExec ["titleCut", _player];
-    [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_ground_reached"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", _player];
-} forEach _boardedPlayers;
-// 未登机玩家：等待相同时间后直接传送到直升机正下方
-{
-    private _player = _x;
-    sleep 3; // 等待时间
-    moveOut _player;
-    sleep 0.5;
-    _player setPosASL _groundPosASL;
-    _player setVariable ["intro_completed", true, true];
-    [["", "BLACK IN", 1]] remoteExec ["titleCut", _player];
-    [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_ground_reached"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", _player];
-} forEach _unboardedPlayers;
+// Held until the last man is down: the flyaway below moves the helicopter off the point every
+// one of these threads is placing a player on.
+waitUntil {sleep 0.5; (_dropThreads findIf {!scriptDone _x}) isEqualTo -1};
 
 missionNamespace setVariable ["intro_heli_done", true, true];
 publicVariable "intro_heli_done";
