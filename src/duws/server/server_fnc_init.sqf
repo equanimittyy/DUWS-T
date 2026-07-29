@@ -817,6 +817,13 @@ fnc_mission_begin = {
 	publicVariable "Mission_available";
 	["INFO", "MISSION", format ["start type=%1 name=%2 pos=%3",
 		_missionType, _mission_name, _MissionPos]] call fnc_log;
+	// Every mission generates an operation name and, until now, only ever showed it in the task
+	// list. Announced here rather than in the seventeen threads: this is the one line all of
+	// them pass through, so a card added anywhere else would cover some missions and not others.
+	// Arguments are broadcast, not the result -- titleText run server-side returns Nothing and
+	// no client would see the card at all.
+	[format ["%1\n%2", localize "STR_DUWS_T_MISSION_CARD", _mission_name], "PLAIN DOWN", 1]
+		remoteExec ["titleText", [0,-2] select isDedicated];
 	true
 };
 

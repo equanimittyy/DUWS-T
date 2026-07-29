@@ -3897,6 +3897,10 @@
             </Key>
         </Container>
         <Container name="Side Missions">
+            <Key ID="STR_DUWS_T_MISSION_CARD">
+                <Original>SIDE MISSION</Original>
+                <English>SIDE MISSION</English>
+            </Key>
             <Key ID="STR_DUWS_T_supply_recovery">
                 <Original>Supply Recovery</Original>
                 <English>Supply Recovery</English>

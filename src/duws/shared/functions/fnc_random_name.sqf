@@ -148,6 +148,8 @@ if (_length==1) exitWith {
 };
 
 if (_length==0) then {
-    _gen_operation_fullname = _operation+_first+_second;
+    // Spaced: the two halves are separate words, and concatenated bare they read as one
+    // camel-cased run -- "Operation BlueThunder".
+    _gen_operation_fullname = _operation+_first+" "+_second;
     _gen_operation_fullname
 };
