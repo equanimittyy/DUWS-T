@@ -1,7 +1,26 @@
 # Known issues and untested surface
 
 What is broken, what is merely unverified, and what the previous developer worked around
-rather than fixed. Everything here is reproducible from the source; nothing is speculation.
+rather than fixed. Everything below the dump is reproducible from the source; nothing there
+is speculation.
+
+**How this doc is used.** Play-testing produces raw notes in the dump below, written as
+observed and before anyone knows whether they belong to a section further down. A note that
+turns out to name a known issue is folded into that section and dropped from the dump; the
+rest stay until they are diagnosed or dismissed. Checkboxes elsewhere are ticked as each
+check is actually run, so an unticked box means untested rather than merely unfixed.
+
+## User dump
+
+- Helicopter intro fast-ropes one individual at a time instead of the whole crew
+- Supports are per squad leader, but are not capped; so two squad leaders or more can call mortars all at the same time, spamming the radio.
+- Certain supports such as HALO are shared to whole of BLUFOR; we need to track what supports were unlocked and by whom (track the group leader name)
+- Rest/Heal plays the Overlord voice before the fadeout finishes
+- CP loss isn't reported on death
+- The generator item in HQ next to the shootable targets near the camo-net is causing bugs, possibly due to simulation; if not delete it
+- Mission descriptions suggest Allseer is enemy OPFOR commander which makes no sense
+- Repair depot also has same issue; other players have prop de-sync issues
+- Side Missions don't get generated as actual tasks; should self-clean
 
 ## Untested since the client/server split
 
@@ -210,4 +229,4 @@ Carried from the previous developer and left alone deliberately.
 - **Zone selection can pick a centre that surprises BLUFOR.** Three WARCOM spawners
   (`fnc_WARCOM_opf_patrol.sqf`, `fnc_WARCOM_opf_qrf.sqf`, `fnc_random_veh_opf_patrol.sqf`)
   each place their units deliberately far from the zone centre to compensate. The underlying
-  selection is untouched.
+  selection is untouched..
