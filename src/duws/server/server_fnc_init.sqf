@@ -1481,7 +1481,7 @@ fnc_wbk_survivorKilled_server = {
             };
             _newUnit setBehaviour "CARELESS";
             _newUnit setCombatMode "BLUE";
-            [_newUnit] remoteExec ["fnc_addRecruitAction", 0, true];
+            [_newUnit] remoteExec ["fnc_addRecruitAction", 0, _newUnit];
             _newUnit addEventHandler ["Killed", {
                 params ["_dead", "_killer", "_instigator"];
                 [_dead, _killer, _instigator] remoteExec ["fnc_wbk_survivorKilled_server", 2];

@@ -125,6 +125,9 @@ missionNamespace setVariable ["HQ_recycleStation_active", true, true];
 private _trg = createTrigger ["EmptyDetector", getPosATL _helipad, true];
 _trg setTriggerArea [5, 5, 0, false, 5];
 
-[_depot, netId _trg] remoteExec ["fnc_client_addRecycleActions", 0, true];
+// Suffixed JIP id: supports/fnc_activateBaseRepairStation.sqf resolves _depot from the same
+// HQ_repairDepot_netId, and an object-keyed id is that object's netId, so the two would evict
+// each other.
+[_depot, netId _trg] remoteExec ["fnc_client_addRecycleActions", 0, format ["hq_recycle_%1", netId _depot]];
 
 ["info", [localize "STR_DUWS_T_zaijvhuishouzhan2", localize "STR_DUWS_T_zaijvhuishouzhan3"]] remoteExec ["BIS_fnc_showNotification", 0];

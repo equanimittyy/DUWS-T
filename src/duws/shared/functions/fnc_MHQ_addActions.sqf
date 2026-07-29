@@ -1,4 +1,8 @@
 // Locality: all machines -- some callers remoteExec to target 0, others to target 2, so it can run anywhere.
+// The JIP-flagged callers share the id "duws_mhq_actions", so the queue holds one entry at the
+// MHQ's current state rather than the whole deploy/undeploy history. Replacement is safe because
+// each branch below opens with removeAllActions. "select" is not part of that: it carries no JIP
+// flag and does something else.
 
 #include "..\includes\action_style.hpp"
 

@@ -7,7 +7,7 @@
 _empty = (count (crew MHQ1)) == 0;
 if (!_empty) exitWith {
 	["info",[localize "STR_DUWS_T_ywl7naen",localize "STR_DUWS_T_bnw9muay"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
-	["deploy"] remoteExec ["fnc_MHQ_addActions", [0,-2] select isDedicated,true];
+	["deploy"] remoteExec ["fnc_MHQ_addActions", [0,-2] select isDedicated,"duws_mhq_actions"];
 };
 
 _mhqDir = getDir MHQ1;
@@ -75,7 +75,7 @@ publicVariable "MHQ_deployed";
 
 ["INFO", "SUPPORT", format ["MHQ deployed at %1", getPos MHQ1]] call fnc_log;
 
-["undeploy"] remoteExec ["fnc_MHQ_addActions", [0,-2] select isDedicated,true];
+["undeploy"] remoteExec ["fnc_MHQ_addActions", [0,-2] select isDedicated,"duws_mhq_actions"];
 
 // Lock vehicle
 MHQ1 setVehicleLock "LOCKED";

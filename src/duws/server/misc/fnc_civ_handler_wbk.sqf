@@ -399,7 +399,7 @@ if (_mode == "spawn") then {
                 };
                 _newUnit setBehaviour "AWARE";
                 _newUnit setCombatMode "YELLOW";
-                [_newUnit] remoteExec ["fnc_addRecruitAction", 0, true];
+                [_newUnit] remoteExec ["fnc_addRecruitAction", 0, _newUnit];
                 if (random 1 < 0.5) then {
                     private _weaponEntry = selectRandom WBK_civWeaponPool;
                     private _weapon = _weaponEntry select 0;
@@ -462,7 +462,7 @@ if (_mode == "spawn") then {
             };
             _x setBehaviour "AWARE";
             _x setCombatMode "YELLOW";
-            [_x] remoteExec ["fnc_addRecruitAction", 0, true];
+            [_x] remoteExec ["fnc_addRecruitAction", 0, _x];
             if (random 1 < 0.5) then {
                 private _weaponEntry = selectRandom WBK_civWeaponPool;
                 private _weapon = _weaponEntry select 0;

@@ -307,7 +307,7 @@ if (isNil "fnc_intel_container_search_server") then {
         _container setDir random 360;
         _allSpawnedContainers pushBack _container;
         
-        [_container] remoteExec ["fnc_intel_container_addAction", 0, true];
+        [_container] remoteExec ["fnc_intel_container_addAction", 0, _container];
     };
     
 } forEach _selectedBuildings;

@@ -44,4 +44,4 @@ publicVariable "MHQ_deployed";
 // Unlock vehicle
 MHQ1 setVehicleLock "UNLOCKED";
 
-["deploy"] remoteExec ["fnc_MHQ_addActions", [0,-2] select isDedicated,true];
+["deploy"] remoteExec ["fnc_MHQ_addActions", [0,-2] select isDedicated,"duws_mhq_actions"];

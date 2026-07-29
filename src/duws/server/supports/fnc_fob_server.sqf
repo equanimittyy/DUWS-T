@@ -33,7 +33,10 @@ switch (VERSION_X) do {
 [_fob, format ["FOB_%1", netId _fob]] call fnc_duws_keep;
 
 // FOB ADD ACTION MENU
-[_fob, _fob_owner] remoteExec ["fnc_FOBactions", [0,-2] select isDedicated,true];
+// Keyed to the FOB so the entry dies with it. The defences and guards entries hang off the same
+// FOB and cannot use this form -- an object-keyed id is that object's netId, so the three would
+// evict each other; those two suffix a string instead.
+[_fob, _fob_owner] remoteExec ["fnc_FOBactions", [0,-2] select isDedicated,_fob];
 
 // Add the fortifications
 _refortify = false;
