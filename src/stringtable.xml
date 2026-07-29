@@ -3518,8 +3518,8 @@
                 <English>Casualty</English>
             </Key>
             <Key ID="STR_DUWS_T_DEATH_CP_MSG">
-                <Original>%1 CP charged against the pool for your replacement.</Original>
-                <English>%1 CP charged against the pool for your replacement.</English>
+                <Original>Your death has cost BLUFOR %1 CP.</Original>
+                <English>Your death has cost BLUFOR %1 CP.</English>
             </Key>
         </Container>
         <Container name="Zones &amp; Campaign Flow">
