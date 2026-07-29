@@ -340,7 +340,12 @@ if (CIV_PRESENCE == "RAVAGE") then {
     ["INFO", "BOOT", "WBK mode: Client-side fog forced."] call fnc_log;
 };
 // 等待末日模式变量同步
-waitUntil {!isNil "apocalypse_mode"};
+// Bounded: an unbounded wait here stalls the client ahead of every later boot milestone, and the
+// flag is broadcast rather than derived, so a joiner that misses it would never proceed. The
+// local default keeps the read below from tripping over nil; the publicVariable handler further
+// down applies a value that lands late.
+["BOOT", "apocalypse_mode broadcast", {!isNil "apocalypse_mode"}, 300] call fnc_waitLogged;
+if (isNil "apocalypse_mode") then { apocalypse_mode = false };
 
 // 定义应用滤镜的函数（以便重生后调用）
 DUWS_fnc_applyApocalypseFilter = {
@@ -400,10 +405,18 @@ if (CIV_PRESENCE == "WBK") then {
     ["biohazard", [localize "STR_DUWS_T_wbk", localize "STR_DUWS_T_WBK_NOREP"]] remoteExec ["BIS_fnc_showNotification", 0];
 };
 // 等待索降完成标志
-waitUntil { sleep 0.2; !isNil "intro_heli_done" };
+// Bounded and logged, and deliberately not wrapped in the while-retry the other boot waits use:
+// misc/fnc_intro_heli.sqf exits without publishing this flag when PosOfBLUHQ is undefined, and
+// an unbounded wait there leaves the player invulnerable and unteleported with nothing in the
+// log. Proceeding on timeout at least reaches allowDamage true below.
+["BOOT", "intro_heli_done (intro drop finished)", {!isNil "intro_heli_done"}, 420] call fnc_waitLogged;
 
 // 如果玩家尚未完成索降流程（即 intro_completed 未设置为 true），则传送
-if !(player getVariable ["intro_completed", false]) then {
+// The position guard is what makes the timeout above survivable: server_var_init.sqf broadcasts
+// PosOfBLUHQ as [], so on the early-exit path the client holds an empty array rather than nil,
+// and BIS_fnc_findSafePos would fall back to [0,0,0] and leave `[] getPos [...]` to kill this
+// thread before allowDamage true below.
+if (!(player getVariable ["intro_completed", false]) && {!isNil "PosOfBLUHQ" && {count PosOfBLUHQ > 0}}) then {
     private _safePos = [PosOfBLUHQ, 0, 30, 3, 0, 0.2, 0] call BIS_fnc_findSafePos;
     if (_safePos isEqualTo [0,0,0]) then {
         _safePos = PosOfBLUHQ getPos [random 10, random 360];

@@ -14,8 +14,13 @@ _duwst_isServer = if (isDedicated || _duwst_isHostedserver) then {true} else {fa
 _duwst_isClient = if ((_duwst_isHostedserver || !isDedicated) && (hasInterface)) then {true} else {false};
 _duwst_isHeadless = if !(hasInterface || isDedicated) then {true} else {false};
 
+// Every machine needs a local default so the waits below have a Bool to test, but only the server
+// may broadcast one: on a joining client this runs before the JIP variable sync is guaranteed to
+// have landed, and an ungated client would publish false over the server's true and stall every
+// machine still waiting on the flag.
 if (isNil "serverinit_complete") then {
-	serverinit_complete = false;publicVariable "serverinit_complete";
+	serverinit_complete = false;
+	if (isServer) then { publicVariable "serverinit_complete" };
 };
 
 if (_duwst_isServer || _duwst_isHostedserver || _duwst_isHeadless) then 
