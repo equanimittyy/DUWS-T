@@ -111,10 +111,16 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   _missionConfig = [];
   _missionCount = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
   _missionShuffle = _missionCount call BIS_fnc_arrayShuffle;
-  
-  while {_counter < count _missionCount} do {
+  // Seven drawn from the shuffled seventeen, not all of them. Every candidate costs a
+  // BIS_fnc_findSafePos search before it can be offered, so the full pool spent that search
+  // ten extra times to build a list no one reads to the bottom of.
+  _missionDraw = 7 min (count _missionCount);
 
-	_progress = 0.1 * _counter;
+  while {_counter < _missionDraw} do {
+
+	// Proportional to the draw, not a fixed 0.1 a step: that constant was sized for the old
+	// full-pool loop and would now stall the bar at 0.6.
+	_progress = _counter / _missionDraw;
 	progressLoadingScreen _progress;
 	
 	//////////////////////////////////////////////
