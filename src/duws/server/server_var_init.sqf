@@ -266,7 +266,9 @@ ZeusStatus = 2;publicVariable "ZeusStatus";
 // Civilian faction. Defaulted here like every other environment setting: six subsystems
 // read it with no isNil guard, so leaving it unset makes each of them error separately and
 // civilians never generate, with nothing in the log naming the cause.
-CIV_PRESENCE = "NONE";publicVariable "CIV_PRESENCE";
+// "med" is the only pool that is entirely base-game Altis classes, so it is the one default
+// that cannot pull in a mod dependency on the map this mission ships for.
+CIV_PRESENCE = "med";publicVariable "CIV_PRESENCE";
 
 // zone_namePOS_pairs
 zone_namePOS_pairs = [];publicVariable "zone_namePOS_pairs";

@@ -120,7 +120,7 @@ missionNamespace setVariable ["index_civtype_wbk", _index_wbk];
 lbSetColor [2109, _index_ravage, [1,0,0,1]];
 missionNamespace setVariable ["index_civtype_ravage", _index_ravage];
 
-[2109, index_civtype_off] call _setDefault;
+[2109, index_civtype_med] call _setDefault;
 
 // ENABLE HARDCORE MODE
 index_hardcore_false = lbAdd [2110, localize "STR_DUWS_T_x4zs3lsg0"];
