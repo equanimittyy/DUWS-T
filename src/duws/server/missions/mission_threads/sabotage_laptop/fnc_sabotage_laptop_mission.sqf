@@ -17,7 +17,6 @@ _Building = [];
 _Posfound = false;
 _targetpos = [];
 _failSafe = 0;
-_markerText = "sabot";
 _markerText2 = "";
 switch (VERSION_X) do {
     case "MODERN": {
@@ -45,9 +44,7 @@ if (_failsafe > 10 && _Posfound == false) exitWith {
 
 _tableLoc = _targetpos;
 
-_markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
-_markername = _markerData select 0;
-_markername2 = _markerData select 1;
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 _laptop = "";
 switch (VERSION_X) do {
@@ -184,8 +181,7 @@ _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round
 sleep 8;
 switch (VERSION_X) do {
     case "MODERN": {
-        [west, [_VARtaskgeneratedName],
-        [localize "STR_DUWS_T_j97ecrsh", _mission_name, "aoMarker"], objNull, true] call BIS_fnc_taskCreate;
+        [_VARtaskgeneratedName, localize "STR_DUWS_T_j97ecrsh", _mission_name, _randomPos, "download"] call fnc_missionTaskCreate;
     };
 };
 
@@ -193,7 +189,7 @@ switch (VERSION_X) do {
 // Suffixed JIP id, not the laptop itself: the hardcore intel rotary below hangs off the same
 // object, and an object-keyed id is that object's netId, so the two entries evicted each other
 // and a joining client got the search but never the sabotage. The success path removes this id.
-[_laptop,[ACT_COMMIT("STR_DUWS_T_p3200mf5"), fnc_sabotage_laptop_success, [_MissionPos,_targetpos,_mission_name,_markername,_markername2,_radius], 10, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["sabotage_action_%1", netId _laptop]];
+[_laptop,[ACT_COMMIT("STR_DUWS_T_p3200mf5"), fnc_sabotage_laptop_success, [_MissionPos,_targetpos,_mission_name,_markername2,_radius], 10, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["sabotage_action_%1", netId _laptop]];
 
 // Put an intel action on LAPTOP
 if (hardcore_mode_enable) then {

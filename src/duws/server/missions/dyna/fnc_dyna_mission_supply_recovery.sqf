@@ -138,21 +138,14 @@ private _newUnits = [];
 _generatedObjects append _newUnits;
 
 // ---------- 创建地图标记 ----------
-private _markerData = [_foundPos, "Supply Cache", localize _nameKey, 200] call fnc_missionMarkerData;
-_markerData params ["_markerIcon", "_markerArea"];
+private _markerArea = [_foundPos, 200] call fnc_missionMarkerData;
 [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_supply_start"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
 sleep 6;
 [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_supply_start2"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
 
 // ---------- 创建任务 ----------
 private _taskID = format ["dyna_supplyrecover_%1", round time];
-[
-    west,
-    _taskID,
-    [localize "STR_DUWS_T_supply_recovery_desc", localize _nameKey, _foundPos],
-    objNull,
-    true
-] call BIS_fnc_taskCreate;
+[_taskID, localize "STR_DUWS_T_supply_recovery_desc", localize _nameKey, _foundPos, "search"] call fnc_missionTaskCreate;
 
 // ---------- 将生成的单位存储到全局变量（供清理函数使用）----------
 missionNamespace setVariable ["dyna_mission_objects", _generatedObjects];
@@ -171,16 +164,13 @@ waitUntil {
 
 // 判断结局
 if (!alive _box) then {
-    deleteMarker _markerIcon;
-    deleteMarker _markerArea;
-    deleteMarker str(_markerIcon);
     deleteMarker str(_markerArea);
     [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_supply_fail"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
     sleep 5;
     [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_supply_fail2"] remoteExec ["fnc_duws_dialogue", 0];
     sleep 4;
     // 任务失败
-    [_taskID, "FAILED"] call BIS_fnc_taskSetState;
+    [_taskID, "FAILED"] call fnc_missionTaskEnd;
 
     // 清理：移除除箱子以外的所有任务物体，重置标志
     missionNamespace setVariable ["dyna_mission_active", false];
@@ -190,9 +180,6 @@ if (!alive _box) then {
     missionNamespace setVariable ["dyna_mission_objects", nil];
 
 } else {
-    deleteMarker _markerIcon;
-    deleteMarker _markerArea;
-    deleteMarker str(_markerIcon);
     deleteMarker str(_markerArea);
     
     private _missionName = localize _nameKey;
@@ -201,7 +188,7 @@ if (!alive _box) then {
     [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_supply_success"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
     sleep 5;
     // 任务成功
-    [_taskID, "SUCCEEDED"] call BIS_fnc_taskSetState;
+    [_taskID, "SUCCEEDED"] call fnc_missionTaskEnd;
 
     // 清理：移除除箱子以外的所有任务物体，重置标志
     missionNamespace setVariable ["dyna_mission_active", false];

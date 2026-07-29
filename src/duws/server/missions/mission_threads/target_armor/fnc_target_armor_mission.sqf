@@ -20,7 +20,6 @@ _Building = [];
 _Posfound = false;
 _targetpos = [];
 _failSafe = 0;
-_markerText = "tank";
 _markerText2 = localize "STR_DUWS_T_c7";
 
 _POSdata = [_MissionPos, _radius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
@@ -41,9 +40,7 @@ if (_failsafe > 10 && _Posfound == false) exitWith {
 
 _vehpos = [_targetpos, 10, 30,10,0,0.15,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 
-_markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
-_markername = _markerData select 0;
-_markername2 = _markerData select 1;
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 
@@ -212,8 +209,7 @@ private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["targetarmor%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
-[west, [_VARtaskgeneratedName],
-[localize "STR_DUWS_T_y7z1cx6j", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate;
+[_VARtaskgeneratedName, localize "STR_DUWS_T_y7z1cx6j", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
 
 // 设置任务目标位置（军官位置）
 missionNamespace setVariable ["current_mission_target_pos", getPos _target];
@@ -238,9 +234,8 @@ sleep 120;
 
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
 deleteMarker str(_markername2);
-deleteMarker str(_markername);
 
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 
 sleep 1;
 

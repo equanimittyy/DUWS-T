@@ -140,8 +140,7 @@ sleep 3;
 
 // ----- 4. 创建任务条目（使用线人标记作为任务位置标记）----------------------
 _VARtaskgeneratedName = format ["protectciv_%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
-[west, [_VARtaskgeneratedName], 
-[localize "STR_DUWS_T_protectciv", _mission_name, _civilianMarker], objNull, true] call BIS_fnc_taskCreate; 
+[_VARtaskgeneratedName, localize "STR_DUWS_T_protectciv", _mission_name, getPosATL _civilian, "defend"] call fnc_missionTaskCreate;
 sleep 5;
 [_speakeracteam, _messageroger] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
@@ -195,7 +194,7 @@ Mission_Failed = false;
     // ----- 任务结局判定 -----
     if (!alive _civ) then {
         // 平民死亡 → 失败
-        [_taskID, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, _taskID];
+        [_taskID, "FAILED"] call fnc_missionTaskEnd;
         // Reputation is a civilian-system currency: skip its change when off. Charged against
         // the town the escorted civilian belonged to, falling back to the global outside one.
         if (CIV_PRESENCE != "NONE") then {
@@ -209,7 +208,7 @@ Mission_Failed = false;
             _message2       = ([localize "STR_DUWS_T_pcend"] call fnc_cs);
             [_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
             sleep 8;
-            [_taskID, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, _taskID];
+            [_taskID, "SUCCEEDED"] call fnc_missionTaskEnd;
 
             [_cp, _ap, "Protect Civilian"] call fnc_mission_reward;
             if (CIV_PRESENCE != "NONE") then {

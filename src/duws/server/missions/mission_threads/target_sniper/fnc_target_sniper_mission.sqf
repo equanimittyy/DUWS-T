@@ -20,7 +20,6 @@ _Building = [];
 _Posfound = false;
 _targetpos = [];
 _failSafe = 0;
-_markerText = "sniper";
 _markerText2 = localize "STR_DUWS_T_c5";
 
 _POSdata = [_MissionPos, _radius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
@@ -39,9 +38,7 @@ if (_failsafe > 10 && _Posfound == false) exitWith {
 
 [_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  player1];
 
-_markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
-_markername = _markerData select 0;
-_markername2 = _markerData select 1;
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 // 建筑驻军
 private _buildingSearchRadius = _radius;
@@ -202,8 +199,7 @@ private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["sniperhunt%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
-[west, [_VARtaskgeneratedName], 
-[localize "STR_DUWS_T_16dh939j", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate; 
+[_VARtaskgeneratedName, localize "STR_DUWS_T_16dh939j", _mission_name, _randomPos, "kill"] call fnc_missionTaskCreate; 
 
 // ========== 统计初始敌军数量 ==========
 sleep 5; // 等待巡逻队生成完毕
@@ -222,9 +218,8 @@ waitUntil {sleep 2; (!alive _target1 && !alive _target2)};
 sleep 120;
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
 deleteMarker str(_markername2);
-deleteMarker str(_markername);
 
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 
 sleep 1;
 

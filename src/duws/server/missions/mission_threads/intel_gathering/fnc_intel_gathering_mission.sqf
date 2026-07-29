@@ -321,19 +321,12 @@ sleep 6;
 // ========== 创建任务标记 ==========
 private _randomPos = [_MissionPos, 0, _radius, 5, 0, 0.2, 0] call BIS_fnc_findSafePos;
 if (_randomPos isEqualTo [0,0,0]) then { _randomPos = _MissionPos; };
-private _markerData = [_randomPos, "Intel", localize "STR_DUWS_T_INTEL_GATHERING_TITLE", _radius] call fnc_missionMarkerData;
-_markername = _markerData select 0;
-_markername2 = _markerData select 1;
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 // ========== 创建任务 ==========
 private _taskID = format ["intel_gathering_%1", round time];
-[
-    west,
-    _taskID,
-    [localize "STR_DUWS_T_INTEL_GATHERING_DESC", localize "STR_DUWS_T_INTEL_GATHERING_TITLE", "getMarkerPos str(_markername)"],
-    objNull,
-    true
-] call BIS_fnc_taskCreate;
+[_taskID, localize "STR_DUWS_T_INTEL_GATHERING_DESC", localize "STR_DUWS_T_INTEL_GATHERING_TITLE",
+    _randomPos, "search"] call fnc_missionTaskCreate;
 
 [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_INTEL_GATHERING3"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
 sleep 6;
@@ -354,15 +347,14 @@ missionNamespace setVariable [_triggeredVar, false, true];
 // ============================================
 
 // ========== 15分钟后自动成功 ==========
-[_taskID, _MissionPos, _radius, _markername, _markername2, _allSpawnedContainers, _buildingMarkers, _cpreward, _apreward, _mission_name] spawn {
-    params ["_taskID", "_pos", "_rad", "_markerIcon", "_markerArea", "_containers", "_bldgMarkers", "_cpreward", "_apreward", "_mission_name"];
+// The area ellipse is not deleted here: this branch and the countdown below both fire at 900 s,
+// and the countdown owns the removal.
+[_taskID, _MissionPos, _radius, _allSpawnedContainers, _buildingMarkers, _cpreward, _apreward, _mission_name] spawn {
+    params ["_taskID", "_pos", "_rad", "_containers", "_bldgMarkers", "_cpreward", "_apreward", "_mission_name"];
 
     sleep 900;
 
-    [_taskID, "SUCCEEDED"] call BIS_fnc_taskSetState;
-
-    deleteMarker _markerIcon;
-    deleteMarker _markerArea;
+    [_taskID, "SUCCEEDED"] call fnc_missionTaskEnd;
 
     {
         deleteMarker _x;
@@ -390,4 +382,3 @@ sleep 600;
 ["info",[localize "STR_DUWS_T_INTEL_GATHERING",localize "STR_DUWS_T_INTEL_GATHERING_TMLEFT"]] remoteExec ['BIS_fnc_showNotification',0];
 sleep 300;
 deleteMarker str(_markername2);
-deleteMarker str(_markername);

@@ -147,13 +147,7 @@ sleep 4;
 sleep 8;
 // ---------- 5. 创建任务和标记 ----------
 private _taskID = format ["dyna_mortar_%1", round time];
-[
-    west,
-    _taskID,
-    [localize "STR_DUWS_T_mortarspotter2", localize _nameKey, _spotterPos],
-    objNull,
-    true
-] call BIS_fnc_taskCreate;
+[_taskID, localize "STR_DUWS_T_mortarspotter2", localize _nameKey, _spotterPos, "kill"] call fnc_missionTaskCreate;
 
 // 生成一个在观察员位置周围50米内的随机偏移点
 private _offsetPos = [_spotterPos, 0, 50, 5, 0, 0.2, 0, [], [_spotterPos, _spotterPos]] call BIS_fnc_findSafePos;
@@ -164,8 +158,7 @@ if (_offsetPos isEqualTo [0,0,0]) then {
 };
 
 // 创建标记（图标和椭圆区域都以偏移点为中心）
-private _markerData = [_offsetPos, "hd_unknown", localize _nameKey, 50] call fnc_missionMarkerData;
-_markerData params ["_markerIcon", "_markerArea"];
+private _markerArea = [_offsetPos, 50] call fnc_missionMarkerData;
 
 // ---------- 6. 启动周期性炮击（每30秒一发，直到观察员死亡） ----------
 [_targetPlayer, _spotter] spawn {
@@ -190,27 +183,17 @@ sleep 4;
 [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_mortarspotter5"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
 sleep 4;
 // ---------- 8. 任务成功，奖励 ----------
-[_taskID, "SUCCEEDED"] call BIS_fnc_taskSetState;
+[_taskID, "SUCCEEDED"] call fnc_missionTaskEnd;
 // 使用 fnc_mission_reward 发放奖励（CP 乘数自动应用，并触发特战队员技能提升）
 
 private _missionName = localize _nameKey; // 获取本地化任务名称
 [10, 5, _missionName] spawn fnc_mission_reward;
 
-// 清理标记
-deleteMarker _markerIcon;
-deleteMarker _markerArea;
-deleteMarker str(_markerIcon);
-deleteMarker str(_markerArea);
 // ---------- 清理标记 ----------
-if (!isNil "_markerIcon" && {_markerIcon != ""}) then {
-    deleteMarker _markerIcon;
-    ["INFO", "MISSION", format ["Deleted marker icon: %1", _markerIcon]] call fnc_log;
-} else {
-    ["ERROR", "MISSION", "_markerIcon is nil or empty, cannot delete."] call fnc_log;
-};
-
+// str(): fnc_missionMarkerData creates the ellipse under str(name), so the real marker name
+// carries literal quote characters and an unquoted deleteMarker silently misses it.
 if (!isNil "_markerArea" && {_markerArea != ""}) then {
-    deleteMarker _markerArea;
+    deleteMarker str(_markerArea);
     ["INFO", "MISSION", format ["Deleted marker area: %1", _markerArea]] call fnc_log;
 } else {
     ["ERROR", "MISSION", "_markerArea is nil or empty, cannot delete."] call fnc_log;

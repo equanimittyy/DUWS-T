@@ -23,7 +23,6 @@ _Building = [];
 _Posfound = false;
 _targetpos = [];
 _failSafe = 0;
-_markerText = "cache";
 _markerText2 = localize "STR_DUWS_T_c9";
 
 _POSdata = [_MissionPos, _radius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
@@ -44,9 +43,7 @@ if (_failSafe > 10 && !_Posfound) exitWith {
 
 _cachePos = _targetpos;
 
-_markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
-_markername = _markerData select 0;
-_markername2 = _markerData select 1;
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 _centerSpawn = _cachePos;
 _centerSpawnX = _centerSpawn select 0;
@@ -321,8 +318,7 @@ sleep 6;
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_cachecopy"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-[west, [_VARtaskgeneratedName],
-[localize "STR_DUWS_T_geryeddp", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate;
+[_VARtaskgeneratedName, localize "STR_DUWS_T_geryeddp", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
 ["dakaijunhuoku", [localize "STR_DUWS_T_xnjhk", localize "STR_DUWS_T_xnjhk2"]] remoteExec ["BIS_fnc_showNotification", 0];
 
 missionNamespace setVariable ["current_mission_target_pos", getPos _vehicle_7];
@@ -366,9 +362,8 @@ sleep 0.5;
 _bomb = "grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
 
 deleteMarker str(_markername2);
-deleteMarker str(_markername);
 
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, _VARtaskgeneratedName];
+[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;

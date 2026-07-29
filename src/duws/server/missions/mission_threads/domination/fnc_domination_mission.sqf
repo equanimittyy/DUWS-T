@@ -14,7 +14,6 @@ _message1 = ([localize "STR_DUWS_T_dominationoverlord"] call fnc_cs);
 _message2 = ([localize "STR_DUWS_T_dominationcopy"] call fnc_cs);
 _message3 = ([localize "STR_DUWS_T_dominationend"] call fnc_cs);
 _messagehoundlost = ([localize "STR_DUWS_T_dominationhoundlost"] call fnc_cs);
-_markerText = "Hound Pos";
 _markerText2 = localize "STR_DUWS_T_c13";
 
 // 初始化变量
@@ -714,9 +713,7 @@ _arrowMarker setMarkerSize [1.1, 1.1];
 _arrowMarker setMarkerAlpha 0.7;
 _arrowMarker setMarkerText localize "STR_DUWS_T_dominationarrow";
 //Create the marker	
-_markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
-_markername = _markerData select 0;
-_markername2 = _markerData select 1;
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 // TASK AND NOTIFICATION
 private "_VARtaskgeneratedName";
@@ -724,8 +721,7 @@ private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["combat%1%2", round(_MissionPos select 0), round(_MissionPos select 1)];
 
 // 创建任务：消灭所有红方坦克
-[west, [_VARtaskgeneratedName], 
-[localize "STR_DUWS_T_domination", _mission_name, _markername2], objNull, true] call BIS_fnc_taskCreate; 
+[_VARtaskgeneratedName, localize "STR_DUWS_T_domination", _mission_name, _randomPos, "attack"] call fnc_missionTaskCreate;
 
 // ================ [MOD] 设置红方路点（进攻蓝方APC位置） ================
 
@@ -792,14 +788,13 @@ waitUntil {
 
 // 删除标记
 deleteMarker str(_markername2);
-deleteMarker str(_markername);
 deleteMarker _arrowMarkerName;
 // [MOD] 删除蓝方 APC 标记
 { deleteMarker _x; } forEach _apcMarkers;
 
 [_speaker1, _message3] remoteExec ["fnc_duws_dialogue", 0];
 sleep 12;
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 
 sleep 1;
 

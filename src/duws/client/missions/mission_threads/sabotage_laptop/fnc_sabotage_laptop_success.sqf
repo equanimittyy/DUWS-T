@@ -7,9 +7,8 @@ _arguments = _this select 3;
 _missionPos = _arguments select 0;
 _targetPos = _arguments select 1;
 _mission_name = _arguments select 2;
-_markername = _arguments select 3;
-_markername2 = _arguments select 4;
-_radius = _arguments select 5;
+_markername2 = _arguments select 3;
+_radius = _arguments select 4;
 
 _cpreward = 10;
 _apreward = 35;
@@ -35,9 +34,8 @@ private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 
 deleteMarker str(_markername2);
-deleteMarker str(_markername);
 
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["fnc_missionTaskEnd", 2];
 missionNamespace setVariable ["current_mission_target_pos", nil];
 
 // ========== 防止清理时误触发直升机增援 ==========

@@ -12,7 +12,6 @@ _messageroger = ([localize "STR_DUWS_T_cqbroger"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_cqblookslike";
 _message2 = ([localize "STR_DUWS_T_cqbend"] call fnc_cs);
 _message3 = localize "STR_DUWS_T_cqboverlordcopy";
-_markerText = "Clear houses";
 _markerText2 = localize "STR_DUWS_T_clearhouse_desc";
 
 _randomPos = [];          
@@ -199,11 +198,8 @@ _VARtaskgeneratedName = format ["clearhouse%1%2",round(_MissionPos select 0),rou
 sleep 8;
 [_speakeracteam, _messageroger] remoteExec ["fnc_duws_dialogue", 0];
 
-_markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
-_markername = _markerData select 0;
-_markername2 = _markerData select 1;
-[west, [_VARtaskgeneratedName], 
-[localize "STR_DUWS_T_shentouxiaodui", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate;
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
+[_VARtaskgeneratedName, localize "STR_DUWS_T_shentouxiaodui", _mission_name, _randomPos, "attack"] call fnc_missionTaskCreate;
 
 waitUntil {
     sleep 3;
@@ -217,7 +213,6 @@ waitUntil {
 };
 
 deleteMarker str(_markername2);
-deleteMarker str(_markername);
 
 [_speakeracteam, _message1] remoteExec ["fnc_duws_dialogue", 0];
 sleep 5;
@@ -225,7 +220,7 @@ sleep 5;
 sleep 6;
 [_speaker, _message3] remoteExec ["fnc_duws_dialogue", 0];
 sleep 6;
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 
 sleep 1;
 

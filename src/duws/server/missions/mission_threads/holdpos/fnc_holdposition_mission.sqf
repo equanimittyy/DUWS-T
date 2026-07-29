@@ -24,7 +24,6 @@ _Building = [];
 _Posfound = false;
 _targetpos = [];
 _failSafe = 0;
-_markerText = "Tactical Asset";
 _markerText2 = localize "STR_DUWS_T_c12";
 
 _POSdata = [_MissionPos, _radius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
@@ -43,9 +42,7 @@ if (_failsafe > 10 && _Posfound == false) exitWith {
 
 [_markerText2, {hint _this}] remoteExec ["BIS_fnc_Spawn", 0];
 
-_markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
-_markername = _markerData select 0;
-_markername2 = _markerData select 1;
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 _centerSpawn = _targetpos;
 _centerSpawnX = _centerSpawn select 0;
@@ -182,8 +179,7 @@ _VARtaskgeneratedName = format ["HOLDPOSITION%1%2",round(_MissionPos select 0),r
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 10;
 
-[west, [_VARtaskgeneratedName], 
-[localize "STR_DUWS_T_jianshouzhendi2", _mission_name, "(getMarkerPos str(_markername)"], objNull, true] call BIS_fnc_taskCreate; 
+[_VARtaskgeneratedName, localize "STR_DUWS_T_jianshouzhendi2", _mission_name, _randomPos, "defend"] call fnc_missionTaskCreate; 
 
 _friendlyUnits = [];
 _friendlyGroup = [(_targetpos getPos [8, random 360]), WEST, [
@@ -237,8 +233,8 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
 Mission_Active = true;
 publicVariable "Mission_Active";
 
-_conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markername, _markername2, _VARtaskgeneratedName, _cpreward, _apreward, _mission_name, _targetpos, _radius, _missionUnits] spawn {
-    params ["_samSystem", "_radarSystem", "_countdownDuration", "_markername", "_markername2", "_VARtaskgeneratedName", "_cpreward", "_apreward", "_mission_name", "_targetpos", "_radius", "_missionUnits"];
+_conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markername2, _VARtaskgeneratedName, _cpreward, _apreward, _mission_name, _targetpos, _radius, _missionUnits] spawn {
+    params ["_samSystem", "_radarSystem", "_countdownDuration", "_markername2", "_VARtaskgeneratedName", "_cpreward", "_apreward", "_mission_name", "_targetpos", "_radius", "_missionUnits"];
 
     waitUntil { sleep 1; missionNamespace getVariable [format ["%1_started", _VARtaskgeneratedName], false] };
     private _missionStartTime = missionNamespace getVariable [format ["%1_startTime", _VARtaskgeneratedName], time];
@@ -247,8 +243,7 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
         sleep 5;
         if ((!alive _samSystem || !alive _radarSystem) && ((time - _missionStartTime) < _countdownDuration)) exitWith {
             deleteMarker str(_markername2);
-            deleteMarker str(_markername);
-            [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+            [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
             [] spawn fnc_missionTimer;
             [_targetpos,_radius, "mission_holdpos", true] spawn fnc_mission_cleanup;
             Mission_Active = false;
@@ -261,8 +256,7 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
         };
         if ((time - _missionStartTime) >= _countdownDuration) exitWith {
             deleteMarker str(_markername2);
-            deleteMarker str(_markername);
-            [_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+            [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
             sleep 1;
             [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
             [] spawn fnc_missionTimer;

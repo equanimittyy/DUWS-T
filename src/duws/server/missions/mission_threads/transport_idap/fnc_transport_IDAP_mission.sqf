@@ -23,7 +23,6 @@ _Building = [];
 _Posfound = false;
 _targetpos = [];
 _failSafe = 0;
-_markerText = "IDAP";
 _markerText2 = localize "STR_DUWS_T_c15";
 
 _POSdata = [_MissionPos, _radius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
@@ -44,9 +43,7 @@ if (_failsafe > 10 && _Posfound == false) exitWith {
 
 _vehPos = _targetpos;
 
-_markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
-_markername = _markerData select 0;
-_markername2 = _markerData select 1;
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 // 生成卡车
 _truck1 = "C_IDAP_Truck_02_Transport_F" createVehicle (_vehpos);
@@ -190,8 +187,7 @@ sleep 5;
 // TASK AND NOTIFICATION
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
-[west, [_VARtaskgeneratedName],
-[localize "STR_DUWS_T_transIDAP", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate;
+[_VARtaskgeneratedName, localize "STR_DUWS_T_transIDAP", _mission_name, _randomPos, "truck"] call fnc_missionTaskCreate;
 
 // 设置任务目标位置（卡车位置）
 missionNamespace setVariable ["current_mission_target_pos", getPos _truck1];
@@ -217,7 +213,6 @@ waitUntil {
 
 // 删除任务区域标记
 deleteMarker str(_markername2);
-deleteMarker str(_markername);
 
 // 失败分支
 if (getdammage _truck1>0.95) exitWith {
@@ -225,7 +220,7 @@ if (getdammage _truck1>0.95) exitWith {
     call _cleanupDelivery;
     _truck1 setDamage 1;
     [{hint localize "STR_DUWS_T_jsg7ys0w"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     // Reputation is a civilian-system currency: skip its change when civilians are off. The
     // town is resolved from the delivery point, falling back to the global outside every radius.
     if (CIV_PRESENCE != "NONE") then {
@@ -242,7 +237,7 @@ if (getdammage _truck1>0.95) exitWith {
 deleteMarker _deliveryMarkerName;
 [_speakerIDAP, _message3] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 if (CIV_PRESENCE != "NONE") then {
     [[_targetpos] call fnc_civ_townAt, 5, "idap_success"] call fnc_town_rep_adjust;
     ["repup", [localize "STR_DUWS_T_rqwho9bq", localize "STR_DUWS_T_civ_rep_up"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];

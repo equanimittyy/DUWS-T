@@ -1,5 +1,5 @@
 // Locality: server -- inherited from server/missions/mission_threads/rescue_squad/fnc_rescue_squad_mission.sqf.
-params ["_markername","_markername2","_sol1","_sol2","_sol3","_MissionPos","_targetPos","_radius","_mission_name"];
+params ["_markername2","_sol1","_sol2","_sol3","_MissionPos","_targetPos","_radius","_mission_name"];
 
 
 _speaker = localize "STR_DUWS_T_Signal";
@@ -49,7 +49,6 @@ _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_
 
 // remove markers
 deleteMarker str(_markername2);
-deleteMarker str(_markername);
 
 // IF SOLDIERS DEAD
 if (!(alive _sol1) && !(alive _sol2) && !(alive _sol3)) exitWith {
@@ -59,14 +58,14 @@ if (!(alive _sol1) && !(alive _sol2) && !(alive _sol3)) exitWith {
     _message = ([localize "STR_DUWS_T_squadfail"] call fnc_cs);
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
-	[_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+	[_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
 
 	[] spawn fnc_missionTimer;
 
 	[_targetPos,_radius] spawn fnc_mission_cleanup;
 };
 
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 
 // Define globalChat source
 _solRadio = "";

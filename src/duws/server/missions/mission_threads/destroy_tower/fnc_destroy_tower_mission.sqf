@@ -26,7 +26,6 @@ _Building = [];
 _Posfound = false;
 _targetpos = [];
 _failSafe = 0;
-_markerText = "tower";
 _markerText2 = localize "STR_DUWS_T_c3";
 
 _POSdata = [_MissionPos, _radius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
@@ -47,9 +46,7 @@ if (_failsafe > 10 && _Posfound == false) exitWith {
 
 _towerPos = _targetpos;
 
-_markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
-_markername = _markerData select 0;
-_markername2 = _markerData select 1;
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 _centerSpawn = _towerPos;
 _centerSpawnX = _towerPos select 0;
@@ -222,8 +219,7 @@ sleep 12;
 ["", _message1] remoteExec ["fnc_duws_dialogue", 0];
 sleep 12;
 [_speaker, _message2] remoteExec ["fnc_duws_dialogue", 0];
-[west, [_VARtaskgeneratedName],
-[localize "STR_DUWS_T_dgpqenyw", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate;
+[_VARtaskgeneratedName, localize "STR_DUWS_T_dgpqenyw", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
 
 missionNamespace setVariable ["current_mission_target_pos", getPos _vehicle_7];
 ["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", 0];
@@ -252,12 +248,11 @@ waitUntil {
 
 if ((alive _vehicle_7 && (damage _vehicle_7) < 1) && (time - _missionStartTime) > _taskTimeout_tower) exitWith {
     [{hint localize "STR_DUWS_T_xhtbpyl1"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = ([localize "STR_DUWS_T_towerfail"] call fnc_cs);
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
     deleteMarker str(_markername2);
-    deleteMarker str(_markername);
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos,_radius, "mission_destroy_tower"] spawn fnc_mission_cleanup;
@@ -265,9 +260,8 @@ if ((alive _vehicle_7 && (damage _vehicle_7) < 1) && (time - _missionStartTime) 
 };
 
 deleteMarker str(_markername2);
-deleteMarker str(_markername);
 
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;

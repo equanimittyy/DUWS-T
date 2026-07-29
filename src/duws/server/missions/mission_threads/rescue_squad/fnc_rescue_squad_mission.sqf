@@ -8,7 +8,6 @@ private _initialCountVar = format ["opf_initial_%1", _varSuffix];
 private _triggeredVar = format ["opf_reinforce_%1", _varSuffix];
 // ====================================
 
-_markerText = "resc";
 _markerText2 = localize "STR_DUWS_T_c0";
 _radius = 300;
 _positions_needed = 5;
@@ -33,9 +32,7 @@ _Building = _usableBuildings select (floor (random (count _usableBuildings)));
 _BuildingPos = getPos _Building;
 _targetpos = _BuildingPos;
 
-_markerData = [_MissionPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
-_markername = _markerData select 0;
-_markername2 = _markerData select 1;
+_markername2 = [_MissionPos, _radius] call fnc_missionMarkerData;
 
 // Create soldiers  -- BEGIN
 _soldier1 = format ["s1%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
@@ -60,7 +57,7 @@ _rand = random 1;
 
 // function to execute on captive squad when players are near
 fnc_rescue_squad_uncaptive = {
-    params ["_markername","_markername2","_sol1","_sol2","_sol3","_MissionPos","_targetPos","_radius","_mission_name"];
+    params ["_markername2","_sol1","_sol2","_sol3","_MissionPos","_targetPos","_radius","_mission_name"];
     
     { _x setcaptive false; _x switchMove ""; } forEach [_sol1,_sol2,_sol3];
     [{hint localize "STR_DUWS_T_xdbfx123"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
@@ -74,21 +71,20 @@ _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_
 sleep 8;
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
-[west, [_VARtaskgeneratedName], 
-[localize "STR_DUWS_T_kievbwmd", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate; 
+[_VARtaskgeneratedName, localize "STR_DUWS_T_kievbwmd", _mission_name, _MissionPos, "help"] call fnc_missionTaskCreate; 
 
 // trigger to uncaptive squad when players are near
 _trg=createTrigger["EmptyDetector",_Building];
 _trg setTriggerArea[200,200,0,false, 20];
 _trg setTriggerActivation["WEST","PRESENT",false];
-_trg setTriggerStatements["this",format["[""%1"",""%2"",%3,%4,%5,%6,%7,%8,""%9""] spawn fnc_rescue_squad_uncaptive",_markername,_markername2,_soldier1,_soldier2,_soldier3,_MissionPos,_targetPos,_radius,_mission_name], ""];
+_trg setTriggerStatements["this",format["[""%1"",%2,%3,%4,%5,%6,%7,""%8""] spawn fnc_rescue_squad_uncaptive",_markername2,_soldier1,_soldier2,_soldier3,_MissionPos,_targetPos,_radius,_mission_name], ""];
 _trg setTriggerTimeout [10, 10, 10, true ]; 
 
 // CREATE TRIGGER ZONES
 _trg=createTrigger["EmptyDetector",_Building];
 _trg setTriggerArea[100,100,0,false, 20];
 _trg setTriggerActivation["WEST","PRESENT",false];
-_trg setTriggerStatements["this",format["[""%1"",""%2"",%3,%4,%5,%6,%7,%8,""%9""] spawn fnc_rescue_squad_success",_markername,_markername2,_soldier1,_soldier2,_soldier3,_MissionPos,_targetPos,_radius,_mission_name], ""];
+_trg setTriggerStatements["this",format["[""%1"",%2,%3,%4,%5,%6,%7,""%8""] spawn fnc_rescue_squad_success",_markername2,_soldier1,_soldier2,_soldier3,_MissionPos,_targetPos,_radius,_mission_name], ""];
 _trg setTriggerTimeout [10, 10, 10, true ];  
 
 sleep 10;

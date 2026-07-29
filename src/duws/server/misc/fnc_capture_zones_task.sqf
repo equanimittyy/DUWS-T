@@ -26,21 +26,28 @@ while {!(["ZONES", "mission_init_complete (zones built, civilians registered)",
 // this file looks the task up by this exact string, so a localized ID silently stops matching
 // the moment the server is not English and the campaign task never completes. The player-facing
 // name comes from the description array below, not from the ID.
+// Broadcast, not called: BIS_fnc_taskCreate does not synchronise itself, so a server-side call
+// leaves the campaign objective visible to a hosting player alone. The JIP key is suffixed
+// because the SUCCEEDED update below is filed under the bare id, and a same-key entry replaces
+// rather than joins.
 [west, ["Campaign"],
-    [localize "STR_DUWS_T_92465yls", localize "STR_DUWS_T_q5xntd8z", localize "STR_DUWS_T_q5xntd8z"], objNull, true] call BIS_fnc_taskCreate;
+    [localize "STR_DUWS_T_92465yls", localize "STR_DUWS_T_q5xntd8z", localize "STR_DUWS_T_q5xntd8z"], objNull, true]
+    remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, "Campaign_new"];
 sleep 2;
 // 如果是丧尸模式且尚未创建额外任务，则创建
 if (CIV_PRESENCE == "RAVAGE" && !ZombieTaskCreated) then {
     // ===== 丧尸模式额外任务（请在此处填写具体内容）=====
     [west, ["ZombieTask"],
-        [localize "STR_DUWS_T_zhxdjj", localize "STR_DUWS_T_zhxd", localize "STR_DUWS_T_zhxd"], objNull, true] call BIS_fnc_taskCreate;
+        [localize "STR_DUWS_T_zhxdjj", localize "STR_DUWS_T_zhxd", localize "STR_DUWS_T_zhxd"], objNull, true]
+        remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, "ZombieTask_new"];
     // =================================================
     ZombieTaskCreated = true;
 };
 // 如果是 WBK 模式且尚未创建额外任务，则创建
 if (CIV_PRESENCE == "WBK" && !ZombieTaskCreated) then {
     [west, ["WBKTask"],
-        [localize "STR_DUWS_T_WBK_TASK_DESC", localize "STR_DUWS_T_zhxd", localize "STR_DUWS_T_zhxd"], objNull, true] call BIS_fnc_taskCreate;
+        [localize "STR_DUWS_T_WBK_TASK_DESC", localize "STR_DUWS_T_zhxd", localize "STR_DUWS_T_zhxd"], objNull, true]
+        remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, "WBKTask_new"];
     ZombieTaskCreated = true;
 };
 
@@ -69,7 +76,7 @@ private _body = [localize "STR_DUWS_T_CAMPAIGN_LOST", localize "STR_DUWS_T_CAMPA
 ["info", [_title, _body]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 [format ["%1 %2", _title, _body], {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
-["Campaign", ["FAILED", "SUCCEEDED"] select _won] remoteExec ["BIS_fnc_taskSetState", 0];
+["Campaign", ["FAILED", "SUCCEEDED"] select _won] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, "Campaign"];
 sleep 10;
 // Two-argument form: the one-argument call defaults victory to true, which would end a
 // flattened Altis on the winning card.

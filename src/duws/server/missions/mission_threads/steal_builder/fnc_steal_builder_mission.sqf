@@ -27,7 +27,6 @@ _Building = [];
 _Posfound = false;
 _targetpos = [];
 _failSafe = 0;
-_markerText = "recov";
 _markerText2 = localize "STR_DUWS_T_c6";
 
 _POSdata = [_MissionPos, _radius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
@@ -48,9 +47,7 @@ if (_failsafe > 10 && _Posfound == false) exitWith {
 
 _vehpos = _targetpos;
 
-_markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
-_markername = _markerData select 0;
-_markername2 = _markerData select 1;
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 // CREATE Mobile builder vehicle
 // The objective itself: kept for the mission's duration so the abandoned-vehicle clause
@@ -198,8 +195,7 @@ sleep 1;
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 
-[west, [_VARtaskgeneratedName],
-[localize "STR_DUWS_T_czpvn5z1", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate;
+[_VARtaskgeneratedName, localize "STR_DUWS_T_czpvn5z1", _mission_name, _randomPos, "getin"] call fnc_missionTaskCreate;
 
 // 设置任务目标位置
 missionNamespace setVariable ["current_mission_target_pos", getPos _bld1];
@@ -220,18 +216,17 @@ missionNamespace setVariable [_triggeredVar, false, true];
 waitUntil {sleep 2; ((getdammage BLD1)>0.95 || (BLD1 distance PosOfBLUHQ)<50)};
 
 deleteMarker str(_markername2);
-deleteMarker str(_markername);
 
 if (getdammage BLD1>0.95) exitWith {
     [{hint localize "STR_DUWS_T_obc4591x"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos,_radius, "mission_steal_builder"] spawn fnc_mission_cleanup;
     missionNamespace setVariable ["current_mission_target_pos", nil];
 };
 
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 [[{hint localize "STR_DUWS_T_125f39s4"}],"BIS_fnc_Spawn",true] call BIS_fnc_MP;
 sleep 2;
 

@@ -425,7 +425,6 @@ _Building = [];
 _Posfound = false;
 _targetpos = [];
 _failSafe = 0;
-_markerText = "pilot";
 _markerText2 = localize "STR_DUWS_T_c4";
 
 _POSdata = [_MissionPos, _radius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
@@ -446,9 +445,7 @@ if (_failsafe > 10 && _Posfound == false) exitWith {
 
 _vehPos = _targetpos;
 
-_markerData = [_randomPos, _markerText, _markerText2, _radius] call fnc_missionMarkerData;
-_markername = _markerData select 0;
-_markername2 = _markerData select 1;
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 _spawnPos = _targetpos;
 _vec =[random [-1,0,1], random [-1,0,1], 0];
@@ -492,8 +489,7 @@ private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
-[west, [_VARtaskgeneratedName], 
-[localize "STR_DUWS_T_njsu8ofz", _mission_name, "(getMarkerPos str(_markername))"], objNull, true] call BIS_fnc_taskCreate; 
+[_VARtaskgeneratedName, localize "STR_DUWS_T_njsu8ofz", _mission_name, _randomPos, "help"] call fnc_missionTaskCreate; 
 
 pilot_west_close = false;
 _trg=createTrigger["EmptyDetector",_choppa];
@@ -530,10 +526,9 @@ if (!pilot_west_close && (time - _missionStartTime) > _taskTimeout_approach) exi
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
     deleteMarker str(_markername2);
-    deleteMarker str(_markername);
     _pilot setDamage 1;
     [{hint localize "STR_DUWS_T_fxysw123"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
@@ -543,9 +538,8 @@ if (!(alive _pilot)) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
     deleteMarker str(_markername2);
-    deleteMarker str(_markername);
     [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;   
@@ -571,23 +565,21 @@ if (!(alive _pilot)) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
     deleteMarker str(_markername2);
-    deleteMarker str(_markername);
     [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    [_VARtaskgeneratedName, "FAILED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [] spawn fnc_missionTimer;
     missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
 };
 
 deleteMarker str(_markername2);
-deleteMarker str(_markername);
 
 if (!isNull attachedTo _pilot) then {
     detach _pilot;
     CLEANUP_PILOT(_pilot);
 };
 
-[_VARtaskgeneratedName, "SUCCEEDED"] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated,_VARtaskgeneratedName];
+[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 sleep 1;
 
 [_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0];
