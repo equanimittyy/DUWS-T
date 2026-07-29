@@ -170,7 +170,7 @@ if !(("OPTRE" in BLUFOR_FactionFile_X)
 // Put an intel action on target
 if (hardcore_mode_enable) then {
     _code = {[getPos player, player] remoteExec ["fnc_intel_payout", 2]};
-    [_target, "Search for Intel", "search", _code] spawn fnc_actionRotary;
+    [_target, localize "STR_DUWS_T_7yec9ifj", _code] spawn fnc_actionRotary;
 };
 
 _wp = _group addWaypoint [_vehpos, 0];

@@ -5,21 +5,9 @@
 
 // Add Rotary Action to object
 
-params ["_object", "_display", "_iconType", "_code"];
+params ["_object", "_display", "_code"];
 
-_icon = "";
-
-switch (_iconType) do {
-	case "connect": {
-		_icon = "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_connect_ca.paa";
-	};
-	case "search": {
-		_icon = "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_search_ca.paa"
-	};
-	case "talk": {
-		_icon = "\a3\missions_f_oldman\data\img\holdactions\holdAction_talk_ca.paa"
-	};
-};
+private _icon = "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_search_ca.paa";
 
 [
 	_object,										// Object the action is attached to

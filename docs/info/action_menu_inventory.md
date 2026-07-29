@@ -173,19 +173,16 @@ signal the player already has.
 | Search Body | `STR_DUWS_T_SEARCH_CORPSE_ACTION` | `holdAction_search_ca.paa` |
 | Search Container | `STR_DUWS_T_SEARCH_CONTAINER` | `holdAction_search_ca.paa` |
 | Search Intel | `STR_DUWS_T_7yec9ifj` | `holdAction_search_ca.paa` |
-| Search for Intel | none — an English literal | `holdAction_search_ca.paa` |
 
 `STR_DUWS_T_SEARCH_CORPSE_ACTION` exists separately from `STR_DUWS_T_SEARCH_CORPSE`, which titles
 the "bodies may carry intel" notification in nine side missions. They were one key; the action
 needed a label and the notification needed a sentence.
 
-The last row is the same `fnc_actionRotary` entry as Search Intel, but `clearthearea_cqb`,
-`target_armor` and `target_sniper` pass its title as a hardcoded English string where the sabotage
-laptop passes `STR_DUWS_T_7yec9ifj`. Three call sites reach no translation at all.
-
-`fnc_actionRotary` switches on three icon names, but every DUWS caller asks for `search`: the
-`connect` and `talk` branches are unreached. The talk icon is also the one not from
-`\a3\ui_f\data\IGUI\Cfg\holdactions\`.
+Search Intel is one entry across four mission threads — the sabotage laptop, and the intel carrier
+in `clearthearea_cqb`, `target_armor` and `target_sniper` — all raised through `fnc_actionRotary`
+behind `hardcore_mode_enable`. The helper hardcodes its icon rather than taking one as an argument:
+the icon is the entry's only identification, and a name it did not recognise drew a hold action
+with no icon and raised no error.
 
 ## Call-site conventions
 
