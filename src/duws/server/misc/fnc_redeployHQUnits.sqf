@@ -57,7 +57,7 @@ if (!isNull _mgAnchor) then {
         (getPosWorld _mgAnchor select 2) + 1.21321
     ];
     private _obj = createVehicle ["I_HMG_02_high_F", _worldPos, [], 0, "CAN_COLLIDE"];
-    _obj enableSimulation false;
+    _obj enableSimulationGlobal false;
     _obj setPosWorld _worldPos;
     _obj setDir ([_worldPos, getPosWorld _mgAnchor] call BIS_fnc_dirTo);
     _newWeaponList pushBack _obj;
@@ -73,7 +73,7 @@ if (!isNull _mgAnchor) then {
         (getPosWorld _hqObj select 2) + _hOffset
     ];
     private _obj = createVehicle [_class, _worldPos, [], 0, "CAN_COLLIDE"];
-    _obj enableSimulation false;
+    _obj enableSimulationGlobal false;
     _obj setPosWorld _worldPos;
     _obj setDir (getDir _hqObj);
     _newWeaponList pushBack _obj;
@@ -87,7 +87,7 @@ if (count _newWeaponList > 0) then {
     private _group = [_spawnPos, WEST, _unitTypes, [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
     _group deleteGroupWhenEmpty true;
     { (units _group select _forEachIndex) moveInGunner _x; } forEach _newWeaponList;
-    { _x enableSimulation true; } forEach _newWeaponList;
+    { _x enableSimulationGlobal true; } forEach _newWeaponList;
     missionNamespace setVariable ["HQ_redeploy_weaponGroup", _group, true];
     missionNamespace setVariable ["HQ_redeploy_weaponList", _newWeaponList, true];
 };
@@ -108,7 +108,7 @@ private _hqGuardsGroups = [];
     private _grp = [_worldPos, WEST, [_type], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
     private _unit = (units _grp) select 0;
     _unit allowDamage true;
-    _unit enableSimulation false;
+    _unit enableSimulationGlobal false;
     _unit setPosWorld _worldPos;
     _unit setUnitPos "UP";
     _unit disableAI "PATH";
@@ -118,7 +118,7 @@ private _hqGuardsGroups = [];
     [_unit] spawn {
         params ["_u"];
         sleep 0.5;
-        if (!isNull _u && alive _u) then { _u enableSimulation true; };
+        if (!isNull _u && alive _u) then { _u enableSimulationGlobal true; };
     };
 } forEach _hqGuardsData;
 missionNamespace setVariable ["HQ_redeploy_hqGuardsGroup0", _hqGuardsGroups select 0, true];
@@ -140,7 +140,7 @@ private _medGuardsGroups = [];
     private _grp = [_worldPos, WEST, [_type], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
     private _unit = (units _grp) select 0;
     _unit allowDamage true;
-    _unit enableSimulation false;
+    _unit enableSimulationGlobal false;
     _unit setPosWorld _worldPos;
     _unit setUnitPos "UP";
     _unit disableAI "PATH";
@@ -150,7 +150,7 @@ private _medGuardsGroups = [];
     [_unit] spawn {
         params ["_u"];
         sleep 0.5;
-        if (!isNull _u && alive _u) then { _u enableSimulation true; };
+        if (!isNull _u && alive _u) then { _u enableSimulationGlobal true; };
     };
 } forEach _medGuardsData;
 missionNamespace setVariable ["HQ_redeploy_medGuardsGroup0", _medGuardsGroups select 0, true];
@@ -175,7 +175,7 @@ if (!isNull _guardBoxObj) then {
     private _grp = [_bestPos, WEST, [_type], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
     private _unit = (units _grp) select 0;
     _unit allowDamage true;
-    _unit enableSimulation false;
+    _unit enableSimulationGlobal false;
     _unit setPosWorld _bestPos;
     _unit setUnitPos "UP";
     _unit disableAI "PATH";
@@ -184,7 +184,7 @@ if (!isNull _guardBoxObj) then {
     [_unit] spawn {
         params ["_u"];
         sleep 0.5;
-        if (!isNull _u && alive _u) then { _u enableSimulation true; };
+        if (!isNull _u && alive _u) then { _u enableSimulationGlobal true; };
     };
     missionNamespace setVariable ["HQ_redeploy_guardBoxGroup", _grp, true];
 };
@@ -204,7 +204,7 @@ private _newTowerGuards = [];
     private _grp = [_worldPos, WEST, [blufor_SOLDIER_X], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
     private _unit = (units _grp) select 0;
     _unit allowDamage true;
-    _unit enableSimulation false;
+    _unit enableSimulationGlobal false;
     _unit setPosWorld _worldPos;
     _unit setUnitPos "UP";
     _unit disableAI "PATH";
@@ -214,7 +214,7 @@ private _newTowerGuards = [];
     [_unit] spawn {
         params ["_u"];
         sleep 2.5;
-        if (!isNull _u && alive _u) then { _u enableSimulation true; };
+        if (!isNull _u && alive _u) then { _u enableSimulationGlobal true; };
     };
 } forEach _allTowersList;
 missionNamespace setVariable ["HQ_redeploy_towerGuards", _newTowerGuards, true];
@@ -227,7 +227,7 @@ if (count _patrolSpawnPos > 0 && count _patrolUnits > 0) then {
     _patrolGroup deleteGroupWhenEmpty true;
     {
         _x allowDamage false;
-        _x enableSimulation false;
+        _x enableSimulationGlobal false;
         _x setPosWorld _patrolSpawnPos;
     } forEach (units _patrolGroup);
     while {count (waypoints _patrolGroup) > 0} do { deleteWaypoint ((waypoints _patrolGroup) select 0); };
@@ -251,7 +251,7 @@ if (count _patrolSpawnPos > 0 && count _patrolUnits > 0) then {
         sleep 1.5;
         {
             if (!isNull _x && alive _x) then {
-                _x enableSimulation true;
+                _x enableSimulationGlobal true;
                 _x allowDamage true;
             };
         } forEach (units _grp);

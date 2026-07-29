@@ -337,7 +337,7 @@ private _towerGuards = [];
     private _grp = [_worldPos, WEST, [blufor_SOLDIER_X], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
     private _unit = (units _grp) select 0;
     _unit allowDamage true;
-    _unit enableSimulation false;
+    _unit enableSimulationGlobal false;
     _unit setPosWorld _worldPos;
     _unit setUnitPos "UP";
     _unit disableAI "PATH";
@@ -347,7 +347,7 @@ private _towerGuards = [];
     [_unit] spawn {
         params ["_u"];
         sleep 2.5;
-        if (!isNull _u && alive _u) then { _u enableSimulation true; };
+        if (!isNull _u && alive _u) then { _u enableSimulationGlobal true; };
     };
 } forEach _allTowersList;
 missionNamespace setVariable ["HQ_redeploy_towerGuards", _towerGuards, true];
@@ -419,7 +419,7 @@ private _newHQGuardsGroups = [];
     private _grp = [_worldPos, WEST, [_type], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
     private _unit = (units _grp) select 0;
     _unit allowDamage true;
-    _unit enableSimulation false;
+    _unit enableSimulationGlobal false;
     _unit setPosWorld _worldPos;
     _unit setUnitPos "UP";
     _unit disableAI "PATH";
@@ -429,7 +429,7 @@ private _newHQGuardsGroups = [];
     [_unit] spawn {
         params ["_u"];
         sleep 0.5;
-        if (!isNull _u && alive _u) then { _u enableSimulation true; };
+        if (!isNull _u && alive _u) then { _u enableSimulationGlobal true; };
     };
 } forEach _hqGuardsData;
 missionNamespace setVariable ["HQ_redeploy_hqGuardsGroup0", _newHQGuardsGroups select 0, true];
@@ -454,7 +454,7 @@ private _newMedGuardsGroups = [];
     private _grp = [_worldPos, WEST, [_type], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
     private _unit = (units _grp) select 0;
     _unit allowDamage true;
-    _unit enableSimulation false;
+    _unit enableSimulationGlobal false;
     _unit setPosWorld _worldPos;
     _unit setUnitPos "UP";
     _unit disableAI "PATH";
@@ -464,7 +464,7 @@ private _newMedGuardsGroups = [];
     [_unit] spawn {
         params ["_u"];
         sleep 0.5;
-        if (!isNull _u && alive _u) then { _u enableSimulation true; };
+        if (!isNull _u && alive _u) then { _u enableSimulationGlobal true; };
     };
 } forEach _medGuardsData;
 missionNamespace setVariable ["HQ_redeploy_medGuardsGroup0", _newMedGuardsGroups select 0, true];
@@ -489,7 +489,7 @@ if (!isNull _guardBoxObj) then {
     private _grp = [_bestPos, WEST, [_type], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
     private _unit = (units _grp) select 0;
     _unit allowDamage true;
-    _unit enableSimulation false;
+    _unit enableSimulationGlobal false;
     _unit setPosWorld _bestPos;
     _unit setUnitPos "UP";
     _unit disableAI "PATH";
@@ -498,7 +498,7 @@ if (!isNull _guardBoxObj) then {
     [_unit] spawn {
         params ["_u"];
         sleep 0.5;
-        if (!isNull _u && alive _u) then { _u enableSimulation true; };
+        if (!isNull _u && alive _u) then { _u enableSimulationGlobal true; };
     };
     missionNamespace setVariable ["HQ_redeploy_guardBoxGroup", _grp, true];
 };
@@ -513,7 +513,9 @@ private _worldPos = [
 private _offGrp = [_worldPos, WEST, [blufor_OFFICER_X], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
 private _officer = (units _offGrp) select 0;
 _officer allowDamage true;
-_officer enableSimulation false;
+// Global: the local form freezes the officer on the server alone, so every client keeps
+// simulating a unit hard-placed at an absolute Z and renders it falling.
+_officer enableSimulationGlobal false;
 _officer setPosWorld _worldPos;
 _officer setDir 180;  // 面朝外，如需调整修改此角度
 _officer setBehaviour "CARELESS";
@@ -525,7 +527,6 @@ _officer setVariable ["NOAI", 1, false];
 _officer setVariable ["Vcm_Disable", true];
 _officer setVariable ["lambs_danger_disableAI", true];
 removeBackpackGlobal _officer;
-_officer switchMove "acts_StandingSpeakingUnarmed";
 // An "Acts_" ambient animation holds through death: the corpse keeps the standing pose and
 // never ragdolls, so hits read as having no effect and the officer looks invulnerable. The
 // tower guards escape this because BIS_fnc_ambientAnimCombat breaks its own animation; a raw
@@ -533,6 +534,10 @@ _officer switchMove "acts_StandingSpeakingUnarmed";
 _officer addEventHandler ["Killed", {
     params ["_unit"];
     [_unit, ""] remoteExec ["switchMove", 0];
+    // The queued pose goes with it. Left in the queue, a player joining after the officer dies
+    // is handed the standing animation for a corpse -- the state clearing the move exists to
+    // prevent, arriving by the other route.
+    remoteExec ["", format ["hq_pose_%1", netId _unit]];
 }];
 hq_blu1 = _officer; publicVariable "hq_blu1";
 blu_officer_object = _officer; publicVariable "blu_officer_object";
@@ -545,7 +550,12 @@ blu_officer_object = _officer; publicVariable "blu_officer_object";
 [_officer] spawn {
     params ["_u"];
     sleep 0.5;
-    if (!isNull _u && alive _u) then { _u enableSimulation true; };
+    if (isNull _u || {!alive _u}) exitWith {};
+    _u enableSimulationGlobal true;
+    // switchMove is local, so posing from the server dressed the officer on the host and nowhere
+    // else. Applied after simulation is back -- a frozen unit does not take the animation -- and
+    // keyed so a joiner is posed too rather than meeting a man standing to attention.
+    [_u, "acts_StandingSpeakingUnarmed"] remoteExec ["switchMove", 0, format ["hq_pose_%1", netId _u]];
 };
 
 // 路障旁工兵：基于 RoadBarrier 模型XY + 世界Z偏移放置，特定装备
@@ -563,7 +573,7 @@ if (!isNull _barrier) then {
     private _unit = (units _grp) select 0;
     private _dirToTent = [_worldPos, getPosWorld _medTent] call BIS_fnc_dirTo;
     _unit allowDamage true;
-    _unit enableSimulation false;
+    _unit enableSimulationGlobal false;
     _unit setPosWorld _worldPos;
     _unit setUnitPos "UP";
     _unit disableAI "MOVE";
@@ -583,15 +593,18 @@ if (!isNull _barrier) then {
         sleep 0.5;
         _u addHeadgear "H_Construction_headset_orange_F";
         _u addGoggles "G_EyeProtectors_F";
-        if (!isNull _u && alive _u) then {
-            _u enableSimulation true;
-        };
+        if (isNull _u || {!alive _u}) exitWith {};
+        _u enableSimulationGlobal true;
+        // Broadcast and keyed, same as the officer: a local switchMove posed him for the host
+        // alone, and it has to wait for simulation to come back before it takes.
+        [_u, "Acts_PointingLeftUnarmed"] remoteExec ["switchMove", 0, format ["hq_pose_%1", netId _u]];
     };
-    _unit switchMove "Acts_PointingLeftUnarmed";
     // Clears the pose on death; the Acts_ animation otherwise holds and the corpse stands.
+    // The queued pose is dropped with it, or a joiner re-poses the corpse.
     _unit addEventHandler ["Killed", {
         params ["_u"];
         [_u, ""] remoteExec ["switchMove", 0];
+        remoteExec ["", format ["hq_pose_%1", netId _u]];
     }];
 };
 
@@ -614,7 +627,7 @@ _patrolGroup deleteGroupWhenEmpty true;
 // 立即禁用伤害和模拟，防止坠落死亡
 {
     _x allowDamage false;
-    _x enableSimulation false;
+    _x enableSimulationGlobal false;
     _x setPosWorld _patrolSpawn;
 } forEach (units _patrolGroup);
 
@@ -646,7 +659,7 @@ _wpCycle setWaypointBehaviour "SAFE";
     sleep 1.5;
     {
         if (!isNull _x && alive _x) then {
-            _x enableSimulation true;
+            _x enableSimulationGlobal true;
             _x allowDamage true;
         };
     } forEach (units _grp);

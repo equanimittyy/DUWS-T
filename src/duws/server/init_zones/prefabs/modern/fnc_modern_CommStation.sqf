@@ -108,7 +108,7 @@ private _tiltTypes = [
     _obj setDir _dir;
 
     // 禁用模拟（所有静态物体）
-    _obj enableSimulation false;
+    _obj enableSimulationGlobal false;
 
     // 易碎物品无敌
     if (_class in ["Land_WaterTank_F","Land_PaperBox_closed_F","Land_ToiletBox_F","Land_GarbageBarrel_01_F"]) then {
@@ -130,7 +130,7 @@ private _weaponList = [];
 
     private _obj = createVehicle [_class, [_newX, _newY, _newZ], [], 0, "CAN_COLLIDE"];
     [_obj, _zoneKey] call fnc_duws_keep;
-    _obj enableSimulation false;
+    _obj enableSimulationGlobal false;
     _obj setPosWorld [_newX, _newY, _newZ];
     _obj setDir (_centerSpawn getDir [_newX, _newY]);
     _obj setPosWorld [_newX, _newY, _newZ];
@@ -157,6 +157,6 @@ if (count _allWeapons > 0) then {
     { (units _guardGroup select _idx) moveInGunner _x; _idx = _idx + 1; } forEach _mortarList;
     { (units _guardGroup select _idx) moveInGunner _x; _idx = _idx + 1; } forEach _aaList;
 
-    { if (!isNull _x) then { _x enableSimulation true; }; } forEach _allWeapons;
+    { if (!isNull _x) then { _x enableSimulationGlobal true; }; } forEach _allWeapons;
     [_guardGroup, _centerSpawn] call bis_fnc_taskDefend;
 };

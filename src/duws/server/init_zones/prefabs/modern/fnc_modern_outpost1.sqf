@@ -102,7 +102,7 @@ private _tiltTypes = [
 
     // 哨塔保留模拟，其余静态物体禁用模拟
     if (_class != "Land_Cargo_Patrol_V1_F") then {
-        _obj enableSimulation false;
+        _obj enableSimulationGlobal false;
     };
     // 部分易碎物品无敌
     if (_class in ["Land_WaterTank_F","Land_WaterBarrel_F","Land_MetalBarrel_F","Land_Pallets_F","Land_ToiletBox_F","Land_Cargo20_military_green_F"]) then {
@@ -124,7 +124,7 @@ private _weaponList = [];
 
     private _obj = createVehicle [_class, [_newX, _newY, _newZ], [], 0, "CAN_COLLIDE"];
     [_obj, _zoneKey] call fnc_duws_keep;
-    _obj enableSimulation false;
+    _obj enableSimulationGlobal false;
     _obj setPosWorld [_newX, _newY, _newZ];
     // 枪口方向：从中心指向武器位置
     _obj setDir (_centerSpawn getDir [_newX, _newY]);
@@ -153,7 +153,7 @@ if (count _allWeapons > 0) then {
     { (units _guardGroup select _idx) moveInGunner _x; _idx = _idx + 1; } forEach _aaList;
 
     // 炮手上缴后统一激活模拟
-    { if (!isNull _x) then { _x enableSimulation true; }; } forEach _allWeapons;
+    { if (!isNull _x) then { _x enableSimulationGlobal true; }; } forEach _allWeapons;
     [_guardGroup, _centerSpawn] call bis_fnc_taskDefend;
 };
 
