@@ -1520,6 +1520,11 @@
                 <English>Run cancelled. No rewards granted.</English>
                 <Chinese>训练已取消，不获得奖励。</Chinese>
             </Key>
+            <Key ID="STR_DUWS_KILLHOUSE_FAILED">
+                <Original>Challenge failed: a player went down in the course. No CP awarded.</Original>
+                <English>Challenge failed: a player went down in the course. No CP awarded.</English>
+                <Chinese>挑战失败：有玩家在场地内阵亡，不获得CP。</Chinese>
+            </Key>
             <Key ID="STR_DUWS_KILLHOUSE_START_TRAINING">
                 <Original>Start Killhouse Drill</Original>
                 <English>Start Killhouse Drill</English>

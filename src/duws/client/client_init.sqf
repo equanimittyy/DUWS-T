@@ -198,6 +198,9 @@ PlayerKilledEH = player addEventHandler ["killed", {
     if (!_inKillhouse) then {
         [-DUWSMP_CP_death_cost, "death_penalty"] remoteExec ["fnc_cp_adjust", 2];
     };
+    // Reported unfiltered: a challenge run fails on a death inside the course, and the server
+    // owns that test against its own area radius rather than the wider one used just above.
+    [_this select 0, getPosWorld (_this select 0)] remoteExec ["killhouse_srv_player_died", 2];
     [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_playerdown"] remoteExec ["fnc_duws_dialogue", 0];
 }];
 

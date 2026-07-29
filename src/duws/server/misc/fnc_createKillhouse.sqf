@@ -852,6 +852,7 @@ missionNamespace setVariable ["killhouse_targetData", _targetsData];
 missionNamespace setVariable ["killhouse_run_active", false];
 // ========== 第一步：生成普通物体 ==========
 private _computerObjects = [];
+private _bellObjects = [];
 {
     _x params ["_class", "_dX", "_dY", "_dZ", "_yaw", "_atlOffset", "_isTarget"];
     private _newX = _centerSpawnX + _dX;
@@ -868,7 +869,12 @@ private _computerObjects = [];
     if (_class == "Land_MultiScreenComputer_01_olive_F") then {
         _computerObjects pushBack _obj;
     };
+    if (_class == "Land_MysteriousBell_01_F") then {
+        _bellObjects pushBack _obj;
+    };
 } forEach _objectsData;
+// One bell per entrance gate, and the run functions run in scopes these locals never reach.
+missionNamespace setVariable ["killhouse_bells", _bellObjects];
 
 ["INFO", "SUPPORT", format ["spawned %1 props, %2 targets pending, %3 computers", count _objectsData, count _targetsData, count _computerObjects]] call fnc_log;
 // ========== 计算传送点 A/B 并广播 ==========
@@ -923,14 +929,14 @@ publicVariable "killhouse_srv_target_hit";
 
 // Run shape. Globals rather than file-scope privates: the killhouse_srv_* bodies run later,
 // from remoteExec, where a private declared here is long out of scope.
-killhouse_run_total              = 25;
+killhouse_run_total              = 30;
 killhouse_wave_size              = 10;
 killhouse_wave_threshold         = 3;   // next wave once this many or fewer are alive
 killhouse_wave_timeout           = 30;  // ...or this long after the last wave, but only while
 killhouse_wave_timeout_threshold = 10;  // at or below this, so a stalled run cannot stack
                                         // wave on wave onto a course nobody is clearing
 killhouse_reward_training        = 1;
-killhouse_reward_challenge       = 2;
+killhouse_reward_challenge       = 3;
 killhouse_progress_delay         = 10;  // before the first progress hint, so the opening
                                         // briefing is readable before the counter overwrites it
 killhouse_progress_period        = 1;   // between progress hints after that; cannot resolve
@@ -971,6 +977,15 @@ killhouse_srv_hint = {
     [_msg] remoteExec ["hint", _who];
 };
 
+// Rung to open a run and again when one ends, whether it was finished or failed. Both bells ring
+// rather than the nearer one: they are ~60 m apart at opposite entrances, so 3D falloff already
+// decides who hears what, and picking a bell would mean picking a player to pick it from.
+// say3D carries to every client by itself, so this needs no remoteExec.
+killhouse_srv_bell = {
+    if (!isServer) exitWith {};
+    { _x say3D "killhouse_bell"; } forEach (missionNamespace getVariable ["killhouse_bells", []]);
+};
+
 // Three call sites need exactly this, and a half-cleared killhouse leaks objects at 1000 m
 // where nobody will ever see them to notice.
 killhouse_srv_clear_all = {
@@ -993,6 +1008,35 @@ killhouse_srv_end_run = {
         [localize "STR_DUWS_KILLHOUSE_TRAINING_CANCELLED"] call killhouse_srv_hint;
     };
 };
+
+// One death inside the course ends a challenge run with nothing paid: the drill is meant to cost
+// the player for a bad move, and letting them respawn and walk back in to finish would remove
+// that. Training is untouched -- it is a shooting drill against props, not a test.
+//
+// The client reports every player death and the server decides, rather than the client filtering
+// first: killhouse_area_radius is the mission's one definition of "inside the killhouse", and the
+// client's own death handler measures a much wider radius for a different purpose (waiving the CP
+// death penalty). Two radii answering one question is how they drift apart.
+killhouse_srv_player_died = {
+    if (!isServer) exitWith {};
+    params ["_unit", "_deathPos"];
+    if !(missionNamespace getVariable ["killhouse_run_active", false]) exitWith {};
+    if !((missionNamespace getVariable ["killhouse_run_mode", ""]) isEqualTo "CHALLENGE") exitWith {};
+    private _centre = [
+        missionNamespace getVariable ["killhouse_centerX", 0],
+        missionNamespace getVariable ["killhouse_centerY", 0],
+        missionNamespace getVariable ["killhouse_centerZ", 0]
+    ];
+    if (_deathPos distance _centre > killhouse_area_radius) exitWith {};
+
+    [false] call killhouse_srv_end_run;   // silent: the failure below replaces the cancel message
+    call killhouse_srv_clear_all;
+    call killhouse_srv_bell;
+    // Occupants plus the unit that just died, so the message does not depend on whether a dead
+    // player is still returned by allPlayers -- on a solo run that is the only recipient there is.
+    [localize "STR_DUWS_KILLHOUSE_FAILED"] remoteExec ["hint", ((call killhouse_srv_occupants) - [_unit]) + [_unit]];
+};
+publicVariable "killhouse_srv_player_died";
 
 // Picks up to _want rows for the next wave and removes them from _pool. Returns the rows.
 //
@@ -1151,6 +1195,9 @@ killhouse_srv_start_run = {
     private _runId = (missionNamespace getVariable ["killhouse_run_id", 0]) + 1;
     missionNamespace setVariable ["killhouse_run_id", _runId];
     missionNamespace setVariable ["killhouse_run_active", true];
+    // Read by killhouse_srv_player_died: only a challenge run is failed by a death.
+    missionNamespace setVariable ["killhouse_run_mode", _mode];
+    call killhouse_srv_bell;
 
     [_mode, _slots, _total, _runId] spawn {
         params ["_mode", "_slots", "_total", "_runId"];
@@ -1216,6 +1263,7 @@ killhouse_srv_start_run = {
             missionNamespace setVariable ["killhouse_run_active", false];
             private _reward = [killhouse_reward_challenge, killhouse_reward_training] select (_mode == "TRAINING");
             [_reward, "killhouse_score"] call fnc_cp_adjust;
+            call killhouse_srv_bell;
             [format [localize "STR_DUWS_KILLHOUSE_RESULT", _total, _reward]] call killhouse_srv_hint;
         };
     };
