@@ -192,7 +192,9 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
         // A VALID POS HAS BEEN FOUND add the position to the array of missionPos
         _kibot_pos_array_missionPos = _kibot_pos_array_missionPos + [_foundSafePos];
 		
-		if (_counter == (count _missionCount)-1) then {failsafe_not_found = false;};
+		// Clears against the draw, not the pool: the loop stops at _missionDraw, so comparing
+		// with the full pool size leaves the failsafe armed and aborts every request.
+		if (_counter == _missionDraw-1) then {failsafe_not_found = false;};
 		_currentMission = _missionShuffle select _counter;
 
 		// Add each mission type to stratmap array
