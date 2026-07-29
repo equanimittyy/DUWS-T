@@ -852,8 +852,6 @@ missionNamespace setVariable ["killhouse_targetData", _targetsData];
 missionNamespace setVariable ["killhouse_run_active", false];
 // ========== 第一步：生成普通物体 ==========
 private _computerObjects = [];
-// Ten NATO boxes share the ammo room; only the virtual-arsenal pair takes interactions.
-private _arsenalObjects = [];
 {
     _x params ["_class", "_dX", "_dY", "_dZ", "_yaw", "_atlOffset", "_isTarget"];
     private _newX = _centerSpawnX + _dX;
@@ -869,9 +867,6 @@ private _arsenalObjects = [];
     // 保存电脑对象引用
     if (_class == "Land_MultiScreenComputer_01_olive_F") then {
         _computerObjects pushBack _obj;
-    };
-    if (_class == "VirtualReammoBox_small_F") then {
-        _arsenalObjects pushBack _obj;
     };
 } forEach _objectsData;
 
@@ -1274,17 +1269,16 @@ if (count _computerObjects > 0) then {
             "",
             "true"
         ]] remoteExec ["addAction", [0,-2] select isDedicated, _x];
+
+        // Gear hangs off the terminal rather than the arsenal crates mid-course: both teleport
+        // points land at a terminal, and a player made to walk the course to re-kit will not.
+        // Suffixed JIP ids because an object-keyed message *is* that object's netId -- a second
+        // entry on the same terminal would evict the first, and these props are never deleted.
+        [_x, [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 80, false, false, "",
+            "_this distance _target < 8 && support_armory_available"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["killhouse_arsenal_%1", netId _x]];
+        [_x, [ACT_EQUIP("STR_DUWS_T_QUICK_KITS"), { [] call fnc_quick_kits_menu; }, [], 80, false, false, "",
+            "_this distance _target < 8"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["killhouse_kits_%1", netId _x]];
     } forEach _computerObjects;
 };
-
-// Gear sits on the crates rather than inside the terminal menu, so the killhouse reads the
-// same as every other arsenal point in the mission. Broadcast like the terminal above: the
-// composition spawns server-side, but the entries have to exist on each client.
-{
-    [_x, [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 80, false, false, "",
-        "_this distance _target < 3 && support_armory_available"]] remoteExec ["addAction", [0,-2] select isDedicated, _x];
-    [_x, [ACT_EQUIP("STR_DUWS_T_QUICK_KITS"), { [] call fnc_quick_kits_menu; }, [], 80, false, false, "",
-        "_this distance _target < 3"]] remoteExec ["addAction", [0,-2] select isDedicated, _x];
-} forEach _arsenalObjects;
 
 ["INFO", "SUPPORT", "interactions added, killhouse ready"] call fnc_log;

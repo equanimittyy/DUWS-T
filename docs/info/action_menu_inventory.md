@@ -86,8 +86,8 @@ the list.
 
 | Entry | Key | Attached by |
 | --- | --- | --- |
-| Arsenal | `STR_DUWS_T_160jkc3a` | HQ, FOB, MHQ ammobox, airdropped ammobox, killhouse crates |
-| Quick Kits | `STR_DUWS_T_QUICK_KITS` | Supply crate, killhouse crates |
+| Arsenal | `STR_DUWS_T_160jkc3a` | HQ, FOB, MHQ ammobox, airdropped ammobox, multi-screen computer |
+| Quick Kits | `STR_DUWS_T_QUICK_KITS` | Supply crate, multi-screen computer |
 | Full Arsenal | `STR_DUWS_T_FULL_ARSENAL_ONCE` | Cache boxes, supply truck |
 | Disguise | `STR_DUWS_T_DISGUISE_MENU_ACTION` | `player` (hold, 1 s) |
 
@@ -180,6 +180,9 @@ without a condition and the Mobile HQ entries without a priority.
 server, which has no interface to draw a scroll menu on. The third argument is the owning object
 rather than `true`: an auto-generated JIP id outlives the object it decorates and leaves a queue
 entry per object forever, where an object-keyed message is dropped when that object is deleted.
+That id *is* the object's netId, so an object carrying more than one entry needs a distinct id per
+entry — the killhouse terminal suffixes it, `format ["killhouse_kits_%1", netId _x]` — otherwise
+the later message silently evicts the earlier one and only late joiners see the gap.
 
 **Duplicate guards must stay machine-local.** The adders are broadcast to every client and each
 client adds its own local action, so a guard written with a public `setVariable` lets the first
