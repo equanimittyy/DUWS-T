@@ -733,7 +733,7 @@ above: re-crew the surviving core, never build a second one.
 
 Named `hardpoint_<i>`. They must not use the coordinate-derived scheme: zones use
 `<round x><round y>` (`fnc_createzone.sqf:38,52`), side missions use
-`<markerText><round x><round y>` (`server/missions/fnc_missionMarkerData.sqf:7,17`), and
+`<round x><round y>cache` (`server/missions/fnc_missionMarkerData.sqf:9`), and
 `createMarker` on a taken name returns `""` with no error. A hardpoint sited within a metre of
 either would fail silently.
 
