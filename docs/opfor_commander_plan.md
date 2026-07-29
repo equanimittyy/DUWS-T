@@ -85,7 +85,11 @@ Decided so far:
 Open, and to be settled before implementation:
 
 - Event budget: whether sabotage draws from OPFOR Army Power, from a separate per-town pool, or
-  fires on a timer.
+  fires on a timer. Army Power becomes a spendable pool with named sinks in
+  [`ap_economy_plan.md`](ap_economy_plan.md), so drawing from it now means competing with town
+  garrisons, taskings and hardpoints rather than reading a number nothing else touches.
+- How this director divides work with the Rapport tasking in that document, which also acts on a
+  town's reputation — one of them owns dragging a town toward OPFOR, not both.
 - Whether IED placement is persistent terrain state or spawned per approach, and how it
   interacts with despawn.
 - Whether ambush groups count against the same population caps as civilians

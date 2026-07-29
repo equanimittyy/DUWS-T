@@ -354,17 +354,21 @@ changes. Building on it now would mean inventing the ownership model inside this
 
 ### The director and the escalation ladder
 
-**No Army Power changes hands in either direction.** The director does not buy hardpoints and
-clearing one does not debit OPFOR. A cost-and-refund model is farmable: build 25, clear −25,
+**The director pays to build; clearing refunds nothing.** Construction is one of the OPFOR Army
+Power sinks in [`ap_economy_plan.md`](ap_economy_plan.md), so an emplacement competes with town
+garrisons and tasking orders for the same points — that competition is the reason the sink
+exists. The refund is what stays forbidden: cost-and-refund is farmable — build 25, clear −25,
 repeat, and the enemy's pool never reaches the escalation thresholds that make it dangerous.
-Clearing pays the player CP and nothing else, so there is no loop to run.
+Clearing pays the player CP and returns the enemy nothing, so the only loop on offer is one that
+costs the enemy AP to run.
 
-`WARCOM_opfor_ap` decides **how hard a hardpoint is**, not whether it exists. It is already the
+`WARCOM_opfor_ap` also decides **how hard a hardpoint is**, not just whether the director can
+afford one. It is already the
 enemy's escalation ladder — patrol and assault composition step up at 10/40/65/100/136 AP
 (`fnc_WARCOM_opf_assault.sqf:8-21`, `fnc_WARCOM_opf_patrol.sqf:8-14`) — so hardpoints join the
 ladder every other OPFOR element is already on:
 
-| OPFOR AP | Garrison, any hardpoint | Types the *director* may build |
+| Highest OPFOR AP reached | Garrison, any hardpoint | Types the *director* may build |
 |---|---|---|
 | < 40 | 2-3 infantry | OP, MG |
 | 40-99 | 3-4 infantry, one armed car in support | + AT |
@@ -396,11 +400,17 @@ walks past in hour one and returns to in hour five is defended at hour five's st
 what makes the ladder felt: the map does not get more hardpoints so much as harder ones, and it
 costs nothing to implement, because the spawn already happens on approach.
 
+**It reads the tier, not the pool.** Both columns key off the highest AP the enemy has reached,
+never its current balance — otherwise paying for one hardpoint thins the garrisons of every
+hardpoint already standing, and the player watches the war get easier because the enemy invested
+in it.
+
 | Knob | Value | Why |
 |---|---|---|
 | Seed subset | 2-3 at WARCOM init, any type | The player meets the mechanic before the director has produced anything |
 | Build tick | one candidate every 20-30 min | Slower than the 45-90 min patrol cadence (`fnc_WARCOM_opf_patrol.sqf:178`), faster than the 30 min assault cycle |
 | Build gate | OPFOR AP above 10 | A suppressed enemy stops fortifying; matches the threshold its first assault wave uses |
+| Build costs | 8-25 AP by type | Cheapest for an OP or MG nest, dearest for the battery — the same order the clear payouts run in |
 | Live cap | none | ([§Distance gating](#distance-gating-replaces-a-live-cap)) |
 | Clear pays | CP only | Missions and zone capture remain the AP faucets (`fnc_mission_reward.sqf:20`, `fnc_captured.sqf:44-47`) |
 
@@ -764,7 +774,7 @@ is.
 - [ ] Extend the capture trigger condition. Verify: a zone with hardpoints left cannot be captured; the last clear makes it capturable *without* the players leaving and re-entering; `zoneundercontrolblu` and `amount_zones_created` are unchanged by any clear.
 - [ ] Delete a core with `deleteVehicle` mid-campaign. Verify: the zone still becomes capturable. This is the `fnc_mission_cleanup` failure mode and must be tested directly rather than waited for.
 - [ ] Add the remaining types and the faction-global fallbacks. Verify: an AT hardpoint kills a vehicle on the road it covers; an AA one engages a heli taxi; an OP's `reveal` reaches the QRF; every core resolves to a real classname with no faction mod loaded and with one.
-- [ ] Add the director and seed subset. Verify: clearing a hardpoint moves no AP in either direction, and the director stops building below 10 AP.
+- [ ] Add the director and seed subset. Verify: building debits OPFOR AP, clearing refunds none, and the director stops building below 10 AP.
 - [ ] Add the AP-scaled garrison ladder. Verify: the same hardpoint spawns 2-3 infantry early and infantry plus armour late; composition is read at spawn, so leaving and returning to one changes what defends it.
 - [ ] Add garrison distance gating to the monitor. Verify: garrisons disappear 300 s after the last player leaves 600 m and come back on approach; cores, cover and markers never disappear; a re-crewed hardpoint has one turret, not two.
 - [ ] Let a campaign run several hours without visiting the corridors, then count units. Verify: live AI tracks player position rather than campaign length — this is the test that replaces the live cap.
@@ -794,12 +804,13 @@ zone is never taken back — the enemy answers by fortifying the ground around i
 keeps the gate honest: `zone_hp_left_<n>` only ever counts down, so it cannot re-lock a zone
 between the trigger's condition passing and its handler running.
 
-**Army Power is read, never moved.** Neither building nor clearing a hardpoint touches either
-pool. Any version where the enemy pays to build and refunds on destruction is farmable — the
-player clears them as fast as they appear and pins OPFOR below its first escalation threshold,
-which is the one number that decides how dangerous the rest of the campaign is. Reading AP for
-composition instead means the enemy's strength is a consequence of the war, and hardpoints are
-where the player *meets* it rather than a lever on it.
+**Army Power is paid to build, never refunded on clearing.** The refund is the farmable half: with
+one, the player clears hardpoints as fast as they appear and pins OPFOR below its first escalation
+threshold, which is the one number deciding how dangerous the rest of the campaign is. Without
+one, clearing costs the enemy what it spent, and rebuilding costs it again — pressure on the pool
+rather than a lever on it. Composition is read from the tier the enemy has reached rather than its
+balance ([above](#the-director-and-the-escalation-ladder)), so the strength of what defends a
+hardpoint stays a consequence of the war and not of the enemy's last purchase.
 
 **There is no passive income term.** Zone capture pays `radius/10` halved plus `zones_held * 6`
 every 30 min; side missions pay 5-45 CP. A third recurring faucet would feed the snowball the

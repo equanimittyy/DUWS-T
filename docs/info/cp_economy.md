@@ -222,7 +222,9 @@ crash; none is currently scheduled.
 costs nothing thereafter. That is a positive feedback loop — hold → CP → buy → hold more —
 with no attrition pulling the other way, so late-game CP outruns anything to spend it on.
 This is the central design lever, not a bug: if a demanding economy is the goal, the levers
-are per-zone/garrison upkeep, diminishing per-zone passive scale, or a CP cap.
+are per-zone/garrison upkeep, diminishing per-zone passive scale, or a CP cap. Paying it in AP
+instead was considered and rejected — a holdings-scaled AP faucet feeds the escalation ladder,
+and the enemy starts holding the map ([`../ap_economy_plan.md`](../ap_economy_plan.md)).
 
 **Enemy-loot → intel-analysis is an unbounded, cooldown-free faucet.**
 `fnc_addRandomLoot.sqf` puts `Files` (2 CP) / `Wallet_ID` (1.5 CP) on ~80% of spawned
@@ -240,14 +242,18 @@ vehicles convert to free CP. It is *not* a buy-then-recycle loop: purchase cost
 The two formulas are simply not on the same scale, and recycle has no floor tying reward to
 what a vehicle cost.
 
-**AP is a threshold ladder, not a pool, so town income is inflationary.** Nothing spends AP. The
+**AP is a threshold ladder with almost nothing spending it, so town income is inflationary.** The
 WARCOM director reads it as gates — BLUFOR wave tiers at 10, 40, 65, 100 and 136
 (`fnc_WARCOM_blu_assault.sqf:11-25`), OPFOR air above 150 (`fnc_WARCOM_opf_air.sqf:11`), OPFOR
-patrols above 100 (`fnc_missionPatrols.sqf:18`) — and the only subtraction anywhere is losing a
-zone. A 20-town campaign averaging 2 AP pays at most 40 AP per 30 min with every town banded,
-against roughly 50 for capturing a 500 m zone, so civilian income reads as a fraction of a
-capture rather than a replacement for one. The ladder only goes up, so escalation is permanent
-once earned; the 1–3 scale sets how long it takes.
+patrols above 100 (`fnc_missionPatrols.sqf:18`) — and the only subtractions are losing a zone and
+the AP→CP converter below. Turning it into a currency both sides spend, without breaking the
+ladder, is [`../ap_economy_plan.md`](../ap_economy_plan.md). A 20-town campaign averaging 2 AP
+pays at most 40 AP per 30 min with every town banded, against 25 for capturing a 500 m zone and
+50 for a 1000 m one — worth is `round(radius/10)` (`fnc_locatorzones_random.sqf:56`), halved by
+`zone_ap_swing`. So at its ceiling civilian income substitutes for a capture rather than
+supplementing one; how far below that ceiling a real campaign sits is the untested part. The
+ladder only goes up, so escalation is permanent once earned; the 1–3 scale sets how long it
+takes.
 
 **The two routes into a band are not symmetric, and the negative one is far shorter.** Both
 bands sit ten points from neutral, but the travel costs are nothing alike. Going negative is
