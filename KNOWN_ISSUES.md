@@ -6,21 +6,18 @@ is speculation.
 
 **How this doc is used.** Play-testing produces raw notes in the dump below, written as
 observed and before anyone knows whether they belong to a section further down. A note that
-turns out to name a known issue is folded into that section and dropped from the dump; the
-rest stay until they are diagnosed or dismissed. Checkboxes elsewhere are ticked as each
-check is actually run, so an unticked box means untested rather than merely unfixed.
+turns out to name a known issue is folded into that section; a note that gets fixed is deleted
+outright, and no verification section is opened in its place. This doc carries what is still
+wrong or still unproven — not a record of work done, which is what git is for. The rest stay in
+the dump until they are diagnosed or dismissed. Checkboxes are ticked as each check is actually
+run, so an unticked box means untested rather than merely unfixed.
 
 ## User dump
 
-- Helicopter intro fast-ropes one individual at a time instead of the whole crew
-- Supports are per squad leader, but are not capped; so two squad leaders or more can call mortars all at the same time, spamming the radio.
-- Certain supports such as HALO are shared to whole of BLUFOR; we need to track what supports were unlocked and by whom (track the group leader name)
-- Rest/Heal plays the Overlord voice before the fadeout finishes
-- CP loss isn't reported on death
-- The generator item in HQ next to the shootable targets near the camo-net is causing bugs, possibly due to simulation; if not delete it
-- Mission descriptions suggest Allseer is enemy OPFOR commander which makes no sense
-- Repair depot also has same issue; other players have prop de-sync issues
-- Side Missions don't get generated as actual tasks; should self-clean
+- Side Missions should get the nice "mission initialisation" treatment to say "Operation Blue Thunder" for example
+- There needs to be a gap between Camel Cases for side-mission names
+- Limit to 7 missions randomly drawn from the pool of missions
+- Civilian Interaction is spoked as Alpha 1-1 (search bodies is not so copy that pattern)
 
 ## Untested since the client/server split
 
@@ -115,32 +112,6 @@ yourself rejoining a dedicated server. "Rejoin" below means either.
 **Unverified engine behaviour.**
 
 - [ ] Settle whether `remoteExec ["", _id]` removes a queue entry when issued from a client. Both removals in the tree hand the call to the server rather than rely on it
-
-## Side-mission tasks: rebuilt, not yet exercised
-
-Task creation used to run server-side under a plain `call`, so the task existed only on the
-server and a hosting player was the only one who could see it; the state change broadcast later
-then landed on clients holding no such task and was dropped without an error. Creation is now
-broadcast through `server/missions/fnc_missionTaskCreate.sqf`, and
-`fnc_missionTaskEnd.sqf` sets the final state and deletes the task two minutes on. The objective
-icon each mission used to draw is gone — the task's own marker replaces it — and the area ellipse
-stays, because a task destination is a point and cannot show the mission radius.
-
-- [ ] Run a side mission as a **client** on a dedicated server. The task appears in the Tasks
-  menu, with a map waypoint and a 3D marker over the mission area. Nothing there at all means
-  `BIS_fnc_taskCreate` is not safe to run per-machine and creation has to route through one
-  machine that then shares it
-- [ ] Watch a completed mission for two minutes. The task shows SUCCEEDED, then disappears; the
-  area ellipse goes with the mission as before
-- [ ] Rejoin mid-mission, then rejoin after one has finished. One task at its current state in
-  the first case, none in the second. The creation and the state change carry deliberately
-  different JIP keys — `<id>_new` and `<id>` — because a same-key entry replaces rather than
-  joins, which would hand a joiner a completion for a task they never received
-- [ ] Check each mission type's task icon once. The type names are `CfgTaskTypes` classes and an
-  unrecognised one falls back to the default silently rather than erroring
-- [ ] Run two side missions at once in co-op. Each creation sets itself as the *current* task on
-  every machine, which used to affect the host alone; if that reads as hijacking, the state
-  argument in `fnc_missionTaskCreate` becomes `"ASSIGNED"`
 
 ## Heli-lift for non-host players
 
