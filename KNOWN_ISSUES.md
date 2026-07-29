@@ -66,14 +66,35 @@ quickest way to tell which one is wrong.
 ## JIP queue: keyed, not yet exercised
 
 The `remoteExec` JIP queue was keyed throughout; the five bare `true` flags left are the
-compiled-code payloads in [Open defects](#open-defects). None of it has been exercised. A single
-hosted session never touches the queue, so every item here needs a host **plus a client that
-connects after the state exists**.
+compiled-code payloads in [Open defects](#open-defects). None of it has been exercised. A second
+player joining a LAN host is a real JIP client and covers the first group below; testing alone, or
+covering the dedicated-server path a host masks, needs the setup in
+[`docs/info/testing.md`](docs/info/testing.md#testing-join-in-progress).
 
-- [ ] Hack a sabotage laptop, then connect a second client. The action must be gone from the laptop and the mission must not be completable twice
-- [ ] Toggle MHQ deploy/undeploy several times, then join. The new client sees the action matching the MHQ's current state, not the toggle history
-- [ ] Run several side missions, then join. The task list shows each once at its latest state, and the corpse-action backlog tracks corpses on the map rather than the campaign's kill count
-- [ ] Join with an HQ built. Every HQ action is present — quick-change, map board, building, satellite, black market, redeploy — not just the last one added per object
+Every check is: build the state, then have a joiner arrive — a second player connecting, or
+yourself rejoining a dedicated server. "Rejoin" below means either.
+
+**Entries a joiner receives.** Each tests one keying form, so a failure names its own cause.
+
+- [ ] Hack a sabotage laptop, rejoin. The action is gone and the mission cannot be completed twice — this was the one behavioural bug, a joiner re-hacking finished work
+- [ ] In a **hardcore** campaign, approach an un-hacked sabotage laptop and rejoin. It must offer *both* the sabotage action and the intel search: they key to the same object, and the search used to evict the sabotage action so the mission could not be finished at all
+- [ ] Deploy and undeploy the MHQ several times, rejoin. Exactly one action, matching its current state — not the toggle history
+- [ ] Run several side missions to different outcomes, rejoin. Each task appears once at its latest state, with no replay of superseded transitions
+- [ ] Kill a mission patrol, let a mission-slot release fire (it clears `allDeadMen`), rejoin. Corpse search actions track the corpses actually on the map, not the campaign's total kill count
+- [ ] Rejoin with the HQ built. All six HQ actions are present — quick change, map board, HQ building, medical tent, black market, redeploy — plus AI rearm on the tent. Three of these hang off one object and two off another, so a missing one is an id collision
+- [ ] Activate the repair and recycle stations, rejoin. Both actions are present: they resolve the same depot object from `HQ_repairDepot_netId`
+- [ ] Build a FOB, rejoin. Its action menu, fortify and guards entries are all present
+- [ ] Spawn a RAVAGE/WBK recruitable, rejoin. Exactly one recruit action on it, not several
+- [ ] Rest-heal and let a mission slot release a few times, then rejoin. No burst of stacked date/time OSDs
+
+**Boot path.** These gate everything above, so run them first.
+
+- [ ] Rejoin and confirm the client reaches play: no stall on `serverinit_complete`, and the server's `true` is not overwritten by the joiner
+- [ ] Confirm a rejoining player ends up at base, visible, and takes damage — `allowDamage` is set `false` at `initPlayerLocal` and only restored after the intro wait
+- [ ] Grep the client `.rpt` for `\[DUWS\]\[WARN\]\[BOOT\]`. Any bounded wait that timed out names itself there; before this change it would have hung silently
+
+**Unverified engine behaviour.** Both are safe either way today; the answers decide future shape.
+
 - [ ] Settle whether `BIS_fnc_taskCreate` already delivers task state to joiners by itself. Every call runs server-side under a plain `call` and is never broadcast, yet clients see the tasks — which would make the 27 `BIS_fnc_taskSetState` broadcasts redundant rather than merely keyed
 - [ ] Settle whether `remoteExec ["", _id]` removes a queue entry when issued from a client. The one removal in the tree hands the call to the server rather than rely on it
 

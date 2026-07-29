@@ -78,6 +78,43 @@ Remove an entry once the underlying issue is fixed; a genuinely new failure is n
   `unit/cases.sqf`. Only genuinely pure helpers (no config / `BIS_fnc_` / spawning) can run
   in the VM.
 
+## Testing join-in-progress
+
+**A second player joining a LAN host is a real JIP client**, and that is the simplest way to
+exercise the queue: build the state, have them connect, look at what they receive. The host is
+not one — it is server and client in a single process and never joins anything.
+
+Two things that setup cannot give you. You cannot test alone, because quitting as host ends the
+mission rather than leaving it running to rejoin. And a host masks every locality fault that only
+appears once server and client are separate machines, which is why a listen server proves nothing
+about dedicated-server support
+([`server_client_authority.md`](server_client_authority.md#dedicated-server-compatibility)) —
+worth caring about here because much of what was keyed targets `[0,-2] select isDedicated` from
+server-side code.
+
+Both are solved by a local dedicated server plus one client:
+
+1. `repack.cmd` → `DUWS_T.altis.pbo` at the repo root. Copy it into the dedicated server's
+   `mpmissions/`.
+2. Start Arma 3 Dedicated Server (a separate Steam tool) and select the mission.
+3. Connect a normal client to `127.0.0.1`. **This first client is the game master**: pre-play
+   configuration is authored on a client, so nothing generates until someone runs the campaign
+   menu. Wait for `[DUWS][INFO][SRV][ZONES]` to stop before treating the campaign as built.
+
+**A reconnecting player is a JIP client too**, which is what makes this testable by one person: the
+mission keeps running on the dedicated server while you are gone, so disconnect and rejoin, and
+the queue replays to you exactly as it would to a stranger. Build the state a check needs, rejoin,
+then look. Two clients are only needed where one player must act while another watches.
+
+Each machine writes its own `.rpt` — the server's and the client's are separate files, and the
+`SRV` / `CLI` machine tag in each line says which half emitted it. `enableDebugConsole = 1`, so
+the console is available for inspecting state directly; `duws_log_level = 4` there raises the
+level to DEBUG from that point on (there is no lobby parameter for it despite `INIT.sqf` looking
+for one, so the default is 3).
+
+The checklist of what to verify is in
+[`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#jip-queue-keyed-not-yet-exercised).
+
 ## Runtime logging: reading the `.rpt`
 
 Neither lint nor the unit layer can see a running mission. Arma writes one `.rpt` per launch
