@@ -3513,6 +3513,14 @@
                 <Original>Army Power awarded for completing a side mission.</Original>
                 <English>Army Power awarded for completing a side mission.</English>
             </Key>
+            <Key ID="STR_DUWS_T_DEATH_CP_TITLE">
+                <Original>Casualty</Original>
+                <English>Casualty</English>
+            </Key>
+            <Key ID="STR_DUWS_T_DEATH_CP_MSG">
+                <Original>%1 CP charged against the pool for your replacement.</Original>
+                <English>%1 CP charged against the pool for your replacement.</English>
+            </Key>
         </Container>
         <Container name="Zones &amp; Campaign Flow">
             <Key ID="STR_DUWS_T_heli_moving">

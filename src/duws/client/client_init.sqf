@@ -197,6 +197,18 @@ PlayerKilledEH = player addEventHandler ["killed", {
     };
     if (!_inKillhouse) then {
         [-DUWSMP_CP_death_cost, "death_penalty"] remoteExec ["fnc_cp_adjust", 2];
+        // Told to the player who paid it. The deduction itself only ever reached the RPT and
+        // control 1000, which is the counter inside the request dialog and so invisible unless
+        // that dialog happens to be open -- CP left the shared pool with nothing on screen.
+        // Skipped at zero, which is the default until the campaign menu sets a penalty.
+        // Spawned because an event-handler body is unscheduled and the notification queue is not.
+        if (DUWSMP_CP_death_cost > 0) then {
+            [DUWSMP_CP_death_cost] spawn {
+                params ["_cost"];
+                ["info", [localize "STR_DUWS_T_DEATH_CP_TITLE",
+                    format [localize "STR_DUWS_T_DEATH_CP_MSG", _cost]]] call bis_fnc_showNotification;
+            };
+        };
     };
     // Reported unfiltered: a challenge run fails on a death inside the course, and the server
     // owns that test against its own area radius rather than the wider one used just above.
