@@ -1,227 +1,100 @@
 // Locality: server -- inherited from server/server_init.sqf.
-_weather_loop = true;
+//
+// Five of the seven climates are one routine: set an opening overcast, force it, then loop
+// re-rolling fog and overcast on the same cadence. They were written out per climate, so the four
+// numbers that actually differ sat inside four near-identical copies of the loop. The two that are
+// not that shape stay below as code: "varied" runs no fog at all and waits out a full cycle before
+// its loop starts, and "none" pins everything to zero.
+//
+// OvercastVar and FogArray stay global: they are the last values set, and other code reads them.
 
-// 确保 CIV_PRESENCE 已从环境菜单同步
 waitUntil {!isNil "CIV_PRESENCE"};
+
+// [opening overcast rand, its base, loop overcast rand, its base, fog intensity rand, its base,
+//  fog is a fixed haze rather than a rolling bank]
+private _climates = createHashMapFromArray [
+    ["tropical",       [8, 0.2, 8, 0.2, 3, 0.1, false]],
+    ["arid",           [3, 0,   3, 0,   0, 0,   true ]],
+    ["temperate",      [4, 0.3, 5, 0.3, 2, 0,   false]],
+    ["temperate_cold", [4, 0.4, 4, 0.4, 2, 0,   false]],
+    ["mediterranean",  [6, 0,   6, 0,   2, 0,   false]]
+];
+
+private _def = _climates getOrDefault [weather_type, []];
+
+if !(_def isEqualTo []) exitWith {
+    _def params ["_firstRand", "_firstBase", "_loopRand", "_loopBase", "_fogRand", "_fogBase", "_fogFixed"];
+
+    OvercastVar = (random _firstRand) / 10 + _firstBase;
+    0 setOvercast OvercastVar;
+    sleep 0.1;
+    forceWeatherChange;
+    sleep 0.1;
+
+    [_loopRand, _loopBase, _fogRand, _fogBase, _fogFixed] spawn {
+        params ["_loopRand", "_loopBase", "_fogRand", "_fogBase", "_fogFixed"];
+        while {true} do {
+            // Cloud patterns take about 50 minutes to change fully, so a shorter wait would set a
+            // target the sky never reaches before the next roll replaces it.
+            private _wait = random [3000, 3900, 4200];
+
+            if (_fogFixed) then {
+                FogArray = [0.01, 0.01, 0.01];
+                1 setFog FogArray;
+            } else {
+                private _fogTime = (random 60) * 60;
+                private _intensity = (random _fogRand) / 10 + _fogBase;
+                if (_intensity < 0.01) then { _intensity = 0.01 };
+                private _height = (random 1) / 10;
+                if (_height < 0.1) then { _height = 0.1 };
+                FogArray = [_intensity, _height, 10];
+                _fogTime setFog FogArray;
+            };
+
+            OvercastVar = (random _loopRand) / 10 + _loopBase;
+            0 setOvercast OvercastVar;
+
+            sleep _wait;
+        };
+    };
+};
+
 switch (weather_type) do {
-    case "tropical": {
-		_firstWeather = random 8; 
-		_firstWeather = (_firstWeather / 10); 
-		_firstWeather = (_firstWeather + 0.2);  // base weather
-		OvercastVar = _firstWeather;
-		0 setOvercast OvercastVar;
-		sleep 0.1;
-		forceWeatherChange;
-		sleep 0.1;
-		[] spawn {
-			while {true} do {
-				_wait_after = random [3000,3900,4200];   // cloud patterns take 50min to fully change
 
-				_fog_time = random 60; // MINUTES
-				_fog_time = (_fog_time * 60); // transfor to seconds
-				_fog_intensity = random 3;
-				_fog_intensity = (_fog_intensity / 10); 
-				_fog_intensity = (_fog_intensity + 0.1); 
-				if (_fog_intensity<0.01) then {_fog_intensity = 0.01};
-				_fog_height = random 1;
-				_fog_height = (_fog_height / 10); // transforme en centiemes
-				if (_fog_height<0.1) then {_fog_height = 0.1};
-
-				FogArray = [_fog_intensity, _fog_height, 10];
-				_fog_time setFog FogArray;
-
-				_overcast_intensity = random 8; 
-				_overcast_intensity = (_overcast_intensity / 10); 
-				_overcast_intensity = (_overcast_intensity + 0.2);  // base weather
-				OvercastVar = _overcast_intensity;
-				0 setOvercast OvercastVar;
-
-				_wait_total = _fog_time + _wait_after;
-				_wait_total_minute = _wait_total / 60;
-				sleep _wait_after;
-			}; //end while
-		};
-    }; //end case
-    case "arid": {
-		_firstWeather = random 3;
-		_firstWeather = (_firstWeather / 10);  // base weather
-		OvercastVar = _firstWeather;
-		0 setOvercast OvercastVar;
-		sleep 0.1;
-		forceWeatherChange;
-		sleep 0.1;
-		[] spawn {
-			while {true} do {
-				_wait_after = random [3000,3900,4200];   // cloud patterns take 50min to fully change
-
-				_fog_time = random 60; // MINUTES
-				_fog_time = (_fog_time * 60); // transform to seconds
-
-				FogArray = [0.01, 0.01, 0.01];
-				1 setFog FogArray;
-				
-				_overcast_intensity = random 3;
-				_overcast_intensity = (_overcast_intensity / 10); 
-				OvercastVar = _overcast_intensity;
-				0 setOvercast OvercastVar;
-				
-				_fog_time = 0;
-				_wait_total = _fog_time + _wait_after;
-				_wait_total_minute = _wait_total / 60;
-				sleep _wait_after;
-			}; //end while
-		};
-    };
-    case "temperate": {
-		_firstWeather = random 4;
-		_firstWeather = (_firstWeather / 10);
-		_firstWeather = (_firstWeather + 0.3);  // base weather
-		OvercastVar = _firstWeather;
-		0 setOvercast OvercastVar;
-		sleep 0.1;
-		forceWeatherChange;
-		sleep 0.1;
-		[] spawn {
-			while {true} do {
-				_wait_after = random [3000,3900,4200];   // cloud patterns take 50min to fully change
-
-				_fog_time = random 60; // MINUTES 
-				_fog_time = (_fog_time * 60); // transform to seconds
-				_fog_intensity = random 2;
-				_fog_intensity = (_fog_intensity / 10); 
-				if (_fog_intensity<0.01) then {_fog_intensity = 0.01};
-				_fog_height = random 1;
-				_fog_height = (_fog_height / 10); 
-				if (_fog_height<0.1) then {_fog_height = 0.1};
-				
-				FogArray = [_fog_intensity, _fog_height, 10];
-				_fog_time setFog FogArray;
-				
-				_overcast_intensity = random 5;
-				_overcast_intensity = (_overcast_intensity / 10); 
-				_overcast_intensity = (_overcast_intensity + 0.3);  
-				OvercastVar = _overcast_intensity;
-				0 setOvercast OvercastVar;
-
-				_wait_total = _fog_time + _wait_after;
-				_wait_total_minute = _wait_total / 60;
-				sleep _wait_after;
-			}; //end while
-		};
-    };
-    case "temperate_cold": {
-		_firstWeather = random 4;
-		_firstWeather = (_firstWeather / 10);
-		_firstWeather = (_firstWeather + 0.4);  // base weather is 0.4
-		OvercastVar = _firstWeather;
-		0 setOvercast OvercastVar;
-		sleep 0.1;
-		forceWeatherChange;
-		sleep 0.1;
-		[] spawn {
-			while {true} do {
-				_wait_after = random [3000,3900,4200];   // cloud patterns take 50min to fully change
-
-				_fog_time = random 60; // MINUTES
-				_fog_time = (_fog_time * 60); // transform to seconds
-				_fog_intensity = random 2;
-				_fog_intensity = (_fog_intensity / 10); 
-				if (_fog_intensity<0.01) then {_fog_intensity = 0.01};
-				_fog_height = random 1;
-				_fog_height = (_fog_height / 10); 
-				if (_fog_height<0.1) then {_fog_height = 0.1};
-				FogArray = [_fog_intensity, _fog_height, 10];
-				_fog_time setFog FogArray;
-				
-				_overcast_intensity = random 4;
-				_overcast_intensity = (_overcast_intensity / 10); 
-				_overcast_intensity = (_overcast_intensity + 0.4);  // base weather is 0.4
-				OvercastVar = _overcast_intensity;
-				0 setOvercast OvercastVar;
-
-				_wait_total = _fog_time + _wait_after;
-				_wait_total_minute = _wait_total / 60;
-				sleep _wait_after;
-			}; //end while
-		};
-    };
-    case "mediterranean": {
-		_firstWeather = random 6;
-		_firstWeather = (_firstWeather / 10);
-		OvercastVar = _firstWeather;
-		0 setOvercast OvercastVar;
-		sleep 0.1;
-		forceWeatherChange;
-		sleep 0.1;
-		[] spawn {
-			while {true} do {
-				_wait_after = random [3000,3900,4200];   // cloud patterns take 50min to fully change
-
-				_fog_time = random 60; // EN MINUTES !!
-				_fog_time = (_fog_time * 60); // transform to seconds
-				_fog_intensity = random 2;
-				_fog_intensity = (_fog_intensity / 10); 
-				if (_fog_intensity<0.01) then {_fog_intensity = 0.01};
-				_fog_height = random 1;
-				_fog_height = (_fog_height / 10); 
-				if (_fog_height<0.1) then {_fog_height = 0.1};
-
-				FogArray = [_fog_intensity, _fog_height, 10];
-				_fog_time setFog FogArray;
-
-				_overcast_intensity = random 6;
-				_overcast_intensity = (_overcast_intensity / 10); 
-				OvercastVar = _overcast_intensity;
-				0 setOvercast OvercastVar;
-				_wait_total = _fog_time + _wait_after;
-				_wait_total_minute = _wait_total / 60;
-				sleep _wait_after;
-			}; //end while
-		};
-    };
-	case "varied": {
-		firstWeather = random 0.6;
-		OvercastVar = firstWeather;
-		//skipTime -24;
-		//86400 setOvercast firstWeather;
-		//skipTime 24;
-		0 setOvercast firstWeather;
-		sleep 0.1;
-		forceWeatherChange;
-		sleep 0.1;
-		_wait_after = random [3000,3900,4200];   // cloud patterns take 50min to fully change
-		sleep _wait_after;
+    // Overcast only, and rolled straight rather than out of ten -- this is the climate that is
+    // allowed to be anything, so it spans the full range instead of a band. firstWeather is global
+    // here as it always was.
+    case "varied": {
+        firstWeather = random 0.6;
+        OvercastVar = firstWeather;
+        0 setOvercast firstWeather;
+        sleep 0.1;
+        forceWeatherChange;
+        sleep 0.1;
+        // Waits out one full cycle before the loop takes over, so the opening sky is the one the
+        // player flies the intro under.
+        sleep (random [3000, 3900, 4200]);
         [] spawn {
-			while {true} do {
-				_wait_after = random [3000,3900,4200];   // cloud patterns take 50min to fully change
-				_overcast_intensity = random 1;
-				OvercastVar = _overcast_intensity;
-				0 setOvercast OvercastVar;
-				sleep _wait_after;
-			}; //end while
-		};
+            while {true} do {
+                private _wait = random [3000, 3900, 4200];
+                OvercastVar = random 1;
+                0 setOvercast OvercastVar;
+                sleep _wait;
+            };
+        };
     };
 
-	case "none": { //TODO Expand on this
+    case "none": { //TODO Expand on this
         [] spawn {
-			while {true} do {
-				_wait_after = random 1800;
-
-				_fog_time = 0;
-				_fog_intensity = 0;
-				_fog_height = 0;
-				FogArray = [_fog_intensity, _fog_height, 10];
-				_fog_time setFog FogArray;
-
-				_overcast_intensity = 0;
-				OvercastVar = _overcast_intensity;
-				0 setOvercast OvercastVar;
-			
-				_wait_total = _fog_time + _wait_after;
-				_wait_total_minute = _wait_total / 60;
-				sleep _wait_after;
-			}; //end while
-		};
+            while {true} do {
+                private _wait = random 1800;
+                FogArray = [0, 0, 10];
+                0 setFog FogArray;
+                OvercastVar = 0;
+                0 setOvercast OvercastVar;
+                sleep _wait;
+            };
+        };
     };
 
 };
