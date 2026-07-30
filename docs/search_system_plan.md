@@ -11,7 +11,7 @@ succeed always. An intel mission can pay intel every time; a corpse can pay a sp
 
 This is a design for unbuilt work. What ships today is described below as the starting state, and
 the near-term garrison change that lands before any of this is in
-[`refactoring_plan.md`](refactoring_plan.md).
+[`spawn_helpers_plan.md`](spawn_helpers_plan.md).
 
 ## Why one system
 

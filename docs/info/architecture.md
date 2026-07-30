@@ -55,6 +55,23 @@ Two function-loading mechanisms coexist, which is not inferable from any single 
   `src/duws/server/server_fnc_init.sqf` (~250 entries). There is no manifest of these
   functions beyond that file.
 
+## Globals have no namespace
+
+`src/duws/` calls `publicVariable` on **394 distinct names** across over 500 sites, in a global
+namespace several times that size. Nothing separates campaign state from scratch variables, so
+nothing prevents a collision between subsystems and nothing makes one visible when it happens.
+
+This is not fixable in bulk. A sweeping rename is the single highest-risk change available in this
+codebase: `addPublicVariableEventHandler` matches names as strings, so a missed rename fails
+silently at runtime with no compiler to catch it. **Require a `DUWS_` prefix on new globals, and
+prefix on touch.** The mission already has instances of the discipline
+(`DUWS_enemyGear_scannedUnits`, `DUWS_zoneSpawnTiers`, `DUWS_missionSlots`) beside bare ones like
+`support_count` and `Mission_available`.
+
+Retiring a broadcast name needs positive evidence that no reader can exist, not merely the absence
+of one in this tree — a `publicVariable`'d global is readable by any client and by any joiner, and
+the mission ships to a workshop where third-party faction files call into it.
+
 ## Boot flow
 
 `INIT.sqf` is the runtime entry point; `description.ext` wires config and `mission.sqm`

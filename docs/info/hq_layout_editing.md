@@ -76,6 +76,17 @@ import to the clipboard. Paste that into the Eden console. There is also a "past
 array" option. It reports `created N of M objects` and warns if any row-like line failed to
 parse, so a silent drop is visible.
 
+Two constraints the scan imposes on where a composition may live, both of which fail by finding
+nothing rather than by erroring:
+
+- **It enumerates `*.sqf` only.** A composition moved into an `.hpp` becomes invisible to the tool,
+  so a data file split out of a builder has to keep the `.sqf` extension even when it holds nothing
+  but an array. `server/misc/killhouse_composition.sqf` is named that way for this reason.
+- **`zbase=` is resolved by regex against the file holding the fence.** The constant it names has to
+  be declared in that same file. Split the array away from its `_centerSpawnZ` and the attribute
+  matches nothing, the origin silently falls back to zero, and the import lands on the terrain
+  instead of at altitude — a round trip that looks like it worked.
+
 ### Marking a composition
 
 The TUI discovers compositions by scanning for marker comments; adding one is data-only, no

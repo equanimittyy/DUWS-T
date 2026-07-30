@@ -5,7 +5,7 @@
 // padding never reaches them.
 //
 // TRANSITIONAL: prefers the array globals (blufor_RQST_UNITS / blufor_RQST_VEHICLES) and falls back
-// to walking the numbered blufor_RQST_UNIT_01_X ... _50_X names. The fallback exists so a faction
+// to walking the numbered blufor_RQST_UNIT_01_X ... _99_X names. The fallback exists so a faction
 // file that has not been converted -- including one shipped by a third party against the old shape
 // -- still populates its menus. Delete it once a vanilla, a modded and an auto-detected faction
 // have each been seen filling both menus in game; nothing static can confirm that, because these

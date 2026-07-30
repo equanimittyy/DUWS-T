@@ -212,6 +212,29 @@ language variant of the key. When editing a `%N`-bearing string, grep the ID for
 `format[...]` call, count the arguments, and confirm the highest `%N` matches in each
 language tag — the engine will not tell you when they diverge.
 
+## A stored code block sees no locals from where it was written
+
+**SQF blocks are not closures. A block saved now and run later sees only globals and its own
+`_this`; every private in scope where it was written is gone by the time it runs. Where the engine
+invokes a block with no arguments, `_this` is empty too, and a global is the only channel left.**
+
+This is why several globals in the mission look gratuitous and are not. `BIS_fnc_strategicMapOpen`
+runs each mission's block with no arguments, so a block cannot be handed the position and name the
+search picked for it — the seventeen launcher blocks in `shared/includes/mission_types.hpp` each
+carry a hard-coded index instead, and `client/missions/fnc_mission_launch.sqf` turns that index
+back into a slot in the `DUWS_missionSlots` global. An index is the one thing such a block can hold
+without capturing anything.
+
+The failure is silent rather than loud: a private referenced from a deferred block is simply
+undefined at run time, so the block does nothing or throws into a log nobody is reading, while the
+same code called inline works perfectly.
+
+**How to apply:** when a fix would delete a global that a deferred block reads, the deferral has to
+be preserved, not just the value — replace the global with another global, or with something the
+block can carry literally. Building the block text with `format` and `compile` also works and is
+what `setTriggerStatements` forces (below), but it costs the compiler and is worth avoiding where a
+literal index will do.
+
 ## A trigger statement is a string, so anything formatted into it is a float round trip
 
 **`setTriggerStatements` takes source text, not a closure. A local captured into it has to be

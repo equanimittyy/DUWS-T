@@ -217,4 +217,4 @@ mission, the other is the trickle any body offers.
 A hardcore campaign's entire progress is which zones and towns it has revealed, and none of it
 survives a restore today. The shape it needs — revealed state as an outcome applied after
 build-out, the same as zone ownership — is specified in
-[`../campaign_persistence_plan.md`](../campaign_persistence_plan.md#snapshot), which is unbuilt.
+[`../campaign_persistence_plan.md`](../campaign_persistence_plan.md#the-snapshot), which is unbuilt.
