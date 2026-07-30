@@ -46,28 +46,64 @@ performance problem in the tens of megabytes, and this snapshot is tens of kilob
 
 ### Transferring a save between machines
 
-Two routes, and the second is the one that actually works for a player:
+Three routes. Two of them are what a player uses; the clipboard is the escape hatch, not the
+mechanism.
 
 | Route | Mechanism | Limits |
 |---|---|---|
 | Copy the file | `DUWS_T.vars.Arma3Profile` out of the profile directory | Different directory on a client and a dedicated server; the player has to find it |
-| Export a string | `copyToClipboard` on export, a paste-in edit box on import | Needs a dialog; edit-control length under a large snapshot is untested |
+| Client profile carry | The server hands the snapshot to a connected client, which keeps it in its own `profileNamespace` and offers it back on the load screen | Needs that client connected when the save is taken; validated coming back in, not trusted |
+| Clipboard string | `copyToClipboard` out, paste into an edit control in | One deliberate player action per direction; edit-control length under a full snapshot is untested |
 
-The export path costs one dialog and works because of a property the snapshot already has for a
-different reason: it contains only numbers, strings, booleans and arrays of those, which is
-exactly the type set `parseSimpleArray` accepts. `str` on the way out and `parseSimpleArray` on
-the way back is an exact round trip, so no serialiser has to be written or kept in step.
+All three move the same value, and they work because of a property the snapshot already has for a
+different reason: it contains only numbers, strings, booleans and arrays of those, which is exactly
+the type set `parseSimpleArray` accepts. `str` on the way out and `parseSimpleArray` on the way back
+is an exact round trip, so no serialiser has to be written or kept in step.
 
-`copyToClipboard` writes the clipboard of the machine it runs on, so on a dedicated server the
-export has to be `remoteExec`'d back to the requesting client or it lands on the server box where
-nobody can reach it.
+**The clipboard cannot be the store, because SQF can write it and not read it.** `copyToClipboard`
+has no counterpart, so every import ends at a human pasting into an edit control — which is a thing
+no unattended restart can do. That settles the store question rather than weighing it: the namespace
+is not preferred over the clipboard, the clipboard is not a candidate. `copyToClipboard` also writes
+the clipboard of the machine it runs on, so on a dedicated server an export has to be `remoteExec`'d
+back to the requesting client or it lands on the server box where nobody can reach it. The control
+the paste lands in already exists in the mission — `RscEditMulti` idc 2100
+(`shared/includes/custom_faction.hpp:59`), read with `ctrlText`, carries custom-faction definitions
+today.
 
-**Extension-based stores are refused as the mechanism.** FileXT, extDB and iniDBI can write real
-files and are what large persistent missions usually end up on, and every one of them is a mod.
-The mission's no-hard-dependency rule makes them unavailable as *the* store. Nothing stops a later
-optional path writing the same snapshot through an extension when one is present, because the
-snapshot is a value rather than a format — but the vanilla path has to be complete on its own
-first, and this plan is that path.
+**The carry route is the store's own mechanism pointed at a client.** A client's `profileNamespace`
+is durable in the same way the server's `missionProfileNamespace` is, so an export is a `remoteExec`
+plus `saveProfileNamespace` on the receiving end and an import is a `getVariable`, with nothing for
+the player to find, copy or paste. That is why it is the primary route and the clipboard is the
+fallback. Two consequences, both handled rather than avoided: a profile the player can hand-edit is
+an input, so a carried snapshot is validated exactly as the server's own is (version, world, types)
+instead of trusted — cover against a stale or corrupted payload in a co-op mission, not anti-cheat;
+and two clients can offer divergent copies of one campaign, which the write stamp in
+[§Identity and settings](#identity-and-settings) decides — newest wins, and the screen names what it
+is about to load.
+
+**Extension-based stores are refused as the mechanism, and shipping one inside the PBO is not
+available as a compromise.** FileXT, extDB and iniDBI can write real files and are what large
+persistent missions usually end up on. Every one of them is a binary, because SQF has no
+file-writing command at all — that is the reason they exist, not an implementation choice. And the
+engine resolves an extension only from the root of a loaded mod folder or the game install
+directory; a mission PBO is never searched and is never unpacked to disk. So there is no version of
+"vendor the dependency" that reaches a file. The mission already vendors third-party *script*
+modules (`src/modules/`), and that is the ceiling: anything shipped inside the PBO ends at the
+profile namespace, which is where this plan already is.
+
+**The one route that costs a player nothing is a dedicated server's `-serverMod`.** Server mods are
+not announced to clients, so nothing is downloaded, enabled or signature-checked on the joining
+player's side — an admin who installs iniDBI2 gets real files for free, and the campaign's players
+never learn it is there. That is worth building toward because the snapshot is a value rather than a
+format, so an extension writer is one alternative `setVariable` site. Three limits keep it optional
+rather than primary: it does nothing for singleplayer or a hosted session, where the host *is* the
+server and would have to install the binary themselves; iniDBI2's is a Windows C# DLL, so a Linux
+dedicated box needs the community port; and a mission that only saves when an extension is present
+fails exactly the no-hard-dependency rule. The vanilla path has to be complete on its own first, and
+this plan is that path.
+
+The Workshop's "required items" does not soften any of this: it subscribes the dependency, and the
+player still has to tick it in the launcher before the scenario will run with it.
 
 ## When the save is written, and what happens with nobody on
 
@@ -215,7 +251,11 @@ doing.
 1. **Prove the store on a dedicated server.** Dedicated servers have historically written
    profile-namespace variables to disk correctly and failed to read them back on the next start.
    That is reported fixed, and the entire plan rests on it. Write one key, restart, read it: this
-   is a ten-minute check and every other task assumes its answer.
+   is a ten-minute check and every other task assumes its answer. **Run it with a fixed `-profiles`
+   and `-name`.** The namespace is read back for the profile that wrote it, so a server whose profile
+   identity moves between starts saves each session under a different one and presents as the engine
+   bug rather than as a launch-parameter mistake — and a probe that does not control for it cannot
+   tell the two apart.
 2. **Make `fnc_fob_server` replayable.** It needs an optional name, for the naming reason in the
    table above. Silencing its announcement belongs on `fnc_duws_dialogue`, not here: a restore
    replays several builders, and a per-function flag has to be re-invented at every one of them.
@@ -249,9 +289,15 @@ table above: anything the replay rebuilds must not also be restored, or it is do
 
 | Group | Kind | Contents |
 |---|---|---|
-| Identity | — | format version, `worldName`, campaign start time |
+| Identity | — | format version, `worldName`, campaign start time, UTC write stamp |
 | Server config | input | every global the setup screens broadcast |
 | Callsign | input | `duws_callsign` |
+
+**The write stamp is `systemTimeUTC`, and it is a label and a tiebreak, nothing else.** The load
+screen has to say how old a save is, and two carried copies of one campaign need an ordering; UTC
+rather than `systemTime` so a save that crosses a time zone still compares correctly. Nothing gates
+on it — the rule against absolute stamps above exists because `diag_tickTime` restarts with the
+process, and a wall clock does not.
 
 **The server-config group is defined by a name list, not by enumeration in prose.** The setup
 screens publish roughly thirty globals across `client/dialog/fnc_process_campaign_menu.sqf:480-515`
@@ -479,50 +525,90 @@ rule above.
 The restore path must not rebuild anything itself. It sets state, then lets the normal builders
 run. There is exactly one code path that builds a zone, and it stays that way.
 
-**Resume is the default, and the prompt is a confirmation rather than a fork.** A dedicated server
-restarting unattended has nobody to ask; a hosted session has the host sitting at the setup screens
-and asking them costs nothing. One mechanism covers both, and it branches on whether an answer
-arrives rather than on what kind of server this is:
+### The load screen
 
-- The early gate loads the snapshot, raises `DUWST_restoring`, and publishes a one-line summary of
-  what is in it — day, zones held, CP — so a client can describe the campaign it is about to
-  resume rather than offering an unlabelled choice.
-- The game master's setup entry (`client/client_init.sqf:95-113`) shows the screen when that flag
-  is up, in front of `fnc_startup_faction_flow`. Resume skips the setup flow entirely; New campaign
-  clears the key, drops the flag, and calls `fnc_startup_faction_flow` exactly as today.
-- Everyone else waits where they already wait. Non-game-master clients block on
-  `HQ_pos_found_generated && chosen_settings` (`client/client_init.sqf:139-143`) and need no
-  knowledge of the screen at all — a resume satisfies both flags the same way a finished setup
-  does.
+**The first setup screen is a fork: New Game or Load Game.** It is shown to the game master —
+`game_master = ["player1"]` (`server/server_var_init.sqf:331`), so the singleplayer player is one —
+one link ahead of `fnc_startup_faction_flow`, and it is shown every campaign rather than only when a
+save exists. A screen that appears only sometimes is one players do not know they have, and it is
+also the only place an import can live: a machine with no save of its own is exactly the machine that
+needs to bring one in.
+
+- **New Game** runs the existing setup flow — faction, HQ placement, environment, callsign —
+  unchanged.
+- **Load Game** is disabled, with the reason on the control, when the server has no valid snapshot.
+  With one, the control carries what is in it: world, day, zones held, CP, and how long ago it was
+  written. An unlabelled choice is not a choice.
+- **Import** takes a snapshot from this client's own profile or from a pasted string, validates it,
+  and enables Load Game. Export is not here: a player exporting has a campaign running, so it
+  belongs with the in-session save controls.
+
+**New Game does not wipe the save; the first write overwrites it.** This is one misclick from
+destroying a campaign, and nothing is bought by destroying it at the click rather than when the new
+campaign's first save lands — `_prev` then keeps the old one one interval longer still. The
+confirmation stays, because choosing New Game over a save is choosing to lose it; what changes is
+that misreading the confirmation costs the session being started rather than the campaign already
+played.
+
+**`_prev` is visible here.** If the primary key fails validation the screen offers the previous
+snapshot, named as such, rather than silently loading it or silently refusing.
 
 **The screen is one more dialog in the chain, not a new mechanism.** `shared/includes/` holds one
-`.hpp` per screen, each `idd = -1`, each closing through an `onUnload` that spawns the next step —
-which is exactly how `fnc_startup_faction_flow` chains HQ placement into the faction prompts into
-the environment menu. A load screen is a two-button member of that chain placed one link earlier,
-and building it any other way means inventing a second setup idiom for one screen.
-- The gate waits for the answer on the same `fnc_waitLogged` pattern as every other setup gate, and
-  the timeout resumes. The bound is short while no player is connected and extends to the
-  setup-screen bound once one is, so an unattended restart is not delayed by a screen nobody can
-  see and a host is not raced past by a timer.
+`.hpp` per screen, each `idd = -1`, each disabling ESC through an `onLoad` `KeyDown` handler, each
+closing through a handler that spawns the next step — which is exactly how
+`fnc_startup_faction_flow` chains HQ placement into the faction prompts into the environment menu.
+The load screen is one more member of that chain, placed one link earlier, and building it any other
+way means inventing a second setup idiom for one screen. Eating ESC matters more here than on
+the others: escaping this one leaves boot blocked on a question with no answer.
 
-Two properties make the timeout safe rather than merely convenient. Resuming without asking is
-recoverable — the player starts a new campaign one screen later — where starting fresh without
-asking destroys the save. And nothing is written until `mission_init_complete`, so a resume the
-player did not want does not overwrite what it restored from.
+### Nobody at the screen
 
-**New campaign wipes a save, so it confirms.** It is the only destructive control in the flow, and
-it is one click away from the button most players will press every session.
+A dedicated server restarting unattended has no game master connected, and coming back up on its own
+campaign is the checkpoint the whole dedicated story rests on. So the screen has a timeout, on the
+same `fnc_waitLogged` pattern as every other setup gate, and **the timeout loads when a snapshot
+exists and starts a new campaign when none does.** The bound is short while no player is connected
+and extends to the setup-screen bound once one is, so an unattended restart is not delayed by a
+screen nobody can see and a host is not raced past by a timer.
 
-Three hooks, in boot order.
+Two properties make defaulting to Load safe rather than merely convenient. Loading without asking is
+recoverable — the player picks New Game at the next restart — where starting fresh without asking is
+the destructive branch. And nothing is written until `mission_init_complete`, so a load the player
+did not want does not overwrite what it read.
 
-**An early gate in `server_init.sqf`, between `:9` and `:15`.** After `server_var_init` so the
-snapshot overwrites the defaults, before the terrain survey so it can be skipped. It decides
-whether a valid snapshot exists, publishes the settings and placement inputs, and raises a
-`DUWST_restoring` flag the later hooks read. It has to sit this early because the setup gates at
-`:46,52` block on globals a *client* publishes. Note that those are now `fnc_waitLogged` loops
-rather than bare `waitUntil`s, which makes the restore simpler than it was: setting
-`chosen_hq_placement` and `createzone_server` true in the gate satisfies them immediately, so
-nothing has to branch around them.
+**Everyone else waits where they already wait.** Non-game-master clients block on
+`HQ_pos_found_generated && chosen_settings` (`client/client_init.sqf:139-143`) and need no knowledge
+of the screen at all — a load satisfies both flags the same way a finished setup does.
+
+### Hooks, in boot order
+
+**An early gate in `server_init.sqf`, between `:9` and `:15`.** After `server_var_init` so a snapshot
+overwrites the defaults, before the terrain survey so the survey can be skipped. It has to sit this
+early because the setup gates at `:46,52` block on globals a *client* publishes. Because the answer
+now comes from a player, the gate is three steps rather than one:
+
+1. **Scan.** Read the key, validate version and world, publish the summary the load screen labels
+   its Load control with. An absent or invalid snapshot publishes an *empty* summary rather than
+   nothing at all: the client waits on this variable, and a variable that is never set is
+   indistinguishable from a server still working.
+2. **Wait — but only when there is something to load.** On an empty summary the gate returns
+   immediately and boot proceeds exactly as today. That is not a micro-optimisation:
+   `fnc_moreUrban_locations` is `spawn`ed at `:15` and has been recorded taking 140 s, and today it
+   runs *while* the player is in the setup screens. Blocking ahead of it on every campaign would move
+   that 140 s out from behind the screens and into the player's wait.
+3. **Apply, on Load only.** Publish the settings and placement inputs, raise `DUWST_restoring` for
+   the later hooks, and set `chosen_hq_placement` and `createzone_server` true — those gates are now
+   `fnc_waitLogged` loops, so satisfying them clears them immediately and nothing has to branch
+   around them. Skip the terrain survey. On New Game none of this happens and the gate is a no-op.
+
+The client must **wait** for the summary rather than sample it. A joining client is sent every
+`publicVariable`'d global and then runs its own init over the top
+([`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md#a-joining-client-is-sent-every-publicvariabled-global-then-its-own-init-overwrites-them)),
+so a screen that reads the variable once at boot can read back the default it just wrote itself.
+
+**The fork lives inside the existing game-master block** (`client/client_init.sqf:95-113`), with that
+block's current contents — `fnc_startup_faction_flow` and its `chosen_settings` wait — moving into
+the New Game branch. Load needs no client-side flag of its own: the branch it is not in is the one
+that opens the setup screens.
 
 **Zone replay, at `server/warcom/fnc_init_OPFOR_WARCOM.sqf:8-16`,** where the guard already is:
 
@@ -586,11 +672,11 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 | File | Change |
 |---|---|
 | `server/misc/fnc_campaign_save.sqf` | New. Builds the snapshot array and writes the namespace key. |
-| `server/misc/fnc_campaign_restore.sqf` | New. Reads it, validates version and world, sets globals, replays builders. |
+| `server/misc/fnc_campaign_restore.sqf` | New. Reads it, validates version and world, sets globals, replays builders. The same validation is what an imported snapshot goes through. |
 | `server/misc/fnc_campaign_vehicles.sqf` | New. Collects and respawns the stockpile around each anchor. |
 | `server/misc/fnc_autoSave.sqf` | Rewritten to call the new save; drop `saveGame`. Owns the interval loop and the no-overlap guard. |
 | `server/supports/fnc_sitrep_support.sqf:13` | Nothing here for persistence — it already asks the server to save. Its price and cooldown are [`ap_economy_plan.md`](ap_economy_plan.md#sitrep-becomes-free)'s business. |
-| `server/server_init.sqf` | Early restore gate before `:15`; save triggers and the disconnect/end event handlers. Keep `enableSaving [false,false]` at `:113`; the engine save is no longer the mechanism. |
+| `server/server_init.sqf` | Early gate before `:15` — scan, wait for the fork, apply; save triggers and the disconnect/end event handlers. Keep `enableSaving [false,false]` at `:113`; the engine save is no longer the mechanism. |
 | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:8-16,54,97` | Branch to the restore path for zones; feed saved towns to civilian init; replay ownership and reveal after `WARCOM_init_done`. |
 | `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name; the announcement is silenced by the router, not a flag here. |
 | `client/misc/fnc_duws_dialogue.sqf` | Suppress mode, so replayed builders announce nothing at boot. |
@@ -598,10 +684,10 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 | `client/client_init.sqf:449` | Loadout save keys on player UID, not the player object. |
 | `server/server_fnc_init.sqf` | Registry lines; the support-unlock mirror writer; the settings name list. |
 | `server/server_var_init.sqf` | Persistence-zone radius and per-anchor cap. |
-| `client/client_init.sqf:95-113` | Resume screen ahead of `fnc_startup_faction_flow`, game master only. |
+| `client/client_init.sqf:95-113` | The New Game / Load Game fork at the top of the block, game master only; the existing faction flow moves into the New Game branch. |
 | `shared/includes/params_modern.hpp` | `DUWS_AutosaveInterval`, seconds, `0` for off, default 900. |
-| `shared/includes/campaign_load_menu.hpp` | New. The load screen, in the existing setup-dialog idiom; `#include`d from `description.ext`. |
-| `client/dialog/` | Its handlers and wipe confirmation; save export and import. |
+| `shared/includes/campaign_load_menu.hpp` | New. The fork screen — New Game, Load Game, Import — in the existing setup-dialog idiom; `#include`d from `description.ext`. |
+| `client/dialog/` | Its handlers, the New Game confirmation, and import from a carried profile or a pasted string. |
 | `description.ext` | `missionGroup = "DUWS_T";` |
 | `info/architecture.md:122` | Replace the "vanilla `saveGame` only" persistence row. |
 | `KNOWN_ISSUES.md` | Drop the save/reload row once it passes. |
@@ -618,9 +704,9 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 - [ ] Add loadouts, support unlocks and cooldowns. Verify: a cooldown stamped just before the save has roughly its remaining time left after it, not the whole duration and not a wedged action.
 - [ ] Add the autosave loop, its parameter and the other three triggers. Verify: changing `DUWS_AutosaveInterval` in the lobby changes the observed write cadence in the `.rpt`; two triggers firing together produce one write, not two; at `0` the loop never fires but SITREP and a clean exit still write.
 - [ ] Add the zero-player gate. Verify: the campaign clocks stop with nobody connected and resume on join; a snapshot is written on the last disconnect; a connected headless client does not count as a player.
-- [ ] Add the resume screen and its timeout. Verify: a hosted host is asked and can decline; a dedicated server with nobody connected resumes without waiting on the screen; declining wipes the save only after a confirmation.
+- [ ] Add the fork screen and its timeout. Verify: the screen is the first thing a game master sees on every campaign, singleplayer included; Load Game is disabled with a reason when there is no snapshot and labelled with world, day, zones and CP when there is; New Game runs the old setup flow untouched and only confirms when a save exists; a dedicated server with nobody connected loads without waiting out the full bound; a fresh campaign is not made to wait on the screen before the terrain survey starts.
 - [ ] Version and world guards: refuse a snapshot from a different map or format version and start fresh with a logged warning.
-- [ ] Add export and import. Verify: a save exported on one machine restores a campaign on another, and an oversized snapshot either survives the edit control or is chunked.
+- [ ] Add export and import. Verify: a campaign carried in a client's own profile restores on a different server with nothing pasted; a hand-edited carried snapshot is refused rather than loaded; the clipboard fallback round-trips, and an oversized snapshot either survives the edit control or is chunked.
 - [ ] On a dedicated server ([`info/dedicated_server_setup.md`](info/dedicated_server_setup.md)): play, restart, confirm the campaign continues. This cannot be validated by a hosted session — a host is both server and client and will mask locality faults.
 
 ## Decided trade-offs
@@ -628,6 +714,12 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 **A restore is a fresh world with an old ledger.** Enemy garrisons, side missions and support in
 flight are all lost. A player who restarts mid-firefight reappears with the zone unclaimed and the
 garrison regenerated. Persisting the fight itself is a different and much larger project.
+
+**The fork screen shows even when there is nothing to load.** It costs a click on every fresh
+campaign. It buys a control players know exists, the only sensible home for import, and one code
+path instead of a screen that appears conditionally — and the alternative, loading by default and
+asking only for confirmation, hides the decision behind a button whose meaning changes between
+sessions.
 
 **Save on a timer, not on every change.** Writing the snapshot per CP change would put a
 serialisation on the hot path of the most frequently written global in the mission. A periodic
@@ -652,7 +744,8 @@ object is lost. The alternative is persisting object identity, which vanilla can
 ## Open questions
 
 - Whether the edit control survives a full-size snapshot on import, and at what size chunking
-  becomes necessary. This is the only part of the transfer story that cannot be settled on paper.
+  becomes necessary. It bounds the clipboard fallback only — the carry route never builds the string
+  — and it cannot be settled on paper.
 - Whether a per-anchor cap of 15 vehicles is generous or stingy. It wants a play-test, not an
   argument.
 - Where a player who wants to save *now* is sent. SITREP is that control today and it is a radio

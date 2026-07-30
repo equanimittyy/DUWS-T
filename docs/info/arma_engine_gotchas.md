@@ -80,6 +80,32 @@ displayNull])` — which also detects a dialog closed elsewhere. The faction sel
 its reused dialog handle this way, in `fnc_factionSelector`
 (`src/duws/shared/factions/MODERN/fn_factionAutoDetect.sqf`).
 
+## Nothing in SQF writes a file, and an extension cannot be shipped inside a mission PBO
+
+**The only durable write targets a mission can reach on its own are the profile-backed
+namespaces (`profileNamespace`, `missionProfileNamespace`) and the clipboard. There is no
+file-write command, and the `callExtension` route out of that is unavailable to a mission
+because the engine never looks inside a PBO for the binary.**
+
+Every file-based persistence library for Arma — iniDBI2, extDB, FileXT — is a compiled
+extension for exactly this reason, not by preference. The engine resolves an extension only
+from the root of a loaded mod folder or the game install directory, and a mission PBO is
+neither searched nor unpacked to disk, so "vendor the dependency into the PBO" reaches a
+file in no form. Script libraries vendor fine (`src/modules/`); their ceiling is still the
+namespace.
+
+The clipboard is a one-way door in the same way: `copyToClipboard` writes and nothing reads
+back, so every clipboard import ends at a human pasting into an edit control. That rules it
+out of any unattended path, whatever its size limits turn out to be.
+
+**How to apply:** treat `missionProfileNamespace` as the store and design the payload as
+plain numbers, strings, booleans and arrays so `str` / `parseSimpleArray` round-trips it —
+then the store is one `setVariable` and an alternative writer costs nothing later. A
+dedicated server is the one deployment that can add a real file store invisibly, because a
+`-serverMod` extension is not announced to clients and needs nothing installed player-side;
+singleplayer and hosted sessions cannot, since the host is the server. Reasoning and the
+design built on it: [`../campaign_persistence_plan.md`](../campaign_persistence_plan.md#where-the-save-lives).
+
 ## `exitWith` exits the nearest loop or call scope, not the enclosing if/then
 
 **Inside a loop, `if (cond) exitWith {...}` terminates the whole loop — even when the

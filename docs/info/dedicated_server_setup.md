@@ -31,6 +31,12 @@ The `<name>.<world>.pbo` filename is load-bearing — Arma reads the terrain out
 [`campaign_persistence_plan.md`](../campaign_persistence_plan.md) lands. It is the directory you
 back up and the directory you copy a save out of.
 
+**Then keep `-profiles=` and `-name=` identical on every restart.** The profile namespace is read
+back for the profile that wrote it, so a server whose profile identity moves between starts files
+each session's save under a different one and finds nothing on the next boot. The symptom is a
+campaign that vanishes on restart while the writes were succeeding all along, which reads as an
+engine fault rather than as a launch line that changed.
+
 ## server.cfg
 
 ```cpp
