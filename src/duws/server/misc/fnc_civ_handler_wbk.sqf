@@ -58,10 +58,7 @@ if (_mode == "cleanup") exitWith {
     if (!(missionNamespace getVariable [_spawnedKey, false])) exitWith {
         if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Location %1 not spawned, ignoring", _locIndex]] call fnc_log; };
         missionNamespace setVariable [_pendingVar, false];
-        if (civ_current_active_location == _locIndex) then {
-            civ_current_active_location = -1;
-            publicVariable "civ_current_active_location";
-        };
+        [_locIndex] call fnc_civ_mode_releaseLock;
     };
 
     // 删除所有属于该城镇的单位
@@ -105,11 +102,8 @@ if (_mode == "cleanup") exitWith {
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Spawned key set to false, remaining cleared for %1", _locIndex]] call fnc_log; };
 
     // 释放互斥锁
-    if (civ_current_active_location == _locIndex) then {
-        civ_current_active_location = -1;
-        publicVariable "civ_current_active_location";
-        if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Lock released for location %1", _locIndex]] call fnc_log; };
-    };
+    [_locIndex] call fnc_civ_mode_releaseLock;
+    if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Lock released for location %1", _locIndex]] call fnc_log; };
 
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Finished for location %1", _locIndex]] call fnc_log; };
 };
@@ -118,96 +112,10 @@ if (_mode == "cleanup") exitWith {
 // 生成模式
 // ============================================
 if (_mode == "spawn") then {
-    if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Function called for location %1", _locIndex]] call fnc_log; };
-
-    // 互斥等待：只有锁空闲或本城镇已持锁才能继续
-    private _timeout = diag_tickTime + 600; // 10分钟超时
-    waitUntil {
-        sleep 2;
-        (civ_current_active_location == -1 || civ_current_active_location == _locIndex) || diag_tickTime > _timeout
-    };
-    if (diag_tickTime > _timeout) then {
-        if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Location %1 wait timeout, forcing spawn.", _locIndex]] call fnc_log; };
-    };
-
-    // 原子性获取锁：只有锁空闲时才设置为当前索引
-    if (civ_current_active_location == -1) then {
-        civ_current_active_location = _locIndex;
-        publicVariable "civ_current_active_location";
-        if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Lock acquired for location %1", _locIndex]] call fnc_log; };
-    } else {
-        if (civ_current_active_location == _locIndex) then {
-            if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Location %1 already holds lock, continuing.", _locIndex]] call fnc_log; };
-        } else {
-            // 超时后强制抢占
-            civ_current_active_location = _locIndex;
-            publicVariable "civ_current_active_location";
-            if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Location %1 force-acquired lock after timeout.", _locIndex]] call fnc_log; };
-        };
-    };
-
-    // 二次验证：玩家是否仍在区域内？
-    private _playersNow = allPlayers select { _x distance _centerPos < _triggerRadius };
-    if (count _playersNow == 0) exitWith {
-        ["ERROR", "WBK", format ["[Spawn] No players in location %1 after acquiring lock, aborting.", _locIndex]] call fnc_log;
-        if (civ_current_active_location == _locIndex) then {
-            civ_current_active_location = -1;
-            publicVariable "civ_current_active_location";
-        };
-    };
-
-    // 取消待处理清理
-    private _pendingVar = format ["civ_pending_cleanup_%1", _locIndex];
-    if (missionNamespace getVariable [_pendingVar, false]) then {
-        missionNamespace setVariable [_pendingVar, false];
-        if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Cancelled pending cleanup for %1 due to player re-entry", _locIndex]] call fnc_log; };
-    };
-
-    // 等待生成启用时间
-    if (isNil "civ_spawn_enabled_time") then {
-        waitUntil { !isNil "civ_spawn_enabled_time" };
-    };
-    private _enableTime = missionNamespace getVariable ["civ_spawn_enabled_time", 0];
-    if (_enableTime > time) then {
-        private _wait = _enableTime - time;
-        if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Delaying spawn for location %1 for %2 seconds", _locIndex, _wait]] call fnc_log; };
-        sleep _wait;
-    };
-
-    // 防重
     private _spawningKey = format ["civ_spawning_%1", _locIndex];
-    private _spawnedKey = format ["civ_spawned_%1", _locIndex];
 
-    if (missionNamespace getVariable [_spawningKey, false]) exitWith {
-        if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Location %1 is already spawning, skipping duplicate request", _locIndex]] call fnc_log; };
-        if (civ_current_active_location == _locIndex) then {
-            civ_current_active_location = -1;
-            publicVariable "civ_current_active_location";
-        };
-    };
-    missionNamespace setVariable [_spawningKey, true];
-
-    if (missionNamespace getVariable [_spawnedKey, false]) exitWith {
-        if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Location %1 already spawned, skipping", _locIndex]] call fnc_log; };
-        missionNamespace setVariable [_spawningKey, false];
-        if (civ_current_active_location == _locIndex) then {
-            civ_current_active_location = -1;
-            publicVariable "civ_current_active_location";
-        };
-    };
-    missionNamespace setVariable [_spawnedKey, true];
-
-    // 读取人口
-    private _targetPop = missionNamespace getVariable [format ["civ_pop_%1", _locIndex], 0];
-    if (_targetPop <= 0) exitWith {
-        if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Target population for location %1 is %2, skipping spawn", _locIndex, _targetPop]] call fnc_log; };
-        missionNamespace setVariable [_spawnedKey, false];
-        missionNamespace setVariable [_spawningKey, false];
-        if (civ_current_active_location == _locIndex) then {
-            civ_current_active_location = -1;
-            publicVariable "civ_current_active_location";
-        };
-    };
+    ([_locIndex, _centerPos, _triggerRadius, "WBK"] call fnc_civ_mode_spawnGate) params ["_gateOk", "_targetPop"];
+    if (!_gateOk) exitWith {};
 
     // Zombies, not civilians: this mode keeps the one-shot fill and the kill-replacement pool the
     // civilian towns dropped, because a horde that thins out as it is cut down is the mode. It

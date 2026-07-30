@@ -904,6 +904,10 @@ fnc_civ_handler_ravage = compile preprocessFileLineNumbers "duws\server\misc\fnc
 publicVariable "fnc_civ_handler_ravage";
 fnc_civ_handler_wbk = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_handler_wbk.sqf";
 publicVariable "fnc_civ_handler_wbk";
+// Shared by the two mode handlers above and by nothing else -- fnc_civ_handler runs mod-free and
+// takes no mutex, so it must not reach these.
+fnc_civ_mode_releaseLock = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_mode_releaseLock.sqf";
+fnc_civ_mode_spawnGate = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_mode_spawnGate.sqf";
 // Server-only: every caller is a handler thread or its trigger, and the trigger already resolves
 // on the machine that runs the spawn. The recycle pass is RAVAGE and WBK's alone; the ceiling is
 // shared with the plain path.
