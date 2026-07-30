@@ -6,7 +6,8 @@
 // not that shape stay below as code: "varied" runs no fog at all and waits out a full cycle before
 // its loop starts, and "none" pins everything to zero.
 //
-// OvercastVar and FogArray stay global: they are the last values set, and other code reads them.
+// setOvercast and setFog self-synchronise from the server, so nothing here broadcasts: a client
+// wanting the current sky reads `overcast` / `fogParams`, which return the engine's own state.
 
 waitUntil {!isNil "CIV_PRESENCE"};
 
@@ -25,8 +26,7 @@ private _def = _climates getOrDefault [weather_type, []];
 if !(_def isEqualTo []) exitWith {
     _def params ["_firstRand", "_firstBase", "_loopRand", "_loopBase", "_fogRand", "_fogBase", "_fogFixed"];
 
-    OvercastVar = (random _firstRand) / 10 + _firstBase;
-    0 setOvercast OvercastVar;
+    0 setOvercast ((random _firstRand) / 10 + _firstBase);
     sleep 0.1;
     forceWeatherChange;
     sleep 0.1;
@@ -39,20 +39,17 @@ if !(_def isEqualTo []) exitWith {
             private _wait = random [3000, 3900, 4200];
 
             if (_fogFixed) then {
-                FogArray = [0.01, 0.01, 0.01];
-                1 setFog FogArray;
+                1 setFog [0.01, 0.01, 0.01];
             } else {
                 private _fogTime = (random 60) * 60;
                 private _intensity = (random _fogRand) / 10 + _fogBase;
                 if (_intensity < 0.01) then { _intensity = 0.01 };
                 private _height = (random 1) / 10;
                 if (_height < 0.1) then { _height = 0.1 };
-                FogArray = [_intensity, _height, 10];
-                _fogTime setFog FogArray;
+                _fogTime setFog [_intensity, _height, 10];
             };
 
-            OvercastVar = (random _loopRand) / 10 + _loopBase;
-            0 setOvercast OvercastVar;
+            0 setOvercast ((random _loopRand) / 10 + _loopBase);
 
             sleep _wait;
         };
@@ -66,7 +63,6 @@ switch (weather_type) do {
     // here as it always was.
     case "varied": {
         firstWeather = random 0.6;
-        OvercastVar = firstWeather;
         0 setOvercast firstWeather;
         sleep 0.1;
         forceWeatherChange;
@@ -77,8 +73,7 @@ switch (weather_type) do {
         [] spawn {
             while {true} do {
                 private _wait = random [3000, 3900, 4200];
-                OvercastVar = random 1;
-                0 setOvercast OvercastVar;
+                0 setOvercast (random 1);
                 sleep _wait;
             };
         };
@@ -88,10 +83,8 @@ switch (weather_type) do {
         [] spawn {
             while {true} do {
                 private _wait = random 1800;
-                FogArray = [0, 0, 10];
-                0 setFog FogArray;
-                OvercastVar = 0;
-                0 setOvercast OvercastVar;
+                0 setFog [0, 0, 10];
+                0 setOvercast 0;
                 sleep _wait;
             };
         };

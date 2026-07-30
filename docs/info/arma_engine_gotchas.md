@@ -400,6 +400,25 @@ they are not: `client/includes/supports_init.hpp` guards three flags and assigns
 unconditionally while `client/dialog/fnc_request_support.sqf` broadcasts all six
 ([`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#open-defects)).
 
+## Weather set on the server synchronises itself, so mirroring it into a global is dead state
+
+**`setOvercast`, `setFog` and `setDate` are artificially synchronised: run on the server, the
+engine propagates the change to every client and to joiners. A client that sets them locally is
+overridden by the server's value shortly after. Copying the value into a broadcast global adds
+nothing, and the copy rots the moment anyone forgets to re-broadcast it.**
+
+The failure is quiet in a way a normal stale global is not. A `publicVariable`'d weather mirror is
+usually broadcast once at init, when it holds a placeholder, and then written every cycle by the
+weather loop without a second broadcast — so remote readers keep receiving the placeholder forever
+while the sky they are looking at says something else. Nothing errors, because the writes are all
+legal and the local machine (server, or a host) always agrees with itself.
+
+**How to apply:** read the sky through `overcast` and `fogParams`, which return the engine's own
+synchronised state on any machine, and never mirror weather into a global. Only one script-driven
+weather change runs at a time — starting a `setOvercast` halts an in-flight `setFog` — so the
+engine's values are also the only ones that account for a transition being cut short. `setRain` is
+independent and can run alongside either.
+
 ## Waypoint and flight commands are ignored unless the group is local to that machine
 
 **`addWaypoint`, `deleteWaypoint`, `flyInHeight`, `setMass` and `ropeCreate` take effect only

@@ -170,9 +170,6 @@ failsafe_zones_not_found2 = false;//publicVariable "failsafe_zones_not_found2";
 // FOB_removed keeps fnc_fob_destroyed from running
 FOB_removed = false;//publicVariable "FOB_removed";
 
-// FogArray
-FogArray = [];publicVariable "FogArray";
-
 // allow TFs to begin assault, hardcore mode will set false
 hardcore_visibleZone_found = true;publicVariable "hardcore_visibleZone_found";
 
@@ -215,9 +212,6 @@ opfor_ai_skill = [0.55,0.75];publicVariable "opfor_ai_skill";
 
 // declare opfor rifleman variable
 opfor_SOLDIER_X = "";
-
-// OvercastVar
-OvercastVar = 0;publicVariable "OvercastVar";
 
 // HQ chat
 PAPABEAR=[West,"HQ"];publicVariable "PAPABEAR";
