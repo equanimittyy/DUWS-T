@@ -26,22 +26,14 @@ The markers stay so the next round has somewhere to land. An empty block means t
 fully triaged.
 
 _BEGIN-USER_
-- A friendly element has arrived notification plays when BLUFOR enters a zone (get rid of noise)
-> Similar friendly element has left notification
-- OPFOR QRF airdrop feature (currently impl) causes performance issues with paratroopers - remove QRF feature in light of future OPFOR commander QRF tasking features
-- Captured blufor zone shows ugly green; better as BLUFOR blue
 - Need to ensure all vehicle taxis (helicopter, boat etc) have proper marker names TaxiWP1/TaxiWP2 sound a bit silly so normalise it to something tactical sounding like LZ (even if it's just WP Alpha, WP Bravo or something else if that's a bit too cheesy)
 - Taxi helicopter doesn't kick everyone out of the vehicle like the support caller when getting to LZ; so it should - boat taxi should follow same behaviour
-- BLUFOR randomly gets 1CP even while holding nothing
 - For a FOB deployment, anyone who is nearby (100m) should get a fade out/fade in (like the rest mechanic) to reduce how jarring it is when the FOB spawns in
 - FOBS and MHQs should get a zone radius similar to how the main HQ does; this is used to signify what will persist when players park their vehicles near these objects 
 - Redeployment for a FOB's guards and defences doesn't cost the same and isn't as simple as the HQ's; make them match
 - FOB Manager Fast Travel should also have the fade out/fade in (for the player that asks for the travel); ensure it also brings his AI squad mates (leave any players under him alone and they'll travel themselves; these players don't exist yet but wire this in for future support)
-- Remove the Fast Travel at the Map that lets you fast travel 200m near HQ
-- OPFOR spawns a foot QRF as soon as BLUFOR enters the zone; remove it
 - Add debug option to modify rep and view escalation similar to how we can modify AP/CP; feel free to merge into same window; should be able to click on a town and modify AP/CP or just pick from a list; whatever is lighter
 -> also want to be able to see/add/remove escalation numbers too, so how many destroyed houses, and the current map's house scale tiers for 0-11
-- 
 
 
 _END-USER_
@@ -256,7 +248,6 @@ Carried from the previous developer and left alone deliberately.
 - **`Land_GuardTower_02_F` reports one building position with a wrong Z**, and `modelToWorld`'s
   Z is unusable on it too. `server/init_hq/fnc_BluHQinit.sqf:348` combines model-space XY with
   world-space Z to place the tower garrison. The comment there records the reasoning.
-- **Zone selection can pick a centre that surprises BLUFOR.** Three WARCOM spawners
-  (`fnc_WARCOM_opf_patrol.sqf`, `fnc_WARCOM_opf_qrf.sqf`, `fnc_random_veh_opf_patrol.sqf`)
-  each place their units deliberately far from the zone centre to compensate. The underlying
-  selection is untouched..
+- **Zone selection can pick a centre that surprises BLUFOR.** Two WARCOM spawners
+  (`fnc_WARCOM_opf_patrol.sqf`, `fnc_random_veh_opf_patrol.sqf`) each place their units
+  deliberately far from the zone centre to compensate. The underlying selection is untouched.
