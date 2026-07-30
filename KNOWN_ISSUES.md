@@ -56,79 +56,6 @@ _BEGIN-USER_
 
 _END-USER_
 
-## The refactor branch: twenty-four code commits, none of them run
-
-A structural pass over `src/duws/` fixed eight defects on the way through. All of it passes
-`bash tests/run.sh`, which reads brackets, resolves paths and runs the pure-function unit layer —
-none of which can see a running mission. Eight of the commits change what the game does.
-
-Eleven checks cover the risk. Each names the commits it clears, so a failure points somewhere
-narrower than the whole branch.
-
-- [x] **Run one side mission end to end.** Covers the mission prologue and exit helpers, the shared
-      garrison, and corpse intel. Watch for: a mission that fails to find ground is immediately
-      re-requestable rather than locked for an hour; markers are deleted on completion; the reward
-      pays once. A sniper hunt's garrison should now drop searchable intel, which it never did
-- [x] **Open the HQ and FOB request menus, buy a unit and a vehicle from each — on a vanilla, a
-      modded and an auto-detected faction.** Covers the `getVariable` conversion, the guards added
-      beneath it, and the move to one array per faction. Rows must populate identically, and a row
-      with no faction entry behind it must refuse *before* charging rather than after. The three
-      faction kinds are three different writers: literal arrays, a third-party file that may still
-      use the old numbered names, and the detection loop that builds its list at runtime. All three
-      populating **both** menus is what allows the numbered fallback in `fnc_faction_rqst_list` to
-      be deleted; nothing static can confirm it, because these globals only exist at runtime
-- [x] **Check the five factions whose vehicle lists were truncated.** `SFP_DES`, `SFP_WDL`,
-      `TIOW_CADIAN_776`, `CFP_O_HEZBOLLAH` and `TFC_TEMP` each hid everything past a gap in their
-      numbering — `SFP_DES` offered 14 of 36. All 70 recovered entries must spawn the vehicle their
-      label names. `CFP_O_HEZBOLLAH` lists one classname under three different labels and prices and
-      `TIOW_CADIAN_776` lists two vehicles twice; both pre-date the recovery and were already
-      visible, so they are faction-data errors to correct rather than regressions
-- [x] **Buy a support, then try to buy it again.** Covers the table-and-driver rewrite. Every
-      support unlocks once, refuses a second purchase, respects the eight-slot radio cap, and
-      colours **its own** listbox row — HALO previously coloured the laser strike's
-- [x] **Build a FOB, let OPFOR approach it, then remove it.** Covers the trigger conversion: the
-      enemy warning still fires, and removal deletes the trigger rather than orphaning it
-- [x] **Capture a zone, leave, and let OPFOR return to it.** Covers the spawn-band table and the new
-      contact warning. Garrison sizes per radius band should be unchanged; a zone you hold now
-      reports enemy contact, and one you do not must stay silent
-- [x] **Rebuild the base from the HQ redeploy action.** Covers the extraction of `fnc_placeHQUnits`,
-      which now runs for both the first build and the rebuild. Tower, door, tent and guard-box
-      sentries stand where a fresh campaign puts them, the patrol walks its towers, 2 CP is charged
-      once, and the replacement MG and AA gun survive a cleanup sweep — the rebuild never registered
-      them with the composition stream, so they were not persistent and could be deleted
-- [x] **Open the strategic map twice, then force a mission from the debug menu.** Covers the one
-      definition table replacing four hand-synced ones. Seven of seventeen types are offered each
-      opening, each row launches the mission it names rather than a neighbour's, the cooldown-ready
-      notification names the right type, and every debug row forces the type its label claims
-- [x] **Enter and leave a RAVAGE town and a WBK town.** Covers the shared spawn gate. Both fill,
-      both clean up after their grace period, and a duplicate entry does not double-spawn. A WBK
-      town still holds the mutex until it empties, which is the open defect above, not a regression.
-      Then start a **plain** civilian campaign: it shares nothing with either and must be unchanged
-      _USER: Defer this, not going to test RAVAGE and WBK until base DUWS is complete and whole_
-- [x] **Board the killhouse and run it.** Covers moving 821 lines of composition into a data file
-      `#include`d by the builder. The range and its targets build at altitude as before. Re-import
-      one of the two compositions through `duws_eden.ps1` on Windows if convenient: the tool
-      resolves `zbase=` against the file holding the fence, which is why `_centerSpawnZ` moved too
-- [x] **Look at the sky at campaign start, then grep the RPT.** Covers two retired broadcast
-      globals. The opening overcast is set and forced during init, so a wrong sky shows at once; the
-      re-roll loop only runs every 50–70 minutes, which is not worth waiting out in a test session.
-      What matters in the log is that `OvercastVar` and `FogArray` appear nowhere — no
-      undefined-variable error naming either. The engine syncs weather from the server by itself,
-      which is the whole reason those two globals went
-      _USER: supplied RPT_
-
-Two of these need a dedicated server rather than a hosted session: one search per corpse *for the
-whole team* cannot be observed with one machine, and neither can the once-by-anyone claim behind it
-([`docs/info/testing.md`](docs/info/testing.md#testing-join-in-progress)).
-
-**What a single run covers.** Checks 1 and 4 to 11 all fit one plain campaign, roughly in the order
-the campaign hands them over: sky at start, HQ built, strategic map opened twice, a side mission run,
-a support bought twice, a zone taken and lost, a FOB built and removed, the base redeployed, the
-killhouse boarded. Everything else needs its own run — a campaign per faction kind for check 2, a
-campaign in each of RAVAGE and WBK plus a plain one for check 9, and one of the five named factions
-for check 3. Keep the `.rpt` from every run: several of these fail as a log line rather than as
-anything visible on screen.
-
 ## Composition streaming: the prop-position fix is unverified
 
 Every field a stowed composition's record carries has now been exercised, and only the positions
@@ -145,31 +72,43 @@ that place these props do both, which is why the drift appeared only across a st
 - [ ] Destroy a house as a **client** on a dedicated server and watch the escalation counter. No movement means `BuildingChanged` is local-only and escalation has never worked in dedicated MP — neither did the war-crimes script it replaced. Record it rather than working around it
 - [ ] Clear a garrison in a populated town. If the `WEST SEIZED` trigger never fires, CIVILIAN-side units are blocking it and the fallback is a condition trigger counting hostile units in `thisList`
 - [ ] Check the census line in the RPT on a new map, and confirm a single fire mission cannot advance an escalation level. Both numbers are logged on the first run
-- [ ] Start a RAVAGE or WBK campaign. Towns should carry a `Pop:`-only marker and a permanently neutral ellipse, spawn no garrison, never scale prices, and log no census line
 
 ## Hardcore intel: shipped, not yet exercised
 
 - [ ] Complete a rescue-pilot and a rescue-squad mission on a dedicated server and confirm each reveals a zone. These are the two sites that never paid out at all
+- [ ] On a dedicated server with two clients, have one player search a body and send the other over the same one. No search action may appear for the second, and one payout may land in total. The claim is taken server-side and broadcast, so an action still showing on the second machine means the broadcast never arrived. One machine cannot see either half of this ([`docs/info/testing.md`](docs/info/testing.md#testing-join-in-progress))
 - [ ] Die with a search attempt spent and respawn. The action must still be hidden, and must come back on the next economy tick and not before. Available again on respawn means `fnc_intel_search_restore` is not reaching the new body; never coming back means the UID entry is outliving the window it was stamped in
 - [ ] Die a few times in one window, then walk back over your own bodies. No second search action may appear on any of them — the strip in `onPlayerKilled.sqf` is what keeps this one action per player rather than one per death
 
-## Hardcore civilian towns: shipped, not yet exercised
+## RAVAGE and WBK: parked until base DUWS is whole
 
-Only one check is left, and it is a **RAVAGE or WBK** one. Those two modes are the only ones that
-give a town a presence trigger; a plain civilian campaign reveals towns from a polling thread on the
-server instead, which no client ever runs.
+Nothing here runs until base DUWS is complete: these are unticked by decision rather than by
+oversight. They are collected in one place because a campaign in each mode clears the lot, and
+because no plain campaign can stand in — only these two route a town's fill through
+`fnc_civ_mode_spawnGate`, and only they give a town a presence trigger.
 
-A trigger made by `createTrigger` is global by default, and a global trigger runs its activation
-statement on *every* machine — server and each client — not only on the machine that made it. That
-statement names `fnc_civ_town_reveal`. The function is broadcast, and it returns immediately on a
-client (`if (!isServer) exitWith {false}`), so a client running it is meant to be a harmless no-op.
-The doubt is timing: if a client's copy of the function has not arrived by the time that client's
-trigger fires, the statement names something that does not exist yet and the engine throws. Nothing
-breaks — the server reveals the town regardless — but the client's log fills up, and a broadcast
-arriving later than the first trigger it feeds is worth knowing about for its own sake.
+- [ ] Enter and leave a RAVAGE town and a WBK town. Both fill, both clean up after their grace
+      period, and a duplicate entry does not double-spawn. A WBK town holding the mutex until it
+      empties is the defect in [Open defects](#open-defects), not a failure of this check
+- [ ] Start a campaign in either mode. Towns should carry a `Pop:`-only marker and a permanently
+      neutral ellipse, spawn no garrison, never scale prices, and log no census line
+- [ ] Spawn a recruitable, then rejoin. Exactly one recruit action on it, not several — the JIP
+      queue's per-object keying, which only these two modes produce a subject for
 
-- [ ] In a RAVAGE or WBK campaign on a dedicated server, walk a **client** into a town and grep that
-      client's `.rpt` for `Undefined variable in expression: fnc_civ_town_reveal`
+The remaining check is a client-log one, and the reason it exists needs the trigger's locality. A
+plain civilian campaign reveals towns from a polling thread on the server, which no client ever
+runs; these two use a trigger instead. A trigger made by `createTrigger` is global by default, and
+a global trigger runs its activation statement on *every* machine — server and each client — not
+only on the machine that made it. That statement names `fnc_civ_town_reveal`. The function is
+broadcast, and it returns immediately on a client (`if (!isServer) exitWith {false}`), so a client
+running it is meant to be a harmless no-op. The doubt is timing: if a client's copy of the function
+has not arrived by the time that client's trigger fires, the statement names something that does
+not exist yet and the engine throws. Nothing breaks — the server reveals the town regardless — but
+the client's log fills up, and a broadcast arriving later than the first trigger it feeds is worth
+knowing about for its own sake.
+
+- [ ] On a dedicated server, walk a **client** into a town and grep that client's `.rpt` for
+      `Undefined variable in expression: fnc_civ_town_reveal`
 
 ## JIP queue: keyed, not yet exercised
 
@@ -190,7 +129,6 @@ yourself rejoining a dedicated server. "Rejoin" below means either.
 - [ ] Rejoin with the HQ built. All six HQ actions are present — quick change, map board, HQ building, medical tent, black market, redeploy — plus AI rearm on the tent. Three of these hang off one object and two off another, so a missing one is an id collision
 - [ ] Activate the repair and recycle stations, rejoin. Both actions are present: they resolve the same depot object from `HQ_repairDepot_netId`
 - [ ] Build a FOB, rejoin. Its action menu, fortify and guards entries are all present
-- [ ] Spawn a RAVAGE/WBK recruitable, rejoin. Exactly one recruit action on it, not several
 - [ ] Rest-heal and let a mission slot release a few times, then rejoin. No burst of stacked date/time OSDs
 
 **Boot path.** These gate everything above, so run them first.
@@ -296,6 +234,7 @@ dedicated server a manual act rather than an automatic one.
 | An unbounded `waitUntil` sits on the joiner's branch of the client boot | `client/client_init.sqf:140` | Blocks on `HQ_pos_found_generated && chosen_settings` with no timeout, reached only when `WARCOM_init_done` is false. It hints the player every five seconds, so the stall is visible; proceeding on a timeout would boot a client into a campaign whose settings never arrived. What it lacks is a log line |
 | `staminaEnabled` is read but never assigned anywhere in the mission | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:67` | The whole `format` throws on `Undefined variable in expression: staminaenabled`, so the campaign settings summary hint never displays for any player. Confirmed in an RPT at the moment generation completes. `client/misc/fnc_sitrep_display.sqf:33` reads the same variable behind an `isNil` guard, which is why only this site fails — either assign it at setup or drop it from the hint |
 | Buying the Mobile HQ and never designating one locks the team out of it permanently | `client/dialog/fnc_request_support.sqf:477`, `shared/functions/fnc_MHQ_destroyed.sqf:23` | The purchase clears `support_mobile_HQ_available` for everyone and hands the buyer a one-shot comm-menu token; the only path that sets the flag back waits on an MHQ that exists being destroyed. If the token is lost before it is spent — the buyer disconnecting being the certain case — no second purchase is possible and no MHQ exists to die, so the campaign has no Mobile HQ and 10 CP bought nothing. The three guards in `fnc_MHQ_select.sqf` hand the token back rather than consume it, so a bad target or an MHQ already being active cost nothing; losing the player is the case none of them can cover. Whether respawn also drops the token is unverified |
+| One classname is sold under three labels and prices | `shared/factions/MODERN/CFP_O_HEZBOLLAH_blufor.sqf:120,122,126` | "BTR-60P APC" at 25 CP, "MTLB-LV APC" at 28 and "BTR 60PB" at 35 all deliver `CFP_O_HEZBOLLAH_BTR_60PB_01`, so two of the three charge for a vehicle they do not hand over. Three rows were meant to be three vehicles and one classname was copied across all of them; the two missing classnames can only come from the mod, so this needs someone with CFP installed rather than a source edit |
 | WBK holds the campaign-wide town mutex for a town's whole occupancy | `server/misc/fnc_civ_handler_wbk.sqf` | The lock is taken in `fnc_civ_mode_spawnGate` and released only on the cleanup path, so a second WBK town cannot fill until the first empties or the gate's ten-minute timeout expires — a co-op pair splitting between two towns leaves one of them dead. RAVAGE releases immediately after its spawn burst and carries a comment recording that exact symptom as the reason. The two handlers were written separately and only the RAVAGE side was ever changed, so this is the same defect surviving in the copy nobody revisited. Left alone because making WBK match is a behaviour change, not a refactor, and WBK's one-shot fill may depend on the serialisation in ways only a play-test shows |
 
 ## Zone generation is slow at large radii

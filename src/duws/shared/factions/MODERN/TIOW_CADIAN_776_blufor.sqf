@@ -123,8 +123,6 @@ blufor_RQST_VEHICLES = [
 	["B_Truck_01_Repair_F","HEMTT Repair (50CP)",50],
 	["B_Truck_01_ammo_F","HEMTT Ammo (50CP)",50],
 	["B_Truck_01_fuel_F","HEMTT Fuel (50CP)",50],
-	["B_Truck_01_ammo_F","HEMTT Ammo (50CP)",50],
-	["B_Truck_01_fuel_F","HEMTT Fuel (50CP)",50],
 	["TIOW_Cad_LR_Battlecannon_776th_Blu","Leman Russ - Battlecannon (40CP)",40],
 	["TIOW_Cad_LR_Conqueror_776th_Blu","Leman Russ - Conqueror (45CP)",45],
 	["TIOW_Cad_LR_Demolisher_776th_Blu","Leman Russ - Demolisher (55CP)",55],
