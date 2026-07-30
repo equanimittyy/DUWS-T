@@ -41,22 +41,33 @@ _BEGIN-USER_
 
 _END-USER_
 
-## The refactor branch: sixteen code commits, none of them run
+## The refactor branch: twenty-four code commits, none of them run
 
-A structural pass over `src/duws/` fixed six defects on the way through. All of it passes
+A structural pass over `src/duws/` fixed eight defects on the way through. All of it passes
 `bash tests/run.sh`, which reads brackets, resolves paths and runs the pure-function unit layer —
-none of which can see a running mission. Six of the commits change what the game does.
+none of which can see a running mission. Eight of the commits change what the game does.
 
-Five checks cover the risk. Each names the commits it clears, so a failure points somewhere
+Eleven checks cover the risk. Each names the commits it clears, so a failure points somewhere
 narrower than the whole branch.
 
 - [ ] **Run one side mission end to end.** Covers the mission prologue and exit helpers, the shared
       garrison, and corpse intel. Watch for: a mission that fails to find ground is immediately
       re-requestable rather than locked for an hour; markers are deleted on completion; the reward
       pays once. A sniper hunt's garrison should now drop searchable intel, which it never did
-- [ ] **Open the HQ and FOB request menus, buy a unit and a vehicle from each.** Covers the
-      `getVariable` conversion and the guards added beneath it. Rows must populate identically, and
-      a row with no faction entry behind it must refuse *before* charging rather than after
+- [ ] **Open the HQ and FOB request menus, buy a unit and a vehicle from each — on a vanilla, a
+      modded and an auto-detected faction.** Covers the `getVariable` conversion, the guards added
+      beneath it, and the move to one array per faction. Rows must populate identically, and a row
+      with no faction entry behind it must refuse *before* charging rather than after. The three
+      faction kinds are three different writers: literal arrays, a third-party file that may still
+      use the old numbered names, and the detection loop that builds its list at runtime. All three
+      populating **both** menus is what allows the numbered fallback in `fnc_faction_rqst_list` to
+      be deleted; nothing static can confirm it, because these globals only exist at runtime
+- [ ] **Check the five factions whose vehicle lists were truncated.** `SFP_DES`, `SFP_WDL`,
+      `TIOW_CADIAN_776`, `CFP_O_HEZBOLLAH` and `TFC_TEMP` each hid everything past a gap in their
+      numbering — `SFP_DES` offered 14 of 36. All 70 recovered entries must spawn the vehicle their
+      label names. `CFP_O_HEZBOLLAH` lists one classname under three different labels and prices and
+      `TIOW_CADIAN_776` lists two vehicles twice; both pre-date the recovery and were already
+      visible, so they are faction-data errors to correct rather than regressions
 - [ ] **Buy a support, then try to buy it again.** Covers the table-and-driver rewrite. Every
       support unlocks once, refuses a second purchase, respects the eight-slot radio cap, and
       colours **its own** listbox row — HALO previously coloured the laser strike's
@@ -65,9 +76,29 @@ narrower than the whole branch.
 - [ ] **Capture a zone, leave, and let OPFOR return to it.** Covers the spawn-band table and the new
       contact warning. Garrison sizes per radius band should be unchanged; a zone you hold now
       reports enemy contact, and one you do not must stay silent
+- [ ] **Rebuild the base from the HQ redeploy action.** Covers the extraction of `fnc_placeHQUnits`,
+      which now runs for both the first build and the rebuild. Tower, door, tent and guard-box
+      sentries stand where a fresh campaign puts them, the patrol walks its towers, 2 CP is charged
+      once, and the replacement MG and AA gun survive a cleanup sweep — the rebuild never registered
+      them with the composition stream, so they were not persistent and could be deleted
+- [ ] **Open the strategic map twice, then force a mission from the debug menu.** Covers the one
+      definition table replacing four hand-synced ones. Seven of seventeen types are offered each
+      opening, each row launches the mission it names rather than a neighbour's, the cooldown-ready
+      notification names the right type, and every debug row forces the type its label claims
+- [ ] **Enter and leave a RAVAGE town and a WBK town.** Covers the shared spawn gate. Both fill,
+      both clean up after their grace period, and a duplicate entry does not double-spawn. A WBK
+      town still holds the mutex until it empties, which is the open defect above, not a regression.
+      Then start a **plain** civilian campaign: it shares nothing with either and must be unchanged
+- [ ] **Board the killhouse and run it.** Covers moving 821 lines of composition into a data file
+      `#include`d by the builder. The range and its targets build at altitude as before. Re-import
+      one of the two compositions through `duws_eden.ps1` on Windows if convenient: the tool
+      resolves `zbase=` against the file holding the fence, which is why `_centerSpawnZ` moved too
+- [ ] **Watch the weather change once.** Covers two retired broadcast globals. The sky and fog still
+      move on their cycle; on a dedicated server a client must see the same sky as the host
 
-Two of these need a dedicated server rather than a hosted session: one search per corpse *for the
-whole team* cannot be observed with one machine, and neither can the once-by-anyone claim behind it
+Parts of these need a dedicated server rather than a hosted session: one search per corpse *for the
+whole team* cannot be observed with one machine, neither can the once-by-anyone claim behind it, and
+weather reaching a machine that is not the one setting it is the same kind of claim
 ([`docs/info/testing.md`](docs/info/testing.md#testing-join-in-progress)).
 
 ## Composition streaming: the prop-position fix is unverified

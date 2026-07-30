@@ -42,9 +42,11 @@ would swamp the result: the 256-file `shared/factions/` tree, and
 `server/misc/fnc_factions_check_modern.sqf`, whose BLUFOR and OPFOR roster arrays are identical
 by design — its own header says so.
 
-**3,860 of 24,676 non-data lines are duplicated — 15.6%.** `server/missions/mission_threads/`
-carries 1,521 of those lines, 39% of all duplication in the tree, which is why that directory
-leads the plan.
+**The opening measurement was 3,860 of 24,676 non-data lines duplicated — 15.6%**, of which
+`server/missions/mission_threads/` held 1,521, or 39% of the tree's total. That is what set the
+order the work was taken in. It has not been re-run since, so read it as where this started rather
+than as where the tree stands: the mission threads, the support cases, the HQ placement routine and
+the two civilian mode handlers have all come out of that figure.
 
 ## The work itself
 
@@ -56,7 +58,7 @@ code used to look like.
 |---|---|
 | [`spawn_helpers_plan.md`](spawn_helpers_plan.md) | The OPFOR role-list builder duplicated four times, the two ways a unit is held in a building, and whether `fnc_garrisonBuildings` should widen after those come out |
 | [`registry_split_plan.md`](registry_split_plan.md) | The 50 function bodies living inside `server_fnc_init.sqf`, grouped into the subsystem files they name |
-| [`refactor_backlog_plan.md`](refactor_backlog_plan.md) | HQ placement implemented twice, the RAVAGE/WBK shared lines, the side-mission definition table, the faction request tables, composition schemas, and three open decisions |
+| [`refactor_backlog_plan.md`](refactor_backlog_plan.md) | The three composition row schemas, which need a Windows checkout to verify, and retiring the numbered faction-request fallback once three kinds of faction have been seen filling their menus |
 
 ## A convention rather than a task
 
