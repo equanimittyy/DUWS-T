@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"LOP_UA_Infantry_Rifleman_2";		//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"rhsgref_nat_grenadier_rpg";		//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"LOP_UA_Infantry_GL";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"LOP_US_Infantry_TL";				//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"LOP_US_Infantry_TL";				//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"rhsgref_nat_commander";			//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"rhsgref_nat_machinegunner";		//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"LOP_US_Infantry_Marksman";			//init_hq\fnc_HQguards

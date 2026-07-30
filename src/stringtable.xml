@@ -2623,20 +2623,6 @@
                 <Spanish>¡Civil asesinado!</Spanish>
                 <Chinesesimp>平民被杀了！</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_civloot">
-                <Original>A civilian is being frisked by a player</Original>
-                <English>A civilian is being frisked by a player</English>
-                <German>Ein Zivilist wird von einem Spieler durchsucht.</German>
-                <Spanish>Un civil está siendo registrado por un jugador.</Spanish>
-                <Chinesesimp>一个平民正被玩家搜身</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_civloot2">
-                <Original>Due to hostile actions, this town's reputation dropped by 1.</Original>
-                <English>Due to hostile actions, this town's reputation dropped by 1.</English>
-                <German>Wegen der feindseligen Handlungen von BLUFOR ist der Ruf gesunken.</German>
-                <Spanish>Debido a las acciones hostiles de BLUFOR, la reputación ha disminuido.</Spanish>
-                <Chinesesimp>由于蓝军的恶劣行径，声望降低。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_LOOT">
                 <Original>Search</Original>
                 <English>Search</English>
@@ -3832,46 +3818,6 @@
             </Key>
         </Container>
         <Container name="Side Missions">
-            <Key ID="STR_DUWS_T_supply_recovery">
-                <Original>Supply Recovery</Original>
-                <English>Supply Recovery</English>
-                <Chinesesimp>回收补给箱</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_supply_start">
-                <German>Action Squad, hier ist „Overlord 1-1“. Freundliche Einheiten haben gerade unsere gestohlene Munitionskiste in der Wildnis geortet. Rückt sofort aus, um sie zurückzuholen.</German>
-                <Spanish>Action Squad, aquí es «Overlord 1-1». Las fuerzas amigas acaban de localizar nuestro cajón de munición robado en el campo. Salid inmediatamente para recuperarlo.</Spanish>
-                <Chinesesimp>行动组。友军刚刚在野外定位到了我们被抢走的弹药箱。你们需要立刻出发将它抢回来。</Chinesesimp>
-                <Original>Alpha 1-1. Friendly forces have located our stolen ammo crate out in the wilderness. Move out and recover it.</Original>
-                <English>Alpha 1-1. Friendly forces have located our stolen ammo crate out in the wilderness. Move out and recover it.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_supply_start2">
-                <German>Action Squad, verstanden. Wir rücken sofort aus.</German>
-                <Spanish>Action Squad, recibido. Salimos inmediatamente.</Spanish>
-                <Chinesesimp>行动组收到，马上出发。</Chinesesimp>
-                <Original>Copy. Moving out.</Original>
-                <English>Copy. Moving out.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_supply_success">
-                <German>Action Squad an "Overlord 1-1", die Versorgungskiste wurde zum nächsten Stützpunkt geliefert.</German>
-                <Spanish>Action Squad a "Overlord 1-1", el cajón de suministros ha sido entregado a la base más cercana.</Spanish>
-                <Chinesesimp>"霸王1-1"，补给箱已经送到了最近的基地。</Chinesesimp>
-                <Original>To Overlord, the supply crate's been delivered to the nearest base.</Original>
-                <English>To Overlord, the supply crate's been delivered to the nearest base.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_supply_fail">
-                <German>Action Squad an "Overlord 1-1"... Die Versorgungskiste wurde von den Feinden zerstört.</German>
-                <Spanish>Action Squad a "Overlord 1-1"... El cajón de suministros ha sido destruido por el enemigo.</Spanish>
-                <Chinesesimp>"霸王1-1"...补给箱被敌人毁掉了...</Chinesesimp>
-                <Original>To Overlord... the supply crate's been destroyed.</Original>
-                <English>To Overlord... the supply crate's been destroyed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_supply_fail2">
-                <German>Verstanden. Zieht euch zurück. Sicherheit geht vor.</German>
-                <Spanish>Recibido. Retroceded. La seguridad es lo primero.</Spanish>
-                <Chinesesimp>收到，你们撤出来吧。安全第一。</Chinesesimp>
-                <Original>Copy. Break contact and come home.</Original>
-                <English>Copy. Break contact and come home.</English>
-            </Key>
             <Key ID="STR_DUWS_T_c0">
                 <German>Rettungs-Sturmtrupp</German>
                 <Spanish>Equipo de Asalto de Rescate</Spanish>
@@ -3990,41 +3936,6 @@
                 <Chinesesimp>突击指挥部</Chinesesimp>
                 <Original>Assault Command Post</Original>
                 <English>Assault Command Post</English>
-            </Key>
-            <Key ID="STR_DUWS_T_mortarspotter">
-                <German>Mörserbeobachter jagen</German>
-                <Spanish>Cazar observador de mortero</Spanish>
-                <Chinesesimp>猎杀迫击炮观察员</Chinesesimp>
-                <Original>Hunt Mortar Observer</Original>
-                <English>Hunt Mortar Observer</English>
-            </Key>
-            <Key ID="STR_DUWS_T_mortarspotter2">
-                <German>Bewege dich sofort, um den feindlichen Mörserbeobachter zu eliminieren.</German>
-                <Spanish>Muévete inmediatamente para eliminar al observador de mortero enemigo.</Spanish>
-                <Chinesesimp>立刻前往消灭敌人的迫击炮观察员。</Chinesesimp>
-                <Original>Kill the enemy mortar observer.</Original>
-                <English>Kill the enemy mortar observer.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_mortarspotter3">
-                <German>Mörser!</German>
-                <Spanish>Mortero!</Spanish>
-                <Chinesesimp>迫击炮！</Chinesesimp>
-                <Original>Mortar!</Original>
-                <English>Mortar!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_mortarspotter4">
-                <German>Action Squad, hier ist "Allseer". Radar hat gerade einen feindlichen Mörserbeobachter in eurer Nähe entdeckt. Rückt sofort aus, um ihn zu eliminieren.</German>
-                <Spanish>Action Squad, aquí es "Allseer". El radar acaba de detectar a un observador de mortero enemigo en vuestra proximidad. Salid inmediatamente para eliminarlo.</Spanish>
-                <Chinesesimp>行动组。就在刚刚，雷达在你们周边发现了敌人的迫击炮观察员。你们需要立刻出发歼灭他。</Chinesesimp>
-                <Original>Alpha 1-1. Radar's picked up an enemy mortar observer near your position. Move out and take him down.</Original>
-                <English>Alpha 1-1. Radar's picked up an enemy mortar observer near your position. Move out and take him down.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_mortarspotter5">
-                <German>Action Squad hier, Mörserbeobachter ausgeschaltet.</German>
-                <Spanish>Equipo de Acción aquí, observador de mortero eliminado.</Spanish>
-                <Chinesesimp>迫击炮观察员已被歼灭。</Chinesesimp>
-                <Original>To Overlord, mortar observer is down.</Original>
-                <English>To Overlord, mortar observer is down.</English>
             </Key>
             <Key ID="STR_DUWS_T_renwuqingli">
                 <German>Missionsbereiniger</German>
@@ -4320,8 +4231,8 @@
             </Key>
             <Key ID="STR_DUWS_T_MISSION_COOLDOWN">
                 <Chinesesimp>这个任务正处于冷却状态，剩余时间 %1 分 %2 秒</Chinesesimp>
-                <Original>This mission is on cooldown, %1 min %2 sec remaining.</Original>
-                <English>This mission is on cooldown, %1 min %2 sec remaining.</English>
+                <Original>This mission is on cooldown, %1 h %2 min of campaign time remaining.</Original>
+                <English>This mission is on cooldown, %1 h %2 min of campaign time remaining.</English>
             </Key>
             <Key ID="STR_DUWS_T_q3iy1vcz">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer Pilot wurde getötet !</German>
@@ -4731,13 +4642,13 @@
                 <Original>No building found. Please try again.</Original>
                 <English>No building found. Please try again.</English>
             </Key>
-            <Key ID="STR_DUWS_T_supply_recovery_desc">
-                <Original>Recover the supply cache at the marked position and bring it back to HQ or a FOB.</Original>
-                <English>Recover the supply cache at the marked position and bring it back to HQ or a FOB.</English>
+            <Key ID="STR_DUWS_T_enemy_contact_title">
+                <Original>Contact Report</Original>
+                <English>Contact Report</English>
             </Key>
-            <Key ID="STR_DUWS_T_zone_enemy_contact">
-                <Original>All units in the AO, enemy activity spotted at Zone %1, over.</Original>
-                <English>All units in the AO, enemy activity spotted at Zone %1, over.</English>
+            <Key ID="STR_DUWS_T_enemy_contact">
+                <Original>Enemies have been spotted near %1!</Original>
+                <English>Enemies have been spotted near %1!</English>
             </Key>
 </Container>
         <Container name="Support &amp; Radio">
@@ -5690,13 +5601,6 @@
                 <Original>FOB %1 to all units in the AO, taking contact at our position, over.</Original>
                 <English>FOB %1 to all units in the AO, taking contact at our position, over.</English>
             </Key>
-            <Key ID="STR_DUWS_T_hqwarning">
-                <German>Alle Einheiten im Einsatzgebiet, Feind um das HQ, über.</German>
-                <Spanish>Todas las unidades en la zona, enemigos alrededor del cuartel general, fuera.</Spanish>
-                <Chinesesimp>战区所有单位注意，总部周围发现敌情，完毕。</Chinesesimp>
-                <Original>All units in the AO, enemy activity spotted around HQ, over.</Original>
-                <English>All units in the AO, enemy activity spotted around HQ, over.</English>
-            </Key>
             <Key ID="STR_DUWS_T_supplydropcall">
                 <German>Action Squad an "Overlord 1-1" – Supply-Drop an meiner Position angefordert, over.</German>
                 <Spanish>Action Squad a "Overlord 1-1" – solicito supply drop en mi posición, over.</Spanish>
@@ -6272,6 +6176,14 @@
                 <Chinesesimp>行动组，补给投送已就绪。</Chinesesimp>
                 <Original>To Alpha 1-1, supply drop is ready.</Original>
                 <English>To Alpha 1-1, supply drop is ready.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fob_request_row">
+                <Original>Establish FOB (10 CP) Radio</Original>
+                <English>Establish FOB (10 CP) Radio</English>
+            </Key>
+            <Key ID="STR_DUWS_T_fobunlock">
+                <Original>To Alpha 1-1, FOB deployment is authorised. Each site costs 10 CP.</Original>
+                <English>To Alpha 1-1, FOB deployment is authorised. Each site costs 10 CP.</English>
             </Key>
             <Key ID="STR_DUWS_T_paradropunlock">
                 <German>"Overlord 1-1" an alle AO-Einheiten – Fallschirmjägertruppe ist im Einsatzgebiet angekommen und bereit.</German>
@@ -7746,8 +7658,8 @@
                 <German>Nachdem die BLUFOR-Streitkräfte die erste Operationszone erobert haben, kann der Spielerkommandant eine FOB für 10 CP errichten. Die FOB sichert die Logistik an abgelegenen Orten abseits des Hauptquartiers. Das Errichten einer FOB erzeugt zudem eine Garnison und warnt dich, wenn sich Feinde in der Nähe befinden. Um eine FOB zu errichten, muss die Umgebung um dich herum innerhalb eines 500-Meter-Radius feindfrei sein. Nutze das Unterstützungsmenü (0,8) und wähle „FOB errichten“ aus. Die FOB wird in der Richtung eingesetzt, in die du blickst.</German>
                 <Spanish>Una vez que las fuerzas BLUFOR hayan capturado la primera zona operativa, el jugador comandante puede establecer una FOB por 10 CP. La FOB asegura la logística en lugares remotos alejados del cuartel general. Establecer una FOB también genera una guarnición y te avisa si hay enemigos cercanos. Para establecer una FOB, la zona a tu alrededor debe estar libre de enemigos en un radio de 500 metros. Usa el menú de apoyo (0,8) y selecciona «Establecer una FOB». La FOB se desplegará en la dirección a la que estás mirando.</Spanish>
                 <Chinesesimp>蓝方部队占领了第一个战区后，玩家指挥官将可以用10 CP设立一个FOB。FOB在基地外的偏远地点保障后勤。建立FOB也会产生守备部队，并在附近有敌人时发出警告。要建立FOB，你周围的区域必须在500米半径范围内远离敌人。使用支援菜单(0,8)并选择“建立FOB”。FOB将部署在你正在寻找的方向。</Chinesesimp>
-                <Original>After BLUFOR forces have captured the first operational zone, the player commander can establish a FOB for 10 CP. The FOB secures logistics in remote locations away from headquarters. Establishing a FOB also spawns a garrison force and alerts you when enemies are nearby. To establish a FOB, the area around you must be clear of enemies within a 500-meter radius. Use the support menu (0,8) and select "Establish FOB". The FOB will be deployed in the direction you are looking.</Original>
-                <English>After BLUFOR forces have captured the first operational zone, the player commander can establish a FOB for 10 CP. The FOB secures logistics in remote locations away from headquarters. Establishing a FOB also spawns a garrison force and alerts you when enemies are nearby. To establish a FOB, the area around you must be clear of enemies within a 500-meter radius. Use the support menu (0,8) and select "Establish FOB". The FOB will be deployed in the direction you are looking.</English>
+                <Original>After BLUFOR forces have captured the first operational zone, "Establish FOB" appears in the requests menu at HQ. Unlock it there for 10 CP; each FOB then costs a further 10 CP. The FOB secures logistics in remote locations away from headquarters. Establishing a FOB also spawns a garrison force and alerts you when enemies are nearby. To establish a FOB, the area around you must be clear of enemies within a 500-meter radius. Use the support menu (0,8) and select "Establish FOB". The FOB will be deployed in the direction you are looking.</Original>
+                <English>After BLUFOR forces have captured the first operational zone, "Establish FOB" appears in the requests menu at HQ. Unlock it there for 10 CP; each FOB then costs a further 10 CP. The FOB secures logistics in remote locations away from headquarters. Establishing a FOB also spawns a garrison force and alerts you when enemies are nearby. To establish a FOB, the area around you must be clear of enemies within a 500-meter radius. Use the support menu (0,8) and select "Establish FOB". The FOB will be deployed in the direction you are looking.</English>
             </Key>
             <Key ID="STR_DUWS_T_ryhnop2g">
                 <German>Überarbeitetes Nebenmissionssystem</German>
@@ -7837,8 +7749,8 @@
                 <German>Supply Drop (5CP zum Freischalten, 2CP pro Einsatz. Enthält Haupt-Infanterieausrüstung von BLUFOR.) Virtual Arsenal (10CP zum Freischalten. Das virtuelle Arsenal kann an Hauptquartieren, Mobilen Kommandoposten, Vorwärtsoperationbasen (FOBs) und Luftabwurf-Versorgungskisten genutzt werden.) Notfahrzeug-Airdrop (5CP zum Freischalten, 5CP pro Einsatz. Nach dem Ruf wirft ein freundlicher Hubschrauber ein ziviles Transportfahrzeug für den Anrufer ab.) Squad Infil Vehicle Airdrop (10CP zum Freischalten, 10CP pro Einsatz. Nach dem Ruf wirft ein freundlicher Hubschrauber ein leicht bewaffnetes Fahrzeug der BLUFOR-Fraktion für den Anrufer ab.) Squad Assault Weapon Pack (10CP zum Freischalten, 10CP pro Einsatz. Nach dem Ruf wirft ein freundlicher Hubschrauber ein Paket für den Anrufer ab mit: 2 automatischen Granatentürmen, 1 Drohnenterminal, 1 ED-1D, 1 Laserdesignator.) HALO (15CP zum Freischalten.) Fahrzeug-Recycling-Station (5 CP zum Kauf, kostenlos pro Abruf. Nach der Bereitstellung erhält der Spieler die Fähigkeit zur Fahrzeugbergung.) Spezialaufklärungsdrohne (10CP zum Freischalten, 5CP pro Einsatz. Nach dem Ruf scannt eine freundliche Aufklärungsdrohne befreundete und feindliche Einheiten in Reichweite und synchronisiert ihre Positionen auf deiner Karte.) Hubschraubertransport (5CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf holt ein freundlicher Transporthubschrauber die Squad des Anrufers ab und transportiert sie.) Schwertransporthubschrauber-Fahrzeugtransport (10 CP zum Kauf des Zugangs, kostenlos pro Abruf. Nach dem Abruf holen befreundete Schwertransporthubschrauber das festgelegte Fahrzeug an den Zielort.)  Bootsverkehr (2CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf holt ein freundliches Bootsteam die Squad des Anrufers ab und transportiert sie. Diese Funktion hat manchmal Bugs.) 155mm-Artillerieunterstützung (20CP zum Freischalten, 10CP pro Einsatz. Nach dem Ruf bombardiert eine außerhalb der Karte liegende 155mm-Artilleriegruppe den angegebenen Ort des Anrufers eine Minute lang ununterbrochen.) Mörserunterstützung (10CP zum Freischalten, 5CP pro Einsatz. Nach dem Ruf bombardiert eine außerhalb der Karte liegende Mörsergruppe den angegebenen Ort des Anrufers eine Minute lang ununterbrochen.) JDAM-Bombe (10CP zum Freischalten, 3CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine JDAM-Bombe auf den angegebenen Ort des Anrufers ab.) Lasergelenkte Bombe (10CP zum Freischalten, 1CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine lasergelenkte Bombe auf den angegebenen Ort des Anrufers ab. Der Anrufer muss den Laserdesignator ständig auf das Ziel richten.) Mk.20-Clustergleitbombe (25CP zum Freischalten, 20CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine Mk.20-Clustergleitbombe auf den angegebenen Ort ab, die Flächenschaden verursacht.) Napalm-Bombe (20CP zum Freischalten, 15CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine Napalm-Bombe auf den angegebenen Ort ab, die anhaltendes Feuer verursacht und die KI-Pfadfindung stört.) High Command: Angriffshubschrauber (20CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf wird ein Angriffshubschrauber zum High-Command-System des Anrufers hinzugefügt. Der Anrufer kann nicht erneut rufen, bis der Angriffshubschrauber zerstört ist.) High Command: CAS-Starrflügelflugzeug (25CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf wird ein Close-Air-Support-Starrflügelflugzeug zum High-Command-System des Anrufers hinzugefügt. Der Anrufer kann nicht erneut rufen, bis das Flugzeug zerstört ist.) Airborne (20CP zum Freischalten, 12CP pro Einsatz. Nach dem Ruf wird eine Squad freundlicher Infanterie um den Anrufer abgeworfen und schließt sich seiner Squad an.) Mobiles HQ errichten (10CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf wird das Fahrzeug vor dem Anrufer in ein Mobiles HQ umgewandelt. Das Mobile HQ dient als Respawn-Punkt, wenn es eingesetzt ist.)</German>
                 <Spanish>Supply Drop (5CP para desbloquear, 2CP por uso. Contiene el equipo de infantería principal de BLUFOR.) Arsenal Virtual (10CP para desbloquear. El arsenal virtual se puede utilizar en el Cuartel General, los Puestos de Mando Móviles, las Bases de Operaciones Avanzadas (FOBs) y las cajas de suministro por airdrop.) Lanzamiento Aéreo de Vehículo de Emergencia (5CP para desbloquear, 5CP por uso. Al llamar, un helicóptero amigante lanzará un vehículo de transporte civil para el solicitante.) Lanzamiento Aéreo de Vehículo de Infiltración de Escuadra (10CP para desbloquear, 10CP por uso. Al llamar, un helicóptero amigante lanzará un vehículo ligero armado de la facción BLUFOR para el solicitante.) Paquete de Armas de Asalto de Escuadra (10CP para desbloquear, 10CP por uso. Al llamar, un helicóptero amigante lanzará un paquete para el solicitante que contiene: 2 torretas granaderas automáticas, 1 terminal de dron, 1 ED-1D, 1 designador láser.) Estación de Reciclaje de Vehículos (5 CP para comprar, gratuita cada llamada. Una vez desplegada, otorga al jugador la capacidad de recuperar vehículos.) HALO (15CP para desbloquear.) Dron de Reconocimiento Especial (10CP para desbloquear, 5CP por uso. Al llamar, un dron de reconocimiento amigante escaneará unidades amigantes y enemigas en rango y sincronizará sus posiciones en tu mapa.) Transporte en Helicóptero (5CP para desbloquear, uso gratuito. Al llamar, un helicóptero de transporte amigante recogerá y transportará al escuadra del solicitante.) Transporte de Vehículos con Helicóptero Pesado (10 CP para comprar acceso, gratuito cada llamada. Después de llamar, helicópteros pesados amigos izarán el vehículo designado hasta la ubicación objetivo.) Transporte en Barco (2CP para desbloquear, uso gratuito. Al llamar, un equipo de embarcaciones amigante recogerá y transportará al escuadra del solicitante. Esta función a veces tiene errores.) Apoyo de Artillería de 155mm (20CP para desbloquear, 10CP por uso. Al llamar, una batería de artillería de 155mm fuera del mapa bombardeará la ubicación designada por el solicitante de forma continua durante un minuto.) Apoyo de Mortero (10CP para desbloquear, 5CP por uso. Al llamar, un equipo de morteros fuera del mapa bombardeará la ubicación designada por el solicitante de forma continua durante un minuto.) Bomba JDAM (10CP para desbloquear, 3CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba JDAM en la ubicación designada por el solicitante.) Bomba Guiada por Láser (10CP para desbloquear, 1CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba guiada por láser en la ubicación designada por el solicitante. El solicitante debe mantener el designador láser apuntando al objetivo de forma continua.) Bomba de Racimo Mk.20 (25CP para desbloquear, 20CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba de racimo Mk.20 en la ubicación designada, causando daño en área amplia.) Bomba Napalm (20CP para desbloquear, 15CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba napalm en la ubicación designada, causando fuego continuo y perturbando la navegación de la IA.) Alto Mando: Helicóptero de Ataque (20CP para desbloquear, uso gratuito. Al llamar, un helicóptero de ataque se añadirá al sistema de Alto Mando del solicitante. El solicitante no podrá volver a llamar hasta que el helicóptero de ataque sea destruido.) Alto Mando: Avión de Ala Fija de Apoyo Aéreo Cercano (25CP para desbloquear, uso gratuito. Al llamar, un avión de ala fija de apoyo aéreo cercano se añadirá al sistema de Alto Mando del solicitante. El solicitante no podrá volver a llamar hasta que el avión sea destruido.) Airborne (20CP para desbloquear, 12CP por uso. Al llamar, un escuadra de infantería amigante será lanzada por paracaídas alrededor del solicitante y se unirá a su escuadra.) Establecer Cuartel General Móvil (10CP para desbloquear, uso gratuito. Al llamar, el vehículo frente al solicitante se convertirá en un Cuartel General Móvil. El Cuartel General Móvil actúa como punto de reaparición cuando está desplegado.)</Spanish>
                 <Chinesesimp>空投补给(5CP购买使用权，每次呼叫消耗2CP。补给内含一个受限制的虚拟军火库。)  虚拟军火库(10CP购买使用权。虚拟军火库可以在总部、机动指挥部、前线作战基地以及空投的补给箱里使用。)  紧急载具空投(5CP购买使用权，每次呼叫消耗5CP。呼叫后友军直升机会为呼叫者投放一辆民用运输载具。)  班组渗透载具空投(10CP购买使用权，每次呼叫消耗10CP。呼叫后友军直升机会为呼叫者投放一辆蓝方阵营的轻型武装车辆)  班组突击武器包(10CP购买使用权，每次呼叫消耗10CP。呼叫后友军直升机会为呼叫者投放包裹，内含：两架自动化榴弹机枪，一个无人机终端，一个ED-1D，一个激光指示器。)   空降(15CP购买使用权。)  特种无人侦察机(10CP购买使用权，每次呼叫消耗5CP。呼叫后友军无人侦察机会扫描范围内的友军和敌军单位，并同步位置到你的地图上。)  直升机运输(5CP购买使用权，每次呼叫免费。呼叫后友军运输直升机可以来接送呼叫者的小队。)  重型直升机载具运输 ( 10CP 购买使用权，每次呼叫免费。呼叫后友军重型直升机会来吊装指定载具到目标位置。) 船运(2CP购买使用权，每次呼叫免费。呼叫后友军舟艇小队可以来接送呼叫者的小队。有时这个功能会出bug。)  载具回收站 (5CP 购买，每次呼叫免费。部署后使玩家拥有载具回收能力。) 155毫米炮支援(20CP购买使用权，每次呼叫10CP。呼叫后地图外的155毫米炮炮组会朝着呼叫者给出的地点持续炮击一分钟。)  迫击炮支援(10CP购买使用权，每次呼叫5CP。呼叫后地图外的迫击炮炮组会朝着呼叫者给出的地点持续炮击一分钟。)  杰达姆炸弹(10CP购买使用权，每次呼叫3CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚杰达姆炸弹)  激光指导炸弹(10CP购买使用权，每次呼叫1CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚激光制导炸弹。呼叫者需要使用激光指示器持续对准目标。)  Mk.20集束炸弹(25CP购买使用权，每次呼叫20CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚Mk.20集束炸弹，造成大面积伤害。)  凝固汽油弹(20CP购买使用权，每次呼叫15CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚凝固汽油弹，造成持续性的燃烧并扰乱AI寻路。)  高级指挥攻击直升机(20CP购买使用权，每次呼叫免费。呼叫后，一架攻击直升机会添加到呼叫者的高级指挥系统里。呼叫者将无法再次呼叫，直到攻击直升机被摧毁。)  高级指挥近空支援固定翼飞机(25CP购买使用权，每次呼叫免费。呼叫后，一架近空支援固定翼飞机会添加到呼叫者的高级指挥系统里。呼叫者将无法再次呼叫，直到近空支援固定翼飞机被摧毁。)  空降部队(20CP购买使用权，每次呼叫消耗12CP。呼叫后，一队友军步兵将被空降到呼叫者周围并加入呼叫者的班组。)  建立机动指挥部(10CP购买使用权，每次呼叫免费。呼叫后，呼叫者面前的车辆会被改造为机动指挥部。机动指挥部部署时可以作为复活点。)</Chinesesimp>
-                <Original>Costs are in CP: price to unlock, then price per call.&lt;br/&gt;&lt;br/&gt;Supply Drop - 5 unlock / 2 per call: a crate of equipment with an Arsenal.&lt;br/&gt;Virtual Arsenal - 10 unlock: usable at HQ, MHQ, FOBs and airdropped supply crates.&lt;br/&gt;Emergency Vehicle Airdrop - 5 unlock / 5 per call: a helicopter drops a civilian transport vehicle.&lt;br/&gt;Squad Infil Vehicle Airdrop - 10 unlock / 10 per call: a helicopter drops a light armed BLUFOR vehicle.&lt;br/&gt;Squad Assault Weapon Pack - 10 unlock / 10 per call: a helicopter drops 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D and 1 laser designator.&lt;br/&gt;HALO - 15 unlock: high-altitude jump insertion.&lt;br/&gt;Special Recon Drone - 10 unlock / 5 per call: scans friendly and enemy units in range and marks them on your map.&lt;br/&gt;Helicopter Transport - 5 unlock / free per call: a transport helicopter picks up and moves your squad.&lt;br/&gt;Heavy Helicopter Vehicle Transport - 10 unlock / free per call: heavy helicopters lift a designated vehicle to a target location.&lt;br/&gt;Boat Transport - 2 unlock / free per call: a boat team picks up and moves your squad. Can be buggy.&lt;br/&gt;Vehicle Recycling Station - 5 unlock / free per call: once deployed, gives you vehicle recovery.&lt;br/&gt;155mm Artillery Support - 20 unlock / 10 per call: off-map guns shell your mark for one minute.&lt;br/&gt;Mortar Support - 10 unlock / 5 per call: an off-map mortar team shells your mark for one minute.&lt;br/&gt;JDAM Bomb - 10 unlock / 3 per call: one JDAM on your mark.&lt;br/&gt;Laser-Guided Bomb - 10 unlock / 1 per call: one guided bomb; keep the designator on the target throughout.&lt;br/&gt;Mk.20 Cluster Bomb - 25 unlock / 20 per call: wide-area damage on your mark.&lt;br/&gt;Napalm Bomb - 20 unlock / 15 per call: sustained fire on your mark, which also disrupts enemy pathfinding.&lt;br/&gt;High Command: Attack Helicopter - 20 unlock / free per call: adds one attack helicopter to your high command. No second call until it is destroyed.&lt;br/&gt;High Command: CAS Fixed-Wing - 25 unlock / free per call: adds one CAS aircraft to your high command. No second call until it is destroyed.&lt;br/&gt;Airborne - 20 unlock / 12 per call: an infantry squad drops around you and joins your squad.&lt;br/&gt;Establish Mobile HQ - 10 unlock / free per call: turns the vehicle in front of you into an MHQ, which acts as a respawn point once deployed.</Original>
-                <English>Costs are in CP: price to unlock, then price per call.&lt;br/&gt;&lt;br/&gt;Supply Drop - 5 unlock / 2 per call: a crate of equipment with an Arsenal.&lt;br/&gt;Virtual Arsenal - 10 unlock: usable at HQ, MHQ, FOBs and airdropped supply crates.&lt;br/&gt;Emergency Vehicle Airdrop - 5 unlock / 5 per call: a helicopter drops a civilian transport vehicle.&lt;br/&gt;Squad Infil Vehicle Airdrop - 10 unlock / 10 per call: a helicopter drops a light armed BLUFOR vehicle.&lt;br/&gt;Squad Assault Weapon Pack - 10 unlock / 10 per call: a helicopter drops 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D and 1 laser designator.&lt;br/&gt;HALO - 15 unlock: high-altitude jump insertion.&lt;br/&gt;Special Recon Drone - 10 unlock / 5 per call: scans friendly and enemy units in range and marks them on your map.&lt;br/&gt;Helicopter Transport - 5 unlock / free per call: a transport helicopter picks up and moves your squad.&lt;br/&gt;Heavy Helicopter Vehicle Transport - 10 unlock / free per call: heavy helicopters lift a designated vehicle to a target location.&lt;br/&gt;Boat Transport - 2 unlock / free per call: a boat team picks up and moves your squad. Can be buggy.&lt;br/&gt;Vehicle Recycling Station - 5 unlock / free per call: once deployed, gives you vehicle recovery.&lt;br/&gt;155mm Artillery Support - 20 unlock / 10 per call: off-map guns shell your mark for one minute.&lt;br/&gt;Mortar Support - 10 unlock / 5 per call: an off-map mortar team shells your mark for one minute.&lt;br/&gt;JDAM Bomb - 10 unlock / 3 per call: one JDAM on your mark.&lt;br/&gt;Laser-Guided Bomb - 10 unlock / 1 per call: one guided bomb; keep the designator on the target throughout.&lt;br/&gt;Mk.20 Cluster Bomb - 25 unlock / 20 per call: wide-area damage on your mark.&lt;br/&gt;Napalm Bomb - 20 unlock / 15 per call: sustained fire on your mark, which also disrupts enemy pathfinding.&lt;br/&gt;High Command: Attack Helicopter - 20 unlock / free per call: adds one attack helicopter to your high command. No second call until it is destroyed.&lt;br/&gt;High Command: CAS Fixed-Wing - 25 unlock / free per call: adds one CAS aircraft to your high command. No second call until it is destroyed.&lt;br/&gt;Airborne - 20 unlock / 12 per call: an infantry squad drops around you and joins your squad.&lt;br/&gt;Establish Mobile HQ - 10 unlock / free per call: turns the vehicle in front of you into an MHQ, which acts as a respawn point once deployed.</English>
+                <Original>Costs are in CP: price to unlock, then price per call.&lt;br/&gt;&lt;br/&gt;Supply Drop - 5 unlock / 2 per call: a crate of equipment with an Arsenal.&lt;br/&gt;Virtual Arsenal - 10 unlock: usable at HQ, MHQ, FOBs and airdropped supply crates.&lt;br/&gt;Emergency Vehicle Airdrop - 5 unlock / 5 per call: a helicopter drops a civilian transport vehicle.&lt;br/&gt;Squad Infil Vehicle Airdrop - 10 unlock / 10 per call: a helicopter drops a light armed BLUFOR vehicle.&lt;br/&gt;Squad Assault Weapon Pack - 10 unlock / 10 per call: a helicopter drops 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D and 1 laser designator.&lt;br/&gt;HALO - 15 unlock: high-altitude jump insertion.&lt;br/&gt;Special Recon Drone - 10 unlock / 5 per call: scans friendly and enemy units in range and marks them on your map.&lt;br/&gt;Helicopter Transport - 5 unlock / free per call: a transport helicopter picks up and moves your squad.&lt;br/&gt;Heavy Helicopter Vehicle Transport - 10 unlock / free per call: heavy helicopters lift a designated vehicle to a target location.&lt;br/&gt;Boat Transport - 2 unlock / free per call: a boat team picks up and moves your squad. Can be buggy.&lt;br/&gt;Vehicle Recycling Station - 5 unlock / free per call: once deployed, gives you vehicle recovery.&lt;br/&gt;155mm Artillery Support - 20 unlock / 10 per call: off-map guns shell your mark for one minute.&lt;br/&gt;Mortar Support - 10 unlock / 5 per call: an off-map mortar team shells your mark for one minute.&lt;br/&gt;JDAM Bomb - 10 unlock / 3 per call: one JDAM on your mark.&lt;br/&gt;Laser-Guided Bomb - 10 unlock / 1 per call: one guided bomb; keep the designator on the target throughout.&lt;br/&gt;Mk.20 Cluster Bomb - 25 unlock / 20 per call: wide-area damage on your mark.&lt;br/&gt;Napalm Bomb - 20 unlock / 15 per call: sustained fire on your mark, which also disrupts enemy pathfinding.&lt;br/&gt;High Command: Attack Helicopter - 20 unlock / free per call: adds one attack helicopter to your high command. No second call until it is destroyed.&lt;br/&gt;High Command: CAS Fixed-Wing - 25 unlock / free per call: adds one CAS aircraft to your high command. No second call until it is destroyed.&lt;br/&gt;Airborne - 20 unlock / 12 per call: an infantry squad drops around you and joins your squad.&lt;br/&gt;Establish Mobile HQ - 10 unlock / free per call: turns the vehicle in front of you into an MHQ, which acts as a respawn point once deployed.&lt;br/&gt;Establish FOB - 10 unlock / 10 per call: a forward base with its own garrison, patrol and logistics. Its row only appears once the first zone has been taken.</Original>
+                <English>Costs are in CP: price to unlock, then price per call.&lt;br/&gt;&lt;br/&gt;Supply Drop - 5 unlock / 2 per call: a crate of equipment with an Arsenal.&lt;br/&gt;Virtual Arsenal - 10 unlock: usable at HQ, MHQ, FOBs and airdropped supply crates.&lt;br/&gt;Emergency Vehicle Airdrop - 5 unlock / 5 per call: a helicopter drops a civilian transport vehicle.&lt;br/&gt;Squad Infil Vehicle Airdrop - 10 unlock / 10 per call: a helicopter drops a light armed BLUFOR vehicle.&lt;br/&gt;Squad Assault Weapon Pack - 10 unlock / 10 per call: a helicopter drops 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D and 1 laser designator.&lt;br/&gt;HALO - 15 unlock: high-altitude jump insertion.&lt;br/&gt;Special Recon Drone - 10 unlock / 5 per call: scans friendly and enemy units in range and marks them on your map.&lt;br/&gt;Helicopter Transport - 5 unlock / free per call: a transport helicopter picks up and moves your squad.&lt;br/&gt;Heavy Helicopter Vehicle Transport - 10 unlock / free per call: heavy helicopters lift a designated vehicle to a target location.&lt;br/&gt;Boat Transport - 2 unlock / free per call: a boat team picks up and moves your squad. Can be buggy.&lt;br/&gt;Vehicle Recycling Station - 5 unlock / free per call: once deployed, gives you vehicle recovery.&lt;br/&gt;155mm Artillery Support - 20 unlock / 10 per call: off-map guns shell your mark for one minute.&lt;br/&gt;Mortar Support - 10 unlock / 5 per call: an off-map mortar team shells your mark for one minute.&lt;br/&gt;JDAM Bomb - 10 unlock / 3 per call: one JDAM on your mark.&lt;br/&gt;Laser-Guided Bomb - 10 unlock / 1 per call: one guided bomb; keep the designator on the target throughout.&lt;br/&gt;Mk.20 Cluster Bomb - 25 unlock / 20 per call: wide-area damage on your mark.&lt;br/&gt;Napalm Bomb - 20 unlock / 15 per call: sustained fire on your mark, which also disrupts enemy pathfinding.&lt;br/&gt;High Command: Attack Helicopter - 20 unlock / free per call: adds one attack helicopter to your high command. No second call until it is destroyed.&lt;br/&gt;High Command: CAS Fixed-Wing - 25 unlock / free per call: adds one CAS aircraft to your high command. No second call until it is destroyed.&lt;br/&gt;Airborne - 20 unlock / 12 per call: an infantry squad drops around you and joins your squad.&lt;br/&gt;Establish Mobile HQ - 10 unlock / free per call: turns the vehicle in front of you into an MHQ, which acts as a respawn point once deployed.&lt;br/&gt;Establish FOB - 10 unlock / 10 per call: a forward base with its own garrison, patrol and logistics. Its row only appears once the first zone has been taken.</English>
             </Key>
             <Key ID="STR_DUWS_T_m204wqqq">
                 <German>Das nervige Kriegsverbrechersystem aus DUWS_X wurde entfernt und überarbeitet. Die Anzahl an Zivilisten (einschließlich bewaffneter Zivilisten) wurde ebenfalls stark erhöht. In DUWS_T führt ein zu niedriger Ruf nicht zu einer Reduzierung der CP/AP-Punkte oder einem Spielende. BLUFOR startet mit 1 Rufpunkt. Der Ruf sinkt, wenn Zivilisten sterben (aus irgendeinem Grund) oder Gebäude zerstört werden. Ist der Ruf negativ, bewaffnen sich Zivilisten und greifen BLUFOR an. Der Ruf erholt sich nicht automatisch; Spieler müssen Nebenmissionen zur Hilfe von Zivilisten erledigen, um Ruf zu erhalten. (Schätze deinen Ruf! Bewaffnete Zivilisten können extrem tödlich sein!)</German>

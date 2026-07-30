@@ -56,14 +56,12 @@ if (count _fadePlayers > 0) then {
 	["IN", _fadePlayers] call fnc_baseFade;
 };
 
-// create the patrols
-[_foundPickupPos, _size] spawn fnc_createpatrolFOB;
-[_foundPickupPos, _size] spawn fnc_createpatrolFOB;
-[_foundPickupPos, _size] spawn fnc_createpatrolFOB;
-
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_26nbk6p8"] remoteExec ["fnc_duws_dialogue", 0];
 
-// create some patrols
+// The garrison, and the one patrol that walks the perimeter with it. Three more groups used to be
+// spawned here on bis_fnc_taskPatrol circuits of their own, which scattered the FOB's infantry
+// across 170 m of open ground on separate random routes -- and none of them was rebuilt by the
+// reguard action, so a FOB that lost them never got them back.
 [_foundPickupPos, _fob] spawn fnc_guardsFOB;
 
 // No arrival trigger: it existed only to announce a friendly element reaching the FOB, and the

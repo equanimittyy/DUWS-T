@@ -57,6 +57,11 @@ if (count _buildingPositions < 4) then {
     };
 };
 
+// The operation-area ellipse every other thread draws. Sited on _targetpos rather than _randomPos
+// because that is what the start trigger and the end sweep below both use, so all three describe
+// one area. Drawn only once the 4-position rebuild above has settled which building it is.
+_markername2 = [_targetpos, _searchRadius] call fnc_missionMarkerData;
+
 // ----- 2. 放置平民（蓝方渔民，持续害怕动画）--------------------------------
 _civilianClass = "C_Man_Fisherman_01_F";
 _civGroup = [[0,0], WEST, [_civilianClass]] call BIS_fnc_spawnGroup;
@@ -156,8 +161,8 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
 Mission_Failed = false;
 
 // 启动监控线程，同时传递必要参数
-[_civilian, _VARtaskgeneratedName, _civilianMarker, _timeLimit, _cpReward, _apReward, _repReward, _targetpos, _searchRadius] spawn {
-    params ["_civ", "_taskID", "_civMarker", "_timeLimit", "_cp", "_ap", "_rep", "_targetPos", "_radius"];
+[_civilian, _VARtaskgeneratedName, _civilianMarker, _timeLimit, _cpReward, _apReward, _repReward, _targetpos, _searchRadius, _markername2] spawn {
+    params ["_civ", "_taskID", "_civMarker", "_timeLimit", "_cp", "_ap", "_rep", "_targetPos", "_radius", "_areaMarker"];
 
     // 等待玩家进入任务区域
     waitUntil { sleep 1; missionNamespace getVariable [format ["%1_started", _taskID], false] };
@@ -200,7 +205,6 @@ Mission_Failed = false;
             [_cp, _ap, "Protect Civilian"] call fnc_mission_reward;
             if (CIV_PRESENCE != "NONE") then {
                 [_civ getVariable ["civ_locIndex", -1], _rep, "protect_civ_success"] call fnc_town_rep_adjust;
-                ["repup", [localize "STR_DUWS_T_rqwho9bq", localize "STR_DUWS_T_civ_rep_up"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
             };
     };
 
@@ -209,6 +213,11 @@ Mission_Failed = false;
     // ✅ 删除线人标记（无论成功/失败/取消，都会执行）
     if (!isNil "_civMarker" && {_civMarker != ""}) then {
         deleteMarker _civMarker;
+    };
+    // str(): fnc_missionMarkerData creates the ellipse under str(name), so the real marker name
+    // carries literal quote characters and an unquoted deleteMarker silently misses it.
+    if (!isNil "_areaMarker" && {_areaMarker != ""}) then {
+        deleteMarker str(_areaMarker);
     };
 
     // 调用通用清理函数（清除敌方单位、残骸等）

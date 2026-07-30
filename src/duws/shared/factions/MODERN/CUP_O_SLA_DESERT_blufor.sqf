@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"CUP_O_SLA_Soldier_Backpack_desert";		//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"CUP_O_sla_Soldier_AT_desert";				//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"CUP_O_sla_Soldier_GL_desert";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"CUP_O_sla_Soldier_SL_desert";				//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"CUP_O_sla_Soldier_SL_desert";				//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"CUP_O_sla_Soldier_SL_desert";				//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"CUP_O_sla_Soldier_AR_desert";				//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"CUP_O_sla_Sniper_desert";					//init_hq\fnc_HQguards

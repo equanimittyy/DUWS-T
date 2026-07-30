@@ -12,7 +12,7 @@
 blufor_SOLDIER_X =				"TFC_C_Soldier_OTW_Rifleman_TW_F";			//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"TFC_C_Soldier_OTW_M72_TW_F";				//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"TFC_C_Soldier_OTW_Grenadier_TW_F";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"TFC_C_Soldier_OTW_IC_TW_F";				//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"TFC_C_Soldier_OTW_IC_TW_F";				//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"TFC_C_Soldier_OTW_2IC_TW_F";				//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"TFC_C_Soldier_OTW_C9_TW_F";				//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"TFC_C_Soldier_OTW_Rifleman_Lite_TW_F";		//init_hq\fnc_HQguards

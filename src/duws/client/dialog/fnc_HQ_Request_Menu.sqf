@@ -130,6 +130,16 @@ if (!isNil "insurgent_mode_enable" && insurgent_mode_enable) then {
 };
 index_mobile_HQ = lbAdd [2103, _mhqText];
 
+// Last row, and the only conditional one: a FOB is not offered until a zone has been taken, which
+// is what the comm-menu item this replaces waited on. Appended rather than slotted in beside the
+// other logistics rows because every index below is a literal in the colour block and a key in
+// fnc_request_support's table -- inserting anywhere else renumbers both.
+// Absent rather than greyed: an index that was never added cannot be selected, so nothing
+// downstream needs a second condition to refuse it.
+if (zoneundercontrolblu >= 1) then {
+    index_support_fob = lbAdd [2103, localize "STR_DUWS_T_fob_request_row"];
+};
+
 // Escalation surcharge, appended rather than substituted. Each label carries its base cost
 // inside its own stringtable text ("Supply Drop (5CP) Radio"), so the written number stays as
 // the base and the scaled figure follows it. Stripping the numbers out and re-formatting from
@@ -149,7 +159,7 @@ if ((missionNamespace getVariable ["escalation_multiplier", 1]) > 1) then {
         ["index_support_jdam", 10],      ["index_support_laser", 10],
         ["index_support_cluster", 25],   ["index_support_napalm", 20],
         ["index_support_hcAttChop", 20], ["index_support_hcCAS", 25],
-        ["index_support_paradrop", 20]
+        ["index_support_paradrop", 20],  ["index_support_fob", 10]
     ];
     // Free under insurgent mode, and its label already says so.
     if (isNil "insurgent_mode_enable" || {!insurgent_mode_enable}) then {
@@ -232,6 +242,10 @@ if (support_paradrop_available) then {
 };
 if (!support_mobile_HQ_available) then {
     lbSetColor [2103, 21, [0, 1, 0, 1]];
+};
+// By name, not by literal: this row only exists once a zone has been taken.
+if (support_FOB_available && !isNil "index_support_fob") then {
+    lbSetColor [2103, index_support_fob, [0, 1, 0, 1]];
 };
 // 叛军模式下禁用部分支援（置灰显示）
 if (!isNil "insurgent_mode_enable" && {insurgent_mode_enable}) then {

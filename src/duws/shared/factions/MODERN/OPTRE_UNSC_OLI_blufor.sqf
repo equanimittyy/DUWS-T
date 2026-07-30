@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"OPTRE_UNSC_Army_Soldier_Rifleman_BR_OLI";				//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"OPTRE_UNSC_Army_Soldier_Rifleman_AT_OLI";				//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"OPTRE_UNSC_Army_Soldier_Grenadier_OLI";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"OPTRE_UNSC_Army_Soldier_TeamLead_OLI";			//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"OPTRE_UNSC_Army_Soldier_TeamLead_OLI";			//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"OPTRE_UNSC_Army_Soldier_SquadLead_OLI";			//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"OPTRE_UNSC_Army_Soldier_Autorifleman_OLI";		//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"OPTRE_UNSC_Army_Soldier_Marksman_OLI";				//init_hq\fnc_HQguards

@@ -61,36 +61,28 @@ switch (VERSION_X) do {
 [_groupGuard, _centerPos] call bis_fnc_taskDefend;
 
 // Patrolling Guards
+//
+// One group walking a fixed circuit and cycling back to its first leg, the shape the HQ patrol
+// uses (init_hq/fnc_placeHQUnits.sqf). It is the FOB's only moving element now.
+//
+// 20 m, not the 10 this used to walk: the fortification ring puts HESCO and turrets on the 9-10 m
+// line, so the old corners sat inside the wall and the patrol spent its circuit pathing through it.
+#define FOB_PATROL_RADIUS 20
 
-_groupPatrol = [_safe, WEST, [blufor_SOLDIER_X],[],[],blufor_ai_skill] call BIS_fnc_spawnGroup; 
+_groupPatrol = [_safe, WEST, [blufor_SOLDIER_X],[],[],blufor_ai_skill] call BIS_fnc_spawnGroup;
 _groupPatrol deleteGroupWhenEmpty true;
-
-//_HQguard5 = _groupPatrol createUnit [blufor_SOLDIER_GL_X, _centerPos, [], 0, "FORM"];
-_HQguard5 = units _groupGuard select 0;
-//_HQguard5 addEventHandler ["Fired",{(_this select 0) setVehicleAmmo 1}];
-
-//_HQguard5 setpos [(_centerPos select 0)+10, (_centerPos select 1)+10];
-
 _groupPatrol setCombatMode "WHITE";
-_wp = _groupPatrol addWaypoint [[(_centerPos select 0)+10, (_centerPos select 1)+10], 0];
-_wp setWaypointType "MOVE";
-_wp setWaypointBehaviour "SAFE";
-_wp setWaypointSpeed "LIMITED";
 
-_wp = _groupPatrol addWaypoint [[(_centerPos select 0)-10, (_centerPos select 1)+10], 0];
-_wp setWaypointType "MOVE";
-_wp setWaypointBehaviour "SAFE";
-_wp setWaypointSpeed "LIMITED";
+{
+	private _wp = _groupPatrol addWaypoint [_centerPos getPos [FOB_PATROL_RADIUS, _x], 0];
+	_wp setWaypointType "MOVE";
+	_wp setWaypointBehaviour "SAFE";
+	_wp setWaypointSpeed "LIMITED";
+} forEach [0, 90, 180, 270];
 
-_wp = _groupPatrol addWaypoint [[(_centerPos select 0)-10, (_centerPos select 1)-10], 0];
-_wp setWaypointType "MOVE";
-_wp setWaypointBehaviour "SAFE";
-_wp setWaypointSpeed "LIMITED";
-
-_wp = _groupPatrol addWaypoint [[(_centerPos select 0)+10, (_centerPos select 1)-10], 0];
-_wp setWaypointType "MOVE";
-
-_wp = _groupPatrol addWaypoint [[(_centerPos select 0)+10, (_centerPos select 1)+10], 0];
+// Back to the first leg. The cycle waypoint is what makes the circuit repeat; without it the
+// group stops on the last corner and stands there.
+_wp = _groupPatrol addWaypoint [_centerPos getPos [FOB_PATROL_RADIUS, 0], 0];
 _wp setWaypointType "CYCLE";
 _wp setWaypointBehaviour "SAFE";
 _wp setWaypointSpeed "LIMITED";

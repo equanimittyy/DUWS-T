@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"MIN_RF_SOLDIER_DESERT";					//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"MIN_RF_SOLDIER_DESERT_LAT";				//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"MIN_RF_SOLDIER_DESERT_GL";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"MIN_RF_SOLDIER_DESERT_TL";				//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"MIN_RF_SOLDIER_DESERT_TL";				//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"MIN_RF_SOLDIER_DESERT_SL";				//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"MIN_RF_SOLDIER_DESERT_AR";				//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"MIN_RF_SOLDIER_DESERT_M";				//init_hq\fnc_HQguards

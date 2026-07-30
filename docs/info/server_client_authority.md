@@ -92,9 +92,9 @@ automated resolution could not reach, and the reasons are worth knowing:
   `fnc_bluHQinit` while the registry defines `fnc_BluHQinit`; `shared/includes/operative_menu.hpp:70`
   calls `fnc_LBselected` against a registered `fnc_lbselected`. SQF does not care, but any
   exact-match search over the source does, so a grep for callers silently comes back empty.
-- **A function passed as a value has no call site to find.** `addAction`, `onLBSelChanged` and
-  the dyna-mission table all take a bare function reference, so the invocation never appears as
-  `spawn`/`call`/`remoteExec` next to the name.
+- **A function passed as a value has no call site to find.** `addAction` and `onLBSelChanged`
+  take a bare function reference, so the invocation never appears as `spawn`/`call`/`remoteExec`
+  next to the name.
 
 ## Dedicated-server compatibility
 

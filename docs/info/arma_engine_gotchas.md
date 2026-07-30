@@ -544,11 +544,24 @@ suddenly in the future and locked for as long as the previous session ran. Mixin
 inside one system is worse — the rest-heal cooldown stamps `time`, so writing a `diag_tickTime`
 value into it locks the action out for the remainder of the mission.
 
+There is a third clock, and a cooldown the player is meant to be able to *skip* has to be on it:
+the campaign date. Neither `time` nor `diag_tickTime` is moved by `skipTime` or scaled by
+`setTimeMultiplier`, so a cooldown on either is untouched by the rest mechanic and by however fast
+the campaign's days are running. `dateToNumber date` is the fraction of the year elapsed and does
+move with both; multiplied by 8760 it reads as hours.
+
+Do not fold the year into that figure. SQF numbers are 32-bit floats, so a stamp in the millions
+has a unit of precision worth more than a short cooldown. Working within the year instead means the
+stamp is stale once the in-game year rolls over — treat a deadline more than one full cooldown
+ahead as expired, or the roll-over wedges the thing for the rest of the campaign.
+
 **How to apply:** pick one clock per cooldown and keep the sentinel, the stamp, and every check
-on it. Prefer `time` where a savegame must carry the cooldown; `diag_tickTime` only where the
-cooldown is meant to die with the session. The one genuine anomaly worth repairing is a stamp
-*ahead* of its clock — clear it and let the function's own default apply, as the monitor in
-`server/server_init.sqf:434` does. A stamp far in the past is just an action nobody has used.
+on it. Prefer the campaign date where resting or time acceleration should shorten the wait, as
+`shared/functions/fnc_mission_cooldown_left.sqf` does; `time` where a savegame must carry the
+cooldown; `diag_tickTime` only where the cooldown is meant to die with the session. The one genuine
+anomaly worth repairing is a stamp *ahead* of its clock — clear it and let the function's own
+default apply, as the monitor in `server/server_init.sqf:434` does. A stamp far in the past is just
+an action nobody has used.
 
 ## An `Acts_` ambient animation survives death, so the corpse stands and shrugs off hits
 
@@ -604,6 +617,25 @@ never gets the matching re-enable, so it never stops simulating at all. `fnc_duw
 `server/misc/fnc_composition_stream_init.sqf` is the reference: global simulation, local `allowDamage`, the
 latter because damage on a server-local object is resolved server-side anyway and broadcasting
 it per prop would cost a JIP entry each.
+
+## A hidden terrain object comes back the moment its damage state changes
+
+**A terrain object cannot be deleted, so clearing ground means `hideObjectGlobal`. The engine
+replaces a building with a fresh object when its damage state changes, and the replacement is
+not hidden — so any explosion near a cleared site re-pops the buildings that were cleared from
+it, straight through whatever was built on top.** `deleteVehicle` returns without complaint on a
+terrain object, which is why `fnc_createzone.sqf` tests `isNull` afterwards and hides whatever
+survived.
+
+The replacement arrives through the `BuildingChanged` mission event, whose arguments are the old
+object and the new one. Nothing carries the hidden flag across for you.
+
+**How to apply:** keep a register of what was hidden, and on `BuildingChanged` hide the
+replacement and put it in the old one's place in the register — otherwise the second hit on the
+same house brings it back. `fnc_createzone.sqf` holds both halves, registering the handler once
+on the first zone that clears ground. The same caveat as escalation applies: `BuildingChanged`
+is a local event, so whether a dedicated server sees it for damage a client caused is unconfirmed
+([KNOWN_ISSUES.md](../../KNOWN_ISSUES.md)).
 
 ## A unary command binds tighter than `+`, so `sleep 2 + random 5` sleeps a flat 2 s
 

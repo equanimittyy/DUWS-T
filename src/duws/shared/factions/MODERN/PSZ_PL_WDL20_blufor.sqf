@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"PSZ_PL_WDL20_Soldier_Rifleman";		//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"PSZ_PL_WDL20_Soldier_AT_RPG7";			//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"PSZ_PL_WDL20_Soldier_Grenadier";		//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"PSZ_PL_WDL20_Soldier_TL";				//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"PSZ_PL_WDL20_Soldier_TL";				//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"PSZ_PL_WDL20_Soldier_SL";				//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"PSZ_PL_WDL20_Soldier_PKM";				//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"PSZ_PL_WDL20_Soldier_Marksman";		//init_hq\fnc_HQguards

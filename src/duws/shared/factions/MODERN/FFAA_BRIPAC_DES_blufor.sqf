@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"ffaa_bripac_fusilero_mochila_ds";		//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"ffaa_bripac_c90_ds";					//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"ffaa_bripac_granadero_ds";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"ffaa_bripac_jefe_peloton_ds";			//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"ffaa_bripac_jefe_peloton_ds";			//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"ffaa_bripac_jefe_escuadra_ds";			//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"ffaa_bripac_mg4_ds";					//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"ffaa_bripac_tirador_ds";				//init_hq\fnc_HQguards

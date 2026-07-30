@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"CFP_O_ALQAEDA_Rifleman_01";		//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"cfp_i_alNusra_at";					//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"cfp_o_is_grenadier";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"cfp_o_is_team_leader";				//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"cfp_o_is_team_leader";				//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"cfp_o_is_squad_leader";			//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"cfp_i_alNusra_machinegunner";		//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"cfp_i_alNusra_sniper";				//init_hq\fnc_HQguards

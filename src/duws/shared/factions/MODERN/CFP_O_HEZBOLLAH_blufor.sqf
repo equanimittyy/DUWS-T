@@ -12,7 +12,7 @@
 blufor_SOLDIER_X =				"CFP_O_HEZBOLLAH_Paramilitary_Rifleman_01";		//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"CFP_O_HEZBOLLAH_Paramilitary_Rifleman_AT_01";					//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"CFP_O_HEZBOLLAH_Militia_Explosive_Specialist_01";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"CFP_O_HEZBOLLAH_Squad_Leader_SF_01";				//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"CFP_O_HEZBOLLAH_Squad_Leader_SF_01";				//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"CFP_O_HEZBOLLAH_Militia_Squad_Leader_01";			//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"CFP_O_HEZBOLLAH_Militia_Machine_Gunner_01";		//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"CFP_O_HEZBOLLAH_Sniper_SF_01";				//init_hq\fnc_HQguards

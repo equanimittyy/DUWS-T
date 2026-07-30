@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"UK3CB_BAF_Pointman_DPMW";		//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"UK3CB_BAF_LAT_ILAW_DPMW";		//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"UK3CB_BAF_Grenadier_DPMW";		//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"UK3CB_BAF_FT_DPMW";            //init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"UK3CB_BAF_FT_DPMW";            //init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"UK3CB_BAF_SC_DPMW";            //Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"UK3CB_BAF_LSW_DPMW";			//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"UK3CB_BAF_Marksman_DPMW";		//init_hq\fnc_HQguards

@@ -21,7 +21,7 @@ _index = -1;
 //// CREATE THE ARRAY OF FOBS w/ POSITION -- END
 // add the base
 _hqpos = PosOfBLUHQ;
-_list = _list + [[_hqpos,"Main base"]];
+_list = _list + [[_hqpos,"Main Base"]];
 _index = lbCurSel 2100;
 
 _selected_fob = _list select _index;

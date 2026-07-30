@@ -22,7 +22,10 @@ _site params ["_randomPos", "_Building", "_targetpos"];
 
 sleep 2;
 
-_usableBuildings = [_MissionPos, 2, 180] call fnc_usableBuildings;
+// Garrisoned around the site, not around the slot centre. Every other thread builds on what
+// fnc_mission_site returned and marks the same point; this one drew its ellipse at _randomPos and
+// then filled houses up to 280 m away from it, so the enemy routinely sat outside the marked area.
+_usableBuildings = [_randomPos, 2, 180] call fnc_usableBuildings;
 
 _desiredBldgCount = 4;
 _actualBldgCount = count _usableBuildings;

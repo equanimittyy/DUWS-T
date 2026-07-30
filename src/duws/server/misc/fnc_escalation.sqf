@@ -10,8 +10,9 @@ if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {};
 
 // A whole-map census counts every House on the terrain, the overwhelming majority of them in
 // settlements no campaign ever visits, so the raw total is far larger than anything a player
-// could plausibly destroy. A tenth of it is the loss condition and a ninetieth advances a level.
-#define ESCALATION_FRACTION 0.1
+// could plausibly destroy. A thirtieth of it is the loss condition, so a level costs a
+// three-hundred-and-thirtieth of the map -- about fifty houses on Altis.
+#define ESCALATION_FRACTION (1 / 30)
 #define ESCALATION_MAX_LEVEL 11
 
 // The census is one engine call that cannot yield -- measured at 5.03 s for Altis's 17472
@@ -78,6 +79,10 @@ uiSleep 1.5;
 // BuildingChanged is a local event and this runs server-only. Whether a dedicated server sees
 // it for damage a client caused is unconfirmed; if it does not, this has never worked in
 // dedicated MP and neither did the script it replaces.
+//
+// It fires on every state change rather than once per structure, so a house damaged and then
+// levelled counts twice. That is the reading the budget is sized against: it measures ruin done,
+// not buildings lost, and the census it is a fraction of is only the scale for that.
 addMissionEventHandler ["BuildingChanged", {
     params ["_old", "_damagedObject", "_isRuin"];
 

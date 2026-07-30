@@ -27,7 +27,7 @@ _index = -1;
 
 // add the base
 _hqpos = PosOfBLUHQ;
-_listFT = _listFT + [[_hqpos,"Main base"]];
+_listFT = _listFT + [[_hqpos,"Main Base"]];
 
 if (enable_fast_travel) then {  
     // FOB FT

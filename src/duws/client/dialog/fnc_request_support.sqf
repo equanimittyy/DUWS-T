@@ -46,7 +46,12 @@ private _supportDefs = createHashMapFromArray [
     [17, [20, "support_napalm_available", "index_support_napalm",
         "STR_DUWS_T_OVERLORD", "STR_DUWS_T_napalmunlock", true, "napalm", true]],
     [20, [20, "support_paradrop_available", "index_support_paradrop",
-        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_paradropunlock", false, "paradrop", true]]
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_paradropunlock", false, "paradrop", true]],
+    // Row 22 exists only once a zone has been taken (fnc_HQ_Request_Menu), so this key is
+    // unreachable before then rather than needing a condition of its own. The unlock is what is
+    // bought here; each FOB still costs its own 10 CP when the comm item is used.
+    [22, [10, "support_FOB_available", "index_support_fob",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_fobunlock", false, "fob_support", false]]
 ];
 
 private _def = _supportDefs getOrDefault [_index2, []];

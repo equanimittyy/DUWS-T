@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"Japan_JP_Jeitai_Soldier_Base";		//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"Japan_JP_Jeitai_Soldier_LAT";		//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"Japan_JP_Jeitai_Soldier_GL";		//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"Japan_JP_Jeitai_Soldier_TL";		//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"Japan_JP_Jeitai_Soldier_TL";		//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"Japan_JP_Jeitai_Soldier_SL";		//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"Japan_JP_Jeitai_soldier_AR";		//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"Japan_JP_Jeitai_soldier_M";		//init_hq\fnc_HQguards

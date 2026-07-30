@@ -27,18 +27,35 @@ _group = [_spawn, EAST, _multipliedGroup,[],[],opfor_ai_skill] call BIS_fnc_spaw
 _group deleteGroupWhenEmpty true;
 
 // ========== 添加随机战利品 ==========
+// Scattered on a ring before taskDefend rather than left to walk apart. Zones stream in, so a
+// garrison spawns while BLUFOR are already close enough to watch it happen: on one point it reads
+// as a clump appearing out of nothing and then filing outward, and a defence stacked on the centre
+// is one the player can fight from a single angle. Spread wide, they have to be dug out.
+//
+// findEmptyPosition rather than BIS_fnc_findSafePos: this runs once per unit on the frame budget
+// of a player arriving, and the safe-pos search is the expensive one. The ring does the spreading;
+// the lookup only keeps a body out of a wall, and falls back to the bare ring point.
 {
     [_x] call fnc_addRandomLoot;
+    private _ring = _position getPos [40 + random 110, random 360];
+    private _spot = _ring findEmptyPosition [0, 15, typeOf _x];
+    _x setPos ([_spot, _ring] select (_spot isEqualTo []));
 } forEach units _group;
 // =================================
 
-[_group, _position] call bis_fnc_taskDefend;
+// Radius passed rather than defaulted: taskDefend defends 50 m unless told otherwise, and treats
+// anyone outside that as out of position -- so it would walk the ring back onto the centre and
+// undo the spread above. It has to describe the same ground the units were just placed on.
+[_group, _position, 150] call bis_fnc_taskDefend;
 
 
 // Add a mortar team anyway
 		_group = [_spawn, EAST, [opfor_SOLDIER_X,opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 		(units _group select 0) addbackpack "O_Mortar_01_support_F";
 		(units _group select 1) addbackpack "O_Mortar_01_weapon_F";
+		// Left on the centre while the rifles fan out. The tube and its ammunition are a backpack
+		// each on the two different men, so the pair has to stay together, and a mortar belongs
+		// behind the position it is firing over rather than out on the perimeter with the patrols.
 		[_group, _position] call BIS_fnc_taskDefend;
 		// ========== 添加随机战利品 ==========
 		{

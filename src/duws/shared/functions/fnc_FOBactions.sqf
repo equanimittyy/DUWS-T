@@ -71,17 +71,15 @@ _fob addaction [
         private _lines = [];
         private _missionTypes = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
         private _version = VERSION_X;
-        private _currentTime = diag_tickTime;
 
         {
             private _type = _x;
-            private _cooldownVar = missionNamespace getVariable [format ["mission_cooldown_%1", _type], 0];
-            private _remaining = 0;
-            if (_cooldownVar > _currentTime) then {
-                _remaining = _cooldownVar - _currentTime;
-            };
-            private _minutes = floor (_remaining / 60);
-            private _seconds = _remaining % 60;
+            // In-game hours and minutes, not real ones -- the cooldown is measured on the campaign
+            // clock so that resting at HQ moves it. Both floored: the clock is fractional, and an
+            // unfloored remainder printed as "0.000381".
+            private _remaining = [_type] call fnc_mission_cooldown_left;
+            private _hours = floor _remaining;
+            private _minutes = floor ((_remaining % 1) * 60);
 
             // 根据任务类型获取本地化名称
             private _missionName = "";
@@ -124,7 +122,7 @@ _fob addaction [
             private _line = if (_remaining <= 0) then {
                 format ["%1: %2", _missionName, localize "STR_DUWS_T_COOLDOWN_READY"]
             } else {
-                format ["%1: %2min%3sec", _missionName, _minutes, _seconds]
+                format ["%1: %2h%3min", _missionName, _hours, _minutes]
             };
             _lines pushBack _line;
         } forEach _missionTypes;

@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"rhsusf_army_ucp_rifleman";				//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"rhsusf_army_ucp_maaws";				//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"rhsusf_army_ucp_grenadier";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"rhsusf_army_ucp_teamleader";			//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"rhsusf_army_ucp_teamleader";			//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"rhsusf_army_ucp_squadleader";			//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"rhsusf_army_ucp_autorifleman";			//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"rhsusf_army_ucp_marksman";				//init_hq\fnc_HQguards

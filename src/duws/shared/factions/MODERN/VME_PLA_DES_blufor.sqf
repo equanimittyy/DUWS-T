@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"PLA_Soldier_HM_F";					//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"PLA_Soldier_AT89B_HM_F";			//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"PLA_Soldier_HM_GL_F";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"PLA_Soldier_TL_HM_F";				//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"PLA_Soldier_TL_HM_F";				//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"PLA_Soldier_TL_HM_F";				//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"PLA_Soldier_HMG_HM_F";				//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"PLA_Soldier_mk_HM_F";				//init_hq\fnc_HQguards

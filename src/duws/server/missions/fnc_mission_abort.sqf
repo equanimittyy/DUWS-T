@@ -5,10 +5,10 @@
 // can terminate its caller's scope.
 params ["_missionType", ["_hintKey", "STR_DUWS_T_crtzxs0j"]];
 
-// fnc_mission_begin stamps a full hour before the thread has found so much as a position, so a
-// thread that gives up here left the type greyed out on the strategic map having spawned nothing.
+// fnc_mission_begin stamps the full cooldown before the thread has found so much as a position, so
+// a thread that gives up here left the type greyed out on the strategic map having spawned nothing.
 // Cleared rather than restored to a previous value: the type never ran, so it has no cooldown to
-// serve.
+// serve. Zero reads as expired on any clock, so this needs no knowledge of which one is in use.
 missionNamespace setVariable [format ["mission_cooldown_%1", _missionType], 0, true];
 Mission_available = true;
 publicVariable "Mission_available";

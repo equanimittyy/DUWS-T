@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"OPTRE_UNSC_Marine_Soldier_Rifleman_BR";				//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"OPTRE_UNSC_Marine_Soldier_Rifleman_AT";				//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"OPTRE_UNSC_Marine_Soldier_Grenadier";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"OPTRE_UNSC_Marine_Soldier_TeamLead";			//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"OPTRE_UNSC_Marine_Soldier_TeamLead";			//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"OPTRE_UNSC_Marine_Soldier_SquadLead";			//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"OPTRE_UNSC_Marine_Soldier_Rifleman_AR";		//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"OPTRE_UNSC_Marine_Soldier_Marksman";				//init_hq\fnc_HQguards

@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"TIOW_Valhallan_Trooper_1_white_Blu";			//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"TIOW_Valhallan_Plasmagunner_1_white_Blu";				//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"TIOW_Valhallan_Meltagunner_1_white_Blu";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"TIOW_Valhallan_NCO_1_white_Blu";	//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"TIOW_Valhallan_NCO_1_white_Blu";	//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"TIOW_Valhallan_NCO_1_white_Blu";				//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"TIOW_Valhallan_Stubber_2_white_Blu";				//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"TIOW_Valhallan_Trooper_2_white_Blu";				//init_hq\fnc_HQguards

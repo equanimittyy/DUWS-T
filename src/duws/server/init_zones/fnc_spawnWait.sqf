@@ -10,7 +10,11 @@ _index = _this select 2;
 _blufor_close = false;
 
 _AI_buffer = 400;
-_despawn_timer = 300;
+// Twice the civilian handler's 60 s grace, and for the same reason: a zone left standing for five
+// minutes after the last sighting leaves a trail of fully spawned garrisons behind anyone crossing
+// the map. Zones are the more expensive of the two, so they get the shorter multiple, not a longer
+// clock -- what buys the zone its extra minute is the composition rebuild a re-entry pays for.
+_despawn_timer = 120;
 
 // The key the prefab and the fortification ring both file their objects under
 // (prefabs/modern/*.sqf:9, fnc_createzone.sqf:204). Derived from the same position array they

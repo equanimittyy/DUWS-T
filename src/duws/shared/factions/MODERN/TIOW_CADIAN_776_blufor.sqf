@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"TIOW_Cad_GM776th";			//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"TIOW_Cad_GM_Plasma_776th";				//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"TIOW_Cad_GM_GrenadeLauncher_776th";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"TIOW_Cad_VET776th";	//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"TIOW_Cad_VET776th";	//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"TIOW_Cad_SGT776th";				//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"TIOW_Cad_Kasr776th";				//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"TIOW_Cad_SNIPER776th";				//init_hq\fnc_HQguards

@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"RIFLEMAN_WINTER_HEX";				//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"RIFLEMAN_AT_WINTER_HEX";			//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"GRENADIER_WINTER_HEX";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"TEAM_LEADER_WINTER_HEX";			//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"TEAM_LEADER_WINTER_HEX";			//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"SQUAD_LEADER_WINTER_HEX";			//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"AUTORIFLEMAN_WINTER_HEX";			//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"MARKSMAN_WINTER_HEX";				//init_hq\fnc_HQguards

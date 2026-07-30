@@ -104,6 +104,10 @@ sleep 5;
 // 通知客户端可以开始（但不执行淡入，避免干扰）
 missionNamespace setVariable ["intro_heli_fadein", true, true];
 [["", "BLACK IN", 1]] remoteExec ["titleCut", 0];
+// The insertion flight is one of only two places music plays; the other is a side mission opening.
+// A day-cycle loop used to run underneath the whole campaign, which is what made music feel like
+// weather rather than an event. Double brackets for the same reason as the titleText below.
+[["LeadTrack01_F_EPA", 0]] remoteExec ["playMusic", 0];
 [] spawn fnc_bottom_right_message;
 sleep 0.5;
 // 航点到基地上空 50 米
@@ -126,9 +130,9 @@ sleep 8;
 // Double brackets: remoteExec hands the command an argument list, so a unary command whose one
 // argument is itself an array needs the outer pair. Written flat, titleText is passed the string
 // alone and throws on the type -- which is the memorial card silently not displaying at all.
-[["In memory of KillaTomata, the creator of the original DUWS_X.", "PLAIN", 3]] remoteExec ["titleText", 0];
-sleep 12;
-[["", "PLAIN", 5]] remoteExec ["titleText", 0];
+[["In memory of KillaTomata, the creator of the original DUWS_X.", "PLAIN", 1]] remoteExec ["titleText", 0];
+sleep 6;
+[["", "PLAIN", 2]] remoteExec ["titleText", 0];
 sleep 3;
 [["", "PLAIN", 5]] remoteExec ["cutText", 0];
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_heli_ttgtw"] remoteExec ["fnc_duws_dialogue", 0];

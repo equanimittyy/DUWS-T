@@ -34,11 +34,9 @@ if (isServer && isNil "missionCooldownMonitorRunning") then {
             _wasInCooldown pushBack false;
         };
         while {true} do {
-            private _currentTime = diag_tickTime;
             {
                 private _type = _forEachIndex;
-                private _cooldown = missionNamespace getVariable [format ["mission_cooldown_%1", _type], 0];
-                private _inCooldown = _cooldown > _currentTime;
+                private _inCooldown = ([_type] call fnc_mission_cooldown_left) > 0;
 
                 // 如果当前处于冷却中，标记为 true
                 if (_inCooldown) then {

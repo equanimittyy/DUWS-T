@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"ASZ_EI_rifleman_06A";				//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"ASZ_EI_operator_AT_A";				//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"ASZ_EI_riflemanGL_04A";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"ASZ_EI_commander_03A";				//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"ASZ_EI_commander_03A";				//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"ASZ_EI_commander_03A";				//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"ASZ_EI_mg_02A";					//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"ASZ_EI_marksman_01A";				//init_hq\fnc_HQguards

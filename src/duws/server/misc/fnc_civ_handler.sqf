@@ -22,12 +22,12 @@ if (!isServer) exitWith {};
 
 #define POLL_INTERVAL 10
 
-// Well under the zone gate's 300 s, deliberately. Towns are disjoint -- the cull in
+// Half the zone gate's grace, deliberately. Towns are disjoint -- the cull in
 // fnc_civ_init_Tomata pushes them apart until they are -- so a player is inside at most one, and a
-// five-minute grace leaves a trail of fully populated towns behind anyone crossing the map. The
+// long grace leaves a trail of fully populated towns behind anyone crossing the map. The
 // ceiling thins that trail but does not end it: its floor of three keeps every occupied town
 // holding somebody, so the overshoot tracks how many towns are occupied at once, and the grace is
-// what decides that. A zone can afford 300 s because there are forty of it at the very most.
+// what decides that. A zone can afford the longer clock because there are forty of it at the very most.
 #define DESPAWN_TIMER 60
 
 // How far outside a town its arrival is noticed, so the fill lands before the player does. Not the

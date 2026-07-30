@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"BWA3_Rifleman_G27_Tropen";			//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"BWA3_RiflemanAT_RGW90_Tropen";		//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"BWA3_Grenadier_G27_Tropen";		//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"BWA3_TL_Tropen";					//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"BWA3_TL_Tropen";					//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"BWA3_SL_Tropen";					//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"BWA3_MachineGunner_MG5_Tropen";	//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"BWA3_Marksman_Tropen";				//init_hq\fnc_HQguards

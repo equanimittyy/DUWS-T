@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"sfp_m90w_rifleman_ak5";				//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"sfp_m90w_at_specialist_pskott86";		//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"sfp_m90w_gr";							//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"sfp_m90w_teamleader";					//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"sfp_m90w_teamleader";					//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"sfp_m90w_squadleader";					//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"sfp_m90w_machinegunner_ksp58";			//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"sfp_m90w_marksman";					//init_hq\fnc_HQguards

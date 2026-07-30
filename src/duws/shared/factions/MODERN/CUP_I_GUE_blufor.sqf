@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"CUP_I_GUE_Soldier_AKS74";			//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"CUP_I_GUE_Soldier_AT";				//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"CUP_I_GUE_Soldier_GL";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"CUP_I_GUE_Officer";				//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"CUP_I_GUE_Officer";				//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"CUP_I_GUE_Officer";				//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"CUP_I_GUE_Soldier_MG";				//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"CUP_I_GUE_Sniper";					//init_hq\fnc_HQguards

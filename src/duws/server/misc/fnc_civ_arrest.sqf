@@ -26,11 +26,8 @@ _civilian setVariable ["DUWS_civ_arrested", true, true];
 
 _civilian disableAI "PATH";
 
-// Charged whether or not they comply: the town saw the weapon raised either way. The figure in the
-// notification is what was asked for, not necessarily what landed -- a town already at the -20
-// floor absorbs less -- and the town marker carries the standing that actually resulted.
+// Charged whether or not they comply: the town saw the weapon raised either way.
 [_civilian getVariable ["civ_locIndex", -1], -1, "looted_civilian"] call fnc_town_rep_adjust;
-["info", [localize "STR_DUWS_T_civloot", localize "STR_DUWS_T_civloot2"]] remoteExec ["BIS_fnc_showNotification", 0];
 
 sleep 3;
 if (isNull _civilian || !alive _civilian) exitWith {};

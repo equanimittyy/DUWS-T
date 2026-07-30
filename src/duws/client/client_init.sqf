@@ -59,18 +59,6 @@ if (!isMultiplayer) then {
 #include "includes\supports_init.hpp"
 #include "includes\squad_number_init.hpp"
 
-// VERSION specific inits
-switch (VERSION_X) do {
-	case "MODERN": {
-		// Create "firedNear" event for players
-		// - if enemy present, play music
-		// [] spawn fnc_dyn_music_init;
-		
-		// AMBIANCE LOOP
-		[] spawn fnc_ambient_musicloop;
-	};
-};
-
 // JIP SCREEN, open map
 if (isMultiplayer) then {
 	

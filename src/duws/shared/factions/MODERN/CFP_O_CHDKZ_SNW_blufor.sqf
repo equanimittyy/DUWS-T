@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"CFP_O_CHDKZ_Rifleman_AK_74_SNW_01";		//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"CFP_O_CHDKZ_AT_Specialist_SNW_01";			//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"CFP_O_CHDKZ_Grenadier_SNW_01";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"CFP_O_CHDKZ_Officer_SNW_01";				//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"CFP_O_CHDKZ_Officer_SNW_01";				//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"CFP_O_CHDKZ_Officer_SNW_01";				//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"CFP_O_CHDKZ_Machinegunner_SNW_01";			//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"CFP_O_CHDKZ_Sniper_SNW_01";				//init_hq\fnc_HQguards

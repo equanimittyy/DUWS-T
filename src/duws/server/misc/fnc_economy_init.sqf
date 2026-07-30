@@ -64,6 +64,11 @@ fnc_ap_adjust = {
 // RAVAGE/WBK alike -- and reputation is territory, so harm done where no town can see it costs
 // nothing. Not broadcast: no client reads civ_town_rep, and the markers below are painted with
 // global-effect commands.
+//
+// The player is told here rather than by each caller. Eight sites announced their own change in
+// six different wordings, two announced nothing, and one quoted a figure the clamp had already
+// reduced. Announced off the applied change, so a town pinned at a bound reports nothing at all
+// instead of claiming a charge it absorbed.
 fnc_town_rep_adjust = {
 	if (!isServer) exitWith {};
 	params [["_townIndex", -1], ["_delta", 0], ["_reason", ""]];
@@ -76,6 +81,14 @@ fnc_town_rep_adjust = {
 	_reps set [_townIndex, _new];
 	[_townIndex] call fnc_civ_townRender;
 	["INFO", "CIV", format ["TOWNREP %1: %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
+
+	if (_new == _old) exitWith {};
+	private _card = if (_new > _old) then {
+		["repup", [localize "STR_DUWS_T_rqwho9bq", localize "STR_DUWS_T_civ_rep_up"]]
+	} else {
+		["info", [localize "STR_DUWS_T_shengwangjianshao", localize "STR_DUWS_T_civ_rep_down"]]
+	};
+	_card remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
 };
 
 // A cost with escalation applied, rounded up so a scaled price is never cheaper than the base

@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"DKoK_GM_1490th";			//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"DKoK_GM_1490th_Plasma";				//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"DKoK_Gren_1490th";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"DKoK_GM_WM_1490th";	//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"DKoK_GM_WM_1490th";	//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"DKoK_QM_1490th";				//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"DKoK_GM_1490th_HStubber";				//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"DKoK_GM_1490th";				//init_hq\fnc_HQguards

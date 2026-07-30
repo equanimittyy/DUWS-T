@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"cfp_b_iqarmy_rifleman";			//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"cfp_b_iqarmy_at";					//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"cfp_b_iqarmy_grenadier";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"cfp_b_iqarmy_officer";				//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"cfp_b_iqarmy_officer";				//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"cfp_b_iqarmy_officer";				//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"cfp_b_iqarmy_machinegunner";		//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"cfp_b_iqarmy_sniper";				//init_hq\fnc_HQguards

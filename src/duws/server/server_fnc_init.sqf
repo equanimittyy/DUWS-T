@@ -82,11 +82,9 @@ fnc_missionTaskEnd = compile preprocessFileLineNumbers "duws\server\missions\fnc
 fnc_missionPatrols = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrols.sqf";
 fnc_missionPatrolswithintel = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrolswithintel.sqf";
 fnc_mission_cleanup = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_cleanup.sqf";
-// 动态氛围任务系统
 fnc_findSafeMissionPos = compile preprocessFileLineNumbers "duws\server\misc\fnc_findSafeMissionPos.sqf";
 publicVariable "fnc_findSafeMissionPos";
-fnc_dynamicAtmosphere_init = compile preprocessFileLineNumbers "duws\server\missions\dyna\fnc_dynamicAtmosphere_init.sqf";
-publicVariable "fnc_dynamicAtmosphere_init";
+fnc_mission_cooldown_left = compile preprocessFileLineNumbers "duws\shared\functions\fnc_mission_cooldown_left.sqf";publicVariable "fnc_mission_cooldown_left";
 fnc_mission_begin = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_begin.sqf";
 
 // SIDE MISSION THREADS
@@ -108,10 +106,6 @@ fnc_sabotage_laptop_mission = compile preprocessFileLineNumbers "duws\server\mis
 fnc_sabotage_laptop_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_success.sqf";
 fnc_destroy_cache_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_cache\fnc_destroy_cache_mission.sqf";
 fnc_destroy_radar_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_radar\fnc_destroy_radar_mission.sqf";
-fnc_dyna_mission_mortarspotter = compile preprocessFileLineNumbers "duws\server\missions\dyna\fnc_dyna_mission_mortarspotter.sqf";
-publicVariable "fnc_dyna_mission_mortarspotter";
-fnc_dyna_mission_supply_recovery = compile preprocessFileLineNumbers "duws\server\missions\dyna\fnc_dyna_mission_supply_recovery.sqf";
-publicVariable "fnc_dyna_mission_supply_recovery";
 fnc_intel_gathering_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\intel_gathering\fnc_intel_gathering_mission.sqf";
 publicVariable "fnc_intel_gathering_mission";
 // CIVILIAN FUNCTIONS
@@ -217,6 +211,9 @@ fnc_captured = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_cap
 fnc_blufor_cap = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_blufor_cap.sqf";
 fnc_opfor_cap = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_opfor_cap.sqf";
 fnc_enterlocation = compile preprocessFileLineNumbers "duws\server\misc\fnc_enterlocation.sqf";
+// Not broadcast: the two triggers that name it are created server-local, and it creates global
+// markers, so exactly one machine may run it.
+fnc_enemy_contact = compile preprocessFileLineNumbers "duws\server\misc\fnc_enemy_contact.sqf";
 fnc_spawnWait = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawnWait.sqf";
 fnc_createopfortified = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createopfortified.sqf";
 fnc_createoppatrol_sniper = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createoppatrol_sniper.sqf";
@@ -265,7 +262,6 @@ publicVariable "fnc_mapclick_claim";
 publicVariable "fnc_mapclick_release";
 
 // GLOBAL FUNCTIONS
-fnc_ambient_musicloop = compile preprocessFileLineNumbers "duws\client\sounds\fnc_ambient_musicloop.sqf";publicVariable "fnc_ambient_musicloop";
 fnc_duws_Arsenal = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_Arsenal.sqf";publicVariable "fnc_duws_Arsenal";
 fnc_ghst_halo = compile preprocessFileLineNumbers "duws\client\misc\fnc_ghst_halo.sqf";publicVariable "fnc_ghst_halo";
 fnc_WARCOM_blu_assault = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_blu_assault.sqf";publicVariable "fnc_WARCOM_blu_assault";
@@ -278,7 +274,6 @@ fnc_guardsFOB = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_guard
 fnc_redeployFOB = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_redeployFOB.sqf";publicVariable "fnc_redeployFOB";
 // Not broadcast: server-only, so an accidental client call fails loud.
 fnc_redeployFOBUnits = compile preprocessFileLineNumbers "duws\server\misc\fnc_redeployFOBUnits.sqf";
-fnc_createpatrolFOB = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_createpatrolFOB.sqf";publicVariable "fnc_createpatrolFOB";
 fnc_locatorZones_manual = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_manual.sqf";publicVariable "fnc_locatorZones_manual";
 fnc_createZone = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createZone.sqf";publicVariable "fnc_createZone";
 fnc_intel_payout = compile preprocessFileLineNumbers "duws\server\misc\fnc_intel_payout.sqf";

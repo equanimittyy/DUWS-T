@@ -140,7 +140,7 @@ emits, so it must never be used as a tag — `[DUWS][INFO][SRV][DUWS]` breaks ta
 | `REGISTRY` | the compiled-empty self-check in `server_fnc_init.sqf` |
 | `FACTION` | BLUFOR/OPFOR resolution, custom and autodetected factions |
 | `ZONES` | generation, registration, capture and loss |
-| `MISSION` | side-mission start, reward, cleanup, slot release, dynamic missions |
+| `MISSION` | side-mission start, reward, cleanup, slot release |
 | `WARCOM` | OPFOR assault targeting and patrols |
 | `ECON` | every CP / AP / reputation mutation, with the reason that caused it |
 | `SUPPORT` | FOB, MHQ, repair and recycle stations, killhouse |

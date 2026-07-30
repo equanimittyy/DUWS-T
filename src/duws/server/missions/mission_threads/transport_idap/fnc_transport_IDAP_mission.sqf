@@ -195,7 +195,6 @@ if (getdammage _truck1>0.95) exitWith {
     // town is resolved from the delivery point, falling back to the global outside every radius.
     if (CIV_PRESENCE != "NONE") then {
         [[_targetpos] call fnc_civ_townAt, -5, "idap_failed"] call fnc_town_rep_adjust;
-        ["info", [localize "STR_DUWS_T_shengwangjianshao", localize "STR_DUWS_T_civ_rep_down"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
     };
     [_targetpos,_radius, "mission_transport_idap"] call fnc_mission_end;
 };
@@ -207,7 +206,6 @@ sleep 8;
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 if (CIV_PRESENCE != "NONE") then {
     [[_targetpos] call fnc_civ_townAt, 5, "idap_success"] call fnc_town_rep_adjust;
-    ["repup", [localize "STR_DUWS_T_rqwho9bq", localize "STR_DUWS_T_civ_rep_up"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
 };
 sleep 2;
 deleteVehicle _box2;

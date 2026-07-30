@@ -68,29 +68,48 @@ if (hardcore_mode_enable) then {
 };
 
 // ========== 清理战区中心周围的障碍物 ==========
+// Registered once for the whole campaign, on the first zone that clears ground. A terrain object
+// cannot be deleted, so the pass below hides it instead -- and the engine swaps a hidden building
+// for a fresh, visible one the moment its damage state changes, which is a grenade landing
+// anywhere near the zone. The replacement is hidden in its turn and takes the old one's place in
+// the register, so a house that is damaged twice does not come back on the second hit.
+if (isNil "DUWS_zone_hidden") then {
+    DUWS_zone_hidden = [];
+    addMissionEventHandler ["BuildingChanged", {
+        params ["_old", "_new"];
+        private _i = DUWS_zone_hidden find _old;
+        if (_i < 0) exitWith {};
+        _new hideObjectGlobal true;
+        DUWS_zone_hidden set [_i, _new];
+    }];
+};
+
 if (_prefab) then {
     private _clearRadius = 35;
     private _allObjects = nearestObjects [_zonePos, [], _clearRadius];
     private _deletedCount = 0;
     private _hiddenCount = 0;
     {
-        if (!isPlayer _x && 
-            !(_x isKindOf "Man") && 
-            !(_x isKindOf "Land_HelipadEmpty_F") && 
+        if (!isPlayer _x &&
+            !(_x isKindOf "Man") &&
+            !(_x isKindOf "Land_HelipadEmpty_F") &&
             !(_x isKindOf "FlagPole_F") &&
             !(_x isEqualTo bluHQ_object) &&
-            !(_x in Array_of_FOBS)) then 
+            !(_x in Array_of_FOBS)) then
         {
             deleteVehicle _x;
-            _deletedCount = _deletedCount + 1;
-            if (!isNull _x) then {
+            if (isNull _x) then {
+                _deletedCount = _deletedCount + 1;
+            } else {
                 _x hideObjectGlobal true;
+                DUWS_zone_hidden pushBack _x;
                 _hiddenCount = _hiddenCount + 1;
             };
         };
     } forEach _allObjects;
     if (_deletedCount > 0 || _hiddenCount > 0) then {
-        ["INFO", "ZONES", format ["Cleaned up %1 objects at zone center %2", _deletedCount + _hiddenCount, _zonePos]] call fnc_log;
+        ["INFO", "ZONES", format ["Cleared %1 objects at zone center %2 (%3 deleted, %4 hidden)",
+            _deletedCount + _hiddenCount, _zonePos, _deletedCount, _hiddenCount]] call fnc_log;
     };
     sleep 0.5;
 };
@@ -248,8 +267,7 @@ _trgEnemy setVariable ["DUWS_zoneNum", _zone_num];
 _trgEnemy setTriggerStatements [
     "this && {private _p = thisTrigger getVariable ['DUWS_zonePos', []];
         (WARCOM_zones_controled_by_BLUFOR findIf { (_x distance2D _p) < 1 }) >= 0}",
-    "[localize 'STR_DUWS_T_OVERLORD', format [localize 'STR_DUWS_T_zone_enemy_contact',
-        thisTrigger getVariable ['DUWS_zoneNum', 0]]] remoteExec ['fnc_duws_dialogue', 0];",
+    "[format ['Zone %1', thisTrigger getVariable ['DUWS_zoneNum', 0]], thisList] call fnc_enemy_contact;",
     ""
 ];
 // Same debounce as the HQ's: OPFOR crossing the boundary on patrol would otherwise re-report on

@@ -23,7 +23,5 @@ if ((missionNamespace getVariable [_key, -1]) == _window) exitWith { false };
 
 missionNamespace setVariable [_key, _window];
 [_idx, 1, "healed_civilian"] call fnc_town_rep_adjust;
-["info", [localize "STR_DUWS_T_rqwho9bq", localize "STR_DUWS_T_civ_rep_up"]]
-    remoteExec ["BIS_fnc_showNotification", _healer];
 
 false

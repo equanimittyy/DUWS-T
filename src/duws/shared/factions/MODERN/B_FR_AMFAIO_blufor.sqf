@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"B_FR_Fusilier_01";						//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"B_FR_Fusilier_AC_01";					//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"B_FR_Grenadier_01";					//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"B_FR_Chef_dEquipe_01";					//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"B_FR_Chef_dEquipe_01";					//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"B_FR_Chef_de_groupe_01";				//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"B_FR_Gunner_01";						//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"B_BFR_Tireur_de_precision_SCAR_H_01";		//init_hq\fnc_HQguards

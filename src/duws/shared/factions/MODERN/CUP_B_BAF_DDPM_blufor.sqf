@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"CUP_B_BAF_Soldier_Rifleman_DDPM";		//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"CUP_B_BAF_Soldier_RiflemanLAT_DDPM";	//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"CUP_B_BAF_Soldier_Grenadier_DDPM";		//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"CUP_B_BAF_Soldier_TeamLeader_DDPM";	//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"CUP_B_BAF_Soldier_TeamLeader_DDPM";	//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"CUP_B_BAF_Soldier_SquadLeader_DDPM";	//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"CUP_B_BAF_Soldier_AutoRifleman_DDPM";	//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"CUP_B_BAF_Soldier_Marksman_DDPM";		//init_hq\fnc_HQguards

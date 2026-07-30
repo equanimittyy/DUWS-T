@@ -6,14 +6,12 @@
 // _requester is remoteExecutedOwner read in the calling thread -- it must be sampled
 // there, in the scope remoteExec actually entered. 0 means the thread was called
 // locally, in which case a plain hint is the only machine there is to reach.
-params ["_missionType", "_MissionPos", "_mission_name", ["_requester", 0], ["_cooldown", 3600]];
-private _var = format ["mission_cooldown_%1", _missionType];
-private _until = missionNamespace getVariable [_var, 0];
-if (_until > diag_tickTime) exitWith {
-	private _remaining = _until - diag_tickTime;
-	// Floor the seconds too: diag_tickTime is fractional, so an unfloored remainder reaches
-	// format at full precision and the hint reads "59 min 0.000381 sec".
-	private _parts = [floor (_remaining / 60), floor (_remaining % 60)];
+params ["_missionType", "_MissionPos", "_mission_name", ["_requester", 0]];
+private _remaining = [_missionType] call fnc_mission_cooldown_left;
+if (_remaining > 0) exitWith {
+	// Floored both, and the units are in-game hours and minutes: the clock is fractional, so an
+	// unfloored remainder reaches format at full precision and the hint reads "2 h 0.000381 min".
+	private _parts = [floor _remaining, floor ((_remaining % 1) * 60)];
 	// Localised on the receiving machine: the server's language is not the player's.
 	if (_requester > 0) then {
 		[_parts, {
@@ -22,11 +20,12 @@ if (_until > diag_tickTime) exitWith {
 	} else {
 		hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _parts select 0, _parts select 1];
 	};
-	["DEBUG", "MISSION", format ["type=%1 refused, %2s of cooldown left",
-		_missionType, round _remaining]] call fnc_log;
+	["DEBUG", "MISSION", format ["type=%1 refused, %2 in-game hours of cooldown left",
+		_missionType, (round (_remaining * 100)) / 100]] call fnc_log;
 	false
 };
-missionNamespace setVariable [_var, diag_tickTime + _cooldown, true];
+missionNamespace setVariable [format ["mission_cooldown_%1", _missionType],
+	((dateToNumber date) * 8760) + mission_cooldown_hours, true];
 // Holds off the next mission until this thread finishes; each thread clears it on exit.
 Mission_available = false;
 publicVariable "Mission_available";
@@ -38,7 +37,13 @@ publicVariable "Mission_available";
 // Typed rather than titleText'd, to match the card the campaign opens with. Spawned on each
 // client rather than remoteExec'd straight to BIS_fnc_typeText: it sleeps between characters,
 // which throws in the unscheduled environment remoteExec would call it in.
+// The trailing 2 is the hold before the fade: the default of 1 puts the last character on screen
+// and takes the line away again, so the operation name was never readable as a whole.
 [_mission_name, {
-	[[[toUpper _this, "<t align='center' shadow='1' size='1'>%1</t>"]]] spawn BIS_fnc_typeText;
+	[[[toUpper _this, "<t align='center' shadow='1' size='1'>%1</t>"]], 1, 2] spawn BIS_fnc_typeText;
 }] remoteExec ["spawn", [0,-2] select isDedicated];
+// Under the card, and one of only two places music plays -- the other is the insertion flight.
+// Double brackets: playMusic is a unary command whose one argument is an array, so written flat
+// remoteExec hands it the string alone and it throws on the type.
+[["LeadTrack02_F", 0]] remoteExec ["playMusic", [0,-2] select isDedicated];
 true

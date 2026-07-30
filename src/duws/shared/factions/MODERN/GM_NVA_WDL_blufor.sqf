@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"gm_gc_army_rifleman_mpiak74n_80_str";			//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"gm_gc_army_antitank_mpiak74n_rpg7_80_str";		//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"gm_gc_army_rifleman_mpiak74n_80_str";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"gm_gc_army_squadleader_mpiak74n_80_str";		//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"gm_gc_army_squadleader_mpiak74n_80_str";		//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"gm_gc_army_radioman_mpiak74n_80_str";			//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"gm_gc_army_machinegunner_pk_80_str";			//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"gm_gc_army_marksman_svd_80_str";				//init_hq\fnc_HQguards

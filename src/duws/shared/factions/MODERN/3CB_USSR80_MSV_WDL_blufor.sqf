@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"UK3CB_CW_SOV_O_LATE_RIF_1";			//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"UK3CB_CW_SOV_O_LATE_LAT";				//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"UK3CB_CW_SOV_O_LATE_GL";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"UK3CB_CW_SOV_O_LATE_TL";				//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"UK3CB_CW_SOV_O_LATE_TL";				//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"UK3CB_CW_SOV_O_LATE_RADIO";			//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"UK3CB_CW_SOV_O_LATE_MG";				//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"UK3CB_CW_SOV_O_LATE_MK";				//init_hq\fnc_HQguards

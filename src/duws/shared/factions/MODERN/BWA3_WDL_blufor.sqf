@@ -13,7 +13,7 @@
 blufor_SOLDIER_X =				"BWA3_Rifleman_G27_Fleck";			//patrol, fortify, paradrop
 blufor_SOLDIER_LAT_X =			"BWA3_RiflemanAT_RGW90_Fleck";		//init_hq\fnc_HQguards, supports\fnc_paradrop
 blufor_SOLDIER_GL_X =			"BWA3_Grenadier_G27_Fleck";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"BWA3_TL_Fleck";					//init_hq\fnc_createpatrolFOB, init_hq\fnc_HQguards
+blufor_SOLDIER_TL_X =			"BWA3_TL_Fleck";					//init_hq\fnc_HQguards
 blufor_SOLDIER_SL_X =			"BWA3_SL_Fleck";					//Comms voice, Multiplayer slot
 blufor_SOLDIER_AR_X =			"BWA3_MachineGunner_MG5_Fleck";		//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARKSMAN_X = 			"BWA3_Marksman_Fleck";				//init_hq\fnc_HQguards
