@@ -256,9 +256,7 @@ if (!alive _truck1 || (time - _taskStartTime > _taskTimeLimit)) exitWith {
     [{hint localize "STR_DUWS_T_jsg7ys0w"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
     [_speaker1, _message2] remoteExec ["fnc_duws_dialogue", 0];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
-    [] spawn fnc_missionTimer;
-    [_targetpos, _radius, "mission_steal_supply"] spawn fnc_mission_cleanup;
-    missionNamespace setVariable ["current_mission_target_pos", nil];
+    [_targetpos, _radius, "mission_steal_supply"] call fnc_mission_end;
 };
 
 _truck1 removeEventHandler ["GetIn", _truckGetInEH];
@@ -273,7 +271,4 @@ deleteVehicle _box1;
 
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[] spawn fnc_missionTimer;
-[_targetpos, _radius, "mission_steal_supply"] spawn fnc_mission_cleanup;
-
-missionNamespace setVariable ["current_mission_target_pos", nil];
+[_targetpos, _radius, "mission_steal_supply"] call fnc_mission_end;

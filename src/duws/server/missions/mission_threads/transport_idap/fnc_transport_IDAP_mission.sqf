@@ -198,9 +198,7 @@ if (getdammage _truck1>0.95) exitWith {
         [[_targetpos] call fnc_civ_townAt, -5, "idap_failed"] call fnc_town_rep_adjust;
         ["info", [localize "STR_DUWS_T_shengwangjianshao", localize "STR_DUWS_T_civ_rep_down"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
     };
-    [] spawn fnc_missionTimer;
-    [_targetpos,_radius, "mission_transport_idap"] spawn fnc_mission_cleanup;
-    missionNamespace setVariable ["current_mission_target_pos", nil];
+    [_targetpos,_radius, "mission_transport_idap"] call fnc_mission_end;
 };
 
 // 成功分支
@@ -222,7 +220,4 @@ call _cleanupDelivery;
 
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[] spawn fnc_missionTimer;
-[_targetpos,_radius, "mission_transport_idap", true] spawn fnc_mission_cleanup;
-
-missionNamespace setVariable ["current_mission_target_pos", nil];
+[_targetpos,_radius, "mission_transport_idap", true] call fnc_mission_end;

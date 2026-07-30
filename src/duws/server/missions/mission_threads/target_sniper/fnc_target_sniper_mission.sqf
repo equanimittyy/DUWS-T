@@ -195,5 +195,4 @@ deleteMarker str(_markername2);
 sleep 1;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[] spawn fnc_missionTimer;
-[_targetpos,_radius] spawn fnc_mission_cleanup;
+[_targetpos,_radius] call fnc_mission_end;

@@ -214,9 +214,8 @@ Mission_Failed = false;
     };
 
     // 调用通用清理函数（清除敌方单位、残骸等）
-    [_targetPos, _radius, "", true] spawn fnc_mission_cleanup;
+    [_targetPos, _radius, "", true] call fnc_mission_end;
     // Spawn the "next mission" wait
-    [] spawn fnc_missionTimer;
 };
 
 // ----- 8. 生成红方部队线程（最多四波，受 Mission_Active 控制）-----------

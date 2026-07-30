@@ -787,6 +787,5 @@ sleep 1;
 // 给予奖励：指挥点、行动点，并显示通知
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 // 启动下一个任务计时器
-[] spawn fnc_missionTimer;
 // 启动清理程序
-[_MissionPos, _radius, "", true] spawn fnc_mission_cleanup;
+[_MissionPos, _radius, "", true] call fnc_mission_end;

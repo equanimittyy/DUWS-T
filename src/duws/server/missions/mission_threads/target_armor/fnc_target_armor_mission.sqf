@@ -211,8 +211,5 @@ deleteMarker str(_markername2);
 sleep 1;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[] spawn fnc_missionTimer;
 
-[_targetpos,_radius, "mission_target_armor"] spawn fnc_mission_cleanup;
-
-missionNamespace setVariable ["current_mission_target_pos", nil];
+[_targetpos,_radius, "mission_target_armor"] call fnc_mission_end;

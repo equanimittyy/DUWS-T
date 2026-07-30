@@ -500,8 +500,7 @@ if (!pilot_west_close && (time - _missionStartTime) > _taskTimeout_approach) exi
     _pilot setDamage 1;
     [{hint localize "STR_DUWS_T_fxysw123"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
-    [] spawn fnc_missionTimer;
-    [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
+    [_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;
 };
 
 if (!(alive _pilot)) exitWith {
@@ -510,8 +509,7 @@ if (!(alive _pilot)) exitWith {
     deleteMarker str(_markername2);
     [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
-    [] spawn fnc_missionTimer;
-    [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;   
+    [_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;
 };
 
 _trigger = player1;
@@ -536,8 +534,7 @@ if (!(alive _pilot)) exitWith {
     deleteMarker str(_markername2);
     [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
-    [] spawn fnc_missionTimer;
-    [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
+    [_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;
 };
 
 deleteMarker str(_markername2);
@@ -559,8 +556,7 @@ _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_pilotend2"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[] spawn fnc_missionTimer;
-[_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
+[_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;
 
 // Guaranteed, and called rather than spawned into a client function: completing the mission is
 // the gate, and the shape this replaces rolled a chance from a server thread through a function

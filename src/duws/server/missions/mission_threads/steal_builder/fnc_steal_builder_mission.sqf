@@ -191,9 +191,7 @@ deleteMarker str(_markername2);
 if (getdammage BLD1>0.95) exitWith {
     [{hint localize "STR_DUWS_T_obc4591x"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
-    [] spawn fnc_missionTimer;
-    [_targetpos,_radius, "mission_steal_builder"] spawn fnc_mission_cleanup;
-    missionNamespace setVariable ["current_mission_target_pos", nil];
+    [_targetpos,_radius, "mission_steal_builder"] call fnc_mission_end;
 };
 
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
@@ -211,8 +209,5 @@ sleep 5;
 [{hint localize "STR_DUWS_T_rw65exr8"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[] spawn fnc_missionTimer;
 
-[_targetpos,_radius, "mission_steal_builder"] spawn fnc_mission_cleanup;
-
-missionNamespace setVariable ["current_mission_target_pos", nil];
+[_targetpos,_radius, "mission_steal_builder"] call fnc_mission_end;

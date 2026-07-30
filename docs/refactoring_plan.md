@@ -133,18 +133,6 @@ to be true:
 - **The per-player search timer stays out of it.** `playerIntelSearchTick` and `econ_tick` gate
   `fnc_intel_search`, the area search, and never touched the corpse path. Nothing to do.
 
-### The mission-thread epilogue
-
-All 17 threads share an epilogue that differs only in constants. `fnc_mission_begin` owns the
-entry half of the contract — cooldown gate, cooldown stamp, `Mission_available = false`, the typed
-mission-name card, logging — and `fnc_mission_site` and `fnc_mission_abort` now own the give-up
-half. What is left unshared is the exit: reward, timer, cleanup, clear
-`current_mission_target_pos`. That is the missing `fnc_mission_end`.
-
-A contract audit across all 17 threads found no thread missing its cleanup — `rescue_squad` and
-`sabotage_laptop` carry theirs in a separate `_success` file, correctly `remoteExec`'d to the
-server. The contract is honoured; a helper makes it hard to stop honouring.
-
 ### Clone hotspots outside the mission threads
 
 Three more files carry over 100 duplicated lines each and are not covered by anything above.
@@ -391,7 +379,6 @@ Sequenced so that each step is independently verifiable and nothing later depend
 not yet made. Lint is `bash tests/run.sh`; "smoke" means repack and play far enough to exercise
 the named system.
 
-- [ ] Add `fnc_mission_end` alongside `fnc_mission_begin`, `fnc_mission_site` and `fnc_mission_abort`; convert the threads one at a time. Verify per thread: markers are deleted and the reward pays once.
 - [ ] Extract `fnc_garrisonBuildings` and convert the nine copied call sites, intel and loot passes inside it. Verify: each of the nine missions spawns building garrisons, and all nine now drop corpse intel — including `target_sniper`, which does not today.
 - [ ] Make the corpse search claimable once server-side, and set `current_mission_target_pos` in `target_sniper` and `clearthearea_cqb`. Verify on a dedicated server with two clients: the second player finds no search action on a body the first has already searched, and a run of searches on both missions reveals targets rather than returning silence.
 - [ ] Fold the two reimplementations (`fnc_createopfortified.sqf`, `clearthearea_cqb`) onto the same helper, parameterised by building count only. Verify: zone fortification garrisons and CQB garrisons spawn at their existing counts of 8 and 4, and corpses from both now carry intel where zone-fortification corpses did not.

@@ -224,9 +224,7 @@ if ((alive _vehicle_7 && (damage _vehicle_7) < 1) && (time - _missionStartTime) 
     _message = ([localize "STR_DUWS_T_towerfail"] call fnc_cs);
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
     deleteMarker str(_markername2);
-    [] spawn fnc_missionTimer;
-    [_targetpos,_radius, "mission_destroy_tower"] spawn fnc_mission_cleanup;
-    missionNamespace setVariable ["current_mission_target_pos", nil];
+    [_targetpos,_radius, "mission_destroy_tower"] call fnc_mission_end;
 };
 
 deleteMarker str(_markername2);
@@ -234,7 +232,4 @@ deleteMarker str(_markername2);
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[] spawn fnc_missionTimer;
-[_targetpos,_radius, "mission_destroy_tower"] spawn fnc_mission_cleanup;
-
-missionNamespace setVariable ["current_mission_target_pos", nil];
+[_targetpos,_radius, "mission_destroy_tower"] call fnc_mission_end;

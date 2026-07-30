@@ -29,15 +29,13 @@ _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round
 deleteMarker str(_markername2);
 
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
-missionNamespace setVariable ["current_mission_target_pos", nil];
 
 
 // 发放奖励
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[] spawn fnc_missionTimer;
 // Disposal of the laptop, table, pallet and camo net rides on this composition key: they are
 // filed under it by fnc_duws_keep at spawn, and release hands each one to fnc_duws_disposeAfter.
 // The hand-rolled sweep this replaces ran a second timer in the hacker's scheduler, so it was
 // lost on disconnect, and it deleted by class and radius without the keep-radius the disposal
 // path respects -- which meant the props could vanish in front of a player still standing there.
-[_targetPos,_radius, "mission_sabotage_laptop"] spawn fnc_mission_cleanup;
+[_targetPos,_radius, "mission_sabotage_laptop"] call fnc_mission_end;

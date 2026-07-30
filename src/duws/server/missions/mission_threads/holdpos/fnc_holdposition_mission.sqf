@@ -229,8 +229,7 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
         if ((!alive _samSystem || !alive _radarSystem) && ((time - _missionStartTime) < _countdownDuration)) exitWith {
             deleteMarker str(_markername2);
             [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
-            [] spawn fnc_missionTimer;
-            [_targetpos,_radius, "mission_holdpos", true] spawn fnc_mission_cleanup;
+            [_targetpos,_radius, "mission_holdpos", true] call fnc_mission_end;
             Mission_Active = false;
             publicVariable "Mission_Active";
             // 延迟 300 秒删除所有任务物体和单位
@@ -244,8 +243,7 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
             [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
             sleep 1;
             [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-            [] spawn fnc_missionTimer;
-            [_targetpos,_radius, "mission_holdpos", true] spawn fnc_mission_cleanup;
+            [_targetpos,_radius, "mission_holdpos", true] call fnc_mission_end;
             Mission_Active = false;
             publicVariable "Mission_Active";
             // 延迟 300 秒删除所有任务物体和单位

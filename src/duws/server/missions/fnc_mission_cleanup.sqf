@@ -6,9 +6,10 @@
     Tears a finished side mission down: hands its composition to the map cleanup, then sweeps
     the leftover hostiles around the objective once the player has had time to leave.
 
-    USAGE:
-        [_targetpos, _radius] spawn fnc_mission_cleanup;
-        [_targetpos, _radius, "mission_holdpos", true] spawn fnc_mission_cleanup;
+    USAGE: reached through fnc_mission_end, which owns the rest of a thread's exit and takes the
+    same arguments. Call it directly only for a teardown that is not a mission ending.
+        [_targetpos, _radius] call fnc_mission_end;
+        [_targetpos, _radius, "mission_holdpos", true] call fnc_mission_end;
 
     _compKey    composition to release, or "" for a mission that owns no built objects.
     _sweepFriendly  also delete BLUFOR-configured leftovers. Off by default: most missions

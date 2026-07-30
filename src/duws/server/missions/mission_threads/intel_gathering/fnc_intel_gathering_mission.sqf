@@ -346,8 +346,7 @@ sleep 6;
 
     [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_INTEL_GATHERING6"] remoteExec ["fnc_duws_dialogue", 0];
 
-    [] spawn fnc_missionTimer;
-    [_pos, _rad] spawn fnc_mission_cleanup;
+    [_pos, _rad] call fnc_mission_end;
 
     [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 

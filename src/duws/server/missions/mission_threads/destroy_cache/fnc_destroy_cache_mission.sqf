@@ -337,7 +337,4 @@ deleteMarker str(_markername2);
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[] spawn fnc_missionTimer;
-[_targetpos, _radius, "mission_destroy_cache"] spawn fnc_mission_cleanup;
-
-missionNamespace setVariable ["current_mission_target_pos", nil];
+[_targetpos, _radius, "mission_destroy_cache"] call fnc_mission_end;

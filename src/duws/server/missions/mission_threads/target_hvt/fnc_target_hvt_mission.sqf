@@ -229,10 +229,8 @@ waitUntil {sleep 0.5; !alive _target || (time - _missionStartTime) > _taskTimeou
 if (alive _target && (time - _missionStartTime) > _taskTimeout) exitWith {
     [{hint localize "STR_DUWS_T_abc1abc2"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
-    [] spawn fnc_missionTimer;
     deleteMarker str(_markername2);
-    [_targetpos,_radius, "mission_target_hvt"] spawn fnc_mission_cleanup;
-    missionNamespace setVariable ["current_mission_target_pos", nil];
+    [_targetpos,_radius, "mission_target_hvt"] call fnc_mission_end;
 };
 
 sleep 120;
@@ -245,10 +243,7 @@ deleteMarker str(_markername2);
 sleep 1;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[] spawn fnc_missionTimer;
 
 // 清理其他任务物体（APC 不在其中）
 
-[_targetpos,_radius, "mission_target_hvt"] spawn fnc_mission_cleanup;
-
-missionNamespace setVariable ["current_mission_target_pos", nil];
+[_targetpos,_radius, "mission_target_hvt"] call fnc_mission_end;

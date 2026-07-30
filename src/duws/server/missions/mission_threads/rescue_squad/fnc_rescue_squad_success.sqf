@@ -63,9 +63,8 @@ if (!(alive _sol1) && !(alive _sol2) && !(alive _sol3)) exitWith {
 
 	[_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
 
-	[] spawn fnc_missionTimer;
 
-	[_targetPos,_radius] spawn fnc_mission_cleanup;
+	[_targetPos,_radius] call fnc_mission_end;
 };
 
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
@@ -103,11 +102,10 @@ sleep 5;
 // Give cookies  (bonus & notifications)
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 // Spawn the "next mission" wait
-[] spawn fnc_missionTimer;
 
 
 // Spawn the cleanup
-[_targetpos,_radius] spawn fnc_mission_cleanup;
+[_targetpos,_radius] call fnc_mission_end;
 
 // If HARDCORE, Rescue pays intel. Guaranteed, and called rather than spawned into a client
 // function: the shape this replaced ran from a server thread through one that began
