@@ -23,24 +23,10 @@ _message2       = ([localize "STR_DUWS_T_pcend"] call fnc_cs);
 _message3       = ([localize "STR_DUWS_T_pcfail"] call fnc_cs);
 
 // ----- 1. 寻找合适的任务目标位置（含建筑物）--------------------------------
-_randomPos = [];
-_Building = objNull;
-_Posfound = false;
-_targetpos = [];
-_failSafe = 0;
 
-_POSdata = [_MissionPos, _searchRadius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
-_randomPos   = _POSdata select 0;
-_Building    = _POSdata select 1;
-_Posfound    = _POSdata select 2;
-_targetpos   = _POSdata select 3;
-_failSafe    = _POSdata select 4;
-
-if (_failSafe > 10 && !_Posfound) exitWith {
-    Mission_available = true;
-    publicVariable "Mission_available";
-    [{hint localize "STR_DUWS_T_mission_no_location"}] remoteExec ["BIS_fnc_Spawn", 0];
-};
+private _site = [_MissionPos, _searchRadius, 14] call fnc_mission_site;
+if (_site isEqualTo []) exitWith {};
+_site params ["_randomPos", "_Building", "_targetpos"];
 
 // ----- 修改点：确保建筑物至少有4个建筑位置 -----
 _buildingPositions = []; // 将在后面填充
@@ -61,16 +47,12 @@ if (!isNull _Building) then {
             };
         } forEach _nearbyBuildings;
         if (!_found) exitWith {
-            Mission_available = true;
-            publicVariable "Mission_available";
-            [{hint localize "STR_DUWS_T_mission_no_building_4pos"}] remoteExec ["BIS_fnc_Spawn", 0];
+            [14, "STR_DUWS_T_mission_no_building_4pos"] call fnc_mission_abort;
         };
     };
 } else {
     // 没有建筑物，退出
-    Mission_available = true;
-    publicVariable "Mission_available";
-    [{hint localize "STR_DUWS_T_mission_no_building"}] remoteExec ["BIS_fnc_Spawn", 0];
+    [14, "STR_DUWS_T_mission_no_building"] call fnc_mission_abort;
 };
 
 // ----- 2. 放置平民（蓝方渔民，持续害怕动画）--------------------------------

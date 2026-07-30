@@ -133,51 +133,17 @@ to be true:
 - **The per-player search timer stays out of it.** `playerIntelSearchTick` and `econ_tick` gate
   `fnc_intel_search`, the area search, and never touched the corpse path. Nothing to do.
 
-### The mission-thread skeleton, and the cooldown it leaks
+### The mission-thread epilogue
 
-Beyond the garrison block, all 17 threads share a prologue and an epilogue that differ only in
-constants. The prologue — target-position search, the failsafe bail-out, marker creation — is 33
-lines repeated across 15 files, pure boilerplate around values the thread already has.
-
-The prologue is the better first target, because since `fnc_mission_begin` gained a cooldown
-stamp the bail-out no longer undoes everything the entry did:
-
-```sqf
-if (_failsafe > 10 && _Posfound == false) exitWith {
-    Mission_available = true;
-    publicVariable "Mission_available";
-    [{hint localize "STR_DUWS_T_crtzxs0j"}] remoteExec ["BIS_fnc_Spawn", 0];
-};
-```
-
-`fnc_mission_begin` (`server_fnc_init.sqf:785`) writes `mission_cooldown_<type> = diag_tickTime +
-3600` *before* the thread searches for a site. Sixteen threads carry **eighteen early-exit
-paths** — the fifteen failsafe bail-outs, `rescue_squad`'s `count _usableBuildings < 2` check at
-`:18`, and `clearthearea_cqb`'s two at `:31` and `:46` — and **not one of them clears that
-stamp**. A mission that never found a site is on a full hour of cooldown having spawned nothing,
-and the strategic map greys it out for that hour. This is the live cost of the missing helper,
-not a hypothetical one.
-
-The bail-outs have drifted three other ways, all of which a single definition collapses:
-
-- Four still hardcode English rather than localising: `clearthearea_cqb:34` and `:49`,
-  `domination:40`, `target_sniper:31`.
-- The localised ones use two different keys for one message, `STR_DUWS_T_crtzxs0j` and
-  `STR_DUWS_T_mission_no_location`.
-- `target_hvt:32` tests `_failsafe > 5` where every other thread tests `> 10`. Both are inert:
-  `fnc_missionTargetPos` gives up at `_failSafe > 50` (`fnc_missionTargetPos.sqf:31`), so it only
-  ever returns past either threshold. Three constants describing one boundary, none of which can
-  be changed safely without reading the other two.
-
-`fnc_mission_begin` already owns the *entry* half of the contract — cooldown gate, cooldown stamp,
-`Mission_available = false`, the typed mission-name card, logging. The prologue is the missing
-`fnc_mission_site` companion, and it is where the cooldown release belongs; the epilogue (reward,
-timer, cleanup, clear `current_mission_target_pos`) is the missing `fnc_mission_end`.
+All 17 threads share an epilogue that differs only in constants. `fnc_mission_begin` owns the
+entry half of the contract — cooldown gate, cooldown stamp, `Mission_available = false`, the typed
+mission-name card, logging — and `fnc_mission_site` and `fnc_mission_abort` now own the give-up
+half. What is left unshared is the exit: reward, timer, cleanup, clear
+`current_mission_target_pos`. That is the missing `fnc_mission_end`.
 
 A contract audit across all 17 threads found no thread missing its cleanup — `rescue_squad` and
 `sabotage_laptop` carry theirs in a separate `_success` file, correctly `remoteExec`'d to the
-server. That half of the contract is honoured. Three helpers make it hard to stop honouring, and
-close the cooldown leak by construction.
+server. The contract is honoured; a helper makes it hard to stop honouring.
 
 ### Clone hotspots outside the mission threads
 
@@ -425,7 +391,7 @@ Sequenced so that each step is independently verifiable and nothing later depend
 not yet made. Lint is `bash tests/run.sh`; "smoke" means repack and play far enough to exercise
 the named system.
 
-- [ ] Add `fnc_mission_site` and `fnc_mission_end` alongside the existing `fnc_mission_begin`, with the cooldown release in `fnc_mission_site`'s bail-out path; convert the threads one at a time. Verify per thread: the bail-out releases `Mission_available` **and** clears `mission_cooldown_<type>` so the type is immediately re-offerable, markers are deleted, and the reward pays once.
+- [ ] Add `fnc_mission_end` alongside `fnc_mission_begin`, `fnc_mission_site` and `fnc_mission_abort`; convert the threads one at a time. Verify per thread: markers are deleted and the reward pays once.
 - [ ] Extract `fnc_garrisonBuildings` and convert the nine copied call sites, intel and loot passes inside it. Verify: each of the nine missions spawns building garrisons, and all nine now drop corpse intel — including `target_sniper`, which does not today.
 - [ ] Make the corpse search claimable once server-side, and set `current_mission_target_pos` in `target_sniper` and `clearthearea_cqb`. Verify on a dedicated server with two clients: the second player finds no search action on a body the first has already searched, and a run of searches on both missions reveals targets rather than returning silence.
 - [ ] Fold the two reimplementations (`fnc_createopfortified.sqf`, `clearthearea_cqb`) onto the same helper, parameterised by building count only. Verify: zone fortification garrisons and CQB garrisons spawn at their existing counts of 8 and 4, and corpses from both now carry intel where zone-fortification corpses did not.

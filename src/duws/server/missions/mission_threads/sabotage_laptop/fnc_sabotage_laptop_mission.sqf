@@ -7,11 +7,6 @@ if (!([8, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 
 _radius = 200;
 
-_randomPos = [];
-_Building = [];
-_Posfound = false;
-_targetpos = [];
-_failSafe = 0;
 _markerText2 = "";
 switch (VERSION_X) do {
     case "MODERN": {
@@ -21,19 +16,9 @@ switch (VERSION_X) do {
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_laptopletsdothis";
 
-_POSdata = [_MissionPos, _radius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
-
-_randomPos = _POSdata select 0;
-_Building = _POSdata select 1;
-_Posfound = _POSdata select 2;
-_targetpos = _POSdata select 3;
-_failSafe = _POSdata select 4;
-
-if (_failsafe > 10 && _Posfound == false) exitWith {
-    Mission_available = true;
-    publicVariable "Mission_available";
-    [{hint localize "STR_DUWS_T_crtzxs0j"}] remoteExec ["BIS_fnc_Spawn", 0];
-};
+private _site = [_MissionPos, _radius, 8] call fnc_mission_site;
+if (_site isEqualTo []) exitWith {};
+_site params ["_randomPos", "_Building", "_targetpos"];
 
 [_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  player1];
 

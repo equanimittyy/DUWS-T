@@ -16,9 +16,7 @@ _usableBuildings = [];
 _usableBuildings = [_MissionPos,_positions_needed,_radius] call fnc_usableBuildings;
 
 if (count _usableBuildings < 2) exitWith {
-	Mission_available = true; 
-	publicVariable "Mission_available"; 
-	[{hint localize "STR_DUWS_T_crtzxs0j"}] remoteExec ["BIS_fnc_Spawn", 0];
+	[0, "STR_DUWS_T_mission_no_building"] call fnc_mission_abort;
 };
 
 [_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  player1];

@@ -17,28 +17,14 @@ _messagehoundlost = ([localize "STR_DUWS_T_dominationhoundlost"] call fnc_cs);
 _markerText2 = localize "STR_DUWS_T_c13";
 
 // 初始化变量
-_randomPos = [];
-_Posfound = false;
-_targetpos = [];
-_failSafe = 0;
 
 // [MOD] 用于存储蓝方 APC 标记名称，任务结束时清理
 _apcMarkers = [];
 
 // 调用函数寻找合适的任务目标位置
-_POSdata = [_MissionPos, _radius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
-
-_randomPos = _POSdata select 0;
-_Posfound = _POSdata select 2;
-_targetpos = _POSdata select 3;
-_failSafe = _POSdata select 4;
-
-// 如果安全计数器超过10次且仍未找到合适位置，则退出任务并提示
-if (_failsafe > 10 && _Posfound == false) exitWith {
-    Mission_available = true; 
-    publicVariable "Mission_available"; 
-    [{hint"No suitable location found. Please try again."}] remoteExec ["BIS_fnc_Spawn", 0];
-};
+private _site = [_MissionPos, _radius, 13] call fnc_mission_site;
+if (_site isEqualTo []) exitWith {};
+_site params ["_randomPos", "_Building", "_targetpos"];
 
 // 向玩家显示任务提示
 ["Armor Hunting",{hint _this}] remoteExec ["BIS_fnc_Spawn", 0];

@@ -10,26 +10,11 @@ _speaker = localize "STR_DUWS_T_Viper";
 _message = localize "STR_DUWS_T_sniperletsdothis";
 _message1 = ([localize "STR_DUWS_T_sniperend"] call fnc_cs);
 
-_randomPos = [];
-_Building = [];
-_Posfound = false;
-_targetpos = [];
-_failSafe = 0;
 _markerText2 = localize "STR_DUWS_T_c5";
 
-_POSdata = [_MissionPos, _radius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
-
-_randomPos = _POSdata select 0;
-_Building = _POSdata select 1;
-_Posfound = _POSdata select 2;
-_targetpos = _POSdata select 3;
-_failSafe = _POSdata select 4;
-
-if (_failsafe > 10 && _Posfound == false) exitWith {
-	Mission_available = true; 
-	publicVariable "Mission_available"; 
-	[{hint"No suitable location found.  Please try again."}] remoteExec ["BIS_fnc_Spawn", 0];
-};
+private _site = [_MissionPos, _radius, 5] call fnc_mission_site;
+if (_site isEqualTo []) exitWith {};
+_site params ["_randomPos", "_Building", "_targetpos"];
 
 [_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  player1];
 

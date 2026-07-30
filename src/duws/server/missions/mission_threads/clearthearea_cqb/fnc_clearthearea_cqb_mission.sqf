@@ -14,25 +14,9 @@ _message2 = ([localize "STR_DUWS_T_cqbend"] call fnc_cs);
 _message3 = localize "STR_DUWS_T_cqboverlordcopy";
 _markerText2 = localize "STR_DUWS_T_clearhouse_desc";
 
-_randomPos = [];          
-_Building = [];           
-_Posfound = false;        
-_targetpos = [];          
-_failSafe = 0;            
-
-_POSdata = [_MissionPos, _radius, _Posfound, _targetpos, _failSafe] call fnc_missionTargetPos;
-
-_randomPos = _POSdata select 0;
-_Building = _POSdata select 1;
-_Posfound = _POSdata select 2;
-_targetpos = _POSdata select 3;
-_failSafe = _POSdata select 4;
-
-if (_failsafe > 10 && _Posfound == false) exitWith {
-    Mission_available = true; 
-    publicVariable "Mission_available"; 
-    [{hint"No suitable location found.  Please try again."}] remoteExec ["BIS_fnc_Spawn", 0];
-};
+private _site = [_MissionPos, _radius, 11] call fnc_mission_site;
+if (_site isEqualTo []) exitWith {};
+_site params ["_randomPos", "_Building", "_targetpos"];
 
 [localize "STR_DUWS_T_c11",{hint _this}] remoteExec ["BIS_fnc_Spawn",  0];
 
@@ -44,9 +28,7 @@ _desiredBldgCount = 4;
 _actualBldgCount = count _usableBuildings;
 
 if (_actualBldgCount == 0) exitWith {
-    Mission_available = true; 
-    publicVariable "Mission_available"; 
-    [{hint"No suitable buildings found in the area. Mission cancelled."}] remoteExec ["BIS_fnc_Spawn", 0];
+    [11, "STR_DUWS_T_mission_no_building"] call fnc_mission_abort;
 };
 
 _maxBuildingsToUse = (_actualBldgCount min _desiredBldgCount);
