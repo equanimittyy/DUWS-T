@@ -124,6 +124,21 @@ blufor_RQST_VEHICLES = [
 	["B_Truck_01_ammo_F","HEMTT Ammo (50CP)",50],
 	["B_Truck_01_fuel_F","HEMTT Fuel (50CP)",50],
 	["B_Truck_01_ammo_F","HEMTT Ammo (50CP)",50],
-	["B_Truck_01_fuel_F","HEMTT Fuel (50CP)",50]
+	["B_Truck_01_fuel_F","HEMTT Fuel (50CP)",50],
+	["TIOW_Cad_LR_Battlecannon_776th_Blu","Leman Russ - Battlecannon (40CP)",40],
+	["TIOW_Cad_LR_Conqueror_776th_Blu","Leman Russ - Conqueror (45CP)",45],
+	["TIOW_Cad_LR_Demolisher_776th_Blu","Leman Russ - Demolisher (55CP)",55],
+	["TIOW_Cad_LR_Executioner_776th_Blu","Leman Russ - Executioner (45CP)",45],
+	["TIOW_Cad_LR_Exterminator_776th_Blu","Leman Russ - Exterminator (55CP)",55],
+	["TIOW_Cad_LR_Punisher_776th_Blu","Leman Russ - Punisher (45CP)",45],
+	["TIOW_Cad_LR_Vanquisher_776th_Blu","Leman Russ - Vanquisher (45CP)",40],
+	["TIOW_Warhound_LP_PBG_BLU","Titan Warhound - Plasma (200CP)",200],
+	["TIOW_Warhound_LP_TLD_BLU","Titan Warhound - Turbolaser (200CP)",200],
+	["TIOW_Warhound_LP_VMB_BLU","Titan Warhound - Megabolter (200CP)",200],
+	["TIOW_Valkyrie_Fuel_B","Valkyrie - Lascannon(40CP)",40],
+	["TIOW_Valkyrie_Fuel_M_B","Valkyrie - Multilaser (45CP)",45],
+	["TIOW_Valkyrie_Rocket_B","Valkyrie - Lascannon + Rockets (50CP)",50],
+	["TIOW_Valkyrie_Rocket_M_B","Valkyrie - Multilaser + Rockets (50CP)",50],
+	["TIOW_Thunderbolt_Base","Thunderbolt Heavy Figher (60CP",60]
 ];
 

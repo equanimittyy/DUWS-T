@@ -144,6 +144,16 @@ blufor_RQST_VEHICLES = [
 	["B_UAV_01_F","UAV Darter(5CP)",5],
 	["B_UAV_02_dynamicLoadout_F","UAV MQ-4A Greyhawk (15CP)",15],
 	["B_UGV_01_F","UGV Stomper Recon (10CP)",10],
-	["B_UGV_01_rcws_F","UGV Stomper RCWS (20CP)",20]
+	["B_UGV_01_rcws_F","UGV Stomper RCWS (20CP)",20],
+	["TFC_vs_luvw_F","LUVW unarmed (5CP)",5],
+	["TFC_vs_luvw_armed_F","LUVW armed (15CP)",15],
+	["C_TFC_VS_LSVW_transport_uncovered_F","LSWV Transport Uncovered (8CP)",8],
+	["C_TFC_VS_LSVW_transport_covered_F","LSWV Transport Covered (8CP)",8],
+	["TFC_Wheeled_LAV6_ISC","LAV 6.0 IFV (25CP)",25],
+	["TFC_Leopard2A_4_cannon_TW","Leopard2A4 (50CP)",50],
+	["TFC_CH146402_unarmed_F","CH146402 EGRESS Griffon (15CP)",15],
+	["TFC_CH146444_dynamicLoadout_F","CH146444 CAS Griffon (25CP)",25],
+	["TFC_AIR_CC130J_Cargo","CC130J Hercules Cargo (50CP)",50],
+	["TFC_AIR_CC130J","CC130J Hercules Troop Transport (50CP)",50]
 ];
 

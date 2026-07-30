@@ -126,7 +126,18 @@ blufor_RQST_VEHICLES = [
 	["CFP_O_HEZBOLLAH_BTR_60PB_01","BTR 60PB (35CP)",35],
 	["CFP_O_HEZBOLLAH_T72_01","T-72 Tank (35CP)",35],
 	["CFP_O_HEZBOLLAH_Quad_Bike_01","Quad Bike (2CP)",2],
-	["CFP_O_HEZBOLLAH_Hilux_DShKM_01","Hilux DShKM (15CP)",15]
+	["CFP_O_HEZBOLLAH_Hilux_DShKM_01","Hilux DShKM (15CP)",15],
+	["CUP_O_BM21_SLA","BM-21 Rockets (75CP)",75],
+	["B_Heli_Light_01_F","MH-9 Hummingbird (15CP)",15],
+	["CUP_I_UH1H_TK_GUE","Stolen UH-1H (22CP)",22],
+	["CUP_I_UH1H_gunship_TK_GUE","Stolen UH-1H Gunship (25CP)",25],
+	["CUP_B_UH60M_US","Stolen UH-60 Blackhawk (35CP)",35],
+	["CUP_O_Mi24_D_Dynamic_SLA","MI-24D Armed (40CP)",40],
+	["CUP_O_Su25_Dyn_TKA","SU-25 Frogfoot(stolen) (50CP)",50],
+	["B_UAV_01_F","UAV Darter(5CP)",5],
+	["CUP_O_Pchela1T_RU","UAV Pchela 1T (15CP)",15],
+	["B_UGV_01_F","UGV Stomper Recon (10CP)",10],
+	["B_UGV_01_rcws_F","UGV Stomper RCWS (20CP)",20]
 ];
 
 
