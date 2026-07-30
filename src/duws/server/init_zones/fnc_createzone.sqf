@@ -268,16 +268,6 @@ _opfor_spawn = (zone_spawn_array select _index) select 1;
 sleep 60;
 [_spawnPos,_size,_index] spawn fnc_spawnWait;
 
-_fnc_spawn_size = "";
-switch (true) do {
-	case (_size < 101): { _fnc_spawn_size = fnc_100_zone; };
-	case (_size < 251): { _fnc_spawn_size = fnc_250_zone; };
-	case (_size < 501): { _fnc_spawn_size = fnc_500_zone; };
-	case (_size < 1001): { _fnc_spawn_size = fnc_1000_zone; };
-	case (_size < 1501): { _fnc_spawn_size = fnc_1500_zone; };
-	case (_size > 1500): { _fnc_spawn_size = fnc_1501_zone; };
-};
-
 // ✅ 修复：将占领触发器和旗杆创建代码移到 while 循环之前，确保它们能够执行
 
 // CREATE ZONE CAPTURABLE TRIGGER
@@ -321,7 +311,7 @@ while {true} do {
 		(zone_spawn_array select _index) set [1,false];
 		[_spawnPos] spawn fnc_createopfortified;
 		sleep 2;
-		[_spawnPos,_size] spawn _fnc_spawn_size;
+		[_spawnPos,_size] spawn fnc_zone_spawn;
 	};
 	// Waits for the next spawn signal from fnc_spawnWait. Slot 2 of the entry used to carry a
 	// "never despawn again" flag; nothing sets it now that despawn is decided by a grace period
