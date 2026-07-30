@@ -10,7 +10,6 @@ private _hqInCompX = 10.0413;
 private _hqInCompY = 11.3066;
 private _compCenterX = 1041.4962;
 private _compCenterY = 6115.1133;
-private _compCenterZ = 5;
 
 // 计算偏移
 private _offsetX = _compCenterX - _hqInCompX;
@@ -261,247 +260,55 @@ private _invulnerableTypes = [
 // 设置全局 HQ 建筑变量
 bluHQ_object = _hqObj;
 publicVariable "bluHQ_object";
-// ========== 单独生成武器（机枪、AA炮） ==========
-private _weaponList = [];
 
-// 机枪：基于沙袋锚定点，高度 +2.5 米
+// ========== 重新部署锚点 ==========
+// Every anchor fnc_placeHQUnits reads lives in these keys. They are written before the placement
+// call rather than beside each spawn so the rebuild -- which has nothing but the namespace to work
+// from -- places its units off exactly the data this build used.
+
+// 机枪锚定沙袋
 private _mgAnchorPosX = _spawnBaseX + (24.0503 - _compCenterX);
 private _mgAnchorPosY = _spawnBaseY + (-13.7368 - _compCenterY);
 private _mgAnchor = nearestObject [[_mgAnchorPosX, _mgAnchorPosY, 0] apply { _x + 0 }, "Land_SandbagBarricade_01_hole_F"];
-if (!isNull _mgAnchor) then {
-    private _xyWorld = _mgAnchor modelToWorld [-0.3172, -2.36523, 0];
-    private _worldPos = [
-        _xyWorld select 0,
-        _xyWorld select 1,
-        (getPosWorld _mgAnchor select 2) + (1.21321)  // 原 -1.28679，加2.5米
-    ];
-    private _obj = createVehicle ["I_HMG_02_high_F", _worldPos, [], 0, "CAN_COLLIDE"];
-    [_obj, "HQ"] call fnc_duws_keep;
-    _obj enableSimulationGlobal false;
-    _obj setPosWorld _worldPos;
-    private _dirToAnchor = [_worldPos, getPosWorld _mgAnchor] call BIS_fnc_dirTo;
-    _obj setDir _dirToAnchor;
-    _weaponList pushBack _obj;
-};
+missionNamespace setVariable ["HQ_redeploy_mgAnchor", _mgAnchor, true];
 
-// AA炮：基于HQ建筑，高度 +2 米
-private _aaData = [
-    [blufor_TURRET_AA, [-0.31131, 0.814453], 1.252556]  // 原 -0.747444，加2米
-];
-{
-    _x params ["_class", "_xyModel", "_hOffset"];
-    private _xyWorld = _hqObj modelToWorld [_xyModel select 0, _xyModel select 1, 0];
-    private _worldPos = [
-        _xyWorld select 0,
-        _xyWorld select 1,
-        (getPosWorld _hqObj select 2) + _hOffset
-    ];
-    private _obj = createVehicle [_class, _worldPos, [], 0, "CAN_COLLIDE"];
-    [_obj, "HQ"] call fnc_duws_keep;
-    _obj enableSimulationGlobal false;
-    _obj setPosWorld _worldPos;
-    _obj setDir (getDir _hqObj);
-    _weaponList pushBack _obj;
-} forEach _aaData;
-sleep 0.5;
-if (count _weaponList > 0) then {
-    private _unitTypes = [];
-    for "_i" from 1 to (count _weaponList) do { _unitTypes pushBack blufor_SOLDIER_X };
-    private _spawnPos = PosOfBLUHQ findEmptyPosition [0, 50];
-    if (count _spawnPos == 0) then { _spawnPos = PosOfBLUHQ; };
-    private _guardGroup = [_spawnPos, WEST, _unitTypes, [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
-    _guardGroup deleteGroupWhenEmpty true;
-    { (units _guardGroup select _forEachIndex) moveInGunner _x; } forEach _weaponList;
-    { _x enableSimulationGlobal true; } forEach _weaponList;
-    missionNamespace setVariable ["HQ_redeploy_weaponGroup", _guardGroup, true];
-    missionNamespace setVariable ["HQ_redeploy_weaponList", _weaponList, true];
-    missionNamespace setVariable ["HQ_redeploy_mgAnchor", _mgAnchor, true];
-    missionNamespace setVariable ["HQ_redeploy_aaData", _aaData, true];
-};
+// AA炮：基于HQ建筑的模型XY与高度偏移
+missionNamespace setVariable ["HQ_redeploy_aaData", [
+    [blufor_TURRET_AA, [-0.31131, 0.814453], 1.252556]
+], true];
 
-// 哨塔士兵：模型空间XY + 世界空间Z，精确放置
-//兵种池
-private _guardTypes = [blufor_SOLDIER_X, blufor_SOLDIER_LAT_X, blufor_SOLDIER_GL_X, blufor_SOLDIER_TL_X, blufor_SOLDIER_SL_X, blufor_SOLDIER_AR_X, blufor_MARKSMAN_X];
-missionNamespace setVariable ["HQ_redeploy_guardTypes", _guardTypes, true];
+// 兵种池。Broadcast because client_init reads it to caption the guards.
+missionNamespace setVariable ["HQ_redeploy_guardTypes", [blufor_SOLDIER_X, blufor_SOLDIER_LAT_X, blufor_SOLDIER_GL_X, blufor_SOLDIER_TL_X, blufor_SOLDIER_SL_X, blufor_SOLDIER_AR_X, blufor_MARKSMAN_X], true];
 
-private _towerGuards = [];
-{
-    private _tower = _x;
-    private _towerPos = getPosWorld _tower;
-    private _xyWorld = _tower modelToWorld [0.05, 1.47, 0];
-    private _worldPos = [
-        _xyWorld select 0,
-        _xyWorld select 1,
-        (_towerPos select 2) + 1.6369
-    ];
-    private _grp = [_worldPos, WEST, [blufor_SOLDIER_X], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
-    private _unit = (units _grp) select 0;
-    _unit allowDamage true;
-    _unit enableSimulationGlobal false;
-    _unit setPosWorld _worldPos;
-    _unit setUnitPos "UP";
-    _unit disableAI "PATH";
-    _unit setDir (getDir _tower);
-    [_unit, selectRandom ["STAND_IA","STAND"], "FULL"] call BIS_fnc_ambientAnimCombat;
-    _towerGuards pushBack _grp;
-    [_unit] spawn {
-        params ["_u"];
-        sleep 2.5;
-        if (!isNull _u && alive _u) then { _u enableSimulationGlobal true; };
-    };
-} forEach _allTowersList;
-missionNamespace setVariable ["HQ_redeploy_towerGuards", _towerGuards, true];
 missionNamespace setVariable ["HQ_redeploy_towers", _allTowersList, true];
-//塔卫放置流程逻辑总结（纯文本）：
-//
-//核心问题：Land_GuardTower_02_F只有一个建筑位置，其Z高度不正确。modelToWorld的Z轴也不可用。最终方案是将模型空间XY与世界空间Z结合。
-//
-//第一步：在游戏中玩家需要站在塔顶目标位置，打开控制台执行：
-//_tower = nearestObject [player, "Land_GuardTower_02_F"];
-//_playerPos = getPosWorld player;
-//_towerPos = getPosWorld _tower;
-//_heightOffset = (_playerPos select 2) - (_towerPos select 2);
-//_xyModel = _tower worldToModel _playerPos;
-//系统聊天输出或复制以下值：
-//玩家世界位置
-//塔世界位置
-//高度偏移 _heightOffset
-//模型XY偏移 _xyModel 中的前两个值
-//
-//第二步：从输出中记录下关键数据。示例：
-//塔世界位置Z: 10.5261
-//玩家世界位置Z: 12.163
-//高度偏移: 1.6369
-//模型XY: [0.05, 1.47] (仅用前两个值，忽略Z)
-//
-//第三步：在脚本中使用这些固定值，每个塔都这样处理：
-//{
-//private _tower = _x;
-//private _xyWorld = _tower modelToWorld [0.05, 1.47, 0]; // XY用模型偏移
-//private _worldPos = [
-//_xyWorld select 0,
-//_xyWorld select 1,
-//(getPosWorld _tower select 2) + 1.6369 // Z用世界偏移
-//];
-//private _grp = [_worldPos, WEST, [blufor_SOLDIER_X], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
-//private _unit = (units _grp) select 0;
-//_unit allowDamage false;
-//_unit enableSimulation false;
-//_unit setPosWorld _worldPos;
-//_unit setUnitPos "UP";
-//_unit disableAI "PATH";
-//_unit setDir (getDir _tower);
-//[_unit, selectRandom ["STAND_IA","STAND"], "FULL"] call BIS_fnc_ambientAnimCombat;
-//[_unit] spawn {
-//params ["_u"];
-//sleep 0.5;
-//if (!isNull _u && alive _u) then { _u enableSimulation true; };
-//};
-//} forEach _allTowersList;
-//
-//这样无论塔被放置在何处、何方向，塔卫都能准确站在玩家当初站立测试的位置。
-//无论如何不要删除这段备注！！
-// ========== HQ门口双人组（新生成，存储引用，开启伤害） ==========
-private _hqGuardsData = [
+
+// 门口双人组：模型XY、高度偏移、朝向、动作
+missionNamespace setVariable ["HQ_redeploy_hqGuardsData", [
     [[-5.49573, -0.923828], -4.10893, 180, "STAND"],
     [[-4.84598, -3.90649], -4.03631, 180, "STAND_IA"]
-];
-private _newHQGuardsGroups = [];
-{
-    _x params ["_xyModel", "_hOffset", "_dir", "_anim"];
-    private _xyWorld = _hqObj modelToWorld [_xyModel select 0, _xyModel select 1, 0];
-    private _worldPos = [
-        _xyWorld select 0,
-        _xyWorld select 1,
-        (getPosWorld _hqObj select 2) + _hOffset
-    ];
-    private _type = selectRandom _guardTypes;
-    private _grp = [_worldPos, WEST, [_type], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
-    private _unit = (units _grp) select 0;
-    _unit allowDamage true;
-    _unit enableSimulationGlobal false;
-    _unit setPosWorld _worldPos;
-    _unit setUnitPos "UP";
-    _unit disableAI "PATH";
-    _unit setDir _dir;
-    [_unit, _anim, "FULL"] call BIS_fnc_ambientAnimCombat;
-    _newHQGuardsGroups pushBack _grp;
-    [_unit] spawn {
-        params ["_u"];
-        sleep 0.5;
-        if (!isNull _u && alive _u) then { _u enableSimulationGlobal true; };
-    };
-} forEach _hqGuardsData;
-missionNamespace setVariable ["HQ_redeploy_hqGuardsGroup0", _newHQGuardsGroups select 0, true];
-missionNamespace setVariable ["HQ_redeploy_hqGuardsGroup1", _newHQGuardsGroups select 1, true];
-missionNamespace setVariable ["HQ_redeploy_hqGuardsData", _hqGuardsData, true];
-
-// ========== 医疗帐篷门口双人组 ==========
-private _medGuardsData = [
+], true];
+missionNamespace setVariable ["HQ_redeploy_medGuardsData", [
     [[1.49021, -5.54492], -1.37312, "STAND_IA"],
     [[3.18945, -5.54492], -1.37312, "STAND"]
-];
-private _newMedGuardsGroups = [];
-{
-    _x params ["_xyModel", "_hOffset", "_anim"];
-    private _xyWorld = _medTent modelToWorld [_xyModel select 0, _xyModel select 1, 0];
-    private _worldPos = [
-        _xyWorld select 0,
-        _xyWorld select 1,
-        (getPosWorld _medTent select 2) + _hOffset
-    ];
-    private _type = selectRandom _guardTypes;
-    private _grp = [_worldPos, WEST, [_type], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
-    private _unit = (units _grp) select 0;
-    _unit allowDamage true;
-    _unit enableSimulationGlobal false;
-    _unit setPosWorld _worldPos;
-    _unit setUnitPos "UP";
-    _unit disableAI "PATH";
-    _unit setDir ((getDir _medTent) + 180);
-    [_unit, _anim, "FULL"] call BIS_fnc_ambientAnimCombat;
-    _newMedGuardsGroups pushBack _grp;
-    [_unit] spawn {
-        params ["_u"];
-        sleep 0.5;
-        if (!isNull _u && alive _u) then { _u enableSimulationGlobal true; };
-    };
-} forEach _medGuardsData;
-missionNamespace setVariable ["HQ_redeploy_medGuardsGroup0", _newMedGuardsGroups select 0, true];
-missionNamespace setVariable ["HQ_redeploy_medGuardsGroup1", _newMedGuardsGroups select 1, true];
-missionNamespace setVariable ["HQ_redeploy_medGuardsData", _medGuardsData, true];
+], true];
 
-// ========== 警卫室士兵 ==========
-if (!isNull _guardBoxObj) then {
-    private _bestPos = [0,0,0];
-    private _idx = 0;
-    while {true} do {
-        private _pos = _guardBoxObj buildingPos _idx;
-        if (_pos isEqualTo [0,0,0]) exitWith {};
-        if ((_pos select 2) > (_bestPos select 2)) then { _bestPos = _pos };
-        _idx = _idx + 1;
-    };
-    if (_bestPos isEqualTo [0,0,0]) then {
-        _bestPos = getPosATL _guardBoxObj;
-        _bestPos set [2, (_bestPos select 2) + 0.5];
-    };
-    private _type = selectRandom _guardTypes;
-    private _grp = [_bestPos, WEST, [_type], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
-    private _unit = (units _grp) select 0;
-    _unit allowDamage true;
-    _unit enableSimulationGlobal false;
-    _unit setPosWorld _bestPos;
-    _unit setUnitPos "UP";
-    _unit disableAI "PATH";
-    _unit setDir ((getDir _guardBoxObj) + 180);
-    [_unit, "STAND", "FULL"] call BIS_fnc_ambientAnimCombat;
-    [_unit] spawn {
-        params ["_u"];
-        sleep 0.5;
-        if (!isNull _u && alive _u) then { _u enableSimulationGlobal true; };
-    };
-    missionNamespace setVariable ["HQ_redeploy_guardBoxGroup", _grp, true];
-};
+// 医疗帐篷与警卫室的网络ID
+if (!isNull _medTent) then { missionNamespace setVariable ["HQ_medTent_netId", netId _medTent, true]; };
+if (!isNull _guardBoxObj) then { missionNamespace setVariable ["HQ_guardBox_netId", netId _guardBoxObj, true]; };
+
+// 巡逻队：8人随机兵种，出生点用实测的模型坐标和高度偏移
+private _patrolTypes = [blufor_SOLDIER_X, blufor_SOLDIER_LAT_X, blufor_SOLDIER_GL_X, blufor_SOLDIER_TL_X, blufor_SOLDIER_SL_X, blufor_SOLDIER_AR_X, blufor_MARKSMAN_X];
+private _patrolUnits = [];
+for "_i" from 1 to 8 do { _patrolUnits pushBack (selectRandom _patrolTypes); };
+private _patrolSpawnXY = _hqObj modelToWorld [1.27142, -21.9805, 0];
+missionNamespace setVariable ["HQ_redeploy_patrolUnits", _patrolUnits, true];
+missionNamespace setVariable ["HQ_redeploy_patrolSpawnPos", [
+    _patrolSpawnXY select 0,
+    _patrolSpawnXY select 1,
+    (getPosWorld _hqObj select 2) + (-3.87396)
+], true];
+
+call fnc_placeHQUnits;
 
 // 军官：模型XY + 世界Z偏移，精确放置
 private _xyWorld = _hqObj modelToWorld [0.0896273, -0.0180664, 0];
@@ -608,67 +415,6 @@ if (!isNull _barrier) then {
     }];
 };
 
-// ========== 生成蓝方巡逻队（8人，绕塔巡逻） ==========
-private _patrolTypes = [blufor_SOLDIER_X, blufor_SOLDIER_LAT_X, blufor_SOLDIER_GL_X, blufor_SOLDIER_TL_X, blufor_SOLDIER_SL_X, blufor_SOLDIER_AR_X, blufor_MARKSMAN_X];
-private _patrolUnits = [];
-for "_i" from 1 to 8 do { _patrolUnits pushBack (selectRandom _patrolTypes); };
-
-// 出生点：使用你实测的模型坐标和高度偏移
-private _patrolSpawnXY = _hqObj modelToWorld [1.27142, -21.9805, 0];
-private _patrolSpawn = [
-    _patrolSpawnXY select 0,
-    _patrolSpawnXY select 1,
-    (getPosWorld _hqObj select 2) + (-3.87396)
-];
-
-private _patrolGroup = [_patrolSpawn, WEST, _patrolUnits, [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
-_patrolGroup deleteGroupWhenEmpty true;
-
-// 立即禁用伤害和模拟，防止坠落死亡
-{
-    _x allowDamage false;
-    _x enableSimulationGlobal false;
-    _x setPosWorld _patrolSpawn;
-} forEach (units _patrolGroup);
-
-// 清除现有航点
-while {count (waypoints _patrolGroup) > 0} do { deleteWaypoint ((waypoints _patrolGroup) select 0); };
-
-// 添加巡逻航点（四个塔前15米处）
-{
-    private _tower = _x;
-    private _dir = getDir _tower;
-    private _wpPos = _tower getPos [15, _dir];
-    private _wp = _patrolGroup addWaypoint [_wpPos, 0];
-    _wp setWaypointType "MOVE";
-    _wp setWaypointSpeed "LIMITED";
-    _wp setWaypointBehaviour "SAFE";
-} forEach _allTowersList;
-
-// 添加循环航点
-private _firstTower = _allTowersList select 0;
-private _cyclePos = _firstTower getPos [8, getDir _firstTower];
-private _wpCycle = _patrolGroup addWaypoint [_cyclePos, 0];
-_wpCycle setWaypointType "CYCLE";
-_wpCycle setWaypointSpeed "LIMITED";
-_wpCycle setWaypointBehaviour "SAFE";
-
-// 延迟1.5秒后恢复模拟和伤害
-[_patrolGroup] spawn {
-    params ["_grp"];
-    sleep 1.5;
-    {
-        if (!isNull _x && alive _x) then {
-            _x enableSimulationGlobal true;
-            _x allowDamage true;
-        };
-    } forEach (units _grp);
-};
-// 保存巡逻队相关信息，供重新部署使用
-missionNamespace setVariable ["HQ_redeploy_patrolGroup", _patrolGroup, true];
-missionNamespace setVariable ["HQ_redeploy_patrolUnits", _patrolUnits, true];
-missionNamespace setVariable ["HQ_redeploy_patrolSpawnPos", _patrolSpawn, true];
-
 // ========== 交互动作 ==========
 if (!isNull _supplyCrate) then {
     clearMagazineCargoGlobal _supplyCrate;
@@ -739,10 +485,6 @@ private _respawnPos = [
     (getPosWorld _medTent select 2) + (-2.02112)
 ];
 "respawn_west" setMarkerPos _respawnPos;
-
-// 保存医疗帐篷和警卫室的网络ID，供重新部署使用
-if (!isNull _medTent) then { missionNamespace setVariable ["HQ_medTent_netId", netId _medTent, true]; };
-if (!isNull _guardBoxObj) then { missionNamespace setVariable ["HQ_guardBox_netId", netId _guardBoxObj, true]; };
 
 // 保存维修站和停机坪的ID（原有功能）
 if (!isNull _repairDepot) then { missionNamespace setVariable ["HQ_repairDepot_netId", netId _repairDepot, true]; };
