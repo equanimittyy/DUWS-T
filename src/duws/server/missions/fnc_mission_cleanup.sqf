@@ -1,4 +1,4 @@
-// Locality: server -- callers remoteExec to target 2.
+// Locality: server -- called by mission threads only, all server-side.
 /*
     NAME: missions\fnc_mission_cleanup.sqf
 

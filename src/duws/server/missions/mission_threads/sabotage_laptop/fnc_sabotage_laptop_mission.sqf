@@ -189,7 +189,17 @@ switch (VERSION_X) do {
 // Suffixed JIP id, not the laptop itself: the hardcore intel rotary below hangs off the same
 // object, and an object-keyed id is that object's netId, so the two entries evicted each other
 // and a joining client got the search but never the sabotage. The success path removes this id.
-[_laptop,[ACT_COMMIT("STR_DUWS_T_p3200mf5"), fnc_sabotage_laptop_success, [_MissionPos,_targetpos,_mission_name,_markername2,_radius], 10, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["sabotage_action_%1", netId _laptop]];
+// The local half of a split: an addAction runs on whoever activated it, and its index exists
+// only on that machine, so removal has to happen here. Everything else the hack changes is
+// shared state and is decided on the server.
+[_laptop,[ACT_COMMIT("STR_DUWS_T_p3200mf5"), {
+    params ["_target", "_caller", "_actionId", "_arguments"];
+    // Dropped locally first. The server's broadcast removal is a round-trip away, and this
+    // action admits only the activating player, so they are the only one who could pay
+    // themselves twice inside that window.
+    _target removeAction _actionId;
+    ([_target] + _arguments) remoteExec ["fnc_sabotage_laptop_success", 2];
+}, [_MissionPos,_targetpos,_mission_name,_markername2,_radius], 10, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["sabotage_action_%1", netId _laptop]];
 
 // Put an intel action on LAPTOP
 if (hardcore_mode_enable) then {

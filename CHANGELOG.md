@@ -19,6 +19,7 @@ see [`README.md`](README.md) for the fork lineage. `git log` has the detail.
 - Zone capture and loss applied as one server-side transition
 - High Command squads spawn on the server
 - Two silent WARCOM multiplayer bugs repaired
+- Sabotage-laptop completion decided on the server; its prop cleanup no longer dies with the hacker
 - Locality stated on line 1 of every load-bearing function
 
 ## Source layout
