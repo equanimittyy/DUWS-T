@@ -26,15 +26,8 @@ _message = ([localize "STR_DUWS_T_fobcall"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
 // A FOB is a building and a ring of fortifications appearing out of nothing, and anyone stood on
-// that ground sees it pop in around them. The same fade the rest mechanic uses covers the swap,
-// aimed only at players close enough to witness it -- a blackout for someone a kilometre away has
-// no cause they can see. Nobody nearby means no fade and no wait.
-private _fadeRadius = 100;
-private _fadePlayers = (call BIS_fnc_ListPlayers) select {_x distance _foundPickupPos < _fadeRadius};
-if (count _fadePlayers > 0) then {
-	{ [["", "BLACK OUT", 1.5]] remoteExec ["titleCut", _x] } forEach _fadePlayers;
-	sleep 1.7;
-};
+// that ground sees it pop in around them.
+private _fadePlayers = ["OUT", _foundPickupPos] call fnc_baseFade;
 
 // Create the building
 _fob = "";
@@ -61,7 +54,7 @@ _refortify = false;
 // walking in and need no cover.
 if (count _fadePlayers > 0) then {
 	sleep 2;
-	{ [["", "BLACK IN", 1.5]] remoteExec ["titleCut", _x] } forEach _fadePlayers;
+	["IN", _fadePlayers] call fnc_baseFade;
 };
 
 // create the patrols

@@ -2,6 +2,13 @@
 // fnc_MHQ_undeploy.sqf
 // 取消部署机动指挥部，清理弹药箱、帐篷、复活点，解锁载具
 
+// Same cover as the deploy, in the other direction: the crate and the net vanishing out from under
+// someone standing there reads exactly as badly as them appearing. Guarded rather than called
+// straight, because the branch below tolerates this function running on a client, where the
+// server-only fade helper does not exist.
+private _fadePlayers = [];
+if (isServer) then { _fadePlayers = ["OUT", getPos MHQ1] call fnc_baseFade };
+
 // 删除隐形乘员
 {
     deleteVehicle _x;
@@ -10,6 +17,8 @@
 // 删除静态物体
 deleteVehicle MHQ_tent;
 deleteVehicle MHQ_ammobox;
+
+if (isServer) then { ["IN", _fadePlayers] call fnc_baseFade };
 
 // 更新地图标记
 _markerType = "b_motor_inf";

@@ -12,6 +12,10 @@ if (!_empty) exitWith {
 
 _mhqDir = getDir MHQ1;
 
+// A supply crate and a camo net appear on top of whoever is stood beside the vehicle, so the deploy
+// gets the same cover a FOB build does. Read before anything is created; handed back at the end.
+private _fadePlayers = ["OUT", getPos MHQ1] call fnc_baseFade;
+
 // 创建完全静止的虚拟驾驶员
 _groupMHQ = [[0,0], WEST, ["C_Soldier_VR_F"], [], [], blufor_ai_skill] call BIS_fnc_spawnGroup; 
 _groupMHQ deleteGroupWhenEmpty true;
@@ -55,6 +59,10 @@ sleep 0.2;
 MHQ_tent = objNull;
 MHQ_tent = createVehicle ["CamoNet_INDP_big_F", getPos MHQ1, [], 0, "CAN_COLLIDE"];
 MHQ_tent setDir _mhqDir;
+
+// Both objects are placed, so the screens can come back. Everything below this is markers, respawn
+// registration and flags -- nothing anyone can see appearing.
+["IN", _fadePlayers] call fnc_baseFade;
 
 // create marker on MHQ
 _markerType = "b_motor_inf";
