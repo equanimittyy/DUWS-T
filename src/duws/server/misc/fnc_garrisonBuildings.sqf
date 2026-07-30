@@ -7,6 +7,12 @@
 // routine drifted apart, and the one that lost them -- target_sniper -- quietly stopped paying the
 // corpse intel every other mission paid, with nothing in the source to say that was deliberate. A
 // caller cannot forget a step it does not perform.
+//
+// Side missions only. fnc_createopfortified garrisons a zone the same way by eye but not in fact:
+// it wants five usable building positions rather than two, stands its units UP rather than AUTO,
+// repositions on a slower cadence, and walks every usable building instead of a random subset.
+// Folding it in costs four parameters that no other caller sets. clearthearea_cqb is likewise out,
+// because its house-cleared announcements need the per-building unit lists this does not return.
 params ["_pos", "_radius", ["_desiredBldgCount", 6], ["_unitsPerBuilding", 4]];
 
 private _usableBuildings = [_pos, 2, _radius] call fnc_usableBuildings;

@@ -50,92 +50,6 @@ leads the plan.
 
 This is where the bulk of that 15.6% lives, and where duplication has already cost behaviour.
 
-### The building-garrison block: 90-odd lines, nine copies, one drifted
-
-Nine mission threads contain the same routine — find enterable buildings near a point, pick up
-to six, spawn four OPFOR per building, and start a per-unit reposition loop:
-
-| File | Span | Lines |
-|---|---|---|
-| `missions/mission_threads/destroy_cache/fnc_destroy_cache_mission.sqf` | `199-295` | 97 |
-| `missions/mission_threads/destroy_radar/fnc_destroy_radar_mission.sqf` | `120-210` | 91 |
-| `missions/mission_threads/destroy_tower/fnc_destroy_tower_mission.sqf` | `106-196` | 91 |
-| `missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_mission.sqf` | `67-157` | 91 |
-| `missions/mission_threads/steal_builder/fnc_steal_builder_mission.sqf` | `87-177` | 91 |
-| `missions/mission_threads/steal_supply/fnc_steal_supply_mission.sqf` | `135-225` | 91 |
-| `missions/mission_threads/target_armor/fnc_target_armor_mission.sqf` | `57-147` | 91 |
-| `missions/mission_threads/target_hvt/fnc_target_hvt_mission.sqf` | `76-166` | 91 |
-| `missions/mission_threads/target_sniper/fnc_target_sniper_mission.sqf` | `40-129` | 90 |
-
-Eight are identical modulo the position variable's name. `target_sniper` is not, and the
-difference is player-visible: it declares `_buildingGroup` inside the `if` block rather than
-before it (`:82`), so the group is unreachable after the block — and the two passes the other
-eight run there, `fnc_add_intel_to_group` and `fnc_addRandomLoot`, are simply absent. **A sniper
-hunt's building garrison drops no corpse intel**, where every other mission's does. Nothing in
-the source says that is deliberate. That is the substitutability failure in concrete form: one
-copy of a shared routine quietly lost a step, and there is no single definition to compare it
-against.
-
-**Two more files stay as they are.** `server/init_zones/fnc_createopfortified.sqf` and
-`clearthearea_cqb` solve the same problem a third and fourth way, and folding them onto
-`fnc_garrisonBuildings` was considered and rejected. Zone fortification differs on four axes at
-once — minimum building positions (5 against 2), unit stance (`UP` against `AUTO`), two reposition
-sleep ranges, and walking every usable building rather than a random subset — so the fold costs
-four parameters that exist for one caller and make the helper worse for the nine it was extracted
-for. CQB needs the per-building unit lists its house-cleared announcements are built on, which is
-an interface for one consumer. They resemble the block without being copies of it, and there is no
-drift to close.
-
-The extraction has precedent in the same tree: `server/misc/fnc_usableBuildings.sqf` is already a
-19-line shared helper with fifteen callers across the mission. The block wants to become
-`fnc_garrisonBuildings` taking `[_pos, _radius, _bucketKey]` and returning the group, with the
-intel and loot passes inside it so a caller cannot forget them. Nine of those fifteen callers are
-the copied block, two are the reimplementations above, and the remaining four — `rescue_squad`,
-`intel_gathering`, `fnc_civ_handler_wbk` and `fnc_civ_selectTowns` — use `fnc_usableBuildings`
-for siting rather than garrisoning and are not part of this conversion.
-
-**The drift is decided: the outliers are wrong.** `target_sniper` and `clearthearea_cqb` should
-drop corpse intel like the other seven, so `fnc_garrisonBuildings` runs the intel and loot passes
-unconditionally for every side mission and no caller can opt out. That makes two missions start
-paying intel they do not pay today — a behaviour change, so it lands in its own commit with its
-own smoke test rather than riding along with the extraction.
-
-**"Consistent" means all eleven sites, including the zone garrison.** `fnc_add_intel_to_group` is
-called from side missions only today, and `fnc_createopfortified` has never added intel to a
-zone's garrison. That gap closes rather than being preserved behind a parameter: the helper runs
-the intel and loot passes for every caller, and `fnc_garrisonBuildings` takes no intel flag at all.
-
-A zone rebuilds its garrison whenever players return to it, so this is a supply the player can
-work repeatedly. That is intended — the cost of each cycle is defeating the garrison again, and
-the intel pool is finite, so grinding buys a faster route through the hidden-map phase and nothing
-after it. The reasoning is in [`search_system_plan.md`](search_system_plan.md#streamed-entities-are-flagged-too-and-the-farm-is-the-price).
-
-The per-corpse hold action this attaches is a standing cost rather than a leak: its JIP entry is
-keyed to the body and dropped when `fnc_repetitive_cleanup` deletes it
-([`info/intel_system.md`](info/intel_system.md#the-body-search-looks-outward-so-it-scales-with-players-not-corpses)).
-Extending it to a respawning population raises the steady-state count, which is one more reason
-the Search rework should move this onto the outward-looking shape.
-
-The reward keeps the Search the Body shape it already has — the `BIS_fnc_holdActionAdd` that
-`fnc_add_intel_on_death` wires onto each corpse — at a 60% find rate, searchable once by anyone.
-Two of those three hold today; the third does not, and a fourth thing has to change for the rate
-to be true:
-
-- **60% is already the aggregate.** `fnc_corpse_search_action.sqf` rolls `random 1`: under 0.4
-  reveals the target, 0.4–0.6 pays 1 CP and 1 AP, above 0.6 pays nothing. No odds change.
-- **Once-by-anyone is not what happens.** The action is `remoteExec`'d to every client, its
-  remove-on-completion is per-machine, and the `corpse_search_action_added` guard at `:12-13` is
-  set without the broadcast flag — so it is per-machine too. In co-op each player searches the
-  same body for their own payout. Closing it needs a server-side claim on the corpse, checked in
-  the action's condition; the mission already has `fnc_support_try_claim` as precedent.
-- **The 40% reveal branch is inert for both new missions.** It is guarded by
-  `count _targetPos == 3`, and `current_mission_target_pos` is set by eight threads —
-  `target_sniper` and `clearthearea_cqb` are not among them. Left alone, their garrisons would
-  pay at 20%, not 60%, and 40% of searches would return no dialogue, no notification and no
-  reward at all. Both threads must set the global for the stated rate to be the real one.
-- **The per-player search timer stays out of it.** `playerIntelSearchTick` and `econ_tick` gate
-  `fnc_intel_search`, the area search, and never touched the corpse path. Nothing to do.
-
 ### Clone hotspots outside the mission threads
 
 Three more files carry over 100 duplicated lines each and are not covered by anything above.
@@ -220,43 +134,6 @@ DUWS_missionDefs = [
 `compile format ["[%1] call fnc_launch_side_mission", _type]` — seven one-token compiles per
 opening, replacing 34 globals and four hand-synchronised tables. Adding a mission then means one
 table row and one registry line.
-
-### The support menu is a 22-case switch over one template
-
-`client/dialog/fnc_request_support.sqf` is 485 lines and 22 cases. Every case is the same
-template:
-
-```sqf
-case N: {
-    if (insurgent_mode_enable) exitWith { hint localize "STR_DUWS_T_inssupport" };   // 13 cases
-    _cost = C;
-    if (support_count > 7) exitWith { /* radio cap */ };                             // 17 cases
-    if (support_X_available) exitWith { hint localize "STR_DUWS_T_8c1i4vga" };
-    if !(["CP", _cost] call fnc_pool_spend) exitWith { hint localize "STR_DUWS_T_e95mc4lv" };
-    support_count = support_count + 1;                                               // 17 cases
-    [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-    ctrlSetText [1000, format ["%1", commandpointsblu1]];
-    lbSetColor [2103, index_support_X, [0, 1, 0, 1]];
-    playSound "...";
-    support_X_available = true;
-};
-```
-
-The "not enough CP" literal `STR_DUWS_T_e95mc4lv` appears 39 times across the tree, 22 of them in
-this file. There are 23 `support_*_available` globals. The variation between cases is five
-values — cost, unlock flag, dialogue key, listbox index, sound — plus an optional
-`insurgent_mode` guard, an optional radio-slot cap, and a per-support unlock action.
-
-A table of the five values plus a per-support unlock block collapses the file to roughly its
-declaration table and a 20-line driver. The unlock blocks genuinely differ (arsenal walks
-`Array_of_FOBS`, HALO adds three `addAction`s conditioned on `Squad_Leaders`), so they stay as
-code — but as one entry per support in the table, not one branch in a switch.
-
-**Sequence this before the two-currency split, not after.**
-[`ap_economy_plan.md`](ap_economy_plan.md) and [`cp_economy_plan.md`](cp_economy_plan.md) put
-advanced supports behind a CP *and* AP price. Against the switch that is a second price and a
-second spend call edited into every advanced case by hand; against the table it is one more
-column and one more line in the driver.
 
 ### A faction is 60-odd flat globals plus 50 numbered slots
 
@@ -382,8 +259,6 @@ Sequenced so that each step is independently verifiable and nothing later depend
 not yet made. Lint is `bash tests/run.sh`; "smoke" means repack and play far enough to exercise
 the named system.
 
-- [ ] Extract `fnc_garrisonBuildings` and convert the nine copied call sites, intel and loot passes inside it. Verify: each of the nine missions spawns building garrisons, and all nine now drop corpse intel — including `target_sniper`, which does not today.
-- [ ] Collapse `fnc_request_support.sqf` to a declaration table plus a driver, **before** the two-currency work adds an AP price to every advanced case. Verify: every one of the 22 supports unlocks once, refuses a second purchase, respects the eight-slot radio cap, and colours its listbox row.
 - [ ] Move the 49 inline bodies out of `server_fnc_init.sqf` into subsystem files, leaving a pure manifest. Verify: lint's path check passes, the registry self-check reports the same function count, and CP/AP mutation plus composition stow/deploy still work.
 - [ ] Fold `fnc_redeployHQUnits.sqf` onto `fnc_BluHQinit.sqf`'s placement routine, and collapse `fnc_weather.sqf` and `fnc_zone_spawn_sizes.sqf` to table-plus-driver. Verify: HQ units place identically on init and on redeploy; each weather type still transitions; each zone size spawns its existing group count.
 - [ ] Extract the 51 lines the RAVAGE and WBK handlers still share into a helper the two of them call, leaving the plain handler untouched. Verify: both modes spawn, clean up, and respect the spawn mutex; the plain path is unchanged.
