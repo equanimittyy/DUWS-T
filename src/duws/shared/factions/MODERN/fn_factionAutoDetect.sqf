@@ -42,6 +42,10 @@ fnc_vehiclePostInit = compileFinal {
 //[_entity] spawn fnc_vehiclePostInit;
 
 
+// No caller left in this tree: the request menus it padded slot names for now hold one array each.
+// Kept because it is publicVariable'd with the rest of the detection helpers, so a faction file
+// shipped by somebody else may still call it, and a missing broadcast name fails silently at the
+// call rather than anywhere a linter or the boot self-check would see it.
 fnc_padZero = compileFinal {
 	switch (True) do { 
 		case (_this < 10): {format ["0%1", str _this]};
