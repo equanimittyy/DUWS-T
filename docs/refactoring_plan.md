@@ -76,12 +76,15 @@ the source says that is deliberate. That is the substitutability failure in conc
 copy of a shared routine quietly lost a step, and there is no single definition to compare it
 against.
 
-Two more files solve the same problem a third and fourth way rather than copying it:
-`server/init_zones/fnc_createopfortified.sqf:49-55` (eight buildings) and
-`missions/mission_threads/clearthearea_cqb/fnc_clearthearea_cqb_mission.sqf:41-79` (four, and
-also no intel pass). They share `fnc_usableBuildings` and the `_desiredBldgCount` idea but not
-the code, so they are reimplementation rather than duplication — worth folding into the same
-helper, but they are not evidence of copy-paste drift and should be converted last.
+**Two more files stay as they are.** `server/init_zones/fnc_createopfortified.sqf` and
+`clearthearea_cqb` solve the same problem a third and fourth way, and folding them onto
+`fnc_garrisonBuildings` was considered and rejected. Zone fortification differs on four axes at
+once — minimum building positions (5 against 2), unit stance (`UP` against `AUTO`), two reposition
+sleep ranges, and walking every usable building rather than a random subset — so the fold costs
+four parameters that exist for one caller and make the helper worse for the nine it was extracted
+for. CQB needs the per-building unit lists its house-cleared announcements are built on, which is
+an interface for one consumer. They resemble the block without being copies of it, and there is no
+drift to close.
 
 The extraction has precedent in the same tree: `server/misc/fnc_usableBuildings.sqf` is already a
 19-line shared helper with fifteen callers across the mission. The block wants to become
@@ -380,8 +383,6 @@ not yet made. Lint is `bash tests/run.sh`; "smoke" means repack and play far eno
 the named system.
 
 - [ ] Extract `fnc_garrisonBuildings` and convert the nine copied call sites, intel and loot passes inside it. Verify: each of the nine missions spawns building garrisons, and all nine now drop corpse intel — including `target_sniper`, which does not today.
-- [ ] Make the corpse search claimable once server-side, and set `current_mission_target_pos` in `target_sniper` and `clearthearea_cqb`. Verify on a dedicated server with two clients: the second player finds no search action on a body the first has already searched, and a run of searches on both missions reveals targets rather than returning silence.
-- [ ] Fold the two reimplementations (`fnc_createopfortified.sqf`, `clearthearea_cqb`) onto the same helper, parameterised by building count only. Verify: zone fortification garrisons and CQB garrisons spawn at their existing counts of 8 and 4, and corpses from both now carry intel where zone-fortification corpses did not.
 - [ ] Collapse `fnc_request_support.sqf` to a declaration table plus a driver, **before** the two-currency work adds an AP price to every advanced case. Verify: every one of the 22 supports unlocks once, refuses a second purchase, respects the eight-slot radio cap, and colours its listbox row.
 - [ ] Move the 49 inline bodies out of `server_fnc_init.sqf` into subsystem files, leaving a pure manifest. Verify: lint's path check passes, the registry self-check reports the same function count, and CP/AP mutation plus composition stow/deploy still work.
 - [ ] Fold `fnc_redeployHQUnits.sqf` onto `fnc_BluHQinit.sqf`'s placement routine, and collapse `fnc_weather.sqf` and `fnc_zone_spawn_sizes.sqf` to table-plus-driver. Verify: HQ units place identically on init and on redeploy; each weather type still transitions; each zone size spawns its existing group count.

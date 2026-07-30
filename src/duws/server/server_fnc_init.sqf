@@ -852,6 +852,7 @@ publicVariable "fnc_dyna_mission_supply_recovery";
 fnc_add_intel_on_death = compile preprocessFileLineNumbers "duws\server\misc\fnc_add_intel_on_death.sqf";
 publicVariable "fnc_add_intel_on_death";
 fnc_corpse_search_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_corpse_search_action.sqf";
+fnc_corpse_search_claim = compile preprocessFileLineNumbers "duws\server\misc\fnc_corpse_search_claim.sqf";
 publicVariable "fnc_corpse_search_action";
 fnc_add_intel_to_group = compile preprocessFileLineNumbers "duws\server\misc\fnc_add_intel_to_group.sqf";
 publicVariable "fnc_add_intel_to_group";
