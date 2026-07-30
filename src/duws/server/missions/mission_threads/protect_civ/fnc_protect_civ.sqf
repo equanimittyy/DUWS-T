@@ -29,30 +29,33 @@ if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
 // ----- 修改点：确保建筑物至少有4个建筑位置 -----
-_buildingPositions = []; // 将在后面填充
-if (!isNull _Building) then {
-    _buildingPositions = [_Building] call BIS_fnc_buildingPositions;
-    if (count _buildingPositions < 4) then {
-        // 需要寻找附近其他建筑物
-        private _nearbyBuildings = nearestObjects [_MissionPos, ["House"], _searchRadius];
-        private _found = false;
-        {
-            private _bpos = [_x] call BIS_fnc_buildingPositions;
-            if (count _bpos >= 4) then {
-                _Building = _x;
-                _targetpos = getPosATL _Building;
-                _buildingPositions = _bpos;
-                _found = true;
-                break;
-            };
-        } forEach _nearbyBuildings;
-        if (!_found) exitWith {
-            [14, "STR_DUWS_T_mission_no_building_4pos"] call fnc_mission_abort;
-        };
-    };
-} else {
-    // 没有建筑物，退出
+// A guard, not an else branch. The else this replaces announced the failure and handed the mission
+// slot back, then fell through and built the civilian, the markers and the triggers on a null
+// building anyway -- a mission the player was told had been cancelled, running while the campaign
+// believed no mission was live. exitWith leaves the thread from here because if/then is transparent
+// to it and nothing between this line and the thread body is a loop.
+if (isNull _Building) exitWith {
     [14, "STR_DUWS_T_mission_no_building"] call fnc_mission_abort;
+};
+
+_buildingPositions = [_Building] call BIS_fnc_buildingPositions;
+if (count _buildingPositions < 4) then {
+    // 需要寻找附近其他建筑物
+    private _nearbyBuildings = nearestObjects [_MissionPos, ["House"], _searchRadius];
+    private _found = false;
+    {
+        private _bpos = [_x] call BIS_fnc_buildingPositions;
+        if (count _bpos >= 4) then {
+            _Building = _x;
+            _targetpos = getPosATL _Building;
+            _buildingPositions = _bpos;
+            _found = true;
+            break;
+        };
+    } forEach _nearbyBuildings;
+    if (!_found) exitWith {
+        [14, "STR_DUWS_T_mission_no_building_4pos"] call fnc_mission_abort;
+    };
 };
 
 // ----- 2. 放置平民（蓝方渔民，持续害怕动画）--------------------------------
