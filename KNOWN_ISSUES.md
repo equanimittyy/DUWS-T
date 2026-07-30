@@ -41,6 +41,35 @@ _BEGIN-USER_
 
 _END-USER_
 
+## The refactor branch: sixteen code commits, none of them run
+
+A structural pass over `src/duws/` fixed six defects on the way through. All of it passes
+`bash tests/run.sh`, which reads brackets, resolves paths and runs the pure-function unit layer —
+none of which can see a running mission. Six of the commits change what the game does.
+
+Five checks cover the risk. Each names the commits it clears, so a failure points somewhere
+narrower than the whole branch.
+
+- [ ] **Run one side mission end to end.** Covers the mission prologue and exit helpers, the shared
+      garrison, and corpse intel. Watch for: a mission that fails to find ground is immediately
+      re-requestable rather than locked for an hour; markers are deleted on completion; the reward
+      pays once. A sniper hunt's garrison should now drop searchable intel, which it never did
+- [ ] **Open the HQ and FOB request menus, buy a unit and a vehicle from each.** Covers the
+      `getVariable` conversion and the guards added beneath it. Rows must populate identically, and
+      a row with no faction entry behind it must refuse *before* charging rather than after
+- [ ] **Buy a support, then try to buy it again.** Covers the table-and-driver rewrite. Every
+      support unlocks once, refuses a second purchase, respects the eight-slot radio cap, and
+      colours **its own** listbox row — HALO previously coloured the laser strike's
+- [ ] **Build a FOB, let OPFOR approach it, then remove it.** Covers the trigger conversion: the
+      enemy warning still fires, and removal deletes the trigger rather than orphaning it
+- [ ] **Capture a zone, leave, and let OPFOR return to it.** Covers the spawn-band table and the new
+      contact warning. Garrison sizes per radius band should be unchanged; a zone you hold now
+      reports enemy contact, and one you do not must stay silent
+
+Two of these need a dedicated server rather than a hosted session: one search per corpse *for the
+whole team* cannot be observed with one machine, and neither can the once-by-anyone claim behind it
+([`docs/info/testing.md`](docs/info/testing.md#testing-join-in-progress)).
+
 ## Composition streaming: the prop-position fix is unverified
 
 Every field a stowed composition's record carries has now been exercised, and only the positions
