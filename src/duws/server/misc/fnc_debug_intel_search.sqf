@@ -1,10 +1,15 @@
-// Locality: server. Runs the real roll and the real payout, and deliberately ignores the
-// per-player attempt: at one attempt per 30-minute economy tick, exercising a 20% chance the
-// honest way takes a couple of hours. Nothing else about the path is faked.
+// Locality: server. Runs the real payout draw and the real payout, and deliberately skips stage
+// one: the flag is rolled when a unit spawns, so exercising it honestly means fighting a garrison
+// per sample. The stage-one chance is reported rather than obeyed. Nothing else is faked.
 if (!isServer) exitWith {};
 
-params ["_caller"];
+params ["_caller", ["_source", "mission"]];
 if (isNull _caller) exitWith {};
+
+private _config = DUWS_searchSources getOrDefault [_source, []];
+if (_config isEqualTo []) exitWith {
+    [format ["Intel search (debug)\n\nNo source named '%1' in DUWS_searchSources.", _source]] remoteExec ["hint", _caller];
+};
 
 // Names copied out as strings, zones and hardcore-hidden towns together. The entries themselves
 // are handed out by reference, so a snapshot of them would mutate along with the array and show
@@ -23,25 +28,26 @@ private _fnc_hidden = {
 
 private _hiddenBefore = call _fnc_hidden;
 
-private _roll = random 1;
-private _hit = _roll < intel_search_chance;
+private _kind = [_config select 1] call fnc_search_drawKind;
+private _outcome = format ["drew '%1'", _kind];
 
-private _outcome = "MISS - no payout";
-if (_hit) then {
-    _outcome = if ([getPos _caller, _caller] call fnc_intel_payout) then {
-        format ["HIT - revealed %1", (_hiddenBefore - (call _fnc_hidden)) param [0, "?"]]
+// Only the intel kind can decline, and only the intel kind is worth showing the pool for. The
+// other kinds are reported as drawn rather than paid, so a debug press cannot quietly hand out CP.
+if (_kind isEqualTo "intel") then {
+    _outcome = if ([getPosATL _caller, _caller] call fnc_intel_payout) then {
+        format ["intel - revealed %1", (_hiddenBefore - (call _fnc_hidden)) param [0, "?"]]
     } else {
-        "HIT - but every payout pool is empty"
+        "intel - but every payout pool is empty, so a real search would re-draw"
     };
 };
 
 [format [
-    "Intel search (debug)\n\nRoll %1 against a chance of %2\n%3\n\nHidden positions: %4 -> %5\nTask forces unblocked: %6\nYour real attempt is spent: %7",
-    (round (_roll * 1000)) / 1000,
-    intel_search_chance,
+    "Intel search (debug)\n\nSource '%1', flagged at spawn %2%% of the time\nWeights: %3\n\n%4\n\nHidden positions: %5 -> %6\nTask forces unblocked: %7",
+    _source,
+    (_config select 0) * 100,
+    _config select 1,
     _outcome,
     count _hiddenBefore,
     count (call _fnc_hidden),
-    hardcore_visibleZone_found,
-    _caller getVariable ["DUWS_intel_searched", false]
+    hardcore_visibleZone_found
 ]] remoteExec ["hint", _caller];

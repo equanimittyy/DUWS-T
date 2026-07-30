@@ -71,7 +71,7 @@ sleep 1;
 
 {
     if (!isNull _x) then {
-        [_x] call fnc_add_intel_to_group;
+        [_x, "mission"] call fnc_search_flag_group;
     };
 } forEach [_group];
 {
@@ -170,7 +170,6 @@ _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_
 [_VARtaskgeneratedName, localize "STR_DUWS_T_transIDAP", _mission_name, _randomPos, "truck"] call fnc_missionTaskCreate;
 
 // 设置任务目标位置（卡车位置）
-missionNamespace setVariable ["current_mission_target_pos", getPos _truck1];
 ["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", 0];
 
 sleep 5; // 等待巡逻队生成完毕

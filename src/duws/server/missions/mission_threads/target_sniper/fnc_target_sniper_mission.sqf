@@ -41,7 +41,6 @@ _target2 = units _group select 2;
 // mark, so it returned silently and this mission paid at the roll's lower band instead of its full
 // rate -- the garrison it applies to only started carrying intel when fnc_garrisonBuildings took
 // over, so the gap had never shown.
-missionNamespace setVariable ["current_mission_target_pos", getPos _target1];
 
 // 为狙击手添加吉利服
 [_target1] spawn {

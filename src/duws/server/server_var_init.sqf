@@ -189,12 +189,6 @@ HQ_pos_found_generated = false;publicVariable "HQ_pos_found_generated";
 MASTER_allLocations_filtered = [];//publicVariable "MASTER_allLocations_filtered";
 MASTER_allLocationsPos = [];publicVariable "MASTER_allLocationsPos";
 
-// Chance a body search turns up a zone. Server-local: the roll is server-side, and a client
-// that can read the number is a client that can be shown to have rolled against it.
-// Superseded by the per-source table below; still read by the search path that has not yet been
-// converted onto it, and by the debug probe that reports what that path would roll.
-intel_search_chance = 0.2;
-
 // [successChance, [[payoutKind, weight], ...]] per search source.
 //
 // The success roll is spent when the entity is created, not when it is searched. What the player
@@ -211,11 +205,16 @@ intel_search_chance = 0.2;
 //
 // civ_frisk is flagged on every civilian and carries its own `nothing` weight, which keeps the
 // shipped 37.5 / 12.5 / 50 split exactly: the arrest is the price, and it is paid before this.
+// The speaker and the empty-handed line are per-source too. A body is the searcher talking to
+// themselves; a frisk is the team reporting what a detainee was carrying, and the two should not
+// sound alike just because they share a driver. "" as a speaker means the searcher's own name.
+//
+// [successChance, [[payoutKind, weight], ...], speakerKey, nothingKey]
 DUWS_searchSources = createHashMapFromArray [
-    ["garrison",  [0.08, [["intel", 2], ["pool", 3], ["coins", 2], ["document", 1]]]],
-    ["mission",   [0.15, [["intel", 3], ["pool", 2]]]],
-    ["objective", [1,    [["intel", 1]]]],
-    ["civ_frisk", [1,    [["coins", 3], ["document", 1], ["nothing", 4]]]]
+    ["garrison",  [0.08, [["intel", 2], ["pool", 3], ["coins", 2], ["document", 1]], "", "STR_DUWS_T_INTEL_FOUND_n"]],
+    ["mission",   [0.15, [["intel", 3], ["pool", 2]],                                "", "STR_DUWS_T_INTEL_FOUND_n"]],
+    ["objective", [1,    [["intel", 1]],                                             "", "STR_DUWS_T_INTEL_FOUND_n"]],
+    ["civ_frisk", [1,    [["coins", 3], ["document", 1], ["nothing", 4]], "STR_DUWS_T_actionteam", "STR_DUWS_T_LOOT6"]]
 ];
 
 // manually_chosen
@@ -317,15 +316,6 @@ DUWS_base_keep_radius = 250;
 // Sequence number of the 30-minute campaign economy tick (fnc_zonesundercontrol.sqf).
 // Not broadcast: only server-side payout caps read it.
 econ_tick = 0;
-
-// Which economy window each player spent their body search in, keyed by UID. The flag the search
-// action's condition reads has to sit on the player object for a client to see it, and a respawn
-// hands out a fresh object -- so the object alone cannot be the record, or every death refunds the
-// attempt. Keyed on econ_tick the way fnc_civ_healed keys its heal window, so the tick that clears
-// the broadcast flags retires these entries by moving past them and nothing has to be swept. Not
-// cleared on disconnect either: dropping an entry would hand the attempt back to anyone who
-// reconnected inside the same window, and an entry is one integer.
-playerIntelSearchTick = createHashMap;
 
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
 

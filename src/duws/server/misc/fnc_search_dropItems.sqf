@@ -11,4 +11,11 @@ params ["_items", "_basePosATL"];
     // Lifted clear of the surface: an item written exactly at ground level can settle inside it.
     _spawnPos set [2, (_basePosATL select 2) + 0.05];
     _obj setPosATL _spawnPos;
+    _obj setDir random 360;
+    // Re-enabled explicitly: a dropped item that never simulates hangs at the height it was
+    // written to rather than falling the last few centimetres onto the ground.
+    _obj enableSimulation true;
+    // Binned on a timer. These are ground litter with no owner, and the map cleanup keys off
+    // composition membership, which nothing dropped by a search ever has.
+    [_obj] spawn { sleep 60; deleteVehicle (_this select 0) };
 } forEach _items;

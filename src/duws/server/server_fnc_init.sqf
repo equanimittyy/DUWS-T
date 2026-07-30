@@ -112,13 +112,6 @@ fnc_dyna_mission_mortarspotter = compile preprocessFileLineNumbers "duws\server\
 publicVariable "fnc_dyna_mission_mortarspotter";
 fnc_dyna_mission_supply_recovery = compile preprocessFileLineNumbers "duws\server\missions\dyna\fnc_dyna_mission_supply_recovery.sqf";
 publicVariable "fnc_dyna_mission_supply_recovery";
-fnc_add_intel_on_death = compile preprocessFileLineNumbers "duws\server\misc\fnc_add_intel_on_death.sqf";
-publicVariable "fnc_add_intel_on_death";
-fnc_corpse_search_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_corpse_search_action.sqf";
-fnc_corpse_search_claim = compile preprocessFileLineNumbers "duws\server\misc\fnc_corpse_search_claim.sqf";
-publicVariable "fnc_corpse_search_action";
-fnc_add_intel_to_group = compile preprocessFileLineNumbers "duws\server\misc\fnc_add_intel_to_group.sqf";
-publicVariable "fnc_add_intel_to_group";
 fnc_intel_gathering_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\intel_gathering\fnc_intel_gathering_mission.sqf";
 publicVariable "fnc_intel_gathering_mission";
 // CIVILIAN FUNCTIONS
@@ -295,8 +288,6 @@ fnc_createpatrolFOB = compile preprocessFileLineNumbers "duws\server\init_hq\fnc
 fnc_locatorZones_manual = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_manual.sqf";publicVariable "fnc_locatorZones_manual";
 fnc_createZone = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createZone.sqf";publicVariable "fnc_createZone";
 fnc_intel_payout = compile preprocessFileLineNumbers "duws\server\misc\fnc_intel_payout.sqf";
-fnc_intel_search = compile preprocessFileLineNumbers "duws\server\misc\fnc_intel_search.sqf";
-fnc_intel_search_restore = compile preprocessFileLineNumbers "duws\server\misc\fnc_intel_search_restore.sqf";
 fnc_debug_intel_search = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_intel_search.sqf";
 fnc_debug_force_mission = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_force_mission.sqf";
 fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";

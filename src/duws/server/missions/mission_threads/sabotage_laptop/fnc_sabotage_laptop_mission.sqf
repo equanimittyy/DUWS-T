@@ -88,6 +88,5 @@ if (hardcore_mode_enable) then {
 };
 ["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", 0];
 // 设置任务目标位置
-missionNamespace setVariable ["current_mission_target_pos", getPos _laptop];
 
 sleep 5; // 等待巡逻队生成完毕

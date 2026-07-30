@@ -112,7 +112,7 @@ _wp2 setWaypointTimeout [30, 45, 60];
 // ========== 添加死亡情报动作 ==========
 {
     if (!isNull _x) then {
-        [_x] call fnc_add_intel_to_group;
+        [_x, "mission"] call fnc_search_flag_group;
     };
 } forEach [_group];
 // ====================================
@@ -123,7 +123,6 @@ _wp2 setWaypointTimeout [30, 45, 60];
 
 
 // 设置任务目标位置（HVT 位置）
-missionNamespace setVariable ["current_mission_target_pos", getPos _target];
 ["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", 0];
 
 sleep 5; // 等待巡逻队生成完毕

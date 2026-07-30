@@ -22,7 +22,11 @@ _target setVariable ["DUWS_search_done", true, true];
 private _config = DUWS_searchSources getOrDefault [_source, []];
 if (_config isEqualTo []) exitWith {};
 
-private _speaker = name _caller;
+// "" means the searcher speaks as themselves, which is what a body search is. A source naming a
+// speaker key overrides that, so a frisk still reports in the team's voice.
+private _speakerKey = _config param [2, ""];
+private _speaker = if (_speakerKey isEqualTo "") then { name _caller } else { localize _speakerKey };
+private _nothingLine = localize (_config param [3, "STR_DUWS_T_INTEL_FOUND_n"]);
 // ATL throughout: fnc_search_dropItems places with setPosATL, and a body on a roof drops its
 // items through it if the two disagree.
 private _origin = getPosATL _target;
@@ -70,7 +74,7 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
         // A row, not the absence of one. A search that finds nothing has to say so: four of six
         // faucets could not speak that outcome before, so a dry result read as a broken action.
         case "nothing": {
-            [_speaker, localize "STR_DUWS_T_INTEL_FOUND_n"] remoteExec ["fnc_duws_dialogue", _caller];
+            [_speaker, _nothingLine] remoteExec ["fnc_duws_dialogue", _caller];
             _paid = true;
         };
     };
@@ -80,5 +84,5 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
 
 // Every kind declined, which today only the intel-only sources can reach. Still speaks.
 if (!_paid) then {
-    [_speaker, localize "STR_DUWS_T_INTEL_FOUND_n"] remoteExec ["fnc_duws_dialogue", _caller];
+    [_speaker, _nothingLine] remoteExec ["fnc_duws_dialogue", _caller];
 };

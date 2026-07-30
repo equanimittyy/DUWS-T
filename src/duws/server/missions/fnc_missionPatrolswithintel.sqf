@@ -26,7 +26,7 @@ sleep 1;
     private _units = _pos nearEntities [["CAManBase", "LandVehicle", "Air"], _rad * 1.5];
     {
         if (side _x == EAST && !isPlayer _x && !(_x getVariable ["intel_action_added", false])) then {
-            [_x] call fnc_add_intel_on_death;
+            [[_x], "mission"] call fnc_search_flag_group;
             _x setVariable ["intel_action_added", true];
         };
     } forEach _units;
