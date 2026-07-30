@@ -26,6 +26,18 @@ The markers stay so the next round has somewhere to land. An empty block means t
 fully triaged.
 
 _BEGIN-USER_
+- Killa Tomata message lasts a little bit too long now, cut down by 3 seconds
+- Note in the docs/code that the building change/destruction logic for escalation actually means building state has changed (so 1 house can contribute more than once)
+> This is fine, non-issue.
+> We need to make escalation easier to trigger though, I think it's currently set to 10%? I want the current ratio divided by 3 so level 1 escalation costs 159 buildings, should be about 50 buildings, and so on.
+- Straight up killing civilians did nothing; need to make it cost -1 REP and -2 REP for building destruction (same constraints; player within 200m)
+> Ensure same notification plays when rep is changed, ensrue it's consistent
+- There is a zone generation mechanic that hides buildings/deletes them
+> Maybe needs to be fed through to server/clients but an explosion nearby that changes building state, re-pops the building
+- Despawning of enemy zones should match civilians, or 2x of civilians, 5min is too long
+- Left over dynamic side-missions should be deleted where OPFOR does something
+> e.g. Hunt Mortar Observer; not killing the observer spawns mortars ontop of you - to be replaced with OPFOR commander system later
+- Garrisons spawn all their units all in one spot instead of spreading them out across buildings and patrols; if it does, it does so very slowly (efficiency gain here likely)
 
 _END-USER_
 
