@@ -46,69 +46,47 @@ _BEGIN-USER_
 
 _END-USER_
 
-## Untested since the client/server split
+## Composition streaming: the prop-position fix is unverified
 
-The move to `server/` / `client/` / `shared/` rewrote every script path in the mission.
-`tests/run.sh` proves each one resolves and that no function compiled empty, but path
-resolution is not execution — only a live run proves the campaign still plays. Zone
-generation has been exercised; the rest has not.
+Every field a stowed composition's record carries has now been exercised, and only the positions
+came back wrong. `fnc_duws_deploy` disabled simulation *after* placing each prop rather than before
+— and the loop is scheduled code, so a prop that stayed simulated over a frame boundary settled off
+the position just written to it — and it never re-applied the position after rotating. The prefabs
+that place these props do both, which is why the drift appeared only across a stow/deploy cycle.
 
-- [x] Capture a zone and confirm the marker flips **on a second machine**, not just the host
-- [x] Run a side mission to completion and confirm the CP/AP reward lands
-- [ ] Save and reload mid-campaign — but settle whether a save happens at all first (see below)
-- [x] Call heli-lift **as a non-host player** (see below)
-- [x] Request one support of each family: drop, artillery, UAV, FOB
-
-Zone capture and side missions are server-owned — no zone or mission file runs on a client, so
-all 17 zone files and 34 mission files push their notifications outward. The client-owned/
-server-commanded inversion that made heli-lift unusable cannot occur there, so the residual
-risk is narrower: a `publicVariable` that never lands. That is only visible with a second
-player connected, which is why the first item above says so explicitly.
-
-## Composition streaming: the record fields are unexercised
-
-Zone props are deleted when no player is near and rebuilt from a record on return
-(`server/server_fnc_init.sqf`, `fnc_duws_stow` and `fnc_duws_deploy`). Stow and deploy have been
-seen to run, but the six fields a record carries have not been checked against what comes back.
-
-`tests/run.sh` cannot reach this: it proves brackets balance and paths resolve, not that a command
-takes the arguments given. Each field below fails silently and differently, so the symptom is the
-quickest way to tell which one is wrong.
-
-- [x] Deploy a stowed zone and compare it against a screenshot taken before — props in the same places, facing the same way. Wrong headings or objects sunk into a slope means `getPosWorld` / `setVectorDirAndUp`
-- [x] Watch server FPS after a deploy. A drop with no other cause means `simulationEnabled` did not round-trip and the whole composition came back simulated
-- [x] Shoot a prop that was invulnerable before the cycle. Damage taken means `isDamageAllowed` did not survive
-- [x] Empty an ammo crate, stow, deploy, reopen it. A refilled crate means the four `get*Cargo` / `add*CargoGlobal` pairs are wrong, and is an infinite ammo source until fixed
-- [x] Destroy a bunker, stow, deploy. Its return means the alive test at stow time is not filtering
-
-_USER: All working, except the exact positions of each prop shuffled a bit_
+- [ ] Stow a zone, deploy it, compare against a screenshot taken before. Props still off by a little
+      means the residue is `createVehicle`'s own placement rather than those two ordering faults
 
 ## Per-town reputation: shipped, not yet exercised
 
 - [ ] Destroy a house as a **client** on a dedicated server and watch the escalation counter. No movement means `BuildingChanged` is local-only and escalation has never worked in dedicated MP — neither did the war-crimes script it replaced. Record it rather than working around it
 - [ ] Clear a garrison in a populated town. If the `WEST SEIZED` trigger never fires, CIVILIAN-side units are blocking it and the fallback is a condition trigger counting hostile units in `thisList`
 - [ ] Check the census line in the RPT on a new map, and confirm a single fire mission cannot advance an escalation level. Both numbers are logged on the first run
-- [x] Look at a neutral town's ellipse. Opaque rather than translucent means the inline colour string's fourth channel does nothing and `setMarkerAlpha` is carrying the translucency alone
-- [x] Confirm the campaign-wide reputation still gates partisan hiring and pays its CP tick exactly as before the per-town split
-_USER: remove campaign-wide rep, remove the gate for now_
 - [ ] Start a RAVAGE or WBK campaign. Towns should carry a `Pop:`-only marker and a permanently neutral ellipse, spawn no garrison, never scale prices, and log no census line
 
 ## Hardcore intel: shipped, not yet exercised
 
-- [x] Search a corpse and confirm the action appears at all. `side group cursorObject == east` is the last clause of its condition, and a dead unit leaves its group's unit list — a group set to `deleteGroupWhenEmpty` can be gone before the body is, which would hide the action on exactly the bodies it exists for. Fallback is stamping the side on the unit at spawn
-- [x] Confirm `cursorObject` returns a corpse reliably at 3 m. Ragdolled bodies and ones settled half-inside geometry are the doubt; `cursorTarget` or a short `nearestObjects` sweep is the swap, but a scripted sweep must stay behind the cheap clauses
-- [x] On a **dedicated** server, as a non-host player: confirm the search action vanishes the moment the attempt is spent and returns on the next economy tick. The flag is broadcast on the player object precisely so a client-side condition can see it, so a host-only test proves nothing
 - [ ] Complete a rescue-pilot and a rescue-squad mission on a dedicated server and confirm each reveals a zone. These are the two sites that never paid out at all
-- [x] Die with a search attempt spent, respawn, and check whether the action is available again. It will be — the flag lives on the body — and the open question is whether that refund is acceptable rather than whether it happens
+- [ ] Die with a search attempt spent and respawn. The action must still be hidden, and must come back on the next economy tick and not before. Available again on respawn means `fnc_intel_search_restore` is not reaching the new body; never coming back means the UID entry is outliving the window it was stamped in
+- [ ] Die a few times in one window, then walk back over your own bodies. No second search action may appear on any of them — the strip in `onPlayerKilled.sqf` is what keeps this one action per player rather than one per death
 
 ## Hardcore civilian towns: shipped, not yet exercised
 
-- [x] Open the map on a fresh hardcore campaign. Up to three towns near the HQ should be drawn and every other one dark. None at all means the HQ was not the first anchor when selection ran — the `Town selection:` log line reports the anchor count, and `PosOfBLUHQ` being unset at that moment is the way it happens
-- [x] Walk into a hidden town and confirm the ellipse and the population icon appear together. One without the other means only half the pair is being repainted, and the two alphas are set in different places (`fnc_civ_town_reveal` on reveal, `fnc_civ_townRender` on every reputation change)
-- [x] Shoot a civilian in a hidden town, then check the map. The town appearing means the band repaint is overriding the reveal flag rather than reading it
-- [x] From well away from the HQ, roll the debug payout until it lands on a town rather than a zone — the kind is a coin flip while both buckets hold stock. The town it reveals should be the nearest hidden one to *you*; one near base means the origin never arrived and the HQ fallback is carrying every call
-- [ ] Enter a town as a **client** on a dedicated server and watch that client's RPT. `fnc_civ_town_reveal` is named by the town's presence trigger, which is global, so an undefined-variable error there means the broadcast is not landing before the first player arrives
-_USER: what does this even mean/supposed to test? ELI5_
+Only one check is left, and it is a **RAVAGE or WBK** one. Those two modes are the only ones that
+give a town a presence trigger; a plain civilian campaign reveals towns from a polling thread on the
+server instead, which no client ever runs.
+
+A trigger made by `createTrigger` is global by default, and a global trigger runs its activation
+statement on *every* machine — server and each client — not only on the machine that made it. That
+statement names `fnc_civ_town_reveal`. The function is broadcast, and it returns immediately on a
+client (`if (!isServer) exitWith {false}`), so a client running it is meant to be a harmless no-op.
+The doubt is timing: if a client's copy of the function has not arrived by the time that client's
+trigger fires, the statement names something that does not exist yet and the engine throws. Nothing
+breaks — the server reveals the town regardless — but the client's log fills up, and a broadcast
+arriving later than the first trigger it feeds is worth knowing about for its own sake.
+
+- [ ] In a RAVAGE or WBK campaign on a dedicated server, walk a **client** into a town and grep that
+      client's `.rpt` for `Undefined variable in expression: fnc_civ_town_reveal`
 
 ## JIP queue: keyed, not yet exercised
 
@@ -123,8 +101,6 @@ yourself rejoining a dedicated server. "Rejoin" below means either.
 
 **Entries a joiner receives.** Each tests one keying form, so a failure names its own cause.
 
-- [x] Hack a sabotage laptop, rejoin. The action is gone and the mission cannot be completed twice — this was the one behavioural bug, a joiner re-hacking finished work
-- [x] In a **hardcore** campaign, approach an un-hacked sabotage laptop and rejoin. It must offer *both* the sabotage action and the intel search: they key to the same object, and the search used to evict the sabotage action so the mission could not be finished at all
 - [ ] Deploy and undeploy the MHQ several times, rejoin. Exactly one action, matching its current state — not the toggle history
 - [ ] Run several side missions to different outcomes, rejoin. Each task appears once at its latest state, with no replay of superseded transitions
 - [ ] Kill a mission patrol, let a mission-slot release fire (it clears `allDeadMen`), rejoin. Corpse search actions track the corpses actually on the map, not the campaign's total kill count
@@ -144,22 +120,6 @@ yourself rejoining a dedicated server. "Rejoin" below means either.
 
 - [ ] Settle whether `remoteExec ["", _id]` removes a queue entry when issued from a client. Both removals in the tree hand the call to the server rather than rely on it
 - [ ] Buy the Mobile HQ, then rejoin. It must still read as claimed. A joiner offered it a second time means `publicVariable` values are **not** delivered to joining clients, in which case the `isNil` defaults in `client/includes/supports_init.hpp` have nothing to preserve and the team can still be charged twice — the fix would then have to be a server-side record of what the team owns rather than a client-side default. Recycle and repair are the same test the other way round: both must still read as unlocked. This also settles the claim the gotchas entry rests on ([gotchas](docs/info/arma_engine_gotchas.md#a-joining-client-is-sent-every-publicvariabled-global-then-its-own-init-overwrites-them))
-
-## Heli-lift for non-host players
-
-`client/supports/fnc_helolift.sqf` used to create the transport helicopter on the calling
-client and then ask the server to give it waypoints. Waypoint and flight commands are only
-honoured where the group is local, so this worked for a hosting player — whose client *is*
-the server — and silently did nothing for anyone else. `fnc_request_support.sqf` carried an
-`if (!isServer) exitWith` that disabled the whole support for non-host players rather than
-fix it.
-
-The helicopter is now created and owned by `server/supports/fnc_helolift_spawnHeli.sqf`, and
-that gate is gone. **The host case is confirmed working; the non-host case is not, and cannot
-be tested solo** — it needs a second player or a dedicated server. If it misbehaves in co-op,
-restoring the `!isServer` gate re-hides the feature without reverting the rewrite.
-
-Background on the locality rule: [`docs/info/arma_engine_gotchas.md`](docs/info/arma_engine_gotchas.md).
 
 ## Does a multiplayer save happen at all?
 
@@ -185,6 +145,11 @@ SITREP, then check whether a resumable save appears. That distinguishes "no save
 works and reload is the untested half". For the diagnosis rather than the symptom, log
 `isMultiplayer` and `savingEnabled` either side of the `enableSaving` call, plus a line after
 `saveGame` proving it was reached.
+
+- [ ] Call SITREP in a hosted multiplayer session and confirm whether a resumable save appears
+- [ ] If one does, reload it mid-campaign and confirm the campaign comes back playable. This is the
+      half that stays untested even when the save itself works, and it is the only check the
+      client/server split left outstanding
 
 Until that runs, the SITREP notification is unsound in one direction or the other: it
 broadcasts *"The game has been saved"* to every player unconditionally
