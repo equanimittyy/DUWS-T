@@ -1,10 +1,4 @@
 // Locality: server -- spawned per town from server/misc/fnc_civ_init_Tomata.sqf.
-/*
-    fnc_civ_garrison.sqf
-    参数: [_townIndex]
-    敌占城镇（声望 <= -10）的驻军。玩家清空驻军后该城镇声望归零。
-    每个城镇一个常驻线程，按声望自行进出。
-*/
 if (!isServer) exitWith {};
 
 params ["_townIndex"];

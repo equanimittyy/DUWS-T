@@ -1,9 +1,4 @@
 // Locality: client; the addAction bodies below run on the machine that triggers them, not here.
-/*
-    fnc_addHQSatelliteActions.sqf
-    参数: _satellite - 卫星电话对象
-    由服务器远程调用，在每个客户端为卫星电话添加交互动作
-*/
 #include "..\..\shared\includes\action_style.hpp"
 
 if (!hasInterface) exitWith {};

@@ -1,7 +1,4 @@
 
-/////////////////////
-//  DO THE ZONES
-/////////////////////
 if (!isServer) exitWith {};
 ["INFO", "WARCOM", format ["Opfor Warcom Start Zone Placement. Manual: %1",  manually_chosen]] call fnc_log;
 
@@ -88,9 +85,6 @@ sleep 1;
     publicVariable "mission_init_complete";
 };
 
-////////////////////////////////////////
-//  INIT WARCOM FOR BLUFOR AND OPFOR
-////////////////////////////////////////
 ["INFO", "WARCOM", "Opfor Warcom Start WARCOM zone patrols."] call fnc_log;
 
 [serv_zones_array, PosOfBLUHQ, [0,0,0], WARCOM_blufor_ap, WARCOM_opfor_ap, 1800, blufor_ai_skill, opfor_ai_skill, 1800] spawn fnc_WARCOM_init; // 2700 is 40 mins

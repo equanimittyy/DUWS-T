@@ -1,16 +1,4 @@
 // Locality: server -- inherited from server/missions/dyna/fnc_dynamicAtmosphere_init.sqf.
-/*
-    fnc_dyna_mission_mortarspotter.sqf
-    功能：猎杀迫击炮观察员任务
-    流程：
-        1. 随机选择一个玩家，在其周围100-120米空中生成2发迫击炮弹（间隔5秒）
-        2. 在距离该玩家300-1200米范围内寻找建筑安置观察员（opfor_MARK_SOLDIER_X，蹲姿，禁止移动）
-        3. 观察员无敌10秒后创建任务，标记范围50米
-        4. 观察员存活时每30秒在玩家周围生成1发迫击炮弹
-        5. 观察员死亡则任务成功，奖励10CP和5AP
-    参数：
-        _nameKey: 任务名称的本地化键（来自主循环）
-*/
 
 params ["_nameKey"];
 
@@ -189,7 +177,6 @@ sleep 4;
 private _missionName = localize _nameKey; // 获取本地化任务名称
 [10, 5, _missionName] spawn fnc_mission_reward;
 
-// ---------- 清理标记 ----------
 // str(): fnc_missionMarkerData creates the ellipse under str(name), so the real marker name
 // carries literal quote characters and an unquoted deleteMarker silently misses it.
 if (!isNil "_markerArea" && {_markerArea != ""}) then {

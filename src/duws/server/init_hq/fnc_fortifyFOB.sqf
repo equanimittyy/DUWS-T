@@ -101,9 +101,7 @@ switch (VERSION_X) do {
 	};
 };	
 
-//////////////////
-// PERM Statics
-//////////////////
+// Permanent statics: first fortify only, so a refortify cannot stack a second set.
 
 if !(_refortify) then {
 	switch (VERSION_X) do {

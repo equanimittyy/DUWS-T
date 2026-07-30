@@ -1,13 +1,6 @@
 if (!isServer) exitWith {};
-//////////////////////////////////////////
-// BLUFOR SQUADS and PATROLS
-//  - REQUEST, AI Task Force and Patrols
-//////////////////////////////////////////
-// fnc_request_squad
-//   _index = lbCurSel 2101;
-// fnc_request_squad_fob
-//   _index = lbCurSel 2121;
-//////////////////////////////////////////
+// Squad list order is a contract with the request dialogs: fnc_request_squad reads lbCurSel 2101
+// and fnc_request_squad_fob reads lbCurSel 2121, so reordering here silently remaps both menus.
 
 ["INFO", "BOOT", "Squad File Init"] call fnc_log;
 
@@ -36,12 +29,6 @@ switch (VERSION_X) do {
 		publicVariable "blufor_MOTOR_SECTION_X";
 		publicVariable "blufor_MECH_SECTION_X";
 		publicVariable "blufor_ARMOR_SECTION_X";
-		
-		/*publicVariable "blufor_PLANE_CAS_X";
-		publicVariable "blufor_CAR_PATROL1_X";
-		publicVariable "blufor_APC_PATROL1_X";
-		publicVariable "blufor_APC_PATROL2_X";
-		publicVariable "blufor_TANK_PATROL1_X";*/
 
 	};
 };

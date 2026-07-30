@@ -229,9 +229,7 @@ fnc_zone_reveal = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_
 fnc_hardcore_visible_recalc = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardcore_visible_recalc.sqf";
 fnc_zone_spawn_sizes = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_spawn_sizes.sqf";
 
-//////////////////
 // ZONE PREFABS
-//////////////////
 
 switch (VERSION_X) do {
 	case "MODERN": {
@@ -266,9 +264,7 @@ publicVariable "fnc_mapclick_background";
 publicVariable "fnc_mapclick_claim";
 publicVariable "fnc_mapclick_release";
 
-//////////////////////////////
 // GLOBAL FUNCTIONS
-//////////////////////////////
 fnc_ambient_musicloop = compile preprocessFileLineNumbers "duws\client\sounds\fnc_ambient_musicloop.sqf";publicVariable "fnc_ambient_musicloop";
 fnc_duws_Arsenal = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_Arsenal.sqf";publicVariable "fnc_duws_Arsenal";
 fnc_ghst_halo = compile preprocessFileLineNumbers "duws\client\misc\fnc_ghst_halo.sqf";publicVariable "fnc_ghst_halo";

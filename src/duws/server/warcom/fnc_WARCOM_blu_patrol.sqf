@@ -41,10 +41,6 @@ WARCOM_blu_patrol_type = "";
 
 sleep 200;  // wait for "Type of Patrol" to get the proper AP
 
-////////////////////////////////
-// Patrol main infinite loop
-///////////////////////////////
-
 blufor_patrol_count = 0;
 
 [] spawn {

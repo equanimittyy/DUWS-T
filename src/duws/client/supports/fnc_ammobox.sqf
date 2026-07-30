@@ -1,11 +1,6 @@
 // Locality: client -- invoked from the comm menu (shared/includes/supports_radio_modern.hpp:87).
 // The crate's scroll entries are attached by shared/functions/fnc_ammobox_actions.sqf, which this
 // broadcasts to every machine.
-/*
- * fnc_ammobox.sqf
- * 功能：呼叫空投补给箱，消耗指挥点，空中载具运送并投放。
- * 修改：移除全局变量 onStation，改用载具变量；标记名使用 netId 确保唯一。
- */
 
 
 _target = _this select 0;

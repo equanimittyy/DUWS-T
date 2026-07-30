@@ -7,9 +7,6 @@ _HCsquadtype = "";
 _cost = 0;
 _task_force = false;
 
-///////////////////////////////////
-// Check which Squad was selected
-///////////////////////////////////
 switch (VERSION_X) do {
 	
 	case "MODERN": {		///  10 SQUADS MAX
@@ -76,9 +73,6 @@ switch (VERSION_X) do {
 	};
 };
 
-///////////////////////////
-// Process any TF configs	
-///////////////////////////	
 if (_task_force == true && hardcore_visibleZone_found == false) exitWith {hint localize "STR_DUWS_T_b20y3byh"};
 
 _spawnPos = getpos player;
@@ -88,9 +82,6 @@ _spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],300,400,15,0,0.3,0,[],
 _TFname = [1] call fnc_random_name;
 sleep 2;
 
-////////////////////////
-// Spawn the SQUAD
-////////////////////////
 // Charge before spawning: the server rules on affordability, so a refused request must
 // not leave a squad standing.
 if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};

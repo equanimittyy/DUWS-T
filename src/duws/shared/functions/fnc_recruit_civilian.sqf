@@ -1,9 +1,4 @@
 // Locality: all machines -- inherited from shared/functions/fnc_addRecruitAction.sqf.
-/*
-    fnc_recruit_civilian.sqf
-    参数: _civilian - 平民单位, _caller - 发起交互的玩家
-    功能: 客户端触发，将招募请求发送到服务器执行
-*/
 params ["_civilian", "_caller"];
 
 ["INFO", "CIV", format ["Client called by %1 on %2", _caller, _civilian]] call fnc_log;

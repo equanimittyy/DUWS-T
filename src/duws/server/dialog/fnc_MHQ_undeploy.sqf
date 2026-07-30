@@ -1,6 +1,4 @@
 // Locality: server -- callers remoteExec to target 2.
-// fnc_MHQ_undeploy.sqf
-// 取消部署机动指挥部，清理弹药箱、帐篷、复活点，解锁载具
 
 // Same cover as the deploy, in the other direction: the crate and the net vanishing out from under
 // someone standing there reads exactly as badly as them appearing. Guarded rather than called

@@ -298,7 +298,6 @@ sleep 6;
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_INTEL_GATHERING5"] remoteExec ["fnc_duws_dialogue", 0];
 
 
-// ========== 15分钟后自动成功 ==========
 // The area ellipse is not deleted here: this branch and the countdown below both fire at 900 s,
 // and the countdown owns the removal.
 [_taskID, _MissionPos, _radius, _allSpawnedContainers, _buildingMarkers, _cpreward, _apreward, _mission_name] spawn {

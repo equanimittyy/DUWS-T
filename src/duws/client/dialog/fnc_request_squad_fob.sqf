@@ -7,9 +7,6 @@ _HCsquadtype = "";
 _cost = 0;
 _task_force = false;
 
-///////////////////////////////////
-// Check which Squad was selected
-///////////////////////////////////
 switch (VERSION_X) do {
 	
 	case "MODERN": {	///  8 SQUADS MAX

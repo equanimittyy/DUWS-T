@@ -29,7 +29,6 @@ _vehPos = _targetpos;
 
 _markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
-// 创建卡车
 // The objective itself: kept for the mission's duration so the abandoned-vehicle clause
 // cannot collect it. A player who disables it and takes half an hour would otherwise find
 // the thing they were sent for gone, with no way left to finish.

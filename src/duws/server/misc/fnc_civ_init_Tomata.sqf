@@ -1,12 +1,7 @@
 // Locality: server; the trigger bodies below run on the machine that triggers them, not here.
-/*
-    fnc_civ_init_Tomata.sqf
-    功能: 初始化平民系统，为每个城镇创建触发器，计算初始人口，添加地图标记
-    执行端: 服务器
-    Invoked from fnc_init_OPFOR_WARCOM once zone build-out finishes: the towns come from
-    fnc_civ_selectTowns, which ranks map towns against the HQ and the enemy zones, so this
-    cannot run before zone placement.
-*/
+// Invoked from fnc_init_OPFOR_WARCOM once zone build-out finishes: the towns come from
+// fnc_civ_selectTowns, which ranks map towns against the HQ and the enemy zones, so this
+// cannot run before zone placement.
 if (!isServer) exitWith {};
 
 if (!isNil "civ_init_done") exitWith { ["WARN", "CIV", "Already initialized, skipping."] call fnc_log; };

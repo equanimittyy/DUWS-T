@@ -6,9 +6,7 @@ class squad_rename_dialog
 
     class controls
     {
-        ////////////////////////////////////////////////////////
         // GUI EDITOR OUTPUT START
-        ////////////////////////////////////////////////////////
         class renameHCmainframe: RscFrame
         {
             idc = 1800;
@@ -39,8 +37,6 @@ class squad_rename_dialog
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_squad_rename";
         };
-        ////////////////////////////////////////////////////////
         // GUI EDITOR OUTPUT END
-        ////////////////////////////////////////////////////////
     };
 };

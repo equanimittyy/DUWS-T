@@ -66,7 +66,6 @@ opfor_patrol_count = 0;
 
 [] spawn {
     while {true} do {
-        // ===== 原有普通巡逻生成逻辑 =====
         // make sure opfor is controlling at least 2 zones
         // and opfor_patrol_count <= (total zones / 2) + 1   (5 zones = 3 patrol spawns max)
         

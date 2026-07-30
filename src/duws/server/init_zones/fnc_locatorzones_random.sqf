@@ -1,8 +1,4 @@
 // Locality: server -- inherited from server/warcom/fnc_init_OPFOR_WARCOM.sqf.
-// fnc_locatorZones_random.sqf
-//////////////////
-// Random Zones
-//////////////////
 while {!(["ZONES", "MASTER_allLocations_filtered from fnc_moreUrban_locations", {count(MASTER_allLocations_filtered) > 0}, 300] call fnc_waitLogged)} do {};
 
 _radius = _this select 0;
@@ -38,9 +34,6 @@ _fortified = false;
 _zones_array = [[-9999,-9999,-9999]];
 _distances = [];
 
-////////////////////////
-// Loop for each zone
-////////////////////////
 for "_i" from 1 to zones_number do {
 	[{hint localize "STR_DUWS_T_2amacebc"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 	trap = _i;

@@ -1,6 +1,5 @@
 // Locality: server -- spawned from server/server_init.sqf:102, which spells it fnc_bluHQinit;
 // SQF names are case-insensitive.
-// fnc_BluHQinit.sqf (最终修复版：增加更多无敌物体)
 #include "..\..\shared\includes\action_style.hpp"
 
 if (isNil "PosOfBLUHQ") exitWith {};
@@ -32,7 +31,6 @@ private _repairDepot = objNull;
 private _helipad = objNull;
 private _allTowersList = [];
 
-// ========================= 全部静态物体数据 =========================
 // 格式: [类名, 世界X, 世界Y, 世界Z海拔, 方向度, 是否武器]
 // --DUWS-COMPOSITION BEGIN name="HQ Main Base" schema=A anchor=hqInComp--
 private _allObjectsData = [
@@ -224,7 +222,6 @@ private _invulnerableTypes = [
     _obj setPosATL [_newX, _newY, 0];
     _obj setDir _dir;
     
-    // 灯和补给箱开启模拟，其余关闭
     // Global, not the local form: enableSimulation only affects the machine it runs on, so a
     // server-side call leaves every client still simulating props the server has frozen. They
     // then settle, drift and fall differently on each machine, which is how the base ends up
@@ -261,7 +258,6 @@ private _invulnerableTypes = [
 bluHQ_object = _hqObj;
 publicVariable "bluHQ_object";
 
-// ========== 重新部署锚点 ==========
 // Every anchor fnc_placeHQUnits reads lives in these keys. They are written before the placement
 // call rather than beside each spawn so the rebuild -- which has nothing but the namespace to work
 // from -- places its units off exactly the data this build used.
@@ -490,7 +486,6 @@ private _respawnPos = [
 if (!isNull _repairDepot) then { missionNamespace setVariable ["HQ_repairDepot_netId", netId _repairDepot, true]; };
 if (!isNull _helipad) then { missionNamespace setVariable ["HQ_helipad_netId", netId _helipad, true]; };
 
-// 在HQ建筑上添加“重新部署基地单位”的动作
 // Null-guarded like the other _hqObj adders above: netId objNull is "0:0", so an unguarded call
 // would queue a permanent entry under an id that names nothing.
 if (!isNull _hqObj) then {
@@ -499,7 +494,6 @@ if (!isNull _hqObj) then {
 
 HQ_pos_found_generated = true; publicVariable "HQ_pos_found_generated";
 ["INFO", "BOOT", format ["BLUFOR HQ built at %1", PosOfBLUHQ]] call fnc_log;
-// 基地车辆保留范围标记（半透明蓝色）. Drawn through the shared function so the HQ, every FOB and
-// the MHQ all advertise the one radius the cleanup sweep honours -- this used to say 200 m against
-// a sweep that spared 250.
+// Drawn through the shared function so the HQ, every FOB and the MHQ all advertise the one radius
+// the cleanup sweep honours -- this used to say 200 m against a sweep that spared 250.
 [PosOfBLUHQ] call fnc_baseRangeMarker;

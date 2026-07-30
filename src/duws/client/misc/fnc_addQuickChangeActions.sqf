@@ -1,10 +1,4 @@
 // Locality: client; the addAction bodies below run on the machine that triggers them, not here.
-/*
-    fnc_addQuickChangeActions.sqf
-    参数: _crate - 补给箱对象
-    功能: 为补给箱添加快速换装菜单（客户端执行）。
-          换装列表来自服务器扫描并广播的 loadouts 数据。
-*/
 #include "..\..\shared\includes\action_style.hpp"
 
 params ["_crate"];

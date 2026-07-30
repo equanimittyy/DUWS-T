@@ -1,5 +1,4 @@
 // Locality: server -- inherited from server/init_zones/fnc_createzone.sqf.
-// fnc_modern_outpost1.sqf (基于 composition 偏移量重构版)
 // 原始 Composition 中心: [3302.7124, 5, 707.04645] (x, z, y)
 _centerSpawn = _this select 0;
 // Zone construction is campaign property, filed under the zone it stands in so the whole

@@ -37,10 +37,6 @@ str(_markerpickup) setMarkerType "hd_end";
 str(_markerpickup) setMarkerColor "ColorGreen";
 str(_markerpickup) setMarkerText "LZ";
 
-////////////////////////////////////////////
-//   SPAWN THE HELO
-///////////////////////////////////////////
-
 _vehpos = _posplayer;
 _vec =[random [-1,0,1], random [-1,0,1], 0];
 _dist = 2000;
@@ -57,10 +53,6 @@ _helo addAction [ACT_MOVE("STR_DUWS_T_helotaxi_action_wp"), fnc_mapclickhelo, []
  
 _heloGroup = _veh select 2;
 _heloGroup deleteGroupWhenEmpty true;
-//_pilot = units _helogroup select 0;
-//_copilot = units _helogroup select 1;
-//_gunner1 = units _helogroup select 2;
-//_gunner2 = units _helogroup select 3;
 
 _pilot = currentPilot _helo;
 _pilot setcaptive true;
@@ -72,10 +64,6 @@ _pilot allowDamage false;
 {
 	_x setVariable ["Vcm_Disable",true];
 } forEach units _heloGroup;
-
-///////////////
-//  HELI PAD
-///////////////
 
 // create the helipad to land and the waypoints
 _helipad1 = createVehicle ["Land_HelipadEmpty_F", _foundPickupPos, [], 0, "NONE"]; 
@@ -111,10 +99,6 @@ waitUntil {sleep 0.5;(_foundpickuppos distance _helo < 350) or (call _check_dama
 if (call _check_damage) exitWith {
 	[_helo,_helogroup,_helipad1,_markerpickup] spawn _abort;
 }; 
-
-////////////////////
-// LAND THE HELO
-////////////////////
 
 // spawn smokeshell
 _smokePos = [_foundpickuppos select 0, (_foundpickuppos select 1)+ random 5];
@@ -167,9 +151,6 @@ if (call _check_damage) exitWith {
 	[_helo,_helogroup,_helipad1,_markerpickup] spawn _abort;
 }; 
 
-// *****************************
-//   PLAYER IS IN DA CHOPPA
-// *****************************
 playMusic [_music, 0];
 _helo setEffectiveCommander player;  // turn helo "blue" while player is on board.
 

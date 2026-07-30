@@ -28,7 +28,6 @@ private _site = [_MissionPos, _searchRadius, 14] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
-// ----- 修改点：确保建筑物至少有4个建筑位置 -----
 // A guard, not an else branch. The else this replaces announced the failure and handed the mission
 // slot back, then fell through and built the civilian, the markers and the triggers on a null
 // building anyway -- a mission the player was told had been cancelled, running while the campaign
@@ -89,7 +88,6 @@ _civilianMarker setMarkerColor "ColorBlue";
 _civilianMarker setMarkerText "Informant";
 _civilianMarker setMarkerSize [1, 1];
 
-// 任务提示（只保留文字提示，不再重复广播标记）
 // TODO: revisit the channel -- every mission thread announces through a hint box, so moving off
 // it is one pass across all of them rather than a change here.
 [localize "STR_DUWS_T_c14", {hint _this}] remoteExec ["BIS_fnc_Spawn", 0];

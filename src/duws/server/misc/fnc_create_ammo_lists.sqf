@@ -59,11 +59,6 @@ _basic_optics = _basic_ammoArray select 4;
 _basic_magazines = _basic_ammoArray select 5;
 _extra_weapons = _basic_ammoArray select 6;
 
-////////////////////////////
-// AMMOBOX LISTS
-// FOREACH [BLUFOR,OPFOR]
-////////////////////////////
-
 _blufor_units = [blufor_SOLDIER_LAT_X,blufor_SPECOPS_MEDIC_X,blufor_SPECOPS_ENG_X];
 _opfor_units = [opfor_LAT_SOLDIER_X,opfor_SPECOPS_MEDIC_X,opfor_SPECOPS_ENG_X];
 
@@ -149,10 +144,6 @@ _opfor_units = [opfor_LAT_SOLDIER_X,opfor_SPECOPS_MEDIC_X,opfor_SPECOPS_ENG_X];
 
 } forEach [1,2];  // 1 = blufor, 2 = opfor
 
-
-//////////////////////////////////////
-// CREATE THE RESTRICTED ARSENAL LIST
-//////////////////////////////////////
 
 waitUntil {sleep 5;chosen_settings};
 // 始终构建受限军械库列表，不再检查 restricted_arsenal
@@ -333,9 +324,6 @@ _isBackpackWithCapacity = {
 //basic backpacks - multicolor variants to make them as usable with as many factions as possible
 if (VERSION_X != "MODERN") exitWith {};
 
-// ==================================================
-// 添加基础物品时也排除指定类名，并过滤容量为0的背包
-//backpacks    
 private _filteredBackpacks = [];
 {
     if ([_x] call _isBackpackWithCapacity) then {
@@ -375,9 +363,6 @@ private _aceFoods = [
 ];
 [missionNamespace, _aceFoods, true] call BIS_fnc_addVirtualItemCargo;
 [missionNamespace, _aceFoods, true] call BIS_fnc_addVirtualMagazineCargo;
-// =======================================================
-// ========== 直接从CfgWeapons获取头盔、背心和制服 ==========
-// 获取当前蓝方阵营名称（从已生成的单位中获取）
 private _bluFaction = "";
 private _opfFaction = "";
 {

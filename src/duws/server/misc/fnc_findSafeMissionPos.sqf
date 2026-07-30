@@ -1,13 +1,4 @@
 // Locality: server -- called by server/misc/fnc_debug_force_mission.sqf.
-/*
-    fnc_findSafeMissionPos.sqf
-    功能：查找一个安全的任务生成位置，远离所有战区、HQ和其他已激活任务区域
-    参数：
-        _minDistFromZones (可选): 距离战区的最小距离，默认 600 米
-        _minDistFromHQ (可选): 距离 HQ 的最小距离，默认 600 米
-        _maxAttempts (可选): 最大尝试次数，默认 50 次
-    返回：安全位置 [x,y,z] 或 []（如果找不到）
-*/
 
 params [
     ["_minDistFromZones", 600],

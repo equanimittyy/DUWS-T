@@ -1,6 +1,3 @@
-// fnc_scanEnemyGear.sqf
-// 功能：从现有及后续生成的 EAST 步兵身上直接抓取装备（一次性扫描 + 事件驱动，无性能损耗）
-// 执行端：服务器
 if (!isServer) exitWith {};
 
 ["INFO", "GEAR", "Starting fixed enemy gear scan (global function + delayed init)."] call fnc_log;

@@ -6,9 +6,7 @@ overviewText = "Evolved from the renowned DUWS_X scenario created by Killa Tomat
 overviewPicture = "DUWS_T.jpg";
 LoadScreen = "DUWS_T.jpg";
 
-//--------------------------------------------------------------
-//------------------------AIS INJURY----------------------------
-//--------------------------------------------------------------
+// AIS INJURY
 respawn = 3;
 respawnDialog = 1;
 respawndelay = 10;

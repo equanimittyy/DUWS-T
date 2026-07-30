@@ -1,8 +1,6 @@
 
 
-////////////////////////////////
-/// DUWS_T "More Urban" changes
-////////////////////////////////
+// DUWS_T "More Urban" changes
 if (!isServer) exitWith {};
 _half = worldSize / 2;
 _safehalf = worldSize / 2.2;  //STAY OFF THE EDGES OF SMALL MAPS
@@ -81,34 +79,6 @@ _tStage = diag_tickTime;
 // ZONE DISTANCE FILTER APPLIED.
 [{player globalChat localize "STR_DUWS_T_8q8zqlf0"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
-/*
-_placesCfg = configFile >> "CfgWorlds" >> worldName >> "Names";
-_namesToKeep = ["MILITARY","CAMP","FOB","OUTPOST","FACTORY","POWER","TRAIN","AIRFIELD","AIRSTRIP","AIRBASE","DAM","CASTLE","STORAGE","WAREHOUSE","LUMBER","HOSPITAL","BRIDGE"];
-_typesToChk =["NameLocal", "ViewPoint", "NameMarine", "Strategic", "StrongPointArea"];
-_places = [];
-for "_i" from 0 to (count _placesCfg)-1 do {
-	_place = _placesCfg select _i;
-	_name = toUpper(getText(_place >> "name"));
-	_position = getArray (_place >> "position");
-	_type = getText(_place >> "type");
-	_location = nearestLocation [_position, _type];
-	if(_type in _typesToChk) then {
-		{
-			if (_x in _name) exitWith {_ZnObjects = _ZnObjects + [_location]};
-		} forEach _namesToKeep;
-	};
-};	
-
-{
-	_ZnObjects = _ZnObjects + [_x];
-} forEach (nearestTerrainObjects [PosOfBLUHQ, ["TRANSMITTER", "FORTRESS"], (zones_max_dist_from_hq*1.2), false,true]);
-*/
-
-////////////////////////////////////////////////////////
-// Try to use locations in a 135 degree arc from HQ
-// - otherwise use 360
-///////////////////////////////////////////////////////
-
 if (count(AO_direction) > 0) then {
 
 	_direction = PosOfBLUHQ getDir AO_direction;
@@ -145,9 +115,6 @@ if (count(AO_direction) > 0) then {
     count _allLocations, count _allTowns, round (diag_tickTime - _tStage)]] call fnc_log;
 _tStage = diag_tickTime;
 
-/////////////////////////////////////////////////
-// Only use locations with enough buildings
-/////////////////////////////////////////////////
 // The dominant cost of zone generation: one nearestTerrainObjects sweep per surviving
 // candidate, and the pass is linear in that count. What swings it is the arc filter, whose
 // yield depends on where HQ landed -- the same 15 km radius has produced both 1144 and 5909

@@ -5,9 +5,7 @@ class startup_hq_placement_dialog
 
     class controls
     {
-    ////////////////////////////////////////////////////////
     // GUI EDITOR OUTPUT START
-    ////////////////////////////////////////////////////////
         class background_request: RscText
         {
             idc = 1445;
@@ -49,8 +47,6 @@ class startup_hq_placement_dialog
             tooltip = "$STR_DUWS_T_qwfdr33k"; //--- ToDo: Localize;
             action = "[] spawn fnc_HQ_manual_place; closedialog 0;";
         };
-        ////////////////////////////////////////////////////////
         // GUI EDITOR OUTPUT END
-        ////////////////////////////////////////////////////////
     };
 };

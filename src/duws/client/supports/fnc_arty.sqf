@@ -218,16 +218,6 @@ if (_ammotype == "Laser" && isNull _target) then {
 	hint localize "STR_DUWS_T_t6y8r92y";
 };
 
-//DELETE THE SMOKE & FLAMES
-//if (_ammotype == "Napalm") then { [_position,_radius] remoteExec ["fnc_delete_napalm",[0,-2] select isDedicated] };
-//_fireObjects = [];
-
-//{ 
-//	if (typeof _x == "#particlesource") then { 
-//		_fireObjects pushBack _x;
-//	};
-//} foreach (_position nearObjects (_radius + 50));
-
 sleep 30;
 
 { 

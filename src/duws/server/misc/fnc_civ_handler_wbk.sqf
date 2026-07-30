@@ -1,11 +1,3 @@
-/*
-    fnc_civ_handler_wbk.sqf
-    WBK 模式平民统一处理函数（生成 + 清理）
-    参数: [_locIndex, _mode]
-    _mode: "spawn" 或 "cleanup"
-    执行端: 服务器
-    修复：恢复全局互斥锁，生成前二次验证玩家位置，解决排队失效问题
-*/
 if (!isServer) exitWith {};
 
 params ["_locIndex", "_mode"];
@@ -28,9 +20,6 @@ private _triggerRadius = _radii param [_locIndex, 500];
 if (_centerPos isEqualTo [0,0,0]) exitWith {
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Location %1 has zero position", _locIndex]] call fnc_log; };
 };
-// ============================================
-// 清理模式（延迟 60 秒）
-// ============================================
 if (_mode == "cleanup") exitWith {
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Requested for location %1, will execute in 60 seconds", _locIndex]] call fnc_log; };
     private _pendingVar = format ["civ_pending_cleanup_%1", _locIndex];
@@ -108,9 +97,6 @@ if (_mode == "cleanup") exitWith {
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Finished for location %1", _locIndex]] call fnc_log; };
 };
 
-// ============================================
-// 生成模式
-// ============================================
 if (_mode == "spawn") then {
     private _spawningKey = format ["civ_spawning_%1", _locIndex];
 

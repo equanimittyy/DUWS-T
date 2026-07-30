@@ -1,7 +1,3 @@
-// fnc_hirePartisans.sqf
-// 功能：雇佣平民游击队，消耗10个Money_roll，生成6名武装平民，独立成组加入高级指挥
-// 参数: _caller - 执行动作的玩家
-// 执行端: 服务器
 if (!isServer) exitWith {};
 
 params ["_caller"];

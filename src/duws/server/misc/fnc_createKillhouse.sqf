@@ -1,8 +1,5 @@
 // Locality: server; the addAction and HitPart bodies below run on the machine that triggers
 // them, not here.
-// fnc_createKillhouse.sqf
-// 生成基于 composition 偏移的 Killhouse 训练场 (所有物体、正确朝向、高空)
-// 初始不生成靶子，通过多屏幕电脑动作来生成目标和敌人
 #include "..\..\shared\includes\action_style.hpp"
 
 if (!isServer) exitWith {};
@@ -15,7 +12,6 @@ private _fnc_radToDeg = { (_this * 180) / 3.1415926535 };
 
 #include "killhouse_composition.sqf"
 
-// ========== 存储关键数据到 missionNamespace（供客户端交互使用） ==========
 // Broadcast: clients test their own distance to the killhouse, for the contact markers and for
 // the death-penalty exemption in client_init. Left server-local, both silently fail everywhere
 // except a hosting player's machine, which is also the server.
@@ -61,9 +57,6 @@ private _flagRedstone = objNull;
     if (_x isKindOf "SignAd_Sponsor_Redstone_F") then { _flagRedstone = _x; };
 } forEach _computerObjects;  // 注意：标志物不在 _computerObjects 中，需从所有生成物体中查找
 
-// 重新遍历所有已生成的物体（包括普通物体）
-// 更简单：在生成物体时就记录标志物
-// 可在生成物体的循环中加入判断，或者生成后从 _centerSpawnX/Y/Z 附近查找
 private _flags = nearestObjects [[_centerSpawnX, _centerSpawnY, _centerSpawnZ], ["SignAd_Sponsor_Blueking_F","SignAd_Sponsor_Redstone_F"], 500];
 {
     if (_x isKindOf "SignAd_Sponsor_Blueking_F") then { _flagBlueking = _x; };
@@ -85,7 +78,6 @@ if (!isNull _flagRedstone) then {
 missionNamespace setVariable ["killhouse_targets", []];
 missionNamespace setVariable ["killhouse_enemies", []];
 
-// ========== 定义服务器端生成/清理逻辑 ==========
 // Deletes a shot target. Called from each target's HitPart handler, which runs on the
 // shooting client, so the delete has to come back here -- the server owns the list.
 // The membership test keeps that list authoritative and stops a remote call deleting

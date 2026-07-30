@@ -56,10 +56,6 @@ while {!(["BOOT", "createzone_server (setup screens committed)", {createzone_ser
 if (BLUFOR_Faction_X == "CUSTOM") then { while {!(["FACTION", "BLUfactionDataTemp pasted", {BLUfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
 if (OPFOR_Faction_X == "CUSTOM") then { while {!(["FACTION", "OPFfactionDataTemp pasted", {OPFfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
 
-///////////////////////
-// INIT THE FACTIONS
-///////////////////////
-
 // BLUFOR
 ["INFO", "BOOT", format ["BLUFOR Faction init on server: %1", BLUFOR_Faction_X]] call fnc_log;
 
@@ -96,14 +92,8 @@ if (opfor_SOLDIER_X == "") then {
 
 };
 
-///////////////////////////
-// Init the Ammobox lists
-///////////////////////////
 [] spawn fnc_create_ammo_lists;
 
-////////////////////
-// Init the BLU HQ
-////////////////////
 ["INFO", "BOOT", format ["bluHQ Position: %1", str PosOfBLUHQ]] call fnc_log;
 [] spawn fnc_bluHQinit;
 
@@ -112,32 +102,19 @@ if (opfor_SOLDIER_X == "") then {
 
 enableSaving [false, false];
 
-//////////////////////////////////////////////
-/////  WAIT FOR HQ SPAWNS
-//////////////////////////////////////////////
-
 while {!(["BOOT", "HQ_pos_found_generated", {HQ_pos_found_generated}, 300] call fnc_waitLogged)} do {};
 
 // use weapons instead items, some factions bork on items
 while {!(["BOOT", "opfor_ammobox_weapons built", {(count opfor_ammobox_weapons) > 0}, 180] call fnc_waitLogged)} do {};
 
 
-////////////////////////////////////
-//  INIT OPFOR Faction & WARCOM
-////////////////////////////////////
 ["INFO", "BOOT", "WARCOM INIT"] call fnc_log;
 [] spawn fnc_init_OPFOR_WARCOM;
 
 
-/////////////////////////////////
-// CREATE MAIN TASK/OBJECTIVE
-/////////////////////////////////
 [] spawn fnc_capture_zones_task;
 
 
-///////////////////////////////////////////////////////
-// Create the array of zone sizes for DESPAWN CLEANUP
-///////////////////////////////////////////////////////
 [] spawn fnc_zone_spawn_sizes;
 
 
@@ -146,9 +123,6 @@ if (dynamic_weather_enable) then {
 	[] spawn fnc_weather;
 };
 
-/////////////////////////////////
-//  MAP OBJECT CLEANING SCRIPT
-/////////////////////////////////
 // One lifetime for every category the sweep collects; 0 turns it off. The default lives in
 // the parameter, not here, so the two cannot drift apart.
 [["DUWS_CleanupLifetime", 900] call BIS_fnc_getParamValue] spawn fnc_repetitive_cleanup;
@@ -431,7 +405,6 @@ if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK" && CIV_PRESENCE != "NONE")
     sleep 15;  // 等待阵营初始化完成
     [] spawn fnc_scanEnemyGear;
 };
-// ========== 冷却时间戳的存档恢复修正（服务器端，防重，多人兼容） ==========
 // These cooldowns stamp diag_tickTime, which counts from Arma process start, not mission
 // start. Resuming an autosave in a fresh Arma session restarts that clock, so every stamp
 // then sits in the future and wedges its action for as long as the old session had run.

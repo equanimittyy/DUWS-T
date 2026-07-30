@@ -5,9 +5,7 @@
 
 player allowDamage false;
 
-/////////////////////////////////////////
-///// REVIVE CODE  Make sure this is last
-/////////////////////////////////////////
+// Revive selection must stay last in this file.
 
 // NO REVIVE vs AIS vs Vanilla vs ACE medical
 _revive = ["Revive", 1] call BIS_fnc_getParamValue;

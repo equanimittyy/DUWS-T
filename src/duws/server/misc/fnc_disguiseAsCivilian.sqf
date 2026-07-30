@@ -4,7 +4,6 @@ if (!isServer) exitWith {};
 params ["_player"];
 if (isNull _player) exitWith {};
 
-// ========== 辅助函数：发送失败提示 ==========
 // Refusals take DISGUISE_CANT_*, breaks take DISGUISE_BROKEN_* -- the two read as whole
 // sentences from different frames, so a key never serves both paths.
 fnc_disguise_hintFail = {
@@ -248,7 +247,6 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
                 };
             };
             
-            // 10. 敌占城镇
             // The OPFOR band, not any negative figure: a town the enemy holds is where a
             // disguise gets you recognised, and with reputation localised a campaign-wide
             // negative says nothing about the ground the player is standing on.

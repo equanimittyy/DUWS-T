@@ -1,10 +1,3 @@
-/*
-    fnc_addNearbyUnitsGearToArsenal.sqf
-    功能：扫描 HQ 附近 500 米内的所有蓝方人员，将身上的装备添加到虚拟军火库。
-    执行端：服务器
-    依赖：需在 fnc_create_ammo_lists.sqf 中定义了 _excludedItems 并公开为 DUWS_excludedItems，
-          或在此处重新定义排除列表。
-*/
 
 if (!isServer) exitWith {};
 

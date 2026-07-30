@@ -1,6 +1,5 @@
 // Locality: client; the event-handler bodies below run on the machine that triggers them,
 // not here (invoked from the comm menu, shared/includes/supports_radio_modern.hpp:198).
-// ========== fnc_request_hcCAS.sqf (修改版，与直升机逻辑一致) ==========
 _cost = 0;
 _index = lbCurSel 2103;
 CASInUse = true;

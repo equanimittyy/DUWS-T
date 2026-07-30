@@ -7,9 +7,7 @@ class ressourceheader2
 
 class controls
 {
-////////////////////////////////////////////////////////
 // GUI EDITOR OUTPUT START (by kibot, v1.062, #Foputi)
-////////////////////////////////////////////////////////
 class background_request: RscText
 {
 	idc = 1769;
@@ -250,9 +248,7 @@ class recruit_operative_button: RscButton
 	action = "[] spawn fnc_operator_open";
  	tooltip = "$STR_DUWS_T_a2si05g7";
 };
-////////////////////////////////////////////////////////
 // GUI EDITOR OUTPUT END
-////////////////////////////////////////////////////////
 
 
 

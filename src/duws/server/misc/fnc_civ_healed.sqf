@@ -1,17 +1,10 @@
 // Locality: server -- HandleHeal fires where the healed unit is local, and civilians are the
 // server's.
-/*
-    fnc_civ_healed.sqf
-    参数: [_unit, _healer, _isMedic] —— HandleHeal 事件参数
-    玩家用原版医疗系统救治平民时，为该城镇加 1 点声望。每个城镇每个经济周期只计一次。
-    返回 false，绝不接管原版治疗流程。
-
-    Listening to the engine rather than offering an action removes the farm the custom heal
-    action had: that one credited any civilian, wounded or not, consumed nothing when its 70 %
-    roll failed, and drew its FirstAidKits from an arsenal with no limit -- so twenty clicks
-    around one town bought the BLUFOR band. Vanilla healing only fires on a unit that is
-    actually hurt, and the window below caps what a town can pay out however many are.
-*/
+// Listening to the engine rather than offering an action removes the farm the custom heal
+// action had: that one credited any civilian, wounded or not, consumed nothing when its 70 %
+// roll failed, and drew its FirstAidKits from an arsenal with no limit -- so twenty clicks
+// around one town bought the BLUFOR band. Vanilla healing only fires on a unit that is
+// actually hurt, and the window below caps what a town can pay out however many are.
 params ["_unit", "_healer"];
 
 if (!isServer) exitWith { false };

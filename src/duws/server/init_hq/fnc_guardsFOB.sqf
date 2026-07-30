@@ -99,7 +99,6 @@ _wp setWaypointSpeed "LIMITED";
 _fob setVariable ["FOB_guardGroups", [_groupGuard, _groupPatrol]];
 _fob setVariable ["FOB_guard_busy", false];
 
-// 添加重新部署动作（防重）
 // Added once, on every machine and for JIP, so it is no longer tied to whoever built the FOB.
 // The flag is what makes "once" hold; it works because the action is never removed now, where
 // before a reguard removed it and relied on the flag being invisible from the acting client to

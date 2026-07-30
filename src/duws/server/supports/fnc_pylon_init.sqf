@@ -22,7 +22,6 @@ fnc_pylon_set_with_cost = {
         [_cost] remoteExec ["fnc_pylon_hint_nocp", _player];
     };
 
-    // 扣除 CP 并广播
     // call, not remoteExec to self: a queued debit runs a frame later, leaving the check
     // above and the deduction split across frames for a second request to slip between.
     [-_cost, "pylon_purchase"] call fnc_cp_adjust;

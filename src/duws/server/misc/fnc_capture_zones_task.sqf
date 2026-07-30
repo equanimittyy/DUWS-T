@@ -21,7 +21,6 @@ while {!(["ZONES", "mission_init_complete (zones built, civilians registered)",
 // MP session with that slot empty would never publish it.
 ["ZONES", "sitrep_granted (radio item added)", {!isNil "sitrep_granted"}, 90] call fnc_waitLogged;
 
-// 创建主要任务（占领所有区域）
 // The task ID is a fixed key and must never be localized: the SUCCEEDED update at the end of
 // this file looks the task up by this exact string, so a localized ID silently stops matching
 // the moment the server is not English and the campaign task never completes. The player-facing

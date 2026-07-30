@@ -1,8 +1,3 @@
-/*
-    fnc_restHealServer.sqf
-    参数: _caller - 发起治疗的玩家
-    在服务器上执行休息治疗逻辑
-*/
 if (!isServer) exitWith {};
 
 params ["_caller", "_restSite"];

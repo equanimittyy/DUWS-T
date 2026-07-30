@@ -7,9 +7,7 @@ class operativemaingui
 
 class controls
 {
-////////////////////////////////////////////////////////
 // GUI EDITOR OUTPUT START (by kibot, v1.063, #Kozezi)
-////////////////////////////////////////////////////////
 class background_operative: RscText
 {
 	idc = 1018;
@@ -338,9 +336,7 @@ class operative_add_reload: RscButton
 	tooltip = "Spend 1 point on this skill"; //--- ToDo: Localize;
 	action  = "call DUWS_operator_add_reload"; 
 };
-////////////////////////////////////////////////////////
 // GUI EDITOR OUTPUT END
-////////////////////////////////////////////////////////
 
 
 

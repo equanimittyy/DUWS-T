@@ -2,10 +2,6 @@
 
 ["INFO", "FACTION", format ["HQ Faction Dialog Init: %1", profileName]] call fnc_log;
 
-///////////////////////////////////////////
-// Create the FACTION Dialog
-///////////////////////////////////////////
-
 waituntil {!(IsNull (findDisplay 46))};
 _factionSelect = 0;
 _display = (findDisplay 46) createDisplay "RscDisplayEmpty";
@@ -14,11 +10,6 @@ _HQtext = _display ctrlCreate ["RscText", 1234];
 _HQtext ctrlSetPosition [0.2,-0.1,1,0.04];
 _HQtext ctrlSetText localize "STR_DUWS_T_hlr39me1";
 _HQtext ctrlCommit 0;
-			
-//_HQtext2 = _display ctrlCreate ["RscText", 1235];
-//_HQtext2 ctrlSetPosition [0.45,.1,1,0.04];
-//_HQtext2 ctrlSetText "Mission Type";
-//_HQtext2 ctrlCommit 0;
 
 _dropdownBLU = _display ctrlCreate ["RscCombo", 1001];
 _dropdownBLU ctrlSetPosition [-0.25, .15, .5, 0.04];
@@ -55,10 +46,6 @@ _dropdownOPF ctrlAddEventHandler ["LBSelChanged",
 	params ["_control", "_selectedIndex"];
 	OPFOR_Faction_X = (_control lbData (lbCurSel _control));
 }];
-	
-////////////////////////////////////////////////
-//  Start the HQ DIALOG
-////////////////////////////////////////////////
 
 _handle = createDialog "startup_hq_placement_dialog";
 waitUntil {dialog};
@@ -74,16 +61,6 @@ if (player_is_choosing_hqpos) then {
 	titleCut ["", "BLACK IN", 5];  // so you can see the map
 	waitUntil {chosen_hq_placement};
 };
-	
-// debug
-//player globalChat format ["hq_manually_placed: %1", hq_manually_placed];
-//player globalChat format ["player_is_choosing_hqpos: %1", player_is_choosing_hqpos];
-
-// Close the Faction dialog
-//_display closeDisplay 1;
-//closeDialog 0;
-//titleCut ["", "BLACK IN", 5];
-//waitUntil {chosen_hq_placement};
 
 publicVariable "BLUFOR_Faction_X";
 publicVariable "OPFOR_Faction_X";

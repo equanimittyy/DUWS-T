@@ -1,11 +1,4 @@
-/*
-    fnc_scanNearbyUnitsForQuickChange.sqf
-    功能：扫描 HQ 附近 500 米内的所有蓝方 AI 单位，收集其类名、显示名称和完整 loadout，
-          存储到全局数组 blufor_quickChange_loadouts_scanned 中，供客户端快速换装使用。
-          同时，将这些单位身上的装备动态添加到虚拟军火库，使其在受限军火库中可用。
-    执行端：服务器
-    触发条件：首次有玩家距离 HQ < 50 米时执行一次。
-*/
+// Runs once, the first time a player comes within 50 m of HQ -- the caller owns that trigger.
 
 if (!isServer) exitWith {};
 sleep 10;

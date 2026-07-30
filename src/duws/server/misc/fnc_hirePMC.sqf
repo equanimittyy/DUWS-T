@@ -1,7 +1,3 @@
-// fnc_hirePMC.sqf
-// 功能：雇佣私人军事承包商小组（6名精英干员），消耗15个Money_roll，冷却15分钟
-// 参数: _caller - 执行动作的玩家
-// 执行端: 服务器
 if (!isServer) exitWith {};
 
 params ["_caller"];

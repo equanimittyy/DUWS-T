@@ -232,7 +232,6 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
             [_targetpos,_radius, "mission_holdpos", true] call fnc_mission_end;
             Mission_Active = false;
             publicVariable "Mission_Active";
-            // 延迟 300 秒删除所有任务物体和单位
             // Handed to the map cleanup instead of deleted on a private timer: the same wait, but
             // the sweep holds anything a player is still standing near, so a finished objective does
             // not dissolve in front of whoever is looting it.
@@ -246,7 +245,6 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
             [_targetpos,_radius, "mission_holdpos", true] call fnc_mission_end;
             Mission_Active = false;
             publicVariable "Mission_Active";
-            // 延迟 300 秒删除所有任务物体和单位
             // Handed to the map cleanup instead of deleted on a private timer: the same wait, but
             // the sweep holds anything a player is still standing near, so a finished objective does
             // not dissolve in front of whoever is looting it.

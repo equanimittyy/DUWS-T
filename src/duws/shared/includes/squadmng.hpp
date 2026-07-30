@@ -6,9 +6,7 @@ class squad_mng_dialog
 
     class controls
     {
-        ////////////////////////////////////////////////////////
         // GUI EDITOR OUTPUT START
-        ////////////////////////////////////////////////////////
         class background_request: RscText
         {
             idc = 1445;
@@ -137,8 +135,6 @@ class launch_button: RscButton
     tooltip = "$STR_DUWS_T_launch_attack_tooltip";
     action = "[] spawn fnc_blu_taskforces_launch; closeDialog 0;";
 };
-        ////////////////////////////////////////////////////////
         // GUI EDITOR OUTPUT END
-        ////////////////////////////////////////////////////////
     };
 };

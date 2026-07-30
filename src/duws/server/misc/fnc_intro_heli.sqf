@@ -1,9 +1,3 @@
-/*
-    fnc_intro_heli.sqf - 修正版（客户端索降同步）
-    功能：任务开始时，生成直升机，所有玩家乘机到基地上空，黑屏+音效模拟绳降，然后传送至直升机正下方。
-    执行端：服务器
-    依赖：PosOfBLUHQ, blufor_HELI_TRANS_UNARM_X
-*/
 
 if (!isServer) exitWith {};
 

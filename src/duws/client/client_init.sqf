@@ -8,9 +8,6 @@
 ["INFO", "BOOT", format ["client_init start, player %1", profileName]] call fnc_log;
 fnc_hirePartisans_clientMap = compile preprocessFileLineNumbers "duws\client\misc\fnc_hirePartisans_clientMap.sqf";
 publicVariable "fnc_hirePartisans_clientMap";
-///////////////////////
-// DUWS_T Client INIT
-///////////////////////
 setGroupIconsVisible [true,false]; //now everyone can see enemies on map
 // BLACK SCREEN
 titleCut ["", "BLACK FADED", 999];
@@ -89,9 +86,6 @@ if (isMultiplayer) then {
 
 };
 
-//////////////////////
-// GAMEMASTER DIALOG
-//////////////////////
 if (((vehiclevarname player) in game_master) && !HQ_pos_found_generated) then {
 
 	// Faction + HQ placement + custom-faction paste + environment menu are owned
@@ -126,10 +120,6 @@ if ((vehiclevarname player) in game_master && !manually_chosen) then {
 
 waitUntil {isPlayer Player};
 
-///////////////////////////////////////////////
-// Game Master: wait for Zones to start init 
-// or JIP: update map screen
-///////////////////////////////////////////////
 if (((vehiclevarname player) in game_master)) then {
 	while {!(["ZONES", "serv_zones_array broadcast by the server", {count serv_zones_array > 0}, 300] call fnc_waitLogged)} do {};
 	//titleCut ["", "BLACK FADED", 999];
@@ -145,9 +135,6 @@ if (((vehiclevarname player) in game_master)) then {
 	};
 };
 
-////////////////////////
-//  WAIT FOR WARCOM 
-////////////////////////
 waituntil {sleep 1;WARCOM_init_done;};
 
 // Draw the HQ icon on map
@@ -157,18 +144,11 @@ waituntil {sleep 1;WARCOM_init_done;};
 [] call fnc_killhouse_markers;
 
 
-//////////////////////////
-//  JIP CODE
-//////////////////////////
-
 if (isMultiplayer) then {
 
 	// change the shown CP for request dialog
 	"commandpointsblu1" addPublicVariableEventHandler {ctrlSetText [1000, format["%1",commandpointsblu1]]; };
 	
-	///////////////////////////////////////////
-	// Initialize the BLUFOR FACTION for JIP
-	///////////////////////////////////////////
 	["INFO", "BOOT", format ["BLUFOR Faction init for JIP: %1", BLUFOR_Faction_X]] call fnc_log;
 	if (BLUFOR_Faction_X == "CUSTOM") then {
 		while {!(["FACTION", "BLUfactionData (JIP custom faction)", {count BLUfactionData > 0}, 300] call fnc_waitLogged)} do {};
@@ -239,10 +219,6 @@ if ((vehiclevarname player) in Squad_Leaders) then {
 	[] spawn fnc_hc_init;
 };
 
-/////////////////////////////
-// INIT the operative list
-////////////////////////////
-
 [] spawn fnc_operator_init;
 
 
@@ -285,10 +261,6 @@ if ((vehiclevarname player) in game_master) then {
 } else {
 	sleep 10;
 };
-
-////////////////////////
-// TELEPORT PLAYER
-////////////////////////
 
 hint localize "STR_DUWS_T_zu4bxt24";
 
@@ -351,7 +323,6 @@ if (CIV_PRESENCE == "RAVAGE") then {
     forceWeatherChange;
     ["INFO", "BOOT", "WBK mode: Client-side fog forced."] call fnc_log;
 };
-// 等待末日模式变量同步
 // Bounded: an unbounded wait here stalls the client ahead of every later boot milestone, and the
 // flag is broadcast rather than derived, so a joiner that misses it would never proceed. The
 // local default keeps the read below from tripping over nil; the publicVariable handler further
@@ -416,14 +387,12 @@ if (CIV_PRESENCE == "RAVAGE") then {
 if (CIV_PRESENCE == "WBK") then {
     ["biohazard", [localize "STR_DUWS_T_wbk", localize "STR_DUWS_T_WBK_NOREP"]] remoteExec ["BIS_fnc_showNotification", 0];
 };
-// 等待索降完成标志
 // Bounded and logged, and deliberately not wrapped in the while-retry the other boot waits use:
 // misc/fnc_intro_heli.sqf exits without publishing this flag when PosOfBLUHQ is undefined, and
 // an unbounded wait there leaves the player invulnerable and unteleported with nothing in the
 // log. Proceeding on timeout at least reaches allowDamage true below.
 ["BOOT", "intro_heli_done (intro drop finished)", {!isNil "intro_heli_done"}, 420] call fnc_waitLogged;
 
-// 如果玩家尚未完成索降流程（即 intro_completed 未设置为 true），则传送
 // The position guard is what makes the timeout above survivable: server_var_init.sqf broadcasts
 // PosOfBLUHQ as [], so on the early-exit path the client holds an empty array rather than nil,
 // and BIS_fnc_findSafePos would fall back to [0,0,0] and leave `[] getPos [...]` to kill this

@@ -1,15 +1,4 @@
 // Locality: server -- inherited from server/missions/dyna/fnc_dynamicAtmosphere_init.sqf.
-/*
-    fnc_dyna_mission_supply_recovery.sqf
-    功能：回收补给箱任务
-    流程：
-        1. 随机选择一名玩家，在其周围1000-6600米寻找安全位置生成补给箱
-        2. 生成巡逻队保护补给箱
-        3. 补给箱被运至FOB或HQ附近即成功，被毁即失败
-        4. 任务结束360秒后自动删除其他生成的单位（保留箱子）
-    参数：
-        _nameKey: 任务名称的本地化键（来自主循环）
-*/
 
 params ["_nameKey"];
 
@@ -203,7 +192,6 @@ if (!alive _box) then {
 // a crate per run, accumulating on the map for the whole campaign.
 ["mission_supply_recovery", 360] call fnc_duws_release;
 
-// ---------- 延迟 360 秒后执行清理（保留补给箱）----------
 // The crate is still skipped here: release gives it to the map sweep, which holds it while a
 // player is within the keep-radius. Deleting it outright would take it from under them.
 [_generatedObjects] spawn {

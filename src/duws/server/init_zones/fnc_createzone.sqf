@@ -264,9 +264,6 @@ _spawnPos = _zonePos;
 zones_buildout_done = zones_buildout_done + 1;
 publicVariable "zones_buildout_done";
 
-///////////////////////////////////////////////
-// CREATE OPFOR
-///////////////////////////////////////////////
 _index = zone_spawn_array find [_zone_num,false,false];
 _opfor_spawn = (zone_spawn_array select _index) select 1;
 

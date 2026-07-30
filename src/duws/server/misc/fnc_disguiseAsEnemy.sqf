@@ -1,7 +1,3 @@
-// fnc_disguiseAsEnemy.sqf (完整修改版 v4 - 禁止连续重复装束)
-// 功能：伪装成敌人，自动换上敌方制服，并禁止连续两次使用相同的背心+头盔组合
-// 参数: _caller - 执行伪装的玩家
-// 执行端: 服务器
 if (!isServer) exitWith {};
 
 params ["_caller"];

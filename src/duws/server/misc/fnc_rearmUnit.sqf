@@ -1,7 +1,3 @@
-// fnc_rearmUnit.sqf
-// 功能：给单位的所有武器补充 2 个适配弹匣（参照 fn_addAmmo 逻辑）
-// 参数：_unit（单个单位）
-// 执行端：服务器
 if (!isServer) exitWith {};
 
 params ["_unit"];

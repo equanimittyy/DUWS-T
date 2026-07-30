@@ -1,7 +1,5 @@
 // Locality: client; the map-click body below runs on the machine that triggers it, not
 // here (passed as an addAction function value in client/supports/fnc_helolift.sqf:427).
-// fnc_mapclicklift.sqf - 地图点击选择三个航点，带实时图标反馈，标记保留至释放
-// 由玩家动作触发，接收参数 [_target, _caller, _actionId, _arguments]
 
 params ["_target", "_caller", "_actionId", "_arguments"];
 
@@ -39,7 +37,6 @@ while {_timer > 0 && count _waypoints < 3} do {
         openMap true;
     };
 
-    // 重置并设置点击回调（使用玩家变量传递数据）
     // Re-claiming as the current holder, which the slot allows: each waypoint reinstalls the
     // same handler.
     ["LIFT", _liftClickHandler] call fnc_mapclick_claim;

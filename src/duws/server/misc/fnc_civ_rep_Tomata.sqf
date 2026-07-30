@@ -11,9 +11,9 @@ _instigator = _this select 2;
 // 丧尸/WBK模式不处理
 if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {};
 
-// 只有30%的死亡会被计入。The roll can sit this low because reputation is localised now: a bad
-// engagement costs the campaign nothing outside the town it happened in, and the roll is what
-// stops a firefight in a populated town turning it over on stray rounds.
+// The roll can sit this low because reputation is localised now: a bad engagement costs the
+// campaign nothing outside the town it happened in, and the roll is what stops a firefight in a
+// populated town turning it over on stray rounds.
 if (random 10 < 7) exitWith {};
 
 // 必须有玩家在附近（200米内）

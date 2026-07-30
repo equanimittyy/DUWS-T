@@ -1,13 +1,7 @@
 // Locality: server -- spawned from server/server_init.sqf.
-/*
-    fnc_escalation.sqf
-    战争升级：全图统计民用建筑总数，记录被摧毁的数量，按等级抬高 CP/AP 价格，
-    满级则战役失败。同时把城镇范围内的破坏计入该城镇声望。
-
-    Replaces the war-crimes script, which charged reputation on a curve that dampened rather
-    than escalated -- levelling a hundred buildings cost four points -- and discarded any
-    remainder below its threshold each tick, so one building a minute was free forever.
-*/
+// Replaces the war-crimes script, which charged reputation on a curve that dampened rather
+// than escalated -- levelling a hundred buildings cost four points -- and discarded any
+// remainder below its threshold each tick, so one building a minute was free forever.
 if (!isServer) exitWith {};
 
 // A zombie apocalypse has no civil standing to lose and nobody to raise prices, and both modes

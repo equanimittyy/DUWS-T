@@ -104,12 +104,8 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 	// full-pool loop and would now stall the bar at 0.6.
 	_progress = _counter / _missionDraw;
 	progressLoadingScreen _progress;
-	
-	//////////////////////////////////////////////
-	/// DUWS_T "More Urban" changes
-	///  - put near a building
-	///  - stay away from zone centers
-	//////////////////////////////////////////////
+
+	// DUWS_T "More Urban": near a building, clear of zone centres.
 
 	_Posfound = false;
 	_ZnLocation = [];

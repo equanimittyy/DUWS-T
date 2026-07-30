@@ -6,9 +6,7 @@ class fob_mng_dialog
 
     class controls
     {
-        ////////////////////////////////////////////////////////
         // GUI EDITOR OUTPUT START
-        ////////////////////////////////////////////////////////
         class background_request: RscText
         {
             idc = 9745;
@@ -99,8 +97,6 @@ class fob_mng_dialog
             tooltip = "$STR_DUWS_T_hq4mvl3z"; //--- ToDo: Localize;
             action = "closeDialog 0";
         };
-        ////////////////////////////////////////////////////////
         // GUI EDITOR OUTPUT END
-        ////////////////////////////////////////////////////////
     };
 };

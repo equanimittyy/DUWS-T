@@ -1,10 +1,4 @@
-/*
-    fnc_night_horde_event.sqf
-    功能：夜间随机尸潮事件，生成多波僵尸进攻HQ，并创建任务
-    执行端：服务器
-    依赖：PosOfBLUHQ（HQ位置）
-    注意：仅在丧尸模式 (CIV_PRESENCE == "RAVAGE") 下启用，请在调用处控制。
-*/
+// Gated at the call site: only spawned when CIV_PRESENCE is "RAVAGE".
 
 if (!isServer) exitWith {};
 

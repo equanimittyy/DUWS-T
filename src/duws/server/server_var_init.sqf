@@ -1,11 +1,5 @@
 // Locality: server -- see callers.
-
-//////////////////////////////////////////////////////
-// INIT A BUNCH OF VARIABLES
-//
-// SOME OF THESE VALUES ARE BEING OVERWRITTEN 
-//  BY PLAYER INPUT IN THE CONFIG MENU
-//////////////////////////////////////////////////////
+// The config menu overwrites many of these from player input; treat the values here as defaults.
 
 // SET THE VERSION
 VERSION_X = "MODERN";publicVariable "VERSION_X";
@@ -318,12 +312,6 @@ DUWS_base_keep_radius = 250;
 econ_tick = 0;
 
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
-
-// enable ZBE units caching
-//ZbeCacheStatus = ["ZBEcache", 1] call BIS_fnc_getParamValue;
-//if (ZbeCacheStatus == 1) then {
-//	if (isServer) then {[1000,-1,false,1500,1500,1500]execvm "modules\zbe_cache\main.sqf"};
-//};
 
 // Two permission lists of playable slot names, both checked as
 // (vehiclevarname player) in <list>. game_master owns campaign-level controls -- the setup

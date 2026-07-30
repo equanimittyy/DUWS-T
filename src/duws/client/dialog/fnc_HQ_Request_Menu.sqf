@@ -167,9 +167,6 @@ if ((missionNamespace getVariable ["escalation_multiplier", 1]) > 1) then {
     } forEach _baseCosts;
 };
 
-////////////////////////////////////////////
-// Change menu colors
-//  lbSetCurSel [2103, 0];
 if (support_supplydrop_available) then {
     lbSetColor [2103, 0, [0, 1, 0, 1]];
 };
