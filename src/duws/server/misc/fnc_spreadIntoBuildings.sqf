@@ -10,10 +10,12 @@
 //
 // Buildings past the group's supply still return an entry, an empty one, so a caller indexing
 // its own building array against the result stays aligned with it.
+//
+// _stance "" leaves each unit's stance untouched, for a caller that assigns its own per-unit mix.
 params ["_group", "_buildings", ["_unitsPerBuilding", 4], ["_stance", "AUTO"]];
 
-// Snapshotted rather than re-read per unit: `units` re-derived mid-loop renumbers everything
-// after a unit that died while the loop was still placing.
+// One lookup rather than one per unit: `units` walks the group on every call, and nothing below
+// suspends, so the list cannot change while the placement runs.
 private _units = units _group;
 private _perBuilding = [];
 
@@ -33,7 +35,9 @@ private _perBuilding = [];
 
         if !(_positions isEqualTo []) then {
             _unit setPosATL (_building buildingPos (floor (random (count _positions))));
-            _unit setUnitPos _stance;
+            // Guarded, and passed through the same way, so "" means one thing in both halves:
+            // setUnitPos "" is not a stance, and silently leaves the unit however it spawned.
+            if (_stance != "") then { _unit setUnitPos _stance };
             _unit setBehaviour "AWARE";
             [_unit, _building, _positions, "HERD", _stance] spawn fnc_holdBuildingPost;
         };
