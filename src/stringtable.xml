@@ -2735,13 +2735,6 @@
                 <Spanish>Nada útil...</Spanish>
                 <Chinesesimp>没什么有用的...</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_LOOT_REVENGE">
-                <Original>Go to hell!</Original>
-                <English>Go to hell!</English>
-                <German>Zur Hölle!</German>
-                <Spanish>¡Ve al infierno!</Spanish>
-                <Chinesesimp>去死吧！</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_askopforloc">
                 <Original>Have you seen any enemy movement around here? We'll pay for anything useful.</Original>
                 <English>Have you seen any enemy movement around here? We'll pay for anything useful.</English>

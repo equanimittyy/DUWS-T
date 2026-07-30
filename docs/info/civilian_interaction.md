@@ -83,7 +83,7 @@ released stays spent.
 | Call over | 6 m | `src/duws/shared/functions/fnc_civ_stopCommand.sqf:59` |
 | Interaction menu | 3 m | `src/duws/shared/functions/fnc_civ_menuAction.sqf:44` |
 | Every menu row, re-tested server-side | 3 m | `src/duws/server/misc/fnc_civ_request.sqf:22` |
-| Search and Release | 3 m | `fnc_civ_search_action.sqf:79`, `fnc_civ_release_action.sqf:29` |
+| Search and Release | 3 m | `fnc_civ_search_action.sqf:73`, `fnc_civ_release_action.sqf:27` |
 
 The call-over reaches twice as far as everything it gates. Halting a local you can see, walking up
 to them, and only then getting an exchange is the shape of the interaction; matching the two
@@ -218,18 +218,17 @@ close, wait out the animation and reopen to offer either.
 
 | Action | Ends in |
 |---|---|
-| Search | the loot table below, then a 50 % reprisal roll (`fnc_civ_search_armed`) that arms the civilian and turns them on whoever searched them |
+| Search | the loot table below |
 | Release | `isSurrendered` cleared, the surrender pose ended on every machine, `PATH` re-enabled and `fnc_civ_resume` drawing a fresh walking circuit |
 
 Release exists because `PATH` is disabled from the arrest onwards and the panic sweep refuses to
-touch anyone surrendered: without it, a detainee nobody frisks — or one the reprisal roll spares —
-keeps their hands up until the town is recycled. It returns no reputation. The town saw the weapon
-raised, and letting the player undo that by being polite afterwards would make the arrest free.
+touch anyone surrendered: without it a detainee keeps their hands up until the town is recycled.
+It returns no reputation. The town saw the weapon raised, and letting the player undo that by
+being polite afterwards would make the arrest free.
 
-Release also tests `side group _target == civilian`, because the reprisal moves an armed civilian
-into a resistance group without clearing `isSurrendered` — otherwise the player could pacify
-someone shooting at them. The reprisal roll makes the reciprocal check: it aborts if the civilian
-was released during the five seconds it sleeps before firing.
+**A search carries no reprisal.** The price of an arrest is the reputation it costs, charged the
+moment hands go up. Arming the detainee on a coin flip and turning them on whoever frisked them
+priced it a second time, in a way no decision the player made could influence.
 
 ### What a search turns up
 

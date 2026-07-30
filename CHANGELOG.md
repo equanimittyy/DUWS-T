@@ -51,6 +51,7 @@ see [`README.md`](README.md) for the fork lineage. `git log` has the detail.
 - Both disguise modes front a panel menu; civ-disguised players may use binoculars
 - Diary manual reworked into a single subject with a numbered outline
 - Killhouse reworked into waves, with free enemy movement and see-through contact markers
+- Searching an arrested civilian no longer arms them and turns them on the player
 - Earplugs always available
 - Two full passes over user-facing prose, radio dialogue and notifications
 

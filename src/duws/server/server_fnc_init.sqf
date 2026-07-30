@@ -895,8 +895,6 @@ fnc_civ_stopCommand = compile preprocessFileLineNumbers "duws\shared\functions\f
 publicVariable "fnc_civ_stopCommand";
 fnc_civ_search_action = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_search_action.sqf";
 publicVariable "fnc_civ_search_action";
-fnc_civ_search_armed = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_search_armed.sqf";
-publicVariable "fnc_civ_search_armed";
 fnc_civ_release_action = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_release_action.sqf";
 publicVariable "fnc_civ_release_action";
 fnc_civ_release = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_release.sqf";

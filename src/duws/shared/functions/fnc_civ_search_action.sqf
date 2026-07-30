@@ -64,8 +64,6 @@ private _actionID = _unit addAction [
                 } forEach _items;
             };
         };
-
-        [_target, _caller] remoteExec ["fnc_civ_search_armed", 2];
     },
     [],
     50,
