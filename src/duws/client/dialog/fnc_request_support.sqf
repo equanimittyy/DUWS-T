@@ -1,34 +1,83 @@
 // Locality: client; the addAction bodies below run on the machine that triggers them, not here (invoked from a dialog action).
-// Every case tests its own already-unlocked flag before asking the server to charge:
+// Every purchase tests its own already-unlocked flag before asking the server to charge:
 // the spend is a round trip, so ordering it first would both waste one and report
 // "not enough CP" to a player who already owns the support.
-
 
 #include "..\..\shared\includes\action_style.hpp"
 
 _index2 = lbCurSel 2103;
 
+// Fifteen supports differ only in these eight values. They are alike in three more that used to be
+// written out per case and are now the driver's: all of them consume one of the eight radio slots,
+// all play the same sound, and all hand the player a comm-menu item. The seven below the driver do
+// not fit that shape -- an arsenal walks every FOB, HALO adds three conditional actions, the two
+// depot stations reach the server, the two High Command aircraft can be sold back, and the Mobile
+// HQ reads its flag inverted -- so they stay as code rather than becoming table columns no other
+// row would use.
+//
+// [cost, unlock flag, listbox row, speaker, message, wrap in fnc_cs, comm item, blocked in insurgent mode]
+private _supportDefs = createHashMapFromArray [
+    [0, [5, "support_supplydrop_available", "index_support_supply",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_supplydropunlock", true, "ammo", false]],
+    [2, [5, "support_veh_drop_available", "index_support_veh_supply",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_vehicledropunlock", true, "veh_drop", false]],
+    [3, [10, "support_siva_drop_available", "index_support_siva_supply",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_sivaunlock", false, "siva_drop", true]],
+    [4, [10, "support_sawp_drop_available", "index_support_sawp",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_sawpunlock", false, "sawp_drop", true]],
+    [6, [10, "support_uav_recon_available", "index_support_uavrecon",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_uavunlock", false, "uav_recon", true]],
+    [7, [5, "support_helotaxi_available", "index_support_helotaxi",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_helotaxiunlock", false, "helo_taxi", false]],
+    [8, [10, "support_helolift_available", "index_support_helolift",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_heloliftunlock", false, "helo_lift", false]],
+    [9, [2, "support_boattaxi_available", "index_support_boattaxi",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_boattaxiunlock", false, "boat_taxi", false]],
+    [12, [20, "support_arty_available", "index_support_arty",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_artyunlock", false, "artillery", true]],
+    [13, [10, "support_mortar_available", "index_support_mortar",
+        "STR_DUWS_T_slingshot", "STR_DUWS_T_mtrunlock", false, "mortar", false]],
+    [14, [10, "support_jdam_available", "index_support_jdam",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_jdamunlock", true, "jdam", true]],
+    [15, [10, "support_laser_available", "index_support_laser",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_laserguidedunlock", false, "laser", true]],
+    [16, [25, "support_cluster_available", "index_support_cluster",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_clusterunlock", true, "cluster", true]],
+    [17, [20, "support_napalm_available", "index_support_napalm",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_napalmunlock", true, "napalm", true]],
+    [20, [20, "support_paradrop_available", "index_support_paradrop",
+        "STR_DUWS_T_OVERLORD", "STR_DUWS_T_paradropunlock", false, "paradrop", true]]
+];
+
+private _def = _supportDefs getOrDefault [_index2, []];
+if !(_def isEqualTo []) exitWith {
+    _def params ["_cost", "_flagVar", "_lbVar", "_speakerKey", "_msgKey", "_useCs", "_commItem", "_insBlocked"];
+
+    if (_insBlocked && {!isNil "insurgent_mode_enable" && {insurgent_mode_enable}}) exitWith {
+        hint localize "STR_DUWS_T_inssupport";
+    };
+    if (support_count > 7) exitWith {
+        ["info", [localize "STR_DUWS_T_45a8q6tj", localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;
+    };
+    if (missionNamespace getVariable [_flagVar, false]) exitWith { hint localize "STR_DUWS_T_8c1i4vga" };
+    if !(["CP", _cost] call fnc_pool_spend) exitWith { hint localize "STR_DUWS_T_e95mc4lv" };
+
+    support_count = support_count + 1;
+    private _message = localize _msgKey;
+    if (_useCs) then { _message = [_message] call fnc_cs };
+    [localize _speakerKey, _message] remoteExec ["fnc_duws_dialogue", 0];
+    ctrlSetText [1000, format ["%1", commandpointsblu1]];
+    [player, _commItem] call BIS_fnc_addCommMenuItem;
+    // Defaulted: a row absent under this VERSION_X leaves its index global undefined, and the
+    // literal that used to sit here would have coloured whatever row happened to occupy that slot.
+    lbSetColor [2103, missionNamespace getVariable [_lbVar, -1], [0, 1, 0, 1]];
+    playSound "boots";
+    missionNamespace setVariable [_flagVar, true];
+};
+
 switch (_index2) do {
 
-	// SUPPLY DROP
-    case 0: {
-		_cost = 5;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_supplydrop_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_OVERLORD";
-		_message = ([localize "STR_DUWS_T_supplydropunlock"] call fnc_cs);
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		_supplydrop = [player,"ammo"] call BIS_fnc_addCommMenuItem;
-		lbSetColor [2103, index_support_supply, [0, 1, 0, 1]];
-		playSound "boots";
-		support_supplydrop_available = true;
-    };
-
-	// ARSENAL
+    // ARSENAL
     case 1: {
 		_cost = 10;
 		if (support_armory_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
@@ -47,66 +96,6 @@ switch (_index2) do {
 		playSound "loadgun";
 		publicVariable "support_armory_available";
 		["armory",[localize "STR_DUWS_T_sg49vbhh",localize "STR_DUWS_T_h5t5vtfs"]] call bis_fnc_showNotification;
-    };
-
-	// VEHICLE DROP
-    case 2: {
-		_cost = 5;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_veh_drop_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_OVERLORD";
-		_message = ([localize "STR_DUWS_T_vehicledropunlock"] call fnc_cs);
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		_vehdrop = [player,"veh_drop"] call BIS_fnc_addCommMenuItem;
-		lbSetColor [2103, index_support_veh_supply, [0, 1, 0, 1]];
-		playSound "boots";
-		support_veh_drop_available = true;
-    };
-
-	// SIVA DROP
-    case 3: {
-        if (insurgent_mode_enable) exitWith {
-        hint localize "STR_DUWS_T_inssupport";
-        };
-		_cost = 10;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_siva_drop_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_OVERLORD";
-		_message = localize "STR_DUWS_T_sivaunlock";
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		_sivadrop = [player,"siva_drop"] call BIS_fnc_addCommMenuItem;
-		lbSetColor [2103, index_support_siva_supply, [0, 1, 0, 1]];
-		playSound "boots";
-		support_siva_drop_available = true;
-    };
-
-	// SAWP DROP
-    case 4: {
-        if (insurgent_mode_enable) exitWith {
-        hint localize "STR_DUWS_T_inssupport";
-        };
-		_cost = 10;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_sawp_drop_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_OVERLORD";
-		_message = localize "STR_DUWS_T_sawpunlock";
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		_sawpdrop = [player,"sawp_drop"] call BIS_fnc_addCommMenuItem;
-		lbSetColor [2103, index_support_sawp, [0, 1, 0, 1]];
-		playSound "boots";
-		support_sawp_drop_available = true;
     };
 
 // HALO JUMP
@@ -144,82 +133,7 @@ case 5: {
     ["halo",[localize "STR_DUWS_T_0m2mxf4u",localize "STR_DUWS_T_adygxrb6"]] call bis_fnc_showNotification;
 };
 
-	// UAV RECON
-    case 6: {
-        if (insurgent_mode_enable) exitWith {
-        hint localize "STR_DUWS_T_inssupport";
-        };
-		_cost = 10;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_uav_recon_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_OVERLORD";
-		_message = localize "STR_DUWS_T_uavunlock";
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		_uav_recon = [player,"uav_recon"] call BIS_fnc_addCommMenuItem;
-		lbSetColor [2103, index_support_uavrecon, [0, 1, 0, 1]];
-		playSound "boots";
-		support_uav_recon_available = true;
-    };
-
-	// HELO TAXI
-    case 7: {
-		_cost = 5;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_helotaxi_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_OVERLORD";
-		_message = localize "STR_DUWS_T_helotaxiunlock";
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		_helo = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;
-		lbSetColor [2103, index_support_helotaxi, [0, 1, 0, 1]];
-		playSound "boots";
-		support_helotaxi_available = true;
-    };
-
-// HELO LIFT
-case 8: {
-    _cost = 10;
-    // Check if Radio Support
-    if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-    if (support_helolift_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-    if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-    support_count = support_count + 1;
-    _speaker = localize "STR_DUWS_T_OVERLORD";
-    _message = localize "STR_DUWS_T_heloliftunlock";
-    [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-    ctrlSetText [1000, format["%1",commandpointsblu1]];
-    _helo = [player,"helo_lift"] call BIS_fnc_addCommMenuItem;
-    lbSetColor [2103, index_support_helolift, [0, 1, 0, 1]];
-    playSound "boots";
-    support_helolift_available = true;
-};
-
-	// BOAT TAXI
-    case 9: {
-		_cost = 2;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_boattaxi_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_OVERLORD";
-		_message = localize "STR_DUWS_T_boattaxiunlock";
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		lbSetColor [2103, index_support_boattaxi, [0, 1, 0, 1]];
-		support_boattaxi_available = true;
-		_boattaxi = [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
-		playSound "boots";
-    };
-
-	// VEHICLE RECYCLE
+// VEHICLE RECYCLE
 case 10: {
     _cost = 5;
     if (support_veh_recycle_available) exitWith { hint localize "STR_DUWS_T_8c1i4vga"; };
@@ -233,6 +147,7 @@ case 10: {
 };
 
 	// VEHICLE REPAIR
+
 case 11: {
     _cost = 5;
     if (support_veh_repair_available) exitWith { hint localize "STR_DUWS_T_8c1i4vga"; };
@@ -245,130 +160,6 @@ case 11: {
     [] remoteExec ["fnc_activateBaseRepairStation", 2];
 };
 
-	// ARTILLERY
-    case 12: {
-        if (insurgent_mode_enable) exitWith {
-        hint localize "STR_DUWS_T_inssupport";
-        };
-		_cost = 20;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_arty_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_OVERLORD";
-		_message = localize "STR_DUWS_T_artyunlock";
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		_arty = [player,"artillery"] call BIS_fnc_addCommMenuItem;
-		lbSetColor [2103, index_support_arty, [0, 1, 0, 1]];
-		playSound "boots";
-		support_arty_available = true;
-    };
-
-	// MORTAR
-    case 13: {
-		_cost = 10;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_mortar_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_slingshot";
-		_message = localize "STR_DUWS_T_mtrunlock";
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		_mortar = [player,"mortar"] call BIS_fnc_addCommMenuItem;
-		lbSetColor [2103, index_support_mortar, [0, 1, 0, 1]];
-		playSound "boots";
-		support_mortar_available = true;
-    };
-
-	// JDAM STRIKE
-    case 14: {
-        if (insurgent_mode_enable) exitWith {
-        hint localize "STR_DUWS_T_inssupport";
-        };
-		_cost = 10;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_jdam_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_OVERLORD";
-		_message = ([localize "STR_DUWS_T_jdamunlock"] call fnc_cs);
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		_jdam = [player,"jdam"] call BIS_fnc_addCommMenuItem;
-		lbSetColor [2103, index_support_jdam, [0, 1, 0, 1]];
-		playSound "boots";
-		support_jdam_available = true;
-    };
-
-	// LASER GUIDED BOMB
-    case 15: {
-        if (insurgent_mode_enable) exitWith {
-        hint localize "STR_DUWS_T_inssupport";
-        };
-		_cost = 10;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_laser_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_OVERLORD";
-		_message = localize "STR_DUWS_T_laserguidedunlock";
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		_laser = [player,"laser"] call BIS_fnc_addCommMenuItem;
-		lbSetColor [2103, index_support_laser, [0, 1, 0, 1]];
-		playSound "boots";
-		support_laser_available = true;
-    };
-
-	// CLUSTER STRIKE
-    case 16: {
-        if (insurgent_mode_enable) exitWith {
-        hint localize "STR_DUWS_T_inssupport";
-        };
-		_cost = 25;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_cluster_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_OVERLORD";
-		_message = ([localize "STR_DUWS_T_clusterunlock"] call fnc_cs);
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		_cluster = [player,"cluster"] call BIS_fnc_addCommMenuItem;
-		lbSetColor [2103, index_support_cluster, [0, 1, 0, 1]];
-		playSound "boots";
-		support_cluster_available = true;
-    };
-
-	// NAPALM STRIKE
-    case 17: {
-        if (insurgent_mode_enable) exitWith {
-        hint localize "STR_DUWS_T_inssupport";
-        };
-		_cost = 20;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_napalm_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_OVERLORD";
-		_message = ([localize "STR_DUWS_T_napalmunlock"] call fnc_cs);
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		_cluster = [player,"napalm"] call BIS_fnc_addCommMenuItem;
-		lbSetColor [2103, index_support_napalm, [0, 1, 0, 1]];
-		playSound "boots";
-		support_napalm_available = true;
-    };
-
-	// HC ATTACK CHOPPER
     case 18: {
         if (insurgent_mode_enable) exitWith {
         hint localize "STR_DUWS_T_inssupport";
@@ -401,6 +192,7 @@ case 11: {
     };
 
 	// HC CAS JET
+
     case 19: {
         if (insurgent_mode_enable) exitWith {
         hint localize "STR_DUWS_T_inssupport";
@@ -432,28 +224,7 @@ case 11: {
              };
     };
 
-	// PARADROP
-    case 20: {
-        if (insurgent_mode_enable) exitWith {
-        hint localize "STR_DUWS_T_inssupport";
-        };
-		_cost = 20;
-		// Check if Radio Support
-		if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
-		if (support_paradrop_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
-		if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
-		support_count = support_count + 1;
-		_speaker = localize "STR_DUWS_T_OVERLORD";
-		_message = localize "STR_DUWS_T_paradropunlock";
-		[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-		ctrlSetText [1000, format["%1",commandpointsblu1]];
-		_supplydrop = [player,"paradrop"] call BIS_fnc_addCommMenuItem;
-		lbSetColor [2103, index_support_paradrop, [0, 1, 0, 1]];
-		playSound "boots";
-		support_paradrop_available = true;
-    };
-
-// Mobile HQ
+// MOBILE HQ
 case 21: {
     _cost = 10;
     // 叛军模式免费
@@ -480,6 +251,3 @@ case 21: {
 };
 
 };
-
-//hint format["index: %1",_index2];
-
