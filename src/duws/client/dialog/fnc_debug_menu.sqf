@@ -27,6 +27,11 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
         [player] remoteExec ["fnc_debug_intel_search", 2];
     }, [], [1,0.667,0,1]],
 
+    // cursorObject is read here rather than in the submenu, because it is read before
+    // fnc_open_action_menu creates its dialog. A row's code runs with the dialog already down and
+    // the pointer gone, so reading it there is a guess at what the player was looking at.
+    ["Flag cursor object as searchable", fnc_debug_search_menu, [cursorObject], [1,0.667,0,1]],
+
     ["Adjust CP / AP / Town / Escalation", fnc_debug_econ_menu, [], [1,0.667,0,1]],
 
     ["Force side mission", fnc_debug_mission_menu, [], [1,0.667,0,1]],
