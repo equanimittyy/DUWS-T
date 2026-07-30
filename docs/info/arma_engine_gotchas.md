@@ -604,6 +604,23 @@ never gets the matching re-enable, so it never stops simulating at all. `fnc_duw
 latter because damage on a server-local object is resolved server-side anyway and broadcasting
 it per prop would cost a JIP entry each.
 
+## A unary command binds tighter than `+`, so `sleep 2 + random 5` sleeps a flat 2 s
+
+**`sleep 2 + random 5` parses as `(sleep 2) + (random 5)`, not `sleep (2 + random 5)`. The
+delay is a flat 2 seconds, the randomised part is discarded, and nothing appears in the RPT.**
+
+Every unary command — `sleep`, `count`, `random`, `floor`, `str` — sits above `+`, `-`, `*` and
+the comparisons in SQF's precedence table, so it takes only the token immediately to its right
+as its argument. `count _array + 1` is `(count _array) + 1`, which is normally what was meant;
+`sleep 2 + random 5` is the same shape and is not. The `+` then receives Nothing as its left
+argument. As a bare statement the result is discarded, so the failure is silent — a play-test
+RPT carrying this construct in a garrison loop logged no error of any kind for it.
+
+**How to apply:** parenthesise whenever a unary command is followed by arithmetic —
+`sleep (2 + random 5)`. Staggered-wake loops are where this hides, and it is worth catching
+there specifically: a delay meant to spread a garrison's units across frames collapses to one
+delay they all share, which is the thundering herd the stagger existed to prevent.
+
 ## `reverse` returns Nothing, so it cannot be inlined — and `deleteWaypoint` shifts indices
 
 **`reverse` reverses an array in place and evaluates to Nothing, not to the reversed array. Any

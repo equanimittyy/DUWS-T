@@ -5,10 +5,10 @@
 # ~95% of the mission needs the Arma engine and can't be unit-tested in sqf-vm.
 initPlayerLocal.sqf::DUWS_fnc_extractLoadoutItems
 initPlayerLocal.sqf::DUWS_fnc_countLoadoutChanges
-duws/server/server_fnc_init.sqf::fnc_cs
-duws/server/server_fnc_init.sqf::fnc_duws_dialogue_channel
-duws/server/server_fnc_init.sqf::fnc_civ_reaction_weights
-duws/server/server_fnc_init.sqf::fnc_civ_rowPrice
-duws/server/server_fnc_init.sqf::fnc_civ_townBand
-duws/server/server_fnc_init.sqf::fnc_civ_townIncome
+duws/shared/functions/fnc_cs.sqf::*fnc_cs
+duws/client/misc/fnc_duws_dialogue_channel.sqf::*fnc_duws_dialogue_channel
+duws/server/misc/fnc_civ_state_init.sqf::fnc_civ_reaction_weights
+duws/server/misc/fnc_civ_state_init.sqf::fnc_civ_rowPrice
+duws/server/misc/fnc_civ_state_init.sqf::fnc_civ_townBand
+duws/server/misc/fnc_civ_state_init.sqf::fnc_civ_townIncome
 duws/server/misc/fnc_civ_liveTarget.sqf::*fnc_civ_liveTarget
