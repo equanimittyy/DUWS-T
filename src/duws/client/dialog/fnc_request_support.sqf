@@ -460,8 +460,10 @@ case 21: {
     if (!isNil "insurgent_mode_enable" && insurgent_mode_enable) then {
         _cost = 0;
     };
-    // Check if Radio Support
-    if (support_count > 7) exitWith {["info",[localize "STR_DUWS_T_45a8q6tj",localize "STR_DUWS_T_iadwwap5"]] call bis_fnc_showNotification;};
+    // Outside the eight-slot cap, like the armory and the depot stations: this buys a one-shot
+    // designation token for a team-wide vehicle, not a permanent per-player capability, and it
+    // is re-bought every time the MHQ is destroyed. Charging a permanent slot for a recurring
+    // purchase would spend several players' slots on one vehicle over a campaign.
     // The flag reads "still unclaimed" here, unlike every other support flag in this file.
     if (!support_mobile_HQ_available) exitWith {hint localize "STR_DUWS_T_8c1i4vga";};
     if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};

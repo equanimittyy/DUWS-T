@@ -5353,6 +5353,10 @@
                 <Original>Vehicle must be a car, tank, helicopter, or fixed-wing aircraft. Please try again.</Original>
                 <English>Vehicle must be a car, tank, helicopter, or fixed-wing aircraft. Please try again.</English>
             </Key>
+            <Key ID="STR_DUWS_T_mhq_exists">
+                <Original>A Mobile HQ is already active. Only one can exist at a time.</Original>
+                <English>A Mobile HQ is already active. Only one can exist at a time.</English>
+            </Key>
             <Key ID="STR_DUWS_T_0a6o9dsm">
                 <German>Setze TF Gruppe ein!</German>
                 <Spanish>¡Desplegando fuerza de ataque!</Spanish>

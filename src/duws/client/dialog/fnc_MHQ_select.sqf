@@ -1,6 +1,15 @@
 // Locality: client -- invoked from a comm-menu expression (shared/includes/supports_radio_modern.hpp:209).
 
 
+// One MHQ at a time. Two players can each be holding an unspent designation token, and without
+// this the second SetVehicleVarName repoints MHQ1 at a new vehicle while the first keeps its
+// actions -- leaving a deploy action and respawn point acting on globals describing something
+// else. Tested with alive, not isNil: fnc_MHQ_destroyed leaves the dead object in the variable.
+if (!isNil "MHQ1" && {alive MHQ1}) exitWith {
+	hint localize "STR_DUWS_T_mhq_exists";
+	[player,"mobile_HQ"] call BIS_fnc_addCommMenuItem;
+};
+
 _target = cursorObject;
 if (_target == objNull) exitWith {
 	hint localize "STR_DUWS_T_imz98waj";
