@@ -7,8 +7,14 @@ if (isNull _player) exitWith {};
 
 // Spent on the attempt, not on the outcome. A search that costs nothing when it fails is a
 // button the player holds again immediately, which is how the heal action was farmed before
-// fnc_civ_healed replaced it. Broadcast because the action's own condition reads it client-side.
-if (_player getVariable ["DUWS_intel_searched", false]) exitWith {};
+// fnc_civ_healed replaced it.
+//
+// The record is the UID entry; the flag on the body is a copy of it for the action's condition to
+// read client-side. Dying is what forces the split: a respawned player is a new object with no
+// flag on it, and the attempt was refunded every death while the object was the only record.
+private _uid = getPlayerUID _player;
+if ((playerIntelSearchTick getOrDefault [_uid, -1]) == econ_tick) exitWith {};
+playerIntelSearchTick set [_uid, econ_tick];
 _player setVariable ["DUWS_intel_searched", true, true];
 
 // The searcher speaks this, not Overlord: it reports what one player found on one body, and only

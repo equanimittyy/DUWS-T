@@ -2510,19 +2510,14 @@
                 <English>Hire Partisans</English>
                 <Chinesesimp>雇佣游击队</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_HIRE_PARTISANS_LOW_REP">
-                <Original>Your reputation is too low. You need at least 2.</Original>
-                <English>Your reputation is too low. You need at least 2.</English>
-                <Chinesesimp>声望过低（需要≥2）。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_HIRE_PARTISANS_SUCCESS">
                 <Original>Alpha 1-1, we have raised some local auxiliary forces. %1 volunteers have joined your squad.</Original>
                 <English>Alpha 1-1, we have raised some local auxiliary forces. %1 volunteers have joined your squad.</English>
                 <Chinesesimp>行动组，我们在当地发展了一些协助部队，%1 名志愿者加入了你的小队。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HIRE_PARTISANS_HINT">
-                <Original>%1 partisans are now under your command. Their gear is whatever they could find. The better your reputation, the more will come at once. You can hire again in 30 minutes.</Original>
-                <English>%1 partisans are now under your command. Their gear is whatever they could find. The better your reputation, the more will come at once. You can hire again in 30 minutes.</English>
+                <Original>%1 partisans are now under your command. Their gear is whatever they could find. You can hire again in 30 minutes.</Original>
+                <English>%1 partisans are now under your command. Their gear is whatever they could find. You can hire again in 30 minutes.</English>
                 <Chinesesimp>%1 名游击队现已听你指挥。注意：你的声望越高，一次能雇佣的游击队就越多(最多12名)。游击队的装备完全随机。每次雇佣间有30分钟的冷却时间。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_NOT_ENOUGH_MONEY">
@@ -8343,7 +8338,7 @@
 					\nARMORED VEHICLES: %5
 					\nAIRCRAFT: %6
 					\n\nYou Have %2 Command Points
-					\n\nPlayer Reputation: %9
+					\n\nLocal Town Standing: %9
 					\nFriendly Army Power: %3
 					\nEnemy Army Power: %4
 					\n\nBLUFOR Zones: %7
@@ -8365,7 +8360,7 @@
 					\nARMORED VEHICLES: %5
 					\nAIRCRAFT: %6
 					\n\nYou Have %2 Command Points
-					\n\nPlayer Reputation: %9
+					\n\nLocal Town Standing: %9
 					\nFriendly Army Power: %3
 					\nEnemy Army Power: %4
 					\n\nBLUFOR Zones: %7

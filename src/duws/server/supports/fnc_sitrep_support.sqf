@@ -14,7 +14,9 @@ if !(["CP", 1] call fnc_pool_spend) exitWith
 ["sitrepinfo", [localize "STR_DUWS_T_qkkva9tk", localize "STR_DUWS_T_biham0s3"]] remoteExec ["BIS_fnc_showNotification", 0];
 
 // 让所有玩家显示详细的战况报告（fnc_sitrep_display 内部包含 hint）
-[] remoteExec ["fnc_sitrep_display", 0];
+// Through the server rather than broadcast straight to fnc_sitrep_display: the hint's reputation
+// line is per player, and only the server can resolve it.
+[] remoteExec ["fnc_sitrep_fanout", 2];
 
 // 让所有玩家显示底部 OSD 信息
 [] remoteExec ["fnc_bottom_right_message", 0];

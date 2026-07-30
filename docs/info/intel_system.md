@@ -161,13 +161,21 @@ having already searched, and a 20 % roll a client makes is a 20 % roll a client 
 failed search pays nothing but a line: what it costs is the thirty minutes before the next one,
 and paying out on failure would make that wait the only thing separating a hit from a miss.
 
-`DUWS_intel_searched` lives on the player object, broadcast, and is cleared on every player by
-the tick — as does `DUWS_civ_intel_asked` beside it. They go there rather than in a server-side
-table keyed by UID because the search action's own condition reads one and the civilian menu greys
-its intel row against the other, and a condition string is evaluated on the client several times a
-second.
-Broadcasting one boolean per player is cheaper than broadcasting the clock for clients to
-subtract.
+**The record and the readout are two different things, because a player does not survive their own
+death.** `playerIntelSearchTick` (`server/server_var_init.sqf`) is the record: a server-only map
+from player UID to the `econ_tick` the attempt was spent in, and the only thing `fnc_intel_search`
+consults before refusing. `DUWS_intel_searched` on the player object, broadcast and cleared on
+every player by the tick, is a copy of that record for the search action's condition to read — a
+condition string is evaluated on the client several times a second, and broadcasting one boolean
+per player is cheaper than broadcasting the clock for clients to subtract. `DUWS_civ_intel_asked`
+beside it needs no record because nothing charges it across a death.
+
+The split is what a respawn forces. A respawned player is a new object carrying no flag, so while
+the object was the only record, dying refunded the attempt — a cheaper way to buy a search than
+waiting out the window. The UID entry outlives the body; `fnc_intel_search_restore` copies it onto
+whatever body the player is in now, asked for by `fnc_intel_search_action` at every add, which
+covers a client's first boot as well as each respawn. A client that declines to ask gains nothing:
+the server refuses on the record either way.
 
 ## The body search looks outward, so it scales with players not corpses
 
@@ -181,6 +189,15 @@ The condition's clause order is load-bearing and is documented where it lives
 (`client/misc/fnc_intel_search_action.sqf`). The reason it matters at all is that an action on
 the player is evaluated far more often than one on a distant object: the player is never out of
 range of themselves.
+
+**One action per player only holds while dead bodies give theirs up.** An `addAction` is not removed
+by its owner dying and the engine goes on evaluating the conditions of actions on any object near a
+player, so a corpse left carrying this one polls a seven-clause condition for the rest of the
+campaign — one more per death, forever, which is the per-corpse cost the outward-looking shape
+exists to avoid. `onPlayerKilled.sqf` strips it from the body using the id stashed at add time. The
+spent clause reads `player` rather than the object the action hangs on for the same reason: on a
+body from an earlier death those are different units, and testing the corpse's flag would let a
+player search past their own spent attempt.
 
 The existing corpse hold action (`fnc_corpse_search_action.sqf`) is untouched. It reveals the
 current *mission* target and is a different mechanic that happens to live on the same bodies, so

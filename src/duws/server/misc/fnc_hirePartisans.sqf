@@ -1,5 +1,5 @@
 // fnc_hirePartisans.sqf
-// 功能：雇佣平民游击队，消耗10个Money_roll，根据声望生成6-12名武装平民，独立成组加入高级指挥
+// 功能：雇佣平民游击队，消耗10个Money_roll，生成6名武装平民，独立成组加入高级指挥
 // 参数: _caller - 执行动作的玩家
 // 执行端: 服务器
 if (!isServer) exitWith {};
@@ -18,13 +18,6 @@ if (_cooldownRemaining > 0) exitWith {
     ["info", [localize "STR_DUWS_T_HIRE_PARTISANS_TITLE", _msg]] remoteExec ["BIS_fnc_showNotification", _caller];
 };
 
-// 检查声望
-private _rep = missionNamespace getVariable ["Player_Reputation", 0];
-if (_rep < 2) exitWith {
-    private _msg = localize "STR_DUWS_T_HIRE_PARTISANS_LOW_REP";
-    ["info", [localize "STR_DUWS_T_HIRE_PARTISANS_TITLE", _msg]] remoteExec ["BIS_fnc_showNotification", _caller];
-};
-
 // 检查并扣除 10 个 Money_roll
 if !([_caller, 10] call fnc_coins_spend) exitWith {
     private _msg = localize "STR_DUWS_T_NOT_ENOUGH_MONEY";
@@ -34,9 +27,9 @@ if !([_caller, 10] call fnc_coins_spend) exitWith {
 // 记录使用时间
 _caller setVariable [_cooldownVar, diag_tickTime, true];
 
-// 计算游击队数量（声望2=6，每增加2点声望+1，上限12）
-private _count = 6 + floor ((_rep - 2) / 2);
-_count = _count max 6 min 12;
+// Flat squad, no reputation scaling: there is no campaign-wide reputation to scale off, and the
+// town the squad drops into is not known here -- the client picks that position after this runs.
+private _count = 6;
 
 // ========== 通知客户端打开地图选择部署位置 ==========
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_HIRE_PARTISANS_choseMap"] remoteExec ["fnc_duws_dialogue", _caller];

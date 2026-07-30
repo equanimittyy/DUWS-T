@@ -144,25 +144,10 @@ fnc_fob_deregister = {
 	publicVariable "Array_of_FOBpos";
 };
 
-// Server-authoritative reputation mutation, same delta contract as fnc_cp_adjust.
-// The writer owns the rounding rather than the callers: deltas are fractional
-// (+0.5, -0.3) and partisan hiring gates on the running total, so two callers
-// rounding differently would compound drift into what the player can buy.
-// This is the campaign-wide readout. Anything that happens in a town goes through
-// fnc_town_rep_adjust, which forwards here.
-fnc_rep_adjust = {
-	if (!isServer) exitWith {};
-	params [["_delta", 0], ["_reason", ""]];
-	Player_Reputation = Player_Reputation + _delta;
-	Player_Reputation = (round (Player_Reputation * 100)) / 100;
-	if (abs Player_Reputation < 0.01) then { Player_Reputation = 0 };
-	publicVariable "Player_Reputation";
-	["INFO", "ECON", format ["REP %1 -> %2 (%3)", _delta, Player_Reputation, _reason]] call fnc_log;
-};
-
 // Position to town index, -1 when the point sits outside every civilian radius. Open country,
-// a civilians-off campaign and RAVAGE/WBK all land on -1, and that is the degradation path
-// every caller takes: charge the global alone rather than treat it as an error.
+// a civilians-off campaign and RAVAGE/WBK all land on -1, and every caller degrades on that
+// rather than treating it as an error: a reputation charge is dropped, a reputation read comes
+// back neutral.
 fnc_civ_townAt = {
 	if (!isServer) exitWith { -1 };
 	params [["_pos", [0,0,0]]];
@@ -210,9 +195,12 @@ fnc_civ_playerNear = {
 	((call BIS_fnc_ListPlayers) findIf { (_x distance _pos) < _radius }) >= 0
 };
 
-// The reputation a town-local consumer acts on: that town's if it has one, the campaign-wide
-// figure otherwise. Every civilian gate degrades this way rather than refusing to act, because
-// civilians can be switched off and RAVAGE/WBK register no town reputation at all.
+// The reputation a town-local consumer acts on: that town's if it has one, neutral otherwise.
+// Every civilian gate degrades this way rather than refusing to act, because civilians can be
+// switched off and RAVAGE/WBK register no town reputation at all.
+// Neutral, not a stored figure: reputation is territory, and there is nothing to be liked or
+// hated by on ground no town owns. A caller that has to tell "neutral" from "not modelled"
+// reads civ_town_rep directly, the way fnc_civ_townQuery does.
 fnc_civ_repAt = {
 	if (!isServer) exitWith { 0 };
 	params [["_townIndex", -1]];
@@ -220,7 +208,7 @@ fnc_civ_repAt = {
 	if (_townIndex >= 0 && _townIndex < count _reps) then {
 		_reps select _townIndex
 	} else {
-		missionNamespace getVariable ["Player_Reputation", 0]
+		0
 	}
 };
 
@@ -313,25 +301,24 @@ fnc_civ_townRender = {
 	_area setMarkerAlpha ([0, 0.3] select _shown);
 };
 
-// Per-town reputation, same contract as fnc_rep_adjust above: server-only, signed delta, the
-// writer owns the rounding, callers never assign. A town index of -1 charges the global alone.
+// Per-town reputation, and the only reputation there is: server-only, signed delta, the writer
+// owns the rounding, callers never assign. Deltas are fractional (+0.5, -0.3), so two callers
+// rounding differently would compound drift into what a town will sell.
+// A town index of -1 is dropped rather than charged somewhere else. Every caller resolves its
+// index through fnc_civ_townAt, which answers -1 for open country, a civilians-off campaign and
+// RAVAGE/WBK alike -- and reputation is territory, so harm done where no town can see it costs
+// nothing. Not broadcast: no client reads civ_town_rep, and the markers below are painted with
+// global-effect commands.
 fnc_town_rep_adjust = {
 	if (!isServer) exitWith {};
 	params [["_townIndex", -1], ["_delta", 0], ["_reason", ""]];
 	private _reps = missionNamespace getVariable ["civ_town_rep", []];
-	if (_townIndex < 0 || _townIndex >= count _reps) exitWith {
-		[_delta, _reason] call fnc_rep_adjust;
-	};
+	if (_townIndex < 0 || _townIndex >= count _reps) exitWith {};
 	private _old = _reps select _townIndex;
 	private _new = ((_old + _delta) max -20) min 20;
 	_new = (round (_new * 100)) / 100;
 	if (abs _new < 0.01) then { _new = 0 };
 	_reps set [_townIndex, _new];
-	// The global receives what the town absorbed, not what was asked for. A town pinned at -20
-	// taking repeated hits would otherwise drag the global down forever while nothing on the
-	// map changed. Not broadcast: no client reads civ_town_rep, and the markers below are
-	// painted with global-effect commands.
-	[_new - _old, _reason] call fnc_rep_adjust;
 	[_townIndex] call fnc_civ_townRender;
 	["INFO", "CIV", format ["TOWNREP %1: %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 };
@@ -672,11 +659,17 @@ fnc_duws_deploy = {
     {
         _x params ["_class", "_pos", "_vectorDirUp", "_sim", "_damageAllowed", "_cargo"];
         private _obj = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
+        // Before it is placed, not after: this loop is scheduled code, so the engine can suspend it
+        // between any two statements, and a prop that is still simulated over a frame boundary
+        // settles or slides off the position just written to it.
+        _obj enableSimulationGlobal _sim;
         // Placed again after creation: createVehicle reads its position as AGL, and the record
         // holds world coordinates. Without this a prop on a slope returns metres into the hill.
         _obj setPosWorld _pos;
         _obj setVectorDirAndUp _vectorDirUp;
-        _obj enableSimulationGlobal _sim;
+        // Rotating displaces the object, so the position has to be written a second time after it.
+        // The prefabs that place these props do the same around their setDir for the same reason.
+        _obj setPosWorld _pos;
         _obj allowDamage _damageAllowed;
         if (count _cargo > 0) then {
             clearWeaponCargoGlobal _obj;
@@ -876,7 +869,6 @@ fnc_civ_townInfo = compile preprocessFileLineNumbers "duws\client\misc\fnc_civ_t
 publicVariable "fnc_civ_townInfo";
 fnc_civ_mapView = compile preprocessFileLineNumbers "duws\client\misc\fnc_civ_mapView.sqf";
 publicVariable "fnc_civ_mapView";
-fnc_civ_rep_economy = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_rep_economy.sqf";
 fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_wp_Tomata.sqf";
 // Server-only, and deliberately not broadcast: the FiredNear handler that calls it is added on
 // this machine alone, and a client that could run it could scatter a town at will.
@@ -1240,6 +1232,19 @@ fnc_locatorZones_manual = compile preprocessFileLineNumbers "duws\server\init_zo
 fnc_createZone = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createZone.sqf";publicVariable "fnc_createZone";
 fnc_intel_payout = compile preprocessFileLineNumbers "duws\server\misc\fnc_intel_payout.sqf";
 fnc_intel_search = compile preprocessFileLineNumbers "duws\server\misc\fnc_intel_search.sqf";
+// Copies a spent attempt back onto the body a player is currently in. The record is the UID entry
+// in playerIntelSearchTick and that is what refuses a search, so this only brings the client-visible
+// flag back in line with it -- a respawned or joining player would otherwise be shown an action the
+// server silently refuses. Safe to let the client ask for: nothing here grants anything.
+// Not published; fnc_intel_search_action remoteExecs it.
+fnc_intel_search_restore = {
+	if (!isServer) exitWith {};
+	params ["_player"];
+	if (isNull _player) exitWith {};
+	if ((playerIntelSearchTick getOrDefault [getPlayerUID _player, -1]) == econ_tick) then {
+		_player setVariable ["DUWS_intel_searched", true, true];
+	};
+};
 fnc_debug_intel_search = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_intel_search.sqf";
 fnc_debug_force_mission = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_force_mission.sqf";
 fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
@@ -1379,6 +1384,27 @@ fnc_autoSave = compile preprocessFileLineNumbers "duws\server\misc\fnc_autoSave.
 fnc_playerTF_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_playerTF_spawn.sqf";publicVariable "fnc_playerTF_spawn";
 // Not broadcast: server-only, so an accidental client call fails loud.
 fnc_HCsquad_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_HCsquad_spawn.sqf";
+// Hands each player their own SITREP, because one line of it is local to where they stand: the
+// reputation of the town they are in. The support runs on the client that bought it and
+// civ_town_rep is never broadcast, so nothing client-side can answer that. Not published --
+// fnc_sitrep_support remoteExecs it here rather than calling it.
+fnc_sitrep_fanout = {
+	if (!isServer) exitWith {};
+	private _reps = missionNamespace getVariable ["civ_town_rep", []];
+	{
+		private _town = [getPos _x] call fnc_civ_townAt;
+		// Sent as text, not a number: open country, a civilians-off campaign and RAVAGE/WBK all
+		// register no reputation, and a 0 would report those as a town that feels neutral about
+		// the player. Read straight out of the array rather than through fnc_civ_repAt, which
+		// cannot make that distinction either.
+		private _rep = if (_town >= 0 && _town < count _reps) then {
+			str (_reps select _town)
+		} else {
+			"--"
+		};
+		[_rep] remoteExec ["fnc_sitrep_display", _x];
+	} forEach allPlayers;
+};
 fnc_sitrep_display = compile preprocessFileLineNumbers "duws\client\misc\fnc_sitrep_display.sqf";publicVariable "fnc_sitrep_display";
 fnc_fill_ammobox = compile preprocessFileLineNumbers "duws\server\misc\fnc_fill_ammobox.sqf";publicVariable "fnc_fill_ammobox";
 fnc_fill_sawpbox = compile preprocessFileLineNumbers "duws\server\misc\fnc_fill_sawpbox.sqf";publicVariable "fnc_fill_sawpbox";

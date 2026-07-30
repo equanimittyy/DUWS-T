@@ -82,9 +82,9 @@ private _pct = { (_this call fnc_civ_reaction_weights) apply { round (_x * 100) 
 [ "reaction: +10 is 62/22/17", (10 call _pct), [62, 22, 17] ] call fnc_assertEq;
 [ "reaction: +20 is 90/10/0",  (20 call _pct), [90, 10, 0] ] call fnc_assertEq;
 
-// Reputation is clamped to +-20 by fnc_town_rep_adjust, but the global Player_Reputation
-// fallback is not, so out-of-range input must saturate rather than run the line past its ends
-// into a negative weight.
+// The curve is asserted to saturate rather than trusted to be fed in range: the +-20 clamp lives
+// in fnc_town_rep_adjust, a different function, and the line run past its ends yields a negative
+// weight rather than an error.
 [ "reaction: below -20 saturates", (-100 call _pct), (-20 call _pct) ] call fnc_assertEq;
 [ "reaction: above +20 saturates", (100 call _pct), (20 call _pct) ] call fnc_assertEq;
 

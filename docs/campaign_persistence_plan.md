@@ -293,7 +293,7 @@ which radii survive. A Location's position comes out of the map's config and doe
 
 | Group | Kind | Contents |
 |---|---|---|
-| Pools | outcome | `commandpointsblu1`, `WARCOM_blufor_ap`, `WARCOM_opfor_ap`, `Player_Reputation` |
+| Pools | outcome | `commandpointsblu1`, `WARCOM_blufor_ap`, `WARCOM_opfor_ap` |
 | Ownership | outcome | the positions of BLUFOR-held zones, and nothing else |
 | Zone bounty | outcome | the current bounty per zone, keyed by zone number |
 | Town reputation | outcome | `civ_town_rep` and `civ_town_ap` |

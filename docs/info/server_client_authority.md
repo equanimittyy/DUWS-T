@@ -19,7 +19,7 @@ server applies each as one uninterruptible statement.
 
 Five writers implement it, all in `server/server_fnc_init.sqf`, and they are the templates to
 copy: `fnc_cp_adjust` (signed numeric delta), `fnc_ap_adjust` (delta plus a target-pool
-selector), `fnc_rep_adjust` (delta plus ownership of rounding),
+selector), `fnc_town_rep_adjust` (delta plus ownership of rounding, applied to one town),
 `fnc_warcom_set_primary_zone` (an operation on a shared list, matched by value so a stale
 caller finds nothing rather than corrupting state), and `fnc_zone_control_set` (a whole
 transition — a capture moves both side lists and both counters, and applying them together

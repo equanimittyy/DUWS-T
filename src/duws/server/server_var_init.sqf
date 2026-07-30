@@ -222,9 +222,6 @@ OvercastVar = 0;publicVariable "OvercastVar";
 // HQ chat
 PAPABEAR=[West,"HQ"];publicVariable "PAPABEAR";
 
-// Player_Reputation
-Player_Reputation = 1;publicVariable "Player_Reputation";
-
 // player_is_choosing_hqpos
 player_is_choosing_hqpos = false;publicVariable "player_is_choosing_hqpos";
 
@@ -299,6 +296,15 @@ zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
 // Sequence number of the 30-minute campaign economy tick (fnc_zonesundercontrol.sqf).
 // Not broadcast: only server-side payout caps read it.
 econ_tick = 0;
+
+// Which economy window each player spent their body search in, keyed by UID. The flag the search
+// action's condition reads has to sit on the player object for a client to see it, and a respawn
+// hands out a fresh object -- so the object alone cannot be the record, or every death refunds the
+// attempt. Keyed on econ_tick the way fnc_civ_healed keys its heal window, so the tick that clears
+// the broadcast flags retires these entries by moving past them and nothing has to be swept. Not
+// cleared on disconnect either: dropping an entry would hand the attempt back to anyone who
+// reconnected inside the same window, and an entry is one integer.
+playerIntelSearchTick = createHashMap;
 
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
 

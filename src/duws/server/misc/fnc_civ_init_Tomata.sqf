@@ -290,6 +290,4 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then { [] spawn fnc_civ_handler };
 // map-wide scan, so there is nothing left for the spawns to wait out.
 missionNamespace setVariable ["civ_spawn_enabled_time", time, true];
 
-[] call fnc_civ_rep_economy;
-
 call _fnc_finish;

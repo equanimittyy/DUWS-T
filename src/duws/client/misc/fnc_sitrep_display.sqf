@@ -1,5 +1,9 @@
 // DISPLAY A SITREP
+// The reputation figure arrives as an argument rather than being read here: it is the standing of
+// the town this player is in, and that array lives on the server alone. fnc_sitrep_fanout resolves
+// it per player.
 if (!hasInterface) exitWith {};
+params [["_rep", "--"]];
 sleep 1;
 
 // 安全获取变量，若未定义则使用默认值
@@ -25,7 +29,6 @@ private _bluAp = if (!isNil "WARCOM_blufor_ap") then { WARCOM_blufor_ap } else {
 private _opfAp = if (!isNil "WARCOM_opfor_ap") then { WARCOM_opfor_ap } else { 0 };
 private _bluZones = if (!isNil "WARCOM_zones_controled_by_BLUFOR") then { count WARCOM_zones_controled_by_BLUFOR } else { 0 };
 private _opfZonesCount = count _opfZones;
-private _rep = if (!isNil "Player_Reputation") then { str Player_Reputation } else { "0" };
 private _weather = if (!isNil "weather_type") then { weather_type } else { "" };
 private _timeOfDay = if (!isNil "time_of_day") then { time_of_day } else { 0 };
 private _fastTravel = if (!isNil "enable_fast_travel") then { enable_fast_travel } else { false };

@@ -42,26 +42,26 @@ refresh, because AP has no HUD counter and no `publicVariableEventHandler` — w
 `fnc_convertAPtoCP.sqf` paints control 1002 from its own expected post-spend total instead of
 re-reading the pool, whose local copy is still pre-spend at that point.
 
-Reputation follows the same contract, with one addition: `fnc_rep_adjust` (same file) owns the
-rounding as well as the write. It is the only pool taking fractional deltas (`+0.5`, `-1`), and
-partisan hiring gates on the running total, so float drift would compound into what the player
-can buy rather than just a display. The writer snaps to two decimals and zeroes anything below
-`0.01`; callers send a plain delta and never normalise, or two of them would round differently.
-Its pre-play absolute is `server_var_init.sqf`.
+**Reputation is territory, and `fnc_town_rep_adjust` is its only writer.** It follows the same
+contract with one addition: the writer owns the rounding as well as the write. Reputation is the
+only pool taking fractional deltas (`+0.5`, `-1`), so callers send a plain delta and never
+normalise, or two of them would round differently; the writer snaps to two decimals, zeroes
+anything below `0.01`, and clamps each town to `[-20, 20]`.
 
-**Reputation has two writers and one of them is per-town.** Anything that happens inside a
-civilian area goes through `fnc_town_rep_adjust`, which clamps that town to `[-20, 20]` and then
-forwards the *absorbed* delta — the clamped total minus the old total — to `fnc_rep_adjust`. The
-global therefore stays the running sum of what actually happened, and a town pinned at `-20`
-stops dragging it down. The global itself is not clamped: it is the sum of N town pools, so a
-cap that meant the same thing would have to be `20 x town count`, which is not a cap.
+There is no campaign-wide figure to sum into. Every caller resolves its town through
+`fnc_civ_townAt`, which answers `-1` for open country, a civilians-off campaign and RAVAGE/WBK
+alike, and a `-1` delta is dropped: harm done where no town can see it costs nothing. Consumers
+that only need a number read `fnc_civ_repAt`, which answers neutral for the same three cases —
+a consumer that has to tell "neutral" from "not modelled" reads `civ_town_rep` directly, the way
+`fnc_civ_townQuery` and `fnc_sitrep_fanout` do.
 
 **No call site prints a reputation total, and neither does the map.** A caller computes its figure
 before the write lands, and the clamp means the writer may apply less than was asked, so any number
 a caller names is a prediction. A town's standing reaches the player as marker *colour* alone —
 `fnc_civ_townRender` sets colour and alpha, the markers are created without text
-(`fnc_civ_init_Tomata.sqf:262-279`), and `civ_town_rep` is never broadcast. SITREP carries the
-campaign figure.
+(`fnc_civ_init_Tomata.sqf:262-279`), and `civ_town_rep` is never broadcast. SITREP prints the
+standing of the town the reading player is stood in, resolved per player by `fnc_sitrep_fanout`
+because that array never leaves the server.
 
 ## Authority: the server decides a purchase, not the buyer
 
@@ -130,7 +130,6 @@ figure, which is a wrong number rather than an untranslated one.
 | Zone recapture (after loss) | `server/init_zones/fnc_blufor_cap.sqf:61` | the bounty as decayed by prior captures — ≈17, then ≈6, … |
 | Passive territory hold | `server/misc/fnc_zonesundercontrol.sqf:54-56` | `zones_held × 6`, every 30 min |
 | Side-mission reward | `server/missions/fnc_mission_reward.sqf` | `reward × cp_reward_multiplier` (multiplier default 1) |
-| Reputation tick | `server/misc/fnc_civ_rep_economy.sqf` | `ceil(rep/2)`, every 15 min |
 | Town Army Power | `server/misc/fnc_zonesundercontrol.sqf:32-46` | AP, not CP: each banded town's worth of 1–3 to whichever side holds it, every 30 min |
 | Recruit rescued civilian | `server/misc/fnc_recruit_civilian_server.sqf` | +5 (+8 in WBK mode) |
 | Intel analysis (terminal) | `server/misc/fnc_intelAnalysis.sqf` | 1.5–8 per item; `FileTopSecret`/`FilesSecret` = 8 |
