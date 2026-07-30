@@ -17,7 +17,10 @@ if (_index > 10) then {
 } else {
 	_var = "blufor_RQST_UNIT_0" + (str (_index - 1)) + "_X"; // Parse the name of the variable as a string
 };	
-_unitType = call (compile _var); // Get the vehicle variable
+_unitType = missionNamespace getVariable [_var, []];
+// Refused before the spend: a row with no faction entry behind it must not charge CP, and
+// `select 2` on the missing entry would otherwise throw with nothing said to the player.
+if (_unitType isEqualTo []) exitWith {hint localize "STR_DUWS_T_9607znvh"};
 
 if !(["CP", _unitType select 2] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv"};
 

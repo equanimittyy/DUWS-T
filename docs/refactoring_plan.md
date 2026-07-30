@@ -50,25 +50,6 @@ leads the plan.
 
 Small, self-contained, and each one is a strict improvement with no design argument attached.
 
-### `call (compile _var)` where `getVariable` is meant
-
-Eight sites read a global by reconstructing its name as a string and invoking the compiler on it:
-
-```sqf
-_var = "blufor_RQST_VEHICLE_0" + (str (_index - 1)) + "_X";
-_vehicle = call (compile _var);                    // client/dialog/fnc_request_vehicle.sqf:14-18
-```
-
-`compile` parses SQF at runtime. Here it parses an identifier — the parse result is a variable
-read. `missionNamespace getVariable _var` does the same lookup with no parser involved and, more
-usefully, takes a default so a missing entry yields `[]` instead of a script error. The menu
-builders at `client/dialog/fnc_HQ_Request_Menu.sqf:26,70` and
-`client/dialog/fnc_FOB_Request_Menu.sqf:28,73` run this inside a `while {true}` loop, once per
-row, every time the dialog opens.
-
-Sites: `fnc_request_vehicle.sqf:18`, `fnc_request_vehicle_fob.sqf:19`, `fnc_request_unit.sqf:21`,
-`fnc_request_unit_fob.sqf:20`, and the four menu-builder lines above.
-
 ### Dynamically-named globals for zone and FOB triggers
 
 ```sqf
@@ -472,7 +453,6 @@ Sequenced so that each step is independently verifiable and nothing later depend
 not yet made. Lint is `bash tests/run.sh`; "smoke" means repack and play far enough to exercise
 the named system.
 
-- [ ] Replace the eight `call (compile _var)` reads with `missionNamespace getVariable`. Verify: HQ and FOB request menus populate identically, and buying a vehicle from each still charges CP.
 - [ ] Convert the live FOB warning-trigger name (`fnc_fob_server.sqf:85-86` / `fnc_FOB_cleanup.sqf:18`) to `setVariable`/`getVariable`, and decide the dead zone write at `fnc_createzone.sqf:221-222`. Verify: deploy a FOB, let an OPFOR element approach it (warning fires), then remove it (the trigger is deleted, not orphaned).
 - [ ] Add `fnc_mission_site` and `fnc_mission_end` alongside the existing `fnc_mission_begin`, with the cooldown release in `fnc_mission_site`'s bail-out path; convert the threads one at a time. Verify per thread: the bail-out releases `Mission_available` **and** clears `mission_cooldown_<type>` so the type is immediately re-offerable, markers are deleted, and the reward pays once.
 - [ ] Extract `fnc_garrisonBuildings` and convert the nine copied call sites, intel and loot passes inside it. Verify: each of the nine missions spawns building garrisons, and all nine now drop corpse intel — including `target_sniper`, which does not today.

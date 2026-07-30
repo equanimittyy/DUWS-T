@@ -23,7 +23,7 @@ while {true} do {
 		_var = "blufor_RQST_UNIT_0" + str _var_count + "_X"; // Parse the name of the variable as a string
 	};
 	if (isNil _var) exitWith {}; // Get the vehicle variable
-	_unitArray = call (compile _var);
+	_unitArray = missionNamespace getVariable _var;
 	if (_unitArray select 0 == "empty" || _unitArray select 2 == 0) exitWith {}; 
 	_displayName = [configFile >> "CfgVehicles" >> (_unitArray select 0)] call BIS_fnc_displayName;
 	_index = lbAdd [2100, _displayName  + " (" + str (_unitArray select 2) + "cp)"];
@@ -67,7 +67,7 @@ while {true} do {
 		_var = "blufor_RQST_VEHICLE_0" + str _var_count + "_X"; // Parse the name of the variable as a string
 	};
 	if (isNil _var) exitWith {}; 
-	_vehArray = call (compile _var);
+	_vehArray = missionNamespace getVariable _var;
 	if (_vehArray select 0 == "empty" || _vehArray select 2 == 0) exitWith {}; 
 	_displayName = [configFile >> "CfgVehicles" >> (_vehArray select 0)] call BIS_fnc_displayName;
 	_index = lbAdd [2102, _displayName  + " (" + str (_vehArray select 2) + "cp)"];
