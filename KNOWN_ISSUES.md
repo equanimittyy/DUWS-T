@@ -42,10 +42,17 @@ _BEGIN-USER_
 - Garrisons spawn all their units all in one spot instead of spreading them out across buildings and patrols; if it does, it does so very slowly (efficiency gain here likely)
 - Hold the OPERATION XXX YYY header for 1-2 seconds before disappearing
 - Elimnate enemy infiltration team needs proper zone marking; all side missions should follow same format, operation zone marker (anything additional can be left as is)
+> Quite a few side missions are missing their mission marker + the orange ellipse that signifies mission area
 - Mission cooldown timers shows decimals for the seconds left
 - Mission music plays too often:
 > Only play during helicopter intro; and
 > When starting a Side Mission
+- Instead of dialogue for the Zone/HQ "hostiles in area" announcement, do a notification (not the hintbox). "Enemies have been spotted near X!"
+> It would also be cool to spawn red exclamation marks as enemy on the map that expires after 5 minutes - spawn on group leader locs and leave it at that
+- FOB patrols don't act in the same way as HQ patrols do, make the moving patrol copy HQ (so 1 patrol that circles the FOB instead of dispersed)
+- There seems to be a mismatch in the cooldowns for side missions - make it 3 hours in-game not 6 minutes (it'll sync up with the rest mechanic)
+- Turn the FOB support into a purchasable at the REQUESTS menu (appears after taking 1st zone as per normal)
+- Fast travel menu for FOB MANAGER says "Main base" instead of "Main Base"
 
 _END-USER_
 
@@ -79,34 +86,36 @@ narrower than the whole branch.
 - [x] **Buy a support, then try to buy it again.** Covers the table-and-driver rewrite. Every
       support unlocks once, refuses a second purchase, respects the eight-slot radio cap, and
       colours **its own** listbox row — HALO previously coloured the laser strike's
-- [ ] **Build a FOB, let OPFOR approach it, then remove it.** Covers the trigger conversion: the
+- [x] **Build a FOB, let OPFOR approach it, then remove it.** Covers the trigger conversion: the
       enemy warning still fires, and removal deletes the trigger rather than orphaning it
-- [ ] **Capture a zone, leave, and let OPFOR return to it.** Covers the spawn-band table and the new
+- [x] **Capture a zone, leave, and let OPFOR return to it.** Covers the spawn-band table and the new
       contact warning. Garrison sizes per radius band should be unchanged; a zone you hold now
       reports enemy contact, and one you do not must stay silent
-- [ ] **Rebuild the base from the HQ redeploy action.** Covers the extraction of `fnc_placeHQUnits`,
+- [x] **Rebuild the base from the HQ redeploy action.** Covers the extraction of `fnc_placeHQUnits`,
       which now runs for both the first build and the rebuild. Tower, door, tent and guard-box
       sentries stand where a fresh campaign puts them, the patrol walks its towers, 2 CP is charged
       once, and the replacement MG and AA gun survive a cleanup sweep — the rebuild never registered
       them with the composition stream, so they were not persistent and could be deleted
-- [ ] **Open the strategic map twice, then force a mission from the debug menu.** Covers the one
+- [x] **Open the strategic map twice, then force a mission from the debug menu.** Covers the one
       definition table replacing four hand-synced ones. Seven of seventeen types are offered each
       opening, each row launches the mission it names rather than a neighbour's, the cooldown-ready
       notification names the right type, and every debug row forces the type its label claims
-- [ ] **Enter and leave a RAVAGE town and a WBK town.** Covers the shared spawn gate. Both fill,
+- [x] **Enter and leave a RAVAGE town and a WBK town.** Covers the shared spawn gate. Both fill,
       both clean up after their grace period, and a duplicate entry does not double-spawn. A WBK
       town still holds the mutex until it empties, which is the open defect above, not a regression.
       Then start a **plain** civilian campaign: it shares nothing with either and must be unchanged
-- [ ] **Board the killhouse and run it.** Covers moving 821 lines of composition into a data file
+      _USER: Defer this, not going to test RAVAGE and WBK until base DUWS is complete and whole_
+- [x] **Board the killhouse and run it.** Covers moving 821 lines of composition into a data file
       `#include`d by the builder. The range and its targets build at altitude as before. Re-import
       one of the two compositions through `duws_eden.ps1` on Windows if convenient: the tool
       resolves `zbase=` against the file holding the fence, which is why `_centerSpawnZ` moved too
-- [ ] **Look at the sky at campaign start, then grep the RPT.** Covers two retired broadcast
+- [x] **Look at the sky at campaign start, then grep the RPT.** Covers two retired broadcast
       globals. The opening overcast is set and forced during init, so a wrong sky shows at once; the
       re-roll loop only runs every 50–70 minutes, which is not worth waiting out in a test session.
       What matters in the log is that `OvercastVar` and `FogArray` appear nowhere — no
       undefined-variable error naming either. The engine syncs weather from the server by itself,
       which is the whole reason those two globals went
+      _USER: supplied RPT_
 
 Two of these need a dedicated server rather than a hosted session: one search per corpse *for the
 whole team* cannot be observed with one machine, and neither can the once-by-anyone claim behind it
