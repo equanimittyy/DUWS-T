@@ -63,22 +63,14 @@ _markerCount = 0;
 _unitsPerBuilding = 6;
 _totalUnitsToSpawn = _maxBuildingsToUse * _unitsPerBuilding;
 
-_possibleUnitTypes = [];
-{
-    if (!isNil "_x" && {_x != ""}) then {
-        _possibleUnitTypes pushBack _x;
-    };
-} forEach [
+_possibleUnitTypes = [[
     opfor_SOLDIER_X,
     opfor_AA_SOLDIER_X,
     opfor_AR_SOLDIER_X,
     opfor_AT_SOLDIER_X,
     opfor_LAT_SOLDIER_X,
     opfor_SL_SOLDIER_X
-];
-if (count _possibleUnitTypes == 0) then {
-    _possibleUnitTypes = [opfor_SOLDIER_X];
-};
+]] call fnc_opforRoles;
 
 _bldgUnits = [];
 for "_i" from 1 to _totalUnitsToSpawn do {
@@ -94,59 +86,7 @@ _group deleteGroupWhenEmpty true;
 } forEach units _group;
 // =================================
 
-_buildingUnitsList = [];
-
-{
-    if (_forEachIndex >= _maxBuildingsToUse) exitWith {};
-    
-    _building = _x;
-    _positions = [_building] call BIS_fnc_buildingPositions;
-    
-    _buildingUnits = [];
-    for "_j" from 0 to (_unitsPerBuilding - 1) do {
-        _unitIndex = _forEachIndex * _unitsPerBuilding + _j;
-        if (_unitIndex >= count (units _group)) exitWith {};
-        
-        _unit = units _group select _unitIndex;
-        _buildingUnits pushBack _unit;
-        if (count _positions > 0) then {
-            _randPosIndex = floor (random (count _positions));
-            _unit setPosATL (_building buildingPos _randPosIndex);
-            _unit setUnitPos "AUTO";
-            _unit setBehaviour "AWARE";
-            
-            [_unit, _building, _positions] spawn {
-                params ["_unit", "_building", "_positions"];
-                sleep 2 + random 5;
-                private _buildingPos = getPosATL _building;
-                while {alive _unit} do {
-                    if (_unit distance _buildingPos > 15 && count _positions > 0) then {
-                        private _returnPos = selectRandom _positions;
-                        _unit doMove _returnPos;
-                    };
-                    if (count _positions > 0) then {
-                        private _targetPosIndex = floor (random (count _positions));
-                        private _targetPos = _building buildingPos _targetPosIndex;
-                        _unit doMove _targetPos;
-                        _unit setUnitPos "AUTO";
-                        private _timeout = time + 30;
-                        waitUntil {
-                            sleep 5;
-                            (unitReady _unit) || 
-                            (!alive _unit) || 
-                            (_unit distance _targetPos < 2) || 
-                            (time > _timeout)
-                        };
-                        sleep 5 + random 5;
-                    } else {
-                        sleep 5 + random 5;
-                    };
-                };
-            };
-        };
-    };
-    _buildingUnitsList pushBack _buildingUnits;
-} forEach _selectedBuildings;
+_buildingUnitsList = [_group, _selectedBuildings, _unitsPerBuilding, "AUTO"] call fnc_spreadIntoBuildings;
 
 // ========== 监控每个房屋，清理后广播并删除标记 ==========
 {

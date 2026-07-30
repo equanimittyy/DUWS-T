@@ -10,9 +10,9 @@
 //
 // Side missions only. fnc_createopfortified garrisons a zone the same way by eye but not in fact:
 // it wants five usable building positions rather than two, stands its units UP rather than AUTO,
-// repositions on a slower cadence, and walks every usable building instead of a random subset.
-// Folding it in costs four parameters that no other caller sets. clearthearea_cqb is likewise out,
-// because its house-cleared announcements need the per-building unit lists this does not return.
+// and walks every usable building instead of a random subset. Folding it in costs three parameters
+// that no other caller sets. clearthearea_cqb is likewise out, because its house-cleared
+// announcements need the per-building unit lists this does not return.
 params ["_pos", "_radius", ["_desiredBldgCount", 6], ["_unitsPerBuilding", 4]];
 
 private _usableBuildings = [_pos, 2, _radius] call fnc_usableBuildings;
@@ -32,21 +32,14 @@ if (_actualBldgCount == _maxBuildingsToUse) then {
     };
 };
 
-// Walked rather than filtered, because a faction table that omits a role leaves its global
-// undefined, and an undefined name inside an array literal is not something `select` can test for
-// after the fact.
-private _possibleUnitTypes = [];
-{
-    if (!isNil "_x" && {_x != ""}) then { _possibleUnitTypes pushBack _x };
-} forEach [
+private _possibleUnitTypes = [[
     opfor_SOLDIER_X,
     opfor_AA_SOLDIER_X,
     opfor_AR_SOLDIER_X,
     opfor_AT_SOLDIER_X,
     opfor_LAT_SOLDIER_X,
     opfor_SL_SOLDIER_X
-];
-if (count _possibleUnitTypes == 0) then { _possibleUnitTypes = [opfor_SOLDIER_X] };
+]] call fnc_opforRoles;
 
 private _bldgUnits = [];
 for "_i" from 1 to (_maxBuildingsToUse * _unitsPerBuilding) do {
@@ -55,48 +48,7 @@ for "_i" from 1 to (_maxBuildingsToUse * _unitsPerBuilding) do {
 private _buildingGroup = [[0,0], EAST, _bldgUnits, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
 _buildingGroup deleteGroupWhenEmpty true;
 
-{
-    if (_forEachIndex >= _maxBuildingsToUse) exitWith {};
-    private _building = _x;
-    private _positions = [_building] call BIS_fnc_buildingPositions;
-    for "_j" from 0 to (_unitsPerBuilding - 1) do {
-        private _unitIndex = _forEachIndex * _unitsPerBuilding + _j;
-        if (_unitIndex >= count (units _buildingGroup)) exitWith {};
-        private _unit = units _buildingGroup select _unitIndex;
-        if (count _positions > 0) then {
-            _unit setPosATL (_building buildingPos (floor (random (count _positions))));
-            _unit setUnitPos "AUTO";
-            _unit setBehaviour "AWARE";
-            // Each garrison unit runs its own return-to-post loop for life. The alternative, one
-            // monitor walking the group, has to re-derive which building each unit belongs to on
-            // every pass; the building and its position list are captured here for free.
-            [_unit, _building, _positions] spawn {
-                params ["_unit", "_building", "_positions"];
-                sleep 2 + random 5;
-                private _buildingPos = getPosATL _building;
-                while {alive _unit} do {
-                    if (_unit distance _buildingPos > 15 && count _positions > 0) then {
-                        _unit doMove (selectRandom _positions);
-                    };
-                    if (count _positions > 0) then {
-                        private _targetPos = _building buildingPos (floor (random (count _positions)));
-                        _unit doMove _targetPos;
-                        _unit setUnitPos "AUTO";
-                        private _timeout = time + 30;
-                        waitUntil {
-                            sleep 5;
-                            (unitReady _unit) ||
-                            (!alive _unit) ||
-                            (_unit distance _targetPos < 2) ||
-                            (time > _timeout)
-                        };
-                    };
-                    sleep 5 + random 5;
-                };
-            };
-        };
-    };
-} forEach _selectedBuildings;
+[_buildingGroup, _selectedBuildings, _unitsPerBuilding, "AUTO"] call fnc_spreadIntoBuildings;
 
 [_buildingGroup] call fnc_add_intel_to_group;
 { [_x] call fnc_addRandomLoot } forEach units _buildingGroup;

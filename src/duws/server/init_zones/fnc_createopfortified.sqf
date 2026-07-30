@@ -56,22 +56,14 @@ _maxBuildingsToUse = (_actualBldgCount min _desiredBldgCount);
 _unitsPerBuilding = 3;
 _totalUnitsToSpawn = _maxBuildingsToUse * _unitsPerBuilding;
 
-_possibleUnitTypes = [];
-{
-    if (!isNil "_x" && {_x != ""}) then {
-        _possibleUnitTypes pushBack _x;
-    };
-} forEach [
+_possibleUnitTypes = [[
     opfor_SOLDIER_X,
     opfor_AA_SOLDIER_X,
     opfor_AR_SOLDIER_X,
     opfor_AT_SOLDIER_X,
     opfor_LAT_SOLDIER_X,
     opfor_SL_SOLDIER_X
-];
-if (count _possibleUnitTypes == 0) then {
-    _possibleUnitTypes = [opfor_SOLDIER_X];
-};
+]] call fnc_opforRoles;
 
 _bldgUnits = [];
 for "_i" from 1 to _totalUnitsToSpawn do {
@@ -87,50 +79,9 @@ _group deleteGroupWhenEmpty true;
 } forEach units _group;
 // =================================
 
-{
-    if (_forEachIndex >= _maxBuildingsToUse) exitWith {};
-    _building = _x;
-    _positions = [_building] call BIS_fnc_buildingPositions;
-    for "_j" from 0 to (_unitsPerBuilding - 1) do {
-        _unitIndex = _forEachIndex * _unitsPerBuilding + _j;
-        if (_unitIndex >= count (units _group)) exitWith {};
-        _unit = units _group select _unitIndex;
-        if (count _positions > 0) then {
-            _randPosIndex = floor (random (count _positions));
-            _unit setPosATL (_building buildingPos _randPosIndex);
-            _unit setUnitPos "UP";
-            _unit setBehaviour "AWARE";
-            [_unit, _building, _positions] spawn {
-                params ["_unit", "_building", "_positions"];
-                sleep 2 + random 5;
-                private _buildingPos = getPosATL _building;
-                while {alive _unit} do {
-                    if (_unit distance _buildingPos > 15 && count _positions > 0) then {
-                        private _returnPos = selectRandom _positions;
-                        _unit doMove _returnPos;
-                    };
-                    if (count _positions > 0) then {
-                        private _targetPosIndex = floor (random (count _positions));
-                        private _targetPos = _building buildingPos _targetPosIndex;
-                        _unit doMove _targetPos;
-                        _unit setUnitPos "UP";
-                        private _timeout = time + 30;
-                        waitUntil {
-                            sleep 5;
-                            (unitReady _unit) || 
-                            (!alive _unit) || 
-                            (_unit distance _targetPos < 2) || 
-                            (time > _timeout)
-                        };
-                        sleep 5 + random 15;
-                    } else {
-                        sleep 10 + random 20;
-                    };
-                };
-            };
-        };
-    };
-} forEach _usableBuildings;
+// Sliced rather than walked whole: the loop this replaces capped itself on _forEachIndex, and
+// _usableBuildings is the uncapped list here where the other two callers cap at selection.
+[_group, _usableBuildings select [0, _maxBuildingsToUse], _unitsPerBuilding, "UP"] call fnc_spreadIntoBuildings;
 
 // ========== 为特定工事建筑添加驻军（改用 BIS_fnc_spawnGroup） ==========
 private _fortificationClasses = [
@@ -150,13 +101,13 @@ private _foundBuildings = [];
 private _uniqueBuildings = [];
 { if (!(_x in _uniqueBuildings)) then { _uniqueBuildings pushBack _x }; } forEach _foundBuildings;
 
-private _fortPossibleUnitTypes = [
+private _fortPossibleUnitTypes = [[
     opfor_SOLDIER_X,
     opfor_AR_SOLDIER_X,
     opfor_GL_SOLDIER_X,
     opfor_LAT_SOLDIER_X,
     opfor_MARK_SOLDIER_X
-];
+]] call fnc_opforRoles;
 
 {
     private _building = _x;
@@ -183,19 +134,9 @@ private _fortPossibleUnitTypes = [
         _unit setUnitPos "UP";
         _unit setBehaviour "AWARE";
         _unit setCombatMode "RED";
-        
-        // 监控确保单位保持在建筑内
-        [_unit, _bldPos] spawn {
-            params ["_unit", "_fixedPos"];
-            sleep 1;
-            while {alive _unit && {!isNull _unit}} do {
-                if (_unit distance _fixedPos > 3) then {
-                    _unit setPosATL _fixedPos;
-                };
-                sleep 5;
-            };
-        };
-        
+
+        [_unit, _building, [_bldPos], "PIN"] spawn fnc_holdBuildingPost;
+
         [_unit] call fnc_addRandomLoot;
     } forEach units _fortGroup;
     

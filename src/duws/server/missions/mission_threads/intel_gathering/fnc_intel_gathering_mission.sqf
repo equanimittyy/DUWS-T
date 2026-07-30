@@ -34,12 +34,7 @@ if (count _usableBuildings <= _maxBuildings) then {
 ["INFO", "MISSION", format ["Selected %1 buildings.", count _selectedBuildings]] call fnc_log;
 
 // ========== 定义敌方单位类型池 ==========
-private _possibleUnitTypes = [];
-{
-    if (!isNil "_x" && {_x != ""}) then {
-        _possibleUnitTypes pushBack _x;
-    };
-} forEach [
+private _possibleUnitTypes = [[
     opfor_SOLDIER_X,
     opfor_AA_SOLDIER_X,
     opfor_AR_SOLDIER_X,
@@ -48,10 +43,7 @@ private _possibleUnitTypes = [];
     opfor_SL_SOLDIER_X,
     opfor_GL_SOLDIER_X,
     opfor_MARK_SOLDIER_X
-];
-if (count _possibleUnitTypes == 0) then {
-    _possibleUnitTypes = [opfor_SOLDIER_X];
-};
+]] call fnc_opforRoles;
 
 // ========== 容器类名列表 ==========
 private _containerClasses = [
@@ -246,33 +238,9 @@ if (isNil "fnc_intel_container_search_server") then {
         
         [_unit] call fnc_addRandomLoot;
         
-        [_unit, _building, _positions] spawn {
-            params ["_unit", "_building", "_positions"];
-            sleep 2 + random 5;
-            private _buildingPos = getPosATL _building;
-            while {alive _unit} do {
-                if (_unit distance _buildingPos > 15 && count _positions > 0) then {
-                    private _returnPos = selectRandom _positions;
-                    _unit doMove _returnPos;
-                };
-                if (count _positions > 0) then {
-                    private _targetPosIndex = floor random (count _positions);
-                    private _targetPos = _building buildingPos _targetPosIndex;
-                    _unit doMove _targetPos;
-                    private _timeout = time + 30;
-                    waitUntil {
-                        sleep 5;
-                        (unitReady _unit) || 
-                        (!alive _unit) || 
-                        (_unit distance _targetPos < 2) || 
-                        (time > _timeout)
-                    };
-                    sleep 5 + random 5;
-                } else {
-                    sleep 5 + random 5;
-                };
-            };
-        };
+        // No stance argument: the per-unit UP/MIDDLE mix chosen above has to survive the hold
+        // loop, and any stance passed here would re-assert one of them onto every unit.
+        [_unit, _building, _positions, "HERD"] spawn fnc_holdBuildingPost;
         
         _allSpawnedUnits pushBack _unit;
     };
