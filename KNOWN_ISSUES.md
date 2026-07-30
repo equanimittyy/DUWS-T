@@ -26,7 +26,22 @@ The markers stay so the next round has somewhere to land. An empty block means t
 fully triaged.
 
 _BEGIN-USER_
--
+- A friendly element has arrived notification plays when BLUFOR enters a zone (get rid of noise)
+> Similar friendly element has left notification
+- OPFOR QRF airdrop feature (currently impl) causes performance issues with paratroopers - remove QRF feature in light of future OPFOR commander QRF tasking features
+- Captured blufor zone shows ugly green; better as BLUFOR blue
+- Need to ensure all vehicle taxis (helicopter, boat etc) have proper marker names TaxiWP1/TaxiWP2 sound a bit silly so normalise it to something tactical sounding like LZ (even if it's just WP Alpha, WP Bravo or something else if that's a bit too cheesy)
+- Taxi helicopter doesn't kick everyone out of the vehicle like the support caller when getting to LZ; so it should - boat taxi should follow same behaviour
+- BLUFOR randomly gets 1CP even while holding nothing
+- For a FOB deployment, anyone who is nearby (100m) should get a fade out/fade in (like the rest mechanic) to reduce how jarring it is when the FOB spawns in
+- FOBS and MHQs should get a zone radius similar to how the main HQ does; this is used to signify what will persist when players park their vehicles near these objects 
+- Redeployment for a FOB's guards and defences doesn't cost the same and isn't as simple as the HQ's; make them match
+- FOB Manager Fast Travel should also have the fade out/fade in (for the player that asks for the travel); ensure it also brings his AI squad mates (leave any players under him alone and they'll travel themselves; these players don't exist yet but wire this in for future support)
+- Remove the Fast Travel at the Map that lets you fast travel 200m near HQ
+- OPFOR spawns a foot QRF as soon as BLUFOR enters the zone; remove it
+- Add debug option to modify rep and view escalation similar to how we can modify AP/CP; feel free to merge into same window; should be able to click on a town and modify AP/CP or just pick from a list; whatever is lighter
+-> also want to be able to see/add/remove escalation numbers too, so how many destroyed houses, and the current map's house scale tiers for 0-11
+- 
 
 
 _END-USER_
@@ -38,14 +53,14 @@ The move to `server/` / `client/` / `shared/` rewrote every script path in the m
 resolution is not execution — only a live run proves the campaign still plays. Zone
 generation has been exercised; the rest has not.
 
-- [ ] Capture a zone and confirm the marker flips **on a second machine**, not just the host
-- [ ] Run a side mission to completion and confirm the CP/AP reward lands
+- [x] Capture a zone and confirm the marker flips **on a second machine**, not just the host
+- [x] Run a side mission to completion and confirm the CP/AP reward lands
 - [ ] Save and reload mid-campaign — but settle whether a save happens at all first (see below)
-- [ ] Call heli-lift **as a non-host player** (see below)
-- [ ] Request one support of each family: drop, artillery, UAV, FOB
+- [x] Call heli-lift **as a non-host player** (see below)
+- [x] Request one support of each family: drop, artillery, UAV, FOB
 
-Zone capture and side missions are server-owned — 16 of 16 zone files and 11 of 12 mission
-files run server-side, pushing notifications outward to clients. The client-owned/
+Zone capture and side missions are server-owned — no zone or mission file runs on a client, so
+all 17 zone files and 34 mission files push their notifications outward. The client-owned/
 server-commanded inversion that made heli-lift unusable cannot occur there, so the residual
 risk is narrower: a `publicVariable` that never lands. That is only visible with a second
 player connected, which is why the first item above says so explicitly.
@@ -60,36 +75,40 @@ seen to run, but the six fields a record carries have not been checked against w
 takes the arguments given. Each field below fails silently and differently, so the symptom is the
 quickest way to tell which one is wrong.
 
-- [ ] Deploy a stowed zone and compare it against a screenshot taken before — props in the same places, facing the same way. Wrong headings or objects sunk into a slope means `getPosWorld` / `setVectorDirAndUp`
-- [ ] Watch server FPS after a deploy. A drop with no other cause means `simulationEnabled` did not round-trip and the whole composition came back simulated
-- [ ] Shoot a prop that was invulnerable before the cycle. Damage taken means `isDamageAllowed` did not survive
-- [ ] Empty an ammo crate, stow, deploy, reopen it. A refilled crate means the four `get*Cargo` / `add*CargoGlobal` pairs are wrong, and is an infinite ammo source until fixed
-- [ ] Destroy a bunker, stow, deploy. Its return means the alive test at stow time is not filtering
+- [x] Deploy a stowed zone and compare it against a screenshot taken before — props in the same places, facing the same way. Wrong headings or objects sunk into a slope means `getPosWorld` / `setVectorDirAndUp`
+- [x] Watch server FPS after a deploy. A drop with no other cause means `simulationEnabled` did not round-trip and the whole composition came back simulated
+- [x] Shoot a prop that was invulnerable before the cycle. Damage taken means `isDamageAllowed` did not survive
+- [x] Empty an ammo crate, stow, deploy, reopen it. A refilled crate means the four `get*Cargo` / `add*CargoGlobal` pairs are wrong, and is an infinite ammo source until fixed
+- [x] Destroy a bunker, stow, deploy. Its return means the alive test at stow time is not filtering
+
+_USER: All working, except the exact positions of each prop shuffled a bit_
 
 ## Per-town reputation: shipped, not yet exercised
 
 - [ ] Destroy a house as a **client** on a dedicated server and watch the escalation counter. No movement means `BuildingChanged` is local-only and escalation has never worked in dedicated MP — neither did the war-crimes script it replaced. Record it rather than working around it
 - [ ] Clear a garrison in a populated town. If the `WEST SEIZED` trigger never fires, CIVILIAN-side units are blocking it and the fallback is a condition trigger counting hostile units in `thisList`
 - [ ] Check the census line in the RPT on a new map, and confirm a single fire mission cannot advance an escalation level. Both numbers are logged on the first run
-- [ ] Look at a neutral town's ellipse. Opaque rather than translucent means the inline colour string's fourth channel does nothing and `setMarkerAlpha` is carrying the translucency alone
-- [ ] Confirm the campaign-wide reputation still gates partisan hiring and pays its CP tick exactly as before the per-town split
+- [x] Look at a neutral town's ellipse. Opaque rather than translucent means the inline colour string's fourth channel does nothing and `setMarkerAlpha` is carrying the translucency alone
+- [x] Confirm the campaign-wide reputation still gates partisan hiring and pays its CP tick exactly as before the per-town split
+_USER: remove campaign-wide rep, remove the gate for now_
 - [ ] Start a RAVAGE or WBK campaign. Towns should carry a `Pop:`-only marker and a permanently neutral ellipse, spawn no garrison, never scale prices, and log no census line
 
 ## Hardcore intel: shipped, not yet exercised
 
-- [ ] Search a corpse and confirm the action appears at all. `side group cursorObject == east` is the last clause of its condition, and a dead unit leaves its group's unit list — a group set to `deleteGroupWhenEmpty` can be gone before the body is, which would hide the action on exactly the bodies it exists for. Fallback is stamping the side on the unit at spawn
-- [ ] Confirm `cursorObject` returns a corpse reliably at 3 m. Ragdolled bodies and ones settled half-inside geometry are the doubt; `cursorTarget` or a short `nearestObjects` sweep is the swap, but a scripted sweep must stay behind the cheap clauses
-- [ ] On a **dedicated** server, as a non-host player: confirm the search action vanishes the moment the attempt is spent and returns on the next economy tick. The flag is broadcast on the player object precisely so a client-side condition can see it, so a host-only test proves nothing
+- [x] Search a corpse and confirm the action appears at all. `side group cursorObject == east` is the last clause of its condition, and a dead unit leaves its group's unit list — a group set to `deleteGroupWhenEmpty` can be gone before the body is, which would hide the action on exactly the bodies it exists for. Fallback is stamping the side on the unit at spawn
+- [x] Confirm `cursorObject` returns a corpse reliably at 3 m. Ragdolled bodies and ones settled half-inside geometry are the doubt; `cursorTarget` or a short `nearestObjects` sweep is the swap, but a scripted sweep must stay behind the cheap clauses
+- [x] On a **dedicated** server, as a non-host player: confirm the search action vanishes the moment the attempt is spent and returns on the next economy tick. The flag is broadcast on the player object precisely so a client-side condition can see it, so a host-only test proves nothing
 - [ ] Complete a rescue-pilot and a rescue-squad mission on a dedicated server and confirm each reveals a zone. These are the two sites that never paid out at all
-- [ ] Die with a search attempt spent, respawn, and check whether the action is available again. It will be — the flag lives on the body — and the open question is whether that refund is acceptable rather than whether it happens
+- [x] Die with a search attempt spent, respawn, and check whether the action is available again. It will be — the flag lives on the body — and the open question is whether that refund is acceptable rather than whether it happens
 
 ## Hardcore civilian towns: shipped, not yet exercised
 
-- [ ] Open the map on a fresh hardcore campaign. Up to three towns near the HQ should be drawn and every other one dark. None at all means the HQ was not the first anchor when selection ran — the `Town selection:` log line reports the anchor count, and `PosOfBLUHQ` being unset at that moment is the way it happens
-- [ ] Walk into a hidden town and confirm the ellipse and the population icon appear together. One without the other means only half the pair is being repainted, and the two alphas are set in different places (`fnc_civ_town_reveal` on reveal, `fnc_civ_townRender` on every reputation change)
-- [ ] Shoot a civilian in a hidden town, then check the map. The town appearing means the band repaint is overriding the reveal flag rather than reading it
-- [ ] From well away from the HQ, roll the debug payout until it lands on a town rather than a zone — the kind is a coin flip while both buckets hold stock. The town it reveals should be the nearest hidden one to *you*; one near base means the origin never arrived and the HQ fallback is carrying every call
+- [x] Open the map on a fresh hardcore campaign. Up to three towns near the HQ should be drawn and every other one dark. None at all means the HQ was not the first anchor when selection ran — the `Town selection:` log line reports the anchor count, and `PosOfBLUHQ` being unset at that moment is the way it happens
+- [x] Walk into a hidden town and confirm the ellipse and the population icon appear together. One without the other means only half the pair is being repainted, and the two alphas are set in different places (`fnc_civ_town_reveal` on reveal, `fnc_civ_townRender` on every reputation change)
+- [x] Shoot a civilian in a hidden town, then check the map. The town appearing means the band repaint is overriding the reveal flag rather than reading it
+- [x] From well away from the HQ, roll the debug payout until it lands on a town rather than a zone — the kind is a coin flip while both buckets hold stock. The town it reveals should be the nearest hidden one to *you*; one near base means the origin never arrived and the HQ fallback is carrying every call
 - [ ] Enter a town as a **client** on a dedicated server and watch that client's RPT. `fnc_civ_town_reveal` is named by the town's presence trigger, which is global, so an undefined-variable error there means the broadcast is not landing before the first player arrives
+_USER: what does this even mean/supposed to test? ELI5_
 
 ## JIP queue: keyed, not yet exercised
 
@@ -104,8 +123,8 @@ yourself rejoining a dedicated server. "Rejoin" below means either.
 
 **Entries a joiner receives.** Each tests one keying form, so a failure names its own cause.
 
-- [ ] Hack a sabotage laptop, rejoin. The action is gone and the mission cannot be completed twice — this was the one behavioural bug, a joiner re-hacking finished work
-- [ ] In a **hardcore** campaign, approach an un-hacked sabotage laptop and rejoin. It must offer *both* the sabotage action and the intel search: they key to the same object, and the search used to evict the sabotage action so the mission could not be finished at all
+- [x] Hack a sabotage laptop, rejoin. The action is gone and the mission cannot be completed twice — this was the one behavioural bug, a joiner re-hacking finished work
+- [x] In a **hardcore** campaign, approach an un-hacked sabotage laptop and rejoin. It must offer *both* the sabotage action and the intel search: they key to the same object, and the search used to evict the sabotage action so the mission could not be finished at all
 - [ ] Deploy and undeploy the MHQ several times, rejoin. Exactly one action, matching its current state — not the toggle history
 - [ ] Run several side missions to different outcomes, rejoin. Each task appears once at its latest state, with no replay of superseded transitions
 - [ ] Kill a mission patrol, let a mission-slot release fire (it clears `allDeadMen`), rejoin. Corpse search actions track the corpses actually on the map, not the campaign's total kill count
@@ -226,7 +245,7 @@ dedicated server a manual act rather than an automatic one.
 | Two functions named by zone triggers are never broadcast | `fnc_captured`, `fnc_enterlocation`, registered in `server/server_fnc_init.sqf` without `publicVariable` | A `createTrigger` statement is global, which is why the civilian town trigger's `fnc_civ_handler_ravage` / `fnc_civ_handler_wbk` *are* broadcast. One of the two treatments is wrong: if the zone side is, every client spawns a nil on each zone entry and capture. The campaign is unaffected — the server runs its own copy — but a client RPT fills with undefined-variable errors |
 | `duws_all_helmets` and `duws_all_vests` are read but assigned nowhere in the mission | `server/misc/fnc_civ_handler_ravage.sqf:260,270` | RAVAGE only, and only on the zombies that draw no uniform — roughly 30%, since the uniform roll is `_isZombie && random 1 < 0.7`. Those two branches are the fallback for a unit with no uniform side to match, so they are the only readers, and `count` on an undefined variable throws where the assigned lists would have been used. Both were carried over untouched when RAVAGE was split out of `fnc_civ_handler` |
 | Five `remoteExec ["call", 0, true]` sites ship a whole `addAction` body as compiled code | `destroy_cache:123,158`, `rescue_pilot:336,407`, `steal_supply:87` | Queued under an engine-generated id nothing can address or remove, and the largest entries a joiner receives. Cannot be keyed until each body becomes a named function taking arguments |
-| `removeAction` takes index `0` rather than a captured `addAction` return | `client/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_success.sqf:24` | Works today because insertion order puts the sabotage add before the hardcore intel rotary, but the laptop carries two actions, which is exactly when index-`0` removal stops being safe |
+| `removeAction` takes index `0` rather than a captured `addAction` return | `server/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_success.sqf:18` | Works today because insertion order puts the sabotage add before the hardcore intel rotary, but the laptop carries two actions, which is exactly when index-`0` removal stops being safe |
 | An unbounded `waitUntil` sits on the joiner's branch of the client boot | `client/client_init.sqf:140` | Blocks on `HQ_pos_found_generated && chosen_settings` with no timeout, reached only when `WARCOM_init_done` is false. It hints the player every five seconds, so the stall is visible; proceeding on a timeout would boot a client into a campaign whose settings never arrived. What it lacks is a log line |
 | `staminaEnabled` is read but never assigned anywhere in the mission | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:67` | The whole `format` throws on `Undefined variable in expression: staminaenabled`, so the campaign settings summary hint never displays for any player. Confirmed in an RPT at the moment generation completes. `client/misc/fnc_sitrep_display.sqf:33` reads the same variable behind an `isNil` guard, which is why only this site fails — either assign it at setup or drop it from the hint |
 | Buying the Mobile HQ and never designating one locks the team out of it permanently | `client/dialog/fnc_request_support.sqf:477`, `shared/functions/fnc_MHQ_destroyed.sqf:23` | The purchase clears `support_mobile_HQ_available` for everyone and hands the buyer a one-shot comm-menu token; the only path that sets the flag back waits on an MHQ that exists being destroyed. If the token is lost before it is spent — the buyer disconnecting being the certain case — no second purchase is possible and no MHQ exists to die, so the campaign has no Mobile HQ and 10 CP bought nothing. The three guards in `fnc_MHQ_select.sqf` hand the token back rather than consume it, so a bad target or an MHQ already being active cost nothing; losing the player is the case none of them can cover. Whether respawn also drops the token is unverified |
