@@ -235,11 +235,16 @@ _trgEnemy setTriggerActivation ["EAST", "PRESENT", true];
 // text and back.
 _trgEnemy setVariable ["DUWS_zonePos", _zonePos];
 _trgEnemy setVariable ["DUWS_zoneNum", _zone_num];
-// Tested as BLUFOR-held rather than not-OPFOR-held, so a zone in neither list stays quiet. Matched
-// by distance because the entry on the other side did not get that protection: the capture trigger
-// formats its position into a statement string (`%5` below), so what fnc_zone_control_set files has
-// been through a float round trip and need not compare equal to the array this zone was built from.
-// Zones sit hundreds of metres apart, so a metre of tolerance cannot pick the wrong one.
+// Tested as BLUFOR-held rather than not-OPFOR-held, so a zone in neither list stays quiet.
+//
+// The distance test below is an identity lookup -- "which zone is this" -- not a proximity check.
+// Whether enemies are here is already answered by the trigger area above; this only asks whether
+// the entry in the ownership list is *this* zone. It cannot use `==` or `in`, because the entry on
+// the other side has been through text: the capture trigger formats its position into a statement
+// string (`%5` below), so what fnc_zone_control_set files was parsed back out of characters and
+// need not equal the array this zone was built from. The metre is float slop, not a game distance
+// -- it could be 0.5 or 5 and mean the same thing, and it must not be folded in with the real
+// radii the streaming checks use.
 _trgEnemy setTriggerStatements [
     "this && {private _p = thisTrigger getVariable ['DUWS_zonePos', []];
         (WARCOM_zones_controled_by_BLUFOR findIf { (_x distance2D _p) < 1 }) >= 0}",
