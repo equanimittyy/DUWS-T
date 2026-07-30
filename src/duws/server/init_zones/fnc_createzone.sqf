@@ -218,8 +218,10 @@ _trg2=createTrigger["EmptyDetector",_zonePos];
 _trg2 setTriggerArea[_size,_size,0,false];
 _trg2 setTriggerActivation["ANYPLAYER","PRESENT",true];
 _trg2 setTriggerStatements["this", format["['Zone %1',%2,'%3','%4',thislist] spawn fnc_enterlocation;",_zone_num,_zonePos,_markername,_markername2], ""];
-_zonePosName2 = format["trigger2%1%2",round (_zonePos select 0),round (_zonePos select 1)];
-call compile format["%1 = _trg2",_zonePosName2];
+// The handle is not filed anywhere. Nothing deletes this trigger -- a zone lives for the
+// campaign and its notification fires whoever owns the ground -- so there is no reader to keep
+// one for. The capture trigger beside it is filed, under trigger_<x>_<y>, because fnc_captured
+// and fnc_blufor_cap rewrite it on every ownership change.
 _spawnPos = _zonePos;
 
 // Build-out ends here: markers, prefab, fortifications and triggers are all placed. What

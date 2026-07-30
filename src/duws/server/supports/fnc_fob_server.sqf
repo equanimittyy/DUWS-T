@@ -81,9 +81,12 @@ _trgWarning setTriggerStatements[
     format["[%1, enemy_near_fob] remoteExec ['fnc_duws_dialogue', 0];", str(_foundPickupPos)],
     ""
 ];
-// CREATE VARNAME FOR WARNING TRIGGER --> use the pos of the trigger
-_fobPosName2 = format["trigfob2%1%2",round (_foundPickupPos select 0),round (_foundPickupPos select 1)];
-call compile format["%1 = _trgWarning",_fobPosName2];
+// Filed under the rounded trigger position, which is the only key fnc_FOB_cleanup can rebuild
+// from the FOB position it is handed.
+missionNamespace setVariable [
+    format["trigfob2%1%2",round (_foundPickupPos select 0),round (_foundPickupPos select 1)],
+    _trgWarning
+];
 
 //ADD THE FOB TO Array_of_FOBS
 Array_of_FOBS = Array_of_FOBS + [_fob];

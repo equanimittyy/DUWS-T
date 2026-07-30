@@ -46,35 +46,7 @@ by design — its own header says so.
 carries 1,521 of those lines, 39% of all duplication in the tree, which is why that directory
 leads the plan.
 
-## Tier 1: quick wins
-
-Small, self-contained, and each one is a strict improvement with no design argument attached.
-
-### Dynamically-named globals for zone and FOB triggers
-
-```sqf
-_zonePosName2 = format["trigger2%1%2", round (_zonePos select 0), round (_zonePos select 1)];
-call compile format["%1 = _trg2", _zonePosName2];   // server/init_zones/fnc_createzone.sqf:221-222
-```
-
-This synthesises a global variable name from a coordinate and assigns to it through the
-compiler. The consequence is that no grep can find the writer of `trigger2123456` — the
-identifier does not exist in the source. Two writes remain, and they are not the same case:
-
-- **`fnc_fob_server.sqf:85-86` is live.** It stores the FOB's enemy-proximity trigger, and
-  `server/dialog/fnc_FOB_cleanup.sqf:18` reads it back the same way to delete it. Conversion is
-  a `setVariable`/`getVariable` pair, and defaulting the read to `objNull` is a strict
-  improvement: `deleteVehicle objNull` no-ops where `deleteVehicle nil` throws. It also retires
-  the `private "_trg2"` on the preceding line, which exists only so the compiled block can
-  assign into a caller local.
-- **`fnc_createzone.sqf:221-222` is read by nothing.** The zone notification trigger's handle is
-  stored and never consumed anywhere in the owned tree. Converting it preserves a dead write;
-  deleting the two lines is the honest fix, and is a decision rather than a conversion.
-
-The larger fix for the live case is a single hashmap keyed by the rounded position, but the
-one-line version is worth taking on its own.
-
-## Tier 2: the copy-paste layer
+## Tier 1: the copy-paste layer
 
 This is where the bulk of that 15.6% lives, and where duplication has already cost behaviour.
 
@@ -245,7 +217,7 @@ strategy threaded through it puts RAVAGE and WBK branches on the path every stoc
 the mode handlers converge further, the shape is a helper the two of them call — not one entry
 point that all three enter.
 
-## Tier 3: adding one thing costs N edits
+## Tier 2: adding one thing costs N edits
 
 ### Registering a side mission touches seven places
 
@@ -364,7 +336,7 @@ names the files do.
 The payoff is not elegance: 2,389 padding lines and a 50-entry ceiling both disappear, and a
 faction file becomes readable.
 
-## Tier 4: couplings that need a decision first
+## Tier 3: couplings that need a decision first
 
 These are real, but each needs a call from the maintainer before any code moves. Listed so the
 decision can be made deliberately rather than discovered mid-refactor.
@@ -453,7 +425,6 @@ Sequenced so that each step is independently verifiable and nothing later depend
 not yet made. Lint is `bash tests/run.sh`; "smoke" means repack and play far enough to exercise
 the named system.
 
-- [ ] Convert the live FOB warning-trigger name (`fnc_fob_server.sqf:85-86` / `fnc_FOB_cleanup.sqf:18`) to `setVariable`/`getVariable`, and decide the dead zone write at `fnc_createzone.sqf:221-222`. Verify: deploy a FOB, let an OPFOR element approach it (warning fires), then remove it (the trigger is deleted, not orphaned).
 - [ ] Add `fnc_mission_site` and `fnc_mission_end` alongside the existing `fnc_mission_begin`, with the cooldown release in `fnc_mission_site`'s bail-out path; convert the threads one at a time. Verify per thread: the bail-out releases `Mission_available` **and** clears `mission_cooldown_<type>` so the type is immediately re-offerable, markers are deleted, and the reward pays once.
 - [ ] Extract `fnc_garrisonBuildings` and convert the nine copied call sites, intel and loot passes inside it. Verify: each of the nine missions spawns building garrisons, and all nine now drop corpse intel — including `target_sniper`, which does not today.
 - [ ] Make the corpse search claimable once server-side, and set `current_mission_target_pos` in `target_sniper` and `clearthearea_cqb`. Verify on a dedicated server with two clients: the second player finds no search action on a body the first has already searched, and a run of searches on both missions reveals targets rather than returning silence.
