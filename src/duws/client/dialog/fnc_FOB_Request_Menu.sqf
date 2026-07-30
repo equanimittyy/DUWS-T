@@ -15,8 +15,6 @@ _index = lbAdd [2120, ""]; 									// 1
 _var_count = 1;  // 99 max
 _unit_count = 1;  // 5 max
 while {true} do {
-	_unitArray = [];
-	_var = "";
 	if (_unit_count > 5) exitWith {};
 	if (_var_count > 99) exitWith {};
 	if (_var_count > 9) then {
@@ -60,8 +58,6 @@ _index1 = lbAdd [2122, ""];              									// 1
 _var_count = 1;
 _veh_count = 1;  // 10 max
 while {true} do {
-	_vehArray = "";
-	_var = "";
 	if (_veh_count > 10) exitWith {};
 	if (_var_count > 99) exitWith {};
 	if (_var_count > 9) then {

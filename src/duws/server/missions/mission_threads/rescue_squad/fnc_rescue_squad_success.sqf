@@ -32,9 +32,6 @@ if (isMultiplayer) then {
 _sol1 setcaptive false;
 _sol2 setcaptive false;
 _sol3 setcaptive false;
-//_sol1 switchMove "AmovPpneMstpSnonWnonDnon";
-//_sol2 switchMove "AmovPpneMstpSnonWnonDnon";
-//_sol3 switchMove "AmovPpneMstpSnonWnonDnon";
 // Broadcast, and the queued pose dropped with it: a local clear released the captives on the
 // server alone, leaving every client a squad still crouching after it had walked away.
 {

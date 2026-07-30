@@ -8,7 +8,6 @@ _fobname = [1] call fnc_random_name;
 
 // create marker on FOB
 _markername = format["fob%1%2",round (_foundPickupPos select 0),round (_foundPickupPos select 1)]; // Define marker name
-//hint _markername;
 _markerstr = createMarker [str(_markername), _foundPickupPos];
 _markerstr setMarkerShape "ICON";
 str(_markername) setMarkerType "loc_Bunker";

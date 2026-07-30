@@ -3,14 +3,12 @@ _index = lbCurSel 2122;
 
 _spawnPos = getpos player;
 _spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],10,300,15,0,0.4,0,[],[]] call BIS_fnc_findSafePos;
-//_spawnPos = [(_spawnPos select 0)+30, _spawnPos select 1];
 
 
 ///  10 VEHICLES MAX
 
 if (_index < 2) exitWith {hint localize "STR_DUWS_T_9607znvh"};
 
-_var = "";
 if (_index > 10) then {
 	_var = "blufor_RQST_VEHICLE_" + (str (_index - 1)) + "_X"; // Parse the name of the variable as a string
 } else {
@@ -28,11 +26,9 @@ _message = localize "STR_DUWS_T_vehicleready";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 _vehic = _vehicle select 0 createVehicle _spawnPos;
 
-//hint format["index: %1",_index];
 
 // give vehicle a marker
 _markername = format["lbl%1%2",_spawnPos]; // Define marker name
-//hint _markername;
 _markerstr = createMarker [str(_markername), _spawnPos];
 _markerstr setMarkerShape "ICON";
 str(_markername) setMarkerType "hd_objective";

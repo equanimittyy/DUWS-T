@@ -14,8 +14,6 @@ _index = lbAdd [2100, ""];                              	// 1
 
 _var_count = 1;
 while {true} do {
-	_unitArray = [];
-	_var = "";
 	if (_var_count > 99) exitWith {};
 	if (_var_count > 9) then {
 		_var = "blufor_RQST_UNIT_" + str _var_count + "_X"; // Parse the name of the variable as a string
@@ -58,8 +56,6 @@ _index1 = lbAdd [2102, ""];              					// 1
 
 _var_count = 1;
 while {true} do {
-	_vehArray = "";
-	_var = "";
 	if (_var_count > 99) exitWith {};
 	if (_var_count > 9) then {
 		_var = "blufor_RQST_VEHICLE_" + str _var_count + "_X"; // Parse the name of the variable as a string
@@ -267,5 +263,3 @@ if (!isNil "insurgent_mode_enable" && {insurgent_mode_enable}) then {
     private _disabledIndices = [3,4,5,6,12,14,15,16,17,18,19,20];
     { lbSetColor [2103, _x, [0.5,0.5,0.5,1]]; } forEach _disabledIndices;
 };
-
-//hint format["index: %1",_index2];

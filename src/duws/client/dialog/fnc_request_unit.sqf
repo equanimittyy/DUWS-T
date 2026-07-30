@@ -4,7 +4,6 @@ _index = lbCurSel 2100;
 _skill = blufor_ai_skill_random;
 _skillSF = blufor_ai_skill_random;
 
-//_spawnpos = [(getpos player select 0)-78, (getpos player select 1)-73.5];
 _spawnPos = getpos player;
 _spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],150,200,15,0,0.3,0,[],[]] call BIS_fnc_findSafePos;
 
@@ -12,7 +11,6 @@ _spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],150,200,15,0,0.3,0,[],
 
 if (_index < 2) exitWith {hint localize "STR_DUWS_T_9607znvh"};
 
-_var = "";
 if (_index > 10) then {
 	_var = "blufor_RQST_UNIT_" + (str (_index - 1)) + "_X"; // Parse the name of the variable as a string
 } else {
