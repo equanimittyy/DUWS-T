@@ -26,15 +26,6 @@ The markers stay so the next round has somewhere to land. An empty block means t
 fully triaged.
 
 _BEGIN-USER_
-- Need to ensure all vehicle taxis (helicopter, boat etc) have proper marker names TaxiWP1/TaxiWP2 sound a bit silly so normalise it to something tactical sounding like LZ (even if it's just WP Alpha, WP Bravo or something else if that's a bit too cheesy)
-- Taxi helicopter doesn't kick everyone out of the vehicle like the support caller when getting to LZ; so it should - boat taxi should follow same behaviour
-- For a FOB deployment, anyone who is nearby (100m) should get a fade out/fade in (like the rest mechanic) to reduce how jarring it is when the FOB spawns in
-- FOBS and MHQs should get a zone radius similar to how the main HQ does; this is used to signify what will persist when players park their vehicles near these objects 
-- Redeployment for a FOB's guards and defences doesn't cost the same and isn't as simple as the HQ's; make them match
-- FOB Manager Fast Travel should also have the fade out/fade in (for the player that asks for the travel); ensure it also brings his AI squad mates (leave any players under him alone and they'll travel themselves; these players don't exist yet but wire this in for future support)
-- Add debug option to modify rep and view escalation similar to how we can modify AP/CP; feel free to merge into same window; should be able to click on a town and modify AP/CP or just pick from a list; whatever is lighter
--> also want to be able to see/add/remove escalation numbers too, so how many destroyed houses, and the current map's house scale tiers for 0-11
-
 
 _END-USER_
 
