@@ -207,6 +207,12 @@ against one that has been through a statement string, match it by distance (`_a 
 rather than equality; zones and bases are hundreds of metres apart, so a metre of tolerance cannot
 select the wrong one.
 
+**Such a match is an identity test, not a proximity one**, and the two read alike at a glance. The
+tolerance is float slop and its exact value carries no meaning — unlike the radii in
+`fnc_spawnWait` or `fnc_duws_bluforNear`, where the distance *is* the question and the number is
+tuned. Comment the difference where you write it, or the next reader folds an identity lookup in
+with the gameplay ranges.
+
 ## `hint` renders beneath the open map, so map-phase prompts are invisible
 
 **A `hint` (or `hintSilent`) issued while the map is open — `forceMap true` /
