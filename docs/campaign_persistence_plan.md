@@ -139,7 +139,7 @@ session instead of one interval.
 
 One limit of the manual path is temporary. SITREP costs 1 CP today, so a player spent down to
 nothing cannot save at all — and that price is being removed, with a cooldown in its place
-([`ap_economy_plan.md`](ap_economy_plan.md#sitrep-becomes-free)). Off is a second reason for that
+([`economy_plan.md`](economy_plan.md#sitrep-becomes-free)). Off is a second reason for that
 change to land rather than a reason to withhold the option, because it promotes the manual save
 from a convenience to the only in-session one. The grant itself follows the `game_master` slot
 rather than the person (`server/server_var_init.sqf`), so a co-op team whose game master leaves
@@ -184,7 +184,7 @@ optimisation here; without it a dedicated server loses the campaign every time t
 the configuration this mission wants for a persistent campaign, and it raises a design question
 the mission has never had to answer: the 30-minute economy tick keeps paying, WARCOM keeps
 spawning waves, the side-mission generator keeps rolling and expiring missions, and — once the
-[OPFOR director](ap_economy_plan.md#what-the-opfor-director-spends-on) lands — the enemy keeps
+[OPFOR director](economy_plan.md#what-the-commander-spends-on) lands — the enemy keeps
 buying garrisons and hardpoints against a player who is asleep.
 
 **Decided: the campaign idles at zero players.** A player who logs off overnight and returns to a
@@ -277,7 +277,7 @@ doing.
    (`server/supports/fnc_fob_server.sqf:84`).
 3. **Mirror support unlocks server-side.** One broadcast array; the client keeps its local copy as
    the fast path. Players spend CP on these, and once
-   [AP buys permanent capability](ap_economy_plan.md#what-ap-buys-is-permanent-cp-buys-uses)
+   [AP buys permanent capability](economy_plan.md#what-army-power-buys-is-permanent)
    losing them across a restart is losing the campaign's premium currency.
 
 **Taking Locations out of `civ_locations` is not one of them.** The civilian rewrite deliberately
@@ -379,7 +379,7 @@ for every one they have already farmed.
 **The tier ratchet is state, not a threshold test.** Once AP is spendable, deriving the tier from
 the live pool re-derives it from a number that has since been spent down, silently un-unlocking an
 enemy that had already reached armour — the failure mode
-[`ap_economy_plan.md`](ap_economy_plan.md#the-ratchet-is-structural-today-and-only-in-half-the-read-sites)
+[`economy_plan.md`](economy_plan.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites)
 describes. A ratchet whose only record is a number that goes both ways is not a ratchet.
 
 `civ_town_ap` is stored rather than recomputed, against this plan's usual preference for rebuilding
@@ -408,7 +408,7 @@ multiplier and the loss condition together.
 | Taskings | outcome | one row per standing order: type, target, and budget already spent |
 
 The commander archetype is rolled once per campaign and never re-rolled
-([`ap_economy_plan.md`](ap_economy_plan.md#the-commander-has-an-archetype)), so a restore that
+([`economy_plan.md`](economy_plan.md#the-commander-has-an-archetype)), so a restore that
 re-rolls it changes the war the player has been fighting. One string.
 
 Hardpoints are an input for the same reason zones are:
@@ -721,7 +721,7 @@ is already the price tables the economies buy from, so this is a walk and a sum,
 | `server/misc/fnc_campaign_reconcile.sqf` | New. Folds the value of live units and vehicles back into the pools, before every write. |
 | `server/misc/fnc_campaign_vehicles.sqf` | New. Collects and respawns the stockpile around each anchor. |
 | `server/misc/fnc_autoSave.sqf` | Rewritten to call the new save; drop `saveGame`. Owns the interval loop and the no-overlap guard. |
-| `server/supports/fnc_sitrep_support.sqf:13` | Nothing here for persistence — it already asks the server to save. Its price and cooldown are [`ap_economy_plan.md`](ap_economy_plan.md#sitrep-becomes-free)'s business. |
+| `server/supports/fnc_sitrep_support.sqf:13` | Nothing here for persistence — it already asks the server to save. Its price and cooldown are [`economy_plan.md`](economy_plan.md#sitrep-becomes-free)'s business. |
 | `server/server_init.sqf` | Early gate before `:15` — scan, wait for the fork, apply; save triggers and the disconnect/end event handlers. Keep `enableSaving [false,false]` at `:113`; the engine save is no longer the mechanism. |
 | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:8-16,54,97` | Branch to the restore path for zones; feed saved towns to civilian init; replay ownership and reveal after `WARCOM_init_done`. |
 | `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name; the announcement is silenced by the router, not a flag here. |

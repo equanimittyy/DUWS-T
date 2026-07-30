@@ -355,7 +355,7 @@ changes. Building on it now would mean inventing the ownership model inside this
 ### The director and the escalation ladder
 
 **The director pays to build; clearing refunds nothing.** Construction is one of the OPFOR Army
-Power sinks in [`ap_economy_plan.md`](ap_economy_plan.md), so an emplacement competes with town
+Power sinks in [`economy_plan.md`](economy_plan.md), so an emplacement competes with town
 garrisons and tasking orders for the same points — that competition is the reason the sink
 exists. The refund is what stays forbidden: cost-and-refund is farmable — build 25, clear −25,
 repeat, and the enemy's pool never reaches the escalation thresholds that make it dangerous.

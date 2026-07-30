@@ -75,6 +75,15 @@ scripted-movement event needs the same.
 
 Decided so far:
 
+- **Events are free and rolled, not bought.** Reputation is the whole input: a town deep enough
+  into the OPFOR band generates them on its own, and the commander that buys garrisons, taskings
+  and hardpoints neither funds them nor schedules them
+  ([`economy_plan.md`](economy_plan.md#what-the-commander-spends-on)). Charging Army Power for
+  them would price a thing the player has already paid for by letting the town fall.
+- **Rapport moves a town's reputation; events are what a low reputation does.** Both act on a town
+  in the OPFOR band, so the division has to be stated or the two drift into each other. Rapport is
+  the commander's purchased way of dragging a town down; events are the free consequence of it
+  already being down.
 - It acts on towns in the OPFOR band (reputation `<= -10`), the same band that pays OPFOR Army
   Power and spawns a garrison.
 - It plans outside the town's presence trigger. The civilian handler runs only when a player is
@@ -84,12 +93,8 @@ Decided so far:
 
 Open, and to be settled before implementation:
 
-- Event budget: whether sabotage draws from OPFOR Army Power, from a separate per-town pool, or
-  fires on a timer. Army Power becomes a spendable pool with named sinks in
-  [`ap_economy_plan.md`](ap_economy_plan.md), so drawing from it now means competing with town
-  garrisons, taskings and hardpoints rather than reading a number nothing else touches.
-- How this director divides work with the Rapport tasking in that document, which also acts on a
-  town's reputation — one of them owns dragging a town toward OPFOR, not both.
+- The roll itself: what rate a town at `-10` generates events at against one at `-20`, and whether
+  the curve between them is worth having or the band alone should decide.
 - Whether IED placement is persistent terrain state or spawned per approach, and how it
   interacts with despawn.
 - Whether ambush groups count against the same population caps as civilians
