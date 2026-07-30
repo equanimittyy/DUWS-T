@@ -39,55 +39,6 @@ _board addAction [
     [], 90, true, true, "", "_this == player"
 ];
 
-// 添加基地快速移动动作（在白板地图上）
-if !(_board getVariable ["board_fasttravel_actions_done", false]) then {
-    _board setVariable ["board_fasttravel_actions_done", true];
-    _board addAction [
-        ACT_SECONDARY_MENU("STR_DUWS_T_FAST_TRAVEL_BASE"),
-        {
-            params ["_target", "_caller", "_actionId"];
-            // 避免重复打开地图
-            if (!isNil "DUWS_baseTravelMapOpen" && {DUWS_baseTravelMapOpen}) exitWith {
-                hint localize "STR_DUWS_T_FAST_TRAVEL_BUSY";
-            };
-            private _got = ["FASTTRAVEL", {
-                params ["_pos"];
-                // Releasing clears the banner too, and it has to happen while the map is still
-                // up: the banner is a control on that display.
-                ["FASTTRAVEL"] call fnc_mapclick_release;
-                openMap false;
-                DUWS_baseTravelMapOpen = false;
-                if (_pos distance PosOfBLUHQ < 200) then {
-                    player setPos _pos;
-                    hint localize "STR_DUWS_T_FAST_TRAVEL_BASE_ARRIVE";
-                } else {
-                    hint localize "STR_DUWS_T_FAST_TRAVEL_BASE_FAIL";
-                };
-                true;
-            }] call fnc_mapclick_claim;
-            if (!_got) exitWith {};
-
-            DUWS_baseTravelMapOpen = true;
-            openMap true;
-            // Not a hint: the hint box renders beneath the map display, so the instruction to
-            // click near the base played its sound and showed nothing, leaving the player in a
-            // click-to-travel mode with no sign it had started.
-            [localize "STR_DUWS_T_FAST_TRAVEL_BASE_HINT"] call fnc_map_prompt;
-
-            // 地图被强制关闭时的清理
-            [] spawn {
-                waitUntil { !visibleMap };
-                if (!isNil "DUWS_baseTravelMapOpen" && {DUWS_baseTravelMapOpen}) then {
-                    DUWS_baseTravelMapOpen = nil;
-                    ["FASTTRAVEL"] call fnc_mapclick_release;
-                };
-            };
-        },
-        [],
-        90,
-        true,
-        true,
-        "",
-        "_this == player"
-    ];
-};
+// No base fast travel on the board. It only ever moved the player somewhere within 200 m of an HQ
+// they were already standing at, so it bought nothing a walk did not; the FOB Manager owns travel
+// between bases.

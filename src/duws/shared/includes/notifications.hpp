@@ -24,30 +24,6 @@ class CfgNotifications
         difficulty[] = {"netStats"};
     };
 
-    class Location_enter
-    {
-        title = "$STR_DUWS_T_zjxh0fh4"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\A3\ui_f\data\map\mapcontrol\tourism_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
-        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
-        description = "$STR_DUWS_T_l843uwpu"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {1,1,1,1}; // Icon and text color
-        duration = 4; // How many seconds will the notification be displayed
-        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
-        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
-    };
-
-    class Location_leave
-    {
-        title = "$STR_DUWS_T_zjxh0fh4"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\A3\ui_f\data\map\mapcontrol\tourism_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
-        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
-        description = "$STR_DUWS_T_aibgwt2g"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {1,1,1,1}; // Icon and text color
-        duration = 4; // How many seconds will the notification be displayed
-        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
-        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
-    };
-
     class US_takencontrol
     {
         title = "$STR_DUWS_T_drq88qxs"; // Tile displayed as text on black background. Filled by arguments.
@@ -120,17 +96,6 @@ class CfgNotifications
         iconText = "+%1";
         description = "$STR_DUWS_T_zcxhmft5";
         color[] = {0.5,1,1,1};
-        priority = 0;
-        difficulty[] = {};
-    };
-
-    class CPaddedciv
-    {
-        title = "$STR_DUWS_T_elszwwpc3";
-        iconText = "+%1";
-        description = "$STR_DUWS_T_zcxhmft53";
-        color[] = {0.5,1,1,1};
-        duration = 4;
         priority = 0;
         difficulty[] = {};
     };

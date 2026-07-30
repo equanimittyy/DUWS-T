@@ -52,15 +52,8 @@ _refortify = false;
 // create some patrols
 [_foundPickupPos, _fob] spawn fnc_guardsFOB;
 
-// CREATE ZONE NOTIFICATION TRIGGER
-_size = 75;
-_trg23=createTrigger["EmptyDetector",_foundPickupPos];
-_trg23 setTriggerArea[_size,_size,0,false];
-_trg23 setTriggerActivation["ANYPLAYER","PRESENT",true];
-_trg23 setTriggerStatements["this", format["['FOB %1',%2,'%3','%4',thisList] spawn fnc_enterlocation",_fobname,0,'',''], ""];
-// CREATE VARNAME FOR FOB TRIGGER --> use the pos of the trigger
-_fobPosName = format["trigfob%1%2",round (_foundPickupPos select 0),round (_foundPickupPos select 1)];
-call compile format["%1 = _trg23",_fobPosName];
+// No arrival trigger: it existed only to announce a friendly element reaching the FOB, and the
+// hardcore reveal fnc_enterlocation still does is keyed on a zone name, which a FOB never has.
 
 // warning trigger when an enemy approaches the camp
 enemy_near_fob = format[localize 'STR_DUWS_T_i0w3u54j',_fobname];

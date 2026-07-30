@@ -94,10 +94,6 @@ automated resolution could not reach, and the reasons are worth knowing:
 - **A function passed as a value has no call site to find.** `addAction`, `onLBSelChanged` and
   the dyna-mission table all take a bare function reference, so the invocation never appears as
   `spawn`/`call`/`remoteExec` next to the name.
-- **One file is compiled under a different name than the file suggests.**
-  `server/warcom/fnc_WARCOM_opf_qrf.sqf` is registered as `fnc_QRF_test`
-  (`server/server_var_init.sqf:164`) and fired from a `FiredNear` handler.
-
 `server/missions/fnc_missionPatrolsSmall.sqf` is registered and never called from anywhere. Its header
 records that rather than inventing a locality for it.
 

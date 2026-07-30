@@ -231,9 +231,9 @@ and the enemy starts holding the map ([`../ap_economy_plan.md`](../ap_economy_pl
 **Enemy-loot → intel-analysis is an unbounded, cooldown-free faucet.**
 `fnc_addRandomLoot.sqf` puts `Files` (2 CP) / `Wallet_ID` (1.5 CP) on ~80% of spawned
 enemies, and terminal analysis (`fnc_intelAnalysis.sqf`) converts them with no cap and no
-cooldown; HVT missions add `FileTopSecret` at 8 CP each. Because enemies respawn via QRF and
-patrols, this taps ≈1 CP per kill scaling with playtime rather than difficulty. A per-visit
-cap or a cooldown on the terminal action bounds it.
+cooldown; HVT missions add `FileTopSecret` at 8 CP each. Because a zone re-garrisons every time it
+is left and re-approached, and patrols keep spawning, this taps ≈1 CP per kill scaling with playtime
+rather than difficulty. A per-visit cap or a cooldown on the terminal action bounds it.
 
 **Recycle pays for vehicles the player never bought.**
 `fnc_activateBaseRecycleStation.sqf:88-101` deletes every empty, non-excluded vehicle near

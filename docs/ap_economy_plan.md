@@ -216,11 +216,9 @@ anything spends:
 |---|---|---|
 | `fnc_WARCOM_opf_patrol.sqf:101` | >100 | The second team joined onto a patrol |
 | `fnc_WARCOM_opf_patrol.sqf:124,128,132` | >99 / >149 / >199 | Patrol car, then armour, then the third vehicle |
-| `fnc_WARCOM_opf_qrf.sqf:89` | >100 | The QRF's escort group |
 | `fnc_WARCOM_blu_patrol.sqf:96,100,104` | >99 / >149 / >199 | The same three vehicle steps, BLUFOR side |
 | `server/missions/fnc_missionPatrols.sqf:18` | >100 | Mission guard armour drops to a car |
 | `server/missions/fnc_missionPatrolswithintel.sqf:14` | >100 | Same |
-| `server/missions/fnc_opf_heli_reinforce.sqf:81` | `ap/200` | Reinforcement head count, scaled linearly |
 
 **These must read the unlock, not the pool** — and the tier globals that replace them are save
 state, for the same reason. A reload that restores the pools but not the tiers would re-derive
@@ -229,9 +227,9 @@ unlocked armour. A ratchet whose only record is a number that goes both ways is 
 
 A player who watches enemy armour disappear because the enemy bought a garrison is being shown an
 unlock that un-unlocked, which contradicts the one rule the ladder has. The fix is a pair of published tier globals that only ever rise, written
-where the `waitUntil` threads already step, and read in place of the comparisons above. The
-`fnc_opf_heli_reinforce.sqf:81` linear scale is the odd one out: it is a curve, not a gate, so it
-takes the highest tier reached rather than a threshold test.
+where the `waitUntil` threads already step, and read in place of the comparisons above. Every
+surviving site is a threshold test; a consumer that wants a curve rather than a gate takes the
+highest tier reached instead.
 
 Making the tier explicit is also what lets both sides display it. The pool figure alone stops
 describing capability the moment spending starts.
@@ -411,7 +409,7 @@ A tasking order is bought for a squad the director is spawning anyway, so the pr
 
 | Tasking | Job |
 |---|---|
-| QRF | Respond to contact — the behaviour `server/warcom/fnc_WARCOM_opf_qrf.sqf` already implements |
+| QRF | Respond to contact. The removed contact-triggered QRF is the behaviour to rebuild here, under a commander that decides whether to spend the reserve rather than a handler that always does |
 | Supply | Move between held towns and zones, restoring garrison strength en route |
 | Rapport | The enemy's hearts-and-minds: occupy a town and drag its reputation toward OPFOR |
 | Intel patrol | Sweep for BLUFOR and report what it finds, feeding target selection |

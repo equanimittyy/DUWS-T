@@ -2,11 +2,6 @@
 params ["_MissionPos", "_mission_name"];
 if (!([2, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
-// ========== 增援系统变量 ==========
-private _varSuffix = format ["%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
-private _initialCountVar = format ["opf_initial_%1", _varSuffix];
-private _triggeredVar = format ["opf_reinforce_%1", _varSuffix];
-// ====================================
 _radius = 600;
 _cpreward = 35;
 _apreward = 35;
@@ -241,17 +236,8 @@ _wp2 setWaypointTimeout [30, 45, 60];
 missionNamespace setVariable ["current_mission_target_pos", getPos _target];
 ["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", 0];
 
-// ========== 统计初始敌军数量 ==========
 sleep 5; // 等待巡逻队生成完毕
-private _nearbyEnemies = _targetpos nearEntities [["CAManBase", "LandVehicle", "Air"], _radius * 1.5] select { side _x == EAST };
-private _initialEnemyCount = count _nearbyEnemies;
-missionNamespace setVariable [_initialCountVar, _initialEnemyCount, true];
-missionNamespace setVariable [_triggeredVar, false, true];
-["INFO", "ZONES", format ["%1: Initial enemy count = %2", _mission_name, _initialEnemyCount]] call fnc_log;
 
-// ========== 启动直升机增援监控 ==========
-[_targetpos, _radius, _initialCountVar, _triggeredVar, _VARtaskgeneratedName] spawn fnc_opf_heli_reinforce;
-// ======================================
 
 waitUntil {sleep 0.5; !alive _target || (time - _missionStartTime) > _taskTimeout};
 
@@ -260,7 +246,6 @@ if (alive _target && (time - _missionStartTime) > _taskTimeout) exitWith {
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [] spawn fnc_missionTimer;
     deleteMarker str(_markername2);
-    missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos,_radius, "mission_target_hvt"] spawn fnc_mission_cleanup;
     missionNamespace setVariable ["current_mission_target_pos", nil];
 };
@@ -279,7 +264,6 @@ sleep 1;
 
 // 清理其他任务物体（APC 不在其中）
 
-missionNamespace setVariable [_triggeredVar, true, true];
 [_targetpos,_radius, "mission_target_hvt"] spawn fnc_mission_cleanup;
 
 missionNamespace setVariable ["current_mission_target_pos", nil];

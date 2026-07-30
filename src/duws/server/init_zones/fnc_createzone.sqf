@@ -208,13 +208,10 @@ for "_i" from 1 to _fortificationCount do {
 missionNamespace setVariable [format ["ZoneFortifications_%1", _zone_num], _zoneFortifications];
 // ================================================
 
-// ADD THE QRF OBJECT
-_vehicle_0 = objNull;
-_vehicle_0 = createVehicle ["Land_MultiMeter_F", [0, 0, 0], [], 0, "CAN_COLLIDE"];
-_vehicle_0 allowDamage false;
-_vehicle_0 setPos [(_zonePos select 0)+20,(_zonePos select 1)];
-hideObjectGlobal _vehicle_0;
-_null = _vehicle_0 addEventHandler ["FiredNear", {[_this select 0] spawn fnc_QRF_test}];
+// No QRF listener. A hidden object sat here carrying a FiredNear handler, so the first shot fired
+// anywhere in the zone spawned up to four infantry waves at a distant OPFOR zone and walked them in
+// -- reinforcement the player could neither see coming nor interdict. Tasking OPFOR reserves is the
+// commander's job, and the plan for it is docs/opfor_commander_plan.md.
 
 // CREATE ZONE NOTIFICATION TRIGGER
 _trg2=createTrigger["EmptyDetector",_zonePos];
@@ -249,25 +246,6 @@ switch (true) do {
 	case (_size < 1501): { _fnc_spawn_size = fnc_1500_zone; };
 	case (_size > 1500): { _fnc_spawn_size = fnc_1501_zone; };
 };
-
-// ========== 战区直升机增援监控初始化 ==========
-private _zoneCenter = _zonePos;
-private _zoneRadius = _size;
-private _zoneNum = _zone_num;
-
-// 生成唯一变量后缀
-private _varSuffix = format ["zone_%1_%2", round(_zoneCenter select 0), round(_zoneCenter select 1)];
-private _initialCountVar = format ["opf_initial_%1", _varSuffix];
-private _triggeredVar = format ["opf_reinforce_%1", _varSuffix];
-
-// 初始计数设为0，实际统计在 fnc_spawnWait 首次生成敌军时完成
-missionNamespace setVariable [_initialCountVar, 0, true];
-missionNamespace setVariable [_triggeredVar, false, true];
-
-// 存储变量名到战区，以便后续重置时使用
-_zonePosName = format ["zoneVars_%1", _zoneNum];
-missionNamespace setVariable [_zonePosName, [_initialCountVar, _triggeredVar, _zoneCenter, _zoneRadius], true];
-// ================================================
 
 // ✅ 修复：将占领触发器和旗杆创建代码移到 while 循环之前，确保它们能够执行
 
@@ -313,23 +291,6 @@ while {true} do {
 		[_spawnPos] spawn fnc_createopfortified;
 		sleep 2;
 		[_spawnPos,_size] spawn _fnc_spawn_size;
-		
-		// ========== 战区增援：重置计数并启动监控 ==========
-		sleep 5; // 等待敌军完全生成
-		private _varSuffix = format ["zone_%1_%2", round(_spawnPos select 0), round(_spawnPos select 1)];
-		private _initialCountVar = format ["opf_initial_%1", _varSuffix];
-		private _triggeredVar = format ["opf_reinforce_%1", _varSuffix];
-		
-		private _nearbyEnemies = _spawnPos nearEntities [["CAManBase", "LandVehicle", "Air"], _size * 1.2] select { side _x == EAST };
-		private _initialEnemyCount = count _nearbyEnemies;
-		
-		missionNamespace setVariable [_initialCountVar, _initialEnemyCount, true];
-		missionNamespace setVariable [_triggeredVar, false, true];
-		
-		["INFO", "ZONES", format ["Zone %1: Initial enemy count reset to %2", _zone_num, _initialEnemyCount]] call fnc_log;
-		
-		[_spawnPos, _size, _initialCountVar, _triggeredVar, "", true] spawn fnc_opf_heli_reinforce;
-		// ==============================================
 	};
 	// Waits for the next spawn signal from fnc_spawnWait. Slot 2 of the entry used to carry a
 	// "never despawn again" flag; nothing sets it now that despawn is decided by a grace period

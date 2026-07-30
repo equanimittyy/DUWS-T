@@ -23,7 +23,6 @@ WARCOM_blufor_ap = _blufor_ap;
 WARCOM_opfor_ap = _opfor_ap;
 WARCOM_blu_attack_delay = _blu_attack_delay;
 WARCOM_marker_num = 0;
-WARCOM_qrf_ready = true;
 publicVariable "WARCOM_blufor_ap";
 publicVariable "WARCOM_opfor_ap";
 publicVariable "WARCOM_blu_hq_pos";
@@ -50,7 +49,7 @@ publicVariable "WARCOM_zones_controled_by_OPFOR";
 ["INFO", "WARCOM", "Init BLU patrols"] call fnc_log;
 [] spawn fnc_WARCOM_blu_patrol;
 
-// Init OPF patrols and QRF type
+// Init OPF patrols
 ["INFO", "WARCOM", "Init OPF patrols"] call fnc_log;
 [] spawn fnc_WARCOM_opf_patrol;
 

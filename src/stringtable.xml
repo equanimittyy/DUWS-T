@@ -1621,26 +1621,6 @@
             </Key>
 </Container>
         <Container name="Base Services">
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_BASE">
-                <Original>Fast Travel</Original>
-                <English>Fast Travel</English>
-                <Chinese>基地快速移动</Chinese>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_BASE_HINT">
-                <Original>Click on the map within 200m of the HQ (the blue circle) to teleport.</Original>
-                <English>Click on the map within 200m of the HQ (the blue circle) to teleport.</English>
-                <Chinese>点击总部周围200米内的地图位置进行传送。(蓝色实心圆内)</Chinese>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_BASE_ARRIVE">
-                <Original>Teleported</Original>
-                <English>Teleported</English>
-                <Chinese>已传送。</Chinese>
-            </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_BASE_FAIL">
-                <Original>Location is too far from HQ (max 200m)</Original>
-                <English>Location is too far from HQ (max 200m)</English>
-                <Chinese>位置离总部太远（最远200米）。</Chinese>
-            </Key>
             <Key ID="STR_DUWS_T_PYLON_COST_HINT">
                 <Original>Changing pylon loadout costs 5 CP each time</Original>
                 <English>Changing pylon loadout costs 5 CP each time</English>
@@ -2590,11 +2570,6 @@
                 <English>You lost the following on respawn: %1.</English>
                 <Chinesesimp>你在重生时损失了以下物品：%1</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_FAST_TRAVEL_BUSY">
-                <Original>The map is already opening, please wait...</Original>
-                <English>The map is already opening, please wait...</English>
-                <Chinesesimp>正在打开地图，请稍等...</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_civ">
                 <Original>Local</Original>
                 <English>Local</English>
@@ -3490,13 +3465,6 @@
                 <Original>CP Bonus: side mission completed</Original>
                 <English>CP Bonus: side mission completed</English>
             </Key>
-            <Key ID="STR_DUWS_T_elszwwpc3">
-                <German>CP Bonus: Hohe Ruf-Belohnungen</German>
-                <Chinesesimp>CP点：高声望奖励</Chinesesimp>
-                <Spanish>Bonificación de CP: Recompensas por alto prestigio</Spanish>
-                <Original>CP Bonus: High reputation</Original>
-                <English>CP Bonus: High reputation</English>
-            </Key>
             <Key ID="STR_DUWS_T_elszwwpc2">
                 <German>AP Bonus: Sekundäre Mission erfolgreich</German>
                 <Chinesesimp>AP点：支线任务完成</Chinesesimp>
@@ -3510,13 +3478,6 @@
                 <Spanish>CP Bonus received!</Spanish>
                 <Original>Command Points awarded for completing a side mission.</Original>
                 <English>Command Points awarded for completing a side mission.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_zcxhmft53">
-                <German>Du hast CP-Belohnungen für deinen guten Ruf erhalten!</German>
-                <Chinesesimp>你因良好声望获取了CP奖励！</Chinesesimp>
-                <Spanish>¡Has conseguido recompensas de CP por tu alto prestigio!</Spanish>
-                <Original>Command Points awarded for standing with the local population.</Original>
-                <English>Command Points awarded for standing with the local population.</English>
             </Key>
             <Key ID="STR_DUWS_T_zcxhmft52">
                 <German>AP Bonus received!</German>
@@ -3692,34 +3653,6 @@
                 <Chinesesimp>你把特种行动完全搞砸了。任务失败了，立刻撤离！</Chinesesimp>
                 <Original>You completely botched the operation. The mission has failed and you will be evacuated shortly.</Original>
                 <English>You completely botched the operation. The mission has failed and you will be evacuated shortly.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_cpcivbonus">
-                <German>Hier ist "Overlord". Einige Zivilisten haben uns gerade dafür gedankt, dass wir die Ordnung aufrechterhalten. Gut gemacht, weiter so.</German>
-                <Chinesesimp>刚刚有几个平民对我们维持秩序表达了感谢。干得不错，继续保持。</Chinesesimp>
-                <Spanish>Aquí "Overlord". Algunos civiles acaban de agradecernos por mantener el orden. Buen trabajo, sigue así.</Spanish>
-                <Original>Locals have been thanking us for keeping order. Good work, keep it up.</Original>
-                <English>Locals have been thanking us for keeping order. Good work, keep it up.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_zjxh0fh4">
-                <German>Position: %1</German>
-                <Chinesesimp>位置: %1</Chinesesimp>
-                <Spanish>Ubicación %1</Spanish>
-                <Original>Location: %1</Original>
-                <English>Location: %1</English>
-            </Key>
-            <Key ID="STR_DUWS_T_l843uwpu">
-                <German>Ein Spieler hat eine Zone betreten: %1</German>
-                <Chinesesimp>玩家进入了战区: %1</Chinesesimp>
-                <Spanish>Un jugador ha entrado a una zona: %1</Spanish>
-                <Original>A friendly element has arrived.</Original>
-                <English>A friendly element has arrived.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_aibgwt2g">
-                <German>Die Spieler haben die Zone verlassen: %1</German>
-                <Chinesesimp>玩家离开了战区: %1</Chinesesimp>
-                <Spanish>Los jugadores han abandonado una zona: %1</Spanish>
-                <Original>Friendly elements have moved out.</Original>
-                <English>Friendly elements have moved out.</English>
             </Key>
             <Key ID="STR_DUWS_T_drq88qxs">
                 <German>Erobert: %1</German>
@@ -4821,11 +4754,6 @@
             </Key>
 </Container>
         <Container name="Support &amp; Radio">
-            <Key ID="STR_DUWS_T_HELIQRF1">
-                <Original>Be advised, OPFOR air assault troops detected near the AO.</Original>
-                <English>Be advised, OPFOR air assault troops detected near the AO.</English>
-                <Chinesesimp>注意，行动区域附近监测到敌方空中突击部队。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_halo_ai_only">
                 <German>HALO Gruppe (AI only)</German>
                 <Spanish>HALO group (AI only)</Spanish>
@@ -6009,13 +5937,6 @@
                 <Chinesesimp>我们到了。注意部署冲击应对措施。</Chinesesimp>
                 <Original>On station. Stand clear, setting the load down. Heavy transport available again in two minutes.</Original>
                 <English>On station. Stand clear, setting the load down. Heavy transport available again in two minutes.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_opforqrf1">
-                <German>Hier ist "Overlord". Achtung, Aufklärungseinheiten haben feindliche schnelle Eingreiftruppen (QRF) entdeckt, die sich um das Einsatzgebiet herum aufstellen. Bleibt wachsam.</German>
-                <Spanish>Aquí "Overlord". Atención, unidades de reconocimiento han detectado fuerzas de respuesta rápida enemigas desplegándose alrededor del área de operaciones. Mantengan la vigilancia.</Spanish>
-                <Chinesesimp>注意，侦查单位发现敌人正在战区周围部署快反部队。注意警惕。</Chinesesimp>
-                <Original>Be advised, reconnaissance elements have spotted enemy QRF deploying around the AO. Stay alert.</Original>
-                <English>Be advised, reconnaissance elements have spotted enemy QRF deploying around the AO. Stay alert.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxidamaged">
                 <German>%1 hat schweren Schaden erlitten und kann den geplanten Auftrag nicht erfüllen. Ersatzeinheit ist unterwegs, voraussichtliche Ankunftszeit: 5 Minuten.</German>

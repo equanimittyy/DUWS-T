@@ -31,11 +31,6 @@ deleteMarker str(_markername2);
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 missionNamespace setVariable ["current_mission_target_pos", nil];
 
-// ========== 防止清理时误触发直升机增援 ==========
-private _varSuffix = format ["%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
-private _triggeredVar = format ["opf_reinforce_%1", _varSuffix];
-missionNamespace setVariable [_triggeredVar, true, true];
-// ================================================
 
 // 发放奖励
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;

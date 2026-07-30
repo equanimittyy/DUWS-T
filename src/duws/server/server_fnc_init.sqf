@@ -767,8 +767,6 @@ fnc_missionPatrols = compile preprocessFileLineNumbers "duws\server\missions\fnc
 fnc_missionPatrolswithintel = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrolswithintel.sqf";
 fnc_missionPatrolsSmall = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrolsSmall.sqf";
 fnc_mission_cleanup = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_cleanup.sqf";
-fnc_opf_heli_reinforce = compile preprocessFileLineNumbers "duws\server\missions\fnc_opf_heli_reinforce.sqf";
-publicVariable "fnc_opf_heli_reinforce";
 // 动态氛围任务系统
 fnc_findSafeMissionPos = compile preprocessFileLineNumbers "duws\server\misc\fnc_findSafeMissionPos.sqf";
 publicVariable "fnc_findSafeMissionPos";
@@ -1078,7 +1076,6 @@ fnc_WARCOM_opf_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fn
 fnc_WARCOM_wp_opf_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_wp_opf_patrol.sqf";
 fnc_WARCOM_opf_assault = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_assault.sqf";
 fnc_WARCOM_wp_opf_assault = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_wp_opf_assault.sqf";
-fnc_WARCOM_wp_opf_qrf = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_wp_opf_qrf.sqf";
 fnc_WARCOM_opf_air = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_air.sqf";
 fnc_random_veh_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_random_veh_blu_patrol.sqf";
 fnc_random_veh_opf_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_random_veh_opf_patrol.sqf";

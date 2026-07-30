@@ -122,11 +122,6 @@ while {true} do {
 
 		// CLEANUP ZONE
 		if (_despawn) then {
-			// ========== 清理前强制终止增援监控 ==========
-			private _triggeredVar = format ["opf_reinforce_%1", _zoneKey];
-			missionNamespace setVariable [_triggeredVar, true, true];
-			// =========================================
-			
 			(zone_spawn_array select _index) set [1,false];
 			_zoneObj = _spawnPos nearObjects (_size + _AI_buffer);
 			{

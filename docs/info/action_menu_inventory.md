@@ -74,13 +74,11 @@ Priority and colour follow the bucket, so neither is repeated per row.
 | Vehicle Recycling | `STR_DUWS_T_VEHICLE_RECYCLING` | Depot | 2 |
 | Vehicle Customization | `STR_DUWS_T_VEHICLE_CUSTOMIZATION` | Depot | 4 |
 | View Map | `STR_DUWS_T_civ_mapview_action` | HQ map board | — |
-| Fast Travel | `STR_DUWS_T_FAST_TRAVEL_BASE` | HQ map board | — |
 
-The two board entries open a readout and a map-click rather than a listbox, so they carry no row
-count. Fast Travel is a relocation and belongs to `ACT_MOVE` by consequence; it sits here so the
-map board reads as one group and does not disappear into the same blue as the earplugs toggle.
-Both outrank the Killhouse teleports attached to the same board, and View Map is added before Fast
-Travel, so it heads the pair.
+View Map opens a readout rather than a listbox, so it carries no row count. It outranks the
+Killhouse teleports attached to the same board. Travel between bases belongs to the FOB Manager;
+the board's own base fast travel is gone, having only ever moved the player within 200 m of an HQ
+they were standing at.
 
 ### Equip
 

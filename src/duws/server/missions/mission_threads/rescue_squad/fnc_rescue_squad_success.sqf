@@ -105,11 +105,6 @@ sleep 5;
 // Spawn the "next mission" wait
 [] spawn fnc_missionTimer;
 
-// ========== 防止清理时误触发直升机增援 ==========
-private _varSuffix = format ["%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
-private _triggeredVar = format ["opf_reinforce_%1", _varSuffix];
-missionNamespace setVariable [_triggeredVar, true, true];
-// ================================================
 
 // Spawn the cleanup
 [_targetpos,_radius] spawn fnc_mission_cleanup;

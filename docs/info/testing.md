@@ -141,7 +141,7 @@ emits, so it must never be used as a tag — `[DUWS][INFO][SRV][DUWS]` breaks ta
 | `FACTION` | BLUFOR/OPFOR resolution, custom and autodetected factions |
 | `ZONES` | generation, registration, capture and loss |
 | `MISSION` | side-mission start, reward, cleanup, slot release, dynamic missions |
-| `WARCOM` | OPFOR assault targeting, QRF, reinforcement |
+| `WARCOM` | OPFOR assault targeting and patrols |
 | `ECON` | every CP / AP / reputation mutation, with the reason that caused it |
 | `SUPPORT` | FOB, MHQ, repair and recycle stations, killhouse |
 | `CIV` | civilian presence, recruitment, reputation events |

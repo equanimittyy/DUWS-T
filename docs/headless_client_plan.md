@@ -17,7 +17,6 @@ an HC to a DUWS_T server does not merely fail to help — it corrupts the campai
 | No HC is declared: no `headlessClients[]` entry, no HC slot among the 20 playable slots | `description.ext`, `mission.sqm` |
 | Waypoint commands only take effect where the group is local, and every waypoint call runs server-side | `server/warcom/fnc_WARCOM_wp_*.sqf`, rule in [`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md) |
 | `setSkill` needs locality, so HC-owned units would silently never receive skill settings | `server/misc/fnc_AI_Master_Control.sqf:5,22,26` |
-| Two QRF keep-out tests read bare `player`, which is `objNull` on a dedicated server — already broken there, equally broken on an HC | `server/warcom/fnc_WARCOM_opf_qrf.sqf:51,74` |
 
 The abbreviation is also overloaded, which matters because the file a newcomer will open first
 is the wrong one. `client/misc/fnc_hc_init.sqf` is Arma's **High Command** commanding UI —
@@ -69,7 +68,7 @@ Mobile WARCOM groups only:
 | Spawner | `path:line` |
 |---|---|
 | OPFOR assault | `server/warcom/fnc_WARCOM_opf_assault.sqf:98,100,109` |
-| OPFOR patrol, QRF, air | `server/warcom/fnc_WARCOM_opf_patrol.sqf`, `fnc_WARCOM_opf_qrf.sqf`, `fnc_WARCOM_opf_air.sqf` |
+| OPFOR patrol, air | `server/warcom/fnc_WARCOM_opf_patrol.sqf`, `fnc_WARCOM_opf_air.sqf` |
 | Vehicle crews for the above | `server/misc/fnc_random_veh.sqf:105` |
 
 Zone garrisons — `server/init_zones/fnc_createopteam.sqf:23`, `fnc_createopteam2.sqf`,
@@ -80,7 +79,7 @@ Zone garrisons — `server/init_zones/fnc_createopteam.sqf:23`, `fnc_createoptea
 
 Waypoint logic is already factored into its own files, which is the seam that makes this
 tractable: `fnc_WARCOM_wp_opf_assault.sqf:10,27`, `fnc_WARCOM_wp_opf_patrol.sqf:17`,
-`fnc_WARCOM_wp_opf_qrf.sqf:11`, `fnc_WARCOM_wp_blu_patrol.sqf:7,17,25`,
+`fnc_WARCOM_wp_blu_patrol.sqf:7,17,25`,
 `fnc_WARCOM_wp_blu_assault.sqf:29`, plus `fnc_WARCOM_blu_assault.sqf:89,95` and the
 `bis_fnc_taskPatrol` call at `server/init_zones/fnc_createopteam.sqf:32`.
 
@@ -108,23 +107,21 @@ machine sets skill on the units it owns.
 | `mission.sqm` | One HC slot. |
 | `server/server_fnc_init.sqf` | `fnc_hc_handoff`; `DUWST_hc_owner` registration handler; registry lines. |
 | `server/server_var_init.sqf` | Declare `DUWST_hc_owner` defaulting to `2`. |
-| `server/warcom/fnc_WARCOM_opf_assault.sqf:98-109`, `fnc_WARCOM_opf_patrol.sqf`, `fnc_WARCOM_opf_qrf.sqf`, `fnc_WARCOM_opf_air.sqf` | Hand off after spawn. |
+| `server/warcom/fnc_WARCOM_opf_assault.sqf:98-109`, `fnc_WARCOM_opf_patrol.sqf`, `fnc_WARCOM_opf_air.sqf` | Hand off after spawn. |
 | `server/misc/fnc_random_veh.sqf:105` | Hand off crews with their group. |
 | `server/warcom/fnc_WARCOM_wp_*.sqf` call sites | Route to `groupOwner`. |
 | `server/misc/fnc_AI_Master_Control.sqf:5,22-26` | Filter to `local _x`; run on server and HC. |
-| `server/warcom/fnc_WARCOM_opf_qrf.sqf:51,74` | Replace the bare `player` reads. Prerequisite — they are already broken on dedicated. |
 | `info/server_client_authority.md` | Document the HC as a third machine role and the handoff contract. |
 | `info/architecture.md:125,143,145` | Correct the stale claim that VCOM and `zbe_cache` are active; both are disabled. |
 
 ## Task list
 
 - [ ] Fix `INIT.sqf:21` and add a minimal `hc/hc_init.sqf`. Verify: connect an HC and confirm the server log shows one campaign generation, not two.
-- [ ] Fix the bare `player` reads at `fnc_WARCOM_opf_qrf.sqf:51,74`.
 - [ ] Add `headlessClients[]`, the `mission.sqm` slot, and `DUWST_hc_owner` registration. Verify: with no HC connected, `DUWST_hc_owner` stays `2` and nothing changes.
 - [ ] Add `fnc_hc_handoff` and route the waypoint calls through `groupOwner`, with no handoff wired up yet. Verify: a full campaign plays identically — this proves the routing is a no-op on the server before locality moves.
-- [ ] Hand off the four WARCOM spawners. Verify: `groupOwner` reports the HC for assault groups, and they still reach their objectives.
+- [ ] Hand off the WARCOM spawners. Verify: `groupOwner` reports the HC for assault groups, and they still reach their objectives.
 - [ ] Split `fnc_AI_Master_Control.sqf` by locality.
-- [ ] On a dedicated server plus a real headless client: play a campaign to a zone capture. Confirm patrols move, QRFs arrive, and server FPS improves.
+- [ ] On a dedicated server plus a real headless client: play a campaign to a zone capture. Confirm patrols move, assaults arrive, and server FPS improves.
 - [ ] Update `info/server_client_authority.md` and correct `info/architecture.md`.
 
 ## Decided trade-offs

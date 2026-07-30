@@ -106,7 +106,7 @@ broadcast, so "never `publicVariable`'d" does not imply server-only.
 | `init_hq/` | HQ and FOB setup: base init, fortify/guard, FOB patrols. How the Main Base layout is built and how to rearrange it (including an Eden round-trip) are in [`hq_layout_editing.md`](hq_layout_editing.md) |
 | `missions/` | Side missions: spawner (`fnc_missionLocator`), rewards, timers; `mission_threads/` holds one folder per mission type |
 | `supports/` | Support requests: CAS, artillery, UAV, paradrop, heli-lift, vehicle drop, FOB deploy, transport |
-| `warcom/` | War Command — the dynamic AI director for both sides (assault / patrol / QRF task forces reacting to the front line) |
+| `warcom/` | War Command — the dynamic AI director for both sides (assault and patrol task forces reacting to the front line) |
 | `dialog/` | Runtime UI: HQ/FOB request menus, mobile-HQ deploy, campaign menu, faction dialog, the CP/AP economy |
 | `misc/` | Autosave, recruiting, black market, civilian/informant system, intel-on-death, AI master control |
 | `sounds/` | Ambient music loop |

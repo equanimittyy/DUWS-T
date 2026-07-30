@@ -1,11 +1,6 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_MissionPos", "_mission_name"];
 
-// ========== 增援系统变量（必须提前声明，避免提前退出时未定义） ==========
-private _varSuffix = format ["%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
-private _initialCountVar = format ["opf_initial_%1", _varSuffix];
-private _triggeredVar = format ["opf_reinforce_%1", _varSuffix];
-// ====================================
 
 private _radius = 800;
 private _minBuildings = 20;
@@ -334,17 +329,6 @@ sleep 6;
 sleep 6;
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_INTEL_GATHERING5"] remoteExec ["fnc_duws_dialogue", 0];
 
-// ========== 统计初始敌军数量 ==========
-sleep 5;
-private _nearbyEnemies = _MissionPos nearEntities [["CAManBase", "LandVehicle", "Air"], _radius * 1.5] select { side _x == EAST };
-private _initialEnemyCount = count _nearbyEnemies;
-missionNamespace setVariable [_initialCountVar, _initialEnemyCount, true];
-missionNamespace setVariable [_triggeredVar, false, true];
-["INFO", "ZONES", format ["%1: Initial enemy count = %2", _mission_name, _initialEnemyCount]] call fnc_log;
-
-// ========== 启动直升机增援监控 ==========
-[_MissionPos, _radius, _initialCountVar, _triggeredVar, _taskID] spawn fnc_opf_heli_reinforce;
-// ============================================
 
 // ========== 15分钟后自动成功 ==========
 // The area ellipse is not deleted here: this branch and the countdown below both fire at 900 s,
@@ -363,7 +347,6 @@ missionNamespace setVariable [_triggeredVar, false, true];
     [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_INTEL_GATHERING6"] remoteExec ["fnc_duws_dialogue", 0];
 
     [] spawn fnc_missionTimer;
-    missionNamespace setVariable [_triggeredVar, true, true];
     [_pos, _rad] spawn fnc_mission_cleanup;
 
     [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;

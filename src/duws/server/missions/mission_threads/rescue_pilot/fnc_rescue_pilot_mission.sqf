@@ -2,11 +2,6 @@
 params ["_MissionPos", "_mission_name"];
 if (!([4, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
-// ========== 增援系统变量 ==========
-private _varSuffix = format ["%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
-private _initialCountVar = format ["opf_initial_%1", _varSuffix];
-private _triggeredVar = format ["opf_reinforce_%1", _varSuffix];
-// ====================================
 
 // ==================== 定义所有辅助函数（确保在所有机器上执行）====================
 private _fncScript = {
@@ -498,17 +493,8 @@ _trg setTriggerActivation["WEST","PRESENT",false];
 _trg setTriggerStatements["this","pilot_west_close = true;", ""];
 _trg setTriggerTimeout [10, 10, 10, true ];  
 
-// ========== 统计初始敌军数量 ==========
 sleep 5; // 等待巡逻队生成完毕
-private _nearbyEnemies = _targetpos nearEntities [["CAManBase", "LandVehicle", "Air"], _radius * 1.5] select { side _x == EAST };
-private _initialEnemyCount = count _nearbyEnemies;
-missionNamespace setVariable [_initialCountVar, _initialEnemyCount, true];
-missionNamespace setVariable [_triggeredVar, false, true];
-["INFO", "ZONES", format ["%1: Initial enemy count = %2", _mission_name, _initialEnemyCount]] call fnc_log;
 
-// ========== 启动直升机增援监控 ==========
-[_targetpos, _radius, _initialCountVar, _triggeredVar, _VARtaskgeneratedName] spawn fnc_opf_heli_reinforce;
-// ======================================
 
 waitUntil {
     sleep 1; 
@@ -530,7 +516,6 @@ if (!pilot_west_close && (time - _missionStartTime) > _taskTimeout_approach) exi
     [{hint localize "STR_DUWS_T_fxysw123"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [] spawn fnc_missionTimer;
-    missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
 };
 
@@ -541,7 +526,6 @@ if (!(alive _pilot)) exitWith {
     [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [] spawn fnc_missionTimer;
-    missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;   
 };
 
@@ -568,7 +552,6 @@ if (!(alive _pilot)) exitWith {
     [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [] spawn fnc_missionTimer;
-    missionNamespace setVariable [_triggeredVar, true, true];
     [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
 };
 
@@ -592,7 +575,6 @@ _message = ([localize "STR_DUWS_T_pilotend2"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [] spawn fnc_missionTimer;
-missionNamespace setVariable [_triggeredVar, true, true];
 [_targetpos,_radius, "mission_rescue_pilot"] spawn fnc_mission_cleanup;
 
 // Guaranteed, and called rather than spawned into a client function: completing the mission is

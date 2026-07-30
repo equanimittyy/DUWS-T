@@ -228,9 +228,6 @@ player_is_choosing_hqpos = false;publicVariable "player_is_choosing_hqpos";
 // PosOfBLUHQ
 PosOfBLUHQ = [];publicVariable "PosOfBLUHQ";
 
-// preprocess the qrf file for the EH
-fnc_QRF_test = compile preprocessFile "duws\server\warcom\fnc_WARCOM_opf_qrf.sqf";
-
 //serv_zones_array
 serv_zones_array = [];publicVariable "serv_zones_array";
 

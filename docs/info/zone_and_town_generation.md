@@ -63,7 +63,7 @@ random-then-snap-to-building behaviour, with a 10-try validation loop.
 
 **Build-out** places markers, clears obstacles for prefab zones (`:61-87`), spawns a
 weighted prefab (`:89-139`), scatters 3-4 fortification towers (`:141-195`), and wires the
-QRF, spawn-wait, and capture triggers.
+spawn-wait, presence and capture triggers.
 
 ### Defects (Subsystem A)
 

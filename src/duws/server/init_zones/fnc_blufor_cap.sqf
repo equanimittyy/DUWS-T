@@ -37,10 +37,11 @@ _opfreward = round(_apswing * zone_ap_consolation);
 [] spawn fnc_operative_mission_complete; 
 
 // MODIFY MARKER ICON
-str(_markername) setMarkerColor "ColorGreen";
+// Blue for the same reason as the first capture: green is Independent, not friendly.
+str(_markername) setMarkerColor "ColorBlue";
 // hint str(_markername);
 // MODIFY MARKER ELLIPSE
-str(_markername2) setMarkerColor "ColorGreen";
+str(_markername2) setMarkerColor "ColorBlue";
 
 // ADD POINTS
 // Skipped once the bounty has decayed away, so a zone flipped enough times stops announcing

@@ -24,11 +24,11 @@ asks the same question about the same patch of ground once per man.
 engine with `nearEntities` / `nearestObjects`, which use the spatial index. Anchor on
 `allUnits` only when the answer genuinely differs per unit.
 
-One live instance of the shape, for a reader who wants to see it rather than take the rule on
-faith: `src/duws/server/missions/fnc_opf_heli_reinforce.sqf:23-32` re-filters `allUnits` by
-side and distance every 5 s, one monitor per zone, and keeps doing it until that zone's
-defenders fall to a quarter of their starting count — which for a zone the player never
-attacks is never. `nearEntities` answers the same question off the spatial index.
+The shape's worst instance is gone with the airdrop reinforcement it belonged to: one monitor per
+zone re-filtered `allUnits` by side and distance every 5 s, and kept doing it until that zone's
+defenders fell to a quarter of their starting count — which for a zone the player never attacks is
+never. `fnc_spawnWait.sqf:23-26` is the shape done right, and answers a comparable question per
+zone off the spatial index instead.
 
 ## AI caching ships disabled, and re-enabling it is not a one-line change
 
@@ -195,15 +195,16 @@ map-portable and mod-tolerant, so a stored figure goes stale silently whenever t
 changes. Tiling the count across frames removes the stall but raises total work for edge
 handling, and it is only worth revisiting if the placement above proves insufficient.
 
-### Unverified: paradrop canopies
+### Paradrop canopies: the leak is gone with its source
 
-`src/duws/server/missions/fnc_opf_heli_reinforce.sqf:132` creates a `Steerable_Parachute_F` per
-dropped trooper, 12 to 20 per reinforcement, and nothing in this tree deletes it.
-`misc/fnc_repetitive_cleanup.sqf` will not: its categories are weapon holders, timebombs,
-smokes, dead bodies, dead vehicles and *immobile* vehicles, and a landed canopy still reports
-`canMove`. Whether the engine reaps them unprompted is not answered anywhere in the source, so
-this is the one item here that needs a live check before a fix —
-`count (allMissionObjects "ParachuteBase")` after a few reinforcements settles it.
+OPFOR reinforcement used to create a `Steerable_Parachute_F` per dropped trooper, 12 to 20 per
+reinforcement, and nothing in this tree deleted them. That whole feature is removed, so nothing
+OPFOR does leaks canopies any more.
+
+`misc/fnc_repetitive_cleanup.sqf` still will not collect one: its categories are weapon holders,
+timebombs, smokes, dead bodies, dead vehicles and *immobile* vehicles, and a landed canopy still
+reports `canMove`. That matters for the BLUFOR paradrop support, which the player invokes a handful
+of times rather than automatically, and for anything that reintroduces a scripted drop.
 
 ## Checked and dismissed
 

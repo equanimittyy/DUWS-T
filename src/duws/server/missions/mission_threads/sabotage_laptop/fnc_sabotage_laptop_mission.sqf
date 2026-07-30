@@ -4,11 +4,6 @@
 params ["_MissionPos", "_mission_name"];
 if (!([8, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
-// ========== 增援系统变量 ==========
-private _varSuffix = format ["%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
-private _initialCountVar = format ["opf_initial_%1", _varSuffix];
-private _triggeredVar = format ["opf_reinforce_%1", _varSuffix];
-// ====================================
 
 _radius = 200;
 
@@ -210,14 +205,4 @@ if (hardcore_mode_enable) then {
 // 设置任务目标位置
 missionNamespace setVariable ["current_mission_target_pos", getPos _laptop];
 
-// ========== 统计初始敌军数量 ==========
 sleep 5; // 等待巡逻队生成完毕
-private _nearbyEnemies = _targetpos nearEntities [["CAManBase", "LandVehicle", "Air"], _radius * 1.5] select { side _x == EAST };
-private _initialEnemyCount = count _nearbyEnemies;
-missionNamespace setVariable [_initialCountVar, _initialEnemyCount, true];
-missionNamespace setVariable [_triggeredVar, false, true];
-["INFO", "ZONES", format ["%1: Initial enemy count = %2", _mission_name, _initialEnemyCount]] call fnc_log;
-
-// ========== 启动直升机增援监控 ==========
-[_targetpos, _radius, _initialCountVar, _triggeredVar, _VARtaskgeneratedName] spawn fnc_opf_heli_reinforce;
-// ======================================

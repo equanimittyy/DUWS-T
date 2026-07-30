@@ -9,10 +9,8 @@ FOB_removed = true;
 
 ["info",[format[localize "STR_DUWS_T_mrmg6qui",_fob_name],localize "STR_DUWS_T_f28nbzbw"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 
-// Delete the FOB triggers
-private "_trg";
-call compile format["_trg = trigfob%1%2",round (_fob_pos select 0),round (_fob_pos select 1)];
-deleteVehicle _trg;
+// Delete the FOB's enemy-proximity trigger. It is the only one a FOB carries -- the arrival
+// notification trigger that used to sit beside it is gone.
 private "_trg2";
 call compile format["_trg2 = trigfob2%1%2",round (_fob_pos select 0),round (_fob_pos select 1)];
 deleteVehicle _trg2;
