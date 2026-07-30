@@ -66,10 +66,9 @@ blufor_SPECOPS_ENG_X = 			"rhs_vdv_des_engineer";				//operator
 /////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
 //
-// THESE HAVE FIXED AMOUNTS -fill the ends with ["empty",0,0];
-//
-// - Units = 				14
-// - Vehicles/Statics = 	50
+// Ordered lists, no padding and no fixed length: the menus offer every entry in the order
+// written here, so position in the list is the display order. A faction may list as many
+// or as few as it has.
 //
 /////////////////////////////////////////////////////////////////
 
@@ -87,20 +86,15 @@ blufor_SPECOPS_ENG_X = 			"rhs_vdv_des_engineer";				//operator
 ///////////////////////////////
 
 
-blufor_RQST_UNIT_01_X = 			["LOP_SYR_Infantry_Rifleman","Rifleman (2CP)",2];
-blufor_RQST_UNIT_02_X =				["LOP_SYR_Infantry_Grenadier","Grenadier (3CP)",3];
-blufor_RQST_UNIT_03_X =				["LOP_SYR_Infantry_MG","Heavy Gunner (4CP)",4];
-blufor_RQST_UNIT_04_X =				["LOP_SYR_Infantry_Corpsman","Medic (3CP)",3];
-blufor_RQST_UNIT_05_X =				["LOP_SYR_Infantry_AT","AT Specialist (4CP)",4];
-blufor_RQST_UNIT_06_X =				["LOP_SYR_Infantry_Engineer","Engineer (4CP)",4];
-blufor_RQST_UNIT_07_X =				["LOP_SYR_Infantry_Marksman","Sniper (4CP)",4];
-blufor_RQST_UNIT_08_X =				["empty",0,0];
-blufor_RQST_UNIT_09_X =				["empty",0,0];
-blufor_RQST_UNIT_10_X =				["empty",0,0];
-blufor_RQST_UNIT_11_X =				["empty",0,0];
-blufor_RQST_UNIT_12_X =				["empty",0,0];
-blufor_RQST_UNIT_13_X =				["empty",0,0];
-blufor_RQST_UNIT_14_X =				["empty",0,0];
+blufor_RQST_UNITS = [
+	["LOP_SYR_Infantry_Rifleman","Rifleman (2CP)",2],
+	["LOP_SYR_Infantry_Grenadier","Grenadier (3CP)",3],
+	["LOP_SYR_Infantry_MG","Heavy Gunner (4CP)",4],
+	["LOP_SYR_Infantry_Corpsman","Medic (3CP)",3],
+	["LOP_SYR_Infantry_AT","AT Specialist (4CP)",4],
+	["LOP_SYR_Infantry_Engineer","Engineer (4CP)",4],
+	["LOP_SYR_Infantry_Marksman","Sniper (4CP)",4]
+];
 
 
 ///////////////////////////////
@@ -110,55 +104,39 @@ blufor_RQST_UNIT_14_X =				["empty",0,0];
 //   _index = lbCurSel 2122;
 ////////////////////////////////
 
-blufor_RQST_VEHICLE_01_X =			["B_Quadbike_01_F","ATV (1CP)",1];
-blufor_RQST_VEHICLE_02_X =			["C_Offroad_01_F","SF Offroader (2CP)",2];
-blufor_RQST_VEHICLE_03_X =			["I_G_Van_01_transport_F","Transport Truck (6CP)",6];
-blufor_RQST_VEHICLE_04_X =			["B_MRAP_01_F","Hunter Unarmed (5CP)",5];
-blufor_RQST_VEHICLE_05_X =			["LOP_SYR_UAZ_DshKM","UAZ HMG (15CP)",15];
-blufor_RQST_VEHICLE_06_X =			["LOP_SYR_UAZ_SPG","UAZ SPG-9 (18CP)",18];
-blufor_RQST_VEHICLE_07_X =			["rhsgref_BRDM2_b","BRDM-2 (25CP)",25];
-blufor_RQST_VEHICLE_08_X =			["rhs_tigr_sts_3camo_vdv","GAZ Tigr HMG/GMG (25CP)",25];
-blufor_RQST_VEHICLE_09_X =			["LOP_SYR_Ural","URAL Transport Covered (8CP)",8];
-blufor_RQST_VEHICLE_10_X =			["LOP_SYR_KAMAZ_Transport","KAMAZ Transport Open (8CP)",8];
-blufor_RQST_VEHICLE_11_X =			["LOP_SYR_KAMAZ_Repair","KAMAZ Repair (50CP)",50];
-blufor_RQST_VEHICLE_12_X =			["LOP_SYR_KAMAZ_Ammo","KAMAZ Ammo (50CP)",50];
-blufor_RQST_VEHICLE_13_X =			["LOP_SYR_KAMAZ_Fuel","KAMAZ Fuel (50CP)",50];
-blufor_RQST_VEHICLE_14_X =			["LOP_SYR_BTR60","BTR-60 (25CP)",25];
-blufor_RQST_VEHICLE_15_X =			["LOP_SYR_BTR80","BTR-80 (28CP)",28];
-blufor_RQST_VEHICLE_16_X =			["rhs_btr80a_vmf","BTR-80A (32CP)",32];
-blufor_RQST_VEHICLE_17_X =			["LOP_SYR_BMP1","BMP-1 (30CP)",30];
-blufor_RQST_VEHICLE_18_X =			["LOP_SYR_BMP2","BMP-2 (35CP)",35];
-blufor_RQST_VEHICLE_19_X =			["LOP_SYR_T55","T-55 Tank (40CP)",40];
-blufor_RQST_VEHICLE_20_X =			["LOP_SYR_T72BB","T-72 Tank (45CP)",45];
-blufor_RQST_VEHICLE_21_X =			["LOP_SYR_ZSU234","ZSU-23 Tunguska (50CP)",50];
-blufor_RQST_VEHICLE_22_X =			["LOP_SYR_BM21","BM-21 Rockets (75CP)",75];
-blufor_RQST_VEHICLE_23_X =			["B_Heli_Light_01_F","MH-9 Hummingbird (15CP)",15];
-blufor_RQST_VEHICLE_24_X =			["RHS_Mi8mt_vvsc","MI-MI8 MTV (25CP)",25];
-blufor_RQST_VEHICLE_25_X =			["RHS_Mi24V_vvsc","MI-24V Armed (35CP)",35];
-blufor_RQST_VEHICLE_26_X =			["RHS_Ka52_vvsc","KA-52 Attack Heli (40CP)",40];
-blufor_RQST_VEHICLE_27_X =			["RHS_Su25SM_vvsc","SU-25 Frogfoot (45CP)",45];
-blufor_RQST_VEHICLE_28_X =			["rhs_mig29s_vmf","MIG-29 (50CP)",50];
-blufor_RQST_VEHICLE_29_X =			["O_UAV_01_F","UAV AR-2 Tayran (5CP)",5];
-blufor_RQST_VEHICLE_30_X =			["rhs_pchela1t_vvs","UAV Pchela-1T (15CP)",15];
-blufor_RQST_VEHICLE_31_X =			["B_UGV_01_F","UGV Stomper Recon (10CP)",10];
-blufor_RQST_VEHICLE_32_X =			["B_UGV_01_rcws_F","UGV Stomper RCWS (20CP)",20];
-blufor_RQST_VEHICLE_33_X =			["empty",0,0];
-blufor_RQST_VEHICLE_34_X =			["empty",0,0];
-blufor_RQST_VEHICLE_35_X =			["empty",0,0];
-blufor_RQST_VEHICLE_36_X =			["empty",0,0];
-blufor_RQST_VEHICLE_37_X =			["empty",0,0];
-blufor_RQST_VEHICLE_38_X =			["empty",0,0];
-blufor_RQST_VEHICLE_39_X =			["empty",0,0];
-blufor_RQST_VEHICLE_40_X =			["empty",0,0];
-blufor_RQST_VEHICLE_41_X =			["empty",0,0];
-blufor_RQST_VEHICLE_42_X =			["empty",0,0];
-blufor_RQST_VEHICLE_43_X =			["empty",0,0];
-blufor_RQST_VEHICLE_44_X =			["empty",0,0];
-blufor_RQST_VEHICLE_45_X =			["empty",0,0];
-blufor_RQST_VEHICLE_46_X =			["empty",0,0];
-blufor_RQST_VEHICLE_47_X =			["empty",0,0];
-blufor_RQST_VEHICLE_48_X =			["empty",0,0];
-blufor_RQST_VEHICLE_49_X =			["empty",0,0];
-blufor_RQST_VEHICLE_50_X =			["empty",0,0];
+blufor_RQST_VEHICLES = [
+	["B_Quadbike_01_F","ATV (1CP)",1],
+	["C_Offroad_01_F","SF Offroader (2CP)",2],
+	["I_G_Van_01_transport_F","Transport Truck (6CP)",6],
+	["B_MRAP_01_F","Hunter Unarmed (5CP)",5],
+	["LOP_SYR_UAZ_DshKM","UAZ HMG (15CP)",15],
+	["LOP_SYR_UAZ_SPG","UAZ SPG-9 (18CP)",18],
+	["rhsgref_BRDM2_b","BRDM-2 (25CP)",25],
+	["rhs_tigr_sts_3camo_vdv","GAZ Tigr HMG/GMG (25CP)",25],
+	["LOP_SYR_Ural","URAL Transport Covered (8CP)",8],
+	["LOP_SYR_KAMAZ_Transport","KAMAZ Transport Open (8CP)",8],
+	["LOP_SYR_KAMAZ_Repair","KAMAZ Repair (50CP)",50],
+	["LOP_SYR_KAMAZ_Ammo","KAMAZ Ammo (50CP)",50],
+	["LOP_SYR_KAMAZ_Fuel","KAMAZ Fuel (50CP)",50],
+	["LOP_SYR_BTR60","BTR-60 (25CP)",25],
+	["LOP_SYR_BTR80","BTR-80 (28CP)",28],
+	["rhs_btr80a_vmf","BTR-80A (32CP)",32],
+	["LOP_SYR_BMP1","BMP-1 (30CP)",30],
+	["LOP_SYR_BMP2","BMP-2 (35CP)",35],
+	["LOP_SYR_T55","T-55 Tank (40CP)",40],
+	["LOP_SYR_T72BB","T-72 Tank (45CP)",45],
+	["LOP_SYR_ZSU234","ZSU-23 Tunguska (50CP)",50],
+	["LOP_SYR_BM21","BM-21 Rockets (75CP)",75],
+	["B_Heli_Light_01_F","MH-9 Hummingbird (15CP)",15],
+	["RHS_Mi8mt_vvsc","MI-MI8 MTV (25CP)",25],
+	["RHS_Mi24V_vvsc","MI-24V Armed (35CP)",35],
+	["RHS_Ka52_vvsc","KA-52 Attack Heli (40CP)",40],
+	["RHS_Su25SM_vvsc","SU-25 Frogfoot (45CP)",45],
+	["rhs_mig29s_vmf","MIG-29 (50CP)",50],
+	["O_UAV_01_F","UAV AR-2 Tayran (5CP)",5],
+	["rhs_pchela1t_vvs","UAV Pchela-1T (15CP)",15],
+	["B_UGV_01_F","UGV Stomper Recon (10CP)",10],
+	["B_UGV_01_rcws_F","UGV Stomper RCWS (20CP)",20]
+];
 
 

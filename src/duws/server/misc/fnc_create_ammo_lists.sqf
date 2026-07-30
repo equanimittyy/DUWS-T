@@ -179,16 +179,7 @@ _temp_factionUnitArray = [];
 _factionUnitArray = _factionUnitArray arrayIntersect _factionUnitArray; 
 
 // ========== 添加快捷换装单位类名 ==========
-private _quickChangeUnits = [];
-for "_i" from 1 to 14 do {
-    private _varName = if (_i < 10) then { format ["blufor_RQST_UNIT_0%1_X", _i] } else { format ["blufor_RQST_UNIT_%1_X", _i] };
-    private _unitData = missionNamespace getVariable [_varName, []];
-    if (_unitData isEqualTo []) then { continue };
-    private _className = _unitData select 0;
-    if (_className != "empty") then {
-        _quickChangeUnits pushBack _className;
-    };
-};
+private _quickChangeUnits = (["UNIT"] call fnc_faction_rqst_list) apply { _x select 0 };
 // 将快速换装单位加入数组并去重
 _factionUnitArray append _quickChangeUnits;
 _factionUnitArray = _factionUnitArray arrayIntersect _factionUnitArray;

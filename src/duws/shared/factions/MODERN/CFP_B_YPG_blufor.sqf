@@ -66,10 +66,9 @@ blufor_SPECOPS_ENG_X = 			"cfp_b_ypg_crewman";			//operator
 /////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
 //
-// THESE HAVE FIXED AMOUNTS -fill the ends with ["empty",0,0];
-//
-// - Units = 				14
-// - Vehicles/Statics = 	50
+// Ordered lists, no padding and no fixed length: the menus offer every entry in the order
+// written here, so position in the list is the display order. A faction may list as many
+// or as few as it has.
 //
 /////////////////////////////////////////////////////////////////
 
@@ -87,20 +86,16 @@ blufor_SPECOPS_ENG_X = 			"cfp_b_ypg_crewman";			//operator
 ///////////////////////////////
 
 
-blufor_RQST_UNIT_01_X = 			["cfp_b_ypg_rifleman","Rifleman (2CP)",2];
-blufor_RQST_UNIT_02_X =				["cfp_b_ypg_grenadier","Grenadier (3CP)",3];
-blufor_RQST_UNIT_03_X =				["cfp_b_ypg_rifleman_dshkm","Rifleman (DSHKM) (3CP)",3];
-blufor_RQST_UNIT_04_X =				["cfp_b_ypg_asst_gunner_dshkm","Assistant Rifleman (DSHKM) (3CP)",4];
-blufor_RQST_UNIT_05_X =				["cfp_b_ypg_medic","Medic (4CP)",4];
-blufor_RQST_UNIT_06_X =				["cfp_b_ypg_at","AT Rifleman (3CP)",3];
-blufor_RQST_UNIT_07_X =				["cfp_b_ypg_machinegunner","Machinegunner (4CP)",4];
-blufor_RQST_UNIT_08_X =				["cfp_b_ypg_sniper","Sniper (4CP)",4];
-blufor_RQST_UNIT_09_X =				["empty",0,0];
-blufor_RQST_UNIT_10_X =				["empty",0,0];
-blufor_RQST_UNIT_11_X =				["empty",0,0];
-blufor_RQST_UNIT_12_X =				["empty",0,0];
-blufor_RQST_UNIT_13_X =				["empty",0,0];
-blufor_RQST_UNIT_14_X =				["empty",0,0];
+blufor_RQST_UNITS = [
+	["cfp_b_ypg_rifleman","Rifleman (2CP)",2],
+	["cfp_b_ypg_grenadier","Grenadier (3CP)",3],
+	["cfp_b_ypg_rifleman_dshkm","Rifleman (DSHKM) (3CP)",3],
+	["cfp_b_ypg_asst_gunner_dshkm","Assistant Rifleman (DSHKM) (3CP)",4],
+	["cfp_b_ypg_medic","Medic (4CP)",4],
+	["cfp_b_ypg_at","AT Rifleman (3CP)",3],
+	["cfp_b_ypg_machinegunner","Machinegunner (4CP)",4],
+	["cfp_b_ypg_sniper","Sniper (4CP)",4]
+];
 
 
 ///////////////////////////////
@@ -110,55 +105,18 @@ blufor_RQST_UNIT_14_X =				["empty",0,0];
 //   _index = lbCurSel 2122;
 ////////////////////////////////   
 
-blufor_RQST_VEHICLE_01_X =			["CFP_B_YPG_Hilux_DSHKM_01","Hilux (DSHKM) (3CP)",3];
-blufor_RQST_VEHICLE_02_X =			["CFP_B_YPG_Hilux_ZU_23_01","Hilux (ZU23) (10CP)",10];
-blufor_RQST_VEHICLE_03_X =			["cfp_b_ypg_offroad_flag","Offroad (Unarmed) (1CP)",1];
-blufor_RQST_VEHICLE_04_X =			["cfp_b_ypg_offroad_M2_flag","Offroad (MG) (3CP)",3];
-blufor_RQST_VEHICLE_05_X =			["CUP_O_Ural_Open_SLA","URAL Transport (10CP)",10];
-blufor_RQST_VEHICLE_06_X =			["CUP_B_HMMWV_M2_GPK_USA","HMMWV HMG (18CP)",18];
-blufor_RQST_VEHICLE_07_X =			["CFP_B_USARMY_2003_UH_60M_MEV_WDL_01","USAF UH-60 Medical (Unarmed) (20CP)",20];
-blufor_RQST_VEHICLE_08_X =			["CFP_B_USARMY_2003_UH_60M_DES_01","USAF UH-60M (Armed) (25CP)",25];
-blufor_RQST_VEHICLE_09_X =			["CFP_B_USARMY_2003_AH_64D_DES_01","USAF AH-64D (35CP)",35];
-blufor_RQST_VEHICLE_10_X =			["CUP_B_A10_DYN_USA","USAF A10 (40CP)",40];
-blufor_RQST_VEHICLE_11_X =			["CUP_B_AV8B_DYN_USMC","AV-8B Harrier (50CP)",50];
-blufor_RQST_VEHICLE_12_X =			["empty",0,0];
-blufor_RQST_VEHICLE_13_X =			["empty",0,0];
-blufor_RQST_VEHICLE_14_X =			["empty",0,0];
-blufor_RQST_VEHICLE_15_X =			["empty",0,0];
-blufor_RQST_VEHICLE_16_X =			["empty",0,0];
-blufor_RQST_VEHICLE_17_X =			["empty",0,0];
-blufor_RQST_VEHICLE_18_X =			["empty",0,0];
-blufor_RQST_VEHICLE_19_X =			["empty",0,0];
-blufor_RQST_VEHICLE_20_X =			["empty",0,0];
-blufor_RQST_VEHICLE_21_X =			["empty",0,0];
-blufor_RQST_VEHICLE_22_X =			["empty",0,0];
-blufor_RQST_VEHICLE_23_X =			["empty",0,0];
-blufor_RQST_VEHICLE_24_X =			["empty",0,0];
-blufor_RQST_VEHICLE_25_X =			["empty",0,0];
-blufor_RQST_VEHICLE_26_X =			["empty",0,0];
-blufor_RQST_VEHICLE_27_X =			["empty",0,0];
-blufor_RQST_VEHICLE_28_X =			["empty",0,0];
-blufor_RQST_VEHICLE_29_X =			["empty",0,0];
-blufor_RQST_VEHICLE_30_X =			["empty",0,0];
-blufor_RQST_VEHICLE_31_X =			["empty",0,0];
-blufor_RQST_VEHICLE_32_X =			["empty",0,0];
-blufor_RQST_VEHICLE_33_X =			["empty",0,0];
-blufor_RQST_VEHICLE_34_X =			["empty",0,0];
-blufor_RQST_VEHICLE_35_X =			["empty",0,0];
-blufor_RQST_VEHICLE_36_X =			["empty",0,0];
-blufor_RQST_VEHICLE_37_X =			["empty",0,0];
-blufor_RQST_VEHICLE_38_X =			["empty",0,0];
-blufor_RQST_VEHICLE_39_X =			["empty",0,0];
-blufor_RQST_VEHICLE_40_X =			["empty",0,0];
-blufor_RQST_VEHICLE_41_X =			["empty",0,0];
-blufor_RQST_VEHICLE_42_X =			["empty",0,0];
-blufor_RQST_VEHICLE_43_X =			["empty",0,0];
-blufor_RQST_VEHICLE_44_X =			["empty",0,0];
-blufor_RQST_VEHICLE_45_X =			["empty",0,0];
-blufor_RQST_VEHICLE_46_X =			["empty",0,0];
-blufor_RQST_VEHICLE_47_X =			["empty",0,0];
-blufor_RQST_VEHICLE_48_X =			["empty",0,0];
-blufor_RQST_VEHICLE_49_X =			["empty",0,0];
-blufor_RQST_VEHICLE_50_X =			["empty",0,0];
+blufor_RQST_VEHICLES = [
+	["CFP_B_YPG_Hilux_DSHKM_01","Hilux (DSHKM) (3CP)",3],
+	["CFP_B_YPG_Hilux_ZU_23_01","Hilux (ZU23) (10CP)",10],
+	["cfp_b_ypg_offroad_flag","Offroad (Unarmed) (1CP)",1],
+	["cfp_b_ypg_offroad_M2_flag","Offroad (MG) (3CP)",3],
+	["CUP_O_Ural_Open_SLA","URAL Transport (10CP)",10],
+	["CUP_B_HMMWV_M2_GPK_USA","HMMWV HMG (18CP)",18],
+	["CFP_B_USARMY_2003_UH_60M_MEV_WDL_01","USAF UH-60 Medical (Unarmed) (20CP)",20],
+	["CFP_B_USARMY_2003_UH_60M_DES_01","USAF UH-60M (Armed) (25CP)",25],
+	["CFP_B_USARMY_2003_AH_64D_DES_01","USAF AH-64D (35CP)",35],
+	["CUP_B_A10_DYN_USA","USAF A10 (40CP)",40],
+	["CUP_B_AV8B_DYN_USMC","AV-8B Harrier (50CP)",50]
+];
 
 

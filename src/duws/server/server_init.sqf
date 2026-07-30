@@ -70,7 +70,7 @@ if (BLUFOR_Faction_X == "CUSTOM") then {
 	[] call fnc_BLUFOR_faction_init;
 };
 ["INFO", "BOOT", format ["Blufor Faction init on server complete.  Rifleman: %1", blufor_SOLDIER_X]] call fnc_log;
-["INFO", "BOOT", format ["Blufor Faction init on server complete.  blufor RQST VEHICLE 01: %1", blufor_RQST_VEHICLE_01_X]] call fnc_log;
+["INFO", "BOOT", format ["Blufor Faction init on server complete.  blufor RQST VEHICLE 01: %1", (["VEHICLE"] call fnc_faction_rqst_list) param [0, "none"]]] call fnc_log;
 
 // create the BLUFOR squads
 [] call fnc_BLUFOR_squad_init;

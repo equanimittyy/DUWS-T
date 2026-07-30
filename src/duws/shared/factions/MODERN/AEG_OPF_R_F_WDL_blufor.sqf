@@ -66,10 +66,9 @@ blufor_SPECOPS_ENG_X = 			"O_R_engineer_F";					//operator
 /////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
 //
-// THESE HAVE FIXED AMOUNTS -fill the ends with ["empty",0,0];
-//
-// - Units = 				14
-// - Vehicles/Statics = 	50
+// Ordered lists, no padding and no fixed length: the menus offer every entry in the order
+// written here, so position in the list is the display order. A faction may list as many
+// or as few as it has.
 //
 /////////////////////////////////////////////////////////////////
 
@@ -87,20 +86,19 @@ blufor_SPECOPS_ENG_X = 			"O_R_engineer_F";					//operator
 ///////////////////////////////
 
 
-blufor_RQST_UNIT_01_X = 			["O_R_Soldier_F","Rifleman (2CP)",2];
-blufor_RQST_UNIT_02_X =				["O_R_Soldier_GL_F","Grenadier (3CP)",3];
-blufor_RQST_UNIT_03_X =				["O_R_Soldier_AR_F","Automatic Rifleman (3CP)",3];
-blufor_RQST_UNIT_04_X =				["O_R_Soldier_uav_F","Drone Operator (4CP)",4];
-blufor_RQST_UNIT_05_X =				["O_R_Medic_F","Medic (4CP)",4];
-blufor_RQST_UNIT_06_X =				["O_R_Soldier_LAT_F","AT Rifleman (3CP)",3];
-blufor_RQST_UNIT_07_X =				["O_R_Soldier_AT_F","AT Specialist (4CP)",4];
-blufor_RQST_UNIT_08_X =				["O_R_soldier_AA_F","AA Specialist (4CP)",4];
-blufor_RQST_UNIT_09_X =				["O_R_Engineer_F","Engineer (4CP)",4];
-blufor_RQST_UNIT_10_X =				["O_R_soldier_M_F","Marksman (3CP)",3];
-blufor_RQST_UNIT_11_X =				["O_R_sniper_F","Sniper (4CP)",4];
-blufor_RQST_UNIT_12_X =				["empty",0,0];
-blufor_RQST_UNIT_13_X =				["empty",0,0];
-blufor_RQST_UNIT_14_X =				["empty",0,0];
+blufor_RQST_UNITS = [
+	["O_R_Soldier_F","Rifleman (2CP)",2],
+	["O_R_Soldier_GL_F","Grenadier (3CP)",3],
+	["O_R_Soldier_AR_F","Automatic Rifleman (3CP)",3],
+	["O_R_Soldier_uav_F","Drone Operator (4CP)",4],
+	["O_R_Medic_F","Medic (4CP)",4],
+	["O_R_Soldier_LAT_F","AT Rifleman (3CP)",3],
+	["O_R_Soldier_AT_F","AT Specialist (4CP)",4],
+	["O_R_soldier_AA_F","AA Specialist (4CP)",4],
+	["O_R_Engineer_F","Engineer (4CP)",4],
+	["O_R_soldier_M_F","Marksman (3CP)",3],
+	["O_R_sniper_F","Sniper (4CP)",4]
+];
 
 
 
@@ -111,54 +109,41 @@ blufor_RQST_UNIT_14_X =				["empty",0,0];
 //   _index = lbCurSel 2122;
 ////////////////////////////////
 
-blufor_RQST_VEHICLE_01_X =			["O_Quadbike_01_F","ATV (1CP)",1];
-blufor_RQST_VEHICLE_02_X =			["C_Offroad_01_F","SF Offroader (2CP)",2];
-blufor_RQST_VEHICLE_03_X =			["I_G_Van_01_transport_F","Transport Truck (6CP)",6];
-blufor_RQST_VEHICLE_04_X =			["O_R_MRAP_02_F","Galkin Unarmed (5CP)",5];
-blufor_RQST_VEHICLE_05_X =			["O_R_MRAP_02_hmg_F","Galkin HMG (18CP)",18];
-blufor_RQST_VEHICLE_06_X =			["O_R_MRAP_02_gmg_F","Galkin GMG (25CP)",25];
-blufor_RQST_VEHICLE_07_X =			["O_R_LSV_02_unarmed_F","Takhion Unarmed (5CP)",5];
-blufor_RQST_VEHICLE_08_X =			["O_R_LSV_02_armed_F","Takhion HMG (15CP)",15];
-blufor_RQST_VEHICLE_09_X =			["O_R_LSV_02_AT_F","Takhion AT (20CP)",20];
-blufor_RQST_VEHICLE_10_X =			["O_R_Truck_03_transport_F","Tempest Transport Uncovered (8CP)",8];
-blufor_RQST_VEHICLE_11_X =			["O_R_Truck_03_covered_F","Tempest Transport Covered (8CP)",8];
-blufor_RQST_VEHICLE_12_X =			["O_R_Truck_02_box_F","Zamak Repair (50CP)",50];
-blufor_RQST_VEHICLE_13_X =			["O_R_Truck_02_Ammo_F","Zamak Ammo (50CP)",50];
-blufor_RQST_VEHICLE_14_X =			["O_R_Truck_02_fuel_F","Zamak Fuel (50CP)",50];
-blufor_RQST_VEHICLE_15_X =			["O_T_APC_Wheeled_02_rcws_v2_ghex_F","MSE-3 Marid (35CP)",35];
-blufor_RQST_VEHICLE_16_X =			["O_R_APC_Wheeled_04_cannon_F","BTR-100 Bogatyr (35CP)",35];
-blufor_RQST_VEHICLE_17_X =			["I_APC_tracked_03_cannon_F","Mora Cannon (35CP)",35];
-blufor_RQST_VEHICLE_18_X =			["O_R_APC_Tracked_02_cannon_F","BTR-K Kamysh (40CP)",40];
-blufor_RQST_VEHICLE_19_X =			["O_R_MBT_02_cannon_F","T-100 Varsuk (40CP)",40];
-blufor_RQST_VEHICLE_20_X =			["O_R_MBT_04_command_F","T-140K Angara (40CP)",40];
-blufor_RQST_VEHICLE_21_X =			["I_MBT_03_cannon_F","MBT-52 Kuma (50CP)",50];
-blufor_RQST_VEHICLE_22_X =			["O_R_Truck_02_MRL_F","Zamak MRL Rocket (60CP)",60];
-blufor_RQST_VEHICLE_23_X =			["O_R_MBT_02_arty_F","2S9 Sochor (75CP)",75];
-blufor_RQST_VEHICLE_24_X =			["C_Heli_Light_01_civil_F","Heli Civilian Light (22CP)",22];
-blufor_RQST_VEHICLE_25_X =			["I_Heli_light_03_unarmed_F","Hellcat Unarmed (15CP)",15];
-blufor_RQST_VEHICLE_26_X =			["O_R_Heli_Light_02_dynamicLoadout_F","PO-30 Orca Armed (30CP)",30];
-blufor_RQST_VEHICLE_27_X =			["I_Heli_Transport_02_F","CH-49 Mohawk (35CP",35];
-blufor_RQST_VEHICLE_28_X =			["O_R_Heli_Attack_02_dynamicLoadout_F","MI-48 Kajman Attack (45CP)",45];
-blufor_RQST_VEHICLE_29_X =			["O_R_Plane_CAS_02_dynamicLoadout_F","TO-199 Neophron CAS (45CP)",45];
-blufor_RQST_VEHICLE_30_X =			["O_R_Plane_Fighter_02_F","TO-201 Shikra (50CP)",50];
-blufor_RQST_VEHICLE_31_X =			["O_R_Plane_Fighter_02_Stealth_F","TO-201 Shikra Stealth (60CP)",60];
-blufor_RQST_VEHICLE_32_X =			["O_UAV_01_F","UAV AR-2 Tayran (5CP)",5];
-blufor_RQST_VEHICLE_33_X =			["O_UAV_02_dynamicLoadout_F","UAV K-40 Ababil-3 (15CP)",15];
-blufor_RQST_VEHICLE_34_X =			["O_UGV_01_F","UGV Saif (10CP)",10];
-blufor_RQST_VEHICLE_35_X =			["O_UGV_01_rcws_F","UGV Saif RCWS (20CP)",20];
-blufor_RQST_VEHICLE_36_X =			["empty",0,0];
-blufor_RQST_VEHICLE_37_X =			["empty",0,0];
-blufor_RQST_VEHICLE_38_X =			["empty",0,0];
-blufor_RQST_VEHICLE_39_X =			["empty",0,0];
-blufor_RQST_VEHICLE_40_X =			["empty",0,0];
-blufor_RQST_VEHICLE_41_X =			["empty",0,0];
-blufor_RQST_VEHICLE_42_X =			["empty",0,0];
-blufor_RQST_VEHICLE_43_X =			["empty",0,0];
-blufor_RQST_VEHICLE_44_X =			["empty",0,0];
-blufor_RQST_VEHICLE_45_X =			["empty",0,0];
-blufor_RQST_VEHICLE_46_X =			["empty",0,0];
-blufor_RQST_VEHICLE_47_X =			["empty",0,0];
-blufor_RQST_VEHICLE_48_X =			["empty",0,0];
-blufor_RQST_VEHICLE_49_X =			["empty",0,0];
-blufor_RQST_VEHICLE_50_X =			["empty",0,0];
+blufor_RQST_VEHICLES = [
+	["O_Quadbike_01_F","ATV (1CP)",1],
+	["C_Offroad_01_F","SF Offroader (2CP)",2],
+	["I_G_Van_01_transport_F","Transport Truck (6CP)",6],
+	["O_R_MRAP_02_F","Galkin Unarmed (5CP)",5],
+	["O_R_MRAP_02_hmg_F","Galkin HMG (18CP)",18],
+	["O_R_MRAP_02_gmg_F","Galkin GMG (25CP)",25],
+	["O_R_LSV_02_unarmed_F","Takhion Unarmed (5CP)",5],
+	["O_R_LSV_02_armed_F","Takhion HMG (15CP)",15],
+	["O_R_LSV_02_AT_F","Takhion AT (20CP)",20],
+	["O_R_Truck_03_transport_F","Tempest Transport Uncovered (8CP)",8],
+	["O_R_Truck_03_covered_F","Tempest Transport Covered (8CP)",8],
+	["O_R_Truck_02_box_F","Zamak Repair (50CP)",50],
+	["O_R_Truck_02_Ammo_F","Zamak Ammo (50CP)",50],
+	["O_R_Truck_02_fuel_F","Zamak Fuel (50CP)",50],
+	["O_T_APC_Wheeled_02_rcws_v2_ghex_F","MSE-3 Marid (35CP)",35],
+	["O_R_APC_Wheeled_04_cannon_F","BTR-100 Bogatyr (35CP)",35],
+	["I_APC_tracked_03_cannon_F","Mora Cannon (35CP)",35],
+	["O_R_APC_Tracked_02_cannon_F","BTR-K Kamysh (40CP)",40],
+	["O_R_MBT_02_cannon_F","T-100 Varsuk (40CP)",40],
+	["O_R_MBT_04_command_F","T-140K Angara (40CP)",40],
+	["I_MBT_03_cannon_F","MBT-52 Kuma (50CP)",50],
+	["O_R_Truck_02_MRL_F","Zamak MRL Rocket (60CP)",60],
+	["O_R_MBT_02_arty_F","2S9 Sochor (75CP)",75],
+	["C_Heli_Light_01_civil_F","Heli Civilian Light (22CP)",22],
+	["I_Heli_light_03_unarmed_F","Hellcat Unarmed (15CP)",15],
+	["O_R_Heli_Light_02_dynamicLoadout_F","PO-30 Orca Armed (30CP)",30],
+	["I_Heli_Transport_02_F","CH-49 Mohawk (35CP",35],
+	["O_R_Heli_Attack_02_dynamicLoadout_F","MI-48 Kajman Attack (45CP)",45],
+	["O_R_Plane_CAS_02_dynamicLoadout_F","TO-199 Neophron CAS (45CP)",45],
+	["O_R_Plane_Fighter_02_F","TO-201 Shikra (50CP)",50],
+	["O_R_Plane_Fighter_02_Stealth_F","TO-201 Shikra Stealth (60CP)",60],
+	["O_UAV_01_F","UAV AR-2 Tayran (5CP)",5],
+	["O_UAV_02_dynamicLoadout_F","UAV K-40 Ababil-3 (15CP)",15],
+	["O_UGV_01_F","UGV Saif (10CP)",10],
+	["O_UGV_01_rcws_F","UGV Saif RCWS (20CP)",20]
+];
 

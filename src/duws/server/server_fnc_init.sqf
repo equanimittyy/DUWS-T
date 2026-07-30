@@ -1310,6 +1310,8 @@ fnc_request_squad_fob = compile preprocessFileLineNumbers "duws\client\dialog\fn
 fnc_request_vehicle_fob = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_vehicle_fob.sqf";publicVariable "fnc_request_vehicle_fob";
 fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dialog\fnc_custom_faction_capture.sqf";publicVariable "fnc_custom_faction_capture";
 fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\functions\fnc_custom_faction_parse.sqf";publicVariable "fnc_custom_faction_parse";
+// Broadcast: both request menus and all four request handlers are client-side.
+fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_rqst_list.sqf";publicVariable "fnc_faction_rqst_list";
 fnc_custom_faction_init = compile preprocessFileLineNumbers "duws\server\dialog\fnc_custom_faction_init.sqf";publicVariable "fnc_custom_faction_init";
 fnc_HQ_Request_Menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_Request_Menu.sqf";publicVariable "fnc_HQ_Request_Menu";
 fnc_FOB_Request_Menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_FOB_Request_Menu.sqf";publicVariable "fnc_FOB_Request_Menu";

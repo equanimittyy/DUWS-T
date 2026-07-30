@@ -66,10 +66,9 @@ blufor_SPECOPS_ENG_X = 			"B_FR_Sapeur_01";				//operator
 /////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
 //
-// THESE HAVE FIXED AMOUNTS -fill the ends with ["empty",0,0];
-//
-// - Units = 				14
-// - Vehicles/Statics = 	50
+// Ordered lists, no padding and no fixed length: the menus offer every entry in the order
+// written here, so position in the list is the display order. A faction may list as many
+// or as few as it has.
 //
 /////////////////////////////////////////////////////////////////
 
@@ -87,20 +86,19 @@ blufor_SPECOPS_ENG_X = 			"B_FR_Sapeur_01";				//operator
 ///////////////////////////////
 
 
-blufor_RQST_UNIT_01_X = 			["B_FR_Fusilier_01","Rifleman (2CP)",2];
-blufor_RQST_UNIT_02_X =				["B_FR_Grenadier_01","Grenadier (3CP)",3];
-blufor_RQST_UNIT_03_X =				["B_FR_Fusilier_auto_01","Automatic Rifleman (3CP)",3];
-blufor_RQST_UNIT_04_X =				["B_FR_Gunner_01","Heavy Gunner (4CP)",4];
-blufor_RQST_UNIT_05_X =				["B_FR_Infirmier_01","Medic (4CP)",4];
-blufor_RQST_UNIT_06_X =				["B_FR_Fusilier_AC_01","AT Rifleman (3CP)",3];
-blufor_RQST_UNIT_07_X =				["B_FR_Fusilier_Missile_01","AT Specialist (4CP)",4];
-blufor_RQST_UNIT_08_X =				["B_FR_Sapeur_01","Engineer (4CP)",4];
-blufor_RQST_UNIT_09_X =				["B_FR_Spotteur_01","Spotter (3CP)",3];
-blufor_RQST_UNIT_10_X =				["B_BFR_Tireur_de_precision_SCAR_H_01","Marksman (3CP)",3];
-blufor_RQST_UNIT_11_X =				["B_FR_AMF_Tireur_dElite_01","Sniper (4CP)",4];
-blufor_RQST_UNIT_12_X =				["empty",0,0];
-blufor_RQST_UNIT_13_X =				["empty",0,0];
-blufor_RQST_UNIT_14_X =				["empty",0,0];
+blufor_RQST_UNITS = [
+	["B_FR_Fusilier_01","Rifleman (2CP)",2],
+	["B_FR_Grenadier_01","Grenadier (3CP)",3],
+	["B_FR_Fusilier_auto_01","Automatic Rifleman (3CP)",3],
+	["B_FR_Gunner_01","Heavy Gunner (4CP)",4],
+	["B_FR_Infirmier_01","Medic (4CP)",4],
+	["B_FR_Fusilier_AC_01","AT Rifleman (3CP)",3],
+	["B_FR_Fusilier_Missile_01","AT Specialist (4CP)",4],
+	["B_FR_Sapeur_01","Engineer (4CP)",4],
+	["B_FR_Spotteur_01","Spotter (3CP)",3],
+	["B_BFR_Tireur_de_precision_SCAR_H_01","Marksman (3CP)",3],
+	["B_FR_AMF_Tireur_dElite_01","Sniper (4CP)",4]
+];
 
 
 ///////////////////////////////
@@ -110,55 +108,43 @@ blufor_RQST_UNIT_14_X =				["empty",0,0];
 //   _index = lbCurSel 2122;
 ////////////////////////////////
 
-blufor_RQST_VEHICLE_01_X =			["B_Quadbike_01_F","ATV (1CP)",1];
-blufor_RQST_VEHICLE_02_X =			["C_Offroad_01_F","SF Offroader (2CP)",2];
-blufor_RQST_VEHICLE_03_X =			["I_G_Van_01_transport_F","Transport Truck (6CP)",6];
-blufor_RQST_VEHICLE_04_X =			["B_MRAP_01_F","Hunter Unarmed (5CP)",5];
-blufor_RQST_VEHICLE_05_X =			["B_FR_VAB_Ultima_01","VAB Ultima Unarmed (15CP)",15];
-blufor_RQST_VEHICLE_06_X =			["B_FR_VAB_Ultima_TOP_01","VAB Ultima  HMG (20CP)",20];
-blufor_RQST_VEHICLE_07_X =			["B_LSV_01_unarmed_F","Prowler Unarmed (5CP)",5];
-blufor_RQST_VEHICLE_08_X =			["B_LSV_01_armed_F","Prowler HMG (15CP)",15];
-blufor_RQST_VEHICLE_09_X =			["B_LSV_01_AT_F","Prowler AT (20CP)",20];
-blufor_RQST_VEHICLE_10_X =			["B_Truck_01_transport_F","HEMTT Transport Uncovered (8CP)",8];
-blufor_RQST_VEHICLE_11_X =			["B_FR_Zamak_Transport_couvert_01","Zamak Transport Covered (8CP)",8];
-blufor_RQST_VEHICLE_12_X =			["B_FR_Zamak_Maintenance_01","Zamak Repair (50CP)",50];
-blufor_RQST_VEHICLE_13_X =			["B_FR_Zamak_Munitions_01","Zamak Ammo (50CP)",50];
-blufor_RQST_VEHICLE_14_X =			["B_FR_Zamak_Carburant_01","MTVR Fuel (50CP)",50];
-blufor_RQST_VEHICLE_15_X =			["B_FR_Marshall_01","Marshall (35CP)",35];
-blufor_RQST_VEHICLE_16_X =			["B_APC_Tracked_01_rcws_F","IFV-6A Cheetah (35CP)",35];
-blufor_RQST_VEHICLE_17_X =			["B_FR_AMX_10_RCR_SEPAR_01","AMX-10 SEPAR (35CP)",35];
-blufor_RQST_VEHICLE_18_X =			["B_APC_Tracked_01_CRV_F","CRV-6e Bobcat (28CP)",28];
-blufor_RQST_VEHICLE_19_X =			["B_MBT_01_cannon_F","M2A1 Slammer (40CP)",40];
-blufor_RQST_VEHICLE_20_X =			["B_FR_Leclerc_01","Leclerc MBT (45CP)",40];
-blufor_RQST_VEHICLE_21_X =			["B_FR_LRM_01","LRM Arty (75CP)",75];
-blufor_RQST_VEHICLE_22_X =			["B_FR_Scorcher_01","Scorcher Arty (75CP)",75];
-blufor_RQST_VEHICLE_23_X =			["B_Heli_Light_01_dynamicLoadout_F","AH-9 Pawnee (25CP)",25];
-blufor_RQST_VEHICLE_24_X =			["B_Heli_Light_01_F","MH-9 Hummingbird (15CP)",15];
-blufor_RQST_VEHICLE_25_X =			["B_FR_AS565_Panther_Marine_Nationale_01","Panther Trans Heli (22CP)",22];
-blufor_RQST_VEHICLE_26_X =			["B_FR_H225_MCaracal_01","Caracel Trans Armed (26CP)",26];
-blufor_RQST_VEHICLE_27_X =			["B_T_VTOL_01_armed_F","V-44 X Armed (40CP",40];
-blufor_RQST_VEHICLE_28_X =			["B_FR_Helico_dattaque_01","Kajman Attack Heli (45CP)",45];
-blufor_RQST_VEHICLE_29_X =			["B_Plane_CAS_01_dynamicLoadout_F","A-164 Wipeout CAS (45CP)",45];
-blufor_RQST_VEHICLE_30_X =			["B_FR_Mirage_2000_5F_01","Mirage 2000 (50CP)",50];
-blufor_RQST_VEHICLE_31_X =			["B_FR_Rafale_M_01","Rafale M (60CP)",60];
-blufor_RQST_VEHICLE_32_X =			["B_UAV_01_F","UAV Darter(5CP)",5];
-blufor_RQST_VEHICLE_33_X =			["B_UAV_02_dynamicLoadout_F","UAV MQ-4A Greyhawk (15CP)",15];
-blufor_RQST_VEHICLE_34_X =			["B_UGV_01_F","UGV Stomper Recon (10CP)",10];
-blufor_RQST_VEHICLE_35_X =			["B_UGV_01_rcws_F","UGV Stomper RCWS (20CP)",20];
-blufor_RQST_VEHICLE_36_X =			["B_T_UAV_03_dynamicLoadout_F","MQ-12 UAV (20CP)",20];
-blufor_RQST_VEHICLE_37_X =			["empty",0,0];
-blufor_RQST_VEHICLE_38_X =			["empty",0,0];
-blufor_RQST_VEHICLE_39_X =			["empty",0,0];
-blufor_RQST_VEHICLE_40_X =			["empty",0,0];
-blufor_RQST_VEHICLE_41_X =			["empty",0,0];
-blufor_RQST_VEHICLE_42_X =			["empty",0,0];
-blufor_RQST_VEHICLE_43_X =			["empty",0,0];
-blufor_RQST_VEHICLE_44_X =			["empty",0,0];
-blufor_RQST_VEHICLE_45_X =			["empty",0,0];
-blufor_RQST_VEHICLE_46_X =			["empty",0,0];
-blufor_RQST_VEHICLE_47_X =			["empty",0,0];
-blufor_RQST_VEHICLE_48_X =			["empty",0,0];
-blufor_RQST_VEHICLE_49_X =			["empty",0,0];
-blufor_RQST_VEHICLE_50_X =			["empty",0,0];
+blufor_RQST_VEHICLES = [
+	["B_Quadbike_01_F","ATV (1CP)",1],
+	["C_Offroad_01_F","SF Offroader (2CP)",2],
+	["I_G_Van_01_transport_F","Transport Truck (6CP)",6],
+	["B_MRAP_01_F","Hunter Unarmed (5CP)",5],
+	["B_FR_VAB_Ultima_01","VAB Ultima Unarmed (15CP)",15],
+	["B_FR_VAB_Ultima_TOP_01","VAB Ultima  HMG (20CP)",20],
+	["B_LSV_01_unarmed_F","Prowler Unarmed (5CP)",5],
+	["B_LSV_01_armed_F","Prowler HMG (15CP)",15],
+	["B_LSV_01_AT_F","Prowler AT (20CP)",20],
+	["B_Truck_01_transport_F","HEMTT Transport Uncovered (8CP)",8],
+	["B_FR_Zamak_Transport_couvert_01","Zamak Transport Covered (8CP)",8],
+	["B_FR_Zamak_Maintenance_01","Zamak Repair (50CP)",50],
+	["B_FR_Zamak_Munitions_01","Zamak Ammo (50CP)",50],
+	["B_FR_Zamak_Carburant_01","MTVR Fuel (50CP)",50],
+	["B_FR_Marshall_01","Marshall (35CP)",35],
+	["B_APC_Tracked_01_rcws_F","IFV-6A Cheetah (35CP)",35],
+	["B_FR_AMX_10_RCR_SEPAR_01","AMX-10 SEPAR (35CP)",35],
+	["B_APC_Tracked_01_CRV_F","CRV-6e Bobcat (28CP)",28],
+	["B_MBT_01_cannon_F","M2A1 Slammer (40CP)",40],
+	["B_FR_Leclerc_01","Leclerc MBT (45CP)",40],
+	["B_FR_LRM_01","LRM Arty (75CP)",75],
+	["B_FR_Scorcher_01","Scorcher Arty (75CP)",75],
+	["B_Heli_Light_01_dynamicLoadout_F","AH-9 Pawnee (25CP)",25],
+	["B_Heli_Light_01_F","MH-9 Hummingbird (15CP)",15],
+	["B_FR_AS565_Panther_Marine_Nationale_01","Panther Trans Heli (22CP)",22],
+	["B_FR_H225_MCaracal_01","Caracel Trans Armed (26CP)",26],
+	["B_T_VTOL_01_armed_F","V-44 X Armed (40CP",40],
+	["B_FR_Helico_dattaque_01","Kajman Attack Heli (45CP)",45],
+	["B_Plane_CAS_01_dynamicLoadout_F","A-164 Wipeout CAS (45CP)",45],
+	["B_FR_Mirage_2000_5F_01","Mirage 2000 (50CP)",50],
+	["B_FR_Rafale_M_01","Rafale M (60CP)",60],
+	["B_UAV_01_F","UAV Darter(5CP)",5],
+	["B_UAV_02_dynamicLoadout_F","UAV MQ-4A Greyhawk (15CP)",15],
+	["B_UGV_01_F","UGV Stomper Recon (10CP)",10],
+	["B_UGV_01_rcws_F","UGV Stomper RCWS (20CP)",20],
+	["B_T_UAV_03_dynamicLoadout_F","MQ-12 UAV (20CP)",20]
+];
 
 

@@ -143,10 +143,9 @@ blufor_SPECOPS_ENG_X =			[_spec arrayIntersect _eng, _eng, _infantry] call fnc_s
 /////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
 //
-// THESE HAVE FIXED AMOUNTS -fill the ends with ["empty",0,0];
-//
-// - Units =				 14
-// - Vehicles/Statics =	 50
+// Ordered lists, no padding and no fixed length: the menus offer every entry in the order
+// written here, so position in the list is the display order. A faction may list as many
+// or as few as it has.
 //
 /////////////////////////////////////////////////////////////////
 
@@ -164,20 +163,19 @@ blufor_SPECOPS_ENG_X =			[_spec arrayIntersect _eng, _eng, _infantry] call fnc_s
 ///////////////////////////////
 
 
-blufor_RQST_UNIT_01_X =				[selectRandom flatten [[_grunt, _grunt, _infantry] call fnc_selectNonEmpty],"Rifleman (2CP)",2];
-blufor_RQST_UNIT_02_X =				[selectRandom flatten [[_gl, _grunt, _infantry] call fnc_selectNonEmpty],"Grenadier (3CP)",3];
-blufor_RQST_UNIT_03_X =				[selectRandom flatten [[_ar, _mg, _infantry] call fnc_selectNonEmpty],"Automatic Rifleman (3CP)",3];
-blufor_RQST_UNIT_04_X =				[selectRandom flatten [[_mg, _ar, _infantry] call fnc_selectNonEmpty],"Heavy Gunner (4CP)",4];
-blufor_RQST_UNIT_05_X =				[selectRandom flatten [[_medic,  _grunt, _infantry] call fnc_selectNonEmpty],"Medic (4CP)",4];
-blufor_RQST_UNIT_06_X =				[selectRandom flatten [[_lat, _hat, _infantry] call fnc_selectNonEmpty],"AT Rifleman (3CP)",3];
-blufor_RQST_UNIT_07_X =				[selectRandom flatten [[_hat, _lat, _infantry] call fnc_selectNonEmpty],"AT Specialist (4CP)",4];
-blufor_RQST_UNIT_08_X =				[selectRandom flatten [[_aa, _hat + _lat, _infantry] call fnc_selectNonEmpty],"AA Specialist (4CP)",4];
-blufor_RQST_UNIT_09_X =				[selectRandom flatten [[_eng, _exp, _infantry] call fnc_selectNonEmpty],"Engineer (4CP)",4];
-blufor_RQST_UNIT_10_X =				[selectRandom flatten [[_marksman, _grunt, _infantry] call fnc_selectNonEmpty],"Marksman (3CP)",3];
-blufor_RQST_UNIT_11_X =				[selectRandom flatten [[_sniper, _marksman, _infantry] call fnc_selectNonEmpty],"Sniper (4CP)",4];
-blufor_RQST_UNIT_12_X =				["empty",0,0];
-blufor_RQST_UNIT_13_X =				["empty",0,0];
-blufor_RQST_UNIT_14_X =				["empty",0,0];
+blufor_RQST_UNITS = [
+	[selectRandom flatten [[_grunt, _grunt, _infantry] call fnc_selectNonEmpty],"Rifleman (2CP)",2],
+	[selectRandom flatten [[_gl, _grunt, _infantry] call fnc_selectNonEmpty],"Grenadier (3CP)",3],
+	[selectRandom flatten [[_ar, _mg, _infantry] call fnc_selectNonEmpty],"Automatic Rifleman (3CP)",3],
+	[selectRandom flatten [[_mg, _ar, _infantry] call fnc_selectNonEmpty],"Heavy Gunner (4CP)",4],
+	[selectRandom flatten [[_medic,  _grunt, _infantry] call fnc_selectNonEmpty],"Medic (4CP)",4],
+	[selectRandom flatten [[_lat, _hat, _infantry] call fnc_selectNonEmpty],"AT Rifleman (3CP)",3],
+	[selectRandom flatten [[_hat, _lat, _infantry] call fnc_selectNonEmpty],"AT Specialist (4CP)",4],
+	[selectRandom flatten [[_aa, _hat + _lat, _infantry] call fnc_selectNonEmpty],"AA Specialist (4CP)",4],
+	[selectRandom flatten [[_eng, _exp, _infantry] call fnc_selectNonEmpty],"Engineer (4CP)",4],
+	[selectRandom flatten [[_marksman, _grunt, _infantry] call fnc_selectNonEmpty],"Marksman (3CP)",3],
+	[selectRandom flatten [[_sniper, _marksman, _infantry] call fnc_selectNonEmpty],"Sniper (4CP)",4]
+];
 
 
 ///////////////////////////////
@@ -187,7 +185,7 @@ blufor_RQST_UNIT_14_X =				["empty",0,0];
 //   _index = lbCurSel 2122;
 ////////////////////////////////
 
-blufor_RQST_VEHICLE_01_X =			["C_Quadbike_01_black_F","ATV (1CP)",1];	// default first vehicle
+blufor_RQST_VEHICLES = [["C_Quadbike_01_black_F","ATV (1CP)",1]];	// default first vehicle
 
 _civilianVeh = ["C_Heli_Light_01_civil_F","C_Plane_Civil_01_F"
 		,"C_Rubberboat","C_Boat_Transport_02_F"
@@ -223,8 +221,7 @@ requestAssets = requestAssets arrayIntersect requestAssets;	// remove potential 
 	_typeCost = _typeName call fnc_enumCost;
 	_typeDisplayName = getText (configFile >> "CfgVehicles" >> _typeName >> "displayName");
 	_typeCostFormatted = [_typeName, _typeDisplayName + ' (' + str(_typeCost) + 'CP)', _typeCost];
-	_requestName = "blufor_RQST_VEHICLE_" + ((_forEachIndex + 2) call fnc_padZero) + "_X";
-	missionNamespace setVariable [_requestName, _typeCostFormatted];
+	blufor_RQST_VEHICLES pushBack _typeCostFormatted;
 	
 } forEach requestAssets;
 

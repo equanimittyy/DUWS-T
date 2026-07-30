@@ -9,12 +9,7 @@ _spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],10,300,15,0,0.4,0,[],[
 
 if (_index < 2) exitWith {hint localize "STR_DUWS_T_9607znvh"};
 
-if (_index > 10) then {
-	_var = "blufor_RQST_VEHICLE_" + (str (_index - 1)) + "_X"; // Parse the name of the variable as a string
-} else {
-	_var = "blufor_RQST_VEHICLE_0" + (str (_index - 1)) + "_X"; // Parse the name of the variable as a string
-};	
-_vehicle = missionNamespace getVariable [_var, []];
+_vehicle = (["VEHICLE"] call fnc_faction_rqst_list) param [_index - 2, []];
 // Refused before the spend: a row with no faction entry behind it must not charge CP, and
 // `select 2` on the missing entry would otherwise throw with nothing said to the player.
 if (_vehicle isEqualTo []) exitWith {hint localize "STR_DUWS_T_9607znvh"};

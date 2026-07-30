@@ -66,10 +66,9 @@ blufor_SPECOPS_ENG_X = 			"PLA_spec_FOR_ENG";						//operator
 /////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
 //
-// THESE HAVE FIXED AMOUNTS -fill the ends with ["empty",0,0];
-//
-// - Units = 				14
-// - Vehicles/Statics = 	50
+// Ordered lists, no padding and no fixed length: the menus offer every entry in the order
+// written here, so position in the list is the display order. A faction may list as many
+// or as few as it has.
 //
 /////////////////////////////////////////////////////////////////
 
@@ -87,20 +86,18 @@ blufor_SPECOPS_ENG_X = 			"PLA_spec_FOR_ENG";						//operator
 ///////////////////////////////
 
 
-blufor_RQST_UNIT_01_X = 			["PLAFOR_Soldier","Rifleman (Forest) (2CP)",2];
-blufor_RQST_UNIT_02_X =				["PLAFOR_Soldier_GL","Grenadier (Forest) (3CP)",3];
-blufor_RQST_UNIT_03_X =				["PLAFOR_Soldier_MG","Automatic Rifleman (Forest) (3CP)",3];
-blufor_RQST_UNIT_04_X =				["PLAFOR_Soldier_HMG","Heavy Gunner (Forest) (4CP)",4];
-blufor_RQST_UNIT_05_X =				["PLAFOR_Soldier_medic","Medic (Forest) (4CP)",4];
-blufor_RQST_UNIT_06_X =				["PLAFOR_Soldier_AT89B","AT Specialist (Forest) (4CP)",4];
-blufor_RQST_UNIT_07_X =				["PLAFOR_Soldier_AA","AA Specialist (Forest) (4CP)",4];
-blufor_RQST_UNIT_08_X =				["PLAFOR_Soldier_Engineer","Engineer (Forest) (4CP)",4];
-blufor_RQST_UNIT_09_X =				["PLAFOR_Soldier_mk","Marksman (Forest) (3CP)",3];
-blufor_RQST_UNIT_10_X =				["PLA_spec_SNIPER","Sniper (Forest) (4CP)",4];
-blufor_RQST_UNIT_11_X =				["empty",0,0];
-blufor_RQST_UNIT_12_X =				["empty",0,0];
-blufor_RQST_UNIT_13_X =				["empty",0,0];
-blufor_RQST_UNIT_14_X =				["empty",0,0];
+blufor_RQST_UNITS = [
+	["PLAFOR_Soldier","Rifleman (Forest) (2CP)",2],
+	["PLAFOR_Soldier_GL","Grenadier (Forest) (3CP)",3],
+	["PLAFOR_Soldier_MG","Automatic Rifleman (Forest) (3CP)",3],
+	["PLAFOR_Soldier_HMG","Heavy Gunner (Forest) (4CP)",4],
+	["PLAFOR_Soldier_medic","Medic (Forest) (4CP)",4],
+	["PLAFOR_Soldier_AT89B","AT Specialist (Forest) (4CP)",4],
+	["PLAFOR_Soldier_AA","AA Specialist (Forest) (4CP)",4],
+	["PLAFOR_Soldier_Engineer","Engineer (Forest) (4CP)",4],
+	["PLAFOR_Soldier_mk","Marksman (Forest) (3CP)",3],
+	["PLA_spec_SNIPER","Sniper (Forest) (4CP)",4]
+];
 
 
 ///////////////////////////////
@@ -110,55 +107,45 @@ blufor_RQST_UNIT_14_X =				["empty",0,0];
 //   _index = lbCurSel 2122;
 ////////////////////////////////
 
-blufor_RQST_VEHICLE_01_X =			["B_Quadbike_01_F","ATV (1CP)",1];
-blufor_RQST_VEHICLE_02_X =			["C_Offroad_01_F","SF Offroader (2CP)",2];
-blufor_RQST_VEHICLE_03_X =			["I_G_Van_01_transport_F","Transport Truck (6CP)",6];
-blufor_RQST_VEHICLE_04_X =			["B_MRAP_01_F","Hunter Unarmed (5CP)",5];
-blufor_RQST_VEHICLE_05_X =			["VME_PLA_BJ2022patrol","BJ 2022 HMG (15CP)",15];
-blufor_RQST_VEHICLE_06_X =			["VME_PLA_EQ2050","EQ 2050 Unarmed (8CP)",8];
-blufor_RQST_VEHICLE_07_X =			["VME_PLA_EQ2050_MG","EQ 2050 HMG (18CP)",18];
-blufor_RQST_VEHICLE_08_X =			["VME_PLA_EQ2050_GL","EQ 2050 GMG (20CP)",20];
-blufor_RQST_VEHICLE_09_X =			["VME_PLA_EQ2050_AT","EQ 2050 ATGM (20CP)",20];
-blufor_RQST_VEHICLE_10_X =			["C_Truck_02_transport_F","Zamak Transport Uncovered (8CP)",8];
-blufor_RQST_VEHICLE_11_X =			["VME_PLA_SX2190","SX 2190 Transport Covered (8CP)",8];
-blufor_RQST_VEHICLE_12_X =			["VME_PLA_SX2190Repair","SX 2190 Repair Truck(50CP)",50];
-blufor_RQST_VEHICLE_13_X =			["VME_PLA_SX2190Reammo","SX 2190 Ammo Truck (50CP)",50];
-blufor_RQST_VEHICLE_14_X =			["VME_PLA_SX2190Refuel","SX 2190 Fuel Truck (50CP)",50];
-blufor_RQST_VEHICLE_15_X =			["VME_PLA_ZBD03","APC ZBD-03 (25CP)",25];
-blufor_RQST_VEHICLE_16_X =			["VME_PLA_ZBD04","APC ZBD-04 (30CP)",30];
-blufor_RQST_VEHICLE_17_X =			["VME_PLA_ZBL09","APC ZBL-08 (35CP)",35];
-blufor_RQST_VEHICLE_18_X =			["O_T_APC_Wheeled_02_rcws_v2_ghex_F","MSE-3 Marid (25CP)",25];
-blufor_RQST_VEHICLE_19_X =			["B_APC_Tracked_01_CRV_F","CRV-6e Bobcat (28CP)",28];
-blufor_RQST_VEHICLE_20_X =			["VME_PLA_PGZ07","PGZ-07 AA (35CP)",35];
-blufor_RQST_VEHICLE_21_X =			["VME_PLA_AFT10","AFT-10 AT (35CP)",35];
-blufor_RQST_VEHICLE_22_X =			["VME_PLA_ZTZ96A","ZTZ-96 MBT (40CP)",40];
-blufor_RQST_VEHICLE_23_X =			["VME_PLA_ZTZ99","ZTZ-99 MBT (50CP)",50];
-blufor_RQST_VEHICLE_24_X =			["VME_PLA_PLZ05","PLZ-05 Artillery (75CP)",75];
-blufor_RQST_VEHICLE_25_X =			["VME_PLA_HQ64","HQ 64 ADS (75CP)",75];
-blufor_RQST_VEHICLE_26_X =			["B_Heli_Light_01_F","MH-9 Hummingbird (15CP)",15];
-blufor_RQST_VEHICLE_27_X =			["VME_PLA_z9_base","Z9-A Heli (20CP)",20];
-blufor_RQST_VEHICLE_28_X =			["VME_PLA_z9_CAS","Z9-A CAS Heli (25CP)",25];
-blufor_RQST_VEHICLE_29_X =			["VME_PLA_Mi17","Mi-17 Trans (25CP)",25];
-blufor_RQST_VEHICLE_30_X =			["VME_PLA_Mi171","Mi-171 Gunship (30CP)",30];
-blufor_RQST_VEHICLE_31_X =			["VME_WZ10_FOR","WZ-10 Attack Heli (45CP)",45];
-blufor_RQST_VEHICLE_32_X =			["O_T_VTOL_02_infantry_dynamicLoadout_F","Y-32 Zian VTOL (45CP",45];
-blufor_RQST_VEHICLE_33_X =			["VME_PLA_jh7","JH-7 Jet (45CP)",45];
-blufor_RQST_VEHICLE_34_X =			["VME_PLA_J20","J-20 Jet (50CP)",50];
-blufor_RQST_VEHICLE_35_X =			["PLA_UAV_01","AR-2 Darter (5CP)",5];
-blufor_RQST_VEHICLE_36_X =			["vme_CH4B","Wing Loong II UAV (15CP)",15];
-blufor_RQST_VEHICLE_37_X =			["B_UGV_01_F","UGV Stomper Recon (10CP)",10];
-blufor_RQST_VEHICLE_38_X =			["B_UGV_01_rcws_F","UGV Stomper RCWS (20CP)",20];
-blufor_RQST_VEHICLE_39_X =			["empty",0,0];
-blufor_RQST_VEHICLE_40_X =			["empty",0,0];
-blufor_RQST_VEHICLE_41_X =			["empty",0,0];
-blufor_RQST_VEHICLE_42_X =			["empty",0,0];
-blufor_RQST_VEHICLE_43_X =			["empty",0,0];
-blufor_RQST_VEHICLE_44_X =			["empty",0,0];
-blufor_RQST_VEHICLE_45_X =			["empty",0,0];
-blufor_RQST_VEHICLE_46_X =			["empty",0,0];
-blufor_RQST_VEHICLE_47_X =			["empty",0,0];
-blufor_RQST_VEHICLE_48_X =			["empty",0,0];
-blufor_RQST_VEHICLE_49_X =			["empty",0,0];
-blufor_RQST_VEHICLE_50_X =			["empty",0,0];
+blufor_RQST_VEHICLES = [
+	["B_Quadbike_01_F","ATV (1CP)",1],
+	["C_Offroad_01_F","SF Offroader (2CP)",2],
+	["I_G_Van_01_transport_F","Transport Truck (6CP)",6],
+	["B_MRAP_01_F","Hunter Unarmed (5CP)",5],
+	["VME_PLA_BJ2022patrol","BJ 2022 HMG (15CP)",15],
+	["VME_PLA_EQ2050","EQ 2050 Unarmed (8CP)",8],
+	["VME_PLA_EQ2050_MG","EQ 2050 HMG (18CP)",18],
+	["VME_PLA_EQ2050_GL","EQ 2050 GMG (20CP)",20],
+	["VME_PLA_EQ2050_AT","EQ 2050 ATGM (20CP)",20],
+	["C_Truck_02_transport_F","Zamak Transport Uncovered (8CP)",8],
+	["VME_PLA_SX2190","SX 2190 Transport Covered (8CP)",8],
+	["VME_PLA_SX2190Repair","SX 2190 Repair Truck(50CP)",50],
+	["VME_PLA_SX2190Reammo","SX 2190 Ammo Truck (50CP)",50],
+	["VME_PLA_SX2190Refuel","SX 2190 Fuel Truck (50CP)",50],
+	["VME_PLA_ZBD03","APC ZBD-03 (25CP)",25],
+	["VME_PLA_ZBD04","APC ZBD-04 (30CP)",30],
+	["VME_PLA_ZBL09","APC ZBL-08 (35CP)",35],
+	["O_T_APC_Wheeled_02_rcws_v2_ghex_F","MSE-3 Marid (25CP)",25],
+	["B_APC_Tracked_01_CRV_F","CRV-6e Bobcat (28CP)",28],
+	["VME_PLA_PGZ07","PGZ-07 AA (35CP)",35],
+	["VME_PLA_AFT10","AFT-10 AT (35CP)",35],
+	["VME_PLA_ZTZ96A","ZTZ-96 MBT (40CP)",40],
+	["VME_PLA_ZTZ99","ZTZ-99 MBT (50CP)",50],
+	["VME_PLA_PLZ05","PLZ-05 Artillery (75CP)",75],
+	["VME_PLA_HQ64","HQ 64 ADS (75CP)",75],
+	["B_Heli_Light_01_F","MH-9 Hummingbird (15CP)",15],
+	["VME_PLA_z9_base","Z9-A Heli (20CP)",20],
+	["VME_PLA_z9_CAS","Z9-A CAS Heli (25CP)",25],
+	["VME_PLA_Mi17","Mi-17 Trans (25CP)",25],
+	["VME_PLA_Mi171","Mi-171 Gunship (30CP)",30],
+	["VME_WZ10_FOR","WZ-10 Attack Heli (45CP)",45],
+	["O_T_VTOL_02_infantry_dynamicLoadout_F","Y-32 Zian VTOL (45CP",45],
+	["VME_PLA_jh7","JH-7 Jet (45CP)",45],
+	["VME_PLA_J20","J-20 Jet (50CP)",50],
+	["PLA_UAV_01","AR-2 Darter (5CP)",5],
+	["vme_CH4B","Wing Loong II UAV (15CP)",15],
+	["B_UGV_01_F","UGV Stomper Recon (10CP)",10],
+	["B_UGV_01_rcws_F","UGV Stomper RCWS (20CP)",20]
+];
 
 

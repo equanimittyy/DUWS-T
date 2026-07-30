@@ -63,10 +63,9 @@ blufor_SPECOPS_ENG_X = 			"cwr3_b_soldier_engineer";				//operator
 /////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
 //
-// THESE HAVE FIXED AMOUNTS -fill the ends with ["empty",0,0];
-//
-// - Units = 				14
-// - Vehicles/Statics = 	50
+// Ordered lists, no padding and no fixed length: the menus offer every entry in the order
+// written here, so position in the list is the display order. A faction may list as many
+// or as few as it has.
 //
 /////////////////////////////////////////////////////////////////
 
@@ -84,20 +83,19 @@ blufor_SPECOPS_ENG_X = 			"cwr3_b_soldier_engineer";				//operator
 ///////////////////////////////
 
 
-blufor_RQST_UNIT_01_X = 			["cwr3_b_soldier","Rifleman (2CP)",2];
-blufor_RQST_UNIT_02_X =				["cwr3_b_soldier_gl","Grenadier (3CP)",3];
-blufor_RQST_UNIT_03_X =				["cwr3_b_soldier_ar","Automatic Rifleman (3CP)",3];
-blufor_RQST_UNIT_04_X =				["cwr3_b_soldier_mg","Heavy Gunner (4CP)",4];
-blufor_RQST_UNIT_05_X =				["cwr3_b_soldier_medic","Medic (4CP)",4];
-blufor_RQST_UNIT_06_X =				["cwr3_b_soldier_aat_m47","Asst. AT Specialist (3CP)",3];
-blufor_RQST_UNIT_07_X =				["cwr3_b_soldier_at_m47","AT Specialist (4CP)",4];
-blufor_RQST_UNIT_08_X =				["cwr3_b_soldier_aa_stinger","AA Specialist (4CP)",4];
-blufor_RQST_UNIT_09_X =				["cwr3_b_soldier_engineer","Engineer (4CP)",4];
-blufor_RQST_UNIT_10_X =				["cwr3_b_soldier_marksman","Marksman (3CP)",3];
-blufor_RQST_UNIT_11_X =				["cwr3_b_soldier_sniper","Sniper (4CP)",4];
-blufor_RQST_UNIT_12_X =				["empty",0,0];
-blufor_RQST_UNIT_13_X =				["empty",0,0];
-blufor_RQST_UNIT_14_X =				["empty",0,0];
+blufor_RQST_UNITS = [
+	["cwr3_b_soldier","Rifleman (2CP)",2],
+	["cwr3_b_soldier_gl","Grenadier (3CP)",3],
+	["cwr3_b_soldier_ar","Automatic Rifleman (3CP)",3],
+	["cwr3_b_soldier_mg","Heavy Gunner (4CP)",4],
+	["cwr3_b_soldier_medic","Medic (4CP)",4],
+	["cwr3_b_soldier_aat_m47","Asst. AT Specialist (3CP)",3],
+	["cwr3_b_soldier_at_m47","AT Specialist (4CP)",4],
+	["cwr3_b_soldier_aa_stinger","AA Specialist (4CP)",4],
+	["cwr3_b_soldier_engineer","Engineer (4CP)",4],
+	["cwr3_b_soldier_marksman","Marksman (3CP)",3],
+	["cwr3_b_soldier_sniper","Sniper (4CP)",4]
+];
 
 
 ///////////////////////////////
@@ -107,55 +105,38 @@ blufor_RQST_UNIT_14_X =				["empty",0,0];
 //   _index = lbCurSel 2122;
 ////////////////////////////////   
 
-blufor_RQST_VEHICLE_01_X =			["cwr3_b_m113a1","M113-A1 (20CP)",20];
-blufor_RQST_VEHICLE_02_X =			["cwr3_b_m113a3","M113-A3 (22CP)",22];
-blufor_RQST_VEHICLE_03_X =			["cwr3_b_m2a2","M2A2 (24CP)",24];
-blufor_RQST_VEHICLE_04_X =			["cwr3_b_m163","M163 AA Vehicle (20CP)",20];
-blufor_RQST_VEHICLE_05_X =			["cwr3_b_hmmwv_transport","HMMVW (Transport) (3CP)",3];
-blufor_RQST_VEHICLE_06_X =			["cwr3_b_hmmwv_m2","HMMVW (Armed, M2) (5CP)",5];
-blufor_RQST_VEHICLE_07_X =			["cwr3_b_hmmwv_tow","HMMVW (Armed, TOW) (8CP)",8];
-blufor_RQST_VEHICLE_08_X =			["cwr3_b_m939","M939 (Truck, roof) (5CP)",5];
-blufor_RQST_VEHICLE_09_X =			["cwr3_b_m939_empty","M939 (Truck, no roof) (5CP)",5];
-blufor_RQST_VEHICLE_10_X =			["cwr3_b_m1a1","M1A1 (30CP)",30];
-blufor_RQST_VEHICLE_11_X =			["cwr3_b_m60a3","M60A3 (32CP)",32];
-blufor_RQST_VEHICLE_12_X =			["cwr3_b_uh60","UH60 Transp. (30CP)",30];
-blufor_RQST_VEHICLE_13_X =			["cwr3_b_ah64_hellfire","AH64 (35CP)",35];
-blufor_RQST_VEHICLE_14_X =			["cwr3_b_ch47","CH47 Chinook (32CP)",32];
-blufor_RQST_VEHICLE_15_X =			["cwr3_b_c130","C-130 (Transport) (35CP)",35];
-blufor_RQST_VEHICLE_16_X =			["cwr3_b_a10_cas","A-10 Warthog (40CP)",40];
-blufor_RQST_VEHICLE_17_X =			["B_T_UAV_03_dynamicLoadout_F","MQ-12 UAV (20CP)",20];
-blufor_RQST_VEHICLE_18_X =			["cwr3_b_m939_reammo","M939 (Rearm) (50CP)",50];
-blufor_RQST_VEHICLE_19_X =			["cwr3_b_m939_refuel","M939 (Refuel) (50CP)",50];
-blufor_RQST_VEHICLE_20_X =			["cwr3_b_m939_repair","M939 (Repair) (50CP)",50];
-blufor_RQST_VEHICLE_21_X =			["cwr3_b_m163","M163A1 VADS (Anti-Air, Manual) (25CP)",25];
-blufor_RQST_VEHICLE_22_X =			["cwr3_b_m270_he","M270 MLRS (HE) (75CP)",75];
-blufor_RQST_VEHICLE_23_X =			["cwr3_b_m151","M151 Willys Jeep (Transport) (5CP)",5];
-blufor_RQST_VEHICLE_24_X =			["cwr3_b_m151_m2","M151 Willys Jeep (Armed, M2) (10CP)",10];
-blufor_RQST_VEHICLE_25_X =			["cwr3_b_ah1f","AH1S Cobra (Fixed Pylons, TOW) (25CP)",25];
-blufor_RQST_VEHICLE_26_X =			["cwr3_b_ah6j","AH-6J Littlebird (Armed) (25CP)",25];
-blufor_RQST_VEHICLE_27_X =			["cwr3_b_kiowa_dyn","OH-58D Kiowa (Armed) (25CP)",25];
-blufor_RQST_VEHICLE_28_X =			["cwr3_b_uh60_x4_esss","UH-60L Blackhawk (4xFFARs) (30CP)",30];
-blufor_RQST_VEHICLE_29_X =			["cwr3_b_uh60_unarmed_ffv","UH-60L Blackhawk (Unarmed FFV) (15CP)",15];
-blufor_RQST_VEHICLE_30_X =			["cwr3_b_uh60_ffv","UH-60L Blackhawk (M134 FFV) (20CP)",20];
-blufor_RQST_VEHICLE_31_X =			["cwr3_b_mh6j","MH-6J Littlebird (Transport) (15CP)",15];
-blufor_RQST_VEHICLE_32_X =			["empty",0,0];
-blufor_RQST_VEHICLE_33_X =			["empty",0,0];
-blufor_RQST_VEHICLE_34_X =			["empty",0,0];
-blufor_RQST_VEHICLE_35_X =			["empty",0,0];
-blufor_RQST_VEHICLE_36_X =			["empty",0,0];
-blufor_RQST_VEHICLE_37_X =			["empty",0,0];
-blufor_RQST_VEHICLE_38_X =			["empty",0,0];
-blufor_RQST_VEHICLE_39_X =			["empty",0,0];
-blufor_RQST_VEHICLE_40_X =			["empty",0,0];
-blufor_RQST_VEHICLE_41_X =			["empty",0,0];
-blufor_RQST_VEHICLE_42_X =			["empty",0,0];
-blufor_RQST_VEHICLE_43_X =			["empty",0,0];
-blufor_RQST_VEHICLE_44_X =			["empty",0,0];
-blufor_RQST_VEHICLE_45_X =			["empty",0,0];
-blufor_RQST_VEHICLE_46_X =			["empty",0,0];
-blufor_RQST_VEHICLE_47_X =			["empty",0,0];
-blufor_RQST_VEHICLE_48_X =			["empty",0,0];
-blufor_RQST_VEHICLE_49_X =			["empty",0,0];
-blufor_RQST_VEHICLE_50_X =			["empty",0,0];
+blufor_RQST_VEHICLES = [
+	["cwr3_b_m113a1","M113-A1 (20CP)",20],
+	["cwr3_b_m113a3","M113-A3 (22CP)",22],
+	["cwr3_b_m2a2","M2A2 (24CP)",24],
+	["cwr3_b_m163","M163 AA Vehicle (20CP)",20],
+	["cwr3_b_hmmwv_transport","HMMVW (Transport) (3CP)",3],
+	["cwr3_b_hmmwv_m2","HMMVW (Armed, M2) (5CP)",5],
+	["cwr3_b_hmmwv_tow","HMMVW (Armed, TOW) (8CP)",8],
+	["cwr3_b_m939","M939 (Truck, roof) (5CP)",5],
+	["cwr3_b_m939_empty","M939 (Truck, no roof) (5CP)",5],
+	["cwr3_b_m1a1","M1A1 (30CP)",30],
+	["cwr3_b_m60a3","M60A3 (32CP)",32],
+	["cwr3_b_uh60","UH60 Transp. (30CP)",30],
+	["cwr3_b_ah64_hellfire","AH64 (35CP)",35],
+	["cwr3_b_ch47","CH47 Chinook (32CP)",32],
+	["cwr3_b_c130","C-130 (Transport) (35CP)",35],
+	["cwr3_b_a10_cas","A-10 Warthog (40CP)",40],
+	["B_T_UAV_03_dynamicLoadout_F","MQ-12 UAV (20CP)",20],
+	["cwr3_b_m939_reammo","M939 (Rearm) (50CP)",50],
+	["cwr3_b_m939_refuel","M939 (Refuel) (50CP)",50],
+	["cwr3_b_m939_repair","M939 (Repair) (50CP)",50],
+	["cwr3_b_m163","M163A1 VADS (Anti-Air, Manual) (25CP)",25],
+	["cwr3_b_m270_he","M270 MLRS (HE) (75CP)",75],
+	["cwr3_b_m151","M151 Willys Jeep (Transport) (5CP)",5],
+	["cwr3_b_m151_m2","M151 Willys Jeep (Armed, M2) (10CP)",10],
+	["cwr3_b_ah1f","AH1S Cobra (Fixed Pylons, TOW) (25CP)",25],
+	["cwr3_b_ah6j","AH-6J Littlebird (Armed) (25CP)",25],
+	["cwr3_b_kiowa_dyn","OH-58D Kiowa (Armed) (25CP)",25],
+	["cwr3_b_uh60_x4_esss","UH-60L Blackhawk (4xFFARs) (30CP)",30],
+	["cwr3_b_uh60_unarmed_ffv","UH-60L Blackhawk (Unarmed FFV) (15CP)",15],
+	["cwr3_b_uh60_ffv","UH-60L Blackhawk (M134 FFV) (20CP)",20],
+	["cwr3_b_mh6j","MH-6J Littlebird (Transport) (15CP)",15]
+];
 
 

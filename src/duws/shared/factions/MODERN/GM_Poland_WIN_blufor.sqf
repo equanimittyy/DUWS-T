@@ -66,10 +66,9 @@ blufor_SPECOPS_ENG_X = 			"gm_pl_army_sf_engineer_pm63_80_win";				//operator
 /////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
 //
-// THESE HAVE FIXED AMOUNTS -fill the ends with ["empty",0,0];
-//
-// - Units = 				14
-// - Vehicles/Statics = 	50
+// Ordered lists, no padding and no fixed length: the menus offer every entry in the order
+// written here, so position in the list is the display order. A faction may list as many
+// or as few as it has.
 //
 /////////////////////////////////////////////////////////////////
 
@@ -87,20 +86,19 @@ blufor_SPECOPS_ENG_X = 			"gm_pl_army_sf_engineer_pm63_80_win";				//operator
 ///////////////////////////////
 
 
-blufor_RQST_UNIT_01_X = 			["gm_pl_army_rifleman_akm_80_win","Rifleman (2CP)",2];
-blufor_RQST_UNIT_02_X =				["gm_pl_army_grenadier_akm_pallad_80_win","Grenadier (3CP)",3];
-blufor_RQST_UNIT_03_X =				["gm_pl_army_machinegunner_pk_80_win","Machinegunner (3CP)",3];
-blufor_RQST_UNIT_04_X =				["gm_pl_army_demolition_akm_80_win","Explosive Specialist (4CP)",4];
-blufor_RQST_UNIT_05_X =				["gm_pl_army_medic_akm_80_win","Medic (4CP)",4];
-blufor_RQST_UNIT_06_X =				["gm_pl_army_antitank_akm_rpg7_80_win","AT Specialist (4CP)",4];
-blufor_RQST_UNIT_07_X =				["gm_pl_army_antiair_akm_9k32m_80_win","AA Specialist (4CP)",4];
-blufor_RQST_UNIT_08_X =				["gm_pl_army_engineer_akm_80_win","Engineer (4CP)",4];
-blufor_RQST_UNIT_09_X =				["gm_pl_army_marksman_svd_80_win","Marksman (3CP)",3];
-blufor_RQST_UNIT_10_X =				["gm_pl_army_crew_pm63_80_moro","Crewman (2CP)",4];
-blufor_RQST_UNIT_11_X =				["gm_pl_army_antitank_akm_fagot_80_win","Rifleman (Fagot) (4CP)",4];
-blufor_RQST_UNIT_12_X =				["empty",0,0];
-blufor_RQST_UNIT_13_X =				["empty",0,0];
-blufor_RQST_UNIT_14_X =				["empty",0,0];
+blufor_RQST_UNITS = [
+	["gm_pl_army_rifleman_akm_80_win","Rifleman (2CP)",2],
+	["gm_pl_army_grenadier_akm_pallad_80_win","Grenadier (3CP)",3],
+	["gm_pl_army_machinegunner_pk_80_win","Machinegunner (3CP)",3],
+	["gm_pl_army_demolition_akm_80_win","Explosive Specialist (4CP)",4],
+	["gm_pl_army_medic_akm_80_win","Medic (4CP)",4],
+	["gm_pl_army_antitank_akm_rpg7_80_win","AT Specialist (4CP)",4],
+	["gm_pl_army_antiair_akm_9k32m_80_win","AA Specialist (4CP)",4],
+	["gm_pl_army_engineer_akm_80_win","Engineer (4CP)",4],
+	["gm_pl_army_marksman_svd_80_win","Marksman (3CP)",3],
+	["gm_pl_army_crew_pm63_80_moro","Crewman (2CP)",4],
+	["gm_pl_army_antitank_akm_fagot_80_win","Rifleman (Fagot) (4CP)",4]
+];
 
 
 ///////////////////////////////
@@ -110,55 +108,28 @@ blufor_RQST_UNIT_14_X =				["empty",0,0];
 //   _index = lbCurSel 2122;
 ////////////////////////////////
 
-blufor_RQST_VEHICLE_01_X =			["gm_pl_army_uaz469_cargo_win","UAZ469 (Unarmed) (4CP)",4];
-blufor_RQST_VEHICLE_02_X =			["gm_pl_army_uaz469_dshkm_win","UAZ469 (DShKM) (6CP)",6];
-blufor_RQST_VEHICLE_03_X =			["gm_pl_army_ural4320_cargo_win","URAL 4320 (Cargo) (10CP)",10];
-blufor_RQST_VEHICLE_04_X =			["gm_pl_army_ural4320_repair_win","URAL 4320 (Repair) (50CP)",50];
-blufor_RQST_VEHICLE_05_X =			["gm_pl_army_ural375d_medic_win","URAL 375D (Medic) (50CP)",50];
-blufor_RQST_VEHICLE_06_X =			["gm_pl_army_ural4320_reammo_win","URAL 4320 (Ammo) (50CP)",50];
-blufor_RQST_VEHICLE_07_X =			["gm_pl_army_ural375d_refuel_win","URAL 375D (Fuel) (50CP)",50];
-blufor_RQST_VEHICLE_08_X =			["gm_pl_army_brdm2_win","BRDM2 (Armed) (20CP)",20];
-blufor_RQST_VEHICLE_09_X =			["gm_pl_army_ot64a_win","OT64A (25CP)",25];
-blufor_RQST_VEHICLE_10_X =			["gm_pl_army_bmp1sp2_win","BMP1 (30CP)",30];
-blufor_RQST_VEHICLE_11_X =			["gm_pl_army_pt76b_win","PT76B (32CP)",32];
-blufor_RQST_VEHICLE_12_X =			["gm_pl_army_t55ak_win","T55 (35CP)",35];
-blufor_RQST_VEHICLE_13_X =			["gm_pl_army_zsu234v1_win","ZSU-23-4V1 (30CP)",30];
-blufor_RQST_VEHICLE_14_X =			["gm_pl_airforce_mi2p","Mi-2P (Unarmed) (15CP)",15];
-blufor_RQST_VEHICLE_15_X =			["UK3CB_CW_SOV_O_EARLY_Mi8AMT","Mi-8 (Unarmed) (USSR) (20CP)",20];
-blufor_RQST_VEHICLE_16_X =			["gm_pl_airforce_mi2urn","Mi-2URN (Armed) (25CP)",25];
-blufor_RQST_VEHICLE_17_X =			["gm_pl_airforce_mi2urpg","Mi-2URP-G (Armed) (30CP)",30];
-blufor_RQST_VEHICLE_18_X =			["UK3CB_CW_SOV_O_EARLY_Mi_24V","Mi-24V (USSR) (45CP)",45];
-blufor_RQST_VEHICLE_19_X =			["UK3CB_CW_SOV_O_EARLY_Su25SM","SU25SM (USSR) (45CP)",45];
-blufor_RQST_VEHICLE_20_X =			["UK3CB_CW_SOV_O_EARLY_2S3","2S3 SPG (USSR) (50CP)",50];
-blufor_RQST_VEHICLE_21_X =			["UK3CB_CW_SOV_O_EARLY_BM21","BM21 (USSR) (65CP)",65];
-blufor_RQST_VEHICLE_22_X =			["empty",0,0];
-blufor_RQST_VEHICLE_23_X =			["empty",0,0];
-blufor_RQST_VEHICLE_24_X =			["empty",0,0];
-blufor_RQST_VEHICLE_25_X =			["empty",0,0];
-blufor_RQST_VEHICLE_26_X =			["empty",0,0];
-blufor_RQST_VEHICLE_27_X =			["empty",0,0];
-blufor_RQST_VEHICLE_28_X =			["empty",0,0];
-blufor_RQST_VEHICLE_29_X =			["empty",0,0];
-blufor_RQST_VEHICLE_30_X =			["empty",0,0];
-blufor_RQST_VEHICLE_31_X =			["empty",0,0];
-blufor_RQST_VEHICLE_32_X =			["empty",0,0];
-blufor_RQST_VEHICLE_33_X =			["empty",0,0];
-blufor_RQST_VEHICLE_34_X =			["empty",0,0];
-blufor_RQST_VEHICLE_35_X =			["empty",0,0];
-blufor_RQST_VEHICLE_36_X =			["empty",0,0];
-blufor_RQST_VEHICLE_37_X =			["empty",0,0];
-blufor_RQST_VEHICLE_38_X =			["empty",0,0];
-blufor_RQST_VEHICLE_39_X =			["empty",0,0];
-blufor_RQST_VEHICLE_40_X =			["empty",0,0];
-blufor_RQST_VEHICLE_41_X =			["empty",0,0];
-blufor_RQST_VEHICLE_42_X =			["empty",0,0];
-blufor_RQST_VEHICLE_43_X =			["empty",0,0];
-blufor_RQST_VEHICLE_44_X =			["empty",0,0];
-blufor_RQST_VEHICLE_45_X =			["empty",0,0];
-blufor_RQST_VEHICLE_46_X =			["empty",0,0];
-blufor_RQST_VEHICLE_47_X =			["empty",0,0];
-blufor_RQST_VEHICLE_48_X =			["empty",0,0];
-blufor_RQST_VEHICLE_49_X =			["empty",0,0];
-blufor_RQST_VEHICLE_50_X =			["empty",0,0];
+blufor_RQST_VEHICLES = [
+	["gm_pl_army_uaz469_cargo_win","UAZ469 (Unarmed) (4CP)",4],
+	["gm_pl_army_uaz469_dshkm_win","UAZ469 (DShKM) (6CP)",6],
+	["gm_pl_army_ural4320_cargo_win","URAL 4320 (Cargo) (10CP)",10],
+	["gm_pl_army_ural4320_repair_win","URAL 4320 (Repair) (50CP)",50],
+	["gm_pl_army_ural375d_medic_win","URAL 375D (Medic) (50CP)",50],
+	["gm_pl_army_ural4320_reammo_win","URAL 4320 (Ammo) (50CP)",50],
+	["gm_pl_army_ural375d_refuel_win","URAL 375D (Fuel) (50CP)",50],
+	["gm_pl_army_brdm2_win","BRDM2 (Armed) (20CP)",20],
+	["gm_pl_army_ot64a_win","OT64A (25CP)",25],
+	["gm_pl_army_bmp1sp2_win","BMP1 (30CP)",30],
+	["gm_pl_army_pt76b_win","PT76B (32CP)",32],
+	["gm_pl_army_t55ak_win","T55 (35CP)",35],
+	["gm_pl_army_zsu234v1_win","ZSU-23-4V1 (30CP)",30],
+	["gm_pl_airforce_mi2p","Mi-2P (Unarmed) (15CP)",15],
+	["UK3CB_CW_SOV_O_EARLY_Mi8AMT","Mi-8 (Unarmed) (USSR) (20CP)",20],
+	["gm_pl_airforce_mi2urn","Mi-2URN (Armed) (25CP)",25],
+	["gm_pl_airforce_mi2urpg","Mi-2URP-G (Armed) (30CP)",30],
+	["UK3CB_CW_SOV_O_EARLY_Mi_24V","Mi-24V (USSR) (45CP)",45],
+	["UK3CB_CW_SOV_O_EARLY_Su25SM","SU25SM (USSR) (45CP)",45],
+	["UK3CB_CW_SOV_O_EARLY_2S3","2S3 SPG (USSR) (50CP)",50],
+	["UK3CB_CW_SOV_O_EARLY_BM21","BM21 (USSR) (65CP)",65]
+];
 
 

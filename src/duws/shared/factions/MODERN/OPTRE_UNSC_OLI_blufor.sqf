@@ -66,10 +66,9 @@ blufor_SPECOPS_ENG_X =			"OPTRE_UNSC_ODST_Soldier_DemolitionsExpert"; 	//operato
 /////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
 //
-// THESE HAVE FIXED AMOUNTS -fill the ends with ["empty",0,0];
-//
-// - Units = 				14
-// - Vehicles/Statics = 	50
+// Ordered lists, no padding and no fixed length: the menus offer every entry in the order
+// written here, so position in the list is the display order. A faction may list as many
+// or as few as it has.
 //
 /////////////////////////////////////////////////////////////////
 
@@ -87,20 +86,19 @@ blufor_SPECOPS_ENG_X =			"OPTRE_UNSC_ODST_Soldier_DemolitionsExpert"; 	//operato
 ///////////////////////////////
 
 
-blufor_RQST_UNIT_01_X = 			["OPTRE_UNSC_Army_Soldier_Rifleman_BR_OLI","Rifleman (UNSC) (2CP)",2];
-blufor_RQST_UNIT_02_X =				["OPTRE_UNSC_Army_Soldier_Grenadier_OLI","Grenadier (UNSC) (3CP)",3];
-blufor_RQST_UNIT_03_X =				["OPTRE_UNSC_Army_Soldier_Rifleman_AR_OLI","Automatic Rifleman (UNSC) (3CP)",3];
-blufor_RQST_UNIT_04_X =				["OPTRE_UNSC_Army_Soldier_Autorifleman_OLI","Heavy Gunner (UNSC) (4CP)",4];
-blufor_RQST_UNIT_05_X =				["OPTRE_UNSC_Army_Soldier_Medic_OLI","Medic (UNSC) (4CP)",4];
-blufor_RQST_UNIT_06_X =				["OPTRE_UNSC_Army_Soldier_Rifleman_AT_OLI","AT Rifleman (UNSC) (3CP)",3];
-blufor_RQST_UNIT_07_X =				["OPTRE_UNSC_Army_Soldier_AT_Specialist_OLI","AT Specialist (UNSC) (4CP)",4];
-blufor_RQST_UNIT_08_X =				["OPTRE_UNSC_Army_Soldier_AA_Specialist_OLI","AA Specialist (UNSC) (4CP)",4];
-blufor_RQST_UNIT_09_X =				["OPTRE_UNSC_Army_Soldier_Engineer_OLI","Engineer (UNSC) (4CP)",4];
-blufor_RQST_UNIT_10_X =				["OPTRE_UNSC_Army_Soldier_Marksman_OLI","Marksman (UNSC) (3CP)",3];
-blufor_RQST_UNIT_11_X =				["OPTRE_UNSC_Army_Soldier_Sniper_OLI","Sniper (UNSC) (4CP)",4];
-blufor_RQST_UNIT_12_X =				["empty",0,0];
-blufor_RQST_UNIT_13_X =				["empty",0,0];
-blufor_RQST_UNIT_14_X =				["empty",0,0];
+blufor_RQST_UNITS = [
+	["OPTRE_UNSC_Army_Soldier_Rifleman_BR_OLI","Rifleman (UNSC) (2CP)",2],
+	["OPTRE_UNSC_Army_Soldier_Grenadier_OLI","Grenadier (UNSC) (3CP)",3],
+	["OPTRE_UNSC_Army_Soldier_Rifleman_AR_OLI","Automatic Rifleman (UNSC) (3CP)",3],
+	["OPTRE_UNSC_Army_Soldier_Autorifleman_OLI","Heavy Gunner (UNSC) (4CP)",4],
+	["OPTRE_UNSC_Army_Soldier_Medic_OLI","Medic (UNSC) (4CP)",4],
+	["OPTRE_UNSC_Army_Soldier_Rifleman_AT_OLI","AT Rifleman (UNSC) (3CP)",3],
+	["OPTRE_UNSC_Army_Soldier_AT_Specialist_OLI","AT Specialist (UNSC) (4CP)",4],
+	["OPTRE_UNSC_Army_Soldier_AA_Specialist_OLI","AA Specialist (UNSC) (4CP)",4],
+	["OPTRE_UNSC_Army_Soldier_Engineer_OLI","Engineer (UNSC) (4CP)",4],
+	["OPTRE_UNSC_Army_Soldier_Marksman_OLI","Marksman (UNSC) (3CP)",3],
+	["OPTRE_UNSC_Army_Soldier_Sniper_OLI","Sniper (UNSC) (4CP)",4]
+];
 
 
 ///////////////////////////////
@@ -110,53 +108,23 @@ blufor_RQST_UNIT_14_X =				["empty",0,0];
 //   _index = lbCurSel 2122;
 ////////////////////////////////
 
-blufor_RQST_VEHICLE_01_X =			["OPTRE_M12_FAV","Warthog (Unarmed) (2CP)",2];
-blufor_RQST_VEHICLE_02_X =			["OPTRE_M813_TT","Warthog Transport (6CP)",6];
-blufor_RQST_VEHICLE_03_X =			["OPTRE_m1087_stallion_unsc","Stallion Transport (8CP)",8];
-blufor_RQST_VEHICLE_04_X =			["OPTRE_M12_LRV","Warthog MG (15CP)",15];
-blufor_RQST_VEHICLE_05_X =			["OPTRE_M12A1_LRV","Warthog Rocket (20CP)",20];
-blufor_RQST_VEHICLE_06_X =			["OPTRE_M12G1_LRV","Warthog Gauss (25CP)",25];
-blufor_RQST_VEHICLE_07_X =			["OPTRE_M12R_AA","Warthog AA (30CP)",30];
-blufor_RQST_VEHICLE_08_X =			["OPTRE_M808B_UNSC","Scorpion (45CP)",45];
-blufor_RQST_VEHICLE_09_X =			["OPTRE_UNSC_hornet","Hornet (15CP)",15];
-blufor_RQST_VEHICLE_10_X =			["OPTRE_AV22_Sparrowhawk","AV22 Sparrowhawk (25CP)",25];
-blufor_RQST_VEHICLE_11_X =			["OPTRE_AV22A_Sparrowhawk","AV22A Sparrowhawk (35CP)",35];
-blufor_RQST_VEHICLE_12_X =			["OPTRE_UNSC_falcon","Falcon (22CP)",22];
-blufor_RQST_VEHICLE_13_X =			["OPTRE_Pelican_unarmed","Pelican (Unarmed) (26CP)",26];
-blufor_RQST_VEHICLE_14_X =			["OPTRE_Pelican_armed","Pelican (Armed) (30CP)",30];
-blufor_RQST_VEHICLE_15_X =			["OPTRE_M412_IFV_UNSC","Bison IFV (40CP)",40];
-blufor_RQST_VEHICLE_16_X =			["OPTRE_M413_MGS_UNSC","Bison MGS (50CP)",50];
-blufor_RQST_VEHICLE_17_X =			["OPTRE_M808S","Heavy Scorpion (50CP)",50];
-blufor_RQST_VEHICLE_18_X =			["OPTRE_M313_UNSC","Elephant (30CP)",30];
-blufor_RQST_VEHICLE_19_X =			["empty",0,0];
-blufor_RQST_VEHICLE_20_X =			["empty",0,0];
-blufor_RQST_VEHICLE_21_X =			["empty",0,0];
-blufor_RQST_VEHICLE_22_X =			["empty",0,0];
-blufor_RQST_VEHICLE_23_X =			["empty",0,0];
-blufor_RQST_VEHICLE_24_X =			["empty",0,0];
-blufor_RQST_VEHICLE_25_X =			["empty",0,0];
-blufor_RQST_VEHICLE_26_X =			["empty",0,0];
-blufor_RQST_VEHICLE_27_X =			["empty",0,0];
-blufor_RQST_VEHICLE_28_X =			["empty",0,0];
-blufor_RQST_VEHICLE_29_X =			["empty",0,0];
-blufor_RQST_VEHICLE_30_X =			["empty",0,0];
-blufor_RQST_VEHICLE_31_X =			["empty",0,0];
-blufor_RQST_VEHICLE_32_X =			["empty",0,0];
-blufor_RQST_VEHICLE_33_X =			["empty",0,0];
-blufor_RQST_VEHICLE_34_X =			["empty",0,0];
-blufor_RQST_VEHICLE_35_X =			["empty",0,0];
-blufor_RQST_VEHICLE_36_X =			["empty",0,0];
-blufor_RQST_VEHICLE_37_X =			["empty",0,0];
-blufor_RQST_VEHICLE_38_X =			["empty",0,0];
-blufor_RQST_VEHICLE_39_X =			["empty",0,0];
-blufor_RQST_VEHICLE_40_X =			["empty",0,0];
-blufor_RQST_VEHICLE_41_X =			["empty",0,0];
-blufor_RQST_VEHICLE_42_X =			["empty",0,0];
-blufor_RQST_VEHICLE_43_X =			["empty",0,0];
-blufor_RQST_VEHICLE_44_X =			["empty",0,0];
-blufor_RQST_VEHICLE_45_X =			["empty",0,0];
-blufor_RQST_VEHICLE_46_X =			["empty",0,0];
-blufor_RQST_VEHICLE_47_X =			["empty",0,0];
-blufor_RQST_VEHICLE_48_X =			["empty",0,0];
-blufor_RQST_VEHICLE_49_X =			["empty",0,0];
-blufor_RQST_VEHICLE_50_X =			["empty",0,0];
+blufor_RQST_VEHICLES = [
+	["OPTRE_M12_FAV","Warthog (Unarmed) (2CP)",2],
+	["OPTRE_M813_TT","Warthog Transport (6CP)",6],
+	["OPTRE_m1087_stallion_unsc","Stallion Transport (8CP)",8],
+	["OPTRE_M12_LRV","Warthog MG (15CP)",15],
+	["OPTRE_M12A1_LRV","Warthog Rocket (20CP)",20],
+	["OPTRE_M12G1_LRV","Warthog Gauss (25CP)",25],
+	["OPTRE_M12R_AA","Warthog AA (30CP)",30],
+	["OPTRE_M808B_UNSC","Scorpion (45CP)",45],
+	["OPTRE_UNSC_hornet","Hornet (15CP)",15],
+	["OPTRE_AV22_Sparrowhawk","AV22 Sparrowhawk (25CP)",25],
+	["OPTRE_AV22A_Sparrowhawk","AV22A Sparrowhawk (35CP)",35],
+	["OPTRE_UNSC_falcon","Falcon (22CP)",22],
+	["OPTRE_Pelican_unarmed","Pelican (Unarmed) (26CP)",26],
+	["OPTRE_Pelican_armed","Pelican (Armed) (30CP)",30],
+	["OPTRE_M412_IFV_UNSC","Bison IFV (40CP)",40],
+	["OPTRE_M413_MGS_UNSC","Bison MGS (50CP)",50],
+	["OPTRE_M808S","Heavy Scorpion (50CP)",50],
+	["OPTRE_M313_UNSC","Elephant (30CP)",30]
+];

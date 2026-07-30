@@ -67,10 +67,9 @@ blufor_SPECOPS_ENG_X = 			"ENGINEER_WINTER_HEX";					//operator
 /////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
 //
-// THESE HAVE FIXED AMOUNTS -fill the ends with ["empty",0,0];
-//
-// - Units = 				14
-// - Vehicles/Statics = 	50
+// Ordered lists, no padding and no fixed length: the menus offer every entry in the order
+// written here, so position in the list is the display order. A faction may list as many
+// or as few as it has.
 //
 /////////////////////////////////////////////////////////////////
 
@@ -88,20 +87,19 @@ blufor_SPECOPS_ENG_X = 			"ENGINEER_WINTER_HEX";					//operator
 ///////////////////////////////
 
 
-blufor_RQST_UNIT_01_X = 			["RIFLEMAN_WINTER_HEX","Rifleman (2CP)",2];
-blufor_RQST_UNIT_02_X =				["GRENADIER_WINTER_HEX","Grenadier (3CP)",3];
-blufor_RQST_UNIT_03_X =				["AUTORIFLEMAN_WINTER_HEX","Automatic Rifleman (3CP)",3];
-blufor_RQST_UNIT_04_X =				["HEAVYGUNNER_WINTER_HEX","Heavy Gunner (4CP)",4];
-blufor_RQST_UNIT_05_X =				["MEDIC_WINTER_HEX","Medic (4CP)",4];
-blufor_RQST_UNIT_06_X =				["RIFLEMAN_AT_WINTER_HEX","AT Rifleman (3CP)",3];
-blufor_RQST_UNIT_07_X =				["MISSILE_SPECIALIST_AT_WINTER_HEX","AT Specialist (4CP)",4];
-blufor_RQST_UNIT_08_X =				["MISSILE_SPECIALIST_AA_WINTER_HEX","AA Specialist (4CP)",4];
-blufor_RQST_UNIT_09_X =				["ENGINEER_WINTER_HEX","Engineer (4CP)",4];
-blufor_RQST_UNIT_10_X =				["MARKSMAN_WINTER_HEX","Marksman (3CP)",3];
-blufor_RQST_UNIT_11_X =				["SNIPER_WINTER_HEX","Sniper (4CP)",4];
-blufor_RQST_UNIT_12_X =				["empty",0,0];
-blufor_RQST_UNIT_13_X =				["empty",0,0];
-blufor_RQST_UNIT_14_X =				["empty",0,0];
+blufor_RQST_UNITS = [
+	["RIFLEMAN_WINTER_HEX","Rifleman (2CP)",2],
+	["GRENADIER_WINTER_HEX","Grenadier (3CP)",3],
+	["AUTORIFLEMAN_WINTER_HEX","Automatic Rifleman (3CP)",3],
+	["HEAVYGUNNER_WINTER_HEX","Heavy Gunner (4CP)",4],
+	["MEDIC_WINTER_HEX","Medic (4CP)",4],
+	["RIFLEMAN_AT_WINTER_HEX","AT Rifleman (3CP)",3],
+	["MISSILE_SPECIALIST_AT_WINTER_HEX","AT Specialist (4CP)",4],
+	["MISSILE_SPECIALIST_AA_WINTER_HEX","AA Specialist (4CP)",4],
+	["ENGINEER_WINTER_HEX","Engineer (4CP)",4],
+	["MARKSMAN_WINTER_HEX","Marksman (3CP)",3],
+	["SNIPER_WINTER_HEX","Sniper (4CP)",4]
+];
 
 
 
@@ -112,54 +110,38 @@ blufor_RQST_UNIT_14_X =				["empty",0,0];
 //   _index = lbCurSel 2122;
 ////////////////////////////////
 
-blufor_RQST_VEHICLE_01_X =			["QUADBIKE_WINTER_HEX","ATV (1CP)",1];
-blufor_RQST_VEHICLE_02_X =			["C_Offroad_01_F","SF Offroader (2CP)",2];
-blufor_RQST_VEHICLE_03_X =			["I_G_Van_01_transport_F","Transport Truck (6CP)",6];
-blufor_RQST_VEHICLE_04_X =			["IFRIT_WINTER_HEX","Ifrit Unarmed (5CP)",5];
-blufor_RQST_VEHICLE_05_X =			["IFRIT_HMG_WINTER_HEX","Ifrit HMG (18CP)",18];
-blufor_RQST_VEHICLE_06_X =			["IFRIT_GMG_WINTER_HEX","Ifrit GMG (25CP)",25];
-blufor_RQST_VEHICLE_07_X =			["QILIN_WINTER_HEX","Qilin Unarmed (5CP)",5];
-blufor_RQST_VEHICLE_08_X =			["QILIN_MINIGUN_WINTER_HEX","Qilin HMG (15CP)",15];
-blufor_RQST_VEHICLE_09_X =			["QILIN_AT_WINTER_HEX","Qilin AT (20CP)",20];
-blufor_RQST_VEHICLE_10_X =			["TEMPEST_TRANSPORT_WINTER_HEX","Tempest Transport Uncovered (8CP)",8];
-blufor_RQST_VEHICLE_11_X =			["TEMPEST_TRANSPORT_COVERED_WINTER_HEX","Tempest Transport Covered (8CP)",8];
-blufor_RQST_VEHICLE_12_X =			["ZAMAK_REPAIR_WINTER_HEX","Zamak Repair (50CP)",50];
-blufor_RQST_VEHICLE_13_X =			["ZAMAK_AMMO_WINTER_HEX","Zamak Ammo (50CP)",50];
-blufor_RQST_VEHICLE_14_X =			["ZAMAK_FUEL_WINTER_HEX","Zamak Fuel (50CP)",50];
-blufor_RQST_VEHICLE_15_X =			["MSE_MARID_WINTER_HEX","MSE-3 Marid (35CP)",35];
-blufor_RQST_VEHICLE_16_X =			["ZSU39_TIGRIS_WINTER_HEX","ZSU-39 Tigris (30CP)",30];
-blufor_RQST_VEHICLE_17_X =			["BTR_K_KAMYSH_WINTER_HEX","BTR-K Kamysh (40CP)",40];
-blufor_RQST_VEHICLE_18_X =			["T100_VARSUK_WINTER_HEX","T-100 Varsuk (40CP)",40];
-blufor_RQST_VEHICLE_19_X =			["T140K_ANGARA_WINTER_HEX","T-140K Angara (50CP)",50];
-blufor_RQST_VEHICLE_20_X =			["SOCHOR_WINTER_HEX","2S9 Sochor (75CP)",75];
-blufor_RQST_VEHICLE_21_X =			["C_Heli_Light_01_civil_F","Heli Civilian Light (22CP)",22];
-blufor_RQST_VEHICLE_22_X =			["ORCA_UNARMED_WINTER_HEX","PO-30 Orca Unarmed (15CP)",15];
-blufor_RQST_VEHICLE_23_X =			["ORCA_ARMED_WINTER_HEX","PO-30 Orca Armed (30CP)",30];
-blufor_RQST_VEHICLE_24_X =			["TARU_TRANSPORT_WINTER_HEX","Mi-290 Taru Transport (35CP",35];
-blufor_RQST_VEHICLE_25_X =			["KAJMAN_WINTER_HEX","MI-48 Kajman Attack (45CP)",45];
-blufor_RQST_VEHICLE_26_X =			["NEOPHRON_WINTER_HEX","TO-199 Neophron CAS (45CP)",45];
-blufor_RQST_VEHICLE_27_X =			["SHIKRA_WINTER_HEX","TO-201 Shikra (50CP)",50];
-blufor_RQST_VEHICLE_28_X =			["SHIKRA_STEALTH_WINTER_HEX","TO-201 Shikra Stealth (60CP)",60];
-blufor_RQST_VEHICLE_29_X =			["TAYRAN_A2_WINTER_HEX","UAV AR-2 Tayran (5CP)",5];
-blufor_RQST_VEHICLE_30_X =			["K40_ABABIL_WINTER_HEX","UAV K-40 Ababil-3 (15CP)",15];
-blufor_RQST_VEHICLE_31_X =			["UGV_SAIF_UNARMED_WINTER_HEX","UGV Saif (10CP)",10];
-blufor_RQST_VEHICLE_32_X =			["UGV_SAIF_RCWS_WINTER_HEX","UGV Saif RCWS (20CP)",20];
-blufor_RQST_VEHICLE_33_X =			["empty",0,0];
-blufor_RQST_VEHICLE_34_X =			["empty",0,0];
-blufor_RQST_VEHICLE_35_X =			["empty",0,0];
-blufor_RQST_VEHICLE_36_X =			["empty",0,0];
-blufor_RQST_VEHICLE_37_X =			["empty",0,0];
-blufor_RQST_VEHICLE_38_X =			["empty",0,0];
-blufor_RQST_VEHICLE_39_X =			["empty",0,0];
-blufor_RQST_VEHICLE_40_X =			["empty",0,0];
-blufor_RQST_VEHICLE_41_X =			["empty",0,0];
-blufor_RQST_VEHICLE_42_X =			["empty",0,0];
-blufor_RQST_VEHICLE_43_X =			["empty",0,0];
-blufor_RQST_VEHICLE_44_X =			["empty",0,0];
-blufor_RQST_VEHICLE_45_X =			["empty",0,0];
-blufor_RQST_VEHICLE_46_X =			["empty",0,0];
-blufor_RQST_VEHICLE_47_X =			["empty",0,0];
-blufor_RQST_VEHICLE_48_X =			["empty",0,0];
-blufor_RQST_VEHICLE_49_X =			["empty",0,0];
-blufor_RQST_VEHICLE_50_X =			["empty",0,0];
+blufor_RQST_VEHICLES = [
+	["QUADBIKE_WINTER_HEX","ATV (1CP)",1],
+	["C_Offroad_01_F","SF Offroader (2CP)",2],
+	["I_G_Van_01_transport_F","Transport Truck (6CP)",6],
+	["IFRIT_WINTER_HEX","Ifrit Unarmed (5CP)",5],
+	["IFRIT_HMG_WINTER_HEX","Ifrit HMG (18CP)",18],
+	["IFRIT_GMG_WINTER_HEX","Ifrit GMG (25CP)",25],
+	["QILIN_WINTER_HEX","Qilin Unarmed (5CP)",5],
+	["QILIN_MINIGUN_WINTER_HEX","Qilin HMG (15CP)",15],
+	["QILIN_AT_WINTER_HEX","Qilin AT (20CP)",20],
+	["TEMPEST_TRANSPORT_WINTER_HEX","Tempest Transport Uncovered (8CP)",8],
+	["TEMPEST_TRANSPORT_COVERED_WINTER_HEX","Tempest Transport Covered (8CP)",8],
+	["ZAMAK_REPAIR_WINTER_HEX","Zamak Repair (50CP)",50],
+	["ZAMAK_AMMO_WINTER_HEX","Zamak Ammo (50CP)",50],
+	["ZAMAK_FUEL_WINTER_HEX","Zamak Fuel (50CP)",50],
+	["MSE_MARID_WINTER_HEX","MSE-3 Marid (35CP)",35],
+	["ZSU39_TIGRIS_WINTER_HEX","ZSU-39 Tigris (30CP)",30],
+	["BTR_K_KAMYSH_WINTER_HEX","BTR-K Kamysh (40CP)",40],
+	["T100_VARSUK_WINTER_HEX","T-100 Varsuk (40CP)",40],
+	["T140K_ANGARA_WINTER_HEX","T-140K Angara (50CP)",50],
+	["SOCHOR_WINTER_HEX","2S9 Sochor (75CP)",75],
+	["C_Heli_Light_01_civil_F","Heli Civilian Light (22CP)",22],
+	["ORCA_UNARMED_WINTER_HEX","PO-30 Orca Unarmed (15CP)",15],
+	["ORCA_ARMED_WINTER_HEX","PO-30 Orca Armed (30CP)",30],
+	["TARU_TRANSPORT_WINTER_HEX","Mi-290 Taru Transport (35CP",35],
+	["KAJMAN_WINTER_HEX","MI-48 Kajman Attack (45CP)",45],
+	["NEOPHRON_WINTER_HEX","TO-199 Neophron CAS (45CP)",45],
+	["SHIKRA_WINTER_HEX","TO-201 Shikra (50CP)",50],
+	["SHIKRA_STEALTH_WINTER_HEX","TO-201 Shikra Stealth (60CP)",60],
+	["TAYRAN_A2_WINTER_HEX","UAV AR-2 Tayran (5CP)",5],
+	["K40_ABABIL_WINTER_HEX","UAV K-40 Ababil-3 (15CP)",15],
+	["UGV_SAIF_UNARMED_WINTER_HEX","UGV Saif (10CP)",10],
+	["UGV_SAIF_RCWS_WINTER_HEX","UGV Saif RCWS (20CP)",20]
+];
 

@@ -12,24 +12,11 @@ ctrlSetText [1002, format["%1",WARCOM_blufor_ap]];
 _index = lbAdd [2120, localize "STR_DUWS_T_zo6ih0pt"]; 					// 0
 _index = lbAdd [2120, ""]; 									// 1
 
-_var_count = 1;  // 99 max
-_unit_count = 1;  // 5 max
-while {true} do {
-	if (_unit_count > 5) exitWith {};
-	if (_var_count > 99) exitWith {};
-	if (_var_count > 9) then {
-		_var = "blufor_RQST_UNIT_" + str _var_count + "_X"; // Parse the name of the variable as a string
-	} else {
-		_var = "blufor_RQST_UNIT_0" + str _var_count + "_X"; // Parse the name of the variable as a string
-	};
-	if (isNil _var) exitWith {}; // Get the vehicle variable
-	_unitArray = missionNamespace getVariable _var;
-	if (_unitArray select 0 == "empty" || _unitArray select 2 == 0) exitWith {}; 
-	_displayName = [configFile >> "CfgVehicles" >> (_unitArray select 0)] call BIS_fnc_displayName;
-	_index = lbAdd [2120, _displayName  + " (" + str (_unitArray select 2) + "cp)"];
-	_var_count = _var_count + 1;
-	_unit_count = _unit_count + 1;
-};
+// A FOB offers the first five of the faction's units, not the full HQ list.
+{
+	_displayName = [configFile >> "CfgVehicles" >> (_x select 0)] call BIS_fnc_displayName;
+	_index = lbAdd [2120, _displayName  + " (" + str (_x select 2) + "cp)"];
+} forEach ((["UNIT"] call fnc_faction_rqst_list) select [0, 5]);
 
 lbSetCurSel [2120, 0];
 
@@ -55,23 +42,10 @@ lbSetCurSel [2121, 0];
 // REQUEST VEHICLES - 10 MAX
 _index1 = lbAdd [2122, localize "STR_DUWS_T_zo6ih0pt"]; 					// 0
 _index1 = lbAdd [2122, ""];              									// 1
-_var_count = 1;
-_veh_count = 1;  // 10 max
-while {true} do {
-	if (_veh_count > 10) exitWith {};
-	if (_var_count > 99) exitWith {};
-	if (_var_count > 9) then {
-		_var = "blufor_RQST_VEHICLE_" + str _var_count + "_X"; // Parse the name of the variable as a string
-	} else {
-		_var = "blufor_RQST_VEHICLE_0" + str _var_count + "_X"; // Parse the name of the variable as a string
-	};
-	if (isNil _var) exitWith {}; 
-	_vehArray = missionNamespace getVariable _var;
-	if (_vehArray select 0 == "empty" || _vehArray select 2 == 0) exitWith {}; 
-	_displayName = [configFile >> "CfgVehicles" >> (_vehArray select 0)] call BIS_fnc_displayName;
-	_index = lbAdd [2122, _displayName  + " (" + str (_vehArray select 2) + "cp)"];
-	_var_count = _var_count + 1;
-	_veh_count = _veh_count + 1;
-};
+// Ten vehicles at a FOB against the HQ's full list.
+{
+	_displayName = [configFile >> "CfgVehicles" >> (_x select 0)] call BIS_fnc_displayName;
+	_index = lbAdd [2122, _displayName  + " (" + str (_x select 2) + "cp)"];
+} forEach ((["VEHICLE"] call fnc_faction_rqst_list) select [0, 10]);
 
 lbSetCurSel [2122, 0];

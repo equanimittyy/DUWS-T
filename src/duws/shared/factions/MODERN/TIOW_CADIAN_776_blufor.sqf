@@ -67,10 +67,9 @@ blufor_SPECOPS_ENG_X = 			"TIOW_Cad_GM_Vox_776th";			//operator
 /////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
 //
-// THESE HAVE FIXED AMOUNTS -fill the ends with ["empty",0,0];
-//
-// - Units = 				14
-// - Vehicles/Statics = 	50
+// Ordered lists, no padding and no fixed length: the menus offer every entry in the order
+// written here, so position in the list is the display order. A faction may list as many
+// or as few as it has.
 //
 /////////////////////////////////////////////////////////////////
 
@@ -88,20 +87,20 @@ blufor_SPECOPS_ENG_X = 			"TIOW_Cad_GM_Vox_776th";			//operator
 ///////////////////////////////
 
 
-blufor_RQST_UNIT_01_X = 			["TIOW_Cad_GM776th","Shocktrooper (2CP)",2];
-blufor_RQST_UNIT_02_X =				["TIOW_Cad_VET776th","Veteran (3CP)",3];
-blufor_RQST_UNIT_03_X =				["TIOW_Cad_GM_Vox_776th","Vox Operator (3CP)",3];
-blufor_RQST_UNIT_04_X =				["TIOW_Cad_GM_Plasma_776th","Plasmagunner (4CP)",4];
-blufor_RQST_UNIT_05_X =				["TIOW_Cad_Med776th","Medic (4CP)",4];
-blufor_RQST_UNIT_06_X =				["TIOW_Cad_GM_Melta_776th","Meltagunner (4CP)",4];
-blufor_RQST_UNIT_07_X =				["TIOW_Cad_GM_GrenadeLauncher_776th","Grenade Launcher (4CP)",4];
-blufor_RQST_UNIT_08_X =				["TIOW_Cad_GM_Flamer_776th","Flamer (4CP)",4];
-blufor_RQST_UNIT_09_X =				["TIOW_Cad_Kasr776th","Kasrkin (4CP)",4];
-blufor_RQST_UNIT_10_X =				["TIOW_Cad_SNIPER776th","Sniper (3CP)",3];
-blufor_RQST_UNIT_11_X =				["TIOW_Comissar_Winter","Comissar (4CP)",4];
-blufor_RQST_UNIT_12_X =				["TIOW_Priest","Priest (4CP)",4];
-blufor_RQST_UNIT_13_X =				["empty",0,0];
-blufor_RQST_UNIT_14_X =				["empty",0,0];
+blufor_RQST_UNITS = [
+	["TIOW_Cad_GM776th","Shocktrooper (2CP)",2],
+	["TIOW_Cad_VET776th","Veteran (3CP)",3],
+	["TIOW_Cad_GM_Vox_776th","Vox Operator (3CP)",3],
+	["TIOW_Cad_GM_Plasma_776th","Plasmagunner (4CP)",4],
+	["TIOW_Cad_Med776th","Medic (4CP)",4],
+	["TIOW_Cad_GM_Melta_776th","Meltagunner (4CP)",4],
+	["TIOW_Cad_GM_GrenadeLauncher_776th","Grenade Launcher (4CP)",4],
+	["TIOW_Cad_GM_Flamer_776th","Flamer (4CP)",4],
+	["TIOW_Cad_Kasr776th","Kasrkin (4CP)",4],
+	["TIOW_Cad_SNIPER776th","Sniper (3CP)",3],
+	["TIOW_Comissar_Winter","Comissar (4CP)",4],
+	["TIOW_Priest","Priest (4CP)",4]
+];
 
 
 ///////////////////////////////
@@ -111,54 +110,20 @@ blufor_RQST_UNIT_14_X =				["empty",0,0];
 //   _index = lbCurSel 2122;
 ////////////////////////////////
 
-blufor_RQST_VEHICLE_01_X =			["TIOW_Centaur_01_Cadian_776_Blu","Centaur (1CP)",1];
-blufor_RQST_VEHICLE_02_X =			["C_Offroad_01_F","SF Offroader (2CP)",2];
-blufor_RQST_VEHICLE_03_X =			["I_G_Van_01_transport_F","Transport Truck (6CP)",6];
-blufor_RQST_VEHICLE_04_X =			["TIOW_CadianTrojan_776","Trojan(7CP)",7];
-blufor_RQST_VEHICLE_05_X =			["TIOW_CadianChimAuto_776","Chimera (18CP)",18];
-blufor_RQST_VEHICLE_06_X =			["TIOW_CadianWyvern_776","Wyvern (25CP)",25];
-blufor_RQST_VEHICLE_07_X =			["TIOW_CadianHydra_776","Hydra (25CP)",25];
-blufor_RQST_VEHICLE_08_X =			["B_Truck_01_transport_F","HEMTT Transport Uncovered (8CP)",8];
-blufor_RQST_VEHICLE_09_X =			["B_Truck_01_covered_F","HEMTT Transport Covered (8CP)",8];
-blufor_RQST_VEHICLE_10_X =			["B_Truck_01_Repair_F","HEMTT Repair (50CP)",50];
-blufor_RQST_VEHICLE_11_X =			["B_Truck_01_ammo_F","HEMTT Ammo (50CP)",50];
-blufor_RQST_VEHICLE_12_X =			["B_Truck_01_fuel_F","HEMTT Fuel (50CP)",50];
-blufor_RQST_VEHICLE_13_X =			["B_Truck_01_ammo_F","HEMTT Ammo (50CP)",50];
-blufor_RQST_VEHICLE_14_X =			["B_Truck_01_fuel_F","HEMTT Fuel (50CP)",50];
-blufor_RQST_VEHICLE_50_X =			["TIOW_Cad_LR_Annihilator_776th_Blu","Leman Russ - Annihilator (50CP)",50];
-blufor_RQST_VEHICLE_16_X =			["TIOW_Cad_LR_Battlecannon_776th_Blu","Leman Russ - Battlecannon (40CP)",40];
-blufor_RQST_VEHICLE_17_X =			["TIOW_Cad_LR_Conqueror_776th_Blu","Leman Russ - Conqueror (45CP)",45];
-blufor_RQST_VEHICLE_18_X =			["TIOW_Cad_LR_Demolisher_776th_Blu","Leman Russ - Demolisher (55CP)",55];
-blufor_RQST_VEHICLE_19_X =			["TIOW_Cad_LR_Executioner_776th_Blu","Leman Russ - Executioner (45CP)",45];
-blufor_RQST_VEHICLE_20_X =			["TIOW_Cad_LR_Exterminator_776th_Blu","Leman Russ - Exterminator (55CP)",55];
-blufor_RQST_VEHICLE_21_X =			["TIOW_Cad_LR_Punisher_776th_Blu","Leman Russ - Punisher (45CP)",45];
-blufor_RQST_VEHICLE_22_X =			["TIOW_Cad_LR_Vanquisher_776th_Blu","Leman Russ - Vanquisher (45CP)",40];
-blufor_RQST_VEHICLE_23_X =			["TIOW_Warhound_LP_PBG_BLU","Titan Warhound - Plasma (200CP)",200];
-blufor_RQST_VEHICLE_24_X =			["TIOW_Warhound_LP_TLD_BLU","Titan Warhound - Turbolaser (200CP)",200];
-blufor_RQST_VEHICLE_25_X =			["TIOW_Warhound_LP_VMB_BLU","Titan Warhound - Megabolter (200CP)",200];
-blufor_RQST_VEHICLE_26_X =			["TIOW_Valkyrie_Fuel_B","Valkyrie - Lascannon(40CP)",40];
-blufor_RQST_VEHICLE_27_X =			["TIOW_Valkyrie_Fuel_M_B","Valkyrie - Multilaser (45CP)",45];
-blufor_RQST_VEHICLE_28_X =			["TIOW_Valkyrie_Rocket_B","Valkyrie - Lascannon + Rockets (50CP)",50];
-blufor_RQST_VEHICLE_29_X =			["TIOW_Valkyrie_Rocket_M_B","Valkyrie - Multilaser + Rockets (50CP)",50];
-blufor_RQST_VEHICLE_30_X =			["TIOW_Thunderbolt_Base","Thunderbolt Heavy Figher (60CP",60];
-blufor_RQST_VEHICLE_31_X =			["empty",0,0];
-blufor_RQST_VEHICLE_32_X =			["empty",0,0];
-blufor_RQST_VEHICLE_33_X =			["empty",0,0];
-blufor_RQST_VEHICLE_34_X =			["empty",0,0];
-blufor_RQST_VEHICLE_35_X =			["empty",0,0];
-blufor_RQST_VEHICLE_36_X =			["empty",0,0];
-blufor_RQST_VEHICLE_37_X =			["empty",0,0];
-blufor_RQST_VEHICLE_38_X =			["empty",0,0];
-blufor_RQST_VEHICLE_39_X =			["empty",0,0];
-blufor_RQST_VEHICLE_40_X =			["empty",0,0];
-blufor_RQST_VEHICLE_41_X =			["empty",0,0];
-blufor_RQST_VEHICLE_42_X =			["empty",0,0];
-blufor_RQST_VEHICLE_43_X =			["empty",0,0];
-blufor_RQST_VEHICLE_44_X =			["empty",0,0];
-blufor_RQST_VEHICLE_45_X =			["empty",0,0];
-blufor_RQST_VEHICLE_46_X =			["empty",0,0];
-blufor_RQST_VEHICLE_47_X =			["empty",0,0];
-blufor_RQST_VEHICLE_48_X =			["empty",0,0];
-blufor_RQST_VEHICLE_49_X =			["empty",0,0];
-blufor_RQST_VEHICLE_50_X =			["empty",0,0];
+blufor_RQST_VEHICLES = [
+	["TIOW_Centaur_01_Cadian_776_Blu","Centaur (1CP)",1],
+	["C_Offroad_01_F","SF Offroader (2CP)",2],
+	["I_G_Van_01_transport_F","Transport Truck (6CP)",6],
+	["TIOW_CadianTrojan_776","Trojan(7CP)",7],
+	["TIOW_CadianChimAuto_776","Chimera (18CP)",18],
+	["TIOW_CadianWyvern_776","Wyvern (25CP)",25],
+	["TIOW_CadianHydra_776","Hydra (25CP)",25],
+	["B_Truck_01_transport_F","HEMTT Transport Uncovered (8CP)",8],
+	["B_Truck_01_covered_F","HEMTT Transport Covered (8CP)",8],
+	["B_Truck_01_Repair_F","HEMTT Repair (50CP)",50],
+	["B_Truck_01_ammo_F","HEMTT Ammo (50CP)",50],
+	["B_Truck_01_fuel_F","HEMTT Fuel (50CP)",50],
+	["B_Truck_01_ammo_F","HEMTT Ammo (50CP)",50],
+	["B_Truck_01_fuel_F","HEMTT Fuel (50CP)",50]
+];
 

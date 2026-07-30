@@ -63,10 +63,9 @@ blufor_SPECOPS_ENG_X = 			"cwr3_o_soldier_engineer";			//operator
 /////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
 //
-// THESE HAVE FIXED AMOUNTS -fill the ends with ["empty",0,0];
-//
-// - Units = 				14
-// - Vehicles/Statics = 	50
+// Ordered lists, no padding and no fixed length: the menus offer every entry in the order
+// written here, so position in the list is the display order. A faction may list as many
+// or as few as it has.
 //
 /////////////////////////////////////////////////////////////////
 
@@ -84,20 +83,20 @@ blufor_SPECOPS_ENG_X = 			"cwr3_o_soldier_engineer";			//operator
 ///////////////////////////////
 
 
-blufor_RQST_UNIT_01_X = 			["cwr3_o_soldier","Rifleman (2CP)",2];
-blufor_RQST_UNIT_02_X =				["cwr3_o_soldier_gl","Grenadier (3CP)",3];
-blufor_RQST_UNIT_03_X =				["cwr3_o_soldier_ar","Automatic Rifleman (3CP)",3];
-blufor_RQST_UNIT_04_X =				["cwr3_o_soldier_mg","Heavy Gunner (4CP)",4];
-blufor_RQST_UNIT_05_X =				["cwr3_o_soldier_medic","Medic (4CP)",4];
-blufor_RQST_UNIT_06_X =				["cwr3_o_soldier_at_rpg7","AT Rifleman (3CP)",3];
-blufor_RQST_UNIT_07_X =				["cwr3_o_soldier_aat_rpg7","AT Assistant (2CP)",4];
-blufor_RQST_UNIT_08_X =				["cwr3_o_soldier_aa_igla","AA Specialist (4CP)",4];
-blufor_RQST_UNIT_09_X =				["cwr3_o_soldier_engineer","Engineer (4CP)",4];
-blufor_RQST_UNIT_10_X =				["cwr3_o_soldier_marksman","Marksman (3CP)",3];
-blufor_RQST_UNIT_11_X =				["cwr3_o_soldier_sniper","Sniper (4CP)",4];
-blufor_RQST_UNIT_12_X =				["cwr3_o_soldier_hg","Heavy Grenadier (4CP)",4];
-blufor_RQST_UNIT_13_X =				["empty",0,0];
-blufor_RQST_UNIT_14_X =				["empty",0,0];
+blufor_RQST_UNITS = [
+	["cwr3_o_soldier","Rifleman (2CP)",2],
+	["cwr3_o_soldier_gl","Grenadier (3CP)",3],
+	["cwr3_o_soldier_ar","Automatic Rifleman (3CP)",3],
+	["cwr3_o_soldier_mg","Heavy Gunner (4CP)",4],
+	["cwr3_o_soldier_medic","Medic (4CP)",4],
+	["cwr3_o_soldier_at_rpg7","AT Rifleman (3CP)",3],
+	["cwr3_o_soldier_aat_rpg7","AT Assistant (2CP)",4],
+	["cwr3_o_soldier_aa_igla","AA Specialist (4CP)",4],
+	["cwr3_o_soldier_engineer","Engineer (4CP)",4],
+	["cwr3_o_soldier_marksman","Marksman (3CP)",3],
+	["cwr3_o_soldier_sniper","Sniper (4CP)",4],
+	["cwr3_o_soldier_hg","Heavy Grenadier (4CP)",4]
+];
 
 
 ///////////////////////////////
@@ -107,55 +106,31 @@ blufor_RQST_UNIT_14_X =				["empty",0,0];
 //   _index = lbCurSel 2122;
 ////////////////////////////////   
 
-blufor_RQST_VEHICLE_01_X =			["cwr3_o_bmp1","BMP-1 (20CP)",20];
-blufor_RQST_VEHICLE_02_X =			["cwr3_o_bmp2","BMP-2 (22CP)",22];
-blufor_RQST_VEHICLE_03_X =			["cwr3_o_brdm2","BRDM-2 (24CP)",24];
-blufor_RQST_VEHICLE_04_X =			["cwr3_o_btr80","BTR-80 (25CP)",25];
-blufor_RQST_VEHICLE_05_X =			["cwr3_o_zsu","ZSU AA Vehicle (20CP)",20];
-blufor_RQST_VEHICLE_06_X =			["cwr3_o_bmp2_zu23","BMP-2 (ZU23 AA Cannon) (22CP)",22];
-blufor_RQST_VEHICLE_07_X =			["cwr3_o_uaz452","UAZ452 (Van) (5CP)",5];
-blufor_RQST_VEHICLE_08_X =			["cwr3_o_uaz","UAZ (Truck, roof) (3CP)",3];
-blufor_RQST_VEHICLE_09_X =			["cwr3_o_uaz_open","UAZ (Truck, no roof) (3CP)",3];
-blufor_RQST_VEHICLE_10_X =			["cwr3_o_ural","Ural (6CP)",6];
-blufor_RQST_VEHICLE_11_X =			["cwr3_o_uaz_dshkm","UAZ (DshKM) (8CP)",8];
-blufor_RQST_VEHICLE_12_X =			["cwr3_o_t55","T55 (30CP)",30];
-blufor_RQST_VEHICLE_13_X =			["cwr3_o_t64b","T64 (32CP)",32];
-blufor_RQST_VEHICLE_14_X =			["cwr3_o_t72a","T72 (35CP)",35];
-blufor_RQST_VEHICLE_15_X =			["cwr3_o_mi24d","MI24D (Hind) (35CP)",35];
-blufor_RQST_VEHICLE_16_X =			["cwr3_o_mi8_amt","MI8 Transp. (30CP)",30];
-blufor_RQST_VEHICLE_17_X =			["cwr3_o_v80","V80 (35CP)",35];
-blufor_RQST_VEHICLE_18_X =			["cwr3_o_su25","SU-25 Frogfoot (40CP)",40];
-blufor_RQST_VEHICLE_19_X =			["cwr3_o_ural_reammo","Ural Rearm (50CP)",50];
-blufor_RQST_VEHICLE_20_X =			["cwr3_o_ural_refuel","Ural Refuel (50CP)",50];
-blufor_RQST_VEHICLE_21_X =			["cwr3_o_ural_repair","Ural Repair (50CP)",50];
-blufor_RQST_VEHICLE_22_X =			["cwr3_o_mtlb_repair","MTLB Repair (50CP)",50];
-blufor_RQST_VEHICLE_23_X =			["cwr3_o_bm21","BM-21 GRAD MLRS (50CP)",50];
-blufor_RQST_VEHICLE_24_X =			["cwr3_o_scud","Scud-B TEL SRBM (75CP)",75];
-blufor_RQST_VEHICLE_25_X =			["empty",0,0];
-blufor_RQST_VEHICLE_26_X =			["empty",0,0];
-blufor_RQST_VEHICLE_27_X =			["empty",0,0];
-blufor_RQST_VEHICLE_28_X =			["empty",0,0];
-blufor_RQST_VEHICLE_29_X =			["empty",0,0];
-blufor_RQST_VEHICLE_30_X =			["empty",0,0];
-blufor_RQST_VEHICLE_31_X =			["empty",0,0];
-blufor_RQST_VEHICLE_32_X =			["empty",0,0];
-blufor_RQST_VEHICLE_33_X =			["empty",0,0];
-blufor_RQST_VEHICLE_34_X =			["empty",0,0];
-blufor_RQST_VEHICLE_35_X =			["empty",0,0];
-blufor_RQST_VEHICLE_36_X =			["empty",0,0];
-blufor_RQST_VEHICLE_37_X =			["empty",0,0];
-blufor_RQST_VEHICLE_38_X =			["empty",0,0];
-blufor_RQST_VEHICLE_39_X =			["empty",0,0];
-blufor_RQST_VEHICLE_40_X =			["empty",0,0];
-blufor_RQST_VEHICLE_41_X =			["empty",0,0];
-blufor_RQST_VEHICLE_42_X =			["empty",0,0];
-blufor_RQST_VEHICLE_43_X =			["empty",0,0];
-blufor_RQST_VEHICLE_44_X =			["empty",0,0];
-blufor_RQST_VEHICLE_45_X =			["empty",0,0];
-blufor_RQST_VEHICLE_46_X =			["empty",0,0];
-blufor_RQST_VEHICLE_47_X =			["empty",0,0];
-blufor_RQST_VEHICLE_48_X =			["empty",0,0];
-blufor_RQST_VEHICLE_49_X =			["empty",0,0];
-blufor_RQST_VEHICLE_50_X =			["empty",0,0];
+blufor_RQST_VEHICLES = [
+	["cwr3_o_bmp1","BMP-1 (20CP)",20],
+	["cwr3_o_bmp2","BMP-2 (22CP)",22],
+	["cwr3_o_brdm2","BRDM-2 (24CP)",24],
+	["cwr3_o_btr80","BTR-80 (25CP)",25],
+	["cwr3_o_zsu","ZSU AA Vehicle (20CP)",20],
+	["cwr3_o_bmp2_zu23","BMP-2 (ZU23 AA Cannon) (22CP)",22],
+	["cwr3_o_uaz452","UAZ452 (Van) (5CP)",5],
+	["cwr3_o_uaz","UAZ (Truck, roof) (3CP)",3],
+	["cwr3_o_uaz_open","UAZ (Truck, no roof) (3CP)",3],
+	["cwr3_o_ural","Ural (6CP)",6],
+	["cwr3_o_uaz_dshkm","UAZ (DshKM) (8CP)",8],
+	["cwr3_o_t55","T55 (30CP)",30],
+	["cwr3_o_t64b","T64 (32CP)",32],
+	["cwr3_o_t72a","T72 (35CP)",35],
+	["cwr3_o_mi24d","MI24D (Hind) (35CP)",35],
+	["cwr3_o_mi8_amt","MI8 Transp. (30CP)",30],
+	["cwr3_o_v80","V80 (35CP)",35],
+	["cwr3_o_su25","SU-25 Frogfoot (40CP)",40],
+	["cwr3_o_ural_reammo","Ural Rearm (50CP)",50],
+	["cwr3_o_ural_refuel","Ural Refuel (50CP)",50],
+	["cwr3_o_ural_repair","Ural Repair (50CP)",50],
+	["cwr3_o_mtlb_repair","MTLB Repair (50CP)",50],
+	["cwr3_o_bm21","BM-21 GRAD MLRS (50CP)",50],
+	["cwr3_o_scud","Scud-B TEL SRBM (75CP)",75]
+];
 
 

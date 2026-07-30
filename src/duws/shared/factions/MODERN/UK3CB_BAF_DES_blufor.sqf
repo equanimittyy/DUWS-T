@@ -66,10 +66,9 @@ blufor_SPECOPS_ENG_X = 			"UK3CB_BAF_Engineer_DDPM";		//operator
 /////////////////////////////////////////////////////////////////
 // REQUEST Units/Vehicles
 //
-// THESE HAVE FIXED AMOUNTS -fill the ends with ["empty",0,0];
-//
-// - Units = 				14
-// - Vehicles/Statics = 	50
+// Ordered lists, no padding and no fixed length: the menus offer every entry in the order
+// written here, so position in the list is the display order. A faction may list as many
+// or as few as it has.
 //
 /////////////////////////////////////////////////////////////////
 
@@ -87,20 +86,21 @@ blufor_SPECOPS_ENG_X = 			"UK3CB_BAF_Engineer_DDPM";		//operator
 ///////////////////////////////
 
 
-blufor_RQST_UNIT_01_X = 			["UK3CB_BAF_Pointman_DDPM","Point Man (DDPM) (2CP)",2];
-blufor_RQST_UNIT_02_X =				["UK3CB_BAF_Grenadier_DDPM","Grenadier (DDPM) (3CP)",3];
-blufor_RQST_UNIT_03_X =				["UK3CB_BAF_LSW_DDPM","Automatic Rifleman (DDPM) (3CP)",3];
-blufor_RQST_UNIT_04_X =				["UK3CB_BAF_MGGPMG_DDPM","Heavy Gunner (DDPM) (4CP)",4];
-blufor_RQST_UNIT_05_X =				["UK3CB_BAF_Medic_DDPM","Medic (DDPM) (4CP)",4];
-blufor_RQST_UNIT_06_X =				["UK3CB_BAF_LAT_ILAW_DDPM","AT Rifleman (DDPM) (3CP)",3];
-blufor_RQST_UNIT_07_X =				["UK3CB_BAF_MAT_DDPM","AT Specialist (DDPM) (4CP)",4];
-blufor_RQST_UNIT_08_X =				["UK3CB_BAF_Engineer_DDPM","Engineer (DDPM) (4CP)",4];
-blufor_RQST_UNIT_09_X =				["UK3CB_BAF_Repair_DDPM","Repair Specialist (DDPM) (4CP)",4];
-blufor_RQST_UNIT_10_X =				["UK3CB_BAF_Explosive_DDPM","Explosive Specialist (DDPM) (4CP)",4];
-blufor_RQST_UNIT_11_X =				["UK3CB_BAF_Spotter_DDPM_Ghillie_L129","Spotter (DDPM) (3CP)",3];
-blufor_RQST_UNIT_12_X =				["UK3CB_BAF_Marksman_DDPM","Marksman (DDPM) (3CP)",3];
-blufor_RQST_UNIT_13_X =				["UK3CB_BAF_Sniper_DDPM_Ghillie_L115","Sniper (DDPM) (4CP)",4];
-blufor_RQST_UNIT_14_X =				["empty",0,0];
+blufor_RQST_UNITS = [
+	["UK3CB_BAF_Pointman_DDPM","Point Man (DDPM) (2CP)",2],
+	["UK3CB_BAF_Grenadier_DDPM","Grenadier (DDPM) (3CP)",3],
+	["UK3CB_BAF_LSW_DDPM","Automatic Rifleman (DDPM) (3CP)",3],
+	["UK3CB_BAF_MGGPMG_DDPM","Heavy Gunner (DDPM) (4CP)",4],
+	["UK3CB_BAF_Medic_DDPM","Medic (DDPM) (4CP)",4],
+	["UK3CB_BAF_LAT_ILAW_DDPM","AT Rifleman (DDPM) (3CP)",3],
+	["UK3CB_BAF_MAT_DDPM","AT Specialist (DDPM) (4CP)",4],
+	["UK3CB_BAF_Engineer_DDPM","Engineer (DDPM) (4CP)",4],
+	["UK3CB_BAF_Repair_DDPM","Repair Specialist (DDPM) (4CP)",4],
+	["UK3CB_BAF_Explosive_DDPM","Explosive Specialist (DDPM) (4CP)",4],
+	["UK3CB_BAF_Spotter_DDPM_Ghillie_L129","Spotter (DDPM) (3CP)",3],
+	["UK3CB_BAF_Marksman_DDPM","Marksman (DDPM) (3CP)",3],
+	["UK3CB_BAF_Sniper_DDPM_Ghillie_L115","Sniper (DDPM) (4CP)",4]
+];
 
 
 ///////////////////////////////
@@ -110,55 +110,48 @@ blufor_RQST_UNIT_14_X =				["empty",0,0];
 //   _index = lbCurSel 2122;
 ////////////////////////////////   
 
-blufor_RQST_VEHICLE_01_X =			["B_Quadbike_01_F","ATV (1CP)",1];
-blufor_RQST_VEHICLE_02_X =			["C_Offroad_01_F","SF Offroader (2CP)",2];
-blufor_RQST_VEHICLE_03_X =			["I_G_Van_01_transport_F","Transport Truck (6CP)",6];
-blufor_RQST_VEHICLE_04_X =			["B_MRAP_01_F","Hunter Unarmed (5CP)",5];
-blufor_RQST_VEHICLE_05_X =			["UK3CB_BAF_Husky_Passenger_HMG_Sand_DDPM","Husky HMG (18CP)",18];
-blufor_RQST_VEHICLE_06_X =			["UK3CB_BAF_Husky_Passenger_GMG_Sand_DDPM","Husky GMG (25CP)",25];
-blufor_RQST_VEHICLE_07_X =			["UK3CB_BAF_LandRover_Hard_FFR_Sand_A_DDPM","Land Rover Unarmed (5CP)",5];
-blufor_RQST_VEHICLE_08_X =			["UK3CB_BAF_LandRover_WMIK_HMG_FFR_Sand_A_DDPM","Land Rover HMG (15CP)",15];
-blufor_RQST_VEHICLE_09_X =			["UK3CB_BAF_LandRover_WMIK_Milan_FFR_Sand_A_DDPM","Land Rover AT (20CP)",20];
-blufor_RQST_VEHICLE_10_X =			["B_Truck_01_transport_F","HEMTT Transport Uncovered (8CP)",8];
-blufor_RQST_VEHICLE_11_X =			["UK3CB_BAF_MAN_HX58_Transport_Sand_DDPM","MAN Transport Covered (8CP)",8];
-blufor_RQST_VEHICLE_12_X =			["UK3CB_BAF_MAN_HX58_Repair_Sand_DDPM","MAN Repair (50CP)",50];
-blufor_RQST_VEHICLE_13_X =			["UK3CB_BAF_MAN_HX58_Cargo_Sand_B_DDPM","MAN Cargo (50CP)",50];
-blufor_RQST_VEHICLE_14_X =			["UK3CB_BAF_MAN_HX58_Fuel_Sand_DDPM","MAN Fuel (50CP)",50];
-blufor_RQST_VEHICLE_15_X =			["B_APC_Wheeled_01_cannon_F","AMV-7 Marshall (35CP)",35];
-blufor_RQST_VEHICLE_16_X =			["B_APC_Tracked_01_AA_F","IFV-6c Cheetah (30CP)",30];
-blufor_RQST_VEHICLE_17_X =			["B_AFV_Wheeled_01_cannon_F","Rhino MGS (35CP)",35];
-blufor_RQST_VEHICLE_18_X =			["B_AFV_Wheeled_01_up_cannon_F","Rhino MGS UP (35CP)",35];
-blufor_RQST_VEHICLE_19_X =			["UK3CB_BAF_LandRover_Panama_Sand_A_DDPM","Land Rover ROV (10CP)",10];
-blufor_RQST_VEHICLE_20_X =			["UK3CB_BAF_FV432_Mk3_RWS_Sand_DDPM","FV432/3 Bulldog HMG (25CP)",25];
-blufor_RQST_VEHICLE_21_X =			["UK3CB_BAF_FV432_Mk3_GPMG_Sand_DDPM","FV432/3 Bulldog GPMG (35CP)",35];
-blufor_RQST_VEHICLE_22_X =			["B_MBT_01_cannon_F","M2A1 Slammer (40CP)",40];
-blufor_RQST_VEHICLE_23_X =			["B_MBT_01_TUSK_F","M2A4 Slammer UP (40CP)",40];
-blufor_RQST_VEHICLE_24_X =			["I_MBT_03_cannon_F","MBT-52 Kuma (50CP)",50];
-blufor_RQST_VEHICLE_25_X =			["B_MBT_01_arty_F","M4 Scorcher Artillery (75CP)",75];
-blufor_RQST_VEHICLE_26_X =			["B_MBT_01_mlrs_F","M5 Sandstorm MLRS (75CP)",75];
-blufor_RQST_VEHICLE_27_X =			["B_Heli_Light_01_dynamicLoadout_F","AH-9 Pawnee (25CP)",25];
-blufor_RQST_VEHICLE_28_X =			["B_Heli_Light_01_F","MH-9 Hummingbird (15CP)",15];
-blufor_RQST_VEHICLE_29_X =			["UK3CB_BAF_Apache_AH1_DDPM","Apache AH1 (45CP)",45];
-blufor_RQST_VEHICLE_30_X =			["B_T_VTOL_01_armed_F","V-44 X Armed (40CP",40];
-blufor_RQST_VEHICLE_31_X =			["UK3CB_BAF_Wildcat_AH1_TRN_8A_DDPM","Wildcat AH1 Transport (22CP)",22];
-blufor_RQST_VEHICLE_32_X =			["UK3CB_BAF_Merlin_HC3_18_DDPM","Merlin HC3 Unarmed (26CP)",26];
-blufor_RQST_VEHICLE_33_X =			["UK3CB_BAF_Merlin_HC3_18_GPMG_DDPM","Merlin HC3 Armed (26CP)",26];
-blufor_RQST_VEHICLE_34_X =			["B_Plane_CAS_01_dynamicLoadout_F","A-164 Wipeout CAS (45CP)",45];
-blufor_RQST_VEHICLE_35_X =			["B_Plane_Fighter_01_F","FA-181 Black Wasp II (50CP)",50];
-blufor_RQST_VEHICLE_36_X =			["B_Plane_Fighter_01_Stealth_F","FA-181 Black Wasp II Stealth (60CP)",60];
-blufor_RQST_VEHICLE_37_X =			["B_UAV_01_F","UAV Darter(5CP)",5];
-blufor_RQST_VEHICLE_38_X =			["UK3CB_BAF_MQ9_Reaper_DDPM","MQ-9 Reaper (15CP)",15];
-blufor_RQST_VEHICLE_39_X =			["B_UGV_01_F","UGV Stomper Recon (10CP)",10];
-blufor_RQST_VEHICLE_40_X =			["B_UGV_01_rcws_F","UGV Stomper RCWS (20CP)",20];
-blufor_RQST_VEHICLE_41_X =			["B_T_UAV_03_dynamicLoadout_F","MQ-12 UAV (20CP)",20];
-blufor_RQST_VEHICLE_42_X =			["empty",0,0];
-blufor_RQST_VEHICLE_43_X =			["empty",0,0];
-blufor_RQST_VEHICLE_44_X =			["empty",0,0];
-blufor_RQST_VEHICLE_45_X =			["empty",0,0];
-blufor_RQST_VEHICLE_46_X =			["empty",0,0];
-blufor_RQST_VEHICLE_47_X =			["empty",0,0];
-blufor_RQST_VEHICLE_48_X =			["empty",0,0];
-blufor_RQST_VEHICLE_49_X =			["empty",0,0];
-blufor_RQST_VEHICLE_50_X =			["empty",0,0];
+blufor_RQST_VEHICLES = [
+	["B_Quadbike_01_F","ATV (1CP)",1],
+	["C_Offroad_01_F","SF Offroader (2CP)",2],
+	["I_G_Van_01_transport_F","Transport Truck (6CP)",6],
+	["B_MRAP_01_F","Hunter Unarmed (5CP)",5],
+	["UK3CB_BAF_Husky_Passenger_HMG_Sand_DDPM","Husky HMG (18CP)",18],
+	["UK3CB_BAF_Husky_Passenger_GMG_Sand_DDPM","Husky GMG (25CP)",25],
+	["UK3CB_BAF_LandRover_Hard_FFR_Sand_A_DDPM","Land Rover Unarmed (5CP)",5],
+	["UK3CB_BAF_LandRover_WMIK_HMG_FFR_Sand_A_DDPM","Land Rover HMG (15CP)",15],
+	["UK3CB_BAF_LandRover_WMIK_Milan_FFR_Sand_A_DDPM","Land Rover AT (20CP)",20],
+	["B_Truck_01_transport_F","HEMTT Transport Uncovered (8CP)",8],
+	["UK3CB_BAF_MAN_HX58_Transport_Sand_DDPM","MAN Transport Covered (8CP)",8],
+	["UK3CB_BAF_MAN_HX58_Repair_Sand_DDPM","MAN Repair (50CP)",50],
+	["UK3CB_BAF_MAN_HX58_Cargo_Sand_B_DDPM","MAN Cargo (50CP)",50],
+	["UK3CB_BAF_MAN_HX58_Fuel_Sand_DDPM","MAN Fuel (50CP)",50],
+	["B_APC_Wheeled_01_cannon_F","AMV-7 Marshall (35CP)",35],
+	["B_APC_Tracked_01_AA_F","IFV-6c Cheetah (30CP)",30],
+	["B_AFV_Wheeled_01_cannon_F","Rhino MGS (35CP)",35],
+	["B_AFV_Wheeled_01_up_cannon_F","Rhino MGS UP (35CP)",35],
+	["UK3CB_BAF_LandRover_Panama_Sand_A_DDPM","Land Rover ROV (10CP)",10],
+	["UK3CB_BAF_FV432_Mk3_RWS_Sand_DDPM","FV432/3 Bulldog HMG (25CP)",25],
+	["UK3CB_BAF_FV432_Mk3_GPMG_Sand_DDPM","FV432/3 Bulldog GPMG (35CP)",35],
+	["B_MBT_01_cannon_F","M2A1 Slammer (40CP)",40],
+	["B_MBT_01_TUSK_F","M2A4 Slammer UP (40CP)",40],
+	["I_MBT_03_cannon_F","MBT-52 Kuma (50CP)",50],
+	["B_MBT_01_arty_F","M4 Scorcher Artillery (75CP)",75],
+	["B_MBT_01_mlrs_F","M5 Sandstorm MLRS (75CP)",75],
+	["B_Heli_Light_01_dynamicLoadout_F","AH-9 Pawnee (25CP)",25],
+	["B_Heli_Light_01_F","MH-9 Hummingbird (15CP)",15],
+	["UK3CB_BAF_Apache_AH1_DDPM","Apache AH1 (45CP)",45],
+	["B_T_VTOL_01_armed_F","V-44 X Armed (40CP",40],
+	["UK3CB_BAF_Wildcat_AH1_TRN_8A_DDPM","Wildcat AH1 Transport (22CP)",22],
+	["UK3CB_BAF_Merlin_HC3_18_DDPM","Merlin HC3 Unarmed (26CP)",26],
+	["UK3CB_BAF_Merlin_HC3_18_GPMG_DDPM","Merlin HC3 Armed (26CP)",26],
+	["B_Plane_CAS_01_dynamicLoadout_F","A-164 Wipeout CAS (45CP)",45],
+	["B_Plane_Fighter_01_F","FA-181 Black Wasp II (50CP)",50],
+	["B_Plane_Fighter_01_Stealth_F","FA-181 Black Wasp II Stealth (60CP)",60],
+	["B_UAV_01_F","UAV Darter(5CP)",5],
+	["UK3CB_BAF_MQ9_Reaper_DDPM","MQ-9 Reaper (15CP)",15],
+	["B_UGV_01_F","UGV Stomper Recon (10CP)",10],
+	["B_UGV_01_rcws_F","UGV Stomper RCWS (20CP)",20],
+	["B_T_UAV_03_dynamicLoadout_F","MQ-12 UAV (20CP)",20]
+];
 
 
