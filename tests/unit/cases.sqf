@@ -252,3 +252,47 @@ private _shrunk = [["coins", 2], ["document", 1]];
 
 // A zero-weight row is how a source opts out of a kind; it must never be selectable.
 ["drawKind: a zero-weight row is skipped", ([[["intel", 0], ["pool", 1]], 0] call fnc_search_drawKind), "pool"] call fnc_assertEq;
+
+// --- fnc_opforRoles: the spawnable role list a faction table actually resolved ---
+// Last block in the file: it captures fnc_log rather than stubbing it away, because the warning
+// is what makes a faction table that resolved nothing visible at all, and it leaves fnc_log
+// captured and opfor_SOLDIER_X undefined behind it.
+DUWS_TEST_LOG = [];
+fnc_log = { DUWS_TEST_LOG pushBack _this };
+
+// Deliberately not the real classnames: a fake rifleman is the only way to tell "fell back to
+// opfor_SOLDIER_X" apart from "fell back to the vanilla literal".
+opfor_SOLDIER_X = "O_Soldier_F_fake";
+opfor_AA_SOLDIER_X = "O_Soldier_AA_fake";
+opfor_AR_SOLDIER_X = "O_Soldier_AR_fake";
+
+["opforRoles: a table defining every role keeps all of them, in order",
+    ([[opfor_SOLDIER_X, opfor_AA_SOLDIER_X, opfor_AR_SOLDIER_X]] call fnc_opforRoles),
+    ["O_Soldier_F_fake", "O_Soldier_AA_fake", "O_Soldier_AR_fake"]] call fnc_assertEq;
+
+// The array literal is built at the call site, so a role the faction table never defined arrives
+// as a nil element. This is the whole reason the list is walked instead of filtered.
+["opforRoles: a role the table never defined is dropped, not spawned as nil",
+    ([[opfor_SOLDIER_X, opfor_MISSING_ROLE_X, opfor_AR_SOLDIER_X]] call fnc_opforRoles),
+    ["O_Soldier_F_fake", "O_Soldier_AR_fake"]] call fnc_assertEq;
+
+opfor_EMPTY_ROLE_X = "";
+["opforRoles: a role defined as an empty string is dropped too",
+    ([[opfor_SOLDIER_X, opfor_EMPTY_ROLE_X]] call fnc_opforRoles),
+    ["O_Soldier_F_fake"]] call fnc_assertEq;
+
+DUWS_TEST_LOG = [];
+["opforRoles: a table resolving nothing falls back to the rifleman",
+    ([[opfor_MISSING_ROLE_X, opfor_ALSO_MISSING_X]] call fnc_opforRoles),
+    ["O_Soldier_F_fake"]] call fnc_assertEq;
+["opforRoles: the fallback warns rather than degrading silently",
+    (count DUWS_TEST_LOG), 1] call fnc_assertEq;
+
+// The case the fallback used to miss: with no rifleman defined either, handing back
+// [opfor_SOLDIER_X] returned [nil] -- the exact outcome the guard exists to prevent.
+opfor_SOLDIER_X = nil;
+["opforRoles: with no rifleman defined either, the fallback is a vanilla class",
+    ([[opfor_MISSING_ROLE_X]] call fnc_opforRoles), ["O_Soldier_F"]] call fnc_assertEq;
+
+["opforRoles: no argument at all still yields a spawnable list",
+    ([] call fnc_opforRoles), ["O_Soldier_F"]] call fnc_assertEq;
