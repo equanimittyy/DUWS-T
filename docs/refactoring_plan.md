@@ -50,18 +50,6 @@ leads the plan.
 
 Small, self-contained, and each one is a strict improvement with no design argument attached.
 
-### The registry has one duplicate entry and one dead one
-
-`fnc_missionLocator` is registered twice from the same path — `server/server_fnc_init.sqf:749`
-and `:1270` — and only the second broadcasts it, so the first is doing nothing the second does
-not redo.
-
-`fnc_missionPatrolsSmall` (`:772`) is registered and then called from nowhere in `src/`: its only
-reference in the tree is the registration itself. Its siblings `fnc_missionPatrols` and
-`fnc_missionPatrolswithintel` are both live, so the name is not a placeholder for a system that
-was removed — deleting the entry orphans `server/missions/fnc_missionPatrolsSmall.sqf`, which is
-a separate call.
-
 ### `call (compile _var)` where `getVariable` is meant
 
 Eight sites read a global by reconstructing its name as a string and invoking the compiler on it:
@@ -484,7 +472,6 @@ Sequenced so that each step is independently verifiable and nothing later depend
 not yet made. Lint is `bash tests/run.sh`; "smoke" means repack and play far enough to exercise
 the named system.
 
-- [ ] Registry corrections: delete the duplicate `fnc_missionLocator` at `server_fnc_init.sqf:749` and the unreferenced `fnc_missionPatrolsSmall` at `:772`. Verify: lint passes, and the boot-time registry self-check logs no `compiled EMPTY`.
 - [ ] Replace the eight `call (compile _var)` reads with `missionNamespace getVariable`. Verify: HQ and FOB request menus populate identically, and buying a vehicle from each still charges CP.
 - [ ] Convert the live FOB warning-trigger name (`fnc_fob_server.sqf:85-86` / `fnc_FOB_cleanup.sqf:18`) to `setVariable`/`getVariable`, and decide the dead zone write at `fnc_createzone.sqf:221-222`. Verify: deploy a FOB, let an OPFOR element approach it (warning fires), then remove it (the trigger is deleted, not orphaned).
 - [ ] Add `fnc_mission_site` and `fnc_mission_end` alongside the existing `fnc_mission_begin`, with the cooldown release in `fnc_mission_site`'s bail-out path; convert the threads one at a time. Verify per thread: the bail-out releases `Mission_available` **and** clears `mission_cooldown_<type>` so the type is immediately re-offerable, markers are deleted, and the reward pays once.

@@ -94,8 +94,6 @@ automated resolution could not reach, and the reasons are worth knowing:
 - **A function passed as a value has no call site to find.** `addAction`, `onLBSelChanged` and
   the dyna-mission table all take a bare function reference, so the invocation never appears as
   `spawn`/`call`/`remoteExec` next to the name.
-`server/missions/fnc_missionPatrolsSmall.sqf` is registered and never called from anywhere. Its header
-records that rather than inventing a locality for it.
 
 ## Dedicated-server compatibility
 

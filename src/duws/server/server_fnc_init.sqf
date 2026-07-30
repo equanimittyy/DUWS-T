@@ -746,7 +746,6 @@ fnc_fob_destroyed = compile preprocessFileLineNumbers "duws\server\misc\fnc_fob_
 fnc_baseRangeMarker = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseRangeMarker.sqf";
 // Not broadcast: it decides which players a base appearing is visible to, which only the server can.
 fnc_baseFade = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseFade.sqf";
-fnc_missionLocator = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionLocator.sqf";
 fnc_create_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_create_ammo_lists.sqf";
 fnc_basic_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_basic_ammo_lists.sqf";
 fnc_escalation = compile preprocessFileLineNumbers "duws\server\misc\fnc_escalation.sqf";
@@ -769,7 +768,6 @@ fnc_missionTaskCreate = compile preprocessFileLineNumbers "duws\server\missions\
 fnc_missionTaskEnd = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTaskEnd.sqf";
 fnc_missionPatrols = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrols.sqf";
 fnc_missionPatrolswithintel = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrolswithintel.sqf";
-fnc_missionPatrolsSmall = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrolsSmall.sqf";
 fnc_mission_cleanup = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_cleanup.sqf";
 // 动态氛围任务系统
 fnc_findSafeMissionPos = compile preprocessFileLineNumbers "duws\server\misc\fnc_findSafeMissionPos.sqf";
