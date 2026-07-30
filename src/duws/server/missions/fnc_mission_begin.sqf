@@ -37,10 +37,12 @@ publicVariable "Mission_available";
 // Typed rather than titleText'd, to match the card the campaign opens with. Spawned on each
 // client rather than remoteExec'd straight to BIS_fnc_typeText: it sleeps between characters,
 // which throws in the unscheduled environment remoteExec would call it in.
-// The trailing 2 is the hold before the fade: the default of 1 puts the last character on screen
-// and takes the line away again, so the operation name was never readable as a whole.
+// The hold is the line's own third element, not a trailing argument: BIS_fnc_typeText's second
+// and third arguments are screen coordinates, so a hold passed there types the card two screens
+// below the bottom edge and nobody sees it. Four seconds, because the default puts the last
+// character on screen and takes the line away again.
 [_mission_name, {
-	[[[toUpper _this, "<t align='center' shadow='1' size='1'>%1</t>"]], 1, 2] spawn BIS_fnc_typeText;
+	[[[toUpper _this, "<t align='center' shadow='1' size='1'>%1</t>", 4]]] spawn BIS_fnc_typeText;
 }] remoteExec ["spawn", [0,-2] select isDedicated];
 // Under the card, and one of only two places music plays -- the other is the insertion flight.
 // Double brackets: playMusic is a unary command whose one argument is an array, so written flat

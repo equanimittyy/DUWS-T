@@ -238,14 +238,16 @@ table (`server/server_var_init.sqf`), drawn by weight rather than by a threshold
 | Weight | Outcome |
 |---:|---|
 | 3 / 8 | 1–5 `Item_Money_roll` on the ground |
-| 1 / 8 | exactly one item from Files / Wallet_traitor / FlashDisk / SmartPhone / MobilePhone |
+| 1 / 8 | exactly one item from Wallet_traitor / FlashDisk / SmartPhone / MobilePhone |
 | 4 / 8 | nothing |
 
 Three quarters of what is found is cash, so a frisk is a gamble on pocket change rather than a way
 to farm intel. Phones share the pool with the documents because both exist only to be turned in at
-the HQ terminal, which prices a phone above a file — a branch of their own was two names for one
-outcome. The intel drop is capped at one item: three documents off one person is three searches'
-worth of CP for a single frisk.
+the HQ terminal, which prices a phone above a wallet — a branch of their own was two names for one
+outcome. The file is the one document absent from that pool, because it is also what
+`fnc_addRandomLoot` puts on 80 % of enemies: pricing it for a search would price every corpse in
+the campaign. The intel drop is capped at one item: three documents off one person is three
+searches' worth of CP for a single frisk.
 
 Civilians carry no coins of their own. This table is the whole of what a person is worth in cash,
 so the coins in a town are a function of how many people the player is willing to hold at gunpoint.

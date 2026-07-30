@@ -73,8 +73,9 @@ something wrong.
 
 **The numbers are unbalanced by admission.** An 8 % flag rate on a garrison, 15 % on a mission
 group, and every payout weight, are the shape's placeholder values rather than played ones. They
-are one table in `server/server_var_init.sqf` and are meant to be moved once the arc has been felt
-end to end.
+are one table in `server/server_var_init.sqf`, with what a document is worth in
+`server/misc/fnc_intelAnalysis.sqf`, and are meant to be moved once the arc has been felt end to
+end.
 
 ## RAVAGE and WBK: parked until base DUWS is whole
 

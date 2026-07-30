@@ -28,8 +28,7 @@ if (!hasInterface) exitWith {};
 // never dead and an intact vehicle is still worth opening -- and surrender is the other way a man
 // becomes searchable, which is the whole of what an arrest buys.
 private _cond =
-    "!isNil 'hardcore_mode_enable' && {hardcore_mode_enable}"
-  + " && {!isNull cursorObject}"
+    "!isNull cursorObject"
   + " && {cursorObject distance _target < 3}"
   + " && {(cursorObject getVariable ['DUWS_search_src', '']) != ''}"
   + " && {!(cursorObject getVariable ['DUWS_search_done', false])}"

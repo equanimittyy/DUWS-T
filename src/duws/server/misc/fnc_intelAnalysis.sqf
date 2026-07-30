@@ -5,14 +5,22 @@ params ["_caller"];
 if (isNull _caller) exitWith {};
 
 // 定义情报物品与对应 CP 值
+//
+// Two tiers, and which tier an item is in is decided by where it comes from. `Files` and
+// `Wallet_ID` are what fnc_addRandomLoot puts on 80 % of enemies, so they price a corpse and stay
+// low. The rest are only ever handed over by a search, whose whole point is that it beat the 1-3
+// CP the pool pays on the spot -- so every one of them clears 3.
+//
+// Whole numbers throughout: the total is floored once at the end, so a fractional value made two
+// of a kind worth more than twice one.
 private _intelItems = [
-    ["SmartPhone", 4],
-    ["MobilePhone", 2],
-    ["FlashDisk", 2.5],
+    ["SmartPhone", 6],
+    ["MobilePhone", 4],
+    ["FlashDisk", 5],
     ["Files", 2],
     ["FilesSecret", 8],
     ["Wallet_ID", 1],
-    ["Wallet_traitor", 1],
+    ["Wallet_traitor", 4],
     ["FileTopSecret", 8]
 ];
 

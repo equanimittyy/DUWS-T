@@ -744,3 +744,22 @@ handed only the first element — `titleText "In memory of..."` — and throws o
 by-name form silently fails too if the nesting is dropped. That is how the memorial card came to
 display nothing while the `titleCut` fades on either side of it, all written nested, kept
 working. `src/duws/server/misc/fnc_intro_heli.sqf` is the worked example for both.
+
+## `BIS_fnc_typeText`'s second and third arguments are screen coordinates, not timings
+
+**The signature is `[lines, x, y, format]`. A hold or a typing speed passed in those two slots is
+read as a position, so the card types itself off the edge of the screen and the call reports
+nothing wrong.** `[..., 1, 2]` puts it two full screens below the bottom — indistinguishable from
+the function never having run.
+
+The timing lever is per line, not per call: each entry of the line array is
+`[text, format, delay]`, and the delay is how long that line sits before the next one types or
+the block fades. Read the two callers together and the shape is unambiguous —
+`client/misc/fnc_bottom_right_message.sqf:221` passes `-safezoneX` and `0.85` to pin the date and
+time OSD to the bottom right, and `server/warcom/fnc_init_OPFOR_WARCOM.sqf:75` passes the line
+array alone and lands centred.
+
+**How to apply:** pass the line array alone unless you actually mean to move the card, and put a
+hold in the line's own third element. A one-line card with no delay is the case that misleads:
+the default drops the line the instant the last character lands, which reads as a flicker and
+invites exactly the trailing-argument "fix" that then hides it altogether.

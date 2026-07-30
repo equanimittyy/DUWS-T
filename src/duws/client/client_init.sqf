@@ -59,6 +59,11 @@ if (!isMultiplayer) then {
 #include "includes\supports_init.hpp"
 #include "includes\squad_number_init.hpp"
 
+// One track over the setup screens, which is all the day-cycle loop deleted from here ever
+// contributed before it started: the loop running underneath the whole campaign is what made
+// music read as a menu, not this. Replaced at the insertion flight.
+playMusic ["LeadTrack02_F", 0];
+
 // JIP SCREEN, open map
 if (isMultiplayer) then {
 	
@@ -224,7 +229,7 @@ if (_difficulty_setting < 2 || (difficultyOption "mapContentFriendly") == 1) the
 // onPlayerRespawn.sqf re-adds it.
 player addaction [ACT_UTIL("STR_DUWS_T_2rc0nvug"),fnc_earplugs, [], 20, true, true, "", "_this == player"];
 
-// Hardcore body search. Same re-add reason as the earplugs above: it dies with the body.
+// Body search. Same re-add reason as the earplugs above: it dies with the body.
 [] call fnc_intel_search_action;
 
 // Developer tools. Two gates, because the parameter is mission config and so reads the same on

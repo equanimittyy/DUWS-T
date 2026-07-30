@@ -33,6 +33,14 @@ private _origin = getPosATL _target;
 private _remaining = +(_config select 1);
 private _paid = false;
 
+// What a document draw hands over, named once because the intel substitute at the bottom draws
+// from it too. Every member clears the 1-3 CP the pool pays on the spot, which is what makes the
+// trip back to the terminal worth taking. `Item_Files` is deliberately absent: the file is also
+// what fnc_addRandomLoot puts on 80 % of enemies, so pricing it for a search prices every corpse
+// in the campaign.
+private _documents = ["Item_Wallet_traitor", "Item_FlashDisk", "Item_SmartPhone",
+    "Item_MobilePhone"];
+
 // Drawn without replacement. A kind that reports nothing left to give drops out and the rest are
 // re-drawn, so an exhausted intel pool costs the search its best outcome rather than its voice.
 while {!_paid && {!(_remaining isEqualTo [])}} do {
@@ -41,8 +49,10 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
 
     switch (_kind) do {
         // The only kind that can decline: fnc_intel_payout returns false once every zone, town
-        // and hardpoint is already revealed. It speaks its own line when it pays.
-        case "intel": { _paid = [_origin, _caller] call fnc_intel_payout };
+        // and hardpoint is already revealed. It speaks its own line when it pays. Silenced on the
+        // dry path because this driver answers that case itself, below -- outside hardcore it is
+        // reached on every single search, and the two lines contradict each other.
+        case "intel": { _paid = [_origin, _caller, false] call fnc_intel_payout };
 
         // CP only, and rolled: a search is a windfall for the player who made it, not a shift in
         // the war's momentum, which is what AP measures and what every WARCOM wave threshold reads.
@@ -64,11 +74,9 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
         };
 
         // One item, not a handful: three documents off one body is three searches' worth of CP
-        // for a single search. Phones share the pool with the files -- both exist only to be
-        // turned in at the terminal, which already prices a phone above a file.
+        // for a single search.
         case "document": {
-            [[selectRandom ["Item_Files", "Item_Wallet_traitor", "Item_FlashDisk",
-                "Item_SmartPhone", "Item_MobilePhone"]], _origin] call fnc_search_dropItems;
+            [[selectRandom _documents], _origin] call fnc_search_dropItems;
             [_speaker, localize "STR_DUWS_T_LOOT2"] remoteExec ["fnc_duws_dialogue", _caller];
             _paid = true;
         };
@@ -84,7 +92,12 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
     _remaining = _remaining select { (_x select 0) != _kind };
 };
 
-// Every kind declined, which today only the intel-only sources can reach. Still speaks.
+// Every kind declined, which means intel was the only kind left and there was nothing hidden for
+// it to reveal. Outside hardcore that is every search of an intel-only source, because nothing is
+// ever hidden there -- so the substitute is what the source pays in normal mode, not a rare
+// fallback. A document rather than the pool's CP: intel is the premium outcome wherever it is
+// drawn, and a search that reached the object it was sent for must not pay less than a body does.
 if (!_paid) then {
-    [_speaker, _nothingLine] remoteExec ["fnc_duws_dialogue", _caller];
+    [[selectRandom _documents], _origin] call fnc_search_dropItems;
+    [_speaker, localize "STR_DUWS_T_LOOT2"] remoteExec ["fnc_duws_dialogue", _caller];
 };
