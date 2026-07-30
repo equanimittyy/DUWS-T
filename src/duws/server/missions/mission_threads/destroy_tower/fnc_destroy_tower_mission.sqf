@@ -39,24 +39,24 @@ _this setPos _centerSpawn;
 _centerSpawnZ = (getpos _vehicle_0 select 2);
 deleteVehicle _vehicle_0;
 
-// --DUWS-COMPOSITION BEGIN name="Mission: Destroy Tower" schema=C--
+// --DUWS-COMPOSITION BEGIN name="Mission: Destroy Tower" schema=A--
 _staticsArray = [];
 switch (VERSION_X) do {
     case "MODERN": {
         _staticsArray = [
-            ["Land_CratesWooden_F",[-3.56738,-6.65527,0],269.589,1,0,[],"","",true,false],
-            ["CargoNet_01_barrels_F",[3.37939,-7.32568,0],0,1,0,[],"","",true,false],
-            ["Land_CratesWooden_F",[-5.61475,-6.56982,0],269.589,1,0,[],"","",true,false],
-            ["CargoNet_01_barrels_F",[5.3335,-7.30029,0],0,1,0,[],"","",true,false],
-            ["Land_HBarrier_5_F",[-3.70996,8.57227,0],1.64537,1,0,[],"","",true,false],
-            ["Land_HBarrier_5_F",[2.06396,8.42969,0],1.64537,1,0,[],"","",true,false],
-            ["Land_HBarrier_5_F",[10.0508,1.10498,0],271.593,1,0,[],"","",true,false],
-            ["Land_HBarrier_5_F",[-4.1333,-9.50635,0],179.745,1,0,[],"","",true,false],
-            ["Land_HBarrier_5_F",[9.91553,-4.47949,0],271.593,1,0,[],"","",true,false],
-            ["Land_HBarrier_5_F",[4.69043,-9.56396,0],179.745,1,0,[],"","",true,false],
-            ["Land_HBarrier_5_F",[-10.3931,2.490234,0],271.593,1,0,[],"","",true,false],
-            ["Land_HBarrier_5_F",[-10.5269,-3.28467,0],271.593,1,0,[],"","",true,false],
-            ["Land_TBox_F",[-0.117676,-14.9492,0],182.221,1,0,[],"","",true,false]
+            ["Land_CratesWooden_F", -3.56738, -6.65527, 0, 269.589],
+            ["CargoNet_01_barrels_F", 3.37939, -7.32568, 0, 0],
+            ["Land_CratesWooden_F", -5.61475, -6.56982, 0, 269.589],
+            ["CargoNet_01_barrels_F", 5.3335, -7.30029, 0, 0],
+            ["Land_HBarrier_5_F", -3.70996, 8.57227, 0, 1.64537],
+            ["Land_HBarrier_5_F", 2.06396, 8.42969, 0, 1.64537],
+            ["Land_HBarrier_5_F", 10.0508, 1.10498, 0, 271.593],
+            ["Land_HBarrier_5_F", -4.1333, -9.50635, 0, 179.745],
+            ["Land_HBarrier_5_F", 9.91553, -4.47949, 0, 271.593],
+            ["Land_HBarrier_5_F", 4.69043, -9.56396, 0, 179.745],
+            ["Land_HBarrier_5_F", -10.3931, 2.490234, 0, 271.593],
+            ["Land_HBarrier_5_F", -10.5269, -3.28467, 0, 271.593],
+            ["Land_TBox_F", -0.117676, -14.9492, 0, 182.221]
         ];
 // --DUWS-COMPOSITION END--
     };
@@ -64,12 +64,9 @@ switch (VERSION_X) do {
 
 _vehicle = objNull;
 {
-    _xyz = (_x select 1);
-    _posX = (_xyz select 0);
-    _posY = (_xyz select 1);
-    _posZ = (_xyz select 2);
-    _vehicle = createVehicle [(_x select 0), [0,0,0], [], 0, "CAN_COLLIDE"];
-    _vehicle setDir (_x select 2);
+    _x params ["_class", "_posX", "_posY", "_posZ", "_dir"];
+    _vehicle = createVehicle [_class, [0,0,0], [], 0, "CAN_COLLIDE"];
+    _vehicle setDir _dir;
     _vehicle setPosATL [(_centerSpawnX)+_posX,(_centerSpawnY)+_posY,0];
     [_vehicle, "mission_destroy_tower"] call fnc_duws_keep;
 } forEach _staticsArray;

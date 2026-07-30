@@ -104,23 +104,18 @@ comments, so they are inert at runtime. Attributes:
 | Attr | Meaning |
 |---|---|
 | `name="..."` | label shown in the TUI |
-| `schema=A\|B\|C` | which row format (below) — explicit, since A and B look alike |
+| `schema=A` | the row format (below); the only one there is |
 | `anchor=hqInComp` | HQ only: its array stores original composition coords, so the tool subtracts `_hqInCompX/Y`. Omit elsewhere (offsets are already relative to `[0,0]`) |
-| `z=snap\|keep` | optional override; default `keep` for schema B, `snap` otherwise |
+| `z=snap\|keep` | optional; default `snap` |
 | `zbase=<var>` | reads that source constant as the origin's Z, so the composition keeps its native altitude instead of ground. Killhouse uses `zbase=_centerSpawnZ` |
 
-The adapters normalize all three row formats to `[class, offX, offY, offZ, dir°]`:
-
-| Schema | Row shape | Used by |
-|---|---|---|
-| A | `[class, X, Y, Z, dir°, isWeapon]` | HQ + the 7 clean zone prefabs |
-| B | `[class, dX, dY, dZ, yaw_rad, atl, isTarget]` — **yaw in radians** | killhouse objects/targets |
-| C | `[class, [x,y,z], dir°, 1,0,[],"","",true,false]` — position nested at index 1 | `simple_zone` + 4 mission statics |
+Every row is `[class, X, Y, Z, dir°]`, degrees, position flat at indices 1-3. A row may carry
+extra trailing fields for its own consumer — the HQ and zone prefabs append `isWeapon` — and
+the tool ignores anything past index 4. Fifteen compositions are marked today.
 
 `snap` drops objects onto the terrain (ground layouts); `keep` preserves each object's Z. The
-killhouse is a multi-floor structure that would collapse if snapped, so it pairs `keep` with
-`zbase=_centerSpawnZ` to sit at its original off-map altitude (~1000). Fifteen compositions
-are marked today.
+killhouse is a multi-floor structure that would collapse if snapped, so it declares `z=keep`
+alongside `zbase=_centerSpawnZ` to sit at its original off-map altitude (~1000).
 
 **Export** — after rearranging, copies a schema-agnostic block of `[class, dx, dy, dz, dir°]`
 rows (offsets from the import origin) to re-integrate into the composition's source array:
@@ -151,17 +146,15 @@ round-trips. Fold the rows back into the composition's array by these rules:
 - **Match by order.** The export returns rows in source order (creation order), so line them up
   1:1 with the existing array by index, confirm the class matches at each row, and change only
   the rows whose X/Y (or dir) actually moved.
-- **X/Y** are the source coordinates (X/Y for schema A; the nested `[x,y,z]` for C). For the
+- **X/Y and direction** drop straight in — the export is already the source row format. For the
   **HQ**, add `_hqInComp` (10.0413, 11.3066) to X/Y — its array stores original composition
   coordinates, not offsets.
-- **Direction** stays in degrees for A/C; for the **killhouse** (B) convert back to radians
-  (`dir * pi / 180`).
 - **Ignore the exported Z for ground layouts.** It is just the terrain baseline of wherever you
   dropped the composition in Eden, not a real coordinate — keep each row's original Z (the
   runtime ignores the Z column anyway). Only the **killhouse** uses Z, as the floor offset:
   export it with `_origin`'s Z set to its `_centerSpawnZ` (1000) so the values come back raw.
-- **Keep the flags.** Carry each row's `isWeapon` / `isTarget` / Eden-export tail from the
-  original row; a rearrange never changes them.
+- **Keep the trailing fields.** Carry each row's `isWeapon` flag from the original row; a
+  rearrange never changes it, and the export does not emit it.
 
 Verify once by import -> export -> re-import and confirming the layout is identical.
 

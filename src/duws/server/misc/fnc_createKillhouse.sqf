@@ -7,9 +7,6 @@ if (!isServer) exitWith {};
 private _centerSpawnX = worldSize * 0.05;
 private _centerSpawnY = worldSize * 0.05;
 
-// ========== 弧度转度 ==========
-private _fnc_radToDeg = { (_this * 180) / 3.1415926535 };
-
 #include "killhouse_composition.sqf"
 
 // Broadcast: clients test their own distance to the killhouse, for the contact markers and for
@@ -24,14 +21,14 @@ missionNamespace setVariable ["killhouse_run_active", false];
 private _computerObjects = [];
 private _bellObjects = [];
 {
-    _x params ["_class", "_dX", "_dY", "_dZ", "_yaw", "_atlOffset", "_isTarget"];
+    _x params ["_class", "_dX", "_dY", "_dZ", "_dir"];
     private _newX = _centerSpawnX + _dX;
     private _newY = _centerSpawnY + _dY;
     private _newZ = _centerSpawnZ + _dZ;
-    
+
     private _obj = createVehicle [_class, [_newX, _newY, _newZ], [], 0, "CAN_COLLIDE"];
     _obj setPosWorld [_newX, _newY, _newZ];
-    _obj setDir ((_yaw * 180) / 3.1415926535);
+    _obj setDir _dir;
     // Global: the local form leaves clients simulating props the server froze, and the course
     // furniture then sits somewhere different on every machine.
     _obj enableSimulationGlobal false;
@@ -272,10 +269,10 @@ killhouse_srv_spawn_wave = {
     if (_mode == "TRAINING") then {
         private _targets = missionNamespace getVariable ["killhouse_targets", []];
         {
-            _x params ["_class", "_dX", "_dY", "_dZ", "_yaw"];
+            _x params ["_class", "_dX", "_dY", "_dZ", "_dir"];
             private _obj = createVehicle [_class, [0,0,0], [], 0, "CAN_COLLIDE"];
             _obj setPosWorld [_centerX + _dX, _centerY + _dY, _centerZ + _dZ];
-            _obj setDir ((_yaw * 180) / 3.1415926535);
+            _obj setDir _dir;
             // These range targets ignore bullet damage, so a server-side Hit/HandleDamage EH
             // never fires on them. HitPart is a physical-impact event instead, and it runs on
             // the machine that fired the round, so it goes on every machine and bounces the

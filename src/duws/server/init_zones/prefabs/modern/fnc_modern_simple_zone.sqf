@@ -21,22 +21,19 @@ deleteVehicle _vehicle_0;
 
 ///////////////////////////////////////////////////////////////////////
 
-// --DUWS-COMPOSITION BEGIN name="Simple Zone" schema=C--
+// --DUWS-COMPOSITION BEGIN name="Simple Zone" schema=A--
 _staticsArray = [
-	["CamoNet_INDP_open_F",[0,0,0],0,1,0,[],"","",true,false] 
+	["CamoNet_INDP_open_F", 0, 0, 0, 0]
 ];
 // --DUWS-COMPOSITION END--
 
 // PLACE STATICS WITHOUT INTERACTION
 _vehicle = objNull;
 {
-	_xyz = (_x select 1);
-	_posX = (_xyz select 0);
-	_posY = (_xyz select 1);
-	_posZ = (_xyz select 2);
-	_vehicle = createVehicle [(_x select 0), [0,0,0], [], 0, "CAN_COLLIDE"];
+	_x params ["_class", "_posX", "_posY", "_posZ", "_dir"];
+	_vehicle = createVehicle [_class, [0,0,0], [], 0, "CAN_COLLIDE"];
 	[_vehicle, _zoneKey] call fnc_duws_keep;
-	_vehicle setDir (_x select 2);
+	_vehicle setDir _dir;
 	_vehicle setPosATL [(_centerSpawnX)+_posX,(_centerSpawnY)+_posY,0];
 	_vehicle enableSimulationGlobal false;
 } forEach _staticsArray;

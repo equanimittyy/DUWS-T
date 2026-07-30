@@ -36,31 +36,29 @@ _this setPos _centerSpawn;
 _centerSpawnZ = (getpos _vehicle_0 select 2);
 deleteVehicle _vehicle_0;
 
-// --DUWS-COMPOSITION BEGIN name="Mission: Destroy Cache" schema=C--
+// --DUWS-COMPOSITION BEGIN name="Mission: Destroy Cache" schema=A--
 _staticsArray = [
-    ["CamoNet_INDP_open_F",[0.942383,-0.640625,0],342.004,1,0,[],"","",true,false],
-    ["Land_GarbageHeap_02_F",[-1.71191,-1.54443,3.33786e-006],93.4817,1,0,[],"","",true,false],
-    ["Land_CratesWooden_F",[-1.27148,2.11084,0],0,1,0,[],"","",true,false],
-    ["Land_GarbageHeap_04_F",[-2.4165,-0.706543,-0.0443211],90.9487,1,0,[],"","",true,false],
-    ["Land_CratesWooden_F",[1.46631,-3.19775,0],0,1,0,[],"","",true,false],
-    ["Land_HBarrier_5_F",[-6.48291,-3.77783,0],49.5237,1,0,[],"","",true,false],
-    ["Land_HBarrier_5_F",[-8.11426,1.68848,0],88.8804,1,0,[],"","",true,false],
-    ["Land_HBarrier_5_F",[1.946484,-8.04492,0],0.520331,1,0,[],"","",true,false],
-    ["Land_HBarrier_5_F",[-0.718359,8.46387,0],183.745,1,0,[],"","",true,false],
-    ["Land_HBarrier_5_F",[3.80957,6.41455,0],45.2709,1,0,[],"","",true,false],
-    ["Land_HBarrier_5_F",[9.2251,-1.25684,0],269.491,1,0,[],"","",true,false],
-    ["Land_BagBunker_Small_F",[-7.08691,7.32031,0],134.261,1,0,[],"","",true,false],
-    ["Land_BagBunker_Small_F",[8.24512,-6.67188,0],314.617,1,0,[],"","",true,false]
+    ["CamoNet_INDP_open_F", 0.942383, -0.640625, 0, 342.004],
+    ["Land_GarbageHeap_02_F", -1.71191, -1.54443, 3.33786e-06, 93.4817],
+    ["Land_CratesWooden_F", -1.27148, 2.11084, 0, 0],
+    ["Land_GarbageHeap_04_F", -2.4165, -0.706543, -0.0443211, 90.9487],
+    ["Land_CratesWooden_F", 1.46631, -3.19775, 0, 0],
+    ["Land_HBarrier_5_F", -6.48291, -3.77783, 0, 49.5237],
+    ["Land_HBarrier_5_F", -8.11426, 1.68848, 0, 88.8804],
+    ["Land_HBarrier_5_F", 1.946484, -8.04492, 0, 0.520331],
+    ["Land_HBarrier_5_F", -0.718359, 8.46387, 0, 183.745],
+    ["Land_HBarrier_5_F", 3.80957, 6.41455, 0, 45.2709],
+    ["Land_HBarrier_5_F", 9.2251, -1.25684, 0, 269.491],
+    ["Land_BagBunker_Small_F", -7.08691, 7.32031, 0, 134.261],
+    ["Land_BagBunker_Small_F", 8.24512, -6.67188, 0, 314.617]
 ];
 // --DUWS-COMPOSITION END--
 
 _vehicle = objNull;
 {
-    _xyz = (_x select 1);
-    _posX = (_xyz select 0);
-    _posY = (_xyz select 1);
-    _vehicle = createVehicle [(_x select 0), [0,0,0], [], 0, "CAN_COLLIDE"];
-    _vehicle setDir (_x select 2);
+    _x params ["_class", "_posX", "_posY", "_posZ", "_dir"];
+    _vehicle = createVehicle [_class, [0,0,0], [], 0, "CAN_COLLIDE"];
+    _vehicle setDir _dir;
     _vehicle setPosATL [(_centerSpawnX)+_posX,(_centerSpawnY)+_posY,0];
     [_vehicle, "mission_destroy_cache"] call fnc_duws_keep;
 } forEach _staticsArray;

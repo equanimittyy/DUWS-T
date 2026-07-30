@@ -60,7 +60,7 @@ see [`README.md`](README.md) for the fork lineage. `git log` has the detail.
 ## Tooling and docs
 
 - `unpack.cmd` / `repack.cmd` wrap the vendored PBO Manager; `src/` is the source of truth
-- `duws_eden.ps1` imports Eden compositions by marker comment
+- `duws_eden.ps1` imports Eden compositions by marker comment; all fifteen share one row format
 - `tests/run.sh` — SQF syntax, static path resolution, sqf-vm unit layer
 - Reference docs in `docs/info/`; `docs/` holds feature plans
 - [`KNOWN_ISSUES.md`](KNOWN_ISSUES.md) tracks open defects and untested surface

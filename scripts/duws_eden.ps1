@@ -1,20 +1,16 @@
 # duws_eden.ps1 - DUWS Eden composition import TUI
 #
 # Scans src/ for compositions flagged with marker comments:
-#   // --DUWS-COMPOSITION BEGIN name="..." schema=A|B|C [anchor=hqInComp] [z=snap|keep]--
+#   // --DUWS-COMPOSITION BEGIN name="..." schema=A [anchor=hqInComp] [z=snap|keep]--
 #   <array literal>
 #   // --DUWS-COMPOSITION END--
-# normalizes each schema into a common [class, offX, offY, offZ, dir_deg] row, and emits a
-# paste-ready Eden import (create3DENEntity + rotation) copied to the clipboard.
+# and emits a paste-ready Eden import (create3DENEntity + rotation) copied to the clipboard.
 #
-# The three schemas differ only in packing; the import output is schema-independent, so each
-# schema needs only a small field adapter, and everything downstream is one code path:
-#   A: [class, X, Y, Z, dir_deg, isWeapon]                      (HQ + clean zone prefabs)
-#   B: [class, dX, dY, dZ, yaw_RAD, atl, isTarget]             (killhouse; yaw in radians)
-#   C: [class, [x,y,z], dir_deg, 1,0,[],"","",true,false]      (mission statics; pos nested)
+# Every composition is schema A -- [class, X, Y, Z, dir_deg] with any trailing fields its own
+# consumer needs (isWeapon and the like), which this tool ignores.
 #
 # Launch via duws_eden.cmd at the repo root, or run scripts\duws_eden.ps1 directly.
-# See docs/hq_layout_editing.md.
+# See docs/info/hq_layout_editing.md.
 $ErrorActionPreference = "Stop"
 $root    = Split-Path -Parent $PSScriptRoot   # script lives in scripts/; repo root is its parent
 $srcDir  = Join-Path $root "src"
@@ -22,8 +18,7 @@ $outFile = Join-Path $root "temp\eden_import.sqf"
 
 $inv   = [System.Globalization.CultureInfo]::InvariantCulture
 $numRe = '-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?'
-$rowReAB = '"([^"]+)"\s*,\s*({0})\s*,\s*({0})\s*,\s*({0})\s*,\s*({0})' -f $numRe
-$rowReC  = '"([^"]+)"\s*,\s*\[\s*({0})\s*,\s*({0})\s*,\s*({0})\s*\]\s*,\s*({0})' -f $numRe
+$rowRe = '"([^"]+)"\s*,\s*({0})\s*,\s*({0})\s*,\s*({0})\s*,\s*({0})' -f $numRe
 
 function Get-Attr($s, $pattern, $default) {
     if ($s -match $pattern) { return $Matches[1] } else { return $default }
@@ -40,14 +35,11 @@ function Get-Compositions {
         if ($text -notmatch 'DUWS-COMPOSITION BEGIN') { continue }
         foreach ($m in $blockRe.Matches($text)) {
             $attrs  = $m.Groups[1].Value
-            $schema = Get-Attr $attrs 'schema=(\w+)' 'A'
-            $zmode  = Get-Attr $attrs 'z=(\w+)' $null
-            if (-not $zmode) { $zmode = if ($schema -eq 'B') { 'keep' } else { 'snap' } }
             $comps += [pscustomobject]@{
                 Name   = Get-Attr $attrs 'name="([^"]*)"' '(unnamed)'
-                Schema = $schema
+                Schema = Get-Attr $attrs 'schema=(\w+)' 'A'
                 Anchor = Get-Attr $attrs 'anchor=(\w+)' ''
-                ZMode  = $zmode
+                ZMode  = Get-Attr $attrs 'z=(\w+)' 'snap'
                 ZBase  = Get-Attr $attrs 'zbase=(\w+)' ''
                 Body   = $m.Groups[2].Value
                 Text   = $text
@@ -75,18 +67,8 @@ function ConvertTo-Rows($comp) {
     foreach ($line in ($comp.Body -split "`n")) {
         if ($line -notmatch '^\s*\["') { continue }
         $seen++
-        $c = $null
-        if ($comp.Schema -eq 'C') {
-            if ($line -match $rowReC) {
-                $c=$Matches[1]; $x=[double]$Matches[2]; $y=[double]$Matches[3]; $z=[double]$Matches[4]; $d=[double]$Matches[5]
-            }
-        } else {
-            if ($line -match $rowReAB) {
-                $c=$Matches[1]; $x=[double]$Matches[2]; $y=[double]$Matches[3]; $z=[double]$Matches[4]; $d=[double]$Matches[5]
-                if ($comp.Schema -eq 'B') { $d = $d * 180.0 / [Math]::PI }
-            }
-        }
-        if ($null -eq $c) { continue }
+        if ($line -notmatch $rowRe) { continue }
+        $c=$Matches[1]; $x=[double]$Matches[2]; $y=[double]$Matches[3]; $z=[double]$Matches[4]; $d=[double]$Matches[5]
         $rows.Add([pscustomobject]@{ Class=$c; OX=($x-$ax); OY=($y-$ay); OZ=$z; Dir=$d })
     }
     return [pscustomobject]@{ Rows=$rows; Seen=$seen }

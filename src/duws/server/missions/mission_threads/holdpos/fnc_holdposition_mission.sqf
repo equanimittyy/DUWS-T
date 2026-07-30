@@ -92,27 +92,24 @@ _radarOperator disableAI "WEAPONAIM";
 _samOperator setVariable ["BIS_fnc_setUnitInsignia_class", "StayInVehicle", true];
 _radarOperator setVariable ["BIS_fnc_setUnitInsignia_class", "StayInVehicle", true];
 
-// --DUWS-COMPOSITION BEGIN name="Mission: Hold Position" schema=C--
+// --DUWS-COMPOSITION BEGIN name="Mission: Hold Position" schema=A--
 _staticsArray = [
-	["Land_HBarrier_5_F",[-6.48291,-3.77783,0],49.5237,1,0,[],"","",true,false], 
-	["Land_HBarrier_5_F",[-8.11426,1.68848,0],88.8804,1,0,[],"","",true,false], 
-	["Land_HBarrier_5_F",[1.946484,-8.04492,0],0.520331,1,0,[],"","",true,false], 
-	["Land_HBarrier_5_F",[-0.718359,8.46387,0],183.745,1,0,[],"","",true,false], 
-	["Land_HBarrier_5_F",[3.80957,6.41455,0],45.2709,1,0,[],"","",true,false], 
-	["Land_HBarrier_5_F",[9.2251,-1.25684,0],269.491,1,0,[],"","",true,false], 
-	["Land_BagBunker_Small_F",[-7.08691,7.32031,0],134.261,1,0,[],"","",true,false], 
-	["Land_BagBunker_Small_F",[8.24512,-6.67188,0],314.617,1,0,[],"","",true,false]
+	["Land_HBarrier_5_F", -6.48291, -3.77783, 0, 49.5237],
+	["Land_HBarrier_5_F", -8.11426, 1.68848, 0, 88.8804],
+	["Land_HBarrier_5_F", 1.946484, -8.04492, 0, 0.520331],
+	["Land_HBarrier_5_F", -0.718359, 8.46387, 0, 183.745],
+	["Land_HBarrier_5_F", 3.80957, 6.41455, 0, 45.2709],
+	["Land_HBarrier_5_F", 9.2251, -1.25684, 0, 269.491],
+	["Land_BagBunker_Small_F", -7.08691, 7.32031, 0, 134.261],
+	["Land_BagBunker_Small_F", 8.24512, -6.67188, 0, 314.617]
 ];
 // --DUWS-COMPOSITION END--
 
 _vehicle = objNull;
 {
-	_xyz = (_x select 1);
-	_posX = (_xyz select 0);
-	_posY = (_xyz select 1);
-	_posZ = (_xyz select 2);
-	_vehicle = createVehicle [(_x select 0), [0,0,0], [], 0, "CAN_COLLIDE"];
-	_vehicle setDir (_x select 2);
+	_x params ["_class", "_posX", "_posY", "_posZ", "_dir"];
+	_vehicle = createVehicle [_class, [0,0,0], [], 0, "CAN_COLLIDE"];
+	_vehicle setDir _dir;
 	_vehicle setPosATL [(_centerSpawnX)+_posX,(_centerSpawnY)+_posY,0];
 	[_vehicle, "mission_holdpos"] call fnc_duws_keep;
 } forEach _staticsArray;
