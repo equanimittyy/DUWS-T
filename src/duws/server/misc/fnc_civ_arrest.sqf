@@ -45,7 +45,11 @@ if (random 1 < 0.9) then {
     // PATH stays disabled: a surrendered civilian holds still until they are let go or armed.
     // Both endings are offered at once -- searching them is a second decision, not the only one,
     // and a detainee left with neither stands there until the town is recycled.
-    [_civilian] remoteExec ["fnc_civ_search_action", 0];
+    // Flagged rather than given an action of its own: a detainee holds still, so the player's
+    // outward-looking search action reaches them the same way it reaches a body. Civilians are
+    // flagged unconditionally -- the arrest is the price, and it has just been paid -- so the
+    // frisk's odds live entirely in its payout table.
+    [[_civilian], "civ_frisk"] call fnc_search_flag_group;
     [_civilian] remoteExec ["fnc_civ_release_action", 0];
 } else {
     _civilian enableAI "PATH";

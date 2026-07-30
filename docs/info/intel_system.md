@@ -119,15 +119,14 @@ still has a route.
 
 | Source | Capped |
 |---|---|
-| Body search | yes — one attempt per player per economy tick, 20 % |
-| Side-mission intel | no, and no roll either: completing the mission is the gate |
+| Body search | by the flagged materiel on the ground, not by a clock — 8 % of a garrison, 15 % of a mission group |
+| Side-mission objective | flagged with certainty; reaching the object is the gate |
 | Walking into a zone or town | not applicable; it reveals the ground the player is standing on and rolls nothing |
-| Civilian interaction menu | no — limited instead by per-civilian consumption |
+| Civilian frisk | flagged with certainty; the arrest is the price, and its payout table carries the odds |
 
-**Civilians are the intended primary source and the body search is a trickle.** That is what
-makes 20 % a deliberate figure rather than a generous one. Anyone tuning this should raise the
-civilian side before touching the body search, or the two stop being different mechanisms and
-hardcore turns back into a kill count.
+**Civilians are the intended primary source and the body search is a trickle.** The flag rate is
+what holds that ordering now, so anyone tuning it should raise the civilian side before the flag
+rate, or the two stop being different mechanisms and hardcore turns back into a kill count.
 
 The sources draw from one finite pool, so they compete rather than stack, and the hidden-map
 phase ends when the last hidden position is found however that happened. That is the intended arc — but it
@@ -139,78 +138,78 @@ about why; worse, the roll ran at mission *setup*, deciding whether the intel ob
 before the player had done anything. Four of the six plant a hold action on a specific object
 rather than paying on completion, because reaching that object is the mission.
 
-## The throttle is per player, and the attempt is what it spends
+## The success roll is spent at spawn, so the price is the fight
 
-One search per player per 30-minute economy tick at 20 %. `econ_tick`
-(`server/misc/fnc_zonesundercontrol.sqf`) is the clock, shared with the civilian heal cap and
-with the civilian menu's intel row so nothing new is timed.
+An entity that can be searched is decided when it is created, not when it is searched
+(`server/misc/fnc_search_flag_group.sqf`). What the player can find is then a function of how much
+OPFOR the campaign put on the ground, rather than of how often a key was pressed, and the price of
+a search is the fight that produced the thing being searched.
 
-**Two budgets on one clock, not one budget.** Asking a local carries its own per-player cap
-(`DUWS_civ_intel_asked`), cleared by the same tick in the same sweep. They are separate because a
-corpse and a living local are different things to find: one flag would mean a body search on the
-way into a town silently closed the conversation the player walked there to have. A player who
-does both gets two chances per window.
+**That is what let the clock go.** The body search used to carry a second price, one attempt per
+player per 30-minute economy tick, and with it a UID-keyed record, a broadcast copy on the player
+object and a restore routine to reconcile the two across a respawn — a whole apparatus existing
+only to make a timer survive dying. A flag lives on the body and dies with it, so none of it is
+needed. `DUWS_civ_intel_asked` still rides `econ_tick`, because asking a *local* is capped against
+a finite population rather than against a clock.
 
-Per player rather than campaign-wide is what makes it work in co-op. The throttle it replaces
-was a single global, so the first player to find intel switched it off for everyone and a
-four-player squad searched at the same rate as a lone operator. Here a squad genuinely searches
-four times as fast.
+Only the flagged minority carries any state, so the cost is one unit in twelve rather than every
+corpse the campaign produces. Flags are broadcast, because the action's condition is evaluated on
+the client that would draw it and an unflagged thing offers no action at all.
 
-The attempt is spent on the *attempt*, on the server. A client cannot be trusted to report
-having already searched, and a 20 % roll a client makes is a 20 % roll a client can retry. A
-failed search pays nothing but a line: what it costs is the thirty minutes before the next one,
-and paying out on failure would make that wait the only thing separating a hit from a miss.
+**A zone rebuilding its garrison re-rolls, and that is allowed.** A player can leave, wait out the
+despawn, return and search a fresh garrison — but the cycle is not a button press, it is walking
+out and defeating a full garrison again. The pool is finite, so farming buys a faster route through
+the hidden-map phase and nothing after it, and the cost scales with the reward because the garrison
+that must be beaten is the same garrison whose size sets how many flags are in it.
 
-**The record and the readout are two different things, because a player does not survive their own
-death.** `playerIntelSearchTick` (`server/server_var_init.sqf`) is the record: a server-only map
-from player UID to the `econ_tick` the attempt was spent in, and the only thing `fnc_intel_search`
-consults before refusing. `DUWS_intel_searched` on the player object, broadcast and cleared on
-every player by the tick, is a copy of that record for the search action's condition to read — a
-condition string is evaluated on the client several times a second, and broadcasting one boolean
-per player is cheaper than broadcasting the clock for clients to subtract. `DUWS_civ_intel_asked`
-beside it needs no record because nothing charges it across a death.
+## What a search pays is a weighted table per source
 
-The split is what a respawn forces. A respawned player is a new object carrying no flag, so while
-the object was the only record, dying refunded the attempt — a cheaper way to buy a search than
-waiting out the window. The UID entry outlives the body; `fnc_intel_search_restore` copies it onto
-whatever body the player is in now, asked for by `fnc_intel_search_action` at every add, which
-covers a client's first boot as well as each respawn. A client that declines to ask gains nothing:
-the server refuses on the record either way.
+Stage two is a draw over `DUWS_searchSources` (`server/server_var_init.sqf`), each row naming a
+payout kind and its weight. Weights rather than a cumulative `if` ladder: every band in a ladder
+depends on the one above it, so adding a kind means re-deriving each constant below it.
 
-## The body search looks outward, so it scales with players not corpses
+Kinds are drawn **without replacement**. `fnc_intel_payout` is the only kind that can decline — it
+returns false once every position is revealed — and when it does, that kind drops out and the
+remainder are re-drawn. A dry pool therefore costs a search its best outcome rather than its voice,
+which is the failure this mission already paid for once when a dry pool returned quietly.
 
-One action on the player, watching `cursorObject`, rather than one action per corpse. The
-per-corpse shape needs a `remoteExec` with the JIP flag per death, and it costs one queue entry
-and one hold action for every body rather than one of each per player.
+`nothing` is a row rather than the absence of one, and a weight of zero is how a source opts out of
+a kind. The speaker and the empty-handed line are per-source too: a body is the searcher talking to
+themselves, a frisk is the team reporting what a detainee was carrying.
 
-**It is bounded, not unbounded.** `fnc_add_intel_on_death.sqf` keys the JIP entry to the corpse
-rather than passing a bare `true`, so the engine drops the entry when the body is deleted, and
-`fnc_repetitive_cleanup` deletes `allDeadMen` at `DUWS_CleanupLifetime` (900 s by default,
-`server/server_init.sqf:154`). The ceiling is therefore kill rate times that lifetime, not the
-campaign's total kill count. A bare `true` is what would have grown forever, and the source says
-so where it avoids it.
+**Both rolls run on the server, and so does everything they read.** A roll a client makes is a roll
+a client can retry. Server authority over the roll alone is not enough: the reveal payout was once
+handed a target position sampled on the client, from a global only the server ever wrote, so it
+silently paid nothing on a dedicated server while working perfectly on a listen host. The claim is
+taken before the payout resolves, because the intel branch speaks across a sleep.
 
-The outward-looking shape is still the cheaper one, and the reason to prefer it for anything that
-fires on every kill. But the per-corpse cost is a standing overhead to weigh, not a leak.
+## One action on the player, not one per searchable thing
+
+One hold action watching `cursorObject`, rather than an action attached to each thing that can be
+searched. A per-corpse action needs a `remoteExec` with the JIP flag per death, so it costs one
+queue entry and one action for every body the campaign produces rather than one of each per player.
+
+The flag is what let the type test go with it. The condition no longer asks whether the thing under
+the cursor is a body: it asks whether it carries a search source and has not already been claimed,
+which covers bodies and the objects a mission places deliberately -- a laptop, a piece of armour --
+through one condition. Those objects had an action apiece before, each with `removeOnCompletion`
+set, and that removal is local: it hid the entry from the searcher and left it standing for
+everyone else, so in co-op one objective paid once per player.
+
+Living men are the one exclusion the flag cannot express, since a garrison is flagged when it
+spawns. That clause is scoped to men rather than gating the whole action, because a laptop is never
+dead and an intact vehicle is still worth opening.
 
 The condition's clause order is load-bearing and is documented where it lives
 (`client/misc/fnc_intel_search_action.sqf`). The reason it matters at all is that an action on
 the player is evaluated far more often than one on a distant object: the player is never out of
 range of themselves.
 
-**One action per player only holds while dead bodies give theirs up.** An `addAction` is not removed
+**The action survives its owner's death, so it has to be stripped.** An `addAction` is not removed
 by its owner dying and the engine goes on evaluating the conditions of actions on any object near a
-player, so a corpse left carrying this one polls a seven-clause condition for the rest of the
-campaign — one more per death, forever, which is the per-corpse cost the outward-looking shape
-exists to avoid. `onPlayerKilled.sqf` strips it from the body using the id stashed at add time. The
-spent clause reads `player` rather than the object the action hangs on for the same reason: on a
-body from an earlier death those are different units, and testing the corpse's flag would let a
-player search past their own spent attempt.
-
-The existing corpse hold action (`fnc_corpse_search_action.sqf`) is untouched. It reveals the
-current *mission* target and is a different mechanic that happens to live on the same bodies, so
-a mission target's corpse can carry both. That overlap is intended: one is the reward for the
-mission, the other is the trickle any body offers.
+player, so a corpse left carrying this one polls the whole condition for the rest of the campaign --
+one more per death, forever, which is the per-object cost this shape exists to avoid.
+`onPlayerKilled.sqf` strips it from the body using the id stashed at add time.
 
 ## Persistence
 

@@ -81,10 +81,11 @@ switch (VERSION_X) do {
     ([_target] + _arguments) remoteExec ["fnc_sabotage_laptop_success", 2];
 }, [_MissionPos,_targetpos,_mission_name,_markername2,_radius], 10, true, true, "", "_this == player"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["sabotage_action_%1", netId _laptop]];
 
-// Put an intel action on LAPTOP
+// Searchable through the player's own action, the same way a body is. The laptop carries two
+// actions -- this and the sabotage -- so giving it one of its own was also what made the
+// index-0 removeAction in fnc_sabotage_laptop_success unsafe.
 if (hardcore_mode_enable) then {
-    _code = {[getPos player, player] remoteExec ["fnc_intel_payout", 2]};
-    [_laptop, localize "STR_DUWS_T_7yec9ifj", _code] spawn fnc_actionRotary;
+    [[_laptop], "objective"] call fnc_search_flag_group;
 };
 ["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", 0];
 // 设置任务目标位置

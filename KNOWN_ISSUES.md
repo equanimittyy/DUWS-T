@@ -73,12 +73,35 @@ that place these props do both, which is why the drift appeared only across a st
 - [ ] Clear a garrison in a populated town. If the `WEST SEIZED` trigger never fires, CIVILIAN-side units are blocking it and the fallback is a condition trigger counting hostile units in `thisList`
 - [ ] Check the census line in the RPT on a new map, and confirm a single fire mission cannot advance an escalation level. Both numbers are logged on the first run
 
-## Hardcore intel: shipped, not yet exercised
+## The search system: shipped whole, exercised nowhere
 
-- [ ] Complete a rescue-pilot and a rescue-squad mission on a dedicated server and confirm each reveals a zone. These are the two sites that never paid out at all
-- [ ] On a dedicated server with two clients, have one player search a body and send the other over the same one. No search action may appear for the second, and one payout may land in total. The claim is taken server-side and broadcast, so an action still showing on the second machine means the broadcast never arrived. One machine cannot see either half of this ([`docs/info/testing.md`](docs/info/testing.md#testing-join-in-progress))
-- [ ] Die with a search attempt spent and respawn. The action must still be hidden, and must come back on the next economy tick and not before. Available again on respawn means `fnc_intel_search_restore` is not reaching the new body; never coming back means the UID entry is outliving the window it was stamped in
-- [ ] Die a few times in one window, then walk back over your own bodies. No second search action may appear on any of them — the strip in `onPlayerKilled.sqf` is what keeps this one action per player rather than one per death
+Five separate faucets became one two-roll path, and not a line of it has run in a session. The
+rewrite deleted seven functions, so a failure here is more likely to be something missing than
+something wrong.
+
+- [ ] Clear a garrison and search bodies. Roughly one in twelve offers the action at all; the rest
+      show no prompt, which is the flag working rather than the action being broken
+- [ ] Search a flagged body, an intel-mission objective, a laptop and a piece of armour. All four
+      go through the one action on the player now, so a prompt missing on the two objects means the
+      flag never reached them, not that their own action broke — they no longer have one
+- [ ] Frisk an arrested civilian. Coins, one document and empty-handed should still land at roughly
+      3 : 1 : 4, spoken in the team's voice rather than the searcher's
+- [ ] Play far enough to exhaust the intel pool, then search a flagged body. It must speak an
+      outcome. Silence means the payout re-draw is not dropping the dry kind
+- [ ] On a dedicated server with two clients, have one player search a body and send the other over
+      the same one. No prompt for the second, one payout in total. The same test on an objective and
+      on a civilian, which are the two that paid once *per player* before
+      ([`docs/info/testing.md`](docs/info/testing.md#testing-join-in-progress))
+- [ ] Die a few times and walk back over your own bodies. No search action on any of them — the
+      strip in `onPlayerKilled.sqf` is what keeps this one action per player
+- [ ] Complete a rescue-pilot and a rescue-squad mission on a dedicated server and confirm each
+      reveals a zone. These two pay on completion rather than through a search, so the rewrite did
+      not touch them; they are the two sites that never paid out at all
+
+**The numbers are unbalanced by admission.** An 8 % flag rate on a garrison, 15 % on a mission
+group, and every payout weight, are the shape's placeholder values rather than played ones. They
+are one table in `server/server_var_init.sqf` and are meant to be moved once the arc has been felt
+end to end.
 
 ## RAVAGE and WBK: parked until base DUWS is whole
 
@@ -230,7 +253,7 @@ dedicated server a manual act rather than an automatic one.
 | Two functions named by zone triggers are never broadcast | `fnc_captured`, `fnc_enterlocation`, registered in `server/server_fnc_init.sqf` without `publicVariable` | A `createTrigger` statement is global, which is why the civilian town trigger's `fnc_civ_handler_ravage` / `fnc_civ_handler_wbk` *are* broadcast. One of the two treatments is wrong: if the zone side is, every client spawns a nil on each zone entry and capture. The campaign is unaffected — the server runs its own copy — but a client RPT fills with undefined-variable errors |
 | `duws_all_helmets` and `duws_all_vests` are read but assigned nowhere in the mission | `server/misc/fnc_civ_handler_ravage.sqf:260,270` | RAVAGE only, and only on the zombies that draw no uniform — roughly 30%, since the uniform roll is `_isZombie && random 1 < 0.7`. Those two branches are the fallback for a unit with no uniform side to match, so they are the only readers, and `count` on an undefined variable throws where the assigned lists would have been used. Both were carried over untouched when RAVAGE was split out of `fnc_civ_handler` |
 | Five `remoteExec ["call", 0, true]` sites ship a whole `addAction` body as compiled code | `destroy_cache:123,158`, `rescue_pilot:336,407`, `steal_supply:87` | Queued under an engine-generated id nothing can address or remove, and the largest entries a joiner receives. Cannot be keyed until each body becomes a named function taking arguments |
-| `removeAction` takes index `0` rather than a captured `addAction` return | `server/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_success.sqf:18` | Works today because insertion order puts the sabotage add before the hardcore intel rotary, but the laptop carries two actions, which is exactly when index-`0` removal stops being safe |
+| `removeAction` takes index `0` rather than a captured `addAction` return | `server/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_success.sqf:18` | Safe only while the laptop carries exactly one action. It carried two until the search rewrite gave the objective search back to the player's own action, so the collision this describes is currently not reachable — and returns the moment anything adds a second action to that laptop |
 | An unbounded `waitUntil` sits on the joiner's branch of the client boot | `client/client_init.sqf:140` | Blocks on `HQ_pos_found_generated && chosen_settings` with no timeout, reached only when `WARCOM_init_done` is false. It hints the player every five seconds, so the stall is visible; proceeding on a timeout would boot a client into a campaign whose settings never arrived. What it lacks is a log line |
 | `staminaEnabled` is read but never assigned anywhere in the mission | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:67` | The whole `format` throws on `Undefined variable in expression: staminaenabled`, so the campaign settings summary hint never displays for any player. Confirmed in an RPT at the moment generation completes. `client/misc/fnc_sitrep_display.sqf:33` reads the same variable behind an `isNil` guard, which is why only this site fails — either assign it at setup or drop it from the hint |
 | Buying the Mobile HQ and never designating one locks the team out of it permanently | `client/dialog/fnc_request_support.sqf:477`, `shared/functions/fnc_MHQ_destroyed.sqf:23` | The purchase clears `support_mobile_HQ_available` for everyone and hands the buyer a one-shot comm-menu token; the only path that sets the flag back waits on an MHQ that exists being destroyed. If the token is lost before it is spent — the buyer disconnecting being the certain case — no second purchase is possible and no MHQ exists to die, so the campaign has no Mobile HQ and 10 CP bought nothing. The three guards in `fnc_MHQ_select.sqf` hand the token back rather than consume it, so a bad target or an MHQ already being active cost nothing; losing the player is the case none of them can cover. Whether respawn also drops the token is unverified |

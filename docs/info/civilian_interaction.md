@@ -83,7 +83,8 @@ released stays spent.
 | Call over | 6 m | `src/duws/shared/functions/fnc_civ_stopCommand.sqf:59` |
 | Interaction menu | 3 m | `src/duws/shared/functions/fnc_civ_menuAction.sqf:44` |
 | Every menu row, re-tested server-side | 3 m | `src/duws/server/misc/fnc_civ_request.sqf:22` |
-| Search and Release | 3 m | `fnc_civ_search_action.sqf:73`, `fnc_civ_release_action.sqf:27` |
+| Search (the player's own action, via `cursorObject`) | 3 m | `client/misc/fnc_intel_search_action.sqf` |
+| Release | 3 m | `fnc_civ_release_action.sqf:27` |
 
 The call-over reaches twice as far as everything it gates. Halting a local you can see, walking up
 to them, and only then getting an exchange is the shape of the interaction; matching the two
@@ -152,9 +153,8 @@ Everything but `DUWS_civ_pending` is broadcast because it is read off the server
 built on the client that opens it and has to know at open time which rows are dead, and the
 `addAction` conditions are evaluated on every machine that carries them. A boolean pushed when it
 changes beats a request-and-wait handshake in front of every open, which would either delay the
-menu or pop rows grey after the player is already looking at them — the same trade as
-`DUWS_intel_searched`
-([`intel_system.md`](intel_system.md#the-throttle-is-per-player-and-the-attempt-is-what-it-spends)).
+menu or pop rows grey after the player is already looking at them — the same trade the search flag
+makes ([`intel_system.md`](intel_system.md#the-success-roll-is-spent-at-spawn-so-the-price-is-the-fight)).
 
 `DUWS_civ_stopped` is written server-side, in the call-over's own server function rather than in
 the client action body that triggers it: a client that owns the flag can open the menu on a local
@@ -232,13 +232,14 @@ priced it a second time, in a way no decision the player made could influence.
 
 ### What a search turns up
 
-One roll, half of which is nothing (`fnc_civ_search_action.sqf:31-51`):
+Every arrested civilian is flagged searchable, so the odds live entirely in the `civ_frisk` payout
+table (`server/server_var_init.sqf`), drawn by weight rather than by a threshold ladder:
 
-| Band | Outcome |
+| Weight | Outcome |
 |---:|---|
-| 37.5 % | 1–5 `Item_Money_roll` on the ground |
-| 12.5 % | exactly one item from Files / Wallet_traitor / FlashDisk / SmartPhone / MobilePhone |
-| 50 % | nothing |
+| 3 / 8 | 1–5 `Item_Money_roll` on the ground |
+| 1 / 8 | exactly one item from Files / Wallet_traitor / FlashDisk / SmartPhone / MobilePhone |
+| 4 / 8 | nothing |
 
 Three quarters of what is found is cash, so a frisk is a gamble on pocket change rather than a way
 to farm intel. Phones share the pool with the documents because both exist only to be turned in at

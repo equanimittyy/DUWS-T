@@ -8,7 +8,7 @@ Three mechanisms produce entries, and they are not interchangeable:
 | Mechanism | Produces | Used for |
 | --- | --- | --- |
 | `addAction` | An instant scroll entry | Almost everything |
-| `BIS_fnc_holdActionAdd` | A hold-to-complete entry with an on-screen icon and progress ring | Searching bodies and containers, the disguise panel, `fnc_actionRotary` props |
+| `BIS_fnc_holdActionAdd` | A hold-to-complete entry with an on-screen icon and progress ring | Searching bodies and containers, the disguise panel |
 | `fnc_open_action_menu` | A dialog listbox opened *by* one scroll entry | Collapsing a cluster of related entries into a single scroll row |
 
 `src/duws/client/dialog/fnc_open_action_menu.sqf` is the escape hatch from scroll-menu sprawl:
@@ -174,11 +174,11 @@ signal the player already has.
 the "bodies may carry intel" notification in nine side missions. They were one key; the action
 needed a label and the notification needed a sentence.
 
-Search Intel is one entry across four mission threads — the sabotage laptop, and the intel carrier
-in `clearthearea_cqb`, `target_armor` and `target_sniper` — all raised through `fnc_actionRotary`
-behind `hardcore_mode_enable`. The helper hardcodes its icon rather than taking one as an argument:
-the icon is the entry's only identification, and a name it did not recognise drew a hold action
-with no icon and raised no error.
+Searching is one entry for the whole mission, on the player rather than on the thing searched
+(`client/misc/fnc_intel_search_action.sqf`). Bodies, mission objectives and arrested civilians all
+reach it through `cursorObject`, gated on a search flag the server sets. The four mission threads
+that raised an entry apiece — the sabotage laptop and the intel carrier in `clearthearea_cqb`,
+`target_armor` and `target_sniper` — now only flag their object.
 
 ## Call-site conventions
 

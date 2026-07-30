@@ -46,9 +46,10 @@ produced is the shape that bites.
 
 **An object-keyed ID *is* that object's netId**, so two entries on one object evict each other and
 only the survivor reaches joiners. That is silent and it breaks behaviour: the sabotage laptop
-carried its own `addAction` and, in hardcore, the intel rotary from
-`server/dialog/fnc_actionRotary.sqf`, and the rotary evicted the sabotage action, so a joining
-client could not finish the mission.
+carried its own `addAction` and, in hardcore, a second intel entry, and the second evicted the
+sabotage action, so a joining client could not finish the mission. The laptop carries one entry
+again — searching moved onto the player's own action — but the collision returns the moment
+anything puts a second entry back on it.
 
 **How to apply:** key every entry that repeats. Where an object carries exactly one entry, pass
 the object — it self-cleans. Where two entries must both survive on one object, suffix a string

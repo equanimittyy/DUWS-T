@@ -107,10 +107,10 @@ _buildingUnitsList = [_group, _selectedBuildings, _unitsPerBuilding, "AUTO"] cal
 
 _allUnits = units _group;
 
+// One guaranteed carrier, reached through the player's own search action rather than an action
+// of its own: a body is a body, and the flag is what tells the search this one is worth opening.
 if (hardcore_mode_enable && count _allUnits > 0) then {
-    _intelSoldier = selectRandom _allUnits;
-    _code = {[getPos player, player] remoteExec ["fnc_intel_payout", 2]};
-    [_intelSoldier, localize "STR_DUWS_T_7yec9ifj", _code] spawn fnc_actionRotary;
+    [[selectRandom _allUnits], "objective"] call fnc_search_flag_group;
 };
 
 private "_VARtaskgeneratedName";

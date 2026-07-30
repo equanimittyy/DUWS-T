@@ -146,8 +146,6 @@ publicVariable "fnc_night_horde_event";
 fnc_civ_healed = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_healed.sqf";
 fnc_civ_stopCommand = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_stopCommand.sqf";
 publicVariable "fnc_civ_stopCommand";
-fnc_civ_search_action = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_search_action.sqf";
-publicVariable "fnc_civ_search_action";
 fnc_civ_release_action = compile preprocessFileLineNumbers "duws\shared\functions\fnc_civ_release_action.sqf";
 publicVariable "fnc_civ_release_action";
 fnc_civ_release = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_release.sqf";
@@ -370,7 +368,6 @@ fnc_MHQ_addActions = compile preprocessFileLineNumbers "duws\shared\functions\fn
 fnc_MHQ_deploy = compile preprocessFileLineNumbers "duws\server\dialog\fnc_MHQ_deploy.sqf";publicVariable "fnc_MHQ_deploy";
 fnc_MHQ_undeploy = compile preprocessFileLineNumbers "duws\server\dialog\fnc_MHQ_undeploy.sqf";publicVariable "fnc_MHQ_undeploy";
 fnc_MHQ_destroyed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_MHQ_destroyed.sqf";publicVariable "fnc_MHQ_destroyed";
-fnc_actionRotary = compile preprocessFileLineNumbers "duws\server\dialog\fnc_actionRotary.sqf";publicVariable "fnc_actionRotary";
 
 // HQ & FOB FUNCTIONS
 fnc_draw_HQicon = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_draw_HQicon.sqf";publicVariable "fnc_draw_HQicon";
