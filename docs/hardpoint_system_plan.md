@@ -25,14 +25,14 @@ Background on how zones are placed, captured and consumed:
 
 `fnc_createZone` writes five campaign registries in its first fourteen lines
 (`server/init_zones/fnc_createzone.sqf:19-32`) and `fnc_zone_control_set` moves four globals
-as one atomic transition (`server/server_fnc_init.sqf:81-120`). Both are all-or-nothing.
+as one atomic transition (`server/init_zones/fnc_zone_state_init.sqf:31-70`). Both are all-or-nothing.
 Routing a hardpoint through either puts it into every consumer of zone state at once:
 
 | Global | Written by | What breaks if a hardpoint increments it |
 |---|---|---|
 | `amount_zones_created` | `server/init_zones/fnc_createzone.sqf:19-20` | The campaign never ends. The win condition is `zoneundercontrolblu >= amount_zones_created` (`server/misc/fnc_capture_zones_task.sqf:33`). FOB cap inflates too (`client/supports/fnc_request_fob.sqf:16`) |
-| `zoneundercontrolblu` | `server/server_fnc_init.sqf:97,110` | Passive income becomes `(zones + hardpoints) * 6` per 30 min (`server/misc/fnc_zonesundercontrol.sqf:32`) — the largest balance blow-up available |
-| `WARCOM_zones_controled_by_OPFOR` | `server/server_fnc_init.sqf:95,107-108` | Index 0 is the OPFOR primary assault target. A lost hardpoint redirects the entire enemy war effort. 25+ read sites |
+| `zoneundercontrolblu` | `server/init_zones/fnc_zone_state_init.sqf:47,60` | Passive income becomes `(zones + hardpoints) * 6` per 30 min (`server/misc/fnc_zonesundercontrol.sqf:32`) — the largest balance blow-up available |
+| `WARCOM_zones_controled_by_OPFOR` | `server/init_zones/fnc_zone_state_init.sqf:45,57-58` | Index 0 is the OPFOR primary assault target. A lost hardpoint redirects the entire enemy war effort. 25+ read sites |
 | `zone_namePOS_pairs` | `server/init_zones/fnc_createzone.sqf:28-29` | Intel reveals pick a random entry from the unrevealed set (`server/misc/fnc_intel_payout.sqf:20,61-62`), so hardpoints dilute what intel is worth |
 | `zone_spawn_array` | `:32` | Lookup is positional — `find [_zone_num,false,false]` (`:221`) — so a duplicate number matches the wrong entry |
 
@@ -697,10 +697,11 @@ changes far more often than anything a client needs.
 Because the registry is append-only and unbounded, every entry has to stay cheap — which the
 shapes above already are. Growth is data, not objects.
 
-One writer, `fnc_hardpoint_state_set [_index, _state]`, in `server/server_fnc_init.sqf` beside
-`fnc_zone_control_set` (`:81-120`). It owns `hardpoint_state_array` and `zone_hp_left_<n>`
-together, broadcasts both, and pays the reward through the existing delta writers
-`fnc_cp_adjust` and `fnc_ap_adjust` (`:12,41`) — CP to the player, AP off the OPFOR pool only,
+One writer, `fnc_hardpoint_state_set [_index, _state]`, in
+`server/init_zones/fnc_zone_state_init.sqf` beside `fnc_zone_control_set` (`:31-70`). It owns
+`hardpoint_state_array` and `zone_hp_left_<n>` together, broadcasts both, and pays the reward
+through the existing delta writers `fnc_cp_adjust` and `fnc_ap_adjust`
+(`server/misc/fnc_economy_init.sqf:14,43`) — CP to the player, AP off the OPFOR pool only,
 never `x = x + n; publicVariable "x"` from a trigger or monitor body. It is idempotent on an
 already-cleared index, because two clauses of the clear rule can become true in the same tick.
 
@@ -753,7 +754,8 @@ is.
 | `server/init_zones/fnc_hardpoint_zone_pass.sqf` | New. Count from radius, siting inside the zone, writes `zone_hp_left_<n>` from what was actually placed. |
 | `server/warcom/fnc_WARCOM_opf_hardpoints.sqf` | New. Director: seed subset, corridor picking, AP spend, live cap. |
 | `server/misc/fnc_hardpoint_monitor.sqf` | New. The single shared loop: clear detection, proximity garrison spawn, artillery cadence. |
-| `server/server_fnc_init.sqf` | New `fnc_hardpoint_state_set` beside `fnc_zone_control_set:81-120`; registry lines for the new functions. |
+| `server/init_zones/fnc_zone_state_init.sqf` | New `fnc_hardpoint_state_set` beside `fnc_zone_control_set:31-70`. |
+| `server/server_fnc_init.sqf` | Registry lines for the new functions. |
 | `server/server_var_init.sqf` | Declare and broadcast the four hardpoint arrays. |
 | `server/init_zones/fnc_createzone.sqf:199,266-270` | Call the zone pass; extend the capture trigger condition. |
 | `server/warcom/fnc_WARCOM_init.sqf:51-63` | Spawn the director beside the existing four. |

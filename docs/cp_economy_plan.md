@@ -40,7 +40,7 @@ formats instead of one. Every purchase reads the same way — logistics plus aut
 
 ### The dual price needs an atomic handshake
 
-`fnc_pool_spend` takes one pool per call (`server/server_fnc_init.sqf:426-441`). Charging CP and
+`fnc_pool_spend` takes one pool per call (`server/misc/fnc_economy_init.sqf:165-180`). Charging CP and
 then AP as two sequential calls is not one purchase: the first can succeed and the second fail,
 leaving the player charged for nothing, and in co-op another player's spend can land between
 them. That is the same race the single-pool handshake was written to close

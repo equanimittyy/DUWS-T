@@ -12,7 +12,7 @@ the `blufor_RQST_*` variables and `fnc_evalVehicleCost` — see
 ## Authority: one server-side writer per pool
 
 `commandpointsblu1` is a networked global, so every change routes through a single
-server-side function, `fnc_cp_adjust` (`src/duws/server/server_fnc_init.sqf`), invoked as
+server-side function, `fnc_cp_adjust` (`src/duws/server/misc/fnc_economy_init.sqf`), invoked as
 `[delta] remoteExec ["fnc_cp_adjust", 2]`. Callers send a signed *delta*; nothing else
 assigns or `publicVariable`s the pool, and the result is floored at 0 — the purchase gates all
 ask *"can I afford this"*, so a negative pool behaves like an empty one and the floor only
@@ -72,7 +72,7 @@ once. The debits are then applied in full and the floor absorbs the overshoot, w
 second purchase free.
 
 Every purchase therefore routes through a request/reply handshake, both halves in
-`server/server_fnc_init.sqf`. `fnc_pool_spend` runs on the buyer, sends the request and blocks;
+`server/misc/fnc_economy_init.sqf`. `fnc_pool_spend` runs on the buyer, sends the request and blocks;
 `fnc_pool_try_spend` runs on the server, tests and debits as adjacent statements against the
 one server copy, and replies with the verdict. Call sites read as a guard clause:
 
@@ -106,7 +106,7 @@ in `supports/taxi/` spend nothing.
 
 ## Escalation scales every price
 
-`fnc_escalation_cost` (`server/server_fnc_init.sqf`) multiplies a base cost by
+`fnc_escalation_cost` (`server/misc/fnc_economy_init.sqf`) multiplies a base cost by
 `escalation_multiplier` and rounds up, so a scaled price is never cheaper than the base one.
 `fnc_pool_try_spend` applies it on entry, which covers every `fnc_pool_spend` site at once; the
 four paths listed above as handshake exceptions each apply it themselves, and are the only

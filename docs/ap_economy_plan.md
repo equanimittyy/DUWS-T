@@ -156,7 +156,7 @@ for becomes a prerequisite rather than an improvement.
 Three configurations pay no town income: `CIV_PRESENCE` of `NONE`, `RAVAGE` or `WBK`. Civs-off
 leaves the town arrays empty (`fnc_zonesundercontrol.sqf:8-9`); the two mode campaigns register no
 town reputation at all, so every town sits permanently neutral and `fnc_civ_townIncome`
-(`server/server_fnc_init.sqf:286-291`) pays nobody.
+(`server/misc/fnc_civ_state_init.sqf:110-115`) pays nobody.
 
 With no BLUFOR flat income, town income is the player's only recurring AP faucet — everything else
 is a lump paid for an action taken. So these three settings remove a whole income route rather
@@ -254,10 +254,10 @@ threshold has silently gone back to meaning nothing.
 
 ## Spending authority
 
-`fnc_ap_adjust` (`server/server_fnc_init.sqf`) stays the sole writer of both pools. Two paths in:
+`fnc_ap_adjust` (`server/misc/fnc_economy_init.sqf`) stays the sole writer of both pools. Two paths in:
 
 - **Player spends go through the purchase handshake.** `fnc_pool_spend` already carries an `"AP"`
-  case (`server/server_fnc_init.sqf:415`), used today only by the AP→CP converter. Every new
+  case (`server/misc/fnc_economy_init.sqf:166`), used today only by the AP→CP converter. Every new
   player-facing AP sink uses it for the same reason CP sinks do: a client testing its own copy of
   a networked pool is a round trip out of date, so two co-op players can both pass one gate.
 - **Director spends call `fnc_ap_adjust` directly**, as `["OPF", -_cost, _reason] call

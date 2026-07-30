@@ -349,7 +349,7 @@ which radii survive. A Location's position comes out of the map's config and doe
 
 **Ownership is stored as held positions and nothing derived from them.** Restore applies each as
 `["BLU", _pos] call fnc_zone_control_set`; that writer moves both side lists and both counters
-together and broadcasts them atomically (`server/server_fnc_init.sqf:81-120`), so
+together and broadcasts them atomically (`server/init_zones/fnc_zone_state_init.sqf:31-70`), so
 `zoneundercontrolblu` and `amount_zones_captured` come out consistent instead of being separately
 restored and separately wrong.
 
@@ -474,7 +474,7 @@ tracked is rebuilt with its composition. Without them a restore doubles every FO
 | Cargo | `BIS_fnc_saveInventory` | Verify its output is pure data; the fallback is the four explicit cargo getters |
 | Textures | `getObjectTextures` | The customisation the repair action already applies |
 | Animations | `animationPhase` per source | Same feature, `client/supports/fnc_client_addRepairActions.sqf:77` |
-| Pylons | `getPylonMagazines` | Aircraft only; restored with `setPylonLoadout`, already used at `server/server_fnc_init.sqf:1606` |
+| Pylons | `getPylonMagazines` | Aircraft only; restored with `setPylonLoadout`, already used at `server/supports/fnc_pylon_init.sqf:33` |
 | Locked | `locked` | |
 | MHQ flag | — | Marks which stored vehicle was `MHQ1` |
 
@@ -682,7 +682,7 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 | `client/misc/fnc_duws_dialogue.sqf` | Suppress mode, so replayed builders announce nothing at boot. |
 | `server/misc/fnc_civ_init_Tomata.sqf:170` | Accept a restored town set in place of the `fnc_civ_selectTowns` roll. |
 | `client/client_init.sqf:449` | Loadout save keys on player UID, not the player object. |
-| `server/server_fnc_init.sqf` | Registry lines; the support-unlock mirror writer; the settings name list. |
+| `server/server_fnc_init.sqf` | Registry lines only. The manifest holds no bodies, so the support-unlock mirror writer and the settings name list land in a module beside their subsystem. |
 | `server/server_var_init.sqf` | Persistence-zone radius and per-anchor cap. |
 | `client/client_init.sqf:95-113` | The New Game / Load Game fork at the top of the block, game master only; the existing faction flow moves into the New Game branch. |
 | `shared/includes/params_modern.hpp` | `DUWS_AutosaveInterval`, seconds, `0` for off, default 900. |

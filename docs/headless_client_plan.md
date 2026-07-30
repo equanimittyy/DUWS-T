@@ -105,7 +105,8 @@ machine sets skill on the units it owns.
 | `hc/hc_init.sqf` | New. Minimal HC entry: register `clientOwner`, then idle. |
 | `description.ext` | `headlessClients[]`. |
 | `mission.sqm` | One HC slot. |
-| `server/server_fnc_init.sqf` | `fnc_hc_handoff`; `DUWST_hc_owner` registration handler; registry lines. |
+| `server/misc/fnc_hc_init.sqf` | New. `fnc_hc_handoff` and the `DUWST_hc_owner` registration handler — the manifest holds no bodies. |
+| `server/server_fnc_init.sqf` | Registry lines. |
 | `server/server_var_init.sqf` | Declare `DUWST_hc_owner` defaulting to `2`. |
 | `server/warcom/fnc_WARCOM_opf_assault.sqf:98-109`, `fnc_WARCOM_opf_patrol.sqf`, `fnc_WARCOM_opf_air.sqf` | Hand off after spawn. |
 | `server/misc/fnc_random_veh.sqf:105` | Hand off crews with their group. |

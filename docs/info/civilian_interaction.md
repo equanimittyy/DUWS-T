@@ -11,7 +11,7 @@ enemy is. Everything else the menu offers is secondary to that.
 ## The reaction curve
 
 Every request rolls one of three reactions, weighted by the town's reputation
-(`fnc_civ_reaction_weights`, `src/duws/server/server_fnc_init.sqf:236-247`). With `t = rep / 20`
+(`fnc_civ_reaction_weights`, `src/duws/server/misc/fnc_civ_state_init.sqf:60-71`). With `t = rep / 20`
 clamped to `[-1, 1]`:
 
 ```sqf
@@ -252,7 +252,7 @@ so the coins in a town are a function of how many people the player is willing t
 
 ### What a bribe costs
 
-Per row (`fnc_civ_rowPrice`, `src/duws/server/server_fnc_init.sqf:257-266`), and **not** scaled by
+Per row (`fnc_civ_rowPrice`, `src/duws/server/misc/fnc_civ_state_init.sqf:81-90`), and **not** scaled by
 reputation — the curve already carries that signal by deciding whether money is asked for at all,
 so a reputation term in the amount would count it twice.
 

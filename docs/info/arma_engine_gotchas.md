@@ -21,7 +21,7 @@ returns nothing, so there is no handle to wait on and nothing to reveal the gap.
 inline. Reserve `remoteExec [..., 2]` for callers that are genuinely remote. When the verdict
 has to travel back to a client, `remoteExec` a reply function at the requesting player rather
 than trying to return a value — `fnc_pool_try_spend` and `fnc_pool_spend`
-(`src/duws/server/server_fnc_init.sqf`) are the two halves of that handshake.
+(`src/duws/server/misc/fnc_economy_init.sqf`) are the two halves of that handshake.
 
 ## The JIP queue is append-only unless the message carries an ID you choose
 
@@ -393,7 +393,7 @@ and applies it (`x = x + _delta; publicVariable "x"`); callers send the delta vi
 `[_delta] remoteExec ["fn", 2]` and never touch the global directly. The server serialises
 the deltas as ordinary atomic statements, so nothing is lost regardless of who fires when
 — a delta cannot carry a stale base the way an absolute can. Command points use exactly
-this: `fnc_cp_adjust` (`src/duws/server/server_fnc_init.sqf`) is the sole writer of
+this: `fnc_cp_adjust` (`src/duws/server/misc/fnc_economy_init.sqf`) is the sole writer of
 `commandpointsblu1`; the host's own `publicVariableEventHandler` does not fire for its own
 broadcast, so that function also refreshes the on-screen counter locally when
 `hasInterface`.
@@ -601,7 +601,7 @@ invisible in single-player and in any host-only test.
 **How to apply:** use `enableSimulationGlobal` for anything a client also renders, including the
 transient freeze used to stop fall damage during placement — the window is short but the client
 never gets the matching re-enable, so it never stops simulating at all. `fnc_duws_deploy` in
-`server/server_fnc_init.sqf` is the reference: global simulation, local `allowDamage`, the
+`server/misc/fnc_composition_stream_init.sqf` is the reference: global simulation, local `allowDamage`, the
 latter because damage on a server-local object is resolved server-side anyway and broadcasting
 it per prop would cost a JIP entry each.
 
@@ -642,8 +642,8 @@ inlined `reverse` leaves an empty loop; neither raises anything in the `.rpt`.
 **How to apply:** bind the array first, reverse it as its own statement, then iterate —
 `private _wps = waypoints _group; reverse _wps; { deleteWaypoint _x } forEach _wps;`. Iterating
 `for "_i" from (count _wps - 1) to 0 step -1` is equivalent and avoids `reverse` entirely.
-`fnc_civ_panic.sqf` and the `fnc_civ_moveToPlayerServer` block in `server/server_fnc_init.sqf`
-both do the bind-then-reverse form.
+`fnc_civ_panic.sqf` and the `fnc_civ_moveToPlayerServer` block in
+`server/misc/fnc_civ_state_init.sqf` both do the bind-then-reverse form.
 
 ## A waypoint statement never runs if the group cannot reach the waypoint
 
@@ -670,7 +670,7 @@ Deleting the group's waypoints and adding a fresh set does not clear the stop �
 is issued, is visible to `waypoints`, and is simply never walked.**
 
 This is invisible at the call site because the stop and the re-order live in different functions.
-`fnc_civ_moveToPlayerServer` (`src/duws/server/server_fnc_init.sqf`) ends on `doStop` so a
+`fnc_civ_moveToPlayerServer` (`src/duws/server/misc/fnc_civ_state_init.sqf`) ends on `doStop` so a
 civilian called over stands still to be spoken to; every ending of the conversation then routes
 through `fnc_civ_resume` into `fnc_civ_wp_Tomata`, which rebuilds the circuit and nothing more.
 Each civilian is its own group leader, so the stop held the whole group: anyone the player talked

@@ -52,7 +52,7 @@ Two function-loading mechanisms coexist, which is not inferable from any single 
   [`src/description.ext`](../../src/description.ext), producing namespaced globals
   (`AIS_*_fnc_*`, `TAWVD_fnc_*`, `VCM_fnc_*`).
 - **The DUWS core** compiles its `fnc_*` globals from a hand-maintained registry in
-  `src/duws/server/server_fnc_init.sqf` (~250 entries). There is no manifest of these
+  `src/duws/server/server_fnc_init.sqf` (~310 entries). There is no manifest of these
   functions beyond that file.
 
 ## Globals have no namespace
