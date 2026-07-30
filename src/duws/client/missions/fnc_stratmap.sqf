@@ -25,6 +25,10 @@ if (!((vehiclevarname player) in game_master)) exitWith {hint ([localize "STR_DU
 if (isServer && isNil "missionCooldownMonitorRunning") then {
     missionCooldownMonitorRunning = true; // 防止重复启动
     [] spawn {
+        // Included inside the block, not above it: a spawned block captures no locals.
+        private _defs = [
+        #include "..\..\shared\includes\mission_types.hpp"
+        ];
         private _wasInCooldown = []; // 记录每个任务是否曾处于冷却中
         for "_i" from 0 to 16 do {
             _wasInCooldown pushBack false;
@@ -44,40 +48,10 @@ if (isServer && isNil "missionCooldownMonitorRunning") then {
                 // 如果之前标记过在冷却中，但现在不在冷却中，说明刚刚结束
                 if (!_inCooldown && (_wasInCooldown select _type)) then {
                     // 获取该任务类型的本地化名称
-                    private _missionName = switch (_type) do {
-                        case 0: { localize "STR_DUWS_T_c0" };       // 营救小队
-                        case 1: { localize "STR_DUWS_T_c1" };       // 窃取补给
-                        case 2: { localize "STR_DUWS_T_c2" };       // 击杀 HVT
-                        case 3: {                                         // 摧毁塔
-                            switch (VERSION_X) do {
-                                case "MODERN":  { localize "STR_DUWS_T_c3" };
-                                default         { localize "STR_DUWS_T_c3" };
-                            };
-                        };
-                        case 4: { localize "STR_DUWS_T_c4" };       // 营救飞行员
-                        case 5: { localize "STR_DUWS_T_c5" };       // 猎杀狙击手
-                        case 6: { localize "STR_DUWS_T_c6" };       // 窃取工程车
-                        case 7: { localize "STR_DUWS_T_c7" };       // 击杀装甲 HVT
-                        case 8: {                                         // 破坏笔记本/无线电
-                            switch (VERSION_X) do {
-                                case "MODERN":  { localize "STR_DUWS_T_c8" };
-                                default         { localize "STR_DUWS_T_c8" };
-                            };
-                        };
-                        case 9: { localize "STR_DUWS_T_c9" };       // 摧毁弹药库
-                        case 10: {                                        // 摧毁雷达
-                            switch (VERSION_X) do {
-                                case "MODERN":  { localize "STR_DUWS_T_c10" };
-                                default         { localize "STR_DUWS_T_c10" };
-                            };
-                        };
-                        case 11: { localize "STR_DUWS_T_c11" }; // 清理区域 CQB
-                        case 12: { localize "STR_DUWS_T_c12" }; // 坚守阵地
-                        case 13: { localize "STR_DUWS_T_c13" };     // 占领
-                        case 14: { localize "STR_DUWS_T_c14" };     // 保护平民
-                        case 15: { localize "STR_DUWS_T_c15" };      // 运输 IDAP
-                        case 16: { localize "STR_DUWS_T_c16" };      // 突击指挥部
-                        default { format ["未知任务 %1", _type] };
+                    private _missionName = if (_type < count _defs) then {
+                        localize ((_defs select _type) select 1)
+                    } else {
+                        format ["未知任务 %1", _type]
                     };
                     // 发送通知
                     ["info", [localize "STR_DUWS_T_MISSION_READY1", format [localize "STR_DUWS_T_MISSION_READY", _missionName] ]] remoteExec ["BIS_fnc_showNotification", 0];
@@ -107,9 +81,17 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_missionlook"] remoteExec ["fnc_duws_dialogue", 0];
   _kibot_pos_array_missionPos = [[-99999,-99999,-99999]];
 
-  // CURRENTLY 15 MISSIONS AVAILABLE, 0 indexed
-  _missionConfig = [];
-  _missionCount = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+  // Included inside the block, not above it: a spawned block captures no locals.
+  private _missionDefs = [
+  #include "..\..\shared\includes\mission_types.hpp"
+  ];
+  // Positions and names the launcher blocks read back, one slot per type. A global because the
+  // blocks run later, from the map, and capture nothing.
+  DUWS_missionSlots = [];
+  { DUWS_missionSlots pushBack [] } forEach _missionDefs;
+
+  _missionCount = [];
+  { _missionCount pushBack _forEachIndex } forEach _missionDefs;
   _missionShuffle = _missionCount call BIS_fnc_arrayShuffle;
   // Seven drawn from the shuffled seventeen, not all of them. Every candidate costs a
   // BIS_fnc_findSafePos search before it can be offered, so the full pool spent that search
@@ -197,304 +179,24 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 		if (_counter == _missionDraw-1) then {failsafe_not_found = false;};
 		_currentMission = _missionShuffle select _counter;
 
-		// Add each mission type to stratmap array
+		// Add each mission type to stratmap array. The row supplies the description, the icon and
+		// the launcher; the search supplies the position and the name, which go into the shared
+		// slot array the launcher reads back.
+		(_missionDefs select _currentMission) params ["", "", "_desc", "_icon", "", "_launcher"];
+		private _name = [0] call fnc_random_name;
+		DUWS_missionSlots set [_currentMission, [_foundSafepos, _name]];
 
-        switch (_currentMission) do {
+		array_of_missions pushBack [
+			_foundSafepos,
+			_launcher,
+			_name,
+			localize _desc,
+			"",
+			_icon,
+			1,
+			[]
+		];
 
-			case 0: { // mission RESCUE SQUAD
-				mission0_pos = _foundSafepos;
-                mission0_name = [0] call fnc_random_name;
-    
-                _missionConfig = [
-                    mission0_pos,
-					{_handle = [mission0_pos,mission0_name] remoteExec ["fnc_rescue_squad_mission", 2]},
-                    mission0_name,
-                    localize "STR_DUWS_T_kievbwmd",
-                    "",
-                    "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa",
-                    1,
-                    []
-                ];
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-
-            case 1: { // mission STEAL SUPPLY
-                mission1_name = [0] call fnc_random_name;
-                mission1_pos = _foundSafepos;
-
-                _missionConfig = [
-                    mission1_pos,
-					{_handle = [mission1_pos,mission1_name] remoteExec ["fnc_steal_supply_mission", 2]},
-                    mission1_name,
-                    localize "STR_DUWS_T_p7qawzl4",
-                    "",
-                    "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa",
-                    1,
-                    []
-                ];
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-
-            case 2: { // mission TARGET HVT
-                mission2_name = [0] call fnc_random_name;
-                mission2_pos = _foundSafepos;
-    
-                _missionConfig = [
-                    mission2_pos,
-					{_handle = [mission2_pos,mission2_name] remoteExec ["fnc_target_hvt_mission", 2]},
-                    mission2_name,
-                    localize "STR_DUWS_T_19ajhe1d",
-                    "",
-                    "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa",
-                    1,
-                    []
-                ];
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-
-            case 3: { // mission DESTROY TOWER
-                mission3_name = [0] call fnc_random_name;
-                mission3_pos = _foundSafepos;
-
-				switch (VERSION_X) do {
-					case "MODERN": {  // RADIO TOWER
-						_missionConfig = [
-							mission3_pos,
-							{_handle = [mission3_pos,mission3_name] remoteExec ["fnc_destroy_tower_mission", 2]},
-							mission3_name,
-							localize "STR_DUWS_T_dgpqenyw",
-							"",
-							"\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",
-							1,
-							[]
-						];
-					};
-				};
-                array_of_missions = array_of_missions + [_missionConfig];
-			};
-
-            case 4: { // mission RESCUE PILOT
-                mission4_name = [0] call fnc_random_name;
-                mission4_pos = _foundSafepos;
-    
-                _missionConfig = [
-                    mission4_pos,
-					{_handle = [mission4_pos,mission4_name] remoteExec ["fnc_rescue_pilot_mission", 2]},
-                    mission4_name,
-                    localize "STR_DUWS_T_njsu8ofz",
-                    "",
-                    "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa", 
-                    1,
-                    []
-                ];
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-
-            case 5: { // mission Sniper HUNT
-                mission5_name = [0] call fnc_random_name;
-                mission5_pos = _foundSafepos;
-    
-                _missionConfig = [
-                    mission5_pos,
-					{_handle = [mission5_pos,mission5_name] remoteExec ["fnc_target_sniper_mission", 2]},
-                    mission5_name,
-                    localize "STR_DUWS_T_16dh939j",
-                    "",
-                    "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa",
-                    1,
-                    []
-                ];
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-			
-            case 6: { // mission Steal BUILDER
-                mission6_name = [0] call fnc_random_name;
-                mission6_pos = _foundSafepos;
-    
-                _missionConfig = [
-                    mission6_pos,
-					{_handle = [mission6_pos,mission6_name] remoteExec ["fnc_steal_builder_mission", 2]},
-                    mission6_name,
-                    localize "STR_DUWS_T_czpvn5z1",
-					"",
-					"\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa",
-					1,
-					[]
-				];
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-
-            case 7: { // mission TARGET ARMOR HVT
-                mission7_name = [0] call fnc_random_name;
-                mission7_pos = _foundSafepos;
-    
-                _missionConfig = [
-                    mission7_pos,
-					{_handle = [mission7_pos,mission7_name] remoteExec ["fnc_target_armor_mission", 2]},
-                    mission7_name,
-                    localize "STR_DUWS_T_y7z1cx6j",
-                    "",
-                    "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa",
-                    1,
-                    []
-                ];
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-
-            case 8: { // mission SABOTAGE LAPTOP
-                mission8_name = [0] call fnc_random_name;
-                mission8_pos = _foundSafepos;
-    
-				switch (VERSION_X) do {
-					case "MODERN": {
-						_missionConfig = [
-							mission8_pos,
-							{_handle = [mission8_pos,mission8_name] remoteExec ["fnc_sabotage_laptop_mission", 2]},
-							mission8_name,
-							localize "STR_DUWS_T_j97ecrsh",
-							"",
-							"\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",
-							1,
-							[]
-						];
-					};
-				};
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-
-            case 9: { // mission DESTROY AMMO CACHE
-                mission9_name = [0] call fnc_random_name;
-                mission9_pos = _foundSafepos;
-    
-                _missionConfig = [
-                    mission9_pos,
-					{_handle = [mission9_pos,mission9_name] remoteExec ["fnc_destroy_cache_mission", 2]},
-                    mission9_name,
-                    localize "STR_DUWS_T_geryeddp",
-                    "",
-                    "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",
-                    1,
-                    []
-                ];
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-		
-			case 10: { // mission DESTROY RADAR
-                mission10_name = [0] call fnc_random_name;
-                mission10_pos = _foundSafepos;
-    
-				switch (VERSION_X) do {
-					case "MODERN": {
-						_missionConfig = [
-							mission10_pos,
-							{_handle = [mission10_pos,mission10_name] remoteExec ["fnc_destroy_radar_mission", 2]},
-							mission10_name,
-							localize "STR_DUWS_T_n4uc7t2x",
-							"",
-							"\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",
-							1,
-							[]
-						];
-						array_of_missions = array_of_missions + [_missionConfig];
-					};
-				};
-			};
-            case 11: { // mission CLEAR THE AREA CQB
-                mission11_name = [0] call fnc_random_name;
-                mission11_pos = _foundSafepos;
-    
-                _missionConfig = [
-                    mission11_pos,
-					{_handle = [mission11_pos,mission11_name] remoteExec ["fnc_clearthearea_cqb_mission", 2]},
-                    mission11_name,
-                    localize "STR_DUWS_T_shentouxiaodui",
-                    "",
-                    "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa",
-                    1,
-                    []
-                ];
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-            case 12: { // mission HOLD THE POSITION
-                mission12_name = [0] call fnc_random_name;
-                mission12_pos = _foundSafepos;
-    
-                _missionConfig = [
-                    mission12_pos,
-					{_handle = [mission12_pos,mission12_name] remoteExec ["fnc_holdposition_mission", 2]},
-                    mission12_name,
-                    localize "STR_DUWS_T_jianshouzhendi",
-                    "",
-                    "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa",
-                    1,
-                    []
-                ];
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-            case 13: { // mission DOMINATION
-                mission13_name = [0] call fnc_random_name;
-                mission13_pos = _foundSafepos;
-    
-                _missionConfig = [
-                    mission13_pos,
-					{_handle = [mission13_pos,mission13_name] remoteExec ["fnc_domination_mission", 2]},
-                    mission13_name,
-                    localize "STR_DUWS_T_domination",
-                    "",
-                    "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa",
-                    1,
-                    []
-                ];
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-            case 14: { // mission CIVILIANPROTECTION
-                mission14_name = [0] call fnc_random_name;
-                mission14_pos = _foundSafepos;
-    
-                _missionConfig = [
-                    mission14_pos,
-					{_handle = [mission14_pos,mission14_name] remoteExec ["fnc_protect_civ_mission", 2]},
-                    mission14_name,
-                    localize "STR_DUWS_T_protectciv",
-                    "",
-                    "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa",
-                    1,
-                    []
-                ];
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-            case 15: { // mission TransportIDAP
-                mission15_name = [0] call fnc_random_name;
-                mission15_pos = _foundSafepos;
-    
-                _missionConfig = [
-                    mission15_pos,
-					{_handle = [mission15_pos,mission15_name] remoteExec ["fnc_transport_IDAP_mission", 2]},
-                    mission15_name,
-                    localize "STR_DUWS_T_transIDAP",
-                    "",
-                    "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa",
-                    1,
-                    []
-                ];
-                array_of_missions = array_of_missions + [_missionConfig];
-            };
-            case 16: { // 情报搜集任务
-            mission16_name = [0] call fnc_random_name;
-            mission16_pos = _foundSafepos;
-            _missionConfig = [
-            mission16_pos,
-            {_handle = [mission16_pos, mission16_name] remoteExec ["fnc_intel_gathering_mission", 2]},
-             mission16_name,
-             localize "STR_DUWS_T_INTEL_GATHERING_DESC",
-               "",
-               "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa",
-               1,
-               []
-           ];
-             array_of_missions = array_of_missions + [_missionConfig];
-           };
-		};
         _counter = _counter + 1;
 	};
   };

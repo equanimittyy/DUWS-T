@@ -9,21 +9,17 @@
 params ["_type"];
 if (!isServer) exitWith {};
 
-private _threads = [
-	"fnc_rescue_squad_mission", "fnc_steal_supply_mission", "fnc_target_hvt_mission",
-	"fnc_destroy_tower_mission", "fnc_rescue_pilot_mission", "fnc_target_sniper_mission",
-	"fnc_steal_builder_mission", "fnc_target_armor_mission", "fnc_sabotage_laptop_mission",
-	"fnc_destroy_cache_mission", "fnc_destroy_radar_mission", "fnc_clearthearea_cqb_mission",
-	"fnc_holdposition_mission", "fnc_domination_mission", "fnc_protect_civ_mission",
-	"fnc_transport_IDAP_mission", "fnc_intel_gathering_mission"
+private _defs = [
+#include "..\..\shared\includes\mission_types.hpp"
 ];
-if (_type < 0 || {_type >= count _threads}) exitWith {
+if (_type < 0 || {_type >= count _defs}) exitWith {
 	["ERROR", "MISSION", format ["debug force: no mission type %1", _type]] call fnc_log;
 };
 
-private _thread = missionNamespace getVariable [_threads select _type, {}];
+private _threadName = (_defs select _type) select 0;
+private _thread = missionNamespace getVariable [_threadName, {}];
 if (_thread isEqualTo {}) exitWith {
-	["ERROR", "MISSION", format ["debug force: %1 is not registered", _threads select _type]] call fnc_log;
+	["ERROR", "MISSION", format ["debug force: %1 is not registered", _threadName]] call fnc_log;
 };
 
 private _pos = [] call fnc_findSafeMissionPos;

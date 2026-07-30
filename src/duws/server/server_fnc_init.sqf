@@ -1275,6 +1275,8 @@ fnc_intelAnalysis = compile preprocessFileLineNumbers "duws\server\misc\fnc_inte
 publicVariable "fnc_intelAnalysis";
 // MISSION FUNCTIONS
 fnc_stratmap = compile preprocessFileLineNumbers "duws\client\missions\fnc_stratmap.sqf";publicVariable "fnc_stratmap";
+// Broadcast: the strategic map's mission blocks call it on whoever opened the map.
+fnc_mission_launch = compile preprocessFileLineNumbers "duws\client\missions\fnc_mission_launch.sqf";publicVariable "fnc_mission_launch";
 fnc_missionLocator = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionLocator.sqf";publicVariable "fnc_missionLocator";
 
 

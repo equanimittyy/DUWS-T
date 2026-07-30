@@ -13,12 +13,10 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
 
 // Row order is fnc_mission_begin's mission type, so the index is the argument the server wants
 // and the list doubles as the type reference when reading a MISSION log line.
-private _types = [
-	"Rescue squad", "Steal supply truck", "Kill HVT", "Destroy tower", "Rescue pilot",
-	"Kill snipers", "Steal engineering vehicle", "Destroy armour", "Sabotage laptop",
-	"Destroy cache", "Destroy radar", "Clear the area (CQB)", "Hold position", "Domination",
-	"Protect civilian", "Transport IDAP", "Intel gathering"
+private _defs = [
+#include "..\..\shared\includes\mission_types.hpp"
 ];
+private _types = _defs apply { _x select 4 };
 
 private _rows = [];
 {
