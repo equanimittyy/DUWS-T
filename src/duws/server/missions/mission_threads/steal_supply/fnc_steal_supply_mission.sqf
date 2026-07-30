@@ -115,113 +115,18 @@ sleep 1;
 _group = [_vehPos, EAST, [opfor_SL_SOLDIER_X, opfor_LAT_SOLDIER_X, opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 
-// 建筑驻军
-private _buildingSearchRadius = _radius;
-private _usableBuildings = [_targetpos, 2, _buildingSearchRadius] call fnc_usableBuildings;
-private _desiredBldgCount = 6;
-private _actualBldgCount = count _usableBuildings;
-private _buildingGroup = grpNull;
-
-if (_actualBldgCount > 0) then {
-    private _maxBuildingsToUse = (_actualBldgCount min _desiredBldgCount);
-    private _selectedBuildings = [];
-    if (_actualBldgCount == _maxBuildingsToUse) then {
-        _selectedBuildings = _usableBuildings;
-    } else {
-        private _tempArray = +_usableBuildings;
-        for "_i" from 1 to _maxBuildingsToUse do {
-            private _index = floor (random (count _tempArray));
-            _selectedBuildings pushBack (_tempArray select _index);
-            _tempArray deleteAt _index;
-        };
-    };
-
-    private _unitsPerBuilding = 4;
-    private _totalUnitsToSpawn = _maxBuildingsToUse * _unitsPerBuilding;
-
-    private _possibleUnitTypes = [];
-    {
-        if (!isNil "_x" && {_x != ""}) then {
-            _possibleUnitTypes pushBack _x;
-        };
-    } forEach [
-        opfor_SOLDIER_X,
-        opfor_AA_SOLDIER_X,
-        opfor_AR_SOLDIER_X,
-        opfor_AT_SOLDIER_X,
-        opfor_LAT_SOLDIER_X,
-        opfor_SL_SOLDIER_X
-    ];
-    if (count _possibleUnitTypes == 0) then {
-        _possibleUnitTypes = [opfor_SOLDIER_X];
-    };
-
-    private _bldgUnits = [];
-    for "_i" from 1 to _totalUnitsToSpawn do {
-        _bldgUnits pushBack (selectRandom _possibleUnitTypes);
-    };
-    _buildingGroup = [[0,0], EAST, _bldgUnits,[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
-    _buildingGroup deleteGroupWhenEmpty true;
-
-    {
-        if (_forEachIndex >= _maxBuildingsToUse) exitWith {};
-        private _building = _x;
-        private _positions = [_building] call BIS_fnc_buildingPositions;
-        for "_j" from 0 to (_unitsPerBuilding - 1) do {
-            private _unitIndex = _forEachIndex * _unitsPerBuilding + _j;
-            if (_unitIndex >= count (units _buildingGroup)) exitWith {};
-            private _unit = units _buildingGroup select _unitIndex;
-            if (count _positions > 0) then {
-                private _randPosIndex = floor (random (count _positions));
-                _unit setPosATL (_building buildingPos _randPosIndex);
-                _unit setUnitPos "AUTO";
-                _unit setBehaviour "AWARE";
-                [_unit, _building, _positions] spawn {
-                    params ["_unit", "_building", "_positions"];
-                    sleep 2 + random 5;
-                    private _buildingPos = getPosATL _building;
-                    while {alive _unit} do {
-                        if (_unit distance _buildingPos > 15 && count _positions > 0) then {
-                            private _returnPos = selectRandom _positions;
-                            _unit doMove _returnPos;
-                        };
-                        if (count _positions > 0) then {
-                            private _targetPosIndex = floor (random (count _positions));
-                            private _targetPos = _building buildingPos _targetPosIndex;
-                            _unit doMove _targetPos;
-                            _unit setUnitPos "AUTO";
-                            private _timeout = time + 30;
-                            waitUntil {
-                                sleep 5;
-                                (unitReady _unit) ||
-                                (!alive _unit) ||
-                                (_unit distance _targetPos < 2) ||
-                                (time > _timeout)
-                            };
-                            sleep 5 + random 5;
-                        } else {
-                            sleep 5 + random 5;
-                        };
-                    };
-                };
-            };
-        };
-    } forEach _selectedBuildings;
-};
+[_targetpos, _radius] call fnc_garrisonBuildings;
 
 // ========== 添加死亡情报动作 ==========
 {
     if (!isNull _x) then {
         [_x] call fnc_add_intel_to_group;
     };
-} forEach [_group, _buildingGroup];
+} forEach [_group];
 // ====================================
 {
     [_x] call fnc_addRandomLoot;
 } forEach units _group;
-{
-    [_x] call fnc_addRandomLoot;
-} forEach units _buildingGroup;
 sleep 1;
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 
