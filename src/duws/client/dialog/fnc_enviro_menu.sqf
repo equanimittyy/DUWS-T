@@ -1,4 +1,14 @@
 // Locality: client -- inherited from client/dialog/fnc_startup_closed.sqf.
+
+// Raised while the screen fills itself in, and read by every LBSelChanged handler below:
+// lbSetCurSel fires the same event a player's click does, so without this the act of
+// preselecting the defaults would read as the player editing them. Set before the dialog
+// exists, since the combos' own handlers are live from the moment it does.
+duws_preset_applying = true;
+if (isNil "duws_preset") then { duws_preset = "classic" };
+// [idc, index] per combo, filled by _setDefault below and re-applied when a preset is chosen.
+duws_enviro_defaults = [];
+
 _handle = createDialog "startup_dialog";
 waitUntil {dialog};
 
@@ -6,6 +16,7 @@ waitUntil {dialog};
 // in the stringtable, so shared Yes/No labels stay unchanged elsewhere.
 private _setDefault = {
     params ["_idc", "_i"];
+    duws_enviro_defaults pushBack [_idc, _i];
     lbSetCurSel [_idc, _i];
     lbSetText [_idc, _i, (lbText [_idc, _i]) + " " + (localize "STR_DUWS_T_default_suffix")];
 };
@@ -139,3 +150,26 @@ lbSetColor [2111, index_insurgent_on, [1,0,0,1]];
 if (!isNil "duws_enviro_sel") then {
     { lbSetCurSel [2100 + _forEachIndex, _x]; } forEach duws_enviro_sel;
 };
+
+// PRESET
+// Filled last so the row reflects whatever the restore above ended on: a player who came back
+// from the campaign screen having changed something there is already on Custom.
+duws_preset_classic = lbAdd [2200, localize "STR_DUWS_T_preset_classic"];
+duws_preset_custom = lbAdd [2200, localize "STR_DUWS_T_preset_custom"];
+lbSetCurSel [2200, [duws_preset_classic, duws_preset_custom] select (duws_preset == "custom")];
+
+// Attached from here rather than declared per combo in the dialog config, so that filling the
+// combos above -- twelve preselections and a restore, all of which raise LBSelChanged -- cannot
+// trip them before the screen is ready.
+private _display = uiNamespace getVariable ["duws_startup_display", displayNull];
+{
+    (_display displayCtrl _x) ctrlAddEventHandler ["LBSelChanged", {
+        if (duws_preset_applying) exitWith {};
+        lbSetCurSel [2200, duws_preset_custom];
+    }];
+} forEach [2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2110,2111];
+
+duws_preset_applying = false;
+// Writes the description line under the row. Re-applies the preset too, which is a no-op:
+// Classic is the defaults every combo above already holds, and Custom changes nothing at all.
+[] call fnc_startup_preset_apply;

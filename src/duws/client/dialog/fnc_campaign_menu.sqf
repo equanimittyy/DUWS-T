@@ -1,4 +1,8 @@
 // Locality: client -- inherited from client/dialog/fnc_callsign_back.sqf.
+  // Same flag and the same reason as the environment screen: preselecting a combo raises the
+  // event a player's click raises, and only the player's counts as leaving the preset.
+  duws_preset_applying = true;
+
   _handle = createDialog "startup_dialog2";
   waitUntil {dialog};
 
@@ -146,4 +150,17 @@ index_enemyunit_multiplier_3 = lbAdd [2113, "3x"];
 if (!isNil "duws_campaign_sel") then {
     { lbSetCurSel [2100 + _forEachIndex, _x]; } forEach duws_campaign_sel;
 };
+
+// The preset row lives on the environment screen, which is answered before this one, so there is
+// nothing to repaint here -- only the state to drop. The row shows Custom when the player steps
+// back to it.
+private _display = uiNamespace getVariable ["duws_startup_display", displayNull];
+{
+    (_display displayCtrl _x) ctrlAddEventHandler ["LBSelChanged", {
+        if (duws_preset_applying) exitWith {};
+        duws_preset = "custom";
+    }];
+} forEach [2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2110,2111,2112,2113];
+
+duws_preset_applying = false;
 

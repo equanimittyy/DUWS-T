@@ -4,7 +4,9 @@ class startup_dialog2
     idd = -1;
     movingenable = false;
 	// Disable ESC key
-	onLoad = "(_this select 0) displayAddEventhandler ['KeyDown', {(_this select 1) isEqualTo 1}];";
+	// Stashed for the same reason as the environment screen: fnc_campaign_menu.sqf attaches its
+	// LBSelChanged handlers from script once the combos are filled.
+	onLoad = "uiNamespace setVariable ['duws_startup_display', _this select 0]; (_this select 0) displayAddEventhandler ['KeyDown', {(_this select 1) isEqualTo 1}];";
     onUnload = "[] spawn fnc_startup_closed"; // UI event handler
 
 	class ControlsBackground

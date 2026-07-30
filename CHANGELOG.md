@@ -37,6 +37,7 @@ see [`README.md`](README.md) for the fork lineage. `git log` has the detail.
 
 ## Campaign setup
 
+- Preset row above the environment parameters; Classic is the shipped defaults, and editing any option drops the row to Custom
 - Squad-callsign screen, threaded through the radio dialogue
 - Back navigation through the setup screens; faction and HQ re-pickable
 - Custom-faction paste split per side, with every required key and class validated
