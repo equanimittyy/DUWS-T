@@ -15,7 +15,7 @@ translation used throughout:
 
 | Principle | What it maps to in this codebase |
 |---|---|
-| Single responsibility | A file does one job. `server_fnc_init.sqf` being both a path registry and the home of 36 function bodies is the violation shape. |
+| Single responsibility | A file does one job. `server_fnc_init.sqf` being both a path registry and the home of 49 function bodies is the violation shape. |
 | Open/closed | Adding an instance of an existing concept (a side mission, a support, a faction) edits data, not control flow. A `switch` with one case per instance is the violation shape. |
 | Liskov substitution | Where N files implement the same implicit contract — same `params`, same lifecycle obligations — every one of them honours it. A copy that silently dropped a step is the violation shape. |
 | Interface segregation | A function's `params` contract is narrow and honest. A file that is a function *and* defines three other globals as a side effect is the violation shape. |
@@ -35,13 +35,16 @@ not recommended:
 
 ## How this was measured
 
-A normalised clone detector over `src/duws/` (comments and whitespace stripped, 8-line seed
-windows extended to maximal blocks) run with the 255-file `shared/factions/` data directory
-excluded, since near-identical data tables are expected there and would swamp the result.
+A normalised clone detector over `src/duws/` (block and line comments stripped, whitespace
+collapsed, blank lines dropped, 8-line seed windows hashed and every line in a repeated window
+counted). Two data directories are excluded, since near-identical tables are expected there and
+would swamp the result: the 256-file `shared/factions/` tree, and
+`server/misc/fnc_factions_check_modern.sqf`, whose BLUFOR and OPFOR roster arrays are identical
+by design — its own header says so.
 
-**2,348 of 25,168 non-data lines are duplicated — 9.3%.** All ten of the largest clone blocks sit
-in `server/missions/mission_threads/`, which is why that directory leads the plan: they are the
-same 45-line epilogue repeated across nine of the threads.
+**4,007 of 24,974 non-data lines are duplicated — 16.0%.** `server/missions/mission_threads/`
+carries 1,634 of those lines, 41% of all duplication in the tree, which is why that directory
+leads the plan.
 
 ## Tier 1: quick wins
 
@@ -49,11 +52,11 @@ Small, self-contained, and each one is a strict improvement with no design argum
 
 ### The registry has one duplicate entry and one dead one
 
-`fnc_missionLocator` is registered twice from the same path — `server/server_fnc_init.sqf:705`
-and `:1200` — and only the second broadcasts it, so the first is doing nothing the second does
+`fnc_missionLocator` is registered twice from the same path — `server/server_fnc_init.sqf:752`
+and `:1262` — and only the second broadcasts it, so the first is doing nothing the second does
 not redo.
 
-`fnc_missionPatrolsSmall` (`:726`) is registered and then called from nowhere in `src/`: its only
+`fnc_missionPatrolsSmall` (`:775`) is registered and then called from nowhere in `src/`: its only
 reference in the tree is the registration itself.
 
 ### `call (compile _var)` where `getVariable` is meant
@@ -83,9 +86,10 @@ call compile format["%1 = _trg2", _zonePosName2];   // server/init_zones/fnc_cre
 ```
 
 This synthesises a global variable name from a coordinate and assigns to it through the
-compiler. `server/supports/fnc_fob_server.sqf:60` does the same for FOB triggers, and
-`server/dialog/fnc_FOB_cleanup.sqf:14,17` reads them back the same way. The consequence is that
-no grep can find the writer of `trigger2123456` — the identifier does not exist in the source.
+compiler. `server/supports/fnc_fob_server.sqf:63,78` does the same for the FOB trigger and its
+warning trigger, and `server/dialog/fnc_FOB_cleanup.sqf:14,17` reads both back the same way.
+Four writes, three reads. The consequence is that no grep can find the writer of
+`trigger2123456` — the identifier does not exist in the source.
 
 A `missionNamespace setVariable [_name, _trg2]` is a one-line change that keeps the same keying
 and removes the compiler. The larger fix is a single hashmap keyed by the rounded position, but
@@ -93,7 +97,7 @@ the one-line version is worth taking on its own.
 
 ## Tier 2: the copy-paste layer
 
-This is where the 18.7% lives, and where duplication has already cost behaviour.
+This is where the 16% lives, and where duplication has already cost behaviour.
 
 ### The building-garrison block: 90-odd lines, nine copies, one drifted
 
@@ -102,19 +106,19 @@ to six, spawn four OPFOR per building, and start a per-unit reposition loop:
 
 | File | Span | Lines |
 |---|---|---|
-| `missions/mission_threads/destroy_cache/fnc_destroy_cache_mission.sqf` | `202-298` | 97 |
-| `missions/mission_threads/destroy_radar/fnc_destroy_radar_mission.sqf` | `127-217` | 91 |
-| `missions/mission_threads/destroy_tower/fnc_destroy_tower_mission.sqf` | `113-203` | 91 |
+| `missions/mission_threads/destroy_cache/fnc_destroy_cache_mission.sqf` | `204-300` | 97 |
+| `missions/mission_threads/destroy_radar/fnc_destroy_radar_mission.sqf` | `125-215` | 91 |
+| `missions/mission_threads/destroy_tower/fnc_destroy_tower_mission.sqf` | `111-201` | 91 |
 | `missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_mission.sqf` | `72-162` | 91 |
-| `missions/mission_threads/steal_builder/fnc_steal_builder_mission.sqf` | `94-184` | 91 |
-| `missions/mission_threads/steal_supply/fnc_steal_supply_mission.sqf` | `139-229` | 91 |
-| `missions/mission_threads/target_armor/fnc_target_armor_mission.sqf` | `64-154` | 91 |
-| `missions/mission_threads/target_hvt/fnc_target_hvt_mission.sqf` | `83-173` | 91 |
-| `missions/mission_threads/target_sniper/fnc_target_sniper_mission.sqf` | `47-136` | 90 |
+| `missions/mission_threads/steal_builder/fnc_steal_builder_mission.sqf` | `92-182` | 91 |
+| `missions/mission_threads/steal_supply/fnc_steal_supply_mission.sqf` | `140-230` | 91 |
+| `missions/mission_threads/target_armor/fnc_target_armor_mission.sqf` | `62-152` | 91 |
+| `missions/mission_threads/target_hvt/fnc_target_hvt_mission.sqf` | `81-171` | 91 |
+| `missions/mission_threads/target_sniper/fnc_target_sniper_mission.sqf` | `45-134` | 90 |
 
 Eight are identical modulo the position variable's name. `target_sniper` is not, and the
 difference is player-visible: it declares `_buildingGroup` inside the `if` block rather than
-before it (`:90`), so the group is unreachable after the block — and the two passes the other
+before it (`:87`), so the group is unreachable after the block — and the two passes the other
 eight run there, `fnc_add_intel_to_group` and `fnc_addRandomLoot`, are simply absent. **A sniper
 hunt's building garrison drops no corpse intel**, where every other mission's does. Nothing in
 the source says that is deliberate. That is the substitutability failure in concrete form: one
@@ -123,30 +127,32 @@ against.
 
 Two more files solve the same problem a third and fourth way rather than copying it:
 `server/init_zones/fnc_createopfortified.sqf:49-55` (eight buildings) and
-`missions/mission_threads/clearthearea_cqb/fnc_clearthearea_cqb_mission.sqf:42-80` (four, and
+`missions/mission_threads/clearthearea_cqb/fnc_clearthearea_cqb_mission.sqf:41-79` (four, and
 also no intel pass). They share `fnc_usableBuildings` and the `_desiredBldgCount` idea but not
 the code, so they are reimplementation rather than duplication — worth folding into the same
 helper, but they are not evidence of copy-paste drift and should be converted last.
 
 The extraction has precedent in the same tree: `server/misc/fnc_usableBuildings.sqf` is already a
-19-line shared helper that every one of these ten calls. The block wants to become
+19-line shared helper with thirteen callers across the mission. The block wants to become
 `fnc_garrisonBuildings` taking `[_pos, _radius, _bucketKey]` and returning the group, with the
-intel and loot passes inside it so a caller cannot forget them.
+intel and loot passes inside it so a caller cannot forget them. Two of those thirteen callers —
+`rescue_squad` and `intel_gathering` — use `fnc_usableBuildings` for siting rather than
+garrisoning and are not part of this conversion.
 
 **Decide the drift before extracting, not during.** If the two outliers are correct and the
 other eight over-reward, the shared version needs a flag; if they are wrong, extracting fixes
 two missions' intel economy as a side effect and that belongs in its own commit with its own
 smoke test.
 
-### The mission-thread skeleton
+### The mission-thread skeleton, and the cooldown it leaks
 
 Beyond the garrison block, all 17 threads share a prologue and an epilogue that differ only in
-constants. The prologue — target-position search, the `_failSafe > 10` bail-out, marker
-creation — is 33 lines repeated across 10 files; the reinforcement-monitor wiring is another 14
-across 11. Both are pure boilerplate around values the thread already has.
+constants. The prologue — target-position search, the failsafe bail-out, marker creation — is 33
+lines repeated across 15 files; the reinforcement-monitor wiring is another 14 across 11. Both
+are pure boilerplate around values the thread already has.
 
-The prologue is the better first target because it contains a bail-out path that every thread
-must get right:
+The prologue is the better first target, because since `fnc_mission_begin` gained a cooldown
+stamp the bail-out no longer undoes everything the entry did:
 
 ```sqf
 if (_failsafe > 10 && _Posfound == false) exitWith {
@@ -156,15 +162,51 @@ if (_failsafe > 10 && _Posfound == false) exitWith {
 };
 ```
 
-A thread that forgets this leaves `Mission_available` false forever and the side-mission spawner
-stops. `fnc_mission_begin` (`server_fnc_init.sqf:651`) already exists and already owns the
-*entry* half of that contract — cooldown check, `Mission_available = false`, logging. The
-prologue is the missing `fnc_mission_site` companion, and the epilogue
-(reward, timer, cleanup, clear `current_mission_target_pos`) is the missing `fnc_mission_end`.
+`fnc_mission_begin` (`server_fnc_init.sqf:790`) writes `mission_cooldown_<type> = diag_tickTime +
+3600` *before* the thread searches for a site. Sixteen threads carry an early-exit path — the
+fifteen failsafe bail-outs plus `rescue_squad`'s `count _usableBuildings < 2` check at `:23` —
+and **not one of them clears that stamp**. A mission that never found a site is on a full hour of
+cooldown having spawned nothing, and the strategic map greys it out for that hour. This is the
+live cost of the missing helper, not a hypothetical one.
+
+The bail-outs have drifted three other ways, all of which a single definition collapses:
+
+- Three still hardcode English rather than localising: `clearthearea_cqb:31`, `domination:37`,
+  `target_sniper:37`.
+- The localised ones use two different keys for one message, `STR_DUWS_T_crtzxs0j` and
+  `STR_DUWS_T_mission_no_location`.
+- `target_hvt:37` tests `_failsafe > 5` where every other thread tests `> 10`. Both are inert:
+  `fnc_missionTargetPos` gives up at `_failSafe > 50` (`fnc_missionTargetPos.sqf:30`), so it only
+  ever returns past either threshold. Three constants describing one boundary, none of which can
+  be changed safely without reading the other two.
+
+`fnc_mission_begin` already owns the *entry* half of the contract — cooldown gate, cooldown stamp,
+`Mission_available = false`, the typed mission-name card, logging. The prologue is the missing
+`fnc_mission_site` companion, and it is where the cooldown release belongs; the epilogue (reward,
+timer, cleanup, clear `current_mission_target_pos`) is the missing `fnc_mission_end`.
 
 A contract audit across all 17 threads found no thread missing its cleanup — `rescue_squad` and
 `sabotage_laptop` carry theirs in a separate `_success` file, correctly `remoteExec`'d to the
-server. The contract is currently honoured. Three helpers make it hard to stop honouring.
+server. That half of the contract is honoured. Three helpers make it hard to stop honouring, and
+close the cooldown leak by construction.
+
+### Clone hotspots outside the mission threads
+
+Three more files carry over 100 duplicated lines each and are not covered by anything above.
+None is large enough to lead the plan; all three are cheap once the mission-thread work has
+established the pattern.
+
+| File | Lines | Duplicated | Shape |
+|---|---|---|---|
+| `server/init_hq/fnc_BluHQinit.sqf` | 766 | 110 | HQ unit placement, reimplemented by the file below |
+| `server/misc/fnc_redeployHQUnits.sqf` | 261 | 110 | the same placement again, for the redeploy path |
+| `server/dialog/fnc_weather.sqf` | 226 | 116 | one `switch (weather_type)` case per climate, each repeating the same fog and overcast loop around different constants |
+| `server/init_zones/fnc_zone_spawn_sizes.sqf` | 207 | 100 | six `fnc_<N>_zone` functions that are a spawn table written as code |
+
+The HQ pair is the same reimplementation shape as `fnc_createopfortified` and folds into a shared
+placement helper. `fnc_weather.sqf` and `fnc_zone_spawn_sizes.sqf` are both the open/closed
+violation in miniature — adding a climate or a zone size edits control flow — and both collapse
+to a table with a short driver, exactly as the support menu does below.
 
 ### Three civilian handlers, 51 shared lines
 
@@ -188,24 +230,34 @@ point that all three enter.
 
 ## Tier 3: adding one thing costs N edits
 
-### Registering a side mission touches five places
+### Registering a side mission touches seven places
 
 To add mission type 17, a maintainer edits:
 
 1. `client/missions/fnc_stratmap.sqf:112` — append to the `_missionCount` array
-2. `client/missions/fnc_stratmap.sqf:47-80` — a `case` in the display-name switch
-3. `client/missions/fnc_stratmap.sqf:194+` — a 15-line `case` in the config switch
+2. `client/missions/fnc_stratmap.sqf:47-80` — a `case` in the cooldown-ready notification monitor
+3. `client/missions/fnc_stratmap.sqf:202+` — a 15-line `case` in the config switch
 4. `client/missions/fnc_stratmap.sqf` — two new globals, `mission17_pos` and `mission17_name`
 5. `server/server_fnc_init.sqf` — a registry entry
+6. `server/misc/fnc_debug_force_mission.sqf:13-19` — the `_threads` name array
+7. `client/dialog/fnc_debug_mission_menu.sqf:15-20` — the `_types` label array
 
-Steps 1-4 are all in one file, which is the saving grace, but the file carries 34 numbered
+Four of those are four separate type-indexed tables — the config switch, the notification switch,
+`_threads` and `_types` — that must stay in lockstep by hand and agree only because someone
+checked. Steps 1-4 being in one file is the saving grace, but that file carries 34 numbered
 globals (`mission0_pos` … `mission16_name`) that exist nowhere else in the mission. Each `case`
 is the same 15 lines with three substitutions: a function name, a stringtable key, an icon path.
 
+Two smaller things live in the same file and are worth taking with it. The three
+`switch (VERSION_X)` blocks inside the notification switch (`:52`, `:62`, `:69`) return the same
+string from their case and their default, so they branch on nothing. And the comment at `:111`
+still reads `CURRENTLY 15 MISSIONS AVAILABLE` above a 17-entry array.
+
 The globals are not carelessness. `array_of_missions` is handed to
-`BIS_fnc_strategicMapOpen` (`:521`), whose per-mission code block runs with no arguments — so
-the block has to reach its position and name through globals, because SQF blocks do not capture
-locals. Any fix must keep that property.
+`BIS_fnc_strategicMapOpen`, whose per-mission code block runs with no arguments — so the block
+has to reach its position and name through globals, because SQF blocks do not capture locals.
+Any fix must keep that property, and must keep the shuffle-and-draw at `:113-117`, which offers
+seven of the seventeen types per opening rather than all of them.
 
 The shape that works: one definition table, one shared slot array, and a block built per index.
 
@@ -219,23 +271,23 @@ DUWS_missionDefs = [
 ```
 
 `DUWS_missionSlots` holds `[pos, name]` per type, and the deferred block becomes
-`compile format ["[%1] call fnc_launch_side_mission", _type]` — 17 one-token compiles at
-menu-build time, replacing 34 globals and three switches. Adding a mission then means one table
-row and one registry line.
+`compile format ["[%1] call fnc_launch_side_mission", _type]` — seven one-token compiles per
+opening, replacing 34 globals and four hand-synchronised tables. Adding a mission then means one
+table row and one registry line.
 
-### The support menu is a 24-case switch over one template
+### The support menu is a 22-case switch over one template
 
-`client/dialog/fnc_request_support.sqf` is 481 lines and 24 cases. Every case is the same
+`client/dialog/fnc_request_support.sqf` is 485 lines and 22 cases. Every case is the same
 template:
 
 ```sqf
 case N: {
-    if (insurgent_mode_enable) exitWith { hint localize "STR_DUWS_T_inssupport" };   // some cases
+    if (insurgent_mode_enable) exitWith { hint localize "STR_DUWS_T_inssupport" };   // 13 cases
     _cost = C;
-    if (support_count > 7) exitWith { /* radio cap */ };                             // some cases
+    if (support_count > 7) exitWith { /* radio cap */ };                             // 17 cases
     if (support_X_available) exitWith { hint localize "STR_DUWS_T_8c1i4vga" };
     if !(["CP", _cost] call fnc_pool_spend) exitWith { hint localize "STR_DUWS_T_e95mc4lv" };
-    support_count = support_count + 1;                                               // some cases
+    support_count = support_count + 1;                                               // 17 cases
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
     ctrlSetText [1000, format ["%1", commandpointsblu1]];
     lbSetColor [2103, index_support_X, [0, 1, 0, 1]];
@@ -244,8 +296,8 @@ case N: {
 };
 ```
 
-The "not enough CP" literal `STR_DUWS_T_e95mc4lv` appears 39 times across the tree, 24 of them in
-this file. There are 19 `support_*_available` globals. The variation between cases is five
+The "not enough CP" literal `STR_DUWS_T_e95mc4lv` appears 39 times across the tree, 22 of them in
+this file. There are 23 `support_*_available` globals. The variation between cases is five
 values — cost, unlock flag, dialogue key, listbox index, sound — plus an optional
 `insurgent_mode` guard, an optional radio-slot cap, and a per-support unlock action.
 
@@ -254,9 +306,15 @@ declaration table and a 20-line driver. The unlock blocks genuinely differ (arse
 `Array_of_FOBS`, HALO adds three `addAction`s conditioned on `Squad_Leaders`), so they stay as
 code — but as one entry per support in the table, not one branch in a switch.
 
+**Sequence this before the two-currency split, not after.**
+[`ap_economy_plan.md`](ap_economy_plan.md) and [`cp_economy_plan.md`](cp_economy_plan.md) put
+advanced supports behind a CP *and* AP price. Against the switch that is a second price and a
+second spend call edited into every advanced case by hand; against the table it is one more
+column and one more line in the driver.
+
 ### A faction is 60-odd flat globals plus 50 numbered slots
 
-`shared/factions/` is 27,758 lines — **45% of all DUWS source** — across 255 files, one per
+`shared/factions/` is 27,758 lines — **44% of all DUWS source** — across 256 files, one per
 faction per side. Each assigns the same ~60 `blufor_*` / `opfor_*` globals, which is why
 `opfor_SOLDIER_X` has 133 assignment sites.
 
@@ -276,7 +334,7 @@ if (_var_count > 9) then {
 ```
 
 and the two readers use different thresholds for the same boundary (`> 9` in the menu builder at
-`fnc_HQ_Request_Menu.sqf:65`, `> 10` on the offset index in `fnc_request_vehicle.sqf:14`). They
+`fnc_HQ_Request_Menu.sqf:64`, `> 10` on the offset index in `fnc_request_vehicle.sqf:13`). They
 happen to agree because the indices are offset by one. That is a coincidence holding up a menu.
 
 **Do not rewrite 255 faction files by hand for this.** The honest sequencing is: change the
@@ -296,26 +354,31 @@ decision can be made deliberately rather than discovered mid-refactor.
 
 ### `server_fnc_init.sqf` is two files wearing one name
 
-1,576 lines: 270 registry entries (`fnc_x = compile preprocessFile "..."`) and **45 full function
+1,642 lines: 276 registry entries (`fnc_x = compile preprocessFile "..."`) and **49 full function
 bodies defined inline**, including `fnc_cp_adjust`, `fnc_ap_adjust`, `fnc_zone_control_set`,
 `fnc_mission_begin`, and the whole composition-streaming set (`fnc_duws_keep`, `fnc_duws_stow`,
 `fnc_duws_deploy`, `fnc_duws_release`).
 
 The inline bodies are the mission's most load-bearing code — every CP mutation in the campaign
 routes through `fnc_cp_adjust` — and they are the hardest to find, because the file reads as a
-manifest. The registry self-check at `:1561-1576` is good engineering and should stay wherever
+manifest. The registry self-check at `:1627-1642` is good engineering and should stay wherever
 the registry ends up.
 
 The counter-argument for leaving it alone is real: these functions have no natural file yet, the
 registry is the only place guaranteed to run before anything calls them, and moving them means
-270 path strings get re-verified. The recommendation is the cheap half — move the 45 bodies into
+276 path strings get re-verified. The recommendation is the cheap half — move the 49 bodies into
 subsystem files (`server/misc/fnc_economy.sqf`, `server/misc/fnc_composition_stream.sqf`) and
 register them like everything else, leaving the registry a pure manifest. That is mechanical, and
 `check_paths.py` verifies it.
 
+The file is also the one that grows: it has taken four new inline bodies and six new registry
+entries since this audit was first written, and the pylon helpers at `:1582-1626` went in as
+inline bodies because that is what the file's neighbours are. Every delay makes the same move
+larger.
+
 ### Globals have no namespace
 
-`src/duws/` calls `publicVariable` at 547 sites on 390 distinct names, over a global namespace
+`src/duws/` calls `publicVariable` at 540 sites on 396 distinct names, over a global namespace
 several times that size. There is no convention separating campaign state from scratch variables,
 so nothing prevents a name collision between subsystems and nothing makes it visible when one
 happens.
@@ -334,14 +397,14 @@ Two places carry large data tables inside executable files:
 
 | File | Data lines | Total | Note |
 |---|---|---|---|
-| `server/misc/fnc_createKillhouse.sqf` | 791 | 1,275 | Two composition arrays, `:15-841` |
-| `shared/factions/` | ~27,758 | 27,758 | Covered above |
+| `server/misc/fnc_createKillhouse.sqf` | 821 | 1,334 | Two composition arrays, `:18-727` and `:730-842` |
+| `shared/factions/` | 27,758 | 27,758 | Covered above |
 
-The killhouse composition is already marked with the `--DUWS-COMPOSITION` fence that
+The killhouse compositions are already marked with the `--DUWS-COMPOSITION` fence that
 `scripts/duws_eden.ps1` round-trips through Eden
-([`info/hq_layout_editing.md`](info/hq_layout_editing.md)), so the tooling to treat it as data
-exists. The remaining question is whether it stays inline — `preprocessFile` on a separate data
-file costs one more path reference and buys a 484-line file instead of a 1,275-line one.
+([`info/hq_layout_editing.md`](info/hq_layout_editing.md)), so the tooling to treat them as data
+exists. The remaining question is whether they stay inline — `preprocessFile` on a separate data
+file costs one more path reference and buys a 513-line file instead of a 1,334-line one.
 
 Related: the composition fence carries **three row schemas (A, B, C)** for one concept, with
 eight compositions on A, two on B and five on C. The Eden tool already normalises all three to
@@ -360,6 +423,9 @@ after and diff the normalised rows.
 - **Do not put mode branches back on the plain civilian path.** `fnc_civ_handler.sqf` is what
   runs mod-free; RAVAGE and WBK behaviour reaches it through nothing but the handler chosen at
   init.
+- **Do not extract `fnc_factions_check_modern.sqf`'s roster arrays.** The clone detector flags
+  194 duplicated lines there; they are the BLUFOR and OPFOR tables, which the file's own header
+  requires to stay identical in shape.
 - **Do not treat `bash tests/run.sh` as sufficient.** It checks bracket balance, path resolution
   and retired names. It does not execute the mission
   ([`info/testing.md`](info/testing.md#why-static-analysis-plus-only-a-thin-unit-layer)). Every
@@ -371,15 +437,16 @@ Sequenced so that each step is independently verifiable and nothing later depend
 not yet made. Lint is `bash tests/run.sh`; "smoke" means repack and play far enough to exercise
 the named system.
 
-- [ ] Registry corrections: delete the duplicate `fnc_missionLocator` at `server_fnc_init.sqf:705` and the unreferenced `fnc_missionPatrolsSmall` at `:726`. Verify: lint passes, and the boot-time registry self-check logs no `compiled EMPTY`.
+- [ ] Registry corrections: delete the duplicate `fnc_missionLocator` at `server_fnc_init.sqf:752` and the unreferenced `fnc_missionPatrolsSmall` at `:775`. Verify: lint passes, and the boot-time registry self-check logs no `compiled EMPTY`.
 - [ ] Replace the eight `call (compile _var)` reads with `missionNamespace getVariable`. Verify: HQ and FOB request menus populate identically, and buying a vehicle from each still charges CP.
-- [ ] Replace the three `call compile format ["%1 = ...]` trigger assignments with `setVariable`. Verify: enter a zone (notification fires), deploy and remove a FOB (trigger cleanup runs).
+- [ ] Replace the four `call compile format ["%1 = ...]` trigger assignments with `setVariable`. Verify: enter a zone (notification fires), deploy and remove a FOB (both trigger and warning trigger cleanup run).
+- [ ] Add `fnc_mission_site` and `fnc_mission_end` alongside the existing `fnc_mission_begin`, with the cooldown release in `fnc_mission_site`'s bail-out path; convert the threads one at a time. Verify per thread: the bail-out releases `Mission_available` **and** clears `mission_cooldown_<type>` so the type is immediately re-offerable, markers are deleted, and the reward pays once.
 - [ ] Decide whether `target_sniper` and `clearthearea_cqb` should drop garrison intel. Record the answer, then extract `fnc_garrisonBuildings` and convert the nine copied call sites. Verify: each of the nine missions spawns building garrisons, and corpse intel matches the decision.
 - [ ] Fold the two reimplementations (`fnc_createopfortified.sqf`, `clearthearea_cqb`) onto the same helper, parameterised by building count. Verify: zone fortification garrisons and CQB garrisons spawn at their existing counts of 8 and 4.
-- [ ] Add `fnc_mission_site` and `fnc_mission_end` alongside the existing `fnc_mission_begin`; convert the threads one at a time. Verify per thread: the `_failSafe` bail-out still releases `Mission_available`, markers are deleted, and the reward pays once.
-- [ ] Collapse `fnc_request_support.sqf` to a declaration table plus a driver. Verify: every one of the 22 supports unlocks once, refuses a second purchase, respects the eight-slot radio cap, and colours its listbox row.
-- [ ] Move the 45 inline bodies out of `server_fnc_init.sqf` into subsystem files, leaving a pure manifest. Verify: lint's path check passes, the registry self-check reports the same function count, and CP/AP mutation plus composition stow/deploy still work.
+- [ ] Collapse `fnc_request_support.sqf` to a declaration table plus a driver, **before** the two-currency work adds an AP price to every advanced case. Verify: every one of the 22 supports unlocks once, refuses a second purchase, respects the eight-slot radio cap, and colours its listbox row.
+- [ ] Move the 49 inline bodies out of `server_fnc_init.sqf` into subsystem files, leaving a pure manifest. Verify: lint's path check passes, the registry self-check reports the same function count, and CP/AP mutation plus composition stow/deploy still work.
+- [ ] Fold `fnc_redeployHQUnits.sqf` onto `fnc_BluHQinit.sqf`'s placement routine, and collapse `fnc_weather.sqf` and `fnc_zone_spawn_sizes.sqf` to table-plus-driver. Verify: HQ units place identically on init and on redeploy; each weather type still transitions; each zone size spawns its existing group count.
 - [ ] Extract the 51 lines the RAVAGE and WBK handlers still share into a helper the two of them call, leaving the plain handler untouched. Verify: both modes spawn, clean up, and respect the spawn mutex; the plain path is unchanged.
-- [ ] Side-mission definition table replacing the three switches and 34 numbered globals in `fnc_stratmap.sqf`. Verify: all 17 missions appear on the strategic map, each launches the right thread, and the cooldown hint still names the right mission.
+- [ ] Side-mission definition table replacing the four type-indexed tables and 34 numbered globals in `fnc_stratmap.sqf`, feeding the debug menu from the same table. Verify: seven missions are drawn per map opening, each launches the right thread, the cooldown-ready notification names the right mission, and every debug-menu row forces the type its label claims.
 - [ ] Faction request tables: consumer reads an array global with numbered-global fallback, script-convert the 255 files and `fn_factionAutoDetect.sqf`, then delete the fallback. Verify: a vanilla faction, a modded faction and an auto-detected faction all populate both request menus with the same entries as before.
 - [ ] Normalise the fifteen compositions to schema A and drop the B/C adapters from `duws_eden.ps1`. Verify: import each composition through the tool before and after, and diff the normalised rows.
