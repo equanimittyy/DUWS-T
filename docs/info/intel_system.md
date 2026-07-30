@@ -180,10 +180,18 @@ the server refuses on the record either way.
 ## The body search looks outward, so it scales with players not corpses
 
 One action on the player, watching `cursorObject`, rather than one action per corpse. The
-per-corpse shape needs a `remoteExec` with the JIP flag per death and nothing ever removes those
-entries, so the queue would grow with the campaign's kill count instead of its player count —
-tolerable for the handful of mission patrols `fnc_add_intel_on_death` runs on today, unbounded
-at the scale of every kill.
+per-corpse shape needs a `remoteExec` with the JIP flag per death, and it costs one queue entry
+and one hold action for every body rather than one of each per player.
+
+**It is bounded, not unbounded.** `fnc_add_intel_on_death.sqf` keys the JIP entry to the corpse
+rather than passing a bare `true`, so the engine drops the entry when the body is deleted, and
+`fnc_repetitive_cleanup` deletes `allDeadMen` at `DUWS_CleanupLifetime` (900 s by default,
+`server/server_init.sqf:154`). The ceiling is therefore kill rate times that lifetime, not the
+campaign's total kill count. A bare `true` is what would have grown forever, and the source says
+so where it avoids it.
+
+The outward-looking shape is still the cheaper one, and the reason to prefer it for anything that
+fires on every kill. But the per-corpse cost is a standing overhead to weigh, not a leak.
 
 The condition's clause order is load-bearing and is documented where it lives
 (`client/misc/fnc_intel_search_action.sqf`). The reason it matters at all is that an action on

@@ -156,12 +156,21 @@ unconditionally for every side mission and no caller can opt out. That makes two
 paying intel they do not pay today — a behaviour change, so it lands in its own commit with its
 own smoke test rather than riding along with the extraction.
 
-**"Consistent" stops at the mission boundary.** `fnc_add_intel_to_group` is called from side
-missions only; `fnc_createopfortified` has never added intel to a zone's garrison. That is a
-domain difference, not drift — a zone respawns its OPFOR on a `while {true}` loop, so an
-unconditional intel pass there would regenerate intel-bearing corpses forever. The helper
-therefore takes intel as a parameter that side missions set on and zone fortification sets off.
-The loot pass stays unconditional: every one of the eleven sites already runs it.
+**"Consistent" means all eleven sites, including the zone garrison.** `fnc_add_intel_to_group` is
+called from side missions only today, and `fnc_createopfortified` has never added intel to a
+zone's garrison. That gap closes rather than being preserved behind a parameter: the helper runs
+the intel and loot passes for every caller, and `fnc_garrisonBuildings` takes no intel flag at all.
+
+A zone rebuilds its garrison whenever players return to it, so this is a supply the player can
+work repeatedly. That is intended — the cost of each cycle is defeating the garrison again, and
+the intel pool is finite, so grinding buys a faster route through the hidden-map phase and nothing
+after it. The reasoning is in [`search_system_plan.md`](search_system_plan.md#streamed-entities-are-flagged-too-and-the-farm-is-the-price).
+
+The per-corpse hold action this attaches is a standing cost rather than a leak: its JIP entry is
+keyed to the body and dropped when `fnc_repetitive_cleanup` deletes it
+([`info/intel_system.md`](info/intel_system.md#the-body-search-looks-outward-so-it-scales-with-players-not-corpses)).
+Extending it to a respawning population raises the steady-state count, which is one more reason
+the Search rework should move this onto the outward-looking shape.
 
 The reward keeps the Search the Body shape it already has — the `BIS_fnc_holdActionAdd` that
 `fnc_add_intel_on_death` wires onto each corpse — at a 60% find rate, searchable once by anyone.
@@ -481,7 +490,7 @@ the named system.
 - [ ] Add `fnc_mission_site` and `fnc_mission_end` alongside the existing `fnc_mission_begin`, with the cooldown release in `fnc_mission_site`'s bail-out path; convert the threads one at a time. Verify per thread: the bail-out releases `Mission_available` **and** clears `mission_cooldown_<type>` so the type is immediately re-offerable, markers are deleted, and the reward pays once.
 - [ ] Extract `fnc_garrisonBuildings` and convert the nine copied call sites, intel and loot passes inside it. Verify: each of the nine missions spawns building garrisons, and all nine now drop corpse intel — including `target_sniper`, which does not today.
 - [ ] Make the corpse search claimable once server-side, and set `current_mission_target_pos` in `target_sniper` and `clearthearea_cqb`. Verify on a dedicated server with two clients: the second player finds no search action on a body the first has already searched, and a run of searches on both missions reveals targets rather than returning silence.
-- [ ] Fold the two reimplementations (`fnc_createopfortified.sqf`, `clearthearea_cqb`) onto the same helper, parameterised by building count and by whether intel is added. Verify: zone fortification garrisons and CQB garrisons spawn at their existing counts of 8 and 4; CQB corpses carry intel and zone-fortification corpses still do not.
+- [ ] Fold the two reimplementations (`fnc_createopfortified.sqf`, `clearthearea_cqb`) onto the same helper, parameterised by building count only. Verify: zone fortification garrisons and CQB garrisons spawn at their existing counts of 8 and 4, and corpses from both now carry intel where zone-fortification corpses did not.
 - [ ] Collapse `fnc_request_support.sqf` to a declaration table plus a driver, **before** the two-currency work adds an AP price to every advanced case. Verify: every one of the 22 supports unlocks once, refuses a second purchase, respects the eight-slot radio cap, and colours its listbox row.
 - [ ] Move the 49 inline bodies out of `server_fnc_init.sqf` into subsystem files, leaving a pure manifest. Verify: lint's path check passes, the registry self-check reports the same function count, and CP/AP mutation plus composition stow/deploy still work.
 - [ ] Fold `fnc_redeployHQUnits.sqf` onto `fnc_BluHQinit.sqf`'s placement routine, and collapse `fnc_weather.sqf` and `fnc_zone_spawn_sizes.sqf` to table-plus-driver. Verify: HQ units place identically on init and on redeploy; each weather type still transitions; each zone size spawns its existing group count.

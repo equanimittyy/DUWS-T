@@ -34,9 +34,9 @@ CP payment that happens regardless, which is only expressible because the stages
 ## Stage 1: the flag, set when the entity is created
 
 **The success roll happens at spawn, not at search.** An entity that can be searched carries a
-flag decided when it is generated — 5–10% of a mission garrison, and every side-mission objective.
-Searching an unflagged thing finds nothing, deterministically. Searching a flagged one always
-reaches stage 2.
+flag decided when it is generated — 5–10% of any garrison, zone or mission, and every
+side-mission objective. Searching an unflagged thing finds nothing, deterministically. Searching
+a flagged one always reaches stage 2.
 
 Rolling at creation rather than at the action is what makes the faucet a function of the world
 instead of a function of how often the player pressed a key. A garrison of thirty holds two or
@@ -169,13 +169,16 @@ by one source
 ([`info/civilian_interaction.md`](info/civilian_interaction.md#one-conversation-per-civilian)).
 Stage 1 moving to spawn removes the retry loop but not the co-op race.
 
-**Per-corpse actions do not scale and the system should stop adding them.** A hold action added
-per death needs a JIP `remoteExec` per corpse and nothing removes those entries, so the queue
-grows with the campaign's kill count rather than its player count
-([`info/intel_system.md`](info/intel_system.md#the-body-search-looks-outward-so-it-scales-with-players-not-corpses)).
-The body search already avoids this by watching `cursorObject` from one action on the player. A
-unified Search system should reach corpses the same way and leave hold actions to the fixed,
-countable objects — laptops, caches — that a mission places deliberately.
+**Per-corpse actions are a standing cost and the system should stop adding them.** A hold action
+per death costs a JIP entry and an action for every body, against one of each per player for the
+outward-looking search. The entry is keyed to the corpse and dropped when the cleanup sweep
+deletes it, so the ceiling is kill rate times `DUWS_CleanupLifetime` rather than the campaign's
+kill count
+([`info/intel_system.md`](info/intel_system.md#the-body-search-looks-outward-so-it-scales-with-players-not-corpses))
+— bounded, but a bound that rises once zone garrisons are in scope, since those regenerate for the
+whole campaign. Reaching corpses through `cursorObject` the way the body search already does
+removes it entirely, and leaves hold actions to the fixed, countable objects — laptops, caches —
+that a mission places deliberately.
 
 **A search is claimed once, globally.** `fnc_corpse_search_action.sqf:12-13` sets its guard
 without the broadcast flag and the hold action's remove-on-completion is per-machine, so in co-op
