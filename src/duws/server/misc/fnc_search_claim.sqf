@@ -44,12 +44,14 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
         // and hardpoint is already revealed. It speaks its own line when it pays.
         case "intel": { _paid = [_origin, _caller] call fnc_intel_payout };
 
+        // CP only, and rolled: a search is a windfall for the player who made it, not a shift in
+        // the war's momentum, which is what AP measures and what every WARCOM wave threshold reads.
         case "pool": {
-            [1, "search_pool"] call fnc_cp_adjust;
-            ["BLU", 1, "search_pool"] call fnc_ap_adjust;
+            private _cp = 1 + floor random 3;
+            [_cp, "search_pool"] call fnc_cp_adjust;
             [_speaker, localize "STR_DUWS_T_INTEL_FOUND_x"] remoteExec ["fnc_duws_dialogue", 0];
             ["infosearch", [localize "STR_DUWS_T_INTEL_BONUS_TITLE",
-                format [localize "STR_DUWS_T_INTEL_BONUS_DESC", 1, 1]]] remoteExec ["BIS_fnc_showNotification", 0];
+                format [localize "STR_DUWS_T_INTEL_BONUS_DESC", _cp]]] remoteExec ["BIS_fnc_showNotification", 0];
             _paid = true;
         };
 

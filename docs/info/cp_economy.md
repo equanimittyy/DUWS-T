@@ -134,7 +134,7 @@ figure, which is a wrong number rather than an untranslated one.
 | Recruit rescued civilian | `server/misc/fnc_recruit_civilian_server.sqf` | +5 (+8 in WBK mode) |
 | Intel analysis (terminal) | `server/misc/fnc_intelAnalysis.sqf` | 1.5–8 per item; `FileTopSecret`/`FilesSecret` = 8 |
 | Enemy corpse loot | `server/misc/fnc_addRandomLoot.sqf` → analysis | ~80% of enemies carry 0–2 of Money/Files/Wallet |
-| Search payout (`pool` kind) | `server/misc/fnc_search_claim.sqf` | +1 CP and +1 AP, on a flagged body or objective whose payout draw lands on `pool` |
+| Search payout (`pool` kind) | `server/misc/fnc_search_claim.sqf` | +1–3 CP, on a flagged body or objective whose payout draw lands on `pool` |
 | Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle, summed then rounded |
 | Kill income | `server/server_init.sqf:257-276` | +1 per 10 hostile kills, swept on the economy tick; the remainder carries |
 | Killhouse training | `server/misc/fnc_createKillhouse.sqf:1072` | +1 (targets) or +10 (challenge), once, on clearing all 100 |
@@ -274,4 +274,4 @@ Deliberate demolition carries no such excuse, which is why it is charged every t
 
 **AP→CP merges the two economies.** `fnc_convertAPtoCP.sqf` trades 15 AP → 10 CP,
 repeatable with no cooldown. It is one-way (there is no CP→AP path), so it cannot loop, but
-it means any AP income route — mission rewards, corpse search — ultimately feeds CP.
+it means any AP income route — mission rewards, held territory — ultimately feeds CP.

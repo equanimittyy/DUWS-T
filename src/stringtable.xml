@@ -3252,11 +3252,11 @@
                 <Chinesesimp>发现额外情报</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_BONUS_DESC">
-                <Original>You have acquired extra intel and gained %1 CP, %2 AP.</Original>
-                <English>You have acquired extra intel and gained %1 CP, %2 AP.</English>
-                <German>Du hast zusätzliche Informationen erfasst und %1 CP, %2 AP erhalten.</German>
-                <Spanish>Has obtenido inteligencia adicional y ganado %1 CP, %2 AP.</Spanish>
-                <Chinesesimp>你发现了额外的情报，获得了%1 CP, %2 AP</Chinesesimp>
+                <Original>You have acquired extra intel and gained %1 CP.</Original>
+                <English>You have acquired extra intel and gained %1 CP.</English>
+                <German>Du hast zusätzliche Informationen erfasst und %1 CP erhalten.</German>
+                <Spanish>Has obtenido inteligencia adicional y ganado %1 CP.</Spanish>
+                <Chinesesimp>你发现了额外的情报，获得了%1 CP</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_FOUND_TARGET">
                 <Original>Alpha 1-1 to Overlord, we've got the exact objective location. Uploading it to your map now.</Original>
