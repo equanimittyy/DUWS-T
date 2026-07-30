@@ -226,3 +226,29 @@ private _stage = {
     [format ["liveTarget: a %1-building town holds %2", _pop, _expected],
         ([15, _town] call fnc_civ_liveTarget), _expected] call fnc_assertEq;
 } forEach [[0, 3, 3], [1, 4, 4], [2, 47, 15], [3, 260, 15]];
+
+// --- fnc_search_drawKind: pick a payout kind in proportion to weight ---
+// _roll is a 0-1 fraction standing in for the draw, so each band can be named rather than
+// sampled. Weights 2/3/2/1 over a total of 8 put the boundaries at .25, .625 and .875.
+private _w = [["intel", 2], ["pool", 3], ["coins", 2], ["document", 1]];
+
+["drawKind: the bottom of the first band", ([_w, 0] call fnc_search_drawKind), "intel"] call fnc_assertEq;
+["drawKind: just inside the first band", ([_w, 0.249] call fnc_search_drawKind), "intel"] call fnc_assertEq;
+["drawKind: the boundary belongs to the next band", ([_w, 0.25] call fnc_search_drawKind), "pool"] call fnc_assertEq;
+["drawKind: the widest band spans its whole width", ([_w, 0.624] call fnc_search_drawKind), "pool"] call fnc_assertEq;
+["drawKind: third band", ([_w, 0.7] call fnc_search_drawKind), "coins"] call fnc_assertEq;
+["drawKind: the last band takes the top of the range", ([_w, 1] call fnc_search_drawKind), "document"] call fnc_assertEq;
+
+// A kind that reported nothing left is dropped and the rest re-drawn, so the table shrinks
+// mid-search. What must not happen is the remainder failing to cover the full 0-1 range.
+private _shrunk = [["coins", 2], ["document", 1]];
+["drawKind: a shrunk table still covers the bottom", ([_shrunk, 0] call fnc_search_drawKind), "coins"] call fnc_assertEq;
+["drawKind: a shrunk table still covers the top", ([_shrunk, 1] call fnc_search_drawKind), "document"] call fnc_assertEq;
+
+["drawKind: a single row absorbs the whole range", ([[["intel", 1]], 0.9] call fnc_search_drawKind), "intel"] call fnc_assertEq;
+["drawKind: an exhausted table draws nothing", ([[], 0.5] call fnc_search_drawKind), ""] call fnc_assertEq;
+["drawKind: zero weights draw nothing rather than the first row",
+    ([[["intel", 0], ["pool", 0]], 0.5] call fnc_search_drawKind), ""] call fnc_assertEq;
+
+// A zero-weight row is how a source opts out of a kind; it must never be selectable.
+["drawKind: a zero-weight row is skipped", ([[["intel", 0], ["pool", 1]], 0] call fnc_search_drawKind), "pool"] call fnc_assertEq;

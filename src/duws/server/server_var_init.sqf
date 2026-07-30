@@ -191,9 +191,32 @@ MASTER_allLocationsPos = [];publicVariable "MASTER_allLocationsPos";
 
 // Chance a body search turns up a zone. Server-local: the roll is server-side, and a client
 // that can read the number is a client that can be shown to have rolled against it.
-// Deliberately low -- the body search is the trickle and civilians are the intended bulk source,
-// so raise the civilian side before this or hardcore reverts to a kill count.
+// Superseded by the per-source table below; still read by the search path that has not yet been
+// converted onto it, and by the debug probe that reports what that path would roll.
 intel_search_chance = 0.2;
+
+// [successChance, [[payoutKind, weight], ...]] per search source.
+//
+// The success roll is spent when the entity is created, not when it is searched. What the player
+// can find is then a function of how much OPFOR the campaign put on the ground rather than of how
+// often a key was pressed, which is what lets the per-player search clock go: the price of a
+// search is the fight that produced the thing being searched.
+//
+// Weights, not a cumulative if-ladder. Every band in a ladder depends on the one above it, so
+// adding a kind means re-deriving each constant below it; adding a row here is adding a row.
+//
+// Kinds are drawn without replacement. A kind whose payout reports nothing left to give drops out
+// and the remainder are re-drawn, so an exhausted intel pool cannot turn a search into silence --
+// the failure the mission already paid for once, when a dry pool returned quietly.
+//
+// civ_frisk is flagged on every civilian and carries its own `nothing` weight, which keeps the
+// shipped 37.5 / 12.5 / 50 split exactly: the arrest is the price, and it is paid before this.
+DUWS_searchSources = createHashMapFromArray [
+    ["garrison",  [0.08, [["intel", 2], ["pool", 3], ["coins", 2], ["document", 1]]]],
+    ["mission",   [0.15, [["intel", 3], ["pool", 2]]]],
+    ["objective", [1,    [["intel", 1]]]],
+    ["civ_frisk", [1,    [["coins", 3], ["document", 1], ["nothing", 4]]]]
+];
 
 // manually_chosen
 manually_chosen = false;publicVariable "manually_chosen";

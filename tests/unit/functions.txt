@@ -12,3 +12,4 @@ duws/server/misc/fnc_civ_state_init.sqf::fnc_civ_rowPrice
 duws/server/misc/fnc_civ_state_init.sqf::fnc_civ_townBand
 duws/server/misc/fnc_civ_state_init.sqf::fnc_civ_townIncome
 duws/server/misc/fnc_civ_liveTarget.sqf::*fnc_civ_liveTarget
+duws/server/misc/fnc_search_drawKind.sqf::*fnc_search_drawKind
