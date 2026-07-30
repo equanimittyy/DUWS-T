@@ -127,16 +127,16 @@ _wp setWaypointStatements ["true", "missionNamespace setVariable ['intro_heli_ar
 // hearing a callsign. Do not reconcile the two -- it is intro flavour, not an attribution bug.
 [localize "STR_DUWS_T_pilot_intro", localize "STR_DUWS_T_heli_moving"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 1;
-cutRsc ["DUWST", "PLAIN", 0, true] remoteExec ["call", 0];
+[["DUWST", "PLAIN", 0, true]] remoteExec ["cutRsc", 0];
 sleep 8;
-// Broadcast the arguments to titleText itself. `titleText [...] remoteExec ["call", 0]` evaluates
-// the command on the server and sends the resulting Nothing, so on a dedicated server no client
-// ever sees the memorial.
-["In memory of KillaTomata, the creator of the original DUWS_X.", "PLAIN", 3] remoteExec ["titleText", 0];
+// Double brackets: remoteExec hands the command an argument list, so a unary command whose one
+// argument is itself an array needs the outer pair. Written flat, titleText is passed the string
+// alone and throws on the type -- which is the memorial card silently not displaying at all.
+[["In memory of KillaTomata, the creator of the original DUWS_X.", "PLAIN", 3]] remoteExec ["titleText", 0];
 sleep 12;
-["", "PLAIN", 5] remoteExec ["titleText", 0];
+[["", "PLAIN", 5]] remoteExec ["titleText", 0];
 sleep 3;
-cutText ["", "PLAIN", 5] remoteExec ["call", 0];
+[["", "PLAIN", 5]] remoteExec ["cutText", 0];
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_heli_ttgtw"] remoteExec ["fnc_duws_dialogue", 0];
 // 等待直升机到达航点，超时 120 秒后强制继续
 private _arrivedVar = "intro_heli_arrived";

@@ -583,8 +583,11 @@ in single-player and on a hosted server the caller is a player's machine, so the
 produces exactly the intended visual and the dead broadcast is invisible. Only a dedicated
 server, or a second client in a co-op session, exposes it — and nothing reaches the `.rpt`.
 
-**How to apply:** prefer passing the argument array to the command by name —
-`[_text, "PLAIN", 3] remoteExec ["titleText", 0]` — over wrapping code in braces.
-Both work, but the by-name form has no silent-failure mode, since dropping the array leaves an
-expression that cannot parse. The intro flight (`src/duws/server/misc/fnc_intro_heli.sqf`) uses
-it for the memorial card and for its `titleCut` fades.
+**How to apply:** name the command rather than wrapping code in braces — but `remoteExec` hands
+the command an argument *list*, not a single value, so a unary command whose one argument is
+itself an array needs a second pair of brackets:
+`[["In memory of...", "PLAIN", 3]] remoteExec ["titleText", 0]`. Written flat the command is
+handed only the first element — `titleText "In memory of..."` — and throws on the type, so the
+by-name form silently fails too if the nesting is dropped. That is how the memorial card came to
+display nothing while the `titleCut` fades on either side of it, all written nested, kept
+working. `src/duws/server/misc/fnc_intro_heli.sqf` is the worked example for both.
