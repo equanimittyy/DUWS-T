@@ -297,7 +297,7 @@ decays.
 **The shares above hold at `time_Multiplier = 1` and nowhere else.** The two faucets are on
 different clocks. Town income rides the economy tick's `sleep 1800`, which sits on `time` and is
 not scaled by `setTimeMultiplier`; side-mission cooldowns are stamped against `dateToNumber date`,
-which is
+which is scaled by it
 ([`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
 The host picks 1, 2, 4, 8, 16, 24, 32 or 60 from the environment menu
 (`client/dialog/fnc_process_enviro_menu.sqf:99-106`), so at 32x a mission type comes off a
@@ -305,11 +305,10 @@ three-in-game-hour cooldown every five and a half real minutes while towns keep 
 unchanged real rate. Missions then supply almost all of the player's AP and the ordering this
 plan is built on inverts.
 
-The clock the campaign is paced by should be the one the campaign's economy is paid on, so the
-economy tick moves onto the campaign date with the cooldowns. That is a behaviour change to
-territory CP as well, which is why it is called out rather than folded in: a 60x campaign gets
-its territory income sixty times as often, which is proportionate to everything else running
-sixty times faster, but it is not what the tick does today.
+Which clock the economy should be paid on is
+[open](#open-questions). Every figure in this plan is quoted at 1x until it is answered, so a
+number tuned against an accelerated campaign is being tuned against a different economy from the
+one written down here.
 
 **BLUFOR gets no flat income.** The player's AP stays entirely earned. A passive trickle would
 make the tier gates a matter of waiting rather than of fighting, and it is the earned-only rule
@@ -723,6 +722,14 @@ Each phase is independently shippable, and the ordering is forced rather than ch
   the constant cannot be set before it.
 - **The flat income figure**, which falls out of the answer above once OPFOR town income is
   measured on a real map rather than estimated.
+- **Which clock the economy tick runs on.** Town income and territory CP ride `sleep 1800`, which
+  `setTimeMultiplier` does not scale; side-mission cooldowns ride the campaign date, which it
+  does. The two therefore diverge by exactly the host's multiplier, and at 32x missions supply
+  almost all of the player's AP instead of a quarter of it
+  ([above](#where-blufor-army-power-comes-from)) — so every share and every constant in this plan
+  holds at 1x alone. Moving the tick onto the campaign date makes one clock of the two, at the
+  cost of paying territory CP as many times faster as the campaign is running, which is
+  proportionate but is not what the tick does today.
 - **The AP component of each advanced support and combat vehicle.** The starting values here are
   round numbers against a 300 AP campaign budget; what they should be is a play-test question.
 - **Where the boundary falls for armed cars and wheeled APCs.** Tanks and unarmed transport are
