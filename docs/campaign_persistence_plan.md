@@ -28,21 +28,19 @@ version bump could rename it. With it there is one `DUWS_T.vars.Arma3Profile`, i
 directory of whichever machine is the server — the host's profile for a hosted session, the
 `-profiles` directory for a dedicated one.
 
-`profileNamespace` would also work and is rejected: it is the profile shared by every mission on
-the box, so DUWS_T's campaign state would sit beside every other mission's and a player clearing
-one would risk the other.
+**It is the default rather than the only option, because it is reported broken on Linux servers.**
+Antistasi ships the choice between it and `profileNamespace` as a control on its own load screen,
+defaulted off on Linux with the reason printed on the control. So the namespace and its flush are
+each reached through one function and named nowhere else; the fallback is then a one-line change.
+That indirection, and the rest of the container the snapshot travels in, are
+[`campaign_save_format.md`](campaign_save_format.md). `profileNamespace` stays the fallback rather
+than the default because it is shared by every mission on the box, so a player clearing one
+mission's state risks another's.
 
 `saveGame` is not a candidate at all. It saves a whole session rather than a data snapshot, so it
 cannot be replayed through the builders, which is what the restore below depends on. That holds
 whether or not it works in multiplayer, which is
 [still unestablished](../KNOWN_ISSUES.md#does-a-multiplayer-save-happen-at-all).
-
-**One key per world: `DUWST_save_<worldName>`.** A player who runs a campaign on two maps keeps
-both, and the world guard becomes a key lookup instead of a rejection. A second key,
-`DUWST_save_<worldName>_prev`, holds the previous snapshot: writes are not atomic, and a restart
-during one costs a campaign rather than an interval if there is nothing to fall back to. The
-payload is small enough that doubling it is not a consideration — the profile file only becomes a
-performance problem in the tens of megabytes, and this snapshot is tens of kilobytes.
 
 ### Transferring a save between machines
 
@@ -55,10 +53,10 @@ mechanism.
 | Client profile carry | The server hands the snapshot to a connected client, which keeps it in its own `profileNamespace` and offers it back on the load screen | Needs that client connected when the save is taken; validated coming back in, not trusted |
 | Clipboard string | `copyToClipboard` out, paste into an edit control in | One deliberate player action per direction; edit-control length under a full snapshot is untested |
 
-All three move the same value, and they work because of a property the snapshot already has for a
-different reason: it contains only numbers, strings, booleans and arrays of those, which is exactly
-the type set `parseSimpleArray` accepts. `str` on the way out and `parseSimpleArray` on the way back
-is an exact round trip, so no serialiser has to be written or kept in step.
+All three move the same value, and they cost almost nothing because the snapshot is already a
+single JSON string in the store — `toJSON` on the way out and `fromJSON` on the way back, with no
+serialiser to write or keep in step. Antistasi's export is nine lines and its import twenty-one
+for that reason.
 
 **The clipboard cannot be the store, because SQF can write it and not read it.** `copyToClipboard`
 has no counterpart, so every import ends at a human pasting into an edit control — which is a thing
@@ -113,7 +111,7 @@ The writer is the server and there is only one. Four triggers:
 |---|---|
 | Periodic timer | The only protection against a crash or an ALT-F4, neither of which fires any hook |
 | SITREP action | The existing manual save, kept |
-| Last player disconnecting | On a default dedicated server this is the last moment the mission exists |
+| Last player disconnecting | On a default dedicated server this is the last moment the mission exists. Under `persistent = 1` the loop's first empty pass would cover it; on the default that pass never comes |
 | `Ended` / `MPEnded` mission event handlers | Covers a clean mission end or admin `#missions` |
 
 Every write is gated on `mission_init_complete` (`server/server_var_init.sqf`). A snapshot taken
@@ -147,8 +145,14 @@ from a convenience to the only in-session one. The grant itself follows the `gam
 rather than the person (`server/server_var_init.sqf`), so a co-op team whose game master leaves
 recovers it by someone taking that slot.
 
-- **It always writes.** Tracking whether anything changed since the last pass would mean a dirty
-  flag on every writer in the mission, and the thing it would save is one disk write per interval.
+- **The deadline is a variable the loop polls, not a `sleep`.** Every write sets the next deadline,
+  so a manual save pushes the timer out instead of being followed seconds later by an automatic
+  one. That needs a short poll against a stamp rather than sleeping the interval.
+- **It always writes, as long as somebody has been on since the last pass.** Tracking whether
+  campaign state changed would mean a dirty flag on every writer in the mission; tracking whether
+  anyone was connected is one count. Antistasi's condition is the one to copy — players now *or*
+  players at the previous pass — because the first empty tick still writes, which is what banks the
+  session on a server that has just emptied.
 - **It does not overlap itself.** A pass that starts while one is in flight skips rather than
   queues; a queue of stale snapshots is worse than a missed interval, because the last one to land
   wins and it is the oldest.
@@ -185,11 +189,21 @@ buying garrisons and hardpoints against a player who is asleep.
 
 **Decided: the campaign idles at zero players.** A player who logs off overnight and returns to a
 poorer wallet and a fully upgraded enemy has lost ground by not playing, which is not a mechanic
-anyone chose; and the server burns CPU simulating a war nobody is watching. The gate goes on the
+anyone chose — the OPFOR commander spending an unattended night buying garrisons is the sharp
+edge of it. The server also burns CPU simulating a war nobody is watching. The gate goes on the
 campaign clocks — the economy tick, the WARCOM wave threads, the side-mission generator, the
 hardpoint and director build ticks — not on everything. The zone spawn/despawn checker and the JIP
 machinery keep running; with no players they are already no-ops, and gating them would only add a
 branch.
+
+Antistasi does not do this — its war runs regardless and only the save loop stops writing — so
+this is a divergence from the prior art rather than an uncontested default.
+
+**A "the war moved on" mechanic is the eventual answer and is not this plan's.** Idling is the
+correct floor because it can only ever cost the player nothing; a system that advances the
+campaign across an absence has to decide what it advances, by how much, and how the player is told
+— a design question, not a persistence one. The elapsed real time is derivable whenever it is
+wanted, because the write stamp is already in the snapshot.
 
 **The gate must count humans, not `allPlayers`.** That command includes headless clients, so on a
 server running the [headless client](headless_client_plan.md) an HC alone would hold the campaign
@@ -276,10 +290,14 @@ guard pins the map, so the lookup returns what it stored.
 
 ## The snapshot
 
-One array per key, with a format version first so a future change can be detected rather than
-misread. Only serialisable types go in: numbers, strings, booleans and arrays of those. No
-objects, no groups, no triggers, no Locations, no netIds — netIds are strings but resolve to
-nothing after a restart, which is worse than a type error because it fails silently.
+One hashmap, keyed by name, serialised as a single JSON string; the container and its type rules
+are [`campaign_save_format.md`](campaign_save_format.md). Named keys rather than array positions
+so that adding a field to a later version does not shift what an older save's readers see. Only
+serialisable types go in: numbers, strings, booleans, arrays and hashmaps of those. No objects, no
+groups, no triggers, no Locations, no netIds — netIds are strings but resolve to nothing after a
+restart, which is worse than a type error because it fails silently.
+
+Every group below is one key. The tables name what each holds, not the order it holds it in.
 
 Entries split into **inputs**, fed to the builders before they run, and **outcomes**, applied
 after the builders have run and reset what they own. The split answers the first two rows of the
@@ -417,7 +435,11 @@ group handle.
 | Cooldowns | outcome | remaining seconds per player-scoped cooldown, per UID |
 
 Loadouts are already data; what they lack is a stable key. `client/client_init.sqf:449` stores the
-loadout on the player object, which dies with the session, so the mirror keys on UID.
+loadout on the player object, which dies with the session, so the mirror keys on UID. One hashmap
+of per-player hashmaps, and the three guards a UID-keyed player save needs — a per-player
+"restored yet" flag, stripping a loadout saved while dead, and deleting the unit whose gear has
+just been banked — are in
+[`campaign_save_format.md`](campaign_save_format.md#per-player-data).
 
 **Reveal is an outcome, not an input.** A hardcore campaign's entire progress is which zones and
 towns the player has found, and a replay re-hides both: `fnc_createzone.sqf:16` sets every zone's
@@ -536,22 +558,21 @@ needs to bring one in.
 
 - **New Game** runs the existing setup flow — faction, HQ placement, environment, callsign —
   unchanged.
-- **Load Game** is disabled, with the reason on the control, when the server has no valid snapshot.
-  With one, the control carries what is in it: world, day, zones held, CP, and how long ago it was
-  written. An unlabelled choice is not a choice.
+- **Load Game** lists the campaigns in the save index, newest first, each labelled from its stored
+  header: world, day, zones held, CP, and how long ago it was written. It is disabled, with the
+  reason on the control, when none of them is loadable here. An unlabelled choice is not a choice.
 - **Import** takes a snapshot from this client's own profile or from a pasted string, validates it,
-  and enables Load Game. Export is not here: a player exporting has a campaign running, so it
+  and adds it to the list. Export is not here: a player exporting has a campaign running, so it
   belongs with the in-session save controls.
 
-**New Game does not wipe the save; the first write overwrites it.** This is one misclick from
-destroying a campaign, and nothing is bought by destroying it at the click rather than when the new
-campaign's first save lands — `_prev` then keeps the old one one interval longer still. The
-confirmation stays, because choosing New Game over a save is choosing to lose it; what changes is
-that misreading the confirmation costs the session being started rather than the campaign already
-played.
+**New Game destroys nothing, because it writes under a new campaign ID.** That falls out of the
+index shape rather than being designed for: an existing campaign is only ever overwritten by its
+own saves. What the screen needs instead is a delete, so the list cannot grow without bound — one
+deliberate action, on a named row, with a confirmation.
 
-**`_prev` is visible here.** If the primary key fails validation the screen offers the previous
-snapshot, named as such, rather than silently loading it or silently refusing.
+**A save that fails validation is named and disabled, not hidden.** A row the player can see and
+cannot pick, carrying why, beats a list that silently omits the campaign they are looking for.
+`_prev` is offered the same way when a payload fails to parse.
 
 **The screen is one more dialog in the chain, not a new mechanism.** `shared/includes/` holds one
 `.hpp` per screen, each `idd = -1`, each disabling ESC through an `onLoad` `KeyDown` handler, each
@@ -565,15 +586,20 @@ the others: escaping this one leaves boot blocked on a question with no answer.
 
 A dedicated server restarting unattended has no game master connected, and coming back up on its own
 campaign is the checkpoint the whole dedicated story rests on. So the screen has a timeout, on the
-same `fnc_waitLogged` pattern as every other setup gate, and **the timeout loads when a snapshot
-exists and starts a new campaign when none does.** The bound is short while no player is connected
-and extends to the setup-screen bound once one is, so an unattended restart is not delayed by a
-screen nobody can see and a host is not raced past by a timer.
+same `fnc_waitLogged` pattern as every other setup gate, and **the timeout loads the newest valid
+snapshot when one exists and starts a new campaign when none does.** The bound is short while no
+player is connected and extends to the setup-screen bound once one is, so an unattended restart is
+not delayed by a screen nobody can see and a host is not raced past by a timer.
 
-Two properties make defaulting to Load safe rather than merely convenient. Loading without asking is
-recoverable — the player picks New Game at the next restart — where starting fresh without asking is
-the destructive branch. And nothing is written until `mission_init_complete`, so a load the player
-did not want does not overwrite what it read.
+Antistasi makes the same timeout a mission parameter defaulting to off (`autoLoadLastGame`,
+`-1` through 600 seconds). Here it defaults to on, because a server that will not restart into its
+own campaign without an admin present is the failure this whole plan exists to fix, and the two
+properties below make defaulting to Load recoverable rather than merely convenient.
+
+Loading without asking is recoverable — the player picks New Game at the next restart — where
+starting fresh without asking would strand the campaign behind a screen nobody attended. And a
+load that was not wanted cannot damage what it read: nothing is written until
+`mission_init_complete`, and a New Game started afterwards writes under its own campaign ID.
 
 **Everyone else waits where they already wait.** Non-game-master clients block on
 `HQ_pos_found_generated && chosen_settings` (`client/client_init.sqf:139-143`) and need no knowledge
@@ -667,12 +693,32 @@ This is the decision that keeps the plan finite. The server runs 40 `while {true
 files, each holding script locals; persisting live state would mean relaunching every one with
 reconstructed arguments. Regenerating instead means they start the way they always do.
 
+### What live state costs, and who pays it back
+
+Discarding live units discards what was *spent* on them. A save taken while a WARCOM wave is in
+the air deletes the wave and the AP that bought it; a support in flight takes its CP with it. Over
+a campaign of restarts that is a slow leak out of both economies, and it gets worse once the
+[OPFOR director](economy_plan.md#what-the-commander-spends-on) is buying continuously.
+
+Antistasi reconciles this at save time rather than living with it: before writing, it walks live
+vehicles and units and folds their value back into the pools it is about to save — a full refund
+for anything not crippled, explicitly *"to reduce exploiting save-on-attack"*, and the same pass on
+the player side for a player's live AI squad and their vehicle.
+
+**Decided: a reconciliation pass runs before every write, on both sides.** The alternative is that
+the correct play becomes to save immediately after committing a wave, which is a mechanic nobody
+chose. Scaling by remaining health is the shape to copy — a refund proportional to what survives
+means saving mid-firefight is neither punished nor exploitable. What each unit and vehicle is worth
+is already the price tables the economies buy from, so this is a walk and a sum, not new pricing.
+
 ## Files touched
 
 | File | Change |
 |---|---|
-| `server/misc/fnc_campaign_save.sqf` | New. Builds the snapshot array and writes the namespace key. |
-| `server/misc/fnc_campaign_restore.sqf` | New. Reads it, validates version and world, sets globals, replays builders. The same validation is what an imported snapshot goes through. |
+| `server/misc/fnc_campaign_store.sqf` | New. The container: namespace resolution and flush, the accessor pair, the index, commit and scan. Shape and responsibilities in [`campaign_save_format.md`](campaign_save_format.md). |
+| `server/misc/fnc_campaign_save.sqf` | New. Fills the snapshot hashmap from mission state and commits it. |
+| `server/misc/fnc_campaign_restore.sqf` | New. Validates a payload, sets globals, replays builders. The same validation is what an imported snapshot goes through. |
+| `server/misc/fnc_campaign_reconcile.sqf` | New. Folds the value of live units and vehicles back into the pools, before every write. |
 | `server/misc/fnc_campaign_vehicles.sqf` | New. Collects and respawns the stockpile around each anchor. |
 | `server/misc/fnc_autoSave.sqf` | Rewritten to call the new save; drop `saveGame`. Owns the interval loop and the no-overlap guard. |
 | `server/supports/fnc_sitrep_support.sqf:13` | Nothing here for persistence — it already asks the server to save. Its price and cooldown are [`ap_economy_plan.md`](ap_economy_plan.md#sitrep-becomes-free)'s business. |
@@ -686,8 +732,8 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 | `server/server_var_init.sqf` | Persistence-zone radius and per-anchor cap. |
 | `client/client_init.sqf:95-113` | The New Game / Load Game fork at the top of the block, game master only; the existing faction flow moves into the New Game branch. |
 | `shared/includes/params_modern.hpp` | `DUWS_AutosaveInterval`, seconds, `0` for off, default 900. |
-| `shared/includes/campaign_load_menu.hpp` | New. The fork screen — New Game, Load Game, Import — in the existing setup-dialog idiom; `#include`d from `description.ext`. |
-| `client/dialog/` | Its handlers, the New Game confirmation, and import from a carried profile or a pasted string. |
+| `shared/includes/campaign_load_menu.hpp` | New. The fork screen — New Game, Load Game with the campaign list, Import, Delete — in the existing setup-dialog idiom; `#include`d from `description.ext`. |
+| `client/dialog/` | Its handlers, the delete confirmation, and import from a carried profile or a pasted string. |
 | `description.ext` | `missionGroup = "DUWS_T";` |
 | `info/architecture.md:122` | Replace the "vanilla `saveGame` only" persistence row. |
 | `KNOWN_ISSUES.md` | Drop the save/reload row once it passes. |
@@ -695,7 +741,8 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 ## Task list
 
 - [ ] Prerequisites 1-3 above, each as its own change. Prerequisite 1 gates the rest.
-- [ ] Write `fnc_campaign_save.sqf` and dump a snapshot to the log without restoring. Verify: every value in it is a number, string, boolean or array of those, and `str` then `parseSimpleArray` round-trips it unchanged.
+- [ ] Write `fnc_campaign_store.sqf`: namespace resolution, accessors, index, commit, scan. Verify: two campaigns written under separate IDs both appear in the index with correct headers; a commit replaces its own row rather than appending; `_prev` holds the previous payload.
+- [ ] Write `fnc_campaign_save.sqf` and dump a snapshot to the log without restoring. Verify: `toJSON` then `fromJSON` round-trips it unchanged, and nothing in it is an object, group, side or `netId`.
 - [ ] Write `fnc_campaign_restore.sqf` covering pools, bounties and ownership only. Verify: restart mid-campaign and confirm CP, AP, reputation and a farmed zone's reduced bounty all return.
 - [ ] Add zone replay through `fnc_createZone`, then the ownership and reveal passes after `WARCOM_init_done`. Verify: restored zones sit in the same places with the same radii, a captured zone comes back captured, a hardcore campaign's found zones stay found, and `amount_zones_created` matches the zone count instead of double it.
 - [ ] Add HQ, FOB and civilian-town replay. Verify: HQ actions work, FOB triggers fire, FOB names and towns come back where they were, and the restore replays no FOB radio announcements.
@@ -704,8 +751,9 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 - [ ] Add loadouts, support unlocks and cooldowns. Verify: a cooldown stamped just before the save has roughly its remaining time left after it, not the whole duration and not a wedged action.
 - [ ] Add the autosave loop, its parameter and the other three triggers. Verify: changing `DUWS_AutosaveInterval` in the lobby changes the observed write cadence in the `.rpt`; two triggers firing together produce one write, not two; at `0` the loop never fires but SITREP and a clean exit still write.
 - [ ] Add the zero-player gate. Verify: the campaign clocks stop with nobody connected and resume on join; a snapshot is written on the last disconnect; a connected headless client does not count as a player.
-- [ ] Add the fork screen and its timeout. Verify: the screen is the first thing a game master sees on every campaign, singleplayer included; Load Game is disabled with a reason when there is no snapshot and labelled with world, day, zones and CP when there is; New Game runs the old setup flow untouched and only confirms when a save exists; a dedicated server with nobody connected loads without waiting out the full bound; a fresh campaign is not made to wait on the screen before the terrain survey starts.
-- [ ] Version and world guards: refuse a snapshot from a different map or format version and start fresh with a logged warning.
+- [ ] Add the reconciliation pass. Verify: saving with a WARCOM wave live and reloading returns roughly the AP that wave cost, and saving twice in a row without playing does not inflate either pool.
+- [ ] Add the fork screen and its timeout. Verify: the screen is the first thing a game master sees on every campaign, singleplayer included; Load Game lists every saved campaign newest first, labelled with world, day, zones and CP; an unloadable save is listed disabled with its reason rather than hidden; New Game runs the old setup flow untouched and leaves existing campaigns intact; delete removes exactly one campaign; a dedicated server with nobody connected loads without waiting out the full bound; a fresh campaign is not made to wait on the screen before the terrain survey starts.
+- [ ] Version, world and faction guards: refuse a snapshot from a different map or format version, or one naming a faction this session cannot detect, and say which on the control.
 - [ ] Add export and import. Verify: a campaign carried in a client's own profile restores on a different server with nothing pasted; a hand-edited carried snapshot is refused rather than loaded; the clipboard fallback round-trips, and an oversized snapshot either survives the edit control or is chunked.
 - [ ] On a dedicated server ([`info/dedicated_server_setup.md`](info/dedicated_server_setup.md)): play, restart, confirm the campaign continues. This cannot be validated by a hosted session — a host is both server and client and will mask locality faults.
 
@@ -735,8 +783,14 @@ Storing resolved classnames would pin the campaign to a mod set, which is exactl
 mission's no-hard-dependency rule refuses.
 
 **The campaign idles at zero players.** Reasoning above. The cost is that a persistent dedicated
-server no longer simulates a living war between sessions, which some hosts will want; it is one
-gate to invert if that turns out to be the more popular reading.
+server no longer simulates a living war between sessions, which some hosts will want; the answer
+to them is an offline-progression mechanic built deliberately, not this gate left open.
+
+**The save container is Antistasi's, not a new design.** Its shape has been through several format
+migrations in production on dedicated servers, and the parts of it this plan declines — the dual
+namespace keying, the per-variable namespace writes, the legacy name fallbacks — are back-compat
+for saves already in the wild rather than design. What is adopted and what is dropped:
+[`campaign_save_format.md`](campaign_save_format.md).
 
 **Vehicles persist by data, so they come back as new objects.** Anything attached to the old
 object is lost. The alternative is persisting object identity, which vanilla cannot do.
@@ -756,8 +810,12 @@ object is lost. The alternative is persisting object identity, which vanilla can
 - Whether `BIS_fnc_saveInventory` output is pure data on every container type the mission can
   produce, including modded vehicles.
 - What happens to a save when the mission's own format changes mid-Workshop-release. Refusing it
-  is the decided behaviour; whether a migration path is ever worth writing is not decided.
-- Whether the zero-player gate should be a host-facing setting rather than a decision. It is the
-  same kind of question as the autosave interval, so it would be the same kind of answer — a
-  mission parameter — and the argument against is that a host who turns it off is choosing to lose
-  ground while logged out, which is not obviously a choice worth offering.
+  is the decided behaviour; whether a migration path is ever worth writing is not decided. The
+  datapoint against refusing is that a quarter of Antistasi's save subsystem is converters, carried
+  because refusing means every player loses their campaign on update day.
+- What an offline-progression mechanic would actually advance, and how the returning player is
+  told. Idling is the floor; the elapsed time is derivable from the write stamp whenever this is
+  taken up.
+- What the reconciliation pass is worth per unit type. A flat per-unit figure scaled by health is
+  the opening shape, and whether infantry and armour want different treatment is a tuning question
+  a play-test answers.

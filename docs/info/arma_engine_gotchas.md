@@ -99,13 +99,21 @@ The clipboard is a one-way door in the same way: `copyToClipboard` writes and no
 back, so every clipboard import ends at a human pasting into an edit control. That rules it
 out of any unattended path, whatever its size limits turn out to be.
 
-**How to apply:** treat `missionProfileNamespace` as the store and design the payload as
-plain numbers, strings, booleans and arrays so `str` / `parseSimpleArray` round-trips it —
-then the store is one `setVariable` and an alternative writer costs nothing later. A
-dedicated server is the one deployment that can add a real file store invisibly, because a
-`-serverMod` extension is not announced to clients and needs nothing installed player-side;
-singleplayer and hosted sessions cannot, since the host is the server. Reasoning and the
-design built on it: [`../campaign_persistence_plan.md`](../campaign_persistence_plan.md#where-the-save-lives).
+Neither namespace is unconditionally reliable, either. Antistasi — which has both in
+production — defaults `missionProfileNamespace` **off on Linux servers**, detected with
+`(productVersion # 6) isEqualTo "Linux"`, and prints the reason on the control: *"This may
+not work correctly on Linux servers due to an Arma bug."* So which namespace is in use is a
+runtime decision on a platform the mission does not control.
+
+**How to apply:** treat `missionProfileNamespace` as the store, but name it and its flush
+command in one function each so the `profileNamespace` fallback is a one-line change rather
+than a sweep. Serialise the payload with `toJSON` (Arma 3 2.18+) and key it by name — a
+hashmap tolerates a field being added later, where an array of positions silently misreads
+every older save. A dedicated server is the one deployment that can add a real file store
+invisibly, because a `-serverMod` extension is not announced to clients and needs nothing
+installed player-side; singleplayer and hosted sessions cannot, since the host is the server.
+Reasoning: [`../campaign_persistence_plan.md`](../campaign_persistence_plan.md#where-the-save-lives).
+Container shape: [`../campaign_save_format.md`](../campaign_save_format.md).
 
 ## `exitWith` exits the nearest loop or call scope, not the enclosing if/then
 

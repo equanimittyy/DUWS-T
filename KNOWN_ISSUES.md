@@ -189,6 +189,10 @@ profile-namespace variables to their `.vars.Arma3Profile` file correctly and the
 them back at the next mission start. That is reported fixed upstream, which is not the same as
 observed working on the box this mission runs on.
 
+**Platform is part of the question.** Antistasi ships both namespaces and defaults
+`missionProfileNamespace` off on Linux servers because of an Arma bug it names on the control, so
+a pass on Windows says nothing about a Linux box and vice versa. Record which the probe ran on.
+
 **It has to be a dedicated server.** A hosted session and a singleplayer game use the player's own
 profile and were never subject to the failure, so passing there proves the call shape and the file
 name and nothing about the thing at risk. Run it hosted first if you like — it is thirty seconds
@@ -210,9 +214,10 @@ Setup, including the `#login` the debug console needs on a dedicated server, is 
       `missionProfileNamespace getVariable ["DUWST_probe", "MISSING"]`
 
 `[1,"alive",true]` means the plan's store works as designed. `"MISSING"` means it does not, and the
-question becomes whether `profileNamespace` behaves any differently — it is the same subsystem, so
-expect not — with the clipboard export left as the only route, which would make persistence on a
-dedicated server a manual act rather than an automatic one.
+next step is the same probe against `profileNamespace` — which is what Antistasi falls back to on
+the platform where this fails, so it is worth running rather than assuming the same subsystem
+behaves the same way. Only if both fail is the clipboard export the sole route, which would make
+persistence on a dedicated server a manual act rather than an automatic one.
 
 ## Open defects
 
