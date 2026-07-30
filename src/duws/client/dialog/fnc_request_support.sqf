@@ -121,7 +121,7 @@ case 5: {
     _message = localize "STR_DUWS_T_HALOunlock";
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
     ctrlSetText [1000, format["%1",commandpointsblu1]];
-    lbSetColor [2103, 15, [0, 1, 0, 1]];
+    lbSetColor [2103, index_support_halo, [0, 1, 0, 1]];
     support_halo_available = true;
 
     // 添加三个 HALO 动作：单人、全组、仅 AI
