@@ -13,6 +13,9 @@ waitUntil {sleep 60;!alive _fob};
 if (FOB_removed) exitWith {deleteMarker _markername;FOB_removed = false};
 
 deleteMarker _markername;
+// The persistence ring goes with the FOB. Same name fnc_baseRangeMarker derives from the position,
+// derived again here for the same reason _markername is: this runs against a destroyed building.
+deleteMarker (format ["base_range_%1_%2", round (_fobPos select 0), round (_fobPos select 1)]);
 _spawnPos call BIS_fnc_removeRespawnPosition;
 
 ["WARN", "SUPPORT", format ["FOB '%1' destroyed, respawn point withdrawn", _fobname]] call fnc_log;

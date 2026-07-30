@@ -1701,6 +1701,10 @@
                 <English>Base units have been redeployed.</English>
                 <Chinesesimp>基地单位已重新部署。</Chinesesimp>
             </Key>
+            <Key ID="STR_DUWS_T_FOB_REDEPLOY_BUSY">
+                <Original>This FOB is already being redeployed.</Original>
+                <English>This FOB is already being redeployed.</English>
+            </Key>
             <Key ID="STR_DUWS_T_check_vehicle_status">
                 <Original>Check Vehicle Status</Original>
                 <English>Check Vehicle Status</English>
@@ -1856,26 +1860,12 @@
                 <Spanish>Cambiado a %1</Spanish>
                 <Chinesesimp>已换装为 %1</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_qxrh9fws">
-                <German>Ersetze FOB Verteidung (5CP)</German>
-                <Spanish>Reemplazar defensas del PdA (5CP)</Spanish>
-                <Chinesesimp>重置FOB防御 (5CP)</Chinesesimp>
-                <Original>Replace FOB Defences (5 CP)</Original>
-                <English>Replace FOB Defences (5 CP)</English>
-            </Key>
             <Key ID="STR_DUWS_T_xvtn4llz">
                 <German>&lt;t color='#ff1111'&gt;Ersetze Verteidigung (5CP) &lt;/t&gt;</German>
                 <Spanish>&lt;t color='#ff1111'&gt;Reemplazar defensas (5CP) &lt;/t&gt;</Spanish>
                 <Chinesesimp>&lt;t color='#ff1111'&gt;重置防御 (5CP) &lt;/t&gt;</Chinesesimp>
                 <Original>&lt;t color='#ff1111'&gt;Replace Defences (5 CP) &lt;/t&gt;</Original>
                 <English>&lt;t color='#ff1111'&gt;Replace Defences (5 CP) &lt;/t&gt;</English>
-            </Key>
-            <Key ID="STR_DUWS_T_p5i8fe14">
-                <German>Ersetze Wachen (15CP)</German>
-                <Spanish>Reemplazar guardias (15CP)</Spanish>
-                <Chinesesimp>重置守军 (15CP)</Chinesesimp>
-                <Original>Replace Guards (15 CP)</Original>
-                <English>Replace Guards (15 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_qxhure3n">
                 <German>&lt;t color='#ff1111'&gt;Ersetze Wachen (20CP) &lt;/t&gt;</German>

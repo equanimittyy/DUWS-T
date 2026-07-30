@@ -265,12 +265,16 @@ if (call _check_damage) exitWith {
 	_speaker = localize "STR_DUWS_T_chariot";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 _helo lock false;
+// Everyone the taxi carried, not just the caller's group. doGetOut is an order only AI take, so the
+// player who called the taxi was the one passenger it never turned out, and anyone riding in another
+// group stayed seated with them. moveOut needs its unit local, so each passenger is turned out on
+// the machine that owns them. The flight crew is excluded or the helo is abandoned at the LZ.
 {
-	if (vehicle _x == _helo) then {
-		doGetOut _x; 
+	if !(_x in units _helogroup) then {
+		_x remoteExec ["moveOut", _x];
 		sleep 1;
 	};
-} forEach units group player;
+} forEach crew _helo;
 
 sleep 12;  // wait 10 sec before takeoff
 

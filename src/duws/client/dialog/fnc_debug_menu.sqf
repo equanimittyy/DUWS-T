@@ -27,7 +27,7 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
         [player] remoteExec ["fnc_debug_intel_search", 2];
     }, [], [1,0.667,0,1]],
 
-    ["Adjust CP / AP", fnc_debug_econ_menu, [], [1,0.667,0,1]],
+    ["Adjust CP / AP / Town / Escalation", fnc_debug_econ_menu, [], [1,0.667,0,1]],
 
     ["Force side mission", fnc_debug_mission_menu, [], [1,0.667,0,1]],
 

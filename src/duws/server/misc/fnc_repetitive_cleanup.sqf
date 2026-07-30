@@ -26,12 +26,13 @@ if (!isServer) exitWith {};
 // Expired but watched stays and is retried, so it goes once they leave rather than never.
 #define KEEP_RADIUS 300
 
-// Bases are cleanup exclusion zones: an intact vehicle parked this close to the HQ, a FOB or the
-// MHQ is never collected. This is the supported way to keep a vehicle, which is why no vehicle
-// carries the persistence flag any more -- drive it home instead of tagging it in script.
-// Deliberately narrower than "nothing inside is collected": wrecks, bodies and dropped kit still
-// go, or a base that gets attacked would silt up with exactly what the sweep exists to remove.
-#define BASE_RADIUS 250
+// Bases are cleanup exclusion zones: an intact vehicle parked within DUWS_base_keep_radius of the
+// HQ, a FOB or the MHQ is never collected. This is the supported way to keep a vehicle, which is
+// why no vehicle carries the persistence flag any more -- drive it home instead of tagging it in
+// script. Deliberately narrower than "nothing inside is collected": wrecks, bodies and dropped kit
+// still go, or a base that gets attacked would silt up with exactly what the sweep exists to remove.
+// The radius is a global rather than a #define here because fnc_baseRangeMarker.sqf draws it on the
+// map, and the ring and the sweep must not be able to name different distances.
 
 // Passes between census log lines. The census is the one part of this that cannot be checked
 // offline -- allMissionObjects is documented around mission- and script-created objects, and a
@@ -167,7 +168,7 @@ while {true} do {
                 // else has already agreed the object should go. Intact vehicles only, so a
                 // player can park anything driveable at a base and keep it.
                 private _parked = alive _obj && {_obj isKindOf "AllVehicles"}
-                    && {(_bases findIf {_obj distance _x < BASE_RADIUS}) >= 0};
+                    && {(_bases findIf {_obj distance _x < DUWS_base_keep_radius}) >= 0};
                 if (_parked) then {
                     _tracked = _tracked + 1;
                 } else {

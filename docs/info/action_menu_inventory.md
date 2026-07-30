@@ -45,8 +45,8 @@ entries read as one ambient family against the loud consequence colours. They st
 macros rather than one so priority keys off the bucket, and splitting a blue back out later is a
 one-line edit in the header.
 
-**`ACT_COMMIT` sits lowest on purpose.** Priority orders the scroll list, and a mis-scrolled
-15 CP spend costs more than a buried one.
+**`ACT_COMMIT` sits lowest on purpose.** Priority orders the scroll list, and a mis-scrolled spend
+costs more than a buried entry does.
 
 **A bare `&`, `<` or `>` in a title breaks the entry.** Titles are wrapped in `<t>` markup, so an
 unescaped ampersand ends the structured-text parse and swallows the rest of the entry. Use `/`
@@ -152,9 +152,7 @@ recruit is not a local you can question, so no civilian ever carries both sets.
 
 | Entry | Key | Attached by |
 | --- | --- | --- |
-| Redeploy Base Units (2 CP) | `STR_DUWS_T_REDEPLOY_ACTION` | HQ building |
-| Replace FOB Defences (5 CP) | `STR_DUWS_T_qxrh9fws` | FOB |
-| Replace Guards (15 CP) | `STR_DUWS_T_p5i8fe14` | FOB |
+| Redeploy Base Units (2 CP) | `STR_DUWS_T_REDEPLOY_ACTION` | HQ building, FOB |
 | Deploy / Undeploy Mobile HQ | `STR_DUWS_T_rqzxlvf4`, `…_fjpyu3zb` | `MHQ1` — `Squad_Leaders` only |
 | Sabotage | `STR_DUWS_T_p3200mf5` | Laptop |
 

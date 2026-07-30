@@ -1,18 +1,17 @@
-// Locality: server only -- server/supports/fnc_fob_server.sqf on build, fnc_refortifyFOB via
-// remoteExec target 2 on refortify. A FOB's turrets are campaign property, so spawning them
-// on the refortifying client would leave them simulated there and orphaned on disconnect.
+// Locality: server only -- server/supports/fnc_fob_server.sqf on build, fnc_redeployFOBUnits on
+// rebuild. A FOB's turrets are campaign property, so spawning them on the rebuilding client
+// would leave them simulated there and orphaned on disconnect.
 #include "..\..\shared\includes\action_style.hpp"
 
 if (!isServer) exitWith {};
 
-params ["_centerPos", "_fob", ["_refortify", false], ["_refundOnBusy", 0]];
+params ["_centerPos", "_fob", ["_refortify", false]];
 
 // One rebuild at a time. The scroll action lives on every machine, so two players can fire it
-// at once; without this the second would spawn a duplicate ring over the first. The charge is
-// still taken client-side before the request arrives, so the loser is refunded here.
-if (_fob getVariable ["FOB_fortify_busy", false]) exitWith {
-	if (_refundOnBusy > 0) then { [_refundOnBusy, "fob_fortify_busy_refund"] remoteExec ["fnc_cp_adjust", 2]; };
-};
+// at once; without this the second would spawn a duplicate ring over the first. No refund arm any
+// more -- fnc_redeployFOBUnits reads this flag before it charges, so a second caller is turned
+// away rather than paid back.
+if (_fob getVariable ["FOB_fortify_busy", false]) exitWith {};
 _fob setVariable ["FOB_fortify_busy", true];
 
 // Refortify replaces the previous ring rather than adding to it. The current turrets are read
@@ -209,21 +208,8 @@ _turret5 allowdamage false;
 _fob setVariable ["FOB_turrets", [_turret1, _turret2, _turret3, _turret4, _turret5]];
 _fob setVariable ["FOB_fortify_busy", false];
 
-// Added once, to every machine that has a player and to JIP joiners, so it is no longer tied
-// to whoever built the FOB. Same targeting as supports/fnc_FOBactions. It carries no
-// arguments: the action's target is the FOB itself and the server reads the rest, so it never
-// needs removing and re-adding.
-//
-// Squad_Leaders currently lists every playable slot, so the gate admits everyone today. It
-// is here so a dedicated server can later restrict FOB upkeep to particular slots -- squad
-// leaders, say -- by trimming that one array. The check lives in the action's condition rather
-// than wrapping addAction the way fnc_FOBactions does, because this runs on the server where
-// `player` is objNull; a condition string is evaluated per client, where it resolves.
-// Suffixed JIP id: an object-keyed id is that object's netId, and the guards entry added by
-// init_hq/fnc_guardsFOB.sqf hangs off the same FOB, so a shared id would evict one of the two.
-if (!_refortify) then {
-	[_fob,[ACT_COMMIT("STR_DUWS_T_qxrh9fws"), fnc_refortifyFOB, [], 10, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["fob_defences_%1", netId _fob]];
-};
+// No scroll entry added here. Guards and defences are one redeploy action now, added by
+// init_hq/fnc_guardsFOB.sqf -- the other half of the same rebuild.
 
 
 

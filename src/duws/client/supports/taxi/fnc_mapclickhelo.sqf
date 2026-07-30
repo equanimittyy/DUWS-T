@@ -31,7 +31,7 @@ while {_timer>0} do {
 		_markerstr setMarkerShape "ICON";
 		str(TaxiMarker1) setMarkerType "hd_objective";
 		str(TaxiMarker1) setMarkerColor "ColorYellow";
-		str(TaxiMarker1) setMarkerText "TaxiWP1";
+		str(TaxiMarker1) setMarkerText "WP ALPHA";
 	
 		clicked = false;
 		["TAXI"] call fnc_mapclick_release;
@@ -52,7 +52,7 @@ while {_timer>0} do {
 			_markerstr2 setMarkerShape "ICON";
 			str(TaxiMarker2) setMarkerType "hd_objective";
 			str(TaxiMarker2) setMarkerColor "ColorYellow";
-			str(TaxiMarker2) setMarkerText "TaxiWP2";
+			str(TaxiMarker2) setMarkerText "WP BRAVO";
 
 			clicked = false;
 			["TAXI"] call fnc_mapclick_release;

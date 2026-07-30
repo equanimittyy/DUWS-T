@@ -1,17 +1,16 @@
-// Locality: server only -- server/supports/fnc_fob_server.sqf on build, fnc_reguardFOB via
-// remoteExec target 2 on reguard. A FOB's garrison is campaign property, so spawning it on
-// the reguarding client would leave it simulated there and orphaned on disconnect.
+// Locality: server only -- server/supports/fnc_fob_server.sqf on build, fnc_redeployFOBUnits on
+// rebuild. A FOB's garrison is campaign property, so spawning it on the rebuilding client
+// would leave it simulated there and orphaned on disconnect.
 #include "..\..\shared\includes\action_style.hpp"
 
 if (!isServer) exitWith {};
 
-params ["_centerPos", "_fob", ["_refundOnBusy", 0]];
+params ["_centerPos", "_fob"];
 
 // One reguard at a time, for the same reason as fnc_fortifyFOB: the scroll action is on every
-// machine, so two players can fire it at once, and the charge is taken client-side first.
-if (_fob getVariable ["FOB_guard_busy", false]) exitWith {
-	if (_refundOnBusy > 0) then { [_refundOnBusy, "fob_guards_busy_refund"] remoteExec ["fnc_cp_adjust", 2]; };
-};
+// machine, so two players can fire it at once. No refund arm any more -- fnc_redeployFOBUnits
+// reads this flag before it charges, so a second caller is turned away rather than paid back.
+if (_fob getVariable ["FOB_guard_busy", false]) exitWith {};
 _fob setVariable ["FOB_guard_busy", true];
 
 // Reguard replaces the previous garrison rather than adding to it. Read off the FOB rather
@@ -100,17 +99,23 @@ _wp setWaypointSpeed "LIMITED";
 _fob setVariable ["FOB_guardGroups", [_groupGuard, _groupPatrol]];
 _fob setVariable ["FOB_guard_busy", false];
 
-// 添加守卫重置动作（防重）
+// 添加重新部署动作（防重）
 // Added once, on every machine and for JIP, so it is no longer tied to whoever built the FOB.
 // The flag is what makes "once" hold; it works because the action is never removed now, where
 // before a reguard removed it and relied on the flag being invisible from the acting client to
-// get it back. The Squad_Leaders gate is the same forward-looking restriction described in
-// init_hq/fnc_fortifyFOB.sqf, and admits every playable slot as things stand.
+// get it back.
+//
+// Squad_Leaders currently lists every playable slot, so the gate admits everyone today. It is here
+// so a dedicated server can later restrict FOB upkeep to particular slots -- squad leaders, say --
+// by trimming that one array. The check lives in the action's condition rather than wrapping
+// addAction the way fnc_FOBactions does, because this runs on the server where `player` is objNull;
+// a condition string is evaluated per client, where it resolves.
 if (isNil {_fob getVariable "FOB_guard_action_done"}) then {
     _fob setVariable ["FOB_guard_action_done", true];
-    // Suffixed JIP id: an object-keyed id is that object's netId, and the defences entry added by
-    // init_hq/fnc_fortifyFOB.sqf hangs off the same FOB, so a shared id would evict one of the two.
-    [_fob,[ACT_COMMIT("STR_DUWS_T_p5i8fe14"), fnc_reguardFOB, [], 10, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["fob_guards_%1", netId _fob]];
+    // Suffixed JIP id: an object-keyed id is that object's netId, which the FOB's own action menu
+    // already claims. One entry covers guards and defences together now, so it is added here --
+    // where a FOB's garrison first exists -- rather than once per half.
+    [_fob,[ACT_COMMIT("STR_DUWS_T_REDEPLOY_ACTION"), fnc_redeployFOB, [], 10, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["fob_redeploy_%1", netId _fob]];
 };
 
 

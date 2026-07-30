@@ -23,7 +23,7 @@ _markerstr = createMarker [str(_markerpickup), _foundPickupPos];
 _markerstr setMarkerShape "ICON";
 str(_markerpickup) setMarkerType "hd_end";
 str(_markerpickup) setMarkerColor "ColorGreen";
-str(_markerpickup) setMarkerText "Pickup";
+str(_markerpickup) setMarkerText "PICKUP";
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_boattaxicall"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
@@ -89,7 +89,7 @@ playMusic [_music, 0];
 _boat lock true;
 titleText [localize "STR_DUWS_T_boattaxi_oscarmike", "PLAIN DOWN"];
 str(_markerpickup) setMarkerPos ClickedTaxiPos; 
-str(_markerpickup) setMarkerText "Drop point";
+str(_markerpickup) setMarkerText "DROP POINT";
 
 
 
@@ -125,7 +125,15 @@ if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 // *****************************
 titleText [localize "STR_DUWS_T_boattaxi_arrived", "PLAIN DOWN"];
 
-{doGetOut _x; sleep 1;} forEach units group player;
+// Same turn-out as the helo taxi, and for the same reasons: doGetOut is an order only AI take, so
+// the caller was never moved, and passengers outside the caller's group were never considered.
+// moveOut needs its unit local, hence the hop to each passenger's owner. The pilot is excluded.
+{
+	if (_x != _pilot) then {
+		_x remoteExec ["moveOut", _x];
+		sleep 1;
+	};
+} forEach crew _boat;
 
 sleep 40;
 [localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_rtb"] remoteExec ["fnc_duws_dialogue", 0];

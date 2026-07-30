@@ -190,9 +190,8 @@ and unbroadcast: only server-side caps read it.
 | FOB deploy | `client/supports/fnc_request_fob.sqf` | fixed |
 | Operatives | `client/operative/fnc_operator_recruit.sqf:29` | 8 (re-deploying a healed one is free) |
 | Mobile HQ | `client/dialog/fnc_MHQ_select.sqf` | 10 |
-| FOB refortify / reguard | `client/init_hq/fnc_refortifyFOB.sqf`, `fnc_reguardFOB.sqf` | 5 / 15 |
 | Heli / boat taxi | `supports/taxi/` | fixed |
-| Base repair, HQ redeploy, sitrep | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/misc/fnc_redeployHQUnits.sqf`, `server/supports/fnc_sitrep_support.sqf` | 2 / 2 / 1 |
+| Base repair, HQ and FOB redeploy, sitrep | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/misc/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf`, `server/supports/fnc_sitrep_support.sqf` | 2 / 2 / 2 / 1 |
 | Death | `client/client_init.sqf:194` | `DUWSMP_CP_death_cost` (0–10) |
 
 ## Who may spend
@@ -203,7 +202,7 @@ Two permission lists of playable slot names, defined together at
 | List | Owns |
 |---|---|
 | `game_master` | campaign-level control — the setup flow, side-mission requests (`client/missions/fnc_stratmap.sqf:24`), the global heal |
-| `Squad_Leaders` | everything that spends CP — request menus, radio supports, MHQ, FOB refortify and reguard — plus High Command |
+| `Squad_Leaders` | everything that spends CP — request menus, radio supports, MHQ, FOB redeploy — plus High Command |
 
 `Squad_Leaders` lists every playable slot as shipped, so it restricts nothing today. It exists to
 be trimmed: on a dedicated server, cutting it to the real squad-lead slots restricts all of the

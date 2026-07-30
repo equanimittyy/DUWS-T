@@ -3,6 +3,9 @@ params ["_fob_pos","_fob_name"];
 
 _markername = format["fob%1%2",round (_fob_pos select 0),round (_fob_pos select 1)]; // Define marker name
 deleteMarker _markername;
+// The persistence ring goes with it, or the map keeps promising a vehicle is safe at a FOB that no
+// longer exists. Same name fnc_baseRangeMarker derives from the position.
+deleteMarker (format ["base_range_%1_%2", round (_fob_pos select 0), round (_fob_pos select 1)]);
 FOB_removed = true;
 
 ["INFO", "SUPPORT", format ["FOB '%1' removed by player at %2", _fob_name, _fob_pos]] call fnc_log;

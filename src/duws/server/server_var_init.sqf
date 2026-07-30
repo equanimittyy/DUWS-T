@@ -290,6 +290,13 @@ zones_min_radius = 200;publicVariable "zones_min_radius";
 // zoneundercontrolblu
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
 
+// How close to a base an intact vehicle must be parked to survive the cleanup sweep. Read by both
+// the sweep (fnc_repetitive_cleanup.sqf) and the ring drawn around every base
+// (fnc_baseRangeMarker.sqf), because a ring that disagreed with the sweep would promise a player
+// their vehicle was safe on ground where it is collected. Not broadcast: the markers are made with
+// global-effect commands and the sweep is server-only.
+DUWS_base_keep_radius = 250;
+
 // Sequence number of the 30-minute campaign economy tick (fnc_zonesundercontrol.sqf).
 // Not broadcast: only server-side payout caps read it.
 econ_tick = 0;

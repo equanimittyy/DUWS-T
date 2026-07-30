@@ -17,10 +17,24 @@ str(_markername) setMarkerColor "ColorBlue";
 str(_markername) setMarkerText format["FOB %1",_fobname];
 str(_markername) setMarkerSize [2.5, 2.5];
 
+// The ring showing what a vehicle parked here keeps, same as the HQ carries.
+[_foundPickupPos] call fnc_baseRangeMarker;
+
 sleep 5;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_fobcall"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+
+// A FOB is a building and a ring of fortifications appearing out of nothing, and anyone stood on
+// that ground sees it pop in around them. The same fade the rest mechanic uses covers the swap,
+// aimed only at players close enough to witness it -- a blackout for someone a kilometre away has
+// no cause they can see. Nobody nearby means no fade and no wait.
+private _fadeRadius = 100;
+private _fadePlayers = (call BIS_fnc_ListPlayers) select {_x distance _foundPickupPos < _fadeRadius};
+if (count _fadePlayers > 0) then {
+	{ [["", "BLACK OUT", 1.5]] remoteExec ["titleCut", _x] } forEach _fadePlayers;
+	sleep 1.7;
+};
 
 // Create the building
 _fob = "";
@@ -41,6 +55,14 @@ switch (VERSION_X) do {
 // Add the fortifications
 _refortify = false;
 [(getpos _fob), _fob, _refortify] spawn fnc_fortifyFOB;
+
+// Held until the fortification pass has placed its objects -- it creates them before its first
+// sleep, so a short wait covers the ring as well as the building. The patrols below are units
+// walking in and need no cover.
+if (count _fadePlayers > 0) then {
+	sleep 2;
+	{ [["", "BLACK IN", 1.5]] remoteExec ["titleCut", _x] } forEach _fadePlayers;
+};
 
 // create the patrols
 [_foundPickupPos, _size] spawn fnc_createpatrolFOB;

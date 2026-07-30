@@ -742,6 +742,8 @@ fnc_weather = compile preprocessFileLineNumbers "duws\server\dialog\fnc_weather.
 fnc_zeus_objects_init = compile preprocessFileLineNumbers "duws\server\misc\fnc_zeus_objects_init.sqf";
 fnc_usableBuildings = compile preprocessFileLineNumbers "duws\server\misc\fnc_usableBuildings.sqf";
 fnc_fob_destroyed = compile preprocessFileLineNumbers "duws\server\misc\fnc_fob_destroyed.sqf";
+// Not broadcast: it creates a global marker, so exactly one machine may run it.
+fnc_baseRangeMarker = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseRangeMarker.sqf";
 fnc_missionLocator = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionLocator.sqf";
 fnc_create_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_create_ammo_lists.sqf";
 fnc_basic_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_basic_ammo_lists.sqf";
@@ -1221,9 +1223,11 @@ fnc_random_name = compile preprocessFileLineNumbers "duws\shared\functions\fnc_r
 fnc_BLUFOR_squad_init = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BLUFOR_squad_init.sqf";publicVariable "fnc_BLUFOR_squad_init";
 fnc_BLUFOR_faction_init = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BLUFOR_faction_init.sqf";publicVariable "fnc_BLUFOR_faction_init";
 fnc_fortifyFOB = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_fortifyFOB.sqf";publicVariable "fnc_fortifyFOB";
-fnc_refortifyFOB = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_refortifyFOB.sqf";publicVariable "fnc_refortifyFOB";
 fnc_guardsFOB = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_guardsFOB.sqf";publicVariable "fnc_guardsFOB";
-fnc_reguardFOB = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_reguardFOB.sqf";publicVariable "fnc_reguardFOB";
+// Broadcast: it is the FOB redeploy action's function value, so every client needs it.
+fnc_redeployFOB = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_redeployFOB.sqf";publicVariable "fnc_redeployFOB";
+// Not broadcast: server-only, so an accidental client call fails loud.
+fnc_redeployFOBUnits = compile preprocessFileLineNumbers "duws\server\misc\fnc_redeployFOBUnits.sqf";
 fnc_createpatrolFOB = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_createpatrolFOB.sqf";publicVariable "fnc_createpatrolFOB";
 fnc_locatorZones_manual = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_manual.sqf";publicVariable "fnc_locatorZones_manual";
 fnc_createZone = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createZone.sqf";publicVariable "fnc_createZone";
@@ -1302,6 +1306,10 @@ fnc_open_action_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc
 fnc_disguise_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_disguise_menu.sqf";publicVariable "fnc_disguise_menu";
 fnc_debug_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_menu.sqf";publicVariable "fnc_debug_menu";
 fnc_debug_econ_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_econ_menu.sqf";publicVariable "fnc_debug_econ_menu";
+fnc_debug_econ_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_econ_fill.sqf";publicVariable "fnc_debug_econ_fill";
+// Not broadcast: the window remoteExecs it to the server by name, and it re-checks game_master
+// itself because any client could send it.
+fnc_debug_econ_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_econ_server.sqf";
 fnc_debug_mission_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_mission_menu.sqf";publicVariable "fnc_debug_mission_menu";
 fnc_dismissHC = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismissHC.sqf";publicVariable "fnc_dismissHC";
 fnc_dismiss_playerAI = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismiss_playerAI.sqf";publicVariable "fnc_dismiss_playerAI";

@@ -1,0 +1,34 @@
+// Locality: server -- the action remoteExecs to target 2, the way the HQ's redeploy does.
+//
+// One entry point for both halves of a FOB's upkeep, checked and charged once. This was two
+// actions costing 15 CP and 5 CP, each charged on the acting client before the request travelled;
+// the HQ rebuilds everything it owns from one action for 2 CP, and a FOB's garrison is the same job
+// on a smaller base.
+if (!isServer) exitWith {};
+
+params ["_fob"];
+if (isNull _fob) exitWith {};
+
+// Turned away before anything is charged, which is what moving the debit to the server buys: the
+// client-side charge could only be handed back after the fact, so the losing player of two
+// simultaneous rebuilds paid and was refunded. Both flags, because one action now drives both.
+if ((_fob getVariable ["FOB_guard_busy", false]) || {_fob getVariable ["FOB_fortify_busy", false]}) exitWith {
+    [localize "STR_DUWS_T_FOB_REDEPLOY_BUSY"] remoteExec ["hint", 0];
+};
+
+if (commandpointsblu1 < 2) exitWith {
+    [localize "STR_DUWS_T_REDEPLOY_COST_TITLE", format [localize "STR_DUWS_T_REDEPLOY_COST", 2]] remoteExec ["BIS_fnc_showNotification", 0];
+};
+
+// call, not remoteExec to self, and escalation applied here rather than in fnc_pool_try_spend:
+// identical to fnc_redeployHQUnits for the same reason, since this path never reaches the purchase
+// handshake either.
+[-([2] call fnc_escalation_cost), "fob_redeploy"] call fnc_cp_adjust;
+
+private _pos = getPos _fob;
+// Spawned rather than called: both builders sleep, and the second must not wait out the first.
+// Each replaces what it owns and sets its own busy flag, so the two do not collide.
+[_pos, _fob, true] spawn fnc_fortifyFOB;
+[_pos, _fob] spawn fnc_guardsFOB;
+
+[localize "STR_DUWS_T_REDEPLOY_SUCCESS"] remoteExec ["hint", 0];

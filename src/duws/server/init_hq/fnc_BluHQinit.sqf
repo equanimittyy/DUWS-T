@@ -757,11 +757,7 @@ if (!isNull _hqObj) then {
 
 HQ_pos_found_generated = true; publicVariable "HQ_pos_found_generated";
 ["INFO", "BOOT", format ["BLUFOR HQ built at %1", PosOfBLUHQ]] call fnc_log;
-// 基地100米范围标记（半透明蓝色）
-private _baseMarkerName = format ["base_range_%1_%2", round (PosOfBLUHQ select 0), round (PosOfBLUHQ select 1)];
-private _baseRangeMarker = createMarker [_baseMarkerName, PosOfBLUHQ];
-_baseRangeMarker setMarkerShape "ELLIPSE";
-_baseRangeMarker setMarkerBrush "SolidBorder";
-_baseRangeMarker setMarkerColor "ColorBlue";   // 蓝色
-_baseRangeMarker setMarkerSize [200, 200];   // 半径200米
-_baseRangeMarker setMarkerAlpha 0.3;           // 半透明
+// 基地车辆保留范围标记（半透明蓝色）. Drawn through the shared function so the HQ, every FOB and
+// the MHQ all advertise the one radius the cleanup sweep honours -- this used to say 200 m against
+// a sweep that spared 250.
+[PosOfBLUHQ] call fnc_baseRangeMarker;

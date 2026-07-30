@@ -16,6 +16,11 @@ if (_addAction == "select") then {
 
 	[MHQ1, _markerType, "ColorYellow", 1, 1, localize "STR_DUWS_T_9ziy0qai"] remoteExec ["kndr_assignMarker", [0,-2] select isDedicated,false];
 
+	// The persistence ring, following the MHQ because it drives. Fixed name rather than one derived
+	// from a position that changes, and only from the server: this branch is remoteExec'd to 2, and
+	// the ring is a global marker one machine has to own.
+	if (isServer) then { [MHQ1, "base_range_mhq"] call fnc_baseRangeMarker };
+
 	// spawn loop to detect MHQ destroyed
 	[] spawn fnc_MHQ_destroyed;
 

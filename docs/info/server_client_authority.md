@@ -157,16 +157,17 @@ client-authority problem. It mostly is not — locality has to be judged per sit
 | `client/dialog/fnc_request_unit.sqf`, `fnc_request_unit_fob.sqf` | client, `createUnit` into `group player` | correct by design — a player's AI subordinates belong on the commanding machine |
 | `client/operative/fnc_operator_recruit.sqf` | client, then `joinSilent (group player)` | same |
 | `client/dialog/fnc_request_vehicle.sqf`, `fnc_request_vehicle_fob.sqf` | client, `createVehicle` | low risk — locality transfers when a player enters |
-| `server/init_hq/fnc_fortifyFOB.sqf`, `fnc_guardsFOB.sqf` | server, on build and on refortify alike | correct |
+| `server/init_hq/fnc_fortifyFOB.sqf`, `fnc_guardsFOB.sqf` | server, on build and on rebuild alike | correct |
 
 The distinction that matters: a group the player *commands* belongs on the commanding machine,
 because that is where orders originate. A group the campaign *owns* belongs on the server,
 because it must survive that player disconnecting.
 
-FOB defences are campaign property by that test, so both spawn functions are server-only. The
-refortify and reguard scroll actions still run on the acting player and keep the affordability
-check and the sound, but the teardown and respawn go to the server, which owns the entities on
-both ends of the swap.
+FOB defences are campaign property by that test, so both spawn functions are server-only. The one
+redeploy scroll action still runs on the acting player, but it keeps only the sound and an advisory
+affordability hint: `server/misc/fnc_redeployFOBUnits.sqf` does the checking, the charging and the
+rebuild, exactly as the HQ's redeploy does. The charge moved off the client so that a caller who
+loses a race against another rebuild is turned away before paying, rather than charged and refunded.
 
 Getting there needed three linked changes, and the reasoning generalises to any per-object
 scroll action in a co-op mission:
