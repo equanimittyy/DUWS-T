@@ -93,13 +93,24 @@ narrower than the whole branch.
       `#include`d by the builder. The range and its targets build at altitude as before. Re-import
       one of the two compositions through `duws_eden.ps1` on Windows if convenient: the tool
       resolves `zbase=` against the file holding the fence, which is why `_centerSpawnZ` moved too
-- [ ] **Watch the weather change once.** Covers two retired broadcast globals. The sky and fog still
-      move on their cycle; on a dedicated server a client must see the same sky as the host
+- [ ] **Look at the sky at campaign start, then grep the RPT.** Covers two retired broadcast
+      globals. The opening overcast is set and forced during init, so a wrong sky shows at once; the
+      re-roll loop only runs every 50–70 minutes, which is not worth waiting out in a test session.
+      What matters in the log is that `OvercastVar` and `FogArray` appear nowhere — no
+      undefined-variable error naming either. The engine syncs weather from the server by itself,
+      which is the whole reason those two globals went
 
-Parts of these need a dedicated server rather than a hosted session: one search per corpse *for the
-whole team* cannot be observed with one machine, neither can the once-by-anyone claim behind it, and
-weather reaching a machine that is not the one setting it is the same kind of claim
+Two of these need a dedicated server rather than a hosted session: one search per corpse *for the
+whole team* cannot be observed with one machine, and neither can the once-by-anyone claim behind it
 ([`docs/info/testing.md`](docs/info/testing.md#testing-join-in-progress)).
+
+**What a single run covers.** Checks 1 and 4 to 11 all fit one plain campaign, roughly in the order
+the campaign hands them over: sky at start, HQ built, strategic map opened twice, a side mission run,
+a support bought twice, a zone taken and lost, a FOB built and removed, the base redeployed, the
+killhouse boarded. Everything else needs its own run — a campaign per faction kind for check 2, a
+campaign in each of RAVAGE and WBK plus a plain one for check 9, and one of the five named factions
+for check 3. Keep the `.rpt` from every run: several of these fail as a log line rather than as
+anything visible on screen.
 
 ## Composition streaming: the prop-position fix is unverified
 
