@@ -186,6 +186,27 @@ language variant of the key. When editing a `%N`-bearing string, grep the ID for
 `format[...]` call, count the arguments, and confirm the highest `%N` matches in each
 language tag — the engine will not tell you when they diverge.
 
+## A trigger statement is a string, so anything formatted into it is a float round trip
+
+**`setTriggerStatements` takes source text, not a closure. A local captured into it has to be
+written in with `format`, and a number written into a string and parsed back is not guaranteed to
+compare equal to the one that went in.** The value still *looks* right in a log line; it fails
+only against `==`, `isEqualTo` or `in`.
+
+This mission stores zone ownership as a list of positions, and the capture path is exactly this
+shape: `fnc_createzone.sqf` formats `_zonePos` into the capture trigger's statement, so the array
+`fnc_captured` hands to `fnc_zone_control_set` — and which is then filed in
+`WARCOM_zones_controled_by_BLUFOR` — descends from text, while the zone's own code still holds the
+original. Comparing the two for equality is a coin toss on how many digits survived.
+`fnc_zone_control_set` compares X and Y rather than using `in`, which dodges the Z component but
+not this.
+
+**How to apply:** prefer `thisTrigger setVariable` over interpolation — the statement can read the
+object it is attached to, and the value never becomes text. Where a position must be matched
+against one that has been through a statement string, match it by distance (`_a distance2D _b < 1`)
+rather than equality; zones and bases are hundreds of metres apart, so a metre of tolerance cannot
+select the wrong one.
+
 ## `hint` renders beneath the open map, so map-phase prompts are invisible
 
 **A `hint` (or `hintSilent`) issued while the map is open — `forceMap true` /

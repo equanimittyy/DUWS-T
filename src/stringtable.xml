@@ -4742,6 +4742,10 @@
                 <Original>Recover the supply cache at the marked position and bring it back to HQ or a FOB.</Original>
                 <English>Recover the supply cache at the marked position and bring it back to HQ or a FOB.</English>
             </Key>
+            <Key ID="STR_DUWS_T_zone_enemy_contact">
+                <Original>All units in the AO, enemy activity spotted at Zone %1, over.</Original>
+                <English>All units in the AO, enemy activity spotted at Zone %1, over.</English>
+            </Key>
 </Container>
         <Container name="Support &amp; Radio">
             <Key ID="STR_DUWS_T_halo_ai_only">

@@ -222,6 +222,35 @@ _trg2 setTriggerStatements["this", format["['Zone %1',%2,'%3','%4',thislist] spa
 // campaign and its notification fires whoever owns the ground -- so there is no reader to keep
 // one for. The capture trigger beside it is filed, under trigger_<x>_<y>, because fnc_captured
 // and fnc_blufor_cap rewrite it on every ownership change.
+
+// Enemy contact on ground the player holds, the same report the HQ and every FOB already make.
+// Only that direction: walking into enemy ground is something the player chose and can see, so it
+// announces nothing, while a counter-attack on a zone they took is news they cannot be present for.
+// Server-local, so the dialogue is raised once no matter how the engine treats a global trigger's
+// statement -- a question fnc_captured.sqf:15 records as unproven rather than answered.
+private _trgEnemy = createTrigger ["EmptyDetector", _zonePos, false];
+_trgEnemy setTriggerArea [_size, _size, 0, false];
+_trgEnemy setTriggerActivation ["EAST", "PRESENT", true];
+// Carried on the trigger, not formatted into the statement string, so this position never becomes
+// text and back.
+_trgEnemy setVariable ["DUWS_zonePos", _zonePos];
+_trgEnemy setVariable ["DUWS_zoneNum", _zone_num];
+// Tested as BLUFOR-held rather than not-OPFOR-held, so a zone in neither list stays quiet. Matched
+// by distance because the entry on the other side did not get that protection: the capture trigger
+// formats its position into a statement string (`%5` below), so what fnc_zone_control_set files has
+// been through a float round trip and need not compare equal to the array this zone was built from.
+// Zones sit hundreds of metres apart, so a metre of tolerance cannot pick the wrong one.
+_trgEnemy setTriggerStatements [
+    "this && {private _p = thisTrigger getVariable ['DUWS_zonePos', []];
+        (WARCOM_zones_controled_by_BLUFOR findIf { (_x distance2D _p) < 1 }) >= 0}",
+    "[localize 'STR_DUWS_T_OVERLORD', format [localize 'STR_DUWS_T_zone_enemy_contact',
+        thisTrigger getVariable ['DUWS_zoneNum', 0]]] remoteExec ['fnc_duws_dialogue', 0];",
+    ""
+];
+// Same debounce as the HQ's: OPFOR crossing the boundary on patrol would otherwise re-report on
+// every pass.
+_trgEnemy setTriggerTimeout [10, 10, 10, true];
+
 _spawnPos = _zonePos;
 
 // Build-out ends here: markers, prefab, fortifications and triggers are all placed. What
