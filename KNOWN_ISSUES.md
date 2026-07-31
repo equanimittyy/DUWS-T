@@ -228,6 +228,37 @@ the platform where this fails, so it is worth running rather than assuming the s
 behaves the same way. Only if both fail is the clipboard export the sole route, which would make
 persistence on a dedicated server a manual act rather than an automatic one.
 
+## Can a dedicated server boot a campaign with nobody connected?
+
+`-autoInit` starts the mission at server boot with no player, and the unattended restart in
+[`docs/campaign_persistence_plan.md`](docs/campaign_persistence_plan.md#nobody-at-the-screen)
+assumes that path already works. Two boot steps run against an empty server and neither has been
+watched doing it. Both are minutes to check, and either one alone makes an unattended restart
+useless.
+
+**The slot sweep runs with every slot unoccupied.** `server/server_init.sqf:130-138` deletes
+`player2` through `player36` wherever `isPlayer` is false. Hosted, it fires after everyone has
+picked a slot, so it only ever removes genuinely spare ones; under `-autoInit` it fires against
+every playable slot in the mission, including the ones players are about to join into.
+`disabledAI = 1` (`src/description.ext`) may have already left it nothing to delete — that is the
+outcome to confirm rather than assume, because if the slots do go, the server comes back up after
+every restart with nobody able to join it.
+
+- [ ] Start a server with `-autoInit` and nobody connected, then join. Every slot the mission
+      ships is still selectable. A short lobby means the sweep is deleting units the engine still
+      needs, and it has to be skipped when no player is connected
+
+**Setup is owned by one slot.** `client/client_init.sqf:82` opens the faction, HQ and environment
+screens only for a player whose variable name is in `game_master`, which is `["player1"]`
+(`server/server_var_init.sqf`). Nobody else publishes `chosen_hq_placement` or
+`createzone_server`, and the server's gates on those (`server/server_init.sqf:46,52`) are retry
+loops with no fallback — so a session where that one slot stays empty waits on a screen no
+connected player will ever be shown.
+
+- [ ] Join a dedicated server as the only player, taking any slot but `player1`. A campaign that
+      never generates means a full server can be held up today by one empty slot, and that the fork
+      screen's timeout has to key on no *game master* connected rather than on no player connected
+
 ## Open defects
 
 | Defect | Where | Effect |
