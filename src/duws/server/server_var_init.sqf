@@ -127,6 +127,14 @@ zone_cp_recapture = 1/3;    // each recapture pays this share of the previous bo
 zone_ap_swing = 0.5;        // AP the taking side gains, as a share of worth; the loser sheds the same
 zone_ap_consolation = 0.5;  // OPFOR's share of that swing when BLUFOR is the one taking
 
+// What OPFOR earns per man walked off a lost position, credited only on a withdrawal that broke
+// contact -- a force wiped or run down on the way out pays nothing. Per man rather than per
+// withdrawal, so the reward tracks how much of the force actually got away and a garrison ground
+// down to two survivors is not worth the same as one that pulled out whole. This is the lever that
+// makes giving ground a decision the enemy can be good at rather than a way of tidying corpses.
+// Server-only: fnc_opfor_retreat is the sole reader and runs there.
+opfor_ap_per_withdrawn = 1;
+
 // [object, seconds] pairs awaiting pickup by the map cleanup, written through
 // fnc_duws_disposeAfter and drained every pass. Server-only: the sweep runs here and clients
 // reach it by remoteExec.

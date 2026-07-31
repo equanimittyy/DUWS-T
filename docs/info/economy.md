@@ -185,6 +185,7 @@ which inverts what the death penalty is for.
 | Passive territory hold | `server/misc/fnc_zonesundercontrol.sqf:54-56` | `zones_held × 6`, every 30 min |
 | Side-mission reward | `server/missions/fnc_mission_reward.sqf` | `reward × cp_reward_multiplier` (multiplier default 1) |
 | Town Army Power | `server/misc/fnc_zonesundercontrol.sqf:32-46` | AP, not CP: each banded town's worth of 1–3 to whichever side holds it, every 30 min |
+| OPFOR withdrawal | `server/misc/fnc_opfor_retreat.sqf` | AP to OPFOR, not CP: `opfor_ap_per_withdrawn` (1) per man walked off a lost position, and only on a withdrawal that broke contact — a force wiped or run down on the way out pays nothing |
 | Recruit rescued civilian | `server/misc/fnc_recruit_civilian_server.sqf` | +5 (+8 in WBK mode) |
 | Intel analysis (terminal) | `server/misc/fnc_intelAnalysis.sqf` | 1–2 for the two corpse-loot items, 4–6 for the four a search drops, 8 for either secret file |
 | Enemy corpse loot | `server/misc/fnc_addRandomLoot.sqf` → analysis | ~80% of enemies carry 0–2 of Money/Files/Wallet |

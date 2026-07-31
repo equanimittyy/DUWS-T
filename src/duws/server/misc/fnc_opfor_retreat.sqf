@@ -387,16 +387,25 @@ while {_outcome == ""} do {
 private _survivors = (_elements select 0) + (_elements select 1);
 switch (_outcome) do {
     case "clear": {
+        // Counted before the release, which deletes the very units being counted. Men, not groups:
+        // what the enemy gets back is manpower, and a four-man team and a full squad leaving the
+        // same position are not the same withdrawal.
+        private _walkedOff = 0;
+        { _walkedOff = _walkedOff + ([_x] call _fnc_alive) } forEach _survivors;
+
         [_survivors] call _fnc_release;
-        ["INFO", "OPFOR", format ["withdrawal from %1 broke contact; %2 group(s) despawned clear",
-            mapGridPosition _holdPos, count _survivors]] call fnc_log;
+        ["INFO", "OPFOR", format ["withdrawal from %1 broke contact; %2 group(s), %3 man/men despawned clear",
+            mapGridPosition _holdPos, count _survivors, _walkedOff]] call fnc_log;
+
+        // The one exit that hands the enemy a force back intact, so it is the one that pays. Ground
+        // given up cheaply buys OPFOR the manpower to come back with, which is what makes a
+        // withdrawal a decision rather than a tidier way of losing.
+        if (_walkedOff > 0) then {
+            ["OPF", _walkedOff * opfor_ap_per_withdrawn, "opfor_withdrawal"] call fnc_ap_adjust;
+        };
+
         // Only this outcome is announced. "shadowed" puts the force back on its feet and the player
         // is already in contact with it, and "wiped" is a fight they watched themselves win.
-        //
-        // TODO: credit OPFOR army power here, for the survivors counted above. This is the one exit
-        // that hands the enemy a force back intact, which is what makes it the site worth paying:
-        // ground given up cheaply should buy the enemy something the player can later be made to
-        // pay for. Until it lands, the card below promises manpower that no pool actually receives.
         ["info", [localize "STR_DUWS_T_OPFOR_ESCAPED_TITLE",
             format [localize "STR_DUWS_T_OPFOR_ESCAPED_MSG", _place]]]
             remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
