@@ -217,13 +217,12 @@ manually_chosen = false;publicVariable "manually_chosen";
 // Side Mission wait
 Mission_available = true;publicVariable "Mission_available";
 
-// How long a side-mission type sits on cooldown, in *in-game* hours -- see
-// shared/functions/fnc_mission_cooldown_left.sqf for why the clock is the campaign date rather
-// than a real-time one. Half an hour, which is the whole wait between side missions: the slot
-// itself frees the moment a mission ends, so this is the only thing pacing them. One rest at HQ
-// still clears the board, its skipTime being six times this.
+// How long a side-mission type sits on cooldown, in mission seconds -- see
+// shared/functions/fnc_mission_cooldown_left.sqf for which clock that is and why. Half an hour,
+// which is the whole wait between side missions: the slot itself frees the moment a mission ends,
+// so this is the only thing pacing them.
 // Broadcast because the readout and the strategic map both read it on the client.
-mission_cooldown_hours = 0.5;publicVariable "mission_cooldown_hours";
+mission_cooldown_seconds = 1800;publicVariable "mission_cooldown_seconds";
 
 // Locations for mission placement
 MissionLocations = [];publicVariable "MissionLocations";

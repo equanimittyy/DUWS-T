@@ -563,10 +563,13 @@ inside one system is worse — the rest-heal cooldown stamps `time`, so writing 
 value into it locks the action out for the remainder of the mission.
 
 There is a third clock, and a cooldown the player is meant to be able to *skip* has to be on it:
-the campaign date. Neither `time` nor `diag_tickTime` is moved by `skipTime` or scaled by
-`setTimeMultiplier`, so a cooldown on either is untouched by the rest mechanic and by however fast
-the campaign's days are running. `dateToNumber date` is the fraction of the year elapsed and does
-move with both; multiplied by 8760 it reads as hours.
+the campaign date. `skipTime` moves neither `time` nor `diag_tickTime`, so a cooldown on either is
+untouched by the rest mechanic and by a Zeus dragging the clock to midnight. `dateToNumber date` is
+the fraction of the year elapsed and does move with them; multiplied by 8760 it reads as hours.
+
+`setTimeMultiplier` splits the three differently: it scales the campaign date *and* `time`, but not
+`diag_tickTime`. That is the same split as `sleep` versus `uiSleep`, because `sleep` is built on
+mission time — which is why nothing that must hold a real-world duration can use either of them.
 
 Do not fold the year into that figure. SQF numbers are 32-bit floats, so a stamp in the millions
 has a unit of precision worth more than a short cooldown. Working within the year instead means the
@@ -574,9 +577,10 @@ stamp is stale once the in-game year rolls over — treat a deadline more than o
 ahead as expired, or the roll-over wedges the thing for the rest of the campaign.
 
 **How to apply:** pick one clock per cooldown and keep the sentinel, the stamp, and every check
-on it. Prefer the campaign date where resting or time acceleration should shorten the wait, as
-`shared/functions/fnc_mission_cooldown_left.sqf` does; `time` where a savegame must carry the
-cooldown; `diag_tickTime` only where the cooldown is meant to die with the session. The one genuine
+on it. Prefer the campaign date where resting or time acceleration should shorten the wait; `time`
+where a savegame must carry the cooldown and neither resting nor a Zeus may shorten it, as
+`shared/functions/fnc_mission_cooldown_left.sqf` does; `diag_tickTime` only where the cooldown is
+meant to die with the session. The one genuine
 anomaly worth repairing is a stamp *ahead* of its clock — clear it and let the function's own
 default apply, as the monitor in `server/server_init.sqf:434` does. A stamp far in the past is just
 an action nobody has used.

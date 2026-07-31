@@ -9,9 +9,9 @@
 params ["_missionType", "_MissionPos", "_mission_name", ["_requester", 0]];
 private _remaining = [_missionType] call fnc_mission_cooldown_left;
 if (_remaining > 0) exitWith {
-	// Floored both, and the units are in-game hours and minutes: the clock is fractional, so an
-	// unfloored remainder reaches format at full precision and the hint reads "2 h 0.000381 min".
-	private _parts = [floor _remaining, floor ((_remaining % 1) * 60)];
+	// Floored both, and the units are minutes and seconds: the clock is fractional, so an
+	// unfloored remainder reaches format at full precision and the hint reads "27 min 3.41 s".
+	private _parts = [floor (_remaining / 60), floor (_remaining % 60)];
 	// Localised on the receiving machine: the server's language is not the player's.
 	if (_requester > 0) then {
 		[_parts, {
@@ -20,12 +20,12 @@ if (_remaining > 0) exitWith {
 	} else {
 		hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _parts select 0, _parts select 1];
 	};
-	["DEBUG", "MISSION", format ["type=%1 refused, %2 in-game hours of cooldown left",
-		_missionType, (round (_remaining * 100)) / 100]] call fnc_log;
+	["DEBUG", "MISSION", format ["type=%1 refused, %2 s of cooldown left",
+		_missionType, round _remaining]] call fnc_log;
 	false
 };
 missionNamespace setVariable [format ["mission_cooldown_%1", _missionType],
-	((dateToNumber date) * 8760) + mission_cooldown_hours, true];
+	time + mission_cooldown_seconds, true];
 // Holds off the next mission until this thread finishes; each thread clears it on exit.
 Mission_available = false;
 publicVariable "Mission_available";

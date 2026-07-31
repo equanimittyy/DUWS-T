@@ -32,11 +32,11 @@ _hqBuilding addAction [
         private _version = VERSION_X;
         {
             private _type = _x;
-            // In-game hours and minutes, not real ones -- the cooldown is measured on the campaign
-            // clock so that resting at HQ moves it.
+            // Mission seconds, not campaign time: nothing that drags the clock -- resting, a Zeus
+            // jumping to night -- shortens the wait.
             private _remaining = [_type] call fnc_mission_cooldown_left;
-            private _hours = floor _remaining;
-            private _minutes = floor ((_remaining % 1) * 60);
+            private _minutes = floor (_remaining / 60);
+            private _seconds = floor (_remaining % 60);
 
             private _missionName = switch (_type) do {
                 case 0: { localize "STR_DUWS_T_c0" };
@@ -81,7 +81,7 @@ _hqBuilding addAction [
             private _line = if (_remaining <= 0) then {
                 format ["%1: %2", _missionName, localize "STR_DUWS_T_COOLDOWN_READY"]
             } else {
-                format ["%1: %2h%3min", _missionName, _hours, _minutes]
+                format ["%1: %2m%3s", _missionName, _minutes, _seconds]
             };
             _lines pushBack _line;
         } forEach _missionTypes;

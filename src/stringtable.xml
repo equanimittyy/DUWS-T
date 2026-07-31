@@ -4272,8 +4272,8 @@
             </Key>
             <Key ID="STR_DUWS_T_MISSION_COOLDOWN">
                 <Chinesesimp>这个任务正处于冷却状态，剩余时间 %1 分 %2 秒</Chinesesimp>
-                <Original>This mission is on cooldown, %1 h %2 min of campaign time remaining.</Original>
-                <English>This mission is on cooldown, %1 h %2 min of campaign time remaining.</English>
+                <Original>This mission is on cooldown, %1 min %2 s remaining.</Original>
+                <English>This mission is on cooldown, %1 min %2 s remaining.</English>
             </Key>
             <Key ID="STR_DUWS_T_q3iy1vcz">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer Pilot wurde getötet !</German>
