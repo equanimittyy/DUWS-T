@@ -17,3 +17,21 @@ if (!isServer) exitWith {};
 // unrecognised one falls back to the default rather than failing.
 [west, [_taskId], [_description, _title, _title], _destination, true, 1, true, _type, true]
 	remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, _taskId + "_new"];
+
+// The operation card rides with the broadcast rather than with the thread's entry gate. A thread
+// that opens and then fails to find ground exits before it ever creates a task, and announcing at
+// the gate named an operation the player was never given. Here the card and the task are the same
+// event, and this is the one line all seventeen threads pass through.
+// Typed rather than titleText'd, to match the card the campaign opens with. Spawned on each client
+// rather than remoteExec'd straight to BIS_fnc_typeText: it sleeps between characters, which throws
+// in the unscheduled environment remoteExec would call it in.
+// The hold is the line's own third element, not a trailing argument: BIS_fnc_typeText's second and
+// third arguments are screen coordinates, so a hold passed there types the card two screens below
+// the bottom edge and nobody sees it.
+[_title, {
+	[[[toUpper _this, "<t align='center' shadow='1' size='1'>%1</t>", 5]]] spawn BIS_fnc_typeText;
+}] remoteExec ["spawn", [0,-2] select isDedicated];
+// Under the card, and one of only two places music plays -- the other is the insertion flight.
+// Double brackets: playMusic is a unary command whose one argument is an array, so written flat
+// remoteExec hands it the string alone and it throws on the type.
+[["LeadTrack02_F", 0]] remoteExec ["playMusic", [0,-2] select isDedicated];
