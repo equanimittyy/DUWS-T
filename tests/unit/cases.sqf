@@ -327,3 +327,33 @@ private _band = ["sniper", "patrol", "patrol", "team", "wpteam", "armored", "air
     (count ([["patrol", "team"], 0.1] call fnc_zone_thin)), 1] call fnc_assertEq;
 ["zone_thin: leaves the caller's list alone",
     (count _band), 10] call fnc_assertEq;
+
+// --- fnc_zone_tier / fnc_zone_force: a zone's inherent size against its attrition ---
+// The real table, restated: the extractor pulls named functions, not the globals beside them.
+DUWS_zoneTierForce = [0.5, 0.7, 0.85, 1];
+
+// fnc_zone_tier_roll is absent here on purpose: it needs selectRandomWeighted, which sqf-vm does not
+// implement, and reshaping the roll to suit the harness would cost the mission its stated idiom.
+["zone_tier: an unrolled zone is tier IV, so nothing regresses on a save that predates tiers",
+    (["untiered"] call fnc_zone_tier), 4] call fnc_assertEq;
+
+missionNamespace setVariable ["DUWS_zoneTier_f1", 4];
+["f1", 1] call fnc_zone_strength_set;
+["zone_force: a full tier IV zone fields its whole band",
+    (["f1"] call fnc_zone_force), 1] call fnc_assertEq;
+missionNamespace setVariable ["DUWS_zoneTier_f1", 1];
+["zone_force: tier I halves it",
+    (["f1"] call fnc_zone_force), 0.5] call fnc_assertEq;
+// The two multiply rather than one overriding the other: a small zone that has also been mauled is
+// thinner than either fact alone makes it.
+["f1", 0.6] call fnc_zone_strength_set;
+["zone_force: tier and attrition compound",
+    (["f1"] call fnc_zone_force), 0.3] call fnc_assertEq;
+// Clamped, not trusted: a tier outside the table would index off the end of it and fault the spawn.
+missionNamespace setVariable ["DUWS_zoneTier_f1", 9];
+["f1", 1] call fnc_zone_strength_set;
+["zone_force: a tier above the table clamps to IV rather than faulting",
+    (["f1"] call fnc_zone_force), 1] call fnc_assertEq;
+missionNamespace setVariable ["DUWS_zoneTier_f1", 0];
+["zone_force: a tier below the table clamps to I",
+    (["f1"] call fnc_zone_force), 0.5] call fnc_assertEq;

@@ -180,6 +180,54 @@ fnc_zone_strength_refresh = {
 	} forEach zone_meta_array;
 };
 
+// How much of its radius band a zone of each tier fields, indexed tier-1. Tier IV is a zone exactly
+// as it has always shipped, and the ladder runs downward from it: nothing here can make a zone
+// heavier than the band already describes, so the top spawn band's twenty-one groups stay the
+// campaign's ceiling whatever a zone rolls.
+DUWS_zoneTierForce = [0.5, 0.7, 0.85, 1];
+
+// A zone's inherent size, rolled once when it is generated and fixed for the campaign. Distinct from
+// fnc_zone_strength, which is attrition: tier says how big this zone was ever meant to be, strength
+// says how much of it is left. Multiplying them is what fnc_zone_force does, and keeping them apart
+// is what lets the map readout show a tier I zone at a full bar -- small, but not yet fought over.
+//
+// Defaults to IV so a zone that never rolled one -- a save written before tiers existed, or any path
+// that reaches the spawn without passing through the roll -- fields what it always did rather than
+// silently coming back at half strength.
+fnc_zone_tier = {
+	params ["_zoneKey"];
+	missionNamespace getVariable [format ["DUWS_zoneTier_%1", _zoneKey], 4]
+};
+
+// Rolled once per zone and never re-rolled. fnc_createzone is re-entrant by design -- zone_meta_array
+// exists so a zone can be rebuilt through it -- and a rebuild that re-rolled would change what the
+// ground is worth behind the player's back, and disagree with the garrison peak already measured
+// against the old tier.
+//
+// Skewed to the top: most zones are the full-strength objective the campaign has always fielded, and
+// the lower tiers are the occasional soft one worth taking early. selectRandomWeighted rather than a
+// hand-rolled cumulative sum, as fnc_createzone's prefab pick and fnc_random_veh both already use.
+fnc_zone_tier_roll = {
+	params ["_zoneKey"];
+	private _var = format ["DUWS_zoneTier_%1", _zoneKey];
+	private _existing = missionNamespace getVariable [_var, 0];
+	if (_existing > 0) exitWith { _existing };
+	private _tier = selectRandomWeighted [1, 1, 2, 2, 3, 3, 4, 4];
+	missionNamespace setVariable [_var, _tier];
+	_tier
+};
+
+// What a zone actually puts on the ground: its tier against its attrition. The two spawn paths read
+// this rather than fnc_zone_strength, so a tier I zone is thinner everywhere -- band, occupied
+// buildings and tower crews alike -- instead of fielding a small patrol screen around a full one.
+// Not folded into fnc_zone_strength, which has one writer that records attrition and would otherwise
+// bake the tier in and then decay it a second time on every teardown.
+fnc_zone_force = {
+	params ["_zoneKey"];
+	private _tier = ((round ([_zoneKey] call fnc_zone_tier)) max 1) min 4;
+	(DUWS_zoneTierForce select (_tier - 1)) * ([_zoneKey] call fnc_zone_strength)
+};
+
 // Drops entries from a spawn list at random until the fraction is met, keeping at least one. Random
 // rather than off the tail: every caller's list is ordered by kind -- the tier table puts a band's
 // vehicles last, the fortification builder walks towers in the order it found them -- so trimming

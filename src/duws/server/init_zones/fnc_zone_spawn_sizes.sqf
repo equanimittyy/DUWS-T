@@ -54,10 +54,10 @@ fnc_zone_spawn = {
 
     private _spawns = _base + ([_extraSolo, _extraMulti] select (count (call BIS_fnc_listPlayers) > 2));
 
-    // The band is what the zone would field intact; it deploys at whatever its garrison was ground
-    // down to. Without this, breaking a garrison and leaving buys the player nothing -- the same
-    // fight is waiting at full strength when they come back.
-    _spawns = [_spawns, [_zoneKey] call fnc_zone_strength] call fnc_zone_thin;
+    // The band is what a tier IV zone would field intact; it deploys at its tier against whatever its
+    // garrison was ground down to. Without the attrition half, breaking a garrison and leaving buys
+    // the player nothing -- the same fight is waiting at full strength when they come back.
+    _spawns = [_spawns, [_zoneKey] call fnc_zone_force] call fnc_zone_thin;
 
     {
         private _grp = [_x, _spawnPos, _size] call DUWS_fnc_zoneSpawnOne;
@@ -101,6 +101,7 @@ fnc_zone_spawn = {
         missionNamespace setVariable [_baseVar, _baseline];
     };
     missionNamespace setVariable [format ["DUWS_zonePeak_%1", _zoneKey], _baseline];
-    ["INFO", "ZONES", format ["%1 deployed %2 men at %3 strength; garrison peak %4",
-        _zoneKey, _placed, [_zoneKey] call fnc_zone_strength, _baseline]] call fnc_log;
+    ["INFO", "ZONES", format ["%1 deployed %2 men at tier %3, %4 strength; garrison peak %5",
+        _zoneKey, _placed, [_zoneKey] call fnc_zone_tier, [_zoneKey] call fnc_zone_strength,
+        _baseline]] call fnc_log;
 };

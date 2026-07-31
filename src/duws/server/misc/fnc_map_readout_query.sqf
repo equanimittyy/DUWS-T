@@ -83,10 +83,10 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 	};
 	_seg = (_seg max 0) min 20;
 
-	// A zone garrison is tier IV by definition and is never purchased -- it is what a zone already
-	// is, and the ladder a town climbs is measured against it. A zone the player took holds no
-	// garrison at all, so it reports tier 0 rather than the IV it was fought off.
-	private _tier = [4, 0] select _held;
+	// Rolled when the zone was generated and fixed for the campaign, so this is what the ground is
+	// worth taking rather than how much of it is left -- which is what the bar under it says. A zone
+	// the player took holds no garrison at all, so it reports 0 rather than the tier it was fought off.
+	private _tier = [([_key] call fnc_zone_tier), 0] select _held;
 	["ZONE", [_name, _held, _seg, _tier]] remoteExec ["fnc_map_readout_draw", _caller];
 };
 

@@ -17,3 +17,5 @@ duws/server/misc/fnc_opforRoles.sqf::*fnc_opforRoles
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_strength
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_strength_set
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_thin
+duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_tier
+duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_force

@@ -288,6 +288,12 @@ _spawnPos = _zonePos;
 // rather than spelled out per caller, so the readers cannot drift apart.
 private _zoneKey = [_zonePos] call fnc_zone_key;
 
+// Rolled before anything spawns, because both spawn paths read it to size themselves. A rebuild
+// through this same function keeps the tier it already has -- the roll refuses to run twice.
+private _zoneTier = [_zoneKey] call fnc_zone_tier_roll;
+["INFO", "ZONES", format ["%1 is tier %2, fielding %3 of its band", _zoneKey, _zoneTier,
+	DUWS_zoneTierForce select (_zoneTier - 1)]] call fnc_log;
+
 // Build-out ends here: markers, prefab, fortifications and triggers are all placed. What
 // follows is OPFOR spawning and then a permanent despawn monitor, so this is the last point
 // at which this function can report completion -- it never returns.

@@ -566,9 +566,10 @@ archetype decides *where* the money goes, not whether there is anywhere for it t
 
 Towns gain purchasable garrisons on both sides. A zone garrison is the benchmark the ladder climbs
 toward: `server/init_zones/fnc_createopfortified.sqf` fields a multiplied fortified group with a
-squad leader, a mortar team, and up to eight buildings occupied at three units each. **Zone
-garrisons are tier IV by definition and are not purchased** — they are what a zone already is, and
-nothing about zone generation changes.
+squad leader, a mortar team, and up to eight buildings occupied at three units each. **Zones carry a
+tier of their own, rolled at generation and never purchased** — see
+[`info/zones_and_civilians.md`](info/zones_and_civilians.md#zone-tiers). A tier IV zone is that
+benchmark unchanged; the lower tiers thin it. Nothing a commander can buy raises a zone.
 
 The OPFOR side of the ladder is built: tiers 0 to IV live in `DUWS_townSpawnTiers` and the per-town
 tier in `DUWS_townGarrisonTier`, written through `fnc_town_garrison_setTier`. Full contract in
@@ -630,10 +631,14 @@ spending starts.
 
 **Garrison tier is in the click readout, not on the markers.** Nothing was added to the map itself:
 the player clicks a zone or town and the popup that already answers carries a Garrison Tier line
-above the strength bar, in roman, for both sides' ground. A zone reports IV — that is what a zone is
-— and 0 once the player holds it; a town reports what it owes, which is not always what is standing
-in it, since a town under the capture grace has a tier and no men. That is the honest answer for a
-map read before travelling: the readout describes what the player will meet, not what is loaded.
+above the strength bar, in roman, for both sides' ground. A zone reports the tier it rolled, and 0
+once the player holds it; a town reports what it owes, which is not always what is standing in it,
+since a town under the capture grace has a tier and no men. That is the honest answer for a map read
+before travelling: the readout describes what the player will meet, not what is loaded.
+
+Tier above strength is the pair the player reads together, and they are orthogonal by design: tier is
+how big this ground was ever meant to be, the bar is how much of it is left. A tier I zone at a full
+bar is small and untouched, not mauled.
 
 The lookup stays server-side because `civ_locations`, `civ_radii`, `civ_town_rep` and
 `DUWS_townGarrisonTier` are none of them broadcast, so this costs no new networked state. Reveal

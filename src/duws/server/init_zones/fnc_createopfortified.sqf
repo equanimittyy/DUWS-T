@@ -15,10 +15,10 @@ private _fnc_own = {
     _roster append (units _g);
     [_g, "garrison"] call fnc_search_flag_group;
 };
-// The zone redeploys at whatever its garrison was ground down to, and this half of it has to shrink
-// with the spawn band: at three tenths strength a zone still holding every building and every tower
-// would be no thinner where the player actually fights it.
-private _strength = [_zoneKey] call fnc_zone_strength;
+// The zone redeploys at its tier against whatever its garrison was ground down to, and this half of
+// it has to shrink with the spawn band: at three tenths a zone still holding every building and
+// every tower would be no thinner where the player actually fights it.
+private _strength = [_zoneKey] call fnc_zone_force;
 _group = [];
 // minimum positions to allow for building spawns
 _positions_needed = 5;

@@ -123,16 +123,48 @@ withdrawal is also what clears the objective: the remnant walks off the centre a
 once it has, rather than the player hunting the last four men through a composition. Latched per
 deploy cycle, since the count drops to zero as soon as they are flagged.
 
+### Zone tiers
+
+Every zone rolls a tier I to IV when it is generated, and keeps it for the campaign. **Tier is how
+big the zone was ever meant to be; strength is how much of it is left.** The two are separate numbers
+and they multiply — `fnc_zone_force` is that product, and the three places that put OPFOR on a zone
+read it rather than strength alone.
+
+| Tier | Fields | Weight |
+|---|---|---|
+| I | 0.50 of its radius band | 1 |
+| II | 0.70 | 2 |
+| III | 0.85 | 3 |
+| IV | 1.00 — the zone as the mission has always shipped it | 4 |
+
+**The roll is skewed to the top**, so most zones are the full objective and a low roll is the
+occasional soft one worth taking early. **Nothing scales a zone above its band**: tier IV is the
+ceiling, so the largest band's twenty-one groups remain what the campaign can ask a machine for.
+
+`fnc_zone_tier_roll` refuses to roll twice. `fnc_createzone` is re-entrant by design — `zone_meta_array`
+exists so a zone can be rebuilt through it — and a rebuild that re-rolled would change what the ground
+is worth behind the player's back and disagree with the garrison peak already measured against the old
+tier. A zone with no tier recorded reads as IV, so a save written before tiers existed comes back at
+the strength it had rather than silently halving.
+
+Zone tiers are not purchasable and no commander raises them, which is what separates them from a
+town's ([§Garrison tiers 0 to IV](#garrison-tiers-0-to-iv)): a town's tier is bought and can change
+mid-campaign, a zone's is the ground's fixed character.
+
 ### Attrition carries between visits
 
 A zone remembers what was left of its garrison when it streamed out. `fnc_spawnWait` calls
 `fnc_zone_strength_record` on the despawn exit — before the peak is cleared and before the sweep
 deletes the survivors it counts — and that stores `survivors / original` in tenths, rounded up and
-floored at `0.3`. Everything the zone raises on its next arrival scales by that fraction: the tier
-band drops tokens at random (`fnc_zone_spawn_sizes.sqf`), the fortification builder thins its
-defence section and holds fewer buildings and fewer towers (`fnc_createopfortified.sqf`), and fewer
-of the composition's statics are re-crewed (`fnc_spawnWait.sqf`). The mortar pair is the one
+floored at `0.3`. Everything the zone raises on its next arrival scales by that fraction *times its
+tier*: the radius band drops tokens at random (`fnc_zone_spawn_sizes.sqf`), the fortification builder
+thins its defence section and holds fewer buildings and fewer towers (`fnc_createopfortified.sqf`),
+and fewer of the composition's statics are re-crewed (`fnc_spawnWait.sqf`). The mortar pair is the one
 exception — two men, and the zone's only indirect fire, so a fraction of it is none of it.
+
+Tier is deliberately kept out of `fnc_zone_strength`, which has a single writer that records attrition
+and would otherwise bake the tier in and decay it a second time on every teardown. It is also why the
+readout can show a tier I zone at a full bar: small, but not yet fought over.
 
 **The peak is anchored, not re-based.** `DUWS_zoneBase_<key>` is the men the zone's first completed
 cycle placed, and every later cycle publishes that same figure as `DUWS_zonePeak_<key>`. A garrison
@@ -151,8 +183,9 @@ the only writer, so a mechanic that lets OPFOR rebuild a mauled zone has one pla
 **Where the player reads it.** The request menu's View Map mode answers zones as well as towns. A click
 goes to `fnc_map_readout_query` on the server, which picks whichever revealed zone or town disc the
 click landed in with the **nearest centre** — zone circles and town discs overlap by design, so the
-tie has to break on something — and `fnc_map_readout_draw` draws the answer. A zone prints its garrison
-as twenty segments, green for what is left and grey for what is gone. A streamed-in zone counts live
+tie has to break on something — and `fnc_map_readout_draw` draws the answer. A zone prints its tier in
+roman above its garrison bar, and the bar as twenty segments, green for what is left and grey for what
+is gone. A streamed-in zone counts live
 men against its baseline and gets all twenty, so a couple of kills move the bar; a stowed one reports
 the strength it will redeploy at, quantised to the tenths that strength is stored in and doubled, so
 it steps two segments at a time and cannot disagree with what arrives. A zone the player holds prints

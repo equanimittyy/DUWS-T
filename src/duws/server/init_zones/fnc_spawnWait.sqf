@@ -50,9 +50,10 @@ private _manStatics = {
 
 	private _guns = _statics select {count crew _x == 0};
 	if (count _guns == 0) exitWith {};
-	// Manned to the garrison's strength, like everything else this zone raises: a weakened zone
-	// gets fewer emplacements manned, not weaker ones.
-	_guns = [_guns, [_key] call fnc_zone_strength] call fnc_zone_thin;
+	// Manned to the garrison's force, like everything else this zone raises: a small or weakened zone
+	// gets fewer emplacements manned, not weaker ones. The prefab builds the same guns whatever the
+	// zone rolled -- tier decides how many of them have somebody behind them.
+	_guns = [_guns, [_key] call fnc_zone_force] call fnc_zone_thin;
 	private _types = _guns apply {opfor_SOLDIER_X};
 	private _spawn = _pos findEmptyPosition [0, 30, opfor_SOLDIER_X];
 	if (count _spawn == 0) then { _spawn = _pos };
