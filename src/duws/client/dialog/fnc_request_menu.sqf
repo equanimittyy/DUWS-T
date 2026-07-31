@@ -7,8 +7,8 @@
     no supports at all.
 
     _this is the addAction argument array -- [target, caller, id, args] -- where args is [true]
-    at a FOB. The target is the base the menu was opened on, which the BASE list needs: rest
-    treats who is standing near it, and a redeploy rebuilds that base's garrison.
+    at a FOB. The target is the base the menu was opened on, which the command column needs: a
+    redeploy rebuilds that base's garrison.
 */
 if (!hasInterface) exitWith {};
 
@@ -70,28 +70,19 @@ if (_isFob) then { _vehicles = _vehicles select [0, 10] };
 } forEach _vehicles;
 lbSetCurSel [2102, 0];
 
-[_site, _isFob] call fnc_base_menu_fill;
+[_display, _site, _isFob] call fnc_command_fill;
 
-// A FOB buys no supports, so that half would be an empty box over a button that does nothing.
-// The BASE list takes the width instead, measured off the hidden controls rather than restated
-// as numbers, so a layout edit in request_menu.hpp carries through here.
-if (_isFob) then {
-    {
-        _x params ["_hiddenIdc", "_wideIdc"];
-        private _hidden = _display displayCtrl _hiddenIdc;
-        private _ctrl = _display displayCtrl _wideIdc;
-        private _pos = ctrlPosition _ctrl;
-        _ctrl ctrlSetPosition [
-            (ctrlPosition _hidden) select 0,
-            _pos select 1,
-            (_pos select 0) + (_pos select 2) - ((ctrlPosition _hidden) select 0),
-            _pos select 3
-        ];
-        _ctrl ctrlCommit 0;
-        _hidden ctrlShow false;
-    } forEach [[1804, 1808], [2103, 2104], [1603, 1606]];
+// The readout is the Game Master's, which is the only slot it was ever offered to. Hidden rather
+// than absent, because the MISSIONS box is a fixed layout: there is nothing below it to slide up.
+if ((vehiclevarname player) != "player1") then {
+    (_display displayCtrl 1607) ctrlShow false;
 };
 
-if (_isFob) exitWith {};
+// A FOB buys no supports, so the whole strip goes rather than standing as an empty box over a
+// button that does nothing. The main window keeps its size: it is the window, and the strip is
+// appended to it.
+if (_isFob) exitWith {
+    { (_display displayCtrl _x) ctrlShow false } forEach [1804, 2103, 1603];
+};
 
 [] call fnc_support_list_fill;

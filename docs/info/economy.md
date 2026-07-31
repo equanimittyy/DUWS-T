@@ -98,7 +98,7 @@ inside `fnc_pool_try_spend`, so the base price the caller passed is not what lef
 
 Three client-side comparisons survive as *advisory* pre-filters, and are commented as such:
 `client/supports/fnc_mapclickarty.sqf`, `client/supports/fnc_mapclickuav.sqf`,
-the redeploy row in `client/dialog/fnc_base_menu_fill.sqf`, plus the opening check in
+the redeploy button in `client/dialog/fnc_command_fill.sqf`, plus the opening check in
 `client/supports/fnc_request_fob.sqf`.
 Each spares the player a wait — a 45 s map-click window, a 10 s site survey — that they provably cannot
 pay for. None of them decides anything; the charge happens later, on the server, against a balance the

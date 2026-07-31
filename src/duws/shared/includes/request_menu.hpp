@@ -1,10 +1,14 @@
-// The request menu, shared by the HQ and every FOB. fnc_request_menu fills it and hides the
-// supports half at a FOB, where supports cannot be bought -- the FOB used to have a dialog of
+// The request dialog, shared by the HQ and every FOB. fnc_request_menu fills it and hides the
+// SUPPORTS strip at a FOB, where supports cannot be bought -- the FOB used to have a dialog of
 // its own that was this one with three listbox IDCs renamed and a dead supports box.
 //
-// Laid out on the 40x25 GUI grid, near full screen: the supports list holds two dozen rows and
-// the base list a dozen, and both were previously 2.5 grid cells tall -- three visible rows,
-// scrolled blind.
+// Laid out on the 40x25 GUI grid as a main window with a strip appended to its right. The main
+// window holds two boxes, MISSIONS over COMMAND AND CONTROL, and the exit sits inside it rather
+// than under the strip. The strip is the whole supports catalogue, which runs to two dozen rows
+// and needs the full height to be readable rather than scrolled blind.
+//
+// Every button in here is 1.5 grid cells tall. Sizes used to run 1 or 1.5 depending on which pass
+// added the control, which read as two classes of button where there is only one.
 class ressourceheader
 {
     idd = -1;
@@ -28,19 +32,28 @@ class ressourceheader
             text = "$STR_DUWS_T_ii4q52bc";
             x = 0 * GUI_GRID_W + GUI_GRID_X;
             y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 40 * GUI_GRID_W;
+            w = 26.5 * GUI_GRID_W;
             h = 22 * GUI_GRID_H;
             colorBackground[] = {0,0,0,0.5};
         };
 
-        // --- Header: the three pools the rest of the menu spends, plus the map ---
+        // --- MISSIONS: the three pools, what converts between them, and where work comes from ---
+        class missionsframe: RscFrame
+        {
+            idc = 1808;
+            text = "$STR_DUWS_T_REQ_MISSIONS";
+            x = 0.5 * GUI_GRID_W + GUI_GRID_X;
+            y = 2.5 * GUI_GRID_H + GUI_GRID_Y;
+            w = 25.5 * GUI_GRID_W;
+            h = 5.3 * GUI_GRID_H;
+        };
         class RscFrame_1805: RscFrame
         {
             idc = 1805;
             text = "$STR_DUWS_T_rqfuzzt0";
-            x = 0.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 2.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 9 * GUI_GRID_W;
+            x = 1 * GUI_GRID_W + GUI_GRID_X;
+            y = 3.3 * GUI_GRID_H + GUI_GRID_Y;
+            w = 5.8 * GUI_GRID_W;
             h = 2 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_zsv1b4zp";
         };
@@ -48,39 +61,19 @@ class ressourceheader
         {
             idc = 1000;
             text = "CP: XXX";
-            x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 3 * GUI_GRID_H + GUI_GRID_Y;
-            w = 8 * GUI_GRID_W;
-            h = 1.5 * GUI_GRID_H;
-            colorText[] = {1,1,1,1};
-        };
-        class RscFrame_1806: RscFrame
-        {
-            idc = 1806;
-            text = "$STR_DUWS_T_dvt8byhj";
-            x = 10 * GUI_GRID_W + GUI_GRID_X;
-            y = 2.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 9 * GUI_GRID_W;
-            h = 2 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_8ibx2y3c";
-        };
-        class RscText_1001: RscText
-        {
-            idc = 1001;
-            text = "ZUC:XXX";
-            x = 10.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 3 * GUI_GRID_H + GUI_GRID_Y;
-            w = 8 * GUI_GRID_W;
-            h = 1.5 * GUI_GRID_H;
+            x = 1.4 * GUI_GRID_W + GUI_GRID_X;
+            y = 3.75 * GUI_GRID_H + GUI_GRID_Y;
+            w = 5 * GUI_GRID_W;
+            h = 1.1 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
         };
         class ap_mainframe: RscFrame
         {
             idc = 1807;
             text = "$STR_DUWS_T_01aj6v4j";
-            x = 19.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 2.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 9 * GUI_GRID_W;
+            x = 7.1 * GUI_GRID_W + GUI_GRID_X;
+            y = 3.3 * GUI_GRID_H + GUI_GRID_Y;
+            w = 5.8 * GUI_GRID_W;
             h = 2 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_23shv5yr";
         };
@@ -88,52 +81,108 @@ class ressourceheader
         {
             idc = 1002;
             text = "000";
-            x = 20 * GUI_GRID_W + GUI_GRID_X;
-            y = 3 * GUI_GRID_H + GUI_GRID_Y;
-            w = 8 * GUI_GRID_W;
-            h = 1.5 * GUI_GRID_H;
+            x = 7.5 * GUI_GRID_W + GUI_GRID_X;
+            y = 3.75 * GUI_GRID_H + GUI_GRID_Y;
+            w = 5 * GUI_GRID_W;
+            h = 1.1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_23shv5yr";
             colorText[] = {1,1,1,1};
         };
-        class RscButton_1605: RscButton
+        class RscFrame_1806: RscFrame
+        {
+            idc = 1806;
+            text = "$STR_DUWS_T_dvt8byhj";
+            x = 13.2 * GUI_GRID_W + GUI_GRID_X;
+            y = 3.3 * GUI_GRID_H + GUI_GRID_Y;
+            w = 5.8 * GUI_GRID_W;
+            h = 2 * GUI_GRID_H;
+            tooltip = "$STR_DUWS_T_8ibx2y3c";
+        };
+        class RscText_1001: RscText
+        {
+            idc = 1001;
+            text = "ZUC:XXX";
+            x = 13.6 * GUI_GRID_W + GUI_GRID_X;
+            y = 3.75 * GUI_GRID_H + GUI_GRID_Y;
+            w = 5 * GUI_GRID_W;
+            h = 1.1 * GUI_GRID_H;
+            colorText[] = {1,1,1,1};
+        };
+        class convertCPbutton: RscButton
+        {
+            idc = 1627;
+            text = "$STR_DUWS_T_f62mxt4i";
+            x = 19.3 * GUI_GRID_W + GUI_GRID_X;
+            y = 3.55 * GUI_GRID_H + GUI_GRID_Y;
+            w = 5.8 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
+            action = "[] spawn fnc_convertAPtoCP";
+            tooltip = "$STR_DUWS_T_a72vvbgp";
+        };
+        class sidemissionbutton: RscButton
         {
             idc = 1605;
             text = "$STR_DUWS_T_rplkhwfu";
-            x = 29 * GUI_GRID_W + GUI_GRID_X;
-            y = 3 * GUI_GRID_H + GUI_GRID_Y;
-            w = 10.5 * GUI_GRID_W;
+            x = 1 * GUI_GRID_W + GUI_GRID_X;
+            y = 5.8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 5.8 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_stratmap; closeDialog 0";
             tooltip = "$STR_DUWS_T_k9t3ub5d";
         };
+        // Hidden for anyone but the Game Master slot, which is the only one the readout was ever
+        // offered to. fnc_request_menu owns that test; the control exists unconditionally.
+        class missiontimersbutton: RscButton
+        {
+            idc = 1607;
+            text = "$STR_DUWS_T_SHOW_MISSION_COOLDOWNS";
+            x = 7.1 * GUI_GRID_W + GUI_GRID_X;
+            y = 5.8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 5.8 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
+            action = "closeDialog 0; [] spawn fnc_mission_cooldowns_show";
+            tooltip = "$STR_DUWS_T_SHOW_MISSION_COOLDOWNS";
+        };
 
-        // --- What command sends: one column per kind, each a picker over its button ---
+        // --- COMMAND AND CONTROL: what command sends on the left, what it administers on the right
+        // Right-column buttons carry no action of their own. They are slots: fnc_command_fill
+        // decides which entries apply, writes them into the slots from the top down and hides the
+        // rest, so a row that cannot apply leaves no gap rather than a greyed button.
+        class commandframe: RscFrame
+        {
+            idc = 1809;
+            text = "$STR_DUWS_T_REQ_COMMAND";
+            x = 0.5 * GUI_GRID_W + GUI_GRID_X;
+            y = 8.1 * GUI_GRID_H + GUI_GRID_Y;
+            w = 25.5 * GUI_GRID_W;
+            h = 13.4 * GUI_GRID_H;
+        };
         class requestunitframe: RscFrame
         {
             idc = 1801;
             text = "$STR_DUWS_T_m8wc394w";
-            x = 0.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 5.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 12.5 * GUI_GRID_W;
-            h = 4.5 * GUI_GRID_H;
+            x = 1 * GUI_GRID_W + GUI_GRID_X;
+            y = 9 * GUI_GRID_H + GUI_GRID_Y;
+            w = 11.5 * GUI_GRID_W;
+            h = 3.9 * GUI_GRID_H;
         };
         class unitlistbox: RscCombo
         {
             idc = 2100;
-            x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 7 * GUI_GRID_H + GUI_GRID_Y;
-            w = 11.5 * GUI_GRID_W;
-            h = 1 * GUI_GRID_H;
+            x = 1.4 * GUI_GRID_W + GUI_GRID_X;
+            y = 10 * GUI_GRID_H + GUI_GRID_Y;
+            w = 10.7 * GUI_GRID_W;
+            h = 1.2 * GUI_GRID_H;
             sizeEx = 0.025;
         };
         class requestunitsbutton: RscButton
         {
             idc = 1600;
             text = "$STR_DUWS_T_wulhhx81";
-            x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 8.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 11.5 * GUI_GRID_W;
-            h = 1 * GUI_GRID_H;
+            x = 1.4 * GUI_GRID_W + GUI_GRID_X;
+            y = 11.3 * GUI_GRID_H + GUI_GRID_Y;
+            w = 10.7 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_request_unit";
             tooltip = "$STR_DUWS_T_1tik0eaw";
         };
@@ -141,29 +190,29 @@ class ressourceheader
         {
             idc = 1802;
             text = "$STR_DUWS_T_kyrhidgf";
-            x = 13.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 5.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 12.5 * GUI_GRID_W;
-            h = 4.5 * GUI_GRID_H;
+            x = 1 * GUI_GRID_W + GUI_GRID_X;
+            y = 13.2 * GUI_GRID_H + GUI_GRID_Y;
+            w = 11.5 * GUI_GRID_W;
+            h = 3.9 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_3fvc6hv1";
         };
         class squadlist: RscCombo
         {
             idc = 2101;
-            x = 14 * GUI_GRID_W + GUI_GRID_X;
-            y = 7 * GUI_GRID_H + GUI_GRID_Y;
-            w = 11.5 * GUI_GRID_W;
-            h = 1 * GUI_GRID_H;
+            x = 1.4 * GUI_GRID_W + GUI_GRID_X;
+            y = 14.2 * GUI_GRID_H + GUI_GRID_Y;
+            w = 10.7 * GUI_GRID_W;
+            h = 1.2 * GUI_GRID_H;
             sizeEx = 0.025;
         };
         class requestsquadbutton: RscButton
         {
             idc = 1601;
             text = "$STR_DUWS_T_wulhhx81";
-            x = 14 * GUI_GRID_W + GUI_GRID_X;
-            y = 8.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 11.5 * GUI_GRID_W;
-            h = 1 * GUI_GRID_H;
+            x = 1.4 * GUI_GRID_W + GUI_GRID_X;
+            y = 15.5 * GUI_GRID_H + GUI_GRID_Y;
+            w = 10.7 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_request_squad";
             tooltip = "$STR_DUWS_T_3fvc6hv1";
         };
@@ -171,49 +220,109 @@ class ressourceheader
         {
             idc = 1803;
             text = "$STR_DUWS_T_uskdohql";
-            x = 26.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 5.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 12.5 * GUI_GRID_W;
-            h = 4.5 * GUI_GRID_H;
+            x = 1 * GUI_GRID_W + GUI_GRID_X;
+            y = 17.4 * GUI_GRID_H + GUI_GRID_Y;
+            w = 11.5 * GUI_GRID_W;
+            h = 3.9 * GUI_GRID_H;
         };
         class emptyvehiclelist: RscCombo
         {
             idc = 2102;
-            x = 27 * GUI_GRID_W + GUI_GRID_X;
-            y = 7 * GUI_GRID_H + GUI_GRID_Y;
-            w = 11.5 * GUI_GRID_W;
-            h = 1 * GUI_GRID_H;
+            x = 1.4 * GUI_GRID_W + GUI_GRID_X;
+            y = 18.4 * GUI_GRID_H + GUI_GRID_Y;
+            w = 10.7 * GUI_GRID_W;
+            h = 1.2 * GUI_GRID_H;
             sizeEx = 0.025;
         };
         class requestvehiclebutton: RscButton
         {
             idc = 1602;
             text = "$STR_DUWS_T_wulhhx81";
-            x = 27 * GUI_GRID_W + GUI_GRID_X;
-            y = 8.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 11.5 * GUI_GRID_W;
-            h = 1 * GUI_GRID_H;
+            x = 1.4 * GUI_GRID_W + GUI_GRID_X;
+            y = 19.7 * GUI_GRID_H + GUI_GRID_Y;
+            w = 10.7 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_hf8ph7ss";
             action = "[] spawn fnc_request_vehicle";
         };
 
-        // --- The two lists: what can be unlocked, and what the base itself does ---
+        class commandslot0: RscButton
+        {
+            idc = 1610;
+            text = "";
+            x = 13.5 * GUI_GRID_W + GUI_GRID_X;
+            y = 9 * GUI_GRID_H + GUI_GRID_Y;
+            w = 11.5 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
+            action = "[0] spawn fnc_command_select";
+        };
+        class commandslot1: commandslot0
+        {
+            idc = 1611;
+            y = 10.8 * GUI_GRID_H + GUI_GRID_Y;
+            action = "[1] spawn fnc_command_select";
+        };
+        class commandslot2: commandslot0
+        {
+            idc = 1612;
+            y = 12.6 * GUI_GRID_H + GUI_GRID_Y;
+            action = "[2] spawn fnc_command_select";
+        };
+        class commandslot3: commandslot0
+        {
+            idc = 1613;
+            y = 14.4 * GUI_GRID_H + GUI_GRID_Y;
+            action = "[3] spawn fnc_command_select";
+        };
+        class commandslot4: commandslot0
+        {
+            idc = 1614;
+            y = 16.2 * GUI_GRID_H + GUI_GRID_Y;
+            action = "[4] spawn fnc_command_select";
+        };
+        class commandslot5: commandslot0
+        {
+            idc = 1615;
+            y = 18 * GUI_GRID_H + GUI_GRID_Y;
+            action = "[5] spawn fnc_command_select";
+        };
+        class commandslot6: commandslot0
+        {
+            idc = 1616;
+            y = 19.8 * GUI_GRID_H + GUI_GRID_Y;
+            action = "[6] spawn fnc_command_select";
+        };
+
+        // Inside the main window, not under the strip: the strip is appended to the interface and
+        // owns none of the window's chrome.
+        class exitbutton: RscButton
+        {
+            idc = 1604;
+            text = "EXIT";
+            x = 19.3 * GUI_GRID_W + GUI_GRID_X;
+            y = 21.8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 5.8 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
+            action = "closeDialog 0";
+        };
+
+        // --- SUPPORTS: the catalogue, appended down the right-hand side ---
         class supportunlockframe: RscFrame
         {
             idc = 1804;
             text = "$STR_DUWS_T_x0l67g37";
-            x = 0.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 10.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 19 * GUI_GRID_W;
-            h = 10 * GUI_GRID_H;
+            x = 27 * GUI_GRID_W + GUI_GRID_X;
+            y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
+            w = 12.5 * GUI_GRID_W;
+            h = 22 * GUI_GRID_H;
         };
         class supportunlocklist: RscListBox
         {
             idc = 2103;
-            x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 11.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 18 * GUI_GRID_W;
-            h = 7.5 * GUI_GRID_H;
+            x = 27.4 * GUI_GRID_W + GUI_GRID_X;
+            y = 2.5 * GUI_GRID_H + GUI_GRID_Y;
+            w = 11.7 * GUI_GRID_W;
+            h = 18.5 * GUI_GRID_H;
             sizeEx = 0.025;
             // The button below both buys and refunds, so its label follows the selection.
             onLBSelChanged = "_this call fnc_support_sel_changed";
@@ -222,76 +331,12 @@ class ressourceheader
         {
             idc = 1603;
             text = "$STR_DUWS_T_bp73qs16";
-            x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 19.3 * GUI_GRID_H + GUI_GRID_Y;
-            w = 18 * GUI_GRID_W;
-            h = 1 * GUI_GRID_H;
+            x = 27.4 * GUI_GRID_W + GUI_GRID_X;
+            y = 21.3 * GUI_GRID_H + GUI_GRID_Y;
+            w = 11.7 * GUI_GRID_W;
+            h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_request_support";
             tooltip = "$STR_DUWS_T_dsl9rr00";
-        };
-        class basemenuframe: RscFrame
-        {
-            idc = 1808;
-            text = "$STR_DUWS_T_BASE_MENU_TITLE";
-            x = 20 * GUI_GRID_W + GUI_GRID_X;
-            y = 10.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 19 * GUI_GRID_W;
-            h = 10 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_BASE_MENU_TOOLTIP";
-        };
-        class basemenulist: RscListBox
-        {
-            idc = 2104;
-            x = 20.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 11.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 18 * GUI_GRID_W;
-            h = 7.5 * GUI_GRID_H;
-            sizeEx = 0.025;
-        };
-        class basemenubutton: RscButton
-        {
-            idc = 1606;
-            text = "$STR_DUWS_T_MENU_SELECT";
-            x = 20.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 19.3 * GUI_GRID_H + GUI_GRID_Y;
-            w = 18 * GUI_GRID_W;
-            h = 1 * GUI_GRID_H;
-            action = "[] spawn fnc_base_menu_select";
-            tooltip = "$STR_DUWS_T_BASE_MENU_TOOLTIP";
-        };
-
-        // --- The two economy actions, then out ---
-        class convertCPbutton: RscButton
-        {
-            idc = 1627;
-            text = "$STR_DUWS_T_f62mxt4i";
-            x = 0.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 21 * GUI_GRID_H + GUI_GRID_Y;
-            w = 12.5 * GUI_GRID_W;
-            h = 1 * GUI_GRID_H;
-            action = "[] spawn fnc_convertAPtoCP";
-            tooltip = "$STR_DUWS_T_a72vvbgp";
-        };
-        class recruit_operative_button: RscButton
-        {
-            idc = 1347;
-            text = "$STR_DUWS_T_0dlbonpc";
-            x = 13.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 21 * GUI_GRID_H + GUI_GRID_Y;
-            w = 12.5 * GUI_GRID_W;
-            h = 1 * GUI_GRID_H;
-            action = "[] spawn fnc_operator_open";
-            tooltip = "$STR_DUWS_T_a2si05g7";
-        };
-        class exitbutton: RscButton
-        {
-            idc = 1604;
-            text = "EXIT";
-            x = 26.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 21 * GUI_GRID_H + GUI_GRID_Y;
-            w = 12.5 * GUI_GRID_W;
-            h = 1 * GUI_GRID_H;
-            action = "closeDialog 0";
         };
     };
 };

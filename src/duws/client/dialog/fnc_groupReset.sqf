@@ -1,4 +1,4 @@
-// Locality: client -- a BASE row body in the request menu, so it runs on whoever resets their group.
+// Locality: client -- a scroll-action body on the HQ medical tent, so it runs on whoever resets their group.
 _grp = group player;
 [player] join grpNull;
 _ld = leader _grp;

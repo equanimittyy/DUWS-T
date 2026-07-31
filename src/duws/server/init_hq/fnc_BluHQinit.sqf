@@ -442,7 +442,10 @@ if (!isNull _supplyCrate) then {
 };
 
 if (!isNull _medTent) then {
-    [_medTent, [ACT_AID("STR_DUWS_T_xfgokhbc"), { [] spawn fnc_AI_rearm; }, [], 60, false, true, "", "_this distance _target < 12"]] remoteExec ["addAction", [0,-2] select isDedicated, _medTent];
+    // Broadcast to everyone rather than to interfaced machines alone, and keyed, because the
+    // adder now decides per player which of its three entries apply -- a joiner has to run it for
+    // themselves rather than inherit the host's answer.
+    [_medTent] remoteExec ["fnc_medtent_actions", 0, format ["hq_medtent_%1", netId _medTent]];
 };
 
 if (!isNull _mapBoard) then {

@@ -75,13 +75,17 @@ Black Market, Vehicle Recycling, Vehicle Customization, Killhouse Controls, Quic
 menu each occupy one scroll row and expand into a list. Rows in that listbox are *not* action-menu
 entries and are excluded from the inventory below.
 
-The request menu's BASE list is the same idea one level up: everything a player has to ask command
-for is a row in the dialog Requests already opens, so the HQ structure carries one scroll entry
-instead of the twelve it once did. The dividing line is **who needs it and how fast** — an arsenal,
-a HALO jump, quick kits, an AI rearm, the killhouse teleports and the black market stay on the
-scroll wheel and on the prop they belong to, because a player reaches for those without asking
-anyone. Squad and FOB management, mission control, the rest, the cooldown readout and the redeploy
-are rows, built by `fnc_base_menu_fill`.
+The request menu's COMMAND AND CONTROL column is the same idea one level up: everything a player has
+to ask command for is a button in the dialog Requests already opens, so the HQ structure carries one
+scroll entry instead of the twelve it once did. The dividing line is **who needs it and how fast** —
+an arsenal, a HALO jump, quick kits, an AI rearm, the killhouse teleports and the black market stay
+on the scroll wheel and on the prop they belong to, because a player reaches for those without asking
+anyone. Squad and FOB management, the redeploy, operative recruitment, the two hires and intel
+analysis are buttons, built by `fnc_command_fill`.
+
+Rest and the squad-leader reset went the other way and are scroll entries again, on the HQ medical
+tent (`fnc_medtent_actions`) and on the FOB object. Both are things a player walks somewhere to do
+rather than things they ask command for, and resting treats who is standing at that site.
 
 ## Buckets
 
@@ -118,12 +122,10 @@ costs more than a buried entry does.
 unescaped ampersand ends the structured-text parse and swallows the rest of the entry. Use `/` or a
 different word — `Rest / Heal`, `Mission Control`.
 
-**Each bucket has a row form for the BASE list.** An entry that moved off the scroll wheel keeps its
-bucket meaning, so `ACT_ROW_*` in the same header carries the identical colour as an `[r,g,b,a]`
-float array — a listbox renders `<t>` markup literally, so the tags cannot travel with it. The four
-blues collapse to one `ACT_ROW_AMBIENT`, since only the scroll priority they keyed ever separated
-them, and the BASE list orders itself by bucket the way the scroll list orders itself by priority —
-command first, the spend last.
+**The buckets stop at the scroll wheel.** They once had `ACT_ROW_*` twins for the BASE listbox, which
+died with it: a button is already legible as a button, and the five row hues only ever re-encoded a
+scroll priority that a fixed column has no use for. The command column still orders itself the way
+the scroll list does — management first, the spend last.
 
 ## Inventory
 
@@ -136,9 +138,9 @@ and colour follow the bucket, so neither is repeated per row.
 | --- | --- | --- |
 | Requests | `STR_DUWS_T_vw32hahc` | HQ building, FOB |
 
-Squad Manager (`STR_DUWS_T_l0xark5g`) and FOB Manager (`STR_DUWS_T_iggpsdqo`) are BASE rows inside
-it, and keep the bucket's capitals: the case is a property of the bucket, not of the string, so the
-row applies `toUpper` where the scroll macro used to.
+Squad Manager (`STR_DUWS_T_l0xark5g`) and FOB Manager (`STR_DUWS_T_iggpsdqo`) are the first two
+buttons of the command column inside it. They print as written rather than uppercased: capitals were
+a property of the scroll bucket, and a button carries no bucket.
 
 ### Secondary menu
 
@@ -155,10 +157,10 @@ killhouse teleports attached to the same board. Travel between bases belongs to 
 board's own base fast travel is gone, having only ever moved the player within 200 m of an HQ they
 were standing at.
 
-Mission Control (`STR_DUWS_T_INTELRECRUIT_TITLE`, 3 rows) became a BASE row: every row of it spends
-CP, which is command's business. The black market stayed on the scroll wheel, because it spends the
-coins a player takes off civilians instead — nobody has to ask for that. Both hung off the HQ
-structure rather than a terminal of their own, so the one that stayed is added by
+Mission Control is gone as a menu: its three entries spend CP, which is command's business, so each
+became a button of its own in the command column. The black market stayed on the scroll wheel,
+because it spends the coins a player takes off civilians instead — nobody has to ask for that. Both
+hung off the HQ structure rather than a terminal of their own, so the one that stayed is added by
 `fnc_addHQBuildingActions` alongside Requests, in the single broadcast that object gets.
 
 ### Equip
@@ -189,16 +191,17 @@ request are independently translatable but present the same choice.
 | Entry | Key | Attached by |
 | --- | --- | --- |
 | AI Heal / Rearm | `STR_DUWS_T_xfgokhbc` | Medical tent, FOB, MHQ ammobox, airdropped ammobox |
+| Rest / Heal | `STR_DUWS_T_9eiwr3bt` | Medical tent, FOB — `game_master` only |
 
-Rest / Heal (`STR_DUWS_T_9eiwr3bt`, `game_master` only) is a BASE row now, and there is one of it.
-It had been two entries sharing one 600 s cooldown through `GM_Heal_LastUsedTime` but testing it in
-different places — the satellite copy deferred to `fnc_restHealServer`, where one machine decides,
-while the FOB copy checked and stamped in its own client callback and then `publicVariable`d the
-result, so two players triggering it inside one propagation window both passed. The row takes the
-server-checked path.
+Rest / Heal is two entries again, one per base kind, but both now take the server-checked path.
+They had shared one 600 s cooldown through `GM_Heal_LastUsedTime` while testing it in different
+places — the HQ copy deferred to `fnc_restHealServer`, where one machine decides, while the FOB copy
+checked and stamped in its own client callback and then `publicVariable`d the result, so two players
+triggering it inside one propagation window both passed.
 
-Which base the row rests is the object the menu was opened on: `fnc_rest_heal` treats only what
-stands within 100 m of it, so a rest called at a FOB cannot patch up a fight at the HQ.
+Which base is rested is the object the entry sits on: `fnc_rest_heal` treats only what stands within
+100 m of it, so a rest called at a FOB cannot patch up a fight at the HQ. That is also why it is on
+the medical tent rather than on the HQ structure — the tent is where the wounded are.
 
 ### Civilian interaction
 
@@ -228,9 +231,12 @@ not a local you can question, so no civilian ever carries both sets.
 | Earplugs | `STR_DUWS_T_2rc0nvug` | `player` |
 | Debug | `STR_DUWS_T_DEBUG_ACTION` | `player` — needs the `DUWS_Debug` parameter and `game_master` |
 
-Both hang off the player, so they follow whoever opened them anywhere on the map; that is why they
-stayed while Reset Squad Leader (`STR_DUWS_T_4jabuvz6`) and Mission Cooldowns
-(`STR_DUWS_T_SHOW_MISSION_COOLDOWNS`) became BASE rows, since neither means anything away from a base.
+| Reset Squad Leader | `STR_DUWS_T_4jabuvz6` | HQ medical tent — `Squad_Leaders` only |
+
+The first two hang off the player, so they follow whoever opened them anywhere on the map. Reset
+Squad Leader and Mission Timers (`STR_DUWS_T_SHOW_MISSION_COOLDOWNS`) mean nothing away from a base,
+so neither follows the player: the reset is on the tent and the timers are a button in the MISSIONS
+box, Game Master only.
 
 ### Commit
 
@@ -243,11 +249,13 @@ stayed while Reset Squad Leader (`STR_DUWS_T_4jabuvz6`) and Mission Cooldowns
 Release sits beside Deploy rather than beside Undeploy, so it is reachable exactly while the vehicle
 is packed up and never while it is a working base. Undeploying is how the MHQ moves and is the common
 action; releasing ends the designation and frees the one-at-a-time slot, which is rare and worth the
-second click. Build Mobile HQ itself is never consumed — every player keeps the entry, so all three
-of its refusals leave them something to act on.
+second click. Both are open to any squad leader, whether or not they carry the designation radio.
+Designate Mobile HQ itself is never consumed — a lead holding that slot keeps the entry, so every one
+of its refusals leaves them something to act on.
 
-Redeploy Base Units (`STR_DUWS_T_REDEPLOY_ACTION`, 2 CP) is the BASE list's last row at both the HQ
-and every FOB, which is the same reasoning that put `ACT_COMMIT` at the bottom of the scroll list.
+Redeploy Base Units (`STR_DUWS_T_REDEPLOY_ACTION`, 2 CP) is the last of the three administration
+buttons at both the HQ and every FOB, which is the same reasoning that put `ACT_COMMIT` at the bottom
+of the scroll list.
 The two differ only in what the server is asked to rebuild — `fnc_redeployHQUnits` against
 `fnc_redeployFOBUnits`, the latter carrying the FOB the menu was opened on.
 
@@ -301,9 +309,9 @@ single-player test shows one, because there is only one machine to multiply by.
 client adds its own local action, so a guard written with a public `setVariable` lets the first
 client through and locks every other one out permanently.
 
-**A row needs no broadcast at all.** The BASE list is built per client when the menu opens, so an
-entry that became a row stopped needing a broadcast, a JIP id and a duplicate guard along with it —
-which is what let the FOB redeploy come out of `fnc_guardsFOB` entirely.
+**A button needs no broadcast at all.** The command column is built per client when the menu opens,
+so an entry that became a button stopped needing a broadcast, a JIP id and a duplicate guard along
+with it — which is what let the FOB redeploy come out of `fnc_guardsFOB` entirely.
 
 ## Menu rows
 
@@ -313,9 +321,7 @@ applying it — so a scroll-entry colour and a row colour cannot share a definit
 
 | Menu | Row colours |
 | --- | --- |
-| BASE | `ACT_ROW_*` per row, so a row keeps the colour its scroll bucket gave it |
 | Black Market | `[0,1,0,1]` on all three purchases |
-| Mission Control | `[1,0.667,0,1]` on all three rows |
 | Killhouse Controls | `[0,1,0,1]` spawn targets, `[1,0,0,1]` spawn enemies, `[1,1,0,1]` cleanup, `[1,0.533,0,1]` exit |
 | Vehicle Recycling | None — both rows default |
 | Vehicle Customization | None — all four rows default |
@@ -323,14 +329,12 @@ applying it — so a scroll-entry colour and a row colour cannot share a definit
 | Debug | `[1,0.667,0,1]` on the six working tools, `[0.6,0.6,0.6,1]` on the unimplemented WARCOM row |
 | Flag *(object)* as searchable, Force side mission | `[1,0.667,0,1]` on every row |
 
-BASE is the one list not opened by `fnc_open_action_menu`: it is a listbox in the request dialog
-itself (`request_menu.hpp`, idc 2104), filled by `fnc_base_menu_fill` and run by
-`fnc_base_menu_select`. It follows the same two rules as the reusable menu — the dialog closes before
-a row's code runs, since several rows open a dialog of their own, and the row's CODE rides in
-`uiNamespace` because `lbSetData` carries strings only.
-
-Mission Control is reached from a BASE row rather than from a scroll entry now, and keeps its own
-row colours inside its own list.
+The command column is not a menu in this sense: it is seven fixed buttons in the request dialog
+itself (`request_menu.hpp`, idc 1610-1616), written from the top down by `fnc_command_fill` and run
+by `fnc_command_select`. It follows the same two rules as the reusable menu — the dialog closes
+before an entry's code runs, since several open a dialog of their own, and the entry's CODE rides in
+`uiNamespace` because a control's action is a string. Entries that do not apply are hidden rather
+than greyed, so the column never shows a gap.
 
 Quick Kits is the only menu whose row count is not fixed: the rows come from the loadout list the
 server scans and broadcasts, and the entry refuses to open when that list is empty. Debug rows are

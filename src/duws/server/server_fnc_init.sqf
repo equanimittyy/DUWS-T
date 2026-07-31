@@ -351,8 +351,8 @@ fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\functi
 fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_rqst_list.sqf";publicVariable "fnc_faction_rqst_list";
 fnc_custom_faction_init = compile preprocessFileLineNumbers "duws\server\dialog\fnc_custom_faction_init.sqf";publicVariable "fnc_custom_faction_init";
 fnc_request_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_menu.sqf";publicVariable "fnc_request_menu";
-fnc_base_menu_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_base_menu_fill.sqf";publicVariable "fnc_base_menu_fill";
-fnc_base_menu_select = compile preprocessFileLineNumbers "duws\client\dialog\fnc_base_menu_select.sqf";publicVariable "fnc_base_menu_select";
+fnc_command_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_command_fill.sqf";publicVariable "fnc_command_fill";
+fnc_command_select = compile preprocessFileLineNumbers "duws\client\dialog\fnc_command_select.sqf";publicVariable "fnc_command_select";
 fnc_squad_manage = compile preprocessFileLineNumbers "duws\client\dialog\fnc_squad_manage.sqf";publicVariable "fnc_squad_manage";
 fnc_open_action_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_open_action_menu.sqf";publicVariable "fnc_open_action_menu";
 fnc_disguise_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_disguise_menu.sqf";publicVariable "fnc_disguise_menu";
@@ -388,6 +388,7 @@ fnc_fob_server = compile preprocessFileLineNumbers "duws\server\supports\fnc_fob
 
 // SUPPORTS FUNCTIONS
 fnc_ammobox = compile preprocessFileLineNumbers "duws\client\supports\fnc_ammobox.sqf";publicVariable "fnc_ammobox";
+fnc_medtent_actions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_medtent_actions.sqf";publicVariable "fnc_medtent_actions";
 fnc_ammobox_actions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_ammobox_actions.sqf";publicVariable "fnc_ammobox_actions";
 fnc_arty = compile preprocessFileLineNumbers "duws\client\supports\fnc_arty.sqf";publicVariable "fnc_arty";
 fnc_mapclickarty = compile preprocessFileLineNumbers "duws\client\supports\fnc_mapclickarty.sqf";publicVariable "fnc_mapclickarty";

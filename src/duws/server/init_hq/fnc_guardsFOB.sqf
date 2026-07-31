@@ -98,7 +98,7 @@ _wp setWaypointSpeed "LIMITED";
 _fob setVariable ["FOB_guardGroups", [_groupGuard, _groupPatrol]];
 _fob setVariable ["FOB_guard_busy", false];
 
-// Redeploy is a row in the FOB's request menu now (fnc_base_menu_fill), built per client when the
+// Redeploy is a button in the FOB's request menu now (fnc_command_fill), built per client when the
 // menu opens, so nothing has to be broadcast or JIP-queued from here.
 
 

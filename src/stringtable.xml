@@ -819,8 +819,8 @@
                 <German>WÄHLE SEKUNDÄRE MISSION</German>
                 <Chinesesimp>选择支线任务</Chinesesimp>
                 <Spanish>SELECCIONE LA MISIÓN SECUNDARIA</Spanish>
-                <Original>SELECT SIDE MISSION</Original>
-                <English>SELECT SIDE MISSION</English>
+                <Original>Side Missions</Original>
+                <English>Side Missions</English>
             </Key>
             <Key ID="STR_DUWS_T_k9t3ub5d">
                 <German>Select a random side mission. Accomplishing different side missions gives you different bonus.</German>
@@ -1665,6 +1665,14 @@
                 <Original>Vehicle Recycling</Original>
                 <English>Vehicle Recycling</English>
                 <Chinese>载具回收</Chinese>
+            </Key>
+            <Key ID="STR_DUWS_T_REQ_MISSIONS">
+                <Original>MISSIONS</Original>
+                <English>MISSIONS</English>
+            </Key>
+            <Key ID="STR_DUWS_T_REQ_COMMAND">
+                <Original>COMMAND AND CONTROL</Original>
+                <English>COMMAND AND CONTROL</English>
             </Key>
             <Key ID="STR_DUWS_T_MENU_SELECT">
                 <Original>Select</Original>
@@ -3192,8 +3200,8 @@
                 <Chinesesimp>区域内可用建筑不足，任务已取消。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_ACTION">
-                <Original>Analyze Intel Items</Original>
-                <English>Analyze Intel Items</English>
+                <Original>Analyse Intel</Original>
+                <English>Analyse Intel</English>
                 <Chinesesimp>分析情报物品</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_TITLE">
@@ -3524,12 +3532,12 @@
                 <English>Your death has cost BLUFOR %1 CP.</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_HEAD_PERM">
-                <Original>--- PERMANENT (bought once, for the whole team) ---</Original>
-                <English>--- PERMANENT (bought once, for the whole team) ---</English>
+                <Original>--- BLUFOR REQUESTS (Permanent requests bought once, for the whole team) ---</Original>
+                <English>--- BLUFOR REQUESTS (Permanent requests bought once, for the whole team) ---</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_HEAD_CONS">
-                <Original>--- YOURS (%1 of %2 slots used, refundable) ---</Original>
-                <English>--- YOURS (%1 of %2 slots used, refundable) ---</English>
+                <Original>--- SQUAD REQUESTS (%1 of %2 slots used, refundable) ---</Original>
+                <English>--- SQUAD REQUESTS (%1 of %2 slots used, refundable) ---</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_REFUND_BUTTON">
                 <Original>REFUND</Original>
@@ -6890,8 +6898,8 @@
                 <German>ASSET BENUTZEROBERFLÄCHE</German>
                 <Chinesesimp>资产界面</Chinesesimp>
                 <Spanish>Interfaz de objetos</Spanish>
-                <Original>ASSETS INTERFACE</Original>
-                <English>ASSETS INTERFACE</English>
+                <Original>REQUESTS INTERFACE</Original>
+                <English>REQUESTS INTERFACE</English>
             </Key>
             <Key ID="STR_DUWS_T_kyrhidgf">
                 <German>HC und TF Gruppen</German>
@@ -6981,16 +6989,8 @@
                 <German>SUPPORT FREISCHALTEN</German>
                 <Chinesesimp>解锁支援</Chinesesimp>
                 <Spanish>DESBLOQUEAR SOPORTE</Spanish>
-                <Original>UNLOCK SUPPORT</Original>
-                <English>UNLOCK SUPPORT</English>
-            </Key>
-            <Key ID="STR_DUWS_T_BASE_MENU_TITLE">
-                <Original>BASE</Original>
-                <English>BASE</English>
-            </Key>
-            <Key ID="STR_DUWS_T_BASE_MENU_TOOLTIP">
-                <Original>Manage your squad, your FOBs and the base itself</Original>
-                <English>Manage your squad, your FOBs and the base itself</English>
+                <Original>SUPPORTS</Original>
+                <English>SUPPORTS</English>
             </Key>
             <Key ID="STR_DUWS_T_bp73qs16">
                 <German>FREISCHALTEN</German>
@@ -7985,8 +7985,8 @@
                 <English>Your squad members have been fully Healed and Re-Armed.</English>
             </Key>
             <Key ID="STR_DUWS_T_SHOW_MISSION_COOLDOWNS">
-                <Original>Mission Cooldowns</Original>
-                <English>Mission Cooldowns</English>
+                <Original>Mission Timers</Original>
+                <English>Mission Timers</English>
             </Key>
             <Key ID="STR_DUWS_T_COOLDOWN_READY">
                 <Original>Ready</Original>
