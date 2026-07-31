@@ -93,7 +93,7 @@ if (isNull _nearRoad) then {
 			_prefab=true;
 			if (simple_zones_enable) then {_prefab = false};
 
-			[format[localize "STR_DUWS_T_39z6pg7y",currzone],man_points_zone,man_zone_radius,man_missionPos,man_fortified,_prefab,currzone] remoteExec ["fnc_createZone", 2];
+			["",man_points_zone,man_zone_radius,man_missionPos,man_fortified,_prefab,currzone] remoteExec ["fnc_createZone", 2];
             _found = true;
             _zones_array = _zones_array + [man_missionPos]; 
 			

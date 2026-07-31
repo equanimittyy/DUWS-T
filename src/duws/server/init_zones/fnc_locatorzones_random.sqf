@@ -171,7 +171,7 @@ if (_found_distance) then {
     _zonePos = [round(_zonePos select 0), round(_zonePos select 1)];
     private _prefabFlag = true;
     if (simple_zones_enable) then { _prefabFlag = false };
-    [format[localize "STR_DUWS_T_39z6pg7y",_i], _points_zone, _zone_radius, _zonePos, _fortified, _prefabFlag, _i] spawn fnc_createZone;
+    ["", _points_zone, _zone_radius, _zonePos, _fortified, _prefabFlag, _i] spawn fnc_createZone;
     _found = true;
     _zones_array pushBack _zonePos;
     // Same map-layer constraint as the terrain survey: the globalChat lines below are

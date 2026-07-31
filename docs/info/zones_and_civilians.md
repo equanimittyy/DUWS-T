@@ -4,8 +4,8 @@ Two placement subsystems that both "put things at towns", plus the civilian laye
 second. They are no longer independent: civilian selection consumes the zone system's output, and the
 dependency runs one way.
 
-- **Enemy zone siting** ("More Urban"): where OPFOR objectives spawn — the red `"N. Outpost"` markers
-  you capture.
+- **Enemy zone siting** ("More Urban"): where OPFOR objectives spawn — the red `"Bravo (Outpost)"`
+  markers you capture.
 - **Civilian town selection**: a subset of the map's real towns near the fighting, each seeded with a
   persistent civilian population. Purely civilian — not an objective.
 
@@ -62,6 +62,15 @@ validation loop.
 **Build-out** places markers, clears obstacles for prefab zones (`:61-87`), spawns a weighted prefab
 (`:89-139`), scatters 3-4 fortification towers (`:141-195`), and wires the spawn-wait, presence and
 capture triggers.
+
+**Naming.** `fnc_zone_name` (`fnc_zone_state_init.sqf`) hands each zone one phonetic-alphabet word,
+drawn without repeats and pairing two distinct words past the twenty-sixth. It is called from
+`fnc_createzone` rather than from either locator, because manual placement's map-click body runs on
+the clicking client where a server-side allocator does not exist; both locators pass an empty name to
+ask for the next one. The words carry no stringtable key for the same reason squad callsigns do not —
+a translated phonetic alphabet is a different alphabet, not a translation. The prefab's kind
+("Comm Station") is a marker subtitle only; it used to overwrite the name, which is why a capture
+once reported a kind while the map called the same ground by a number.
 
 > `getPos` on a Location is *not* a bug. The civilian system relies on it throughout
 > (`fnc_civ_selectTowns.sqf`, `fnc_civ_init_Tomata.sqf`, `fnc_civ_handler.sqf:32`) and the towns

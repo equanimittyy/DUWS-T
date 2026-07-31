@@ -1,6 +1,6 @@
 // Locality: server; the trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
 // fnc_createZone.sqf
-//  _generatezonescript = [format["Zone %1",_i],_points_zone,_zone_radius,_MissionPos,_fortified,true,_i] spawn fnc_createzone
+//  _generatezonescript = ["",_points_zone,_zone_radius,_MissionPos,_fortified,true,_i] spawn fnc_createzone
 //  Name of the place,pts,radius,position,fortified,prefab,zone#
 //
 
@@ -11,6 +11,10 @@ _zonePos = _this select 3;  //position
 _fortified = _this select 4;
 _prefab = _this select 5;
 _zone_num = _this select 6;
+// Named here rather than by the locator that sited it: the manual placer's map-click body runs on
+// the clicking client, and the allocator is server-side. An empty name asks for the next one, which
+// is what both locators pass -- the zone number survives only as an index for the arrays below.
+if (_name == "") then { _name = [] call fnc_zone_name };
 // Zone visibility
 _visible = true;
 if (hardcore_mode_enable) then {_visible = false};
@@ -145,12 +149,15 @@ if (_prefab) then {
 		(_array_of_prefabs select 6),((_array_of_prefabs select 6) select 3)
 	];
 	 
-	_name = _prefab_array select 0;
+	// The composition's kind, not the zone's name -- it used to overwrite the name, which is why a
+	// capture reported "Comm Station" while the map called the same ground Zone 4. It stays a
+	// subtitle on the marker, where what is built there is worth knowing before travelling to it.
+	_prefabName = _prefab_array select 0;
 	_fortified = _prefab_array select 1;
 	_path = _prefab_array select 2;
 
 	[_zonePos] spawn _path;
-	str(_markername) setMarkerText format["%1. %2", _zone_num, _name];
+	str(_markername) setMarkerText format["%1 (%2)", _name, _prefabName];
 
 } else {
 	switch (VERSION_X) do {
@@ -158,12 +165,12 @@ if (_prefab) then {
 			_prefab = ["Outpost",true,fnc_modern_simple_zone];
 		};
 	};
-	_name = _prefab select 0;
+	_prefabName = _prefab select 0;
 	_fortified = _prefab select 1;
 	_path = _prefab select 2;
 
 	[_zonePos] spawn _path;
-	str(_markername) setMarkerText format["%1. %2", _zone_num, _name];
+	str(_markername) setMarkerText format["%1 (%2)", _name, _prefabName];
 };
 
 // ========== 随机放置 3-4 个工事建筑，并记录到全局数组 ==========
@@ -236,7 +243,7 @@ missionNamespace setVariable [format ["ZoneFortifications_%1", _zone_num], _zone
 _trg2=createTrigger["EmptyDetector",_zonePos];
 _trg2 setTriggerArea[_size,_size,0,false];
 _trg2 setTriggerActivation["ANYPLAYER","PRESENT",true];
-_trg2 setTriggerStatements["this", format["['Zone %1',%2,'%3','%4',thislist] spawn fnc_enterlocation;",_zone_num,_zonePos,_markername,_markername2], ""];
+_trg2 setTriggerStatements["this", format["['%1',%2,'%3','%4',thislist] spawn fnc_enterlocation;",_name,_zonePos,_markername,_markername2], ""];
 // The handle is not filed anywhere. Nothing deletes this trigger -- a zone lives for the
 // campaign and its notification fires whoever owns the ground -- so there is no reader to keep
 // one for. The capture trigger beside it is filed, under trigger_<x>_<y>, because fnc_captured
@@ -253,7 +260,7 @@ _trgEnemy setTriggerActivation ["EAST", "PRESENT", true];
 // Carried on the trigger, not formatted into the statement string, so this position never becomes
 // text and back.
 _trgEnemy setVariable ["DUWS_zonePos", _zonePos];
-_trgEnemy setVariable ["DUWS_zoneNum", _zone_num];
+_trgEnemy setVariable ["DUWS_zoneName", _name];
 // Tested as BLUFOR-held rather than not-OPFOR-held, so a zone in neither list stays quiet.
 //
 // The distance test below is an identity lookup -- "which zone is this" -- not a proximity check.
@@ -267,7 +274,7 @@ _trgEnemy setVariable ["DUWS_zoneNum", _zone_num];
 _trgEnemy setTriggerStatements [
     "this && {private _p = thisTrigger getVariable ['DUWS_zonePos', []];
         (WARCOM_zones_controled_by_BLUFOR findIf { (_x distance2D _p) < 1 }) >= 0}",
-    "[format ['Zone %1', thisTrigger getVariable ['DUWS_zoneNum', 0]], thisList] call fnc_enemy_contact;",
+    "[thisTrigger getVariable ['DUWS_zoneName', ''], thisList] call fnc_enemy_contact;",
     ""
 ];
 // Same debounce as the HQ's: OPFOR crossing the boundary on patrol would otherwise re-report on

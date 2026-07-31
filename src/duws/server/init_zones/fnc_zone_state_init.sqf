@@ -12,6 +12,43 @@ fnc_zone_key = {
 	format ["zone_%1_%2", round (_pos select 0), round (_pos select 1)]
 };
 
+// One zone identity, handed out once and never reused. Zones were numbered, which meant every line
+// of dialogue naming one read as a spreadsheet row and two adjacent zones sounded like the same
+// place; a spoken callsign is what the player ends up using for the ground itself.
+//
+// English words with no stringtable key, like the squad callsigns: these are proper nouns a player
+// says out loud, and a translated phonetic alphabet is a different alphabet, not a translation.
+//
+// Past the twenty-six the pool pairs two distinct words. Selection is by draw-and-retry rather than
+// by building the 650 pairs, because a campaign runs to tens of zones and would throw the list away.
+fnc_zone_name = {
+	private _words = ["Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India",
+		"Juliett","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango",
+		"Uniform","Victor","Whiskey","Xray","Yankee","Zulu"];
+	private _used = missionNamespace getVariable ["DUWS_zoneNames", []];
+	private _free = _words select {!(_x in _used)};
+
+	private _name = "";
+	if (count _free > 0) then {
+		_name = selectRandom _free;
+	} else {
+		for "_i" from 1 to 50 do {
+			private _first = selectRandom _words;
+			private _try = format ["%1-%2", _first, selectRandom (_words - [_first])];
+			if !(_try in _used) exitWith { _name = _try };
+		};
+		// Fifty draws without a new pair means the pair pool is effectively spent. Uniqueness is
+		// what the rest of the mission keys on -- two zones answering to one name would make the
+		// map readout and the capture report ambiguous -- so the count is appended rather than
+		// risking a collision.
+		if (_name == "") then { _name = format ["%1-%2", selectRandom _words, count _used] };
+	};
+
+	_used pushBack _name;
+	missionNamespace setVariable ["DUWS_zoneNames", _used];
+	_name
+};
+
 // Every unit a zone spawned, in one array per zone. Both spawn threads append to it and
 // fnc_createzone empties it at the head of each spawn cycle, so it describes the garrison currently
 // on the ground rather than every garrison the zone has ever had.
