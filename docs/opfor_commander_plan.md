@@ -125,6 +125,10 @@ Four properties are why they could not stay:
 
 ## What the director needs
 
+The director's own decision machinery — belief, scoring and commitment — is
+[`opfor_commander_loop_plan.md`](opfor_commander_loop_plan.md). What follows is what the town-event
+half of it requires on top.
+
 Decided so far:
 
 - **Events are free and rolled, not bought.** Reputation is the whole input: a town deep enough

@@ -469,7 +469,9 @@ alongside it is.
 One actor, one pool, one archetype. The director in this document, the director that builds
 hardpoints in [`hardpoint_system_plan.md`](hardpoint_system_plan.md) and the commander that makes
 low-reputation towns fight back in [`opfor_commander_plan.md`](opfor_commander_plan.md) are the
-same thing under three names, and they share `WARCOM_opfor_ap`.
+same thing under three names, and they share `WARCOM_opfor_ap`. How that one actor decides — what
+it wakes on, what it is allowed to know, and how it ranks targets — is
+[`opfor_commander_loop_plan.md`](opfor_commander_loop_plan.md); this section is its shopping list.
 
 Director spends call `fnc_ap_adjust` directly, as `["OPF", -_cost, _reason] call fnc_ap_adjust`.
 There is no second writer to race — the director is server-side and single — so the purchase
