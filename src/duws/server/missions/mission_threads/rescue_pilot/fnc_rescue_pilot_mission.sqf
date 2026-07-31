@@ -512,12 +512,6 @@ if (!(alive _pilot)) exitWith {
     [_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;
 };
 
-_trigger = player1;
-if (isMultiplayer) then {
-    _nearestUnits = nearestObjects [_pilot,["Man"],150];
-    { if (_x in _nearestUnits) then {_trigger = _x}; } forEach call BIS_fnc_ListPlayers;   
-};
-
 sleep 5;
 _pilot setcaptive false;
 _pilot disableAI "PATH";
