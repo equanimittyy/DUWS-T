@@ -9,14 +9,12 @@ params ["_missionPos", "_radius", ["_patrols", 5]];
 // position, so anything past the third repeats it.
 private _offsets = [[30, 20], [30, 0], [35, 0]];
 
-// Claimed for the mission that ordered the ring, so its teardown collects it wherever it has
-// patrolled to rather than only where it was put down. The claim lives here and not inside the
-// builders because those are shared with zone and town garrisons, which no mission clock owns.
+// Claimed for the mission that ordered the ring, so its teardown collects it wherever it patrolled
+// to. The claim lives here, not in the builders, which are shared with zone and town garrisons.
 //
-// Each builder keeps its own thread and is `call`ed from inside it rather than `spawn`ed directly,
-// which is the only way to read back the group it returns. The wrapper is what makes that safe:
-// the builders assign _radius, _group and a for-counter without `private`, so calling one straight
-// from this scope would write those over the variables of the same name here.
+// Each builder is `call`ed from inside its own thread -- the only way to read back the group it
+// returns. The wrapper is what makes that safe: the builders assign _radius, _group and a
+// for-counter without `private`, which would otherwise clobber the same names in this scope.
 private _fnc_claimInf = { [_this call fnc_createoppatrol2] call fnc_mission_claim };
 private _fnc_claimTeam = { [_this call fnc_createopteam2] call fnc_mission_claim };
 private _fnc_claimVeh = { [_this call fnc_random_veh] call fnc_mission_claim };

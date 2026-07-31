@@ -1,15 +1,11 @@
 // Locality: client -- invoked from a comm-menu expression (shared/includes/supports_radio_modern.hpp).
 //
-// Calling this does not consume the entry (removeAfterExpressionCall = 0), so none of the refusals
-// below hands it back. All of them are things the player is meant to act on straight away --
-// nothing under the cursor, wrong kind of vehicle, one already assigned, one lost too recently --
-// and an entry that vanished on each of them made a slot the player is holding behave like a
-// spent charge.
+// Calling this does not consume the entry (removeAfterExpressionCall = 0), so no refusal hands it
+// back: every one is something the player acts on straight away, and an entry that vanished on each
+// made a slot they are holding behave like a spent charge.
 //
-// Every refusal is a corner hint. hintC was tried for the one-already-assigned case on the grounds
-// that it has to be read, and it is the wrong tool: it opens a modal the player has to dismiss
-// mid-firefight to get their controls back, which is a heavier interruption than anything a
-// refusal warrants.
+// Refusals are corner hints. hintC was tried here and is the wrong tool: it opens a modal the player
+// has to dismiss mid-firefight to get their controls back.
 
 _target = cursorObject;
 
@@ -24,9 +20,8 @@ if (!isNil "MHQ1" && {alive MHQ1}) exitWith {
 	hint localize (["STR_DUWS_T_mhq_exists", "STR_DUWS_T_mhq_is_this"] select (_target == MHQ1));
 };
 
-// Losing the Mobile HQ costs the team half an hour of it. Without this, designating is free the
-// instant the last one burns, so parking the MHQ forward and letting it die is strictly cheaper
-// than driving it home -- the one thing a mobile respawn must not reward.
+// Without this, designating is free the instant the last one burns, so parking the MHQ forward and
+// letting it die beats driving it home -- the one thing a mobile respawn must not reward.
 private _until = missionNamespace getVariable ["MHQ_lockout_until", 0];
 if (time < _until) exitWith {
 	hint format [localize "STR_DUWS_T_MHQ_LOCKOUT", ceil ((_until - time) / 60)];

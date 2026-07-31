@@ -31,10 +31,8 @@ removeAllActions MHQ1;
 // Remove Marker
 //[MHQ1] remoteExec ["kndr_removeMarker", [0,-2] select isDedicated,true];
 
-// Half an hour before another can be designated. Stamped here and not on the release path, which
-// this thread never reaches: giving a working vehicle back is not the thing being priced. Mission
-// time rather than the campaign date, so it tracks setTimeMultiplier the way every other cooldown
-// in the mission does.
+// Stamped here and not on the release path, which this thread never reaches: handing a working
+// vehicle back is not what is being priced. Mission time, like every other cooldown here.
 MHQ_lockout_until = time + MHQ_lockout_seconds;
 publicVariable "MHQ_lockout_until";
 ["INFO", "SUPPORT", format ["MHQ destroyed: designation locked out for %1 s", MHQ_lockout_seconds]] call fnc_log;

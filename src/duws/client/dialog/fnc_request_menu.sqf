@@ -72,15 +72,12 @@ lbSetCurSel [2102, 0];
 
 [_display, _site, _isFob] call fnc_command_fill;
 
-// The readout is the Game Master's, which is the only slot it was ever offered to. Hidden rather
-// than absent, because the MISSIONS box is a fixed layout: there is nothing below it to slide up.
+// Hidden rather than absent: the MISSIONS box is a fixed layout with nothing below to slide up.
 if ((vehiclevarname player) != "player1") then {
     (_display displayCtrl 1607) ctrlShow false;
 };
 
-// A FOB buys no supports, so the whole strip goes rather than standing as an empty box over a
-// button that does nothing. The main window keeps its size: it is the window, and the strip is
-// appended to it.
+// A FOB buys no supports, so the strip goes entirely. The main window keeps its size.
 if (_isFob) exitWith {
     { (_display displayCtrl _x) ctrlShow false } forEach [1804, 2103, 1603];
 };

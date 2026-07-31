@@ -28,10 +28,8 @@ fnc_support_defs = {
 		["mobile_HQ", "PERM", 10, "support_mobile_HQ_available",   "STR_DUWS_T_b7gmddq3",             "",           "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_mhqunlock",         false, false, false],
 		["fob",       "PERM", 10, "support_FOB_available",         "STR_DUWS_T_fob_request_row",      "fob_support","STR_DUWS_T_OVERLORD",       "STR_DUWS_T_fobunlock",         false, false, false],
 
-		// The designation radio, taken a slot at a time rather than handed to every squad leader the
-		// moment the team unlocks it. Free, because the team already paid at the permanent row: what
-		// this row costs is a slot, which is the point -- carrying the ability to designate is a
-		// choice against carrying something else, and a lead who does not want it is not made to.
+		// The designation radio, a slot at a time rather than handed to every lead on unlock. Free
+		// because the team paid at the permanent row: what this costs is the slot.
 		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_mhqslotunlock",     false, false, false],
 		["supply",    "CONS",  5, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_supplydropunlock",  true,  false, false],
 		["veh_drop",  "CONS",  5, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_vehicledropunlock", true,  false, true],
@@ -62,8 +60,7 @@ fnc_support_defs = {
 		// A FOB is not offered until a zone has been taken, which is what the comm item it grants
 		// used to wait on.
 		if (_key == "fob" && {zoneundercontrolblu < 1}) then { _keep = false };
-		// The designation slot exists only once the team owns the Mobile HQ. Absent rather than
-		// greyed, matching every other row the campaign has not reached yet.
+		// Only once the team owns the Mobile HQ. Absent rather than greyed, like every other row.
 		if (_key == "mhq_slot" && {!(["support_mobile_HQ_available"] call fnc_support_owned)}) then {
 			_keep = false;
 		};

@@ -2,13 +2,11 @@
 // SUPPORTS strip at a FOB, where supports cannot be bought -- the FOB used to have a dialog of
 // its own that was this one with three listbox IDCs renamed and a dead supports box.
 //
-// Laid out on the 40x25 GUI grid as a main window with a strip appended to its right. The main
-// window holds two boxes, MISSIONS over COMMAND AND CONTROL, and the exit sits inside it rather
-// than under the strip. The strip is the whole supports catalogue, which runs to two dozen rows
-// and needs the full height to be readable rather than scrolled blind.
+// Laid out on the 40x25 GUI grid as a main window with a strip appended right. The window holds
+// MISSIONS over COMMAND AND CONTROL, with the exit inside it. The strip is the supports catalogue,
+// two dozen rows needing the full height rather than being scrolled blind.
 //
-// Every button in here is 1.5 grid cells tall. Sizes used to run 1 or 1.5 depending on which pass
-// added the control, which read as two classes of button where there is only one.
+// Every button is 1.5 grid cells tall; sizes used to run 1 or 1.5 by whichever pass added them.
 class ressourceheader
 {
     idd = -1;
@@ -130,8 +128,7 @@ class ressourceheader
             action = "[] spawn fnc_stratmap; closeDialog 0";
             tooltip = "$STR_DUWS_T_k9t3ub5d";
         };
-        // Hidden for anyone but the Game Master slot, which is the only one the readout was ever
-        // offered to. fnc_request_menu owns that test; the control exists unconditionally.
+        // Game Master only; fnc_request_menu owns that test.
         class missiontimersbutton: RscButton
         {
             idc = 1607;
@@ -145,9 +142,8 @@ class ressourceheader
         };
 
         // --- COMMAND AND CONTROL: what command sends on the left, what it administers on the right
-        // Right-column buttons carry no action of their own. They are slots: fnc_command_fill
-        // decides which entries apply, writes them into the slots from the top down and hides the
-        // rest, so a row that cannot apply leaves no gap rather than a greyed button.
+        // The right column is slots, not fixed entries: fnc_command_fill writes the applicable ones
+        // in from the top and hides the rest, so an inapplicable entry leaves no gap.
         class commandframe: RscFrame
         {
             idc = 1809;
@@ -293,8 +289,7 @@ class ressourceheader
             action = "[6] spawn fnc_command_select";
         };
 
-        // Inside the main window, not under the strip: the strip is appended to the interface and
-        // owns none of the window's chrome.
+        // Inside the main window, not under the strip, which owns none of the window's chrome.
         class exitbutton: RscButton
         {
             idc = 1604;

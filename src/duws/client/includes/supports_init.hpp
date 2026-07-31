@@ -26,9 +26,8 @@ AttChopInUse = false;
 support_hcCAS_available = false;
 CASInUse = false;
 support_paradrop_available = false;
-// The Mobile HQ designation radio. Consumable, not permanent: the team's unlock is
-// support_mobile_HQ_available below, and this is one squad leader choosing to spend a slot on
-// carrying the ability to designate.
+// The Mobile HQ designation radio. Consumable: the team's unlock is support_mobile_HQ_available
+// below, and this is one lead spending a slot to carry the ability.
 support_mobile_HQ_slot_available = false;
 
 // How many consumable supports this player is holding, against server_var_init's support_max_slots.
@@ -65,12 +64,10 @@ if (isNil "support_FOB_available") then {
 	support_FOB_available = false;
 };
 
-// The FOB unlock hands its comm item to every player, not just the buyer, because it is bought for
-// the team. The publicVariableEventHandler is the hook rather than a broadcast from the buyer: it
-// fires only once the flag has actually landed here, so the ownership test inside
-// fnc_support_comm_add cannot lose a race with it.
+// The FOB unlock hands its comm item to every player, being bought for the team. The
+// publicVariableEventHandler is the hook rather than a broadcast from the buyer: it fires once the
+// flag has landed here, so fnc_support_comm_add's ownership test cannot lose a race with it.
 //
-// The Mobile HQ deliberately has no twin here. Its unlock opens the mhq_slot row instead, and the
-// radio arrives when a squad leader takes that slot -- which is also what stops the team being
-// locked out of the Mobile HQ for good when the one player holding a handed-out token leaves.
+// The Mobile HQ has no twin here: its unlock opens the mhq_slot row instead, which is what stops
+// the team being locked out for good when the one player holding a handed-out token leaves.
 "support_FOB_available" addPublicVariableEventHandler { ["fob_support"] call fnc_support_comm_add };

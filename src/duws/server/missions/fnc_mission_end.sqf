@@ -9,9 +9,8 @@
 // callers have no use for.
 params ["_targetpos", "_radius", ["_compKey", ""], ["_sweepFriendly", false]];
 
-// Read before the slot is released, and carried into the cleanup rather than looked up there: the
-// teardown sleeps for minutes, and the next mission may well have opened and taken the token by the
-// time it wakes.
+// Read before the slot is released and carried in: the teardown sleeps for minutes, by which time
+// the next mission may hold the token.
 private _token = missionNamespace getVariable ["DUWS_mission_token", 0];
 
 // Released here rather than after a delay. The wait between side missions is the per-type cooldown

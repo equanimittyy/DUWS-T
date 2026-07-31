@@ -29,11 +29,9 @@ missionNamespace setVariable [format ["mission_cooldown_%1", _missionType],
 // Holds off the next mission until this thread finishes; each thread clears it on exit.
 Mission_available = false;
 publicVariable "Mission_available";
-// Which mission instance this is. fnc_mission_claim stamps it on everything the thread raises and
-// fnc_mission_cleanup deletes by it, so a teardown collects what this mission spawned rather than
-// whatever happens to be standing near the objective. Server-local: nothing off the server reads
-// it, and only this line ever moves it -- which is safe to leave implicit at the claim sites
-// because it cannot advance while Mission_available is false.
+// Which mission instance this is: fnc_mission_claim stamps it, fnc_mission_cleanup deletes by it.
+// Server-local, and only this line moves it -- which is what lets the claim sites leave it
+// implicit, since it cannot advance while Mission_available is false.
 DUWS_mission_token = (missionNamespace getVariable ["DUWS_mission_token", 0]) + 1;
 ["INFO", "MISSION", format ["start type=%1 name=%2 pos=%3 token=%4",
 	_missionType, _mission_name, _MissionPos, DUWS_mission_token]] call fnc_log;

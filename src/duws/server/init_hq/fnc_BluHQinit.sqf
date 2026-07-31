@@ -344,12 +344,10 @@ _officer addEventHandler ["Killed", {
     // prevent, arriving by the other route.
     remoteExec ["", format ["hq_pose_%1", netId _unit]];
 }];
-// He is a campaign loss condition, so he cannot be one of the team's to end. Damage is refused
-// outright rather than merely discounted at the point of death: counting only OPFOR kills would
-// still let anyone delete the officer the HQ terminal and the request menu hang off, and losing
-// him to a stray burst in a base firefight is the ordinary case, not the malicious one.
-// _instigator names the player behind an explosive or a vehicle where _source is the thing that
-// did the damage; either being WEST is enough to refuse.
+// He is a campaign loss condition, so he cannot be one the team can end. Refused outright rather
+// than discounted at death: counting only OPFOR kills would still let anyone delete the officer the
+// HQ actions hang off. _instigator names the player behind an explosive or vehicle, _source the
+// thing that did the damage; either being WEST refuses.
 _officer addEventHandler ["HandleDamage", {
     params ["", "", "_damage", "_source", "", "", "_instigator"];
     private _by = [_source, _instigator] select (!isNull _instigator);

@@ -3,8 +3,7 @@
 // The guard ring plus the corpse-search flag, for the missions whose bodies are worth searching.
 params ["_missionPos", "_radius"];
 
-// Claimed for the mission that ordered the ring; see fnc_missionPatrols for why the claim lives
-// here rather than inside the builders, and why each builder is called from inside its own thread.
+// See fnc_missionPatrols for why the claim lives here and why each builder runs in its own thread.
 private _fnc_claimInf = { [_this call fnc_createoppatrol2] call fnc_mission_claim };
 private _fnc_claimTeam = { [_this call fnc_createopteam2] call fnc_mission_claim };
 private _fnc_claimVeh = { [_this call fnc_random_veh] call fnc_mission_claim };
@@ -26,8 +25,7 @@ if (WARCOM_opfor_ap > 100) then {
 sleep 1;
 [OPFOR_Faction_X,"car",[(_missionPos select 0)+28, (_missionPos select 1)+12],_radius] spawn _fnc_claimVeh;
 
-// Swept rather than claimed: the flag has to reach whatever else is standing there too, since a
-// mission drawn next to a zone puts that zone's garrison inside the same fight.
+// Swept rather than claimed: the flag has to reach a neighbouring zone's garrison too.
 [_missionPos, _radius] spawn {
     params ["_pos", "_rad"];
     sleep 5; // let the ring finish spawning

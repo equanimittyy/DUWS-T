@@ -16,12 +16,11 @@
                 most missions spawn nothing on that side, and that pass is a blunt proximity delete.
     _token      which mission instance this is tearing down, from fnc_mission_begin.
 
-    Two passes, and the order matters. The ownership pass is the one that finishes the job: it is
-    map-wide and deletes exactly what fnc_mission_claim filed under this mission, so a guard ring
-    that patrolled a kilometre out or a technical that drove off is still collected. The radius pass
-    that follows is the backstop for anything a thread raised without claiming it, and it is the
-    blunt one -- proximity cannot tell a mission's leftovers from a neighbouring garrison, which is
-    why it stands down entirely near an enemy zone.
+    Two passes. The ownership pass finishes the job: map-wide, deleting exactly what
+    fnc_mission_claim filed under this mission, so a guard ring that patrolled a kilometre out is
+    still collected. The radius pass is the backstop for anything raised without a claim, and is
+    the blunt one -- proximity cannot tell a mission's leftovers from a neighbouring garrison, which
+    is why it stands down near an enemy zone.
 */
 
 params ["_targetpos", "_radius", ["_compKey", ""], ["_sweepFriendly", false], ["_token", -1]];
@@ -34,9 +33,8 @@ params ["_targetpos", "_radius", ["_compKey", ""], ["_sweepFriendly", false], ["
 // player leaves behind.
 if (_compKey != "") then { [_compKey] call fnc_duws_release };
 
-// Five minutes to strip the area, with a warning at the last minute. Two notices, because a
-// countdown the player has to plan around only needs the start and the edge -- the ten-second call
-// this replaces arrived far too late to act on and read as noise.
+// Five minutes to strip the area, warned at the last minute. Two notices: a countdown only needs
+// its start and its edge, and the ten-second call this replaces was too late to act on.
 ["missionclean", [localize "STR_DUWS_T_renwuqingli", localize "STR_DUWS_T_renwuqingli2"]]
     remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
 sleep 240;
@@ -48,9 +46,8 @@ sleep 60;
 // missions point the player at, so the sweep must not run until the countdown has finished.
 {deleteVehicle _x} forEach allDeadMen;
 
-// The ownership pass. Crew before their vehicle, or deleting the vehicle first ejects whoever is
-// inside it. A claimed vehicle is deleted whether or not it still has crew, which is the case the
-// old proximity sweep could not reach: an abandoned technical looks like every other empty car.
+// Crew before their vehicle, or deleting the vehicle first ejects whoever is inside it. A claimed
+// vehicle goes whether or not it still has crew.
 if (_token >= 0) then {
     private _owned = (allUnits + vehicles) select {_x getVariable ["DUWS_missionOwner", -1] == _token};
     {

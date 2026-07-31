@@ -80,25 +80,17 @@ private _fnc_point = {
      ((_from select 1) + BOUND_LENGTH * cos _dir) max 100 min _edge, 0]
 };
 
-// What to call the ground being given up. A zone or a town by name where one is registered at this
-// position, and a grid reference otherwise -- prefixed with the word, because a bare six-figure
-// number on a notification card reads as anything but a map reference.
-//
-// Both callers hand over the position the place was registered at -- fnc_spawnWait its zone's
-// spawn position, fnc_civ_garrison `getPos` of the town's Location -- so an exact match is the
-// right test and a radius search would only invite naming a neighbour.
-//
-// A zone hardcore mode has not revealed stays a grid. The map readout withholds its name on the
-// same flag, and a notification broadcast to every player must not hand out what the mode hides.
+// Names the ground being given up, falling back to a grid. Exact position match: both callers pass
+// the position the place was registered at, so a radius search would only risk naming a neighbour.
+// An unrevealed zone stays a grid -- the map readout withholds its name on the same flag.
 private _fnc_placeName = {
     params ["_pos"];
     private _zones = missionNamespace getVariable ["zone_namePOS_pairs", []];
     private _i = _zones findIf {((_x select 1) distance2D _pos) < 1 && {_x select 2}};
     if (_i > -1) exitWith { (_zones select _i) select 0 };
 
-    // Towns carry no reveal flag: the readout names any town the player clicks, so there is
-    // nothing here to withhold. An unnamed Location falls through to the grid rather than
-    // printing the "Unnamed7" placeholder the civilian registry uses for its own bookkeeping.
+    // Towns have no reveal flag. An unnamed Location falls through rather than printing the
+    // "Unnamed7" placeholder the civilian registry keeps for its own bookkeeping.
     private _locs = missionNamespace getVariable ["civ_locations", []];
     private _t = _locs findIf {((getPos _x) distance2D _pos) < 1};
     if (_t > -1 && {text (_locs select _t) != ""}) exitWith { text (_locs select _t) };
@@ -326,13 +318,10 @@ private _moving = 0;
 ["INFO", "OPFOR", format ["%1 group(s) bounding back from %2",
     count _groups, mapGridPosition _holdPos]] call fnc_log;
 
-// Resolved once and carried to both cards: the ground does not move, and a second lookup could
-// disagree with the first if the zone were revealed part-way through the withdrawal.
+// Resolved once: a second lookup could disagree if the zone were revealed mid-withdrawal.
 private _place = [_holdPos] call _fnc_placeName;
 
-// Announced rather than left to be noticed. A bounding withdrawal reads as a firefight the player
-// is still losing until they see the ground behind it empty, and the whole mechanic is worth
-// nothing if it is mistaken for the AI holding.
+// Announced, or a bounding withdrawal reads as a firefight the player is still losing.
 ["info", [localize "STR_DUWS_T_OPFOR_WITHDRAW_TITLE",
     format [localize "STR_DUWS_T_OPFOR_WITHDRAW_MSG", _place]]]
     remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
@@ -387,9 +376,8 @@ while {_outcome == ""} do {
 private _survivors = (_elements select 0) + (_elements select 1);
 switch (_outcome) do {
     case "clear": {
-        // Counted before the release, which deletes the very units being counted. Men, not groups:
-        // what the enemy gets back is manpower, and a four-man team and a full squad leaving the
-        // same position are not the same withdrawal.
+        // Counted before the release, which deletes them. Men, not groups: a team and a full
+        // squad leaving the same position are not the same withdrawal.
         private _walkedOff = 0;
         { _walkedOff = _walkedOff + ([_x] call _fnc_alive) } forEach _survivors;
 
@@ -397,15 +385,13 @@ switch (_outcome) do {
         ["INFO", "OPFOR", format ["withdrawal from %1 broke contact; %2 group(s), %3 man/men despawned clear",
             mapGridPosition _holdPos, count _survivors, _walkedOff]] call fnc_log;
 
-        // The one exit that hands the enemy a force back intact, so it is the one that pays. Ground
-        // given up cheaply buys OPFOR the manpower to come back with, which is what makes a
-        // withdrawal a decision rather than a tidier way of losing.
+        // The one exit that hands the enemy a force back intact, so the one that pays.
         if (_walkedOff > 0) then {
             ["OPF", _walkedOff * opfor_ap_per_withdrawn, "opfor_withdrawal"] call fnc_ap_adjust;
         };
 
-        // Only this outcome is announced. "shadowed" puts the force back on its feet and the player
-        // is already in contact with it, and "wiped" is a fight they watched themselves win.
+        // Only this outcome is announced: "shadowed" leaves the player in contact with the force,
+        // and "wiped" is a fight they watched themselves win.
         ["info", [localize "STR_DUWS_T_OPFOR_ESCAPED_TITLE",
             format [localize "STR_DUWS_T_OPFOR_ESCAPED_MSG", _place]]]
             remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];

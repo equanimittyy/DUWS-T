@@ -105,17 +105,13 @@ while {true} do {
     { _candidates pushBackUnique _x } forEach allDeadMen;
     { if (_x == vehicle _x) then { _candidates pushBackUnique _x } } forEach (allDead - allDeadMen);
 
-    // Idling vehicles: unmanned is the whole test now. It used to also demand !canMove, which meant
-    // an intact vehicle abandoned anywhere on the map was never a candidate -- only a broken-down one
-    // was -- and a campaign's worth of requisitioned trucks parked wherever they were last needed is
-    // the litter this sweep exists to remove. What still holds them is the same two things that hold
-    // everything else: DUWS_base_keep_radius parks them at a base, and the persistent flag keeps a
-    // mission objective or a composition member whatever its crew.
-    // Statics stay excluded. The clause is about vehicles somebody drove and walked away from, and a
-    // turret is unmanned by default -- collecting those would take a zone's emplacements off the map
-    // the moment the player who captured them steps away.
-    // A vehicle that regains crew has its clock cleared, unless it was retired deliberately, whose
-    // deadline is not this clause's to reset.
+    // Idling vehicles: unmanned is the whole test. It also demanded !canMove, so only a broken-down
+    // vehicle was ever a candidate and a campaign of requisitioned trucks parked where they were
+    // last needed never went. They are still held by DUWS_base_keep_radius and by the persistent
+    // flag, the same two things that hold everything else.
+    // Statics stay excluded: a turret is unmanned by design, and collecting those would take a
+    // zone's emplacements the moment its captor steps away.
+    // Regaining crew clears the clock, unless the vehicle was retired deliberately.
     {
         if (!(_x isKindOf "StaticWeapon") && {({alive _x} count crew _x) == 0}) then {
             _candidates pushBackUnique _x;

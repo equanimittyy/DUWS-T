@@ -5,12 +5,11 @@
     the entry's code runs, matching fnc_open_action_menu: several entries open a dialog of their
     own, which would otherwise stack on top of the request menu.
 
-    The slot index is the argument rather than a listbox selection, because the column is seven
-    buttons and each carries its own index in its action string.
+    The slot index is the argument rather than a listbox selection: the column is seven buttons,
+    each carrying its own index in its action string.
 
-    Every one of those actions spawns this rather than calling it, and that is load-bearing: three
-    of the entries open a dialog and then `waitUntil {dialog}`, which throws in the unscheduled
-    environment a button action runs in.
+    Those actions spawn this rather than calling it, which is load-bearing: three entries open a
+    dialog and then `waitUntil {dialog}`, which throws unscheduled.
 */
 params [["_slot", -1]];
 private _rows = uiNamespace getVariable ["DUWS_commandMenu_rows", []];
