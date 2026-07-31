@@ -80,6 +80,32 @@ private _fnc_point = {
      ((_from select 1) + BOUND_LENGTH * cos _dir) max 100 min _edge, 0]
 };
 
+// What to call the ground being given up. A zone or a town by name where one is registered at this
+// position, and a grid reference otherwise -- prefixed with the word, because a bare six-figure
+// number on a notification card reads as anything but a map reference.
+//
+// Both callers hand over the position the place was registered at -- fnc_spawnWait its zone's
+// spawn position, fnc_civ_garrison `getPos` of the town's Location -- so an exact match is the
+// right test and a radius search would only invite naming a neighbour.
+//
+// A zone hardcore mode has not revealed stays a grid. The map readout withholds its name on the
+// same flag, and a notification broadcast to every player must not hand out what the mode hides.
+private _fnc_placeName = {
+    params ["_pos"];
+    private _zones = missionNamespace getVariable ["zone_namePOS_pairs", []];
+    private _i = _zones findIf {((_x select 1) distance2D _pos) < 1 && {_x select 2}};
+    if (_i > -1) exitWith { (_zones select _i) select 0 };
+
+    // Towns carry no reveal flag: the readout names any town the player clicks, so there is
+    // nothing here to withhold. An unnamed Location falls through to the grid rather than
+    // printing the "Unnamed7" placeholder the civilian registry uses for its own bookkeeping.
+    private _locs = missionNamespace getVariable ["civ_locations", []];
+    private _t = _locs findIf {((getPos _x) distance2D _pos) < 1};
+    if (_t > -1 && {text (_locs select _t) != ""}) exitWith { text (_locs select _t) };
+
+    format [localize "STR_DUWS_T_GRID_REF", mapGridPosition _pos]
+};
+
 private _fnc_centre = {
     params ["_grps"];
     private _sx = 0; private _sy = 0; private _n = 0;
@@ -300,11 +326,15 @@ private _moving = 0;
 ["INFO", "OPFOR", format ["%1 group(s) bounding back from %2",
     count _groups, mapGridPosition _holdPos]] call fnc_log;
 
+// Resolved once and carried to both cards: the ground does not move, and a second lookup could
+// disagree with the first if the zone were revealed part-way through the withdrawal.
+private _place = [_holdPos] call _fnc_placeName;
+
 // Announced rather than left to be noticed. A bounding withdrawal reads as a firefight the player
 // is still losing until they see the ground behind it empty, and the whole mechanic is worth
 // nothing if it is mistaken for the AI holding.
 ["info", [localize "STR_DUWS_T_OPFOR_WITHDRAW_TITLE",
-    format [localize "STR_DUWS_T_OPFOR_WITHDRAW_MSG", mapGridPosition _holdPos]]]
+    format [localize "STR_DUWS_T_OPFOR_WITHDRAW_MSG", _place]]]
     remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
 
 private _deadline = time + GIVE_UP;
@@ -362,8 +392,13 @@ switch (_outcome) do {
             mapGridPosition _holdPos, count _survivors]] call fnc_log;
         // Only this outcome is announced. "shadowed" puts the force back on its feet and the player
         // is already in contact with it, and "wiped" is a fight they watched themselves win.
+        //
+        // TODO: credit OPFOR army power here, for the survivors counted above. This is the one exit
+        // that hands the enemy a force back intact, which is what makes it the site worth paying:
+        // ground given up cheaply should buy the enemy something the player can later be made to
+        // pay for. Until it lands, the card below promises manpower that no pool actually receives.
         ["info", [localize "STR_DUWS_T_OPFOR_ESCAPED_TITLE",
-            format [localize "STR_DUWS_T_OPFOR_ESCAPED_MSG", mapGridPosition _holdPos]]]
+            format [localize "STR_DUWS_T_OPFOR_ESCAPED_MSG", _place]]]
             remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
     };
     case "shadowed": {

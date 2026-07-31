@@ -3941,6 +3941,10 @@
                 <Original>The game has been saved.</Original>
                 <English>The game has been saved.</English>
             </Key>
+            <Key ID="STR_DUWS_T_GRID_REF">
+                <Original>Grid %1</Original>
+                <English>Grid %1</English>
+            </Key>
             <Key ID="STR_DUWS_T_OPFOR_WITHDRAW_TITLE">
                 <Original>Enemy Withdrawing</Original>
                 <English>Enemy Withdrawing</English>
@@ -3954,8 +3958,8 @@
                 <English>Enemy Escaped</English>
             </Key>
             <Key ID="STR_DUWS_T_OPFOR_ESCAPED_MSG">
-                <Original>The force from %1 broke contact and got clear.</Original>
-                <English>The force from %1 broke contact and got clear.</English>
+                <Original>Enemy force from %1 retreated. OPFOR regains manpower.</Original>
+                <English>Enemy force from %1 retreated. OPFOR regains manpower.</English>
             </Key>
         </Container>
         <Container name="Side Missions">
