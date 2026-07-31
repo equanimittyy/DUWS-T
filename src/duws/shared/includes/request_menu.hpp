@@ -348,7 +348,7 @@ class ressourceheader
             text = "$STR_DUWS_T_x0l67g37";
             x = 25 * GUI_GRID_W + GUI_GRID_X;
             y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 15 * GUI_GRID_W;
+            w = 14.7 * GUI_GRID_W;
             h = 22 * GUI_GRID_H;
         };
         class supportunlocklist: RscListBox
@@ -356,7 +356,7 @@ class ressourceheader
             idc = 2103;
             x = 25.4 * GUI_GRID_W + GUI_GRID_X;
             y = 2.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 14.2 * GUI_GRID_W;
+            w = 13.9 * GUI_GRID_W;
             h = 18.5 * GUI_GRID_H;
             sizeEx = 0.025;
             // The button below both buys and refunds, so its label follows the selection.
@@ -368,7 +368,7 @@ class ressourceheader
             text = "$STR_DUWS_T_bp73qs16";
             x = 25.4 * GUI_GRID_W + GUI_GRID_X;
             y = 21.3 * GUI_GRID_H + GUI_GRID_Y;
-            w = 14.2 * GUI_GRID_W;
+            w = 13.9 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_request_support";
             tooltip = "$STR_DUWS_T_dsl9rr00";
