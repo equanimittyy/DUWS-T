@@ -22,11 +22,16 @@ private _site = [_MissionPos, _radius, 3] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
+// Marked before anything is built. The ellipse and the task are the only things telling the
+// player where the objective is, and the spawn-up below runs for tens of seconds.
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
+private _VARtaskgeneratedName = format ["tower%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
+[_VARtaskgeneratedName, localize "STR_DUWS_T_dgpqenyw", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
+
 [_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",[0,-2] select isDedicated];
 
 _towerPos = _targetpos;
 
-_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 _centerSpawn = _towerPos;
 _centerSpawnX = _towerPos select 0;
@@ -88,15 +93,12 @@ switch (VERSION_X) do {
 sleep 1;
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 
-private "_VARtaskgeneratedName";
-_VARtaskgeneratedName = format ["tower%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 
 [_speaker1, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 12;
 ["", _message1] remoteExec ["fnc_duws_dialogue", 0];
 sleep 12;
 [_speaker, _message2] remoteExec ["fnc_duws_dialogue", 0];
-[_VARtaskgeneratedName, localize "STR_DUWS_T_dgpqenyw", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
 
 ["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 

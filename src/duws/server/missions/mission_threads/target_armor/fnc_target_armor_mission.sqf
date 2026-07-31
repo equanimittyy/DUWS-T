@@ -16,11 +16,16 @@ private _site = [_MissionPos, _radius, 7] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
+// Marked before anything is built. The ellipse and the task are the only things telling the
+// player where the objective is, and the spawn-up below runs for tens of seconds.
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
+private _VARtaskgeneratedName = format ["targetarmor%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
+[_VARtaskgeneratedName, localize "STR_DUWS_T_y7z1cx6j", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
+
 [_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 _vehpos = [_targetpos, 10, 30,10,0,0.15,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 
-_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 
@@ -88,11 +93,8 @@ _wp2 setWaypointTimeout [30, 45, 60];
     [_x] call fnc_addRandomLoot;
 } forEach units _group;
 // TASK AND NOTIFICATION
-private "_VARtaskgeneratedName";
-_VARtaskgeneratedName = format ["targetarmor%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
-[_VARtaskgeneratedName, localize "STR_DUWS_T_y7z1cx6j", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
 
 // 设置任务目标位置（军官位置）
 ["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];

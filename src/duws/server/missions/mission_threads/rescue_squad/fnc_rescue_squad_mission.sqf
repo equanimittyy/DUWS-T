@@ -25,7 +25,11 @@ _Building = _usableBuildings select (floor (random (count _usableBuildings)));
 _BuildingPos = getPos _Building;
 _targetpos = _BuildingPos;
 
+// Marked before anything is built. The ellipse and the task are the only things telling the
+// player where the objective is, and the spawn-up below runs for tens of seconds.
 _markername2 = [_MissionPos, _radius] call fnc_missionMarkerData;
+private _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
+[_VARtaskgeneratedName, localize "STR_DUWS_T_kievbwmd", _mission_name, _MissionPos, "help"] call fnc_missionTaskCreate;
 
 // Create soldiers  -- BEGIN
 _soldier1 = format ["s1%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
@@ -64,14 +68,9 @@ fnc_rescue_squad_uncaptive = {
     
 };
 
-// TASK AND NOTIFICATION
-private "_VARtaskgeneratedName";
-_VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 [_speaker1, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
-[_VARtaskgeneratedName, localize "STR_DUWS_T_kievbwmd", _mission_name, _MissionPos, "help"] call fnc_missionTaskCreate; 
 
 // trigger to uncaptive squad when players are near
 _trg=createTrigger["EmptyDetector",_Building];

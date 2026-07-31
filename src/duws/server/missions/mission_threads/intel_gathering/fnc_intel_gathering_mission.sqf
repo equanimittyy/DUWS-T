@@ -18,6 +18,15 @@ if (count _usableBuildings < _minBuildings) exitWith {
 // Gated after the building check on purpose: too few buildings must not burn the cooldown.
 if (!([16, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
+// Marked before anything is built. The ellipse and the task are the only things telling the
+// player where the objective is, and the container seeding below runs for tens of seconds.
+private _randomPos = [_MissionPos, 0, _radius, 5, 0, 0.2, 0] call BIS_fnc_findSafePos;
+if (_randomPos isEqualTo [0,0,0]) then { _randomPos = _MissionPos; };
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
+private _taskID = format ["intel_gathering_%1", round time];
+[_taskID, localize "STR_DUWS_T_INTEL_GATHERING_DESC", localize "STR_DUWS_T_INTEL_GATHERING_TITLE",
+    _randomPos, "search"] call fnc_missionTaskCreate;
+
 // ========== 随机选取最多30个建筑 ==========
 private _maxBuildings = 30;
 private _selectedBuildings = [];
@@ -280,16 +289,6 @@ if (isNil "fnc_intel_container_search_server") then {
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_GATHERING1"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 6;
 [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_INTEL_GATHERING2"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-
-// ========== 创建任务标记 ==========
-private _randomPos = [_MissionPos, 0, _radius, 5, 0, 0.2, 0] call BIS_fnc_findSafePos;
-if (_randomPos isEqualTo [0,0,0]) then { _randomPos = _MissionPos; };
-_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
-
-// ========== 创建任务 ==========
-private _taskID = format ["intel_gathering_%1", round time];
-[_taskID, localize "STR_DUWS_T_INTEL_GATHERING_DESC", localize "STR_DUWS_T_INTEL_GATHERING_TITLE",
-    _randomPos, "search"] call fnc_missionTaskCreate;
 
 [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_INTEL_GATHERING3"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
 sleep 6;

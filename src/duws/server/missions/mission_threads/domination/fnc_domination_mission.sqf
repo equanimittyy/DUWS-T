@@ -26,6 +26,12 @@ private _site = [_MissionPos, _radius, 13] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
+// Marked before anything is built. The ellipse and the task are the only things telling the
+// player where the objective is, and the spawn-up below runs for tens of seconds.
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
+private _VARtaskgeneratedName = format ["combat%1%2", round(_MissionPos select 0), round(_MissionPos select 1)];
+[_VARtaskgeneratedName, localize "STR_DUWS_T_domination", _mission_name, _randomPos, "attack"] call fnc_missionTaskCreate;
+
 // 向玩家显示任务提示
 ["Armor Hunting",{hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
@@ -699,15 +705,11 @@ _arrowMarker setMarkerSize [1.1, 1.1];
 _arrowMarker setMarkerAlpha 0.7;
 _arrowMarker setMarkerText localize "STR_DUWS_T_dominationarrow";
 //Create the marker	
-_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 // TASK AND NOTIFICATION
-private "_VARtaskgeneratedName";
 // 生成唯一的任务变量名
-_VARtaskgeneratedName = format ["combat%1%2", round(_MissionPos select 0), round(_MissionPos select 1)];
 
 // 创建任务：消灭所有红方坦克
-[_VARtaskgeneratedName, localize "STR_DUWS_T_domination", _mission_name, _randomPos, "attack"] call fnc_missionTaskCreate;
 
 // ================ [MOD] 设置红方路点（进攻蓝方APC位置） ================
 

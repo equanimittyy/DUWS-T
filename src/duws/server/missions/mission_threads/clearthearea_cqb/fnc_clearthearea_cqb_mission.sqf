@@ -34,6 +34,13 @@ if (_actualBldgCount == 0) exitWith {
     [11, "STR_DUWS_T_mission_no_building"] call fnc_mission_abort;
 };
 
+// Marked before anything is built. The ellipse and the task are the only things telling the
+// player where the objective is, and the spawn-up below runs for tens of seconds. Below the
+// abort above, not above it: a marker drawn first would outlive a mission that never started.
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
+private _VARtaskgeneratedName = format ["clearhouse%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
+[_VARtaskgeneratedName, localize "STR_DUWS_T_shentouxiaodui", _mission_name, _randomPos, "attack"] call fnc_missionTaskCreate;
+
 _maxBuildingsToUse = (_actualBldgCount min _desiredBldgCount);
 
 _selectedBuildings = [];
@@ -116,15 +123,9 @@ if (hardcore_mode_enable && count _allUnits > 0) then {
     [[selectRandom _allUnits], "objective"] call fnc_search_flag_group;
 };
 
-private "_VARtaskgeneratedName";
-_VARtaskgeneratedName = format ["clearhouse%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
-
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 [_speakeracteam, _messageroger] remoteExec ["fnc_duws_dialogue", 0];
-
-_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
-[_VARtaskgeneratedName, localize "STR_DUWS_T_shentouxiaodui", _mission_name, _randomPos, "attack"] call fnc_missionTaskCreate;
 
 waitUntil {
     sleep 3;

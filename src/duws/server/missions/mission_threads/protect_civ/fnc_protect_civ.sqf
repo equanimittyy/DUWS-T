@@ -62,6 +62,12 @@ if (count _buildingPositions < 4) then {
 // one area. Drawn only once the 4-position rebuild above has settled which building it is.
 _markername2 = [_targetpos, _searchRadius] call fnc_missionMarkerData;
 
+// Task alongside the ellipse, before the civilian exists: sited on _targetpos for the same reason
+// the ellipse is, so the marker, the trigger, the sweep and the task all describe one area. The
+// informant is placed inside that building a few lines down, within metres of this point.
+private _VARtaskgeneratedName = format ["protectciv_%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
+[_VARtaskgeneratedName, localize "STR_DUWS_T_protectciv", _mission_name, _targetpos, "defend"] call fnc_missionTaskCreate;
+
 // ----- 2. 放置平民（蓝方渔民，持续害怕动画）--------------------------------
 _civilianClass = "C_Man_Fisherman_01_F";
 _civGroup = [[0,0], WEST, [_civilianClass]] call BIS_fnc_spawnGroup;
@@ -130,9 +136,6 @@ sleep 8;
 [_speaker, _messageoverlord] remoteExec ["fnc_duws_dialogue", 0];
 sleep 3;
 
-// ----- 4. 创建任务条目（使用线人标记作为任务位置标记）----------------------
-_VARtaskgeneratedName = format ["protectciv_%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
-[_VARtaskgeneratedName, localize "STR_DUWS_T_protectciv", _mission_name, getPosATL _civilian, "defend"] call fnc_missionTaskCreate;
 sleep 5;
 [_speakeracteam, _messageroger] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;

@@ -20,11 +20,16 @@ private _site = [_MissionPos, _radius, 2] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
+// Marked before anything is built. The ellipse and the task are the only things telling the
+// player where the objective is, and the spawn-up below runs for tens of seconds.
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
+private _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
+[_VARtaskgeneratedName, localize "STR_DUWS_T_19ajhe1d", _mission_name, _randomPos, "kill"] call fnc_missionTaskCreate;
+
 [_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  [0,-2] select isDedicated];
 
 _vehpos = [_targetpos, 10, 30,10,0,0.1,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 
-_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 sleep 1;
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
@@ -59,11 +64,8 @@ sleep 1;
 [_targetpos, _radius] call fnc_garrisonBuildings;
 
 // TASK AND NOTIFICATION
-private "_VARtaskgeneratedName";
-_VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
-[_VARtaskgeneratedName, localize "STR_DUWS_T_19ajhe1d", _mission_name, _randomPos, "kill"] call fnc_missionTaskCreate;
  [_speaker1, _message0] remoteExec ["fnc_duws_dialogue", 0];
 
 // CREATE THE HVT GROUP

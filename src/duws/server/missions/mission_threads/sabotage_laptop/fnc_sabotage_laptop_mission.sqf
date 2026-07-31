@@ -24,7 +24,11 @@ _site params ["_randomPos", "_Building", "_targetpos"];
 
 _tableLoc = _targetpos;
 
+// Marked before anything is built. The ellipse and the task are the only things telling the
+// player where the objective is, and the spawn-up below runs for tens of seconds.
 _markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
+private _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
+[_VARtaskgeneratedName, localize "STR_DUWS_T_j97ecrsh", _mission_name, _randomPos, "download"] call fnc_missionTaskCreate;
 
 _laptop = "";
 switch (VERSION_X) do {
@@ -53,17 +57,8 @@ switch (VERSION_X) do {
 sleep 1;
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 
-// TASK AND NOTIFICATION
-private "_VARtaskgeneratedName";
-_VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
-
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
-switch (VERSION_X) do {
-    case "MODERN": {
-        [_VARtaskgeneratedName, localize "STR_DUWS_T_j97ecrsh", _mission_name, _randomPos, "download"] call fnc_missionTaskCreate;
-    };
-};
 
 // ADD SABOTAGE ACTION TO LAPTOP
 // Suffixed JIP id, not the laptop itself: the hardcore intel rotary below hangs off the same

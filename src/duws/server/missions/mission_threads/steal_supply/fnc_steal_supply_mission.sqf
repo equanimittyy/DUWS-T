@@ -23,11 +23,16 @@ private _site = [_MissionPos, _radius, 1] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
+// Marked before anything is built. The ellipse and the task are the only things telling the
+// player where the objective is, and the spawn-up below runs for tens of seconds.
+_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
+private _VARtaskgeneratedName = format ["rescue%1%2", round(_MissionPos select 0), round(_MissionPos select 1)];
+[_VARtaskgeneratedName, localize "STR_DUWS_T_p7qawzl4", _mission_name, _randomPos, "getin"] call fnc_missionTaskCreate;
+
 [_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 _vehPos = _targetpos;
 
-_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 
 // The objective itself: kept for the mission's duration so the abandoned-vehicle clause
 // cannot collect it. A player who disables it and takes half an hour would otherwise find
@@ -129,13 +134,10 @@ _group deleteGroupWhenEmpty true;
 sleep 1;
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 
-private "_VARtaskgeneratedName";
-_VARtaskgeneratedName = format ["rescue%1%2", round(_MissionPos select 0), round(_MissionPos select 1)];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
-[_VARtaskgeneratedName, localize "STR_DUWS_T_p7qawzl4", _mission_name, _randomPos, "getin"] call fnc_missionTaskCreate;
 ["dakaijunhuoku", [localize "STR_DUWS_T_xnjhk", localize "STR_DUWS_T_xnjhk2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
 // 设置任务目标位置
