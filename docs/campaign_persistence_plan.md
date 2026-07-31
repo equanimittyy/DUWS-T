@@ -118,6 +118,23 @@ Every write is gated on `mission_init_complete` (`server/server_var_init.sqf`). 
 during zone build-out describes half a campaign, and restoring it would produce a map with some
 zones and no others.
 
+**The last-disconnect write cannot be scheduled.** Under `persistent = 0` the mission ends in the
+frame the last player leaves, so a `spawn`ed save is a thread the mission may never get to run —
+the trigger that exists *because* it is the last moment the mission exists is also the one with no
+time to spare. The snapshot and the flush both `call`, inside the disconnect handler
+(`server/server_init.sqf:221`). That handler also has to identify the last player rather than count
+them: the leaver can still be in `allPlayers` when it fires, so the test excludes the UID the
+handler was handed.
+
+**A campaign that has ended is written, and must then never be auto-loaded.**
+`server/misc/fnc_capture_zones_task.sqf:87` ends the mission on total victory, which fires the
+`Ended` trigger above; the load screen's timeout reloads the newest snapshot on the next unattended
+start, and that campaign's win condition is true on its first evaluation — so the server ends and
+restarts into it again, indefinitely, with nobody able to play. Both endings go in the snapshot
+header: the win, and the `campaign_lost` that is otherwise stored nowhere and would restore a lost
+campaign as a live one on a flattened map. The index labels a terminal campaign and the timeout
+passes over it; a player can still pick it deliberately.
+
 ### The autosave loop
 
 One server-side thread, replacing what `fnc_autoSave.sqf` does today.
@@ -346,6 +363,15 @@ must not have a snapshot put the old list back.
 | Placement | input | `PosOfBLUHQ`, `AO_direction`, `serv_zones_array`, `zone_meta_array` |
 | Player build | input | `Array_of_FOBpos`, `Array_of_FOBname` |
 | Civilians | input | town positions, names, radii and populations |
+| Clock | outcome | `date` |
+
+**The campaign clock is stored because boot sets it unconditionally.**
+`server/server_init.sqf:154` calls `setDate [2035, 8, 3, time_of_day, 0]`, so without this every
+restore snaps back to the third day at the hour the campaign was configured with, and a night
+operation resumes at noon. It is gameplay state rather than presentation:
+`server/misc/fnc_night_horde_event.sqf:33` counts days off `date`, and the load screen labels each
+row with one. It is an outcome because it has to be re-applied after `setTimeMultiplier` (`:159`)
+rather than before the builders — the boot line would overwrite it.
 
 **Zone names are not stored.** `fnc_locatorzones_random.sqf:181` builds them as
 `format [localize "STR_DUWS_T_39z6pg7y", _i]`, so storing the string pins a restored campaign to
@@ -367,7 +393,7 @@ which radii survive. A Location's position comes out of the map's config and doe
 | Town reputation | outcome | `civ_town_rep` and `civ_town_ap` |
 | Escalation | outcome | `escalation_destroyed`. One integer; the census re-runs on the restored world |
 | Tier ratchet | outcome | the AP tier reached by each side |
-| Kill income | outcome | the per-player kill tally awaiting conversion, keyed by UID |
+| Kill income | outcome | the per-player kill tally awaiting conversion, keyed by UID, and the CP already banked for players who have left |
 
 **Ownership is stored as held positions and nothing derived from them.** Restore applies each as
 `["BLU", _pos] call fnc_zone_control_set`; that writer moves both side lists and both counters
@@ -385,6 +411,14 @@ the live pool re-derives it from a number that has since been spent down, silent
 enemy that had already reached armour — the failure mode
 [`economy_plan.md`](economy_plan.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites)
 describes. A ratchet whose only record is a number that goes both ways is not a ratchet.
+
+**Kill income needs one existing handler changed to survive a restore.**
+`server/server_init.sqf:214` zeroes a UID's tally on `PlayerConnected` so that a rejoining player
+does not resume a count from earlier in the session; against a restored tally it deletes exactly
+the entries the snapshot was written for. The handler has to skip UIDs the restore has just
+written. The banked total goes in beside the tally because it holds a leaver's unpaid kills
+(`:224`), which makes it the balance most likely to be non-zero at the moment a persistent server
+saves on the last disconnect.
 
 `civ_town_ap` is stored rather than recomputed, against this plan's usual preference for rebuilding
 derived state. It is a rank within the kept set's building counts, so recomputing it needs the
@@ -715,6 +749,12 @@ chose. Scaling by remaining health is the shape to copy — a refund proportiona
 means saving mid-firefight is neither punished nor exploitable. What each unit and vehicle is worth
 is already the price tables the economies buy from, so this is a walk and a sum, not new pricing.
 
+**The refund lands in the snapshot's pools, never in the live ones.** The pass runs on a repeating
+timer for the life of the campaign, so a refund applied through `fnc_ap_adjust` pays for the same
+live wave again at every interval, and on a server that stays up for days the enemy's pool grows
+with uptime rather than with play. Reconciling into the copy about to be serialised keeps each
+refund attached to the one restore that consumes it.
+
 ## Files touched
 
 | File | Change |
@@ -726,7 +766,7 @@ is already the price tables the economies buy from, so this is a walk and a sum,
 | `server/misc/fnc_campaign_vehicles.sqf` | New. Collects and respawns the stockpile around each anchor. |
 | `server/misc/fnc_autoSave.sqf` | Rewritten to call the new save; drop `saveGame`. Owns the interval loop and the no-overlap guard. |
 | `server/supports/fnc_sitrep_support.sqf:13` | Nothing here for persistence — it already asks the server to save. Its price and cooldown are [`economy_plan.md`](economy_plan.md#sitrep-becomes-free)'s business. |
-| `server/server_init.sqf` | Early gate before `:15` — scan, wait for the fork, apply; save triggers and the disconnect/end event handlers. Keep `enableSaving [false,false]` at `:113`; the engine save is no longer the mechanism. |
+| `server/server_init.sqf` | Early gate before `:15` — scan, wait for the fork, apply; save triggers and the disconnect/end event handlers. Re-apply the saved date after `:159`, and stop the connect handler at `:214` zeroing a restored kill tally. Keep `enableSaving [false,false]` at `:113`; the engine save is no longer the mechanism. |
 | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:8-16,54,97` | Branch to the restore path for zones; feed saved towns to civilian init; replay ownership and reveal after `WARCOM_init_done`. |
 | `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name; the announcement is silenced by the router, not a flag here. |
 | `client/misc/fnc_duws_dialogue.sqf` | Suppress mode, so replayed builders announce nothing at boot. |
@@ -747,16 +787,16 @@ is already the price tables the economies buy from, so this is a walk and a sum,
 - [ ] Prerequisites 1-3 above, each as its own change. Prerequisite 1 gates the rest.
 - [ ] Write `fnc_campaign_store.sqf`: namespace resolution, accessors, index, commit, scan. Verify: two campaigns written under separate IDs both appear in the index with correct headers; a commit replaces its own row rather than appending; `_prev` holds the previous payload.
 - [ ] Write `fnc_campaign_save.sqf` and dump a snapshot to the log without restoring. Verify: `toJSON` then `fromJSON` round-trips it unchanged, and nothing in it is an object, group, side or `netId`.
-- [ ] Write `fnc_campaign_restore.sqf` covering pools, bounties and ownership only. Verify: restart mid-campaign and confirm CP, AP, reputation and a farmed zone's reduced bounty all return.
+- [ ] Write `fnc_campaign_restore.sqf` covering pools, bounties and ownership only. Verify: restart mid-campaign and confirm CP, AP, reputation and a farmed zone's reduced bounty all return, and that the campaign resumes on the date and hour it was saved at rather than on day three.
 - [ ] Add zone replay through `fnc_createZone`, then the ownership and reveal passes after `WARCOM_init_done`. Verify: restored zones sit in the same places with the same radii, a captured zone comes back captured, a hardcore campaign's found zones stay found, and `amount_zones_created` matches the zone count instead of double it.
 - [ ] Add HQ, FOB and civilian-town replay. Verify: HQ actions work, FOB triggers fire, FOB names and towns come back where they were, and the restore replays no FOB radio announcements.
 - [ ] Add the vehicle persistence zone. Verify: a vehicle parked at a FOB returns with its damage, fuel, cargo and paint; a FOB's turret ring is not duplicated; the cap drops the furthest vehicle and logs it.
 - [ ] Add the MHQ. Verify: a deployed MHQ comes back deployed, with a working respawn point and one ammo box.
-- [ ] Add loadouts, support unlocks and cooldowns. Verify: a cooldown stamped just before the save has roughly its remaining time left after it, not the whole duration and not a wedged action.
+- [ ] Add loadouts, support unlocks and cooldowns. Verify: a cooldown stamped just before the save has roughly its remaining time left after it, not the whole duration and not a wedged action; a rejoining player's restored kill tally survives their reconnect instead of being zeroed by the connect handler.
 - [ ] Add the autosave loop, its parameter and the other three triggers. Verify: changing `DUWS_AutosaveInterval` in the lobby changes the observed write cadence in the `.rpt`; two triggers firing together produce one write, not two; at `0` the loop never fires but SITREP and a clean exit still write.
-- [ ] Add the zero-player gate. Verify: the campaign clocks stop with nobody connected and resume on join; a snapshot is written on the last disconnect; a connected headless client does not count as a player.
+- [ ] Add the zero-player gate. Verify: the campaign clocks stop with nobody connected and resume on join; a snapshot is written on the last disconnect, on a `persistent = 0` server as well as a `persistent = 1` one; a connected headless client does not count as a player.
 - [ ] Add the reconciliation pass. Verify: saving with a WARCOM wave live and reloading returns roughly the AP that wave cost, and saving twice in a row without playing does not inflate either pool.
-- [ ] Add the fork screen and its timeout. Verify: the screen is the first thing a game master sees on every campaign, singleplayer included; Load Game lists every saved campaign newest first, labelled with world, day, zones and CP; an unloadable save is listed disabled with its reason rather than hidden; New Game runs the old setup flow untouched and leaves existing campaigns intact; delete removes exactly one campaign; a dedicated server with nobody connected loads without waiting out the full bound; a fresh campaign is not made to wait on the screen before the terrain survey starts.
+- [ ] Add the fork screen and its timeout. Verify: the screen is the first thing a game master sees on every campaign, singleplayer included; Load Game lists every saved campaign newest first, labelled with world, day, zones and CP; an unloadable save is listed disabled with its reason rather than hidden; New Game runs the old setup flow untouched and leaves existing campaigns intact; delete removes exactly one campaign; a dedicated server with nobody connected loads without waiting out the full bound; a fresh campaign is not made to wait on the screen before the terrain survey starts; a campaign that was won or lost is listed as ended and is not what the timeout picks up.
 - [ ] Version, world and faction guards: refuse a snapshot from a different map or format version, or one naming a faction this session cannot detect, and say which on the control.
 - [ ] Add export and import. Verify: a campaign carried in a client's own profile restores on a different server with nothing pasted; a hand-edited carried snapshot is refused rather than loaded; the clipboard fallback round-trips, and an oversized snapshot either survives the edit control or is chunked.
 - [ ] On a dedicated server ([`info/testing.md`](info/testing.md#running-a-dedicated-server)): play, restart, confirm the campaign continues. This cannot be validated by a hosted session — a host is both server and client and will mask locality faults.
