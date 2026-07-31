@@ -10,9 +10,9 @@ if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {};
 
 // A whole-map census counts every House on the terrain, the overwhelming majority of them in
 // settlements no campaign ever visits, so the raw total is far larger than anything a player
-// could plausibly destroy. A thirtieth of it is the loss condition, so a level costs a
-// three-hundred-and-thirtieth of the map -- about fifty houses on Altis.
-#define ESCALATION_FRACTION (1 / 30)
+// could plausibly destroy. A fifty-third of it is the loss condition, so a level costs a
+// five-hundred-and-eighty-third of the map -- thirty houses on Altis.
+#define ESCALATION_FRACTION (1 / 53)
 #define ESCALATION_MAX_LEVEL 11
 
 // The census is one engine call that cannot yield -- measured at 5.03 s for Altis's 17472
@@ -131,6 +131,6 @@ addMissionEventHandler ["BuildingChanged", {
     };
 
     ["info", [localize "STR_DUWS_T_escalation_title",
-        format [localize "STR_DUWS_T_escalation_level", _level, escalation_multiplier]]]
+        format [localize "STR_DUWS_T_escalation_level", _level]]]
         remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 }];

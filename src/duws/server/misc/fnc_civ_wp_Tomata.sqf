@@ -23,10 +23,14 @@ _buildings = _buildings select {!isNull _x && {_x isKindOf "Building"}};
 // pose wanting a chair or a table would be played on open ground.
 //
 // Names are exact and unvalidated by the engine: BIS_fnc_ambientAnim has no SMOKING set and no
-// bare WATCH, only WATCH1 and WATCH2, and an unknown name leaves the civilian standing in the
-// default stance with nothing logged. The STAND_U variants are the unarmed idles, which is what
-// a civilian should be playing.
-private _idlePoses = ["STAND", "STAND_IA", "STAND_U1", "STAND_U2", "STAND_U3", "LEAN", "WATCH1", "WATCH2"];
+// bare WATCH, and an unknown name leaves the civilian standing in the default stance with
+// nothing logged.
+//
+// The _U suffix is what makes a set unarmed, and only the unarmed sets belong on a civilian: the
+// armed idles animate the hands around a rifle the civilian is not carrying, so STAND, STAND_IA,
+// LEAN and the WATCH pair all read on screen as a man holding an invisible gun. Three poses
+// rather than eight is the price of that, and the walking share carries most of the variety.
+private _idlePoses = ["STAND_U1", "STAND_U2", "STAND_U3"];
 
 // Water is the one surface worth rejecting: an unreachable waypoint inland is left behind by the
 // timeout, but a coastal town will happily walk someone into the sea.

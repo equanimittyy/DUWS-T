@@ -27,7 +27,7 @@ _civilian setVariable ["DUWS_civ_arrested", true, true];
 _civilian disableAI "PATH";
 
 // Charged whether or not they comply: the town saw the weapon raised either way.
-[_civilian getVariable ["civ_locIndex", -1], -1, "looted_civilian"] call fnc_town_rep_adjust;
+[_civilian getVariable ["civ_locIndex", -1], -1, "civilian_arrested"] call fnc_town_rep_adjust;
 
 sleep 3;
 if (isNull _civilian || !alive _civilian) exitWith {};

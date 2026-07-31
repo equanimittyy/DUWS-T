@@ -10,6 +10,11 @@ params [["_origin", []], ["_earner", objNull], ["_speakDry", true]];
 
 if (!isServer) exitWith {false};
 
+// Who hears about it. A null earner is a faucet with no one player to tell -- a mission completing
+// is everyone's news -- and 0 carries it to every machine; anyone else earned the reveal
+// themselves and is the only one told.
+private _audience = if (isNull _earner) then { 0 } else { _earner };
+
 // Rolled over the kinds that have something to give right now, not a fixed list: a kind whose
 // pool is empty never enters the draw, and a campaign late enough to have found everything
 // reports that instead of silently awarding nothing. They stay separate buckets rather than one
@@ -41,12 +46,10 @@ if !(_hiddenTowns isEqualTo []) then { _kinds pushBack "CIV" };
 
 // The dry-pool line lives here rather than at each faucet because four of the six side-mission
 // sites hand their result to a remoteExec and never see the return value, so they could not speak
-// it. A null earner is a faucet with no one player to tell -- a mission completing is everyone's
-// news -- and Overlord carries it there.
+// it. Overlord carries it when there is no earner to speak in their own voice.
 if (_kinds isEqualTo []) exitWith {
     if (_speakDry) then {
         private _speaker = if (isNull _earner) then { localize "STR_DUWS_T_OVERLORD" } else { name _earner };
-        private _audience = if (isNull _earner) then { 0 } else { _earner };
         [_speaker, localize "STR_DUWS_T_8skllpyx"] remoteExec ["fnc_duws_dialogue", _audience];
     };
     false
@@ -62,7 +65,7 @@ switch (selectRandom _kinds) do {
     // odds decaying as a campaign progresses, when late on most winning rolls land on ground
     // already found.
     case "ZONE": {
-        _awarded = ["ONE", (selectRandom _hiddenZones) select 1] call fnc_zone_reveal;
+        _awarded = ["ONE", (selectRandom _hiddenZones) select 1, _audience] call fnc_zone_reveal;
     };
 
     // Nearest wins. A town is somewhere the player goes to do something -- trade, recruit, ask a
@@ -76,7 +79,7 @@ switch (selectRandom _kinds) do {
             private _dist = _from distance2D (getPos (_towns select _x));
             if (_dist < _bestDist) then { _bestDist = _dist; _closest = _x };
         } forEach _hiddenTowns;
-        _awarded = [_closest] call fnc_civ_town_reveal;
+        _awarded = [_closest, _audience] call fnc_civ_town_reveal;
     };
 
 };

@@ -745,6 +745,21 @@ by-name form silently fails too if the nesting is dropped. That is how the memor
 display nothing while the `titleCut` fades on either side of it, all written nested, kept
 working. `src/duws/server/misc/fnc_intro_heli.sqf` is the worked example for both.
 
+## `titleText`'s speed argument fades the new card in; it never fades the old one out
+
+**`titleText [_text, _type, _speed]` times the card being *posted*. Posting an empty string to
+clear the screen therefore replaces the visible card instantly and then spends `_speed` seconds
+fading in nothing — the text snaps off rather than dissolving, and the call looks like a fade
+that was written and simply did not take.**
+
+`titleFadeOut _duration` is the only command that fades what is currently on screen. It takes a
+plain number, so `remoteExec` needs one pair of brackets rather than the two a titleText payload
+needs — `[2] remoteExec ["titleFadeOut", 0]`.
+
+**How to apply:** clear a title card with `titleFadeOut`, and keep the empty-string form only for
+the case it actually fits — swapping one card for another with no gap between them. The intro's
+memorial card in `src/duws/server/misc/fnc_intro_heli.sqf` is the worked example.
+
 ## `BIS_fnc_typeText`'s second and third arguments are screen coordinates, not timings
 
 **The signature is `[lines, x, y, format]`. A hold or a typing speed passed in those two slots is

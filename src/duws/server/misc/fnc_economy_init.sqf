@@ -56,6 +56,66 @@ fnc_ap_adjust = {
 	};
 };
 
+// How long a town has to stop taking a given kind of charge before its card is posted, in seconds.
+// Long enough that the shells of one fire mission land inside one window, short enough that a lone
+// act -- a civilian treated, an arrest -- is still answered while the player is standing over it.
+#define REP_ANNOUNCE_WINDOW 4
+
+// Pending reputation cards, keyed by town and cause together: [delta, deadline]. Server state
+// with one reader, and an entry's presence is also the flag saying a card is already queued for
+// that pair, which is what keeps one announce thread per pair rather than one per charge.
+civ_rep_pending = createHashMap;
+
+// Posts one card for a town and a cause once that pair stops moving, and names the town, the
+// cause and the applied figure.
+//
+// One card per burst, not per charge: a fire mission changes the damage state of dozens of
+// buildings within a few seconds and each one is its own charge, so a card each buries the screen
+// and pushes everything else off it. Accumulating also means the number the player reads is what
+// the barrage actually cost rather than the last -2 of forty.
+//
+// The cause is half the key rather than a field, so a barrage that levels houses *and* kills
+// civilians posts one card for each. Summing across causes would report a figure under a heading
+// that only explains part of it -- and with a heal and a demolition in the same window the two
+// could cancel into a card that named the wrong direction, or into no card at all.
+fnc_town_rep_announce = {
+	params ["_townIndex", "_reason"];
+	private _key = format ["%1:%2", _townIndex, _reason];
+	// Each further charge of the same cause pushes the deadline out rather than spawning a second
+	// thread, so this waits out the whole barrage however long it runs.
+	waitUntil { sleep 1; diag_tickTime > ((civ_rep_pending getOrDefault [_key, [0, 0]]) select 1) };
+	// Charges that cancel out inside one window leave nothing to report.
+	private _delta = (round (((civ_rep_pending deleteAt _key) select 0) * 100)) / 100;
+	if (_delta == 0) exitWith {};
+
+	private _name = text ((missionNamespace getVariable ["civ_locations", []]) param [_townIndex, locationNull]);
+	if (_name isEqualTo "") then { _name = format ["Unnamed%1", _townIndex] };
+
+	private _why = localize (switch (_reason) do {
+		case "building_destroyed":    { "STR_DUWS_T_civ_rep_why_building" };
+		case "civilian_harmed":       { "STR_DUWS_T_civ_rep_why_harmed" };
+		case "healed_civilian":       { "STR_DUWS_T_civ_rep_why_healed" };
+		case "civilian_arrested":     { "STR_DUWS_T_civ_rep_why_arrested" };
+		case "idap_success":          { "STR_DUWS_T_civ_rep_why_aid" };
+		case "idap_failed":           { "STR_DUWS_T_civ_rep_why_aid_failed" };
+		case "protect_civ_success":   { "STR_DUWS_T_civ_rep_why_escort" };
+		case "protect_civ_casualty":  { "STR_DUWS_T_civ_rep_why_escort_lost" };
+		case "garrison_cleared":      { "STR_DUWS_T_civ_rep_why_garrison" };
+		default                       { "STR_DUWS_T_civ_rep_why_other" };
+	});
+
+	// A negative figure prints its own sign; a positive one has none to print.
+	private _amount = format ["%1%2", ["", "+"] select (_delta > 0), _delta];
+	private _card = if (_delta > 0) then {
+		["repup", [localize "STR_DUWS_T_rqwho9bq",
+			format [localize "STR_DUWS_T_civ_rep_up", _name, _why, _amount]]]
+	} else {
+		["info", [localize "STR_DUWS_T_shengwangjianshao",
+			format [localize "STR_DUWS_T_civ_rep_down", _name, _why, _amount]]]
+	};
+	_card remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
+};
+
 // Per-town reputation, and the only reputation there is: server-only, signed delta, the writer
 // owns the rounding, callers never assign. Deltas are fractional (+0.5, -0.3), so two callers
 // rounding differently would compound drift into what a town will sell.
@@ -67,7 +127,7 @@ fnc_ap_adjust = {
 //
 // The player is told here rather than by each caller. Eight sites announced their own change in
 // six different wordings, two announced nothing, and one quoted a figure the clamp had already
-// reduced. Announced off the applied change, so a town pinned at a bound reports nothing at all
+// reduced. Queued off the applied change, so a town pinned at a bound contributes nothing at all
 // instead of claiming a charge it absorbed.
 fnc_town_rep_adjust = {
 	if (!isServer) exitWith {};
@@ -83,12 +143,13 @@ fnc_town_rep_adjust = {
 	["INFO", "CIV", format ["TOWNREP %1: %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 
 	if (_new == _old) exitWith {};
-	private _card = if (_new > _old) then {
-		["repup", [localize "STR_DUWS_T_rqwho9bq", localize "STR_DUWS_T_civ_rep_up"]]
-	} else {
-		["info", [localize "STR_DUWS_T_shengwangjianshao", localize "STR_DUWS_T_civ_rep_down"]]
-	};
-	_card remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
+	private _key = format ["%1:%2", _townIndex, _reason];
+	private _queued = _key in civ_rep_pending;
+	private _entry = civ_rep_pending getOrDefault [_key, [0, 0]];
+	_entry set [0, (_entry select 0) + (_new - _old)];
+	_entry set [1, diag_tickTime + REP_ANNOUNCE_WINDOW];
+	civ_rep_pending set [_key, _entry];
+	if (!_queued) then { [_townIndex, _reason] spawn fnc_town_rep_announce };
 };
 
 // A cost with escalation applied, rounded up so a scaled price is never cheaper than the base

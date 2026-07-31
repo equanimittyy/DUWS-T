@@ -1711,12 +1711,52 @@
                 <Chinesesimp>查看载具状态</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_civ_rep_up">
-                <Original>This town's standing with BLUFOR has improved.</Original>
-                <English>This town's standing with BLUFOR has improved.</English>
+                <Original>%1's reputation with BLUFOR has improved due to %2! %3 Reputation.</Original>
+                <English>%1's reputation with BLUFOR has improved due to %2! %3 Reputation.</English>
             </Key>
             <Key ID="STR_DUWS_T_civ_rep_down">
-                <Original>This town's standing with BLUFOR has suffered.</Original>
-                <English>This town's standing with BLUFOR has suffered.</English>
+                <Original>%1's reputation with BLUFOR has deteriorated due to %2! %3 Reputation.</Original>
+                <English>%1's reputation with BLUFOR has deteriorated due to %2! %3 Reputation.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_rep_why_building">
+                <Original>a destroyed building</Original>
+                <English>a destroyed building</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_rep_why_harmed">
+                <Original>a civilian being harmed</Original>
+                <English>a civilian being harmed</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_rep_why_healed">
+                <Original>a civilian being treated</Original>
+                <English>a civilian being treated</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_rep_why_arrested">
+                <Original>a civilian held at gunpoint</Original>
+                <English>a civilian held at gunpoint</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_rep_why_aid">
+                <Original>an aid delivery</Original>
+                <English>an aid delivery</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_rep_why_aid_failed">
+                <Original>an aid delivery that never arrived</Original>
+                <English>an aid delivery that never arrived</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_rep_why_escort">
+                <Original>civilians brought to safety</Original>
+                <English>civilians brought to safety</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_rep_why_escort_lost">
+                <Original>a civilian lost under escort</Original>
+                <English>a civilian lost under escort</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_rep_why_garrison">
+                <Original>the garrison being driven out</Original>
+                <English>the garrison being driven out</English>
+            </Key>
+            <Key ID="STR_DUWS_T_civ_rep_why_other">
+                <Original>recent events</Original>
+                <English>recent events</English>
             </Key>
             <Key ID="STR_DUWS_T_mapclick_busy">
                 <Original>Another request is already waiting for you to mark the map.</Original>
@@ -1771,8 +1811,8 @@
                 <English>%1  -&gt;  %2 CP</English>
             </Key>
             <Key ID="STR_DUWS_T_escalation_level">
-                <Original>The war has worsened. Escalation level %1: all support costs are now %2x.</Original>
-                <English>The war has worsened. Escalation level %1: all support costs are now %2x.</English>
+                <Original>The war has escalated to level %1 due to destroyed buildings. Expect supports to cost more.</Original>
+                <English>The war has escalated to level %1 due to destroyed buildings. Expect supports to cost more.</English>
             </Key>
             <Key ID="STR_DUWS_T_escalation_tooltip">
                 <Original>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of Altis and the campaign is lost.</Original>
@@ -3193,8 +3233,8 @@
                 <Chinesesimp>此任务的目标位置可以通过搜索敌军尸体来揭露</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_SEARCH_ACTION">
-                <Original>Search For OPFOR Positions</Original>
-                <English>Search For OPFOR Positions</English>
+                <Original>Search</Original>
+                <English>Search</English>
             </Key>
             <Key ID="STR_DUWS_T_SEARCH_CORPSE_ACTION">
                 <Original>Search Body</Original>

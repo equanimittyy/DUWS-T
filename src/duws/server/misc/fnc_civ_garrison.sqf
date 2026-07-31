@@ -47,6 +47,13 @@ private _fnc_makeClearTrigger = {
     _trg
 };
 
+// OPFOR standing inside the trigger's own area, which is what makes the town clearable. SEIZED is
+// satisfied by an empty town as readily as by a fought-out one, so nothing else can tell the two
+// apart.
+private _fnc_opforPresent = {
+    ({side _x == EAST} count (_centre nearEntities [["CAManBase"], _radius])) > 0
+};
+
 private _garrisoned = false;
 private _trg = objNull;
 
@@ -67,9 +74,24 @@ while {true} do {
                     if (_rep <= -15) then { _tier = 2 };
                     if (_rep <= -20) then { _tier = 3 };
                     [_tier] spawn _fnc_spawnTier;
-                    _trg = call _fnc_makeClearTrigger;
-                    _garrisoned = true;
-                    ["INFO", "CIV", format ["Garrison tier %1 spawned at town %2 (rep %3)", _tier, _townIndex, _rep]] call fnc_log;
+                    // Armed only once the garrison is standing in it. The three spawners are
+                    // scheduled and each resolves a safe position before it places anything, so
+                    // for the first half-minute the town holds the player and nobody else -- and
+                    // that is precisely what WEST SEIZED reports as cleared. A trigger armed
+                    // beside the spawn therefore hands the town its whole reputation debt back
+                    // for a garrison nobody fought, which reads in play as reputation climbing
+                    // out of the negative band on its own from standing in the town.
+                    private _deadline = diag_tickTime + 60;
+                    waitUntil { sleep 2; (call _fnc_opforPresent) || {diag_tickTime > _deadline} };
+                    if (call _fnc_opforPresent) then {
+                        _trg = call _fnc_makeClearTrigger;
+                        _garrisoned = true;
+                        ["INFO", "CIV", format ["Garrison tier %1 spawned at town %2 (rep %3)", _tier, _townIndex, _rep]] call fnc_log;
+                    } else {
+                        // Left un-garrisoned rather than credited: the band is still the
+                        // condition, so the next pass tries again.
+                        ["WARN", "CIV", format ["Garrison tier %1 at town %2 placed no OPFOR within %3 m in 60 s; not armed", _tier, _townIndex, _radius]] call fnc_log;
+                    };
                 };
             };
         };

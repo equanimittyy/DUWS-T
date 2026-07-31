@@ -165,7 +165,7 @@ signal the player already has.
 | Entry | Key | Icon |
 | --- | --- | --- |
 | Carry Pilot / Drop Pilot / Load Into Vehicle / Unload Pilot | `STR_DUWS_T_carry_pilot` and siblings | — |
-| Search For OPFOR Positions | `STR_DUWS_T_INTEL_SEARCH_ACTION` | `holdAction_search_ca.paa` |
+| Search | `STR_DUWS_T_INTEL_SEARCH_ACTION` | `holdAction_search_ca.paa` |
 | Search Body | `STR_DUWS_T_SEARCH_CORPSE_ACTION` | `holdAction_search_ca.paa` |
 | Search Container | `STR_DUWS_T_SEARCH_CONTAINER` | `holdAction_search_ca.paa` |
 | Search Intel | `STR_DUWS_T_7yec9ifj` | `holdAction_search_ca.paa` |

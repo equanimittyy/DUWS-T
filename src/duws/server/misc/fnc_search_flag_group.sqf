@@ -6,13 +6,13 @@
 //
 // Rolled at creation rather than at the action: how much intel exists is then a function of how
 // much OPFOR the campaign put on the ground, not of how often a key was pressed. It also means
-// only the flagged minority carries any state at all -- one unit in twelve rather than every
-// corpse the campaign produces.
+// only the flagged share carries any state at all, rather than every corpse the campaign
+// produces.
 //
 // Broadcast because the search action's condition is evaluated on the client that would draw it.
 // That makes the flag readable by a client with the debug console open, which is accepted here:
 // this is co-op against AI, and the alternative -- offering the action on every body and
-// answering "nothing" from the server -- puts a prompt on the ~92% of bodies that hold nothing.
+// answering "nothing" from the server -- puts a prompt on every body the campaign produces.
 //
 // Takes a group or a plain array of units, because the mission patrol spawners hold neither
 // shape consistently.

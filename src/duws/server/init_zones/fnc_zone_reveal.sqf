@@ -2,7 +2,12 @@
 //
 // Returns true only when this call changed something, so a caller can tell "revealed a zone"
 // from "that zone was already on the map" without re-reading the array.
-params ["_one_or_all", ["_zonePos", []]];
+//
+// _audience is who is told. Walking into a zone is everyone's news and takes the default; a zone
+// bought with a search belongs to the one player who paid for it, and passing that player also
+// puts the line on their screen as a hint -- the dialogue queue can hold it behind other traffic,
+// and a result the player acted for should not arrive late or scroll past unread.
+params ["_one_or_all", ["_zonePos", []], ["_audience", 0]];
 
 if (!isServer) exitWith {false};
 
@@ -27,7 +32,9 @@ switch (_one_or_all) do {
             (zone_namePOS_pairs select _i) set [2, true];
             [_zonePos] call _fnc_paint;
             _revealed = true;
-            [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_zonereveal"] remoteExec ["fnc_duws_dialogue", 0];
+            private _line = localize "STR_DUWS_T_zonereveal";
+            [localize "STR_DUWS_T_OVERLORD", _line] remoteExec ["fnc_duws_dialogue", _audience];
+            if (_audience isEqualType objNull) then { [_line] remoteExec ["hint", _audience] };
         };
     };
 

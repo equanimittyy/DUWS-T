@@ -37,28 +37,36 @@ came back wrong. `fnc_duws_deploy` disabled simulation *after* placing each prop
 the position just written to it — and it never re-applied the position after rotating. The prefabs
 that place these props do both, which is why the drift appeared only across a stow/deploy cycle.
 
-- [ ] Stow a zone, deploy it, compare against a screenshot taken before. Props still off by a little
+- [x] Stow a zone, deploy it, compare against a screenshot taken before. Props still off by a little
       means the residue is `createVehicle`'s own placement rather than those two ordering faults
 
 ## Per-town reputation: shipped, not yet exercised
 
-- [ ] Destroy a house as a **client** on a dedicated server and watch the escalation counter. No movement means `BuildingChanged` is local-only and escalation has never worked in dedicated MP — neither did the war-crimes script it replaced. Record it rather than working around it
-- [ ] Clear a garrison in a populated town. If the `WEST SEIZED` trigger never fires, CIVILIAN-side units are blocking it and the fallback is a condition trigger counting hostile units in `thisList`
-- [ ] Check the census line in the RPT on a new map, and confirm a single fire mission cannot advance an escalation level. Both numbers are logged on the first run
+- [x] Destroy a house as a **client** on a dedicated server and watch the escalation counter. No movement means `BuildingChanged` is local-only and escalation has never worked in dedicated MP — neither did the war-crimes script it replaced. Record it rather than working around it
+- [ ] Take a town below -10 and stand in it. A garrison must appear and the town must keep its debt
+      until that garrison is fought. Reputation returning to 0 on its own means something other
+      than the clear trigger's arming order is discharging it; the RPT says which happened, since
+      an armed garrison logs `Garrison tier N spawned` and a spawn that put nothing inside the
+      trigger area logs `placed no OPFOR`
+- [ ] Clear that garrison. If the `WEST SEIZED` trigger never fires, CIVILIAN-side units are blocking it and the fallback is a condition trigger counting hostile units in `thisList`
+- [ ] Read the `Escalation census:` line in the RPT on a new map and check `tier` against 30.
+      Thirty buildings a level across eleven levels is the shipped figure, but it is reached as a
+      fraction of a whole-map house count rather than as a constant, so it lands on 30 for Altis's
+      17472 houses and proportionally lower on any smaller map. That line is the only place the
+      total, the budget and `tier` ever appear
 
-## The search system: shipped whole, exercised nowhere
+## The search system: shipped whole, barely exercised
 
-Five separate faucets became one two-roll path, and not a line of it has run in a session. The
-rewrite deleted seven functions, so a failure here is more likely to be something missing than
-something wrong.
+Five separate faucets became one two-roll path, and the rewrite deleted seven functions, so a
+failure here is more likely to be something missing than something wrong.
 
-- [ ] Clear a garrison and search bodies. Roughly one in twelve offers the action at all; the rest
-      show no prompt, which is the flag working rather than the action being broken
-- [ ] Search a flagged body, an intel-mission objective, a laptop and a piece of armour. All four
+- [ ] Clear a garrison and search bodies. Half of them carry the action; a garrison offering none
+      at all is the flag not reaching them rather than a cold run
+- [x] Search a flagged body, an intel-mission objective, a laptop and a piece of armour. All four
       go through the one action on the player now, so a prompt missing on the two objects means the
       flag never reached them, not that their own action broke — they no longer have one
-- [ ] Frisk an arrested civilian. Coins, one document and empty-handed should still land at roughly
-      3 : 1 : 4, spoken in the team's voice rather than the searcher's
+- [x] Frisk an arrested civilian. Coins, one document and empty-handed should still land at roughly
+      3 : 1 : 4
 - [ ] Play far enough to exhaust the intel pool, then search a flagged body. It must speak an
       outcome. Silence means the payout re-draw is not dropping the dry kind
 - [ ] On a dedicated server with two clients, have one player search a body and send the other over
@@ -71,9 +79,9 @@ something wrong.
       reveals a zone. These two pay on completion rather than through a search, so the rewrite did
       not touch them; they are the two sites that never paid out at all
 
-**The numbers are unbalanced by admission.** An 8 % flag rate on a garrison, 15 % on a mission
-group, and every payout weight, are the shape's placeholder values rather than played ones. They
-are one table in `server/server_var_init.sqf`, with what a document is worth in
+**The numbers are only half played.** The 50 % flag rate on a garrison was set from play; 15 % on a
+mission group and every payout weight are still the shape's placeholder values. They are one table
+in `server/server_var_init.sqf`, with what a document is worth in
 `server/misc/fnc_intelAnalysis.sqf`, and are meant to be moved once the arc has been felt end to
 end.
 

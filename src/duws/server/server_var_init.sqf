@@ -199,16 +199,16 @@ MASTER_allLocationsPos = [];publicVariable "MASTER_allLocationsPos";
 //
 // civ_frisk is flagged on every civilian and carries its own `nothing` weight, which keeps the
 // shipped 37.5 / 12.5 / 50 split exactly: the arrest is the price, and it is paid before this.
-// The speaker and the empty-handed line are per-source too. A body is the searcher talking to
-// themselves; a frisk is the team reporting what a detainee was carrying, and the two should not
-// sound alike just because they share a driver. "" as a speaker means the searcher's own name.
+// The empty-handed line is per-source, because a body that held nothing and a detainee who was
+// carrying nothing are different sentences. The voice is not: every search is the searcher
+// reporting what they found, whatever they were searching.
 //
-// [successChance, [[payoutKind, weight], ...], speakerKey, nothingKey]
+// [successChance, [[payoutKind, weight], ...], nothingKey]
 DUWS_searchSources = createHashMapFromArray [
-    ["garrison",  [0.08, [["intel", 2], ["pool", 3], ["coins", 2], ["document", 1]], "", "STR_DUWS_T_INTEL_FOUND_n"]],
-    ["mission",   [0.15, [["intel", 3], ["pool", 2]],                                "", "STR_DUWS_T_INTEL_FOUND_n"]],
-    ["objective", [1,    [["intel", 1]],                                             "", "STR_DUWS_T_INTEL_FOUND_n"]],
-    ["civ_frisk", [1,    [["coins", 3], ["document", 1], ["nothing", 4]], "STR_DUWS_T_actionteam", "STR_DUWS_T_LOOT6"]]
+    ["garrison",  [0.5,  [["intel", 2], ["pool", 3], ["coins", 2], ["document", 1]], "STR_DUWS_T_INTEL_FOUND_n"]],
+    ["mission",   [0.15, [["intel", 3], ["pool", 2]],                                "STR_DUWS_T_INTEL_FOUND_n"]],
+    ["objective", [1,    [["intel", 1]],                                             "STR_DUWS_T_INTEL_FOUND_n"]],
+    ["civ_frisk", [1,    [["coins", 3], ["document", 1], ["nothing", 4]],            "STR_DUWS_T_LOOT6"]]
 ];
 
 // manually_chosen

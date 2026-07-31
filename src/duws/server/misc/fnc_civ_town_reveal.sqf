@@ -4,7 +4,11 @@
 //
 // Returns true only when this call changed something, so a caller can tell "revealed a town"
 // from "that town was already on the map".
-params ["_townIndex"];
+//
+// _audience is who is told, on the same rule fnc_zone_reveal uses: the presence trigger's reveal
+// is everyone's news and takes the default, while one bought with a search is hinted to the
+// player who paid for it as well as spoken to them.
+params ["_townIndex", ["_audience", 0]];
 
 if (!isServer) exitWith {false};
 
@@ -19,6 +23,8 @@ _vis set [_townIndex, true];
 (format ["civ_area_%1", _townIndex]) setMarkerAlpha 0.3;
 (format ["civ_icon_%1", _townIndex]) setMarkerAlpha 1;
 
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_townreveal"] remoteExec ["fnc_duws_dialogue", 0];
+private _line = localize "STR_DUWS_T_townreveal";
+[localize "STR_DUWS_T_OVERLORD", _line] remoteExec ["fnc_duws_dialogue", _audience];
+if (_audience isEqualType objNull) then { [_line] remoteExec ["hint", _audience] };
 
 true

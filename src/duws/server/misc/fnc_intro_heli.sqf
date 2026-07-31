@@ -132,7 +132,9 @@ sleep 8;
 // alone and throws on the type -- which is the memorial card silently not displaying at all.
 [["In memory of KillaTomata, the creator of the original DUWS_X.", "PLAIN", 1]] remoteExec ["titleText", 0];
 sleep 6;
-[["", "PLAIN", 2]] remoteExec ["titleText", 0];
+// titleFadeOut, not an empty titleText: the speed argument times the *new* card fading in, so an
+// empty one replaces the memorial the instant it is issued and the card snaps off screen.
+[2] remoteExec ["titleFadeOut", 0];
 sleep 3;
 [["", "PLAIN", 5]] remoteExec ["cutText", 0];
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_heli_ttgtw"] remoteExec ["fnc_duws_dialogue", 0];

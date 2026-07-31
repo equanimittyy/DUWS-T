@@ -33,12 +33,9 @@ _target setVariable ["DUWS_search_src", _source, true];
 // hands back an object whose action no longer shows.
 _target setVariable ["DUWS_search_done", false, true];
 
-// The two conditions the flag cannot satisfy on its own, reported rather than worked around --
-// a debug path that lifted them would stop exercising the gate the real action runs.
+// The one condition the flag cannot satisfy on its own, reported rather than worked around -- a
+// debug path that lifted it would stop exercising the gate the real action runs.
 private _blockers = [];
-if (isNil "hardcore_mode_enable" || {!hardcore_mode_enable}) then {
-    _blockers pushBack "hardcore mode is off";
-};
 if (_target isKindOf "CAManBase" && {alive _target}
     && {!(_target getVariable ["isSurrendered", false])}) then {
     _blockers pushBack "a living man is excluded until surrendered";

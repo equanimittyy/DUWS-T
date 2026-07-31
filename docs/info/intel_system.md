@@ -56,6 +56,11 @@ entry of `civ_locations`. Both repaint the markers from the flag rather than bes
 caller can leave the map and the array disagreeing, and both return whether they changed anything
 so a caller can tell "revealed something" from "that was already on the map".
 
+Both take the audience for their announcement rather than assuming one. Walking into a zone or a
+town is everyone's news and takes the default of `0`; a reveal bought with a search or a bribe
+belongs to the one player who paid for it, so `fnc_intel_payout` passes its earner down and the
+line is hinted to that player as well as spoken to them.
+
 Two functions rather than one switched writer, because the two arrays are keyed differently — a
 zone by position compared through `str`, since that array carries no index; a town by index — and
 their markers follow unrelated naming conventions. The town writer sets its alphas directly
@@ -125,14 +130,17 @@ still has a route.
 
 | Source | Capped |
 |---|---|
-| Body search | by the flagged materiel on the ground, not by a clock — 8 % of a garrison, 15 % of a mission group |
+| Body search | by the flagged materiel on the ground, not by a clock — 50 % of a garrison, 15 % of a mission group |
 | Side-mission objective | flagged with certainty; reaching the object is the gate |
 | Walking into a zone or town | not applicable; it reveals the ground the player is standing on and rolls nothing |
 | Civilian frisk | flagged with certainty; the arrest is the price, and its payout table carries the odds |
 
-**Civilians are the intended primary source and the body search is a trickle.** The flag rate is
-what holds that ordering now, so anyone tuning it should raise the civilian side before the flag
-rate, or the two stop being different mechanisms and hardcore turns back into a kill count.
+**Half a garrison is searchable, so a fight is a reliable route to intel rather than a lottery.**
+The rate was an eighth of that and read in play as a broken action: a player who cleared a
+position and found no prompt on any body had no way to tell a cold roll from a feature that never
+worked. What keeps the search from collapsing into a kill count is its payout table, where intel
+is one weight of four, not its flag rate — so a garrison pays *something* most of the time and
+pays intel far less often than that.
 
 The sources draw from one finite pool, so they compete rather than stack, and the hidden-map
 phase ends when the last hidden position is found however that happened. That is the intended arc — but it
@@ -158,9 +166,9 @@ only to make a timer survive dying. A flag lives on the body and dies with it, s
 needed. `DUWS_civ_intel_asked` still rides `econ_tick`, because asking a *local* is capped against
 a finite population rather than against a clock.
 
-Only the flagged minority carries any state, so the cost is one unit in twelve rather than every
-corpse the campaign produces. Flags are broadcast, because the action's condition is evaluated on
-the client that would draw it and an unflagged thing offers no action at all.
+Only the flagged share carries any state, rather than every corpse the campaign produces. Flags are
+broadcast, because the action's condition is evaluated on the client that would draw it and an
+unflagged thing offers no action at all.
 
 **A zone rebuilding its garrison re-rolls, and that is allowed.** A player can leave, wait out the
 despawn, return and search a fresh garrison — but the cycle is not a button press, it is walking
@@ -192,8 +200,17 @@ related reason: announcing an empty search and then handing over a document says
 things about one draw.
 
 `nothing` is a row rather than the absence of one, and a weight of zero is how a source opts out of
-a kind. The speaker and the empty-handed line are per-source too: a body is the searcher talking to
-themselves, a frisk is the team reporting what a detainee was carrying.
+a kind. The empty-handed line is per-source too, because a body that held nothing and a detainee
+who was carrying nothing are different sentences.
+
+**Every outcome is the searcher's, in their voice and on their screen alone.** A frisk spoke in the
+team's callsign until the two shapes were reconciled; the player did the searching either way, and
+one voice per faucet was the thing this system was collapsed to remove. It is hinted as well as
+spoken: the dialogue queue holds a line behind whatever traffic is already in it, and a result the
+player held an action for should not arrive late or scroll past unread. The audience is the
+searcher rather than everyone for the same reason a reveal earned by a search names its earner
+(§[One writer per reveal flag](#one-writer-per-reveal-flag-one-function-for-payout)) — a body
+emptied in co-op is not news the other three players asked for.
 
 **Both rolls run on the server, and so does everything they read.** A roll a client makes is a roll
 a client can retry. Server authority over the roll alone is not enough: the reveal payout was once
