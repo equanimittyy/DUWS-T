@@ -138,11 +138,10 @@ revisiting if the placement above proves insufficient.
 ## Checked and dismissed
 
 **Paradrop canopies no longer leak.** OPFOR reinforcement used to create a `Steerable_Parachute_F` per
-dropped trooper and nothing deleted them; that whole feature is removed.
-`misc/fnc_repetitive_cleanup.sqf` still will not collect one — its categories are weapon holders,
-timebombs, smokes, dead bodies, dead vehicles and *immobile* vehicles, and a landed canopy still reports
-`canMove` — which matters for the BLUFOR paradrop support and for anything that reintroduces a scripted
-drop.
+dropped trooper and nothing deleted them; that whole feature is removed. `misc/fnc_repetitive_cleanup.sqf`
+collects a landed canopy either way: `ParachuteBase` is one of its litter classes, and the vehicle clause
+takes anything unmanned. Worth knowing for the BLUFOR paradrop support and for anything that reintroduces
+a scripted drop.
 
 **VCOM AI is compiled but never started.** `description.ext` includes `modules/vcom/cfgFunctions.hpp`,
 so every `VCM_fnc_*` exists and greps as live code, but nothing calls `VCM_fnc_VcomInit` — the only

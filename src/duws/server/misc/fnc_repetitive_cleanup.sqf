@@ -3,7 +3,7 @@
     NAME: misc\fnc_repetitive_cleanup.sqf
 
     DESCRIPTION:
-    Deletes what play leaves behind: bodies, wrecks, vehicles abandoned where they broke down,
+    Deletes what play leaves behind: bodies, wrecks, any vehicle left standing with nobody in it,
     dropped weapons, spent smoke, supply crates and parachutes. One lifetime covers all of it,
     set by the DUWS_CleanupLifetime parameter.
 
@@ -105,12 +105,19 @@ while {true} do {
     { _candidates pushBackUnique _x } forEach allDeadMen;
     { if (_x == vehicle _x) then { _candidates pushBackUnique _x } } forEach (allDead - allDeadMen);
 
-    // Abandoned vehicles. Statics are excluded because the clause means "could be driven and no
-    // longer can" -- a turret satisfies !canMove by being a turret, which made every unmanned
-    // emplacement a false positive. One that regains crew or mobility has its clock cleared,
-    // unless it was retired deliberately, whose deadline is not this clause's to reset.
+    // Idling vehicles: unmanned is the whole test now. It used to also demand !canMove, which meant
+    // an intact vehicle abandoned anywhere on the map was never a candidate -- only a broken-down one
+    // was -- and a campaign's worth of requisitioned trucks parked wherever they were last needed is
+    // the litter this sweep exists to remove. What still holds them is the same two things that hold
+    // everything else: DUWS_base_keep_radius parks them at a base, and the persistent flag keeps a
+    // mission objective or a composition member whatever its crew.
+    // Statics stay excluded. The clause is about vehicles somebody drove and walked away from, and a
+    // turret is unmanned by default -- collecting those would take a zone's emplacements off the map
+    // the moment the player who captured them steps away.
+    // A vehicle that regains crew has its clock cleared, unless it was retired deliberately, whose
+    // deadline is not this clause's to reset.
     {
-        if (!(_x isKindOf "StaticWeapon") && !canMove _x && {alive _x} count crew _x == 0) then {
+        if (!(_x isKindOf "StaticWeapon") && {({alive _x} count crew _x) == 0}) then {
             _candidates pushBackUnique _x;
         } else {
             if !(_x in _disposed) then { _x setVariable ["DUWS_binAt", nil] };
