@@ -265,7 +265,7 @@ correct for a fresh campaign, and each is resolved in the design below.
 | The setup-screen gates block on globals a *client* publishes | `server/server_init.sqf:46,52` | A restore has no player at those screens, so boot never gets past them |
 | The locator `spawn`s `fnc_createZone` per zone, so builds finish out of order | `server/init_zones/fnc_locatorzones_random.sqf:181` | Registration order is not zone order, so anything keyed by array position is keyed to the wrong zone. `zone_meta_array` carries `_zone_num` for this reason |
 | `fnc_fob_server` rolls a fresh name and announces the FOB over radio behind a 5 s sleep | `server/supports/fnc_fob_server.sqf:7,20-24` | Replaying it renames every FOB and queues one callout per FOB at boot |
-| Zone names are localised at creation | `server/init_zones/fnc_locatorzones_random.sqf:181` | A stored name pins a restored campaign to the language it was created in |
+| Zone names are drawn at random from a pool that records what it has spent | `server/init_zones/fnc_zone_state_init.sqf`, `fnc_createzone.sqf` | Replaying the builder renames every zone on the map. The names *and* the used list have to be restored, and the builder must not re-draw |
 | Campaign settings are set *and* broadcast by a client | `client/dialog/fnc_process_campaign_menu.sqf:480-515`, `fnc_process_enviro_menu.sqf:88-194` | A restore that only assigns them server-side leaves every client on defaults |
 | Arsenal contents are resolved at boot from whatever mods are loaded | `server/misc/fnc_create_ammo_lists.sqf` | Storing the resolved classnames pins the campaign to that mod set |
 | Hardpoints are sited inside `fnc_createZone`, if [`hardpoint_system_plan.md`](hardpoint_system_plan.md) lands | — | Replaying zones re-rolls every hardpoint position and orphans its cleared state |
@@ -373,10 +373,13 @@ operation resumes at noon. It is gameplay state rather than presentation:
 row with one. It is an outcome because it has to be re-applied after `setTimeMultiplier` (`:159`)
 rather than before the builders — the boot line would overwrite it.
 
-**Zone names are not stored.** `fnc_locatorzones_random.sqf:181` builds them as
-`format [localize "STR_DUWS_T_39z6pg7y", _i]`, so storing the string pins a restored campaign to
-the language it was created in. The index is already in `zone_meta_array`; the name re-localises
-from it.
+**Zone names have to be stored.** They are drawn, not derived: `fnc_zone_name` hands out a
+phonetic-alphabet word at random and records which are spent, so nothing about a zone's index or
+position reproduces the name it was given. A restore that re-ran the allocator would rename every
+zone on the map, and the player's own notes and any dialogue they remember would stop matching the
+ground. Storing the string costs nothing in translation, which was the old objection: these words
+carry no stringtable key and are the same in every language. The used-name list is restored with
+them, or the allocator would hand a second zone a name already on the map.
 
 Towns go in by position even though the runtime keys them by index into `civ_locations`, because
 that index is not stable across a restore: selection's top-up wave shuffles before it draws

@@ -1181,13 +1181,6 @@
                 <Original>Unable to find zones, please restart the mission and try:\n\n-Reducing the maximum radius of the zones\n-Reducing the number of zones\n-Increasing the maximum distance of created zones from the HQ\n-Changing to LESS URBAN in MP Params</Original>
                 <English>Unable to find zones, please restart the mission and try:\n\n-Reducing the maximum radius of the zones\n-Reducing the number of zones\n-Increasing the maximum distance of created zones from the HQ\n-Changing to LESS URBAN in MP Params</English>
             </Key>
-            <Key ID="STR_DUWS_T_39z6pg7y">
-                <German>Zone %1</German>
-                <Spanish>Zona %1</Spanish>
-                <Chinesesimp>战区 %1</Chinesesimp>
-                <Original>Zone %1</Original>
-                <English>Zone %1</English>
-            </Key>
             <Key ID="STR_DUWS_T_vai9q3po">
                 <German>Position %1 gefunden...</German>
                 <Spanish>Encontrada posición %1</Spanish>
