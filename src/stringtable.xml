@@ -7450,8 +7450,8 @@
                 <German>Ravage-Modus aktiviert. Siehe die Beschreibung auf der linken Seite der Karte für Details.</German>
                 <Spanish>Modo Ravage activado. Consulta la descripción en el lado izquierdo del mapa para más detalles.</Spanish>
                 <Chinesesimp>Ravage模式已开启。玩法详见地图左侧的简介。</Chinesesimp>
-                <Original>Ravage mode activated. See the description on the left side of the map for details.</Original>
-                <English>Ravage mode activated. See the description on the left side of the map for details.</English>
+                <Original>Ravage mode active. Details are on the left of the map screen.</Original>
+                <English>Ravage mode active. Details are on the left of the map screen.</English>
             </Key>
             <Key ID="STR_DUWS_T_WBK_NOREP">
                 <German>Wbk-Modus aktiviert. Siehe die Beschreibung auf der linken Seite der Karte für Details.</German>
