@@ -102,6 +102,11 @@ base_garrison_sleep_delay = 120;
 support_max_slots = 8;      publicVariable "support_max_slots";
 support_death_refund = 0.1; publicVariable "support_death_refund";
 
+// How long a destroyed Mobile HQ locks designation out for. Losing it has to cost something, or
+// leaving it parked at the objective and letting it burn is cheaper than driving it home -- the
+// respawn point comes back within a minute either way. Read on clients, so it is broadcast.
+MHQ_lockout_seconds = 1800; publicVariable "MHQ_lockout_seconds";
+
 // Which permanent supports the team has bought, in purchase order. Their broadcast flags stay
 // every client's fast path; this holds the same set as data a campaign save can walk, instead of
 // as a scatter of named globals a restore would have to know one at a time.

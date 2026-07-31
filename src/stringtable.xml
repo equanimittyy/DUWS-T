@@ -3563,6 +3563,30 @@
                 <Original>The vehicle is an ordinary truck again. Any squad leader can designate a new Mobile HQ.</Original>
                 <English>The vehicle is an ordinary truck again. Any squad leader can designate a new Mobile HQ.</English>
             </Key>
+            <Key ID="STR_DUWS_T_MHQ_NAME">
+                <Original>Mobile HQ</Original>
+                <English>Mobile HQ</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MHQ_LOCKOUT">
+                <Original>The last Mobile HQ was destroyed. Another can be named in %1 min.</Original>
+                <English>The last Mobile HQ was destroyed. Another can be named in %1 min.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mhq_slot_row">
+                <Original>Mobile HQ Designation (0 CP) Radio</Original>
+                <English>Mobile HQ Designation (0 CP) Radio</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mhqslotunlock">
+                <Original>Designation authority is yours. Point at a vehicle and call it in.</Original>
+                <English>Designation authority is yours. Point at a vehicle and call it in.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MHQ_RELEASED_TITLE">
+                <Original>Mobile HQ Released</Original>
+                <English>Mobile HQ Released</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MHQ_RELEASED_MSG">
+                <Original>It is an ordinary truck again. Any squad leader can claim a new one.</Original>
+                <English>It is an ordinary truck again. Any squad leader can claim a new one.</English>
+            </Key>
             <Key ID="STR_DUWS_T_SUPPORT_LOST_TITLE">
                 <Original>Supports Lost</Original>
                 <English>Supports Lost</English>
@@ -5200,15 +5224,15 @@
                 <German>Baue Mobiles HQ (10CP) Funk</German>
                 <Spanish>Construir Cuartel General móvil (10 CP) Radio</Spanish>
                 <Chinesesimp>建立机动指挥部(10CP)</Chinesesimp>
-                <Original>Build Mobile HQ (10 CP) Radio</Original>
-                <English>Build Mobile HQ (10 CP) Radio</English>
+                <Original>Mobile HQ (10 CP)</Original>
+                <English>Mobile HQ (10 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_ooi6w4yh">
                 <German>Baue Mobiles HQ</German>
                 <Spanish>Construir Cuartel General móvil</Spanish>
                 <Chinesesimp>建立机动指挥部</Chinesesimp>
-                <Original>Build Mobile HQ</Original>
-                <English>Build Mobile HQ</English>
+                <Original>Designate Mobile HQ</Original>
+                <English>Designate Mobile HQ</English>
             </Key>
             <Key ID="STR_DUWS_T_zfwwi081">
                 <German>HC CAP Flugzeug (25CP) Funk</German>
@@ -5379,8 +5403,8 @@
                 <German>Zeige auf ein Fahrzeug und wähle =Baue Mobiles HQ= im Funk-Menü</German>
                 <Spanish>Apunta a un vehículo y selecciona =Construir CGM= en la radio de apoyo</Spanish>
                 <Chinesesimp>指向一辆车，然后在支援无线电上选择=建立机动指挥部=</Chinesesimp>
-                <Original>Point at a vehicle and choose =Build Mobile HQ= on the Support Radio.</Original>
-                <English>Point at a vehicle and choose =Build Mobile HQ= on the Support Radio.</English>
+                <Original>Add the Mobile HQ request to your slots, then designate by radio.</Original>
+                <English>Add the Mobile HQ request to your slots, then designate by radio.</English>
             </Key>
             <Key ID="STR_DUWS_T_uhaz94ur">
                 <German>Fahrzeug gespawnt</German>
@@ -5390,8 +5414,8 @@
                 <English>Vehicle Spawn</English>
             </Key>
             <Key ID="STR_DUWS_T_b7gmddq3_free">
-                <Original>Build Mobile HQ (0 CP) Radio</Original>
-                <English>Build Mobile HQ (0 CP) Radio</English>
+                <Original>Mobile HQ (0 CP)</Original>
+                <English>Mobile HQ (0 CP)</English>
                 <German>Baue Mobiles HQ (0KP) Funk</German>
                 <Spanish>Construir CGM (0PC) Radio</Spanish>
                 <Chinesesimp>建立机动指挥部(0CP)</Chinesesimp>

@@ -31,5 +31,15 @@ removeAllActions MHQ1;
 // Remove Marker
 //[MHQ1] remoteExec ["kndr_removeMarker", [0,-2] select isDedicated,true];
 
-["info",[localize "STR_DUWS_T_scudflh9",localize "STR_DUWS_T_scudflh9"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
+// Half an hour before another can be designated. Stamped here and not on the release path, which
+// this thread never reaches: giving a working vehicle back is not the thing being priced. Mission
+// time rather than the campaign date, so it tracks setTimeMultiplier the way every other cooldown
+// in the mission does.
+MHQ_lockout_until = time + MHQ_lockout_seconds;
+publicVariable "MHQ_lockout_until";
+["INFO", "SUPPORT", format ["MHQ destroyed: designation locked out for %1 s", MHQ_lockout_seconds]] call fnc_log;
+
+["info",[localize "STR_DUWS_T_scudflh9",
+	format [localize "STR_DUWS_T_MHQ_LOCKOUT", ceil (MHQ_lockout_seconds / 60)]]]
+	remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 	
