@@ -148,7 +148,7 @@ Strength only ever falls. It resets to full when BLUFOR take the zone, since wha
 it after retaking the ground is a fresh force; nothing else restores it. `fnc_zone_strength_set` is
 the only writer, so a mechanic that lets OPFOR rebuild a mauled zone has one place to go through.
 
-**Where the player reads it.** The HQ board's View Map mode answers zones as well as towns. A click
+**Where the player reads it.** The request menu's View Map mode answers zones as well as towns. A click
 goes to `fnc_map_readout_query` on the server, which picks whichever revealed zone or town disc the
 click landed in with the **nearest centre** — zone circles and town discs overlap by design, so the
 tie has to break on something — and `fnc_map_readout_draw` draws the answer. A zone prints its garrison

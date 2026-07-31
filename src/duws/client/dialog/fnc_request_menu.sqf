@@ -18,6 +18,10 @@ private _isFob = (_this param [3, []]) param [0, false];
 private _display = createDialog ["ressourceheader", false];
 if (isNull _display) exitWith {};
 
+// Kept for fnc_request_map_view, which closes this dialog to show the map and rebuilds it after.
+// uiNamespace because it is display state, and the mission namespace is written into save games.
+uiNamespace setVariable ["DUWS_requestMenu_ctx", [_site, _isFob]];
+
 ctrlSetText [1000, format ["%1", commandpointsblu1]];
 ctrlSetText [1001, format ["%1", zoneundercontrolblu]];
 ctrlSetText [1002, format ["%1", WARCOM_blufor_ap]];

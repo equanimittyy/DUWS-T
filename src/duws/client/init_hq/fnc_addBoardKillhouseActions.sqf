@@ -31,12 +31,10 @@ _board addAction [
     [], 70, true, true, "", "true"
 ];
 
-_board addAction [
-    ACT_SECONDARY_MENU("STR_DUWS_T_civ_mapview_action"),
-    { call fnc_map_readout_open },
-    [], 90, true, true, "", "_this == player"
-];
-
+// No View Map on the board either. It moved into the REQUESTS menu, beside the mission timers and
+// the pools it is read against -- the board is at the HQ, so the two were a pace apart, and reading
+// the map is part of deciding what to request rather than an errand of its own.
+//
 // No base fast travel on the board. It only ever moved the player somewhere within 200 m of an HQ
 // they were already standing at, so it bought nothing a walk did not; the FOB Manager owns travel
 // between bases.

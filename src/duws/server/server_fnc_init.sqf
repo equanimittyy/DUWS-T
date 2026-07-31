@@ -351,6 +351,7 @@ fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\functi
 fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_rqst_list.sqf";publicVariable "fnc_faction_rqst_list";
 fnc_custom_faction_init = compile preprocessFileLineNumbers "duws\server\dialog\fnc_custom_faction_init.sqf";publicVariable "fnc_custom_faction_init";
 fnc_request_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_menu.sqf";publicVariable "fnc_request_menu";
+fnc_request_map_view = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_map_view.sqf";publicVariable "fnc_request_map_view";
 fnc_command_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_command_fill.sqf";publicVariable "fnc_command_fill";
 fnc_command_select = compile preprocessFileLineNumbers "duws\client\dialog\fnc_command_select.sqf";publicVariable "fnc_command_select";
 fnc_squad_manage = compile preprocessFileLineNumbers "duws\client\dialog\fnc_squad_manage.sqf";publicVariable "fnc_squad_manage";

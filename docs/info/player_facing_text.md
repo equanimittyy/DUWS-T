@@ -80,8 +80,9 @@ to ask command for is a button in the dialog Requests already opens, so the HQ s
 scroll entry instead of the twelve it once did. The dividing line is **who needs it and how fast** —
 an arsenal, a HALO jump, quick kits, an AI rearm, the killhouse teleports and the black market stay
 on the scroll wheel and on the prop they belong to, because a player reaches for those without asking
-anyone. Squad and FOB management, the redeploy, operative recruitment, the two hires and intel
-analysis are buttons, built by `fnc_command_fill`.
+anyone. Squad and FOB management, operative recruitment, intel analysis, the redeploy and the two
+hires are buttons, built by `fnc_command_fill` in that order: what costs nothing above what does,
+and the analysis directly under the operatives whose take it converts.
 
 Rest and the squad-leader reset went the other way and are scroll entries again, on the HQ medical
 tent (`fnc_medtent_actions`) and on the FOB object. Both are things a player walks somewhere to do
@@ -150,12 +151,12 @@ a property of the scroll bucket, and a button carries no bucket.
 | Killhouse Controls | `STR_DUWS_T_KILLHOUSE_CONTROLS` | Multi-screen computer | 4 |
 | Vehicle Recycling | `STR_DUWS_T_VEHICLE_RECYCLING` | Depot | 2 |
 | Vehicle Customization | `STR_DUWS_T_VEHICLE_CUSTOMIZATION` | Depot | 4 |
-| View Map | `STR_DUWS_T_civ_mapview_action` | HQ map board | — |
 
-View Map opens a readout rather than a listbox, so it carries no row count. It outranks the
-killhouse teleports attached to the same board. Travel between bases belongs to the FOB Manager; the
-board's own base fast travel is gone, having only ever moved the player within 200 m of an HQ they
-were standing at.
+View Map is no longer here. It is a button in the request menu's missions row, beside the mission
+timers and the pools it is read against, because choosing where to go and choosing what to buy for
+it are one decision. Travel between bases belongs to the FOB Manager; the board's own base fast
+travel is gone, having only ever moved the player within 200 m of an HQ they were standing at, and
+the board now carries the killhouse teleports alone.
 
 Mission Control is gone as a menu: its three entries spend CP, which is command's business, so each
 became a button of its own in the command column. The black market stayed on the scroll wheel,
@@ -331,10 +332,15 @@ applying it — so a scroll-entry colour and a row colour cannot share a definit
 
 The command column is not a menu in this sense: it is seven fixed buttons in the request dialog
 itself (`request_menu.hpp`, idc 1610-1616), written from the top down by `fnc_command_fill` and run
-by `fnc_command_select`. It follows the same two rules as the reusable menu — the dialog closes
-before an entry's code runs, since several open a dialog of their own, and the entry's CODE rides in
-`uiNamespace` because a control's action is a string. Entries that do not apply are hidden rather
-than greyed, so the column never shows a gap.
+by `fnc_command_select`. The entry's CODE rides in `uiNamespace`, because a control's action is a
+string, and entries that do not apply are hidden rather than greyed so the column never shows a gap.
+
+It differs from the reusable menu on closing. Only an entry that opens a dialog of its own brings the
+request menu down — Squad Manager, FOB Manager and Special Operatives — because those would stack on
+top of it. The rest spend, hint and leave the menu standing, so buying two things in a row does not
+mean walking back to the prop between them. Entries that cost are drawn in the same orange the
+supports catalogue paints an unbought permanent with: the label carries the figure, but nothing else
+carried the fact that clicking spends it.
 
 Quick Kits is the only menu whose row count is not fixed: the rows come from the loadout list the
 server scans and broadcasts, and the entry refuses to open when that list is empty. Debug rows are
