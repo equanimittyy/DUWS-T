@@ -23,15 +23,16 @@ switch (_kind) do {
 		_data params [["_name", ""], ["_held", false], ["_seg", 0]];
 		private _lines = [format ["<t size='1.2'>%1</t>", _name]];
 		if (_held) then {
-			// No bar on a zone the player owns: ten grey segments would read as a garrison wiped
+			// No bar on a zone the player owns: a full run of grey would read as a garrison wiped
 			// rather than as one that was never there.
 			_lines pushBack localize "STR_DUWS_T_zone_mapview_held";
 		} else {
 			// Green for what is left, grey for what is gone. A bar rather than a percentage because
 			// this is read while deciding where to go next -- proportion at a glance beats a figure
-			// the player has to weigh against a zone size they cannot see.
+			// the player has to weigh against a zone size they cannot see. Twenty segments wide, so
+			// a full garrison reads as a solid block; the query owns the scale.
 			private _bar = format ["<t color='#55ff55'>%1</t><t color='#7f7f7f'>%2</t>",
-				[_seg] call _fnc_pipes, [10 - _seg] call _fnc_pipes];
+				[_seg] call _fnc_pipes, [20 - _seg] call _fnc_pipes];
 			_lines pushBack format [localize "STR_DUWS_T_zone_mapview_garrison", _bar];
 		};
 		_text = _lines joinString "<br/>";

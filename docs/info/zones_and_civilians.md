@@ -143,10 +143,17 @@ the only writer, so a mechanic that lets OPFOR rebuild a mauled zone has one pla
 goes to `fnc_map_readout_query` on the server, which picks whichever revealed zone or town disc the
 click landed in with the **nearest centre** — zone circles and town discs overlap by design, so the
 tie has to break on something — and `fnc_map_readout_draw` draws the answer. A zone prints its garrison
-as ten segments, green for what is left and grey for what is gone. A streamed-in zone reports what
-is alive against its baseline; a stowed one reports the strength it will redeploy at, rounded the
-same way, so the bar cannot disagree by a segment with what arrives. A zone the player holds prints
-no bar: ten grey segments would read as a garrison wiped rather than one that was never there.
+as twenty segments, green for what is left and grey for what is gone. A streamed-in zone counts live
+men against its baseline and gets all twenty, so a couple of kills move the bar; a stowed one reports
+the strength it will redeploy at, quantised to the tenths that strength is stored in and doubled, so
+it steps two segments at a time and cannot disagree with what arrives. A zone the player holds prints
+no bar: a full run of grey would read as a garrison wiped rather than one that was never there.
+
+Opening the map runs `fnc_zone_strength_refresh` first, which records every deployed zone's live
+strength. Without it the stored figure was written only by the streaming teardown, so a zone the
+player mauled and left still read at its old strength for the two minutes before it packed up —
+which is exactly when the map gets opened. The refresh only ever lowers a zone, for the same reason
+the teardown record does.
 
 ### Why a pack-up cannot read as a capture
 

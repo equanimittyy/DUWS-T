@@ -120,6 +120,29 @@ fnc_zone_strength_record = {
 		_zoneKey, _left, _base, _s]] call fnc_log;
 };
 
+// Brings every deployed zone's recorded strength up to what is standing right now. The record is
+// otherwise written only on the streaming teardown, so a zone the player mauled and walked away from
+// carried its old figure until the grace period expired -- and the map readout is read exactly in
+// that window, while deciding where to go next. Called when a player opens the map readout, which is
+// the only time the stored figure is read for anything but a redeploy.
+//
+// Falls but never rises, like the teardown record and for the same reason: a zone that healed itself
+// because somebody looked at the map would refund the attrition it just took.
+fnc_zone_strength_refresh = {
+	if (!isServer) exitWith {};
+	{
+		_x params ["", "_pos"];
+		private _key = [_pos] call fnc_zone_key;
+		private _base = missionNamespace getVariable [format ["DUWS_zoneBase_%1", _key], 0];
+		// No peak means stowed or still arriving. Stowed already reads what it last recorded, and a
+		// garrison mid-placement would be recorded as casualties nobody inflicted.
+		if (!isNil {missionNamespace getVariable (format ["DUWS_zonePeak_%1", _key])} && {_base > 0}) then {
+			private _left = [_key] call fnc_zone_garrison_count;
+			[_key, (_left / _base) min ([_key] call fnc_zone_strength)] call fnc_zone_strength_set;
+		};
+	} forEach zone_meta_array;
+};
+
 // Drops entries from a spawn list at random until the fraction is met, keeping at least one. Random
 // rather than off the tail: every caller's list is ordered by kind -- the tier table puts a band's
 // vehicles last, the fortification builder walks towers in the order it found them -- so trimming

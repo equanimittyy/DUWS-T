@@ -57,17 +57,31 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 	private _held = (WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zPos) < 1}) >= 0;
 
 	// A zone that is streamed in reports what is alive right now; a stowed one reports what it will
-	// come back at, which is what its teardown recorded. Both answer "how strong is this zone", so
-	// the readout never has to tell the player which side of the streaming boundary they are on.
+	// come back at, which is what its last refresh or teardown recorded. Both answer "how strong is
+	// this zone", so the readout never has to tell the player which side of the streaming boundary
+	// they are on.
 	private _peak = missionNamespace getVariable [format ["DUWS_zonePeak_%1", _key], 0];
 	private _base = missionNamespace getVariable [format ["DUWS_zoneBase_%1", _key], 0];
-	private _frac = [_key] call fnc_zone_strength;
-	if (_peak > 0 && {_base > 0}) then { _frac = ([_key] call fnc_zone_garrison_count) / _base };
+	private _live = _peak > 0 && {_base > 0};
+	private _frac = if (_live) then {
+		([_key] call fnc_zone_garrison_count) / _base
+	} else {
+		[_key] call fnc_zone_strength
+	};
 
-	// Rounded up on the same epsilon as fnc_zone_strength_set, so a stowed zone's bar cannot
-	// disagree by a segment with the strength it is about to redeploy at. Capped because a
-	// full-strength cycle can place a few men over the baseline it is measured against.
-	private _seg = ((ceil ((_frac * 10) - 0.0001)) max 0) min 10;
+	// Twenty segments rather than ten, so a full garrison reads as a solid bar. A deployed zone is
+	// counted off live men and gets the whole resolution -- one segment per twentieth, so a couple
+	// of kills move it. A stowed one is quantised to the tenths its strength is stored in and then
+	// doubled, so its bar cannot disagree by a segment with the strength it is about to redeploy at;
+	// it moves two segments at a time by design. Rounded up on the same epsilon as
+	// fnc_zone_strength_set, and capped because a full-strength cycle can place a few men over the
+	// baseline it is measured against.
+	private _seg = if (_live) then {
+		ceil ((_frac * 20) - 0.0001)
+	} else {
+		2 * (ceil ((_frac * 10) - 0.0001))
+	};
+	_seg = (_seg max 0) min 20;
 	["ZONE", [_name, _held, _seg]] remoteExec ["fnc_map_readout_draw", _caller];
 };
 
