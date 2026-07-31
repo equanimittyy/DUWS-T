@@ -49,6 +49,25 @@ failure modes to check for before enabling anything are a zone that never repopu
 cache restored units the zone logic had already deleted, and a garrison that doubles because both
 systems restored it. Any evaluation has to decide which system owns zone AI, not run both.
 
+## A FOB garrison sleeps rather than despawning
+
+`server/init_hq/fnc_FOBgarrisonSleep.sqf` stops simulating a FOB's twelve soldiers once no player
+has been within `base_garrison_sleep_range` for `base_garrison_sleep_delay`. Nothing culled them
+before, so the count grew with the campaign: the FOB cap is `floor(zones x 0.7)`, which is 168
+permanently-simulated soldiers on a 20-zone map.
+
+**Frozen, not deleted, which is the one place this departs from zone streaming.** A zone garrison is
+OPFOR's and is rebuilt from a table, so deleting it loses nothing. A FOB's belongs to the player, and
+rebuilding it would hand back every soldier who had been killed — a free version of the 2 CP
+redeploy, bought by walking away for two minutes. Freezing keeps identity and damage; simulation is
+where nearly all of an idle soldier's cost sits, so the saving is most of it either way.
+
+Two consequences worth knowing. Object count is *not* bounded by this, unlike the composition
+streaming below — the units still exist, so this trades CPU without trading slots. And the proximity
+test is players-only rather than `fnc_duws_bluforNear`: that helper's AI arm exists to notice BLUFOR
+arriving on OPFOR ground, and at a friendly base it would count the garrison standing in the middle
+of its own radius and never let it sleep.
+
 ## Map object count is bounded by proximity, not campaign length
 
 The same gate cycles a zone's props. `fnc_duws_stow` records each composition member and deletes it;

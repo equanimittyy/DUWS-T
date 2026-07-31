@@ -19,8 +19,6 @@ _fob setVariable ["FOB_guard_busy", true];
 
 _safe = [(_centerPos select 0)+10, (_centerPos select 1)+10];
 
-_size = 500;
-
 // Create the guards
 _groupGuard = [[0,0], WEST, [blufor_SOLDIER_X, blufor_SOLDIER_X, blufor_SOLDIER_X, blufor_SOLDIER_X],[],[],blufor_ai_skill] call BIS_fnc_spawnGroup; 
 _groupGuard deleteGroupWhenEmpty true;

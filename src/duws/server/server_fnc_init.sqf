@@ -277,6 +277,7 @@ fnc_BLUFOR_squad_init = compile preprocessFileLineNumbers "duws\server\init_hq\f
 fnc_BLUFOR_faction_init = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BLUFOR_faction_init.sqf";publicVariable "fnc_BLUFOR_faction_init";
 fnc_fortifyFOB = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_fortifyFOB.sqf";publicVariable "fnc_fortifyFOB";
 fnc_guardsFOB = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_guardsFOB.sqf";publicVariable "fnc_guardsFOB";
+fnc_FOBgarrisonSleep = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_FOBgarrisonSleep.sqf";
 // Broadcast: it is the FOB redeploy action's function value, so every client needs it.
 fnc_redeployFOB = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_redeployFOB.sqf";publicVariable "fnc_redeployFOB";
 // Not broadcast: server-only, so an accidental client call fails loud.

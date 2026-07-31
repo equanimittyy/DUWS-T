@@ -63,6 +63,7 @@ if (count _fadePlayers > 0) then {
 // across 170 m of open ground on separate random routes -- and none of them was rebuilt by the
 // reguard action, so a FOB that lost them never got them back.
 [_foundPickupPos, _fob] spawn fnc_guardsFOB;
+[_fob, _foundPickupPos] spawn fnc_FOBgarrisonSleep;
 
 // No arrival trigger: it existed only to announce a friendly element reaching the FOB, and the
 // hardcore reveal fnc_enterlocation still does is keyed on a zone name, which a FOB never has.
