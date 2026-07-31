@@ -296,3 +296,34 @@ opfor_SOLDIER_X = nil;
 
 ["opforRoles: no argument at all still yields a spawnable list",
     ([] call fnc_opforRoles), ["O_Soldier_F"]] call fnc_assertEq;
+
+// --- fnc_zone_strength_set: what a mauled zone redeploys at ---
+// Tenths rounded up, floored at 0.3, capped at 1. The floor is the mechanic: against the 0.2 break
+// line, a garrison at three tenths is still a tenth of the zone's original strength from beaten.
+["zone_strength_set: rounds up to the next tenth",
+    (["k1", 0.55] call fnc_zone_strength_set), 0.6] call fnc_assertEq;
+["zone_strength_set: an exact tenth does not step up",
+    (["k1", 0.7] call fnc_zone_strength_set), 0.7] call fnc_assertEq;
+["zone_strength_set: a wiped garrison redeploys at the floor",
+    (["k1", 0] call fnc_zone_strength_set), 0.3] call fnc_assertEq;
+["zone_strength_set: just under the floor is the floor, not a rounding of it",
+    (["k1", 0.24] call fnc_zone_strength_set), 0.3] call fnc_assertEq;
+["zone_strength_set: an untouched garrison stays at full",
+    (["k1", 1] call fnc_zone_strength_set), 1] call fnc_assertEq;
+["zone_strength_set: reads back what it stored",
+    (["k1"] call fnc_zone_strength), 1] call fnc_assertEq;
+["zone_strength: a zone that has never been fought over is full strength",
+    (["never_touched"] call fnc_zone_strength), 1] call fnc_assertEq;
+
+// --- fnc_zone_thin: scaling a spawn list by that strength ---
+private _band = ["sniper", "patrol", "patrol", "team", "wpteam", "armored", "air", "car", "car", "patrol"];
+["zone_thin: keeps the ceiling of the fraction",
+    (count ([_band, 0.55] call fnc_zone_thin)), 6] call fnc_assertEq;
+["zone_thin: full strength keeps the whole band",
+    (count ([_band, 1] call fnc_zone_thin)), 10] call fnc_assertEq;
+// A zone that placed nothing publishes no peak, and fnc_zone_capture_ready refuses capture on a
+// zero peak -- so a thinned band must never come back empty.
+["zone_thin: never empties a list",
+    (count ([["patrol", "team"], 0.1] call fnc_zone_thin)), 1] call fnc_assertEq;
+["zone_thin: leaves the caller's list alone",
+    (count _band), 10] call fnc_assertEq;

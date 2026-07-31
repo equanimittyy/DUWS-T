@@ -67,6 +67,71 @@ fnc_zone_garrison_dropped = {
 	[_zoneKey] call fnc_zone_gen_bump;
 };
 
+// How much of its original garrison a zone still has, as a fraction. Read by everything that places
+// OPFOR for a zone, so a force the player broke is not handed back to them intact two minutes later.
+fnc_zone_strength = {
+	params ["_zoneKey"];
+	missionNamespace getVariable [format ["DUWS_zoneStrength_%1", _zoneKey], 1]
+};
+
+// The one writer, so a mechanic that lets OPFOR rebuild a mauled zone -- spending to restore ground
+// they hold, rather than the player being refunded the loss by walking away -- has a single place to
+// go through, and inherits the quantisation and the floor rather than restating them.
+//
+// Tenths because this is a spawn budget, not a casualty ledger: what it scales is whole groups,
+// whole buildings and whole emplacements, so finer resolution rounds away at the point of use. The
+// epsilon absorbs float slop rather than shifting the rule: SQF scalars are 32-bit floats, and a
+// division landing a hair above an exact tenth would buy the garrison a whole free step.
+//
+// The 0.3 floor is the mechanic rather than a guard. Against the 0.2 break line in
+// fnc_zone_capture_ready, a garrison at the floor still sits a tenth of the zone's original strength
+// above beaten, so retaking ground you softened is a fight rather than a walk-in. A zone allowed to
+// redeploy empty would also be uncapturable outright: a zero peak refuses capture.
+fnc_zone_strength_set = {
+	params ["_zoneKey", "_frac"];
+	private _q = ((ceil ((_frac * 10) - 0.0001)) / 10) max 0.3 min 1;
+	missionNamespace setVariable [format ["DUWS_zoneStrength_%1", _zoneKey], _q];
+	_q
+};
+
+// Measured against the force the zone was first given -- DUWS_zoneBase_<key>, published beside the
+// peak in fnc_zone_spawn -- rather than the possibly already reduced force it last deployed, so
+// attrition accumulates across visits instead of each one starting from a fresh hundred per cent.
+// Called on the streaming teardown, before the sweep deletes the survivors it is counting.
+fnc_zone_strength_record = {
+	params ["_zoneKey"];
+	// The peak is published when the spawn band settles and cleared on teardown, so its presence is
+	// the one signal that what is standing finished arriving. A band still placing when its own zone
+	// packs up would otherwise be recorded as casualties nobody inflicted, and the zone would come
+	// back permanently weaker for having been driven past. Callers must run this before
+	// fnc_zone_garrison_dropped.
+	if (isNil {missionNamespace getVariable (format ["DUWS_zonePeak_%1", _zoneKey])}) exitWith {};
+	private _base = missionNamespace getVariable [format ["DUWS_zoneBase_%1", _zoneKey], 0];
+	// No baseline means no cycle of this zone has ever finished placing, so there is nothing to
+	// measure against and what is standing describes a garrison that was still arriving.
+	if (_base <= 0) exitWith {};
+	private _left = [_zoneKey] call fnc_zone_garrison_count;
+	// Clamped to what the zone already deployed at, so strength only ever falls. Every consumer
+	// rounds its own share up and keeps at least one of whatever it is placing, so a garrison sent
+	// out at three tenths stands nearer four; measured raw, an untouched zone would climb a step on
+	// every visit and heal itself back to full for free.
+	private _s = [_zoneKey, (_left / _base) min ([_zoneKey] call fnc_zone_strength)] call fnc_zone_strength_set;
+	["INFO", "ZONES", format ["%1 packed up holding %2 of %3; redeploys at %4 strength",
+		_zoneKey, _left, _base, _s]] call fnc_log;
+};
+
+// Drops entries from a spawn list at random until the fraction is met, keeping at least one. Random
+// rather than off the tail: every caller's list is ordered by kind -- the tier table puts a band's
+// vehicles last, the fortification builder walks towers in the order it found them -- so trimming
+// the end would cost a weakened zone the same thing every time.
+fnc_zone_thin = {
+	params ["_list", "_frac"];
+	private _out = +_list;
+	private _keep = (ceil (_frac * count _out)) max 1;
+	while {count _out > _keep} do { _out deleteAt (floor random count _out) };
+	_out
+};
+
 // Server-authoritative reorder of the OPFOR assault queue. The map-click picker runs
 // on the clicking player's machine, so mutating this shared list there and
 // broadcasting the absolute array would drop a concurrent capture's edit to it.

@@ -53,6 +53,12 @@ fnc_zone_spawn = {
     (DUWS_zoneSpawnTiers select _i) params ["", "_base", "_extraMulti", "_extraSolo"];
 
     private _spawns = _base + ([_extraSolo, _extraMulti] select (count (call BIS_fnc_listPlayers) > 2));
+
+    // The band is what the zone would field intact; it deploys at whatever its garrison was ground
+    // down to. Without this, breaking a garrison and leaving buys the player nothing -- the same
+    // fight is waiting at full strength when they come back.
+    _spawns = [_spawns, [_zoneKey] call fnc_zone_strength] call fnc_zone_thin;
+
     {
         private _grp = [_x, _spawnPos, _size] call DUWS_fnc_zoneSpawnOne;
         if (!isNull _grp) then { _roster append (units _grp) };
@@ -76,7 +82,19 @@ fnc_zone_spawn = {
     // The strength fnc_zone_capture_ready judges this zone against, and the only place it is set.
     // fnc_zone_garrison_dropped is the only place it is cleared, and states the contract binding
     // the two.
-    private _peak = [_zoneKey] call fnc_zone_garrison_count;
-    missionNamespace setVariable [format ["DUWS_zonePeak_%1", _zoneKey], _peak];
-    ["INFO", "ZONES", format ["%1 garrison peak %2", _zoneKey, _peak]] call fnc_log;
+    //
+    // Anchored to the men this zone's first completed cycle placed, not to what just deployed: a
+    // garrison that comes back at six tenths is still measured against the ten, so the men killed
+    // last visit stay killed. Re-basing the peak on the reduced garrison would restore the whole
+    // 80%-to-beat every time the zone streamed out, which is the refund attrition exists to stop.
+    private _placed = [_zoneKey] call fnc_zone_garrison_count;
+    private _baseVar = format ["DUWS_zoneBase_%1", _zoneKey];
+    private _baseline = missionNamespace getVariable [_baseVar, 0];
+    if (_baseline <= 0) then {
+        _baseline = _placed;
+        missionNamespace setVariable [_baseVar, _baseline];
+    };
+    missionNamespace setVariable [format ["DUWS_zonePeak_%1", _zoneKey], _baseline];
+    ["INFO", "ZONES", format ["%1 deployed %2 men at %3 strength; garrison peak %4",
+        _zoneKey, _placed, [_zoneKey] call fnc_zone_strength, _baseline]] call fnc_log;
 };

@@ -76,7 +76,7 @@ trigger while any WEST unit is inside the zone radius:
 
 | Test | Counts | Threshold |
 |---|---|---|
-| Garrison beaten | **only units this zone spawned**, by roster, wherever they are | at or below a fifth of the zone's spawn peak — the same fraction a town garrison breaks at |
+| Garrison beaten | **only units this zone spawned**, by roster, wherever they are | at or below a fifth of the zone's *original* garrison — the same fraction a town garrison breaks at |
 | Objective clear | **any** OPFOR, within 50 m of the composition centre | none alive |
 
 **The strength test counts by ownership, not by position.** Every unit a zone raises is appended to
@@ -98,6 +98,31 @@ invisible to the test, which is the trap for whoever adds a sixth group to the f
 and anyone standing on it denies that whoever spawned them — a relief wave parked on the flag does
 block capture, even though it cannot un-beat the garrison. Withdrawing units are excluded from both
 tests, so a retreat bounding across the centre cannot stall a capture.
+
+### Attrition carries between visits
+
+A zone remembers what was left of its garrison when it streamed out. `fnc_spawnWait` calls
+`fnc_zone_strength_record` on the despawn exit — before the peak is cleared and before the sweep
+deletes the survivors it counts — and that stores `survivors / original` in tenths, rounded up and
+floored at `0.3`. Everything the zone raises on its next arrival scales by that fraction: the tier
+band drops tokens at random (`fnc_zone_spawn_sizes.sqf`), the fortification builder thins its
+defence section and holds fewer buildings and fewer towers (`fnc_createopfortified.sqf`), and fewer
+of the composition's statics are re-crewed (`fnc_spawnWait.sqf`). The mortar pair is the one
+exception — two men, and the zone's only indirect fire, so a fraction of it is none of it.
+
+**The peak is anchored, not re-based.** `DUWS_zoneBase_<key>` is the men the zone's first completed
+cycle placed, and every later cycle publishes that same figure as `DUWS_zonePeak_<key>`. A garrison
+that redeploys at three tenths is therefore measured against the ten: the men killed last visit stay
+killed, and taking a zone you softened means killing a *tenth* of its original strength with the
+objective held. Re-basing the peak on the reduced garrison would restore the full 80%-to-beat every
+time the zone streamed out — the refund the mechanic exists to stop.
+
+The `0.3` floor is what keeps that from becoming a walk-in, and it is also structural: a zone allowed
+to redeploy empty would be uncapturable outright, because a zero peak refuses capture.
+
+Strength only ever falls. It resets to full when BLUFOR take the zone, since whatever OPFOR garrison
+it after retaking the ground is a fresh force; nothing else restores it. `fnc_zone_strength_set` is
+the only writer, so a mechanic that lets OPFOR rebuild a mauled zone has one place to go through.
 
 ### Why a pack-up cannot read as a capture
 

@@ -9,6 +9,10 @@ _zoneKey = _this param [1, ""];
 if (_zoneKey == "") then { _zoneKey = [_position] call fnc_zone_key };
 private _roster = [_zoneKey] call fnc_zone_roster;
 private _fnc_own = { params ["_g"]; _roster append (units _g) };
+// The zone redeploys at whatever its garrison was ground down to, and this half of it has to shrink
+// with the spawn band: at three tenths strength a zone still holding every building and every tower
+// would be no thinner where the player actually fights it.
+private _strength = [_zoneKey] call fnc_zone_strength;
 _group = [];
 // minimum positions to allow for building spawns
 _positions_needed = 5;
@@ -28,6 +32,8 @@ for "_i" from 0 to (_mult - 1) step 1 do
     {
         _multipliedGroup = _multipliedGroup + _initGroup;
     };
+// Thinned before the leader is inserted, so a section that has taken losses still has one.
+_multipliedGroup = [_multipliedGroup, _strength] call fnc_zone_thin;
 // let's add squad leader now
 _multipliedGroup = [_multipliedGroup, [opfor_SL_SOLDIER_X], 0] call BIS_fnc_arrayInsert;
 _group = [_spawn, EAST, _multipliedGroup,[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
@@ -58,6 +64,8 @@ _group deleteGroupWhenEmpty true;
 
 
 // Add a mortar team anyway
+// Not thinned with the rest: two men, and the zone's only indirect fire. Scaling a pair by a
+// fraction takes the tube away entirely, which changes what the zone is rather than how strong.
 		_group = [_spawn, EAST, [opfor_SOLDIER_X,opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 		[_group] call _fnc_own;
 		(units _group select 0) addbackpack "O_Mortar_01_support_F";
@@ -79,6 +87,9 @@ _actualBldgCount = count _usableBuildings;
 if (_actualBldgCount == 0) exitWith {};
 
 _maxBuildingsToUse = (_actualBldgCount min _desiredBldgCount);
+// Fewer buildings held rather than fewer men in each: three to a house is what makes clearing one
+// cost something, and a house with a single man in it is a house the player walks through.
+_maxBuildingsToUse = ((ceil (_strength * _maxBuildingsToUse)) max 1);
 _unitsPerBuilding = 3;
 _totalUnitsToSpawn = _maxBuildingsToUse * _unitsPerBuilding;
 
@@ -127,6 +138,8 @@ private _foundBuildings = [];
 // 去重
 private _uniqueBuildings = [];
 { if (!(_x in _uniqueBuildings)) then { _uniqueBuildings pushBack _x }; } forEach _foundBuildings;
+// Towers left empty rather than held thinly, for the same reason the houses above are.
+_uniqueBuildings = [_uniqueBuildings, _strength] call fnc_zone_thin;
 
 private _fortPossibleUnitTypes = [[
     opfor_SOLDIER_X,

@@ -41,6 +41,10 @@ private _manStatics = {
 		!isNull _x && {alive _x} && {_x isKindOf "StaticWeapon"} && {count crew _x == 0}
 	};
 	if (count _guns == 0) exitWith {};
+	// Manned to the garrison's strength, like everything else this zone raises. These gunners are
+	// not on the roster, so they carry no attrition of their own and none of them counts toward the
+	// peak: a weakened zone gets fewer emplacements manned, not weaker ones.
+	_guns = [_guns, [_key] call fnc_zone_strength] call fnc_zone_thin;
 	private _types = _guns apply {opfor_SOLDIER_X};
 	private _spawn = _pos findEmptyPosition [0, 30, opfor_SOLDIER_X];
 	if (count _spawn == 0) then { _spawn = _pos };
@@ -125,6 +129,11 @@ while {true} do {
 			sleep 10;
 		};
 
+		// What the player left of the garrison, off the roster and above the line below: the record
+		// reads the peak to tell a garrison that finished arriving from one still being placed, and
+		// the next statement clears it. The sweep further down is what deletes the men it counts.
+		if (_despawn) then { [_zoneKey] call fnc_zone_strength_record };
+
 		// Both exits, before the split below: the garrison is about to be deleted or the zone has
 		// changed hands, and either ends what the capture test was judging. Ordering is the point --
 		// a peak surviving into the sweep reads a pack-up as a garrison wiped. Do not inline.
@@ -179,6 +188,11 @@ while {true} do {
 				["INFO", "STREAM", format ["%1 lost; %2 surviving group(s) ordered out", _zoneKey, count _grps]] call fnc_log;
 				[_grps, _spawnPos] spawn fnc_opfor_retreat;
 			};
+
+			// The zone is BLUFOR's and what held it is walking away, so the attrition it carried
+			// goes with it: whatever OPFOR put back here after retaking the ground is a fresh
+			// force, not the one the player ground down.
+			[_zoneKey, 1] call fnc_zone_strength_set;
 
 			// This thread idles until OPFOR hold it again rather than re-entering the arrival
 			// branch, which would spawn an OPFOR garrison inside a zone BLUFOR own.
