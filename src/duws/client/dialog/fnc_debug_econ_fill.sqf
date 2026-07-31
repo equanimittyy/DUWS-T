@@ -21,11 +21,13 @@ if (isNull _list) exitWith {};
 
 lbClear _list;
 {
-    _x params ["_index", "_name", "_hasRep", "_rep", "_ap"];
+    _x params ["_index", "_name", "_hasRep", "_rep", "_ap", ["_tier", 0]];
     // The row carries the town index as its data, so the buttons act on the town the player picked
     // rather than on the position it happens to occupy in a list that skips nothing today but might.
-    private _row = _list lbAdd format ["%1  --  rep %2, worth %3",
-        _name, if (_hasRep) then { _rep } else { "n/a" }, _ap];
+    // Tier is arabic here rather than the roman the map readout prints: this is the figure the +/-
+    // button moves, so a tester reads it in the units they are typing a delta in.
+    private _row = _list lbAdd format ["%1  --  rep %2, worth %3, tier %4",
+        _name, if (_hasRep) then { _rep } else { "n/a" }, _ap, _tier];
     _list lbSetData [_row, str _index];
 } forEach _towns;
 if (count _towns > 0) then { _list lbSetCurSel 0 };

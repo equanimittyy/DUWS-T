@@ -17,11 +17,25 @@ private _fnc_pipes = {
 	_s
 };
 
+// Roman for the tier, because the ladder is written that way everywhere the player meets it, and
+// arabic would collide with the strength figure sitting under it. Clamped rather than trusted: this
+// arrives over the network, and an out-of-range index is a script error inside a map click.
+private _fnc_tier = {
+	params ["_tier"];
+	private _label = [localize "STR_DUWS_T_mapview_garrison_none", "I", "II", "III", "IV"]
+		select (((round _tier) max 0) min 4);
+	format [localize "STR_DUWS_T_mapview_garrison_tier", _label]
+};
+
 switch (_kind) do {
 
 	case "ZONE": {
-		_data params [["_name", ""], ["_held", false], ["_seg", 0]];
+		_data params [["_name", ""], ["_held", false], ["_seg", 0], ["_tier", 0]];
 		private _lines = [format ["<t size='1.2'>%1</t>", _name]];
+		// Above the strength bar, and printed on a held zone too: tier is what the ground is worth
+		// fighting for and strength is how much of it is left, so the pair reads in that order
+		// whichever side holds it.
+		_lines pushBack ([_tier] call _fnc_tier);
 		if (_held) then {
 			// No bar on a zone the player owns: a full run of grey would read as a garrison wiped
 			// rather than as one that was never there.
@@ -40,7 +54,7 @@ switch (_kind) do {
 
 	case "TOWN": {
 		_data params [["_name", ""], ["_pop", 0], ["_hasRep", false], ["_rep", 0], ["_income", 0],
-			["_side", ""], ["_ap", 0]];
+			["_side", ""], ["_ap", 0], ["_tier", 0]];
 		private _lines = [
 			format ["<t size='1.2'>%1</t>", _name],
 			format [localize "STR_DUWS_T_civ_mapview_pop", _pop]
@@ -60,6 +74,11 @@ switch (_kind) do {
 				case "OPF": { format [localize "STR_DUWS_T_civ_mapview_income_opf", _income] };
 				default { format [localize "STR_DUWS_T_civ_mapview_income_none", _ap] };
 			});
+			// Last, so it sits where a zone's tier does -- directly above where a town strength bar
+			// would go. Inside the reputation gate with the rest: a town that registers no
+			// reputation can hold no tier either, and printing "None" would read as a town that
+			// merely happens to be ungarrisoned.
+			_lines pushBack ([_tier] call _fnc_tier);
 		};
 		_text = _lines joinString "<br/>";
 	};

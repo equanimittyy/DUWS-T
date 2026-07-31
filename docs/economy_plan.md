@@ -628,20 +628,17 @@ opens is read at the moment they are deciding, where a dialog control left open 
 and the tier are both printed: the pool figure alone stops describing capability the moment
 spending starts.
 
-Garrison levels belong in the same click readout rather than on the markers. Nothing is added to
-the map itself: the player clicks a town and the popup that already answers gains a line.
-`client/misc/fnc_map_readout_open.sqf` claims map clicks, each click goes to
-`fnc_map_readout_query` on the server, and `fnc_map_readout_draw` draws the answer — a garrison
-level is one more field on the tuple those two pass.
+**Garrison tier is in the click readout, not on the markers.** Nothing was added to the map itself:
+the player clicks a zone or town and the popup that already answers carries a Garrison Tier line
+above the strength bar, in roman, for both sides' ground. A zone reports IV — that is what a zone is
+— and 0 once the player holds it; a town reports what it owes, which is not always what is standing
+in it, since a town under the capture grace has a tier and no men. That is the honest answer for a
+map read before travelling: the readout describes what the player will meet, not what is loaded.
 
-The lookup stays server-side because `civ_locations`, `civ_radii` and `civ_town_rep` are none of
-them broadcast, so this costs no new networked state. Reveal gating is already correct: an
-unrevealed town answers as empty ground rather than as a hit the readout declines to describe, so
-the map cannot be swept for towns the presence trigger is hiding.
-
-The tier the readout needs now exists: `DUWS_townGarrisonTier` is server-local per-town state, read
-through `fnc_town_garrison_tierAt`, so the readout is one more field on the tuple
-`fnc_map_readout_query` and `fnc_map_readout_draw` already pass and costs no new networked state.
+The lookup stays server-side because `civ_locations`, `civ_radii`, `civ_town_rep` and
+`DUWS_townGarrisonTier` are none of them broadcast, so this costs no new networked state. Reveal
+gating is already correct: an unrevealed town answers as empty ground rather than as a hit the
+readout declines to describe, so the map cannot be swept for towns the presence trigger is hiding.
 
 ### SITREP becomes free
 

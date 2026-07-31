@@ -6,8 +6,8 @@
     the escalation counters are never broadcast, so the window cannot read them and cannot write
     them either -- it asks here for a snapshot and sends its edits back through the same door.
 
-    Modes: "snapshot" answers the caller, "rep" / "ap" adjust one town, "escalation" moves the
-    destroyed-house count.
+    Modes: "snapshot" answers the caller, "rep" / "ap" / "tier" adjust one town, "escalation" moves
+    the destroyed-house count.
 */
 if (!isServer) exitWith {};
 
@@ -24,6 +24,7 @@ switch (toLower _mode) do {
         private _reps = missionNamespace getVariable ["civ_town_rep", []];
         private _aps  = missionNamespace getVariable ["civ_town_ap", []];
         private _locs = missionNamespace getVariable ["civ_locations", []];
+        private _tiers = missionNamespace getVariable ["DUWS_townGarrisonTier", []];
 
         // One row per town: the name the map readout uses, whether it has a reputation at all, that
         // figure and its worth. The flag is carried rather than a nil reputation, the same way
@@ -36,7 +37,8 @@ switch (toLower _mode) do {
             private _hasRep = _forEachIndex < count _reps;
             _towns pushBack [_forEachIndex, _name, _hasRep,
                 if (_hasRep) then { _reps select _forEachIndex } else { 0 },
-                _aps param [_forEachIndex, 0]];
+                _aps param [_forEachIndex, 0],
+                _tiers param [_forEachIndex, 0]];
         } forEach _locs;
 
         // Escalation is absent entirely in RAVAGE and WBK -- fnc_escalation returns before setting
@@ -68,6 +70,19 @@ switch (toLower _mode) do {
         // have the economy tick charge the owner for holding ground.
         _aps set [_townIndex, ((_aps select _townIndex) + _delta) max 0];
         ["INFO", "ECON", format ["TOWNAP %1 -> %2 (debug menu)", _townIndex, _aps select _townIndex]] call fnc_log;
+    };
+
+    case "tier": {
+        _args params ["_townIndex", "_delta"];
+        // Through the campaign's own writer, which owns the clamp: a tier filed outside the table
+        // would fault the spawn driver that indexes it, in a thread nothing is watching.
+        // Signed like every other button here, because the window's model is an amount rather than
+        // a value. The garrison thread applies a raise on its own 30 s cycle, so a tier set while
+        // the player stands in the town arrives as reinforcement rather than instantly -- and a
+        // tier set on a town above -10 is zeroed again on that same cycle, since the band is what
+        // decides whether OPFOR holds the town at all.
+        private _current = [_townIndex] call fnc_town_garrison_tierAt;
+        [_townIndex, _current + _delta, "debug menu"] call fnc_town_garrison_setTier;
     };
 
     case "escalation": {

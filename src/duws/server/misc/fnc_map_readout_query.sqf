@@ -82,7 +82,12 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 		2 * (ceil ((_frac * 10) - 0.0001))
 	};
 	_seg = (_seg max 0) min 20;
-	["ZONE", [_name, _held, _seg]] remoteExec ["fnc_map_readout_draw", _caller];
+
+	// A zone garrison is tier IV by definition and is never purchased -- it is what a zone already
+	// is, and the ladder a town climbs is measured against it. A zone the player took holds no
+	// garrison at all, so it reports tier 0 rather than the IV it was fought off.
+	private _tier = [4, 0] select _held;
+	["ZONE", [_name, _held, _seg, _tier]] remoteExec ["fnc_map_readout_draw", _caller];
 };
 
 private _hit = _pick select 1;
@@ -103,4 +108,10 @@ private _ap = (missionNamespace getVariable ["civ_town_ap", []]) param [_hit, 0]
 // Worth travels alongside the income, not instead of it. They are the same number for a town that
 // has picked a side, but a neutral one earns nothing while still being worth something to turn,
 // and the readout has to be able to say both without re-deriving the tick's figure client-side.
-["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap]] remoteExec ["fnc_map_readout_draw", _caller];
+//
+// The tier is what the town owes, which is not always what is standing in it: a town under the
+// capture grace, or one nobody has walked into yet, reads its purchased tier with no men on the
+// ground. That is the honest answer for a map read before travelling -- the readout is describing
+// what the player will meet, not what is loaded.
+private _tier = [_hit] call fnc_town_garrison_tierAt;
+["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap, _tier]] remoteExec ["fnc_map_readout_draw", _caller];

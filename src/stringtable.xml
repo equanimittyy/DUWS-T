@@ -1807,6 +1807,14 @@
                 <Original>Click on a zone.</Original>
                 <English>Click on a zone.</English>
             </Key>
+            <Key ID="STR_DUWS_T_mapview_garrison_tier">
+                <Original>Garrison Tier: %1</Original>
+                <English>Garrison Tier: %1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mapview_garrison_none">
+                <Original>None</Original>
+                <English>None</English>
+            </Key>
             <Key ID="STR_DUWS_T_zone_mapview_garrison">
                 <Original>Garrison Strength: %1</Original>
                 <English>Garrison Strength: %1</English>
