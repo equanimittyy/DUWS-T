@@ -6,8 +6,8 @@ is still being observed keeps going further out rather than vanishing.
 
 `server/misc/fnc_opfor_retreat.sqf` is the order — `[[_group, …], _holdPos] spawn
 fnc_opfor_retreat`, groups or units. It takes arbitrary groups rather than anything the caller
-owns, because the town garrison is the first caller and the OPFOR commander
-([`opfor_commander_plan.md`](opfor_commander_plan.md)) is the intended second.
+owns, because the town garrison, the zone garrison and the OPFOR commander
+([`opfor_commander_plan.md`](opfor_commander_plan.md)) each hold their force in a different shape.
 
 ## What it replaces
 
@@ -17,8 +17,13 @@ finds. It runs only after the grace period has confirmed no BLUFOR nearby for `_
 seconds, so nobody is normally watching — the units blink out of an empty landscape. That is
 correct as a resource measure and says nothing about what happened to them.
 
-The gap is the cases where the ground changes hands with the player still on it, and both callers
-now answer it.
+The gap is the cases where a force is finished but nobody may delete it, and three triggers now
+answer it.
+
+**A zone garrison beaten to a fifth is ordered out where it stands**, without waiting for the zone to
+flip. `fnc_spawnWait`'s presence poll latches the test per deploy cycle. This is the common case
+rather than the edge one: it fires while the player is still fighting, and because withdrawing units
+count toward neither half of the capture test, it is what clears the objective for them.
 
 **A captured zone leaks survivors by construction.** The capture trigger covers `_size` while
 streaming runs over `_size + _AI_buffer`, so a zone flips with everything in that 400 m ring still

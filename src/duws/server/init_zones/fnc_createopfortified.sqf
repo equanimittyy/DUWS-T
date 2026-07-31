@@ -8,7 +8,13 @@ _position = _this select 0;
 _zoneKey = _this param [1, ""];
 if (_zoneKey == "") then { _zoneKey = [_position] call fnc_zone_key };
 private _roster = [_zoneKey] call fnc_zone_roster;
-private _fnc_own = { params ["_g"]; _roster append (units _g) };
+// Rostering and flagging are one act: a group that defends the zone is a group whose bodies are
+// worth searching, and separating them is how the spawn band ended up rostered but unflagged.
+private _fnc_own = {
+    params ["_g"];
+    _roster append (units _g);
+    [_g, "garrison"] call fnc_search_flag_group;
+};
 // The zone redeploys at whatever its garrison was ground down to, and this half of it has to shrink
 // with the spawn band: at three tenths strength a zone still holding every building and every tower
 // would be no thinner where the player actually fights it.

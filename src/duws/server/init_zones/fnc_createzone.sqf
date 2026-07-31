@@ -347,14 +347,13 @@ while {true} do {
 	if (_opfor_spawn == true) then {
 		_opfor_spawn = false;
 		(zone_spawn_array select _index) set [1,false];
-		// The roster is emptied here, at the head of the cycle and before either thread starts, so
-		// it describes the garrison now on the ground rather than every garrison this zone has had.
-		// Both threads are handed the key and append what they raise; the capture test counts that
-		// roster, so anything spawned here and not appended is invisible to it.
-		// The generation bump invalidates any band still placing from a previous cycle, which is
-		// what stops it publishing a garrison peak over the top of this one.
-		private _gen = [_zoneKey] call fnc_zone_gen_bump;
-		missionNamespace setVariable [format ["DUWS_zoneUnits_%1", _zoneKey], []];
+		// Read, not bumped: fnc_spawnWait opens the cycle when it deploys the composition, because
+		// the turret crews it raises there are garrison and a roster emptied here would drop them.
+		// Both threads below are handed the key and append what they raise; the capture test counts
+		// that roster, so anything spawned here and not appended is invisible to it. The generation
+		// carried into the band is what stops a band still placing from a previous cycle publishing
+		// a garrison peak over the top of this one.
+		private _gen = [_zoneKey] call fnc_zone_gen;
 		[_spawnPos, _zoneKey] spawn fnc_createopfortified;
 		sleep 2;
 		[_spawnPos,_size,_zoneKey,_gen] spawn fnc_zone_spawn;

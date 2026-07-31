@@ -34,7 +34,11 @@ private _fnc_spawnTier = {
         sleep 5;
         _grps pushBack ([OPFOR_Faction_X, "armored", _pos, _rad] call fnc_random_veh);
     };
-    _grps select { !isNull _x }
+    _grps = _grps select { !isNull _x };
+    // A town garrison is a garrison: it pays the same search rate a zone's does. The spawners it
+    // shares with the zone band carry the loot pass and not this one, so it has to be asked for.
+    { [_x, "garrison"] call fnc_search_flag_group } forEach _grps;
+    _grps
 };
 
 private _fnc_rosterAlive = {

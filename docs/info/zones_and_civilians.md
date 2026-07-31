@@ -80,10 +80,12 @@ trigger while any WEST unit is inside the zone radius:
 | Objective clear | **any** OPFOR, within 50 m of the composition centre | none alive |
 
 **The strength test counts by ownership, not by position.** Every unit a zone raises is appended to
-`DUWS_zoneUnits_<key>` — the spawn band appends what its spawners hand back, and
-`fnc_createopfortified` appends each of the five groups it builds. `fnc_createzone` empties the
-roster at the head of each spawn cycle, so it describes the garrison now on the ground rather than
-every garrison the zone has ever had.
+`DUWS_zoneUnits_<key>` — the spawn band appends what its spawners hand back,
+`fnc_createopfortified` appends each of the five groups it builds, and `fnc_spawnWait` appends the
+turret crews it re-mans the composition with. `fnc_spawnWait` empties the roster when it deploys the
+composition, one act with the generation bump, so it describes the garrison now on the ground rather
+than every garrison the zone has ever had. The clear has to happen there rather than where the band
+is raised, because the turret crews are placed first and a later clear would drop them.
 
 Two things follow. Units that are not the zone's own cannot restore it: a side mission's guard ring
 or a neighbouring town's garrison is not on the roster, so a beaten garrison stays beaten however
@@ -99,6 +101,18 @@ invisible to the test, which is the trap for whoever adds a sixth group to the f
 and anyone standing on it denies that whoever spawned them — a side mission's guards parked on the
 flag do block capture, even though they cannot un-beat the garrison. Withdrawing units are excluded
 from both tests, so a retreat bounding across the centre cannot stall a capture.
+
+Turret crews are on the roster for exactly that reason. They sit inside the composition, so they
+deny the centre test for as long as they live; off the roster they counted toward neither the peak
+nor the break line, and killing one was progress the zone never registered — a gun crew alone could
+hold a zone whose field garrison had been wiped, with nothing on screen to say why.
+
+**A beaten garrison leaves rather than waiting to be finished.** The moment the roster falls to or
+below the same fifth, `fnc_spawnWait`'s presence poll orders the survivors out through
+`fnc_opfor_retreat` ([`opfor_retreat_plan.md`](../opfor_retreat_plan.md)). Because withdrawing units
+are excluded from both tests, the withdrawal is also what clears the objective: the remnant walks off
+the centre and the zone falls once it has, rather than the player hunting the last four men through a
+composition. Latched per deploy cycle, since the count drops to zero as soon as they are flagged.
 
 ### Attrition carries between visits
 

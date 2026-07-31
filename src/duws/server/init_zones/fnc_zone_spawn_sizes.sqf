@@ -61,7 +61,13 @@ fnc_zone_spawn = {
 
     {
         private _grp = [_x, _spawnPos, _size] call DUWS_fnc_zoneSpawnOne;
-        if (!isNull _grp) then { _roster append (units _grp) };
+        if (!isNull _grp) then {
+            _roster append (units _grp);
+            // Flagged where the group is rostered, so the two cannot drift: every spawner here
+            // already carried the loot pass and none of them carried this one, which left the
+            // 50 % garrison rate firing on side-mission garrisons and nowhere else.
+            [_grp, "garrison"] call fnc_search_flag_group;
+        };
         // Staggered, not batched: each of these spawns a group, and firing the whole band in one
         // frame is what the original's per-call sleep existed to avoid. None after the last.
         if (_forEachIndex < (count _spawns) - 1) then { sleep 5 };

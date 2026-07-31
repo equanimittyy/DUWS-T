@@ -37,13 +37,21 @@ private _bluforNear = {
 private _manStatics = {
 	params ["_pos", "_key"];
 	if !(_pos in WARCOM_zones_controled_by_OPFOR) exitWith {};
-	private _guns = (DUWS_compositions getOrDefault [_key, []]) select {
-		!isNull _x && {alive _x} && {_x isKindOf "StaticWeapon"} && {count crew _x == 0}
+	private _roster = [_key] call fnc_zone_roster;
+	private _statics = (DUWS_compositions getOrDefault [_key, []]) select {
+		!isNull _x && {alive _x} && {_x isKindOf "StaticWeapon"}
 	};
+
+	// A gun still carrying the crew the prefab gave it. That gunner is the zone's garrison as much
+	// as a spawned one, so he joins the roster rather than holding the objective off the books:
+	// unrostered, he denies capture through fnc_opfor_count_at while counting toward neither the
+	// peak nor the break line, so killing him is progress the zone never registers.
+	{ _roster append (crew _x) } forEach (_statics select {count crew _x > 0});
+
+	private _guns = _statics select {count crew _x == 0};
 	if (count _guns == 0) exitWith {};
-	// Manned to the garrison's strength, like everything else this zone raises. These gunners are
-	// not on the roster, so they carry no attrition of their own and none of them counts toward the
-	// peak: a weakened zone gets fewer emplacements manned, not weaker ones.
+	// Manned to the garrison's strength, like everything else this zone raises: a weakened zone
+	// gets fewer emplacements manned, not weaker ones.
 	_guns = [_guns, [_key] call fnc_zone_strength] call fnc_zone_thin;
 	private _types = _guns apply {opfor_SOLDIER_X};
 	private _spawn = _pos findEmptyPosition [0, 30, opfor_SOLDIER_X];
@@ -56,7 +64,35 @@ private _manStatics = {
 		private _unit = (units _grp) param [_forEachIndex, objNull];
 		if (!isNull _unit) then { _unit moveInGunner _x };
 	} forEach _guns;
+	_roster append (units _grp);
+	// Searchable on the same terms as the rest of the garrison. A gunner is the one defender a
+	// player is certain to have to kill, so leaving him unflagged made the objective itself the
+	// least rewarding thing in the zone.
+	[_grp, "garrison"] call fnc_search_flag_group;
 	[_grp, _pos] call bis_fnc_taskDefend;
+};
+
+// A garrison ground this far down has lost the zone whether or not the player finishes it off, and
+// standing the remnant in it until the last man is what makes taking ground a sweep rather than a
+// fight. The same fraction fnc_zone_capture_ready judges a beaten garrison by and the town garrison
+// breaks at: one number for "this force is finished" across the campaign, so a player learns it once.
+#define BREAK_FRACTION 0.2
+
+// This zone's own survivors, by roster, as groups -- not every EAST man standing in the ring. A
+// neighbouring town's garrison or a side mission's guards are not this zone's to order off the map.
+// Anyone already withdrawing is skipped: a second order on a group mid-bound would put two threads
+// on the same waypoints. Returns how many groups were sent, so callers can log it.
+private _orderOut = {
+	params ["_key", "_pos"];
+	private _grps = [];
+	{
+		if (alive _x && {!(_x getVariable ["DUWS_retreating", false])}) then {
+			_grps pushBackUnique (group _x);
+		};
+	} forEach ([_key] call fnc_zone_roster);
+	if (count _grps == 0) exitWith { 0 };
+	[_grps, _pos] spawn fnc_opfor_retreat;
+	count _grps
 };
 
 // Crewing out has to happen here rather than in the loop below: that loop's man clause tests
@@ -100,6 +136,12 @@ while {true} do {
 
 			// Start the Spawns
 			if (_blufor_close) exitWith {
+				// The spawn cycle opens here rather than where the band is raised, because the
+				// turret crews below are garrison too and a roster cleared after them would drop
+				// them. Clear and bump stay one act, and fnc_createzone reads the generation this
+				// publishes instead of bumping its own.
+				[_zoneKey] call fnc_zone_gen_bump;
+				missionNamespace setVariable [format ["DUWS_zoneUnits_%1", _zoneKey], []];
 				// Props before the garrison: units must not spawn into ground that is about to
 				// have a bunker on it, and the turrets have to exist before anyone mans them.
 				if (_zoneKey in DUWS_stowed) then {
@@ -122,10 +164,31 @@ while {true} do {
 		// for the rest of the campaign. One AI holds it here against two needed to raise it.
 		private _lastSeen = time;
 		private _despawn = false;
+		// Latched, not re-tested: once a garrison has been ordered out it stays ordered out for the
+		// rest of this deploy cycle. The count below drops to zero the moment they are flagged as
+		// withdrawing, so an unlatched test would re-issue the order every ten seconds.
+		private _withdrawn = false;
 		while {true} do {
 			if !(_spawnPos in WARCOM_zones_controled_by_OPFOR) exitWith {};
 			if ([1] call _bluforNear) then { _lastSeen = time };
 			if (time - _lastSeen >= _despawn_timer) exitWith { _despawn = true };
+
+			if (!_withdrawn) then {
+				// No peak means the garrison has not finished arriving, so there is nothing to
+				// judge beaten yet -- the same gate fnc_zone_capture_ready refuses on.
+				private _peak = missionNamespace getVariable [format ["DUWS_zonePeak_%1", _zoneKey], 0];
+				if (_peak > 0 && {([_zoneKey] call fnc_zone_garrison_count) <= BREAK_FRACTION * _peak}) then {
+					_withdrawn = true;
+					// The withdrawal is also what clears the objective: retreating units count
+					// toward neither half of the capture test, and the survivors walk off the
+					// centre. So this and the capture trigger run in sequence rather than
+					// competing -- the remnant leaves, and the zone falls once it has.
+					private _sent = [_zoneKey, _spawnPos] call _orderOut;
+					["INFO", "ZONES", format ["%1 garrison broken at or below %2 of peak %3; %4 group(s) ordered out",
+						_zoneKey, BREAK_FRACTION, _peak, _sent]] call fnc_log;
+				};
+			};
+
 			sleep 10;
 		};
 
@@ -176,17 +239,12 @@ while {true} do {
 			// rest of the campaign, because this branch only idles and the sweep above is
 			// unreachable once the zone is BLUFOR's. Deleting them is not an option either -- a
 			// capture is watched by definition. So they withdraw.
-			// This zone's own units, off its roster -- not every EAST man in the ring. A neighbouring
-			// town's garrison, or a side mission's guard ring drawn beside the zone, is not this
-			// zone's to order off the map. Read before the peak's cycle ends, so the roster still
-			// describes the garrison that was holding when the zone fell.
-			private _grps = [];
-			{
-				if (alive _x) then { _grps pushBackUnique (group _x) };
-			} forEach ([_zoneKey] call fnc_zone_roster);
-			if (count _grps > 0) then {
-				["INFO", "STREAM", format ["%1 lost; %2 surviving group(s) ordered out", _zoneKey, count _grps]] call fnc_log;
-				[_grps, _spawnPos] spawn fnc_opfor_retreat;
+			// Read before the peak's cycle ends, so the roster still describes the garrison that was
+			// holding when the zone fell. A garrison already broken has been ordered out by the poll
+			// above and is skipped there, so this covers a zone that fell with its garrison intact.
+			private _sent = [_zoneKey, _spawnPos] call _orderOut;
+			if (_sent > 0) then {
+				["INFO", "STREAM", format ["%1 lost; %2 surviving group(s) ordered out", _zoneKey, _sent]] call fnc_log;
 			};
 
 			// The zone is BLUFOR's and what held it is walking away, so the attrition it carried
