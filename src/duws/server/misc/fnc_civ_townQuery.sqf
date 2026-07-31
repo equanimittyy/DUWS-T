@@ -1,7 +1,7 @@
-// Locality: server. Answers one map click from the board's View Map action: which town, if
-// any, sits under the clicked position. The lookup cannot live on the client -- civ_locations,
-// civ_radii, the per-town population variables and civ_town_rep are all server-only and none
-// of them is broadcast -- so the click travels here and the readout travels back.
+// Locality: server. Answers one map click from the board's View Map action: which zone or civilian
+// town, if any, sits under the clicked position. The lookup cannot live on the client -- civ_locations,
+// civ_radii, the per-town population variables, civ_town_rep and every zone's garrison state are all
+// server-only and none of them is broadcast -- so the click travels here and the readout travels back.
 if (!isServer) exitWith {};
 
 params [["_pos", [0, 0, 0]], ["_caller", objNull]];
@@ -11,20 +11,67 @@ private _locations = missionNamespace getVariable ["civ_locations", []];
 private _radii = missionNamespace getVariable ["civ_radii", []];
 private _visible = missionNamespace getVariable ["civ_visible", []];
 
-// An unrevealed town answers as empty ground. Anything else would make the map a free sweep
-// for the towns the presence trigger exists to keep hidden until the player walks into one.
-// A missing radius reads as 0 so an array that ever falls short of civ_locations misses rather
-// than matching everything.
-private _hit = -1;
+// Nearest centre wins, across both kinds. Zone circles and town discs overlap by design -- a
+// contested town on enemy ground is the point -- so a click inside both has to resolve to one of
+// them, and the middle the player clicked nearer is the one they were pointing at.
+//
+// An unrevealed town or zone answers as empty ground. Anything else would make the map a free sweep
+// for what hardcore's reveal machinery exists to keep hidden until it is found. A missing radius
+// reads as 0 so an array that ever falls short of its list misses rather than matching everything.
+private _pick = [];
+private _best = 1e11;
+
 {
+	private _d = _pos distance2D (getPos _x);
 	if ((_visible param [_forEachIndex, true])
-		&& {(_pos distance2D (getPos _x)) < (_radii param [_forEachIndex, 0])}) exitWith {
-		_hit = _forEachIndex;
+		&& {_d < (_radii param [_forEachIndex, 0])} && {_d < _best}) then {
+		_pick = ["TOWN", _forEachIndex];
+		_best = _d;
 	};
 } forEach _locations;
 
-if (_hit < 0) exitWith { [] remoteExec ["fnc_civ_townInfo", _caller]; };
+// Radius comes from zone_meta_array and the name and revealed flag from zone_namePOS_pairs, matched
+// on position rather than by index: fnc_createzone appends to both, but a spawned build can be
+// suspended between the two appends, so concurrent zone builds are not guaranteed to line the two
+// arrays up.
+{
+	_x params ["", "_zPos", "_zSize"];
+	private _d = _pos distance2D _zPos;
+	if (_d < _zSize && {_d < _best}) then {
+		private _i = zone_namePOS_pairs findIf {((_x select 1) distance2D _zPos) < 1};
+		if (_i > -1 && {(zone_namePOS_pairs select _i) select 2}) then {
+			_pick = ["ZONE", (zone_namePOS_pairs select _i) select 0, _zPos];
+			_best = _d;
+		};
+	};
+} forEach zone_meta_array;
 
+if (_pick isEqualTo []) exitWith { [] remoteExec ["fnc_civ_townInfo", _caller]; };
+
+if ((_pick select 0) isEqualTo "ZONE") exitWith {
+	_pick params ["", "_name", "_zPos"];
+	private _key = [_zPos] call fnc_zone_key;
+	// Matched on distance rather than `in`, like every other read of these lists: a stored zone
+	// position and the one a capture trigger filed differ in z, and the capture path's has been
+	// through a formatted statement string.
+	private _held = (WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zPos) < 1}) >= 0;
+
+	// A zone that is streamed in reports what is alive right now; a stowed one reports what it will
+	// come back at, which is what its teardown recorded. Both answer "how strong is this zone", so
+	// the readout never has to tell the player which side of the streaming boundary they are on.
+	private _peak = missionNamespace getVariable [format ["DUWS_zonePeak_%1", _key], 0];
+	private _base = missionNamespace getVariable [format ["DUWS_zoneBase_%1", _key], 0];
+	private _frac = [_key] call fnc_zone_strength;
+	if (_peak > 0 && {_base > 0}) then { _frac = ([_key] call fnc_zone_garrison_count) / _base };
+
+	// Rounded up on the same epsilon as fnc_zone_strength_set, so a stowed zone's bar cannot
+	// disagree by a segment with the strength it is about to redeploy at. Capped because a
+	// full-strength cycle can place a few men over the baseline it is measured against.
+	private _seg = ((ceil ((_frac * 10) - 0.0001)) max 0) min 10;
+	["ZONE", [_name, _held, _seg]] remoteExec ["fnc_civ_townInfo", _caller];
+};
+
+private _hit = _pick select 1;
 private _name = text (_locations select _hit);
 if (_name isEqualTo "") then { _name = format ["Unnamed%1", _hit] };
 private _pop = missionNamespace getVariable [format ["civ_pop_%1", _hit], 0];
@@ -42,4 +89,4 @@ private _ap = (missionNamespace getVariable ["civ_town_ap", []]) param [_hit, 0]
 // Worth travels alongside the income, not instead of it. They are the same number for a town that
 // has picked a side, but a neutral one earns nothing while still being worth something to turn,
 // and the readout has to be able to say both without re-deriving the tick's figure client-side.
-[_name, _pop, _hasRep, _rep, _income, _side, _ap] remoteExec ["fnc_civ_townInfo", _caller];
+["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap]] remoteExec ["fnc_civ_townInfo", _caller];

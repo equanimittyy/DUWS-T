@@ -1767,12 +1767,20 @@
                 <English>View Map</English>
             </Key>
             <Key ID="STR_DUWS_T_civ_mapview_open">
-                <Original>Click a civilian zone for its details.</Original>
-                <English>Click a civilian zone for its details.</English>
+                <Original>Click a zone for its details.</Original>
+                <English>Click a zone for its details.</English>
             </Key>
             <Key ID="STR_DUWS_T_civ_mapview_miss">
-                <Original>Click on a civilian zone.</Original>
-                <English>Click on a civilian zone.</English>
+                <Original>Click on a zone.</Original>
+                <English>Click on a zone.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_zone_mapview_garrison">
+                <Original>Garrison Strength: %1</Original>
+                <English>Garrison Strength: %1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_zone_mapview_held">
+                <Original>Held by BLUFOR</Original>
+                <English>Held by BLUFOR</English>
             </Key>
             <Key ID="STR_DUWS_T_civ_mapview_pop">
                 <Original>Population: %1</Original>

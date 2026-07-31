@@ -1,5 +1,6 @@
-// Locality: the client that used the board. Opens the map in town-readout mode, where every
-// click is a question for the server -- this machine holds none of the civilian data.
+// Locality: the client that used the board. Opens the map in readout mode, where every click is a
+// question for the server -- this machine holds neither the civilian data nor any zone's garrison
+// state.
 if (!hasInterface) exitWith {};
 
 if (!isNil "DUWS_civMapViewOpen" && {DUWS_civMapViewOpen}) exitWith {};
