@@ -4,7 +4,10 @@
 
 //Mission_available = false;
 
-sleep 360;   // 6 min
+// uiSleep, not sleep: setTimeMultiplier scales sleep, so a host running the campaign clock at
+// 8x would get four minutes out of this rather than thirty. The slot lock is paced against the
+// player's evening, not the campaign's daylight.
+uiSleep 1800;   // 30 min
 
 if (Mission_available) exitWith {};
 Mission_available = true;

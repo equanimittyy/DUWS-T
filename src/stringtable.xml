@@ -7905,8 +7905,8 @@
                 <Chinesesimp>一名自杀式炸弹袭击者引爆了！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_MISSION_CLEANUP_START">
-                <Original>Clearance of the objective area has begun. Enemy forces and abandoned vehicles there will be removed, so recover anything you want to keep now. Command will release the next tasking once the area is clear.</Original>
-                <English>Clearance of the objective area has begun. Enemy forces and abandoned vehicles there will be removed, so recover anything you want to keep now. Command will release the next tasking once the area is clear.</English>
+                <Original>Clearance of the objective area has begun. Enemy forces and abandoned vehicles there will be removed, so recover anything you want to keep now. Command will signal when the next tasking is ready.</Original>
+                <English>Clearance of the objective area has begun. Enemy forces and abandoned vehicles there will be removed, so recover anything you want to keep now. Command will signal when the next tasking is ready.</English>
                 <Chinesesimp>任务清理线程开始————该线程会清理任务范围内所有敌军单位与空载具，请在清理前带走想要的空载具。清理线程结束后便可进行下一个任务。</Chinesesimp>
                 <German>Missionsbereinigungs-Thread gestartet — Dieser Thread entfernt alle feindlichen Einheiten und unbewohnten Fahrzeuge im Missionsbereich. Bitte nehme alle gewünschten unbewohnten Fahrzeuge vor der Bereinigung mit. Du kannst zur nächsten Mission fortfahren, sobald der Bereinigungs-Thread beendet ist.</German>
                 <Spanish>Hilo de limpieza de misión iniciado — Este hilo eliminará todas las unidades enemigas y vehículos desocupados dentro del área de misión. Por favor, toma los vehículos desocupados que quieras antes de la limpieza. Podrás continuar con la siguiente misión cuando termine el hilo de limpieza.</Spanish>
