@@ -35,8 +35,10 @@ if (_tracked) then {
 		params ["_obj", "_marker"];
 		// Five seconds, not every frame: the ring is hundreds of metres across, so nothing driveable
 		// leaves its own circle inside one interval, and this thread lives for the rest of the
-		// campaign.
-		while {!isNull _obj && {alive _obj}} do {
+		// campaign. It also ends when the marker goes, which is how a released MHQ stops being
+		// followed by a vehicle that is still very much alive -- markerShape answers "" for a
+		// marker that no longer exists.
+		while {!isNull _obj && {alive _obj} && {markerShape _marker != ""}} do {
 			_marker setMarkerPos (getPos _obj);
 			sleep 5;
 		};

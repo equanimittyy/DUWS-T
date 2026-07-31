@@ -2,8 +2,16 @@
 
 // BEGIN OF SPAWN "IF MHQ DESTROYED"
 
-waituntil {sleep 10;!alive MHQ1};
-	
+// Released designations end this watch as well as destroyed ones. Both tests are needed: the
+// variable is cleared on release, so reading `alive MHQ1` alone would throw, and the generation
+// catches the case where a replacement was designated inside one ten-second interval -- without it
+// this thread would adopt the new MHQ and tear it down alongside the watcher spawned for it.
+params [["_generation", 0]];
+
+waituntil {sleep 10; (missionNamespace getVariable ["MHQ_generation", 0]) != _generation || {isNil "MHQ1"} || {!alive MHQ1}};
+
+if ((missionNamespace getVariable ["MHQ_generation", 0]) != _generation || {isNil "MHQ1"}) exitWith {};
+
 if (MHQ_deployed) then {
 
 	MHQ_respawn call BIS_fnc_removeRespawnPosition;

@@ -144,7 +144,8 @@ repair, vehicle recycle — already broadcast their flag and already sat outside
 the radio supports already took a slot and already handed the buyer a per-player comm-menu item.
 Mobile HQ and the FOB unlock moved to permanent because both are capabilities rather than
 deliveries: each still charges per use (10 CP a FOB, and the MHQ token is re-issued rather than
-re-bought when the vehicle is destroyed), so team ownership costs nothing it was collecting before.
+re-bought when its vehicle is released or destroyed), so team ownership costs nothing it was
+collecting before.
 
 **Row order is the catalogue's, not a literal.** Both the list build (`fnc_support_list_fill`) and
 the buy/refund handler read the same array and index it the same way, and the listbox keeps a

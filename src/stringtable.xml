@@ -3535,6 +3535,18 @@
                 <Original>All %1 support slots are in use. Refund one to free a slot.</Original>
                 <English>All %1 support slots are in use. Refund one to free a slot.</English>
             </Key>
+            <Key ID="STR_DUWS_T_MHQ_RELEASE">
+                <Original>Release Mobile HQ</Original>
+                <English>Release Mobile HQ</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MHQ_RELEASED_TITLE">
+                <Original>Mobile HQ Released</Original>
+                <English>Mobile HQ Released</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MHQ_RELEASED_MSG">
+                <Original>The vehicle is an ordinary truck again. Any squad leader can designate a new Mobile HQ.</Original>
+                <English>The vehicle is an ordinary truck again. Any squad leader can designate a new Mobile HQ.</English>
+            </Key>
             <Key ID="STR_DUWS_T_SUPPORT_LOST_TITLE">
                 <Original>Supports Lost</Original>
                 <English>Supports Lost</English>
@@ -5258,8 +5270,8 @@
                 <English>Vehicle must be a car, tank, helicopter, or fixed-wing aircraft. Please try again.</English>
             </Key>
             <Key ID="STR_DUWS_T_mhq_exists">
-                <Original>A Mobile HQ is already assigned, and is marked on your map. Only one exists at a time: the current one has to be destroyed before another vehicle can be designated. Your request has been returned to the support menu.</Original>
-                <English>A Mobile HQ is already assigned, and is marked on your map. Only one exists at a time: the current one has to be destroyed before another vehicle can be designated. Your request has been returned to the support menu.</English>
+                <Original>A Mobile HQ is already assigned, and is marked on your map. Only one exists at a time. To move it, undeploy it, drive it and deploy it again. To hand it back and choose a different vehicle, undeploy it and use Release Mobile HQ. Your request has been returned to the support menu.</Original>
+                <English>A Mobile HQ is already assigned, and is marked on your map. Only one exists at a time. To move it, undeploy it, drive it and deploy it again. To hand it back and choose a different vehicle, undeploy it and use Release Mobile HQ. Your request has been returned to the support menu.</English>
             </Key>
             <Key ID="STR_DUWS_T_0a6o9dsm">
                 <German>Setze TF Gruppe ein!</German>

@@ -237,7 +237,13 @@ stayed while Reset Squad Leader (`STR_DUWS_T_4jabuvz6`) and Mission Cooldowns
 | Entry | Key | Attached by |
 | --- | --- | --- |
 | Deploy / Undeploy Mobile HQ | `STR_DUWS_T_rqzxlvf4`, `…_fjpyu3zb` | `MHQ1` — `Squad_Leaders` only |
+| Release Mobile HQ | `STR_DUWS_T_MHQ_RELEASE` | `MHQ1` while undeployed — `Squad_Leaders` only |
 | Sabotage | `STR_DUWS_T_p3200mf5` | Laptop |
+
+Release sits beside Deploy rather than beside Undeploy, so it is reachable exactly while the vehicle
+is packed up and never while it is a working base. Undeploying is how the MHQ moves and is the common
+action; releasing ends the designation, frees the one-at-a-time slot and hands the build token back to
+every player, which is rare and worth the second click.
 
 Redeploy Base Units (`STR_DUWS_T_REDEPLOY_ACTION`, 2 CP) is the BASE list's last row at both the HQ
 and every FOB, which is the same reasoning that put `ACT_COMMIT` at the bottom of the scroll list.

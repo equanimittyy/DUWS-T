@@ -381,6 +381,7 @@ fnc_MHQ_select = compile preprocessFileLineNumbers "duws\client\dialog\fnc_MHQ_s
 fnc_MHQ_addActions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_MHQ_addActions.sqf";publicVariable "fnc_MHQ_addActions";
 fnc_MHQ_deploy = compile preprocessFileLineNumbers "duws\server\dialog\fnc_MHQ_deploy.sqf";publicVariable "fnc_MHQ_deploy";
 fnc_MHQ_undeploy = compile preprocessFileLineNumbers "duws\server\dialog\fnc_MHQ_undeploy.sqf";publicVariable "fnc_MHQ_undeploy";
+fnc_MHQ_release = compile preprocessFileLineNumbers "duws\server\dialog\fnc_MHQ_release.sqf";
 fnc_MHQ_destroyed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_MHQ_destroyed.sqf";publicVariable "fnc_MHQ_destroyed";
 
 // HQ & FOB FUNCTIONS
