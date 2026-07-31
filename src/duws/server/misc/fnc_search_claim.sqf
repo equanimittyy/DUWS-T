@@ -41,6 +41,27 @@ private _paid = false;
 private _documents = ["Item_Wallet_traitor", "Item_FlashDisk", "Item_SmartPhone",
     "Item_MobilePhone"];
 
+// The two kinds the substitute draw can also pay, hoisted so it does not need a second copy of
+// either. `call` shares the caller's scope, so both read _documents, _origin, _speaker and
+// _caller from here.
+//
+// CP only, and rolled: a search is a windfall for the player who made it, not a shift in the
+// war's momentum, which is what AP measures and what every WARCOM wave threshold reads.
+private _payPool = {
+    private _cp = 1 + floor random 3;
+    [_cp, "search_pool"] call fnc_cp_adjust;
+    [_speaker, localize "STR_DUWS_T_INTEL_FOUND_x"] remoteExec ["fnc_duws_dialogue", 0];
+    ["infosearch", [localize "STR_DUWS_T_INTEL_BONUS_TITLE",
+        format [localize "STR_DUWS_T_INTEL_BONUS_DESC", _cp]]] remoteExec ["BIS_fnc_showNotification", 0];
+};
+
+// One item, not a handful: three documents off one body is three searches' worth of CP for a
+// single search.
+private _payDocument = {
+    [[selectRandom _documents], _origin] call fnc_search_dropItems;
+    [_speaker, localize "STR_DUWS_T_LOOT2"] remoteExec ["fnc_duws_dialogue", _caller];
+};
+
 // Drawn without replacement. A kind that reports nothing left to give drops out and the rest are
 // re-drawn, so an exhausted intel pool costs the search its best outcome rather than its voice.
 while {!_paid && {!(_remaining isEqualTo [])}} do {
@@ -50,20 +71,11 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
     switch (_kind) do {
         // The only kind that can decline: fnc_intel_payout returns false once every zone, town
         // and hardpoint is already revealed. It speaks its own line when it pays. Silenced on the
-        // dry path because this driver answers that case itself, below -- outside hardcore it is
-        // reached on every single search, and the two lines contradict each other.
+        // dry path because the substitute below answers that case itself, and the two lines would
+        // contradict each other.
         case "intel": { _paid = [_origin, _caller, false] call fnc_intel_payout };
 
-        // CP only, and rolled: a search is a windfall for the player who made it, not a shift in
-        // the war's momentum, which is what AP measures and what every WARCOM wave threshold reads.
-        case "pool": {
-            private _cp = 1 + floor random 3;
-            [_cp, "search_pool"] call fnc_cp_adjust;
-            [_speaker, localize "STR_DUWS_T_INTEL_FOUND_x"] remoteExec ["fnc_duws_dialogue", 0];
-            ["infosearch", [localize "STR_DUWS_T_INTEL_BONUS_TITLE",
-                format [localize "STR_DUWS_T_INTEL_BONUS_DESC", _cp]]] remoteExec ["BIS_fnc_showNotification", 0];
-            _paid = true;
-        };
+        case "pool": { call _payPool; _paid = true };
 
         case "coins": {
             private _items = [];
@@ -73,13 +85,7 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
             _paid = true;
         };
 
-        // One item, not a handful: three documents off one body is three searches' worth of CP
-        // for a single search.
-        case "document": {
-            [[selectRandom _documents], _origin] call fnc_search_dropItems;
-            [_speaker, localize "STR_DUWS_T_LOOT2"] remoteExec ["fnc_duws_dialogue", _caller];
-            _paid = true;
-        };
+        case "document": { call _payDocument; _paid = true };
 
         // A row, not the absence of one. A search that finds nothing has to say so: four of six
         // faucets could not speak that outcome before, so a dry result read as a broken action.
@@ -92,12 +98,18 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
     _remaining = _remaining select { (_x select 0) != _kind };
 };
 
-// Every kind declined, which means intel was the only kind left and there was nothing hidden for
-// it to reveal. Outside hardcore that is every search of an intel-only source, because nothing is
-// ever hidden there -- so the substitute is what the source pays in normal mode, not a rare
-// fallback. A document rather than the pool's CP: intel is the premium outcome wherever it is
-// drawn, and a search that reached the object it was sent for must not pay less than a body does.
+// Every kind declined, so intel was the last one standing and there was nothing hidden left for it
+// to reveal. One branch for both modes, because they differ only in what is hidden: hardcore
+// reaches this once the map has been found, normal mode reaches it on every search of an
+// intel-only source, and the search itself behaves the same either way.
+//
+// Half of these still come up empty. Paying every time would make a source that can only draw
+// intel strictly better than one that can draw anything, since a body can roll `nothing` too --
+// the substitute replaces what intel was worth, it does not add a floor the other kinds lack.
 if (!_paid) then {
-    [[selectRandom _documents], _origin] call fnc_search_dropItems;
-    [_speaker, localize "STR_DUWS_T_LOOT2"] remoteExec ["fnc_duws_dialogue", _caller];
+    switch ([[["document", 1], ["pool", 1], ["nothing", 2]]] call fnc_search_drawKind) do {
+        case "document": { call _payDocument };
+        case "pool": { call _payPool };
+        default { [_speaker, _nothingLine] remoteExec ["fnc_duws_dialogue", _caller] };
+    };
 };

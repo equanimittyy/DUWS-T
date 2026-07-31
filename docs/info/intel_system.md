@@ -36,11 +36,14 @@ anything OPFOR build during play stays hidden in both.
 So normal mode has a live intel channel answering "what has changed", and hardcore has that plus
 everything generation produced, answering "where is the war".
 
-Both of normal mode's payouts are unbuilt today, so outside hardcore the reveal pool is empty and
-a draw that lands on intel has nothing to give. The search is not gated on that — it pays a
-document instead, so the mechanic exists in both modes and what differs is only what it hands
-over. Gating it on hardcore was the earlier answer, and it cost normal mode a whole faucet to
-avoid a case the substitute handles in one branch.
+Both of normal mode's payouts are unbuilt today, so outside hardcore the reveal pool is empty and a
+draw that lands on intel has nothing to give.
+
+**The mode changes what is hidden and nothing else.** Every mechanic runs the same in both — same
+flag rates, same action, same payout table, same substitute when intel comes up dry. Only how often
+each branch is reached differs, because that follows from what generation put on the map. The
+search used to be gated on `hardcore_mode_enable` to sidestep the empty pool, which cost normal
+mode a whole faucet to avoid a case one branch handles.
 
 ## One writer per reveal flag, one function for payout
 
@@ -176,13 +179,17 @@ returns false once every position is revealed — and when it does, that kind dr
 remainder are re-drawn. A dry pool therefore costs a search its best outcome rather than its voice,
 which is the failure this mission already paid for once when a dry pool returned quietly.
 
-**When every kind declines, the search pays a document.** That is reachable only where intel is the
-last kind standing, which outside hardcore is every search of an intel-only source rather than a
-rare tail — so the substitute is what those sources pay in normal mode, not a fallback. A document
-rather than the pool's 1–3 CP, because intel is the premium outcome wherever it is drawn and
-reaching a side-mission objective must not pay less than a body does. `fnc_search_claim` silences
-the dry-pool line for its own call into `fnc_intel_payout` for the same reason: announcing an empty
-search and then handing over a document says two different things about one draw.
+**When every kind declines, a second draw decides what stands in for intel** — one document at
+1 / 4, the pool's 1–3 CP at 1 / 4, nothing at 2 / 4. Reachable only where intel was the last kind
+standing, which hardcore hits once the map has been found and normal mode hits on every search of
+an intel-only source; the branch is the same either way.
+
+Half of them still come up empty, deliberately. A source that can only draw intel would otherwise
+be strictly better than one that can draw anything, since a body can roll `nothing` too — the
+substitute replaces what intel was worth, rather than adding a floor the other kinds do not have.
+`fnc_search_claim` silences the dry-pool line for its own call into `fnc_intel_payout` for the
+related reason: announcing an empty search and then handing over a document says two different
+things about one draw.
 
 `nothing` is a row rather than the absence of one, and a weight of zero is how a source opts out of
 a kind. The speaker and the empty-handed line are per-source too: a body is the searcher talking to
