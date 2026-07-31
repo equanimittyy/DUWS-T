@@ -125,8 +125,10 @@ addMissionEventHandler ["BuildingChanged", {
         _level, escalation_destroyed, escalation_budget, escalation_multiplier]] call fnc_log;
 
     if (_level >= ESCALATION_MAX_LEVEL) exitWith {
-        escalation_lost = true;
-        publicVariable "escalation_lost";
+        campaign_lost = true;
+        campaign_lost_body = "STR_DUWS_T_CAMPAIGN_LOST";
+        publicVariable "campaign_lost";
+        publicVariable "campaign_lost_body";
         ["INFO", "ECON", "Escalation reached its ceiling: campaign lost"] call fnc_log;
     };
 

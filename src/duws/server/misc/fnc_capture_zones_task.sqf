@@ -61,16 +61,21 @@ waitUntil {sleep 10; WARCOM_init_done};
 waitUntil {
     sleep 30;
     (amount_zones_created > 0 && {zoneundercontrolblu >= amount_zones_created})
-    || {!isNil "escalation_lost"}
+    || {!isNil "campaign_lost"}
 };
 
 // The pause only lets the notification and the task update land before the outro card replaces
 // them. The notification takes title and body as separate fields; the hint and side-chat take
 // one string, so they need the separator the `+` concatenation was missing -- it ran the
 // headline straight into the sentence as "Mission Completed!Every zone...".
-private _won = isNil "escalation_lost";
+private _won = isNil "campaign_lost";
 private _title = [localize "STR_DUWS_T_CAMPAIGN_LOST_TITLE", localize "STR_DUWS_T_fo1ihi1n"] select _won;
-private _body = [localize "STR_DUWS_T_CAMPAIGN_LOST", localize "STR_DUWS_T_CAMPAIGN_WON"] select _won;
+// The losing body names which ending this was: there is more than one way to lose now, and the
+// ruined-island line reads as a non sequitur after the commander is shot at his own desk. Carried
+// as a stringtable key rather than as resolved text so the setter does not have to be a machine
+// with a stringtable -- and so this stays the one place the campaign's endings are worded.
+private _body = [localize (missionNamespace getVariable
+    ["campaign_lost_body", "STR_DUWS_T_CAMPAIGN_LOST"]), localize "STR_DUWS_T_CAMPAIGN_WON"] select _won;
 
 ["info", [_title, _body]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 [format ["%1 %2", _title, _body], {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];

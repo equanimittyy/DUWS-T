@@ -1811,8 +1811,12 @@
                 <English>Campaign Lost</English>
             </Key>
             <Key ID="STR_DUWS_T_CAMPAIGN_LOST">
-                <Original>Altis is in ruins. Command has withdrawn its mandate; there is nothing left here worth holding.</Original>
-                <English>Altis is in ruins. Command has withdrawn its mandate; there is nothing left here worth holding.</English>
+                <Original>Altis is in ruins. Command has withdrawn its mandate.</Original>
+                <English>Altis is in ruins. Command has withdrawn its mandate.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CAMPAIGN_LOST_OFFICER">
+                <Original>Your commanding officer is dead. Command has stood the operation down.</Original>
+                <English>Your commanding officer is dead. Command has stood the operation down.</English>
             </Key>
             <Key ID="STR_DUWS_T_escalation_row">
                 <Original>%1  -&gt;  %2 CP</Original>
@@ -7051,13 +7055,6 @@
                 <Chinesesimp>你的指挥官已经阵亡</Chinesesimp>
                 <Original>Your commanding officer has been killed.</Original>
                 <English>Your commanding officer has been killed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_htwg04l5">
-                <German>Du kannst trotzdem versuchen die Mission erfolgreich abzuschließen, allerdings werden alle HQ/FOB Anforderungs-Menüs in 10 Minuten deaktiviert.</German>
-                <Spanish>Puede seguir intentando completar la misión, pero todas las solicitudes del menú del CG/PdA desaparecerán dentro de 10 minutos</Spanish>
-                <Chinesesimp>你仍然可以尝试完成任务，但10分钟后所有的总部/FOB请求菜单将消失。</Chinesesimp>
-                <Original>You can still try to complete the mission but all HQ/FOB Request Menus will disappear after 10 minutes.</Original>
-                <English>You can still try to complete the mission but all HQ/FOB Request Menus will disappear after 10 minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_32ci6fa1">
                 <German>"Overlord 1-1" an alle Einheiten, Einsatztruppe %1 betritt den Operationsbereich.</German>

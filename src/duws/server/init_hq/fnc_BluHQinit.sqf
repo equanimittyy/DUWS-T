@@ -344,13 +344,28 @@ _officer addEventHandler ["Killed", {
     // prevent, arriving by the other route.
     remoteExec ["", format ["hq_pose_%1", netId _unit]];
 }];
+// He is a campaign loss condition, so he cannot be one of the team's to end. Damage is refused
+// outright rather than merely discounted at the point of death: counting only OPFOR kills would
+// still let anyone delete the officer the HQ terminal and the request menu hang off, and losing
+// him to a stray burst in a base firefight is the ordinary case, not the malicious one.
+// _instigator names the player behind an explosive or a vehicle where _source is the thing that
+// did the damage; either being WEST is enough to refuse.
+_officer addEventHandler ["HandleDamage", {
+    params ["", "", "_damage", "_source", "", "", "_instigator"];
+    private _by = [_source, _instigator] select (!isNull _instigator);
+    if (!isNull _by && {side _by == WEST}) exitWith { 0 };
+    _damage
+}];
 hq_blu1 = _officer; publicVariable "hq_blu1";
 blu_officer_object = _officer; publicVariable "blu_officer_object";
 [_officer] spawn {
     waitUntil {sleep 10; !alive hq_blu1};
     ["TaskFailed", ["", localize "STR_DUWS_T_amiszycs"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
-    sleep 6;
-    [{hint localize "STR_DUWS_T_htwg04l5"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
+    campaign_lost = true;
+    campaign_lost_body = "STR_DUWS_T_CAMPAIGN_LOST_OFFICER";
+    publicVariable "campaign_lost";
+    publicVariable "campaign_lost_body";
+    ["INFO", "WARCOM", "Commanding officer killed: campaign lost"] call fnc_log;
 };
 [_officer] spawn {
     params ["_u"];
