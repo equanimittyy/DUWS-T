@@ -29,6 +29,21 @@ _BEGIN-USER_
 
 _END-USER_
 
+## The notification character ceiling is inferred from one clipped card
+
+`CfgNotifications` clips a description that does not fit instead of wrapping it, and the figure the
+mission now writes to — 75 characters, recorded in
+[gotchas](docs/info/arma_engine_gotchas.md#a-cfgnotifications-description-is-clipped-not-wrapped-past-roughly-75-characters)
+— was read off a single observation: an 87-character body that reached the player cut at 76. Nothing
+has measured where the cut actually falls, and it is a pixel width rather than a character count, so
+a string of wide glyphs can cross it sooner than a narrow one. Six bodies were shortened to fit;
+whether 75 is the right number for all of them is what is untested.
+
+- [ ] Read the Mobile HQ release card end to end. A cut still landing inside it means the ceiling is
+      lower than 75 and every body shortened to that figure has to come down again
+- [ ] Set a body to exactly 75 wide characters (`WWW…`) and read it. Clipping there proves the
+      budget is pixels and the doc has to name a narrower character figure to stay safe
+
 ## Composition streaming: the prop-position fix is unverified
 
 Every field a stowed composition's record carries has now been exercised, and only the positions
@@ -244,7 +259,6 @@ persistence on a dedicated server a manual act rather than an automatic one.
 | `removeAction` takes index `0` rather than a captured `addAction` return | `server/missions/mission_threads/sabotage_laptop/fnc_sabotage_laptop_success.sqf:18` | Safe only while the laptop carries exactly one action. It carried two until the search rewrite gave the objective search back to the player's own action, so the collision this describes is currently not reachable — and returns the moment anything adds a second action to that laptop |
 | An unbounded `waitUntil` sits on the joiner's branch of the client boot | `client/client_init.sqf:140` | Blocks on `HQ_pos_found_generated && chosen_settings` with no timeout, reached only when `WARCOM_init_done` is false. It hints the player every five seconds, so the stall is visible; proceeding on a timeout would boot a client into a campaign whose settings never arrived. What it lacks is a log line |
 | `staminaEnabled` is read but never assigned anywhere in the mission | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:67` | The whole `format` throws on `Undefined variable in expression: staminaenabled`, so the campaign settings summary hint never displays for any player. Confirmed in an RPT at the moment generation completes. `client/misc/fnc_sitrep_display.sqf:33` reads the same variable behind an `isNil` guard, which is why only this site fails — either assign it at setup or drop it from the hint |
-| Buying the Mobile HQ and never designating one locks the team out of it permanently | `client/dialog/fnc_request_support.sqf:477`, `shared/functions/fnc_MHQ_destroyed.sqf:23` | The purchase clears `support_mobile_HQ_available` for everyone and hands the buyer a one-shot comm-menu token; the only path that sets the flag back waits on an MHQ that exists being destroyed. If the token is lost before it is spent — the buyer disconnecting being the certain case — no second purchase is possible and no MHQ exists to die, so the campaign has no Mobile HQ and 10 CP bought nothing. The three guards in `fnc_MHQ_select.sqf` hand the token back rather than consume it, so a bad target or an MHQ already being active cost nothing; losing the player is the case none of them can cover. Whether respawn also drops the token is unverified |
 | One classname is sold under three labels and prices | `shared/factions/MODERN/CFP_O_HEZBOLLAH_blufor.sqf:120,122,126` | "BTR-60P APC" at 25 CP, "MTLB-LV APC" at 28 and "BTR 60PB" at 35 all deliver `CFP_O_HEZBOLLAH_BTR_60PB_01`, so two of the three charge for a vehicle they do not hand over. Three rows were meant to be three vehicles and one classname was copied across all of them; the two missing classnames can only come from the mod, so this needs someone with CFP installed rather than a source edit |
 | WBK holds the campaign-wide town mutex for a town's whole occupancy | `server/misc/fnc_civ_handler_wbk.sqf` | The lock is taken in `fnc_civ_mode_spawnGate` and released only on the cleanup path, so a second WBK town cannot fill until the first empties or the gate's ten-minute timeout expires — a co-op pair splitting between two towns leaves one of them dead. RAVAGE releases immediately after its spawn burst and carries a comment recording that exact symptom as the reason. The two handlers were written separately and only the RAVAGE side was ever changed, so this is the same defect surviving in the copy nobody revisited. Left alone because making WBK match is a behaviour change, not a refactor, and WBK's one-shot fill may depend on the serialisation in ways only a play-test shows |
 | A unit marker is never removed, and its update loop throws every four seconds | `client/misc/fnc_kndr_unit_markers.sqf:81` | The loop *index* is passed where `kndr_removeMarker` (`:183-195`) expects the object, so `kndr_objs find <number>` returns -1 and `kndr_mrks select -1` raises `Index out of range`. The entry is never removed and the local marker never deleted, so the 4 s update loop (`:203-208`) retries that same dead entry for the rest of the mission and throws once per pass. The leaked marker costs nothing; the permanent error rate does, since every throw writes to the RPT. It starts the moment a marked object dies — MHQ1 (`server/dialog/fnc_MHQ_deploy.sqf:63`) or the mission builder BLD1 (`missions/mission_threads/steal_builder/fnc_steal_builder_mission.sqf:239`). The `remoteExec` callers pass the object and are correct; only the internal update path is wrong |
@@ -294,8 +308,9 @@ simulated AI parked next to the base — inside view distance, never a despawn c
 is what Arma's frame time tracks, which makes this the mission's largest growth term at roughly two
 groups an hour. The patrol spawner shows what a cap looks like here:
 `fnc_WARCOM_blu_patrol.sqf:55` gates on `blufor_patrol_count` and stops at one patrol per held zone.
-OPFOR assault (`fnc_WARCOM_opf_assault.sqf:59-124`) spawns two groups per 30 minutes on the same
-open-ended terms — those at least get engaged and killed.
+It is now the only growth term of its kind: the OPFOR patrol, assault and air spawners that grew the
+same way have been deleted, and whatever OPFOR commander replaces them starts with this entry as the
+worked example of what not to do.
 
 **The GPS marker loop appends a position every four seconds.**
 `server/warcom/fnc_WARCOM_gps_marker.sqf:70` calls `_primary_waypoint insert [0, …]` inside a loop that
@@ -385,9 +400,9 @@ are simply not on the same scale, and recycle has no floor tying reward to what 
 
 **AP is a threshold ladder with almost nothing spending it, so town income is inflationary.** The WARCOM
 director reads it as gates — BLUFOR wave tiers at 10, 40, 65, 100 and 136
-(`fnc_WARCOM_blu_assault.sqf:11-25`), OPFOR air above 150 (`fnc_WARCOM_opf_air.sqf:11`), OPFOR patrols
-above 100 (`fnc_missionPatrols.sqf:18`) — and the only subtractions are losing a zone and the AP→CP
-converter. Turning it into a currency both sides spend, without breaking the ladder, is
+(`fnc_WARCOM_blu_assault.sqf:11-25`) and mission-guard armour above 100 (`fnc_missionPatrols.sqf:20`)
+— and the only subtractions are losing a zone and the AP→CP converter. The enemy half of that ladder
+is a single rung now; the rest went with the WARCOM OPFOR spawners. Turning it into a currency both sides spend, without breaking the ladder, is
 [`docs/economy_plan.md`](docs/economy_plan.md). A 20-town campaign averaging 2 AP pays at most 40 AP per
 30 min with every town banded, against 25 for capturing a 500 m zone and 50 for a 1000 m one — worth is
 `round(radius/10)` (`fnc_locatorzones_random.sqf:56`), halved by `zone_ap_swing`. So at its ceiling
@@ -428,6 +443,7 @@ Carried from the previous developer and left alone deliberately.
 - **`Land_GuardTower_02_F` reports one building position with a wrong Z**, and `modelToWorld`'s
   Z is unusable on it too. `server/init_hq/fnc_BluHQinit.sqf:348` combines model-space XY with
   world-space Z to place the tower garrison. The comment there records the reasoning.
-- **Zone selection can pick a centre that surprises BLUFOR.** Two WARCOM spawners
-  (`fnc_WARCOM_opf_patrol.sqf`, `fnc_random_veh_opf_patrol.sqf`) each place their units
-  deliberately far from the zone centre to compensate. The underlying selection is untouched.
+- **Zone selection can pick a centre that surprises BLUFOR.** The two WARCOM spawners that
+  compensated by placing their units deliberately far from the zone centre are gone, so nothing
+  works around it any more. The underlying selection is still untouched, and whatever replaces
+  those spawners meets it unmediated.
