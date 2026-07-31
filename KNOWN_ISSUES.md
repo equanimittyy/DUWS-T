@@ -29,21 +29,6 @@ _BEGIN-USER_
 
 _END-USER_
 
-## The notification character ceiling is inferred from one clipped card
-
-`CfgNotifications` clips a description that does not fit instead of wrapping it, and the figure the
-mission now writes to — 75 characters, recorded in
-[gotchas](docs/info/arma_engine_gotchas.md#a-cfgnotifications-description-is-clipped-not-wrapped-past-roughly-75-characters)
-— was read off a single observation: an 87-character body that reached the player cut at 76. Nothing
-has measured where the cut actually falls, and it is a pixel width rather than a character count, so
-a string of wide glyphs can cross it sooner than a narrow one. Six bodies were shortened to fit;
-whether 75 is the right number for all of them is what is untested.
-
-- [ ] Read the Mobile HQ release card end to end. A cut still landing inside it means the ceiling is
-      lower than 75 and every body shortened to that figure has to come down again
-- [ ] Set a body to exactly 75 wide characters (`WWW…`) and read it. Clipping there proves the
-      budget is pixels and the doc has to name a narrower character figure to stay safe
-
 ## Composition streaming: the prop-position fix is unverified
 
 Every field a stowed composition's record carries has now been exercised, and only the positions
@@ -252,7 +237,6 @@ persistence on a dedicated server a manual act rather than an automatic one.
 | `random_placement` is set on the client and never `publicVariable`'d | `client/dialog/fnc_HQ_random_place.sqf`, `fnc_HQ_faction_dialog.sqf`, `fnc_startup_faction_flow.sqf` | Harmless today — its only reader is client-side on the same machine — but it fails silently the moment anything server-side reads it |
 | Two script paths in `paths_baseline.txt` point at files that do not exist | `client/misc/fnc_player_markers.sqf`, `server/misc/fnc_repetitive_cleanup.sqf` | Pre-dates the test suite; baselined so the linter gates regressions without being blocked by it |
 | Six `format[...]` calls wrap a single literal with no placeholders | `client/supports/fnc_helolift.sqf` | Cosmetic — a wasted call per invocation |
-| `fnc_log` calls itself instead of writing the line | `shared/functions/fnc_log_init.sqf:25` | Unbounded recursion on every line at or below the active level: nothing reaches the RPT and the first logged milestone kills the boot. The `diag_log` -> `fnc_log` sweep has to skip this one file — it is where `diag_log` lives |
 | Two functions named by zone triggers are never broadcast | `fnc_captured`, `fnc_enterlocation`, registered in `server/server_fnc_init.sqf` without `publicVariable` | A `createTrigger` statement is global, which is why the civilian town trigger's `fnc_civ_handler_ravage` / `fnc_civ_handler_wbk` *are* broadcast. One of the two treatments is wrong: if the zone side is, every client spawns a nil on each zone entry and capture. The campaign is unaffected — the server runs its own copy — but a client RPT fills with undefined-variable errors |
 | `duws_all_helmets` and `duws_all_vests` are read but assigned nowhere in the mission | `server/misc/fnc_civ_handler_ravage.sqf:260,270` | RAVAGE only, and only on the zombies that draw no uniform — roughly 30%, since the uniform roll is `_isZombie && random 1 < 0.7`. Those two branches are the fallback for a unit with no uniform side to match, so they are the only readers, and `count` on an undefined variable throws where the assigned lists would have been used. Both were carried over untouched when RAVAGE was split out of `fnc_civ_handler` |
 | Five `remoteExec ["call", 0, true]` sites ship a whole `addAction` body as compiled code | `destroy_cache:123,158`, `rescue_pilot:336,407`, `steal_supply:87` | Queued under an engine-generated id nothing can address or remove, and the largest entries a joiner receives. Cannot be keyed until each body becomes a named function taking arguments |
