@@ -2,6 +2,8 @@
 _radius = _this select 0;
 _diff = _this select 1;
 
+// player1 on purpose, unlike the mission announcements: manual placement is one person clicking the
+// map, and the map this opens is theirs. Everyone else gets the typeText card on the next line.
 [{hint localize "STR_DUWS_T_5ve9v8c0"}] remoteExec ["BIS_fnc_Spawn", player1,false];
 [[localize "STR_DUWS_T_shuo4nyn"]] remoteExec ["BIS_fnc_typeText", [0,-2] select isDedicated,false];
 

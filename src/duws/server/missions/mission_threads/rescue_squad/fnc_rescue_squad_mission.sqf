@@ -19,7 +19,7 @@ if (count _usableBuildings < 2) exitWith {
 	[0, "STR_DUWS_T_mission_no_building"] call fnc_mission_abort;
 };
 
-[_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  player1];
+[_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  [0,-2] select isDedicated];
 
 _Building = _usableBuildings select (floor (random (count _usableBuildings)));
 _BuildingPos = getPos _Building;

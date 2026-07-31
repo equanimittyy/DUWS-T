@@ -13,7 +13,7 @@ while {!_Posfound} do {
 	if (count(_nearBuildings) == 0) then {
 		//_Building = nearestBuilding _randomPos;
 		_Building = _randomPos;
-		[{hint localize "STR_DUWS_T_pj31ugj0"}] remoteExec ["BIS_fnc_Spawn", player1];
+		[{hint localize "STR_DUWS_T_pj31ugj0"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 		sleep 5;
 	} else {
 		_bindex = (count _nearBuildings) - 1;

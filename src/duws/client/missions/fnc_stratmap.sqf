@@ -13,7 +13,10 @@ _speaker = localize "STR_DUWS_T_OVERLORD";
 _speakeracteam = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_missioncooldown"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_missioncooldown2";
-[localize "STR_DUWS_T_b68ftbvf",{hint _this}] remoteExec ["BIS_fnc_Spawn", player1];
+// Answers the player who opened the menu, so it stays on their machine: this function is spawned
+// by the request-menu action and already runs there. It was addressed to player1, which in co-op
+// showed one player the refusal for another player's click.
+hint localize "STR_DUWS_T_b68ftbvf";
 [_speakeracteam, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 4;
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];

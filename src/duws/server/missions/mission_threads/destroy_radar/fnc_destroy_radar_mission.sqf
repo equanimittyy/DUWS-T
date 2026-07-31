@@ -16,7 +16,7 @@ private _site = [_MissionPos, _radius, 10] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
-[_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  player1];
+[_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  [0,-2] select isDedicated];
 
 _radarPos = _targetpos;
 

@@ -151,7 +151,7 @@ _missionUnits pushBack _guard2;
 
 [_guard2] joinSilent _groupBunker1;
 
-["HOLD POSITION",{hint _this}] remoteExec ["BIS_fnc_Spawn",  player1];
+["HOLD POSITION",{hint _this}] remoteExec ["BIS_fnc_Spawn",  [0,-2] select isDedicated];
 
 sleep 2;
 
