@@ -34,12 +34,11 @@ private _paid = false;
 
 // What a search found is one player's news, and the searcher is the only one told: a body is
 // searched alone and a co-op session where every pocket emptied is announced to everyone reads as
-// spam rather than as reporting. Hinted as well as spoken because the dialogue queue can hold a
-// line behind other traffic, and a result the player held an action for should not scroll past.
+// spam rather than as reporting. Bound to the searcher here so the six outcomes below each pass a
+// line and nothing else; fnc_duws_report owns which surfaces a result lands on.
 private _fnc_report = {
     params ["_line"];
-    [_speaker, _line] remoteExec ["fnc_duws_dialogue", _caller];
-    [_line] remoteExec ["hint", _caller];
+    [_speaker, _line, _caller] call fnc_duws_report;
 };
 
 // The one exception to the rule above, and the reason it is a separate helper rather than a flag on

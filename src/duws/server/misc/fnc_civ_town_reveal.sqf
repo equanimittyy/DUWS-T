@@ -25,9 +25,7 @@ _vis set [_townIndex, true];
 (format ["civ_icon_%1", _townIndex]) setMarkerAlpha 1;
 
 if (!_quiet) then {
-    private _line = localize "STR_DUWS_T_townreveal";
-    [localize "STR_DUWS_T_OVERLORD", _line] remoteExec ["fnc_duws_dialogue", _audience];
-    if (_audience isEqualType objNull) then { [_line] remoteExec ["hint", _audience] };
+    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_townreveal", _audience] call fnc_duws_report;
 };
 
 true

@@ -37,9 +37,8 @@ switch (_one_or_all) do {
             [_zonePos] call _fnc_paint;
             _revealed = true;
             if (!_quiet) then {
-                private _line = localize "STR_DUWS_T_zonereveal";
-                [localize "STR_DUWS_T_OVERLORD", _line] remoteExec ["fnc_duws_dialogue", _audience];
-                if (_audience isEqualType objNull) then { [_line] remoteExec ["hint", _audience] };
+                [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_zonereveal",
+                    _audience] call fnc_duws_report;
             };
         };
     };
