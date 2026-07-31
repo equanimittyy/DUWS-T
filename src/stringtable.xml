@@ -3941,6 +3941,22 @@
                 <English>Eliminate High-Value Target</English>
             </Key>
             <Key ID="STR_DUWS_T_c3">
+            <Key ID="STR_DUWS_T_OPFOR_WITHDRAW_TITLE">
+                <Original>Enemy Withdrawing</Original>
+                <English>Enemy Withdrawing</English>
+            </Key>
+            <Key ID="STR_DUWS_T_OPFOR_WITHDRAW_MSG">
+                <Original>Enemy at %1 is breaking off and falling back.</Original>
+                <English>Enemy at %1 is breaking off and falling back.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_OPFOR_ESCAPED_TITLE">
+                <Original>Enemy Escaped</Original>
+                <English>Enemy Escaped</English>
+            </Key>
+            <Key ID="STR_DUWS_T_OPFOR_ESCAPED_MSG">
+                <Original>The force from %1 broke contact and got clear.</Original>
+                <English>The force from %1 broke contact and got clear.</English>
+            </Key>
                 <German>Sendemast zerstören</German>
                 <Spanish>Destruir torre de señal</Spanish>
                 <Chinesesimp>摧毁信号塔</Chinesesimp>

@@ -300,6 +300,13 @@ private _moving = 0;
 ["INFO", "OPFOR", format ["%1 group(s) bounding back from %2",
     count _groups, mapGridPosition _holdPos]] call fnc_log;
 
+// Announced rather than left to be noticed. A bounding withdrawal reads as a firefight the player
+// is still losing until they see the ground behind it empty, and the whole mechanic is worth
+// nothing if it is mistaken for the AI holding.
+["info", [localize "STR_DUWS_T_OPFOR_WITHDRAW_TITLE",
+    format [localize "STR_DUWS_T_OPFOR_WITHDRAW_MSG", mapGridPosition _holdPos]]]
+    remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
+
 private _deadline = time + GIVE_UP;
 private _outcome = "";
 
@@ -353,6 +360,11 @@ switch (_outcome) do {
         [_survivors] call _fnc_release;
         ["INFO", "OPFOR", format ["withdrawal from %1 broke contact; %2 group(s) despawned clear",
             mapGridPosition _holdPos, count _survivors]] call fnc_log;
+        // Only this outcome is announced. "shadowed" puts the force back on its feet and the player
+        // is already in contact with it, and "wiped" is a fight they watched themselves win.
+        ["info", [localize "STR_DUWS_T_OPFOR_ESCAPED_TITLE",
+            format [localize "STR_DUWS_T_OPFOR_ESCAPED_MSG", mapGridPosition _holdPos]]]
+            remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
     };
     case "shadowed": {
         [_survivors] call _fnc_standDown;
