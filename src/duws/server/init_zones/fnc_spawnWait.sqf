@@ -128,14 +128,22 @@ while {true} do {
 		if (_despawn) then {
 			(zone_spawn_array select _index) set [1,false];
 			_zoneObj = _spawnPos nearObjects (_size + _AI_buffer);
+			// A withdrawal in progress is exempt: fnc_opfor_retreat owns those units until it has
+			// taken them clear of anyone watching, and towns sit on enemy zones by design, so a
+			// town garrison walking out crosses this radius on its way. Collecting it here would
+			// delete it in front of the force that pushed it out, which is the one thing the
+			// retreat exists to avoid. The give-up path in that function drops the flag, so
+			// nothing it abandons stays exempt.
 			{
 				// Delete vehicles and crew
-				if (side _x == EAST && !(_x isKindOf "StaticWeapon") && !(_x isKindOf "Man")) then {
+				if (side _x == EAST && !(_x isKindOf "StaticWeapon") && !(_x isKindOf "Man")
+					&& !(_x getVariable ["DUWS_retreating", false])) then {
 					deleteVehicleCrew _x;
 					deleteVehicle _x;
 				};
 				// Delete units not in vehicles
-				if (side _x == EAST && _x isKindOf "Man" && vehicle _x == _x) then {
+				if (side _x == EAST && _x isKindOf "Man" && vehicle _x == _x
+					&& !(_x getVariable ["DUWS_retreating", false])) then {
 					deleteVehicle _x;
 				};
 				

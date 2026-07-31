@@ -15,21 +15,33 @@ private _radius = (missionNamespace getVariable ["civ_radii", []]) param [_townI
 
 // Units only. A town gets no fortification ring and no prefab: the static emplacements are what
 // make a zone an objective, and a town must not compete with one for the player's attention.
+// The position and radius are passed in rather than read from the enclosing scope: a spawned block
+// sees no locals from where it was written, and this one is called for its return value anyway --
+// the roster is what lets the garrison be counted and ordered out.
 private _fnc_spawnTier = {
-    params ["_tier"];
-    [_centre, _radius] spawn fnc_createoppatrol2;
+    params ["_tier", "_pos", "_rad"];
+    private _grps = [];
+    _grps pushBack ([_pos, _rad] call fnc_createoppatrol2);
     sleep 5;
-    [_centre, _radius] spawn fnc_createopteam2;
+    _grps pushBack ([_pos, _rad] call fnc_createopteam2);
     if (_tier >= 2) then {
         sleep 5;
-        [_centre, _radius] spawn fnc_createopteam2;
+        _grps pushBack ([_pos, _rad] call fnc_createopteam2);
         sleep 5;
-        [OPFOR_Faction_X, "car", _centre, _radius] spawn fnc_random_veh;
+        _grps pushBack ([OPFOR_Faction_X, "car", _pos, _rad] call fnc_random_veh);
     };
     if (_tier >= 3) then {
         sleep 5;
-        [OPFOR_Faction_X, "armored", _centre, _radius] spawn fnc_random_veh;
+        _grps pushBack ([OPFOR_Faction_X, "armored", _pos, _rad] call fnc_random_veh);
     };
+    _grps select { !isNull _x }
+};
+
+private _fnc_rosterAlive = {
+    params ["_grps"];
+    private _n = 0;
+    { _n = _n + ({alive _x} count units _x) } forEach _grps;
+    _n
 };
 
 // SEIZED is the engine's own "this side present, the opposing side absent" test, which is what
@@ -56,6 +68,14 @@ private _fnc_opforPresent = {
 
 private _garrisoned = false;
 private _trg = objNull;
+private _roster = [];
+private _baseline = 0;
+private _retreating = false;
+
+// A garrison broken this far is not going to hold the town, and standing the remnant in it until
+// the last man dies is what makes clearing a town a sweep rather than a fight. Counted against the
+// strength the town was actually given, so a tier 3 garrison may lose more men than a tier 1 has.
+#define BREAK_FRACTION 0.2
 
 while {true} do {
     sleep 30;
@@ -73,40 +93,63 @@ while {true} do {
                     private _tier = 1;
                     if (_rep <= -15) then { _tier = 2 };
                     if (_rep <= -20) then { _tier = 3 };
-                    [_tier] spawn _fnc_spawnTier;
-                    // Armed only once the garrison is standing in it. The three spawners are
-                    // scheduled and each resolves a safe position before it places anything, so
-                    // for the first half-minute the town holds the player and nobody else -- and
-                    // that is precisely what WEST SEIZED reports as cleared. A trigger armed
-                    // beside the spawn therefore hands the town its whole reputation debt back
-                    // for a garrison nobody fought, which reads in play as reputation climbing
-                    // out of the negative band on its own from standing in the town.
+                    _roster = [_tier, _centre, _radius] call _fnc_spawnTier;
+                    // Armed only once the garrison is standing in it. Each spawner resolves a safe
+                    // position before it places anything, and one that fails leaves the town
+                    // holding the player and nobody else -- which is precisely what WEST SEIZED
+                    // reports as cleared. A trigger armed beside the spawn therefore hands the town
+                    // its whole reputation debt back for a garrison nobody fought, which reads in
+                    // play as reputation climbing out of the negative band on its own from standing
+                    // in the town.
                     private _deadline = diag_tickTime + 60;
                     waitUntil { sleep 2; (call _fnc_opforPresent) || {diag_tickTime > _deadline} };
                     if (call _fnc_opforPresent) then {
                         _trg = call _fnc_makeClearTrigger;
                         _garrisoned = true;
-                        ["INFO", "CIV", format ["Garrison tier %1 spawned at town %2 (rep %3)", _tier, _townIndex, _rep]] call fnc_log;
+                        _retreating = false;
+                        _baseline = [_roster] call _fnc_rosterAlive;
+                        ["INFO", "CIV", format ["Garrison tier %1 spawned at town %2 (rep %3), %4 men", _tier, _townIndex, _rep, _baseline]] call fnc_log;
                     } else {
-                        // Left un-garrisoned rather than credited: the band is still the
-                        // condition, so the next pass tries again.
+                        // Left un-garrisoned rather than credited: the band is still the condition,
+                        // so the next pass tries again. Whatever the spawners did place is ordered
+                        // out rather than abandoned, or every retry would silt the map up with
+                        // another tier's worth of units nothing is counting.
+                        [_roster, _centre] spawn fnc_opfor_retreat;
+                        _roster = [];
                         ["WARN", "CIV", format ["Garrison tier %1 at town %2 placed no OPFOR within %3 m in 60 s; not armed", _tier, _townIndex, _radius]] call fnc_log;
                     };
                 };
             };
         };
     } else {
+        // Ordered out on strength rather than left to be finished off. The withdrawal is also what
+        // clears the trigger area, so this and the WEST SEIZED test below run in sequence rather
+        // than competing: the remnant walks out, and the town reads as cleared once it has.
+        private _left = [_roster] call _fnc_rosterAlive;
+        if (!_retreating && {_baseline > 0} && {_left > 0} && {_left <= BREAK_FRACTION * _baseline}) then {
+            _retreating = true;
+            [_roster, _centre] spawn fnc_opfor_retreat;
+            ["INFO", "CIV", format ["Town %1 garrison broken at %2 of %3 men; withdrawing", _townIndex, _left, _baseline]] call fnc_log;
+        };
+
         // Out of the band by aid or heals rather than by a fight: the band is the condition, so
-        // the garrison has no business being there. How those units leave is the retreat
-        // behaviour, not a deletion sweep -- until it lands they are left to the map cleanup.
+        // the garrison has no business being there, and it leaves the same way a broken one does.
         if (_rep > -10) then {
             deleteVehicle _trg;
             _garrisoned = false;
-            ["INFO", "CIV", format ["Town %1 left the OPFOR band at rep %2; garrison released", _townIndex, _rep]] call fnc_log;
+            if (!_retreating) then {
+                _retreating = true;
+                [_roster, _centre] spawn fnc_opfor_retreat;
+            };
+            _roster = [];
+            _baseline = 0;
+            ["INFO", "CIV", format ["Town %1 left the OPFOR band at rep %2; garrison withdrawing", _townIndex, _rep]] call fnc_log;
         } else {
             if (!isNull _trg && {triggerActivated _trg}) then {
                 deleteVehicle _trg;
                 _garrisoned = false;
+                _roster = [];
+                _baseline = 0;
                 // Clearing the garrison discharges the whole debt at once. That is deliberate:
                 // the alternative is a town the player can permanently ruin with no route back,
                 // which is what passive recovery used to prevent. The garrison is the price.

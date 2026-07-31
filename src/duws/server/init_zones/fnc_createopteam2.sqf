@@ -62,3 +62,7 @@ _group setCombatMode "YELLOW";
 	_wp1 setWaypointType "CYCLE";
 	_wp1 setWaypointBehaviour "SAFE";
 	_wp1 setWaypointSpeed "LIMITED";
+
+// Returned for the callers that `call` this rather than `spawn` it -- the town garrison needs a
+// handle on what it raised to count its strength and to order it out.
+_group

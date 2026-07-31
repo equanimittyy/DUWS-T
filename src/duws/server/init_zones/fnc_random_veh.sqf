@@ -137,6 +137,11 @@ sleep 5;
 	_x setSkill opfor_ai_skill_random;
 } foreach units _vehGroup;
 
+// Returned for the callers that `call` this rather than `spawn` it -- the town garrison needs a
+// handle on what it raised to count its strength and to order it out.
+_vehGroup
+
+
 
 
 

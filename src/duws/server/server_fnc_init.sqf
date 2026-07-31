@@ -60,6 +60,9 @@ fnc_create_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_
 fnc_basic_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_basic_ammo_lists.sqf";
 fnc_escalation = compile preprocessFileLineNumbers "duws\server\misc\fnc_escalation.sqf";
 fnc_civ_garrison = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_garrison.sqf";
+// Not broadcast: it issues waypoints, which only the machine the group is local to may do, and
+// every group it steers is server-spawned.
+fnc_opfor_retreat = compile preprocessFileLineNumbers "duws\server\misc\fnc_opfor_retreat.sqf";
 fnc_ai_rearm = compile preprocessFileLineNumbers "duws\client\misc\fnc_ai_rearm.sqf";publicVariable "fnc_ai_rearm";
 fnc_addRandomLoot = compile preprocessFileLineNumbers "duws\server\misc\fnc_addRandomLoot.sqf";
 publicVariable "fnc_addRandomLoot";
