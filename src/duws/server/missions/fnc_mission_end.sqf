@@ -9,6 +9,11 @@
 // callers have no use for.
 params ["_targetpos", "_radius", ["_compKey", ""], ["_sweepFriendly", false]];
 
+// Read before the slot is released, and carried into the cleanup rather than looked up there: the
+// teardown sleeps for minutes, and the next mission may well have opened and taken the token by the
+// time it wakes.
+private _token = missionNamespace getVariable ["DUWS_mission_token", 0];
+
 // Released here rather than after a delay. The wait between side missions is the per-type cooldown
 // fnc_mission_begin stamps, so the only thing this flag still says is "a mission is running right
 // now" -- which stops being true the moment one ends.
@@ -16,4 +21,4 @@ Mission_available = true;
 publicVariable "Mission_available";
 ["INFO", "MISSION", "mission slot released, a new side mission can generate"] call fnc_log;
 
-[_targetpos, _radius, _compKey, _sweepFriendly] spawn fnc_mission_cleanup;
+[_targetpos, _radius, _compKey, _sweepFriendly, _token] spawn fnc_mission_cleanup;

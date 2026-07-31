@@ -61,8 +61,7 @@ _obj3 = createVehicle [_static3, _targetpos, [], 0, "CAN_COLLIDE"];
 [_obj3, "mission_target_hvt"] call fnc_duws_keep;
 sleep 1;
 
-[_targetpos, _radius] call fnc_garrisonBuildings;
-
+[[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 // TASK AND NOTIFICATION
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
@@ -71,6 +70,7 @@ sleep 8;
 // CREATE THE HVT GROUP
 _group = [_targetpos, EAST, [opfor_OFFICER_X, opfor_OPERATOR_X, opfor_MARK_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
+[_group] call fnc_mission_claim;
 _target = units _group select 0;
 
 // 为军官添加黑贝雷帽

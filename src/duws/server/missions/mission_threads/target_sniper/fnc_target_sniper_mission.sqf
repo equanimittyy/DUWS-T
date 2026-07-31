@@ -25,20 +25,20 @@ private _VARtaskgeneratedName = format ["sniperhunt%1%2",round(_MissionPos selec
 [_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  [0,-2] select isDedicated];
 
 
-[_targetpos, _radius] call fnc_garrisonBuildings;
-
+[[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 // CREATE PATROLS, NO VEHICLES
 sleep 1;
 [_missionpos, 15, false] spawn fnc_createoppatrol2;
 sleep 1;
 [_randompos, _radius, false] spawn fnc_createoppatrol2;
 sleep 1;
-[_randompos, _radius, false] spawn fnc_createopteam2;
+[_randompos, _radius] spawn { [_this call fnc_createopteam2] call fnc_mission_claim };
 sleep 1;
-[_randompos, _radius, false] spawn fnc_createopteam2;
+[_randompos, _radius] spawn { [_this call fnc_createopteam2] call fnc_mission_claim };
 
-_group = [_targetpos, east, [opfor_SL_SOLDIER_X, opfor_SNIPER_SOLDIER_X, opfor_SNIPER_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup; 
+_group = [_targetpos, east, [opfor_SL_SOLDIER_X, opfor_SNIPER_SOLDIER_X, opfor_SNIPER_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
+[_group] call fnc_mission_claim;
 _target1 = units _group select 1;
 _target2 = units _group select 2;
 

@@ -118,9 +118,9 @@ sleep 1;
 // 守卫
 _group = [_vehPos, EAST, [opfor_SL_SOLDIER_X, opfor_LAT_SOLDIER_X, opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
+[_group] call fnc_mission_claim;
 
-[_targetpos, _radius] call fnc_garrisonBuildings;
-
+[[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 // ========== 添加死亡情报动作 ==========
 {
     if (!isNull _x) then {

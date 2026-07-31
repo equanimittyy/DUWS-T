@@ -233,6 +233,7 @@ if (isNil "fnc_intel_container_search_server") then {
     
     private _group = [_MissionPos, EAST, _unitTypes, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
     _group deleteGroupWhenEmpty true;
+    [_group] call fnc_mission_claim;
     
     private _unitsArray = units _group;
     for "_i" from 0 to (_unitCount - 1) do {

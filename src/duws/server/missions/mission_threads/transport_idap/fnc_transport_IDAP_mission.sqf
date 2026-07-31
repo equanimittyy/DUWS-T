@@ -69,6 +69,7 @@ sleep 1;
 // Vehicle guards
 _group = [_vehPos, EAST, [opfor_SL_SOLDIER_X, opfor_LAT_SOLDIER_X, opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
+[_group] call fnc_mission_claim;
 
 // CREATE PATROLS
 sleep 1;

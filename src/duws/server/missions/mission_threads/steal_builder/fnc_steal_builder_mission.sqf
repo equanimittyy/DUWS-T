@@ -69,11 +69,11 @@ sleep 1;
 // Vehicle Guards
 _group = [_vehPos, EAST, [opfor_SL_SOLDIER_X, opfor_LAT_SOLDIER_X, opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
+[_group] call fnc_mission_claim;
 {
     [_x] call fnc_addRandomLoot;
 } forEach units _group;
-[_targetpos, _radius] call fnc_garrisonBuildings;
-
+[[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 {
     if (!isNull _x) then {
         [_x, "mission"] call fnc_search_flag_group;

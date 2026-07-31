@@ -89,6 +89,7 @@ for "_i" from 1 to _totalUnitsToSpawn do {
 };
 _group = [[0,0], east, _bldgUnits,[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
+[_group] call fnc_mission_claim;
 
 // ========== 添加随机战利品 ==========
 {

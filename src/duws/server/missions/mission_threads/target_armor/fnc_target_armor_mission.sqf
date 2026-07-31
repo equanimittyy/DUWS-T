@@ -42,11 +42,11 @@ _obj1 = createVehicle ["CamoNet_OPFOR_open_F", _targetpos, [], 0, "CAN_COLLIDE"]
 _obj2 = createVehicle ["Land_WoodenTable_large_F", [(_targetpos select 0)+1, (_targetpos select 1)+1], [], 0, "CAN_COLLIDE"];
 [_obj2, "mission_target_armor"] call fnc_duws_keep;
 
-[_targetpos, _radius] call fnc_garrisonBuildings;
-
+[[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 // Commander group
 _group = [_targetpos, EAST, [opfor_OFFICER_X, opfor_CREW_X, opfor_OPERATOR_X, opfor_ENG_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
+[_group] call fnc_mission_claim;
 _target = units _group select 0;
 
 // No hat for OPTRE, HL2 or TIOW

@@ -91,6 +91,7 @@ _groupBunker1 = [getpos _vehicle_9, EAST, [opfor_SOLDIER_X],[],[],opfor_ai_skill
 _groupBunker1 deleteGroupWhenEmpty true;
 _groupBunker2 = [getpos _vehicle_10, EAST, [opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _groupBunker2 deleteGroupWhenEmpty true;
+[[_groupBunker1, _groupBunker2]] call fnc_mission_claim;
 _guard1 = units _groupBunker1 select 0;
 _guard2 = units _groupBunker2 select 0;
 _guard1 moveinGunner _vehicle_9;
@@ -103,8 +104,7 @@ _groupBunker1 addVehicle _vehicle_7;
 
 sleep 1;
 
-[_targetpos, _radius] call fnc_garrisonBuildings;
-
+[[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 // ========== 添加死亡情报动作 ==========
 {
     if (!isNull _x) then {

@@ -88,8 +88,7 @@ switch (VERSION_X) do {
     };
 };
 
-[_targetpos, _radius] call fnc_garrisonBuildings;
-
+[[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 sleep 1;
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 

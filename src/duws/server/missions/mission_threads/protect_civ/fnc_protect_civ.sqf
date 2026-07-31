@@ -272,6 +272,7 @@ Mission_Failed = false;
         } forEach units _group;
 
         _group deleteGroupWhenEmpty true;
+        [_group] call fnc_mission_claim;
 
         _wp = _group addWaypoint [getPosATL _targetObject, 0];
         _wp setWaypointType "MOVE";

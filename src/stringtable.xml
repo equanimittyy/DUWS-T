@@ -4049,22 +4049,15 @@
                 <German>Stellen Sie sicher, dass wertvolle stuff das Missionsgebiet innerhalb von 6 Minuten evakuieren.</German>
                 <Spanish>Asegúrate de que los stuff valiosos abandonen el área de misión en 6 minutos.</Spanish>
                 <Chinesesimp>请确保有价值的资产/武器/人员在6分钟内离开任务区域。</Chinesesimp>
-                <Original>Strip anything useful from the mission area. You have about five minutes.</Original>
-                <English>Strip anything useful from the mission area. You have about five minutes.</English>
+                <Original>Strip anything useful from the objective area. Clearance in five minutes.</Original>
+                <English>Strip anything useful from the objective area. Clearance in five minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_renwuqingli4">
                 <German>Noch eine Minute bis zur Aufräumaktion.</German>
                 <Spanish>Queda un minuto para la limpieza de la misión.</Spanish>
                 <Chinesesimp>还有最后一分钟执行任务清理。</Chinesesimp>
-                <Original>One minute until mission cleanup.</Original>
-                <English>One minute until mission cleanup.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_renwuqingli5">
-                <German>Noch 10 Sekunden bis zur Missionsbereinigung.</German>
-                <Spanish>Quedan 10 segundos para la limpieza de misión.</Spanish>
-                <Chinesesimp>还有最后十秒钟执行任务清理。</Chinesesimp>
-                <Original>Ten seconds until mission cleanup.</Original>
-                <English>Ten seconds until mission cleanup.</English>
+                <Original>One minute. The objective area is cleared after that.</Original>
+                <English>One minute. The objective area is cleared after that.</English>
             </Key>
             <Key ID="STR_DUWS_T_kievbwmd">
                 <German>Eine verbündete Angriffstruppe wurde überfallen! Sie verbirgt sich in einem Gebäude in diesem Gebiet, mit feindlichen Truppen ringsherum. Hilf ihnen, sich durchzubrechen!  (Very high CP, low AP)</German>
@@ -7911,20 +7904,6 @@
                 <German>Ein Selbstmordattentäter hat sich in die Luft gesprengt!</German>
                 <Spanish>¡Un terrorista suicida ha detonado!</Spanish>
                 <Chinesesimp>一名自杀式炸弹袭击者引爆了！</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_MISSION_CLEANUP_START">
-                <Original>Clearance of the objective area has begun. Enemy forces and abandoned vehicles there will be removed, so recover anything you want to keep now. Command will signal when the next tasking is ready.</Original>
-                <English>Clearance of the objective area has begun. Enemy forces and abandoned vehicles there will be removed, so recover anything you want to keep now. Command will signal when the next tasking is ready.</English>
-                <Chinesesimp>任务清理线程开始————该线程会清理任务范围内所有敌军单位与空载具，请在清理前带走想要的空载具。清理线程结束后便可进行下一个任务。</Chinesesimp>
-                <German>Missionsbereinigungs-Thread gestartet — Dieser Thread entfernt alle feindlichen Einheiten und unbewohnten Fahrzeuge im Missionsbereich. Bitte nehme alle gewünschten unbewohnten Fahrzeuge vor der Bereinigung mit. Du kannst zur nächsten Mission fortfahren, sobald der Bereinigungs-Thread beendet ist.</German>
-                <Spanish>Hilo de limpieza de misión iniciado — Este hilo eliminará todas las unidades enemigas y vehículos desocupados dentro del área de misión. Por favor, toma los vehículos desocupados que quieras antes de la limpieza. Podrás continuar con la siguiente misión cuando termine el hilo de limpieza.</Spanish>
-            </Key>
-            <Key ID="STR_DUWS_T_MISSION_CLEANUPA_START">
-                <Original>Aggressive mission cleanup started. This removes all BLUFOR and OPFOR units and empty vehicles in the mission area, except your own squad. Recover anything valuable first. Once cleanup finishes, you can move on to the next mission</Original>
-                <English>Aggressive mission cleanup started. This removes all BLUFOR and OPFOR units and empty vehicles in the mission area, except your own squad. Recover anything valuable first. Once cleanup finishes, you can move on to the next mission</English>
-                <Chinesesimp>激进型任务清理线程开始————该线程会清理任务范围内友军与敌军的单位与空载具(除了玩家班组内的单位)，请在清理前撤离有价值的物品。清理线程结束后便可进行下一个任务。</Chinesesimp>
-                <German>Aggressiver Missionsbereinigungs-Thread gestartet — Dieser Thread entfernt alle BLUFOR- und OPFOR-Einheiten sowie unbewohnte Fahrzeuge im Missionsbereich (ausgenommen Einheiten in der Spielertrupp). Bitte evakuiere wertvolle Gegenstände vor der Bereinigung. Du kannst zur nächsten Mission fortfahren, sobald der Bereinigungs-Thread beendet ist.</German>
-                <Spanish>Hilo de limpieza de misión agresivo iniciado — Este hilo eliminará todas las unidades BLUFOR y OPFOR y vehículos desocupados dentro del área de misión (excepto las unidades del escuadrón del jugador). Por favor, evacúa los objetos valiosos antes de la limpieza. Podrás continuar con la siguiente misión cuando termine el hilo de limpieza.</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_UNKNOWN_MISSION">
                 <Original>Unknown Mission %1</Original>

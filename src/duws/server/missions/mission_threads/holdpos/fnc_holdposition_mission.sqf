@@ -292,6 +292,7 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
             _x setCombatMode "RED";
         } forEach units _opforGroup;
         _opforGroup deleteGroupWhenEmpty true;
+        [_opforGroup] call fnc_mission_claim;
         _wp = _opforGroup addWaypoint [_targetpos, 0];
         _wp setWaypointType "MOVE";
         _wp setWaypointBehaviour "AWARE";
@@ -332,6 +333,7 @@ _conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markerna
             _x setCombatMode "RED";
         } forEach units _bluforGroup;
         _bluforGroup deleteGroupWhenEmpty true;
+        [_bluforGroup] call fnc_mission_claim;
         _wp = _bluforGroup addWaypoint [_targetpos, 0];
         _wp setWaypointType "MOVE";
         _wp setWaypointBehaviour "AWARE";

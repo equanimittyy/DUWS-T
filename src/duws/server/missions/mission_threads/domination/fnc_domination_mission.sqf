@@ -77,7 +77,8 @@ _fn_waterproofBluforGroupCenter = {
     
     // 创建班组
     _bluforGroup = [_groundPos, WEST, _unitTypes, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
-    
+    [_bluforGroup] call fnc_mission_claim;
+
     // 为蓝方部队设置战斗状态和自动战斗
     {
         // 禁用逃跑 - 设为0表示完全不会逃跑
@@ -201,6 +202,9 @@ _fn_createBluforCrewGroup = {
     
     // 删除组时的自动清理
     _crewGroup deleteGroupWhenEmpty true;
+    // Claimed after they are seated, not at spawn: fnc_mission_claim stamps the vehicle a unit is
+    // in, and at spawn they are all still standing next to it.
+    [_crewGroup] call fnc_mission_claim;
     
     // 返回创建的组
     _crewGroup
@@ -249,6 +253,7 @@ _fn_waterproofOpforGroupEdge = {
     
     // 创建班组
     _opforGroup = [_groundPos, EAST, _unitTypes, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
+    [_opforGroup] call fnc_mission_claim;
     {
     [_x] call fnc_addRandomLoot;
     } forEach units _opforGroup;
@@ -380,6 +385,9 @@ _fn_createOpforCrewGroup = {
     
     // 删除组时的自动清理
     _crewGroup deleteGroupWhenEmpty true;
+    // Claimed after they are seated, not at spawn: fnc_mission_claim stamps the vehicle a unit is
+    // in, and at spawn they are all still standing next to it.
+    [_crewGroup] call fnc_mission_claim;
     
     // 返回创建的组
     _crewGroup
@@ -509,6 +517,7 @@ for "_i" from 1 to 2 do {
     
     // 使用BIS_fnc_spawnGroup创建步兵组
     _infantryGroup = [_apcPos, WEST, _bluforInfantryTypes, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
+    [_infantryGroup] call fnc_mission_claim;
     
     // 将组中的每个单位移动到APC周围的随机位置
     {

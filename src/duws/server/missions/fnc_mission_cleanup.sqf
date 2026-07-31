@@ -3,8 +3,8 @@
     NAME: missions\fnc_mission_cleanup.sqf
 
     DESCRIPTION:
-    Tears a finished side mission down: hands its composition to the map cleanup, then sweeps
-    the leftover hostiles around the objective once the player has had time to leave.
+    Tears a finished side mission down: hands its composition to the map cleanup, then, once the
+    player has had time to leave, deletes what the mission raised.
 
     USAGE: reached through fnc_mission_end, which owns the rest of a thread's exit and takes the
     same arguments. Call it directly only for a teardown that is not a mission ending.
@@ -12,34 +12,58 @@
         [_targetpos, _radius, "mission_holdpos", true] call fnc_mission_end;
 
     _compKey    composition to release, or "" for a mission that owns no built objects.
-    _sweepFriendly  also delete BLUFOR-configured leftovers. Off by default: most missions
-                spawn nothing on that side, and the sweep is a blunt proximity delete.
+    _sweepFriendly  also delete BLUFOR-configured leftovers in the radius pass. Off by default:
+                most missions spawn nothing on that side, and that pass is a blunt proximity delete.
+    _token      which mission instance this is tearing down, from fnc_mission_begin.
+
+    Two passes, and the order matters. The ownership pass is the one that finishes the job: it is
+    map-wide and deletes exactly what fnc_mission_claim filed under this mission, so a guard ring
+    that patrolled a kilometre out or a technical that drove off is still collected. The radius pass
+    that follows is the backstop for anything a thread raised without claiming it, and it is the
+    blunt one -- proximity cannot tell a mission's leftovers from a neighbouring garrison, which is
+    why it stands down entirely near an enemy zone.
 */
 
-params ["_targetpos", "_radius", ["_compKey", ""], ["_sweepFriendly", false]];
-["INFO", "MISSION", format ["cleanup queued for %1 within %2 m, composition %3",
-    _targetpos, _radius, ["none", _compKey] select (_compKey != "")]] call fnc_log;
+params ["_targetpos", "_radius", ["_compKey", ""], ["_sweepFriendly", false], ["_token", -1]];
+["INFO", "MISSION", format ["cleanup queued for %1 within %2 m, composition %3, token %4",
+    _targetpos, _radius, ["none", _compKey] select (_compKey != ""), _token]] call fnc_log;
 
 // Released before the countdown, not after it: release only drops the protection and sets a
-// deadline, so the map sweep still holds these inside its keep-radius. Waiting out the six
-// minutes here as well would put the objective's own props on a different clock to everything
-// else the player leaves behind.
+// deadline, so the map sweep still holds these inside its keep-radius. Waiting out the countdown
+// here as well would put the objective's own props on a different clock to everything else the
+// player leaves behind.
 if (_compKey != "") then { [_compKey] call fnc_duws_release };
 
-sleep 20;
-private _hintMsg = localize "STR_DUWS_T_MISSION_CLEANUP_START";
-[_hintMsg] remoteExec ["hint", 0];
-["missionclean", [localize "STR_DUWS_T_renwuqingli", localize "STR_DUWS_T_renwuqingli2"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
-sleep 280;
-["missionclean", [localize "STR_DUWS_T_renwuqingli", localize "STR_DUWS_T_renwuqingli4"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
-sleep 50;
-["missionclean", [localize "STR_DUWS_T_renwuqingli", localize "STR_DUWS_T_renwuqingli5"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
-sleep 10;
+// Five minutes to strip the area, with a warning at the last minute. Two notices, because a
+// countdown the player has to plan around only needs the start and the edge -- the ten-second call
+// this replaces arrived far too late to act on and read as noise.
+["missionclean", [localize "STR_DUWS_T_renwuqingli", localize "STR_DUWS_T_renwuqingli2"]]
+    remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+sleep 240;
+["missionclean", [localize "STR_DUWS_T_renwuqingli", localize "STR_DUWS_T_renwuqingli4"]]
+    remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+sleep 60;
 
-// Map-wide, unlike the radius delete below, and held back this far on purpose: bodies at the
-// objective carry the intel several missions point the player at, so the sweep must not run until
-// the countdown the player was just given has finished.
+// Map-wide, and held back this far on purpose: bodies at the objective carry the intel several
+// missions point the player at, so the sweep must not run until the countdown has finished.
 {deleteVehicle _x} forEach allDeadMen;
+
+// The ownership pass. Crew before their vehicle, or deleting the vehicle first ejects whoever is
+// inside it. A claimed vehicle is deleted whether or not it still has crew, which is the case the
+// old proximity sweep could not reach: an abandoned technical looks like every other empty car.
+if (_token >= 0) then {
+    private _owned = (allUnits + vehicles) select {_x getVariable ["DUWS_missionOwner", -1] == _token};
+    {
+        if (_x isKindOf "CAManBase") then { deleteVehicle _x };
+    } forEach _owned;
+    {
+        if (!(_x isKindOf "CAManBase") && {!isNull _x}) then {
+            deleteVehicleCrew _x;
+            deleteVehicle _x;
+        };
+    } forEach _owned;
+    ["INFO", "MISSION", format ["token %1: %2 claimed entities deleted", _token, count _owned]] call fnc_log;
+};
 
 _close = false;
 {
@@ -67,8 +91,6 @@ if (_close == false) then {
     } forEach allPlayers;
 
     {
-        private _isHostile = _x getVariable ["isHostile", false];
-
         // WBK dresses its friendly civilians as WEST, so that side is spared whatever the
         // caller asked for -- _sweepFriendly exists to collect a mission's own BLUFOR-configured
         // emplacements, and it must not become a licence to delete the townspeople.
@@ -82,8 +104,7 @@ if (_close == false) then {
         if (!(_x in _protected)
             && !(_x getVariable ["persistent", false])
             && !_sparedSide
-            && !(typeOf _x in _zombieClasses)
-            && !_isHostile) then {
+            && !(typeOf _x in _zombieClasses)) then {
             deleteVehicleCrew _x;
             deleteVehicle _x;
         };
