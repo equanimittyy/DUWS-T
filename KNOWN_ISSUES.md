@@ -29,20 +29,20 @@ _BEGIN-USER_
 
 _END-USER_
 
-## Composition streaming: the prop-position fix is unverified
+## No zone has been seen to fall since the capture rule changed
 
-Every field a stowed composition's record carries has now been exercised, and only the positions
-came back wrong. `fnc_duws_deploy` disabled simulation *after* placing each prop rather than before
-— and the loop is scheduled code, so a prop that stayed simulated over a frame boundary settled off
-the position just written to it — and it never re-applied the position after rotating. The prefabs
-that place these props do both, which is why the drift appeared only across a stow/deploy cycle.
+`fnc_zone_capture_ready` replaced `WEST SEIZED` on the BLUFOR direction, and no session logged since
+carries a `captured by BLUFOR` line. The last one that does pre-dates the rule, so the whole
+condition — the roster count against the peak, and the centre being clear — is unexercised rather
+than merely untuned. Everything downstream of a capture is unexercised with it.
 
-- [x] Stow a zone, deploy it, compare against a screenshot taken before. Props still off by a little
-      means the residue is `createVehicle`'s own placement rather than those two ordering faults
+- [ ] Take a zone and watch for `captured by BLUFOR` in the RPT. A zone that will not fall with
+      nothing alive within 50 m of the composition and its garrison beaten means something standing
+      on the objective is not on the roster, which is the failure the centre test is prone to and
+      cannot report on its own — nothing in that condition logs why it refused
 
 ## Per-town reputation: shipped, not yet exercised
 
-- [x] Destroy a house as a **client** on a dedicated server and watch the escalation counter. No movement means `BuildingChanged` is local-only and escalation has never worked in dedicated MP — neither did the war-crimes script it replaced. Record it rather than working around it
 - [ ] Take a town below -10 and stand in it. A garrison must appear and the town must keep its debt
       until that garrison is fought. Reputation returning to 0 on its own means something other
       than the clear trigger's arming order is discharging it; the RPT says which happened, since
@@ -62,11 +62,6 @@ failure here is more likely to be something missing than something wrong.
 
 - [ ] Clear a garrison and search bodies. Half of them carry the action; a garrison offering none
       at all is the flag not reaching them rather than a cold run
-- [x] Search a flagged body, an intel-mission objective, a laptop and a piece of armour. All four
-      go through the one action on the player now, so a prompt missing on the two objects means the
-      flag never reached them, not that their own action broke — they no longer have one
-- [x] Frisk an arrested civilian. Coins, one document and empty-handed should still land at roughly
-      3 : 1 : 4
 - [ ] Play far enough to exhaust the intel pool, then search a flagged body. It must speak an
       outcome. Silence means the payout re-draw is not dropping the dry kind
 - [ ] On a dedicated server with two clients, have one player search a body and send the other over
