@@ -788,3 +788,44 @@ array alone and lands centred.
 hold in the line's own third element. A one-line card with no delay is the case that misleads:
 the default drops the line the instant the last character lands, which reads as a flicker and
 invites exactly the trailing-argument "fix" that then hides it altogether.
+
+## `localize` resolves on the machine that runs it, so a broadcast string carries the sender's language
+
+**`localize` reads the stringtable of the machine executing it. Resolving a key server-side and
+broadcasting the result sends the *server's* language to every client; broadcasting a code block
+that localizes on arrival lets each client resolve its own.**
+
+The two forms look interchangeable and are not:
+
+```sqf
+[localize "STR_X"] remoteExec ["hint", 0];                  // server resolves: everyone reads the server's language
+[{hint localize "STR_X"}] remoteExec ["BIS_fnc_Spawn", 0];  // each client resolves its own
+```
+
+A dedicated server takes its language from its own config, so the first form can hand every player
+a language none of them chose. It is invisible in single-player and on a hosted server, where the
+machine doing the resolving is a player's own.
+
+**How to apply:** this mission resolves server-side nearly everywhere — every `fnc_duws_dialogue`
+call site is handed text that has already been `localize`d — so the `BIS_fnc_Spawn` hint sites are
+the lone exception rather than the convention. Do not fold them into the first form without
+deciding that one language for everyone is what you want: the German, Spanish and Chinese tags stop
+reaching anyone on a dedicated server the moment you do.
+
+## `player1` is an editor unit, so `remoteExec`ing to it addresses slot 1 and nobody else
+
+**A `remoteExec` target that is an object runs only where that object is local. `player1` is a unit
+placed in `mission.sqm`, not a synonym for "the player", so it resolves to whoever holds slot 1 —
+the Game Master seat.**
+
+Nothing at the call site says so, and single-player hides it completely: there you *are* player1, so
+a hint addressed to it behaves exactly like a hint addressed to everyone. Only a second player in
+co-op exposes it, and nothing reaches the `.rpt`. That is how fourteen side-mission announcements
+came to be readable by one player in a four-player session while three other mission threads sent
+the identical hint to `0`.
+
+**How to apply:** `player1` is right only where the thing genuinely belongs to the Game Master seat
+— manual zone placement, HQ placement, the game-master-gated action rows. Anything the team is meant
+to read takes `[0,-2] select isDedicated`. Note that the `select` is evaluated where the call is
+made: `isDedicated` is false on every client, so the idiom only excludes an interfaceless server
+when the call site itself is server-side, which is why client-side broadcasts keep a plain `0`.
