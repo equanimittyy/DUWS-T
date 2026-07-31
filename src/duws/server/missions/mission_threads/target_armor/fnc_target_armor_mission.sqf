@@ -103,8 +103,6 @@ sleep 5; // 等待巡逻队生成完毕
 // MISSION COMPLETED ?
 waitUntil {sleep 2; !alive _target};
 
-sleep 120;
-
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
 deleteMarker str(_markername2);
 

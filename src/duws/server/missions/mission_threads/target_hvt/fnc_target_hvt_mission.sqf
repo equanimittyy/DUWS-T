@@ -137,8 +137,6 @@ if (alive _target && (time - _missionStartTime) > _taskTimeout) exitWith {
     [_targetpos,_radius, "mission_target_hvt"] call fnc_mission_end;
 };
 
-sleep 120;
-
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
 deleteMarker str(_markername2);
 

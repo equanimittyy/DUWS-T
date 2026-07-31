@@ -132,9 +132,6 @@ sleep 5; // 等待巡逻队生成完毕
 
 waitUntil {sleep 5; !alive _vehicle_7 || (damage _vehicle_7) == 1};
 
-
-sleep 120;
-
 // Overlord's line, not the player's: _speaker was reassigned to the player callsign above
 // for the intervening exchange, which left this congratulation attributed to Alpha 1-1.
 [localize "STR_DUWS_T_OVERLORD", _message1] remoteExec ["fnc_duws_dialogue", 0];

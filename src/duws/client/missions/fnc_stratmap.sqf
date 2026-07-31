@@ -24,48 +24,6 @@ sleep 4;
 
 if (!((vehiclevarname player) in game_master)) exitWith {hint ([localize "STR_DUWS_T_eck4xh9m"] call fnc_cs)};
 
-// ==================== 任务冷却监控（服务器端） ====================
-if (isServer && isNil "missionCooldownMonitorRunning") then {
-    missionCooldownMonitorRunning = true; // 防止重复启动
-    [] spawn {
-        // Included inside the block, not above it: a spawned block captures no locals.
-        private _defs = [
-        #include "..\..\shared\includes\mission_types.hpp"
-        ];
-        private _wasInCooldown = []; // 记录每个任务是否曾处于冷却中
-        for "_i" from 0 to 16 do {
-            _wasInCooldown pushBack false;
-        };
-        while {true} do {
-            {
-                private _type = _forEachIndex;
-                private _inCooldown = ([_type] call fnc_mission_cooldown_left) > 0;
-
-                // 如果当前处于冷却中，标记为 true
-                if (_inCooldown) then {
-                    _wasInCooldown set [_type, true];
-                };
-
-                // 如果之前标记过在冷却中，但现在不在冷却中，说明刚刚结束
-                if (!_inCooldown && (_wasInCooldown select _type)) then {
-                    // 获取该任务类型的本地化名称
-                    private _missionName = if (_type < count _defs) then {
-                        localize ((_defs select _type) select 1)
-                    } else {
-                        format ["未知任务 %1", _type]
-                    };
-                    // 发送通知
-                    ["info", [localize "STR_DUWS_T_MISSION_READY1", format [localize "STR_DUWS_T_MISSION_READY", _missionName] ]] remoteExec ["BIS_fnc_showNotification", 0];
-                    // 重置标记
-                    _wasInCooldown set [_type, false];
-                };
-            } forEach _wasInCooldown; // 遍历数组，利用 _forEachIndex 作为任务类型
-            sleep 10; // 每10秒检查一次
-        };
-    };
-};
-// ==================== 监控代码结束 ====================
-
 // init the array of missions
 array_of_missions = [];
 

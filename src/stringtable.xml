@@ -4042,8 +4042,8 @@
                 <German>Der Nachrichtendienst hat gerade ermittelt, dass eine feindliche vorläufige Kommandotruppe sich hier vorübergehend versammelt hat – eliminiere den Offizier in der Truppe! Nach der Eliminierung des Offiziers braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Zielerfüllung zu bestätigen.(Diese Mission ist extrem zeitsensitiv; sie schlägt fehl, falls sie innerhalb von 8 Minuten nicht abgeschlossen wird.) (High CP, high AP)</German>
                 <Spanish>El servicio de inteligencia acaba de detectar que un equipo de comando temporal enemigo se ha reunido aquí temporalmente — elimína al oficial del equipo! Después de que el oficial sea eliminado, el servicio de inteligencia necesitará unos minutos adicionales para confirmar la consecución del objetivo.(Esta misión es extremadamente sensible al tiempo; fracasará si no se completa dentro de 8 minutos.) (High CP, high AP)</Spanish>
                 <Chinesesimp>情报部门刚刚发现，敌军的临时指挥班组在这里短暂聚集，去干掉班组里的军官！军官死亡后，情报部门需要额外几分钟确认目标完成。(此任务具有极强时效性，若未在8分钟内完成任务则会失败。)(高CP，高AP)</Chinesesimp>
-                <Original>Allseer has eyes on an enemy command team assembled here. Kill the officer; the team disperses in 8 minutes, so move now. Stand by afterwards — Allseer takes about 2 minutes to confirm the kill.&lt;br /&gt;&lt;br /&gt;CP: 35&lt;br /&gt;AP: 35</Original>
-                <English>Allseer has eyes on an enemy command team assembled here. Kill the officer; the team disperses in 8 minutes, so move now. Stand by afterwards — Allseer takes about 2 minutes to confirm the kill.&lt;br /&gt;&lt;br /&gt;CP: 35&lt;br /&gt;AP: 35</English>
+                <Original>Allseer has eyes on an enemy command team assembled here. Kill the officer. The team disperses in 8 minutes, so move now.&lt;br /&gt;&lt;br /&gt;CP: 35&lt;br /&gt;AP: 35</Original>
+                <English>Allseer has eyes on an enemy command team assembled here. Kill the officer. The team disperses in 8 minutes, so move now.&lt;br /&gt;&lt;br /&gt;CP: 35&lt;br /&gt;AP: 35</English>
             </Key>
             <Key ID="STR_DUWS_T_dgpqenyw">
                 <German>Ein freundlicher Signalturm in diesem Gebiet wurde von feindlichen Truppen eingenommen. Feindliche Truppen sind in der Nähe stationiert und entschlüsseln kritische Informationen. Sprenge den Turm, bevor die Feinde das Entschlüsseln abschließen! (Nur noch 15 Minuten, bis kritische Informationen an die Feinde gelangen!) (Slightly low CP, avg AP)</German>
@@ -4159,8 +4159,8 @@
                 <German>Der Nachrichtendienst hat zwei feindliche Scharfschützen in diesem Bereich gesichtet – eliminiere sie! (Nach der Eliminierung der Scharfschützen braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Mission abschließend zu bestätigen.) (Slightly high CP, Slightly high AP)</German>
                 <Spanish>El servicio de inteligencia ha detectado a dos francotiradores enemigos en esta zona — elimínalos! (Después de que los francotiradores sean eliminados, el servicio de inteligencia necesitará unos minutos adicionales para confirmar la finalización de la misión.) (Slightly high CP, Slightly high AP)</Spanish>
                 <Chinesesimp>这个区域有敌军的两名狙击手，干掉他们。(狙击手死亡后，情报部门需要额外几分钟确认目标完成。)(稍高CP，稍高AP)</Chinesesimp>
-                <Original>Allseer has tracked two enemy snipers working this area. Kill both, then stand by — Allseer takes about 2 minutes to call the area clear.&lt;br /&gt;&lt;br /&gt;CP: 30&lt;br /&gt;AP: 30</Original>
-                <English>Allseer has tracked two enemy snipers working this area. Kill both, then stand by — Allseer takes about 2 minutes to call the area clear.&lt;br /&gt;&lt;br /&gt;CP: 30&lt;br /&gt;AP: 30</English>
+                <Original>Allseer has tracked two enemy snipers working this area. Kill both.&lt;br /&gt;&lt;br /&gt;CP: 30&lt;br /&gt;AP: 30</Original>
+                <English>Allseer has tracked two enemy snipers working this area. Kill both.&lt;br /&gt;&lt;br /&gt;CP: 30&lt;br /&gt;AP: 30</English>
             </Key>
             <Key ID="STR_DUWS_T_shentouxiaodui">
                 <German>Ein feindliches Eindringlungsteam ist hier blockiert! Vernichtet sie! (Low CP, Low AP)</German>
@@ -4243,8 +4243,8 @@
                 <German>Die feindliche Panzerbesatzung legt hier eine kurze Pause ein – eliminiere ihren Kommandanten! (Nach der Eliminierung des Panzerkommandanten braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Mission abschließend zu bestätigen.) (Low CP, low AP)</German>
                 <Spanish>La tripulación de tanque enemiga está tomando un descanso breve aquí — elimína a su comandante! (Después de que el comandante de tanque sea eliminado, el servicio de inteligencia necesitará unos minutos adicionales para confirmar la finalización de la misión.) (Low CP, low AP)</Spanish>
                 <Chinesesimp>敌人的坦克车组正在这里稍作休息，干掉他们的车长！(车长死亡后，情报部门需要额外几分钟确认目标完成。)(低CP，低AP)</Chinesesimp>
-                <Original>An enemy tank crew is stood down here. Kill their commander, then stand by — Allseer takes about 2 minutes to confirm the kill.&lt;br /&gt;&lt;br /&gt;CP: 15&lt;br /&gt;AP: 15</Original>
-                <English>An enemy tank crew is stood down here. Kill their commander, then stand by — Allseer takes about 2 minutes to confirm the kill.&lt;br /&gt;&lt;br /&gt;CP: 15&lt;br /&gt;AP: 15</English>
+                <Original>An enemy tank crew is stood down here. Kill their commander.&lt;br /&gt;&lt;br /&gt;CP: 15&lt;br /&gt;AP: 15</Original>
+                <English>An enemy tank crew is stood down here. Kill their commander.&lt;br /&gt;&lt;br /&gt;CP: 15&lt;br /&gt;AP: 15</English>
             </Key>
             <Key ID="STR_DUWS_T_j97ecrsh">
                 <German>Die Späher melden, dass die Feinde hier laptopartige elektronische Kampfgeräte aufgestellt haben, in denen möglicherweise Informationen über die Standorte feindlicher Truppenstellungen enthalten sind. Suchen Sie das Gerät auf, laden Sie alle nützlichen Informationen herunter und zerstören Sie es, falls es keine gibt. (Very low CP, high AP)</German>
@@ -4264,8 +4264,8 @@
                 <German>Der Feind hat in diesem Gebiet ein Luftverteidigungsradar aufgestellt, und es stört unsere Luftoperationen. Du musst es zerstören. (Nach der Zerstörung des Radars braucht der Nachrichtendienst noch ein paar Minuten, um zu bestätigen, dass das Radar neutralisiert wurde.) (Avg CP, slightly low AP)</German>
                 <Spanish>El enemigo ha desplegado un radar de defensa aérea en esta área, y está interrumpiendo nuestras operaciones aéreas. Debes destruirlo. (Después de que el radar sea destruido, el servicio de inteligencia necesitará unos minutos para confirmar que el radar ha sido neutralizado.) (Avg CP, slightly low AP)</Spanish>
                 <Chinesesimp>敌人在这一地区部署了防空雷达，它正在骚扰我们的空中行动。你必须摧毁它。(雷达被摧毁后，情报部门需要几分钟确认雷达已被无效化。)(平均CP，稍低AP)</Chinesesimp>
-                <Original>An enemy AA radar in this area is shutting our aircraft out of the sky. Destroy it, then stand by — Allseer takes about 2 minutes to confirm the site is off the air.&lt;br /&gt;&lt;br /&gt;CP: 25&lt;br /&gt;AP: 20</Original>
-                <English>An enemy AA radar in this area is shutting our aircraft out of the sky. Destroy it, then stand by — Allseer takes about 2 minutes to confirm the site is off the air.&lt;br /&gt;&lt;br /&gt;CP: 25&lt;br /&gt;AP: 20</English>
+                <Original>An enemy AA radar in this area is shutting our aircraft out of the sky. Destroy it.&lt;br /&gt;&lt;br /&gt;CP: 25&lt;br /&gt;AP: 20</Original>
+                <English>An enemy AA radar in this area is shutting our aircraft out of the sky. Destroy it.&lt;br /&gt;&lt;br /&gt;CP: 25&lt;br /&gt;AP: 20</English>
             </Key>
             <Key ID="STR_DUWS_T_dmfmwmfp">
                 <German>Lade Missions-Positionen...</German>
@@ -7069,19 +7069,12 @@
                 <Original>To all units, proceed with the plan and secure all objectives.</Original>
                 <English>To all units, proceed with the plan and secure all objectives.</English>
             </Key>
-            <Key ID="STR_DUWS_T_missiontimer">
-                <Spanish>Action Squad a "Overlord 1-1", hemos restaurado la efectividad de combate y estamos listos para nuevas misiones.</Spanish>
-                <German>Action Squad an "Overlord 1-1", wir haben die Kampfwirksamkeit wiederhergestellt und sind bereit für neue Einsätze.</German>
-                <Chinesesimp>"霸王1-1"，我们已经恢复战斗效能，可以再次执行任务。</Chinesesimp>
-                <Original>To Overlord, we're back to full combat effectiveness and ready for tasking.</Original>
-                <English>To Overlord, we're back to full combat effectiveness and ready for tasking.</English>
-            </Key>
             <Key ID="STR_DUWS_T_restsuccess">
                 <Spanish>"Overlord 1-1", aquí Grupo de Acción. Hemos restaurado la efectividad de combate y estamos en espera.</Spanish>
                 <German>"Overlord 1-1", hier ist Einsatzgruppe. Wir haben unsere Kampffähigkeit wiederhergestellt und sind bereit.</German>
                 <Chinesesimp>"霸王1-1"。我们已恢复战斗效能，正在待命。</Chinesesimp>
-                <Original>To Overlord, we're rested and back to full combat effectiveness.</Original>
-                <English>To Overlord, we're rested and back to full combat effectiveness.</English>
+                <Original>To Overlord, we're back to full combat effectiveness and ready for tasking.</Original>
+                <English>To Overlord, we're back to full combat effectiveness and ready for tasking.</English>
             </Key>
             <Key ID="STR_DUWS_T_restcooldown">
                 <Spanish>Aquí es "Overlord 1-1", solicitud denegada. Permanezcan en posición.</Spanish>
@@ -7857,8 +7850,8 @@
                 <German>Nebenmissionen verfügbar (nach 3 Stunden)</German>
                 <Spanish>Misiones Secundarias Disponibles (después de 3 horas)</Spanish>
                 <Chinesesimp>支线任务就绪(3小时后)</Chinesesimp>
-                <Original>Side Missions Available (after 3 hours)</Original>
-                <English>Side Missions Available (after 3 hours)</English>
+                <Original>Side missions are now available.</Original>
+                <English>Side missions are now available.</English>
             </Key>
             <Key ID="STR_DUWS_T_zhixian">
                 <German>Sekundäre Missionen</German>
@@ -7924,14 +7917,6 @@
                 <Chinesesimp>激进型任务清理线程开始————该线程会清理任务范围内友军与敌军的单位与空载具(除了玩家班组内的单位)，请在清理前撤离有价值的物品。清理线程结束后便可进行下一个任务。</Chinesesimp>
                 <German>Aggressiver Missionsbereinigungs-Thread gestartet — Dieser Thread entfernt alle BLUFOR- und OPFOR-Einheiten sowie unbewohnte Fahrzeuge im Missionsbereich (ausgenommen Einheiten in der Spielertrupp). Bitte evakuiere wertvolle Gegenstände vor der Bereinigung. Du kannst zur nächsten Mission fortfahren, sobald der Bereinigungs-Thread beendet ist.</German>
                 <Spanish>Hilo de limpieza de misión agresivo iniciado — Este hilo eliminará todas las unidades BLUFOR y OPFOR y vehículos desocupados dentro del área de misión (excepto las unidades del escuadrón del jugador). Por favor, evacúa los objetos valiosos antes de la limpieza. Podrás continuar con la siguiente misión cuando termine el hilo de limpieza.</Spanish>
-            </Key>
-            <Key ID="STR_DUWS_T_MISSION_READY">
-                <Original>%1 mission is ready.</Original>
-                <English>%1 mission is ready.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_MISSION_READY1">
-                <Original>Side Mission Available</Original>
-                <English>Side Mission Available</English>
             </Key>
             <Key ID="STR_DUWS_T_UNKNOWN_MISSION">
                 <Original>Unknown Mission %1</Original>
