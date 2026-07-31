@@ -328,7 +328,10 @@ _trg setVariable ["DUWS_zoneKey", _zoneKey];
 // Seventh argument is the zone's opening CP bounty; _points stays its permanent worth. The
 // two travel together for the rest of the campaign, round the capture handlers and back here.
 _trg setTriggerStatements ["this && {[thisTrigger] call fnc_zone_capture_ready}", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_captured", _name, _points, _markername, _markername2, _zonePos, _size, round(_points * zone_cp_capture)], ""];
-_trg setTriggerTimeout [30, 40, 50, true];
+// Flat, not the usual min/mid/max spread: the hold is a rule the player learns, and a capture that
+// sometimes lands at 30 s and sometimes at 50 reads as the mechanic being unreliable. Interruptable,
+// so stepping off the objective restarts it.
+_trg setTriggerTimeout [30, 30, 30, true];
 
 // 存储触发器变量（统一使用 floor abs 避免负号）
 private _trgVarName = format["trigger_%1_%2", floor abs (_zonePos select 0), floor abs (_zonePos select 1)];
