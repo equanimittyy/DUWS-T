@@ -126,12 +126,12 @@ fnc_civ_town_reveal = compile preprocessFileLineNumbers "duws\server\misc\fnc_ci
 publicVariable "fnc_civ_town_reveal";
 // The board's map readout. The query is broadcast because a client is what calls it, and the
 // two display halves because the server is what calls them back.
-fnc_civ_townQuery = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_townQuery.sqf";
-publicVariable "fnc_civ_townQuery";
-fnc_civ_townInfo = compile preprocessFileLineNumbers "duws\client\misc\fnc_civ_townInfo.sqf";
-publicVariable "fnc_civ_townInfo";
-fnc_civ_mapView = compile preprocessFileLineNumbers "duws\client\misc\fnc_civ_mapView.sqf";
-publicVariable "fnc_civ_mapView";
+fnc_map_readout_query = compile preprocessFileLineNumbers "duws\server\misc\fnc_map_readout_query.sqf";
+publicVariable "fnc_map_readout_query";
+fnc_map_readout_draw = compile preprocessFileLineNumbers "duws\client\misc\fnc_map_readout_draw.sqf";
+publicVariable "fnc_map_readout_draw";
+fnc_map_readout_open = compile preprocessFileLineNumbers "duws\client\misc\fnc_map_readout_open.sqf";
+publicVariable "fnc_map_readout_open";
 fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_wp_Tomata.sqf";
 // Server-only, and deliberately not broadcast: the FiredNear handler that calls it is added on
 // this machine alone, and a client that could run it could scatter a town at will.

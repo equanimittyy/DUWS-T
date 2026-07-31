@@ -627,9 +627,9 @@ spending starts.
 
 Garrison levels belong in the same click readout rather than on the markers. Nothing is added to
 the map itself: the player clicks a town and the popup that already answers gains a line.
-`client/misc/fnc_civ_mapView.sqf` claims map clicks, each click goes to `fnc_civ_townQuery` on the
-server, and `fnc_civ_townInfo` draws the answer — a garrison level is one more field on the tuple
-those two pass.
+`client/misc/fnc_map_readout_open.sqf` claims map clicks, each click goes to
+`fnc_map_readout_query` on the server, and `fnc_map_readout_draw` draws the answer — a garrison
+level is one more field on the tuple those two pass.
 
 The lookup stays server-side because `civ_locations`, `civ_radii` and `civ_town_rep` are none of
 them broadcast, so this costs no new networked state. Reveal gating is already correct: an

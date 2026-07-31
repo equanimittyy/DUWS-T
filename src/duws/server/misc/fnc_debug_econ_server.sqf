@@ -27,7 +27,7 @@ switch (toLower _mode) do {
 
         // One row per town: the name the map readout uses, whether it has a reputation at all, that
         // figure and its worth. The flag is carried rather than a nil reputation, the same way
-        // fnc_civ_townQuery does it -- a town in RAVAGE, WBK or a civilians-off campaign registers
+        // fnc_map_readout_query does it -- a town in RAVAGE, WBK or a civilians-off campaign registers
         // none, and 0 would report that as a town that feels neutral about the player.
         private _towns = [];
         {

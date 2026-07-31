@@ -46,7 +46,7 @@ private _best = 1e11;
 	};
 } forEach zone_meta_array;
 
-if (_pick isEqualTo []) exitWith { [] remoteExec ["fnc_civ_townInfo", _caller]; };
+if (_pick isEqualTo []) exitWith { [] remoteExec ["fnc_map_readout_draw", _caller]; };
 
 if ((_pick select 0) isEqualTo "ZONE") exitWith {
 	_pick params ["", "_name", "_zPos"];
@@ -68,7 +68,7 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 	// disagree by a segment with the strength it is about to redeploy at. Capped because a
 	// full-strength cycle can place a few men over the baseline it is measured against.
 	private _seg = ((ceil ((_frac * 10) - 0.0001)) max 0) min 10;
-	["ZONE", [_name, _held, _seg]] remoteExec ["fnc_civ_townInfo", _caller];
+	["ZONE", [_name, _held, _seg]] remoteExec ["fnc_map_readout_draw", _caller];
 };
 
 private _hit = _pick select 1;
@@ -89,4 +89,4 @@ private _ap = (missionNamespace getVariable ["civ_town_ap", []]) param [_hit, 0]
 // Worth travels alongside the income, not instead of it. They are the same number for a town that
 // has picked a side, but a neutral one earns nothing while still being worth something to turn,
 // and the readout has to be able to say both without re-deriving the tick's figure client-side.
-["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap]] remoteExec ["fnc_civ_townInfo", _caller];
+["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap]] remoteExec ["fnc_map_readout_draw", _caller];

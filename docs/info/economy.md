@@ -50,7 +50,7 @@ There is no campaign-wide figure to sum into. Every caller resolves its town thr
 `fnc_civ_townAt`, which answers `-1` for open country, a civilians-off campaign and RAVAGE/WBK alike,
 and a `-1` delta is dropped: harm done where no town can see it costs nothing. Consumers that only
 need a number read `fnc_civ_repAt`, which answers neutral for the same three cases — a consumer that
-has to tell "neutral" from "not modelled" reads `civ_town_rep` directly, the way `fnc_civ_townQuery`
+has to tell "neutral" from "not modelled" reads `civ_town_rep` directly, the way `fnc_map_readout_query`
 and `fnc_sitrep_fanout` do.
 
 **No call site prints a reputation total, and neither does the map.** A caller computes its figure

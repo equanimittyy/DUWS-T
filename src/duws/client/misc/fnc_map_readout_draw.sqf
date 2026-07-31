@@ -1,4 +1,4 @@
-// Locality: the client that clicked. Draws the answer fnc_civ_townQuery sent back, for a zone or
+// Locality: the client that clicked. Draws the answer fnc_map_readout_query sent back, for a zone or
 // for a civilian town.
 // Not a hint: the engine's hint box renders beneath findDisplay 12, so a hint raised over the
 // open map plays its sound and shows nothing. fnc_map_prompt draws on the map display itself.
@@ -71,13 +71,13 @@ switch (_kind) do {
 // from an earlier click must not wipe a later click's readout when its ten seconds are up.
 // uiNamespace, not missionNamespace: this is display state, and the mission namespace is
 // serialized into save games.
-private _seq = (uiNamespace getVariable ["DUWS_civ_mapInfo_seq", 0]) + 1;
-uiNamespace setVariable ["DUWS_civ_mapInfo_seq", _seq];
+private _seq = (uiNamespace getVariable ["DUWS_mapReadout_seq", 0]) + 1;
+uiNamespace setVariable ["DUWS_mapReadout_seq", _seq];
 
 [_seq] spawn {
 	params ["_seq"];
 	sleep 10;
-	if ((uiNamespace getVariable ["DUWS_civ_mapInfo_seq", 0]) isEqualTo _seq) then {
+	if ((uiNamespace getVariable ["DUWS_mapReadout_seq", 0]) isEqualTo _seq) then {
 		[""] call fnc_map_prompt;
 	};
 };

@@ -36,7 +36,7 @@ fnc_civ_playerNear = {
 // switched off and RAVAGE/WBK register no town reputation at all.
 // Neutral, not a stored figure: reputation is territory, and there is nothing to be liked or
 // hated by on ground no town owns. A caller that has to tell "neutral" from "not modelled"
-// reads civ_town_rep directly, the way fnc_civ_townQuery does.
+// reads civ_town_rep directly, the way fnc_map_readout_query does.
 fnc_civ_repAt = {
 	if (!isServer) exitWith { 0 };
 	params [["_townIndex", -1]];

@@ -312,7 +312,7 @@ feature being broken rather than as a collision.
 
 **How to apply:** every map-click mode raises its own "I own the map" global before
 `openMap true` and refuses to start if another mode's flag is up
-(`DUWS_baseTravelMapOpen`, `DUWS_civMapViewOpen`). Clear the flag *and* the handler
+(`DUWS_baseTravelMapOpen`, `DUWS_mapReadoutOpen`). Clear the flag *and* the handler
 (`onMapSingleClick ""`) from a `waitUntil { !visibleMap }` spawn, because the engine gives no
 callback for the player closing the map and a mode abandoned that way would hold the slot for
 the rest of the mission.

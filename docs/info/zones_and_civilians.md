@@ -125,9 +125,9 @@ it after retaking the ground is a fresh force; nothing else restores it. `fnc_zo
 the only writer, so a mechanic that lets OPFOR rebuild a mauled zone has one place to go through.
 
 **Where the player reads it.** The HQ board's View Map mode answers zones as well as towns. A click
-goes to `fnc_civ_townQuery` on the server, which picks whichever revealed zone or town disc the
+goes to `fnc_map_readout_query` on the server, which picks whichever revealed zone or town disc the
 click landed in with the **nearest centre** — zone circles and town discs overlap by design, so the
-tie has to break on something — and `fnc_civ_townInfo` draws the answer. A zone prints its garrison
+tie has to break on something — and `fnc_map_readout_draw` draws the answer. A zone prints its garrison
 as ten segments, green for what is left and grey for what is gone. A streamed-in zone reports what
 is alive against its baseline; a stowed one reports the strength it will redeploy at, rounded the
 same way, so the bar cannot disagree by a segment with what arrives. A zone the player holds prints

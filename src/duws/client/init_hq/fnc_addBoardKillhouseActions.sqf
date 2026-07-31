@@ -33,7 +33,7 @@ _board addAction [
 
 _board addAction [
     ACT_SECONDARY_MENU("STR_DUWS_T_civ_mapview_action"),
-    { call fnc_civ_mapView },
+    { call fnc_map_readout_open },
     [], 90, true, true, "", "_this == player"
 ];
 
