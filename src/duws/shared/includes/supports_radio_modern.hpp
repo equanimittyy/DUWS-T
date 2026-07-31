@@ -206,11 +206,14 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_ooi6w4yh"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "['mobile_HQ'] call fnc_support_comm_used; [0] spawn fnc_MHQ_select"; 
+        expression = "[0] spawn fnc_MHQ_select"; 
         icon = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\attack_ca.paa"; // Icon displayed permanently next to the command menu
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
-        removeAfterExpressionCall = 1; // 1 to remove the item after calling
+        // Kept, not consumed. Every other outcome of designating is a refusal the player has to be
+        // able to act on -- wrong vehicle, nothing under the cursor, one already assigned -- and an
+        // entry that vanishes on each of them made the permanent unlock feel like a spent charge.
+        removeAfterExpressionCall = 0;
     };
 
 };                             

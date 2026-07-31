@@ -1,32 +1,32 @@
-// Locality: client -- invoked from a comm-menu expression (shared/includes/supports_radio_modern.hpp:209).
-
-
-// One MHQ at a time. Two players can each be holding an unspent designation token, and without
-// this the second SetVehicleVarName repoints MHQ1 at a new vehicle while the first keeps its
-// actions -- leaving a deploy action and respawn point acting on globals describing something
-// else. Tested with alive, not isNil: fnc_MHQ_destroyed leaves the dead object in the variable.
-// hintC rather than hint: this one has to be read. A corner hint competes with whatever notification
-// the player is already looking at, and the refusal has to explain a rule -- one MHQ, freed only by
-// losing it -- rather than just report a failure.
-if (!isNil "MHQ1" && {alive MHQ1}) exitWith {
-	hintC localize "STR_DUWS_T_mhq_exists";
-	["mobile_HQ"] call fnc_support_comm_add;
-};
+// Locality: client -- invoked from a comm-menu expression (shared/includes/supports_radio_modern.hpp).
+//
+// Calling this does not consume the entry (removeAfterExpressionCall = 0), so none of the refusals
+// below hands it back. Three of the four outcomes here are refusals the player is meant to act on
+// straight away -- nothing under the cursor, wrong kind of vehicle, one already assigned -- and an
+// entry that vanished on each of them made a permanent team unlock behave like a spent charge.
 
 _target = cursorObject;
-if (_target == objNull) exitWith {
-	hint localize "STR_DUWS_T_imz98waj";
-	["mobile_HQ"] call fnc_support_comm_add;
+
+// One MHQ at a time. Every player carries the designation entry, so without this the second
+// SetVehicleVarName repoints MHQ1 at a new vehicle while the first keeps its actions -- leaving a
+// deploy action and a respawn point acting on globals describing something else. Tested with alive,
+// not isNil: fnc_MHQ_destroyed leaves the dead object in the variable.
+//
+// hintC rather than hint: this one has to be read. A corner hint competes with whatever notification
+// the player is already looking at, and the refusal has to teach two verbs rather than report a
+// failure. Pointing at the current MHQ is the likeliest way to arrive here and gets its own line,
+// because answering that with the general one-at-a-time rule reads as the mission not knowing what
+// the player is looking at.
+if (!isNil "MHQ1" && {alive MHQ1}) exitWith {
+	hintC localize (["STR_DUWS_T_mhq_exists", "STR_DUWS_T_mhq_is_this"] select (_target == MHQ1));
 };
+
+if (_target == objNull) exitWith { hint localize "STR_DUWS_T_imz98waj" };
 
 _goodVeh = false;
 if (_target isKindOf "car" || _target isKindOf "tank") then {_goodVeh = true};
 
-if (!_goodVeh) exitWith {
-	hint localize "STR_DUWS_T_1gk907or";
-	["mobile_HQ"] call fnc_support_comm_add;
-};
-
+if (!_goodVeh) exitWith { hint localize "STR_DUWS_T_1gk907or" };
 
 // Give MHQ a name with public variable
 _Varname = "MHQ1";

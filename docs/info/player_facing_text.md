@@ -242,8 +242,9 @@ stayed while Reset Squad Leader (`STR_DUWS_T_4jabuvz6`) and Mission Cooldowns
 
 Release sits beside Deploy rather than beside Undeploy, so it is reachable exactly while the vehicle
 is packed up and never while it is a working base. Undeploying is how the MHQ moves and is the common
-action; releasing ends the designation, frees the one-at-a-time slot and hands the build token back to
-every player, which is rare and worth the second click.
+action; releasing ends the designation and frees the one-at-a-time slot, which is rare and worth the
+second click. Build Mobile HQ itself is never consumed — every player keeps the entry, so all three
+of its refusals leave them something to act on.
 
 Redeploy Base Units (`STR_DUWS_T_REDEPLOY_ACTION`, 2 CP) is the BASE list's last row at both the HQ
 and every FOB, which is the same reasoning that put `ACT_COMMIT` at the bottom of the scroll list.

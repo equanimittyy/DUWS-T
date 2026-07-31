@@ -843,7 +843,7 @@ purchase time points at nothing — and whether the other items' ids survive a r
 undocumented, because nothing says if an id is a stable handle or an index into a compacting
 array.**
 
-Fourteen of DUWS_T's twenty comm classes are declared that way, and every one of them re-adds
+Thirteen of DUWS_T's twenty comm classes are declared that way, and every one of them re-adds
 itself from its own script when its mission finishes or its cooldown expires
 (`client/supports/fnc_helolift.sqf`, `fnc_mapclickuav.sqf`, both taxis, and the rest). Those
 re-adds used to discard the returned id, which was invisible while nothing ever removed an item:
@@ -852,7 +852,7 @@ that kept their id current. The first feature that has to remove any other item 
 
 **How to apply:** never call the two BIS functions directly. `fnc_support_comm_add` and
 `fnc_support_comm_drop` (`client/supports/fnc_supports_init.sqf`) own a per-player
-class → id record, every re-add site routes through the add, and each of the fourteen
+class → id record, every re-add site routes through the add, and each of the thirteen
 `expression` fields opens with `['<class>'] call fnc_support_comm_used` so the engine's own
 deletion is observable at all. Removal then tears the whole slate down in **descending id
 order** — correct whether ids are handles or indices — and rebuilds it from the record, so the

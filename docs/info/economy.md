@@ -143,9 +143,9 @@ The split is not new; it was latent and unnamed. The four base facilities — ar
 repair, vehicle recycle — already broadcast their flag and already sat outside the slot cap, while
 the radio supports already took a slot and already handed the buyer a per-player comm-menu item.
 Mobile HQ and the FOB unlock moved to permanent because both are capabilities rather than
-deliveries: each still charges per use (10 CP a FOB, and the MHQ token is re-issued rather than
-re-bought when its vehicle is released or destroyed), so team ownership costs nothing it was
-collecting before.
+deliveries: each still charges per use, 10 CP a FOB, and the MHQ designation is an entry every
+player keeps rather than a charge anyone spends, so team ownership costs nothing it was collecting
+before.
 
 **Row order is the catalogue's, not a literal.** Both the list build (`fnc_support_list_fill`) and
 the buy/refund handler read the same array and index it the same way, and the listbox keeps a
@@ -164,7 +164,7 @@ debited is what comes back.
 single fire mission costs exactly that fire mission — which is what stops the refund from being a way
 to replay a campaign's worth of supports for free.
 
-**A support that is not in hand cannot be refunded.** The fourteen comm-menu classes with
+**A support that is not in hand cannot be refunded.** The thirteen comm-menu classes with
 `removeAfterExpressionCall = 1` are absent from the player's menu for as long as their mission is
 running, and `fnc_supports_init` tracks presence for its own reasons
 ([`arma_engine_gotchas.md`](arma_engine_gotchas.md#a-comm-menu-item-id-goes-stale-the-moment-the-item-is-used)),
