@@ -42,6 +42,16 @@ private _fnc_report = {
     [_line] remoteExec ["hint", _caller];
 };
 
+// The one exception to the rule above, and the reason it is a separate helper rather than a flag on
+// it: a revealed position and a topped-up CP pool are shared state that lands on every player's map
+// and terminal, so the team is told through a notification even though the search that bought it is
+// still reported locally. Money, a document and an empty pocket move nothing anyone else can see
+// and stay with the searcher.
+private _fnc_notify = {
+    params ["_title", "_desc"];
+    ["infosearch", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", 0];
+};
+
 // What a document draw hands over, named once because the intel substitute at the bottom draws
 // from it too. Every member clears the 1-3 CP the pool pays on the spot, which is what makes the
 // trip back to the terminal worth taking. `Item_Files` is deliberately absent: the file is also
@@ -51,8 +61,8 @@ private _documents = ["Item_Wallet_traitor", "Item_FlashDisk", "Item_SmartPhone"
     "Item_MobilePhone"];
 
 // The two kinds the substitute draw can also pay, hoisted so it does not need a second copy of
-// either. `call` shares the caller's scope, so both read _documents, _origin, _caller and
-// _fnc_report from here.
+// either. `call` shares the caller's scope, so both read _documents, _origin, _caller, _fnc_report
+// and _fnc_notify from here.
 //
 // CP only, and rolled: a search is a windfall for the player who made it, not a shift in the
 // war's momentum, which is what AP measures and what every WARCOM wave threshold reads.
@@ -60,8 +70,8 @@ private _payPool = {
     private _cp = 1 + floor random 3;
     [_cp, "search_pool"] call fnc_cp_adjust;
     [localize "STR_DUWS_T_INTEL_FOUND_x"] call _fnc_report;
-    ["infosearch", [localize "STR_DUWS_T_INTEL_BONUS_TITLE",
-        format [localize "STR_DUWS_T_INTEL_BONUS_DESC", _cp]]] remoteExec ["BIS_fnc_showNotification", _caller];
+    [localize "STR_DUWS_T_INTEL_BONUS_TITLE",
+        format [localize "STR_DUWS_T_INTEL_BONUS_DESC", _cp]] call _fnc_notify;
 };
 
 // One item, not a handful: three documents off one body is three searches' worth of CP for a
@@ -79,10 +89,17 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
 
     switch (_kind) do {
         // The only kind that can decline: fnc_intel_payout returns false once every zone, town
-        // and hardpoint is already revealed. It speaks its own line when it pays. Silenced on the
-        // dry path because the substitute below answers that case itself, and the two lines would
-        // contradict each other.
-        case "intel": { _paid = [_origin, _caller, false] call fnc_intel_payout };
+        // and hardpoint is already revealed. Silenced either way, so the substitute below is free
+        // to answer a decline without the two lines contradicting each other, and a reveal is
+        // reported here in the searcher's voice instead of as an Overlord broadcast to the AO.
+        case "intel": {
+            _paid = [_origin, _caller, true] call fnc_intel_payout;
+            if (_paid) then {
+                [localize "STR_DUWS_T_INTEL_FOUND_map"] call _fnc_report;
+                [localize "STR_DUWS_T_INTEL_MAP_TITLE",
+                    localize "STR_DUWS_T_INTEL_MAP_DESC"] call _fnc_notify;
+            };
+        };
 
         case "pool": { call _payPool; _paid = true };
 

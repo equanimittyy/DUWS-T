@@ -7,8 +7,9 @@
 //
 // _audience is who is told, on the same rule fnc_zone_reveal uses: the presence trigger's reveal
 // is everyone's news and takes the default, while one bought with a search is hinted to the
-// player who paid for it as well as spoken to them.
-params ["_townIndex", ["_audience", 0]];
+// player who paid for it as well as spoken to them. _quiet likewise hands the reporting to the
+// caller, so a search speaks in the searcher's voice rather than Overlord's.
+params ["_townIndex", ["_audience", 0], ["_quiet", false]];
 
 if (!isServer) exitWith {false};
 
@@ -23,8 +24,10 @@ _vis set [_townIndex, true];
 (format ["civ_area_%1", _townIndex]) setMarkerAlpha 0.3;
 (format ["civ_icon_%1", _townIndex]) setMarkerAlpha 1;
 
-private _line = localize "STR_DUWS_T_townreveal";
-[localize "STR_DUWS_T_OVERLORD", _line] remoteExec ["fnc_duws_dialogue", _audience];
-if (_audience isEqualType objNull) then { [_line] remoteExec ["hint", _audience] };
+if (!_quiet) then {
+    private _line = localize "STR_DUWS_T_townreveal";
+    [localize "STR_DUWS_T_OVERLORD", _line] remoteExec ["fnc_duws_dialogue", _audience];
+    if (_audience isEqualType objNull) then { [_line] remoteExec ["hint", _audience] };
+};
 
 true

@@ -4,9 +4,14 @@
 //
 // Takes the position the intel was earned at, which only the town bucket uses, and who earned it,
 // who is told when there is nothing left. Returns true if something was awarded, false if there
-// was nothing left to give. _speakDry off is for the one caller that pays something else when this
-// declines: it would otherwise announce an empty search and then hand over a document.
-params [["_origin", []], ["_earner", objNull], ["_speakDry", true]];
+// was nothing left to give.
+//
+// _silent hands every line this would speak -- the reveal and the dry answer alike -- to the
+// caller, and is for the one that reports its own result either way. Silencing only the dry answer
+// is not enough: a caller that declines has to pay something else and would otherwise announce an
+// empty search and then hand over a document, and a caller that succeeds would have Overlord
+// broadcast the reveal on top of the line it speaks itself.
+params [["_origin", []], ["_earner", objNull], ["_silent", false]];
 
 if (!isServer) exitWith {false};
 
@@ -48,7 +53,7 @@ if !(_hiddenTowns isEqualTo []) then { _kinds pushBack "CIV" };
 // sites hand their result to a remoteExec and never see the return value, so they could not speak
 // it. Overlord carries it when there is no earner to speak in their own voice.
 if (_kinds isEqualTo []) exitWith {
-    if (_speakDry) then {
+    if (!_silent) then {
         private _speaker = if (isNull _earner) then { localize "STR_DUWS_T_OVERLORD" } else { name _earner };
         [_speaker, localize "STR_DUWS_T_8skllpyx"] remoteExec ["fnc_duws_dialogue", _audience];
     };
@@ -65,7 +70,7 @@ switch (selectRandom _kinds) do {
     // odds decaying as a campaign progresses, when late on most winning rolls land on ground
     // already found.
     case "ZONE": {
-        _awarded = ["ONE", (selectRandom _hiddenZones) select 1, _audience] call fnc_zone_reveal;
+        _awarded = ["ONE", (selectRandom _hiddenZones) select 1, _audience, _silent] call fnc_zone_reveal;
     };
 
     // Nearest wins. A town is somewhere the player goes to do something -- trade, recruit, ask a
@@ -79,7 +84,7 @@ switch (selectRandom _kinds) do {
             private _dist = _from distance2D (getPos (_towns select _x));
             if (_dist < _bestDist) then { _bestDist = _dist; _closest = _x };
         } forEach _hiddenTowns;
-        _awarded = [_closest, _audience] call fnc_civ_town_reveal;
+        _awarded = [_closest, _audience, _silent] call fnc_civ_town_reveal;
     };
 
 };
