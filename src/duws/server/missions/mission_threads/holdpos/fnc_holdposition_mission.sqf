@@ -161,7 +161,7 @@ _VARtaskgeneratedName = format ["HOLDPOSITION%1%2",round(_MissionPos select 0),r
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 10;
 
-[_VARtaskgeneratedName, localize "STR_DUWS_T_jianshouzhendi2", _mission_name, _randomPos, "defend"] call fnc_missionTaskCreate; 
+[_VARtaskgeneratedName, localize "STR_DUWS_T_jianshouzhendi", _mission_name, _randomPos, "defend"] call fnc_missionTaskCreate;
 
 _friendlyUnits = [];
 _friendlyGroup = [(_targetpos getPos [8, random 360]), WEST, [

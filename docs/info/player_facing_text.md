@@ -37,8 +37,24 @@ tags cannot simply be aligned key-for-key.
 The reference for radio prose is the `Support & Radio` container: speaker-first callsign framing
 (`Alpha 1-1, this is Overlord.` / `Swordfish 1-1 to Alpha 1-1, ...`), procedure words (*be advised,
 roger, stand by, over, out*), numbers spelled out in spoken lines but numerals in HUD text, and flat
-declaratives — Overlord does not shout. Hints carry no trailing period; subtitles do. Mission
-briefings end with a parenthesised reward tag, `(High CP, average AP)`.
+declaratives — Overlord does not shout. Hints carry no trailing period; subtitles do.
+
+## Side-mission briefings carry their own reward block
+
+One key per side mission serves both the strategic-map card and the task description, so the same
+text has to read as a briefing in either place: situation, task, then any timer or kit the player
+has to plan around. It ends with the reward, laid out on its own lines after a blank one:
+
+```
+&lt;br /&gt;&lt;br /&gt;CP: 45&lt;br /&gt;AP: 15
+```
+
+Breaks are `<br />` (XML-escaped in the file, as above), never `\n` — a task description is parsed
+as structured text, where a bare newline is whitespace. The numbers are the base rewards the thread
+passes to `fnc_mission_reward`; `cp_reward_multiplier` scales the CP actually paid but not the
+figure printed here, so a campaign run above 1x pays more than the card says. The two missions that
+pay town reputation instead of army power carry a third `REP:` line, because `AP: 0` on its own
+would read as unpaid work.
 
 ## Unreferenced keys
 
