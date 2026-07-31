@@ -2663,13 +2663,6 @@
                 <Spanish>¡Civil asesinado!</Spanish>
                 <Chinesesimp>平民被杀了！</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_LOOT">
-                <Original>Search</Original>
-                <English>Search</English>
-                <German>Durchsuchen</German>
-                <Spanish>Registrar</Spanish>
-                <Chinesesimp>搜身</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_HANDSUP1">
                 <Original>Hands up!</Original>
                 <English>Hands up!</English>
@@ -3235,10 +3228,6 @@
             <Key ID="STR_DUWS_T_INTEL_SEARCH_ACTION">
                 <Original>Search</Original>
                 <English>Search</English>
-            </Key>
-            <Key ID="STR_DUWS_T_SEARCH_CORPSE_ACTION">
-                <Original>Search Body</Original>
-                <English>Search Body</English>
             </Key>
             <Key ID="STR_DUWS_T_DEBUG_ACTION">
                 <Original>Debug</Original>
@@ -8239,15 +8228,15 @@
                 <German>Einsatztrupp an "Overlord", wir sind wieder kampfbereit und warten an der Basis.</German>
                 <Spanish>Equipo de Acción a "Overlord", hemos recuperado la efectividad de combate y estamos en espera en la base.</Spanish>
                 <Chinesesimp>"霸王"，我们已经恢复战斗效能，在基地待命。</Chinesesimp>
-                <Original>To Overlord, we're back to full combat readiness and standing by at base.</Original>
-                <English>To Overlord, we're back to full combat readiness and standing by at base.</English>
+                <Original>To Overlord, requesting a new tasking, over.</Original>
+                <English>To Overlord, requesting a new tasking, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_missioncooldown2">
                 <German>"Overlord 1-1" verstanden. Bleiben Sie an der Basis bereit bis zur weiteren Anweisung. Over.</German>
                 <Spanish>"Overlord 1-1" recibido. Permanezcan en la base a la espera de nuevas instrucciones. Over.</Spanish>
                 <Chinesesimp>"霸王1-1"收到。在基地待命，直到进一步指示。完毕。</Chinesesimp>
-                <Original>Copy. Stand by at base for further instructions, over.</Original>
-                <English>Copy. Stand by at base for further instructions, over.</English>
+                <Original>Negative. Nothing available right now — we'll call you when that changes, out.</Original>
+                <English>Negative. Nothing available right now — we'll call you when that changes, out.</English>
             </Key>
             <Key ID="STR_DUWS_T_eck4xh9m">
                 <German>Nur der Host (Alpha1-1) can aktuell sekundäre Missionen anfordern</German>

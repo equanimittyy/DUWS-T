@@ -181,14 +181,14 @@ pass.
 | --- | --- | --- |
 | Halt | `STR_DUWS_T_CIV_STOP` | Within 6 m, inside a ±15° facing cone, not panicking |
 | Interact | `STR_DUWS_T_CIV_MENU_ACTION` | Alive, called over, within 3 m, not surrendered, not arrested, not spent |
-| Search | `STR_DUWS_T_LOOT` | Within 3 m and surrendered |
 | Release | `STR_DUWS_T_RELEASE` | Within 3 m, surrendered, still civilian-side |
 | Evacuate | `STR_DUWS_T_RECRUIT_ACTION` | Always, but only on RAVAGE/WBK civilians |
 
 Interact opens `civ_dialog` rather than `fnc_open_action_menu`, because its rows need per-row greying
-against coin count, town state and range. Search stays a scroll entry rather than becoming a dialog
-row: the menu hides on `isSurrendered`, so offering it there would mean closing, waiting out the
-surrender animation and reopening. Reach and reputation are in
+against coin count, town state and range. Searching a surrendered civilian carries no entry of its
+own — it goes through the shared hold action below — and was never a row inside Interact either: the
+menu hides on `isSurrendered`, so offering it there would mean closing, waiting out the surrender
+animation and reopening. Reach and reputation are in
 [`zones_and_civilians.md`](zones_and_civilians.md#range-two-distances-on-purpose).
 
 **Evacuate never shares a civilian with the other four.** `fnc_civ_spawnUnit` branches on
@@ -223,18 +223,14 @@ the player already has.
 | --- | --- | --- |
 | Carry Pilot / Drop Pilot / Load Into Vehicle / Unload Pilot | `STR_DUWS_T_carry_pilot` and siblings | — |
 | Search | `STR_DUWS_T_INTEL_SEARCH_ACTION` | `holdAction_search_ca.paa` |
-| Search Body | `STR_DUWS_T_SEARCH_CORPSE_ACTION` | `holdAction_search_ca.paa` |
 | Search Container | `STR_DUWS_T_SEARCH_CONTAINER` | `holdAction_search_ca.paa` |
-| Search Intel | `STR_DUWS_T_7yec9ifj` | `holdAction_search_ca.paa` |
-
-`STR_DUWS_T_SEARCH_CORPSE_ACTION` exists separately from `STR_DUWS_T_SEARCH_CORPSE`, which titles
-the "bodies may carry intel" notification in nine side missions. They were one key; the action needed
-a label and the notification needed a sentence.
 
 Searching is one entry for the whole mission, on the player rather than on the thing searched
 (`client/misc/fnc_intel_search_action.sqf`). Bodies, mission objectives and arrested civilians all
 reach it through `cursorObject`, gated on a search flag the server sets; the reasoning is in
-[`intel_system.md`](intel_system.md#one-action-on-the-player-not-one-per-searchable-thing).
+[`intel_system.md`](intel_system.md#one-action-on-the-player-not-one-per-searchable-thing). Search
+Container is the exception: intel gathering attaches its own hold action per container, because it
+hands physical intel items to the searcher rather than paying through the shared claim.
 
 ## Call-site conventions
 
@@ -281,11 +277,16 @@ applying it — so a scroll-entry colour and a row colour cannot share a definit
 | Vehicle Recycling | None — both rows default |
 | Vehicle Customization | None — all four rows default |
 | Quick Kits | None — one row per scanned loadout, all default |
-| Debug | `[1,0.667,0,1]` on the four working tools, `[0.6,0.6,0.6,1]` on the unimplemented WARCOM row |
+| Debug | `[1,0.667,0,1]` on the six working tools, `[0.6,0.6,0.6,1]` on the unimplemented WARCOM row |
+| Flag *(object)* as searchable, Force side mission | `[1,0.667,0,1]` on every row |
 
 Quick Kits is the only menu whose row count is not fixed: the rows come from the loadout list the
 server scans and broadcasts, and the entry refuses to open when that list is empty. Debug rows are
 deliberately unlocalised English — a dev surface no player reads.
+
+Both menus in the last row open from a Debug row rather than from a scroll entry, and are the one
+place a menu opens another menu. The economy tool sitting between them in Debug is a hand-built
+dialog rather than one of these lists, because it pairs an edit box with the buttons that spend it.
 
 ## Vendored module entries
 
