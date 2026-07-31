@@ -5,27 +5,18 @@ params ["_markername2","_sol1","_sol2","_sol3","_MissionPos","_targetPos","_radi
 _speaker = localize "STR_DUWS_T_Signal";
 _message = localize "STR_DUWS_T_lyjjiteq";
 
-_trigger = player1;
-if (isMultiplayer) then {
-
-	_nearestUnits = [];
-	if (alive _sol1) then {
-		_nearestUnits = nearestObjects [_sol1,["Man"],150];
-	} else {
-		if (alive _sol2) then {
-			_nearestUnits = nearestObjects [_sol2,["Man"],150];
-		} else {
-			if (alive _sol3) then {
-				_nearestUnits = nearestObjects [_sol3,["Man"],150];
-			};
-		};
-	};
-
-
-	{
-		if (_x in _nearestUnits) then {_trigger = _x}; 
-	} forEach call BIS_fnc_ListPlayers;   
-
+// Whose squad the rescued three join. Nearest living player at any range, not nearest inside a
+// radius: success turns on the prisoners' state rather than on anyone standing close, so "nobody
+// within 150 m" is reachable -- and the radius fallback was player1, an editor slot that in co-op
+// may be unoccupied, dead or across the map, handing three soldiers to a phantom. The shape this
+// replaced also compared no distances at all, letting the last player in list order win. Seeded
+// from the first candidate so no magic number stands in for "further than any map".
+private _anchor = ([_sol1, _sol2, _sol3] select {alive _x}) param [0, objNull];
+private _players = (call BIS_fnc_ListPlayers) select {alive _x};
+private _trigger = objNull;
+if (!isNull _anchor && {!(_players isEqualTo [])}) then {
+	_trigger = _players select 0;
+	{ if (_x distance _anchor < _trigger distance _anchor) then {_trigger = _x} } forEach _players;
 };
 
 
@@ -81,14 +72,10 @@ if (alive _sol1) then {
 };
 
 // JOIN PLAYER
-if (alive _sol1) then {
-	[_sol1] joinSilent (group _trigger);
-};
-if (alive _sol2) then {
-	[_sol2] joinSilent (group _trigger);
-};
-if (alive _sol3) then {
-	[_sol3] joinSilent (group _trigger);
+// Null only when every player is dead, and then there is nobody to hand them to: they stay in
+// their own group as friendly AI rather than joining group objNull.
+if (!isNull _trigger) then {
+	{ if (alive _x) then {[_x] joinSilent (group _trigger)} } forEach [_sol1, _sol2, _sol3];
 };
 
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
