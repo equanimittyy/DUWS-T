@@ -77,13 +77,13 @@ private _title = localize "STR_DUWS_T_INTEL_ANALYSIS_TITLE";
 // swallowing the delivery for nothing.
 if (random 1 < 0.10 && {[getPos _caller, _caller] call fnc_intel_payout}) exitWith {
     private _revealDesc = format [localize "STR_DUWS_T_INTEL_ANALYSIS_REVEAL", name _caller, _itemsList];
-    ["info", [_title, _revealDesc]] remoteExec ["BIS_fnc_showNotification", 0];
+    ["info", [_title, _revealDesc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 };
 
 private _finalCP = floor _totalCP;
 [_finalCP, "intel_analysis"] remoteExec ["fnc_cp_adjust", 2];
 private _desc = format [localize "STR_DUWS_T_INTEL_ANALYSIS_BROADCAST", name _caller, _itemsList, _finalCP];
-["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", 0];
+["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
 private _hintMsg = format [localize "STR_DUWS_T_INTEL_ANALYSIS_HINT", _finalCP, _itemsList];
 _hintMsg remoteExec ["hint", 0];

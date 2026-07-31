@@ -111,7 +111,7 @@ if (random 1 < 0.95) then {
             
             // 构建动态描述文本，显示实际奖励值
             private _desc = format [localize "STR_DUWS_T_RECRUIT_gainCP", _reward];
-            ["repup", [localize "STR_DUWS_T_RECRUIT_SUCCESS2", _desc]] remoteExec ["BIS_fnc_showNotification", 0];
+            ["repup", [localize "STR_DUWS_T_RECRUIT_SUCCESS2", _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
         };
     };
     

@@ -238,7 +238,7 @@ private _fnc_addAttachments = {
 
 // 广播成功通知
 private _successMsg = format [localize "STR_DUWS_T_HIRE_PMC_SUCCESS", _count];
-["info", [localize "STR_DUWS_T_HIRE_PMC_TITLE", _successMsg]] remoteExec ["BIS_fnc_showNotification", 0];
+["info", [localize "STR_DUWS_T_HIRE_PMC_TITLE", _successMsg]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_HIRE_PMC_SUCCESS2"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
 
 private _hintMsg = format [localize "STR_DUWS_T_HIRE_PMC_HINT", _count];

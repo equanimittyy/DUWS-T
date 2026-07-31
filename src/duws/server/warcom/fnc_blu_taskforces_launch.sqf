@@ -3,7 +3,7 @@ if (!isServer) exitWith {};
 
 private _standby = missionNamespace getVariable ["blu_taskforces_standby", []];
 if (count _standby == 0) exitWith {
-    ["info", [localize "STR_DUWS_T_no_standby_tf", localize "STR_DUWS_T_no_standby_tf_desc"]] remoteExec ["BIS_fnc_showNotification", 0];
+    ["info", [localize "STR_DUWS_T_no_standby_tf", localize "STR_DUWS_T_no_standby_tf_desc"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 };
 // 提示玩家
 [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_taskforces_launchrqst"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
@@ -25,4 +25,4 @@ sleep 6;
 missionNamespace setVariable ["blu_taskforces_standby", [], true];
 
 
-["info", [localize "STR_DUWS_T_taskforces_launched_title", localize "STR_DUWS_T_taskforces_launched_desc"]] remoteExec ["BIS_fnc_showNotification", 0];
+["info", [localize "STR_DUWS_T_taskforces_launched_title", localize "STR_DUWS_T_taskforces_launched_desc"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];

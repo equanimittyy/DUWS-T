@@ -136,4 +136,4 @@ if (_type == "goggles") then {
         _desc = format [localize "STR_DUWS_T_BLACKMARKET_BOUGHT_PISTOL", name _caller, _displayName];
     };
 };
-["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", 0];
+["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];

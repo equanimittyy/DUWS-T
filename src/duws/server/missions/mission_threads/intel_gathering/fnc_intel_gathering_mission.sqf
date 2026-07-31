@@ -178,7 +178,7 @@ if (isNil "fnc_intel_container_search_server") then {
             if (_hasTopSecret) then {
                 private _title = localize "STR_DUWS_T_TOPSECRET_TITLE";
                 private _desc = format [localize "STR_DUWS_T_TOPSECRET_DESC", name _caller];
-                ["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", 0];
+                ["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
                 [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_INTEL_GATHERINGTS1"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
                 sleep 6;
                 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_GATHERINGTS2"] remoteExec ["fnc_duws_dialogue", 0];
@@ -328,6 +328,6 @@ sleep 6;
 };
 
 sleep 600;
-["info",[localize "STR_DUWS_T_INTEL_GATHERING",localize "STR_DUWS_T_INTEL_GATHERING_TMLEFT"]] remoteExec ['BIS_fnc_showNotification',0];
+["info",[localize "STR_DUWS_T_INTEL_GATHERING",localize "STR_DUWS_T_INTEL_GATHERING_TMLEFT"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated];
 sleep 300;
 deleteMarker str(_markername2);

@@ -16,7 +16,7 @@ private _site = [_MissionPos, _radius, 7] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
-[_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn", 0];
+[_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 _vehpos = [_targetpos, 10, 30,10,0,0.15,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 
@@ -95,7 +95,7 @@ sleep 8;
 [_VARtaskgeneratedName, localize "STR_DUWS_T_y7z1cx6j", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
 
 // 设置任务目标位置（军官位置）
-["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", 0];
+["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
 sleep 5; // 等待巡逻队生成完毕
 

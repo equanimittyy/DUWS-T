@@ -27,7 +27,7 @@ if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
 // 向玩家显示任务提示
-["Armor Hunting",{hint _this}] remoteExec ["BIS_fnc_Spawn", 0];
+["Armor Hunting",{hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 sleep 2;
 

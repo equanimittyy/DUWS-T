@@ -95,7 +95,7 @@ _civilianMarker setMarkerSize [1, 1];
 
 // TODO: revisit the channel -- every mission thread announces through a hint box, so moving off
 // it is one pass across all of them rather than a change here.
-[localize "STR_DUWS_T_c14", {hint _this}] remoteExec ["BIS_fnc_Spawn", 0];
+[localize "STR_DUWS_T_c14", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 // 持续播放惊恐动画
 [_civilian] spawn {

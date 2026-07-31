@@ -15,4 +15,4 @@ publicVariable "Mission_available";
 
 ["WARN", "MISSION", format ["type=%1 aborted before spawning, slot and cooldown released",
     _missionType]] call fnc_log;
-[_hintKey, {hint localize _this}] remoteExec ["BIS_fnc_Spawn", 0];
+[_hintKey, {hint localize _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];

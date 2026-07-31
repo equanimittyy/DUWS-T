@@ -215,7 +215,7 @@ if (_mode == "spawn") then {
                     [_reward, "wbk_survivor_rescued"] remoteExec ["fnc_cp_adjust", 2];
                     private _title = localize _titleKey;
                     private _msg = format [localize _msgKey, _reward];
-                    ["repup", [_title, _msg]] remoteExec ["BIS_fnc_showNotification", 0];
+                    ["repup", [_title, _msg]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
                 };
             };
 
@@ -414,7 +414,7 @@ if (_mode == "spawn") then {
 
     [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_civpopR"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
     sleep 2;
-    ["biohazard", [localize "STR_DUWS_T_civrescuetitle", localize "STR_DUWS_T_civrescue"]] remoteExec ["BIS_fnc_showNotification", 0];
+    ["biohazard", [localize "STR_DUWS_T_civrescuetitle", localize "STR_DUWS_T_civrescue"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", "[Spawn] WBK broadcast messages sent"] call fnc_log; };
 
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Spawned %1 groups at location %2 (target population %3)", count _allGroups, _locIndex, _targetPop]] call fnc_log; };

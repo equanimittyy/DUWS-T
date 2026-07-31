@@ -6,7 +6,7 @@
 if (!isServer) exitWith {};
 
 if (commandpointsblu1 < 2) exitWith {
-    [localize "STR_DUWS_T_REDEPLOY_COST_TITLE", format [localize "STR_DUWS_T_REDEPLOY_COST", 2]] remoteExec ["BIS_fnc_showNotification", 0];
+    [localize "STR_DUWS_T_REDEPLOY_COST_TITLE", format [localize "STR_DUWS_T_REDEPLOY_COST", 2]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 };
 
 // call, not remoteExec to self: a queued debit runs a frame later and splits the check

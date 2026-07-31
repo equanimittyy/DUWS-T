@@ -48,7 +48,7 @@ private _fnc_report = {
 // and stay with the searcher.
 private _fnc_notify = {
     params ["_title", "_desc"];
-    ["infosearch", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", 0];
+    ["infosearch", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 };
 
 // What a document draw hands over, named once because the intel substitute at the bottom draws

@@ -83,7 +83,7 @@ clearBackpackCargoGlobal _vehicle_7;
                 _target setVariable ["arsenalUsed", true, true];
                 _target removeAction _actionId;
                 [_target] remoteExec ["fnc_removeArsenalAction", 0];
-                ["dakaijunhuoku", [localize "STR_DUWS_T_dakaijunhuoku", localize "STR_DUWS_T_dakaijunhuoku2"]] remoteExec ["BIS_fnc_showNotification", 0];
+                ["dakaijunhuoku", [localize "STR_DUWS_T_dakaijunhuoku", localize "STR_DUWS_T_dakaijunhuoku2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
                 ["Open", true] call BIS_fnc_arsenal;
             };
         },
@@ -118,7 +118,7 @@ clearBackpackCargoGlobal _vehicle_8;
                 _target setVariable ["arsenalUsed", true, true];
                 _target removeAction _actionId;
                 [_target] remoteExec ["fnc_removeArsenalAction", 0];
-                ["dakaijunhuoku", [localize "STR_DUWS_T_dakaijunhuoku", localize "STR_DUWS_T_dakaijunhuoku2"]] remoteExec ["BIS_fnc_showNotification", 0];
+                ["dakaijunhuoku", [localize "STR_DUWS_T_dakaijunhuoku", localize "STR_DUWS_T_dakaijunhuoku2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
                 ["Open", true] call BIS_fnc_arsenal;
             };
         },
@@ -199,9 +199,9 @@ _speaker = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_cachecopy"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 [_VARtaskgeneratedName, localize "STR_DUWS_T_geryeddp", _mission_name, _randomPos, "destroy"] call fnc_missionTaskCreate;
-["dakaijunhuoku", [localize "STR_DUWS_T_xnjhk", localize "STR_DUWS_T_xnjhk2"]] remoteExec ["BIS_fnc_showNotification", 0];
+["dakaijunhuoku", [localize "STR_DUWS_T_xnjhk", localize "STR_DUWS_T_xnjhk2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
-["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", 0];
+["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
 sleep 5; // 等待巡逻队生成完毕
 

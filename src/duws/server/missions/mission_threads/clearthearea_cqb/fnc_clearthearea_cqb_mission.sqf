@@ -18,7 +18,7 @@ private _site = [_MissionPos, _radius, 11] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
-[localize "STR_DUWS_T_c11",{hint _this}] remoteExec ["BIS_fnc_Spawn",  0];
+[localize "STR_DUWS_T_c11",{hint _this}] remoteExec ["BIS_fnc_Spawn",  [0,-2] select isDedicated];
 
 sleep 2;
 

@@ -170,7 +170,7 @@ _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_
 [_VARtaskgeneratedName, localize "STR_DUWS_T_transIDAP", _mission_name, _randomPos, "truck"] call fnc_missionTaskCreate;
 
 // 设置任务目标位置（卡车位置）
-["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", 0];
+["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
 sleep 5; // 等待巡逻队生成完毕
 
