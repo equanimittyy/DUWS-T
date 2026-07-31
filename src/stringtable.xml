@@ -8232,8 +8232,8 @@
                 <German>Wir haben aktuell keine Missionen für dich. Es kann nur eine Mission aktiv sein und es müssen 6 min zwischen den Missionen liegen.</German>
                 <Spanish>Ahora mismo no contamos con misiones secundarias para que tome. Solo 1 misión puede estar activa a la vez y tiene un enfríamiento de 6 minutos.</Spanish>
                 <Chinesesimp>我们现在没有任务给你。只有一个任务可以激活，两个任务之间有6分钟的冷却时间。</Chinesesimp>
-                <Original>No missions available right now. Only one mission can be active at a time, with a 6-minute cooldown between them.</Original>
-                <English>No missions available right now. Only one mission can be active at a time, with a 6-minute cooldown between them.</English>
+                <Original>No missions available right now. Only one mission can be active at a time, with a 30-minute cooldown between them.</Original>
+                <English>No missions available right now. Only one mission can be active at a time, with a 30-minute cooldown between them.</English>
             </Key>
             <Key ID="STR_DUWS_T_missioncooldown">
                 <German>Einsatztrupp an "Overlord", wir sind wieder kampfbereit und warten an der Basis.</German>
