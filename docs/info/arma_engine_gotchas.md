@@ -859,3 +859,24 @@ order** — correct whether ids are handles or indices — and rebuilds it from 
 ids that come back are certainly current. The record doubles as the presence test: an entry
 exists exactly while the player is holding that item, which is what lets one check refuse to
 refund a support that is away on a mission.
+
+## A `CfgNotifications` description is clipped, not wrapped, past roughly 75 characters
+
+**The notification card's description box is a fixed size. Text longer than fits is cut off
+mid-sentence with no ellipsis and no error, so an over-long body reads as a sentence the mission
+forgot to finish.**
+
+It was found on the Mobile HQ release card, whose body ran to 87 characters and reached the player
+as "The vehicle is an ordinary truck again. Any squad leader can designate a new" — the tail
+vanished exactly where the important half was. Nothing in the RPT records it, and it is invisible
+in the stringtable, where the string looks perfectly ordinary.
+
+The exact ceiling is a pixel width rather than a character count, so it moves with the proportional
+font: a line of `l`s survives longer than a line of `W`s, and the *title* field has a budget of its
+own that is far tighter still. **75 characters is the figure this mission writes to** — measured
+below the observed cut, with enough margin that a wide string cannot cross it.
+
+**How to apply:** keep every `BIS_fnc_showNotification` body at or under 75 characters, counting a
+`format` placeholder at its longest substitution. Titles are short noun phrases regardless. Anything
+that genuinely needs more room is not a notification: a briefing belongs in the task description,
+which scrolls, and an explanation belongs in a `hint`, which wraps.

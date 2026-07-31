@@ -1831,8 +1831,8 @@
                 <English>%1  -&gt;  %2 CP</English>
             </Key>
             <Key ID="STR_DUWS_T_escalation_level">
-                <Original>The war has escalated to level %1 due to destroyed buildings. Expect supports to cost more.</Original>
-                <English>The war has escalated to level %1 due to destroyed buildings. Expect supports to cost more.</English>
+                <Original>Escalation is now level %1. Supports cost more.</Original>
+                <English>Escalation is now level %1. Supports cost more.</English>
             </Key>
             <Key ID="STR_DUWS_T_escalation_tooltip">
                 <Original>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of Altis and the campaign is lost.</Original>
@@ -2060,8 +2060,8 @@
                 <Spanish>Los objetos clave de esta misión incluyen un arsenal completo de un solo uso. ¡No olvides usarlos!</Spanish>
                 <German>Die Schlüsselgegenstände dieser Mission haben ein einmaliges Vollarsenal – vergiss nicht, es zu nutzen!</German>
                 <Chinesesimp>该任务的关键物品配备了一次性的完整军火库，别忘了使用它们</Chinesesimp>
-                <Original>This mission's objective carries a one-time full arsenal. Use it before you leave.</Original>
-                <English>This mission's objective carries a one-time full arsenal. Use it before you leave.</English>
+                <Original>The objective carries a one-time full arsenal. Use it before you leave.</Original>
+                <English>The objective carries a one-time full arsenal. Use it before you leave.</English>
             </Key>
             <Key ID="STR_DUWS_T_dakaijunhuoku2">
                 <Spanish>Un jugador ha usado el arsenal completo de un solo uso, y este ha sido consumido.</Spanish>
@@ -2134,8 +2134,8 @@
                 <Chinesesimp>伪装成敌人</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ACTIVATED">
-                <Original>Enemy disguise activated. Stay away from enemies and do not fire until needed.</Original>
-                <English>Enemy disguise activated. Stay away from enemies and do not fire until needed.</English>
+                <Original>Disguise active. Keep your distance and hold fire until you must.</Original>
+                <English>Disguise active. Keep your distance and hold fire until you must.</English>
                 <Chinesesimp>敌人伪装已激活。远离敌人，非必要情况下不要随意开火。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ohno">
@@ -2541,8 +2541,8 @@
                 <Chinesesimp>雇佣游击队</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HIRE_PARTISANS_SUCCESS">
-                <Original>Alpha 1-1, we have raised some local auxiliary forces. %1 volunteers have joined your squad.</Original>
-                <English>Alpha 1-1, we have raised some local auxiliary forces. %1 volunteers have joined your squad.</English>
+                <Original>Alpha 1-1, %1 local volunteers have joined your squad.</Original>
+                <English>Alpha 1-1, %1 local volunteers have joined your squad.</English>
                 <Chinesesimp>行动组，我们在当地发展了一些协助部队，%1 名志愿者加入了你的小队。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_HIRE_PARTISANS_HINT">
@@ -3563,14 +3563,6 @@
                 <Original>Release Mobile HQ</Original>
                 <English>Release Mobile HQ</English>
             </Key>
-            <Key ID="STR_DUWS_T_MHQ_RELEASED_TITLE">
-                <Original>Mobile HQ Released</Original>
-                <English>Mobile HQ Released</English>
-            </Key>
-            <Key ID="STR_DUWS_T_MHQ_RELEASED_MSG">
-                <Original>The vehicle is an ordinary truck again. Any squad leader can designate a new Mobile HQ.</Original>
-                <English>The vehicle is an ordinary truck again. Any squad leader can designate a new Mobile HQ.</English>
-            </Key>
             <Key ID="STR_DUWS_T_MHQ_NAME">
                 <Original>Mobile HQ</Original>
                 <English>Mobile HQ</English>
@@ -3949,6 +3941,22 @@
                 <Original>The game has been saved.</Original>
                 <English>The game has been saved.</English>
             </Key>
+            <Key ID="STR_DUWS_T_OPFOR_WITHDRAW_TITLE">
+                <Original>Enemy Withdrawing</Original>
+                <English>Enemy Withdrawing</English>
+            </Key>
+            <Key ID="STR_DUWS_T_OPFOR_WITHDRAW_MSG">
+                <Original>Enemy at %1 is breaking off and falling back.</Original>
+                <English>Enemy at %1 is breaking off and falling back.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_OPFOR_ESCAPED_TITLE">
+                <Original>Enemy Escaped</Original>
+                <English>Enemy Escaped</English>
+            </Key>
+            <Key ID="STR_DUWS_T_OPFOR_ESCAPED_MSG">
+                <Original>The force from %1 broke contact and got clear.</Original>
+                <English>The force from %1 broke contact and got clear.</English>
+            </Key>
         </Container>
         <Container name="Side Missions">
             <Key ID="STR_DUWS_T_c0">
@@ -3973,22 +3981,6 @@
                 <English>Eliminate High-Value Target</English>
             </Key>
             <Key ID="STR_DUWS_T_c3">
-            <Key ID="STR_DUWS_T_OPFOR_WITHDRAW_TITLE">
-                <Original>Enemy Withdrawing</Original>
-                <English>Enemy Withdrawing</English>
-            </Key>
-            <Key ID="STR_DUWS_T_OPFOR_WITHDRAW_MSG">
-                <Original>Enemy at %1 is breaking off and falling back.</Original>
-                <English>Enemy at %1 is breaking off and falling back.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_OPFOR_ESCAPED_TITLE">
-                <Original>Enemy Escaped</Original>
-                <English>Enemy Escaped</English>
-            </Key>
-            <Key ID="STR_DUWS_T_OPFOR_ESCAPED_MSG">
-                <Original>The force from %1 broke contact and got clear.</Original>
-                <English>The force from %1 broke contact and got clear.</English>
-            </Key>
                 <German>Sendemast zerstören</German>
                 <Spanish>Destruir torre de señal</Spanish>
                 <Chinesesimp>摧毁信号塔</Chinesesimp>
@@ -4903,8 +4895,8 @@
                 <German>Interagiere mit der Fahnenstange, um das Fahrzeug auf dem Landezonenmarker abzuholen.</German>
                 <Spanish>Interactúa con el asta de bandera para recuperar el vehículo en el marcador de zona de aterrizaje.</Spanish>
                 <Chinesesimp>与修理设施进行交互，以回收停机坪标志上的载具。</Chinesesimp>
-                <Original>Interact with the Vehicle Recycling Station to recycle vehicles on the landing zone.</Original>
-                <English>Interact with the Vehicle Recycling Station to recycle vehicles on the landing zone.</English>
+                <Original>Use the Vehicle Recycling Station to scrap vehicles on the pad.</Original>
+                <English>Use the Vehicle Recycling Station to scrap vehicles on the pad.</English>
             </Key>
             <Key ID="STR_DUWS_T_5n277nzo">
                 <German>Versorgungsabwurf (5CP) Funk</German>
@@ -7465,8 +7457,8 @@
                 <German>Wbk-Modus aktiviert. Siehe die Beschreibung auf der linken Seite der Karte für Details.</German>
                 <Spanish>Modo Wbk activado. Consulta la descripción en el lado izquierdo del mapa para más detalles.</Spanish>
                 <Chinesesimp>Wbk模式已开启。玩法详见地图左侧的简介。</Chinesesimp>
-                <Original>WBK mode activated. See the description on the left side of the map for details.</Original>
-                <English>WBK mode activated. See the description on the left side of the map for details.</English>
+                <Original>WBK mode active. Details are on the left of the map screen.</Original>
+                <English>WBK mode active. Details are on the left of the map screen.</English>
             </Key>
             <Key ID="STR_DUWS_T_wbk">
                 <Original>Enemies from hell (Requires WebKnight's Zombies and Creatures)</Original>
