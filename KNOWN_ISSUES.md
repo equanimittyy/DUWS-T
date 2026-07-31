@@ -213,7 +213,7 @@ from RAM and passes whether or not the file is ever loaded. Only a full process 
 exercises the load path.
 
 Setup, including the `#login` the debug console needs on a dedicated server, is in
-[`docs/info/dedicated_server_setup.md`](docs/info/dedicated_server_setup.md).
+[`docs/info/testing.md`](docs/info/testing.md#running-a-dedicated-server).
 
 - [ ] With the debug console targeting **Server**, run
       `missionProfileNamespace setVariable ["DUWST_probe", [1,"alive",true]]; saveMissionProfileNamespace;`
@@ -247,6 +247,9 @@ persistence on a dedicated server a manual act rather than an automatic one.
 | Buying the Mobile HQ and never designating one locks the team out of it permanently | `client/dialog/fnc_request_support.sqf:477`, `shared/functions/fnc_MHQ_destroyed.sqf:23` | The purchase clears `support_mobile_HQ_available` for everyone and hands the buyer a one-shot comm-menu token; the only path that sets the flag back waits on an MHQ that exists being destroyed. If the token is lost before it is spent — the buyer disconnecting being the certain case — no second purchase is possible and no MHQ exists to die, so the campaign has no Mobile HQ and 10 CP bought nothing. The three guards in `fnc_MHQ_select.sqf` hand the token back rather than consume it, so a bad target or an MHQ already being active cost nothing; losing the player is the case none of them can cover. Whether respawn also drops the token is unverified |
 | One classname is sold under three labels and prices | `shared/factions/MODERN/CFP_O_HEZBOLLAH_blufor.sqf:120,122,126` | "BTR-60P APC" at 25 CP, "MTLB-LV APC" at 28 and "BTR 60PB" at 35 all deliver `CFP_O_HEZBOLLAH_BTR_60PB_01`, so two of the three charge for a vehicle they do not hand over. Three rows were meant to be three vehicles and one classname was copied across all of them; the two missing classnames can only come from the mod, so this needs someone with CFP installed rather than a source edit |
 | WBK holds the campaign-wide town mutex for a town's whole occupancy | `server/misc/fnc_civ_handler_wbk.sqf` | The lock is taken in `fnc_civ_mode_spawnGate` and released only on the cleanup path, so a second WBK town cannot fill until the first empties or the gate's ten-minute timeout expires — a co-op pair splitting between two towns leaves one of them dead. RAVAGE releases immediately after its spawn burst and carries a comment recording that exact symptom as the reason. The two handlers were written separately and only the RAVAGE side was ever changed, so this is the same defect surviving in the copy nobody revisited. Left alone because making WBK match is a behaviour change, not a refactor, and WBK's one-shot fill may depend on the serialisation in ways only a play-test shows |
+| A unit marker is never removed, and its update loop throws every four seconds | `client/misc/fnc_kndr_unit_markers.sqf:81` | The loop *index* is passed where `kndr_removeMarker` (`:183-195`) expects the object, so `kndr_objs find <number>` returns -1 and `kndr_mrks select -1` raises `Index out of range`. The entry is never removed and the local marker never deleted, so the 4 s update loop (`:203-208`) retries that same dead entry for the rest of the mission and throws once per pass. The leaked marker costs nothing; the permanent error rate does, since every throw writes to the RPT. It starts the moment a marked object dies — MHQ1 (`server/dialog/fnc_MHQ_deploy.sqf:63`) or the mission builder BLD1 (`missions/mission_threads/steal_builder/fnc_steal_builder_mission.sqf:239`). The `remoteExec` callers pass the object and are correct; only the internal update path is wrong |
+| A marker is assigned with no preceding remove | `shared/functions/fnc_MHQ_addActions.sqf:11` | Re-running it stacks a second marker on the same object |
+| Hardcore does not hide zone positions from Zeus | `server/misc/fnc_zeus_objects_init.sqf` | Under the BLUFOR curator option (`ZeusStatus == 1`) it adds every WEST and CIVILIAN unit and vehicle to the curator on a 30 s loop. Arma counts static weapons as vehicles, so a curator can read a hidden zone's defences straight off the map. A branch there once narrowed the civilian half to aircraft for exactly this reason, but it tested `DUWS_MODE == "HARDCORE"` — a value nothing ever assigned — so it never ran once and has been removed rather than left as dead code. Restoring the intent means gating on `hardcore_mode_enable` instead, and applying the same guard to the civilian *unit* loop above it, which never had one |
 
 ## Zone generation is slow at large radii
 
@@ -271,16 +274,152 @@ boot script that starves the pass again would show up as the two diverging.
 
 Reading those logs: [`docs/info/testing.md`](docs/info/testing.md#runtime-logging-reading-the-rpt).
 
+## State that grows for the whole session
+
+Three sites where something accumulates for as long as the mission runs. They share a symptom that
+makes them hard to attribute: the mission plays well for an hour and worse at four, with no single
+call to point at, because what grew is the size of what every pass has to walk. The patterns behind
+them, and the streaming that keeps everything else bounded, are in
+[`docs/info/performance.md`](docs/info/performance.md).
+
+**Task forces are created on a timer and never capped.**
+`server/warcom/fnc_WARCOM_blu_assault.sqf:50-113` spawns a BLUFOR task force every 30 minutes for as
+long as the mission runs, pushes it onto `blu_taskforces_standby` (`:100-102`) and parks it on a
+MOVE/CYCLE waypoint pair at HQ (`:88-97`) until the player launches it. That array shrinks only on
+launch (`fnc_blu_taskforces_launch.sqf`) or when the group is wiped (`fnc_WARCOM_gps_marker.sqf:54-58`),
+and nothing bounds how many may be standing by at once. Nothing else will collect them either: zone
+despawn deletes `side _x == EAST` only (`init_zones/fnc_spawnWait.sqf:144-155`) and mission cleanup
+skips WEST (`missions/fnc_mission_cleanup.sqf`). So a task force the player ignores is permanently
+simulated AI parked next to the base — inside view distance, never a despawn candidate. Live AI count
+is what Arma's frame time tracks, which makes this the mission's largest growth term at roughly two
+groups an hour. The patrol spawner shows what a cap looks like here:
+`fnc_WARCOM_blu_patrol.sqf:55` gates on `blufor_patrol_count` and stops at one patrol per held zone.
+OPFOR assault (`fnc_WARCOM_opf_assault.sqf:59-124`) spawns two groups per 30 minutes on the same
+open-ended terms — those at least get engaged and killed.
+
+**The GPS marker loop appends a position every four seconds.**
+`server/warcom/fnc_WARCOM_gps_marker.sqf:70` calls `_primary_waypoint insert [0, …]` inside a loop that
+ticks every 4 s (`:103`). `insert` appends where the intent was to replace: only index 0 is ever read
+(`:24`, `:88`). The array gains ~900 entries an hour per task force, and because the write lands at the
+front, each tick shifts every element already there — so the per-tick cost rises with the array rather
+than staying flat. One of these loops runs per task force, and the entry above is why that count grows
+too. `set [0, …]` is the whole fix.
+
+**The enemy gear table never shrinks.** `DUWS_enemyGear_scannedUnits`
+(`server/misc/fnc_scanEnemyGear.sqf:19`) is a hashmap keyed by `netId`, used to avoid re-reading gear
+off a unit already scanned. Nothing prunes it, so it holds an entry for every EAST unit ever spawned,
+including long-dead ones whose netIds will never be seen again. Each entry is small and the campaign
+would have to run a long time for this to matter, which is why it is recorded rather than fixed — the
+growth is invisible, and the symptom would be a slow server memory climb with no obvious owner. The
+same file publishes eight whole arrays with `publicVariable` (`:38-47`), one per gear category, every
+time a *new* item is seen; that converges quickly, but the initial sweep over `allUnits` can fire a
+burst. Its `EntityCreated` handler (`:75-92`) also spawns a scheduled script per infantry unit created,
+for the rest of the mission, each one only to re-check a table that converged in the first minutes.
+
 ## Zone and civilian siting defects
 
-Thirteen defects in the zone-siting and Dynamic Town subsystems are catalogued with their
-failure modes alongside the explanation of how those systems work, rather than restated
-here: [`docs/info/zone_and_town_generation.md`](docs/info/zone_and_town_generation.md#defects-subsystem-a).
+Six defects in the enemy zone-siting subsystem. How the siting stages fit together is in
+[`docs/info/zones_and_civilians.md`](docs/info/zones_and_civilians.md#enemy-zone-siting-more-urban).
 
-The two worth knowing before a long campaign: the origin keep-out uses `exitWith` inside a
-loop, so a rejected candidate silently costs a zone slot and you get fewer zones than
-requested; and dynamic towns can spawn on top of enemy zones because the exclusion wait
-never actually blocks.
+**Origin keep-out drops the zone instead of retrying it.** `fnc_locatorzones_random.sqf:172-177`. When a
+candidate lands within 500 m of `[0,0,0]`, the guard runs `exitWith`. In SQF `exitWith` exits the nearest
+enclosing **loop** (`if/then` is transparent to it), so it terminates `while {!_found}` with `_found`
+still false and the `for` loop advances — the zone slot is silently lost, yielding **fewer than
+`zones_number` zones**. The comment ("let the outer loop keep searching") describes what a plain
+`if/then` would do. Fix: re-roll inside the loop instead of exiting it. Engine background:
+[gotchas](docs/info/arma_engine_gotchas.md).
+
+**The `moreUrban` branch can emit `[0,0,0]`.** `:92-126`. It sets `_Posfound = true` unconditionally with
+no validity retry; its no-buildings fallback takes `getPos (nearestBuilding …)` (`:100-102`), which is
+`[0,0,0]` when `nearestBuilding` returns `objNull`. That `[0,0,0]` is exactly what the origin guard then
+eats, so the two defects compound. The branch needs the reject-and-retry the less-urban path already has.
+
+**Fortification towers almost never spawn in towns.** `fnc_createzone.sqf:185-186`. Each tower spot is
+rejected if `nearestObjects [_safePos, [], 8]` finds anything within 8 m; the empty type filter makes that
+include terrain/map objects (houses, walls, rocks), so in the dense areas `moreUrban` targets nearly every
+spot is rejected. Filter to the types that actually block placement.
+
+**Prefab obstacle-clear hides real town buildings permanently.** `:61-87`. For prefab zones it
+deletes/hides everything within 35 m of centre except men/pads/flags/HQ/FOBs. `deleteVehicle` cannot
+remove terrain buildings, so the `hideObjectGlobal true` fallback is what actually clears them — a global,
+unrestored change to the town just selected for being dense. The `_deletedCount`/`_hiddenCount` counters
+double-count (both ops per object).
+
+**Unbounded, no-yield retry with a heavy per-iteration cost.** `:62-155`. Rejected positions re-roll with
+no `sleep`, and each `moreUrban` pass calls `nearestTerrainObjects` over 400 m plus a centroid pass; on a
+cramped map or large `zones_spacing` this can busy-spin until the 90 s failsafe. Needs a yield and/or an
+attempt cap.
+
+**Centroid can land in dead space; road nudge not re-checked.** `:103-123`. Averaging two sub-clusters
+inside 400 m yields a point between them (possibly an empty field), kept by the 0-10 m `findSafePos`; the
+single 5 m `relPos` road nudge is never re-validated. Placement-quality only.
+
+## Economy balance
+
+Open observations from an economy review. Each is a design or correctness property, not a crash; none is
+currently scheduled. The writers, faucets and sinks these read against are in
+[`docs/info/economy.md`](docs/info/economy.md).
+
+**Territory income snowballs with no upkeep.** Passive hold pays `zones_held × 6` every 30 min
+(`fnc_zonesundercontrol.sqf:55`) on top of lump capture rewards, and holding a zone costs nothing
+thereafter. That is a positive feedback loop — hold → CP → buy → hold more — with no attrition pulling the
+other way, so late-game CP outruns anything to spend it on. This is the central design lever, not a bug:
+if a demanding economy is the goal, the levers are per-zone/garrison upkeep, diminishing per-zone passive
+scale, or a CP cap. Paying it in AP instead was considered and rejected — a holdings-scaled AP faucet
+feeds the escalation ladder, and the enemy starts holding the map
+([`docs/economy_plan.md`](docs/economy_plan.md)).
+
+**Enemy-loot → intel-analysis is an unbounded, cooldown-free faucet.** `fnc_addRandomLoot.sqf` puts
+`Files` (2 CP) / `Wallet_ID` (1.5 CP) on ~80% of spawned enemies, and terminal analysis
+(`fnc_intelAnalysis.sqf`) converts them with no cap and no cooldown; HVT missions add `FileTopSecret` at
+8 CP each. Because a zone re-garrisons every time it is left and re-approached, and patrols keep spawning,
+this taps ≈1 CP per kill scaling with playtime rather than difficulty. A per-visit cap or a cooldown on the
+terminal action bounds it.
+
+**Recycle pays for vehicles the player never bought.** `fnc_activateBaseRecycleStation.sqf:88-101` deletes
+every empty, non-excluded vehicle near the HQ pad and credits its computed value with no ownership check —
+captured or found vehicles convert to free CP. It is *not* a buy-then-recycle loop: purchase cost
+(`fn_factionAutoDetect.sqf:161`, clamped `[5,100]`) always exceeds recycle value
+(`DUWS_fnc_calculateVehicleValue`, small and uncapped), so buying to recycle always loses. The two formulas
+are simply not on the same scale, and recycle has no floor tying reward to what a vehicle cost.
+
+**AP is a threshold ladder with almost nothing spending it, so town income is inflationary.** The WARCOM
+director reads it as gates — BLUFOR wave tiers at 10, 40, 65, 100 and 136
+(`fnc_WARCOM_blu_assault.sqf:11-25`), OPFOR air above 150 (`fnc_WARCOM_opf_air.sqf:11`), OPFOR patrols
+above 100 (`fnc_missionPatrols.sqf:18`) — and the only subtractions are losing a zone and the AP→CP
+converter. Turning it into a currency both sides spend, without breaking the ladder, is
+[`docs/economy_plan.md`](docs/economy_plan.md). A 20-town campaign averaging 2 AP pays at most 40 AP per
+30 min with every town banded, against 25 for capturing a 500 m zone and 50 for a 1000 m one — worth is
+`round(radius/10)` (`fnc_locatorzones_random.sqf:56`), halved by `zone_ap_swing`. So at its ceiling
+civilian income substitutes for a capture rather than supplementing one; how far below that ceiling a real
+campaign sits is the untested part. The ladder only goes up, so escalation is permanent once earned; the
+1–3 scale sets how long it takes.
+
+**The two routes into a reputation band are not symmetric, and the negative one is far shorter.** Both
+bands sit ten points from neutral, but the travel costs are nothing alike. Going negative is incidental and
+cheap: a civilian death at `-1`, charged three times in ten and only with a player inside 200 m, is about
+thirty-three kills; a building at `-2` under the same proximity guard gets there in five, with no rate roll
+at all; a failed IDAP at `-5` covers half the distance alone. Going positive is deliberate and slow:
+healing is worth `+1` but caps at one credit per town per economy tick (`fnc_civ_healed.sqf`), so the
+BLUFOR band is hours of visits away on healing alone, against IDAP success at `+5`.
+
+That gap is the mechanic rather than an oversight. Ordinary fighting drags a town toward the enemy and no
+amount of ordinary fighting drags it back, so the routes out of the OPFOR band are the ones built for it:
+clearing the garrison, which discharges the debt at once, and the aid missions. The rate roll on deaths can
+sit as low as 30 % precisely because reputation is localised — a bad engagement costs the campaign nothing
+outside the town it happened in. Deliberate demolition carries no such excuse, which is why it is charged
+every time.
+
+**AP→CP merges the two economies.** `fnc_convertAPtoCP.sqf` trades 15 AP → 10 CP, repeatable with no
+cooldown. It is one-way (there is no CP→AP path), so it cannot loop, but it means any AP income route —
+mission rewards, held territory — ultimately feeds CP.
+
+**The bribe figures are placeholders, and the coin supply they meet is unmeasured.** Intel at 3, recruit /
+aid / toolkit at 2 were chosen to make the framework testable. The HQ crate hands out 20 coins once and
+never refills, enemy infantry drop **0.267 coins each** (80 % carry loot, `floor random 3` items, one class
+in three) — so a thirty-enemy zone assault yields about eight coins — and a civilian search averages
+**1.1**, paid only after an arrest that costs the town a point of reputation. Whether that pays for a
+campaign of talking to towns is the first thing to watch.
 
 ## Worked around, not fixed
 

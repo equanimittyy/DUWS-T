@@ -19,7 +19,7 @@ Hardpoints run on their own state and their own clear handler. They must not pas
 [§Why hardpoints cannot be small zones](#why-hardpoints-cannot-be-small-zones).
 
 Background on how zones are placed, captured and consumed:
-[`info/zone_and_town_generation.md`](info/zone_and_town_generation.md).
+[`info/zones_and_civilians.md`](info/zones_and_civilians.md).
 
 ## Why hardpoints cannot be small zones
 
@@ -206,7 +206,7 @@ Rejection rules, cheapest first: 120 m from another hardpoint, 40 m from a place
 `nearestObjects [_safePos, [], 8]` finds anything, and the empty type filter makes that include
 terrain objects, so in the dense towns `moreUrban` targets almost every spot is rejected — the
 documented reason fortification towers barely appear in towns
-([`info/zone_and_town_generation.md`](info/zone_and_town_generation.md#defects-subsystem-a)).
+([`../KNOWN_ISSUES.md`](../KNOWN_ISSUES.md#zone-and-civilian-siting-defects)).
 Inheriting it here would silently produce zones with zero hardpoints, which is worse than a
 missing tower: it makes the whole gate transparent. Filter to the classes that actually block
 placement.
@@ -294,7 +294,7 @@ reach it. It needs its own reveal in **both** modes now, not only hardcore, and 
 interaction menu is the intended source:
 [`info/intel_system.md`](info/intel_system.md#one-writer-per-reveal-flag-one-function-for-payout)
 lists an unrevealed normal hardpoint as one of the kinds `fnc_intel_payout` draws from, and
-[`info/civilian_interaction.md`](info/civilian_interaction.md) hands its intel row to that
+[`info/zones_and_civilians.md`](info/zones_and_civilians.md) hands its intel row to that
 function. The corpse and side-mission paths already reach it on the same terms
 (`server/misc/fnc_intel_search.sqf:27` and the `fnc_intel_payout` calls in the mission threads),
 so a hardpoint kind added to the payout is surfaced by every source at once.
@@ -429,7 +429,7 @@ There is no ceiling on how many normal hardpoints exist. Two things bound them i
   distance, so the cost tracks where the player is rather than how long the campaign has run.
 
 Props cycle with the garrison, per
-[§Map object count](info/performance_hotspots.md#map-object-count-is-bounded-by-proximity-not-campaign-length).
+[§Map object count](info/performance.md#map-object-count-is-bounded-by-proximity-not-campaign-length).
 A hardpoint composition the size of a zone prefab is what forces this: at 1-6 per zone against 65
 objects each, leaving them standing puts a large campaign into five figures of map objects. Filing
 them under a key with
@@ -527,7 +527,7 @@ that nothing fires at what the enemy has not seen.
 player can take, and the unmanned clause already counts that as cleared
 ([§Clearance](#clearance)) — capturing one is a legitimate prize for a hard fight, and the
 recycle station will pay for it (`fnc_activateBaseRecycleStation.sqf`, a documented
-ownership-free faucet in [`info/cp_economy.md`](info/cp_economy.md#balance-concerns)).
+ownership-free faucet in [`../KNOWN_ISSUES.md`](../KNOWN_ISSUES.md#economy-balance)).
 
 Everything below applies to both.
 
@@ -765,8 +765,8 @@ is.
 | `client/missions/fnc_stratmap.sqf:147-155` | Add a 250 m hardpoint keep-out to side-mission siting. Missions already keep out of zones; without this they spawn on top of a hardpoint — and then the cleanup sweep deletes its core. |
 | `shared/includes/notifications.hpp` | One notification class for a hardpoint cleared, beside `CPadded:87`. |
 | `stringtable.xml` | Six hardpoint type names, clear notification, incoming-fire warning line (Allseer), marker labels. |
-| `info/zone_and_town_generation.md` | Document the tier, the capture gate and its state contract. |
-| `info/cp_economy.md` | Two faucet rows and one AP-sink note. |
+| `info/zones_and_civilians.md` | Document the tier, the capture gate and its state contract. |
+| `info/economy.md` | Two faucet rows and one AP-sink note. |
 
 ## Task list
 
@@ -791,7 +791,7 @@ is.
 - [ ] In-game: capture every zone and confirm the campaign still ends.
 - [ ] In-game: repeat with manual zone placement, where `fnc_createZone` arrives by `remoteExec` from a client.
 - [ ] On a dedicated server: confirm the capture gate and the director both work. A hosted session is both server and client and will mask locality faults.
-- [ ] Update `info/zone_and_town_generation.md` and `info/cp_economy.md`.
+- [ ] Update `info/zones_and_civilians.md` and `info/economy.md`.
 
 ## Decided trade-offs
 
@@ -817,7 +817,7 @@ hardpoint stays a consequence of the war and not of the enemy's last purchase.
 **There is no passive income term.** Zone capture pays `radius/10` halved plus `zones_held * 6`
 every 30 min; side missions pay 5-45 CP. A third recurring faucet would feed the snowball the
 economy review already flags
-([`info/cp_economy.md`](info/cp_economy.md#balance-concerns)), and it is not needed: what makes a
+([`../KNOWN_ISSUES.md`](../KNOWN_ISSUES.md#economy-balance)), and it is not needed: what makes a
 hardpoint worth clearing is the zone it unlocks and the threat it stops being.
 
 **Zone hardpoints pay less than normal ones.** Clearing a zone hardpoint is work the zone payout

@@ -62,7 +62,7 @@ from it.
 
 Hosting this way runs the server and a client in one process, which hides every
 locality fault. Persistence, JIP and remote execution need a real dedicated server to
-prove anything: [`docs/info/dedicated_server_setup.md`](docs/info/dedicated_server_setup.md)
+prove anything: [`docs/info/testing.md`](docs/info/testing.md#running-a-dedicated-server)
 sets one up from the executable already in your Arma install.
 
 ## Tests

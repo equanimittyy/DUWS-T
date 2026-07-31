@@ -113,7 +113,6 @@ machine sets skill on the units it owns.
 | `server/warcom/fnc_WARCOM_wp_*.sqf` call sites | Route to `groupOwner`. |
 | `server/misc/fnc_AI_Master_Control.sqf:5,22-26` | Filter to `local _x`; run on server and HC. |
 | `info/server_client_authority.md` | Document the HC as a third machine role and the handoff contract. |
-| `info/architecture.md:125,143,145` | Correct the stale claim that VCOM and `zbe_cache` are active; both are disabled. |
 
 ## Task list
 
@@ -123,7 +122,7 @@ machine sets skill on the units it owns.
 - [ ] Hand off the WARCOM spawners. Verify: `groupOwner` reports the HC for assault groups, and they still reach their objectives.
 - [ ] Split `fnc_AI_Master_Control.sqf` by locality.
 - [ ] On a dedicated server plus a real headless client: play a campaign to a zone capture. Confirm patrols move, assaults arrive, and server FPS improves.
-- [ ] Update `info/server_client_authority.md` and correct `info/architecture.md`.
+- [ ] Update `info/server_client_authority.md`.
 
 ## Decided trade-offs
 

@@ -373,7 +373,7 @@ restored and separately wrong.
 
 **The zone bounty is not derivable.** A zone's *worth* is fixed at generation and comes back with
 `zone_meta_array`, but its CP bounty decays on every capture by design
-([`info/cp_economy.md`](info/cp_economy.md)). Not storing it refunds the player a full-price zone
+([`info/economy.md`](info/economy.md)). Not storing it refunds the player a full-price zone
 for every one they have already farmed.
 
 **The tier ratchet is state, not a threshold test.** Once AP is spendable, deriving the tier from
@@ -686,7 +686,7 @@ is a support nobody can ever call again.
 
 Composition streaming adds nothing here. Its stow records are built when a composition leaves the
 map and dropped when it returns
-([§Map object count](info/performance_hotspots.md#map-object-count-is-bounded-by-proximity-not-campaign-length)),
+([§Map object count](info/performance.md#map-object-count-is-bounded-by-proximity-not-campaign-length)),
 so they never outlive the session and a restore rebuilds every composition deployed.
 
 This is the decision that keeps the plan finite. The server runs 40 `while {true}` loops across 23
@@ -735,7 +735,7 @@ is already the price tables the economies buy from, so this is a walk and a sum,
 | `shared/includes/campaign_load_menu.hpp` | New. The fork screen — New Game, Load Game with the campaign list, Import, Delete — in the existing setup-dialog idiom; `#include`d from `description.ext`. |
 | `client/dialog/` | Its handlers, the delete confirmation, and import from a carried profile or a pasted string. |
 | `description.ext` | `missionGroup = "DUWS_T";` |
-| `info/architecture.md:122` | Replace the "vanilla `saveGame` only" persistence row. |
+| `info/architecture.md:132` | Replace the "vanilla `saveGame` only" persistence row. |
 | `KNOWN_ISSUES.md` | Drop the save/reload row once it passes. |
 
 ## Task list
@@ -755,7 +755,7 @@ is already the price tables the economies buy from, so this is a walk and a sum,
 - [ ] Add the fork screen and its timeout. Verify: the screen is the first thing a game master sees on every campaign, singleplayer included; Load Game lists every saved campaign newest first, labelled with world, day, zones and CP; an unloadable save is listed disabled with its reason rather than hidden; New Game runs the old setup flow untouched and leaves existing campaigns intact; delete removes exactly one campaign; a dedicated server with nobody connected loads without waiting out the full bound; a fresh campaign is not made to wait on the screen before the terrain survey starts.
 - [ ] Version, world and faction guards: refuse a snapshot from a different map or format version, or one naming a faction this session cannot detect, and say which on the control.
 - [ ] Add export and import. Verify: a campaign carried in a client's own profile restores on a different server with nothing pasted; a hand-edited carried snapshot is refused rather than loaded; the clipboard fallback round-trips, and an oversized snapshot either survives the edit control or is chunked.
-- [ ] On a dedicated server ([`info/dedicated_server_setup.md`](info/dedicated_server_setup.md)): play, restart, confirm the campaign continues. This cannot be validated by a hosted session — a host is both server and client and will mask locality faults.
+- [ ] On a dedicated server ([`info/testing.md`](info/testing.md#running-a-dedicated-server)): play, restart, confirm the campaign continues. This cannot be validated by a hosted session — a host is both server and client and will mask locality faults.
 
 ## Decided trade-offs
 

@@ -14,7 +14,7 @@ for more than a few minutes of play, it is wrong. If one action pays for an AP p
 the faucet is wrong.
 
 Where the shipped CP economy is documented — pools, writers, faucets, the purchase handshake —
-see [`info/cp_economy.md`](info/cp_economy.md). This plan covers what changes.
+see [`info/economy.md`](info/economy.md). This plan covers what changes.
 
 ## The integer contract
 
@@ -46,7 +46,7 @@ The two new multipliers below therefore round at their application site, never a
 
 Reputation is the deliberate exception and is not a pool in this sense: it is the only figure
 taking fractional deltas, and `fnc_town_rep_adjust` owns its rounding for the reason recorded in
-[`info/cp_economy.md`](info/cp_economy.md#authority-one-server-side-writer-per-pool).
+[`info/economy.md`](info/economy.md#authority-one-server-side-writer-per-pool).
 
 ## Command Points
 
@@ -460,7 +460,7 @@ explicit.
 one purchase: the first can succeed and the second fail, leaving the player charged for nothing,
 and in co-op another player's spend can land between them. That is the same race the single-pool
 handshake was written to close
-([`info/cp_economy.md`](info/cp_economy.md#authority-the-server-decides-a-purchase-not-the-buyer)),
+([`info/economy.md`](info/economy.md#authority-the-server-decides-a-purchase-not-the-buyer)),
 reopened one level up.
 
 `fnc_pool_try_spend` gains a dual case that tests both pools and debits both as adjacent
@@ -601,7 +601,7 @@ nothing about zone generation changes.
 
 Today a town garrison is OPFOR-only and its tier comes from reputation alone: tier 1 at `-10`,
 2 at `-15`, 3 at `-20` (`server/misc/fnc_civ_garrison.sqf:72-74`, band contract in
-[`info/zone_and_town_generation.md`](info/zone_and_town_generation.md#ownership-bands-and-the-garrison)).
+[`info/zones_and_civilians.md`](info/zones_and_civilians.md#ownership-bands-and-the-garrison)).
 
 - **Reputation still decides *whether* a town garrisons; AP decides *how hard*.** The band is the
   trigger and stays untouched, so the existing contract — clear the garrison, reputation resets to

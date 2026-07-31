@@ -1,0 +1,503 @@
+# Zones, towns and civilians
+
+Two placement subsystems that both "put things at towns", plus the civilian layer built on the
+second. They are no longer independent: civilian selection consumes the zone system's output, and the
+dependency runs one way.
+
+- **Enemy zone siting** ("More Urban"): where OPFOR objectives spawn — the red `"N. Outpost"` markers
+  you capture.
+- **Civilian town selection**: a subset of the map's real towns near the fighting, each seeded with a
+  persistent civilian population. Purely civilian — not an objective.
+
+Both are server-only and run near campaign start; civilians are registered once zone build-out has
+finished. For the boot order see [`architecture.md`](architecture.md#boot-flow); siting defects are
+catalogued in [`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#zone-and-civilian-siting-defects).
+
+## Provenance: what 5U5 changed vs inherited
+
+The fork chain is Kibot's DUWS -> Tomata's DUWS_X -> 5U5's DUWS_T. 5U5's additions carry Chinese
+comments; DUWS-era code is English. Comment language is a proxy, not proof, but here it lines up with
+explicit author annotations (`// LESS URBAN 保持不变` = "keep unchanged", `修复` = "fix",
+`改进版` = "improved version"):
+
+**Enemy zone placement is largely inherited.** 5U5 did *not* rewrite the core siting. The "More
+Urban" survey (`fnc_moreUrban_locations.sqf`) is untouched Tomata code. In the siting loop 5U5
+replaced only the `moreUrban == 1` branch (building-cluster centroid) and added the origin guard; the
+less-urban branch, the outer loop, the distance/spacing gates and the failsafes are inherited. Manual
+placement is untouched. `fnc_createzone.sqf` keeps its inherited core (markers, prefab, triggers,
+spawn loop) with 5U5 features *bolted on*: obstacle clearing, the fortification ring, heli
+reinforcement and the offset flag.
+
+**The civilian population system is 5U5's own work**, layered on Tomata's civilian-presence concept
+and rewritten again since: the map-wide building-cluster scan and the synthetic "Dynamic Town N"
+locations it invented are gone, replaced by the selection pass in `fnc_civ_selectTowns.sqf`.
+
+So the honest summary for a reviewer: the classic DUWS objective placement was tweaked and decorated,
+not overhauled; the substantial new system is civilian population.
+
+## Enemy zone siting ("More Urban")
+
+Default-on (`moreUrban = 1`, `src/duws/server/server_var_init.sqf:140`; campaign menu can set `0`,
+`fnc_process_campaign_menu.sqf:189-203`). Three stages during `server_init.sqf`.
+
+| Stage | File | Produces |
+|---|---|---|
+| 1. Survey | `server/misc/fnc_moreUrban_locations.sqf` | `MASTER_allLocations_filtered` (Locations, town-weighted, shuffled) |
+| 2. Siting | `server/init_zones/fnc_locatorzones_random.sqf` | one `_zonePos` per zone -> `fnc_createZone` |
+| 3. Build-out | `server/init_zones/fnc_createzone.sqf` | markers, prefab, fortifications, triggers |
+
+**Survey** enumerates `CfgLocationTypes`, pulls map Locations and towns within
+`zones_max_dist_from_hq` of HQ (optionally a 135-degree arc), and requires non-town locations to hold
+>5 `House` objects within 100 m (`:132-137`). The result is `towns ++ filtered-locations` (`:147`);
+towns can appear in both lists, which is the only real "weighting" — the concatenation order is inert,
+since siting picks uniformly at random.
+
+**Siting** loops `zones_number` times. The `moreUrban` branch (`:92-126`): pick a random anchor, take
+the centroid of `House`/`Building` objects within 400 m (`:96-117`), `findSafePos` 0-10 m around it
+(`:113`), nudge 5 m off the nearest road (`:119-123`). Then distance-from-HQ (`:155`), spacing
+(`:159-169`) and 500 m origin keep-out (`:171-177`) gates, then `spawn fnc_createZone` (`:185`). The
+`else` branch (`:127-150`) is the older random-then-snap-to-building behaviour, with a 10-try
+validation loop.
+
+**Build-out** places markers, clears obstacles for prefab zones (`:61-87`), spawns a weighted prefab
+(`:89-139`), scatters 3-4 fortification towers (`:141-195`), and wires the spawn-wait, presence and
+capture triggers.
+
+> `getPos` on a Location is *not* a bug. The civilian system relies on it throughout
+> (`fnc_civ_selectTowns.sqf`, `fnc_civ_init_Tomata.sqf`, `fnc_civ_handler.sqf:32`) and the towns
+> render, so it resolves a Location's position fine; it is only stylistically inconsistent with the
+> `position`/`locationPosition` used elsewhere. Whichever is chosen, selection and the runtime must
+> use the *same* one or a town's trigger and its eligibility test measure different points.
+
+## Civilian town selection
+
+Selects real map towns near the fighting and gives each a persistent civilian population with map
+markers. Gated on `CIV_PRESENCE`; no synthetic locations are created.
+
+| Stage | File | Produces |
+|---|---|---|
+| 1. Selection | `server/misc/fnc_civ_selectTowns.sqf` | ranked shortlist of `[Location, buildingCount, hqQuota]` |
+| 2. Registration | `server/misc/fnc_civ_init_Tomata.sqf` | `civ_locations` / `civ_radii`, per-town runtime gate and markers |
+| 3. Runtime | `server/misc/fnc_civ_handler.sqf` (`_ravage` / `_wbk` twins) | fill the town on arrival, empty it after departure |
+
+**Selection** takes the BLUFOR HQ plus every entry of `serv_zones_array` as anchors and pulls
+city/village/local Locations with one `nearestLocations` call, keeping those within 5,000 m of *any*
+anchor that hold at least three usable buildings within 350 m. Anchors then draw in turn: each ranks
+its own disc by that building count, takes three, and skips whatever earlier anchors took. A second
+wave adds `count serv_zones_array` more, drawn at random across the whole union. What is left over
+comes back alongside the selection as a replacement queue. No side effects; the caller owns
+everything else.
+
+Size is measured in standing buildings, not `size _loc`: a Location's `radiusA`/`radiusB` come out of
+`CfgWorlds`, are hand-authored per map, and routinely put a hamlet level with a city, so an
+extent-ranked pass spent slots on empty ground. Distance is a gate only — inside a disc the bigger
+town wins however far back it sits, because blending in closeness let roadside hamlets outrank the
+cities behind them. Anchors draw in turn rather than from one ranking over the union because a global
+top-N let the densest cluster of anchors win every slot, leaving a remote zone with no civilian town
+in reach. The random second wave exists so the result does not read as exactly three towns ringing
+every objective. The count travels with the location rather than being recounted downstream: it is
+the heaviest engine work in the civilian pass, and both stages need the same figure over the same
+`getPos` centre.
+
+**Registration** derives radius and starting population from that count, drops any town whose disc
+overlaps the 100 m keep-out around `PosOfBLUHQ` and pulls a stand-in off the replacement queue in its
+place, resolves overlapping towns by shrinking or dropping the smaller, then creates the ellipse
+marker, the population icon, and the town's runtime gate — a streaming thread for plain civilians, a
+presence trigger for RAVAGE and WBK. The overlap loser is dropped from the registry only — never
+`deleteLocation`d, because these are the map's own Locations and removing one takes it away from
+side-mission siting (`fnc_findSafeMissionPos.sqf:30`) and the player's location readout
+(`fnc_bottom_right_message.sqf:152`) for the rest of the mission.
+
+The HQ keep-out is disc-against-disc, not centre-against-centre: a civilian area whose edge reaches
+the base still spawns civilians inside it. It sits in registration because that is where the radius
+formula lives. Enemy zones get no such gate; a contested town is the point.
+
+Registration also decides each town's starting reputation and its Army Power worth. Both run after the
+overlap cull has finalised every radius, for the same reason the HQ keep-out does: the enemy-zone test
+is disc-against-disc, and it reads radii out of `zone_meta_array` (entry index 2) rather than
+`serv_zones_array`, which stores positions only. A town whose disc reaches into an enemy zone opens at
+`-20` — the enemy already holds that ground and the civilians there start with them. Worth is a rank
+within the campaign's own kept set rather than an absolute building count, so Altis cities and a
+sparse map's hamlets both span 1 to 3.
+
+In hardcore it also decides what starts on the map: the towns the HQ anchor claimed in selection's
+first wave are visible, and every other one is hidden until it is walked into or bought with intel,
+exactly as an enemy zone is. The flag travels on the shortlist entry rather than being recomputed from
+distance later, because the stand-in swap and the overlap cull both reshuffle the registry — the HQ's
+opening three are a selection fact, not a geometric one. Hiding is marker alpha and nothing else:
+trigger, garrison and population run either way. `civ_visible` holds the state; the reveal machinery
+is in [`intel_system.md`](intel_system.md).
+
+### Ownership bands and the garrison
+
+A town's reputation runs `-20 … 20` and three consumers read it as a *band* rather than a magnitude,
+so the thresholds are a contract between them:
+
+| Band | Reputation | Pays | Garrison |
+|---|---|---|---|
+| BLUFOR | `>= 10` | BLUFOR AP | — |
+| Neutral | `-9` … `9` | nobody | — |
+| OPFOR | `<= -10` | OPFOR AP | tier 1, rising to 2 at `-15` and 3 at `-20` |
+
+Tier 1 is infantry; tier 2 adds a second team and a light vehicle; tier 3 adds armour
+(`fnc_civ_garrison.sqf`). All three are built from the existing OPFOR spawners, so the garrison
+inherits faction auto-detection for free. It is units only — no fortification ring and no prefab,
+because static emplacements are what make a zone an objective and a town must not compete with one.
+
+Presence uses the same arrival test zones use (`fnc_duws_bluforNear`) rather than a presence trigger of
+its own, which would fire the instant anyone crossed the radius and whose handle is discarded at
+creation anyway. Clearing the garrison resets that town's reputation to 0, decided by a `WEST SEIZED`
+trigger rather than by counting the garrison dead: a garrison that withdraws has cleared the town as
+surely as one that was wiped, and only the trigger sees both.
+
+The garrison does hold a roster — the three spawners return their group — but it reads it for
+strength, never for the clear. At or below a fifth of the men the town was given, what is left
+withdraws rather than being finished off in place
+([`opfor_retreat_plan.md`](../opfor_retreat_plan.md)).
+
+The band is the condition, not a one-shot flag — a town driven back below `-10` gets a new garrison,
+and a town lifted out of the band while its garrison lives sees it withdraw.
+
+**Clearing discards the whole debt, deliberately.** A player who ruins a town to `-20` and then kills
+the garrison lands back at neutral having paid nothing for the civilian deaths that got them there.
+The alternative is a town the player can permanently ruin with no route back, which is what passive
+recovery used to prevent. The garrison is the price, and its tiers are the dial: if the reset proves
+too cheap, raise tier strength rather than introducing partial resets.
+
+### Population is a size figure, not a head count
+
+`civ_pop_<n>` is set once at registration to the town's usable building count and never written again.
+It is a ceiling, not a head count: a town holds at most `min(civ_density, civ_pop_<n>)` civilians while
+players are in it, less if the campaign-wide throttle below applies. So `civ_density` (5–20,
+environment menu) is the dial a player turns down for frames, and the building count is what stops a
+hamlet presenting as a city.
+
+Because the figure never decrements, nothing can reach zero, which is why the depopulation path —
+ghost-town notification, black marker, and the scorched-earth CP reward that rode on it — no longer
+exists.
+
+### A town streams like a zone
+
+Per town, `fnc_civ_handler.sqf` is the enemy zone gate from `fnc_spawnWait.sqf`: a town fills once it
+has been occupied on two consecutive polls, and everything tagged `civ_locIndex` is deleted once the
+grace period since the last sighting expires. The grace restarts on every sighting, so leaving starts
+the clock rather than how long you stayed, and the confirmation is what stops a helicopter crossing the
+disc filling a town for someone already past it.
+
+Presence is players only, where the zone gate counts friendly AI as well (`fnc_duws_bluforNear`): a
+town fills so there is somebody to talk to, and an AI squad passing through has nobody to talk to it.
+
+Two numbers differ from the zone gate's, both because towns outnumber zones.
+
+| | Zone | Town | Why |
+|---|---|---|---|
+| Threads | one per zone | one for all | 3 towns per anchor plus a top-up wave ≈ `4 × zones + 3`, so a 40-zone campaign registers over 160 towns against 40 zones. One thread builds the player list once a tick and tests every town against it. |
+| Grace | 300 s | 60 s | Towns are disjoint, so a player is inside at most one, and a five-minute grace leaves a trail of populated towns behind anyone crossing the map. |
+| Reach | radius + 400 | radius + 200 | `zones_spacing` holds zones 1200 m apart, so 400 is a third of the guaranteed separation. Towns are only culled until their discs stop touching — `(r1 + r2) × 1.05` — so two 100 m towns can sit 210 m apart, and 400 would stream three in at once. |
+
+The reach buffer applies to arrival only; the fill still uses the town's own radius, or the crowd would
+be spread over the open ground the buffer reaches into. What it does double-trigger is self-limiting:
+radius is `buildings × 10` floored at 100, so the tightly packed pairs are the ≤10-building towns, and
+`civ_pop_<n>` caps their population at that same count.
+
+That trail is the thing to keep bounded, because the ceiling only thins it. `fnc_civ_liveTarget` gives
+one town the density setting in full, soft-caps the campaign at three towns' worth, then throttles the
+rest proportionally down to a floor of three apiece — so every occupied town still reads as inhabited,
+and the overshoot tracks how many towns are occupied at once rather than the density setting. The grace
+period is what decides that count, which is why it is 60 s and not 300. The bound matters because every
+civilian holds its own group so it can wander independently, and the engine stops issuing groups at
+roughly 144 per side; past that `createGroup` returns `grpNull` and a fill produces nobody. That is why
+the top option is 20 and not 30: at 30 the tail reaches roughly 145 groups across six concurrent towns,
+level with the limit, where 20 tops out near 97 and leaves the setting safe at any number of towns a
+campaign can actually occupy.
+
+The throttle is applied at fill time and never revisited, so the order towns fill in decides who is
+thinned: the first town in keeps its full crowd while later ones are cut. Under the old model the
+recycle pass re-ran the same calculation every 90 s; nothing does now.
+
+The single-thread collapse does **not** transfer to zones. It works here because presence is a
+player-list scan — one global list, then a cheap per-town distance test. `fnc_duws_bluforNear` is a
+per-position `nearEntities` query with crew resolution, which cannot be shared across zones at
+different centres; folding it into one pass means a global `allUnits` sweep per tick, the
+`O(zones × all units)` shape `fnc_spawnWait.sqf:20-22` records as deliberately removed.
+
+This replaced a second answer to the same two questions — an engine presence trigger, a single-slot
+global mutex serialising town fills, and a 90 s pass that deleted civilians the players had walked away
+from and re-spawned them nearer. The ceiling was not one of those answers and stayed. RAVAGE and WBK
+still run on all of it (`fnc_civ_handler_ravage.sqf`, `fnc_civ_handler_wbk.sqf`), which is why
+`fnc_civ_recycle.sqf` is still in the tree.
+
+### Ordering
+
+Civilian generation is a step of zone generation, not a parallel system racing it. The kick-off lives
+in `fnc_init_OPFOR_WARCOM.sqf` after its `serv_zones_array` wait and fires once
+`zones_buildout_done >= count serv_zones_array`.
+
+That counter exists because `amount_zones_created` cannot answer the question: `fnc_createzone.sqf:19`
+bumps it on entry, so it counts zones *started*, and the function never returns — its tail is a
+permanent despawn monitor. The comparison is against `count serv_zones_array` rather than
+`zones_number` because the origin keep-out (`fnc_locatorzones_random.sqf:171-177`) can silently drop a
+zone slot, and a `zones_number` target would then never be reached.
+
+Nothing in this chain times out. Everything the player reads as "the campaign has started" blocks on
+`mission_init_complete`: the MISSION INITIALIZATION COMPLETE banner and settings summary, the map
+closing (`client_init.sqf`), and the intro helicopter (`server_init.sqf`). The flag is published by the
+same spawn that runs the kick-off, once civilian registration returns, so an abort inside the civilian
+pass still releases the start — no exit-path discipline required inside `fnc_civ_init_Tomata.sqf`. The
+completion announcements were moved out of both zone locators to get this; left there they fired as
+soon as zone *positions* were final, telling the player the campaign was ready while towns were still
+being placed.
+
+The Capture the Zones task (`fnc_capture_zones_task.sqf`) sits one step further out again: it waits on
+`mission_init_complete`, then on `intro_heli_done`, so orders reach the player after the fast-rope
+rather than during generation. Only the first wait is retried — `fnc_intro_heli` has exit paths that
+never publish the second, and a campaign with no main task has no win condition at all, so that wait
+falls through on timeout with the earlier gate holding the line.
+
+## Talking to a civilian
+
+What a local will do for the player sits behind one dialog, built like the Requests and Squad Manager
+screens. The town's reputation is rolled *against* rather than gated on, so the `-20 … 20` scale above
+has a consumer reading more of it than `> 0`.
+
+Civilians are primarily an **information** channel: locals are how the player learns where the enemy
+is. Everything else the menu offers is secondary to that.
+
+### The reaction curve
+
+Every request rolls one of three reactions, weighted by the town's reputation
+(`fnc_civ_reaction_weights`, `src/duws/server/misc/fnc_civ_state_init.sqf:60-71`). With `t = rep / 20`
+clamped to `[-1, 1]`:
+
+```sqf
+accept = if (t <= 0) then { (1 + t) / 3 } else { (1/3) + t * (0.9 - 1/3) };
+refuse = accept evaluated at -t;      // exact mirror
+bribe  = 1 - accept - refuse;         // the remainder
+```
+
+| Rep | Accept | Bribe | Refuse |
+|---:|---:|---:|---:|
+| −20 | 0 % | 10 % | 90 % |
+| −10 | 17 % | 22 % | 62 % |
+| 0 | 33 % | 33 % | 33 % |
+| +10 | 62 % | 22 % | 17 % |
+| +20 | 90 % | 10 % | 0 % |
+
+Piecewise linear with a kink at zero, because accept climbs faster above neutral than below it. Refuse
+is written as accept's mirror rather than as its own expression, so the curve cannot drift out of
+symmetry by being maintained twice. Bribe is a symmetric tent peaking at neutral: a town that neither
+likes nor hates the player is where money talks loudest, and at both extremes standing decides instead
+of coins.
+
+**There is no hard refusal wall.** A town at `-20` still takes a bribe one time in ten, so hostile
+ground is expensive rather than closed. **And the band boundary is not a cliff on this curve** — `±10`
+reads 62 % / 17 %, so the ellipse colour hints at the reception rather than predicting it. That is a
+deliberate loss of map legibility in exchange for reputation mattering continuously instead of at two
+thresholds.
+
+### One conversation per civilian
+
+The roll is scoped to the individual, not the town, and every outcome ends the conversation: accept
+and a paid bribe serve the request, refuse and an unaffordable or declined bribe do not, and in all
+four cases the civilian walks off and will not talk again.
+
+This is what stops the curve being decorative. A per-attempt roll with no cost lets a player at `-20`
+work down a fifty-strong town until one civilian says yes — the failure the old heal action had before
+`fnc_civ_healed.sqf` replaced it, where a failed roll consumed nothing so the player simply clicked
+again. A refusal costs a person, so a hostile town burns through roughly ten civilians per successful
+deal against one in ten at a friendly one, and the population is finite until it respawns. A person
+who has helped is as finished with the player as one who refused.
+
+**One per civilian, not one per player, and claimed when the row is picked rather than when the roll
+resolves.** `fnc_civ_request` sets `DUWS_civ_closed` before the three-second pause it spends speaking
+the opener, so the flag is broadcast while the exchange is still in flight. Written on the way out
+instead — in `fnc_civ_serve` or `fnc_civ_close` — it left three seconds in which a second player stood
+at the same local passed the same check, and the person answered both: two medikits, two intel drops,
+or a recruit joining one group while already in another.
+
+An arrest is one of the exchanges a civilian only has one of, so it and a conversation block each
+other. `fnc_civ_arrest` claims `DUWS_civ_arrested` before its own pause and tests `DUWS_civ_closed`;
+`fnc_civ_request` tests both. Neither flag is ever cleared, so a detainee who is released stays spent.
+
+### Range: two distances, on purpose
+
+| Step | Reach | Source |
+|---|---:|---|
+| Call over | 6 m | `src/duws/shared/functions/fnc_civ_stopCommand.sqf:59` |
+| Interaction menu | 3 m | `src/duws/shared/functions/fnc_civ_menuAction.sqf:44` |
+| Every menu row, re-tested server-side | 3 m | `src/duws/server/misc/fnc_civ_request.sqf:22` |
+| Search (the player's own action, via `cursorObject`) | 3 m | `client/misc/fnc_intel_search_action.sqf` |
+| Release | 3 m | `fnc_civ_release_action.sqf:27` |
+
+The call-over reaches twice as far as everything it gates. Halting a local you can see, walking up to
+them, and only then getting an exchange is the shape of the interaction; matching the two distances
+meant standing close enough to talk before being allowed to ask for attention. The call-over also
+carries a 15° facing cone — `abs (180 - getRelDir) > 165`, close to an aim test — so it picks the
+person meant rather than whoever is standing beside them.
+
+Call over is the gate on everything else: the menu action does not appear until the local has been told
+to stop, so a player cannot work a whole town without announcing themselves to anyone in it. Panicking
+civilians drop out of the call-over entirely, and the entry coming back is what tells the player the
+town has settled.
+
+### The dialog
+
+`shared/includes/civ_menu.hpp` holds two dialogs: `civ_dialog` on idc block **8300-8399** and the bribe
+prompt on **8400-8499**, both clear of every idc the mission ships (the nearest neighbours are the
+disguise panel's 8000-8203 and `fobmanager.hpp`'s lone 9745). Five framed rows — intel, aid, toolkit,
+recruit, arrest — each `closeDialog 0` and `remoteExec` the work to the server.
+
+**The client does not need the town's reputation.** The rows are the same whatever the band; only the
+outcome differs, and that is rolled server-side when a row is picked. `civ_town_rep` therefore stays
+server-side. The per-civilian state below is a different thing and does go out.
+
+**Rows carry no price, and a bribe gets its own prompt.** The reaction is unknown until the roll, so a
+price on the row would be a guess at a demand that arrives two thirds of the time at best. Picking a row
+is free of commitment; if the roll comes back `bribe`, a second dialog states the amount and the player
+answers it — on `onUnload` rather than a send on each button, so closing with Escape answers too, since
+an offer left hanging would block the civilian silently.
+
+The prompt carries the demand, an **In Inventory: X** readout of the player's `Money_roll` count, and
+Accept / Refuse, with Accept disabled when the count falls short so an unaffordable demand reads as
+unaffordable instead of failing on click. Refusing, and being unable to pay, both close the civilian:
+what the prompt buys is knowing the price before losing the contact, not a free look.
+
+#### Everything the client greys, the server re-checks
+
+Three client-side conditions decide what a row looks like, and none of them decides anything:
+
+| Greyed when | Read from | Why the server cannot trust it |
+|---|---|---|
+| The player cannot afford a bribe | `magazines player` | A snapshot; in co-op two players can spend the same coins |
+| The civilian is closed | the unit's own variables | Broadcast state a client machine holds a copy of |
+| The player has already asked a local for intel this tick | `DUWS_civ_intel_asked` on the player | Broadcast state, and a dialog left open across a tick boundary reads the value it opened with |
+
+The deduction, the spend and the range test all stay server-side, exactly as
+[`economy.md`](economy.md) describes for the client-side CP pre-filters. Range is no longer greyed at
+all: the action that opens the menu is itself gated to the 3 m the rows work at, so a row cannot be
+reached from further away than it functions. What greying is left is defensive — a dialog already open
+when a flag lands still has its rows live, and the flag only ever arrives over the wire.
+
+#### State lives on the civilian
+
+| Variable | Locality | Purpose |
+|---|---|---|
+| `DUWS_civ_stopped` | broadcast | Set when call over is answered. The menu action's condition gates on it, so nothing before it exists as an entry point |
+| `DUWS_civ_closed` | broadcast | Claimed when any player picks a conversational row, whatever the roll then answers |
+| `DUWS_civ_arrested` | broadcast | One hands-up attempt per civilian, claimed the same way |
+| `DUWS_civ_panicked` | broadcast | Set by the panic sweep, cleared after a flat 60 s. Suppresses the call-over |
+| `isSurrendered` | broadcast | Held at gunpoint. Gates Search and Release, and makes the panic sweep skip them |
+| `DUWS_civ_pending` | server only | `[caller, row, amount]`, written when a roll returns `bribe`, cleared when the prompt is answered |
+
+Everything but `DUWS_civ_pending` is broadcast because it is read off the server: the dialog is built on
+the client that opens it and has to know at open time which rows are dead, and the `addAction`
+conditions are evaluated on every machine that carries them. A boolean pushed when it changes beats a
+request-and-wait handshake in front of every open, which would either delay the menu or pop rows grey
+after the player is already looking at them — the same trade the search flag makes
+([`intel_system.md`](intel_system.md#the-success-roll-is-spent-at-spawn-so-the-price-is-the-fight)).
+
+`DUWS_civ_stopped` is written server-side, in the call-over's own server function rather than in the
+client action body that triggers it: a client that owns the flag can open the menu on a local it never
+actually stopped.
+
+`DUWS_civ_pending` is the opposite case and must not be broadcast. The Accept button sends only *I
+accept* — the server reads which row and how much from its own record, so a client cannot claim a bribe
+it was never offered or name its own price. It records the caller too, so in co-op a second player
+cannot answer someone else's prompt.
+
+All of it lives on the unit, so it dies with the civilian and needs no registry.
+
+### What an accepted request pays
+
+**Intel** hands off to `fnc_intel_payout`, the single point where intel becomes something for every
+source in the mission — [`intel_system.md`](intel_system.md#one-writer-per-reveal-flag-one-function-for-payout)
+owns that contract, including which payout kinds exist. The menu is a faucet like the body search, and
+what a faucet pays is not the faucet's business. The one thing this row must pass is an origin — the
+asking player's position — because the town bucket ranks by distance.
+
+Intel is the one row with a cap on top of the one-conversation rule: **one ask per player per 30-minute
+economy tick**, spent on the attempt whatever the local answers, and greyed in the menu once spent. It
+rides the same clock and the same sweep as the body search rather than starting a timer of its own.
+Spending it on the attempt is what stops a player working a hostile town local by local until one of
+them says yes — the reaction curve prices that walk in people, and this prices it in time.
+
+**Recruit** reaches `fnc_recruitSuccessServer`, which clears captive and broadcasts it itself.
+
+**Aid and toolkit are one choice, not two.** A civilian answers one request and then walks, which is
+what removes the old dominance without inventing a number: same price, same odds, and the only
+difference left is which item the player needs. Aid drops a medikit *and three first aid kits* — a
+medikit is unusable without the medic trait, so a squad without one got nothing it could spend out of
+the only favour that person does. Both items carry the same 60 s despawn: the item is handed over to be
+picked up, not left as a supply dump, and a persistent one would let a single friendly town furnish a
+squad's repairs for the rest of the campaign.
+
+### Arrest
+
+The arrest row orders hands up and nothing else. It rolls no reaction and takes no bribe — a town's
+opinion does not change whether a person raises their hands. It is still one of the exchanges a civilian
+only has one of, so someone already talked to is spent.
+
+**One attempt per civilian, spent on the attempt.** A dialog row is redrawn on every open, so
+`DUWS_civ_arrested` is what stops the player holding the row until the 90 % surrender lands, which would
+make both the reputation hit and the 10 % runner free. Same rule and same reason as the body search,
+whose claim is taken before its payout resolves (`server/misc/fnc_search_claim.sqf`).
+
+**The town is charged −1 whether or not they comply**, because it saw the weapon raised either way. The
+notification names the figure; a town already at the `-20` floor absorbs less than was asked, and the
+town marker carries the standing that actually resulted.
+
+**Two scroll actions follow a surrender, and both stay off the dialog.** They work on a civilian standing
+still with their hands up, and the menu — which hides on `isSurrendered` — would have to close, wait out
+the animation and reopen to offer either. Search ends in the loot table below; Release clears
+`isSurrendered`, ends the surrender pose on every machine, re-enables `PATH` and has `fnc_civ_resume`
+draw a fresh walking circuit.
+
+Release exists because `PATH` is disabled from the arrest onwards and the panic sweep refuses to touch
+anyone surrendered: without it a detainee keeps their hands up until the town is recycled. It returns no
+reputation — the town saw the weapon raised, and letting the player undo that by being polite afterwards
+would make the arrest free. **A search carries no reprisal** for the same reason: the price of an arrest
+is the reputation it costs, charged the moment hands go up. Arming the detainee on a coin flip and
+turning them on whoever frisked them priced it a second time, in a way no decision the player made could
+influence.
+
+#### What a search turns up
+
+Every arrested civilian is flagged searchable, so the odds live entirely in the `civ_frisk` payout table
+(`server/server_var_init.sqf`), drawn by weight rather than by a threshold ladder:
+
+| Weight | Outcome |
+|---:|---|
+| 3 / 8 | 1–5 `Item_Money_roll` on the ground |
+| 1 / 8 | exactly one item from Wallet_traitor / FlashDisk / SmartPhone / MobilePhone |
+| 4 / 8 | nothing |
+
+Three quarters of what is found is cash, so a frisk is a gamble on pocket change rather than a way to
+farm intel. Phones share the pool with the documents because both exist only to be turned in at the HQ
+terminal, which prices a phone above a wallet — a branch of their own was two names for one outcome. The
+file is the one document absent from that pool, because it is also what `fnc_addRandomLoot` puts on 80 %
+of enemies: pricing it for a search would price every corpse in the campaign. The intel drop is capped at
+one item, since three documents off one person is three searches' worth of CP for a single frisk.
+
+Civilians carry no coins of their own. This table is the whole of what a person is worth in cash, so the
+coins in a town are a function of how many people the player is willing to hold at gunpoint.
+
+#### What a bribe costs
+
+Per row (`fnc_civ_rowPrice`, `src/duws/server/misc/fnc_civ_state_init.sqf:81-90`), and **not** scaled by
+reputation — the curve already carries that signal by deciding whether money is asked for at all, so a
+reputation term in the amount would count it twice.
+
+| Row | Bribe |
+|---|---:|
+| Intel | 3 |
+| Recruit | 2 |
+| Aid | 2 |
+| Toolkit | 2 |
+| Arrest | — |
+
+**These are placeholders chosen to make the framework testable, not balanced figures**
+([`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#economy-balance)). They are anchored on the black
+market, which is the price scale the player already reads — goggles at 1, pistol and optic at 5 — so
+intel sits between the two. An unrecognised row returns a negative price, and callers treat that as a
+reject: rows only ever come off the wire, so that is the fail-closed edge for a client sending one the
+menu never offered.

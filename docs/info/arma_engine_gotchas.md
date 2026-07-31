@@ -132,7 +132,7 @@ quits.
 fall off the end of the loop body); reserve `exitWith` for when you genuinely want the loop
 to stop. The zone locator hit this: an origin keep-out used `exitWith` to "re-roll" a
 position but instead dropped the zone entirely — see
-[`zone_and_town_generation.md`](zone_and_town_generation.md#defects-subsystem-a).
+[`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#zone-and-civilian-siting-defects).
 
 ## Structured-text controls need a parsed object, not `ctrlSetText`
 
@@ -393,7 +393,7 @@ surfaces in co-op.
 A delta writer fixes the arithmetic but not the authorisation: the *caller* still decides
 whether to spend, and on a client that decision reads a snapshot the server has already moved
 past. Both have to be server-side. See
-[`cp_economy.md`](cp_economy.md#authority-the-server-decides-a-purchase-not-the-buyer).
+[`economy.md`](economy.md#authority-the-server-decides-a-purchase-not-the-buyer).
 
 **How to apply:** never `publicVariable` a shared resource from a non-authoritative
 machine. Route every change through one server-side function that takes a signed *delta*

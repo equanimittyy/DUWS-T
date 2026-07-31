@@ -7,7 +7,7 @@ observed keeps going further out rather than vanishing.
 
 This is split out of the per-town reputation work, which needed an answer for one narrow case —
 what happens to a town garrison when reputation rises out of the OPFOR band while its units are
-alive ([`info/zone_and_town_generation.md`](info/zone_and_town_generation.md#ownership-bands-and-the-garrison))
+alive ([`info/zones_and_civilians.md`](info/zones_and_civilians.md#ownership-bands-and-the-garrison))
 — and found the answer was a general behaviour that zones want too.
 
 ## What it replaces
