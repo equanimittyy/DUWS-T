@@ -69,6 +69,66 @@ capture triggers.
 > `position`/`locationPosition` used elsewhere. Whichever is chosen, selection and the runtime must
 > use the *same* one or a town's trigger and its eligibility test measure different points.
 
+### What captures a zone
+
+BLUFOR take a zone on two tests, both in `fnc_zone_capture_ready.sqf`, evaluated from the capture
+trigger while any WEST unit is inside the zone radius:
+
+| Test | Counts | Threshold |
+|---|---|---|
+| Garrison beaten | **only units this zone spawned**, by roster, wherever they are | at or below a fifth of the zone's spawn peak — the same fraction a town garrison breaks at |
+| Objective clear | **any** OPFOR, within 50 m of the composition centre | none alive |
+
+**The strength test counts by ownership, not by position.** Every unit a zone raises is appended to
+`DUWS_zoneUnits_<key>` — the spawn band appends what its spawners hand back, and
+`fnc_createopfortified` appends each of the five groups it builds. `fnc_createzone` empties the
+roster at the head of each spawn cycle, so it describes the garrison now on the ground rather than
+every garrison the zone has ever had.
+
+Two things follow. A WARCOM relief wave cannot restore a zone: reinforcements are not on the roster,
+so a beaten garrison stays beaten however many units arrive to stand on it. And a patrol that has
+wandered clear of the zone is still the zone's and still has to be dealt with.
+
+A roster rather than a flag on each unit, because the capture condition runs twice a second while a
+player stands in the zone — walking `allUnits` to find stamped ones would put a several-hundred-entry
+scan on exactly the frames a firefight is using. Anything spawned into a zone and not appended is
+invisible to the test, which is the trap for whoever adds a sixth group to the fortification builder.
+
+**The centre test is deliberately owner-blind.** It asks whether the objective is physically held,
+and anyone standing on it denies that whoever spawned them — a relief wave parked on the flag does
+block capture, even though it cannot un-beat the garrison. Withdrawing units are excluded from both
+tests, so a retreat bounding across the centre cannot stall a capture.
+
+### Why a pack-up cannot read as a capture
+
+Streaming deletes a zone's units after 120 s with no BLUFOR in reach, which would leave the garrison
+count at zero. Three things keep that from being read as a garrison wiped:
+
+- `fnc_spawnWait` clears the peak on **both** its exits, before the sweep runs. No peak means no
+  capture, so an empty stowed zone is never takeable — nor is one still mid-spawn.
+- The condition is `this && {...}`, and `this` is `WEST PRESENT`. The expensive half never runs
+  unless BLUFOR are inside the zone, and their presence is also what stops the despawn clock.
+- A spawn band can outlive its own zone: a large band takes longer to place than the 120 s grace.
+  Each spawn cycle carries a generation number, bumped by `fnc_createzone` when it starts and by
+  `fnc_spawnWait` when it tears down, and a band whose generation is stale publishes nothing —
+  otherwise it would write a fresh peak seconds after the sweep deleted what it counted.
+
+**This replaced `WEST SEIZED`.** SEIZED requires the whole trigger area to be empty of OPFOR, which
+made a capture a sweep of every last patrol out to the zone radius, and — as the town garrison's
+trigger still can — could be held indefinitely by anything the engine counts as present. What is
+left in the ring when the zone flips withdraws instead
+([`../opfor_retreat_plan.md`](../opfor_retreat_plan.md)).
+
+The OPFOR-takes-it-back direction still uses `EAST SEIZED`: there is no BLUFOR garrison figure to
+judge a retake against, and retakes are driven by WARCOM assault waves rather than by a force being
+ground down. Both directions are re-armed on every ownership change, in `fnc_captured.sqf`,
+`fnc_blufor_cap.sqf` and `fnc_opfor_cap.sqf`, so the condition lives in four places and has to move
+in all of them at once.
+
+The capture trigger is created **server-local**, unlike the notification trigger beside it, because
+the condition reads a server-side global. That also settles the evaluation-locality question the
+capture handlers previously guarded against with an `isServer` assert.
+
 ## Civilian town selection
 
 Selects real map towns near the fighting and gives each a persistent civilian population with map

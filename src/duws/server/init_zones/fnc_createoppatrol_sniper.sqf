@@ -56,3 +56,6 @@ _group setCombatMode "YELLOW";
 	_wp1 setWaypointType "CYCLE";
 	_wp1 setWaypointBehaviour "SAFE";
 	_wp1 setWaypointSpeed "LIMITED";
+// Returned for the callers that `call` this rather than `spawn` it -- the zone spawn band
+// flags what it raised so the capture test can tell this zone's garrison from passers-by.
+_group

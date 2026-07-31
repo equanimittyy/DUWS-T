@@ -17,9 +17,10 @@ _AI_buffer = 400;
 _despawn_timer = 120;
 
 // The key the prefab and the fortification ring both file their objects under
-// (prefabs/modern/*.sqf:9, fnc_createzone.sqf:204). Derived from the same position array they
-// use rather than passed in, so the three cannot drift apart without the zone itself moving.
-_zoneKey = format ["zone_%1_%2", round (_spawnPos select 0), round (_spawnPos select 1)];
+// (prefabs/modern/*.sqf:9, fnc_createzone.sqf:204), and the key every unit this zone spawns is
+// stamped with. Derived from the same position array they use rather than passed in, and through
+// the shared helper, so none of them can drift apart without the zone itself moving.
+_zoneKey = [_spawnPos] call fnc_zone_key;
 
 // One of these runs per zone every 10 s for the whole campaign, so the scan it replaces was
 // O(zones x all units) forever. The test itself lives in fnc_duws_bluforNear, shared with the
@@ -124,6 +125,15 @@ while {true} do {
 			sleep 10;
 		};
 
+		// Cleared on both exits, before the split below. Either the garrison is about to be deleted
+		// or the zone has changed hands, and in both cases the figure fnc_zone_capture_ready judges
+		// a capture against is about to describe ground that no longer holds what it counted. No
+		// peak means no capture, which is what keeps a pack-up from reading as a garrison wiped.
+		// The generation bump goes with it: a spawn band still placing from this cycle would
+		// otherwise publish a fresh peak seconds after the sweep deleted what it counted.
+		missionNamespace setVariable [format ["DUWS_zonePeak_%1", _zoneKey], nil];
+		[_zoneKey] call fnc_zone_gen_bump;
+
 		// CLEANUP ZONE
 		if (_despawn) then {
 			(zone_spawn_array select _index) set [1,false];
@@ -151,8 +161,30 @@ while {true} do {
 
 			[_zoneKey] call _stowZone;
 		} else {
-			// The zone changed hands, so nothing is despawned -- the emplacements are the player's
-			// now. This thread idles until OPFOR hold it again rather than re-entering the arrival
+			// The zone changed hands, so the composition is not despawned -- the emplacements are
+			// the player's now.
+			//
+			// Its surviving OPFOR are a different question. The capture trigger tests WEST SEIZED
+			// over _size (fnc_createzone.sqf) while this thread streams over _size + _AI_buffer, so
+			// the zone can flip with everything in that 400 m ring still alive: those units were
+			// never inside the test. Left alone they stand in ground the player now owns for the
+			// rest of the campaign, because this branch only idles and the sweep above is
+			// unreachable once the zone is BLUFOR's. Deleting them is not an option either -- a
+			// capture is watched by definition. So they withdraw.
+			// This zone's own units, off its roster -- not every EAST man in the ring. A neighbouring
+			// town's garrison, or a WARCOM wave that came to relieve the zone, is not this zone's to
+			// order off the map. Read before the peak's cycle ends, so the roster still describes
+			// the garrison that was holding when the zone fell.
+			private _grps = [];
+			{
+				if (alive _x) then { _grps pushBackUnique (group _x) };
+			} forEach ([_zoneKey] call fnc_zone_roster);
+			if (count _grps > 0) then {
+				["INFO", "STREAM", format ["%1 lost; %2 surviving group(s) ordered out", _zoneKey, count _grps]] call fnc_log;
+				[_grps, _spawnPos] spawn fnc_opfor_retreat;
+			};
+
+			// This thread idles until OPFOR hold it again rather than re-entering the arrival
 			// branch, which would spawn an OPFOR garrison inside a zone BLUFOR own.
 			waitUntil {sleep 60; (_spawnPos in WARCOM_zones_controled_by_OPFOR)
 				|| {count WARCOM_zones_controled_by_OPFOR < 1}};

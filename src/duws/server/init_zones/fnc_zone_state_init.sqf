@@ -4,6 +4,57 @@
 // Broadcasts stay in server_fnc_init.sqf beside the load, so the manifest remains the one
 // place to see what reaches clients.
 
+// The one derivation of a zone's key. The composition system, the streaming thread, the garrison
+// peak and the capture test all file under it, so it cannot be spelled out per caller without the
+// four drifting the moment one is retuned.
+fnc_zone_key = {
+	params ["_pos"];
+	format ["zone_%1_%2", round (_pos select 0), round (_pos select 1)]
+};
+
+// Every unit a zone spawned, in one array per zone. Both spawn threads append to it and
+// fnc_createzone empties it at the head of each spawn cycle, so it describes the garrison currently
+// on the ground rather than every garrison the zone has ever had.
+//
+// A roster rather than a flag on each unit: the capture condition reads this twice a second while a
+// player stands in the zone, and walking allUnits to find the stamped ones would put a
+// several-hundred-entry scan on exactly the frames a firefight is using.
+fnc_zone_roster = {
+	params ["_zoneKey"];
+	private _var = format ["DUWS_zoneUnits_%1", _zoneKey];
+	private _r = missionNamespace getVariable [_var, []];
+	if (isNil {missionNamespace getVariable _var}) then { missionNamespace setVariable [_var, _r] };
+	_r
+};
+
+// What "this zone's garrison" is worth, wherever it happens to be standing. Deliberately not bounded
+// by the zone radius: a patrol that has wandered out is still the zone's, and reinforcements that
+// walk in are not, which is the whole reason the roster exists. Shared by the peak and the capture
+// test so the strength a zone is measured against cannot be counted differently from the strength
+// it is judged by. Units already ordered out are not defending anything.
+fnc_zone_garrison_count = {
+	params ["_zoneKey"];
+	{ alive _x && {!(_x getVariable ["DUWS_retreating", false])} } count ([_zoneKey] call fnc_zone_roster)
+};
+
+// Bumped whenever a zone's garrison is raised, packed up, or lost. The spawn band takes up to a
+// couple of minutes to place a large zone and the streaming grace period is 120 s, so a band can
+// still be running when its own zone despawns; without this it would then publish a garrison peak
+// describing units the sweep had already deleted, and the capture test would read that stale figure
+// against empty ground as a garrison wiped.
+fnc_zone_gen_bump = {
+	params ["_zoneKey"];
+	private _var = format ["DUWS_zoneGen_%1", _zoneKey];
+	private _g = (missionNamespace getVariable [_var, 0]) + 1;
+	missionNamespace setVariable [_var, _g];
+	_g
+};
+
+fnc_zone_gen = {
+	params ["_zoneKey"];
+	missionNamespace getVariable [format ["DUWS_zoneGen_%1", _zoneKey], 0]
+};
+
 // Server-authoritative reorder of the OPFOR assault queue. The map-click picker runs
 // on the clicking player's machine, so mutating this shared list there and
 // broadcasting the absolute array would drop a concurrent capture's edit to it.

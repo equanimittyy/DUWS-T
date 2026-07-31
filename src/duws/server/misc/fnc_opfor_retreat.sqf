@@ -241,13 +241,22 @@ private _fnc_standDown = {
 // Corpses are left where they fell: bodies carry the search flag and are the garrison's payout, and
 // the litter sweep already has a lifetime for them. Crew before their vehicle, or deleting the
 // vehicle first ejects whoever is in it.
+//
+// A static weapon or a composition member is never taken with its crew. Zone emplacements pass to
+// the player on capture and are exactly what a gunner ordered out of a lost zone is still sitting
+// in, and a tracked composition member deleted behind its record's back leaves that record naming
+// a null object. The zone despawn sweep spares statics for the same reason.
 private _fnc_release = {
     params ["_grps"];
     {
         private _vehs = [];
         {
             if (alive _x) then {
-                if (vehicle _x != _x) then { _vehs pushBackUnique (vehicle _x) };
+                private _veh = vehicle _x;
+                if (_veh != _x && {!(_veh isKindOf "StaticWeapon")}
+                    && {!(_veh getVariable ["persistent", false])}) then {
+                    _vehs pushBackUnique _veh;
+                };
                 deleteVehicle _x;
             };
         } forEach units _x;

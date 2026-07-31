@@ -2,6 +2,13 @@
 // fnc_createopfortified.sqf
 // Spawn guards around prefab and random units in buildings
 _position = _this select 0;
+// Every group raised here is part of the zone's garrison, and the capture test counts the roster
+// rather than whatever happens to be standing nearby -- so anything spawned here and not appended
+// is invisible to it, and the zone reads as beaten while its emplacements are still manned.
+_zoneKey = _this param [1, ""];
+if (_zoneKey == "") then { _zoneKey = [_position] call fnc_zone_key };
+private _roster = [_zoneKey] call fnc_zone_roster;
+private _fnc_own = { params ["_g"]; _roster append (units _g) };
 _group = [];
 // minimum positions to allow for building spawns
 _positions_needed = 5;
@@ -25,6 +32,7 @@ for "_i" from 0 to (_mult - 1) step 1 do
 _multipliedGroup = [_multipliedGroup, [opfor_SL_SOLDIER_X], 0] call BIS_fnc_arrayInsert;
 _group = [_spawn, EAST, _multipliedGroup,[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
+[_group] call _fnc_own;
 
 // ========== 添加随机战利品 ==========
 // Scattered on a ring before taskDefend rather than left to walk apart. Zones stream in, so a
@@ -51,6 +59,7 @@ _group deleteGroupWhenEmpty true;
 
 // Add a mortar team anyway
 		_group = [_spawn, EAST, [opfor_SOLDIER_X,opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
+		[_group] call _fnc_own;
 		(units _group select 0) addbackpack "O_Mortar_01_support_F";
 		(units _group select 1) addbackpack "O_Mortar_01_weapon_F";
 		// Left on the centre while the rifles fan out. The tube and its ammunition are a backpack
@@ -89,6 +98,7 @@ for "_i" from 1 to _totalUnitsToSpawn do {
 };
 _group = [[0,0], EAST, _bldgUnits,[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
+[_group] call _fnc_own;
 
 // ========== 添加随机战利品 ==========
 {
@@ -141,6 +151,7 @@ private _fortPossibleUnitTypes = [[
     // 使用 BIS_fnc_spawnGroup 生成组
     private _fortGroup = [[0,0,0], EAST, _unitTypes, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
     _fortGroup deleteGroupWhenEmpty true;
+    [_fortGroup] call _fnc_own;
     
     // 将单位分配到建筑位置
     {

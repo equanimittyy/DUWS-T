@@ -17,10 +17,20 @@ finds. It runs only after the grace period has confirmed no BLUFOR nearby for `_
 seconds, so nobody is normally watching — the units blink out of an empty landscape. That is
 correct as a resource measure and says nothing about what happened to them.
 
-The gap is the cases where the ground changes hands with the player still on it. A zone captured
-while its garrison is alive falls into the branch that despawns nothing and idles until OPFOR hold
-it again; the surviving garrison simply stays. **Zones are not yet wired to the order** — the
-garrison is.
+The gap is the cases where the ground changes hands with the player still on it, and both callers
+now answer it.
+
+**A captured zone leaks survivors by construction.** The capture trigger covers `_size` while
+streaming runs over `_size + _AI_buffer`, so a zone flips with everything in that 400 m ring still
+alive — those units were never part of the test. The changed-hands branch of `fnc_spawnWait.sqf`
+despawns nothing and idles, and the sweep above it is unreachable once BLUFOR hold the zone, so
+before this they stood there for the rest of the campaign. They are now ordered out. Deleting them
+was never available: a capture is watched by definition.
+
+The withdrawal is what made the capture rule affordable. Capture no longer demands the radius be
+swept clear of OPFOR — it asks whether the garrison is beaten and the objective itself is held
+([`info/zones_and_civilians.md`](info/zones_and_civilians.md#what-captures-a-zone)) — and the
+survivors that rule leaves behind are exactly what this order takes off the map.
 
 ## Why retreat rather than a wider deletion
 
@@ -95,7 +105,10 @@ stands down instead: `DUWS_retreating` is cleared, `enableAttack` restored, post
 `COMBAT`/`RED`, and they become ordinary OPFOR who happen to be where they are. `allowFleeing` is
 left at `0` — a force already ordered out once that could not break contact has nowhere to rout to.
 Corpses are never collected on any path: bodies carry the search flag and are the garrison's
-payout, and the litter sweep already owns their lifetime.
+payout, and the litter sweep already owns their lifetime. Neither are static weapons or tracked
+composition members, even when a withdrawing unit is crewing one — a zone's emplacements pass to
+the player on capture, and that is precisely the case where a gunner is ordered out of something
+the player now owns.
 
 **Withdrawing units are exempt from zone streaming.** They carry `DUWS_retreating`, and
 `fnc_spawnWait.sqf` skips it in both delete clauses. Civilian towns sit on enemy zones by design,

@@ -53,6 +53,10 @@ if (VERSION_X == "MODERN" || simple_zones_enable) then {
 private _trgVarName = format["trigger_%1_%2", floor abs (_triggerPos select 0), floor abs (_triggerPos select 1)];
 private _trg = missionNamespace getVariable [_trgVarName, objNull];
 if (!isNull _trg) then {
-    _trg setTriggerActivation["WEST SEIZED","PRESENT",true];
-    _trg setTriggerStatements["this", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_blufor_cap",_place,_points,_markername,_markername2,_triggerPos,_radius,_bounty], ""];
+    // Re-armed for BLUFOR to take it back, on the same terms as the opening capture: the garrison
+    // beaten and the objective clear, not the whole radius swept (fnc_zone_capture_ready). The
+    // position and radius the condition reads were put on this trigger when the zone was built and
+    // ride it through every ownership change, so only the activation and statement move here.
+    _trg setTriggerActivation["WEST","PRESENT",true];
+    _trg setTriggerStatements["this && {[thisTrigger] call fnc_zone_capture_ready}", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_blufor_cap",_place,_points,_markername,_markername2,_triggerPos,_radius,_bounty], ""];
 };

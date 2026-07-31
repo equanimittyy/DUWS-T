@@ -276,6 +276,11 @@ _trgEnemy setTriggerTimeout [10, 10, 10, true];
 
 _spawnPos = _zonePos;
 
+// The key everything about this zone files under: its stowed composition, its streaming thread, its
+// garrison peak and the flag on every unit it spawns. Derived once here through the shared helper
+// rather than spelled out per caller, so the readers cannot drift apart.
+private _zoneKey = [_zonePos] call fnc_zone_key;
+
 // Build-out ends here: markers, prefab, fortifications and triggers are all placed. What
 // follows is OPFOR spawning and then a permanent despawn monitor, so this is the last point
 // at which this function can report completion -- it never returns.
@@ -291,12 +296,25 @@ sleep 60;
 // ✅ 修复：将占领触发器和旗杆创建代码移到 while 循环之前，确保它们能够执行
 
 // CREATE ZONE CAPTURABLE TRIGGER
-_trg = createTrigger ["EmptyDetector", _zonePos];
+// Server-local, unlike the notification trigger above it: the capture condition reads the zone's
+// garrison peak, which is a server-side global, so a client evaluating it would answer for state it
+// cannot see. It also settles the locality question fnc_captured.sqf records as unproven.
+_trg = createTrigger ["EmptyDetector", _zonePos, false];
 _trg setTriggerArea [_size, _size, 0, false];
-_trg setTriggerActivation ["WEST SEIZED", "PRESENT", true];
+// PRESENT rather than SEIZED on the BLUFOR direction. SEIZED demands the whole area be empty of
+// OPFOR, which made a capture a sweep of every last patrol out to the zone radius; the condition
+// asks instead whether the garrison is beaten and the objective itself is clear, and what is left
+// in the ring withdraws once the zone flips (fnc_spawnWait.sqf).
+_trg setTriggerActivation ["WEST", "PRESENT", true];
+// Carried on the trigger rather than formatted into the condition, so this position never becomes
+// text and back -- the same reason the enemy-contact trigger above carries its own. Both ride the
+// trigger through every ownership change, so the handlers that re-arm it move only the activation
+// and the statement.
+_trg setVariable ["DUWS_zonePos", _zonePos];
+_trg setVariable ["DUWS_zoneKey", _zoneKey];
 // Seventh argument is the zone's opening CP bounty; _points stays its permanent worth. The
 // two travel together for the rest of the campaign, round the capture handlers and back here.
-_trg setTriggerStatements ["this", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_captured", _name, _points, _markername, _markername2, _zonePos, _size, round(_points * zone_cp_capture)], ""];
+_trg setTriggerStatements ["this && {[thisTrigger] call fnc_zone_capture_ready}", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_captured", _name, _points, _markername, _markername2, _zonePos, _size, round(_points * zone_cp_capture)], ""];
 _trg setTriggerTimeout [30, 40, 50, true];
 
 // 存储触发器变量（统一使用 floor abs 避免负号）
@@ -329,9 +347,17 @@ while {true} do {
 	if (_opfor_spawn == true) then {
 		_opfor_spawn = false;
 		(zone_spawn_array select _index) set [1,false];
-		[_spawnPos] spawn fnc_createopfortified;
+		// The roster is emptied here, at the head of the cycle and before either thread starts, so
+		// it describes the garrison now on the ground rather than every garrison this zone has had.
+		// Both threads are handed the key and append what they raise; the capture test counts that
+		// roster, so anything spawned here and not appended is invisible to it.
+		// The generation bump invalidates any band still placing from a previous cycle, which is
+		// what stops it publishing a garrison peak over the top of this one.
+		private _gen = [_zoneKey] call fnc_zone_gen_bump;
+		missionNamespace setVariable [format ["DUWS_zoneUnits_%1", _zoneKey], []];
+		[_spawnPos, _zoneKey] spawn fnc_createopfortified;
 		sleep 2;
-		[_spawnPos,_size] spawn fnc_zone_spawn;
+		[_spawnPos,_size,_zoneKey,_gen] spawn fnc_zone_spawn;
 	};
 	// Waits for the next spawn signal from fnc_spawnWait. Slot 2 of the entry used to carry a
 	// "never despawn again" flag; nothing sets it now that despawn is decided by a grace period

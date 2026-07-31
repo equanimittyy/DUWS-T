@@ -25,21 +25,26 @@ DUWS_zoneSpawnTiers = [
            [], []]
 ];
 
+// Called rather than spawned, for the group each one hands back: the capture test counts this
+// zone's own garrison, so every unit raised here has to be flagged with the zone it belongs to.
+// The band below still staggers them, which is what the spawn was doing.
 DUWS_fnc_zoneSpawnOne = {
     params ["_token", "_pos", "_size"];
     switch (_token) do {
-        case "patrol": { [_pos, _size] spawn fnc_createoppatrol2 };
-        case "team":   { [_pos, _size] spawn fnc_createopteam2 };
-        case "sniper": { [_pos, _size] spawn fnc_createoppatrol_sniper };
-        case "wpteam": { [_pos, _size] spawn fnc_createopwpteam };
+        case "patrol": { [_pos, _size] call fnc_createoppatrol2 };
+        case "team":   { [_pos, _size] call fnc_createopteam2 };
+        case "sniper": { [_pos, _size] call fnc_createoppatrol_sniper };
+        case "wpteam": { [_pos, _size] call fnc_createopwpteam };
         // Anything else names a vehicle class rather than a group kind.
-        default        { [OPFOR_Faction_X, _token, _pos, _size] spawn fnc_random_veh };
+        default        { [OPFOR_Faction_X, _token, _pos, _size] call fnc_random_veh };
     };
 };
 
 // Spawned by fnc_createzone, which no longer needs a switch to pick a function per band.
 fnc_zone_spawn = {
-    params ["_spawnPos", "_size"];
+    params ["_spawnPos", "_size", ["_zoneKey", ""], ["_gen", -1]];
+    if (_zoneKey == "") then { _zoneKey = [_spawnPos] call fnc_zone_key };
+    private _roster = [_zoneKey] call fnc_zone_roster;
 
     private _i = DUWS_zoneSpawnTiers findIf { _size < (_x select 0) };
     if (_i < 0) exitWith {
@@ -49,9 +54,28 @@ fnc_zone_spawn = {
 
     private _spawns = _base + ([_extraSolo, _extraMulti] select (count (call BIS_fnc_listPlayers) > 2));
     {
-        [_x, _spawnPos, _size] call DUWS_fnc_zoneSpawnOne;
+        private _grp = [_x, _spawnPos, _size] call DUWS_fnc_zoneSpawnOne;
+        if (!isNull _grp) then { _roster append (units _grp) };
         // Staggered, not batched: each of these spawns a group, and firing the whole band in one
         // frame is what the original's per-call sleep existed to avoid. None after the last.
         if (_forEachIndex < (count _spawns) - 1) then { sleep 5 };
     } forEach _spawns;
+
+    // Settled before the peak is taken. fnc_createopfortified appends to the same roster from its
+    // own thread and is normally long finished by here, but nothing enforces that, and a peak taken
+    // before its crews are in undercounts the garrison -- which makes the zone quietly cheaper.
+    sleep 15;
+
+    // A band still placing when its own zone packs up must not publish anything: the sweep has
+    // already deleted what it would be describing, and the capture test reads a stale peak beside
+    // empty ground as a garrison wiped.
+    if (_gen >= 0 && {([_zoneKey] call fnc_zone_gen) != _gen}) exitWith {
+        ["INFO", "ZONES", format ["%1 torn down mid-spawn; garrison peak not published", _zoneKey]] call fnc_log;
+    };
+
+    // The strength fnc_zone_capture_ready judges this zone against, and the only place it is set.
+    // fnc_spawnWait clears it the moment the zone stops being a spawned OPFOR zone.
+    private _peak = [_zoneKey] call fnc_zone_garrison_count;
+    missionNamespace setVariable [format ["DUWS_zonePeak_%1", _zoneKey], _peak];
+    ["INFO", "ZONES", format ["%1 garrison peak %2", _zoneKey, _peak]] call fnc_log;
 };

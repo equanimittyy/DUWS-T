@@ -34,3 +34,6 @@ _group deleteGroupWhenEmpty true;
 
 _patrolRadius = round(_radius/1.25);
 [_group, _patrolCenter, _patrolradius] call bis_fnc_taskPatrol;
+// Returned for the callers that `call` this rather than `spawn` it -- the zone spawn band
+// flags what it raised so the capture test can tell this zone's garrison from passers-by.
+_group
