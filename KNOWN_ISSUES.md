@@ -41,6 +41,15 @@ than merely untuned. Everything downstream of a capture is unexercised with it.
       on the objective is not on the roster, which is the failure the centre test is prone to and
       cannot report on its own — nothing in that condition logs why it refused
 
+## OPFOR retreat: a difficulty lever nobody has played against
+
+A garrison beaten to a fifth withdraws under `fnc_opfor_retreat` rather than being fought to the
+last man, and so does whatever survives inside the streaming ring when a zone flips. It cuts both
+ways: the player loses the clean sweep of a wiped garrison, and gains ground they no longer have to
+clear unit by unit. Whether that wants a campaign toggle is not answerable until a zone has actually
+fallen this way ([§No zone has been seen to fall](#no-zone-has-been-seen-to-fall-since-the-capture-rule-changed)),
+since the withdrawal is what clears the objective and the two are felt together.
+
 ## Per-town reputation: shipped, not yet exercised
 
 - [ ] Take a town below -10 and stand in it. A garrison must appear and the town must keep its debt

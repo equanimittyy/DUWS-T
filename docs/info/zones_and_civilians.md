@@ -118,10 +118,10 @@ hold a zone whose field garrison had been wiped, with nothing on screen to say w
 
 **A beaten garrison leaves rather than waiting to be finished.** The moment the roster falls to or
 below the same fifth, `fnc_spawnWait`'s presence poll orders the survivors out through
-`fnc_opfor_retreat` ([`opfor_retreat_plan.md`](../opfor_retreat_plan.md)). Because withdrawing units
-are excluded from both tests, the withdrawal is also what clears the objective: the remnant walks off
-the centre and the zone falls once it has, rather than the player hunting the last four men through a
-composition. Latched per deploy cycle, since the count drops to zero as soon as they are flagged.
+`server/misc/fnc_opfor_retreat.sqf`. Because withdrawing units are excluded from both tests, the
+withdrawal is also what clears the objective: the remnant walks off the centre and the zone falls
+once it has, rather than the player hunting the last four men through a composition. Latched per
+deploy cycle, since the count drops to zero as soon as they are flagged.
 
 ### Attrition carries between visits
 
@@ -181,8 +181,7 @@ count at zero. Three things keep that from being read as a garrison wiped:
 **This replaced `WEST SEIZED`.** SEIZED requires the whole trigger area to be empty of OPFOR, which
 made a capture a sweep of every last patrol out to the zone radius, and — as the town garrison's
 trigger still can — could be held indefinitely by anything the engine counts as present. What is
-left in the ring when the zone flips withdraws instead
-([`../opfor_retreat_plan.md`](../opfor_retreat_plan.md)).
+left in the ring when the zone flips withdraws instead.
 
 The OPFOR-takes-it-back direction still uses `EAST SEIZED`: there is no BLUFOR garrison figure to
 judge a retake against, and retakes are driven by WARCOM assault waves rather than by a force being
@@ -277,8 +276,7 @@ surely as one that was wiped, and only the trigger sees both.
 
 The garrison does hold a roster — the three spawners return their group — but it reads it for
 strength, never for the clear. At or below a fifth of the men the town was given, what is left
-withdraws rather than being finished off in place
-([`opfor_retreat_plan.md`](../opfor_retreat_plan.md)).
+withdraws rather than being finished off in place, through the same `fnc_opfor_retreat`.
 
 The band is the condition, not a one-shot flag — a town driven back below `-10` gets a new garrison,
 and a town lifted out of the band while its garrison lives sees it withdraw.

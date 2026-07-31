@@ -161,10 +161,9 @@ This is the layer naive utility systems omit and always regret. Without it a com
 re-evaluating every tick oscillates between two near-equal options and reads as noise, which is
 worse than the fixed thresholds the WARCOM spawners were deleted for.
 
-It is needed for an unrelated reason anyway: [`opfor_retreat_plan.md`](opfor_retreat_plan.md#open-questions)
-asks whether a withdrawing group is still a valid target for the director's reinforcement logic.
-That is an intent-ownership question and has no answer until intents exist — a withdrawing group is
-one whose intent has been released.
+It is needed for an unrelated reason anyway: whether a withdrawing group is still a valid target for
+the director's reinforcement logic. That is an intent-ownership question and has no answer until
+intents exist — a withdrawing group is one whose intent has been released.
 
 Numbers and strings only, for the same serialisation reason as the belief store, and `time` rather
 than `diag_tickTime` so an expiry survives a savegame
@@ -193,8 +192,8 @@ There is also a horizon mismatch: the hardpoint build tick is 20-30 minutes, and
 over that horizon is invalidated by the player before its second step.
 
 **Planning would earn its keep one layer down, not here** — a single squad ordered to retake a town
-deciding mount, route, dismount, assault. [`opfor_retreat_plan.md`](opfor_retreat_plan.md) is the
-evidence that layer is worth hand-authoring as an explicit state machine rather than searching.
+deciding mount, route, dismount, assault. `server/misc/fnc_opfor_retreat.sqf` is the evidence that
+layer is worth hand-authoring as an explicit state machine rather than searching.
 
 An **influence map** — a coarse grid holding decayed per-side influence — is the standard upgrade
 to the *reach* and *threat* terms, and it would produce the front line as a by-product, which is

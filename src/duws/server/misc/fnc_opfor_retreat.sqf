@@ -310,7 +310,9 @@ private _fnc_forceClear = {
 } forEach _groups;
 
 // Split on index parity rather than by strength: the callers hand over a garrison's spawn order, so
-// alternate entries are already a patrol and a team rather than two of a kind.
+// alternate entries are already a patrol and a team rather than two of a kind. A vehicle is its own
+// group out of the spawners and so withdraws independently of the infantry beside it -- mounted crew
+// leaving a dismounted team behind is the realistic outcome and the worse-looking one.
 private _elements = [[], []];
 { (_elements select (_forEachIndex % 2)) pushBack _x } forEach _groups;
 private _moving = 0;
