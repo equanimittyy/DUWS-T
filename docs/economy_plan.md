@@ -303,7 +303,7 @@ without also being paid for the player's successes — and being paid for them i
 of the four, since it is the one the player cannot see or influence.
 
 **The flat income is a floor, not the main faucet.** A town whose radius reaches into an enemy
-zone starts at `-20` (`server/misc/fnc_civ_init_Tomata.sqf:200-210`), so the enemy opens with
+zone starts at `-20` (`server/misc/fnc_civ_init_Tomata.sqf:197-205`), so the enemy opens with
 several towns already banded and already paying — OPFOR town income outweighs any sensible flat
 constant several times over at hour zero. The constant is sized for a director holding nothing,
 and the figure that has to be checked is the combined one.
@@ -570,15 +570,13 @@ squad leader, a mortar team, and up to eight buildings occupied at three units e
 garrisons are tier IV by definition and are not purchased** — they are what a zone already is, and
 nothing about zone generation changes.
 
-Today a town garrison is OPFOR-only and its tier comes from reputation alone: tier 1 at `-10`,
-2 at `-15`, 3 at `-20` (`server/misc/fnc_civ_garrison.sqf:72-74`, band contract in
-[`info/zones_and_civilians.md`](info/zones_and_civilians.md#ownership-bands-and-the-garrison)).
+The OPFOR side of the ladder is built: tiers 0 to IV live in `DUWS_townSpawnTiers` and the per-town
+tier in `DUWS_townGarrisonTier`, written through `fnc_town_garrison_setTier`. Full contract in
+[`info/zones_and_civilians.md`](info/zones_and_civilians.md#garrison-tiers-0-to-iv).
 
-- **Reputation still decides *whether* a town garrisons; AP decides *how hard*.** The band is the
-  trigger and stays untouched, so the existing contract — clear the garrison, reputation resets to
-  0, the garrison stops — survives intact.
-- **Effective tier is the higher of the reputation tier and the purchased tier**, so a town ruined
-  to `-20` is never made weaker by the arithmetic.
+- **Reputation decides *whether* a town garrisons; AP decides *how hard*.** Crossing `-10` writes
+  tier I and nothing deeper writes more, so the existing contract — clear the garrison, reputation
+  resets to 0, the garrison stops — survives intact.
 - **Clearing a town destroys the purchase.** No refund, and the director must spend again to
   restore it. With a refund, a player clearing towns would hand the enemy its AP back and the
   enemy would never climb; with a purchase that survives clearing, clearing stops meaning
@@ -587,12 +585,15 @@ Today a town garrison is OPFOR-only and its tier comes from reputation alone: ti
   objective and a town must not compete with one, so IV reaches the zone benchmark by occupying
   buildings.
 
-| Tier | Adds | Reputation reaches it at | Starting price |
+| Tier | Adds | Reached by | Starting price |
 |---|---|---|---|
-| I | Patrol plus one team | `-10` | 15 |
-| II | Second team, light vehicle | `-15` | 25 |
-| III | Armour | `-20` | 40 |
-| IV | Building-occupying units, on the zone pattern | never — purchase only | 60 |
+| I | Patrol plus one team | reputation `<= -10` | — |
+| II | Second team, light vehicle | purchase | 25 |
+| III | Armour | purchase | 40 |
+| IV | Building-occupying units, on the zone pattern | purchase | 60 |
+
+Tier I is unpriced because nothing buys it: it is what the band grants. A commander that wants a
+town garrisoned turns the town instead, through rapport.
 
 BLUFOR garrisons are new ground: the BLUFOR band (`>= 10`) has no garrison today, so a player
 buying tier I at a town they hold is creating something that has never existed rather than
@@ -638,10 +639,9 @@ them broadcast, so this costs no new networked state. Reveal gating is already c
 unrevealed town answers as empty ground rather than as a hit the readout declines to describe, so
 the map cannot be swept for towns the presence trigger is hiding.
 
-**Nothing records a garrison tier today**, which is why the readout cannot lead. In
-`server/misc/fnc_civ_garrison.sqf:72-74` the tier is a local, computed inside the spawn branch and
-discarded. Making it per-town state belongs to the garrison work, which has to record it either
-way; the readout is a consumer and follows it.
+The tier the readout needs now exists: `DUWS_townGarrisonTier` is server-local per-town state, read
+through `fnc_town_garrison_tierAt`, so the readout is one more field on the tuple
+`fnc_map_readout_query` and `fnc_map_readout_draw` already pass and costs no new networked state.
 
 ### SITREP becomes free
 

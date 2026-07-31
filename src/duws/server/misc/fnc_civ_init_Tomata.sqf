@@ -206,10 +206,15 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     } forEach _locations;
     missionNamespace setVariable ["civ_town_rep", _townRep];
     missionNamespace setVariable ["civ_town_ap", _townAp];
+    // Tier I is the floor for a town that starts in the OPFOR band -- the ones seeded at -20 for
+    // overlapping an enemy zone are enemy ground before anyone has played a minute, and reading
+    // them as ungarrisoned until the first garrison cycle would let the commander appraise them
+    // as neutral. Everything else starts at 0, which is what the BLUFOR and neutral bands stay at.
+    missionNamespace setVariable ["DUWS_townGarrisonTier", _townRep apply {[0, 1] select (_x <= -10)}];
     ["INFO", "CIV", format ["Town reputation registered for %1 towns, AP worth %2", _n, _townAp]] call fnc_log;
 
-    // One garrison thread per town, watching its own band. Started after both arrays exist,
-    // since the first thing each does is read its town's reputation.
+    // One garrison thread per town, watching its own band. Started after the arrays above exist,
+    // since the first thing each does is read its town's reputation and its tier.
     for "_i" from 0 to (_n - 1) do { [_i] spawn fnc_civ_garrison };
 };
 

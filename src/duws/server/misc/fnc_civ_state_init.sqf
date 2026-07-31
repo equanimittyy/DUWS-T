@@ -48,6 +48,53 @@ fnc_civ_repAt = {
 	}
 };
 
+// What each garrison tier puts in a town, as tokens DUWS_fnc_zoneSpawnOne already understands --
+// plus "buildings", which only tier IV raises and which no zone band emits.
+// Cumulative: a tier IV town fields every row from I down. That is what lets a tier bought while
+// the garrison stands raise only the rows between the old tier and the new one, instead of a
+// second garrison beside the first.
+// Units only -- no fortification ring, no prefab. Static emplacements are what make a zone an
+// objective and a town must not compete with one for the player's attention, so IV reaches the
+// zone benchmark by occupying buildings rather than by digging in.
+DUWS_townSpawnTiers = [
+	["patrol", "team"],
+	["team", "car"],
+	["armored"],
+	["buildings"]
+];
+
+// A town's garrison tier: 0 for ground OPFOR does not hold, 1 to 4 for ground it does. Reputation
+// only ever writes tier 1 -- see fnc_civ_garrison -- and every step above it is bought by the
+// OPFOR commander, so the tier is stored state rather than a figure derived from reputation.
+// Neutral by default for the same reason fnc_civ_repAt is: ground no town owns has no garrison.
+fnc_town_garrison_tierAt = {
+	if (!isServer) exitWith { 0 };
+	params [["_townIndex", -1]];
+	private _tiers = missionNamespace getVariable ["DUWS_townGarrisonTier", []];
+	if (_townIndex >= 0 && _townIndex < count _tiers) then {
+		_tiers select _townIndex
+	} else {
+		0
+	}
+};
+
+// The sole writer, and the OPFOR commander's purchase hook. Clamped rather than trusted: nothing
+// upstream validates a tier, and a table lookup on one out of range is a fatal error rather than a
+// weak garrison.
+// A tier written here is what the town owes, not what is standing in it -- the garrison thread
+// picks the change up on its own cycle, and only when a player is there to see it arrive.
+fnc_town_garrison_setTier = {
+	if (!isServer) exitWith {};
+	params [["_townIndex", -1], ["_tier", 0], ["_reason", ""]];
+	private _tiers = missionNamespace getVariable ["DUWS_townGarrisonTier", []];
+	if (_townIndex < 0 || _townIndex >= count _tiers) exitWith {};
+	private _new = ((round _tier) max 0) min (count DUWS_townSpawnTiers);
+	private _old = _tiers select _townIndex;
+	if (_new == _old) exitWith {};
+	_tiers set [_townIndex, _new];
+	["INFO", "CIV", format ["Town %1 garrison tier %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
+};
+
 // How a town reacts to a request: [accept, bribe, refuse], summing to 1. Split out of the roll
 // that consumes it so the curve is unit-testable -- the rest of the request path needs the
 // engine, this needs nothing.

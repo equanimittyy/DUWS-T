@@ -259,14 +259,48 @@ so the thresholds are a contract between them:
 
 | Band | Reputation | Pays | Garrison |
 |---|---|---|---|
-| BLUFOR | `>= 10` | BLUFOR AP | — |
-| Neutral | `-9` … `9` | nobody | — |
-| OPFOR | `<= -10` | OPFOR AP | tier 1, rising to 2 at `-15` and 3 at `-20` |
+| BLUFOR | `>= 10` | BLUFOR AP | tier 0 |
+| Neutral | `-9` … `9` | nobody | tier 0 |
+| OPFOR | `<= -10` | OPFOR AP | tier I, and no higher from reputation |
 
-Tier 1 is infantry; tier 2 adds a second team and a light vehicle; tier 3 adds armour
-(`fnc_civ_garrison.sqf`). All three are built from the existing OPFOR spawners, so the garrison
-inherits faction auto-detection for free. It is units only — no fortification ring and no prefab,
-because static emplacements are what make a zone an objective and a town must not compete with one.
+### Garrison tiers 0 to IV
+
+**Reputation decides *whether* a town garrisons; it does not decide how hard.** Crossing `-10` is the
+capture — it writes tier I and nothing deeper in the negative writes more. Tiers II to IV are the
+OPFOR commander's to buy, so a town the player has merely ruined is not automatically a hard one:
+the enemy has to have spent on it. Tier 0 is a town OPFOR does not hold, which is where both the
+neutral and the BLUFOR band sit.
+
+The tier is stored per town in `DUWS_townGarrisonTier` and written only through
+`fnc_town_garrison_setTier` (`server/misc/fnc_civ_state_init.sqf`) — a number per town, so it
+serialises. Towns that start inside an enemy zone are seeded at tier I rather than 0: they are enemy
+ground before anyone has played a minute, and reading them as ungarrisoned would have the commander
+appraise them as neutral.
+
+| Tier | Adds | Reached by |
+|---|---|---|
+| 0 | — | not OPFOR ground |
+| I | Patrol plus one team | reputation `<= -10` |
+| II | Second team, light vehicle | purchase |
+| III | Armour | purchase |
+| IV | Building-occupying units, on the zone pattern | purchase |
+
+The rows are cumulative and live as data in `DUWS_townSpawnTiers`, as tokens
+`DUWS_fnc_zoneSpawnOne` already understands — the same driver the zone bands walk, so the garrison
+inherits faction auto-detection for free. Cumulative is what lets a tier bought while the garrison
+stands raise only the rows between the old tier and the new one, rather than a second garrison
+beside the first; the men that reinforcement adds are added to the strength baseline rather than
+re-measured from it, so casualties the player has already inflicted are not refunded.
+
+**It is units only — no fortification ring and no prefab**, because static emplacements are what
+make a zone an objective and a town must not compete with one. Tier IV reaches the zone benchmark
+(`fnc_createopfortified`: eight buildings at three men each) by occupying buildings instead.
+
+**Clearing destroys the purchase.** No refund, and the commander must spend again: with a refund a
+player clearing towns would hand the enemy its AP back and the enemy would never climb; with a tier
+that survived clearing, clearing would stop meaning anything.
+
+### Arrival, the capture grace and the clear
 
 Presence uses the same arrival test zones use (`fnc_duws_bluforNear`) rather than a presence trigger of
 its own, which would fire the instant anyone crossed the radius and whose handle is discarded at
@@ -274,7 +308,14 @@ creation anyway. Clearing the garrison resets that town's reputation to 0, decid
 trigger rather than by counting the garrison dead: a garrison that withdraws has cleared the town as
 surely as one that was wiped, and only the trigger sees both.
 
-The garrison does hold a roster — the three spawners return their group — but it reads it for
+**A newly taken town holds its first garrison for 30 minutes of wall-clock time.** The player is
+standing in the town at the moment it crosses — that is how the reputation got spent — so a tier
+materialising around them is the pop-in the zone spawners scatter their men on a ring to avoid. The
+guard is one-shot and re-arms on each crossing, so leaving a garrisoned town and returning re-spawns
+at once. It is stamped with `diag_tickTime`, which a savegame does not restore; the worst a reload
+inside the window does is let one garrison in early.
+
+The garrison does hold a roster — every spawner returns its group — but it reads it for
 strength, never for the clear. At or below a fifth of the men the town was given, what is left
 withdraws rather than being finished off in place, through the same `fnc_opfor_retreat`.
 
