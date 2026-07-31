@@ -2,7 +2,7 @@
 if (!isServer) exitWith {};
 
 // Task forces refuse to launch while nothing OPFOR holds is on the map, so this flag gates every
-// assault (fnc_request_squad, fnc_WARCOM_blu_assault, fnc_WARCOM_opf_air). Recomputed whole
+// assault (fnc_request_squad, fnc_WARCOM_blu_assault). Recomputed whole
 // rather than nudged: capture moves it in one direction and reveal in the other, and a delta
 // from either side drifts as soon as they interleave.
 if (!hardcore_mode_enable) exitWith {};

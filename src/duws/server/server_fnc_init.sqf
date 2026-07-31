@@ -202,13 +202,7 @@ fnc_WARCOM_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARC
 fnc_WARCOM_wp_blu_assault = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_wp_blu_assault.sqf";
 fnc_WARCOM_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_blu_patrol.sqf";
 fnc_WARCOM_wp_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_wp_blu_patrol.sqf";
-fnc_WARCOM_opf_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_patrol.sqf";
-fnc_WARCOM_wp_opf_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_wp_opf_patrol.sqf";
-fnc_WARCOM_opf_assault = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_assault.sqf";
-fnc_WARCOM_wp_opf_assault = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_wp_opf_assault.sqf";
-fnc_WARCOM_opf_air = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_air.sqf";
 fnc_random_veh_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_random_veh_blu_patrol.sqf";
-fnc_random_veh_opf_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_random_veh_opf_patrol.sqf";
 fnc_WARCOM_gps_marker = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_gps_marker.sqf";
 
 // ZONE FUNCTIONS

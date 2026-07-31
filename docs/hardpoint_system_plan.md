@@ -94,8 +94,7 @@ zero weight relies on `selectRandomWeighted` semantics that are not worth depend
 - for director builds only, OPFOR AP has not unlocked it.
 
 `selectRandomWeighted` is the mission's idiom for exactly this — `fnc_createzone.sqf:113-121`
-picks prefabs with it and the WARCOM wave tables pick vehicles with it
-(`fnc_WARCOM_opf_assault.sqf:23-28`).
+picks prefabs with it and `fnc_random_veh.sqf` picks zone vehicles with it.
 
 ### The indirect-fire types are capped campaign-wide
 
@@ -363,10 +362,9 @@ Clearing pays the player CP and returns the enemy nothing, so the only loop on o
 costs the enemy AP to run.
 
 `WARCOM_opfor_ap` also decides **how hard a hardpoint is**, not just whether the director can
-afford one. It is already the
-enemy's escalation ladder — patrol and assault composition step up at 10/40/65/100/136 AP
-(`fnc_WARCOM_opf_assault.sqf:8-21`, `fnc_WARCOM_opf_patrol.sqf:8-14`) — so hardpoints join the
-ladder every other OPFOR element is already on:
+afford one. The patrol and assault spawners that used to step up at 10/40/65/100/136 AP have been
+deleted, so hardpoints would be the first thing to put rungs back on the enemy's ladder rather than
+joining one already there — the tiers below are proposed, not matched to a surviving precedent:
 
 | Highest OPFOR AP reached | Garrison, any hardpoint | Types the *director* may build |
 |---|---|---|
@@ -408,8 +406,8 @@ in it.
 | Knob | Value | Why |
 |---|---|---|
 | Seed subset | 2-3 at WARCOM init, any type | The player meets the mechanic before the director has produced anything |
-| Build tick | one candidate every 20-30 min | Slower than the 45-90 min patrol cadence (`fnc_WARCOM_opf_patrol.sqf:178`), faster than the 30 min assault cycle |
-| Build gate | OPFOR AP above 10 | A suppressed enemy stops fortifying; matches the threshold its first assault wave uses |
+| Build tick | one candidate every 20-30 min | Slow enough that the map changes between visits rather than while the player is looking at it |
+| Build gate | OPFOR AP above 10 | A suppressed enemy stops fortifying |
 | Build costs | 8-25 AP by type | Cheapest for an OP or MG nest, dearest for the battery — the same order the clear payouts run in |
 | Live cap | none | ([§Distance gating](#distance-gating-replaces-a-live-cap)) |
 | Clear pays | CP only | Missions and zone capture remain the AP faucets (`fnc_mission_reward.sqf:20`, `fnc_captured.sqf:44-47`) |
@@ -631,9 +629,10 @@ The telegraph is not politeness. Without it the mechanic reads as random damage 
 a real object. It works with the visible markers: a player under fire can see on the map which
 emplacement is doing it, so the counterplay is legible from the first barrage.
 
-Finite ammo also gives the existing OPFOR ammo-truck patrol (`fnc_WARCOM_opf_patrol.sqf:141-175`)
-something to be for: intercepting it silences guns the player cannot reach. That is a follow-on,
-not part of this plan.
+Finite ammo also gives an OPFOR resupply run something to be for: intercepting it silences guns
+the player cannot reach. The ammo-truck patrol that would have carried it went with the rest of the
+WARCOM OPFOR spawners, so this is a follow-on for whatever commander replaces them, not part of
+this plan.
 
 **Fallback if AI static-mortar fire proves unreliable:** spawn the shells directly, as the
 player's own artillery support does (`client/supports/fnc_arty.sqf` creates rounds at 800 m

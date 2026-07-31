@@ -111,8 +111,8 @@ has none, so they pass the mission site, the ground the rescue was fought over. 
 falls back to the HQ. With neither, the bucket sits out the draw rather than picking at random — one feature
 quietly running on two different rules is worse than it paying a zone instead.
 
-`hardcore_visibleZone_found` gates every task-force launch (`fnc_request_squad`, `fnc_WARCOM_blu_assault`,
-`fnc_WARCOM_opf_air`). It is derived from reveal state plus OPFOR ownership and recomputed whole by
+`hardcore_visibleZone_found` gates every task-force launch (`fnc_request_squad`,
+`fnc_WARCOM_blu_assault`). It is derived from reveal state plus OPFOR ownership and recomputed whole by
 `fnc_hardcore_visible_recalc`, never nudged: capture moves it one way and reveal the other, and a delta from
 either side drifts as soon as they interleave. Towns are deliberately outside it — it asks whether the
 player can see an enemy zone to send a task force at, and a town is not capturable.

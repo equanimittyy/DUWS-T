@@ -201,9 +201,7 @@ anything spends:
 
 | Site | Gate | What is lost |
 |---|---|---|
-| `fnc_WARCOM_opf_patrol.sqf:100` | > 100 | The second team joined onto a patrol |
-| `fnc_WARCOM_opf_patrol.sqf:123,127,131` | > 99 / > 149 / > 199 | Patrol car, then armour, then the third vehicle |
-| `fnc_WARCOM_blu_patrol.sqf:92,96,100` | > 99 / > 149 / > 199 | The same three vehicle steps, BLUFOR side |
+| `fnc_WARCOM_blu_patrol.sqf:92,96,100` | > 99 / > 149 / > 199 | The three vehicle steps, BLUFOR side |
 | `fnc_missionPatrols.sqf:20` | > 100 | Mission guard armour drops to a car |
 | `fnc_missionPatrolswithintel.sqf:14` | > 100 | Same |
 
@@ -319,28 +317,23 @@ to 40 while the thresholds are constants, so a large campaign would climb forty 
 a small one and every threshold in the mission would mean something different depending on a
 number chosen before play.
 
-### The enemy ceiling is 199, not 136
+### The enemy ceiling is 100, and one gate stands behind it
 
-Above the wave rungs sit three more gates, so the point where further AP buys the enemy nothing is
-higher than the ladder the presets are named after:
+The WARCOM patrol, assault and air spawners are gone, and they held every OPFOR rung above the
+first. What is left reading the enemy pool is a single gate:
 
 | Gate | Site | Buys |
 |---|---|---|
-| 10 / 40 / 65 / 100 / 136 | `fnc_WARCOM_opf_assault.sqf:8-21`, `fnc_WARCOM_opf_patrol.sqf:10-19` | The five wave-composition tiers |
-| 99 | `fnc_WARCOM_opf_patrol.sqf:123` | A car on the patrol |
-| 100 | `fnc_WARCOM_opf_patrol.sqf:100`, `fnc_missionPatrols.sqf:20` | A second team on the patrol; mission-guard armour |
-| 149 | `fnc_WARCOM_opf_patrol.sqf:127` | Armour on the patrol |
-| 150 | `fnc_WARCOM_opf_air.sqf:11` | Enemy air |
-| 199 | `fnc_WARCOM_opf_patrol.sqf:131` | A third patrol vehicle |
+| 100 | `fnc_missionPatrols.sqf:20`, `fnc_missionPatrolswithintel.sqf:14` | Mission-guard armour instead of a car |
 
-Past 199 *earned*, further income buys no capability at all — it still fills the wallet, but the
-tier has nowhere left to go. Because the ratchet is one-way, reaching it once fixes the enemy at
-maximum strength for the rest of the campaign.
+So enemy AP is currently a number that fills and buys almost nothing, and the ladder is the OPFOR
+commander's to rebuild rather than something to balance against as it stands. Any figure below on
+what enemy income *should* pace is written against that commander existing.
 
-**Town income alone will reach it.** Every town whose radius overlaps an enemy zone starts at
-`-20` (`server/misc/fnc_civ_init_Tomata.sqf:199-201`), the deepest band, so the enemy opens with
-its zone-adjacent towns already paying. Six such towns at 2 AP each is 12 a tick, which crosses
-199 in roughly seventeen ticks without a flat income existing at all. The flat constant is
+**Town income alone will reach any ceiling put back.** Every town whose radius overlaps an enemy
+zone starts at `-20` (`server/misc/fnc_civ_init_Tomata.sqf:199-201`), the deepest band, so the enemy
+opens with its zone-adjacent towns already paying. Six such towns at 2 AP each is 12 a tick, which
+crosses 200 in roughly seventeen ticks without a flat income existing at all. The flat constant is
 therefore insurance for a director that has lost its towns, not the faucet that sets the pace.
 
 **The player's lever on escalation is the enemy's income, not its balance.** A player-facing debit

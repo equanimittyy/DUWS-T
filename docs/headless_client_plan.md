@@ -67,9 +67,13 @@ Mobile WARCOM groups only:
 
 | Spawner | `path:line` |
 |---|---|
-| OPFOR assault | `server/warcom/fnc_WARCOM_opf_assault.sqf:98,100,109` |
-| OPFOR patrol, air | `server/warcom/fnc_WARCOM_opf_patrol.sqf`, `fnc_WARCOM_opf_air.sqf` |
+| BLUFOR assault | `server/warcom/fnc_WARCOM_blu_assault.sqf:50-113` |
+| BLUFOR patrol | `server/warcom/fnc_WARCOM_blu_patrol.sqf` |
 | Vehicle crews for the above | `server/misc/fnc_random_veh.sqf:105` |
+
+The OPFOR half of this table is empty on purpose: the enemy patrol, assault and air spawners were
+deleted, so until an OPFOR commander replaces them nothing mobile spawns on that side. Whatever it
+turns out to spawn is what this plan will hand off, and it is the reason the plan is worth keeping.
 
 Zone garrisons — `server/init_zones/fnc_createopteam.sqf:23`, `fnc_createopteam2.sqf`,
 `fnc_createoppatrol2.sqf`, `fnc_createoppatrol_sniper.sqf`, `fnc_createopwpteam.sqf`,
@@ -78,8 +82,7 @@ Zone garrisons — `server/init_zones/fnc_createopteam.sqf:23`, `fnc_createoptea
 ### Routing waypoint calls
 
 Waypoint logic is already factored into its own files, which is the seam that makes this
-tractable: `fnc_WARCOM_wp_opf_assault.sqf:10,27`, `fnc_WARCOM_wp_opf_patrol.sqf:17`,
-`fnc_WARCOM_wp_blu_patrol.sqf:7,17,25`,
+tractable: `fnc_WARCOM_wp_blu_patrol.sqf:7,17,25`,
 `fnc_WARCOM_wp_blu_assault.sqf:29`, plus `fnc_WARCOM_blu_assault.sqf:89,95` and the
 `bis_fnc_taskPatrol` call at `server/init_zones/fnc_createopteam.sqf:32`.
 
@@ -108,7 +111,7 @@ machine sets skill on the units it owns.
 | `server/misc/fnc_hc_init.sqf` | New. `fnc_hc_handoff` and the `DUWST_hc_owner` registration handler — the manifest holds no bodies. |
 | `server/server_fnc_init.sqf` | Registry lines. |
 | `server/server_var_init.sqf` | Declare `DUWST_hc_owner` defaulting to `2`. |
-| `server/warcom/fnc_WARCOM_opf_assault.sqf:98-109`, `fnc_WARCOM_opf_patrol.sqf`, `fnc_WARCOM_opf_air.sqf` | Hand off after spawn. |
+| `server/warcom/fnc_WARCOM_blu_assault.sqf:50-113`, `fnc_WARCOM_blu_patrol.sqf` | Hand off after spawn. |
 | `server/misc/fnc_random_veh.sqf:105` | Hand off crews with their group. |
 | `server/warcom/fnc_WARCOM_wp_*.sqf` call sites | Route to `groupOwner`. |
 | `server/misc/fnc_AI_Master_Control.sqf:5,22-26` | Filter to `local _x`; run on server and HC. |

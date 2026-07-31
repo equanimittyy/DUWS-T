@@ -49,22 +49,15 @@ publicVariable "WARCOM_zones_controled_by_OPFOR";
 ["INFO", "WARCOM", "Init BLU patrols"] call fnc_log;
 [] spawn fnc_WARCOM_blu_patrol;
 
-// Init OPF patrols
-["INFO", "WARCOM", "Init OPF patrols"] call fnc_log;
-[] spawn fnc_WARCOM_opf_patrol;
-
 // Initialize the BLU attack waves
 ["INFO", "WARCOM", "Initialize the BLU attack waves"] call fnc_log;
 [] spawn fnc_WARCOM_blu_assault;
 
-// Init the OPF attack waves
-["INFO", "WARCOM", "Init the OPF attack waves"] call fnc_log;
-[] spawn fnc_WARCOM_opf_assault;
-
-// Initialize the OPF Random Air if not already spawned
-if (WARCOM_opf_air == false) then {
-	[] spawn fnc_WARCOM_opf_air;
-};
+// Nothing spawns OPFOR here any more. The roaming patrols, the attack waves and the random air
+// were three timers each dropping live groups on the map for the rest of the campaign, answering
+// to Army Power alone rather than to anything the enemy was trying to achieve -- and they are what
+// put permanently simulated AI between the zones and on the road to the BLUFOR HQ. Enemy presence
+// is zone garrisons and side-mission guards until an OPFOR commander decides it.
 
 WARCOM_init_done = true;
 publicVariable "WARCOM_init_done";

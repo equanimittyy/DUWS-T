@@ -288,10 +288,7 @@ WARCOM_opfor_ap = 0;publicVariable "WARCOM_opfor_ap";
 WARCOM_init_done = false;publicVariable "WARCOM_init_done";
 
 // PATROL TYPES
-WARCOM_opf_patrol_type = [];
-WARCOM_opf_attack_wave_type = [];
 WARCOM_blu_attack_wave_type = [];
-WARCOM_opf_air = false;
 
 // DEFAULT WEATHER
 // choose between "none" - "tropical" - "arid" - "temperate" - "temperate_cold" - "mediterranean"
