@@ -34,9 +34,9 @@ private _peak = missionNamespace getVariable [format ["DUWS_zonePeak_%1", _key],
 // while every teardown discharges fnc_zone_garrison_dropped, which is where that contract is stated.
 if (_peak <= 0) exitWith { false };
 
-// This zone's own garrison, by roster and wherever it is standing -- not by proximity. A WARCOM
-// reinforcement wave is not this zone's garrison and cannot restore it, and a patrol that has
-// wandered past the ring is still the zone's and still has to be dealt with.
+// This zone's own garrison, by roster and wherever it is standing -- not by proximity. A side
+// mission's guards, or a neighbouring town's garrison, are not this zone's and cannot restore it;
+// a patrol that has wandered past the ring is still the zone's and still has to be dealt with.
 if (([_key] call fnc_zone_garrison_count) > BREAK_FRACTION * _peak) exitWith { false };
 
 // Deliberately unkeyed, unlike the test above. This one asks whether the objective is physically

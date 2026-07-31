@@ -2,8 +2,8 @@
 // usage: [_pos, _radius] call fnc_opfor_count_at
 //
 // Deliberately owner-blind, unlike fnc_zone_garrison_count: this answers "is this ground held",
-// which anyone standing on it denies whether they are the local garrison, a reinforcement wave, or
-// a patrol passing through.
+// which anyone standing on it denies whether they are the local garrison, a side mission's guards,
+// or a patrol passing through.
 //
 // Crew are unpacked because a CAManBase-only query does not report anyone riding in something,
 // which would let an APC parked on an objective read as nobody there. Static weapons come back

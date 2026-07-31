@@ -85,9 +85,10 @@ trigger while any WEST unit is inside the zone radius:
 roster at the head of each spawn cycle, so it describes the garrison now on the ground rather than
 every garrison the zone has ever had.
 
-Two things follow. A WARCOM relief wave cannot restore a zone: reinforcements are not on the roster,
-so a beaten garrison stays beaten however many units arrive to stand on it. And a patrol that has
-wandered clear of the zone is still the zone's and still has to be dealt with.
+Two things follow. Units that are not the zone's own cannot restore it: a side mission's guard ring
+or a neighbouring town's garrison is not on the roster, so a beaten garrison stays beaten however
+many of them arrive to stand on it. And a patrol that has wandered clear of the zone is still the
+zone's and still has to be dealt with.
 
 A roster rather than a flag on each unit, because the capture condition runs twice a second while a
 player stands in the zone — walking `allUnits` to find stamped ones would put a several-hundred-entry
@@ -95,9 +96,9 @@ scan on exactly the frames a firefight is using. Anything spawned into a zone an
 invisible to the test, which is the trap for whoever adds a sixth group to the fortification builder.
 
 **The centre test is deliberately owner-blind.** It asks whether the objective is physically held,
-and anyone standing on it denies that whoever spawned them — a relief wave parked on the flag does
-block capture, even though it cannot un-beat the garrison. Withdrawing units are excluded from both
-tests, so a retreat bounding across the centre cannot stall a capture.
+and anyone standing on it denies that whoever spawned them — a side mission's guards parked on the
+flag do block capture, even though they cannot un-beat the garrison. Withdrawing units are excluded
+from both tests, so a retreat bounding across the centre cannot stall a capture.
 
 ### Attrition carries between visits
 

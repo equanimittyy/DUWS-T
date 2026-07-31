@@ -177,9 +177,9 @@ while {true} do {
 			// unreachable once the zone is BLUFOR's. Deleting them is not an option either -- a
 			// capture is watched by definition. So they withdraw.
 			// This zone's own units, off its roster -- not every EAST man in the ring. A neighbouring
-			// town's garrison, or a WARCOM wave that came to relieve the zone, is not this zone's to
-			// order off the map. Read before the peak's cycle ends, so the roster still describes
-			// the garrison that was holding when the zone fell.
+			// town's garrison, or a side mission's guard ring drawn beside the zone, is not this
+			// zone's to order off the map. Read before the peak's cycle ends, so the roster still
+			// describes the garrison that was holding when the zone fell.
 			private _grps = [];
 			{
 				if (alive _x) then { _grps pushBackUnique (group _x) };
