@@ -215,6 +215,8 @@ class ressourceheader
             w = 18 * GUI_GRID_W;
             h = 7.5 * GUI_GRID_H;
             sizeEx = 0.025;
+            // The button below both buys and refunds, so its label follows the selection.
+            onLBSelChanged = "_this call fnc_support_sel_changed";
         };
         class supportunlockbutton: RscButton
         {

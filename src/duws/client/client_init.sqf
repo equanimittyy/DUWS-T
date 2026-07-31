@@ -182,6 +182,9 @@ PlayerKilledEH = player addEventHandler ["killed", {
                     format [localize "STR_DUWS_T_DEATH_CP_MSG", _cost]]] call bis_fnc_showNotification;
             };
         };
+        // The consumable slate dies with the body. Inside the killhouse it does not, for the same
+        // reason the CP penalty is waived there: a training death is not a battlefield one.
+        [] call fnc_support_wipe;
     };
     // Reported unfiltered: a challenge run fails on a death inside the course, and the server
     // owns that test against its own area radius rather than the wider one used just above.
@@ -200,13 +203,10 @@ player setUnitTrait ["Medic",true];
 player setUnitTrait ["Engineer",true];
 player setUnitTrait ["uavHacker",true];
 
-// Squad-lead extras: High Command, and the per-player FOB support unlock that arrives once
-// BLUFOR holds a zone. support_count bounds the radio supports, which only leads can request.
+// Squad-lead extras: High Command, and the FOB support row that arrives once BLUFOR holds a zone.
 if ((vehiclevarname player) in Squad_Leaders) then {
 	// wait until blu captures at least one zone
 	[] spawn fnc_zones_bonus;
-	// INIT the max support variable
-	support_count = 0;
 	//INIT HC module
 	["INFO", "BOOT", "HC init"] call fnc_log;
 	[] spawn fnc_hc_init;

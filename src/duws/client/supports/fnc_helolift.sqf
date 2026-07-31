@@ -17,12 +17,12 @@ _target = cursorObject;
 if (isNull _target) exitWith {
     hint localize "STR_DUWS_T_helolift_notarget";
     sleep 10;
-    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
+    ["helo_lift"] call fnc_support_comm_add;
 };
 if !(_target isKindOf "Car" || _target isKindOf "Tank" || _target isKindOf "Helicopter" || _target isKindOf "Plane") exitWith {
     hint localize "STR_DUWS_T_helolift_badtarget";
     sleep 10;
-    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
+    ["helo_lift"] call fnc_support_comm_add;
 };
 
 // 玩家唯一标识
@@ -50,7 +50,7 @@ _heloGroup = missionNamespace getVariable [_varPrefix + "_heloGroup", grpNull];
 if (isNull _helo) exitWith {
     hint localize "STR_DUWS_T_helolift_noheli";
     sleep 10;
-    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
+    ["helo_lift"] call fnc_support_comm_add;
 };
 _pilot = currentPilot _helo;
 
@@ -68,7 +68,7 @@ _abort = {
     [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_heloliftabort"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
     [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
     sleep 300;
-    [player, "helo_lift"] call BIS_fnc_addCommMenuItem;
+    ["helo_lift"] call fnc_support_comm_add;
 };
 
 
@@ -277,4 +277,4 @@ player setVariable ["LiftWaypointMarkers", []];
 player setVariable ["LiftWaypointMarkers", []];
 [player, "cleanup", [_helo]] remoteExec ["fnc_helolift_ropes", 2];
 sleep 120;
-[player, "helo_lift"] call BIS_fnc_addCommMenuItem;
+["helo_lift"] call fnc_support_comm_add;

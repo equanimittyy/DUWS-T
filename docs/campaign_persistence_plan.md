@@ -226,7 +226,7 @@ that stays as the backstop, and nothing new should need it.
 | The only save is vanilla `saveGame`, reached from one place: the SITREP support | `server/misc/fnc_autoSave.sqf:11`, sole caller `server/supports/fnc_sitrep_support.sqf` |
 | Engine autosave and the save menu are switched off at boot | `server/server_init.sqf:113` |
 | `civ_locations` stores Location objects in the mission namespace, which the mission's own rule forbids because the namespace is what a save serialises | `server/misc/fnc_civ_init_Tomata.sqf:170`, rule in [`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md) |
-| Support unlocks are client-local by design — *"Supports are local to players. No need for publicVariable"* — so there is no server-side copy of what the player paid for | `client/includes/supports_init.hpp` |
+| Consumable support unlocks stay client-local by design, and what each one charged is recorded only on the buyer's machine | `client/supports/fnc_supports_init.sqf` |
 | The MHQ is a broadcast object handle (`MHQ1 = _this; publicVariable "MHQ1"`) with no record of which vehicle it was | `client/dialog/fnc_MHQ_select.sqf:20-22` |
 
 Rows three to five are why an engine save cannot be the mechanism even in the case where it works.
@@ -275,10 +275,14 @@ doing.
    replays several builders, and a per-function flag has to be re-invented at every one of them.
    The position registry it needs is already in place: `Array_of_FOBpos`
    (`server/supports/fnc_fob_server.sqf:84`).
-3. **Mirror support unlocks server-side.** One broadcast array; the client keeps its local copy as
-   the fast path. Players spend CP on these, and once
-   [AP buys permanent capability](economy_plan.md#what-army-power-buys-is-permanent)
-   losing them across a restart is losing the campaign's premium currency.
+3. **Read the support mirror back on restore.** The write half exists:
+   `DUWS_support_permanent` holds the team's permanent unlocks in purchase order, and each client
+   keeps the individual flags as its fast path
+   ([`info/economy.md`](info/economy.md#supports-permanent-and-consumable)). What is missing is the
+   read — a restore has to replay the array into the flags, and a joining client should be told the
+   set rather than inferring it from six broadcast booleans. Consumable unlocks are deliberately out
+   of scope: they are per-player and are lost on death already, so a restart costs no more than a
+   firefight does.
 
 **Taking Locations out of `civ_locations` is not one of them.** The civilian rewrite deliberately
 kept them: the entries are the map's own Locations, never deleted so that the `nearestLocations`

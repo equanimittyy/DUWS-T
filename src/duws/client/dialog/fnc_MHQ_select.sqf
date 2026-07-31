@@ -5,15 +5,18 @@
 // this the second SetVehicleVarName repoints MHQ1 at a new vehicle while the first keeps its
 // actions -- leaving a deploy action and respawn point acting on globals describing something
 // else. Tested with alive, not isNil: fnc_MHQ_destroyed leaves the dead object in the variable.
+// hintC rather than hint: this one has to be read. A corner hint competes with whatever notification
+// the player is already looking at, and the refusal has to explain a rule -- one MHQ, freed only by
+// losing it -- rather than just report a failure.
 if (!isNil "MHQ1" && {alive MHQ1}) exitWith {
-	hint localize "STR_DUWS_T_mhq_exists";
-	[player,"mobile_HQ"] call BIS_fnc_addCommMenuItem;
+	hintC localize "STR_DUWS_T_mhq_exists";
+	["mobile_HQ"] call fnc_support_comm_add;
 };
 
 _target = cursorObject;
 if (_target == objNull) exitWith {
 	hint localize "STR_DUWS_T_imz98waj";
-	[player,"mobile_HQ"] call BIS_fnc_addCommMenuItem;
+	["mobile_HQ"] call fnc_support_comm_add;
 };
 
 _goodVeh = false;
@@ -21,7 +24,7 @@ if (_target isKindOf "car" || _target isKindOf "tank") then {_goodVeh = true};
 
 if (!_goodVeh) exitWith {
 	hint localize "STR_DUWS_T_1gk907or";
-	[player,"mobile_HQ"] call BIS_fnc_addCommMenuItem;
+	["mobile_HQ"] call fnc_support_comm_add;
 };
 
 

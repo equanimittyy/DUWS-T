@@ -228,7 +228,10 @@ fnc_pool_try_spend = {
 		case "AP": { if (WARCOM_blufor_ap >= _cost) then { ["BLU", -_cost, _who] call fnc_ap_adjust; _ok = true; }; };
 		default { ["ERROR", "ECON", format ["fnc_pool_try_spend: unrecognised pool '%1', refused %2", _pool, _cost]] call fnc_log; };
 	};
-	[_replyVar, _ok] remoteExec ["fnc_pool_reply", _requester];
+	// The scaled figure goes back with the verdict: it is computed here and nowhere else, and a
+	// support refund that pays the base price instead under-pays a player who bought late and
+	// mints the difference for one who bought early.
+	[_replyVar, _ok, _cost] remoteExec ["fnc_pool_reply", _requester];
 };
 
 // Client half of the purchase handshake: blocks until the server rules on the request,
@@ -236,8 +239,12 @@ fnc_pool_try_spend = {
 // on timeout rather than falling through: silence must not let a purchase happen.
 // A zero cost short-circuits, because several comm-menu supports are charged at unlock
 // time and pass 0 here.
+// duws_last_charge carries what was actually debited, for the one caller that has to record it
+// (client/supports/fnc_supports_init.sqf). Returned on the side rather than in place of the
+// verdict so the forty existing call sites, which read this as a guard clause, stay as they are.
 fnc_pool_spend = {
 	params [["_pool", "CP"], ["_cost", 0]];
+	duws_last_charge = 0;
 	if (_cost <= 0) exitWith { true };
 	duws_spend_seq = (missionNamespace getVariable ["duws_spend_seq", 0]) + 1;
 	private _replyVar = format ["duws_spend_reply_%1", duws_spend_seq];
@@ -245,7 +252,8 @@ fnc_pool_spend = {
 	private _deadline = diag_tickTime + 5;
 	waitUntil { !isNil _replyVar || {diag_tickTime > _deadline} };
 	private _replied = !isNil _replyVar;
-	private _ok = missionNamespace getVariable [_replyVar, false];
+	(missionNamespace getVariable [_replyVar, [false, 0]]) params ["_ok", "_charged"];
+	duws_last_charge = _charged;
 	missionNamespace setVariable [_replyVar, nil];
 	// A timeout and a refusal look identical to the caller, so log the difference: without
 	// it a dropped reply reads in-game as "not enough CP" with a full pool.
@@ -254,6 +262,6 @@ fnc_pool_spend = {
 };
 
 fnc_pool_reply = {
-	params [["_replyVar", ""], ["_ok", false]];
-	missionNamespace setVariable [_replyVar, _ok];
+	params [["_replyVar", ""], ["_ok", false], ["_charged", 0]];
+	missionNamespace setVariable [_replyVar, [_ok, _charged]];
 };

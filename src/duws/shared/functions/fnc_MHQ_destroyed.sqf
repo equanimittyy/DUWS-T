@@ -19,9 +19,12 @@ if (MHQ_deployed) then {
 };
 
 removeAllActions MHQ1;
-		
-support_mobile_HQ_available = true;
-publicVariable "support_mobile_HQ_available";
+
+// The unlock is the team's and stays bought; what a wreck costs is the designation token, so the
+// comm-menu item goes back to everyone rather than the purchase going back on sale. Whoever spent
+// theirs designating this one gets it back; whoever never spent theirs is skipped by the duplicate
+// guard in fnc_support_comm_add.
+["mobile_HQ"] remoteExec ["fnc_support_comm_add", 0];
 
 // Remove Marker
 //[MHQ1] remoteExec ["kndr_removeMarker", [0,-2] select isDedicated,true];

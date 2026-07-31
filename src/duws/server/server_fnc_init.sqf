@@ -330,6 +330,21 @@ fnc_request_unit = compile preprocessFileLineNumbers "duws\client\dialog\fnc_req
 fnc_request_squad = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_squad.sqf";publicVariable "fnc_request_squad";
 fnc_request_vehicle = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_vehicle.sqf";publicVariable "fnc_request_vehicle";
 fnc_request_support = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_support.sqf";publicVariable "fnc_request_support";
+fnc_support_list_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_support_list_fill.sqf";publicVariable "fnc_support_list_fill";
+fnc_support_sel_changed = compile preprocessFileLineNumbers "duws\client\dialog\fnc_support_sel_changed.sqf";publicVariable "fnc_support_sel_changed";
+// The support catalogue and both of its mechanisms. Executed rather than stored: the file defines
+// several functions, and all of them run on the buyer's machine.
+[] call compile preprocessFileLineNumbers "duws\client\supports\fnc_supports_init.sqf";
+publicVariable "fnc_support_defs";
+publicVariable "fnc_support_owned";
+publicVariable "fnc_support_comm_add";
+publicVariable "fnc_support_comm_used";
+publicVariable "fnc_support_comm_drop";
+publicVariable "fnc_support_buy";
+publicVariable "fnc_support_apply";
+publicVariable "fnc_support_refund";
+publicVariable "fnc_support_wipe";
+fnc_support_perm_grant = compile preprocessFileLineNumbers "duws\server\supports\fnc_support_perm_grant.sqf";
 fnc_convertAPtoCP = compile preprocessFileLineNumbers "duws\client\dialog\fnc_convertAPtoCP.sqf";publicVariable "fnc_convertAPtoCP";
 fnc_request_unit_fob = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_unit_fob.sqf";publicVariable "fnc_request_unit_fob";
 fnc_request_squad_fob = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_squad_fob.sqf";publicVariable "fnc_request_squad_fob";

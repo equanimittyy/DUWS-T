@@ -90,6 +90,12 @@ Three properties are load-bearing:
 - **A timeout refuses.** Silence must not let an effect through. It logs, because a dropped reply is
   otherwise indistinguishable in-game from a genuine refusal.
 
+The reply carries the figure that was actually debited as well as the verdict, and `fnc_pool_spend`
+leaves it in `duws_last_charge` rather than returning it: the forty existing call sites read the
+function as a guard clause and none of them wants a second value. Only the support ledger reads it
+([below](#supports-permanent-and-consumable)), and it has to — the escalation multiplier is applied
+inside `fnc_pool_try_spend`, so the base price the caller passed is not what left the pool.
+
 Three client-side comparisons survive as *advisory* pre-filters, and are commented as such:
 `client/supports/fnc_mapclickarty.sqf`, `client/supports/fnc_mapclickuav.sqf`,
 the redeploy row in `client/dialog/fnc_base_menu_fill.sqf`, plus the opening check in
@@ -119,6 +125,56 @@ Stripping the numbers out and re-formatting from a `%1` placeholder is the tidie
 on localisation grounds: a placeholder added to English but not to the other four languages leaves them
 printing the stale baked figure, which is a wrong number rather than an untranslated one.
 
+## Supports: permanent and consumable
+
+One catalogue, `fnc_support_defs` in `client/supports/fnc_supports_init.sqf`, holds every row of the
+request menu's support list in display order, and the `PERM`/`CONS` column decides everything the two
+mechanisms differ in:
+
+| | Permanent (6 rows) | Consumable (17 rows) |
+|---|---|---|
+| Bought for | the whole team, once | the buyer alone |
+| Slot | none | one of `support_max_slots` |
+| Flag | broadcast, and recorded in `DUWS_support_permanent` | client-local |
+| Refund | never | 100% of what it charged |
+| On death | untouched | lost, `support_death_refund` of the slate returned |
+
+The split is not new; it was latent and unnamed. The four base facilities — arsenal, HALO, vehicle
+repair, vehicle recycle — already broadcast their flag and already sat outside the slot cap, while
+the radio supports already took a slot and already handed the buyer a per-player comm-menu item.
+Mobile HQ and the FOB unlock moved to permanent because both are capabilities rather than
+deliveries: each still charges per use (10 CP a FOB, and the MHQ token is re-issued rather than
+re-bought when the vehicle is destroyed), so team ownership costs nothing it was collecting before.
+
+**Row order is the catalogue's, not a literal.** Both the list build (`fnc_support_list_fill`) and
+the buy/refund handler read the same array and index it the same way, and the listbox keeps a
+row → definition map in `uiNamespace`. The previous shape agreed a row number between two files by
+hand, so a row added anywhere but the end repointed every row below it at another support's price
+and flag — which had already happened once, to the colour pass.
+
+**A refund pays back the recorded charge, not the price.** `fnc_pool_try_spend` scales every cost by
+`escalation_multiplier` on entry, so a refund computed from the base under-pays a player who bought
+late, and one computed at the current multiplier mints the difference for a player who bought early:
+buy the slate at 1.0x, refund at 2.0x, and the difference comes from nowhere. What the server
+debited is what comes back.
+
+**It refunds unlocks, never uses.** Every comm-menu support charges again when it is called
+(`fnc_mapclickarty` and the five drops all spend on use), so buying, calling and refunding around a
+single fire mission costs exactly that fire mission — which is what stops the refund from being a way
+to replay a campaign's worth of supports for free.
+
+**A support that is not in hand cannot be refunded.** The fourteen comm-menu classes with
+`removeAfterExpressionCall = 1` are absent from the player's menu for as long as their mission is
+running, and `fnc_supports_init` tracks presence for its own reasons
+([`arma_engine_gotchas.md`](arma_engine_gotchas.md#a-comm-menu-item-id-goes-stale-the-moment-the-item-is-used)),
+so that one test covers a fire mission in flight, a taxi in transit and a High Command aircraft in
+the air without a guard per support.
+
+Both constants are in `server/server_var_init.sqf` and broadcast because clients read them:
+`support_max_slots` (8, unchanged) and `support_death_refund` (0.1). The death share is deliberately
+small — a generous one makes dying a cheaper way to liquidate a slate than walking back to a base,
+which inverts what the death penalty is for.
+
 ## Faucets
 
 | Source | File | Amount |
@@ -137,6 +193,7 @@ printing the stale baked figure, which is a wrong number rather than an untransl
 | Killhouse training | `server/misc/fnc_createKillhouse.sqf:1072` | +1 (targets) or +10 (challenge), once, on clearing all 100 |
 | Rare-zombie kill (WBK) | `server/misc/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
 | AP→CP conversion | `client/dialog/fnc_convertAPtoCP.sqf` | 15 AP → 10 CP, one-way |
+| Support refund | `client/supports/fnc_supports_init.sqf` | the recorded charge in full; `support_death_refund` of the slate when its holder dies |
 
 **A zone carries two figures, and they behave differently on purpose.** Both ride the capture triggers
 — `fnc_createzone.sqf:280` → `fnc_captured.sqf` → `fnc_opfor_cap.sqf` → `fnc_blufor_cap.sqf` and round
@@ -178,7 +235,7 @@ only server-side caps read it.
 
 | Category | Where | Cost |
 |---|---|---|
-| Radio-support unlocks | `client/dialog/fnc_request_support.sqf` | 5–25 (supply 5 … CAS/CAP 25) |
+| Support unlocks | `client/supports/fnc_supports_init.sqf` | 2–25 (boat taxi 2 … CAS/CAP 25); refundable if consumable, see [above](#supports-permanent-and-consumable) |
 | Reinforcement units | `dialog/fnc_request_unit*.sqf` | 2–4 (from `blufor_RQST_UNIT_*`) |
 | Vehicles | `dialog/fnc_request_vehicle*.sqf` | 5–100 (from `fnc_evalVehicleCost`, clamped) |
 | Squads | `dialog/fnc_request_squad*.sqf` | per squad table |
@@ -187,7 +244,7 @@ only server-side caps read it.
 | Mobile HQ | `client/dialog/fnc_MHQ_select.sqf` | 10 |
 | Heli / boat taxi | `supports/taxi/` | fixed |
 | Base repair, HQ and FOB redeploy, sitrep | `server/supports/fnc_activateBaseRepairStation.sqf`, `server/misc/fnc_redeployHQUnits.sqf`, `fnc_redeployFOBUnits.sqf`, `server/supports/fnc_sitrep_support.sqf` | 2 / 2 / 2 / 1 |
-| Death | `client/client_init.sqf:194` | `DUWSMP_CP_death_cost` (0–10) |
+| Death | `client/client_init.sqf:172,187` | `DUWSMP_CP_death_cost` (0–10), plus the holder's consumable slate |
 
 Open balance questions — the territory snowball, the loot-to-analysis faucet, recycle ownership, AP
 inflation and the bribe figures — are in

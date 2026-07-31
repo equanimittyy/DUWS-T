@@ -108,56 +108,32 @@ collapses.
 
 ### The eight slots
 
-`support_count` starts at 0 (`client/client_init.sqf:204`); every comm-menu unlock refuses when
-`support_count > 7` and then increments it. The campaign-long budget is eight radio supports, and
-the slate is messier than the 21 menu rows imply:
+The budget is `support_max_slots` (8) consumable supports per player, and which rows draw on it is
+now the catalogue's `PERM`/`CONS` column rather than a per-case habit — see
+[`info/economy.md`](info/economy.md#supports-permanent-and-consumable). Mobile HQ's half-in state,
+where it tested the cap without ever consuming one, was resolved by making it permanent.
 
-| Category | Rows | Behaviour |
-|---|---|---|
-| Slot-consuming | 17 | Tests the cap, increments it |
-| Exempt | 4 — armory, HALO, vehicle recycle, vehicle repair | Neither tests nor increments; base facilities, not radio supports |
-| Half-in | 1 — Mobile HQ | Tests the cap, never increments |
-
-**Advanced supports draw on the same eight slots.** A second currency that bought its own slots
-would raise the campaign-long budget while appearing to be bookkeeping, and the cap would stop
-meaning anything the moment AP could bypass it.
-
-Mobile HQ's half-in state is an inconsistency to resolve rather than a design: it can be blocked
-by a full slate while contributing nothing to one.
+**Advanced supports draw on the same slots.** A second currency that bought its own would raise the
+campaign-long budget while appearing to be bookkeeping, and the cap would stop meaning anything the
+moment AP could bypass it.
 
 ### Refunding the slate
 
-Eight permanent slots against 17 competing rows means a player commits at hour one to a shape
-they cannot evaluate until hour six. A refund is the escape hatch.
+Eight permanent slots against seventeen competing rows means a player commits at hour one to a
+shape they cannot evaluate until hour six. The refund is the escape hatch, and its CP half is
+built: [`info/economy.md`](info/economy.md#supports-permanent-and-consumable) has the mechanism,
+including why it pays back the recorded charge rather than the price and why a support that is away
+on a mission cannot be sold.
 
-**The refund returns 100% of both currencies and resets the slate wholesale.** No percentage tax:
-a partial refund falls hardest on the inexperienced player the mechanic exists for, and a tax on
-correcting a mistake teaches players to research the mission outside it rather than play it.
+Two things this plan asked for came out differently, and both are better. The refund is
+**per support** rather than a wholesale reset of the slate, because a slate you re-cut one row at a
+time is a loadout selector in the useful sense rather than an all-or-nothing button. And it needs no
+place gate of its own: the support list only exists inside the request menu, which only opens at HQ
+or a FOB, so the trip is already the price.
 
-**It refunds unlocks only.** Per-use charges are consumed and never come back, which is what
-stops the refund from being a way to replay a campaign's worth of supports for free.
-
-**It is available only at HQ or a FOB.** Unrestricted, a free and repeatable total refund does
-not fix the cap, it deletes it — the slate becomes a loadout selector, refunded into artillery
-before an assault and back into transport afterwards, and eight slots that never forgo anything
-are not a constraint. Gating on place rather than on price keeps the full refund, costs the
-player a trip instead of points, and needs no invented number.
-
-Once the slate is full, purchases that would consume a slot are refused with a message naming the
-refund as the remedy. The refusal already exists — it currently reports only that the slate is
-full, which tells the player they are stuck rather than what to do.
-
-The four exempt rows are excluded: refunding a vehicle repair station is dismantling
-infrastructure for cash, which is a different mechanic with its own rules. Mobile HQ follows
-whichever way its half-in status is resolved.
-
-**A true 100% means recording what was charged.** `fnc_pool_try_spend` scales every price by
-`escalation_multiplier` on entry and nothing stores the scaled figure; the `_cost` local at each
-`fnc_request_support.sqf` case is the base price. A refund computed from the base under-pays a
-player who bought late, and one computed at the current multiplier over-pays a player who bought
-early — buy the slate at 1.0x, refund at 2.0x, and the difference is minted from nothing. The
-refund pays back the recorded charge, per unlock, in both currencies. That record is new state
-and it is the substance of the feature; the reset itself is bookkeeping.
+What is left for AP is the second currency, not the mechanism. When a support costs both pools the
+ledger has to record both charges and the refund has to return both; today it records one number per
+support because there is one pool to record.
 
 ## Army Power
 
@@ -685,22 +661,17 @@ cooldown replaces the price; it does not accompany it.
 
 ## The unlock state model has to be settled first
 
-`client/includes/supports_init.hpp` now defaults its five broadcast flags behind `isNil` (`:11,30,
-33,36,40,44`), so a joining client no longer clobbers team state on arrival. What that fix rests
-on is unverified: it preserves a broadcast value only if `publicVariable` values are delivered to
-joining clients at all, which is an open engine question in
-[`KNOWN_ISSUES.md`](../KNOWN_ISSUES.md). If they are not, the defaults preserve nothing and the
-team can still be charged twice for the same unlock.
+The mixed locality that blocked this is now named rather than incidental. A permanent unlock is
+team state, broadcast, and mirrored on the server in `DUWS_support_permanent`; a consumable is the
+buyer's alone and is deliberately not broadcast, because it dies with its buyer. `support_count` is
+still per-client, and that is now correct rather than a gap — it counts one player's slate.
 
-Either way it is not enough for what this plan needs. `support_count` is client-local and never
-broadcast, so the eight-slot budget is per-client rather than per-team. A refund must clear
-roughly 21 flags of mixed locality, reset that counter, and remove comm-menu items that
-`BIS_fnc_addCommMenuItem` added per player. And nothing anywhere records what was charged.
-
-The server-side unlock mirror that
-[`campaign_persistence_plan.md`](campaign_persistence_plan.md) already calls for is the
-prerequisite: one authoritative record of what the team owns and what it paid, which the refund
-reads, the persistence snapshot saves, and a joining client is told rather than guesses.
+One thing the flags rest on is still unverified: defaulting behind `isNil` preserves a broadcast
+value only if `publicVariable` values are delivered to joining clients at all, which is an open
+engine question in [`KNOWN_ISSUES.md`](../KNOWN_ISSUES.md). If they are not, the defaults preserve
+nothing and the team can still be charged twice for the same permanent unlock. The server mirror
+does not close that on its own: it records what the team owns, but nothing yet reads it back to a
+joining client.
 
 ## Build order
 
@@ -711,7 +682,7 @@ Each phase is independently shippable, and the ordering is forced rather than ch
 | **Floor** | `fnc_ap_adjust` integer invariant; both earned counters and both tier globals, seeded by the presets; the eight live pool reads switched to tiers; CP, AP and tier in the map readout; presets regenerated to the rungs | Without the tier globals the first AP spend downgrades that side's own patrols. Without a readout, deciding what to buy is guesswork |
 | **Deflation** | `zone_ap_swing` to 0.15; `ap_reward_multiplier` at 0.3, and 1.0 with no town reputation; `zone_ap_consolation` to 0; the OPFOR flat income; delete the AP-to-CP converter | Two constants and a deletion, playable the moment they land. Nothing else matters until AP is scarce |
 | **CP becomes a flow** | Per-use CP on supports; the intel-analysis cap | Independent of AP entirely |
-| **AP becomes spendable** | The server-side unlock mirror; the dual case in `fnc_pool_try_spend`; AP halves on advanced supports and combat vehicles; the refund | The mirror is the prerequisite, and it is what makes a permanent unlock survive a reconnect |
+| **AP becomes spendable** | The dual case in `fnc_pool_try_spend`; AP halves on advanced supports and combat vehicles; the refund's second currency | The permanent/consumable split and the CP refund are in; what is left is the second pool |
 | **The commander** | One director thread, one archetype roll, four sinks; town garrisons I-IV; hardpoints; town events | Everything above is its budget |
 
 ## Open questions
@@ -735,11 +706,8 @@ Each phase is independently shippable, and the ordering is forced rather than ch
 - **Where the boundary falls for armed cars and wheeled APCs.** Tanks and unarmed transport are
   clear; the middle of the catalogue is where a rule stated as "armed costs AP" starts pricing an
   armed offroad like a main battle tank.
-- **Whether Mobile HQ takes a slot.** It tests the cap without consuming one, and either answer is
-  defensible — but the refund needs it settled.
 - **Whether the support call moves to `game_master` alone**, and what a squad lead sees when it
   does.
-- **Whether the refund has a cooldown** on top of the HQ/FOB gate, or instead of it.
 - **Whether the player can learn the commander's archetype, and how.** One the player can never
   perceive is variance rather than a mechanic; the intel system is the obvious route
   ([`info/intel_system.md`](info/intel_system.md)), and observed behaviour is the free one.

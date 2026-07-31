@@ -26,7 +26,7 @@ _fnc_restoreCommMenu = {
 		case 6: {"napalm"};
 		default {""};
 	};
-	if (_item isNotEqualTo "") then { [player, _item] call BIS_fnc_addCommMenuItem };
+	if (_item isNotEqualTo "") then { [_item] call fnc_support_comm_add };
 };
 
 // IF NOT ENOUGH PTS

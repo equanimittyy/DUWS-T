@@ -66,8 +66,7 @@ _vehicle addEventHandler ["Killed", {
         if (!HC_CAS_active) exitWith {};
 
         // 重新添加HC菜单项并清除状态
-        _hcCAS = [player,"hc_CAS"] call BIS_fnc_addCommMenuItem;
-        hcCAS = _hcCAS;
+        ["hc_CAS"] call fnc_support_comm_add;
         CASInUse = false;
         HC_CAS_active = false;
         HC_CAS_currentVehicle = nil;
@@ -91,8 +90,7 @@ _vehicle addEventHandler ["Deleted", {
     if (HC_CAS_killedPending) exitWith {};
 
     // 立即重新添加HC菜单项（机组存活时删除）
-    _hcCAS = [player,"hc_CAS"] call BIS_fnc_addCommMenuItem;
-    hcCAS = _hcCAS;
+    ["hc_CAS"] call fnc_support_comm_add;
     CASInUse = false;
     HC_CAS_active = false;
     HC_CAS_currentVehicle = nil;

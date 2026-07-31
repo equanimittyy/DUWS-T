@@ -14,7 +14,7 @@ _music = [] call fnc_taxi_music;
 _foundPickupPos = [_posplayer, 20,_radius,20,0,0.5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos; // find a valid pos
 
 // try to find a pos, if no pos is found exit the script
-if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_nolz"; sleep 10; _art = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;};
+if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_nolz"; sleep 10; ["helo_taxi"] call fnc_support_comm_add;};
 
 // A POS NEAR THE PLAYER HAS BEEN FOUND, CHOPPA EN ROUTE
 _speakeracteam = localize "STR_DUWS_T_actionteam";
@@ -87,7 +87,7 @@ _abort = {
 	_helo land "LAND";
 	_helo engineOn false;
 	sleep 300;
-	_art = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;
+	["helo_taxi"] call fnc_support_comm_add;
 	{deleteVehicle _x;} foreach units _helogroup;
 	deleteVehicle _helo;
 };
@@ -283,7 +283,7 @@ if (call _check_damage) exitWith {
 	_speaker = localize "STR_DUWS_T_OVERLORD";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 	sleep 300;
-	_art = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;
+	["helo_taxi"] call fnc_support_comm_add;
 	{deleteVehicle _x;} foreach units _helogroup;
 	deleteVehicle _helo;
 }; 
@@ -304,4 +304,4 @@ terminate _LzSpawnclose;
 deleteVehicle _helo;
 
 sleep 2;
-_art = [player,"helo_taxi"] call BIS_fnc_addCommMenuItem;
+["helo_taxi"] call fnc_support_comm_add;

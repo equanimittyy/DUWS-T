@@ -3511,6 +3511,38 @@
                 <Original>Your death has cost BLUFOR %1 CP.</Original>
                 <English>Your death has cost BLUFOR %1 CP.</English>
             </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_HEAD_PERM">
+                <Original>--- PERMANENT (bought once, for the whole team) ---</Original>
+                <English>--- PERMANENT (bought once, for the whole team) ---</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_HEAD_CONS">
+                <Original>--- YOURS (%1 of %2 slots used, refundable) ---</Original>
+                <English>--- YOURS (%1 of %2 slots used, refundable) ---</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_REFUND_BUTTON">
+                <Original>REFUND</Original>
+                <English>REFUND</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_REFUNDED">
+                <Original>Support handed back. %1 CP returned in full.</Original>
+                <English>Support handed back. %1 CP returned in full.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_NO_REFUND">
+                <Original>Permanent supports are bought for the team and cannot be handed back.</Original>
+                <English>Permanent supports are bought for the team and cannot be handed back.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_SLOTS_FULL">
+                <Original>All %1 support slots are in use. Refund one to free a slot.</Original>
+                <English>All %1 support slots are in use. Refund one to free a slot.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_LOST_TITLE">
+                <Original>Supports Lost</Original>
+                <English>Supports Lost</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_LOST_MSG">
+                <Original>Your radio supports died with you. %1 CP recovered.</Original>
+                <English>Your radio supports died with you. %1 CP recovered.</English>
+            </Key>
         </Container>
         <Container name="Zones &amp; Campaign Flow">
             <Key ID="STR_DUWS_T_heli_moving">
@@ -5226,8 +5258,8 @@
                 <English>Vehicle must be a car, tank, helicopter, or fixed-wing aircraft. Please try again.</English>
             </Key>
             <Key ID="STR_DUWS_T_mhq_exists">
-                <Original>A Mobile HQ is already active. Only one can exist at a time.</Original>
-                <English>A Mobile HQ is already active. Only one can exist at a time.</English>
+                <Original>A Mobile HQ is already assigned, and is marked on your map. Only one exists at a time: the current one has to be destroyed before another vehicle can be designated. Your request has been returned to the support menu.</Original>
+                <English>A Mobile HQ is already assigned, and is marked on your map. Only one exists at a time: the current one has to be destroyed before another vehicle can be designated. Your request has been returned to the support menu.</English>
             </Key>
             <Key ID="STR_DUWS_T_0a6o9dsm">
                 <German>Setze TF Gruppe ein!</German>
@@ -5249,13 +5281,6 @@
                 <Chinesesimp>已有的支援太多了</Chinesesimp>
                 <Original>Too Many Active Supports</Original>
                 <English>Too Many Active Supports</English>
-            </Key>
-            <Key ID="STR_DUWS_T_iadwwap5">
-                <German>Du hast keine weiteren Funk-Unterstüztungs Plätze mehr verfügbar. MAX = 8</German>
-                <Spanish>No tiene más renuras para soporte de radio disponibles. Máx = 8</Spanish>
-                <Chinesesimp>你没有更多可用的无线电支援插槽。最大值=8</Chinesesimp>
-                <Original>No more Radio Support slots available (MAX = 8)</Original>
-                <English>No more Radio Support slots available (MAX = 8)</English>
             </Key>
             <Key ID="STR_DUWS_T_8c1i4vga">
                 <German>Diese Unterstützung ist bereits verfügbar</German>
@@ -5312,13 +5337,6 @@
                 <Chinesesimp>在再次请求之前，您必须等待几分钟，以便选项返回到0-8菜单！</Chinesesimp>
                 <Original>You must wait a few minutes for the item to return to the 0-8 menu before requesting it again!</Original>
                 <English>You must wait a few minutes for the item to return to the 0-8 menu before requesting it again!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_wdgpslhe">
-                <German>Unterstützung gesperrt &amp; 50% zurückerstattet</German>
-                <Spanish>Apoyo bloqueado &amp; 50% del costo devuelto</Spanish>
-                <Chinesesimp>锁定支援 &amp; 50% CP点已返还</Chinesesimp>
-                <Original>Support Locked &amp; 50% Refunded.</Original>
-                <English>Support Locked &amp; 50% Refunded.</English>
             </Key>
             <Key ID="STR_DUWS_T_cghsxhhu">
                 <German>Zeige auf ein Fahrzeug und wähle =Baue Mobiles HQ= im Funk-Menü</German>
@@ -6337,13 +6355,6 @@
                 <Chinesesimp>申请拒绝，附近还有敌人。</Chinesesimp>
                 <Original>Request denied. Enemies are too close to this position.</Original>
                 <English>Request denied. Enemies are too close to this position.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_lqsyni7b">
-                <Spanish>No hay una posición válida para el PdA.  Intente ir a un lugar plano y sin objetos.</Spanish>
-                <German>Keine gültigen FOB Positionen in der Nähe gefunden. Bewege dich in ein flaches und freies Gebiet</German>
-                <Chinesesimp>附近没有适合的FOB位置,试着去一个平坦没有障碍物的地方。</Chinesesimp>
-                <Original>No valid FOB position nearby. Move to a flat, clear area</Original>
-                <English>No valid FOB position nearby. Move to a flat, clear area</English>
             </Key>
             <Key ID="STR_DUWS_T_1k60dqrv">
                 <Spanish>Recibido, el PdA está siendo desplegado...</Spanish>

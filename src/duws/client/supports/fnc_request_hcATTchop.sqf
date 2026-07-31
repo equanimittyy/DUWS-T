@@ -60,8 +60,7 @@ _vehicle addEventHandler ["Killed", {
     if (!HC_ATTchop_active) exitWith {};
 
     // 重新添加HC菜单项并清除状态
-    _hcAttChop = [player,"hc_ATTchop"] call BIS_fnc_addCommMenuItem;
-    hcAttChop = _hcAttChop;
+    ["hc_ATTchop"] call fnc_support_comm_add;
     AttChopInUse = false;
     HC_ATTchop_active = false;
     HC_ATTchop_currentVehicle = nil;
@@ -85,8 +84,7 @@ _vehicle addEventHandler ["Deleted", {
     if (HC_ATTchop_killedPending) exitWith {};
 
     // 立即重新添加HC菜单项（机组存活时删除）
-    _hcAttChop = [player,"hc_ATTchop"] call BIS_fnc_addCommMenuItem;
-    hcAttChop = _hcAttChop;
+    ["hc_ATTchop"] call fnc_support_comm_add;
     AttChopInUse = false;
     HC_ATTchop_active = false;
     HC_ATTchop_currentVehicle = nil;

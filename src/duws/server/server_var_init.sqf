@@ -81,6 +81,20 @@ cp_reward_multiplier = 1;publicVariable "cp_reward_multiplier";
 kill_cp_kills = 10;
 kill_cp_award = 1;
 
+// The consumable-support slate. support_max_slots is how many a player may hold at once, the
+// campaign-long budget that makes choosing between them mean anything; support_death_refund is
+// the share of what they paid that comes back when they die holding it. That share is deliberately
+// small: a generous one would make dying a cheaper way to liquidate a slate than walking back to a
+// base and refunding it, which is the opposite of what the death penalty is for. Both are read on
+// clients, so both are broadcast.
+support_max_slots = 8;      publicVariable "support_max_slots";
+support_death_refund = 0.1; publicVariable "support_death_refund";
+
+// Which permanent supports the team has bought, in purchase order. Their broadcast flags stay
+// every client's fast path; this holds the same set as data a campaign save can walk, instead of
+// as a scatter of named globals a restore would have to know one at a time.
+DUWS_support_permanent = []; publicVariable "DUWS_support_permanent";
+
 // Zone payouts, all shares rather than absolutes so they scale with a zone's size. Two
 // separate figures ride the capture triggers: the zone's *worth*, fixed at generation from
 // its radius and never reassigned, and its *bounty*, the CP the next capture pays.

@@ -13,7 +13,7 @@ _music = [] call fnc_taxi_music;
 _foundPickupPos = [_posplayer, 0,_radius,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos; // find a valid pos
 
 // try to find a pos, if no pos is found exit the script
-if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_boattaxi_noshore"; sleep 10; [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;};
+if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_boattaxi_noshore"; sleep 10; ["boat_taxi"] call fnc_support_comm_add;};
 
 // A POS NEAR THE PLAYER HAS BEEN FOUND, GUNBOAT EN ROUTE
 
@@ -53,7 +53,7 @@ _abort = {
     deleteMarker str(_markerpickup);
     [localize "STR_DUWS_T_OVERLORD", ([localize _msg] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
     sleep 300;
-    [player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
+    ["boat_taxi"] call fnc_support_comm_add;
 };
 
 _wp = _boatgroup addWaypoint [[_foundPickupPos select 0, (_foundPickupPos select 1)-75], 0];
@@ -155,4 +155,4 @@ deleteVehicle _boat;
 
 
 sleep 2;   // spacer: 118 + 2 = the 120s success cooldown
-[player,"boat_taxi"] call BIS_fnc_addCommMenuItem;
+["boat_taxi"] call fnc_support_comm_add;

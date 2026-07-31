@@ -9,7 +9,7 @@ class CfgCommunicationMenu
         text = "$STR_DUWS_T_q3roy1kl"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
 		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
-        expression = "[6, 100, 8, 3, 1, 10, 'Sh_155mm_AMOS'] spawn fnc_mapclickarty"; // Code executed upon activation (ignored when the submenu is not empty)   Sh_155mm_AMOS
+        expression = "['artillery'] call fnc_support_comm_used; [6, 100, 8, 3, 1, 10, 'Sh_155mm_AMOS'] spawn fnc_mapclickarty"; // Code executed upon activation (ignored when the submenu is not empty)   Sh_155mm_AMOS
         icon = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\artillery_ca.paa"; // Icon displayed permanently next to the command menu
         cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -20,7 +20,7 @@ class CfgCommunicationMenu
         text = "$STR_DUWS_T_d0x7zj1h"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
 		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
-        expression = "[8, 50, 5, 3, 2, 5, 'Sh_82mm_AMOS'] spawn fnc_mapclickarty"; // Code executed upon activation (ignored when the submenu is not empty)
+        expression = "['mortar'] call fnc_support_comm_used; [8, 50, 5, 3, 2, 5, 'Sh_82mm_AMOS'] spawn fnc_mapclickarty"; // Code executed upon activation (ignored when the submenu is not empty)
         icon = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\mortar_ca.paa";
         cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -31,7 +31,7 @@ class CfgCommunicationMenu
         text = "$STR_DUWS_T_wcohwh4p"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
 		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
-        expression = "[1, 2, 1, 1, 3, 3, 'Bo_Mk82'] spawn fnc_mapclickarty"; // Code executed upon activation (ignored when the submenu is not empty)
+        expression = "['jdam'] call fnc_support_comm_used; [1, 2, 1, 1, 3, 3, 'Bo_Mk82'] spawn fnc_mapclickarty"; // Code executed upon activation (ignored when the submenu is not empty)
         icon = "\a3\ui_f\data\gui\cfg\CommunicationMenu\cas_ca.paa";
         cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -42,7 +42,7 @@ class CfgCommunicationMenu
         text = "$STR_DUWS_T_ifnnl0j7"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
 		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
-        expression = "[1, 50, 1, 1, 4, 1, 'Laser'] spawn fnc_mapclickarty"; // Code executed upon activation (ignored when the submenu is not empty)
+        expression = "['laser'] call fnc_support_comm_used; [1, 50, 1, 1, 4, 1, 'Laser'] spawn fnc_mapclickarty"; // Code executed upon activation (ignored when the submenu is not empty)
         icon = "\a3\ui_f\data\gui\cfg\hints\Head_ca.paa";
         cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -53,7 +53,7 @@ class CfgCommunicationMenu
         text = "$STR_DUWS_T_jznptb3c"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
 		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
-        expression = "[1, 175, 1, 90, 5, 20, 'Cluster'] spawn fnc_mapclickarty"; 
+        expression = "['cluster'] call fnc_support_comm_used; [1, 175, 1, 90, 5, 20, 'Cluster'] spawn fnc_mapclickarty"; 
         icon = "\a3\ui_f\data\gui\cfg\hints\Death_ca.paa";
         cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -64,7 +64,7 @@ class CfgCommunicationMenu
         text = "$STR_DUWS_T_bhmydfkv"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
 		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
-        expression = "[1, 50, 1, 8, 6, 15, 'Napalm'] spawn fnc_mapclickarty"; 
+        expression = "['napalm'] call fnc_support_comm_used; [1, 50, 1, 8, 6, 15, 'Napalm'] spawn fnc_mapclickarty"; 
         icon = "\a3\ui_f\data\gui\cfg\hints\Death_ca.paa";
         cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -134,7 +134,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_n17vw60y"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "[5] spawn fnc_mapclickuav"; 
+        expression = "['uav_recon'] call fnc_support_comm_used; [5] spawn fnc_mapclickuav"; 
         icon = "\a3\ui_f\data\gui\cfg\hints\Radar_ca.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -144,7 +144,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_h3uo0102"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "[getpos player, 500, 10] spawn fnc_request_fob"; 
+        expression = "['fob_support'] call fnc_support_comm_used; [getpos player, 500, 10] spawn fnc_request_fob"; 
         icon = "\a3\ui_f\data\gui\cfg\hints\Commanding_ca.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -154,7 +154,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_1ptvv5b1"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "[getpos player,100, 0] spawn fnc_helotaxi"; 
+        expression = "['helo_taxi'] call fnc_support_comm_used; [getpos player,100, 0] spawn fnc_helotaxi"; 
         icon = "\A3\ui_f\data\Map\VehicleIcons\iconHelicopter_ca.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -164,7 +164,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_helolift"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "[getpos player,100, 0] spawn fnc_helolift"; 
+        expression = "['helo_lift'] call fnc_support_comm_used; [getpos player,100, 0] spawn fnc_helolift"; 
         icon = "\A3\ui_f\data\Map\VehicleIcons\iconHelicopter_ca.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -174,7 +174,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_evqwlyhz"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "[getpos player,10, 0] spawn fnc_boattaxi"; 
+        expression = "['boat_taxi'] call fnc_support_comm_used; [getpos player,10, 0] spawn fnc_boattaxi"; 
         icon = "\A3\ui_f\data\Map\VehicleIcons\iconShip_ca.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -184,7 +184,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_9bxjbidl"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "[0] spawn fnc_request_hcATTchop"; 
+        expression = "['hc_ATTchop'] call fnc_support_comm_used; [0] spawn fnc_request_hcATTchop"; 
         icon = "\A3\ui_f\data\Map\Markers\NATO\b_air.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -195,7 +195,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_f5y7ue87"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "[0] spawn fnc_request_hcCAS"; 
+        expression = "['hc_CAS'] call fnc_support_comm_used; [0] spawn fnc_request_hcCAS"; 
         icon = "\A3\ui_f\data\Map\Markers\NATO\b_plane.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -206,7 +206,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_ooi6w4yh"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "[0] spawn fnc_MHQ_select"; 
+        expression = "['mobile_HQ'] call fnc_support_comm_used; [0] spawn fnc_MHQ_select"; 
         icon = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\attack_ca.paa"; // Icon displayed permanently next to the command menu
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item

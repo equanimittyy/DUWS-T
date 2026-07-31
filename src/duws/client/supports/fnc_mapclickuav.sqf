@@ -12,7 +12,7 @@ clicked = false;
 if (commandpointsblu1 < _cost) exitWith {
 	["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
 	sleep 30;
-	[player,"uav_recon"] call BIS_fnc_addCommMenuItem;
+	["uav_recon"] call fnc_support_comm_add;
 };
 
 // _cost rides the binary form so the handler can read the price out of _this. It releases
@@ -24,7 +24,7 @@ if (!(["UAV", "[_pos,500,_this,player] remoteExec ['fnc_uav_scanner', 2];
 	openMap false;
 	hint localize 'STR_DUWS_T_6u8qilfh'", _cost] call fnc_mapclick_claim)) exitWith {
 	// The comm-menu entry is consumed on selection, so a refusal has to hand it back.
-	[player,"uav_recon"] call BIS_fnc_addCommMenuItem;
+	["uav_recon"] call fnc_support_comm_add;
 };
 
 // Opened here rather than left to the player, so the brief can be drawn on the map like every
@@ -51,4 +51,4 @@ while {_timer>0 AND !clicked} do {
 ["UAV"] call fnc_mapclick_release;
 openMap false;
 sleep 80;
-[player,"uav_recon"] call BIS_fnc_addCommMenuItem;
+["uav_recon"] call fnc_support_comm_add;
