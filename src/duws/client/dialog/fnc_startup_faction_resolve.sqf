@@ -27,7 +27,8 @@ switch (BLUFOR_Faction_X) do {
     };
     case "AUTODETECT": {
         // Keep the picker open for the OPFOR round only when OPFOR also AutoDetects.
-        ["Select Blufor Faction", !_opfAuto] call fnc_factionSelector;
+        // Never zombies, in any mode: the player's own side is not what the infection fields.
+        ["Select Blufor Faction", !_opfAuto, false] call fnc_factionSelector;
         selectedFaction_BLU = selectedFaction; publicVariable "selectedFaction_BLU";
     };
 };
@@ -46,7 +47,9 @@ switch (OPFOR_Faction_X) do {
         waitUntil { sleep 0.1; duws_custom_faction_back || {OPFfactionDataTemp != ""} };
     };
     case "AUTODETECT": {
-        ["Select Opfor Faction", true] call fnc_factionSelector;
+        // The zombie mode picks its enemy from the zombie factions and nothing else; every other
+        // mode gets the list with those filtered out.
+        ["Select Opfor Faction", true, duws_gamemode isEqualTo "zombies"] call fnc_factionSelector;
         selectedFaction_OPF = selectedFaction; publicVariable "selectedFaction_OPF";
     };
 };

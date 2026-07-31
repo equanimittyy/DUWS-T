@@ -289,6 +289,38 @@
                 <Original>Your own campaign. Every option on this screen and the next is yours to set.</Original>
                 <English>Your own campaign. Every option on this screen and the next is yours to set.</English>
             </Key>
+            <Key ID="STR_DUWS_T_gamemode">
+                <Original>Game Mode</Original>
+                <English>Game Mode</English>
+            </Key>
+            <Key ID="STR_DUWS_T_gamemode_duws">
+                <Original>DUWS</Original>
+                <English>DUWS</English>
+            </Key>
+            <Key ID="STR_DUWS_T_gamemode_duws_desc">
+                <Original>OPFOR hold the island in zones. Take them one at a time and spend what you earn on the force that takes the next.</Original>
+                <English>OPFOR hold the island in zones. Take them one at a time and spend what you earn on the force that takes the next.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_gamemode_guerilla">
+                <Original>Guerilla</Original>
+                <English>Guerilla</English>
+            </Key>
+            <Key ID="STR_DUWS_T_gamemode_guerilla_desc">
+                <Original>OPFOR outnumber and outgun you from the start. Fewer supports, heavier enemy forces, and every weapon and supply crate has to be earned. By you.</Original>
+                <English>OPFOR outnumber and outgun you from the start. Fewer supports, heavier enemy forces, and every weapon and supply crate has to be earned. By you.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_gamemode_zombies">
+                <Original>Zombies</Original>
+                <English>Zombies</English>
+            </Key>
+            <Key ID="STR_DUWS_T_gamemode_zombies_missing">
+                <Original>Zombies needs the Ravage or WBK mod, and neither is loaded. Game mode set back to DUWS.</Original>
+                <English>Zombies needs the Ravage or WBK mod, and neither is loaded. Game mode set back to DUWS.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_gamemode_zombies_desc">
+                <Original>Fight back infected hordes or demons. Build up a survivor base, survive, and get off the island. Needs the Ravage or WBK mod.</Original>
+                <English>Fight back infected hordes or demons. Build up a survivor base, survive, and get off the island. Needs the Ravage or WBK mod.</English>
+            </Key>
             <Key ID="STR_DUWS_T_i565mofh">
                 <German>DEFINIERE DIE PARAMETER FÜR DEINE KAMPAGNE</German>
                 <Spanish>Defina los parámetros de su campaña</Spanish>

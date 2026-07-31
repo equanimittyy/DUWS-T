@@ -352,6 +352,10 @@ econ_tick = 0;
 
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
 
+// Campaign game mode: "duws", "guerilla" or "zombies". Republished by the faction screen once the
+// host picks; declared here so a machine that never ran setup still reads a mode rather than nil.
+duws_gamemode = "duws"; publicVariable "duws_gamemode";
+
 // Two permission lists of playable slot names, both checked as
 // (vehiclevarname player) in <list>. game_master owns campaign-level controls -- the setup
 // flow, side-mission requests, the global heal. Squad_Leaders owns anything that spends the

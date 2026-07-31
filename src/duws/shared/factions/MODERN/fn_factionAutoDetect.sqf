@@ -639,12 +639,30 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 
 
 
+// Is this faction class a zombie faction? Matched on display name rather than a per-mod class
+// list: the mission supports two zombie mods and cannot name every faction either of them ships,
+// but both name theirs for what they field. The same test decides both directions -- zombies are
+// kept out of every ordinary pick, and are the only thing the zombie game mode offers OPFOR.
+// Markers live inside the block rather than in a global: the block is what gets published to
+// clients, and a companion global would have to be published in lockstep with it.
+fnc_factionIsZombie = compileFinal {
+	params ["_factionClass"];
+	private _name = toLower getText (configFile >> "CfgFactionClasses" >> _factionClass >> "displayName");
+	(["zombie", "undead", "infected"] findIf { _name find _x >= 0 }) >= 0
+};
+
 // return list of all valid factions without duplication, such as with one faction duplicated/defined for multiple sides
+// _wantZombies inverts the zombie filter rather than lifting it: a caller gets the ordinary
+// factions or the zombie ones, never both in one list.
 fnc_getAllFactionsClean = compileFinal {
+	params [["_wantZombies", false]];
 	private _factionsRef = [];
 	private _factions = [];
-	
-	(call BIS_fnc_getFactions) select { getNumber (configFile >> "CfgFactionClasses" >> _x >> "side") in [0,1,2] } apply {
+
+	(call BIS_fnc_getFactions) select {
+		getNumber (configFile >> "CfgFactionClasses" >> _x >> "side") in [0,1,2]
+		&& {([_x] call fnc_factionIsZombie) isEqualTo _wantZombies}
+	} apply {
 		_factionDisplayName = getText (configFile >> "CfgFactionClasses" >> _x >> "displayName");
 		if !(_factionDisplayName in _factionsRef) then {
 			_factionsRef append [getText (configFile >> "CfgFactionClasses" >> _x >> "displayName")];
@@ -665,14 +683,14 @@ fnc_getAllFactionsClean = compileFinal {
 // picks, so the settings/campaign menus stacked underneath stay unreachable until
 // both factions are chosen (closing it early exposed the map for a few seconds).
 fnc_factionSelector = compileFinal {
-	params [ ["_prompt", "Select Faction"], ["_finalRound", true] ];
+	params [ ["_prompt", "Select Faction"], ["_finalRound", true], ["_wantZombies", false] ];
 
 	// init
 	selectionDone = nil;
 	DUWS_factionSelectFinal = _finalRound;	// read by the ButtonClick handler at click time
 
 	// Listbox
-	factionList = [] call fnc_getAllFactionsClean;
+	factionList = [_wantZombies] call fnc_getAllFactionsClean;
 
 	disableSerialization;
 
@@ -776,4 +794,4 @@ fnc_factionSelector = compileFinal {
 
 };
 
-["fnc_selectNonEmpty","fnc_vehiclePostInit","fnc_padZero","fnc_enumCost","fnc_enumCostFormatted","fnc_evalVehicleCost","fnc_getEditorCategory","fnc_factionGetFilteredByEditorSubcat","fnc_filterByDisplayName","fnc_filterByClassName","fnc_factionGetFilteredByType","fnc_filterBySeats","fnc_filterByUtility","fnc_filterByPylons","fnc_filterByWeapons","fnc_isThreatTo","fnc_vehicleWeaponType","fnc_unitParseRoles","fnc_parseFaction","fnc_getAllFactionsClean","fnc_factionSelector"] apply { publicVariable _x };
+["fnc_selectNonEmpty","fnc_vehiclePostInit","fnc_padZero","fnc_enumCost","fnc_enumCostFormatted","fnc_evalVehicleCost","fnc_getEditorCategory","fnc_factionGetFilteredByEditorSubcat","fnc_filterByDisplayName","fnc_filterByClassName","fnc_factionGetFilteredByType","fnc_filterBySeats","fnc_filterByUtility","fnc_filterByPylons","fnc_filterByWeapons","fnc_isThreatTo","fnc_vehicleWeaponType","fnc_unitParseRoles","fnc_parseFaction","fnc_factionIsZombie","fnc_getAllFactionsClean","fnc_factionSelector"] apply { publicVariable _x };

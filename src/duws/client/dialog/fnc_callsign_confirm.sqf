@@ -50,7 +50,7 @@ chosen_settings = true;publicVariable "chosen_settings";
     ["INFO", "SETUP", format ["%1 = %2", _x,
         (if (isNil _x) then {"<nil>"} else {missionNamespace getVariable _x})]] call fnc_log;
 } forEach [
-    "VERSION_X", "duws_callsign", "manually_chosen",
+    "VERSION_X", "duws_callsign", "manually_chosen", "duws_gamemode",
     "zones_number", "zones_max_radius", "zones_min_radius", "zones_spacing",
     "zones_max_dist_from_hq", "moreUrban", "AO_direction", "PosOfBLUHQ",
     "BLUFOR_Faction_X", "OPFOR_Faction_X",

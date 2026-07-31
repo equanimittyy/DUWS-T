@@ -2,6 +2,9 @@
 // Snapshot selections so the campaign screen's Back button can restore them.
 // Must read before closeDialog while the controls still exist.
 duws_enviro_sel = [2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2110,2111] apply { lbCurSel _x };
+// Same reason: the civilian row carries its CIV_PRESENCE value as item data, and that has to come
+// off the control while the control is still there.
+private _civValue = lbData [2109, lbCurSel 2109];
 
 closeDialog 0;
 
@@ -115,53 +118,14 @@ switch (_index) do
 };
 
 // ENABLE CIVILIANS
-_index = lbCurSel 2109;
-switch (_index) do
-{
-    case index_civtype_off: { CIV_PRESENCE = "NONE"; };
-    case index_civtype_med: { CIV_PRESENCE = "med"; };
-    case index_civtype_tanoa: { CIV_PRESENCE = "tanoa"; };
-    case index_civtype_Vafrica: { CIV_PRESENCE = "Vafrica"; };
-    case index_civtype_asia: { CIV_PRESENCE = "asia"; };
-    case index_civtype_sumeuro: { CIV_PRESENCE = "sumeuro"; };
-    if (civ_mod == "cup") then {
-        case index_civtype_CUPslav: { CIV_PRESENCE = "CUPslav"; };
-        case index_civtype_CUPmeast: { CIV_PRESENCE = "CUPmeast"; };
-        case index_civtype_CUPslavw: { CIV_PRESENCE = "CUPslavw"; };
-        case index_civtype_CUPmeastw: { CIV_PRESENCE = "CUPmeastw"; };
-    };
-    if (civ_mod == "propfor") then {
-        case index_civtype_Pcoldeuro: { CIV_PRESENCE = "Pcoldeuro"; };
-        case index_civtype_Pmideast: { CIV_PRESENCE = "Pmideast"; };
-        case index_civtype_Pafrica: { CIV_PRESENCE = "Pafrica"; };
-    };
-    if (civ_mod == "cfp") then {
-        case index_civtype_Ccoldeuro: { CIV_PRESENCE = "Ccoldeuro"; };
-        case index_civtype_Cmideast: { CIV_PRESENCE = "Cmideast"; };
-        case index_civtype_Cafghan: { CIV_PRESENCE = "Cafghan"; };
-        case index_civtype_Cafrica: { CIV_PRESENCE = "Cafrica"; };
-    };
-    if (civ_mod == "unsung") then {
-        case index_civtype_Unsung: { CIV_PRESENCE = "Unsung"; };
-    };
-    if (civ_mod == "ifa3") then {
-        case index_civtype_IFA3: { CIV_PRESENCE = "IFA3"; };
-    };
-    case (missionNamespace getVariable ["index_civtype_ravage", -1]): { CIV_PRESENCE = "RAVAGE"; };
-    case (missionNamespace getVariable ["index_civtype_wbk", -1]): { CIV_PRESENCE = "WBK"; };
-    case (missionNamespace getVariable ["index_civtype_medw", -1]): { CIV_PRESENCE = "MAX_WOMENm"; };
-    case (missionNamespace getVariable ["index_civtype_tanoaw", -1]): { CIV_PRESENCE = "MAX_WOMENt"; };
-    case (missionNamespace getVariable ["index_civtype_asiaw", -1]): { CIV_PRESENCE = "MAX_WOMENa"; };
-    case (missionNamespace getVariable ["index_civtype_sumeurow", -1]): { CIV_PRESENCE = "MAX_WOMENs"; };
-    // Falling through is a bug, not a mode: every row the menu adds should map to a value,
-    // and the mod-gated rows above only register when civ_mod matches what it was when the
-    // list was built. Log the index rather than leaving the previous value standing -- a
-    // silent fall-through reads in game as "civilians on, none ever spawn".
-    default {
-        CIV_PRESENCE = "NONE";
-        ["ERROR", "SETUP", format ["civ type index %1 matched no case, civilians off (civ_mod=%2)",
-            _index, if (isNil "civ_mod") then {"<nil>"} else {civ_mod}]] call fnc_log;
-    };
+// A row with no value is a bug, not a mode: every row the menu adds carries one. Take civilians
+// off rather than leave the previous value standing, and log it -- silently keeping the old value
+// reads in game as "civilians on, none ever spawn".
+CIV_PRESENCE = _civValue;
+if (CIV_PRESENCE isEqualTo "") then {
+    CIV_PRESENCE = "NONE";
+    ["ERROR", "SETUP", format ["civ type row carried no value, civilians off (civ_mod=%1)",
+        if (isNil "civ_mod") then {"<nil>"} else {civ_mod}]] call fnc_log;
 };
 
 // ENABLE HARDCORE MODE

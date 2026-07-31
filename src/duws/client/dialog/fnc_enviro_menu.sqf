@@ -85,53 +85,63 @@ index_simpzones_true = lbAdd [2108, localize "STR_DUWS_T_vk37aebo"];
 [2108, index_simpzones_false] call _setDefault;
 
 // ENABLE CIVILIANS
-index_civtype_off = lbAdd [2109, localize "STR_DUWS_T_civoff"];
-switch (civ_mod) do {
-    case "cup" : {
-        index_civtype_CUPslav = lbAdd [2109, localize "STR_DUWS_T_CUPslfr"];
-        index_civtype_CUPmeast = lbAdd [2109, localize "STR_DUWS_T_CUPzdr"];
-        index_civtype_CUPslavw = lbAdd [2109, localize "STR_DUWS_T_CUPslfrw"];
-        index_civtype_CUPmeastw = lbAdd [2109, localize "STR_DUWS_T_CUPzdrw"];
-    };
-    case "propfor" : {
-        index_civtype_Pcoldeuro = lbAdd [2109, localize "STR_DUWS_T_lez0jp04"];
-        index_civtype_Pmideast = lbAdd [2109, localize "STR_DUWS_T_wnfbjquf"];
-        index_civtype_Pafrica = lbAdd [2109, localize "STR_DUWS_T_ycoll66i"];
-    };
-    case "cfp" : {
-        index_civtype_Ccoldeuro = lbAdd [2109, localize "STR_DUWS_T_uv3r9klr"];
-        index_civtype_Cmideast = lbAdd [2109, localize "STR_DUWS_T_fkysvpi4"];
-        index_civtype_Cafghan = lbAdd [2109, localize "STR_DUWS_T_rlykfz31"];
-        index_civtype_Cafrica = lbAdd [2109, localize "STR_DUWS_T_p7ahis16"];
-    };
-    case "Unsung" : {
-        index_civtype_Unsung = lbAdd [2109, localize "STR_DUWS_T_5kow9zoj"];
-    };
-    case "ifa3" : {
-        index_civtype_IFA3 = lbAdd [2109, localize "STR_DUWS_T_7yc3uncm"];
-    };
+// Each row carries its CIV_PRESENCE value as item data rather than recording its index in a
+// global: the game mode decides which rows exist, so an index means nothing outside the list it
+// was added to. fnc_process_enviro_menu.sqf reads the value straight back off the row.
+private _addCiv = {
+    params ["_labelKey", "_value"];
+    private _i = lbAdd [2109, localize _labelKey];
+    lbSetData [2109, _i, _value];
+    _i
 };
-index_civtype_med = lbAdd [2109, localize "STR_DUWS_T_1777ggdk"];
-index_civtype_tanoa = lbAdd [2109, localize "STR_DUWS_T_2j83vkge"];
-index_civtype_Vafrica = lbAdd [2109, localize "STR_DUWS_T_c0v3wxlw"];
-index_civtype_asia = lbAdd [2109, localize "STR_DUWS_T_be1dhnmv"];
-index_civtype_sumeuro = lbAdd [2109, localize "STR_DUWS_T_3tbqvi73"];
-index_civtype_medw = lbAdd [2109, localize "STR_DUWS_T_1777ggdkw"];
-missionNamespace setVariable ["index_civtype_medw", index_civtype_medw];
-index_civtype_tanoaw = lbAdd [2109, localize "STR_DUWS_T_2j83vkgew"];
-missionNamespace setVariable ["index_civtype_tanoaw", index_civtype_tanoaw];
-index_civtype_asiaw = lbAdd [2109, localize "STR_DUWS_T_be1dhnmvw"];
-missionNamespace setVariable ["index_civtype_asiaw", index_civtype_asiaw];
-index_civtype_sumeurow = lbAdd [2109, localize "STR_DUWS_T_3tbqvi73w"];
-missionNamespace setVariable ["index_civtype_sumeurow", index_civtype_sumeurow];
-_index_ravage = lbAdd [2109, localize "STR_DUWS_T_ravage"];
-_index_wbk = lbAdd [2109, localize "STR_DUWS_T_wbk"];
-lbSetColor [2109, _index_wbk, [1,0,0,1]];
-missionNamespace setVariable ["index_civtype_wbk", _index_wbk];
-lbSetColor [2109, _index_ravage, [1,0,0,1]];
-missionNamespace setVariable ["index_civtype_ravage", _index_ravage];
 
-[2109, index_civtype_med] call _setDefault;
+// The zombie modes draw their crowd from the mod they name, so those two rows are the whole list
+// and civilians cannot be turned off; every other mode gets the list without them.
+if (duws_gamemode == "zombies") then {
+    private _iRavage = ["STR_DUWS_T_ravage", "RAVAGE"] call _addCiv;
+    private _iWbk = ["STR_DUWS_T_wbk", "WBK"] call _addCiv;
+    lbSetColor [2109, _iRavage, [1,0,0,1]];
+    lbSetColor [2109, _iWbk, [1,0,0,1]];
+    [2109, _iRavage] call _setDefault;
+} else {
+    ["STR_DUWS_T_civoff", "NONE"] call _addCiv;
+    switch (civ_mod) do {
+        case "cup" : {
+            ["STR_DUWS_T_CUPslfr", "CUPslav"] call _addCiv;
+            ["STR_DUWS_T_CUPzdr", "CUPmeast"] call _addCiv;
+            ["STR_DUWS_T_CUPslfrw", "CUPslavw"] call _addCiv;
+            ["STR_DUWS_T_CUPzdrw", "CUPmeastw"] call _addCiv;
+        };
+        case "propfor" : {
+            ["STR_DUWS_T_lez0jp04", "Pcoldeuro"] call _addCiv;
+            ["STR_DUWS_T_wnfbjquf", "Pmideast"] call _addCiv;
+            ["STR_DUWS_T_ycoll66i", "Pafrica"] call _addCiv;
+        };
+        case "cfp" : {
+            ["STR_DUWS_T_uv3r9klr", "Ccoldeuro"] call _addCiv;
+            ["STR_DUWS_T_fkysvpi4", "Cmideast"] call _addCiv;
+            ["STR_DUWS_T_rlykfz31", "Cafghan"] call _addCiv;
+            ["STR_DUWS_T_p7ahis16", "Cafrica"] call _addCiv;
+        };
+        case "Unsung" : {
+            ["STR_DUWS_T_5kow9zoj", "Unsung"] call _addCiv;
+        };
+        case "ifa3" : {
+            ["STR_DUWS_T_7yc3uncm", "IFA3"] call _addCiv;
+        };
+    };
+    private _iMed = ["STR_DUWS_T_1777ggdk", "med"] call _addCiv;
+    ["STR_DUWS_T_2j83vkge", "tanoa"] call _addCiv;
+    ["STR_DUWS_T_c0v3wxlw", "Vafrica"] call _addCiv;
+    ["STR_DUWS_T_be1dhnmv", "asia"] call _addCiv;
+    ["STR_DUWS_T_3tbqvi73", "sumeuro"] call _addCiv;
+    ["STR_DUWS_T_1777ggdkw", "MAX_WOMENm"] call _addCiv;
+    ["STR_DUWS_T_2j83vkgew", "MAX_WOMENt"] call _addCiv;
+    ["STR_DUWS_T_be1dhnmvw", "MAX_WOMENa"] call _addCiv;
+    ["STR_DUWS_T_3tbqvi73w", "MAX_WOMENs"] call _addCiv;
+
+    [2109, _iMed] call _setDefault;
+};
 
 // ENABLE HARDCORE MODE
 index_hardcore_false = lbAdd [2110, localize "STR_DUWS_T_x4zs3lsg0"];

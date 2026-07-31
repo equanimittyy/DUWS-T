@@ -22,9 +22,15 @@ addMissionEventHandler ["EntityCreated", {
 // fn_factionAutoDetect.sqf helpers are compiled once at init (fnc_factions_check).
 
 
+// Same filter the AutoDetect picker applies: the roll draws from the zombie factions in the
+// zombie mode and from everything else in the others, so a random OPFOR can never be zombies in
+// a campaign that is not about them -- nor an army in one that is.
+_wantZombies = (missionNamespace getVariable ["duws_gamemode", "duws"]) isEqualTo "zombies";
+
 _factions = (call BIS_fnc_getFactions) select {
-	getNumber (configFile >> "CfgFactionClasses" >> _x >> "side") in [0,1,2] &&  
-	!(getNumber (configFile >> "CfgFactionClasses" >> _x >> "priority") in [4])
+	getNumber (configFile >> "CfgFactionClasses" >> _x >> "side") in [0,1,2] &&
+	!(getNumber (configFile >> "CfgFactionClasses" >> _x >> "priority") in [4]) &&
+	{([_x] call fnc_factionIsZombie) isEqualTo _wantZombies}
 };
 
 _factions2d = (_factions apply {[getText (configFile >> "CfgFactionClasses" >> _x >> "displayName"), _x]} select { _x#0 != "" });
