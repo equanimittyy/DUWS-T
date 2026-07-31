@@ -35,6 +35,12 @@ sleep 280;
 sleep 50;
 ["missionclean", [localize "STR_DUWS_T_renwuqingli", localize "STR_DUWS_T_renwuqingli5"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
 sleep 10;
+
+// Map-wide, unlike the radius delete below, and held back this far on purpose: bodies at the
+// objective carry the intel several missions point the player at, so the sweep must not run until
+// the countdown the player was just given has finished.
+{deleteVehicle _x} forEach allDeadMen;
+
 _close = false;
 {
     if ((_targetpos distance _x) < (zones_max_radius * 1.2)) exitWith {_close = true};

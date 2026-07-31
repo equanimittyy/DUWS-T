@@ -78,7 +78,6 @@ fnc_killhouse_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_
 publicVariable "fnc_killhouse_markers";
 // SIDE MISSION FUNCTIONS
 fnc_mission_reward = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_reward.sqf";
-fnc_missionTimer = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTimer.sqf";
 fnc_missionTargetPos = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTargetPos.sqf";
 fnc_mission_abort = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_abort.sqf";
 fnc_mission_site = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_site.sqf";

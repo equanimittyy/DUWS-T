@@ -7835,20 +7835,6 @@
                 <Original>Check the map diary for more info (DUWS_T Manual)</Original>
                 <English>Check the map diary for more info (DUWS_T Manual)</English>
             </Key>
-            <Key ID="STR_DUWS_T_6mg3jdt8">
-                <German>Nebenmissionen verfügbar (nach 3 Stunden)</German>
-                <Spanish>Misiones Secundarias Disponibles (después de 3 horas)</Spanish>
-                <Chinesesimp>支线任务就绪(3小时后)</Chinesesimp>
-                <Original>Side missions are now available.</Original>
-                <English>Side missions are now available.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_zhixian">
-                <German>Sekundäre Missionen</German>
-                <Spanish>Misiones secundarias</Spanish>
-                <Chinesesimp>支线任务</Chinesesimp>
-                <Original>Side Missions</Original>
-                <English>Side Missions</English>
-            </Key>
             <Key ID="STR_DUWS_T_shijianguanli">
                 <German>Zeitverwaltungssystem</German>
                 <Spanish>Sistema de Gestión del Tiempo</Spanish>
@@ -8221,8 +8207,8 @@
                 <German>Wir haben aktuell keine Missionen für dich. Es kann nur eine Mission aktiv sein und es müssen 6 min zwischen den Missionen liegen.</German>
                 <Spanish>Ahora mismo no contamos con misiones secundarias para que tome. Solo 1 misión puede estar activa a la vez y tiene un enfríamiento de 6 minutos.</Spanish>
                 <Chinesesimp>我们现在没有任务给你。只有一个任务可以激活，两个任务之间有6分钟的冷却时间。</Chinesesimp>
-                <Original>No missions available right now. Only one mission can be active at a time, with a 30-minute cooldown between them.</Original>
-                <English>No missions available right now. Only one mission can be active at a time, with a 30-minute cooldown between them.</English>
+                <Original>A side mission is already running. Only one can be active at a time, and each mission type sits out a 30-minute cooldown after you run it.</Original>
+                <English>A side mission is already running. Only one can be active at a time, and each mission type sits out a 30-minute cooldown after you run it.</English>
             </Key>
             <Key ID="STR_DUWS_T_missioncooldown">
                 <German>Einsatztrupp an "Overlord", wir sind wieder kampfbereit und warten an der Basis.</German>
@@ -8235,8 +8221,8 @@
                 <German>"Overlord 1-1" verstanden. Bleiben Sie an der Basis bereit bis zur weiteren Anweisung. Over.</German>
                 <Spanish>"Overlord 1-1" recibido. Permanezcan en la base a la espera de nuevas instrucciones. Over.</Spanish>
                 <Chinesesimp>"霸王1-1"收到。在基地待命，直到进一步指示。完毕。</Chinesesimp>
-                <Original>Negative. Nothing available right now — we'll call you when that changes, out.</Original>
-                <English>Negative. Nothing available right now — we'll call you when that changes, out.</English>
+                <Original>Negative. Close out the one you have first, out.</Original>
+                <English>Negative. Close out the one you have first, out.</English>
             </Key>
             <Key ID="STR_DUWS_T_eck4xh9m">
                 <German>Nur der Host (Alpha1-1) can aktuell sekundäre Missionen anfordern</German>

@@ -322,9 +322,6 @@ sleep 6;
     {
         if (!isNull _x) then { deleteVehicle _x };
     } forEach _containers;
-
-    Mission_available = true;
-    publicVariable "Mission_available";
 };
 
 sleep 600;

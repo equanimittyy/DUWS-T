@@ -21,5 +21,5 @@ private _left = _until - ((dateToNumber date) * 8760);
 // A stamp further ahead than one full cooldown means the in-game year rolled over between the
 // stamp and this read, dropping the clock back to zero underneath it. Expired rather than left
 // wedging that mission type for the rest of the campaign.
-if (_left <= 0 || {_left > (missionNamespace getVariable ["mission_cooldown_hours", 3])}) exitWith { 0 };
+if (_left <= 0 || {_left > (missionNamespace getVariable ["mission_cooldown_hours", 0.5])}) exitWith { 0 };
 _left
