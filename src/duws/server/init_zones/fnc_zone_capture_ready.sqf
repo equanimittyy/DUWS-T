@@ -30,7 +30,8 @@ if (_pos isEqualTo [] || {_key == ""}) exitWith { false };
 private _peak = missionNamespace getVariable [format ["DUWS_zonePeak_%1", _key], 0];
 
 // No peak means the zone is stowed, mid-spawn, or not OPFOR's. Refusing here is what stops a player
-// walking onto empty ground and taking it before its garrison has been placed.
+// walking onto empty ground and taking it before its garrison has been placed -- and it only holds
+// while every teardown discharges fnc_zone_garrison_dropped, which is where that contract is stated.
 if (_peak <= 0) exitWith { false };
 
 // This zone's own garrison, by roster and wherever it is standing -- not by proximity. A WARCOM

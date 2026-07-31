@@ -55,6 +55,18 @@ fnc_zone_gen = {
 	missionNamespace getVariable [format ["DUWS_zoneGen_%1", _zoneKey], 0]
 };
 
+// CONTRACT: every path that removes a zone's garrison calls this, and nothing else clears a peak.
+// A peak outliving the units it counted reads empty ground as a garrison beaten, so the zone falls
+// to whoever walks in next -- silently, with nothing wrong in the SQF to find. Clear and bump are
+// one act because either alone leaves that open: the stale figure stands, or a band still placing
+// from the torn-down cycle republishes it. fnc_spawnWait is today's only caller; a teardown by any
+// other route needs it too.
+fnc_zone_garrison_dropped = {
+	params ["_zoneKey"];
+	missionNamespace setVariable [format ["DUWS_zonePeak_%1", _zoneKey], nil];
+	[_zoneKey] call fnc_zone_gen_bump;
+};
+
 // Server-authoritative reorder of the OPFOR assault queue. The map-click picker runs
 // on the clicking player's machine, so mutating this shared list there and
 // broadcasting the absolute array would drop a concurrent capture's edit to it.

@@ -125,14 +125,10 @@ while {true} do {
 			sleep 10;
 		};
 
-		// Cleared on both exits, before the split below. Either the garrison is about to be deleted
-		// or the zone has changed hands, and in both cases the figure fnc_zone_capture_ready judges
-		// a capture against is about to describe ground that no longer holds what it counted. No
-		// peak means no capture, which is what keeps a pack-up from reading as a garrison wiped.
-		// The generation bump goes with it: a spawn band still placing from this cycle would
-		// otherwise publish a fresh peak seconds after the sweep deleted what it counted.
-		missionNamespace setVariable [format ["DUWS_zonePeak_%1", _zoneKey], nil];
-		[_zoneKey] call fnc_zone_gen_bump;
+		// Both exits, before the split below: the garrison is about to be deleted or the zone has
+		// changed hands, and either ends what the capture test was judging. Ordering is the point --
+		// a peak surviving into the sweep reads a pack-up as a garrison wiped. Do not inline.
+		[_zoneKey] call fnc_zone_garrison_dropped;
 
 		// CLEANUP ZONE
 		if (_despawn) then {

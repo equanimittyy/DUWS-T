@@ -74,7 +74,8 @@ fnc_zone_spawn = {
     };
 
     // The strength fnc_zone_capture_ready judges this zone against, and the only place it is set.
-    // fnc_spawnWait clears it the moment the zone stops being a spawned OPFOR zone.
+    // fnc_zone_garrison_dropped is the only place it is cleared, and states the contract binding
+    // the two.
     private _peak = [_zoneKey] call fnc_zone_garrison_count;
     missionNamespace setVariable [format ["DUWS_zonePeak_%1", _zoneKey], _peak];
     ["INFO", "ZONES", format ["%1 garrison peak %2", _zoneKey, _peak]] call fnc_log;
