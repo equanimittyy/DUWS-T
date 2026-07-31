@@ -1,6 +1,4 @@
-// Locality: client -- passed as an addAction function value in
-// client/misc/fnc_addHQBuildingActions.sqf and shared/functions/fnc_FOBactions.sqf, so it runs on
-// whoever opens the manager.
+// Locality: client -- a BASE row body in the request menu, so it runs on whoever opens the manager.
 
 
 if (count Array_of_FOBname < 1) exitWith {hint localize "STR_DUWS_T_2q33n8h7"};

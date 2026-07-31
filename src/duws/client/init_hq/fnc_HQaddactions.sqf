@@ -1,4 +1,11 @@
 // Locality: client -- inherited from client/client_init.sqf.
+//
+// The arsenal and HALO entries stay on the scroll wheel rather than moving into the request menu:
+// they are bought supports a player uses on the way out, not something to ask command for.
+//
+// The handlers below do not paint the supports listbox green when the purchase lands. That row is
+// coloured from the availability flags each time the menu is built, and the indices written here
+// had drifted onto the wrong rows -- the armory handler was colouring HALO.
 #include "..\..\shared\includes\action_style.hpp"
 
 _hq = _this select 0;
@@ -25,7 +32,6 @@ if (support_halo_available) then {
         {
             _x addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [_this], 80, true, true, "", "_this == player"];
         } forEach (Array_of_FOBS);
-        lbSetColor [2103, 5, [0, 1, 0, 1]];
     };
 
 // 公共变量事件处理器
@@ -42,9 +48,5 @@ if (support_halo_available) then {
             _x addaction [ACT_MOVE("STR_DUWS_T_halo_ai_only"), fnc_ghst_halo, [true,600,70,true], 70, true, true, "","alive player"];
         };  
     } forEach (Array_of_FOBS);
-    lbSetColor [2103, 14, [0, 1, 0, 1]];
 };
 };
-
-waitUntil {sleep 600;!alive blu_officer_object};
-removeAllActions _hq;

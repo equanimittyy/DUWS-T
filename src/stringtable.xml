@@ -6919,6 +6919,14 @@
                 <Original>UNLOCK SUPPORT</Original>
                 <English>UNLOCK SUPPORT</English>
             </Key>
+            <Key ID="STR_DUWS_T_BASE_MENU_TITLE">
+                <Original>BASE</Original>
+                <English>BASE</English>
+            </Key>
+            <Key ID="STR_DUWS_T_BASE_MENU_TOOLTIP">
+                <Original>Manage your squad, your FOBs and the base itself</Original>
+                <English>Manage your squad, your FOBs and the base itself</English>
+            </Key>
             <Key ID="STR_DUWS_T_bp73qs16">
                 <German>FREISCHALTEN</German>
                 <Chinesesimp>解锁</Chinesesimp>

@@ -418,10 +418,14 @@ if (!isNull _supplyCrate) then {
     clearItemCargoGlobal _supplyCrate;
     clearBackpackCargoGlobal _supplyCrate;
     _supplyCrate addMagazineCargoGlobal ["Money_roll", 20];
-    // Suffixed JIP ids throughout this block: an object-keyed id is that object's netId, and
-    // _hqObj carries three of these entries while _medTent carries two (the AI rearm action
-    // below is its second), so object keys would evict all but the last added per object.
+    // Suffixed JIP ids throughout this block: an object-keyed id is that object's netId, so a
+    // second broadcast against the same object would silently evict the first. Each prop takes
+    // one adder today, and the suffix is what keeps that true if one ever takes two.
     [_supplyCrate] remoteExec ["fnc_addQuickChangeActions", 0, format ["hq_quickchange_%1", netId _supplyCrate]];
+};
+
+if (!isNull _medTent) then {
+    [_medTent, [ACT_AID("STR_DUWS_T_xfgokhbc"), { [] spawn fnc_AI_rearm; }, [], 60, false, true, "", "_this distance _target < 12"]] remoteExec ["addAction", [0,-2] select isDedicated, _medTent];
 };
 
 if (!isNull _mapBoard) then {
@@ -430,15 +434,6 @@ if (!isNull _mapBoard) then {
 
 if (!isNull _hqObj) then {
     [_hqObj] remoteExec ["fnc_addHQBuildingActions", 0, format ["hq_building_%1", netId _hqObj]];
-};
-
-if (!isNull _medTent) then {
-    [_medTent] remoteExec ["fnc_addHQSatelliteActions", 0, format ["hq_satellite_%1", netId _medTent]];
-    [_medTent, [ACT_AID("STR_DUWS_T_xfgokhbc"), { [] spawn fnc_AI_rearm; }, [], 60, false, true, "", "_this distance _target < 12"]] remoteExec ["addAction", [0,-2] select isDedicated, _medTent];
-};
-
-if (!isNull _hqObj) then {
-    [_hqObj] remoteExec ["fnc_addTerminalBlackMarketActions", 0, format ["hq_blackmarket_%1", netId _hqObj]];
 };
 
 // 大门自动触发器：使用 netId 传递对象引用
@@ -487,12 +482,6 @@ private _respawnPos = [
 // 保存维修站和停机坪的ID（原有功能）
 if (!isNull _repairDepot) then { missionNamespace setVariable ["HQ_repairDepot_netId", netId _repairDepot, true]; };
 if (!isNull _helipad) then { missionNamespace setVariable ["HQ_helipad_netId", netId _helipad, true]; };
-
-// Null-guarded like the other _hqObj adders above: netId objNull is "0:0", so an unguarded call
-// would queue a permanent entry under an id that names nothing.
-if (!isNull _hqObj) then {
-    [_hqObj] remoteExec ["fnc_addRedeployAction", 0, format ["hq_redeploy_%1", netId _hqObj]];
-};
 
 HQ_pos_found_generated = true; publicVariable "HQ_pos_found_generated";
 ["INFO", "BOOT", format ["BLUFOR HQ built at %1", PosOfBLUHQ]] call fnc_log;

@@ -91,22 +91,7 @@ _wp setWaypointSpeed "LIMITED";
 _fob setVariable ["FOB_guardGroups", [_groupGuard, _groupPatrol]];
 _fob setVariable ["FOB_guard_busy", false];
 
-// Added once, on every machine and for JIP, so it is no longer tied to whoever built the FOB.
-// The flag is what makes "once" hold; it works because the action is never removed now, where
-// before a reguard removed it and relied on the flag being invisible from the acting client to
-// get it back.
-//
-// Squad_Leaders currently lists every playable slot, so the gate admits everyone today. It is here
-// so a dedicated server can later restrict FOB upkeep to particular slots -- squad leaders, say --
-// by trimming that one array. The check lives in the action's condition rather than wrapping
-// addAction the way fnc_FOBactions does, because this runs on the server where `player` is objNull;
-// a condition string is evaluated per client, where it resolves.
-if (isNil {_fob getVariable "FOB_guard_action_done"}) then {
-    _fob setVariable ["FOB_guard_action_done", true];
-    // Suffixed JIP id: an object-keyed id is that object's netId, which the FOB's own action menu
-    // already claims. One entry covers guards and defences together now, so it is added here --
-    // where a FOB's garrison first exists -- rather than once per half.
-    [_fob,[ACT_COMMIT("STR_DUWS_T_REDEPLOY_ACTION"), fnc_redeployFOB, [], 10, true, true, "", "_this == player && ((vehiclevarname player) in Squad_Leaders)"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["fob_redeploy_%1", netId _fob]];
-};
+// Redeploy is a row in the FOB's request menu now (fnc_base_menu_fill), built per client when the
+// menu opens, so nothing has to be broadcast or JIP-queued from here.
 
 

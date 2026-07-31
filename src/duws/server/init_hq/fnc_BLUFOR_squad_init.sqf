@@ -1,6 +1,6 @@
 if (!isServer) exitWith {};
 // Squad list order is a contract with the request dialogs: fnc_request_squad reads lbCurSel 2101
-// and fnc_request_squad_fob reads lbCurSel 2121, so reordering here silently remaps both menus.
+// and fnc_request_squad_fob reads the same listbox, so reordering here silently remaps both menus.
 
 ["INFO", "BOOT", "Squad File Init"] call fnc_log;
 

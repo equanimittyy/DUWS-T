@@ -1,5 +1,5 @@
-// Locality: client -- invoked from a dialog action (shared/includes/request_fob_menu.hpp:77).
-_index = lbCurSel 2120;
+// Locality: client -- invoked from a dialog action (shared/includes/request_menu.hpp, the FOB form).
+_index = lbCurSel 2100;
 
 _skill = (blufor_ai_skill select 0)+0.2;
 _skillSF = (blufor_ai_skill select 0)+0.5;

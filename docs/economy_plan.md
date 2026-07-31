@@ -475,7 +475,7 @@ impossible rather than merely unlikely.
 | Supports | Baked into stringtable text across five languages | The AP figure must be **appended**, never substituted |
 
 The support constraint already forced escalation to append its surcharge rather than rewrite the
-row (`client/dialog/fnc_HQ_Request_Menu.sqf`): a `%1` placeholder added to English but not to the
+row (`client/dialog/fnc_request_menu.sqf`): a `%1` placeholder added to English but not to the
 other four languages leaves them printing a stale baked number, which is a wrong figure rather
 than an untranslated one. A dual price inherits that exactly, and so does a per-use price.
 
@@ -645,7 +645,7 @@ them cannot buy.
 
 **AP needs a live readout, which it has never had.** `fnc_ap_adjust` broadcasts the pool but
 refreshes no control, and there is no `publicVariableEventHandler` for either pool. Three dialogs
-read AP at open time (`client/dialog/fnc_FOB_Request_Menu.sqf`, `fnc_HQ_Request_Menu.sqf`,
+read AP at open time (`client/dialog/fnc_request_menu.sqf` for both the HQ and FOB forms, and
 `fnc_convertAPtoCP.sqf`) and none updates afterwards. A stale counter was cosmetic when AP was a
 score; it is a purchase made on wrong information once AP is a currency, and worse in co-op, where
 someone else's spend is exactly what the reader cannot see.

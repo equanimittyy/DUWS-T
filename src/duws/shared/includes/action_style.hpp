@@ -37,3 +37,13 @@
 
 // The rescue-pilot set and the hold-to-search entries take no macro and stay
 // plain; the searches are already identified by their hold icon.
+
+// Row forms of the buckets above, for a menu that lists what used to be scroll
+// entries. A listbox renders <t> markup literally, so a row takes an [r,g,b,a]
+// float array instead of the tags. The four blues become one row colour: only
+// the scroll priority they keyed ever differed between them.
+#define ACT_ROW_PRIMARY_MENU        [0.082, 1, 0, 1]
+#define ACT_ROW_SECONDARY_MENU      [0.051, 0.6, 0, 1]
+#define ACT_ROW_EQUIP               [1, 0.502, 0, 1]
+#define ACT_ROW_AMBIENT             [0, 0.718, 1, 1]
+#define ACT_ROW_COMMIT              [1, 0.067, 0.067, 1]

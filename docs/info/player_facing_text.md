@@ -71,9 +71,17 @@ liveness — which is what makes bulk pruning safe to reason about.
 | `fnc_open_action_menu` | A dialog listbox opened *by* one scroll entry | Collapsing a cluster of related entries into a single scroll row |
 
 `src/duws/client/dialog/fnc_open_action_menu.sqf` is the escape hatch from scroll-menu sprawl:
-Black Market, Mission Control, Vehicle Recycling, Vehicle Customization, Killhouse Controls, Quick
-Kits and the debug menu each occupy one scroll row and expand into a list. Rows in that listbox are
-*not* action-menu entries and are excluded from the inventory below.
+Black Market, Vehicle Recycling, Vehicle Customization, Killhouse Controls, Quick Kits and the debug
+menu each occupy one scroll row and expand into a list. Rows in that listbox are *not* action-menu
+entries and are excluded from the inventory below.
+
+The request menu's BASE list is the same idea one level up: everything a player has to ask command
+for is a row in the dialog Requests already opens, so the HQ structure carries one scroll entry
+instead of the twelve it once did. The dividing line is **who needs it and how fast** — an arsenal,
+a HALO jump, quick kits, an AI rearm, the killhouse teleports and the black market stay on the
+scroll wheel and on the prop they belong to, because a player reaches for those without asking
+anyone. Squad and FOB management, mission control, the rest, the cooldown readout and the redeploy
+are rows, built by `fnc_base_menu_fill`.
 
 ## Buckets
 
@@ -110,6 +118,13 @@ costs more than a buried entry does.
 unescaped ampersand ends the structured-text parse and swallows the rest of the entry. Use `/` or a
 different word — `Rest / Heal`, `Mission Control`.
 
+**Each bucket has a row form for the BASE list.** An entry that moved off the scroll wheel keeps its
+bucket meaning, so `ACT_ROW_*` in the same header carries the identical colour as an `[r,g,b,a]`
+float array — a listbox renders `<t>` markup literally, so the tags cannot travel with it. The four
+blues collapse to one `ACT_ROW_AMBIENT`, since only the scroll priority they keyed ever separated
+them, and the BASE list orders itself by bucket the way the scroll list orders itself by priority —
+command first, the spend last.
+
 ## Inventory
 
 Every scroll entry DUWS itself creates; vendored modules are listed separately at the end. Priority
@@ -120,15 +135,16 @@ and colour follow the bucket, so neither is repeated per row.
 | Entry | Key | Attached by |
 | --- | --- | --- |
 | Requests | `STR_DUWS_T_vw32hahc` | HQ building, FOB |
-| Squad Manager | `STR_DUWS_T_l0xark5g` | HQ building, FOB |
-| FOB Manager | `STR_DUWS_T_iggpsdqo` | HQ building, FOB |
+
+Squad Manager (`STR_DUWS_T_l0xark5g`) and FOB Manager (`STR_DUWS_T_iggpsdqo`) are BASE rows inside
+it, and keep the bucket's capitals: the case is a property of the bucket, not of the string, so the
+row applies `toUpper` where the scroll macro used to.
 
 ### Secondary menu
 
 | Entry | Key | Attached by | Rows |
 | --- | --- | --- | --- |
-| Black Market | `STR_DUWS_T_BLACKMARKET_TITLE` | HQ terminal | 3 |
-| Mission Control | `STR_DUWS_T_INTELRECRUIT_TITLE` | HQ terminal | 3 |
+| Black Market | `STR_DUWS_T_BLACKMARKET_TITLE` | HQ building | 3 |
 | Killhouse Controls | `STR_DUWS_T_KILLHOUSE_CONTROLS` | Multi-screen computer | 4 |
 | Vehicle Recycling | `STR_DUWS_T_VEHICLE_RECYCLING` | Depot | 2 |
 | Vehicle Customization | `STR_DUWS_T_VEHICLE_CUSTOMIZATION` | Depot | 4 |
@@ -138,6 +154,12 @@ View Map opens a readout rather than a listbox, so it carries no row count. It o
 killhouse teleports attached to the same board. Travel between bases belongs to the FOB Manager; the
 board's own base fast travel is gone, having only ever moved the player within 200 m of an HQ they
 were standing at.
+
+Mission Control (`STR_DUWS_T_INTELRECRUIT_TITLE`, 3 rows) became a BASE row: every row of it spends
+CP, which is command's business. The black market stayed on the scroll wheel, because it spends the
+coins a player takes off civilians instead — nobody has to ask for that. Both hung off the HQ
+structure rather than a terminal of their own, so the one that stayed is added by
+`fnc_addHQBuildingActions` alongside Requests, in the single broadcast that object gets.
 
 ### Equip
 
@@ -167,13 +189,16 @@ request are independently translatable but present the same choice.
 | Entry | Key | Attached by |
 | --- | --- | --- |
 | AI Heal / Rearm | `STR_DUWS_T_xfgokhbc` | Medical tent, FOB, MHQ ammobox, airdropped ammobox |
-| Rest / Heal | `STR_DUWS_T_9eiwr3bt` | Satellite phone, FOB — `game_master` only |
 
-The two Rest / Heal entries share one 600 s cooldown through `GM_Heal_LastUsedTime` but test it in
-different places: the satellite entry defers to `fnc_restHealServer`, where the check is serialised
-on one machine, while the FOB entry checks and stamps in its own client callback and then
-`publicVariable`s the result. Two players triggering the FOB copy inside one propagation window both
-pass.
+Rest / Heal (`STR_DUWS_T_9eiwr3bt`, `game_master` only) is a BASE row now, and there is one of it.
+It had been two entries sharing one 600 s cooldown through `GM_Heal_LastUsedTime` but testing it in
+different places — the satellite copy deferred to `fnc_restHealServer`, where one machine decides,
+while the FOB copy checked and stamped in its own client callback and then `publicVariable`d the
+result, so two players triggering it inside one propagation window both passed. The row takes the
+server-checked path.
+
+Which base the row rests is the object the menu was opened on: `fnc_rest_heal` treats only what
+stands within 100 m of it, so a rest called at a FOB cannot patch up a fight at the HQ.
 
 ### Civilian interaction
 
@@ -202,16 +227,22 @@ not a local you can question, so no civilian ever carries both sets.
 | --- | --- | --- |
 | Earplugs | `STR_DUWS_T_2rc0nvug` | `player` |
 | Debug | `STR_DUWS_T_DEBUG_ACTION` | `player` — needs the `DUWS_Debug` parameter and `game_master` |
-| Reset Squad Leader | `STR_DUWS_T_4jabuvz6` | HQ building |
-| Mission Cooldowns | `STR_DUWS_T_SHOW_MISSION_COOLDOWNS` | HQ building, FOB — `player1` only |
+
+Both hang off the player, so they follow whoever opened them anywhere on the map; that is why they
+stayed while Reset Squad Leader (`STR_DUWS_T_4jabuvz6`) and Mission Cooldowns
+(`STR_DUWS_T_SHOW_MISSION_COOLDOWNS`) became BASE rows, since neither means anything away from a base.
 
 ### Commit
 
 | Entry | Key | Attached by |
 | --- | --- | --- |
-| Redeploy Base Units (2 CP) | `STR_DUWS_T_REDEPLOY_ACTION` | HQ building, FOB |
 | Deploy / Undeploy Mobile HQ | `STR_DUWS_T_rqzxlvf4`, `…_fjpyu3zb` | `MHQ1` — `Squad_Leaders` only |
 | Sabotage | `STR_DUWS_T_p3200mf5` | Laptop |
+
+Redeploy Base Units (`STR_DUWS_T_REDEPLOY_ACTION`, 2 CP) is the BASE list's last row at both the HQ
+and every FOB, which is the same reasoning that put `ACT_COMMIT` at the bottom of the scroll list.
+The two differ only in what the server is asked to rebuild — `fnc_redeployHQUnits` against
+`fnc_redeployFOBUnits`, the latter carrying the FOB the menu was opened on.
 
 ### Plain entries
 
@@ -263,6 +294,10 @@ single-player test shows one, because there is only one machine to multiply by.
 client adds its own local action, so a guard written with a public `setVariable` lets the first
 client through and locks every other one out permanently.
 
+**A row needs no broadcast at all.** The BASE list is built per client when the menu opens, so an
+entry that became a row stopped needing a broadcast, a JIP id and a duplicate guard along with it —
+which is what let the FOB redeploy come out of `fnc_guardsFOB` entirely.
+
 ## Menu rows
 
 `fnc_open_action_menu` takes an optional `[r,g,b,a]` float array per row; a row without one renders in
@@ -271,6 +306,7 @@ applying it — so a scroll-entry colour and a row colour cannot share a definit
 
 | Menu | Row colours |
 | --- | --- |
+| BASE | `ACT_ROW_*` per row, so a row keeps the colour its scroll bucket gave it |
 | Black Market | `[0,1,0,1]` on all three purchases |
 | Mission Control | `[1,0.667,0,1]` on all three rows |
 | Killhouse Controls | `[0,1,0,1]` spawn targets, `[1,0,0,1]` spawn enemies, `[1,1,0,1]` cleanup, `[1,0.533,0,1]` exit |
@@ -279,6 +315,15 @@ applying it — so a scroll-entry colour and a row colour cannot share a definit
 | Quick Kits | None — one row per scanned loadout, all default |
 | Debug | `[1,0.667,0,1]` on the six working tools, `[0.6,0.6,0.6,1]` on the unimplemented WARCOM row |
 | Flag *(object)* as searchable, Force side mission | `[1,0.667,0,1]` on every row |
+
+BASE is the one list not opened by `fnc_open_action_menu`: it is a listbox in the request dialog
+itself (`request_menu.hpp`, idc 2104), filled by `fnc_base_menu_fill` and run by
+`fnc_base_menu_select`. It follows the same two rules as the reusable menu — the dialog closes before
+a row's code runs, since several rows open a dialog of their own, and the row's CODE rides in
+`uiNamespace` because `lbSetData` carries strings only.
+
+Mission Control is reached from a BASE row rather than from a scroll entry now, and keeps its own
+row colours inside its own list.
 
 Quick Kits is the only menu whose row count is not fixed: the rows come from the loadout list the
 server scans and broadcasts, and the entry refuses to open when that list is empty. Debug rows are

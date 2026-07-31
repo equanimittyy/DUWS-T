@@ -1,5 +1,5 @@
-// Locality: client -- invoked from a dialog action (shared/includes/request_fob_menu.hpp:100).
-_index = lbCurSel 2122;
+// Locality: client -- invoked from a dialog action (shared/includes/request_menu.hpp, the FOB form).
+_index = lbCurSel 2102;
 
 _spawnPos = getpos player;
 _spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],10,300,15,0,0.4,0,[],[]] call BIS_fnc_findSafePos;

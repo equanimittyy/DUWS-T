@@ -92,7 +92,8 @@ Three properties are load-bearing:
 
 Three client-side comparisons survive as *advisory* pre-filters, and are commented as such:
 `client/supports/fnc_mapclickarty.sqf`, `client/supports/fnc_mapclickuav.sqf`,
-`client/misc/fnc_addRedeployAction.sqf`, plus the opening check in `client/supports/fnc_request_fob.sqf`.
+the redeploy row in `client/dialog/fnc_base_menu_fill.sqf`, plus the opening check in
+`client/supports/fnc_request_fob.sqf`.
 Each spares the player a wait — a 45 s map-click window, a 10 s site survey — that they provably cannot
 pay for. None of them decides anything; the charge happens later, on the server, against a balance the
 pre-filter's read has long since stopped describing.
@@ -112,7 +113,7 @@ purchase path does not depend on whether escalation ever started — with no mul
 the identity.
 
 The multiplier is `publicVariable`d because the request menu displays it. Base costs are baked into
-each row's stringtable label (`"Supply Drop (5CP) Radio"`), so `client/dialog/fnc_HQ_Request_Menu.sqf`
+each row's stringtable label (`"Supply Drop (5CP) Radio"`), so `client/dialog/fnc_request_menu.sqf`
 appends the scaled figure rather than substituting it, against a cost table it keeps for that purpose.
 Stripping the numbers out and re-formatting from a `%1` placeholder is the tidier shape and is rejected
 on localisation grounds: a placeholder added to English but not to the other four languages leaves them

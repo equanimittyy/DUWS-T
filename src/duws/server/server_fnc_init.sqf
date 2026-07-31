@@ -91,6 +91,7 @@ fnc_mission_cleanup = compile preprocessFileLineNumbers "duws\server\missions\fn
 fnc_findSafeMissionPos = compile preprocessFileLineNumbers "duws\server\misc\fnc_findSafeMissionPos.sqf";
 publicVariable "fnc_findSafeMissionPos";
 fnc_mission_cooldown_left = compile preprocessFileLineNumbers "duws\shared\functions\fnc_mission_cooldown_left.sqf";publicVariable "fnc_mission_cooldown_left";
+fnc_mission_cooldowns_show = compile preprocessFileLineNumbers "duws\client\misc\fnc_mission_cooldowns_show.sqf";publicVariable "fnc_mission_cooldowns_show";
 fnc_mission_begin = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_begin.sqf";
 
 // SIDE MISSION THREADS
@@ -289,16 +290,12 @@ fnc_debug_intel_search = compile preprocessFileLineNumbers "duws\server\misc\fnc
 fnc_debug_force_mission = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_force_mission.sqf";
 fnc_debug_search_flag = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_search_flag.sqf";
 fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
-fnc_addHQSatelliteActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addHQSatelliteActions.sqf";
-publicVariable "fnc_addHQSatelliteActions";
 fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_restHealServer.sqf";
 publicVariable "fnc_restHealServer";
 
 // 如果实现了 HQ 建筑动作，也需添加：
 fnc_addHQBuildingActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addHQBuildingActions.sqf";
 publicVariable "fnc_addHQBuildingActions";
-fnc_addTerminalBlackMarketActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addTerminalBlackMarketActions.sqf";
-publicVariable "fnc_addTerminalBlackMarketActions";
 fnc_blackMarketPurchase = compile preprocessFileLineNumbers "duws\server\misc\fnc_blackMarketPurchase.sqf";
 publicVariable "fnc_blackMarketPurchase";
 fnc_intelAnalysis = compile preprocessFileLineNumbers "duws\server\misc\fnc_intelAnalysis.sqf";
@@ -342,8 +339,9 @@ fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\functi
 // Broadcast: both request menus and all four request handlers are client-side.
 fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_rqst_list.sqf";publicVariable "fnc_faction_rqst_list";
 fnc_custom_faction_init = compile preprocessFileLineNumbers "duws\server\dialog\fnc_custom_faction_init.sqf";publicVariable "fnc_custom_faction_init";
-fnc_HQ_Request_Menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_Request_Menu.sqf";publicVariable "fnc_HQ_Request_Menu";
-fnc_FOB_Request_Menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_FOB_Request_Menu.sqf";publicVariable "fnc_FOB_Request_Menu";
+fnc_request_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_menu.sqf";publicVariable "fnc_request_menu";
+fnc_base_menu_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_base_menu_fill.sqf";publicVariable "fnc_base_menu_fill";
+fnc_base_menu_select = compile preprocessFileLineNumbers "duws\client\dialog\fnc_base_menu_select.sqf";publicVariable "fnc_base_menu_select";
 fnc_squad_manage = compile preprocessFileLineNumbers "duws\client\dialog\fnc_squad_manage.sqf";publicVariable "fnc_squad_manage";
 fnc_open_action_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_open_action_menu.sqf";publicVariable "fnc_open_action_menu";
 fnc_disguise_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_disguise_menu.sqf";publicVariable "fnc_disguise_menu";
@@ -453,8 +451,6 @@ fnc_client_addRepairActions = compile preprocessFileLineNumbers "duws\client\sup
 publicVariable "fnc_client_addRepairActions";
 fnc_redeployHQUnits = compile preprocessFileLineNumbers "duws\server\misc\fnc_redeployHQUnits.sqf";
 publicVariable "fnc_redeployHQUnits";
-fnc_addRedeployAction = compile preprocessFileLineNumbers "duws\client\misc\fnc_addRedeployAction.sqf";
-publicVariable "fnc_addRedeployAction";
 fnc_createKillhouse = compile preprocessFileLineNumbers "duws\server\misc\fnc_createKillhouse.sqf";
 publicVariable "fnc_createKillhouse";
 // WARCOM FUNCTIONS

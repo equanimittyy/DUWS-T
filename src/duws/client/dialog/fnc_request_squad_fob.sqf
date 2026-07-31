@@ -1,6 +1,6 @@
-// Locality: client -- invoked from a dialog action (shared/includes/request_fob_menu.hpp:88).
+// Locality: client -- invoked from a dialog action (shared/includes/request_menu.hpp, the FOB form).
 
-_index = lbCurSel 2121;
+_index = lbCurSel 2101;
 
 _grouptype = "";
 _HCsquadtype = "";
