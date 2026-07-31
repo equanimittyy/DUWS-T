@@ -81,6 +81,11 @@ cp_reward_multiplier = 1;publicVariable "cp_reward_multiplier";
 kill_cp_kills = 10;
 kill_cp_award = 1;
 
+// Soldiers on the perimeter patrol, at the HQ and at every FOB alike. One figure for both because a
+// FOB is a small base rather than a different kind of thing: it used to send a single soldier round
+// a circuit that a two-man probe could walk through. Server-only, both spawns run there.
+base_patrol_squad = 8;
+
 // The consumable-support slate. support_max_slots is how many a player may hold at once, the
 // campaign-long budget that makes choosing between them mean anything; support_death_refund is
 // the share of what they paid that comes back when they die holding it. That share is deliberately

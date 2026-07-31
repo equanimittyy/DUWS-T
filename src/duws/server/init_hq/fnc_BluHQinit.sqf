@@ -273,8 +273,11 @@ missionNamespace setVariable ["HQ_redeploy_aaData", [
     [blufor_TURRET_AA, [-0.31131, 0.814453], 1.252556]
 ], true];
 
-// 兵种池。Broadcast because client_init reads it to caption the guards.
-missionNamespace setVariable ["HQ_redeploy_guardTypes", [blufor_SOLDIER_X, blufor_SOLDIER_LAT_X, blufor_SOLDIER_GL_X, blufor_SOLDIER_TL_X, blufor_SOLDIER_SL_X, blufor_SOLDIER_AR_X, blufor_MARKSMAN_X], true];
+// 兵种池。Broadcast because client_init reads it to caption the guards, and because a FOB's own
+// patrol draws from it too (init_hq/fnc_guardsFOB.sqf) -- the HQ_ prefix is where it is set, not
+// who may read it.
+private _baseGuardTypes = [blufor_SOLDIER_X, blufor_SOLDIER_LAT_X, blufor_SOLDIER_GL_X, blufor_SOLDIER_TL_X, blufor_SOLDIER_SL_X, blufor_SOLDIER_AR_X, blufor_MARKSMAN_X];
+missionNamespace setVariable ["HQ_redeploy_guardTypes", _baseGuardTypes, true];
 
 missionNamespace setVariable ["HQ_redeploy_towers", _allTowersList, true];
 
@@ -292,10 +295,9 @@ missionNamespace setVariable ["HQ_redeploy_medGuardsData", [
 if (!isNull _medTent) then { missionNamespace setVariable ["HQ_medTent_netId", netId _medTent, true]; };
 if (!isNull _guardBoxObj) then { missionNamespace setVariable ["HQ_guardBox_netId", netId _guardBoxObj, true]; };
 
-// 巡逻队：8人随机兵种，出生点用实测的模型坐标和高度偏移
-private _patrolTypes = [blufor_SOLDIER_X, blufor_SOLDIER_LAT_X, blufor_SOLDIER_GL_X, blufor_SOLDIER_TL_X, blufor_SOLDIER_SL_X, blufor_SOLDIER_AR_X, blufor_MARKSMAN_X];
+// 巡逻队：随机兵种，出生点用实测的模型坐标和高度偏移
 private _patrolUnits = [];
-for "_i" from 1 to 8 do { _patrolUnits pushBack (selectRandom _patrolTypes); };
+for "_i" from 1 to base_patrol_squad do { _patrolUnits pushBack (selectRandom _baseGuardTypes); };
 private _patrolSpawnXY = _hqObj modelToWorld [1.27142, -21.9805, 0];
 missionNamespace setVariable ["HQ_redeploy_patrolUnits", _patrolUnits, true];
 missionNamespace setVariable ["HQ_redeploy_patrolSpawnPos", [

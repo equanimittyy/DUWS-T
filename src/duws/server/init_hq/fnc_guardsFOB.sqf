@@ -69,7 +69,16 @@ switch (VERSION_X) do {
 // line, so the old corners sat inside the wall and the patrol spent its circuit pathing through it.
 #define FOB_PATROL_RADIUS 20
 
-_groupPatrol = [_safe, WEST, [blufor_SOLDIER_X],[],[],blufor_ai_skill] call BIS_fnc_spawnGroup;
+// The same squad the HQ walks, drawn from the same pool: a FOB is a small base, not a different
+// kind of thing, and the single soldier this used to send round was a circuit a two-man probe could
+// walk straight through. The pool is set under an HQ_ prefix because that is where it is written
+// (init_hq/fnc_BluHQinit.sqf), not because only the HQ may read it; defaulted, because a FOB built
+// before that ran should still get a patrol rather than throw.
+private _patrolTypes = missionNamespace getVariable ["HQ_redeploy_guardTypes", [blufor_SOLDIER_X]];
+private _patrolUnits = [];
+for "_i" from 1 to base_patrol_squad do { _patrolUnits pushBack (selectRandom _patrolTypes); };
+
+_groupPatrol = [_safe, WEST, _patrolUnits,[],[],blufor_ai_skill] call BIS_fnc_spawnGroup;
 _groupPatrol deleteGroupWhenEmpty true;
 _groupPatrol setCombatMode "WHITE";
 
