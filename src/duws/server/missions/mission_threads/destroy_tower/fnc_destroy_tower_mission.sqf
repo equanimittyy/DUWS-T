@@ -37,13 +37,6 @@ _centerSpawn = _towerPos;
 _centerSpawnX = _towerPos select 0;
 _centerSpawnY = _towerPos select 1;
 
-_vehicle_0 = objNull;
-_this = createVehicle ["Land_MultiMeter_F", [0, 0, 0], [], 0, "CAN_COLLIDE"];
-_vehicle_0 = _this;
-_this setPos _centerSpawn;
-_centerSpawnZ = (getpos _vehicle_0 select 2);
-deleteVehicle _vehicle_0;
-
 // --DUWS-COMPOSITION BEGIN name="Mission: Destroy Tower" schema=A--
 _staticsArray = [];
 switch (VERSION_X) do {

@@ -34,13 +34,6 @@ _centerSpawn = _cachePos;
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
-_vehicle_0 = objNull;
-_this = createVehicle ["Land_MultiMeter_F", [0,0,0], [], 0, "CAN_COLLIDE"];
-_vehicle_0 = _this;
-_this setPos _centerSpawn;
-_centerSpawnZ = (getpos _vehicle_0 select 2);
-deleteVehicle _vehicle_0;
-
 // --DUWS-COMPOSITION BEGIN name="Mission: Destroy Cache" schema=A--
 _staticsArray = [
     ["CamoNet_INDP_open_F", 0.942383, -0.640625, 0, 342.004],

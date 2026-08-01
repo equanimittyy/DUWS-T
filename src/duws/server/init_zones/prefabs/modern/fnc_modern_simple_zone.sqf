@@ -8,17 +8,6 @@ private _zoneKey = format ["zone_%1_%2", round (_centerSpawn select 0), round (_
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
-_vehicle_0 = objNull;
-if (true) then
-{
-  _this = createVehicle ["Land_MultiMeter_F", [0, 0, 0], [], 0, "CAN_COLLIDE"];
-  [_this, _zoneKey] call fnc_duws_keep;
-  _vehicle_0 = _this;
-  _this setPos _centerSpawn;
-};
-_centerSpawnZ = (getpos _vehicle_0 select 2);
-deleteVehicle _vehicle_0;
-
 ///////////////////////////////////////////////////////////////////////
 
 // --DUWS-COMPOSITION BEGIN name="Simple Zone" schema=A--

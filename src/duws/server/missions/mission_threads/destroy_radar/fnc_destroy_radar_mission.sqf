@@ -31,13 +31,6 @@ _centerSpawn = _radarPos;
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
-_vehicle_0 = objNull;
-_this = createVehicle ["Land_MultiMeter_F", [0, 0, 0], [], 0, "CAN_COLLIDE"];
-_vehicle_0 = _this;
-_this setPos _centerSpawn;
-_centerSpawnZ = (getpos _vehicle_0 select 2);
-deleteVehicle _vehicle_0;
-
 // --DUWS-COMPOSITION BEGIN name="Mission: Destroy Radar" schema=A--
 _staticsArray = [
     ["Box_FIA_Ammo_F", 3.23633, -0.296875, 0, 0],
