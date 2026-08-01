@@ -174,12 +174,16 @@ if (_prefab) then {
 };
 
 // ========== 随机放置 3-4 个工事建筑，并记录到全局数组 ==========
+// [class, heading correction]. The correction is added to the outward bearing below, for a model
+// whose front is not at 0 degrees. All zero until each is checked in-game: the bearing alone is
+// right for a model that faces its own +Y, and wrong the same way every time for one that does not
+// -- which is why this is a number per class rather than a fudge inside the bearing.
 private _fortificationClasses = [
-    "Land_GuardTower_02_F",
-    "Land_Cargo_Tower_V2_F",
-    "Land_Cargo_Patrol_V2_F",
-    "Land_BagBunker_Tower_F",
-    "Land_Bunker_01_tall_F"
+    ["Land_GuardTower_02_F",   0],
+    ["Land_Cargo_Tower_V2_F",  0],
+    ["Land_Cargo_Patrol_V2_F", 0],
+    ["Land_BagBunker_Tower_F", 0],
+    ["Land_Bunker_01_tall_F",  0]
 ];
 private _fortificationCount = 3 + floor random 2; // 3-4 个
 private _radius = _size * 0.7; // 在战区半径70%范围内放置
@@ -219,9 +223,12 @@ for "_i" from 1 to _fortificationCount do {
     };
     private _nearObjs = nearestObjects [_safePos, [], 8];
     if (count _nearObjs > 0) then { continue };
-    private _fortClass = selectRandom _fortificationClasses;
+    (selectRandom _fortificationClasses) params ["_fortClass", "_fortFacing"];
     private _fort = createVehicle [_fortClass, _safePos, [], 0, "CAN_COLLIDE"];
-    _fort setDir (random 360);
+    // Faces out from the zone centre. A random heading pointed an embrasure at the objective it was
+    // meant to defend as often as at the ground it was meant to cover, which is what made these read
+    // as scenery rather than as a defence.
+    _fort setDir ((_zonePos getDir _safePos) + _fortFacing);
     _fort setVectorUp [0,0,1];
     _fort allowDamage true;
     // Filed under the zone like the prefab is. These stood outside the bucket model until now,
