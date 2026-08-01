@@ -189,6 +189,13 @@ while {true} do {
         // does not is raised -- reinforcement arrives beside the survivors rather than as a second
         // garrison beside the first. Counting duplicates is the whole point: a tier that goes from
         // one team to two owes one team, not two.
+        //
+        // INVARIANT: this branch is downstream of the capture grace and must stay there. Only the
+        // gated branch above sets _garrisoned, so a tier bought inside the grace window cannot reach
+        // here -- it raises the stored tier and the first spawn reads it whole when the grace ends.
+        // A second spawn path that set _garrisoned without the grace test would silently let an
+        // upgrade land on a town that was captured seconds ago, which is the one thing the grace
+        // exists to prevent.
         // Refused twice over, and the tier stays owed either way -- it lands on a later cycle rather
         // than being lost, the same way the capture grace defers a first garrison.
         //

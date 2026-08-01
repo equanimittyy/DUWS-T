@@ -356,7 +356,13 @@ garrison to shrink: a smaller composition diffs to nothing rather than to someth
 **Buying a tier and the men arriving are separate acts.** Reinforcement is deferred while the
 garrison is withdrawing, and while BLUFOR are within the same radius the arrival test uses — men
 materialising around a player who is already in contact reads as the mission cheating, which is the
-pop-in the capture grace exists to prevent, and worse mid-fight. The tier stays owed and lands on a
+pop-in the capture grace exists to prevent, and worse mid-fight.
+
+**The capture grace covers upgrades too, by structure rather than by a second test.** Reinforcement
+requires a standing garrison, and only the grace-gated branch raises one — so a tier bought seconds
+after a town falls cannot arrive early. It raises the stored tier, and the first spawn reads that
+tier whole once the grace ends: a town captured and immediately bought up to III arrives as a full
+tier III garrison in one go, not as a tier I followed by a top-up. The tier stays owed and lands on a
 later cycle rather than being lost, so the commander may raise a contested town at any time and pays
 for it whether or not the player is standing there. This is why the deferral lives in the garrison
 thread rather than in the commander's appraisal: a purchase made while the player is far away would
