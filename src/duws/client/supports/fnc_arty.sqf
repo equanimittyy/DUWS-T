@@ -156,11 +156,16 @@ if (isNull getConnectedUAV player) then {
 // NUMBER OF SALVOS
 if (_ammotype == "Laser") then {
 		if (isNull _target) then { hint localize "STR_DUWS_T_l6wdrhei"; sleep 10 };
-		_bomb = "Bo_Mk82" createVehicle (getPos _target);
-		_destroyObj10 = nearestObjects [getPos _target, [], 10];
-		_destroyObj20 = nearestObjects [getPos _target, [], 20];
-		{_x setDamage 1 ;}foreach _destroyObj10;
-		{_x setDamage .5 ;}foreach _destroyObj20;
+		private _impact = getPos _target;
+		_bomb = "Bo_Mk82" createVehicle _impact;
+		// One unsorted query at the outer radius, split by distance. nearestObjects with an empty
+		// class filter returns every object in range and sorts the lot by distance, and the inner
+		// ring is a subset of the outer one, so asking twice paid for the same objects twice.
+		// Outermost first, because the rings overlap: damaging the inner ring first left
+		// everything inside 10 m on 0.5, healing what the strike had just destroyed.
+		private _hit = _impact nearObjects 20;
+		{_x setDamage .5} forEach _hit;
+		{_x setDamage 1} forEach (_hit select {_x distance _impact < 10});
 } else {
 	while {_salvos > 0} do {
 		_rps = _rpsinit; 		// reset number of remaining rounds for next salvo
@@ -179,10 +184,12 @@ if (_ammotype == "Laser") then {
 				};
 				case 3: {  // JDAM
 					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)]; //spawn shells
-					_destroyObj10 = nearestObjects [_position, [], 10];
-					_destroyObj20 = nearestObjects [_position, [], 20];
-					{_x setDamage 1 ;}foreach _destroyObj10;
-					{_x setDamage .5 ;}foreach _destroyObj20;
+					// One query and the outermost-first ordering, as the laser strike above.
+					// This branch fires once per round with no yield, so the doubled query was
+					// paid for every shell in the salvo.
+					private _hit = _position nearObjects 20;
+					{_x setDamage .5} forEach _hit;
+					{_x setDamage 1} forEach (_hit select {_x distance _position < 10});
 				};
 				case 5: {  // Cluster
 					_bomb= "R_60mm_HE" createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)]; //spawn shells
