@@ -88,11 +88,11 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 	// the player took holds no garrison at all, so it reports 0 rather than the tier it was fought off.
 	private _tier = [([_key] call fnc_zone_tier), 0] select _held;
 	private _kind = missionNamespace getVariable [format ["DUWS_zoneKind_%1", _key], ""];
-	// The same window a town reports as TAKEN: OPFOR own the ground and their men are not on it yet.
+	// The same window a town reports as MOBILISING: OPFOR own the ground and their men are not on it yet.
 	// A zone the player holds is never mobilising, whatever the flag says -- BLUFOR inherit no
 	// garrison at all when they take one, so there is nothing there to be on its way.
 	private _hold = if (!_held && {missionNamespace getVariable [format ["DUWS_zoneMobilising_%1", _key], false]})
-		then { "TAKEN" } else { "" };
+		then { "MOBILISING" } else { "" };
 	["ZONE", [_name, _kind, _held, _seg, _tier, _hold]] remoteExec ["fnc_map_readout_draw", _caller];
 };
 

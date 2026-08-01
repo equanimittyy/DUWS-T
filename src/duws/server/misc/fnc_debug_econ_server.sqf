@@ -91,7 +91,7 @@ switch (toLower _mode) do {
         // Reinforcement is a step, not an amount: the delta only says how many to buy, and a
         // negative one is refused rather than reinterpreted as taking men away. Nothing in the
         // design removes strength by purchase -- only the player does, by fighting.
-        // Each call goes through the campaign's own writer, so the REGROUP refusal and the ceiling
+        // Each call goes through the campaign's own writer, so the REGROUPING refusal and the ceiling
         // apply here exactly as they will to the commander.
         if (_delta <= 0) exitWith {
             ["Reinforce takes a positive count."] remoteExec ["hint", _caller];

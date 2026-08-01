@@ -567,11 +567,18 @@ archetype decides *where* the money goes, not whether there is anywhere for it t
 Towns gain purchasable garrisons on both sides. A zone garrison is the benchmark the ladder climbs
 toward: `server/init_zones/fnc_createopfortified.sqf` fields a multiplied fortified group with a
 squad leader, a mortar team, and up to eight buildings occupied at three units each. **Zones carry a
-tier of their own, rolled at generation and never purchased** — see
+tier of their own, rolled at generation** — see
 [`info/zones_and_civilians.md`](info/zones_and_civilians.md#zone-tiers). Each tier names its own
-composition and a zone's radius multiplies it per category; nothing a commander can buy raises a
-zone. Towns and zones draw from one token vocabulary but keep separate composition sets, so tuning
-what a town fields cannot silently retune what a zone does.
+composition and a zone's radius multiplies it per category. Towns and zones draw from one token
+vocabulary but keep separate composition sets, so tuning what a town fields cannot silently retune
+what a zone does.
+
+**Nothing buys a zone tier yet, and that is a gap rather than a rule.** The town ladder is this
+sink's first form; extending it to zones is a later addition to the same sink and needs no new
+machinery — the tier is already stored per zone and the composition table already indexed by it. Two
+things to settle when it lands: whether a zone tier is priced like a town's or dearer, given a zone
+garrison is the benchmark the town ladder climbs toward, and whether a retaken zone can be bought
+back up at all or has to live with the `0.3` floor its retake writes.
 
 The OPFOR side of the ladder is built: tiers 0 to IV live in `DUWS_townSpawnTiers` and the per-town
 tier in `DUWS_townGarrisonTier`, written through `fnc_town_garrison_setTier`. Full contract in

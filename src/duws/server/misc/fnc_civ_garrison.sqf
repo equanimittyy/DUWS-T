@@ -115,7 +115,7 @@ while {true} do {
         // the hold lapsing is not on its own permission to spawn around them.
         // Logged once here rather than on each deferred cycle -- sixty lines a town saying the same
         // thing is not a readable log, and this one carries the figure a tester needs.
-        private _held = [_townIndex, "TAKEN"] call fnc_town_garrison_setHold;
+        private _held = [_townIndex, "MOBILISING"] call fnc_town_garrison_setHold;
         _awaitVacate = true;
         ["INFO", "CIV", format ["Town %1 taken at rep %2; first garrison held for %3 s and until the town is left",
             _townIndex, _rep, _held]] call fnc_log;
@@ -200,7 +200,7 @@ while {true} do {
         // branch above sets _garrisoned, so a tier bought while a town is held cannot reach here --
         // it raises the stored tier and the first spawn reads it whole once the hold and the latch
         // are both clear. A second spawn path that set _garrisoned without that gate would silently
-        // let an upgrade land on a town captured seconds ago, which is what the TAKEN hold exists
+        // let an upgrade land on a town captured seconds ago, which is what the MOBILISING hold exists
         // to prevent.
         // Refused twice over, and the tier stays owed either way -- it lands on a later cycle rather
         // than being lost, the same way a hold defers a first garrison.
@@ -336,7 +336,7 @@ while {true} do {
                 // two other things read it: fnc_town_garrison_setTier refuses a purchase through it,
                 // so the commander cannot buy a beaten town up to IV while nobody is looking, and
                 // the map readout prints the town as regrouping.
-                [_townIndex, "REGROUP"] call fnc_town_garrison_setHold;
+                [_townIndex, "REGROUPING"] call fnc_town_garrison_setHold;
                 // The player is standing in the town they just cleared. Nothing may spawn here
                 // until they have left once, or the garrison the hold expires into would appear
                 // around them.

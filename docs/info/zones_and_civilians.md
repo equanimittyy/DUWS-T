@@ -144,9 +144,20 @@ is worth behind the player's back and disagree with the garrison peak already me
 tier. A zone with no tier recorded reads as IV, so a save written before tiers existed comes back at
 the strength it had rather than silently halving.
 
-Zone tiers are not purchasable and no commander raises them, which is what separates them from a
-town's ([§Garrison tiers 0 to IV](#garrison-tiers-0-to-iv)): a town's tier is bought and can change
-mid-campaign, a zone's is the ground's fixed character.
+**A zone's tier is fixed because nothing can yet move it, not because it must never move.** No
+commander raises one today: the OPFOR commander does not exist, and when it does its first garrison
+sink is the town ladder ([§Garrison tiers 0 to IV](#garrison-tiers-0-to-iv)). Zone upgrades are a
+later addition to the same sink, and the machinery is already shaped for it — the tier is stored
+per zone, the composition table is indexed by it, and `fnc_zone_strength_set` exists precisely so a
+mechanic that lets OPFOR rebuild a mauled zone has one place to go through.
+
+What is *not* provisional is the re-roll refusal: `fnc_zone_tier_roll` must keep declining a second
+roll however the tier later comes to change, because a rebuild through `fnc_createzone` would
+otherwise reshuffle ground the player has already fought over. A commander raising a tier writes it
+deliberately; nothing should ever draw one again by accident.
+
+So the difference from a town today is who can pay, not whether the number is allowed to move: a
+town's tier is bought and changes mid-campaign, a zone's has no buyer yet.
 
 #### Radius multiplies each category, not the whole list
 
@@ -401,14 +412,18 @@ only the trigger sees both.
 A town raises no garrison while it is *holding*, and the two things that arm a hold are the two
 moments a garrison arriving would land on the player who caused it.
 
-| Kind | Armed when | Length | Also refuses | Readout |
-|---|---|---|---|---|
-| `TAKEN` | reputation crosses `-10` | 30 min | — | `Mobilising` |
-| `REGROUP` | its garrison is cleared | 3 h | both purchases — upgrade *and* reinforce | `Regrouping` |
+**There are two states, and a hold *is* one of them.** The hold is not a separate stage the town
+passes through on its way to being `Mobilising` — the thirty minutes of held ground with no men on it
+is exactly what `Mobilising` names. Code and readout use one vocabulary so this cannot be misread.
 
-**`REGROUP` refusing both purchases is the whole point of it.** Neither needs a garrison standing to
+| State | Armed when | Length | Also refuses |
+|---|---|---|---|
+| `MOBILISING` | reputation crosses `-10` | 30 min | — |
+| `REGROUPING` | its garrison is cleared | 3 h | both purchases — upgrade *and* reinforce |
+
+**`REGROUPING` refusing both purchases is the whole point of it.** Neither needs a garrison standing to
 be bought, so without the refusal a commander could start rebuilding a town before the player who
-destroyed its garrison had left the map, and clearing it would have bought nothing lasting. `TAKEN`
+destroyed its garrison had left the map, and clearing it would have bought nothing lasting. `MOBILISING`
 refuses neither, because ground that has only just fallen is exactly what the enemy should be free to
 commit to and no men have arrived either way.
 
@@ -416,7 +431,7 @@ Both exist because reputation is spent *inside* a town — you lose it by killin
 wrecking its buildings — so at the instant a town flips, and again at the instant its garrison dies,
 the player is standing in it by definition.
 
-**`TAKEN` does not block a purchase; `REGROUP` does.** A town that has only just fallen is exactly
+**`MOBILISING` does not block a purchase; `REGROUPING` does.** A town that has only just fallen is exactly
 the ground the enemy should be free to commit to, and the men have not arrived either way, so a tier
 bought inside that window is folded into the first spawn rather than arriving as a second wave. A
 town whose garrison was just destroyed is the opposite case: without the refusal the commander could
@@ -545,9 +560,9 @@ a zone is ground with an owner, a town is ground with an opinion.
 | The player's win | ownership flips, permanently, and pays a CP bounty | the garrison is cleared, worth `+5` reputation — an instalment, not the ground |
 | How OPFOR get it back | `EAST SEIZED`: walk in while no BLUFOR is inside the radius | reputation falls back below `-10` |
 | Strength after being beaten | floored to `0.3` on the retake (`fnc_opfor_cap`) | floored to `0.3` on the clear |
-| Time gate | none | `TAKEN` 30 min, `REGROUP` 3 h |
+| Time gate | none | `MOBILISING` 30 min, `REGROUPING` 3 h |
 | Presence latch | thread start, and every retake | thread start, and every hold armed |
-| Mobilising | on a retake, until the peak publishes | `TAKEN`, until the hold and latch both clear |
+| Mobilising | on a retake, until the peak publishes | on crossing `-10`, until the hold and latch both clear |
 | Regrouping | never — a beaten zone is BLUFOR's | after a clear that leaves it in the band |
 
 **Why the zone needs no time gate and the town does.** A zone flip is itself gated on absence —
@@ -601,7 +616,7 @@ clear is one instalment against it.
 **Neither state applies to a town the clear pushed out of the band.** That town is neutral, and
 `fnc_town_garrison_clearHold` drops the hold with the claim. Leaving it armed would keep telling the
 player a redeemed town was regrouping, and — silently — would refuse the tier raise if they ruined
-the same town again inside the window, since a `REGROUP` hold refuses raises.
+the same town again inside the window, since a `REGROUPING` hold refuses raises.
 
 **And there is a third condition that is not a state.** OPFOR hold it, no men are standing, and
 nothing has changed hands — the garrison merely streamed out, or nobody has ever visited. The readout

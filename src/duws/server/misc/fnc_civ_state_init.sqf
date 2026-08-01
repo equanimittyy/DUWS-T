@@ -87,15 +87,15 @@ fnc_town_garrison_tierAt = {
 // A town raises no garrison while it is holding, and the two things that put it there are the two
 // moments a garrison arriving would land on top of the player who caused it.
 //
-// TAKEN: the town has just crossed into the OPFOR band. Reputation is spent inside a town -- by
+// MOBILISING: the town has just crossed into the OPFOR band. Reputation is spent inside a town -- by
 // killing its civilians or wrecking its buildings -- so at the instant one flips, the player is
 // standing in it by definition.
 //
-// REGROUP: its garrison has just been cleared, by the player who is still standing in it. Longer,
+// REGROUPING: its garrison has just been cleared, by the player who is still standing in it. Longer,
 // because this window is a mechanic rather than a courtesy: an enemy town standing undefended is
 // the one stretch of a campaign where its civilians can be worked with nobody in the way.
-#define TOWN_HOLD_TAKEN 1800
-#define TOWN_HOLD_REGROUP 10800
+#define TOWN_HOLD_MOBILISING 1800
+#define TOWN_HOLD_REGROUPING 10800
 
 // Seconds left on a town's hold, or 0 for a town that is free to garrison.
 //
@@ -110,7 +110,7 @@ fnc_town_garrison_holdAt = {
 	private _holds = missionNamespace getVariable ["DUWS_townGarrisonHold", []];
 	if (_townIndex < 0 || _townIndex >= count _holds) exitWith { 0 };
 	private _deadline = _holds select _townIndex;
-	if (_deadline > diag_tickTime + TOWN_HOLD_REGROUP) then {
+	if (_deadline > diag_tickTime + TOWN_HOLD_REGROUPING) then {
 		_holds set [_townIndex, 0];
 		_deadline = 0;
 	};
@@ -118,7 +118,7 @@ fnc_town_garrison_holdAt = {
 };
 
 // Which kind of hold is live, or "" for none. Load-bearing rather than cosmetic: the tier setter
-// refuses a purchase under REGROUP and allows one under TAKEN, and the map readout words the two
+// refuses a purchase under REGROUPING and allows one under MOBILISING, and the map readout words the two
 // differently.
 fnc_town_garrison_holdKindAt = {
 	if (!isServer) exitWith { "" };
@@ -129,10 +129,10 @@ fnc_town_garrison_holdKindAt = {
 
 fnc_town_garrison_setHold = {
 	if (!isServer) exitWith {};
-	params [["_townIndex", -1], ["_kind", "REGROUP"]];
+	params [["_townIndex", -1], ["_kind", "REGROUPING"]];
 	private _holds = missionNamespace getVariable ["DUWS_townGarrisonHold", []];
 	if (_townIndex < 0 || _townIndex >= count _holds) exitWith {};
-	private _secs = [TOWN_HOLD_REGROUP, TOWN_HOLD_TAKEN] select (_kind == "TAKEN");
+	private _secs = [TOWN_HOLD_REGROUPING, TOWN_HOLD_MOBILISING] select (_kind == "MOBILISING");
 	_holds set [_townIndex, diag_tickTime + _secs];
 	(missionNamespace getVariable ["DUWS_townGarrisonHoldKind", []]) set [_townIndex, _kind];
 	_secs
@@ -141,7 +141,7 @@ fnc_town_garrison_setHold = {
 // A hold describes OPFOR's intention for ground OPFOR hold, so it dies with the claim rather than
 // running out on its own. Two things go wrong if it outlives the band:
 // the readout keeps telling the player a town they have redeemed to neutral is regrouping, and --
-// worse, because it is silent -- a REGROUP hold refuses tier *raises*, so a town that left the band
+// worse, because it is silent -- a REGROUPING hold refuses tier *raises*, so a town that left the band
 // and was later ruined again could not garrison at all until the three hours were up.
 fnc_town_garrison_clearHold = {
 	if (!isServer) exitWith {};
@@ -181,9 +181,9 @@ fnc_town_garrison_setStrength = {
 // Folding them into one purchase would make a beaten town cheap to restore precisely because it was
 // beaten, since a single payment would buy back the composition and the men together.
 //
-// Refused under REGROUP, and this is the one thing that hold blocks which matters: with the men
+// Refused under REGROUPING, and this is the one thing that hold blocks which matters: with the men
 // already gone, a commander who could still spend here would erase what clearing the town bought
-// before the player had left the map. A TAKEN hold does not refuse -- ground that has only just
+// before the player had left the map. A MOBILISING hold does not refuse -- ground that has only just
 // fallen is exactly what the enemy should be free to commit to.
 // Returns the new strength, or -1 when refused, so a caller that is paying can tell.
 fnc_town_garrison_reinforce = {
@@ -192,7 +192,7 @@ fnc_town_garrison_reinforce = {
 	// Bounded by the town registry rather than by a strength array: strength now lives in the shared
 	// keyed store, which has no per-town length to range-check against.
 	if (_townIndex < 0 || _townIndex >= count (missionNamespace getVariable ["DUWS_townGarrisonTier", []])) exitWith { -1 };
-	if (([_townIndex] call fnc_town_garrison_holdKindAt) == "REGROUP") exitWith {
+	if (([_townIndex] call fnc_town_garrison_holdKindAt) == "REGROUPING") exitWith {
 		["INFO", "CIV", format ["Town %1 reinforcement refused (%2): regrouping for another %3 s",
 			_townIndex, _reason, round ([_townIndex] call fnc_town_garrison_holdAt)]] call fnc_log;
 		-1
@@ -210,12 +210,12 @@ fnc_town_garrison_reinforce = {
 // A tier written here is what the town owes, not what is standing in it -- the garrison thread
 // picks the change up on its own cycle, and only when a player is there to see it arrive.
 //
-// A raise is refused outright while the town is REGROUP-held, rather than deferred: the garrison
+// A raise is refused outright while the town is REGROUPING-held, rather than deferred: the garrison
 // thread already defers *arrival*, so without this the commander could buy a beaten town up to IV
 // during the hours it is left alone and the player would meet a tier IV garrison where they had
 // just destroyed a tier I. Lowering is always allowed -- that is how the clear itself files the
 // town back down to I.
-// A TAKEN hold does not refuse: a town that has only just fallen is exactly the ground the enemy
+// A MOBILISING hold does not refuse: a town that has only just fallen is exactly the ground the enemy
 // should be free to commit to, and the men have not arrived yet either way, so a purchase made
 // inside that window is folded into the first spawn rather than arriving as a second wave.
 fnc_town_garrison_setTier = {
@@ -226,7 +226,7 @@ fnc_town_garrison_setTier = {
 	private _new = ((round _tier) max 0) min (count DUWS_townSpawnTiers);
 	private _old = _tiers select _townIndex;
 	if (_new == _old) exitWith {};
-	if (_new > _old && {([_townIndex] call fnc_town_garrison_holdKindAt) == "REGROUP"}) exitWith {
+	if (_new > _old && {([_townIndex] call fnc_town_garrison_holdKindAt) == "REGROUPING"}) exitWith {
 		["INFO", "CIV", format ["Town %1 tier %2 -> %3 refused (%4): regrouping for another %5 s",
 			_townIndex, _old, _new, _reason, round ([_townIndex] call fnc_town_garrison_holdAt)]] call fnc_log;
 	};

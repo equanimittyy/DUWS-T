@@ -45,9 +45,9 @@ switch (_kind) do {
 		// A zone OPFOR have just retaken says so instead. The men are owed and not yet standing, so a
 		// numeral here would report a garrison that is not there -- the same reason a town in the
 		// window reports its hold rather than its tier.
-		_lines pushBack (if (_hold isEqualTo "TAKEN") then {
+		_lines pushBack (if (_hold isEqualTo "MOBILISING") then {
 			format [localize "STR_DUWS_T_mapview_garrison_tier",
-				localize "STR_DUWS_T_mapview_garrison_taken"]
+				localize "STR_DUWS_T_mapview_garrison_mobilising"]
 		} else {
 			[_tier] call _fnc_tier
 		});
@@ -99,13 +99,13 @@ switch (_kind) do {
 			// back. Neither says "destroyed" -- a word that final would have the player write the
 			// town off, and both of these end.
 			_lines pushBack (switch (_hold) do {
-				case "TAKEN": {
+				case "MOBILISING": {
 					format [localize "STR_DUWS_T_mapview_garrison_tier",
-						localize "STR_DUWS_T_mapview_garrison_taken"]
+						localize "STR_DUWS_T_mapview_garrison_mobilising"]
 				};
-				case "REGROUP": {
+				case "REGROUPING": {
 					format [localize "STR_DUWS_T_mapview_garrison_tier",
-						localize "STR_DUWS_T_mapview_garrison_regroup"]
+						localize "STR_DUWS_T_mapview_garrison_regrouping"]
 				};
 				default { [_tier] call _fnc_tier };
 			});
