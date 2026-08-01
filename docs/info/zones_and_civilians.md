@@ -842,11 +842,24 @@ The throttle is applied at fill time and never revisited, so the order towns fil
 thinned: the first town in keeps its full crowd while later ones are cut. Under the old model the
 recycle pass re-ran the same calculation every 90 s; nothing does now.
 
-The single-thread collapse does **not** transfer to zones. It works here because presence is a
-player-list scan — one global list, then a cheap per-town distance test. `fnc_duws_bluforNear` is a
-per-position `nearEntities` query with crew resolution, which cannot be shared across zones at
-different centres; folding it into one pass means a global `allUnits` sweep per tick, the
-`O(zones × all units)` shape `fnc_spawnWait.sqf:20-22` records as deliberately removed.
+The collapse extends to `fnc_civ_garrison`, which is the harder case: it polls on
+`fnc_duws_bluforNear` rather than on a player list, and that helper is a per-position `nearEntities`
+query with crew resolution that cannot be shared across centres. What the single thread does instead
+is *gate* it. One pass builds the BLUFOR positions, and a town with none of them inside its reach
+cannot pass the helper, so it is never asked. The helper still decides every arrival, which is the
+point of sharing it with the zone gate at all. This is not the `O(zones × all units)` shape
+`fnc_spawnWait.sqf:20-22` records as deliberately removed: the list is built once a tick and holds
+BLUFOR only, so what each town is tested against is the friendly force, not every unit in the mission.
+
+The garrison's raise cannot run in that thread — it confirms over five seconds, then waits on the
+spawners and on OPFOR actually appearing, up to a minute — so it is dispatched to a worker per town
+and adopted on a later cycle, exactly as `fnc_civ_handler` dispatches its fill. A town with a raise in
+flight is skipped entirely until it reports, or the reinforcement test would read the still-empty
+roster as owing the whole composition and raise it a second time.
+
+It is not worth transferring to zones. There are at most 40 of them against 160 towns, and a zone
+thread does more than poll — it owns the spawn, the turret crews and the stow, with blocking sections
+throughout — so collapsing them buys a fraction of the saving for a much larger rewrite.
 
 This replaced a second answer to the same two questions — an engine presence trigger, a single-slot
 global mutex serialising town fills, and a 90 s pass that deleted civilians the players had walked away
