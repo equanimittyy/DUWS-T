@@ -87,8 +87,9 @@ with no ceiling, reaches five figures on a large campaign.
 engine culls that by view distance already, and the prefabs ship with simulation off. Only deleting the
 entity moves the number.
 
-**Replayed from a record rather than rebuilt by the builder.** `fnc_createzone.sqf:157-198` rolls the
-fortification ring live — count, angle, distance, class and heading are all `random` — so calling the
+**Replayed from a record rather than rebuilt by the builder.** A zone builder is not deterministic:
+the prefab itself is drawn with `selectRandomWeighted`, and inside one, `fnc_modern_simple_zone`
+sites its mortar and both AA guns by rolling positions until one is flat and dry — so calling the
 builder a second time produces a different zone. Recording the placed result sidesteps determinism
 entirely, and it is why a composition needs no streaming code of its own beyond filing its objects
 through `fnc_duws_keep`. Because the record is built when a composition is stowed rather than when it

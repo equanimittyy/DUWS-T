@@ -25,8 +25,7 @@ Urban" survey (`fnc_moreUrban_locations.sqf`) is untouched Tomata code. In the s
 replaced only the `moreUrban == 1` branch (building-cluster centroid) and added the origin guard; the
 less-urban branch, the outer loop, the distance/spacing gates and the failsafes are inherited. Manual
 placement is untouched. `fnc_createzone.sqf` keeps its inherited core (markers, prefab, triggers,
-spawn loop) with 5U5 features *bolted on*: obstacle clearing, the fortification ring, heli
-reinforcement and the offset flag.
+spawn loop) with 5U5 features *bolted on*: obstacle clearing, heli reinforcement and the offset flag.
 
 **The civilian population system is 5U5's own work**, layered on Tomata's civilian-presence concept
 and rewritten again since: the map-wide building-cluster scan and the synthetic "Dynamic Town N"
@@ -60,8 +59,10 @@ the centroid of `House`/`Building` objects within 400 m (`:96-117`), `findSafePo
 validation loop.
 
 **Build-out** places markers, clears obstacles for prefab zones (`:61-87`), spawns a weighted prefab
-(`:89-139`), scatters 3-4 fortification towers (`:141-195`), and wires the spawn-wait, presence and
-capture triggers.
+(`:89-139`), and wires the spawn-wait, presence and capture triggers. A ring of 3-4 fortification
+towers used to sit between the prefab and the triggers; it was deleted rather than tuned, because
+siting emplacements by a random bearing at a random distance is the job
+[`../hardpoint_system_plan.md`](../hardpoint_system_plan.md) exists to do against terrain.
 
 **Naming.** `fnc_zone_name` (`fnc_zone_state_init.sqf`) hands each zone one phonetic-alphabet word,
 drawn without repeats and pairing two distinct words past the twenty-sixth. It is called from
@@ -361,8 +362,8 @@ for it whether or not the player is standing there. This is why the deferral liv
 thread rather than in the commander's appraisal: a purchase made while the player is far away would
 otherwise still pop its men in the moment they walked back.
 
-**It is units only — no fortification ring and no prefab**, because static emplacements are what
-make a zone an objective and a town must not compete with one. Tier IV reaches the zone benchmark
+**It is units only — no static emplacements and no prefab**, because built defences are what make a
+zone an objective and a town must not compete with one. Tier IV reaches the zone benchmark
 (`fnc_createopfortified`: eight buildings at three men each) by occupying buildings instead.
 
 **Clearing destroys the purchase.** No refund, and the commander must spend again: with a refund a

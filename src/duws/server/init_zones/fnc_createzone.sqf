@@ -173,73 +173,12 @@ if (_prefab) then {
 	str(_markername) setMarkerText format["%1 (%2)", _name, _prefabName];
 };
 
-// ========== 随机放置 3-4 个工事建筑，并记录到全局数组 ==========
-// [class, heading correction]. The correction is added to the outward bearing below, for a model
-// whose front is not at 0 degrees. All zero until each is checked in-game: the bearing alone is
-// right for a model that faces its own +Y, and wrong the same way every time for one that does not
-// -- which is why this is a number per class rather than a fudge inside the bearing.
-private _fortificationClasses = [
-    ["Land_GuardTower_02_F",   0],
-    ["Land_Cargo_Tower_V2_F",  0],
-    ["Land_Cargo_Patrol_V2_F", 0],
-    ["Land_BagBunker_Tower_F", 0],
-    ["Land_Bunker_01_tall_F",  0]
-];
-private _fortificationCount = 3 + floor random 2; // 3-4 个
-private _radius = _size * 0.7; // 在战区半径70%范围内放置
-private _zoneFortifications = []; // 存储放置的建筑对象
-for "_i" from 1 to _fortificationCount do {
-    private _angle = random 360;
-    private _dist = random _radius;
-    private _candidatePos = _zonePos getPos [_dist, _angle];
-    private _safePos = [0,0,0];
-    private _waterCheck = true;
-    private _attempts = 0;
-    
-    // 循环直到找到非水域位置（最多10次）
-    while {_waterCheck && _attempts < 10} do {
-        _angle = random 360;
-        _dist = random _radius;
-        _candidatePos = _zonePos getPos [_dist, _angle];
-        _safePos = [_candidatePos, 0, 50, 5, 0, 0.5, 0, [], [[0,0],[0,0]]] call BIS_fnc_findSafePos;
-        if (_safePos isEqualTo [0,0,0]) then { _safePos = _candidatePos; };
-        // 检查是否在水面上
-        if (!surfaceIsWater _safePos) then {
-            _waterCheck = false;
-        };
-        _attempts = _attempts + 1;
-    };
-    // 如果最终位置仍在水面，跳过该建筑
-    if (surfaceIsWater _safePos) then {
-        ["WARN", "ZONES", format ["Skipping fortification due to water at %1", _safePos]] call fnc_log;
-        continue;
-    };
-    
-    private _nearRoad = [_safePos, 10] call BIS_fnc_nearestRoad;
-    if (!isNull _nearRoad) then {
-        _safePos = [_safePos getPos [15, _angle], 0, 10, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
-        if (_safePos isEqualTo [0,0,0]) then { continue };
-        if (surfaceIsWater _safePos) then { continue };
-    };
-    private _nearObjs = nearestObjects [_safePos, [], 8];
-    if (count _nearObjs > 0) then { continue };
-    (selectRandom _fortificationClasses) params ["_fortClass", "_fortFacing"];
-    private _fort = createVehicle [_fortClass, _safePos, [], 0, "CAN_COLLIDE"];
-    // Faces out from the zone centre. A random heading pointed an embrasure at the objective it was
-    // meant to defend as often as at the ground it was meant to cover, which is what made these read
-    // as scenery rather than as a defence.
-    _fort setDir ((_zonePos getDir _safePos) + _fortFacing);
-    _fort setVectorUp [0,0,1];
-    _fort allowDamage true;
-    // Filed under the zone like the prefab is. These stood outside the bucket model until now,
-    // surviving only because a building is invisible to the sweep -- which is the same reason
-    // their ruins were never collected either.
-    [_fort, format ["zone_%1_%2", round (_zonePos select 0), round (_zonePos select 1)]] call fnc_duws_keep;
-    _zoneFortifications pushBack _fort;
-    ["INFO", "ZONES", format ["Placed fortification %1 at %2 for zone %3", _fortClass, _safePos, _zone_num]] call fnc_log;
-};
-missionNamespace setVariable [format ["ZoneFortifications_%1", _zone_num], _zoneFortifications];
-// ================================================
+// No fortification ring. Three or four towers were scattered on a random bearing at a random
+// distance, which sited them by luck and left them facing by luck too -- and the emplacements that
+// make a zone worth taking are exactly the thing that should be sited deliberately, against terrain,
+// against the roads and against the approach the player will actually use. That is the hardpoint
+// system's job and the plan for it is docs/hardpoint_system_plan.md; the prefab composition above
+// still stands, so a zone keeps its built centre.
 
 // No QRF listener. A hidden object sat here carrying a FiredNear handler, so the first shot fired
 // anywhere in the zone spawned up to four infantry waves at a distant OPFOR zone and walked them in

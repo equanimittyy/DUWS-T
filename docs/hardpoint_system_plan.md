@@ -177,8 +177,8 @@ all decisive:
 - **The zone index is in hand.** `_zone_num` keys the per-zone counter the capture trigger
   reads, and it is unique by construction, unlike the coordinate-derived names used elsewhere.
 
-Placement point: after the fortification ring (`fnc_createzone.sqf:199`), before the QRF object
-(`:201`). That is upstream of the `zones_buildout_done` increment at `:221`, so the "Building
+Placement point: where the fortification ring stood, after the prefab composition and before the QRF
+object. That is upstream of the `zones_buildout_done` increment at `:221`, so the "Building
 zones..." prompt and the civilian-generation gate keep describing reality
 (`fnc_init_OPFOR_WARCOM.sqf:39-49`).
 
@@ -198,25 +198,24 @@ Sited in the annulus between `0.35 * _size` and `0.9 * _size`: outside the 35 m 
 clears (`:66`), inside the capture trigger, whose area is `[_size, _size]` — `_size` is the
 *radius* of a circular trigger, not a diameter (`:267`).
 
-Rejection rules, cheapest first: 120 m from another hardpoint, 40 m from a placed fortification
-(the ring stores its objects at `:198`), not on water.
+Rejection rules, cheapest first: 120 m from another hardpoint, 40 m from the prefab composition's own
+objects, not on water.
 
-**Do not reuse the fortification ring's collision test.** `:188-189` rejects a spot if
-`nearestObjects [_safePos, [], 8]` finds anything, and the empty type filter makes that include
-terrain objects, so in the dense towns `moreUrban` targets almost every spot is rejected — the
-documented reason fortification towers barely appear in towns
-([`../KNOWN_ISSUES.md`](../KNOWN_ISSUES.md#zone-and-civilian-siting-defects)).
-Inheriting it here would silently produce zones with zero hardpoints, which is worse than a
-missing tower: it makes the whole gate transparent. Filter to the classes that actually block
-placement.
+**Do not reject on an unfiltered proximity test**, which is what the deleted fortification ring did:
+it refused a spot if `nearestObjects [_pos, [], 8]` found anything, and the empty type filter makes
+that include terrain objects, so in the dense towns `moreUrban` targets almost every spot was
+refused — which is why those towers barely appeared in towns at all. Repeating it here would
+silently produce zones with zero hardpoints, and that is worse than a missing tower: it makes the
+whole capture gate transparent. Filter to the classes that actually block placement.
 
 ### Facing is part of siting, not decoration
 
 **A hardpoint that faces the wrong way is not a hardpoint.** An MG nest is a firing position with
-an arc; a roadblock is a barrier across a line of approach. Both are defined by where they point,
-and the fortification scatter this system replaces gets that wrong today — it places its towers and
-bunkers at `setDir (random 360)` (`server/init_zones/fnc_createzone.sqf:224`), so an embrasure as
-often faces the objective it is meant to defend as the ground it is meant to cover.
+an arc; a roadblock is a barrier across a line of approach. Both are defined by where they point.
+The fortification ring this system replaces had no answer for that — it rolled a heading at random,
+so an embrasure as often faced the objective it was meant to defend as the ground it was meant to
+cover, and that is half of why the ring was deleted rather than tuned. Siting by luck and facing by
+luck are the same defect; a system that reads terrain has to answer both.
 
 So every hardpoint carries a heading, derived at siting time from what the type is for. The **Sited
 toward** column of [§Hardpoint types](#hardpoint-types) already names the intent; this is that

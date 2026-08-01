@@ -16,10 +16,9 @@ _AI_buffer = 400;
 // clock -- what buys the zone its extra minute is the composition rebuild a re-entry pays for.
 _despawn_timer = 120;
 
-// The key the prefab and the fortification ring both file their objects under
-// (prefabs/modern/*.sqf:9, fnc_createzone.sqf:204), and the key every unit this zone spawns is
-// stamped with. Derived from the same position array they use rather than passed in, and through
-// the shared helper, so none of them can drift apart without the zone itself moving.
+// The key the prefab files its objects under (prefabs/modern/*.sqf:9), and the key every unit this
+// zone spawns is stamped with. Derived from the same position array they use rather than passed in,
+// and through the shared helper, so the two cannot drift apart without the zone itself moving.
 _zoneKey = [_spawnPos] call fnc_zone_key;
 
 // One of these runs per zone every 10 s for the whole campaign, so the scan it replaces was
