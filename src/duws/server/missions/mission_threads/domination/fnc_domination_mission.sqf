@@ -14,7 +14,6 @@ _message1 = ([localize "STR_DUWS_T_dominationoverlord"] call fnc_cs);
 _message2 = ([localize "STR_DUWS_T_dominationcopy"] call fnc_cs);
 _message3 = ([localize "STR_DUWS_T_dominationend"] call fnc_cs);
 _messagehoundlost = ([localize "STR_DUWS_T_dominationhoundlost"] call fnc_cs);
-_markerText2 = localize "STR_DUWS_T_c13";
 
 // 初始化变量
 
@@ -38,73 +37,6 @@ private _VARtaskgeneratedName = format ["combat%1%2", round(_MissionPos select 0
 sleep 2;
 
 // ================ 水域检测生成函数 ================
-
-// 蓝方步兵组生成函数（带水域检测，在中心附近生成）
-_fn_waterproofBluforGroupCenter = {
-    params ["_centerPos", "_spawnRadius", "_unitTypes", "_faceDirection"];
-    
-    private ["_spawnPos", "_attempts", "_validPos"];
-    
-    _attempts = 0;
-    _validPos = false;
-    
-    // 尝试最多10次找到合适的生成位置
-    while {_attempts < 10 && !_validPos} do {
-        // 在中心点_spawnRadius米内创建随机位置
-        _randomAngle = random 360;
-        _randomDistance = random _spawnRadius;
-        _spawnPos = _centerPos getPos [_randomDistance, _randomAngle];
-        
-        // 检测位置是否在水中
-        if (!surfaceIsWater _spawnPos) then {
-            _validPos = true;
-        };
-        
-        _attempts = _attempts + 1;
-        sleep 0.5; // 避免密集循环
-    };
-    
-    // 如果10次尝试后仍未找到合适位置，则使用最后一次尝试的位置
-    if (!_validPos) then {
-        _randomAngle = random 360;
-        _randomDistance = random _spawnRadius;
-        _spawnPos = _centerPos getPos [_randomDistance, _randomAngle];
-    };
-    
-    // 调整位置，确保在地面上
-    _groundPos = _spawnPos;
-    _groundPos set [2, 0];
-    
-    // 创建班组
-    _bluforGroup = [_groundPos, WEST, _unitTypes, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
-    [_bluforGroup] call fnc_mission_claim;
-
-    // 为蓝方部队设置战斗状态和自动战斗
-    {
-        // 禁用逃跑 - 设为0表示完全不会逃跑
-        _x allowFleeing 0;
-        
-        // 启用自动战斗模式（保持开启）
-        // 注意：这里我们不使用disableAI "AUTOCOMBAT"，以保持自动战斗开启
-        
-        // 设置AI为战斗状态
-        _x setBehaviour "COMBAT";
-        _x setCombatMode "RED";
-        
-        // 设置单位立即进入警戒状态
-        _x setUnitPos "AUTO";
-        
-        // 设置单位面向指定方向
-        _x setDir _faceDirection;
-        
-    } forEach units _bluforGroup;
-    
-    // 删除组时的自动清理
-    _bluforGroup deleteGroupWhenEmpty true;
-    
-    // 返回创建的组
-    _bluforGroup
-};
 
 // 蓝方车辆生成函数（带水域检测，在中心附近生成）
 _fn_waterproofBluforVehicleCenter = {

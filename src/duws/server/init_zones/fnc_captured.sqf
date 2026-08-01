@@ -4,7 +4,6 @@ _points =   _this select 1;
 _markername = _this select 2;
 _markername2 = _this select 3;
 _triggerPos = _this select 4;
-_flagPos = _triggerPos;
 _radius = _this select 5;
 // The CP this capture pays. Separate from _points, the zone's permanent worth: the bounty
 // decays as the zone changes hands, the worth never does.

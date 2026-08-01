@@ -64,7 +64,6 @@ while {true} do {
 
                 private _hqPos = PosOfBLUHQ;
                 private _waveCount = 3;
-                private _allPlayers = call BIS_fnc_listPlayers; // 获取所有玩家
 
                 for "_wave" from 1 to _waveCount do {
                     private _zombieGroup = createGroup [civilian, true];

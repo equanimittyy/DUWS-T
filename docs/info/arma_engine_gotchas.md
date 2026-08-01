@@ -880,3 +880,21 @@ below the observed cut, with enough margin that a wide string cannot cross it.
 `format` placeholder at its longest substitution. Titles are short noun phrases regardless. Anything
 that genuinely needs more room is not a notification: a briefing belongs in the task description,
 which scrolls, and an explanation belongs in a `hint`, which wraps.
+
+## SQF identifiers are case-insensitive, so `_Varname` and `_VarName` are one variable
+
+**Variable and function names ignore case. `_Varname = "MHQ1"` followed by a read of `_VarName`
+is one variable written and read back, not a write to one name and a read of an undefined
+second one.**
+
+At runtime this is harmless and invisible, which is why mixed spellings survive in the source:
+`client/dialog/fnc_MHQ_select.sqf:38-40` writes `_Varname` and reads `_VarName` twice, and works.
+The cost lands on anything that reasons about the source as text. A case-sensitive search for
+where a variable is used reports the write as dead and the reads as undefined, and both
+conclusions are wrong — the same trap applies to command names, since the engine accepts `IF`,
+`ForEach` and `SetPos` as readily as their usual casing.
+
+**How to apply:** fold case on both sides whenever a tool compares SQF identifiers — a dead-code
+or rename pass that skips this produces confident false positives. Reading by eye, treat two
+spellings of a name as the same variable rather than assuming a bug; changing one to match the
+other is a readability edit with no behavioural effect.

@@ -26,7 +26,6 @@ _index = lbCurSel 2100;
 
 _selected_fob = _list select _index;
 _selected_fob_pos = _selected_fob select 0;
-_selected_fob_name = _selected_fob select 1;
 
 closedialog 0;
 

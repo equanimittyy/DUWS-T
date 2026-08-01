@@ -64,16 +64,13 @@ sleep 5;
 // ========== 尝试添加到库存/装备，若失败则掉落在地面 ==========
 private _pos = _caller modelToWorld [0, 1.5, 0];
 private _holder = objNull;
-private _addedToInventory = false;
 
 if (_isGoggles) then {
     // 护目镜作为物品处理
     private _beforeCount = count (items _caller);
     _caller addItem _itemClass;
     private _afterCount = count (items _caller);
-    if (_afterCount > _beforeCount) then {
-        _addedToInventory = true;
-    } else {
+    if (_afterCount <= _beforeCount) then {
         _holder = createVehicle ["GroundWeaponHolder", _pos, [], 0, "CAN_COLLIDE"];
         _holder addItemCargoGlobal [_itemClass, 1];
         [localize "STR_DUWS_T_BLACKMARKET_DROPPED_ON_GROUND"] remoteExec ["hint", _caller];
@@ -84,9 +81,7 @@ if (_isGoggles) then {
         private _beforeCount = count (items _caller);
         _caller addItem _itemClass;
         private _afterCount = count (items _caller);
-        if (_afterCount > _beforeCount) then {
-            _addedToInventory = true;
-        } else {
+        if (_afterCount <= _beforeCount) then {
             _holder = createVehicle ["GroundWeaponHolder", _pos, [], 0, "CAN_COLLIDE"];
             _holder addItemCargoGlobal [_itemClass, 1];
             [localize "STR_DUWS_T_BLACKMARKET_DROPPED_ON_GROUND"] remoteExec ["hint", _caller];
@@ -102,7 +97,6 @@ if (_isGoggles) then {
             if (!isNil "_magazine" && {_magazine != ""}) then {
                 _holder addMagazineCargoGlobal [_magazine, 1];
             };
-            _addedToInventory = false;
             [localize "STR_DUWS_T_BLACKMARKET_DROPPED_ON_GROUND"] remoteExec ["hint", _caller];
         } else {
             // 副武器栏空闲，尝试添加
@@ -111,15 +105,12 @@ if (_isGoggles) then {
             if (!isNil "_magazine" && {_magazine != ""}) then {
                 _caller addMagazineGlobal _magazine;
             };
-            if (handgunWeapon _caller == _itemClass) then {
-                _addedToInventory = true;
-            } else {
+            if (handgunWeapon _caller != _itemClass) then {
                 _holder = createVehicle ["GroundWeaponHolder", _pos, [], 0, "CAN_COLLIDE"];
                 _holder addWeaponCargoGlobal [_itemClass, 1];
                 if (!isNil "_magazine" && {_magazine != ""}) then {
                     _holder addMagazineCargoGlobal [_magazine, 1];
                 };
-                _addedToInventory = false;
             };
         };
     };

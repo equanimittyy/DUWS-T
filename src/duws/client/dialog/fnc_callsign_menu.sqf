@@ -1,5 +1,5 @@
 // Locality: client -- inherited from client/dialog/fnc_startup_next.sqf.
-_handle = createDialog "startup_dialog3";
+createDialog "startup_dialog3";
 waitUntil {dialog};
 
 // Prefill with the current callsign: the default on first entry, or whatever was

@@ -3,7 +3,6 @@
 ["INFO", "FACTION", format ["HQ Faction Dialog Init: %1", profileName]] call fnc_log;
 
 waituntil {!(IsNull (findDisplay 46))};
-_factionSelect = 0;
 _display = (findDisplay 46) createDisplay "RscDisplayEmpty";
 			
 _HQtext = _display ctrlCreate ["RscText", 1234];
@@ -132,7 +131,7 @@ _dropdownMode ctrlAddEventHandler ["LBSelChanged",
 _modeSel = duws_gamemodes findIf {(_x select 0) == duws_gamemode};
 _dropdownMode lbSetCurSel (0 max _modeSel);
 
-_handle = createDialog "startup_hq_placement_dialog";
+createDialog "startup_hq_placement_dialog";
 waitUntil {dialog};
 
 random_placement = false;

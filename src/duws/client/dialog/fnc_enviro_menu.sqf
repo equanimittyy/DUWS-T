@@ -9,7 +9,7 @@ if (isNil "duws_preset") then { duws_preset = "classic" };
 // [idc, index] per combo, filled by _setDefault below and re-applied when a preset is chosen.
 duws_enviro_defaults = [];
 
-_handle = createDialog "startup_dialog";
+createDialog "startup_dialog";
 waitUntil {dialog};
 
 // Marks a combo's default entry with a localised "(Default)" suffix at runtime, not
@@ -63,7 +63,7 @@ index_apocalypse_false = lbAdd [2105, localize "STR_DUWS_T_x4zs3lsg0"];
 [2105, index_apocalypse_false] call _setDefault;
 
 // ========== 战争升级（替换焦土模式） ==========
-index_escalation_false = lbAdd [2106, localize "STR_DUWS_T_x4zs3lsg0"];
+lbAdd [2106, localize "STR_DUWS_T_x4zs3lsg0"];
 index_escalation_true = lbAdd [2106, localize "STR_DUWS_T_vk37aebo"];
 [2106, index_escalation_true] call _setDefault;
 // =========================================

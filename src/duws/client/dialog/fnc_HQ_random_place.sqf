@@ -10,11 +10,6 @@ _foundSafePos = [];
 
 ["INFO", "BOOT", "Start fnc_HQ_random_place"] call fnc_log;
 
-_half = worldSize / 2;
-_safehalf = worldSize / 2.2;  //STAY OFF THE EDGES OF SMALL MAPS
-_mapradius = sqrt 2 * _safehalf;
-_mapcenter = [_half, _half, 0];
-
 waitUntil {sleep 0.1;count MASTER_allLocationsPos > 100};
 _location_count = count MASTER_allLocationsPos;
 

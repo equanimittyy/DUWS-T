@@ -3,7 +3,7 @@
 
 if (count Array_of_FOBname < 1) exitWith {hint localize "STR_DUWS_T_2q33n8h7"};
 
-_handle = createDialog "fob_mng_dialog";
+createDialog "fob_mng_dialog";
 waitUntil {dialog};
 
 // FAST TRAVEL LIST BEGIN - -

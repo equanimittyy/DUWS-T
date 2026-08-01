@@ -356,11 +356,6 @@ fnc_unitParseRoles = compileFinal {
 		getNumber(configFile >> "CfgVehicles" >> _type >> "canDeactivateMines") == 1;
 	};
 	
-	fnc_IsUAVSpecialist = compileFinal {
-		params ["_type"];
-		getNumber(configFile >> "CfgVehicles" >> _type >> "uavHacker") == 1;
-	};
-	
 	fnc_IsOfficer = compileFinal {
 		params ["_type"];
 		"officer" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"officer" in toLowerANSI _x}

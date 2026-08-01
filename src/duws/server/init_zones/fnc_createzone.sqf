@@ -135,10 +135,6 @@ if (_prefab) then {
 			];
 		};
 	};
-	_amount_of_prefabs = count _array_of_prefabs;
-	_indexedAmount = _amount_of_prefabs - 1;
-	_dice = round random _indexedAmount;
-
 	_prefab_array = selectRandomWeighted [
 		(_array_of_prefabs select 0),((_array_of_prefabs select 0) select 3),	
 		(_array_of_prefabs select 1),((_array_of_prefabs select 1) select 3),	

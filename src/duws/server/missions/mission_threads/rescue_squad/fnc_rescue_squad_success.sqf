@@ -57,20 +57,6 @@ if (!(alive _sol1) && !(alive _sol2) && !(alive _sol3)) exitWith {
 
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 
-// Define globalChat source
-_solRadio = "";
-if (alive _sol1) then {
-	_solRadio = _sol1;
-} else {
-	if (alive _sol2) then {
-		_solRadio = _sol2;
-	} else {
-		if (alive _sol3) then {
-			_solRadio = _sol3;
-		};
-	};
-};
-
 // JOIN PLAYER
 // Null only when every player is dead, and then there is nobody to hand them to: they stay in
 // their own group as friendly AI rather than joining group objNull.

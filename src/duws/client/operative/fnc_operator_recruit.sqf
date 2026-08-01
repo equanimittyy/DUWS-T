@@ -14,8 +14,6 @@ _selected_soldier_status = _selected_soldier select 7;
 _selected_soldier_name = _selected_soldier select 8;
 _selected_soldier_identity = _selected_soldier select 9;
 _selected_soldier_class = _selected_soldier select 10;
-_selected_soldier_headgear = _selected_soldier select 11;
-_selected_soldier_points = _selected_soldier select 13;
 
 hint _selected_soldier_identity;
 

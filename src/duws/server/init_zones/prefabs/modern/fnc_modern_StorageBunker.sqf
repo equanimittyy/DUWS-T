@@ -9,7 +9,6 @@ private _zoneKey = format ["zone_%1_%2", round (_centerSpawn select 0), round (_
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
-private _origCenterZ = 4.375;
 private _newCenterZ = getTerrainHeightASL [_centerSpawnX, _centerSpawnY];
 if (_newCenterZ <= 0) then { _newCenterZ = 0; };
 

@@ -98,7 +98,7 @@ waitUntil {sleep 1; getpos _ammobox select 2 < 0.2};
 	deleteMarker _markername;
 };
 
-_smoke = "SmokeShellGreen" CreateVehicle (getpos _ammobox);
+"SmokeShellGreen" CreateVehicle (getpos _ammobox);
 ["info",[localize "STR_DUWS_T_lyxq9zpm",localize "STR_DUWS_T_5p6d9535"]] call bis_fnc_showNotification;
 [_ammobox] remoteExec ["fnc_ammobox_actions", [0,-2] select isDedicated, _ammobox];
 // 往补给箱中添加物品

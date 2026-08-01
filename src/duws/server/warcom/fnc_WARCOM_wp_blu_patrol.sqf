@@ -1,6 +1,5 @@
 if (!isServer) exitWith {};
 _group =_this select 0;
-_leader = units _group select 0;
 _group setCombatMode "YELLOW";
 
 {

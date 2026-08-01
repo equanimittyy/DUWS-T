@@ -355,7 +355,6 @@ _officer addEventHandler ["HandleDamage", {
     _damage
 }];
 hq_blu1 = _officer; publicVariable "hq_blu1";
-blu_officer_object = _officer; publicVariable "blu_officer_object";
 [_officer] spawn {
     waitUntil {sleep 10; !alive hq_blu1};
     ["TaskFailed", ["", localize "STR_DUWS_T_amiszycs"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];

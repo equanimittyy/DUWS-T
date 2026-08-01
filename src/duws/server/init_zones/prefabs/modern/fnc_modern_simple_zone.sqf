@@ -28,94 +28,80 @@ _vehicle = objNull;
 } forEach _staticsArray;
 
 // PLACE STATICS WITH INTERACTION
-_vehicle_20 = objNull;
 _this = createVehicle ["Box_FIA_Ammo_F", [0,0,0], [], 0, "CAN_COLLIDE"];
 [_this, _zoneKey] call fnc_duws_keep;
-_vehicle_20 = _this;
 _this setDir 0;
 _this setPosATL [(_centerSpawnX)-0.1, (_centerSpawnY)-0.2, 0];
 [_this,"opfor"] spawn fnc_fill_ammobox; 
 
 // 迫击炮 (随机位置 + 安全检查)
-_vehicle_999 = objNull;
-if (true) then
-{
-  _found = false;
-  _pos = [0,0,0];
-  _attempts = 0;
-  while {!_found && _attempts < 20} do {
-    _rX = (_centerSpawnX) + (random 600) - 300;
-    _rY = (_centerSpawnY) + (random 600) - 300;
-    _candidate = [_rX, _rY, 0];
-    _flat = _candidate isFlatEmpty [5, 0, 0.2, 5, 0, false, objNull];
-    if (count _flat > 0 && !surfaceIsWater _candidate) then {
-      _pos = _flat;
-      _found = true;
-    };
-    _attempts = _attempts + 1;
+_found = false;
+_pos = [0,0,0];
+_attempts = 0;
+while {!_found && _attempts < 20} do {
+  _rX = (_centerSpawnX) + (random 600) - 300;
+  _rY = (_centerSpawnY) + (random 600) - 300;
+  _candidate = [_rX, _rY, 0];
+  _flat = _candidate isFlatEmpty [5, 0, 0.2, 5, 0, false, objNull];
+  if (count _flat > 0 && !surfaceIsWater _candidate) then {
+    _pos = _flat;
+    _found = true;
   };
-  if (!_found) then { _pos = [_rX, _rY, 0]; };
-  _this = createVehicle ["B_Mortar_01_F", _pos, [], 0, "CAN_COLLIDE"];
-  [_this, _zoneKey] call fnc_duws_keep;
-  _vehicle_999 = _this;
-  _this setDir 215.154;
+  _attempts = _attempts + 1;
 };
+if (!_found) then { _pos = [_rX, _rY, 0]; };
+_this = createVehicle ["B_Mortar_01_F", _pos, [], 0, "CAN_COLLIDE"];
+[_this, _zoneKey] call fnc_duws_keep;
+_vehicle_999 = _this;
+_this setDir 215.154;
 _vehicle_999 setdamage 0;
   sleep 0.1;
   _vehicle_999 setVectorUp [0,0,1];
 
 // 防空炮1 (随机位置 + 安全检查)
-_vehicle_1000 = objNull;
-if (true) then
-{
-  _found = false;
-  _pos = [0,0,0];
-  _attempts = 0;
-  while {!_found && _attempts < 20} do {
-    _rX = (_centerSpawnX) + (random 600) - 300;
-    _rY = (_centerSpawnY) + (random 600) - 300;
-    _candidate = [_rX, _rY, 0];
-    _flat = _candidate isFlatEmpty [5, 0, 0.2, 5, 0, false, objNull];
-    if (count _flat > 0 && !surfaceIsWater _candidate) then {
-      _pos = _flat;
-      _found = true;
-    };
-    _attempts = _attempts + 1;
+_found = false;
+_pos = [0,0,0];
+_attempts = 0;
+while {!_found && _attempts < 20} do {
+  _rX = (_centerSpawnX) + (random 600) - 300;
+  _rY = (_centerSpawnY) + (random 600) - 300;
+  _candidate = [_rX, _rY, 0];
+  _flat = _candidate isFlatEmpty [5, 0, 0.2, 5, 0, false, objNull];
+  if (count _flat > 0 && !surfaceIsWater _candidate) then {
+    _pos = _flat;
+    _found = true;
   };
-  if (!_found) then { _pos = [_rX, _rY, 0]; };
-  _this = createVehicle ["B_static_AA_F", _pos, [], 0, "CAN_COLLIDE"];
-  [_this, _zoneKey] call fnc_duws_keep;
-  _vehicle_1000 = _this;
-  _this setDir 215.154;
+  _attempts = _attempts + 1;
 };
+if (!_found) then { _pos = [_rX, _rY, 0]; };
+_this = createVehicle ["B_static_AA_F", _pos, [], 0, "CAN_COLLIDE"];
+[_this, _zoneKey] call fnc_duws_keep;
+_vehicle_1000 = _this;
+_this setDir 215.154;
 _vehicle_1000 setdamage 0;
   sleep 0.1;
   _vehicle_1000 setVectorUp [0,0,1];
 
 // 防空炮2 (随机位置 + 安全检查)
-_vehicle_1002 = objNull;
-if (true) then
-{
-  _found = false;
-  _pos = [0,0,0];
-  _attempts = 0;
-  while {!_found && _attempts < 20} do {
-    _rX = (_centerSpawnX) + (random 600) - 300;
-    _rY = (_centerSpawnY) + (random 600) - 300;
-    _candidate = [_rX, _rY, 0];
-    _flat = _candidate isFlatEmpty [5, 0, 0.2, 5, 0, false, objNull];
-    if (count _flat > 0 && !surfaceIsWater _candidate) then {
-      _pos = _flat;
-      _found = true;
-    };
-    _attempts = _attempts + 1;
+_found = false;
+_pos = [0,0,0];
+_attempts = 0;
+while {!_found && _attempts < 20} do {
+  _rX = (_centerSpawnX) + (random 600) - 300;
+  _rY = (_centerSpawnY) + (random 600) - 300;
+  _candidate = [_rX, _rY, 0];
+  _flat = _candidate isFlatEmpty [5, 0, 0.2, 5, 0, false, objNull];
+  if (count _flat > 0 && !surfaceIsWater _candidate) then {
+    _pos = _flat;
+    _found = true;
   };
-  if (!_found) then { _pos = [_rX, _rY, 0]; };
-  _this = createVehicle ["B_static_AA_F", _pos, [], 0, "CAN_COLLIDE"];
-  [_this, _zoneKey] call fnc_duws_keep;
-  _vehicle_1002 = _this;
-  _this setDir 215.154;
+  _attempts = _attempts + 1;
 };
+if (!_found) then { _pos = [_rX, _rY, 0]; };
+_this = createVehicle ["B_static_AA_F", _pos, [], 0, "CAN_COLLIDE"];
+[_this, _zoneKey] call fnc_duws_keep;
+_vehicle_1002 = _this;
+_this setDir 215.154;
 _vehicle_1002 setdamage 0;
   sleep 0.1;
   _vehicle_1002 setVectorUp [0,0,1];

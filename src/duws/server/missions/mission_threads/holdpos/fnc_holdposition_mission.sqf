@@ -38,19 +38,6 @@ _centerSpawn = _targetpos;
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
-_centerSpawnZ = 0;
-_intersections = lineIntersectsSurfaces [
-    [_centerSpawnX, _centerSpawnY, 1000],
-    [_centerSpawnX, _centerSpawnY, 0],
-    objNull, objNull, true, 1, "GEOM"
-];
-if (count _intersections > 0) then {
-    _intersection = _intersections select 0;
-    _centerSpawnZ = (_intersection select 0) select 2;
-} else {
-    _centerSpawnZ = getTerrainHeightASL _centerSpawn;
-};
-
 // ========== 初始化数组记录任务生成的物体 ==========
 _missionUnits = [];
 
@@ -217,7 +204,7 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
 Mission_Active = true;
 publicVariable "Mission_Active";
 
-_conditionCheckThread = [_samSystem, _radarSystem, _countdownDuration, _markername2, _VARtaskgeneratedName, _cpreward, _apreward, _mission_name, _targetpos, _radius, _missionUnits] spawn {
+[_samSystem, _radarSystem, _countdownDuration, _markername2, _VARtaskgeneratedName, _cpreward, _apreward, _mission_name, _targetpos, _radius, _missionUnits] spawn {
     params ["_samSystem", "_radarSystem", "_countdownDuration", "_markername2", "_VARtaskgeneratedName", "_cpreward", "_apreward", "_mission_name", "_targetpos", "_radius", "_missionUnits"];
 
     waitUntil { sleep 1; missionNamespace getVariable [format ["%1_started", _VARtaskgeneratedName], false] };

@@ -1,7 +1,6 @@
 // Locality: server; the trigger bodies below run on the machine that triggers them, not here (callers remoteExec to target 2).
 
 _foundPickupPos = _this select 0;
-_size = _this select 1;
 _fob_owner = _this select 2;
 
 _fobname = [1] call fnc_random_name;

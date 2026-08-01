@@ -10,6 +10,6 @@ while {alive hq_blu1} do {
     sleep 0.1;
 	
     waitUntil {sleep 0.2; player distance PosOfBLUHQ > 100};
-    _removeStackedEHfnc = [_addStackedEHfnc, "onEachFrame"] call BIS_fnc_removeStackedEventHandler;
+    [_addStackedEHfnc, "onEachFrame"] call BIS_fnc_removeStackedEventHandler;
     onEachFrame {};
 };

@@ -117,13 +117,6 @@ _civilianMarker setMarkerSize [1, 1];
     };
 };
 
-// 平民死亡事件：触发任务失败（由监控线程处理）
-_civilian addEventHandler ["Killed", {
-    params ["_unit", "_killer", "_instigator"];
-    Mission_Failed = true;
-    publicVariable "Mission_Failed";
-}];
-
 _civGroup deleteGroupWhenEmpty true;
 
 // ----- 任务前对话（广播）----------------------------------------------------
@@ -161,7 +154,6 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
 };
 
 // ----- 7. 任务状态监控线程（统一处理成功/失败/取消 + 删除线人标记）-------
-Mission_Failed = false;
 
 // 启动监控线程，同时传递必要参数
 [_civilian, _VARtaskgeneratedName, _civilianMarker, _timeLimit, _cpReward, _apReward, _repReward, _targetpos, _searchRadius, _markername2] spawn {

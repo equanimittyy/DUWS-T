@@ -7,13 +7,9 @@ if (!isServer) exitWith {};
 
 _array_of_zones_total =_this select 0;
 _blu_hq_pos =_this select 1;
-_op_hq_pos =_this select 2;
 _blufor_ap =_this select 3;
 _opfor_ap =_this select 4;
 _blu_attack_delay =_this select 5;
-_blu_ai_skill_range =_this select 6;
-_opfor_ai_skill = _this select 7;
-_opfor_assault_delay = _this select 8;
 
 
 // INIT VARIABLES

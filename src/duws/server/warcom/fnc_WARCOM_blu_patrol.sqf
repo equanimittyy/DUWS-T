@@ -1,5 +1,4 @@
 if (!isServer) exitWith {};
-_loop = true;
 
 WARCOM_blu_patrol_type = "";
 

@@ -1,7 +1,5 @@
 // Locality: client; the event-handler bodies below run on the machine that triggers them,
 // not here (invoked from the comm menu, shared/includes/supports_radio_modern.hpp:187).
-_cost = 0;
-_index = lbCurSel 2103;
 AttChopInUse = true;
 
 _grouptype = [];
@@ -23,7 +21,6 @@ _vehicle = vehicle _leader;
 
 // 存储当前攻击直升机信息到全局变量（用于事件同步）
 HC_ATTchop_currentVehicle = _vehicle;
-HC_ATTchop_currentGroup = _group;
 HC_ATTchop_active = true;
 HC_ATTchop_killedPending = false;
 
@@ -64,7 +61,6 @@ _vehicle addEventHandler ["Killed", {
     AttChopInUse = false;
     HC_ATTchop_active = false;
     HC_ATTchop_currentVehicle = nil;
-    HC_ATTchop_currentGroup = nil;
     HC_ATTchop_killedPending = false;
 
     // 广播可用消息
@@ -88,7 +84,6 @@ _vehicle addEventHandler ["Deleted", {
     AttChopInUse = false;
     HC_ATTchop_active = false;
     HC_ATTchop_currentVehicle = nil;
-    HC_ATTchop_currentGroup = nil;
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = ([localize "STR_DUWS_T_casreservelb"] call fnc_cs);  // 复用“可用”提示
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];

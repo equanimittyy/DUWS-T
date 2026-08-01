@@ -78,16 +78,3 @@ fnc_wbk_survivorKilled_server = {
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Survivor killed at location %1", _idx]] call fnc_log; };
 };
 
-// WBK 模式死亡处理函数（服务器执行）
-fnc_wbk_unitKilled_server = {
-    params ["_dead", "_killer", "_instigator"];
-    private _idx = _dead getVariable ["civ_locIndex", -1];
-    if (_idx == -1) exitWith {};
-
-    // 增加剩余人口（用于下次补充）
-    private _remVar = format ["civ_remaining_%1", _idx];
-    private _rem = missionNamespace getVariable [_remVar, 0];
-    missionNamespace setVariable [_remVar, _rem + 1];
-
-    if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["Unit killed at location %1", _idx]] call fnc_log; };
-};

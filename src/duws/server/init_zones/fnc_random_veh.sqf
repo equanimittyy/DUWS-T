@@ -1,7 +1,6 @@
 // Locality: server -- called from the zone spawn sizing and mission patrol builders, all
 // server-side.
 
-_faction = _this select 0;
 _vehClass = _this select 1;
 _patrolCenter = _this select 2;
 _radius = _this select 3;

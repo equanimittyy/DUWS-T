@@ -29,7 +29,7 @@ array_of_missions = [];
 
 failsafe_not_found = true;
 failsafe_not_found2 = false;
-_failsafe2 = [] spawn {  // Spawn the secondary failsafe
+[] spawn {  // Spawn the secondary failsafe
 	uiSleep 20;
 	failsafe_not_found2 = true;
 };

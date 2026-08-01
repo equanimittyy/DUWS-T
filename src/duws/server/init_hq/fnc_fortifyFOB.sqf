@@ -19,7 +19,6 @@ _fob setVariable ["FOB_fortify_busy", true];
 // after another player rebuilds. Server-local: only this machine ever reads them.
 { { deleteVehicle _x } forEach (crew _x); deleteVehicle _x; } forEach (_fob getVariable ["FOB_turrets", []]);
 
-_safe = [(_centerPos select 0)+10, (_centerPos select 1)+10];
 
 playSound "loadgun";
 
@@ -59,12 +58,6 @@ _turret2 = "";
 _turret3 = "";
 _turret4 = "";
 _turret5 = "";
-
-_glPod1 = "";
-_glPod2 = "";
-_turret3 = "";
-_hmgPod1 = "";
-_aaPod = "";
 
 switch (VERSION_X) do {
 	case "MODERN": {

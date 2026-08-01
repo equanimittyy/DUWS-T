@@ -20,10 +20,6 @@ blufor_MARKSMAN_X = 			"CUP_B_USMC_Soldier_Marksman";			//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"CUP_B_USMC_Officer";					//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"CUP_B_USMC_Pilot";						//Rescue Pilot mission
 
-blufor_CAN_DIFFUSE1_X =			"CUP_B_FR_Soldier_Exp";					//IED Defuser  EPD\Ied_Settings.sqf 
-blufor_CAN_DIFFUSE2_X =			"CUP_B_USMC_Engineer";					//IED Defuser  EPD\Ied_Settings.sqf
-IED_DEVICE_X =					"B_408_Ball";							//IED Device   EPD\IED\ExplosionFunctions.sqf
-
 blufor_BOAT_ARMED_X	=			"CUP_B_RHIB_USMC";						//supports\taxi\fnc_boatTaxi
 blufor_BOAT_CREW_X =			"C_Man_UtilityWorker_01_F";				//supports\taxi\fnc_boatTaxi
 

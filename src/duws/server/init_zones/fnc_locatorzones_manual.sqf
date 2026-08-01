@@ -1,6 +1,4 @@
 // Locality: server; the map-click bodies below run on the machine that triggers them, not here (inherited from server/warcom/fnc_init_OPFOR_WARCOM.sqf).
-_radius = _this select 0;
-_diff = _this select 1;
 
 // player1 on purpose, unlike the mission announcements: manual placement is one person clicking the
 // map, and the map this opens is theirs. Everyone else gets the typeText card on the next line.

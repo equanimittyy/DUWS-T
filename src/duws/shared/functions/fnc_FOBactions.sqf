@@ -6,7 +6,6 @@
 #include "..\includes\action_style.hpp"
 
 _fob = _this select 0;
-_fob_owner = _this select 1;
 // 防重
 if (_fob getVariable ["FOB_actions_done", false]) exitWith {};
 _fob setVariable ["FOB_actions_done", true];

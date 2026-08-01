@@ -1,8 +1,6 @@
 // Locality: server -- inherited from server/warcom/fnc_init_OPFOR_WARCOM.sqf.
 while {!(["ZONES", "MASTER_allLocations_filtered from fnc_moreUrban_locations", {count(MASTER_allLocations_filtered) > 0}, 300] call fnc_waitLogged)} do {};
 
-_radius = _this select 0;
-_diff = _this select 1;
 _infinite_failsafe_loop = true;
 failsafe_zones_not_found1 = false;
 failsafe_zones_not_found2 = false;
@@ -32,7 +30,6 @@ _mapcenter = [_half, _half, 0];
 _fortified = false;
 
 _zones_array = [[-9999,-9999,-9999]];
-_distances = [];
 
 for "_i" from 1 to zones_number do {
 	[{hint localize "STR_DUWS_T_2amacebc"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];

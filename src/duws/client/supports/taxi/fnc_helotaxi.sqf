@@ -102,8 +102,8 @@ if (call _check_damage) exitWith {
 
 // spawn smokeshell
 _smokePos = [_foundpickuppos select 0, (_foundpickuppos select 1)+ random 5];
-_smoke = "SmokeShellGreen" createVehicle _smokePos;
-_chemlight = "Chemlight_green" createVehicle _smokePos;
+"SmokeShellGreen" createVehicle _smokePos;
+"Chemlight_green" createVehicle _smokePos;
 
 _helo land "GET IN";
 

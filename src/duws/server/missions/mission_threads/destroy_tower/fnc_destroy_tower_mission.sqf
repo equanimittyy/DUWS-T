@@ -33,7 +33,6 @@ private _VARtaskgeneratedName = format ["tower%1%2",round(_MissionPos select 0),
 _towerPos = _targetpos;
 
 
-_centerSpawn = _towerPos;
 _centerSpawnX = _towerPos select 0;
 _centerSpawnY = _towerPos select 1;
 

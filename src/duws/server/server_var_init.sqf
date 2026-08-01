@@ -271,9 +271,6 @@ opfor_ai_skill = [0.55,0.75];publicVariable "opfor_ai_skill";
 // declare opfor rifleman variable
 opfor_SOLDIER_X = "";
 
-// HQ chat
-PAPABEAR=[West,"HQ"];publicVariable "PAPABEAR";
-
 // player_is_choosing_hqpos
 player_is_choosing_hqpos = false;publicVariable "player_is_choosing_hqpos";
 

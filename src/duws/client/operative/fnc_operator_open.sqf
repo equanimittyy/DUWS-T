@@ -1,5 +1,5 @@
 // Locality: client -- invoked from a dialog action (shared/includes/request_menu.hpp).
-  _handle = createDialog "operativemaingui";
+  createDialog "operativemaingui";
   waitUntil {dialog};
  
 {_index = lbAdd [1500, _x select 8];

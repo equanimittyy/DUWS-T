@@ -72,7 +72,7 @@ deleteVehicle _parachute;
 
 sleep 7;
 
-_smoke = "SmokeShellGreen" CreateVehicle (getpos _cargo);
+"SmokeShellGreen" CreateVehicle (getpos _cargo);
 ["info",[localize "STR_DUWS_T_2oefoo3j",localize "STR_DUWS_T_pvue8vst"]] call bis_fnc_showNotification;
 _cargo setVehicleArmor 1;
 

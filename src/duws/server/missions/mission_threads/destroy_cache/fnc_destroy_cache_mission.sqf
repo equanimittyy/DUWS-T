@@ -211,20 +211,20 @@ waitUntil {
 // props leave through fnc_duws_release, which its own cleanup call triggers.
 { deleteVehicle _x } forEach _missionUnits;
 
-_bomb = "grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
+"grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
 sleep 0.5;
-_bomb = "grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
-_bomb = "grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
+"grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
+"grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
 sleep 0.1;
-_bomb = "grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
+"grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
 sleep 0.5;
-_bomb = "Bo_Mk82" createVehicle[(_cachePos select 0), (_cachePos select 1)];
+"Bo_Mk82" createVehicle[(_cachePos select 0), (_cachePos select 1)];
 sleep 0.5;
-_bomb = "Bo_Mk82" createVehicle[(_cachePos select 0), (_cachePos select 1)];
+"Bo_Mk82" createVehicle[(_cachePos select 0), (_cachePos select 1)];
 sleep 0.5;
-_bomb = "grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
+"grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
 sleep 0.5;
-_bomb = "grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
+"grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
 
 deleteMarker str(_markername2);
 

@@ -2,7 +2,6 @@
 _index = lbCurSel 2100;
 
 _skill = blufor_ai_skill_random;
-_skillSF = blufor_ai_skill_random;
 
 _spawnPos = getpos player;
 _spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],150,200,15,0,0.3,0,[],[]] call BIS_fnc_findSafePos;

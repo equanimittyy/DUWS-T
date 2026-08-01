@@ -17,7 +17,6 @@ setGroupIconsVisible [true,false]; //now everyone can see enemies on map
 // Create centers
 createCenter sideLogic;
 createcenter sideLogic;
-LogicGroup = createGroup SideLogic;
 createCenter west;
 createCenter east;
 createCenter resistance;

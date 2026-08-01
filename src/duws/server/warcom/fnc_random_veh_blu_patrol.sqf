@@ -1,8 +1,6 @@
 if (!isServer) exitWith {};
-_faction = _this select 0;
 _vehClass = _this select 1;
 _position = _this select 2;
-_radius = _this select 3;
 
 
 // DETERMINE LA FACTION

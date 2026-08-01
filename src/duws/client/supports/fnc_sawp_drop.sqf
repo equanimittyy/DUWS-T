@@ -108,7 +108,7 @@ waitUntil {sleep 1; getpos _ammobox select 2 < 0.2};
 	deletemarker _markername;
 };
 
-_smoke = "SmokeShellGreen" CreateVehicle (getpos _ammobox);
+"SmokeShellGreen" CreateVehicle (getpos _ammobox);
 ["info",[localize "STR_DUWS_T_sawpinfo",localize "STR_DUWS_T_sawpnts2"]] call bis_fnc_showNotification;
 
 // Put SAWP System in the ammobox

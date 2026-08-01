@@ -31,5 +31,4 @@ _group deleteGroupWhenEmpty true;
 } forEach units _group;
 // =================================
 
-_patrolRadius = round(_radius/2);
 [_group, _patrolCenter, _patrolradius] call bis_fnc_taskPatrol;

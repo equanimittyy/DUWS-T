@@ -1,7 +1,5 @@
 // Locality: client; the event-handler bodies below run on the machine that triggers them,
 // not here (invoked from the comm menu, shared/includes/supports_radio_modern.hpp:198).
-_cost = 0;
-_index = lbCurSel 2103;
 CASInUse = true;
 
 _spawnPos = getmarkerpos str blu_hq_markername;
@@ -25,7 +23,6 @@ _vehicle engineOn true;
 
 // 存储当前CAS战机信息到全局变量（用于事件同步）
 HC_CAS_currentVehicle = _vehicle;
-HC_CAS_currentGroup = _group;
 HC_CAS_active = true;
 HC_CAS_killedPending = false;
 
@@ -70,7 +67,6 @@ _vehicle addEventHandler ["Killed", {
         CASInUse = false;
         HC_CAS_active = false;
         HC_CAS_currentVehicle = nil;
-        HC_CAS_currentGroup = nil;
         HC_CAS_killedPending = false;
 
         // 广播可用消息
@@ -94,7 +90,6 @@ _vehicle addEventHandler ["Deleted", {
     CASInUse = false;
     HC_CAS_active = false;
     HC_CAS_currentVehicle = nil;
-    HC_CAS_currentGroup = nil;
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = ([localize "STR_DUWS_T_casreservekoi"] call fnc_cs);  // 复用“可用”提示
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];

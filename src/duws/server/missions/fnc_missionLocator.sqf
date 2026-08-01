@@ -1,11 +1,6 @@
 // Locality: server -- inherited from server/server_init.sqf.
 // DUWS_T "More Urban" changes
 
-_half = worldSize / 2;
-_safehalf = worldSize / 2.2;  //STAY OFF THE EDGES OF SMALL MAPS
-_mapradius = sqrt 2 * _safehalf;
-_mapcenter = [_half, _half, 0];
-
 waitUntil {sleep 0.1;!isNil "WARCOM_init_done"};
 waitUntil {sleep 0.1;WARCOM_init_done};
 

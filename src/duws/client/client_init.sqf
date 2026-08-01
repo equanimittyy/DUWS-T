@@ -157,7 +157,7 @@ if (isMultiplayer) then {
 };
 
 // CP Death Penalty EventHandler (killhouse 内免罚)
-PlayerKilledEH = player addEventHandler ["killed", {
+player addEventHandler ["killed", {
     private _inKillhouse = false;
     private _khX = missionNamespace getVariable ["killhouse_centerX", nil];
     private _khY = missionNamespace getVariable ["killhouse_centerY", nil];
@@ -290,7 +290,6 @@ while {!(["BOOT", "mission_init_complete (zones built, civilians registered)",
     {mission_init_complete}, 300] call fnc_waitLogged)} do {};
 
 sleep 5;
-_currVolume = musicVolume;
 titleCut ["", "BLACK FADED", 999];
 sleep 5;
 
@@ -419,7 +418,7 @@ if ((vehiclevarname player) in game_master || !isMultiplayer) then {
 	[player, Curator] remoteExec ["assignCurator",2];
 	[] spawn {
 		sleep 10;
-		_sitrep = [player,"sitrep"] call BIS_fnc_addCommMenuItem;
+		[player,"sitrep"] call BIS_fnc_addCommMenuItem;
 		// The campaign task waits on this so orders never arrive before the radio that
 		// reports on them. Only this machine adds the item, so only it can say when.
 		sitrep_granted = true; publicVariable "sitrep_granted";
@@ -488,11 +487,6 @@ if (hasInterface) then {
     };
 };
 sleep 20;
-// 在客户端添加基础装备
-fnc_disguise_addGear = {
-    { player addItem _x; player assignItem _x; } forEach ["ItemMap", "ItemGPS", "ItemRadio", "ItemCompass", "ItemWatch"];
-};
-publicVariable "fnc_disguise_addGear";
 // Single hold-action opens the disguise panel (fnc_disguise_menu), which fronts
 // both modes. Replaces the two per-mode hold-actions that triggered each disguise
 // directly; the civ-mode CIV_PRESENCE gate now lives inside the panel.

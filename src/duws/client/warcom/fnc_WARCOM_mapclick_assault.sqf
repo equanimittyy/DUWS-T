@@ -11,7 +11,6 @@ openMap true;
 // covered by the map the line after it was issued.
 [localize "STR_DUWS_T_0v7xnprx"] call fnc_map_prompt;
 
-_found_distance = false;
 
 waituntil {sleep 0.1;clicked or !(visiblemap)};
 // Released on both exits. This handler used to be left installed on every path, so the slot

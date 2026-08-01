@@ -482,7 +482,6 @@ fnc_removeArsenalAction = compile preprocessFileLineNumbers "duws\client\misc\fn
 publicVariable "fnc_removeArsenalAction";
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_wbk_server_init.sqf";
 publicVariable "fnc_wbk_survivorKilled_server";
-publicVariable "fnc_wbk_unitKilled_server";
 [] call compile preprocessFileLineNumbers "duws\server\supports\fnc_pylon_init.sqf";
 publicVariable "fnc_pylon_set_with_cost";
 publicVariable "fnc_pylon_hint_nocp";

@@ -170,9 +170,6 @@ if (_mode == "spawn") then {
         ["hgun_Pistol_01_F", "10Rnd_9x21_Mag"]
     ];
 
-    private _outerProbability = 0.6;
-    private _maxOutdoorDist = _triggerRadius * 0.8;
-    private _outdoorRange = 100 min _maxOutdoorDist;
 
     private _survivorCount = round (_spawnCount * 0.3);
     private _zombieCount = _spawnCount - _survivorCount;

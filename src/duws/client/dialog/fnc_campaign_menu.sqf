@@ -3,7 +3,7 @@
   // event a player's click raises, and only the player's counts as leaving the preset.
   duws_preset_applying = true;
 
-  _handle = createDialog "startup_dialog2";
+  createDialog "startup_dialog2";
   waitUntil {dialog};
 
   // Marks a combo's default entry with a localised "(Default)" suffix at runtime, not

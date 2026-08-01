@@ -12,7 +12,6 @@ _messageroger = ([localize "STR_DUWS_T_cqbroger"] call fnc_cs);
 _message1 = localize "STR_DUWS_T_cqblookslike";
 _message2 = ([localize "STR_DUWS_T_cqbend"] call fnc_cs);
 _message3 = localize "STR_DUWS_T_cqboverlordcopy";
-_markerText2 = localize "STR_DUWS_T_clearhouse_desc";
 
 private _site = [_MissionPos, _radius, 11] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
