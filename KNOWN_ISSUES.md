@@ -52,11 +52,19 @@ since the withdrawal is what clears the objective and the two are felt together.
 
 ## Per-town reputation: shipped, not yet exercised
 
-- [ ] Take a town below -10 and stand in it. A garrison must appear and the town must keep its debt
-      until that garrison is fought. Reputation returning to 0 on its own means something other
+- [ ] Take a town below -10. The RPT logs `Town N taken at rep R; first garrison held for 1800 s`
+      at once, and no garrison appears for thirty minutes of wall-clock — the capture grace, so a
+      tier does not materialise around the player who just spent the reputation. Nothing appearing
+      inside that window is the mechanic, not a failure; leave and come back after it
+- [ ] Once the grace has run, stand in the town. A garrison must appear and the town must keep its
+      debt until that garrison is fought. Reputation returning to 0 on its own means something other
       than the clear trigger's arming order is discharging it; the RPT says which happened, since
       an armed garrison logs `Garrison tier N spawned` and a spawn that put nothing inside the
       trigger area logs `placed no OPFOR`
+- [ ] Raise a garrisoned town's tier from the debug menu while standing in it. Nothing must spawn
+      while you are there; walk out past the town radius plus 400 m, come back, and the difference
+      must be standing — `garrison reinforced to tier N` in the RPT, with the baseline risen rather
+      than reset, so casualties already taken are still counted against it
 - [ ] Clear that garrison. If the `WEST SEIZED` trigger never fires, CIVILIAN-side units are blocking it and the fallback is a condition trigger counting hostile units in `thisList`
 - [ ] Read the `Escalation census:` line in the RPT on a new map and check `tier` against 30.
       Thirty buildings a level across eleven levels is the shipped figure, but it is reached as a
