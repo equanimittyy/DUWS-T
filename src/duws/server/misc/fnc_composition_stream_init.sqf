@@ -92,7 +92,17 @@ fnc_duws_stow = {
     private _members = (DUWS_compositions getOrDefault [_key, []]) select {!isNull _x};
     private _pinned = _members select {_x getVariable ["DUWS_noStow", false]};
     private _streamable = _members - _pinned;
-    if ((_streamable findIf {({alive _x} count crew _x) > 0}) >= 0) exitWith { false };
+    // Logged where the reason is known: the streaming caller only sees a bare false, and a
+    // composition that refuses stays on the map for a whole spawn/despawn cycle with nothing to
+    // say why. Unreachable through the zone path -- fnc_spawnWait crews out its statics first and
+    // nothing else in a composition takes crew -- so a line here means something unmodelled put a
+    // man in one, which is worth a WARN rather than a routine note.
+    private _crewed = _streamable findIf {({alive _x} count crew _x) > 0};
+    if (_crewed >= 0) exitWith {
+        ["WARN", "STREAM", format ["stow %1 refused: %2 still crewed",
+            _key, typeOf (_streamable select _crewed)]] call fnc_log;
+        false
+    };
     private _records = [];
     {
         // Dead members go unrecorded, so what a player destroyed stays destroyed. A ruined
