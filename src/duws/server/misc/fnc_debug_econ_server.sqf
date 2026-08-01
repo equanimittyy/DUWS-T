@@ -25,7 +25,6 @@ switch (toLower _mode) do {
         private _aps  = missionNamespace getVariable ["civ_town_ap", []];
         private _locs = missionNamespace getVariable ["civ_locations", []];
         private _tiers = missionNamespace getVariable ["DUWS_townGarrisonTier", []];
-        private _strs  = missionNamespace getVariable ["DUWS_townGarrisonStrength", []];
 
         // One row per town: the name the map readout uses, whether it has a reputation at all, that
         // figure and its worth. The flag is carried rather than a nil reputation, the same way
@@ -40,7 +39,7 @@ switch (toLower _mode) do {
                 if (_hasRep) then { _reps select _forEachIndex } else { 0 },
                 _aps param [_forEachIndex, 0],
                 _tiers param [_forEachIndex, 0],
-                _strs param [_forEachIndex, 1]];
+                [_forEachIndex] call fnc_town_garrison_strengthAt];
         } forEach _locs;
 
         // Escalation is absent entirely in RAVAGE and WBK -- fnc_escalation returns before setting

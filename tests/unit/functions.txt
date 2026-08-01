@@ -14,6 +14,9 @@ duws/server/misc/fnc_civ_state_init.sqf::fnc_civ_townIncome
 duws/server/misc/fnc_civ_liveTarget.sqf::*fnc_civ_liveTarget
 duws/server/misc/fnc_search_drawKind.sqf::*fnc_search_drawKind
 duws/server/misc/fnc_opforRoles.sqf::*fnc_opforRoles
+duws/server/misc/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonStrength
+duws/server/misc/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonStrengthSet
+duws/server/misc/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonStrengthRecord
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_strength
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_strength_set
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_thin

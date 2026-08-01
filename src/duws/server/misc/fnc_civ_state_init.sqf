@@ -152,28 +152,21 @@ fnc_town_garrison_clearHold = {
 	(missionNamespace getVariable ["DUWS_townGarrisonHoldKind", []]) set [_townIndex, ""];
 };
 
-// What fraction of its tier composition a town actually fields. Set to the floor when its garrison
-// is beaten and never restored: a town fought out once stays a shell, so clearing it is worth
-// something lasting rather than something the enemy walks back the moment you leave.
-// The same floor zones use, and read by fnc_zone_thin the same way.
+// What fraction of its tier composition a town actually fields, and the writer for it. Both name the
+// town's key to the shared attrition store, which owns the tenths rule, the 0.3 floor and the
+// lower-only record -- a zone wears down by exactly the same rules and reads the same functions.
 fnc_town_garrison_strengthAt = {
 	if (!isServer) exitWith { 1 };
 	params [["_townIndex", -1]];
-	private _s = missionNamespace getVariable ["DUWS_townGarrisonStrength", []];
-	if (_townIndex < 0 || _townIndex >= count _s) exitWith { 1 };
-	_s select _townIndex
+	if (_townIndex < 0) exitWith { 1 };
+	[[_townIndex] call DUWS_fnc_townStrengthKey] call DUWS_fnc_garrisonStrength
 };
 
-// Quantised to tenths on the same expression as fnc_zone_strength_set, and for its reason: strength
-// is a spawn budget, not a casualty ledger, so what it scales is whole groups and whole buildings and
-// anything finer rounds away at the point of use. One rule for both kinds of ground, rather than a
-// town measuring itself more precisely than it can ever spend.
 fnc_town_garrison_setStrength = {
 	if (!isServer) exitWith {};
 	params [["_townIndex", -1], ["_frac", 1]];
-	private _s = missionNamespace getVariable ["DUWS_townGarrisonStrength", []];
-	if (_townIndex < 0 || _townIndex >= count _s) exitWith {};
-	_s set [_townIndex, ((ceil ((_frac * 10) - 0.0001)) / 10) max 0.3 min 1];
+	if (_townIndex < 0) exitWith {};
+	[[_townIndex] call DUWS_fnc_townStrengthKey, _frac] call DUWS_fnc_garrisonStrengthSet
 };
 
 // What one reinforcement buys. A tenth-multiple because the setter above quantises to tenths: a
@@ -196,16 +189,17 @@ fnc_town_garrison_setStrength = {
 fnc_town_garrison_reinforce = {
 	if (!isServer) exitWith { -1 };
 	params [["_townIndex", -1], ["_reason", ""]];
-	private _s = missionNamespace getVariable ["DUWS_townGarrisonStrength", []];
-	if (_townIndex < 0 || _townIndex >= count _s) exitWith { -1 };
+	// Bounded by the town registry rather than by a strength array: strength now lives in the shared
+	// keyed store, which has no per-town length to range-check against.
+	if (_townIndex < 0 || _townIndex >= count (missionNamespace getVariable ["DUWS_townGarrisonTier", []])) exitWith { -1 };
 	if (([_townIndex] call fnc_town_garrison_holdKindAt) == "REGROUP") exitWith {
 		["INFO", "CIV", format ["Town %1 reinforcement refused (%2): regrouping for another %3 s",
 			_townIndex, _reason, round ([_townIndex] call fnc_town_garrison_holdAt)]] call fnc_log;
 		-1
 	};
-	private _old = _s select _townIndex;
+	private _old = [_townIndex] call fnc_town_garrison_strengthAt;
 	[_townIndex, _old + REINFORCE_STEP] call fnc_town_garrison_setStrength;
-	private _new = _s select _townIndex;
+	private _new = [_townIndex] call fnc_town_garrison_strengthAt;
 	["INFO", "CIV", format ["Town %1 reinforced %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 	_new
 };

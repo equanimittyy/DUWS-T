@@ -13,42 +13,6 @@ if (_townIndex >= count _locations) exitWith {};
 private _centre = getPos (_locations select _townIndex);
 private _radius = (missionNamespace getVariable ["civ_radii", []]) param [_townIndex, 300];
 
-// Raises an explicit token list and hands back what it placed. One driver seeds a garrison from a
-// tier's whole composition and reinforces a standing one from the difference, so a tier bought
-// mid-fight cannot raise something the town already fields.
-// The position and radius are passed in rather than read from the enclosing scope: a spawned block
-// sees no locals from where it was written, and this one is called for its return value anyway --
-// the roster is what lets the garrison be counted and ordered out.
-//
-// DUWS_fnc_zoneSpawnOne comes from fnc_zone_spawn_sizes, which is ordered ahead of this by zone
-// build-out: fnc_civ_init_Tomata waits on every zone being built before it starts these threads,
-// and no zone can be built before the table that spawns its garrison exists.
-private _fnc_spawnList = {
-    params ["_tokens", "_pos", "_rad"];
-    private _grps = [];
-    {
-        private _grp = if (_x == "buildings") then {
-            // The zone benchmark tier IV climbs to -- fnc_createopfortified holds up to eight
-            // buildings at three men each. Flagged and looted inside, unlike everything below:
-            // rolling the search flag over these men a second time would quietly raise the rate
-            // a town garrison pays out at above a zone's.
-            [_pos, _rad, 8, 3] call fnc_garrisonBuildings
-        } else {
-            private _g = [_x, _pos, _rad] call DUWS_fnc_zoneSpawnOne;
-            // A town garrison is a garrison: it pays the same search rate a zone's does. The
-            // spawners it shares with the zone band carry the loot pass and not this one, so it
-            // has to be asked for.
-            if (!isNull _g) then { [_g, "garrison"] call fnc_search_flag_group };
-            _g
-        };
-        if (!isNull _grp) then { _grps pushBack _grp };
-        // Staggered, not batched: each of these raises a group, and firing a whole tier in one
-        // frame is what the per-call sleep this replaces existed to avoid. None after the last.
-        if (_forEachIndex < (count _tokens) - 1) then { sleep 5 };
-    } forEach _tokens;
-    _grps
-};
-
 private _fnc_rosterAlive = {
     params ["_grps"];
     private _n = 0;
@@ -195,7 +159,7 @@ while {true} do {
                     // once fields a fraction of its tier from then on, so the composition is the
                     // ceiling rather than the promise.
                     private _want = [DUWS_townSpawnTiers select (_tier - 1), _strength] call fnc_zone_thin;
-                    _roster = [_want, _centre, _radius] call _fnc_spawnList;
+                    _roster = [_want, _centre, _radius] call DUWS_fnc_raiseGarrison;
                     // Armed only once the garrison is standing in it. Each spawner resolves a safe
                     // position before it places anything, and one that fails leaves the town
                     // holding the player and nobody else -- which is precisely what WEST SEIZED
@@ -302,7 +266,7 @@ while {true} do {
         // different list every call, and an unchanged town would appear to owe men forever.
         if ((_tier > _deployed || _strength > _deployedStrength) && !_retreating && {!_near}) then {
             private _want = [DUWS_townSpawnTiers select (_tier - 1), _strength] call fnc_zone_thin;
-            private _added = [[_deployedList, _want] call DUWS_fnc_spawnDiff, _centre, _radius] call _fnc_spawnList;
+            private _added = [[_deployedList, _want] call DUWS_fnc_spawnDiff, _centre, _radius] call DUWS_fnc_raiseGarrison;
             _roster append _added;
             // Added to the baseline rather than re-measured from the roster. A garrison ground down
             // to three men and then reinforced by six is nine men against a baseline that still

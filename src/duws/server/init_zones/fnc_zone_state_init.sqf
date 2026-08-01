@@ -106,29 +106,16 @@ fnc_zone_garrison_dropped = {
 
 // How much of its original garrison a zone still has, as a fraction. Read by everything that places
 // OPFOR for a zone, so a force the player broke is not handed back to them intact two minutes later.
+// Both of these name the zone's key to the shared attrition store, which owns the quantisation, the
+// floor and the record -- a town wears down by the same rules and reads the same functions.
 fnc_zone_strength = {
 	params ["_zoneKey"];
-	missionNamespace getVariable [format ["DUWS_zoneStrength_%1", _zoneKey], 1]
+	[_zoneKey] call DUWS_fnc_garrisonStrength
 };
 
-// The one writer, so a mechanic that lets OPFOR rebuild a mauled zone -- spending to restore ground
-// they hold, rather than the player being refunded the loss by walking away -- has a single place to
-// go through, and inherits the quantisation and the floor rather than restating them.
-//
-// Tenths because this is a spawn budget, not a casualty ledger: what it scales is whole groups,
-// whole buildings and whole emplacements, so finer resolution rounds away at the point of use. The
-// epsilon absorbs float slop rather than shifting the rule: SQF scalars are 32-bit floats, and a
-// division landing a hair above an exact tenth would buy the garrison a whole free step.
-//
-// The 0.3 floor is the mechanic rather than a guard. Against the 0.2 break line in
-// fnc_zone_capture_ready, a garrison at the floor still sits a tenth of the zone's original strength
-// above beaten, so retaking ground you softened is a fight rather than a walk-in. A zone allowed to
-// redeploy empty would also be uncapturable outright: a zero peak refuses capture.
 fnc_zone_strength_set = {
 	params ["_zoneKey", "_frac"];
-	private _q = ((ceil ((_frac * 10) - 0.0001)) / 10) max 0.3 min 1;
-	missionNamespace setVariable [format ["DUWS_zoneStrength_%1", _zoneKey], _q];
-	_q
+	[_zoneKey, _frac] call DUWS_fnc_garrisonStrengthSet
 };
 
 // Measured against the force the zone was first given -- DUWS_zoneBase_<key>, published beside the
@@ -148,11 +135,7 @@ fnc_zone_strength_record = {
 	// measure against and what is standing describes a garrison that was still arriving.
 	if (_base <= 0) exitWith {};
 	private _left = [_zoneKey] call fnc_zone_garrison_count;
-	// Clamped to what the zone already deployed at, so strength only ever falls. Every consumer
-	// rounds its own share up and keeps at least one of whatever it is placing, so a garrison sent
-	// out at three tenths stands nearer four; measured raw, an untouched zone would climb a step on
-	// every visit and heal itself back to full for free.
-	private _s = [_zoneKey, (_left / _base) min ([_zoneKey] call fnc_zone_strength)] call fnc_zone_strength_set;
+	private _s = [_zoneKey, _left, _base] call DUWS_fnc_garrisonStrengthRecord;
 	["INFO", "ZONES", format ["%1 packed up holding %2 of %3; redeploys at %4 strength",
 		_zoneKey, _left, _base, _s]] call fnc_log;
 };

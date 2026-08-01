@@ -109,9 +109,43 @@ DUWS_fnc_spawnDiff = {
     _out
 };
 
+// Raises a token list and hands back the groups it made, in order. The one place a composition
+// becomes men, shared by the zone band and the town garrison: the stagger, the search flag and the
+// building-occupation token are rules about raising a garrison, not about which kind of ground is
+// raising one.
+//
+// Staggered, not batched: each token raises a group, and firing a whole composition in one frame is
+// what the per-call sleep this replaces existed to avoid. None after the last.
+//
+// Returns groups rather than appending to a caller's roster, so a caller that keeps one appends
+// after. Nothing reads a zone's roster meaningfully while its band is still placing -- the capture
+// test refuses on the missing peak, and the peak is taken after this returns.
+DUWS_fnc_raiseGarrison = {
+    params ["_tokens", "_pos", "_radius"];
+    private _grps = [];
+    {
+        private _grp = if (_x == "buildings") then {
+            // The zone benchmark a town's tier IV climbs to -- fnc_createopfortified holds up to
+            // eight buildings at three men each. It carries its own search and loot passes, unlike
+            // everything below: flagging these men again would roll a second time against the same
+            // bodies and quietly raise the rate this garrison pays out at.
+            [_pos, _radius, 8, 3] call fnc_garrisonBuildings
+        } else {
+            private _g = [_x, _pos, _radius] call DUWS_fnc_zoneSpawnOne;
+            // Flagged where the group is raised, so the two cannot drift: every spawner here already
+            // carried the loot pass and none of them carried this one, which once left the 50 %
+            // garrison rate firing on side-mission garrisons and nowhere else.
+            if (!isNull _g) then { [_g, "garrison"] call fnc_search_flag_group };
+            _g
+        };
+        if (!isNull _grp) then { _grps pushBack _grp };
+        if (_forEachIndex < (count _tokens) - 1) then { sleep 5 };
+    } forEach _tokens;
+    _grps
+};
+
 // Called rather than spawned, for the group each one hands back: the capture test counts this
 // zone's own garrison, so every unit raised here has to be flagged with the zone it belongs to.
-// The band below still staggers them, which is what the spawn was doing.
 DUWS_fnc_zoneSpawnOne = {
     params ["_token", "_pos", "_size"];
     switch (_token) do {
@@ -141,19 +175,7 @@ fnc_zone_spawn = {
     // fight is waiting at full strength when they come back.
     _spawns = [_spawns, [_zoneKey] call fnc_zone_strength] call fnc_zone_thin;
 
-    {
-        private _grp = [_x, _spawnPos, _size] call DUWS_fnc_zoneSpawnOne;
-        if (!isNull _grp) then {
-            _roster append (units _grp);
-            // Flagged where the group is rostered, so the two cannot drift: every spawner here
-            // already carried the loot pass and none of them carried this one, which left the
-            // 50 % garrison rate firing on side-mission garrisons and nowhere else.
-            [_grp, "garrison"] call fnc_search_flag_group;
-        };
-        // Staggered, not batched: each of these spawns a group, and firing the whole band in one
-        // frame is what the original's per-call sleep existed to avoid. None after the last.
-        if (_forEachIndex < (count _spawns) - 1) then { sleep 5 };
-    } forEach _spawns;
+    { _roster append (units _x) } forEach ([_spawns, _spawnPos, _size] call DUWS_fnc_raiseGarrison);
 
     // Settled before the peak is taken. fnc_createopfortified appends to the same roster from its
     // own thread and is normally long finished by here, but nothing enforces that, and a peak taken

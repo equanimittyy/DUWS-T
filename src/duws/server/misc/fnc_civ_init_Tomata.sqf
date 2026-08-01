@@ -211,9 +211,8 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     // them as ungarrisoned until the first garrison cycle would let the commander appraise them
     // as neutral. Everything else starts at 0, which is what the BLUFOR and neutral bands stay at.
     missionNamespace setVariable ["DUWS_townGarrisonTier", _townRep apply {[0, 1] select (_x <= -10)}];
-    // Full strength and no hold: a town that has never been fought over owes its whole tier, and the
-    // floor is written only by a garrison being cleared.
-    missionNamespace setVariable ["DUWS_townGarrisonStrength", _townRep apply {1}];
+    // No strength array: the shared attrition store answers full for ground nobody has fought over,
+    // so a town needs no entry until something writes one.
     missionNamespace setVariable ["DUWS_townGarrisonHold", _townRep apply {0}];
     missionNamespace setVariable ["DUWS_townGarrisonHoldKind", _townRep apply {""}];
     ["INFO", "CIV", format ["Town reputation registered for %1 towns, AP worth %2", _n, _townAp]] call fnc_log;

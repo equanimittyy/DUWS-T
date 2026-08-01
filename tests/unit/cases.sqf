@@ -297,23 +297,41 @@ opfor_SOLDIER_X = nil;
 ["opforRoles: no argument at all still yields a spawnable list",
     ([] call fnc_opforRoles), ["O_Soldier_F"]] call fnc_assertEq;
 
-// --- fnc_zone_strength_set: what a mauled zone redeploys at ---
+// --- the shared attrition store: what a mauled garrison redeploys at ---
+// Exercised through the zone wrappers, so the delegation is covered along with the arithmetic. A
+// town reads the same functions under a town_<n> key.
 // Tenths rounded up, floored at 0.3, capped at 1. The floor is the mechanic: against the 0.2 break
 // line, a garrison at three tenths is still a tenth of the zone's original strength from beaten.
-["zone_strength_set: rounds up to the next tenth",
+["garrisonStrength: rounds up to the next tenth",
     (["k1", 0.55] call fnc_zone_strength_set), 0.6] call fnc_assertEq;
-["zone_strength_set: an exact tenth does not step up",
+["garrisonStrength: an exact tenth does not step up",
     (["k1", 0.7] call fnc_zone_strength_set), 0.7] call fnc_assertEq;
-["zone_strength_set: a wiped garrison redeploys at the floor",
+["garrisonStrength: a wiped garrison redeploys at the floor",
     (["k1", 0] call fnc_zone_strength_set), 0.3] call fnc_assertEq;
-["zone_strength_set: just under the floor is the floor, not a rounding of it",
+["garrisonStrength: just under the floor is the floor, not a rounding of it",
     (["k1", 0.24] call fnc_zone_strength_set), 0.3] call fnc_assertEq;
-["zone_strength_set: an untouched garrison stays at full",
+["garrisonStrength: an untouched garrison stays at full",
     (["k1", 1] call fnc_zone_strength_set), 1] call fnc_assertEq;
-["zone_strength_set: reads back what it stored",
+["garrisonStrength: reads back what it stored",
     (["k1"] call fnc_zone_strength), 1] call fnc_assertEq;
-["zone_strength: a zone that has never been fought over is full strength",
+["garrisonStrength: a zone that has never been fought over is full strength",
     (["never_touched"] call fnc_zone_strength), 1] call fnc_assertEq;
+
+// --- DUWS_fnc_garrisonStrengthRecord: survivors against the force it was given ---
+["rec1", 1] call fnc_zone_strength_set;
+["strengthRecord: records what is left, quantised up",
+    (["rec1", 5, 10] call DUWS_fnc_garrisonStrengthRecord), 0.5] call fnc_assertEq;
+// Falls only. An untouched garrison measured raw would climb a step every visit, because every
+// consumer rounds its own share up and keeps at least one of whatever it places.
+["strengthRecord: never raises what is already lower",
+    (["rec1", 10, 10] call DUWS_fnc_garrisonStrengthRecord), 0.5] call fnc_assertEq;
+["strengthRecord: a wiped garrison lands on the floor, not on zero",
+    (["rec1", 0, 10] call DUWS_fnc_garrisonStrengthRecord), 0.3] call fnc_assertEq;
+// No baseline means no cycle ever finished placing, so there is nothing to measure against and what
+// is standing describes a garrison that was still arriving.
+["rec2", 1] call fnc_zone_strength_set;
+["strengthRecord: a zero baseline records nothing",
+    (["rec2", 3, 0] call DUWS_fnc_garrisonStrengthRecord), 1] call fnc_assertEq;
 
 // --- fnc_zone_thin: scaling a spawn list by that strength ---
 private _band = ["sniper", "patrol", "patrol", "team", "wpteam", "armored", "air", "car", "car", "patrol"];

@@ -563,6 +563,26 @@ retaken and a town cleared each return at `0.3`, and neither climbs back on its 
 purchased reinforcement, a zone not at all, since nothing yet reinforces a zone. Grinding either one
 down is worth something that outlasts the visit.
 
+### What the two share, and what they do not
+
+A zone and a town differ in what they *are*; they do not differ in how a garrison is raised or how it
+wears down. Those two mechanisms are shared outright, and everything else is deliberately separate.
+
+| Shared | Where | Why it can be |
+|---|---|---|
+| Attrition | `fnc_garrison_strength_init.sqf` | One store keyed by a string — `zone_<x>_<y>` or `town_<n>`. Owns the tenths rule, the `0.3` floor and the lower-only record. `fnc_zone_strength*` and `fnc_town_garrison_*Strength` are thin wrappers naming their key |
+| Raising men | `DUWS_fnc_raiseGarrison` | The stagger, the search flag and the `buildings` token are rules about raising a garrison, not about which ground is raising one |
+| Token vocabulary | `DUWS_fnc_zoneSpawnOne`, `fnc_zone_thin`, `DUWS_fnc_spawnDiff` | A group kind means the same thing wherever it is spawned |
+
+**Not shared, and not candidates for it:** ownership (a list versus a reputation band), what a capture
+means, the holds, the two purchases, and composition props — a zone stows and redeploys a prefab and
+re-crews its turrets, a town has no composition at all. Merging the two threads would put one large
+conditional through the middle of a lifecycle rather than remove anything.
+
+The gain is not line count. It is that a rule now has one place to be wrong in: the tenths
+quantisation was written out twice and the `survivors / baseline` record three times, so a change to
+either used to mean finding every copy.
+
 ### The two OPFOR garrison states
 
 Between owning ground and having men on it, OPFOR is in one of two states, and both exist because
