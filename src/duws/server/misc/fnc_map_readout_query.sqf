@@ -87,7 +87,8 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 	// worth taking rather than how much of it is left -- which is what the bar under it says. A zone
 	// the player took holds no garrison at all, so it reports 0 rather than the tier it was fought off.
 	private _tier = [([_key] call fnc_zone_tier), 0] select _held;
-	["ZONE", [_name, _held, _seg, _tier]] remoteExec ["fnc_map_readout_draw", _caller];
+	private _kind = missionNamespace getVariable [format ["DUWS_zoneKind_%1", _key], ""];
+	["ZONE", [_name, _kind, _held, _seg, _tier]] remoteExec ["fnc_map_readout_draw", _caller];
 };
 
 private _hit = _pick select 1;

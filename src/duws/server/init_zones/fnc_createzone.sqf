@@ -33,8 +33,8 @@ zone_namePOS_pairs = zone_namePOS_pairs + [[_name,_zonePos,_visible]];
 publicVariable "zone_namePOS_pairs";
 // Everything needed to rebuild this zone through this same function: radius and points reach the
 // triggers only as compiled strings, so nothing outside can read them. Must stay above the prefab
-// block, which reassigns _fortified and _prefab to the chosen decoration. The name is re-derived
-// from the zone number on rebuild, not stored -- it is localised at creation.
+// block, which reassigns _fortified and _prefab to the chosen decoration. The name is absent
+// deliberately: it is drawn, so a rebuild has to be handed the original back rather than re-roll it.
 zone_meta_array = zone_meta_array + [[_zone_num,_zonePos,_size,_points,_fortified,_prefab]];
 publicVariable "zone_meta_array";
 
@@ -118,6 +118,10 @@ if (_prefab) then {
     sleep 0.5;
 };
 
+// Declared out here because both branches below set it and the store at the zone key reads it:
+// a first assignment inside an if-block would be local to that block.
+private _prefabName = "";
+
 // CREATE PREFAB
 if (_prefab) then {
 	_array_of_prefabs = [];
@@ -146,8 +150,9 @@ if (_prefab) then {
 	];
 	 
 	// The composition's kind, not the zone's name -- it used to overwrite the name, which is why a
-	// capture reported "Comm Station" while the map called the same ground Zone 4. It stays a
-	// subtitle on the marker, where what is built there is worth knowing before travelling to it.
+	// capture reported "Comm Station" while the map called the same ground Zone 4. It stays a map
+	// label, on the marker and in the readout; radio traffic uses the callsign alone, because that is
+	// what a player repeats back and "Comm Station" names a building rather than a place.
 	_prefabName = _prefab_array select 0;
 	_fortified = _prefab_array select 1;
 	_path = _prefab_array select 2;
@@ -229,6 +234,11 @@ _spawnPos = _zonePos;
 // garrison peak and the flag on every unit it spawns. Derived once here through the shared helper
 // rather than spelled out per caller, so the readers cannot drift apart.
 private _zoneKey = [_zonePos] call fnc_zone_key;
+
+// Filed under the zone key like the garrison state rather than read back off the marker text: the
+// readout would otherwise have to unpick "%1 (%2)" to recover the kind, and a zone whose name ever
+// contains a bracket would take the parse with it.
+missionNamespace setVariable [format ["DUWS_zoneKind_%1", _zoneKey], _prefabName];
 
 // Rolled before anything spawns, because both spawn paths read it to size themselves. A rebuild
 // through this same function keeps the tier it already has -- the roll refuses to run twice.

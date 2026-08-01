@@ -30,8 +30,13 @@ private _fnc_tier = {
 switch (_kind) do {
 
 	case "ZONE": {
-		_data params [["_name", ""], ["_held", false], ["_seg", 0], ["_tier", 0]];
-		private _lines = [format ["<t size='1.2'>%1</t>", _name]];
+		_data params [["_name", ""], ["_zoneKind", ""], ["_held", false], ["_seg", 0], ["_tier", 0]];
+		// The kind qualifies the callsign rather than taking a line of its own, the way it reads on the
+		// marker. Guarded because a zone answers the readout from the moment it registers but files its
+		// kind at the end of build-out: a click inside that window would otherwise print "Foxtrot ()".
+		private _title = _name;
+		if !(_zoneKind isEqualTo "") then { _title = format ["%1 (%2)", _name, _zoneKind] };
+		private _lines = [format ["<t size='1.2'>%1</t>", _title]];
 		// Above the strength bar, and printed on a held zone too: tier is what the ground is worth
 		// fighting for and strength is how much of it is left, so the pair reads in that order
 		// whichever side holds it.
