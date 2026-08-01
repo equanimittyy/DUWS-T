@@ -210,6 +210,41 @@ Inheriting it here would silently produce zones with zero hardpoints, which is w
 missing tower: it makes the whole gate transparent. Filter to the classes that actually block
 placement.
 
+### Facing is part of siting, not decoration
+
+**A hardpoint that faces the wrong way is not a hardpoint.** An MG nest is a firing position with
+an arc; a roadblock is a barrier across a line of approach. Both are defined by where they point,
+and the fortification scatter this system replaces gets that wrong today — it places its towers and
+bunkers at `setDir (random 360)` (`server/init_zones/fnc_createzone.sqf:224`), so an embrasure as
+often faces the objective it is meant to defend as the ground it is meant to cover.
+
+So every hardpoint carries a heading, derived at siting time from what the type is for. The **Sited
+toward** column of [§Hardpoint types](#hardpoint-types) already names the intent; this is that
+intent turned into an angle:
+
+| Type | Faces |
+|---|---|
+| MG nest, roadblock | the approach it covers — the road when one is within 30 m, otherwise outward from the anchor it guards |
+| AT position | the road it overwatches; without a road it is not sited at all, which the terrain weighting already makes rare |
+| Observation post | its longest sightline |
+| AA position | flat — the arc is the sky, and heading is cosmetic |
+| Mortar pit, artillery battery | the line they support, so the tubes read as pointing at the war |
+
+Two things this forces:
+
+- **Facing is state, not a placement detail.** `hardpoint_dir_array` joins the parallel arrays in
+  [§State](#state) — one number per hardpoint, which is as serialisable as the rest. Without it a
+  stowed hardpoint redeploys pointing somewhere else, and the composition's props rotate away from
+  the core they were built around.
+- **A multi-object hardpoint rotates as one body.** The core plus its sandbags is a composition, so
+  each prop's offset rotates with the heading rather than each prop being placed and then turned in
+  place. A per-object `setDir` on an unrotated offset is the failure that leaves a sandbag line
+  beside a turret instead of in front of it.
+
+Model-relative correction belongs in the type table rather than in the siting maths: a class whose
+front is not at 0 degrees needs one constant, and burying it in the bearing calculation makes every
+later type inherit a fudge that was only ever true of one model.
+
 ### The capture gate
 
 One broadcast number per zone, `zone_hp_left_<zone_num>`, read directly in the capture
@@ -682,6 +717,7 @@ serialisable, since the mission namespace is the save file
 | Variable | Shape | Broadcast |
 |---|---|---|
 | `hardpoint_pos_array` | `[[x,y,0], …]` | on placement |
+| `hardpoint_dir_array` | heading in degrees, from [§Facing](#facing-is-part-of-siting-not-decoration) | on placement |
 | `hardpoint_type_array` | `"MG"` / `"OP"` / `"AA"` / `"ARTY"` | on placement |
 | `hardpoint_zone_array` | zone number, or `-1` for a normal hardpoint | on placement |
 | `hardpoint_state_array` | `0` live, `1` cleared | on every transition |
