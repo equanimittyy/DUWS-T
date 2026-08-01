@@ -452,6 +452,24 @@ Units are deleted rather than walked out through `fnc_opfor_retreat`: by definit
 the radius plus 400 when this runs, so there is no one to watch them vanish and a withdrawal nobody
 sees is a cost with no audience.
 
+**Both streams start latched, zones included.** The arrival test fires on anyone inside the radius
+plus the buffer and cannot tell somebody walking up from somebody already standing in the middle — so
+a thread whose first cycle finds a player there would raise the garrison around them. `fnc_spawnWait`
+and `fnc_civ_garrison` both begin held until their ground has been seen empty once, which costs a
+single poll for the ordinary zone or town nobody is near and is the whole guard for the case that
+matters: a campaign generated under a player, or a town seeded into the band at start with one
+already inside.
+
+A stream-out needs no latch, because it only happens once the player has left. **A zone retake does**,
+and it is the case most likely to be mistaken for safe: `EAST SEIZED` promises only that BLUFOR are
+outside the *trigger* radius, while the arrival test reaches 400 m further. A player who has backed
+off the objective but is still on the approach counts as near by that reckoning, and so does anyone
+who walks back in during the ten seconds before the next poll — so `fnc_spawnWait` re-latches when the
+zone returns to OPFOR hands and holds until the whole ring is empty, exactly as at campaign start.
+
+The town side latches on the same flag whenever a hold is armed, which covers both the crossing and
+the clear.
+
 The band is the condition, not a one-shot flag — a town driven back below `-10` gets a new garrison,
 and a town lifted out of the band while its garrison lives sees it withdraw.
 

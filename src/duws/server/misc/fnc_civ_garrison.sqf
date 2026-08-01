@@ -96,7 +96,11 @@ private _deployedList = [];
 // is still standing there when the clock lapses, and the arrival test would read them as having
 // just walked up. Waiting for one empty cycle is what makes leaving and coming back the only way
 // to meet the garrison, whichever hold put it off.
-private _awaitVacate = false;
+//
+// Starts latched for the same reason at the other end: a town seeded into the band at campaign
+// start raises its garrison on sight, and the arrival test cannot tell somebody walking up from
+// somebody already standing in it. The first cycle clears this for any town nobody is near.
+private _awaitVacate = true;
 // diag_tickTime from which the town has been empty, or -1 while somebody is in it. The garrison
 // streams out on this, so a step outside the radius does not tear it down and walk it back.
 private _emptySince = -1;

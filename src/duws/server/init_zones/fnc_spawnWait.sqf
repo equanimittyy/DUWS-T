@@ -9,6 +9,15 @@ _index = _this select 2;
 
 _blufor_close = false;
 
+// Held until this zone has been seen empty of BLUFOR once. The arrival test fires on anyone inside
+// the radius plus the buffer and cannot tell somebody walking up from somebody already standing in
+// the middle, so a thread that starts under a player's feet would raise the garrison around them.
+// Only the opening case needs it: a despawn happens only once they have left, and a retake cannot
+// fire while they are inside, so every later cycle already begins from empty ground.
+// Starts latched rather than sampling presence here -- the poll below runs within ten seconds and
+// clears it for the ordinary zone nobody is near, which is all of them at campaign start.
+private _awaitVacate = true;
+
 _AI_buffer = 400;
 // Twice the civilian handler's 60 s grace, and for the same reason: a zone left standing for five
 // minutes after the last sighting leaves a trail of fully spawned garrisons behind anyone crossing
@@ -124,6 +133,13 @@ while {true} do {
 
 		while {true} do {
 			_blufor_close = [2] call _bluforNear;
+
+			// One empty sighting spends the latch. Tested on the same call the arrival uses, so
+			// "here" means one thing: a zone cannot clear the latch and spawn on the same pass.
+			if (_awaitVacate) then {
+				if (!_blufor_close) then { _awaitVacate = false };
+				_blufor_close = false;
+			};
 
 			// Confirmed after a pause rather than acted on the moment anyone clips the perimeter.
 			// A helicopter transiting, or a patrol that turns back at the edge, would otherwise
@@ -258,6 +274,13 @@ while {true} do {
 			waitUntil {sleep 60; (_spawnPos in WARCOM_zones_controled_by_OPFOR)
 				|| {count WARCOM_zones_controled_by_OPFOR < 1}};
 			(zone_spawn_array select _index) set [1,false];
+			// Re-latched, because a retake is not the clean start it looks like. EAST SEIZED only
+			// promises BLUFOR are outside the *trigger* radius; the arrival test below reaches 400 m
+			// further, so a player who has backed off the objective but is still on the approach is
+			// near by its reckoning and would have the new garrison raised in front of them. The
+			// same is true of anyone who walks back in during the ten seconds before the next poll.
+			// Held until the whole ring is empty once, exactly as at campaign start.
+			_awaitVacate = true;
 		};
 
 		_blufor_close = false;
