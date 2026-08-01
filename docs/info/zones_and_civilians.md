@@ -578,6 +578,40 @@ retaken and a town cleared each return at `0.3`, and neither climbs back on its 
 purchased reinforcement, a zone not at all, since nothing yet reinforces a zone. Grinding either one
 down is worth something that outlasts the visit.
 
+### The life of a zone, and the life of a town
+
+The mechanics are in the sections around this one; what they do not give is the order. Both traces
+name the player-visible state at each step, so a reader can find which section owns a step they care
+about.
+
+**A zone.**
+
+| Step | What happens | State on the readout |
+|---|---|---|
+| Generated | OPFOR-held. Rolls a tier I–IV, weighted to IV. Strength `1.0`. No men | tier + full bar |
+| You come within radius + 400 m | Props deploy, turret crews man the prefab's guns, the band is raised: tier composition × per-category radius multiplier, thinned by strength. Peak published | tier + bar |
+| You leave for 2 min | Survivors counted, strength recorded (never upward), men deleted, props stowed, peak cleared | tier + the bar it will return at |
+| You beat it to 20 % **and** hold within 50 m of centre | Ownership flips. CP bounty, AP swings. Survivors are *ordered out*, not deleted — a capture is watched by definition. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
+| OPFOR retake (`EAST SEIZED`) | Strength floored to `0.3`. Streaming re-latches | **`Mobilising`** |
+| You return, after the ring has been empty once | Garrison raised at `0.3`, peak published | tier + bar |
+
+**A town.**
+
+| Step | What happens | State on the readout |
+|---|---|---|
+| Generated | Neutral — unless its radius overlaps an enemy zone, which starts it at `-20`, tier I, no hold | none |
+| You ruin it past `-10` | Tier I written at once: enemy ground on paper. 30 min hold, latch armed | **`Mobilising`** |
+| Hold lapses, you have left once, you return | Garrison raised: tier composition thinned by strength | tier |
+| The commander spends | Upgrade buys composition, reinforce buys `+30 %` strength. Independent, and both land as men when you are not looking | tier |
+| You beat it to 20 % | The remnant withdraws | tier |
+| `WEST SEIZED` — no OPFOR left | `+5` rep, tier back to I, strength to `0.3`, 3 h hold, latch armed | **`Regrouping`** |
+| …unless that `+5` cleared `-10` | Tier 0, hold dropped, garrison withdraws | none — neutral |
+| You leave for 2 min | Strength recorded, men deleted, clear trigger deleted | as above |
+| 3 h later, you have left once, you return | Garrison returns at tier I, `0.3` | tier |
+
+The shape to take away: **a zone changes hands, a town changes its mind.** Everything else follows
+from that — which is why only a town has a state for "beaten but still theirs".
+
 ### What the two share, and what they do not
 
 A zone and a town differ in what they *are*; they do not differ in how a garrison is raised or how it
@@ -623,6 +657,55 @@ nothing has changed hands — the garrison merely streamed out, or nobody has ev
 prints the tier, which is the honest answer: that is what the player will meet when they arrive.
 `Mobilising` cannot be inferred from the absence of a garrison for exactly this reason, which is why
 a zone carries an explicit `DUWS_zoneMobilising_<key>` flag rather than testing for a missing peak.
+
+### Tuning: the levers, and what each is wired to
+
+All of it is expected to move once it has been played. What follows is where each number lives and —
+more usefully — **which of them cannot be moved alone.**
+
+| Lever | Where | Moves |
+|---|---|---|
+| `TOWN_HOLD_MOBILISING` `1800` | `fnc_civ_state_init` | how long after falling a town stays empty |
+| `TOWN_HOLD_REGROUPING` `10800` | `fnc_civ_state_init` | the undefended window a clear buys |
+| `REINFORCE_STEP` `0.3` | `fnc_civ_state_init` | what one reinforcement buys |
+| `CLEAR_REP` `5` | `fnc_civ_garrison` | what one clear repays |
+| `OPFOR_BAND` `-10` | `fnc_civ_garrison` | where a town changes sides |
+| `DESPAWN_GRACE` `120` / `_despawn_timer` `120` | `fnc_civ_garrison` / `fnc_spawnWait` | how long empty ground waits before streaming out |
+| `_AI_buffer` `400` | `fnc_spawnWait` | how far out arrival is noticed (towns hardcode the same figure) |
+| `CENTRE_RADIUS` `50` | `fnc_zone_capture_ready` | how close holding the objective means |
+| Tier roll weights | `fnc_zone_state_init` | how often a zone is soft |
+| The composition tables | `fnc_zone_spawn_sizes`, `fnc_civ_state_init` | what a tier *is*, editable through the TUI |
+
+**Five couplings, each of which fails quietly.**
+
+- **The `0.3` floor is written in four places** — the clamp in `DUWS_fnc_garrisonStrengthSet`, the
+  town clear, the zone retake, and implicitly by every consumer that rounds its own share up. Moving
+  the clamp without the two writers leaves them setting a value the clamp then overrides, and the
+  reverse leaves the writers unable to reach the floor they name.
+- **`BREAK_FRACTION` `0.2` sits in three files** — `fnc_civ_garrison`, `fnc_spawnWait` and
+  `fnc_zone_capture_ready` — because it is one rule the player learns once. It is also *load-bearing
+  against the floor*: a garrison at `0.3` sits one tenth above beaten, so a floor at or below the
+  break line would make a redeployed garrison instantly capturable and a zone with a zero peak
+  uncapturable outright.
+- **`REINFORCE_STEP` must be a multiple of a tenth.** Both strength stores quantise to tenths, so a
+  finer step is rounded up on the way in and the constant silently means something other than it says.
+- **`CLEAR_REP` decides the clear count non-obviously.** The band is inclusive at `-10`, so `+5` takes
+  a town from `-20` in three clears, not four. Any change here should be checked against the sequence
+  rather than divided.
+- **`TOWN_HOLD_REGROUPING` doubles as the stale-deadline bound.** `fnc_town_garrison_holdAt` treats a
+  deadline further out than *the longest hold* as one a previous session wrote. Add a longer hold
+  without moving that bound and a genuine deadline gets discarded as stale.
+
+**Two figures that are arithmetic rather than balance.** Tier IV at the largest radius lands on
+roughly twenty-one groups, which is where the radius-band table it replaced topped out — raising it
+raises the campaign's spawn ceiling, not just that zone. And the `buildings` token is `8 × 3` to match
+`fnc_createopfortified`'s benchmark; changing one without the other makes "tier IV reaches the zone
+benchmark" untrue.
+
+**What has no lever yet.** Nothing prices any of the purchases, because the OPFOR commander does not
+exist — the tier and reinforcement hooks are free to call today, and the debug menu is the only
+caller. Zone tiers have no buyer at all
+([§Zone tiers](#zone-tiers)).
 
 ### BLUFOR inherits nothing
 
