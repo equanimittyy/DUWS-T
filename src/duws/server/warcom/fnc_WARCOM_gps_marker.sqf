@@ -67,7 +67,10 @@ while {true} do {
 	// set the new gps marker position
 	str(_markername) setMarkerPos getpos _leader; 
 		
-	_primary_waypoint insert [0, [(WARCOM_zones_controled_by_OPFOR select 0)]];
+	// Written, not inserted. Only index 0 is ever read, and the insert this replaces appended
+	// there every four seconds -- roughly 900 entries an hour per task force, each tick shifting
+	// everything already in the array, so the per-tick cost climbed with the session.
+	_primary_waypoint set [0, (WARCOM_zones_controled_by_OPFOR select 0)];
 
 	// check to see if primary opfor zone was changed by player
 	// or WP reset was sent from AI master control
