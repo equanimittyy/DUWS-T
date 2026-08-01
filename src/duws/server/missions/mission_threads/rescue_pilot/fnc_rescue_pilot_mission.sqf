@@ -228,6 +228,14 @@ private _fncScript = {
                         [_caller, _pilot] call DUWS_fnc_autoDropPilot;
                         hint localize "STR_DUWS_T_auto_drop_hint";
                     };
+                    // Sampled here for the load action's condition below. An action condition is
+                    // evaluated every frame while its action is in range, so holding the query
+                    // there ran a spatial search at frame rate for the whole carry -- which is
+                    // exactly when the player is under fire. This thread already lives for the
+                    // length of the carry and answers the same question twice a second.
+                    // Local, like the condition that reads it: both run on the carrier's machine.
+                    _caller setVariable ["DUWS_carryVehicleNear",
+                        count (_caller nearEntities [["Car","Tank","Helicopter","Ship"], 5]) > 0];
                     sleep 0.5;
                 };
             };
@@ -256,7 +264,7 @@ private _fncScript = {
                 },
                 [],
                 40, true, true, "",
-                "player == _target && !isNull (_target getVariable ['carriedPilot', objNull]) && {alive (_target getVariable ['carriedPilot', objNull])} && {count (nearestObjects [_target, ['Car','Tank','Helicopter','Ship'], 5]) > 0}",
+                "player == _target && !isNull (_target getVariable ['carriedPilot', objNull]) && {alive (_target getVariable ['carriedPilot', objNull])} && {_target getVariable ['DUWS_carryVehicleNear', false]}",
                 5
             ];
             _caller setVariable ["putInVehicleAction", _putInVehicleAction];
@@ -273,7 +281,10 @@ private _fncScript = {
             private _autoDropHandle = _caller getVariable ["carryAutoDropHandle", scriptNull];
             if (!isNull _autoDropHandle) then { terminate _autoDropHandle; };
             _caller setVariable ["carryAutoDropHandle", nil];
-            
+            // Dropped with the thread that maintains it, or the next carry would open on
+            // whatever the last one left behind until the new watcher's first pass.
+            _caller setVariable ["DUWS_carryVehicleNear", nil];
+
             _caller setVariable ["carriedPilot", nil, true];
             [_caller, ""] remoteExec ["switchMove", 0];
             _caller setVariable ["dropAction", nil];
