@@ -34,6 +34,29 @@ composition lands.
 reports `created N of M objects` and warns if any row-like line failed to parse, so a silent drop is
 visible. There is also a "paste your own array" option.
 
+### The front marker
+
+The import also raises a `FlagPole_F` named **`DUWS_FRONT`**, standing clear of the composition
+along **+Y**.
+
+A composition's rows are offsets in a frame whose +Y is the way the whole thing faces once placed,
+and nothing in the 3D view shows where that frame points — so a rearrange is done blind, and the
+layout can come back rotated with the mistake only surfacing in play. The pole is that frame's
+bearing, made visible.
+
+Its distance is measured from the composition rather than fixed: the furthest row's offset plus 15 m,
+so a 300-object base and a five-prop outpost each get a marker that reads as *outside* rather than as
+one more prop.
+
+**It is not part of the composition, and the export below drops it by name.** So `Ctrl+A` is safe —
+select everything and the pole still will not reach the array. The filter matches `DUWS_FRONT`
+rather than `FlagPole_F` because a composition may legitimately hold a flagpole and the killhouse
+already carries a flag; the name is the marker's identity, its class is not.
+
+That makes the marker safe to leave in place while rearranging, which is the point — it has to stay
+visible for as long as you are working, and a marker you must remember to delete is one that ends up
+in a source array putting a flagpole in every zone that builds that prefab.
+
 Two constraints the scan imposes on where a composition may live, both of which fail by finding
 nothing rather than by erroring:
 
@@ -76,7 +99,11 @@ alongside `zbase=_centerSpawnZ` to sit at its original off-map altitude (~1000).
 // Set _origin to the SAME origin you imported at (the TUI default is shown).
 private _origin = [23100, 18700, 0];
 
-private _objs = get3DENSelected "Object";
+// Dropped by Eden name, not by class: a composition may legitimately contain a flagpole, and the
+// killhouse already carries a flag. The name is the marker's identity; its class is not.
+private _objs = (get3DENSelected "Object") select {
+    ((_x get3DENAttribute "name") param [0, ""]) != "DUWS_FRONT"
+};
 if (_objs isEqualTo []) exitWith { systemChat "Select the composition: click an object in the 3D view, then Ctrl+A."; };
 
 private _rows = _objs apply {
@@ -93,7 +120,10 @@ systemChat format ["Copied %1 objects.", count _objs];
 ```
 
 `getDir` reads each heading in the convention the import wrote (`[0,0,dir]` yaw), so rotation
-round-trips. Fold the rows back into the source array by these rules:
+round-trips. `Copied N objects` should match what the import reported; a mismatch means rows were
+added or lost in Eden, since the marker is already excluded.
+
+Fold the rows back into the source array by these rules:
 
 - **Match by order.** The export returns rows in creation order, so line them up 1:1 with the
   existing array by index, confirm the class matches at each row, and change only the rows whose X/Y
