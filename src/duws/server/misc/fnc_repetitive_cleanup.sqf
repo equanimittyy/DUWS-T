@@ -98,12 +98,18 @@ while {true} do {
 
     {
         private _type = _x;
-        { _candidates pushBackUnique _x } forEach (allMissionObjects _type);
+        _candidates append (allMissionObjects _type);
     } forEach _litterClasses;
+    // Deduped in one engine call rather than by a unique insert per element: pushBackUnique
+    // rescans the list it is building on every insert, so the cost was quadratic in the litter
+    // lying on the map, and a few hundred holders and bodies after a firefight is tens of
+    // thousands of comparisons a pass. The census has to come after it -- the bodybag classes are
+    // listed beside their own base class, so a raw append reports those objects more than once.
+    _candidates = _candidates arrayIntersect _candidates;
     private _census = count _candidates;
 
-    { _candidates pushBackUnique _x } forEach allDeadMen;
-    { if (_x == vehicle _x) then { _candidates pushBackUnique _x } } forEach (allDead - allDeadMen);
+    _candidates append allDeadMen;
+    _candidates append ((allDead - allDeadMen) select { _x == vehicle _x });
 
     // Idling vehicles: unmanned is the whole test. It also demanded !canMove, so only a broken-down
     // vehicle was ever a candidate and a campaign of requisitioned trucks parked where they were
@@ -114,7 +120,7 @@ while {true} do {
     // Regaining crew clears the clock, unless the vehicle was retired deliberately.
     {
         if (!(_x isKindOf "StaticWeapon") && {({alive _x} count crew _x) == 0}) then {
-            _candidates pushBackUnique _x;
+            _candidates pushBack _x;
         } else {
             if !(_x in _disposed) then { _x setVariable ["DUWS_binAt", nil] };
         };
@@ -143,6 +149,12 @@ while {true} do {
     DUWS_cleanup_force = false;
     private _tracked = 0;
     private _binned = 0;
+
+    // One dedupe over the union rather than a unique insert per element upstream. It also
+    // collapses what the separate censuses overlap on -- a dead unmanned vehicle is reported by
+    // allDead and by vehicles both -- which the per-element form was absorbing silently.
+    private _sweep = _candidates + _disposed;
+    _sweep = _sweep arrayIntersect _sweep;
 
     // The deadline lives on the object rather than in a list beside it. A list costs a linear
     // search per object per pass to find its entry, and has to be compacted afterwards; a
@@ -182,7 +194,7 @@ while {true} do {
                 _tracked = _tracked + 1;
             };
         };
-    } forEach (_candidates + _disposed);
+    } forEach _sweep;
 
     if (_force) then {
         ["INFO", "CLEANUP", format ["forced sweep: %1 deleted, %2 held inside %3 m",
