@@ -2,12 +2,18 @@
 
 Sustained cost in this mission comes from two shapes, neither of which is an expensive operation:
 *repeating scans*, which cost the same on the first minute as on the fourth hour, and *state that
-never shrinks*, which does not. This doc covers the first shape and the design decisions taken
-against it; the individual growth sites are catalogued in
-[`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#state-that-grows-for-the-whole-session), since each is
-a defect with a named fix rather than a decided design. Everything here was read out of the source
-rather than profiled in-engine, so treat sizes as reasoning about how often code runs and what it
-touches.
+never shrinks*, which does not. This doc covers both, and the design decisions taken against them.
+Everything here was read out of the source rather than profiled in-engine, so treat sizes as
+reasoning about how often code runs and what it touches.
+
+The three growth terms this tree carried are each bounded now, and the shape of the bound is worth
+knowing because the symptom they shared was a mission that plays well for an hour and worse at four,
+with no single call to point at. BLUFOR task forces stop at one standing by
+(`warcom/fnc_WARCOM_blu_assault.sqf`), so an ignored one no longer accumulates as permanently
+simulated AI beside the base. The task-force waypoint slot is written rather than appended to
+(`warcom/fnc_WARCOM_gps_marker.sqf`), where only index 0 was ever read. And the enemy gear scan
+removes its own `EntityCreated` handler once 200 consecutive units file nothing new
+(`misc/fnc_scanEnemyGear.sqf`), which stops both the per-soldier script and the hashmap behind it.
 
 ## The pattern that costs the most: timed scans anchored on `allUnits`
 
@@ -82,8 +88,9 @@ breaks that: one composition of the same size per hardpoint, 1-6 per zone, plus 
 with no ceiling, reaches five figures on a large campaign.
 
 **Deleted rather than hidden.** A hidden object is still a network entity, still returned by
-`allMissionObjects`, still walked by `nearObjects`, and still added to the curator's editable set by
-`misc/fnc_zeus_objects_init.sqf:26` every 30 s at `ZeusStatus == 2`. Rendering was never the cost — the
+`allMissionObjects`, still walked by `nearObjects`, and still enumerated every 30 s by
+`misc/fnc_zeus_objects_init.sqf` at `ZeusStatus == 2`, which sweeps `allMissionObjects "ALL"` whether
+or not anything in it is new to the curator. Rendering was never the cost — the
 engine culls that by view distance already, and the prefabs ship with simulation off. Only deleting the
 entity moves the number.
 

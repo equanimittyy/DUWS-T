@@ -315,49 +315,6 @@ boot script that starves the pass again would show up as the two diverging.
 
 Reading those logs: [`docs/info/testing.md`](docs/info/testing.md#runtime-logging-reading-the-rpt).
 
-## State that grows for the whole session
-
-Three sites where something accumulates for as long as the mission runs. They share a symptom that
-makes them hard to attribute: the mission plays well for an hour and worse at four, with no single
-call to point at, because what grew is the size of what every pass has to walk. The patterns behind
-them, and the streaming that keeps everything else bounded, are in
-[`docs/info/performance.md`](docs/info/performance.md).
-
-**Task forces are created on a timer and never capped.**
-`server/warcom/fnc_WARCOM_blu_assault.sqf:50-113` spawns a BLUFOR task force every 30 minutes for as
-long as the mission runs, pushes it onto `blu_taskforces_standby` (`:100-102`) and parks it on a
-MOVE/CYCLE waypoint pair at HQ (`:88-97`) until the player launches it. That array shrinks only on
-launch (`fnc_blu_taskforces_launch.sqf`) or when the group is wiped (`fnc_WARCOM_gps_marker.sqf:54-58`),
-and nothing bounds how many may be standing by at once. Nothing else will collect them either: zone
-despawn deletes `side _x == EAST` only (`init_zones/fnc_spawnWait.sqf:144-155`) and mission cleanup
-skips WEST (`missions/fnc_mission_cleanup.sqf`). So a task force the player ignores is permanently
-simulated AI parked next to the base — inside view distance, never a despawn candidate. Live AI count
-is what Arma's frame time tracks, which makes this the mission's largest growth term at roughly two
-groups an hour. The patrol spawner shows what a cap looks like here:
-`fnc_WARCOM_blu_patrol.sqf:55` gates on `blufor_patrol_count` and stops at one patrol per held zone.
-It is now the only growth term of its kind: the OPFOR patrol, assault and air spawners that grew the
-same way have been deleted, and whatever OPFOR commander replaces them starts with this entry as the
-worked example of what not to do.
-
-**The GPS marker loop appends a position every four seconds.**
-`server/warcom/fnc_WARCOM_gps_marker.sqf:70` calls `_primary_waypoint insert [0, …]` inside a loop that
-ticks every 4 s (`:103`). `insert` appends where the intent was to replace: only index 0 is ever read
-(`:24`, `:88`). The array gains ~900 entries an hour per task force, and because the write lands at the
-front, each tick shifts every element already there — so the per-tick cost rises with the array rather
-than staying flat. One of these loops runs per task force, and the entry above is why that count grows
-too. `set [0, …]` is the whole fix.
-
-**The enemy gear table never shrinks.** `DUWS_enemyGear_scannedUnits`
-(`server/misc/fnc_scanEnemyGear.sqf:19`) is a hashmap keyed by `netId`, used to avoid re-reading gear
-off a unit already scanned. Nothing prunes it, so it holds an entry for every EAST unit ever spawned,
-including long-dead ones whose netIds will never be seen again. Each entry is small and the campaign
-would have to run a long time for this to matter, which is why it is recorded rather than fixed — the
-growth is invisible, and the symptom would be a slow server memory climb with no obvious owner. The
-same file publishes eight whole arrays with `publicVariable` (`:38-47`), one per gear category, every
-time a *new* item is seen; that converges quickly, but the initial sweep over `allUnits` can fire a
-burst. Its `EntityCreated` handler (`:75-92`) also spawns a scheduled script per infantry unit created,
-for the rest of the mission, each one only to re-check a table that converged in the first minutes.
-
 ## Zone and civilian siting defects
 
 Six defects in the enemy zone-siting subsystem. How the siting stages fit together is in
