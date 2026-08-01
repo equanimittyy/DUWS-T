@@ -60,12 +60,14 @@ fnc_civ_repAt = {
 // with one for the player's attention -- so a large town stays a garrison rather than becoming a
 // zone that happens to have civilians in it, and IV reaches the zone benchmark by occupying
 // buildings rather than by digging in.
+// --DUWS-UNITCOMP BEGIN name="Town tiers" row="tier I..IV"--
 DUWS_townSpawnTiers = [
 	["patrol", "team"],
 	["patrol", "team", "team", "car"],
 	["patrol", "team", "team", "car", "armored"],
 	["patrol", "team", "team", "car", "armored", "buildings"]
 ];
+// --DUWS-UNITCOMP END--
 
 // A town's garrison tier: 0 for ground OPFOR does not hold, 1 to 4 for ground it does. Reputation
 // only ever writes tier 1 -- see fnc_civ_garrison -- and every step above it is bought by the

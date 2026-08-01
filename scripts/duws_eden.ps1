@@ -1,16 +1,29 @@
-# duws_eden.ps1 - DUWS Eden composition import TUI
+# duws_eden.ps1 - DUWS composition TUI
 #
-# Scans src/ for compositions flagged with marker comments:
+# Two modes over the same marker-fence idea, because the mission has two kinds of composition and
+# both had to be hand-edited in source.
+#
+# STATIC (read-only): scans src/ for
 #   // --DUWS-COMPOSITION BEGIN name="..." schema=A [anchor=hqInComp] [z=snap|keep]--
 #   <array literal>
 #   // --DUWS-COMPOSITION END--
 # and emits a paste-ready Eden import (create3DENEntity + rotation) copied to the clipboard.
-#
 # Every composition is schema A -- [class, X, Y, Z, dir_deg] with any trailing fields its own
 # consumer needs (isWeapon and the like), which this tool ignores.
 #
+# UNIT (read-write): scans src/ for
+#   // --DUWS-UNITCOMP BEGIN name="..." row="<what a row means>"--
+#   <name> = [ <row>, <row>, ... ];
+#   // --DUWS-UNITCOMP END--
+# and edits the rows in place. These are the spawn tables -- tier compositions, radius multipliers,
+# the category map -- which are data, not layout, so there is nothing to round-trip through Eden.
+#
+# Only the fenced body is ever rewritten, so the reasoning above each table survives editing. A
+# write is refused unless the regenerated text parses back to exactly the model it came from, and
+# git is the undo for everything past that.
+#
 # Launch via duws_eden.cmd at the repo root, or run scripts\duws_eden.ps1 directly.
-# See docs/info/hq_layout_editing.md.
+# See docs/info/composition_tooling.md.
 $ErrorActionPreference = "Stop"
 $root    = Split-Path -Parent $PSScriptRoot   # script lives in scripts/; repo root is its parent
 $srcDir  = Join-Path $root "src"
@@ -140,20 +153,249 @@ function Invoke-Generate($comp) {
     Write-Host ("Wrote $outFile" + $(if ($clip) { " and copied to clipboard." } else { " (clipboard unavailable; copy the file)." }))
 }
 
+# ================= unit compositions =================
+# The spawn tables: rows of tokens or numbers, edited in place rather than round-tripped.
+
+$unitFenceRe = [regex]'(?s)(//[ \t]*--DUWS-UNITCOMP BEGIN\s+(.*?)--\r?\n)(.*?)(\r?\n[ \t]*//[ \t]*--DUWS-UNITCOMP END--)'
+
+function Get-UnitComps {
+    $out = @()
+    foreach ($file in (Get-ChildItem -Path $srcDir -Recurse -Filter *.sqf -File)) {
+        $text = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8
+        if ($text -notmatch 'DUWS-UNITCOMP BEGIN') { continue }
+        foreach ($m in $unitFenceRe.Matches($text)) {
+            $out += [pscustomobject]@{
+                Name  = Get-Attr $m.Groups[2].Value 'name="([^"]*)"' '(unnamed)'
+                RowOf = Get-Attr $m.Groups[2].Value 'row="([^"]*)"' 'row'
+                File  = $file.FullName
+                Body  = $m.Groups[3].Value
+            }
+        }
+    }
+    return $out
+}
+
+# The fenced body is "<var> = [ <row>, <row> ];". Rows are the top-level bracket groups inside it.
+# Split by depth rather than by regex: a row may itself hold a nested array (the category map does),
+# and a comma-splitting pass would cut those in half.
+function Split-Rows($body) {
+    $open = $body.IndexOf('[')
+    $close = $body.LastIndexOf(']')
+    if ($open -lt 0 -or $close -le $open) { return ,@() }
+    $inner = $body.Substring($open + 1, $close - $open - 1)
+
+    $rows = New-Object System.Collections.Generic.List[string]
+    $depth = 0; $start = 0; $inStr = $false
+    for ($i = 0; $i -lt $inner.Length; $i++) {
+        $ch = $inner[$i]
+        if ($ch -eq '"') { $inStr = -not $inStr; continue }
+        if ($inStr) { continue }
+        if ($ch -eq '[') { if ($depth -eq 0) { $start = $i }; $depth++ }
+        elseif ($ch -eq ']') {
+            $depth--
+            if ($depth -eq 0) { $rows.Add($inner.Substring($start, $i - $start + 1)) }
+        }
+    }
+    return ,$rows
+}
+
+# A row's entries, as the text between its brackets at depth 0 -- quoted strings keep their quotes so
+# a rewrite cannot turn a token into a bare word, and numbers stay verbatim so 1e11 survives.
+function Split-Entries($row) {
+    $inner = $row.Substring(1, $row.Length - 2)
+    $parts = New-Object System.Collections.Generic.List[string]
+    $depth = 0; $start = 0; $inStr = $false
+    for ($i = 0; $i -lt $inner.Length; $i++) {
+        $ch = $inner[$i]
+        if ($ch -eq '"') { $inStr = -not $inStr; continue }
+        if ($inStr) { continue }
+        if ($ch -eq '[') { $depth++ }
+        elseif ($ch -eq ']') { $depth-- }
+        elseif ($ch -eq ',' -and $depth -eq 0) {
+            $parts.Add($inner.Substring($start, $i - $start).Trim()); $start = $i + 1
+        }
+    }
+    $tail = $inner.Substring($start).Trim()
+    if ($tail -ne '' -or $parts.Count -gt 0) { $parts.Add($tail) }
+    return ,($parts | Where-Object { $_ -ne '' })
+}
+
+function Format-UnitBody($varName, $rows, $indent) {
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.Append("$varName = [")
+    if ($rows.Count -gt 0) { [void]$sb.Append("`r`n") }
+    for ($i = 0; $i -lt $rows.Count; $i++) {
+        [void]$sb.Append($indent + $rows[$i])
+        if ($i -lt $rows.Count - 1) { [void]$sb.Append(',') }
+        [void]$sb.Append("`r`n")
+    }
+    [void]$sb.Append('];')
+    return $sb.ToString()
+}
+
+# A bare number stays a number; anything else is a token and gets quoted. Nested arrays typed by
+# hand keep whatever the user wrote, which is the escape hatch for the category map.
+function Format-Entry($s) {
+    if ($s -match '^-?\d+(\.\d+)?([eE][+-]?\d+)?$') { return $s }
+    if ($s.StartsWith('[') -or $s.StartsWith('"')) { return $s }
+    return '"' + $s.Trim('"') + '"'
+}
+
+function Show-UnitComp($uc, $rows) {
+    # Relative to the repo root rather than the working directory: the launcher may be started from
+    # anywhere, and Resolve-Path -Relative would then print a path back out of the tree.
+    $rel = if ($uc.File.StartsWith($root)) { $uc.File.Substring($root.Length).TrimStart('\', '/') } else { $uc.File }
+    Write-Host ""
+    Write-Host ("  {0}" -f $uc.Name) -ForegroundColor Cyan
+    Write-Host ("  file: {0}" -f $rel)
+    Write-Host ("  row : {0}" -f $uc.RowOf)
+    Write-Host ""
+    for ($i = 0; $i -lt $rows.Count; $i++) {
+        Write-Host ("  {0,2}. {1}" -f ($i + 1), $rows[$i])
+    }
+    Write-Host ""
+}
+
+# Refuses on anything it cannot re-read. The rows are written back into a source file the mission
+# compiles, so the guard is that the regenerated text splits into exactly the rows that produced it.
+function Save-UnitComp($uc, $varName, $rows, $indent) {
+    $newBody = Format-UnitBody $varName $rows $indent
+    $check = Split-Rows $newBody
+    if ($check.Count -ne $rows.Count) {
+        Write-Host "Refusing to write: the regenerated table does not read back as the same rows." -ForegroundColor Red
+        return $false
+    }
+    for ($i = 0; $i -lt $rows.Count; $i++) {
+        if ($check[$i] -ne $rows[$i]) {
+            Write-Host ("Refusing to write: row {0} did not survive the round trip." -f ($i + 1)) -ForegroundColor Red
+            return $false
+        }
+    }
+    # Re-read strictly, and refuse a file that is not valid UTF-8. Thirty-five .sqf files under
+    # src/modules carry legacy single-byte encodings, and Get-Content -Encoding UTF8 silently turns
+    # every non-ASCII byte in them into a replacement character. Reading that is harmless -- the
+    # scan above only looks for an ASCII fence -- but writing it back would corrupt the whole file
+    # for the sake of one edited table. None of today's fences live in such a file; this is what
+    # keeps that from becoming a trap the first time one does.
+    $strict = New-Object System.Text.UTF8Encoding($false, $true)
+    try { $text = $strict.GetString([System.IO.File]::ReadAllBytes($uc.File)) }
+    catch {
+        Write-Host "Refusing to write: $($uc.File) is not valid UTF-8, and rewriting it would corrupt the rest of the file." -ForegroundColor Red
+        return $false
+    }
+    # Matched by fence name rather than by position, and every other fence in the file is returned
+    # untouched. Names are the identity the menu selected on, so a duplicate name is a data error
+    # that would rewrite two tables with one body -- which the round-trip check above cannot catch.
+    $target = $uc.Name
+    $updated = $unitFenceRe.Replace($text, {
+        param($m)
+        if ((Get-Attr $m.Groups[2].Value 'name="([^"]*)"' '') -ne $target) { return $m.Value }
+        return $m.Groups[1].Value + $newBody + $m.Groups[4].Value
+    })
+    if ($updated -eq $text) {
+        Write-Host "Nothing written: the fence was not found or the body is unchanged." -ForegroundColor Yellow
+        return $false
+    }
+    # No trailing-newline normalisation and no BOM: this file sits beside SQF the mission compiles,
+    # and a BOM in front of a preprocessor directive is an error Arma reports from the wrong line.
+    [System.IO.File]::WriteAllText($uc.File, $updated, (New-Object System.Text.UTF8Encoding($false)))
+    return $true
+}
+
+function Invoke-EditUnitComp($uc) {
+    $varName = if ($uc.Body -match '(?m)^\s*(\w+)\s*=') { $Matches[1] } else { $null }
+    if (-not $varName) { Write-Host "Could not read the table's variable name." -ForegroundColor Red; return }
+    $indent = if ($uc.Body -match '(?m)^([ \t]+)\[') { $Matches[1] } else { '    ' }
+    $rows = @(Split-Rows $uc.Body)
+    $dirty = $false
+
+    while ($true) {
+        Clear-Host
+        Write-Host "Unit composition: $varName" -ForegroundColor Cyan
+        Write-Host "======================================"
+        Show-UnitComp $uc $rows
+        if ($dirty) { Write-Host "  * unsaved changes" -ForegroundColor Yellow; Write-Host "" }
+        Write-Host "   A. Add an entry to a row      D. Drop an entry from a row"
+        Write-Host "   R. Replace a whole row        W. Write back to source"
+        Write-Host "   B. Back (discards unsaved changes)"
+        Write-Host ""
+        $sel = Read-Host "Select"
+
+        if ($sel -match '^\s*[Bb]\s*$') { break }
+        elseif ($sel -match '^\s*[Ww]\s*$') {
+            if (-not $dirty) { Write-Host "No changes to write." -ForegroundColor Yellow }
+            elseif (Save-UnitComp $uc $varName $rows $indent) {
+                Write-Host "Written. Review the diff before committing." -ForegroundColor Green
+                $uc.Body = Format-UnitBody $varName $rows $indent
+                $dirty = $false
+            }
+            Read-Host "Press Enter to continue" | Out-Null
+        }
+        elseif ($sel -match '^\s*([AaDdRr])\s*(\d+)?\s*$') {
+            $act = $Matches[1].ToString().ToUpper()
+            $n = if ($Matches[2]) { [int]$Matches[2] } else { [int](Read-Host "Row number") }
+            if ($n -lt 1 -or $n -gt $rows.Count) {
+                Write-Host "No such row." -ForegroundColor Yellow
+                Read-Host "Press Enter to continue" | Out-Null
+                continue
+            }
+            $entries = @(Split-Entries $rows[$n - 1])
+
+            if ($act -eq 'R') {
+                Write-Host ("Current: {0}" -f $rows[$n - 1])
+                $raw = Read-Host 'New entries, comma separated (tokens unquoted, e.g. patrol, team, car)'
+                $new = @($raw -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' })
+                $rows[$n - 1] = '[' + (($new | ForEach-Object { Format-Entry $_ }) -join ', ') + ']'
+                $dirty = $true
+            }
+            elseif ($act -eq 'A') {
+                $raw = Read-Host 'Entry to add'
+                if (-not [string]::IsNullOrWhiteSpace($raw)) {
+                    $entries += (Format-Entry $raw.Trim())
+                    $rows[$n - 1] = '[' + ($entries -join ', ') + ']'
+                    $dirty = $true
+                }
+            }
+            else {
+                for ($i = 0; $i -lt $entries.Count; $i++) { Write-Host ("  {0,2}. {1}" -f ($i + 1), $entries[$i]) }
+                $k = Read-Host "Entry to drop"
+                if ($k -match '^\d+$' -and [int]$k -ge 1 -and [int]$k -le $entries.Count) {
+                    # Dropped by index, not by value: a tier legitimately holds the same token twice,
+                    # and matching on value would take the wrong one of a pair.
+                    $kept = @(); for ($i = 0; $i -lt $entries.Count; $i++) { if ($i -ne ([int]$k - 1)) { $kept += $entries[$i] } }
+                    $rows[$n - 1] = '[' + ($kept -join ', ') + ']'
+                    $dirty = $true
+                }
+            }
+        }
+    }
+}
+
 # ---- main loop ----
 $comps = @(Get-Compositions | Sort-Object Schema, Name)
-if ($comps.Count -eq 0) { Write-Host "No marked compositions found under $srcDir." -ForegroundColor Red; exit 1 }
 foreach ($c in $comps) {
     $c | Add-Member -NotePropertyName Count -NotePropertyValue ((ConvertTo-Rows $c).Rows.Count) -Force
 }
+if ($comps.Count -eq 0) { Write-Host "No marked static compositions found under $srcDir." -ForegroundColor Yellow }
 
 while ($true) {
+    # Re-read each pass: an edit rewrites source, and a stale body would show the pre-edit table.
+    $ucs = @(Get-UnitComps | Sort-Object Name)
+
     Clear-Host
-    Write-Host "DUWS Eden Composition Importer" -ForegroundColor Cyan
-    Write-Host "=============================="
+    Write-Host "DUWS Composition TUI" -ForegroundColor Cyan
+    Write-Host "===================="
+    Write-Host ""
+    Write-Host " Static compositions (Eden round-trip, read-only)" -ForegroundColor DarkGray
     for ($i = 0; $i -lt $comps.Count; $i++) {
         $c = $comps[$i]
         Write-Host ("  {0,2}. {1,-26} [schema {2}, {3,4} objs]" -f ($i + 1), $c.Name, $c.Schema, $c.Count)
+    }
+    Write-Host ""
+    Write-Host " Unit compositions (spawn tables, editable)" -ForegroundColor DarkGray
+    for ($i = 0; $i -lt $ucs.Count; $i++) {
+        $u = $ucs[$i]
+        Write-Host ("  U{0,-2}. {1,-26} [{2,2} rows]" -f ($i + 1), $u.Name, (Split-Rows $u.Body).Count)
     }
     Write-Host ""
     Write-Host "   P. Paste your own array (schema A)"
@@ -171,6 +413,9 @@ while ($true) {
             Invoke-Generate $pasted
         }
         Read-Host "Press Enter to continue" | Out-Null
+    }
+    elseif ($sel -match '^\s*[Uu]\s*(\d+)\s*$' -and [int]$Matches[1] -ge 1 -and [int]$Matches[1] -le $ucs.Count) {
+        Invoke-EditUnitComp $ucs[[int]$Matches[1] - 1]
     }
     elseif ($sel -match '^\s*\d+\s*$' -and [int]$sel -ge 1 -and [int]$sel -le $comps.Count) {
         Invoke-Generate $comps[[int]$sel - 1]

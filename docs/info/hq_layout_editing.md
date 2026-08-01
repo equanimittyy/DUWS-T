@@ -53,103 +53,15 @@ tooling below, rather than hand-typing coordinates.
 
 ## Eden round-trip
 
-The load-bearing trap: `create3DENEntity` **only runs in Eden's own debug console** — the `{ }` console in
-the 3D editor toolbar, not the in-game debug console. Run it in-game and it silently no-ops.
+The HQ array is one of the marked static compositions, so a re-layout goes through the composition TUI
+rather than through hand-typed coordinates: [`composition_tooling.md`](composition_tooling.md#static-compositions-the-eden-round-trip).
 
-Objects take their heading from the yaw slot of the `rotation` attribute (`[pitch, roll, yaw]`, degrees) —
-a bare number sets pitch, not heading. Pick a flat `_origin`; it only decides where the composition lands.
+Two things in that workflow are HQ-specific:
 
-**Import** — run the composition TUI at the repo root (double-click `duws_eden.cmd`, or):
-
-```text
-powershell -ExecutionPolicy Bypass -File scripts\duws_eden.ps1
-```
-
-It scans `src/` for marked compositions (below), lists all of them, and on selection prompts for an origin,
-normalizes the rows, writes `temp\eden_import.sqf`, and copies a paste-ready import to the clipboard. Paste
-that into the Eden console. There is also a "paste your own array" option. It reports
-`created N of M objects` and warns if any row-like line failed to parse, so a silent drop is visible.
-
-Two constraints the scan imposes on where a composition may live, both of which fail by finding nothing
-rather than by erroring:
-
-- **It enumerates `*.sqf` only.** A composition moved into an `.hpp` becomes invisible to the tool, so a
-  data file split out of a builder has to keep the `.sqf` extension even when it holds nothing but an
-  array. `server/misc/killhouse_composition.sqf` is named that way for this reason.
-- **`zbase=` is resolved by regex against the file holding the fence.** The constant it names has to be
-  declared in that same file. Split the array away from its `_centerSpawnZ` and the attribute matches
-  nothing, the origin silently falls back to zero, and the import lands on the terrain instead of at
-  altitude — a round trip that looks like it worked.
-
-### Marking a composition
-
-The TUI discovers compositions by scanning for marker comments; adding one is data-only, no code change.
-Wrap the array literal in the source:
-
-```sqf
-// --DUWS-COMPOSITION BEGIN name="My Thing" schema=A--
-private _allObjectsData = [ ... ];
-// --DUWS-COMPOSITION END--
-```
-
-The markers are a cross-system contract the TUI parses; Arma's preprocessor strips `//` comments, so they
-are inert at runtime. Attributes:
-
-| Attr | Meaning |
-|---|---|
-| `name="..."` | label shown in the TUI |
-| `schema=A` | the row format (below); the only one there is |
-| `anchor=hqInComp` | HQ only: its array stores original composition coords, so the tool subtracts `_hqInCompX/Y`. Omit elsewhere (offsets are already relative to `[0,0]`) |
-| `z=snap\|keep` | optional; default `snap` |
-| `zbase=<var>` | reads that source constant as the origin's Z, so the composition keeps its native altitude instead of ground. Killhouse uses `zbase=_centerSpawnZ` |
-
-Every row is `[class, X, Y, Z, dir°]`, degrees, position flat at indices 1-3. A row may carry extra trailing
-fields for its own consumer — the HQ and zone prefabs append `isWeapon` — and the tool ignores anything past
-index 4. Fifteen compositions are marked today.
-
-`snap` drops objects onto the terrain (ground layouts); `keep` preserves each object's Z. The killhouse is a
-multi-floor structure that would collapse if snapped, so it declares `z=keep` alongside
-`zbase=_centerSpawnZ` to sit at its original off-map altitude (~1000).
-
-**Export** — after rearranging, copies a schema-agnostic block of `[class, dx, dy, dz, dir°]` rows (offsets
-from the import origin) to re-integrate into the composition's source array:
-
-```sqf
-// Set _origin to the SAME origin you imported at (the TUI default is shown).
-private _origin = [23100, 18700, 0];
-
-private _objs = get3DENSelected "Object";
-if (_objs isEqualTo []) exitWith { systemChat "Select the composition: click an object in the 3D view, then Ctrl+A."; };
-
-private _rows = _objs apply {
-    private _p = getPosWorld _x;
-    format ["[""%1"", %2, %3, %4, %5]",
-        typeOf _x,
-        (_p select 0) - (_origin select 0),
-        (_p select 1) - (_origin select 1),
-        (_p select 2) - (_origin select 2),
-        getDir _x]
-};
-copyToClipboard (_rows joinString ("," + endl));
-systemChat format ["Copied %1 objects.", count _objs];
-```
-
-`getDir` reads each heading in the convention the import wrote (`[0,0,dir]` yaw), so rotation round-trips.
-Fold the rows back into the composition's array by these rules:
-
-- **Match by order.** The export returns rows in source order (creation order), so line them up 1:1 with the
-  existing array by index, confirm the class matches at each row, and change only the rows whose X/Y (or
-  dir) actually moved.
-- **X/Y and direction** drop straight in — the export is already the source row format. For the **HQ**, add
-  `_hqInComp` (10.0413, 11.3066) to X/Y — its array stores original composition coordinates, not offsets.
-- **Ignore the exported Z for ground layouts.** It is just the terrain baseline of wherever you dropped the
-  composition in Eden, not a real coordinate — keep each row's original Z (the runtime ignores the Z column
-  anyway). Only the **killhouse** uses Z, as the floor offset: export it with `_origin`'s Z set to its
-  `_centerSpawnZ` (1000) so the values come back raw.
-- **Keep the trailing fields.** Carry each row's `isWeapon` flag from the original row; a rearrange never
-  changes it, and the export does not emit it.
-
-Verify once by import -> export -> re-import and confirming the layout is identical.
+- The HQ fence carries `anchor=hqInComp`, because its array stores original composition coordinates
+  rather than offsets from `[0,0]`. The tool subtracts `_hqInCompX/Y` on import; on the way back in, **add**
+  `_hqInComp` (10.0413, 11.3066) to the exported X/Y.
+- `_hqInCompX/_hqInCompY` must stay equal to the `Land_Cargo_HQ_V1_F` row's X/Y, per the invariant above.
 
 ## What the array does not govern
 

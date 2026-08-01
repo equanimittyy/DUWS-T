@@ -10,12 +10,14 @@
 // Token to category. Categories exist because a zone's radius scales its garrison unevenly: more
 // ground needs proportionally more infantry to cover it and does not need more aircraft. Membership
 // lists rather than a per-token map so the whole vocabulary reads in one block.
+// --DUWS-UNITCOMP BEGIN name="Spawn categories" row="category, members..."--
 DUWS_spawnCategories = [
     ["infantry", ["patrol", "team", "sniper", "wpteam", "buildings"]],
     ["light",    ["car"]],
     ["armour",   ["armored"]],
     ["air",      ["air"]]
 ];
+// --DUWS-UNITCOMP END--
 
 // An unlisted token is a vehicle classname a faction file named directly, which DUWS_fnc_zoneSpawnOne
 // hands to fnc_random_veh. Those scale as "light" -- a multiplier of one everywhere -- rather than
@@ -31,37 +33,42 @@ DUWS_fnc_spawnCategory = {
 // POSITIONALLY LOCKED to DUWS_spawnCategories above: one multiplier per category, in that order,
 // after the radius ceiling. Reordering either table without the other silently scales armour by the
 // air column, which is a balance change with nothing in the log to show for it.
+// Row order is the lookup order: the first ceiling a radius falls under wins, and the last row is a
+// band rather than an else so the table reads in one direction.
+// --DUWS-UNITCOMP BEGIN name="Zone radius multipliers" row="ceiling, infantry, light, armour, air"--
 DUWS_zoneRadiusMult = [
-    // [radius ceiling, infantry, light, armour, air]
     [101,  1, 1, 0, 0],
     [251,  1, 1, 1, 0],
     [501,  2, 1, 1, 0],
     [1001, 2, 1, 1, 1],
     [1501, 2, 1, 2, 1],
-    // Everything above the last ceiling. Kept as a band rather than an else so the table reads in
-    // one direction.
     [1e11, 3, 1, 2, 1]
 ];
+// --DUWS-UNITCOMP END--
 
 // What a zone of each tier fields before its radius multiplies each category, indexed tier-1.
 // Absolute, not cumulative: a tier is the whole garrison, so what a tier IV zone is can be read off
 // one row instead of assembled from four.
+// --DUWS-UNITCOMP BEGIN name="Zone tiers" row="tier I..IV"--
 DUWS_zoneSpawnTiers = [
     ["patrol", "team", "car"],
     ["patrol", "team", "wpteam", "car", "armored"],
     ["sniper", "patrol", "team", "wpteam", "car", "armored"],
     ["sniper", "patrol", "patrol", "team", "wpteam", "car", "armored", "air"]
 ];
+// --DUWS-UNITCOMP END--
 
 // Added when more than two players are in the session. Appended after the radius multiply rather
 // than before it, so co-op scaling stays a flat handful of groups instead of being multiplied into
 // the largest zones as well.
+// --DUWS-UNITCOMP BEGIN name="Zone co-op extra" row="tier I..IV"--
 DUWS_zoneCoopExtra = [
     [],
     ["patrol"],
     ["patrol", "armored"],
     ["patrol", "team"]
 ];
+// --DUWS-UNITCOMP END--
 
 // A zone's spawn list: its tier composition, each entry repeated as many times as its category's
 // radius multiplier asks for, then the co-op extra. Takes the tier and the radius rather than
