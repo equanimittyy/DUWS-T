@@ -180,16 +180,13 @@ fnc_zone_strength_refresh = {
 	} forEach zone_meta_array;
 };
 
-// How much of its radius band a zone of each tier fields, indexed tier-1. Tier IV is a zone exactly
-// as it has always shipped, and the ladder runs downward from it: nothing here can make a zone
-// heavier than the band already describes, so the top spawn band's twenty-one groups stay the
-// campaign's ceiling whatever a zone rolls.
-DUWS_zoneTierForce = [0.5, 0.7, 0.85, 1];
-
 // A zone's inherent size, rolled once when it is generated and fixed for the campaign. Distinct from
-// fnc_zone_strength, which is attrition: tier says how big this zone was ever meant to be, strength
-// says how much of it is left. Multiplying them is what fnc_zone_force does, and keeping them apart
-// is what lets the map readout show a tier I zone at a full bar -- small, but not yet fought over.
+// fnc_zone_strength, which is attrition: tier picks which composition the zone fields, strength says
+// how much of it is left. Keeping them apart is what lets the map readout show a tier I zone at a
+// full bar -- small, but not yet fought over.
+//
+// Tier selects a list rather than scaling one, so it reaches only the units a zone spawns alongside
+// itself. The fortification garrison and the composition's gun crews scale by attrition alone.
 //
 // Defaults to IV so a zone that never rolled one -- a save written before tiers existed, or any path
 // that reaches the spawn without passing through the roll -- fields what it always did rather than
@@ -215,17 +212,6 @@ fnc_zone_tier_roll = {
 	private _tier = selectRandomWeighted [1, 1, 2, 2, 3, 3, 4, 4];
 	missionNamespace setVariable [_var, _tier];
 	_tier
-};
-
-// What a zone actually puts on the ground: its tier against its attrition. The two spawn paths read
-// this rather than fnc_zone_strength, so a tier I zone is thinner everywhere -- band, occupied
-// buildings and tower crews alike -- instead of fielding a small patrol screen around a full one.
-// Not folded into fnc_zone_strength, which has one writer that records attrition and would otherwise
-// bake the tier in and then decay it a second time on every teardown.
-fnc_zone_force = {
-	params ["_zoneKey"];
-	private _tier = ((round ([_zoneKey] call fnc_zone_tier)) max 1) min 4;
-	(DUWS_zoneTierForce select (_tier - 1)) * ([_zoneKey] call fnc_zone_strength)
 };
 
 // Drops entries from a spawn list at random until the fraction is met, keeping at least one. Random

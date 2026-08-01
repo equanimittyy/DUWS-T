@@ -568,8 +568,10 @@ Towns gain purchasable garrisons on both sides. A zone garrison is the benchmark
 toward: `server/init_zones/fnc_createopfortified.sqf` fields a multiplied fortified group with a
 squad leader, a mortar team, and up to eight buildings occupied at three units each. **Zones carry a
 tier of their own, rolled at generation and never purchased** — see
-[`info/zones_and_civilians.md`](info/zones_and_civilians.md#zone-tiers). A tier IV zone is that
-benchmark unchanged; the lower tiers thin it. Nothing a commander can buy raises a zone.
+[`info/zones_and_civilians.md`](info/zones_and_civilians.md#zone-tiers). Each tier names its own
+composition and a zone's radius multiplies it per category; nothing a commander can buy raises a
+zone. Towns and zones draw from one token vocabulary but keep separate composition sets, so tuning
+what a town fields cannot silently retune what a zone does.
 
 The OPFOR side of the ladder is built: tiers 0 to IV live in `DUWS_townSpawnTiers` and the per-town
 tier in `DUWS_townGarrisonTier`, written through `fnc_town_garrison_setTier`. Full contract in

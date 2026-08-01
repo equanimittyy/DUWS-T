@@ -125,21 +125,15 @@ deploy cycle, since the count drops to zero as soon as they are flagged.
 
 ### Zone tiers
 
-Every zone rolls a tier I to IV when it is generated, and keeps it for the campaign. **Tier is how
-big the zone was ever meant to be; strength is how much of it is left.** The two are separate numbers
-and they multiply — `fnc_zone_force` is that product, and the three places that put OPFOR on a zone
-read it rather than strength alone.
+Every zone rolls a tier I to IV when it is generated, and keeps it for the campaign. **Tier picks
+which composition the zone fields; strength is how much of that is left.** Weights are 1/2/3/4, so
+the roll is skewed to the top: most zones are the full objective and a low roll is the occasional
+soft one worth taking early.
 
-| Tier | Fields | Weight |
-|---|---|---|
-| I | 0.50 of its radius band | 1 |
-| II | 0.70 | 2 |
-| III | 0.85 | 3 |
-| IV | 1.00 — the zone as the mission has always shipped it | 4 |
-
-**The roll is skewed to the top**, so most zones are the full objective and a low roll is the
-occasional soft one worth taking early. **Nothing scales a zone above its band**: tier IV is the
-ceiling, so the largest band's twenty-one groups remain what the campaign can ask a machine for.
+`DUWS_zoneSpawnTiers` holds one composition per tier, **absolute rather than cumulative** — a row is
+the whole garrison, so what a tier IV zone is reads off one line instead of being assembled from
+four. Tier reaches only the units a zone spawns alongside itself; the prefab, the fortification
+scatter and their crews are not part of it.
 
 `fnc_zone_tier_roll` refuses to roll twice. `fnc_createzone` is re-entrant by design — `zone_meta_array`
 exists so a zone can be rebuilt through it — and a rebuild that re-rolled would change what the ground
@@ -151,20 +145,44 @@ Zone tiers are not purchasable and no commander raises them, which is what separ
 town's ([§Garrison tiers 0 to IV](#garrison-tiers-0-to-iv)): a town's tier is bought and can change
 mid-campaign, a zone's is the ground's fixed character.
 
+#### Radius multiplies each category, not the whole list
+
+A tier composition says *what* a zone fields; its radius says *how many*. Every token belongs to a
+category (`DUWS_spawnCategories`), and `DUWS_zoneRadiusMult` gives one multiplier per category per
+radius band — because a zone's radius scales its garrison unevenly. More ground needs proportionally
+more infantry to cover it and does not need more aircraft, and a flat multiplier on the whole list
+would buy the biggest zones three times the air support alongside three times the riflemen.
+
+**The two tables are positionally locked**: one multiplier per category, in `DUWS_spawnCategories`
+order, after the radius ceiling. Reordering either without the other scales armour by the air column,
+which is a balance change with nothing in the log to show for it.
+
+An unlisted token is a vehicle classname a faction file named directly, which `fnc_random_veh`
+resolves. Those count as `light` — multiplier one everywhere — so a mod's own class still spawns and
+never at three times the intended count.
+
+`DUWS_zoneCoopExtra` is appended **after** the multiply, so a session with more than two players
+gains a flat handful of groups rather than another multiplied band.
+
+Zones cap at what the largest radius asks of a tier IV composition, which is where the old
+radius-band table topped out. Towns are not multiplied by radius at all — see
+[§Garrison tiers 0 to IV](#garrison-tiers-0-to-iv).
+
 ### Attrition carries between visits
 
 A zone remembers what was left of its garrison when it streamed out. `fnc_spawnWait` calls
 `fnc_zone_strength_record` on the despawn exit — before the peak is cleared and before the sweep
 deletes the survivors it counts — and that stores `survivors / original` in tenths, rounded up and
-floored at `0.3`. Everything the zone raises on its next arrival scales by that fraction *times its
-tier*: the radius band drops tokens at random (`fnc_zone_spawn_sizes.sqf`), the fortification builder
-thins its defence section and holds fewer buildings and fewer towers (`fnc_createopfortified.sqf`),
-and fewer of the composition's statics are re-crewed (`fnc_spawnWait.sqf`). The mortar pair is the one
+floored at `0.3`. Everything the zone raises on its next arrival scales by that fraction: the tier
+composition drops tokens at random (`fnc_zone_spawn_sizes.sqf`), the fortification builder thins its
+defence section and holds fewer buildings and fewer towers (`fnc_createopfortified.sqf`), and fewer
+of the composition's statics are re-crewed (`fnc_spawnWait.sqf`). The mortar pair is the one
 exception — two men, and the zone's only indirect fire, so a fraction of it is none of it.
 
-Tier is deliberately kept out of `fnc_zone_strength`, which has a single writer that records attrition
-and would otherwise bake the tier in and decay it a second time on every teardown. It is also why the
-readout can show a tier I zone at a full bar: small, but not yet fought over.
+**Attrition and tier are separate axes.** Tier chooses the list, attrition thins whatever that list
+produced, and only the spawn list is tiered — the fortification garrison and the prefab's gun crews
+scale by attrition alone. It is also why the readout can show a tier I zone at a full bar: small, but
+not yet fought over.
 
 **The peak is anchored, not re-based.** `DUWS_zoneBase_<key>` is the men the zone's first completed
 cycle placed, and every later cycle publishes that same figure as `DUWS_zonePeak_<key>`. A garrison
@@ -310,20 +328,29 @@ serialises. Towns that start inside an enemy zone are seeded at tier I rather th
 ground before anyone has played a minute, and reading them as ungarrisoned would have the commander
 appraise them as neutral.
 
-| Tier | Adds | Reached by |
+| Tier | Fields | Reached by |
 |---|---|---|
 | 0 | — | not OPFOR ground |
-| I | Patrol plus one team | reputation `<= -10` |
-| II | Second team, light vehicle | purchase |
-| III | Armour | purchase |
-| IV | Building-occupying units, on the zone pattern | purchase |
+| I | Patrol, team | reputation `<= -10` |
+| II | Patrol, two teams, light vehicle | purchase |
+| III | Patrol, two teams, light vehicle, armour | purchase |
+| IV | The above plus building-occupying units | purchase |
 
-The rows are cumulative and live as data in `DUWS_townSpawnTiers`, as tokens
-`DUWS_fnc_zoneSpawnOne` already understands — the same driver the zone bands walk, so the garrison
-inherits faction auto-detection for free. Cumulative is what lets a tier bought while the garrison
-stands raise only the rows between the old tier and the new one, rather than a second garrison
-beside the first; the men that reinforcement adds are added to the strength baseline rather than
-re-measured from it, so casualties the player has already inflicted are not refunded.
+The compositions live as data in `DUWS_townSpawnTiers`, in the token vocabulary
+`DUWS_fnc_zoneSpawnOne` already understands — the same spawner the zone compositions use, so a town
+garrison inherits faction auto-detection for free.
+
+**A town's set is its own, and is deliberately smaller than any zone's.** It is also *not* multiplied
+by the town's radius the way a zone composition is ([§Radius multiplies each category](#radius-multiplies-each-category-not-the-whole-list)):
+a large town scaled like a large zone stops being a garrison and becomes a zone that happens to have
+civilians in it, which is the distinction static emplacements exist to draw.
+
+**Rows are absolute, not cumulative** — a row is the whole garrison for that tier. A tier bought
+while the garrison stands raises `DUWS_fnc_spawnDiff` of the standing composition against the new
+one, counting duplicates, so going from one team to two owes one team rather than two. The men that
+reinforcement adds are *added* to the strength baseline rather than re-measured from it, so
+casualties the player has already inflicted are not refunded. A retuned table cannot order a standing
+garrison to shrink: a smaller composition diffs to nothing rather than to something negative.
 
 **It is units only — no fortification ring and no prefab**, because static emplacements are what
 make a zone an objective and a town must not compete with one. Tier IV reaches the zone benchmark

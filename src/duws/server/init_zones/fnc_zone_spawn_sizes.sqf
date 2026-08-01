@@ -1,29 +1,106 @@
-// Locality: server -- spawned once from server/server_init.sqf to publish the table below.
+// Locality: server -- spawned once from server/server_init.sqf to publish the tables below.
 //
-// What OPFOR a zone gets, by radius band. This was six functions of the same shape, each a flat
-// list of spawn calls with a `sleep 5` written between every pair; adding a band or retuning one
-// meant editing control flow. The lists are data, so they live as data and one driver walks them.
+// The OPFOR spawn composition framework, shared by zones and by town garrisons. A token is a group
+// kind, or a vehicle class fnc_random_veh understands ("car", "armored", "air").
 //
-// A token is a group kind, or a vehicle class fnc_random_veh understands ("car", "armored", "air").
-DUWS_zoneSpawnTiers = [
-    // [radius ceiling, base spawns, extra when more than two players, extra when fewer]
-    [101,  ["patrol","team","patrol","patrol","car","car"],
-           [], []],
-    [251,  ["patrol","team","team","patrol","patrol","car","car"],
-           ["patrol","armored"], ["car"]],
-    [501,  ["sniper","patrol","patrol","patrol","team","wpteam","armored","car"],
-           ["team","armored"], []],
-    [1001, ["sniper","patrol","patrol","patrol","patrol","team","team","wpteam","armored","air","car"],
-           ["patrol","team","wpteam","armored"], []],
-    [1501, ["sniper","patrol","patrol","patrol","patrol","patrol","team","team","team","wpteam",
-            "armored","armored","air","car"],
-           ["sniper","team","wpteam","armored"], []],
+// Zones and towns keep separate composition sets -- a town garrison must not field what a zone does,
+// or the two stop reading differently on the ground -- but share the token vocabulary, the category
+// map and the spawner here, so a new group kind is added in one place rather than two.
+
+// Token to category. Categories exist because a zone's radius scales its garrison unevenly: more
+// ground needs proportionally more infantry to cover it and does not need more aircraft. Membership
+// lists rather than a per-token map so the whole vocabulary reads in one block.
+DUWS_spawnCategories = [
+    ["infantry", ["patrol", "team", "sniper", "wpteam", "buildings"]],
+    ["light",    ["car"]],
+    ["armour",   ["armored"]],
+    ["air",      ["air"]]
+];
+
+// An unlisted token is a vehicle classname a faction file named directly, which DUWS_fnc_zoneSpawnOne
+// hands to fnc_random_veh. Those scale as "light" -- a multiplier of one everywhere -- rather than
+// being dropped or guessed at, so a mod's own class still spawns and never at three times the count.
+DUWS_fnc_spawnCategory = {
+    params ["_token"];
+    private _i = DUWS_spawnCategories findIf { _token in (_x select 1) };
+    if (_i < 0) then { "light" } else { (DUWS_spawnCategories select _i) select 0 }
+};
+
+// How many groups of each category a zone fields per entry in its tier composition.
+//
+// POSITIONALLY LOCKED to DUWS_spawnCategories above: one multiplier per category, in that order,
+// after the radius ceiling. Reordering either table without the other silently scales armour by the
+// air column, which is a balance change with nothing in the log to show for it.
+DUWS_zoneRadiusMult = [
+    // [radius ceiling, infantry, light, armour, air]
+    [101,  1, 1, 0, 0],
+    [251,  1, 1, 1, 0],
+    [501,  2, 1, 1, 0],
+    [1001, 2, 1, 1, 1],
+    [1501, 2, 1, 2, 1],
     // Everything above the last ceiling. Kept as a band rather than an else so the table reads in
     // one direction.
-    [1e11, ["sniper","sniper","patrol","team","wpteam","patrol","patrol","team","wpteam","team",
-            "wpteam","team","patrol","team","patrol","armored","armored","armored","air","air","car"],
-           [], []]
+    [1e11, 3, 1, 2, 1]
 ];
+
+// What a zone of each tier fields before its radius multiplies each category, indexed tier-1.
+// Absolute, not cumulative: a tier is the whole garrison, so what a tier IV zone is can be read off
+// one row instead of assembled from four.
+DUWS_zoneSpawnTiers = [
+    ["patrol", "team", "car"],
+    ["patrol", "team", "wpteam", "car", "armored"],
+    ["sniper", "patrol", "team", "wpteam", "car", "armored"],
+    ["sniper", "patrol", "patrol", "team", "wpteam", "car", "armored", "air"]
+];
+
+// Added when more than two players are in the session. Appended after the radius multiply rather
+// than before it, so co-op scaling stays a flat handful of groups instead of being multiplied into
+// the largest zones as well.
+DUWS_zoneCoopExtra = [
+    [],
+    ["patrol"],
+    ["patrol", "armored"],
+    ["patrol", "team"]
+];
+
+// A zone's spawn list: its tier composition, each entry repeated as many times as its category's
+// radius multiplier asks for, then the co-op extra. Takes the tier and the radius rather than
+// reading either, so the sizing is testable without the engine.
+DUWS_fnc_zoneSpawnList = {
+    params ["_tier", "_size", ["_coop", false]];
+    private _t = (((round _tier) max 1) min (count DUWS_zoneSpawnTiers)) - 1;
+    private _i = DUWS_zoneRadiusMult findIf { _size < (_x select 0) };
+    if (_i < 0) exitWith { [] };
+    private _row = DUWS_zoneRadiusMult select _i;
+
+    private _out = [];
+    {
+        private _token = _x;
+        private _cat = [_token] call DUWS_fnc_spawnCategory;
+        private _ci = DUWS_spawnCategories findIf { (_x select 0) isEqualTo _cat };
+        // Offset by one: the row's first element is the radius ceiling, not a multiplier.
+        private _n = _row param [_ci + 1, 1];
+        for "_k" from 1 to _n do { _out pushBack _token };
+    } forEach (DUWS_zoneSpawnTiers select _t);
+
+    if (_coop) then { _out append (DUWS_zoneCoopExtra select _t) };
+    _out
+};
+
+// What is missing from _have to make it _want, counting duplicates: two patrols wanted against one
+// already standing yields one patrol. This is what makes absolute composition lists workable for a
+// garrison that can be upgraded mid-fight -- reinforcement raises the difference and lands beside
+// the survivors, where re-raising the whole list would double the town.
+DUWS_fnc_spawnDiff = {
+    params ["_have", "_want"];
+    private _pool = +_have;
+    private _out = [];
+    {
+        private _i = _pool find _x;
+        if (_i < 0) then { _out pushBack _x } else { _pool deleteAt _i };
+    } forEach _want;
+    _out
+};
 
 // Called rather than spawned, for the group each one hands back: the capture test counts this
 // zone's own garrison, so every unit raised here has to be flagged with the zone it belongs to.
@@ -46,18 +123,16 @@ fnc_zone_spawn = {
     if (_zoneKey == "") then { _zoneKey = [_spawnPos] call fnc_zone_key };
     private _roster = [_zoneKey] call fnc_zone_roster;
 
-    private _i = DUWS_zoneSpawnTiers findIf { _size < (_x select 0) };
-    if (_i < 0) exitWith {
-        ["ERROR", "ZONES", format ["no spawn tier covers radius %1", _size]] call fnc_log;
+    private _tier = [_zoneKey] call fnc_zone_tier;
+    private _spawns = [_tier, _size, count (call BIS_fnc_listPlayers) > 2] call DUWS_fnc_zoneSpawnList;
+    if (_spawns isEqualTo []) exitWith {
+        ["ERROR", "ZONES", format ["no radius band covers %1 for %2", _size, _zoneKey]] call fnc_log;
     };
-    (DUWS_zoneSpawnTiers select _i) params ["", "_base", "_extraMulti", "_extraSolo"];
 
-    private _spawns = _base + ([_extraSolo, _extraMulti] select (count (call BIS_fnc_listPlayers) > 2));
-
-    // The band is what a tier IV zone would field intact; it deploys at its tier against whatever its
-    // garrison was ground down to. Without the attrition half, breaking a garrison and leaving buys
-    // the player nothing -- the same fight is waiting at full strength when they come back.
-    _spawns = [_spawns, [_zoneKey] call fnc_zone_force] call fnc_zone_thin;
+    // The composition is what the zone fields intact; it deploys at whatever its garrison was ground
+    // down to. Without this, breaking a garrison and leaving buys the player nothing -- the same
+    // fight is waiting at full strength when they come back.
+    _spawns = [_spawns, [_zoneKey] call fnc_zone_strength] call fnc_zone_thin;
 
     {
         private _grp = [_x, _spawnPos, _size] call DUWS_fnc_zoneSpawnOne;
@@ -102,6 +177,5 @@ fnc_zone_spawn = {
     };
     missionNamespace setVariable [format ["DUWS_zonePeak_%1", _zoneKey], _baseline];
     ["INFO", "ZONES", format ["%1 deployed %2 men at tier %3, %4 strength; garrison peak %5",
-        _zoneKey, _placed, [_zoneKey] call fnc_zone_tier, [_zoneKey] call fnc_zone_strength,
-        _baseline]] call fnc_log;
+        _zoneKey, _placed, _tier, [_zoneKey] call fnc_zone_strength, _baseline]] call fnc_log;
 };

@@ -49,18 +49,22 @@ fnc_civ_repAt = {
 };
 
 // What each garrison tier puts in a town, as tokens DUWS_fnc_zoneSpawnOne already understands --
-// plus "buildings", which only tier IV raises and which no zone band emits.
-// Cumulative: a tier IV town fields every row from I down. That is what lets a tier bought while
-// the garrison stands raise only the rows between the old tier and the new one, instead of a
-// second garrison beside the first.
-// Units only -- no fortification ring, no prefab. Static emplacements are what make a zone an
-// objective and a town must not compete with one for the player's attention, so IV reaches the
-// zone benchmark by occupying buildings rather than by digging in.
+// plus "buildings", which only tier IV raises and which no zone composition emits.
+//
+// Absolute, like the zone set: a row is the whole garrison for that tier, so what a tier IV town is
+// reads off one line. A tier bought while the garrison stands raises DUWS_fnc_spawnDiff of the two
+// rows, which is what keeps reinforcement an addition rather than a second garrison.
+//
+// A town's own set, deliberately smaller than any zone's, and not multiplied by its radius the way
+// a zone's is. Static emplacements are what make a zone an objective and a town must not compete
+// with one for the player's attention -- so a large town stays a garrison rather than becoming a
+// zone that happens to have civilians in it, and IV reaches the zone benchmark by occupying
+// buildings rather than by digging in.
 DUWS_townSpawnTiers = [
 	["patrol", "team"],
-	["team", "car"],
-	["armored"],
-	["buildings"]
+	["patrol", "team", "team", "car"],
+	["patrol", "team", "team", "car", "armored"],
+	["patrol", "team", "team", "car", "armored", "buildings"]
 ];
 
 // A town's garrison tier: 0 for ground OPFOR does not hold, 1 to 4 for ground it does. Reputation

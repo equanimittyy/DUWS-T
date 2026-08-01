@@ -328,32 +328,65 @@ private _band = ["sniper", "patrol", "patrol", "team", "wpteam", "armored", "air
 ["zone_thin: leaves the caller's list alone",
     (count _band), 10] call fnc_assertEq;
 
-// --- fnc_zone_tier / fnc_zone_force: a zone's inherent size against its attrition ---
-// The real table, restated: the extractor pulls named functions, not the globals beside them.
-DUWS_zoneTierForce = [0.5, 0.7, 0.85, 1];
-
+// --- fnc_zone_tier: a zone's inherent size ---
 // fnc_zone_tier_roll is absent here on purpose: it needs selectRandomWeighted, which sqf-vm does not
 // implement, and reshaping the roll to suit the harness would cost the mission its stated idiom.
 ["zone_tier: an unrolled zone is tier IV, so nothing regresses on a save that predates tiers",
     (["untiered"] call fnc_zone_tier), 4] call fnc_assertEq;
 
-missionNamespace setVariable ["DUWS_zoneTier_f1", 4];
-["f1", 1] call fnc_zone_strength_set;
-["zone_force: a full tier IV zone fields its whole band",
-    (["f1"] call fnc_zone_force), 1] call fnc_assertEq;
-missionNamespace setVariable ["DUWS_zoneTier_f1", 1];
-["zone_force: tier I halves it",
-    (["f1"] call fnc_zone_force), 0.5] call fnc_assertEq;
-// The two multiply rather than one overriding the other: a small zone that has also been mauled is
-// thinner than either fact alone makes it.
-["f1", 0.6] call fnc_zone_strength_set;
-["zone_force: tier and attrition compound",
-    (["f1"] call fnc_zone_force), 0.3] call fnc_assertEq;
-// Clamped, not trusted: a tier outside the table would index off the end of it and fault the spawn.
-missionNamespace setVariable ["DUWS_zoneTier_f1", 9];
-["f1", 1] call fnc_zone_strength_set;
-["zone_force: a tier above the table clamps to IV rather than faulting",
-    (["f1"] call fnc_zone_force), 1] call fnc_assertEq;
-missionNamespace setVariable ["DUWS_zoneTier_f1", 0];
-["zone_force: a tier below the table clamps to I",
-    (["f1"] call fnc_zone_force), 0.5] call fnc_assertEq;
+// --- the spawn composition framework ---
+// Stand-in tables, not the shipped ones: these pin the mechanics -- category lookup, per-category
+// multiplication, the co-op append -- and the shipped numbers are balance, which a test should not
+// freeze. The extractor pulls named functions, not the globals beside them, so they are set here.
+DUWS_spawnCategories = [
+    ["infantry", ["patrol", "team", "sniper", "wpteam", "buildings"]],
+    ["light",    ["car"]],
+    ["armour",   ["armored"]],
+    ["air",      ["air"]]
+];
+DUWS_zoneRadiusMult = [[101, 1, 1, 0, 0], [1e11, 3, 1, 2, 1]];
+DUWS_zoneSpawnTiers = [["patrol"], ["patrol", "car"], ["patrol", "armored"],
+    ["patrol", "team", "car", "armored", "air"]];
+DUWS_zoneCoopExtra = [[], [], [], ["team"]];
+
+["spawnCategory: a group kind resolves to infantry",
+    (["wpteam"] call DUWS_fnc_spawnCategory), "infantry"] call fnc_assertEq;
+["spawnCategory: armour is its own category, so radius scales it separately",
+    (["armored"] call DUWS_fnc_spawnCategory), "armour"] call fnc_assertEq;
+// A faction file may name a vehicle class directly and fnc_random_veh resolves it. It must still
+// spawn, and at one per entry rather than at the armour multiplier.
+["spawnCategory: an unlisted token is treated as light rather than dropped",
+    (["O_MBT_02_cannon_F"] call DUWS_fnc_spawnCategory), "light"] call fnc_assertEq;
+
+["zoneSpawnList: a small zone drops the categories its band zeroes",
+    ([4, 50] call DUWS_fnc_zoneSpawnList), ["patrol", "team", "car"]] call fnc_assertEq;
+["zoneSpawnList: a large zone repeats each entry by its own category multiplier",
+    ([4, 5000] call DUWS_fnc_zoneSpawnList),
+    ["patrol","patrol","patrol","team","team","team","car","armored","armored","air"]] call fnc_assertEq;
+["zoneSpawnList: tier picks the composition, radius only scales it",
+    ([1, 5000] call DUWS_fnc_zoneSpawnList), ["patrol","patrol","patrol"]] call fnc_assertEq;
+// Appended after the multiply, so co-op adds a flat handful rather than another multiplied band.
+["zoneSpawnList: the co-op extra is not multiplied",
+    ([4, 5000, true] call DUWS_fnc_zoneSpawnList),
+    ["patrol","patrol","patrol","team","team","team","car","armored","armored","air","team"]] call fnc_assertEq;
+["zoneSpawnList: a tier above the table clamps rather than faulting",
+    ([9, 50] call DUWS_fnc_zoneSpawnList), ["patrol", "team", "car"]] call fnc_assertEq;
+
+// --- DUWS_fnc_spawnDiff: what an upgrade owes ---
+["spawnDiff: only what the new composition adds",
+    ([["patrol","team"], ["patrol","team","armored"]] call DUWS_fnc_spawnDiff), ["armored"]] call fnc_assertEq;
+// Counting duplicates is the point: a tier going from one team to two owes one team, not two.
+["spawnDiff: duplicates are counted, not matched once",
+    ([["patrol","team"], ["patrol","team","team"]] call DUWS_fnc_spawnDiff), ["team"]] call fnc_assertEq;
+["spawnDiff: an unchanged composition owes nothing",
+    ([["patrol","team"], ["patrol","team"]] call DUWS_fnc_spawnDiff), []] call fnc_assertEq;
+// A downgrade owes nothing rather than something negative: nothing is withdrawn to meet a smaller
+// list, so a retuned table cannot order a standing garrison to shrink.
+["spawnDiff: a smaller composition owes nothing",
+    ([["patrol","team","armored"], ["patrol"]] call DUWS_fnc_spawnDiff), []] call fnc_assertEq;
+["spawnDiff: seeding from nothing owes the whole list",
+    ([[], ["patrol","team"]] call DUWS_fnc_spawnDiff), ["patrol","team"]] call fnc_assertEq;
+private _have = ["patrol","team"];
+[_have, ["patrol","team","armored"]] call DUWS_fnc_spawnDiff;
+["spawnDiff: leaves the caller's standing list alone",
+    _have, ["patrol","team"]] call fnc_assertEq;

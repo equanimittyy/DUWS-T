@@ -13,9 +13,9 @@ if (_townIndex >= count _locations) exitWith {};
 private _centre = getPos (_locations select _townIndex);
 private _radius = (missionNamespace getVariable ["civ_radii", []]) param [_townIndex, 300];
 
-// Raises the DUWS_townSpawnTiers rows above _from up to and including _to, and hands back what they
-// placed. One driver seeds a garrison from nothing (_from 0) and reinforces a standing one, so a
-// tier bought mid-fight cannot raise a row the town already fields.
+// Raises an explicit token list and hands back what it placed. One driver seeds a garrison from a
+// tier's whole composition and reinforces a standing one from the difference, so a tier bought
+// mid-fight cannot raise something the town already fields.
 // The position and radius are passed in rather than read from the enclosing scope: a spawned block
 // sees no locals from where it was written, and this one is called for its return value anyway --
 // the roster is what lets the garrison be counted and ordered out.
@@ -23,11 +23,8 @@ private _radius = (missionNamespace getVariable ["civ_radii", []]) param [_townI
 // DUWS_fnc_zoneSpawnOne comes from fnc_zone_spawn_sizes, which is ordered ahead of this by zone
 // build-out: fnc_civ_init_Tomata waits on every zone being built before it starts these threads,
 // and no zone can be built before the table that spawns its garrison exists.
-private _fnc_spawnRows = {
-    params ["_from", "_to", "_pos", "_rad"];
-    private _tokens = [];
-    for "_t" from (_from + 1) to _to do { _tokens append (DUWS_townSpawnTiers select (_t - 1)) };
-
+private _fnc_spawnList = {
+    params ["_tokens", "_pos", "_rad"];
     private _grps = [];
     {
         private _grp = if (_x == "buildings") then {
@@ -88,8 +85,12 @@ private _roster = [];
 private _baseline = 0;
 private _retreating = false;
 // What is standing in the town, against the tier the town owes. The two differ while a purchase
-// waits for the garrison to catch up, and after a spawn that placed nothing.
+// waits for the garrison to catch up, and after a spawn that placed nothing. The list is held beside
+// the number because reinforcement is the difference between two compositions, not between two tiers
+// -- a table retuned mid-campaign would otherwise have a standing garrison reinforced from a row it
+// was never raised against.
 private _deployed = 0;
+private _deployedList = [];
 // When this town was taken, or -1 for one that is not under the capture grace. Towns seeded into
 // the band at campaign start hold -1 and garrison on sight: they are pre-existing enemy ground
 // rather than something the player has just turned.
@@ -152,7 +153,8 @@ while {true} do {
             if ([_centre, _radius + 400] call fnc_duws_bluforNear) then {
                 sleep 5;
                 if ([_centre, _radius + 400] call fnc_duws_bluforNear) then {
-                    _roster = [0, _tier, _centre, _radius] call _fnc_spawnRows;
+                    private _want = DUWS_townSpawnTiers select (_tier - 1);
+                    _roster = [_want, _centre, _radius] call _fnc_spawnList;
                     // Armed only once the garrison is standing in it. Each spawner resolves a safe
                     // position before it places anything, and one that fails leaves the town
                     // holding the player and nobody else -- which is precisely what WEST SEIZED
@@ -167,6 +169,7 @@ while {true} do {
                         _garrisoned = true;
                         _retreating = false;
                         _deployed = _tier;
+                        _deployedList = _want;
                         _baseline = [_roster] call _fnc_rosterAlive;
                         ["INFO", "CIV", format ["Garrison tier %1 spawned at town %2 (rep %3), %4 men", _tier, _townIndex, _rep, _baseline]] call fnc_log;
                     } else {
@@ -182,14 +185,16 @@ while {true} do {
             };
         };
     } else {
-        // Bought while the garrison stands, so only the rows between what is deployed and what the
-        // town now owes are raised -- reinforcement arrives beside the survivors rather than as a
-        // second garrison beside the first.
+        // Bought while the garrison stands, so only what the new composition has and the standing one
+        // does not is raised -- reinforcement arrives beside the survivors rather than as a second
+        // garrison beside the first. Counting duplicates is the whole point: a tier that goes from
+        // one team to two owes one team, not two.
         // Refused while the remnant is withdrawing: units walking in behind it would hold the
         // trigger area open, and a town whose garrison keeps being topped up mid-withdrawal never
         // reads as cleared at all. The tier stays owed and lands on the next spawn instead.
         if (_tier > _deployed && !_retreating) then {
-            private _added = [_deployed, _tier, _centre, _radius] call _fnc_spawnRows;
+            private _want = DUWS_townSpawnTiers select (_tier - 1);
+            private _added = [[_deployedList, _want] call DUWS_fnc_spawnDiff, _centre, _radius] call _fnc_spawnList;
             _roster append _added;
             // Added to the baseline rather than re-measured from the roster. A garrison ground down
             // to three men and then reinforced by six is nine men against a baseline that still
@@ -197,6 +202,7 @@ while {true} do {
             // has already paid for and reset the withdrawal threshold with it.
             _baseline = _baseline + ([_added] call _fnc_rosterAlive);
             _deployed = _tier;
+            _deployedList = _want;
             ["INFO", "CIV", format ["Town %1 garrison reinforced to tier %2; baseline now %3 men", _townIndex, _tier, _baseline]] call fnc_log;
         };
 
@@ -223,6 +229,7 @@ while {true} do {
             _roster = [];
             _baseline = 0;
             _deployed = 0;
+            _deployedList = [];
             ["INFO", "CIV", format ["Town %1 left the OPFOR band at rep %2; garrison withdrawing", _townIndex, _rep]] call fnc_log;
         } else {
             if (!isNull _trg && {triggerActivated _trg}) then {
@@ -231,6 +238,7 @@ while {true} do {
                 _roster = [];
                 _baseline = 0;
                 _deployed = 0;
+                _deployedList = [];
                 // Clearing destroys the purchase with the debt. No refund, and the commander must
                 // spend again: with a refund a player clearing towns would hand the enemy its AP
                 // back and the enemy would never climb, and with a tier that survived clearing,
