@@ -425,67 +425,6 @@ if ((vehiclevarname player) in game_master || !isMultiplayer) then {
 	};
 };
 
-if (hasInterface) then {
-    // 初始化变量（使用 diag_tickTime）
-    player setVariable ["shotCount", 0];
-    player setVariable ["shotTimer", diag_tickTime];
-    player setVariable ["flare_lastTime", -999];
-
-    // 监听玩家开火（滑动窗口 1 秒）
-    player addEventHandler ["Fired", {
-        params ["_unit"];
-        private _now = diag_tickTime;
-        private _last = _unit getVariable ["shotTimer", _now];
-        if (_now - _last < 1) then {
-            _unit setVariable ["shotCount", (_unit getVariable ["shotCount", 0]) + 1];
-        } else {
-            _unit setVariable ["shotCount", 1];
-        };
-        _unit setVariable ["shotTimer", _now];
-    }];
-
-    // 主循环
-    [] spawn {
-        while {true} do {
-            sleep 10;
-            if (!alive player) then { continue };
-
-            // 仅在夜间触发（20:00 - 05:00）
-            if ((daytime > 20) or (daytime < 5)) then {
-                private _now = diag_tickTime;
-                private _last = player getVariable ["flare_lastTime", -999];
-                
-                // 冷却时间 60 秒（基于 diag_tickTime）
-                if (_now - _last < 60) then { continue };
-
-                // 获取附近 200 米内的敌人和友军（假设敌方 EAST，友军 WEST）
-                private _nearUnits = nearestObjects [player, ["CAManBase"], 200];
-                private _enemies = _nearUnits select { side _x == EAST && alive _x };
-                private _friendlies = _nearUnits select { side _x == WEST && alive _x };
-
-                // 开火次数
-                private _shots = player getVariable ["shotCount", 0];
-
-                // 触发条件：1秒内开火 ≥4 次，且敌人数量 > 友军数量
-                if (_shots >= 4 && (count _enemies) > (count _friendlies)) then {
-                    // 记录触发时间并重置计数
-                    player setVariable ["flare_lastTime", _now];
-                    player setVariable ["shotCount", 0];
-					playSound "Sound_Shot_UGL";
-					sleep 3;
-					playSound "Sound_Shot_UGL";
-					sleep 2;
-					playSound "Sound_Shot_UGL";
-                    // 生成照明弹：玩家周围 40 米内随机水平位置，高度 50~100 米
-                    private _flarePos = player getPos [random 40, random 360];
-                    _flarePos set [2, 100 + random 50];
-                    [_flarePos] remoteExec ["my_fnc_createFlare", 2];
-                    
-                };
-            };
-        };
-    };
-};
 sleep 20;
 // Single hold-action opens the disguise panel (fnc_disguise_menu), which fronts
 // both modes. Replaces the two per-mode hold-actions that triggered each disguise

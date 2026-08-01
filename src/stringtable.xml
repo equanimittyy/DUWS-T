@@ -4831,20 +4831,6 @@
                 <Original>HALO Group (AI Only)</Original>
                 <English>HALO Group (AI Only)</English>
             </Key>
-            <Key ID="STR_DUWS_T_opforflare">
-                <German>Deckung nehmen! Der Feind hat Leuchtkugeln in unserer Nähe abgefeuert!</German>
-                <Spanish>¡A cubierto! El enemigo lanzó bengalas cerca de nosotros!</Spanish>
-                <Chinesesimp>保持隐蔽！敌人在我们附近发射了照明弹！</Chinesesimp>
-                <Original>Enemy flares overhead! Take cover!</Original>
-                <English>Enemy flares overhead! Take cover!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_opforflare2">
-                <German>Alle, Deckung nehmen!</German>
-                <Spanish>Todos, a cubierto!</Spanish>
-                <Chinesesimp>所有人机动到隐蔽位置！</Chinesesimp>
-                <Original>Everyone, move to cover!</Original>
-                <English>Everyone, move to cover!</English>
-            </Key>
             <Key ID="STR_DUWS_T_zaijvhuishouzhan1">
                 <German>Fahrzeugrecyclingstation(5CP)</German>
                 <Spanish>Estación de Reciclaje de Vehículos(5CP)</Spanish>

@@ -251,58 +251,6 @@ if (isServer) then {
         };
     };
 };
-if (isServer) then {
-    // 全局冷却（可选，按需保留或调整）
-    missionNamespace setVariable ["global_flare_lastTime", -999];
-
-    my_fnc_createFlare = {
-        params ["_pos"];
-        private _now = diag_tickTime;
-        private _lastGlobal = missionNamespace getVariable ["global_flare_lastTime", -999];
-        if (_now - _lastGlobal < 240) exitWith {}; // 240秒全局冷却
-        missionNamespace setVariable ["global_flare_lastTime", _now];
-
-        // 1. 创建红色照明弹（可见弹体）
-        private _flare = "F_40mm_Red" createVehicle _pos;
-        // 添加轻微随机飘落速度，模拟真实感
-        _flare setVelocity [random [-1,0,1], random [-1,0,1], random [-1,0]];
-
-        // 2. 创建红色光源，并绑定到照明弹上
-        private _light = "#lightpoint" createVehicle _pos;
-        _light attachTo [_flare, [0,0,0]];  // 光源随照明弹一起运动
-
-        // 设置光源颜色为红色
-        _light setLightColor [1, 0.2, 0.2];      // 主光源颜色（亮红）
-        _light setLightAmbient [1, 0.2, 0.2];    // 环境光颜色（偏红）
-        
-        // 亮度参数（可大幅调高）
-        _light setLightBrightness 200;            // 基础亮度
-        _light setLightIntensity 1000;            // 强度
-        
-        // 衰减设置：光传很远，亮度衰减缓慢
-        _light setLightAttenuation [0, 0, 0, 0.0035, 0, 250]; // [起始, 常数, 线性, 二次, 硬限起始, 硬限结束]
-        
-        // 添加光晕
-        _light setLightUseFlare true;
-        _light setLightFlareSize 20;
-        _light setLightFlareMaxDistance 500;
-        
-        // 白天可见
-        _light setLightDayLight true;
-
-        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_opforflare"] remoteExec ["fnc_duws_dialogue", 0];
-        sleep 6;
-        [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_opforflare2"] remoteExec ["fnc_duws_dialogue", 0];
-        // 3. 40秒后删除光源（照明弹此时已燃尽）
-        [_light] spawn {
-            params ["_light"];
-            sleep 40;
-            if (!isNull _light) then { deleteVehicle _light; };
-        };
-
-    };
-    publicVariable "my_fnc_createFlare";
-};
 // 服务器端（如 server_init.sqf）
 { 
     [_x] remoteExec ["addRating", _x];
