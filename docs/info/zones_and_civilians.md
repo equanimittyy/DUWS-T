@@ -156,6 +156,20 @@ already names the zone's key to the same store `fnc_town_garrison_reinforce` ste
 is the pair of wrappers a town has — one applying `REINFORCE_STEP` to a zone key, one writing a tier
 with a clamp — not a mechanism.
 
+**Nothing in the current code would overwrite either purchase**, which is worth stating because it is
+the question a reader would otherwise have to re-derive from every writer:
+
+- `fnc_zone_tier_roll` is the **only** writer of `DUWS_zoneTier_<key>`, and it already declines a
+  second roll — so a tier written by a setter survives a rebuild through `fnc_createzone`.
+- A zone's strength has three writers: the retake floor, the teardown record and the map-readout
+  refresh. The last two are lower-only by construction, so **nothing raises strength except a
+  deliberate call** — which is exactly what a reinforcement is.
+
+They are not written yet on purpose: they would have no caller, since neither the game nor the debug
+menu reaches them, and an uncalled hook is a guess about an interface that does not exist. The town's
+equivalents earn their place because the reputation band gate writes tier I through `setTier` whether
+or not a commander ever exists.
+
 What is *not* provisional is the re-roll refusal: `fnc_zone_tier_roll` must keep declining a second
 roll however the tier later comes to change, because a rebuild through `fnc_createzone` would
 otherwise reshuffle ground the player has already fought over. **A commander raising a tier writes it
