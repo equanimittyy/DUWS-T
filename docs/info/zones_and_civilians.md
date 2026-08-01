@@ -352,6 +352,15 @@ reinforcement adds are *added* to the strength baseline rather than re-measured 
 casualties the player has already inflicted are not refunded. A retuned table cannot order a standing
 garrison to shrink: a smaller composition diffs to nothing rather than to something negative.
 
+**Buying a tier and the men arriving are separate acts.** Reinforcement is deferred while the
+garrison is withdrawing, and while BLUFOR are within the same radius the arrival test uses — men
+materialising around a player who is already in contact reads as the mission cheating, which is the
+pop-in the capture grace exists to prevent, and worse mid-fight. The tier stays owed and lands on a
+later cycle rather than being lost, so the commander may raise a contested town at any time and pays
+for it whether or not the player is standing there. This is why the deferral lives in the garrison
+thread rather than in the commander's appraisal: a purchase made while the player is far away would
+otherwise still pop its men in the moment they walked back.
+
 **It is units only — no fortification ring and no prefab**, because static emplacements are what
 make a zone an objective and a town must not compete with one. Tier IV reaches the zone benchmark
 (`fnc_createopfortified`: eight buildings at three men each) by occupying buildings instead.

@@ -189,10 +189,21 @@ while {true} do {
         // does not is raised -- reinforcement arrives beside the survivors rather than as a second
         // garrison beside the first. Counting duplicates is the whole point: a tier that goes from
         // one team to two owes one team, not two.
-        // Refused while the remnant is withdrawing: units walking in behind it would hold the
-        // trigger area open, and a town whose garrison keeps being topped up mid-withdrawal never
-        // reads as cleared at all. The tier stays owed and lands on the next spawn instead.
-        if (_tier > _deployed && !_retreating) then {
+        // Refused twice over, and the tier stays owed either way -- it lands on a later cycle rather
+        // than being lost, the same way the capture grace defers a first garrison.
+        //
+        // While the remnant is withdrawing: units walking in behind it would hold the trigger area
+        // open, and a town whose garrison keeps being topped up mid-withdrawal never reads as
+        // cleared at all.
+        //
+        // While BLUFOR are near: reinforcement that materialises around the player mid-fight is the
+        // pop-in CAPTURE_GRACE exists to prevent, and worse here -- the player is in contact, so men
+        // appearing behind them reads as the mission cheating rather than as the enemy committing.
+        // Buying and arriving are separate acts: the commander may raise a contested town's tier at
+        // any time, and the men walk in once nobody is watching. The same radius the arrival test
+        // uses, so "present" means one thing in this file.
+        if (_tier > _deployed && !_retreating
+            && {!([_centre, _radius + 400] call fnc_duws_bluforNear)}) then {
             private _want = DUWS_townSpawnTiers select (_tier - 1);
             private _added = [[_deployedList, _want] call DUWS_fnc_spawnDiff, _centre, _radius] call _fnc_spawnList;
             _roster append _added;
