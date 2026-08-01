@@ -1815,6 +1815,14 @@
                 <Original>None</Original>
                 <English>None</English>
             </Key>
+            <Key ID="STR_DUWS_T_mapview_garrison_regroup">
+                <Original>Regrouping</Original>
+                <English>Regrouping</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mapview_garrison_taken">
+                <Original>Mobilising</Original>
+                <English>Mobilising</English>
+            </Key>
             <Key ID="STR_DUWS_T_zone_mapview_garrison">
                 <Original>Garrison Strength: %1</Original>
                 <English>Garrison Strength: %1</English>

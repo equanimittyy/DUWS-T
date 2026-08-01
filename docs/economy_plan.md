@@ -578,12 +578,16 @@ tier in `DUWS_townGarrisonTier`, written through `fnc_town_garrison_setTier`. Fu
 [`info/zones_and_civilians.md`](info/zones_and_civilians.md#garrison-tiers-0-to-iv).
 
 - **Reputation decides *whether* a town garrisons; AP decides *how hard*.** Crossing `-10` writes
-  tier I and nothing deeper writes more, so the existing contract — clear the garrison, reputation
-  resets to 0, the garrison stops — survives intact.
-- **Clearing a town destroys the purchase.** No refund, and the director must spend again to
-  restore it. With a refund, a player clearing towns would hand the enemy its AP back and the
-  enemy would never climb; with a purchase that survives clearing, clearing stops meaning
-  anything.
+  tier I and nothing deeper writes more.
+- **Clearing a town destroys the purchase, not the ownership.** The tier falls to I rather than to
+  0, and there is no refund: with one, a player clearing towns would hand the enemy its AP back and
+  the enemy would never climb. The director must spend again to restore it — and cannot, for the
+  three hours the town spends regrouping
+  ([`info/zones_and_civilians.md`](info/zones_and_civilians.md#what-clearing-a-garrison-actually-buys)).
+- **A cleared town is permanently cheaper to hold and permanently weaker.** Its garrison is pinned
+  to the `0.3` floor for the rest of the campaign, so AP spent on a town the player keeps clearing
+  buys progressively less. Whether that makes such towns a trap for the director to avoid, or a sink
+  it should abandon, is a tuning question for when the appraisal exists.
 - **Tier IV is more units, not fortifications.** Static emplacements are what make a zone an
   objective and a town must not compete with one, so IV reaches the zone benchmark by occupying
   buildings.
@@ -635,8 +639,10 @@ spending starts.
 the player clicks a zone or town and the popup that already answers carries a Garrison Tier line
 above the strength bar, in roman, for both sides' ground. A zone reports the tier it rolled, and 0
 once the player holds it; a town reports what it owes, which is not always what is standing in it,
-since a town under the capture grace has a tier and no men. That is the honest answer for a map read
-before travelling: the readout describes what the player will meet, not what is loaded.
+since a town nobody has walked into yet has a tier and no men. That is the honest answer for a map
+read before travelling: the readout describes what the player will meet, not what is loaded. A town
+that is holding says so instead — `Mobilising` if it has only just fallen, `Regrouping` if its
+garrison was destroyed.
 
 Tier above strength is the pair the player reads together, and they are orthogonal by design: tier is
 how big this ground was ever meant to be, the bar is how much of it is left. A tier I zone at a full

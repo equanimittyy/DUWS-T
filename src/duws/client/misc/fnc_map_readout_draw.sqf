@@ -54,7 +54,7 @@ switch (_kind) do {
 
 	case "TOWN": {
 		_data params [["_name", ""], ["_pop", 0], ["_hasRep", false], ["_rep", 0], ["_income", 0],
-			["_side", ""], ["_ap", 0], ["_tier", 0]];
+			["_side", ""], ["_ap", 0], ["_tier", 0], ["_hold", ""]];
 		private _lines = [
 			format ["<t size='1.2'>%1</t>", _name],
 			format [localize "STR_DUWS_T_civ_mapview_pop", _pop]
@@ -78,7 +78,22 @@ switch (_kind) do {
 			// would go. Inside the reputation gate with the rest: a town that registers no
 			// reputation can hold no tier either, and printing "None" would read as a town that
 			// merely happens to be ungarrisoned.
-			_lines pushBack ([_tier] call _fnc_tier);
+			//
+			// A held town prints why in place of the tier, and the two holds read differently: a
+			// town that has just fallen has men on the way, a town that was cleared has men coming
+			// back. Neither says "destroyed" -- a word that final would have the player write the
+			// town off, and both of these end.
+			_lines pushBack (switch (_hold) do {
+				case "TAKEN": {
+					format [localize "STR_DUWS_T_mapview_garrison_tier",
+						localize "STR_DUWS_T_mapview_garrison_taken"]
+				};
+				case "REGROUP": {
+					format [localize "STR_DUWS_T_mapview_garrison_tier",
+						localize "STR_DUWS_T_mapview_garrison_regroup"]
+				};
+				default { [_tier] call _fnc_tier };
+			});
 		};
 		_text = _lines joinString "<br/>";
 	};

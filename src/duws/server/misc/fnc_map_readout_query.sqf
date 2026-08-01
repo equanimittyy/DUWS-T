@@ -109,9 +109,13 @@ private _ap = (missionNamespace getVariable ["civ_town_ap", []]) param [_hit, 0]
 // has picked a side, but a neutral one earns nothing while still being worth something to turn,
 // and the readout has to be able to say both without re-deriving the tick's figure client-side.
 //
-// The tier is what the town owes, which is not always what is standing in it: a town under the
-// capture grace, or one nobody has walked into yet, reads its purchased tier with no men on the
-// ground. That is the honest answer for a map read before travelling -- the readout is describing
-// what the player will meet, not what is loaded.
+// The tier is what the town owes, which is not always what is standing in it: a town nobody has
+// walked into yet reads its purchased tier with no men on the ground. That is the honest answer for
+// a map read before travelling -- the readout is describing what the player will meet, not what is
+// loaded. A town still holding says so instead, below.
 private _tier = [_hit] call fnc_town_garrison_tierAt;
-["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap, _tier]] remoteExec ["fnc_map_readout_draw", _caller];
+// A town holding reports why instead of reporting a tier. The tier is real underneath -- the town is
+// enemy ground either way -- but printing a numeral would say a garrison is standing, and there is
+// none: a player who had just fought one out would read it as having failed to.
+private _hold = [_hit] call fnc_town_garrison_holdKindAt;
+["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap, _tier, _hold]] remoteExec ["fnc_map_readout_draw", _caller];

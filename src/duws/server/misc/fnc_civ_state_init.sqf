@@ -84,11 +84,94 @@ fnc_town_garrison_tierAt = {
 	}
 };
 
+// A town raises no garrison while it is holding, and the two things that put it there are the two
+// moments a garrison arriving would land on top of the player who caused it.
+//
+// TAKEN: the town has just crossed into the OPFOR band. Reputation is spent inside a town -- by
+// killing its civilians or wrecking its buildings -- so at the instant one flips, the player is
+// standing in it by definition.
+//
+// REGROUP: its garrison has just been cleared, by the player who is still standing in it. Longer,
+// because this window is a mechanic rather than a courtesy: an enemy town standing undefended is
+// the one stretch of a campaign where its civilians can be worked with nobody in the way.
+#define TOWN_HOLD_TAKEN 1800
+#define TOWN_HOLD_REGROUP 10800
+
+// Seconds left on a town's hold, or 0 for a town that is free to garrison.
+//
+// The stored figure is a diag_tickTime deadline, which counts from process start and is not restored
+// by a savegame -- so a hold written last session reads as a deadline further out than anything this
+// session could have set. Worth catching because this lives in the mission namespace, which is the
+// save file: left alone it would pin a town for the rest of the run. Bounded by the longest hold
+// there is, so a stale one of either kind is caught.
+fnc_town_garrison_holdAt = {
+	if (!isServer) exitWith { 0 };
+	params [["_townIndex", -1]];
+	private _holds = missionNamespace getVariable ["DUWS_townGarrisonHold", []];
+	if (_townIndex < 0 || _townIndex >= count _holds) exitWith { 0 };
+	private _deadline = _holds select _townIndex;
+	if (_deadline > diag_tickTime + TOWN_HOLD_REGROUP) then {
+		_holds set [_townIndex, 0];
+		_deadline = 0;
+	};
+	(_deadline - diag_tickTime) max 0
+};
+
+// Which kind of hold is live, or "" for none. Load-bearing rather than cosmetic: the tier setter
+// refuses a purchase under REGROUP and allows one under TAKEN, and the map readout words the two
+// differently.
+fnc_town_garrison_holdKindAt = {
+	if (!isServer) exitWith { "" };
+	params [["_townIndex", -1]];
+	if (([_townIndex] call fnc_town_garrison_holdAt) <= 0) exitWith { "" };
+	(missionNamespace getVariable ["DUWS_townGarrisonHoldKind", []]) param [_townIndex, ""]
+};
+
+fnc_town_garrison_setHold = {
+	if (!isServer) exitWith {};
+	params [["_townIndex", -1], ["_kind", "REGROUP"]];
+	private _holds = missionNamespace getVariable ["DUWS_townGarrisonHold", []];
+	if (_townIndex < 0 || _townIndex >= count _holds) exitWith {};
+	private _secs = [TOWN_HOLD_REGROUP, TOWN_HOLD_TAKEN] select (_kind == "TAKEN");
+	_holds set [_townIndex, diag_tickTime + _secs];
+	(missionNamespace getVariable ["DUWS_townGarrisonHoldKind", []]) set [_townIndex, _kind];
+	_secs
+};
+
+// What fraction of its tier composition a town actually fields. Set to the floor when its garrison
+// is beaten and never restored: a town fought out once stays a shell, so clearing it is worth
+// something lasting rather than something the enemy walks back the moment you leave.
+// The same floor zones use, and read by fnc_zone_thin the same way.
+fnc_town_garrison_strengthAt = {
+	if (!isServer) exitWith { 1 };
+	params [["_townIndex", -1]];
+	private _s = missionNamespace getVariable ["DUWS_townGarrisonStrength", []];
+	if (_townIndex < 0 || _townIndex >= count _s) exitWith { 1 };
+	_s select _townIndex
+};
+
+fnc_town_garrison_setStrength = {
+	if (!isServer) exitWith {};
+	params [["_townIndex", -1], ["_frac", 1]];
+	private _s = missionNamespace getVariable ["DUWS_townGarrisonStrength", []];
+	if (_townIndex < 0 || _townIndex >= count _s) exitWith {};
+	_s set [_townIndex, (_frac max 0.3) min 1];
+};
+
 // The sole writer, and the OPFOR commander's purchase hook. Clamped rather than trusted: nothing
 // upstream validates a tier, and a table lookup on one out of range is a fatal error rather than a
 // weak garrison.
 // A tier written here is what the town owes, not what is standing in it -- the garrison thread
 // picks the change up on its own cycle, and only when a player is there to see it arrive.
+//
+// A raise is refused outright while the town is REGROUP-held, rather than deferred: the garrison
+// thread already defers *arrival*, so without this the commander could buy a beaten town up to IV
+// during the hours it is left alone and the player would meet a tier IV garrison where they had
+// just destroyed a tier I. Lowering is always allowed -- that is how the clear itself files the
+// town back down to I.
+// A TAKEN hold does not refuse: a town that has only just fallen is exactly the ground the enemy
+// should be free to commit to, and the men have not arrived yet either way, so a purchase made
+// inside that window is folded into the first spawn rather than arriving as a second wave.
 fnc_town_garrison_setTier = {
 	if (!isServer) exitWith {};
 	params [["_townIndex", -1], ["_tier", 0], ["_reason", ""]];
@@ -97,6 +180,10 @@ fnc_town_garrison_setTier = {
 	private _new = ((round _tier) max 0) min (count DUWS_townSpawnTiers);
 	private _old = _tiers select _townIndex;
 	if (_new == _old) exitWith {};
+	if (_new > _old && {([_townIndex] call fnc_town_garrison_holdKindAt) == "REGROUP"}) exitWith {
+		["INFO", "CIV", format ["Town %1 tier %2 -> %3 refused (%4): regrouping for another %5 s",
+			_townIndex, _old, _new, _reason, round ([_townIndex] call fnc_town_garrison_holdAt)]] call fnc_log;
+	};
 	_tiers set [_townIndex, _new];
 	["INFO", "CIV", format ["Town %1 garrison tier %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 };

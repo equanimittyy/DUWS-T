@@ -144,8 +144,12 @@ Decided so far:
   Power and spawns a garrison.
 - It plans outside the town's presence trigger. The civilian handler runs only when a player is
   inside the radius; a director that can only act then cannot mine a road ahead of the player.
-- Events are attributed to the town, so clearing that town's garrison — which resets its
-  reputation to `0` — also stops its events.
+- Events are attributed to the town, so clearing that town's garrison damps its events by lifting
+  its reputation a step. It no longer stops them outright: a clear is worth `+5` rather than a
+  discharge, so a town driven to `-20` is still deep in the band after one
+  ([`info/zones_and_civilians.md`](info/zones_and_civilians.md#what-clearing-a-garrison-actually-buys)).
+  Whether the regroup hold should silence events along with the garrison is open — a town that keeps
+  mining roads while it visibly has nobody in it is either a good scare or an obvious tell.
 
 Open, and to be settled before implementation:
 

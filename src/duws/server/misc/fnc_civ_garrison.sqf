@@ -91,10 +91,15 @@ private _retreating = false;
 // was never raised against.
 private _deployed = 0;
 private _deployedList = [];
-// When this town was taken, or -1 for one that is not under the capture grace. Towns seeded into
-// the band at campaign start hold -1 and garrison on sight: they are pre-existing enemy ground
-// rather than something the player has just turned.
-private _capturedAt = -1;
+// Set whenever a hold is armed, and held until the town has been empty of BLUFOR once since. The
+// hold expiring is not enough on its own: a player who took or cleared the town and stayed in it
+// is still standing there when the clock lapses, and the arrival test would read them as having
+// just walked up. Waiting for one empty cycle is what makes leaving and coming back the only way
+// to meet the garrison, whichever hold put it off.
+private _awaitVacate = false;
+// diag_tickTime from which the town has been empty, or -1 while somebody is in it. The garrison
+// streams out on this, so a step outside the radius does not tear it down and walk it back.
+private _emptySince = -1;
 
 // A garrison broken this far is not going to hold the town, and standing the remnant in it until
 // the last man dies is what makes clearing a town a sweep rather than a fight. Counted against the
@@ -108,17 +113,15 @@ private _capturedAt = -1;
 // not automatically a hard one -- the enemy has to have spent on it.
 #define OPFOR_BAND -10
 
-// A town's first garrison must not appear on top of the player who has just pushed it into the
-// band. They are standing in it -- that is how the reputation got spent -- and a tier materialising
-// around them is the same pop-in the zone spawners scatter their men on a ring to avoid. The enemy
-// is moving a garrison in and that takes time; the town is theirs on paper from the moment it
-// crosses, which is what the tier records.
-// Wall-clock, so the mission's time multiplier cannot shorten it, and one-shot: it arms on the
-// crossing and is spent, so leaving a garrisoned town and coming back re-spawns at once.
-// diag_tickTime counts from process start and a savegame does not restore it. Accepted here rather
-// than worked around -- the worst a reload inside the window does is let one garrison in early, and
-// nothing outside this thread reads the stamp.
-#define CAPTURE_GRACE 1800
+// What one cleared garrison is worth against the town's debt. Deliberately a step rather than the
+// whole balance: see the clear branch below.
+#define CLEAR_REP 5
+
+// How long the town has to stay empty before its garrison streams out. The same purpose as the
+// zone streaming grace and roughly its length: a player who steps outside the radius to flank has
+// not left, and tearing the garrison down and rebuilding it around them when they step back is both
+// a visible pop and a free reset of everything they had ground down.
+#define DESPAWN_GRACE 120
 
 while {true} do {
     sleep 30;
@@ -132,11 +135,15 @@ while {true} do {
     if (_rep <= OPFOR_BAND && _tier == 0) then {
         [_townIndex, 1, "reputation band"] call fnc_town_garrison_setTier;
         _tier = 1;
-        // Re-armed on every crossing, so a town taken, cleared and taken again gets the grace each
-        // time. Logged once here rather than on each deferred cycle: sixty lines a town saying the
-        // same thing is not a readable log, and this one carries the figure a tester needs.
-        _capturedAt = diag_tickTime;
-        ["INFO", "CIV", format ["Town %1 taken at rep %2; first garrison held for %3 s", _townIndex, _rep, CAPTURE_GRACE]] call fnc_log;
+        // Re-armed on every crossing, so a town taken, cleared and taken again is held each time.
+        // The latch goes with it: the player who spent the reputation is standing in the town, so
+        // the hold lapsing is not on its own permission to spawn around them.
+        // Logged once here rather than on each deferred cycle -- sixty lines a town saying the same
+        // thing is not a readable log, and this one carries the figure a tester needs.
+        private _held = [_townIndex, "TAKEN"] call fnc_town_garrison_setHold;
+        _awaitVacate = true;
+        ["INFO", "CIV", format ["Town %1 taken at rep %2; first garrison held for %3 s and until the town is left",
+            _townIndex, _rep, _held]] call fnc_log;
     };
     // Out of the band by aid or heals rather than by a fight. The band is the condition, so
     // whatever the commander had bought here goes with it -- there is no town left to hold.
@@ -145,15 +152,35 @@ while {true} do {
         _tier = 0;
     };
 
+    // One presence read per cycle, shared by everything below: the arrival test, the vacate latch
+    // and the streaming teardown all have to mean the same thing by "somebody is here", and three
+    // separate calls could disagree across the seconds between them.
+    private _near = [_centre, _radius + 400] call fnc_duws_bluforNear;
+    if (_near) then { _emptySince = -1 } else {
+        if (_emptySince < 0) then { _emptySince = diag_tickTime };
+        // One empty cycle is all the latch wants. It is not a timer: the point is only that the
+        // player left at some stage, not how long for.
+        _awaitVacate = false;
+    };
+
+    // One hold of either kind, plus the latch. Both clocks answer the same question -- may this town
+    // raise men yet -- so they are one piece of state read one way, and the latch is what stops
+    // either of them expiring into a spawn around a player who never left.
     if (!_garrisoned) then {
-        if (_tier > 0 && {_capturedAt < 0 || {diag_tickTime > _capturedAt + CAPTURE_GRACE}}) then {
+        if (_tier > 0
+            && {!_awaitVacate}
+            && {([_townIndex] call fnc_town_garrison_holdAt) <= 0}) then {
             // Presence is decided the way zones decide it: a five-second re-test after first
             // contact, so grazing the perimeter does not commit a garrison for someone already
             // leaving. Waiting for arrival at all is what keeps the map free of standing units.
-            if ([_centre, _radius + 400] call fnc_duws_bluforNear) then {
+            if (_near) then {
                 sleep 5;
                 if ([_centre, _radius + 400] call fnc_duws_bluforNear) then {
-                    private _want = DUWS_townSpawnTiers select (_tier - 1);
+                    // Thinned by what the town has left, the way a zone's band is. A town beaten
+                    // once fields a fraction of its tier from then on, so the composition is the
+                    // ceiling rather than the promise.
+                    private _want = [DUWS_townSpawnTiers select (_tier - 1),
+                        [_townIndex] call fnc_town_garrison_strengthAt] call fnc_zone_thin;
                     _roster = [_want, _centre, _radius] call _fnc_spawnList;
                     // Armed only once the garrison is standing in it. Each spawner resolves a safe
                     // position before it places anything, and one that fails leaves the town
@@ -190,28 +217,71 @@ while {true} do {
         // garrison beside the first. Counting duplicates is the whole point: a tier that goes from
         // one team to two owes one team, not two.
         //
-        // INVARIANT: this branch is downstream of the capture grace and must stay there. Only the
-        // gated branch above sets _garrisoned, so a tier bought inside the grace window cannot reach
-        // here -- it raises the stored tier and the first spawn reads it whole when the grace ends.
-        // A second spawn path that set _garrisoned without the grace test would silently let an
-        // upgrade land on a town that was captured seconds ago, which is the one thing the grace
-        // exists to prevent.
+        // INVARIANT: this branch is downstream of the hold gate and must stay there. Only the gated
+        // branch above sets _garrisoned, so a tier bought while a town is held cannot reach here --
+        // it raises the stored tier and the first spawn reads it whole once the hold and the latch
+        // are both clear. A second spawn path that set _garrisoned without that gate would silently
+        // let an upgrade land on a town captured seconds ago, which is what the TAKEN hold exists
+        // to prevent.
         // Refused twice over, and the tier stays owed either way -- it lands on a later cycle rather
-        // than being lost, the same way the capture grace defers a first garrison.
+        // than being lost, the same way a hold defers a first garrison.
         //
+        // Streamed out once the town has been empty for DESPAWN_GRACE. Town garrisons used to stand for
+        // the rest of the campaign wherever the player had ever been, so a long session left live
+        // men in every town on the map; this makes a town cost what a zone costs.
+        //
+        // What it took is recorded first, against the strength the town will come back at. Without
+        // that, streaming would hand back every casualty: grind a garrison to one man, walk away,
+        // and the town rebuilds whole. Falls only -- the setter floors it and this never raises it
+        // -- so damage accumulates across visits the way a zone's does.
+        //
+        // Deletion rather than fnc_opfor_retreat: nobody is within the radius plus 400 by
+        // definition here, so there is no one to watch men vanish, and walking them out would be a
+        // withdrawal the player never sees and the engine pays for.
+        if (!_near && {_emptySince >= 0} && {diag_tickTime > _emptySince + DESPAWN_GRACE}) then {
+            private _left = [_roster] call _fnc_rosterAlive;
+            if (_baseline > 0) then {
+                private _was = [_townIndex] call fnc_town_garrison_strengthAt;
+                [_townIndex, (_left / _baseline) min _was] call fnc_town_garrison_setStrength;
+            };
+            // The trigger goes with the men. Left armed over an empty town it would read WEST
+            // SEIZED the moment a player walked back into ground the garrison had streamed out of,
+            // and pay them a clear for a fight that never happened.
+            deleteVehicle _trg;
+            // The group goes with its men. Most of these spawners set deleteGroupWhenEmpty, but not
+            // all of them do, and an empty group left behind on every stream-out of every town is a
+            // leak that only shows up as a slow drift over a long campaign.
+            { { deleteVehicle _x } forEach units _x; deleteGroup _x } forEach _roster;
+            ["INFO", "CIV", format ["Town %1 garrison streamed out holding %2 of %3; returns at %4 strength",
+                _townIndex, _left, _baseline, [_townIndex] call fnc_town_garrison_strengthAt]] call fnc_log;
+            _garrisoned = false;
+            _retreating = false;
+            _roster = [];
+            _baseline = 0;
+            _deployed = 0;
+            _deployedList = [];
+            // Nothing below this describes a town that no longer has a garrison, and the
+            // reinforcement test in particular would read the emptied _deployed against a live tier
+            // and raise the whole composition again -- streaming the garrison out and straight back
+            // in, on the one cycle nobody is there to see either.
+            continue;
+        };
+
         // While the remnant is withdrawing: units walking in behind it would hold the trigger area
         // open, and a town whose garrison keeps being topped up mid-withdrawal never reads as
         // cleared at all.
         //
         // While BLUFOR are near: reinforcement that materialises around the player mid-fight is the
-        // pop-in CAPTURE_GRACE exists to prevent, and worse here -- the player is in contact, so men
+        // pop-in the holds above exist to prevent, and worse here -- the player is in contact, so men
         // appearing behind them reads as the mission cheating rather than as the enemy committing.
         // Buying and arriving are separate acts: the commander may raise a contested town's tier at
         // any time, and the men walk in once nobody is watching. The same radius the arrival test
         // uses, so "present" means one thing in this file.
-        if (_tier > _deployed && !_retreating
-            && {!([_centre, _radius + 400] call fnc_duws_bluforNear)}) then {
-            private _want = DUWS_townSpawnTiers select (_tier - 1);
+        if (_tier > _deployed && !_retreating && {!_near}) then {
+            // Thinned on the same fraction the standing garrison was raised at, so an upgrade to a
+            // beaten town buys a beaten town's share of the new tier rather than a full one.
+            private _want = [DUWS_townSpawnTiers select (_tier - 1),
+                [_townIndex] call fnc_town_garrison_strengthAt] call fnc_zone_thin;
             private _added = [[_deployedList, _want] call DUWS_fnc_spawnDiff, _centre, _radius] call _fnc_spawnList;
             _roster append _added;
             // Added to the baseline rather than re-measured from the roster. A garrison ground down
@@ -257,16 +327,35 @@ while {true} do {
                 _baseline = 0;
                 _deployed = 0;
                 _deployedList = [];
-                // Clearing destroys the purchase with the debt. No refund, and the commander must
-                // spend again: with a refund a player clearing towns would hand the enemy its AP
-                // back and the enemy would never climb, and with a tier that survived clearing,
-                // clearing would stop meaning anything.
-                [_townIndex, 0, "garrison cleared"] call fnc_town_garrison_setTier;
-                // Clearing the garrison discharges the whole debt at once. That is deliberate:
-                // the alternative is a town the player can permanently ruin with no route back,
-                // which is what passive recovery used to prevent. The garrison is the price.
-                [_townIndex, -_rep, "garrison_cleared"] call fnc_town_rep_adjust;
-                ["INFO", "CIV", format ["Town %1 cleared at tier %2; reputation reset from %3", _townIndex, _tier, _rep]] call fnc_log;
+                // Clearing destroys the purchase but not the ownership. The tier files back down to
+                // I rather than to 0: the town is still enemy ground, and it is the commander's
+                // spending that was beaten, not the enemy's claim. No refund either -- with one, a
+                // player clearing towns would hand the enemy its AP back and the enemy would never
+                // climb.
+                [_townIndex, 1, "garrison cleared"] call fnc_town_garrison_setTier;
+                // An instalment, not absolution. Discharging the whole debt let a player ruin a town
+                // to -20 and walk away square on one fight, which made the reputation the garrison
+                // was supposed to be the price of effectively free. A clear is worth a fixed step
+                // back toward neutral, so a town driven to the floor takes four of them.
+                // Self-limiting: only a town at or below the band can hold a garrison to clear, so
+                // the most this can ever reach is one step above the band and it can never turn a
+                // town friendly by force.
+                [_townIndex, CLEAR_REP, "garrison_cleared"] call fnc_town_rep_adjust;
+                // Beaten to the floor and left there. Nothing restores it, so what comes back is a
+                // shell for the rest of the campaign -- the lasting half of what clearing a town
+                // buys, against the reputation step which is only an instalment.
+                [_townIndex, 0.3] call fnc_town_garrison_setStrength;
+                // Left alone afterwards, and the hold is per-town state rather than a local because
+                // two other things read it: fnc_town_garrison_setTier refuses a purchase through it,
+                // so the commander cannot buy a beaten town up to IV while nobody is looking, and
+                // the map readout prints the town as regrouping.
+                [_townIndex, "REGROUP"] call fnc_town_garrison_setHold;
+                // The player is standing in the town they just cleared. Nothing may spawn here
+                // until they have left once, or the garrison the hold expires into would appear
+                // around them.
+                _awaitVacate = true;
+                ["INFO", "CIV", format ["Town %1 cleared at tier %2; rep %3 + %4, garrison broken to 0.3 and regrouping",
+                    _townIndex, _tier, _rep, CLEAR_REP]] call fnc_log;
             };
         };
     };
