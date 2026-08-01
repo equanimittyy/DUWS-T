@@ -197,9 +197,18 @@ time the zone streamed out — the refund the mechanic exists to stop.
 The `0.3` floor is what keeps that from becoming a walk-in, and it is also structural: a zone allowed
 to redeploy empty would be uncapturable outright, because a zero peak refuses capture.
 
-Strength only ever falls. It resets to full when BLUFOR take the zone, since whatever OPFOR garrison
-it after retaking the ground is a fresh force; nothing else restores it. `fnc_zone_strength_set` is
-the only writer, so a mechanic that lets OPFOR rebuild a mauled zone has one place to go through.
+**Strength only ever falls, and a retake floors it.** Nothing restores a zone. `fnc_opfor_cap` writes
+`0.3` when OPFOR take a zone back, so what they put on ground they had to retake is a scratch force —
+floored rather than merely reduced, so every retake costs them the same and a zone traded back and
+forth cannot converge on full strength. It used to reset to full on the BLUFOR capture instead, on
+the reasoning that a retaken zone is manned by a fresh garrison; that handed the player's grinding
+straight back the moment they lost the ground again. `fnc_zone_strength_set` is the only writer, so a
+mechanic that lets OPFOR rebuild a mauled zone still has one place to go through.
+
+**No hold beside it, unlike a town's.** `EAST SEIZED` cannot fire while any BLUFOR stand in the zone
+radius, so a retake already cannot happen under the player's feet — presence is the whole gate, and a
+timer on top would only delay a garrison that was never going to appear in front of anyone. The
+garrison then arrives on the ordinary streaming rule, when a player next approaches.
 
 **Where the player reads it.** The request menu's View Map mode answers zones as well as towns. A click
 goes to `fnc_map_readout_query` on the server, which picks whichever revealed zone or town disc the

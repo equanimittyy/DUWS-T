@@ -247,10 +247,11 @@ while {true} do {
 				["INFO", "STREAM", format ["%1 lost; %2 surviving group(s) ordered out", _zoneKey, _sent]] call fnc_log;
 			};
 
-			// The zone is BLUFOR's and what held it is walking away, so the attrition it carried
-			// goes with it: whatever OPFOR put back here after retaking the ground is a fresh
-			// force, not the one the player ground down.
-			[_zoneKey, 1] call fnc_zone_strength_set;
+			// The attrition this zone carried is left as it stands. It used to be reset to full
+			// here, on the reasoning that a retaken zone is manned by a fresh force -- which handed
+			// the player's grinding straight back the moment they lost the ground again. What OPFOR
+			// put on a zone they had to retake is a scratch force instead, and fnc_opfor_cap floors
+			// the figure when the flip actually happens rather than guessing here that it will.
 
 			// This thread idles until OPFOR hold it again rather than re-entering the arrival
 			// branch, which would spawn an OPFOR garrison inside a zone BLUFOR own.

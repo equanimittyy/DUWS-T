@@ -21,6 +21,14 @@ if (_triggerPos in WARCOM_zones_controled_by_OPFOR) exitWith {};
 // and the lost zone becomes the primary assault target.
 ["OPF", _triggerPos] call fnc_zone_control_set;
 
+// What OPFOR put back on ground they had to retake is a scratch force, not the garrison the zone
+// was generated with. Floored rather than merely reduced, so every retake costs them the same and
+// a zone traded back and forth does not converge on full strength.
+// No hold beside it, unlike a town's: EAST SEIZED cannot fire while any BLUFOR stand in the radius,
+// so a retake already cannot happen under the player's feet, and the garrison arrives on the
+// ordinary streaming rule once they are clear.
+[[_triggerPos] call fnc_zone_key, 0.3] call fnc_zone_strength_set;
+
 ["us_lostcontrol",[_place,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_lostcontrol"] remoteExec ["fnc_duws_dialogue", 0];
 
