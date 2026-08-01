@@ -1,4 +1,12 @@
 if (!isServer) exitWith {};
+
+// How many task forces may sit at base waiting to be launched. They spawn on a timer and leave the
+// standby list only when the player launches one (fnc_blu_taskforces_launch) or the group is wiped
+// (fnc_WARCOM_gps_marker), and nothing else will ever collect them -- zone streaming deletes EAST
+// only, and mission cleanup skips WEST. Uncapped, a task force the player ignores was permanently
+// simulated AI parked inside view distance of the base, arriving at two groups an hour.
+#define TASKFORCE_STANDBY_CAP 1
+
 WARCOM_blu_attack_wave_type = "";
 WARCOM_blu_attack_wave_avalaible = false;
 
@@ -48,6 +56,24 @@ WARCOM_blu_attack_wave_avalaible = false;
 		  // WAIT 5 min before launching first assault
           waitUntil {sleep 300; WARCOM_blu_attack_wave_avalaible};  
           while {true} do {
+
+			// Held here rather than spawned and counted afterwards: the ceiling is on what stands
+			// at base, so the next one is built when there is room for it. The patrol spawner gates
+			// the same way on blufor_patrol_count.
+			waitUntil {
+				sleep 30;
+				private _standby = missionNamespace getVariable ["blu_taskforces_standby", []];
+				private _live = _standby select { !isNull _x };
+				// Written back only when it actually shrank. This is a broadcast global, and
+				// republishing an unchanged array every thirty seconds is traffic for nothing.
+				// A wiped group is dropped by fnc_WARCOM_gps_marker, but deleteGroupWhenEmpty can
+				// retire one before that loop next ticks, so the list is filtered rather than
+				// trusted -- an entry left null would hold the ceiling closed for the campaign.
+				if (count _live != count _standby) then {
+					missionNamespace setVariable ["blu_taskforces_standby", _live, true];
+				};
+				count _live < TASKFORCE_STANDBY_CAP
+			};
 
 			// WAIT for Hardcore to find a zone
 			if (hardcore_mode_enable) then {
