@@ -144,20 +144,27 @@ is worth behind the player's back and disagree with the garrison peak already me
 tier. A zone with no tier recorded reads as IV, so a save written before tiers existed comes back at
 the strength it had rather than silently halving.
 
-**A zone's tier is fixed because nothing can yet move it, not because it must never move.** No
-commander raises one today: the OPFOR commander does not exist, and when it does its first garrison
-sink is the town ladder ([§Garrison tiers 0 to IV](#garrison-tiers-0-to-iv)). Zone upgrades are a
-later addition to the same sink, and the machinery is already shaped for it — the tier is stored
-per zone, the composition table is indexed by it, and `fnc_zone_strength_set` exists precisely so a
-mechanic that lets OPFOR rebuild a mauled zone has one place to go through.
+**A zone's tier is fixed because nothing can yet move it, not because it must never move.** The
+OPFOR commander will upgrade *and* reinforce zones exactly as it does towns — both sinks reach both
+kinds of ground, and the roll only decides where a zone starts. It is fixed today because the
+commander does not exist, and the town side is merely further along: it has the hooks written
+([§Garrison tiers 0 to IV](#garrison-tiers-0-to-iv)).
+
+**The machinery is already most of the way there**, which is the point of the shared attrition store:
+a zone's tier is stored per zone, the composition table is indexed by it, and `fnc_zone_strength_set`
+already names the zone's key to the same store `fnc_town_garrison_reinforce` steps. What zones lack
+is the pair of wrappers a town has — one applying `REINFORCE_STEP` to a zone key, one writing a tier
+with a clamp — not a mechanism.
 
 What is *not* provisional is the re-roll refusal: `fnc_zone_tier_roll` must keep declining a second
 roll however the tier later comes to change, because a rebuild through `fnc_createzone` would
-otherwise reshuffle ground the player has already fought over. A commander raising a tier writes it
-deliberately; nothing should ever draw one again by accident.
+otherwise reshuffle ground the player has already fought over. **A commander raising a tier writes it
+deliberately; nothing should ever draw one again by accident.**
 
-So the difference from a town today is who can pay, not whether the number is allowed to move: a
-town's tier is bought and changes mid-campaign, a zone's has no buyer yet.
+One thing a zone will not need is a purchase refusal. A town's `REGROUPING` hold blocks both sinks
+because OPFOR can hold a town whose garrison was just destroyed; there is no equivalent zone state to
+protect, since a beaten zone garrison means the zone changed hands
+([§The two OPFOR garrison states](#the-two-opfor-garrison-states)).
 
 #### Radius multiplies each category, not the whole list
 
@@ -593,7 +600,8 @@ about.
 | You leave for 2 min | Survivors counted, strength recorded (never upward), men deleted, props stowed, peak cleared | tier + the bar it will return at |
 | You beat it to 20 % **and** hold within 50 m of centre | Ownership flips. CP bounty, AP swings. Survivors are *ordered out*, not deleted — a capture is watched by definition. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
 | OPFOR retake (`EAST SEIZED`) | Strength floored to `0.3`. Streaming re-latches | **`Mobilising`** |
-| You return, after the ring has been empty once | Garrison raised at `0.3`, peak published | tier + bar |
+| The commander spends *(planned)* | Upgrade buys composition, reinforce buys strength — the same two sinks a town has, on the same ground rules. No purchase refusal is needed: a zone has no `Regrouping` state to protect | tier + bar |
+| You return, after the ring has been empty once | Garrison raised at whatever it now stands at, peak published | tier + bar |
 
 **A town.**
 
@@ -703,9 +711,10 @@ raises the campaign's spawn ceiling, not just that zone. And the `buildings` tok
 benchmark" untrue.
 
 **What has no lever yet.** Nothing prices any of the purchases, because the OPFOR commander does not
-exist — the tier and reinforcement hooks are free to call today, and the debug menu is the only
-caller. Zone tiers have no buyer at all
-([§Zone tiers](#zone-tiers)).
+exist — the town's tier and reinforcement hooks are free to call today, and the debug menu is their
+only caller. Zones have no hooks at all yet, though the same two sinks are meant to reach them
+([§Zone tiers](#zone-tiers)); when they do, whether a zone costs a town's price or more is the first
+thing to settle, since a zone garrison is the benchmark the town ladder climbs toward.
 
 ### BLUFOR inherits nothing
 

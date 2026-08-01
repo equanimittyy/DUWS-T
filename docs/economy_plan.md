@@ -573,12 +573,27 @@ composition and a zone's radius multiplies it per category. Towns and zones draw
 vocabulary but keep separate composition sets, so tuning what a town fields cannot silently retune
 what a zone does.
 
-**Nothing buys a zone tier yet, and that is a gap rather than a rule.** The town ladder is this
-sink's first form; extending it to zones is a later addition to the same sink and needs no new
-machinery — the tier is already stored per zone and the composition table already indexed by it. Two
-things to settle when it lands: whether a zone tier is priced like a town's or dearer, given a zone
-garrison is the benchmark the town ladder climbs toward, and whether a retaken zone can be bought
-back up at all or has to live with the `0.3` floor its retake writes.
+**Both sinks reach both kinds of ground.** The commander upgrades and reinforces zones exactly as it
+does towns; the town is simply where the hooks were written first. A retaken zone is floored to `0.3`
+precisely so there is something to buy back — the floor is the bill, not a permanent brand
+([`info/zones_and_civilians.md`](info/zones_and_civilians.md#zone-tiers)).
+
+Extending it needs no new machinery: a zone's tier is already stored per zone, the composition table
+is already indexed by it, and `fnc_zone_strength_set` already names the zone's key to the same store
+`fnc_town_garrison_reinforce` steps. What is missing is the pair of wrappers — one applying the
+reinforcement step to a zone key, one writing a tier with a clamp.
+
+Two things to settle when it lands:
+
+- **Whether a zone costs a town's price or more.** A zone garrison is the benchmark the town ladder
+  climbs toward, so charging the same for both would make a zone the better buy at every tier.
+- **Whether zone tiers are capped by the roll.** A zone rolled at I could be bought to IV, which makes
+  the generation weighting a starting position rather than a character; capping at the rolled tier
+  keeps it a character but leaves a soft zone permanently soft. That is a play question.
+
+**No purchase refusal is needed on the zone side.** A town's `REGROUPING` hold blocks both sinks
+because OPFOR can hold a town whose garrison the player has just destroyed. A zone has no such state —
+a beaten zone garrison means the zone changed hands, and ground the player owns is not spendable on.
 
 The OPFOR side of the ladder is built: tiers 0 to IV live in `DUWS_townSpawnTiers` and the per-town
 tier in `DUWS_townGarrisonTier`, written through `fnc_town_garrison_setTier`. Full contract in
