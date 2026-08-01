@@ -29,10 +29,15 @@ Objects take their heading from the yaw slot of the `rotation` attribute (`[pitc
 degrees) — a bare number sets pitch, not heading. Pick a flat `_origin`; it only decides where the
 composition lands.
 
-**Import** — select a composition, give an origin, and the tool normalizes the rows, writes
-`temp\eden_import.sqf` and copies the import to the clipboard. Paste that into the Eden console. It
-reports `created N of M objects` and warns if any row-like line failed to parse, so a silent drop is
-visible. There is also a "paste your own array" option.
+**Import** — select a composition and the tool normalizes the rows, writes `temp\eden_import.sqf` and
+copies the import to the clipboard. Paste that into the Eden console. It reports `created N of M
+objects` and warns if any row-like line failed to parse, so a silent drop is visible. There is also a
+"paste your own array" option.
+
+The origin is one coordinate for the whole run, shown at the top of the menu and changed with `O`
+(default `23100 18700`; it accepts `X Y` or a pasted `[x,y,z]`, whose Z is ignored). It is session
+state rather than a per-import prompt because the export subtracts the same origin back out — answer
+it differently on a second import and the rows come back offset by the difference.
 
 ### The front marker
 
@@ -96,7 +101,7 @@ alongside `zbase=_centerSpawnZ` to sit at its original off-map altitude (~1000).
 `[class, dx, dy, dz, dir°]` rows (offsets from the import origin):
 
 ```sqf
-// Set _origin to the SAME origin you imported at (the TUI default is shown).
+// Set _origin to the SAME origin you imported at (the TUI menu shows it; the default is below).
 private _origin = [23100, 18700, 0];
 
 // Dropped by Eden name, not by class: a composition may legitimately contain a flagpole, and the

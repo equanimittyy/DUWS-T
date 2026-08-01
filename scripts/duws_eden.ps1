@@ -29,6 +29,12 @@ $root    = Split-Path -Parent $PSScriptRoot   # script lives in scripts/; repo r
 $srcDir  = Join-Path $root "src"
 $outFile = Join-Path $root "temp\eden_import.sqf"
 
+# One origin for the whole run. An import and its export have to use the same one -- the export
+# subtracts it back out -- so it is session state shown on the menu, not a per-generate prompt that
+# can be answered differently the second time and hand back rows offset by the difference.
+$script:originX = 23100.0
+$script:originY = 18700.0
+
 $inv   = [System.Globalization.CultureInfo]::InvariantCulture
 $numRe = '-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?'
 $rowRe = '"([^"]+)"\s*,\s*({0})\s*,\s*({0})\s*,\s*({0})\s*,\s*({0})' -f $numRe
@@ -148,21 +154,20 @@ function Save-And-Copy($script) {
     try { Set-Clipboard -Value $script; return $true } catch { return $false }
 }
 
-function Read-Origin {
+function Set-Origin {
     # Accepts "X Y" or a pasted Arma position like [1689.31,5603.31,0]: pull the first
     # two numbers and ignore any Z. Brackets/commas/spaces are all just separators.
     while ($true) {
-        $in = Read-Host "Origin (X Y, or paste [x,y,z]; blank = 23100 18700)"
-        if ([string]::IsNullOrWhiteSpace($in)) { return ,@(23100.0, 18700.0) }
+        $in = Read-Host ("Origin (X Y, or paste [x,y,z]; blank = keep {0} {1})" -f (Fmt $script:originX), (Fmt $script:originY))
+        if ([string]::IsNullOrWhiteSpace($in)) { return }
         $nums = @([regex]::Matches($in, '-?\d+(?:\.\d+)?') | ForEach-Object { [double]$_.Value })
-        if ($nums.Count -ge 2) { return ,@($nums[0], $nums[1]) }
+        if ($nums.Count -ge 2) { $script:originX = $nums[0]; $script:originY = $nums[1]; return }
         Write-Host "Enter at least X and Y (e.g. 23100 18700 or [1689.31,5603.31,0])." -ForegroundColor Yellow
     }
 }
 
 function Invoke-Generate($comp) {
-    $origin = Read-Origin
-    $res    = ConvertTo-Rows $comp
+    $res = ConvertTo-Rows $comp
     if ($res.Rows.Count -eq 0) { Write-Host "No rows parsed." -ForegroundColor Yellow; return }
     # zbase=<var> anchors this composition's Z to a source constant (e.g. the killhouse's
     # off-map _centerSpawnZ) instead of the terrain, keeping its native altitude.
@@ -171,10 +176,10 @@ function Invoke-Generate($comp) {
         $zrx = [regex]([regex]::Escape($comp.ZBase) + '\s*=\s*(-?[\d.]+)')
         if ($zrx.IsMatch($comp.Text)) { $originZ = [double]$zrx.Match($comp.Text).Groups[1].Value }
     }
-    $script = New-ImportScript $comp.Name $comp.Schema $res.Rows $origin[0] $origin[1] $originZ ($comp.ZMode -eq 'keep')
-    $clip   = Save-And-Copy $script
+    $importScript = New-ImportScript $comp.Name $comp.Schema $res.Rows $script:originX $script:originY $originZ ($comp.ZMode -eq 'keep')
+    $clip         = Save-And-Copy $importScript
     Write-Host ""
-    Write-Host ("Generated {0} objects from '{1}' (schema {2}, z={3})." -f $res.Rows.Count, $comp.Name, $comp.Schema, $comp.ZMode) -ForegroundColor Green
+    Write-Host ("Generated {0} objects from '{1}' (schema {2}, z={3}) at origin {4} {5}." -f $res.Rows.Count, $comp.Name, $comp.Schema, $comp.ZMode, (Fmt $script:originX), (Fmt $script:originY)) -ForegroundColor Green
     if ($res.Rows.Count -lt $res.Seen) {
         Write-Host ("WARNING: {0} row-like line(s) did not parse and were skipped." -f ($res.Seen - $res.Rows.Count)) -ForegroundColor Yellow
     }
@@ -413,6 +418,7 @@ while ($true) {
     Clear-Host
     Write-Host "DUWS Composition TUI" -ForegroundColor Cyan
     Write-Host "===================="
+    Write-Host ("Origin: {0} {1}" -f (Fmt $script:originX), (Fmt $script:originY)) -ForegroundColor DarkGray
     Write-Host ""
     Write-Host " Static compositions (Eden round-trip, read-only)" -ForegroundColor DarkGray
     for ($i = 0; $i -lt $comps.Count; $i++) {
@@ -426,12 +432,13 @@ while ($true) {
         Write-Host ("  U{0,-2}. {1,-26} [{2,2} rows]" -f ($i + 1), $u.Name, (Split-Rows $u.Body).Count)
     }
     Write-Host ""
-    Write-Host "   P. Paste your own array (schema A)"
+    Write-Host "   O. Set the import origin      P. Paste your own array (schema A)"
     Write-Host "   Q. Quit"
     Write-Host ""
     $sel = Read-Host "Select"
 
     if ($sel -match '^\s*[Qq]\s*$') { break }
+    elseif ($sel -match '^\s*[Oo]\s*$') { Set-Origin }
     elseif ($sel -match '^\s*[Pp]\s*$') {
         Write-Host 'Paste rows in schema A form: ["class", x, y, z, dir, ...]. Blank line to finish.'
         $lines = @()
