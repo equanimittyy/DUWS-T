@@ -90,6 +90,9 @@ private _retreating = false;
 // -- a table retuned mid-campaign would otherwise have a standing garrison reinforced from a row it
 // was never raised against.
 private _deployed = 0;
+// The strength the standing garrison was raised at. Held beside the tier because the two are
+// separate purchases: a reinforcement moves this and not the tier, and an upgrade the reverse.
+private _deployedStrength = 0;
 private _deployedList = [];
 // Set whenever a hold is armed, and held until the town has been empty of BLUFOR once since. The
 // hold expiring is not enough on its own: a player who took or cleared the town and stayed in it
@@ -132,6 +135,10 @@ while {true} do {
 
     private _rep = [_townIndex] call fnc_civ_repAt;
     private _tier = [_townIndex] call fnc_town_garrison_tierAt;
+    // Read once per cycle beside the tier, because both branches below need it and they must agree:
+    // the spawn thins its composition by this, and the reinforcement test compares it against what
+    // the standing garrison was raised at.
+    private _strength = [_townIndex] call fnc_town_garrison_strengthAt;
 
     // The gate, and the only place reputation writes a tier. Seeded whether or not anyone is near:
     // a town is OPFOR ground from the moment it crosses the band, which is what lets the commander
@@ -154,6 +161,10 @@ while {true} do {
     if (_rep > OPFOR_BAND && _tier > 0) then {
         [_townIndex, 0, "left the OPFOR band"] call fnc_town_garrison_setTier;
         _tier = 0;
+        // The claim is gone, so the hold goes with it. A town the player has worked back to neutral
+        // is neutral, not regrouping -- and leaving the hold armed would also refuse the tier raise
+        // if they ruined the same town again inside the window.
+        [_townIndex] call fnc_town_garrison_clearHold;
     };
 
     // One presence read per cycle, shared by everything below: the arrival test, the vacate latch
@@ -183,8 +194,7 @@ while {true} do {
                     // Thinned by what the town has left, the way a zone's band is. A town beaten
                     // once fields a fraction of its tier from then on, so the composition is the
                     // ceiling rather than the promise.
-                    private _want = [DUWS_townSpawnTiers select (_tier - 1),
-                        [_townIndex] call fnc_town_garrison_strengthAt] call fnc_zone_thin;
+                    private _want = [DUWS_townSpawnTiers select (_tier - 1), _strength] call fnc_zone_thin;
                     _roster = [_want, _centre, _radius] call _fnc_spawnList;
                     // Armed only once the garrison is standing in it. Each spawner resolves a safe
                     // position before it places anything, and one that fails leaves the town
@@ -201,6 +211,7 @@ while {true} do {
                         _retreating = false;
                         _deployed = _tier;
                         _deployedList = _want;
+                        _deployedStrength = _strength;
                         _baseline = [_roster] call _fnc_rosterAlive;
                         ["INFO", "CIV", format ["Garrison tier %1 spawned at town %2 (rep %3), %4 men", _tier, _townIndex, _rep, _baseline]] call fnc_log;
                     } else {
@@ -263,6 +274,7 @@ while {true} do {
             _roster = [];
             _baseline = 0;
             _deployed = 0;
+            _deployedStrength = 0;
             _deployedList = [];
             // Nothing below this describes a town that no longer has a garrison, and the
             // reinforcement test in particular would read the emptied _deployed against a live tier
@@ -281,11 +293,15 @@ while {true} do {
         // Buying and arriving are separate acts: the commander may raise a contested town's tier at
         // any time, and the men walk in once nobody is watching. The same radius the arrival test
         // uses, so "present" means one thing in this file.
-        if (_tier > _deployed && !_retreating && {!_near}) then {
-            // Thinned on the same fraction the standing garrison was raised at, so an upgrade to a
-            // beaten town buys a beaten town's share of the new tier rather than a full one.
-            private _want = [DUWS_townSpawnTiers select (_tier - 1),
-                [_townIndex] call fnc_town_garrison_strengthAt] call fnc_zone_thin;
+        // Either purchase owes men, and both arrive the same way. An upgrade widens the composition,
+        // a reinforcement raises the fraction of it that stands; what the town should be fielding is
+        // the two together, and the difference against what it already has is what gets raised.
+        //
+        // Tested against the stored pair rather than by recomputing the wanted list each cycle and
+        // diffing that: fnc_zone_thin drops entries at random, so the same tier and strength yield a
+        // different list every call, and an unchanged town would appear to owe men forever.
+        if ((_tier > _deployed || _strength > _deployedStrength) && !_retreating && {!_near}) then {
+            private _want = [DUWS_townSpawnTiers select (_tier - 1), _strength] call fnc_zone_thin;
             private _added = [[_deployedList, _want] call DUWS_fnc_spawnDiff, _centre, _radius] call _fnc_spawnList;
             _roster append _added;
             // Added to the baseline rather than re-measured from the roster. A garrison ground down
@@ -295,6 +311,7 @@ while {true} do {
             _baseline = _baseline + ([_added] call _fnc_rosterAlive);
             _deployed = _tier;
             _deployedList = _want;
+            _deployedStrength = _strength;
             ["INFO", "CIV", format ["Town %1 garrison reinforced to tier %2; baseline now %3 men", _townIndex, _tier, _baseline]] call fnc_log;
         };
 
@@ -321,6 +338,7 @@ while {true} do {
             _roster = [];
             _baseline = 0;
             _deployed = 0;
+            _deployedStrength = 0;
             _deployedList = [];
             ["INFO", "CIV", format ["Town %1 left the OPFOR band at rep %2; garrison withdrawing", _townIndex, _rep]] call fnc_log;
         } else {
@@ -330,6 +348,7 @@ while {true} do {
                 _roster = [];
                 _baseline = 0;
                 _deployed = 0;
+                _deployedStrength = 0;
                 _deployedList = [];
                 // Clearing destroys the purchase but not the ownership. The tier files back down to
                 // I rather than to 0: the town is still enemy ground, and it is the commander's

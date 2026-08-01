@@ -138,6 +138,20 @@ fnc_town_garrison_setHold = {
 	_secs
 };
 
+// A hold describes OPFOR's intention for ground OPFOR hold, so it dies with the claim rather than
+// running out on its own. Two things go wrong if it outlives the band:
+// the readout keeps telling the player a town they have redeemed to neutral is regrouping, and --
+// worse, because it is silent -- a REGROUP hold refuses tier *raises*, so a town that left the band
+// and was later ruined again could not garrison at all until the three hours were up.
+fnc_town_garrison_clearHold = {
+	if (!isServer) exitWith {};
+	params [["_townIndex", -1]];
+	private _holds = missionNamespace getVariable ["DUWS_townGarrisonHold", []];
+	if (_townIndex < 0 || _townIndex >= count _holds) exitWith {};
+	_holds set [_townIndex, 0];
+	(missionNamespace getVariable ["DUWS_townGarrisonHoldKind", []]) set [_townIndex, ""];
+};
+
 // What fraction of its tier composition a town actually fields. Set to the floor when its garrison
 // is beaten and never restored: a town fought out once stays a shell, so clearing it is worth
 // something lasting rather than something the enemy walks back the moment you leave.
@@ -150,12 +164,50 @@ fnc_town_garrison_strengthAt = {
 	_s select _townIndex
 };
 
+// Quantised to tenths on the same expression as fnc_zone_strength_set, and for its reason: strength
+// is a spawn budget, not a casualty ledger, so what it scales is whole groups and whole buildings and
+// anything finer rounds away at the point of use. One rule for both kinds of ground, rather than a
+// town measuring itself more precisely than it can ever spend.
 fnc_town_garrison_setStrength = {
 	if (!isServer) exitWith {};
 	params [["_townIndex", -1], ["_frac", 1]];
 	private _s = missionNamespace getVariable ["DUWS_townGarrisonStrength", []];
 	if (_townIndex < 0 || _townIndex >= count _s) exitWith {};
-	_s set [_townIndex, (_frac max 0.3) min 1];
+	_s set [_townIndex, ((ceil ((_frac * 10) - 0.0001)) / 10) max 0.3 min 1];
+};
+
+// What one reinforcement buys. A tenth-multiple because the setter above quantises to tenths: a
+// finer step would be rounded up on the way in, so the table would promise a figure the store cannot
+// hold. Three reinforcements from the floor to full, four from nothing -- and the same step the
+// BLUFOR garrison climbs by, so the two sides read as one rule rather than two tunings.
+#define REINFORCE_STEP 0.3
+
+// Reinforcement buys strength; a tier buys composition. **Two sinks, deliberately independent.** The
+// tier says what the town would field and the strength says how much of it stands, so the commander
+// can hold a tier IV town hollow, fill a tier I one, or pay for both -- and each costs separately.
+// Folding them into one purchase would make a beaten town cheap to restore precisely because it was
+// beaten, since a single payment would buy back the composition and the men together.
+//
+// Refused under REGROUP, and this is the one thing that hold blocks which matters: with the men
+// already gone, a commander who could still spend here would erase what clearing the town bought
+// before the player had left the map. A TAKEN hold does not refuse -- ground that has only just
+// fallen is exactly what the enemy should be free to commit to.
+// Returns the new strength, or -1 when refused, so a caller that is paying can tell.
+fnc_town_garrison_reinforce = {
+	if (!isServer) exitWith { -1 };
+	params [["_townIndex", -1], ["_reason", ""]];
+	private _s = missionNamespace getVariable ["DUWS_townGarrisonStrength", []];
+	if (_townIndex < 0 || _townIndex >= count _s) exitWith { -1 };
+	if (([_townIndex] call fnc_town_garrison_holdKindAt) == "REGROUP") exitWith {
+		["INFO", "CIV", format ["Town %1 reinforcement refused (%2): regrouping for another %3 s",
+			_townIndex, _reason, round ([_townIndex] call fnc_town_garrison_holdAt)]] call fnc_log;
+		-1
+	};
+	private _old = _s select _townIndex;
+	[_townIndex, _old + REINFORCE_STEP] call fnc_town_garrison_setStrength;
+	private _new = _s select _townIndex;
+	["INFO", "CIV", format ["Town %1 reinforced %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
+	_new
 };
 
 // The sole writer, and the OPFOR commander's purchase hook. Clamped rather than trusted: nothing

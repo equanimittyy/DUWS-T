@@ -183,6 +183,10 @@ fnc_zone_spawn = {
         missionNamespace setVariable [_baseVar, _baseline];
     };
     missionNamespace setVariable [format ["DUWS_zonePeak_%1", _zoneKey], _baseline];
+    // Men are standing, so the zone has finished mobilising. Cleared beside the peak rather than at
+    // the head of the spawn, because the peak is the point at which the garrison is real -- a band
+    // still placing has neither, and a torn-down one exits above without publishing either.
+    missionNamespace setVariable [format ["DUWS_zoneMobilising_%1", _zoneKey], nil];
     ["INFO", "ZONES", format ["%1 deployed %2 men at tier %3, %4 strength; garrison peak %5",
         _zoneKey, _placed, _tier, [_zoneKey] call fnc_zone_strength, _baseline]] call fnc_log;
 };

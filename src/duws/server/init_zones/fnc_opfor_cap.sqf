@@ -27,7 +27,16 @@ if (_triggerPos in WARCOM_zones_controled_by_OPFOR) exitWith {};
 // No hold beside it, unlike a town's: EAST SEIZED cannot fire while any BLUFOR stand in the radius,
 // so a retake already cannot happen under the player's feet, and the garrison arrives on the
 // ordinary streaming rule once they are clear.
-[[_triggerPos] call fnc_zone_key, 0.3] call fnc_zone_strength_set;
+private _retakenKey = [_triggerPos] call fnc_zone_key;
+[_retakenKey, 0.3] call fnc_zone_strength_set;
+
+// Mobilising: OPFOR own the ground and their men are not on it yet. Set here and cleared by
+// fnc_zone_spawn when the garrison's peak publishes, so it describes exactly the window between the
+// flip and the first man standing.
+// The readout needs it because the tier alone would lie -- it would report a garrison as though it
+// were there. It cannot be inferred from the absence of a peak, because a zone that has merely
+// streamed out has no peak either and that one is quiet rather than mobilising.
+missionNamespace setVariable [format ["DUWS_zoneMobilising_%1", _retakenKey], true];
 
 ["us_lostcontrol",[_place,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_lostcontrol"] remoteExec ["fnc_duws_dialogue", 0];

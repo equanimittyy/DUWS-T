@@ -84,7 +84,7 @@ private _apply = {
     private _sel = lbCurSel _list;
     if (_sel < 0) exitWith { hint "Pick a town first."; };
     private _townIndex = parseNumber (_list lbData _sel);
-    private _mode = switch (_idc) do { case 9524: { "ap" }; case 9526: { "tier" }; default { "rep" } };
+    private _mode = switch (_idc) do { case 9524: { "ap" }; case 9526: { "tier" }; case 9527: { "reinforce" }; default { "rep" } };
     [_mode, player, [_townIndex, _delta]] remoteExec ["fnc_debug_econ_server", 2];
     ["snapshot", player] remoteExec ["fnc_debug_econ_server", 2];
 };
@@ -131,11 +131,11 @@ _list ctrlCommit 0;
 // growing the window into the close button below it.
 {
     private _btn = _display ctrlCreate ["RscButton", _x];
-    _btn ctrlSetPosition [0.26 + 0.16 * _forEachIndex, 0.68, 0.155, 0.05];
-    _btn ctrlSetText (["Town rep +/-", "Town worth +/-", "Town tier +/-"] select _forEachIndex);
+    _btn ctrlSetPosition [0.26 + 0.12 * _forEachIndex, 0.68, 0.115, 0.05];
+    _btn ctrlSetText (["Rep +/-", "Worth +/-", "Tier +/-", "Reinforce x"] select _forEachIndex);
     _btn ctrlCommit 0;
     _btn ctrlAddEventHandler ["ButtonClick", _apply];
-} forEach [9523, 9524, 9526];
+} forEach [9523, 9524, 9526, 9527];
 
 private _closeBtn = _display ctrlCreate ["RscButton", 9517];
 _closeBtn ctrlSetPosition [0.26, 0.74, 0.48, 0.05];

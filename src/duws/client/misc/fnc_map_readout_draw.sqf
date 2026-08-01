@@ -30,7 +30,8 @@ private _fnc_tier = {
 switch (_kind) do {
 
 	case "ZONE": {
-		_data params [["_name", ""], ["_zoneKind", ""], ["_held", false], ["_seg", 0], ["_tier", 0]];
+		_data params [["_name", ""], ["_zoneKind", ""], ["_held", false], ["_seg", 0], ["_tier", 0],
+			["_hold", ""]];
 		// The kind qualifies the callsign rather than taking a line of its own, the way it reads on the
 		// marker. Guarded because a zone answers the readout from the moment it registers but files its
 		// kind at the end of build-out: a click inside that window would otherwise print "Foxtrot ()".
@@ -40,7 +41,16 @@ switch (_kind) do {
 		// Above the strength bar, and printed on a held zone too: tier is what the ground is worth
 		// fighting for and strength is how much of it is left, so the pair reads in that order
 		// whichever side holds it.
-		_lines pushBack ([_tier] call _fnc_tier);
+		//
+		// A zone OPFOR have just retaken says so instead. The men are owed and not yet standing, so a
+		// numeral here would report a garrison that is not there -- the same reason a town in the
+		// window reports its hold rather than its tier.
+		_lines pushBack (if (_hold isEqualTo "TAKEN") then {
+			format [localize "STR_DUWS_T_mapview_garrison_tier",
+				localize "STR_DUWS_T_mapview_garrison_taken"]
+		} else {
+			[_tier] call _fnc_tier
+		});
 		if (_held) then {
 			// No bar on a zone the player owns: a full run of grey would read as a garrison wiped
 			// rather than as one that was never there.

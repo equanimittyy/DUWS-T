@@ -6,8 +6,8 @@
     the escalation counters are never broadcast, so the window cannot read them and cannot write
     them either -- it asks here for a snapshot and sends its edits back through the same door.
 
-    Modes: "snapshot" answers the caller, "rep" / "ap" / "tier" adjust one town, "escalation" moves
-    the destroyed-house count.
+    Modes: "snapshot" answers the caller, "rep" / "ap" / "tier" / "reinforce" adjust one town,
+    "escalation" moves the destroyed-house count.
 */
 if (!isServer) exitWith {};
 
@@ -25,6 +25,7 @@ switch (toLower _mode) do {
         private _aps  = missionNamespace getVariable ["civ_town_ap", []];
         private _locs = missionNamespace getVariable ["civ_locations", []];
         private _tiers = missionNamespace getVariable ["DUWS_townGarrisonTier", []];
+        private _strs  = missionNamespace getVariable ["DUWS_townGarrisonStrength", []];
 
         // One row per town: the name the map readout uses, whether it has a reputation at all, that
         // figure and its worth. The flag is carried rather than a nil reputation, the same way
@@ -38,7 +39,8 @@ switch (toLower _mode) do {
             _towns pushBack [_forEachIndex, _name, _hasRep,
                 if (_hasRep) then { _reps select _forEachIndex } else { 0 },
                 _aps param [_forEachIndex, 0],
-                _tiers param [_forEachIndex, 0]];
+                _tiers param [_forEachIndex, 0],
+                _strs param [_forEachIndex, 1]];
         } forEach _locs;
 
         // Escalation is absent entirely in RAVAGE and WBK -- fnc_escalation returns before setting
@@ -83,6 +85,21 @@ switch (toLower _mode) do {
         // decides whether OPFOR holds the town at all.
         private _current = [_townIndex] call fnc_town_garrison_tierAt;
         [_townIndex, _current + _delta, "debug menu"] call fnc_town_garrison_setTier;
+    };
+
+    case "reinforce": {
+        _args params ["_townIndex", "_delta"];
+        // Reinforcement is a step, not an amount: the delta only says how many to buy, and a
+        // negative one is refused rather than reinterpreted as taking men away. Nothing in the
+        // design removes strength by purchase -- only the player does, by fighting.
+        // Each call goes through the campaign's own writer, so the REGROUP refusal and the ceiling
+        // apply here exactly as they will to the commander.
+        if (_delta <= 0) exitWith {
+            ["Reinforce takes a positive count."] remoteExec ["hint", _caller];
+        };
+        for "_i" from 1 to _delta do {
+            [_townIndex, "debug menu"] call fnc_town_garrison_reinforce;
+        };
     };
 
     case "escalation": {

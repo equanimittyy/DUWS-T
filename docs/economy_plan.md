@@ -602,9 +602,32 @@ tier in `DUWS_townGarrisonTier`, written through `fnc_town_garrison_setTier`. Fu
 Tier I is unpriced because nothing buys it: it is what the band grants. A commander that wants a
 town garrisoned turns the town instead, through rapport.
 
+### BLUFOR garrisons accumulate; they are not inherited
+
 BLUFOR garrisons are new ground: the BLUFOR band (`>= 10`) has no garrison today, so a player
 buying tier I at a town they hold is creating something that has never existed rather than
 upgrading something that has. It is the player's answer to the enemy taking towns back.
+
+**Taking ground hands the player nothing.** A captured zone or town carries no tier and no strength —
+there is no inherited garrison and no destroyed state to inherit. What OPFOR left behind is OPFOR's:
+their attrition figure is floored at `0.3` and re-read only when they retake the ground
+([`info/zones_and_civilians.md`](info/zones_and_civilians.md#blufor-inherits-nothing)).
+
+**So the ladder runs the other way on this side.** Buying tier I creates a garrison at **zero
+strength**, and each reinforcement adds **30 %** — four to reach full from nothing, three from the
+`0.3` floor an OPFOR town is knocked to. A tenth-multiple because both strength stores quantise to
+tenths, so a finer step would be rounded up on the way in and the table would promise a figure the
+store cannot hold. An OPFOR garrison decays from a tier it was given; a BLUFOR one accumulates from
+nothing.
+
+Two consequences worth settling before this is built:
+
+- **Reinforcement is a second sink, not a second purchase.** The tier says what the garrison *would*
+  field and the strength says how much of it stands, so a player who buys tier III and stops has
+  bought an empty establishment. Whether the two draw on the same pool at the same rate is open.
+- **Nothing here needs the OPFOR holds.** `Mobilising` and `Regrouping` exist because OPFOR arrive on
+  ground they already own; a BLUFOR garrison never arrives, so there is nothing to defer and no state
+  to show. The presence latch is still wanted, since a BLUFOR town garrison will stream.
 
 ## Spending authority
 
