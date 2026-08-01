@@ -42,12 +42,31 @@ declaratives — Overlord does not shout. Hints carry no trailing period; subtit
 ## Side-mission briefings carry their own reward block
 
 One key per side mission serves both the strategic-map card and the task description, so the same
-text has to read as a briefing in either place: situation, task, then any timer or kit the player
-has to plan around. It ends with the reward, laid out on its own lines after a blank one:
+text has to read as a briefing in either place. It opens with the mission's category on its own
+line, then situation, task, and any timer or kit the player has to plan around. It ends with the
+reward, laid out on its own lines after a blank one:
 
 ```
-&lt;br /&gt;&lt;br /&gt;CP: 45&lt;br /&gt;AP: 15
+Mission Type: Sabotage&lt;br /&gt;
+… &lt;br /&gt;&lt;br /&gt;CP: 45&lt;br /&gt;AP: 15
 ```
+
+The category is one word, named for the action the mission asks for rather than for what it is
+about. It is what the player sorts on when picking work off the strategic map, so it tracks the
+*task* and not the thread's name — "Destroy armour" asks for the tank commander's death, which
+makes it `Elimination` rather than a destruction category.
+
+| Category | Asks the player to | Threads |
+|---|---|---|
+| `Elimination` | kill enemy personnel or vehicles | HVT, snipers, armour, CQB, domination |
+| `Sabotage` | destroy enemy equipment or installations | tower, cache, radar, laptop |
+| `Requisition` | take materiel off the enemy and move it | supply truck, engineering vehicle, IDAP truck, intel |
+| `Defence` | keep something alive until a timer runs out | hold position, protect civilian |
+| `Rescue` | bring friendly personnel out | squad, pilot |
+
+The set is deliberately coarse. Destruction splits only on whether the target breathes, so
+`Elimination` and `Sabotage` between them cover most of the board; `Defence` covers both the
+static-asset hold and the bodyguard job, which differ in what ends them but not in how they play.
 
 Breaks are `<br />` (XML-escaped in the file, as above), never `\n` — a task description is parsed
 as structured text, where a bare newline is whitespace. The numbers are the base rewards the thread
