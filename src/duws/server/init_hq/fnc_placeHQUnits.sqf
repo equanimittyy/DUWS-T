@@ -201,3 +201,28 @@ if (count _patrolSpawnPos > 0 && count _patrolUnits > 0) then {
     };
     missionNamespace setVariable ["HQ_redeploy_patrolGroup", _patrolGroup, true];
 };
+
+// The HQ registers as a frozen site on the same terms as a FOB. It was the one base that never got
+// even a sleeper: its garrison stood fully simulated for the whole campaign on the reasoning that
+// the player is usually stood in it -- which held when base was where you were, and stopped holding
+// with fast travel, an MHQ and FOBs on the map.
+//
+// Registered after the placement above, so the roster describes what is actually standing. Woken by
+// players or by hostiles, like a FOB: a base that cannot be woken by an attacker loses itself while
+// nobody is looking.
+if (!isNil "PosOfBLUHQ") then {
+    ["HQ", PosOfBLUHQ, base_garrison_sleep_range, "freeze"] call fnc_site_register;
+    ["HQ", "infantry", WEST, 0, base_garrison_sleep_delay, false, false] call fnc_site_occupant_register;
+    private _roster = ["HQ", "infantry"] call fnc_site_roster;
+    ["HQ", "infantry"] call fnc_site_roster_clear;
+    {
+        private _grp = missionNamespace getVariable [_x, grpNull];
+        if (!isNull _grp) then { _roster append (units _grp) };
+    } forEach ["HQ_redeploy_weaponGroup", "HQ_redeploy_hqGuardsGroup0", "HQ_redeploy_hqGuardsGroup1",
+        "HQ_redeploy_medGuardsGroup0", "HQ_redeploy_medGuardsGroup1", "HQ_redeploy_guardBoxGroup",
+        "HQ_redeploy_patrolGroup"];
+    // The tower guards are kept as a list of one-man groups rather than under a single name.
+    { if (!isNull _x) then { _roster append (units _x) } }
+        forEach (missionNamespace getVariable ["HQ_redeploy_towerGuards", []]);
+    ["INFO", "BOOT", format ["HQ registered as a frozen site holding %1 men", count _roster]] call fnc_log;
+};

@@ -457,7 +457,7 @@ falsifiable:
 - [x] `emplacement` and `structure` kinds; `_manStatics` and `_stowZone` retired
 - [x] Freeze becomes a disposal mode; `fnc_FOBgarrisonSleep`'s thread retired, hostile wake added
 - [x] FOBs register their turrets, not only their guards
-- [ ] The HQ registers as a frozen site
+- [x] The HQ registers as a frozen site
 - [ ] `DUWS_garrisonUnit` replaced by a store lookup
 - [ ] `info/zones_and_civilians.md` rewritten around one lifecycle
 
