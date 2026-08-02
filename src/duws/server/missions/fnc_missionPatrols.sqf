@@ -13,10 +13,10 @@ private _offsets = [[30, 20], [30, 0], [35, 0]];
 // to. The claim lives here, not in the builders, which are shared with zone and town garrisons.
 //
 // Each builder is `call`ed from inside its own thread -- the only way to read back the group it
-// returns. The wrapper is what makes that safe: the builders assign _radius, _group and a
-// for-counter without `private`, which would otherwise clobber the same names in this scope.
-private _fnc_claimInf = { [_this call fnc_createoppatrol2] call fnc_mission_claim };
-private _fnc_claimTeam = { [_this call fnc_createopteam2] call fnc_mission_claim };
+// returns. The wrapper is what makes that safe: fnc_random_veh assigns _radius and _vehpos without
+// `private`, which would otherwise clobber the same names in this scope.
+private _fnc_claimInf = { [(["patrol"] + _this) call fnc_spawn_team] call fnc_mission_claim };
+private _fnc_claimTeam = { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
 private _fnc_claimVeh = { [_this call fnc_random_veh] call fnc_mission_claim };
 
 for "_i" from 1 to _patrols do {

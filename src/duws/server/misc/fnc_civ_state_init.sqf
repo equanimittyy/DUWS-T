@@ -60,7 +60,7 @@ fnc_civ_repAt = {
 // with one for the player's attention -- so a large town stays a garrison rather than becoming a
 // zone that happens to have civilians in it, and IV reaches the zone benchmark by occupying
 // buildings rather than by digging in.
-// --DUWS-UNITCOMP BEGIN name="Town tiers" row="tier I..IV"--
+// --DUWS-UNITCOMP BEGIN name="Town tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_townSpawnTiers = [
 	["patrol", "team"],
 	["patrol", "team", "team", "car"],

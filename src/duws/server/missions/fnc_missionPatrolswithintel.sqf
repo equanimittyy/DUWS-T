@@ -4,8 +4,8 @@
 params ["_missionPos", "_radius"];
 
 // See fnc_missionPatrols for why the claim lives here and why each builder runs in its own thread.
-private _fnc_claimInf = { [_this call fnc_createoppatrol2] call fnc_mission_claim };
-private _fnc_claimTeam = { [_this call fnc_createopteam2] call fnc_mission_claim };
+private _fnc_claimInf = { [(["patrol"] + _this) call fnc_spawn_team] call fnc_mission_claim };
+private _fnc_claimTeam = { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
 private _fnc_claimVeh = { [_this call fnc_random_veh] call fnc_mission_claim };
 
 sleep 1;

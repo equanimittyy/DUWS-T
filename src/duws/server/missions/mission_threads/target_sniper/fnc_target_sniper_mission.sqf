@@ -28,13 +28,13 @@ private _VARtaskgeneratedName = format ["sniperhunt%1%2",round(_MissionPos selec
 [[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 // CREATE PATROLS, NO VEHICLES
 sleep 1;
-[_missionpos, 15, false] spawn fnc_createoppatrol2;
+["patrol", _missionpos, 15] spawn fnc_spawn_team;
 sleep 1;
-[_randompos, _radius, false] spawn fnc_createoppatrol2;
+["patrol", _randompos, _radius] spawn fnc_spawn_team;
 sleep 1;
-[_randompos, _radius] spawn { [_this call fnc_createopteam2] call fnc_mission_claim };
+[_randompos, _radius] spawn { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
 sleep 1;
-[_randompos, _radius] spawn { [_this call fnc_createopteam2] call fnc_mission_claim };
+[_randompos, _radius] spawn { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
 
 _group = [_targetpos, east, [opfor_SL_SOLDIER_X, opfor_SNIPER_SOLDIER_X, opfor_SNIPER_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;

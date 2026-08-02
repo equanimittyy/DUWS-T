@@ -30,7 +30,7 @@ _radius = 250;
 _spawn = [(_position select 0)+20,(_position select 1)];
 
 // Not named _roster: that is the zone's unit roster above, and _fnc_own appends into it by name.
-private _guards = ["fortified", enemyunitMultiplier, _strength] call DUWS_fnc_groupRoster;
+private _guards = ["fortified", enemyunitMultiplier, _strength] call DUWS_fnc_teamRoster;
 _group = [_spawn, EAST, _guards,[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 [_group] call _fnc_own;

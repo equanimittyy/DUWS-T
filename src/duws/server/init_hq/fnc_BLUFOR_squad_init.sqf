@@ -11,7 +11,7 @@ if (!isServer) exitWith {};
 // Rosters are shared: the mechanised and armour sections field the same infantry team, and the
 // motorised section fields the recon team. Held apart from the squad table below so changing what
 // an infantry team is stays one edit rather than three that can drift.
-// --DUWS-UNITCOMP BEGIN name="BLUFOR team rosters" row="team, roles..." fields="team, roles" prefix=blufor_--
+// --DUWS-UNITCOMP BEGIN name="BLUFOR teams" kind=team row="team, roles..." fields="team, roles" prefix=blufor_--
 DUWS_bluforTeams = [
     ["recon", ["blufor_SPECOPS_X", "blufor_SPECOPS_GL_X", "blufor_SPECOPS_MG_X", "blufor_SPECOPS_LAT_X"]],
     ["infantry", ["blufor_SOLDIER_TL_X", "blufor_SOLDIER_GL_X", "blufor_SOLDIER_LAT_X", "blufor_SOLDIER_AR_X"]],
@@ -25,7 +25,7 @@ DUWS_bluforTeams = [
 // built in shared/includes/request_menu.hpp, not from this table.
 // The vehicle pool is drawn once, at boot rather than per purchase: a section's transport is a
 // property of the campaign, so the same request twice does not hand back two different vehicles.
-// --DUWS-UNITCOMP BEGIN name="BLUFOR squads" row="variable, CP cost, team, vehicle pool" fields="variable, CP cost, team, vehicle pool" prefix=blufor_--
+// --DUWS-UNITCOMP BEGIN name="BLUFOR squads" kind=composition row="variable, CP cost, team, vehicle pool" fields="variable, CP cost, team, vehicle pool" prefix=blufor_--
 DUWS_bluforSquads = [
     ["blufor_RECON_TEAM_X", 8, "recon", []],
     ["blufor_INF_SQUAD_X", 12, "squad", []],

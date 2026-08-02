@@ -357,17 +357,30 @@ private _band = ["sniper", "patrol", "patrol", "team", "wpteam", "armored", "air
 // multiplication, the co-op append -- and the shipped numbers are balance, which a test should not
 // freeze. The extractor pulls named functions, not the globals beside them, so they are set here.
 DUWS_spawnCategories = [
-    ["infantry", ["patrol", "team", "sniper", "wpteam", "buildings"]],
+    ["infantry", ["buildings"]],
     ["light",    ["car"]],
     ["armour",   ["armored"]],
     ["air",      ["air"]]
 ];
+// A team carries its own category, so the map above holds only the tokens that are not teams.
+// "misfiled" names a category that does not exist, which the tool lets a user type.
+DUWS_teamRosters = [
+    ["patrol", "route", "infantry", ["opfor_A_X", "opfor_B_X"], [], ""],
+    ["team", "route", "infantry", ["opfor_A_X"], ["opfor_C_X"], "opfor_TL_X"],
+    ["wpteam", "wander", "infantry", ["opfor_A_X"], [], ""],
+    ["thin", "route", "infantry", ["opfor_A_X", "opfor_ABSENT_X"], [], ""],
+    ["misfiled", "route", "cavalry", ["opfor_A_X"], [], ""]
+];
+opfor_A_X = "cls_A";
+opfor_B_X = "cls_B";
+opfor_C_X = "cls_C";
+opfor_TL_X = "cls_TL";
 DUWS_zoneRadiusMult = [[101, 1, 1, 0, 0], [1e11, 3, 1, 2, 1]];
 DUWS_zoneSpawnTiers = [["patrol"], ["patrol", "car"], ["patrol", "armored"],
     ["patrol", "team", "car", "armored", "air"]];
 DUWS_zoneCoopExtra = [[], [], [], ["team"]];
 
-["spawnCategory: a group kind resolves to infantry",
+["spawnCategory: a team is filed by the category on its own row",
     (["wpteam"] call DUWS_fnc_spawnCategory), "infantry"] call fnc_assertEq;
 ["spawnCategory: armour is its own category, so radius scales it separately",
     (["armored"] call DUWS_fnc_spawnCategory), "armour"] call fnc_assertEq;
@@ -375,6 +388,21 @@ DUWS_zoneCoopExtra = [[], [], [], ["team"]];
 // spawn, and at one per entry rather than at the armour multiplier.
 ["spawnCategory: an unlisted token is treated as light rather than dropped",
     (["O_MBT_02_cannon_F"] call DUWS_fnc_spawnCategory), "light"] call fnc_assertEq;
+
+// A category is editable, so a name that is not one is reachable. The multiplier is found by the
+// category's position in the map, so an unchecked name resolves to index 0 -- the radius ceiling --
+// and the zone would try to field 1e11 groups.
+DUWS_TEST_LOG = [];
+fnc_log = { DUWS_TEST_LOG pushBack _this };
+["spawnCategory: a category that does not exist scales as light rather than by the ceiling",
+    (["misfiled"] call DUWS_fnc_spawnCategory), "light"] call fnc_assertEq;
+["spawnCategory: and says so rather than degrading silently",
+    (count DUWS_TEST_LOG), 1] call fnc_assertEq;
+private _savedTiers = +DUWS_zoneSpawnTiers;
+DUWS_zoneSpawnTiers = [["misfiled"]];
+["zoneSpawnList: a misfiled team fields one group, not the radius ceiling",
+    (count ([1, 50] call DUWS_fnc_zoneSpawnList)), 1] call fnc_assertEq;
+DUWS_zoneSpawnTiers = _savedTiers;
 
 ["zoneSpawnList: a small zone drops the categories its band zeroes",
     ([4, 50] call DUWS_fnc_zoneSpawnList), ["patrol", "team", "car"]] call fnc_assertEq;
@@ -409,41 +437,36 @@ private _have = ["patrol","team"];
 ["spawnDiff: leaves the caller's standing list alone",
     _have, ["patrol","team"]] call fnc_assertEq;
 
-// --- DUWS_fnc_groupRoster: the men behind a group token ---
-// A fixture table rather than the shipped one: what is under test is how a row expands, and
-// asserting against the live rosters would fail every time one of them is rebalanced.
-DUWS_groupRosters = [
-    ["patrol", ["opfor_A_X", "opfor_B_X"], [], ""],
-    ["team", ["opfor_A_X"], ["opfor_C_X"], "opfor_TL_X"],
-    ["thin", ["opfor_A_X", "opfor_ABSENT_X"], [], ""]
-];
-opfor_A_X = "cls_A";
-opfor_B_X = "cls_B";
-opfor_C_X = "cls_C";
-opfor_TL_X = "cls_TL";
-
-["groupRoster: the core repeats by the multiplier",
-    (["patrol", 3] call DUWS_fnc_groupRoster), ["cls_A","cls_B","cls_A","cls_B","cls_A","cls_B"]] call fnc_assertEq;
+// --- DUWS_fnc_teamRoster: the men behind a team name ---
+// Against the fixture above rather than the shipped rosters: what is under test is how a row
+// expands, and asserting on the live tables would fail every time one is rebalanced.
+["teamRoster: the core repeats by the multiplier",
+    (["patrol", 3] call DUWS_fnc_teamRoster), ["cls_A","cls_B","cls_A","cls_B","cls_A","cls_B"]] call fnc_assertEq;
 // The whole reason the tail and the leader are their own columns: at x3 this is one marksman and
 // one task leader, not three of each.
-["groupRoster: the tail is added once and the leader leads",
-    (["team", 3] call DUWS_fnc_groupRoster), ["cls_TL","cls_A","cls_A","cls_A","cls_C"]] call fnc_assertEq;
-["groupRoster: a multiplier below one still fields the group once",
-    (["patrol", 0] call DUWS_fnc_groupRoster), ["cls_A","cls_B"]] call fnc_assertEq;
-["groupRoster: a role this faction does not define is dropped, not spawned as nil",
-    (["thin", 1] call DUWS_fnc_groupRoster), ["cls_A"]] call fnc_assertEq;
-// Nothing rather than a fallback group: the caller named a kind that does not exist, and inventing
-// men for it would hide the typo behind a garrison that spawns.
-["groupRoster: an unknown token fields nothing",
-    (["nosuchkind", 2] call DUWS_fnc_groupRoster), []] call fnc_assertEq;
+["teamRoster: the tail is added once and the leader leads",
+    (["team", 3] call DUWS_fnc_teamRoster), ["cls_TL","cls_A","cls_A","cls_A","cls_C"]] call fnc_assertEq;
+["teamRoster: a multiplier below one still fields the team once",
+    (["patrol", 0] call DUWS_fnc_teamRoster), ["cls_A","cls_B"]] call fnc_assertEq;
+["teamRoster: a role this faction does not define is dropped, not spawned as nil",
+    (["thin", 1] call DUWS_fnc_teamRoster), ["cls_A"]] call fnc_assertEq;
+// Nothing rather than a fallback: the caller named a team that does not exist, and inventing men
+// for it would hide the typo behind a garrison that spawns.
+["teamRoster: an unknown team fields nothing",
+    (["nosuchkind", 2] call DUWS_fnc_teamRoster), []] call fnc_assertEq;
+// The same answer is what tells the spawn path a token is a vehicle class rather than a team.
+["teamRow: an unknown team has no row",
+    (["nosuchkind"] call DUWS_fnc_teamRow), []] call fnc_assertEq;
+["teamRow: a team's behaviour is on its row",
+    ((["wpteam"] call DUWS_fnc_teamRow) select 1), "wander"] call fnc_assertEq;
 
 // fnc_zone_thin drops at random indices, so a thinned roster is asserted by size and by who leads
-// rather than by contents. Four core men at x2 is eight, halved is four, and the leader is extra.
-private _thinned = ["team", 8, 0.5] call DUWS_fnc_groupRoster;
-["groupRoster: attrition thins the men",
+// rather than by contents. One core man at x8 is eight, plus the tail is nine, halved is five.
+private _thinned = ["team", 8, 0.5] call DUWS_fnc_teamRoster;
+["teamRoster: attrition thins the men",
     (count _thinned), 6] call fnc_assertEq;
 // The reason thinning happens before the leader is prepended: a section ground down still has one.
-["groupRoster: attrition never takes the leader",
+["teamRoster: attrition never takes the leader",
     (_thinned select 0), "cls_TL"] call fnc_assertEq;
-["groupRoster: full strength thins nothing",
-    (count (["team", 8, 1] call DUWS_fnc_groupRoster)), 10] call fnc_assertEq;
+["teamRoster: full strength thins nothing",
+    (count (["team", 8, 1] call DUWS_fnc_teamRoster)), 10] call fnc_assertEq;

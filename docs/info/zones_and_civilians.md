@@ -183,14 +183,19 @@ protect, since a beaten zone garrison means the zone changed hands
 #### Radius multiplies each category, not the whole list
 
 A tier composition says *what* a zone fields; its radius says *how many*. Every token belongs to a
-category (`DUWS_spawnCategories`), and `DUWS_zoneRadiusMult` gives one multiplier per category per
+category — a team carries its own on its row in `DUWS_teamRosters`, and everything that is not a
+team is filed in `DUWS_spawnCategories` — and `DUWS_zoneRadiusMult` gives one multiplier per category per
 radius band — because a zone's radius scales its garrison unevenly. More ground needs proportionally
 more infantry to cover it and does not need more aircraft, and a flat multiplier on the whole list
 would buy the biggest zones three times the air support alongside three times the riflemen.
 
 **The two tables are positionally locked**: one multiplier per category, in `DUWS_spawnCategories`
 order, after the radius ceiling. Reordering either without the other scales armour by the air column,
-which is a balance change with nothing in the log to show for it.
+which is a balance change with nothing in the log to show for it. `DUWS_fnc_spawnCategory` checks
+the category it is about to return against that table for the same reason: the multiplier is found
+by the category's *position*, so a name that is not in it would resolve to the radius-ceiling column
+and field that many groups. A team's category is editable, so that is reachable rather than
+theoretical.
 
 An unlisted token is a vehicle classname a faction file named directly, which `fnc_random_veh`
 resolves. Those count as `light` — multiplier one everywhere — so a mod's own class still spawns and
@@ -643,7 +648,7 @@ wears down. Those two mechanisms are shared outright, and everything else is del
 |---|---|---|
 | Attrition | `fnc_garrison_strength_init.sqf` | One store keyed by a string — `zone_<x>_<y>` or `town_<n>`. Owns the tenths rule, the `0.3` floor and the lower-only record. `fnc_zone_strength*` and `fnc_town_garrison_*Strength` are thin wrappers naming their key |
 | Raising men | `DUWS_fnc_raiseGarrison` | The stagger, the search flag and the `buildings` token are rules about raising a garrison, not about which ground is raising one |
-| Token vocabulary | `DUWS_fnc_zoneSpawnOne`, `DUWS_fnc_groupRoster`, `fnc_zone_thin`, `DUWS_fnc_spawnDiff` | A group kind means the same thing wherever it is spawned, down to the men it fields |
+| Token vocabulary | `DUWS_fnc_zoneSpawnOne`, `DUWS_fnc_teamRoster`, `fnc_zone_thin`, `DUWS_fnc_spawnDiff` | A team means the same thing wherever it is raised, down to the men it fields |
 
 **Not shared, and not candidates for it:** ownership (a list versus a reputation band), what a capture
 means, the holds, the two purchases, and composition props — a zone stows and redeploys a prefab and
