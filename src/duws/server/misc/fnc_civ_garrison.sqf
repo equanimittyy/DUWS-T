@@ -230,7 +230,14 @@ while {true} do {
             if !(_res isEqualTo []) then {
                 _res params ["_gotRoster", "_gotWant", "_gotTier", "_gotStrength", "_gotTrg"];
                 ([[_i] call fnc_town_site_key] call fnc_site_roster) append _gotRoster;
-                _t set ["baseline", {alive _x} count _gotRoster];
+                // Anchored to the men the town's first garrison placed, not re-measured from what
+                // just arrived. A garrison that comes back at six tenths is still measured against
+                // the ten, so the men killed last visit stay killed -- re-basing on the reduced
+                // garrison restores the whole figure to beat on every visit, which is the refund
+                // attrition exists to stop. The zone's rule, applied to towns.
+                if ((_t get "baseline") <= 0) then {
+                    _t set ["baseline", {alive _x} count _gotRoster];
+                };
                 _t set ["tier", _gotTier];
                 _t set ["deployedList", _gotWant];
                 _t set ["deployedStrength", _gotStrength];
@@ -290,7 +297,7 @@ while {true} do {
                 _i, _left, _t get "baseline", [_i] call fnc_town_garrison_strengthAt]] call fnc_log;
             _t set ["awake", false];
             _t set ["trg", objNull];
-            _t set ["baseline", 0];
+            // The baseline is not cleared here: it is what the next visit is measured against.
             _t set ["tier", 0];
             _t set ["deployedStrength", 0];
             _t set ["deployedList", []];
@@ -350,6 +357,8 @@ while {true} do {
             _t set ["awake", false];
             { deleteVehicle _x } forEach (([[_i] call fnc_town_site_key] call fnc_site_roster) select { alive _x });
             [[_i] call fnc_town_site_key] call fnc_site_roster_clear;
+            // The one place the anchor goes, because the town is no longer enemy ground: whatever
+            // it holds next is a new garrison rather than the remains of this one.
             _t set ["baseline", 0];
             _t set ["tier", 0];
             _t set ["deployedStrength", 0];
@@ -362,7 +371,7 @@ while {true} do {
                 _t set ["trg", objNull];
                 _t set ["awake", false];
                 [[_i] call fnc_town_site_key] call fnc_site_roster_clear;
-                _t set ["baseline", 0];
+                // Baseline survives a clear too -- what was beaten is the purchase, not the anchor.
                 _t set ["tier", 0];
                 _t set ["deployedStrength", 0];
                 _t set ["deployedList", []];
