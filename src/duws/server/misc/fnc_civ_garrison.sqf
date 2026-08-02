@@ -26,16 +26,6 @@ if (_count == 0) exitWith {};
 private _radii = missionNamespace getVariable ["civ_radii", []];
 private _centres = _locations apply { getPos _x };
 
-// The groups a raise hands back, flattened to the men in them. A roster is a unit list -- the same
-// shape a zone's is -- so a garrison can be counted, thinned and collected without every caller
-// having to know whether it is holding groups or men.
-private _fnc_menOf = {
-    params ["_grps"];
-    private _men = [];
-    { _men append (units _x) } forEach _grps;
-    _men
-};
-
 // The band the map markers, the OPFOR AP income and the disguise gate all read as ownership, and
 // the whole reputation input to a garrison. Crossing it makes the town OPFOR ground at tier I and
 // leaving it discharges the town; nothing deeper in the negative buys the enemy anything further.
@@ -79,7 +69,7 @@ private _fnc_raise = {
     // Thinned by what the town has left, the way a zone's band is. A town beaten once fields a
     // fraction of its tier from then on, so the composition is the ceiling rather than the promise.
     private _want = [[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter, _strength] call DUWS_fnc_thinComposition;
-    private _men = [[_want, _centre, _radius, _strength] call DUWS_fnc_raiseGarrison] call _fnc_menOf;
+    private _men = [[_want, _centre, _radius, _strength] call DUWS_fnc_raiseGarrison] call fnc_site_men_of;
 
     // OPFOR standing inside the trigger's own area, which is what makes the town clearable. SEIZED
     // is satisfied by an empty town as readily as by a fought-out one, so nothing else can tell the
@@ -321,7 +311,7 @@ private _fnc_tick = {
         && {!_here}) then {
         private _want = [[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter, _strength] call DUWS_fnc_thinComposition;
         private _added = [[_t get "deployedList", _want] call DUWS_fnc_spawnDiff, _centre, _radius, _strength] call DUWS_fnc_raiseGarrison;
-        private _addedMen = [_added] call _fnc_menOf;
+        private _addedMen = [_added] call fnc_site_men_of;
         ([[_i] call fnc_town_site_key] call fnc_site_roster) append _addedMen;
         // Added to the baseline rather than re-measured from the roster. A garrison ground down
         // to three men and then reinforced by six is nine men against a baseline that still

@@ -184,7 +184,10 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
     // Nothing else would collect them -- fnc_repetitive_cleanup takes bodies, wrecks and empty
     // vehicles, never living men.
     if (_o get "withdrawing") exitWith {
-        private _left = (_o getOrDefault ["leftovers", []]) select { alive _x };
+        // On a roster of its own, not in the record: a record holds plain values so it can survive a
+        // save, and these are object references. The kind names what they are -- men walking off
+        // ground they no longer hold.
+        private _left = ([_key, "withdrawing"] call fnc_site_roster) select { alive _x };
         // BIS_fnc_ListPlayers, not allPlayers: this is the streaming system's own answer to "is a
         // player here", and the whole collection turns on it. A list that came back empty where it
         // should not would delete every survivor on the first pass, which is precisely the vanishing
@@ -196,14 +199,15 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
                 deleteVehicle _man;
             };
         } forEach _left;
-        _left = _left select { alive _x };
-        _o set ["leftovers", _left];
+        private _roster = [_key, "withdrawing"] call fnc_site_roster;
+        _roster resize 0;
+        _roster append (_left select { alive _x });
         // Whatever is still walking goes with BLUFOR's tenure. A retake means they left the zone, so
         // there is nobody to watch it happen, and the garrison that arrives files a roster of its own
         // these men would not be on -- left alive, nothing would collect them.
         if (_opforHolds) then {
-            { deleteVehicle _x } forEach _left;
-            _o set ["leftovers", []];
+            { deleteVehicle _x } forEach _roster;
+            [_key, "withdrawing"] call fnc_site_roster_clear;
             _o set ["withdrawing", false];
         };
     };
@@ -237,7 +241,8 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
         // pack-up as a garrison wiped.
         [_key] call fnc_zone_garrison_dropped;
         private _leftovers = [_key, _pos] call DUWS_fnc_zoneSendOff;
-        _o set ["leftovers", _leftovers];
+        [_key, "withdrawing"] call fnc_site_roster_clear;
+        ([_key, "withdrawing"] call fnc_site_roster) append _leftovers;
         _o set ["withdrawing", true];
         _o set ["awake", false];
         // Re-latched, because a retake is not the clean start it looks like. EAST SEIZED only

@@ -32,7 +32,6 @@ fnc_site_register = {
     private _s = DUWS_sites getOrDefault [_key, createHashMap];
     if (count _s == 0) then {
         _s set ["key", _key];
-        _s set ["nextDue", 0];
         DUWS_sites set [_key, _s];
         DUWS_occupants set [_key, []];
     };
@@ -66,9 +65,8 @@ fnc_site_occupant_register = {
         ["kind", _kind], ["side", _side], ["buffer", _buffer], ["grace", _grace],
         ["aiAware", _aiAware], ["minAI", _minAI],
         ["awake", false], ["seenLast", false], ["emptySince", -1], ["awaitVacate", _latch],
-        ["baseline", 0], ["tier", 0], ["strength", 1], ["deployedList", []],
-        ["deployedStrength", 0], ["trg", objNull], ["hold", 0],
-        ["raising", false], ["withdrawing", false]
+        ["baseline", 0], ["tier", 0], ["deployedList", []], ["deployedStrength", 0],
+        ["trg", objNull], ["raising", false], ["withdrawing", false]
     ];
     _list pushBack _o;
     DUWS_occupants set [_key, _list];
@@ -99,6 +97,13 @@ fnc_site_hook = {
     params ["_key", "_kind", "_name", ["_default", {}]];
     ((DUWS_siteHooks getOrDefault [_key, createHashMap]) getOrDefault [_kind, createHashMap])
         getOrDefault [_name, _default]
+};
+
+// Asked of the store rather than by comparing the answer against {}. Whether isEqualTo holds for two
+// separately compiled empty blocks is not a property worth resting a dispatch on.
+fnc_site_hasHook = {
+    params ["_key", "_kind", "_name"];
+    _name in keys ((DUWS_siteHooks getOrDefault [_key, createHashMap]) getOrDefault [_kind, createHashMap])
 };
 
 // Every unit an occupant spawned, in one array per site and kind.
@@ -139,6 +144,17 @@ fnc_site_roster_drop = {
     private _r = [_siteKey, _kind] call fnc_site_roster;
     private _i = _r find _unit;
     if (_i >= 0) then { _r deleteAt _i };
+};
+
+// The groups a raise hands back, flattened to the men in them. A roster is a unit list everywhere,
+// so a garrison can be counted, thinned and collected without every caller having to know whether it
+// is holding groups or men. Global rather than a local helper: the callers are a spawned worker and
+// a hook the poller calls, and SQF has no closures -- neither can see the scope it was written in.
+fnc_site_men_of = {
+    params ["_grps"];
+    private _men = [];
+    { _men append (units _x) } forEach _grps;
+    _men
 };
 
 // What an occupant is worth, wherever its men happen to be standing. Deliberately not bounded by the
@@ -226,7 +242,6 @@ fnc_site_poller = {
         {
             private _key = _x;
             private _site = _y;
-            if (_now < (_site get "nextDue")) then { continue };
             private _pos = _site get "pos";
             private _radius = _site get "radius";
             private _frozen = (_site get "disposal") isEqualTo "freeze";
@@ -287,7 +302,6 @@ fnc_site_poller = {
                 // garrison also answers to the reputation band, to what the commander has bought and
                 // to whether its town has been cleared, and folding those into wake-and-sleep would
                 // mean expressing them as a presence test they are not.
-                private _fnc_tick = [_key, _kind, "tick"] call fnc_site_hook;
                 // if/else rather than an early exit: exitWith inside a forEach block ends the whole
                 // loop, so one occupant with a cycle of its own would stop every occupant after it
                 // from being serviced at all.
@@ -303,7 +317,8 @@ fnc_site_poller = {
                         [_key, _o, _awake] call fnc_site_setFrozen;
                     };
                 } else {
-                if !(_fnc_tick isEqualTo {}) then {
+                if ([_key, _kind, "tick"] call fnc_site_hasHook) then {
+                    private _fnc_tick = [_key, _kind, "tick"] call fnc_site_hook;
                     [_key, _o, _here, _now] call _fnc_tick;
                 } else {
                     if (_o get "awake") then {
