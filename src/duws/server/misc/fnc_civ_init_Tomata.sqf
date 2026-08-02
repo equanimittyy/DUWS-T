@@ -292,17 +292,6 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
 // list: registration reads all three. Called rather than spawned -- it files hooks and returns.
 if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then { [] call fnc_civ_handler };
 
-// The one thread that services every site. Started here because this is the point at which every
-// site a campaign begins with -- zones, towns, the HQ -- has registered itself.
-//
-// A boolean rather than the script handle: a SCRIPT stored in the mission namespace has no
-// serialized form and would break the save (docs/info/arma_engine_gotchas.md). Nothing needs to
-// terminate this thread, so the handle is worth nothing anyway.
-if !(missionNamespace getVariable ["DUWS_sitePollerUp", false]) then {
-    missionNamespace setVariable ["DUWS_sitePollerUp", true];
-    [] spawn fnc_site_poller;
-};
-
 // No start-up delay: this function now runs after zone build-out rather than alongside a
 // map-wide scan, so there is nothing left for the spawns to wait out.
 missionNamespace setVariable ["civ_spawn_enabled_time", time, true];

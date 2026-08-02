@@ -79,6 +79,47 @@ rather than merely untuned. Everything downstream of a capture is unexercised wi
       than reset, so casualties already taken are still counted against it
 - [ ] Clear that garrison. If the `WEST SEIZED` trigger never fires, CIVILIAN-side units are blocking it and the fallback is a condition trigger counting hostile units in `thisList`
 
+## Presence streaming: one system, none of it played
+
+Zones, town garrisons, town crowds, FOBs and the HQ used to answer "is a player near" in five
+separate loops; they are one poller over one store now, and nothing in it has been played. The
+behaviour-neutral steps are the cheap checks -- any observed change is a fault -- and the rest each
+changed one thing on purpose.
+
+- [ ] Watch a zone through a full cycle: `deployed N men at tier` on arrival, `packed up holding X of
+      Y` on leaving, the same figure back on return. The man count must not move between a fresh
+      campaign and the first visit; the composition tables were re-cut under it and that line is what
+      proves the re-cut was even
+- [ ] Grep a session for `site pass:` at log level 4. It reports how many sites were serviced and how
+      long the pass took. That figure is the whole bet: one thread now walks every site, and
+      scheduled scripts share about 3 ms a frame between them, so a pass creeping toward a frame
+      means per-site work has crept back inline where only a gate belongs
+- [ ] **The freeze rests on one assumption -- that a unit resumes cleanly** from
+      `enableSimulationGlobal false` -- and every base garrison depends on it. Freeze a man
+      mid-patrol, a man posed at a turret and a man walking a fortification ring, thaw all three, and
+      confirm each carries on rather than standing still or losing its waypoints. Walking 500 m from
+      a FOB and back is the whole test
+- [ ] Attack a FOB or the HQ with no player near it, once anything attacks a base. A frozen site
+      wakes on hostiles as well as players, which is dormant until the OPFOR commander ships, and a
+      base that cannot be woken by an attacker loses itself while nobody is looking
+- [ ] Take a zone and watch the survivors walk off rather than vanish. They are collected once no
+      player is within 500 m, retried every pass, so one somebody is standing over goes when they
+      leave rather than never
+- [ ] Start a campaign on a map where no civilian town qualifies. Zone garrisons must still spawn:
+      the poller starts after civilian init rather than inside it, and inside it a map with no towns
+      returned before the poller ever started
+
+**What the tables now decide, and nobody has tuned.** Two figures were made visible by the merge
+rather than chosen by it, and both want play behind them before anyone moves them:
+
+- **Which tokens hang off which Army Power rung.** The ladder already has thresholds -- BLUFOR steps
+  at 10, 40, 65, 100 and 136 (`server/warcom/fnc_WARCOM_blu_assault.sqf:19-33`), OPFOR has one rung
+  at 100. Only `tank` currently names one. How many hours into a campaign the enemy fields armour is
+  a per-row number in `DUWS_spawnVehicles`, and nothing has measured what it should be.
+- **What a zone's tier should buy.** A zone raised from two spawners and only one read the tier, so
+  the I-to-IV ladder moved roughly sixteen men out of fifty. Both halves are one table now
+  (`DUWS_zoneSpawnTiers`), which is the point at which the ladder becomes worth deciding.
+
 ## The search system: shipped whole, barely exercised
 
 Five separate faucets became one two-roll path, and the rewrite deleted seven functions, so a

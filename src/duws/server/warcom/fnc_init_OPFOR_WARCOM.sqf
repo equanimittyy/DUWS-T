@@ -50,6 +50,19 @@ sleep 1;
     [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
     if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then { [] call fnc_civ_init_Tomata; };
 
+    // The one thread that services every site, started once every site a campaign begins with has
+    // registered itself. Outside the civilian gate above and after it deliberately: civilian init
+    // gives up early on a map where no town qualifies, and starting the poller inside it left a
+    // campaign with no civilians unable to spawn a zone garrison at all.
+    //
+    // A boolean rather than the script handle: a SCRIPT stored in the mission namespace has no
+    // serialized form and would break the save (docs/info/arma_engine_gotchas.md). Nothing needs to
+    // terminate this thread, so the handle is worth nothing anyway.
+    if !(missionNamespace getVariable ["DUWS_sitePollerUp", false]) then {
+        missionNamespace setVariable ["DUWS_sitePollerUp", true];
+        [] spawn fnc_site_poller;
+    };
+
     // Last step of generation, and called rather than spawned so it is: its census is a
     // multi-second frame stall, and the only way that is not felt as a hitch is for the player
     // to still be watching the generation banner when it happens. Spawned off WARCOM_init_done
