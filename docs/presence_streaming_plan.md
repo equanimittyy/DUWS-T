@@ -381,11 +381,15 @@ Each step lands and is playable on its own. No step requires the next to be corr
     poller as `disposal = freeze`, and the wake gains its hostile half so an unattended base can be
     woken by an attacker. Behaviour-neutral for the guards it already covers; the hostile wake is
     dormant until something attacks a FOB.
-13. **FOBs register everything they own.** Not just `FOB_guardGroups` — the turret ring from
-    `fnc_fortifyFOB` and its crews as `emplacement`, and the FOB building and its props as
-    `structure`, so the whole site freezes rather than its infantry alone. There are no vehicles to
-    register: a FOB's `createVehicle` calls are the building, the fortification props and the turrets.
-    **Changes behaviour**: a FOB's turrets and their crews stop being simulated while nobody is near.
+13. **FOBs register everything they own.** Not just their guards — the turret ring from
+    `fnc_fortifyFOB` and its crews as `emplacement`, so the freeze reaches the larger half of what a
+    base costs. There are no vehicles to register: a FOB's `createVehicle` calls are the building,
+    the fortification props and the turrets. **Changes behaviour**: a FOB's turrets and their crews
+    stop being simulated while nobody is near.
+
+    The building and its props are deliberately left out. Freezing a static building saves almost
+    nothing, and it is the object carrying the base's action menu and its respawn point — putting
+    those behind `enableSimulationGlobal` for no measurable gain is the wrong trade.
 14. **The HQ joins.** Registers its garrison and its composition as a frozen site. **Changes
     behaviour**: the base garrison stops being simulated when every player is away from it.
 15. **Drop the flag.** `DUWS_garrisonUnit` becomes a store lookup in `fnc_mission_cleanup`.
@@ -452,7 +456,7 @@ falsifiable:
 - [x] Zones migrated; handshake, generation counter and trigger re-arming retired
 - [x] `emplacement` and `structure` kinds; `_manStatics` and `_stowZone` retired
 - [x] Freeze becomes a disposal mode; `fnc_FOBgarrisonSleep`'s thread retired, hostile wake added
-- [ ] FOBs register their turrets and vehicles, not only their guards
+- [x] FOBs register their turrets, not only their guards
 - [ ] The HQ registers as a frozen site
 - [ ] `DUWS_garrisonUnit` replaced by a store lookup
 - [ ] `info/zones_and_civilians.md` rewritten around one lifecycle

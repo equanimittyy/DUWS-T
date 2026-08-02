@@ -197,6 +197,22 @@ _turret5 allowdamage false;
 [_groupGuard, _centerPos] call bis_fnc_taskDefend;
 
 _fob setVariable ["FOB_turrets", [_turret1, _turret2, _turret3, _turret4, _turret5]];
+
+// Filed under the site as its emplacement occupant, so the freeze reaches the ring and not only the
+// guards standing beside it. A turret is a vehicle with a full FSM, so five of them per FOB at up to
+// floor(zones x 0.7) FOBs is the larger half of what a base costs while nobody is there.
+//
+// The FOB building and its props are deliberately not registered. Freezing a static building buys
+// almost nothing, and it is the object carrying the base's action menu and its respawn point --
+// a saving worth nothing is not worth putting those behind enableSimulationGlobal.
+private _emplacements = [_fobKey, "emplacement"] call fnc_site_roster;
+[_fobKey, "emplacement"] call fnc_site_roster_clear;
+{
+	if (!isNull _x) then {
+		_emplacements pushBack _x;
+		_emplacements append (crew _x);
+	};
+} forEach [_turret1, _turret2, _turret3, _turret4, _turret5];
 _fob setVariable ["FOB_fortify_busy", false];
 
 // No scroll entry added here. Guards and defences are one redeploy action now, added by
