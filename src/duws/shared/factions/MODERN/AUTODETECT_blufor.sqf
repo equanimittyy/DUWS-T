@@ -291,33 +291,14 @@ b_arraysToRandomize = [
 	"blufor_SPECOPS_ENG_X"
 ];
 
-// randomise faction data, place holder until duws has similar functionality
-{
-	// transform vars defined in faction files to str if array
-	_factionUnitVarName = _x;													// ex. blufor_SOLDIER_LAT_X
-	_factionUnitVarData = missionNamespace getVariable _factionUnitVarName;	    // ex. ["B_Soldier_LAT_F", "B_Soldier_GL_F", "B_Soldier_TL_F"] or "B_Soldier_F"
-	if (typeName _factionUnitVarData == "ARRAY") then {
-
-		// schedule var randomization every N sec
-		[_factionUnitVarData, _factionUnitVarName] spawn {
-			scriptName "Random Unit Type Selector for Units Defined As Arrays";
-			params ["_factionUnitVarData", "_factionUnitVarName"];
-			while{true} do {
-				_randomSelection = selectRandom _factionUnitVarData;
-				// blufor randomization broadcast across network incl JIP
-				missionNamespace setVariable [_factionUnitVarName, ( if (isNil {_randomSelection}) then [{ "" }, { _randomSelection }] ), true];
-				sleep 300; 
-			};
-		};		
-	};
-} forEach b_arraysToRandomize;
+// Pools published, not collapsed by a timer. See fnc_faction_pools for what the thread per
+// role that used to sit here got wrong.
+[b_arraysToRandomize] call fnc_faction_pools_publish;
 sleep 1;
-[] spawn {
-	scriptName "reinit/randomize blufor squads periodically - every 5 minutes";
-	while{sleep 300.00; true} do {
-		[] call fnc_BLUFOR_squad_init;
-	};
-};
+// The five-minute squad rebuild that used to sit here went with the re-pick it was chasing: it
+// existed to fold newly drawn role classnames into the purchasable squads. server_init calls
+// fnc_BLUFOR_squad_init once, which is right for a catalogue -- a price list that reshuffles under
+// the player mid-purchase is worse than a stable one.
 
 blufor_autodetect_faction_init = true;
 publicVariable "blufor_autodetect_faction_init";

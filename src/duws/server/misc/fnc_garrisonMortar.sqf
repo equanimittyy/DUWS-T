@@ -11,7 +11,7 @@
 // composition naming this token gets the pair whatever else has been ground down.
 params ["_pos", "_radius", ["_strength", 1]];
 
-private _men = [[opfor_SOLDIER_X, opfor_SOLDIER_X]] call fnc_opforRoles;
+private _men = [[["opfor_SOLDIER_X"] call fnc_faction_pick, ["opfor_SOLDIER_X"] call fnc_faction_pick]] call fnc_opforRoles;
 private _group = [_pos, EAST, _men, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 

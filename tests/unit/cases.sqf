@@ -429,6 +429,26 @@ DUWS_zoneSpawnTiers = [["patrol"], ["patrol", "car"], ["patrol", "apc"],
 ["spawnCategory: an unlisted token is treated as light rather than dropped",
     (["O_MBT_02_cannon_F"] call DUWS_fnc_spawnCategory), "light"] call fnc_assertEq;
 
+// --- fnc_faction_pick: one classname per spawn, drawn from the detected pool ---
+// The pool is what detection found; the global is a stable representative for the two hundred-odd
+// sites that read it directly. Picking happens where units are raised, so two zones standing up in
+// the same second field different vehicles -- which is the variety the timed re-pick could not give.
+DUWS_factionPool_opfor_TEST_X = ["cls_a", "cls_b", "cls_c"];
+opfor_TEST_X = "cls_a";
+["faction_pick: draws from the pool", (["opfor_TEST_X"] call fnc_faction_pick) in ["cls_a","cls_b","cls_c"], true] call fnc_assertEq;
+// A hand-written faction file assigns a plain string and gets no pool. It must still answer.
+opfor_PLAIN_X = "cls_plain";
+["faction_pick: a role with no pool falls back to its global",
+    (["opfor_PLAIN_X"] call fnc_faction_pick), "cls_plain"] call fnc_assertEq;
+// Fail closed rather than inventing a class: fnc_opforRoles drops the empty answer, where a
+// substitute would hide a missing role behind a unit that spawns.
+["faction_pick: a role the faction never defined answers with nothing",
+    (["opfor_NEVER_X"] call fnc_faction_pick), ""] call fnc_assertEq;
+DUWS_factionPool_opfor_EMPTY_X = [];
+opfor_EMPTY_X = [];
+["faction_pick: an empty pool answers with nothing, not nil",
+    (["opfor_EMPTY_X"] call fnc_faction_pick), ""] call fnc_assertEq;
+
 // --- the access filter: three reasons to drop a token, never to substitute one ---
 ["tokenClass: a token resolves to the classname its faction role holds",
     (["apc"] call DUWS_fnc_tokenClass), "cls_apc"] call fnc_assertEq;

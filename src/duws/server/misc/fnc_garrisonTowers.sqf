@@ -28,13 +28,10 @@ private _posts = [];
 if (_posts isEqualTo []) exitWith { [] };
 _posts = [_posts, _strength] call fnc_zone_thin;
 
-private _roles = [[
-    opfor_SOLDIER_X,
-    opfor_AR_SOLDIER_X,
-    opfor_GL_SOLDIER_X,
-    opfor_LAT_SOLDIER_X,
-    opfor_MARK_SOLDIER_X
-]] call fnc_opforRoles;
+private _roles = [([
+    "opfor_SOLDIER_X", "opfor_AR_SOLDIER_X", "opfor_GL_SOLDIER_X",
+    "opfor_LAT_SOLDIER_X", "opfor_MARK_SOLDIER_X"
+] apply { [_x] call fnc_faction_pick })] call fnc_opforRoles;
 
 private _groups = [];
 {

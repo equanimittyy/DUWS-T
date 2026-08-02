@@ -171,7 +171,9 @@ DUWS_fnc_tokenClass = {
     // rather than quietly losing a category.
     if (_setting != "" && {(missionNamespace getVariable [_setting, 1]) != 1}) exitWith { "" };
     if (_ap > 0 && {(missionNamespace getVariable ["WARCOM_opfor_ap", 0]) < _ap}) exitWith { "" };
-    missionNamespace getVariable [_role, ""]
+    // Drawn per spawn, not held as one value the whole campaign fields at once: two zones raised in
+    // the same second should not both put down the identical APC.
+    [_role] call fnc_faction_pick
 };
 
 // What is missing from _have to make it _want, counting duplicates: two patrols wanted against one
@@ -281,9 +283,9 @@ DUWS_fnc_teamRow = {
 // A token names one vehicle and never a bucket to roll in. The pool this replaces weighted four
 // trucks alongside three APCs and a tank under the name "armored", so roughly one armour slot in six
 // stood a supply truck on an objective -- and a large zone rolled that dip twice. Variety is not
-// lost with it: under faction auto-detection each role global below re-picks from its faction's own
-// pool every five minutes (AUTODETECT_opfor.sqf), so a deterministic token still fields a different
-// APC across a campaign. What goes is the randomness no table could see.
+// lost with it: the role below names a faction pool, and fnc_faction_pick draws from that pool as
+// each vehicle is placed, so two zones raised in the same second field different APCs. What goes is
+// the randomness no table could see -- a bucket the composition named but could not describe.
 //
 // role -- the faction global holding the classname, named rather than referenced: a faction table
 //         that omits a role leaves its global undefined, and an undefined name inside an array
@@ -368,7 +370,9 @@ DUWS_fnc_teamRoster = {
     private _names = [];
     if (_leader != "") then { _names pushBack _leader };
     _names append _men;
-    [_names apply { missionNamespace getVariable [_x, ""] }] call fnc_opforRoles
+    // Drawn at the moment the team is raised, so two squads standing up in the same second are not
+    // the same five men. The pool behind each role is fnc_faction_pools.
+    [_names apply { [_x] call fnc_faction_pick }] call fnc_opforRoles
 };
 
 // Called rather than spawned, for the group each one hands back: the capture test counts this

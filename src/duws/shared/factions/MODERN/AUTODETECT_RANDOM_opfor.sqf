@@ -147,24 +147,9 @@ o_arraysToRandomize = [
 ];
 
 
-// randomise faction data, place holder until duws has similar functionality
-{
-	// transform vars defined in faction files to str if array
-	_factionUnitVarName = _x;													// ex. blufor_SOLDIER_LAT_X
-	_factionUnitVarData = missionNamespace getVariable _factionUnitVarName;	    // ex. ["B_Soldier_LAT_F", "B_Soldier_GL_F", "B_Soldier_TL_F"] or "B_Soldier_F"
-	if (typeName _factionUnitVarData == "ARRAY") then {
-		
-		// schedule var randomization every N sec
-		[_factionUnitVarData, _factionUnitVarName] spawn {
-			params ["_factionUnitVarData", "_factionUnitVarName"];
-			while{true} do {
-				_randomSelection = selectRandom _factionUnitVarData;
-				missionNamespace setVariable [_factionUnitVarName, ( if (isNil {_randomSelection}) then [{ "" }, { _randomSelection }] )];
-				sleep 300; 
-			};
-		};		
-	};
-} forEach o_arraysToRandomize;
+// Pools published, not collapsed by a timer. See fnc_faction_pools for what the thread per
+// role that used to sit here got wrong.
+[o_arraysToRandomize] call fnc_faction_pools_publish;
 sleep 1;
 
 opfor_autodetect_faction_init = true;

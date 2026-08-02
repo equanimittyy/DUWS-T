@@ -197,21 +197,9 @@ o_arraysToRandomize = [
     "opfor_SPECOPS_ENG_X"
 ];
 
-// 随机化循环
-{
-    private _factionUnitVarName = _x;
-    private _factionUnitVarData = missionNamespace getVariable _factionUnitVarName;
-    if (typeName _factionUnitVarData == "ARRAY") then {
-        [_factionUnitVarData, _factionUnitVarName] spawn {
-            params ["_factionUnitVarData", "_factionUnitVarName"];
-            while {true} do {
-                private _randomSelection = selectRandom _factionUnitVarData;
-                missionNamespace setVariable [_factionUnitVarName, _randomSelection, true];
-                sleep 300;
-            };
-        };
-    };
-} forEach o_arraysToRandomize;
+// Pools published, not collapsed by a timer. See fnc_faction_pools for what the thread per
+// role that used to sit here got wrong.
+[o_arraysToRandomize] call fnc_faction_pools_publish;
 sleep 1;
 
 opfor_autodetect_faction_init = true;

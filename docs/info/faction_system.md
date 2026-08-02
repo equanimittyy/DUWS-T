@@ -91,9 +91,17 @@ Trailing comments name the consuming function for each variable — the de-facto
 - **`fnc_factionSelector`** is a listbox of all present factions (`fnc_getAllFactionsClean` over
   `BIS_fnc_getFactions`); on dedicated it is `remoteExec`d to the admin.
 - The `AUTODETECT_{blufor,opfor}.sqf` wrappers add an `EntityCreated` handler (`fnc_vehiclePostInit`) that
-  retextures and re-crews vehicles spawned for a mismatched faction, then every 300 s re-roll array-valued
-  role variables and re-run squad init. `AUTODETECT_RANDOM_opfor.sqf` is the same pipeline but auto-picks a
-  random faction instead of prompting.
+  retextures and re-crews vehicles spawned for a mismatched faction, then hand every array-valued role to
+  `fnc_faction_pools_publish`. `AUTODETECT_RANDOM_opfor.sqf` is the same pipeline but auto-picks a random
+  faction instead of prompting.
+
+  **Detection derives once; the pick happens per spawn.** A role global holds one classname because every
+  spawner hands it straight to `BIS_fnc_spawnGroup` or `createVehicle`, so the several candidates detection
+  finds are kept beside it in `DUWS_factionPool_<role>` and drawn from by `fnc_faction_pick` at the moment
+  a unit is placed. A thread per role re-rolling the global every 300 s did this before, which gave variety
+  across *time* rather than across the map — every zone raised in the same five-minute window fielded the
+  identical APC — while drifting the faction identity detection exists to establish, and costing seventy
+  permanent scripts and seventy broadcasts every five minutes for a value only read at spawn.
 
 ## Custom factions
 
@@ -110,7 +118,9 @@ input; it is server-side and gated behind the custom-faction dialog.
 `server/init_hq/fnc_BLUFOR_squad_init.sqf` and `server/warcom/fnc_OPFOR_squad_init.sqf` compose
 higher-order groups from the role variables — recon team, infantry squad, motorized / mechanized / armor
 sections — each tagged with a CP price (e.g. `blufor_INF_SQUAD_X = [_squad, "Infantry Squad (12CP)", 12]`).
-Autodetect re-runs squad init every five minutes so squads track the re-rolled unit types.
+Squad init runs once at boot. It composed from the role globals and was re-run every five minutes to track
+the re-rolled classnames; with the roles stable that rebuild produced identical data, and a purchasable
+catalogue whose prices reshuffle under the player is worse than a fixed one.
 
 Civilians are templated separately. `shared/factions/CIV_FACTIONS.sqf` sets `civ_array` from the
 `CIV_PRESENCE` parameter, choosing a classname list per source: vanilla (regional variants), CUP, CFP,
