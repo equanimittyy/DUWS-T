@@ -79,23 +79,15 @@ DUWS_zoneSpawnTiers = [
 ];
 // --DUWS-UNITCOMP END--
 
-// Added when more than two players are in the session. Appended after the radius multiply rather
-// than before it, so co-op scaling stays a flat handful of groups instead of being multiplied into
-// the largest zones as well.
-// --DUWS-UNITCOMP BEGIN name="Zone co-op extra" kind=composition rowname="Tier %1" row="tier I..IV"--
-DUWS_zoneCoopExtra = [
-    [],
-    ["patrol"],
-    ["patrol", "armored"],
-    ["patrol", "team"]
-];
-// --DUWS-UNITCOMP END--
-
 // A zone's spawn list: its tier composition, each entry repeated as many times as its category's
-// radius multiplier asks for, then the co-op extra. Takes the tier and the radius rather than
-// reading either, so the sizing is testable without the engine.
+// radius multiplier asks for. Takes the tier and the radius rather than reading either, so the
+// sizing is testable without the engine.
+//
+// Player count does not enter into it. A zone is its tier and its radius -- three levers the player
+// can see and the commander can spend against -- and head-count scaling was none of those: it made
+// co-op zones harder while leaving co-op towns untouched, which nothing ever chose.
 DUWS_fnc_zoneSpawnList = {
-    params ["_tier", "_size", ["_coop", false]];
+    params ["_tier", "_size"];
     private _t = (((round _tier) max 1) min (count DUWS_zoneSpawnTiers)) - 1;
     private _i = DUWS_zoneRadiusMult findIf { _size < (_x select 0) };
     if (_i < 0) exitWith { [] };
@@ -110,8 +102,6 @@ DUWS_fnc_zoneSpawnList = {
         private _n = _row param [_ci + 1, 1];
         for "_k" from 1 to _n do { _out pushBack _token };
     } forEach (DUWS_zoneSpawnTiers select _t);
-
-    if (_coop) then { _out append (DUWS_zoneCoopExtra select _t) };
     _out
 };
 
@@ -260,7 +250,7 @@ fnc_zone_spawn = {
     private _roster = [_zoneKey] call fnc_zone_roster;
 
     private _tier = [_zoneKey] call fnc_zone_tier;
-    private _spawns = [_tier, _size, count (call BIS_fnc_listPlayers) > 2] call DUWS_fnc_zoneSpawnList;
+    private _spawns = [_tier, _size] call DUWS_fnc_zoneSpawnList;
     if (_spawns isEqualTo []) exitWith {
         ["ERROR", "ZONES", format ["no radius band covers %1 for %2", _size, _zoneKey]] call fnc_log;
     };

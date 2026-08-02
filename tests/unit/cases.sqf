@@ -406,7 +406,6 @@ opfor_TL_X = "cls_TL";
 DUWS_zoneRadiusMult = [[101, 1, 1, 0, 0], [1e11, 3, 1, 2, 1]];
 DUWS_zoneSpawnTiers = [["patrol"], ["patrol", "car"], ["patrol", "armored"],
     ["patrol", "team", "car", "armored", "air"]];
-DUWS_zoneCoopExtra = [[], [], [], ["team"]];
 
 ["spawnCategory: a team is filed by the category on its own row",
     (["wpteam"] call DUWS_fnc_spawnCategory), "infantry"] call fnc_assertEq;
@@ -439,10 +438,6 @@ DUWS_zoneSpawnTiers = _savedTiers;
     ["patrol","patrol","patrol","team","team","team","car","armored","armored","air"]] call fnc_assertEq;
 ["zoneSpawnList: tier picks the composition, radius only scales it",
     ([1, 5000] call DUWS_fnc_zoneSpawnList), ["patrol","patrol","patrol"]] call fnc_assertEq;
-// Appended after the multiply, so co-op adds a flat handful rather than another multiplied band.
-["zoneSpawnList: the co-op extra is not multiplied",
-    ([4, 5000, true] call DUWS_fnc_zoneSpawnList),
-    ["patrol","patrol","patrol","team","team","team","car","armored","armored","air","team"]] call fnc_assertEq;
 ["zoneSpawnList: a tier above the table clamps rather than faulting",
     ([9, 50] call DUWS_fnc_zoneSpawnList), ["patrol", "team", "car"]] call fnc_assertEq;
 
