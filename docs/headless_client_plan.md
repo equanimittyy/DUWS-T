@@ -69,7 +69,7 @@ Mobile WARCOM groups only:
 |---|---|
 | BLUFOR assault | `server/warcom/fnc_WARCOM_blu_assault.sqf:50-113` |
 | BLUFOR patrol | `server/warcom/fnc_WARCOM_blu_patrol.sqf` |
-| Vehicle crews for the above | `server/misc/fnc_random_veh.sqf:105` |
+| Vehicle crews for the above | `server/warcom/fnc_random_veh_blu_patrol.sqf:56-61` |
 
 The OPFOR half of this table is empty on purpose: the enemy patrol, assault and air spawners were
 deleted, so until an OPFOR commander replaces them nothing mobile spawns on that side. Whatever it
@@ -118,7 +118,7 @@ machine sets skill on the units it owns.
 | `server/server_fnc_init.sqf` | Registry lines. |
 | `server/server_var_init.sqf` | Declare `DUWST_hc_owner` defaulting to `2`. |
 | `server/warcom/fnc_WARCOM_blu_assault.sqf:50-113`, `fnc_WARCOM_blu_patrol.sqf` | Hand off after spawn. |
-| `server/misc/fnc_random_veh.sqf:105` | Hand off crews with their group. |
+| `server/warcom/fnc_random_veh_blu_patrol.sqf:56-61` | Hand off crews with their group. |
 | `server/warcom/fnc_WARCOM_wp_*.sqf` call sites | Route to `groupOwner`. |
 | `server/misc/fnc_AI_Master_Control.sqf:5,22-26` | Filter to `local _x`; run on server and HC. |
 | `info/server_client_authority.md` | Document the HC as a third machine role and the handoff contract. |
@@ -136,12 +136,11 @@ machine sets skill on the units it owns.
 ## Decided trade-offs
 
 **Zone garrisons stay on the server.** They are the larger share of the AI, so this leaves
-performance on the table. The reason is `zone_spawn_array`: it is deliberately server-local
-(`server/server_var_init.sqf:198`) and it is the control channel between the per-zone loop at
-`server/init_zones/fnc_createzone.sqf:295,320-331` and `server/init_zones/fnc_spawnWait.sqf:49,95,110,135-136`.
-Moving garrison AI to an HC means either broadcasting that array or moving both loops to the HC,
-and both options put campaign-critical spawn/despawn logic on a machine that may not be
-connected. Mobile groups are already transient, already respawned freely, and carry no shared
+performance on the table. The reason is the site store: `DUWS_sites` and `DUWS_occupants` are
+server-local, and the one poller that services them decides every spawn and despawn in the campaign
+(`server/misc/fnc_site_stream_init.sqf`). Moving garrison AI to an HC means either broadcasting that
+store or moving the poller itself, and both put campaign-critical lifecycle logic on a machine that
+may not be connected. Mobile groups are already transient, already respawned freely, and carry no shared
 state — they are the safe half. Revisit garrisons once the mobile half is proven in play.
 
 **`fnc_hc_init.sqf` keeps its name.** Renaming it to something unambiguous would touch the file,

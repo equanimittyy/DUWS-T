@@ -394,7 +394,7 @@ DUWS_fnc_zoneSpawnOne = {
         ["WARN", "ZONES", format ["%1 cannot be fielded here and was not filtered out", _token]] call fnc_log;
         grpNull
     };
-    [_class, _pos, _size] call fnc_random_veh
+    [_class, _pos, _size] call fnc_spawn_vehicle
 };
 
 // Called by the zone raise worker, which owns the streaming decisions around it. Nothing guards a

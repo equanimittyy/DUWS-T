@@ -16,7 +16,7 @@ private _offsets = [[30, 20], [30, 0], [35, 0]];
 // returns.
 private _fnc_claimInf = { [(["patrol"] + _this) call fnc_spawn_team] call fnc_mission_claim };
 private _fnc_claimTeam = { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
-private _fnc_claimVeh = { [_this call fnc_random_veh] call fnc_mission_claim };
+private _fnc_claimVeh = { [_this call fnc_spawn_vehicle] call fnc_mission_claim };
 
 for "_i" from 1 to _patrols do {
     sleep 1;

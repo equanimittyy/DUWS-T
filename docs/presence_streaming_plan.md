@@ -429,7 +429,7 @@ falsifiable:
 | `server/init_zones/fnc_createzone.sqf` | registers the site instead of running the tail loop |
 | `server/init_zones/fnc_createopfortified.sqf` | deleted; its four passes become tokens |
 | `server/init_zones/fnc_zone_spawn_sizes.sqf` | the `composition` hook; `fortification` category, `mortar` row, `dig-in` behaviour, never-thinned marker |
-| `server/init_zones/fnc_random_veh.sqf` | reduced to placing a named vehicle; the pools and the `if` chain go |
+| `server/init_zones/fnc_random_veh.sqf` | reduced to placing a named vehicle and renamed `fnc_spawn_vehicle.sqf`; the pools and the `if` chain go |
 | `server/init_zones/fnc_zone_state_init.sqf` | roster, count, generation and peak accessors move to the store; `fnc_zone_thin` distributes a man count |
 | `server/init_zones/fnc_captured.sqf`, `fnc_blufor_cap.sqf` | clear-trigger re-arming removed |
 | `server/misc/fnc_civ_state_init.sqf` | town holds, tier and reinforce accessors move to the store |

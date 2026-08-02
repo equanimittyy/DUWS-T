@@ -260,7 +260,7 @@ correct for a fresh campaign, and each is resolved in the design below.
 
 | Problem | Where | Consequence for a restore |
 |---|---|---|
-| `fnc_createZone` appends to `zone_namePOS_pairs`, `Array_of_OPFOR_zones` and `zone_spawn_array`, and increments `amount_zones_created` | `server/init_zones/fnc_createzone.sqf:19-34` | Restoring those globals *and* replaying the builder counts every zone twice |
+| `fnc_createZone` appends to `zone_namePOS_pairs` and `Array_of_OPFOR_zones`, registers the site, and increments `amount_zones_created` | `server/init_zones/fnc_createzone.sqf:19-34` | Restoring those globals *and* replaying the builder counts every zone twice |
 | `fnc_WARCOM_init` clears the BLUFOR zone list and hands every zone back to OPFOR | `server/warcom/fnc_WARCOM_init.sqf:38-46` | Ownership applied before it runs is wiped; every capture is lost |
 | The setup-screen gates block on globals a *client* publishes | `server/server_init.sqf:46,52` | A restore has no player at those screens, so boot never gets past them |
 | The locator `spawn`s `fnc_createZone` per zone, so builds finish out of order | `server/init_zones/fnc_locatorzones_random.sqf:181` | Registration order is not zone order, so anything keyed by array position is keyed to the wrong zone. `zone_meta_array` carries `_zone_num` for this reason |
@@ -718,7 +718,7 @@ standing.
 
 Live AI, spawned garrisons, active side missions, in-flight support, and the JIP task queue. Zone
 garrisons and composition props both spawn and despawn on player distance
-(`server/init_zones/fnc_spawnWait.sqf`), so a restored campaign regenerates them the first time a
+(`server/misc/fnc_site_stream_init.sqf`), so a restored campaign regenerates them the first time a
 player approaches — the same code path a fresh campaign uses.
 
 Session-scoped locks go with them and must come back clear: the per-support fire-mission locks, the

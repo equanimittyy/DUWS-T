@@ -166,7 +166,7 @@ fnc_zone_tier = {
 //
 // Skewed to the top: most zones are the full-strength objective the campaign has always fielded, and
 // the lower tiers are the occasional soft one worth taking early. selectRandomWeighted rather than a
-// hand-rolled cumulative sum, as fnc_createzone's prefab pick and fnc_random_veh both already use.
+// hand-rolled cumulative sum, as fnc_createzone's prefab pick already uses.
 fnc_zone_tier_roll = {
 	params ["_zoneKey"];
 	private _var = format ["DUWS_zoneTier_%1", _zoneKey];

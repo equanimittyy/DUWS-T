@@ -277,7 +277,7 @@ select the wrong one.
 
 **Such a match is an identity test, not a proximity one**, and the two read alike at a glance. The
 tolerance is float slop and its exact value carries no meaning — unlike the radii in
-`fnc_spawnWait` or `fnc_duws_bluforNear`, where the distance *is* the question and the number is
+`fnc_site_poller` or `fnc_duws_bluforNear`, where the distance *is* the question and the number is
 tuned. Comment the difference where you write it, or the next reader folds an identity lookup in
 with the gameplay ranges.
 

@@ -222,7 +222,7 @@ fnc_enemy_contact = compile preprocessFileLineNumbers "duws\server\misc\fnc_enem
 // Publishes DUWS_zoneHooks and the placers around it; after the zone state file it reads.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_stream_init.sqf";
 fnc_spawn_team = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawn_team.sqf";
-fnc_random_veh = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_random_veh.sqf";
+fnc_spawn_vehicle = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawn_vehicle.sqf";
 fnc_zone_reveal = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_reveal.sqf";
 fnc_hardcore_visible_recalc = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardcore_visible_recalc.sqf";
 fnc_zone_spawn_sizes = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_spawn_sizes.sqf";

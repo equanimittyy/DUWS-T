@@ -200,12 +200,9 @@ by the category's *position*, so a name that is not in it would resolve to the r
 and field that many groups. A team's category is editable, so that is reachable rather than
 theoretical.
 
-An unlisted token is a vehicle classname a faction file named directly, which `fnc_random_veh`
-resolves. Those count as `light` — multiplier one everywhere — so a mod's own class still spawns and
-never at three times the intended count.
-
-`DUWS_zoneCoopExtra` is appended **after** the multiply, so a session with more than two players
-gains a flat handful of groups rather than another multiplied band.
+An unlisted token is a vehicle classname a faction file named directly, which `DUWS_fnc_tokenClass`
+passes through unchanged for `fnc_spawn_vehicle` to place. Those count as `light` — multiplier one
+everywhere — so a mod's own class still spawns and never at three times the intended count.
 
 Zones cap at what the largest radius asks of a tier IV composition, which is where the old
 radius-band table topped out. Towns are not multiplied by radius at all — see

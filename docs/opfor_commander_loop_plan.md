@@ -138,8 +138,8 @@ Aggressive weights threat and reach against ground the player holds.
 `selectRandomWeighted` over the highest-scoring three, not `argmax`. Argmax is deterministic and a
 player reads it inside two campaigns; sampling among the top few keeps every decision defensible
 while keeping the campaign unpredictable. It is also the mission's existing idiom —
-`server/init_zones/fnc_createzone.sqf:142` picks prefabs with it and
-`server/init_zones/fnc_random_veh.sqf:15` picks zone vehicles.
+`server/init_zones/fnc_createzone.sqf:142` picks prefabs with it. Zone vehicles are deliberately not
+picked: the tier table names what a zone fields, so nothing rolls where a table could not see it.
 
 **Banking is a candidate, not a policy.** A "spend nothing" entry with a low flat score loses
 whenever anything sensible is affordable and wins when everything else has saturated. That is what

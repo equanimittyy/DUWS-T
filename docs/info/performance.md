@@ -35,8 +35,8 @@ answer genuinely differs per unit.
 The shape's worst instance is gone with the airdrop reinforcement it belonged to: one monitor per zone
 re-filtered `allUnits` by side and distance every 5 s, and kept doing it until that zone's defenders
 fell to a quarter of their starting count — which for a zone the player never attacks is never.
-`fnc_spawnWait.sqf:23-26` is the shape done right, and answers a comparable question per zone off the
-spatial index instead.
+`fnc_duws_bluforNear` is the shape done right, and answers a comparable question per site off the
+spatial index instead — behind a player-list pre-gate, so a site nobody is near pays nothing.
 
 ## AI caching ships disabled, and re-enabling it is not a one-line change
 
@@ -45,9 +45,9 @@ spatial index instead.
 they exist.
 
 Caching is normally the largest single lever in a dynamic Arma campaign, so the temptation is to
-switch it on. The reason not to do that blind: `src/duws/server/init_zones/fnc_spawnWait.sqf` already
-implements a coarser version of the same idea, one instance per zone. It waits for BLUFOR within the
-zone radius plus 400 m, holds the zone spawned for a 5-minute grace period after they leave, and then
+switch it on. The reason not to do that blind: `src/duws/server/misc/fnc_site_stream_init.sqf` already
+implements a coarser version of the same idea, one pass for every site. It waits for BLUFOR within the
+zone radius plus 400 m, holds the zone spawned for a grace period after they leave, and then
 **deletes** the units outright (`:144-155`).
 
 Two systems that both despawn and restore AI, one deleting and one caching, do not compose. The
@@ -55,10 +55,11 @@ failure modes to check for before enabling anything are a zone that never repopu
 cache restored units the zone logic had already deleted, and a garrison that doubles because both
 systems restored it. Any evaluation has to decide which system owns zone AI, not run both.
 
-## A FOB garrison sleeps rather than despawning
+## A base garrison sleeps rather than despawning
 
-`server/init_hq/fnc_FOBgarrisonSleep.sqf` stops simulating a FOB's twelve soldiers once no player
-has been within `base_garrison_sleep_range` for `base_garrison_sleep_delay`. Nothing culled them
+The `freeze` disposal mode (`server/misc/fnc_site_stream_init.sqf`) stops simulating a base's
+occupants — a FOB's twelve soldiers and its turret ring, and the HQ's garrison — once no player has
+been within `base_garrison_sleep_range` for `base_garrison_sleep_delay`. Nothing culled them
 before, so the count grew with the campaign: the FOB cap is `floor(zones x 0.7)`, which is 168
 permanently-simulated soldiers on a 20-zone map.
 

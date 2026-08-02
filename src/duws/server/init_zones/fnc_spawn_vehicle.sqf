@@ -1,13 +1,16 @@
 // Locality: server -- called from the zone spawn path and the mission patrol builders, all
 // server-side.
 //
-// Places one named vehicle and gives it a patrol circuit. It picks nothing: which vehicle a token
-// fields, and whether the side may field it at all, is DUWS_spawnVehicles and DUWS_fnc_tokenClass.
+// Places one named vehicle and gives it a patrol circuit -- the vehicle half of fnc_spawn_team, and
+// named to match it. It picks nothing: which vehicle a token fields, and whether the side may field
+// it at all, is DUWS_spawnVehicles and DUWS_fnc_tokenClass. The name it had before said otherwise,
+// which stopped being true when the pools went and left it reading as the twin of
+// fnc_random_veh_blu_patrol, which still is a roll.
 // The weighted pools this replaces were a second, invisible composition -- an "armored" slot rolled
 // against four trucks, and an air slot with helicopters switched off fell through to the same pool
 // and became a truck.
 //
-// usage: [_class, _pos, _radius] call fnc_random_veh
+// usage: [_class, _pos, _radius] call fnc_spawn_vehicle
 //
 // Returned rather than spawned into the void, for the callers that count what they raised.
 params ["_class", "_patrolCenter", "_radius"];

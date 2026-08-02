@@ -34,7 +34,6 @@ Routing a hardpoint through either puts it into every consumer of zone state at 
 | `zoneundercontrolblu` | `server/init_zones/fnc_zone_state_init.sqf:47,60` | Passive income becomes `(zones + hardpoints) * 6` per 30 min (`server/misc/fnc_zonesundercontrol.sqf:32`) — the largest balance blow-up available |
 | `WARCOM_zones_controled_by_OPFOR` | `server/init_zones/fnc_zone_state_init.sqf:45,57-58` | Index 0 is the OPFOR primary assault target. A lost hardpoint redirects the entire enemy war effort. 25+ read sites |
 | `zone_namePOS_pairs` | `server/init_zones/fnc_createzone.sqf:28-29` | Intel reveals pick a random entry from the unrevealed set (`server/misc/fnc_intel_payout.sqf:20,61-62`), so hardpoints dilute what intel is worth |
-| `zone_spawn_array` | `:32` | Lookup is positional — `find [_zone_num,false,false]` (`:221`) — so a duplicate number matches the wrong entry |
 
 The hardpoint tier therefore gets parallel state built to the same template, and touches none
 of the above. The one deliberate coupling is a *read*: the zone capture trigger reads a
@@ -93,8 +92,9 @@ zero weight relies on `selectRandomWeighted` semantics that are not worth depend
   cannot be five AA guns;
 - for director builds only, OPFOR AP has not unlocked it.
 
-`selectRandomWeighted` is the mission's idiom for exactly this — `fnc_createzone.sqf:113-121`
-picks prefabs with it and `fnc_random_veh.sqf` picks zone vehicles with it.
+`selectRandomWeighted` is the mission's idiom for exactly this — `fnc_createzone.sqf:113-121` picks
+prefabs with it. Zone vehicles are no longer picked at all: a composition names what it fields, and
+`fnc_spawn_vehicle.sqf` places that class.
 
 ### The indirect-fire types are capped campaign-wide
 
@@ -145,7 +145,7 @@ returns `_turretAT`, `_turretAA`, `_turretMortar` and `_arty`
 (`shared/factions/MODERN/fn_factionAutoDetect.sqf:583-586,614`); the OPFOR generator discards all
 four, while the BLUFOR one keeps its turret equivalents (`AUTODETECT_blufor.sqf:118-121`). Four
 lines in each autodetect generator plus entries in `o_arraysToRandomize`
-(`AUTODETECT_opfor.sqf:186`) closes the gap.
+(`AUTODETECT_opfor.sqf`), which is the list handed to `fnc_faction_pools_publish`, closes the gap.
 
 | New global | Parsed from | Vanilla fallback |
 |---|---|---|
@@ -472,8 +472,8 @@ Only the map marker stays. A cleared hardpoint's marker is the record the player
 and it costs nothing to keep.
 
 Thresholds match the zone gate so the two feel the same: spawn at 600 m from any player, despawn
-after 300 s with nobody inside 600 m (`fnc_spawnWait.sqf:12-14` uses a 400 m buffer on the zone
-radius and the same 300 s timer).
+after 300 s with nobody inside 600 m (a zone's occupant carries a 400 m buffer on its radius and a
+120 s grace; see `server/misc/fnc_site_stream_init.sqf`).
 
 ### Which key a hardpoint files under decides its whole lifecycle
 
@@ -749,8 +749,8 @@ would grow that without bound, for work that is a single pass over a few short a
 50 hardpoints against 8 players is 400 distance tests every 20-30 s, which is noise.
 
 Zone hardpoint garrisons ride the zone's existing spawn/despawn cycle
-(`server/init_zones/fnc_spawnWait.sqf`), whose radius is `_size + 400` and therefore already
-covers the whole annulus. Two properties of its cleanup at `:107-121` decide the design:
+(`server/init_zones/fnc_zone_stream_init.sqf`), whose radius is the zone's plus its 400 m buffer and
+therefore already covers the whole annulus. Two properties of its teardown decide the design:
 
 - It skips `StaticWeapon`, so hardpoint **cores survive a despawn**. The re-spawn path must
   re-crew the existing core, never create a second one, or a zone accumulates a fresh turret on
