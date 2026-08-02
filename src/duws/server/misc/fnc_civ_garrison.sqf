@@ -69,9 +69,11 @@ private _fnc_raise = {
         missionNamespace setVariable [RAISE_SLOT(_i), []];
     };
 
+    // Filtered before it is thinned, so attrition reduces the force the side can actually field
+    // rather than a composition that is about to lose entries to a campaign setting anyway.
     // Thinned by what the town has left, the way a zone's band is. A town beaten once fields a
     // fraction of its tier from then on, so the composition is the ceiling rather than the promise.
-    private _want = [DUWS_townSpawnTiers select (_tier - 1), _strength] call fnc_zone_thin;
+    private _want = [[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter, _strength] call fnc_zone_thin;
     private _roster = [_want, _centre, _radius] call DUWS_fnc_raiseGarrison;
 
     // OPFOR standing inside the trigger's own area, which is what makes the town clearable. SEIZED
@@ -310,7 +312,7 @@ while {true} do {
         // different list every call, and an unchanged town would appear to owe men forever.
         if ((_tier > (_t get "deployed") || _strength > (_t get "deployedStrength"))
             && {!_near}) then {
-            private _want = [DUWS_townSpawnTiers select (_tier - 1), _strength] call fnc_zone_thin;
+            private _want = [[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter, _strength] call fnc_zone_thin;
             private _added = [[_t get "deployedList", _want] call DUWS_fnc_spawnDiff, _centre, _radius] call DUWS_fnc_raiseGarrison;
             (_t get "roster") append _added;
             // Added to the baseline rather than re-measured from the roster. A garrison ground down

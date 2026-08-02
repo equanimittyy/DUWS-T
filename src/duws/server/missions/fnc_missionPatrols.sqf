@@ -13,8 +13,7 @@ private _offsets = [[30, 20], [30, 0], [35, 0]];
 // to. The claim lives here, not in the builders, which are shared with zone and town garrisons.
 //
 // Each builder is `call`ed from inside its own thread -- the only way to read back the group it
-// returns. The wrapper is what makes that safe: fnc_random_veh assigns _radius and _vehpos without
-// `private`, which would otherwise clobber the same names in this scope.
+// returns.
 private _fnc_claimInf = { [(["patrol"] + _this) call fnc_spawn_team] call fnc_mission_claim };
 private _fnc_claimTeam = { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
 private _fnc_claimVeh = { [_this call fnc_random_veh] call fnc_mission_claim };
@@ -27,10 +26,14 @@ for "_i" from 1 to _patrols do {
 sleep 1;
 [[(_missionPos select 0), (_missionPos select 1)+35], _radius] spawn _fnc_claimTeam;
 sleep 1;
-if (WARCOM_opfor_ap > 100) then {
-    [OPFOR_Faction_X,"armored",[(_missionPos select 0)+30, (_missionPos select 1)+10],_radius] spawn _fnc_claimVeh;
-} else {
-    [OPFOR_Faction_X,"car",[(_missionPos select 0)+30, (_missionPos select 1)+10],_radius] spawn _fnc_claimVeh;
-};
-sleep 1;
-[OPFOR_Faction_X,"car",[(_missionPos select 0)+28, (_missionPos select 1)+12],_radius] spawn _fnc_claimVeh;
+// Two tokens rather than one substituted for the other. The Army Power rung gates the heavier one;
+// the lighter stands whether or not the heavier is dropped, so the ladder adds armour instead of
+// exchanging a car for it.
+{
+    private _class = [_x] call DUWS_fnc_tokenClass;
+    if (_class != "") then {
+        [_class, [(_missionPos select 0)+30, (_missionPos select 1)+10], _radius] spawn _fnc_claimVeh;
+        sleep 1;
+    };
+} forEach ["tank", "car"];
+[["car"] call DUWS_fnc_tokenClass, [(_missionPos select 0)+28, (_missionPos select 1)+12], _radius] spawn _fnc_claimVeh;

@@ -1,46 +1,44 @@
 // Locality: server -- spawned once from server/server_init.sqf to publish the tables below.
 //
-// The OPFOR spawn composition framework, shared by zones and by town garrisons. A token names a
-// team in DUWS_teamRosters below, or a vehicle class fnc_random_veh understands ("car", "armored",
-// "air").
+// The OPFOR spawn composition framework, shared by zones and by town garrisons. A token names a row
+// in DUWS_teamRosters (a team) or in DUWS_spawnVehicles (a vehicle). A token neither table claims is
+// a vehicle classname a faction file named directly, and spawns as itself.
 //
 // Zones and towns keep separate composition sets -- a town garrison must not field what a zone does,
-// or the two stop reading differently on the ground -- but share the token vocabulary, the category
-// map and the spawner here, so a new team is added in one place rather than two.
+// or the two stop reading differently on the ground -- but share the token vocabulary, the tables
+// and the spawner here, so a new team or vehicle is added in one place rather than two.
 
-// Token to category, for the tokens that are not teams. Categories exist because a zone's radius
-// scales its garrison unevenly: more ground needs proportionally more infantry to cover it and does
-// not need more aircraft.
-// A team carries its own category on its row, so what is left here is the vehicle vocabulary and
-// the building-occupation token. Row order is load-bearing: DUWS_zoneRadiusMult's columns are that
-// order, and a category's position in this table is how the multiplier for it is found.
-// --DUWS-UNITCOMP BEGIN name="Spawn categories" kind=rule row="category, members..." fields="category, members"--
+// The category vocabulary, and nothing more: every token carries its own category on its own row.
+// Categories exist because a zone's radius scales its garrison unevenly -- more ground needs
+// proportionally more infantry to cover it and does not need more aircraft.
+//
+// POSITIONALLY LOCKED to DUWS_zoneRadiusMult below: a category's position here is the column its
+// multiplier is read from. Reordering either table without the other silently scales armour by the
+// air column, which is a balance change with nothing in the log to show for it.
+// --DUWS-UNITCOMP BEGIN name="Spawn categories" kind=rule row="category" fields="category"--
 DUWS_spawnCategories = [
-    ["infantry", ["buildings"]],
-    ["light",    ["car"]],
-    ["armour",   ["armored"]],
-    ["air",      ["air"]]
+    ["infantry"],
+    ["light"],
+    ["armour"],
+    ["air"]
 ];
 // --DUWS-UNITCOMP END--
 
-// A team's category comes off its own row; every other token is looked up in the map above. An
-// unlisted token is a vehicle classname a faction file named directly, which DUWS_fnc_zoneSpawnOne
-// hands to fnc_random_veh. Those scale as "light" -- a multiplier of one everywhere -- rather than
-// being dropped or guessed at, so a mod's own class still spawns and never at three times the count.
+// A token's category comes off its own row in whichever table claims it. A token neither claims is a
+// classname a faction file named directly; those scale as "light" -- a multiplier of one everywhere
+// -- rather than being dropped or guessed at, so a mod's own class still spawns and never at three
+// times the count.
 //
-// The answer is checked against the map before it is returned, and that check is not defensive
-// padding: DUWS_fnc_zoneSpawnList finds a multiplier by the category's *position* in the map, so a
+// The answer is checked against the vocabulary before it is returned, and that check is not
+// defensive padding: DUWS_fnc_zoneSpawnList finds a multiplier by the category's *position*, so a
 // name that is not in it resolves to index 0 -- the radius ceiling column -- and the zone would try
-// to field a hundred thousand groups. A team's category is editable, so this is reachable.
+// to field a hundred thousand groups. A row's category is editable, so this is reachable.
 DUWS_fnc_spawnCategory = {
     params ["_token"];
     private _row = [_token] call DUWS_fnc_teamRow;
-    private _cat = if (_row isEqualTo []) then {
-        private _i = DUWS_spawnCategories findIf { _token in (_x select 1) };
-        if (_i < 0) then { "light" } else { (DUWS_spawnCategories select _i) select 0 }
-    } else {
-        _row select 2
-    };
+    if (_row isEqualTo []) then { _row = [_token] call DUWS_fnc_vehicleRow };
+    if (_row isEqualTo []) then { _row = [_token] call DUWS_fnc_specialRow };
+    private _cat = if (_row isEqualTo []) then { "light" } else { _row select 2 };
     if (DUWS_spawnCategories findIf { (_x select 0) isEqualTo _cat } < 0) then {
         ["WARN", "ZONES", format ["%1 is filed under %2, which is not a category; scaling it as light",
             _token, _cat]] call fnc_log;
@@ -73,9 +71,9 @@ DUWS_zoneRadiusMult = [
 // --DUWS-UNITCOMP BEGIN name="Zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_zoneSpawnTiers = [
     ["patrol", "team", "car"],
-    ["patrol", "team", "wpteam", "car", "armored"],
-    ["sniper", "patrol", "team", "wpteam", "car", "armored"],
-    ["sniper", "patrol", "patrol", "team", "wpteam", "car", "armored", "air"]
+    ["patrol", "team", "wpteam", "car", "apc"],
+    ["sniper", "patrol", "team", "wpteam", "car", "apc"],
+    ["sniper", "patrol", "patrol", "team", "wpteam", "car", "tank", "attackheli"]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -102,7 +100,38 @@ DUWS_fnc_zoneSpawnList = {
         private _n = _row param [_ci + 1, 1];
         for "_k" from 1 to _n do { _out pushBack _token };
     } forEach (DUWS_zoneSpawnTiers select _t);
-    _out
+    [_out] call DUWS_fnc_spawnFilter
+};
+
+// Drops the tokens this side cannot field right now. Three separate reasons, one answer: the token
+// leaves the composition and nothing takes its place.
+//
+// Substituting is what this replaces and it was never chosen -- it was the shape of an `if` leaking.
+// An air slot with attack helicopters switched off fell through to the general vehicle pool, so a
+// player who asked for no helicopters got an extra truck per slot instead of a quieter zone.
+//
+// Runs after the radius expansion and before the strength thin: filtering first thins the force the
+// side can actually field, where thinning first reduces a composition and then reduces it again.
+DUWS_fnc_spawnFilter = {
+    params ["_tokens"];
+    _tokens select { ([_x] call DUWS_fnc_tokenClass) != "" }
+};
+
+// The classname behind a token, or "" when it cannot be fielded. A team is not this function's
+// business and answers itself -- fnc_opforRoles already drops the roles a faction leaves undefined.
+DUWS_fnc_tokenClass = {
+    params ["_token"];
+    if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith { _token };
+    if !(([_token] call DUWS_fnc_specialRow) isEqualTo []) exitWith { _token };
+    private _row = [_token] call DUWS_fnc_vehicleRow;
+    // Not in either table: a faction file named a classname directly, and it stands as itself.
+    if (_row isEqualTo []) exitWith { _token };
+    _row params ["", "_role", "", "_setting", "_ap"];
+    // Missing setting defaults to on: a campaign that predates a new rule fields what it always did
+    // rather than quietly losing a category.
+    if (_setting != "" && {(missionNamespace getVariable [_setting, 1]) != 1}) exitWith { "" };
+    if (_ap > 0 && {(missionNamespace getVariable ["WARCOM_opfor_ap", 0]) < _ap}) exitWith { "" };
+    missionNamespace getVariable [_role, ""]
 };
 
 // What is missing from _have to make it _want, counting duplicates: two patrols wanted against one
@@ -135,12 +164,12 @@ DUWS_fnc_raiseGarrison = {
     params ["_tokens", "_pos", "_radius"];
     private _grps = [];
     {
-        private _grp = if (_x == "buildings") then {
-            // The zone benchmark a town's tier IV climbs to -- fnc_createopfortified holds up to
-            // eight buildings at three men each. It carries its own search and loot passes, unlike
-            // everything below: flagging these men again would roll a second time against the same
-            // bodies and quietly raise the rate this garrison pays out at.
-            [_pos, _radius, 8, 3] call fnc_garrisonBuildings
+        private _special = [_x] call DUWS_fnc_specialRow;
+        private _grp = if !(_special isEqualTo []) then {
+            // fnc_garrisonBuildings carries its own search and loot passes, unlike everything below:
+            // flagging these men again would roll a second time against the same bodies and quietly
+            // raise the rate this garrison pays out at.
+            [_pos, _radius, _special select 3, _special select 4] call fnc_garrisonBuildings
         } else {
             private _g = [_x, _pos, _radius] call DUWS_fnc_zoneSpawnOne;
             // Flagged where the group is raised, so the two cannot drift: every spawner here already
@@ -199,11 +228,73 @@ DUWS_teamRosters = [
 // --DUWS-UNITCOMP END--
 
 // The row behind a token, or [] when nothing claims it -- which is how the spawn path tells a team
-// from a vehicle classname a faction file named directly.
+// from a vehicle from a classname a faction file named directly.
 DUWS_fnc_teamRow = {
     params ["_token"];
     private _i = DUWS_teamRosters findIf { (_x select 0) isEqualTo _token };
     if (_i < 0) then { [] } else { DUWS_teamRosters select _i }
+};
+
+// Every vehicle the OPFOR side fields, one row each, in the same shape as a team's: what it is
+// called, what it fields, which category scales it, and what it requires.
+//
+// A token names one vehicle and never a bucket to roll in. The pool this replaces weighted four
+// trucks alongside three APCs and a tank under the name "armored", so roughly one armour slot in six
+// stood a supply truck on an objective -- and a large zone rolled that dip twice. Variety is not
+// lost with it: under faction auto-detection each role global below re-picks from its faction's own
+// pool every five minutes (AUTODETECT_opfor.sqf), so a deterministic token still fields a different
+// APC across a campaign. What goes is the randomness no table could see.
+//
+// role -- the faction global holding the classname, named rather than referenced: a faction table
+//         that omits a role leaves its global undefined, and an undefined name inside an array
+//         literal is not something the spawner can test for afterwards.
+// setting -- a campaign setting that must read 1, or "" for a vehicle nothing gates.
+// ap -- the Army Power the OPFOR side must have reached, 0 for a vehicle available from the start.
+//       Which tokens hang off which rung is a balance decision; the mechanism is the point here.
+// --DUWS-UNITCOMP BEGIN name="OPFOR vehicles" kind=team row="token, role, category, setting, ap" fields="token, faction role, category, campaign setting, AP required" prefix=opfor_--
+DUWS_spawnVehicles = [
+    ["car",        "opfor_ARMED_CAR1_X",    "light",  "",           0],
+    ["truck",      "opfor_COVERED_TRUCK_X", "light",  "",           0],
+    ["transport",  "opfor_TRANS_TRUCK_X",   "light",  "",           0],
+    ["ammo",       "opfor_AMMO_TRUCK_X",    "light",  "",           0],
+    ["repair",     "opfor_REPAIR_TRUCK_X",  "light",  "",           0],
+    ["apc",        "opfor_APC1_X",          "armour", "",           0],
+    ["ifv",        "opfor_APC2_X",          "armour", "",           0],
+    ["aa",         "opfor_AA_APC_X",        "armour", "",           0],
+    ["tank",       "opfor_MBT_TANK1_X",     "armour", "HeavyArmor", 100],
+    ["attackheli", "opfor_ATTACK_HELI_X",   "air",    "AttackHeli", 0],
+    ["transheli",  "opfor_TRANS_HELI_X",    "air",    "AttackHeli", 0],
+    ["plane",      "opfor_MISC_AIR_X",      "air",    "AttackHeli", 0]
+];
+// --DUWS-UNITCOMP END--
+
+DUWS_fnc_vehicleRow = {
+    params ["_token"];
+    private _i = DUWS_spawnVehicles findIf { (_x select 0) isEqualTo _token };
+    if (_i < 0) then { [] } else { DUWS_spawnVehicles select _i }
+};
+
+// Tokens that are neither a team nor a vehicle: men placed by a rule rather than by a roster. The
+// parameters live on the row for the same reason a team's men do -- they were arguments hardcoded
+// at the one call site, where a second caller wanting different ones had nowhere to say so.
+//
+// Column 2 is the category in all three tables, which is what lets DUWS_fnc_spawnCategory ask one
+// question of whichever row claims the token.
+//
+// buildings -- men spread through the enterable houses around the centre. Fewer buildings held
+//              rather than fewer men in each when a garrison is thinned: three to a house is what
+//              makes clearing one cost something, and a house with one man in it is a house the
+//              player walks through.
+// --DUWS-UNITCOMP BEGIN name="OPFOR specials" kind=team row="token, places, category, buildings, men each" fields="token, places, category, buildings, men per building"--
+DUWS_spawnSpecials = [
+    ["buildings", "houses", "infantry", 8, 3]
+];
+// --DUWS-UNITCOMP END--
+
+DUWS_fnc_specialRow = {
+    params ["_token"];
+    private _i = DUWS_spawnSpecials findIf { (_x select 0) isEqualTo _token };
+    if (_i < 0) then { [] } else { DUWS_spawnSpecials select _i }
 };
 
 // A team's men, in spawn order. The multiplier is clamped here rather than at the call sites, and
@@ -232,15 +323,23 @@ DUWS_fnc_teamRoster = {
 // Called rather than spawned, for the group each one hands back: the capture test counts this
 // zone's own garrison, so every unit raised here has to be flagged with the zone it belongs to.
 //
-// The table decides, not a switch: a token the roster claims is a team and fnc_spawn_team raises it
-// whatever it is called, so a team added to the roster spawns without a case being written for it.
-// Anything the roster does not claim names a vehicle class instead.
+// The tables decide, not a switch: a token the team roster claims is a team and fnc_spawn_team
+// raises it whatever it is called; anything else resolves to a classname and is placed as a vehicle.
+// A team or a vehicle added to a table spawns without a case being written for it.
+//
+// A token whose class resolves to "" is refused rather than spawned. The composition was filtered
+// before it got here, so this is a caller that skipped the filter, and spawning "" is a nil vehicle.
 DUWS_fnc_zoneSpawnOne = {
     params ["_token", "_pos", "_size"];
     if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith {
         [_token, _pos, _size] call fnc_spawn_team
     };
-    [OPFOR_Faction_X, _token, _pos, _size] call fnc_random_veh
+    private _class = [_token] call DUWS_fnc_tokenClass;
+    if (_class == "") exitWith {
+        ["WARN", "ZONES", format ["%1 cannot be fielded here and was not filtered out", _token]] call fnc_log;
+        grpNull
+    };
+    [_class, _pos, _size] call fnc_random_veh
 };
 
 // Spawned by fnc_createzone, which no longer needs a switch to pick a function per band.

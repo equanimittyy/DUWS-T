@@ -17,13 +17,15 @@ sleep 1;
 sleep 1;
 [[(_missionPos select 0), (_missionPos select 1)+35], _radius] spawn _fnc_claimTeam;
 sleep 1;
-if (WARCOM_opfor_ap > 100) then {
-    [OPFOR_Faction_X,"armored",[(_missionPos select 0)+30, (_missionPos select 1)+10],_radius] spawn _fnc_claimVeh;
-} else {
-    [OPFOR_Faction_X,"car",[(_missionPos select 0)+30, (_missionPos select 1)+10],_radius] spawn _fnc_claimVeh;
-};
-sleep 1;
-[OPFOR_Faction_X,"car",[(_missionPos select 0)+28, (_missionPos select 1)+12],_radius] spawn _fnc_claimVeh;
+// See fnc_missionPatrols for why the Army Power rung is two tokens rather than a substitution.
+{
+    private _class = [_x] call DUWS_fnc_tokenClass;
+    if (_class != "") then {
+        [_class, [(_missionPos select 0)+30, (_missionPos select 1)+10], _radius] spawn _fnc_claimVeh;
+        sleep 1;
+    };
+} forEach ["tank", "car"];
+[["car"] call DUWS_fnc_tokenClass, [(_missionPos select 0)+28, (_missionPos select 1)+12], _radius] spawn _fnc_claimVeh;
 
 // Swept rather than claimed: the flag has to reach a neighbouring zone's garrison too.
 [_missionPos, _radius] spawn {

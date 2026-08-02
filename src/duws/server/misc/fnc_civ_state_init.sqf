@@ -64,8 +64,8 @@ fnc_civ_repAt = {
 DUWS_townSpawnTiers = [
 	["patrol", "team"],
 	["patrol", "team", "team", "car"],
-	["patrol", "team", "team", "car", "armored"],
-	["patrol", "team", "team", "car", "armored", "buildings"]
+	["patrol", "team", "team", "car", "apc"],
+	["patrol", "team", "team", "car", "apc", "buildings"]
 ];
 // --DUWS-UNITCOMP END--
 
