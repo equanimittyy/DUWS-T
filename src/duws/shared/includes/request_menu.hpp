@@ -125,17 +125,20 @@ class ressourceheader
             h = 1.1 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
         };
-        // Two by two rather than one row of four: the row is 19.9 cells and the convert button
-        // carries the longest text in the dialog. Mission Timers is Game Master only and is hidden
-        // rather than filled in from a list, so a player without the gate sees a blank quarter.
+        // Four across a 19.9-cell row, each sized to its own label rather than to a quarter share:
+        // evenly divided, "Mission Timers" alone overruns its share. The conversion rate moved off
+        // the convert button and into the confirmation it now raises, because the label carrying it
+        // was 24 characters and the row cannot seat a fourth button beside it. Mission Timers is
+        // Game Master only and is hidden rather than written in from a list, so a player without
+        // the gate sees a gap here.
         class sidemissionbutton: RscButton
         {
             idc = 1605;
             text = "$STR_DUWS_T_rplkhwfu";
-            sizeEx = 0.025;
+            sizeEx = 0.024;
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 9.75 * GUI_GRID_W;
+            w = 5.4 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             // The one entry that still closes the menu: it hands the screen to the strategic map,
             // which a dialog would draw straight over.
@@ -146,10 +149,10 @@ class ressourceheader
         {
             idc = 1609;
             text = "$STR_DUWS_T_SHOW_MISSION_COOLDOWNS";
-            sizeEx = 0.025;
-            x = 10.95 * GUI_GRID_W + GUI_GRID_X;
+            sizeEx = 0.024;
+            x = 6.5 * GUI_GRID_W + GUI_GRID_X;
             y = 5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 9.75 * GUI_GRID_W;
+            w = 5.7 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_mission_cooldowns_show";
             tooltip = "$STR_DUWS_T_SHOW_MISSION_COOLDOWNS";
@@ -158,10 +161,10 @@ class ressourceheader
         {
             idc = 1608;
             text = "$STR_DUWS_T_civ_mapview_action";
-            sizeEx = 0.025;
-            x = 0.8 * GUI_GRID_W + GUI_GRID_X;
-            y = 6.7 * GUI_GRID_H + GUI_GRID_Y;
-            w = 9.75 * GUI_GRID_W;
+            sizeEx = 0.024;
+            x = 12.5 * GUI_GRID_W + GUI_GRID_X;
+            y = 5 * GUI_GRID_H + GUI_GRID_Y;
+            w = 3.6 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_request_map_view";
             tooltip = "$STR_DUWS_T_civ_mapview_action";
@@ -169,11 +172,11 @@ class ressourceheader
         class convertCPbutton: RscButton
         {
             idc = 1627;
-            text = "$STR_DUWS_T_f62mxt4i";
-            sizeEx = 0.025;
-            x = 10.95 * GUI_GRID_W + GUI_GRID_X;
-            y = 6.7 * GUI_GRID_H + GUI_GRID_Y;
-            w = 9.75 * GUI_GRID_W;
+            text = "$STR_DUWS_T_convert_ap";
+            sizeEx = 0.024;
+            x = 16.4 * GUI_GRID_W + GUI_GRID_X;
+            y = 5 * GUI_GRID_H + GUI_GRID_Y;
+            w = 4.3 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_convertAPtoCP";
             tooltip = "$STR_DUWS_T_a72vvbgp";
@@ -186,7 +189,7 @@ class ressourceheader
         {
             idc = 1810;
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
-            y = 8.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 6.8 * GUI_GRID_H + GUI_GRID_Y;
             w = 19.9 * GUI_GRID_W;
             h = 0.06 * GUI_GRID_H;
             colorBackground[] = {1,1,1,0.25};
@@ -196,7 +199,7 @@ class ressourceheader
             idc = 1809;
             text = "$STR_DUWS_T_REQ_COMMAND";
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
-            y = 8.8 * GUI_GRID_H + GUI_GRID_Y;
+            y = 7.1 * GUI_GRID_H + GUI_GRID_Y;
             w = 19.9 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
@@ -205,17 +208,17 @@ class ressourceheader
             idc = 1801;
             text = "$STR_DUWS_T_m8wc394w";
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
-            y = 9.9 * GUI_GRID_H + GUI_GRID_Y;
+            y = 8.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 9.6 * GUI_GRID_W;
-            h = 3.8 * GUI_GRID_H;
+            h = 4.1 * GUI_GRID_H;
         };
         class unitlistbox: RscCombo
         {
             idc = 2100;
             x = 1.2 * GUI_GRID_W + GUI_GRID_X;
-            y = 10.8 * GUI_GRID_H + GUI_GRID_Y;
+            y = 9.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
-            h = 1.1 * GUI_GRID_H;
+            h = 1.2 * GUI_GRID_H;
             sizeEx = 0.023;
         };
         class requestunitsbutton: RscButton
@@ -223,7 +226,7 @@ class ressourceheader
             idc = 1600;
             text = "$STR_DUWS_T_wulhhx81";
             x = 1.2 * GUI_GRID_W + GUI_GRID_X;
-            y = 12 * GUI_GRID_H + GUI_GRID_Y;
+            y = 10.6 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_request_unit";
@@ -234,18 +237,18 @@ class ressourceheader
             idc = 1802;
             text = "$STR_DUWS_T_kyrhidgf";
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
-            y = 13.9 * GUI_GRID_H + GUI_GRID_Y;
+            y = 12.7 * GUI_GRID_H + GUI_GRID_Y;
             w = 9.6 * GUI_GRID_W;
-            h = 3.8 * GUI_GRID_H;
+            h = 4.1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_3fvc6hv1";
         };
         class squadlist: RscCombo
         {
             idc = 2101;
             x = 1.2 * GUI_GRID_W + GUI_GRID_X;
-            y = 14.8 * GUI_GRID_H + GUI_GRID_Y;
+            y = 13.7 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
-            h = 1.1 * GUI_GRID_H;
+            h = 1.2 * GUI_GRID_H;
             sizeEx = 0.023;
         };
         class requestsquadbutton: RscButton
@@ -253,7 +256,7 @@ class ressourceheader
             idc = 1601;
             text = "$STR_DUWS_T_wulhhx81";
             x = 1.2 * GUI_GRID_W + GUI_GRID_X;
-            y = 16 * GUI_GRID_H + GUI_GRID_Y;
+            y = 15.1 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_request_squad";
@@ -264,17 +267,17 @@ class ressourceheader
             idc = 1803;
             text = "$STR_DUWS_T_uskdohql";
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
-            y = 17.9 * GUI_GRID_H + GUI_GRID_Y;
+            y = 17.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 9.6 * GUI_GRID_W;
-            h = 3.8 * GUI_GRID_H;
+            h = 4.1 * GUI_GRID_H;
         };
         class emptyvehiclelist: RscCombo
         {
             idc = 2102;
             x = 1.2 * GUI_GRID_W + GUI_GRID_X;
-            y = 18.8 * GUI_GRID_H + GUI_GRID_Y;
+            y = 18.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
-            h = 1.1 * GUI_GRID_H;
+            h = 1.2 * GUI_GRID_H;
             sizeEx = 0.023;
         };
         class requestvehiclebutton: RscButton
@@ -282,7 +285,7 @@ class ressourceheader
             idc = 1602;
             text = "$STR_DUWS_T_wulhhx81";
             x = 1.2 * GUI_GRID_W + GUI_GRID_X;
-            y = 20 * GUI_GRID_H + GUI_GRID_Y;
+            y = 19.6 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_hf8ph7ss";
@@ -296,7 +299,7 @@ class ressourceheader
             text = "";
             sizeEx = 0.025;
             x = 10.8 * GUI_GRID_W + GUI_GRID_X;
-            y = 9.9 * GUI_GRID_H + GUI_GRID_Y;
+            y = 8.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 9.9 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[0] spawn fnc_command_select";
@@ -304,37 +307,37 @@ class ressourceheader
         class commandslot1: commandslot0
         {
             idc = 1611;
-            y = 11.6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 10.05 * GUI_GRID_H + GUI_GRID_Y;
             action = "[1] spawn fnc_command_select";
         };
         class commandslot2: commandslot0
         {
             idc = 1612;
-            y = 13.3 * GUI_GRID_H + GUI_GRID_Y;
+            y = 11.9 * GUI_GRID_H + GUI_GRID_Y;
             action = "[2] spawn fnc_command_select";
         };
         class commandslot3: commandslot0
         {
             idc = 1613;
-            y = 15 * GUI_GRID_H + GUI_GRID_Y;
+            y = 13.75 * GUI_GRID_H + GUI_GRID_Y;
             action = "[3] spawn fnc_command_select";
         };
         class commandslot4: commandslot0
         {
             idc = 1614;
-            y = 16.7 * GUI_GRID_H + GUI_GRID_Y;
+            y = 15.6 * GUI_GRID_H + GUI_GRID_Y;
             action = "[4] spawn fnc_command_select";
         };
         class commandslot5: commandslot0
         {
             idc = 1615;
-            y = 18.4 * GUI_GRID_H + GUI_GRID_Y;
+            y = 17.45 * GUI_GRID_H + GUI_GRID_Y;
             action = "[5] spawn fnc_command_select";
         };
         class commandslot6: commandslot0
         {
             idc = 1616;
-            y = 20.1 * GUI_GRID_H + GUI_GRID_Y;
+            y = 19.3 * GUI_GRID_H + GUI_GRID_Y;
             action = "[6] spawn fnc_command_select";
         };
 

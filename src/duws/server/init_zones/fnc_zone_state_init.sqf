@@ -19,6 +19,10 @@ fnc_zone_key = {
 // English words with no stringtable key, like the squad callsigns: these are proper nouns a player
 // says out loud, and a translated phonetic alphabet is a different alphabet, not a translation.
 //
+// The common English spellings rather than the official ICAO ones -- "Alpha", not "Alfa" -- so a
+// zone reads the way the team callsign already does ("Alpha 1-1"). "Xray" stays unhyphenated
+// because the pair separator below is a hyphen and "X-ray-Bravo" reads as three words.
+//
 // Past the twenty-six the pool pairs two distinct words. Selection is by draw-and-retry rather than
 // by building the 650 pairs, because a campaign runs to tens of zones and would throw the list away.
 fnc_zone_name = {

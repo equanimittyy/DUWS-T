@@ -1,4 +1,9 @@
 // Locality: client -- invoked from a dialog action.
+// The rate lives in this prompt now: the button is down to "Convert AP" so a fourth entry fits
+// the missions row, which leaves this the only place the player is shown what the trade costs
+// before it is taken.
+if !([localize "STR_DUWS_T_f62mxt4i", localize "STR_DUWS_T_d7eqef75", true, true] call BIS_fnc_guiMessage) exitWith {};
+
 // The AP debit is the half that must be authoritative: this is the mission's only path
 // that turns one pool into another, so two clients converting the same 15 AP would each
 // be credited 10 CP while the floor absorbed the second debit -- CP from nothing.

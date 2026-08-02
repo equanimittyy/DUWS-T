@@ -879,6 +879,10 @@
                 <Original>Current strength of BLUFOR forces</Original>
                 <English>Current strength of BLUFOR forces</English>
             </Key>
+            <Key ID="STR_DUWS_T_convert_ap">
+                <Original>Convert AP</Original>
+                <English>Convert AP</English>
+            </Key>
             <Key ID="STR_DUWS_T_f62mxt4i">
                 <German>Wandle 15 AP in 10 CP um</German>
                 <Chinesesimp>转换15点AP为10点CP</Chinesesimp>
