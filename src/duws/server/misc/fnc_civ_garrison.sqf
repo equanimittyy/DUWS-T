@@ -73,8 +73,8 @@ private _fnc_raise = {
     // rather than a composition that is about to lose entries to a campaign setting anyway.
     // Thinned by what the town has left, the way a zone's band is. A town beaten once fields a
     // fraction of its tier from then on, so the composition is the ceiling rather than the promise.
-    private _want = [[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter, _strength] call fnc_zone_thin;
-    private _roster = [_want, _centre, _radius] call DUWS_fnc_raiseGarrison;
+    private _want = [[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter, _strength] call DUWS_fnc_thinComposition;
+    private _roster = [_want, _centre, _radius, _strength] call DUWS_fnc_raiseGarrison;
 
     // OPFOR standing inside the trigger's own area, which is what makes the town clearable. SEIZED
     // is satisfied by an empty town as readily as by a fought-out one, so nothing else can tell the
@@ -307,13 +307,14 @@ while {true} do {
         // any time, and the men walk in once nobody is watching. The tier stays owed either way, so
         // it lands on a later cycle rather than being lost, the way a hold defers a first garrison.
         //
-        // Tested against the stored pair rather than by recomputing the wanted list each cycle and
-        // diffing that: fnc_zone_thin drops entries at random, so the same tier and strength yield a
-        // different list every call, and an unchanged town would appear to owe men forever.
+        // Tested against the stored pair rather than by diffing recomputed lists. The composition is
+        // deterministic now, so the two agree -- but strength no longer shows in the list at all: a
+        // town ground down and then recovered fields the same tokens at a different share, and a
+        // diff of token lists cannot see that. The stored pair can.
         if ((_tier > (_t get "deployed") || _strength > (_t get "deployedStrength"))
             && {!_near}) then {
-            private _want = [[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter, _strength] call fnc_zone_thin;
-            private _added = [[_t get "deployedList", _want] call DUWS_fnc_spawnDiff, _centre, _radius] call DUWS_fnc_raiseGarrison;
+            private _want = [[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter, _strength] call DUWS_fnc_thinComposition;
+            private _added = [[_t get "deployedList", _want] call DUWS_fnc_spawnDiff, _centre, _radius, _strength] call DUWS_fnc_raiseGarrison;
             (_t get "roster") append _added;
             // Added to the baseline rather than re-measured from the roster. A garrison ground down
             // to three men and then reinforced by six is nine men against a baseline that still

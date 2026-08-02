@@ -402,8 +402,8 @@ DUWS_spawnVehicles = [
     ["absent", "opfor_GONE_X", "light",  "",           0]
 ];
 DUWS_spawnSpecials = [
-    ["buildings", "houses", "infantry",      "fnc_garrisonBuildings", [8, 3, 2, "AUTO", false]],
-    ["mortar",    "tube",   "fortification", "fnc_garrisonMortar",    []]
+    ["buildings", "houses", "infantry",      "fnc_garrisonBuildings", [8, 3, 2, "AUTO", false], true],
+    ["mortar",    "tube",   "fortification", "fnc_garrisonMortar",    [],                       false]
 ];
 opfor_A_X = "cls_A";
 opfor_B_X = "cls_B";
@@ -485,6 +485,33 @@ TEST_Air = 1;
     ([1, 5000] call DUWS_fnc_zoneSpawnList), ["patrol","patrol","patrol"]] call fnc_assertEq;
 ["zoneSpawnList: a tier above the table clamps rather than faulting",
     ([9, 50] call DUWS_fnc_zoneSpawnList), ["patrol", "team", "car"]] call fnc_assertEq;
+
+// --- attrition is a fraction of men, so a token carries its own share of it ---
+// An entry is not a unit: "patrol" is two men and "car" is a vehicle, so dropping entries at random
+// let two zones reported at the same strength differ by twenty men.
+["tokenStrength: a team thins from the inside and keeps its leader",
+    (["patrol", 0.4] call DUWS_fnc_tokenStrength), 0.4] call fnc_assertEq;
+["tokenStrength: a special that thins carries the fraction to its placer",
+    (["buildings", 0.4] call DUWS_fnc_tokenStrength), 0.4] call fnc_assertEq;
+["tokenStrength: the mortar pair is exempt -- half a pair is no tube at all",
+    (["mortar", 0.3] call DUWS_fnc_tokenStrength), 1] call fnc_assertEq;
+["tokenStrength: a vehicle above half strength stands whole",
+    (["apc", 0.5] call DUWS_fnc_tokenStrength), 1] call fnc_assertEq;
+["tokenStrength: and below it is dropped, since there is no partial vehicle",
+    (["apc", 0.49] call DUWS_fnc_tokenStrength), 0] call fnc_assertEq;
+["tokenStrength: full strength leaves everything whole",
+    (["apc", 1] call DUWS_fnc_tokenStrength), 1] call fnc_assertEq;
+
+["thinComposition: a worn zone keeps its men and loses its vehicles",
+    ([["patrol", "team", "car", "apc", "mortar"], 0.4] call DUWS_fnc_thinComposition),
+    ["patrol", "team", "mortar"]] call fnc_assertEq;
+["thinComposition: full strength changes nothing",
+    ([["patrol", "car"], 1] call DUWS_fnc_thinComposition), ["patrol", "car"]] call fnc_assertEq;
+// Deterministic, unlike the entry drop it replaces: a zone the player wore down has to come back as
+// the zone they wore down, not as a fresh roll of which entries survived.
+["thinComposition: the same composition and strength give the same answer twice",
+    ([["patrol", "team", "car", "apc"], 0.6] call DUWS_fnc_thinComposition),
+    ([["patrol", "team", "car", "apc"], 0.6] call DUWS_fnc_thinComposition)] call fnc_assertEq;
 
 // --- DUWS_fnc_spawnDiff: what an upgrade owes ---
 ["spawnDiff: only what the new composition adds",

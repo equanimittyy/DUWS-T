@@ -201,10 +201,14 @@ fnc_zone_tier_roll = {
 	_tier
 };
 
-// Drops entries from a spawn list at random until the fraction is met, keeping at least one. Random
-// rather than off the tail: every caller's list is ordered by kind -- the tier table puts a band's
-// vehicles last, the fortification builder walks towers in the order it found them -- so trimming
-// the end would cost a weakened zone the same thing every time.
+// Drops entries from a list at random until the fraction is met, keeping at least one. Random rather
+// than off the tail: a caller's list is ordered by what it found -- the tower pass walks posts in
+// discovery order, a team's roster puts its leader first -- so trimming the end would cost a
+// weakened zone the same thing every time.
+//
+// This thins *things* -- men inside a team, houses to hold, posts to man. It is no longer what
+// attrition does to a composition: a composition entry is not a unit, so dropping entries made two
+// zones reported at the same strength differ by twenty men. DUWS_fnc_thinComposition is that.
 fnc_zone_thin = {
 	params ["_list", "_frac"];
 	private _out = +_list;

@@ -31,3 +31,5 @@ duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_vehicleRow
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_specialRow
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_tokenClass
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_spawnFilter
+duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_tokenStrength
+duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_thinComposition

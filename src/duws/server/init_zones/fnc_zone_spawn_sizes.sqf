@@ -126,6 +126,37 @@ DUWS_fnc_spawnFilter = {
     _tokens select { ([_x] call DUWS_fnc_tokenClass) != "" }
 };
 
+// What attrition does to one token. A composition entry is not a unit -- "patrol" is two men, "team"
+// is five, "car" is a vehicle -- so dropping entries at random meant two zones reported at the same
+// strength could differ by twenty men, and the bar the readout draws did not mean what it said.
+// Attrition is a fraction of *men*, and every token carries its own share of it.
+//
+// Three answers, and which one a token gets is what it is made of rather than which system raised it:
+//
+//   _strength  anything that thins from the inside -- a team drops men and keeps its leader, the
+//              house pass holds fewer houses, the tower pass mans fewer posts.
+//   1          the mortar pair, which is exempt. The tube and its ammunition are one backpack each
+//              on two men, so a fraction of a pair is no tube at all: that is a different zone
+//              rather than a weaker one.
+//   0          a vehicle below half strength, which is dropped whole. There is no partial vehicle --
+//              a crew short of a driver is a wreck the player walks past -- so a zone ground below
+//              half stops fielding them, which is one rule a player can learn.
+DUWS_fnc_tokenStrength = {
+    params ["_token", ["_strength", 1]];
+    if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith { _strength };
+    private _sp = [_token] call DUWS_fnc_specialRow;
+    if !(_sp isEqualTo []) exitWith { [1, _strength] select (_sp select 5) };
+    [0, 1] select (_strength >= 0.5)
+};
+
+// The composition a site actually raises: every token that still places something. Nothing is
+// dropped at random here -- the tokens that survive are the same ones at the same strength every
+// time, so a zone the player wore down comes back as the zone they wore down.
+DUWS_fnc_thinComposition = {
+    params ["_tokens", ["_strength", 1]];
+    _tokens select { ([_x, _strength] call DUWS_fnc_tokenStrength) > 0 }
+};
+
 // The classname behind a token, or "" when it cannot be fielded. A team is not this function's
 // business and answers itself -- fnc_opforRoles already drops the roles a faction leaves undefined.
 DUWS_fnc_tokenClass = {
@@ -173,13 +204,9 @@ DUWS_fnc_raiseGarrison = {
     params ["_tokens", "_pos", "_radius", ["_strength", 1]];
     private _grps = [];
     {
-        // Attrition reaches a fortification token here rather than by dropping it from the
-        // composition. Those tokens are exempt from the composition thin -- losing the mortar pair
-        // or the whole tower ring to a coin flip is a different zone, not a weaker one -- so each
-        // wears down inside itself instead: fewer houses held, fewer towers manned, fewer men in the
-        // dug-in section. Everything else was already thinned before it reached this list.
-        private _fortified = ([_x] call DUWS_fnc_spawnCategory) == "fortification";
-        private _tokenStrength = [1, _strength] select _fortified;
+        // Attrition reaches every token here, as its own share of the fraction, rather than by
+        // taking entries out of the list before it arrives.
+        private _tokenStrength = [_x, _strength] call DUWS_fnc_tokenStrength;
 
         private _special = [_x] call DUWS_fnc_specialRow;
         private _raised = if !(_special isEqualTo []) then {
@@ -307,6 +334,7 @@ DUWS_fnc_vehicleRow = {
 // Column 2 is the category in all three tables, which is what lets DUWS_fnc_spawnCategory ask one
 // question of whichever row claims the token. Column 3 names the placer, and column 4 is whatever
 // that placer's own parameters are; every placer is called as [pos, radius] + params + [strength].
+// Column 5 says whether attrition reaches inside the token or leaves it whole.
 //
 // buildings     -- houses around the centre, the shape a side mission garrisons with.
 // fortbuildings -- the same pass with a zone's parameters: it wants five usable building positions
@@ -318,12 +346,12 @@ DUWS_fnc_vehicleRow = {
 //                  and its ammunition are one backpack each on two men, so a fraction of a pair
 //                  takes the tube away entirely. That changes what the zone is, not how strong.
 // towers        -- the guard towers and bunkers already standing on the ground, manned in place.
-// --DUWS-UNITCOMP BEGIN name="OPFOR specials" kind=team row="token, places, category, placer, params" fields="token, places, category, placer, parameters"--
+// --DUWS-UNITCOMP BEGIN name="OPFOR specials" kind=team row="token, places, category, placer, params, thins" fields="token, places, category, placer, parameters, thins"--
 DUWS_spawnSpecials = [
-    ["buildings",     "houses", "infantry",      "fnc_garrisonBuildings", [8, 3, 2, "AUTO", false]],
-    ["fortbuildings", "houses", "fortification", "fnc_garrisonBuildings", [8, 3, 5, "UP", true]],
-    ["mortar",        "tube",   "fortification", "fnc_garrisonMortar",    []],
-    ["towers",        "posts",  "fortification", "fnc_garrisonTowers",    [300]]
+    ["buildings",     "houses", "infantry",      "fnc_garrisonBuildings", [8, 3, 2, "AUTO", false], true],
+    ["fortbuildings", "houses", "fortification", "fnc_garrisonBuildings", [8, 3, 5, "UP", true],    true],
+    ["mortar",        "tube",   "fortification", "fnc_garrisonMortar",    [],                       false],
+    ["towers",        "posts",  "fortification", "fnc_garrisonTowers",    [300],                    true]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -394,14 +422,10 @@ fnc_zone_spawn = {
     // down to. Without this, breaking a garrison and leaving buys the player nothing -- the same
     // fight is waiting at full strength when they come back.
     //
-    // The fortification tokens are held out of the thin and carry the fraction into the raise
-    // instead. Dropping whole entries is the right shape for a patrol -- one fewer patrol is a
-    // weaker zone -- and the wrong one for the dug-in half, where losing the mortar pair or the
-    // whole tower ring to a coin flip is a different zone rather than a thinner one.
+    // The list only loses what a fraction cannot place at all; everything else carries the fraction
+    // into the raise and fields its own reduced share.
     private _strength = [_zoneKey] call fnc_zone_strength;
-    private _dug = _spawns select { ([_x] call DUWS_fnc_spawnCategory) == "fortification" };
-    private _mobile = _spawns select { ([_x] call DUWS_fnc_spawnCategory) != "fortification" };
-    _spawns = ([_mobile, _strength] call fnc_zone_thin) + _dug;
+    _spawns = [_spawns, _strength] call DUWS_fnc_thinComposition;
 
     { _roster append (units _x) } forEach ([_spawns, _spawnPos, _size, _strength] call DUWS_fnc_raiseGarrison);
 
