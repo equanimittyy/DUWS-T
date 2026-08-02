@@ -4,14 +4,31 @@
 
 waituntil {!(IsNull (findDisplay 46))};
 _display = (findDisplay 46) createDisplay "RscDisplayEmpty";
-			
+
+// One panel behind the whole screen, created before anything that sits on it: ctrlCreate order is
+// draw order, so a backdrop made later covers its own contents. The green is the one every other
+// setup screen's background uses (shared/includes/enviro_menu.hpp), which is the whole point -- this
+// screen is the first of that sequence and was the only one not painted like it.
+//
+// It runs out past both screen edges because how far past 0 and 1 the screen reaches is a safezone
+// question the layout cannot answer, and a band that stops short of an edge reads as a mistake.
+_backdrop = _display ctrlCreate ["RscText", 1007];
+_backdrop ctrlSetPosition [-0.25, 0, 1.5, 0.3];
+_backdrop ctrlSetBackgroundColor [0.2, 0.4, 0.2, 1];
+_backdrop ctrlCommit 0;
+
+// Two sentences of standing advice rather than a caption, so it is set smaller than the controls
+// under it: at the default height it is wider than the screen and loses its second half.
 _HQtext = _display ctrlCreate ["RscText", 1234];
-_HQtext ctrlSetPosition [0.2,-0.1,1,0.04];
+_HQtext ctrlSetPosition [0.02, 0.01, 0.96, 0.04];
+_HQtext ctrlSetFontHeight 0.03;
 _HQtext ctrlSetText localize "STR_DUWS_T_hlr39me1";
 _HQtext ctrlCommit 0;
 
+// Answered last, so it sits at the bottom of the panel. The two are one row: same width, same
+// baseline, split down the middle of the screen.
 _dropdownBLU = _display ctrlCreate ["RscCombo", 1001];
-_dropdownBLU ctrlSetPosition [-0.25, .15, .5, 0.04];
+_dropdownBLU ctrlSetPosition [0.02, 0.22, 0.47, 0.04];
 _dropdownBLU ctrlCommit 0;
 
 {
@@ -30,7 +47,7 @@ _dropdownBLU ctrlAddEventHandler ["LBSelChanged",
 //////////////////////////////////////
 
 _dropdownOPF = _display ctrlCreate ["RscCombo", 1003];
-_dropdownOPF ctrlSetPosition [0.75, .15, .5, 0.04];
+_dropdownOPF ctrlSetPosition [0.51, 0.22, 0.47, 0.04];
 _dropdownOPF ctrlCommit 0;
 
 // Rebuilt whenever the game mode changes, which is why it is a block rather than a loop in place.
@@ -84,36 +101,35 @@ if (isNil "duws_gamemode") then { duws_gamemode = "duws"; };
 // once here rather than per click, and read by the mode row below.
 duws_zombie_factions_found = count ([true] call fnc_getAllFactionsClean) > 0;
 
-// Created first of the mode controls: ctrlCreate order is draw order, so a panel made after the
-// three it sits behind would cover them. The green is the one the other startup screens' backgrounds
-// use (shared/includes/enviro_menu.hpp), so setup reads as one screen rather than two.
-// It runs wider than the controls on it, out past both screen edges, because how far past 0 and 1
-// the screen actually reaches is a safezone question the layout cannot answer.
-_modePanel = _display ctrlCreate ["RscText", 1007];
-_modePanel ctrlSetPosition [-0.25, 0, 1.5, 0.13];
-_modePanel ctrlSetBackgroundColor [0.2, 0.4, 0.2, 1];
-_modePanel ctrlCommit 0;
+// Rules rather than boxes, for the reason the request dialog uses them: a frame around each block
+// would draw three nested borders on one panel. Full-bleed like the backdrop, so the three bands
+// read as one screen split into steps rather than as controls that happen to be near each other.
+_titleRule = _display ctrlCreate ["RscText", 1008];
+_titleRule ctrlSetPosition [-0.25, 0.062, 1.5, 0.004];
+_titleRule ctrlSetBackgroundColor [1, 1, 1, 0.5];
+_titleRule ctrlCommit 0;
 
 _modeLabel = _display ctrlCreate ["RscText", 1005];
-_modeLabel ctrlSetPosition [0.02, 0.005, 0.96, 0.035];
+_modeLabel ctrlSetPosition [0.02, 0.075, 0.96, 0.035];
 _modeLabel ctrlSetText localize "STR_DUWS_T_gamemode";
 _modeLabel ctrlCommit 0;
 
-_modeDesc = _display ctrlCreate ["RscText", 1006];
-_modeDesc ctrlSetPosition [0.02, 0.09, 0.96, 0.035];
-_modeDesc ctrlSetTextColor [1,1,1,0.75];
-_modeDesc ctrlCommit 0;
-
 _dropdownMode = _display ctrlCreate ["RscCombo", 1004];
-_dropdownMode ctrlSetPosition [0.02, 0.045, 0.96, 0.04];
+_dropdownMode ctrlSetPosition [0.02, 0.115, 0.96, 0.04];
 _dropdownMode ctrlCommit 0;
 
-// The mode is answered before the factions and narrows them; the rule is what says so, since the
-// two blocks otherwise read as one row of three dropdowns.
-_modeDivider = _display ctrlCreate ["RscText", 1008];
-_modeDivider ctrlSetPosition [-0.25, 0.135, 1.5, 0.005];
-_modeDivider ctrlSetBackgroundColor [1, 1, 1, 0.5];
-_modeDivider ctrlCommit 0;
+_modeDesc = _display ctrlCreate ["RscText", 1006];
+_modeDesc ctrlSetPosition [0.02, 0.16, 0.96, 0.035];
+_modeDesc ctrlSetFontHeight 0.03;
+_modeDesc ctrlSetTextColor [1, 1, 1, 0.75];
+_modeDesc ctrlCommit 0;
+
+// The mode is answered before the factions and narrows what they may be, so the two are separated
+// rather than left reading as one row of three dropdowns.
+_modeRule = _display ctrlCreate ["RscText", 1009];
+_modeRule ctrlSetPosition [-0.25, 0.203, 1.5, 0.004];
+_modeRule ctrlSetBackgroundColor [1, 1, 1, 0.5];
+_modeRule ctrlCommit 0;
 
 {
 	_itemMode = _dropdownMode lbAdd localize (_x select 1);

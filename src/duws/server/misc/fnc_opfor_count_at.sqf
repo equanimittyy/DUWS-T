@@ -9,9 +9,6 @@
 // which would let an APC parked on an objective read as nobody there. Static weapons come back
 // through the same query, so a manned emplacement counts as the defender it is.
 //
-// Units already ordered out never count. A withdrawal is not a defence, and leaving them in would
-// let a retreat bounding across an objective stall a capture indefinitely.
-
 if (!isServer) exitWith { 0 };
 
 params ["_pos", ["_radius", 100]];
@@ -20,7 +17,7 @@ private _n = 0;
 {
     private _members = if (_x isKindOf "CAManBase") then { [_x] } else { crew _x };
     {
-        if (alive _x && {side _x == EAST} && {!(_x getVariable ["DUWS_retreating", false])}) then {
+        if (alive _x && {side _x == EAST}) then {
             _n = _n + 1;
         };
     } forEach _members;

@@ -6,7 +6,7 @@
 // Replaces `WEST SEIZED` on the BLUFOR-takes-it direction. SEIZED demands the whole trigger area be
 // empty of OPFOR, which made a capture a sweep of every last patrol out to the zone radius; this
 // asks the two questions that actually describe taking ground -- is the garrison beaten, and does
-// the player hold the objective itself.
+// BLUFOR outnumber what is still standing on the ground.
 //
 // The OPFOR-takes-it-back direction still uses `EAST SEIZED`. There is no BLUFOR garrison figure to
 // judge a retake against, and OPFOR retakes are driven by WARCOM assault waves rather than by a
@@ -14,13 +14,9 @@
 
 if (!isServer) exitWith { false };
 
-// The same fraction the town garrison breaks at. One number for "this force is finished" across the
-// campaign, so a player learns it once.
+// The fraction below which a garrison is finished. One number for it across the campaign, so a
+// player learns it once.
 #define BREAK_FRACTION 0.2
-
-// The composition itself. Capture means standing on the objective, not thinning its defenders from
-// a ridge a kilometre away -- this is the clause that keeps a zone something you enter.
-#define CENTRE_RADIUS 50
 
 params ["_trg"];
 private _pos = _trg getVariable ["DUWS_zonePos", []];
@@ -39,7 +35,11 @@ if (_peak <= 0) exitWith { false };
 // a patrol that has wandered past the ring is still the zone's and still has to be dealt with.
 if (([_key] call fnc_zone_garrison_count) > BREAK_FRACTION * _peak) exitWith { false };
 
-// Deliberately unkeyed, unlike the test above. This one asks whether the objective is physically
-// held, and anyone standing on it denies it whoever spawned them. Withdrawing units are excluded by
-// fnc_opfor_count_at itself, so a retreat bounding through the centre cannot stall a capture.
-([_pos, CENTRE_RADIUS] call fnc_opfor_count_at) == 0
+// Who holds the ground, over the trigger's own area so both sides are counted across the same
+// circle. Deliberately unkeyed, unlike the test above: anyone standing here counts for their side
+// whoever spawned them, so a side mission's guards defend the zone and a passing patrol contests it.
+//
+// `list` is the engine's own record of what activates this trigger, which is WEST PRESENT -- the
+// same set the `this` beside this call is true for, so the two cannot disagree about who is here.
+private _radius = (triggerArea _trg) select 0;
+(count (list _trg)) > ([_pos, _radius] call fnc_opfor_count_at)

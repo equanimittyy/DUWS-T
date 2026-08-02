@@ -17,6 +17,17 @@ private _fnc_pipes = {
 	_s
 };
 
+// Green for what is left, grey for what is gone. A bar rather than a percentage because this is read
+// while deciding where to go next -- proportion at a glance beats a figure the player has to weigh
+// against a garrison size they cannot see. Twenty segments wide, so a full garrison reads as a solid
+// block; the query owns the scale. Shared by zones and towns so the two cannot read differently.
+private _fnc_bar = {
+	params ["_seg"];
+	format [localize "STR_DUWS_T_zone_mapview_garrison",
+		format ["<t color='#55ff55'>%1</t><t color='#7f7f7f'>%2</t>",
+			[_seg] call _fnc_pipes, [20 - _seg] call _fnc_pipes]]
+};
+
 // Roman for the tier, because the ladder is written that way everywhere the player meets it, and
 // arabic would collide with the strength figure sitting under it. Clamped rather than trusted: this
 // arrives over the network, and an out-of-range index is a script error inside a map click.
@@ -56,20 +67,14 @@ switch (_kind) do {
 			// rather than as one that was never there.
 			_lines pushBack localize "STR_DUWS_T_zone_mapview_held";
 		} else {
-			// Green for what is left, grey for what is gone. A bar rather than a percentage because
-			// this is read while deciding where to go next -- proportion at a glance beats a figure
-			// the player has to weigh against a zone size they cannot see. Twenty segments wide, so
-			// a full garrison reads as a solid block; the query owns the scale.
-			private _bar = format ["<t color='#55ff55'>%1</t><t color='#7f7f7f'>%2</t>",
-				[_seg] call _fnc_pipes, [20 - _seg] call _fnc_pipes];
-			_lines pushBack format [localize "STR_DUWS_T_zone_mapview_garrison", _bar];
+			_lines pushBack ([_seg] call _fnc_bar);
 		};
 		_text = _lines joinString "<br/>";
 	};
 
 	case "TOWN": {
 		_data params [["_name", ""], ["_pop", 0], ["_hasRep", false], ["_rep", 0], ["_income", 0],
-			["_side", ""], ["_ap", 0], ["_tier", 0], ["_hold", ""]];
+			["_side", ""], ["_ap", 0], ["_tier", 0], ["_hold", ""], ["_seg", 0]];
 		private _lines = [
 			format ["<t size='1.2'>%1</t>", _name],
 			format [localize "STR_DUWS_T_civ_mapview_pop", _pop]
@@ -109,6 +114,11 @@ switch (_kind) do {
 				};
 				default { [_tier] call _fnc_tier };
 			});
+			// Under the tier, where a zone's bar sits. Only on a town that owes a garrison: a
+			// neutral town has none, and a full grey bar there would read as one wiped rather than
+			// as one that was never raised. A town on a hold keeps its bar -- the men are coming
+			// back at that strength, which is exactly what the player is deciding against.
+			if (_tier >= 1 || {_hold != ""}) then { _lines pushBack ([_seg] call _fnc_bar) };
 		};
 		_text = _lines joinString "<br/>";
 	};

@@ -6,6 +6,8 @@ class startup_hq_placement_dialog
     class controls
     {
     // GUI EDITOR OUTPUT START
+        // The same green every other setup screen's background carries, so the placement box reads
+        // as part of the sequence rather than as a translucent panel dropped on the map.
         class background_request: RscText
         {
             idc = 1445;
@@ -13,7 +15,7 @@ class startup_hq_placement_dialog
             y = 10.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 21 * GUI_GRID_W;
             h = 9.5 * GUI_GRID_H;
-            colorBackground[] = {0,0,0,0.3};
+            colorBackground[] = {0.2, 0.4, 0.2, 1};
         };
         class hq_placement_frame: RscFrame
         {

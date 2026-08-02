@@ -27,7 +27,6 @@ fully triaged.
 
 _BEGIN-USER_
 Currently testing:
-- Grind a garrison to a fifth and let it break: `bounding back from`, then `broke contact` with a card naming the zone rather than a grid, and `opfor_withdrawal` AP
 - Read a zone's tier at generation and again at deploy: `is tier N, fielding` then `deployed N men at tier`; a rebuild keeps the tier it had
 - Lose a captured zone back to OPFOR: strength floored to 0.3 rather than refreshed, and the readout says Mobilising until the first man stands
 - Stand on a zone and step off mid-count: a flat 30 s every time, restarting on the step off
@@ -50,23 +49,14 @@ _END-USER_
 ## No zone has been seen to fall since the capture rule changed
 
 `fnc_zone_capture_ready` replaced `WEST SEIZED` on the BLUFOR direction, and no session logged since
-carries a `captured by BLUFOR` line. The last one that does pre-dates the rule, so the whole
-condition — the roster count against the peak, and the centre being clear — is unexercised rather
-than merely untuned. Everything downstream of a capture is unexercised with it.
+carries a `captured by BLUFOR` line. The last one that does pre-dates the rule, so both halves — the
+roster count against the peak, and BLUFOR outnumbering the OPFOR still in the zone — are unexercised
+rather than merely untuned. Everything downstream of a capture is unexercised with it.
 
-- [ ] Take a zone and watch for `captured by BLUFOR` in the RPT. A zone that will not fall with
-      nothing alive within 50 m of the composition and its garrison beaten means something standing
-      on the objective is not on the roster, which is the failure the centre test is prone to and
-      cannot report on its own — nothing in that condition logs why it refused
-
-## OPFOR retreat: a difficulty lever nobody has played against
-
-A garrison beaten to a fifth withdraws under `fnc_opfor_retreat` rather than being fought to the
-last man, and so does whatever survives inside the streaming ring when a zone flips. It cuts both
-ways: the player loses the clean sweep of a wiped garrison, and gains ground they no longer have to
-clear unit by unit. Whether that wants a campaign toggle is not answerable until a zone has actually
-fallen this way ([§No zone has been seen to fall](#no-zone-has-been-seen-to-fall-since-the-capture-rule-changed)),
-since the withdrawal is what clears the objective and the two are felt together.
+- [ ] Take a zone and watch for `captured by BLUFOR` in the RPT. A zone that will not fall with its
+      garrison beaten and no enemy left standing means the head-count is reading someone the player
+      cannot see — a crew inside a vehicle, or a neighbouring garrison inside the radius. Nothing in
+      that condition logs why it refused, so the RPT will not say so on its own
 
 ## Per-town reputation: shipped, not yet exercised
 
@@ -312,6 +302,28 @@ down again. That accounts for a stall, but not for one lasting 92 s.
 - [ ] If it repeats, log either side of `startLoadingScreen` and `endLoadingScreen` in
       `client/missions/fnc_stratmap.sqf`. A freeze that spans the `endLoadingScreen` line is not
       the loading screen, and the search below it is not the suspect either
+
+## Two UI wants the current shapes cannot meet
+
+Neither is a defect. Both are asks the thing they are asked of cannot do, recorded so the next
+attempt starts from the constraint rather than rediscovering it.
+
+**A zone's map label cannot be centred on the zone.** Arma exposes no text alignment for markers.
+An icon marker draws its text to the right of the icon, which is why the label sits off to one side
+of the ground it names; an area marker draws text as part of drawing its shape, so the same marker
+at `[0,0]` renders nothing at all — which is what a switch to `ELLIPSE` produced. The only route to
+a centred label is `drawIcon`, whose `align` parameter does take `"center"`, on a `Draw` handler
+attached to the map control. That means zone labels stop being markers: the handler has to be
+attached per client on every map open, and reveal and capture would have to repaint through it
+instead of through `setMarkerAlpha` and `setMarkerColor`. Worth it only if map presentation is being
+reworked anyway.
+
+**The supports strip cannot double in width.** The dialog is laid out on a 40-cell grid that is the
+whole screen, so the strip and the main window divide a fixed budget. The window's floor is its
+COMMAND AND CONTROL row — a request frame and a command button side by side, neither of which can
+stack — which puts the strip's ceiling near 15 cells against the 11.7 it had. Doubling to 23 would
+leave 16 cells for a window whose contents need 24. A strip materially wider than the present one
+means supports leaving this dialog for a screen of their own.
 
 ## Open defects
 

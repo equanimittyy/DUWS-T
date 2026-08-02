@@ -36,11 +36,6 @@ private _fnc_rosterAlive = {
     _n
 };
 
-// A garrison broken this far is not going to hold the town, and standing the remnant in it until
-// the last man dies is what makes clearing a town a sweep rather than a fight. Counted against the
-// strength the town was actually given, so a tier IV garrison may lose more men than a tier I has.
-#define BREAK_FRACTION 0.2
-
 // The band the map markers, the OPFOR AP income and the disguise gate all read as ownership, and
 // the whole reputation input to a garrison. Crossing it makes the town OPFOR ground at tier I and
 // leaving it discharges the town; nothing deeper in the negative buys the enemy anything further.
@@ -95,9 +90,11 @@ private _fnc_raise = {
     waitUntil { sleep 2; (call _fnc_opforPresent) || {diag_tickTime > _deadline} };
     if !(call _fnc_opforPresent) exitWith {
         // Left un-garrisoned rather than credited: the band is still the condition, so a later
-        // cycle tries again. Whatever the spawners did place is ordered out rather than abandoned,
-        // or every retry would silt the map up with another tier's worth of units nothing counts.
-        [_roster, _centre] spawn fnc_opfor_retreat;
+        // cycle tries again. Whatever the spawners did place is deleted rather than abandoned, or
+        // every retry would silt the map up with another tier's worth of units nothing counts.
+        // Nothing landed inside the town radius -- that is the condition being handled -- so there
+        // is nobody there to watch it go.
+        { deleteVehicle _x } forEach (_roster select { alive _x });
         missionNamespace setVariable [RAISE_SLOT(_i), []];
         ["WARN", "CIV", format ["Garrison tier %1 at town %2 placed no OPFOR within %3 m in 60 s; not armed",
             _tier, _i, _radius]] call fnc_log;
@@ -144,7 +141,7 @@ private _towns = [];
 for "_i" from 0 to (_count - 1) do {
     _towns pushBack (createHashMapFromArray [
         ["garrisoned", false], ["raising", false], ["trg", objNull], ["roster", []],
-        ["baseline", 0], ["retreating", false], ["deployed", 0], ["deployedStrength", 0],
+        ["baseline", 0], ["deployed", 0], ["deployedStrength", 0],
         ["deployedList", []], ["awaitVacate", true], ["emptySince", -1]
     ]);
 };
@@ -230,7 +227,6 @@ while {true} do {
                 _t set ["deployedStrength", _gotStrength];
                 _t set ["trg", _gotTrg];
                 _t set ["garrisoned", true];
-                _t set ["retreating", false];
                 ["INFO", "CIV", format ["Garrison tier %1 spawned at town %2 (rep %3), %4 men",
                     _gotTier, _i, _rep, _t get "baseline"]] call fnc_log;
             };
@@ -260,10 +256,6 @@ while {true} do {
         // that, streaming would hand back every casualty: grind a garrison to one man, walk away,
         // and the town rebuilds whole. Falls only -- the setter floors it and this never raises it
         // -- so damage accumulates across visits the way a zone's does.
-        //
-        // Deletion rather than fnc_opfor_retreat: nobody is within the radius plus 400 by
-        // definition here, so there is no one to watch men vanish, and walking them out would be a
-        // withdrawal the player never sees and the engine pays for.
         if (!_near && {(_t get "emptySince") >= 0}
             && {diag_tickTime > (_t get "emptySince") + DESPAWN_GRACE}) then {
             private _left = [_t get "roster"] call _fnc_rosterAlive;
@@ -282,7 +274,6 @@ while {true} do {
             ["INFO", "CIV", format ["Town %1 garrison streamed out holding %2 of %3; returns at %4 strength",
                 _i, _left, _t get "baseline", [_i] call fnc_town_garrison_strengthAt]] call fnc_log;
             _t set ["garrisoned", false];
-            _t set ["retreating", false];
             _t set ["trg", objNull];
             _t set ["roster", []];
             _t set ["baseline", 0];
@@ -307,11 +298,9 @@ while {true} do {
         // both clear. A second spawn path that set garrisoned without that gate would silently let
         // an upgrade land on a town captured seconds ago, which is what MOBILISING exists to stop.
         //
-        // Refused while the remnant is withdrawing: units walking in behind it would hold the
-        // trigger area open, and a town whose garrison keeps being topped up mid-withdrawal never
-        // reads as cleared at all. Refused while BLUFOR are near, because reinforcement that
-        // materialises around the player mid-fight is the pop-in the holds exist to prevent, and
-        // worse here -- men appearing behind someone in contact reads as the mission cheating.
+        // Refused while BLUFOR are near, because reinforcement that materialises around the player
+        // mid-fight is the pop-in the holds exist to prevent, and worse here -- men appearing behind
+        // someone in contact reads as the mission cheating.
         // Buying and arriving are separate acts: the commander may raise a contested town's tier at
         // any time, and the men walk in once nobody is watching. The tier stays owed either way, so
         // it lands on a later cycle rather than being lost, the way a hold defers a first garrison.
@@ -320,14 +309,14 @@ while {true} do {
         // diffing that: fnc_zone_thin drops entries at random, so the same tier and strength yield a
         // different list every call, and an unchanged town would appear to owe men forever.
         if ((_tier > (_t get "deployed") || _strength > (_t get "deployedStrength"))
-            && !(_t get "retreating") && {!_near}) then {
+            && {!_near}) then {
             private _want = [DUWS_townSpawnTiers select (_tier - 1), _strength] call fnc_zone_thin;
             private _added = [[_t get "deployedList", _want] call DUWS_fnc_spawnDiff, _centre, _radius] call DUWS_fnc_raiseGarrison;
             (_t get "roster") append _added;
             // Added to the baseline rather than re-measured from the roster. A garrison ground down
             // to three men and then reinforced by six is nine men against a baseline that still
             // counts the dead; re-basing on the alive count would refund every casualty the player
-            // has already paid for and reset the withdrawal threshold with it.
+            // has already paid for.
             _t set ["baseline", (_t get "baseline") + ([_added] call _fnc_rosterAlive)];
             _t set ["deployed", _tier];
             _t set ["deployedList", _want];
@@ -336,35 +325,20 @@ while {true} do {
                 _i, _tier, _t get "baseline"]] call fnc_log;
         };
 
-        // Ordered out on strength rather than left to be finished off. The withdrawal is also what
-        // clears the trigger area, so this and the WEST SEIZED test below run in sequence rather
-        // than competing: the remnant walks out, and the town reads as cleared once it has.
-        private _left = [_t get "roster"] call _fnc_rosterAlive;
-        if (!(_t get "retreating") && {(_t get "baseline") > 0} && {_left > 0}
-            && {_left <= BREAK_FRACTION * (_t get "baseline")}) then {
-            _t set ["retreating", true];
-            [_t get "roster", _centre] spawn fnc_opfor_retreat;
-            ["INFO", "CIV", format ["Town %1 garrison broken at %2 of %3 men; withdrawing",
-                _i, _left, _t get "baseline"]] call fnc_log;
-        };
-
         // Tier 0 is the town no longer being OPFOR ground -- the band test above zeroes it when aid
         // or heals lift the town out, and the commander may zero it directly. Either way there is
-        // nothing left to hold, and the garrison leaves the way a broken one does.
+        // nothing left to hold, so the garrison goes with the trigger that armed it.
         if (_tier == 0) then {
             deleteVehicle (_t get "trg");
             _t set ["trg", objNull];
             _t set ["garrisoned", false];
-            if !(_t get "retreating") then {
-                _t set ["retreating", true];
-                [_t get "roster", _centre] spawn fnc_opfor_retreat;
-            };
+            { deleteVehicle _x } forEach ((_t get "roster") select { alive _x });
             _t set ["roster", []];
             _t set ["baseline", 0];
             _t set ["deployed", 0];
             _t set ["deployedStrength", 0];
             _t set ["deployedList", []];
-            ["INFO", "CIV", format ["Town %1 left the OPFOR band at rep %2; garrison withdrawing",
+            ["INFO", "CIV", format ["Town %1 left the OPFOR band at rep %2; garrison cleared",
                 _i, _rep]] call fnc_log;
         } else {
             if (!isNull (_t get "trg") && {triggerActivated (_t get "trg")}) then {

@@ -44,14 +44,14 @@ zone_spawn_array = zone_spawn_array + [[_zone_num,false,false]];
 ["INFO", "ZONES", format ["zone %1 registered at %2, worth %3, size %4, fortified=%5, prefab=%6",
 	_zone_num, _zonePos, _points, _size, _fortified, _prefab]] call fnc_log;
 
-// CREATE MARKER (LABEL)
-// An area marker carrying nothing but text. The engine draws an icon marker's text to the right of
-// its icon, which put the zone's name off to one side of the ground it names; an area marker centres
-// its text on the position instead. Nothing is lost by the switch -- the size below is an icon
-// scale, so at [0,0] the marker type this used to carry drew nothing either.
+// CREATE MARKER (ICON)
+// Carries the zone's name and nothing else: the size below is an icon scale, so at [0,0] the type
+// draws nothing and only the text lands. It has to stay an icon marker -- an area marker draws its
+// text as part of drawing its shape, so the same marker at zero size renders nothing at all.
 _markername = format["%1%2",round(_zonePos select 0),round(_zonePos select 1)]; // Define marker name
 _markerstr = createMarker [str(_markername),_zonePos];
-_markerstr setMarkerShape "ELLIPSE";
+_markerstr setMarkerShape "ICON";
+str(_markername) setMarkerType "o_inf";
 str(_markername) setMarkerColor "ColorRed";
 str(_markername) setMarkerText _name;
 str(_markername) setMarkerSize [0, 0];
@@ -271,8 +271,8 @@ _trg = createTrigger ["EmptyDetector", _zonePos, false];
 _trg setTriggerArea [_size, _size, 0, false];
 // PRESENT rather than SEIZED on the BLUFOR direction. SEIZED demands the whole area be empty of
 // OPFOR, which made a capture a sweep of every last patrol out to the zone radius; the condition
-// asks instead whether the garrison is beaten and the objective itself is clear, and what is left
-// in the ring withdraws once the zone flips (fnc_spawnWait.sqf).
+// asks instead whether the garrison is beaten and whether BLUFOR outnumber what is still standing.
+// What is left in the outer streaming ring is cleared once the zone flips (fnc_spawnWait.sqf).
 _trg setTriggerActivation ["WEST", "PRESENT", true];
 // Carried on the trigger rather than formatted into the condition, so this position never becomes
 // text and back -- the same reason the enemy-contact trigger above carries its own. Both ride the

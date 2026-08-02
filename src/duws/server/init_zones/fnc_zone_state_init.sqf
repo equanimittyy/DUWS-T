@@ -68,10 +68,10 @@ fnc_zone_roster = {
 // by the zone radius: a patrol that has wandered out is still the zone's, and reinforcements that
 // walk in are not, which is the whole reason the roster exists. Shared by the peak and the capture
 // test so the strength a zone is measured against cannot be counted differently from the strength
-// it is judged by. Units already ordered out are not defending anything.
+// it is judged by.
 fnc_zone_garrison_count = {
 	params ["_zoneKey"];
-	{ alive _x && {!(_x getVariable ["DUWS_retreating", false])} } count ([_zoneKey] call fnc_zone_roster)
+	{ alive _x } count ([_zoneKey] call fnc_zone_roster)
 };
 
 // Bumped whenever a zone's garrison is raised, packed up, or lost. The spawn band takes up to a

@@ -93,11 +93,10 @@ Note that `remoteExec` to your own machine runs a frame later
 ([`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md)), so any test-then-act sequence
 around a waypoint call must not assume the waypoint exists on the next line.
 
-`server/misc/fnc_opfor_retreat.sqf` is the other waypoint caller, and the awkward one: it re-issues
-`doSuppressiveFire`, `doWatch` and `doMove` every poll for the life of a withdrawal rather than
-setting a waypoint once, so routing it through `groupOwner` moves a loop across the wire rather than
-a call. Nothing it steers moves under this plan — its callers are the town and zone garrisons, which
-stay server-owned. But the OPFOR commander is expected to hand it groups, and those are exactly the
+Anything that steers a group by re-issuing `doSuppressiveFire`, `doWatch` or `doMove` every poll,
+rather than setting a waypoint once, is the awkward case: routing it through `groupOwner` moves a
+loop across the wire rather than a call. Nothing in the tree does that today, but the OPFOR
+commander's per-squad layer is expected to, and the groups it steers are exactly the
 mobile groups this plan hands to the HC, so whichever of the two lands second has to agree with the
 first.
 
@@ -121,7 +120,6 @@ machine sets skill on the units it owns.
 | `server/warcom/fnc_WARCOM_blu_assault.sqf:50-113`, `fnc_WARCOM_blu_patrol.sqf` | Hand off after spawn. |
 | `server/misc/fnc_random_veh.sqf:105` | Hand off crews with their group. |
 | `server/warcom/fnc_WARCOM_wp_*.sqf` call sites | Route to `groupOwner`. |
-| `server/misc/fnc_opfor_retreat.sqf` | Route its per-poll orders to `groupOwner`, once anything it steers is handed off. |
 | `server/misc/fnc_AI_Master_Control.sqf:5,22-26` | Filter to `local _x`; run on server and HC. |
 | `info/server_client_authority.md` | Document the HC as a third machine role and the handoff contract. |
 

@@ -62,9 +62,6 @@ fnc_create_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_
 fnc_basic_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_basic_ammo_lists.sqf";
 fnc_escalation = compile preprocessFileLineNumbers "duws\server\misc\fnc_escalation.sqf";
 fnc_civ_garrison = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_garrison.sqf";
-// Not broadcast: it issues waypoints, which only the machine the group is local to may do, and
-// every group it steers is server-spawned.
-fnc_opfor_retreat = compile preprocessFileLineNumbers "duws\server\misc\fnc_opfor_retreat.sqf";
 fnc_opfor_count_at = compile preprocessFileLineNumbers "duws\server\misc\fnc_opfor_count_at.sqf";
 // Not broadcast: read from the zone capture trigger's condition, and that trigger is created
 // server-local precisely because this reads server-side zone state.

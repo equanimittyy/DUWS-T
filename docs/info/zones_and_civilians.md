@@ -119,12 +119,11 @@ deny the centre test for as long as they live; off the roster they counted towar
 nor the break line, and killing one was progress the zone never registered — a gun crew alone could
 hold a zone whose field garrison had been wiped, with nothing on screen to say why.
 
-**A beaten garrison leaves rather than waiting to be finished.** The moment the roster falls to or
-below the same fifth, `fnc_spawnWait`'s presence poll orders the survivors out through
-`server/misc/fnc_opfor_retreat.sqf`. Because withdrawing units are excluded from both tests, the
-withdrawal is also what clears the objective: the remnant walks off the centre and the zone falls
-once it has, rather than the player hunting the last four men through a composition. Latched per
-deploy cycle, since the count drops to zero as soon as they are flagged.
+**A beaten garrison is not the whole condition.** The roster falling to or below a fifth only
+satisfies half of `fnc_zone_capture_ready`; the other half asks whether BLUFOR outnumber the OPFOR
+still standing anywhere in the zone. A remnant that stays and fights therefore delays the capture
+only while it can still contest the ground, rather than for as long as one man is alive somewhere in
+the radius.
 
 ### Zone tiers
 
@@ -280,8 +279,9 @@ count at zero. Three things keep that from being read as a garrison wiped:
 
 **This replaced `WEST SEIZED`.** SEIZED requires the whole trigger area to be empty of OPFOR, which
 made a capture a sweep of every last patrol out to the zone radius, and — as the town garrison's
-trigger still can — could be held indefinitely by anything the engine counts as present. What is
-left in the ring when the zone flips withdraws instead.
+trigger still can — could be held indefinitely by anything the engine counts as present. Counting
+both sides instead means a lone survivor delays a capture only while BLUFOR do not outnumber him,
+and what is left in the outer ring when the zone flips is deleted by roster.
 
 The OPFOR-takes-it-back direction still uses `EAST SEIZED`: there is no BLUFOR garrison figure to
 judge a retake against, and retakes are driven by WARCOM assault waves rather than by a force being
@@ -401,8 +401,8 @@ reinforcement adds are *added* to the strength baseline rather than re-measured 
 casualties the player has already inflicted are not refunded. A retuned table cannot order a standing
 garrison to shrink: a smaller composition diffs to nothing rather than to something negative.
 
-**Buying a tier and the men arriving are separate acts.** Reinforcement is deferred while the
-garrison is withdrawing, and while BLUFOR are within the same radius the arrival test uses — men
+**Buying a tier and the men arriving are separate acts.** Reinforcement is deferred while BLUFOR
+are within the same radius the arrival test uses — men
 materialising around a player who is already in contact reads as the mission cheating, which is the
 pop-in the holds exist to prevent, and worse mid-fight.
 
@@ -430,8 +430,8 @@ enemy would never climb.
 Presence uses the same arrival test zones use (`fnc_duws_bluforNear`) rather than a presence trigger of
 its own, which would fire the instant anyone crossed the radius and whose handle is discarded at
 creation anyway. The clear itself is decided by a `WEST SEIZED` trigger rather than by counting the
-garrison dead: a garrison that withdraws has cleared the town as surely as one that was wiped, and
-only the trigger sees both.
+garrison dead: the roster is read for strength alone, and only the trigger sees what is actually
+standing in the town.
 
 ### Holds: one mechanism, two reasons
 
@@ -478,8 +478,8 @@ Towns seeded into the band at campaign start — the ones whose radius overlaps 
 hold, because nothing crossed. They are pre-existing enemy ground and garrison on sight.
 
 The garrison does hold a roster — every spawner returns its group — but it reads it for
-strength, never for the clear. At or below a fifth of the men the town was given, what is left
-withdraws rather than being finished off in place, through the same `fnc_opfor_retreat`.
+strength, never for the clear. A town is cleared by fighting its garrison out, not by beating it to
+a fraction: only the trigger decides, and it wants the town empty of OPFOR.
 
 **A town garrison streams like a zone.** It is raised when a player arrives and deleted once the town
 has been empty for two minutes, so a long session no longer leaves live men in every town anyone has
@@ -495,9 +495,8 @@ ever walked through. Three things fall out of that and each is load-bearing:
   reinforcement test in particular would read the emptied deployment against a live tier and raise
   the whole composition again, streaming the garrison out and back in on the same pass.
 
-Units are deleted rather than walked out through `fnc_opfor_retreat`: by definition nobody is inside
-the radius plus 400 when this runs, so there is no one to watch them vanish and a withdrawal nobody
-sees is a cost with no audience.
+Deleting them outright is safe here: by definition nobody is inside the radius plus 400 when this
+runs, so there is no one to watch them vanish.
 
 **Both streams start latched, zones included.** The arrival test fires on anyone inside the radius
 plus the buffer and cannot tell somebody walking up from somebody already standing in the middle — so
@@ -518,7 +517,7 @@ The town side latches on the same flag whenever a hold is armed, which covers bo
 the clear.
 
 The band is the condition, not a one-shot flag — a town driven back below `-10` gets a new garrison,
-and a town lifted out of the band while its garrison lives sees it withdraw.
+and a town lifted out of the band while its garrison lives has it cleared off the map.
 
 ### What clearing a garrison actually buys
 
@@ -630,9 +629,8 @@ about.
 | You ruin it past `-10` | Tier I written at once: enemy ground on paper. 30 min hold, latch armed | **`Mobilising`** |
 | Hold lapses, you have left once, you return | Garrison raised: tier composition thinned by strength | tier |
 | The commander spends | Upgrade buys composition, reinforce buys `+30 %` strength. Independent, and both land as men when you are not looking | tier |
-| You beat it to 20 % | The remnant withdraws | tier |
 | `WEST SEIZED` — no OPFOR left | `+5` rep, tier back to I, strength to `0.3`, 3 h hold, latch armed | **`Regrouping`** |
-| …unless that `+5` cleared `-10` | Tier 0, hold dropped, garrison withdraws | none — neutral |
+| …unless that `+5` cleared `-10` | Tier 0, hold dropped, garrison deleted | none — neutral |
 | You leave for 2 min | Strength recorded, men deleted, clear trigger deleted | as above |
 | 3 h later, you have left once, you return | Garrison returns at tier I, `0.3` | tier |
 

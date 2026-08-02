@@ -81,27 +81,51 @@ private _manStatics = {
 	[_grp, _pos] call bis_fnc_taskDefend;
 };
 
-// A garrison ground this far down has lost the zone whether or not the player finishes it off, and
-// standing the remnant in it until the last man is what makes taking ground a sweep rather than a
-// fight. The same fraction fnc_zone_capture_ready judges a beaten garrison by and the town garrison
-// breaks at: one number for "this force is finished" across the campaign, so a player learns it once.
-#define BREAK_FRACTION 0.2
+// How far a fallen zone's survivors are sent. Past the streaming ring, so a group that actually
+// walks it ends up outside the radius the player who just took the zone is likely to still be in.
+#define WITHDRAW_DISTANCE 800
 
-// This zone's own survivors, by roster, as groups -- not every EAST man standing in the ring. A
-// neighbouring town's garrison or a side mission's guards are not this zone's to order off the map.
-// Anyone already withdrawing is skipped: a second order on a group mid-bound would put two threads
-// on the same waypoints. Returns how many groups were sent, so callers can log it.
-private _orderOut = {
+// No player within this of a survivor before it is collected. Wider than the litter sweep's 300 m
+// because these are live men: a body blinking out at 300 m goes unnoticed and a soldier doing it
+// does not.
+#define WITHDRAW_KEEP_RADIUS 500
+
+// Survivors of a zone that has fallen: ordered off the objective here, collected by the sweep below
+// once nobody can see them go. The order is what makes the collection quiet rather than what
+// performs it -- a group that cannot path is still collected on distance, so nothing is left
+// standing whether or not the walk works.
+//
+// Roster-scoped, so only this zone's own garrison goes: a neighbouring town's or a side mission's
+// guards are not this zone's to take. Returns the men, for the sweep to work through.
+//
+// Locality: addWaypoint and setBehaviour are ignored unless the group is local to the machine
+// issuing them (docs/info/arma_engine_gotchas.md); every group on a zone roster is server-spawned.
+private _sendOff = {
 	params ["_key", "_pos"];
+	private _men = ([_key] call fnc_zone_roster) select { alive _x };
 	private _grps = [];
+	{ _grps pushBackUnique (group _x) } forEach _men;
 	{
-		if (alive _x && {!(_x getVariable ["DUWS_retreating", false])}) then {
-			_grps pushBackUnique (group _x);
-		};
-	} forEach ([_key] call fnc_zone_roster);
-	if (count _grps == 0) exitWith { 0 };
-	[_grps, _pos] spawn fnc_opfor_retreat;
-	count _grps
+		private _grp = _x;
+		// The defend and patrol waypoints the spawners gave them would pull them straight back onto
+		// the objective. Back to front: deleteWaypoint shifts every later index down, so a forward
+		// pass deletes every other one.
+		private _wps = waypoints _grp;
+		reverse _wps;
+		{ deleteWaypoint _x } forEach _wps;
+		// Outward on the bearing they already stand on, so a group on the far side of the zone does
+		// not cross it to leave.
+		private _dest = _pos getPos [WITHDRAW_DISTANCE, _pos getDir (leader _grp)];
+		private _wp = _grp addWaypoint [_dest, 50];
+		_wp setWaypointType "MOVE";
+		_wp setWaypointSpeed "FULL";
+		_grp setBehaviour "AWARE";
+		_grp setSpeedMode "FULL";
+		// Saves the sweep having to tidy up behind itself: the engine drops the group on the last
+		// man, whether he was collected or shot.
+		_grp deleteGroupWhenEmpty true;
+	} forEach _grps;
+	_men
 };
 
 // Crewing out has to happen here rather than in the loop below: that loop's man clause tests
@@ -180,31 +204,10 @@ while {true} do {
 		// for the rest of the campaign. One AI holds it here against two needed to raise it.
 		private _lastSeen = time;
 		private _despawn = false;
-		// Latched, not re-tested: once a garrison has been ordered out it stays ordered out for the
-		// rest of this deploy cycle. The count below drops to zero the moment they are flagged as
-		// withdrawing, so an unlatched test would re-issue the order every ten seconds.
-		private _withdrawn = false;
 		while {true} do {
 			if !(_spawnPos in WARCOM_zones_controled_by_OPFOR) exitWith {};
 			if ([1] call _bluforNear) then { _lastSeen = time };
 			if (time - _lastSeen >= _despawn_timer) exitWith { _despawn = true };
-
-			if (!_withdrawn) then {
-				// No peak means the garrison has not finished arriving, so there is nothing to
-				// judge beaten yet -- the same gate fnc_zone_capture_ready refuses on.
-				private _peak = missionNamespace getVariable [format ["DUWS_zonePeak_%1", _zoneKey], 0];
-				if (_peak > 0 && {([_zoneKey] call fnc_zone_garrison_count) <= BREAK_FRACTION * _peak}) then {
-					_withdrawn = true;
-					// The withdrawal is also what clears the objective: retreating units count
-					// toward neither half of the capture test, and the survivors walk off the
-					// centre. So this and the capture trigger run in sequence rather than
-					// competing -- the remnant leaves, and the zone falls once it has.
-					private _sent = [_zoneKey, _spawnPos] call _orderOut;
-					["INFO", "ZONES", format ["%1 garrison broken at or below %2 of peak %3; %4 group(s) ordered out",
-						_zoneKey, BREAK_FRACTION, _peak, _sent]] call fnc_log;
-				};
-			};
-
 			sleep 10;
 		};
 
@@ -222,25 +225,19 @@ while {true} do {
 		if (_despawn) then {
 			(zone_spawn_array select _index) set [1,false];
 			_zoneObj = _spawnPos nearObjects (_size + _AI_buffer);
-			// A withdrawal in progress is exempt: fnc_opfor_retreat owns those units until it has
-			// taken them clear of anyone watching, and towns sit on enemy zones by design, so a
-			// town garrison walking out crosses this radius on its way. Collecting it here would
-			// delete it in front of the force that pushed it out, which is the one thing the
-			// retreat exists to avoid. The give-up path in that function drops the flag, so
-			// nothing it abandons stays exempt.
+			// Every EAST man and vehicle in the ring, whoever spawned them. Nobody is inside the
+			// despawn radius by the time this runs, which is what makes deleting them safe.
 			{
 				// Delete vehicles and crew
-				if (side _x == EAST && !(_x isKindOf "StaticWeapon") && !(_x isKindOf "Man")
-					&& !(_x getVariable ["DUWS_retreating", false])) then {
+				if (side _x == EAST && !(_x isKindOf "StaticWeapon") && !(_x isKindOf "Man")) then {
 					deleteVehicleCrew _x;
 					deleteVehicle _x;
 				};
 				// Delete units not in vehicles
-				if (side _x == EAST && _x isKindOf "Man" && vehicle _x == _x
-					&& !(_x getVariable ["DUWS_retreating", false])) then {
+				if (side _x == EAST && _x isKindOf "Man" && vehicle _x == _x) then {
 					deleteVehicle _x;
 				};
-				
+
 			} foreach _zoneObj;
 
 			[_zoneKey] call _stowZone;
@@ -248,19 +245,18 @@ while {true} do {
 			// The zone changed hands, so the composition is not despawned -- the emplacements are
 			// the player's now.
 			//
-			// Its surviving OPFOR are a different question. The capture trigger tests WEST SEIZED
-			// over _size (fnc_createzone.sqf) while this thread streams over _size + _AI_buffer, so
-			// the zone can flip with everything in that 400 m ring still alive: those units were
-			// never inside the test. Left alone they stand in ground the player now owns for the
-			// rest of the campaign, because this branch only idles and the sweep above is
-			// unreachable once the zone is BLUFOR's. Deleting them is not an option either -- a
-			// capture is watched by definition. So they withdraw.
-			// Read before the peak's cycle ends, so the roster still describes the garrison that was
-			// holding when the zone fell. A garrison already broken has been ordered out by the poll
-			// above and is skipped there, so this covers a zone that fell with its garrison intact.
-			private _sent = [_zoneKey, _spawnPos] call _orderOut;
-			if (_sent > 0) then {
-				["INFO", "STREAM", format ["%1 lost; %2 surviving group(s) ordered out", _zoneKey, _sent]] call fnc_log;
+			// Its surviving OPFOR are a different question. The capture trigger tests over _size
+			// (fnc_createzone.sqf) while this thread streams over _size + _AI_buffer, so the zone
+			// can flip with everything in that 400 m ring still alive: those units were never
+			// inside the test. Left alone they stand in ground the player now owns for the rest of
+			// the campaign, because this branch only idles and the sweep above is unreachable once
+			// the zone is BLUFOR's. Bounded rather than open-ended: fnc_zone_capture_ready refuses
+			// while more than its break fraction of the peak is alive on the roster anywhere, so
+			// this is a fifth of a garrison at worst.
+			private _leftovers = [_zoneKey, _spawnPos] call _sendOff;
+			if (count _leftovers > 0) then {
+				["INFO", "STREAM", format ["%1 lost; %2 surviving garrison man/men ordered off",
+					_zoneKey, count _leftovers]] call fnc_log;
 			};
 
 			// The attrition this zone carried is left as it stands. It used to be reset to full
@@ -270,9 +266,39 @@ while {true} do {
 			// the figure when the flip actually happens rather than guessing here that it will.
 
 			// This thread idles until OPFOR hold it again rather than re-entering the arrival
-			// branch, which would spawn an OPFOR garrison inside a zone BLUFOR own.
-			waitUntil {sleep 60; (_spawnPos in WARCOM_zones_controled_by_OPFOR)
-				|| {count WARCOM_zones_controled_by_OPFOR < 1}};
+			// branch, which would spawn an OPFOR garrison inside a zone BLUFOR own. The withdrawal
+			// ordered above is collected on the same clock, on the rule the litter sweep collects
+			// everything else by: a survivor goes once no player is within WITHDRAW_KEEP_RADIUS of
+			// him, retried every pass rather than timed out, so one somebody is standing over is
+			// collected when they leave rather than never. Nothing else would ever collect them --
+			// fnc_repetitive_cleanup takes bodies, wrecks and empty vehicles, never living men.
+			//
+			// BIS_fnc_ListPlayers, not allPlayers: this is the streaming system's own answer to
+			// "is a player here" (fnc_duws_bluforNear), and the whole sweep turns on it. A list
+			// that came back empty where it should not -- a hosted session, a singleplayer
+			// campaign -- would delete every survivor on the first pass, which is precisely the
+			// vanishing act the walk-off exists to avoid.
+			private _held = true;
+			while {_held} do {
+				// The 60 s this always idled at once there is nothing left to collect, so a zone
+				// held for hours costs what it did before; 20 s while there is, because the
+				// collection has to catch the moment the player moves off.
+				sleep ([60, 20] select (count _leftovers > 0));
+				private _players = call BIS_fnc_ListPlayers;
+				{
+					private _man = _x;
+					if ((_players findIf {_x distance _man < WITHDRAW_KEEP_RADIUS}) < 0) then {
+						deleteVehicle _man;
+					};
+				} forEach _leftovers;
+				_leftovers = _leftovers select { alive _x };
+				_held = !(_spawnPos in WARCOM_zones_controled_by_OPFOR)
+					&& {count WARCOM_zones_controled_by_OPFOR > 0};
+			};
+			// Whatever is still walking goes with BLUFOR's tenure. A retake means they left the
+			// zone, so there is nobody to watch it happen, and the garrison that arrives files a
+			// roster of its own these men would not be on -- left alive, nothing would collect them.
+			{ deleteVehicle _x } forEach _leftovers;
 			(zone_spawn_array select _index) set [1,false];
 			// Re-latched, because a retake is not the clean start it looks like. EAST SEIZED only
 			// promises BLUFOR are outside the *trigger* radius; the arrival test below reaches 400 m

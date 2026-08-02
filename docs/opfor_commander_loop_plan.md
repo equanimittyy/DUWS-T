@@ -192,8 +192,8 @@ There is also a horizon mismatch: the hardpoint build tick is 20-30 minutes, and
 over that horizon is invalidated by the player before its second step.
 
 **Planning would earn its keep one layer down, not here** — a single squad ordered to retake a town
-deciding mount, route, dismount, assault. `server/misc/fnc_opfor_retreat.sqf` is the evidence that
-layer is worth hand-authoring as an explicit state machine rather than searching.
+deciding mount, route, dismount, assault. That layer is worth hand-authoring as an explicit state
+machine rather than searching.
 
 An **influence map** — a coarse grid holding decayed per-side influence — is the standard upgrade
 to the *reach* and *threat* terms, and it would produce the front line as a by-product, which is
@@ -218,8 +218,8 @@ binds harder here, because `src/duws` carries 36 `while {true}` loops across 27 
 No `sleep` inside the `isNil` block — unscheduled code cannot suspend, which is also what makes the
 scoring pass atomic against the rest of the mission.
 
-Constants take the `#define` form `server/misc/fnc_opfor_retreat.sqf:35-46` uses, so the tuning
-surface is the top of one file.
+Constants take the `#define` form the zone and town garrisons use, so the tuning surface is the top
+of one file.
 
 ## What this settles elsewhere
 

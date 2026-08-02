@@ -100,11 +100,6 @@ lbSetCurSel [2102, 0];
 
 [_display, _site, _isFob] call fnc_command_fill;
 
-// Hidden rather than absent: the MISSIONS box is a fixed layout with nothing below to slide up.
-if ((vehiclevarname player) != "player1") then {
-    (_display displayCtrl 1607) ctrlShow false;
-};
-
 // A FOB buys no supports, so the strip goes entirely. The main window keeps its size.
 if (_isFob) exitWith {
     { (_display displayCtrl _x) ctrlShow false } forEach [1804, 2103, 1603];

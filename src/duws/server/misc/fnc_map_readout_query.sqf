@@ -124,4 +124,11 @@ private _tier = [_hit] call fnc_town_garrison_tierAt;
 // enemy ground either way -- but printing a numeral would say a garrison is standing, and there is
 // none: a player who had just fought one out would read it as having failed to.
 private _hold = [_hit] call fnc_town_garrison_holdKindAt;
-["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap, _tier, _hold]] remoteExec ["fnc_map_readout_draw", _caller];
+
+// The same twenty-segment scale a stowed zone reports on, and by the same arithmetic: town strength
+// is stored in tenths, so it is quantised to ten and doubled rather than measured off live men. A
+// town has no equivalent of a deployed zone's live count -- the roster lives inside the garrison
+// thread and is never published -- so this is the one figure there is, standing garrison or not.
+private _seg = 2 * (ceil ((([_hit] call fnc_town_garrison_strengthAt) * 10) - 0.0001));
+_seg = (_seg max 0) min 20;
+["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap, _tier, _hold, _seg]] remoteExec ["fnc_map_readout_draw", _caller];

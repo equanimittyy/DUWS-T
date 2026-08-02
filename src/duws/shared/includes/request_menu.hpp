@@ -7,7 +7,11 @@
 // two dozen rows needing the full height rather than being scrolled blind.
 //
 // The grid is absolute -- 40 cells is the whole screen width -- so widening the strip is taken out
-// of the main window rather than added on the right, where there is nothing left.
+// of the main window rather than added on the right, where there is nothing left. The window's floor
+// is its COMMAND AND CONTROL row, two columns that cannot stack: a request frame at 11.2 cells beside
+// a command button wide enough for its longest label. That puts the strip's ceiling near 15 cells,
+// so a strip materially wider than this one means supports leaving the dialog for a screen of
+// their own.
 //
 // The two categories are a header and a rule rather than boxes. A box around each drew three nested
 // frames on the same content (window, category, group) and spent the vertical room the left column
@@ -37,7 +41,7 @@ class ressourceheader
             text = "$STR_DUWS_T_ii4q52bc";
             x = 0 * GUI_GRID_W + GUI_GRID_X;
             y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 27.5 * GUI_GRID_W;
+            w = 24.5 * GUI_GRID_W;
             h = 22 * GUI_GRID_H;
             colorBackground[] = {0,0,0,0.5};
         };
@@ -49,7 +53,7 @@ class ressourceheader
             text = "$STR_DUWS_T_REQ_MISSIONS";
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 2.2 * GUI_GRID_H + GUI_GRID_Y;
-            w = 26 * GUI_GRID_W;
+            w = 23 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
         // The three pool captions are the longest text in the dialog and the frames carrying them
@@ -63,7 +67,7 @@ class ressourceheader
             sizeEx = 0.024;
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 3.2 * GUI_GRID_H + GUI_GRID_Y;
-            w = 8.4 * GUI_GRID_W;
+            w = 7.4 * GUI_GRID_W;
             h = 2 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_zsv1b4zp";
         };
@@ -73,7 +77,7 @@ class ressourceheader
             text = "CP: XXX";
             x = 1.2 * GUI_GRID_W + GUI_GRID_X;
             y = 3.65 * GUI_GRID_H + GUI_GRID_Y;
-            w = 7.6 * GUI_GRID_W;
+            w = 6.6 * GUI_GRID_W;
             h = 1.1 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
         };
@@ -82,9 +86,9 @@ class ressourceheader
             idc = 1807;
             text = "$STR_DUWS_T_01aj6v4j";
             sizeEx = 0.024;
-            x = 9.6 * GUI_GRID_W + GUI_GRID_X;
+            x = 8.6 * GUI_GRID_W + GUI_GRID_X;
             y = 3.2 * GUI_GRID_H + GUI_GRID_Y;
-            w = 8.4 * GUI_GRID_W;
+            w = 7.4 * GUI_GRID_W;
             h = 2 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_23shv5yr";
         };
@@ -92,9 +96,9 @@ class ressourceheader
         {
             idc = 1002;
             text = "000";
-            x = 10 * GUI_GRID_W + GUI_GRID_X;
+            x = 9 * GUI_GRID_W + GUI_GRID_X;
             y = 3.65 * GUI_GRID_H + GUI_GRID_Y;
-            w = 7.6 * GUI_GRID_W;
+            w = 6.6 * GUI_GRID_W;
             h = 1.1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_23shv5yr";
             colorText[] = {1,1,1,1};
@@ -104,9 +108,9 @@ class ressourceheader
             idc = 1806;
             text = "$STR_DUWS_T_dvt8byhj";
             sizeEx = 0.024;
-            x = 18.4 * GUI_GRID_W + GUI_GRID_X;
+            x = 16.4 * GUI_GRID_W + GUI_GRID_X;
             y = 3.2 * GUI_GRID_H + GUI_GRID_Y;
-            w = 8.4 * GUI_GRID_W;
+            w = 7.4 * GUI_GRID_W;
             h = 2 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_8ibx2y3c";
         };
@@ -114,46 +118,36 @@ class ressourceheader
         {
             idc = 1001;
             text = "ZUC:XXX";
-            x = 18.8 * GUI_GRID_W + GUI_GRID_X;
+            x = 16.8 * GUI_GRID_W + GUI_GRID_X;
             y = 3.65 * GUI_GRID_H + GUI_GRID_Y;
-            w = 7.6 * GUI_GRID_W;
+            w = 6.6 * GUI_GRID_W;
             h = 1.1 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
         };
-        // Four across the second row: the convert button belongs beside what it converts, and View
-        // Map came off the HQ board to sit beside the other two things that answer "what now".
+        // Three across the second row, not four: the row is 23 cells and its labels do not fit in
+        // it four abreast -- the convert button carries the longest text in the dialog and was the
+        // one being cut. Mission Timers went to the command column, where its Game Master gate
+        // leaves no hole in a row of fixed buttons.
         class sidemissionbutton: RscButton
         {
             idc = 1605;
             text = "$STR_DUWS_T_rplkhwfu";
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 5.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 5.4 * GUI_GRID_W;
+            w = 7 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             // The one entry that still closes the menu: it hands the screen to the strategic map,
             // which a dialog would draw straight over.
             action = "closeDialog 0; [] spawn fnc_stratmap";
             tooltip = "$STR_DUWS_T_k9t3ub5d";
         };
-        // Game Master only; fnc_request_menu owns that test.
-        class missiontimersbutton: RscButton
-        {
-            idc = 1607;
-            text = "$STR_DUWS_T_SHOW_MISSION_COOLDOWNS";
-            x = 6.6 * GUI_GRID_W + GUI_GRID_X;
-            y = 5.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 5.4 * GUI_GRID_W;
-            h = 1.5 * GUI_GRID_H;
-            action = "[] spawn fnc_mission_cooldowns_show";
-            tooltip = "$STR_DUWS_T_SHOW_MISSION_COOLDOWNS";
-        };
         class viewmapbutton: RscButton
         {
             idc = 1608;
             text = "$STR_DUWS_T_civ_mapview_action";
-            x = 12.4 * GUI_GRID_W + GUI_GRID_X;
+            x = 8.2 * GUI_GRID_W + GUI_GRID_X;
             y = 5.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 5.4 * GUI_GRID_W;
+            w = 4.4 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_request_map_view";
             tooltip = "$STR_DUWS_T_civ_mapview_action";
@@ -162,9 +156,9 @@ class ressourceheader
         {
             idc = 1627;
             text = "$STR_DUWS_T_f62mxt4i";
-            x = 18.2 * GUI_GRID_W + GUI_GRID_X;
+            x = 13 * GUI_GRID_W + GUI_GRID_X;
             y = 5.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 8.6 * GUI_GRID_W;
+            w = 10.8 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_convertAPtoCP";
             tooltip = "$STR_DUWS_T_a72vvbgp";
@@ -178,7 +172,7 @@ class ressourceheader
             idc = 1810;
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 7.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 26 * GUI_GRID_W;
+            w = 23 * GUI_GRID_W;
             h = 0.06 * GUI_GRID_H;
             colorBackground[] = {1,1,1,0.25};
         };
@@ -188,7 +182,7 @@ class ressourceheader
             text = "$STR_DUWS_T_REQ_COMMAND";
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 7.8 * GUI_GRID_H + GUI_GRID_Y;
-            w = 26 * GUI_GRID_W;
+            w = 23 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
         class requestunitframe: RscFrame
@@ -280,51 +274,59 @@ class ressourceheader
             action = "[] spawn fnc_request_vehicle";
         };
 
+        // Pitched at 1.75 rather than 1.9: at the old spacing the seventh slot ended a tenth of a
+        // cell above the exit button, so a full column read as one control running into another.
         class commandslot0: RscButton
         {
             idc = 1610;
             text = "";
-            x = 12.6 * GUI_GRID_W + GUI_GRID_X;
+            x = 12.4 * GUI_GRID_W + GUI_GRID_X;
             y = 8.9 * GUI_GRID_H + GUI_GRID_Y;
-            w = 14.2 * GUI_GRID_W;
+            w = 11.4 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[0] spawn fnc_command_select";
         };
         class commandslot1: commandslot0
         {
             idc = 1611;
-            y = 10.8 * GUI_GRID_H + GUI_GRID_Y;
+            y = 10.65 * GUI_GRID_H + GUI_GRID_Y;
             action = "[1] spawn fnc_command_select";
         };
         class commandslot2: commandslot0
         {
             idc = 1612;
-            y = 12.7 * GUI_GRID_H + GUI_GRID_Y;
+            y = 12.4 * GUI_GRID_H + GUI_GRID_Y;
             action = "[2] spawn fnc_command_select";
         };
         class commandslot3: commandslot0
         {
             idc = 1613;
-            y = 14.6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 14.15 * GUI_GRID_H + GUI_GRID_Y;
             action = "[3] spawn fnc_command_select";
         };
         class commandslot4: commandslot0
         {
             idc = 1614;
-            y = 16.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 15.9 * GUI_GRID_H + GUI_GRID_Y;
             action = "[4] spawn fnc_command_select";
         };
         class commandslot5: commandslot0
         {
             idc = 1615;
-            y = 18.4 * GUI_GRID_H + GUI_GRID_Y;
+            y = 17.65 * GUI_GRID_H + GUI_GRID_Y;
             action = "[5] spawn fnc_command_select";
         };
         class commandslot6: commandslot0
         {
             idc = 1616;
-            y = 20.3 * GUI_GRID_H + GUI_GRID_Y;
+            y = 19.4 * GUI_GRID_H + GUI_GRID_Y;
             action = "[6] spawn fnc_command_select";
+        };
+        class commandslot7: commandslot0
+        {
+            idc = 1617;
+            y = 21.15 * GUI_GRID_H + GUI_GRID_Y;
+            action = "[7] spawn fnc_command_select";
         };
 
         // Inside the main window, not under the strip, which owns none of the window's chrome.
@@ -332,7 +334,7 @@ class ressourceheader
         {
             idc = 1604;
             text = "EXIT";
-            x = 21.2 * GUI_GRID_W + GUI_GRID_X;
+            x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 21.9 * GUI_GRID_H + GUI_GRID_Y;
             w = 5.6 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
@@ -340,24 +342,25 @@ class ressourceheader
         };
 
         // --- SUPPORTS: the catalogue, appended down the right-hand side ---
-        // The strip is where the main window's width comes from, so its floor is a row still being
-        // readable: "Supply Drop (5CP) Radio" plus the escalation surcharge appended after it. The
-        // two category headings are longer than that and are clipped at any width this can hold.
+        // Width is set by the longest row rendering whole: "Supply Drop (5CP) Radio" plus the
+        // escalation surcharge appended after it. The two category headings are written to that same
+        // budget rather than to the sentence they would like to be -- at this width the strip holds
+        // about 33 characters, and a heading over it is silently cut rather than wrapped.
         class supportunlockframe: RscFrame
         {
             idc = 1804;
             text = "$STR_DUWS_T_x0l67g37";
-            x = 28 * GUI_GRID_W + GUI_GRID_X;
+            x = 25 * GUI_GRID_W + GUI_GRID_X;
             y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 11.7 * GUI_GRID_W;
+            w = 14.7 * GUI_GRID_W;
             h = 22 * GUI_GRID_H;
         };
         class supportunlocklist: RscListBox
         {
             idc = 2103;
-            x = 28.4 * GUI_GRID_W + GUI_GRID_X;
+            x = 25.4 * GUI_GRID_W + GUI_GRID_X;
             y = 2.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 10.9 * GUI_GRID_W;
+            w = 13.9 * GUI_GRID_W;
             h = 18.5 * GUI_GRID_H;
             sizeEx = 0.025;
             // The button below both buys and refunds, so its label follows the selection.
@@ -367,9 +370,9 @@ class ressourceheader
         {
             idc = 1603;
             text = "$STR_DUWS_T_bp73qs16";
-            x = 28.4 * GUI_GRID_W + GUI_GRID_X;
+            x = 25.4 * GUI_GRID_W + GUI_GRID_X;
             y = 21.3 * GUI_GRID_H + GUI_GRID_Y;
-            w = 10.9 * GUI_GRID_W;
+            w = 13.9 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_request_support";
             tooltip = "$STR_DUWS_T_dsl9rr00";
