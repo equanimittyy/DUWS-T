@@ -57,13 +57,13 @@ fnc_site_at = { params ["_key"]; DUWS_sites getOrDefault [_key, createHashMap] }
 // awaitVacate starts latched: an occupant registered under a player's feet would otherwise read them
 // as having just walked up and raise its men around them.
 fnc_site_occupant_register = {
-    params ["_key", "_kind", ["_side", EAST], ["_buffer", 400], ["_grace", 120]];
+    params ["_key", "_kind", ["_side", EAST], ["_buffer", 400], ["_grace", 120], ["_latch", true]];
     private _list = DUWS_occupants getOrDefault [_key, []];
     private _i = _list findIf { (_x get "kind") isEqualTo _kind };
     if (_i >= 0) exitWith { _list select _i };
     private _o = createHashMapFromArray [
         ["kind", _kind], ["side", _side], ["buffer", _buffer], ["grace", _grace],
-        ["awake", false], ["seenLast", false], ["emptySince", -1], ["awaitVacate", true],
+        ["awake", false], ["seenLast", false], ["emptySince", -1], ["awaitVacate", _latch],
         ["baseline", 0], ["tier", 0], ["strength", 1], ["deployedList", []],
         ["deployedStrength", 0], ["trg", objNull], ["hold", 0],
         ["raising", false], ["withdrawing", false]
@@ -90,10 +90,13 @@ fnc_site_hooks_set = {
     (DUWS_siteHooks getOrDefault [_key, createHashMap, true]) set [_kind, _hooks];
 };
 
+// A default is required rather than optional: a site whose hooks have not been registered yet must
+// answer, not fault, and "present" answering nil would read as false and quietly stop a whole kind
+// from ever waking.
 fnc_site_hook = {
-    params ["_key", "_kind", "_name"];
+    params ["_key", "_kind", "_name", ["_default", {}]];
     ((DUWS_siteHooks getOrDefault [_key, createHashMap]) getOrDefault [_kind, createHashMap])
-        getOrDefault [_name, {}]
+        getOrDefault [_name, _default]
 };
 
 // Every unit an occupant spawned, in one array per site and kind.
@@ -149,4 +152,98 @@ fnc_site_alive = {
 fnc_town_site_key = {
     params ["_townIndex"];
     format ["town_%1", _townIndex]
+};
+
+// How often every site is asked whether anything should change. Ten seconds because that is how long
+// a player stands somewhere before anything appears, and a garrison materialising late is the pop-in
+// every hold and latch in this system exists to prevent. Zones and crowds already ran at this; only
+// the town garrison was slower, at thirty.
+#define SITE_TICK 10
+
+// One thread for every site, replacing a thread per zone plus a sleeper per FOB plus two town loops.
+//
+// The saving is the shared pre-gate rather than the thread count. Each zone thread called
+// fnc_duws_bluforNear every tick unconditionally, and that runs a nearEntities over radius + buffer
+// as well as a player-list build: forty zones at six ticks a minute is 240 spatial queries a minute
+// across a map that is empty of players almost everywhere. Here the player list is built once and
+// every site is distance-tested against it, and the spatial query is only paid where somebody
+// actually is. The crowd handler already did this and stated the principle; zones never got it
+// because each had a thread of its own and nothing to share a list with.
+//
+// The risk this shape takes on is one long pass. Scheduled scripts share about 3 ms a frame between
+// them, so a pass that outgrows the budget is split across frames and the sites at the tail are
+// serviced later than those at the head. Two hundred and fifty distance tests sit well inside it;
+// what would not is per-site work done inline. Hence the rule this poller is written to:
+// **gate, then dispatch -- never do real work here.** Every hook below either answers a question or
+// spawns a worker.
+fnc_site_poller = {
+    if (!isServer) exitWith {};
+    while {true} do {
+        sleep SITE_TICK;
+
+        private _players = (call BIS_fnc_listPlayers) select { alive _x };
+        private _now = time;
+        private _t0 = diag_tickTime;
+
+        {
+            private _key = _x;
+            private _site = _y;
+            if (_now < (_site get "nextDue")) then { continue };
+            private _pos = _site get "pos";
+            private _radius = _site get "radius";
+            private _frozen = (_site get "disposal") isEqualTo "freeze";
+
+            {
+                private _o = _x;
+                private _kind = _o get "kind";
+                private _here = (_players findIf { _x distance _pos < _radius + (_o get "buffer") }) >= 0;
+
+                // A frozen site wakes on either side. A garrison that cannot be woken by an attacker
+                // is a garrison that loses its base while nobody is looking, and the shared BLUFOR
+                // test cannot answer it -- its AI arm exists to notice BLUFOR arriving on OPFOR
+                // ground, so at a friendly base it would count the garrison standing in the middle
+                // of the radius and never let it sleep.
+                if (_frozen && {!_here}) then {
+                    _here = ([_pos, _radius + (_o get "buffer")] call fnc_opfor_count_at) > 0;
+                };
+
+                // One empty sighting spends the latch, and a site cannot clear it and wake on the
+                // same pass: the arrival test cannot tell somebody walking up from somebody already
+                // standing in the middle, so an occupant registered under a player's feet would
+                // otherwise raise its men around them.
+                if (_o get "awaitVacate") then {
+                    if (!_here) then { _o set ["awaitVacate", false] };
+                    _here = false;
+                };
+
+                if (_o get "awake") then {
+                    if (_here) then { _o set ["emptySince", _now] };
+                    if (_now - (_o get "emptySince") >= (_o get "grace")) then {
+                        _o set ["awake", false];
+                        private _fnc_sleep = [_key, _kind, "sleep"] call fnc_site_hook;
+                        [_key, _o] call _fnc_sleep;
+                    };
+                } else {
+                    // Two consecutive polls rather than a sleep-and-retest. Both forms exist for the
+                    // same reason -- a helicopter crossing the radius should not commit a fill --
+                    // and this one does not stall the pass that holds every other site's clock.
+                    private _fnc_present = [_key, _kind, "present", {true}] call fnc_site_hook;
+                    if (_here && {_o get "seenLast"} && {[_key, _o] call _fnc_present}) then {
+                        _o set ["awake", true];
+                        _o set ["emptySince", _now];
+                        private _fnc_wake = [_key, _kind, "wake"] call fnc_site_hook;
+                        [_key, _o] call _fnc_wake;
+                    };
+                };
+                _o set ["seenLast", _here];
+            } forEach (DUWS_occupants getOrDefault [_key, []]);
+        } forEach DUWS_sites;
+
+        // Logged rather than assumed. This is the figure that decides whether the shape still holds:
+        // a pass approaching a frame means per-site work has crept back inline.
+        if (duws_log_level >= 4) then {
+            ["DEBUG", "STREAM", format ["site pass: %1 sites in %2 ms",
+                count DUWS_sites, round ((diag_tickTime - _t0) * 1000)]] call fnc_log;
+        };
+    };
 };

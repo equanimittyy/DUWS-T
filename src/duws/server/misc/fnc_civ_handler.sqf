@@ -1,26 +1,17 @@
-// Locality: server -- one thread for all towns, started by fnc_civ_init_Tomata at registration.
+// Locality: server -- registered once for all towns by fnc_civ_init_Tomata.
 /*
     fnc_civ_handler.sqf
-    Streams every town's civilians: fill a town when players arrive, empty it once they have been
-    gone long enough. No params. Never returns.
+    Registers every town's civilian crowd as an occupant of its site and hands the clock to the
+    shared poller. No params. Returns once the hooks are in place.
 
-    Per town this is the enemy zone gate from server/init_zones/fnc_spawnWait.sqf -- confirm a
-    sighting before filling, then a grace period that restarts on every sighting. Answering those
-    two questions a second way is what the mutex, the spawning/spawned flag pair and the recycle
-    pass were each patching around. The campaign-wide ceiling stays: it is not an answer to those
-    questions but a bound on the total crowd, which nothing else provides (fnc_civ_liveTarget).
-
-    One thread for every town rather than one each, which is the one place this departs from the
-    zone gate. Selection hands three towns to the HQ and three to every zone, then adds a top-up
-    wave, so a 40-zone campaign registers over 160 of them against a zone count of 40. A thread
-    apiece would have each of those build its own player list every tick; here the list is built
-    once and every town is tested against it.
+    What is left here is the crowd's own three answers -- when it may exist, what it fills with, and
+    how it is collected -- because everything else it used to do is the same question every other
+    site asks. The poll interval, the two-sample confirm, the grace period and the presence test are
+    fnc_site_poller's now.
 
     RAVAGE and WBK keep the older trigger-driven handlers.
 */
 if (!isServer) exitWith {};
-
-#define POLL_INTERVAL 10
 
 // Half the zone gate's grace, deliberately. Towns are disjoint -- the cull in
 // fnc_civ_init_Tomata pushes them apart until they are -- so a player is inside at most one, and a
@@ -113,80 +104,57 @@ private _fnc_fill = {
 };
 
 private _centres = _locations apply { getPos _x };
-// One record per town rather than three arrays indexed alike: fields indexed the same way are one
-// transposition from a town streaming against another's clock. civ_spawned_<n> is the same "awake"
-// fact published for fnc_civ_liveTarget, which has no other way to see which towns are occupied, and
-// is written only at the two transitions below.
-private _crowds = [];
+
+// Collected by roster, which is what the town filled rather than whatever is standing in it. The
+// scan this replaces walked allUnits + allDeadMen once per emptied town looking for a tag, which is
+// a several-hundred-entry pass to find a list the fill already had.
+//
+// Corpses go with the living: they stay on the roster, and leaving them to the litter sweep does
+// nothing at all when the campaign was started with the cleanup lifetime switched off. A recruited
+// civilian is off the roster by then -- fnc_recruit_civilian_server drops it as it changes hands --
+// and one who turned hostile is still this town's. Groups need no bookkeeping: fnc_civ_spawnUnit
+// creates them with deleteWhenEmpty set.
+private _fnc_empty = {
+    params ["_key", "_o"];
+    private _i = _o get "townIndex";
+    missionNamespace setVariable [format ["civ_spawned_%1", _i], false];
+    private _emptied = 0;
+    {
+        if (!isNull _x) then { deleteVehicle _x; _emptied = _emptied + 1 };
+    } forEach ([_key, "crowd"] call fnc_site_roster);
+    [_key, "crowd"] call fnc_site_roster_clear;
+    if (duws_log_level >= 4) then {
+        ["DEBUG", "CIV", format ["Town %1 emptied, %2 deleted", _i, _emptied]] call fnc_log;
+    };
+};
+
+// Set before the fill is dispatched, not inside it: fnc_civ_liveTarget counts a town as occupied
+// from this flag, and a town that fills on the same tick as another must already be visible to the
+// other's throttle.
+private _fnc_wake = {
+    params ["_key", "_o"];
+    private _i = _o get "townIndex";
+    missionNamespace setVariable [format ["civ_spawned_%1", _i], true];
+    [_i] call fnc_civ_town_reveal;
+    private _site = [_key] call fnc_site_at;
+    [_i, _site get "pos", _site get "radius"] spawn (missionNamespace getVariable "DUWS_civ_fill");
+};
+
+// Reached through the mission namespace because the hook runs from the poller's scope, not this one.
+missionNamespace setVariable ["DUWS_civ_fill", _fnc_fill];
+
 for "_i" from 0 to (_count - 1) do {
     private _key = [_i] call fnc_town_site_key;
-    [_key, _centres select _i, _radii param [_i, 500]] call fnc_site_register;
-    _crowds pushBack ([_key, "crowd", CIVILIAN, STREAM_BUFFER, DESPAWN_TIMER] call fnc_site_occupant_register);
+    private _centre = _centres select _i;
+    private _radius = _radii param [_i, 500];
+    [_key, _centre, _radius] call fnc_site_register;
+    // Unlatched, unlike a garrison. The latch exists to stop men appearing around a player who was
+    // already standing there, and a crowd that never arrives is worse than one that fades in: a town
+    // the player happens to start in would otherwise stay empty until they had left it once.
+    private _o = [_key, "crowd", CIVILIAN, STREAM_BUFFER, DESPAWN_TIMER, false] call fnc_site_occupant_register;
+    // The only field the crowd adds: everything else about where this town is lives on the site.
+    _o set ["townIndex", _i];
+    [_key, "crowd", createHashMapFromArray [["wake", _fnc_wake], ["sleep", _fnc_empty]]] call fnc_site_hooks_set;
 };
 
-while {true} do {
-    sleep POLL_INTERVAL;
-
-    // Built once for every town, which is the whole point of the shared thread. Dead players are
-    // dropped: a body lying in the street should not hold a town up until its owner respawns.
-    private _players = (call BIS_fnc_listPlayers) select { alive _x };
-    private _now = time;
-    private _expired = [];
-
-    for "_i" from 0 to (_count - 1) do {
-        private _centre = _centres select _i;
-        // Buffered for arrival only. The fill itself gets the town's own radius, or the crowd
-        // would be scattered across the open ground the buffer reaches into.
-        private _radius = _radii param [_i, 500];
-        private _c = _crowds select _i;
-        private _here = (_players findIf { _x distance _centre < _radius + (_c get "buffer") }) >= 0;
-
-        if (_c get "awake") then {
-            if (_here) then { _c set ["emptySince", _now] };
-            if (_now - (_c get "emptySince") >= (_c get "grace")) then {
-                _c set ["awake", false];
-                missionNamespace setVariable [format ["civ_spawned_%1", _i], false];
-                _expired pushBack _i;
-            };
-        } else {
-            // Two consecutive polls, which is the confirm the zone gate spends a sleep on: a
-            // helicopter crossing the disc is gone by the next sample, and a fill is expensive
-            // enough to be worth the wait. A second sample rather than a sleep because this
-            // thread holds the grace clock of every other town and must not stall on one.
-            if (_here && {_c get "seenLast"}) then {
-                _c set ["awake", true];
-                // Set before the fill is dispatched, not inside it: fnc_civ_liveTarget counts a
-                // town as occupied from this flag, and a town that fills on the same tick as
-                // another must already be visible to the other's throttle.
-                missionNamespace setVariable [format ["civ_spawned_%1", _i], true];
-                _c set ["emptySince", _now];
-                [_i] call fnc_civ_town_reveal;
-                [_i, _centre, _radius] spawn _fnc_fill;
-            };
-        };
-        _c set ["seenLast", _here];
-    };
-
-    // Collected by roster, which is what the town filled rather than whatever is standing in it.
-    // The scan this replaces walked allUnits + allDeadMen once per emptied town looking for a tag,
-    // which is a several-hundred-entry pass to find a list the fill already had.
-    //
-    // Corpses go with the living: they stay on the roster, and leaving them to the litter sweep does
-    // nothing at all when the campaign was started with the cleanup lifetime switched off. A
-    // recruited civilian is off the roster by then -- fnc_recruit_civilian_server drops it as it
-    // changes hands -- and one who turned hostile is still this town's. Groups need no bookkeeping:
-    // fnc_civ_spawnUnit creates them with deleteWhenEmpty set.
-    if !(_expired isEqualTo []) then {
-        private _emptied = 0;
-        {
-            private _key = [_x] call fnc_town_site_key;
-            {
-                if (!isNull _x) then { deleteVehicle _x; _emptied = _emptied + 1 };
-            } forEach ([_key, "crowd"] call fnc_site_roster);
-            [_key, "crowd"] call fnc_site_roster_clear;
-        } forEach _expired;
-        if (duws_log_level >= 4) then {
-            ["DEBUG", "CIV", format ["Towns %1 emptied, %2 deleted", _expired, _emptied]] call fnc_log;
-        };
-    };
-};
+["INFO", "CIV", format ["%1 town crowds registered with the site poller", _count]] call fnc_log;

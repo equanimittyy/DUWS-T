@@ -447,7 +447,7 @@ falsifiable:
 - [x] Town garrison and crowd rosters become units in the mission namespace
 - [x] `DUWS_sites`, `DUWS_occupants`, `DUWS_siteHooks`
 - [x] Towns take the zone's anchored baseline
-- [ ] The poller, with the crowd migrated onto it
+- [x] The poller, with the crowd migrated onto it
 - [ ] Town garrisons migrated
 - [ ] Zones migrated; handshake, generation counter and trigger re-arming retired
 - [ ] `emplacement` and `structure` kinds; `_manStatics` and `_stowZone` retired
