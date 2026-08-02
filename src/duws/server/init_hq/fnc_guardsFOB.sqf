@@ -15,7 +15,13 @@ _fob setVariable ["FOB_guard_busy", true];
 
 // Reguard replaces the previous garrison rather than adding to it. Read off the FOB rather
 // than passed in, so no copy of the scroll action holds stale groups. Server-local.
-{ { deleteVehicle _x } forEach units _x; } forEach (_fob getVariable ["FOB_guardGroups", []]);
+// The FOB's own men, by roster: a reguard replaces the garrison wholesale, so what stood before it
+// goes with it and the frozen-state flag goes with them.
+private _fobKey = _fob getVariable ["DUWS_siteKey", ""];
+if (_fobKey != "") then {
+	{ deleteVehicle _x } forEach ([_fobKey, "infantry"] call fnc_site_roster);
+	[_fobKey, "infantry"] call fnc_site_roster_clear;
+};
 
 _safe = [(_centerPos select 0)+10, (_centerPos select 1)+10];
 
@@ -95,7 +101,12 @@ _wp setWaypointBehaviour "SAFE";
 _wp setWaypointSpeed "LIMITED";
 
 
-_fob setVariable ["FOB_guardGroups", [_groupGuard, _groupPatrol]];
+// Filed under the site so the poller can freeze them. Registered late rather than at build time
+// because a reguard raises a fresh pair, and the roster has to describe what is standing now.
+if (_fobKey != "") then {
+	private _roster = [_fobKey, "infantry"] call fnc_site_roster;
+	{ _roster append (units _x) } forEach [_groupGuard, _groupPatrol];
+};
 _fob setVariable ["FOB_guard_busy", false];
 
 // Redeploy is a button in the FOB's request menu now (fnc_command_fill), built per client when the

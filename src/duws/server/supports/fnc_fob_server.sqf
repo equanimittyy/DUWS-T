@@ -61,8 +61,19 @@ if (count _fadePlayers > 0) then {
 // spawned here on bis_fnc_taskPatrol circuits of their own, which scattered the FOB's infantry
 // across 170 m of open ground on separate random routes -- and none of them was rebuilt by the
 // reguard action, so a FOB that lost them never got them back.
+
+// Registered as a frozen site rather than given a watcher thread of its own. A ten-FOB campaign
+// carried ten permanent sleepers; they are one pass of the shared poller now.
+private _fobKey = format ["FOB_%1", _fob call BIS_fnc_netId];
+_fob setVariable ["DUWS_siteKey", _fobKey];
+[_fobKey, _foundPickupPos, base_garrison_sleep_range, "freeze"] call fnc_site_register;
+// Woken by players or by hostiles. A garrison that cannot be woken by an attacker is a garrison
+// that loses its base while nobody is looking; the shared BLUFOR test cannot answer it, because
+// its AI arm exists to notice BLUFOR arriving on OPFOR ground and at a friendly base it would
+// count the garrison standing in the middle of the radius and never let it sleep.
+[_fobKey, "infantry", WEST, 0, base_garrison_sleep_delay, false, false] call fnc_site_occupant_register;
+
 [_foundPickupPos, _fob] spawn fnc_guardsFOB;
-[_fob, _foundPickupPos] spawn fnc_FOBgarrisonSleep;
 
 // No arrival trigger: it existed only to announce a friendly element reaching the FOB, and the
 // hardcore reveal fnc_enterlocation still does is keyed on a zone name, which a FOB never has.

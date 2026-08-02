@@ -149,6 +149,37 @@ fnc_site_alive = {
     { alive _x } count ([_siteKey, _kind] call fnc_site_roster)
 };
 
+// The freeze, as a disposal mode. Nothing is rebuilt and nothing is deleted: every registered
+// occupant of the site has its simulation switched off where it stands, and switched back on when
+// anybody arrives.
+//
+// This is why a base is the exception to streaming. A zone garrison belongs to OPFOR and is rebuilt
+// from a table, so deleting it loses nothing. A base's belongs to the player: rebuilding it would
+// hand back every soldier who had been killed, which is a free version of the redeploy they would
+// otherwise pay for, and its buildings carry damage a table cannot reproduce. A base is also a
+// respawn point, so it has to be able to receive somebody who arrives in an instant with no approach
+// to notice. Freezing satisfies all three, and simulation is where nearly all of an idle soldier's
+// cost sits.
+//
+// enableSimulationGlobal, not enableSimulation: the latter is local, so a server-side freeze would
+// leave every client still simulating them.
+//
+// Only registered occupants freeze. A vehicle the player parked at base is their property and not
+// the site's, which also keeps this off anything the base-keep radius already exists to protect.
+//
+// The roster is read each pass rather than captured: a redeploy replaces a garrison wholesale, and a
+// watcher holding the old men would thaw units that no longer exist while the new ones stayed
+// frozen. Only units whose state actually differs are touched, because the command broadcasts.
+fnc_site_setFrozen = {
+    params ["_key", "_o", "_awake"];
+    {
+        if (!isNull _x && {!((_x getVariable ["DUWS_siteAwake", true]) isEqualTo _awake)}) then {
+            _x enableSimulationGlobal _awake;
+            _x setVariable ["DUWS_siteAwake", _awake];
+        };
+    } forEach ([_key, _o get "kind"] call fnc_site_roster);
+};
+
 // The key a town's occupants file under. One place builds it, so the crowd and the garrison cannot
 // disagree about which town they are in.
 fnc_town_site_key = {
@@ -260,6 +291,18 @@ fnc_site_poller = {
                 // if/else rather than an early exit: exitWith inside a forEach block ends the whole
                 // loop, so one occupant with a cycle of its own would stop every occupant after it
                 // from being serviced at all.
+                if (_frozen) then {
+                    // A frozen occupant has no wake-and-sleep transition to make: it is always
+                    // there, and all that changes is whether it is running. The grace period still
+                    // applies, so a player crossing the fence does not thaw the base and refreeze it
+                    // a second later.
+                    private _awake = _here || {_now - (_o getOrDefault ["lastSeen", -1e6]) <= (_o get "grace")};
+                    if (_here) then { _o set ["lastSeen", _now] };
+                    if !((_o get "awake") isEqualTo _awake) then {
+                        _o set ["awake", _awake];
+                        [_key, _o, _awake] call fnc_site_setFrozen;
+                    };
+                } else {
                 if !(_fnc_tick isEqualTo {}) then {
                     [_key, _o, _here, _now] call _fnc_tick;
                 } else {
@@ -281,6 +324,7 @@ fnc_site_poller = {
                             private _fnc_wake = [_key, _kind, "wake"] call fnc_site_hook;
                             [_key, _o] call _fnc_wake;
                         };
+                };
                 };
                 };
                 _o set ["seenLast", _here];

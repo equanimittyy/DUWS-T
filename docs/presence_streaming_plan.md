@@ -451,7 +451,7 @@ falsifiable:
 - [x] Town garrisons migrated
 - [x] Zones migrated; handshake, generation counter and trigger re-arming retired
 - [x] `emplacement` and `structure` kinds; `_manStatics` and `_stowZone` retired
-- [ ] Freeze becomes a disposal mode; `fnc_FOBgarrisonSleep`'s thread retired, hostile wake added
+- [x] Freeze becomes a disposal mode; `fnc_FOBgarrisonSleep`'s thread retired, hostile wake added
 - [ ] FOBs register their turrets and vehicles, not only their guards
 - [ ] The HQ registers as a frozen site
 - [ ] `DUWS_garrisonUnit` replaced by a store lookup
