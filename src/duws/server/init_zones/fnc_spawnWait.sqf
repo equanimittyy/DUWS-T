@@ -187,7 +187,7 @@ while {true} do {
 				// them. Clear and bump stay one act, and fnc_createzone reads the generation this
 				// publishes instead of bumping its own.
 				[_zoneKey] call fnc_zone_gen_bump;
-				missionNamespace setVariable [format ["DUWS_zoneUnits_%1", _zoneKey], []];
+				[_zoneKey] call fnc_site_roster_clear;
 				// Props before the garrison: units must not spawn into ground that is about to
 				// have a bunker on it, and the turrets have to exist before anyone mans them.
 				if (_zoneKey in DUWS_stowed) then {

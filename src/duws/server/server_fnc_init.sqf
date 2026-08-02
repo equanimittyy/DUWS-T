@@ -10,6 +10,8 @@ publicVariable "fnc_pool_spend";
 publicVariable "fnc_pool_reply";
 // Ahead of both state files below, which are its consumers: zones and towns share one attrition model.
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_garrison_strength_init.sqf";
+// Ahead of them for the same reason: zones, towns and bases share one roster store.
+[] call compile preprocessFileLineNumbers "duws\server\misc\fnc_site_stream_init.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_state_init.sqf";
 fnc_fob_deregister = compile preprocessFileLineNumbers "duws\server\misc\fnc_fob_deregister.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_state_init.sqf";

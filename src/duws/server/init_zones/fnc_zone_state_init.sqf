@@ -53,19 +53,12 @@ fnc_zone_name = {
 	_name
 };
 
-// Every unit a zone spawned, in one array per zone. Both spawn threads append to it and
-// fnc_createzone empties it at the head of each spawn cycle, so it describes the garrison currently
-// on the ground rather than every garrison the zone has ever had.
-//
-// A roster rather than a flag on each unit: the capture condition reads this twice a second while a
-// player stands in the zone, and walking allUnits to find the stamped ones would put a
-// several-hundred-entry scan on exactly the frames a firefight is using.
+// A zone's garrison roster, which is the shared site store keyed by the zone. Emptied at the head of
+// each spawn cycle, so it describes the garrison currently on the ground rather than every garrison
+// the zone has ever had. Why a roster rather than a flag on each unit is stated where it is kept.
 fnc_zone_roster = {
 	params ["_zoneKey"];
-	private _var = format ["DUWS_zoneUnits_%1", _zoneKey];
-	private _r = missionNamespace getVariable [_var, []];
-	if (isNil {missionNamespace getVariable _var}) then { missionNamespace setVariable [_var, _r] };
-	_r
+	[_zoneKey] call fnc_site_roster
 };
 
 // What "this zone's garrison" is worth, wherever it happens to be standing. Deliberately not bounded
@@ -75,7 +68,7 @@ fnc_zone_roster = {
 // it is judged by.
 fnc_zone_garrison_count = {
 	params ["_zoneKey"];
-	{ alive _x } count ([_zoneKey] call fnc_zone_roster)
+	[_zoneKey] call fnc_site_alive
 };
 
 // Bumped whenever a zone's garrison is raised, packed up, or lost. The spawn band takes up to a

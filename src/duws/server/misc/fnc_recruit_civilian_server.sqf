@@ -49,8 +49,13 @@ if (random 1 < 0.95) then {
     
     // 将平民转移到玩家组（自动处理阵营变化）
     [_civilian] joinSilent (group _caller);
+    // Off its town's roster as it changes hands, or the next teardown of that town deletes a man
+    // standing in the player's squad. The tag goes with it, for the readers that still ask.
+    if (_locIndex >= 0) then {
+        [[_locIndex] call fnc_town_site_key, _civilian, "crowd"] call fnc_site_roster_drop;
+    };
     _civilian setVariable ["civ_locIndex", nil];
-    
+
     // 确保单位不再被视为俘虏，且启用所有 AI 功能
     _civilian setCaptive false;
     _civilian stop false;
@@ -59,15 +64,7 @@ if (random 1 < 0.95) then {
     _civilian enableAI "AUTOTARGET";
     _civilian enableAI "TARGET";
     _civilian setUnitPos "AUTO";
-    [_civilian] joinSilent (group _caller);
-    _civilian setVariable ["civ_locIndex", nil];
-    sleep 0.1;
-    [_civilian] joinSilent (group _caller);
-    _civilian setVariable ["civ_locIndex", nil];
-    
-    // 清除城镇标记（防止后续清理脚本误删）
-    _civilian setVariable ["civ_locIndex", nil];
-    
+
     // 处理原组：如果原组空了，则删除；并从城镇组列表中移除原组
     if (!isNull _oldGroup) then {
         if (count units _oldGroup == 0) then {

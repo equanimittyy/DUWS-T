@@ -99,7 +99,10 @@ private _fnc_fill = {
         };
 
         private _unit = [_locIndex, _pos, selectRandom _civArray, false] call fnc_civ_spawnUnit;
-        if (!isNull _unit) then { _groups pushBack (group _unit) };
+        if (!isNull _unit) then {
+            _groups pushBack (group _unit);
+            ([[_locIndex] call fnc_town_site_key, "crowd"] call fnc_site_roster) pushBack _unit;
+        };
         sleep 0.2;
     };
 
@@ -164,20 +167,24 @@ while {true} do {
         _seenLast set [_i, _here];
     };
 
-    // One sweep for however many towns expired on this tick rather than one apiece. The tag is the
-    // whole test: fnc_recruit_civilian_server clears it before the civilian joins the player, so
-    // nothing the player owns is caught here, and one who turned hostile is still this town's.
-    // Corpses go with the living rather than being left to the litter sweep, which does nothing at
-    // all when the campaign was started with the cleanup lifetime switched off. Groups need no
-    // bookkeeping: fnc_civ_spawnUnit creates them with deleteWhenEmpty set.
+    // Collected by roster, which is what the town filled rather than whatever is standing in it.
+    // The scan this replaces walked allUnits + allDeadMen once per emptied town looking for a tag,
+    // which is a several-hundred-entry pass to find a list the fill already had.
+    //
+    // Corpses go with the living: they stay on the roster, and leaving them to the litter sweep does
+    // nothing at all when the campaign was started with the cleanup lifetime switched off. A
+    // recruited civilian is off the roster by then -- fnc_recruit_civilian_server drops it as it
+    // changes hands -- and one who turned hostile is still this town's. Groups need no bookkeeping:
+    // fnc_civ_spawnUnit creates them with deleteWhenEmpty set.
     if !(_expired isEqualTo []) then {
         private _emptied = 0;
         {
-            if ((_x getVariable ["civ_locIndex", -1]) in _expired) then {
-                deleteVehicle _x;
-                _emptied = _emptied + 1;
-            };
-        } forEach (allUnits + allDeadMen);
+            private _key = [_x] call fnc_town_site_key;
+            {
+                if (!isNull _x) then { deleteVehicle _x; _emptied = _emptied + 1 };
+            } forEach ([_key, "crowd"] call fnc_site_roster);
+            [_key, "crowd"] call fnc_site_roster_clear;
+        } forEach _expired;
         if (duws_log_level >= 4) then {
             ["DEBUG", "CIV", format ["Towns %1 emptied, %2 deleted", _expired, _emptied]] call fnc_log;
         };

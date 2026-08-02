@@ -444,7 +444,7 @@ falsifiable:
 - [x] The access filter: faction, campaign settings and AP gate, all dropping rather than substituting
 - [x] `fnc_createopfortified` folded into tier-row tokens and deleted
 - [x] `fnc_zone_thin` thins men across the composition, not entries out of it
-- [ ] Town garrison and crowd rosters become units in the mission namespace
+- [x] Town garrison and crowd rosters become units in the mission namespace
 - [ ] `DUWS_sites`, `DUWS_occupants`, `DUWS_siteHooks`
 - [ ] Towns take the zone's anchored baseline
 - [ ] The poller, with the crowd migrated onto it

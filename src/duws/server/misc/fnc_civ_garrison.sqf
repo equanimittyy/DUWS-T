@@ -29,11 +29,14 @@ if (_count == 0) exitWith {};
 private _radii = missionNamespace getVariable ["civ_radii", []];
 private _centres = _locations apply { getPos _x };
 
-private _fnc_rosterAlive = {
+// The groups a raise hands back, flattened to the men in them. A roster is a unit list -- the same
+// shape a zone's is -- so a garrison can be counted, thinned and collected without every caller
+// having to know whether it is holding groups or men.
+private _fnc_menOf = {
     params ["_grps"];
-    private _n = 0;
-    { _n = _n + ({alive _x} count units _x) } forEach _grps;
-    _n
+    private _men = [];
+    { _men append (units _x) } forEach _grps;
+    _men
 };
 
 // The band the map markers, the OPFOR AP income and the disguise gate all read as ownership, and
@@ -74,7 +77,7 @@ private _fnc_raise = {
     // Thinned by what the town has left, the way a zone's band is. A town beaten once fields a
     // fraction of its tier from then on, so the composition is the ceiling rather than the promise.
     private _want = [[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter, _strength] call DUWS_fnc_thinComposition;
-    private _roster = [_want, _centre, _radius, _strength] call DUWS_fnc_raiseGarrison;
+    private _men = [[_want, _centre, _radius, _strength] call DUWS_fnc_raiseGarrison] call _fnc_menOf;
 
     // OPFOR standing inside the trigger's own area, which is what makes the town clearable. SEIZED
     // is satisfied by an empty town as readily as by a fought-out one, so nothing else can tell the
@@ -96,7 +99,7 @@ private _fnc_raise = {
         // every retry would silt the map up with another tier's worth of units nothing counts.
         // Nothing landed inside the town radius -- that is the condition being handled -- so there
         // is nobody there to watch it go.
-        { deleteVehicle _x } forEach (_roster select { alive _x });
+        { deleteVehicle _x } forEach _men;
         missionNamespace setVariable [RAISE_SLOT(_i), []];
         ["WARN", "CIV", format ["Garrison tier %1 at town %2 placed no OPFOR within %3 m in 60 s; not armed",
             _tier, _i, _radius]] call fnc_log;
@@ -115,7 +118,7 @@ private _fnc_raise = {
     _trg setTriggerTimeout [30, 40, 50, true];
     _trg setTriggerStatements ["this", "", ""];
 
-    missionNamespace setVariable [RAISE_SLOT(_i), [_roster, _want, _tier, _strength, _trg]];
+    missionNamespace setVariable [RAISE_SLOT(_i), [_men, _want, _tier, _strength, _trg]];
 };
 
 // One record per town, in place of the locals a thread apiece used to hold. Keyed rather than kept
@@ -142,7 +145,7 @@ private _fnc_raise = {
 private _towns = [];
 for "_i" from 0 to (_count - 1) do {
     _towns pushBack (createHashMapFromArray [
-        ["garrisoned", false], ["raising", false], ["trg", objNull], ["roster", []],
+        ["garrisoned", false], ["raising", false], ["trg", objNull],
         ["baseline", 0], ["deployed", 0], ["deployedStrength", 0],
         ["deployedList", []], ["awaitVacate", true], ["emptySince", -1]
     ]);
@@ -222,8 +225,8 @@ while {true} do {
             missionNamespace setVariable [RAISE_SLOT(_i), nil];
             if !(_res isEqualTo []) then {
                 _res params ["_gotRoster", "_gotWant", "_gotTier", "_gotStrength", "_gotTrg"];
-                _t set ["roster", _gotRoster];
-                _t set ["baseline", [_gotRoster] call _fnc_rosterAlive];
+                ([[_i] call fnc_town_site_key] call fnc_site_roster) append _gotRoster;
+                _t set ["baseline", {alive _x} count _gotRoster];
                 _t set ["deployed", _gotTier];
                 _t set ["deployedList", _gotWant];
                 _t set ["deployedStrength", _gotStrength];
@@ -260,7 +263,7 @@ while {true} do {
         // -- so damage accumulates across visits the way a zone's does.
         if (!_near && {(_t get "emptySince") >= 0}
             && {diag_tickTime > (_t get "emptySince") + DESPAWN_GRACE}) then {
-            private _left = [_t get "roster"] call _fnc_rosterAlive;
+            private _left = [[_i] call fnc_town_site_key] call fnc_site_alive;
             if ((_t get "baseline") > 0) then {
                 private _was = [_i] call fnc_town_garrison_strengthAt;
                 [_i, (_left / (_t get "baseline")) min _was] call fnc_town_garrison_setStrength;
@@ -269,15 +272,20 @@ while {true} do {
             // SEIZED the moment a player walked back into ground the garrison had streamed out of,
             // and pay them a clear for a fight that never happened.
             deleteVehicle (_t get "trg");
-            // The group goes with its men. Most of these spawners set deleteGroupWhenEmpty, but not
-            // all of them do, and an empty group left behind on every stream-out of every town is a
-            // leak that only shows up as a slow drift over a long campaign.
-            { { deleteVehicle _x } forEach units _x; deleteGroup _x } forEach (_t get "roster");
+            // The men, and the groups they leave behind. Most spawners set deleteGroupWhenEmpty but
+            // not all do, and an empty group left on every stream-out of every town is a leak that
+            // only shows as a slow drift over a long campaign.
+            private _key = [_i] call fnc_town_site_key;
+            private _grps = [];
+            {
+                if (!isNull _x) then { _grps pushBackUnique (group _x); deleteVehicle _x };
+            } forEach ([_key] call fnc_site_roster);
+            { if (count units _x == 0) then { deleteGroup _x } } forEach _grps;
+            [_key] call fnc_site_roster_clear;
             ["INFO", "CIV", format ["Town %1 garrison streamed out holding %2 of %3; returns at %4 strength",
                 _i, _left, _t get "baseline", [_i] call fnc_town_garrison_strengthAt]] call fnc_log;
             _t set ["garrisoned", false];
             _t set ["trg", objNull];
-            _t set ["roster", []];
             _t set ["baseline", 0];
             _t set ["deployed", 0];
             _t set ["deployedStrength", 0];
@@ -315,12 +323,13 @@ while {true} do {
             && {!_near}) then {
             private _want = [[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter, _strength] call DUWS_fnc_thinComposition;
             private _added = [[_t get "deployedList", _want] call DUWS_fnc_spawnDiff, _centre, _radius, _strength] call DUWS_fnc_raiseGarrison;
-            (_t get "roster") append _added;
+            private _addedMen = [_added] call _fnc_menOf;
+            ([[_i] call fnc_town_site_key] call fnc_site_roster) append _addedMen;
             // Added to the baseline rather than re-measured from the roster. A garrison ground down
             // to three men and then reinforced by six is nine men against a baseline that still
             // counts the dead; re-basing on the alive count would refund every casualty the player
             // has already paid for.
-            _t set ["baseline", (_t get "baseline") + ([_added] call _fnc_rosterAlive)];
+            _t set ["baseline", (_t get "baseline") + ({alive _x} count _addedMen)];
             _t set ["deployed", _tier];
             _t set ["deployedList", _want];
             _t set ["deployedStrength", _strength];
@@ -335,8 +344,8 @@ while {true} do {
             deleteVehicle (_t get "trg");
             _t set ["trg", objNull];
             _t set ["garrisoned", false];
-            { deleteVehicle _x } forEach ((_t get "roster") select { alive _x });
-            _t set ["roster", []];
+            { deleteVehicle _x } forEach (([[_i] call fnc_town_site_key] call fnc_site_roster) select { alive _x });
+            [[_i] call fnc_town_site_key] call fnc_site_roster_clear;
             _t set ["baseline", 0];
             _t set ["deployed", 0];
             _t set ["deployedStrength", 0];
@@ -348,7 +357,7 @@ while {true} do {
                 deleteVehicle (_t get "trg");
                 _t set ["trg", objNull];
                 _t set ["garrisoned", false];
-                _t set ["roster", []];
+                [[_i] call fnc_town_site_key] call fnc_site_roster_clear;
                 _t set ["baseline", 0];
                 _t set ["deployed", 0];
                 _t set ["deployedStrength", 0];
