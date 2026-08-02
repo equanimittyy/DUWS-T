@@ -219,7 +219,8 @@ fnc_enterlocation = compile preprocessFileLineNumbers "duws\server\misc\fnc_ente
 // Not broadcast: the two triggers that name it are created server-local, and it creates global
 // markers, so exactly one machine may run it.
 fnc_enemy_contact = compile preprocessFileLineNumbers "duws\server\misc\fnc_enemy_contact.sqf";
-fnc_spawnWait = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawnWait.sqf";
+// Publishes DUWS_zoneHooks and the placers around it; after the zone state file it reads.
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_stream_init.sqf";
 fnc_spawn_team = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawn_team.sqf";
 fnc_random_veh = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_random_veh.sqf";
 fnc_zone_reveal = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_reveal.sqf";

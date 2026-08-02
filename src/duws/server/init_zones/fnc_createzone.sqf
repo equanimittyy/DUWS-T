@@ -39,7 +39,6 @@ zone_meta_array = zone_meta_array + [[_zone_num,_zonePos,_size,_points,_fortifie
 publicVariable "zone_meta_array";
 
 // Add zone to the spawn/despawn array [number, blufor_close, noDespawn]
-zone_spawn_array = zone_spawn_array + [[_zone_num,false,false]];
 
 ["INFO", "ZONES", format ["zone %1 registered at %2, worth %3, size %4, fortified=%5, prefab=%6",
 	_zone_num, _zonePos, _points, _size, _fortified, _prefab]] call fnc_log;
@@ -255,16 +254,25 @@ private _zoneTier = [_zoneKey] call fnc_zone_tier_roll;
 zones_buildout_done = zones_buildout_done + 1;
 publicVariable "zones_buildout_done";
 
-_index = zone_spawn_array find [_zone_num,false,false];
-_opfor_spawn = (zone_spawn_array select _index) select 1;
-
-// Registered before the streaming loop starts, so the loop reads its latch and its clock out of the
-// shared store rather than keeping a private copy the rest of the mission cannot see.
+// Registered with the shared poller, which owns the streaming clock from here. Two permanent threads
+// per zone -- a streaming loop and a tail loop polling the array slot it set -- go with the
+// handshake between them; the tick raises directly and adopts what it raised.
+//
+// Two AI to raise a zone and one to hold it: that hysteresis stops a zone flickering off around the
+// edges of the force that just took it.
 [_zoneKey, _spawnPos, _size] call fnc_site_register;
-[_zoneKey, "garrison", EAST, 400, 120] call fnc_site_occupant_register;
+private _occ = [_zoneKey, "garrison", EAST, 400, 120, true, true, 2] call fnc_site_occupant_register;
+_occ set ["minAIHold", 1];
+[_zoneKey, "garrison", DUWS_zoneHooks] call fnc_site_hooks_set;
 
-sleep 60;
-[_spawnPos,_size,_index] spawn fnc_spawnWait;
+// Zones are built deployed and the prefab mans their turrets at build time, so without this a fresh
+// campaign carries every zone's props and gunners for the whole session -- the exact cost streaming
+// exists to remove. The tick cannot do it: its despawn branch is only reachable once a zone has been
+// raised, and a zone nobody has visited never has been. One AI is enough here, because stowing a zone
+// somebody is already standing in would deploy it again on the next pass.
+if !([_spawnPos, _size + 400, 1] call fnc_duws_bluforNear) then {
+	[_zoneKey] call DUWS_fnc_zoneStow;
+};
 
 // ✅ 修复：将占领触发器和旗杆创建代码移到 while 循环之前，确保它们能够执行
 
@@ -277,7 +285,7 @@ _trg setTriggerArea [_size, _size, 0, false];
 // PRESENT rather than SEIZED on the BLUFOR direction. SEIZED demands the whole area be empty of
 // OPFOR, which made a capture a sweep of every last patrol out to the zone radius; the condition
 // asks instead whether the garrison is beaten and whether BLUFOR outnumber what is still standing.
-// What is left in the outer streaming ring is cleared once the zone flips (fnc_spawnWait.sqf).
+// What is left in the outer streaming ring is walked off once the zone flips (fnc_zone_stream_init.sqf).
 _trg setTriggerActivation ["WEST", "PRESENT", true];
 // Carried on the trigger rather than formatted into the condition, so this position never becomes
 // text and back -- the same reason the enemy-contact trigger above carries its own. Both ride the
@@ -316,29 +324,4 @@ if (VERSION_X == "MODERN" || simple_zones_enable) then {
     private _flagVarName = format["flag_%1_%2", floor abs (_zonePos select 0), floor abs (_zonePos select 1)];
     missionNamespace setVariable [_flagVarName, _flg];
     _flg setFlagTexture "\A3\Data_F\Flags\flag_red_CO.paa";
-};
-
-// ✅ 战区重生/清理循环（必须在最后，因为它是无限循环）
-while {true} do {
-	if (_opfor_spawn == true) then {
-		_opfor_spawn = false;
-		(zone_spawn_array select _index) set [1,false];
-		// Read, not bumped: fnc_spawnWait opens the cycle when it deploys the composition, because
-		// the turret crews it raises there are garrison and a roster emptied here would drop them.
-		// The band is handed the key and appends what it raises; the capture test counts that
-		// roster, so anything spawned here and not appended is invisible to it. The generation
-		// carried into the band is what stops a band still placing from a previous cycle publishing
-		// a garrison peak over the top of this one.
-		private _gen = [_zoneKey] call fnc_zone_gen;
-		[_spawnPos,_size,_zoneKey,_gen] spawn fnc_zone_spawn;
-	};
-	// Waits for the next spawn signal from fnc_spawnWait. Slot 2 of the entry used to carry a
-	// "never despawn again" flag; nothing sets it now that despawn is decided by a grace period
-	// that restarts whenever BLUFOR are seen, so a zone always comes back round to this loop.
-	while {true} do {
-		if (_opfor_spawn == true) exitWith {};
-		sleep 10;
-		_opfor_spawn = (zone_spawn_array select _index) select 1;
-	};
-	if (count WARCOM_zones_controled_by_OPFOR < 1) exitWith {};
 };

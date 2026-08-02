@@ -209,8 +209,13 @@ fnc_site_poller = {
                     // place: fnc_duws_bluforNear still decides every arrival, so zones and towns go
                     // on deciding it the same way. What the gate removes is a spatial query per
                     // site per pass across a map that is nearly always empty of anyone.
+                    // Fewer AI hold a site than raise one. That hysteresis stops a zone flickering
+                    // off around the edges of the force that just took it.
+                    private _min = if (_o get "awake") then {
+                        _o getOrDefault ["minAIHold", _o get "minAI"]
+                    } else { _o get "minAI" };
                     if ((_west findIf { _x distance _pos < _ring }) >= 0) then {
-                        [_pos, _ring, _o get "minAI"] call fnc_duws_bluforNear
+                        [_pos, _ring, _min] call fnc_duws_bluforNear
                     } else { false }
                 } else {
                     (_players findIf { _x distance _pos < _ring }) >= 0

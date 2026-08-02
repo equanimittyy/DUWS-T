@@ -71,34 +71,17 @@ fnc_zone_garrison_count = {
 	[_zoneKey] call fnc_site_alive
 };
 
-// Bumped whenever a zone's garrison is raised, packed up, or lost. The spawn band takes up to a
-// couple of minutes to place a large zone and the streaming grace period is 120 s, so a band can
-// still be running when its own zone despawns; without this it would then publish a garrison peak
-// describing units the sweep had already deleted, and the capture test would read that stale figure
-// against empty ground as a garrison wiped.
-fnc_zone_gen_bump = {
-	params ["_zoneKey"];
-	private _var = format ["DUWS_zoneGen_%1", _zoneKey];
-	private _g = (missionNamespace getVariable [_var, 0]) + 1;
-	missionNamespace setVariable [_var, _g];
-	_g
-};
-
-fnc_zone_gen = {
-	params ["_zoneKey"];
-	missionNamespace getVariable [format ["DUWS_zoneGen_%1", _zoneKey], 0]
-};
-
 // CONTRACT: every path that removes a zone's garrison calls this, and nothing else clears a peak.
 // A peak outliving the units it counted reads empty ground as a garrison beaten, so the zone falls
-// to whoever walks in next -- silently, with nothing wrong in the SQF to find. Clear and bump are
-// one act because either alone leaves that open: the stale figure stands, or a band still placing
-// from the torn-down cycle republishes it. fnc_spawnWait is today's only caller; a teardown by any
-// other route needs it too.
+// to whoever walks in next -- silently, with nothing wrong in the SQF to find.
+//
+// The generation counter that used to ride along with it is gone. It existed because a band still
+// placing from a torn-down cycle could republish a stale peak over the top of a new one; the raise
+// flag on the zone's occupant closes that window instead, by refusing to start a second raise or a
+// teardown until the first has reported.
 fnc_zone_garrison_dropped = {
 	params ["_zoneKey"];
 	missionNamespace setVariable [format ["DUWS_zonePeak_%1", _zoneKey], nil];
-	[_zoneKey] call fnc_zone_gen_bump;
 };
 
 // How much of its original garrison a zone still has, as a fraction. Read by everything that places

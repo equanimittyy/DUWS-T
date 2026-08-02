@@ -449,7 +449,7 @@ falsifiable:
 - [x] Towns take the zone's anchored baseline
 - [x] The poller, with the crowd migrated onto it
 - [x] Town garrisons migrated
-- [ ] Zones migrated; handshake, generation counter and trigger re-arming retired
+- [x] Zones migrated; handshake, generation counter and trigger re-arming retired
 - [ ] `emplacement` and `structure` kinds; `_manStatics` and `_stowZone` retired
 - [ ] Freeze becomes a disposal mode; `fnc_FOBgarrisonSleep`'s thread retired, hostile wake added
 - [ ] FOBs register their turrets and vehicles, not only their guards

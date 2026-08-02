@@ -312,8 +312,6 @@ zone_namePOS_pairs = [];publicVariable "zone_namePOS_pairs";
 // Keyed by the zone number it carries, not by array position -- the locator spawns fnc_createZone
 // per zone, so build-out finishes out of order and registration order is not zone order.
 zone_meta_array = [];publicVariable "zone_meta_array";
-// zone_spawn_array
-zone_spawn_array = [];
 // zones_created
 zones_created = false;publicVariable "zones_created";
 // zones_manually_placed

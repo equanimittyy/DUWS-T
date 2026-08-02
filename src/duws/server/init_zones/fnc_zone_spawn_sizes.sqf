@@ -406,9 +406,11 @@ DUWS_fnc_zoneSpawnOne = {
     [_class, _pos, _size] call fnc_random_veh
 };
 
-// Spawned by fnc_createzone, which no longer needs a switch to pick a function per band.
+// Called by the zone raise worker, which owns the streaming decisions around it. Nothing guards a
+// stale cycle here any more: the worker holds the raise flag for the whole placement, and the tick
+// that set it will not start a second one or tear the zone down until it reports.
 fnc_zone_spawn = {
-    params ["_spawnPos", "_size", ["_zoneKey", ""], ["_gen", -1]];
+    params ["_spawnPos", "_size", ["_zoneKey", ""]];
     if (_zoneKey == "") then { _zoneKey = [_spawnPos] call fnc_zone_key };
     private _roster = [_zoneKey] call fnc_zone_roster;
 
@@ -428,13 +430,6 @@ fnc_zone_spawn = {
     _spawns = [_spawns, _strength] call DUWS_fnc_thinComposition;
 
     { _roster append (units _x) } forEach ([_spawns, _spawnPos, _size, _strength] call DUWS_fnc_raiseGarrison);
-
-    // A band still placing when its own zone packs up must not publish anything: the sweep has
-    // already deleted what it would be describing, and the capture test reads a stale peak beside
-    // empty ground as a garrison wiped.
-    if (_gen >= 0 && {([_zoneKey] call fnc_zone_gen) != _gen}) exitWith {
-        ["INFO", "ZONES", format ["%1 torn down mid-spawn; garrison peak not published", _zoneKey]] call fnc_log;
-    };
 
     // The strength fnc_zone_capture_ready judges this zone against, and the only place it is set.
     // fnc_zone_garrison_dropped is the only place it is cleared, and states the contract binding

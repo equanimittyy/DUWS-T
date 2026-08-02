@@ -5,7 +5,7 @@
 // those and the player is usually stood in it.
 //
 // Frozen rather than deleted, which is where this parts company with the zone streaming it
-// otherwise copies (init_zones/fnc_spawnWait.sqf). A zone garrison belongs to OPFOR and is rebuilt
+// otherwise copies (init_zones/fnc_zone_stream_init.sqf). A zone garrison belongs to OPFOR and is rebuilt
 // from a table, so deleting it loses nothing. A FOB's belongs to the player: rebuilding it would
 // hand back every soldier who had been killed, which is a free version of the 2 CP redeploy bought
 // by walking away for two minutes. Freezing keeps each unit's identity and damage, and simulation

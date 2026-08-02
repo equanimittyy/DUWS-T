@@ -80,7 +80,7 @@ fnc_duws_release = {
 // Deletion is immediate rather than handed to the sweep, because removing the entity is the whole
 // point -- a stowed member has to leave allMissionObjects, the curator's editable set and the
 // spatial index at once, and the sweep's keep-radius would hold it instead.
-// Refuses while a streamable member is crewed. fnc_spawnWait leaves gunners sitting in static
+// Refuses while a streamable member is crewed. The zone stow leaves gunners sitting in static
 // weapons alive (its despawn pass tests vehicle _x == _x), so stowing regardless would delete a
 // manned gun and strand the AI where its turret was. Retrying on the next cycle is the safe
 // failure. Pinned members are excluded from that test on purpose: they keep their crew by design,
@@ -94,7 +94,7 @@ fnc_duws_stow = {
     private _streamable = _members - _pinned;
     // Logged where the reason is known: the streaming caller only sees a bare false, and a
     // composition that refuses stays on the map for a whole spawn/despawn cycle with nothing to
-    // say why. Unreachable through the zone path -- fnc_spawnWait crews out its statics first and
+    // say why. Unreachable through the zone path -- DUWS_fnc_zoneStow crews out its statics first and
     // nothing else in a composition takes crew -- so a line here means something unmodelled put a
     // man in one, which is worth a WARN rather than a routine note.
     private _crewed = _streamable findIf {({alive _x} count crew _x) > 0};
