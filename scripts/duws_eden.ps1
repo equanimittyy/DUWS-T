@@ -12,12 +12,17 @@
 # consumer needs (isWeapon and the like), which this tool ignores.
 #
 # UNIT (read-write): scans src/ for
-#   // --DUWS-UNITCOMP BEGIN name="..." row="<what a row means>" [fields="a, b, c"] [prefix=opfor_]--
+#   // --DUWS-UNITCOMP BEGIN name="..." kind=composition|team|rule row="..." [rowname="Tier %1"]
+#                          [fields="a, b, c"] [prefix=opfor_]--
 #   <name> = [ <row>, <row>, ... ];
 #   // --DUWS-UNITCOMP END--
-# and edits the rows in place. These are the spawn tables -- tier compositions, radius multipliers,
-# the category map, the group rosters -- which are data, not layout, so there is nothing to
+# and edits the rows in place. These are the spawn tables -- tier compositions, team rosters, the
+# purchasable squads, the radius multipliers -- which are data, not layout, so there is nothing to
 # round-trip through Eden.
+#
+# kind= sorts a table's rows into one of three menus, because the unit of work is a row rather than
+# the table it lives in: every zone tier, town tier and squad is listed together as a composition,
+# every roster as a team, and the scaling tables on their own.
 #
 # A table declaring `fields=` has fixed columns rather than a free-length list, and is edited a
 # field at a time with the current value seeded into the line. `prefix=` is the faction prefix its
@@ -49,14 +54,39 @@ function Get-Attr($s, $pattern, $default) {
     if ($s -match $pattern) { return $Matches[1] } else { return $default }
 }
 
+# Every .sqf under src/, read once. Get-Content costs about 40 ms a file and there are 800-odd of
+# them, so a scan that way is half a minute; through .NET the same read is a fraction of a second.
+# It has to be cheap because the menus re-scan on every draw -- what is on screen is then what is on
+# disk, rather than a snapshot that goes stale the moment something else edits the source.
+$script:fileCache = $null
+$script:unitCache = $null
+
+function Get-SourceFiles {
+    if ($null -ne $script:fileCache) { return $script:fileCache }
+    $out = New-Object System.Collections.Generic.List[object]
+    # EnumerateFiles rather than Get-ChildItem: the same 800-odd paths cost 3 s as FileInfo objects
+    # through the provider stack and a fraction of that as strings.
+    foreach ($p in [System.IO.Directory]::EnumerateFiles($srcDir, "*.sqf", [System.IO.SearchOption]::AllDirectories)) {
+        $out.Add([pscustomobject]@{ Path = $p; Text = [System.IO.File]::ReadAllText($p) })
+    }
+    $script:fileCache = $out
+    return $out
+}
+
+# Dropped after a write, because the next menu draw has to show what was just written.
+function Clear-SourceCache {
+    $script:fileCache = $null
+    $script:unitCache = $null
+}
+
 # Invariant-culture number formatting: a comma-decimal locale must not corrupt SQF floats.
 function Fmt($v) { ([double]$v).ToString($inv) }
 
 function Get-Compositions {
     $comps = @()
     $blockRe = [regex]'(?s)--DUWS-COMPOSITION BEGIN\s+(.*?)--\r?\n(.*?)\r?\n[ \t]*//\s*--DUWS-COMPOSITION END--'
-    foreach ($file in (Get-ChildItem -Path $srcDir -Recurse -Filter *.sqf -File)) {
-        $text = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8
+    foreach ($file in (Get-SourceFiles)) {
+        $text = $file.Text
         if ($text -notmatch 'DUWS-COMPOSITION BEGIN') { continue }
         foreach ($m in $blockRe.Matches($text)) {
             $attrs  = $m.Groups[1].Value
@@ -198,9 +228,10 @@ function Invoke-Generate($comp) {
 $unitFenceRe = [regex]'(?s)(//[ \t]*--DUWS-UNITCOMP BEGIN\s+(.*?)--\r?\n)(.*?)(\r?\n[ \t]*//[ \t]*--DUWS-UNITCOMP END--)'
 
 function Get-UnitComps {
+    if ($null -ne $script:unitCache) { return $script:unitCache }
     $out = @()
-    foreach ($file in (Get-ChildItem -Path $srcDir -Recurse -Filter *.sqf -File)) {
-        $text = Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8
+    foreach ($file in (Get-SourceFiles)) {
+        $text = $file.Text
         if ($text -notmatch 'DUWS-UNITCOMP BEGIN') { continue }
         foreach ($m in $unitFenceRe.Matches($text)) {
             $out += [pscustomobject]@{
@@ -208,11 +239,16 @@ function Get-UnitComps {
                 RowOf  = Get-Attr $m.Groups[2].Value 'row="([^"]*)"' 'row'
                 Fields = Get-Attr $m.Groups[2].Value 'fields="([^"]*)"' ''
                 Prefix = Get-Attr $m.Groups[2].Value 'prefix=([A-Za-z0-9_]+)' ''
-                File   = $file.FullName
+                # Unclassified tables land under the scaling rules rather than vanishing from the
+                # menu: a table nobody labelled is still one somebody has to be able to edit.
+                Kind   = Get-Attr $m.Groups[2].Value 'kind=(\w+)' 'rule'
+                RowName = Get-Attr $m.Groups[2].Value 'rowname="([^"]*)"' ''
+                File   = $file.Path
                 Body   = $m.Groups[3].Value
             }
         }
     }
+    $script:unitCache = $out
     return $out
 }
 
@@ -347,6 +383,7 @@ function Save-UnitComp($uc, $varName, $rows, $indent) {
     # No trailing-newline normalisation and no BOM: this file sits beside SQF the mission compiles,
     # and a BOM in front of a preprocessor directive is an error Arma reports from the wrong line.
     [System.IO.File]::WriteAllText($uc.File, $updated, (New-Object System.Text.UTF8Encoding($false)))
+    Clear-SourceCache
     return $true
 }
 
@@ -361,10 +398,12 @@ function Get-RoleVocab {
     $re = [regex]'(?m)^\s*((?:opfor|blufor)_[A-Za-z0-9_]+_X)\s*='
     $dir = Join-Path $srcDir "duws\shared\factions"
     if (Test-Path -LiteralPath $dir) {
-        foreach ($f in (Get-ChildItem -Path $dir -Recurse -Filter *.sqf -File)) {
-            # No -Encoding: only ASCII slot names are matched, and nothing here is ever written.
+        foreach ($f in [System.IO.Directory]::EnumerateFiles($dir, "*.sqf", [System.IO.SearchOption]::AllDirectories)) {
+            # Read through .NET, and not for speed alone: several faction files carry legacy
+            # single-byte encodings, and only ASCII slot names are matched here. Nothing under this
+            # directory is ever written back.
             $seen = @{}
-            foreach ($m in $re.Matches((Get-Content -LiteralPath $f.FullName -Raw))) {
+            foreach ($m in $re.Matches([System.IO.File]::ReadAllText($f))) {
                 $seen[$m.Groups[1].Value] = $true
             }
             foreach ($n in $seen.Keys) { $counts[$n] = 1 + [int]$counts[$n] }
@@ -479,6 +518,32 @@ function Read-Seeded($prompt, $seed) {
     }
 }
 
+# What a value that names a team contains, or '' when it names no team. Compositions and teams are
+# deliberately separate menus -- a team is edited in one place and referred to from many -- but a
+# reference showing nothing of what it points at is a dead end, which is exactly how the split reads
+# the first time you meet it.
+function Get-TeamHint($value) {
+    if ($value -eq '' -or $value -eq '-') { return '' }
+    foreach ($uc in (Get-UnitComps | Where-Object { $_.Kind -eq 'team' })) {
+        foreach ($row in (Split-Rows $uc.Body)) {
+            $e = Split-Entries $row
+            if ($e.Count -gt 0 -and $e[0].Trim('"') -eq $value) {
+                # The men only. A team's other columns -- how it patrols, how it scales -- are its
+                # own business and belong on its own screen; here the question being answered is
+                # "who turns up". A roster column is a list, and a single man is a slot name.
+                $parts = @()
+                for ($j = 1; $j -lt $e.Count; $j++) {
+                    if (-not ($e[$j].StartsWith('[') -or $e[$j].Trim('"') -match '_X$')) { continue }
+                    $v = Show-Field $e[$j] $uc.Prefix
+                    if ($v -ne '-') { $parts += $v }
+                }
+                return ($parts -join ', ')
+            }
+        }
+    }
+    return ''
+}
+
 # One row, one field at a time. Returns the rebuilt row literal, or $null if nothing changed.
 function Invoke-EditRow($row, $fields, $prefix, $title) {
     $entries = Split-Entries $row
@@ -490,7 +555,10 @@ function Invoke-EditRow($row, $fields, $prefix, $title) {
         Write-Host ""
         for ($i = 0; $i -lt $entries.Count; $i++) {
             $label = if ($i -lt $fields.Count) { $fields[$i] } else { "field $($i + 1)" }
-            Write-Host ("  {0}. {1,-20} {2}" -f ($i + 1), $label, (Show-Field $entries[$i] $prefix))
+            $val = Show-Field $entries[$i] $prefix
+            $hint = Get-TeamHint $val
+            Write-Host ("  {0}. {1,-20} {2}" -f ($i + 1), $label, $val) -NoNewline
+            if ($hint -ne '') { Write-Host ("   -> {0}" -f $hint) -ForegroundColor DarkGray } else { Write-Host "" }
         }
         Write-Host ""
         if ($prefix) { Write-Host ("  names are shown without their {0} prefix and may be typed either way" -f $prefix) -ForegroundColor DarkGray }
@@ -672,6 +740,328 @@ function Invoke-EditUnitComp($uc) {
     }
 }
 
+# ---- the composition and team menus ----
+#
+# A row is the unit of work, not the table it lives in: "Zone tiers" and "BLUFOR squads" are both
+# lists of compositions, and which file a composition sits in is not something the person editing it
+# should have to know. The kind= attribute is what sorts them, so a table added later lands in the
+# right menu without this code changing.
+
+$romans = @('I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII')
+function Get-Roman($n) { if ($n -ge 1 -and $n -le $romans.Count) { $romans[$n - 1] } else { "$n" } }
+
+# What one row is called. rowname="Tier %1" numbers them; otherwise the first column names itself,
+# which is how a team and a squad both read as what they are.
+function Get-RowLabel($uc, $row, $i) {
+    if ($uc.RowName -ne '') { return ($uc.RowName -replace '%1', (Get-Roman ($i + 1))) }
+    $e = Split-Entries $row
+    if ($e.Count -gt 0) { return (Show-Field $e[0] $uc.Prefix) }
+    return ("Row {0}" -f ($i + 1))
+}
+
+# The one-line "what is in it" the menus show. Everything past the name, so a composition reads as
+# its teams and a team reads as its men without opening it.
+function Get-RowSummary($uc, $row) {
+    $e = Split-Entries $row
+    if ($uc.Fields -eq '') { return ((Show-Field $row $uc.Prefix)) }
+    $fields = @($uc.Fields -split ',' | ForEach-Object { $_.Trim() })
+    $parts = @()
+    for ($j = 1; $j -lt $e.Count; $j++) {
+        $v = Show-Field $e[$j] $uc.Prefix
+        if ($v -eq '-') { continue }
+        $label = ''
+        if ($j -lt $fields.Count) { $label = $fields[$j] + ': ' }
+        $parts += ($label + $v)
+    }
+    return ($parts -join '  ')
+}
+
+# Every row of every table of one kind, flattened into one list.
+function Get-RowEntries($kind) {
+    $out = @()
+    foreach ($uc in (Get-UnitComps | Where-Object { $_.Kind -eq $kind } | Sort-Object Name)) {
+        $rows = Split-Rows $uc.Body
+        for ($i = 0; $i -lt $rows.Count; $i++) {
+            $out += [pscustomobject]@{
+                Comp = $uc; Index = $i; Row = $rows[$i]
+                Label = (Get-RowLabel $uc $rows[$i] $i)
+                Summary = (Get-RowSummary $uc $rows[$i])
+            }
+        }
+    }
+    return ,$out
+}
+
+# One row back into its table. Re-split from the body rather than kept from the menu pass, so the
+# write is against what is on disk now.
+function Save-Row($uc, $index, $newRow) {
+    $varName = if ($uc.Body -match '(?m)^\s*(\w+)\s*=') { $Matches[1] } else { $null }
+    if (-not $varName) { Write-Host "Could not read the table's variable name." -ForegroundColor Red; return $false }
+    $indent = if ($uc.Body -match '(?m)^([ \t]+)\[') { $Matches[1] } else { '    ' }
+    $rows = Split-Rows $uc.Body
+    if ($index -ge $rows.Count) { Write-Host "That row is gone; nothing written." -ForegroundColor Yellow; return $false }
+    $rows[$index] = $newRow
+    return (Save-UnitComp $uc $varName $rows $indent)
+}
+
+# A row that is a plain list -- a zone tier's teams and vehicles. Add, drop, or retype the lot.
+function Invoke-EditListRow($entry) {
+    $uc = $entry.Comp
+    $row = $entry.Row
+    while ($true) {
+        $e = Split-Entries $row
+        Clear-Host
+        Write-Host ("{0} -- {1}" -f $uc.Name, $entry.Label) -ForegroundColor Cyan
+        Write-Host "======================================"
+        Write-Host ""
+        Write-Host ("  {0}" -f $uc.RowOf) -ForegroundColor DarkGray
+        Write-Host ""
+        if ($e.Count -eq 0) { Write-Host "  (empty)" -ForegroundColor DarkGray }
+        for ($i = 0; $i -lt $e.Count; $i++) {
+            $val = Show-Field $e[$i] $uc.Prefix
+            $hint = Get-TeamHint $val
+            Write-Host ("  {0,2}. {1,-14}" -f ($i + 1), $val) -NoNewline
+            if ($hint -ne '') { Write-Host (" {0}" -f $hint) -ForegroundColor DarkGray } else { Write-Host "" }
+        }
+        Write-Host ""
+        Write-Host "   A. Add an entry     D. Drop an entry     R. Retype the row"
+        Write-Host "   B. Back"
+        Write-Host ""
+        $sel = Read-Host "Select"
+
+        if ($sel -match '^\s*[Bb]\s*$') { break }
+        elseif ($sel -match '^\s*[Aa]\s*$') {
+            $raw = Read-Host "Entry to add"
+            if (-not [string]::IsNullOrWhiteSpace($raw)) {
+                $new = @($e) + (Format-Entry $raw.Trim())
+                $row = '[' + ($new -join ', ') + ']'
+                if (Save-Row $uc $entry.Index $row) { $uc.Body = (Get-UnitComps | Where-Object { $_.Name -eq $uc.Name }).Body }
+            }
+        }
+        elseif ($sel -match '^\s*[Dd]\s*(\d+)?\s*$') {
+            $k = if ($Matches[1]) { [int]$Matches[1] } else { [int](Read-Host "Entry to drop") }
+            if ($k -ge 1 -and $k -le $e.Count) {
+                # Dropped by index, not by value: a tier legitimately holds the same team twice, and
+                # matching on value would take the wrong one of a pair.
+                $kept = @(); for ($i = 0; $i -lt $e.Count; $i++) { if ($i -ne ($k - 1)) { $kept += $e[$i] } }
+                $row = '[' + ($kept -join ', ') + ']'
+                if (Save-Row $uc $entry.Index $row) { $uc.Body = (Get-UnitComps | Where-Object { $_.Name -eq $uc.Name }).Body }
+            }
+        }
+        elseif ($sel -match '^\s*[Rr]\s*$') {
+            Clear-Host
+            Write-Host ("{0} -- {1}" -f $uc.Name, $entry.Label) -ForegroundColor Cyan
+            Write-Host "======================================"
+            Write-Host ""
+            Write-Host "  Comma separated. Enter accepts, Escape cancels." -ForegroundColor DarkGray
+            Write-Host ""
+            $seed = (@($e | ForEach-Object { $_.Trim().Trim('"') }) -join ', ')
+            $raw = Read-Seeded "  > " $seed
+            if ($null -ne $raw) {
+                $new = @($raw -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' })
+                $row = '[' + (($new | ForEach-Object { Format-Entry $_ }) -join ', ') + ']'
+                if (Save-Row $uc $entry.Index $row) { $uc.Body = (Get-UnitComps | Where-Object { $_.Name -eq $uc.Name }).Body }
+            }
+        }
+    }
+}
+
+function Invoke-OpenRow($entry) {
+    if ($entry.Comp.Fields -ne '') {
+        $new = Invoke-EditRow $entry.Row ((@($entry.Comp.Fields -split ',' | ForEach-Object { $_.Trim() }))) $entry.Comp.Prefix `
+            ("{0} -- {1}" -f $entry.Comp.Name, $entry.Label)
+        if ($null -ne $new) {
+            if (Save-Row $entry.Comp $entry.Index $new) {
+                Write-Host "Written. Review the diff before committing." -ForegroundColor Green
+                Read-Host "Press Enter to continue" | Out-Null
+            }
+        }
+    } else {
+        Invoke-EditListRow $entry
+    }
+}
+
+# The values a column already holds, as a hint when typing a new one. Read from the table rather
+# than hardcoded: behaviour names are the spawner's vocabulary, and a list here would rot the first
+# time one is added.
+function Get-ColumnValues($uc, $j) {
+    $seen = @()
+    foreach ($row in (Split-Rows $uc.Body)) {
+        $e = Split-Entries $row
+        if ($j -lt $e.Count -and $e[$j].StartsWith('"')) {
+            $v = $e[$j].Trim('"')
+            if ($v -ne '' -and $seen -notcontains $v) { $seen += $v }
+        }
+    }
+    return ,$seen
+}
+
+# Append a row, field by field, starting from an existing row blanked out so each field keeps its
+# kind. A team added here is spawnable as it stands: fnc_spawn_team reads the roster table for its
+# men and its behaviour, so nothing in the mission has to learn the new name.
+function Invoke-AddRow($uc) {
+    $rows = Split-Rows $uc.Body
+    if ($rows.Count -eq 0) { Write-Host "Nothing to copy a shape from." -ForegroundColor Yellow; return }
+    $fields = @($uc.Fields -split ',' | ForEach-Object { $_.Trim() })
+    $tpl = Split-Entries $rows[0]
+    $new = @()
+    for ($j = 0; $j -lt $tpl.Count; $j++) {
+        $label = if ($j -lt $fields.Count) { $fields[$j] } else { "field $($j + 1)" }
+        $blank = if ($tpl[$j].StartsWith('[')) { '[]' } elseif ($tpl[$j].StartsWith('"')) { '""' } else { '0' }
+
+        Clear-Host
+        Write-Host ("{0} -- new row" -f $uc.Name) -ForegroundColor Cyan
+        Write-Host "======================================"
+        Write-Host ""
+        for ($k = 0; $k -lt $new.Count; $k++) {
+            Write-Host ("  {0,-20} {1}" -f $fields[$k], (Show-Field $new[$k] $uc.Prefix)) -ForegroundColor DarkGray
+        }
+        Write-Host ("  {0}" -f $label) -ForegroundColor Cyan
+        $known = Get-ColumnValues $uc $j
+        if ($known.Count -gt 0 -and $blank -eq '""') {
+            Write-Host ("  in use: {0}" -f ($known -join ', ')) -ForegroundColor DarkGray
+        }
+        Write-Host "  Enter accepts, Escape cancels the whole row. Comma separates a list." -ForegroundColor DarkGray
+        Write-Host ""
+        $notes = @()
+        $typed = Read-Seeded "  > " ''
+        if ($null -eq $typed) { return }
+
+        $literal = Format-FieldLiteral $blank $typed $uc.Prefix ([ref]$notes)
+        if ($null -eq $literal) { $literal = '0' }
+        # The first column is the name every other table refers to, so a duplicate would shadow the
+        # row already there and a blank one could never be referenced at all.
+        if ($j -eq 0) {
+            $name = $literal.Trim('"')
+            if ($name -eq '') { Write-Host "  A name is required." -ForegroundColor Red; Read-Host "  Press Enter" | Out-Null; $j--; continue }
+            if ((Get-ColumnValues $uc 0) -contains $name) {
+                Write-Host ("  {0} already exists." -f $name) -ForegroundColor Red
+                Read-Host "  Press Enter" | Out-Null; $j--; continue
+            }
+        }
+        $bad = @($notes | Where-Object { $_.Coverage -eq 0 })
+        if ($bad.Count -gt 0) {
+            Write-Host ""
+            foreach ($n in $bad) { Write-Host ("  {0}: no faction file defines this slot." -f $n.Name) -ForegroundColor Red }
+            if ((Read-Host "  Keep it anyway? (y/N)") -notmatch '^\s*[Yy]') { $j--; continue }
+        }
+        $new += $literal
+    }
+
+    $varName = if ($uc.Body -match '(?m)^\s*(\w+)\s*=') { $Matches[1] } else { $null }
+    $indent = if ($uc.Body -match '(?m)^([ \t]+)\[') { $Matches[1] } else { '    ' }
+    $all = @($rows) + ('[' + ($new -join ', ') + ']')
+    if (Save-UnitComp $uc $varName $all $indent) {
+        Write-Host "Added. Review the diff before committing." -ForegroundColor Green
+    }
+    Read-Host "Press Enter to continue" | Out-Null
+}
+
+# One menu over every row of a kind, grouped by the table each came from.
+function Show-RowMenu($kind, $title, $blurb, $canAdd) {
+    while ($true) {
+        # Re-read each pass: an edit rewrites source, and a stale body would show the pre-edit table.
+        $entries = Get-RowEntries $kind
+        Clear-Host
+        Write-Host $title -ForegroundColor Cyan
+        Write-Host "======================================"
+        Write-Host ("  {0}" -f $blurb) -ForegroundColor DarkGray
+        Write-Host ""
+        if ($entries.Count -eq 0) { Write-Host "  Nothing marked kind=$kind under $srcDir." -ForegroundColor Yellow }
+        $last = ''
+        for ($i = 0; $i -lt $entries.Count; $i++) {
+            if ($entries[$i].Comp.Name -ne $last) {
+                $last = $entries[$i].Comp.Name
+                Write-Host ""
+                Write-Host ("  {0}" -f $last.ToUpper()) -ForegroundColor DarkGray
+            }
+            Write-Host ("  {0,2}. {1,-16} {2}" -f ($i + 1), $entries[$i].Label, $entries[$i].Summary)
+        }
+        Write-Host ""
+        if ($canAdd) { Write-Host "   A. Add" }
+        Write-Host "   B. Back"
+        Write-Host ""
+        $sel = Read-Host "Select"
+
+        if ($sel -match '^\s*[Bb]\s*$') { break }
+        elseif ($canAdd -and $sel -match '^\s*[Aa]\s*$') {
+            # Which table to add to is a question only when there is more than one of this kind.
+            $tables = @(Get-UnitComps | Where-Object { $_.Kind -eq $kind } | Sort-Object Name)
+            $target = $tables[0]
+            if ($tables.Count -gt 1) {
+                Write-Host ""
+                for ($i = 0; $i -lt $tables.Count; $i++) { Write-Host ("  {0}. {1}" -f ($i + 1), $tables[$i].Name) }
+                $t = Read-Host "Add to which"
+                if ($t -notmatch '^\d+$' -or [int]$t -lt 1 -or [int]$t -gt $tables.Count) { continue }
+                $target = $tables[[int]$t - 1]
+            }
+            Invoke-AddRow $target
+        }
+        elseif ($sel -match '^\s*(\d+)\s*$' -and [int]$Matches[1] -ge 1 -and [int]$Matches[1] -le $entries.Count) {
+            Invoke-OpenRow $entries[[int]$Matches[1] - 1]
+        }
+    }
+}
+
+function Show-StaticMenu($comps) {
+    while ($true) {
+        Clear-Host
+        Write-Host "Static compositions" -ForegroundColor Cyan
+        Write-Host "======================================"
+        Write-Host ("  Object layouts, round-tripped through Eden. Origin: {0} {1}" -f (Fmt $script:originX), (Fmt $script:originY)) -ForegroundColor DarkGray
+        Write-Host ""
+        for ($i = 0; $i -lt $comps.Count; $i++) {
+            Write-Host ("  {0,2}. {1,-26} [schema {2}, {3,4} objs]" -f ($i + 1), $comps[$i].Name, $comps[$i].Schema, $comps[$i].Count)
+        }
+        Write-Host ""
+        Write-Host "   O. Set the import origin      P. Paste your own array (schema A)"
+        Write-Host "   B. Back"
+        Write-Host ""
+        $sel = Read-Host "Select"
+
+        if ($sel -match '^\s*[Bb]\s*$') { break }
+        elseif ($sel -match '^\s*[Oo]\s*$') { Set-Origin }
+        elseif ($sel -match '^\s*[Pp]\s*$') {
+            Write-Host 'Paste rows in schema A form: ["class", x, y, z, dir, ...]. Blank line to finish.'
+            $lines = @()
+            while ($true) { $l = Read-Host; if ([string]::IsNullOrWhiteSpace($l)) { break }; $lines += $l }
+            if ($lines.Count -gt 0) {
+                $pasted = [pscustomobject]@{ Name='(pasted)'; Schema='A'; Anchor=''; ZMode='snap'; ZBase=''; Body=($lines -join "`n"); Text='' }
+                Invoke-Generate $pasted
+            }
+            Read-Host "Press Enter to continue" | Out-Null
+        }
+        elseif ($sel -match '^\s*\d+\s*$' -and [int]$sel -ge 1 -and [int]$sel -le $comps.Count) {
+            Invoke-Generate $comps[[int]$sel - 1]
+            Read-Host "Press Enter to continue" | Out-Null
+        }
+    }
+}
+
+# Scaling rules are whole tables rather than a list of rows: a radius band is only meaningful beside
+# the bands above and below it, so it is edited in place with the whole table on screen.
+function Show-RuleMenu {
+    while ($true) {
+        $ucs = @(Get-UnitComps | Where-Object { $_.Kind -eq 'rule' } | Sort-Object Name)
+        Clear-Host
+        Write-Host "Scaling rules" -ForegroundColor Cyan
+        Write-Host "======================================"
+        Write-Host "  How a composition is scaled, not what is in one." -ForegroundColor DarkGray
+        Write-Host ""
+        for ($i = 0; $i -lt $ucs.Count; $i++) {
+            Write-Host ("  {0,2}. {1,-26} [{2,2} rows]" -f ($i + 1), $ucs[$i].Name, (Split-Rows $ucs[$i].Body).Count)
+        }
+        Write-Host ""
+        Write-Host "   B. Back"
+        Write-Host ""
+        $sel = Read-Host "Select"
+        if ($sel -match '^\s*[Bb]\s*$') { break }
+        elseif ($sel -match '^\s*\d+\s*$' -and [int]$sel -ge 1 -and [int]$sel -le $ucs.Count) {
+            Invoke-EditUnitComp $ucs[[int]$sel - 1]
+        }
+    }
+}
+
 # ---- main loop ----
 $comps = @(Get-Compositions | Sort-Object Schema, Name)
 foreach ($c in $comps) {
@@ -680,48 +1070,26 @@ foreach ($c in $comps) {
 if ($comps.Count -eq 0) { Write-Host "No marked static compositions found under $srcDir." -ForegroundColor Yellow }
 
 while ($true) {
-    # Re-read each pass: an edit rewrites source, and a stale body would show the pre-edit table.
-    $ucs = @(Get-UnitComps | Sort-Object Name)
-
     Clear-Host
     Write-Host "DUWS Composition TUI" -ForegroundColor Cyan
     Write-Host "===================="
-    Write-Host ("Origin: {0} {1}" -f (Fmt $script:originX), (Fmt $script:originY)) -ForegroundColor DarkGray
     Write-Host ""
-    Write-Host " Static compositions (Eden round-trip, read-only)" -ForegroundColor DarkGray
-    for ($i = 0; $i -lt $comps.Count; $i++) {
-        $c = $comps[$i]
-        Write-Host ("  {0,2}. {1,-26} [schema {2}, {3,4} objs]" -f ($i + 1), $c.Name, $c.Schema, $c.Count)
-    }
+    Write-Host ("  1. Static compositions   ({0} object layouts, Eden round-trip)" -f $comps.Count)
+    Write-Host "  2. Unit compositions     (what a zone, town or squad fields)"
+    Write-Host "  3. Teams                 (the men inside a patrol, squad or section)"
+    Write-Host "  4. Scaling rules         (radius multipliers, category map)"
     Write-Host ""
-    Write-Host " Unit compositions (spawn tables, editable)" -ForegroundColor DarkGray
-    for ($i = 0; $i -lt $ucs.Count; $i++) {
-        $u = $ucs[$i]
-        Write-Host ("  U{0,-2}. {1,-26} [{2,2} rows]" -f ($i + 1), $u.Name, (Split-Rows $u.Body).Count)
-    }
-    Write-Host ""
-    Write-Host "   O. Set the import origin      P. Paste your own array (schema A)"
     Write-Host "   Q. Quit"
     Write-Host ""
     $sel = Read-Host "Select"
 
     if ($sel -match '^\s*[Qq]\s*$') { break }
-    elseif ($sel -match '^\s*[Oo]\s*$') { Set-Origin }
-    elseif ($sel -match '^\s*[Pp]\s*$') {
-        Write-Host 'Paste rows in schema A form: ["class", x, y, z, dir, ...]. Blank line to finish.'
-        $lines = @()
-        while ($true) { $l = Read-Host; if ([string]::IsNullOrWhiteSpace($l)) { break }; $lines += $l }
-        if ($lines.Count -gt 0) {
-            $pasted = [pscustomobject]@{ Name='(pasted)'; Schema='A'; Anchor=''; ZMode='snap'; ZBase=''; Body=($lines -join "`n"); Text='' }
-            Invoke-Generate $pasted
-        }
-        Read-Host "Press Enter to continue" | Out-Null
+    elseif ($sel -match '^\s*1\s*$') { Show-StaticMenu $comps }
+    elseif ($sel -match '^\s*2\s*$') {
+        Show-RowMenu 'composition' 'Unit compositions' 'A composition is a list of teams and vehicles. Open one to see what it fields.' $false
     }
-    elseif ($sel -match '^\s*[Uu]\s*(\d+)\s*$' -and [int]$Matches[1] -ge 1 -and [int]$Matches[1] -le $ucs.Count) {
-        Invoke-EditUnitComp $ucs[[int]$Matches[1] - 1]
+    elseif ($sel -match '^\s*3\s*$') {
+        Show-RowMenu 'team' 'Teams' 'A team is the men one name raises. Open one to change them, or add a team.' $true
     }
-    elseif ($sel -match '^\s*\d+\s*$' -and [int]$sel -ge 1 -and [int]$sel -le $comps.Count) {
-        Invoke-Generate $comps[[int]$sel - 1]
-        Read-Host "Press Enter to continue" | Out-Null
-    }
+    elseif ($sel -match '^\s*4\s*$') { Show-RuleMenu }
 }

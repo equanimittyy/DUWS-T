@@ -7,13 +7,16 @@ powershell -ExecutionPolicy Bypass -File scripts\duws_eden.ps1
 ```
 
 The mission has two kinds of composition and both used to be hand-edited in source. The tool covers
-both from one menu, over one idea: a **marker fence** in the source that the tool parses and Arma's
-preprocessor discards, so marking something up is data-only and costs no runtime.
+both over one idea: a **marker fence** in the source that the tool parses and Arma's preprocessor
+discards, so marking something up is data-only and costs no runtime.
+
+The top menu is the two kinds, with the unit half split by what a row *is* — a composition, a team,
+or a scaling rule.
 
 | Kind | Marker | What the tool does |
 |---|---|---|
 | **Static** — object layouts (HQ, zone prefabs, killhouse) | `--DUWS-COMPOSITION--` | read-only; emits a paste-ready Eden import |
-| **Unit** — spawn tables (tier compositions, radius multipliers, the category map, group rosters, the purchasable squads) | `--DUWS-UNITCOMP--` | edits rows and writes them back to source |
+| **Unit** — spawn tables (tier compositions, team rosters, the purchasable squads, the scaling rules) | `--DUWS-UNITCOMP--` | edits rows and writes them back to source |
 
 Static compositions round-trip through the 3D editor because they are *layout* — you want to see
 them. Unit compositions are *data*, so there is nothing to look at in Eden and the tool edits them
@@ -146,13 +149,25 @@ Verify once by import → export → re-import and confirming the layout is iden
 
 ## Unit compositions: edited in place
 
-The spawn tables — what a zone or town garrison of each tier fields, how a zone's radius multiplies
-each category, which tokens belong to which category, what men a group kind is made of, and what the
-player can buy. Contract for what the tier tables mean:
-[`zones_and_civilians.md`](zones_and_civilians.md#zone-tiers).
+Two ideas, and keeping them apart is what makes the menus make sense:
+
+- A **composition** is a list of teams and vehicles, sometimes with a price. A zone tier, a town
+  tier, a purchasable squad. Contract for what the tier tables mean:
+  [`zones_and_civilians.md`](zones_and_civilians.md#zone-tiers).
+- A **team** is the men one name raises. `sniper` is two snipers until you say otherwise.
+
+Compositions name teams; teams are edited in one place and referred to from many. **The unit of work
+is a row, not the table it lives in** — which file a composition sits in is not something the person
+editing it should have to know — so the menu lists every zone tier, town tier and squad together and
+opening one shows its configuration. A field naming a team shows that team's men beside it, so a
+reference is never a dead end.
+
+Scaling rules — the radius multipliers and the category map — get their own menu. They are how a
+composition is scaled rather than what is in one, and a radius band is only meaningful beside the
+bands above and below it, so those are still edited as whole tables.
 
 ```sqf
-// --DUWS-UNITCOMP BEGIN name="Zone tiers" row="tier I..IV"--
+// --DUWS-UNITCOMP BEGIN name="Zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_zoneSpawnTiers = [
     ["patrol", "team", "car"],
     ...
@@ -163,17 +178,19 @@ DUWS_zoneSpawnTiers = [
 | Attr | Meaning |
 |---|---|
 | `name="..."` | label in the menu, and the key a write matches on |
+| `kind=` | `composition`, `team` or `rule` — which menu its rows appear under. Anything unlabelled falls to `rule`, so a table nobody classified is still reachable |
 | `row="..."` | what one row means, since a row is a tier in one table and a radius band in another |
+| `rowname="Tier %1"` | how a row is named in the menu, `%1` being its index in roman. Without it the first column names the row, which is what a team and a squad already do |
 | `fields="a, b, c"` | the row's columns, for a table whose rows are fixed-shape rather than a free-length list. Its presence is what switches the editor into field mode |
 | `prefix=opfor_` | the faction prefix this table's role names carry: stripped for display, re-applied on write |
 
-Select one with `U<n>`. A table without `fields=` is a list per row — add an entry, drop one, or
-replace the row. Entries are typed unquoted (`patrol, team, car`) and the tool quotes anything that
-is not a bare number, so a multiplier row stays numeric and a token row stays strings.
+A row without `fields=` is a plain list — add an entry, drop one, or retype the row. Entries are
+typed unquoted (`patrol, team, car`) and the tool quotes anything that is not a bare number, so a
+multiplier row stays numeric and a token row stays strings.
 
 ### Field mode
 
-A row of a `fields=` table is a thing with named parts — a group kind, a purchasable squad — so it is
+A row of a `fields=` table is a thing with named parts — a team, a purchasable squad — so it is
 picked apart by column instead of by entry index. Pick a row, pick a field, and the current value is
 **already in the line** for editing rather than retyped from scratch; Escape backs out.
 
@@ -189,6 +206,31 @@ prompts before the row is changed.
 
 A row holding a nested list belongs in a `fields=` table. The flat editor splits typed input on
 commas, which would cut a nested list in half.
+
+### Adding a team
+
+The team menu can append a row, and the row it appends is spawnable as it stands — nothing in the
+mission has to learn the new name. That is the whole reason a team row carries `behaviour` and
+`category` rather than only its men:
+
+- `fnc_spawn_team` raises every OPFOR team and reads both columns. `behaviour` is what it does with
+  the group once it stands: `route` walks a fixed circuit of search-and-destroy waypoints with one
+  leg inside a building, `wander` hands it to `bis_fnc_taskPatrol`, `none` leaves it where it was
+  put for a caller that gives its own orders. Before this, each of those was a separate near-copy of
+  a spawner file, and a new team meant a new file.
+- `DUWS_fnc_zoneSpawnOne` asks the roster table whether a token is a team rather than switching on
+  known names, so an unrecognised token is a vehicle class and everything else is a team.
+- `category` is which radius multiplier scales it, held on the row so adding a team is one edit
+  rather than two tables that can disagree.
+
+The values already in a column are offered while typing, so the behaviours on offer are the ones the
+spawner actually implements rather than a list in a doc that rots. A duplicate name is refused: the
+first column is what compositions refer to, so a second row of the same name could never be reached.
+
+Adding a **BLUFOR** team is the same, minus those two columns — a squad references it by name and
+`fnc_BLUFOR_squad_init` resolves it. Adding a whole *squad* is not offered: the request dialogs
+switch on a hardcoded listbox index, so a sixth squad needs a case written in
+`fnc_request_squad.sqf` before anything could buy it.
 
 **Only the fenced body is rewritten.** The reasoning above each table is outside the fence and
 survives editing, which is why the fences sit tight around the literal rather than around the whole
@@ -211,6 +253,6 @@ any other change.
 ### Adding a table to the tool
 
 Wrap the literal in a fence and it appears in the menu; there is no code change. The parser expects
-`<var> = [ <row>, … ];` and splits rows by bracket depth, so a row holding a nested array — a group
-roster's role lists — survives intact. Add `fields=` when every row has the same columns, and
-`prefix=` when its names are faction slots.
+`<var> = [ <row>, … ];` and splits rows by bracket depth, so a row holding a nested array — a team's
+role lists — survives intact. Set `kind=` so its rows land in the right menu, add `fields=` when
+every row has the same columns, and `prefix=` when its names are faction slots.
