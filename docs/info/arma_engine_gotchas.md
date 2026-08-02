@@ -317,6 +317,31 @@ first feature being broken rather than as a collision.
 callback for the player closing the map and a mode abandoned that way would hold the slot for
 the rest of the mission.
 
+## A mission event handler id is a per-event index, not a unique handle
+
+**`removeMissionEventHandler ["EntityCreated", _id]` addresses a position in the list of handlers
+registered for that event type, not a handle unique to yours. Store an id and remove it later and
+you are betting that the position still means what it meant when you registered — a bet you lose
+silently, by unhooking whichever handler now sits there.**
+
+`EntityCreated` is the live case in this mission. Three handlers share it and only one is DUWS's own:
+`server/misc/fnc_scanEnemyGear.sqf` reads gear off new enemies, and
+`shared/factions/MODERN/AUTODETECT_blufor.sqf` and `AUTODETECT_opfor.sqf` (or
+`AUTODETECT_RANDOM_opfor.sqf`) retexture vehicles and redress their crew. Neither autodetect handler
+ever removes itself, so nothing in the tree keeps those indices honest, and a wrong id would disable
+part of faction detection with no error and nothing in the log — a failure that surfaces as vehicles
+quietly wearing the wrong livery, hours from its cause.
+
+The registration order is not obvious from any one file either: the autodetect handlers are added by
+`fnc_factions_check` at `server/server_init.sqf:31`, and the gear scan roughly fifteen seconds later
+from its own spawn, so the two are separated by boot timing rather than by anything a reader can see.
+
+**How to apply:** prefer a handler that never needs removing, gated internally on a flag, over one
+removed by id. Where removal is genuinely required, make sure the id was captured in the same scope
+that registered it and cannot outlive the registration — and treat any event type another system
+also hooks as reason not to remove by id at all. Whether a savegame preserves these indices is not
+established; that is a further reason not to hold one across a save.
+
 ## Diary records display newest-first, so add them bottom-up
 
 **`createDiaryRecord` prepends: the record created last is drawn at the TOP of its

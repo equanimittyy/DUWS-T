@@ -6,14 +6,14 @@ never shrinks*, which does not. This doc covers both, and the design decisions t
 Everything here was read out of the source rather than profiled in-engine, so treat sizes as
 reasoning about how often code runs and what it touches.
 
-The three growth terms this tree carried are each bounded now, and the shape of the bound is worth
+Two of the three growth terms this tree carried are bounded now, and the shape of the bound is worth
 knowing because the symptom they shared was a mission that plays well for an hour and worse at four,
 with no single call to point at. BLUFOR task forces stop at one standing by
 (`warcom/fnc_WARCOM_blu_assault.sqf`), so an ignored one no longer accumulates as permanently
 simulated AI beside the base. The task-force waypoint slot is written rather than appended to
-(`warcom/fnc_WARCOM_gps_marker.sqf`), where only index 0 was ever read. And the enemy gear scan
-removes its own `EntityCreated` handler once 200 consecutive units file nothing new
-(`misc/fnc_scanEnemyGear.sqf`), which stops both the per-soldier script and the hashmap behind it.
+(`warcom/fnc_WARCOM_gps_marker.sqf`), where only index 0 was ever read. The third, the enemy gear
+scan, still runs for the whole session, and why a convergence ceiling is not the fix for it is in
+[`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#the-enemy-gear-scan-runs-for-the-whole-session).
 
 ## The pattern that costs the most: timed scans anchored on `allUnits`
 

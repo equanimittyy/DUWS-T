@@ -315,6 +315,34 @@ boot script that starves the pass again would show up as the two diverging.
 
 Reading those logs: [`docs/info/testing.md`](docs/info/testing.md#runtime-logging-reading-the-rpt).
 
+## The enemy gear scan runs for the whole session
+
+`server/misc/fnc_scanEnemyGear.sqf` holds an `EntityCreated` handler for the life of the mission,
+reading kit off new EAST units into the eight tables `fnc_disguiseAsEnemy` validates a disguise
+against. Two costs come with it, each small per occurrence and neither bounded.
+
+The handler filters to `CAManBase` and then spawns a scheduled script per man, which sleeps 0.5 s
+before testing the side — so every civilian a town fill creates and every BLUFOR soldier recruited
+gets its own script whose whole job is to wake up and discover it is not an enemy. The civilian
+streaming system creates and deletes crowds continuously, so this fires for as long as the campaign
+runs. `DUWS_enemyGear_scannedUnits`, the `netId`-keyed hashmap that stops a unit being read twice,
+is never pruned either: it holds an entry for every EAST unit ever spawned, including long-dead ones
+whose netIds will not be seen again. Entries are small, so the symptom would be a slow server memory
+climb with no obvious owner.
+
+**A convergence ceiling is not the fix.** Retiring the handler after N consecutive units add nothing
+was tried and reverted, for two independent reasons. Convergence is per unit *role* rather than per
+faction — pilot and vehicle crew are a separate class set the spawners only reach at higher tiers,
+which is why `AUTODETECT_opfor.sqf` carries `fnc_filterPilotCrew` at all — so a stretch of infantry
+fighting satisfies any counter before the campaign has shown its armour, and the tables then never
+learn a crew uniform. And the removal has to name the handler by an id indexing an event that two
+faction-detection handlers also hook
+([gotchas](docs/info/arma_engine_gotchas.md#a-mission-event-handler-id-is-a-per-event-index-not-a-unique-handle)),
+where a wrong id disables part of faction detection silently.
+
+Hooking the OPFOR spawners directly, instead of a mission-wide handler, is the direction that
+removes the per-man script without either problem.
+
 ## Zone and civilian siting defects
 
 Six defects in the enemy zone-siting subsystem. How the siting stages fit together is in

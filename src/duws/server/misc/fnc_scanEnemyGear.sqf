@@ -24,32 +24,29 @@ if (isNil "DUWS_fnc_isNVG") then {
 
 // 定义全局提取函数（关键修复）
 if (isNil "DUWS_fnc_extractEnemyGear") then {
-    // Returns whether this unit taught the tables anything, which is what lets the spawn handler
-    // below retire itself. Each category broadcasts only when it actually gained an entry: the
-    // unconditional publish this replaces sent all eight arrays to every client for every enemy
-    // scanned, long after they had stopped changing.
+    // Each category broadcasts only when it actually gained an entry. The unconditional publish
+    // this replaces was gated on the unit wearing something rather than on the item being new, so
+    // every enemy scanned sent all eight arrays to every client long after they had stopped
+    // changing -- pushBackUnique deduped the array, but the broadcast went out regardless.
     DUWS_fnc_extractEnemyGear = {
         params ["_unit"];
-        if (isNull _unit || {!alive _unit}) exitWith {false};
+        if (isNull _unit || {!alive _unit}) exitWith {};
 
         private _netId = netId _unit;
-        if (DUWS_enemyGear_scannedUnits getOrDefault [_netId, false]) exitWith {false};
+        if (DUWS_enemyGear_scannedUnits getOrDefault [_netId, false]) exitWith {};
         DUWS_enemyGear_scannedUnits set [_netId, true];
 
-        private _added = false;
-        private _uni = uniform _unit; if (_uni != "" && {!(_uni in DUWS_enemyUniforms)}) then { DUWS_enemyUniforms pushBack _uni; publicVariable "DUWS_enemyUniforms"; _added = true; };
-        private _vest = vest _unit; if (_vest != "" && {!(_vest in DUWS_enemyVests)}) then { DUWS_enemyVests pushBack _vest; publicVariable "DUWS_enemyVests"; _added = true; };
-        private _hg = headgear _unit; if (_hg != "" && {!(_hg in DUWS_enemyHeadgear)}) then { DUWS_enemyHeadgear pushBack _hg; publicVariable "DUWS_enemyHeadgear"; _added = true; };
-        private _bp = backpack _unit; if (_bp != "" && {!(_bp in DUWS_enemyBackpacks)}) then { DUWS_enemyBackpacks pushBack _bp; publicVariable "DUWS_enemyBackpacks"; _added = true; };
-        private _pw = primaryWeapon _unit; if (_pw != "" && {!(_pw in DUWS_enemyPrimaryWeapons)}) then { DUWS_enemyPrimaryWeapons pushBack _pw; publicVariable "DUWS_enemyPrimaryWeapons"; _added = true; };
-        private _sw = secondaryWeapon _unit; if (_sw != "" && {!(_sw in DUWS_enemySecondaryWeapons)}) then { DUWS_enemySecondaryWeapons pushBack _sw; publicVariable "DUWS_enemySecondaryWeapons"; _added = true; };
-        private _hw = handgunWeapon _unit; if (_hw != "" && {!(_hw in DUWS_enemyHandguns)}) then { DUWS_enemyHandguns pushBack _hw; publicVariable "DUWS_enemyHandguns"; _added = true; };
+        private _uni = uniform _unit; if (_uni != "" && {!(_uni in DUWS_enemyUniforms)}) then { DUWS_enemyUniforms pushBack _uni; publicVariable "DUWS_enemyUniforms"; };
+        private _vest = vest _unit; if (_vest != "" && {!(_vest in DUWS_enemyVests)}) then { DUWS_enemyVests pushBack _vest; publicVariable "DUWS_enemyVests"; };
+        private _hg = headgear _unit; if (_hg != "" && {!(_hg in DUWS_enemyHeadgear)}) then { DUWS_enemyHeadgear pushBack _hg; publicVariable "DUWS_enemyHeadgear"; };
+        private _bp = backpack _unit; if (_bp != "" && {!(_bp in DUWS_enemyBackpacks)}) then { DUWS_enemyBackpacks pushBack _bp; publicVariable "DUWS_enemyBackpacks"; };
+        private _pw = primaryWeapon _unit; if (_pw != "" && {!(_pw in DUWS_enemyPrimaryWeapons)}) then { DUWS_enemyPrimaryWeapons pushBack _pw; publicVariable "DUWS_enemyPrimaryWeapons"; };
+        private _sw = secondaryWeapon _unit; if (_sw != "" && {!(_sw in DUWS_enemySecondaryWeapons)}) then { DUWS_enemySecondaryWeapons pushBack _sw; publicVariable "DUWS_enemySecondaryWeapons"; };
+        private _hw = handgunWeapon _unit; if (_hw != "" && {!(_hw in DUWS_enemyHandguns)}) then { DUWS_enemyHandguns pushBack _hw; publicVariable "DUWS_enemyHandguns"; };
 
         {
-            if (_x != "" && {_x call DUWS_fnc_isNVG} && {!(_x in DUWS_enemyNVGs)}) then { DUWS_enemyNVGs pushBack _x; publicVariable "DUWS_enemyNVGs"; _added = true; };
+            if (_x != "" && {_x call DUWS_fnc_isNVG} && {!(_x in DUWS_enemyNVGs)}) then { DUWS_enemyNVGs pushBack _x; publicVariable "DUWS_enemyNVGs"; };
         } forEach assignedItems _unit;
-
-        _added
     };
 };
 
@@ -76,14 +73,14 @@ publicVariable "DUWS_enemyGear_scannedUnits";
 };
 
 // 事件监听：后续新单位
-// The tables converge within the campaign's first minutes -- every EAST unit after that draws from
-// the same faction lists -- so without a stop this handler goes on spawning a script per soldier
-// for the rest of the session to learn nothing. Retired once this many consecutive units file
-// nothing new, which is long enough to survive a faction the campaign meets late.
-#define GEAR_CONVERGED_AFTER 200
-
-DUWS_enemyGear_dryStreak = 0;
-DUWS_enemyGear_scanEH = addMissionEventHandler ["EntityCreated", {
+// Runs for the whole session rather than retiring once the tables stop changing. A dry-streak
+// ceiling was tried and removed: convergence is per unit role, not per faction -- pilot and vehicle
+// crew classes are a separate set the spawners only reach at higher tiers (fnc_filterPilotCrew in
+// shared/factions/MODERN/AUTODETECT_opfor.sqf) -- so a stretch of infantry fighting can satisfy any
+// counter before the campaign has shown its armour. Retiring also meant removing this handler by a
+// stored id, which addresses an index shared with the faction-detection handlers on the same event
+// (docs/info/arma_engine_gotchas.md).
+addMissionEventHandler ["EntityCreated", {
     params ["_entity"];
     if (!isServer) exitWith {};
     if (isNull _entity) exitWith {};
@@ -98,14 +95,6 @@ DUWS_enemyGear_scanEH = addMissionEventHandler ["EntityCreated", {
         sleep 0.5;
         if (isNull _entity || {!alive _entity}) exitWith {};
         if (side _entity != EAST) exitWith {};
-        // A unit already scanned reports nothing new, which is correct: re-seeing one is as much
-        // evidence of convergence as meeting a fresh soldier in known kit.
-        if ([_entity] call DUWS_fnc_extractEnemyGear) exitWith { DUWS_enemyGear_dryStreak = 0 };
-        DUWS_enemyGear_dryStreak = DUWS_enemyGear_dryStreak + 1;
-        if (DUWS_enemyGear_dryStreak >= GEAR_CONVERGED_AFTER) then {
-            removeMissionEventHandler ["EntityCreated", DUWS_enemyGear_scanEH];
-            ["INFO", "GEAR", format ["gear tables unchanged over %1 consecutive units; scan retired",
-                GEAR_CONVERGED_AFTER]] call fnc_log;
-        };
+        [_entity] call DUWS_fnc_extractEnemyGear;
     };
 }];
