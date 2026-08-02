@@ -203,6 +203,11 @@ fnc_site_poller = {
             {
                 private _o = _x;
                 private _kind = _o get "kind";
+                // An occupant a sibling orders. A zone's prefab has to be standing before anyone is
+                // placed on it and its turrets have to be crewed out before it can be stowed, so
+                // those two are driven by the garrison's own cycle rather than reaching their own
+                // conclusions about presence a fraction of a second apart from it.
+                if (_o getOrDefault ["driven", false]) then { continue };
                 private _ring = _radius + (_o get "buffer");
                 private _here = if (_o get "aiAware") then {
                     // The cheap list gates the expensive helper rather than answering in its

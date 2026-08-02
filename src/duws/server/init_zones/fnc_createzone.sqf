@@ -265,6 +265,16 @@ private _occ = [_zoneKey, "garrison", EAST, 400, 120, true, true, 2] call fnc_si
 _occ set ["minAIHold", 1];
 [_zoneKey, "garrison", DUWS_zoneHooks] call fnc_site_hooks_set;
 
+// The zone's other two occupants: the prefab it stands on and the guns bolted to it. Driven by the
+// garrison's cycle rather than polled, because the order between the three is the whole contract --
+// the prefab has to exist before anyone is placed on it, and the guns have to be empty before the
+// prefab can be stowed.
+{
+	_x params ["_kind", "_hooks"];
+	([_zoneKey, _kind] call fnc_site_occupant_register) set ["driven", true];
+	[_zoneKey, _kind, _hooks] call fnc_site_hooks_set;
+} forEach [["structure", DUWS_zoneStructureHooks], ["emplacement", DUWS_zoneEmplacementHooks]];
+
 // Zones are built deployed and the prefab mans their turrets at build time, so without this a fresh
 // campaign carries every zone's props and gunners for the whole session -- the exact cost streaming
 // exists to remove. The tick cannot do it: its despawn branch is only reachable once a zone has been

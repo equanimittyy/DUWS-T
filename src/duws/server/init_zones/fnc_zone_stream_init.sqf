@@ -69,17 +69,46 @@ DUWS_fnc_zoneManStatics = {
     [_grp, _pos] call bis_fnc_taskDefend;
 };
 
-// Crewing out has to happen here rather than in the sweep: that sweep's man clause tests
-// vehicle _x == _x, so a gunner sitting in a static keeps his seat, and stow refuses while any
-// member is crewed. Shared by the opening stow and the despawn one so the two cannot drift.
+// The emplacement kind: a static weapon and the man on it, which do not stream the same way. The gun
+// is campaign property that belongs to whoever holds the ground, so it stows; the man is a defender,
+// so he goes. That split is the reason the model divides by what is streamed rather than by side --
+// one object and one man, on the same objective, with opposite answers.
+//
+// Crewing out has to happen here rather than in the garrison sweep: that sweep's man clause tests
+// vehicle _x == _x, so a gunner sitting in a static keeps his seat, and stow refuses while any member
+// is crewed.
+DUWS_zoneEmplacementHooks = createHashMapFromArray [
+    ["wake", { params ["_key", "_o"]; [([_key] call fnc_site_at) get "pos", _key] call DUWS_fnc_zoneManStatics }],
+    ["sleep", { params ["_key", "_o"];
+        {
+            if (_x isKindOf "StaticWeapon") then { deleteVehicleCrew _x };
+        } forEach ((DUWS_compositions getOrDefault [_key, []]) select {!isNull _x});
+    }]
+];
+
+// The structure kind: props, walls and the prefab itself. Stowed, never deleted -- rebuilding them
+// from scratch would restore the damage the player did to them, and the emplacements become the
+// player's own the moment they take the ground.
+DUWS_zoneStructureHooks = createHashMapFromArray [
+    ["wake", { params ["_key", "_o"];
+        if (_key in DUWS_stowed) then {
+            [_key] call fnc_duws_deploy;
+            ["INFO", "STREAM", format ["deployed %1", _key]] call fnc_log;
+        };
+    }],
+    ["sleep", { params ["_key", "_o"];
+        if ([_key] call fnc_duws_stow) then {
+            ["INFO", "STREAM", format ["stowed %1", _key]] call fnc_log;
+        };
+    }]
+];
+
+// Ordered, which is why these two are driven rather than polled: the crews have to be out of the
+// guns before the composition holding those guns can be stowed.
 DUWS_fnc_zoneStow = {
     params ["_key"];
-    {
-        if (_x isKindOf "StaticWeapon") then { deleteVehicleCrew _x };
-    } forEach ((DUWS_compositions getOrDefault [_key, []]) select {!isNull _x});
-    if ([_key] call fnc_duws_stow) then {
-        ["INFO", "STREAM", format ["stowed %1", _key]] call fnc_log;
-    };
+    [_key, [_key, "emplacement"] call fnc_site_occupant] call (DUWS_zoneEmplacementHooks get "sleep");
+    [_key, [_key, "structure"] call fnc_site_occupant] call (DUWS_zoneStructureHooks get "sleep");
 };
 
 // Survivors of a zone that has fallen: ordered off the objective here, collected by the tick once
@@ -135,13 +164,10 @@ DUWS_fnc_zoneRaiseWorker = {
     // The roster is cleared here rather than where the band is raised, because the turret crews
     // below are garrison too and a roster cleared after them would drop them.
     [_key] call fnc_site_roster_clear;
-    // Props before the garrison: units must not spawn into ground that is about to have a bunker on
-    // it, and the turrets have to exist before anyone mans them.
-    if (_key in DUWS_stowed) then {
-        [_key] call fnc_duws_deploy;
-        ["INFO", "STREAM", format ["deployed %1", _key]] call fnc_log;
-    };
-    [_pos, _key] call DUWS_fnc_zoneManStatics;
+    // Structure, then emplacement, then men: units must not spawn into ground that is about to have
+    // a bunker on it, and the turrets have to exist before anyone mans them.
+    [_key, [_key, "structure"] call fnc_site_occupant] call (DUWS_zoneStructureHooks get "wake");
+    [_key, [_key, "emplacement"] call fnc_site_occupant] call (DUWS_zoneEmplacementHooks get "wake");
     [_pos, _size, _key] call fnc_zone_spawn;
     missionNamespace setVariable [ZONE_RAISE_SLOT(_key), true];
 };
