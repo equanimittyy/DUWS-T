@@ -137,6 +137,13 @@ the whole garrison, so what a tier IV zone is reads off one line instead of bein
 four. Tier reaches only the units a zone spawns alongside itself; the prefab, the fortification
 scatter and their crews are not part of it.
 
+**Tier therefore moves a minority of the fight.** A zone raises its garrison from two spawners, and
+only one of them reads the tier. `fnc_zone_spawn` fields the tier row scaled by the radius band; a
+tier I zone at 500 m is about seventeen men. `fnc_createopfortified` fields the dug-in half —
+a `fortified` team, a mortar pair, three men in each of up to eight buildings, and whoever is standing
+in the guard towers within 300 m — which is about thirty, scales with attrition alone, and is
+identical at every tier. So the whole I-to-IV ladder is worth roughly sixteen men against a garrison
+of fifty, and a tier I zone is not the soft objective the ladder implies.
 `fnc_zone_tier_roll` refuses to roll twice. `fnc_createzone` is re-entrant by design — `zone_meta_array`
 exists so a zone can be rebuilt through it — and a rebuild that re-rolled would change what the ground
 is worth behind the player's back and disagree with the garrison peak already measured against the old

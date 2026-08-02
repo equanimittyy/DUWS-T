@@ -461,7 +461,7 @@ are simply not on the same scale, and recycle has no floor tying reward to what 
 
 **AP is a threshold ladder with almost nothing spending it, so town income is inflationary.** The WARCOM
 director reads it as gates — BLUFOR wave tiers at 10, 40, 65, 100 and 136
-(`fnc_WARCOM_blu_assault.sqf:11-25`) and mission-guard armour above 100 (`fnc_missionPatrols.sqf:20`)
+(`fnc_WARCOM_blu_assault.sqf:19-33`) and mission-guard armour above 100 (`fnc_missionPatrols.sqf:30`)
 — and the only subtractions are losing a zone and the AP→CP converter. The enemy half of that ladder
 is a single rung now; the rest went with the WARCOM OPFOR spawners. Turning it into a currency both sides spend, without breaking the ladder, is
 [`docs/economy_plan.md`](docs/economy_plan.md). A 20-town campaign averaging 2 AP pays at most 40 AP per
