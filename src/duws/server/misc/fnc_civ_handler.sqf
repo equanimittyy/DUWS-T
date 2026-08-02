@@ -151,7 +151,7 @@ for "_i" from 0 to (_count - 1) do {
     // Unlatched, unlike a garrison. The latch exists to stop men appearing around a player who was
     // already standing there, and a crowd that never arrives is worse than one that fades in: a town
     // the player happens to start in would otherwise stay empty until they had left it once.
-    private _o = [_key, "crowd", CIVILIAN, STREAM_BUFFER, DESPAWN_TIMER, false] call fnc_site_occupant_register;
+    private _o = [_key, "crowd", CIVILIAN, STREAM_BUFFER, DESPAWN_TIMER, false, false] call fnc_site_occupant_register;
     // The only field the crowd adds: everything else about where this town is lives on the site.
     _o set ["townIndex", _i];
     [_key, "crowd", createHashMapFromArray [["wake", _fnc_wake], ["sleep", _fnc_empty]]] call fnc_site_hooks_set;

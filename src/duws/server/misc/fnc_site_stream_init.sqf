@@ -57,12 +57,14 @@ fnc_site_at = { params ["_key"]; DUWS_sites getOrDefault [_key, createHashMap] }
 // awaitVacate starts latched: an occupant registered under a player's feet would otherwise read them
 // as having just walked up and raise its men around them.
 fnc_site_occupant_register = {
-    params ["_key", "_kind", ["_side", EAST], ["_buffer", 400], ["_grace", 120], ["_latch", true]];
+    params ["_key", "_kind", ["_side", EAST], ["_buffer", 400], ["_grace", 120], ["_latch", true],
+            ["_aiAware", true], ["_minAI", 2]];
     private _list = DUWS_occupants getOrDefault [_key, []];
     private _i = _list findIf { (_x get "kind") isEqualTo _kind };
     if (_i >= 0) exitWith { _list select _i };
     private _o = createHashMapFromArray [
         ["kind", _kind], ["side", _side], ["buffer", _buffer], ["grace", _grace],
+        ["aiAware", _aiAware], ["minAI", _minAI],
         ["awake", false], ["seenLast", false], ["emptySince", -1], ["awaitVacate", _latch],
         ["baseline", 0], ["tier", 0], ["strength", 1], ["deployedList", []],
         ["deployedStrength", 0], ["trg", objNull], ["hold", 0],
@@ -182,6 +184,11 @@ fnc_site_poller = {
         sleep SITE_TICK;
 
         private _players = (call BIS_fnc_listPlayers) select { alive _x };
+        // Both lists built once for the whole pass, which is the point of the shared thread. A crowd
+        // is held up by a player and a garrison by any BLUFOR, so the two answers differ and each
+        // occupant says which it wants -- but neither costs a spatial query until somebody is
+        // actually within reach of the site being asked about.
+        private _west = (allUnits select { side _x == WEST }) apply { getPosATL _x };
         private _now = time;
         private _t0 = diag_tickTime;
 
@@ -196,7 +203,18 @@ fnc_site_poller = {
             {
                 private _o = _x;
                 private _kind = _o get "kind";
-                private _here = (_players findIf { _x distance _pos < _radius + (_o get "buffer") }) >= 0;
+                private _ring = _radius + (_o get "buffer");
+                private _here = if (_o get "aiAware") then {
+                    // The cheap list gates the expensive helper rather than answering in its
+                    // place: fnc_duws_bluforNear still decides every arrival, so zones and towns go
+                    // on deciding it the same way. What the gate removes is a spatial query per
+                    // site per pass across a map that is nearly always empty of anyone.
+                    if ((_west findIf { _x distance _pos < _ring }) >= 0) then {
+                        [_pos, _ring, _o get "minAI"] call fnc_duws_bluforNear
+                    } else { false }
+                } else {
+                    (_players findIf { _x distance _pos < _ring }) >= 0
+                };
 
                 // A frozen site wakes on either side. A garrison that cannot be woken by an attacker
                 // is a garrison that loses its base while nobody is looking, and the shared BLUFOR
@@ -204,7 +222,7 @@ fnc_site_poller = {
                 // ground, so at a friendly base it would count the garrison standing in the middle
                 // of the radius and never let it sleep.
                 if (_frozen && {!_here}) then {
-                    _here = ([_pos, _radius + (_o get "buffer")] call fnc_opfor_count_at) > 0;
+                    _here = ([_pos, _ring] call fnc_opfor_count_at) > 0;
                 };
 
                 // One empty sighting spends the latch, and a site cannot clear it and wake on the
@@ -216,24 +234,44 @@ fnc_site_poller = {
                     _here = false;
                 };
 
-                if (_o get "awake") then {
-                    if (_here) then { _o set ["emptySince", _now] };
-                    if (_now - (_o get "emptySince") >= (_o get "grace")) then {
-                        _o set ["awake", false];
-                        private _fnc_sleep = [_key, _kind, "sleep"] call fnc_site_hook;
-                        [_key, _o] call _fnc_sleep;
-                    };
+                // The empty clock, kept for every occupant whether or not it drives the default
+                // transitions below: an occupant with a cycle of its own still measures how long the
+                // site has been empty against its own grace.
+                if (_here) then { _o set ["emptySince", -1] } else {
+                    if ((_o get "emptySince") < 0) then { _o set ["emptySince", diag_tickTime] };
+                };
+
+                // An occupant that answers to more than presence keeps its own cycle and is handed
+                // the answers this pass already has. A crowd exists whenever somebody is there; a
+                // garrison also answers to the reputation band, to what the commander has bought and
+                // to whether its town has been cleared, and folding those into wake-and-sleep would
+                // mean expressing them as a presence test they are not.
+                private _fnc_tick = [_key, _kind, "tick"] call fnc_site_hook;
+                // if/else rather than an early exit: exitWith inside a forEach block ends the whole
+                // loop, so one occupant with a cycle of its own would stop every occupant after it
+                // from being serviced at all.
+                if !(_fnc_tick isEqualTo {}) then {
+                    [_key, _o, _here, _now] call _fnc_tick;
                 } else {
-                    // Two consecutive polls rather than a sleep-and-retest. Both forms exist for the
-                    // same reason -- a helicopter crossing the radius should not commit a fill --
-                    // and this one does not stall the pass that holds every other site's clock.
-                    private _fnc_present = [_key, _kind, "present", {true}] call fnc_site_hook;
-                    if (_here && {_o get "seenLast"} && {[_key, _o] call _fnc_present}) then {
-                        _o set ["awake", true];
-                        _o set ["emptySince", _now];
-                        private _fnc_wake = [_key, _kind, "wake"] call fnc_site_hook;
-                        [_key, _o] call _fnc_wake;
-                    };
+                    if (_o get "awake") then {
+                        if (_here) then { _o set ["lastSeen", _now] };
+                        if (_now - (_o getOrDefault ["lastSeen", _now]) >= (_o get "grace")) then {
+                            _o set ["awake", false];
+                            private _fnc_sleep = [_key, _kind, "sleep"] call fnc_site_hook;
+                            [_key, _o] call _fnc_sleep;
+                        };
+                    } else {
+                        // Two consecutive polls rather than a sleep-and-retest. Both forms exist for the
+                        // same reason -- a helicopter crossing the radius should not commit a fill --
+                        // and this one does not stall the pass that holds every other site's clock.
+                        private _fnc_present = [_key, _kind, "present", {true}] call fnc_site_hook;
+                        if (_here && {_o get "seenLast"} && {[_key, _o] call _fnc_present}) then {
+                            _o set ["awake", true];
+                            _o set ["lastSeen", _now];
+                            private _fnc_wake = [_key, _kind, "wake"] call fnc_site_hook;
+                            [_key, _o] call _fnc_wake;
+                        };
+                };
                 };
                 _o set ["seenLast", _here];
             } forEach (DUWS_occupants getOrDefault [_key, []]);

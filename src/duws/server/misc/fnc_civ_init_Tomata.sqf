@@ -219,7 +219,9 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
 
     // One garrison thread for all towns, like fnc_civ_handler below. Started after the arrays above
     // exist, since its first pass reads every town's reputation and tier.
-    [] spawn fnc_civ_garrison;
+    // Called rather than spawned: it files hooks and returns, and they have to exist before the
+    // poller starts.
+    [] call fnc_civ_garrison;
 };
 
 // ========== 第三阶段：为保留的城镇创建触发器、地图标记，并存储人口变量 ==========
