@@ -31,8 +31,8 @@ if (!hasInterface) exitWith {};
 params [["_display", displayNull], ["_site", objNull], ["_isFob", false]];
 if (isNull _display) exitWith {};
 
-// The eight button IDCs in request_menu.hpp, in column order.
-private _slots = [1610, 1611, 1612, 1613, 1614, 1615, 1616, 1617];
+// The seven button IDCs in request_menu.hpp, in column order.
+private _slots = [1610, 1611, 1612, 1613, 1614, 1615, 1616];
 private _rows = [];
 
 if ((vehiclevarname player) in Squad_Leaders) then {
@@ -47,13 +47,6 @@ _rows pushBack [localize "STR_DUWS_T_0dlbonpc", { [] call fnc_operator_open }, [
 // everyone else brought back into CP, so the two are one errand.
 if (!_isFob) then {
     _rows pushBack [localize "STR_DUWS_T_INTEL_ANALYSIS_ACTION", { [player] remoteExec ["fnc_intelAnalysis", 2] }, []];
-};
-
-// A fixed button of its own in the MISSIONS row until that row ran out of width. Here its Game
-// Master gate costs nothing: an entry that does not apply is simply not written, where a fixed
-// button had to be hidden and left a hole between the two beside it.
-if ((vehiclevarname player) in game_master) then {
-    _rows pushBack [localize "STR_DUWS_T_SHOW_MISSION_COOLDOWNS", { [] call fnc_mission_cooldowns_show }, []];
 };
 
 // Below the free entries, for the reason the scroll bucket put it lowest: a mis-clicked spend costs

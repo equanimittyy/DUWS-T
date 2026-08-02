@@ -289,6 +289,10 @@
                 <Original>Your own campaign. Every option on this screen and the next is yours to set.</Original>
                 <English>Your own campaign. Every option on this screen and the next is yours to set.</English>
             </Key>
+            <Key ID="STR_DUWS_T_faction_screen_title">
+                <Original>CHOOSE YOUR GAME MODE AND FACTIONS</Original>
+                <English>CHOOSE YOUR GAME MODE AND FACTIONS</English>
+            </Key>
             <Key ID="STR_DUWS_T_gamemode">
                 <Original>Game Mode</Original>
                 <English>Game Mode</English>
@@ -3593,20 +3597,20 @@
                 <English>Your death has cost BLUFOR %1 CP.</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_HEAD_PERM">
-                <Original>PERMANENT (one purchase, team)</Original>
-                <English>PERMANENT (one purchase, team)</English>
+                <Original>--- PERMANENT (one-time purchase, team) ---</Original>
+                <English>--- PERMANENT (one-time purchase, team) ---</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_HEAD_CONS">
-                <Original>SQUAD (%1/%2 slots, refundable)</Original>
-                <English>SQUAD (%1/%2 slots, refundable)</English>
+                <Original>--- SQUAD (%1/%2 slots, refundable) ---</Original>
+                <English>--- SQUAD (%1/%2 slots, refundable) ---</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_REFUND_BUTTON">
                 <Original>REFUND</Original>
                 <English>REFUND</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_REFUNDED">
-                <Original>Support handed back. %1 CP returned in full.</Original>
-                <English>Support handed back. %1 CP returned in full.</English>
+                <Original>Support refunded for %1 CP.</Original>
+                <English>Support refunded for %1 CP.</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_NO_REFUND">
                 <Original>Permanent supports are bought for the team and cannot be handed back.</Original>

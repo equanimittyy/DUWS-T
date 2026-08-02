@@ -232,7 +232,7 @@ fnc_support_refund = {
 	missionNamespace setVariable [_flagVar, false];
 	support_count = (support_count - 1) max 0;
 	if (_back > 0) then { [_back, "support_refund"] remoteExec ["fnc_cp_adjust", 2] };
-	playSound "boots";
+	// No purchase sound: the cue belongs to spending, and a refund firing it read as a second buy.
 	hint format [localize "STR_DUWS_T_SUPPORT_REFUNDED", _back];
 	true
 };

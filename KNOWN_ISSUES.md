@@ -320,9 +320,10 @@ reworked anyway.
 **The supports strip cannot double in width.** The dialog is laid out on a 40-cell grid that is the
 whole screen, so the strip and the main window divide a fixed budget. The window's floor is its
 COMMAND AND CONTROL row — a request frame and a command button side by side, neither of which can
-stack — which puts the strip's ceiling near 15 cells against the 11.7 it had. Doubling to 23 would
-leave 16 cells for a window whose contents need 24. A strip materially wider than the present one
-means supports leaving this dialog for a screen of their own.
+stack — and the strip's present 17.7 cells already cost that row its default text size: "Recruit
+Special Operatives" only fits 9.9 cells at `sizeEx = 0.025`. Doubling to 23 would leave 16 cells for
+a window whose contents need 21.5 even shrunk. A strip materially wider than this one means supports
+leaving this dialog for a screen of their own.
 
 ## Open defects
 
