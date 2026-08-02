@@ -401,7 +401,10 @@ DUWS_spawnVehicles = [
     ["heli",   "opfor_HELI_X", "air",    "TEST_Air",   0],
     ["absent", "opfor_GONE_X", "light",  "",           0]
 ];
-DUWS_spawnSpecials = [["buildings", "houses", "infantry", 8, 3]];
+DUWS_spawnSpecials = [
+    ["buildings", "houses", "infantry",      "fnc_garrisonBuildings", [8, 3, 2, "AUTO", false]],
+    ["mortar",    "tube",   "fortification", "fnc_garrisonMortar",    []]
+];
 opfor_A_X = "cls_A";
 opfor_B_X = "cls_B";
 opfor_C_X = "cls_C";
@@ -413,7 +416,7 @@ opfor_HELI_X = "cls_heli";
 TEST_Heavy = 1;
 TEST_Air = 1;
 WARCOM_opfor_ap = 200;
-DUWS_zoneRadiusMult = [[101, 1, 1, 0, 0], [1e11, 3, 1, 2, 1]];
+DUWS_zoneRadiusMult = [[101, 1, 1, 0, 0, 1], [1e11, 3, 1, 2, 1, 1]];
 DUWS_zoneSpawnTiers = [["patrol"], ["patrol", "car"], ["patrol", "apc"],
     ["patrol", "team", "car", "apc", "heli"]];
 

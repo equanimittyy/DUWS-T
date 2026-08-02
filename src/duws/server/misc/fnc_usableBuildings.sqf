@@ -1,4 +1,4 @@
-// Locality: server -- inherited from server/init_zones/fnc_createopfortified.sqf.
+// Locality: server -- spawns nothing; called from the garrison placers and the town selector.
 
 //find buildings with a minimum of 2 positions to avoid "unenterable" buildings
 

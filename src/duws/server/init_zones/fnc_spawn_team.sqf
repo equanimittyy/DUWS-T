@@ -11,7 +11,10 @@
 // raised so the capture test can tell this zone's garrison from passers-by, and the town garrison
 // needs the handle to count its strength and to order it out.
 
-params ["_team", "_center", "_radius"];
+// _strength is attrition, and only a caller whose token escapes the composition thin passes it: the
+// fortification tokens wear down inside themselves rather than by being dropped, and everything else
+// was already thinned as a list before it reached here. Thinning both ways would halve twice.
+params ["_team", "_center", "_radius", ["_strength", 1]];
 
 // grpNull rather than an empty group: DUWS_fnc_raiseGarrison already drops nulls, and a group with
 // no men would sit on the zone roster forever holding the capture test open.
@@ -22,7 +25,7 @@ if (_row isEqualTo []) exitWith {
 };
 
 // Not named _roster: callers one frame up use that name for the zone's unit roster.
-private _men = [_team, enemyunitMultiplier] call DUWS_fnc_teamRoster;
+private _men = [_team, enemyunitMultiplier, _strength] call DUWS_fnc_teamRoster;
 private _position = [_center, 50, _radius, 5, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
 private _group = [_position, EAST, _men, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
@@ -62,6 +65,27 @@ switch (_row select 1) do {
     };
     case "wander": {
         [_group, _center, _patrolRadius] call bis_fnc_taskPatrol;
+    };
+    case "digin": {
+        // Scattered on a ring before taskDefend rather than left to walk apart. Zones stream in, so
+        // a garrison spawns while BLUFOR are already close enough to watch it happen: on one point
+        // it reads as a clump appearing out of nothing and then filing outward, and a defence
+        // stacked on the centre is one the player can fight from a single angle. Spread wide, they
+        // have to be dug out.
+        //
+        // findEmptyPosition rather than BIS_fnc_findSafePos: this runs once per unit on the frame
+        // budget of a player arriving, and the safe-pos search is the expensive one. The ring does
+        // the spreading; the lookup only keeps a body out of a wall, and falls back to the ring
+        // point it was given.
+        {
+            private _ring = _center getPos [40 + random 110, random 360];
+            private _spot = _ring findEmptyPosition [0, 15, typeOf _x];
+            _x setPos ([_spot, _ring] select (_spot isEqualTo []));
+        } forEach units _group;
+        // Radius passed rather than defaulted: taskDefend defends 50 m unless told otherwise and
+        // treats anyone outside that as out of position, so it would walk the ring back onto the
+        // centre and undo the spread above. It has to describe the same ground just placed on.
+        [_group, _center, 150] call bis_fnc_taskDefend;
     };
     // "none" and anything unrecognised: the caller places the group and gives it orders itself.
 };

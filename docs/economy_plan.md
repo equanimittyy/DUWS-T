@@ -565,8 +565,8 @@ archetype decides *where* the money goes, not whether there is anywhere for it t
 ### Town garrisons: I through IV
 
 Towns gain purchasable garrisons on both sides. A zone garrison is the benchmark the ladder climbs
-toward: `server/init_zones/fnc_createopfortified.sqf` fields a multiplied fortified group with a
-squad leader, a mortar team, and up to eight buildings occupied at three units each. **Zones carry a
+toward: every zone tier fields a multiplied fortified group with a squad leader, a mortar team, up to
+eight buildings occupied at three units each, and whatever guard towers stand nearby. **Zones carry a
 tier of their own, rolled at generation** — see
 [`info/zones_and_civilians.md`](info/zones_and_civilians.md#zone-tiers). Each tier names its own
 composition and a zone's radius multiplies it per category. Towns and zones draw from one token

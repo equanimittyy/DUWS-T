@@ -130,8 +130,8 @@ one. That is the intended shape — the guns are part of the world the player wa
 director's job is replacing them. It is also why the guns sit at the bottom of the weight table: without
 that, the first three zones would hold every interesting emplacement in the campaign.
 
-Unit classnames come from the `opfor_*_X` faction globals exactly as
-`server/init_zones/fnc_createopfortified.sqf:14,23,43` does. Hardcoding unit or turret
+Unit classnames come from the `opfor_*_X` faction globals exactly as the garrison placers in
+`server/misc/fnc_garrison*.sqf` do. Hardcoding unit or turret
 classnames is the single change that would break mod-free operation and faction
 auto-detection; hardcoding vanilla `Land_*` structures is fine, and the zone code already does
 it (`fnc_createzone.sqf:145-151`).

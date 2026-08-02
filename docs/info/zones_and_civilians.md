@@ -92,9 +92,8 @@ trigger while any WEST unit is inside the zone radius:
 | Objective clear | **any** OPFOR, within 50 m of the composition centre | none alive |
 
 **The strength test counts by ownership, not by position.** Every unit a zone raises is appended to
-`DUWS_zoneUnits_<key>` — the spawn band appends what its spawners hand back,
-`fnc_createopfortified` appends each of the five groups it builds, and `fnc_spawnWait` appends the
-turret crews it re-mans the composition with. `fnc_spawnWait` empties the roster when it deploys the
+`DUWS_zoneUnits_<key>` — the spawn band appends what every token it raises hands back, and
+`fnc_spawnWait` appends the turret crews it re-mans the composition with. `fnc_spawnWait` empties the roster when it deploys the
 composition, one act with the generation bump, so it describes the garrison now on the ground rather
 than every garrison the zone has ever had. The clear has to happen there rather than where the band
 is raised, because the turret crews are placed first and a later clear would drop them.
@@ -137,12 +136,10 @@ the whole garrison, so what a tier IV zone is reads off one line instead of bein
 four. Tier reaches only the units a zone spawns alongside itself; the prefab, the fortification
 scatter and their crews are not part of it.
 
-**Tier therefore moves a minority of the fight.** A zone raises its garrison from two spawners, and
-only one of them reads the tier. `fnc_zone_spawn` fields the tier row scaled by the radius band; a
-tier I zone at 500 m is about seventeen men. `fnc_createopfortified` fields the dug-in half —
-a `fortified` team, a mortar pair, three men in each of up to eight buildings, and whoever is standing
-in the guard towers within 300 m — which is about thirty, scales with attrition alone, and is
-identical at every tier. So the whole I-to-IV ladder is worth roughly sixteen men against a garrison
+**Tier therefore moves a minority of the fight.** The mobile half of a zone's composition scales
+with the tier row and the radius band; a tier I zone at 500 m is about seventeen men. The dug-in half
+— the `fortified`, `mortar`, `fortbuildings` and `towers` tokens — sits on every tier row, so it is
+about thirty men, scales with attrition alone, and is identical at every tier. So the whole I-to-IV ladder is worth roughly sixteen men against a garrison
 of fifty, and a tier I zone is not the soft objective the ladder implies.
 `fnc_zone_tier_roll` refuses to roll twice. `fnc_createzone` is re-entrant by design — `zone_meta_array`
 exists so a zone can be rebuilt through it — and a rebuild that re-rolled would change what the ground
@@ -231,8 +228,8 @@ Zones and towns each stream their own out by roster. A sweep that has no roster 
 is the one left — instead spares anything carrying `DUWS_garrisonUnit`, set on every man
 `DUWS_fnc_raiseGarrison` raises and on the turret crews `fnc_spawnWait` mans a zone's emplacements
 with. The flag rides the vehicle as well as the man, or deleting a transport takes its crew with it. Everything the zone raises on its next arrival scales by that fraction: the tier
-composition drops tokens at random (`fnc_zone_spawn_sizes.sqf`), the fortification builder thins its
-defence section and holds fewer buildings and fewer towers (`fnc_createopfortified.sqf`), and fewer
+composition drops tokens at random (`fnc_zone_spawn_sizes.sqf`), the fortification tokens thin their
+own defence section and hold fewer buildings and fewer towers, and fewer
 of the composition's statics are re-crewed (`fnc_spawnWait.sqf`). The mortar pair is the one
 exception — two men, and the zone's only indirect fire, so a fraction of it is none of it.
 
@@ -436,7 +433,7 @@ otherwise still pop its men in the moment they walked back.
 
 **It is units only — no static emplacements and no prefab**, because built defences are what make a
 zone an objective and a town must not compete with one. Tier IV reaches the zone benchmark
-(`fnc_createopfortified`: eight buildings at three men each) by occupying buildings instead.
+(the `fortbuildings` token: eight buildings at three men each) by occupying buildings instead.
 
 **Clearing destroys the purchase, not the ownership.** The tier files back down to I rather than to
 0 — the town is still enemy ground, and what was beaten is the commander's spending, not the enemy's
@@ -741,9 +738,9 @@ more usefully — **which of them cannot be moved alone.**
 
 **Two figures that are arithmetic rather than balance.** Tier IV at the largest radius lands on
 roughly twenty-one groups, which is where the radius-band table it replaced topped out — raising it
-raises the campaign's spawn ceiling, not just that zone. And the `buildings` token is `8 × 3` to match
-`fnc_createopfortified`'s benchmark; changing one without the other makes "tier IV reaches the zone
-benchmark" untrue.
+raises the campaign's spawn ceiling, not just that zone. And the town's `buildings` token is `8 × 3`
+to match the zone's `fortbuildings` row; changing one without the other makes "tier IV reaches the
+zone benchmark" untrue.
 
 **What has no lever yet.** Nothing prices any of the purchases, because the OPFOR commander does not
 exist — the town's tier and reinforcement hooks are free to call today, and the debug menu is their

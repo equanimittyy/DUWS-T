@@ -53,6 +53,8 @@ fnc_search_flag_group = compile preprocessFileLineNumbers "duws\server\misc\fnc_
 fnc_search_dropItems = compile preprocessFileLineNumbers "duws\server\misc\fnc_search_dropItems.sqf";
 fnc_search_claim = compile preprocessFileLineNumbers "duws\server\misc\fnc_search_claim.sqf";
 fnc_garrisonBuildings = compile preprocessFileLineNumbers "duws\server\misc\fnc_garrisonBuildings.sqf";
+fnc_garrisonMortar = compile preprocessFileLineNumbers "duws\server\misc\fnc_garrisonMortar.sqf";
+fnc_garrisonTowers = compile preprocessFileLineNumbers "duws\server\misc\fnc_garrisonTowers.sqf";
 fnc_fob_destroyed = compile preprocessFileLineNumbers "duws\server\misc\fnc_fob_destroyed.sqf";
 // Not broadcast: it creates a global marker, so exactly one machine may run it.
 fnc_baseRangeMarker = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseRangeMarker.sqf";
@@ -216,7 +218,6 @@ fnc_enterlocation = compile preprocessFileLineNumbers "duws\server\misc\fnc_ente
 // markers, so exactly one machine may run it.
 fnc_enemy_contact = compile preprocessFileLineNumbers "duws\server\misc\fnc_enemy_contact.sqf";
 fnc_spawnWait = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawnWait.sqf";
-fnc_createopfortified = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createopfortified.sqf";
 fnc_spawn_team = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawn_team.sqf";
 fnc_random_veh = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_random_veh.sqf";
 fnc_zone_reveal = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_reveal.sqf";

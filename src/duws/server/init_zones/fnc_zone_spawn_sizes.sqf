@@ -20,7 +20,8 @@ DUWS_spawnCategories = [
     ["infantry"],
     ["light"],
     ["armour"],
-    ["air"]
+    ["air"],
+    ["fortification"]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -54,26 +55,34 @@ DUWS_fnc_spawnCategory = {
 // air column, which is a balance change with nothing in the log to show for it.
 // Row order is the lookup order: the first ceiling a radius falls under wins, and the last row is a
 // band rather than an else so the table reads in one direction.
-// --DUWS-UNITCOMP BEGIN name="Zone radius multipliers" kind=rule row="ceiling, infantry, light, armour, air" fields="radius ceiling, infantry, light, armour, air"--
+// Fortification is one at every radius on purpose: a zone digs in once whatever ground it holds, and
+// the mortar pair, the tower posts and the occupied houses are placed against the centre rather than
+// spread over the perimeter. Multiplying them would put a second mortar section on a wide zone.
+// --DUWS-UNITCOMP BEGIN name="Zone radius multipliers" kind=rule row="ceiling, infantry, light, armour, air, fortification" fields="radius ceiling, infantry, light, armour, air, fortification"--
 DUWS_zoneRadiusMult = [
-    [101,  1, 1, 0, 0],
-    [251,  1, 1, 1, 0],
-    [501,  2, 1, 1, 0],
-    [1001, 2, 1, 1, 1],
-    [1501, 2, 1, 2, 1],
-    [1e11, 3, 1, 2, 1]
+    [101,  1, 1, 0, 0, 1],
+    [251,  1, 1, 1, 0, 1],
+    [501,  2, 1, 1, 0, 1],
+    [1001, 2, 1, 1, 1, 1],
+    [1501, 2, 1, 2, 1, 1],
+    [1e11, 3, 1, 2, 1, 1]
 ];
 // --DUWS-UNITCOMP END--
 
 // What a zone of each tier fields before its radius multiplies each category, indexed tier-1.
 // Absolute, not cumulative: a tier is the whole garrison, so what a tier IV zone is can be read off
 // one row instead of assembled from four.
+//
+// The four fortification tokens sit on every row because the pass they came from ran on every zone
+// whatever its tier -- it was a second, separate spawner that no tier table could see, which is why
+// a tier I zone and a tier IV zone differed by far less than their rows suggested. What each tier
+// should actually buy is now one table's worth of editing rather than a second file.
 // --DUWS-UNITCOMP BEGIN name="Zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_zoneSpawnTiers = [
-    ["patrol", "team", "car"],
-    ["patrol", "team", "wpteam", "car", "apc"],
-    ["sniper", "patrol", "team", "wpteam", "car", "apc"],
-    ["sniper", "patrol", "patrol", "team", "wpteam", "car", "tank", "attackheli"]
+    ["patrol", "team", "car", "fortified", "mortar", "fortbuildings", "towers"],
+    ["patrol", "team", "wpteam", "car", "apc", "fortified", "mortar", "fortbuildings", "towers"],
+    ["sniper", "patrol", "team", "wpteam", "car", "apc", "fortified", "mortar", "fortbuildings", "towers"],
+    ["sniper", "patrol", "patrol", "team", "wpteam", "car", "tank", "attackheli", "fortified", "mortar", "fortbuildings", "towers"]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -161,36 +170,52 @@ DUWS_fnc_spawnDiff = {
 // after. Nothing reads a zone's roster meaningfully while its band is still placing -- the capture
 // test refuses on the missing peak, and the peak is taken after this returns.
 DUWS_fnc_raiseGarrison = {
-    params ["_tokens", "_pos", "_radius"];
+    params ["_tokens", "_pos", "_radius", ["_strength", 1]];
     private _grps = [];
     {
+        // Attrition reaches a fortification token here rather than by dropping it from the
+        // composition. Those tokens are exempt from the composition thin -- losing the mortar pair
+        // or the whole tower ring to a coin flip is a different zone, not a weaker one -- so each
+        // wears down inside itself instead: fewer houses held, fewer towers manned, fewer men in the
+        // dug-in section. Everything else was already thinned before it reached this list.
+        private _fortified = ([_x] call DUWS_fnc_spawnCategory) == "fortification";
+        private _tokenStrength = [1, _strength] select _fortified;
+
         private _special = [_x] call DUWS_fnc_specialRow;
-        private _grp = if !(_special isEqualTo []) then {
-            // fnc_garrisonBuildings carries its own search and loot passes, unlike everything below:
-            // flagging these men again would roll a second time against the same bodies and quietly
-            // raise the rate this garrison pays out at.
-            [_pos, _radius, _special select 3, _special select 4] call fnc_garrisonBuildings
+        private _raised = if !(_special isEqualTo []) then {
+            // Each placer carries its own search and loot passes, unlike the teams below: flagging
+            // these men again would roll a second time against the same bodies and quietly raise the
+            // rate this garrison pays out at.
+            private _fn = missionNamespace getVariable [_special select 3, {grpNull}];
+            ([_pos, _radius] + (_special select 4) + [_tokenStrength]) call _fn
         } else {
-            private _g = [_x, _pos, _radius] call DUWS_fnc_zoneSpawnOne;
+            private _g = [_x, _pos, _radius, _tokenStrength] call DUWS_fnc_zoneSpawnOne;
             // Flagged where the group is raised, so the two cannot drift: every spawner here already
             // carried the loot pass and none of them carried this one, which once left the 50 %
             // garrison rate firing on side-mission garrisons and nowhere else.
             if (!isNull _g) then { [_g, "garrison"] call fnc_search_flag_group };
             _g
         };
-        if (!isNull _grp) then {
-            // Marked as somebody's garrison. A zone and a town each stream their own out by roster,
-            // which is the rule -- but a side mission's teardown deletes by radius and has no way to
-            // tell whose men it is standing among, and a mission that lands on a town disc used to
-            // take that town's garrison with it. The town then measured its survivors against its
-            // baseline, recorded a mauling nobody inflicted, and came back thinned every visit
-            // after. The vehicle carries the flag too, or deleting it takes its crew regardless.
-            {
-                _x setVariable ["DUWS_garrisonUnit", true];
-                if (vehicle _x != _x) then { (vehicle _x) setVariable ["DUWS_garrisonUnit", true] };
-            } forEach units _grp;
-            _grps pushBack _grp;
-        };
+        // A placer that mans a dozen separate posts hands back a group each; everything else hands
+        // back one.
+        private _made = if (_raised isEqualType []) then { _raised } else { [_raised] };
+        {
+            private _grp = _x;
+            if (!isNull _grp) then {
+                // Marked as somebody's garrison. A zone and a town each stream their own out by
+                // roster, which is the rule -- but a side mission's teardown deletes by radius and
+                // has no way to tell whose men it is standing among, and a mission that lands on a
+                // town disc used to take that town's garrison with it. The town then measured its
+                // survivors against its baseline, recorded a mauling nobody inflicted, and came back
+                // thinned every visit after. The vehicle carries the flag too, or deleting it takes
+                // its crew regardless.
+                {
+                    _x setVariable ["DUWS_garrisonUnit", true];
+                    if (vehicle _x != _x) then { (vehicle _x) setVariable ["DUWS_garrisonUnit", true] };
+                } forEach units _grp;
+                _grps pushBack _grp;
+            };
+        } forEach _made;
         if (_forEachIndex < (count _tokens) - 1) then { sleep 5 };
     } forEach _tokens;
     _grps
@@ -213,8 +238,9 @@ DUWS_fnc_raiseGarrison = {
 //   route  a fixed circuit of three search-and-destroy waypoints, one of them at a building, then
 //          CYCLE. Combat mode YELLOW, so it engages what it finds without abandoning the circuit
 //   wander bis_fnc_taskPatrol's own random patrol around the centre
-//   none   nothing: the caller places the group and gives it orders itself, as the fortification
-//          garrison does with taskDefend after scattering it on a ring
+//   digin  scattered on a ring around the centre, then taskDefend over the same ground. A defence
+//          stacked on the centre is one the player can fight from a single angle
+//   none   nothing: the caller places the group and gives it orders itself
 // category -- which radius multiplier scales it. Held here rather than in the category map below,
 // so adding a team is one row rather than two edits that can disagree.
 // --DUWS-UNITCOMP BEGIN name="OPFOR teams" kind=team row="team, behaviour, category, core, added once, leader" fields="team, behaviour, category, core (multiplied), added once, leader" prefix=opfor_--
@@ -223,7 +249,7 @@ DUWS_teamRosters = [
     ["team", "route", "infantry", ["opfor_AR_SOLDIER_X", "opfor_GL_SOLDIER_X"], ["opfor_MARK_SOLDIER_X", "opfor_LAT_SOLDIER_X"], "opfor_TL_SOLDIER_X"],
     ["sniper", "route", "infantry", ["opfor_SNIPER_SOLDIER_X", "opfor_SNIPER_SOLDIER_X"], [], ""],
     ["wpteam", "wander", "infantry", ["opfor_SOLDIER_X"], ["opfor_AA_SOLDIER_X", "opfor_AT_SOLDIER_X", "opfor_SPECOPS_MEDIC_X"], "opfor_TL_SOLDIER_X"],
-    ["fortified", "none", "infantry", ["opfor_AR_SOLDIER_X", "opfor_AT_SOLDIER_X", "opfor_GL_SOLDIER_X", "opfor_SPECOPS_MEDIC_X"], [], "opfor_SL_SOLDIER_X"]
+    ["fortified", "digin", "fortification", ["opfor_AR_SOLDIER_X", "opfor_AT_SOLDIER_X", "opfor_GL_SOLDIER_X", "opfor_SPECOPS_MEDIC_X"], [], "opfor_SL_SOLDIER_X"]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -276,18 +302,28 @@ DUWS_fnc_vehicleRow = {
 
 // Tokens that are neither a team nor a vehicle: men placed by a rule rather than by a roster. The
 // parameters live on the row for the same reason a team's men do -- they were arguments hardcoded
-// at the one call site, where a second caller wanting different ones had nowhere to say so.
+// at one call site, where a second caller wanting different ones had nowhere to say so.
 //
 // Column 2 is the category in all three tables, which is what lets DUWS_fnc_spawnCategory ask one
-// question of whichever row claims the token.
+// question of whichever row claims the token. Column 3 names the placer, and column 4 is whatever
+// that placer's own parameters are; every placer is called as [pos, radius] + params + [strength].
 //
-// buildings -- men spread through the enterable houses around the centre. Fewer buildings held
-//              rather than fewer men in each when a garrison is thinned: three to a house is what
-//              makes clearing one cost something, and a house with one man in it is a house the
-//              player walks through.
-// --DUWS-UNITCOMP BEGIN name="OPFOR specials" kind=team row="token, places, category, buildings, men each" fields="token, places, category, buildings, men per building"--
+// buildings     -- houses around the centre, the shape a side mission garrisons with.
+// fortbuildings -- the same pass with a zone's parameters: it wants five usable building positions
+//                  rather than two, stands its men UP rather than AUTO, and takes the buildings
+//                  nearest the centre rather than a random spread, so a zone is held from its
+//                  middle. Its own row rather than arguments on the one above, because a
+//                  composition names what it fields and never how to field it.
+// mortar        -- the zone's only indirect fire, and exempt from attrition on its own row: the tube
+//                  and its ammunition are one backpack each on two men, so a fraction of a pair
+//                  takes the tube away entirely. That changes what the zone is, not how strong.
+// towers        -- the guard towers and bunkers already standing on the ground, manned in place.
+// --DUWS-UNITCOMP BEGIN name="OPFOR specials" kind=team row="token, places, category, placer, params" fields="token, places, category, placer, parameters"--
 DUWS_spawnSpecials = [
-    ["buildings", "houses", "infantry", 8, 3]
+    ["buildings",     "houses", "infantry",      "fnc_garrisonBuildings", [8, 3, 2, "AUTO", false]],
+    ["fortbuildings", "houses", "fortification", "fnc_garrisonBuildings", [8, 3, 5, "UP", true]],
+    ["mortar",        "tube",   "fortification", "fnc_garrisonMortar",    []],
+    ["towers",        "posts",  "fortification", "fnc_garrisonTowers",    [300]]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -330,9 +366,9 @@ DUWS_fnc_teamRoster = {
 // A token whose class resolves to "" is refused rather than spawned. The composition was filtered
 // before it got here, so this is a caller that skipped the filter, and spawning "" is a nil vehicle.
 DUWS_fnc_zoneSpawnOne = {
-    params ["_token", "_pos", "_size"];
+    params ["_token", "_pos", "_size", ["_strength", 1]];
     if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith {
-        [_token, _pos, _size] call fnc_spawn_team
+        [_token, _pos, _size, _strength] call fnc_spawn_team
     };
     private _class = [_token] call DUWS_fnc_tokenClass;
     if (_class == "") exitWith {
@@ -357,14 +393,17 @@ fnc_zone_spawn = {
     // The composition is what the zone fields intact; it deploys at whatever its garrison was ground
     // down to. Without this, breaking a garrison and leaving buys the player nothing -- the same
     // fight is waiting at full strength when they come back.
-    _spawns = [_spawns, [_zoneKey] call fnc_zone_strength] call fnc_zone_thin;
+    //
+    // The fortification tokens are held out of the thin and carry the fraction into the raise
+    // instead. Dropping whole entries is the right shape for a patrol -- one fewer patrol is a
+    // weaker zone -- and the wrong one for the dug-in half, where losing the mortar pair or the
+    // whole tower ring to a coin flip is a different zone rather than a thinner one.
+    private _strength = [_zoneKey] call fnc_zone_strength;
+    private _dug = _spawns select { ([_x] call DUWS_fnc_spawnCategory) == "fortification" };
+    private _mobile = _spawns select { ([_x] call DUWS_fnc_spawnCategory) != "fortification" };
+    _spawns = ([_mobile, _strength] call fnc_zone_thin) + _dug;
 
-    { _roster append (units _x) } forEach ([_spawns, _spawnPos, _size] call DUWS_fnc_raiseGarrison);
-
-    // Settled before the peak is taken. fnc_createopfortified appends to the same roster from its
-    // own thread and is normally long finished by here, but nothing enforces that, and a peak taken
-    // before its crews are in undercounts the garrison -- which makes the zone quietly cheaper.
-    sleep 15;
+    { _roster append (units _x) } forEach ([_spawns, _spawnPos, _size, _strength] call DUWS_fnc_raiseGarrison);
 
     // A band still placing when its own zone packs up must not publish anything: the sweep has
     // already deleted what it would be describing, and the capture test reads a stale peak beside

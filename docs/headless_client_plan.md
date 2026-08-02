@@ -75,8 +75,8 @@ The OPFOR half of this table is empty on purpose: the enemy patrol, assault and 
 deleted, so until an OPFOR commander replaces them nothing mobile spawns on that side. Whatever it
 turns out to spawn is what this plan will hand off, and it is the reason the plan is worth keeping.
 
-Zone garrisons — `server/init_zones/fnc_spawn_team.sqf` and `fnc_createopfortified.sqf` — stay on
-the server. See the trade-off below.
+Zone garrisons — `server/init_zones/fnc_spawn_team.sqf` and the garrison placers in
+`server/misc/fnc_garrison*.sqf` — stay on the server. See the trade-off below.
 
 ### Routing waypoint calls
 
