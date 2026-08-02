@@ -36,10 +36,7 @@ DUWS_fnc_zoneManStatics = {
     // as a spawned one, so he joins the roster rather than holding the objective off the books:
     // unrostered, he denies capture through fnc_opfor_count_at while counting toward neither the
     // peak nor the break line, so killing him is progress the zone never registers.
-    {
-        { _x setVariable ["DUWS_garrisonUnit", true] } forEach crew _x;
-        _roster append (crew _x);
-    } forEach (_statics select {count crew _x > 0});
+    { _roster append (crew _x) } forEach (_statics select {count crew _x > 0});
 
     private _guns = _statics select {count crew _x == 0};
     if (count _guns == 0) exitWith {};
@@ -58,9 +55,8 @@ DUWS_fnc_zoneManStatics = {
         private _unit = (units _grp) param [_forEachIndex, objNull];
         if (!isNull _unit) then { _unit moveInGunner _x };
     } forEach _guns;
-    // Flagged like everything DUWS_fnc_raiseGarrison raises: these are the zone's garrison too, and
-    // a blunt radius sweep has no other way to know it.
-    { _x setVariable ["DUWS_garrisonUnit", true] } forEach units _grp;
+    // On the roster like everything DUWS_fnc_raiseGarrison raises: these are the zone's garrison
+    // too, and a blunt radius sweep has no other way to know it.
     _roster append (units _grp);
     // Searchable on the same terms as the rest of the garrison. A gunner is the one defender a
     // player is certain to have to kill, so leaving him unflagged made the objective itself the

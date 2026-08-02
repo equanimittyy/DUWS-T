@@ -73,6 +73,25 @@ private _zombieClasses = ["zombie_runner", "zombie_bolter", "zombie_walker"];
 if (_close == false) then {
     _missObj = _targetpos nearObjects (_radius * 1.2);
 
+    // Everything any site currently owns, built once for this teardown. A side mission lands where
+    // it lands, and one drawn on a town disc used to delete that town's garrison on the way out --
+    // the town then measured its survivors against its baseline, recorded a mauling nobody
+    // inflicted, and returned thinned every visit after.
+    //
+    // Read from the site store rather than from a flag stamped on each unit. The flag was a second
+    // record of the same fact, kept in step by hand at every spawner, and a spawner that forgot it
+    // failed silently a campaign later. Vehicles ride along with their crew: deleting a transport
+    // takes its occupants regardless of who owns them.
+    private _siteOwned = [];
+    {
+        private _key = _x;
+        {
+            private _r = [_key, _x get "kind"] call fnc_site_roster;
+            _siteOwned append _r;
+            { if (vehicle _x != _x) then { _siteOwned pushBackUnique (vehicle _x) } } forEach _r;
+        } forEach (DUWS_occupants getOrDefault [_key, []]);
+    } forEach DUWS_sites;
+
     // 构建受保护对象列表（玩家自身及组员、载具）
     private _protected = [];
     {
@@ -99,14 +118,11 @@ if (_close == false) then {
         // mission drawn near a player FOB or the HQ puts their buildings inside it -- without
         // this the teardown would take a standing composition apart on its way past.
         //
-        // DUWS_garrisonUnit is the same rule for men rather than buildings. A zone and a town each
-        // stream their own garrison out by roster; a mission lands where it lands, and one drawn on
-        // a town disc used to delete that town's garrison on the way out. The town then measured its
-        // survivors against its baseline, recorded a mauling nobody inflicted, and returned thinned
-        // every visit after. A mission never raises a flagged unit, so this needs no owner test.
+        // The site set above is the same rule for men rather than buildings, and a mission never
+        // raises a unit any site owns, so this needs no owner test.
         if (!(_x in _protected)
             && !(_x getVariable ["persistent", false])
-            && !(_x getVariable ["DUWS_garrisonUnit", false])
+            && !(_x in _siteOwned)
             && !_sparedSide
             && !(typeOf _x in _zombieClasses)) then {
             deleteVehicleCrew _x;

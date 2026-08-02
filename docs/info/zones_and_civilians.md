@@ -93,7 +93,7 @@ trigger while any WEST unit is inside the zone radius:
 
 **The strength test counts by ownership, not by position.** Every unit a zone raises is appended to
 `DUWS_zoneUnits_<key>` — the spawn band appends what every token it raises hands back, and
-`fnc_spawnWait` appends the turret crews it re-mans the composition with. `fnc_spawnWait` empties the roster when it deploys the
+the zone's emplacement occupant appends the turret crews it re-mans the composition with. The raise worker empties the roster when it deploys the
 composition, one act with the generation bump, so it describes the garrison now on the ground rather
 than every garrison the zone has ever had. The clear has to happen there rather than where the band
 is raised, because the turret crews are placed first and a later clear would drop them.
@@ -213,7 +213,7 @@ radius-band table topped out. Towns are not multiplied by radius at all — see
 
 ### Attrition carries between visits
 
-A zone remembers what was left of its garrison when it streamed out. `fnc_spawnWait` calls
+A zone remembers what was left of its garrison when it streamed out. The zone tick calls
 `fnc_zone_strength_record` on the despawn exit — before the peak is cleared and before the sweep
 deletes the survivors it counts — and that stores `survivors / original` in tenths, rounded up and
 floored at `0.3`.
@@ -225,12 +225,12 @@ its survivors against its baseline, records a mauling that never happened, and c
 every visit after.
 
 Zones and towns each stream their own out by roster. A sweep that has no roster — `fnc_mission_cleanup`
-is the one left — instead spares anything carrying `DUWS_garrisonUnit`, set on every man
-`DUWS_fnc_raiseGarrison` raises and on the turret crews `fnc_spawnWait` mans a zone's emplacements
-with. The flag rides the vehicle as well as the man, or deleting a transport takes its crew with it. Everything the zone raises on its next arrival scales by that fraction: the tier
+is the one left — instead spares anything on a site roster, which is every man `DUWS_fnc_raiseGarrison`
+raises and every turret crew the emplacement occupant mans. Vehicles ride along with their crew, or
+deleting a transport takes its occupants with it. Everything the zone raises on its next arrival scales by that fraction: the tier
 composition drops tokens at random (`fnc_zone_spawn_sizes.sqf`), the fortification tokens thin their
 own defence section and hold fewer buildings and fewer towers, and fewer
-of the composition's statics are re-crewed (`fnc_spawnWait.sqf`). The mortar pair is the one
+of the composition's statics are re-crewed. The mortar pair is the one
 exception — two men, and the zone's only indirect fire, so a fraction of it is none of it.
 
 **Attrition and tier are separate axes.** Tier chooses the list, attrition thins whatever that list
@@ -283,13 +283,13 @@ the teardown record does.
 Streaming deletes a zone's units after 120 s with no BLUFOR in reach, which would leave the garrison
 count at zero. Three things keep that from being read as a garrison wiped:
 
-- `fnc_spawnWait` clears the peak on **both** its exits, before the sweep runs. No peak means no
+- the zone tick clears the peak on **both** its exits, before the sweep runs. No peak means no
   capture, so an empty stowed zone is never takeable — nor is one still mid-spawn.
 - The condition is `this && {...}`, and `this` is `WEST PRESENT`. The expensive half never runs
   unless BLUFOR are inside the zone, and their presence is also what stops the despawn clock.
 - A spawn band can outlive its own zone: a large band takes longer to place than the 120 s grace.
   Each spawn cycle carries a generation number, bumped by `fnc_createzone` when it starts and by
-  `fnc_spawnWait` when it tears down, and a band whose generation is stale publishes nothing —
+  the zone tick when it tears down, and the raise flag stops a second cycle starting at all —
   otherwise it would write a fresh peak seconds after the sweep deleted what it counted.
 
 **This replaced `WEST SEIZED`.** SEIZED requires the whole trigger area to be empty of OPFOR, which
@@ -515,7 +515,7 @@ runs, so there is no one to watch them vanish.
 
 **Both streams start latched, zones included.** The arrival test fires on anyone inside the radius
 plus the buffer and cannot tell somebody walking up from somebody already standing in the middle — so
-a thread whose first cycle finds a player there would raise the garrison around them. `fnc_spawnWait`
+an occupant whose first pass finds a player there would raise the garrison around them. The zone
 and `fnc_civ_garrison` both begin held until their ground has been seen empty once, which costs a
 single poll for the ordinary zone or town nobody is near and is the whole guard for the case that
 matters: a campaign generated under a player, or a town seeded into the band at start with one
@@ -525,7 +525,7 @@ A stream-out needs no latch, because it only happens once the player has left. *
 and it is the case most likely to be mistaken for safe: `EAST SEIZED` promises only that BLUFOR are
 outside the *trigger* radius, while the arrival test reaches 400 m further. A player who has backed
 off the objective but is still on the approach counts as near by that reckoning, and so does anyone
-who walks back in during the ten seconds before the next poll — so `fnc_spawnWait` re-latches when the
+who walks back in during the ten seconds before the next poll — so the zone tick re-latches when the
 zone returns to OPFOR hands and holds until the whole ring is empty, exactly as at campaign start.
 
 The town side latches on the same flag whenever a hold is armed, which covers both the crossing and
@@ -710,8 +710,8 @@ more usefully — **which of them cannot be moved alone.**
 | `REINFORCE_STEP` `0.3` | `fnc_civ_state_init` | what one reinforcement buys |
 | `CLEAR_REP` `5` | `fnc_civ_garrison` | what one clear repays |
 | `OPFOR_BAND` `-10` | `fnc_civ_garrison` | where a town changes sides |
-| `DESPAWN_GRACE` `120` / `_despawn_timer` `120` | `fnc_civ_garrison` / `fnc_spawnWait` | how long empty ground waits before streaming out |
-| `_AI_buffer` `400` | `fnc_spawnWait` | how far out arrival is noticed (towns hardcode the same figure) |
+| `grace` `120` | the occupant record, for both zones and town garrisons | how long empty ground waits before streaming out |
+| `buffer` `400` | the occupant record | how far out arrival is noticed (a town's crowd uses 200) |
 | `CENTRE_RADIUS` `50` | `fnc_zone_capture_ready` | how close holding the objective means |
 | Tier roll weights | `fnc_zone_state_init` | how often a zone is soft |
 | The composition tables | `fnc_zone_spawn_sizes`, `fnc_civ_state_init` | what a tier *is*, editable through the TUI |
@@ -722,7 +722,7 @@ more usefully — **which of them cannot be moved alone.**
   town clear, the zone retake, and implicitly by every consumer that rounds its own share up. Moving
   the clamp without the two writers leaves them setting a value the clamp then overrides, and the
   reverse leaves the writers unable to reach the floor they name.
-- **`BREAK_FRACTION` `0.2` sits in three files** — `fnc_civ_garrison`, `fnc_spawnWait` and
+- **`BREAK_FRACTION` `0.2` sits in three files** — `fnc_civ_garrison`, `fnc_zone_stream_init` and
   `fnc_zone_capture_ready` — because it is one rule the player learns once. It is also *load-bearing
   against the floor*: a garrison at `0.3` sits one tenth above beaten, so a floor at or below the
   break line would make a redeployed garrison instantly capturable and a zone with a zero peak
@@ -789,7 +789,7 @@ It will *not* need the holds. Those exist because OPFOR arrive on ground they al
 BLUFOR garrison never arrives — it is built, from nothing, at the player's expense
 ([§BLUFOR inherits nothing](#blufor-inherits-nothing)). There is nothing to defer.
 
-**FOBs are a special case, and fast travel is why.** `fnc_FOBgarrisonSleep` freezes its garrison
+**Bases are a special case, and fast travel is why.** The `freeze` disposal mode freezes their garrisons
 rather than deleting it, and the usual reason given — that rebuilding would hand back every soldier
 who had been killed, a free version of the redeploy the player would otherwise pay for — is only half
 of it. The other half is that a FOB is a *fast-travel destination*: a player can be standing in one
@@ -823,7 +823,7 @@ exists.
 
 ### A town streams like a zone
 
-Per town, `fnc_civ_handler.sqf` is the enemy zone gate from `fnc_spawnWait.sqf`: a town fills once it
+Per town, `fnc_civ_handler.sqf` is the enemy zone gate: a town fills once it
 has been occupied on two consecutive polls, and everything tagged `civ_locIndex` is deleted once the
 grace period since the last sighting expires. The grace restarts on every sighting, so leaving starts
 the clock rather than how long you stayed, and the confirmation is what stops a helicopter crossing the
@@ -866,7 +866,7 @@ query with crew resolution that cannot be shared across centres. What the single
 is *gate* it. One pass builds the BLUFOR positions, and a town with none of them inside its reach
 cannot pass the helper, so it is never asked. The helper still decides every arrival, which is the
 point of sharing it with the zone gate at all. This is not the `O(zones × all units)` shape
-`fnc_spawnWait.sqf:20-22` records as deliberately removed: the list is built once a tick and holds
+the streaming loop recorded as deliberately removed: the list is built once a tick and holds
 BLUFOR only, so what each town is tested against is the friendly force, not every unit in the mission.
 
 The garrison's raise cannot run in that thread — it confirms over five seconds, then waits on the
