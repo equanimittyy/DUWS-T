@@ -84,19 +84,36 @@ if (isNil "duws_gamemode") then { duws_gamemode = "duws"; };
 // once here rather than per click, and read by the mode row below.
 duws_zombie_factions_found = count ([true] call fnc_getAllFactionsClean) > 0;
 
+// Created first of the mode controls: ctrlCreate order is draw order, so a panel made after the
+// three it sits behind would cover them. The green is the one the other startup screens' backgrounds
+// use (shared/includes/enviro_menu.hpp), so setup reads as one screen rather than two.
+// It runs wider than the controls on it, out past both screen edges, because how far past 0 and 1
+// the screen actually reaches is a safezone question the layout cannot answer.
+_modePanel = _display ctrlCreate ["RscText", 1007];
+_modePanel ctrlSetPosition [-0.25, 0, 1.5, 0.13];
+_modePanel ctrlSetBackgroundColor [0.2, 0.4, 0.2, 1];
+_modePanel ctrlCommit 0;
+
 _modeLabel = _display ctrlCreate ["RscText", 1005];
-_modeLabel ctrlSetPosition [0.2, 0.02, 0.6, 0.04];
+_modeLabel ctrlSetPosition [0.02, 0.005, 0.96, 0.035];
 _modeLabel ctrlSetText localize "STR_DUWS_T_gamemode";
 _modeLabel ctrlCommit 0;
 
 _modeDesc = _display ctrlCreate ["RscText", 1006];
-_modeDesc ctrlSetPosition [0.2, 0.105, 0.6, 0.04];
+_modeDesc ctrlSetPosition [0.02, 0.09, 0.96, 0.035];
 _modeDesc ctrlSetTextColor [1,1,1,0.75];
 _modeDesc ctrlCommit 0;
 
 _dropdownMode = _display ctrlCreate ["RscCombo", 1004];
-_dropdownMode ctrlSetPosition [0.2, 0.06, 0.6, 0.04];
+_dropdownMode ctrlSetPosition [0.02, 0.045, 0.96, 0.04];
 _dropdownMode ctrlCommit 0;
+
+// The mode is answered before the factions and narrows them; the rule is what says so, since the
+// two blocks otherwise read as one row of three dropdowns.
+_modeDivider = _display ctrlCreate ["RscText", 1008];
+_modeDivider ctrlSetPosition [-0.25, 0.135, 1.5, 0.005];
+_modeDivider ctrlSetBackgroundColor [1, 1, 1, 0.5];
+_modeDivider ctrlCommit 0;
 
 {
 	_itemMode = _dropdownMode lbAdd localize (_x select 1);

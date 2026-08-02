@@ -12,8 +12,11 @@
 // globals are built at runtime and no linter sees them.
 params [["_kind", "UNIT"]];
 
+// Filtered to the same rule the numbered walk below enforces, and for the same reason: the array
+// is written by a faction file this mission does not own, and callers read `select 2` off every row
+// they are handed. A short row would take down the whole menu build rather than cost one entry.
 private _list = missionNamespace getVariable [format ["blufor_RQST_%1S", _kind], []];
-if !(_list isEqualTo []) exitWith { _list };
+if !(_list isEqualTo []) exitWith { _list select { _x isEqualType [] && {count _x >= 3} } };
 
 // Same stopping rule the numbered menus always used: the first unset, "empty" or zero-cost slot
 // ends the list, so a faction may leave gaps at the end but not in the middle. The walk runs to 99

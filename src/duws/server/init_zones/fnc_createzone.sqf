@@ -44,11 +44,14 @@ zone_spawn_array = zone_spawn_array + [[_zone_num,false,false]];
 ["INFO", "ZONES", format ["zone %1 registered at %2, worth %3, size %4, fortified=%5, prefab=%6",
 	_zone_num, _zonePos, _points, _size, _fortified, _prefab]] call fnc_log;
 
-// CREATE MARKER (ICON)
+// CREATE MARKER (LABEL)
+// An area marker carrying nothing but text. The engine draws an icon marker's text to the right of
+// its icon, which put the zone's name off to one side of the ground it names; an area marker centres
+// its text on the position instead. Nothing is lost by the switch -- the size below is an icon
+// scale, so at [0,0] the marker type this used to carry drew nothing either.
 _markername = format["%1%2",round(_zonePos select 0),round(_zonePos select 1)]; // Define marker name
 _markerstr = createMarker [str(_markername),_zonePos];
-_markerstr setMarkerShape "ICON";
-str(_markername) setMarkerType "o_inf";
+_markerstr setMarkerShape "ELLIPSE";
 str(_markername) setMarkerColor "ColorRed";
 str(_markername) setMarkerText _name;
 str(_markername) setMarkerSize [0, 0];

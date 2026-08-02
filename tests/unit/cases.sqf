@@ -253,6 +253,34 @@ private _shrunk = [["coins", 2], ["document", 1]];
 // A zero-weight row is how a source opts out of a kind; it must never be selectable.
 ["drawKind: a zero-weight row is skipped", ([[["intel", 0], ["pool", 1]], 0] call fnc_search_drawKind), "pool"] call fnc_assertEq;
 
+// --- fnc_faction_rqst_list: the rows a faction actually filled ---
+// The array comes from a faction file this mission does not own, and every caller reads `select 2`
+// off each row it is handed. A short row therefore has to be dropped here rather than reach them.
+blufor_RQST_UNITS = [["B_Soldier_F", "Rifleman", 2], ["B_medic_F", "Medic", 3]];
+["rqstList: a well-formed table passes through whole",
+    (["UNIT"] call fnc_faction_rqst_list),
+    [["B_Soldier_F", "Rifleman", 2], ["B_medic_F", "Medic", 3]]] call fnc_assertEq;
+
+blufor_RQST_UNITS = [["B_Soldier_F", "Rifleman", 2], ["B_medic_F", "Medic"], ["B_engineer_F", "Engineer", 4]];
+["rqstList: a row with no cost is dropped, not carried into the menu",
+    (["UNIT"] call fnc_faction_rqst_list),
+    [["B_Soldier_F", "Rifleman", 2], ["B_engineer_F", "Engineer", 4]]] call fnc_assertEq;
+
+blufor_RQST_UNITS = [["B_Soldier_F", "Rifleman", 2], "B_medic_F"];
+["rqstList: a row that is not a row at all is dropped",
+    (["UNIT"] call fnc_faction_rqst_list),
+    [["B_Soldier_F", "Rifleman", 2]]] call fnc_assertEq;
+
+// With no array global the numbered walk answers instead, which is what carries an unconverted
+// third-party faction file. Slot 02 ends it, so slot 03 must not appear.
+blufor_RQST_UNITS = [];
+blufor_RQST_UNIT_01_X = ["B_Soldier_F", "Rifleman", 2];
+blufor_RQST_UNIT_02_X = ["empty", "", 0];
+blufor_RQST_UNIT_03_X = ["B_engineer_F", "Engineer", 4];
+["rqstList: the numbered fallback stops at the padding",
+    (["UNIT"] call fnc_faction_rqst_list),
+    [["B_Soldier_F", "Rifleman", 2]]] call fnc_assertEq;
+
 // --- fnc_opforRoles: the spawnable role list a faction table actually resolved ---
 // Last block in the file: it captures fnc_log rather than stubbing it away, because the warning
 // is what makes a faction table that resolved nothing visible at all, and it leaves fnc_log

@@ -26,6 +26,24 @@ The markers stay so the next round has somewhere to land. An empty block means t
 fully triaged.
 
 _BEGIN-USER_
+Currently testing:
+- Grind a garrison to a fifth and let it break: `bounding back from`, then `broke contact` with a card naming the zone rather than a grid, and `opfor_withdrawal` AP
+- Read a zone's tier at generation and again at deploy: `is tier N, fielding` then `deployed N men at tier`; a rebuild keeps the tier it had
+- Lose a captured zone back to OPFOR: strength floored to 0.3 rather than refreshed, and the readout says Mobilising until the first man stands
+- Stand on a zone and step off mid-count: a flat 30 s every time, restarting on the step off
+- Clear a town below -10: `cleared at tier N; rep R + 5, garrison broken to 0.3 and regrouping`, and both purchase sinks refused for the 3 h
+- Visit several towns on a 40-zone campaign: every town garrisons, not only the first — one poller replaced a thread apiece
+- Click zones and towns on the map: a roman tier on both, and on a zone the composition kind beside the callsign over a twenty-segment strength bar, refreshed on opening the map
+- Click through the request menu: nothing clipped, only Squad Manager / FOB Manager / Special Operatives close it, costed entries orange
+- Start a campaign in each game mode: zombie factions filtered out of the other picks, and Zombies with neither Ravage nor WBK falling back to DUWS
+- Run side missions: each briefing opens with its category, English only
+- Call JDAM or artillery onto structures: the inner ring stays destroyed rather than being healed back by the outer pass
+- Carry a downed pilot and let the auto-drop fire: no stale load action left for the next carry
+- Grep the boot for `[DUWS][ERROR]` and `compiled EMPTY`: the dead-code sweep, the fortification ring, the night flare and the multimeter probe all came out
+- Ignore the standby task forces for a few hours: at most one stands by
+- Watch for `stow <key>: refused`: something unmodelled crewed a static
+- Play three hours or more and watch frame time: the waypoint, litter, aim-skill, Zeus and resupply fixes have no other symptom
+- Try a disguise: the gear scan runs the whole session again, so the tables keep filling
 
 _END-USER_
 
@@ -77,8 +95,8 @@ since the withdrawal is what clears the objective and the two are felt together.
 Five separate faucets became one two-roll path, and the rewrite deleted seven functions, so a
 failure here is more likely to be something missing than something wrong.
 
-- [ ] Clear a garrison and search bodies. Half of them carry the action; a garrison offering none
-      at all is the flag not reaching them rather than a cold run
+- [ ] Clear a garrison and search bodies. Half of them carry the action, the static crews among
+      them; a garrison offering none at all is the flag not reaching them rather than a cold run
 - [ ] Play far enough to exhaust the intel pool, then search a flagged body. It must speak an
       outcome. Silence means the payout re-draw is not dropping the dry kind
 - [ ] On a dedicated server with two clients, have one player search a body and send the other over
@@ -270,6 +288,30 @@ connected player will ever be shown.
 - [ ] Join a dedicated server as the only player, taking any slot but `player1`. A campaign that
       never generates means a full server can be held up today by one empty slot, and that the fork
       screen's timeout has to key on no *game master* connected rather than on no player connected
+
+## A hosted session froze hard, and nothing in the log says why
+
+A LAN host stopped responding for the rest of the session and wrote two `FROZEN` minidumps beside
+its `.rpt`. It is a stalled main thread rather than a slow one: `No alive in N ms` climbs from 10 s
+to 92 s and the log ends there. What makes it hard to place is that **no scripting error is logged
+at the freeze at all** — the last line before it is `Setting invalid pitch`, and the nearest error
+is forty seconds earlier, in the request-menu fill, which the engine caught and carried on from.
+
+The play-test note names two candidates and cannot separate them: escaping out of the side-mission
+map, and clicking one of the command buttons that came up blank. The second is not reachable — a
+command slot with nothing written into it exits on its own bounds check — so a repeat answers
+whether the side-mission map was ever involved.
+
+That is the path with a mechanism to look at, because `fnc_stratmap.sqf` holds the game under
+`startLoadingScreen` while a spawned search runs, and only its own 60 s failsafe takes the screen
+down again. That accounts for a stall, but not for one lasting 92 s.
+
+- [ ] Open Side Missions, let the map come up, and press Escape out of it. A repeat means the
+      strategic map owns it; no repeat over several attempts means it belonged to the half-built
+      request menu and went with it
+- [ ] If it repeats, log either side of `startLoadingScreen` and `endLoadingScreen` in
+      `client/missions/fnc_stratmap.sqf`. A freeze that spans the `endLoadingScreen` line is not
+      the loading screen, and the search below it is not the suspect either
 
 ## Open defects
 

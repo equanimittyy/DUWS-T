@@ -37,7 +37,7 @@ class ressourceheader
             text = "$STR_DUWS_T_ii4q52bc";
             x = 0 * GUI_GRID_W + GUI_GRID_X;
             y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 24.5 * GUI_GRID_W;
+            w = 27.5 * GUI_GRID_W;
             h = 22 * GUI_GRID_H;
             colorBackground[] = {0,0,0,0.5};
         };
@@ -49,7 +49,7 @@ class ressourceheader
             text = "$STR_DUWS_T_REQ_MISSIONS";
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 2.2 * GUI_GRID_H + GUI_GRID_Y;
-            w = 23 * GUI_GRID_W;
+            w = 26 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
         // The three pool captions are the longest text in the dialog and the frames carrying them
@@ -63,7 +63,7 @@ class ressourceheader
             sizeEx = 0.024;
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 3.2 * GUI_GRID_H + GUI_GRID_Y;
-            w = 7.4 * GUI_GRID_W;
+            w = 8.4 * GUI_GRID_W;
             h = 2 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_zsv1b4zp";
         };
@@ -73,7 +73,7 @@ class ressourceheader
             text = "CP: XXX";
             x = 1.2 * GUI_GRID_W + GUI_GRID_X;
             y = 3.65 * GUI_GRID_H + GUI_GRID_Y;
-            w = 6.6 * GUI_GRID_W;
+            w = 7.6 * GUI_GRID_W;
             h = 1.1 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
         };
@@ -82,9 +82,9 @@ class ressourceheader
             idc = 1807;
             text = "$STR_DUWS_T_01aj6v4j";
             sizeEx = 0.024;
-            x = 8.6 * GUI_GRID_W + GUI_GRID_X;
+            x = 9.6 * GUI_GRID_W + GUI_GRID_X;
             y = 3.2 * GUI_GRID_H + GUI_GRID_Y;
-            w = 7.4 * GUI_GRID_W;
+            w = 8.4 * GUI_GRID_W;
             h = 2 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_23shv5yr";
         };
@@ -92,9 +92,9 @@ class ressourceheader
         {
             idc = 1002;
             text = "000";
-            x = 9 * GUI_GRID_W + GUI_GRID_X;
+            x = 10 * GUI_GRID_W + GUI_GRID_X;
             y = 3.65 * GUI_GRID_H + GUI_GRID_Y;
-            w = 6.6 * GUI_GRID_W;
+            w = 7.6 * GUI_GRID_W;
             h = 1.1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_23shv5yr";
             colorText[] = {1,1,1,1};
@@ -104,9 +104,9 @@ class ressourceheader
             idc = 1806;
             text = "$STR_DUWS_T_dvt8byhj";
             sizeEx = 0.024;
-            x = 16.4 * GUI_GRID_W + GUI_GRID_X;
+            x = 18.4 * GUI_GRID_W + GUI_GRID_X;
             y = 3.2 * GUI_GRID_H + GUI_GRID_Y;
-            w = 7.4 * GUI_GRID_W;
+            w = 8.4 * GUI_GRID_W;
             h = 2 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_8ibx2y3c";
         };
@@ -114,9 +114,9 @@ class ressourceheader
         {
             idc = 1001;
             text = "ZUC:XXX";
-            x = 16.8 * GUI_GRID_W + GUI_GRID_X;
+            x = 18.8 * GUI_GRID_W + GUI_GRID_X;
             y = 3.65 * GUI_GRID_H + GUI_GRID_Y;
-            w = 6.6 * GUI_GRID_W;
+            w = 7.6 * GUI_GRID_W;
             h = 1.1 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
         };
@@ -164,7 +164,7 @@ class ressourceheader
             text = "$STR_DUWS_T_f62mxt4i";
             x = 18.2 * GUI_GRID_W + GUI_GRID_X;
             y = 5.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 5.6 * GUI_GRID_W;
+            w = 8.6 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_convertAPtoCP";
             tooltip = "$STR_DUWS_T_a72vvbgp";
@@ -178,7 +178,7 @@ class ressourceheader
             idc = 1810;
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 7.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 23 * GUI_GRID_W;
+            w = 26 * GUI_GRID_W;
             h = 0.06 * GUI_GRID_H;
             colorBackground[] = {1,1,1,0.25};
         };
@@ -188,7 +188,7 @@ class ressourceheader
             text = "$STR_DUWS_T_REQ_COMMAND";
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 7.8 * GUI_GRID_H + GUI_GRID_Y;
-            w = 23 * GUI_GRID_W;
+            w = 26 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
         class requestunitframe: RscFrame
@@ -286,7 +286,7 @@ class ressourceheader
             text = "";
             x = 12.6 * GUI_GRID_W + GUI_GRID_X;
             y = 8.9 * GUI_GRID_H + GUI_GRID_Y;
-            w = 11.2 * GUI_GRID_W;
+            w = 14.2 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[0] spawn fnc_command_select";
         };
@@ -332,7 +332,7 @@ class ressourceheader
         {
             idc = 1604;
             text = "EXIT";
-            x = 18.2 * GUI_GRID_W + GUI_GRID_X;
+            x = 21.2 * GUI_GRID_W + GUI_GRID_X;
             y = 21.9 * GUI_GRID_H + GUI_GRID_Y;
             w = 5.6 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
@@ -340,23 +340,24 @@ class ressourceheader
         };
 
         // --- SUPPORTS: the catalogue, appended down the right-hand side ---
-        // Widened out of the main window rather than rightward: a row reads "Supply Drop (5CP)
-        // Radio" and gains an escalation surcharge on top of that, which the old width cut in half.
+        // The strip is where the main window's width comes from, so its floor is a row still being
+        // readable: "Supply Drop (5CP) Radio" plus the escalation surcharge appended after it. The
+        // two category headings are longer than that and are clipped at any width this can hold.
         class supportunlockframe: RscFrame
         {
             idc = 1804;
             text = "$STR_DUWS_T_x0l67g37";
-            x = 25 * GUI_GRID_W + GUI_GRID_X;
+            x = 28 * GUI_GRID_W + GUI_GRID_X;
             y = 1.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 14.7 * GUI_GRID_W;
+            w = 11.7 * GUI_GRID_W;
             h = 22 * GUI_GRID_H;
         };
         class supportunlocklist: RscListBox
         {
             idc = 2103;
-            x = 25.4 * GUI_GRID_W + GUI_GRID_X;
+            x = 28.4 * GUI_GRID_W + GUI_GRID_X;
             y = 2.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 13.9 * GUI_GRID_W;
+            w = 10.9 * GUI_GRID_W;
             h = 18.5 * GUI_GRID_H;
             sizeEx = 0.025;
             // The button below both buys and refunds, so its label follows the selection.
@@ -366,9 +367,9 @@ class ressourceheader
         {
             idc = 1603;
             text = "$STR_DUWS_T_bp73qs16";
-            x = 25.4 * GUI_GRID_W + GUI_GRID_X;
+            x = 28.4 * GUI_GRID_W + GUI_GRID_X;
             y = 21.3 * GUI_GRID_H + GUI_GRID_Y;
-            w = 13.9 * GUI_GRID_W;
+            w = 10.9 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_request_support";
             tooltip = "$STR_DUWS_T_dsl9rr00";

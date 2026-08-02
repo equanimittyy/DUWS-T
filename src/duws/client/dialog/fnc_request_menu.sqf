@@ -9,6 +9,12 @@
     _this is the addAction argument array -- [target, caller, id, args] -- where args is [true]
     at a FOB. The target is the base the menu was opened on, which the command column needs: a
     redeploy rebuilds that base's garrison.
+
+    Every global read here belongs to another file and reaches this one by broadcast, so each read
+    falls back rather than naming the global bare. An SQF runtime error unwinds the whole script and
+    `call` does not contain it, so one stale name in the fill takes down every section after it: the
+    menu comes up with the lists below the fault empty, no command column and no supports, and only
+    the RPT says why. A fallback keeps the rest of the menu standing and leaves the fault one row.
 */
 if (!hasInterface) exitWith {};
 
@@ -22,9 +28,12 @@ if (isNull _display) exitWith {};
 // uiNamespace because it is display state, and the mission namespace is written into save games.
 uiNamespace setVariable ["DUWS_requestMenu_ctx", [_site, _isFob]];
 
-ctrlSetText [1000, format ["%1", commandpointsblu1]];
-ctrlSetText [1001, format ["%1", zoneundercontrolblu]];
-ctrlSetText [1002, format ["%1", WARCOM_blufor_ap]];
+// These three are drawn before any row is added, so they are the reads with the whole menu behind
+// them. "--" is the honest answer for a pool whose value has not arrived: a defaulted 0 would read
+// as an empty account.
+ctrlSetText [1000, format ["%1", missionNamespace getVariable ["commandpointsblu1", "--"]]];
+ctrlSetText [1001, format ["%1", missionNamespace getVariable ["zoneundercontrolblu", "--"]]];
+ctrlSetText [1002, format ["%1", missionNamespace getVariable ["WARCOM_blufor_ap", "--"]]];
 
 // REQUEST UNITS -- a FOB offers the first five of the faction's units, the HQ all of them.
 lbAdd [2100, localize "STR_DUWS_T_zo6ih0pt"];   // 0
@@ -41,23 +50,38 @@ lbSetCurSel [2100, 0];
 // REQUEST SQUADS. Row indices are the argument fnc_request_squad and its FOB twin switch on,
 // so the blank row that separates High Command from task forces is load-bearing padding: the
 // two heavy sections a FOB cannot field are absent, which shifts every row below them.
+//
+// A section's global is [roster, cost], written by server/init_hq/fnc_BLUFOR_squad_init.sqf. The
+// name is menu text and lives here; the price is read live off that broadcast so the two cannot
+// disagree. The shape is checked rather than assumed -- it has changed under this file before, and
+// a section that fails the check has to keep its row anyway or every index below it shifts.
+private _section = {
+    params ["_prefix", "_nameKey", "_var"];
+    private _def = missionNamespace getVariable [_var, []];
+    if ((_def param [1, ""]) isEqualType 0) exitWith {
+        format ["%1 %2 (%3cp)", _prefix, localize _nameKey, _def select 1]
+    };
+    ["WARN", "UI", format ["fnc_request_menu: %1 is %2, not [roster, cost]", _var, _def]] call fnc_log;
+    format ["%1 %2 (n/a)", _prefix, localize _nameKey]
+};
+
 switch (VERSION_X) do {
     case "MODERN": {
         lbAdd [2101, localize "STR_DUWS_T_zo6ih0pt"];               // 0
         lbAdd [2101, ""];                                           // 1
-        lbAdd [2101, "HC " + (blufor_RECON_TEAM_X select 1)];       // 2
-        lbAdd [2101, "HC " + (blufor_INF_SQUAD_X select 1)];        // 3
-        lbAdd [2101, "HC " + (blufor_MOTOR_SECTION_X select 1)];    // 4
+        lbAdd [2101, ["HC", "STR_DUWS_T_SQUAD_RECON", "blufor_RECON_TEAM_X"] call _section];       // 2
+        lbAdd [2101, ["HC", "STR_DUWS_T_SQUAD_INF", "blufor_INF_SQUAD_X"] call _section];          // 3
+        lbAdd [2101, ["HC", "STR_DUWS_T_SQUAD_MOTOR", "blufor_MOTOR_SECTION_X"] call _section];    // 4
         if (!_isFob) then {
-            lbAdd [2101, "HC " + (blufor_MECH_SECTION_X select 1)];  // 5
-            lbAdd [2101, "HC " + (blufor_ARMOR_SECTION_X select 1)]; // 6
+            lbAdd [2101, ["HC", "STR_DUWS_T_SQUAD_MECH", "blufor_MECH_SECTION_X"] call _section];  // 5
+            lbAdd [2101, ["HC", "STR_DUWS_T_SQUAD_ARMOR", "blufor_ARMOR_SECTION_X"] call _section]; // 6
         };
         lbAdd [2101, ""];                                           // 7 at the HQ, 5 at a FOB
-        lbAdd [2101, "TF " + (blufor_RECON_TEAM_X select 1)];
-        lbAdd [2101, "TF " + (blufor_INF_SQUAD_X select 1)];
-        lbAdd [2101, "TF " + (blufor_MOTOR_SECTION_X select 1)];
-        lbAdd [2101, "TF " + (blufor_MECH_SECTION_X select 1)];
-        lbAdd [2101, "TF " + (blufor_ARMOR_SECTION_X select 1)];
+        lbAdd [2101, ["TF", "STR_DUWS_T_SQUAD_RECON", "blufor_RECON_TEAM_X"] call _section];
+        lbAdd [2101, ["TF", "STR_DUWS_T_SQUAD_INF", "blufor_INF_SQUAD_X"] call _section];
+        lbAdd [2101, ["TF", "STR_DUWS_T_SQUAD_MOTOR", "blufor_MOTOR_SECTION_X"] call _section];
+        lbAdd [2101, ["TF", "STR_DUWS_T_SQUAD_MECH", "blufor_MECH_SECTION_X"] call _section];
+        lbAdd [2101, ["TF", "STR_DUWS_T_SQUAD_ARMOR", "blufor_ARMOR_SECTION_X"] call _section];
     };
 };
 lbSetCurSel [2101, 0];

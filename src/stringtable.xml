@@ -1699,6 +1699,26 @@
                 <Original>COMMAND AND CONTROL</Original>
                 <English>COMMAND AND CONTROL</English>
             </Key>
+            <Key ID="STR_DUWS_T_SQUAD_RECON">
+                <Original>Recon Team</Original>
+                <English>Recon Team</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SQUAD_INF">
+                <Original>Infantry Squad</Original>
+                <English>Infantry Squad</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SQUAD_MOTOR">
+                <Original>Motorized Section</Original>
+                <English>Motorized Section</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SQUAD_MECH">
+                <Original>Mechanized Section</Original>
+                <English>Mechanized Section</English>
+            </Key>
+            <Key ID="STR_DUWS_T_SQUAD_ARMOR">
+                <Original>Armor Section</Original>
+                <English>Armor Section</English>
+            </Key>
             <Key ID="STR_DUWS_T_MENU_SELECT">
                 <Original>Select</Original>
                 <English>Select</English>
@@ -3904,8 +3924,8 @@
                 <German>Erobere die Zonen</German>
                 <Spanish>Capture las zonas</Spanish>
                 <Chinesesimp>夺取战区</Chinesesimp>
-                <Original>Capture the Zones.</Original>
-                <English>Capture the Zones.</English>
+                <Original>Capture the Zones</Original>
+                <English>Capture the Zones</English>
             </Key>
             <Key ID="STR_DUWS_T_347ohzwn">
                 <German>Kampagne</German>
