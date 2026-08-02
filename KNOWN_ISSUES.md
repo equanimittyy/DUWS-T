@@ -53,17 +53,21 @@ carries a `captured by BLUFOR` line. The last one that does pre-dates the rule, 
 roster count against the peak, and BLUFOR outnumbering the OPFOR still in the zone — are unexercised
 rather than merely untuned. Everything downstream of a capture is unexercised with it.
 
-- [ ] Take a zone and watch for `captured by BLUFOR` in the RPT. A zone that will not fall with its
-      garrison beaten and no enemy left standing means the head-count is reading someone the player
-      cannot see — a crew inside a vehicle, or a neighbouring garrison inside the radius. Nothing in
-      that condition logs why it refused, so the RPT will not say so on its own
+- [ ] Take a zone and watch for `captured by BLUFOR` in the RPT. A zone that will not fall with the
+      ground visibly clear has two silent refusals to pick between, and neither logs: a garrison
+      member still alive well outside the ring, since that count is keyed to the zone's roster and a
+      patrol that wandered a kilometre out still holds it shut; or no peak recorded for the zone,
+      which refuses before either test runs. Crew inside a vehicle and a neighbouring garrison
+      inside the radius both count deliberately, so neither is the fault to look for
 
 ## Per-town reputation: shipped, not yet exercised
 
-- [ ] Take a town below -10. The RPT logs `Town N taken at rep R; first garrison held for 1800 s`
-      at once, and no garrison appears for thirty minutes of wall-clock — the capture grace, so a
-      tier does not materialise around the player who just spent the reputation. Nothing appearing
-      inside that window is the mechanic, not a failure; leave and come back after it
+- [ ] Take a town below -10. The RPT logs `Town N taken at rep R; first garrison held for 1800 s and
+      until the town is left` at once, and nothing appears for thirty minutes of wall-clock. Two
+      conditions gate it rather than one: the grace timer, so a tier does not materialise around the
+      player who just spent the reputation, and a latch wanting the town empty of BLUFOR once since.
+      Staying put past the timer still yields nothing, so leaving and coming back is the only way to
+      meet the garrison
 - [ ] Once the grace has run, stand in the town. A garrison must appear and the town must keep its
       debt until that garrison is fought. Reputation returning to 0 on its own means something other
       than the clear trigger's arming order is discharging it; the RPT says which happened, since
@@ -74,11 +78,6 @@ rather than merely untuned. Everything downstream of a capture is unexercised wi
       must be standing — `garrison reinforced to tier N` in the RPT, with the baseline risen rather
       than reset, so casualties already taken are still counted against it
 - [ ] Clear that garrison. If the `WEST SEIZED` trigger never fires, CIVILIAN-side units are blocking it and the fallback is a condition trigger counting hostile units in `thisList`
-- [ ] Read the `Escalation census:` line in the RPT on a new map and check `tier` against 30.
-      Thirty buildings a level across eleven levels is the shipped figure, but it is reached as a
-      fraction of a whole-map house count rather than as a constant, so it lands on 30 for Altis's
-      17472 houses and proportionally lower on any smaller map. That line is the only place the
-      total, the budget and `tier` ever appear
 
 ## The search system: shipped whole, barely exercised
 
