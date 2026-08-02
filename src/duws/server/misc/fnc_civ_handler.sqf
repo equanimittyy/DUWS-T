@@ -113,16 +113,15 @@ private _fnc_fill = {
 };
 
 private _centres = _locations apply { getPos _x };
-// _filled is this thread's own working copy; civ_spawned_<n> is the same fact published for
-// fnc_civ_liveTarget, which has no other way to see which towns are occupied. Both are written
-// only at the two transitions below, and nothing else writes civ_spawned_<n> on this path.
-private _filled = [];
-private _seenLast = [];
-private _lastSeen = [];
+// One record per town rather than three arrays indexed alike: fields indexed the same way are one
+// transposition from a town streaming against another's clock. civ_spawned_<n> is the same "awake"
+// fact published for fnc_civ_liveTarget, which has no other way to see which towns are occupied, and
+// is written only at the two transitions below.
+private _crowds = [];
 for "_i" from 0 to (_count - 1) do {
-    _filled pushBack false;
-    _seenLast pushBack false;
-    _lastSeen pushBack 0;
+    private _key = [_i] call fnc_town_site_key;
+    [_key, _centres select _i, _radii param [_i, 500]] call fnc_site_register;
+    _crowds pushBack ([_key, "crowd", CIVILIAN, STREAM_BUFFER, DESPAWN_TIMER] call fnc_site_occupant_register);
 };
 
 while {true} do {
@@ -139,12 +138,13 @@ while {true} do {
         // Buffered for arrival only. The fill itself gets the town's own radius, or the crowd
         // would be scattered across the open ground the buffer reaches into.
         private _radius = _radii param [_i, 500];
-        private _here = (_players findIf { _x distance _centre < _radius + STREAM_BUFFER }) >= 0;
+        private _c = _crowds select _i;
+        private _here = (_players findIf { _x distance _centre < _radius + (_c get "buffer") }) >= 0;
 
-        if (_filled select _i) then {
-            if (_here) then { _lastSeen set [_i, _now] };
-            if (_now - (_lastSeen select _i) >= DESPAWN_TIMER) then {
-                _filled set [_i, false];
+        if (_c get "awake") then {
+            if (_here) then { _c set ["emptySince", _now] };
+            if (_now - (_c get "emptySince") >= (_c get "grace")) then {
+                _c set ["awake", false];
                 missionNamespace setVariable [format ["civ_spawned_%1", _i], false];
                 _expired pushBack _i;
             };
@@ -153,18 +153,18 @@ while {true} do {
             // helicopter crossing the disc is gone by the next sample, and a fill is expensive
             // enough to be worth the wait. A second sample rather than a sleep because this
             // thread holds the grace clock of every other town and must not stall on one.
-            if (_here && {_seenLast select _i}) then {
-                _filled set [_i, true];
+            if (_here && {_c get "seenLast"}) then {
+                _c set ["awake", true];
                 // Set before the fill is dispatched, not inside it: fnc_civ_liveTarget counts a
                 // town as occupied from this flag, and a town that fills on the same tick as
                 // another must already be visible to the other's throttle.
                 missionNamespace setVariable [format ["civ_spawned_%1", _i], true];
-                _lastSeen set [_i, _now];
+                _c set ["emptySince", _now];
                 [_i] call fnc_civ_town_reveal;
                 [_i, _centre, _radius] spawn _fnc_fill;
             };
         };
-        _seenLast set [_i, _here];
+        _c set ["seenLast", _here];
     };
 
     // Collected by roster, which is what the town filled rather than whatever is standing in it.

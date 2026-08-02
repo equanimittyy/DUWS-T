@@ -9,15 +9,6 @@ _index = _this select 2;
 
 _blufor_close = false;
 
-// Held until this zone has been seen empty of BLUFOR once. The arrival test fires on anyone inside
-// the radius plus the buffer and cannot tell somebody walking up from somebody already standing in
-// the middle, so a thread that starts under a player's feet would raise the garrison around them.
-// Only the opening case needs it: a despawn happens only once they have left, and a retake cannot
-// fire while they are inside, so every later cycle already begins from empty ground.
-// Starts latched rather than sampling presence here -- the poll below runs within ten seconds and
-// clears it for the ordinary zone nobody is near, which is all of them at campaign start.
-private _awaitVacate = true;
-
 _AI_buffer = 400;
 // Twice the civilian handler's 60 s grace, and for the same reason: a zone left standing for five
 // minutes after the last sighting leaves a trail of fully spawned garrisons behind anyone crossing
@@ -29,6 +20,18 @@ _despawn_timer = 120;
 // zone spawns is stamped with. Derived from the same position array they use rather than passed in,
 // and through the shared helper, so the two cannot drift apart without the zone itself moving.
 _zoneKey = [_spawnPos] call fnc_zone_key;
+
+// The zone's own streaming state, in the shared store rather than in this thread's locals: it is what
+// the poller reads when this loop is retired, and what a save has to carry.
+//
+// awaitVacate is held until this zone has been seen empty of BLUFOR once. The arrival test fires on
+// anyone inside the radius plus the buffer and cannot tell somebody walking up from somebody already
+// standing in the middle, so a thread that starts under a player's feet would raise the garrison
+// around them. Only the opening case needs it: a despawn happens only once they have left, and a
+// retake cannot fire while they are inside, so every later cycle already begins from empty ground.
+// It starts latched rather than sampling presence here -- the poll below runs within ten seconds and
+// clears it for the ordinary zone nobody is near, which is all of them at campaign start.
+private _occ = [_zoneKey, "garrison"] call fnc_site_occupant_register;
 
 // One of these runs per zone every 10 s for the whole campaign, so the scan it replaces was
 // O(zones x all units) forever. The test itself lives in fnc_duws_bluforNear, shared with the
@@ -166,8 +169,8 @@ while {true} do {
 
 			// One empty sighting spends the latch. Tested on the same call the arrival uses, so
 			// "here" means one thing: a zone cannot clear the latch and spawn on the same pass.
-			if (_awaitVacate) then {
-				if (!_blufor_close) then { _awaitVacate = false };
+			if (_occ get "awaitVacate") then {
+				if (!_blufor_close) then { _occ set ["awaitVacate", false] };
 				_blufor_close = false;
 			};
 
@@ -310,7 +313,7 @@ while {true} do {
 			// near by its reckoning and would have the new garrison raised in front of them. The
 			// same is true of anyone who walks back in during the ten seconds before the next poll.
 			// Held until the whole ring is empty once, exactly as at campaign start.
-			_awaitVacate = true;
+			_occ set ["awaitVacate", true];
 		};
 
 		_blufor_close = false;

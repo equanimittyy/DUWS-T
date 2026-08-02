@@ -56,6 +56,11 @@ private _fnc_menOf = {
 // a visible pop and a free reset of everything they had ground down.
 #define DESPAWN_GRACE 120
 
+// How far outside a town a garrison notices an arrival. The zone gate's figure, not the crowd's 200:
+// a garrison is expensive enough to want the longer warning, and the raise below is written against
+// the same ring.
+#define STREAM_BUFFER 400
+
 // Where a raise files its result for the poll to adopt. Unset while the worker is in flight, [] if
 // it gave up, otherwise the garrison it stood up.
 #define RAISE_SLOT(I) format ["DUWS_townRaise_%1", I]
@@ -68,7 +73,7 @@ private _fnc_raise = {
     // Presence is decided the way zones decide it: a five-second re-test after first contact, so
     // grazing the perimeter does not commit a garrison for someone already leaving.
     sleep 5;
-    if !([_centre, _radius + 400] call fnc_duws_bluforNear) exitWith {
+    if !([_centre, _radius + STREAM_BUFFER] call fnc_duws_bluforNear) exitWith {
         missionNamespace setVariable [RAISE_SLOT(_i), []];
     };
 
@@ -121,9 +126,10 @@ private _fnc_raise = {
     missionNamespace setVariable [RAISE_SLOT(_i), [_men, _want, _tier, _strength, _trg]];
 };
 
-// One record per town, in place of the locals a thread apiece used to hold. Keyed rather than kept
-// as parallel arrays because eleven of them indexed the same way is one transposition away from a
-// town reinforcing against another's composition.
+// One record per town, held in the shared site store: the town garrison is an occupant of the same
+// site its crowd is, so both are reached the same way and neither can go missing when the poller
+// takes them over. Keyed rather than kept as parallel arrays because eleven fields indexed the same
+// way are one transposition away from a town reinforcing against another's composition.
 //
 // awaitVacate is set whenever a hold is armed, and held until the town has been empty of BLUFOR
 // once since. The hold expiring is not enough on its own: a player who took or cleared the town and
@@ -144,11 +150,9 @@ private _fnc_raise = {
 // reinforcement moves the strength and not the tier, and an upgrade the reverse.
 private _towns = [];
 for "_i" from 0 to (_count - 1) do {
-    _towns pushBack (createHashMapFromArray [
-        ["garrisoned", false], ["raising", false], ["trg", objNull],
-        ["baseline", 0], ["deployed", 0], ["deployedStrength", 0],
-        ["deployedList", []], ["awaitVacate", true], ["emptySince", -1]
-    ]);
+    private _key = [_i] call fnc_town_site_key;
+    [_key, _centres select _i, _radii param [_i, 500]] call fnc_site_register;
+    _towns pushBack ([_key, "garrison", EAST, STREAM_BUFFER, DESPAWN_GRACE] call fnc_site_occupant_register);
 };
 
 while {true} do {
@@ -205,8 +209,8 @@ while {true} do {
         // latch and the streaming teardown all have to mean the same thing by "somebody is here",
         // and three separate calls could disagree across the seconds between them.
         private _near = false;
-        if ((_blu findIf { _x distance _centre < _radius + 400 }) >= 0) then {
-            _near = [_centre, _radius + 400] call fnc_duws_bluforNear;
+        if ((_blu findIf { _x distance _centre < _radius + STREAM_BUFFER }) >= 0) then {
+            _near = [_centre, _radius + STREAM_BUFFER] call fnc_duws_bluforNear;
         };
         if (_near) then { _t set ["emptySince", -1] } else {
             if ((_t get "emptySince") < 0) then { _t set ["emptySince", diag_tickTime] };
@@ -227,11 +231,11 @@ while {true} do {
                 _res params ["_gotRoster", "_gotWant", "_gotTier", "_gotStrength", "_gotTrg"];
                 ([[_i] call fnc_town_site_key] call fnc_site_roster) append _gotRoster;
                 _t set ["baseline", {alive _x} count _gotRoster];
-                _t set ["deployed", _gotTier];
+                _t set ["tier", _gotTier];
                 _t set ["deployedList", _gotWant];
                 _t set ["deployedStrength", _gotStrength];
                 _t set ["trg", _gotTrg];
-                _t set ["garrisoned", true];
+                _t set ["awake", true];
                 ["INFO", "CIV", format ["Garrison tier %1 spawned at town %2 (rep %3), %4 men",
                     _gotTier, _i, _rep, _t get "baseline"]] call fnc_log;
             };
@@ -241,7 +245,7 @@ while {true} do {
         // One hold of either kind, plus the latch. Both clocks answer the same question -- may this
         // town raise men yet -- so they are one piece of state read one way, and the latch is what
         // stops either of them expiring into a spawn around a player who never left.
-        if !(_t get "garrisoned") then {
+        if !(_t get "awake") then {
             if (_tier > 0
                 && {!(_t get "awaitVacate")}
                 && {([_i] call fnc_town_garrison_holdAt) <= 0}
@@ -284,10 +288,10 @@ while {true} do {
             [_key] call fnc_site_roster_clear;
             ["INFO", "CIV", format ["Town %1 garrison streamed out holding %2 of %3; returns at %4 strength",
                 _i, _left, _t get "baseline", [_i] call fnc_town_garrison_strengthAt]] call fnc_log;
-            _t set ["garrisoned", false];
+            _t set ["awake", false];
             _t set ["trg", objNull];
             _t set ["baseline", 0];
-            _t set ["deployed", 0];
+            _t set ["tier", 0];
             _t set ["deployedStrength", 0];
             _t set ["deployedList", []];
             // Nothing below this describes a town that no longer has a garrison, and the
@@ -319,7 +323,7 @@ while {true} do {
         // deterministic now, so the two agree -- but strength no longer shows in the list at all: a
         // town ground down and then recovered fields the same tokens at a different share, and a
         // diff of token lists cannot see that. The stored pair can.
-        if ((_tier > (_t get "deployed") || _strength > (_t get "deployedStrength"))
+        if ((_tier > (_t get "tier") || _strength > (_t get "deployedStrength"))
             && {!_near}) then {
             private _want = [[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter, _strength] call DUWS_fnc_thinComposition;
             private _added = [[_t get "deployedList", _want] call DUWS_fnc_spawnDiff, _centre, _radius, _strength] call DUWS_fnc_raiseGarrison;
@@ -330,7 +334,7 @@ while {true} do {
             // counts the dead; re-basing on the alive count would refund every casualty the player
             // has already paid for.
             _t set ["baseline", (_t get "baseline") + ({alive _x} count _addedMen)];
-            _t set ["deployed", _tier];
+            _t set ["tier", _tier];
             _t set ["deployedList", _want];
             _t set ["deployedStrength", _strength];
             ["INFO", "CIV", format ["Town %1 garrison reinforced to tier %2; baseline now %3 men",
@@ -343,11 +347,11 @@ while {true} do {
         if (_tier == 0) then {
             deleteVehicle (_t get "trg");
             _t set ["trg", objNull];
-            _t set ["garrisoned", false];
+            _t set ["awake", false];
             { deleteVehicle _x } forEach (([[_i] call fnc_town_site_key] call fnc_site_roster) select { alive _x });
             [[_i] call fnc_town_site_key] call fnc_site_roster_clear;
             _t set ["baseline", 0];
-            _t set ["deployed", 0];
+            _t set ["tier", 0];
             _t set ["deployedStrength", 0];
             _t set ["deployedList", []];
             ["INFO", "CIV", format ["Town %1 left the OPFOR band at rep %2; garrison cleared",
@@ -356,10 +360,10 @@ while {true} do {
             if (!isNull (_t get "trg") && {triggerActivated (_t get "trg")}) then {
                 deleteVehicle (_t get "trg");
                 _t set ["trg", objNull];
-                _t set ["garrisoned", false];
+                _t set ["awake", false];
                 [[_i] call fnc_town_site_key] call fnc_site_roster_clear;
                 _t set ["baseline", 0];
-                _t set ["deployed", 0];
+                _t set ["tier", 0];
                 _t set ["deployedStrength", 0];
                 _t set ["deployedList", []];
                 // Clearing destroys the purchase but not the ownership. The tier files back down to

@@ -258,6 +258,11 @@ publicVariable "zones_buildout_done";
 _index = zone_spawn_array find [_zone_num,false,false];
 _opfor_spawn = (zone_spawn_array select _index) select 1;
 
+// Registered before the streaming loop starts, so the loop reads its latch and its clock out of the
+// shared store rather than keeping a private copy the rest of the mission cannot see.
+[_zoneKey, _spawnPos, _size] call fnc_site_register;
+[_zoneKey, "garrison", EAST, 400, 120] call fnc_site_occupant_register;
+
 sleep 60;
 [_spawnPos,_size,_index] spawn fnc_spawnWait;
 

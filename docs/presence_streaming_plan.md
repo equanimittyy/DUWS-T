@@ -445,7 +445,7 @@ falsifiable:
 - [x] `fnc_createopfortified` folded into tier-row tokens and deleted
 - [x] `fnc_zone_thin` thins men across the composition, not entries out of it
 - [x] Town garrison and crowd rosters become units in the mission namespace
-- [ ] `DUWS_sites`, `DUWS_occupants`, `DUWS_siteHooks`
+- [x] `DUWS_sites`, `DUWS_occupants`, `DUWS_siteHooks`
 - [ ] Towns take the zone's anchored baseline
 - [ ] The poller, with the crowd migrated onto it
 - [ ] Town garrisons migrated
