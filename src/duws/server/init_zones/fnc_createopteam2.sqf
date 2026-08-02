@@ -8,21 +8,8 @@ _radius   = _this select 1;
 
 _position = [_patrolCenter,50,_radius,5,0,0.5,0,[],[]] call BIS_fnc_findSafePos;
 
-_initGroup = [opfor_AR_SOLDIER_X,opfor_GL_SOLDIER_X];
-_multipliedGroup = [];
-// Local clamp: the setup menu broadcasts this once, so writing the global here would
-// corrupt every later build on this machine with no re-broadcast to repair it.
-private _mult = enemyunitMultiplier max 1;
-for "_i" from 0 to (_mult - 1) step 1 do
-{
-	_multipliedGroup = _multipliedGroup + _initGroup;
-};
-// add more units into squad with launchers and marksman rifles only once
-// so we don't get swarmed by 5x snipers and 5x AT
-_multipliedGroup = _multipliedGroup + [opfor_MARK_SOLDIER_X,opfor_LAT_SOLDIER_X];
-// task leader should be added after multiplication so we dont' get X TLs
-_multipliedGroup = [_multipliedGroup, [opfor_TL_SOLDIER_X], 0] call BIS_fnc_arrayInsert;
-_group = [_position, EAST, _multipliedGroup,[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
+private _roster = ["team", enemyunitMultiplier] call DUWS_fnc_groupRoster;
+_group = [_position, EAST, _roster,[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 
 // ========== 添加随机战利品 ==========

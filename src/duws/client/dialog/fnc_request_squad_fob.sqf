@@ -16,17 +16,17 @@ switch (VERSION_X) do {
 		switch (_index) do
 		{
 			case 2: {
-				_cost = blufor_RECON_TEAM_X select 2;
+				_cost = blufor_RECON_TEAM_X select 1;
 				_grouptype = (blufor_RECON_TEAM_X select 0);
 				_HCsquadtype = "Infantry";
 			};
 			case 3: {
-				_cost = blufor_INF_SQUAD_X select 2;
+				_cost = blufor_INF_SQUAD_X select 1;
 				_grouptype = (blufor_INF_SQUAD_X select 0);
 				_HCsquadtype = "Infantry";
 			};
 			case 4: {
-				_cost = blufor_MOTOR_SECTION_X select 2;
+				_cost = blufor_MOTOR_SECTION_X select 1;
 				_grouptype = (blufor_MOTOR_SECTION_X select 0);
 				_HCsquadtype = "Motor";
 			};
@@ -34,27 +34,27 @@ switch (VERSION_X) do {
 		//  case 5: EMPTY	
 
 			case 6: {
-				_cost = blufor_RECON_TEAM_X select 2;
+				_cost = blufor_RECON_TEAM_X select 1;
 				_grouptype = (blufor_RECON_TEAM_X select 0);
 				_task_force = true;
 			};
 			case 7: {
-				_cost = blufor_INF_SQUAD_X select 2;
+				_cost = blufor_INF_SQUAD_X select 1;
 				_grouptype = (blufor_INF_SQUAD_X select 0);
 				_task_force = true;
 			};
 			case 8: {
-				_cost = blufor_MOTOR_SECTION_X select 2;
+				_cost = blufor_MOTOR_SECTION_X select 1;
 				_grouptype = (blufor_MOTOR_SECTION_X select 0);
 				_task_force = true;
 			};
 			case 9: {
-				_cost = blufor_MECH_SECTION_X select 2;
+				_cost = blufor_MECH_SECTION_X select 1;
 				_grouptype = (blufor_MECH_SECTION_X select 0);
 				_task_force = true;
 			};
 			case 10: {
-				_cost = blufor_ARMOR_SECTION_X select 2;
+				_cost = blufor_ARMOR_SECTION_X select 1;
 				_grouptype = (blufor_ARMOR_SECTION_X select 0);
 				_task_force = true;
 			};

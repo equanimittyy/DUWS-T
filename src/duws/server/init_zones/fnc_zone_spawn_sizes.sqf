@@ -10,7 +10,7 @@
 // Token to category. Categories exist because a zone's radius scales its garrison unevenly: more
 // ground needs proportionally more infantry to cover it and does not need more aircraft. Membership
 // lists rather than a per-token map so the whole vocabulary reads in one block.
-// --DUWS-UNITCOMP BEGIN name="Spawn categories" row="category, members..."--
+// --DUWS-UNITCOMP BEGIN name="Spawn categories" row="category, members..." fields="category, members"--
 DUWS_spawnCategories = [
     ["infantry", ["patrol", "team", "sniper", "wpteam", "buildings"]],
     ["light",    ["car"]],
@@ -35,7 +35,7 @@ DUWS_fnc_spawnCategory = {
 // air column, which is a balance change with nothing in the log to show for it.
 // Row order is the lookup order: the first ceiling a radius falls under wins, and the last row is a
 // band rather than an else so the table reads in one direction.
-// --DUWS-UNITCOMP BEGIN name="Zone radius multipliers" row="ceiling, infantry, light, armour, air"--
+// --DUWS-UNITCOMP BEGIN name="Zone radius multipliers" row="ceiling, infantry, light, armour, air" fields="radius ceiling, infantry, light, armour, air"--
 DUWS_zoneRadiusMult = [
     [101,  1, 1, 0, 0],
     [251,  1, 1, 1, 0],
@@ -142,6 +142,47 @@ DUWS_fnc_raiseGarrison = {
         if (_forEachIndex < (count _tokens) - 1) then { sleep 5 };
     } forEach _tokens;
     _grps
+};
+
+// What each group kind fields. Roles are named rather than referenced: a faction table that omits
+// a role leaves its global undefined, and an undefined name inside an array literal is not
+// something the spawner can test for afterwards -- BIS_fnc_spawnGroup takes the nil and quietly
+// raises a group one man short. Named, it resolves to "" and fnc_opforRoles drops it.
+//
+// Three columns because that is the shape every one of these groups already had: a core repeated by
+// the enemy multiplier, a tail added once so a x5 setting fields one marksman rather than five, and
+// at most one leader, at the front, for the same reason.
+// --DUWS-UNITCOMP BEGIN name="OPFOR group rosters" row="token, core, added once, leader" fields="token, core (multiplied), added once, leader" prefix=opfor_--
+DUWS_groupRosters = [
+    ["patrol", ["opfor_SOLDIER_X", "opfor_AR_SOLDIER_X"], [], ""],
+    ["team", ["opfor_AR_SOLDIER_X", "opfor_GL_SOLDIER_X"], ["opfor_MARK_SOLDIER_X", "opfor_LAT_SOLDIER_X"], "opfor_TL_SOLDIER_X"],
+    ["sniper", ["opfor_SNIPER_SOLDIER_X", "opfor_SNIPER_SOLDIER_X"], [], ""],
+    ["wpteam", ["opfor_SOLDIER_X"], ["opfor_AA_SOLDIER_X", "opfor_AT_SOLDIER_X", "opfor_SPECOPS_MEDIC_X"], "opfor_TL_SOLDIER_X"],
+    ["fortified", ["opfor_AR_SOLDIER_X", "opfor_AT_SOLDIER_X", "opfor_GL_SOLDIER_X", "opfor_SPECOPS_MEDIC_X"], [], "opfor_SL_SOLDIER_X"]
+];
+// --DUWS-UNITCOMP END--
+
+// A token's men, in spawn order. The multiplier is clamped here rather than at the call sites, and
+// never written back: the setup menu broadcasts enemyunitMultiplier once, so a spawner that
+// corrected the global would corrupt every later build on that machine with nothing to re-broadcast
+// a repair.
+// _strength is attrition, and it is applied to the multiplied men before the leader joins them, so
+// a section ground down still has one rather than sometimes losing it to a coin flip.
+// An unknown token yields nothing rather than a fallback group -- the caller named a group kind
+// that does not exist, and inventing men for it would hide the typo behind a garrison that spawns.
+DUWS_fnc_groupRoster = {
+    params ["_token", ["_mult", 1], ["_strength", 1]];
+    private _i = DUWS_groupRosters findIf { (_x select 0) isEqualTo _token };
+    if (_i < 0) exitWith { [] };
+    (DUWS_groupRosters select _i) params ["", "_core", "_once", "_leader"];
+    private _men = [];
+    for "_k" from 1 to (_mult max 1) do { _men append _core };
+    _men append _once;
+    if (_strength < 1) then { _men = [_men, _strength] call fnc_zone_thin };
+    private _names = [];
+    if (_leader != "") then { _names pushBack _leader };
+    _names append _men;
+    [_names apply { missionNamespace getVariable [_x, ""] }] call fnc_opforRoles
 };
 
 // Called rather than spawned, for the group each one hands back: the capture test counts this

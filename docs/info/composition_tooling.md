@@ -13,7 +13,7 @@ preprocessor discards, so marking something up is data-only and costs no runtime
 | Kind | Marker | What the tool does |
 |---|---|---|
 | **Static** — object layouts (HQ, zone prefabs, killhouse) | `--DUWS-COMPOSITION--` | read-only; emits a paste-ready Eden import |
-| **Unit** — spawn tables (tier compositions, radius multipliers, the category map) | `--DUWS-UNITCOMP--` | edits rows and writes them back to source |
+| **Unit** — spawn tables (tier compositions, radius multipliers, the category map, group rosters, the purchasable squads) | `--DUWS-UNITCOMP--` | edits rows and writes them back to source |
 
 Static compositions round-trip through the 3D editor because they are *layout* — you want to see
 them. Unit compositions are *data*, so there is nothing to look at in Eden and the tool edits them
@@ -147,7 +147,8 @@ Verify once by import → export → re-import and confirming the layout is iden
 ## Unit compositions: edited in place
 
 The spawn tables — what a zone or town garrison of each tier fields, how a zone's radius multiplies
-each category, which tokens belong to which category. Contract for what they mean:
+each category, which tokens belong to which category, what men a group kind is made of, and what the
+player can buy. Contract for what the tier tables mean:
 [`zones_and_civilians.md`](zones_and_civilians.md#zone-tiers).
 
 ```sqf
@@ -159,12 +160,35 @@ DUWS_zoneSpawnTiers = [
 // --DUWS-UNITCOMP END--
 ```
 
-`name=` labels it in the menu; `row=` says what one row means, since a row is a tier in one table
-and a radius band in another and the tool cannot infer which.
+| Attr | Meaning |
+|---|---|
+| `name="..."` | label in the menu, and the key a write matches on |
+| `row="..."` | what one row means, since a row is a tier in one table and a radius band in another |
+| `fields="a, b, c"` | the row's columns, for a table whose rows are fixed-shape rather than a free-length list. Its presence is what switches the editor into field mode |
+| `prefix=opfor_` | the faction prefix this table's role names carry: stripped for display, re-applied on write |
 
-Select one with `U<n>`, then add an entry to a row, drop one, or replace a row wholesale. Entries are
-typed unquoted — `patrol, team, car` — and the tool quotes anything that is not a bare number, so a
-multiplier row stays numeric and a token row stays strings.
+Select one with `U<n>`. A table without `fields=` is a list per row — add an entry, drop one, or
+replace the row. Entries are typed unquoted (`patrol, team, car`) and the tool quotes anything that
+is not a bare number, so a multiplier row stays numeric and a token row stays strings.
+
+### Field mode
+
+A row of a `fields=` table is a thing with named parts — a group kind, a purchasable squad — so it is
+picked apart by column instead of by entry index. Pick a row, pick a field, and the current value is
+**already in the line** for editing rather than retyped from scratch; Escape backs out.
+
+Each field keeps the kind it already had, inferred from the value rather than declared: a list stays
+a list, a quoted name stays quoted, and a number field refuses text instead of writing a table that
+will not compile.
+
+Role names are checked against the slots the faction files under `shared/factions/` actually define,
+and the count is the point rather than a yes/no: every faction file fills the same slots, so a name
+none of them defines would spawn nothing, and one only some of them define is a roster that quietly
+thins on the rest — which is the failure the faction auto-detection exists to prevent. Either
+prompts before the row is changed.
+
+A row holding a nested list belongs in a `fields=` table. The flat editor splits typed input on
+commas, which would cut a nested list in half.
 
 **Only the fenced body is rewritten.** The reasoning above each table is outside the fence and
 survives editing, which is why the fences sit tight around the literal rather than around the whole
@@ -187,5 +211,6 @@ any other change.
 ### Adding a table to the tool
 
 Wrap the literal in a fence and it appears in the menu; there is no code change. The parser expects
-`<var> = [ <row>, … ];` and splits rows by bracket depth, so a row holding a nested array — the
-category map's member lists — survives intact.
+`<var> = [ <row>, … ];` and splits rows by bracket depth, so a row holding a nested array — a group
+roster's role lists — survives intact. Add `fields=` when every row has the same columns, and
+`prefix=` when its names are faction slots.

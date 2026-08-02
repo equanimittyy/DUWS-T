@@ -408,3 +408,42 @@ private _have = ["patrol","team"];
 [_have, ["patrol","team","armored"]] call DUWS_fnc_spawnDiff;
 ["spawnDiff: leaves the caller's standing list alone",
     _have, ["patrol","team"]] call fnc_assertEq;
+
+// --- DUWS_fnc_groupRoster: the men behind a group token ---
+// A fixture table rather than the shipped one: what is under test is how a row expands, and
+// asserting against the live rosters would fail every time one of them is rebalanced.
+DUWS_groupRosters = [
+    ["patrol", ["opfor_A_X", "opfor_B_X"], [], ""],
+    ["team", ["opfor_A_X"], ["opfor_C_X"], "opfor_TL_X"],
+    ["thin", ["opfor_A_X", "opfor_ABSENT_X"], [], ""]
+];
+opfor_A_X = "cls_A";
+opfor_B_X = "cls_B";
+opfor_C_X = "cls_C";
+opfor_TL_X = "cls_TL";
+
+["groupRoster: the core repeats by the multiplier",
+    (["patrol", 3] call DUWS_fnc_groupRoster), ["cls_A","cls_B","cls_A","cls_B","cls_A","cls_B"]] call fnc_assertEq;
+// The whole reason the tail and the leader are their own columns: at x3 this is one marksman and
+// one task leader, not three of each.
+["groupRoster: the tail is added once and the leader leads",
+    (["team", 3] call DUWS_fnc_groupRoster), ["cls_TL","cls_A","cls_A","cls_A","cls_C"]] call fnc_assertEq;
+["groupRoster: a multiplier below one still fields the group once",
+    (["patrol", 0] call DUWS_fnc_groupRoster), ["cls_A","cls_B"]] call fnc_assertEq;
+["groupRoster: a role this faction does not define is dropped, not spawned as nil",
+    (["thin", 1] call DUWS_fnc_groupRoster), ["cls_A"]] call fnc_assertEq;
+// Nothing rather than a fallback group: the caller named a kind that does not exist, and inventing
+// men for it would hide the typo behind a garrison that spawns.
+["groupRoster: an unknown token fields nothing",
+    (["nosuchkind", 2] call DUWS_fnc_groupRoster), []] call fnc_assertEq;
+
+// fnc_zone_thin drops at random indices, so a thinned roster is asserted by size and by who leads
+// rather than by contents. Four core men at x2 is eight, halved is four, and the leader is extra.
+private _thinned = ["team", 8, 0.5] call DUWS_fnc_groupRoster;
+["groupRoster: attrition thins the men",
+    (count _thinned), 6] call fnc_assertEq;
+// The reason thinning happens before the leader is prepended: a section ground down still has one.
+["groupRoster: attrition never takes the leader",
+    (_thinned select 0), "cls_TL"] call fnc_assertEq;
+["groupRoster: full strength thins nothing",
+    (count (["team", 8, 1] call DUWS_fnc_groupRoster)), 10] call fnc_assertEq;

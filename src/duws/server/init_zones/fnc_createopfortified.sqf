@@ -29,22 +29,8 @@ _radius = 250;
 
 _spawn = [(_position select 0)+20,(_position select 1)];
 
-//original group without leaders
-_initGroup = [opfor_AR_SOLDIER_X,opfor_AT_SOLDIER_X,opfor_GL_SOLDIER_X, opfor_SPECOPS_MEDIC_X];
-_multipliedGroup = [];
-// Local clamp: the setup menu broadcasts this once, so writing the global here would
-// corrupt every later build on this machine with no re-broadcast to repair it.
-private _mult = enemyunitMultiplier max 1;
-
-for "_i" from 0 to (_mult - 1) step 1 do
-    {
-        _multipliedGroup = _multipliedGroup + _initGroup;
-    };
-// Thinned before the leader is inserted, so a section that has taken losses still has one.
-_multipliedGroup = [_multipliedGroup, _strength] call fnc_zone_thin;
-// let's add squad leader now
-_multipliedGroup = [_multipliedGroup, [opfor_SL_SOLDIER_X], 0] call BIS_fnc_arrayInsert;
-_group = [_spawn, EAST, _multipliedGroup,[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
+private _roster = ["fortified", enemyunitMultiplier, _strength] call DUWS_fnc_groupRoster;
+_group = [_spawn, EAST, _roster,[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 [_group] call _fnc_own;
 

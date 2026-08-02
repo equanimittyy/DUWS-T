@@ -12,11 +12,17 @@
 # consumer needs (isWeapon and the like), which this tool ignores.
 #
 # UNIT (read-write): scans src/ for
-#   // --DUWS-UNITCOMP BEGIN name="..." row="<what a row means>"--
+#   // --DUWS-UNITCOMP BEGIN name="..." row="<what a row means>" [fields="a, b, c"] [prefix=opfor_]--
 #   <name> = [ <row>, <row>, ... ];
 #   // --DUWS-UNITCOMP END--
 # and edits the rows in place. These are the spawn tables -- tier compositions, radius multipliers,
-# the category map -- which are data, not layout, so there is nothing to round-trip through Eden.
+# the category map, the group rosters -- which are data, not layout, so there is nothing to
+# round-trip through Eden.
+#
+# A table declaring `fields=` has fixed columns rather than a free-length list, and is edited a
+# field at a time with the current value seeded into the line. `prefix=` is the faction prefix its
+# role names carry: it is stripped for display and re-applied on write, and names are checked
+# against the slots the faction tables actually define.
 #
 # Only the fenced body is ever rewritten, so the reasoning above each table survives editing. A
 # write is refused unless the regenerated text parses back to exactly the model it came from, and
@@ -198,10 +204,12 @@ function Get-UnitComps {
         if ($text -notmatch 'DUWS-UNITCOMP BEGIN') { continue }
         foreach ($m in $unitFenceRe.Matches($text)) {
             $out += [pscustomobject]@{
-                Name  = Get-Attr $m.Groups[2].Value 'name="([^"]*)"' '(unnamed)'
-                RowOf = Get-Attr $m.Groups[2].Value 'row="([^"]*)"' 'row'
-                File  = $file.FullName
-                Body  = $m.Groups[3].Value
+                Name   = Get-Attr $m.Groups[2].Value 'name="([^"]*)"' '(unnamed)'
+                RowOf  = Get-Attr $m.Groups[2].Value 'row="([^"]*)"' 'row'
+                Fields = Get-Attr $m.Groups[2].Value 'fields="([^"]*)"' ''
+                Prefix = Get-Attr $m.Groups[2].Value 'prefix=([A-Za-z0-9_]+)' ''
+                File   = $file.FullName
+                Body   = $m.Groups[3].Value
             }
         }
     }
@@ -229,7 +237,11 @@ function Split-Rows($body) {
             if ($depth -eq 0) { $rows.Add($inner.Substring($start, $i - $start + 1)) }
         }
     }
-    return ,$rows
+    # Returned comma-wrapped so a one-row table arrives as an array rather than a bare string, and
+    # as a real string[] rather than the builder, so a caller can assign into it. Callers must NOT
+    # wrap the call in @() or pipe it directly: the wrapper protects the array from being unrolled,
+    # so both would hand back one element holding the whole table.
+    return ,$rows.ToArray()
 }
 
 # A row's entries, as the text between its brackets at depth 0 -- quoted strings keep their quotes so
@@ -250,7 +262,10 @@ function Split-Entries($row) {
     }
     $tail = $inner.Substring($start).Trim()
     if ($tail -ne '' -or $parts.Count -gt 0) { $parts.Add($tail) }
-    return ,($parts | Where-Object { $_ -ne '' })
+    # Cast, so a row holding a single entry is still an array: += on a bare string concatenates it
+    # instead of appending, which would quietly fuse two tokens into one. Same no-@()/no-pipe rule
+    # as Split-Rows above.
+    return ,([string[]]($parts | Where-Object { $_ -ne '' }))
 }
 
 function Format-UnitBody($varName, $rows, $indent) {
@@ -335,11 +350,257 @@ function Save-UnitComp($uc, $varName, $rows, $indent) {
     return $true
 }
 
-function Invoke-EditUnitComp($uc) {
+# The role vocabulary, read from the faction tables rather than hardcoded. Every faction file fills
+# the same slots, so a name none of them defines is a typo that would spawn nothing, and a name only
+# some define is a roster that quietly thins on the rest -- which is the failure mode the whole
+# faction auto-detection exists to avoid. Both are worth saying out loud before a write.
+function Get-RoleVocab {
+    if ($script:roleVocab) { return $script:roleVocab }
+    $counts = @{}   # slot name -> how many faction files define it
+    $files  = @{}   # prefix    -> how many faction files carry that prefix at all
+    $re = [regex]'(?m)^\s*((?:opfor|blufor)_[A-Za-z0-9_]+_X)\s*='
+    $dir = Join-Path $srcDir "duws\shared\factions"
+    if (Test-Path -LiteralPath $dir) {
+        foreach ($f in (Get-ChildItem -Path $dir -Recurse -Filter *.sqf -File)) {
+            # No -Encoding: only ASCII slot names are matched, and nothing here is ever written.
+            $seen = @{}
+            foreach ($m in $re.Matches((Get-Content -LiteralPath $f.FullName -Raw))) {
+                $seen[$m.Groups[1].Value] = $true
+            }
+            foreach ($n in $seen.Keys) { $counts[$n] = 1 + [int]$counts[$n] }
+            foreach ($p in @('opfor_', 'blufor_')) {
+                if (@($seen.Keys | Where-Object { $_.StartsWith($p) }).Count -gt 0) { $files[$p] = 1 + [int]$files[$p] }
+            }
+        }
+    }
+    $script:roleVocab = [pscustomobject]@{ Counts = $counts; Files = $files }
+    return $script:roleVocab
+}
+
+# What a typed name is written back as, and how many faction files define it. Coverage -1 means the
+# value is not a role slot at all: a field may legitimately hold a group token or a team key, and
+# those end in neither _X nor a faction prefix, so they are passed through unchecked.
+function Resolve-Role($name, $prefix) {
+    if ($name -notmatch '_X$') { return [pscustomobject]@{ Name = $name; Coverage = -1; Total = 0 } }
+    $v = Get-RoleVocab
+    $cands = @($name)
+    if ($prefix -and -not $name.StartsWith($prefix)) { $cands += ($prefix + $name) }
+    foreach ($c in $cands) {
+        if ($v.Counts.ContainsKey($c)) {
+            $p = if ($c -match '^(opfor_|blufor_)') { $Matches[1] } else { '' }
+            return [pscustomobject]@{ Name = $c; Coverage = [int]$v.Counts[$c]; Total = [int]$v.Files[$p] }
+        }
+    }
+    # Unknown, so qualify it the way the table stores its other names: a name written bare would
+    # resolve to nothing at runtime and read as the roster silently losing a man.
+    $out = if ($prefix -and -not $name.StartsWith($prefix)) { $prefix + $name } else { $name }
+    return [pscustomobject]@{ Name = $out; Coverage = 0; Total = [int]$v.Files[$prefix] }
+}
+
+# A field's literal, shown with quotes and the faction prefix taken off. An empty list or string
+# shows as a dash: "no leader" has to be visible rather than reading as a rendering gap.
+function Show-Field($literal, $prefix) {
+    $strip = { param($s) $t = $s.Trim().Trim('"'); if ($prefix -and $t.StartsWith($prefix)) { $t.Substring($prefix.Length) } else { $t } }
+    if ($literal.StartsWith('[')) {
+        # Bound to a variable before piping: Split-Entries returns its array comma-wrapped, so
+        # piping the call directly would hand ForEach-Object the whole row as one item.
+        $parts = Split-Entries $literal
+        if ($parts.Count -eq 0) { return '-' }
+        return (($parts | ForEach-Object { & $strip $_ }) -join ', ')
+    }
+    if ($literal.StartsWith('"')) {
+        $t = & $strip $literal
+        if ($t -eq '') { return '-' }
+        return $t
+    }
+    return $literal
+}
+
+# Rebuild a field's literal from typed text, keeping the kind it already had: a list stays a list,
+# a quoted name stays quoted, a number stays a number. Inferred from the current value rather than
+# declared per table, because the fence has no schema and every table would have to repeat one.
+# Returns $null when the text cannot be that kind -- refusing beats writing a table that will not
+# compile. Coverage notes for every role slot named are appended to $notes.
+function Format-FieldLiteral($current, $text, $prefix, [ref]$notes) {
+    $qualify = {
+        param($s)
+        $r = Resolve-Role $s.Trim().Trim('"') $prefix
+        if ($r.Coverage -ge 0) { $notes.Value += ,$r }
+        if ($r.Name -match '^-?\d+(\.\d+)?([eE][+-]?\d+)?$') { $r.Name } else { '"' + $r.Name + '"' }
+    }
+    if ($current.StartsWith('[')) {
+        $parts = @($text -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' })
+        return '[' + (($parts | ForEach-Object { & $qualify $_ }) -join ', ') + ']'
+    }
+    if ($current.StartsWith('"')) {
+        if ($text.Trim() -eq '') { return '""' }
+        return (& $qualify $text)
+    }
+    if ($text.Trim() -match '^-?\d+(\.\d+)?([eE][+-]?\d+)?$') { return $text.Trim() }
+    return $null
+}
+
+# Read a line with the current value already in the buffer, so a field is tweaked rather than
+# retyped from scratch -- retyping an eight-role squad to change one man is the friction this tool
+# exists to remove, and Read-Host cannot seed its buffer. Enter accepts, Escape cancels.
+# Redrawn from a fixed origin so a value that wraps past the console width still repaints; the
+# caller draws this on a cleared screen with room below it for that reason.
+function Read-Seeded($prompt, $seed) {
+    $buf = New-Object System.Text.StringBuilder
+    [void]$buf.Append($seed)
+    $pos = $buf.Length
+    $top = [Console]::CursorTop
+    $prev = 0
+    while ($true) {
+        $text = $prompt + $buf.ToString()
+        [Console]::SetCursorPosition(0, $top)
+        Write-Host -NoNewline ($text.PadRight([Math]::Max($prev, $text.Length)))
+        $prev = $text.Length
+        $abs = $prompt.Length + $pos
+        $w = [Console]::WindowWidth
+        [Console]::SetCursorPosition($abs % $w, $top + [Math]::Floor($abs / $w))
+
+        $key = [Console]::ReadKey($true)
+        switch ($key.Key) {
+            'Enter'      { Write-Host ""; return $buf.ToString() }
+            'Escape'     { Write-Host ""; return $null }
+            'Backspace'  { if ($pos -gt 0) { [void]$buf.Remove($pos - 1, 1); $pos-- } }
+            'Delete'     { if ($pos -lt $buf.Length) { [void]$buf.Remove($pos, 1) } }
+            'LeftArrow'  { if ($pos -gt 0) { $pos-- } }
+            'RightArrow' { if ($pos -lt $buf.Length) { $pos++ } }
+            'Home'       { $pos = 0 }
+            'End'        { $pos = $buf.Length }
+            default {
+                if ($key.KeyChar -and -not [char]::IsControl($key.KeyChar)) {
+                    [void]$buf.Insert($pos, $key.KeyChar); $pos++
+                }
+            }
+        }
+    }
+}
+
+# One row, one field at a time. Returns the rebuilt row literal, or $null if nothing changed.
+function Invoke-EditRow($row, $fields, $prefix, $title) {
+    $entries = Split-Entries $row
+    $changed = $false
+    while ($true) {
+        Clear-Host
+        Write-Host $title -ForegroundColor Cyan
+        Write-Host "======================================"
+        Write-Host ""
+        for ($i = 0; $i -lt $entries.Count; $i++) {
+            $label = if ($i -lt $fields.Count) { $fields[$i] } else { "field $($i + 1)" }
+            Write-Host ("  {0}. {1,-20} {2}" -f ($i + 1), $label, (Show-Field $entries[$i] $prefix))
+        }
+        Write-Host ""
+        if ($prefix) { Write-Host ("  names are shown without their {0} prefix and may be typed either way" -f $prefix) -ForegroundColor DarkGray }
+        Write-Host "  Field number to edit, or Enter to go back." -ForegroundColor DarkGray
+        Write-Host ""
+        $sel = Read-Host "Select"
+        if ($sel -notmatch '^\s*\d+\s*$') { break }
+        $k = [int]$sel
+        if ($k -lt 1 -or $k -gt $entries.Count) { continue }
+
+        $label = if (($k - 1) -lt $fields.Count) { $fields[$k - 1] } else { "field $k" }
+        Clear-Host
+        Write-Host $title -ForegroundColor Cyan
+        Write-Host "======================================"
+        Write-Host ""
+        Write-Host ("  {0}" -f $label) -ForegroundColor Cyan
+        Write-Host "  Enter accepts, Escape cancels. Comma separates a list." -ForegroundColor DarkGray
+        Write-Host ""
+        $seed = Show-Field $entries[$k - 1] $prefix
+        if ($seed -eq '-') { $seed = '' }
+        $notes = @()
+        $typed = Read-Seeded "  > " $seed
+        if ($null -eq $typed) { continue }
+
+        $literal = Format-FieldLiteral $entries[$k - 1] $typed $prefix ([ref]$notes)
+        if ($null -eq $literal) {
+            Write-Host "  That field holds a number; leaving it as it was." -ForegroundColor Yellow
+            Read-Host "  Press Enter to continue" | Out-Null
+            continue
+        }
+        # Coverage is reported before the row is touched, not after the write: a roster naming a
+        # slot only some factions fill still compiles, and the only sign at runtime is a group that
+        # spawns short on those factions.
+        $bad = @($notes | Where-Object { $_.Coverage -lt $_.Total })
+        if ($bad.Count -gt 0) {
+            Write-Host ""
+            foreach ($n in $bad) {
+                if ($n.Coverage -eq 0) {
+                    Write-Host ("  {0}: no faction file defines this slot -- it would spawn nothing." -f $n.Name) -ForegroundColor Red
+                } else {
+                    Write-Host ("  {0}: defined by {1} of {2} faction files -- thins on the rest." -f $n.Name, $n.Coverage, $n.Total) -ForegroundColor Yellow
+                }
+            }
+            Write-Host ""
+            if ((Read-Host "  Keep it anyway? (y/N)") -notmatch '^\s*[Yy]') { continue }
+        }
+        if ($literal -ne $entries[$k - 1]) { $entries[$k - 1] = $literal; $changed = $true }
+    }
+    if (-not $changed) { return $null }
+    return '[' + ($entries -join ', ') + ']'
+}
+
+# Fixed-column tables: a row is a thing with named parts (a group kind, a purchasable squad) rather
+# than a free-length list, so it is picked apart by field instead of by entry index.
+function Invoke-EditFieldComp($uc) {
     $varName = if ($uc.Body -match '(?m)^\s*(\w+)\s*=') { $Matches[1] } else { $null }
     if (-not $varName) { Write-Host "Could not read the table's variable name." -ForegroundColor Red; return }
     $indent = if ($uc.Body -match '(?m)^([ \t]+)\[') { $Matches[1] } else { '    ' }
-    $rows = @(Split-Rows $uc.Body)
+    $rows   = Split-Rows $uc.Body
+    $fields = @($uc.Fields -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' })
+    $rel    = if ($uc.File.StartsWith($root)) { $uc.File.Substring($root.Length).TrimStart('\', '/') } else { $uc.File }
+    $dirty  = $false
+
+    while ($true) {
+        Clear-Host
+        Write-Host "Unit composition: $varName" -ForegroundColor Cyan
+        Write-Host "======================================"
+        Write-Host ""
+        Write-Host ("  {0}" -f $uc.Name) -ForegroundColor Cyan
+        Write-Host ("  file: {0}" -f $rel)
+        Write-Host ""
+        for ($i = 0; $i -lt $rows.Count; $i++) {
+            $entries = Split-Entries $rows[$i]
+            Write-Host ("  {0,2}. {1}" -f ($i + 1), (Show-Field $entries[0] $uc.Prefix)) -ForegroundColor White
+            for ($j = 1; $j -lt $entries.Count; $j++) {
+                $label = if ($j -lt $fields.Count) { $fields[$j] } else { "field $($j + 1)" }
+                Write-Host ("        {0,-20} {1}" -f $label, (Show-Field $entries[$j] $uc.Prefix)) -ForegroundColor Gray
+            }
+        }
+        Write-Host ""
+        if ($dirty) { Write-Host "  * unsaved changes" -ForegroundColor Yellow; Write-Host "" }
+        Write-Host "   <n>. Edit that row        W. Write back to source"
+        Write-Host "   B. Back (discards unsaved changes)"
+        Write-Host ""
+        $sel = Read-Host "Select"
+
+        if ($sel -match '^\s*[Bb]\s*$') { break }
+        elseif ($sel -match '^\s*[Ww]\s*$') {
+            if (-not $dirty) { Write-Host "No changes to write." -ForegroundColor Yellow }
+            elseif (Save-UnitComp $uc $varName $rows $indent) {
+                Write-Host "Written. Review the diff before committing." -ForegroundColor Green
+                $uc.Body = Format-UnitBody $varName $rows $indent
+                $dirty = $false
+            }
+            Read-Host "Press Enter to continue" | Out-Null
+        }
+        elseif ($sel -match '^\s*(\d+)\s*$' -and [int]$Matches[1] -ge 1 -and [int]$Matches[1] -le $rows.Count) {
+            $n = [int]$Matches[1]
+            $new = Invoke-EditRow $rows[$n - 1] $fields $uc.Prefix ("{0} -- row {1}" -f $uc.Name, $n)
+            if ($null -ne $new) { $rows[$n - 1] = $new; $dirty = $true }
+        }
+    }
+}
+
+function Invoke-EditUnitComp($uc) {
+    if ($uc.Fields -ne '') { Invoke-EditFieldComp $uc; return }
+    $varName = if ($uc.Body -match '(?m)^\s*(\w+)\s*=') { $Matches[1] } else { $null }
+    if (-not $varName) { Write-Host "Could not read the table's variable name." -ForegroundColor Red; return }
+    $indent = if ($uc.Body -match '(?m)^([ \t]+)\[') { $Matches[1] } else { '    ' }
+    $rows = Split-Rows $uc.Body
     $dirty = $false
 
     while ($true) {
@@ -372,14 +633,21 @@ function Invoke-EditUnitComp($uc) {
                 Read-Host "Press Enter to continue" | Out-Null
                 continue
             }
-            $entries = @(Split-Entries $rows[$n - 1])
+            $entries = Split-Entries $rows[$n - 1]
 
             if ($act -eq 'R') {
-                Write-Host ("Current: {0}" -f $rows[$n - 1])
-                $raw = Read-Host 'New entries, comma separated (tokens unquoted, e.g. patrol, team, car)'
-                $new = @($raw -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' })
-                $rows[$n - 1] = '[' + (($new | ForEach-Object { Format-Entry $_ }) -join ', ') + ']'
-                $dirty = $true
+                Clear-Host
+                Write-Host ("{0} -- row {1}" -f $uc.Name, $n) -ForegroundColor Cyan
+                Write-Host "======================================"
+                Write-Host ""
+                Write-Host "  Comma separated, tokens unquoted. Enter accepts, Escape cancels." -ForegroundColor DarkGray
+                Write-Host ""
+                $raw = Read-Seeded "  > " ((($entries | ForEach-Object { $_.Trim().Trim('"') }) -join ', '))
+                if ($null -ne $raw) {
+                    $new = @($raw -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' })
+                    $rows[$n - 1] = '[' + (($new | ForEach-Object { Format-Entry $_ }) -join ', ') + ']'
+                    $dirty = $true
+                }
             }
             elseif ($act -eq 'A') {
                 $raw = Read-Host 'Entry to add'

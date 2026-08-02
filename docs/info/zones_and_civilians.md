@@ -643,7 +643,7 @@ wears down. Those two mechanisms are shared outright, and everything else is del
 |---|---|---|
 | Attrition | `fnc_garrison_strength_init.sqf` | One store keyed by a string — `zone_<x>_<y>` or `town_<n>`. Owns the tenths rule, the `0.3` floor and the lower-only record. `fnc_zone_strength*` and `fnc_town_garrison_*Strength` are thin wrappers naming their key |
 | Raising men | `DUWS_fnc_raiseGarrison` | The stagger, the search flag and the `buildings` token are rules about raising a garrison, not about which ground is raising one |
-| Token vocabulary | `DUWS_fnc_zoneSpawnOne`, `fnc_zone_thin`, `DUWS_fnc_spawnDiff` | A group kind means the same thing wherever it is spawned |
+| Token vocabulary | `DUWS_fnc_zoneSpawnOne`, `DUWS_fnc_groupRoster`, `fnc_zone_thin`, `DUWS_fnc_spawnDiff` | A group kind means the same thing wherever it is spawned, down to the men it fields |
 
 **Not shared, and not candidates for it:** ownership (a list versus a reputation band), what a capture
 means, the holds, the two purchases, and composition props — a zone stows and redeploys a prefab and

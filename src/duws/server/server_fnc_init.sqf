@@ -222,7 +222,6 @@ fnc_spawnWait = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_sp
 fnc_createopfortified = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createopfortified.sqf";
 fnc_createoppatrol_sniper = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createoppatrol_sniper.sqf";
 fnc_createoppatrol2 = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createoppatrol2.sqf";
-fnc_createopteam = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createopteam.sqf";
 fnc_createopteam2 = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createopteam2.sqf";
 fnc_createopwpteam = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_createopwpteam.sqf";
 fnc_random_veh = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_random_veh.sqf";
