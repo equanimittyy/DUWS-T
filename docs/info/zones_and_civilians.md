@@ -212,7 +212,18 @@ radius-band table topped out. Towns are not multiplied by radius at all — see
 A zone remembers what was left of its garrison when it streamed out. `fnc_spawnWait` calls
 `fnc_zone_strength_record` on the despawn exit — before the peak is cleared and before the sweep
 deletes the survivors it counts — and that stores `survivors / original` in tenths, rounded up and
-floored at `0.3`. Everything the zone raises on its next arrival scales by that fraction: the tier
+floored at `0.3`.
+
+**Garrison men are deleted by roster, never by proximity, and the rule is campaign-wide.** Town discs
+overlap zone circles by design and a side mission lands where it lands, so any sweep that collects by
+radius will find another system's men standing in its circle. Delete them and that system measures
+its survivors against its baseline, records a mauling that never happened, and comes back thinned
+every visit after.
+
+Zones and towns each stream their own out by roster. A sweep that has no roster — `fnc_mission_cleanup`
+is the one left — instead spares anything carrying `DUWS_garrisonUnit`, set on every man
+`DUWS_fnc_raiseGarrison` raises and on the turret crews `fnc_spawnWait` mans a zone's emplacements
+with. The flag rides the vehicle as well as the man, or deleting a transport takes its crew with it. Everything the zone raises on its next arrival scales by that fraction: the tier
 composition drops tokens at random (`fnc_zone_spawn_sizes.sqf`), the fortification builder thins its
 defence section and holds fewer buildings and fewer towers (`fnc_createopfortified.sqf`), and fewer
 of the composition's statics are re-crewed (`fnc_spawnWait.sqf`). The mortar pair is the one
@@ -615,8 +626,8 @@ about.
 |---|---|---|
 | Generated | OPFOR-held. Rolls a tier I–IV, weighted to IV. Strength `1.0`. No men | tier + full bar |
 | You come within radius + 400 m | Props deploy, turret crews man the prefab's guns, the band is raised: tier composition × per-category radius multiplier, thinned by strength. Peak published | tier + bar |
-| You leave for 2 min | Survivors counted, strength recorded (never upward), men deleted, props stowed, peak cleared | tier + the bar it will return at |
-| You beat it to 20 % **and** hold within 50 m of centre | Ownership flips. CP bounty, AP swings. Survivors are *ordered out*, not deleted — a capture is watched by definition. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
+| You leave for 2 min | Survivors counted, strength recorded (never upward), the zone's own men deleted by roster, props stowed, peak cleared | tier + the bar it will return at |
+| You beat it to 20 % **and** outnumber the OPFOR left in the zone | Ownership flips. CP bounty, AP swings. Survivors are sent off and then collected once no player is within 500 m — a capture is watched by definition. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
 | OPFOR retake (`EAST SEIZED`) | Strength floored to `0.3`. Streaming re-latches | **`Mobilising`** |
 | The commander spends *(planned)* | Upgrade buys composition, reinforce buys strength — the same two sinks a town has, on the same ground rules. No purchase refusal is needed: a zone has no `Regrouping` state to protect | tier + bar |
 | You return, after the ring has been empty once | Garrison raised at whatever it now stands at, peak published | tier + bar |

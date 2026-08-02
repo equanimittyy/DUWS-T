@@ -98,8 +98,15 @@ if (_close == false) then {
         // The persistent flag outranks proximity. This is a blunt radius delete, and a side
         // mission drawn near a player FOB or the HQ puts their buildings inside it -- without
         // this the teardown would take a standing composition apart on its way past.
+        //
+        // DUWS_garrisonUnit is the same rule for men rather than buildings. A zone and a town each
+        // stream their own garrison out by roster; a mission lands where it lands, and one drawn on
+        // a town disc used to delete that town's garrison on the way out. The town then measured its
+        // survivors against its baseline, recorded a mauling nobody inflicted, and returned thinned
+        // every visit after. A mission never raises a flagged unit, so this needs no owner test.
         if (!(_x in _protected)
             && !(_x getVariable ["persistent", false])
+            && !(_x getVariable ["DUWS_garrisonUnit", false])
             && !_sparedSide
             && !(typeOf _x in _zombieClasses)) then {
             deleteVehicleCrew _x;

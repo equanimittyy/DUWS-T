@@ -54,7 +54,10 @@ private _manStatics = {
 	// as a spawned one, so he joins the roster rather than holding the objective off the books:
 	// unrostered, he denies capture through fnc_opfor_count_at while counting toward neither the
 	// peak nor the break line, so killing him is progress the zone never registers.
-	{ _roster append (crew _x) } forEach (_statics select {count crew _x > 0});
+	{
+		{ _x setVariable ["DUWS_garrisonUnit", true] } forEach crew _x;
+		_roster append (crew _x);
+	} forEach (_statics select {count crew _x > 0});
 
 	private _guns = _statics select {count crew _x == 0};
 	if (count _guns == 0) exitWith {};
@@ -73,6 +76,9 @@ private _manStatics = {
 		private _unit = (units _grp) param [_forEachIndex, objNull];
 		if (!isNull _unit) then { _unit moveInGunner _x };
 	} forEach _guns;
+	// Flagged like everything DUWS_fnc_raiseGarrison raises: these are the zone's garrison too, and
+	// a blunt radius sweep has no other way to know it.
+	{ _x setVariable ["DUWS_garrisonUnit", true] } forEach units _grp;
 	_roster append (units _grp);
 	// Searchable on the same terms as the rest of the garrison. A gunner is the one defender a
 	// player is certain to have to kill, so leaving him unflagged made the objective itself the
@@ -224,21 +230,19 @@ while {true} do {
 		// CLEANUP ZONE
 		if (_despawn) then {
 			(zone_spawn_array select _index) set [1,false];
-			_zoneObj = _spawnPos nearObjects (_size + _AI_buffer);
-			// Every EAST man and vehicle in the ring, whoever spawned them. Nobody is inside the
-			// despawn radius by the time this runs, which is what makes deleting them safe.
-			{
-				// Delete vehicles and crew
-				if (side _x == EAST && !(_x isKindOf "StaticWeapon") && !(_x isKindOf "Man")) then {
-					deleteVehicleCrew _x;
-					deleteVehicle _x;
-				};
-				// Delete units not in vehicles
-				if (side _x == EAST && _x isKindOf "Man" && vehicle _x == _x) then {
-					deleteVehicle _x;
-				};
-
-			} foreach _zoneObj;
+			// By roster, not by proximity. This swept every EAST man inside _size + _AI_buffer
+			// whoever raised them, and town discs overlap zone circles by design -- so a zone
+			// streaming out took the neighbouring town's garrison with it. The town then measured
+			// its survivors against its baseline, recorded a mauling that never happened, and came
+			// back thinned for the rest of the campaign. Nothing standing in the ring that is not on
+			// this roster is this zone's to delete; whoever raised it streams it out themselves.
+			private _men = ([_zoneKey] call fnc_zone_roster) select { !isNull _x };
+			private _vehs = [];
+			{ if (vehicle _x != _x) then { _vehs pushBackUnique (vehicle _x) } } forEach _men;
+			{ deleteVehicle _x } forEach _men;
+			// After the men, and only if nothing else is aboard: a transport the zone crewed goes
+			// with its crew, while one the player left in the ring is not on this roster and stays.
+			{ if (({alive _x} count crew _x) == 0) then { deleteVehicle _x } } forEach _vehs;
 
 			[_zoneKey] call _stowZone;
 		} else {

@@ -159,7 +159,19 @@ DUWS_fnc_raiseGarrison = {
             if (!isNull _g) then { [_g, "garrison"] call fnc_search_flag_group };
             _g
         };
-        if (!isNull _grp) then { _grps pushBack _grp };
+        if (!isNull _grp) then {
+            // Marked as somebody's garrison. A zone and a town each stream their own out by roster,
+            // which is the rule -- but a side mission's teardown deletes by radius and has no way to
+            // tell whose men it is standing among, and a mission that lands on a town disc used to
+            // take that town's garrison with it. The town then measured its survivors against its
+            // baseline, recorded a mauling nobody inflicted, and came back thinned every visit
+            // after. The vehicle carries the flag too, or deleting it takes its crew regardless.
+            {
+                _x setVariable ["DUWS_garrisonUnit", true];
+                if (vehicle _x != _x) then { (vehicle _x) setVariable ["DUWS_garrisonUnit", true] };
+            } forEach units _grp;
+            _grps pushBack _grp;
+        };
         if (_forEachIndex < (count _tokens) - 1) then { sleep 5 };
     } forEach _tokens;
     _grps
