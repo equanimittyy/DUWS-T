@@ -178,7 +178,7 @@ class CfgNotifications
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
     // These two exist for their icon alone: a support unlock is white like every other one, and the
-    // shared white card would put a warning triangle over "VA Arsenal / Unlocked".
+    // shared white card would put a warning triangle over "VA Arsenal (10 CP)".
     class armory
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.

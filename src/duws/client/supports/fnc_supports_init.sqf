@@ -13,41 +13,38 @@
 // The catalogue: one ordered list, permanent rows first, read by both the menu build
 // (client/dialog/fnc_request_menu.sqf) and the buy/refund handler. Row order used to be literal
 // indices agreed between those two files, so adding a row anywhere but the end silently
-// repointed every row below it at another support's price, flag and unlock line.
+// repointed every row below it at another support's price, flag and comm item.
 //
-// [key, kind, cost, flag, label, comm item, speaker, unlock line, wrap in fnc_cs, insurgent-blocked, MODERN-only]
-//
-// An empty unlock line means the row announces itself by notification alone, which is what the
-// two depot stations have always done.
+// [key, kind, cost, flag, label, comm item, insurgent-blocked, MODERN-only]
 fnc_support_defs = {
 	private _defs = [
-		["armory",    "PERM", 10, "support_armory_available",      "STR_DUWS_T_kw2lnaig",             "",           "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_arsenalunlock",     false, false, false],
-		["halo",      "PERM", 15, "support_halo_available",        "STR_DUWS_T_xghf3qqd",             "",           "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_HALOunlock",        false, true,  false],
-		["repair",    "PERM",  5, "support_veh_repair_available",  "STR_DUWS_T_vehicle_repair",       "",           "",                          "",                             false, false, false],
-		["recycle",   "PERM",  5, "support_veh_recycle_available", "STR_DUWS_T_recyclestation1",    "",           "",                          "",                             false, false, false],
-		["mobile_HQ", "PERM", 10, "support_mobile_HQ_available",   "STR_DUWS_T_b7gmddq3",             "",           "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_mhqunlock",         false, false, false],
-		["fob",       "PERM", 10, "support_FOB_available",         "STR_DUWS_T_fob_request_row",      "fob_support","STR_DUWS_T_OVERLORD",       "STR_DUWS_T_fobunlock",         false, false, false],
+		["armory",    "PERM", 10, "support_armory_available",      "STR_DUWS_T_kw2lnaig",             "",           false, false],
+		["halo",      "PERM", 15, "support_halo_available",        "STR_DUWS_T_xghf3qqd",             "",           true,  false],
+		["repair",    "PERM",  5, "support_veh_repair_available",  "STR_DUWS_T_vehicle_repair",       "",           false, false],
+		["recycle",   "PERM",  5, "support_veh_recycle_available", "STR_DUWS_T_recyclestation1",    "",           false, false],
+		["mobile_HQ", "PERM", 10, "support_mobile_HQ_available",   "STR_DUWS_T_b7gmddq3",             "",           false, false],
+		["fob",       "PERM", 10, "support_FOB_available",         "STR_DUWS_T_fob_request_row",      "fob_support",false, false],
 
 		// The designation radio, a slot at a time rather than handed to every lead on unlock. Free
 		// because the team paid at the permanent row: what this costs is the slot.
-		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_mhqslotunlock",     false, false, false],
-		["supply",    "CONS",  5, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_supplydropunlock",  true,  false, false],
-		["veh_drop",  "CONS",  5, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_vehicledropunlock", true,  false, true],
-		["siva",      "CONS", 10, "support_siva_drop_available",   "STR_DUWS_T_jjzzkt01",             "siva_drop",  "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_sivaunlock",        false, true,  true],
-		["sawp",      "CONS", 10, "support_sawp_drop_available",   "STR_DUWS_T_sawp1234",             "sawp_drop",  "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_sawpunlock",        false, true,  false],
-		["uav",       "CONS", 10, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_uavunlock",         false, true,  true],
-		["helotaxi",  "CONS",  5, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_helotaxiunlock",    false, false, true],
-		["helolift",  "CONS", 10, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_heloliftunlock",    false, false, true],
-		["boattaxi",  "CONS",  2, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_boattaxiunlock",    false, false, false],
-		["arty",      "CONS", 20, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_artyunlock",        false, true,  false],
-		["mortar",    "CONS", 10, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     "STR_DUWS_T_slingshot",      "STR_DUWS_T_mtrunlock",         false, false, false],
-		["jdam",      "CONS", 10, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_jdamunlock",        true,  true,  true],
-		["laser",     "CONS", 10, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_laserguidedunlock", false, true,  true],
-		["cluster",   "CONS", 25, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_clusterunlock",     true,  true,  true],
-		["napalm",    "CONS", 20, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_napalmunlock",      true,  true,  false],
-		["hcAttChop", "CONS", 20, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", "STR_DUWS_T_longbowpilot", "STR_DUWS_T_hcchopperunlock",   false, true,  true],
-		["hcCAS",     "CONS", 25, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     "STR_DUWS_T_koipilot",       "STR_DUWS_T_hcjetunlock",       true,  true,  true],
-		["paradrop",  "CONS", 20, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_paradropunlock",    false, true,  false]
+		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false, false],
+		["supply",    "CONS",  5, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       false, false],
+		["veh_drop",  "CONS",  5, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   false, true],
+		["siva",      "CONS", 10, "support_siva_drop_available",   "STR_DUWS_T_jjzzkt01",             "siva_drop",  true,  true],
+		["sawp",      "CONS", 10, "support_sawp_drop_available",   "STR_DUWS_T_sawp1234",             "sawp_drop",  true,  false],
+		["uav",       "CONS", 10, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true,  true],
+		["helotaxi",  "CONS",  5, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false, true],
+		["helolift",  "CONS", 10, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false, true],
+		["boattaxi",  "CONS",  2, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  false, false],
+		["arty",      "CONS", 20, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  false],
+		["mortar",    "CONS", 10, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false, false],
+		["jdam",      "CONS", 10, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,  true],
+		["laser",     "CONS", 10, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,  true],
+		["cluster",   "CONS", 25, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  true],
+		["napalm",    "CONS", 20, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  false],
+		["hcAttChop", "CONS", 20, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  true],
+		["hcCAS",     "CONS", 25, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  true],
+		["paradrop",  "CONS", 20, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   true,  false]
 	];
 
 	// A row that cannot apply is absent rather than greyed, so nothing downstream needs a second
@@ -56,7 +53,7 @@ fnc_support_defs = {
 	_defs select {
 		private _key = _x select 0;
 		private _keep = true;
-		if ((_x select 10) && {VERSION_X != "MODERN"}) then { _keep = false };
+		if ((_x select 7) && {VERSION_X != "MODERN"}) then { _keep = false };
 		// A FOB is not offered until a zone has been taken, which is what the comm item it grants
 		// used to wait on.
 		if (_key == "fob" && {zoneundercontrolblu < 1}) then { _keep = false };
@@ -133,7 +130,7 @@ fnc_support_comm_drop = {
 fnc_support_buy = {
 	params [["_def", []]];
 	if (_def isEqualTo []) exitWith { false };
-	_def params ["_key", "_kind", "_cost", "_flagVar", "_labelKey", "_commItem", "_speakerKey", "_msgKey", "_useCs", "_insBlocked"];
+	_def params ["_key", "_kind", "_cost", "_flagVar", "_labelKey", "_commItem", "_insBlocked"];
 
 	private _insurgent = !isNil "insurgent_mode_enable" && {insurgent_mode_enable};
 	if (_insBlocked && _insurgent) exitWith { hint localize "STR_DUWS_T_inssupport"; false };
@@ -165,11 +162,6 @@ fnc_support_buy = {
 
 	[_key] call fnc_support_apply;
 	[_commItem] call fnc_support_comm_add;
-	if (_msgKey != "") then {
-		private _message = localize _msgKey;
-		if (_useCs) then { _message = [_message] call fnc_cs };
-		[localize _speakerKey, _message] remoteExec ["fnc_duws_dialogue", 0];
-	};
 	ctrlSetText [1000, format ["%1", commandpointsblu1]];
 	playSound "boots";
 	true
@@ -185,7 +177,7 @@ fnc_support_apply = {
 			private _arsenal = [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 80, true, true, "", "_this == player"];
 			bluHQ_object addAction _arsenal;
 			{ _x addAction _arsenal } forEach Array_of_FOBS;
-			["armory", [localize "STR_DUWS_T_sg49vbhh", localize "STR_DUWS_T_SUPPORT_UNLOCKED"]] call bis_fnc_showNotification;
+			["armory", [localize "STR_DUWS_T_kw2lnaig", ""]] call bis_fnc_showNotification;
 		};
 		case "halo": {
 			private _sites = [bluHQ_object] + Array_of_FOBS;
@@ -196,12 +188,12 @@ fnc_support_apply = {
 					_x addAction [ACT_MOVE("STR_DUWS_T_halo_ai_only"), fnc_ghst_halo, [true,600,70,true], 70, true, true, "", "alive player"];
 				};
 			} forEach _sites;
-			["halo", [localize "STR_DUWS_T_0m2mxf4u", localize "STR_DUWS_T_SUPPORT_UNLOCKED"]] call bis_fnc_showNotification;
+			["halo", [localize "STR_DUWS_T_xghf3qqd", ""]] call bis_fnc_showNotification;
 		};
 		case "repair":  { [] remoteExec ["fnc_activateBaseRepairStation", 2] };
 		case "recycle": { [] remoteExec ["fnc_activateBaseRecycleStation", 2] };
 		case "mobile_HQ": {
-			["info", [localize "STR_DUWS_T_MHQ_NAME", localize "STR_DUWS_T_SUPPORT_UNLOCKED"]] call bis_fnc_showNotification;
+			["info", [localize "STR_DUWS_T_b7gmddq3", ""]] call bis_fnc_showNotification;
 		};
 	};
 };

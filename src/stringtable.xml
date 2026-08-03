@@ -3556,10 +3556,6 @@
                 <Original>Release Mobile HQ</Original>
                 <English>Release Mobile HQ</English>
             </Key>
-            <Key ID="STR_DUWS_T_MHQ_NAME">
-                <Original>Mobile HQ</Original>
-                <English>Mobile HQ</English>
-            </Key>
             <Key ID="STR_DUWS_T_MHQ_LOCKOUT">
                 <Original>Last Mobile HQ destroyed. Name another in %1 min</Original>
                 <English>Last Mobile HQ destroyed. Name another in %1 min</English>
@@ -3567,10 +3563,6 @@
             <Key ID="STR_DUWS_T_mhq_slot_row">
                 <Original>Mobile HQ Designation (0 CP) Radio</Original>
                 <English>Mobile HQ Designation (0 CP) Radio</English>
-            </Key>
-            <Key ID="STR_DUWS_T_mhqslotunlock">
-                <Original>Designation authority is yours. Point at a vehicle and call it in.</Original>
-                <English>Designation authority is yours. Point at a vehicle and call it in.</English>
             </Key>
             <Key ID="STR_DUWS_T_MHQ_RELEASED_TITLE">
                 <Original>Mobile HQ Released</Original>
@@ -4819,21 +4811,6 @@
                 <Original>Roger, Vehicle Recycling Station is being deployed...</Original>
                 <English>Roger, Vehicle Recycling Station is being deployed...</English>
             </Key>
-            <Key ID="STR_DUWS_T_recyclestation2">
-                <German>Fahrzeugrecyclingstation</German>
-                <Spanish>Estación de Reciclaje de Vehículos</Spanish>
-                <Chinesesimp>载具回收站</Chinesesimp>
-                <Original>Vehicle Recycling Station</Original>
-                <English>Vehicle Recycling Station</English>
-            </Key>
-            <Key ID="STR_DUWS_T_SUPPORT_UNLOCKED">
-                <Original>Unlocked</Original>
-                <English>Unlocked</English>
-            </Key>
-            <Key ID="STR_DUWS_T_REPAIR_STATION_NAME">
-                <Original>Vehicle Modification Station</Original>
-                <English>Vehicle Modification Station</English>
-            </Key>
             <Key ID="STR_DUWS_T_OPERATOR_HEALED">
                 <Original>Operator Healed</Original>
                 <English>Operator Healed</English>
@@ -5311,13 +5288,6 @@
                 <Original>This support is already available.</Original>
                 <English>This support is already available.</English>
             </Key>
-            <Key ID="STR_DUWS_T_sg49vbhh">
-                <German>Virtuelles Arsenal freigeschaltet</German>
-                <Spanish>Arsenal desbloqueado</Spanish>
-                <Chinesesimp>军火库解锁了</Chinesesimp>
-                <Original>VA Arsenal</Original>
-                <English>VA Arsenal</English>
-            </Key>
             <Key ID="STR_DUWS_T_foldimok">
                 <German>HALO Solo</German>
                 <Spanish>HALO solo</Spanish>
@@ -5331,13 +5301,6 @@
                 <Chinesesimp>班组空降</Chinesesimp>
                 <Original>HALO Group</Original>
                 <English>HALO Group</English>
-            </Key>
-            <Key ID="STR_DUWS_T_0m2mxf4u">
-                <German>HALO freigeschaltet</German>
-                <Spanish>Salto HALO desbloqueado</Spanish>
-                <Chinesesimp>空降已解锁</Chinesesimp>
-                <Original>HALO Jump</Original>
-                <English>HALO Jump</English>
             </Key>
             <Key ID="STR_DUWS_T_dvbox9ay">
                 <German>Du musst einige Minuten warten bis die Auswahl wieder im 0-8 Menü zur Anforderung bereitsteht!</German>
@@ -5773,62 +5736,6 @@
                 <Original>Come on out, we've got a way to go.</Original>
                 <English>Come on out, we've got a way to go.</English>
             </Key>
-            <Key ID="STR_DUWS_T_arsenalunlock">
-                <German>Hier spricht "Overlord 1-1", das Arsenal ist ab sofort im Hauptquartier und in der vorläufigen Operationsbasis nutzbar.</German>
-                <Spanish>Aquí "Overlord 1-1", el arsenal ya está disponible en el cuartel general y la base operativa avanzada.</Spanish>
-                <Chinesesimp>军火库现可在总部、前线作战基地以及补给箱内使用。</Chinesesimp>
-                <Original>The arsenal is now available at HQ, FOBs and supply crates.</Original>
-                <English>The arsenal is now available at HQ, FOBs and supply crates.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_vehicledropunlock">
-                <German>"Overlord 1-1" an Action Squad, die dringende Lieferung ziviler Fahrzeuge ist ab sofort nutzbar.</German>
-                <Spanish>"Overlord 1-1" a Action Squad, el envío de vehículos civiles de emergencia ya está disponible.</Spanish>
-                <Chinesesimp>行动组，民用载具紧急投送现可使用。</Chinesesimp>
-                <Original>To Alpha 1-1, emergency civilian vehicle delivery is now available.</Original>
-                <English>To Alpha 1-1, emergency civilian vehicle delivery is now available.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_sivaunlock">
-                <German>Achtung, der Luftabwurf von Truppeneinführungsfahrzeugen für die Infiltration ist ab sofort nutzbar.</German>
-                <Spanish>Atención, el lanzamiento aéreo de vehículos de infiltración de escuadrón ya está disponible.</Spanish>
-                <Chinesesimp>注意，班组渗透载具投送现可使用。</Chinesesimp>
-                <Original>Be advised, Squad Infil Vehicle Airdrop is now available.</Original>
-                <English>Be advised, Squad Infil Vehicle Airdrop is now available.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_sawpunlock">
-                <German>Hier spricht "Overlord 1-1", Achtung – deine Einheit ist berechtigt, das SAWP (Truppenersturmwaffen-Paket) zu nutzen.</German>
-                <Spanish>Aquí "Overlord 1-1", Atención – tu unidad está autorizada a usar el SAWP (kit de armas de asalto de escuadrón).</Spanish>
-                <Chinesesimp>注意，你的单位已被授权使用班组突击武器包。(SAWP)</Chinesesimp>
-                <Original>Be advised: you're now authorized to call in the SAWP (Squad Assault Weapon Pack).</Original>
-                <English>Be advised: you're now authorized to call in the SAWP (Squad Assault Weapon Pack).</English>
-            </Key>
-            <Key ID="STR_DUWS_T_HALOunlock">
-                <German>Eigene schwere Transportflugzeuge sind online und stehen jederzeit für den Personal-Luftabwurf bereit.</German>
-                <Spanish>La aeronave de transporte pesado propio está en línea, lista para el lanzamiento aéreo de personal en cualquier momento.</Spanish>
-                <Chinesesimp>我方重型运输机上线了，随时准备进行人员空投。</Chinesesimp>
-                <Original>Friendly heavy transport aircraft is on station, standing by for personnel airdrop on request.</Original>
-                <English>Friendly heavy transport aircraft is on station, standing by for personnel airdrop on request.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_uavunlock">
-                <German>Eigene unbemannten Aufklärungsflugzeug einsatzbereit.</German>
-                <Spanish>UAV de reconocimiento aliado en servicio.</Spanish>
-                <Chinesesimp>我方无人侦察机上线了。</Chinesesimp>
-                <Original>Be advised, friendly UAV recon is on station.</Original>
-                <English>Be advised, friendly UAV recon is on station.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_helotaxiunlock">
-                <German>Ein Transportflugzeug Ihrem Trupp zugewiesen – rufen Sie es über Ihr Unterstützungsterminal an.</German>
-                <Spanish>Un avión de transporte asignado a tu unidad – llámalo por tu terminal de apoyo.</Spanish>
-                <Chinesesimp>一架运输机已被配给至你的单位，在你的支援终端呼叫它。</Chinesesimp>
-                <Original>Be advised, a transport aircraft is assigned to you and standing by on request.</Original>
-                <English>Be advised, a transport aircraft is assigned to you and standing by on request.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_heloliftunlock">
-                <German>Freundliche Kräfte haben gerade das örtliche zivile Hangar gesichert und ein schweres Transportflugzeug gefunden, das nun schwere Fahrzeuge sling-loaden kann.</German>
-                <Spanish>Las fuerzas amigas acaban de asegurar el hangar civil local y han encontrado un avión de transporte pesado, que ahora puede realizar sling load de vehículos pesados.</Spanish>
-                <Chinesesimp>友军刚刚控制了当地的民用机库并发现了一架重型运输机————现可承担重型载具吊装任务。</Chinesesimp>
-                <Original>Be advised, a heavy transport aircraft is on station and can sling-load vehicles on request.</Original>
-                <English>Be advised, a heavy transport aircraft is on station and can sling-load vehicles on request.</English>
-            </Key>
             <Key ID="STR_DUWS_T_heloliftcall">
                 <German>Hier ist Action Squad, wir haben a Fahrzeug an unserer Position, das slinggeladen werden muss. Anforderung eines schweren Transportflugzeugs.</German>
                 <Spanish>Aquí Action Squad, tenemos a vehículo en nuestra posición que necesita ser slingload. Solicitamos avión de transporte pesado.</Spanish>
@@ -6118,68 +6025,12 @@
                 <Original>Alpha 1-1. New close air support inbound, callsign Longbow 1-1.</Original>
                 <English>Alpha 1-1. New close air support inbound, callsign Longbow 1-1.</English>
             </Key>
-            <Key ID="STR_DUWS_T_boattaxiunlock">
-                <German>Hier ist die Disposition – nahe gelegenes Bootsteam ist transportbereit.</German>
-                <Spanish>Este es el Despacho – equipo de barcos cercano listo para el transporte.</Spanish>
-                <Chinesesimp>附近的舟艇队已经做好运输准备。</Chinesesimp>
-                <Original>A boat team in your area is ready for transport.</Original>
-                <English>A boat team in your area is ready for transport.</English>
-            </Key>
             <Key ID="STR_DUWS_T_boattaxicall">
                 <German>Action Squad, hier ist Disposition – das Bootsteam in Ihrer Nähe kommt zur Evakuierung, achten Sie auf Freundfeindfeuer.</German>
                 <Spanish>Action Squad, este es Despacho – el equipo de embarcaciones cerca de tu posición viene a evacuarte, ten cuidado con el fuego amigo.</Spanish>
                 <Chinesesimp>行动组。你位置附近的舟艇队正在赶来接送，注意友军火力。</Chinesesimp>
                 <Original>Alpha 1-1. The boat team near you is en route for extraction. Watch your fire.</Original>
                 <English>Alpha 1-1. The boat team near you is en route for extraction. Watch your fire.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_artyunlock">
-                <German>Achtung, feindlichefreundliche 155-mm-Artillerie steht bereit. Nutze diese wertvollen Ressourcen sinnvoll.</German>
-                <Spanish>Atención, el grupo de artillería de 155 mm aliado está en espera. Usa estas valiosas reservas con prudencia.</Spanish>
-                <Chinesesimp>注意，友军155毫米炮组正在待命。好好使用这些珍贵资源。</Chinesesimp>
-                <Original>Be advised, friendly 155mm artillery team standing by.</Original>
-                <English>Be advised, friendly 155mm artillery team standing by.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_mtrunlock">
-                <German>Hier ist Slingshot 1-1 – wir sind bereit, indirekten Feuerschutz zu leisten.</German>
-                <Spanish>Este es Slingshot 1-1 – estamos listos para brindar apoyo de fuego indirecto.</Spanish>
-                <Chinesesimp>我们已经准备好提供曲射火力支援。</Chinesesimp>
-                <Original>Standing by to provide indirect fire support.</Original>
-                <English>Standing by to provide indirect fire support.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_jdamunlock">
-                <German>Disposition an Action Squad – Sie sind berechtigt, JDAM-Bombenabwürfe anzufordern.</German>
-                <Spanish>Despacho a Action Squad – autorizado para solicitar lanzamiento de bombas JDAM.</Spanish>
-                <Chinesesimp>行动组，你已被授权呼叫杰达姆炸弹投送。</Chinesesimp>
-                <Original>To Alpha 1-1, you're authorized to call in JDAM strikes.</Original>
-                <English>To Alpha 1-1, you're authorized to call in JDAM strikes.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_laserguidedunlock">
-                <German>Achtung, befreundete Jagdflugzeuge warten im AO-Luftraum bereit – sofort bereit für die Abwurf von lasergeleiteten Bomben.</German>
-                <Spanish>Atención, aviones de caza aliados en espera en el espacio aéreo del AO – listos para lanzar bombas guiadas por láser en cualquier momento.</Spanish>
-                <Chinesesimp>注意，友军战机已在战区空域待命，随时准备投送激光制导炸弹。</Chinesesimp>
-                <Original>Be advised, friendly fast air is standing by in AO airspace, ready for laser-guided bomb runs.</Original>
-                <English>Be advised, friendly fast air is standing by in AO airspace, ready for laser-guided bomb runs.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_clusterunlock">
-                <German>"Overlord" an Action Squad, befreundete Starrflügelflugzeuge können jetzt Streubomben an der Front einsetzen.</German>
-                <Spanish>"Overlord" al Action Squad, las aeronaves de ala fija amigas ya pueden desplegar bombas de racimo en el frente.</Spanish>
-                <Chinesesimp>行动组，友军固定翼现在可以部署集束炸弹到前线了。</Chinesesimp>
-                <Original>To Alpha 1-1, friendly fast air can now deliver cluster munitions to the front line.</Original>
-                <English>To Alpha 1-1, friendly fast air can now deliver cluster munitions to the front line.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_napalmunlock">
-                <German>Overlord 1-1 an Action Squad – wir haben Napalm-Unterstützung.</German>
-                <Spanish>Overlord 1-1 a Action Squad – tenemos apoyo de napalm.</Spanish>
-                <Chinesesimp>行动组，我们取得了凝固汽油弹支持。</Chinesesimp>
-                <Original>To Alpha 1-1, napalm is now available.</Original>
-                <English>To Alpha 1-1, napalm is now available.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_hcchopperunlock">
-                <German>Hier ist "Longbow" – bereit zur Verfügung.</German>
-                <Spanish>Este es "Longbow" – en espera.</Spanish>
-                <Chinesesimp>这里是"长弓"，正在待命。</Chinesesimp>
-                <Original>On station and standing by.</Original>
-                <English>On station and standing by.</English>
             </Key>
             <Key ID="STR_DUWS_T_longbowin">
                 <German>"Longbow" an Einsatzteam, ich habe den HQ-Luftraum erreicht. Bereit zur Nahluftunterstützung jederzeit.</German>
@@ -6209,41 +6060,9 @@
                 <Original>To Alpha 1-1, I'm on station over HQ. Ready to hit any enemy vehicles you spot.</Original>
                 <English>To Alpha 1-1, I'm on station over HQ. Ready to hit any enemy vehicles you spot.</English>
             </Key>
-            <Key ID="STR_DUWS_T_hcjetunlock">
-                <German>"Koi" an Action Squad – ich bin im AO-Luftraum eingetroffen.</German>
-                <Spanish>"Koi" a Action Squad – he entrado al espacio aéreo del AO.</Spanish>
-                <Chinesesimp>"鲤鱼"呼叫行动组，我已进入战区空域。</Chinesesimp>
-                <Original>To Alpha 1-1, I'm in AO airspace.</Original>
-                <English>To Alpha 1-1, I'm in AO airspace.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_mhqunlock">
-                <German>Hier ist die Disposition – Sie sind berechtigt, ein mobiles Kommandozentrum einzurichten.</German>
-                <Spanish>Este es el Despacho – tú estás autorizado para establecer un puesto de mando móvil.</Spanish>
-                <Chinesesimp>你已被授权建立机动指挥部。</Chinesesimp>
-                <Original>You're authorized to establish an MHQ.</Original>
-                <English>You're authorized to establish an MHQ.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_supplydropunlock">
-                <German>Disposition an Action Squad – Supply-Drop ist bereit.</German>
-                <Spanish>Despacho a Action Squad – el supply drop está listo.</Spanish>
-                <Chinesesimp>行动组，补给投送已就绪。</Chinesesimp>
-                <Original>To Alpha 1-1, supply drop is ready.</Original>
-                <English>To Alpha 1-1, supply drop is ready.</English>
-            </Key>
             <Key ID="STR_DUWS_T_fob_request_row">
                 <Original>Establish FOB (10 CP) Radio</Original>
                 <English>Establish FOB (10 CP) Radio</English>
-            </Key>
-            <Key ID="STR_DUWS_T_fobunlock">
-                <Original>To Alpha 1-1, FOB deployment is authorised. Each site costs 10 CP.</Original>
-                <English>To Alpha 1-1, FOB deployment is authorised. Each site costs 10 CP.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_paradropunlock">
-                <German>"Overlord 1-1" an alle AO-Einheiten – Fallschirmjägertruppe ist im Einsatzgebiet angekommen und bereit.</German>
-                <Spanish>"Overlord 1-1" a todas las unidades del AO – unidad de paracaidistas ha llegado al teatro de operaciones y está en espera.</Spanish>
-                <Chinesesimp>战区所有单位，空降兵部队已经到达战区并待命。</Chinesesimp>
-                <Original>To all AO units, a paratrooper unit is on station and standing by.</Original>
-                <English>To all AO units, a paratrooper unit is on station and standing by.</English>
             </Key>
             <Key ID="STR_DUWS_T_slingshot">
                 <German>Schleuder 1-1</German>

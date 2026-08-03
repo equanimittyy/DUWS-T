@@ -124,4 +124,4 @@ _trg setTriggerArea [5, 5, 0, false, 5];
 // each other.
 [_depot, netId _trg] remoteExec ["fnc_client_addRepairActions", 0, format ["hq_repair_%1", netId _depot]];
 
-["info", [localize "STR_DUWS_T_REPAIR_STATION_NAME", localize "STR_DUWS_T_SUPPORT_UNLOCKED"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+["info", [localize "STR_DUWS_T_vehicle_repair", ""]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];

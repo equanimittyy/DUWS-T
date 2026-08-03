@@ -37,7 +37,7 @@ private _rows = [];   // listbox index -> its def, [] for a heading
 
     {
         _x params ["_key", "_defKind", "_cost", "_flagVar", "_labelKey", "_commItem",
-            "_speakerKey", "_msgKey", "_useCs", "_insBlocked", "_modernOnly"];
+            "_insBlocked", "_modernOnly"];
         private _free = _key == "mobile_HQ" && _insurgent;
         private _label = localize ([_labelKey, "STR_DUWS_T_b7gmddq3_free"] select _free);
         // Escalation surcharge, appended rather than substituted. Each label carries its base cost
