@@ -109,7 +109,7 @@ is why a CP award call passes a bare number where every other call passes a sent
 | red `{1,0,0,1}` | something lost | `US_lostcontrol`, `biohazard` |
 | cyan `{0.5,1,1,1}` | economy | the `CPadded*` / `APaddedmission` badge family |
 
-**In service — 14 classes:**
+**The catalogue — 14 classes, every one in service:**
 
 | Class | Colour | Sites | Carries |
 |---|---|---|---|
@@ -125,18 +125,16 @@ is why a CP award call passes a bare number where every other call passes a sent
 | `infosearch` | green | 1 | a search that revealed something |
 | `CPadded` · `CPaddedmission` · `CPaddedattrition` · `APaddedmission` | cyan | 1 each | zone, mission, kill income, mission AP |
 
-**Not referenced — 12 classes.** `armory`, `arsenal_warning`, `artyicon`, `CPadded_retaken`,
-`CPloot`, `halo`, `inf_training`, `new_ability`, `operator_healed`, `pflir`, `ScoreAdded`,
-`task_echec`. Several name systems that do exist — artillery, HALO, thermal, the operative pool — so
-these are unused rather than obsolete, and deleting them would take the styling with them.
-`ScoreAdded` is the one that could be called and still not draw: it carries
-`difficulty[] = {"netStats"}` and shows only when that difficulty flag is on.
+The file held twelve further classes that nothing called — among them one for artillery, one for
+HALO and one for a failed task. They are deleted rather than kept against a future caller: a styling
+class costs nothing to write back out of git the day something needs it, and reading a catalogue
+where half the entries never fire teaches the wrong shape.
 
-**Two inconsistencies to know about.** `fnc_BluHQinit.sqf` fires `TaskFailed`, which is Arma's own
-class and not one of these — the mission's own `task_echec` looks like the intended replacement and
-has never been used. And five call sites name their class in lowercase (`cpadded`,
-`us_takencontrol`, `us_lostcontrol`, `cpaddedmission`, `apaddedmission`) against a CamelCase
-definition. Config lookup is case-insensitive so both work, which is why the drift went unnoticed.
+**One anomaly.** `fnc_BluHQinit.sqf` fires `TaskFailed`, which is Arma's own class rather than one of
+these, so that single card is styled by the engine. And five call sites name their class in
+lowercase (`cpadded`, `us_takencontrol`, `us_lostcontrol`, `cpaddedmission`, `apaddedmission`)
+against a CamelCase definition — config lookup is case-insensitive, which is why the drift went
+unnoticed.
 
 ## Hint prose is system prose
 

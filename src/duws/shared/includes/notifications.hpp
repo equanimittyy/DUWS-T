@@ -14,16 +14,6 @@ class CfgNotifications
 
     // Examples
 
-    class ScoreAdded
-    {
-        title = "$STR_DUWS_T_668shcf1";
-        iconText = "+%2";
-        description = "%1";
-        color[] = {0.5,1,1,1};
-        priority = 0;
-        difficulty[] = {"netStats"};
-    };
-
     class US_takencontrol
     {
         title = "$STR_DUWS_T_drq88qxs"; // Tile displayed as text on black background. Filled by arguments.
@@ -48,43 +38,11 @@ class CfgNotifications
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
 
-    class task_echec
-    {
-        title = "$STR_DUWS_T_1efzglbh"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\A3\ui_f\data\map\mapcontrol\taskIconFailed_ca.paa";
-        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
-        description = "%1"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {1,0.3,0.2,1};
-        duration = 4; // How many seconds will the notification be displayed
-        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
-        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
-    };
-
     class CPadded
     {
         title = "$STR_DUWS_T_k1glh3eb";
         iconText = "+%1";
         description = "$STR_DUWS_T_2x9bb19m";
-        color[] = {0.5,1,1,1};
-        priority = 0;
-        difficulty[] = {};
-    };
-
-    class CPloot
-    {
-        title = "$STR_DUWS_T_k1glh3eb2";
-        iconText = "+%1";
-        description = "$STR_DUWS_T_2x9bb19m2";
-        color[] = {0.5,1,1,1};
-        priority = 0;
-        difficulty[] = {};
-    };
-
-    class CPadded_retaken
-    {
-        title = "$STR_DUWS_T_arxufadx";
-        iconText = "+%1";
-        description = "$STR_DUWS_T_ey0lpqcb";
         color[] = {0.5,1,1,1};
         priority = 0;
         difficulty[] = {};
@@ -156,18 +114,6 @@ class CfgNotifications
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
 
-    class artyicon
-    {
-        title = "%1"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\artillery_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
-        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
-        description = "%2"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {1,1,1,1}; // Icon and text color
-        duration = 4; // How many seconds will the notification be displayed
-        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
-        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
-    };
-
     class sitrepinfo
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.
@@ -180,77 +126,8 @@ class CfgNotifications
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
 
-    class armory
-    {
-        title = "%1"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Sniper_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
-        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
-        description = "%2"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {1,1,1,1}; // Icon and text color
-        duration = 4; // How many seconds will the notification be displayed
-        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
-        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
-    };
-
-    class halo
-    {
-        title = "%1"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\A3\ui_f\data\Map\VehicleIcons\iconParachute_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
-        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
-        description = "%2"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {1,1,1,1}; // Icon and text color
-        duration = 4; // How many seconds will the notification be displayed
-        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
-        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
-    };
-
-    class pflir
-    {
-        title = "%1"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Thermal_imaging_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
-        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
-        description = "%2"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {1,1,1,1}; // Icon and text color
-        duration = 4; // How many seconds will the notification be displayed
-        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
-        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
-    };
-
-    class new_ability
-    {
-        title = "%1"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Commanding_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
-        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
-        description = "%2"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {0.67,0.87,0,1}; // Icon and text color
-        duration = 4; // How many seconds will the notification be displayed
-        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
-        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
-    };
-
-    class inf_training
-    {
-        title = "%1"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Miss_icon_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
-        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
-        description = "%2"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {1,1,1,1}; // Icon and text color
-        duration = 4; // How many seconds will the notification be displayed
-        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
-        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
-    };	
-
-    class operator_healed
-    {
-        title = "$STR_DUWS_T_55g6poab"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\a3\ui_f\data\gui\cfg\hints\BasicStances_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
-        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
-        description = "$STR_DUWS_T_ze9vuqvj"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {0.39,0.82,0.96,1}; // Icon and text color
-        duration = 4; // How many seconds will the notification be displayed
-        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
-        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
-    };	
+	
+	
 
     class biohazard
     {
@@ -299,16 +176,4 @@ class CfgNotifications
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
 
-
-    class arsenal_warning
-    {
-        title = "%1";                       // 标题，由调用时传入
-        iconPicture = "\a3\ui_f\data\gui\cfg\hints\NormalDamage_ca.paa";  // 可选：金钱图标
-        iconText = "";
-        description = "%2";                 // 描述，由调用时传入
-        color[] = {1,0,0,1};           // 金黄色
-        duration = 4;
-        priority = 5;
-        difficulty[] = {};
-    };
 };

@@ -3479,13 +3479,6 @@
                 <Original>Due to your efforts, BLUFOR was awarded %1 CP.</Original>
                 <English>Due to your efforts, BLUFOR was awarded %1 CP.</English>
             </Key>
-            <Key ID="STR_DUWS_T_668shcf1">
-                <German>Punkte Bonus</German>
-                <Chinesesimp>得分</Chinesesimp>
-                <Spanish>Bonificación de puntuación</Spanish>
-                <Original>Score bonus</Original>
-                <English>Score bonus</English>
-            </Key>
             <Key ID="STR_DUWS_T_k1glh3eb">
                 <German>CP Bonus: Zone erobert</German>
                 <Chinesesimp>CP点：夺取区域</Chinesesimp>
@@ -3493,40 +3486,12 @@
                 <Original>CP Bonus: Zone captured</Original>
                 <English>CP Bonus: Zone captured</English>
             </Key>
-            <Key ID="STR_DUWS_T_k1glh3eb2">
-                <German>Beute sichern</German>
-                <Chinesesimp>掠夺获得物品</Chinesesimp>
-                <Spanish>Botín adquirido</Spanish>
-                <Original>Loot acquired</Original>
-                <English>Loot acquired</English>
-            </Key>
             <Key ID="STR_DUWS_T_2x9bb19m">
                 <German>Zusätzliche CP und AP für das Erobern einer Zone erhalten</German>
                 <Chinesesimp>收到来自夺取战区的额外CP和AP</Chinesesimp>
                 <Spanish>Recividos CP y AP adicionales por capturar una zona</Spanish>
                 <Original>Received additional CP and AP for capturing a zone.</Original>
                 <English>Received additional CP and AP for capturing a zone.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_2x9bb19m2">
-                <German>Spieler hat wertvolle Gegenstände von Zivilisten geplündert.</German>
-                <Chinesesimp>玩家从平民身上掠夺到了有价值的物品</Chinesesimp>
-                <Spanish>El jugador saqueó objetos valiosos a los civiles.</Spanish>
-                <Original>Player looted valuable items from civilians.</Original>
-                <English>Player looted valuable items from civilians.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_arxufadx">
-                <German>CP Bonus: Zone zurückerobert</German>
-                <Chinesesimp>CP点：战区重新夺取</Chinesesimp>
-                <Spanish>Bonus de CP: Zona recapturada</Spanish>
-                <Original>CP Bonus: Zone recaptured</Original>
-                <English>CP Bonus: Zone recaptured</English>
-            </Key>
-            <Key ID="STR_DUWS_T_ey0lpqcb">
-                <German>Zusätzliche CP und AP für die Zurückeroberung einer Zone erhalten</German>
-                <Chinesesimp>收到重新夺取一个战区的CP点和AP点</Chinesesimp>
-                <Spanish>Recividos CP y AP por recapturar una zona</Spanish>
-                <Original>Received CP and AP for recapturing a zone.</Original>
-                <English>Received CP and AP for recapturing a zone.</English>
             </Key>
             <Key ID="STR_DUWS_T_elszwwpc">
                 <German>CP Bonus: Sekundäre Mission erfolgreich</German>
@@ -3815,13 +3780,6 @@
                 <Spanish>Las fuerzas aliadas han perdido el control de: %1</Spanish>
                 <Original>The zone has fallen to the enemy.</Original>
                 <English>The zone has fallen to the enemy.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_1efzglbh">
-                <German>Mission gescheitert</German>
-                <Chinesesimp>任务失败</Chinesesimp>
-                <Spanish>Missión fracazada</Spanish>
-                <Original>Mission failed</Original>
-                <English>Mission failed</English>
             </Key>
             <Key ID="STR_DUWS_T_opfast">
                 <German>Alle Einheiten im Einsatzgebiet, Achtung. Hier ist "Allseer". Wir haben gerade feindliche Angriffstruppen in der feindlichen Zone ausgemacht. Sie könnten auf das HQ oder freundliche Stellungen vorrücken. Bleibt wachsam!</German>
@@ -6868,13 +6826,6 @@
                 <Original>FOB Lost</Original>
                 <English>FOB Lost</English>
             </Key>
-            <Key ID="STR_DUWS_T_55g6poab">
-                <German>Status der Operativ-Einsatzbereitstellung</German>
-                <Chinesesimp>干员部署情况</Chinesesimp>
-                <Spanish>Estado del despliegue de operativos</Spanish>
-                <Original>Operative deployment status</Original>
-                <English>Operative deployment status</English>
-            </Key>
             <Key ID="STR_DUWS_T_qmkng5xv">
                 <German>Gebe einen neuen Namen ein</German>
                 <Chinesesimp>输入新名称</Chinesesimp>
@@ -8064,13 +8015,6 @@
                 <Spanish>Sanación Vanilla</Spanish>
                 <Original>Vanilla Medical</Original>
                 <English>Vanilla Medical</English>
-            </Key>
-            <Key ID="STR_DUWS_T_ze9vuqvj">
-                <German>KIA-Operative sind zur Wiederverwendung bereit.</German>
-                <Chinesesimp>阵亡干员已可重新部署</Chinesesimp>
-                <Spanish>Operativos KIA listos para el redespliegue.</Spanish>
-                <Original>KIA operatives are ready for redeployment.</Original>
-                <English>KIA operatives are ready for redeployment.</English>
             </Key>
             <Key ID="STR_DUWS_T_tsy2hg6o">
                 <German>KIA-Operative sind zur Wiederverwendung bereit.</German>
