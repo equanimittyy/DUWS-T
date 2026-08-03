@@ -130,6 +130,13 @@ switch (_posture) do {
             // Nothing left to hold. Sent out rather than left standing on the spot they spawned:
             // a squad with no building is a squad with no orders, and patrolling is what the rest
             // of the garrison is already doing.
+            //
+            // Logged because the two ways of getting here are indistinguishable in play: a zone
+            // whose garrison all patrols looks the same whether nothing holdable stands there or
+            // every candidate was refused. The count separates them -- zero means the ground is
+            // bare, non-zero means the claim or the positions test took them all.
+            ["INFO", "ZONES", format ["%1 found no free post; %2 candidates within %3 m",
+                groupId _group, count _candidates, GARRISON_REACH]] call fnc_log;
             [_group, selectRandom ["closepatrol", "widepatrol"], _centre, _radius]
                 call fnc_apply_posture;
         } else {
