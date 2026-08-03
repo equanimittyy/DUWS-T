@@ -114,7 +114,7 @@ _player setVariable ["DUWS_disguise_validHeadgear", _civHeadgear];
 _player setVariable ["DUWS_disguise_validBackpacks", _civBackpacks];
 _player setVariable ["DUWS_disguise_civilianVehicles", _civilianVehicles];
 
-["weizhuang", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_DISGUISE_ACTIVATED_DESC"]] remoteExec ["BIS_fnc_showNotification", _player];
+[localize "STR_DUWS_T_DISGUISE_ACTIVATED_DESC"] remoteExec ["hint", _player];
 [localize "STR_DUWS_T_DISGUISE_SUCCESS_HINT"] remoteExec ["hint", _player];
 
 // ========== 启动监控线程 ==========
@@ -127,7 +127,7 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
             _unit setVariable ["DUWS_disguised", false, true];
             _unit setCaptive false;
             [false] remoteExec ["fnc_disguise_setCaptiveLocal", _unit];
-            ["weizhuangdapo", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_DISGUISE_BROKEN_THROW"]] remoteExec ["BIS_fnc_showNotification", _unit];
+            [localize "STR_DUWS_T_DISGUISE_BROKEN_THROW"] remoteExec ["hint", _unit];
         };
     }];
     _player setVariable ["DUWS_disguise_firedEH", _firedEH];
@@ -152,7 +152,7 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
                 _player setVariable ["DUWS_disguised", false, true];
                 _player setCaptive false;
                 [false] remoteExec ["fnc_disguise_setCaptiveLocal", _player];
-                ["weizhuangdapo", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize _reasonKey]] remoteExec ["BIS_fnc_showNotification", _player];
+                [localize _reasonKey] remoteExec ["hint", _player];
             };
         };
         

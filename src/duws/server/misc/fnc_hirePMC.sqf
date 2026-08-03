@@ -7,17 +7,19 @@ if (isNull _caller) exitWith {};
 private _cooldownVar = "DUWS_hirePMC_lastUse";
 private _lastUse = _caller getVariable [_cooldownVar, -900];
 private _cooldownRemaining = 900 - (diag_tickTime - _lastUse);
+// Hints, where the squad arriving below is a card: a refusal answers the one player who
+// clicked and the hire is news for the team (docs/info/player_facing_text.md).
 if (_cooldownRemaining > 0) exitWith {
     private _minutes = floor (_cooldownRemaining / 60);
     private _seconds = floor (_cooldownRemaining % 60);
     private _msg = format [localize "STR_DUWS_T_HIRE_PMC_COOLDOWN", _minutes, _seconds];
-    ["info", [localize "STR_DUWS_T_HIRE_PMC_TITLE", _msg]] remoteExec ["BIS_fnc_showNotification", _caller];
+    [_msg] remoteExec ["hint", _caller];
 };
 
 // 检查并扣除 15 个 Money_roll
 if !([_caller, 15] call fnc_coins_spend) exitWith {
     private _msg = localize "STR_DUWS_T_NOT_ENOUGH_MONEY_15";
-    ["info", [localize "STR_DUWS_T_HIRE_PMC_TITLE", _msg]] remoteExec ["BIS_fnc_showNotification", _caller];
+    [_msg] remoteExec ["hint", _caller];
 };
 
 // 记录使用时间

@@ -84,7 +84,7 @@ _caller setVariable ["DUWS_enemyDisguise_lastUse", diag_tickTime];
 _caller setVariable ["DUWS_enemyDisguised", true, true];
 _caller setCaptive true;
 [true] remoteExec ["fnc_disguise_setCaptiveLocal", _caller];
-["weizhuang", [localize "STR_DUWS_T_ENEMY_DISGUISE_ACTION", localize "STR_DUWS_T_ENEMY_DISGUISE_ACTIVATED"]] remoteExec ["BIS_fnc_showNotification", _caller];
+[localize "STR_DUWS_T_ENEMY_DISGUISE_ACTIVATED"] remoteExec ["hint", _caller];
 
 // 记录本次使用的背心和头盔（新增）
 _caller setVariable ["DUWS_enemyDisguise_lastVest", _vest, true];
@@ -137,7 +137,6 @@ _caller setVariable ["DUWS_enemyDisguise_subtitleHandle", _subtitleHandle];
         if (_caller getVariable ["DUWS_enemyDisguise_fired", false]) exitWith {
             _exposed = true;
             [localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_FIRE"] remoteExec ["hint", _caller];
-            ["weizhuangdapo", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_FIRE"]] remoteExec ["BIS_fnc_showNotification", _caller];
             sleep 3;
         };
         
@@ -155,49 +154,41 @@ _caller setVariable ["DUWS_enemyDisguise_subtitleHandle", _subtitleHandle];
         if (_curUniform != (_caller getVariable ["DUWS_enemyDisguise_uniform", ""])) exitWith {
             _exposed = true;
             [localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_GEAR"] remoteExec ["hint", _caller];
-            ["weizhuangdapo", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_GEAR"]] remoteExec ["BIS_fnc_showNotification", _caller];
             sleep 3;
         };
         if (_curVest != (_caller getVariable ["DUWS_enemyDisguise_vest", ""])) exitWith {
             _exposed = true;
             [localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_GEAR"] remoteExec ["hint", _caller];
-            ["weizhuangdapo", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_GEAR"]] remoteExec ["BIS_fnc_showNotification", _caller];
             sleep 3;
         };
         if (_curHeadgear != (_caller getVariable ["DUWS_enemyDisguise_headgear", ""])) exitWith {
             _exposed = true;
             [localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_GEAR"] remoteExec ["hint", _caller];
-            ["weizhuangdapo", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_GEAR"]] remoteExec ["BIS_fnc_showNotification", _caller];
             sleep 3;
         };
         if (_curPrimary != (_caller getVariable ["DUWS_enemyDisguise_primary", ""])) exitWith {
             _exposed = true;
             [localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_GEAR"] remoteExec ["hint", _caller];
-            ["weizhuangdapo", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_GEAR"]] remoteExec ["BIS_fnc_showNotification", _caller];
             sleep 3;
         };
         if (_curBackpack != "" && _curBackpack != (_caller getVariable ["DUWS_enemyDisguise_backpack", ""])) exitWith {
             _exposed = true;
             [localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_BACKPACK"] remoteExec ["hint", _caller];
-            ["weizhuangdapo", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_BACKPACK"]] remoteExec ["BIS_fnc_showNotification", _caller];
             sleep 3;
         };
         if (_curSecondary != "" && _curSecondary != (_caller getVariable ["DUWS_enemyDisguise_secondary", ""])) exitWith {
             _exposed = true;
             [localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_SECONDARY"] remoteExec ["hint", _caller];
-            ["weizhuangdapo", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_SECONDARY"]] remoteExec ["BIS_fnc_showNotification", _caller];
             sleep 3;
         };
         if (_curHandgun != "" && _curHandgun != (_caller getVariable ["DUWS_enemyDisguise_handgun", ""])) exitWith {
             _exposed = true;
             [localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_HANDGUN"] remoteExec ["hint", _caller];
-            ["weizhuangdapo", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_HANDGUN"]] remoteExec ["BIS_fnc_showNotification", _caller];
             sleep 3;
         };
         if (_curNVG != (_caller getVariable ["DUWS_enemyDisguise_hasNVG", false])) exitWith {
             _exposed = true;
             [localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_NVG"] remoteExec ["hint", _caller];
-            ["weizhuangdapo", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_NVG"]] remoteExec ["BIS_fnc_showNotification", _caller];
             sleep 3;
         };
         
@@ -211,7 +202,6 @@ _caller setVariable ["DUWS_enemyDisguise_subtitleHandle", _subtitleHandle];
                 if (diag_tickTime - _warningStart >= 5) then {
                     _exposed = true;
                     [localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_DISTANCE"] remoteExec ["hint", _caller];
-                    ["weizhuangdapo", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_ENEMY_DISGUISE_BROKEN_DISTANCE"]] remoteExec ["BIS_fnc_showNotification", _caller];
                     sleep 3;
                 };
             };
@@ -235,7 +225,6 @@ _caller setVariable ["DUWS_enemyDisguise_subtitleHandle", _subtitleHandle];
             _caller setCaptive false;
             [false] remoteExec ["fnc_disguise_setCaptiveLocal", _caller];
             [localize "STR_DUWS_T_ENEMY_DISGUISE_EXPIRED"] remoteExec ["hint", _caller];
-            ["weizhuangdapo", [localize "STR_DUWS_T_DISGUISE_ACTIVATED", localize "STR_DUWS_T_ENEMY_DISGUISE_EXPIRED"]] remoteExec ["BIS_fnc_showNotification", _caller];
         };
     };
 };

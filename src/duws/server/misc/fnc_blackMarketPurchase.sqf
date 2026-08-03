@@ -7,9 +7,11 @@ if (isNull _caller) exitWith {};
 // Read before the spend, because the refusal message quotes what the player actually has.
 private _moneyCount = [_caller] call fnc_coins_count;
 
+// A hint, where the purchase below is a card: the refusal answers the one player who clicked and
+// the sale is news for the team (docs/info/player_facing_text.md).
 if !([_caller, _amount] call fnc_coins_spend) exitWith {
     private _msg = format [localize "STR_DUWS_T_BLACKMARKET_NOT_ENOUGH_MONEY", _amount, _moneyCount];
-    ["info", [localize "STR_DUWS_T_BLACKMARKET_TITLE", _msg]] remoteExec ["BIS_fnc_showNotification", _caller];
+    [_msg] remoteExec ["hint", _caller];
 };
 
 // ========== 生成随机物品 ==========

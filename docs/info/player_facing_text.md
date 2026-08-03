@@ -39,6 +39,36 @@ The reference for radio prose is the `Support & Radio` container: speaker-first 
 roger, stand by, over, out*), numbers spelled out in spoken lines but numerals in HUD text, and flat
 declaratives — Overlord does not shout. Hints carry no trailing period; subtitles do.
 
+## Which surface a message goes to, and never both
+
+Two mechanisms put text on screen and they are not interchangeable. **A message uses one of them.**
+
+| Surface | Command | Use it for | Length |
+|---|---|---|---|
+| Hint box | `hint` | the ordinary case: anything answering one player, at the moment they did something | wraps, no limit |
+| Notification card | `BIS_fnc_showNotification` | the important case: a change of state the whole team is told about | 60 characters, clipped |
+
+The hint box is the default. It answers the player who acted — a refusal, a price, a result they
+asked for — and it wraps, so the wording is free. A notification card is for news: something the
+campaign did that every player has to know, whether or not they were the one who triggered it.
+Reach for it when the audience is the team; if the audience is one player, it is a hint.
+
+**Never fire both for one event.** The same sentence in two boxes reads as two things happening, and
+it forces the wording down to the card's 60 characters for no gain — the hint had no limit and did
+not need it. A message that deserves the card gets the card alone.
+
+**One exception stands, and it is the economy.** `CPaddedattrition`
+(`server/server_init.sqf`) pays kill income to each player individually and tells each of them
+alone, so by audience it is a hint — but CP arriving is what the card vocabulary already means,
+through `cpaddedmission` and `apaddedmission`, and kill income is the one income that would look
+different. It also fires on the economy tick rather than on an action, so it is neither frequent
+enough to read as noise nor small enough to want burying. The call site carries the same note.
+
+The card's ceiling is a hard one and it clips mid-sentence with no error, which is a trap of its own
+([`arma_engine_gotchas.md`](arma_engine_gotchas.md#a-cfgnotifications-description-is-clipped-not-wrapped-past-roughly-60-characters)).
+That budget is a reason to keep a card's text to a headline rather than a reason to split a long one
+across both surfaces.
+
 ## Side-mission briefings carry their own reward block
 
 One key per side mission serves both the strategic-map card and the task description, so the same

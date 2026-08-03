@@ -966,7 +966,9 @@ buy. 60 is under the narrowest clip seen rather than beside it.
 **How to apply:** keep every `BIS_fnc_showNotification` body at or under 60 characters, counting a
 `format` placeholder at its longest substitution. Titles are short noun phrases regardless. Anything
 that genuinely needs more room is not a notification: a briefing belongs in the task description,
-which scrolls, and an explanation belongs in a `hint`, which wraps.
+which scrolls, and an explanation belongs in a `hint`, which wraps. Which surface a given message
+belongs on is a separate decision, and it is one or the other rather than both --
+[`player_facing_text.md`](player_facing_text.md#which-surface-a-message-goes-to-and-never-both).
 
 ## SQF identifiers are case-insensitive, so `_Varname` and `_VarName` are one variable
 

@@ -241,6 +241,13 @@ if (isServer) then {
                 // land a frame later.
                 [_award, "kill_income"] call fnc_cp_adjust;
                 playerKillCount set [_uid, _kills - _batches * kill_cp_kills];
+                // A card, not a hint, and deliberately the exception to the surface rule in
+                // docs/info/player_facing_text.md: that rule sends a one-player message to the hint
+                // box, and this is addressed at one player. CP arriving speaks the card vocabulary
+                // its siblings cpaddedmission and apaddedmission already own -- moving it would make
+                // kill income the only income that looks like a refusal. It is also the payoff for
+                // half an hour of fighting, and it fires on the economy tick, so it is neither
+                // frequent enough to be noise nor small enough to bury in the corner.
                 ["CPaddedattrition", [_award]] remoteExec ["BIS_fnc_showNotification", _x, false];
             };
         } forEach allPlayers;

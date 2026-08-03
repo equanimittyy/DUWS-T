@@ -2197,11 +2197,6 @@
                 <English>Your vest and helmet are already known to the enemy. Use different gear and try again.</English>
                 <Chinesesimp>你不能使用与上次完全相同的背心和头盔，请更换伪装装备后再试。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ACTION">
-                <Original>Disguise as OPFOR</Original>
-                <English>Disguise as OPFOR</English>
-                <Chinesesimp>伪装成敌人</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ACTIVATED">
                 <Original>Disguise active. Keep your distance, hold fire.</Original>
                 <English>Disguise active. Keep your distance, hold fire.</English>
@@ -2464,11 +2459,6 @@
                 <Original>Disguise broken: No civilian clothing.</Original>
                 <English>Disguise broken: No civilian clothing.</English>
                 <Chinesesimp>伪装暴露：未穿着平民衣物。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_ACTIVATED">
-                <Original>Disguise</Original>
-                <English>Disguise</English>
-                <Chinesesimp>伪装</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_ACTIVATED_DESC">
                 <Original>Disguised as a civilian. Avoid suspicious actions.</Original>
