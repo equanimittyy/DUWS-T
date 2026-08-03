@@ -25,10 +25,17 @@ if (_thread isEqualTo {}) exitWith {
 private _pos = [] call fnc_findSafeMissionPos;
 if (_pos isEqualTo []) then {
 	// The finder samples named map locations and comes back empty when every one of them is
-	// too near a zone or the HQ. A ring around the HQ is not sited as carefully, but a forced
-	// mission that refuses to start teaches a tester nothing.
-	_pos = PosOfBLUHQ getPos [1500 + random 1500, random 360];
-	["WARN", "MISSION", "debug force: no safe location, falling back to an HQ ring"] call fnc_log;
+	// too near a zone, a town or the HQ. A ring around the HQ is not sited as carefully, but a
+	// forced mission that refuses to start teaches a tester nothing -- so it still has to clear
+	// the same ground, which is what the retries are for.
+	for "_i" from 1 to 20 do {
+		private _ring = PosOfBLUHQ getPos [1500 + random 1500, random 360];
+		if !([_ring, 400] call fnc_pos_claimed) exitWith { _pos = _ring };
+	};
+	["WARN", "MISSION", format ["debug force: no safe location, fell back to an HQ ring at %1", _pos]] call fnc_log;
+};
+if (_pos isEqualTo []) exitWith {
+	["ERROR", "MISSION", "debug force: nowhere clear of every zone and town to put a mission"] call fnc_log;
 };
 
 missionNamespace setVariable [format ["mission_cooldown_%1", _type], 0, true];

@@ -3253,11 +3253,6 @@
                 <English>Copy. Bring it back, whatever it takes.</English>
                 <Chinesesimp>"霸王1-1"收到，务必带回它。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_GATHERING_TITLE">
-                <Original>Intel Gathering</Original>
-                <English>Intel Gathering</English>
-                <Chinesesimp>情报搜集</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING_DESC">
                 <Original>Mission Type: Requisition&lt;br /&gt;Our assault scattered an enemy command post. What's left of them is bagging up their intel and pulling out. Search the buildings in this area and take whatever they haven't carried off. Allseer closes the mission out in 15 minutes.&lt;br /&gt;&lt;br /&gt;CP: 5&lt;br /&gt;AP: 5</Original>
                 <English>Mission Type: Requisition&lt;br /&gt;Our assault scattered an enemy command post. What's left of them is bagging up their intel and pulling out. Search the buildings in this area and take whatever they haven't carried off. Allseer closes the mission out in 15 minutes.&lt;br /&gt;&lt;br /&gt;CP: 5&lt;br /&gt;AP: 5</English>

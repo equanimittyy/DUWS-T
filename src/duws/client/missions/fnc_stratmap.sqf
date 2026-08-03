@@ -90,7 +90,7 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 		// (fnc_missionTargetPos), so an anchor accepted a metre outside a zone does not hand that
 		// thread fifty rejections and an abort. The drifted position is tested again there, which is
 		// the test that actually decides; this one only keeps the offer off a zone.
-		if ([_foundSafePos, 400] call fnc_pos_in_zone) then {_Posfound = false};
+		if ([_foundSafePos, 400] call fnc_pos_claimed) then {_Posfound = false};
 
 	};
  

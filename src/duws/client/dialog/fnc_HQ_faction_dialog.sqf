@@ -25,7 +25,7 @@ _backdrop ctrlSetBackgroundColor [0.2, 0.4, 0.2, 1];
 _backdrop ctrlCommit 0;
 
 _boxframe = _display ctrlCreate ["RscFrame", 1008];
-_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.68];
+_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.652];
 _boxframe ctrlSetText localize "STR_DUWS_T_faction_screen_title";
 _boxframe ctrlCommit 0;
 

@@ -95,7 +95,7 @@ fnc_mission_cleanup = compile preprocessFileLineNumbers "duws\server\missions\fn
 fnc_findSafeMissionPos = compile preprocessFileLineNumbers "duws\server\misc\fnc_findSafeMissionPos.sqf";
 publicVariable "fnc_findSafeMissionPos";
 fnc_mission_cooldown_left = compile preprocessFileLineNumbers "duws\shared\functions\fnc_mission_cooldown_left.sqf";publicVariable "fnc_mission_cooldown_left";
-fnc_pos_in_zone = compile preprocessFileLineNumbers "duws\shared\functions\fnc_pos_in_zone.sqf";publicVariable "fnc_pos_in_zone";
+fnc_pos_claimed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_pos_claimed.sqf";publicVariable "fnc_pos_claimed";
 fnc_mission_cooldowns_show = compile preprocessFileLineNumbers "duws\client\misc\fnc_mission_cooldowns_show.sqf";publicVariable "fnc_mission_cooldowns_show";
 fnc_mission_begin = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_begin.sqf";
 fnc_mission_claim = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_claim.sqf";

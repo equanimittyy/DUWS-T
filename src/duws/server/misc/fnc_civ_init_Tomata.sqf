@@ -164,6 +164,14 @@ _radii = _newRadii;
 _pops = _newPops;
 missionNamespace setVariable ["civ_locations", _locations];
 missionNamespace setVariable ["civ_radii", _radii];
+// The same two numbers a client needs to keep a side mission off a town, and nothing else. Those
+// two arrays stay server-side -- one holds Location objects and the other is half of a state
+// machine -- but the side-mission picker runs on the client and has to be able to ask
+// (client/missions/fnc_stratmap.sqf). Plain positions and radii, the shape zone_meta_array already
+// broadcasts for the military half.
+duws_town_circles = [];
+{ duws_town_circles pushBack [getPos _x, _radii param [_forEachIndex, 0]] } forEach _locations;
+publicVariable "duws_town_circles";
 // Written before the marker loop below, because the renderer it calls reads this to decide
 // whether its repaint is allowed to put a town back on the map.
 missionNamespace setVariable ["civ_visible", _newVis];

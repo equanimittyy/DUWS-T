@@ -24,7 +24,7 @@ class startup_hq_placement_dialog
 			x = 3 * GUI_GRID_W + GUI_GRID_X;
 			y = 11.9 * GUI_GRID_H + GUI_GRID_Y;
 			w = 34 * GUI_GRID_W;
-			h = 6.9 * GUI_GRID_H;
+			h = 5.9 * GUI_GRID_H;
 			colorBackground[] = {0.2, 0.4, 0.2, 1};
 		};
 		class hq_placement_random_button: RscButton
@@ -43,7 +43,7 @@ class startup_hq_placement_dialog
 			idc = 1601;
 			text = "$STR_DUWS_T_x0cq7o5y";
 			x = 11 * GUI_GRID_W + GUI_GRID_X;
-			y = 15.5 * GUI_GRID_H + GUI_GRID_Y;
+			y = 14.8 * GUI_GRID_H + GUI_GRID_Y;
 			w = 18 * GUI_GRID_W;
 			h = 2.5 * GUI_GRID_H;
 			tooltip = "$STR_DUWS_T_qwfdr33k";

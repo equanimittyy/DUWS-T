@@ -24,7 +24,7 @@ private _randomPos = [_MissionPos, 0, _radius, 5, 0, 0.2, 0] call BIS_fnc_findSa
 if (_randomPos isEqualTo [0,0,0]) then { _randomPos = _MissionPos; };
 _markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 private _taskID = format ["intel_gathering_%1", round time];
-[_taskID, localize "STR_DUWS_T_INTEL_GATHERING_DESC", localize "STR_DUWS_T_INTEL_GATHERING_TITLE",
+[_taskID, localize "STR_DUWS_T_INTEL_GATHERING_DESC", _mission_name,
     _randomPos, "search"] call fnc_missionTaskCreate;
 
 // ========== 随机选取最多30个建筑 ==========
