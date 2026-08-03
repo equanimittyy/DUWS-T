@@ -83,12 +83,19 @@ switch (_posture) do {
         // so a composition could not ask for those men under any other orders. What they had in
         // common was holding a fixed post; what differed was the class list and the leash, and both
         // are decided here from what the group actually claimed.
+        // nearestObjects, not nearestTerrainObjects: these have to include what the zone prefab put
+        // down as well as what the map shipped. The V1 and V3 variants are here because the modern
+        // prefabs build those and the list only named V2, so a zone's own guard towers stood empty
+        // while the map's were manned. Safe to keep extending: the positions test below drops
+        // anything that turns out to have no interior.
         private _posts = [];
         if (!_mounted) then {
             {
                 _posts append (nearestObjects [_centre, [_x], GARRISON_REACH]);
-            } forEach ["Land_GuardTower_02_F", "Land_Cargo_Tower_V2_F", "Land_Cargo_Patrol_V2_F",
-                       "Land_BagBunker_Tower_F", "Land_Bunker_01_tall_F"];
+            } forEach ["Land_GuardTower_02_F", "Land_Bunker_01_tall_F",
+                       "Land_Cargo_Tower_V1_F", "Land_Cargo_Tower_V2_F",
+                       "Land_Cargo_Patrol_V1_F", "Land_Cargo_Patrol_V2_F", "Land_Cargo_Patrol_V3_F",
+                       "Land_BagBunker_Tower_F", "Land_BagBunker_Large_F"];
         };
 
         // A fixed floor rather than one position per man: enemyunitMultiplier can double or treble a
