@@ -28,6 +28,32 @@ DUWS_spawnCategories = [
     ["fortification"]
 ];
 
+// A composition token is "posture:name" -- what the group does, and what it is made of. Splitting
+// them is what stops a roster and its orders being one decision: the same five men are a patrol at
+// one zone and a house garrison at the next without a second roster row that duplicates the first.
+//
+// One string rather than a nested pair because these tables are edited through the composition TUI,
+// whose row editor splits typed input on commas and would cut a nested list in half
+// (docs/info/composition_tooling.md). It also leaves DUWS_fnc_spawnDiff comparing strings, so a town
+// reinforcement still diffs what is standing against what is owed without knowing about postures.
+//
+// A bare name gets a close patrol, which is the circuit every team and every vehicle walked back when
+// orders were a property of the roster. So a caller that names no posture -- a side mission raising a
+// guard ring, a faction file naming a vehicle classname -- still gets what it has always got.
+DUWS_fnc_tokenName = {
+    params ["_token"];
+    private _parts = _token splitString ":";
+    if (count _parts < 2) exitWith { _token };
+    _parts select 1
+};
+
+DUWS_fnc_tokenPosture = {
+    params ["_token"];
+    private _parts = _token splitString ":";
+    if (count _parts < 2) exitWith { "closepatrol" };
+    _parts select 0
+};
+
 // A token's category comes off its own row in whichever table claims it. A token neither claims is a
 // classname a faction file named directly; those scale as "light" -- a multiplier of one everywhere
 // -- rather than being dropped or guessed at, so a mod's own class still spawns and never at three
@@ -42,7 +68,7 @@ DUWS_fnc_spawnCategory = {
     private _row = [_token] call DUWS_fnc_teamRow;
     if (_row isEqualTo []) then { _row = [_token] call DUWS_fnc_vehicleRow };
     if (_row isEqualTo []) then { _row = [_token] call DUWS_fnc_specialRow };
-    private _cat = if (_row isEqualTo []) then { "light" } else { _row select 2 };
+    private _cat = if (_row isEqualTo []) then { "light" } else { _row select 1 };
     if (DUWS_spawnCategories findIf { (_x select 0) isEqualTo _cat } < 0) then {
         ["WARN", "ZONES", format ["%1 is filed under %2, which is not a category; scaling it as light",
             _token, _cat]] call fnc_log;
@@ -59,8 +85,9 @@ DUWS_fnc_spawnCategory = {
 // Row order is the lookup order: the first ceiling a radius falls under wins, and the last row is a
 // band rather than an else so the table reads in one direction.
 // Fortification is one at every radius on purpose: a zone digs in once whatever ground it holds, and
-// the mortar pair, the tower posts and the occupied houses are placed against the centre rather than
-// spread over the perimeter. Multiplying them would put a second mortar section on a wide zone.
+// the mortar pair and the garrisoned structures are held against the centre rather than spread over
+// the perimeter. Multiplying them would put a second mortar section on a wide zone, and would send
+// garrison squads out to whatever sheds the far edge of a big radius happens to hold.
 // --DUWS-UNITCOMP BEGIN name="Zone radius multipliers" kind=rule row="ceiling, infantry, light, armour, air, fortification" fields="radius ceiling, infantry, light, armour, air, fortification"--
 DUWS_zoneRadiusMult = [
     [101,  1, 1, 0, 0, 1],
@@ -76,16 +103,20 @@ DUWS_zoneRadiusMult = [
 // Absolute, not cumulative: a tier is the whole garrison, so what a tier IV zone is can be read off
 // one row instead of assembled from four.
 //
-// The four fortification tokens sit on every row because the pass they came from ran on every zone
-// whatever its tier -- it was a second, separate spawner that no tier table could see, which is why
-// a tier I zone and a tier IV zone differed by far less than their rows suggested. What each tier
-// should actually buy is now one table's worth of editing rather than a second file.
+// Every entry is one A3 group: a posture and the team standing up under it. Six garrison slots
+// rather than one token that held eight houses at three men, because a squad to a building is what
+// makes clearing one cost something and puts a leader in each.
+//
+// The dug-in half sits on every row at the same count, which is inherited rather than chosen: the
+// pass it came from ran on every zone whatever its tier, and a tier I zone and a tier IV zone
+// therefore differ by far less than their rows suggest. Varying it is now a matter of deleting
+// garrison slots off the lower rows, which is the whole reason it is in this table.
 // --DUWS-UNITCOMP BEGIN name="Zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_zoneSpawnTiers = [
-    ["patrol", "team", "car", "fortified", "mortar", "fortbuildings", "towers"],
-    ["patrol", "team", "wpteam", "car", "apc", "fortified", "mortar", "fortbuildings", "towers"],
-    ["sniper", "patrol", "team", "wpteam", "car", "apc", "fortified", "mortar", "fortbuildings", "towers"],
-    ["sniper", "patrol", "patrol", "team", "wpteam", "car", "tank", "attackheli", "fortified", "mortar", "fortbuildings", "towers"]
+    ["closepatrol:patrol", "closepatrol:team", "closepatrol:car", "mortar", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified"],
+    ["closepatrol:patrol", "closepatrol:team", "widepatrol:wpteam", "closepatrol:car", "closepatrol:apc", "mortar", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified"],
+    ["closepatrol:sniper", "closepatrol:patrol", "closepatrol:team", "widepatrol:wpteam", "closepatrol:car", "closepatrol:apc", "mortar", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified"],
+    ["closepatrol:sniper", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "widepatrol:wpteam", "closepatrol:car", "closepatrol:tank", "closepatrol:attackheli", "mortar", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified"]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -136,8 +167,9 @@ DUWS_fnc_spawnFilter = {
 //
 // Three answers, and which one a token gets is what it is made of rather than which system raised it:
 //
-//   _strength  anything that thins from the inside -- a team drops men and keeps its leader, the
-//              house pass holds fewer houses, the tower pass mans fewer posts.
+//   _strength  a team, which drops men and keeps its leader. A garrison slot is a team too, so a
+//              worn zone holds the same buildings with fewer men in each rather than fewer
+//              buildings: one squad to one structure, however thin the squad has become.
 //   1          the mortar pair, which is exempt. The tube and its ammunition are one backpack each
 //              on two men, so a fraction of a pair is no tube at all: that is a different zone
 //              rather than a weaker one.
@@ -164,12 +196,15 @@ DUWS_fnc_thinComposition = {
 // business and answers itself -- fnc_opforRoles already drops the roles a faction leaves undefined.
 DUWS_fnc_tokenClass = {
     params ["_token"];
-    if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith { _token };
-    if !(([_token] call DUWS_fnc_specialRow) isEqualTo []) exitWith { _token };
-    private _row = [_token] call DUWS_fnc_vehicleRow;
+    // The posture goes here rather than downstream: the passthrough below hands its answer to
+    // fnc_spawn_vehicle as a classname, and "closepatrol:O_MBT_02_cannon_F" is not one.
+    private _name = [_token] call DUWS_fnc_tokenName;
+    if !(([_name] call DUWS_fnc_teamRow) isEqualTo []) exitWith { _name };
+    if !(([_name] call DUWS_fnc_specialRow) isEqualTo []) exitWith { _name };
+    private _row = [_name] call DUWS_fnc_vehicleRow;
     // Not in either table: a faction file named a classname directly, and it stands as itself.
-    if (_row isEqualTo []) exitWith { _token };
-    _row params ["", "_role", "", "_setting", "_ap"];
+    if (_row isEqualTo []) exitWith { _name };
+    _row params ["", "", "_role", "_setting", "_ap"];
     // Missing setting defaults to on: a campaign that predates a new rule fields what it always did
     // rather than quietly losing a category.
     if (_setting != "" && {(missionNamespace getVariable [_setting, 1]) != 1}) exitWith { "" };
@@ -195,9 +230,8 @@ DUWS_fnc_spawnDiff = {
 };
 
 // Raises a token list and hands back the groups it made, in order. The one place a composition
-// becomes men, shared by the zone band and the town garrison: the stagger, the search flag and the
-// building-occupation token are rules about raising a garrison, not about which kind of ground is
-// raising one.
+// becomes men, shared by the zone band and the town garrison: the stagger and the search flag are
+// rules about raising a garrison, not about which kind of ground is raising one.
 //
 // Staggered, not batched: each token raises a group, and firing a whole composition in one frame is
 // what the per-call sleep this replaces existed to avoid. None after the last.
@@ -253,30 +287,31 @@ DUWS_fnc_raiseGarrison = {
 // the enemy multiplier, a tail added once so a x5 setting fields one marksman rather than five, and
 // at most one leader, at the front, for the same reason.
 //
-// behaviour -- what fnc_spawn_team does with the group once it stands:
-//   route  a fixed circuit of three search-and-destroy waypoints, one of them at a building, then
-//          CYCLE. Combat mode YELLOW, so it engages what it finds without abandoning the circuit
-//   wander bis_fnc_taskPatrol's own random patrol around the centre
-//   digin  scattered on a ring around the centre, then taskDefend over the same ground. A defence
-//          stacked on the centre is one the player can fight from a single angle
-//   none   nothing: the caller places the group and gives it orders itself
-// category -- which radius multiplier scales it. Held here rather than in the category map below,
+// A team is what an A3 group is made of and nothing about what it does. The orders used to be a
+// column here, which meant a roster and one set of orders were a single decision: fielding these
+// same men dug in rather than patrolling took a second row with an identical roster. A composition
+// names the posture now, so one roster covers both.
+//
+// category -- which radius multiplier scales it. Held here rather than in the category map above,
 // so adding a team is one row rather than two edits that can disagree.
-// --DUWS-UNITCOMP BEGIN name="OPFOR teams" kind=team row="team, behaviour, category, core, added once, leader" fields="team, behaviour, category, core (multiplied), added once, leader" prefix=opfor_--
+// --DUWS-UNITCOMP BEGIN name="OPFOR teams" kind=team row="team, category, core, added once, leader" fields="team, category, core (multiplied), added once, leader" prefix=opfor_--
 DUWS_teamRosters = [
-    ["patrol", "route", "infantry", ["opfor_SOLDIER_X", "opfor_AR_SOLDIER_X"], [], ""],
-    ["team", "route", "infantry", ["opfor_AR_SOLDIER_X", "opfor_GL_SOLDIER_X"], ["opfor_MARK_SOLDIER_X", "opfor_LAT_SOLDIER_X"], "opfor_TL_SOLDIER_X"],
-    ["sniper", "route", "infantry", ["opfor_SNIPER_SOLDIER_X", "opfor_SNIPER_SOLDIER_X"], [], ""],
-    ["wpteam", "wander", "infantry", ["opfor_SOLDIER_X"], ["opfor_AA_SOLDIER_X", "opfor_AT_SOLDIER_X", "opfor_SPECOPS_MEDIC_X"], "opfor_TL_SOLDIER_X"],
-    ["fortified", "digin", "fortification", ["opfor_AR_SOLDIER_X", "opfor_AT_SOLDIER_X", "opfor_GL_SOLDIER_X", "opfor_SPECOPS_MEDIC_X"], [], "opfor_SL_SOLDIER_X"]
+    ["patrol", "infantry", ["opfor_SOLDIER_X", "opfor_AR_SOLDIER_X"], [], ""],
+    ["team", "infantry", ["opfor_AR_SOLDIER_X", "opfor_GL_SOLDIER_X"], ["opfor_MARK_SOLDIER_X", "opfor_LAT_SOLDIER_X"], "opfor_TL_SOLDIER_X"],
+    ["sniper", "infantry", ["opfor_SNIPER_SOLDIER_X", "opfor_SNIPER_SOLDIER_X"], [], ""],
+    ["wpteam", "infantry", ["opfor_SOLDIER_X"], ["opfor_AA_SOLDIER_X", "opfor_AT_SOLDIER_X", "opfor_SPECOPS_MEDIC_X"], "opfor_TL_SOLDIER_X"],
+    ["fortified", "fortification", ["opfor_AR_SOLDIER_X", "opfor_AT_SOLDIER_X", "opfor_GL_SOLDIER_X", "opfor_SPECOPS_MEDIC_X"], [], "opfor_SL_SOLDIER_X"]
 ];
 // --DUWS-UNITCOMP END--
 
 // The row behind a token, or [] when nothing claims it -- which is how the spawn path tells a team
 // from a vehicle from a classname a faction file named directly.
+// Stripped here rather than at every call site: a token carries its posture everywhere it travels,
+// and a lookup that matched the whole string would find no row for "closepatrol:team".
 DUWS_fnc_teamRow = {
     params ["_token"];
-    private _i = DUWS_teamRosters findIf { (_x select 0) isEqualTo _token };
+    private _name = [_token] call DUWS_fnc_tokenName;
+    private _i = DUWS_teamRosters findIf { (_x select 0) isEqualTo _name };
     if (_i < 0) then { [] } else { DUWS_teamRosters select _i }
 };
 
@@ -296,26 +331,27 @@ DUWS_fnc_teamRow = {
 // setting -- a campaign setting that must read 1, or "" for a vehicle nothing gates.
 // ap -- the Army Power the OPFOR side must have reached, 0 for a vehicle available from the start.
 //       Which tokens hang off which rung is a balance decision; the mechanism is the point here.
-// --DUWS-UNITCOMP BEGIN name="OPFOR vehicles" kind=team row="token, role, category, setting, ap" fields="token, faction role, category, campaign setting, AP required" prefix=opfor_--
+// --DUWS-UNITCOMP BEGIN name="OPFOR vehicles" kind=team row="token, category, role, setting, ap" fields="token, category, faction role, campaign setting, AP required" prefix=opfor_--
 DUWS_spawnVehicles = [
-    ["car",        "opfor_ARMED_CAR1_X",    "light",  "",           0],
-    ["truck",      "opfor_COVERED_TRUCK_X", "light",  "",           0],
-    ["transport",  "opfor_TRANS_TRUCK_X",   "light",  "",           0],
-    ["ammo",       "opfor_AMMO_TRUCK_X",    "light",  "",           0],
-    ["repair",     "opfor_REPAIR_TRUCK_X",  "light",  "",           0],
-    ["apc",        "opfor_APC1_X",          "armour", "",           0],
-    ["ifv",        "opfor_APC2_X",          "armour", "",           0],
-    ["aa",         "opfor_AA_APC_X",        "armour", "",           0],
-    ["tank",       "opfor_MBT_TANK1_X",     "armour", "HeavyArmor", 100],
-    ["attackheli", "opfor_ATTACK_HELI_X",   "air",    "AttackHeli", 0],
-    ["transheli",  "opfor_TRANS_HELI_X",    "air",    "AttackHeli", 0],
-    ["plane",      "opfor_MISC_AIR_X",      "air",    "AttackHeli", 0]
+    ["car",        "light",  "opfor_ARMED_CAR1_X",    "",           0],
+    ["truck",      "light",  "opfor_COVERED_TRUCK_X", "",           0],
+    ["transport",  "light",  "opfor_TRANS_TRUCK_X",   "",           0],
+    ["ammo",       "light",  "opfor_AMMO_TRUCK_X",    "",           0],
+    ["repair",     "light",  "opfor_REPAIR_TRUCK_X",  "",           0],
+    ["apc",        "armour", "opfor_APC1_X",          "",           0],
+    ["ifv",        "armour", "opfor_APC2_X",          "",           0],
+    ["aa",         "armour", "opfor_AA_APC_X",        "",           0],
+    ["tank",       "armour", "opfor_MBT_TANK1_X",     "HeavyArmor", 100],
+    ["attackheli", "air",    "opfor_ATTACK_HELI_X",   "AttackHeli", 0],
+    ["transheli",  "air",    "opfor_TRANS_HELI_X",    "AttackHeli", 0],
+    ["plane",      "air",    "opfor_MISC_AIR_X",      "AttackHeli", 0]
 ];
 // --DUWS-UNITCOMP END--
 
 DUWS_fnc_vehicleRow = {
     params ["_token"];
-    private _i = DUWS_spawnVehicles findIf { (_x select 0) isEqualTo _token };
+    private _name = [_token] call DUWS_fnc_tokenName;
+    private _i = DUWS_spawnVehicles findIf { (_x select 0) isEqualTo _name };
     if (_i < 0) then { [] } else { DUWS_spawnVehicles select _i }
 };
 
@@ -323,33 +359,29 @@ DUWS_fnc_vehicleRow = {
 // parameters live on the row for the same reason a team's men do -- they were arguments hardcoded
 // at one call site, where a second caller wanting different ones had nowhere to say so.
 //
-// Column 2 is the category in all three tables, which is what lets DUWS_fnc_spawnCategory ask one
+// Column 1 is the category in all three tables, which is what lets DUWS_fnc_spawnCategory ask one
 // question of whichever row claims the token. Column 3 names the placer, and column 4 is whatever
 // that placer's own parameters are; every placer is called as [pos, radius] + params + [strength].
 // Column 5 says whether attrition reaches inside the token or leaves it whole.
 //
-// buildings     -- houses around the centre, the shape a side mission garrisons with.
-// fortbuildings -- the same pass with a zone's parameters: it wants five usable building positions
-//                  rather than two, stands its men UP rather than AUTO, and takes the buildings
-//                  nearest the centre rather than a random spread, so a zone is held from its
-//                  middle. Its own row rather than arguments on the one above, because a
-//                  composition names what it fields and never how to field it.
-// mortar        -- the zone's only indirect fire, and exempt from attrition on its own row: the tube
-//                  and its ammunition are one backpack each on two men, so a fraction of a pair
-//                  takes the tube away entirely. That changes what the zone is, not how strong.
-// towers        -- the guard towers and bunkers already standing on the ground, manned in place.
-// --DUWS-UNITCOMP BEGIN name="OPFOR specials" kind=team row="token, places, category, placer, params, thins" fields="token, places, category, placer, parameters, thins"--
+// One row, and that is the point: the house, tower and bunker placers that used to sit here were
+// men raised by a rule *and* ordered by the same rule, so a composition could not ask for those men
+// under different orders. They are the "garrison" posture now, and what they raise is an ordinary
+// team. What is left is the case that is genuinely not a roster.
+//
+// mortar -- the zone's only indirect fire, and exempt from attrition: the tube and its ammunition
+//           are one backpack each on two men, so a fraction of a pair takes the tube away entirely.
+//           That changes what the zone is, not how strong it is.
+// --DUWS-UNITCOMP BEGIN name="OPFOR specials" kind=team row="token, category, places, placer, params, thins" fields="token, category, places, placer, parameters, thins"--
 DUWS_spawnSpecials = [
-    ["buildings",     "houses", "infantry",      "fnc_garrisonBuildings", [8, 3, 2, "AUTO", false], true],
-    ["fortbuildings", "houses", "fortification", "fnc_garrisonBuildings", [8, 3, 5, "UP", true],    true],
-    ["mortar",        "tube",   "fortification", "fnc_garrisonMortar",    [],                       false],
-    ["towers",        "posts",  "fortification", "fnc_garrisonTowers",    [300],                    true]
+    ["mortar", "fortification", "tube", "fnc_garrisonMortar", [], false]
 ];
 // --DUWS-UNITCOMP END--
 
 DUWS_fnc_specialRow = {
     params ["_token"];
-    private _i = DUWS_spawnSpecials findIf { (_x select 0) isEqualTo _token };
+    private _name = [_token] call DUWS_fnc_tokenName;
+    private _i = DUWS_spawnSpecials findIf { (_x select 0) isEqualTo _name };
     if (_i < 0) then { [] } else { DUWS_spawnSpecials select _i }
 };
 
@@ -365,7 +397,7 @@ DUWS_fnc_teamRoster = {
     params ["_token", ["_mult", 1], ["_strength", 1]];
     private _row = [_token] call DUWS_fnc_teamRow;
     if (_row isEqualTo []) exitWith { [] };
-    _row params ["", "", "", "_core", "_once", "_leader"];
+    _row params ["", "", "_core", "_once", "_leader"];
     private _men = [];
     for "_k" from 1 to (_mult max 1) do { _men append _core };
     _men append _once;
@@ -389,15 +421,16 @@ DUWS_fnc_teamRoster = {
 // before it got here, so this is a caller that skipped the filter, and spawning "" is a nil vehicle.
 DUWS_fnc_zoneSpawnOne = {
     params ["_token", "_pos", "_size", ["_strength", 1]];
+    private _posture = [_token] call DUWS_fnc_tokenPosture;
     if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith {
-        [_token, _pos, _size, _strength] call fnc_spawn_team
+        [_token, _pos, _size, _strength, _posture] call fnc_spawn_team
     };
     private _class = [_token] call DUWS_fnc_tokenClass;
     if (_class == "") exitWith {
         ["WARN", "ZONES", format ["%1 cannot be fielded here and was not filtered out", _token]] call fnc_log;
         grpNull
     };
-    [_class, _pos, _size] call fnc_spawn_vehicle
+    [_class, _pos, _size, _posture] call fnc_spawn_vehicle
 };
 
 // Called by the zone raise worker, which owns the streaming decisions around it. Nothing guards a

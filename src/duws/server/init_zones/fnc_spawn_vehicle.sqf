@@ -10,10 +10,15 @@
 // against four trucks, and an air slot with helicopters switched off fell through to the same pool
 // and became a truck.
 //
-// usage: [_class, _pos, _radius] call fnc_spawn_vehicle
+// usage: [_class, _pos, _radius, _posture] call fnc_spawn_vehicle
 //
 // Returned rather than spawned into the void, for the callers that count what they raised.
-params ["_class", "_patrolCenter", "_radius"];
+//
+// _posture is fnc_apply_posture's, the same vocabulary a rifle section is ordered in: a vehicle is a
+// group like any other once it is standing, and its circuit used to be a near-copy of the one teams
+// walked. The postures that put men inside a structure answer for a mounted group by patrolling
+// instead, so a composition may name any of them without having to know what it is naming.
+params ["_class", "_patrolCenter", "_radius", ["_posture", "closepatrol"]];
 if (_class == "") exitWith { grpNull };
 
 // Air enters from off the map at altitude and everything else from a safe spot on the ground. Keyed
@@ -42,22 +47,7 @@ if (_isAir) then {
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 };
 
-_vehGroup setCombatMode "YELLOW";
-{
-    private _wp = _vehGroup addWaypoint [_patrolCenter, _radius];
-    _wp setWaypointType "SAD";
-    _wp setWaypointBehaviour "SAFE";
-    _wp setWaypointSpeed "LIMITED";
-    _wp setWaypointCompletionRadius 100;
-    // A ground patrol holds each leg for a minute so a zone is not circled at speed; an aircraft
-    // loitering on a waypoint is a stationary target.
-    if (!_isAir) then { _wp setWaypointTimeout [60, 61, 62] };
-} forEach [1, 2, 3];
-
-private _wp1 = _vehGroup addWaypoint [_patrolCenter, 100];
-_wp1 setWaypointType "CYCLE";
-_wp1 setWaypointBehaviour "SAFE";
-_wp1 setWaypointSpeed "LIMITED";
+[_vehGroup, _posture, _patrolCenter, _radius] call fnc_apply_posture;
 
 {
     [_x] call fnc_addRandomLoot;

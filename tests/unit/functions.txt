@@ -22,6 +22,8 @@ duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_strength
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_strength_set
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_thin
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_tier
+duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_tokenName
+duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_tokenPosture
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_spawnCategory
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_zoneSpawnList
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_spawnDiff

@@ -56,7 +56,6 @@ fnc_search_dropItems = compile preprocessFileLineNumbers "duws\server\misc\fnc_s
 fnc_search_claim = compile preprocessFileLineNumbers "duws\server\misc\fnc_search_claim.sqf";
 fnc_garrisonBuildings = compile preprocessFileLineNumbers "duws\server\misc\fnc_garrisonBuildings.sqf";
 fnc_garrisonMortar = compile preprocessFileLineNumbers "duws\server\misc\fnc_garrisonMortar.sqf";
-fnc_garrisonTowers = compile preprocessFileLineNumbers "duws\server\misc\fnc_garrisonTowers.sqf";
 fnc_fob_destroyed = compile preprocessFileLineNumbers "duws\server\misc\fnc_fob_destroyed.sqf";
 // Not broadcast: it creates a global marker, so exactly one machine may run it.
 fnc_baseRangeMarker = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseRangeMarker.sqf";
@@ -223,6 +222,9 @@ fnc_enterlocation = compile preprocessFileLineNumbers "duws\server\misc\fnc_ente
 fnc_enemy_contact = compile preprocessFileLineNumbers "duws\server\misc\fnc_enemy_contact.sqf";
 // Publishes DUWS_zoneHooks and the placers around it; after the zone state file it reads.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_stream_init.sqf";
+// The standing orders half of every spawner below, and of the base guards: a group is raised by one
+// of them and ordered by this.
+fnc_apply_posture = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_apply_posture.sqf";
 fnc_spawn_team = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawn_team.sqf";
 fnc_spawn_vehicle = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawn_vehicle.sqf";
 fnc_zone_reveal = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_reveal.sqf";

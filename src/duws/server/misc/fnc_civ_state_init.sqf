@@ -48,8 +48,8 @@ fnc_civ_repAt = {
 	}
 };
 
-// What each garrison tier puts in a town, as tokens DUWS_fnc_zoneSpawnOne already understands --
-// plus "buildings", which only tier IV raises and which no zone composition emits.
+// What each garrison tier puts in a town, as tokens DUWS_fnc_zoneSpawnOne already understands: a
+// posture and the team standing up under it, one entry per A3 group.
 //
 // Absolute, like the zone set: a row is the whole garrison for that tier, so what a tier IV town is
 // reads off one line. A tier bought while the garrison stands raises DUWS_fnc_spawnDiff of the two
@@ -62,10 +62,10 @@ fnc_civ_repAt = {
 // buildings rather than by digging in.
 // --DUWS-UNITCOMP BEGIN name="Town tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_townSpawnTiers = [
-	["patrol", "team"],
-	["patrol", "team", "team", "car"],
-	["patrol", "team", "team", "car", "apc"],
-	["patrol", "team", "team", "car", "apc", "buildings"]
+	["closepatrol:patrol", "closepatrol:team"],
+	["closepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:car"],
+	["closepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:car", "closepatrol:apc"],
+	["closepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:car", "closepatrol:apc", "garrison:team", "garrison:team", "garrison:team", "garrison:team", "garrison:team", "garrison:team"]
 ];
 // --DUWS-UNITCOMP END--
 

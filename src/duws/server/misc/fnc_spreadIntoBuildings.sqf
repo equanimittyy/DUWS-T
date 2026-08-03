@@ -12,7 +12,13 @@
 // its own building array against the result stays aligned with it.
 //
 // _stance "" leaves each unit's stance untouched, for a caller that assigns its own per-unit mix.
-params ["_group", "_buildings", ["_unitsPerBuilding", 4], ["_stance", "AUTO"]];
+//
+// _mode is the leash fnc_holdBuildingPost puts on each placed unit. HERD lets a unit walk between
+// its building's positions; PIN keeps it on the one it was given, for a tower or a catwalk a unit
+// shoved off often cannot path back up. PIN therefore assigns positions by index rather than at
+// random and hands each unit only its own: fnc_holdBuildingPost pins to the first entry it is given,
+// so passing the whole list would drag every pinned man onto the same spot.
+params ["_group", "_buildings", ["_unitsPerBuilding", 4], ["_stance", "AUTO"], ["_mode", "HERD"]];
 
 // One lookup rather than one per unit: `units` walks the group on every call, and nothing below
 // suspends, so the list cannot change while the placement runs.
@@ -34,12 +40,18 @@ private _perBuilding = [];
         _buildingUnits pushBack _unit;
 
         if !(_positions isEqualTo []) then {
-            _unit setPosATL (_building buildingPos (floor (random (count _positions))));
+            private _slot = if (_mode == "PIN") then {
+                _building buildingPos (_unitIndex % count _positions)
+            } else {
+                _building buildingPos (floor (random (count _positions)))
+            };
+            _unit setPosATL _slot;
             // Guarded, and passed through the same way, so "" means one thing in both halves:
             // setUnitPos "" is not a stance, and silently leaves the unit however it spawned.
             if (_stance != "") then { _unit setUnitPos _stance };
             _unit setBehaviour "AWARE";
-            [_unit, _building, _positions, "HERD", _stance] spawn fnc_holdBuildingPost;
+            [_unit, _building, ([_positions, [_slot]] select (_mode == "PIN")), _mode, _stance]
+                spawn fnc_holdBuildingPost;
         };
     };
 

@@ -388,22 +388,22 @@ DUWS_spawnCategories = [["infantry"], ["light"], ["armour"], ["air"]];
 // Every token carries its own category on its own row, in whichever table claims it.
 // "misfiled" names a category that does not exist, which the tool lets a user type.
 DUWS_teamRosters = [
-    ["patrol", "route", "infantry", ["opfor_A_X", "opfor_B_X"], [], ""],
-    ["team", "route", "infantry", ["opfor_A_X"], ["opfor_C_X"], "opfor_TL_X"],
-    ["wpteam", "wander", "infantry", ["opfor_A_X"], [], ""],
-    ["thin", "route", "infantry", ["opfor_A_X", "opfor_ABSENT_X"], [], ""],
-    ["misfiled", "route", "cavalry", ["opfor_A_X"], [], ""]
+    ["patrol", "infantry", ["opfor_A_X", "opfor_B_X"], [], ""],
+    ["team", "infantry", ["opfor_A_X"], ["opfor_C_X"], "opfor_TL_X"],
+    ["wpteam", "infantry", ["opfor_A_X"], [], ""],
+    ["thin", "infantry", ["opfor_A_X", "opfor_ABSENT_X"], [], ""],
+    ["misfiled", "cavalry", ["opfor_A_X"], [], ""]
 ];
 DUWS_spawnVehicles = [
-    ["car",    "opfor_CAR_X",  "light",  "",           0],
-    ["apc",    "opfor_APC_X",  "armour", "",           0],
-    ["tank",   "opfor_TANK_X", "armour", "TEST_Heavy", 100],
-    ["heli",   "opfor_HELI_X", "air",    "TEST_Air",   0],
-    ["absent", "opfor_GONE_X", "light",  "",           0]
+    ["car",    "light",  "opfor_CAR_X",  "",           0],
+    ["apc",    "armour", "opfor_APC_X",  "",           0],
+    ["tank",   "armour", "opfor_TANK_X", "TEST_Heavy", 100],
+    ["heli",   "air",    "opfor_HELI_X", "TEST_Air",   0],
+    ["absent", "light",  "opfor_GONE_X", "",           0]
 ];
 DUWS_spawnSpecials = [
-    ["buildings", "houses", "infantry",      "fnc_garrisonBuildings", [8, 3, 2, "AUTO", false], true],
-    ["mortar",    "tube",   "fortification", "fnc_garrisonMortar",    [],                       false]
+    ["buildings", "infantry",      "houses", "fnc_garrisonBuildings", [8, 3, 2, "AUTO", false], true],
+    ["mortar",    "fortification", "tube",   "fnc_garrisonMortar",    [],                       false]
 ];
 opfor_A_X = "cls_A";
 opfor_B_X = "cls_B";
@@ -572,8 +572,32 @@ private _have = ["patrol","team"];
 // The same answer is what tells the spawn path a token is a vehicle class rather than a team.
 ["teamRow: an unknown team has no row",
     (["nosuchkind"] call DUWS_fnc_teamRow), []] call fnc_assertEq;
-["teamRow: a team's behaviour is on its row",
-    ((["wpteam"] call DUWS_fnc_teamRow) select 1), "wander"] call fnc_assertEq;
+["teamRow: a team's category is on its row",
+    ((["wpteam"] call DUWS_fnc_teamRow) select 1), "infantry"] call fnc_assertEq;
+
+["tokenName: a posture-carrying token names the team behind it",
+    (["garrison:team"] call DUWS_fnc_tokenName), "team"] call fnc_assertEq;
+["tokenName: a bare token is its own name",
+    (["team"] call DUWS_fnc_tokenName), "team"] call fnc_assertEq;
+["tokenPosture: the posture is the half before the colon",
+    (["garrison:team"] call DUWS_fnc_tokenPosture), "garrison"] call fnc_assertEq;
+// The orders every team and every vehicle walked when a posture was a column on the roster row, so
+// a side mission that names only a team keeps getting what it always got.
+["tokenPosture: a bare token falls back to a close patrol",
+    (["team"] call DUWS_fnc_tokenPosture), "closepatrol"] call fnc_assertEq;
+// The lookups strip the posture themselves; a row matched on the whole string would find nothing.
+["teamRow: a posture-carrying token still finds its roster row",
+    ((["garrison:team"] call DUWS_fnc_teamRow) select 0), "team"] call fnc_assertEq;
+["vehicleRow: and so does a vehicle's",
+    ((["closepatrol:apc"] call DUWS_fnc_vehicleRow) select 0), "apc"] call fnc_assertEq;
+["spawnCategory: a posture does not change which category scales a token",
+    (["garrison:apc"] call DUWS_fnc_spawnCategory), "armour"] call fnc_assertEq;
+// fnc_spawn_vehicle is handed this as a classname, so the posture has to be gone by here.
+["tokenClass: a posture-carrying classname passes through without its posture",
+    (["garrison:O_MBT_02_cannon_F"] call DUWS_fnc_tokenClass), "O_MBT_02_cannon_F"] call fnc_assertEq;
+["thinComposition: attrition reads a posture-carrying token by what it is made of",
+    ([["garrison:team", "closepatrol:apc"], 0.4] call DUWS_fnc_thinComposition),
+    ["garrison:team"]] call fnc_assertEq;
 
 // fnc_zone_thin drops at random indices, so a thinned roster is asserted by size and by who leads
 // rather than by contents. One core man at x8 is eight, plus the tail is nine, halved is five.

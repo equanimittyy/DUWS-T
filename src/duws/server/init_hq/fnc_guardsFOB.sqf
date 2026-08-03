@@ -66,8 +66,8 @@ switch (VERSION_X) do {
 
 // Patrolling Guards
 //
-// One group walking a fixed circuit and cycling back to its first leg, the shape the HQ patrol
-// uses (init_hq/fnc_placeHQUnits.sqf). It is the FOB's only moving element now.
+// One group walking the hqpatrol posture, the same circuit the HQ walks round its towers. It is the
+// FOB's only moving element now.
 //
 // 20 m, not the 10 this used to walk: the fortification ring puts HESCO and turrets on the 9-10 m
 // line, so the old corners sat inside the wall and the patrol spent its circuit pathing through it.
@@ -86,19 +86,9 @@ _groupPatrol = [_safe, WEST, _patrolUnits,[],[],blufor_ai_skill] call BIS_fnc_sp
 _groupPatrol deleteGroupWhenEmpty true;
 _groupPatrol setCombatMode "WHITE";
 
-{
-	private _wp = _groupPatrol addWaypoint [_centerPos getPos [FOB_PATROL_RADIUS, _x], 0];
-	_wp setWaypointType "MOVE";
-	_wp setWaypointBehaviour "SAFE";
-	_wp setWaypointSpeed "LIMITED";
-} forEach [0, 90, 180, 270];
-
-// Back to the first leg. The cycle waypoint is what makes the circuit repeat; without it the
-// group stops on the last corner and stands there.
-_wp = _groupPatrol addWaypoint [_centerPos getPos [FOB_PATROL_RADIUS, 0], 0];
-_wp setWaypointType "CYCLE";
-_wp setWaypointBehaviour "SAFE";
-_wp setWaypointSpeed "LIMITED";
+// Four corners, walked as a circuit by the same posture the HQ patrol uses.
+[_groupPatrol, "hqpatrol", _centerPos, FOB_PATROL_RADIUS,
+	[0, 90, 180, 270] apply { _centerPos getPos [FOB_PATROL_RADIUS, _x] }] call fnc_apply_posture;
 
 
 // Filed under the site so the poller can freeze them. Registered late rather than at build time

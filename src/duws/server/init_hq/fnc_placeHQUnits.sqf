@@ -185,17 +185,11 @@ if (count _patrolSpawnPos > 0 && count _patrolUnits > 0) then {
         _x setPosWorld _patrolSpawnPos;
     } forEach (units _patrolGroup);
     while {count (waypoints _patrolGroup) > 0} do { deleteWaypoint ((waypoints _patrolGroup) select 0); };
-    {
-        private _wp = _patrolGroup addWaypoint [_x getPos [15, getDir _x], 0];
-        _wp setWaypointType "MOVE";
-        _wp setWaypointSpeed "LIMITED";
-        _wp setWaypointBehaviour "SAFE";
-    } forEach _towers;
-    private _firstTower = _towers select 0;
-    private _wpCycle = _patrolGroup addWaypoint [_firstTower getPos [8, getDir _firstTower], 0];
-    _wpCycle setWaypointType "CYCLE";
-    _wpCycle setWaypointSpeed "LIMITED";
-    _wpCycle setWaypointBehaviour "SAFE";
+    // The anchors are this base's own towers, stood off far enough not to path into one. The circuit
+    // itself is fnc_apply_posture's, shared with the FOB pair, which walks its corners on the same
+    // orders and used to carry its own copy of this block.
+    [_patrolGroup, "hqpatrol", _patrolSpawnPos, 0, _towers apply { _x getPos [15, getDir _x] }]
+        call fnc_apply_posture;
     [_patrolGroup] spawn {
         params ["_grp"];
         sleep 1.5;

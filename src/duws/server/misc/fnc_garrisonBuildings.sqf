@@ -8,38 +8,30 @@
 // corpse intel every other mission paid, with nothing in the source to say that was deliberate. A
 // caller cannot forget a step it does not perform.
 //
-// Shared by side missions and by a zone's own dug-in half, which wants different answers to three
-// questions: five usable building positions rather than two, men stood UP rather than AUTO, and the
-// buildings nearest the centre rather than a random spread, so a zone is held from its middle.
-// Those are the parameters below rather than a second copy of this routine.
+// A side mission's guard ring, and only that. A zone and a town garrison hold buildings through the
+// "garrison" posture instead -- one squad to one structure, drawn from an ordinary team roster --
+// which is what a composition can name and vary; this raises its own men by a rule and cannot be
+// asked for anything else. The zone parameters that used to sit here (nearest-first, men stood UP,
+// five positions rather than two, an attrition fraction) went with that caller.
 // clearthearea_cqb stays out, because its house-cleared announcements need the per-building unit
 // lists this does not return.
-//
-// _strength thins the number of buildings held and never the men inside one: three to a house is
-// what makes clearing one cost something, and a house with a single man in it is a house the player
-// walks through. Never empties: a garrison at its floor still holds one building.
-params ["_pos", "_radius", ["_desiredBldgCount", 6], ["_unitsPerBuilding", 4],
-        ["_positionsNeeded", 2], ["_stance", "AUTO"], ["_nearestFirst", false], ["_strength", 1]];
+params ["_pos", "_radius", ["_desiredBldgCount", 6], ["_unitsPerBuilding", 4]];
 
-private _usableBuildings = [_pos, _positionsNeeded, _radius] call fnc_usableBuildings;
+// Two positions, so a hut with a doorway counts: a side mission wants its objective ringed rather
+// than held from the best windows on the street.
+private _usableBuildings = [_pos, 2, _radius] call fnc_usableBuildings;
 private _actualBldgCount = count _usableBuildings;
 if (_actualBldgCount == 0) exitWith { grpNull };
 
-private _maxBuildingsToUse = ((ceil (_strength * (_actualBldgCount min _desiredBldgCount))) max 1);
-private _selectedBuildings = [];
-if (_nearestFirst) then {
-    // fnc_usableBuildings returns them sorted by distance, so a slice is the nearest N.
-    _selectedBuildings = _usableBuildings select [0, _maxBuildingsToUse];
-} else {
-    if (_actualBldgCount == _maxBuildingsToUse) then {
-        _selectedBuildings = _usableBuildings;
-    } else {
-        private _tempArray = +_usableBuildings;
-        for "_i" from 1 to _maxBuildingsToUse do {
-            private _index = floor (random (count _tempArray));
-            _selectedBuildings pushBack (_tempArray select _index);
-            _tempArray deleteAt _index;
-        };
+private _maxBuildingsToUse = (_actualBldgCount min _desiredBldgCount) max 1;
+private _selectedBuildings = _usableBuildings;
+if (_actualBldgCount != _maxBuildingsToUse) then {
+    _selectedBuildings = [];
+    private _tempArray = +_usableBuildings;
+    for "_i" from 1 to _maxBuildingsToUse do {
+        private _index = floor (random (count _tempArray));
+        _selectedBuildings pushBack (_tempArray select _index);
+        _tempArray deleteAt _index;
     };
 };
 _maxBuildingsToUse = count _selectedBuildings;
@@ -56,7 +48,7 @@ for "_i" from 1 to (_maxBuildingsToUse * _unitsPerBuilding) do {
 private _buildingGroup = [[0,0], EAST, _bldgUnits, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
 _buildingGroup deleteGroupWhenEmpty true;
 
-[_buildingGroup, _selectedBuildings, _unitsPerBuilding, _stance] call fnc_spreadIntoBuildings;
+[_buildingGroup, _selectedBuildings, _unitsPerBuilding, "AUTO"] call fnc_spreadIntoBuildings;
 
 [_buildingGroup, "garrison"] call fnc_search_flag_group;
 { [_x] call fnc_addRandomLoot } forEach units _buildingGroup;
