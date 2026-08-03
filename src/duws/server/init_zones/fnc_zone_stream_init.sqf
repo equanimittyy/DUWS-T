@@ -25,6 +25,34 @@ if (!isServer) exitWith {};
 #define STATIC_MAN_ATTEMPTS 3
 #define STATIC_MAN_LIFT 0.15
 
+// How far a gun may lean before it is stood back up, as the cosine of the angle between its own up
+// and the ground's. Measured against the terrain rather than against vertical, so a gun standing on
+// a slope is not read as fallen; past this it is on its side or its back.
+#define STATIC_UPRIGHT_DOT 0.7
+
+// Stand a fallen gun back up, on the arc it was placed to cover.
+//
+// Nothing downstream can catch this one, which is why it is done rather than detected: a gun lying
+// on its side seats its gunner exactly as a standing one does, so the seat read-back below reports
+// success, the man goes on the roster, and the zone counts a defence that can neither traverse nor
+// fire. The player finds a gunner lying sideways behind a gun pointed at the sky.
+DUWS_fnc_uprightStatic = {
+    params ["_gun"];
+    private _up = surfaceNormal (getPos _gun);
+    if (((vectorUp _gun) vectorDotProduct _up) > STATIC_UPRIGHT_DOT) exitWith {};
+
+    // Only the heading survives a fall worth keeping, and a gun that went over its nose has not even
+    // that: its dir points into the ground, and handing that to setVectorDirAndUp against a vertical
+    // up gives the engine two near-parallel vectors and an orientation it can make nothing of. North
+    // is arbitrary and deliberately so -- a gun facing the wrong way still traverses onto targets.
+    private _dir = vectorDir _gun;
+    private _flat = [_dir select 0, _dir select 1, 0];
+    if (vectorMagnitude _flat < 0.1) then { _flat = [0, 1, 0] };
+    _gun setVectorDirAndUp [vectorNormalized _flat, _up];
+    ["INFO", "ZONES", format ["emplacement %1 had fallen over; stood back up", typeOf _gun]]
+        call fnc_log;
+};
+
 // Seats one man on one gun and answers with the gunner, or objNull when it could not be done.
 //
 // moveInGunner reports nothing either way, so whether the man actually took the seat can only be
@@ -45,6 +73,10 @@ DUWS_fnc_manStatic = {
         // A gun the player destroyed stays destroyed -- compositions are persistent, and rebuilding
         // one here would hand back ground that was already taken.
         if (isNull _unit || {!alive _gun}) exitWith {};
+
+        // Every pass, not once before the loop: the lift below drops the gun again, and a gun
+        // dropped onto a slope can go over on the way down.
+        [_gun] call DUWS_fnc_uprightStatic;
 
         _unit moveInGunner _gun;
         if (gunner _gun isEqualTo _unit) exitWith {};
@@ -81,7 +113,10 @@ DUWS_fnc_zoneManStatics = {
     // as a spawned one, so he joins the roster rather than holding the objective off the books:
     // unrostered, he denies capture through fnc_opfor_count_at while counting toward neither the
     // peak nor the break line, so killing him is progress the zone never registers.
-    { _roster append (crew _x) } forEach (_statics select {count crew _x > 0});
+    // Uprighted here as well as in the seating pass, because a crewed gun never reaches it: the
+    // gunner is what makes it look correct, so a fallen one would stand as it is for the campaign.
+    { _roster append (crew _x); [_x] call DUWS_fnc_uprightStatic } forEach
+        (_statics select {count crew _x > 0});
 
     private _guns = _statics select {count crew _x == 0};
     if (count _guns == 0) exitWith {};

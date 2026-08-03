@@ -849,6 +849,32 @@ seat a gun sunk *into* it refuses. `DUWS_fnc_manStatic`
 than leaving him standing, logging a `WARN` naming the gun; the emplacement stays as scenery the
 player can use.
 
+## A static weapon lying on its side still takes its gunner
+
+**A fallen gun answers every test a standing one does: `alive` is true, `moveInGunner` seats the
+man, and reading the seat back off the gun reports success. Only `vectorUp` says otherwise — no
+command reports that a gun cannot traverse or fire because it is on its ground.**
+
+So the seat read-back above, which catches a man left standing, cannot catch this: the gunner is
+inside the gun, on the roster, counted toward the garrison peak, and the zone believes it is
+defended. What the player finds is a soldier lying sideways behind a gun pointing at the sky.
+
+Placement is where guns go down. A member that keeps its simulation — a static weapon, a watchtower
+— is a live physics body, so teleporting and rotating one (`setPosWorld` then `setVectorDirAndUp`)
+leaves it resolving against whatever it now intersects, and a tripod can resolve that by going over.
+A fall then persists rather than being one bad deploy: the stow record holds the orientation the gun
+was last seen in, so every later deploy replays it.
+
+**How to apply:** freeze before you place and restore after — `enableSimulationGlobal false`, the
+position and orientation writes, then the recorded state back (`fnc_duws_deploy`,
+`server/misc/fnc_composition_stream_init.sqf`). Where a gun may already have gone over, test the
+tilt rather than the seat: `(vectorUp _gun) vectorDotProduct (surfaceNormal (getPos _gun))`, against
+the terrain rather than against vertical so a gun standing on a slope is not read as fallen. Correct
+it with `setVectorDirAndUp` on a `vectorDir` flattened into the horizontal plane — a gun that went
+over its nose has a dir pointing into the ground, and that against a vertical up leaves the engine
+two near-parallel vectors and no orientation it can derive. `DUWS_fnc_uprightStatic`
+(`server/init_zones/fnc_zone_stream_init.sqf`) does this before every seating attempt.
+
 ## `doStop` outlives the orders it was issued against, and new waypoints do not release it
 
 **A unit under `doStop` ignores its group's waypoints until it is given a move order of its own.
