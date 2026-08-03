@@ -26,31 +26,15 @@ The markers stay so the next round has somewhere to land. An empty block means t
 fully triaged.
 
 _BEGIN-USER_
-Currently testing:
-- Read a zone's tier at generation and again at deploy: `is tier N, fielding` then `deployed N men at tier`; a rebuild keeps the tier it had
-- Lose a captured zone back to OPFOR: strength floored to 0.3 rather than refreshed, and the readout says Mobilising until the first man stands
-- Stand on a zone and step off mid-count: a flat 30 s every time, restarting on the step off
-- Clear a town below -10: `cleared at tier N; rep R + 5, garrison broken to 0.3 and regrouping`, and both purchase sinks refused for the 3 h
-- Visit several towns on a 40-zone campaign: every town garrisons, not only the first — one poller replaced a thread apiece
-- Walk into a dormant zone, then fly across a second one without stopping: the first deploys, the second stays empty — the raise reconfirms after five seconds
-- Stop between a banded town's two rings, then send an AI squad in alone: the garrison raises both times, the streets fill neither
-- Recruit a civilian, leave the town for a minute and come back: he is still in the squad
-- Run a side mission that lands on a town or zone disc: the garrison is standing when it cleans up, and the town is not thinned on the next visit
-- Redeploy into a base nobody is near: the guards are moving when you land, not statues
-- Walk 500 m from a FOB and back: the perimeter patrol, the turret gunners and the ring guards all carry on rather than standing still
-- Build a FOB and then remove it, grepping `site pass:` at log level 4 either side: the site count rises by one and falls back, and the pass stays far short of a frame
-- Start a campaign on a map where no civilian town qualifies: zone garrisons still spawn
-- Click zones and towns on the map: a roman tier on both, and on a zone the composition kind beside the callsign over a twenty-segment strength bar, refreshed on opening the map
-- Click through the request menu: nothing clipped, only Squad Manager / FOB Manager / Special Operatives close it, costed entries orange
-- Start a campaign in each game mode: zombie factions filtered out of the other picks, and Zombies with neither Ravage nor WBK falling back to DUWS
-- Run side missions: each briefing opens with its category, English only
-- Call JDAM or artillery onto structures: the inner ring stays destroyed rather than being healed back by the outer pass
-- Carry a downed pilot and let the auto-drop fire: no stale load action left for the next carry
-- Grep the boot for `[DUWS][ERROR]` and `compiled EMPTY`: the dead-code sweep, the fortification ring, the night flare and the multimeter probe all came out
-- Ignore the standby task forces for a few hours: at most one stands by
-- Watch for `stow <key>: refused`: something unmodelled crewed a static
-- Play three hours or more and watch frame time: the waypoint, litter, aim-skill, Zeus and resupply fixes have no other symptom
-- Try a disguise: the gear scan runs the whole session again, so the tables keep filling
+- Rep notifications: change icon to handshake icon
+- Notifications for unlocking supports are broken: HALO, Arsenal etc. look at our most recent diffs - I feel we deleted a few keys that may have been in-use
+> Unlock prose for permanant unlocks should be updated. For example the scrap unlock tells you what to do, instead it should just say "Scrap Facility Unlocked" etc.
+- Dialogue for civilian interaction system:
+> When refusing a bribe, the civilian's dialogue of "I don't know anything" shouldn't fire; just the bribe rejection dialogue
+-> They say "Move along." which isn't something a civilian would say to a soldier. I think they should say "Go away." instead - make it read naturally though like "No money? Then go away."
+- Debug option to "flag item as searchable" no longer works
+- Change civilian line: "Next time try asking..." to "Fucking BLUFOR..."
+- Check latest RPT logs, I spawned a garrison at enemy zone LIMA but 2 dudes stay behind; why?
 
 _END-USER_
 
