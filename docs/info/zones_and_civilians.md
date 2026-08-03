@@ -211,6 +211,35 @@ Zones cap at what the largest radius asks of a tier IV composition, which is whe
 radius-band table topped out. Towns are not multiplied by radius at all — see
 [§Garrison tiers 0 to IV](#garrison-tiers-0-to-iv).
 
+#### A posture reaches groups, and only groups
+
+A zone is described by two arrays that never meet in source, and the tier reaches one of them.
+
+| | Holds | Tiered | Where |
+|---|---|---|---|
+| Composition | one entry per A3 group, `posture:token` | yes, a row per tier | `DUWS_zoneSpawnTiers` |
+| Prefab | one row per object — sandbags, wire, bunkers, towers and the guns alike | no, drawn by weighted roll at zone creation (`fnc_createzone.sqf:130-140`) | the `--DUWS-COMPOSITION--` fence in each `init_zones/prefabs/modern/fnc_modern_*.sqf` |
+
+**A prefab object cannot carry a posture, because a posture is an order and there is no group to
+give it to.** What carries one is whatever occupies the object, and every occupancy is discovered at
+runtime rather than written down anywhere:
+
+- a `garrison:` slot claims the nearest structure that both matches the class list in
+  `fnc_apply_posture` and has `buildingPos` entries, within `GARRISON_REACH`;
+- the emplacement occupant mans whatever `isKindOf "StaticWeapon"` it finds in the zone's
+  composition membership. That is a seat rather than a building position, so it never passes through
+  a posture at all and its orders cannot be named from a composition;
+- sandbag lines, HESCO and wire are cover for whoever is near them and are occupied by nobody.
+
+Nothing marks a prefab row as garrisonable. `isWeapon` is the only flag one carries and it exists for
+placement — a gun keeps its Z so it lands on the bunker roof rather than in the dirt.
+
+**So what is built does not scale with tier.** The prefab draw does not read the tier, which is easy
+to misread now that the dug-in half of a garrison is six rows of the tier table: those rows scale the
+men *holding* the ground, never what stands on it. Tiering built defences means either weighting the
+prefab draw by tier, or a composition entry that places an object rather than a group — which is what
+[`../hardpoint_system_plan.md`](../hardpoint_system_plan.md) is for.
+
 ### Attrition carries between visits
 
 A zone remembers what was left of its garrison when it streamed out. The zone tick calls
