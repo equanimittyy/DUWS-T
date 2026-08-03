@@ -47,32 +47,39 @@ private _hqObj = bluHQ_object;
 private _guardTypes = missionNamespace getVariable ["HQ_redeploy_guardTypes", [blufor_SOLDIER_X]];
 
 // 1. Static weapons and their gunners.
-private _mgAnchor = missionNamespace getVariable ["HQ_redeploy_mgAnchor", objNull];
-private _aaData = missionNamespace getVariable ["HQ_redeploy_aaData", []];
+//
+// Position and heading come off the "HQ Turrets" composition (init_hq/fnc_BluHQinit.sqf), so a gun
+// is moved by rearranging the fence in the 3D editor rather than by re-measuring a model-space
+// offset by hand. Only the height still rides an anchor: a row's Z is discarded by the prop
+// placement, and these sit above the terrain by an amount measured against the anchor's
+// getPosWorld for the reason stated at the head of this file.
+private _weaponData = missionNamespace getVariable ["HQ_redeploy_weaponData", []];
 private _weaponList = [];
 
-if (!isNull _mgAnchor) then {
-    private _worldPos = [_mgAnchor, [-0.3172, -2.36523], 1.21321] call _anchoredPos;
-    private _obj = createVehicle ["I_HMG_02_high_F", _worldPos, [], 0, "CAN_COLLIDE"];
+{
+    _x params ["_class", "_xy", "_dir", "_anchorClass", "_hOffset"];
+    // Re-found against what is standing rather than carried as a reference, so a rebuild after the
+    // anchor was destroyed still places the gun. No anchor at all falls back to the terrain, which
+    // is where a gun with nothing to stand on belongs.
+    private _anchor = nearestObject [[_xy select 0, _xy select 1, 0], _anchorClass];
+    private _base = if (isNull _anchor) then {
+        getTerrainHeightASL [_xy select 0, _xy select 1]
+    } else {
+        getPosWorld _anchor select 2
+    };
+    private _worldPos = [_xy select 0, _xy select 1, _base + _hOffset];
+    private _obj = createVehicle [_class, _worldPos, [], 0, "CAN_COLLIDE"];
     // Filed under the HQ key on the rebuild as well as the build: an unregistered replacement is
     // not marked persistent, so the cleanup sweep is free to delete a gun the player just paid for.
     [_obj, "HQ"] call fnc_duws_keep;
     _obj enableSimulationGlobal false;
     _obj setPosWorld _worldPos;
-    _obj setDir ([_worldPos, getPosWorld _mgAnchor] call BIS_fnc_dirTo);
-    _weaponList pushBack _obj;
-};
-
-{
-    _x params ["_class", "_xyModel", "_hOffset"];
-    private _worldPos = [_hqObj, _xyModel, _hOffset] call _anchoredPos;
-    private _obj = createVehicle [_class, _worldPos, [], 0, "CAN_COLLIDE"];
-    [_obj, "HQ"] call fnc_duws_keep;
-    _obj enableSimulationGlobal false;
+    _obj setDir _dir;
+    // Rotating displaces the object, so the position is written a second time after it -- the same
+    // reason the composition deploy does (misc/fnc_composition_stream_init.sqf).
     _obj setPosWorld _worldPos;
-    _obj setDir (getDir _hqObj);
     _weaponList pushBack _obj;
-} forEach _aaData;
+} forEach _weaponData;
 
 sleep 0.5;
 

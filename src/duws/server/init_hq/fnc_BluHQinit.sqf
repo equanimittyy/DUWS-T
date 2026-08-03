@@ -177,6 +177,33 @@ private _allObjectsData = [
 ];
 // --DUWS-COMPOSITION END--
 
+// The base's guns, in the same frame as the walls around them. Their own fence rather than rows on
+// the one above, because the two halves have different lifetimes: the props are built once and the
+// guns are replaced on every redeploy (misc/fnc_redeployHQUnits.sqf), and the Eden export emits
+// nothing past the heading column -- so a permanent/rebuilt flag on one array would survive only by
+// being hand-carried back on every round trip.
+//
+// They were placed off model-space offsets from the sandbag and the HQ building rather than from
+// rows, which is why the composition above carries a hundred and thirty-five props and not one
+// weapon: importing it into the 3D editor showed a firing position with no gun in it.
+//
+// Height is the one thing that cannot be a row. A row's Z is discarded -- the placement loop below
+// snaps every prop to the terrain -- and these two sit above it by a measured amount that was taken
+// against an anchor's getPosWorld, because a building's own modelToWorld Z is unusable
+// (init_hq/fnc_placeHQUnits.sqf). So the last two columns name the anchor class and the offset,
+// resolved by whatever object of that class is nearest the row: move the gun in Eden and its
+// height follows the thing it stands on.
+//
+// Column 5 is the faction role holding the classname, or "" for a gun that is what it says it is.
+// The column 0 class is what the role resolves to on the stock faction, so the import draws the
+// right silhouette whether or not a mod is loaded.
+// --DUWS-COMPOSITION BEGIN name="HQ Turrets" schema=A anchor=hqInComp--
+private _weaponData = [
+    ["I_HMG_02_high_F", 21.6814, -13.4485, 0,  96.9, "",                  "Land_SandbagBarricade_01_hole_F", 1.21321],
+    ["B_static_AA_F",    9.2279,  10.9924, 0, 269.8, "blufor_TURRET_AA",  "Land_Cargo_HQ_V1_F",              1.252556]
+];
+// --DUWS-COMPOSITION END--
+
 private _lightTypes = ["Land_PortableLight_double_F", "Land_LampShabby_F"];
 
 // 需要设置为无敌的物体类型列表
@@ -262,16 +289,20 @@ publicVariable "bluHQ_object";
 // call rather than beside each spawn so the rebuild -- which has nothing but the namespace to work
 // from -- places its units off exactly the data this build used.
 
-// 机枪锚定沙袋
-private _mgAnchorPosX = _spawnBaseX + (24.0503 - _compCenterX);
-private _mgAnchorPosY = _spawnBaseY + (-13.7368 - _compCenterY);
-private _mgAnchor = nearestObject [[_mgAnchorPosX, _mgAnchorPosY, 0] apply { _x + 0 }, "Land_SandbagBarricade_01_hole_F"];
-missionNamespace setVariable ["HQ_redeploy_mgAnchor", _mgAnchor, true];
-
-// AA炮：基于HQ建筑的模型XY与高度偏移
-missionNamespace setVariable ["HQ_redeploy_aaData", [
-    [blufor_TURRET_AA, [-0.31131, 0.814453], 1.252556]
-], true];
+// The guns, resolved out of their fence into the world positions the rebuild works from. Anchors
+// travel as a class and a position rather than as an object reference: an anchor destroyed between
+// build and rebuild would leave a null behind, where the class is re-found against whatever is
+// standing there now.
+missionNamespace setVariable ["HQ_redeploy_weaponData", _weaponData apply {
+    _x params ["_class", "_origX", "_origY", "", "_dir", "_role", "_anchorClass", "_hOffset"];
+    [
+        // Missing role falls back to the row's own class, so a faction file that omits the slot
+        // fields the vanilla gun rather than a nil.
+        if (_role == "") then { _class } else { missionNamespace getVariable [_role, _class] },
+        [_spawnBaseX + (_origX - _compCenterX), _spawnBaseY + (_origY - _compCenterY)],
+        _dir, _anchorClass, _hOffset
+    ]
+}, true];
 
 // 兵种池。Broadcast because client_init reads it to caption the guards, and because a FOB's own
 // patrol draws from it too (init_hq/fnc_guardsFOB.sqf) -- the HQ_ prefix is where it is set, not

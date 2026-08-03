@@ -1,7 +1,6 @@
 // Locality: server only -- server/supports/fnc_fob_server.sqf on build, fnc_redeployFOBUnits on
 // rebuild. A FOB's turrets are campaign property, so spawning them on the rebuilding client
 // would leave them simulated there and orphaned on disconnect.
-#include "..\..\shared\includes\action_style.hpp"
 
 if (!isServer) exitWith {};
 
@@ -22,181 +21,153 @@ _fob setVariable ["FOB_fortify_busy", true];
 
 playSound "loadgun";
 
-_groupGuard = [[0,0], WEST, [blufor_SOLDIER_X, blufor_SOLDIER_X, blufor_SOLDIER_X, blufor_SOLDIER_X, blufor_SOLDIER_X],[],[],blufor_ai_skill] call BIS_fnc_spawnGroup; 
-_groupGuard deleteGroupWhenEmpty true;
-
-_fobGuard1 = units _groupGuard select 0;
-_fobGuard2 = units _groupGuard select 1;
-_fobGuard3 = units _groupGuard select 2;
-_fobGuard4 = units _groupGuard select 3;
-_fobGuard5 = units _groupGuard select 4;
-
 // Everything this FOB owns is filed under one key, so tearing the FOB down can hand the whole
 // ring to the cleanup at once -- the turrets and the sandbags around them alike.
 _fobKey = format ["FOB_%1", netId _fob];
 
-_forty_spawn = {
-	_name = _this select 0;
-	_center = _this select 1;
-	_offset = _this select 2;
+// Two fences rather than one, because the halves have different lifetimes: the perimeter is placed
+// on the first fortify and left standing, while a refortify replaces every turret. A single array
+// would have to carry a permanent/rebuilt flag, and the Eden export does not emit anything past the
+// heading column -- so the flag would survive only by being hand-carried back on every round trip.
+// The split makes the lifetime the fence rather than a column.
+//
+// Rows are [class, X, Y, Z, heading], offsets from the FOB centre, which is what lets the layout
+// round-trip through the 3D editor (docs/info/composition_tooling.md).
+// --DUWS-COMPOSITION BEGIN name="FOB Perimeter" schema=A--
+private _perimeterData = [
+	["Land_HBarrier_1_F",         -10.0,   4.5, 0,  0.0],
+	["Land_HBarrier_1_F",         -10.0,   3.0, 0,  0.0],
+	["Land_HBarrier_1_F",         -10.0,   1.5, 0,  0.0],
+	["Land_HBarrier_1_F",         -10.0,   0.0, 0,  0.0],
+	["Land_HBarrier_1_F",         -10.0,  -6.0, 0,  0.0],
+	["Land_HBarrier_1_F",         -10.0,  -7.5, 0,  0.0],
+	["Land_HBarrier_1_F",          -6.0, -11.5, 0, 90.0],
+	["Land_HBarrier_1_F",          -4.5, -11.5, 0, 90.0],
+	["Land_HBarrier_1_F",          -3.0, -11.5, 0, 90.0],
+	["Land_HBarrier_1_F",          -1.5, -11.5, 0, 90.0],
+	["Land_HBarrier_1_F",           0.0, -11.5, 0, 90.0],
+	["Land_HBarrier_1_F",           1.5, -11.5, 0, 90.0],
+	["Land_HBarrier_1_F",           3.0, -11.5, 0, 90.0],
+	["Land_HBarrier_1_F",           4.5, -11.5, 0, 90.0],
+	["Land_HBarrier_1_F",           6.0, -11.5, 0, 90.0],
+	["Land_HBarrier_1_F",           7.5, -11.5, 0, 90.0],
+	["Land_HBarrier_1_F",          11.0,  -7.0, 0,  0.0],
+	["Land_HBarrier_1_F",          11.0,  -5.5, 0,  0.0],
+	["Land_HBarrier_1_F",          11.0,  -4.0, 0,  0.0],
+	["Land_HBarrier_1_F",          11.0,  -2.5, 0,  0.0],
+	["Land_HBarrier_1_F",          11.0,  -1.0, 0,  0.0],
+	["Land_HBarrier_1_F",          11.0,   0.5, 0,  0.0],
+	["Land_HBarrier_1_F",          11.0,   2.0, 0,  0.0],
+	["Land_HBarrier_1_F",          11.0,   3.5, 0,  0.0],
+	["Land_HBarrier_1_F",          11.0,   5.0, 0,  0.0],
+	["Land_HBarrier_1_F",          11.0,   6.5, 0,  0.0],
+	["Land_HBarrier_1_F",           6.5,  10.0, 0, 90.0],
+	["Land_HBarrier_1_F",           5.0,  10.0, 0, 90.0],
+	["Land_HBarrier_1_F",           3.5,  10.0, 0, 90.0],
+	["Land_HBarrier_1_F",           2.0,  10.0, 0, 90.0],
+	["Land_HBarrier_1_F",           0.5,  10.0, 0, 90.0],
+	["Land_HBarrier_1_F",          -1.0,  10.0, 0, 90.0],
+	["Land_HBarrier_1_F",          -5.5,  10.0, 0, 90.0],
+	["Land_HBarrier_1_F",          -7.0,  10.0, 0, 90.0],
+	["Land_Camping_Light_F",        5.5,  -5.5, 0,  0.0],
+	["Land_Camping_Light_F",       -5.5,   3.5, 0,  0.0],
+	["Land_Camping_Light_F",        5.5,   3.5, 0,  0.0],
+	["Land_Camping_Light_F",       -5.5,  -5.5, 0,  0.0],
+	["Land_Camping_Light_F",       -2.75, -2.75, 0, 0.0],
+	["Land_Camping_Light_F",       -2.75,  2.75, 0, 0.0],
+	["Land_Camping_Light_F",        2.75,  2.75, 0, 0.0],
+	["Land_Camping_Light_F",        2.75,  2.75, 1, 0.0]
+];
+// --DUWS-COMPOSITION END--
 
-	_newx = (_center select 0) + (_offset select 0);
-	_newy = (_center select 1) + (_offset select 1);
-	_newz = (_offset select 2);
+// Column 5 is the faction role holding the classname and column 0 is what that role resolves to on
+// the stock faction. The runtime prefers the role, so a mod's own GMG stands here rather than a
+// vanilla one; the class is what the Eden import draws, so the ring is rearranged against the right
+// silhouettes instead of against nothing. A row whose role is undefined stands as its own class,
+// which is what keeps this working mod-free.
+//
+// The headings used to be computed radially from the centre. They are rows now because the export
+// emits a heading per object: computed, a turret turned in the 3D editor would come back facing
+// wherever the formula put it, and the round trip would silently drop half the edit.
+// --DUWS-COMPOSITION BEGIN name="FOB Turrets" schema=A--
+private _turretData = [
+	["B_GMG_01_high_F",   9.0,   9.5, 0,  43.5, "blufor_TURRET_GMG"],
+	["B_GMG_01_high_F",  -8.5,   7.5, 0, 311.4, "blufor_TURRET_GMG"],
+	["B_static_AT_F",    -8.0,  -9.0, 0, 221.6, "blufor_TURRET_AT"],
+	["B_HMG_01_high_F",   9.5,  -9.5, 0, 135.0, "blufor_TURRET_HMG"]
+];
+// --DUWS-COMPOSITION END--
 
-	_new = createVehicle [_name, [0,0,0], [], 0, "CAN_COLLIDE"];
-	[_new, _fobKey] call fnc_duws_keep;
-	_new allowdamage false;
-	_new setpos [_newx, _newy, _newz];
-	_new setdamage 0;
-	_new
+// One row, one object. Position is written twice around the rotation for the reason the composition
+// deploy states: setDir displaces the object, so the heading has to be applied between two writes.
+private _fnc_place = {
+	params ["_row", "_key"];
+	_row params ["_class", "_ox", "_oy", "_oz", "_dir", ["_role", ""]];
+	// Defaulted to the row's own class rather than to "": a faction file that omits the role leaves
+	// its global undefined, and createVehicle on a nil is a script error rather than a missing gun.
+	private _type = if (_role == "") then { _class } else {
+		missionNamespace getVariable [_role, _class]
+	};
+	private _pos = [(_centerPos select 0) + _ox, (_centerPos select 1) + _oy, _oz];
+	private _obj = createVehicle [_type, [0,0,0], [], 0, "CAN_COLLIDE"];
+	[_obj, _key] call fnc_duws_keep;
+	_obj allowDamage false;
+	_obj setPos _pos;
+	_obj setDir _dir;
+	_obj setPos _pos;
+	_obj setDamage 0;
+	_obj
 };
 
-// REFORTIFY STATICS
-_turret1 = "";
-_turret2 = "";
-_turret3 = "";
-_turret4 = "";
-_turret5 = "";
-
+private _turrets = [];
 switch (VERSION_X) do {
 	case "MODERN": {
-		// GMG
-		//_sandbags = ["land_bagfence_round_f",_centerPos,[9.5,9,0]] call _forty_spawn;
-		_turret1 = [blufor_TURRET_GMG,_centerPos,[9,9.5,0]] call _forty_spawn;
-		//_sandbags setDir(getPosWorld _turret1 getDir _centerPos); //try to situate this guy radially
-		_turret1 setDir( _centerPos getDir getPosWorld _turret1); //try to situate this guy radially
-		//_turret1 addEventHandler ["Fired",{(_this select 0) setVehicleAmmo 1}];
-		// GMG
-		//_sandbags = ["land_bagfence_round_f",_centerPos,[-9,7,0]] call _forty_spawn;
-		_turret2 = [blufor_TURRET_GMG,_centerPos,[-8.5,7.5,0]] call _forty_spawn;
-		//_sandbags setDir(getPosWorld _turret2 getDir _centerPos); //try to situate this guy radially
-		_turret2 setDir( _centerPos getDir getPosWorld _turret2); //try to situate this guy radially
-		//_turret2 addEventHandler ["Fired",{(_this select 0) setVehicleAmmo 1}];
-		// AT
-		//_sandbags = ["land_bagfence_round_f",_centerPos,[-9,-10.8,-0.3]] call _forty_spawn;
-		_turret3 = [blufor_TURRET_AT,_centerPos,[-8,-9,0]] call _forty_spawn;
-		//_sandbags setDir(getPosWorld _turret3 getDir _centerPos); //try to situate this guy radially
-		_turret3 setDir( _centerPos getDir getPosWorld _turret3); //try to situate this guy radially
-		//_turret3 addEventHandler ["Fired",{(_this select 0) setVehicleAmmo 1}];
-		// HMG
-		//_sandbags = ["land_bagfence_round_f",_centerPos,[10.2,-10.7,0]] call _forty_spawn;
-		_turret4 = [blufor_TURRET_HMG,_centerPos,[9.5,-9.5,0]] call _forty_spawn;
-		//_sandbags setDir(getPosWorld _turret4 getDir _centerPos); //try to situate this guy radially
-		_turret4 setDir( _centerPos getDir getPosWorld _turret4); //try to situate this guy radially
-		//_turret4 addEventHandler ["Fired",{(_this select 0) setVehicleAmmo 1}];
-		// AA on the roof
-		_tempPos = _fob buildingPos 5;
-		_turret5 = createVehicle [blufor_TURRET_AA, [0,0,0], [], 0, "CAN_COLLIDE"];
-		_turret5 setPosATL [(_tempPos select 0)-3, (_tempPos select 1)-5, _tempPos select 2];
-		//_turret5 = [blufor_TURRET_AA,_centerPos,[0,0,2.9]] call _forty_spawn;
-		//_turret5 addEventHandler ["Fired",{(_this select 0) setVehicleAmmo 1}];
-	};
-};	
+		{ _turrets pushBack ([_x, _fobKey] call _fnc_place) } forEach _turretData;
 
-// Permanent statics: first fortify only, so a refortify cannot stack a second set.
+		// The one turret that is not a row: it stands on the FOB building's own roof, and
+		// buildingPos is the only thing that knows where that is. A flat offset would put it at
+		// ground level the first time the building were replaced with anything else.
+		// Filed under the FOB key like the rest, so a teardown hands the whole ring over at once.
+		private _roofPos = _fob buildingPos 5;
+		private _aa = createVehicle [
+			missionNamespace getVariable ["blufor_TURRET_AA", "B_static_AA_F"],
+			[0,0,0], [], 0, "CAN_COLLIDE"
+		];
+		[_aa, _fobKey] call fnc_duws_keep;
+		_aa setPosATL [(_roofPos select 0) - 3, (_roofPos select 1) - 5, _roofPos select 2];
+		_turrets pushBack _aa;
 
-if !(_refortify) then {
-	switch (VERSION_X) do {
-		case "MODERN": {
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[-10,4.5,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[-10,3,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[-10,1.5,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[-10,0,0]] call _forty_spawn;
-			//_hesco = ["Land_HBarrier_1_F",_centerPos,[-10,-1.5,0]] call _forty_spawn;
-			//_hesco = ["Land_HBarrier_1_F",_centerPos,[-10,-4.5,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[-10,-6,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[-10,-7.5,0]] call _forty_spawn;
-	
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[-6,-11.5,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[-4.5,-11.5,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[-3,-11.5,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[-1.5,-11.5,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[0,-11.5,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[1.5,-11.5,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[3,-11.5,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[4.5,-11.5,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[6,-11.5,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[7.5,-11.5,0]] call _forty_spawn;
-			_hesco setDir 90;
-		
-			//_sandbags = ["land_bagfence_end_f",_centerPos,[10.5,-8,0]] call _forty_spawn;
-			//_sandbags setDir 270;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[11,-7,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[11,-5.5,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[11,-4,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[11,-2.5,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[11,-1,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[11,0.5,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[11,2,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[11,3.5,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[11,5,0]] call _forty_spawn;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[11,6.5,0]] call _forty_spawn;
-	
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[6.5,10,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[5,10,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[3.5,10,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[2,10,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[0.5,10,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[-1,10,0]] call _forty_spawn;
-			_hesco setDir 90;
-			//_hesco = ["Land_HBarrier_1_F",_centerPos,[-2.5,10,0]] call _forty_spawn;
-			//_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[-5.5,10,0]] call _forty_spawn;
-			_hesco setDir 90;
-			_hesco = ["Land_HBarrier_1_F",_centerPos,[-7,10,0]] call _forty_spawn;
-			_hesco setDir 90;
-	
-			// LIGHTS
-			//["Land_Camping_Light_F",_foundPickupPos,[0,0,2]] call _forty_spawn;
-			["Land_Camping_Light_F",_centerPos,[5.5,-5.5,0]] call _forty_spawn;
-			["Land_Camping_Light_F",_centerPos,[-5.5,3.5,0]] call _forty_spawn;
-			["Land_Camping_Light_F",_centerPos,[5.5,3.5,0]] call _forty_spawn;
-			["Land_Camping_Light_F",_centerPos,[-5.5,-5.5,0]] call _forty_spawn;
-			["Land_Camping_Light_F",_centerPos,[-2.75,-2.75,0]] call _forty_spawn;
-			["Land_Camping_Light_F",_centerPos,[-2.75,2.75,0]] call _forty_spawn;
-			["Land_Camping_Light_F",_centerPos,[2.75,2.75,0]] call _forty_spawn;
-			["Land_Camping_Light_F",_centerPos,[2.75,2.75,1]] call _forty_spawn;
+		// Permanent, so first fortify only: a refortify replaces the guns above and leaves the
+		// walls the player has been fighting behind exactly where they are.
+		if !(_refortify) then {
+			{ [_x, _fobKey] call _fnc_place } forEach _perimeterData;
 		};
 	};
 };
 
+// One gunner per turret, so a ring edited in the 3D editor is crewed by whatever it now holds
+// rather than by a hardcoded five.
+private _guardTypes = [];
+{ _guardTypes pushBack blufor_SOLDIER_X } forEach _turrets;
+_groupGuard = [[0,0], WEST, _guardTypes, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
+_groupGuard deleteGroupWhenEmpty true;
+
 sleep 10;
-_fobGuard1 setpos _centerPos;
-_fobGuard2 setpos _centerPos;
-_fobGuard3 setpos _centerPos;
-_fobGuard4 setpos _centerPos;
-_fobGuard5 setpos _centerPos;
-_fobGuard1 moveinGunner _turret1;
-_fobGuard2 moveinGunner _turret2;
-_fobGuard3 moveinGunner _turret3;
-_fobGuard4 moveinGunner _turret4;
-_fobGuard5 moveinGunner _turret5;
+
+{
+	private _gunner = (units _groupGuard) param [_forEachIndex, objNull];
+	if (!isNull _gunner) then {
+		_gunner setPos _centerPos;
+		_gunner moveInGunner _x;
+	};
+} forEach _turrets;
 
 sleep 50;
-_turret1 allowdamage false;
-_turret2 allowdamage false;
-_turret3 allowdamage false;
-_turret4 allowdamage false;
-_turret5 allowdamage false;
+{ _x allowDamage false } forEach _turrets;
 
 [_groupGuard, _centerPos] call bis_fnc_taskDefend;
 
-_fob setVariable ["FOB_turrets", [_turret1, _turret2, _turret3, _turret4, _turret5]];
+_fob setVariable ["FOB_turrets", _turrets];
 
 // Filed under the site as its emplacement occupant, so the freeze reaches the ring and not only the
 // guards standing beside it. A turret is a vehicle with a full FSM, so five of them per FOB at up to
@@ -212,12 +183,8 @@ private _emplacements = [_fobKey, "emplacement"] call fnc_site_roster;
 		_emplacements pushBack _x;
 		_emplacements append (crew _x);
 	};
-} forEach [_turret1, _turret2, _turret3, _turret4, _turret5];
+} forEach _turrets;
 _fob setVariable ["FOB_fortify_busy", false];
 
 // No scroll entry added here. Guards and defences are one redeploy action now, added by
 // init_hq/fnc_guardsFOB.sqf -- the other half of the same rebuild.
-
-
-
-
