@@ -365,10 +365,11 @@ class ressourceheader
 
         // --- SUPPORTS: the catalogue, appended down the right-hand side ---
         // The listbox is as wide as its widest line, on the rule the rest of the dialog follows.
-        // That line is the permanent category heading rather than any support, and a line over the
-        // width is silently cut rather than wrapped: its 42 characters at sizeEx 0.025 want the
-        // 17.3 cells below, which is the whole inside of the frame. Anything longer added to
-        // `fnc_support_list_fill` has nowhere left to go here.
+        // That line is a category heading rather than any support, and a line over the width is
+        // silently cut rather than wrapped: 41 characters at sizeEx 0.025 want the 17.3 cells below,
+        // which is the whole inside of the frame. The headings are already written to that budget --
+        // "team" came off the permanent one and "slots" off the squad one to pay for naming both
+        // SUPPORTS -- so anything longer added to `fnc_support_list_fill` has nowhere left to go.
         class supportunlockframe: RscFrame
         {
             idc = 1804;

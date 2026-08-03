@@ -11,22 +11,21 @@ _display = (findDisplay 46) createDisplay "RscDisplayEmpty";
 // white rules, which read as controls dropped on the map rather than as the first screen of the
 // setup sequence.
 //
-// Everything the player sees is on this one display, the HQ placement buttons at the bottom of it
-// included. They used to be a dialog of its own with a green box of its own, which read as two menus
-// for one decision -- and folding that box into this one put the buttons under it and off the
-// screen, because two surfaces have no draw order worth relying on
-// (docs/info/arma_engine_gotchas.md). The dialog is still opened, empty, for the cursor
-// (shared/includes/hq_placement.hpp).
+// One box, painted by two surfaces. The HQ placement buttons are a dialog of their own
+// (shared/includes/hq_placement.hpp) because a control this display creates cannot be styled like a
+// menu button, and this display draws over that dialog -- so the panel below stops just short of
+// the strip the dialog paints, and the two greens meet edge to edge rather than overlapping. The
+// frame spans both and draws over the join, being transparent inside.
 //
 // Created before anything that sits on it: ctrlCreate order is draw order, so a panel made later
 // covers its own contents.
 _backdrop = _display ctrlCreate ["RscText", 1007];
-_backdrop ctrlSetPosition [0.075, 0.032, 0.85, 0.61];
+_backdrop ctrlSetPosition [0.075, 0.032, 0.85, 0.444];
 _backdrop ctrlSetBackgroundColor [0.2, 0.4, 0.2, 1];
 _backdrop ctrlCommit 0;
 
 _boxframe = _display ctrlCreate ["RscFrame", 1008];
-_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.57];
+_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.68];
 _boxframe ctrlSetText localize "STR_DUWS_T_faction_screen_title";
 _boxframe ctrlCommit 0;
 
@@ -144,7 +143,8 @@ _modeDesc ctrlCommit 0;
 
 // The last question, and the one that ends the screen. Under a rule and a plain caption rather than
 // in a frame: three frames answering three questions and a fourth around the way out read as a
-// fourth question. Cleared before the buttons exist, because a click is live the moment one does.
+// fourth question. The buttons themselves are the dialog's, below. Cleared before it opens, because
+// a click is live the moment they exist.
 random_placement = false;
 
 _rule = _display ctrlCreate ["RscText", 1009];
@@ -161,45 +161,16 @@ _placeText ctrlSetStructuredText parseText format ["<t align='center' size='0.8'
 	localize "STR_DUWS_T_7tr969mm"];
 _placeText ctrlCommit 0;
 
-// player1, not the caller: HQ placement is the Game Master seat's to make, which is what that unit
-// names (docs/info/arma_engine_gotchas.md).
-_btnRandom = _display ctrlCreate ["RscButton", 1600];
-_btnRandom ctrlSetPosition [0.4, 0.48, 0.2, 0.06];
-_btnRandom ctrlSetText localize "STR_DUWS_T_2f55ngq1";
-_btnRandom ctrlSetTooltip localize "STR_DUWS_T_50n9sdxk";
-_btnRandom ctrlAddEventHandler ["ButtonClick", { [20, 0.015] remoteExec ["fnc_HQ_random_place", player1] }];
-_btnRandom ctrlCommit 0;
-
-_btnManual = _display ctrlCreate ["RscButton", 1601];
-_btnManual ctrlSetPosition [0.4, 0.552, 0.2, 0.06];
-_btnManual ctrlSetText localize "STR_DUWS_T_x0cq7o5y";
-_btnManual ctrlSetTooltip localize "STR_DUWS_T_qwfdr33k";
-_btnManual ctrlAddEventHandler ["ButtonClick", { [] spawn fnc_HQ_manual_place }];
-_btnManual ctrlCommit 0;
-
 // ctrlCreate resolves a class name against the display's own config before the mission's, and this
 // display is RscDisplayEmpty -- a configFile display, so every control above is the engine's base
-// class rather than shared/includes/defines.hpp's. The buttons are what proved it: they came up in
-// the engine's grey instead of the blue every other menu button in the mission carries.
-//
-// Restated here rather than fixed at the source, because there is no source to fix -- a mission
-// class cannot outrank a display's own config. Anything added to this screen has to be pinned too.
+// class rather than shared/includes/defines.hpp's. Only what a setter exists for can be restated,
+// which is why the two placement buttons are declared in a dialog instead: a button's hover, focus,
+// shadow, border, press offsets and click sounds all come off the class and none of them have one.
 {
 	_x ctrlSetFont "PuristaMedium";
 	_x ctrlSetFontHeight 0.03;
 	_x ctrlCommit 0;
 } forEach [_boxframe, _frameMode, _frameBLU, _frameOPF];
-
-// The shape every screen after this one gives its Next Page button -- 8 grid cells by 1.5 at
-// sizeEx 0.05 (shared/includes/campaign_menu.hpp). Blue rather than that button's red, which
-// belongs to the one entry on a screen that commits it.
-{
-	_x ctrlSetFont "PuristaMedium";
-	_x ctrlSetFontHeight 0.05;
-	_x ctrlSetBackgroundColor [0.067, 0.518, 0.729, 0.5];
-	_x ctrlSetTextColor [0.8784, 0.8471, 0.651, 1];
-	_x ctrlCommit 0;
-} forEach [_btnRandom, _btnManual];
 
 {
 	_itemMode = _dropdownMode lbAdd localize (_x select 1);
@@ -235,7 +206,7 @@ _dropdownMode ctrlAddEventHandler ["LBSelChanged",
 _modeSel = duws_gamemodes findIf {(_x select 0) == duws_gamemode};
 _dropdownMode lbSetCurSel (0 max _modeSel);
 
-// Opened for the cursor and nothing else -- see shared/includes/hq_placement.hpp.
+// The placement buttons, and the cursor that makes this whole screen clickable.
 createDialog "startup_hq_placement_dialog";
 waitUntil {dialog};
 

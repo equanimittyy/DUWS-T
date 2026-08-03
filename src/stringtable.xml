@@ -3587,12 +3587,12 @@
                 <English>Your death has cost BLUFOR %1 CP.</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_HEAD_PERM">
-                <Original>--- PERMANENT (one-time purchase, team) ---</Original>
-                <English>--- PERMANENT (one-time purchase, team) ---</English>
+                <Original>--- TEAM SUPPORTS (one-time purchase) ---</Original>
+                <English>--- TEAM SUPPORTS (one-time purchase) ---</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_HEAD_CONS">
-                <Original>--- SQUAD (%1/%2 slots, refundable) ---</Original>
-                <English>--- SQUAD (%1/%2 slots, refundable) ---</English>
+                <Original>--- SQUAD SUPPORTS (%1/%2, refundable) ---</Original>
+                <English>--- SQUAD SUPPORTS (%1/%2, refundable) ---</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_REFUND_BUTTON">
                 <Original>REFUND</Original>
