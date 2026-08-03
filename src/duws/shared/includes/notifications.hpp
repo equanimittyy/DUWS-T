@@ -177,16 +177,15 @@ class CfgNotifications
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
-    // The two permanent unlocks whose icon is worth more than the shared one: a card reading
-    // "VA Arsenal / Unlocked" under a warning triangle says the opposite of what it means. Blue
-    // because an unlock is something gained.
+    // These two exist for their icon alone: a support unlock is white like every other one, and the
+    // shared white card would put a warning triangle over "VA Arsenal / Unlocked".
     class armory
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.
         iconPicture = "\a3\ui_f\data\gui\cfg\hints\Sniper_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
         iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
         description = "%2"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {0.2,0.5,1,1}; // Icon and text color
+        color[] = {1,1,1,1}; // Icon and text color
         duration = 4; // How many seconds will the notification be displayed
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
@@ -198,7 +197,7 @@ class CfgNotifications
         iconPicture = "\A3\ui_f\data\Map\VehicleIcons\iconParachute_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
         iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
         description = "%2"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {0.2,0.5,1,1}; // Icon and text color
+        color[] = {1,1,1,1}; // Icon and text color
         duration = 4; // How many seconds will the notification be displayed
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled

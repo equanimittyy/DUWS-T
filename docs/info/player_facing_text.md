@@ -104,8 +104,8 @@ is why a CP award call passes a bare number where every other call passes a sent
 
 | Colour | Means | Classes |
 |---|---|---|
-| white `{1,1,1,1}` | neutral information | `info`, `missionclean`, `sitrepinfo`, `arsenal` |
-| blue `{0.2,0.5,1,1}` | something gained | `US_takencontrol`, `repup`, `infosearch`, `armory`, `halo` |
+| white `{1,1,1,1}` | neutral information | `info`, `missionclean`, `sitrepinfo`, `arsenal`, `armory`, `halo` |
+| blue `{0.2,0.5,1,1}` | something gained | `US_takencontrol`, `repup`, `infosearch` |
 | red `{1,0.2,0.2,1}` | something lost | `alert`, `US_lostcontrol`, `repdown`, `biohazard` |
 | cyan `{0.5,1,1,1}` | economy | the `CPadded*` / `APaddedmission` badge family |
 
@@ -141,12 +141,15 @@ but `"%1"` may carry exactly one event.
 | `US_takencontrol` | blue | 2 | zone captured |
 | `US_lostcontrol` | red | 1 | zone lost |
 | `infosearch` | blue | 1 | a search that revealed something |
-| `armory` | blue | 1 | the VA Arsenal permanent unlock |
-| `halo` | blue | 1 | the HALO Jump permanent unlock |
+| `armory` | white | 1 | the VA Arsenal permanent unlock |
+| `halo` | white | 1 | the HALO Jump permanent unlock |
 | `CPadded` · `CPaddedmission` · `CPaddedattrition` · `APaddedmission` | cyan | 1 each | zone, mission, kill income, mission AP |
 
-`armory` and `halo` earn a class each over sharing `info` only for their icon: an unlock card under
-`info`'s warning triangle reads as the opposite of what it announces.
+**A support unlock is white**, all five of them, whichever class draws it. Blue is reserved for
+ground and standing taken off the enemy — a zone, a reputation, a search that paid — and a purchase
+the player made at their own base is not that. `armory` and `halo` earn a class each over sharing
+`info` only for their icon: `info`'s warning triangle over "VA Arsenal / Unlocked" reads as the
+opposite of what it announces.
 
 The two rep cards wear the handshake `meet_ca.paa` rather than a flare, because reputation is the
 one figure the player moves by dealing with people rather than by shooting.
