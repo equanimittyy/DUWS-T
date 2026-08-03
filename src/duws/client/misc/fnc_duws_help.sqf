@@ -55,7 +55,7 @@ private _records = [
     ["1.4", "STR_DUWS_T_MAN_REQFORCES",       _reqForcesBody] call _rec,
     ["1.5", "STR_DUWS_T_4yxb8s2k",            localize "STR_DUWS_T_4elv35h6"] call _rec,       // Establish a FOB
     ["1.6", "STR_DUWS_T_MAN_SUPPARS",         _suppArsBody] call _rec,
-    ["1.7", "STR_DUWS_T_MAN_L_SUPPDETAIL",    localize "STR_DUWS_T_zhiyuan1"] call _rec,
+    ["1.7", "STR_DUWS_T_MAN_L_SUPPDETAIL",    localize "STR_DUWS_T_supportguide1"] call _rec,
     ["1.8", "STR_DUWS_T_MAN_L_SIDEMISSIONS",  localize "STR_DUWS_T_617kjc41"] call _rec,
     ["1.9", "STR_DUWS_T_MAN_L_REPUTATION",    localize "STR_DUWS_T_m204wqqq"] call _rec,
     ["2.",  "STR_DUWS_T_MAN_CIV"] call _rule,
@@ -63,10 +63,10 @@ private _records = [
     ["2.2", "STR_DUWS_T_RAVAGE_HELP_TITLE",   localize "STR_DUWS_T_RAVAGE_HELP_DESC"] call _rec,
     ["2.3", "STR_DUWS_T_WBK_HELP_TITLE",      localize "STR_DUWS_T_WBK_HELP_DESC"] call _rec,
     ["3.",  "STR_DUWS_T_MAN_CONFIG"] call _rule,
-    ["3.1", "STR_DUWS_T_shijianguanli",       localize "STR_DUWS_T_shijianguanli2"] call _rec, // Time Management
+    ["3.1", "STR_DUWS_T_timemanagement",       localize "STR_DUWS_T_timemanagement2"] call _rec, // Time Management
     ["3.2", "STR_DUWS_T_ojav7yf4",            localize "STR_DUWS_T_d38s8oac"] call _rec,        // Hardcore Mode
-    ["3.3", "STR_DUWS_T_siwang",              localize "STR_DUWS_T_siwang2"] call _rec,         // Death Penalty
-    ["3.4", "STR_DUWS_T_zimuxitong",          ([localize "STR_DUWS_T_zimuxitong2"] call fnc_cs)] call _rec,     // Subtitles
+    ["3.3", "STR_DUWS_T_deathpenalty",              localize "STR_DUWS_T_deathpenalty2"] call _rec,         // Death Penalty
+    ["3.4", "STR_DUWS_T_subtitlesystem",          ([localize "STR_DUWS_T_subtitlesystem2"] call fnc_cs)] call _rec,     // Subtitles
     ["3.5", "STR_DUWS_T_ty006zz4",            localize "STR_DUWS_T_8o0fomss"] call _rec,         // Saving
     ["3.6", "STR_DUWS_T_ljw9ndqz",            localize "STR_DUWS_T_nk0wa9zo"] call _rec,         // Multiplayer
     ["4.",  "STR_DUWS_T_MAN_L_ABOUTCRED"] call _rule,

@@ -24,7 +24,7 @@ fnc_support_defs = {
 		["armory",    "PERM", 10, "support_armory_available",      "STR_DUWS_T_kw2lnaig",             "",           "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_arsenalunlock",     false, false, false],
 		["halo",      "PERM", 15, "support_halo_available",        "STR_DUWS_T_xghf3qqd",             "",           "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_HALOunlock",        false, true,  false],
 		["repair",    "PERM",  5, "support_veh_repair_available",  "STR_DUWS_T_vehicle_repair",       "",           "",                          "",                             false, false, false],
-		["recycle",   "PERM",  5, "support_veh_recycle_available", "STR_DUWS_T_zaijvhuishouzhan1",    "",           "",                          "",                             false, false, false],
+		["recycle",   "PERM",  5, "support_veh_recycle_available", "STR_DUWS_T_recyclestation1",    "",           "",                          "",                             false, false, false],
 		["mobile_HQ", "PERM", 10, "support_mobile_HQ_available",   "STR_DUWS_T_b7gmddq3",             "",           "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_mhqunlock",         false, false, false],
 		["fob",       "PERM", 10, "support_FOB_available",         "STR_DUWS_T_fob_request_row",      "fob_support","STR_DUWS_T_OVERLORD",       "STR_DUWS_T_fobunlock",         false, false, false],
 
@@ -45,7 +45,7 @@ fnc_support_defs = {
 		["laser",     "CONS", 10, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_laserguidedunlock", false, true,  true],
 		["cluster",   "CONS", 25, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_clusterunlock",     true,  true,  true],
 		["napalm",    "CONS", 20, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_napalmunlock",      true,  true,  false],
-		["hcAttChop", "CONS", 20, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", "STR_DUWS_T_changgongpilot", "STR_DUWS_T_hcchopperunlock",   false, true,  true],
+		["hcAttChop", "CONS", 20, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", "STR_DUWS_T_longbowpilot", "STR_DUWS_T_hcchopperunlock",   false, true,  true],
 		["hcCAS",     "CONS", 25, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     "STR_DUWS_T_koipilot",       "STR_DUWS_T_hcjetunlock",       true,  true,  true],
 		["paradrop",  "CONS", 20, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   "STR_DUWS_T_OVERLORD",       "STR_DUWS_T_paradropunlock",    false, true,  false]
 	];

@@ -97,7 +97,7 @@ sleep 5; // 等待巡逻队生成完毕
 waitUntil {
     sleep 5;
     if ((time - _missionStartTime) >= (_taskTimeout_tower - 120) && !_hasShown2MinHint) then {
-        [{hint localize "STR_DUWS_T_xinhaopy"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+        [{hint localize "STR_DUWS_T_towerdecrypt"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
         _hasShown2MinHint = true;
     };
     !alive _vehicle_7 || (damage _vehicle_7) == 1 || (time - _missionStartTime) > _taskTimeout_tower

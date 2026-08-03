@@ -35,10 +35,10 @@ if (_compKey != "") then { [_compKey] call fnc_duws_release };
 
 // Five minutes to strip the area, warned at the last minute. Two notices: a countdown only needs
 // its start and its edge, and the ten-second call this replaces was too late to act on.
-["missionclean", [localize "STR_DUWS_T_renwuqingli", localize "STR_DUWS_T_renwuqingli2"]]
+["missionclean", [localize "STR_DUWS_T_missioncleanup", localize "STR_DUWS_T_missioncleanup2"]]
     remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
 sleep 240;
-["missionclean", [localize "STR_DUWS_T_renwuqingli", localize "STR_DUWS_T_renwuqingli4"]]
+["missionclean", [localize "STR_DUWS_T_missioncleanup", localize "STR_DUWS_T_missioncleanup4"]]
     remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
 sleep 60;
 

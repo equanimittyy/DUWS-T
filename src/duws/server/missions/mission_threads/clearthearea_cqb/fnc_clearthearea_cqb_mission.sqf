@@ -38,7 +38,7 @@ if (_actualBldgCount == 0) exitWith {
 // abort above, not above it: a marker drawn first would outlive a mission that never started.
 _markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 private _VARtaskgeneratedName = format ["clearhouse%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
-[_VARtaskgeneratedName, localize "STR_DUWS_T_shentouxiaodui", _mission_name, _randomPos, "attack"] call fnc_missionTaskCreate;
+[_VARtaskgeneratedName, localize "STR_DUWS_T_cqbdesc", _mission_name, _randomPos, "attack"] call fnc_missionTaskCreate;
 
 _maxBuildingsToUse = (_actualBldgCount min _desiredBldgCount);
 

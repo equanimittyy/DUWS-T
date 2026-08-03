@@ -149,7 +149,7 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
     waitUntil { sleep 1; triggerActivated _trg };
     missionNamespace setVariable [format ["%1_startTime", _taskName], time];
     missionNamespace setVariable [format ["%1_started", _taskName], true];
-    [localize "STR_DUWS_T_infomat", localize "STR_DUWS_T_pcyh"] remoteExec ["fnc_duws_dialogue", 0];
+    [localize "STR_DUWS_T_infomat", localize "STR_DUWS_T_pcbehindme"] remoteExec ["fnc_duws_dialogue", 0];
     deleteVehicle _trg;
 };
 

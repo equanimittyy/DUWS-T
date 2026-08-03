@@ -105,10 +105,10 @@ if (isNil "fnc_veh_recycle_action") then {
             // round once here so the hint and the credited amount cannot disagree.
             _totalReward = round _totalReward;
             [_totalReward, "recycle_station"] remoteExec ["fnc_cp_adjust", 2];
-            [format [localize "STR_DUWS_T_chenggonghuishou", _count, _totalReward]] remoteExec ["hint", _caller];
+            [format [localize "STR_DUWS_T_recyclesuccess", _count, _totalReward]] remoteExec ["hint", _caller];
         } else {
-            if (_hasExcluded) then { [localize "STR_DUWS_T_gaizaijvwufahuishou"] remoteExec ["hint", _caller]; }
-            else { [localize "STR_DUWS_T_gaizaijvkongde"] remoteExec ["hint", _caller]; };
+            if (_hasExcluded) then { [localize "STR_DUWS_T_recyclenotallowed"] remoteExec ["hint", _caller]; }
+            else { [localize "STR_DUWS_T_recycleempty"] remoteExec ["hint", _caller]; };
         };
     };
     publicVariable "fnc_veh_recycle_action";
@@ -130,4 +130,4 @@ _trg setTriggerArea [5, 5, 0, false, 5];
 // each other.
 [_depot, netId _trg] remoteExec ["fnc_client_addRecycleActions", 0, format ["hq_recycle_%1", netId _depot]];
 
-["info", [localize "STR_DUWS_T_zaijvhuishouzhan2", localize "STR_DUWS_T_zaijvhuishouzhan3"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+["info", [localize "STR_DUWS_T_recyclestation2", localize "STR_DUWS_T_recyclestation3"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];

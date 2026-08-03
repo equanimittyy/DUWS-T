@@ -68,7 +68,7 @@ hint localize "STR_DUWS_T_zhiugl0g";
 // 等待载具到达或损毁，使用载具变量判断
 waitUntil {sleep 0.1; (_vehicle getVariable ["DUWS_onStation", false]) || !alive _vehicle};
 
-if (!alive _vehicle) exitWith {hint localize "STR_DUWS_T_trkhanzi"};
+if (!alive _vehicle) exitWith {hint localize "STR_DUWS_T_supplydropfail"};
 
 _parachute = "Steerable_Parachute_F" CreateVehicle _location;
 _parachute setPos [_location select 0, _location select 1, (_location select 2)+100];

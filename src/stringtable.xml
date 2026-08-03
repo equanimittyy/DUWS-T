@@ -209,49 +209,49 @@
                 <Original>No Visibility</Original>
                 <English>No Visibility</English>
             </Key>
-            <Key ID="STR_DUWS_T_xuanxiang1">
+            <Key ID="STR_DUWS_T_zoneradiusmax500">
                 <German>500m</German>
                 <Spanish>500m</Spanish>
                 <Chinesesimp>500m</Chinesesimp>
                 <Original>500m</Original>
                 <English>500m</English>
             </Key>
-            <Key ID="STR_DUWS_T_xuanxiang2">
+            <Key ID="STR_DUWS_T_zoneradiusmin350">
                 <German>350m</German>
                 <Spanish>350m</Spanish>
                 <Chinesesimp>350m</Chinesesimp>
                 <Original>350m</Original>
                 <English>350m</English>
             </Key>
-            <Key ID="STR_DUWS_T_xuanxiang3">
+            <Key ID="STR_DUWS_T_zonecount4">
                 <German>4</German>
                 <Spanish>4</Spanish>
                 <Chinesesimp>4</Chinesesimp>
                 <Original>4</Original>
                 <English>4</English>
             </Key>
-            <Key ID="STR_DUWS_T_xuanxiang4">
+            <Key ID="STR_DUWS_T_hqdistmax15km">
                 <German>15km</German>
                 <Spanish>15km</Spanish>
                 <Chinesesimp>15km</Chinesesimp>
                 <Original>15km</Original>
                 <English>15km</English>
             </Key>
-            <Key ID="STR_DUWS_T_xuanxiang5">
+            <Key ID="STR_DUWS_T_startcp400">
                 <German>400 (Einfacher)</German>
                 <Spanish>400 (Más Fácil)</Spanish>
                 <Chinesesimp>400 (更容易)</Chinesesimp>
                 <Original>400 (Easier)</Original>
                 <English>400 (Easier)</English>
             </Key>
-            <Key ID="STR_DUWS_T_xuanxiang11">
+            <Key ID="STR_DUWS_T_bluforap50">
                 <German>50</German>
                 <Spanish>50</Spanish>
                 <Chinesesimp>50</Chinesesimp>
                 <Original>50</Original>
                 <English>50</English>
             </Key>
-            <Key ID="STR_DUWS_T_xuanxiang12">
+            <Key ID="STR_DUWS_T_opforap80">
                 <German>80</German>
                 <Spanish>80</Spanish>
                 <Chinesesimp>80</Chinesesimp>
@@ -2118,28 +2118,28 @@
                 <Original>The arsenal supports every ALIVE-made faction, and scopes, suppressors and eyewear stay on your loadout instead of vanishing. Saving and loading are disabled in the Restricted Arsenal, so set your gear up carefully.</Original>
                 <English>The arsenal supports every ALIVE-made faction, and scopes, suppressors and eyewear stay on your loadout instead of vanishing. Saving and loading are disabled in the Restricted Arsenal, so set your gear up carefully.</English>
             </Key>
-            <Key ID="STR_DUWS_T_xnjhk">
+            <Key ID="STR_DUWS_T_arsenalfound">
                 <Spanish>Arsenal completo disponible.</Spanish>
                 <German>Vollständiges Arsenal verfügbar.</German>
                 <Chinesesimp>有可用的完整军火库</Chinesesimp>
                 <Original>Full arsenal available</Original>
                 <English>Full arsenal available</English>
             </Key>
-            <Key ID="STR_DUWS_T_xnjhk2">
+            <Key ID="STR_DUWS_T_arsenalfound2">
                 <Spanish>Los objetos clave de esta misión incluyen un arsenal completo de un solo uso. ¡No olvides usarlos!</Spanish>
                 <German>Die Schlüsselgegenstände dieser Mission haben ein einmaliges Vollarsenal – vergiss nicht, es zu nutzen!</German>
                 <Chinesesimp>该任务的关键物品配备了一次性的完整军火库，别忘了使用它们</Chinesesimp>
                 <Original>A one-time arsenal here. Use it before you leave</Original>
                 <English>A one-time arsenal here. Use it before you leave</English>
             </Key>
-            <Key ID="STR_DUWS_T_dakaijunhuoku2">
+            <Key ID="STR_DUWS_T_arsenalused2">
                 <Spanish>Un jugador ha usado el arsenal completo de un solo uso, y este ha sido consumido.</Spanish>
                 <German>Ein Spieler hat das Einmal-Vollarsenal benutzt, es wurde verbraucht.</German>
                 <Chinesesimp>有玩家使用了一次性军火库，该军火库已被消耗。</Chinesesimp>
                 <Original>Someone has used the one-time full arsenal. It's gone now</Original>
                 <English>Someone has used the one-time full arsenal. It's gone now</English>
             </Key>
-            <Key ID="STR_DUWS_T_dakaijunhuoku">
+            <Key ID="STR_DUWS_T_arsenalused">
                 <Spanish>El arsenal de un solo uso ha sido consumido.</Spanish>
                 <German>Einmal-Arsenal wurde verbraucht.</German>
                 <Chinesesimp>一次性军火库被消耗</Chinesesimp>
@@ -2921,7 +2921,7 @@
                 <Original>Reputation Increased!</Original>
                 <English>Reputation Increased!</English>
             </Key>
-            <Key ID="STR_DUWS_T_shengwangjianshao">
+            <Key ID="STR_DUWS_T_reputationdown">
                 <German>Ruf gesunken!</German>
                 <Spanish>Reputación reducida!</Spanish>
                 <Chinesesimp>声望降低！</Chinesesimp>
@@ -3059,7 +3059,7 @@
                 <Original>Identify yourself, over.</Original>
                 <English>Identify yourself, over.</English>
             </Key>
-            <Key ID="STR_DUWS_T_pcyh">
+            <Key ID="STR_DUWS_T_pcbehindme">
                 <German>Ich bin in eurer Nähe! Passt auf! Sie kommen gleich hinterher!</German>
                 <Spanish>Estoy cerca de vosotros! ¡Cuidado! Vendrán justo detrás!</Spanish>
                 <Chinesesimp>我在你们附近！看着点！他们马上就要跟过来了！</Chinesesimp>
@@ -4053,21 +4053,21 @@
                 <Original>Assault Command Post</Original>
                 <English>Assault Command Post</English>
             </Key>
-            <Key ID="STR_DUWS_T_renwuqingli">
+            <Key ID="STR_DUWS_T_missioncleanup">
                 <German>Missionsbereiniger</German>
                 <Spanish>Limpiador de Misiones</Spanish>
                 <Chinesesimp>任务清理器</Chinesesimp>
                 <Original>Mission Cleanup</Original>
                 <English>Mission Cleanup</English>
             </Key>
-            <Key ID="STR_DUWS_T_renwuqingli2">
+            <Key ID="STR_DUWS_T_missioncleanup2">
                 <German>Stellen Sie sicher, dass wertvolle stuff das Missionsgebiet innerhalb von 6 Minuten evakuieren.</German>
                 <Spanish>Asegúrate de que los stuff valiosos abandonen el área de misión en 6 minutos.</Spanish>
                 <Chinesesimp>请确保有价值的资产/武器/人员在6分钟内离开任务区域。</Chinesesimp>
                 <Original>Strip anything useful. The area will clear in five minutes</Original>
                 <English>Strip anything useful. The area will clear in five minutes</English>
             </Key>
-            <Key ID="STR_DUWS_T_renwuqingli4">
+            <Key ID="STR_DUWS_T_missioncleanup4">
                 <German>Noch eine Minute bis zur Aufräumaktion.</German>
                 <Spanish>Queda un minuto para la limpieza de la misión.</Spanish>
                 <Chinesesimp>还有最后一分钟执行任务清理。</Chinesesimp>
@@ -4109,7 +4109,7 @@
                 <Original>Mission Type: Sabotage&lt;br /&gt;OPFOR has taken a friendly signal tower in this area and is decoding the traffic off it from a position nearby. Bring explosives and drop the tower. They finish decoding in 15 minutes.&lt;br /&gt;&lt;br /&gt;CP: 20&lt;br /&gt;AP: 25</Original>
                 <English>Mission Type: Sabotage&lt;br /&gt;OPFOR has taken a friendly signal tower in this area and is decoding the traffic off it from a position nearby. Bring explosives and drop the tower. They finish decoding in 15 minutes.&lt;br /&gt;&lt;br /&gt;CP: 20&lt;br /&gt;AP: 25</English>
             </Key>
-            <Key ID="STR_DUWS_T_xinhaopy">
+            <Key ID="STR_DUWS_T_towerdecrypt">
                 <German>Unsere kritischen Informationen werden gerade entschlüsselt! Du und deine Truppe müsst euch beeilen!</German>
                 <Spanish>Nuestra información crítica está siendo descifrada! Tú y tu escuadrón debéis apresuraros!</Spanish>
                 <Chinesesimp>我们的关键信息正被破译！你和你的小队需要加快脚步了！</Chinesesimp>
@@ -4219,14 +4219,14 @@
                 <Original>Mission Type: Elimination&lt;br /&gt;Allseer has tracked two enemy snipers working this area. Kill both.&lt;br /&gt;&lt;br /&gt;CP: 30&lt;br /&gt;AP: 30</Original>
                 <English>Mission Type: Elimination&lt;br /&gt;Allseer has tracked two enemy snipers working this area. Kill both.&lt;br /&gt;&lt;br /&gt;CP: 30&lt;br /&gt;AP: 30</English>
             </Key>
-            <Key ID="STR_DUWS_T_shentouxiaodui">
+            <Key ID="STR_DUWS_T_cqbdesc">
                 <German>Ein feindliches Eindringlungsteam ist hier blockiert! Vernichtet sie! (Low CP, Low AP)</German>
                 <Spanish>Hay un equipo de infiltración enemigo atrapado aquí! ¡Elimínalos! (Low CP, Low AP)</Spanish>
                 <Chinesesimp>敌人的渗透小队被困在这里了！去干掉他们！(低CP，低AP)</Chinesesimp>
                 <Original>Mission Type: Elimination&lt;br /&gt;An enemy infiltration team has gone to ground in the buildings here. Clear them out.&lt;br /&gt;&lt;br /&gt;CP: 15&lt;br /&gt;AP: 15</Original>
                 <English>Mission Type: Elimination&lt;br /&gt;An enemy infiltration team has gone to ground in the buildings here. Clear them out.&lt;br /&gt;&lt;br /&gt;CP: 15&lt;br /&gt;AP: 15</English>
             </Key>
-            <Key ID="STR_DUWS_T_jianshouzhendi">
+            <Key ID="STR_DUWS_T_holdposdesc">
                 <German>Unser hochwertiges taktisches Asset befindet sich hier. Du musst das Ziel schnell erreichen und es für eine Weile halten, bis die Verstärkung eintrifft. (Slightly high CP, high AP)</German>
                 <Spanish>Nuestro activo táctico de alto valor está aquí. Debes llegar al destino con prisa y mantener la posición durante un tiempo hasta que lleguen los refuerzos. (Slightly high CP, high AP)</Spanish>
                 <Chinesesimp>我方高价值战术资产在这里，你需要快点到达目的地并坚守一段时间，直到援军抵达。(稍高CP，高AP)</Chinesesimp>
@@ -4761,28 +4761,28 @@
                 <Original>HALO Group (AI Only)</Original>
                 <English>HALO Group (AI Only)</English>
             </Key>
-            <Key ID="STR_DUWS_T_zaijvhuishouzhan1">
+            <Key ID="STR_DUWS_T_recyclestation1">
                 <German>Fahrzeugrecyclingstation(5CP)</German>
                 <Spanish>Estación de Reciclaje de Vehículos(5CP)</Spanish>
                 <Chinesesimp>载具回收站(5CP)</Chinesesimp>
                 <Original>Vehicle Recycling Station (5 CP)</Original>
                 <English>Vehicle Recycling Station (5 CP)</English>
             </Key>
-            <Key ID="STR_DUWS_T_gaizaijvwufahuishou">
+            <Key ID="STR_DUWS_T_recyclenotallowed">
                 <German>Dieses Fahrzeug kann nicht recycelt werden.</German>
                 <Spanish>Este vehículo no se puede reciclar.</Spanish>
                 <Chinesesimp>该载具无法回收</Chinesesimp>
                 <Original>This vehicle cannot be recycled.</Original>
                 <English>This vehicle cannot be recycled.</English>
             </Key>
-            <Key ID="STR_DUWS_T_gaizaijvkongde">
+            <Key ID="STR_DUWS_T_recycleempty">
                 <German>Kein Fahrzeug in der Fahrzeugrecyclingstation.</German>
                 <Spanish>No hay vehículo dentro de la Estación de Reciclaje de Vehículos.</Spanish>
                 <Chinesesimp>载具回收站内没有载具。</Chinesesimp>
                 <Original>There's no vehicle in the Vehicle Recycling Station.</Original>
                 <English>There's no vehicle in the Vehicle Recycling Station.</English>
             </Key>
-            <Key ID="STR_DUWS_T_bixuzaifujin">
+            <Key ID="STR_DUWS_T_recyclenearhq">
                 <German>Du musst in der Nähe des HQ sein, um die Fahrzeugrecyclingstation zu platzieren.</German>
                 <Spanish>Debes estar cerca del cuartel general (HQ) para desplegar la Estación de Reciclaje de Vehículos.</Spanish>
                 <Chinesesimp>必须在HQ附近才能部署载具回收站</Chinesesimp>
@@ -4810,7 +4810,7 @@
                 <Original>No valid Vehicle Recycling Station location nearby... Try moving to a flat, clear area</Original>
                 <English>No valid Vehicle Recycling Station location nearby... Try moving to a flat, clear area</English>
             </Key>
-            <Key ID="STR_DUWS_T_chenggonghuishou">
+            <Key ID="STR_DUWS_T_recyclesuccess">
                 <Spanish>Has reciclado %1 vehículo(s) con éxito, has obtenido %2 CP.</Spanish>
                 <German>%1 Fahrzeug erfolgreich recycelt, %2 CP erhalten.</German>
                 <Chinesesimp>成功回收%1辆载具，获得%2CP</Chinesesimp>
@@ -4824,14 +4824,14 @@
                 <Original>Roger, Vehicle Recycling Station is being deployed...</Original>
                 <English>Roger, Vehicle Recycling Station is being deployed...</English>
             </Key>
-            <Key ID="STR_DUWS_T_zaijvhuishouzhan2">
+            <Key ID="STR_DUWS_T_recyclestation2">
                 <German>Fahrzeugrecyclingstation</German>
                 <Spanish>Estación de Reciclaje de Vehículos</Spanish>
                 <Chinesesimp>载具回收站</Chinesesimp>
                 <Original>Vehicle Recycling Station</Original>
                 <English>Vehicle Recycling Station</English>
             </Key>
-            <Key ID="STR_DUWS_T_huishouzaijv">
+            <Key ID="STR_DUWS_T_recycleaction">
                 <German>Fahrzeug recyceln</German>
                 <Spanish>Reciclar Vehículo</Spanish>
                 <Chinesesimp>回收载具</Chinesesimp>
@@ -4852,7 +4852,7 @@
                 <Spanish>Se encontraron %1 vehículos reciclables, valor total estimado: %2 PC</Spanish>
                 <Chinesesimp>发现 %1 辆可回收载具，预计总价值：%2 CP</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_zaijvhuishouzhan3">
+            <Key ID="STR_DUWS_T_recyclestation3">
                 <German>Interagiere mit der Fahnenstange, um das Fahrzeug auf dem Landezonenmarker abzuholen.</German>
                 <Spanish>Interactúa con el asta de bandera para recuperar el vehículo en el marcador de zona de aterrizaje.</Spanish>
                 <Chinesesimp>与修理设施进行交互，以回收停机坪标志上的载具。</Chinesesimp>
@@ -5479,7 +5479,7 @@
                 <Original>SAWP is in position.</Original>
                 <English>SAWP is in position.</English>
             </Key>
-            <Key ID="STR_DUWS_T_trkhanzi">
+            <Key ID="STR_DUWS_T_supplydropfail">
                 <German>Nachschub Abwurf wurde abgeschossen. Abwurf fehlgeschlagen.</German>
                 <Spanish>Los suministros ha sido derribados. Entrega de suministros fallida.</Spanish>
                 <Chinesesimp>空投补给被击落了，空投补给失败。</Chinesesimp>
@@ -6640,7 +6640,7 @@
                 <Original>Signal 2-2</Original>
                 <English>Signal 2-2</English>
             </Key>
-            <Key ID="STR_DUWS_T_changgongpilot">
+            <Key ID="STR_DUWS_T_longbowpilot">
                 <German>"Longbow 1-1" Pilot</German>
                 <Spanish>Piloto de "Longbow 1-1"</Spanish>
                 <Chinesesimp>长弓 1-1 飞行员</Chinesesimp>
@@ -7419,7 +7419,7 @@
                 <English>Enemies from hell (Requires WebKnight's Zombies and Creatures)</English>
                 <Chinesesimp>地狱之敌 (需要WebKnight's Zombies and Creatures)</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_zhxd">
+            <Key ID="STR_DUWS_T_deadbolt">
                 <German>Operation Deadbolt</German>
                 <Spanish>Operación Deadbolt</Spanish>
                 <Chinesesimp>镇魂行动</Chinesesimp>
@@ -7440,7 +7440,7 @@
                 <Original>Extract Survivors</Original>
                 <English>Extract Survivors</English>
             </Key>
-            <Key ID="STR_DUWS_T_zhxdjj">
+            <Key ID="STR_DUWS_T_deadboltdesc">
                 <German>Die Plague Zero hat diesen Ort durchzogen — doch der Konflikt endet nicht aufgrund der Seuche. Dein Team muss die Offensive in den feindlichen Kriegsgebieten aufrechterhalten, während es in den Städten nach Überlebenden sucht und sie zum HQ zurückbringt. Dies ist entscheidend für den Ruf unserer Streitkräfte hier. Je mehr Überlebende ihr extrahiert, desto besser — für jeden Überlebenden, den ihr extrahiert, erhält dein Team Belohnungen.</German>
                 <Spanish>La Plaga Cero ha arrasado este lugar — pero el conflicto no terminará a causa de la plaga. Tu escuadra debe mantener la ofensiva en las zonas de guerra enemigas mientras busca supervivientes en los pueblos y los lleva al HQ. Esto es crucial para mantener la reputación de nuestro ejército aquí. Cuantos más supervivientes extraigas, mejor — tu equipo recibirá recompensas por cada superviviente que extraigas.</Spanish>
                 <Chinesesimp>
@@ -7595,14 +7595,14 @@
                 <Original>Feedback / Bug Report</Original>
                 <English>Feedback / Bug Report</English>
             </Key>
-            <Key ID="STR_DUWS_T_siwang">
+            <Key ID="STR_DUWS_T_deathpenalty">
                 <German>Todesstrafe</German>
                 <Spanish>Penalización por Muerte</Spanish>
                 <Chinesesimp>死亡惩罚</Chinesesimp>
                 <Original>Death Penalty</Original>
                 <English>Death Penalty</English>
             </Key>
-            <Key ID="STR_DUWS_T_siwang2">
+            <Key ID="STR_DUWS_T_deathpenalty2">
                 <German>Die Todesstrafe macht die Kampagne fordernder: Denke taktisch über jeden deiner Schritte nach, versuche keine Fehler zu machen und nutze kostengünstige Unterstützungsoptionen und spezielle Nebenmissionen, um dir einen Vorteil zu verschaffen. In den Kampagneneinstellungen kannst du festlegen, wie viel sie kostet, oder sie ausschalten.</German>
                 <Spanish>La penalización por muerte hace la campaña más exigente: piensa tácticamente en cada uno de tus pasos, intenta no cometer errores y utiliza las opciones de apoyo de bajo coste y las misiones secundarias especiales para crear ventaja. En las opciones de configuración de la campaña puedes ajustar cuánto cuesta, o desactivarla.</Spanish>
                 <Chinesesimp>死亡惩罚让战役更具挑战性：请战术地思考你的每一步，试着不犯错误，并利用低价支援选项和特殊的支线任务为你创造优势。你可以在战役设置选项中调整它的代价，或将其关闭。</Chinesesimp>
@@ -7749,14 +7749,14 @@
                 <Original>Recruiting Operatives</Original>
                 <English>Recruiting Operatives</English>
             </Key>
-            <Key ID="STR_DUWS_T_zimuxitong">
+            <Key ID="STR_DUWS_T_subtitlesystem">
                 <German>Untertitel-System</German>
                 <Spanish>Sistema de Subtítulos</Spanish>
                 <Chinesesimp>字幕系统</Chinesesimp>
                 <Original>Subtitle System</Original>
                 <English>Subtitle System</English>
             </Key>
-            <Key ID="STR_DUWS_T_zimuxitong2">
+            <Key ID="STR_DUWS_T_subtitlesystem2">
                 <German>DUWS_T verfügt über ein immersives Untertitelsystem, das auf fast jede Aktion des Spielers reagiert. „Overlord 1-1“ ist der Gesamtkommandant der BLUFOR-Kampagne und „Action Squad“ die Sammelbezeichnung für alle Spieler.</German>
                 <Spanish>DUWS_T cuenta con un sistema de subtítulos inmersivo que responde a casi todas las acciones del jugador. «Overlord 1-1» es el comandante general de la campaña BLUFOR y «Action Squad» el término colectivo para todos los jugadores.</Spanish>
                 <Chinesesimp>DUWS_T配备了沉浸式字幕系统，玩家的每一个举动几乎都会有字幕响应。"霸王1-1"为蓝方战役总指挥，"行动组"为所有玩家的统称。</Chinesesimp>
@@ -7777,14 +7777,14 @@
                 <Original>Reworked Reputation System</Original>
                 <English>Reworked Reputation System</English>
             </Key>
-            <Key ID="STR_DUWS_T_zhiyuan">
+            <Key ID="STR_DUWS_T_supportguide">
                 <German>Detaillierte Erklärung der überarbeiteten Unterstützungsoptionen</German>
                 <Spanish>Explicación Detallada de las Opciones de Apoyo Reelaboradas</Spanish>
                 <Chinesesimp>重做后的支援项目详解</Chinesesimp>
                 <Original>Detailed Explanation of the Reworked Support Options</Original>
                 <English>Detailed Explanation of the Reworked Support Options</English>
             </Key>
-            <Key ID="STR_DUWS_T_zhiyuan1">
+            <Key ID="STR_DUWS_T_supportguide1">
                 <German>Supply Drop (5CP zum Freischalten, 2CP pro Einsatz. Enthält Haupt-Infanterieausrüstung von BLUFOR.) Virtual Arsenal (10CP zum Freischalten. Das virtuelle Arsenal kann an Hauptquartieren, Mobilen Kommandoposten, Vorwärtsoperationbasen (FOBs) und Luftabwurf-Versorgungskisten genutzt werden.) Notfahrzeug-Airdrop (5CP zum Freischalten, 5CP pro Einsatz. Nach dem Ruf wirft ein freundlicher Hubschrauber ein ziviles Transportfahrzeug für den Anrufer ab.) Squad Infil Vehicle Airdrop (10CP zum Freischalten, 10CP pro Einsatz. Nach dem Ruf wirft ein freundlicher Hubschrauber ein leicht bewaffnetes Fahrzeug der BLUFOR-Fraktion für den Anrufer ab.) Squad Assault Weapon Pack (10CP zum Freischalten, 10CP pro Einsatz. Nach dem Ruf wirft ein freundlicher Hubschrauber ein Paket für den Anrufer ab mit: 2 automatischen Granatentürmen, 1 Drohnenterminal, 1 ED-1D, 1 Laserdesignator.) HALO (15CP zum Freischalten.) Fahrzeug-Recycling-Station (5 CP zum Kauf, kostenlos pro Abruf. Nach der Bereitstellung erhält der Spieler die Fähigkeit zur Fahrzeugbergung.) Spezialaufklärungsdrohne (10CP zum Freischalten, 5CP pro Einsatz. Nach dem Ruf scannt eine freundliche Aufklärungsdrohne befreundete und feindliche Einheiten in Reichweite und synchronisiert ihre Positionen auf deiner Karte.) Hubschraubertransport (5CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf holt ein freundlicher Transporthubschrauber die Squad des Anrufers ab und transportiert sie.) Schwertransporthubschrauber-Fahrzeugtransport (10 CP zum Kauf des Zugangs, kostenlos pro Abruf. Nach dem Abruf holen befreundete Schwertransporthubschrauber das festgelegte Fahrzeug an den Zielort.)  Bootsverkehr (2CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf holt ein freundliches Bootsteam die Squad des Anrufers ab und transportiert sie. Diese Funktion hat manchmal Bugs.) 155mm-Artillerieunterstützung (20CP zum Freischalten, 10CP pro Einsatz. Nach dem Ruf bombardiert eine außerhalb der Karte liegende 155mm-Artilleriegruppe den angegebenen Ort des Anrufers eine Minute lang ununterbrochen.) Mörserunterstützung (10CP zum Freischalten, 5CP pro Einsatz. Nach dem Ruf bombardiert eine außerhalb der Karte liegende Mörsergruppe den angegebenen Ort des Anrufers eine Minute lang ununterbrochen.) JDAM-Bombe (10CP zum Freischalten, 3CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine JDAM-Bombe auf den angegebenen Ort des Anrufers ab.) Lasergelenkte Bombe (10CP zum Freischalten, 1CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine lasergelenkte Bombe auf den angegebenen Ort des Anrufers ab. Der Anrufer muss den Laserdesignator ständig auf das Ziel richten.) Mk.20-Clustergleitbombe (25CP zum Freischalten, 20CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine Mk.20-Clustergleitbombe auf den angegebenen Ort ab, die Flächenschaden verursacht.) Napalm-Bombe (20CP zum Freischalten, 15CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine Napalm-Bombe auf den angegebenen Ort ab, die anhaltendes Feuer verursacht und die KI-Pfadfindung stört.) High Command: Angriffshubschrauber (20CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf wird ein Angriffshubschrauber zum High-Command-System des Anrufers hinzugefügt. Der Anrufer kann nicht erneut rufen, bis der Angriffshubschrauber zerstört ist.) High Command: CAS-Starrflügelflugzeug (25CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf wird ein Close-Air-Support-Starrflügelflugzeug zum High-Command-System des Anrufers hinzugefügt. Der Anrufer kann nicht erneut rufen, bis das Flugzeug zerstört ist.) Airborne (20CP zum Freischalten, 12CP pro Einsatz. Nach dem Ruf wird eine Squad freundlicher Infanterie um den Anrufer abgeworfen und schließt sich seiner Squad an.) Mobiles HQ errichten (10CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf wird das Fahrzeug vor dem Anrufer in ein Mobiles HQ umgewandelt. Das Mobile HQ dient als Respawn-Punkt, wenn es eingesetzt ist.)</German>
                 <Spanish>Supply Drop (5CP para desbloquear, 2CP por uso. Contiene el equipo de infantería principal de BLUFOR.) Arsenal Virtual (10CP para desbloquear. El arsenal virtual se puede utilizar en el Cuartel General, los Puestos de Mando Móviles, las Bases de Operaciones Avanzadas (FOBs) y las cajas de suministro por airdrop.) Lanzamiento Aéreo de Vehículo de Emergencia (5CP para desbloquear, 5CP por uso. Al llamar, un helicóptero amigante lanzará un vehículo de transporte civil para el solicitante.) Lanzamiento Aéreo de Vehículo de Infiltración de Escuadra (10CP para desbloquear, 10CP por uso. Al llamar, un helicóptero amigante lanzará un vehículo ligero armado de la facción BLUFOR para el solicitante.) Paquete de Armas de Asalto de Escuadra (10CP para desbloquear, 10CP por uso. Al llamar, un helicóptero amigante lanzará un paquete para el solicitante que contiene: 2 torretas granaderas automáticas, 1 terminal de dron, 1 ED-1D, 1 designador láser.) Estación de Reciclaje de Vehículos (5 CP para comprar, gratuita cada llamada. Una vez desplegada, otorga al jugador la capacidad de recuperar vehículos.) HALO (15CP para desbloquear.) Dron de Reconocimiento Especial (10CP para desbloquear, 5CP por uso. Al llamar, un dron de reconocimiento amigante escaneará unidades amigantes y enemigas en rango y sincronizará sus posiciones en tu mapa.) Transporte en Helicóptero (5CP para desbloquear, uso gratuito. Al llamar, un helicóptero de transporte amigante recogerá y transportará al escuadra del solicitante.) Transporte de Vehículos con Helicóptero Pesado (10 CP para comprar acceso, gratuito cada llamada. Después de llamar, helicópteros pesados amigos izarán el vehículo designado hasta la ubicación objetivo.) Transporte en Barco (2CP para desbloquear, uso gratuito. Al llamar, un equipo de embarcaciones amigante recogerá y transportará al escuadra del solicitante. Esta función a veces tiene errores.) Apoyo de Artillería de 155mm (20CP para desbloquear, 10CP por uso. Al llamar, una batería de artillería de 155mm fuera del mapa bombardeará la ubicación designada por el solicitante de forma continua durante un minuto.) Apoyo de Mortero (10CP para desbloquear, 5CP por uso. Al llamar, un equipo de morteros fuera del mapa bombardeará la ubicación designada por el solicitante de forma continua durante un minuto.) Bomba JDAM (10CP para desbloquear, 3CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba JDAM en la ubicación designada por el solicitante.) Bomba Guiada por Láser (10CP para desbloquear, 1CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba guiada por láser en la ubicación designada por el solicitante. El solicitante debe mantener el designador láser apuntando al objetivo de forma continua.) Bomba de Racimo Mk.20 (25CP para desbloquear, 20CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba de racimo Mk.20 en la ubicación designada, causando daño en área amplia.) Bomba Napalm (20CP para desbloquear, 15CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba napalm en la ubicación designada, causando fuego continuo y perturbando la navegación de la IA.) Alto Mando: Helicóptero de Ataque (20CP para desbloquear, uso gratuito. Al llamar, un helicóptero de ataque se añadirá al sistema de Alto Mando del solicitante. El solicitante no podrá volver a llamar hasta que el helicóptero de ataque sea destruido.) Alto Mando: Avión de Ala Fija de Apoyo Aéreo Cercano (25CP para desbloquear, uso gratuito. Al llamar, un avión de ala fija de apoyo aéreo cercano se añadirá al sistema de Alto Mando del solicitante. El solicitante no podrá volver a llamar hasta que el avión sea destruido.) Airborne (20CP para desbloquear, 12CP por uso. Al llamar, un escuadra de infantería amigante será lanzada por paracaídas alrededor del solicitante y se unirá a su escuadra.) Establecer Cuartel General Móvil (10CP para desbloquear, uso gratuito. Al llamar, el vehículo frente al solicitante se convertirá en un Cuartel General Móvil. El Cuartel General Móvil actúa como punto de reaparición cuando está desplegado.)</Spanish>
                 <Chinesesimp>空投补给(5CP购买使用权，每次呼叫消耗2CP。补给内含一个受限制的虚拟军火库。)  虚拟军火库(10CP购买使用权。虚拟军火库可以在总部、机动指挥部、前线作战基地以及空投的补给箱里使用。)  紧急载具空投(5CP购买使用权，每次呼叫消耗5CP。呼叫后友军直升机会为呼叫者投放一辆民用运输载具。)  班组渗透载具空投(10CP购买使用权，每次呼叫消耗10CP。呼叫后友军直升机会为呼叫者投放一辆蓝方阵营的轻型武装车辆)  班组突击武器包(10CP购买使用权，每次呼叫消耗10CP。呼叫后友军直升机会为呼叫者投放包裹，内含：两架自动化榴弹机枪，一个无人机终端，一个ED-1D，一个激光指示器。)   空降(15CP购买使用权。)  特种无人侦察机(10CP购买使用权，每次呼叫消耗5CP。呼叫后友军无人侦察机会扫描范围内的友军和敌军单位，并同步位置到你的地图上。)  直升机运输(5CP购买使用权，每次呼叫免费。呼叫后友军运输直升机可以来接送呼叫者的小队。)  重型直升机载具运输 ( 10CP 购买使用权，每次呼叫免费。呼叫后友军重型直升机会来吊装指定载具到目标位置。) 船运(2CP购买使用权，每次呼叫免费。呼叫后友军舟艇小队可以来接送呼叫者的小队。有时这个功能会出bug。)  载具回收站 (5CP 购买，每次呼叫免费。部署后使玩家拥有载具回收能力。) 155毫米炮支援(20CP购买使用权，每次呼叫10CP。呼叫后地图外的155毫米炮炮组会朝着呼叫者给出的地点持续炮击一分钟。)  迫击炮支援(10CP购买使用权，每次呼叫5CP。呼叫后地图外的迫击炮炮组会朝着呼叫者给出的地点持续炮击一分钟。)  杰达姆炸弹(10CP购买使用权，每次呼叫3CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚杰达姆炸弹)  激光指导炸弹(10CP购买使用权，每次呼叫1CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚激光制导炸弹。呼叫者需要使用激光指示器持续对准目标。)  Mk.20集束炸弹(25CP购买使用权，每次呼叫20CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚Mk.20集束炸弹，造成大面积伤害。)  凝固汽油弹(20CP购买使用权，每次呼叫15CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚凝固汽油弹，造成持续性的燃烧并扰乱AI寻路。)  高级指挥攻击直升机(20CP购买使用权，每次呼叫免费。呼叫后，一架攻击直升机会添加到呼叫者的高级指挥系统里。呼叫者将无法再次呼叫，直到攻击直升机被摧毁。)  高级指挥近空支援固定翼飞机(25CP购买使用权，每次呼叫免费。呼叫后，一架近空支援固定翼飞机会添加到呼叫者的高级指挥系统里。呼叫者将无法再次呼叫，直到近空支援固定翼飞机被摧毁。)  空降部队(20CP购买使用权，每次呼叫消耗12CP。呼叫后，一队友军步兵将被空降到呼叫者周围并加入呼叫者的班组。)  建立机动指挥部(10CP购买使用权，每次呼叫免费。呼叫后，呼叫者面前的车辆会被改造为机动指挥部。机动指挥部部署时可以作为复活点。)</Chinesesimp>
@@ -7847,14 +7847,14 @@
                 <Original>Check the map diary for more info (DUWS_T Manual)</Original>
                 <English>Check the map diary for more info (DUWS_T Manual)</English>
             </Key>
-            <Key ID="STR_DUWS_T_shijianguanli">
+            <Key ID="STR_DUWS_T_timemanagement">
                 <German>Zeitverwaltungssystem</German>
                 <Spanish>Sistema de Gestión del Tiempo</Spanish>
                 <Chinesesimp>时间管理系统</Chinesesimp>
                 <Original>Time Management System</Original>
                 <English>Time Management System</English>
             </Key>
-            <Key ID="STR_DUWS_T_shijianguanli2">
+            <Key ID="STR_DUWS_T_timemanagement2">
                 <German>Anders als DUWS_X haben Spieler in DUWS_T nur sehr wenige Möglichkeiten, die Zeit frei zu überspringen. Spieler können 3 Stunden im HQ und an Vorwärtsoperationsstützpunkten überspringen (mit einer 10-minütigen Abkühlzeit). Nachdem die Abkühlzeit einer Nebenmission abgeschlossen ist, werden automatisch 3 Stunden übersprungen. Du kannst wählen, tagsüber offen gegen Feinde zu kämpfen oder nachts heimlich feindliche Hochwertziele und Vermögenswerte zu zerstören.</German>
                 <Spanish>A diferencia de DUWS_X, en DUWS_T los jugadores tienen muy pocas oportunidades de saltarse el tiempo libremente. Los jugadores pueden saltarse 3 horas en el Cuartel General y en las Bases de Operaciones Avanzadas (con un tiempo de enfriamiento de 10 minutos). Cuando se complete el tiempo de enfriamiento de una misión secundaria, también se saltarán 3 horas automáticamente. Puedes elegir enfrentarte a los enemigos de frente durante el día o destruir sigilosamente objetivos de alto valor y activos enemigos por la noche.</Spanish>
                 <Chinesesimp>不像DUWS_X，在DUWS_T中，玩家能自由跳过时间的机会很少。玩家可以在总部和前线作战基地跳过3小时(有10分钟的冷却时间)，支线任务冷却完毕后也会自动跳过3小时时间。你可以选择在白天和敌人正面对决，在黑夜偷偷摧毁敌方重要人物和资产。</Chinesesimp>
@@ -7895,7 +7895,7 @@
                 <Original>Unknown Mission %1</Original>
                 <English>Unknown Mission %1</English>
             </Key>
-            <Key ID="STR_DUWS_T_shiyanxinggongneng">
+            <Key ID="STR_DUWS_T_experimentalfeature">
                 <German>Diese Funktion ist experimentell und kann nur vom Host-Spieler verwendet werden.</German>
                 <Spanish>Esta función es experimental y solo puede ser usada por el jugador host.</Spanish>
                 <Chinesesimp>该功能为实验性功能，暂时只能由担任主机的玩家实现。</Chinesesimp>

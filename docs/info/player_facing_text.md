@@ -152,7 +152,7 @@ piecemeal now would be re-editing text that is about to be replaced wholesale:
 | `STR_DUWS_T_fxyys123` | The pilot's fading fast. Two minutes, maybe less. |
 | `STR_DUWS_T_fxysw123` | …The pilot stopped answering the radio. He's most likely bled out. |
 | `STR_DUWS_T_xdbfx123` | The enemy's found the squad. Move now. |
-| `STR_DUWS_T_xinhaopy` | They're nearly through the intel. Two minutes left. |
+| `STR_DUWS_T_towerdecrypt` | They're nearly through the intel. Two minutes left. |
 | `STR_DUWS_T_fxkczy00` | The enemy rigged the truck with a timed charge and there's no disarming it in the field… |
 | `STR_DUWS_T_3jmpthvi` | Unloading complete. The truck's yours. |
 | `STR_DUWS_T_auto_drop_hint` | You were already carrying the pilot, so he's been set down here. |

@@ -37,7 +37,7 @@ sleep 2;
 if (CIV_PRESENCE == "RAVAGE" && !ZombieTaskCreated) then {
     // ===== 丧尸模式额外任务（请在此处填写具体内容）=====
     [west, ["ZombieTask"],
-        [localize "STR_DUWS_T_zhxdjj", localize "STR_DUWS_T_zhxd", localize "STR_DUWS_T_zhxd"], objNull, true]
+        [localize "STR_DUWS_T_deadboltdesc", localize "STR_DUWS_T_deadbolt", localize "STR_DUWS_T_deadbolt"], objNull, true]
         remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, "ZombieTask_new"];
     // =================================================
     ZombieTaskCreated = true;
@@ -45,7 +45,7 @@ if (CIV_PRESENCE == "RAVAGE" && !ZombieTaskCreated) then {
 // 如果是 WBK 模式且尚未创建额外任务，则创建
 if (CIV_PRESENCE == "WBK" && !ZombieTaskCreated) then {
     [west, ["WBKTask"],
-        [localize "STR_DUWS_T_WBK_TASK_DESC", localize "STR_DUWS_T_zhxd", localize "STR_DUWS_T_zhxd"], objNull, true]
+        [localize "STR_DUWS_T_WBK_TASK_DESC", localize "STR_DUWS_T_deadbolt", localize "STR_DUWS_T_deadbolt"], objNull, true]
         remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, "WBKTask_new"];
     ZombieTaskCreated = true;
 };

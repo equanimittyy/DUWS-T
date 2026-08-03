@@ -21,7 +21,7 @@
   index_max_radius_1250 = lbAdd [2100, "1250m"];
   index_max_radius_1000 = lbAdd [2100, "1000m"];
   index_max_radius_750 = lbAdd [2100, "750m"];
-  index_max_radius_500 = lbAdd [2100, localize "STR_DUWS_T_xuanxiang1"];
+  index_max_radius_500 = lbAdd [2100, localize "STR_DUWS_T_zoneradiusmax500"];
   [2100, index_max_radius_500] call _setDefault;
 
   // MIN RADIUS
@@ -31,7 +31,7 @@
   index_min_radius_1000 = lbAdd [2101, "1000m"];
   index_min_radius_750 = lbAdd [2101, "750m"];
   index_min_radius_500 = lbAdd [2101, "500m"];
-  index_min_radius_350 = lbAdd [2101, localize "STR_DUWS_T_xuanxiang2"];
+  index_min_radius_350 = lbAdd [2101, localize "STR_DUWS_T_zoneradiusmin350"];
   [2101, index_min_radius_350] call _setDefault;
 
 // AMOUNT ENEMY ZONES
@@ -45,7 +45,7 @@ index_amount_zones_8 = lbAdd [2102, "8"];
 index_amount_zones_7 = lbAdd [2102, "7"];
 index_amount_zones_6 = lbAdd [2102, "6"];
 index_amount_zones_5 = lbAdd [2102, "5"];
-index_amount_zones_4 = lbAdd [2102, localize "STR_DUWS_T_xuanxiang3"];
+index_amount_zones_4 = lbAdd [2102, localize "STR_DUWS_T_zonecount4"];
 index_amount_zones_3 = lbAdd [2102, "3"];
 index_amount_zones_2 = lbAdd [2102, "2"];
 index_amount_zones_1 = lbAdd [2102, "1"];
@@ -56,7 +56,7 @@ index_max_dist_hq_30 = lbAdd [2103, localize "STR_DUWS_T_blqblz86"];
 index_max_dist_hq_40 = lbAdd [2103, "4 km"];
 index_max_dist_hq_50 = lbAdd [2103, "5 km"];
 index_max_dist_hq_100 = lbAdd [2103, "10 km"];
-index_max_dist_hq_150 = lbAdd [2103, localize "STR_DUWS_T_xuanxiang4"];
+index_max_dist_hq_150 = lbAdd [2103, localize "STR_DUWS_T_hqdistmax15km"];
 index_max_dist_hq_200 = lbAdd [2103, "20 km"];
 [2103, index_max_dist_hq_150] call _setDefault;
 
@@ -74,7 +74,7 @@ index_amount_cp_50 = lbAdd [2104, "50"];
 index_amount_cp_100 = lbAdd [2104, "100"];
 index_amount_cp_200 = lbAdd [2104, "200"];
 index_amount_cp_300 = lbAdd [2104, "300"];
-index_amount_cp_400 = lbAdd [2104, localize "STR_DUWS_T_xuanxiang5"];
+index_amount_cp_400 = lbAdd [2104, localize "STR_DUWS_T_startcp400"];
 [2104, index_amount_cp_100] call _setDefault;
 
 // CP Reward Multiplier
@@ -98,7 +98,7 @@ index_cp_death_penalty_10 = lbAdd [2107, "10"];
 
 // BLUFOR AP
 index_blufor_ap_10 = lbAdd [2108, "10"];
-index_blufor_ap_50 = lbAdd [2108, localize "STR_DUWS_T_xuanxiang11"];
+index_blufor_ap_50 = lbAdd [2108, localize "STR_DUWS_T_bluforap50"];
 index_blufor_ap_80 = lbAdd [2108, "80"];
 index_blufor_ap_110 = lbAdd [2108, localize "STR_DUWS_T_57jjx7d6"];
 index_blufor_ap_150 = lbAdd [2108, "150"];
@@ -109,7 +109,7 @@ index_blufor_ap_200 = lbAdd [2108, localize "STR_DUWS_T_rf9c6kt2"];
 // OPFOR AP
 index_opfor_ap_10 = lbAdd [2109, "10"];
 index_opfor_ap_50 = lbAdd [2109, "50"];
-index_opfor_ap_80 = lbAdd [2109, localize "STR_DUWS_T_xuanxiang12"];
+index_opfor_ap_80 = lbAdd [2109, localize "STR_DUWS_T_opforap80"];
 index_opfor_ap_110 = lbAdd [2109, localize "STR_DUWS_T_57jjx7d6"];
 index_opfor_ap_150 = lbAdd [2109, "150"];
 index_opfor_ap_170 = lbAdd [2109, "170"];

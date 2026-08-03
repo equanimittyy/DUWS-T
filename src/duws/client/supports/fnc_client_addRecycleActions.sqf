@@ -16,7 +16,7 @@ _depot addAction [
     {
         params ["_t", "_c", "_i", "_trg"];
         [localize "STR_DUWS_T_VEHICLE_RECYCLING", [
-            [localize "STR_DUWS_T_huishouzaijv",          { params ["_trg"]; [player, _trg] remoteExec ["fnc_veh_recycle_action", 2]; }, [_trg]],
+            [localize "STR_DUWS_T_recycleaction",          { params ["_trg"]; [player, _trg] remoteExec ["fnc_veh_recycle_action", 2]; }, [_trg]],
             [localize "STR_DUWS_T_PREVIEW_RECYCLE_VALUE", { params ["_trg"]; [player, _trg] remoteExec ["fnc_veh_recycle_preview_server", 2]; }, [_trg]]
         ]] call fnc_open_action_menu;
     },

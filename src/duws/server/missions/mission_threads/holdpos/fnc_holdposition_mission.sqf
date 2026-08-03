@@ -29,7 +29,7 @@ _site params ["_randomPos", "_Building", "_targetpos"];
 // player where the objective is, and the spawn-up below runs for tens of seconds.
 _markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
 private _VARtaskgeneratedName = format ["HOLDPOSITION%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
-[_VARtaskgeneratedName, localize "STR_DUWS_T_jianshouzhendi", _mission_name, _randomPos, "defend"] call fnc_missionTaskCreate;
+[_VARtaskgeneratedName, localize "STR_DUWS_T_holdposdesc", _mission_name, _randomPos, "defend"] call fnc_missionTaskCreate;
 
 [_markerText2, {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 

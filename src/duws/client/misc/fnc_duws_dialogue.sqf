@@ -18,7 +18,7 @@ if (isNil "DUWS_netSpeakers") then {
     DUWS_netSpeakers = [
         "STR_DUWS_T_allseer", "STR_DUWS_T_Scout", "STR_DUWS_T_Express",
         "STR_DUWS_T_Viper", "STR_DUWS_T_Rein", "STR_DUWS_T_koipilot",
-        "STR_DUWS_T_changgongpilot", "STR_DUWS_T_slingshot", "STR_DUWS_T_Cobra",
+        "STR_DUWS_T_longbowpilot", "STR_DUWS_T_slingshot", "STR_DUWS_T_Cobra",
         "STR_DUWS_T_hound", "STR_DUWS_T_Signal", "STR_DUWS_T_Signal2",
         "STR_DUWS_T_DISGUISE_OPFOR_SPEAKER",
         // Supports the player calls and then listens to. The two Pilot keys are absent on

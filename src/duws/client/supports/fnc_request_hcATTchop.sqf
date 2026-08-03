@@ -32,7 +32,7 @@ switch (VERSION_X) do {
 		_group setGroupId [format[localize "STR_DUWS_T_8mtxjfj3",DUWS_number_attackchopa]];
 	};
 };
-_speaker = localize "STR_DUWS_T_changgongpilot";
+_speaker = localize "STR_DUWS_T_longbowpilot";
 _message = ([localize "STR_DUWS_T_longbowin"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 hint localize "STR_DUWS_T_rjuehu36";
