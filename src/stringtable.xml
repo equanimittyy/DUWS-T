@@ -3307,13 +3307,6 @@
                 <Original>%1 turned in intel: %2. The analysts pulled a location out of it.</Original>
                 <English>%1 turned in intel: %2. The analysts pulled a location out of it.</English>
             </Key>
-            <Key ID="STR_DUWS_T_sidemissionloc">
-                <Original>Search enemy bodies to reveal the objective's exact location.</Original>
-                <English>Search enemy bodies to reveal the objective's exact location.</English>
-                <German>Der Zielort dieser Mission kann durchsuchen von feindlichen Leichen aufgedeckt werden.</German>
-                <Spanish>La ubicación del objetivo de esta misión se puede revelar buscando en los cuerpos enemigos.</Spanish>
-                <Chinesesimp>此任务的目标位置可以通过搜索敌军尸体来揭露</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_INTEL_SEARCH_ACTION">
                 <Original>Search</Original>
                 <English>Search</English>
@@ -3321,13 +3314,6 @@
             <Key ID="STR_DUWS_T_DEBUG_ACTION">
                 <Original>Debug</Original>
                 <English>Debug</English>
-            </Key>
-            <Key ID="STR_DUWS_T_SEARCH_CORPSE">
-                <Original>Search the body</Original>
-                <English>Search the body</English>
-                <German>Nach Geheimdienstinformationen suchen</German>
-                <Spanish>Buscar inteligencia</Spanish>
-                <Chinesesimp>搜索尸体</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_FOUND_TARGETtitle">
                 <Original>Critical Intel</Original>

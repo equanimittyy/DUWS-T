@@ -91,8 +91,6 @@ sleep 12;
 sleep 12;
 [_speaker, _message2] remoteExec ["fnc_duws_dialogue", 0];
 
-["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
-
 sleep 5; // 等待巡逻队生成完毕
 
 

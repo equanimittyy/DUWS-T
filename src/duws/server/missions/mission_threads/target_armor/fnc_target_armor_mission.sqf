@@ -96,9 +96,6 @@ _wp2 setWaypointTimeout [30, 45, 60];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 
-// 设置任务目标位置（军官位置）
-["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
-
 sleep 5; // 等待巡逻队生成完毕
 
 

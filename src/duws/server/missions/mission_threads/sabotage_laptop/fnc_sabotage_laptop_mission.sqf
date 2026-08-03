@@ -81,7 +81,4 @@ sleep 8;
 if (hardcore_mode_enable) then {
     [[_laptop], "objective"] call fnc_search_flag_group;
 };
-["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
-// 设置任务目标位置
-
 sleep 5; // 等待巡逻队生成完毕

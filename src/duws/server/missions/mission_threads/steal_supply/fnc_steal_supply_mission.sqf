@@ -140,9 +140,6 @@ sleep 8;
 sleep 8;
 ["dakaijunhuoku", [localize "STR_DUWS_T_xnjhk", localize "STR_DUWS_T_xnjhk2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
-// 设置任务目标位置
-["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
-
 sleep 5; // 等待巡逻队生成完毕
 
 

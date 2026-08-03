@@ -172,9 +172,6 @@ sleep 5;
 
 // TASK AND NOTIFICATION
 
-// 设置任务目标位置（卡车位置）
-["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
-
 sleep 5; // 等待巡逻队生成完毕
 
 

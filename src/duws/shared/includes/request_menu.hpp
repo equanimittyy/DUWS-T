@@ -10,9 +10,13 @@
 // The grid is absolute -- 40 cells is the whole screen width -- so the strip's width comes out of
 // the main window rather than being added on the right, where there is nothing left. At this split
 // the window's floor is its COMMAND AND CONTROL row, a request frame beside a command button that
-// cannot stack, and both columns carry text at sizeEx 0.025 to hold their longest label whole
-// ("Recruit Special Operatives"). A strip wider than this one means dropping labels, so past here
-// supports leave the dialog for a screen of their own.
+// cannot stack. A strip wider than this one means dropping labels, so past here supports leave the
+// dialog for a screen of their own.
+//
+// Every button and every combo carries sizeEx 0.025, which is what holds the longest label in the
+// dialog whole ("Recruit Special Operatives", in a 9.9-cell command slot). One size for the lot:
+// buttons sized per row drifted apart by whichever pass last touched the row, and the dialog read
+// as three different menus stacked together. The two exceptions below each state their own reason.
 //
 // The two categories are a header and a rule rather than boxes. A box around each drew three nested
 // frames on the same content (window, category, group) and spent the vertical room the left column
@@ -57,10 +61,11 @@ class ressourceheader
             w = 19.9 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
-        // The three pool captions are the longest text in the dialog and the frames carrying them
-        // are the narrowest controls, so they set their own size rather than inheriting RscFrame's.
-        // "Zones under control" is what forced it: at the default it was clipped to nothing and
-        // read as a figure with no label at all.
+        // First exception to the dialog's 0.025. The three pool captions are the longest text in
+        // the dialog and the 6.4-cell frames carrying them are the narrowest controls, so they set
+        // their own size. "Zones under control" is what forced it: nineteen characters do not fit
+        // in 6.4 cells at anything larger, and at the RscFrame default it was clipped to nothing
+        // and read as a figure with no label at all.
         class RscFrame_1805: RscFrame
         {
             idc = 1805;
@@ -135,7 +140,7 @@ class ressourceheader
         {
             idc = 1605;
             text = "$STR_DUWS_T_rplkhwfu";
-            sizeEx = 0.024;
+            sizeEx = 0.025;
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 5 * GUI_GRID_H + GUI_GRID_Y;
             w = 5.4 * GUI_GRID_W;
@@ -149,7 +154,7 @@ class ressourceheader
         {
             idc = 1609;
             text = "$STR_DUWS_T_SHOW_MISSION_COOLDOWNS";
-            sizeEx = 0.024;
+            sizeEx = 0.025;
             x = 6.5 * GUI_GRID_W + GUI_GRID_X;
             y = 5 * GUI_GRID_H + GUI_GRID_Y;
             w = 5.7 * GUI_GRID_W;
@@ -161,7 +166,7 @@ class ressourceheader
         {
             idc = 1608;
             text = "$STR_DUWS_T_civ_mapview_action";
-            sizeEx = 0.024;
+            sizeEx = 0.025;
             x = 12.5 * GUI_GRID_W + GUI_GRID_X;
             y = 5 * GUI_GRID_H + GUI_GRID_Y;
             w = 3.6 * GUI_GRID_W;
@@ -173,7 +178,7 @@ class ressourceheader
         {
             idc = 1627;
             text = "$STR_DUWS_T_convert_ap";
-            sizeEx = 0.024;
+            sizeEx = 0.025;
             x = 16.4 * GUI_GRID_W + GUI_GRID_X;
             y = 5 * GUI_GRID_H + GUI_GRID_Y;
             w = 4.3 * GUI_GRID_W;
@@ -219,12 +224,13 @@ class ressourceheader
             y = 9.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
             h = 1.2 * GUI_GRID_H;
-            sizeEx = 0.023;
+            sizeEx = 0.025;
         };
         class requestunitsbutton: RscButton
         {
             idc = 1600;
             text = "$STR_DUWS_T_wulhhx81";
+            sizeEx = 0.025;
             x = 1.2 * GUI_GRID_W + GUI_GRID_X;
             y = 10.6 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
@@ -249,12 +255,13 @@ class ressourceheader
             y = 13.7 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
             h = 1.2 * GUI_GRID_H;
-            sizeEx = 0.023;
+            sizeEx = 0.025;
         };
         class requestsquadbutton: RscButton
         {
             idc = 1601;
             text = "$STR_DUWS_T_wulhhx81";
+            sizeEx = 0.025;
             x = 1.2 * GUI_GRID_W + GUI_GRID_X;
             y = 15.1 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
@@ -278,12 +285,13 @@ class ressourceheader
             y = 18.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
             h = 1.2 * GUI_GRID_H;
-            sizeEx = 0.023;
+            sizeEx = 0.025;
         };
         class requestvehiclebutton: RscButton
         {
             idc = 1602;
             text = "$STR_DUWS_T_wulhhx81";
+            sizeEx = 0.025;
             x = 1.2 * GUI_GRID_W + GUI_GRID_X;
             y = 19.6 * GUI_GRID_H + GUI_GRID_Y;
             w = 8.8 * GUI_GRID_W;
@@ -347,6 +355,7 @@ class ressourceheader
         {
             idc = 1604;
             text = "EXIT";
+            sizeEx = 0.025;
             x = 34.1 * GUI_GRID_W + GUI_GRID_X;
             y = 22.4 * GUI_GRID_H + GUI_GRID_Y;
             w = 5.6 * GUI_GRID_W;
@@ -358,7 +367,8 @@ class ressourceheader
         // Width is set by the two category headings rather than by a row: with their rules restored
         // the permanent heading is the longest line the strip carries, and a line over the width is
         // silently cut rather than wrapped. At 16.9 cells and sizeEx 0.024 it holds about 43
-        // characters, which is that heading with nothing to spare.
+        // characters, which is that heading with nothing to spare -- the second exception to the
+        // dialog's 0.025, and it is one character of headroom rather than a preference.
         class supportunlockframe: RscFrame
         {
             idc = 1804;
@@ -383,6 +393,7 @@ class ressourceheader
         {
             idc = 1603;
             text = "$STR_DUWS_T_bp73qs16";
+            sizeEx = 0.025;
             x = 22.4 * GUI_GRID_W + GUI_GRID_X;
             y = 20.4 * GUI_GRID_H + GUI_GRID_Y;
             w = 16.9 * GUI_GRID_W;

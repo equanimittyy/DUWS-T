@@ -106,7 +106,7 @@ addMissionEventHandler ["BuildingChanged", {
     if (CIV_PRESENCE != "NONE" && {[_pos] call fnc_civ_playerNear}) then {
         private _town = [_pos] call fnc_civ_townAt;
         if (_town >= 0) then {
-            [_town, -2, "building_destroyed"] call fnc_town_rep_adjust;
+            [_town, -1, "building_destroyed"] call fnc_town_rep_adjust;
         };
     };
 

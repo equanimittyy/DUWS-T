@@ -40,10 +40,11 @@ DUWS_fnc_zoneManStatics = {
 
     private _guns = _statics select {count crew _x == 0};
     if (count _guns == 0) exitWith {};
-    // Manned to the garrison's strength: a weakened zone gets fewer emplacements manned, not weaker
-    // ones. Attrition only, not tier -- these crew the prefab's own guns, and tier picks what the
-    // zone spawns alongside itself rather than who stands on its fortifications.
-    _guns = [_guns, [_key] call fnc_zone_strength] call fnc_zone_thin;
+    // Every empty gun is crewed, whatever the zone's attrition. Attrition thins what a garrison can
+    // field -- men out of a team, vehicles off the list -- and a static weapon is neither: it is
+    // already standing on the ground, so thinning does not make the zone weaker, it makes the
+    // emplacement scenery the player walks past. A worn-down zone therefore has the same guns and
+    // fewer of everything else.
     private _types = _guns apply {opfor_SOLDIER_X};
     private _spawn = _pos findEmptyPosition [0, 30, opfor_SOLDIER_X];
     if (count _spawn == 0) then { _spawn = _pos };

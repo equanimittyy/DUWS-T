@@ -1,3 +1,11 @@
+// The bottom of the faction screen, in a dialog of its own: client/dialog/fnc_HQ_faction_dialog.sqf
+// builds that screen on an RscDisplayEmpty, which takes no keyboard focus, and the two buttons here
+// are what the flow waits on.
+//
+// It carries no panel and no frame. The green box is the faction screen's and runs down past its own
+// controls to enclose these; a second filled box stacked on the first read as two menus for one
+// decision. A rule and a plain caption separate the placement question from the answers above it,
+// which is the same header-and-rule the request menu uses instead of nesting boxes.
 class startup_hq_placement_dialog
 {
 	idd = -1;
@@ -5,50 +13,48 @@ class startup_hq_placement_dialog
 
     class controls
     {
-    // GUI EDITOR OUTPUT START
-        // The same green every other setup screen's background carries, so the placement box reads
-        // as part of the sequence rather than as a translucent panel dropped on the map.
-        class background_request: RscText
+        class hq_placement_divider: RscText
         {
-            idc = 1445;
-            x = 9.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 10.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 21 * GUI_GRID_W;
-            h = 9.5 * GUI_GRID_H;
-            colorBackground[] = {0.2, 0.4, 0.2, 1};
+            idc = 1444;
+            x = 4 * GUI_GRID_W + GUI_GRID_X;
+            y = 10.45 * GUI_GRID_H + GUI_GRID_Y;
+            w = 32 * GUI_GRID_W;
+            h = 0.0625 * GUI_GRID_H;
+            colorBackground[] = {1,1,1,0.25};
         };
-        class hq_placement_frame: RscFrame
+        class hq_placement_caption: RscText
         {
-            idc = 1800;
-            text = "$STR_DUWS_T_7tr969mm"; //--- ToDo: Localize;
-            x = 10 * GUI_GRID_W + GUI_GRID_X;
-            y = 11 * GUI_GRID_H + GUI_GRID_Y;
-            w = 20 * GUI_GRID_W;
-            h = 8.5 * GUI_GRID_H;
+            idc = 1801;
+            text = "$STR_DUWS_T_7tr969mm";
+            style = ST_CENTER;
+            sizeEx = 0.03;
+            x = 4 * GUI_GRID_W + GUI_GRID_X;
+            y = 10.6 * GUI_GRID_H + GUI_GRID_Y;
+            w = 32 * GUI_GRID_W;
+            h = 0.85 * GUI_GRID_H;
+            colorText[] = {1,1,1,1};
         };
         class hq_placement_random_button: RscButton
         {
             idc = 1600;
-            text = "$STR_DUWS_T_2f55ngq1"; //--- ToDo: Localize;
+            text = "$STR_DUWS_T_2f55ngq1";
             x = 11 * GUI_GRID_W + GUI_GRID_X;
-            y = 12.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 11.6 * GUI_GRID_H + GUI_GRID_Y;
             w = 18 * GUI_GRID_W;
-            h = 2.5 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_50n9sdxk"; //--- ToDo: Localize;
+            h = 1.25 * GUI_GRID_H;
+            tooltip = "$STR_DUWS_T_50n9sdxk";
             action = "[20, 0.015] remoteExec ['fnc_HQ_random_place',player1]; closedialog 0;";
-            //action = "[20, 0.015] spawn fnc_HQ_random_place; closedialog 0;";
         };
         class hq_placement_manual_button: RscButton
         {
             idc = 1601;
-            text = "$STR_DUWS_T_x0cq7o5y"; //--- ToDo: Localize;
+            text = "$STR_DUWS_T_x0cq7o5y";
             x = 11 * GUI_GRID_W + GUI_GRID_X;
-            y = 16 * GUI_GRID_H + GUI_GRID_Y;
+            y = 13 * GUI_GRID_H + GUI_GRID_Y;
             w = 18 * GUI_GRID_W;
-            h = 2.5 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_qwfdr33k"; //--- ToDo: Localize;
+            h = 1.25 * GUI_GRID_H;
+            tooltip = "$STR_DUWS_T_qwfdr33k";
             action = "[] spawn fnc_HQ_manual_place; closedialog 0;";
         };
-        // GUI EDITOR OUTPUT END
     };
 };

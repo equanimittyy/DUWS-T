@@ -124,9 +124,6 @@ _wp2 setWaypointTimeout [30, 45, 60];
 } forEach units _group;
 
 
-// 设置任务目标位置（HVT 位置）
-["info", [localize "STR_DUWS_T_SEARCH_CORPSE", localize "STR_DUWS_T_sidemissionloc"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
-
 sleep 5; // 等待巡逻队生成完毕
 
 

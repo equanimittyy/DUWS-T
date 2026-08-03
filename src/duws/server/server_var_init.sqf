@@ -86,12 +86,16 @@ kill_cp_award = 1;
 // a circuit that a two-man probe could walk through. Server-only, both spawns run there.
 base_patrol_squad = 8;
 
-// When a FOB garrison stops being simulated. Nothing culled it before, so every FOB's soldiers ran
-// their pathing and targeting for the rest of the campaign whether or not anyone was within a
-// kilometre. The delay is the zone streamer's, for the same reason: leaving is what starts the
-// clock, so crossing the map does not leave a trail of woken bases behind you. Server-only.
+// When a FOB or HQ garrison stops being simulated. Nothing culled it before, so every base's
+// soldiers ran their pathing and targeting for the rest of the campaign whether or not anyone was
+// within a kilometre. Server-only.
+//
+// Short on the way down and nothing at all on the way up: a base is frozen rather than rebuilt, so
+// the only cost of freezing early is a garrison a returning player watches start moving, and that
+// costs a frame. The zone streamer's two minutes buy a zone something this does not -- there, the
+// clock stops a garrison being torn down and rebuilt around somebody crossing the radius.
 base_garrison_sleep_range = 500;
-base_garrison_sleep_delay = 120;
+base_garrison_sleep_delay = 10;
 
 // The consumable-support slate. support_max_slots is how many a player may hold at once, the
 // campaign-long budget that makes choosing between them mean anything; support_death_refund is
