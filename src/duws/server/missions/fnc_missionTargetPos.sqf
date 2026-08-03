@@ -2,6 +2,16 @@
 
 params ["_missionpos", "_radius", "_Posfound", "_targetpos", "_failSafe"];
 
+// Declared here rather than left to the loop, and that is the whole of a long-standing bug. A
+// while/do block is its own scope: a variable first assigned inside it dies with the iteration, so
+// only the four params above survived to the return array and these two came back undefined. Every
+// side mission routed through here was then handed an undefined position for its ellipse, its icon
+// and its task destination alike -- and a marker created at one never draws, silently. Intel
+// Gathering was the only mission that looked right on the map, and the only one that finds its own
+// position instead of asking for this one.
+private _randomPos = [];
+private _Building = objNull;
+
 while {!_Posfound} do {
 
 	_failSafe = _failSafe + 1;

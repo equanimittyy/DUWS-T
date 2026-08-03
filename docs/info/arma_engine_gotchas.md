@@ -115,6 +115,26 @@ installed player-side; singleplayer and hosted sessions cannot, since the host i
 Reasoning: [`../campaign_persistence_plan.md`](../campaign_persistence_plan.md#where-the-save-lives).
 Container shape: [`../campaign_save_format.md`](../campaign_save_format.md).
 
+## A variable first assigned inside `while do` does not survive the loop
+
+**`while {...} do {...}` runs its block in a scope of its own. A variable that gets its first
+assignment in there is created in that scope and is gone when the iteration ends — so reading it
+after the loop is reading an undefined variable, whatever the last iteration put in it.**
+
+The trap is that a loop usually has other variables that *do* survive, which makes the broken one
+look like a typo rather than a scoping rule. `server/missions/fnc_missionTargetPos.sqf` returned
+five values from after its loop; `_targetpos`, `_Posfound` and `_failSafe` came back because
+`params` had declared them in the function's scope, and `_randomPos` and `_Building` came back
+undefined because nothing had. Every side mission was then handed an undefined position for its
+area marker, its objective icon and its task destination — and `createMarker` at an undefined
+position draws nothing and reports nothing, so the only symptom was a blank map for years. The
+`.rpt` did carry `Error Undefined variable in expression: _randompos`, unattached to any
+subsystem name, which is why it was never read as a mission bug.
+
+**How to apply:** `private _x = <empty value>` above the loop for anything the code after it reads.
+`params` counts as that declaration, which is why a params-declared variable behaves differently
+from its neighbours in the same block. The same applies to `for do`, `switch do` and `if then`.
+
 ## `exitWith` exits the nearest loop or call scope, not the enclosing if/then
 
 **Inside a loop, `if (cond) exitWith {...}` terminates the whole loop — even when the
