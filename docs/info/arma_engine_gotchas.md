@@ -370,12 +370,38 @@ travel and the civilian-zone readout were both reached from the HQ, a pace apart
 you: the second feature works perfectly and the first simply never completes, which reads as the
 first feature being broken rather than as a collision.
 
-**How to apply:** every map-click mode raises its own "I own the map" global before
-`openMap true` and refuses to start if another mode's flag is up
-(`DUWS_baseTravelMapOpen`, `DUWS_mapReadoutOpen`). Clear the flag *and* the handler
-(`onMapSingleClick ""`) from a `waitUntil { !visibleMap }` spawn, because the engine gives no
-callback for the player closing the map and a mode abandoned that way would hold the slot for
-the rest of the mission.
+**How to apply:** the slot is arbitrated by one owner name in `uiNamespace`, not by a flag per mode.
+Claim it with `["MODE", _handler] call fnc_mapclick_claim` and hand it back with
+`["MODE"] call fnc_mapclick_release` (`server/misc/fnc_mapclick_init.sqf:25`, `:68`). Claiming while
+another mode holds the slot is refused *and* said to the player, so a collision surfaces as a message
+rather than as a feature that never completes; re-claiming as the current holder succeeds, which is
+what lets a multi-stage mode swap handlers between stages. Release restores the background listener
+rather than clearing to `""`, because the player-marker system needs the clicked position for the
+whole mission, and a release from anyone but the holder is a no-op, so a mode that clears itself both
+inside its handler and on the way out cannot disarm whoever claimed in between. A
+`waitUntil { !visibleMap }` spawn is still required to release on the player closing the map
+(`client/misc/fnc_map_readout_open.sqf:27-35`): the engine gives no callback for it, and a mode
+abandoned that way would hold the slot for the rest of the mission. `DUWS_mapReadoutOpen` survives in
+that file but only stops the readout being opened twice; it is not a claim on the slot.
+
+## A click handler's `_pos` belongs to the engine, not to the local of the same name beside it
+
+**Handler code handed to `onMapSingleClick` is a string the engine compiles and runs in a scope of
+its own, binding `_pos`, `_units`, `_shift` and `_alt` itself. A local called `_pos` in the scope
+that installs the handler never reaches it, however connected the two look on the page.**
+
+Three sites declare one and none of them uses it: `client/warcom/fnc_WARCOM_mapclick_assault.sqf:6`,
+`client/supports/fnc_mapclickuav.sqf:6` and `client/supports/fnc_mapclickarty.sqf:50` each open with
+`_pos = [];` above a handler string that mentions `_pos`. The arty site goes a step further and
+passes its local to `format` as `%1` in a template that only substitutes `%2` onwards. All three are
+harmless at runtime, and all three are invisible to a text search, which counts the name inside the
+string as a use — which is how they survive a dead-code pass that removes the ordinary unused locals
+sitting beside them.
+
+**How to apply:** treat a handler string as a separate scope and do not declare the variables the
+engine supplies to it; if a handler genuinely needs a value from the installing scope, substitute it
+in through `format` or pass it as `_this` via the binary form of the command. Any tool that counts
+where a local is used has to blank string literals first, or every one of these reads as live.
 
 ## A mission event handler id is a per-event index, not a unique handle
 
