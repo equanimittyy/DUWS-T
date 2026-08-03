@@ -88,6 +88,56 @@ The card's ceiling is a hard one and it clips mid-sentence with no error, which 
 That budget is a reason to keep a card's text to a headline rather than a reason to split a long one
 across both surfaces.
 
+## The notification card catalogue
+
+Cards are styled by their `CfgNotifications` class in
+[`shared/includes/notifications.hpp`](../../src/duws/shared/includes/notifications.hpp), named as the
+first element of the `BIS_fnc_showNotification` argument. The class decides colour, icon and
+duration; the call site supplies only the text. Every class runs `duration = 4`.
+
+**Two shapes.** Most classes are an icon card: a picture on the left, `description = "%1"` filled by
+the call site. The economy family is a badge card instead — no picture, `iconText = "+%1"` drawing
+the figure over the icon slot, and a fixed description on the class rather than one passed in. That
+is why a CP award call passes a bare number where every other call passes a sentence.
+
+**Colour carries meaning**, and the four in service are consistent:
+
+| Colour | Means | Classes |
+|---|---|---|
+| white `{1,1,1,1}` | neutral information | `info`, `info2`, `missionclean`, `sitrepinfo`, `dakaijunhuoku` |
+| green `{0,1,0,1}` | something gained | `US_takencontrol`, `infosearch`, `repup` |
+| red `{1,0,0,1}` | something lost | `US_lostcontrol`, `biohazard` |
+| cyan `{0.5,1,1,1}` | economy | the `CPadded*` / `APaddedmission` badge family |
+
+**In service — 14 classes:**
+
+| Class | Colour | Sites | Carries |
+|---|---|---|---|
+| `info` | white | 19 | the general-purpose card; MHQ, FOB, hire, black market, supports |
+| `dakaijunhuoku` | white | 5 | the one-time arsenal at a side-mission objective |
+| `biohazard` | red | 4 | RAVAGE / WBK zombie-mode announcements |
+| `missionclean` | white | 2 | the side-mission cleanup countdown |
+| `repup` | green | 2 | reputation gained |
+| `sitrepinfo` | white | 2 | the SITREP support |
+| `US_takencontrol` | green | 2 | zone captured |
+| `US_lostcontrol` | red | 1 | zone lost |
+| `info2` | white | 1 | FOB destroyed |
+| `infosearch` | green | 1 | a search that revealed something |
+| `CPadded` · `CPaddedmission` · `CPaddedattrition` · `APaddedmission` | cyan | 1 each | zone, mission, kill income, mission AP |
+
+**Not referenced — 12 classes.** `armory`, `arsenal_warning`, `artyicon`, `CPadded_retaken`,
+`CPloot`, `halo`, `inf_training`, `new_ability`, `operator_healed`, `pflir`, `ScoreAdded`,
+`task_echec`. Several name systems that do exist — artillery, HALO, thermal, the operative pool — so
+these are unused rather than obsolete, and deleting them would take the styling with them.
+`ScoreAdded` is the one that could be called and still not draw: it carries
+`difficulty[] = {"netStats"}` and shows only when that difficulty flag is on.
+
+**Two inconsistencies to know about.** `fnc_BluHQinit.sqf` fires `TaskFailed`, which is Arma's own
+class and not one of these — the mission's own `task_echec` looks like the intended replacement and
+has never been used. And five call sites name their class in lowercase (`cpadded`,
+`us_takencontrol`, `us_lostcontrol`, `cpaddedmission`, `apaddedmission`) against a CamelCase
+definition. Config lookup is case-insensitive so both work, which is why the drift went unnoticed.
+
 ## Hint prose is system prose
 
 A hint reports state. It does not narrate the software (`The system is finding…`, `Please wait…`),
