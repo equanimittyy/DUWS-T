@@ -102,12 +102,14 @@ class CfgNotifications
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
 
+    // Title comes from the call site: this class carries four different losses -- a FOB, the MHQ,
+    // an informant, a rise in escalation -- and a fixed title titled every one of them "FOB Lost".
     class alert
     {
-        title = "$STR_DUWS_T_gwn85uxh"; // Tile displayed as text on black background. Filled by arguments.
+        title = "%1"; // Tile displayed as text on black background. Filled by arguments.
         iconPicture = "\A3\ui_f\data\map\markers\military\warning_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
         iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
-        description = "%1 %2"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
+        description = "%2"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
         color[] = {1,0.2,0.2,1}; // Icon and text color
         duration = 4; // How many seconds will the notification be displayed
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
@@ -144,7 +146,7 @@ class CfgNotifications
     class repup
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Flares_CA.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
+        iconPicture = "\A3\ui_f\data\igui\cfg\simpleTasks\types\meet_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
         iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
         description = "%2 %3"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
         color[] = {0.2,0.5,1,1}; // Icon and text color
@@ -155,7 +157,7 @@ class CfgNotifications
     class repdown
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.
-        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Flares_CA.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
+        iconPicture = "\A3\ui_f\data\igui\cfg\simpleTasks\types\meet_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
         iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
         description = "%2 %3"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
         color[] = {1,0.2,0.2,1}; // Icon and text color
@@ -175,6 +177,33 @@ class CfgNotifications
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
+    // The two permanent unlocks whose icon is worth more than the shared one: a card reading
+    // "VA Arsenal / Unlocked" under a warning triangle says the opposite of what it means. Blue
+    // because an unlock is something gained.
+    class armory
+    {
+        title = "%1"; // Tile displayed as text on black background. Filled by arguments.
+        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Sniper_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
+        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
+        description = "%2"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
+        color[] = {0.2,0.5,1,1}; // Icon and text color
+        duration = 4; // How many seconds will the notification be displayed
+        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
+        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
+    };
+
+    class halo
+    {
+        title = "%1"; // Tile displayed as text on black background. Filled by arguments.
+        iconPicture = "\A3\ui_f\data\Map\VehicleIcons\iconParachute_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
+        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
+        description = "%2"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
+        color[] = {0.2,0.5,1,1}; // Icon and text color
+        duration = 4; // How many seconds will the notification be displayed
+        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
+        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
+    };
+
     class arsenal
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.

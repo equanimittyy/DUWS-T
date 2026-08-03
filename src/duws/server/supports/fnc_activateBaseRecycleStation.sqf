@@ -130,4 +130,4 @@ _trg setTriggerArea [5, 5, 0, false, 5];
 // each other.
 [_depot, netId _trg] remoteExec ["fnc_client_addRecycleActions", 0, format ["hq_recycle_%1", netId _depot]];
 
-["info", [localize "STR_DUWS_T_recyclestation2", localize "STR_DUWS_T_recyclestation3"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+["info", [localize "STR_DUWS_T_recyclestation2", localize "STR_DUWS_T_SUPPORT_UNLOCKED"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];

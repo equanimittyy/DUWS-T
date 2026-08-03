@@ -276,7 +276,7 @@ if (_moneyIntelCount > 0) then {
     // 新增：使用 BIS_fnc_showNotification 弹出醒目提醒
     private _title = localize "STR_DUWS_ARSENAL_MONEY_WARNING_TITLE";
     private _desc = format [localize "STR_DUWS_ARSENAL_MONEY_WARNING_DESC", _moneyIntelCount];
-    ["arsenal_warning", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", player];
+    ["alert", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", player];
 };
         
         private _isRestricted = player getVariable ["DUWS_isRestrictedArsenal", false];

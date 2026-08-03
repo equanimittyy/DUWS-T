@@ -6,7 +6,10 @@
 // civilian said yes -- the same failure the heal action had before fnc_civ_healed replaced it.
 if (!isServer) exitWith {};
 
-params ["_civilian", "_caller", ["_row", ""]];
+// _speak false for a caller that has already spoken. A declined bribe answers itself, and the
+// refusal line on top of it had the civilian say they knew nothing straight after naming a price
+// for what they knew.
+params ["_civilian", "_caller", ["_row", ""], ["_speak", true]];
 
 if (isNull _civilian) exitWith {};
 
@@ -20,7 +23,7 @@ private _line = switch (toUpper _row) do {
     default { "STR_DUWS_T_stfu" };
 };
 
-if (!isNull _caller) then {
+if (_speak && {!isNull _caller}) then {
     [localize "STR_DUWS_T_civ", localize _line] remoteExec ["fnc_duws_dialogue", _caller];
 };
 

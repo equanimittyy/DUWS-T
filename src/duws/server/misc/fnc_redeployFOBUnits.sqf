@@ -17,7 +17,8 @@ if ((_fob getVariable ["FOB_guard_busy", false]) || {_fob getVariable ["FOB_fort
 };
 
 if (commandpointsblu1 < 2) exitWith {
-    [localize "STR_DUWS_T_REDEPLOY_COST_TITLE", format [localize "STR_DUWS_T_REDEPLOY_COST", 2]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+    ["info", [localize "STR_DUWS_T_REDEPLOY_COST_TITLE",
+        format [localize "STR_DUWS_T_REDEPLOY_COST", 2]]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 };
 
 // call, not remoteExec to self, and escalation applied here rather than in fnc_pool_try_spend:

@@ -1947,11 +1947,6 @@
                 <English>Not enough Command Points (need 2 CP).</English>
                 <Chinesesimp>指挥点不足（需要2 CP）。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_repair_station_deployed">
-                <Original>Use the base repair facility to repair and edit vehicles</Original>
-                <English>Use the base repair facility to repair and edit vehicles</English>
-                <Chinesesimp>与基地内的修理设施进行交互以维修/编辑载具。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_437x650k">
                 <German>Die Zeit wurde 3 Stunden vorgespult und alle Teammitglieder wurden vollständig geheilt</German>
                 <Spanish>El juego ha avanzado 3 horas. TODAS las unidades han sido completamente curadas</Spanish>
@@ -2043,8 +2038,8 @@
                 <Chinesesimp>检测到钱币/情报</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_ARSENAL_MONEY_WARNING_DESC">
-                <Original>You are carrying %1 cash and intel items. Changing your loadout here will destroy them.</Original>
-                <English>You are carrying %1 cash and intel items. Changing your loadout here will destroy them.</English>
+                <Original>Changing loadout here destroys %1 cash and intel items</Original>
+                <English>Changing loadout here destroys %1 cash and intel items</English>
                 <Chinesesimp>你携带了%1个钱币/情报物品。若换装则会被移除。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_ARSENAL_MONEY_WARNING">
@@ -2772,8 +2767,8 @@
                 <English>Alright, you're clear. Go on.</English>
             </Key>
             <Key ID="STR_DUWS_T_RELEASE2">
-                <Original>...Next time, try asking.</Original>
-                <English>...Next time, try asking.</English>
+                <Original>Fucking BLUFOR...</Original>
+                <English>Fucking BLUFOR...</English>
             </Key>
             <Key ID="STR_DUWS_T_LOOT1">
                 <Original>Sorry, just keeping order.</Original>
@@ -2954,8 +2949,8 @@
                 <English>Talk like that isn't free around here. Make it worth my while.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIV_BRIBE_DECLINED">
-                <Original>Then we've got nothing to talk about. Move along.</Original>
-                <English>Then we've got nothing to talk about. Move along.</English>
+                <Original>No money? Then go away.</Original>
+                <English>No money? Then go away.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIV_MENU_TITLE">
                 <Original>Civilian Interaction</Original>
@@ -4831,6 +4826,18 @@
                 <Original>Vehicle Recycling Station</Original>
                 <English>Vehicle Recycling Station</English>
             </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_UNLOCKED">
+                <Original>Unlocked</Original>
+                <English>Unlocked</English>
+            </Key>
+            <Key ID="STR_DUWS_T_REPAIR_STATION_NAME">
+                <Original>Vehicle Modification Station</Original>
+                <English>Vehicle Modification Station</English>
+            </Key>
+            <Key ID="STR_DUWS_T_OPERATOR_HEALED">
+                <Original>Operator Healed</Original>
+                <English>Operator Healed</English>
+            </Key>
             <Key ID="STR_DUWS_T_recycleaction">
                 <German>Fahrzeug recyceln</German>
                 <Spanish>Reciclar Vehículo</Spanish>
@@ -4851,13 +4858,6 @@
                 <German>%1 recyclebare Fahrzeuge gefunden, geschätzter Gesamtwert: %2 KP</German>
                 <Spanish>Se encontraron %1 vehículos reciclables, valor total estimado: %2 PC</Spanish>
                 <Chinesesimp>发现 %1 辆可回收载具，预计总价值：%2 CP</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_recyclestation3">
-                <German>Interagiere mit der Fahnenstange, um das Fahrzeug auf dem Landezonenmarker abzuholen.</German>
-                <Spanish>Interactúa con el asta de bandera para recuperar el vehículo en el marcador de zona de aterrizaje.</Spanish>
-                <Chinesesimp>与修理设施进行交互，以回收停机坪标志上的载具。</Chinesesimp>
-                <Original>Scrap vehicles on the pad at the Recycling Station</Original>
-                <English>Scrap vehicles on the pad at the Recycling Station</English>
             </Key>
             <Key ID="STR_DUWS_T_5n277nzo">
                 <German>Versorgungsabwurf (5CP) Funk</German>
@@ -5262,8 +5262,8 @@
                 <German>Mobile HQ wurde zerstört</German>
                 <Spanish>El CGM ha sido destruído</Spanish>
                 <Chinesesimp>机动指挥部已被摧毁</Chinesesimp>
-                <Original>Mobile HQ was destroyed.</Original>
-                <English>Mobile HQ was destroyed.</English>
+                <Original>Mobile HQ Destroyed</Original>
+                <English>Mobile HQ Destroyed</English>
             </Key>
             <Key ID="STR_DUWS_T_imz98waj">
                 <German>Du musst ein Fahrzeug als Ziel wählen.</German>
@@ -5315,15 +5315,8 @@
                 <German>Virtuelles Arsenal freigeschaltet</German>
                 <Spanish>Arsenal desbloqueado</Spanish>
                 <Chinesesimp>军火库解锁了</Chinesesimp>
-                <Original>Arsenal Unlocked</Original>
-                <English>Arsenal Unlocked</English>
-            </Key>
-            <Key ID="STR_DUWS_T_h5t5vtfs">
-                <German>Greife auf das Virtuelle Arsenal am HQ, MHQ, FOBs</German>
-                <Spanish>Acceda al Arsenal virtual en el CG, CGM, Puestos de avanzada</Spanish>
-                <Chinesesimp>在总部，机动指挥部，FOB来进入虚拟军火库</Chinesesimp>
-                <Original>Access the VA Arsenal at the HQ, MHQ and FOBs.</Original>
-                <English>Access the VA Arsenal at the HQ, MHQ and FOBs.</English>
+                <Original>VA Arsenal</Original>
+                <English>VA Arsenal</English>
             </Key>
             <Key ID="STR_DUWS_T_foldimok">
                 <German>HALO Solo</German>
@@ -5343,15 +5336,8 @@
                 <German>HALO freigeschaltet</German>
                 <Spanish>Salto HALO desbloqueado</Spanish>
                 <Chinesesimp>空降已解锁</Chinesesimp>
-                <Original>HALO Unlocked</Original>
-                <English>HALO Unlocked</English>
-            </Key>
-            <Key ID="STR_DUWS_T_adygxrb6">
-                <German>Greife auf den HALO Absprung am HQ und FOBs zu</German>
-                <Spanish>Acceda al salto HALO desde el CG y los Puestos de avanzada</Spanish>
-                <Chinesesimp>在总部和FOB来进行空降</Chinesesimp>
-                <Original>Access the HALO Jump at HQ and FOBs.</Original>
-                <English>Access the HALO Jump at HQ and FOBs.</English>
+                <Original>HALO Jump</Original>
+                <English>HALO Jump</English>
             </Key>
             <Key ID="STR_DUWS_T_dvbox9ay">
                 <German>Du musst einige Minuten warten bis die Auswahl wieder im 0-8 Menü zur Anforderung bereitsteht!</German>
@@ -5359,13 +5345,6 @@
                 <Chinesesimp>在再次请求之前，您必须等待几分钟，以便选项返回到0-8菜单！</Chinesesimp>
                 <Original>You must wait a few minutes for the item to return to the 0-8 menu before requesting it again.</Original>
                 <English>You must wait a few minutes for the item to return to the 0-8 menu before requesting it again.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_cghsxhhu">
-                <German>Zeige auf ein Fahrzeug und wähle =Baue Mobiles HQ= im Funk-Menü</German>
-                <Spanish>Apunta a un vehículo y selecciona =Construir CGM= en la radio de apoyo</Spanish>
-                <Chinesesimp>指向一辆车，然后在支援无线电上选择=建立机动指挥部=</Chinesesimp>
-                <Original>Add the Mobile HQ request to your slots, then designate by radio.</Original>
-                <English>Add the Mobile HQ request to your slots, then designate by radio.</English>
             </Key>
             <Key ID="STR_DUWS_T_uhaz94ur">
                 <German>Fahrzeug gespawnt</German>

@@ -105,7 +105,7 @@ is why a CP award call passes a bare number where every other call passes a sent
 | Colour | Means | Classes |
 |---|---|---|
 | white `{1,1,1,1}` | neutral information | `info`, `missionclean`, `sitrepinfo`, `arsenal` |
-| blue `{0.2,0.5,1,1}` | something gained | `US_takencontrol`, `repup`, `infosearch` |
+| blue `{0.2,0.5,1,1}` | something gained | `US_takencontrol`, `repup`, `infosearch`, `armory`, `halo` |
 | red `{1,0.2,0.2,1}` | something lost | `alert`, `US_lostcontrol`, `repdown`, `biohazard` |
 | cyan `{0.5,1,1,1}` | economy | the `CPadded*` / `APaddedmission` badge family |
 
@@ -121,7 +121,12 @@ light background and read as muddy text on the card's black one.
 `alert` is the old `info2`, which was white and carried one card -- a FOB being destroyed, reported
 in the same colour as a repair station opening.
 
-**The catalogue — 14 classes, every one in service:**
+**A class that carries more than one event takes its title from the call site.** `alert` held a
+fixed `$STR_DUWS_T_gwn85uxh` title while serving four of them, so a destroyed MHQ, a dead informant
+and a rise in escalation all announced themselves as `FOB Lost`. A class whose `title` is anything
+but `"%1"` may carry exactly one event.
+
+**The catalogue — 16 classes, every one in service:**
 
 | Class | Colour | Sites | Carries |
 |---|---|---|---|
@@ -129,25 +134,39 @@ in the same colour as a repair station opening.
 | `arsenal` | white | 5 | the one-time arsenal at a side-mission objective |
 | `biohazard` | red | 4 | RAVAGE / WBK zombie-mode announcements |
 | `missionclean` | white | 2 | the side-mission cleanup countdown |
-| `repup` | green | 3 | reputation gained |
-| `alert` | red | 4 | MHQ or FOB destroyed, informant killed, escalation risen |
+| `repup` | blue | 3 | reputation gained |
+| `alert` | red | 5 | MHQ or FOB destroyed, informant killed, escalation risen, arsenal kit warning |
 | `repdown` | red | 1 | reputation lost |
 | `sitrepinfo` | white | 2 | the SITREP support |
-| `US_takencontrol` | green | 2 | zone captured |
+| `US_takencontrol` | blue | 2 | zone captured |
 | `US_lostcontrol` | red | 1 | zone lost |
-| `infosearch` | green | 1 | a search that revealed something |
+| `infosearch` | blue | 1 | a search that revealed something |
+| `armory` | blue | 1 | the VA Arsenal permanent unlock |
+| `halo` | blue | 1 | the HALO Jump permanent unlock |
 | `CPadded` · `CPaddedmission` · `CPaddedattrition` · `APaddedmission` | cyan | 1 each | zone, mission, kill income, mission AP |
 
-The file held twelve further classes that nothing called — among them one for artillery, one for
-HALO and one for a failed task. They are deleted rather than kept against a future caller: a styling
-class costs nothing to write back out of git the day something needs it, and reading a catalogue
-where half the entries never fire teaches the wrong shape.
+`armory` and `halo` earn a class each over sharing `info` only for their icon: an unlock card under
+`info`'s warning triangle reads as the opposite of what it announces.
+
+The two rep cards wear the handshake `meet_ca.paa` rather than a flare, because reputation is the
+one figure the player moves by dealing with people rather than by shooting.
 
 **One anomaly.** `fnc_BluHQinit.sqf` fires `TaskFailed`, which is Arma's own class rather than one of
 these, so that single card is styled by the engine. And five call sites name their class in
 lowercase (`cpadded`, `us_takencontrol`, `us_lostcontrol`, `cpaddedmission`, `apaddedmission`)
 against a CamelCase definition — config lookup is case-insensitive, which is why the drift went
 unnoticed.
+
+## A permanent unlock announces itself and nothing more
+
+The five permanent unlocks — the VA Arsenal, HALO Jump, Mobile HQ, and the recycling and vehicle
+modification stations — all fire the same card: the facility's name as the title, the shared
+`STR_DUWS_T_SUPPORT_UNLOCKED` as the description. They used to spend the description telling the
+player how to use what they had just bought (`Scrap vehicles on the pad at the Recycling Station`),
+which is the one thing a four-second card cannot teach and the scroll action on the object itself
+already says. The name keys are the plain noun (`Vehicle Recycling Station`), never the menu row's
+label: a row carries its price, and a card reading `Vehicle Modification Station (5 CP)` prices
+something the player has already paid for.
 
 ## Hint prose is system prose
 
