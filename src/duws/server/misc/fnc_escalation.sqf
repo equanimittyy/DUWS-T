@@ -132,7 +132,7 @@ addMissionEventHandler ["BuildingChanged", {
         ["INFO", "ECON", "Escalation reached its ceiling: campaign lost"] call fnc_log;
     };
 
-    ["info", [localize "STR_DUWS_T_escalation_title",
+    ["alert", [localize "STR_DUWS_T_escalation_title",
         format [localize "STR_DUWS_T_escalation_level", _level]]]
         remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 }];

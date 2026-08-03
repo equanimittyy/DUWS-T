@@ -81,7 +81,7 @@ clearBackpackCargoGlobal _vehicle_7;
                 _target setVariable ["arsenalUsed", true, true];
                 _target removeAction _actionId;
                 [_target] remoteExec ["fnc_removeArsenalAction", 0];
-                ["dakaijunhuoku", [localize "STR_DUWS_T_arsenalused", localize "STR_DUWS_T_arsenalused2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+                ["arsenal", [localize "STR_DUWS_T_arsenalused", localize "STR_DUWS_T_arsenalused2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
                 ["Open", true] call BIS_fnc_arsenal;
             };
         },
@@ -116,7 +116,7 @@ clearBackpackCargoGlobal _vehicle_8;
                 _target setVariable ["arsenalUsed", true, true];
                 _target removeAction _actionId;
                 [_target] remoteExec ["fnc_removeArsenalAction", 0];
-                ["dakaijunhuoku", [localize "STR_DUWS_T_arsenalused", localize "STR_DUWS_T_arsenalused2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+                ["arsenal", [localize "STR_DUWS_T_arsenalused", localize "STR_DUWS_T_arsenalused2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
                 ["Open", true] call BIS_fnc_arsenal;
             };
         },
@@ -194,7 +194,7 @@ sleep 6;
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_cachecopy"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-["dakaijunhuoku", [localize "STR_DUWS_T_arsenalfound", localize "STR_DUWS_T_arsenalfound2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+["arsenal", [localize "STR_DUWS_T_arsenalfound", localize "STR_DUWS_T_arsenalfound2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
 
 sleep 5; // 等待巡逻队生成完毕

@@ -104,24 +104,37 @@ is why a CP award call passes a bare number where every other call passes a sent
 
 | Colour | Means | Classes |
 |---|---|---|
-| white `{1,1,1,1}` | neutral information | `info`, `info2`, `missionclean`, `sitrepinfo`, `dakaijunhuoku` |
-| green `{0,1,0,1}` | something gained | `US_takencontrol`, `infosearch`, `repup` |
-| red `{1,0,0,1}` | something lost | `US_lostcontrol`, `biohazard` |
+| white `{1,1,1,1}` | neutral information | `info`, `missionclean`, `sitrepinfo`, `arsenal` |
+| blue `{0.2,0.5,1,1}` | something gained | `US_takencontrol`, `repup`, `infosearch` |
+| red `{1,0.2,0.2,1}` | something lost | `alert`, `US_lostcontrol`, `repdown`, `biohazard` |
 | cyan `{0.5,1,1,1}` | economy | the `CPadded*` / `APaddedmission` badge family |
+
+Gain and loss are the two sides' own colours, taken from the pair the setup screen already paints
+its faction rows with — `[.2,.5,1,1]` for BLUFOR against `[1,.2,.2,1]` for OPFOR
+(`client/dialog/fnc_HQ_faction_dialog.sqf`). A card saying *you took this* wears blue and one saying
+*you lost this* wears red, and the player has met both before the campaign starts. Arma's own
+`ColorBLUFOR` and `ColorOPFOR` are the wrong values for it: those are mixed for map markers on a
+light background and read as muddy text on the card's black one.
+
+**A card's direction is the class, not the wording.** Every loss now has a red class to go to:
+`alert` for a thing destroyed or a war getting worse, `repdown` beside `repup` for reputation.
+`alert` is the old `info2`, which was white and carried one card -- a FOB being destroyed, reported
+in the same colour as a repair station opening.
 
 **The catalogue — 14 classes, every one in service:**
 
 | Class | Colour | Sites | Carries |
 |---|---|---|---|
-| `info` | white | 19 | the general-purpose card; MHQ, FOB, hire, black market, supports |
-| `dakaijunhuoku` | white | 5 | the one-time arsenal at a side-mission objective |
+| `info` | white | 16 | the general-purpose card; MHQ, FOB, hire, black market, supports |
+| `arsenal` | white | 5 | the one-time arsenal at a side-mission objective |
 | `biohazard` | red | 4 | RAVAGE / WBK zombie-mode announcements |
 | `missionclean` | white | 2 | the side-mission cleanup countdown |
-| `repup` | green | 2 | reputation gained |
+| `repup` | green | 3 | reputation gained |
+| `alert` | red | 4 | MHQ or FOB destroyed, informant killed, escalation risen |
+| `repdown` | red | 1 | reputation lost |
 | `sitrepinfo` | white | 2 | the SITREP support |
 | `US_takencontrol` | green | 2 | zone captured |
 | `US_lostcontrol` | red | 1 | zone lost |
-| `info2` | white | 1 | FOB destroyed |
 | `infosearch` | green | 1 | a search that revealed something |
 | `CPadded` · `CPaddedmission` · `CPaddedattrition` · `APaddedmission` | cyan | 1 each | zone, mission, kill income, mission AP |
 

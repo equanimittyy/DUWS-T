@@ -110,7 +110,7 @@ fnc_town_rep_announce = {
 		["repup", [localize "STR_DUWS_T_rqwho9bq",
 			format [localize "STR_DUWS_T_civ_rep_up", _name, _why, _amount]]]
 	} else {
-		["info", [localize "STR_DUWS_T_reputationdown",
+		["repdown", [localize "STR_DUWS_T_reputationdown",
 			format [localize "STR_DUWS_T_civ_rep_down", _name, _why, _amount]]]
 	};
 	_card remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];

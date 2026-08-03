@@ -53,7 +53,7 @@ clearBackpackCargoGlobal _truck1;
                 _target setVariable ["arsenalUsed", true, true];
                 _target removeAction _actionId;
                 [_target] remoteExec ["fnc_removeArsenalAction", 0];
-                ["dakaijunhuoku", [localize "STR_DUWS_T_arsenalused", localize "STR_DUWS_T_arsenalused2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+                ["arsenal", [localize "STR_DUWS_T_arsenalused", localize "STR_DUWS_T_arsenalused2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
                 ["Open", true] call BIS_fnc_arsenal;
             };
         },
@@ -138,7 +138,7 @@ sleep 1;
 sleep 8;
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
-["dakaijunhuoku", [localize "STR_DUWS_T_arsenalfound", localize "STR_DUWS_T_arsenalfound2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+["arsenal", [localize "STR_DUWS_T_arsenalfound", localize "STR_DUWS_T_arsenalfound2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
 sleep 5; // 等待巡逻队生成完毕
 

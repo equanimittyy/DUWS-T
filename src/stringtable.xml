@@ -1772,12 +1772,12 @@
                 <Chinesesimp>查看载具状态</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_civ_rep_up">
-                <Original>%1 %3: %2</Original>
-                <English>%1 %3: %2</English>
+                <Original>%1 %3 rep: %2</Original>
+                <English>%1 %3 rep: %2</English>
             </Key>
             <Key ID="STR_DUWS_T_civ_rep_down">
-                <Original>%1 %3: %2</Original>
-                <English>%1 %3: %2</English>
+                <Original>%1 %3 rep: %2</Original>
+                <English>%1 %3 rep: %2</English>
             </Key>
             <Key ID="STR_DUWS_T_civ_rep_why_building">
                 <Original>buildings were destroyed</Original>
@@ -2736,8 +2736,8 @@
                 <Chinesesimp>行，我一直都很想杀光那帮杂碎！(接过纸币)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_cycuqbvj">
-                <Original>Civilian Killed!</Original>
-                <English>Civilian Killed!</English>
+                <Original>Civilian Killed</Original>
+                <English>Civilian Killed</English>
                 <German>Zivilist getötet !</German>
                 <Spanish>¡Civil asesinado!</Spanish>
                 <Chinesesimp>平民被杀了！</Chinesesimp>
@@ -2918,15 +2918,15 @@
                 <German>Ansehen erhöht !</German>
                 <Spanish>Reputación incrementada !</Spanish>
                 <Chinesesimp>声望提高！</Chinesesimp>
-                <Original>Reputation Increased!</Original>
-                <English>Reputation Increased!</English>
+                <Original>Reputation Increased</Original>
+                <English>Reputation Increased</English>
             </Key>
             <Key ID="STR_DUWS_T_reputationdown">
                 <German>Ruf gesunken!</German>
                 <Spanish>Reputación reducida!</Spanish>
                 <Chinesesimp>声望降低！</Chinesesimp>
-                <Original>Reputation Decreased!</Original>
-                <English>Reputation Decreased!</English>
+                <Original>Reputation Decreased</Original>
+                <English>Reputation Decreased</English>
             </Key>
             <Key ID="STR_DUWS_T_b16p8tvz">
                 <German>Ansehen negativ !</German>
@@ -4749,8 +4749,8 @@
                 <English>Contact Report</English>
             </Key>
             <Key ID="STR_DUWS_T_enemy_contact">
-                <Original>Enemies have been spotted near %1!</Original>
-                <English>Enemies have been spotted near %1!</English>
+                <Original>Enemies have been spotted near %1</Original>
+                <English>Enemies have been spotted near %1</English>
             </Key>
 </Container>
         <Container name="Support &amp; Radio">

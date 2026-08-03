@@ -187,7 +187,7 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
         if (CIV_PRESENCE != "NONE") then {
             [_civ getVariable ["civ_locIndex", -1], -1, "protect_civ_casualty"] call fnc_town_rep_adjust;
         };
-        ["info", [localize "STR_DUWS_T_cycuqbvj", localize "STR_DUWS_T_ayhemuj4"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
+        ["alert", [localize "STR_DUWS_T_cycuqbvj", localize "STR_DUWS_T_ayhemuj4"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
         [_speaker, _message3] remoteExec ["fnc_duws_dialogue", 0];
     } else {
             // 时间到且平民存活 → 成功

@@ -20,7 +20,7 @@ class CfgNotifications
         iconPicture = "\A3\ui_f\data\map\markers\military\flag_CA.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
         iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
         description = "$STR_DUWS_T_4qpf7a88"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {0,1,0,1}; // Icon and text color
+        color[] = {0.2,0.5,1,1}; // Icon and text color
         duration = 4; // How many seconds will the notification be displayed
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
@@ -32,7 +32,7 @@ class CfgNotifications
         iconPicture = "\A3\ui_f\data\map\markers\military\warning_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
         iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
         description = "$STR_DUWS_T_ztgsrx05"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {1,0,0,1}; // Icon and text color
+        color[] = {1,0.2,0.2,1}; // Icon and text color
         duration = 4; // How many seconds will the notification be displayed
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
@@ -96,19 +96,19 @@ class CfgNotifications
         iconPicture = "\a3\ui_f\data\gui\cfg\hints\Flares_CA.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
         iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
         description = "%2 %3"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {0,1,0,1}; // Icon and text color
+        color[] = {0.2,0.5,1,1}; // Icon and text color
         duration = 4; // How many seconds will the notification be displayed
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
 
-    class info2
+    class alert
     {
         title = "$STR_DUWS_T_gwn85uxh"; // Tile displayed as text on black background. Filled by arguments.
         iconPicture = "\A3\ui_f\data\map\markers\military\warning_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
         iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
         description = "%1 %2"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {1,1,1,1}; // Icon and text color
+        color[] = {1,0.2,0.2,1}; // Icon and text color
         duration = 4; // How many seconds will the notification be displayed
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
@@ -135,7 +135,7 @@ class CfgNotifications
         iconPicture = "\a3\ui_f\data\gui\cfg\hints\Death_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
         iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
         description = "%2 %3"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {1,0,0,1}; // Icon and text color
+        color[] = {1,0.2,0.2,1}; // Icon and text color
         duration = 4; // How many seconds will the notification be displayed
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
@@ -147,7 +147,18 @@ class CfgNotifications
         iconPicture = "\a3\ui_f\data\gui\cfg\hints\Flares_CA.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
         iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
         description = "%2 %3"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
-        color[] = {0,1,0,1}; // Icon and text color
+        color[] = {0.2,0.5,1,1}; // Icon and text color
+        duration = 4; // How many seconds will the notification be displayed
+        priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
+        difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
+    };
+    class repdown
+    {
+        title = "%1"; // Tile displayed as text on black background. Filled by arguments.
+        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Flares_CA.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.
+        iconText = ""; // Short text displayed over the icon. Colored by "color", filled by arguments.
+        description = "%2 %3"; // Brief description displayed as structured text. Colored by "color", filled by arguments.
+        color[] = {1,0.2,0.2,1}; // Icon and text color
         duration = 4; // How many seconds will the notification be displayed
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
@@ -164,7 +175,7 @@ class CfgNotifications
         priority = 0; // Priority; higher number = more important; tasks in queue are selected by priority
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
-    class dakaijunhuoku
+    class arsenal
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.
         iconPicture = "\a3\ui_f\data\gui\cfg\hints\Firemode_ca.paa"; // Small icon displayed in left part. Colored by "color", filled by arguments.

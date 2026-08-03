@@ -37,7 +37,7 @@ MHQ_lockout_until = time + MHQ_lockout_seconds;
 publicVariable "MHQ_lockout_until";
 ["INFO", "SUPPORT", format ["MHQ destroyed: designation locked out for %1 s", MHQ_lockout_seconds]] call fnc_log;
 
-["info",[localize "STR_DUWS_T_scudflh9",
+["alert",[localize "STR_DUWS_T_scudflh9",
 	format [localize "STR_DUWS_T_MHQ_LOCKOUT", ceil (MHQ_lockout_seconds / 60)]]]
 	remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 	
