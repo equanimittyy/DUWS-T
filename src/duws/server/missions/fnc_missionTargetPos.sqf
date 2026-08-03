@@ -24,16 +24,25 @@ while {!_Posfound} do {
 
 	// DON'T SPAWN ON ROADS
 	_nearRoad = [_targetpos,15] call BIS_fnc_nearestRoad;
-	// And not inside a zone. This is the position the mission is actually built on and garrisons
-	// around, and it drifts from the anchor the strategic map cleared -- up to _radius on each axis
-	// to _randomPos, then another 10-50 m off a building -- so an anchor outside every zone is no
-	// guarantee the objective is. Tested here because this is the loop that can re-roll it.
+	// And on ground nothing else owns: not inside a zone, not inside a civilian town. This is the
+	// position the mission is actually built on and garrisons around, and it drifts from the anchor
+	// the strategic map cleared -- up to _radius on each axis to _randomPos, then another 10-50 m
+	// off a building -- so an anchor outside everything is no guarantee the objective is. Tested
+	// here because this is the loop that can re-roll it, and because the town radii live on the
+	// server: civ_locations and civ_radii are never broadcast, so the strategic map cannot ask.
+	// fnc_civ_townAt answers -1 for open country, a civilians-off campaign and RAVAGE/WBK alike.
 	if (_targetpos select 0 != 0 &&
 		_targetpos select 1 != 0 &&
 		isNull _nearRoad &&
-		!([_targetpos] call fnc_pos_in_zone)) then {_Posfound=true;};
+		!([_targetpos] call fnc_pos_in_zone) &&
+		([_targetpos] call fnc_civ_townAt) < 0) then {_Posfound=true;};
 
-	if (_failSafe > 50) exitWith {};
+	// Logged rather than left to the caller's generic abort: with zones and towns both excluded this
+	// is the loop that starves first on a crowded map, and the abort alone does not say which
+	// constraint could not be met.
+	if (_failSafe > 50) exitWith {
+		["WARN", "MISSION", format ["no clear ground within %1 m of %2 in 50 tries", _radius, _missionpos]] call fnc_log;
+	};
 };
 
 _returnArray = [_randomPos, _Building, _Posfound, _targetpos, _failSafe];

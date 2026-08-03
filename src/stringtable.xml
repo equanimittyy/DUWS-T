@@ -1395,8 +1395,8 @@
                 <German>Das HQ wird zufällig auf der Karte platziert (Nicht empfohlen, Basiselemente könnten im Boden einsinken)</German>
                 <Chinesesimp>总部会随机放置在地图上某个位置(不推荐，可能导致基地物体陷入地面)</Chinesesimp>
                 <Spanish>El CG será colocado aleatoriamente en el mapa (No recomendado, puede hacer que los objetos de la base se hundan en el suelo)</Spanish>
-                <Original>The HQ is randomly placed somewhere on the map (Not recommended; may cause base objects to sink into the ground)</Original>
-                <English>The HQ is randomly placed somewhere on the map (Not recommended; may cause base objects to sink into the ground)</English>
+                <Original>The HQ is randomly placed somewhere on the map (may cause base objects to sink into the ground)</Original>
+                <English>The HQ is randomly placed somewhere on the map (may cause base objects to sink into the ground)</English>
             </Key>
             <Key ID="STR_DUWS_T_x0cq7o5y">
                 <German>MANUELLES HQ</German>
