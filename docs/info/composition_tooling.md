@@ -153,7 +153,9 @@ Two ideas, and keeping them apart is what makes the menus make sense:
 
 - A **composition** is a list of tokens, sometimes with a price. A zone tier, a town tier, a
   purchasable squad. Contract for what the tier tables mean:
-  [`zones_and_civilians.md`](zones_and_civilians.md#zone-tiers).
+  [`zones_and_civilians.md`](zones_and_civilians.md#zone-tiers). A garrison composition writes each
+  entry as `posture:token` — one A3 group, its orders and its roster. Typed as one string rather
+  than a pair because the row editor below splits on commas and would cut a nested list in half.
 - A **token** is what one name raises, and there are three tables of them under the Tokens menu: a
   team of men (`sniper` is two snipers until you say otherwise), one vehicle, or a placer that
   garrisons ground by a rule rather than from a roster.
@@ -223,26 +225,27 @@ commas, which would cut a nested list in half.
 ### Adding a token
 
 The Tokens menu can append a row. A **team** or a **vehicle** added there is spawnable as it stands —
-nothing in the mission has to learn the new name. That is the whole reason a team row carries
-`behaviour` and `category` rather than only its men:
+nothing in the mission has to learn the new name:
 
-- `fnc_spawn_team` raises every OPFOR team and reads both columns. `behaviour` is what it does with
-  the group once it stands. Before this, each behaviour was a separate near-copy of a spawner file,
-  and a new team meant a new file.
+- A team row is a roster and nothing else. What the group *does* is the posture a composition names
+  beside it, applied by `fnc_apply_posture`, so the same five men are a patrol on one row and a
+  building garrison on the next. Before this the orders were a column here, and fielding those men
+  under different orders took a second row with an identical roster.
 - The spawn path asks the tables what a token is rather than switching on known names, so a token
   no table claims is a classname a faction file named directly and stands as itself.
 - `category` is which radius multiplier scales it, held on the row so adding a token is one edit
-  rather than two tables that can disagree.
+  rather than two tables that can disagree. It is column 1 in all three token tables, which is what
+  lets one lookup ask whichever table claims the token.
 
 A **special** is the exception to spawnable-as-it-stands: its `placer` column names code, so the
 function has to exist before the row does. The tool prompts on a name nothing compiles rather than
 letting the row through to raise nothing.
 
-The values already in a column are offered while typing, so the behaviours on offer are the ones the
-spawner actually implements rather than a list in a doc that rots. A duplicate name is refused: the
+The values already in a column are offered while typing, so the categories on offer are the ones the
+tables actually use rather than a list in a doc that rots. A duplicate name is refused: the
 first column is what compositions refer to, so a second row of the same name could never be reached.
 
-Adding a **BLUFOR** team is the same, minus those two columns — a squad references it by name and
+Adding a **BLUFOR** team is the same, minus the category column — a squad references it by name and
 `fnc_BLUFOR_squad_init` resolves it. Adding a whole *squad* is not offered: the request dialogs
 switch on a hardcoded listbox index, so a sixth squad needs a case written in
 `fnc_request_squad.sqf` before anything could buy it.

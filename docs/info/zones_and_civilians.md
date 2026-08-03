@@ -89,7 +89,7 @@ trigger while any WEST unit is inside the zone radius:
 | Test | Counts | Threshold |
 |---|---|---|
 | Garrison beaten | **only units this zone spawned**, by roster, wherever they are | at or below a fifth of the zone's *original* garrison — the same fraction a town garrison breaks at |
-| Objective clear | **any** OPFOR, within 50 m of the composition centre | none alive |
+| Ground held | **any** OPFOR inside the trigger area, whoever raised them, against the WEST units the trigger lists | BLUFOR outnumber them |
 
 **The strength test counts by ownership, not by position.** Every unit a zone raises is appended to
 `DUWS_zoneUnits_<key>` — the spawn band appends what every token it raises hands back, and
@@ -106,15 +106,15 @@ zone's and still has to be dealt with.
 A roster rather than a flag on each unit, because the capture condition runs twice a second while a
 player stands in the zone — walking `allUnits` to find stamped ones would put a several-hundred-entry
 scan on exactly the frames a firefight is using. Anything spawned into a zone and not appended is
-invisible to the test, which is the trap for whoever adds a sixth group to the fortification builder.
+invisible to the test, which is the trap for whoever raises men into a zone outside its composition.
 
-**The centre test is deliberately owner-blind.** It asks whether the objective is physically held,
-and anyone standing on it denies that whoever spawned them — a side mission's guards parked on the
-flag do block capture, even though they cannot un-beat the garrison. Withdrawing units are excluded
-from both tests, so a retreat bounding across the centre cannot stall a capture.
+**The second test is deliberately owner-blind.** It asks whether the ground is physically held, and
+anyone standing on it counts for their side whoever spawned them — a side mission's guards inside the
+radius do contest a capture, even though they cannot un-beat the garrison. Withdrawing units are
+excluded from both tests, so a retreat bounding across the zone cannot stall a capture.
 
 Turret crews are on the roster for exactly that reason. They sit inside the composition, so they
-deny the centre test for as long as they live; off the roster they counted toward neither the peak
+contest the ground for as long as they live; off the roster they counted toward neither the peak
 nor the break line, and killing one was progress the zone never registered — a gun crew alone could
 hold a zone whose field garrison had been wiped, with nothing on screen to say why.
 
@@ -138,9 +138,11 @@ scatter and their crews are not part of it.
 
 **Tier therefore moves a minority of the fight.** The mobile half of a zone's composition scales
 with the tier row and the radius band; a tier I zone at 500 m is about seventeen men. The dug-in half
-— the `fortified`, `mortar`, `fortbuildings` and `towers` tokens — sits on every tier row, so it is
+— six `garrison:fortified` slots and the `mortar` pair — sits on every tier row, so it is
 about thirty men, scales with attrition alone, and is identical at every tier. So the whole I-to-IV ladder is worth roughly sixteen men against a garrison
-of fifty, and a tier I zone is not the soft objective the ladder implies.
+of fifty, and a tier I zone is not the soft objective the ladder implies. That sameness is now a
+table edit rather than a second spawner: deleting garrison slots off the lower rows is all it takes
+to make a tier I zone genuinely thinner.
 `fnc_zone_tier_roll` refuses to roll twice. `fnc_createzone` is re-entrant by design — `zone_meta_array`
 exists so a zone can be rebuilt through it — and a rebuild that re-rolled would change what the ground
 is worth behind the player's back and disagree with the garrison peak already measured against the old
@@ -226,14 +228,15 @@ Zones and towns each stream their own out by roster. A sweep that has no roster 
 is the one left — instead spares anything on a site roster, which is every man `DUWS_fnc_raiseGarrison`
 raises and every turret crew the emplacement occupant mans. Vehicles ride along with their crew, or
 deleting a transport takes its occupants with it. Everything the zone raises on its next arrival scales by that fraction: the tier
-composition drops tokens at random (`fnc_zone_spawn_sizes.sqf`), the fortification tokens thin their
-own defence section and hold fewer buildings and fewer towers, and fewer
-of the composition's statics are re-crewed. The mortar pair is the one
+composition drops the vehicles it can no longer crew (`fnc_zone_spawn_sizes.sqf`) and every team
+thins the men inside it. A garrison slot is a team, so a worn zone holds the **same** buildings with
+fewer men in each rather than fewer buildings — one squad to one structure, however thin the squad
+has become. The mortar pair is the one
 exception — two men, and the zone's only indirect fire, so a fraction of it is none of it.
 
 **Attrition and tier are separate axes.** Tier chooses the list, attrition thins whatever that list
-produced, and only the spawn list is tiered — the fortification garrison and the prefab's gun crews
-scale by attrition alone. It is also why the readout can show a tier I zone at a full bar: small, but
+produced. The prefab's gun crews are outside the tier list entirely and scale by attrition alone;
+the garrison slots are on it, and are identical across tiers only because the rows say so. It is also why the readout can show a tier I zone at a full bar: small, but
 not yet fought over.
 
 **The peak is anchored, not re-based.** `DUWS_zoneBase_<key>` is the men the zone's first completed
@@ -430,8 +433,8 @@ thread rather than in the commander's appraisal: a purchase made while the playe
 otherwise still pop its men in the moment they walked back.
 
 **It is units only — no static emplacements and no prefab**, because built defences are what make a
-zone an objective and a town must not compete with one. Tier IV reaches the zone benchmark
-(the `fortbuildings` token: eight buildings at three men each) by occupying buildings instead.
+zone an objective and a town must not compete with one. Tier IV reaches the zone benchmark — six
+squads holding six buildings — by occupying buildings instead.
 
 **Clearing destroys the purchase, not the ownership.** The tier files back down to I rather than to
 0 — the town is still enemy ground, and what was beaten is the commander's spending, not the enemy's
@@ -658,8 +661,9 @@ wears down. Those two mechanisms are shared outright, and everything else is del
 | Shared | Where | Why it can be |
 |---|---|---|
 | Attrition | `fnc_garrison_strength_init.sqf` | One store keyed by a string — `zone_<x>_<y>` or `town_<n>`. Owns the tenths rule, the `0.3` floor and the lower-only record. `fnc_zone_strength*` and `fnc_town_garrison_*Strength` are thin wrappers naming their key |
-| Raising men | `DUWS_fnc_raiseGarrison` | The stagger, the search flag and the `buildings` token are rules about raising a garrison, not about which ground is raising one |
+| Raising men | `DUWS_fnc_raiseGarrison` | The stagger and the search flag are rules about raising a garrison, not about which ground is raising one |
 | Token vocabulary | `DUWS_fnc_zoneSpawnOne`, `DUWS_fnc_teamRoster`, `fnc_zone_thin`, `DUWS_fnc_spawnDiff` | A team means the same thing wherever it is raised, down to the men it fields |
+| Standing orders | `fnc_apply_posture` | A composition entry is `posture:token`. What a group does is a property of the ground it was raised on, not of its roster, so the same team patrols at one site and holds a building at the next |
 
 **Not shared, and not candidates for it:** ownership (a list versus a reputation band), what a capture
 means, the holds, the two purchases, and composition props — a zone stows and redeploys a prefab and
@@ -710,7 +714,7 @@ more usefully — **which of them cannot be moved alone.**
 | `OPFOR_BAND` `-10` | `fnc_civ_garrison` | where a town changes sides |
 | `grace` `120` | the occupant record, for both zones and town garrisons | how long empty ground waits before streaming out |
 | `buffer` `400` | the occupant record | how far out arrival is noticed (a town's crowd uses 200) |
-| `CENTRE_RADIUS` `50` | `fnc_zone_capture_ready` | how close holding the objective means |
+| `GARRISON_REACH` `300` | `fnc_apply_posture` | how far a garrison squad looks for a building to hold |
 | Tier roll weights | `fnc_zone_state_init` | how often a zone is soft |
 | The composition tables | `fnc_zone_spawn_sizes`, `fnc_civ_state_init` | what a tier *is*, editable through the TUI |
 
@@ -736,9 +740,9 @@ more usefully — **which of them cannot be moved alone.**
 
 **Two figures that are arithmetic rather than balance.** Tier IV at the largest radius lands on
 roughly twenty-one groups, which is where the radius-band table it replaced topped out — raising it
-raises the campaign's spawn ceiling, not just that zone. And the town's `buildings` token is `8 × 3`
-to match the zone's `fortbuildings` row; changing one without the other makes "tier IV reaches the
-zone benchmark" untrue.
+raises the campaign's spawn ceiling, not just that zone. And a town's tier IV carries six
+`garrison:team` slots to match the six `garrison:fortified` on every zone row; changing one without
+the other makes "tier IV reaches the zone benchmark" untrue.
 
 **What has no lever yet.** Nothing prices any of the purchases, because the OPFOR commander does not
 exist — the town's tier and reinforcement hooks are free to call today, and the debug menu is their

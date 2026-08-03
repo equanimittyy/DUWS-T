@@ -924,7 +924,7 @@ function Invoke-OpenRow($entry) {
 }
 
 # The values a column already holds, as a hint when typing a new one. Read from the table rather
-# than hardcoded: behaviour names are the spawner's vocabulary, and a list here would rot the first
+# than hardcoded: category names are the spawner's vocabulary, and a list here would rot the first
 # time one is added.
 function Get-ColumnValues($uc, $j) {
     $seen = @()
