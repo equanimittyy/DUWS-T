@@ -26,15 +26,6 @@ The markers stay so the next round has somewhere to land. An empty block means t
 fully triaged.
 
 _BEGIN-USER_
-- Rep notifications: change icon to handshake icon
-- Notifications for unlocking supports are broken: HALO, Arsenal etc. look at our most recent diffs - I feel we deleted a few keys that may have been in-use
-> Unlock prose for permanant unlocks should be updated. For example the scrap unlock tells you what to do, instead it should just say "Scrap Facility Unlocked" etc.
-- Dialogue for civilian interaction system:
-> When refusing a bribe, the civilian's dialogue of "I don't know anything" shouldn't fire; just the bribe rejection dialogue
--> They say "Move along." which isn't something a civilian would say to a soldier. I think they should say "Go away." instead - make it read naturally though like "No money? Then go away."
-- Debug option to "flag item as searchable" no longer works
-- Change civilian line: "Next time try asking..." to "Fucking BLUFOR..."
-- Check latest RPT logs, I spawned a garrison at enemy zone LIMA but 2 dudes stay behind; why?
 
 _END-USER_
 
@@ -93,6 +84,12 @@ worth running before anything below them.
 roster -- a site collects the men it raised and nothing else -- and a radius sweep in its place is
 what once took a neighbouring town's garrison with it and left that town thinned for the campaign.
 
+- [ ] Deploy a zone garrison and count the men that reach a posture against the `deployed N men at
+      tier` figure. A pair standing at the spawn point while the rest walk off is the report to
+      chase: the deploy line counts what was raised, not what was ordered, so a group that never
+      received its waypoints is indistinguishable from one still walking. Nothing else in the log
+      separates them, and the log names a zone by internal id (`zone_<x>_<y>`) where the player sees
+      a callsign, so note the id from the marker before reporting one
 - [ ] Watch a zone through a full cycle: `deployed N men at tier` on arrival, `packed up holding X of
       Y` on leaving, the same figure back on return. The man count must not move between a fresh
       campaign and the first visit; the composition tables were re-cut under it and that line is what
@@ -166,6 +163,15 @@ failure here is more likely to be something missing than something wrong.
 - [ ] Complete a rescue-pilot and a rescue-squad mission on a dedicated server and confirm each
       reveals a zone. These two pay on completion rather than through a search, so the rewrite did
       not touch them; they are the two sites that never paid out at all
+- [ ] Flag an object through Debug -> "Flag cursor object as searchable" and confirm the hint comes
+      back naming the object and the source. Reported as no longer working; the chain reads intact
+      end to end, so what a run has to separate is which of the three silent exits it dies on --
+      `cursorObject` being null when the Debug menu opened (that one hints and is the only loud
+      case), the `game_master` test in `client/dialog/fnc_debug_search_menu.sqf:12`, or the same
+      test again on the server at `server/misc/fnc_debug_search_flag.sqf:17`, which exits with
+      nothing. `game_master` is an array from `server/server_var_init.sqf:365` but a bare string
+      from `client/client_init.sqf:56` in single-player, and `in` accepts both, so a mismatch there
+      would show up here first
 - [ ] Run any side mission and look at the map the moment the task lands. An `hd_objective` icon and
       the area ellipse around it must both be drawn. The icon is the half that was missing: it was
       deleted on the reasoning that the task's own marker had replaced it, and a task marker is drawn
@@ -417,6 +423,7 @@ leaving this dialog for a screen of their own.
 | WBK holds the campaign-wide town mutex for a town's whole occupancy | `server/misc/fnc_civ_handler_wbk.sqf` | The lock is taken in `fnc_civ_mode_spawnGate` and released only on the cleanup path, so a second WBK town cannot fill until the first empties or the gate's ten-minute timeout expires — a co-op pair splitting between two towns leaves one of them dead. RAVAGE releases immediately after its spawn burst and carries a comment recording that exact symptom as the reason. The two handlers were written separately and only the RAVAGE side was ever changed, so this is the same defect surviving in the copy nobody revisited. Left alone because making WBK match is a behaviour change, not a refactor, and WBK's one-shot fill may depend on the serialisation in ways only a play-test shows |
 | A unit marker is never removed, and its update loop throws every four seconds | `client/misc/fnc_kndr_unit_markers.sqf:81` | The loop *index* is passed where `kndr_removeMarker` (`:183-195`) expects the object, so `kndr_objs find <number>` returns -1 and `kndr_mrks select -1` raises `Index out of range`. The entry is never removed and the local marker never deleted, so the 4 s update loop (`:203-208`) retries that same dead entry for the rest of the mission and throws once per pass. The leaked marker costs nothing; the permanent error rate does, since every throw writes to the RPT. It starts the moment a marked object dies — MHQ1 (`server/dialog/fnc_MHQ_deploy.sqf:63`) or the mission builder BLD1 (`missions/mission_threads/steal_builder/fnc_steal_builder_mission.sqf:239`). The `remoteExec` callers pass the object and are correct; only the internal update path is wrong |
 | A marker is assigned with no preceding remove | `shared/functions/fnc_MHQ_addActions.sqf:11` | Re-running it stacks a second marker on the same object |
+| A burst of netId type errors comes from no caller in this tree | RPT only; no call site under `src/` | `BIS_fnc_groupFromNetId` and `BIS_fnc_objectFromNetId` are each handed an object where a string is wanted, alternating, roughly ninety pairs inside one second. Nothing under `src/` calls either function. The only pre-`remoteExec` wrapper left is `BIS_fnc_MP` at `server/missions/mission_threads/steal_builder/fnc_steal_builder_mission.sqf:101,109`, which resolves its targets through both — so noting whether a steal-builder mission was running when the burst lands is what separates a DUWS cause from a loaded mod's |
 | Hardcore does not hide zone positions from Zeus | `server/misc/fnc_zeus_objects_init.sqf` | Under the BLUFOR curator option (`ZeusStatus == 1`) it adds every WEST and CIVILIAN unit and vehicle to the curator on a 30 s loop. Arma counts static weapons as vehicles, so a curator can read a hidden zone's defences straight off the map. A branch there once narrowed the civilian half to aircraft for exactly this reason, but it tested `DUWS_MODE == "HARDCORE"` — a value nothing ever assigned — so it never ran once and has been removed rather than left as dead code. Restoring the intent means gating on `hardcore_mode_enable` instead, and applying the same guard to the civilian *unit* loop above it, which never had one |
 
 ## Zone generation is slow at large radii
