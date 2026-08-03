@@ -134,6 +134,25 @@ to stop. The zone locator hit this: an origin keep-out used `exitWith` to "re-ro
 position but instead dropped the zone entirely — see
 [`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#zone-and-civilian-siting-defects).
 
+## A `createDisplay` screen takes no cursor, and shares no draw order with a dialog beside it
+
+**A display made with `createDisplay` renders controls but does not put a mouse pointer on
+screen; `createDialog` does. A screen built the first way is clickable only while a dialog
+happens to be open beside it — and the two are separate surfaces whose draw order is not the
+order they were created in.**
+
+The trap is that both halves stay invisible while the two surfaces occupy different ground. The
+faction setup screen has always been an `RscDisplayEmpty` full of `ctrlCreate` controls with
+`startup_hq_placement_dialog` open underneath it, and its combos have always worked — so nothing
+said the dialog was carrying the cursor for both. Growing the display's opaque background panel
+down over the dialog's two buttons then took them off the screen outright: no error, no log line,
+just a green panel where the buttons had been.
+
+**How to apply:** keep everything the player sees on one surface. `client/dialog/fnc_HQ_faction_dialog.sqf`
+owns every control on that screen and opens `shared/includes/hq_placement.hpp` empty, purely for
+the cursor. A second display is for input, never for pixels that have to sit in a known order
+against the first.
+
 ## Structured-text controls need a parsed object, not `ctrlSetText`
 
 **Set a `CT_STRUCTURED_TEXT` (type 13 / `RscStructuredText`) control with

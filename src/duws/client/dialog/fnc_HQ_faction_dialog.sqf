@@ -11,19 +11,22 @@ _display = (findDisplay 46) createDisplay "RscDisplayEmpty";
 // white rules, which read as controls dropped on the map rather than as the first screen of the
 // setup sequence.
 //
-// The box runs past this display's own controls because the HQ placement dialog draws its buttons
-// into the bottom of it (shared/includes/hq_placement.hpp). That dialog carries no panel of its
-// own: two green boxes stacked on the map read as two menus for one decision.
+// Everything the player sees is on this one display, the HQ placement buttons at the bottom of it
+// included. They used to be a dialog of its own with a green box of its own, which read as two menus
+// for one decision -- and folding that box into this one put the buttons under it and off the
+// screen, because two surfaces have no draw order worth relying on
+// (docs/info/arma_engine_gotchas.md). The dialog is still opened, empty, for the cursor
+// (shared/includes/hq_placement.hpp).
 //
 // Created before anything that sits on it: ctrlCreate order is draw order, so a panel made later
 // covers its own contents.
 _backdrop = _display ctrlCreate ["RscText", 1007];
-_backdrop ctrlSetPosition [0.075, 0.032, 0.85, 0.568];
+_backdrop ctrlSetPosition [0.075, 0.032, 0.85, 0.582];
 _backdrop ctrlSetBackgroundColor [0.2, 0.4, 0.2, 1];
 _backdrop ctrlCommit 0;
 
 _boxframe = _display ctrlCreate ["RscFrame", 1008];
-_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.528];
+_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.542];
 _boxframe ctrlSetText localize "STR_DUWS_T_faction_screen_title";
 _boxframe ctrlCommit 0;
 
@@ -31,19 +34,19 @@ _boxframe ctrlCommit 0;
 // it is wider than the box and a plain control cuts the tail off instead of wrapping. The height
 // holds two lines at this size; raising the size without raising it too clips the second line.
 _HQtext = _display ctrlCreate ["RscStructuredText", 1234];
-_HQtext ctrlSetPosition [0.1, 0.074, 0.8, 0.076];
+_HQtext ctrlSetPosition [0.1, 0.088, 0.8, 0.076];
 _HQtext ctrlSetStructuredText parseText format ["<t size='0.9'>%1</t>", localize "STR_DUWS_T_hlr39me1"];
 _HQtext ctrlCommit 0;
 
 // The last of the three questions, so the two sit under the mode row. One row: same width, same
 // baseline, split down the middle, each in the frame that names its side.
 _frameBLU = _display ctrlCreate ["RscFrame", 1010];
-_frameBLU ctrlSetPosition [0.1, 0.308, 0.3925, 0.1];
+_frameBLU ctrlSetPosition [0.1, 0.322, 0.3925, 0.1];
 _frameBLU ctrlSetText localize "STR_DUWS_T_rqdziaei";
 _frameBLU ctrlCommit 0;
 
 _dropdownBLU = _display ctrlCreate ["RscCombo", 1001];
-_dropdownBLU ctrlSetPosition [0.1125, 0.348, 0.3675, 0.04];
+_dropdownBLU ctrlSetPosition [0.1125, 0.362, 0.3675, 0.04];
 _dropdownBLU ctrlCommit 0;
 
 {
@@ -62,12 +65,12 @@ _dropdownBLU ctrlAddEventHandler ["LBSelChanged",
 //////////////////////////////////////
 
 _frameOPF = _display ctrlCreate ["RscFrame", 1011];
-_frameOPF ctrlSetPosition [0.5075, 0.308, 0.3925, 0.1];
+_frameOPF ctrlSetPosition [0.5075, 0.322, 0.3925, 0.1];
 _frameOPF ctrlSetText localize "STR_DUWS_T_1m1bl9nd";
 _frameOPF ctrlCommit 0;
 
 _dropdownOPF = _display ctrlCreate ["RscCombo", 1003];
-_dropdownOPF ctrlSetPosition [0.52, 0.348, 0.3675, 0.04];
+_dropdownOPF ctrlSetPosition [0.52, 0.362, 0.3675, 0.04];
 _dropdownOPF ctrlCommit 0;
 
 // Rebuilt whenever the game mode changes, which is why it is a block rather than a loop in place.
@@ -125,29 +128,62 @@ duws_zombie_factions_found = count ([true] call fnc_getAllFactionsClean) > 0;
 // faction row keeps the order of the screen readable: the mode is answered first and narrows what
 // the factions may be.
 _frameMode = _display ctrlCreate ["RscFrame", 1005];
-_frameMode ctrlSetPosition [0.1, 0.156, 0.8, 0.14];
+_frameMode ctrlSetPosition [0.1, 0.17, 0.8, 0.14];
 _frameMode ctrlSetText localize "STR_DUWS_T_gamemode";
 _frameMode ctrlCommit 0;
 
 _dropdownMode = _display ctrlCreate ["RscCombo", 1004];
-_dropdownMode ctrlSetPosition [0.1125, 0.192, 0.775, 0.04];
+_dropdownMode ctrlSetPosition [0.1125, 0.206, 0.775, 0.04];
 _dropdownMode ctrlCommit 0;
 
 // Structured for the reason the advice line is: the longest mode description is 145 characters and
 // wants two lines of the box rather than one line with its end cut off.
 _modeDesc = _display ctrlCreate ["RscStructuredText", 1006];
-_modeDesc ctrlSetPosition [0.1125, 0.24, 0.775, 0.052];
+_modeDesc ctrlSetPosition [0.1125, 0.254, 0.775, 0.052];
 _modeDesc ctrlCommit 0;
 
+// The last question, and the one that ends the screen. Under a rule and a plain caption rather than
+// in a frame: three frames answering three questions and a fourth around the way out read as a
+// fourth question. Cleared before the buttons exist, because a click is live the moment one does.
+random_placement = false;
+
+_rule = _display ctrlCreate ["RscText", 1009];
+_rule ctrlSetPosition [0.1, 0.432, 0.8, 0.0025];
+_rule ctrlSetBackgroundColor [1, 1, 1, 0.25];
+_rule ctrlCommit 0;
+
+// Structured for its centring rather than its wrapping: RscText draws left and SQF has no
+// ctrlSetStyle, so a plain control cannot be centred after the fact.
+_placeText = _display ctrlCreate ["RscStructuredText", 1012];
+_placeText ctrlSetPosition [0.1, 0.438, 0.8, 0.034];
+_placeText ctrlSetStructuredText parseText format ["<t size='0.8'>%1</t>", localize "STR_DUWS_T_7tr969mm"];
+_placeText ctrlCommit 0;
+
+// player1, not the caller: HQ placement is the Game Master seat's to make, which is what that unit
+// names (docs/info/arma_engine_gotchas.md).
+_btnRandom = _display ctrlCreate ["RscButton", 1600];
+_btnRandom ctrlSetPosition [0.275, 0.478, 0.45, 0.05];
+_btnRandom ctrlSetText localize "STR_DUWS_T_2f55ngq1";
+_btnRandom ctrlSetTooltip localize "STR_DUWS_T_50n9sdxk";
+_btnRandom ctrlAddEventHandler ["ButtonClick", { [20, 0.015] remoteExec ["fnc_HQ_random_place", player1] }];
+_btnRandom ctrlCommit 0;
+
+_btnManual = _display ctrlCreate ["RscButton", 1601];
+_btnManual ctrlSetPosition [0.275, 0.534, 0.45, 0.05];
+_btnManual ctrlSetText localize "STR_DUWS_T_x0cq7o5y";
+_btnManual ctrlSetTooltip localize "STR_DUWS_T_qwfdr33k";
+_btnManual ctrlAddEventHandler ["ButtonClick", { [] spawn fnc_HQ_manual_place }];
+_btnManual ctrlCommit 0;
+
 // ctrlCreate resolves a class name against the display's own config before the mission's, and this
-// display is RscDisplayEmpty -- a configFile display, where RscFrame is a different font at a
-// different height. Pinned to what shared/includes/defines.hpp gives every frame on the screens
-// after this one, so a caption does not change weight between one setup screen and the next.
+// display is RscDisplayEmpty -- a configFile display, where the base classes are a different font at
+// a different height. Pinned to what shared/includes/defines.hpp gives the screens after this one,
+// so a caption does not change weight between one setup screen and the next.
 {
 	_x ctrlSetFont "PuristaMedium";
 	_x ctrlSetFontHeight 0.03;
 	_x ctrlCommit 0;
-} forEach [_boxframe, _frameMode, _frameBLU, _frameOPF];
+} forEach [_boxframe, _frameMode, _frameBLU, _frameOPF, _btnRandom, _btnManual];
 
 {
 	_itemMode = _dropdownMode lbAdd localize (_x select 1);
@@ -183,10 +219,9 @@ _dropdownMode ctrlAddEventHandler ["LBSelChanged",
 _modeSel = duws_gamemodes findIf {(_x select 0) == duws_gamemode};
 _dropdownMode lbSetCurSel (0 max _modeSel);
 
+// Opened for the cursor and nothing else -- see shared/includes/hq_placement.hpp.
 createDialog "startup_hq_placement_dialog";
 waitUntil {dialog};
-
-random_placement = false;
 
 waitUntil {random_placement || player_is_choosing_hqpos};
 
