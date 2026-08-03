@@ -15,8 +15,8 @@
                 <Spanish>Cancelado</Spanish>
                 <German>Abgebrochen</German>
                 <Chinesesimp>已取消</Chinesesimp>
-                <Original>Cancelled</Original>
-                <English>Cancelled</English>
+                <Original>Cancelled.</Original>
+                <English>Cancelled.</English>
             </Key>
         </Container>
         <Container name="Campaign Parameters">
@@ -143,8 +143,8 @@
                 <German>Umwandlung erfolgreich</German>
                 <Spanish>Conversión exitosa</Spanish>
                 <Chinesesimp>转换成功</Chinesesimp>
-                <Original>Conversion successful</Original>
-                <English>Conversion successful</English>
+                <Original>Conversion successful.</Original>
+                <English>Conversion successful.</English>
             </Key>
             <Key ID="STR_DUWS_T_pa387ndd">
                 <German>Variables Wetter (kein Nebel)</German>
@@ -1186,8 +1186,8 @@
                 <German>Keine Zonen gefunden, bitte starte die Mission neu und versuche:\n\n-den Radius der Zonen zu reduzieren\n-die Anzahl der erstellten Zonen zu reduzieren\n-die maximale Distanz der erstellten Zonen vom HQ zu erhöhen\n-die "URBAN"-Einstellung in den Parametern auszuschalten</German>
                 <Spanish>No se pudieron localizar zonas, Por favor reinicie la misión e intente:\nReducir el radio máximo de las zonas.\nReducir la cantidad de zonas creadas.\nIncrementar la distancia máxima entre las zonas y el Cuartel General.\nCambiar los parámetros a MENOS URBANOS.</Spanish>
                 <Chinesesimp>无法找到战区， 请重新开始任务并尝试:\n\n-降低战区最大范围\n-减少生成战区的数量\n-增加战区到总部的最大距离\n-更改“战区更多在城市中”选项。</Chinesesimp>
-                <Original>Unable to find zones, please restart the mission and try:\n\n-Reducing the maximum radius of the zones\n-Reducing the number of zones\n-Increasing the maximum distance of created zones from the HQ\n-Changing to LESS URBAN in MP Params</Original>
-                <English>Unable to find zones, please restart the mission and try:\n\n-Reducing the maximum radius of the zones\n-Reducing the number of zones\n-Increasing the maximum distance of created zones from the HQ\n-Changing to LESS URBAN in MP Params</English>
+                <Original>Unable to find zones, please restart the mission and try:\n\n-Reducing the maximum radius of the zones.\n-Reducing the number of zones.\n-Increasing the maximum distance of created zones from the HQ.\n-Changing to LESS URBAN in MP Params.</Original>
+                <English>Unable to find zones, please restart the mission and try:\n\n-Reducing the maximum radius of the zones.\n-Reducing the number of zones.\n-Increasing the maximum distance of created zones from the HQ.\n-Changing to LESS URBAN in MP Params.</English>
             </Key>
             <Key ID="STR_DUWS_T_vai9q3po">
                 <German>Position %1 gefunden...</German>
@@ -1214,8 +1214,8 @@
                 <German>MISSIONS INITIALISIERUNG ABGESCHLOSSEN!</German>
                 <Spanish>¡INICIALIZACIÓN DE MISIÓN COMPLETA!</Spanish>
                 <Chinesesimp>任务初始化成功！</Chinesesimp>
-                <Original>MISSION INITIALIZATION COMPLETE!</Original>
-                <English>MISSION INITIALIZATION COMPLETE!</English>
+                <Original>MISSION INITIALIZATION COMPLETE</Original>
+                <English>MISSION INITIALIZATION COMPLETE</English>
             </Key>
             <Key ID="STR_DUWS_T_7mog9k78">
                 <German>MISSIONS INITIALISIERUNG ABGESCHLOSSEN!
@@ -1269,7 +1269,7 @@
 					\n平民存在: %12
 				</Chinesesimp>
                 <Original>
-					MISSION INITIALIZATION COMPLETE!
+					MISSION INITIALIZATION COMPLETE
 					\nCampaign generated
 					\nZones: %1
 					\nMaximum radius: %2m
@@ -1286,7 +1286,7 @@
 					\nCiv Presence: %12
 				</Original>
                 <English>
-					MISSION INITIALIZATION COMPLETE!
+					MISSION INITIALIZATION COMPLETE
 					\nCampaign generated
 					\nZones: %1
 					\nMaximum radius: %2m
@@ -1514,8 +1514,8 @@
                 <German>Das System sucht eine sichere Position für Missionsobjekte. Bitte warten...</German>
                 <Spanish>El sistema busca una ubicación segura para los objetos de misión. Espere...</Spanish>
                 <Chinesesimp>系统正为任务物件寻找安全放置位置，请稍等...可能会很久。</Chinesesimp>
-                <Original>The system is finding a safe placement for mission objects. Please wait... This may take a while.</Original>
-                <English>The system is finding a safe placement for mission objects. Please wait... This may take a while.</English>
+                <Original>Finding a safe placement for mission objects. This can take a while.</Original>
+                <English>Finding a safe placement for mission objects. This can take a while.</English>
             </Key>
             <Key ID="STR_DUWS_T_ma8d1xaz">
                 <Spanish>ZONAS COMPLETAS, Por favor espere mientras limpiamos el desastre.</Spanish>
@@ -1649,8 +1649,8 @@
                 <Chinesesimp>场景已清理，所有目标和敌人已移除。</Chinesesimp>
             </Key>
                     <Key ID="STR_DUWS_T_killhouse_tp_notready">
-                <Original>Teleport point %1 is not ready yet.</Original>
-                <English>Teleport point %1 is not ready yet.</English>
+                <Original>Teleport point %1 is not yet ready.</Original>
+                <English>Teleport point %1 is not yet ready.</English>
             </Key>
 </Container>
         <Container name="Base Services">
@@ -1753,8 +1753,8 @@
                 <Chinesesimp>重新部署需要 %1 指挥点。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_REDEPLOY_NO_CP">
-                <Original>Not enough CP (need %1)</Original>
-                <English>Not enough CP (need %1)</English>
+                <Original>Not enough CP (need %1).</Original>
+                <English>Not enough CP (need %1).</English>
                 <Chinesesimp>指挥点不足 (需要 %1)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_REDEPLOY_SUCCESS">
@@ -1943,8 +1943,8 @@
                 <Chinesesimp>载具的严重受损部位已修理至可用的最低水平并加油，消耗2CP。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_repair_not_enough_cp">
-                <Original>Not enough Command Points (need 2 CP)</Original>
-                <English>Not enough Command Points (need 2 CP)</English>
+                <Original>Not enough Command Points (need 2 CP).</Original>
+                <English>Not enough Command Points (need 2 CP).</English>
                 <Chinesesimp>指挥点不足（需要2 CP）。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_repair_station_deployed">
@@ -2238,8 +2238,8 @@
                 <Chinesesimp>敌军无线电</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_WARNING">
-                <Original>You are too close to an enemy! Move away within 5 seconds or you will be exposed.</Original>
-                <English>You are too close to an enemy! Move away within 5 seconds or you will be exposed.</English>
+                <Original>Too close to an enemy. Move away within 5 seconds or you are exposed.</Original>
+                <English>Too close to an enemy. Move away within 5 seconds or you are exposed.</English>
                 <Chinesesimp>你离敌人太近了！5秒内远离否则将暴露。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_FIRE">
@@ -2298,8 +2298,8 @@
                 <Chinesesimp>无法伪装：你正在载具内。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_NO_ENEMY_DATA">
-                <Original>Enemy gear data not available. Please wait a moment.</Original>
-                <English>Enemy gear data not available. Please wait a moment.</English>
+                <Original>Enemy gear data not yet available.</Original>
+                <English>Enemy gear data not yet available.</English>
                 <Chinesesimp>敌军装备数据不可用，请稍等。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_NO_UNIFORM">
@@ -3267,8 +3267,8 @@
                 <Chinesesimp>"霸王1-1"收到，数据分析小组会好好看看它们的。干得漂亮。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_NO_ITEMS">
-                <Original>You have no intel items to analyze!</Original>
-                <English>You have no intel items to analyze!</English>
+                <Original>No intel items to analyze.</Original>
+                <English>No intel items to analyze.</English>
                 <Chinesesimp>你没有可分析的情报物品！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_BROADCAST">
@@ -3392,8 +3392,8 @@
                 <English>Mission Control</English>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_DROPPED_ON_GROUND">
-                <Original>Item dropped on the ground (no inventory space left)</Original>
-                <English>Item dropped on the ground (no inventory space left)</English>
+                <Original>Item dropped on the ground (no inventory space left).</Original>
+                <English>Item dropped on the ground (no inventory space left).</English>
                 <Chinesesimp>物品已掉落在地面 (玩家没有充足的库存空间)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_BUY_GOGGLES">
@@ -3852,8 +3852,8 @@
                 <German>Speichern aktiviert</German>
                 <Spanish>Guardado activado</Spanish>
                 <Chinesesimp>启用保存</Chinesesimp>
-                <Original>Saving Enabled</Original>
-                <English>Saving Enabled</English>
+                <Original>Saving Enabled.</Original>
+                <English>Saving Enabled.</English>
             </Key>
             <Key ID="STR_DUWS_T_92465yls">
                 <German>
@@ -4480,8 +4480,8 @@
                 <German>Sabotage erfolgreich</German>
                 <Spanish>Sabotaje exitoso</Spanish>
                 <Chinesesimp>破坏成功</Chinesesimp>
-                <Original>Sabotage successful</Original>
-                <English>Sabotage successful</English>
+                <Original>Sabotage successful.</Original>
+                <English>Sabotage successful.</English>
             </Key>
             <Key ID="STR_DUWS_T_mfxb090t">
                 <German>==DEIN BAU-FAHRZEUG IST NOCH INTAKT==\n\nEs ist nur 1 Bau-Fahrzeug gleichzeitig in der Mission erlaubt! Bitte wähle eine andere Mission.</German>
@@ -4508,8 +4508,8 @@
                 <German>Anpassung des Fahrzeugs abgeschlossen!\nDu kannst das Fahrzeug jetzt zum Bauen von Befestigungen nutzen!</German>
                 <Spanish>¡Modificaciónes al vehículo completadas!\n ¡Ahora puede usar el vehículo como una fábrica de estructuras!</Spanish>
                 <Chinesesimp>载具改装完成！\n你可以把载具变成建造工厂！</Chinesesimp>
-                <Original>Conversion complete.\nThe vehicle now works as a building factory</Original>
-                <English>Conversion complete.\nThe vehicle now works as a building factory</English>
+                <Original>Conversion complete.\nThe vehicle now works as a building factory.</Original>
+                <English>Conversion complete.\nThe vehicle now works as a building factory.</English>
             </Key>
             <Key ID="STR_DUWS_T_jsg7ys0w">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer LKW wurde zerstört!</German>
@@ -5318,8 +5318,8 @@
                 <German>Fahrzeug muss ein Auto, Panzer, Hubschrauber oder Festflügelflugzeug sein. Bitte versuche es erneut.</German>
                 <Spanish>El vehículo debe ser un coche, tanque, helicóptero o avión de ala fija. Inténtalo de nuevo.</Spanish>
                 <Chinesesimp>载具必须为车辆、坦克、直升机或固定翼战机。请重试。</Chinesesimp>
-                <Original>Vehicle must be a car, tank, helicopter, or fixed-wing aircraft. Please try again.</Original>
-                <English>Vehicle must be a car, tank, helicopter, or fixed-wing aircraft. Please try again.</English>
+                <Original>Vehicle must be a car, tank, helicopter or fixed-wing aircraft.</Original>
+                <English>Vehicle must be a car, tank, helicopter or fixed-wing aircraft.</English>
             </Key>
             <Key ID="STR_DUWS_T_mhq_exists">
                 <Original>A Mobile HQ is already assigned, and is marked on your map. Only one exists at a time. To move it, undeploy it, drive it and deploy it again. To hand it back and choose a different vehicle, undeploy it and use Release Mobile HQ.</Original>
@@ -5329,15 +5329,15 @@
                 <German>Setze TF Gruppe ein!</German>
                 <Spanish>¡Desplegando fuerza de ataque!</Spanish>
                 <Chinesesimp>特遣队部署中！</Chinesesimp>
-                <Original>Deploying TF Squad!</Original>
-                <English>Deploying TF Squad!</English>
+                <Original>Deploying TF squad.</Original>
+                <English>Deploying TF squad.</English>
             </Key>
             <Key ID="STR_DUWS_T_gu6cbc5f">
                 <German>Gruppe bereit!\nBefehlige die Gruppe mit [L.STRG - LEER]</German>
                 <Spanish>¡Escuadrón listo!\n Accede a él con [CTRL.Izq. + Espacio]</Spanish>
                 <Chinesesimp>小队就绪 !\n按 [L.CTRL - SPACE] 来查看。</Chinesesimp>
-                <Original>Squad ready!\nAccess it with [L.CTRL - SPACE]</Original>
-                <English>Squad ready!\nAccess it with [L.CTRL - SPACE]</English>
+                <Original>Squad ready.\nAccess it with [L.CTRL - SPACE].</Original>
+                <English>Squad ready.\nAccess it with [L.CTRL - SPACE].</English>
             </Key>
             <Key ID="STR_DUWS_T_45a8q6tj">
                 <German>Zu viele Unterstützungen</German>
@@ -5399,8 +5399,8 @@
                 <German>Du musst einige Minuten warten bis die Auswahl wieder im 0-8 Menü zur Anforderung bereitsteht!</German>
                 <Spanish>¡Debe esperar unos cuantos minutos para que el objeto regrese al menú 0-8 antes de solicitarlo de nuevo!</Spanish>
                 <Chinesesimp>在再次请求之前，您必须等待几分钟，以便选项返回到0-8菜单！</Chinesesimp>
-                <Original>You must wait a few minutes for the item to return to the 0-8 menu before requesting it again!</Original>
-                <English>You must wait a few minutes for the item to return to the 0-8 menu before requesting it again!</English>
+                <Original>You must wait a few minutes for the item to return to the 0-8 menu before requesting it again.</Original>
+                <English>You must wait a few minutes for the item to return to the 0-8 menu before requesting it again.</English>
             </Key>
             <Key ID="STR_DUWS_T_cghsxhhu">
                 <German>Zeige auf ein Fahrzeug und wähle =Baue Mobiles HQ= im Funk-Menü</German>
@@ -5427,8 +5427,8 @@
                 <German>HALO nicht verfügbar</German>
                 <Spanish>El HALO no está disponible</Spanish>
                 <Chinesesimp>空降不再可用</Chinesesimp>
-                <Original>HALO Not Available.</Original>
-                <English>HALO Not Available.</English>
+                <Original>HALO not available.</Original>
+                <English>HALO not available.</English>
             </Key>
             <Key ID="STR_DUWS_T_vtkkn80v">
                 <German>Mache einen Links-Klick auf der Karte, wo du eingesetzt werden möchtest</German>
@@ -5686,15 +5686,15 @@
                 <German>Laserziel NICHT erfasst</German>
                 <Spanish>Objetivo láser no adquirido</Spanish>
                 <Chinesesimp>没有获取激光目标</Chinesesimp>
-                <Original>Laser Target NOT Acquired.</Original>
-                <English>Laser Target NOT Acquired.</English>
+                <Original>Laser target not acquired.</Original>
+                <English>Laser target not acquired.</English>
             </Key>
             <Key ID="STR_DUWS_T_b95i2b8d">
                 <German>Zielerfassung fehlgeschlagen</German>
                 <Spanish>Apuntado FALLADO</Spanish>
                 <Chinesesimp>瞄准失败</Chinesesimp>
-                <Original>Targeting FAILED</Original>
-                <English>Targeting FAILED</English>
+                <Original>Targeting failed.</Original>
+                <English>Targeting failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_t6y8r92y">
                 <German>Anforderung abgeschlossen</German>
@@ -5988,8 +5988,8 @@
                 <English>To Overlord, we're at the LZ.</English>
             </Key>
             <Key ID="STR_DUWS_T_liftwp_incomplete">
-                <Original>Mule 1-1, route incomplete. Aborting the tasking. Heavy transport available again in five minutes.</Original>
-                <English>Mule 1-1, route incomplete. Aborting the tasking. Heavy transport available again in five minutes.</English>
+                <Original>Route incomplete, tasking aborted. Heavy transport available again in five minutes.</Original>
+                <English>Route incomplete, tasking aborted. Heavy transport available again in five minutes.</English>
             </Key>
                    <Key ID="STR_DUWS_T_helolift_notarget">
                        <Original>You must pick a target vehicle. Heavy transport available again in ten seconds.</Original>
@@ -6000,8 +6000,8 @@
                        <English>Target must be a car, tank, helicopter or fixed-wing aircraft. Heavy transport available again in ten seconds.</English>
                    </Key>
                    <Key ID="STR_DUWS_T_helolift_noheli">
-                       <Original>Mule 1-1 failed to reach your position. Heavy transport available again in ten seconds.</Original>
-                       <English>Mule 1-1 failed to reach your position. Heavy transport available again in ten seconds.</English>
+                       <Original>Heavy transport could not reach your position. Available again in ten seconds.</Original>
+                       <English>Heavy transport could not reach your position. Available again in ten seconds.</English>
                    </Key>
                    <Key ID="STR_DUWS_T_liftwp_brief">
                 <Original>Mark three points on the map: two route legs, then the drop point.</Original>
@@ -6036,12 +6036,12 @@
                 <English>Chariot 1-1, no clear LZ at that grid. Send another, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxiwp_reopen">
-                <Original>Chariot 1-1 standing by. Open your map to continue, over.</Original>
-                <English>Chariot 1-1 standing by. Open your map to continue, over.</English>
+                <Original>Air taxi standing by. Open your map to continue.</Original>
+                <English>Air taxi standing by. Open your map to continue.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxi_noshore">
-                <Original>Swordfish 1-1, no clear shoreline at your position. Move to open water or a clear beach. Boat taxi available again in ten seconds, over.</Original>
-                <English>Swordfish 1-1, no clear shoreline at your position. Move to open water or a clear beach. Boat taxi available again in ten seconds, over.</English>
+                <Original>No clear shoreline at your position. Move to open water or a clear beach. Boat taxi available again in ten seconds.</Original>
+                <English>No clear shoreline at your position. Move to open water or a clear beach. Boat taxi available again in ten seconds.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxi_rtbdown">
                 <Original>This is Overlord. Swordfish 1-1 went down on the return leg. Your extraction is complete, Alpha 1-1 — no further action required. Boat taxi available again in five minutes. Out.</Original>
@@ -6354,8 +6354,8 @@
                 <Spanish>Coordenadas recividas</Spanish>
                 <German>Koordinaten erhalten</German>
                 <Chinesesimp>指令收到</Chinesesimp>
-                <Original>Coordinates received</Original>
-                <English>Coordinates received</English>
+                <Original>Coordinates received.</Original>
+                <English>Coordinates received.</English>
             </Key>
             <Key ID="STR_DUWS_T_r8ubc9jy">
                 <Spanish>Paracaídistas en camino TEL: 1 minuto</Spanish>
@@ -6368,8 +6368,8 @@
                 <Spanish>Paracaídistas en camino</Spanish>
                 <German>Fallschirmäger im Anflug</German>
                 <Chinesesimp>空投进场</Chinesesimp>
-                <Original>Paradrop Inbound</Original>
-                <English>Paradrop Inbound</English>
+                <Original>Paradrop Inbound.</Original>
+                <English>Paradrop Inbound.</English>
             </Key>
             <Key ID="STR_DUWS_T_o4p4grm4">
                 <Spanish>Paracaídistas en estación</Spanish>
@@ -6389,8 +6389,8 @@
                 <Spanish>Paracaídistas desplegados</Spanish>
                 <German>Fallschirmjäger abgesprungen</German>
                 <Chinesesimp>部署空降兵</Chinesesimp>
-                <Original>Paratroopers deployed</Original>
-                <English>Paratroopers deployed</English>
+                <Original>Paratroopers deployed.</Original>
+                <English>Paratroopers deployed.</English>
             </Key>
             <Key ID="STR_DUWS_T_0xtit0ht">
                 <Spanish>Los paracaídistas han sido agregados a su mando</Spanish>
@@ -6795,8 +6795,8 @@
                 <German>Transfer abgeschlossen!\nBefehlige deine Gruppe mit\n[L.STRG - LEERTASTE]</German>
                 <Spanish>¡Tranferencia exitosa!\nAccesa a tu escuadrón con\n[CTRL IZQ. + Espacio]</Spanish>
                 <Chinesesimp>转换成功!\n按来查看你的小队\n[L.CTRL - SPACE]</Chinesesimp>
-                <Original>Transfer complete!\nAccess your squad with\n[L.CTRL - SPACE]</Original>
-                <English>Transfer complete!\nAccess your squad with\n[L.CTRL - SPACE]</English>
+                <Original>Transfer complete.\nAccess your squad with\n[L.CTRL - SPACE].</Original>
+                <English>Transfer complete.\nAccess your squad with\n[L.CTRL - SPACE].</English>
             </Key>
             <Key ID="STR_DUWS_T_1bntq9ke">
                 <German>Du hast %1 Sekunden um eine High Command Gruppe auszuwählen</German>
@@ -6823,8 +6823,8 @@
                 <German>Auflösung erfolgreich!</German>
                 <Spanish>Disolución exitosa!</Spanish>
                 <Chinesesimp>解散成功！</Chinesesimp>
-                <Original>Successfully disbanded!</Original>
-                <English>Successfully disbanded!</English>
+                <Original>Squad disbanded.</Original>
+                <English>Squad disbanded.</English>
             </Key>
             <Key ID="STR_DUWS_T_ixyfae8b">
                 <German>Du hast %1 Sekunden um eine High Command Gruppe auszuwählen</German>
@@ -7109,8 +7109,8 @@
                 <Spanish>¡Vehículo áereo del AM listo! \n Accese a él con [CTRL. Izq. + Espacio]</Spanish>
                 <German>HC Flugzeug bereit !\nBefehlige es über [L.STRG - LEER]</German>
                 <Chinesesimp>HC 飞机准备就绪 !\n按 [L.CTRL - SPACE]来查看</Chinesesimp>
-                <Original>HC Aircraft ready!\nAccess it with [L.CTRL - SPACE]</Original>
-                <English>HC Aircraft ready!\nAccess it with [L.CTRL - SPACE]</English>
+                <Original>HC aircraft ready.\nAccess it with [L.CTRL - SPACE].</Original>
+                <English>HC aircraft ready.\nAccess it with [L.CTRL - SPACE].</English>
             </Key>
             <Key ID="STR_DUWS_T_vzjqx5tp">
                 <Spanish>"Overlord 1-1" a todas las unidades, actúa según el plan previsto y ocupa todas las zonas objetivo.</Spanish>
@@ -8013,15 +8013,15 @@
                 <German>Nicht genug Command Points (%1CP benötigt)</German>
                 <Spanish>No posee suficientes puntos de comando (se requieren %1)</Spanish>
                 <Chinesesimp>没有足够的指挥点(还需要%1CP)</Chinesesimp>
-                <Original>Not enough Command Points (%1 CP required)</Original>
-                <English>Not enough Command Points (%1 CP required)</English>
+                <Original>Not enough Command Points (%1 CP required).</Original>
+                <English>Not enough Command Points (%1 CP required).</English>
             </Key>
             <Key ID="STR_DUWS_T_9607znvh">
                 <German>Bitte wähle etwas aus!</German>
                 <Spanish>¡Por favor selecciona algo!</Spanish>
                 <Chinesesimp>请进行选择！</Chinesesimp>
-                <Original>Please make a selection!</Original>
-                <English>Please make a selection!</English>
+                <Original>Make a selection first.</Original>
+                <English>Make a selection first.</English>
             </Key>
             <Key ID="STR_DUWS_T_b20y3byh">
                 <German>Es muss mindestens eine feindliche Zone auf der Karte sichtbar sein. Versuche es später erneut.</German>
@@ -8097,15 +8097,15 @@
                 <German>Ohrenstöpsel entfernt</German>
                 <Spanish>Tapones para oídos removidos</Spanish>
                 <Chinesesimp>耳塞移除</Chinesesimp>
-                <Original>Earplugs Removed</Original>
-                <English>Earplugs Removed</English>
+                <Original>Earplugs Removed.</Original>
+                <English>Earplugs Removed.</English>
             </Key>
             <Key ID="STR_DUWS_T_6ecpsh0b">
                 <German>Ohrenstöpsel verwenden</German>
                 <Spanish>Tapones para oídos insertados</Spanish>
                 <Chinesesimp>戴上耳塞</Chinesesimp>
-                <Original>Earplugs Inserted</Original>
-                <English>Earplugs Inserted</English>
+                <Original>Earplugs Inserted.</Original>
+                <English>Earplugs Inserted.</English>
             </Key>
             <Key ID="STR_DUWS_T_r17nker3">
                 <German>Der Feind zerstörte die FOB - </German>

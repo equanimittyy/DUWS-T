@@ -37,7 +37,14 @@ tags cannot simply be aligned key-for-key.
 The reference for radio prose is the `Support & Radio` container: speaker-first callsign framing
 (`Alpha 1-1, this is Overlord.` / `Swordfish 1-1 to Alpha 1-1, ...`), procedure words (*be advised,
 roger, stand by, over, out*), numbers spelled out in spoken lines but numerals in HUD text, and flat
-declaratives — Overlord does not shout. Hints carry no trailing period; subtitles do.
+declaratives — Overlord does not shout, and neither does the hint box: no exclamation marks, and no
+shouted words mid-sentence (`Targeting FAILED`).
+
+**Everything the player reads is punctuated as prose.** Hints, subtitles and notification bodies all
+carry terminal periods, including one-line statuses — `Cancelled.`, `Paratroopers deployed.` A label
+is the exception, because it is not a sentence: a side-mission name (`Clear Area`), a menu heading
+(`Mission Selector`), and a line ending on a substituted value (`Squad renamed to:` + the name) take
+no period.
 
 ## Which surface a message goes to, and never both
 
@@ -68,6 +75,30 @@ The card's ceiling is a hard one and it clips mid-sentence with no error, which 
 ([`arma_engine_gotchas.md`](arma_engine_gotchas.md#a-cfgnotifications-description-is-clipped-not-wrapped-past-roughly-60-characters)).
 That budget is a reason to keep a card's text to a headline rather than a reason to split a long one
 across both surfaces.
+
+## Hint prose is system prose
+
+A hint reports state. It does not narrate the software (`The system is finding…`, `Please wait…`),
+it does not exclaim, and it does not speak — callsign framing and procedure words belong to
+`fnc_duws_dialogue` and the subtitle line, never to the hint box. A support that cannot fly says
+`Heavy transport could not reach your position`, not `Mule 1-1 failed to reach your position`.
+
+**Seven side-mission hints are knowingly in the wrong voice** and are left that way. They narrate
+rather than report, and the revision that rewrites the side missions owns them — fixing the prose
+piecemeal now would be re-editing text that is about to be replaced wholesale:
+
+| Key | Text |
+|---|---|
+| `STR_DUWS_T_fxyys123` | The pilot's fading fast. Two minutes, maybe less. |
+| `STR_DUWS_T_fxysw123` | …The pilot stopped answering the radio. He's most likely bled out. |
+| `STR_DUWS_T_xdbfx123` | The enemy's found the squad. Move now. |
+| `STR_DUWS_T_xinhaopy` | They're nearly through the intel. Two minutes left. |
+| `STR_DUWS_T_fxkczy00` | The enemy rigged the truck with a timed charge and there's no disarming it in the field… |
+| `STR_DUWS_T_3jmpthvi` | Unloading complete. The truck's yours. |
+| `STR_DUWS_T_auto_drop_hint` | You were already carrying the pilot, so he's been set down here. |
+
+They are listed here rather than commented beside their keys because `stringtable.xml` carries no
+XML comments today, and this is not the change that should find out whether the parser accepts them.
 
 ## Side-mission briefings carry their own reward block
 
