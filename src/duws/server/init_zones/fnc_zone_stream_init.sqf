@@ -270,16 +270,10 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
         // the next statement clears it.
         [_key] call fnc_zone_strength_record;
         [_key] call fnc_zone_garrison_dropped;
-        // By roster, not by proximity. A radius sweep took the neighbouring town's garrison with it,
-        // and the town then measured its survivors against its baseline and came back thinned for
-        // the rest of the campaign.
-        private _men = ([_key] call fnc_zone_roster) select { !isNull _x };
-        private _vehs = [];
-        { if (vehicle _x != _x) then { _vehs pushBackUnique (vehicle _x) } } forEach _men;
-        { deleteVehicle _x } forEach _men;
-        // After the men, and only if nothing else is aboard: a transport the zone crewed goes with
-        // its crew, while one the player left in the ring is not on this roster and stays.
-        { if (({alive _x} count crew _x) == 0) then { deleteVehicle _x } } forEach _vehs;
+        // The shared collection: men by roster, their vehicles once nothing living is aboard, and
+        // the groups they empty. A town streams out by the same rules, so the rules live in one
+        // place rather than in two copies that can drift.
+        [_key] call fnc_site_collect;
         [_key] call DUWS_fnc_zoneStow;
         _o set ["awake", false];
     };

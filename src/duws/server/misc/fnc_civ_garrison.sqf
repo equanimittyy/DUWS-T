@@ -261,16 +261,11 @@ private _fnc_tick = {
         // SEIZED the moment a player walked back into ground the garrison had streamed out of,
         // and pay them a clear for a fight that never happened.
         deleteVehicle (_t get "trg");
-        // The men, and the groups they leave behind. Most spawners set deleteGroupWhenEmpty but
-        // not all do, and an empty group left on every stream-out of every town is a leak that
-        // only shows as a slow drift over a long campaign.
-        private _key = [_i] call fnc_town_site_key;
-        private _grps = [];
-        {
-            if (!isNull _x) then { _grps pushBackUnique (group _x); deleteVehicle _x };
-        } forEach ([_key] call fnc_site_roster);
-        { if (count units _x == 0) then { deleteGroup _x } } forEach _grps;
-        [_key] call fnc_site_roster_clear;
+        // The men, the vehicles they crewed and the groups they empty, on the same rules a zone
+        // streams out by. The vehicle half is why this is shared rather than local: a town tier
+        // fields a car and an APC, and deleting only the crew left both standing in an emptied town
+        // on every visit, for the litter sweep to collect on a lifetime the campaign can switch off.
+        [[_i] call fnc_town_site_key] call fnc_site_collect;
         ["INFO", "CIV", format ["Town %1 garrison streamed out holding %2 of %3; returns at %4 strength",
             _i, _left, _t get "baseline", [_i] call fnc_town_garrison_strengthAt]] call fnc_log;
         _t set ["awake", false];
@@ -327,13 +322,15 @@ private _fnc_tick = {
 
     // Tier 0 is the town no longer being OPFOR ground -- the band test above zeroes it when aid
     // or heals lift the town out, and the commander may zero it directly. Either way there is
-    // nothing left to hold, so the garrison goes with the trigger that armed it.
+    // nothing left to hold, so the garrison goes with the trigger that armed it: the same
+    // collection the stream-out uses, so the vehicles go with their crews here too. This branch can
+    // fire with the player standing in the town, and it already took living men out of their sight
+    // to get here -- leaving the transport those men were sitting in would be the odd half.
     if (_tier == 0) then {
         deleteVehicle (_t get "trg");
         _t set ["trg", objNull];
         _t set ["awake", false];
-        { deleteVehicle _x } forEach (([[_i] call fnc_town_site_key] call fnc_site_roster) select { alive _x });
-        [[_i] call fnc_town_site_key] call fnc_site_roster_clear;
+        [[_i] call fnc_town_site_key] call fnc_site_collect;
         // The one place the anchor goes, because the town is no longer enemy ground: whatever
         // it holds next is a new garrison rather than the remains of this one.
         _t set ["baseline", 0];

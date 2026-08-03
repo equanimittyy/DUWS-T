@@ -55,16 +55,26 @@ fnc_site_at = { params ["_key"]; DUWS_sites getOrDefault [_key, createHashMap] }
 //
 // awaitVacate starts latched: an occupant registered under a player's feet would otherwise read them
 // as having just walked up and raise its men around them.
+//
+// awake starts true on a frozen site and false on a streamed one, because it describes what is
+// standing rather than what is wanted: a streamed occupant has spawned nothing yet, while a frozen
+// one is registered around men who already exist and are already simulated. Starting it false would
+// leave the freeze with no transition to make -- the first empty pass would find the field already
+// saying "asleep" and never switch simulation off -- so a base nobody was near when the poller made
+// its first pass would stay fully simulated for the campaign. That is the HQ almost every game: it
+// registers at base build and the poller does not start until zone build-out has finished.
 fnc_site_occupant_register = {
     params ["_key", "_kind", ["_side", EAST], ["_buffer", 400], ["_grace", 120], ["_latch", true],
             ["_aiAware", true], ["_minAI", 2]];
     private _list = DUWS_occupants getOrDefault [_key, []];
     private _i = _list findIf { (_x get "kind") isEqualTo _kind };
     if (_i >= 0) exitWith { _list select _i };
+    private _frozen = (([_key] call fnc_site_at) getOrDefault ["disposal", DISPOSAL_DEFAULT])
+        isEqualTo "freeze";
     private _o = createHashMapFromArray [
         ["kind", _kind], ["side", _side], ["buffer", _buffer], ["grace", _grace],
         ["aiAware", _aiAware], ["minAI", _minAI],
-        ["awake", false], ["seenLast", false], ["emptySince", -1], ["awaitVacate", _latch],
+        ["awake", _frozen], ["seenLast", false], ["emptySince", -1], ["awaitVacate", _latch],
         ["baseline", 0], ["tier", 0], ["deployedList", []], ["deployedStrength", 0],
         ["trg", objNull], ["raising", false], ["withdrawing", false]
     ];
@@ -121,9 +131,16 @@ fnc_site_hasHook = {
 //
 // Held outside the occupant record because a roster is object references, and the record is the half
 // of this that has to survive a save.
+// One derivation of the name, because two readers spell it: the roster itself and the retirement
+// below, which has to unset the variable the roster created.
+fnc_site_roster_var = {
+    params ["_siteKey", ["_kind", "garrison"]];
+    format ["DUWS_siteUnits_%1_%2", _siteKey, _kind]
+};
+
 fnc_site_roster = {
     params ["_siteKey", ["_kind", "garrison"]];
-    private _var = format ["DUWS_siteUnits_%1_%2", _siteKey, _kind];
+    private _var = [_siteKey, _kind] call fnc_site_roster_var;
     private _r = missionNamespace getVariable [_var, []];
     // Stored on first read so every later caller appends into the same array rather than into a
     // copy the next read would discard.
@@ -144,6 +161,59 @@ fnc_site_roster_drop = {
     private _r = [_siteKey, _kind] call fnc_site_roster;
     private _i = _r find _unit;
     if (_i >= 0) then { _r deleteAt _i };
+};
+
+// The ground is gone: a FOB the player removed or an enemy destroyed. Everything keyed to it leaves
+// the store together, because nothing else ever will -- a record left behind goes on being asked
+// whether anybody is standing where the base used to be for the rest of the campaign, and a frozen
+// site pays a spatial query for that answer every pass.
+//
+// Rosters are emptied in place before their variables go, so anything still holding one of those
+// arrays reads it as empty rather than appending into a list nothing will collect.
+fnc_site_retire = {
+    params ["_key"];
+    {
+        private _kind = _x get "kind";
+        [_key, _kind] call fnc_site_roster_clear;
+        missionNamespace setVariable [[_key, _kind] call fnc_site_roster_var, nil];
+    } forEach (DUWS_occupants getOrDefault [_key, []]);
+    DUWS_sites deleteAt _key;
+    DUWS_occupants deleteAt _key;
+    DUWS_siteHooks deleteAt _key;
+};
+
+// Takes an occupant's men off the map along with everything they leave behind.
+//
+// By roster, never by proximity: a radius sweep took a neighbouring town's garrison with it, and
+// that town then measured its survivors against its own baseline, recorded a mauling nobody
+// inflicted, and came back thinned for the rest of the campaign.
+//
+// A vehicle goes only once nothing living is aboard, so a transport the site crewed leaves with its
+// crew while one the player parked in the ring is not on this roster and stays. Groups are swept
+// because not every spawner sets deleteGroupWhenEmpty, and an empty group left behind on every
+// teardown of every site shows up only as a slow drift across a long campaign.
+//
+// A composition member is never taken this way, and the persistent flag is what says so: a zone's
+// turret gunner is on this roster and the thing he is sitting in is the zone's own emplacement, so
+// collecting "the vehicle he was in" once he is gone deletes a gun that was about to be stowed --
+// and a stow skips nulls, so the zone comes back without it, permanently, from its first teardown
+// on. The flag is set by fnc_duws_keep on everything a composition owns and by nothing else.
+fnc_site_collect = {
+    params ["_siteKey", ["_kind", "garrison"]];
+    private _men = ([_siteKey, _kind] call fnc_site_roster) select { !isNull _x };
+    private _vehs = [];
+    private _grps = [];
+    {
+        private _veh = vehicle _x;
+        if (_veh != _x && {!(_veh getVariable ["persistent", false])}) then {
+            _vehs pushBackUnique _veh;
+        };
+        _grps pushBackUnique (group _x);
+    } forEach _men;
+    { deleteVehicle _x } forEach _men;
+    { if (({alive _x} count crew _x) == 0) then { deleteVehicle _x } } forEach _vehs;
+    { if (count units _x == 0) then { deleteGroup _x } } forEach _grps;
+    [_siteKey, _kind] call fnc_site_roster_clear;
 };
 
 // The groups a raise hands back, flattened to the men in them. A roster is a unit list everywhere,
@@ -236,6 +306,11 @@ fnc_site_poller = {
         // occupant says which it wants -- but neither costs a spatial query until somebody is
         // actually within reach of the site being asked about.
         private _west = (allUnits select { side _x == WEST }) apply { getPosATL _x };
+        // The hostile half of the same gate, for the frozen sites below. Built here rather than
+        // asked per site, because a base with nothing near it would otherwise pay a spatial query
+        // every pass for the whole campaign -- and with the HQ plus a FOB per zone and a half, that
+        // is more of them than the per-zone threads this poller replaced ever ran.
+        private _east = (allUnits select { side _x == EAST }) apply { getPosATL _x };
         private _now = time;
         private _t0 = diag_tickTime;
 
@@ -277,7 +352,11 @@ fnc_site_poller = {
                 // test cannot answer it -- its AI arm exists to notice BLUFOR arriving on OPFOR
                 // ground, so at a friendly base it would count the garrison standing in the middle
                 // of the radius and never let it sleep.
-                if (_frozen && {!_here}) then {
+                //
+                // Gated by the cheap list first, the same way the BLUFOR arm is: the helper still
+                // decides, because it resolves crew and filters the dead where a bare unit list
+                // does neither, but it is only reached where somebody is actually within range.
+                if (_frozen && {!_here} && {(_east findIf { _x distance _pos < _ring }) >= 0}) then {
                     _here = ([_pos, _ring] call fnc_opfor_count_at) > 0;
                 };
 

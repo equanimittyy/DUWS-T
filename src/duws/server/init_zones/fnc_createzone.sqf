@@ -123,6 +123,9 @@ if (_prefab) then {
 // Declared out here because both branches below set it and the store at the zone key reads it:
 // a first assignment inside an if-block would be local to that block.
 private _prefabName = "";
+// The handle of the composition builder, for the opening stow further down to wait on. Same reason
+// as the name above: both branches spawn one.
+private _prefabScript = scriptNull;
 
 // CREATE PREFAB
 if (_prefab) then {
@@ -159,7 +162,7 @@ if (_prefab) then {
 	_fortified = _prefab_array select 1;
 	_path = _prefab_array select 2;
 
-	[_zonePos] spawn _path;
+	_prefabScript = [_zonePos] spawn _path;
 	str(_markername) setMarkerText format["%1 (%2)", _name, _prefabName];
 
 } else {
@@ -172,7 +175,7 @@ if (_prefab) then {
 	_fortified = _prefab select 1;
 	_path = _prefab select 2;
 
-	[_zonePos] spawn _path;
+	_prefabScript = [_zonePos] spawn _path;
 	str(_markername) setMarkerText format["%1 (%2)", _name, _prefabName];
 };
 
@@ -280,6 +283,13 @@ _occ set ["minAIHold", 1];
 // exists to remove. The tick cannot do it: its despawn branch is only reachable once a zone has been
 // raised, and a zone nobody has visited never has been. One AI is enough here, because stowing a zone
 // somebody is already standing in would deploy it again on the next pass.
+//
+// Held until the builder has finished, and that wait is the whole point of it. The prefab is a
+// spawned script that places its props, sleeps, places its weapons, sleeps again and only then crews
+// them, so a stow racing it finds nothing filed under the key yet and returns false without a word --
+// leaving the composition and its gunners standing for the campaign. The markers and triggers above
+// are deliberately not behind this: only the stow needs the composition to exist.
+waitUntil { scriptDone _prefabScript };
 if !([_spawnPos, _size + 400, 1] call fnc_duws_bluforNear) then {
 	[_zoneKey] call DUWS_fnc_zoneStow;
 };
