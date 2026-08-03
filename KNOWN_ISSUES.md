@@ -32,6 +32,14 @@ Currently testing:
 - Stand on a zone and step off mid-count: a flat 30 s every time, restarting on the step off
 - Clear a town below -10: `cleared at tier N; rep R + 5, garrison broken to 0.3 and regrouping`, and both purchase sinks refused for the 3 h
 - Visit several towns on a 40-zone campaign: every town garrisons, not only the first — one poller replaced a thread apiece
+- Walk into a dormant zone, then fly across a second one without stopping: the first deploys, the second stays empty — the raise reconfirms after five seconds
+- Stop between a banded town's two rings, then send an AI squad in alone: the garrison raises both times, the streets fill neither
+- Recruit a civilian, leave the town for a minute and come back: he is still in the squad
+- Run a side mission that lands on a town or zone disc: the garrison is standing when it cleans up, and the town is not thinned on the next visit
+- Redeploy into a base nobody is near: the guards are moving when you land, not statues
+- Walk 500 m from a FOB and back: the perimeter patrol, the turret gunners and the ring guards all carry on rather than standing still
+- Build a FOB and then remove it, grepping `site pass:` at log level 4 either side: the site count rises by one and falls back, and the pass stays far short of a frame
+- Start a campaign on a map where no civilian town qualifies: zone garrisons still spawn
 - Click zones and towns on the map: a roman tier on both, and on a zone the composition kind beside the callsign over a twenty-segment strength bar, refreshed on opening the map
 - Click through the request menu: nothing clipped, only Squad Manager / FOB Manager / Special Operatives close it, costed entries orange
 - Start a campaign in each game mode: zombie factions filtered out of the other picks, and Zombies with neither Ravage nor WBK falling back to DUWS
@@ -81,33 +89,69 @@ rather than merely untuned. Everything downstream of a capture is unexercised wi
 
 ## Presence streaming: one system, none of it played
 
-Zones, town garrisons, town crowds, FOBs and the HQ used to answer "is a player near" in five
-separate loops; they are one poller over one store now, and nothing in it has been played. The
-behaviour-neutral steps are the cheap checks -- any observed change is a fault -- and the rest each
-changed one thing on purpose.
+Zones, town garrisons, town crowds and FOBs each used to answer "is a player near" in a loop of its
+own, and the HQ never answered it at all; they are one poller over one store now, and nothing in it
+has been played. Most of the merge was meant to be behaviour-neutral, so an observed change is a
+fault rather than a tuning question -- where something changed on purpose, the check says so.
 
-- [ ] Watch a zone through a full cycle: `deployed N men at tier` on arrival, `packed up holding X of
-      Y` on leaving, the same figure back on return. The man count must not move between a fresh
-      campaign and the first visit; the composition tables were re-cut under it and that line is what
-      proves the re-cut was even
+**The shared poller.** One thread services every site, so these two fail everywhere at once and are
+worth running before anything below them.
+
 - [ ] Grep a session for `site pass:` at log level 4. It reports how many sites were serviced and how
       long the pass took. That figure is the whole bet: one thread now walks every site, and
       scheduled scripts share about 3 ms a frame between them, so a pass creeping toward a frame
       means per-site work has crept back inline where only a gate belongs
+- [ ] Start a campaign on a map where no civilian town qualifies. Zone garrisons must still spawn:
+      the poller starts after civilian init rather than inside it, and inside it a map with no towns
+      returned before the poller ever started
+
+**Streaming: taken off the map and rebuilt.** Zones and towns. What makes a teardown safe here is the
+roster -- a site collects the men it raised and nothing else -- and a radius sweep in its place is
+what once took a neighbouring town's garrison with it and left that town thinned for the campaign.
+
+- [ ] Watch a zone through a full cycle: `deployed N men at tier` on arrival, `packed up holding X of
+      Y` on leaving, the same figure back on return. The man count must not move between a fresh
+      campaign and the first visit; the composition tables were re-cut under it and that line is what
+      proves the re-cut was even. Then fly across a second dormant zone without stopping and nothing
+      may spawn: the raise confirms presence again after a five-second pause, and that pause is all
+      that stands between a helicopter transiting and a whole composition being built under it
+- [ ] Stand between a banded town's two rings -- inside 400 m of its edge, outside 200 m -- and the
+      garrison must raise while the streets stay empty. Then send an AI squad in with no player near
+      for the sharper half: a garrison answers to any BLUFOR and a crowd only to players, so a town
+      that fills for an AI patrol has lost the per-occupant split the merge was for. One town, two
+      occupants, and every presence setting different between them is the design under test
+- [ ] Recruit a civilian, leave the town for a minute, come back. He must still be in the squad. A
+      crowd is torn down by roster rather than by radius, so a man who changes hands has to leave
+      that roster as he joins (`server/misc/fnc_recruit_civilian_server.sqf:55`) -- a drop that
+      misses deletes a man standing in the player's own squad
+- [ ] Run a side mission that lands on a town or zone disc and complete it. The garrison must be
+      standing afterwards, and the town must not come back thinned on the next visit. Mission
+      teardown is a blunt radius delete that now spares whatever the site store owns, rather than
+      whatever carries a flag each spawner had to remember to stamp; a miss reads as a mauling
+      nobody inflicted, and the town measures every later visit against it
+- [ ] Take a zone and watch the survivors walk off rather than vanish. They are collected once no
+      player is within 500 m, retried every pass, so one somebody is standing over goes when they
+      leave rather than never
+
+**Freezing: left standing with simulation off.** FOBs and the HQ, where a rebuild would hand back
+every soldier the player had lost and every point of damage a building had taken.
+
 - [ ] **The freeze rests on one assumption -- that a unit resumes cleanly** from
       `enableSimulationGlobal false` -- and every base garrison depends on it. Freeze a man
       mid-patrol, a man posed at a turret and a man walking a fortification ring, thaw all three, and
       confirm each carries on rather than standing still or losing its waypoints. Walking 500 m from
       a FOB and back is the whole test
+- [ ] Redeploy or respawn into a base nobody is near. A base thaws on a poller pass and the poller
+      runs every ten seconds, so an arrival with no approach to notice can land inside a frozen one.
+      Whether that reads as a beat of stillness or as ten seconds of statues decides whether the wake
+      has to hang off the arrival as well as off the pass
 - [ ] Attack a FOB or the HQ with no player near it, once anything attacks a base. A frozen site
       wakes on hostiles as well as players, which is dormant until the OPFOR commander ships, and a
       base that cannot be woken by an attacker loses itself while nobody is looking
-- [ ] Take a zone and watch the survivors walk off rather than vanish. They are collected once no
-      player is within 500 m, retried every pass, so one somebody is standing over goes when they
-      leave rather than never
-- [ ] Start a campaign on a map where no civilian town qualifies. Zone garrisons must still spawn:
-      the poller starts after civilian init rather than inside it, and inside it a map with no towns
-      returned before the poller ever started
+- [ ] Build a FOB and then remove it, reading `site pass:` either side. The count must rise by one
+      and fall back. A record left behind goes on asking whether anybody is standing where the base
+      used to be for the rest of the campaign, and a frozen one pays a spatial query for the answer
+      every pass -- both removal paths funnel through one function, so a leak here leaks on both
 
 **What the tables now decide, and nobody has tuned.** Two figures were made visible by the merge
 rather than chosen by it, and both want play behind them before anyone moves them:
