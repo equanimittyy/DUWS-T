@@ -63,13 +63,6 @@ if (!_networked) then {
 private _name = typeOf _target;
 if (_name isEqualTo "") then { _name = str _target };
 
-// Logged as well as hinted: the hint is gone in four seconds and the client-side probe in
-// client/misc/fnc_intel_search_action.sqf reports the other half of this from the machine that
-// draws the action. Both halves in one RPT is what pairs a write against the read that refused it.
-["INFO", "INTEL", format ["debug flag: %1 (netId %2) as '%3'; stuck=%4, networked=%5",
-    _name, netId _target, _source,
-    (_target getVariable ["DUWS_search_src", ""]) isEqualTo _source, _networked]] call fnc_log;
-
 [format [
     "Search flag (debug)\n\n%1\nflagged as '%2'\nWeights: %3\n\n%4\n\nThe claim is taken on the server and broadcast, so the\nfirst player to finish the hold spends it for everyone.",
     _name,

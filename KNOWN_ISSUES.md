@@ -153,8 +153,8 @@ rather than chosen by it, and both want play behind them before anyone moves the
 Five separate faucets became one two-roll path, and the rewrite deleted seven functions, so a
 failure here is more likely to be something missing than something wrong.
 
-- [ ] Clear a garrison and search bodies. Half of them carry the action, the static crews among
-      them; a garrison offering none at all is the flag not reaching them rather than a cold run
+- [ ] Clear a garrison and search bodies. The action appears, so what is left to confirm is the
+      proportion: half of them carry it, the static crews among them
 - [ ] Play far enough to exhaust the intel pool, then search a flagged body. It must speak an
       outcome. Silence means the payout re-draw is not dropping the dry kind
 - [ ] On a dedicated server with two clients, have one player search a body and send the other over
@@ -166,20 +166,6 @@ failure here is more likely to be something missing than something wrong.
 - [ ] Complete a rescue-pilot and a rescue-squad mission on a dedicated server and confirm each
       reveals a zone. These two pay on completion rather than through a search, so the rewrite did
       not touch them; they are the two sites that never paid out at all
-- [ ] Flag an object through Debug -> "Flag cursor object as searchable", then stand within 3 m of
-      it and look at it. The hint returning with the right object name rules out every exit in the
-      flag path -- it prints last, after the write -- so the flag lands and the failure is
-      downstream in the hold action's condition (`client/misc/fnc_intel_search_action.sqf:30-37`).
-      The flag now reads its own variable back and names the object's network id, so the hint
-      itself reports which of the two remaining causes it is
-- [ ] Grep that session's `.rpt` for `\[INTEL\]`. Three lines settle it between them: `search hold
-      action added` proves the action exists at all and on which machine, `debug flag:` reports
-      `stuck=` and `networked=` for the write, and the probe reports the first clause to refuse each
-      time the player comes within 3 m of something. `stuck=true` beside a `DUWS_search_src is
-      empty` refusal is a locality split -- the write and the read are on different machines
-- [ ] Search an enemy body after a firefight. This is the discriminating run: no action there
-      either means the condition fails for every target and the search system is broken rather than
-      the debug tool, which would make the unexercised checks above failures rather than gaps
 - [ ] Run any side mission and look at the map the moment the task lands. An `hd_objective` icon and
       the area ellipse around it must both be drawn. The icon is the half that was missing: it was
       deleted on the reasoning that the task's own marker had replaced it, and a task marker is drawn
