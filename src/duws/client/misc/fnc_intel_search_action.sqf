@@ -60,3 +60,49 @@ private _id = [
 ] call BIS_fnc_holdActionAdd;
 
 player setVariable ["DUWS_intel_search_actionId", _id];
+["INFO", "INTEL", format ["search hold action added, id %1", _id]] call fnc_log;
+
+// Debug only. The condition above is silent by construction: an action that does not show reports
+// nothing, so a flag that never reached the object and a condition refusing a flag that did look
+// identical from the player's side. This names the first clause that refuses.
+//
+// Reported once per change rather than once per evaluation -- the condition is re-read many times a
+// second, and a line per read would bury the rest of the RPT. Silent unless the player is within
+// reach of something, which is the only range at which the answer means anything.
+//
+// A separate loop rather than a log inside the condition itself: the condition runs on every nearby
+// object every frame, and it must stay cheap and must never throw. The clauses are duplicated here
+// knowingly -- the copy is debug-only, and wiring the live one to report would slow the real path.
+if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1
+    && {(vehiclevarname player) in game_master}) then {
+    [] spawn {
+        scriptName "Intel search condition probe";
+        private _last = "";
+        while { true } do {
+            sleep 1;
+            private _o = cursorObject;
+            private _why = call {
+                // Out of reach or nothing under the cursor: not an answer, so say nothing.
+                if (isNull _o || {_o distance player >= 3}) exitWith { "" };
+                if ((_o getVariable ["DUWS_search_src", ""]) isEqualTo "") exitWith {
+                    "refused: DUWS_search_src is empty, the flag never reached this object"
+                };
+                if (_o getVariable ["DUWS_search_done", false]) exitWith {
+                    "refused: DUWS_search_done is true, this one is already spent"
+                };
+                if (_o isKindOf "CAManBase" && {alive _o}
+                    && {!(_o getVariable ["isSurrendered", false])}) exitWith {
+                    "refused: a living man is excluded until surrendered"
+                };
+                "shows"
+            };
+            if !(_why isEqualTo _last) then {
+                _last = _why;
+                if !(_why isEqualTo "") then {
+                    ["INFO", "INTEL", format ["search action on %1 (netId %2): %3",
+                        typeOf _o, netId _o, _why]] call fnc_log;
+                };
+            };
+        };
+    };
+};
