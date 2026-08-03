@@ -828,6 +828,27 @@ completion signal for cleanup. Gate deletion on something the engine cannot with
 travelled plus a hard time cap — the way `fnc_helotaxi.sqf` does, which waits only for the
 helicopter to clear 100 m of the player and then deletes on a fixed timer.
 
+## `moveInGunner` reports nothing when it fails, and the man is left standing where he spawned
+
+**`moveInGunner` returns no value and raises no error. A static weapon whose gunner memory point
+is inside the ground or clutter it was placed on refuses the seat, and the only way to know is to
+read the seat back off the gun: `gunner _gun isEqualTo _unit`.**
+
+The failure is quiet in the worst way, because the man is not lost — he is standing beside his gun,
+alive, on the garrison roster and counted toward the zone's peak. So the zone is weaker than its own
+count says, capture is denied by a defender who is not defending anything, and the log records a
+garrison that deployed at full strength. A deploy line counts what was *raised*, not what was
+*ordered*, so nothing in the RPT separates a stranded pair from one still walking into position.
+
+The same applies to `moveInDriver` / `moveInCargo` / `moveInTurret`: none of them report.
+
+**How to apply:** never treat the command as the end of the operation. Seat, read the seat back,
+and retry — lifting the gun slightly each pass, since a gun dropped *onto* its ground takes the
+seat a gun sunk *into* it refuses. `DUWS_fnc_manStatic`
+(`server/init_zones/fnc_zone_stream_init.sqf`) does three passes and then deletes the man rather
+than leaving him standing, logging a `WARN` naming the gun; the emplacement stays as scenery the
+player can use.
+
 ## `doStop` outlives the orders it was issued against, and new waypoints do not release it
 
 **A unit under `doStop` ignores its group's waypoints until it is given a move order of its own.

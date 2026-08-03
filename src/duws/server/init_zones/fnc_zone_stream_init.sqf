@@ -20,6 +20,51 @@ if (!isServer) exitWith {};
 // Where a raise files its result for the tick to adopt. Unset while the worker is in flight.
 #define ZONE_RAISE_SLOT(K) format ["DUWS_zoneRaise_%1", K]
 
+// How many times an emplacement is tried before it is given up on, and how far the gun is lifted
+// between attempts.
+#define STATIC_MAN_ATTEMPTS 3
+#define STATIC_MAN_LIFT 0.15
+
+// Seats one man on one gun and answers with the gunner, or objNull when it could not be done.
+//
+// moveInGunner reports nothing either way, so whether the man actually took the seat can only be
+// read back off the gun. A static settled into terrain or composition clutter refuses its gunner
+// memory point silently, which is what left a pair of soldiers standing beside their guns for the
+// rest of a campaign: each had been spawned, rostered and counted toward the garrison's peak, so
+// the failure both weakened the zone and left a statue for the player to walk up to.
+DUWS_fnc_manStatic = {
+    params ["_gun", "_grp", "_unit"];
+    if (isNull _gun || {isNull _grp}) exitWith { objNull };
+
+    for "_try" from 1 to STATIC_MAN_ATTEMPTS do {
+        // Replaced rather than abandoned: the gun is a defence the zone is still counting on, and
+        // the man may have been shot between the spawn and the seating.
+        if (isNull _unit || {!alive _unit}) then {
+            _unit = _grp createUnit [opfor_SOLDIER_X, getPos _gun, [], 0, "NONE"];
+        };
+        // A gun the player destroyed stays destroyed -- compositions are persistent, and rebuilding
+        // one here would hand back ground that was already taken.
+        if (isNull _unit || {!alive _gun}) exitWith {};
+
+        _unit moveInGunner _gun;
+        if (gunner _gun isEqualTo _unit) exitWith {};
+
+        // Lifted a little further each pass. A gun whose gunner point sits inside the ground it was
+        // placed on takes the seat once it is dropped onto that ground rather than into it.
+        _gun setPosATL ((getPosATL _gun) vectorAdd [0, 0, STATIC_MAN_LIFT * _try]);
+    };
+
+    if (!isNull _unit && {alive _gun} && {gunner _gun isEqualTo _unit}) exitWith { _unit };
+
+    ["WARN", "ZONES", format ["emplacement %1 took no gunner in %2 tries; left unmanned",
+        typeOf _gun, STATIC_MAN_ATTEMPTS]] call fnc_log;
+    // Deleted rather than left standing. He is about to go on the roster and count toward the peak,
+    // and an unrostered-looking man beside a gun he never entered denies the zone its capture while
+    // reading as a bug. The gun stays: an empty emplacement is ground the player can use.
+    if (!isNull _unit) then { deleteVehicle _unit };
+    objNull
+};
+
 // Zone turrets get their gunners from the prefab at build time, and the prefab never runs again --
 // so a composition that has been stowed comes back with empty guns unless they are re-crewed here.
 // Skipped once the zone is BLUFOR's: the emplacements are then the player's to use, which is the
@@ -53,8 +98,7 @@ DUWS_fnc_zoneManStatics = {
     // Indexed off the spawned group rather than assumed one-to-one: a group that came back short
     // would otherwise throw here every despawn cycle for the rest of the campaign.
     {
-        private _unit = (units _grp) param [_forEachIndex, objNull];
-        if (!isNull _unit) then { _unit moveInGunner _x };
+        [_x, _grp, (units _grp) param [_forEachIndex, objNull]] call DUWS_fnc_manStatic;
     } forEach _guns;
     // On the roster like everything DUWS_fnc_raiseGarrison raises: these are the zone's garrison
     // too, and a blunt radius sweep has no other way to know it.
