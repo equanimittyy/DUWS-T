@@ -711,20 +711,6 @@
                 <Original>Define what level of Zeus is allowed</Original>
                 <English>Define what level of Zeus is allowed</English>
             </Key>
-            <Key ID="STR_DUWS_T_9ot9nlls">
-                <German>VCOM AI: Aktiviere das in DUWS_T eingebaute Skript</German>
-                <Spanish>VCOM AI: Usar el script construído en DUWS_T</Spanish>
-                <Chinesesimp>VCOM AI：启动DUWS_T内置模块</Chinesesimp>
-                <Original>VCOM AI: Enable DUWS_T built-in script</Original>
-                <English>VCOM AI: Enable DUWS_T built-in script</English>
-            </Key>
-            <Key ID="STR_DUWS_T_jllmqv3h">
-                <German>Schalte VCOM AI an oder aus</German>
-                <Spanish>Decida si usará VCOM AI</Spanish>
-                <Chinesesimp>开启或关闭VCOM AI</Chinesesimp>
-                <Original>Turn VCOM AI On or Off</Original>
-                <English>Turn VCOM AI On or Off</English>
-            </Key>
             <Key ID="STR_DUWS_T_9f7m3bn3">
                 <German>Zeit-Multiplikator</German>
                 <Spanish>Multiplicador de tiempo</Spanish>
@@ -1010,13 +996,6 @@
                 <Chinesesimp>地中海的男性和女性(需要Max_Women)</Chinesesimp>
                 <Original>Mediterranean Males and Females (Requires Max_Women)</Original>
                 <English>Mediterranean Males and Females (Requires Max_Women)</English>
-            </Key>
-            <Key ID="STR_DUWS_T_l81ldgc6">
-                <German>VCOM AI Mod erkannt</German>
-                <Spanish>Mod VCOM AI detectado</Spanish>
-                <Chinesesimp>检测到了VCOM AI 模组</Chinesesimp>
-                <Original>VCOM AI mod detected</Original>
-                <English>VCOM AI mod detected</English>
             </Key>
             <Key ID="STR_DUWS_T_lez0jp04">
                 <German>PrOpfor Europa (Kalt)</German>
@@ -1377,13 +1356,6 @@
                 <Original>Calculating HQ Locations.</Original>
                 <English>Calculating HQ Locations.</English>
             </Key>
-            <Key ID="STR_DUWS_T_1dd56l85">
-                <German>Passende Position gefunden: %1</German>
-                <Spanish>Encontrada Posición segura: %1</Spanish>
-                <Chinesesimp>找到有效位置: %1</Chinesesimp>
-                <Original>Found safe position: %1</Original>
-                <English>Found safe position: %1</English>
-            </Key>
             <Key ID="STR_DUWS_T_2f55ngq1">
                 <German>ZUFÄLLIGES HQ</German>
                 <Chinesesimp>随机总部位置</Chinesesimp>
@@ -1433,13 +1405,6 @@
                 <Original>Choose a location for zone #%1...</Original>
                 <English>Choose a location for zone #%1...</English>
             </Key>
-            <Key ID="STR_DUWS_T_bsxj4ef9">
-                <German>Ungültige Position, zu nah an letzten Zonen oder einer FOB.</German>
-                <Spanish>Posición inválida, demaciado cerca a una zona anterior o un puesto de avanzada</Spanish>
-                <Chinesesimp>位置无效，离上一个的战区或离FOB太近。</Chinesesimp>
-                <Original>Invalid position, too close to previous zones or a FOB</Original>
-                <English>Invalid position, too close to previous zones or a FOB</English>
-            </Key>
             <Key ID="STR_DUWS_T_blz9jyju">
                 <German>Ungültige Position, die Position muss eben und frei von Objekten sein</German>
                 <Spanish>Posición inválida, el lugar debe ser plano y no debe haber objetos cerca</Spanish>
@@ -1460,13 +1425,6 @@
                 <Chinesesimp>位置无效，唯一的好位置是在路上</Chinesesimp>
                 <Original>Invalid position: a valid spot must be on a road.</Original>
                 <English>Invalid position: a valid spot must be on a road.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_1vp3mgnc">
-                <German>Wir haben eine der feindlichen Zonen aufgeklärt. Überprüfe die Position auf deiner Karte.</German>
-                <Spanish>Encontramos una de las zonas enemigas. Revise su mapa.</Spanish>
-                <Chinesesimp>我们发现了一个敌区。查看地图。</Chinesesimp>
-                <Original>We found one of the enemy zones. Check your map</Original>
-                <English>We found one of the enemy zones. Check your map</English>
             </Key>
             <Key ID="STR_DUWS_T_eggxrcci">
                 <German>Die Zonen werden generiert. Wenn eine max. Distanz über 10km (Urban) gewählt wurde, kann dies länger als 30 Sekunden dauern. Bitte warte bis die Initialisierung der Mission abgeschlossen wurde.</German>
@@ -1516,20 +1474,6 @@
                 <Chinesesimp>系统正为任务物件寻找安全放置位置，请稍等...可能会很久。</Chinesesimp>
                 <Original>Finding a safe placement for mission objects. This can take a while.</Original>
                 <English>Finding a safe placement for mission objects. This can take a while.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_ma8d1xaz">
-                <Spanish>ZONAS COMPLETAS, Por favor espere mientras limpiamos el desastre.</Spanish>
-                <German>ZONEN VOLLSTÄNDIG, Bitte warte bis wir die Unordnung beseitigt haben.</German>
-                <Chinesesimp>战区完成，请等待清理缓存。</Chinesesimp>
-                <Original>ZONES COMPLETE</Original>
-                <English>ZONES COMPLETE</English>
-            </Key>
-            <Key ID="STR_DUWS_T_zt70beop">
-                <Spanish>Espere</Spanish>
-                <German>BEREITHALTEN</German>
-                <Chinesesimp>等待</Chinesesimp>
-                <Original>HANG ON</Original>
-                <English>HANG ON</English>
             </Key>
             <Key ID="STR_DUWS_T_zu4bxt24">
                 <Spanish>Prepárese. Teletransportando jugador.</Spanish>
@@ -1581,11 +1525,6 @@
                 <Original>Challenge failed: a player went down in the course. No CP awarded.</Original>
                 <English>Challenge failed: a player went down in the course. No CP awarded.</English>
                 <Chinese>挑战失败：有玩家在场地内阵亡，不获得CP。</Chinese>
-            </Key>
-            <Key ID="STR_DUWS_KILLHOUSE_START_TRAINING">
-                <Original>Start Killhouse Drill</Original>
-                <English>Start Killhouse Drill</English>
-                <Chinese>杀人屋训练</Chinese>
             </Key>
             <Key ID="STR_DUWS_KILLHOUSE_TELEPORT_A">
                 <Original>Killhouse A</Original>
@@ -1907,11 +1846,6 @@
                 <Original>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of Altis and the campaign is lost.</Original>
                 <English>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of Altis and the campaign is lost.</English>
             </Key>
-            <Key ID="STR_DUWS_T_repair_purchased">
-                <Original>Vehicle Modification Station can perform minimal repairs on severely damaged vehicles (component damage over 70%) and fully refuel them. For full repairs or additional rearming, you still need a dedicated repair/ammo vehicle.</Original>
-                <English>Vehicle Modification Station can perform minimal repairs on severely damaged vehicles (component damage over 70%) and fully refuel them. For full repairs or additional rearming, you still need a dedicated repair/ammo vehicle.</English>
-                <Chinesesimp>载具改装站能对严重受损的载具(部件伤害大于70%)进行最低限度的维修，并为其加满油。若需要完整的维修或弹药补给，你仍需要购买专用的维修/弹药载具。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_repair_no_need">
                 <Original>Vehicle status does not meet repair standards (fuel ≤ 80% and component damage over 70%). Repair unavailable.</Original>
                 <English>Vehicle status does not meet repair standards (fuel ≤ 80% and component damage over 70%). Repair unavailable.</English>
@@ -1954,13 +1888,6 @@
                 <Original>Game time has advanced by 3 hrs.</Original>
                 <English>Game time has advanced by 3 hrs.</English>
             </Key>
-            <Key ID="STR_DUWS_T_QUICK_CHANGE">
-                <Original>Quick gear up</Original>
-                <English>Quick gear up</English>
-                <German>Schnelles Ausrüsten</German>
-                <Spanish>Equipamiento rápido</Spanish>
-                <Chinesesimp>快速整备</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_QUICK_KITS">
                 <Original>Quick Kits</Original>
                 <English>Quick Kits</English>
@@ -1983,20 +1910,6 @@
                 <German>Gewechselt zu %1</German>
                 <Spanish>Cambiado a %1</Spanish>
                 <Chinesesimp>已换装为 %1</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_xvtn4llz">
-                <German>&lt;t color='#ff1111'&gt;Ersetze Verteidigung (5CP) &lt;/t&gt;</German>
-                <Spanish>&lt;t color='#ff1111'&gt;Reemplazar defensas (5CP) &lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#ff1111'&gt;重置防御 (5CP) &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#ff1111'&gt;Replace Defences (5 CP) &lt;/t&gt;</Original>
-                <English>&lt;t color='#ff1111'&gt;Replace Defences (5 CP) &lt;/t&gt;</English>
-            </Key>
-            <Key ID="STR_DUWS_T_qxhure3n">
-                <German>&lt;t color='#ff1111'&gt;Ersetze Wachen (20CP) &lt;/t&gt;</German>
-                <Spanish>&lt;t color='#ff1111'&gt;Reemplazar guardias (20CP) &lt;/t&gt;</Spanish>
-                <Chinesesimp>&lt;t color='#ff1111'&gt;重置守军 (20CP) &lt;/t&gt;</Chinesesimp>
-                <Original>&lt;t color='#ff1111'&gt;Replace Guards (20 CP) &lt;/t&gt;</Original>
-                <English>&lt;t color='#ff1111'&gt;Replace Guards (20 CP) &lt;/t&gt;</English>
             </Key>
             <Key ID="STR_DUWS_T_vw32hahc">
                 <German>ANFORDERUNGS MENÜ</German>
@@ -2067,11 +1980,6 @@
                 <English>Detected loadout change, enforcing full restricted check.</English>
                 <Chinesesimp>检测到大幅度换装，正在执行检查</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_ARSENAL_EXIT_LARGE_CHANGE">
-                <Original>Exit check: loadout change, enforcing full restricted check</Original>
-                <English>Exit check: loadout change, enforcing full restricted check</English>
-                <Chinesesimp>退出检查：检测到大幅度换装，正在执行检查</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_ARSENAL_EXIT">
                 <Original>Arsenal enforcer exit.</Original>
                 <English>Arsenal enforcer exit.</English>
@@ -2086,11 +1994,6 @@
                 <Original>[Arsenal] %1 restricted items removed.</Original>
                 <English>[Arsenal] %1 restricted items removed.</English>
                 <Chinesesimp>[军火库] 已移除 %1 个受限物品。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_ARSENAL_FULL_MONEY_REMOVED">
-                <Original>[Arsenal] %1 money/intel items removed</Original>
-                <English>[Arsenal] %1 money/intel items removed</English>
-                <Chinesesimp>[完整军火库] 已移除 %1 个钱币/情报物品。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_FULL_ARSENAL_ONCE">
                 <Original>Full Arsenal</Original>
@@ -2197,11 +2100,6 @@
                 <English>Disguise active. Keep your distance, hold fire.</English>
                 <Chinesesimp>敌人伪装已激活。远离敌人，非必要情况下不要随意开火。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ohno">
-                <Original>Damn. We're blown...</Original>
-                <English>Damn. We're blown...</English>
-                <Chinesesimp>操！糟了...</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_RADIO_1">
                 <Original>Delta 1-3, this is Siren 1-4. Form up on me, over.</Original>
                 <English>Delta 1-3, this is Siren 1-4. Form up on me, over.</English>
@@ -2226,11 +2124,6 @@
                 <Original>All units, this is HQ. Delta 1-3 is presumed KIA. Assume BLUFOR saboteurs are in the area. Stay sharp.</Original>
                 <English>All units, this is HQ. Delta 1-3 is presumed KIA. Assume BLUFOR saboteurs are in the area. Stay sharp.</English>
                 <Chinesesimp>"总部呼叫所有单位，德尔塔1-3疑似已经在行动中阵亡！蓝军的渗透部队很可能在周围活动！保持警惕！"</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_RADIO_TITLE">
-                <Original>Enemy Radio</Original>
-                <English>Enemy Radio</English>
-                <Chinesesimp>敌军无线电</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_WARNING">
                 <Original>Too close to an enemy. Move away within 5 seconds or you are exposed.</Original>
@@ -2272,11 +2165,6 @@
                 <English>Disguise broken: NVGs not enemy issue.</English>
                 <Chinesesimp>伪装暴露：你装备了非敌军夜视仪。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_VEHICLE">
-                <Original>Disguise broken: You entered a vehicle</Original>
-                <English>Disguise broken: You entered a vehicle</English>
-                <Chinesesimp>伪装暴露：你进入了载具。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_EXPIRED">
                 <Original>Enemy disguise expired. You are now vulnerable.</Original>
                 <English>Enemy disguise expired. You are now vulnerable.</English>
@@ -2287,20 +2175,10 @@
                 <English>Enemy disguise cooldown: %1 min %2 sec remaining</English>
                 <Chinesesimp>敌人伪装冷却剩余：%1 分 %2 秒。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_IN_VEHICLE">
-                <Original>Cannot disguise: You are inside a vehicle</Original>
-                <English>Cannot disguise: You are inside a vehicle</English>
-                <Chinesesimp>无法伪装：你正在载具内。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_NO_ENEMY_DATA">
                 <Original>Enemy gear data not yet available.</Original>
                 <English>Enemy gear data not yet available.</English>
                 <Chinesesimp>敌军装备数据不可用，请稍等。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_NO_UNIFORM">
-                <Original>You must wear an enemy uniform</Original>
-                <English>You must wear an enemy uniform</English>
-                <Chinesesimp>你必须穿着敌军制服。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_NO_VEST">
                 <Original>You must wear an enemy vest.</Original>
@@ -2316,11 +2194,6 @@
                 <Original>You must equip an enemy primary weapon.</Original>
                 <English>You must equip an enemy primary weapon.</English>
                 <Chinesesimp>你必须装备敌军主武器。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_WRONG_UNIFORM">
-                <Original>Your uniform does not match the enemy's</Original>
-                <English>Your uniform does not match the enemy's</English>
-                <Chinesesimp>你的制服不是敌军类型。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_WRONG_VEST">
                 <Original>Your vest does not match the enemy's.</Original>
@@ -2369,11 +2242,6 @@
                 <English>Disguise broken: Too close to a corpse.</English>
                 <Chinesesimp>伪装暴露：附近有尸体。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_ZONE">
-                <Original>Disguise broken: Too close to an enemy zone center</Original>
-                <English>Disguise broken: Too close to an enemy zone center</English>
-                <Chinesesimp>伪装暴露：距离战区中心过近。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_NVG">
                 <Original>Disguise broken: Night vision goggles detected.</Original>
                 <English>Disguise broken: Night vision goggles detected.</English>
@@ -2400,11 +2268,6 @@
                 <English>Disguise cooldown: %1 min %2 sec remaining</English>
                 <Chinesesimp>伪装冷却剩余：%1 分 %2 秒。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_SUCCESS_SUB">
-                <Original>You are now disguised as a civilian</Original>
-                <English>You are now disguised as a civilian</English>
-                <Chinesesimp>你已伪装成平民。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_HINT">
                 <Original>The enemy is getting suspicious of you. Move away to a safe distance to maintain your disguise.</Original>
                 <English>The enemy is getting suspicious of you. Move away to a safe distance to maintain your disguise.</English>
@@ -2414,16 +2277,6 @@
                 <Original>Disguise activated. Stay low.</Original>
                 <English>Disguise activated. Stay low.</English>
                 <Chinesesimp>伪装已激活。保持低调。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_RENEWED_DESC">
-                <Original>Your disguise has been refreshed with new clothing and a backpack</Original>
-                <English>Your disguise has been refreshed with new clothing and a backpack</English>
-                <Chinesesimp>你的伪装已更新，换上了新的服装和背包。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_HAS_INTEL">
-                <Original>Cannot disguise: You are carrying money or intel items. Store them in the base supply crate first, or just drop them</Original>
-                <English>Cannot disguise: You are carrying money or intel items. Store them in the base supply crate first, or just drop them</English>
-                <Chinesesimp>无法伪装：你身上携带有钱币或情报物品。请先将它们存入基地的补给箱内，或先扔到地上。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_WARNING_1">
                 <Original>Hey, you! What are you doing sneaking around here?</Original>
@@ -2465,11 +2318,6 @@
                 <English>Disguise broken: Weapon detected.</English>
                 <Chinesesimp>伪装暴露：携带武器。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_BROKEN_GEAR">
-                <Original>Disguise broken: Military gear detected</Original>
-                <English>Disguise broken: Military gear detected</English>
-                <Chinesesimp>伪装暴露：身穿军用装备。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_DISTANCE">
                 <Original>Disguise broken: Too close to enemy.</Original>
                 <English>Disguise broken: Too close to enemy.</English>
@@ -2484,16 +2332,6 @@
                 <Original>Disguise broken: Recognised by the locals here.</Original>
                 <English>Disguise broken: Recognised by the locals here.</English>
                 <Chinesesimp>伪装暴露：负声望进入城镇——你的伪装在居住当地多年的民众面前不值一提。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_ALREADY">
-                <Original>You are already disguised</Original>
-                <English>You are already disguised</English>
-                <Chinesesimp>你已经在伪装状态中。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_ERROR">
-                <Original>Disguise Error</Original>
-                <English>Disguise Error</English>
-                <Chinesesimp>伪装错误</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_CANT_NOCIVDATA">
                 <Original>Cannot disguise: Not ready yet, try again shortly.</Original>
@@ -2543,11 +2381,6 @@
                 <Original>Partisan squad ready. Click on the map to select a deployment location.</Original>
                 <English>Partisan squad ready. Click on the map to select a deployment location.</English>
                 <Chinese>游击队准备好了，点击地图选择部署位置。</Chinese>
-            </Key>
-            <Key ID="STR_DUWS_T_HIRE_PARTISANS_cancelled">
-                <Original>Deployment cancelled</Original>
-                <English>Deployment cancelled</English>
-                <Chinese>部署已取消。</Chinese>
             </Key>
             <Key ID="STR_DUWS_T_HIRE_PMC">
                 <Original>Hire PMC (15 cash)</Original>
@@ -2654,16 +2487,6 @@
                 <English>Take it. It's not much, but it's what we have.</English>
                 <Chinesesimp>...拿着这个，别让我再看到你。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_ARSENAL_ENTER_TITLE">
-                <Original>Arsenal Notice</Original>
-                <English>Arsenal Notice</English>
-                <Chinesesimp>军火库提示</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ARSENAL_ENTER_DESC">
-                <Original>You have dropped %1 on the ground. Please pick them up after leaving the arsenal</Original>
-                <English>You have dropped %1 on the ground. Please pick them up after leaving the arsenal</English>
-                <Chinesesimp>你已将 %1 丢弃在地上，请离开军火库后捡起。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_RESPAWN_LOSS_TITLE">
                 <Original>Respawn Loss</Original>
                 <English>Respawn Loss</English>
@@ -2701,13 +2524,6 @@
                 <German>Hey du! Komm her!</German>
                 <Spanish>¡Oye tú! Ven aquí!</Spanish>
                 <Chinesesimp>嘿，你！给我过来！</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_STOP_FAIL_HINT">
-                <Original>Civilian ignores you</Original>
-                <English>Civilian ignores you</English>
-                <German>Zivilist ignoriert Sie.</German>
-                <Spanish>Civil te ignora.</Spanish>
-                <Chinesesimp>平民不理你。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_fight4freedom">
                 <Original>We're arming locals who'll fight. Will you come with us?</Original>
@@ -2770,13 +2586,6 @@
                 <Original>Fucking BLUFOR...</Original>
                 <English>Fucking BLUFOR...</English>
             </Key>
-            <Key ID="STR_DUWS_T_LOOT1">
-                <Original>Sorry, just keeping order.</Original>
-                <English>Sorry, just keeping order.</English>
-                <German>Tut mir leid, nur für Ordnung.</German>
-                <Spanish>Lo siento, solo mantengo el orden.</Spanish>
-                <Chinesesimp>对不住了，只是为了维护治安。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_LOOT2">
                 <Original>Documents found! Worth CP at the terminal.</Original>
                 <English>Documents found! Worth CP at the terminal.</English>
@@ -2790,20 +2599,6 @@
                 <German>Das ist verdammter Krieg, Bruder... du brauchst das nicht.</German>
                 <Spanish>Es una puta guerra, hermano... no necesitas esto.</Spanish>
                 <Chinesesimp>这他妈是战争，兄弟...你不需要这些东西。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_LOOT_MONEY2">
-                <Original>Found some cash!</Original>
-                <English>Found some cash!</English>
-                <German>Bargeld gefunden!</German>
-                <Spanish>¡Dinero encontrado!</Spanish>
-                <Chinesesimp>发现一些现金！</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_LOOT_NOTHING">
-                <Original>Nothing useful...</Original>
-                <English>Nothing useful...</English>
-                <German>Nichts Nützliches...</German>
-                <Spanish>Nada útil...</Spanish>
-                <Chinesesimp>没什么有用的...</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_askopforloc">
                 <Original>Have you seen any enemy movement around here? We'll pay for anything useful.</Original>
@@ -2922,20 +2717,6 @@
                 <Chinesesimp>声望降低！</Chinesesimp>
                 <Original>Reputation Decreased</Original>
                 <English>Reputation Decreased</English>
-            </Key>
-            <Key ID="STR_DUWS_T_b16p8tvz">
-                <German>Ansehen negativ !</German>
-                <Spanish>Reputación negativa</Spanish>
-                <Chinesesimp>负面声望！</Chinesesimp>
-                <Original>Negative Reputation!</Original>
-                <English>Negative Reputation!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_6jv8t94t">
-                <German>Du verlierst 5% deiner CP und AP pro Tötung</German>
-                <Spanish>Perderá 5% de su CP y AP por asesinato</Spanish>
-                <Chinesesimp>每次击杀平民造成了你5%的CP点和AP点损失</Chinesesimp>
-                <Original>You lose 5% of CP and AP per kill</Original>
-                <English>You lose 5% of CP and AP per kill</English>
             </Key>
             <Key ID="STR_DUWS_T_civpopR">
                 <Spanish>Action Squad, aquí "Overlord". Infección confirmada en tu zona. Se te permite abrir fuego contra los infectados a voluntad. Pero ten cuidado — la posibilidad de supervivientes no ha sido descartada.</Spanish>
@@ -3288,25 +3069,6 @@
                 <Original>Debug</Original>
                 <English>Debug</English>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_FOUND_TARGETtitle">
-                <Original>Critical Intel</Original>
-                <English>Critical Intel</English>
-                <German>Kritische Informationen</German>
-                <Spanish>Inteligencia crítica</Spanish>
-                <Chinesesimp>关键情报</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_FOUND_TARGETdesc">
-                <Original>Mission-critical objective location acquired.</Original>
-                <English>Mission-critical objective location acquired.</English>
-                <German>Standort des missionskritischen Ziels erfasst</German>
-                <Spanish>Se ha localizado la ubicación del objetivo crítico de la misión</Spanish>
-                <Chinesesimp>任务关键目标的位置已被找到</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_SEARCH_START_SUBTITLE">
-                <Original>Let's see...</Original>
-                <English>Let's see...</English>
-                <Chinesesimp>让我找找...</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_INTEL_BONUS_TITLE">
                 <Original>Additional Intel</Original>
                 <English>Additional Intel</English>
@@ -3320,20 +3082,6 @@
                 <German>Du hast zusätzliche Informationen erfasst und %1 CP erhalten.</German>
                 <Spanish>Has obtenido inteligencia adicional y ganado %1 CP.</Spanish>
                 <Chinesesimp>你发现了额外的情报，获得了%1 CP</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_FOUND_TARGET">
-                <Original>Alpha 1-1 to Overlord, we've got the exact objective location. Uploading it to your map now.</Original>
-                <English>Alpha 1-1 to Overlord, we've got the exact objective location. Uploading it to your map now.</English>
-                <German>Action Squad an "Overlord", wir haben den genauen Standort des Missionsziels erfasst und auf das GPS-Terminal übermittelt.</German>
-                <Spanish>Action Squad llamando a "Overlord", hemos obtenido la ubicación detallada del objetivo de la misión y la hemos subido al terminal GPS.</Spanish>
-                <Chinesesimp>行动组呼叫"霸王"，我们获取了任务目标的详细位置，已经上传到GPS终端。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_FOUND_TARGET2">
-                <Original>Copy. Proceed with the mission.</Original>
-                <English>Copy. Proceed with the mission.</English>
-                <German>Hier ist "Overlord" — Empfangen, Mission fortsetzen.</German>
-                <Spanish>Aquí es "Overlord" — Recibido, continúa la misión.</Spanish>
-                <Chinesesimp>这里是"霸王"—— 收到，继续执行任务。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_FOUND_x">
                 <Original>Intel found! Credited to the pool.</Original>
@@ -3361,30 +3109,12 @@
                 <Original>Intel recovered in the field. A new position is marked on your map.</Original>
                 <English>Intel recovered in the field. A new position is marked on your map.</English>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_TARGET">
-                <Original>Intel Target</Original>
-                <English>Intel Target</English>
-                <German>Informationsziel</German>
-                <Spanish>Objetivo de inteligencia</Spanish>
-                <Chinesesimp>情报目标</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_LOOT_INTEL">
-                <Original>Something for the analysts!</Original>
-                <English>Something for the analysts!</English>
-                <German>Wichtige Dokumente gefunden!</German>
-                <Spanish>¡Documentos importantes encontrados!</Spanish>
-                <Chinesesimp>发现重要文件！</Chinesesimp>
-            </Key>
         </Container>
         <Container name="Black Market">
             <Key ID="STR_DUWS_T_BLACKMARKET_TITLE">
                 <Original>Black Market</Original>
                 <English>Black Market</English>
                 <Chinesesimp>黑市</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTELRECRUIT_TITLE">
-                <Original>Mission Control</Original>
-                <English>Mission Control</English>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_DROPPED_ON_GROUND">
                 <Original>Item dropped on the ground (no inventory space left).</Original>
@@ -3410,11 +3140,6 @@
                 <Original>%1 bought an optic: %2.</Original>
                 <English>%1 bought an optic: %2.</English>
                 <Chinesesimp>%1 购买了瞄具：%2</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_BLACKMARKET_NO_MONEY">
-                <Original>You don't have any cash.</Original>
-                <English>You don't have any cash.</English>
-                <Chinesesimp>你没有纸币，无法购买！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_NOT_ENOUGH_MONEY">
                 <Original>Not enough cash. This costs %1; you have %2.</Original>
@@ -3768,13 +3493,6 @@
                 <Original>The zone has fallen to the enemy.</Original>
                 <English>The zone has fallen to the enemy.</English>
             </Key>
-            <Key ID="STR_DUWS_T_opfast">
-                <German>Alle Einheiten im Einsatzgebiet, Achtung. Hier ist "Allseer". Wir haben gerade feindliche Angriffstruppen in der feindlichen Zone ausgemacht. Sie könnten auf das HQ oder freundliche Stellungen vorrücken. Bleibt wachsam!</German>
-                <Spanish>Todas las unidades en la zona de operaciones, atención. Aquí es "Allseer". Acabamos de detectar fuerzas de asalto enemigas en la zona enemiga. Podrían avanzar hacia el HQ o las posiciones amigas. ¡Mantengan la alerta!</Spanish>
-                <Chinesesimp>战区所有单位。我们刚刚在敌区发现了敌军的进攻部队。他们可能会朝总部或是友军据点进攻。注意警惕！</Chinesesimp>
-                <Original>All units in the AO. We've detected enemy assault forces staging in the zone. They may push toward HQ or friendly positions. Stay alert.</Original>
-                <English>All units in the AO. We've detected enemy assault forces staging in the zone. They may push toward HQ or friendly positions. Stay alert.</English>
-            </Key>
             <Key ID="STR_DUWS_T_zonereveal">
                 <German>Alle Einheiten im Einsatzgebiet, Achtung. Wir haben eine feindliche Zone ausgemacht. Sie ist nun auf euren GPS-Terminals einsehbar.</German>
                 <Spanish>Todas las unidades en la zona de operaciones, atención. Hemos localizado una zona enemiga. Ya es visible en vuestros terminales GPS.</Spanish>
@@ -3844,13 +3562,6 @@
                 <Original>Capture the Zones</Original>
                 <English>Capture the Zones</English>
             </Key>
-            <Key ID="STR_DUWS_T_347ohzwn">
-                <German>Kampagne</German>
-                <Spanish>Campaña</Spanish>
-                <Chinesesimp>战役</Chinesesimp>
-                <Original>Campaign</Original>
-                <English>Campaign</English>
-            </Key>
             <Key ID="STR_DUWS_T_fo1ihi1n">
                 <German>Mission abgeschlossen !</German>
                 <Spanish>¡Misión completada!</Spanish>
@@ -3862,55 +3573,6 @@
                 <Original>Every zone is under our control. The island is ours. All units, stand down.</Original>
                 <English>Every zone is under our control. The island is ours. All units, stand down.</English>
                 <Chinesesimp>所有战区已被我方占领。全体单位，停止行动。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_6p70rgp4">
-                <German>Sichere alle besetzten Zonen oder verliere deine Assets.</German>
-                <Spanish>Despeje todas las zonas ocupadas o perderá sus cosas.</Spanish>
-                <Chinesesimp>清除所有被占领的战区。</Chinesesimp>
-                <Original>Clear all remaining enemy zones, or the campaign will restart</Original>
-                <English>Clear all remaining enemy zones, or the campaign will restart</English>
-            </Key>
-            <Key ID="STR_DUWS_T_gur3301v">
-                <German>Zwei Minuten bis die Kampagne neugestartet wird.</German>
-                <Spanish>2 minutos hasta que la campaña se reinicie.</Spanish>
-                <Chinesesimp>距战役重启还需2分钟</Chinesesimp>
-                <Original>2 minutes until Campaign Restart</Original>
-                <English>2 minutes until Campaign Restart</English>
-            </Key>
-            <Key ID="STR_DUWS_T_dky7jtnz">
-                <German>KRIEGSVERBRECHEN</German>
-                <Spanish>CRÍMINES DE GUERRA</Spanish>
-                <Chinesesimp>战争罪犯</Chinesesimp>
-                <Original>WAR CRIMES</Original>
-                <English>WAR CRIMES</English>
-            </Key>
-            <Key ID="STR_DUWS_T_5445z2bn">
-                <German>Beschädigte Gebäude: %1</German>
-                <Spanish>Edificios dañados: %1</Spanish>
-                <Chinesesimp>摧毁建筑: %1</Chinesesimp>
-                <Original>Damaged Buildings: %1</Original>
-                <English>Damaged Buildings: %1</English>
-            </Key>
-            <Key ID="STR_DUWS_T_y9d3jrt6">
-                <German>Gebäude zerstört !</German>
-                <Spanish>Edificios destruídos!</Spanish>
-                <Chinesesimp>建筑被摧毁了！</Chinesesimp>
-                <Original>Buildings Destroyed!</Original>
-                <English>Buildings Destroyed!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_g2ehnkc5">
-                <German>Irgendein BLUFOR Idiot hat zivile Gebäude zerstört. Ansehen nimmt ab.</German>
-                <Spanish>Un idiota de BLUFOR destruyó varios edificios. Reduciendo reputación.</Spanish>
-                <Chinesesimp>一个玩家摧毁了一些建筑，降低了声誉。</Chinesesimp>
-                <Original>A BLUFOR unit destroyed buildings. Reputation reduced</Original>
-                <English>A BLUFOR unit destroyed buildings. Reputation reduced</English>
-            </Key>
-            <Key ID="STR_DUWS_T_jly4u3ui">
-                <German>Dein Ansehen liegt jetzt bei: </German>
-                <Spanish>Su reputación actual:</Spanish>
-                <Chinesesimp>你现在的声誉是：</Chinesesimp>
-                <Original>Your Reputation is now: </Original>
-                <English>Your Reputation is now: </English>
             </Key>
             <Key ID="STR_DUWS_T_biham0s3">
                 <Spanish>El juego ha sido guardado</Spanish>
@@ -4491,13 +4153,6 @@
                 <Original>Unloading the truck and disarming the charge...</Original>
                 <English>Unloading the truck and disarming the charge...</English>
             </Key>
-            <Key ID="STR_DUWS_T_clearhouse_desc">
-                <German>Das Zielgebiet säubern</German>
-                <Spanish>Despejar la zona objetivo</Spanish>
-                <Chinesesimp>清理目标区域</Chinesesimp>
-                <Original>Clear Area</Original>
-                <English>Clear Area</English>
-            </Key>
             <Key ID="STR_DUWS_T_cqbletsdothis">
                 <German>Dies ist „Oberherr 1-1“. Ein feindliches Infiltrationskommando wurde in den Gebäuden am Zielort gesichtet. Die genaue Position des Kommandos wurde auf Ihren Positionsterminals aktualisiert. Beseitigen Sie sie.</German>
                 <Spanish>Este es "Imperador 1-1". Un equipo de infiltración enemigo ha sido detectado dentro de los edificios en el lugar objetivo. La posición exacta del equipo ha sido actualizada en sus terminales de posición. Acaben con ellos.</Spanish>
@@ -4719,10 +4374,6 @@
                 <Original>Mission Selector</Original>
                 <English>Mission Selector</English>
             </Key>
-            <Key ID="STR_DUWS_T_mission_no_location">
-                <Original>No suitable location found. Please try again.</Original>
-                <English>No suitable location found. Please try again.</English>
-            </Key>
             <Key ID="STR_DUWS_T_mission_no_building_4pos">
                 <Original>No building with at least 4 positions found. Please try again.</Original>
                 <English>No building with at least 4 positions found. Please try again.</English>
@@ -4769,47 +4420,12 @@
                 <Original>There's no vehicle in the Vehicle Recycling Station.</Original>
                 <English>There's no vehicle in the Vehicle Recycling Station.</English>
             </Key>
-            <Key ID="STR_DUWS_T_recyclenearhq">
-                <German>Du musst in der Nähe des HQ sein, um die Fahrzeugrecyclingstation zu platzieren.</German>
-                <Spanish>Debes estar cerca del cuartel general (HQ) para desplegar la Estación de Reciclaje de Vehículos.</Spanish>
-                <Chinesesimp>必须在HQ附近才能部署载具回收站</Chinesesimp>
-                <Original>You must be near HQ to deploy the Vehicle Recycling Station</Original>
-                <English>You must be near HQ to deploy the Vehicle Recycling Station</English>
-            </Key>
-            <Key ID="STR_DUWS_T_x89qxhs4">
-                <Spanish>Solicito una Estación de Reciclaje de Vehículos en mi posición...</Spanish>
-                <German>Beantrage eine Fahrzeugrecyclingstation an meiner Position...</German>
-                <Chinesesimp>申请一个载具回收站在我的位置...</Chinesesimp>
-                <Original>Request a Vehicle Recycling Station at my position...</Original>
-                <English>Request a Vehicle Recycling Station at my position...</English>
-            </Key>
-            <Key ID="STR_DUWS_T_27jtm6ab">
-                <Spanish>Solicito una Estación de Reciclaje de Vehículos en mi posición...</Spanish>
-                <German>Beantrage eine Fahrzeugrecyclingstation an meiner Position...</German>
-                <Chinesesimp>载具回收站已部署</Chinesesimp>
-                <Original>Request a Vehicle Recycling Station at my position...</Original>
-                <English>Request a Vehicle Recycling Station at my position...</English>
-            </Key>
-            <Key ID="STR_DUWS_T_dmaapo98">
-                <Spanish>No hay una ubicación válida para la Estación de Reciclaje de Vehículos cerca... Intenta moverte a una zona plana y despejada.</Spanish>
-                <German>Keine gültige Position für eine Fahrzeugrecyclingstation in der Nähe... Versuchen Sie, sich an einen flachen, freien Bereich zu begeben.</German>
-                <Chinesesimp>附近没有有效的载具回收站位置...尝试靠近平坦、无物体的区域。</Chinesesimp>
-                <Original>No valid Vehicle Recycling Station location nearby... Try moving to a flat, clear area</Original>
-                <English>No valid Vehicle Recycling Station location nearby... Try moving to a flat, clear area</English>
-            </Key>
             <Key ID="STR_DUWS_T_recyclesuccess">
                 <Spanish>Has reciclado %1 vehículo(s) con éxito, has obtenido %2 CP.</Spanish>
                 <German>%1 Fahrzeug erfolgreich recycelt, %2 CP erhalten.</German>
                 <Chinesesimp>成功回收%1辆载具，获得%2CP</Chinesesimp>
                 <Original>Recycled %1 vehicle(s) and earned %2 CP.</Original>
                 <English>Recycled %1 vehicle(s) and earned %2 CP.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_c4zbp19e">
-                <Spanish>Recibido, Estación de Reciclaje de Vehículos está siendo desplegada...</Spanish>
-                <German>Verstanden, Fahrzeugrecyclingstation wird aufgebaut...</German>
-                <Chinesesimp>收到，载具回收站正在部署中...</Chinesesimp>
-                <Original>Roger, Vehicle Recycling Station is being deployed...</Original>
-                <English>Roger, Vehicle Recycling Station is being deployed...</English>
             </Key>
             <Key ID="STR_DUWS_T_OPERATOR_HEALED">
                 <Original>Operator Healed</Original>
@@ -4913,13 +4529,6 @@
                 <Original>HALO Jump (15 CP)</Original>
                 <English>HALO Jump (15 CP)</English>
             </Key>
-            <Key ID="STR_DUWS_T_xmq9hr78">
-                <German>HALO Absprung</German>
-                <Spanish>Salto HALO</Spanish>
-                <Chinesesimp>空降</Chinesesimp>
-                <Original>HALO Jump</Original>
-                <English>HALO Jump</English>
-            </Key>
             <Key ID="STR_DUWS_T_892wo8h0">
                 <German>Drohnen Aufklärung (10CP) Funk</German>
                 <Spanish>Reconocimiento VANT (10 CP) Radio</Spanish>
@@ -4933,20 +4542,6 @@
                 <Chinesesimp>特种UAV(5CP)</Chinesesimp>
                 <Original>UAV Recon (5 CP)</Original>
                 <English>UAV Recon (5 CP)</English>
-            </Key>
-            <Key ID="STR_DUWS_T_37e388r7">
-                <German>Aufklärungsflugzeug (10CP) Funk</German>
-                <Spanish>Avioneta de reconocimiento (10 CP) Radio</Spanish>
-                <Chinesesimp>特种飞机(10CP)</Chinesesimp>
-                <Original>Recon Plane (10 CP) Radio</Original>
-                <English>Recon Plane (10 CP) Radio</English>
-            </Key>
-            <Key ID="STR_DUWS_T_6ur7ueyi">
-                <German>Aufklärungsflugzeug (5 CP)</German>
-                <Spanish>Avioneta de reconocimiento (5 CP)</Spanish>
-                <Chinesesimp>特种飞机(5CP)</Chinesesimp>
-                <Original>Recon Plane (5 CP)</Original>
-                <English>Recon Plane (5 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_witoiij3">
                 <German>Helikopter-Transport (5CP) Funk</German>
@@ -5032,20 +4627,6 @@
                 <Original>JDAM strike (3 CP)</Original>
                 <English>JDAM strike (3 CP)</English>
             </Key>
-            <Key ID="STR_DUWS_T_2vd6lsvm">
-                <German>Luftschlag (15CP) Funk</German>
-                <Spanish>Ataque áereo (15 CP) Radio</Spanish>
-                <Chinesesimp>空袭(15CP)</Chinesesimp>
-                <Original>Air Strike (15 CP) Radio</Original>
-                <English>Air Strike (15 CP) Radio</English>
-            </Key>
-            <Key ID="STR_DUWS_T_qskapqt7">
-                <German>Luftschlag (5 CP)</German>
-                <Spanish>Ataque áereo (5 CP)</Spanish>
-                <Chinesesimp>空袭(5CP)</Chinesesimp>
-                <Original>Air Strike (5 CP)</Original>
-                <English>Air Strike (5 CP)</English>
-            </Key>
             <Key ID="STR_DUWS_T_xja6gemx">
                 <German>Lasergelenkte Bombe (10CP) Funk</German>
                 <Spanish>Bomba Guiada por Láser (10 CP) Radio</Spanish>
@@ -5102,20 +4683,6 @@
                 <Original>HC Attack Helicopter</Original>
                 <English>HC Attack Helicopter</English>
             </Key>
-            <Key ID="STR_DUWS_T_z7o7t4hd">
-                <German>HC Erdkampfflugzeug (20CP) Funk</German>
-                <Spanish>Avión de ataque del Alto Mando (20 CP) Radio</Spanish>
-                <Chinesesimp>HC 攻击机(20CP)</Chinesesimp>
-                <Original>HC Attack Plane (20 CP) Radio</Original>
-                <English>HC Attack Plane (20 CP) Radio</English>
-            </Key>
-            <Key ID="STR_DUWS_T_fq89nk8d">
-                <German>HC Erdkampfflugzeug</German>
-                <Spanish>Avión de ataque del Alto Mando</Spanish>
-                <Chinesesimp>HC 攻击机</Chinesesimp>
-                <Original>HC Attack Plane</Original>
-                <English>HC Attack Plane</English>
-            </Key>
             <Key ID="STR_DUWS_T_6khosjp7">
                 <German>HC CAS Jet (25CP) Funk</German>
                 <Spanish>Jet de Apoyo Áereo del Alto Mando (25 CP) Radio</Spanish>
@@ -5129,20 +4696,6 @@
                 <Chinesesimp>HC CAS战斗机</Chinesesimp>
                 <Original>HC CAS Jet</Original>
                 <English>HC CAS Jet</English>
-            </Key>
-            <Key ID="STR_DUWS_T_r73lk2kv">
-                <German>HC CAS Flugzeug (25CP) Funk</German>
-                <Spanish>Avión de apoyo áereo del Alto Mando (25 CP) Radio</Spanish>
-                <Chinesesimp>HC CAS飞机(25CP)</Chinesesimp>
-                <Original>HC CAS Plane (25 CP) Radio</Original>
-                <English>HC CAS Plane (25 CP) Radio</English>
-            </Key>
-            <Key ID="STR_DUWS_T_byyqsj3b">
-                <German>HC CAS Flugzeug</German>
-                <Spanish>Avión de apoyo áereo del Alto mando</Spanish>
-                <Chinesesimp>HC CAS飞机</Chinesesimp>
-                <Original>HC CAS Plane</Original>
-                <English>HC CAS Plane</English>
             </Key>
             <Key ID="STR_DUWS_T_9hmlads9">
                 <German>Fallschirmspringer (20CP) Funk</German>
@@ -5171,20 +4724,6 @@
                 <Chinesesimp>建立机动指挥部</Chinesesimp>
                 <Original>Designate Mobile HQ</Original>
                 <English>Designate Mobile HQ</English>
-            </Key>
-            <Key ID="STR_DUWS_T_zfwwi081">
-                <German>HC CAP Flugzeug (25CP) Funk</German>
-                <Spanish>Patrulla de combate áereo del Alto Mando (25 CP) Radio</Spanish>
-                <Chinesesimp>HC CAP战斗机(25CP)</Chinesesimp>
-                <Original>HC CAP Jet (25 CP) Radio</Original>
-                <English>HC CAP Jet (25 CP) Radio</English>
-            </Key>
-            <Key ID="STR_DUWS_T_5ax9nkcc">
-                <German>HC CAP Flugzeug (15 CP)</German>
-                <Spanish>Patrulla de combate áereo del Alto mando (15 CP)</Spanish>
-                <Chinesesimp>HC CAP战斗机(15CP)</Chinesesimp>
-                <Original>HC CAP Jet (15 CP)</Original>
-                <English>HC CAP Jet (15 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_9ziy0qai">
                 <German>MHQ abgebaut</German>
@@ -5344,20 +4883,6 @@
                 <Original>HALO operation cancelled.</Original>
                 <English>HALO operation cancelled.</English>
             </Key>
-            <Key ID="STR_DUWS_T_lz5ab73w">
-                <German>Zu nah an Feinden</German>
-                <Spanish>Demasiado cerca del enemigo</Spanish>
-                <Chinesesimp>离敌人太近了</Chinesesimp>
-                <Original>Too close to enemy</Original>
-                <English>Too close to enemy</English>
-            </Key>
-            <Key ID="STR_DUWS_T_z2i74zs7">
-                <German>Wähle eine Position %1m vom Zonen-Mittelpunkt entfernt.</German>
-                <Spanish>Escoja un lugar %1m del centro de la zona</Spanish>
-                <Chinesesimp>从战区中心 %1m选择一个位置  。</Chinesesimp>
-                <Original>Choose a location at least %1m from the zone center</Original>
-                <English>Choose a location at least %1m from the zone center</English>
-            </Key>
             <Key ID="STR_DUWS_T_sjk84cdc">
                 <German>Gute Reise</German>
                 <Spanish>Tenga un buen viaje</Spanish>
@@ -5497,13 +5022,6 @@
                 <Chinesesimp>JDAM</Chinesesimp>
                 <Original>JDAM</Original>
                 <English>JDAM</English>
-            </Key>
-            <Key ID="STR_DUWS_T_y8qmqb8y">
-                <German>Luftschlag</German>
-                <Spanish>Ataque áereo</Spanish>
-                <Chinesesimp>空袭</Chinesesimp>
-                <Original>Air Strike</Original>
-                <English>Air Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_4o24llvl">
                 <German>Lasergelenkte Bombe</German>
@@ -6099,13 +5617,6 @@
                 <Original>Click on your map to scan a location using the UAV.</Original>
                 <English>Click on your map to scan a location using the UAV.</English>
             </Key>
-            <Key ID="STR_DUWS_T_p5x6uu0a">
-                <Spanish>Haz clic en el mapa para observar la locación con una avioneta de reconocimiento</Spanish>
-                <German>Klicke auf die Karte um einen Bereich mit dem Aufklärungsflugzeug zu überwachen</German>
-                <Chinesesimp>点击地图，用侦察机观察一个位置</Chinesesimp>
-                <Original>Click on your map to scan a location with a Recon Plane</Original>
-                <English>Click on your map to scan a location with a Recon Plane</English>
-            </Key>
             <Key ID="STR_DUWS_T_6u8qilfh">
                 <Spanish>Coordenadas recividas</Spanish>
                 <German>Koordinaten erhalten</German>
@@ -6190,13 +5701,6 @@
                 <Original>The UAV has been sent to the designated coordinates. Standby for further intel.</Original>
                 <English>The UAV has been sent to the designated coordinates. Standby for further intel.</English>
             </Key>
-            <Key ID="STR_DUWS_T_51d2rwpv">
-                <Spanish>Aeroplano de reconocimiento enviado a las coordenadas designadas, por favor espere para más inteligencia.</Spanish>
-                <German>Das Aufklärungsflugzug wurde zu den angegebenen Koordinaten geschickt, bitte warte auf den Aufklärungsbericht.</German>
-                <Chinesesimp>侦察机已被派往指定坐标，请等待进一步情报。</Chinesesimp>
-                <Original>The Recon Plane has been sent to the designated coordinates. Standby for further intel.</Original>
-                <English>The Recon Plane has been sent to the designated coordinates. Standby for further intel.</English>
-            </Key>
             <Key ID="STR_DUWS_T_l01sbx6n">
                 <Spanish>Reconocimiento derribado. Reconocimiento fallido.</Spanish>
                 <German>Aufklärfung wurde abgeschossen. Aufklärung gescheitert.</German>
@@ -6211,13 +5715,6 @@
                 <Original>On Station. Collecting data from the UAV...</Original>
                 <English>On Station. Collecting data from the UAV...</English>
             </Key>
-            <Key ID="STR_DUWS_T_xaibwohn">
-                <Spanish>En estación. Reciviendo posiciones enemigas del Aeroplano...</Spanish>
-                <German>Im Einsatzgebiet. Erhalte Daten des Aufklärungsflugzeugs zu feindlichen Positionen...</German>
-                <Chinesesimp>就绪，从侦察机处接收敌人位置...</Chinesesimp>
-                <Original>On Station. Receiving enemy positions from the Recon Plane...</Original>
-                <English>On Station. Receiving enemy positions from the Recon Plane...</English>
-            </Key>
             <Key ID="STR_DUWS_T_2ncoq1yy">
                 <Spanish>Revise su mapa. Las últimas posiciones enemigas están en estas coordenadas.</Spanish>
                 <German>Prüfe deine Karte. Die letzten bekannten Feindpositionen befinden sich auf diesen Koordinaten.</German>
@@ -6231,13 +5728,6 @@
                 <Chinesesimp>UAV正在返回基地</Chinesesimp>
                 <Original>The UAV is returning to base.</Original>
                 <English>The UAV is returning to base.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_w7qo214u">
-                <Spanish>El avión de reconocimiento está regresando a base</Spanish>
-                <German>Das Aufklärungsflugzeug kehrt zur Basis zurück</German>
-                <Chinesesimp>侦察机正在返回基地</Chinesesimp>
-                <Original>The Recon Plane is returning to base</Original>
-                <English>The Recon Plane is returning to base</English>
             </Key>
             <Key ID="STR_DUWS_T_q76uei82">
                 <Spanish>Vehículo en camino. TEL: 1 min</Spanish>
@@ -6295,13 +5785,6 @@
                 <Original>The transport was shot down. Vehicle drop failed.</Original>
                 <English>The transport was shot down. Vehicle drop failed.</English>
             </Key>
-            <Key ID="STR_DUWS_T_sawp1324">
-                <Spanish>SAWP derribado, misión de lanzamiento aéreo fallida.</Spanish>
-                <German>SAWP abgeschossen, Luftversorgungseinsatz fehlgeschlagen.</German>
-                <Chinesesimp>SAWP被击落，空投行动失败。</Chinesesimp>
-                <Original>The transport was shot down, SAWP airdrop failed</Original>
-                <English>The transport was shot down, SAWP airdrop failed</English>
-            </Key>
             <Key ID="STR_DUWS_T_iv3s5xlc">
                 <Spanish>Un vehículo de emergencia ha sido soltado cerca de su locación</Spanish>
                 <German>Ein Notfall Fahrzeug wurde in der Nähe deiner Position abgeworfen</German>
@@ -6329,20 +5812,6 @@
                 <Chinesesimp>载具被标上了绿色烟雾</Chinesesimp>
                 <Original>The vehicle has been marked with green smoke.</Original>
                 <English>The vehicle has been marked with green smoke.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_yd0y9b8b">
-                <Spanish>Debe estar cerca del CG o de un PdA (100 m)</Spanish>
-                <German>Du musst in der Nähe des HQs oder ein FOB sein (100m).</German>
-                <Chinesesimp>你必须靠近总部或FOB(100m)</Chinesesimp>
-                <Original>You must be near the HQ or a FOB (100m)</Original>
-                <English>You must be near the HQ or a FOB (100m)</English>
-            </Key>
-            <Key ID="STR_DUWS_T_noxzr04q">
-                <Spanish>Vehículo %1</Spanish>
-                <German>Fahrzeug %1</German>
-                <Chinesesimp>载具 %1</Chinesesimp>
-                <Original>Vehicle %1</Original>
-                <English>Vehicle %1</English>
             </Key>
             <Key ID="STR_DUWS_T_opforairspotted">
                 <Spanish>"Overlord" llama a todas las unidades, unidades aéreas enemigas detectadas en la zona de operaciones. ¡Mantengan la vigilancia!</Spanish>
@@ -6610,20 +6079,6 @@
                 <Original>Squad renamed to:\n%1</Original>
                 <English>Squad renamed to:\n%1</English>
             </Key>
-            <Key ID="STR_DUWS_T_n4zvxjo6">
-                <German>Wiederbeleben</German>
-                <Chinesesimp>复活</Chinesesimp>
-                <Spanish>Revivir</Spanish>
-                <Original>Revive</Original>
-                <English>Revive</English>
-            </Key>
-            <Key ID="STR_DUWS_T_gwn85uxh">
-                <German>Wir haben eine FOB verloren</German>
-                <Chinesesimp>我们损失了一个FOB</Chinesesimp>
-                <Spanish>Perdimos un puesto de avanzada</Spanish>
-                <Original>FOB Lost</Original>
-                <English>FOB Lost</English>
-            </Key>
             <Key ID="STR_DUWS_T_qmkng5xv">
                 <German>Gebe einen neuen Namen ein</German>
                 <Chinesesimp>输入新名称</Chinesesimp>
@@ -6658,13 +6113,6 @@
                 <Spanish>Vacíar vehículos</Spanish>
                 <Original>EMPTY VEHICLES</Original>
                 <English>EMPTY VEHICLES</English>
-            </Key>
-            <Key ID="STR_DUWS_T_xojnfriv">
-                <German>KEINE UNTERSTÜTZUNGEN AN FOBs freigeschaltet</German>
-                <Chinesesimp>FOB中没有已解锁的支援</Chinesesimp>
-                <Spanish>No se pueden desbloquear apoyos en puestos de avanzada</Spanish>
-                <Original>UNLOCK SUPPORT</Original>
-                <English>UNLOCK SUPPORT</English>
             </Key>
             <Key ID="STR_DUWS_T_m8wc394w">
                 <German>EINHEITEN</German>
@@ -6701,13 +6149,6 @@
                 <Original>Request an EMPTY vehicle to spawn at your position</Original>
                 <English>Request an EMPTY vehicle to spawn at your position</English>
             </Key>
-            <Key ID="STR_DUWS_T_9vjtr8gw">
-                <German>ABSCHLIESSEN/AUFSCHLIESSEN</German>
-                <Chinesesimp>解锁/上锁</Chinesesimp>
-                <Spanish>Desbloquear/Bloquear</Spanish>
-                <Original>UNLOCK/LOCK</Original>
-                <English>UNLOCK/LOCK</English>
-            </Key>
             <Key ID="STR_DUWS_T_dsl9rr00">
                 <German>Schalte Unterstützungen frei, die über das Funk-Menü (0-8) verfügbar sind</German>
                 <Chinesesimp>解锁在无线电菜单(0-8)可用的支援</Chinesesimp>
@@ -6721,13 +6162,6 @@
                 <Spanish>Reclutar operativos especiales</Spanish>
                 <Original>Recruit Special Operatives</Original>
                 <English>Recruit Special Operatives</English>
-            </Key>
-            <Key ID="STR_DUWS_T_a2si05g7">
-                <German>Rekrutiere Spezial-Einheiten die während der Kampagne immer wieder respawnen können</German>
-                <Chinesesimp>招募可以重生的特种单位</Chinesesimp>
-                <Spanish>Reclute unidades especiales que pueden reaparecer durante toda la campaña</Spanish>
-                <Original>Recruit special units that can respawn throughout the campaign</Original>
-                <English>Recruit special units that can respawn throughout the campaign</English>
             </Key>
             <Key ID="STR_DUWS_T_x0l67g37">
                 <German>SUPPORT FREISCHALTEN</German>
@@ -6776,13 +6210,6 @@
                 <Spanish>Para seleccionar un miembro de escuadrón, precione (F1-F12) entonces asigna a la unidad al equipo amarillo con el meú del radio (9-4)</Spanish>
                 <Original>To select a squad member, press (F1-F12), then assign the unit to team yellow via the radio menu (9-4).</Original>
                 <English>To select a squad member, press (F1-F12), then assign the unit to team yellow via the radio menu (9-4).</English>
-            </Key>
-            <Key ID="STR_DUWS_T_vxkdlshk">
-                <German>High Command Gruppen</German>
-                <Chinesesimp>高级指挥模式小队</Chinesesimp>
-                <Spanish>Escuadrones del Alto Mando</Spanish>
-                <Original>High Command squads</Original>
-                <English>High Command squads</English>
             </Key>
             <Key ID="STR_DUWS_T_u4t2durf">
                 <German>Du hast 10 Sekunden Zeit ein Squad über (F1-F12) auszuwählen</German>
@@ -6846,13 +6273,6 @@
                 <Chinesesimp>空中攻击小队 %1</Chinesesimp>
                 <Original>Air attack squad %1</Original>
                 <English>Air attack squad %1</English>
-            </Key>
-            <Key ID="STR_DUWS_T_u01o9vpk">
-                <Spanish>Caza %1</Spanish>
-                <German>Kampfflieger %1</German>
-                <Chinesesimp>战斗机 %1</Chinesesimp>
-                <Original>Fighter %1</Original>
-                <English>Fighter %1</English>
             </Key>
             <Key ID="STR_DUWS_T_rjuehu36">
                 <Spanish>¡Vehículo áereo del AM listo! \n Accese a él con [CTRL. Izq. + Espacio]</Spanish>
@@ -7113,13 +6533,6 @@
                 <Spanish>Apocalipsis Zombi</Spanish>
                 <Chinesesimp>丧尸末日</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_RAVAGE_HELP_SUB">
-                <Original>Plague Zone Guide</Original>
-                <English>Plague Zone Guide</English>
-                <German>Seuchengebiet Handbuch</German>
-                <Spanish>Guía de Zona de la Plaga</Spanish>
-                <Chinesesimp>疫区指南</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_RAVAGE_HELP_DESC">
                 <Original>Plague Zero has turned most civilians into mindless zombies. Recruit survivors and bring them back to base for evacuation: each rescue pays 5 CP. Killing zombies or civilians costs no reputation, and the weather is locked to permanent mist.</Original>
                 <English>Plague Zero has turned most civilians into mindless zombies. Recruit survivors and bring them back to base for evacuation: each rescue pays 5 CP. Killing zombies or civilians costs no reputation, and the weather is locked to permanent mist.</English>
@@ -7133,13 +6546,6 @@
                 <German>"WBK" Ereignis</German>
                 <Spanish>Incidente "WBK"</Spanish>
                 <Chinesesimp>"WBK"事件</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_WBK_HELP_SUB">
-                <Original>Fighting Demons</Original>
-                <English>Fighting Demons</English>
-                <German>Dämonen bekämpfen</German>
-                <Spanish>Combatiendo demonios</Spanish>
-                <Chinesesimp>对抗恶魔</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_WBK_HELP_DESC">
                 <Original>The Gates of Hell were quietly opened amid the conflict. Recruit survivors and bring them back to base for evacuation: each rescue pays 8 CP. Killing demons or harming civilians costs no reputation, and the weather is locked to permanent mist.</Original>
@@ -7498,13 +6904,6 @@
                 <Original>After BLUFOR forces have captured the first operational zone, "Establish FOB" appears in the requests menu at HQ. Unlock it there for 10 CP; each FOB then costs a further 10 CP. The FOB secures logistics in remote locations away from headquarters. Establishing a FOB also spawns a garrison force and alerts you when enemies are nearby. To establish a FOB, the area around you must be clear of enemies within a 500-meter radius. Use the support menu (0,8) and select "Establish FOB". The FOB will be deployed in the direction you are looking.</Original>
                 <English>After BLUFOR forces have captured the first operational zone, "Establish FOB" appears in the requests menu at HQ. Unlock it there for 10 CP; each FOB then costs a further 10 CP. The FOB secures logistics in remote locations away from headquarters. Establishing a FOB also spawns a garrison force and alerts you when enemies are nearby. To establish a FOB, the area around you must be clear of enemies within a 500-meter radius. Use the support menu (0,8) and select "Establish FOB". The FOB will be deployed in the direction you are looking.</English>
             </Key>
-            <Key ID="STR_DUWS_T_ryhnop2g">
-                <German>Überarbeitetes Nebenmissionssystem</German>
-                <Spanish>Sistema de misiones secundarias rehecho</Spanish>
-                <Chinesesimp>重做的支线任务系统</Chinesesimp>
-                <Original>Reworked Side Mission System</Original>
-                <English>Reworked Side Mission System</English>
-            </Key>
             <Key ID="STR_DUWS_T_617kjc41">
                 <German>Das Nebenmissionssystem von DUWS_X wurde in DUWS_T vollständig überarbeitet, darunter mehrere neue Missionen. Missionen, die spezielle Beute bieten oder einfacher sind, geben im Allgemeinen weniger CP/AP-Punkte. Einige Missionen haben strenge Zeitlimits und schlagen fehl, wenn sie nicht innerhalb der Frist erledigt werden. Du kannst Nebenmissionen im Hauptquartier oder an einer Forward Operating Base (FOB) anfordern. Nachdem du eine Nebenmission angefordert hast, kannst du sie über das Scrollmenü im Hauptquartier auch abbrechen. Zwischen zwei Nebenmissionen besteht eine 6-minütige Abkühlzeit; sobald die Abkühlzeit abgeschlossen ist, wird die Spielzeit um 3 Stunden vorspult.</German>
                 <Spanish>El sistema de misiones secundarias de DUWS_X ha sido completamente rehecho en DUWS_T, incluyendo varias misiones nuevas. Las misiones que ofrecen botín especial o son más fáciles generalmente dan menos puntos de CP/AP. Algunas misiones tienen límites de tiempo estrictos y fallarán si no se completan dentro del plazo. Puedes solicitar misiones secundarias en el cuartel general o en la Base Operativa Avanzada (FOB). Después de solicitar una misión secundaria, también puedes abortarla mediante el menú de rueda de desplazamiento en el cuartel general. Hay un tiempo de enfriamiento de 6 minutos entre dos misiones secundarias; una vez finalizado el enfriamiento, el tiempo del juego se adelantará 3 horas.</Spanish>
@@ -7567,13 +6966,6 @@
                 <Chinesesimp>每个玩家(必须为班长)都可以在总部和前线作战基地(FOB)的招募菜单中招募干员。第一次购买是8CP(在DUWS_X中是10CP)。如果干员在战斗中阵亡，一分钟后玩家可以在招募菜单中重新部署阵亡干员(免费)</Chinesesimp>
                 <Original>Any player who is a squad leader can recruit operatives from the recruitment menu at HQ or a FOB. The first hire costs 8 CP. If an operative is killed, you can redeploy them free from the same menu after one minute.</Original>
                 <English>Any player who is a squad leader can recruit operatives from the recruitment menu at HQ or a FOB. The first hire costs 8 CP. If an operative is killed, you can redeploy them free from the same menu after one minute.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_n4yjyv9x">
-                <German>Überarbeitetes Rufsystem</German>
-                <Spanish>Sistema de reputación rehecho</Spanish>
-                <Chinesesimp>重做的声望系统</Chinesesimp>
-                <Original>Reworked Reputation System</Original>
-                <English>Reworked Reputation System</English>
             </Key>
             <Key ID="STR_DUWS_T_supportguide">
                 <German>Detaillierte Erklärung der überarbeiteten Unterstützungsoptionen</German>
@@ -7659,20 +7051,6 @@
                 <Original>Time skips are deliberately rare. You can skip 3 hours at HQ or a FOB, with a 10-minute cooldown, and 3 hours pass automatically when a side-mission cooldown ends. Fight head-on in daylight, or hit high-value targets and assets under cover of night.</Original>
                 <English>Time skips are deliberately rare. You can skip 3 hours at HQ or a FOB, with a 10-minute cooldown, and 3 hours pass automatically when a side-mission cooldown ends. Fight head-on in daylight, or hit high-value targets and assets under cover of night.</English>
             </Key>
-            <Key ID="STR_DUWS_T_qs2vfigs">
-                <Spanish>Mecánicas Multi Jugador</Spanish>
-                <German>Multiplayer Mechaniken</German>
-                <Chinesesimp>联机模式机制</Chinesesimp>
-                <Original>MP Mechanics</Original>
-                <English>MP Mechanics</English>
-            </Key>
-            <Key ID="STR_DUWS_T_towt823p">
-                <Spanish>Revise el manual para las especificaciones de DUWS_T en MJ</Spanish>
-                <German>Prüfe die Anleitung für die Einzelheiten zu DUWS_T im Multiplayer</German>
-                <Chinesesimp>查看手册了解多人游戏中DUWS_T的注意事项</Chinesesimp>
-                <Original>Check the manual for the specifics of DUWS_T in MP</Original>
-                <English>Check the manual for the specifics of DUWS_T in MP</English>
-            </Key>
         </Container>
         <Container name="System &amp; Multiplayer">
             <Key ID="STR_DUWS_T_HOUSE_CLEARED">
@@ -7681,24 +7059,6 @@
                 <German>Haus %1 wurde gesäubert!</German>
                 <Spanish>La casa %1 ha sido limpiada!</Spanish>
                 <Chinesesimp>第%1个房屋已被清理！</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_SUICIDE_BOMB_DETONATED">
-                <Original>A suicide bomber has detonated!</Original>
-                <English>A suicide bomber has detonated!</English>
-                <German>Ein Selbstmordattentäter hat sich in die Luft gesprengt!</German>
-                <Spanish>¡Un terrorista suicida ha detonado!</Spanish>
-                <Chinesesimp>一名自杀式炸弹袭击者引爆了！</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_UNKNOWN_MISSION">
-                <Original>Unknown Mission %1</Original>
-                <English>Unknown Mission %1</English>
-            </Key>
-            <Key ID="STR_DUWS_T_experimentalfeature">
-                <German>Diese Funktion ist experimentell und kann nur vom Host-Spieler verwendet werden.</German>
-                <Spanish>Esta función es experimental y solo puede ser usada por el jugador host.</Spanish>
-                <Chinesesimp>该功能为实验性功能，暂时只能由担任主机的玩家实现。</Chinesesimp>
-                <Original>This feature is experimental and can only be used by the host player</Original>
-                <English>This feature is experimental and can only be used by the host player</English>
             </Key>
             <Key ID="STR_DUWS_T_ij1nh3gu">
                 <German>AI Aufmunitionierung setzt deine Gruppen AI auf ihr gespeichertes oder ursprüngliches Loadout zurück. Die Einheiten werden vollständig geheilt.</German>
@@ -7814,27 +7174,6 @@
                 <Original>Vanilla Medical</Original>
                 <English>Vanilla Medical</English>
             </Key>
-            <Key ID="STR_DUWS_T_tsy2hg6o">
-                <German>KIA-Operative sind zur Wiederverwendung bereit.</German>
-                <Chinesesimp>阵亡干员已可重新部署</Chinesesimp>
-                <Spanish>Operativos KIA listos para el redespliegue.</Spanish>
-                <Original>KIA operatives are ready for redeployment</Original>
-                <English>KIA operatives are ready for redeployment</English>
-            </Key>
-            <Key ID="STR_DUWS_T_c9l2p1wj">
-                <German>KIA-Operative sind zur Wiederverwendung bereit.</German>
-                <Chinesesimp>阵亡干员已可重新部署</Chinesesimp>
-                <Spanish>Operativos KIA listos para el redespliegue.</Spanish>
-                <Original>KIA operatives are ready for redeployment</Original>
-                <English>KIA operatives are ready for redeployment</English>
-            </Key>
-            <Key ID="STR_DUWS_T_bvz8r23q">
-                <German>Soundtrack für DANG's DUWS-R Musik Mod (falls geladen)</German>
-                <Chinesesimp>DANG's DUWS-R音乐mod的音乐包(如果加载了)</Chinesesimp>
-                <Spanish>Música por DANG's DUWS-R Music Mod (si está cargado)</Spanish>
-                <Original>Soundtrack for DANG's DUWS-R Music Mod (if loaded)</Original>
-                <English>Soundtrack for DANG's DUWS-R Music Mod (if loaded)</English>
-            </Key>
             <Key ID="STR_DUWS_T_b5ri931u">
                 <German>Ohrenstöpsel entfernt</German>
                 <Spanish>Tapones para oídos removidos</Spanish>
@@ -7869,13 +7208,6 @@
                 <Chinesesimp>现在没有什么我们不知道的。</Chinesesimp>
                 <Original>Nothing we don't already know.</Original>
                 <English>Nothing we don't already know.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_b22m11b0">
-                <German>Hier ist das 'Overlord 1-1'. Nichts nützliches gefunden.</German>
-                <Spanish>Éste es el CG. Nada útil aquí.</Spanish>
-                <Chinesesimp>这里没有任何有用的。</Chinesesimp>
-                <Original>Nothing useful here.</Original>
-                <English>Nothing useful here.</English>
             </Key>
             <Key ID="STR_DUWS_T_jjl0pm74">
                 <German>
@@ -8026,13 +7358,6 @@
                 <Chinesesimp>报告</Chinesesimp>
                 <Original>SITREP</Original>
                 <English>SITREP</English>
-            </Key>
-            <Key ID="STR_DUWS_T_10dzingj">
-                <Spanish>REPSIT recivido, tenemos %1 puntos de comando y nuesto poder militar está en %2. el Poder militar de OPFOR está a %3.</Spanish>
-                <German>SITREP erhalten, wir haben %1 Command Points und unsere Army Power liegt bei %2. OPFOR Army Power liegt bei %3.</German>
-                <Chinesesimp>报告收到, 我们有 %1 指挥点 ，我们的军力现在是 %2. 敌军军力是 %3.</Chinesesimp>
-                <Original>SITREP received, we have %1 command points and our army power is at %2. OPFOR army power is at %3.</Original>
-                <English>SITREP received, we have %1 command points and our army power is at %2. OPFOR army power is at %3.</English>
             </Key>
             <Key ID="STR_DUWS_T_waithostsetup">
                 <Spanish>Esperando a que el anfitrión termine la configuración de la misión...</Spanish>
