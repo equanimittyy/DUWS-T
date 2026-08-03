@@ -19,6 +19,12 @@
 params ["_group", "_posture", "_centre", "_radius", ["_anchors", []]];
 if (isNull _group) exitWith {};
 
+// Every posture is SAFE, set once here rather than per branch so a new posture cannot forget it.
+// A garrison at rest until something happens to it is the read the mission wants, and the engine
+// promotes a group out of SAFE by itself the moment it detects anything -- so AWARE only ever
+// bought men who were already alert before the player had done anything to alert them.
+_group setBehaviour "SAFE";
+
 private _patrolRadius = round (_radius / 1.25);
 // A mounted group cannot walk into a house or hold a tower, so the two postures that place men
 // inside a structure answer differently for one. Read off the leader's vehicle rather than off the
@@ -142,12 +148,13 @@ switch (_posture) do {
         } else {
             private _building = _candidates select _i;
             _building setVariable ["DUWS_garrisonedBy", _group];
-            // A post is held from a fixed spot and a house is roamed: a man shoved off a catwalk
-            // often cannot path back up, where one inside a house should move between its windows.
+            // Pinned, house and tower alike. Letting a house garrison roam between its own building
+            // positions read as men milling about indoors rather than holding the place, and a man
+            // walking is a man the player watches walk -- so the whole posture is now place, hold,
+            // done. The only thing a structure's kind still decides is stance: a guard on a catwalk
+            // stands, where a house garrison takes whatever the fight calls for.
             private _isPost = _building in _posts;
-            if (_isPost) then { _group setCombatMode "RED" };
-            [_group, [_building], count units _group,
-                ["AUTO", "UP"] select _isPost, ["HERD", "PIN"] select _isPost]
+            [_group, [_building], count units _group, ["AUTO", "UP"] select _isPost, "PIN"]
                 call fnc_spreadIntoBuildings;
         };
     };

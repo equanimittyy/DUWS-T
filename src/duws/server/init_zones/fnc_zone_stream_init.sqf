@@ -167,10 +167,15 @@ DUWS_fnc_zoneSendOff = {
     private _men = ([_key] call fnc_zone_roster) select { alive _x };
     private _grps = [];
     { _grps pushBackUnique (group _x) } forEach _men;
-    // Every held post is released before a single order is issued. A garrison unit is kept in its
-    // building by a loop that reissues doMove, and that loop beats a waypoint added afterwards, so
-    // without this the men in the houses simply stayed in them.
-    { _x setVariable ["DUWS_postReleased", true] } forEach _men;
+    // Every held post is released before a single order is issued, because a garrison man is held
+    // two ways and a withdrawal has to undo both: PATH is switched off so he cannot walk out of his
+    // building at all, and the shared house pass can also have him on a loop that reissues doMove,
+    // which beats a waypoint added afterwards. Without this the men in the houses simply stayed in
+    // them and were collected on distance instead of walking off.
+    {
+        _x setVariable ["DUWS_postReleased", true];
+        _x enableAI "PATH";
+    } forEach _men;
     {
         private _grp = _x;
         // The defend and patrol waypoints the spawners gave them would pull them straight back onto

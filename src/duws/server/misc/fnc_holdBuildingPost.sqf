@@ -26,6 +26,12 @@ params ["_unit", "_building", "_positions", ["_mode", "HERD"], ["_stance", ""]];
 if (_positions isEqualTo []) exitWith {};
 
 if (_mode == "PIN") exitWith {
+    // PATH off is what actually holds him, and it is the only thing that can now this is a one-shot
+    // with nothing left running to put him back. A pinned man has no waypoints to follow, but SAFE
+    // behaviour still lets the engine walk him off to relax. The base's tower guards are held the
+    // same way (init_hq/fnc_placeHQUnits.sqf). Whatever releases the post has to switch it back on,
+    // or a withdrawal order reaches a unit with no way to obey it.
+    _unit disableAI "PATH";
     private _fixedPos = _positions select 0;
     sleep 1;
     if (alive _unit) then { _unit setPosATL _fixedPos };

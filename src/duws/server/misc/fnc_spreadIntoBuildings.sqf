@@ -49,7 +49,9 @@ private _perBuilding = [];
             // Guarded, and passed through the same way, so "" means one thing in both halves:
             // setUnitPos "" is not a stance, and silently leaves the unit however it spawned.
             if (_stance != "") then { _unit setUnitPos _stance };
-            _unit setBehaviour "AWARE";
+            // Behaviour is the caller's. Forcing AWARE here overrode whatever the caller had just
+            // set on the group, which is how every garrison ended up alert before anything had
+            // happened to alert it.
             [_unit, _building, ([_positions, [_slot]] select (_mode == "PIN")), _mode, _stance]
                 spawn fnc_holdBuildingPost;
         };
