@@ -1900,8 +1900,8 @@
                 <English>%1  -&gt;  %2 CP</English>
             </Key>
             <Key ID="STR_DUWS_T_escalation_level">
-                <Original>Escalation is now level %1. Supports cost more.</Original>
-                <English>Escalation is now level %1. Supports cost more.</English>
+                <Original>Escalation is now level %1. Supports cost more</Original>
+                <English>Escalation is now level %1. Supports cost more</English>
             </Key>
             <Key ID="STR_DUWS_T_escalation_tooltip">
                 <Original>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of Altis and the campaign is lost.</Original>
@@ -1948,8 +1948,8 @@
                 <Chinesesimp>指挥点不足（需要2 CP）。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_repair_station_deployed">
-                <Original>Use the base repair facility to repair and edit vehicles.</Original>
-                <English>Use the base repair facility to repair and edit vehicles.</English>
+                <Original>Use the base repair facility to repair and edit vehicles</Original>
+                <English>Use the base repair facility to repair and edit vehicles</English>
                 <Chinesesimp>与基地内的修理设施进行交互以维修/编辑载具。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_437x650k">
@@ -2129,15 +2129,15 @@
                 <Spanish>Los objetos clave de esta misión incluyen un arsenal completo de un solo uso. ¡No olvides usarlos!</Spanish>
                 <German>Die Schlüsselgegenstände dieser Mission haben ein einmaliges Vollarsenal – vergiss nicht, es zu nutzen!</German>
                 <Chinesesimp>该任务的关键物品配备了一次性的完整军火库，别忘了使用它们</Chinesesimp>
-                <Original>A one-time arsenal here. Use it before you leave.</Original>
-                <English>A one-time arsenal here. Use it before you leave.</English>
+                <Original>A one-time arsenal here. Use it before you leave</Original>
+                <English>A one-time arsenal here. Use it before you leave</English>
             </Key>
             <Key ID="STR_DUWS_T_dakaijunhuoku2">
                 <Spanish>Un jugador ha usado el arsenal completo de un solo uso, y este ha sido consumido.</Spanish>
                 <German>Ein Spieler hat das Einmal-Vollarsenal benutzt, es wurde verbraucht.</German>
                 <Chinesesimp>有玩家使用了一次性军火库，该军火库已被消耗。</Chinesesimp>
-                <Original>Someone has used the one-time full arsenal. It's gone now.</Original>
-                <English>Someone has used the one-time full arsenal. It's gone now.</English>
+                <Original>Someone has used the one-time full arsenal. It's gone now</Original>
+                <English>Someone has used the one-time full arsenal. It's gone now</English>
             </Key>
             <Key ID="STR_DUWS_T_dakaijunhuoku">
                 <Spanish>El arsenal de un solo uso ha sido consumido.</Spanish>
@@ -3151,8 +3151,8 @@
                 <English>To Alpha 1-1, the informant's dead. Nothing more we can do there — extract.</English>
             </Key>
             <Key ID="STR_DUWS_T_ayhemuj4">
-                <Original>The informant is dead.</Original>
-                <English>The informant is dead.</English>
+                <Original>The informant is dead</Original>
+                <English>The informant is dead</English>
             </Key>
         </Container>
         <Container name="Intel &amp; Search">
@@ -3192,8 +3192,8 @@
                 <Chinesesimp>情报搜集</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING_TMLEFT">
-                <Original>Mission time remaining: 5 minutes.</Original>
-                <English>Mission time remaining: 5 minutes.</English>
+                <Original>Mission time remaining: 5 minutes</Original>
+                <English>Mission time remaining: 5 minutes</English>
                 <Chinesesimp>任务有效时间还剩5分钟</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING1">
@@ -3601,8 +3601,8 @@
                 <English>Mobile HQ</English>
             </Key>
             <Key ID="STR_DUWS_T_MHQ_LOCKOUT">
-                <Original>Last Mobile HQ destroyed. Name another in %1 min.</Original>
-                <English>Last Mobile HQ destroyed. Name another in %1 min.</English>
+                <Original>Last Mobile HQ destroyed. Name another in %1 min</Original>
+                <English>Last Mobile HQ destroyed. Name another in %1 min</English>
             </Key>
             <Key ID="STR_DUWS_T_mhq_slot_row">
                 <Original>Mobile HQ Designation (0 CP) Radio</Original>
@@ -3617,8 +3617,8 @@
                 <English>Mobile HQ Released</English>
             </Key>
             <Key ID="STR_DUWS_T_MHQ_RELEASED_MSG">
-                <Original>An ordinary truck again. Any squad lead can claim a new one.</Original>
-                <English>An ordinary truck again. Any squad lead can claim a new one.</English>
+                <Original>An ordinary truck again. Any squad lead can claim a new one</Original>
+                <English>An ordinary truck again. Any squad lead can claim a new one</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_LOST_TITLE">
                 <Original>Supports Lost</Original>
@@ -3971,8 +3971,8 @@
                 <Spanish>El juego ha sido guardado</Spanish>
                 <German>Das Spiel wurde gespeichert</German>
                 <Chinesesimp>游戏已经保存</Chinesesimp>
-                <Original>The game has been saved.</Original>
-                <English>The game has been saved.</English>
+                <Original>The game has been saved</Original>
+                <English>The game has been saved</English>
             </Key>
         </Container>
         <Container name="Side Missions">
@@ -4106,15 +4106,15 @@
                 <German>Stellen Sie sicher, dass wertvolle stuff das Missionsgebiet innerhalb von 6 Minuten evakuieren.</German>
                 <Spanish>Asegúrate de que los stuff valiosos abandonen el área de misión en 6 minutos.</Spanish>
                 <Chinesesimp>请确保有价值的资产/武器/人员在6分钟内离开任务区域。</Chinesesimp>
-                <Original>Strip anything useful. The area will clear in five minutes.</Original>
-                <English>Strip anything useful. The area will clear in five minutes.</English>
+                <Original>Strip anything useful. The area will clear in five minutes</Original>
+                <English>Strip anything useful. The area will clear in five minutes</English>
             </Key>
             <Key ID="STR_DUWS_T_renwuqingli4">
                 <German>Noch eine Minute bis zur Aufräumaktion.</German>
                 <Spanish>Queda un minuto para la limpieza de la misión.</Spanish>
                 <Chinesesimp>还有最后一分钟执行任务清理。</Chinesesimp>
-                <Original>One minute. The objective area is cleared after that.</Original>
-                <English>One minute. The objective area is cleared after that.</English>
+                <Original>One minute. The objective area is cleared after that</Original>
+                <English>One minute. The objective area is cleared after that</English>
             </Key>
             <Key ID="STR_DUWS_T_kievbwmd">
                 <German>Eine verbündete Angriffstruppe wurde überfallen! Sie verbirgt sich in einem Gebäude in diesem Gebiet, mit feindlichen Truppen ringsherum. Hilf ihnen, sich durchzubrechen!  (Very high CP, low AP)</German>
@@ -4898,8 +4898,8 @@
                 <German>Interagiere mit der Fahnenstange, um das Fahrzeug auf dem Landezonenmarker abzuholen.</German>
                 <Spanish>Interactúa con el asta de bandera para recuperar el vehículo en el marcador de zona de aterrizaje.</Spanish>
                 <Chinesesimp>与修理设施进行交互，以回收停机坪标志上的载具。</Chinesesimp>
-                <Original>Scrap vehicles on the pad at the Recycling Station.</Original>
-                <English>Scrap vehicles on the pad at the Recycling Station.</English>
+                <Original>Scrap vehicles on the pad at the Recycling Station</Original>
+                <English>Scrap vehicles on the pad at the Recycling Station</English>
             </Key>
             <Key ID="STR_DUWS_T_5n277nzo">
                 <German>Versorgungsabwurf (5CP) Funk</German>
@@ -5283,8 +5283,8 @@
                 <German>Besatzung muss absitzen um das MHQ aufzubauen</German>
                 <Spanish>Todos los ocupantes deben salir del CGM para desplegarlo</Spanish>
                 <Chinesesimp>所有乘员必须离开机动指挥部才能部署</Chinesesimp>
-                <Original>All occupants must exit the MHQ before it can be deployed.</Original>
-                <English>All occupants must exit the MHQ before it can be deployed.</English>
+                <Original>All occupants must exit the MHQ before it can be deployed</Original>
+                <English>All occupants must exit the MHQ before it can be deployed</English>
             </Key>
             <Key ID="STR_DUWS_T_160jkc3a">
                 <German>Virtuelles Arsenal</German>
@@ -6760,8 +6760,8 @@
                 <Chinesesimp>没有待命的特遣队</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_no_standby_tf_desc">
-                <Original>There are no task forces waiting to attack.</Original>
-                <English>There are no task forces waiting to attack.</English>
+                <Original>There are no task forces waiting to attack</Original>
+                <English>There are no task forces waiting to attack</English>
                 <Chinesesimp>当前没有待命中的特遣队。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_taskforces_launchrqst">
@@ -6780,8 +6780,8 @@
                 <Chinesesimp>进攻命令已下达</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_taskforces_launched_desc">
-                <Original>All standby task forces are now moving to engage the enemy.</Original>
-                <English>All standby task forces are now moving to engage the enemy.</English>
+                <Original>All standby task forces are now moving to engage the enemy</Original>
+                <English>All standby task forces are now moving to engage the enemy</English>
                 <Chinesesimp>所有待命中的特遣队现在开始向敌人发起进攻。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_5i5rdhy7">
@@ -7081,8 +7081,8 @@
                 <German>Dein befehlshabender Offizier wurde getötet</German>
                 <Spanish>Su oficial al mando ha sido asesinado</Spanish>
                 <Chinesesimp>你的指挥官已经阵亡</Chinesesimp>
-                <Original>Your commanding officer has been killed.</Original>
-                <English>Your commanding officer has been killed.</English>
+                <Original>Your commanding officer has been killed</Original>
+                <English>Your commanding officer has been killed</English>
             </Key>
             <Key ID="STR_DUWS_T_32ci6fa1">
                 <German>"Overlord 1-1" an alle Einheiten, Einsatztruppe %1 betritt den Operationsbereich.</German>
@@ -7229,8 +7229,8 @@
                 <English>Removing FOB %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_f28nbzbw">
-                <Original>Its marker is gone; the structures clear in five minutes.</Original>
-                <English>Its marker is gone; the structures clear in five minutes.</English>
+                <Original>Its marker is gone; the structures clear in five minutes</Original>
+                <English>Its marker is gone; the structures clear in five minutes</English>
             </Key>
             <Key ID="STR_DUWS_T_gogv37ur">
                 <German>Schnellreise ist deaktiviert</German>
@@ -7453,15 +7453,15 @@
                 <German>Ravage-Modus aktiviert. Siehe die Beschreibung auf der linken Seite der Karte für Details.</German>
                 <Spanish>Modo Ravage activado. Consulta la descripción en el lado izquierdo del mapa para más detalles.</Spanish>
                 <Chinesesimp>Ravage模式已开启。玩法详见地图左侧的简介。</Chinesesimp>
-                <Original>Ravage mode active. Details at the left of the map.</Original>
-                <English>Ravage mode active. Details at the left of the map.</English>
+                <Original>Ravage mode active. Details at the left of the map</Original>
+                <English>Ravage mode active. Details at the left of the map</English>
             </Key>
             <Key ID="STR_DUWS_T_WBK_NOREP">
                 <German>Wbk-Modus aktiviert. Siehe die Beschreibung auf der linken Seite der Karte für Details.</German>
                 <Spanish>Modo Wbk activado. Consulta la descripción en el lado izquierdo del mapa para más detalles.</Spanish>
                 <Chinesesimp>Wbk模式已开启。玩法详见地图左侧的简介。</Chinesesimp>
-                <Original>WBK mode active. Details are on the left of the map screen.</Original>
-                <English>WBK mode active. Details are on the left of the map screen.</English>
+                <Original>WBK mode active. Details are on the left of the map screen</Original>
+                <English>WBK mode active. Details are on the left of the map screen</English>
             </Key>
             <Key ID="STR_DUWS_T_wbk">
                 <Original>Enemies from hell (Requires WebKnight's Zombies and Creatures)</Original>
@@ -7479,8 +7479,8 @@
                 <German>In diesem Gebiet gibt es verlorengebliebene Zivilisten! Extrahiere sie!</German>
                 <Spanish>Hay varados civiles en esta zona! Extrae los!</Spanish>
                 <Chinesesimp>这个区域有一些被困的平民！将他们营救出来。</Chinesesimp>
-                <Original>There are stranded civilians in this area! Extract them.</Original>
-                <English>There are stranded civilians in this area! Extract them.</English>
+                <Original>There are stranded civilians in this area. Extract them</Original>
+                <English>There are stranded civilians in this area. Extract them</English>
             </Key>
             <Key ID="STR_DUWS_T_civrescuetitle">
                 <German>Überlebende extrahieren</German>
@@ -8013,8 +8013,8 @@
                 <German>Nicht genug Command Points (%1CP benötigt)</German>
                 <Spanish>No posee suficientes puntos de comando (se requieren %1)</Spanish>
                 <Chinesesimp>没有足够的指挥点(还需要%1CP)</Chinesesimp>
-                <Original>Not enough Command Points (%1 CP required).</Original>
-                <English>Not enough Command Points (%1 CP required).</English>
+                <Original>Not enough Command Points (%1 CP required)</Original>
+                <English>Not enough Command Points (%1 CP required)</English>
             </Key>
             <Key ID="STR_DUWS_T_9607znvh">
                 <German>Bitte wähle etwas aus!</German>

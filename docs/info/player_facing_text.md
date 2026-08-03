@@ -40,11 +40,23 @@ roger, stand by, over, out*), numbers spelled out in spoken lines but numerals i
 declaratives — Overlord does not shout, and neither does the hint box: no exclamation marks, and no
 shouted words mid-sentence (`Targeting FAILED`).
 
-**Everything the player reads is punctuated as prose.** Hints, subtitles and notification bodies all
-carry terminal periods, including one-line statuses — `Cancelled.`, `Paratroopers deployed.` A label
-is the exception, because it is not a sentence: a side-mission name (`Clear Area`), a menu heading
-(`Mission Selector`), and a line ending on a substituted value (`Squad renamed to:` + the name) take
-no period.
+**Terminal punctuation is decided by the surface, not by the sentence.** Prose surfaces are
+punctuated as prose; the two surfaces that exist to be glanced at are kept bare.
+
+| Surface | Terminal period | Because |
+|---|---|---|
+| Hint box | **yes** | it is prose the player reads, and it wraps |
+| Dialogue and subtitles | **yes** | spoken lines, punctuated as speech |
+| Mission descriptions, briefings, task text | **yes** | prose, read at length |
+| A3 notification card | **no** | a headline, kept clean |
+| Map marker text | **no** | a label on the map, kept free of clutter |
+
+Sentence breaks *inside* a string are untouched by this — only the final one goes. A card reads
+`Last Mobile HQ destroyed. Name another in %1 min`, keeping the break and dropping the tail.
+
+A label takes no period on any surface, because it is not a sentence: a side-mission name
+(`Clear Area`), a menu heading (`Mission Selector`), a card's title field, and a line ending on a
+substituted value (`Squad renamed to:` + the name).
 
 ## Which surface a message goes to, and never both
 
