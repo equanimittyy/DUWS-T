@@ -1278,11 +1278,11 @@
 					\n\nIf you experience performance issues, restart the mission and try reducing the number of zones and/or the radius
 					\n\nWeather: %5
 					\nTime of Day: %6
-					\nTaxi Fast Travel: %7
-					\nFOB Fast Travel: %8
-					\nZeus Visibility: %9
-					\nStamina: %10
-					\nTime Mult: %11
+					\nFast Travel: %7
+					\nZeus Visibility: %8
+					\nVcom AI: %9
+					\nTime Mult: %10
+					\nSimple Zones: %11
 					\nCiv Presence: %12
 				</Original>
                 <English>
@@ -1295,11 +1295,11 @@
 					\n\nIf you experience performance issues, restart the mission and try reducing the number of zones and/or the radius
 					\n\nWeather: %5
 					\nTime of Day: %6
-					\nTaxi Fast Travel: %7
-					\nFOB Fast Travel: %8
-					\nZeus Visibility: %9
-					\nStamina: %10
-					\nTime Mult: %11
+					\nFast Travel: %7
+					\nZeus Visibility: %8
+					\nVcom AI: %9
+					\nTime Mult: %10
+					\nSimple Zones: %11
 					\nCiv Presence: %12
 				</English>
             </Key>

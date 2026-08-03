@@ -1,3 +1,18 @@
+/////////////////////////////////////////
+/////////   DUWS_T CHANGES   ////////////
+/////////////////////////////////////////
+
+// The same gate Core/fn_postinit.sqf carries, and it belongs on both halves. Core exits here
+// without ever setting AIS_Core_realPlayer, while this half went on registering its player actions
+// against it -- and AIS_Core_fnc_addAction tests that variable, so each call threw twice. A boot
+// with revive switched off wrote ninety-eight undefined-variable errors for a system nobody asked
+// to run.
+_revive = ["Revive", 0] call BIS_fnc_getParamValue;
+if (_revive == 0) exitwith {};
+
+/////////////////////////////////////////
+/////////////////////////////////////////
+
 if (isDedicated || !hasInterface) exitWith {};
 if (ais_ace_shutdown) exitWith {diag_log ["AIS: AIS shutdown itself cause ACE mod was detected. ACE and AIS cant work at the same time."]};
 /*
