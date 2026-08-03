@@ -15,7 +15,11 @@
 // POSITIONALLY LOCKED to DUWS_zoneRadiusMult below: a category's position here is the column its
 // multiplier is read from. Reordering either table without the other silently scales armour by the
 // air column, which is a balance change with nothing in the log to show for it.
-// --DUWS-UNITCOMP BEGIN name="Spawn categories" kind=rule row="category" fields="category"--
+//
+// Deliberately outside a TUI fence, unlike every other table here. A category is named from three
+// other tables' rows, so a rename made in one place leaves those tokens filed under a category that
+// no longer exists and scaling as light; and a category cannot be added without a matching column in
+// the multipliers below. Neither is an edit a row editor can make safely.
 DUWS_spawnCategories = [
     ["infantry"],
     ["light"],
@@ -23,7 +27,6 @@ DUWS_spawnCategories = [
     ["air"],
     ["fortification"]
 ];
-// --DUWS-UNITCOMP END--
 
 // A token's category comes off its own row in whichever table claims it. A token neither claims is a
 // classname a faction file named directly; those scale as "light" -- a multiplier of one everywhere

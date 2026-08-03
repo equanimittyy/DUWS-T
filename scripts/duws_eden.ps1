@@ -416,6 +416,22 @@ function Get-RoleVocab {
     return $script:roleVocab
 }
 
+# The placer vocabulary: the globals server_fnc_init.sqf compiles. A specials row names its placer by
+# global name and the spawn path falls back to {grpNull} for a name nothing defines, so a typo there
+# is a row that raises nothing, silently -- the same failure the role check below exists to catch.
+function Get-PlacerVocab {
+    if ($null -ne $script:placerVocab) { return $script:placerVocab }
+    $names = @{}
+    $f = Join-Path $srcDir "duws\server\server_fnc_init.sqf"
+    if (Test-Path -LiteralPath $f) {
+        foreach ($m in [regex]::Matches([System.IO.File]::ReadAllText($f), '(?m)^\s*(fnc_\w+)\s*=\s*compile')) {
+            $names[$m.Groups[1].Value] = $true
+        }
+    }
+    $script:placerVocab = $names
+    return $script:placerVocab
+}
+
 # What a typed name is written back as, and how many faction files define it. Coverage -1 means the
 # value is not a role slot at all: a field may legitimately hold a group token or a team key, and
 # those end in neither _X nor a faction prefix, so they are passed through unchecked.
@@ -434,6 +450,24 @@ function Resolve-Role($name, $prefix) {
     # resolve to nothing at runtime and read as the roster silently losing a man.
     $out = if ($prefix -and -not $name.StartsWith($prefix)) { $prefix + $name } else { $name }
     return [pscustomobject]@{ Name = $out; Coverage = 0; Total = [int]$v.Files[$prefix] }
+}
+
+# What is wrong with a resolved name, or $null when nothing is. Two vocabularies, one question: a
+# slot no faction file fills spawns nothing, and a placer nothing compiles raises nothing. Both write
+# a table that compiles, and neither says anything at runtime, so both are worth a prompt.
+function Get-NameWarning($r) {
+    if ($r.Name -match '^fnc_') {
+        if ((Get-PlacerVocab).ContainsKey($r.Name)) { return $null }
+        return [pscustomobject]@{ Name = $r.Name; Hard = $true; Note = "nothing compiles this name -- the row would raise nothing." }
+    }
+    if ($r.Coverage -lt 0) { return $null }
+    if ($r.Coverage -eq 0) {
+        return [pscustomobject]@{ Name = $r.Name; Hard = $true; Note = "no faction file defines this slot -- it would spawn nothing." }
+    }
+    if ($r.Coverage -lt $r.Total) {
+        return [pscustomobject]@{ Name = $r.Name; Hard = $false; Note = ("defined by {0} of {1} faction files -- thins on the rest." -f $r.Coverage, $r.Total) }
+    }
+    return $null
 }
 
 # A field's literal, shown with quotes and the faction prefix taken off. An empty list or string
@@ -455,25 +489,37 @@ function Show-Field($literal, $prefix) {
     return $literal
 }
 
-# Rebuild a field's literal from typed text, keeping the kind it already had: a list stays a list,
-# a quoted name stays quoted, a number stays a number. Inferred from the current value rather than
-# declared per table, because the fence has no schema and every table would have to repeat one.
+# Rebuild a field's literal from typed text, keeping the kind it already had: a list stays a list, a
+# quoted name stays quoted, a number stays a number and a boolean stays a boolean. Inferred from the
+# current value rather than declared per table, because the fence has no schema and every table would
+# have to repeat one.
 # Returns $null when the text cannot be that kind -- refusing beats writing a table that will not
-# compile. Coverage notes for every role slot named are appended to $notes.
+# compile. Warnings for every name written are appended to $notes.
 function Format-FieldLiteral($current, $text, $prefix, [ref]$notes) {
     $qualify = {
         param($s)
         $r = Resolve-Role $s.Trim().Trim('"') $prefix
-        if ($r.Coverage -ge 0) { $notes.Value += ,$r }
+        $w = Get-NameWarning $r
+        if ($null -ne $w) { $notes.Value += ,$w }
         if ($r.Name -match '^-?\d+(\.\d+)?([eE][+-]?\d+)?$') { $r.Name } else { '"' + $r.Name + '"' }
     }
     if ($current.StartsWith('[')) {
         $parts = @($text -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' })
-        return '[' + (($parts | ForEach-Object { & $qualify $_ }) -join ', ') + ']'
+        # A bare true/false is left bare here and not in $qualify below, which also serves string
+        # fields: a placer parameter list carries booleans, and a quoted one is a type the spawner
+        # substitutes its default for, which reads as a parameter that stopped taking effect.
+        return '[' + (($parts | ForEach-Object {
+            if ($_ -match '^(true|false)$') { $_.ToLower() } else { & $qualify $_ }
+        }) -join ', ') + ']'
     }
     if ($current.StartsWith('"')) {
         if ($text.Trim() -eq '') { return '""' }
         return (& $qualify $text)
+    }
+    if ($current -match '^(true|false)$') {
+        $t = $text.Trim().ToLower()
+        if ($t -eq 'true' -or $t -eq 'false') { return $t }
+        return $null
     }
     if ($text.Trim() -match '^-?\d+(\.\d+)?([eE][+-]?\d+)?$') { return $text.Trim() }
     return $null
@@ -585,22 +631,18 @@ function Invoke-EditRow($row, $fields, $prefix, $title) {
 
         $literal = Format-FieldLiteral $entries[$k - 1] $typed $prefix ([ref]$notes)
         if ($null -eq $literal) {
-            Write-Host "  That field holds a number; leaving it as it was." -ForegroundColor Yellow
+            $holds = if ($entries[$k - 1] -match '^(true|false)$') { "true or false" } else { "a number" }
+            Write-Host ("  That field holds {0}; leaving it as it was." -f $holds) -ForegroundColor Yellow
             Read-Host "  Press Enter to continue" | Out-Null
             continue
         }
-        # Coverage is reported before the row is touched, not after the write: a roster naming a
-        # slot only some factions fill still compiles, and the only sign at runtime is a group that
-        # spawns short on those factions.
-        $bad = @($notes | Where-Object { $_.Coverage -lt $_.Total })
-        if ($bad.Count -gt 0) {
+        # Reported before the row is touched, not after the write: a roster naming a slot only some
+        # factions fill still compiles, and the only sign at runtime is a group that spawns short on
+        # those factions.
+        if ($notes.Count -gt 0) {
             Write-Host ""
-            foreach ($n in $bad) {
-                if ($n.Coverage -eq 0) {
-                    Write-Host ("  {0}: no faction file defines this slot -- it would spawn nothing." -f $n.Name) -ForegroundColor Red
-                } else {
-                    Write-Host ("  {0}: defined by {1} of {2} faction files -- thins on the rest." -f $n.Name, $n.Coverage, $n.Total) -ForegroundColor Yellow
-                }
+            foreach ($n in $notes) {
+                Write-Host ("  {0}: {1}" -f $n.Name, $n.Note) -ForegroundColor $(if ($n.Hard) { 'Red' } else { 'Yellow' })
             }
             Write-Host ""
             if ((Read-Host "  Keep it anyway? (y/N)") -notmatch '^\s*[Yy]') { continue }
@@ -897,8 +939,9 @@ function Get-ColumnValues($uc, $j) {
 }
 
 # Append a row, field by field, starting from an existing row blanked out so each field keeps its
-# kind. A team added here is spawnable as it stands: fnc_spawn_team reads the roster table for its
-# men and its behaviour, so nothing in the mission has to learn the new name.
+# kind. A team or a vehicle added here is spawnable as it stands -- the spawn path reads the tables
+# for what a token is, so nothing in the mission has to learn the new name. A special is the one
+# exception: its placer column names code, which is why a name nothing compiles is prompted on.
 function Invoke-AddRow($uc) {
     $rows = Split-Rows $uc.Body
     if ($rows.Count -eq 0) { Write-Host "Nothing to copy a shape from." -ForegroundColor Yellow; return }
@@ -907,7 +950,7 @@ function Invoke-AddRow($uc) {
     $new = @()
     for ($j = 0; $j -lt $tpl.Count; $j++) {
         $label = if ($j -lt $fields.Count) { $fields[$j] } else { "field $($j + 1)" }
-        $blank = if ($tpl[$j].StartsWith('[')) { '[]' } elseif ($tpl[$j].StartsWith('"')) { '""' } else { '0' }
+        $blank = if ($tpl[$j].StartsWith('[')) { '[]' } elseif ($tpl[$j].StartsWith('"')) { '""' } elseif ($tpl[$j] -match '^(true|false)$') { 'false' } else { '0' }
 
         Clear-Host
         Write-Host ("{0} -- new row" -f $uc.Name) -ForegroundColor Cyan
@@ -928,7 +971,7 @@ function Invoke-AddRow($uc) {
         if ($null -eq $typed) { return }
 
         $literal = Format-FieldLiteral $blank $typed $uc.Prefix ([ref]$notes)
-        if ($null -eq $literal) { $literal = '0' }
+        if ($null -eq $literal) { $literal = $blank }
         # The first column is the name every other table refers to, so a duplicate would shadow the
         # row already there and a blank one could never be referenced at all.
         if ($j -eq 0) {
@@ -939,10 +982,11 @@ function Invoke-AddRow($uc) {
                 Read-Host "  Press Enter" | Out-Null; $j--; continue
             }
         }
-        $bad = @($notes | Where-Object { $_.Coverage -eq 0 })
-        if ($bad.Count -gt 0) {
+        if ($notes.Count -gt 0) {
             Write-Host ""
-            foreach ($n in $bad) { Write-Host ("  {0}: no faction file defines this slot." -f $n.Name) -ForegroundColor Red }
+            foreach ($n in $notes) {
+                Write-Host ("  {0}: {1}" -f $n.Name, $n.Note) -ForegroundColor $(if ($n.Hard) { 'Red' } else { 'Yellow' })
+            }
             if ((Read-Host "  Keep it anyway? (y/N)") -notmatch '^\s*[Yy]') { $j--; continue }
         }
         $new += $literal
@@ -1076,8 +1120,8 @@ while ($true) {
     Write-Host ""
     Write-Host ("  1. Static compositions   ({0} object layouts, Eden round-trip)" -f $comps.Count)
     Write-Host "  2. Unit compositions     (what a zone, town or squad fields)"
-    Write-Host "  3. Teams                 (the men inside a patrol, squad or section)"
-    Write-Host "  4. Scaling rules         (radius multipliers, category map)"
+    Write-Host "  3. Tokens                (what one name raises: men, a vehicle, a placer)"
+    Write-Host "  4. Scaling rules         (radius multipliers)"
     Write-Host ""
     Write-Host "   Q. Quit"
     Write-Host ""
@@ -1089,7 +1133,7 @@ while ($true) {
         Show-RowMenu 'composition' 'Unit compositions' 'A composition is a list of teams and vehicles. Open one to see what it fields.' $false
     }
     elseif ($sel -match '^\s*3\s*$') {
-        Show-RowMenu 'team' 'Teams' 'A team is the men one name raises. Open one to change them, or add a team.' $true
+        Show-RowMenu 'team' 'Tokens' 'What a composition names: a team of men, one vehicle, or a placer. Open one, or add a row.' $true
     }
     elseif ($sel -match '^\s*4\s*$') { Show-RuleMenu }
 }

@@ -10,7 +10,7 @@ The mission has two kinds of composition and both used to be hand-edited in sour
 both over one idea: a **marker fence** in the source that the tool parses and Arma's preprocessor
 discards, so marking something up is data-only and costs no runtime.
 
-The top menu is the two kinds, with the unit half split by what a row *is* — a composition, a team,
+The top menu is the two kinds, with the unit half split by what a row *is* — a composition, a token,
 or a scaling rule.
 
 | Kind | Marker | What the tool does |
@@ -151,20 +151,26 @@ Verify once by import → export → re-import and confirming the layout is iden
 
 Two ideas, and keeping them apart is what makes the menus make sense:
 
-- A **composition** is a list of teams and vehicles, sometimes with a price. A zone tier, a town
-  tier, a purchasable squad. Contract for what the tier tables mean:
+- A **composition** is a list of tokens, sometimes with a price. A zone tier, a town tier, a
+  purchasable squad. Contract for what the tier tables mean:
   [`zones_and_civilians.md`](zones_and_civilians.md#zone-tiers).
-- A **team** is the men one name raises. `sniper` is two snipers until you say otherwise.
+- A **token** is what one name raises, and there are three tables of them under the Tokens menu: a
+  team of men (`sniper` is two snipers until you say otherwise), one vehicle, or a placer that
+  garrisons ground by a rule rather than from a roster.
 
-Compositions name teams; teams are edited in one place and referred to from many. **The unit of work
-is a row, not the table it lives in** — which file a composition sits in is not something the person
-editing it should have to know — so the menu lists every zone tier, town tier and squad together and
-opening one shows its configuration. A field naming a team shows that team's men beside it, so a
-reference is never a dead end.
+Compositions name tokens; a token is edited in one place and referred to from many. **The unit of
+work is a row, not the table it lives in** — which file a composition sits in is not something the
+person editing it should have to know — so the menu lists every zone tier, town tier and squad
+together and opening one shows its configuration. A field naming a token shows what that token
+raises beside it, so a reference is never a dead end.
 
-Scaling rules — the radius multipliers and the category map — get their own menu. They are how a
-composition is scaled rather than what is in one, and a radius band is only meaningful beside the
-bands above and below it, so those are still edited as whole tables.
+Scaling rules — the radius multipliers — get their own menu. They are how a composition is scaled
+rather than what is in one, and a radius band is only meaningful beside the bands above and below
+it, so those are still edited as whole tables.
+
+The category vocabulary is deliberately not in the tool. Its rows are positionally locked to the
+multiplier table's columns, and every token names a category from its own row in one of three other
+tables, so neither a rename nor an addition is an edit one row editor can complete.
 
 ```sqf
 // --DUWS-UNITCOMP BEGIN name="Zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
@@ -178,7 +184,7 @@ DUWS_zoneSpawnTiers = [
 | Attr | Meaning |
 |---|---|
 | `name="..."` | label in the menu, and the key a write matches on |
-| `kind=` | `composition`, `team` or `rule` — which menu its rows appear under. Anything unlabelled falls to `rule`, so a table nobody classified is still reachable |
+| `kind=` | `composition`, `team` (the Tokens menu) or `rule` — which menu its rows appear under. Anything unlabelled falls to `rule`, so a table nobody classified is still reachable |
 | `row="..."` | what one row means, since a row is a tier in one table and a radius band in another |
 | `rowname="Tier %1"` | how a row is named in the menu, `%1` being its index in roman. Without it the first column names the row, which is what a team and a squad already do |
 | `fields="a, b, c"` | the row's columns, for a table whose rows are fixed-shape rather than a free-length list. Its presence is what switches the editor into field mode |
@@ -195,33 +201,42 @@ picked apart by column instead of by entry index. Pick a row, pick a field, and 
 **already in the line** for editing rather than retyped from scratch; Escape backs out.
 
 Each field keeps the kind it already had, inferred from the value rather than declared: a list stays
-a list, a quoted name stays quoted, and a number field refuses text instead of writing a table that
-will not compile.
+a list, a quoted name stays quoted, and a number or boolean field refuses anything else instead of
+writing a table that will not compile. Booleans matter more than they look: a placer's parameter
+list carries them, and SQF's `params` substitutes its own default for an argument of the wrong type,
+so a quoted `"false"` reads at runtime as a parameter that quietly stopped taking effect.
 
-Role names are checked against the slots the faction files under `shared/factions/` actually define,
-and the count is the point rather than a yes/no: every faction file fills the same slots, so a name
-none of them defines would spawn nothing, and one only some of them define is a roster that quietly
-thins on the rest — which is the failure the faction auto-detection exists to prevent. Either
-prompts before the row is changed.
+Two vocabularies are checked before a row is changed, and both catch a write that compiles and then
+says nothing at runtime:
+
+- **Role names**, against the slots the faction files under `shared/factions/` actually define. The
+  count is the point rather than a yes/no: every faction file fills the same slots, so a name none
+  of them defines would spawn nothing, and one only some of them define is a roster that quietly
+  thins on the rest — which is the failure the faction auto-detection exists to prevent.
+- **Names beginning `fnc_`**, against the globals `server_fnc_init.sqf` compiles. A placer is named
+  by global, and the spawn path falls back to `{grpNull}` for a name nothing defines, so a typo is a
+  row that raises nothing.
 
 A row holding a nested list belongs in a `fields=` table. The flat editor splits typed input on
 commas, which would cut a nested list in half.
 
-### Adding a team
+### Adding a token
 
-The team menu can append a row, and the row it appends is spawnable as it stands — nothing in the
-mission has to learn the new name. That is the whole reason a team row carries `behaviour` and
-`category` rather than only its men:
+The Tokens menu can append a row. A **team** or a **vehicle** added there is spawnable as it stands —
+nothing in the mission has to learn the new name. That is the whole reason a team row carries
+`behaviour` and `category` rather than only its men:
 
 - `fnc_spawn_team` raises every OPFOR team and reads both columns. `behaviour` is what it does with
-  the group once it stands: `route` walks a fixed circuit of search-and-destroy waypoints with one
-  leg inside a building, `wander` hands it to `bis_fnc_taskPatrol`, `none` leaves it where it was
-  put for a caller that gives its own orders. Before this, each of those was a separate near-copy of
-  a spawner file, and a new team meant a new file.
-- `DUWS_fnc_zoneSpawnOne` asks the roster table whether a token is a team rather than switching on
-  known names, so an unrecognised token is a vehicle class and everything else is a team.
-- `category` is which radius multiplier scales it, held on the row so adding a team is one edit
+  the group once it stands. Before this, each behaviour was a separate near-copy of a spawner file,
+  and a new team meant a new file.
+- The spawn path asks the tables what a token is rather than switching on known names, so a token
+  no table claims is a classname a faction file named directly and stands as itself.
+- `category` is which radius multiplier scales it, held on the row so adding a token is one edit
   rather than two tables that can disagree.
+
+A **special** is the exception to spawnable-as-it-stands: its `placer` column names code, so the
+function has to exist before the row does. The tool prompts on a name nothing compiles rather than
+letting the row through to raise nothing.
 
 The values already in a column are offered while typing, so the behaviours on offer are the ones the
 spawner actually implements rather than a list in a doc that rots. A duplicate name is refused: the

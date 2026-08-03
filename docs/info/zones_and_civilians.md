@@ -186,11 +186,12 @@ protect, since a beaten zone garrison means the zone changed hands
 #### Radius multiplies each category, not the whole list
 
 A tier composition says *what* a zone fields; its radius says *how many*. Every token belongs to a
-category — a team carries its own on its row in `DUWS_teamRosters`, and everything that is not a
-team is filed in `DUWS_spawnCategories` — and `DUWS_zoneRadiusMult` gives one multiplier per category per
-radius band — because a zone's radius scales its garrison unevenly. More ground needs proportionally
-more infantry to cover it and does not need more aircraft, and a flat multiplier on the whole list
-would buy the biggest zones three times the air support alongside three times the riflemen.
+category, carried on its own row in whichever table claims it — `DUWS_teamRosters`,
+`DUWS_spawnVehicles` or `DUWS_spawnSpecials`, with `DUWS_spawnCategories` holding the vocabulary and
+nothing else — and `DUWS_zoneRadiusMult` gives one multiplier per category per radius band, because
+a zone's radius scales its garrison unevenly. More ground needs proportionally more infantry to
+cover it and does not need more aircraft, and a flat multiplier on the whole list would buy the
+biggest zones three times the air support alongside three times the riflemen.
 
 **The two tables are positionally locked**: one multiplier per category, in `DUWS_spawnCategories`
 order, after the radius ceiling. Reordering either without the other scales armour by the air column,
