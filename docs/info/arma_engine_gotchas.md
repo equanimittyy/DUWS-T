@@ -945,7 +945,7 @@ ids that come back are certainly current. The record doubles as the presence tes
 exists exactly while the player is holding that item, which is what lets one check refuse to
 refund a support that is away on a mission.
 
-## A `CfgNotifications` description is clipped, not wrapped, past roughly 75 characters
+## A `CfgNotifications` description is clipped, not wrapped, past roughly 60 characters
 
 **The notification card's description box is a fixed size. Text longer than fits is cut off
 mid-sentence with no ellipsis and no error, so an over-long body reads as a sentence the mission
@@ -958,10 +958,12 @@ in the stringtable, where the string looks perfectly ordinary.
 
 The exact ceiling is a pixel width rather than a character count, so it moves with the proportional
 font: a line of `l`s survives longer than a line of `W`s, and the *title* field has a budget of its
-own that is far tighter still. **75 characters is the figure this mission writes to** — measured
-below the observed cut, with enough margin that a wide string cannot cross it.
+own that is far tighter still. **60 characters is the figure this mission writes to.** It was 75,
+and a 73-character side-mission line still clipped in play — 75 sat close enough to the observed cut
+that a wide string crossed it anyway, which is exactly the margin a character count is supposed to
+buy. 60 is under the narrowest clip seen rather than beside it.
 
-**How to apply:** keep every `BIS_fnc_showNotification` body at or under 75 characters, counting a
+**How to apply:** keep every `BIS_fnc_showNotification` body at or under 60 characters, counting a
 `format` placeholder at its longest substitution. Titles are short noun phrases regardless. Anything
 that genuinely needs more room is not a notification: a briefing belongs in the task description,
 which scrolls, and an explanation belongs in a `hint`, which wraps.

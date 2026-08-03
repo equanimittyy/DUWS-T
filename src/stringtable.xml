@@ -1948,8 +1948,8 @@
                 <Chinesesimp>指挥点不足（需要2 CP）。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_repair_station_deployed">
-                <Original>Interact with the repair facility in the base to repair/edit vehicles.</Original>
-                <English>Interact with the repair facility in the base to repair/edit vehicles.</English>
+                <Original>Use the base repair facility to repair and edit vehicles.</Original>
+                <English>Use the base repair facility to repair and edit vehicles.</English>
                 <Chinesesimp>与基地内的修理设施进行交互以维修/编辑载具。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_437x650k">
@@ -2129,8 +2129,8 @@
                 <Spanish>Los objetos clave de esta misión incluyen un arsenal completo de un solo uso. ¡No olvides usarlos!</Spanish>
                 <German>Die Schlüsselgegenstände dieser Mission haben ein einmaliges Vollarsenal – vergiss nicht, es zu nutzen!</German>
                 <Chinesesimp>该任务的关键物品配备了一次性的完整军火库，别忘了使用它们</Chinesesimp>
-                <Original>The objective carries a one-time full arsenal. Use it before you leave.</Original>
-                <English>The objective carries a one-time full arsenal. Use it before you leave.</English>
+                <Original>A one-time arsenal here. Use it before you leave.</Original>
+                <English>A one-time arsenal here. Use it before you leave.</English>
             </Key>
             <Key ID="STR_DUWS_T_dakaijunhuoku2">
                 <Spanish>Un jugador ha usado el arsenal completo de un solo uso, y este ha sido consumido.</Spanish>
@@ -2203,8 +2203,8 @@
                 <Chinesesimp>伪装成敌人</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ACTIVATED">
-                <Original>Disguise active. Keep your distance and hold fire until you must.</Original>
-                <English>Disguise active. Keep your distance and hold fire until you must.</English>
+                <Original>Disguise active. Keep your distance, hold fire.</Original>
+                <English>Disguise active. Keep your distance, hold fire.</English>
                 <Chinesesimp>敌人伪装已激活。远离敌人，非必要情况下不要随意开火。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ohno">
@@ -2258,18 +2258,18 @@
                 <Chinesesimp>伪装暴露：你距离敌人过近且未及时远离。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_GEAR">
-                <Original>Disguise broken: You changed your uniform, vest, helmet or primary weapon.</Original>
-                <English>Disguise broken: You changed your uniform, vest, helmet or primary weapon.</English>
+                <Original>Disguise broken: uniform, vest, helmet or weapon changed.</Original>
+                <English>Disguise broken: uniform, vest, helmet or weapon changed.</English>
                 <Chinesesimp>伪装暴露：你更换了制服、背心、头盔或主武器。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_BACKPACK">
-                <Original>Disguise broken: You switched to a backpack that isn't enemy issue.</Original>
-                <English>Disguise broken: You switched to a backpack that isn't enemy issue.</English>
+                <Original>Disguise broken: backpack is not enemy issue.</Original>
+                <English>Disguise broken: backpack is not enemy issue.</English>
                 <Chinesesimp>伪装暴露：你更换了非敌军类型的背包。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_SECONDARY">
-                <Original>Disguise broken: You equipped a secondary weapon that isn't enemy issue.</Original>
-                <English>Disguise broken: You equipped a secondary weapon that isn't enemy issue.</English>
+                <Original>Disguise broken: launcher is not enemy issue.</Original>
+                <English>Disguise broken: launcher is not enemy issue.</English>
                 <Chinesesimp>伪装暴露：你装备了非敌军副手武器。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_HANDGUN">
@@ -2278,8 +2278,8 @@
                 <Chinesesimp>伪装暴露：你装备了非敌军手枪。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_NVG">
-                <Original>Disguise broken: You equipped night vision goggles that aren't enemy issue.</Original>
-                <English>Disguise broken: You equipped night vision goggles that aren't enemy issue.</English>
+                <Original>Disguise broken: NVGs not enemy issue.</Original>
+                <English>Disguise broken: NVGs not enemy issue.</English>
                 <Chinesesimp>伪装暴露：你装备了非敌军夜视仪。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_VEHICLE">
@@ -2471,8 +2471,8 @@
                 <Chinesesimp>伪装</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_ACTIVATED_DESC">
-                <Original>You are now disguised as a civilian. Avoid suspicious actions.</Original>
-                <English>You are now disguised as a civilian. Avoid suspicious actions.</English>
+                <Original>Disguised as a civilian. Avoid suspicious actions.</Original>
+                <English>Disguised as a civilian. Avoid suspicious actions.</English>
                 <Chinesesimp>你已伪装成平民。请避免可疑行为。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_BROKEN_WEAPON">
@@ -2805,13 +2805,6 @@
                 <German>Das ist verdammter Krieg, Bruder... du brauchst das nicht.</German>
                 <Spanish>Es una puta guerra, hermano... no necesitas esto.</Spanish>
                 <Chinesesimp>这他妈是战争，兄弟...你不需要这些东西。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_LOOT6">
-                <Original>Nothing? Alright.</Original>
-                <English>Nothing? Alright.</English>
-                <German>Nichts? Na gut.</German>
-                <Spanish>Nada? Vale.</Spanish>
-                <Chinesesimp>什么都没有？好吧。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_LOOT_MONEY2">
                 <Original>Found some cash!</Original>
@@ -3618,8 +3611,8 @@
                 <English>Mobile HQ</English>
             </Key>
             <Key ID="STR_DUWS_T_MHQ_LOCKOUT">
-                <Original>The last Mobile HQ was destroyed. Another can be named in %1 min.</Original>
-                <English>The last Mobile HQ was destroyed. Another can be named in %1 min.</English>
+                <Original>Last Mobile HQ destroyed. Name another in %1 min.</Original>
+                <English>Last Mobile HQ destroyed. Name another in %1 min.</English>
             </Key>
             <Key ID="STR_DUWS_T_mhq_slot_row">
                 <Original>Mobile HQ Designation (0 CP) Radio</Original>
@@ -3634,8 +3627,8 @@
                 <English>Mobile HQ Released</English>
             </Key>
             <Key ID="STR_DUWS_T_MHQ_RELEASED_MSG">
-                <Original>It is an ordinary truck again. Any squad leader can claim a new one.</Original>
-                <English>It is an ordinary truck again. Any squad leader can claim a new one.</English>
+                <Original>An ordinary truck again. Any squad lead can claim a new one.</Original>
+                <English>An ordinary truck again. Any squad lead can claim a new one.</English>
             </Key>
             <Key ID="STR_DUWS_T_SUPPORT_LOST_TITLE">
                 <Original>Supports Lost</Original>
@@ -4123,8 +4116,8 @@
                 <German>Stellen Sie sicher, dass wertvolle stuff das Missionsgebiet innerhalb von 6 Minuten evakuieren.</German>
                 <Spanish>Asegúrate de que los stuff valiosos abandonen el área de misión en 6 minutos.</Spanish>
                 <Chinesesimp>请确保有价值的资产/武器/人员在6分钟内离开任务区域。</Chinesesimp>
-                <Original>Strip anything useful from the objective area. Clearance in five minutes.</Original>
-                <English>Strip anything useful from the objective area. Clearance in five minutes.</English>
+                <Original>Strip anything useful. The area will clear in five minutes.</Original>
+                <English>Strip anything useful. The area will clear in five minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_renwuqingli4">
                 <German>Noch eine Minute bis zur Aufräumaktion.</German>
@@ -4915,8 +4908,8 @@
                 <German>Interagiere mit der Fahnenstange, um das Fahrzeug auf dem Landezonenmarker abzuholen.</German>
                 <Spanish>Interactúa con el asta de bandera para recuperar el vehículo en el marcador de zona de aterrizaje.</Spanish>
                 <Chinesesimp>与修理设施进行交互，以回收停机坪标志上的载具。</Chinesesimp>
-                <Original>Use the Vehicle Recycling Station to scrap vehicles on the pad.</Original>
-                <English>Use the Vehicle Recycling Station to scrap vehicles on the pad.</English>
+                <Original>Scrap vehicles on the pad at the Recycling Station.</Original>
+                <English>Scrap vehicles on the pad at the Recycling Station.</English>
             </Key>
             <Key ID="STR_DUWS_T_5n277nzo">
                 <German>Versorgungsabwurf (5CP) Funk</German>
@@ -7470,8 +7463,8 @@
                 <German>Ravage-Modus aktiviert. Siehe die Beschreibung auf der linken Seite der Karte für Details.</German>
                 <Spanish>Modo Ravage activado. Consulta la descripción en el lado izquierdo del mapa para más detalles.</Spanish>
                 <Chinesesimp>Ravage模式已开启。玩法详见地图左侧的简介。</Chinesesimp>
-                <Original>Ravage mode active. Details are on the left of the map screen.</Original>
-                <English>Ravage mode active. Details are on the left of the map screen.</English>
+                <Original>Ravage mode active. Details at the left of the map.</Original>
+                <English>Ravage mode active. Details at the left of the map.</English>
             </Key>
             <Key ID="STR_DUWS_T_WBK_NOREP">
                 <German>Wbk-Modus aktiviert. Siehe die Beschreibung auf der linken Seite der Karte für Details.</German>

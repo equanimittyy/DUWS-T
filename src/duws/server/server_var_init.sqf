@@ -234,16 +234,17 @@ MASTER_allLocationsPos = [];publicVariable "MASTER_allLocationsPos";
 //
 // civ_frisk is flagged on every civilian and carries its own `nothing` weight, which keeps the
 // shipped 37.5 / 12.5 / 50 split exactly: the arrest is the price, and it is paid before this.
-// The empty-handed line is per-source, because a body that held nothing and a detainee who was
-// carrying nothing are different sentences. The voice is not: every search is the searcher
-// reporting what they found, whatever they were searching.
+// What it no longer carries is a line of its own. The empty-handed result was written per source,
+// on the reasoning that a body holding nothing and a detainee carrying nothing are different
+// sentences -- but every one of these is the same act reported by the same searcher, and the one
+// odd wording read as a different system rather than as a different subject.
 //
 // [successChance, [[payoutKind, weight], ...], nothingKey]
 DUWS_searchSources = createHashMapFromArray [
     ["garrison",  [0.5,  [["intel", 2], ["pool", 3], ["coins", 2], ["document", 1]], "STR_DUWS_T_INTEL_FOUND_n"]],
     ["mission",   [0.15, [["intel", 3], ["pool", 2]],                                "STR_DUWS_T_INTEL_FOUND_n"]],
     ["objective", [1,    [["intel", 1]],                                             "STR_DUWS_T_INTEL_FOUND_n"]],
-    ["civ_frisk", [1,    [["coins", 3], ["document", 1], ["nothing", 4]],            "STR_DUWS_T_LOOT6"]]
+    ["civ_frisk", [1,    [["coins", 3], ["document", 1], ["nothing", 4]],            "STR_DUWS_T_INTEL_FOUND_n"]]
 ];
 
 // manually_chosen
