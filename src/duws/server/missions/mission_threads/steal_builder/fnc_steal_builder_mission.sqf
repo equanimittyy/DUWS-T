@@ -89,7 +89,7 @@ sleep 5; // 等待巡逻队生成完毕
 
 waitUntil {sleep 2; ((getdammage BLD1)>0.95 || (BLD1 distance PosOfBLUHQ)<50)};
 
-deleteMarker str(_markername2);
+[_markername2] call fnc_missionMarkerClear;
 
 if (getdammage BLD1>0.95) exitWith {
     [{hint localize "STR_DUWS_T_obc4591x"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];

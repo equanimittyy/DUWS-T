@@ -182,7 +182,7 @@ waitUntil {
 };
 
 // 删除任务区域标记
-deleteMarker str(_markername2);
+[_markername2] call fnc_missionMarkerClear;
 
 // 失败分支
 if (getdammage _truck1>0.95) exitWith {

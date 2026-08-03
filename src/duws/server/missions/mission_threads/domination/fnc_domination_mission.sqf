@@ -716,7 +716,7 @@ waitUntil {
 };
 
 // 删除标记
-deleteMarker str(_markername2);
+[_markername2] call fnc_missionMarkerClear;
 deleteMarker _arrowMarkerName;
 // [MOD] 删除蓝方 APC 标记
 { deleteMarker _x; } forEach _apcMarkers;

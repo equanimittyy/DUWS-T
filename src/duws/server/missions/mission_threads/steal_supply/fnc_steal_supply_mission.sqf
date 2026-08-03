@@ -150,7 +150,7 @@ waitUntil {
     (time - _taskStartTime > _taskTimeLimit)
 };
 
-deleteMarker str(_markername2);
+[_markername2] call fnc_missionMarkerClear;
 
 if (!alive _truck1 || (time - _taskStartTime > _taskTimeLimit)) exitWith {
     _truck1 removeEventHandler ["GetIn", _truckGetInEH];

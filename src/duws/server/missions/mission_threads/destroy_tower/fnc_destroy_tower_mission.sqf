@@ -110,11 +110,11 @@ if ((alive _vehicle_7 && (damage _vehicle_7) < 1) && (time - _missionStartTime) 
     _speaker = localize "STR_DUWS_T_OVERLORD";
     _message = ([localize "STR_DUWS_T_towerfail"] call fnc_cs);
     [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-    deleteMarker str(_markername2);
+    [_markername2] call fnc_missionMarkerClear;
     [_targetpos,_radius, "mission_destroy_tower"] call fnc_mission_end;
 };
 
-deleteMarker str(_markername2);
+[_markername2] call fnc_missionMarkerClear;
 
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 

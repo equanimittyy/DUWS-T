@@ -84,17 +84,14 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 		};
 
 		_Posfound = true;
-		
-		// STAY AWAY FROM CENTER OF ZONES
-		_zonesArray = WARCOM_zones_controled_by_OPFOR + WARCOM_zones_controled_by_BLUFOR;
-		for [{_t=1}, {_t <= count _zonesArray}, {_t=_t+1}] do 
-		{                                         
-			// get the index of the element
-			_zonesArray_index = _t-1;
-			_distance = (_zonesArray select _zonesArray_index) distance (_foundSafePos);
-			if (_distance < (zones_max_radius*0.75)) then {_Posfound = false};
-		};
-		
+
+		// Clear of every zone, by the zone's own radius rather than the campaign ceiling. The 400 m
+		// on top is roughly what a mission's objective drifts from the anchor offered here
+		// (fnc_missionTargetPos), so an anchor accepted a metre outside a zone does not hand that
+		// thread fifty rejections and an abort. The drifted position is tested again there, which is
+		// the test that actually decides; this one only keeps the offer off a zone.
+		if ([_foundSafePos, 400] call fnc_pos_in_zone) then {_Posfound = false};
+
 	};
  
 	// CREATE AN ARRAY OF POSSIBLE POSITIONS

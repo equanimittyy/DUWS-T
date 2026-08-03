@@ -24,9 +24,14 @@ while {!_Posfound} do {
 
 	// DON'T SPAWN ON ROADS
 	_nearRoad = [_targetpos,15] call BIS_fnc_nearestRoad;
-	if (_targetpos select 0 != 0 && 
+	// And not inside a zone. This is the position the mission is actually built on and garrisons
+	// around, and it drifts from the anchor the strategic map cleared -- up to _radius on each axis
+	// to _randomPos, then another 10-50 m off a building -- so an anchor outside every zone is no
+	// guarantee the objective is. Tested here because this is the loop that can re-roll it.
+	if (_targetpos select 0 != 0 &&
 		_targetpos select 1 != 0 &&
-		isNull _nearRoad) then {_Posfound=true;};
+		isNull _nearRoad &&
+		!([_targetpos] call fnc_pos_in_zone)) then {_Posfound=true;};
 
 	if (_failSafe > 50) exitWith {};
 };

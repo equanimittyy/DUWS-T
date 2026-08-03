@@ -509,7 +509,7 @@ waitUntil {
 if (!pilot_west_close && (time - _missionStartTime) > _taskTimeout_approach) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
-    deleteMarker str(_markername2);
+    [_markername2] call fnc_missionMarkerClear;
     _pilot setDamage 1;
     [{hint localize "STR_DUWS_T_fxysw123"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
@@ -519,7 +519,7 @@ if (!pilot_west_close && (time - _missionStartTime) > _taskTimeout_approach) exi
 if (!(alive _pilot)) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
-    deleteMarker str(_markername2);
+    [_markername2] call fnc_missionMarkerClear;
     [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;
@@ -538,13 +538,13 @@ waitUntil {sleep 1; (_pilot distance PosOfBLUHQ)<50 OR !(alive _pilot)};
 if (!(alive _pilot)) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
-    deleteMarker str(_markername2);
+    [_markername2] call fnc_missionMarkerClear;
     [{hint localize "STR_DUWS_T_q3iy1vcz"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;
 };
 
-deleteMarker str(_markername2);
+[_markername2] call fnc_missionMarkerClear;
 
 if (!isNull attachedTo _pilot) then {
     detach _pilot;

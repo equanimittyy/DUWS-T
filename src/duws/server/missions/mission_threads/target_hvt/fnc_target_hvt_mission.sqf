@@ -132,12 +132,12 @@ waitUntil {sleep 0.5; !alive _target || (time - _missionStartTime) > _taskTimeou
 if (alive _target && (time - _missionStartTime) > _taskTimeout) exitWith {
     [{hint localize "STR_DUWS_T_abc1abc2"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
-    deleteMarker str(_markername2);
+    [_markername2] call fnc_missionMarkerClear;
     [_targetpos,_radius, "mission_target_hvt"] call fnc_mission_end;
 };
 
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-deleteMarker str(_markername2);
+[_markername2] call fnc_missionMarkerClear;
 
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 

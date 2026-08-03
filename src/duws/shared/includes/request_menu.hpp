@@ -13,10 +13,11 @@
 // cannot stack. A strip wider than this one means dropping labels, so past here supports leave the
 // dialog for a screen of their own.
 //
-// Every button and every combo carries sizeEx 0.025, which is what holds the longest label in the
-// dialog whole ("Recruit Special Operatives", in a 9.9-cell command slot). One size for the lot:
-// buttons sized per row drifted apart by whichever pass last touched the row, and the dialog read
-// as three different menus stacked together. The two exceptions below each state their own reason.
+// Every button, combo, caption and list row carries sizeEx 0.025, and a control is as wide as its
+// own label needs rather than an even share of its row. The two go together: one text size across
+// the dialog is only affordable because nothing has to shrink to fit a share it never earned.
+// Sizes set per row drifted apart by whichever pass last touched the row, and the dialog read as
+// three different menus stacked together.
 //
 // The two categories are a header and a rule rather than boxes. A box around each drew three nested
 // frames on the same content (window, category, group) and spent the vertical room the left column
@@ -61,19 +62,18 @@ class ressourceheader
             w = 19.9 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
-        // First exception to the dialog's 0.025. The three pool captions are the longest text in
-        // the dialog and the 6.4-cell frames carrying them are the narrowest controls, so they set
-        // their own size. "Zones under control" is what forced it: nineteen characters do not fit
-        // in 6.4 cells at anything larger, and at the RscFrame default it was clipped to nothing
-        // and read as a figure with no label at all.
+        // Three unequal frames rather than three sixths of the row. "Zones under control" is
+        // nineteen characters against "Army Power"'s ten, so an even split sets the dialog's text
+        // size from the longest caption in it and shrinks the other two to suit -- which is how
+        // this row came to be the one place carrying smaller text than everything around it.
         class RscFrame_1805: RscFrame
         {
             idc = 1805;
             text = "$STR_DUWS_T_rqfuzzt0";
-            sizeEx = 0.021;
+            sizeEx = 0.025;
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 2.8 * GUI_GRID_H + GUI_GRID_Y;
-            w = 6.4 * GUI_GRID_W;
+            w = 6 * GUI_GRID_W;
             h = 1.9 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_zsv1b4zp";
         };
@@ -83,7 +83,7 @@ class ressourceheader
             text = "CP: XXX";
             x = 1.2 * GUI_GRID_W + GUI_GRID_X;
             y = 3.25 * GUI_GRID_H + GUI_GRID_Y;
-            w = 5.6 * GUI_GRID_W;
+            w = 5.2 * GUI_GRID_W;
             h = 1.1 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
         };
@@ -91,10 +91,10 @@ class ressourceheader
         {
             idc = 1807;
             text = "$STR_DUWS_T_01aj6v4j";
-            sizeEx = 0.021;
-            x = 7.55 * GUI_GRID_W + GUI_GRID_X;
+            sizeEx = 0.025;
+            x = 7.15 * GUI_GRID_W + GUI_GRID_X;
             y = 2.8 * GUI_GRID_H + GUI_GRID_Y;
-            w = 6.4 * GUI_GRID_W;
+            w = 4.6 * GUI_GRID_W;
             h = 1.9 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_23shv5yr";
         };
@@ -102,9 +102,9 @@ class ressourceheader
         {
             idc = 1002;
             text = "000";
-            x = 7.95 * GUI_GRID_W + GUI_GRID_X;
+            x = 7.55 * GUI_GRID_W + GUI_GRID_X;
             y = 3.25 * GUI_GRID_H + GUI_GRID_Y;
-            w = 5.6 * GUI_GRID_W;
+            w = 3.8 * GUI_GRID_W;
             h = 1.1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_23shv5yr";
             colorText[] = {1,1,1,1};
@@ -113,10 +113,10 @@ class ressourceheader
         {
             idc = 1806;
             text = "$STR_DUWS_T_dvt8byhj";
-            sizeEx = 0.021;
-            x = 14.3 * GUI_GRID_W + GUI_GRID_X;
+            sizeEx = 0.025;
+            x = 12.1 * GUI_GRID_W + GUI_GRID_X;
             y = 2.8 * GUI_GRID_H + GUI_GRID_Y;
-            w = 6.4 * GUI_GRID_W;
+            w = 8.6 * GUI_GRID_W;
             h = 1.9 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_8ibx2y3c";
         };
@@ -124,9 +124,9 @@ class ressourceheader
         {
             idc = 1001;
             text = "ZUC:XXX";
-            x = 14.7 * GUI_GRID_W + GUI_GRID_X;
+            x = 12.5 * GUI_GRID_W + GUI_GRID_X;
             y = 3.25 * GUI_GRID_H + GUI_GRID_Y;
-            w = 5.6 * GUI_GRID_W;
+            w = 7.8 * GUI_GRID_W;
             h = 1.1 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
         };
@@ -364,11 +364,11 @@ class ressourceheader
         };
 
         // --- SUPPORTS: the catalogue, appended down the right-hand side ---
-        // Width is set by the two category headings rather than by a row: with their rules restored
-        // the permanent heading is the longest line the strip carries, and a line over the width is
-        // silently cut rather than wrapped. At 16.9 cells and sizeEx 0.024 it holds about 43
-        // characters, which is that heading with nothing to spare -- the second exception to the
-        // dialog's 0.025, and it is one character of headroom rather than a preference.
+        // The listbox is as wide as its widest line, on the rule the rest of the dialog follows.
+        // That line is the permanent category heading rather than any support, and a line over the
+        // width is silently cut rather than wrapped: its 42 characters at sizeEx 0.025 want the
+        // 17.3 cells below, which is the whole inside of the frame. Anything longer added to
+        // `fnc_support_list_fill` has nowhere left to go here.
         class supportunlockframe: RscFrame
         {
             idc = 1804;
@@ -381,11 +381,11 @@ class ressourceheader
         class supportunlocklist: RscListBox
         {
             idc = 2103;
-            x = 22.4 * GUI_GRID_W + GUI_GRID_X;
+            x = 22.2 * GUI_GRID_W + GUI_GRID_X;
             y = 2.2 * GUI_GRID_H + GUI_GRID_Y;
-            w = 16.9 * GUI_GRID_W;
+            w = 17.3 * GUI_GRID_W;
             h = 18 * GUI_GRID_H;
-            sizeEx = 0.024;
+            sizeEx = 0.025;
             // The button below both buys and refunds, so its label follows the selection.
             onLBSelChanged = "_this call fnc_support_sel_changed";
         };
@@ -394,9 +394,9 @@ class ressourceheader
             idc = 1603;
             text = "$STR_DUWS_T_bp73qs16";
             sizeEx = 0.025;
-            x = 22.4 * GUI_GRID_W + GUI_GRID_X;
+            x = 22.2 * GUI_GRID_W + GUI_GRID_X;
             y = 20.4 * GUI_GRID_H + GUI_GRID_Y;
-            w = 16.9 * GUI_GRID_W;
+            w = 17.3 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_request_support";
             tooltip = "$STR_DUWS_T_dsl9rr00";

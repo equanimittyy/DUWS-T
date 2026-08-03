@@ -138,12 +138,12 @@ failure here is more likely to be something missing than something wrong.
 - [ ] Complete a rescue-pilot and a rescue-squad mission on a dedicated server and confirm each
       reveals a zone. These two pay on completion rather than through a search, so the rewrite did
       not touch them; they are the two sites that never paid out at all
-- [ ] Run any side mission and look at the map the moment the task lands. The objective's area
-      ellipse must be drawn. It never had anything to do with the search — nothing in the payout
-      knows what a mission is — but the ellipse asked for a marker colour no `CfgMarkerColors` class
-      answers to, and a colour that does not resolve leaves an area marker invisible. That is the
-      diagnosis behind the fix and it is inferred from the source rather than seen, so a mission
-      whose area is still blank means the cause is elsewhere
+- [ ] Run any side mission and look at the map the moment the task lands. An `hd_objective` icon and
+      the area ellipse around it must both be drawn. The icon is the half that was missing: it was
+      deleted on the reasoning that the task's own marker had replaced it, and a task marker is drawn
+      for whoever holds the task in whatever state the engine decides, where a map marker is simply
+      there. Whether the task marker draws at all is the open question underneath, and nothing here
+      depends on the answer any more
 
 **The numbers are only half played.** The 50 % flag rate on a garrison was set from play; 15 % on a
 mission group and every payout weight are still the shape's placeholder values. They are one table

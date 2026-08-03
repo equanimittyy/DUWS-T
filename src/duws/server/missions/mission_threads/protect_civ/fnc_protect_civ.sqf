@@ -209,10 +209,8 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
     if (!isNil "_civMarker" && {_civMarker != ""}) then {
         deleteMarker _civMarker;
     };
-    // str(): fnc_missionMarkerData creates the ellipse under str(name), so the real marker name
-    // carries literal quote characters and an unquoted deleteMarker silently misses it.
     if (!isNil "_areaMarker" && {_areaMarker != ""}) then {
-        deleteMarker str(_areaMarker);
+        [_areaMarker] call fnc_missionMarkerClear;
     };
 
     // 调用通用清理函数（清除敌方单位、残骸等）

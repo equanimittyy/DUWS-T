@@ -26,7 +26,7 @@ remoteExec ["", format ["sabotage_action_%1", netId _object]];
 private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
 
-deleteMarker str(_markername2);
+[_markername2] call fnc_missionMarkerClear;
 
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 

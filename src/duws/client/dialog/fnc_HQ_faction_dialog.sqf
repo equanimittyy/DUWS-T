@@ -21,12 +21,12 @@ _display = (findDisplay 46) createDisplay "RscDisplayEmpty";
 // Created before anything that sits on it: ctrlCreate order is draw order, so a panel made later
 // covers its own contents.
 _backdrop = _display ctrlCreate ["RscText", 1007];
-_backdrop ctrlSetPosition [0.075, 0.032, 0.85, 0.582];
+_backdrop ctrlSetPosition [0.075, 0.032, 0.85, 0.61];
 _backdrop ctrlSetBackgroundColor [0.2, 0.4, 0.2, 1];
 _backdrop ctrlCommit 0;
 
 _boxframe = _display ctrlCreate ["RscFrame", 1008];
-_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.542];
+_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.57];
 _boxframe ctrlSetText localize "STR_DUWS_T_faction_screen_title";
 _boxframe ctrlCommit 0;
 
@@ -153,37 +153,53 @@ _rule ctrlSetBackgroundColor [1, 1, 1, 0.25];
 _rule ctrlCommit 0;
 
 // Structured for its centring rather than its wrapping: RscText draws left and SQF has no
-// ctrlSetStyle, so a plain control cannot be centred after the fact.
+// ctrlSetStyle, so a plain control cannot be centred after the fact. The alignment is in the markup
+// and not left to the class, for the reason the pin below states.
 _placeText = _display ctrlCreate ["RscStructuredText", 1012];
 _placeText ctrlSetPosition [0.1, 0.438, 0.8, 0.034];
-_placeText ctrlSetStructuredText parseText format ["<t size='0.8'>%1</t>", localize "STR_DUWS_T_7tr969mm"];
+_placeText ctrlSetStructuredText parseText format ["<t align='center' size='0.8'>%1</t>",
+	localize "STR_DUWS_T_7tr969mm"];
 _placeText ctrlCommit 0;
 
 // player1, not the caller: HQ placement is the Game Master seat's to make, which is what that unit
 // names (docs/info/arma_engine_gotchas.md).
 _btnRandom = _display ctrlCreate ["RscButton", 1600];
-_btnRandom ctrlSetPosition [0.275, 0.478, 0.45, 0.05];
+_btnRandom ctrlSetPosition [0.4, 0.48, 0.2, 0.06];
 _btnRandom ctrlSetText localize "STR_DUWS_T_2f55ngq1";
 _btnRandom ctrlSetTooltip localize "STR_DUWS_T_50n9sdxk";
 _btnRandom ctrlAddEventHandler ["ButtonClick", { [20, 0.015] remoteExec ["fnc_HQ_random_place", player1] }];
 _btnRandom ctrlCommit 0;
 
 _btnManual = _display ctrlCreate ["RscButton", 1601];
-_btnManual ctrlSetPosition [0.275, 0.534, 0.45, 0.05];
+_btnManual ctrlSetPosition [0.4, 0.552, 0.2, 0.06];
 _btnManual ctrlSetText localize "STR_DUWS_T_x0cq7o5y";
 _btnManual ctrlSetTooltip localize "STR_DUWS_T_qwfdr33k";
 _btnManual ctrlAddEventHandler ["ButtonClick", { [] spawn fnc_HQ_manual_place }];
 _btnManual ctrlCommit 0;
 
 // ctrlCreate resolves a class name against the display's own config before the mission's, and this
-// display is RscDisplayEmpty -- a configFile display, where the base classes are a different font at
-// a different height. Pinned to what shared/includes/defines.hpp gives the screens after this one,
-// so a caption does not change weight between one setup screen and the next.
+// display is RscDisplayEmpty -- a configFile display, so every control above is the engine's base
+// class rather than shared/includes/defines.hpp's. The buttons are what proved it: they came up in
+// the engine's grey instead of the blue every other menu button in the mission carries.
+//
+// Restated here rather than fixed at the source, because there is no source to fix -- a mission
+// class cannot outrank a display's own config. Anything added to this screen has to be pinned too.
 {
 	_x ctrlSetFont "PuristaMedium";
 	_x ctrlSetFontHeight 0.03;
 	_x ctrlCommit 0;
-} forEach [_boxframe, _frameMode, _frameBLU, _frameOPF, _btnRandom, _btnManual];
+} forEach [_boxframe, _frameMode, _frameBLU, _frameOPF];
+
+// The shape every screen after this one gives its Next Page button -- 8 grid cells by 1.5 at
+// sizeEx 0.05 (shared/includes/campaign_menu.hpp). Blue rather than that button's red, which
+// belongs to the one entry on a screen that commits it.
+{
+	_x ctrlSetFont "PuristaMedium";
+	_x ctrlSetFontHeight 0.05;
+	_x ctrlSetBackgroundColor [0.067, 0.518, 0.729, 0.5];
+	_x ctrlSetTextColor [0.8784, 0.8471, 0.651, 1];
+	_x ctrlCommit 0;
+} forEach [_btnRandom, _btnManual];
 
 {
 	_itemMode = _dropdownMode lbAdd localize (_x select 1);

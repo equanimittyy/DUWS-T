@@ -134,6 +134,27 @@ to stop. The zone locator hit this: an origin keep-out used `exitWith` to "re-ro
 position but instead dropped the zone entirely — see
 [`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#zone-and-civilian-siting-defects).
 
+## `ctrlCreate` on a config display ignores the mission's base classes entirely
+
+**`ctrlCreate ["RscButton", idc]` resolves the class against the parent display's own config
+before `missionConfigFile`. On a display made from `createDisplay "RscDisplayEmpty"` — a
+`configFile` display — that means every control is the *engine's* `RscButton`, `RscFrame` and
+`RscStructuredText`, and the mission's overrides in `shared/includes/defines.hpp` never apply.**
+
+The trap is that the two sets differ in ways a screenshot does not obviously blame on the class:
+the engine's frames are RobotoCondensed, which is narrower than PuristaMedium and reads as text
+that is simply too small, and its structured text is left-aligned where the mission's is centred.
+Only the buttons make it unmistakable — the mission paints them
+`{0.067, 0.518, 0.729, 0.5}` blue and the engine's come up grey.
+
+**How to apply:** there is nothing to fix at the source; a mission class cannot outrank a
+display's own config. Pin what matters after `ctrlCreate` — `ctrlSetFont`, `ctrlSetFontHeight`,
+`ctrlSetBackgroundColor`, `ctrlSetTextColor` — and put structured-text alignment in the markup
+(`<t align='center'>`) rather than trusting the class. `client/dialog/fnc_HQ_faction_dialog.sqf`
+does this in one place for the whole screen, and anything added there has to join it. Controls
+declared in a `.hpp` and opened with `createDialog` are unaffected: those inherit from
+`missionConfigFile` normally.
+
 ## A `createDisplay` screen takes no cursor, and shares no draw order with a dialog beside it
 
 **A display made with `createDisplay` renders controls but does not put a mouse pointer on

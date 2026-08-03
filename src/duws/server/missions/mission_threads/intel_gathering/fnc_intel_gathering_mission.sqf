@@ -327,4 +327,4 @@ sleep 6;
 sleep 600;
 ["info",[localize "STR_DUWS_T_INTEL_GATHERING",localize "STR_DUWS_T_INTEL_GATHERING_TMLEFT"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated];
 sleep 300;
-deleteMarker str(_markername2);
+[_markername2] call fnc_missionMarkerClear;

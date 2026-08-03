@@ -213,7 +213,7 @@ publicVariable "Mission_Active";
     while {true} do {
         sleep 5;
         if ((!alive _samSystem || !alive _radarSystem) && ((time - _missionStartTime) < _countdownDuration)) exitWith {
-            deleteMarker str(_markername2);
+            [_markername2] call fnc_missionMarkerClear;
             [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
             [_targetpos,_radius, "mission_holdpos", true] call fnc_mission_end;
             Mission_Active = false;
@@ -224,7 +224,7 @@ publicVariable "Mission_Active";
             { deleteVehicle _x } forEach _missionUnits;
         };
         if ((time - _missionStartTime) >= _countdownDuration) exitWith {
-            deleteMarker str(_markername2);
+            [_markername2] call fnc_missionMarkerClear;
             [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
             sleep 1;
             [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;

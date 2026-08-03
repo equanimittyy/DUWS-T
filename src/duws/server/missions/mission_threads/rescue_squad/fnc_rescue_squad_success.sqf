@@ -39,7 +39,7 @@ private "_VARtaskgeneratedName";
 _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0),round(_MissionPos select 1)]; // generate taskname/variable name
 
 // remove markers
-deleteMarker str(_markername2);
+[_markername2] call fnc_missionMarkerClear;
 
 // IF SOLDIERS DEAD
 if (!(alive _sol1) && !(alive _sol2) && !(alive _sol3)) exitWith {

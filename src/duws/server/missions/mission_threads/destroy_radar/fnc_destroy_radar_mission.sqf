@@ -129,7 +129,7 @@ waitUntil {sleep 5; !alive _vehicle_7 || (damage _vehicle_7) == 1};
 // Overlord's line, not the player's: _speaker was reassigned to the player callsign above
 // for the intervening exchange, which left this congratulation attributed to Alpha 1-1.
 [localize "STR_DUWS_T_OVERLORD", _message1] remoteExec ["fnc_duws_dialogue", 0];
-deleteMarker str(_markername2);
+[_markername2] call fnc_missionMarkerClear;
 
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 

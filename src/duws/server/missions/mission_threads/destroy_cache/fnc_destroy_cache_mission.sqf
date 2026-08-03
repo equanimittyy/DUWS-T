@@ -225,7 +225,7 @@ sleep 0.5;
 sleep 0.5;
 "grenade" createVehicle[(_cachePos select 0), (_cachePos select 1)];
 
-deleteMarker str(_markername2);
+[_markername2] call fnc_missionMarkerClear;
 
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 

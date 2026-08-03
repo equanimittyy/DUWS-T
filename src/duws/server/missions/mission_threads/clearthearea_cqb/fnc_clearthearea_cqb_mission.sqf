@@ -138,7 +138,7 @@ waitUntil {
     (_allDead && count _bldgUnits > 0)
 };
 
-deleteMarker str(_markername2);
+[_markername2] call fnc_missionMarkerClear;
 
 [_speakeracteam, _message1] remoteExec ["fnc_duws_dialogue", 0];
 sleep 5;
