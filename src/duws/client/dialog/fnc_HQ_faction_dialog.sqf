@@ -141,11 +141,11 @@ _modeDesc = _display ctrlCreate ["RscStructuredText", 1006];
 _modeDesc ctrlSetPosition [0.1125, 0.254, 0.775, 0.052];
 _modeDesc ctrlCommit 0;
 
-// The last question, and the one that ends the screen. Under a rule and a plain caption rather than
-// in a frame: three frames answering three questions and a fourth around the way out read as a
-// fourth question. The buttons themselves are the dialog's, below. Cleared before it opens, because
-// a click is live the moment they exist.
-random_placement = false;
+// The way out of the screen, under a rule and a plain caption rather than in a frame: three frames
+// answering three questions and a fourth around the way out read as a fourth question. The button
+// itself is the dialog's, below. Cleared before it opens, because a click is live the moment it
+// exists.
+duws_faction_screen_next = false;
 
 _rule = _display ctrlCreate ["RscText", 1009];
 _rule ctrlSetPosition [0.1, 0.432, 0.8, 0.0025];
@@ -158,7 +158,7 @@ _rule ctrlCommit 0;
 _placeText = _display ctrlCreate ["RscStructuredText", 1012];
 _placeText ctrlSetPosition [0.1, 0.470, 0.8, 0.034];
 _placeText ctrlSetStructuredText parseText format ["<t align='center' size='0.8'>%1</t>",
-	localize "STR_DUWS_T_7tr969mm"];
+	localize "STR_DUWS_T_faction_screen_next"];
 _placeText ctrlCommit 0;
 
 // ctrlCreate resolves a class name against the display's own config before the mission's, and this
@@ -206,19 +206,14 @@ _dropdownMode ctrlAddEventHandler ["LBSelChanged",
 _modeSel = duws_gamemodes findIf {(_x select 0) == duws_gamemode};
 _dropdownMode lbSetCurSel (0 max _modeSel);
 
-// The placement buttons, and the cursor that makes this whole screen clickable.
-createDialog "startup_hq_placement_dialog";
+// The Next button, and the cursor that makes this whole screen clickable.
+createDialog "startup_faction_next_dialog";
 waitUntil {dialog};
 
-waitUntil {random_placement || player_is_choosing_hqpos};
+waitUntil {duws_faction_screen_next};
 
 _display closeDisplay 1;
 closeDialog 0;
-
-if (player_is_choosing_hqpos) then {
-	titleCut ["", "BLACK IN", 5];  // so you can see the map
-	waitUntil {chosen_hq_placement};
-};
 
 publicVariable "BLUFOR_FactionFile_X";
 publicVariable "OPFOR_FactionFile_X";

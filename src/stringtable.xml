@@ -317,6 +317,10 @@
                 <Original>Resolving factions...</Original>
                 <English>Resolving factions...</English>
             </Key>
+            <Key ID="STR_DUWS_T_faction_screen_next">
+                <Original>Select your GAME MODE and FACTIONS above. HQ placement comes after you confirm them.</Original>
+                <English>Select your GAME MODE and FACTIONS above. HQ placement comes after you confirm them.</English>
+            </Key>
             <Key ID="STR_DUWS_T_faction_confirm_select">
                 <Original>SELECT</Original>
                 <English>SELECT</English>
@@ -903,13 +907,6 @@
                 <Chinesesimp>转到战役参数页</Chinesesimp>
                 <Original>Go to the Campaign Parameters page</Original>
                 <English>Go to the Campaign Parameters page</English>
-            </Key>
-            <Key ID="STR_DUWS_T_7tr969mm">
-                <German>Wähle die FRAKTIONEN und wähle dann HQ PLATZIERUNG</German>
-                <Chinesesimp>在上面选择你的阵营然后选择总部放置位置</Chinesesimp>
-                <Spanish>Selecciona tus facciones arriba, luego selecciona el acomodo del cuartel general</Spanish>
-                <Original>Select your FACTIONS above then select HQ PLACEMENT</Original>
-                <English>Select your FACTIONS above then select HQ PLACEMENT</English>
             </Key>
             <Key ID="STR_DUWS_T_civamount2">
                 <German>Anzahl der spawnenden Zivilisten, wenn der Spieler eine Stadt betritt (Höhere Werte beeinträchtigen die Leistung stärker). Ohne Wirkung, wenn das Zivilisten / Ansehenssystem auf AUS steht.</German>

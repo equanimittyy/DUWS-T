@@ -328,6 +328,7 @@ fnc_startup_next = compile preprocessFileLineNumbers "duws\client\dialog\fnc_sta
 fnc_startup_back = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_back.sqf";publicVariable "fnc_startup_back";
 fnc_startup_faction_flow = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_faction_flow.sqf";publicVariable "fnc_startup_faction_flow";
 fnc_startup_faction_resolve = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_faction_resolve.sqf";publicVariable "fnc_startup_faction_resolve";
+fnc_hq_placement = compile preprocessFileLineNumbers "duws\client\dialog\fnc_hq_placement.sqf";publicVariable "fnc_hq_placement";
 fnc_faction_confirm = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_confirm.sqf";publicVariable "fnc_faction_confirm";
 fnc_faction_confirm_rows = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_confirm_rows.sqf";publicVariable "fnc_faction_confirm_rows";
 fnc_faction_row_paint = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_row_paint.sqf";publicVariable "fnc_faction_row_paint";

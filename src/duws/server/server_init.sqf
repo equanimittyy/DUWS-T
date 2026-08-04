@@ -41,9 +41,6 @@ sleep 1;
 serverinit_complete = true;
 publicVariable "serverinit_complete";
 
-// wait for HQ placement
-while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_placement}, 300] call fnc_waitLogged)} do {};
-
 // Faction resolution answers the confirmation screen, which shows the player the classname each
 // side will field for every role and is the last point they can change one -- so it cannot wait
 // for the commit. Served in a loop rather than once: stepping back from the environment screen
@@ -107,6 +104,11 @@ while {!createzone_server} do {
 // Everything below consumes only PosOfBLUHQ (set at placement) until this gate; verified no
 // HQ-object read sits before it.
 while {!(["BOOT", "createzone_server (setup screens committed)", {createzone_server}, 300] call fnc_waitLogged)} do {};
+
+// HQ placement runs after the confirmation screen now, so this cannot gate the resolution loop
+// above: the screen waits on a resolution that would be waiting on a placement the player has not
+// been offered yet. Kept as a guard here, where PosOfBLUHQ is about to be read for real.
+while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_placement}, 300] call fnc_waitLogged)} do {};
 
 // The player's edits from the confirmation screen, laid over what resolution produced.
 [] call fnc_faction_apply_locked;

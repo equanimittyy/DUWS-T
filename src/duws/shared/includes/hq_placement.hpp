@@ -1,16 +1,14 @@
-// The bottom of the faction setup screen, in a dialog of its own. Two things force that, and either
-// alone would be enough. The screen is an RscDisplayEmpty built by ctrlCreate
-// (client/dialog/fnc_HQ_faction_dialog.sqf), and a display made that way takes no mouse cursor --
-// having a dialog open beside it is what makes the screen clickable at all. And a control created on
-// it resolves its class against that display's config rather than the mission's, so it comes up as
-// the engine's RscButton: no green hover, no focus colour, different shadow, border, press offsets
-// and click sounds, and only some of that has a runtime setter
-// (docs/info/arma_engine_gotchas.md). Declared here, these are ordinary menu buttons.
+// The HQ placement buttons, opened on their own over the map once the faction confirmation screen
+// is done with (client/dialog/fnc_hq_placement.sqf). They used to be the bottom strip of the
+// faction setup screen, which is why the geometry below still lands where that screen's panel
+// ended; nothing draws behind them now, so the strip reads as a floating panel until it is
+// repositioned.
 //
-// The panel continues the screen's green rather than opening a second box. It has to be this way
-// round: the display draws over this dialog, so the screen's own panel stops just above this strip
-// and the two meet edge to edge at the same x and width. No frame here -- the screen's frame spans
-// both and draws over the join, an RscFrame being transparent inside.
+// A dialog rather than controls on a display, which is what it has to be in either arrangement: a
+// control created on an RscDisplayEmpty resolves its class against that display's config rather
+// than the mission's, so it comes up as the engine's RscButton -- no green hover, no focus colour,
+// different shadow, border, press offsets and click sounds, and only some of that has a runtime
+// setter (docs/info/arma_engine_gotchas.md). Declared here, these are ordinary menu buttons.
 class startup_hq_placement_dialog
 {
 	idd = -1;
