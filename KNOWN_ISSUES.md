@@ -472,7 +472,7 @@ removes the per-man script without either problem.
 
 ## Zone and civilian siting defects
 
-Five defects in the enemy zone-siting subsystem. How the siting stages fit together is in
+Six defects in the enemy zone-siting subsystem. How the siting stages fit together is in
 [`docs/info/zones_and_civilians.md`](docs/info/zones_and_civilians.md#enemy-zone-siting-more-urban).
 
 **Origin keep-out drops the zone instead of retrying it.** `fnc_locatorzones_random.sqf:172-177`. When a
@@ -487,6 +487,13 @@ still false and the `for` loop advances — the zone slot is silently lost, yiel
 no validity retry; its no-buildings fallback takes `getPos (nearestBuilding …)` (`:100-102`), which is
 `[0,0,0]` when `nearestBuilding` returns `objNull`. That `[0,0,0]` is exactly what the origin guard then
 eats, so the two defects compound. The branch needs the reject-and-retry the less-urban path already has.
+
+**A cleared prefab zone leaves invisible houses behind for good.** `fnc_createzone.sqf:85-121`. The
+pass hides every terrain building within 35 m of centre so the prefab has ground to stand on, which
+is what makes urban zones placeable at all. Nothing puts them back: a hide is permanent, so a town
+the player later captures and fights through keeps holes where houses were. Restoring them when the
+zone is cleared — unhide everything the zone pushed into `DUWS_zone_hidden` — is the fix, and needs
+the register keyed per zone rather than held as one campaign-wide array.
 
 **Unbounded, no-yield retry with a heavy per-iteration cost.** `:62-155`. Rejected positions re-roll with
 no `sleep`, and each `moreUrban` pass calls `nearestTerrainObjects` over 400 m plus a centroid pass; on a

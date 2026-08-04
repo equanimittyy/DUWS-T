@@ -763,15 +763,19 @@ and unmarked.
 The replacement arrives through the `BuildingChanged` mission event, whose arguments are the old
 object and the new one. Nothing carries the hidden flag across for you.
 
-**How to apply:** hide foliage and leave the buildings. The mission clears ground in three places —
-the HQ footprint, a prefab zone centre and a FOB perimeter — and all three go through
-`server/misc/fnc_clear_foliage.sqf`, which is filtered to `TREE`/`SMALL TREE`/`BUSH`. A hide is
-permanent and unrestorable, so hiding a town's houses trades a re-popping building for one that is
-invisible for the rest of the campaign. Where a building genuinely has to go, the register is the
-only correct shape: keep what was hidden, and on `BuildingChanged` hide the replacement and put it
-in the old one's place — otherwise the second hit on the same house brings it back. The same caveat
-as escalation applies: `BuildingChanged` is a local event, so whether a dedicated server sees it for
-damage a client caused is unconfirmed ([KNOWN_ISSUES.md](../../KNOWN_ISSUES.md)).
+**How to apply:** hide a building only where one genuinely has to go, and register it when you do.
+The mission clears ground in three places, and they split on this. A prefab zone centre takes the
+buildings with it (`init_zones/fnc_createzone.sqf`) — the prefab is dropped whole onto a centre
+picked for being dense, so a house left standing lands inside it — and that pass holds the register
+plus the `BuildingChanged` handler that re-hides each replacement in the old one's place. The HQ
+footprint and a FOB perimeter go through `server/misc/fnc_clear_foliage.sqf` instead, filtered to
+`TREE`/`SMALL TREE`/`BUSH` and needing no register, because nothing it hides is a building.
+
+The split is a trade, not a hierarchy: a hide is permanent and unrestorable, so a cleared town keeps
+invisible houses for the rest of the campaign. That is worth paying where a composition has to fit
+and not worth paying to stop a tree clipping a tent. The same caveat as escalation applies:
+`BuildingChanged` is a local event, so whether a dedicated server sees it for damage a client caused
+is unconfirmed ([KNOWN_ISSUES.md](../../KNOWN_ISSUES.md)).
 
 ## A unary command binds tighter than `+`, so `sleep 2 + random 5` sleeps a flat 2 s
 
