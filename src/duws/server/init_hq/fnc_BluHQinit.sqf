@@ -2,10 +2,11 @@
 // SQF names are case-insensitive.
 #include "..\..\shared\includes\action_style.hpp"
 
-// The ground the mission treats as the base: the radius the enemy-contact alert fires on, and the
-// radius OPFOR must be standing inside before the officer can be hurt at all. One number for both,
-// so the campaign can only be lost to an attack the players were warned about.
-#define HQ_ZONE_RADIUS 200
+// The officer is invulnerable until OPFOR come within this of him -- wider than the 200 m the
+// contact alert calls the base, so a marksman on a ridge stays a loss worth keeping, and drawn on
+// no map. It gates on enemy presence near him, never on where a shot came from: with anything
+// hostile inside the ring, a strike called in from kilometres away kills him the same as a rifle.
+#define OFFICER_GUARD_RADIUS 500
 
 if (isNil "PosOfBLUHQ") exitWith {};
 
@@ -388,13 +389,13 @@ _officer addEventHandler ["Killed", {
 }];
 // He is a campaign loss condition, so he cannot be one the team can end. WEST damage never lands
 // (_instigator names the player behind an explosive or vehicle, _source the thing that dealt it),
-// and nothing lands at all unless OPFOR are standing in the base -- which closes the captured
+// and nothing lands at all with no OPFOR inside OFFICER_GUARD_RADIUS -- which closes the captured
 // enemy vehicle and the unattributed explosion a source-side check alone walks straight past.
 _officer addEventHandler ["HandleDamage", {
-    params ["", "", "_damage", "_source", "", "", "_instigator"];
+    params ["_unit", "", "_damage", "_source", "", "", "_instigator"];
     private _by = [_source, _instigator] select (!isNull _instigator);
     if (!isNull _by && {side _by == WEST}) exitWith { 0 };
-    if (([PosOfBLUHQ, HQ_ZONE_RADIUS] call fnc_opfor_count_at) == 0) exitWith { 0 };
+    if (([getPos _unit, OFFICER_GUARD_RADIUS] call fnc_opfor_count_at) == 0) exitWith { 0 };
     _damage
 }];
 hq_blu1 = _officer; publicVariable "hq_blu1";
@@ -532,7 +533,7 @@ str(_markername) setMarkerText "Main Base";
 // Server-local, matching the zone's contact trigger: a global trigger runs its statement on every
 // machine, which would raise the alert and drop its markers once per player.
 _trgWarning = createTrigger["EmptyDetector",PosOfBLUHQ,false];
-_trgWarning setTriggerArea[HQ_ZONE_RADIUS,HQ_ZONE_RADIUS,0,false];
+_trgWarning setTriggerArea[200,200,0,false];
 _trgWarning setTriggerActivation["EAST","PRESENT",true];
 _trgWarning setTriggerStatements["this", "['Main Base', thisList] call fnc_enemy_contact;", ""];
 _trgWarning setTriggerTimeout [10, 10, 10, true];
