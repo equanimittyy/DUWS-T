@@ -447,19 +447,18 @@ if (!isNull _barrier) then {
     _unit setDir _dirToTent;
     removeAllWeapons _unit;
     removeGoggles _unit;
-    removeHeadgear _unit;
     _unit unassignItem "NVGoggles";
     _unit removeItem "NVGoggles";
     _unit unassignItem "NVGoggles_OPFOR";
     _unit removeItem "NVGoggles_OPFOR";
     _unit unassignItem "NVGoggles_INDEP";
     _unit removeItem "NVGoggles_INDEP";
-    // 计算朝向帐篷的方向
-    [_unit, _dirToTent] spawn {
-        params ["_u", "_dir"];
+    // He keeps the helmet his own class spawns in rather than being dressed as ground crew: the
+    // construction hard hat is DLC content, so a player who does not own it met the base wearing a
+    // purchase prompt.
+    [_unit] spawn {
+        params ["_u"];
         sleep 0.5;
-        _u addHeadgear "H_Construction_headset_orange_F";
-        _u addGoggles "G_EyeProtectors_F";
         if (isNull _u || {!alive _u}) exitWith {};
         _u enableSimulationGlobal true;
         // Broadcast and keyed, same as the officer: a local switchMove posed him for the host
