@@ -73,6 +73,11 @@ if errorlevel 8 (
   exit /b 1
 )
 
+rem The .pbo holds repack.cmd's stamped build_stamp.hpp, so a straight sync would leave a
+rem generated hash in src\ looking like an edit. Restore the tracked placeholder; outside a
+rem git checkout this fails harmlessly and the stamped value simply stays.
+git checkout -- "src/duws/shared/includes/build_stamp.hpp" >nul 2>nul
+
 rmdir /s /q "%STAGE%"
 echo [unpack] Done. Mission source is in src\
 exit /b 0

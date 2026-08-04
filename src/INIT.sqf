@@ -1,5 +1,9 @@
+#include "duws\shared\includes\build_stamp.hpp"
 
-diag_log format ["------------------ DUWS_T START ----v0------ player: %1", profileName];
+// Names the build the rest of the log is about. A .pbo carries no other mark of the source it
+// was packed from, so "was the fix in the mission I just tested?" is otherwise unanswerable
+// after the fact -- and a stale .pbo left in mpmissions reads exactly like a failed fix.
+diag_log format ["------------------ DUWS_T START ---- build %1 ---- player: %2", DUWS_BUILD_STAMP, profileName];
 
 // Lobby log level, read on every machine because each keeps its own copy of the global.
 // Must land before server_init/client_init compile fnc_log_init, which only defaults the

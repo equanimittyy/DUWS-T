@@ -52,6 +52,11 @@ won't run in the Linux devcontainer):
 Edit the mission as `.sqf` / `.hpp` / etc. under `src/`; the packed `.pbo` stays
 build output (git-ignored).
 
+`repack.cmd` also stamps the build into the staged copy, so the mission's first log line
+names the source it came from — `DUWS_T START ---- build d016106-dirty 2026-08-05T00:20:13`.
+The `-dirty` suffix means `src/` had uncommitted changes at pack time. Check it before
+trusting an `.rpt`: a stale `.pbo` in `MPMissions\` reads exactly like a fix that failed.
+
 ### 3. Load it in Arma for testing
 
 Copy `DUWS_T.altis.pbo` into the Arma 3 **install** folder's `MPMissions\`, e.g.

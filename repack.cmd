@@ -53,6 +53,32 @@ if errorlevel 8 (
   exit /b 1
 )
 
+rem Stamp the staged copy so the mission's own log names the source it was packed from.
+rem Written here rather than into src\ so a repack never dirties the working tree and no
+rem generated hash is ever committed. A tree with no git falls back to "nogit"; the mission
+rem still builds, it just cannot name itself.
+set "STAMP=nogit"
+for /f "delims=" %%i in ('git rev-parse --short HEAD 2^>nul') do set "STAMP=%%i"
+rem Scoped to src\ because only src\ is packed: a docs-only edit is not a different build.
+rem Set inside the loop so any number of dirty paths still yields one suffix.
+set "DIRTY="
+for /f "delims=" %%i in ('git status --porcelain -- src 2^>nul') do set "DIRTY=-dirty"
+rem Locale-independent, unlike %DATE%/%TIME%; powershell is already required below. The
+rem sortable 's' format is one bare token, so it needs no quotes nested inside the for.
+set "BUILT=unknown"
+for /f "delims=" %%i in ('powershell -NoProfile -Command "Get-Date -Format s"') do set "BUILT=%%i"
+
+echo [repack] Build stamp: %STAMP%%DIRTY% %BUILT%
+(
+  echo // Generated into the staging tree by repack.cmd; see src\duws\shared\includes\build_stamp.hpp.
+  echo #define DUWS_BUILD_STAMP "%STAMP%%DIRTY% %BUILT%"
+) > "%STAGE%\%MISSION%\duws\shared\includes\build_stamp.hpp"
+if errorlevel 1 (
+  echo [repack] ERROR: could not write the build stamp.
+  rmdir /s /q "%STAGE%"
+  exit /b 1
+)
+
 echo [repack] Packing to %OUT% ...
 if exist "%OUT%" del /q "%OUT%"
 "%PBOC%" pack "%STAGE%\%MISSION%" -o .
