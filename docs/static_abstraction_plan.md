@@ -124,8 +124,14 @@ which includes all 254 hand-authored files, since they define `opfor_TURRET_HMG`
 lose their indirect fire and their air cover, and are easier for it. The alternative is a zone whose
 "CSAT" mortar pit is a NATO tube, which is the fault this plan was opened to fix.
 
-Locality is server. Ordering is already safe without a new gate: faction init completes at
-`server_init.sqf:66-88` and every prefab runs behind the `createzone_server` wait at `:109`.
+Locality is server. Ordering is already safe without a new gate, but the gate that matters is not
+the obvious one. Resolution runs per pass inside the confirmation loop (`server_init.sqf:63-97`) and
+the player may then edit or clear any key on that screen; `fnc_faction_apply_locked:114` is what
+lays those edits over the resolved globals and republishes the pools. A static resolved before that
+call would field the detected class rather than the confirmed one. Nothing does today — the HQ is
+spawned at `:125` and zone siting at `:146`, both behind it — and any new placement site has to stay
+behind it too. The `createzone_server` wait at `:106` is two gates earlier and proves nothing about
+the edits.
 
 ### The map is a fenced table
 
@@ -227,7 +233,16 @@ reports any key that is missing or resolves to a non-existent class. Add the fiv
 **Add a fourth column to the schema tuple: `required`.** The new statics are `false`; every
 existing key stays `true`. `fnc_custom_faction_parse` filters on it before building `_bad`. The
 confirmation screen still renders the rows — as `-- MISSING --`, which is accurate and is the
-information the screen exists to give.
+information the screen exists to give (`client/dialog/fnc_faction_row_paint.sqf:35-41` paints the
+empty row red and disables its CLEAR button).
+
+**The filter narrows validation only — the clear loop keeps every key.** `_requiredKeys` is used
+twice: once to blank the globals before the paste is compiled (`:36`), once to build `_bad` (`:50`).
+The blanking is what stops a value left over from a previously pasted faction being read as one this
+paste defines. Narrow that loop along with the validation and the five static keys survive a
+re-paste, so faction B fields faction A's guns. Stepping back into the faction screen re-picks and
+re-pastes as a normal navigation path now, so this is a routine sequence rather than an edge case.
+Clear the full schema, validate the required subset.
 
 The alternative, excluding the whole `STATIC` group from the required set, also drops the four
 BLUFOR turrets that are required today and do real work in the FOB ring.
@@ -238,6 +253,16 @@ This lands in the middle of the confirmation-screen work, which documents the tu
 gains a column, and the section becomes 5 BLUFOR / 5 OPFOR, so it stops padding one column against
 the other entirely. Sequence this after that screen lands, or fold it in — either works, but the two
 must not be written against each other's old shape.
+
+Nothing else on that screen needs touching, and two of its existing behaviours are load-bearing
+here. Its key editor already filters a `static` row to `isKindOf "StaticWeapon"`
+(`fnc_faction_key_edit.sqf:50`), which is resolver rule 3 enforced at the point of choice — so rule
+3 only ever fires on values coming from faction files and pastes, never from the screen. And an
+edited key is written back as a pool rebuilt from the matching `fnc_parseFaction` bucket
+(`fnc_faction_key_apply.sqf:55-62`); all five turret buckets are in that function's return, so a
+player editing a static key keeps the per-object variety rule 4 draws on. A class the parse returns
+no bucket for — a cannon-typed AA gun, which the return drops — yields a pool of one and nothing
+worse.
 
 ## Call sites
 
@@ -329,7 +354,8 @@ from being wrong. Worth checking against two or three mod factions once the keys
 ## Task list
 
 1. `fnc_faction_schema.sqf`: `required` column, plus the five new static rows.
-2. `fnc_custom_faction_parse.sqf`: filter `_requiredKeys` on `required`.
+2. `fnc_custom_faction_parse.sqf`: validate against the `required` subset, clear against the whole
+   schema.
 3. Fill the keys in `AUTODETECT_opfor.sqf`, `AUTODETECT_RANDOM_opfor.sqf` and
    `AUTODETECT_blufor.sqf` — own bucket or `""`, vanilla tail on the HMG keys only — and widen
    `_turretAA`'s chain with the air-threat members of `_turretCannon`. Warn at faction init when a
