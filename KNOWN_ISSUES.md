@@ -404,7 +404,6 @@ leaving this dialog for a screen of their own.
 
 | Defect | Where | Effect |
 |---|---|---|
-| Manual HQ placement hides terrain objects from a client, and never re-hides them | `client/dialog/fnc_HQ_manual_place.sqf:40` | The same clearing pass zones run, on the machine that clicked the map. Two faults follow from the locality: `hideObjectGlobal` is a server command, so what a client hides may only be hidden there; and the objects are not in the `DUWS_zone_hidden` register, so the `BuildingChanged` handler in `fnc_createzone.sqf` cannot re-hide the replacements the engine swaps in when a blast changes their damage state. A base built on a manually placed HQ therefore grows its cleared buildings back through itself. Fixing it means the clearing moving to the server, which is a locality change to the setup flow rather than a line |
 | `random_placement` is set on the client and never `publicVariable`'d | `client/dialog/fnc_HQ_random_place.sqf`, `fnc_HQ_faction_dialog.sqf`, `fnc_startup_faction_flow.sqf` | Harmless today — its only reader is client-side on the same machine — but it fails silently the moment anything server-side reads it |
 | Two script paths in `paths_baseline.txt` point at files that do not exist | `client/misc/fnc_player_markers.sqf`, `server/misc/fnc_repetitive_cleanup.sqf` | Pre-dates the test suite; baselined so the linter gates regressions without being blocked by it |
 | Six `format[...]` calls wrap a single literal with no placeholders | `client/supports/fnc_helolift.sqf` | Cosmetic — a wasted call per invocation |

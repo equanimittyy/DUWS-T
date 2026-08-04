@@ -237,6 +237,12 @@ private _invulnerableTypes = [
     "Land_Pallet_F"
 ];
 
+// Cleared before the props go down rather than at placement time: this is the first point the
+// final HQ position is known, and it is the one path both random and manual placement pass
+// through. 50 m is the composition's own reach -- its farthest wall stands 47 m from the HQ
+// building every offset above is measured against.
+[PosOfBLUHQ, 50] call fnc_clear_foliage;
+
 // ========== 生成所有物体并记录关键对象 ==========
 {
     _x params ["_class","_origX","_origY","_origZ","_dir","_isWeapon"];

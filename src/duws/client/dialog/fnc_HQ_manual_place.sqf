@@ -23,41 +23,14 @@ OnMapSingleClick "ClickedPos = _pos; clicked = true;";
 
 while {true} do {
     if (clicked) then {
-        // ========== 第一步：删除点击位置周围 45 米内的所有物体（无筛选）==========
-        private _clearRadius = 45;
-        private _allObjects = nearestObjects [ClickedPos, [], _clearRadius];
-        private _deletedCount = 0;
-        private _hiddenCount = 0;
-        
-        {
-            // 排除玩家、总部建筑等关键对象（可选，防止误删）
-            if (!isPlayer _x && !(_x isKindOf "Man") && !(_x isKindOf "Land_HelipadEmpty_F") && !(_x isKindOf "FlagPole_F")) then {
-                // 尝试删除
-                deleteVehicle _x;
-                _deletedCount = _deletedCount + 1;
-                // 如果删除后对象仍然存在（某些静态物体），强制隐藏
-                if (!isNull _x) then {
-                    _x hideObjectGlobal true;
-                    _hiddenCount = _hiddenCount + 1;
-                };
-            };
-        } forEach _allObjects;
-        
-        // 广播删除+隐藏提示
-        if (_deletedCount > 0 || _hiddenCount > 0) then {
-            private _msg = format ["[HQ Placement] Removed %1 objects (deleted: %2, hidden: %3) within %4m of clicked location.", 
-                _deletedCount + _hiddenCount, _deletedCount, _hiddenCount, _clearRadius];
-            _msg remoteExec ["hint", 0];
-        };
-        
-        // 等待引擎更新（重要）
+        // Handed to the server, which is the only machine whose hide is seen by everyone. The
+        // final HQ position lands within 10 m of the click, so this circle is the click's own;
+        // fnc_BluHQinit clears the base footprint again once that position is settled.
+        [ClickedPos, 50] remoteExec ["fnc_clear_foliage", 2, false];
         sleep 1;
-        // ================================================================
 
-        // ========== 第二步：在已清空的区域寻找安全位置 ==========
         _foundPickupPos = [ClickedPos, 0, 10, 5, 0, 0.5, 0, [], [[0,0],[0,0]]] call BIS_fnc_findSafePos;
         _nearRoad = [_foundPickupPos, 3] call BIS_fnc_nearestRoad;
-        // ========================================================
 
         if ((!isNull _nearRoad) || (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1)) then {  
             clicked = false;

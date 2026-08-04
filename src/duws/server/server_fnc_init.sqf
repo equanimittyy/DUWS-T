@@ -34,6 +34,9 @@ publicVariable "fnc_duws_deploy";
 // STARTUP FUNCTIONS
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BluHQinit.sqf";
 fnc_placeHQUnits = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_placeHQUnits.sqf";
+// Not broadcast: the client half of HQ placement reaches it by remoteExec to the server, which is
+// the only machine allowed to hide a terrain object.
+fnc_clear_foliage = compile preprocessFileLineNumbers "duws\server\misc\fnc_clear_foliage.sqf";
 fnc_factions_check = compile preprocessFileLineNumbers "duws\server\misc\fnc_factions_check_modern.sqf";
 fnc_intro_heli = compile preprocessFileLineNumbers "duws\server\misc\fnc_intro_heli.sqf";
 publicVariable "fnc_intro_heli";
