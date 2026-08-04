@@ -51,6 +51,12 @@ fnc_remoteBoard = {
     ["INFO", "INTRO", format ["Client %1 boarded helicopter as %2", name player, _seatType]] call fnc_log;
 };
 publicVariable "fnc_remoteBoard";
+
+// Announced now, immediately after the function the intro will remoteExec onto this machine to seat
+// the player. The server waits on this instead of sleeping a flat count before spawning the
+// helicopter: a blind wait is dead time on every ordinary boot and still too short for a client that
+// has not reached this line.
+player setVariable ["duws_intro_ready", true, true];
 // Set GameMaster
 if (!isMultiplayer) then {
 	game_master = vehiclevarname player;
@@ -251,12 +257,6 @@ if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1 && {(vehiclevarname play
 // Add HQ actions for REQUEST Players
 [bluHQ_object] spawn fnc_HQaddactions;
 
-if ((vehiclevarname player) in game_master) then {
-	sleep 10;
-} else {
-	sleep 10;
-};
-
 hint localize "STR_DUWS_T_zu4bxt24";
 
 // ========== 换装：从基地守卫中随机复制战斗单位装备（白名单版）==========
@@ -291,13 +291,19 @@ hint localize "STR_DUWS_T_zu4bxt24";
 while {!(["BOOT", "mission_init_complete (zones built, civilians registered)",
     {mission_init_complete}, 300] call fnc_waitLogged)} do {};
 
-sleep 5;
-titleCut ["", "BLACK FADED", 999];
-sleep 5;
+// Then held until the insertion flight actually exists, rather than for a fixed count. The server
+// spawns the helicopter, seats the player in it and only then fades in
+// (server/misc/fnc_intro_heli.sqf). The fixed sleeps this replaces ran on past that fade and blacked
+// out a screen the server had just cleared, so the player sat in the cabin still looking at the map
+// for the rest of them. Bounded so a failed intro drops the map anyway rather than pinning it open.
+["BOOT", "intro_heli_object (insertion flight spawned)",
+    {!isNull (missionNamespace getVariable ["intro_heli_object", objNull])}, 120] call fnc_waitLogged;
 
-// close map
+// Black first, map second: the server's fade-in is what clears this, and the black is what hides the
+// switch from the map display to the cabin. The pause is for the black to paint, not for pacing.
+titleCut ["", "BLACK FADED", 999];
+uiSleep 0.3;
 forceMap false;
-sleep 1;
 openMap [false, false];
 // ========== 丧尸模式强制客户端薄雾 ==========
 if (CIV_PRESENCE == "RAVAGE") then {

@@ -374,8 +374,12 @@ waitUntil { sleep 1.0; HQ_pos_found_generated };
 // in while the campaign is still being built around them.
 while {!(["BOOT", "mission_init_complete (zones built, civilians registered)",
     {mission_init_complete}, 300] call fnc_waitLogged)} do {};
-// 再等待十几秒，确保所有玩家已连接并同步
-sleep 15;
+// Every player has to hold client_init's fnc_remoteBoard before the intro can seat them, which is
+// what the flat 15 s sleep here was really waiting for -- dead time on every ordinary boot, and no
+// guarantee at all on a slow one. Bounded and not retried: one client stuck short of that line must
+// not hold the insertion flight for everybody else.
+["BOOT", "duws_intro_ready on every player",
+    {(allPlayers findIf {!(_x getVariable ["duws_intro_ready", false])}) isEqualTo -1}, 60] call fnc_waitLogged;
 ["INFO", "BOOT", "Starting helicopter intro sequence..."] call fnc_log;
 [] spawn fnc_intro_heli;
 // 仅在非僵尸/非WBK模式下扫描平民装备
