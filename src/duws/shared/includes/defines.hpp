@@ -466,6 +466,56 @@ class RscSlider
     shadow = 0;
     h = 0.025;
 };
+// A scrolling container for controls the engine cannot put in a listbox. The faction
+// confirmation screen holds both sides' rows in one of these, so its single scrollbar moves the
+// two columns together -- two groups would need their scroll positions synced every frame.
+class RscControlsGroup
+{
+    type = CT_CONTROLS_GROUP;
+    idc = -1;
+    style = ST_MULTI;
+    x = 0; y = 0; w = 1; h = 1;
+    shadow = 0;
+    // Scroll extent. w/h here are the *content* size; the control's own w/h is the viewport, and
+    // the scrollbar appears when the content is taller. Overridden per dialog.
+    class Controls {};
+    class VScrollbar
+    {
+        color[] = {1,1,1,0.6};
+        colorActive[] = {1,1,1,1};
+        colorDisabled[] = {1,1,1,0.3};
+        width = 0.021;
+        autoScrollEnabled = 0;
+        shadow = 0;
+        thumb = "\A3\ui_f\data\gui\cfg\scrollbar\thumb_ca.paa";
+        arrowFull = "\A3\ui_f\data\gui\cfg\scrollbar\arrowFull_ca.paa";
+        arrowEmpty = "\A3\ui_f\data\gui\cfg\scrollbar\arrowEmpty_ca.paa";
+        border = "\A3\ui_f\data\gui\cfg\scrollbar\border_ca.paa";
+    };
+    // Declared and zero-height: without it the engine falls back to a default horizontal bar that
+    // steals a row of the viewport for content that never scrolls sideways.
+    class HScrollbar
+    {
+        color[] = {1,1,1,0.6};
+        height = 0;
+        shadow = 0;
+        thumb = "\A3\ui_f\data\gui\cfg\scrollbar\thumb_ca.paa";
+        arrowFull = "\A3\ui_f\data\gui\cfg\scrollbar\arrowFull_ca.paa";
+        arrowEmpty = "\A3\ui_f\data\gui\cfg\scrollbar\arrowEmpty_ca.paa";
+        border = "\A3\ui_f\data\gui\cfg\scrollbar\border_ca.paa";
+    };
+    class ScrollBar
+    {
+        color[] = {1,1,1,0.6};
+        colorActive[] = {1,1,1,1};
+        colorDisabled[] = {1,1,1,0.3};
+        shadow = 0;
+        thumb = "\A3\ui_f\data\gui\cfg\scrollbar\thumb_ca.paa";
+        arrowFull = "\A3\ui_f\data\gui\cfg\scrollbar\arrowFull_ca.paa";
+        arrowEmpty = "\A3\ui_f\data\gui\cfg\scrollbar\arrowEmpty_ca.paa";
+        border = "\A3\ui_f\data\gui\cfg\scrollbar\border_ca.paa";
+    };
+};
 
 class RscDisplayTest
 {

@@ -53,7 +53,7 @@ chosen_settings = true;publicVariable "chosen_settings";
     "VERSION_X", "duws_callsign", "manually_chosen", "duws_gamemode",
     "zones_number", "zones_max_radius", "zones_min_radius", "zones_spacing",
     "zones_max_dist_from_hq", "moreUrban", "AO_direction", "PosOfBLUHQ",
-    "BLUFOR_Faction_X", "OPFOR_Faction_X",
+    "BLUFOR_FactionFile_X", "OPFOR_FactionFile_X", "BLUFOR_Faction_X", "OPFOR_Faction_X",
     "commandpointsblu1", "WARCOM_blufor_ap", "WARCOM_opfor_ap", "cp_reward_multiplier",
     "DUWSMP_CP_death_cost", "blufor_ai_skill", "opfor_ai_skill", "enemyunitMultiplier",
     "HeavyArmor", "AttackHeli",

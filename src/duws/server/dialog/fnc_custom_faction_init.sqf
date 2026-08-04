@@ -11,7 +11,7 @@ params ["_side"];
 switch (_side) do {
 
     case "blufor": {
-        if (BLUfactionDataTemp != "" && {BLUFOR_Faction_X == "CUSTOM"}) then {
+        if (BLUfactionDataTemp != "" && {BLUFOR_FactionFile_X == "CUSTOM"}) then {
             (["blufor", BLUfactionDataTemp] call fnc_custom_faction_parse) params ["_pairs", "_valid", "_bad"];
             ["INFO", "FACTION", format ["BLUFOR CUSTOM FACTION: %1", str _pairs]] call fnc_log;
             if (_valid) then {
@@ -24,7 +24,7 @@ switch (_side) do {
     };
 
     case "opfor": {
-        if (OPFfactionDataTemp != "" && {OPFOR_Faction_X == "CUSTOM"}) then {
+        if (OPFfactionDataTemp != "" && {OPFOR_FactionFile_X == "CUSTOM"}) then {
             (["opfor", OPFfactionDataTemp] call fnc_custom_faction_parse) params ["_pairs", "_valid", "_bad"];
             ["INFO", "FACTION", format ["OPFOR CUSTOM FACTION: %1", str _pairs]] call fnc_log;
             if (_valid) then {

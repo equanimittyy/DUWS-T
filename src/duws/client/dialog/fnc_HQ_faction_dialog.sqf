@@ -58,7 +58,7 @@ _dropdownBLU lbSetCurSel 0;
 _dropdownBLU ctrlAddEventHandler ["LBSelChanged",
 {
 	params ["_control", "_selectedIndex"];
-	BLUFOR_Faction_X = (_control lbData (lbCurSel _control));
+	BLUFOR_FactionFile_X = (_control lbData (lbCurSel _control));
 }];
 
 //////////////////////////////////////
@@ -85,7 +85,7 @@ duws_fill_opfor_combo = {
 		_rows = _rows select {(_x select 2) in ["AUTODETECT", "AUTODETECT_RANDOM"]};
 		// The faction the untouched default names is no longer in the list, so the row the combo
 		// opens on has to become the answer; otherwise only a click ever writes this.
-		OPFOR_Faction_X = (_rows select 0) select 2;
+		OPFOR_FactionFile_X = (_rows select 0) select 2;
 	};
 
 	{
@@ -101,7 +101,7 @@ duws_fill_opfor_combo = {
 _dropdownOPF ctrlAddEventHandler ["LBSelChanged",
 {	
 	params ["_control", "_selectedIndex"];
-	OPFOR_Faction_X = (_control lbData (lbCurSel _control));
+	OPFOR_FactionFile_X = (_control lbData (lbCurSel _control));
 }];
 
 //////////////////////////////////////
@@ -220,8 +220,8 @@ if (player_is_choosing_hqpos) then {
 	waitUntil {chosen_hq_placement};
 };
 
-publicVariable "BLUFOR_Faction_X";
-publicVariable "OPFOR_Faction_X";
+publicVariable "BLUFOR_FactionFile_X";
+publicVariable "OPFOR_FactionFile_X";
 publicVariable "duws_gamemode";
 //publicVariable "hardcore_visibleZone_found";
 //publicVariable "hardcore_mode_enable";

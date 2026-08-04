@@ -140,8 +140,8 @@ if (isMultiplayer) then {
 	// change the shown CP for request dialog
 	"commandpointsblu1" addPublicVariableEventHandler {ctrlSetText [1000, format["%1",commandpointsblu1]]; };
 	
-	["INFO", "BOOT", format ["BLUFOR Faction init for JIP: %1", BLUFOR_Faction_X]] call fnc_log;
-	if (BLUFOR_Faction_X == "CUSTOM") then {
+	["INFO", "BOOT", format ["BLUFOR Faction init for JIP: %1", BLUFOR_FactionFile_X]] call fnc_log;
+	if (BLUFOR_FactionFile_X == "CUSTOM") then {
 		while {!(["FACTION", "BLUfactionData (JIP custom faction)", {count BLUfactionData > 0}, 300] call fnc_waitLogged)} do {};
 		{
 			call compile _x;
@@ -150,6 +150,10 @@ if (isMultiplayer) then {
 		[] call fnc_BLUFOR_FactionFile_X;
 	};
 	sleep 1;
+	// The run above is for the request-menu catalogue, which the confirmation screen's schema does
+	// not cover -- but it also puts the faction file's own classnames back over the role globals.
+	// Re-apply the locked table so this machine fields what the player confirmed.
+	[] call fnc_faction_apply_locked;
 	["INFO", "BOOT", format ["Blufor Faction init for JIP complete.  Rifleman: %1", blufor_SOLDIER_X]] call fnc_log;
 
 };

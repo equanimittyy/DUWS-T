@@ -1,7 +1,7 @@
 // Locality: client -- inherited from client/dialog/fnc_startup_enviro_closed.sqf.
-// Faction + HQ placement -> custom-faction paste (if any) -> environment menu.
-// Runs on first setup (from client_init) and whenever the environment screen's
-// Back button routes back here to re-pick faction and HQ.
+// Faction + HQ placement -> custom-faction paste (if any) -> faction confirmation -> environment
+// menu. Runs on first setup (from client_init) and whenever the environment screen's Back button
+// routes back here to re-pick faction and HQ.
 //
 // Reset the placement-state flags first: on a re-entry they are still set from
 // the previous run, and fnc_HQ_faction_dialog's waits (player_is_choosing_hqpos
@@ -13,6 +13,12 @@ player_is_choosing_hqpos = false;
 random_placement = false;
 duws_custom_faction_back = false;   // set by the paste screen's Back button
 
+// Cleared network-wide, unlike the flags above: the AutoDetect wrappers wait on these, and on a
+// re-entry the server would otherwise resolve against the previous round's pick before the picker
+// republishes this round's.
+missionNamespace setVariable ["selectedFaction_BLU", nil, true];
+missionNamespace setVariable ["selectedFaction_OPF", nil, true];
+
 [] call fnc_HQ_faction_dialog;
 waitUntil {sleep 0.1; chosen_hq_placement};
 
@@ -23,5 +29,10 @@ waitUntil {sleep 0.1; chosen_hq_placement};
 
 // Back from a paste window restarts the whole faction/HQ selection.
 if (duws_custom_faction_back) exitWith { [] spawn fnc_startup_faction_flow; };
+
+// Confirmation: the first point the resolved classnames exist and the last point they can be
+// changed. Its own Back restarts the selection the same way the paste window's does.
+[] call fnc_faction_confirm;
+if (duws_faction_confirm_back) exitWith { [] spawn fnc_startup_faction_flow; };
 
 [] spawn fnc_enviro_menu;

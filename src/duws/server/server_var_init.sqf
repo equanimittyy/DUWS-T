@@ -16,8 +16,12 @@ switch (VERSION_X) do {
 	
 };
 
-BLUFOR_FactionFile_X = "";publicVariable "BLUFOR_FactionFile_X";
-OPFOR_FactionFile_X = "";publicVariable "OPFOR_FactionFile_X";
+// The faction dropdown's own answer -- a faction-file token, or "CUSTOM"/"AUTODETECT". Kept apart
+// from *_Faction_X because faction init overwrites that one with the faction class the random
+// vehicle patrols read, and resolution now runs again every time the setup screens are stepped
+// back through. These default to the rows the two combos open on.
+BLUFOR_FactionFile_X = "BLU_F_ARID";publicVariable "BLUFOR_FactionFile_X";
+OPFOR_FactionFile_X = "OPF_F_ARID";publicVariable "OPFOR_FactionFile_X";
 
 BLUfactionDataTemp = "";publicVariable "BLUfactionDataTemp";
 OPFfactionDataTemp = "";publicVariable "OPFfactionDataTemp";
@@ -63,6 +67,18 @@ chosen_hq_placement = false;publicVariable "chosen_hq_placement";
 
 // chosen_settings
 chosen_settings = false;publicVariable "chosen_settings";
+
+// The faction confirmation screen's handshake. Request and ready are counters, not flags: stepping
+// back from the environment screen re-enters faction selection and the screen asks again, and a
+// flag cleared by the server can race a fresh request raised by the client. The screen waits for
+// ready to reach the number it asked with, so it can never read the previous pick's rows.
+//
+// duws_faction_locked is the whole table the player confirmed -- [[side, [[key, value], ...]], ...]
+// -- carried whole rather than as a diff, so the server has one code path to apply rather than a
+// reconciliation to work out.
+duws_faction_preview_request = 0;publicVariable "duws_faction_preview_request";
+duws_faction_preview_ready = 0;publicVariable "duws_faction_preview_ready";
+duws_faction_locked = [];publicVariable "duws_faction_locked";
 
 // Player squad callsign, set on the callsign setup screen and substituted into
 // English radio dialogue by fnc_cs. Default matches the "Alpha 1-1" literal baked

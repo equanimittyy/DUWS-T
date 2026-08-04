@@ -2,19 +2,15 @@ if (!isServer) exitWith {};
 
 /////////  BLUFOR INIT  ///////////////////
 
-//hint "BLUFOR INIT";
-switch (VERSION_X) do {
-	case "MODERN": {
-		if (BLUFOR_Faction_X == "BLU_F") then {
-			BLUFOR_FactionFile_X = "BLU_F_ARID";
-		};
-	};
-};
-
+// Resolves the dropdown's answer (BLUFOR_FactionFile_X) to a faction file and runs it. Runs once
+// when the confirmation screen asks for a preview and again at the commit, and re-runs whenever
+// the setup screens are stepped back through -- so it must read the token rather than
+// BLUFOR_Faction_X, which the loop below overwrites with the faction class the random vehicle
+// patrols want. A second pass reading that overwritten value matches no row and silently keeps
+// the previous faction's file.
 {
-	if (BLUFOR_Faction_X == (_x select 2)) then {
-		BLUFOR_FactionFile_X = (_x select 2);
-		BLUFOR_Faction_X = (_x select 0);	
+	if (BLUFOR_FactionFile_X == (_x select 2)) then {
+		BLUFOR_Faction_X = (_x select 0);
 	};
 } foreach Factions_Available_BLUFOR_X;
 
@@ -30,6 +26,3 @@ sleep 1;
 publicVariable "BLUFOR_Faction_X";
 publicVariable "BLUFOR_FactionFile_X";
 publicVariable "fnc_BLUFOR_FactionFile_X";
-
-
-

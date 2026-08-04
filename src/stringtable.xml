@@ -293,6 +293,122 @@
                 <Original>CHOOSE YOUR GAME MODE AND FACTIONS</Original>
                 <English>CHOOSE YOUR GAME MODE AND FACTIONS</English>
             </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_title">
+                <Original>CONFIRM YOUR FACTIONS</Original>
+                <English>CONFIRM YOUR FACTIONS</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_intro">
+                <Original>Review the classname each side will field for every role. SELECT swaps a role, CLEAR empties it. These are the final faction settings for this campaign.</Original>
+                <English>Review the classname each side will field for every role. SELECT swaps a role, CLEAR empties it. These are the final faction settings for this campaign.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_blufor">
+                <Original>BLUFOR</Original>
+                <English>BLUFOR</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_opfor">
+                <Original>OPFOR</Original>
+                <English>OPFOR</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_footer">
+                <Original>Request-menu units and vehicles are generated separately and are not listed here.</Original>
+                <English>Request-menu units and vehicles are generated separately and are not listed here.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_waiting">
+                <Original>Resolving factions...</Original>
+                <English>Resolving factions...</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_select">
+                <Original>SELECT</Original>
+                <English>SELECT</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_clear">
+                <Original>CLEAR</Original>
+                <English>CLEAR</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_missing">
+                <Original>-- MISSING --</Original>
+                <English>-- MISSING --</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_continue">
+                <Original>CONTINUE</Original>
+                <English>CONTINUE</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_continue_tt">
+                <Original>Lock these factions in and move on to the environment settings.</Original>
+                <English>Lock these factions in and move on to the environment settings.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_back_tt">
+                <Original>Go back and pick the factions and HQ position again.</Original>
+                <English>Go back and pick the factions and HQ position again.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_group_infantry">
+                <Original>INFANTRY</Original>
+                <English>INFANTRY</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_group_vehicles">
+                <Original>VEHICLES</Original>
+                <English>VEHICLES</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_group_static">
+                <Original>STATIC WEAPONS</Original>
+                <English>STATIC WEAPONS</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_group_operators">
+                <Original>OPERATORS</Original>
+                <English>OPERATORS</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_cancel">
+                <Original>CANCEL</Original>
+                <English>CANCEL</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_clear_title">
+                <Original>CLEAR ROLE</Original>
+                <English>CLEAR ROLE</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_clear_text">
+                <Original>Are you sure you want to clear the key? A missing key may cause issues.</Original>
+                <English>Are you sure you want to clear the key? A missing key may cause issues.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_lock_title">
+                <Original>LOCK IN FACTIONS</Original>
+                <English>LOCK IN FACTIONS</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_lock_text">
+                <Original>Continue? This action will lock in your factions.</Original>
+                <English>Continue? This action will lock in your factions.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_lock_warn">
+                <Original>Warning: You are missing keys. A missing key may cause issues.</Original>
+                <English>Warning: You are missing keys. A missing key may cause issues.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_title">
+                <Original>SET ROLE</Original>
+                <English>SET ROLE</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_faction">
+                <Original>Faction</Original>
+                <English>Faction</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_class">
+                <Original>Class</Original>
+                <English>Class</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_confirm">
+                <Original>CONFIRM</Original>
+                <English>CONFIRM</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_pool">
+                <Original>Confirming fills this role with the picked class first, then the rest of its role group from this faction, so spawns keep their variety.</Original>
+                <English>Confirming fills this role with the picked class first, then the rest of its role group from this faction, so spawns keep their variety.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_nopreview">
+                <Original>NO PREVIEW</Original>
+                <English>NO PREVIEW</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_noclass">
+                <Original>NO CLASS SELECTED</Original>
+                <English>NO CLASS SELECTED</English>
+            </Key>
             <Key ID="STR_DUWS_T_gamemode">
                 <Original>Game Mode</Original>
                 <English>Game Mode</English>

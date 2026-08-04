@@ -46,6 +46,7 @@ class CfgFunctions
 #include "duws\shared\includes\hq_placement.hpp"
 #include "duws\shared\includes\sounds.hpp"
 #include "duws\shared\includes\custom_faction.hpp"
+#include "duws\shared\includes\faction_confirm.hpp"
 #include "modules\R3F_LOG\desc_include.h"
 #include "duws\shared\includes\remoteExec.hpp"
 #include "duws\shared\includes\operative_menu.hpp"

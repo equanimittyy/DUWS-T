@@ -2,15 +2,11 @@
 
 /////////   OPFOR FACTION INIT  ///////////////////
 
-//hint "OPFOR FACTION INIT";
-
-if (OPFOR_Faction_X == "OPF_F") then {
-OPFOR_FactionFile_X = "OPF_F_ARID";
-};
+// Reads the dropdown's token, not OPFOR_Faction_X: see fnc_BLUFOR_faction_init for why the two
+// are separate now that resolution re-runs.
 {
-	if (OPFOR_Faction_X == (_x select 2)) then {
-		OPFOR_FactionFile_X = (_x select 2);
-		OPFOR_Faction_X = (_x select 0);	
+	if (OPFOR_FactionFile_X == (_x select 2)) then {
+		OPFOR_Faction_X = (_x select 0);
 	};
 } foreach Factions_Available_OPFOR_X;
 
@@ -26,5 +22,3 @@ publicVariable "fnc_OPFOR_FactionFile_X";
 // R3F logistics needs to know these values
 publicVariable "opfor_TRANS_TRUCK_X";
 publicVariable "opfor_AMMO_TRUCK_X";
-
-

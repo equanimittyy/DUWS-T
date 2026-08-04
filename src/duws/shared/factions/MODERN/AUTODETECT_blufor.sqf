@@ -4,18 +4,24 @@
 ///////////	"BLU_F", "E X P E R I M E N T A L", "BLU_F_ARID"
 ///////////
 
-if (!isNil "blufor_autodetect_faction_init") exitWith {};	// prevent duplicate instantiation
+// The retexture handler is installed once and never removed; the generation below re-runs every
+// time the player re-picks a faction in the setup screens. Guarding the whole file instead would
+// pin the first pick, and installing the handler per pass would retexture each spawned vehicle
+// once per pass.
+if (isNil "blufor_autodetect_handler_init") then {
+	blufor_autodetect_handler_init = true;
 
-// retexture opfor vehicles of a different side and redress crew
-addMissionEventHandler ["EntityCreated", {
-	params ["_entity"];
-	
-	if (_entity isKindOf "Car" || {_entity isKindOf "Tank"} || {_entity isKindOf "Air"}) then {
-		//systemChat str [ _entity, (typeOf _entity) call BIS_fnc_objectType, _entity isKindOf "LandVehicle"];
-		[_entity, west] spawn fnc_vehiclePostInit;
-	};
-	
-}];
+	// retexture opfor vehicles of a different side and redress crew
+	addMissionEventHandler ["EntityCreated", {
+		params ["_entity"];
+
+		if (_entity isKindOf "Car" || {_entity isKindOf "Tank"} || {_entity isKindOf "Air"}) then {
+			//systemChat str [ _entity, (typeOf _entity) call BIS_fnc_objectType, _entity isKindOf "LandVehicle"];
+			[_entity, west] spawn fnc_vehiclePostInit;
+		};
+
+	}];
+};
 
 
 // fn_factionAutoDetect.sqf helpers are compiled once at init (fnc_factions_check).
@@ -253,43 +259,7 @@ waitUntil { sleep 0.1; !isNil "selectedFaction_BLU" };
 selectedFaction_BLU call fnc_factionGen;
 sleep 0.5;
 
-// use predefined array for improved performance
-b_arraysToRandomize = [
-	"blufor_SOLDIER_X",
-	"blufor_SOLDIER_LAT_X",
-	"blufor_SOLDIER_GL_X",
-	"blufor_SOLDIER_TL_X",
-	"blufor_SOLDIER_SL_X",
-	"blufor_SOLDIER_AR_X",
-	"blufor_MARKSMAN_X",
-	"blufor_OFFICER_X",
-	"blufor_HELI_PILOT_X",
-	"blufor_BOAT_ARMED_X",
-	"blufor_BOAT_CREW_X",
-	"blufor_HELI_TRANS_ARM_X",
-	"blufor_HELI_TRANS_UNARM_X",
-	"blufor_HELI_ATTACK_X",
-	"blufor_PLANE_CAS_X",
-	"blufor_CAR_PATROL1_X",
-	"blufor_APC_PATROL1_X",
-	"blufor_APC_PATROL2_X",
-	"blufor_TANK_PATROL1_X",
-	"blufor_TURRET_AA",
-	"blufor_TURRET_AT",
-	"blufor_TURRET_HMG",
-	"blufor_TURRET_GMG",
-	"blufor_SPECOPS_X",
-	"blufor_SPECOPS_GL_X",
-	"blufor_SPECOPS_LAT_X",
-	"blufor_SPECOPS_HAT_X",
-	"blufor_SPECOPS_AA_X",
-	"blufor_SPECOPS_MG_X",
-	"blufor_SPECOPS_MEDIC_X",
-	"blufor_SPECOPS_MARK_X",
-	"blufor_SPECOPS_SNIPER_X",
-	"blufor_SPECOPS_EXP_X",
-	"blufor_SPECOPS_ENG_X"
-];
+b_arraysToRandomize = (["blufor"] call fnc_faction_schema) apply {_x select 0};
 
 // Pools published, not collapsed by a timer. See fnc_faction_pools for what the thread per
 // role that used to sit here got wrong.
@@ -299,6 +269,3 @@ sleep 1;
 // existed to fold newly drawn role classnames into the purchasable squads. server_init calls
 // fnc_BLUFOR_squad_init once, which is right for a catalogue -- a price list that reshuffles under
 // the player mid-purchase is worse than a stable one.
-
-blufor_autodetect_faction_init = true;
-publicVariable "blufor_autodetect_faction_init";

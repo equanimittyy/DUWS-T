@@ -51,14 +51,35 @@ defaults). The same file probes signature civilian classes to set `civ_mod`. The
 `AUTODETECT_RANDOM` and `CUSTOM` pseudo-factions are appended as always-available options.
 
 `client/dialog/fnc_HQ_faction_dialog.sqf` renders two dropdowns from those arrays (blue BLUFOR, red OPFOR)
-and, on selection, sets `BLUFOR_Faction_X` / `OPFOR_Faction_X` to the chosen faction-file token, then hands
-off to HQ placement.
+and, on selection, sets `BLUFOR_FactionFile_X` / `OPFOR_FactionFile_X` to the chosen faction-file token,
+then hands off to HQ placement.
+
+**Two globals, two meanings.** `*_FactionFile_X` is the player's answer — a faction-file token, or
+`CUSTOM`/`AUTODETECT`. `*_Faction_X` is the faction *class*, written only by faction init and read by the
+random vehicle patrols (`server/warcom/fnc_WARCOM_blu_patrol.sqf`). Init used to overwrite the answer with
+the class, which was harmless only while it ran once; resolution now runs once per pass through the setup
+screens, and a second pass reading the overwritten value matched no registry row and silently kept the
+previous faction's file.
 
 `server/init_hq/fnc_BLUFOR_faction_init.sqf` and `server/warcom/fnc_OPFOR_faction_init.sqf` resolve the
 choice to a file, build the path `duws\factions\MODERN\<file>_<side>.sqf`, then
 `compile preprocessFileLineNumbers` and call it — populating the schema. (This dynamic path build is why
 the faction folder can't be renamed without care.) `AUTODETECT*`/`CUSTOM` route to the generator or the
 paste parser instead of a static file.
+
+## The confirmation screen
+
+After both sides are chosen, `client/dialog/fnc_faction_confirm.sqf` shows every role key both sides will
+field, side by side, and lets the player swap or clear any of them. It is the reason faction resolution no
+longer waits for the post-START commit: the screen has to show resolved classnames, so it asks the server
+to resolve and the commit applies the player's table over the result. Layout, the request handshake and
+the re-entrancy that loop demands are in
+[`../faction_confirm_screen_plan.md`](../faction_confirm_screen_plan.md).
+
+`shared/functions/fnc_faction_schema.sqf` is the single source for which keys exist. It returns
+`[key, group, kind]` per side and feeds the screen's rows, `fnc_custom_faction_parse`'s required-key
+validation, and both AutoDetect wrappers' pool-publish lists — which each held their own copy of the list
+before.
 
 ## The static template library
 

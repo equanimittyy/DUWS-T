@@ -12,10 +12,10 @@
 // The single-side paste dialog (startup_faction) is reused per side: duws_custom_side
 // tells the submit handler which side it is, and the frame/info labels are set here.
 
-private _opfAuto = (OPFOR_Faction_X == "AUTODETECT");
+private _opfAuto = (OPFOR_FactionFile_X == "AUTODETECT");
 
 // --- BLUFOR ---
-switch (BLUFOR_Faction_X) do {
+switch (BLUFOR_FactionFile_X) do {
     case "CUSTOM": {
         BLUfactionDataTemp = ""; publicVariable "BLUfactionDataTemp";
         duws_custom_side = "blufor";
@@ -36,7 +36,7 @@ switch (BLUFOR_Faction_X) do {
 if (duws_custom_faction_back) exitWith {};
 
 // --- OPFOR ---
-switch (OPFOR_Faction_X) do {
+switch (OPFOR_FactionFile_X) do {
     case "CUSTOM": {
         OPFfactionDataTemp = ""; publicVariable "OPFfactionDataTemp";
         duws_custom_side = "opfor";

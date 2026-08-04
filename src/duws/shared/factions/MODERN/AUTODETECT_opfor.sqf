@@ -4,18 +4,24 @@
 ///////////	"OPF_F", "E X P E R I M E N T A L", "OPF_F_ARID"
 ///////////
 
-if (!isNil "opfor_autodetect_faction_init") exitWith {};	// prevent duplicate instantiation
+// The retexture handler is installed once and never removed; the generation below re-runs every
+// time the player re-picks a faction in the setup screens. Guarding the whole file instead would
+// pin the first pick, and installing the handler per pass would retexture each spawned vehicle
+// once per pass.
+if (isNil "opfor_autodetect_handler_init") then {
+	opfor_autodetect_handler_init = true;
 
-// retexture opfor vehicles of a different side and redress crew
-addMissionEventHandler ["EntityCreated", {
-	params ["_entity"];
-	
-	if (_entity isKindOf "Car" || {_entity isKindOf "Tank"} || {_entity isKindOf "Air"}) then {
-		//systemChat str [ _entity, (typeOf _entity) call BIS_fnc_objectType, _entity isKindOf "LandVehicle"];
-		[_entity, east] spawn fnc_vehiclePostInit;
-	};
-	
-}];
+	// retexture opfor vehicles of a different side and redress crew
+	addMissionEventHandler ["EntityCreated", {
+		params ["_entity"];
+
+		if (_entity isKindOf "Car" || {_entity isKindOf "Tank"} || {_entity isKindOf "Air"}) then {
+			//systemChat str [ _entity, (typeOf _entity) call BIS_fnc_objectType, _entity isKindOf "LandVehicle"];
+			[_entity, east] spawn fnc_vehiclePostInit;
+		};
+
+	}];
+};
 
 
 // fn_factionAutoDetect.sqf helpers are compiled once at init (fnc_factions_check).
@@ -155,52 +161,9 @@ waitUntil { sleep 0.1; !isNil "selectedFaction_OPF" };
 selectedFaction_OPF call fnc_factionGen;
 sleep 0.5;
 
-// use predefined array for improved performance
-o_arraysToRandomize = [
-    "opfor_SOLDIER_X",
-    "opfor_AA_SOLDIER_X",
-    "opfor_AR_SOLDIER_X",
-    "opfor_AT_SOLDIER_X",
-    "opfor_GL_SOLDIER_X",
-    "opfor_LAT_SOLDIER_X",
-    "opfor_SL_SOLDIER_X",
-    "opfor_TL_SOLDIER_X",
-    "opfor_MARK_SOLDIER_X",
-    "opfor_CREW_X",
-    "opfor_ENG_SOLDIER_X",
-    "opfor_SNIPER_SOLDIER_X",
-    "opfor_OFFICER_X",
-    "opfor_OPERATOR_X",
-    "opfor_COVERED_TRUCK_X",
-    "opfor_TRANS_TRUCK_X",
-    "opfor_AMMO_TRUCK_X",
-    "opfor_REPAIR_TRUCK_X",
-    "opfor_APC1_X",
-    "opfor_ARMED_CAR1_X",
-    "opfor_MBT_TANK1_X",
-    "opfor_APC2_X",
-    "opfor_AA_APC_X",
-    "opfor_TRANS_HELI_X",
-    "opfor_ATTACK_HELI_X",
-    "opfor_MISC_AIR_X",
-    "opfor_TURRET_HMG",
-    "opfor_SPECOPS_X",
-    "opfor_SPECOPS_GL_X",
-    "opfor_SPECOPS_LAT_X",
-    "opfor_SPECOPS_HAT_X",
-    "opfor_SPECOPS_AA_X",
-    "opfor_SPECOPS_MG_X",
-    "opfor_SPECOPS_MEDIC_X",
-    "opfor_SPECOPS_MARK_X",
-    "opfor_SPECOPS_SNIPER_X",
-    "opfor_SPECOPS_EXP_X",
-    "opfor_SPECOPS_ENG_X"
-];
+o_arraysToRandomize = (["opfor"] call fnc_faction_schema) apply {_x select 0};
 
 // Pools published, not collapsed by a timer. See fnc_faction_pools for what the thread per
 // role that used to sit here got wrong.
 [o_arraysToRandomize] call fnc_faction_pools_publish;
 sleep 1;
-
-opfor_autodetect_faction_init = true;
-publicVariable "opfor_autodetect_faction_init";

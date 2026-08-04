@@ -44,6 +44,8 @@ publicVariable "fnc_intro_heli";
 fnc_init_OPFOR_WARCOM = compile preprocessFileLineNumbers "duws\server\warcom\fnc_init_OPFOR_WARCOM.sqf";
 fnc_OPFOR_faction_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_OPFOR_faction_init.sqf";
 fnc_OPFOR_squad_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_OPFOR_squad_init.sqf";
+// Broadcast: clients re-run the faction file for themselves on join and have to re-apply over it.
+fnc_faction_apply_locked = compile preprocessFileLineNumbers "duws\server\warcom\fnc_faction_apply_locked.sqf";publicVariable "fnc_faction_apply_locked";
 fnc_repetitive_cleanup = compile preprocessFileLineNumbers "duws\server\misc\fnc_repetitive_cleanup.sqf";
 fnc_capture_zones_task = compile preprocessFileLineNumbers "duws\server\misc\fnc_capture_zones_task.sqf";
 fnc_AI_Master_Control = compile preprocessFileLineNumbers "duws\server\misc\fnc_AI_Master_Control.sqf";
@@ -326,6 +328,18 @@ fnc_startup_next = compile preprocessFileLineNumbers "duws\client\dialog\fnc_sta
 fnc_startup_back = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_back.sqf";publicVariable "fnc_startup_back";
 fnc_startup_faction_flow = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_faction_flow.sqf";publicVariable "fnc_startup_faction_flow";
 fnc_startup_faction_resolve = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_faction_resolve.sqf";publicVariable "fnc_startup_faction_resolve";
+fnc_faction_confirm = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_confirm.sqf";publicVariable "fnc_faction_confirm";
+fnc_faction_confirm_rows = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_confirm_rows.sqf";publicVariable "fnc_faction_confirm_rows";
+fnc_faction_row_paint = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_row_paint.sqf";publicVariable "fnc_faction_row_paint";
+fnc_faction_key_edit = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_key_edit.sqf";publicVariable "fnc_faction_key_edit";
+fnc_faction_key_apply = compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_key_apply.sqf";publicVariable "fnc_faction_key_apply";
+// Defines the confirmation screen's two prompts rather than being one function, so it is executed
+// here and its pieces broadcast individually.
+[] call compile preprocessFileLineNumbers "duws\client\dialog\fnc_faction_prompts.sqf";
+publicVariable "fnc_faction_prompt_hide";
+publicVariable "fnc_faction_prompt_clear";
+publicVariable "fnc_faction_prompt_lock";
+publicVariable "fnc_faction_key_clear";
 fnc_enviro_back = compile preprocessFileLineNumbers "duws\client\dialog\fnc_enviro_back.sqf";publicVariable "fnc_enviro_back";
 fnc_startup_enviro_closed = compile preprocessFileLineNumbers "duws\client\dialog\fnc_startup_enviro_closed.sqf";publicVariable "fnc_startup_enviro_closed";
 fnc_request_unit = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_unit.sqf";publicVariable "fnc_request_unit";
@@ -354,6 +368,9 @@ fnc_request_vehicle_fob = compile preprocessFileLineNumbers "duws\client\dialog\
 fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dialog\fnc_custom_faction_capture.sqf";publicVariable "fnc_custom_faction_capture";
 // Ahead of faction init, which calls it. Not broadcast: generation and every spawn path are server.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_pools.sqf";
+// Ahead of the two AutoDetect wrappers and fnc_custom_faction_parse, which both build their key
+// lists from it. Broadcast because the confirmation screen builds its rows from it client-side.
+fnc_faction_schema = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_schema.sqf";publicVariable "fnc_faction_schema";
 fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\functions\fnc_custom_faction_parse.sqf";publicVariable "fnc_custom_faction_parse";
 // Broadcast: both request menus and all four request handlers are client-side.
 fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_rqst_list.sqf";publicVariable "fnc_faction_rqst_list";

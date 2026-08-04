@@ -44,39 +44,42 @@ publicVariable "serverinit_complete";
 // wait for HQ placement
 while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_placement}, 300] call fnc_waitLogged)} do {};
 
-// Faction init + HQ build are deferred to final commit (createzone_server) so
-// the setup screens' Back navigation can re-pick faction/HQ with nothing yet
-// built. Everything below consumes only PosOfBLUHQ (set at placement) until
-// this gate; verified no faction-array or HQ-object read sits before it.
-while {!(["BOOT", "createzone_server (setup screens committed)", {createzone_server}, 300] call fnc_waitLogged)} do {};
+// Faction resolution answers the confirmation screen, which shows the player the classname each
+// side will field for every role and is the last point they can change one -- so it cannot wait
+// for the commit. Served in a loop rather than once: stepping back from the environment screen
+// re-enters faction selection, and the screen asks again with the new pick. Both faction inits and
+// all three AutoDetect wrappers are written to survive being called again.
+// The condition below reads globals only: fnc_waitLogged calls the block in its own scope, so a
+// private captured here would be undefined by the time it is evaluated. duws_faction_preview_ready
+// doubles as the served marker, which is what the screen waits on anyway.
+while {!createzone_server} do {
+	while {!(["BOOT", "duws_faction_preview_request (confirmation screen opened)",
+		{duws_faction_preview_request > duws_faction_preview_ready || createzone_server}, 600] call fnc_waitLogged)} do {};
+	if (createzone_server) exitWith {};
+	private _serving = duws_faction_preview_request;
 
-// wait for CUSTOM FACTIONS to be pasted
-["INFO", "BOOT", "Server waiting for BLU faction Data Temp"] call fnc_log;
-if (BLUFOR_Faction_X == "CUSTOM") then { while {!(["FACTION", "BLUfactionDataTemp pasted", {BLUfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
-if (OPFOR_Faction_X == "CUSTOM") then { while {!(["FACTION", "OPFfactionDataTemp pasted", {OPFfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
+	// wait for CUSTOM FACTIONS to be pasted
+	["INFO", "BOOT", "Server waiting for BLU faction Data Temp"] call fnc_log;
+	if (BLUFOR_FactionFile_X == "CUSTOM") then { while {!(["FACTION", "BLUfactionDataTemp pasted", {BLUfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
+	if (OPFOR_FactionFile_X == "CUSTOM") then { while {!(["FACTION", "OPFfactionDataTemp pasted", {OPFfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
 
-// BLUFOR
-["INFO", "BOOT", format ["BLUFOR Faction init on server: %1", BLUFOR_Faction_X]] call fnc_log;
+	// BLUFOR
+	["INFO", "BOOT", format ["BLUFOR Faction init on server: %1", BLUFOR_FactionFile_X]] call fnc_log;
 
-if (BLUFOR_Faction_X == "CUSTOM") then {
-	["blufor"] call fnc_custom_faction_init;
-	while {!(["FACTION", "BLUfactionData populated", {count BLUfactionData > 0}, 300] call fnc_waitLogged)} do {};
-} else {
-	[] call fnc_BLUFOR_faction_init;
-};
-["INFO", "BOOT", format ["Blufor Faction init on server complete.  Rifleman: %1", blufor_SOLDIER_X]] call fnc_log;
-["INFO", "BOOT", format ["Blufor Faction init on server complete.  blufor RQST VEHICLE 01: %1", (["VEHICLE"] call fnc_faction_rqst_list) param [0, "none"]]] call fnc_log;
+	if (BLUFOR_FactionFile_X == "CUSTOM") then {
+		["blufor"] call fnc_custom_faction_init;
+		while {!(["FACTION", "BLUfactionData populated", {count BLUfactionData > 0}, 300] call fnc_waitLogged)} do {};
+	} else {
+		[] call fnc_BLUFOR_faction_init;
+	};
+	["INFO", "BOOT", format ["Blufor Faction init on server complete.  Rifleman: %1", blufor_SOLDIER_X]] call fnc_log;
+	["INFO", "BOOT", format ["Blufor Faction init on server complete.  blufor RQST VEHICLE 01: %1", (["VEHICLE"] call fnc_faction_rqst_list) param [0, "none"]]] call fnc_log;
 
-// create the BLUFOR squads
-[] call fnc_BLUFOR_squad_init;
-["INFO", "BOOT", format ["blufor RECON_TEAM: %1", str blufor_RECON_TEAM_X]] call fnc_log;
+	// OPFOR. Unguarded: the "opfor already resolved" check that used to wrap this pinned the first
+	// resolution, which is wrong once stepping back can re-pick the faction.
+	["INFO", "BOOT", format ["OPFOR Faction init on server: %1", OPFOR_FactionFile_X]] call fnc_log;
 
-
-// OPFOR
-if (opfor_SOLDIER_X == "") then {
-	["INFO", "BOOT", format ["OPFOR Faction init on server: %1", OPFOR_Faction_X]] call fnc_log;
-
-	if (OPFOR_Faction_X == "CUSTOM") then {
+	if (OPFOR_FactionFile_X == "CUSTOM") then {
 		["opfor"] call fnc_custom_faction_init;
 		while {!(["FACTION", "OPFfactionData populated", {count OPFfactionData > 0}, 300] call fnc_waitLogged)} do {};
 	} else {
@@ -85,11 +88,35 @@ if (opfor_SOLDIER_X == "") then {
 	["INFO", "BOOT", format ["Opfor Warcom Faction init on server complete.  Rifleman: %1", opfor_SOLDIER_X]] call fnc_log;
 	["INFO", "BOOT", format ["Opfor Warcom Faction init on server complete.  Spec Ops: %1", opfor_SPECOPS_X]] call fnc_log;
 
-	// create the BLUFOR squads
-	[] call fnc_OPFOR_squad_init;
-	["INFO", "BOOT", format ["opfor INF_TEAM: %1", str opfor_INFTEAM_X]] call fnc_log;
+	// Publish every role global the screen will show. AutoDetect broadcasts its own and a CUSTOM
+	// paste ships its assignment list, but a static faction file only assigns server-side and the
+	// OPFOR file is never run on a client at all -- so without this the screen would paint whatever
+	// that machine happened to hold rather than what the server just resolved.
+	{
+		private _side = _x;
+		{ missionNamespace setVariable [_x select 0, missionNamespace getVariable [_x select 0, ""], true]; }
+			forEach ([_side] call fnc_faction_schema);
+	} forEach ["blufor", "opfor"];
 
+	// Answers the request by number, so the screen can tell this round's rows from the last one's.
+	duws_faction_preview_ready = _serving;
+	publicVariable "duws_faction_preview_ready";
 };
+
+// HQ build stays behind the commit so Back navigation still finds nothing built to unwind.
+// Everything below consumes only PosOfBLUHQ (set at placement) until this gate; verified no
+// HQ-object read sits before it.
+while {!(["BOOT", "createzone_server (setup screens committed)", {createzone_server}, 300] call fnc_waitLogged)} do {};
+
+// The player's edits from the confirmation screen, laid over what resolution produced.
+[] call fnc_faction_apply_locked;
+
+// Squads compose from the role globals, so they are built after the edits land rather than
+// beside the resolution that produced them.
+[] call fnc_BLUFOR_squad_init;
+["INFO", "BOOT", format ["blufor RECON_TEAM: %1", str blufor_RECON_TEAM_X]] call fnc_log;
+[] call fnc_OPFOR_squad_init;
+["INFO", "BOOT", format ["opfor INF_TEAM: %1", str opfor_INFTEAM_X]] call fnc_log;
 
 [] spawn fnc_create_ammo_lists;
 
