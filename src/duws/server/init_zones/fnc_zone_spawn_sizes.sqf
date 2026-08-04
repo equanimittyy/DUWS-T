@@ -271,6 +271,16 @@ DUWS_fnc_raiseGarrison = {
         } forEach _made;
         if (_forEachIndex < (count _tokens) - 1) then { sleep 5 };
     } forEach _tokens;
+
+    // Fall damage from the placement itself, not from anything the zone chose: a man raised above his
+    // position lands on it hurt. Read after a pause, because the damage arrives when he lands rather
+    // than when he appears -- a pass run the instant the last group returns finds every man whole.
+    // One shot from a player firing on the spawn is undone with it, and goes unnoticed at that size.
+    sleep 3;
+    {
+        private _grp = _x;
+        { if (alive _x && {damage _x > 0}) then { _x setDamage 0 } } forEach (units _grp);
+    } forEach _grps;
     _grps
 };
 
