@@ -37,7 +37,7 @@ class startup_faction_next_dialog
 		class faction_next_button: RscButton
 		{
 			idc = 1600;
-			text = "$STR_DUWS_T_faction_screen_pick";
+			text = "$STR_DUWS_T_faction_screen_resolve";
 			x = 11 * GUI_GRID_W + GUI_GRID_X;
 			y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
 			w = 18 * GUI_GRID_W;

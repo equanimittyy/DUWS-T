@@ -32,9 +32,20 @@ duws_faction_preview_request = duws_faction_preview_request + 1;
 private _request = duws_faction_preview_request;
 publicVariable "duws_faction_preview_request";
 
+// Re-issued about once a second rather than shown once: titleText fades itself out after a few
+// seconds, and a resolution slower than that -- which is every heavy mod set -- left the player on
+// an empty black screen with nothing to tell setup working from setup hung. Repeats are issued at
+// speed 0 so the line holds steady instead of pulsing through its fade-in each time.
 titleText [localize "STR_DUWS_T_faction_confirm_waiting", "PLAIN", 0.3];
-waitUntil { sleep 0.2; duws_faction_preview_ready >= _request };
-titleText ["", "PLAIN", 0.3];
+private _nextSay = diag_tickTime + 1;
+waitUntil {
+    sleep 0.2;
+    if (diag_tickTime > _nextSay) then {
+        titleText [localize "STR_DUWS_T_faction_confirm_waiting", "PLAIN", 0];
+        _nextSay = diag_tickTime + 1;
+    };
+    duws_faction_preview_ready >= _request
+};
 
 // Snapshot of what resolution produced, one row per schema key. Read once here rather than off the
 // globals per repaint, so an edit shows immediately without waiting on a server round trip.
@@ -45,10 +56,15 @@ duws_faction_table = ["blufor", "opfor"] apply {
     }]
 };
 
+// The line stays up across the table build and the dialog opening, and is cleared only once the
+// screen it was announcing is actually on -- clearing it at the end of the wait above put a gap of
+// blank screen exactly where the player was already wondering whether anything was happening.
 if (!createDialog "startup_faction_confirm") exitWith {
+    titleText ["", "PLAIN", 0.3];
     ["ERROR", "FACTION", "Faction confirmation screen failed to open; skipping to the environment menu."] call fnc_log;
 };
 waitUntil { dialog };
+titleText ["", "PLAIN", 0.3];
 private _display = uiNamespace getVariable ["duws_faction_confirm_display", displayNull];
 
 (_display displayCtrl 8603) ctrlSetStructuredText parseText format ["<t size='0.85'>%1</t>", localize "STR_DUWS_T_faction_confirm_intro"];
