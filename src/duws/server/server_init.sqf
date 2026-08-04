@@ -378,7 +378,7 @@ while {!(["BOOT", "mission_init_complete (zones built, civilians registered)",
 // screen and hinting the settings summary (warcom/fnc_init_OPFOR_WARCOM.sqf), both fired the instant
 // mission_init_complete goes up, and the intro's first act is to black the screen over them. Flying
 // as soon as the clients were ready cut the typing off about a second into a six-second run.
-sleep 12;
+sleep 15;
 
 // The pause above does not replace this: the intro remoteExecs a seat onto each client, so every
 // player must be holding client_init's fnc_remoteBoard before it flies. Bounded and not retried --
