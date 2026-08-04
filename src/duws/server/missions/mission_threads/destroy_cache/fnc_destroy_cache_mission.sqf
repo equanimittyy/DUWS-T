@@ -131,19 +131,23 @@ clearBackpackCargoGlobal _vehicle_8;
 }] remoteExec ["call", 0, true];
 _vehicle_8 setVariable ["arsenalUsed", false, true];
 
-_vehicle_9 = createVehicle [blufor_TURRET_HMG, [0,0,0], [], 0, "CAN_COLLIDE"];
-_vehicle_9 setDir 314.218;
-_vehicle_9 setPosATL [(_centerSpawnX)-5.52539, (_centerSpawnY)+5.98193, 0];
-_vehicle_9 allowdamage false;
-_vehicle_9 setdamage 0;
-[_vehicle_9, "mission_destroy_cache"] call fnc_duws_keep;
+// The cache's two MG nests, fenced so a rearrange in the 3D editor reaches them. Resolved against
+// OPFOR: the objective is an enemy cache, and these read blufor_TURRET_HMG until now, so a
+// mod-equipped BLUFOR was defending the enemy's supplies with its own guns.
+// --DUWS-COMPOSITION BEGIN name="Mission: Destroy Cache guns" schema=A--
+_gunArray = [
+    ["O_HMG_01_high_F", -5.52539,  5.98193, 0, 314.218],
+    ["O_HMG_01_high_F",  6.7168,  -5.49365, 0, 136.703]
+];
+// --DUWS-COMPOSITION END--
 
-_vehicle_10 = createVehicle [blufor_TURRET_HMG, [0,0,0], [], 0, "CAN_COLLIDE"];
-_vehicle_10 setDir 136.703;
-_vehicle_10 setPosATL [(_centerSpawnX)+6.7168, (_centerSpawnY)-5.49365, 0];
-_vehicle_10 allowdamage false;
-_vehicle_10 setdamage 0;
-[_vehicle_10, "mission_destroy_cache"] call fnc_duws_keep;
+private _guns = _gunArray apply {
+    private _gun = [_x, [_centerSpawnX, _centerSpawnY], "opfor", "mission_destroy_cache", "pos"] call fnc_static_place;
+    _gun allowDamage false;
+    _gun setDamage 0;
+    _gun
+};
+_guns params ["_vehicle_9", "_vehicle_10"];
 
 _groupBunker1 = [getpos _vehicle_9, EAST, [opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _groupBunker1 deleteGroupWhenEmpty true;
@@ -154,8 +158,8 @@ _guard1 = units _groupBunker1 select 0;
 _guard2 = units _groupBunker2 select 0;
 _guard1 moveinGunner _vehicle_9;
 _guard2 moveinGunner _vehicle_10;
-_vehicle_9 setDir( [_centerSpawnX,_centerSpawnY] getDir getPosWorld _vehicle_9);
-_vehicle_10 setDir( [_centerSpawnX,_centerSpawnY] getDir getPosWorld _vehicle_10);
+// The thaw for fnc_static_place's placement freeze.
+{ _x enableSimulationGlobal true } forEach _guns;
 
 [_guard2] joinSilent _groupBunker1;
 _missionUnits pushBack _guard1;

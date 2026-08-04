@@ -64,21 +64,25 @@ clearItemCargoGlobal _vehicle_7;
 clearBackpackCargoGlobal _vehicle_7;
 [_vehicle_7, "mission_destroy_radar"] call fnc_duws_keep;
 
-_vehicle_9 = objNull;
-_vehicle_9 = createVehicle ["B_static_AA_F", [0,0,0], [], 0, "CAN_COLLIDE"];
-[_vehicle_9, "mission_destroy_radar"] call fnc_duws_keep;
-_vehicle_9 setDir 314.218;
-_vehicle_9 setPosATL [(_centerSpawnX)-5.52539, (_centerSpawnY)+5.98193, 0];
-_vehicle_9 allowdamage false;
-_vehicle_9 setdamage 0;
+// The radar's air cover, fenced like the barriers above so a rearrange in the 3D editor reaches it.
+// The classes are placeholders resolved against OPFOR: this is an enemy site, and it stood NATO
+// launchers over an enemy radar until it went through fnc_static_place.
+// --DUWS-COMPOSITION BEGIN name="Mission: Destroy Radar guns" schema=A--
+_gunArray = [
+    ["B_static_AA_F", -5.52539,  5.98193, 0, 314.218],
+    ["B_static_AA_F",  6.7168,  -5.49365, 0, 136.703]
+];
+// --DUWS-COMPOSITION END--
 
-_vehicle_10 = objNull;
-_vehicle_10 = createVehicle ["B_static_AA_F", [0,0,0], [], 0, "CAN_COLLIDE"];
-[_vehicle_10, "mission_destroy_radar"] call fnc_duws_keep;
-_vehicle_10 setDir 136.703;
-_vehicle_10 setPosATL [(_centerSpawnX)+6.7168, (_centerSpawnY)-5.49365, 0];
-_vehicle_10 allowdamage false;
-_vehicle_10 setdamage 0;
+// Invulnerable by design: the objective is the radar, and a launcher the player can shoot off from
+// a ridge is one the mission never asks them to close with.
+private _guns = _gunArray apply {
+    private _gun = [_x, [_centerSpawnX, _centerSpawnY], "opfor", "mission_destroy_radar", "pos"] call fnc_static_place;
+    _gun allowDamage false;
+    _gun setDamage 0;
+    _gun
+};
+_guns params ["_vehicle_9", "_vehicle_10"];
 
 _groupBunker1 = [getpos _vehicle_9, EAST, [opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _groupBunker1 deleteGroupWhenEmpty true;
@@ -89,8 +93,8 @@ _guard1 = units _groupBunker1 select 0;
 _guard2 = units _groupBunker2 select 0;
 _guard1 moveinGunner _vehicle_9;
 _guard2 moveinGunner _vehicle_10;
-_vehicle_9 setDir( [_centerSpawnX,_centerSpawnY] getDir getPosWorld _vehicle_9);
-_vehicle_10 setDir( [_centerSpawnX,_centerSpawnY] getDir getPosWorld _vehicle_10);
+// The thaw for fnc_static_place's placement freeze.
+{ _x enableSimulationGlobal true } forEach _guns;
 
 [_guard2] joinSilent _groupBunker1;
 _groupBunker1 addVehicle _vehicle_7;

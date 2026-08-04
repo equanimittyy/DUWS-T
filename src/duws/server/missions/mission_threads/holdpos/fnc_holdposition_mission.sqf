@@ -106,26 +106,24 @@ _vehicle = objNull;
 	[_vehicle, "mission_holdpos"] call fnc_duws_keep;
 } forEach _staticsArray;
 
-_vehicle_9 = objNull;
-_vehicle_9 = createVehicle ["I_HMG_02_high_F", [0,0,0], [], 0, "CAN_COLLIDE"];
-[_vehicle_9, "mission_holdpos"] call fnc_duws_keep;
-_vehicle_9 setDir 314.218;
-_vehicle_9 setPosATL [(_centerSpawnX)-5.52539, (_centerSpawnY)+5.98193, 0];
-_vehicle_9 setdamage 0;
+// The position's own guns, fenced like the barriers above so a rearrange in the 3D editor reaches
+// them too. Their classes are placeholders: fnc_static_place stands the player's faction's own
+// emplacements here instead, so a mod-equipped BLUFOR holds this ground with its own kit.
+// --DUWS-COMPOSITION BEGIN name="Mission: Hold Position guns" schema=A--
+_gunArray = [
+	["I_HMG_02_high_F", -5.52539,  5.98193, 0, 314.218],
+	["I_HMG_02_high_F",  6.7168,  -5.49365, 0, 136.703],
+	["B_Mortar_01_F",    0.01,    -4.49365, 0, 136.703]
+];
+// --DUWS-COMPOSITION END--
 
-_vehicle_10 = objNull;
-_vehicle_10 = createVehicle ["I_HMG_02_high_F", [0,0,0], [], 0, "CAN_COLLIDE"];
-[_vehicle_10, "mission_holdpos"] call fnc_duws_keep;
-_vehicle_10 setDir 136.703;
-_vehicle_10 setPosATL [(_centerSpawnX)+6.7168, (_centerSpawnY)-5.49365, 0];
-_vehicle_10 setdamage 0;
-
-_vehicle_11 = objNull;
-_vehicle_11 = createVehicle ["B_Mortar_01_F", [0,0,0], [], 0, "CAN_COLLIDE"];
-[_vehicle_11, "mission_holdpos"] call fnc_duws_keep;
-_vehicle_11 setDir 136.703;
-_vehicle_11 setPosATL [(_centerSpawnX)+0.01, (_centerSpawnY)-4.49365, 0];
-_vehicle_11 setdamage 0;
+private _guns = _gunArray apply {
+	[_x, [_centerSpawnX, _centerSpawnY], "blufor", "mission_holdpos", "pos"] call fnc_static_place
+};
+{ _x setDamage 0 } forEach _guns;
+_guns params ["_vehicle_9", "_vehicle_10", "_vehicle_11"];
+// A few rounds, not a battery: the tube is a threat the attack has to close on rather than one that
+// decides the fight from the middle of the position.
 _vehicle_11 setVehicleAmmo 0.3;
 
 _groupBunker1 = [getpos _vehicle_9, WEST, [blufor_SOLDIER_X],[],[],blufor_ai_skill] call BIS_fnc_spawnGroup;
@@ -136,8 +134,9 @@ _guard1 = units _groupBunker1 select 0;
 _guard2 = units _groupBunker2 select 0;
 _guard1 moveinGunner _vehicle_9;
 _guard2 moveinGunner _vehicle_10;
-_vehicle_9 setDir( [_centerSpawnX,_centerSpawnY] getDir getPosWorld _vehicle_9);
-_vehicle_10 setDir( [_centerSpawnX,_centerSpawnY] getDir getPosWorld _vehicle_10);
+// The thaw for fnc_static_place's placement freeze. The mortar has no crew of its own and is
+// released here with the two the guards just took.
+{ _x enableSimulationGlobal true } forEach _guns;
 _missionUnits pushBack _guard1;
 _missionUnits pushBack _guard2;
 
