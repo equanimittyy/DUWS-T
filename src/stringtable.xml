@@ -318,8 +318,8 @@
                 <English>Resolving factions...</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_screen_next">
-                <Original>Select your GAME MODE and FACTIONS above. HQ placement comes after you confirm them.</Original>
-                <English>Select your GAME MODE and FACTIONS above. HQ placement comes after you confirm them.</English>
+                <Original>Select your GAME MODE and FACTIONS. HQ placement comes after you confirm them.</Original>
+                <English>Select your GAME MODE and FACTIONS. HQ placement comes after you confirm them.</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_screen_pick">
                 <Original>PICK FACTIONS</Original>
