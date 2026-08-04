@@ -14,11 +14,28 @@
 // The smallest matching bucket wins: a rifleman appears in both the whole-infantry list and the
 // grunt list, and the tighter of the two is the role the player was editing.
 
-private _key = duws_faction_edit_key;
-private _faction = lbData [8623, lbCurSel 8623];
-private _class = lbData [8625, lbCurSel 8625];
+// Read off the editor's own display. The IDC forms resolve against whichever display the engine
+// holds current, and the confirmation screen is open underneath -- landing there they return "",
+// which this used to read as "nothing picked" and answer a CONFIRM click by closing the editor and
+// changing nothing.
+private _display = uiNamespace getVariable ["duws_faction_edit_display", displayNull];
+if (isNull _display) exitWith {
+    ["ERROR", "FACTION", "Key editor confirmed with no display; the pick was dropped."] call fnc_log;
+    closeDialog 0;
+};
 
-if (_class isEqualTo "") exitWith { closeDialog 0; };
+private _key = duws_faction_edit_key;
+private _factionCtrl = _display displayCtrl 8623;
+private _classCtrl = _display displayCtrl 8625;
+private _faction = _factionCtrl lbData (lbCurSel _factionCtrl);
+private _class = _classCtrl lbData (lbCurSel _classCtrl);
+
+if (_class isEqualTo "") exitWith {
+    ["WARN", "FACTION", format ["Key editor confirmed with no class selected for %1.", _key]] call fnc_log;
+    closeDialog 0;
+};
+
+["INFO", "FACTION", format ["Key editor: %1 <- %2 (faction %3)", _key, _class, _faction]] call fnc_log;
 
 // Per faction and per screen: the parse walks a whole faction's CfgVehicles, and its answer cannot
 // change while the confirmation screen is open.

@@ -10,7 +10,9 @@
 params ["_side", "_key"];
 
 private _schema = ([_side] call fnc_faction_schema) select { (_x select 0) isEqualTo _key };
-if (_schema isEqualTo []) exitWith {};
+if (_schema isEqualTo []) exitWith {
+    ["ERROR", "FACTION", format ["Key editor: %1 is not a %2 schema key.", _key, _side]] call fnc_log;
+};
 
 duws_faction_edit_side = _side;
 duws_faction_edit_key = _key;
@@ -20,11 +22,25 @@ duws_faction_edit_kind = (_schema select 0) select 2;
 // both, and nothing should be unreachable from an explicit pick.
 duws_faction_edit_list = ([false] call fnc_getAllFactionsClean) + ([true] call fnc_getAllFactionsClean);
 
+// The editor's own controls. Every list command below takes a control rather than an IDC, because
+// the confirmation screen is still open underneath this dialog and the IDC forms resolve against
+// whichever display the engine holds current -- landing on the wrong one, they report an empty list
+// and no selection instead of failing, so the class list fills from nothing and the pick reads back
+// as "". Same reason the hpp stashes the display for displayCtrl.
+duws_faction_edit_ctrl = {
+    params ["_idc"];
+    private _display = uiNamespace getVariable ["duws_faction_edit_display", displayNull];
+    if (isNull _display) exitWith { controlNull };
+    _display displayCtrl _idc
+};
+
 // Every class of one faction that could fill a key of this kind. Rebuilt per faction rather than
 // held for all of them: the enumeration walks the whole of CfgVehicles and only one faction's
 // answer is ever on screen.
 duws_faction_fill_classes = {
     params ["_faction"];
+    private _classCtrl = [8625] call duws_faction_edit_ctrl;
+    if (isNull _classCtrl) exitWith {};
 
     private _classes = ("(getNumber(_x >> 'scope') in [1,2]) && (gettext (_x >> 'faction') == _faction)"
         configClasses (configFile >> "CfgVehicles")) apply { configName _x };
@@ -48,10 +64,10 @@ duws_faction_fill_classes = {
     };
     _rows sort true;
 
-    lbClear 8625;
+    lbClear _classCtrl;
     {
-        private _i = lbAdd [8625, format ["%1  --  %2", _x select 0, _x select 1]];
-        lbSetData [8625, _i, _x select 1];
+        private _i = _classCtrl lbAdd format ["%1  --  %2", _x select 0, _x select 1];
+        _classCtrl lbSetData [_i, _x select 1];
     } forEach _rows;
 };
 
@@ -59,18 +75,20 @@ duws_faction_fill_classes = {
 // picker carries: a class with no editorPreview gets a caption over the empty frame rather than a
 // silently blank panel.
 duws_faction_edit_preview = {
-    private _class = lbData [8625, lbCurSel 8625];
     private _display = uiNamespace getVariable ["duws_faction_edit_display", displayNull];
+    if (isNull _display) exitWith {};
+    private _classCtrl = _display displayCtrl 8625;
+    private _class = _classCtrl lbData (lbCurSel _classCtrl);
 
     if (_class isEqualTo "") exitWith {
-        ctrlSetText [8626, "#(argb,8,8,3)color(0,0,0,0.5)"];
+        (_display displayCtrl 8626) ctrlSetText "#(argb,8,8,3)color(0,0,0,0.5)";
         (_display displayCtrl 8627) ctrlSetStructuredText parseText format ["<t align='center' size='1.4' font='PuristaMedium' color='#ff5555'>%1</t>",
             localize "STR_DUWS_T_faction_edit_noclass"];
         (_display displayCtrl 8628) ctrlSetStructuredText parseText "";
     };
 
     private _preview = getText (configFile >> "CfgVehicles" >> _class >> "editorPreview");
-    ctrlSetText [8626, if (_preview isEqualTo "") then {"#(argb,8,8,3)color(0,0,0,0.5)"} else {_preview}];
+    (_display displayCtrl 8626) ctrlSetText (if (_preview isEqualTo "") then {"#(argb,8,8,3)color(0,0,0,0.5)"} else {_preview});
     (_display displayCtrl 8627) ctrlSetStructuredText parseText (if (_preview isEqualTo "") then {
         format ["<t align='center' size='1.4' font='PuristaMedium' color='#ff5555'>%1</t>",
             localize "STR_DUWS_T_faction_edit_nopreview"]
@@ -82,28 +100,46 @@ duws_faction_edit_preview = {
         localize "STR_DUWS_T_faction_edit_pool"];
 };
 
-if (!createDialog "startup_faction_key_edit") exitWith {};
+// Logged rather than silent on both counts: a SELECT click that opens nothing is indistinguishable
+// from a dead button, and this is the only place that can say which of the two it was.
+if (!createDialog "startup_faction_key_edit") exitWith {
+    ["ERROR", "FACTION", format ["Key editor for %1 failed to open.", _key]] call fnc_log;
+};
 waitUntil { dialog };
 
 private _display = uiNamespace getVariable ["duws_faction_edit_display", displayNull];
-if (isNull _display) exitWith { closeDialog 0; };
+if (isNull _display) exitWith {
+    ["ERROR", "FACTION", format ["Key editor for %1 opened with no display handle.", _key]] call fnc_log;
+    closeDialog 0;
+};
 
 private _short = (_key regexReplace ["^(blufor|opfor)_", ""]) regexReplace ["_X$", ""];
 (_display displayCtrl 8621) ctrlSetText format ["%1 -- %2 / %3",
     localize "STR_DUWS_T_faction_edit_title", toUpper _side, _short];
 (_display displayCtrl 8621) ctrlSetFont "PuristaMedium";
 
+private _factionCtrl = _display displayCtrl 8623;
+private _classCtrl = _display displayCtrl 8625;
+
 {
-    private _i = lbAdd [8623, _x select 0];
-    lbSetData [8623, _i, _x select 1];
+    private _i = _factionCtrl lbAdd (_x select 0);
+    _factionCtrl lbSetData [_i, _x select 1];
 } forEach duws_faction_edit_list;
 
-// Attached after the fill so the lbSetCurSel below is the first thing that raises them.
-(_display displayCtrl 8623) ctrlAddEventHandler ["LBSelChanged", {
-    [lbData [8623, lbCurSel 8623]] call duws_faction_fill_classes;
-    if (lbSize 8625 > 0) then { lbSetCurSel [8625, 0]; } else { [] call duws_faction_edit_preview; };
+// Attached after the fill so the lbSetCurSel below is the first thing that raises them. Each handler
+// works off the control it was attached to, which is the one thing here guaranteed to be the
+// editor's rather than the confirmation screen's.
+_factionCtrl ctrlAddEventHandler ["LBSelChanged", {
+    params ["_ctrl"];
+    [_ctrl lbData (lbCurSel _ctrl)] call duws_faction_fill_classes;
+    private _classCtrl = [8625] call duws_faction_edit_ctrl;
+    if (!isNull _classCtrl && {lbSize _classCtrl > 0}) then {
+        _classCtrl lbSetCurSel 0;
+    } else {
+        [] call duws_faction_edit_preview;
+    };
 }];
-(_display displayCtrl 8625) ctrlAddEventHandler ["LBSelChanged", { [] call duws_faction_edit_preview; }];
+_classCtrl ctrlAddEventHandler ["LBSelChanged", { [] call duws_faction_edit_preview; }];
 
 // Open on the faction and class the key already holds, so the screen starts from what it is
 // changing rather than from whichever faction happens to sort first.
@@ -114,12 +150,12 @@ private _currentFaction = if (_currentClass isEqualTo "") then {""} else {
 };
 
 private _fIdx = duws_faction_edit_list findIf { (_x select 1) isEqualTo _currentFaction };
-lbSetCurSel [8623, 0 max _fIdx];
+_factionCtrl lbSetCurSel (0 max _fIdx);
 
 if (_currentClass != "") then {
     private _cIdx = -1;
-    for "_i" from 0 to (lbSize 8625 - 1) do {
-        if (lbData [8625, _i] isEqualTo _currentClass) exitWith { _cIdx = _i; };
+    for "_i" from 0 to (lbSize _classCtrl - 1) do {
+        if (_classCtrl lbData _i isEqualTo _currentClass) exitWith { _cIdx = _i; };
     };
-    if (_cIdx >= 0) then { lbSetCurSel [8625, _cIdx]; };
+    if (_cIdx >= 0) then { _classCtrl lbSetCurSel _cIdx; };
 };
