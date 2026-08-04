@@ -25,13 +25,13 @@ if (!isServer) exitWith {};
 #define STATIC_DROP_ATTEMPTS 5
 #define STATIC_SETTLE_WAIT 5
 
-// Drop height, as clearance plus a step per attempt -- 0.7 m on the first, 1.5 m on the last. The
+// Drop height, as clearance plus a step per attempt -- 0.35 m on the first, 0.75 m on the last. The
 // clearance is not slack: the position a drop is measured from is the one the composition recorded,
 // which is the object's own centre, and a gun recorded lying on its side has a centre roughly half
 // its height below the one it will have standing. Without it the first attempts would drop an
 // upright gun into the ground it has to clear, spending half the budget getting back to zero.
-#define STATIC_DROP_BASE 0.5
-#define STATIC_DROP_STEP 0.2
+#define STATIC_DROP_BASE 0.25
+#define STATIC_DROP_STEP 0.1
 
 // How far a gun may lean before it counts as fallen, as the cosine of the angle between its own up
 // and vertical -- about 45 degrees. Vertical rather than the terrain normal, which reads backwards
