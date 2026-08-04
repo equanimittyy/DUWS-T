@@ -136,30 +136,22 @@ classnames is the single change that would break mod-free operation and faction
 auto-detection; hardcoding vanilla `Land_*` structures is fine, and every zone prefab already does
 it (`server/init_zones/prefabs/modern/*.sqf`).
 
-**`opfor_TURRET_HMG` already exists and is used nowhere.** Every faction file defines it
-(`shared/factions/MODERN/*_opfor.sqf:35-36`, `AUTODETECT_opfor.sqf:115`) and no script reads
-it. The MG nest is its first consumer.
+**Four of the five emplacement types are static roles, and those are not this plan's to define.**
+`opfor_TURRET_HMG`, `_AT`, `_AA` and `_MORTAR` — what fills them, why the 254 hand-authored faction
+files are not swept to add them, and how a composition's vanilla placeholder resolves to a mod's
+own gun — are [`static_abstraction_plan.md`](static_abstraction_plan.md). That work is a
+prerequisite for the MG nest, the AT position, the AA position and the mortar pit alike, and it is
+worth landing on its own: it also fixes the 41 prefab rows standing NATO guns on CSAT ground.
 
-**The other four globals do not exist yet, but the data does.** `fnc_parseFaction` already
-returns `_turretAT`, `_turretAA`, `_turretMortar` and `_arty`
-(`shared/factions/MODERN/fn_factionAutoDetect.sqf:583-590,613-616`); the OPFOR generator discards all
-four, while the BLUFOR one keeps its turret equivalents (`AUTODETECT_blufor.sqf:118-121`). Four
-lines in each autodetect generator plus entries in `o_arraysToRandomize`
-(`AUTODETECT_opfor.sqf:186`, `AUTODETECT_RANDOM_opfor.sqf:135`), which is the list handed to
-`fnc_faction_pools_publish`, closes the gap.
+**The artillery battery's global is this plan's, because a battery is a vehicle.**
+`fnc_parseFaction` already returns `_arty` from the artillery editor subcategory
+(`shared/factions/MODERN/fn_factionAutoDetect.sqf:590,616`) and the OPFOR generator discards it.
+One line in each autodetect generator fills `opfor_ARTY_X`; `o_arraysToRandomize` derives from
+`fnc_faction_schema` (`AUTODETECT_opfor.sqf:164`, `AUTODETECT_RANDOM_opfor.sqf:110`), so a schema
+row reaches `fnc_faction_pools_publish` without a second edit.
 
-| New global | Parsed from | Vanilla fallback |
-|---|---|---|
-| `opfor_TURRET_AT` | `_turretAT` | `O_static_AT_F` |
-| `opfor_TURRET_AA` | `_turretAA` | `O_static_AA_F` |
-| `opfor_TURRET_MORTAR` | `_turretMortar` | `O_Mortar_01_F` |
-| `opfor_ARTY_X` | `_arty` | `O_MBT_02_arty_F` |
-
-The 130 hand-authored OPFOR faction files must **not** be swept to add them. Read each as
-`missionNamespace getVariable ["opfor_TURRET_AT", "O_static_AT_F"]` — the fallback is what the
-`fnc_selectNonEmpty` chains in autodetect already end in, and it keeps a faction file that
-predates this feature working untouched. `_arty` is the one most likely to come back empty on a
-mod faction, so its fallback earns its keep.
+Read it as `missionNamespace getVariable ["opfor_ARTY_X", "O_MBT_02_arty_F"]`. `_arty` is the
+bucket most likely to come back empty on a mod faction, so its fallback earns its keep.
 
 ## Zone hardpoints
 
@@ -891,7 +883,7 @@ is.
 | `server/init_zones/fnc_zone_stream_init.sqf:207-242,254-258` | Exclude pinned cores from the emplacement crew-out, and hardpoint cores from the zone's re-crew and roster. |
 | `server/warcom/fnc_WARCOM_init.sqf:44-50` | Spawn the director beside the two that still launch there. |
 | `server/init_zones/fnc_zone_reveal.sqf:33-34` | Hardcore only: reveal this zone's hardpoint markers with the zone, filtered spatially. |
-| `shared/factions/MODERN/AUTODETECT_opfor.sqf:115,186`, `AUTODETECT_RANDOM_opfor.sqf:87,135` | Define the four new turret and gun globals from the already-parsed `_turretAT` / `_turretAA` / `_turretMortar` / `_arty`. |
+| `shared/factions/MODERN/AUTODETECT_opfor.sqf:121`, `AUTODETECT_RANDOM_opfor.sqf:90` | Define `opfor_ARTY_X` from the already-parsed `_arty`. The four turret globals belong to [`static_abstraction_plan.md`](static_abstraction_plan.md). |
 | `shared/functions/fnc_pos_claimed.sqf` | Add a hardpoint keep-out to the shared "is this ground claimed" test. One edit reaches every mission siting path at once — `fnc_stratmap.sqf:93`, `fnc_findSafeMissionPos.sqf:33,38`, `fnc_missionTargetPos.sqf:45` — where a bespoke test in one of them leaves the others placing missions on top of an emplacement. |
 | `shared/includes/notifications.hpp` | One notification class for a hardpoint cleared, beside `CPadded:41`. |
 | `stringtable.xml` | Six hardpoint type names, clear notification, incoming-fire warning line (Allseer), marker labels. |
@@ -900,7 +892,7 @@ is.
 
 ## Task list
 
-- [ ] Add the four faction globals and their fallbacks to both autodetect generators. Verify: every one resolves to a real classname with no mod loaded and with a faction mod loaded, and a hand-authored faction file that defines none of them still boots.
+- [ ] Land [`static_abstraction_plan.md`](static_abstraction_plan.md), which fills the four turret globals. Then add `opfor_ARTY_X` and its fallback to both autodetect generators. Verify: it resolves to a real classname with no mod loaded and with a faction mod loaded, and a hand-authored faction file that defines none of the five still boots.
 - [ ] Author the MG nest composition in Eden through the TUI and fence it in source. Verify: import, rearrange, export, re-import returns the identical layout, and `DUWS_FRONT` stands on the side the gun faces.
 - [ ] Write `fnc_hardpoint_place.sqf` for the MG type only, called by hand from the debug console. Verify: core, cover and garrison appear; the whole layout rotates with the heading rather than the core turning inside a fixed ring of sandbags; no hardcoded unit classname is used with a faction mod loaded.
 - [ ] Add `fnc_hardpoint_zone_pass.sqf` and call it from `fnc_createZone`. Verify: `bash tests/run.sh` passes the path lint; hardpoint count per zone tracks radius; nothing lands on water or inside the prefab's 35 m.
