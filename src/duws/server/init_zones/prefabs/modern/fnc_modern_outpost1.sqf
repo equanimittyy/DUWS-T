@@ -112,22 +112,11 @@ sleep 2;
 
 // ========= 第二步：武器物体 海拔还原 =========
 private _weaponList = [];
+private _origin = [_centerSpawnX, _centerSpawnY, _newCenterZ];
 {
-    _x params ["_class", "_offsetX", "_offsetY", "_offsetZ", "_dir", "_isWeapon"];
-    if (!_isWeapon) then { continue; };
-
-    private _newX = _centerSpawnX + _offsetX;
-    private _newY = _centerSpawnY + _offsetY;
-    private _newZ = _newCenterZ + _offsetZ;   // 相对海拔直接累加
-
-    private _obj = createVehicle [_class, [_newX, _newY, _newZ], [], 0, "CAN_COLLIDE"];
-    [_obj, _zoneKey] call fnc_duws_keep;
-    _obj enableSimulationGlobal false;
-    _obj setPosWorld [_newX, _newY, _newZ];
-    // 枪口方向：从中心指向武器位置
-    _obj setDir (_centerSpawn getDir [_newX, _newY]);
-    _obj setPosWorld [_newX, _newY, _newZ];
-    _weaponList pushBack _obj;
+    // Index 5 is the prefab convention's isWeapon; the ground pass above placed everything else.
+    if !(_x select 5) then { continue; };
+    _weaponList pushBack ([_x, _origin, "opfor", _zoneKey, "world"] call fnc_static_place);
 } forEach _allObjectsData;
 
 sleep 2;

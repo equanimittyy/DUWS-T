@@ -110,7 +110,10 @@ fnc_static_resolve = {
 // zero is indistinguishable from one that omitted the column, and the caller knows which it wrote.
 fnc_static_place = {
     params ["_row", "_origin", "_side", "_key", ["_mode", "pos"]];
-    _row params ["_class", "_ox", "_oy", ["_oz", 0], ["_dir", 0], ["_role", ""]];
+    // Index 5 is typed, not just defaulted: it is the role on the HQ and FOB fences but the zone
+    // prefabs' isWeapon flag, and a boolean reaching _role would be read as a key name. A row that
+    // carries the flag falls back to the table lookup, which is what those rows want anyway.
+    _row params ["_class", "_ox", "_oy", ["_oz", 0], ["_dir", 0], ["_role", "", [""]]];
 
     private _world = _mode isEqualTo "world";
     private _pos = [
