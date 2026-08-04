@@ -208,6 +208,29 @@ cause (the wasted time goes into suspecting a missing class definition instead).
 to clear. The faction selector's "no units" caption uses this, in `fnc_factionSelector`
 (`src/duws/shared/factions/MODERN/fn_factionAutoDetect.sqf`).
 
+## `ctrlSetStructuredText` has no IDC form, and the parse error voids the whole file
+
+**`ctrlSetStructuredText` exists only as `control ctrlSetStructuredText text`. Unlike
+`ctrlSetText`, `ctrlEnable`, `ctrlShow` and the `lb*` family, there is no
+`ctrlSetStructuredText [idc, text]` overload — writing one is a syntax error.**
+
+The damage is out of all proportion to the typo, because the failure is at *compile* time
+rather than at the call. `compile preprocessFileLineNumbers` on a file containing one of
+these logs `Error Missing ;` with the file and line, then hands back a code block that does
+nothing: every function the file defines becomes a silent no-op. `[] call fnc_x` then
+returns without running, without an error, and the caller falls over on whichever variable
+that function was supposed to set — a mile from the actual cause. Registration files
+compile dozens of paths in a row, so the one useful line sits in the RPT at server-init
+time, thousands of lines above the symptom.
+
+**How to apply:** take the control first —
+`(_display displayCtrl 8603) ctrlSetStructuredText parseText _markup`. Where the call sits
+in an event handler with no display in scope, read the one the dialog's `onLoad` stashed:
+`uiNamespace getVariable ["duws_faction_confirm_display", displayNull]`. Both patterns are
+in `src/duws/client/dialog/fnc_faction_confirm.sqf` and `fnc_faction_prompts.sqf`. When a
+setup screen never appears, grep the RPT for `Error Missing ;` before reading any of the
+script it should have run.
+
 ## Listbox rows show `<t>` markup literally; `addAction` titles render it
 
 **`lbAdd` / `lbSetText` store a row's text verbatim, so `<t color=...>...</t>` shows as

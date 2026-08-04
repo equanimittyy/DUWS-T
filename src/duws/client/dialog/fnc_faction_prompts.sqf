@@ -22,7 +22,8 @@ fnc_faction_prompt_clear = {
     params ["_key"];
     duws_faction_clear_key = _key;
 
-    ctrlSetStructuredText [8643, parseText format ["<t size='0.8'>%1</t>", localize "STR_DUWS_T_faction_clear_text"]];
+    private _display = uiNamespace getVariable ["duws_faction_confirm_display", displayNull];
+    (_display displayCtrl 8643) ctrlSetStructuredText parseText format ["<t size='0.8'>%1</t>", localize "STR_DUWS_T_faction_clear_text"];
     { ctrlEnable [_x, false]; } forEach SCREEN_CTRLS;
     { ctrlShow [_x, true]; } forEach CLEAR_CTRLS;
 };
@@ -58,7 +59,8 @@ fnc_faction_prompt_lock = {
             localize "STR_DUWS_T_faction_lock_warn"];
     };
 
-    ctrlSetStructuredText [8653, parseText _body];
+    private _display = uiNamespace getVariable ["duws_faction_confirm_display", displayNull];
+    (_display displayCtrl 8653) ctrlSetStructuredText parseText _body;
     { ctrlEnable [_x, false]; } forEach SCREEN_CTRLS;
     { ctrlShow [_x, true]; } forEach LOCK_CTRLS;
 };

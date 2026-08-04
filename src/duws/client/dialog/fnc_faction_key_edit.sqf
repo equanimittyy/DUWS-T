@@ -60,25 +60,26 @@ duws_faction_fill_classes = {
 // silently blank panel.
 duws_faction_edit_preview = {
     private _class = lbData [8625, lbCurSel 8625];
+    private _display = uiNamespace getVariable ["duws_faction_edit_display", displayNull];
 
     if (_class isEqualTo "") exitWith {
         ctrlSetText [8626, "#(argb,8,8,3)color(0,0,0,0.5)"];
-        ctrlSetStructuredText [8627, parseText format ["<t align='center' size='1.4' font='PuristaMedium' color='#ff5555'>%1</t>",
-            localize "STR_DUWS_T_faction_edit_noclass"]];
-        ctrlSetStructuredText [8628, parseText ""];
+        (_display displayCtrl 8627) ctrlSetStructuredText parseText format ["<t align='center' size='1.4' font='PuristaMedium' color='#ff5555'>%1</t>",
+            localize "STR_DUWS_T_faction_edit_noclass"];
+        (_display displayCtrl 8628) ctrlSetStructuredText parseText "";
     };
 
     private _preview = getText (configFile >> "CfgVehicles" >> _class >> "editorPreview");
     ctrlSetText [8626, if (_preview isEqualTo "") then {"#(argb,8,8,3)color(0,0,0,0.5)"} else {_preview}];
-    ctrlSetStructuredText [8627, parseText (if (_preview isEqualTo "") then {
+    (_display displayCtrl 8627) ctrlSetStructuredText parseText (if (_preview isEqualTo "") then {
         format ["<t align='center' size='1.4' font='PuristaMedium' color='#ff5555'>%1</t>",
             localize "STR_DUWS_T_faction_edit_nopreview"]
-    } else {""})];
+    } else {""});
 
     private _name = getText (configFile >> "CfgVehicles" >> _class >> "displayName");
-    ctrlSetStructuredText [8628, parseText format ["<t size='0.8'>%1</t><br/><t size='0.7' color='#c0c0c0'>%2</t>",
+    (_display displayCtrl 8628) ctrlSetStructuredText parseText format ["<t size='0.8'>%1</t><br/><t size='0.7' color='#c0c0c0'>%2</t>",
         if (_name isEqualTo "") then {_class} else {format ["%1  --  %2", _name, _class]},
-        localize "STR_DUWS_T_faction_edit_pool"]];
+        localize "STR_DUWS_T_faction_edit_pool"];
 };
 
 if (!createDialog "startup_faction_key_edit") exitWith {};

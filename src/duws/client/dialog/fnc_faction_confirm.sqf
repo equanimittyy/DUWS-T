@@ -51,10 +51,10 @@ if (!createDialog "startup_faction_confirm") exitWith {
 waitUntil { dialog };
 private _display = uiNamespace getVariable ["duws_faction_confirm_display", displayNull];
 
-ctrlSetStructuredText [8603, parseText format ["<t size='0.85'>%1</t>", localize "STR_DUWS_T_faction_confirm_intro"]];
-ctrlSetStructuredText [8604, parseText format ["<t size='1' align='center' font='PuristaMedium' color='#3380ff'>%1</t>", localize "STR_DUWS_T_faction_confirm_blufor"]];
-ctrlSetStructuredText [8605, parseText format ["<t size='1' align='center' font='PuristaMedium' color='#ff3333'>%1</t>", localize "STR_DUWS_T_faction_confirm_opfor"]];
-ctrlSetStructuredText [8607, parseText format ["<t size='0.7' color='#c0c0c0'>%1</t>", localize "STR_DUWS_T_faction_confirm_footer"]];
+(_display displayCtrl 8603) ctrlSetStructuredText parseText format ["<t size='0.85'>%1</t>", localize "STR_DUWS_T_faction_confirm_intro"];
+(_display displayCtrl 8604) ctrlSetStructuredText parseText format ["<t size='1' align='center' font='PuristaMedium' color='#3380ff'>%1</t>", localize "STR_DUWS_T_faction_confirm_blufor"];
+(_display displayCtrl 8605) ctrlSetStructuredText parseText format ["<t size='1' align='center' font='PuristaMedium' color='#ff3333'>%1</t>", localize "STR_DUWS_T_faction_confirm_opfor"];
+(_display displayCtrl 8607) ctrlSetStructuredText parseText format ["<t size='0.7' color='#c0c0c0'>%1</t>", localize "STR_DUWS_T_faction_confirm_footer"];
 
 { (_display displayCtrl _x) ctrlSetFont "PuristaMedium"; } forEach [8602, 8642, 8652];
 
