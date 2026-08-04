@@ -849,15 +849,16 @@ seat a gun sunk *into* it refuses. `DUWS_fnc_manStatic`
 than leaving him standing, logging a `WARN` naming the gun; the emplacement stays as scenery the
 player can use.
 
-## A static weapon lying on its side still takes its gunner
+## A static weapon that goes over throws its gunner out and refuses a new one
 
-**A fallen gun answers every test a standing one does: `alive` is true, `moveInGunner` seats the
-man, and reading the seat back off the gun reports success. Only `vectorUp` says otherwise — no
-command reports that a gun cannot traverse or fire because it is on its ground.**
+**A gun knocked onto its side does not keep the man on it — the engine ejects him — and it refuses a
+new one for as long as it lies there. The emplacement is gone and its defender is standing beside it,
+alive, on whatever roster counted him as a gun.**
 
-So the seat read-back above, which catches a man left standing, cannot catch this: the gunner is
-inside the gun, on the roster, counted toward the garrison peak, and the zone believes it is
-defended. What the player finds is a soldier lying sideways behind a gun pointing at the sky.
+The seat is what most code tests, and it cannot tell an orientation fault from a clearance one: a gun
+on its side and a gun sunk into its ground both simply refuse. So the retry that recovers the second
+never recovers the first, and lifting the gun between attempts makes it worse — a fallen gun dropped
+15 cm lands fallen. Orientation is carried by `vectorUp` alone; nothing else reports it.
 
 Placement is where guns go down. A member that keeps its simulation — a static weapon, a watchtower
 — is a live physics body, so teleporting and rotating one (`setPosWorld` then `setVectorDirAndUp`)
@@ -867,9 +868,9 @@ was last seen in, so every later deploy replays it.
 
 **How to apply:** freeze before you place and restore after — `enableSimulationGlobal false`, the
 position and orientation writes, then the recorded state back (`fnc_duws_deploy`,
-`server/misc/fnc_composition_stream_init.sqf`). Where a gun may already have gone over, test the
-tilt rather than the seat: `(vectorUp _gun) vectorDotProduct (surfaceNormal (getPos _gun))`, against
-the terrain rather than against vertical so a gun standing on a slope is not read as fallen. Correct
+`server/misc/fnc_composition_stream_init.sqf`). Upright before you seat rather than in answer to a
+refused seat, and test the tilt: `(vectorUp _gun) vectorDotProduct (surfaceNormal (getPos _gun))`,
+against the terrain rather than against vertical so a gun on a slope is not read as fallen. Correct
 it with `setVectorDirAndUp` on a `vectorDir` flattened into the horizontal plane — a gun that went
 over its nose has a dir pointing into the ground, and that against a vertical up leaves the engine
 two near-parallel vectors and no orientation it can derive. `DUWS_fnc_uprightStatic`

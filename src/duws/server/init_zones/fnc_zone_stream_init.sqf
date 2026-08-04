@@ -32,10 +32,11 @@ if (!isServer) exitWith {};
 
 // Stand a fallen gun back up, on the arc it was placed to cover.
 //
-// Nothing downstream can catch this one, which is why it is done rather than detected: a gun lying
-// on its side seats its gunner exactly as a standing one does, so the seat read-back below reports
-// success, the man goes on the roster, and the zone counts a defence that can neither traverse nor
-// fire. The player finds a gunner lying sideways behind a gun pointed at the sky.
+// Ahead of the seating rather than after it fails, because the engine throws a gunner out of a
+// static that goes over: a fallen gun cannot be crewed at all, and one that goes over later un-crews
+// itself. The seat read-back below sees only the refusal, which is the same refusal a gun sunk into
+// its ground gives, so retrying it -- or lifting the gun and retrying -- never recovers this one.
+// The lift makes it worse: a gun dropped 15 cm lands on its side again.
 DUWS_fnc_uprightStatic = {
     params ["_gun"];
     private _up = surfaceNormal (getPos _gun);
@@ -113,10 +114,7 @@ DUWS_fnc_zoneManStatics = {
     // as a spawned one, so he joins the roster rather than holding the objective off the books:
     // unrostered, he denies capture through fnc_opfor_count_at while counting toward neither the
     // peak nor the break line, so killing him is progress the zone never registers.
-    // Uprighted here as well as in the seating pass, because a crewed gun never reaches it: the
-    // gunner is what makes it look correct, so a fallen one would stand as it is for the campaign.
-    { _roster append (crew _x); [_x] call DUWS_fnc_uprightStatic } forEach
-        (_statics select {count crew _x > 0});
+    { _roster append (crew _x) } forEach (_statics select {count crew _x > 0});
 
     private _guns = _statics select {count crew _x == 0};
     if (count _guns == 0) exitWith {};
