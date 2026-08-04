@@ -10,20 +10,13 @@
 if (!isServer) exitWith { false };
 params ["_pos", "_radius", ["_minAI", 2]];
 
-// Above this counts as overflying rather than arriving. getPos, so the height is measured from the
-// ground under the entity: ASL would read every man standing in a hilltop zone as being hundreds of
-// metres up, and ATL measures from the sea floor out over water, which puts a landing craft
-// approaching a coastal zone at the depth beneath it.
-#define ARRIVAL_CEILING 100
-
 // Nobody flying raises a site: a jet crosses several rings a minute and a helicopter orbits them,
-// each one a full composition placed for someone who never landed. Height alone does not say so --
-// a helicopter on the deck reads as standing on the ground. A parachute is the exception: a man
-// under canopy is committed to the ground below him, and the ceiling makes his descent lead time.
+// each one a full composition placed for someone who never landed. What is being carried decides it
+// rather than any height, because a helicopter on the deck is still nobody arriving. A parachute is
+// the exception: a man under canopy is committed to the ground below him.
 private _arrived = {
 	private _veh = vehicle _this;
-	(!(_veh isKindOf "Air") || {_veh isKindOf "ParachuteBase"})
-		&& {((getPos _this) select 2) < ARRIVAL_CEILING}
+	!(_veh isKindOf "Air") || {_veh isKindOf "ParachuteBase"}
 };
 
 private _men = [];
