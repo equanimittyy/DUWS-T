@@ -3305,6 +3305,18 @@
                 <Original>Your radio supports died with you. %1 CP recovered.</Original>
                 <English>Your radio supports died with you. %1 CP recovered.</English>
             </Key>
+            <Key ID="STR_DUWS_T_FACILITY_KILLHOUSE">
+                <Original>Killhouse</Original>
+                <English>Killhouse</English>
+            </Key>
+            <Key ID="STR_DUWS_T_FACILITY_RESTTENT">
+                <Original>Rest Tent</Original>
+                <English>Rest Tent</English>
+            </Key>
+            <Key ID="STR_DUWS_T_FACILITY_VEHMOD">
+                <Original>Vehicle Modification</Original>
+                <English>Vehicle Modification</English>
+            </Key>
             <Key ID="STR_DUWS_T_SUPPORT_UNLOCK_TITLE">
                 <Original>Permanent Support Unlocked</Original>
                 <English>Permanent Support Unlocked</English>

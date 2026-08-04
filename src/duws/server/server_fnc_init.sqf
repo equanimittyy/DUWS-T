@@ -391,6 +391,7 @@ fnc_MHQ_destroyed = compile preprocessFileLineNumbers "duws\shared\functions\fnc
 
 // HQ & FOB FUNCTIONS
 fnc_draw_HQicon = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_draw_HQicon.sqf";publicVariable "fnc_draw_HQicon";
+fnc_draw_HQfacilities = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_draw_HQfacilities.sqf";publicVariable "fnc_draw_HQfacilities";
 fnc_HQaddactions = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_HQaddactions.sqf";publicVariable "fnc_HQaddactions";
 fnc_FOBactions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_FOBactions.sqf";publicVariable "fnc_FOBactions";
 fnc_fob_server = compile preprocessFileLineNumbers "duws\server\supports\fnc_fob_server.sqf";publicVariable "fnc_fob_server";

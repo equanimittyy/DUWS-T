@@ -135,6 +135,7 @@ waituntil {sleep 1;WARCOM_init_done;};
 
 // Registers a Draw3D handler and returns, so call rather than spawn.
 [] call fnc_killhouse_markers;
+[] call fnc_draw_HQfacilities;
 
 
 if (isMultiplayer) then {

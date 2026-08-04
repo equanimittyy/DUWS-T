@@ -483,6 +483,7 @@ if (!isNull _medTent) then {
 };
 
 if (!isNull _mapBoard) then {
+    missionNamespace setVariable ["HQ_mapBoard_netId", netId _mapBoard, true];
     [_mapBoard] remoteExec ["fnc_addBoardKillhouseActions", 0, format ["hq_mapboard_%1", netId _mapBoard]];
 };
 
