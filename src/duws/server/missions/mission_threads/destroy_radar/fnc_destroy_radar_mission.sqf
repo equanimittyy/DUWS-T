@@ -65,8 +65,8 @@ clearBackpackCargoGlobal _vehicle_7;
 [_vehicle_7, "mission_destroy_radar"] call fnc_duws_keep;
 
 // The radar's air cover, fenced like the barriers above so a rearrange in the 3D editor reaches it.
-// The classes are placeholders resolved against OPFOR: this is an enemy site, and it stood NATO
-// launchers over an enemy radar until it went through fnc_static_place.
+// The classes are placeholders resolved against OPFOR, which is whose radar this is; the row's own
+// class only decides what the Eden import draws.
 // --DUWS-COMPOSITION BEGIN name="Mission: Destroy Radar guns" schema=A--
 _gunArray = [
     ["B_static_AA_F", -5.52539,  5.98193, 0, 314.218],

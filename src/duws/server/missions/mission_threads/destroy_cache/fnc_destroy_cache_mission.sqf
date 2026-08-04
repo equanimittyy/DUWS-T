@@ -132,8 +132,8 @@ clearBackpackCargoGlobal _vehicle_8;
 _vehicle_8 setVariable ["arsenalUsed", false, true];
 
 // The cache's two MG nests, fenced so a rearrange in the 3D editor reaches them. Resolved against
-// OPFOR: the objective is an enemy cache, and these read blufor_TURRET_HMG until now, so a
-// mod-equipped BLUFOR was defending the enemy's supplies with its own guns.
+// OPFOR because the objective is an enemy cache: a BLUFOR key here would have the player's own
+// faction defending the enemy's supplies.
 // --DUWS-COMPOSITION BEGIN name="Mission: Destroy Cache guns" schema=A--
 _gunArray = [
     ["O_HMG_01_high_F", -5.52539,  5.98193, 0, 314.218],
