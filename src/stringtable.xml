@@ -3614,20 +3614,6 @@
                 <Original>You have successfully captured all the zones and completed the mission. This AO is now under BLUFOR control. Well done, soldier.</Original>
                 <English>You have successfully captured all the zones and completed the mission. This AO is now under BLUFOR control. Well done, soldier.</English>
             </Key>
-            <Key ID="STR_DUWS_T_vl40q84w">
-                <German>HQ Offizier wurde getötet</German>
-                <Spanish>Oficial del CG asesinado</Spanish>
-                <Chinesesimp>总部指挥官被杀</Chinesesimp>
-                <Original>HQ Officer Killed</Original>
-                <English>HQ Officer Killed</English>
-            </Key>
-            <Key ID="STR_DUWS_T_b212193q">
-                <German>Dein befehlshabender Offizier wurde getötet. Die Mission ist fehlgeschlagen, deine Evakuierung wird in kürze eingeleitet.</German>
-                <Spanish>Tu oficial al mando ha muerto. La misión ha fracasado y serás evacuado en breve.</Spanish>
-                <Chinesesimp>你的总部指挥官已经被杀了。任务失败了，立刻撤离！</Chinesesimp>
-                <Original>Your commanding officer has been killed. The mission has failed and you will be evacuated shortly.</Original>
-                <English>Your commanding officer has been killed. The mission has failed and you will be evacuated shortly.</English>
-            </Key>
             <Key ID="STR_DUWS_T_drq88qxs">
                 <German>Erobert: %1</German>
                 <Chinesesimp>已夺取: %1</Chinesesimp>
@@ -6415,13 +6401,6 @@
                 <Chinesesimp>给特遣部队改变主要目标</Chinesesimp>
                 <Original>Change the Primary Target for Task Forces</Original>
                 <English>Change the Primary Target for Task Forces</English>
-            </Key>
-            <Key ID="STR_DUWS_T_amiszycs">
-                <German>Dein befehlshabender Offizier wurde getötet</German>
-                <Spanish>Su oficial al mando ha sido asesinado</Spanish>
-                <Chinesesimp>你的指挥官已经阵亡</Chinesesimp>
-                <Original>Your commanding officer has been killed</Original>
-                <English>Your commanding officer has been killed</English>
             </Key>
             <Key ID="STR_DUWS_T_32ci6fa1">
                 <German>"Overlord 1-1" an alle Einheiten, Einsatztruppe %1 betritt den Operationsbereich.</German>

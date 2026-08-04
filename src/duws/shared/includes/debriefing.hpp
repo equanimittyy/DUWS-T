@@ -12,9 +12,11 @@ class CfgDebriefing
 
  	class officerkilled
 	{
-		title = "$STR_DUWS_T_vl40q84w";
+		title = "$STR_DUWS_T_CAMPAIGN_LOST_TITLE";
 		subtitle = "";
-		description = "$STR_DUWS_T_b212193q";
+		// The hint's officer body, which carries no %1 to leave unsubstituted, so the card can
+		// show it verbatim. Every loss is titled the same and named by its description alone.
+		description = "$STR_DUWS_T_CAMPAIGN_LOST_OFFICER";
 		pictureBackground = "";
 		picture = "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa";
 		pictureColor[] = {1,0,0,1};
