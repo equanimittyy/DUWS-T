@@ -58,8 +58,11 @@ waitUntil {sleep 10; WARCOM_init_done};
 // Both endings are waited on together and the branch below picks which fired. A second thread
 // watching for the loss is not an option: this wait blocks for the whole campaign, so anything
 // appended after it is unreachable until the win lands.
+// Five seconds, not thirty: both losses are published the moment they happen and this poll is
+// what turns them into an ending, so a long interval reads as the campaign not noticing. The
+// condition is two variable reads, so the rate costs nothing.
 waitUntil {
-    sleep 30;
+    sleep 5;
     (amount_zones_created > 0 && {zoneundercontrolblu >= amount_zones_created})
     || {!isNil "campaign_lost"}
 };

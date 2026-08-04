@@ -393,7 +393,12 @@ _officer addEventHandler ["HandleDamage", {
 }];
 hq_blu1 = _officer; publicVariable "hq_blu1";
 [_officer] spawn {
-    waitUntil {sleep 10; !alive hq_blu1};
+    // Polled rather than hung off the Killed event handler above: the handler runs wherever the
+    // officer is local, and campaign_lost_ending is deliberately not broadcast, so a handler that
+    // ever fired on a client would leave the server without the ending it names. One second
+    // because the loss is the player's answer to a kill he just watched -- escalation publishes
+    // its loss inside the destroyed-building handler, with no wait of its own to match.
+    waitUntil {sleep 1; !alive hq_blu1};
     campaign_lost = true;
     campaign_lost_body = "STR_DUWS_T_CAMPAIGN_LOST_OFFICER";
     // Names the outro card as well as the hint: both endings are worded, and the debriefing
