@@ -81,10 +81,12 @@ private _perimeterData = [
 // --DUWS-COMPOSITION END--
 
 // Column 5 is the faction role holding the classname and column 0 is what that role resolves to on
-// the stock faction. The runtime prefers the role, so a mod's own GMG stands here rather than a
-// vanilla one; the class is what the Eden import draws, so the ring is rearranged against the right
-// silhouettes instead of against nothing. A row whose role is undefined stands as its own class,
-// which is what keeps this working mod-free.
+// the stock faction. fnc_static_resolve prefers the role, so a mod's own GMG stands here rather than
+// a vanilla one; the class is what the Eden import draws, so the ring is rearranged against the
+// right silhouettes instead of against nothing. A row whose role the faction never fields falls to
+// that faction's MG nest and then to its own class, which is what keeps this working mod-free.
+// A gun added here in Eden carries no role column and is resolved by its class instead, so the ring
+// follows the faction without anyone remembering to hand-add a sixth column after a round trip.
 //
 // The headings used to be computed radially from the centre. They are rows now because the export
 // emits a heading per object: computed, a turret turned in the 3D editor would come back facing
@@ -98,18 +100,16 @@ private _turretData = [
 ];
 // --DUWS-COMPOSITION END--
 
-// One row, one object. Position is written twice around the rotation for the reason the composition
-// deploy states: setDir displaces the object, so the heading has to be applied between two writes.
+// One perimeter row, one object. The turrets go through fnc_static_place instead: a wall is the same
+// wall whoever built it, while a gun is whatever the faction fields, and the perimeter stays
+// simulated and invulnerable where the ring is frozen until it is crewed.
+// Position is written twice around the rotation for the reason the composition deploy states:
+// setDir displaces the object, so the heading has to be applied between two writes.
 private _fnc_place = {
 	params ["_row", "_key"];
-	_row params ["_class", "_ox", "_oy", "_oz", "_dir", ["_role", ""]];
-	// Defaulted to the row's own class rather than to "": a faction file that omits the role leaves
-	// its global undefined, and createVehicle on a nil is a script error rather than a missing gun.
-	private _type = if (_role == "") then { _class } else {
-		missionNamespace getVariable [_role, _class]
-	};
+	_row params ["_class", "_ox", "_oy", "_oz", "_dir"];
 	private _pos = [(_centerPos select 0) + _ox, (_centerPos select 1) + _oy, _oz];
-	private _obj = createVehicle [_type, [0,0,0], [], 0, "CAN_COLLIDE"];
+	private _obj = createVehicle [_class, [0,0,0], [], 0, "CAN_COLLIDE"];
 	[_obj, _key] call fnc_duws_keep;
 	_obj allowDamage false;
 	_obj setPos _pos;
@@ -122,15 +122,25 @@ private _fnc_place = {
 private _turrets = [];
 switch (VERSION_X) do {
 	case "MODERN": {
-		{ _turrets pushBack ([_x, _fobKey] call _fnc_place) } forEach _turretData;
+		{
+			// Invulnerable from the moment it stands up rather than from when its gunner arrives,
+			// which is why the caller applies this and the placer does not: the ring is what the
+			// player paid for, and the perimeter and roof AA below want their own answers.
+			private _turret = [_x, _centerPos, "blufor", _fobKey, "pos"] call fnc_static_place;
+			_turret allowDamage false;
+			_turret setDamage 0;
+			_turrets pushBack _turret;
+		} forEach _turretData;
 
 		// The one turret that is not a row: it stands on the FOB building's own roof, and
 		// buildingPos is the only thing that knows where that is. A flat offset would put it at
 		// ground level the first time the building were replaced with anything else.
 		// Filed under the FOB key like the rest, so a teardown hands the whole ring over at once.
+		// Its class still goes through the resolver, so the roof gun is drawn from the same pool and
+		// gets the same type test as the ring; only its placement is its own.
 		private _roofPos = _fob buildingPos 5;
 		private _aa = createVehicle [
-			missionNamespace getVariable ["blufor_TURRET_AA", "B_static_AA_F"],
+			["B_static_AA_F", "blufor", "blufor_TURRET_AA"] call fnc_static_resolve,
 			[0,0,0], [], 0, "CAN_COLLIDE"
 		];
 		[_aa, _fobKey] call fnc_duws_keep;
@@ -157,12 +167,16 @@ _groupGuard deleteGroupWhenEmpty true;
 
 sleep 10;
 
+// The thaw that undoes fnc_static_place's freeze. It has to happen here and not at placement: the
+// freeze is what holds a row where its Z put it, and a gun released before its gunner is in settles
+// wherever gravity takes it first. The roof AA was never frozen, so this is a no-op for it.
 {
 	private _gunner = (units _groupGuard) param [_forEachIndex, objNull];
 	if (!isNull _gunner) then {
 		_gunner setPos _centerPos;
 		_gunner moveInGunner _x;
 	};
+	_x enableSimulationGlobal true;
 } forEach _turrets;
 
 sleep 50;
