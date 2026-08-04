@@ -20,12 +20,12 @@ _display = (findDisplay 46) createDisplay "RscDisplayEmpty";
 // Created before anything that sits on it: ctrlCreate order is draw order, so a panel made later
 // covers its own contents.
 _backdrop = _display ctrlCreate ["RscText", 1007];
-_backdrop ctrlSetPosition [0.075, 0.032, 0.85, 0.444];
+_backdrop ctrlSetPosition [0.075, 0.032, 0.85, 0.476];
 _backdrop ctrlSetBackgroundColor [0.2, 0.4, 0.2, 1];
 _backdrop ctrlCommit 0;
 
 _boxframe = _display ctrlCreate ["RscFrame", 1008];
-_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.652];
+_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.684];
 _boxframe ctrlSetText localize "STR_DUWS_T_faction_screen_title";
 _boxframe ctrlCommit 0;
 
@@ -156,7 +156,7 @@ _rule ctrlCommit 0;
 // ctrlSetStyle, so a plain control cannot be centred after the fact. The alignment is in the markup
 // and not left to the class, for the reason the pin below states.
 _placeText = _display ctrlCreate ["RscStructuredText", 1012];
-_placeText ctrlSetPosition [0.1, 0.438, 0.8, 0.034];
+_placeText ctrlSetPosition [0.1, 0.470, 0.8, 0.034];
 _placeText ctrlSetStructuredText parseText format ["<t align='center' size='0.8'>%1</t>",
 	localize "STR_DUWS_T_7tr969mm"];
 _placeText ctrlCommit 0;
