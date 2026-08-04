@@ -3,13 +3,14 @@
 # Two modes over the same marker-fence idea, because the mission has two kinds of composition and
 # both had to be hand-edited in source.
 #
-# STATIC (read-only): scans src/ for
+# STATIC: scans src/ for
 #   // --DUWS-COMPOSITION BEGIN name="..." schema=A [anchor=hqInComp] [z=snap|keep]--
 #   <array literal>
 #   // --DUWS-COMPOSITION END--
 # and emits a paste-ready Eden import (create3DENEntity + rotation) copied to the clipboard.
 # Every composition is schema A -- [class, X, Y, Z, dir_deg] with any trailing fields its own
-# consumer needs (isWeapon and the like), which this tool ignores.
+# consumer needs (isWeapon and the like), which this tool ignores. A new one is written from rows
+# pasted back out of Eden; what consumes it is still a hand edit.
 #
 # UNIT (read-write): scans src/ for
 #   // --DUWS-UNITCOMP BEGIN name="..." kind=composition|team|rule row="..." [rowname="Tier %1"]
@@ -222,6 +223,145 @@ function Invoke-Generate($comp) {
     Write-Host ("Wrote $outFile" + $(if ($clip) { " and copied to clipboard." } else { " (clipboard unavailable; copy the file)." }))
 }
 
+# ---- creating a fence ----
+
+# Appends a new fence to a source file, creating the file when it does not exist yet. Shared by both
+# kinds, because where a fence may live and how it is written are the same question for each.
+#
+# Under src/ and .sqf only, refused rather than corrected. Both scans enumerate *.sqf beneath src/,
+# so a fence written anywhere else is invisible to the tool that wrote it -- which reads as the write
+# having silently done nothing rather than as a path mistake.
+function Add-FenceToFile($relPath, $block, $newFileHeader) {
+    $rel = $relPath.Trim().Trim('"').Replace('/', '\')
+    if ($rel -eq '') { Write-Host "  A file is required." -ForegroundColor Red; return $false }
+    if ($rel -notmatch '\.sqf$') {
+        Write-Host "  The file has to be .sqf -- the scan that finds fences enumerates nothing else." -ForegroundColor Red
+        return $false
+    }
+    if ($rel -notmatch '^src\\') { $rel = "src\$rel" }
+    # Caught rather than allowed to propagate: $ErrorActionPreference is Stop, so a drive letter or a
+    # stray character in a pasted path would end the whole session instead of the prompt.
+    try { $full = [System.IO.Path]::GetFullPath((Join-Path $root $rel)) }
+    catch { Write-Host "  That is not a usable path." -ForegroundColor Red; return $false }
+    if (-not $full.StartsWith($srcDir, [System.StringComparison]::OrdinalIgnoreCase)) {
+        Write-Host "  The file has to sit under src/ to be found again." -ForegroundColor Red
+        return $false
+    }
+
+    $existing = ''
+    if (Test-Path -LiteralPath $full) {
+        # Strict, and refused rather than repaired: rewriting a file whose other bytes cannot be
+        # decoded would replace every one of them for the sake of an appended block. Same guard as
+        # the unit-table writer, for the same reason.
+        $strict = New-Object System.Text.UTF8Encoding($false, $true)
+        try { $existing = $strict.GetString([System.IO.File]::ReadAllBytes($full)) }
+        catch {
+            Write-Host "  Refusing to write: $rel is not valid UTF-8, and appending would corrupt the rest of it." -ForegroundColor Red
+            return $false
+        }
+        if ($existing.Length -gt 0 -and -not $existing.EndsWith("`n")) { $existing += "`r`n" }
+    } else {
+        $existing = $newFileHeader
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $full) | Out-Null
+    }
+
+    # No BOM: this sits beside SQF the mission compiles, and a BOM in front of a preprocessor
+    # directive is an error Arma reports from the wrong line.
+    [System.IO.File]::WriteAllText($full, ($existing + $block), (New-Object System.Text.UTF8Encoding($false)))
+    Clear-SourceCache
+    Write-Host ("  Wrote {0}. Review the diff before committing." -f $rel) -ForegroundColor Green
+    return $true
+}
+
+# Rows pasted back from the Eden export snippet. Returns the parsed rows, or $null if nothing usable
+# arrived -- the caller has a name and a file by then and should not write an empty fence.
+function Read-PastedRows {
+    Write-Host ""
+    Write-Host "  Paste the export rows. Blank line to finish." -ForegroundColor DarkGray
+    Write-Host "  The snippet in docs/info/composition_tooling.md copies them to the clipboard." -ForegroundColor DarkGray
+    Write-Host ""
+    $lines = @()
+    while ($true) { $l = Read-Host; if ([string]::IsNullOrWhiteSpace($l)) { break }; $lines += $l }
+    if ($lines.Count -eq 0) { return $null }
+    $pseudo = [pscustomobject]@{ Anchor=''; Body=($lines -join "`n"); Text='' }
+    $res = ConvertTo-Rows $pseudo
+    if ($res.Rows.Count -eq 0) {
+        Write-Host "  No rows parsed. Expected lines of the form [`"class`", x, y, z, dir]." -ForegroundColor Yellow
+        return $null
+    }
+    if ($res.Rows.Count -lt $res.Seen) {
+        Write-Host ("  WARNING: {0} row-like line(s) did not parse and were dropped." -f ($res.Seen - $res.Rows.Count)) -ForegroundColor Yellow
+    }
+    # Comma-wrapped, like every other array this script hands back: a returned list is unrolled by
+    # the pipeline, so a one-row paste would arrive as a bare row object rather than as rows.
+    return ,@($res.Rows)
+}
+
+# The variable a new composition's array is assigned to. A leading underscore is a local, and a local
+# at file scope is only readable by an #include -- which is what the killhouse does and what a prefab
+# builder holding its own array does. Anything else is a global the rest of the mission can read.
+function Format-Declaration($varName) {
+    if ($varName.StartsWith('_')) { return "private $varName" }
+    return $varName
+}
+
+# Create a static composition from rows arranged in Eden. The tool could only ever open one that
+# already existed, so a new layout meant hand-writing the fence and pasting rows under it, and a
+# mistyped attribute failed by the composition never appearing in the menu.
+function New-StaticFence {
+    Clear-Host
+    Write-Host "New static composition" -ForegroundColor Cyan
+    Write-Host "======================================"
+    Write-Host "  Arrange it in Eden, run the export snippet, and paste the rows here." -ForegroundColor DarkGray
+    Write-Host ""
+
+    $name = (Read-Host "  Name (as it appears in the menu)").Trim()
+    if ($name -eq '') { return }
+    if ($name.Contains('"')) { Write-Host "  A name cannot contain a quote." -ForegroundColor Red; return }
+    # Refused rather than allowed through: the menu selects a composition by name, so a second one
+    # under the same name is a row nobody can reach on purpose.
+    if (@(Get-Compositions | Where-Object { $_.Name -eq $name }).Count -gt 0) {
+        Write-Host ("  A composition called '{0}' already exists." -f $name) -ForegroundColor Red
+        return
+    }
+
+    # Derived from the name rather than prompted blind, because the answer is nearly always the same
+    # shape and a global is what a placer outside this file can read.
+    $suggest = 'DUWS_comp_' + (($name -replace '[^A-Za-z0-9]', ''))
+    $varName = (Read-Host ("  Variable (blank = {0})" -f $suggest)).Trim()
+    if ($varName -eq '') { $varName = $suggest }
+    if ($varName -notmatch '^_?[A-Za-z]\w*$') { Write-Host "  That is not a variable name." -ForegroundColor Red; return }
+
+    $file = Read-Host "  File under src/ (existing or new), e.g. src\duws\server\init_zones\hardpoint_compositions.sqf"
+    if ([string]::IsNullOrWhiteSpace($file)) { return }
+
+    $rows = Read-PastedRows
+    if ($null -eq $rows) { return }
+
+    $rowStrs = foreach ($r in $rows) {
+        '    ["{0}", {1}, {2}, {3}, {4}]' -f $r.Class, (Fmt $r.OX), (Fmt $r.OY), (Fmt $r.OZ), (Fmt $r.Dir)
+    }
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.Append("`r`n")
+    [void]$sb.Append("// --DUWS-COMPOSITION BEGIN name=`"$name`" schema=A--`r`n")
+    [void]$sb.Append((Format-Declaration $varName) + " = [`r`n")
+    [void]$sb.Append(($rowStrs -join ",`r`n"))
+    [void]$sb.Append("`r`n];`r`n")
+    [void]$sb.Append("// --DUWS-COMPOSITION END--`r`n")
+
+    $header = "// Composition data. The fences are comments, so the preprocessor discards them and the" + "`r`n" +
+              "// markup costs nothing at runtime; scripts/duws_eden.ps1 reads them to round-trip a layout" + "`r`n" +
+              "// through the 3D editor. See docs/info/composition_tooling.md." + "`r`n"
+
+    if (Add-FenceToFile $file $sb.ToString() $header) {
+        Write-Host ("  {0}: {1} rows." -f $name, $rows.Count) -ForegroundColor Green
+        # Said once, here, because it is the one thing the export cannot carry: the snippet emits five
+        # columns and a consumer that wants more -- an isWeapon flag, a faction role -- reads them off
+        # positions the export never wrote.
+        Write-Host "  Trailing columns a consumer needs (isWeapon, a faction role) are added by hand." -ForegroundColor DarkGray
+    }
+}
+
 # ================= unit compositions =================
 # The spawn tables: rows of tokens or numbers, edited in place rather than round-tripped.
 
@@ -385,6 +525,109 @@ function Save-UnitComp($uc, $varName, $rows, $indent) {
     [System.IO.File]::WriteAllText($uc.File, $updated, (New-Object System.Text.UTF8Encoding($false)))
     Clear-SourceCache
     return $true
+}
+
+# A whole new table, empty, for rows to be added to afterwards.
+#
+# Its attributes are the whole of what the tool knows about a table, and every one of them fails
+# quietly when it is wrong: an unknown kind lands the rows under the scaling rules, a missing row=
+# leaves them described as "row", and a fields= that does not match what the rows hold switches the
+# editor into field mode against columns that are not there. So they are prompted rather than
+# hand-written into a fence, and the two that cannot be recovered from are refused outright.
+function New-UnitTable {
+    Clear-Host
+    Write-Host "New unit table" -ForegroundColor Cyan
+    Write-Host "======================================"
+    Write-Host "  An empty fenced table. Add its rows from the menu afterwards." -ForegroundColor DarkGray
+    Write-Host ""
+
+    $ask = {
+        param($label, $default)
+        $v = (Read-Host $label).Trim()
+        if ($v -eq '') { $v = $default }
+        return $v
+    }
+
+    $name = (Read-Host "  Name (as it appears in the menu)").Trim()
+    if ($name -eq '') { return }
+    # Refused, and this is the one that cannot be recovered from by editing: the writer matches a
+    # fence by name, so two under one name means every write to either rewrites both bodies.
+    if (@(Get-UnitComps | Where-Object { $_.Name -eq $name }).Count -gt 0) {
+        Write-Host ("  A table called '{0}' already exists." -f $name) -ForegroundColor Red
+        return
+    }
+
+    $varName = (Read-Host "  Variable, e.g. DUWS_hardpointTiers").Trim()
+    if ($varName -eq '') { return }
+    if ($varName -notmatch '^[A-Za-z]\w*$') { Write-Host "  That is not a global variable name." -ForegroundColor Red; return }
+    # A second assignment to the same global is the other unrecoverable one: whichever file the
+    # mission compiles last wins, and the table the tool edits may not be the one that is live.
+    $assignRe = [regex]('(?m)^\s*' + [regex]::Escape($varName) + '\s*=')
+    foreach ($f in (Get-SourceFiles)) {
+        if ($assignRe.IsMatch($f.Text)) {
+            Write-Host ("  {0} is already assigned in {1}." -f $varName, (Split-Path -Leaf $f.Path)) -ForegroundColor Red
+            return
+        }
+    }
+
+    Write-Host ""
+    Write-Host "  kind: composition (a list of tokens -- a tier, a squad), team (what one name" -ForegroundColor DarkGray
+    Write-Host "        raises), rule (how a composition is scaled)." -ForegroundColor DarkGray
+    $kind = & $ask "  kind (blank = composition)" 'composition'
+    if (@('composition', 'team', 'rule') -notcontains $kind) {
+        Write-Host "  kind has to be composition, team or rule." -ForegroundColor Red
+        return
+    }
+
+    Write-Host ""
+    Write-Host "  row: what one row of this table IS, since a row is a tier in one table and a" -ForegroundColor DarkGray
+    Write-Host "       radius band in another." -ForegroundColor DarkGray
+    $rowOf = & $ask "  row (blank = row)" 'row'
+
+    Write-Host ""
+    Write-Host "  fields: the columns, for a table whose rows are fixed-shape rather than a" -ForegroundColor DarkGray
+    Write-Host "          free-length list. Blank leaves rows as plain lists." -ForegroundColor DarkGray
+    $fields = & $ask "  fields (blank = none)" ''
+
+    Write-Host ""
+    Write-Host "  rowname: how a row is named in the menu, %1 being its index in roman. Blank" -ForegroundColor DarkGray
+    Write-Host "           lets the first column name the row." -ForegroundColor DarkGray
+    $rowName = & $ask "  rowname (blank = none)" ''
+
+    $prefix = & $ask "  prefix, e.g. opfor_ (blank = none)" ''
+    if ($prefix -ne '' -and $prefix -notmatch '^[A-Za-z0-9_]+$') {
+        Write-Host "  A prefix is letters, digits and underscores." -ForegroundColor Red
+        return
+    }
+
+    foreach ($v in @($name, $rowOf, $fields, $rowName)) {
+        if ($v.Contains('"')) { Write-Host "  Attribute values cannot contain a quote." -ForegroundColor Red; return }
+    }
+
+    $file = Read-Host "  File under src/ (existing or new)"
+    if ([string]::IsNullOrWhiteSpace($file)) { return }
+
+    $attrs = "name=`"$name`" kind=$kind row=`"$rowOf`""
+    if ($rowName -ne '') { $attrs += " rowname=`"$rowName`"" }
+    if ($fields  -ne '') { $attrs += " fields=`"$fields`"" }
+    if ($prefix  -ne '') { $attrs += " prefix=$prefix" }
+
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.Append("`r`n")
+    [void]$sb.Append("// --DUWS-UNITCOMP BEGIN $attrs--`r`n")
+    [void]$sb.Append("$varName = [];`r`n")
+    [void]$sb.Append("// --DUWS-UNITCOMP END--`r`n")
+
+    $header = "// Spawn tables. The fences are comments, so the preprocessor discards them and the markup" + "`r`n" +
+              "// costs nothing at runtime; scripts/duws_eden.ps1 edits the rows in place." + "`r`n" +
+              "// See docs/info/composition_tooling.md." + "`r`n"
+
+    if (Add-FenceToFile $file $sb.ToString() $header) {
+        # Said plainly, because a table that spawns nothing looks identical to one that is broken:
+        # the tables are asked what a token is, so a new ROW is live at once, while a new TABLE is
+        # inert until something reads its global.
+        Write-Host ("  {0} is empty until you add rows, and inert until code reads {1}." -f $name, $varName) -ForegroundColor DarkGray
+    }
 }
 
 # The role vocabulary, read from the faction tables rather than hardcoded. Every faction file fills
@@ -683,11 +926,27 @@ function Invoke-EditFieldComp($uc) {
         Write-Host ""
         if ($dirty) { Write-Host "  * unsaved changes" -ForegroundColor Yellow; Write-Host "" }
         Write-Host "   <n>. Edit that row        W. Write back to source"
-        Write-Host "   B. Back (discards unsaved changes)"
+        Write-Host "   A. Add a row              B. Back (discards unsaved changes)"
         Write-Host ""
         $sel = Read-Host "Select"
 
         if ($sel -match '^\s*[Bb]\s*$') { break }
+        elseif ($sel -match '^\s*[Aa]\s*$') {
+            # Refused while this screen holds unsaved edits rather than merged with them: the add
+            # writes straight to source, and the buffer here would then be written over the top of it
+            # from rows that never had the new one -- an add that appears to work and is gone by the
+            # next write.
+            if ($dirty) {
+                Write-Host "Write the changes on screen first; an add goes straight to source." -ForegroundColor Yellow
+                Read-Host "Press Enter to continue" | Out-Null
+                continue
+            }
+            Invoke-AddRow $uc
+            # Re-read from the table that was just written, not from the stale body this screen was
+            # opened with.
+            $fresh = @(Get-UnitComps | Where-Object { $_.Name -eq $uc.Name })
+            if ($fresh.Count -gt 0) { $uc = $fresh[0]; $rows = Split-Rows $uc.Body }
+        }
         elseif ($sel -match '^\s*[Ww]\s*$') {
             if (-not $dirty) { Write-Host "No changes to write." -ForegroundColor Yellow }
             elseif (Save-UnitComp $uc $varName $rows $indent) {
@@ -720,12 +979,24 @@ function Invoke-EditUnitComp($uc) {
         Show-UnitComp $uc $rows
         if ($dirty) { Write-Host "  * unsaved changes" -ForegroundColor Yellow; Write-Host "" }
         Write-Host "   A. Add an entry to a row      D. Drop an entry from a row"
-        Write-Host "   R. Replace a whole row        W. Write back to source"
-        Write-Host "   B. Back (discards unsaved changes)"
+        Write-Host "   R. Replace a whole row        N. New row"
+        Write-Host "   W. Write back to source       B. Back (discards unsaved changes)"
         Write-Host ""
         $sel = Read-Host "Select"
 
         if ($sel -match '^\s*[Bb]\s*$') { break }
+        elseif ($sel -match '^\s*[Nn]\s*$') {
+            # Same reason as the fixed-column editor's: an add writes straight to source, so the
+            # buffer on screen would be written back over it from rows that never held the new one.
+            if ($dirty) {
+                Write-Host "Write the changes on screen first; an add goes straight to source." -ForegroundColor Yellow
+                Read-Host "Press Enter to continue" | Out-Null
+                continue
+            }
+            Invoke-AddRow $uc
+            $fresh = @(Get-UnitComps | Where-Object { $_.Name -eq $uc.Name })
+            if ($fresh.Count -gt 0) { $uc = $fresh[0]; $rows = Split-Rows $uc.Body }
+        }
         elseif ($sel -match '^\s*[Ww]\s*$') {
             if (-not $dirty) { Write-Host "No changes to write." -ForegroundColor Yellow }
             elseif (Save-UnitComp $uc $varName $rows $indent) {
@@ -938,14 +1209,31 @@ function Get-ColumnValues($uc, $j) {
     return ,$seen
 }
 
-# Append a row, field by field, starting from an existing row blanked out so each field keeps its
-# kind. A team or a vehicle added here is spawnable as it stands -- the spawn path reads the tables
-# for what a token is, so nothing in the mission has to learn the new name. A special is the one
-# exception: its placer column names code, which is why a name nothing compiles is prompted on.
-function Invoke-AddRow($uc) {
-    $rows = Split-Rows $uc.Body
-    if ($rows.Count -eq 0) { Write-Host "Nothing to copy a shape from." -ForegroundColor Yellow; return }
-    $fields = @($uc.Fields -split ',' | ForEach-Object { $_.Trim() })
+# A row that is a plain list: typed in one line, entries comma separated. Returns the row literal, or
+# $null if nothing usable was typed.
+#
+# Used for a table that declares no columns, and for one that declares columns but holds no rows yet:
+# the field walk below reads each field's kind off the row above it, so a table created a moment ago
+# has nothing to read and there is no shape to copy.
+function Add-FlatRow($uc) {
+    Clear-Host
+    Write-Host ("{0} -- new row" -f $uc.Name) -ForegroundColor Cyan
+    Write-Host "======================================"
+    Write-Host ""
+    Write-Host ("  {0}" -f $uc.RowOf) -ForegroundColor DarkGray
+    if ($uc.Fields -ne '') { Write-Host ("  columns: {0}" -f $uc.Fields) -ForegroundColor DarkGray }
+    Write-Host "  Comma separated, tokens unquoted. Enter accepts, Escape cancels." -ForegroundColor DarkGray
+    Write-Host ""
+    $raw = Read-Seeded "  > " ''
+    if ($null -eq $raw) { return $null }
+    $new = @($raw -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' })
+    if ($new.Count -eq 0) { return $null }
+    return '[' + (($new | ForEach-Object { Format-Entry $_ }) -join ', ') + ']'
+}
+
+# A row of a fixed-column table, field by field, starting from an existing row blanked out so each
+# field keeps its kind. Returns the row literal, or $null if the row was cancelled.
+function Add-FieldRow($uc, $rows, $fields) {
     $tpl = Split-Entries $rows[0]
     $new = @()
     for ($j = 0; $j -lt $tpl.Count; $j++) {
@@ -968,7 +1256,7 @@ function Invoke-AddRow($uc) {
         Write-Host ""
         $notes = @()
         $typed = Read-Seeded "  > " ''
-        if ($null -eq $typed) { return }
+        if ($null -eq $typed) { return $null }
 
         $literal = Format-FieldLiteral $blank $typed $uc.Prefix ([ref]$notes)
         if ($null -eq $literal) { $literal = $blank }
@@ -991,18 +1279,33 @@ function Invoke-AddRow($uc) {
         }
         $new += $literal
     }
+    return '[' + ($new -join ', ') + ']'
+}
+
+# Append a row. A team or a vehicle added here is spawnable as it stands -- the spawn path reads the
+# tables for what a token is, so nothing in the mission has to learn the new name. A special is the
+# one exception: its placer column names code, which is why a name nothing compiles is prompted on.
+function Invoke-AddRow($uc) {
+    $rows = Split-Rows $uc.Body
+    $fields = @($uc.Fields -split ',' | ForEach-Object { $_.Trim() })
+
+    $rowLiteral = if ($uc.Fields -eq '' -or $rows.Count -eq 0) {
+        Add-FlatRow $uc
+    } else {
+        Add-FieldRow $uc $rows $fields
+    }
+    if ($null -eq $rowLiteral) { return }
 
     $varName = if ($uc.Body -match '(?m)^\s*(\w+)\s*=') { $Matches[1] } else { $null }
     $indent = if ($uc.Body -match '(?m)^([ \t]+)\[') { $Matches[1] } else { '    ' }
-    $all = @($rows) + ('[' + ($new -join ', ') + ']')
-    if (Save-UnitComp $uc $varName $all $indent) {
+    if (Save-UnitComp $uc $varName (@($rows) + $rowLiteral) $indent) {
         Write-Host "Added. Review the diff before committing." -ForegroundColor Green
     }
     Read-Host "Press Enter to continue" | Out-Null
 }
 
 # One menu over every row of a kind, grouped by the table each came from.
-function Show-RowMenu($kind, $title, $blurb, $canAdd) {
+function Show-RowMenu($kind, $title, $blurb) {
     while ($true) {
         # Re-read each pass: an edit rewrites source, and a stale body would show the pre-edit table.
         $entries = Get-RowEntries $kind
@@ -1022,15 +1325,24 @@ function Show-RowMenu($kind, $title, $blurb, $canAdd) {
             Write-Host ("  {0,2}. {1,-16} {2}" -f ($i + 1), $entries[$i].Label, $entries[$i].Summary)
         }
         Write-Host ""
-        if ($canAdd) { Write-Host "   A. Add" }
+        Write-Host "   A. Add a row       N. New table"
         Write-Host "   B. Back"
         Write-Host ""
         $sel = Read-Host "Select"
 
         if ($sel -match '^\s*[Bb]\s*$') { break }
-        elseif ($canAdd -and $sel -match '^\s*[Aa]\s*$') {
+        elseif ($sel -match '^\s*[Nn]\s*$') {
+            New-UnitTable
+            Read-Host "Press Enter to continue" | Out-Null
+        }
+        elseif ($sel -match '^\s*[Aa]\s*$') {
             # Which table to add to is a question only when there is more than one of this kind.
             $tables = @(Get-UnitComps | Where-Object { $_.Kind -eq $kind } | Sort-Object Name)
+            if ($tables.Count -eq 0) {
+                Write-Host "No table of this kind to add to. Create one first." -ForegroundColor Yellow
+                Read-Host "Press Enter to continue" | Out-Null
+                continue
+            }
             $target = $tables[0]
             if ($tables.Count -gt 1) {
                 Write-Host ""
@@ -1047,8 +1359,19 @@ function Show-RowMenu($kind, $title, $blurb, $canAdd) {
     }
 }
 
-function Show-StaticMenu($comps) {
+# Re-scanned on every draw rather than captured once at startup, for the reason the unit menus
+# already are: a composition created in this session has to appear in the menu that created it.
+function Get-StaticList {
+    $list = @(Get-Compositions | Sort-Object Schema, Name)
+    foreach ($c in $list) {
+        $c | Add-Member -NotePropertyName Count -NotePropertyValue ((ConvertTo-Rows $c).Rows.Count) -Force
+    }
+    return ,$list
+}
+
+function Show-StaticMenu {
     while ($true) {
+        $comps = Get-StaticList
         Clear-Host
         Write-Host "Static compositions" -ForegroundColor Cyan
         Write-Host "======================================"
@@ -1059,12 +1382,17 @@ function Show-StaticMenu($comps) {
         }
         Write-Host ""
         Write-Host "   O. Set the import origin      P. Paste your own array (schema A)"
+        Write-Host "   N. New composition from an Eden export"
         Write-Host "   B. Back"
         Write-Host ""
         $sel = Read-Host "Select"
 
         if ($sel -match '^\s*[Bb]\s*$') { break }
         elseif ($sel -match '^\s*[Oo]\s*$') { Set-Origin }
+        elseif ($sel -match '^\s*[Nn]\s*$') {
+            New-StaticFence
+            Read-Host "Press Enter to continue" | Out-Null
+        }
         elseif ($sel -match '^\s*[Pp]\s*$') {
             Write-Host 'Paste rows in schema A form: ["class", x, y, z, dir, ...]. Blank line to finish.'
             $lines = @()
@@ -1107,18 +1435,14 @@ function Show-RuleMenu {
 }
 
 # ---- main loop ----
-$comps = @(Get-Compositions | Sort-Object Schema, Name)
-foreach ($c in $comps) {
-    $c | Add-Member -NotePropertyName Count -NotePropertyValue ((ConvertTo-Rows $c).Rows.Count) -Force
-}
-if ($comps.Count -eq 0) { Write-Host "No marked static compositions found under $srcDir." -ForegroundColor Yellow }
+if ((Get-StaticList).Count -eq 0) { Write-Host "No marked static compositions found under $srcDir." -ForegroundColor Yellow }
 
 while ($true) {
     Clear-Host
     Write-Host "DUWS Composition TUI" -ForegroundColor Cyan
     Write-Host "===================="
     Write-Host ""
-    Write-Host ("  1. Static compositions   ({0} object layouts, Eden round-trip)" -f $comps.Count)
+    Write-Host ("  1. Static compositions   ({0} object layouts, Eden round-trip)" -f (Get-StaticList).Count)
     Write-Host "  2. Unit compositions     (what a zone, town or squad fields)"
     Write-Host "  3. Tokens                (what one name raises: men, a vehicle, a placer)"
     Write-Host "  4. Scaling rules         (radius multipliers)"
@@ -1128,12 +1452,12 @@ while ($true) {
     $sel = Read-Host "Select"
 
     if ($sel -match '^\s*[Qq]\s*$') { break }
-    elseif ($sel -match '^\s*1\s*$') { Show-StaticMenu $comps }
+    elseif ($sel -match '^\s*1\s*$') { Show-StaticMenu }
     elseif ($sel -match '^\s*2\s*$') {
-        Show-RowMenu 'composition' 'Unit compositions' 'A composition is a list of teams and vehicles. Open one to see what it fields.' $false
+        Show-RowMenu 'composition' 'Unit compositions' 'A composition is a list of teams and vehicles. Open one to see what it fields.'
     }
     elseif ($sel -match '^\s*3\s*$') {
-        Show-RowMenu 'team' 'Tokens' 'What a composition names: a team of men, one vehicle, or a placer. Open one, or add a row.' $true
+        Show-RowMenu 'team' 'Tokens' 'What a composition names: a team of men, one vehicle, or a placer. Open one, or add a row.'
     }
     elseif ($sel -match '^\s*4\s*$') { Show-RuleMenu }
 }

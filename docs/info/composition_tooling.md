@@ -15,8 +15,8 @@ or a scaling rule.
 
 | Kind | Marker | What the tool does |
 |---|---|---|
-| **Static** — object layouts (HQ, zone prefabs, killhouse) | `--DUWS-COMPOSITION--` | read-only; emits a paste-ready Eden import |
-| **Unit** — spawn tables (tier compositions, team rosters, the purchasable squads, the scaling rules) | `--DUWS-UNITCOMP--` | edits rows and writes them back to source |
+| **Static** — object layouts (HQ, zone prefabs, killhouse) | `--DUWS-COMPOSITION--` | emits a paste-ready Eden import; writes a new fence from rows pasted back |
+| **Unit** — spawn tables (tier compositions, team rosters, the purchasable squads, the scaling rules) | `--DUWS-UNITCOMP--` | edits rows and writes them back to source; adds rows and whole tables |
 
 Static compositions round-trip through the 3D editor because they are *layout* — you want to see
 them. Unit compositions are *data*, so there is nothing to look at in Eden and the tool edits them
@@ -147,6 +147,27 @@ Fold the rows back into the source array by these rules:
 
 Verify once by import → export → re-import and confirming the layout is identical.
 
+### Creating one
+
+**New composition** on the static menu takes the same export rows and writes the fence itself: name,
+variable, target file, then the pasted rows. The file may be one that already exists or one the tool
+creates.
+
+Two things it refuses rather than corrects, both because the failure is silent otherwise:
+
+- **A target the scan above cannot reach**, which would be a fence invisible to the tool that wrote
+  it — indistinguishable from the write having done nothing.
+- **A name another composition already holds.** The menu selects by name, so a duplicate is an entry
+  nobody can open on purpose.
+
+The variable decides who can read the array: a leading underscore makes it a file-scope local, which
+only an `#include` can reach — what the killhouse does — and anything else is a global a placer in
+another file can read. The suggestion is a global.
+
+**The export writes five columns and no more.** A consumer wanting an `isWeapon` flag or a faction
+role reads those off positions the export never emitted, so those columns are added by hand
+afterwards and survive later round trips by the match-by-order rule above.
+
 ## Unit compositions: edited in place
 
 Two ideas, and keeping them apart is what makes the menus make sense:
@@ -246,9 +267,34 @@ tables actually use rather than a list in a doc that rots. A duplicate name is r
 first column is what compositions refer to, so a second row of the same name could never be reached.
 
 Adding a **BLUFOR** team is the same, minus the category column — a squad references it by name and
-`fnc_BLUFOR_squad_init` resolves it. Adding a whole *squad* is not offered: the request dialogs
-switch on a hardcoded listbox index, so a sixth squad needs a case written in
-`fnc_request_squad.sqf` before anything could buy it.
+`fnc_BLUFOR_squad_init` resolves it.
+
+**Add** is on every menu, not only Tokens: a zone tier, a town tier and a purchasable squad are rows
+like any other. A row of a table that declares no `fields=` is typed as one comma-separated list;
+one of a fixed-column table is walked field by field, each blanked from the row above so it keeps
+its kind. The one row that buys nothing on its own is a *squad*: the request dialog switches on a
+hardcoded listbox index (`client/dialog/fnc_request_squad.sqf:16`), so a sixth squad needs a case
+written there before anything can purchase what the table now offers.
+
+### Adding a table
+
+**New table** writes an empty fenced table and prompts for the attributes above, because every one of
+them fails quietly when it is wrong: an unknown `kind=` files the rows under the scaling rules, a
+missing `row=` leaves them described as "row", and a `fields=` that does not match what the rows hold
+switches the editor into field mode against columns that are not there.
+
+Two are refused outright rather than left to be edited later, because neither is recoverable from
+inside the tool: a **name** another fence already carries, since a write matches a fence by name and
+would rewrite both bodies; and a **variable** already assigned somewhere under `src/`, since whichever
+file the mission compiles last wins and the table being edited need not be the one that is live.
+
+A new table arrives empty, and the first row typed into it goes through the flat prompt whatever its
+`fields=` says — the field walk reads each column's kind off the row above, and a table created a
+moment ago has no row to read.
+
+**A new row is live; a new table is not.** The spawn path asks the tables what a token is rather than
+switching on known names, so a team or vehicle added to an existing table spawns without any code
+changing. A new table is inert until something reads its global.
 
 **Only the fenced body is rewritten.** The reasoning above each table is outside the fence and
 survives editing, which is why the fences sit tight around the literal rather than around the whole
