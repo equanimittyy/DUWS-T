@@ -205,22 +205,22 @@ class CfgNotifications
         description = "$STR_DUWS_T_UNLOCK_HALO";
     };
 
-    // The two radio unlocks wear the icon their own comm-menu item wears
-    // (shared/includes/supports_radio_modern.hpp), so the card and the 0-8 entry it grants match.
     class unlock_mobile_HQ : SupportUnlock
     {
-        iconPicture = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\attack_ca.paa";
+        iconPicture = "\A3\ui_f\data\map\markers\military\flag_CA.paa";
         description = "$STR_DUWS_T_UNLOCK_MOBILE_HQ";
     };
 
+    // The FOB wears the icon its own comm-menu item wears
+    // (shared/includes/supports_radio_modern.hpp), so the card and the 0-8 entry it grants match.
     class unlock_fob : SupportUnlock
     {
         iconPicture = "\a3\ui_f\data\gui\cfg\hints\Commanding_ca.paa";
         description = "$STR_DUWS_T_UNLOCK_FOB";
     };
 
-    // No stock glyph depicts recycling, so the recycling station takes the scroll-action icon --
-    // distinct from the modification station's, which is the engine's own repair action.
+    // The two depot stations share the engine's repair action icon: they are one pair of vehicle
+    // services at the base, and no stock glyph depicts recycling to tell them apart with.
     class unlock_repair : SupportUnlock
     {
         iconPicture = "\A3\ui_f\data\IGUI\Cfg\Actions\repair_ca.paa";
@@ -229,7 +229,7 @@ class CfgNotifications
 
     class unlock_recycle : SupportUnlock
     {
-        iconPicture = "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa";
+        iconPicture = "\A3\ui_f\data\IGUI\Cfg\Actions\repair_ca.paa";
         description = "$STR_DUWS_T_UNLOCK_RECYCLE";
     };
 
