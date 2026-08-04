@@ -8,14 +8,14 @@
 // it. Draw3D is a separate mission event and cannot be clobbered.
 if (!hasInterface) exitWith {};
 
-HQ_facility_draw_range = 100;   // the gate fnc_draw_HQicon puts on the HQ icon itself
+HQ_facility_draw_range = 30;    // signposts inside the base, not a way to find the base
 
 // [netId key, icon, label, metres above the model origin, unlock flag ("" draws unconditionally)]
 // Read from a global rather than a local: a Draw3D block sees no locals from where it was written.
 HQ_facility_icons = [
     ["HQ_mapBoard_netId",    "\a3\ui_f\data\gui\cfg\hints\Firemode_ca.paa",  localize "STR_DUWS_T_FACILITY_KILLHOUSE", 2.5, ""],
     ["HQ_medTent_netId",     "\A3\ui_f\data\IGUI\Cfg\Actions\heal_ca.paa",   localize "STR_DUWS_T_FACILITY_RESTTENT",  4,   ""],
-    ["HQ_repairDepot_netId", "\A3\ui_f\data\IGUI\Cfg\Actions\repair_ca.paa", localize "STR_DUWS_T_FACILITY_VEHMOD",    6,   "support_veh_repair_available"]
+    ["HQ_repairDepot_netId", "\A3\ui_f\data\IGUI\Cfg\Actions\repair_ca.paa", localize "STR_DUWS_T_FACILITY_VEHMOD",    3,   "support_veh_repair_available"]
 ];
 
 addMissionEventHandler ["Draw3D", {
@@ -29,7 +29,7 @@ addMissionEventHandler ["Draw3D", {
         private _obj = objectFromNetId (missionNamespace getVariable [_netIdVar, ""]);
         if (_bought && {!isNull _obj}) then {
             drawIcon3D [
-                _icon, [0.2,1,0.2,0.8], _obj modelToWorldVisual [0, 0, _height],
+                _icon, [0.2,1,0.2,0.5], _obj modelToWorldVisual [0, 0, _height],
                 1, 1, 0, _label, 1, 0.025, "TahomaB"
             ];
         };
