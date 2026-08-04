@@ -74,8 +74,13 @@ private _title = [localize "STR_DUWS_T_CAMPAIGN_LOST_TITLE", localize "STR_DUWS_
 // ruined-island line reads as a non sequitur after the commander is shot at his own desk. Carried
 // as a stringtable key rather than as resolved text so the setter does not have to be a machine
 // with a stringtable -- and so this stays the one place the campaign's endings are worded.
-private _body = [localize (missionNamespace getVariable
-    ["campaign_lost_body", "STR_DUWS_T_CAMPAIGN_LOST"]), localize "STR_DUWS_T_CAMPAIGN_WON"] select _won;
+// The map name is passed to every ending, not just the one that reads it: a body without a %1
+// discards the surplus argument (docs/info/arma_engine_gotchas.md), so this stays one call. It is the
+// map's config description rather than worldName -- the latter is the internal class ("Altis" but
+// "Enoch" for Livonia), which is not what the player calls the place.
+private _body = format [[localize (missionNamespace getVariable
+    ["campaign_lost_body", "STR_DUWS_T_CAMPAIGN_LOST"]), localize "STR_DUWS_T_CAMPAIGN_WON"] select _won,
+    getText (configFile >> "cfgWorlds" >> worldName >> "description")];
 
 ["info", [_title, _body]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 [format ["%1\n\n%2", _title, _body], {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
@@ -85,7 +90,7 @@ sleep 10;
 // The outro card is a CfgDebriefing class and carries its own wording, so ending a loss on the
 // win class congratulated the player for capturing the island they had just lost. Each loss setter
 // names the class that matches its ending; the fallback covers a loss published without one.
-private _ending = [missionNamespace getVariable ["campaign_lost_ending", "shittyReputation"],
+private _ending = [missionNamespace getVariable ["campaign_lost_ending", "island_ruined"],
     "island_captured_win"] select _won;
 // Two-argument form: the one-argument call defaults victory to true, which would end a
 // flattened Altis on the winning card.

@@ -19,11 +19,13 @@ class CfgDebriefing
 		picture = "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa";
 		pictureColor[] = {1,0,0,1};
 	};
- 	class shittyReputation
+ 	class island_ruined
 	{
-		title = "$STR_DUWS_T_c404e8p1";
+		title = "$STR_DUWS_T_CAMPAIGN_LOST_TITLE";
 		subtitle = "";
-		description = "$STR_DUWS_T_on6u64th";
+		// Its own key, not the hint's: config text is shown verbatim, so the hint's %1 map-name
+		// placeholder would reach the player unsubstituted on the outro card.
+		description = "$STR_DUWS_T_CAMPAIGN_LOST_CARD";
 		pictureBackground = "";
 		picture = "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa";
 		pictureColor[] = {1,0,0,1};

@@ -304,6 +304,20 @@ language variant of the key. When editing a `%N`-bearing string, grep the ID for
 `format[...]` call, count the arguments, and confirm the highest `%N` matches in each
 language tag — the engine will not tell you when they diverge.
 
+## Config text is shown verbatim, so a `%N` in it reaches the player unsubstituted
+
+**A `$STR_` reference in config — `CfgDebriefing` titles and descriptions, action names, class
+`displayName` — is resolved by the engine and displayed as-is. There is no call site to hand it
+arguments, so a placeholder in that key renders as the literal characters `%1`.**
+
+This bites when one key serves both a script and a config entry. The campaign's losing text is
+shown twice: `server/misc/fnc_capture_zones_task.sqf` formats it into the hint with the map's
+name, and `shared/includes/debriefing.hpp` shows it again on the outro card. The moment the
+script gained a `%1`, the card started reading "%1 is in ruins" — the shared key was the bug.
+
+**How to apply:** a `%N`-bearing key belongs to script call sites only. When config needs the
+same sentence, give it its own placeholder-free key rather than pointing both at one ID.
+
 ## A code block sees no locals from where it was written unless it is `call`ed
 
 **SQF blocks are not closures. Scoping is dynamic: a block sees the privates of whatever `call`ed

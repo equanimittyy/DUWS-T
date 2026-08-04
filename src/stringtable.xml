@@ -1956,12 +1956,16 @@
                 <English>Campaign Lost</English>
             </Key>
             <Key ID="STR_DUWS_T_CAMPAIGN_LOST">
-                <Original>Altis is in ruins. Command has withdrawn its mandate.</Original>
-                <English>Altis is in ruins. Command has withdrawn its mandate.</English>
+                <Original>%1 is in ruins. Command has ordered a withdrawal of friendly forces.</Original>
+                <English>%1 is in ruins. Command has ordered a withdrawal of friendly forces.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CAMPAIGN_LOST_CARD">
+                <Original>The AO is in ruins. Command has ordered a withdrawal of friendly forces.</Original>
+                <English>The AO is in ruins. Command has ordered a withdrawal of friendly forces.</English>
             </Key>
             <Key ID="STR_DUWS_T_CAMPAIGN_LOST_OFFICER">
-                <Original>Your commanding officer is dead. Command has stood the operation down.</Original>
-                <English>Your commanding officer is dead. Command has stood the operation down.</English>
+                <Original>Your commanding officer is dead. Command has ordered a withdrawal of friendly forces.</Original>
+                <English>Your commanding officer is dead. Command has ordered a withdrawal of friendly forces.</English>
             </Key>
             <Key ID="STR_DUWS_T_escalation_row">
                 <Original>%1  -&gt;  %2 CP</Original>
@@ -3623,20 +3627,6 @@
                 <Chinesesimp>你的总部指挥官已经被杀了。任务失败了，立刻撤离！</Chinesesimp>
                 <Original>Your commanding officer has been killed. The mission has failed and you will be evacuated shortly.</Original>
                 <English>Your commanding officer has been killed. The mission has failed and you will be evacuated shortly.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_c404e8p1">
-                <German>Zu viele KRIEGSVERBRECHEN begangen</German>
-                <Spanish>Demasiados CRIMENES DE GUERRA</Spanish>
-                <Chinesesimp>太多战争罪行</Chinesesimp>
-                <Original>Too many WAR CRIMES</Original>
-                <English>Too many WAR CRIMES</English>
-            </Key>
-            <Key ID="STR_DUWS_T_on6u64th">
-                <German>Du hast die Operation komplett verbockt. Die Mission ist fehlgeschlagen, deine Evakuierung wird in kürze eingeleitet.</German>
-                <Spanish>Has fastidiado la operación. La misión ha fallado y serás evacuado en breve.</Spanish>
-                <Chinesesimp>你把特种行动完全搞砸了。任务失败了，立刻撤离！</Chinesesimp>
-                <Original>You completely botched the operation. The mission has failed and you will be evacuated shortly.</Original>
-                <English>You completely botched the operation. The mission has failed and you will be evacuated shortly.</English>
             </Key>
             <Key ID="STR_DUWS_T_drq88qxs">
                 <German>Erobert: %1</German>
