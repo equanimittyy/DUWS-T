@@ -64,21 +64,68 @@ DUWS_fnc_dropStatic = {
     // for the same reason. World coordinates throughout, so a gun standing on a composition's
     // bunker roof is lifted off the roof rather than dropped through it to the terrain.
     _gun setPosWorld (_base vectorAdd [0, 0, _height]);
+    // Enabled last, so the fall starts from the position just written rather than from wherever a
+    // frame boundary mid-placement left the gun. Needed at all because the prefabs build their
+    // weapons with simulation off and re-enable only the classnames they list: one they miss stows
+    // and comes back that way, and would hang at the drop height instead of falling.
+    _gun enableSimulationGlobal true;
+};
+
+// Put back a gun the drops themselves destroyed, at ground level and on the composition's books.
+//
+// The drops are the cause worth assuming: each one heals the gun before it falls, so it goes into
+// every attempt intact, and a raise happens before the players who triggered it are on the objective.
+// Leaving the wreck would let the recovery quietly disarm the zone -- the emplacement is a defence
+// the garrison is counted as having, and nothing else ever rebuilds one. Ground level rather than the
+// recorded position, because that position is the one the gun could not be landed on.
+DUWS_fnc_replaceStatic = {
+    params ["_gun", "_base", "_key"];
+    private _class = typeOf _gun;
+    private _dir = direction _gun;
+    // Read before the wreck goes. A pinned member keeps its crew and never stows -- an artillery
+    // piece or an AA gun -- so a rebuild that dropped the flag would start stowing a capability the
+    // zone is counted as fielding.
+    private _pinned = _gun getVariable ["DUWS_noStow", false];
+    // The wreck first, so fnc_duws_keep prunes its slot on the way in rather than filing the
+    // replacement beside a dead member the next stow would try to record.
+    deleteVehicle _gun;
+
+    private _fresh = createVehicle [_class, [_base select 0, _base select 1, 0], [], 0, "CAN_COLLIDE"];
+    _fresh setVectorUp [0, 0, 1];
+    _fresh setDir _dir;
+    // Written after the rotation, which displaces the object -- the order the prefabs place in.
+    _fresh setPosATL [_base select 0, _base select 1, 0];
+    // Back on the books: persistent, so no cleanup sweep takes it, and under the key, so it stows and
+    // returns with the rest of the composition. An unfiled gun is one the zone loses on the next
+    // streaming cycle with nothing to say where it went.
+    [_fresh, _key, _pinned] call fnc_duws_keep;
+    ["WARN", "ZONES", format ["emplacement %1 was wrecked while being placed; rebuilt at ground level",
+        _class]] call fnc_log;
+    _fresh
+};
+
+// Seat one man on one gun that has come to rest, and answer whether he took it.
+//
+// moveInGunner reports nothing either way, so the only proof is read back off the gun. It is refused
+// silently by a static settled into the terrain or composition clutter around it, and by one lying on
+// its side -- the engine empties a gun that goes over and keeps it empty for as long as it lies
+// there. Between them that is what left a pair of soldiers standing beside their guns for the rest of
+// a campaign: each had been spawned, rostered and counted toward the garrison's peak, so the failure
+// both weakened the zone and left a statue for the player to walk up to.
+DUWS_fnc_seatStatic = {
+    params ["_gun", "_unit"];
+    if (((vectorUp _gun) select 2) > STATIC_UPRIGHT_DOT) then { _unit moveInGunner _gun };
+    !isNull _unit && {gunner _gun isEqualTo _unit}
 };
 
 // Place a composition's guns and crew the ones that come to rest standing.
 //
 // In rounds over every gun rather than gun by gun: a drop can only be read once the gun has fallen
 // and settled, and one wait covers every gun in the air, so a six-gun zone costs the same seconds
-// as a one-gun zone instead of six times as many.
-//
-// The seat is the test, not the lean. moveInGunner reports nothing either way, so whether the man
-// actually took it can only be read back off the gun, and a gun that refuses is dropped again from
-// higher up. That silent refusal is what left a pair of soldiers standing beside their guns for the
-// rest of a campaign: each had been spawned, rostered and counted toward the garrison's peak, so the
-// failure both weakened the zone and left a statue for the player to walk up to.
+// as a one-gun zone instead of six times as many. The seat is the test rather than the lean, for the
+// reason DUWS_fnc_seatStatic gives, and a gun that refuses one is dropped again from higher up.
 DUWS_fnc_manStatics = {
-    params ["_guns", "_grp"];
+    params ["_guns", "_grp", "_key"];
     // Indexed off the spawned group rather than assumed one-to-one: a group that came back short
     // would otherwise throw here every despawn cycle for the rest of the campaign.
     private _men = units _grp;
@@ -87,6 +134,7 @@ DUWS_fnc_manStatics = {
         _pending pushBack [_x, getPosWorld _x, _men param [_forEachIndex, objNull]];
     } forEach _guns;
 
+    private _wrecked = [];
     for "_drop" from 1 to STATIC_DROP_ATTEMPTS do {
         if (count _pending == 0) exitWith {};
         {
@@ -98,19 +146,18 @@ DUWS_fnc_manStatics = {
         private _next = [];
         {
             _x params ["_gun", "_base", "_unit"];
-            // Replaced rather than abandoned: the gun is a defence the zone is still counting on,
-            // and the man may have been shot over the seconds the drops take.
-            if (!alive _unit) then {
-                _unit = _grp createUnit [opfor_SOLDIER_X, getPos _gun, [], 0, "NONE"];
-            };
-            // A gun the player destroyed stays destroyed -- compositions are persistent, and
-            // rebuilding one here would hand back ground that was already taken. Its man goes with
-            // it, for the reason the give-up below deletes one.
+            // Out of the rounds the moment it dies, and rebuilt once they are over: dropping a wreck
+            // again would only wreck its replacement, and rebuilding mid-pass would put a fresh gun
+            // under the next round's drop.
             if (!alive _gun) then {
-                if (!isNull _unit) then { deleteVehicle _unit };
+                _wrecked pushBack [_gun, _base, _unit];
             } else {
-                if (((vectorUp _gun) select 2) > STATIC_UPRIGHT_DOT) then { _unit moveInGunner _gun };
-                if (isNull _unit || {!(gunner _gun isEqualTo _unit)}) then {
+                // Replaced rather than abandoned: the gun is a defence the zone is still counting
+                // on, and the man may have been shot over the seconds the drops take.
+                if (!alive _unit) then {
+                    _unit = _grp createUnit [opfor_SOLDIER_X, getPos _gun, [], 0, "NONE"];
+                };
+                if !([_gun, _unit] call DUWS_fnc_seatStatic) then {
                     _next pushBack [_gun, _base, _unit];
                 };
             };
@@ -118,10 +165,34 @@ DUWS_fnc_manStatics = {
         _pending = _next;
     };
 
+    private _rebuilt = [];
     {
         _x params ["_gun", "_base", "_unit"];
-        ["WARN", "ZONES", format ["emplacement %1 took no gunner in %2 drops; left unmanned",
-            typeOf _gun, STATIC_DROP_ATTEMPTS]] call fnc_log;
+        private _fresh = [_gun, _base, _key] call DUWS_fnc_replaceStatic;
+        // Whatever took the gun is as likely to have taken the man standing beside it.
+        if (!alive _unit) then {
+            _unit = _grp createUnit [opfor_SOLDIER_X, getPos _fresh, [], 0, "NONE"];
+        };
+        _rebuilt pushBack [_fresh, _base, _unit];
+    } forEach _wrecked;
+
+    // One settle for the rebuilds, then one seat attempt each. A gun created upright on level ground
+    // is the best placement this pass has to offer, so a seat it still refuses is not worth another
+    // drop -- and dropping a gun that was just rebuilt from a wreck only earns a second wreck.
+    if (count _rebuilt > 0) then {
+        sleep STATIC_SETTLE_WAIT;
+        {
+            _x params ["_gun", "_base", "_unit"];
+            if !([_gun, _unit] call DUWS_fnc_seatStatic) then {
+                _pending pushBack [_gun, _base, _unit];
+            };
+        } forEach _rebuilt;
+    };
+
+    {
+        _x params ["_gun", "_base", "_unit"];
+        ["WARN", "ZONES", format ["emplacement %1 took no gunner; left unmanned",
+            typeOf _gun]] call fnc_log;
         // The gun stays: an empty emplacement is ground the player can use. The man does not -- he
         // is about to go on the roster and count toward the peak, and an unrostered-looking man
         // beside a gun he never entered denies the zone its capture while reading as a bug.
@@ -159,7 +230,7 @@ DUWS_fnc_zoneManStatics = {
     if (count _spawn == 0) then { _spawn = _pos };
     private _grp = [_spawn, EAST, _types, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
     _grp deleteGroupWhenEmpty true;
-    [_guns, _grp] call DUWS_fnc_manStatics;
+    [_guns, _grp, _key] call DUWS_fnc_manStatics;
     // On the roster like everything DUWS_fnc_raiseGarrison raises: these are the zone's garrison
     // too, and a blunt radius sweep has no other way to know it.
     _roster append (units _grp);
