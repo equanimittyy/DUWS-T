@@ -1,6 +1,16 @@
 
 if (!isServer) exitWith {};
 
+// Released on every exit below, not only the successful one. Clients hold the map open until the
+// insertion flight is up or this says it is not coming, and the drop-in teleport is gated on it too
+// -- so an intro that gives up silently leaves every player parked on the map screen.
+private _abandon = {
+    params ["_why"];
+    ["ERROR", "INTRO", format ["Intro abandoned: %1. Releasing clients.", _why]] call fnc_log;
+    missionNamespace setVariable ["intro_heli_done", true, true];
+    publicVariable "intro_heli_done";
+};
+
 // ==================== 单次执行锁 ====================
 if (!isNil "intro_heli_executed") exitWith { ["WARN", "INTRO", "Already executed, skipping."] call fnc_log; };
 missionNamespace setVariable ["intro_heli_executed", true, true];
@@ -13,7 +23,7 @@ missionNamespace setVariable ["intro_heli_executed", true, true];
 waitUntil { sleep 0.5; count allPlayers > 0 };
 
 private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", []];
-if (_hqPos isEqualTo []) exitWith { ["INFO", "INTRO", "PosOfBLUHQ not defined."] call fnc_log;};
+if (_hqPos isEqualTo []) exitWith { ["PosOfBLUHQ not defined"] call _abandon; };
 
 // ==================== 生成直升机 ====================
 private _spawnPos = [_hqPos, 700, 1000, 10, 0, 0.2, 0] call BIS_fnc_findSafePos;
@@ -25,12 +35,27 @@ if (_spawnPos isEqualTo [0,0,0]) then {
 };
 _spawnPos set [2, 50];
 
-private _heliType = missionNamespace getVariable ["blufor_HELI_TRANS_UNARM_X", "B_Heli_Transport_01_F"];
+// Coerced to a single classname: a role global may hold the pool AutoDetect built for the key
+// rather than one class, and BIS_fnc_spawnVehicle takes a string -- handed an array it returns a
+// null vehicle and an empty group, with no error of its own. The vanilla default covers a key that
+// resolved to nothing at all, which no faction file guarantees against.
+private _heliType = missionNamespace getVariable ["blufor_HELI_TRANS_UNARM_X", ""];
+if (_heliType isEqualType []) then { _heliType = _heliType param [0, ""]; };
+if (_heliType isEqualTo "") then { _heliType = "B_Heli_Transport_01_F"; };
+
 private _veh = [_spawnPos, 0, _heliType, WEST] call BIS_fnc_spawnVehicle;
 private _heli = _veh select 0;
 private _heliGroup = _veh select 2;
+
+// Checked rather than assumed: a classname this faction does not ship leaves _heli null, and every
+// line below it then works on nothing -- the flight never arrives, and the clients waiting on it
+// sit on the map screen while the intro talks over them.
+if (isNull _heli) exitWith {
+    [format ["%1 did not spawn", _heliType]] call _abandon;
+};
+
 _heliGroup deleteGroupWhenEmpty true;
-["INFO", "INTRO", format ["Helicopter spawned, group ID: %1", groupId _heliGroup]] call fnc_log;
+["INFO", "INTRO", format ["Helicopter spawned: %1, group ID: %2", _heliType, groupId _heliGroup]] call fnc_log;
 
 // 确保有驾驶员
 private _pilot = driver _heli;

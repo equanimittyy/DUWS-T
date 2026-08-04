@@ -51,12 +51,6 @@ fnc_remoteBoard = {
     ["INFO", "INTRO", format ["Client %1 boarded helicopter as %2", name player, _seatType]] call fnc_log;
 };
 publicVariable "fnc_remoteBoard";
-
-// Announced now, immediately after the function the intro will remoteExec onto this machine to seat
-// the player. The server waits on this instead of sleeping a flat count before spawning the
-// helicopter: a blind wait is dead time on every ordinary boot and still too short for a client that
-// has not reached this line.
-player setVariable ["duws_intro_ready", true, true];
 // Set GameMaster
 if (!isMultiplayer) then {
 	game_master = vehiclevarname player;
@@ -291,13 +285,25 @@ hint localize "STR_DUWS_T_zu4bxt24";
 while {!(["BOOT", "mission_init_complete (zones built, civilians registered)",
     {mission_init_complete}, 300] call fnc_waitLogged)} do {};
 
-// Then held until the insertion flight actually exists, rather than for a fixed count. The server
-// spawns the helicopter, seats the player in it and only then fades in
-// (server/misc/fnc_intro_heli.sqf). The fixed sleeps this replaces ran on past that fade and blacked
-// out a screen the server had just cleared, so the player sat in the cabin still looking at the map
-// for the rest of them. Bounded so a failed intro drops the map anyway rather than pinning it open.
+// Only now is this machine ready to be flown in: everything above it -- the JIP faction re-run, the
+// squad-lead extras, the action set -- still had to happen, and the intro remoteExecs a seat onto
+// this client. Announced here rather than beside fnc_remoteBoard at the top of this file, which
+// says only that the function exists and let the server spawn the helicopter while the client was
+// still initialising, boarding nobody.
+player setVariable ["duws_intro_ready", true, true];
+
+// Then held until the insertion flight is up, or until the intro reports it is not coming. The
+// server spawns the helicopter, seats the player in it and only then fades in
+// (server/misc/fnc_intro_heli.sqf), so waiting for it is what puts the cut in the right order: the
+// fixed sleeps this replaces ran on past that fade and blacked out a screen the server had just
+// cleared, leaving the player in the cabin still looking at the map.
+//
+// intro_heli_done is in the condition because a failed spawn publishes an objNull helicopter, which
+// this can never see turn up; without it the map stayed pinned for the whole timeout while the
+// intro played its dialogue underneath.
 ["BOOT", "intro_heli_object (insertion flight spawned)",
-    {!isNull (missionNamespace getVariable ["intro_heli_object", objNull])}, 120] call fnc_waitLogged;
+    {!isNull (missionNamespace getVariable ["intro_heli_object", objNull])
+        || {!isNil "intro_heli_done"}}, 120] call fnc_waitLogged;
 
 // Black first, map second: the server's fade-in is what clears this, and the black is what hides the
 // switch from the map display to the cabin. The pause is for the black to paint, not for pacing.

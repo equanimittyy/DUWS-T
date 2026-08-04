@@ -378,8 +378,11 @@ while {!(["BOOT", "mission_init_complete (zones built, civilians registered)",
 // what the flat 15 s sleep here was really waiting for -- dead time on every ordinary boot, and no
 // guarantee at all on a slow one. Bounded and not retried: one client stuck short of that line must
 // not hold the insertion flight for everybody else.
+// The count test is load-bearing: findIf over an empty allPlayers returns -1, so without it an
+// empty player list satisfies this on the first check and the flight leaves before anyone exists.
 ["BOOT", "duws_intro_ready on every player",
-    {(allPlayers findIf {!(_x getVariable ["duws_intro_ready", false])}) isEqualTo -1}, 60] call fnc_waitLogged;
+    {count allPlayers > 0
+        && {(allPlayers findIf {!(_x getVariable ["duws_intro_ready", false])}) isEqualTo -1}}, 60] call fnc_waitLogged;
 ["INFO", "BOOT", "Starting helicopter intro sequence..."] call fnc_log;
 [] spawn fnc_intro_heli;
 // 仅在非僵尸/非WBK模式下扫描平民装备
