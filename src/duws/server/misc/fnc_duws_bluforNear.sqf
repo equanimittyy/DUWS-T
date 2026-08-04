@@ -9,13 +9,32 @@
 // edges of the force that just took it.
 if (!isServer) exitWith { false };
 params ["_pos", "_radius", ["_minAI", 2]];
+
+// Above this counts as overflying rather than arriving. getPos, so the height is measured from the
+// ground under the entity: ASL would read every man standing in a hilltop zone as being hundreds of
+// metres up, and ATL measures from the sea floor out over water, which puts a landing craft
+// approaching a coastal zone at the depth beneath it.
+#define ARRIVAL_CEILING 100
+
+// Nobody flying raises a site: a jet crosses several rings a minute and a helicopter orbits them,
+// each one a full composition placed for someone who never landed. Height alone does not say so --
+// a helicopter on the deck reads as standing on the ground. A parachute is the exception: a man
+// under canopy is committed to the ground below him, and the ceiling makes his descent lead time.
+private _arrived = {
+	private _veh = vehicle _this;
+	(!(_veh isKindOf "Air") || {_veh isKindOf "ParachuteBase"})
+		&& {((getPos _this) select 2) < ARRIVAL_CEILING}
+};
+
 private _men = [];
 {
-	if (_x isKindOf "CAManBase") then {
-		if (side _x == WEST) then { _men pushBackUnique _x };
-	} else {
-		{ if (side _x == WEST) then { _men pushBackUnique _x } } forEach crew _x;
+	if (_x call _arrived) then {
+		if (_x isKindOf "CAManBase") then {
+			if (side _x == WEST) then { _men pushBackUnique _x };
+		} else {
+			{ if (side _x == WEST) then { _men pushBackUnique _x } } forEach crew _x;
+		};
 	};
 } forEach (_pos nearEntities [["CAManBase", "LandVehicle", "Air"], _radius]);
 if (count _men >= _minAI) exitWith { true };
-((call BIS_fnc_ListPlayers) findIf { (_pos distance _x) < _radius }) >= 0
+((call BIS_fnc_ListPlayers) findIf { (_pos distance _x) < _radius && {_x call _arrived} }) >= 0
