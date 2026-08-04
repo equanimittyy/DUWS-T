@@ -374,12 +374,16 @@ waitUntil { sleep 1.0; HQ_pos_found_generated };
 // in while the campaign is still being built around them.
 while {!(["BOOT", "mission_init_complete (zones built, civilians registered)",
     {mission_init_complete}, 300] call fnc_waitLogged)} do {};
-// Every player has to hold client_init's fnc_remoteBoard before the intro can seat them, which is
-// what the flat 15 s sleep here was really waiting for -- dead time on every ordinary boot, and no
-// guarantee at all on a slow one. Bounded and not retried: one client stuck short of that line must
-// not hold the insertion flight for everybody else.
-// The count test is load-bearing: findIf over an empty allPlayers returns -1, so without it an
-// empty player list satisfies this on the first check and the flight leaves before anyone exists.
+// Paced, not idle: generation signs off by typing MISSION INITIALIZATION COMPLETE across every
+// screen and hinting the settings summary (warcom/fnc_init_OPFOR_WARCOM.sqf), both fired the instant
+// mission_init_complete goes up, and the intro's first act is to black the screen over them. Flying
+// as soon as the clients were ready cut the typing off about a second into a six-second run.
+sleep 15;
+
+// The pause above does not replace this: the intro remoteExecs a seat onto each client, so every
+// player must be holding client_init's fnc_remoteBoard before it flies. Bounded and not retried --
+// one client stuck short of that line must not hold the flight for everybody else. The count test is
+// load-bearing: findIf over an empty allPlayers returns -1, so an empty list would pass on sight.
 ["BOOT", "duws_intro_ready on every player",
     {count allPlayers > 0
         && {(allPlayers findIf {!(_x getVariable ["duws_intro_ready", false])}) isEqualTo -1}}, 60] call fnc_waitLogged;
