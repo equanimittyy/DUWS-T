@@ -113,6 +113,16 @@ while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_place
 // The player's edits from the confirmation screen, laid over what resolution produced.
 [] call fnc_faction_apply_locked;
 
+// fnc_static_resolve stands a faction's own MG nest in for any static role it never fields, so a
+// side with no static MG at all leaves each composition's vanilla placeholder standing instead --
+// the one case where a zone garrisons itself with the wrong side's gun. Checked here rather than at
+// each placement: this is the first point the keys are final, and it is one line per campaign.
+{
+	if (([format ["%1_TURRET_HMG", _x]] call fnc_faction_pick) isEqualTo "") then {
+		["WARN", "FACTION", format ["%1 fields no static MG -- statics with no role of their own stand as the composition's own class", _x]] call fnc_log;
+	};
+} forEach ["blufor", "opfor"];
+
 // Squads compose from the role globals, so they are built after the edits land rather than
 // beside the resolution that produced them.
 [] call fnc_BLUFOR_squad_init;

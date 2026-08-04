@@ -79,6 +79,9 @@ fnc_factionGen = {
 	["blufor_TURRET_AT",          [_turretAT, _turretAA, _turretHMG],                     "B_static_AT_F"],
 	["blufor_TURRET_HMG",         [_turretHMG, _turretGMG],                               "B_HMG_01_high_F"],
 	["blufor_TURRET_GMG",         [_turretGMG, _turretHMG],                               "B_GMG_01_high_F"],
+	// The GMG rung before the MG one: a grenade launcher is the nearest thing a faction with no
+	// tube has to arcing HE. Read by fnc_static_resolve, like the four above.
+	["blufor_TURRET_MORTAR",      [_turretMortar, _turretGMG, _turretHMG],                "B_Mortar_01_F"],
 
 	["blufor_SPECOPS_X",          [_spec_sl, _spec, _sl, _grunt, _infantry],              "B_recon_F"],
 	["blufor_SPECOPS_GL_X",       [_spec_gl, _gl, _grunt, _infantry],                     "B_Soldier_GL_F"],
