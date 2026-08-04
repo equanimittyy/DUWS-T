@@ -3,12 +3,11 @@
 
 params ["_pos", ["_radius", 50]];
 
-// Foliage only, not the unfiltered sweep zone centres use (init_zones/fnc_createzone.sqf): a
-// terrain object cannot be deleted, so anything caught here stays hidden for the rest of the
-// campaign, and a permanently invisible house is a worse trade at a base site than a tree
-// standing through a tent. No BuildingChanged register for the same reason -- that event swaps a
-// damaged *building* for a fresh visible one, and nothing here is a building.
+// Foliage only, never buildings: a terrain object cannot be deleted, so anything caught here stays
+// hidden for the rest of the campaign, and an invisible house is a worse trade at a base site than
+// a tree standing through a tent. No BuildingChanged register for the same reason -- that event
+// swaps a damaged *building* for a fresh visible one, and nothing here is a building.
 private _foliage = nearestTerrainObjects [_pos, ["TREE", "SMALL TREE", "BUSH"], _radius, false];
 { _x hideObjectGlobal true } forEach _foliage;
 
-["INFO", "BOOT", format ["Cleared %1 foliage objects within %2 m of %3", count _foliage, _radius, _pos]] call fnc_log;
+["INFO", "TERRAIN", format ["Cleared %1 foliage objects within %2 m of %3", count _foliage, _radius, _pos]] call fnc_log;

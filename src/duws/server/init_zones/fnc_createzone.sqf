@@ -74,27 +74,15 @@ if (hardcore_mode_enable) then {
 };
 
 // ========== 清理战区中心周围的障碍物 ==========
-// Registered once for the whole campaign, on the first zone that clears ground. A terrain object
-// cannot be deleted, so the pass below hides it instead -- and the engine swaps a hidden building
-// for a fresh, visible one the moment its damage state changes, which is a grenade landing
-// anywhere near the zone. The replacement is hidden in its turn and takes the old one's place in
-// the register, so a house that is damaged twice does not come back on the second hit.
-if (isNil "DUWS_zone_hidden") then {
-    DUWS_zone_hidden = [];
-    addMissionEventHandler ["BuildingChanged", {
-        params ["_old", "_new"];
-        private _i = DUWS_zone_hidden find _old;
-        if (_i < 0) exitWith {};
-        _new hideObjectGlobal true;
-        DUWS_zone_hidden set [_i, _new];
-    }];
-};
-
+// Subtracting the terrain set leaves the map's own buildings standing. They cannot be deleted --
+// only hidden, and a hide never comes back -- so clearing them left a real town house invisible for
+// the rest of the campaign at every prefab zone, on exactly the dense towns moreUrban selects for.
+// Foliage is the one part of the terrain worth hiding, and fnc_clear_foliage owns that trade.
 if (_prefab) then {
     private _clearRadius = 35;
-    private _allObjects = nearestObjects [_zonePos, [], _clearRadius];
+    private _terrain = nearestTerrainObjects [_zonePos, [], _clearRadius];
+    private _scripted = (nearestObjects [_zonePos, [], _clearRadius]) - _terrain;
     private _deletedCount = 0;
-    private _hiddenCount = 0;
     {
         if (!isPlayer _x &&
             !(_x isKindOf "Man") &&
@@ -104,18 +92,12 @@ if (_prefab) then {
             !(_x in Array_of_FOBS)) then
         {
             deleteVehicle _x;
-            if (isNull _x) then {
-                _deletedCount = _deletedCount + 1;
-            } else {
-                _x hideObjectGlobal true;
-                DUWS_zone_hidden pushBack _x;
-                _hiddenCount = _hiddenCount + 1;
-            };
+            _deletedCount = _deletedCount + 1;
         };
-    } forEach _allObjects;
-    if (_deletedCount > 0 || _hiddenCount > 0) then {
-        ["INFO", "ZONES", format ["Cleared %1 objects at zone center %2 (%3 deleted, %4 hidden)",
-            _deletedCount + _hiddenCount, _zonePos, _deletedCount, _hiddenCount]] call fnc_log;
+    } forEach _scripted;
+    [_zonePos, _clearRadius] call fnc_clear_foliage;
+    if (_deletedCount > 0) then {
+        ["INFO", "ZONES", format ["Cleared %1 scripted objects at zone center %2", _deletedCount, _zonePos]] call fnc_log;
     };
     sleep 0.5;
 };

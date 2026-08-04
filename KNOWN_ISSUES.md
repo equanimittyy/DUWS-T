@@ -472,7 +472,7 @@ removes the per-man script without either problem.
 
 ## Zone and civilian siting defects
 
-Six defects in the enemy zone-siting subsystem. How the siting stages fit together is in
+Five defects in the enemy zone-siting subsystem. How the siting stages fit together is in
 [`docs/info/zones_and_civilians.md`](docs/info/zones_and_civilians.md#enemy-zone-siting-more-urban).
 
 **Origin keep-out drops the zone instead of retrying it.** `fnc_locatorzones_random.sqf:172-177`. When a
@@ -487,12 +487,6 @@ still false and the `for` loop advances — the zone slot is silently lost, yiel
 no validity retry; its no-buildings fallback takes `getPos (nearestBuilding …)` (`:100-102`), which is
 `[0,0,0]` when `nearestBuilding` returns `objNull`. That `[0,0,0]` is exactly what the origin guard then
 eats, so the two defects compound. The branch needs the reject-and-retry the less-urban path already has.
-
-**Prefab obstacle-clear hides real town buildings permanently.** `:61-87`. For prefab zones it
-deletes/hides everything within 35 m of centre except men/pads/flags/HQ/FOBs. `deleteVehicle` cannot
-remove terrain buildings, so the `hideObjectGlobal true` fallback is what actually clears them — a global,
-unrestored change to the town just selected for being dense. The `_deletedCount`/`_hiddenCount` counters
-double-count (both ops per object).
 
 **Unbounded, no-yield retry with a heavy per-iteration cost.** `:62-155`. Rejected positions re-roll with
 no `sleep`, and each `moreUrban` pass calls `nearestTerrainObjects` over 400 m plus a centroid pass; on a

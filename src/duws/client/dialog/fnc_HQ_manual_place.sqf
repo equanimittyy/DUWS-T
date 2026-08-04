@@ -43,37 +43,7 @@ while {true} do {
             publicVariable "PosOfBLUHQ";
             ["INFO", "BOOT", format ["HQ placed manually at %1", PosOfBLUHQ]] call fnc_log;
 
-            // 创建临时 HQ 标记
-            _markername = "foo";
-            _markerstr = createMarker [str(_markername), PosOfBLUHQ];
-            _markerstr setMarkerShape "ICON";
-            str(_markername) setMarkerType "mil_flag";
-            str(_markername) setMarkerColor "ColorBlue";
-
-            sleep 2;
-
-            forceMap false;
-            [localize "STR_DUWS_T_k9kxtm85"] call fnc_map_prompt;
-            OnMapSingleClick "ClickedPos2 = _pos; clicked = true;";
-            waituntil {sleep 0.1; clicked or !(visiblemap)};
-            if (clicked) then {
-                AO_direction = ClickedPos2;
-                publicVariable "AO_direction";
-                _markername2 = "foo2";
-                _markerstr2 = createMarker [str(_markername2), AO_direction];
-                _markerstr2 setMarkerShape "ICON";
-                str(_markername2) setMarkerType "mil_flag";
-                str(_markername2) setMarkerColor "ColorRed";
-                sleep 2;
-                deletemarker str(_markername2);
-            };  
-            deletemarker str(_markername);
-            hint "";
-            [""] call fnc_map_prompt;
-            openMap [false, false];
-            titleCut ["", "BLACK FADED", 999];
-            chosen_hq_placement = true;
-            publicVariable "chosen_hq_placement";
+            [] call fnc_HQ_placement_finish;
         }
     };
     sleep 1;

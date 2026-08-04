@@ -140,6 +140,9 @@ switch (VERSION_X) do {
 		// Permanent, so first fortify only: a refortify replaces the guns above and leaves the
 		// walls the player has been fighting behind exactly where they are.
 		if !(_refortify) then {
+			// With the walls, not with the turrets: 15 m covers a perimeter that reaches 11.5 m from
+			// centre, and a refortify is standing the guns back up inside ground already cleared.
+			[_centerPos, 15] call fnc_clear_foliage;
 			{ [_x, _fobKey] call _fnc_place } forEach _perimeterData;
 		};
 	};

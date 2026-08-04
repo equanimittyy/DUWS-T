@@ -757,18 +757,21 @@ it per prop would cost a JIP entry each.
 replaces a building with a fresh object when its damage state changes, and the replacement is
 not hidden — so any explosion near a cleared site re-pops the buildings that were cleared from
 it, straight through whatever was built on top.** `deleteVehicle` returns without complaint on a
-terrain object, which is why `fnc_createzone.sqf` tests `isNull` afterwards and hides whatever
-survived.
+terrain object, so a pass that deletes what it finds silently leaves every map building standing
+and unmarked.
 
 The replacement arrives through the `BuildingChanged` mission event, whose arguments are the old
 object and the new one. Nothing carries the hidden flag across for you.
 
-**How to apply:** keep a register of what was hidden, and on `BuildingChanged` hide the
-replacement and put it in the old one's place in the register — otherwise the second hit on the
-same house brings it back. `fnc_createzone.sqf` holds both halves, registering the handler once
-on the first zone that clears ground. The same caveat as escalation applies: `BuildingChanged`
-is a local event, so whether a dedicated server sees it for damage a client caused is unconfirmed
-([KNOWN_ISSUES.md](../../KNOWN_ISSUES.md)).
+**How to apply:** hide foliage and leave the buildings. The mission clears ground in three places —
+the HQ footprint, a prefab zone centre and a FOB perimeter — and all three go through
+`server/misc/fnc_clear_foliage.sqf`, which is filtered to `TREE`/`SMALL TREE`/`BUSH`. A hide is
+permanent and unrestorable, so hiding a town's houses trades a re-popping building for one that is
+invisible for the rest of the campaign. Where a building genuinely has to go, the register is the
+only correct shape: keep what was hidden, and on `BuildingChanged` hide the replacement and put it
+in the old one's place — otherwise the second hit on the same house brings it back. The same caveat
+as escalation applies: `BuildingChanged` is a local event, so whether a dedicated server sees it for
+damage a client caused is unconfirmed ([KNOWN_ISSUES.md](../../KNOWN_ISSUES.md)).
 
 ## A unary command binds tighter than `+`, so `sleep 2 + random 5` sleeps a flat 2 s
 
