@@ -205,7 +205,7 @@ siting and nothing else, so it is an upgrade path rather than part of the first 
 
 **One thread with a phase counter, not one per sink.** The hardpoint plan already made this call
 for its monitor ([§Spawn, despawn and cost](hardpoint_system_plan.md#spawn-despawn-and-cost)); it
-binds harder here, because `src/duws` carries 36 `while {true}` loops across 27 files today.
+binds harder here, because `src/duws` carries 25 `while {true}` loops across 19 files today.
 
 | Property | Value | Why |
 |---|---|---|

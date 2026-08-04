@@ -23,17 +23,17 @@ Background on how zones are placed, captured and consumed:
 
 ## Why hardpoints cannot be small zones
 
-`fnc_createZone` writes five campaign registries in its first fourteen lines
-(`server/init_zones/fnc_createzone.sqf:19-32`) and `fnc_zone_control_set` moves four globals
-as one atomic transition (`server/init_zones/fnc_zone_state_init.sqf:31-70`). Both are all-or-nothing.
+`fnc_createZone` writes five campaign registries in its opening block
+(`server/init_zones/fnc_createzone.sqf:23-39`) and `fnc_zone_control_set` moves four globals
+as one atomic transition (`server/init_zones/fnc_zone_state_init.sqf:219-257`). Both are all-or-nothing.
 Routing a hardpoint through either puts it into every consumer of zone state at once:
 
 | Global | Written by | What breaks if a hardpoint increments it |
 |---|---|---|
-| `amount_zones_created` | `server/init_zones/fnc_createzone.sqf:19-20` | The campaign never ends. The win condition is `zoneundercontrolblu >= amount_zones_created` (`server/misc/fnc_capture_zones_task.sqf:33`). FOB cap inflates too (`client/supports/fnc_request_fob.sqf:16`) |
-| `zoneundercontrolblu` | `server/init_zones/fnc_zone_state_init.sqf:47,60` | Passive income becomes `(zones + hardpoints) * 6` per 30 min (`server/misc/fnc_zonesundercontrol.sqf:32`) — the largest balance blow-up available |
-| `WARCOM_zones_controled_by_OPFOR` | `server/init_zones/fnc_zone_state_init.sqf:45,57-58` | Index 0 is the OPFOR primary assault target. A lost hardpoint redirects the entire enemy war effort. 25+ read sites |
-| `zone_namePOS_pairs` | `server/init_zones/fnc_createzone.sqf:28-29` | Intel reveals pick a random entry from the unrevealed set (`server/misc/fnc_intel_payout.sqf:20,61-62`), so hardpoints dilute what intel is worth |
+| `amount_zones_created` | `server/init_zones/fnc_createzone.sqf:23-24` | The campaign never ends. The win condition is `zoneundercontrolblu >= amount_zones_created` (`server/misc/fnc_capture_zones_task.sqf:63`). FOB cap inflates too (`client/supports/fnc_request_fob.sqf:16`) |
+| `zoneundercontrolblu` | `server/init_zones/fnc_zone_state_init.sqf:235,248` | Passive income becomes `(zones + hardpoints) * 6` per 30 min (`server/misc/fnc_zonesundercontrol.sqf:52`) — the largest balance blow-up available |
+| `WARCOM_zones_controled_by_OPFOR` | `server/init_zones/fnc_zone_state_init.sqf:245-246` | Index 0 is the OPFOR primary assault target. A lost hardpoint redirects the entire enemy war effort. 25+ read sites |
+| `zone_namePOS_pairs` | `server/init_zones/fnc_createzone.sqf:32-33` | Intel reveals pick a random entry from the unrevealed set (`server/misc/fnc_intel_payout.sqf:31,73`), so hardpoints dilute what intel is worth |
 
 The hardpoint tier therefore gets parallel state built to the same template, and touches none
 of the above. The one deliberate coupling is a *read*: the zone capture trigger reads a
@@ -48,7 +48,7 @@ icon marks, and the only thing the clear rule looks at.
 |---|---|---|---|---|
 | Observation post | vanilla tower or radar prop | `reveal`s BLUFOR within ~800 m to EAST, so patrols and QRF react to what it sees | 2 CP zone / 5 CP normal | high ground, long sightlines |
 | MG nest | `opfor_TURRET_HMG` + sandbags | covers an approach on foot | 2 / 5 CP | open approaches, dead ground below it |
-| AT position | `opfor_TURRET_AT` | kills anything wheeled or tracked using the road it covers | 3 / 6 CP | road overwatch (`BIS_fnc_nearestRoad`, as `fnc_createzone.sqf:182` uses it) |
+| AT position | `opfor_TURRET_AT` | kills anything wheeled or tracked using the road it covers | 3 / 6 CP | road overwatch (`BIS_fnc_nearestRoad`, as `fnc_locatorzones_random.sqf:107,133` uses it) |
 | AA position | `opfor_TURRET_AA` | denies the air corridor — taxi, helolift, CAS | 3 / 8 CP | open sky, away from tree cover |
 | Mortar pit | `opfor_TURRET_MORTAR` | light indirect fire out to a few km ([§Indirect fire](#indirect-fire-hardpoints)) | 3 / 8 CP | defilade behind the line it supports |
 | Artillery battery | `opfor_ARTY_X` (self-propelled gun) | heavy indirect fire over a region | 4 / 12 CP | rear areas, near a road for the look of resupply |
@@ -79,8 +79,8 @@ being seen changes little.
 | Artillery battery | 0.05 | 0.1 |
 
 Terrain then multiplies what the site actually supports: AT roughly triples with a road inside
-30 m and all but disappears without one (`BIS_fnc_nearestRoad`, as `fnc_createzone.sqf:182` uses
-it), AA doubles on open high ground, mortar doubles in defilade, OP doubles with sightlines. The
+30 m and all but disappears without one (`BIS_fnc_nearestRoad`, as `fnc_locatorzones_random.sqf:107,133`
+uses it), AA doubles on open high ground, mortar doubles in defilade, OP doubles with sightlines. The
 weights are a starting point to tune in play; the *shape* — common infantry positions, uncommon
 specialised ones, rare guns — is the part that matters.
 
@@ -92,7 +92,7 @@ zero weight relies on `selectRandomWeighted` semantics that are not worth depend
   cannot be five AA guns;
 - for director builds only, OPFOR AP has not unlocked it.
 
-`selectRandomWeighted` is the mission's idiom for exactly this — `fnc_createzone.sqf:113-121` picks
+`selectRandomWeighted` is the mission's idiom for exactly this — `fnc_createzone.sqf:150-158` picks
 prefabs with it. Zone vehicles are no longer picked at all: a composition names what it fields, and
 `fnc_spawn_vehicle.sqf` places that class.
 
@@ -115,7 +115,7 @@ Three reasons the number is this small:
 
 Counting is a filter over `hardpoint_type_array` where `hardpoint_state_array` is `0`; no new
 state. **Claim the slot in the same unsuspended block that reads the count.** Zones build
-concurrently — `fnc_locatorzones_random.sqf:180` spawns one `fnc_createZone` per zone, and each
+concurrently — `fnc_locatorzones_random.sqf:171` spawns one `fnc_createZone` per zone, and each
 siting loop sleeps — so a read, a `sleep`, then a placement lets two zones both see an empty slot
 and both take it. SQF only yields where the script says so, which is what makes decide-and-claim
 in one block sufficient.
@@ -133,8 +133,8 @@ that, the first three zones would hold every interesting emplacement in the camp
 Unit classnames come from the `opfor_*_X` faction globals exactly as the garrison placers in
 `server/misc/fnc_garrison*.sqf` do. Hardcoding unit or turret
 classnames is the single change that would break mod-free operation and faction
-auto-detection; hardcoding vanilla `Land_*` structures is fine, and the zone code already does
-it (`fnc_createzone.sqf:145-151`).
+auto-detection; hardcoding vanilla `Land_*` structures is fine, and every zone prefab already does
+it (`server/init_zones/prefabs/modern/*.sqf`).
 
 **`opfor_TURRET_HMG` already exists and is used nowhere.** Every faction file defines it
 (`shared/factions/MODERN/*_opfor.sqf:35-36`, `AUTODETECT_opfor.sqf:115`) and no script reads
@@ -142,10 +142,11 @@ it. The MG nest is its first consumer.
 
 **The other four globals do not exist yet, but the data does.** `fnc_parseFaction` already
 returns `_turretAT`, `_turretAA`, `_turretMortar` and `_arty`
-(`shared/factions/MODERN/fn_factionAutoDetect.sqf:583-586,614`); the OPFOR generator discards all
+(`shared/factions/MODERN/fn_factionAutoDetect.sqf:583-590,613-616`); the OPFOR generator discards all
 four, while the BLUFOR one keeps its turret equivalents (`AUTODETECT_blufor.sqf:118-121`). Four
 lines in each autodetect generator plus entries in `o_arraysToRandomize`
-(`AUTODETECT_opfor.sqf`), which is the list handed to `fnc_faction_pools_publish`, closes the gap.
+(`AUTODETECT_opfor.sqf:186`, `AUTODETECT_RANDOM_opfor.sqf:135`), which is the list handed to
+`fnc_faction_pools_publish`, closes the gap.
 
 | New global | Parsed from | Vanilla fallback |
 |---|---|---|
@@ -154,7 +155,7 @@ lines in each autodetect generator plus entries in `o_arraysToRandomize`
 | `opfor_TURRET_MORTAR` | `_turretMortar` | `O_Mortar_01_F` |
 | `opfor_ARTY_X` | `_arty` | `O_MBT_02_arty_F` |
 
-The 132 hand-authored faction files must **not** be swept to add them. Read each as
+The 130 hand-authored OPFOR faction files must **not** be swept to add them. Read each as
 `missionNamespace getVariable ["opfor_TURRET_AT", "O_static_AT_F"]` — the fallback is what the
 `fnc_selectNonEmpty` chains in autodetect already end in, and it keeps a faction file that
 predates this feature working untouched. `_arty` is the one most likely to come back empty on a
@@ -167,25 +168,34 @@ mod faction, so its fallback earns its keep.
 Inside `fnc_createZone`, not in a separate siting pass off `serv_zones_array`. Three reasons,
 all decisive:
 
-- **Radius is in hand there.** `serv_zones_array` entries are two-element `[x,y]`
-  (`fnc_locatorzones_random.sqf:180`), so a pass driven off that array would have to read the
-  radius back out of `zone_meta_array` (`fnc_createzone.sqf:30-36`); inside `fnc_createZone` it
+- **Radius is in hand there.** `serv_zones_array` entries carry a position and nothing else
+  (`fnc_locatorzones_random.sqf:171-173`), so a pass driven off that array would have to read the
+  radius back out of `zone_meta_array` (`fnc_createzone.sqf:38-39`); inside `fnc_createZone` it
   is the `_size` argument.
-- **Both locators already funnel through it.** Random placement `spawn`s it (`:185`); manual
-  placement `remoteExec`s it to target 2 (`fnc_locatorzones_manual.sqf:94`). A pass inside
-  `fnc_createZone` is server-side in both cases and needs no wait on a client-published array.
+- **Both locators already funnel through it.** Random placement `spawn`s it
+  (`fnc_locatorzones_random.sqf:171`); manual placement `remoteExec`s it to target 2
+  (`fnc_locatorzones_manual.sqf:94`). A pass inside `fnc_createZone` is server-side in both cases
+  and needs no wait on a client-published array.
 - **The zone index is in hand.** `_zone_num` keys the per-zone counter the capture trigger
   reads, and it is unique by construction, unlike the coordinate-derived names used elsewhere.
 
-Placement point: where the fortification ring stood, after the prefab composition and before the QRF
-object. That is upstream of the `zones_buildout_done` increment at `:221`, so the "Building
-zones..." prompt and the civilian-generation gate keep describing reality
-(`fnc_init_OPFOR_WARCOM.sqf:39-49`).
+Placement point: where the fortification ring stood, after the prefab composition is dispatched and
+before the site registration at `fnc_createzone.sqf:269-282`. Two things bound it, and both are the
+tail of that function rather than the middle of it:
+
+- **Upstream of the `zones_buildout_done` increment at `:260`**, so the "Building zones..." prompt
+  and the civilian-generation gate keep describing reality
+  (`server/warcom/fnc_init_OPFOR_WARCOM.sqf:37-46`).
+- **Upstream of the opening stow at `:295-298`**, which waits for the prefab builder and then puts
+  the whole composition away if nobody is near. A hardpoint placed after it is placed into ground
+  that has already been stowed, and the zone comes back carrying it only if it was filed under the
+  key first. Filing before the stow is what makes the hardpoint part of the composition rather than
+  a straggler beside it.
 
 ### Count and siting
 
 Radius is in `(zones_min_radius, zones_max_radius]` — `(200, 1000]` as shipped
-(`server/server_var_init.sqf:216-220`):
+(`server/server_var_init.sqf:331,333`):
 
 ```sqf
 private _count = ((1 + floor (_size / 220)) + floor (random 2)) min 6;
@@ -195,8 +205,8 @@ private _count = ((1 + floor (_size / 220)) + floor (random 2)) min 6;
 player-settable and a 6-zone campaign at 5 hardpoints each is already 30 extra emplacements.
 
 Sited in the annulus between `0.35 * _size` and `0.9 * _size`: outside the 35 m the prefab pass
-clears (`:66`), inside the capture trigger, whose area is `[_size, _size]` — `_size` is the
-*radius* of a circular trigger, not a diameter (`:267`).
+clears (`:97`), inside the capture trigger, whose area is `[_size, _size]` — `_size` is the
+*radius* of a circular trigger, not a diameter (`:307`).
 
 Rejection rules, cheapest first: 120 m from another hardpoint, 40 m from the prefab composition's own
 objects, not on water.
@@ -246,26 +256,28 @@ later type inherit a fudge that was only ever true of one model.
 
 ### The capture gate
 
-One broadcast number per zone, `zone_hp_left_<zone_num>`, read directly in the capture
-trigger's condition (`fnc_createzone.sqf:266-270`):
+One number per zone, `zone_hp_left_<zone_num>`, refused inside `fnc_zone_capture_ready`, beside
+the two questions it already asks — is the garrison beaten, and does BLUFOR outnumber what is left
+standing (`server/init_zones/fnc_zone_capture_ready.sqf`). The gate is one `exitWith` alongside the
+garrison-peak refusal at `:31`; nothing about the trigger changes.
 
-```sqf
-_trg setTriggerStatements [
-    format ["this && ((missionNamespace getVariable ['zone_hp_left_%1', 1]) <= 0)", _zone_num],
-    format ["[""%1"",%2,""%3"",""%4"",%5,%6] spawn fnc_captured", …], ""];
-```
-
-Single quotes inside the condition, so the `format` needs no doubled-quote escaping — the
-activation statement below it shows what the alternative reads like.
+**Nothing is formatted into the trigger.** The capture trigger's condition is already a call —
+`"this && {[thisTrigger] call fnc_zone_capture_ready}"` (`fnc_createzone.sqf:321`) — and the zone's
+position and key ride the trigger as variables rather than as text (`:317-318`). Formatting a zone
+number into a condition string would put this counter back through the float round trip that
+convention exists to avoid
+([`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md#a-trigger-statement-is-a-string-so-anything-formatted-into-it-is-a-float-round-trip)).
 
 **The gate has to live in the condition, not in the handler.** A trigger fires on a false→true
 transition. If `fnc_captured` instead refused a capture while hardpoints remained, the condition
 would stay true for as long as the player stood in a cleared zone, so it would never re-fire:
 the zone would become permanently uncapturable until everyone left and came back.
 
-**The default is `1`, not `0`.** A global trigger is evaluated on every machine, which is why
-`fnc_captured` asserts `isServer` at all (`fnc_captured.sqf:12-14`). Defaulting to "one left"
-means a machine that has not yet received the broadcast cannot evaluate the gate as satisfied.
+**The counter is read server-side, so it needs no defensive default.** The capture trigger is
+created server-local for exactly this reason — the condition already reads the garrison peak, a
+server-side global — so there is no machine evaluating it without the state
+(`fnc_createzone.sqf:306`, `fnc_zone_capture_ready.sqf:1-3,15`). It is still broadcast, because the
+markers and the readout count it on the client.
 
 **A zone with zero placed hardpoints is capturable immediately.** That is the intended failure
 mode: siting can legitimately place nothing (a zone centred on a lake shore), and the counter is
@@ -277,21 +289,25 @@ captured is unrecoverable; a zone that is slightly easier is not.
 Zone hardpoint markers are visible from campaign start, like the zone markers themselves. The
 player plans the assault off the map rather than discovering the objective count after walking
 in, which is what makes a strict all-of-them gate fair: the hunt for a last unseen emplacement
-across a 1,000 m zone is the failure mode this avoids. The zone-entry notification
-(`server/misc/fnc_enterlocation.sqf:15`) still reports how many are left, because a count is
-faster to read than icons are to tally.
+across a 1,000 m zone is the failure mode this avoids.
+
+The count of what is left belongs on the zone's own marker text, beside the name and kind it
+already carries (`fnc_createzone.sqf:169`). Not on zone entry: that notification was deleted as
+noise — a zone the player is standing in does not need naming to them — and its only remaining job
+is the hardcore reveal (`server/misc/fnc_enterlocation.sqf:2-5`). Putting a count back on arrival
+would reopen that decision to save a glance at the map.
 
 The cost is map density — up to 36 icons on a six-zone campaign — so hardpoints get an icon and
 no ellipse ([§Markers](#markers)), and the icon carries the type, so a cluster of six still reads
 as information rather than clutter.
 
 **Hardcore mode is the one exception, and it is mandatory.** Hardcore hides zone markers until
-intel or entry reveals them (`fnc_createzone.sqf:45-49,58-62`, `fnc_zone_reveal.sqf`). A visible
+intel or entry reveals them (`fnc_createzone.sqf:57-61,70-74`, `fnc_zone_reveal.sqf`). A visible
 hardpoint icon inside a hidden zone gives the zone's position away, which defeats the mode
 outright. So in hardcore, hardpoint markers start at alpha 0 and are revealed by
 `fnc_zone_reveal` along with their parent.
 
-That function resolves its target by position, not by index (`fnc_zone_reveal.sqf:11-22`), and
+That function resolves its target by position, not by index (`fnc_zone_reveal.sqf:33-34`), and
 the hardpoint registry has no position-to-zone-number lookup. Filter spatially instead: reveal
 every marker whose `hardpoint_zone_array` entry is `>= 0` and whose position is within
 `zones_max_radius` of the revealed zone. Both arrays are broadcast, so this needs no new state,
@@ -329,8 +345,10 @@ interaction menu is the intended source:
 lists an unrevealed normal hardpoint as one of the kinds `fnc_intel_payout` draws from, and
 [`info/zones_and_civilians.md`](info/zones_and_civilians.md) hands its intel row to that
 function. The corpse and side-mission paths already reach it on the same terms
-(`server/misc/fnc_intel_search.sqf:27` and the `fnc_intel_payout` calls in the mission threads),
-so a hardpoint kind added to the payout is surfaced by every source at once.
+(`server/misc/fnc_search_claim.sqf:95` and the `fnc_intel_payout` calls in the mission threads),
+so a hardpoint kind added to the payout is surfaced by every source at once. The payout's own
+comment already names an unrevealed normal hardpoint as a kind waiting for the system behind it
+(`server/misc/fnc_intel_payout.sqf:26-28`).
 
 Revealing one is a marker alpha change on a single index — the registry is broadcast and
 `hardpoint_zone_array` is `-1` for exactly this set, so a reveal picks from entries with that
@@ -367,20 +385,21 @@ BLUFOR-held position. Placed 35-65% along the segment between them with lateral 
 hardpoints appear on the ground the player has to cross rather than at either end.
 
 BLUFOR anchors available today: `WARCOM_zones_controled_by_BLUFOR`, `PosOfBLUHQ`, and
-`Array_of_FOBpos` (`server/supports/fnc_fob_server.sqf:84`), which is index-parallel to
+`Array_of_FOBpos` (`server/supports/fnc_fob_server.sqf:112`), which is index-parallel to
 `Array_of_FOBS` and holds positions rather than building objects.
 
 Rejection rules: 800 m from `PosOfBLUHQ` and from any FOB, `zones_max_radius * 0.9` from any
 zone centre (a hardpoint inside a zone would be a zone hardpoint that does not gate it), 400 m
 from another hardpoint, 1000 m from any player, not on water. The player keep-out reads
 `allPlayers`, never `player` — a bare `player` read server-side is `objNull` on a dedicated
-server and the distance test then always passes, which is exactly the bug
-`fnc_WARCOM_blu_patrol.sqf` shipped with
-([`info/server_client_authority.md`](info/server_client_authority.md#dedicated-server-compatibility)).
+server and the distance test then always passes, which is the bug `fnc_WARCOM_blu_patrol.sqf`
+shipped with and now states in place of
+(`server/warcom/fnc_WARCOM_blu_patrol.sqf:60-63`,
+[`info/server_client_authority.md`](info/server_client_authority.md#dedicated-server-compatibility)).
 
 **The civilian-town anchor is a named seam, not a dependency.** The design intent is corridors
 between enemy zones and *enemy-held towns*, but towns have no ownership today:
-`fnc_civ_init_Tomata.sqf:163-164` registers `civ_locations` / `civ_radii` with no side, and the
+`fnc_civ_init_Tomata.sqf:165-166` registers `civ_locations` / `civ_radii` with no side, and the
 registry is server-local rather than broadcast — which is fine here, because siting is
 server-side anyway. When town ownership exists it appends to the anchor list and nothing else
 changes. Building on it now would mean inventing the ownership model inside this plan.
@@ -422,9 +441,15 @@ at placement. So an AA position generated in hour one is a real gun with a thin 
 position revisited in hour five has armour parked next to it. The emplacement is what the map
 rolled; the troops around it are what the war has become.
 
-Vehicle classes come from the same `opfor_ARMED_CAR1_X` / `opfor_APC1_X` / `opfor_MBT_TANK1_X`
-globals the wave tables use, so a hardpoint late in a campaign is defended by whatever the enemy
-is fielding everywhere else.
+**The ladder is a composition table, not a bespoke list.** OPFOR garrisons are token compositions
+now — a row of `posture:token` entries resolved against the team, vehicle and special tables in
+`server/init_zones/fnc_zone_spawn_sizes.sqf:115-121,308-314,345-358`, scaled, attrition-thinned and
+raised by `DUWS_fnc_raiseGarrison` (`:242`). A hardpoint tier belongs in that file as its own small
+table beside the zone one, for three reasons: the vehicle rows already name faction roles rather
+than classnames, so a hardpoint late in a campaign is defended by whatever the enemy fields
+everywhere else; the row's `setting` column already answers `HeavyArmor`; and a fenced table is
+editable through the composition TUI, where a list hardcoded in a placer is not
+([`info/composition_tooling.md`](info/composition_tooling.md)).
 
 **Composition is read when the garrison spawns, not when the hardpoint is built.** With garrisons
 distance-gated ([§Distance gating](#distance-gating-replaces-a-live-cap)), a hardpoint the player
@@ -437,6 +462,13 @@ never its current balance — otherwise paying for one hardpoint thins the garri
 hardpoint already standing, and the player watches the war get easier because the enemy invested
 in it.
 
+That is not what the existing tables do. `DUWS_fnc_tokenClass` gates a vehicle token on the
+*current* `WARCOM_opfor_ap` (`fnc_zone_spawn_sizes.sqf:211,354`), so a zone raised the moment after
+the commander spends fields less armour than the same zone raised a minute earlier. Nothing tracks a
+high-water mark today, so one of the two has to give: either this tier accepts the existing rule, or
+a high-water global is written once and both read it. Two rules for one idea is the outcome to
+avoid, because the difference is invisible in play and only shows up as a zone that got easier.
+
 | Knob | Value | Why |
 |---|---|---|
 | Seed subset | 2-3 at WARCOM init, any type | The player meets the mechanic before the director has produced anything |
@@ -444,11 +476,17 @@ in it.
 | Build gate | OPFOR AP above 10 | A suppressed enemy stops fortifying |
 | Build costs | 8-25 AP by type | Cheapest for an OP or MG nest, dearest for the battery — the same order the clear payouts run in |
 | Live cap | none | ([§Distance gating](#distance-gating-replaces-a-live-cap)) |
-| Clear pays | CP only | Missions and zone capture remain the AP faucets (`fnc_mission_reward.sqf:20`, `fnc_captured.sqf:44-47`) |
+| Clear pays | CP only | Missions and zone capture remain the AP faucets (`fnc_mission_reward.sqf:19`, `fnc_captured.sqf:38-41`) |
 
-The director is one thread, `spawn`ed from `fnc_WARCOM_init.sqf` beside the four that already
-launch there (`:51-63`). It runs after both side lists exist (`:38-45`), which is what its
-anchor pairs read.
+The director is one thread, `spawn`ed from `fnc_WARCOM_init.sqf` beside the two that still launch
+there (`:44-50`). It runs after both side lists exist (`:33-40`), which is what its anchor pairs
+read.
+
+**Whether it is a thread at all is not this plan's call to make.**
+[`opfor_commander_loop_plan.md`](opfor_commander_loop_plan.md) puts the hardpoint build in one
+commander loop as one of two Army Power sinks, and defers to this document for what a hardpoint
+*is*. Everything above is the spend rule; where the tick lives belongs to whichever lands first,
+and writing a second AP-spending loop to be deleted is the outcome to avoid.
 
 ### Distance gating replaces a live cap
 
@@ -462,18 +500,28 @@ There is no ceiling on how many normal hardpoints exist. Two things bound them i
 
 Props cycle with the garrison, per
 [§Map object count](info/performance.md#map-object-count-is-bounded-by-proximity-not-campaign-length).
-A hardpoint composition the size of a zone prefab is what forces this: at 1-6 per zone against 65
-objects each, leaving them standing puts a large campaign into five figures of map objects. Filing
-them under a key with
-`fnc_duws_keep` is the whole integration — streaming reads the registry, so no hardpoint code
-places or removes an object itself.
+Even at a dozen objects to a hardpoint — a gun, its cover, a crate, a net, not a zone prefab's
+worth — a six-zone campaign with the director running carries several hundred props that exist for
+no one, and the count only ever grows. Filing them under a key with `fnc_duws_keep` is the whole
+integration: streaming reads the registry, so no hardpoint code places or removes an object itself.
 
 Only the map marker stays. A cleared hardpoint's marker is the record the player was promised,
 and it costs nothing to keep.
 
+**A normal hardpoint registers as a site rather than being polled by hand.** `fnc_site_register`,
+`fnc_site_occupant_register` and `fnc_site_hooks_set` (`server/misc/fnc_site_stream_init.sqf:30,66,98`)
+are the mechanism a zone already uses for exactly this, on a shared 10 s tick that builds its player
+list once and distance-tests every site against it. Writing a second proximity loop would pay a
+spatial query per hardpoint per pass for the sake of thresholds this store already holds.
+
+The occupant split is the zone's too — `structure` for the composition, `emplacement` for the core,
+`garrison` for the men (`fnc_createzone.sqf:269-282`) — because the ordering constraint is the same
+one: the props have to stand before anyone is placed on them, and the gun has to be empty before the
+composition holding it can be stowed.
+
 Thresholds match the zone gate so the two feel the same: spawn at 600 m from any player, despawn
 after 300 s with nobody inside 600 m (a zone's occupant carries a 400 m buffer on its radius and a
-120 s grace; see `server/misc/fnc_site_stream_init.sqf`).
+120 s grace, `fnc_createzone.sqf:270`).
 
 ### Which key a hardpoint files under decides its whole lifecycle
 
@@ -496,23 +544,47 @@ hardpoints' vanished, inside the same circle. Normal hardpoints have the opposit
 sit on ground nobody holds, the director keeps building more, and a spent turret left in an empty
 field forever is the accumulation this tier would otherwise create.
 
-### Retirement has to be explicit
+**Sharing the zone's key means sharing its stow, and that is what forces every core to be pinned.**
+A stow deletes its members and a deploy rebuilds them as new objects
+(`server/misc/fnc_composition_stream_init.sqf:124,137-139`) — the key is the only identity a
+composition carries across one. An unpinned core therefore goes null on the first despawn, and
+`isNull _core` clears the hardpoint for free ([§Clearance](#clearance)). Pinning is
+[§Types whose effect depends on existing](#types-whose-effect-depends-on-existing-are-not-stowed),
+applied to all six rather than three.
 
-A cleared normal hardpoint's gate must be told to stop, not left to discover it has nothing to do.
-After `fnc_duws_release` the key is gone from `DUWS_compositions`, so a stow call silently
-no-ops — correct by accident, and only because `fnc_duws_stow` tests membership first. Relying on
-that leaves one idle loop per cleared hardpoint running for the rest of the campaign, and any
-future change to that guard turns a resource cost into a correctness bug.
-
-Release must also clear `DUWS_stowed`. `fnc_duws_release` walks `DUWS_compositions` and deletes
-that key without ever looking at the stow map, so retiring a stowed composition currently succeeds
-while changing nothing, and the composition redeploys intact on the next approach. Unreachable
-while zones are the only thing that streams, because nothing releases a zone.
+**Retirement is already explicit, and the release path already answers it.** `fnc_duws_release`
+clears `DUWS_stowed` alongside `DUWS_compositions` and files the key in `DUWS_retired`
+(`fnc_composition_stream_init.sqf:61-75`), which is a terminal state a gate can read rather than
+infer from an absent key; re-filing under a retired key revives it (`:47-50`), so a hardpoint built
+at the same rounded coordinates as a cleared one does not inherit its predecessor's retirement. What
+a cleared normal hardpoint still owes is `fnc_site_retire` (`fnc_site_stream_init.sqf:173`), so the
+poller stops asking whether anybody is standing where the emplacement used to be.
 
 ### Types whose effect depends on existing are not stowed
 
-Three types act at ranges far beyond the gate that would stow them, so streaming their core
-removes the capability rather than deferring it:
+**Every core is pinned; three of them keep their crew as well.** The mechanism exists:
+`fnc_duws_keep` takes a `_pinned` flag that files a member as `DUWS_noStow`, `fnc_duws_stow`
+leaves those standing and excludes them from its crewed-member refusal, and the zone's
+static-rebuild path already carries the flag across a replacement
+(`fnc_composition_stream_init.sqf:38-46,93,100`, `fnc_zone_stream_init.sqf:85-101`). Nothing passes
+`true` yet — this tier is its first caller.
+
+Pinning every core is what keeps `isNull _core` meaning destruction rather than distance
+([§Clearance](#clearance)). It costs one object per hardpoint: the gun stays, the cover around it
+streams like any other prop.
+
+Two hooks in the zone's own cycle have to learn about pinned members, or the pin buys nothing:
+
+- `DUWS_zoneEmplacementHooks` "sleep" crews out every `StaticWeapon` in the composition without
+  testing `DUWS_noStow` (`fnc_zone_stream_init.sqf:254-258`), so a gun that is meant to keep its
+  crew loses it on the first despawn.
+- `DUWS_fnc_zoneManStatics` re-crews every empty static in the composition and appends the gunners
+  to the zone's roster (`:207-242`), which would fold hardpoint crews into the zone's garrison peak
+  and its capture break-line — a hardpoint's men are not the zone's garrison, and counting them
+  makes clearing one look like beating the other.
+
+Three types then keep their crew on top of the pin, because they act at ranges far beyond the gate
+that would stow them, so streaming the core removes the capability rather than deferring it:
 
 | Type | Why the core stays resident |
 |---|---|
@@ -521,8 +593,7 @@ removes the capability rather than deferring it:
 | AA position | Denies an air corridor. A jet crosses a 450 m trigger in about three seconds — deploy cannot finish before the aircraft is past, so a streamed AA gun never engages anything |
 
 **The core and its crew stay; the furniture around it streams normally.** That is the split worth
-having — the gun is one object against roughly 65 in the composition, so pinning it costs about
-1.5% of what pinning the whole hardpoint would.
+having — one gun and two men against everything else the emplacement is built from.
 
 Indirect fire is already capped at three guns campaign-wide
 ([§The indirect-fire types are capped](#the-indirect-fire-types-are-capped-campaign-wide)), and
@@ -535,6 +606,13 @@ live-AI growth the indirect-fire cap was written to prevent.
 The types that justify the tier: persistent enemy assets that act on the campaign, so destroying
 one changes the player's situation rather than incrementing a counter. Two tiers, sharing one
 fire-mission implementation.
+
+**A zone's own mortar section is a different thing and stays as it is.** Every zone tier already
+fields a `mortar` token — two men carrying a tube and its ammunition, defending the centre
+(`fnc_zone_spawn_sizes.sqf:116-119`, `server/misc/fnc_garrisonMortar.sqf`) — and its fire is
+whatever the engine's AI decides on its own. It is garrison, it despawns with the garrison, and it
+is not counted against the caps below. What is capped is the emplacement kind: a sited, crewed,
+map-marked gun that keeps firing while nobody is there.
 
 Real crewed guns, not a virtual effect. `doArtilleryFire` must be issued from the machine where
 the gun is local, and both are server-spawned, so the server issues it — the same locality rule
@@ -578,9 +656,8 @@ anyway: the HQ is the one position the player cannot abandon, cannot move, and c
 unoccupied, so fire on it is attrition against a fixed address rather than a fight. Assault waves
 already pressure the base and can be met.
 
-The exclusion is on the **aim point**, over a 100 m radius around `PosOfBLUHQ` — the same circle
-the HQ icon already uses (`client/init_hq/fnc_draw_HQicon.sqf:8`, and the civilian keep-out uses
-the same figure). No fire mission may be *aimed* inside it.
+The exclusion is on the **aim point**, over a 100 m radius around `PosOfBLUHQ`. No fire mission
+may be *aimed* inside it.
 
 Rounds may still land there. A barrage aimed at a player 200 m out will spill onto the base once
 scatter is applied, and that is the intended behaviour: what is denied is deliberate, accurate
@@ -683,18 +760,23 @@ isNull _core || !alive _core || damage _core >= 0.9
              || (_core unmanned && no live EAST within 60 m)
 ```
 
-- `isNull _core` is the important one. `fnc_mission_cleanup.sqf:24-40` deletes every non-WEST,
-  non-civilian object within `_radius * 1.2` of a finished side mission, and only skips the sweep
-  when an OPFOR zone is within `zones_max_radius * 1.2`. A normal hardpoint in a corridor is
-  squarely in scope. Without this clause a deleted core would leave its parent zone permanently
-  uncapturable — the single worst failure this design can produce.
-- **`isNull` and despawn must never overlap.** A core that is deleted on despawn would satisfy
-  the clause and clear itself for free, handing the player every distant hardpoint on the map.
-  This is why cores are exempt from distance gating
-  ([§Distance gating](#distance-gating-replaces-a-live-cap)): nothing but destruction or a
-  cleanup sweep ever deletes one, so `isNull` keeps meaning what it says. If a core ever does
-  become despawnable, the clear rule has to be gated on a spawned flag first, and the flag has to
-  be written *before* the delete.
+- `isNull _core` is the safety net, and what it guards against is a core deleted by something that
+  never asked whether it mattered. A side mission's teardown is the near miss: it deletes what it
+  finds within `_radius * 1.2` of a finished objective, and a normal hardpoint in a corridor is
+  squarely in that circle — but the sweep spares anything flagged `persistent` and anything a site
+  owns (`server/missions/fnc_mission_cleanup.sqf:117-127`), and `fnc_duws_keep` sets that flag on
+  everything it files. So a filed core is already out of scope. The clause stays because a core that
+  goes missing for any reason at all must clear its hardpoint rather than leave a zone permanently
+  uncapturable, which is the single worst failure this design can produce.
+- **`isNull` and despawn must never overlap.** A core deleted on despawn satisfies the clause and
+  clears itself for free, handing the player every distant hardpoint on the map. In this codebase
+  that is not hypothetical: `fnc_duws_stow` deletes composition members outright
+  (`server/misc/fnc_composition_stream_init.sqf:124`), so an unpinned core is deleted the first time
+  its zone streams out. Pinning every core is what closes it
+  ([§Types whose effect depends on existing](#types-whose-effect-depends-on-existing-are-not-stowed));
+  it is a correctness requirement, not a performance choice. If a core ever does become stowable,
+  the clear rule has to be gated on a deployed flag first, and the flag has to be written *before*
+  the delete.
 - The unmanned-and-clear clause is what makes the tier playable with rifles. A zone gated on
   *destroying* five static weapons is uncappable for a squad without explosives, and an
   observation-post core built from a `Land_*` prop cannot be destroyed by small arms at all.
@@ -705,7 +787,7 @@ isNull _core || !alive _core || damage _core >= 0.9
 Detection is polling, not a `Killed` event handler. The unmanned clause is a state, not an
 event, so a poll is needed regardless, and one mechanism means one place for the idempotency
 guard. Polling is also the codebase's existing idiom for exactly this
-(`shared/functions/fnc_MHQ_destroyed.sqf:4`).
+(`shared/functions/fnc_MHQ_destroyed.sqf:11`).
 
 ## State
 
@@ -720,19 +802,25 @@ serialisable, since the mission namespace is the save file
 | `hardpoint_type_array` | `"MG"` / `"OP"` / `"AA"` / `"ARTY"` | on placement |
 | `hardpoint_zone_array` | zone number, or `-1` for a normal hardpoint | on placement |
 | `hardpoint_state_array` | `0` live, `1` cleared | on every transition |
-| `zone_hp_left_<n>` | number per zone | on every transition (the trigger condition reads it) |
+| `zone_hp_left_<n>` | number per zone | on every transition (`fnc_zone_capture_ready` reads it) |
 
 Core objects and garrison groups are **not** in the broadcast registry. They go in server-local
-namespace keys, `hardpoint_core_<i>`, the way the zone code holds its triggers and fortifications
-(`fnc_createzone.sqf:198,274`). Nothing publicVariables an object handle. The garrison-spawned
-flag is server-local for the same reason it is not broadcast: only the monitor reads it, and it
-changes far more often than anything a client needs.
+namespace keys, `hardpoint_core_<i>`, the way the zone code holds its capture trigger
+(`fnc_createzone.sqf:328-330`) and its flagpole (`:347-348`). Nothing publicVariables an object
+handle. The garrison-spawned flag is server-local for the same reason it is not broadcast: only the
+monitor reads it, and it changes far more often than anything a client needs.
+
+**A core handle is only durable because the core is pinned.** A stow replaces every member of a
+composition with a fresh object on the next deploy (`fnc_composition_stream_init.sqf:137-139`), so a
+handle held in `hardpoint_core_<i>` would go stale on the first despawn of an unpinned core — the
+same fact the clear rule turns into a free capture
+([§Clearance](#clearance)). Pinning is what lets the registry hold a handle at all.
 
 Because the registry is append-only and unbounded, every entry has to stay cheap — which the
 shapes above already are. Growth is data, not objects.
 
 One writer, `fnc_hardpoint_state_set [_index, _state]`, in
-`server/init_zones/fnc_zone_state_init.sqf` beside `fnc_zone_control_set` (`:31-70`). It owns
+`server/init_zones/fnc_zone_state_init.sqf` beside `fnc_zone_control_set` (`:219-257`). It owns
 `hardpoint_state_array` and `zone_hp_left_<n>` together, broadcasts both, and pays the reward
 through the existing delta writers `fnc_cp_adjust` and `fnc_ap_adjust`
 (`server/misc/fnc_economy_init.sqf:14,43`) — CP to the player, AP off the OPFOR pool only,
@@ -741,34 +829,39 @@ already-cleared index, because two clauses of the clear rule can become true in 
 
 ## Spawn, despawn and cost
 
-**One monitor thread for all hardpoints**, ticking every 20-30 s over the registry: clear
-detection, garrison spawn and despawn on player distance, artillery cadence. Not one thread each.
-The server already runs 40 `while {true}` loops across 23 files
-([`campaign_persistence_plan.md`](campaign_persistence_plan.md)), and one thread per hardpoint
-would grow that without bound, for work that is a single pass over a few short arrays. A pass over
-50 hardpoints against 8 players is 400 distance tests every 20-30 s, which is noise.
+**One monitor thread for all hardpoints**, ticking every 20-30 s over the registry: clear detection
+and artillery cadence. Not one thread each. The server runs 25 `while {true}` loops across 19 files
+as it is ([`campaign_persistence_plan.md`](campaign_persistence_plan.md)), and one thread per
+hardpoint would grow that without bound for work that is a single pass over a few short arrays.
 
-Zone hardpoint garrisons ride the zone's existing spawn/despawn cycle
+**Presence is not its job.** Spawning and despawning on player distance belongs to the site poller,
+which already builds one player list per pass and tests every site against it
+([§Distance gating](#distance-gating-replaces-a-live-cap)). A monitor doing its own proximity work
+would duplicate the one thing that store exists to share.
+
+Zone hardpoint garrisons ride the zone's existing cycle
 (`server/init_zones/fnc_zone_stream_init.sqf`), whose radius is the zone's plus its 400 m buffer and
-therefore already covers the whole annulus. Two properties of its teardown decide the design:
+therefore already covers the whole annulus. Two properties of that cycle decide the design, and
+neither is the one an earlier draft of this plan assumed:
 
-- It skips `StaticWeapon`, so hardpoint **cores survive a despawn**. The re-spawn path must
-  re-crew the existing core, never create a second one, or a zone accumulates a fresh turret on
-  every despawn cycle.
-- A crewman inside a static is caught by neither delete clause — the first excludes
-  `StaticWeapon`, the second requires `vehicle _x == _x` — so **gunners survive too**. Only the
-  loose garrison despawns, which is the desired behaviour and costs nothing to implement.
+- **A teardown takes the men, whoever they are.** `fnc_site_collect` deletes everything on the
+  occupant's roster (`server/misc/fnc_site_stream_init.sqf:201-217`) and the emplacement hook crews
+  out the statics first (`fnc_zone_stream_init.sqf:254-258`), so a gunner sitting in a turret is
+  removed like any other defender. Hardpoint crews are only exempt where they are pinned
+  ([§Types whose effect depends on existing](#types-whose-effect-depends-on-existing-are-not-stowed)).
+- **The core survives only because it is pinned**, not because statics are skipped. `fnc_site_collect`
+  spares a vehicle carrying the `persistent` flag (`:208`), so the garrison teardown leaves it — and
+  the composition stow deletes it a moment later unless `DUWS_noStow` says otherwise.
 
-Normal hardpoints sit outside every zone, so the zone gate never reaches them and the monitor
-does the same job itself at 600 m / 300 s
-([§Distance gating](#distance-gating-replaces-a-live-cap)). The rule it has to match is the one
-above: re-crew the surviving core, never build a second one.
+The re-spawn path must therefore re-crew the standing core and never create a second one, or a zone
+accumulates a fresh turret on every cycle. Normal hardpoints sit outside every zone, so the zone's
+occupants never reach them; they register occupants of their own on the same terms.
 
 ## Markers
 
 Named `hardpoint_<i>`. They must not use the coordinate-derived scheme: zones use
-`<round x><round y>` (`fnc_createzone.sqf:38,52`), side missions use
-`<round x><round y>cache` (`server/missions/fnc_missionMarkerData.sqf:9`), and
+`<round x><round y>` (`fnc_createzone.sqf:50,64`), side missions use
+`<round x><round y>cache` (`server/missions/fnc_missionMarkerData.sqf:18`), and
 `createMarker` on a taken name returns `""` with no error. A hardpoint sited within a metre of
 either would fail silently.
 
@@ -784,35 +877,41 @@ is.
 
 | File | Change |
 |---|---|
-| `server/init_zones/fnc_hardpoint_place.sqf` | New. Builds one hardpoint of a given type at a given position: core, cover, garrison; returns the core. Shared by both flavours. |
+| `server/init_zones/hardpoint_compositions.sqf` | New. One fenced `--DUWS-COMPOSITION--` array per type, authored in Eden through the TUI. Offsets in a frame whose +Y is the hardpoint's facing, so a heading rotates the whole layout ([§Facing](#facing-is-part-of-siting-not-decoration)). |
+| `server/init_zones/fnc_hardpoint_place.sqf` | New. Builds one hardpoint of a given type at a given position and heading: rotates the composition's offsets, resolves the core's faction role, files everything through `fnc_duws_keep` with the core pinned, raises the garrison; returns the core. Shared by both flavours. **No shared rotating placer exists** — every placer in the tree adds offsets in world axes and sets a per-row heading (`fnc_fortifyFOB.sqf:99-120`, and each prefab inline). |
 | `server/init_zones/fnc_hardpoint_zone_pass.sqf` | New. Count from radius, siting inside the zone, writes `zone_hp_left_<n>` from what was actually placed. |
-| `server/warcom/fnc_WARCOM_opf_hardpoints.sqf` | New. Director: seed subset, corridor picking, AP spend, live cap. |
-| `server/misc/fnc_hardpoint_monitor.sqf` | New. The single shared loop: clear detection, proximity garrison spawn, artillery cadence. |
-| `server/init_zones/fnc_zone_state_init.sqf` | New `fnc_hardpoint_state_set` beside `fnc_zone_control_set:31-70`. |
+| `server/warcom/fnc_WARCOM_opf_hardpoints.sqf` | New. Director: seed subset, corridor picking, AP spend. Folds into the OPFOR commander loop if that lands first. |
+| `server/misc/fnc_hardpoint_monitor.sqf` | New. The single shared loop: clear detection and artillery cadence. Presence belongs to the site poller. |
+| `server/init_zones/fnc_zone_state_init.sqf` | New `fnc_hardpoint_state_set` beside `fnc_zone_control_set:219-257`. |
+| `server/init_zones/fnc_zone_spawn_sizes.sqf` | Hardpoint garrison tiers as a fenced token table beside the zone one (`:115-121`). |
 | `server/server_fnc_init.sqf` | Registry lines for the new functions. |
-| `server/server_var_init.sqf` | Declare and broadcast the four hardpoint arrays. |
-| `server/init_zones/fnc_createzone.sqf:199,266-270` | Call the zone pass; extend the capture trigger condition. |
-| `server/warcom/fnc_WARCOM_init.sqf:51-63` | Spawn the director beside the existing four. |
-| `server/misc/fnc_enterlocation.sqf:15` | Report how many of this zone's hardpoints are left, in the zone-entry notification. |
-| `server/init_zones/fnc_zone_reveal.sqf:11-22` | Hardcore only: reveal this zone's hardpoint markers with the zone, filtered spatially. |
-| `shared/factions/MODERN/AUTODETECT_opfor.sqf:115,186`, `AUTODETECT_RANDOM_opfor.sqf:81,129` | Define the four new turret and gun globals from the already-parsed `_turretAT` / `_turretAA` / `_turretMortar` / `_arty`. |
-| `client/missions/fnc_stratmap.sqf:147-155` | Add a 250 m hardpoint keep-out to side-mission siting. Missions already keep out of zones; without this they spawn on top of a hardpoint — and then the cleanup sweep deletes its core. |
-| `shared/includes/notifications.hpp` | One notification class for a hardpoint cleared, beside `CPadded:87`. |
+| `server/server_var_init.sqf` | Declare and broadcast the five hardpoint arrays. |
+| `server/init_zones/fnc_createzone.sqf:260,269` | Call the zone pass, above the buildout increment and above the site registration and opening stow. |
+| `server/init_zones/fnc_zone_capture_ready.sqf:31` | The capture gate: refuse while this zone has hardpoints left, beside the garrison-peak refusal. |
+| `server/init_zones/fnc_zone_stream_init.sqf:207-242,254-258` | Exclude pinned cores from the emplacement crew-out, and hardpoint cores from the zone's re-crew and roster. |
+| `server/warcom/fnc_WARCOM_init.sqf:44-50` | Spawn the director beside the two that still launch there. |
+| `server/init_zones/fnc_zone_reveal.sqf:33-34` | Hardcore only: reveal this zone's hardpoint markers with the zone, filtered spatially. |
+| `shared/factions/MODERN/AUTODETECT_opfor.sqf:115,186`, `AUTODETECT_RANDOM_opfor.sqf:87,135` | Define the four new turret and gun globals from the already-parsed `_turretAT` / `_turretAA` / `_turretMortar` / `_arty`. |
+| `shared/functions/fnc_pos_claimed.sqf` | Add a hardpoint keep-out to the shared "is this ground claimed" test. One edit reaches every mission siting path at once — `fnc_stratmap.sqf:93`, `fnc_findSafeMissionPos.sqf:33,38`, `fnc_missionTargetPos.sqf:45` — where a bespoke test in one of them leaves the others placing missions on top of an emplacement. |
+| `shared/includes/notifications.hpp` | One notification class for a hardpoint cleared, beside `CPadded:41`. |
 | `stringtable.xml` | Six hardpoint type names, clear notification, incoming-fire warning line (Allseer), marker labels. |
 | `info/zones_and_civilians.md` | Document the tier, the capture gate and its state contract. |
 | `info/economy.md` | Two faucet rows and one AP-sink note. |
 
 ## Task list
 
-- [ ] Write `fnc_hardpoint_place.sqf` for the MG type only, called by hand from the debug console. Verify: core, cover and garrison appear, and no hardcoded unit classname is used with a faction mod loaded.
+- [ ] Add the four faction globals and their fallbacks to both autodetect generators. Verify: every one resolves to a real classname with no mod loaded and with a faction mod loaded, and a hand-authored faction file that defines none of them still boots.
+- [ ] Author the MG nest composition in Eden through the TUI and fence it in source. Verify: import, rearrange, export, re-import returns the identical layout, and `DUWS_FRONT` stands on the side the gun faces.
+- [ ] Write `fnc_hardpoint_place.sqf` for the MG type only, called by hand from the debug console. Verify: core, cover and garrison appear; the whole layout rotates with the heading rather than the core turning inside a fixed ring of sandbags; no hardcoded unit classname is used with a faction mod loaded.
 - [ ] Add `fnc_hardpoint_zone_pass.sqf` and call it from `fnc_createZone`. Verify: `bash tests/run.sh` passes the path lint; hardpoint count per zone tracks radius; nothing lands on water or inside the prefab's 35 m.
 - [ ] Add the registry, `fnc_hardpoint_state_set` and the monitor's clear detection. Verify: destroying a core decrements `zone_hp_left_<n>` exactly once, and so does killing the crew and walking away.
-- [ ] Extend the capture trigger condition. Verify: a zone with hardpoints left cannot be captured; the last clear makes it capturable *without* the players leaving and re-entering; `zoneundercontrolblu` and `amount_zones_created` are unchanged by any clear.
-- [ ] Delete a core with `deleteVehicle` mid-campaign. Verify: the zone still becomes capturable. This is the `fnc_mission_cleanup` failure mode and must be tested directly rather than waited for.
-- [ ] Add the remaining types and the faction-global fallbacks. Verify: an AT hardpoint kills a vehicle on the road it covers; an AA one engages a heli taxi; an OP's `reveal` reaches the QRF; every core resolves to a real classname with no faction mod loaded and with one.
+- [ ] Add the capture gate to `fnc_zone_capture_ready`. Verify: a zone with hardpoints left cannot be captured; the last clear makes it capturable *without* the players leaving and re-entering; `zoneundercontrolblu` and `amount_zones_created` are unchanged by any clear.
+- [ ] Pin every core, and exclude hardpoint cores from the zone's emplacement crew-out and re-crew. Verify: walk a zone's hardpoints out of streaming range and back — the cores are the same objects, the zone's garrison peak did not move, and no hardpoint has grown a second turret.
+- [ ] Delete a core with `deleteVehicle` mid-campaign. Verify: the zone still becomes capturable. The cleanup sweep can no longer reach a filed core, so this is a test of the safety net rather than of a live failure mode, and it has to be provoked directly.
+- [ ] Author the remaining five compositions and add their types. Verify: an AT hardpoint kills a vehicle on the road it covers; an AA one engages a heli taxi; an OP's `reveal` reaches the QRF.
 - [ ] Add the director and seed subset. Verify: building debits OPFOR AP, clearing refunds none, and the director stops building below 10 AP.
-- [ ] Add the AP-scaled garrison ladder. Verify: the same hardpoint spawns 2-3 infantry early and infantry plus armour late; composition is read at spawn, so leaving and returning to one changes what defends it.
-- [ ] Add garrison distance gating to the monitor. Verify: garrisons disappear 300 s after the last player leaves 600 m and come back on approach; cores, cover and markers never disappear; a re-crewed hardpoint has one turret, not two.
+- [ ] Add the AP-scaled garrison tiers as a token table. Verify: the same hardpoint spawns 2-3 infantry early and infantry plus armour late; composition is read at spawn, so leaving and returning to one changes what defends it; the TUI lists the new table and can edit a row.
+- [ ] Register normal hardpoints as sites with their own occupants. Verify: garrisons disappear 300 s after the last player leaves 600 m and come back on approach; cores and markers never disappear; a re-crewed hardpoint has one turret, not two; a cleared one is retired from the site store rather than polled for the rest of the campaign.
 - [ ] Let a campaign run several hours without visiting the corridors, then count units. Verify: live AI tracks player position rather than campaign length — this is the test that replaces the live cap.
 - [ ] Enforce the indirect-fire caps. Verify: never more than one live battery or two live mortar pits with every zone generated and the director running for hours; a zone at cap places a substitute type rather than nothing; clearing one lets another be built.
 - [ ] Add mortar-pit fire missions against fixed positions. Verify: rounds land only on BLU-held zones and FOBs within `inRangeOfArtillery`, the warning precedes impact, and a dry tube stops.
@@ -830,7 +929,7 @@ is.
 ## Decided trade-offs
 
 **Hardpoints cannot be retaken.** Clearing is one-way; there is no `EAST SEIZED` re-arm as zones
-have (`fnc_captured.sqf:66-71`). The director builds *new* hardpoints instead, which gives the
+have (`fnc_captured.sqf:66`). The director builds *new* hardpoints instead, which gives the
 enemy a way to reapply pressure without teaching WARCOM's assault, QRF and patrol logic — all of
 which read `WARCOM_zones_controled_by_*` — about a second kind of holding.
 
@@ -882,15 +981,24 @@ anchor list when they have an owner.
 
 Both are in-game observations that decide implementation details, not design choices.
 
-**Does an unmanned EAST static weapon block `WEST SEIZED`?** Zone capture fires on a
-`["WEST SEIZED","PRESENT",true]` trigger (`fnc_createzone.sqf:268`). If an empty enemy-sided
-static counts as enemy presence, a cleared MG nest whose turret still stands would hold its own
-zone, and the clear rule would additionally have to delete or re-side the core. The tree offers
-no evidence either way: the statics in the prefabs are BLUFOR- and independent-classed
-(`server/init_zones/prefabs/modern/*.sqf`), and `opfor_TURRET_HMG` has never been spawned by
-anything. Test before writing the clear handler.
+**Does an unmanned EAST static weapon block an OPFOR retake?** The BLUFOR direction is settled and
+needs no test: capture is `["WEST","PRESENT",true]` plus `fnc_zone_capture_ready`
+(`fnc_createzone.sqf:312,321`), and the OPFOR half of that condition is `fnc_opfor_count_at`, which
+unpacks `crew` — an empty turret contributes nobody
+(`server/misc/fnc_opfor_count_at.sqf:19-23`). The retake direction still re-arms to
+`["EAST SEIZED","PRESENT",true]` (`fnc_captured.sqf:66`), and `SEIZED` demands the area be clear of
+the other side rather than counting anyone. So the question that remains is narrower: does a cleared
+hardpoint's standing turret, still EAST-sided, hold a zone against OPFOR retaking it? If it does,
+that is a zone the enemy can never win back, and the clear rule has to delete or re-side the core.
+No evidence in the tree either way — the statics in the prefabs are BLUFOR- and
+independent-classed (`server/init_zones/prefabs/modern/*.sqf`) and `opfor_TURRET_HMG` has never been
+spawned by anything.
 
 **Will an AI gunner in a static mortar or a self-propelled gun reliably execute
-`doArtilleryFire`?** If not, the
-shell-spawn fallback above becomes the implementation, and the gun is a target rather than a
-weapon.
+`doArtilleryFire`?** Nothing in the mission has ever issued it: `doArtilleryFire`,
+`commandArtilleryFire` and `inRangeOfArtillery` appear nowhere in the tree, and the zone mortar pair
+fires or does not fire entirely on the engine's own judgement
+(`server/misc/fnc_garrisonMortar.sqf`). Answer this with a throwaway console test before writing any
+of [§Indirect-fire hardpoints](#indirect-fire-hardpoints): if the answer is no, the shell-spawn
+fallback becomes the implementation and the gun is a target rather than a weapon, which is a
+different feature wearing the same name.

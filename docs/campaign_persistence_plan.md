@@ -730,7 +730,7 @@ map and dropped when it returns
 ([§Map object count](info/performance.md#map-object-count-is-bounded-by-proximity-not-campaign-length)),
 so they never outlive the session and a restore rebuilds every composition deployed.
 
-This is the decision that keeps the plan finite. The server runs 40 `while {true}` loops across 23
+This is the decision that keeps the plan finite. The server runs 25 `while {true}` loops across 19
 files, each holding script locals; persisting live state would mean relaunching every one with
 reconstructed arguments. Regenerating instead means they start the way they always do.
 
