@@ -143,14 +143,10 @@ fnc_duws_deploy = {
     {
         _x params ["_class", "_pos", "_vectorDirUp", "_sim", "_damageAllowed", "_cargo"];
         private _obj = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
-        // Frozen across the placement whatever it was stowed as, and restored once it stands where
-        // the record puts it. This loop is scheduled code, so the engine can suspend it between any
-        // two statements, and a member still simulated over a frame boundary settles or slides off
-        // the position just written to it. A member that keeps its simulation -- a static weapon,
-        // a watchtower -- is a live physics body while that happens, and one resolving a teleport
-        // against what it now intersects can go over: a gun on its side costs the zone the
-        // emplacement and leaves its gunner sitting in it.
-        _obj enableSimulationGlobal false;
+        // Before it is placed, not after: this loop is scheduled code, so the engine can suspend it
+        // between any two statements, and a prop that is still simulated over a frame boundary
+        // settles or slides off the position just written to it.
+        _obj enableSimulationGlobal _sim;
         // Placed again after creation: createVehicle reads its position as AGL, and the record
         // holds world coordinates. Without this a prop on a slope returns metres into the hill.
         _obj setPosWorld _pos;
@@ -158,7 +154,6 @@ fnc_duws_deploy = {
         // Rotating displaces the object, so the position has to be written a second time after it.
         // The prefabs that place these props do the same around their setDir for the same reason.
         _obj setPosWorld _pos;
-        _obj enableSimulationGlobal _sim;
         _obj allowDamage _damageAllowed;
         if (count _cargo > 0) then {
             clearWeaponCargoGlobal _obj;

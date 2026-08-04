@@ -860,21 +860,20 @@ on its side and a gun sunk into its ground both simply refuse. So the retry that
 never recovers the first, and lifting the gun between attempts makes it worse — a fallen gun dropped
 15 cm lands fallen. Orientation is carried by `vectorUp` alone; nothing else reports it.
 
-Placement is where guns go down. A member that keeps its simulation — a static weapon, a watchtower
-— is a live physics body, so teleporting and rotating one (`setPosWorld` then `setVectorDirAndUp`)
-leaves it resolving against whatever it now intersects, and a tripod can resolve that by going over.
-A fall then persists rather than being one bad deploy: the stow record holds the orientation the gun
-was last seen in, so every later deploy replays it.
+**The fall lands in the seconds after placement, not during it.** A rebuilt static keeps its
+simulation, so it is a live physics body settling onto ground it was teleported into, and it goes
+over as it settles. Code that places the composition and immediately inspects its guns therefore
+sees nothing wrong: every gun is standing, every gun crews, and the RPT records a clean rebuild
+that the player then walks up to and finds flat. Correct after a settle wait or not at all.
 
-**How to apply:** freeze before you place and restore after — `enableSimulationGlobal false`, the
-position and orientation writes, then the recorded state back (`fnc_duws_deploy`,
-`server/misc/fnc_composition_stream_init.sqf`). Upright before you seat rather than in answer to a
-refused seat, and test the tilt: `(vectorUp _gun) vectorDotProduct (surfaceNormal (getPos _gun))`,
-against the terrain rather than against vertical so a gun on a slope is not read as fallen. Correct
-it with `setVectorDirAndUp` on a `vectorDir` flattened into the horizontal plane — a gun that went
-over its nose has a dir pointing into the ground, and that against a vertical up leaves the engine
-two near-parallel vectors and no orientation it can derive. `DUWS_fnc_uprightStatic`
-(`server/init_zones/fnc_zone_stream_init.sqf`) does this before every seating attempt.
+**How to apply:** test the tilt, never the seat — `(vectorUp _gun) select 2`, against vertical.
+Vertical rather than the ground's own normal, which reads backwards on steep terrain: a gun standing
+on a 50° slope scores below any sane threshold and would be laid over to match the hill, while one
+lying on that same hill scores above it and would be left down. Correct with `setVectorDirAndUp` on
+a `vectorDir` flattened into the horizontal plane — a gun that went over its nose has a dir pointing
+into the ground, and that against a vertical up leaves the engine two near-parallel vectors and no
+orientation it can derive. `DUWS_fnc_uprightStatic` and the settle wait in `DUWS_fnc_zoneRaiseWorker`
+(`server/init_zones/fnc_zone_stream_init.sqf`) are the two halves; neither works without the other.
 
 ## `doStop` outlives the orders it was issued against, and new waypoints do not release it
 

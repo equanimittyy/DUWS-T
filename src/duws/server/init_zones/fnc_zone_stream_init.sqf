@@ -26,21 +26,27 @@ if (!isServer) exitWith {};
 #define STATIC_MAN_LIFT 0.15
 
 // How far a gun may lean before it is stood back up, as the cosine of the angle between its own up
-// and the ground's. Measured against the terrain rather than against vertical, so a gun standing on
-// a slope is not read as fallen; past this it is on its side or its back.
+// and vertical -- about 45 degrees. Vertical rather than the terrain normal, which reads backwards
+// on steep ground: a gun standing on a 50-degree slope scores below this and would be laid over to
+// match the hill, while one lying on that same hill scores above it and would be left down.
 #define STATIC_UPRIGHT_DOT 0.7
+
+// How long the composition is left alone before its guns are looked at. A rebuilt static is a live
+// physics body that has to settle, and it goes over during those seconds, not before them: a pass
+// run the instant the composition returns finds every gun standing and every gun crewable, and the
+// fall lands behind it.
+#define STATIC_SETTLE_WAIT 5
 
 // Stand a fallen gun back up, on the arc it was placed to cover.
 //
-// Ahead of the seating rather than after it fails, because the engine throws a gunner out of a
-// static that goes over: a fallen gun cannot be crewed at all, and one that goes over later un-crews
-// itself. The seat read-back below sees only the refusal, which is the same refusal a gun sunk into
-// its ground gives, so retrying it -- or lifting the gun and retrying -- never recovers this one.
-// The lift makes it worse: a gun dropped 15 cm lands on its side again.
+// Worth doing rather than logging, because the engine throws a gunner out of a static that goes
+// over: the gun is then empty and refuses a new man for as long as it lies there, so the seat
+// read-back below cannot tell this from the gun that is merely sunk into its ground, and the retry
+// that recovers the second never recovers the first. The lift makes it worse -- a fallen gun
+// dropped 15 cm lands fallen.
 DUWS_fnc_uprightStatic = {
     params ["_gun"];
-    private _up = surfaceNormal (getPos _gun);
-    if (((vectorUp _gun) vectorDotProduct _up) > STATIC_UPRIGHT_DOT) exitWith {};
+    if (((vectorUp _gun) select 2) > STATIC_UPRIGHT_DOT) exitWith {};
 
     // Only the heading survives a fall worth keeping, and a gun that went over its nose has not even
     // that: its dir points into the ground, and handing that to setVectorDirAndUp against a vertical
@@ -49,7 +55,7 @@ DUWS_fnc_uprightStatic = {
     private _dir = vectorDir _gun;
     private _flat = [_dir select 0, _dir select 1, 0];
     if (vectorMagnitude _flat < 0.1) then { _flat = [0, 1, 0] };
-    _gun setVectorDirAndUp [vectorNormalized _flat, _up];
+    _gun setVectorDirAndUp [vectorNormalized _flat, [0, 0, 1]];
     ["INFO", "ZONES", format ["emplacement %1 had fallen over; stood back up", typeOf _gun]]
         call fnc_log;
 };
@@ -250,6 +256,10 @@ DUWS_fnc_zoneRaiseWorker = {
     // Structure, then emplacement, then men: units must not spawn into ground that is about to have
     // a bunker on it, and the turrets have to exist before anyone mans them.
     [_key, [_key, "structure"] call fnc_site_occupant] call (DUWS_zoneStructureHooks get "wake");
+    // The gap between the two is the fall: a rebuilt gun settles over the seconds after it lands and
+    // that is when it goes over, so an emplacement pass run against a composition still coming to
+    // rest crews guns that are about to tip and throw those men straight back out.
+    sleep STATIC_SETTLE_WAIT;
     [_key, [_key, "emplacement"] call fnc_site_occupant] call (DUWS_zoneEmplacementHooks get "wake");
     [_pos, _size, _key] call fnc_zone_spawn;
     missionNamespace setVariable [ZONE_RAISE_SLOT(_key), true];
