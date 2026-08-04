@@ -68,8 +68,8 @@ Two alternatives, both rejected:
   hand-edited now and re-edited after every Eden round trip, because the export emits five columns
   and nothing past them.
 - **Replace `isWeapon` with the role at index 5.** Uniform, and the flag looks redundant — across
-  the 515 fenced rows in the seven prefabs, the 41 flagged `true` are exactly the static-weapon
-  classes and nothing else. But it rewrites all 515 to buy a uniformity the resolver does not need,
+  the 380 fenced rows in the seven prefabs, the 41 flagged `true` are exactly the static-weapon
+  classes and nothing else. But it rewrites all 380 to buy a uniformity the resolver does not need,
   and it deletes a flag each prefab's two placement passes read to split props from guns.
 
 ### The resolver
@@ -93,43 +93,47 @@ Four rules, each covering a way this fails silently otherwise:
    what keeps a prefab working when the map is incomplete.
 2. **An empty key falls to the side's HMG, and an empty HMG falls to the row's own class.**
    `fnc_faction_pick` returns `""` for a role nothing defined
-   (`shared/functions/fnc_faction_pools.sqf:46-54`), which is the state all 254 hand-authored
-   faction files will be in for the new keys, forever, and the state of any mod faction fielding
-   no mortar or no AA. Substituting the faction's own MG nest keeps the campaign inside the
-   faction it detected; standing a vanilla Titan there would put back exactly the wrong-side gun
-   this plan removes. A faction with no static MG either is warned about once at init and its rows
-   stand as themselves. Neither branch needs the 254 files swept.
+   (`shared/functions/fnc_faction_pools.sqf:104-112`), which is the state all 254 hand-authored
+   faction files will be in for the new keys, forever, since they define `opfor_TURRET_HMG` and
+   the four BLUFOR turrets alone. Substituting the faction's own MG nest keeps the campaign inside
+   the faction the file names. A faction with no static MG either is warned about once at init and
+   its rows stand as themselves. Neither branch needs the 254 files swept.
+   This rule does not fire for an auto-detected faction: the ladders below carry a vanilla tail on
+   every static key, so a detected faction's key is never empty. Hand-authored files and custom
+   pastes are what it covers, which is the majority path.
 3. **The replacement must be `isKindOf "StaticWeapon"` or it is refused.** Three systems key off
    that type test — the zone manning hook (`init_zones/fnc_zone_stream_init.sqf:212`), its
    crew-out counterpart (`:256`), and the empty-vehicle cleanup's exemption
    (`misc/fnc_repetitive_cleanup.sqf:122`). A mod "static" that is configured as a car would be
    placed, never crewed, never crewed out, and swept as an abandoned vehicle. Fail closed: keep
-   the placeholder.
+   the placeholder. It fires on values from faction files and pastes only — the AutoDetect ladders
+   and the confirmation screen's key editor both gate on the same test already.
 4. **Drawn through `fnc_faction_pick`, not read off the global.** Detection finds several statics
    per role and keeps them in `DUWS_factionPool_<role>`; picking per object is what makes two MG
    nests in one zone different guns, exactly as it already does for infantry and vehicles.
 
-**The whole fallback chain is these two rules and nothing else** — no vanilla tail per key, no
-per-side table of stand-in classes. Any role but HMG resolves to HMG when the faction has none;
-HMG itself resolves to the placeholder, warned. It lives in the resolver rather than in the
-AutoDetect chains for two reasons. The chains only cover auto-detected factions, so a rule written
-there would miss the 254 hand-authored files and every custom paste — the paths most likely to
-leave a static key empty. And a chain bakes the substitution into the key, which then reads as a
-real AA gun when it is a stand-in; a consumer that must tell those apart, such as the hardpoint
-director choosing which emplacement types a faction can field, has nothing left to test.
+**There is no per-side table of stand-in classes.** Rule 2 is the whole of the resolver's fallback:
+any role but HMG resolves to HMG when the faction has none; HMG itself resolves to the placeholder,
+warned. It lives in the resolver rather than in the AutoDetect ladders because the ladders only
+cover auto-detected factions, so a rule written there would miss the 254 hand-authored files and
+every custom paste — the paths that actually leave a static key empty.
 
-What this costs is real and is the point: a faction with no mortar fields no mortar. The seven AA
-rows and seven mortar rows across the prefabs become MG nests on any faction lacking those guns,
-which includes all 254 hand-authored files, since they define `opfor_TURRET_HMG` alone. Those zones
-lose their indirect fire and their air cover, and are easier for it. The alternative is a zone whose
-"CSAT" mortar pit is a NATO tube, which is the fault this plan was opened to fix.
+Between the ladders' vanilla tail and rule 2, the same missing role gets two different answers
+depending on which path resolved the faction. A detected faction with no mortar fields a vanilla
+CSAT tube; a hand-authored one fields its own MG nest. Both are on the right side, which is what
+this plan was opened to fix — today that pit holds a NATO tube whatever the faction is. Closing the
+split would mean sweeping 254 files, which is the cost this plan exists to avoid.
+
+What the tail costs is a distinction the key can no longer draw: a detected faction's mortar key
+always answers with a class, so nothing downstream can ask whether the faction really fields a
+mortar or is standing in a vanilla one. The hardpoint tier is the consumer that would want to.
 
 Locality is server. Ordering is already safe without a new gate, but the gate that matters is not
-the obvious one. Resolution runs per pass inside the confirmation loop (`server_init.sqf:63-97`) and
-the player may then edit or clear any key on that screen; `fnc_faction_apply_locked:114` is what
-lays those edits over the resolved globals and republishes the pools. A static resolved before that
-call would field the detected class rather than the confirmed one. Nothing does today — the HQ is
-spawned at `:125` and zone siting at `:146`, both behind it — and any new placement site has to stay
+the obvious one. Resolution runs per pass inside the confirmation loop (`server_init.sqf:52-100`) and
+the player may then edit or clear any key on that screen; the `fnc_faction_apply_locked` call at
+`:114` is what lays those edits over the resolved globals and republishes the pools. A static
+resolved before it would field the detected class rather than the confirmed one. Nothing does today
+— the HQ is spawned at `:126` and zone siting at `:146`, both behind it — and any new site has to stay
 behind it too. The `createzone_server` wait at `:106` is two gates earlier and proves nothing about
 the edits.
 
@@ -166,7 +170,7 @@ the HQ roof is a decision about that position, not a lookup.
 Both branches go through the resolver. An unroled row falls through to the class-token lookup, so a
 gun added to the fence in Eden follows the faction without anyone remembering to hand-add a sixth
 column; a roled row hands its key over and the map is never consulted. What the named branch gains
-is what it does not have today — `fnc_fortifyFOB.sqf:106-110` and `fnc_BluHQinit.sqf:302-311` both
+is what it does not have today — `fnc_fortifyFOB.sqf:108-110` and `fnc_BluHQinit.sqf:302-311` both
 read the global directly, which is the pool's stable representative, so a FOB's four guns are
 identical every campaign and a mod static configured as a car is placed unchecked. Routing them
 through the resolver gives the fence the same per-object draw and the same type test as everything
@@ -174,25 +178,25 @@ else, and leaves one place where a static's class is decided rather than two.
 
 ## Detection needs nothing new
 
-`fnc_parseFaction` already buckets all five roles and returns them. The OPFOR generator uses none
-of them — it hardcodes the HMG at `AUTODETECT_opfor.sqf:121` — and the BLUFOR one uses all but the
-mortar. So the detection half of this is reading values that have been computed and discarded
-since the generator was written.
+`fnc_parseFaction` already buckets all five roles and returns them. The OPFOR ladder reads three of
+them for its one static key (`shared/includes/autodetect_roles_opfor.hpp:50`) and the BLUFOR one
+reads all but the mortar (`AUTODETECT_blufor.sqf:78-81`). So the detection half of this is reading
+values that have been computed and discarded since the generator was written.
 
 | Role | Bucket | Where |
 |---|---|---|
-| HMG | `_turretHMG` | `shared/factions/MODERN/fn_factionAutoDetect.sqf:605` |
-| GMG | `_turretGMG` | `:606` |
-| Mortar | `_turretMortar` | `:607` |
-| AA | `_turretAA` | `:608` |
-| AT | `_turretAT` | `:609` |
+| HMG | `_turretHMG` | `shared/factions/MODERN/fn_factionAutoDetect.sqf:630` |
+| GMG | `_turretGMG` | `:631` |
+| Mortar | `_turretMortar` | `:632` |
+| AA | `_turretAA` | `:633` |
+| AT | `_turretAT` | `:634` |
 
 The return array is positional and destructured by a `params` string in each of the three wrappers
-(`AUTODETECT_opfor.sqf:41` and the same line in the other two). Nothing is added to it, so those
-strings do not change.
+(`AUTODETECT_opfor.sqf:33`, `AUTODETECT_blufor.sqf:33`, `AUTODETECT_RANDOM_opfor.sqf:51`). Nothing is
+added to it, so those strings do not change.
 
-One line is worth changing while here. `_turretCannon` (`:610`) is parsed and then dropped from
-the return at `:631-645`; a towed AA gun that a mod types as a cannon rather than as
+One line is worth changing while here. `_turretCannon` (`:635`) is parsed and then dropped from
+the return at `:659-675`; a towed AA gun that a mod types as a cannon rather than as
 `StaticAAWeapon` falls into it and disappears. Extending `_turretAA`'s existing
 `fnc_selectNonEmpty` chain with the air-threat members of `_turretCannon` recovers those factions
 without touching the return array's shape.
@@ -202,26 +206,26 @@ without touching the return array's shape.
 | Path | Change |
 |---|---|
 | `fnc_faction_schema.sqf` | four new OPFOR rows, one new BLUFOR, all `STATIC`/`static` |
-| `AUTODETECT_opfor.sqf:121` | one hardcoded HMG line becomes five `fnc_selectNonEmpty` chains |
-| `AUTODETECT_RANDOM_opfor.sqf:90` | the same five |
-| `AUTODETECT_blufor.sqf:124-127` | one line added for the mortar; `_AA` and `_GMG` chains widened |
+| `includes/autodetect_roles_opfor.hpp:50` | four ladder rows added beside the HMG one; shared by both OPFOR wrappers, so neither is edited |
+| `AUTODETECT_blufor.sqf:78-81` | one ladder row added for the mortar; `_AA` and `_GMG` ladders widened |
 | 254 files in `factions/MODERN/` | **none** — resolver rule 2 covers them |
 | Custom paste | see below; it does not work without a schema change |
 
 `o_arraysToRandomize` / `b_arraysToRandomize` need no edit: both derive from the schema
-(`AUTODETECT_opfor.sqf:164`, `AUTODETECT_RANDOM_opfor.sqf:110`, `AUTODETECT_blufor.sqf:262`), so
+(`AUTODETECT_opfor.sqf:80`, `AUTODETECT_RANDOM_opfor.sqf:73`, `AUTODETECT_blufor.sqf:223`), so
 a schema row reaches `fnc_faction_pools_publish` for free.
 
-**No generator writes a vanilla fallback class.** Each of the ten keys is its own detected bucket or
-nothing; the substitution is the resolver's, so a stand-in written here would only hide from it
-whether the faction actually has the gun. The HMG keys are the exception worth stating: they keep a
-vanilla tail on both sides, because rule 2 leans the other nine keys on them and a side with an
-empty HMG loses the whole chain.
+**Every new key carries a vanilla tail, like every other ladder row.** A static row is
+`[key, [buckets in preference order], fallback]` and the fallback is that side's vanilla class —
+CSAT on the OPFOR ladder, NATO on the BLUFOR one — so a detected faction fielding no mortar stands a
+vanilla tube rather than nothing. The alternative, leaving the new keys tailless so rule 2 could
+substitute the faction's own HMG, was rejected for the reason the ladder has tails at all: one row
+shaped unlike the other forty is a row the next edit "corrects".
 
-Assign `""` explicitly for the nothing case rather than letting the chain produce it.
-`fnc_selectNonEmpty` is `_this select {_x isNotEqualTo []} select 0` — with every candidate empty,
-`select 0` runs against an empty array and returns **nil**, which deletes the global instead of
-emptying it, and a direct reader then throws on an undefined variable rather than reading `""`.
+`fnc_faction_resolve` gates each rung on the schema's `kind`, so a static key only ever takes a
+class that is `isKindOf "StaticWeapon"` — resolver rule 3 already enforced for this path. Nothing
+here needs to assign `""`: with every rung and the fallback empty, resolve writes `[]` and
+`fnc_faction_pick` reads it back as `""`.
 
 ### Adding a required key breaks every existing custom faction
 
@@ -257,15 +261,17 @@ here. Its key editor already filters a `static` row to `isKindOf "StaticWeapon"`
 (`fnc_faction_key_edit.sqf:50`), which is resolver rule 3 enforced at the point of choice — so rule
 3 only ever fires on values coming from faction files and pastes, never from the screen. And an
 edited key is written back as a pool rebuilt from the matching `fnc_parseFaction` bucket
-(`fnc_faction_key_apply.sqf:55-62`); all five turret buckets are in that function's return, so a
+(`fnc_faction_key_apply.sqf:60-72`); all five turret buckets are in that function's return, so a
 player editing a static key keeps the per-object variety rule 4 draws on. A class the parse returns
 no bucket for — a cannon-typed AA gun, which the return drops — yields a pool of one and nothing
 worse.
 
 ## Call sites
 
-Fifty-eight placements across thirteen files. Every one of them goes through the placer below,
-so an OPFOR zone gun and a BLUFOR FOB gun differ in the `_side` argument and nothing else.
+Fifty-eight placements across thirteen files. Fifty-two go through the placer below, so an OPFOR
+zone gun and a BLUFOR FOB gun differ in the `_side` argument and nothing else. The six that do not
+place from a row at all — the HQ's two, `simple_zone`'s three and the FOB's roof AA — resolve their
+class the same way and keep the placement they have.
 
 | File | Statics | Change |
 |---|---|---|
@@ -276,7 +282,7 @@ so an OPFOR zone gun and a BLUFOR FOB gun differ in the `_side` argument and not
 | `.../fnc_modern_FieldHospital.sqf` | 5 | same |
 | `.../fnc_modern_StorageBunker.sqf` | 4 | same |
 | `.../fnc_modern_vehfittingstation.sqf` | 3 | same |
-| `.../fnc_modern_simple_zone.sqf` | 3 | inline `createVehicle` at `:53,77,101`; becomes three rows |
+| `.../fnc_modern_simple_zone.sqf` | 3 | `:53,77,101`, resolve only — see below |
 | `init_hq/fnc_fortifyFOB.sqf` | 5 | `_fnc_place` becomes a call to the placer (`:103-119`), roof AA at `:133` |
 | `init_hq/fnc_BluHQinit.sqf` | 2 | `:302-311`, resolve only — see below |
 | `missions/mission_threads/holdpos/fnc_holdposition_mission.sqf` | 3 | `:110,117` HMG and `:124` mortar, hand-written blocks |
@@ -299,15 +305,45 @@ which class a static is and the only sanctioned way to put one down cannot drift
 ```
 
 `_row` is `[class, offsetX, offsetY, offsetZ, dir, role]` with `role` optional, which is the shape
-both fences already use. `_mode` is `"world"` (prefab weapon rows: `_origin`'s Z plus the row's
-offset, written with `setPosWorld`) or `"atl"` (FOB and missions: ground level, `setPosATL`). Both
-are behaviour that exists today, lifted rather than redesigned; there is no third mode, and adding
-one is how this function starts growing flags for each caller's quirks.
+both fences already use. `_mode` is `"world"` or `"pos"`, and which one a caller passes follows from
+whether its rows carry a height:
+
+- **`"world"`** — the row states a Z, so the gun is written at `_origin`'s Z plus that offset with
+  `setPosWorld`. This is what holds a gun off the ground: Outpost2's four tower rows at Z 19.71-20.85
+  stand on a structure, and `setPosATL` measures from terrain and would drop them through it. All 41
+  prefab weapon rows carry a non-zero Z, so all 41 take this mode.
+- **`"pos"`** — the row's Z is 0, meaning "on the ground", written with `setPos`. That is the FOB's
+  four rows and, once they are fenced, the seven mission guns.
+
+The mode is passed rather than inferred from the Z, because a row genuinely authored at absolute
+zero is indistinguishable from one that omitted the column, and the caller knows which it wrote.
+There is no third mode; adding one is how this function starts growing flags for each caller's
+quirks. The FOB's roof AA keeps its own `setPosATL`: its height comes from `buildingPos`, not from a
+row, so it is not a placer call at all.
 
 Inside: resolve, `createVehicle`, position written either side of `setDir` (which displaces the
-object — the reason both existing placers write it twice), `fnc_duws_keep` under `_key`, and the
-placement freeze. The gunner step stays with each prefab, since what it crews is the list the
-caller collected.
+object — the reason both existing placers write it twice), `fnc_duws_keep` under `_key`, and
+`enableSimulationGlobal false`.
+
+**The heading is the row's, always.** Six prefabs and all three mission files currently discard it
+and turn the gun to face away from the composition centre — `_obj setDir (_centerSpawn getDir
+[_newX, _newY])` in the weapon passes, and a second `setDir` over the crewed pair at
+`fnc_holdposition_mission.sqf:139-140`, `fnc_destroy_radar_mission.sqf:92-93` and
+`fnc_destroy_cache_mission.sqf:157-158`. Those go. The
+argument is the one `fnc_fortifyFOB.sqf:89-92` already settled for the FOB ring: a computed heading
+means a turret turned in Eden comes back facing wherever the formula put it, and the round trip
+silently drops the edit. It also makes a facing something a composition can state, which is what the
+hardpoint tier needs to put an MG on a road rather than on a bearing.
+
+**The placer freezes, the crew step thaws.** `enableSimulationGlobal false` at creation is what makes
+an elevated row hold — an unsimulated object placed in the air stays there, a simulated one falls
+([`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md)) — and the freeze has to be the
+`Global` variant or every client keeps simulating a gun the server has parked. The prefabs already
+do both halves (`fnc_modern_reconOutpost.sqf:158` and `:184`); the FOB and the three missions do
+neither today and gain the thaw in the step that crews their guns. One rule, so a site that forgets
+it fails the same recognisable way rather than a new one.
+
+The gunner step stays with each caller, since what it crews is the list that caller collected.
 
 **`fnc_BluHQinit.sqf` cannot use it and calls the resolver directly.** Its fence is not placed at
 build time at all — it is resolved into `HQ_redeploy_weaponData` for `fnc_placeHQUnits.sqf`, which
@@ -316,14 +352,23 @@ is the wrong tool for a site whose product is data.
 
 **Mission statics become fenced rows.** The three mission files write each gun as a hand-numbered
 `_vehicle_9 = createVehicle [...]` block with its own `setDir` and `setPosATL`. They become rows in
-a `--DUWS-COMPOSITION--` fence and go through the placer like everything else, which is what puts
-those five guns inside the Eden round trip the prefabs already have.
+a `--DUWS-COMPOSITION--` fence and go through the placer in `"pos"` mode like everything else, which
+is what puts those seven guns inside the Eden round trip the prefabs already have. Each keeps the
+`allowDamage false` or `setVehicleAmmo 0.3` it carries today, applied by the caller to the object
+the placer returns: the radar's two AA guns are invulnerable by design, and the holdpos mortar is
+deliberately short of ammunition.
+
+**`simple_zone`'s three guns are resolve-only.** Its mortar and two AA guns are not offset
+placements — each runs a twenty-attempt `isFlatEmpty` search up to 300 m from the zone centre
+(`:36-58`, `:60-83`, `:85-107`) and then levels itself with `setVectorUp [0,0,1]`. That scatter is
+the zone type: it fits itself to whatever ground it was sited on. Only the classname goes through
+`fnc_static_resolve`; the placement stays where it is, `setPosATL` included.
 
 **`destroy_cache` guards an enemy objective with the player's own gun.** `:134,141` spawn
 `blufor_TURRET_HMG` on a mission whose whole subject is an OPFOR cache, so a mod-equipped BLUFOR
 faction currently defends the enemy's supplies. It resolves as OPFOR with the rest of them.
 
-**`fnc_garrisonMortar.sqf:23-24` stays hardcoded.** Its tube is two backpacks on two men
+**`misc/fnc_garrisonMortar.sqf:23-24` stays hardcoded.** Its tube is two backpacks on two men
 (`O_Mortar_01_support_F` / `_weapon_F`), not a static, and there is no faction key for a mortar
 backpack — inventing one to cover a single call site is a sixth key for one consumer. It is
 listed here so its absence reads as a decision.
@@ -343,25 +388,26 @@ still the right call: the sites that do have a pool get variety for free, and do
 way as infantry and vehicles is one fewer special case.
 
 **Detection quality is the real ceiling.** The AA and AT buckets fall back to `fnc_isThreatTo`
-(`fn_factionAutoDetect.sqf:608-609`), which reads one `threat` array and returns whichever of
-soft/armor/air is largest (`:291-300`) — so a gun equally threatening to infantry and air resolves
+(`fn_factionAutoDetect.sqf:633-634`), which reads one `threat` array and returns whichever of
+soft/armor/air is largest (`:295-304`) — so a gun equally threatening to infantry and air resolves
 to whichever `selectMax` hits first. A misbucketed static is a gun that never fires at aircraft
-rather than an error. The `fnc_selectNonEmpty` chains keep a key from being empty; nothing keeps it
-from being wrong. Worth checking against two or three mod factions once the keys are readable.
+rather than an error. The ladders and their vanilla tails keep a key from being empty; nothing keeps
+it from being wrong. Worth checking against two or three mod factions once the keys are readable.
 
 ## Task list
 
 1. `fnc_faction_schema.sqf`: `required` column, plus the five new static rows.
 2. `fnc_custom_faction_parse.sqf`: validate against the `required` subset, clear against the whole
    schema.
-3. Fill the keys in `AUTODETECT_opfor.sqf`, `AUTODETECT_RANDOM_opfor.sqf` and
-   `AUTODETECT_blufor.sqf` — own bucket or `""`, vanilla tail on the HMG keys only — and widen
-   `_turretAA`'s chain with the air-threat members of `_turretCannon`. Warn at faction init when a
-   side's HMG key comes back empty, since rule 2 rests on it.
+3. Fill the keys in `includes/autodetect_roles_opfor.hpp` and `AUTODETECT_blufor.sqf` — own buckets
+   in preference order, side-appropriate vanilla tail on every one — and widen `_turretAA`'s chain
+   with the air-threat members of `_turretCannon`. Warn at faction init when a side's HMG key comes
+   back empty, since rule 2 rests on it for the hand-authored path.
 4. `shared/functions/fnc_static_roles.sqf`: the fenced `DUWS_staticRoles` table, `fnc_static_resolve`
    and `fnc_static_place`, registered in `server_fnc_init.sqf`.
-5. Convert the call sites: seven prefab weapon passes, the FOB fence, the three mission files
-   (blocks to fenced rows), and `fnc_BluHQinit.sqf` to resolve-only.
+5. Convert the call sites: six prefab weapon passes and the FOB fence to placer calls, the three
+   mission files to fenced rows plus a thaw in their crew steps, and `fnc_BluHQinit.sqf` and
+   `simple_zone` to resolve-only.
 6. Update [`info/faction_system.md`](info/faction_system.md) (the static-weapon row of the schema
    table) and [`info/composition_tooling.md`](info/composition_tooling.md) (a static row's class is
    a role token at runtime, so a placeholder swapped in Eden changes what the faction fields).
@@ -371,6 +417,8 @@ verified against a faction readout before any composition changes. Step 4 is ine
 
 Step 5 is where the risk sits, because it is a placement rewrite rather than an inserted line. Land
 it one caller at a time against a zone built from the same seed before and after: same count, same
-positions, same headings, same guns crewed. A prefab whose statics move or lose their gunners has
-had its Z mode or its row shape mistranslated, and it is the only class of fault this step can
-introduce.
+positions, same guns crewed, and every gun simulated once its gunner is in. Headings are the one
+thing expected to change — roughly fifty guns turn from computed-outward to whatever their row says,
+which is the point of the change and not a fault. A gun that moves, hangs in the air, loses its
+gunner or stays frozen has had its mode or its row shape mistranslated, and those are the only
+faults this step can introduce.
