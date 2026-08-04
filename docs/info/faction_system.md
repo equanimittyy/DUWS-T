@@ -72,9 +72,23 @@ paste parser instead of a static file.
 After both sides are chosen, `client/dialog/fnc_faction_confirm.sqf` shows every role key both sides will
 field, side by side, and lets the player swap or clear any of them. It is the reason faction resolution no
 longer waits for the post-START commit: the screen has to show resolved classnames, so it asks the server
-to resolve and the commit applies the player's table over the result. Layout, the request handshake and
-the re-entrancy that loop demands are in
-[`../faction_confirm_screen_plan.md`](../faction_confirm_screen_plan.md).
+to resolve and the commit applies the player's table over the result.
+
+**Request and ready are counters, not flags.** The screen increments `duws_faction_preview_request` on
+open; `server_init.sqf` serves in a loop and sets `duws_faction_preview_ready` to the number it served,
+which is what the screen waits on. A loop because the environment screen's Back button re-enters faction
+selection and the screen asks again with the new pick; counters because a flag cleared by the server races
+a fresh request, and the screen would paint the previous pick's rows. Two obligations land outside the
+screen: every path the loop calls — both faction inits, all three AutoDetect wrappers, the paste parser —
+has to survive a second call, and the loop `publicVariable`s every schema key before answering, because a
+static faction file assigns server-side only and the OPFOR file never runs on a client at all.
+
+On Continue the screen publishes `duws_faction_locked` — the whole table, not just the edits, so applying
+it is an overwrite rather than a reconciliation. `server/warcom/fnc_faction_apply_locked.sqf` does that on
+the server at the commit and again on each client after the JIP faction-file re-run, which fetches the
+request-menu catalogue the schema does not cover and puts the file's own classnames back over the role
+globals on the way. An edited key is written back as a pool rebuilt from the picked class's
+`fnc_parseFaction` bucket, so a swap keeps the per-spawn variety instead of pinning the role to one class.
 
 `shared/functions/fnc_faction_schema.sqf` is the single source for which keys exist. It returns
 `[key, group, kind]` per side and feeds the screen's rows, `fnc_custom_faction_parse`'s required-key

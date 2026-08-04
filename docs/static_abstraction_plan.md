@@ -247,12 +247,10 @@ Clear the full schema, validate the required subset.
 The alternative, excluding the whole `STATIC` group from the required set, also drops the four
 BLUFOR turrets that are required today and do real work in the FOB ring.
 
-This lands in the middle of the confirmation-screen work, which documents the tuple as
-`[key, group, kind]` and sizes its static section at 4 BLUFOR / 1 OPFOR
-([`faction_confirm_screen_plan.md`](faction_confirm_screen_plan.md)). Both change here: the tuple
-gains a column, and the section becomes 5 BLUFOR / 5 OPFOR, so it stops padding one column against
-the other entirely. Sequence this after that screen lands, or fold it in — either works, but the two
-must not be written against each other's old shape.
+`fnc_faction_schema.sqf` returns `[key, group, kind]` today, and its `STATIC` group is 4 BLUFOR
+against 1 OPFOR — a gap the confirmation screen pads so the section below it starts on the same line
+in both columns. Both change here: the tuple gains a column, and the section becomes 5 BLUFOR /
+5 OPFOR, so it stops padding one column against the other entirely.
 
 Nothing else on that screen needs touching, and two of its existing behaviours are load-bearing
 here. Its key editor already filters a `static` row to `isKindOf "StaticWeapon"`
