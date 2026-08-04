@@ -142,10 +142,12 @@ private _weaponList = [];
 
 sleep 2;
 // ── 第三步：分配炮手 ──
-private _hmgList = nearestObjects [_centerSpawn, ["I_HMG_02_high_F"], 150];
-private _mortarList = nearestObjects [_centerSpawn, ["I_Mortar_01_F"], 150];
-private _aaList = nearestObjects [_centerSpawn, ["B_static_AA_F"], 150];
-private _allWeapons = _hmgList + _mortarList + _aaList;
+// The weapons this composition just placed, taken from the loop that placed them. Searching for them
+// again by classname and radius is what left guns frozen: the thaw below is the only thing that
+// undoes the placement freeze, and a class the search did not name never reached it -- placed, stowed
+// and redeployed unsimulated, unable to fall or settle, for the rest of the campaign. A radius also
+// claims a neighbouring composition's guns.
+private _allWeapons = _weaponList select {!isNull _x};
 
 if (count _allWeapons > 0) then {
     private _unitTypes = [];
@@ -155,10 +157,7 @@ if (count _allWeapons > 0) then {
     private _guardGroup = [_spawnPos, EAST, _unitTypes, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
     _guardGroup deleteGroupWhenEmpty true;
 
-    private _idx = 0;
-    { (units _guardGroup select _idx) moveInGunner _x; _idx = _idx + 1; } forEach _hmgList;
-    { (units _guardGroup select _idx) moveInGunner _x; _idx = _idx + 1; } forEach _mortarList;
-    { (units _guardGroup select _idx) moveInGunner _x; _idx = _idx + 1; } forEach _aaList;
+    { ((units _guardGroup) param [_forEachIndex, objNull]) moveInGunner _x } forEach _allWeapons;
 
     { if (!isNull _x) then { _x enableSimulationGlobal true; }; } forEach _allWeapons;
     [_guardGroup, _centerSpawn] call bis_fnc_taskDefend;

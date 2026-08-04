@@ -751,6 +751,30 @@ never gets the matching re-enable, so it never stops simulating at all. `fnc_duw
 latter because damage on a server-local object is resolved server-side anyway and broadcasting
 it per prop would cost a JIP entry each.
 
+## An unsimulated object does not fall, so placing one in the air parks it there
+
+**Physics runs only while simulation is on. `setPosWorld` / `setPosATL` on an object whose
+simulation is disabled puts it exactly where it was told and leaves it — no fall, no settle, no
+contact with the ground beneath it. It hangs, permanently, and nothing errors.**
+
+Placement code reads identically either way, and the simulation flag is almost never set nearby:
+compositions carry it in their stow record (`fnc_duws_stow` writes `simulationEnabled _x` and
+`fnc_duws_deploy` replays it), so an object frozen at build time comes back frozen a campaign later,
+far from the code that froze it. Anything that places by lifting and dropping — the standard cure
+for a static weapon settled into its own ground — then performs the lift and never gets the drop.
+
+The prefabs are where that state comes from here. Each builds its props and weapons with
+`enableSimulationGlobal false` and thaws them again afterwards, so the thaw is the only thing
+standing between a composition and a campaign spent frozen: a weapon it fails to cover is placed,
+stowed and redeployed unsimulated for good.
+
+**How to apply:** never assume an object you did not just create is simulated. Where a placement
+depends on the object falling, assert it with `enableSimulationGlobal true` — global, not local, per
+[§`enableSimulation` is local](#enablesimulation-is-local-so-a-server-side-freeze-leaves-clients-simulating)
+— and enable it *after* the position is written, so the fall starts from that position rather than
+from wherever a frame boundary mid-placement left the object. `DUWS_fnc_dropStatic`
+(`server/init_zones/fnc_zone_stream_init.sqf`) ends on exactly that pair.
+
 ## A hidden terrain object comes back the moment its damage state changes
 
 **A terrain object cannot be deleted, so clearing ground means `hideObjectGlobal`. The engine
@@ -849,12 +873,12 @@ garrison that deployed at full strength. A deploy line counts what was *raised*,
 
 The same applies to `moveInDriver` / `moveInCargo` / `moveInTurret`: none of them report.
 
-**How to apply:** never treat the command as the end of the operation. Seat, read the seat back,
-and retry — lifting the gun slightly each pass, since a gun dropped *onto* its ground takes the
-seat a gun sunk *into* it refuses. `DUWS_fnc_manStatic`
-(`server/init_zones/fnc_zone_stream_init.sqf`) does three passes and then deletes the man rather
-than leaving him standing, logging a `WARN` naming the gun; the emplacement stays as scenery the
-player can use.
+**How to apply:** never treat the command as the end of the operation. Seat, read the seat back, and
+retry — dropping the gun from a little higher each pass, since a gun that lands *onto* its ground
+takes the seat a gun sunk *into* it refuses. `DUWS_fnc_seatStatic` and `DUWS_fnc_manStatics`
+(`server/init_zones/fnc_zone_stream_init.sqf`) are the read-back and the retry; after the last drop
+the man is deleted rather than left standing, with a `WARN` naming the gun, and the emplacement stays
+as scenery the player can use.
 
 ## A static weapon that goes over throws its gunner out and refuses a new one
 
@@ -879,8 +903,9 @@ on a 50° slope scores below any sane threshold and would be laid over to match 
 lying on that same hill scores above it and would be left down. Correct with `setVectorDirAndUp` on
 a `vectorDir` flattened into the horizontal plane — a gun that went over its nose has a dir pointing
 into the ground, and that against a vertical up leaves the engine two near-parallel vectors and no
-orientation it can derive. `DUWS_fnc_uprightStatic` and the settle wait in `DUWS_fnc_zoneRaiseWorker`
-(`server/init_zones/fnc_zone_stream_init.sqf`) are the two halves; neither works without the other.
+orientation it can derive. `DUWS_fnc_dropStatic` stands the gun up and drops it; the settle wait that
+makes the result readable is one per round in `DUWS_fnc_manStatics`
+(`server/init_zones/fnc_zone_stream_init.sqf`). Neither half works without the other.
 
 ## `doStop` outlives the orders it was issued against, and new waypoints do not release it
 
