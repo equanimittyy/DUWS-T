@@ -397,6 +397,9 @@ hq_blu1 = _officer; publicVariable "hq_blu1";
     ["TaskFailed", ["", localize "STR_DUWS_T_amiszycs"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
     campaign_lost = true;
     campaign_lost_body = "STR_DUWS_T_CAMPAIGN_LOST_OFFICER";
+    // Names the outro card as well as the hint: both endings are worded, and the debriefing
+    // class is read on the server only, so it needs no broadcast.
+    campaign_lost_ending = "officerkilled";
     publicVariable "campaign_lost";
     publicVariable "campaign_lost_body";
     ["INFO", "WARCOM", "Commanding officer killed: campaign lost"] call fnc_log;

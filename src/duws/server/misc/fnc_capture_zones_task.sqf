@@ -78,10 +78,15 @@ private _body = [localize (missionNamespace getVariable
     ["campaign_lost_body", "STR_DUWS_T_CAMPAIGN_LOST"]), localize "STR_DUWS_T_CAMPAIGN_WON"] select _won;
 
 ["info", [_title, _body]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
-[format ["%1 %2", _title, _body], {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+[format ["%1\n\n%2", _title, _body], {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
 ["Campaign", ["FAILED", "SUCCEEDED"] select _won] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, "Campaign"];
 sleep 10;
+// The outro card is a CfgDebriefing class and carries its own wording, so ending a loss on the
+// win class congratulated the player for capturing the island they had just lost. Each loss setter
+// names the class that matches its ending; the fallback covers a loss published without one.
+private _ending = [missionNamespace getVariable ["campaign_lost_ending", "shittyReputation"],
+    "island_captured_win"] select _won;
 // Two-argument form: the one-argument call defaults victory to true, which would end a
 // flattened Altis on the winning card.
-["island_captured_win", _won] call BIS_fnc_endMissionServer;
+[_ending, _won] call BIS_fnc_endMissionServer;
