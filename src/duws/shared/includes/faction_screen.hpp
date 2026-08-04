@@ -19,6 +19,10 @@ class startup_faction_next_dialog
 {
 	idd = -1;
 	movingenable = false;
+	// Stashed so the screen beside it can grey the button out while a faction dropdown is open --
+	// the dropdown belongs to the other display and does not swallow clicks aimed at this one, so
+	// a click meant for a list row lands on the button underneath it.
+	onLoad = "uiNamespace setVariable ['duws_faction_next_display', _this select 0];";
 
 	class controls
 	{
@@ -36,7 +40,7 @@ class startup_faction_next_dialog
 		class faction_next_button: RscButton
 		{
 			idc = 1600;
-			text = "$STR_DUWS_T_xxci6q7d";
+			text = "$STR_DUWS_T_faction_screen_review";
 			x = 11 * GUI_GRID_W + GUI_GRID_X;
 			y = 14.4 * GUI_GRID_H + GUI_GRID_Y;
 			w = 18 * GUI_GRID_W;

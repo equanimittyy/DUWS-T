@@ -5,6 +5,23 @@
 waituntil {!(IsNull (findDisplay 46))};
 _display = (findDisplay 46) createDisplay "RscDisplayEmpty";
 
+// The Review Factions button lives in a dialog of its own (shared/includes/faction_screen.hpp), and
+// an open combo dropdown belongs to this display instead. The dropdown draws over the button but
+// does not take its clicks, so a click aimed at a list row lands on the button and leaves the
+// screen. Greying it out while a combo holds focus is what stops that.
+duws_faction_next_enable = {
+	params ["_enable"];
+	private _d = uiNamespace getVariable ["duws_faction_next_display", displayNull];
+	if (isNull _d) exitWith {};
+	(_d displayCtrl 1600) ctrlEnable _enable;
+};
+
+// Re-armed by any press on this display, not only by a selection: a dropdown dismissed by clicking
+// the background fires no LBSelChanged and leaves focus on the combo, which would stick the button
+// off. The press that opens a combo re-arms and then disables again, SetFocus running after this;
+// were that order ever reversed the button would stay live, which is where it started.
+_display displayAddEventHandler ["MouseButtonDown", { [true] call duws_faction_next_enable; false }];
+
 // One green box with everything tucked inside it, which is the shape every other setup screen
 // carries (shared/includes/campaign_menu.hpp): a filled panel, a titled frame just inside it, and
 // each answer in a labelled frame of its own. This screen used to be a full-bleed band split by two
@@ -206,7 +223,14 @@ _dropdownMode ctrlAddEventHandler ["LBSelChanged",
 _modeSel = duws_gamemodes findIf {(_x select 0) == duws_gamemode};
 _dropdownMode lbSetCurSel (0 max _modeSel);
 
-// The Next button, and the cursor that makes this whole screen clickable.
+// Attached as a second handler per combo rather than folded into the three LBSelChanged bodies
+// above, which each answer a different question and would all have to repeat the same line.
+{
+	_x ctrlAddEventHandler ["SetFocus", { [false] call duws_faction_next_enable; }];
+	_x ctrlAddEventHandler ["LBSelChanged", { [true] call duws_faction_next_enable; }];
+} forEach [_dropdownBLU, _dropdownOPF, _dropdownMode];
+
+// The Review Factions button, and the cursor that makes this whole screen clickable.
 createDialog "startup_faction_next_dialog";
 waitUntil {dialog};
 

@@ -321,6 +321,22 @@
                 <Original>Select your GAME MODE and FACTIONS above. HQ placement comes after you confirm them.</Original>
                 <English>Select your GAME MODE and FACTIONS above. HQ placement comes after you confirm them.</English>
             </Key>
+            <Key ID="STR_DUWS_T_faction_screen_review">
+                <Original>Review Factions</Original>
+                <English>Review Factions</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_working">
+                <Original>Working...</Original>
+                <English>Working...</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hq_place_title">
+                <Original>HQ PLACEMENT</Original>
+                <English>HQ PLACEMENT</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hq_place_intro">
+                <Original>Place your HQ. RANDOM HQ drops it on the map for you, but can leave base objects sunk into the ground. MANUAL HQ lets you place it yourself.</Original>
+                <English>Place your HQ. RANDOM HQ drops it on the map for you, but can leave base objects sunk into the ground. MANUAL HQ lets you place it yourself.</English>
+            </Key>
             <Key ID="STR_DUWS_T_faction_confirm_select">
                 <Original>SELECT</Original>
                 <English>SELECT</English>

@@ -37,6 +37,17 @@ if (_class isEqualTo "") exitWith {
 
 ["INFO", "FACTION", format ["Key editor: %1 <- %2 (faction %3)", _key, _class, _faction]] call fnc_log;
 
+// Said before the parse below rather than after, because that parse walks a whole faction's
+// CfgVehicles and on a heavy mod set takes long enough that the screen reads as frozen: the button
+// stops responding and nothing on it changes. The controls are disabled alongside so a second
+// impatient click cannot start the work twice.
+{ (_display displayCtrl _x) ctrlEnable false; } forEach [8623, 8625, 8629, 8630];
+(_display displayCtrl 8628) ctrlSetStructuredText parseText format ["<t size='0.8' color='#ffcc55'>%1</t>",
+    localize "STR_DUWS_T_faction_edit_working"];
+// One frame for the line above to actually paint. The parse that follows holds the frame for its
+// whole run, so without this yield the message is set and overwritten without ever being drawn.
+uiSleep 0.05;
+
 // Per faction and per screen: the parse walks a whole faction's CfgVehicles, and its answer cannot
 // change while the confirmation screen is open.
 private _cache = uiNamespace getVariable ["duws_faction_parse_cache", createHashMap];
