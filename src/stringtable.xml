@@ -1956,16 +1956,16 @@
                 <English>Campaign Lost</English>
             </Key>
             <Key ID="STR_DUWS_T_CAMPAIGN_LOST">
-                <Original>%1 is in ruins. Withdrawing all forces.</Original>
-                <English>%1 is in ruins. Withdrawing all forces.</English>
+                <Original>%1 is in ruins. Operation is a failure.</Original>
+                <English>%1 is in ruins. Operation is a failure.</English>
             </Key>
             <Key ID="STR_DUWS_T_CAMPAIGN_LOST_CARD">
-                <Original>The AO is in ruins. Withdrawing all forces.</Original>
-                <English>The AO is in ruins. Withdrawing all forces.</English>
+                <Original>The AO is in ruins. Operation is a failure.</Original>
+                <English>The AO is in ruins. Operation is a failure.</English>
             </Key>
             <Key ID="STR_DUWS_T_CAMPAIGN_LOST_OFFICER">
-                <Original>Your commanding officer is dead. Withdrawing all forces.</Original>
-                <English>Your commanding officer is dead. Withdrawing all forces.</English>
+                <Original>Your commanding officer is dead. Operation is a failure.</Original>
+                <English>Your commanding officer is dead. Operation is a failure.</English>
             </Key>
             <Key ID="STR_DUWS_T_escalation_row">
                 <Original>%1  -&gt;  %2 CP</Original>
