@@ -200,7 +200,7 @@ private _allObjectsData = [
 // resolved by whatever object of that class is nearest the row: move the gun in Eden and its
 // height follows the thing it stands on.
 //
-// Column 5 is the faction role holding the classname, or "" for a gun that is what it says it is.
+// Column 5 is the faction role holding the classname, or "" for a gun resolved by its class instead.
 // The column 0 class is what the role resolves to on the stock faction, so the import draws the
 // right silhouette whether or not a mod is loaded.
 // --DUWS-COMPOSITION BEGIN name="HQ Turrets" schema=A anchor=hqInComp--
@@ -305,12 +305,14 @@ publicVariable "bluHQ_object";
 // travel as a class and a position rather than as an object reference: an anchor destroyed between
 // build and rebuild would leave a null behind, where the class is re-found against whatever is
 // standing there now.
+// Resolved here rather than by fnc_static_place: this fence's product is data, not objects. The
+// rebuild runs it again against whatever is standing on the anchors now, so the class is decided
+// once per build and carried, and an unroled row is decided by its class through the same table
+// every zone prefab uses.
 missionNamespace setVariable ["HQ_redeploy_weaponData", _weaponData apply {
     _x params ["_class", "_origX", "_origY", "", "_dir", "_role", "_anchorClass", "_hOffset"];
     [
-        // Missing role falls back to the row's own class, so a faction file that omits the slot
-        // fields the vanilla gun rather than a nil.
-        if (_role == "") then { _class } else { missionNamespace getVariable [_role, _class] },
+        [_class, "blufor", _role] call fnc_static_resolve,
         [_spawnBaseX + (_origX - _compCenterX), _spawnBaseY + (_origY - _compCenterY)],
         _dir, _anchorClass, _hOffset
     ]

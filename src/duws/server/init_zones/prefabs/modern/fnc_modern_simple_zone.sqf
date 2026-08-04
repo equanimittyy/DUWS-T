@@ -50,7 +50,11 @@ while {!_found && _attempts < 20} do {
   _attempts = _attempts + 1;
 };
 if (!_found) then { _pos = [_rX, _rY, 0]; };
-_this = createVehicle ["B_Mortar_01_F", _pos, [], 0, "CAN_COLLIDE"];
+// This zone type scatters its three guns rather than laying them out: each one searches up to
+// twenty candidate spots within 300 m for flat, dry ground and then levels itself, because fitting
+// itself to whatever terrain it was sited on is what a simple zone is. So only the classname goes
+// through fnc_static_resolve -- the placement below is its own, setPosATL and all.
+_this = createVehicle [["B_Mortar_01_F", "opfor"] call fnc_static_resolve, _pos, [], 0, "CAN_COLLIDE"];
 [_this, _zoneKey] call fnc_duws_keep;
 _vehicle_999 = _this;
 _this setDir 215.154;
@@ -74,7 +78,7 @@ while {!_found && _attempts < 20} do {
   _attempts = _attempts + 1;
 };
 if (!_found) then { _pos = [_rX, _rY, 0]; };
-_this = createVehicle ["B_static_AA_F", _pos, [], 0, "CAN_COLLIDE"];
+_this = createVehicle [["B_static_AA_F", "opfor"] call fnc_static_resolve, _pos, [], 0, "CAN_COLLIDE"];
 [_this, _zoneKey] call fnc_duws_keep;
 _vehicle_1000 = _this;
 _this setDir 215.154;
@@ -98,7 +102,7 @@ while {!_found && _attempts < 20} do {
   _attempts = _attempts + 1;
 };
 if (!_found) then { _pos = [_rX, _rY, 0]; };
-_this = createVehicle ["B_static_AA_F", _pos, [], 0, "CAN_COLLIDE"];
+_this = createVehicle [["B_static_AA_F", "opfor"] call fnc_static_resolve, _pos, [], 0, "CAN_COLLIDE"];
 [_this, _zoneKey] call fnc_duws_keep;
 _vehicle_1002 = _this;
 _this setDir 215.154;
