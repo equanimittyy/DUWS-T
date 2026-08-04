@@ -5,44 +5,36 @@
 waituntil {!(IsNull (findDisplay 46))};
 _display = (findDisplay 46) createDisplay "RscDisplayEmpty";
 
-// The Review Factions button lives in a dialog of its own (shared/includes/faction_screen.hpp), and
-// an open combo dropdown belongs to this display instead. The dropdown draws over the button but
-// does not take its clicks, so a click aimed at a list row lands on the button and leaves the
-// screen. Greying it out while a combo holds focus is what stops that.
-duws_faction_next_enable = {
-	params ["_enable"];
-	private _d = uiNamespace getVariable ["duws_faction_next_display", displayNull];
-	if (isNull _d) exitWith {};
-	(_d displayCtrl 1600) ctrlEnable _enable;
-};
-
-// Re-armed by any press on this display, not only by a selection: a dropdown dismissed by clicking
-// the background fires no LBSelChanged and leaves focus on the combo, which would stick the button
-// off. The press that opens a combo re-arms and then disables again, SetFocus running after this;
-// were that order ever reversed the button would stay live, which is where it started.
-_display displayAddEventHandler ["MouseButtonDown", { [true] call duws_faction_next_enable; false }];
-
 // One green box with everything tucked inside it, which is the shape every other setup screen
 // carries (shared/includes/campaign_menu.hpp): a filled panel, a titled frame just inside it, and
 // each answer in a labelled frame of its own. This screen used to be a full-bleed band split by two
 // white rules, which read as controls dropped on the map rather than as the first screen of the
 // setup sequence.
 //
-// One box, painted by two surfaces. The HQ placement buttons are a dialog of their own
-// (shared/includes/hq_placement.hpp) because a control this display creates cannot be styled like a
-// menu button, and this display draws over that dialog -- so the panel below stops just short of
-// the strip the dialog paints, and the two greens meet edge to edge rather than overlapping. The
-// frame spans both and draws over the join, being transparent inside.
+// One box, painted by three surfaces. The PICK FACTIONS button is a dialog of its own
+// (shared/includes/faction_screen.hpp) because a control this display creates cannot be styled like
+// a menu button, and this display draws over that dialog -- so the panel is cut into the two pieces
+// below, above and beneath the strip the dialog paints, and the three greens meet edge to edge
+// rather than overlapping. The frame spans all of it and draws over the joins, being transparent
+// inside.
+//
+// The strip sits high, between the welcome line and the first dropdown, because that is what stops
+// an open list being clicked straight through into the button; the reasoning is in that hpp.
 //
 // Created before anything that sits on it: ctrlCreate order is draw order, so a panel made later
 // covers its own contents.
-_backdrop = _display ctrlCreate ["RscText", 1007];
-_backdrop ctrlSetPosition [0.075, 0.032, 0.85, 0.476];
+_backdropTop = _display ctrlCreate ["RscText", 1007];
+_backdropTop ctrlSetPosition [0.075, 0.032, 0.85, 0.140];
+_backdropTop ctrlSetBackgroundColor [0.2, 0.4, 0.2, 1];
+_backdropTop ctrlCommit 0;
+
+_backdrop = _display ctrlCreate ["RscText", 1013];
+_backdrop ctrlSetPosition [0.075, 0.276, 0.85, 0.354];
 _backdrop ctrlSetBackgroundColor [0.2, 0.4, 0.2, 1];
 _backdrop ctrlCommit 0;
 
 _boxframe = _display ctrlCreate ["RscFrame", 1008];
-_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.684];
+_boxframe ctrlSetPosition [0.0875, 0.052, 0.825, 0.578];
 _boxframe ctrlSetText localize "STR_DUWS_T_faction_screen_title";
 _boxframe ctrlCommit 0;
 
@@ -57,12 +49,12 @@ _HQtext ctrlCommit 0;
 // The last of the three questions, so the two sit under the mode row. One row: same width, same
 // baseline, split down the middle, each in the frame that names its side.
 _frameBLU = _display ctrlCreate ["RscFrame", 1010];
-_frameBLU ctrlSetPosition [0.1, 0.322, 0.3925, 0.1];
+_frameBLU ctrlSetPosition [0.1, 0.444, 0.3925, 0.1];
 _frameBLU ctrlSetText localize "STR_DUWS_T_rqdziaei";
 _frameBLU ctrlCommit 0;
 
 _dropdownBLU = _display ctrlCreate ["RscCombo", 1001];
-_dropdownBLU ctrlSetPosition [0.1125, 0.362, 0.3675, 0.04];
+_dropdownBLU ctrlSetPosition [0.1125, 0.484, 0.3675, 0.04];
 _dropdownBLU ctrlCommit 0;
 
 {
@@ -81,12 +73,12 @@ _dropdownBLU ctrlAddEventHandler ["LBSelChanged",
 //////////////////////////////////////
 
 _frameOPF = _display ctrlCreate ["RscFrame", 1011];
-_frameOPF ctrlSetPosition [0.5075, 0.322, 0.3925, 0.1];
+_frameOPF ctrlSetPosition [0.5075, 0.444, 0.3925, 0.1];
 _frameOPF ctrlSetText localize "STR_DUWS_T_1m1bl9nd";
 _frameOPF ctrlCommit 0;
 
 _dropdownOPF = _display ctrlCreate ["RscCombo", 1003];
-_dropdownOPF ctrlSetPosition [0.52, 0.362, 0.3675, 0.04];
+_dropdownOPF ctrlSetPosition [0.52, 0.484, 0.3675, 0.04];
 _dropdownOPF ctrlCommit 0;
 
 // Rebuilt whenever the game mode changes, which is why it is a block rather than a loop in place.
@@ -144,28 +136,28 @@ duws_zombie_factions_found = count ([true] call fnc_getAllFactionsClean) > 0;
 // faction row keeps the order of the screen readable: the mode is answered first and narrows what
 // the factions may be.
 _frameMode = _display ctrlCreate ["RscFrame", 1005];
-_frameMode ctrlSetPosition [0.1, 0.17, 0.8, 0.14];
+_frameMode ctrlSetPosition [0.1, 0.292, 0.8, 0.14];
 _frameMode ctrlSetText localize "STR_DUWS_T_gamemode";
 _frameMode ctrlCommit 0;
 
 _dropdownMode = _display ctrlCreate ["RscCombo", 1004];
-_dropdownMode ctrlSetPosition [0.1125, 0.206, 0.775, 0.04];
+_dropdownMode ctrlSetPosition [0.1125, 0.328, 0.775, 0.04];
 _dropdownMode ctrlCommit 0;
 
 // Structured for the reason the advice line is: the longest mode description is 145 characters and
 // wants two lines of the box rather than one line with its end cut off.
 _modeDesc = _display ctrlCreate ["RscStructuredText", 1006];
-_modeDesc ctrlSetPosition [0.1125, 0.254, 0.775, 0.052];
+_modeDesc ctrlSetPosition [0.1125, 0.376, 0.775, 0.052];
 _modeDesc ctrlCommit 0;
 
-// The way out of the screen, under a rule and a plain caption rather than in a frame: three frames
-// answering three questions and a fourth around the way out read as a fourth question. The button
-// itself is the dialog's, below. Cleared before it opens, because a click is live the moment it
-// exists.
+// Cleared before the dialog opens, because a click is live the moment the button exists.
 duws_faction_screen_next = false;
 
+// A rule and a centred note close the box off, rather than a fourth frame: three frames answering
+// three questions and a fourth around a footnote read as a fourth question.
+
 _rule = _display ctrlCreate ["RscText", 1009];
-_rule ctrlSetPosition [0.1, 0.432, 0.8, 0.0025];
+_rule ctrlSetPosition [0.1, 0.554, 0.8, 0.0025];
 _rule ctrlSetBackgroundColor [1, 1, 1, 0.25];
 _rule ctrlCommit 0;
 
@@ -173,7 +165,7 @@ _rule ctrlCommit 0;
 // ctrlSetStyle, so a plain control cannot be centred after the fact. The alignment is in the markup
 // and not left to the class, for the reason the pin below states.
 _placeText = _display ctrlCreate ["RscStructuredText", 1012];
-_placeText ctrlSetPosition [0.1, 0.470, 0.8, 0.034];
+_placeText ctrlSetPosition [0.1, 0.578, 0.8, 0.034];
 _placeText ctrlSetStructuredText parseText format ["<t align='center' size='0.8'>%1</t>",
 	localize "STR_DUWS_T_faction_screen_next"];
 _placeText ctrlCommit 0;
@@ -181,7 +173,7 @@ _placeText ctrlCommit 0;
 // ctrlCreate resolves a class name against the display's own config before the mission's, and this
 // display is RscDisplayEmpty -- a configFile display, so every control above is the engine's base
 // class rather than shared/includes/defines.hpp's. Only what a setter exists for can be restated,
-// which is why the two placement buttons are declared in a dialog instead: a button's hover, focus,
+// which is why the PICK FACTIONS button is declared in a dialog instead: a button's hover, focus,
 // shadow, border, press offsets and click sounds all come off the class and none of them have one.
 {
 	_x ctrlSetFont "PuristaMedium";
@@ -223,14 +215,7 @@ _dropdownMode ctrlAddEventHandler ["LBSelChanged",
 _modeSel = duws_gamemodes findIf {(_x select 0) == duws_gamemode};
 _dropdownMode lbSetCurSel (0 max _modeSel);
 
-// Attached as a second handler per combo rather than folded into the three LBSelChanged bodies
-// above, which each answer a different question and would all have to repeat the same line.
-{
-	_x ctrlAddEventHandler ["SetFocus", { [false] call duws_faction_next_enable; }];
-	_x ctrlAddEventHandler ["LBSelChanged", { [true] call duws_faction_next_enable; }];
-} forEach [_dropdownBLU, _dropdownOPF, _dropdownMode];
-
-// The Review Factions button, and the cursor that makes this whole screen clickable.
+// The PICK FACTIONS button, and the cursor that makes this whole screen clickable.
 createDialog "startup_faction_next_dialog";
 waitUntil {dialog};
 

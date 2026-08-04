@@ -321,9 +321,9 @@
                 <Original>Select your GAME MODE and FACTIONS above. HQ placement comes after you confirm them.</Original>
                 <English>Select your GAME MODE and FACTIONS above. HQ placement comes after you confirm them.</English>
             </Key>
-            <Key ID="STR_DUWS_T_faction_screen_review">
-                <Original>Review Factions</Original>
-                <English>Review Factions</English>
+            <Key ID="STR_DUWS_T_faction_screen_pick">
+                <Original>PICK FACTIONS</Original>
+                <English>PICK FACTIONS</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_edit_working">
                 <Original>Working...</Original>

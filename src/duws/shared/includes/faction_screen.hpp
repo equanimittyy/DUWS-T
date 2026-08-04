@@ -1,5 +1,5 @@
-// The bottom of the faction setup screen, in a dialog of its own. Two things force that, and either
-// alone would be enough. The screen is an RscDisplayEmpty built by ctrlCreate
+// The faction setup screen's confirm button, in a dialog of its own. Two things force that, and
+// either alone would be enough. The screen is an RscDisplayEmpty built by ctrlCreate
 // (client/dialog/fnc_HQ_faction_dialog.sqf), and a display made that way takes no mouse cursor --
 // having a dialog open beside it is what makes the screen clickable at all. And a control created on
 // it resolves its class against that display's config rather than the mission's, so it comes up as
@@ -7,22 +7,21 @@
 // and click sounds, and only some of that has a runtime setter
 // (docs/info/arma_engine_gotchas.md). Declared here, this is an ordinary menu button.
 //
-// The panel continues the screen's green rather than opening a second box. It has to be this way
-// round: the display draws over this dialog, so the screen's own panel stops just above this strip
-// and the two meet edge to edge at the same x and width. No frame here -- the screen's frame spans
-// both and draws over the join, an RscFrame being transparent inside.
+// It sits above every combo on the screen, which is what keeps it clickable rather than clicked
+// through. A dropdown belongs to the other display and draws over this dialog without taking its
+// clicks, so a list row opened over this button would put a pick straight through it and end the
+// screen. Dropdowns only ever expand downwards, so being above the topmost one is the whole fix --
+// no greying, no focus tracking. Anything lower would only be safe by arithmetic about how many
+// rows a list holds, and the faction lists grow with every mod loaded.
 //
-// This strip used to hold the two HQ placement buttons. Placement now runs after the faction
-// confirmation screen (client/dialog/fnc_hq_placement.sqf), so the only thing this screen still
-// has to do is say when the player is done answering it.
+// The panel continues the screen's green rather than opening a second box: the display draws over
+// this dialog, so the screen's own panel is split around this strip and the three meet edge to edge
+// at the same x and width. No frame here -- the screen's frame spans all of it and draws over the
+// joins, an RscFrame being transparent inside.
 class startup_faction_next_dialog
 {
 	idd = -1;
 	movingenable = false;
-	// Stashed so the screen beside it can grey the button out while a faction dropdown is open --
-	// the dropdown belongs to the other display and does not swallow clicks aimed at this one, so
-	// a click meant for a list row lands on the button underneath it.
-	onLoad = "uiNamespace setVariable ['duws_faction_next_display', _this select 0];";
 
 	class controls
 	{
@@ -30,21 +29,19 @@ class startup_faction_next_dialog
 		{
 			idc = 1443;
 			x = 3 * GUI_GRID_W + GUI_GRID_X;
-			y = 12.7 * GUI_GRID_H + GUI_GRID_Y;
+			y = 4.3 * GUI_GRID_H + GUI_GRID_Y;
 			w = 34 * GUI_GRID_W;
-			h = 5.9 * GUI_GRID_H;
+			h = 2.6 * GUI_GRID_H;
 			colorBackground[] = {0.2, 0.4, 0.2, 1};
 		};
-		// Centred in the strip the two placement buttons used to share, so the panel still meets
-		// the screen's frame at the same edge and the box does not have to be re-measured.
 		class faction_next_button: RscButton
 		{
 			idc = 1600;
-			text = "$STR_DUWS_T_faction_screen_review";
+			text = "$STR_DUWS_T_faction_screen_pick";
 			x = 11 * GUI_GRID_W + GUI_GRID_X;
-			y = 14.4 * GUI_GRID_H + GUI_GRID_Y;
+			y = 4.6 * GUI_GRID_H + GUI_GRID_Y;
 			w = 18 * GUI_GRID_W;
-			h = 2.5 * GUI_GRID_H;
+			h = 2 * GUI_GRID_H;
 			sizeEx = 0.05;
 			colorBackground[] = {1, 0, 0, 0.5};
 			tooltip = "$STR_DUWS_T_callsign_next_tt";
