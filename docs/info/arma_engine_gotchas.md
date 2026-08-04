@@ -1092,3 +1092,17 @@ conclusions are wrong — the same trap applies to command names, since the engi
 or rename pass that skips this produces confident false positives. Reading by eye, treat two
 spellings of a name as the same variable rather than assuming a bug; changing one to match the
 other is a readability edit with no behavioural effect.
+
+## `getUnitLoadout` pads weapon arrays, so length is not presence
+
+A weapon slot in `getUnitLoadout` is always seven elements when the unit carries that weapon --
+`[classname, suppressor, pointer, optics, [mag, count], [mag2, count2], bipod]` -- with absent
+attachments left as `""` and absent magazines as `[]`. `count _weapon > 3` therefore tests whether
+the unit has a *weapon*, never whether it has an optic, and `_weapon # 4 # 0` indexes into an empty
+array whenever a launcher is carried without a magazine.
+
+Reading an absent attachment compounds it: `configFile >> "CfgWeapons" >> "" >> ...` resolves to a
+config with no classes, `configClasses` returns `[]`, and **`selectMax []` returns nil**. Assigning
+nil to a variable *undefines* it, so the failure surfaces one or more lines later as "Undefined
+variable in expression" at the point of use, not at the assignment that caused it. Test the slot,
+not the array length.

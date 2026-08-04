@@ -499,10 +499,34 @@ fnc_unitParseRoles = compileFinal {
 		*/
 		
 		_primaryWeaponIsSuppressed = if (count _primaryWeapon > 1) then [{_primaryWeapon # 1 isNotEqualTo ""}, {false}];
-		_primaryWeaponOpticMaxZero = if (count _primaryWeapon > 3) then [{selectMax flatten ("true" configClasses (configFile >> "CfgWeapons" >> (_primaryWeapon # 3) >> "ItemInfo" >> "OpticsModes") apply {getArray (_x >> "discreteDistance") })}, {9999}];
-		_primaryWeaponOpticMaxZoom = if (count _primaryWeapon > 3) then [{selectMax ("true" configClasses (configFile >> "CfgWeapons" >> (_primaryWeapon # 3) >> "ItemInfo" >> "OpticsModes") apply {getNumber (_x >> "distanceZoomMax") })}, {9999}];
+		// getUnitLoadout pads a weapon array to seven elements and leaves absent attachments as "",
+		// so `count > 3` only says the unit carries a primary weapon at all -- not that it has an
+		// optic. An iron-sighted rifle looked up CfgWeapons >> "" >> ItemInfo >> OpticsModes, which
+		// holds no classes, so selectMax was handed an empty array and returned nil. Assigning nil
+		// undefines the variable, so both reads below errored on every such unit.
+		// An optic that defines no OpticsModes fails the same way, hence the check on the modes
+		// rather than on the classname alone.
+		private _opticsModes = [];
+		if (count _primaryWeapon > 3 && {(_primaryWeapon # 3) isNotEqualTo ""}) then {
+			_opticsModes = "true" configClasses (configFile >> "CfgWeapons" >> (_primaryWeapon # 3) >> "ItemInfo" >> "OpticsModes");
+		};
+
+		// Zero rather than the no-weapon fallback: a weapon whose optic cannot be read is a weapon
+		// without a long-range optic, and 9999 would claim the opposite.
+		_primaryWeaponOpticMaxZero = if (_opticsModes isEqualTo []) then {0} else {
+			selectMax flatten (_opticsModes apply {getArray (_x >> "discreteDistance")})
+		};
+		_primaryWeaponOpticMaxZoom = if (_opticsModes isEqualTo []) then {0} else {
+			selectMax (_opticsModes apply {getNumber (_x >> "distanceZoomMax")})
+		};
 		_primaryWeaponHasLongRangeOptic = _primaryWeaponOpticMaxZero > 1000 && {_primaryWeaponOpticMaxZoom > 700};
-		_secondaryWeaponDamageCost = if (count _secondaryWeapon > 3) then [{getNumber (configFile >> "CfgAmmo" >> getText (configFile >> "CfgMagazines" >> (_secondaryWeapon # 4 # 0 ) >> "ammo") >> "cost")}, {-1}];	// LAT < 400, HAT > 400
+
+		// Same shape of fault: index 4 is the [magazine, count] pair, and a launcher carried without
+		// a magazine leaves it empty, so `# 4 # 0` errored and left the cost undefined.
+		private _secondaryMag = (_secondaryWeapon param [4, []]) param [0, ""];
+		_secondaryWeaponDamageCost = if (_secondaryMag isEqualTo "") then {-1} else {
+			getNumber (configFile >> "CfgAmmo" >> getText (configFile >> "CfgMagazines" >> _secondaryMag >> "ammo") >> "cost")
+		};	// LAT < 400, HAT > 400
 		_hasUAVterminal = "uav" in toLowerANSI (_assignedItems # 1);
 		// param, not # 0: an unarmed unit has an empty weapon array, and indexing that handed
 		// the role predicates below nothing at all -- one config lookup per weaponless unit,
