@@ -2,7 +2,7 @@
 //
 // Fills the confirmation screen's scroll group with one row per role key, both sides side by side.
 //
-// The two sides are not mirror images -- 34 BLUFOR keys against 38 OPFOR, and different names for
+// The two sides are not mirror images -- 35 BLUFOR keys against 42 OPFOR, and different names for
 // the same role -- so rows cannot pair off one to one. Sections align instead: each section is as
 // tall as the longer side's share of it and the shorter side leaves the tail blank, which keeps
 // OPERATORS starting on the same line in both columns.

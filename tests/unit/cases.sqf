@@ -664,3 +664,21 @@ fnc_faction_keep = {
     (["blufor_SOLDER_X", [["typo_1"]], "B_Soldier_F"] call fnc_faction_resolve),
     ["typo_1"]] call fnc_assertEq;
 ["faction_resolve: ... with no kind to gate on", TEST_KIND, ""] call fnc_assertEq;
+
+// --- fnc_faction_schema: the required column ---
+// A row short of four columns reads `nil` as its required flag, which fnc_custom_faction_parse's
+// filter would treat as false -- silently dropping a core key out of paste validation.
+private _rows = (["blufor"] call fnc_faction_schema) + (["opfor"] call fnc_faction_schema);
+["faction_schema: every row carries all four columns",
+    (_rows findIf { count _x != 4 }), -1] call fnc_assertEq;
+["faction_schema: both sides field the same five statics",
+    (_rows select {(_x select 1) isEqualTo "STATIC"} apply {_x select 0}),
+    ["blufor_TURRET_AA", "blufor_TURRET_AT", "blufor_TURRET_HMG", "blufor_TURRET_GMG",
+     "blufor_TURRET_MORTAR", "opfor_TURRET_AA", "opfor_TURRET_AT", "opfor_TURRET_HMG",
+     "opfor_TURRET_GMG", "opfor_TURRET_MORTAR"]] call fnc_assertEq;
+// The keys no shipped faction file defines. Marking one required fails every paste a player
+// already has, including one copied out of factions/MODERN/.
+["faction_schema: the statics added after the faction files are optional",
+    (_rows select {!(_x select 3)} apply {_x select 0}),
+    ["blufor_TURRET_MORTAR", "opfor_TURRET_AA", "opfor_TURRET_AT", "opfor_TURRET_GMG",
+     "opfor_TURRET_MORTAR"]] call fnc_assertEq;

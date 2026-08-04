@@ -8,10 +8,15 @@
 //
 // Side effect: compiling the fragments assigns the faction globals. That is the
 // intent server-side; on the client it is a transient pre-check, overwritten when
-// the server's data is applied. Every required key is cleared first so a leftover
+// the server's data is applied. Every schema key is cleared first so a leftover
 // value from a previous faction/paste can't mask a key this paste never defines --
 // a misspelled key (blufor_SOLDER_X) leaves its canonical name (blufor_SOLDIER_X)
 // cleared, so it is reported missing rather than silently accepted.
+//
+// Clearing walks the whole schema; validation walks only its required subset. Narrowing
+// the clear to match would let an optional key survive a re-paste, so faction B would
+// field faction A's guns -- and stepping back into the faction screen re-pastes as a
+// normal navigation path, not an edge case.
 //
 // Returns [_pairs, _valid, _bad]:
 //   _pairs   - compiled assignment fragments (consumed by the server build)
@@ -25,15 +30,17 @@ private _prefix = if (_side == "opfor") then {"opfor_"} else {"blufor_"};
 
 // Core combat keys a faction must define. What counts as required, and why the request-menu
 // catalogue is not, is fnc_faction_schema's to say.
-private _requiredKeys = ([_side] call fnc_faction_schema) apply {_x select 0};
+private _schema = [_side] call fnc_faction_schema;
+private _allKeys = _schema apply {_x select 0};
+private _requiredKeys = (_schema select {_x select 3}) apply {_x select 0};
 
 // keep only "<prefix>..." lines, break each on ";", drop path-like junk
 private _pairs = (_text splitString (toString [13,10])) select { _prefix in _x };
 _pairs = flatten (_pairs apply { _x splitString ";" });
 _pairs = _pairs select { !(["/", _x] call BIS_fnc_inString) };
 
-// Clear the required keys, then apply the paste over the top.
-{ missionNamespace setVariable [_x, ""]; } forEach _requiredKeys;
+// Clear every key, then apply the paste over the top.
+{ missionNamespace setVariable [_x, ""]; } forEach _allKeys;
 { call compile _x; } forEach _pairs;
 
 // A key is OK if it holds at least one classname and every classname it holds
