@@ -130,12 +130,9 @@ if (((vehiclevarname player) in game_master)) then {
 
 waituntil {sleep 1;WARCOM_init_done;};
 
-// Draw the HQ icon on map
-[] spawn fnc_draw_HQicon;
-
-// Registers a Draw3D handler and returns, so call rather than spawn.
+// Both register a Draw3D handler and return, so call rather than spawn.
 [] call fnc_killhouse_markers;
-[] call fnc_draw_HQfacilities;
+[] call fnc_draw_world_icons;
 
 
 if (isMultiplayer) then {

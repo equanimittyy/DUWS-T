@@ -3305,6 +3305,10 @@
                 <Original>Your radio supports died with you. %1 CP recovered.</Original>
                 <English>Your radio supports died with you. %1 CP recovered.</English>
             </Key>
+            <Key ID="STR_DUWS_T_FACILITY_HQ">
+                <Original>Headquarters</Original>
+                <English>Headquarters</English>
+            </Key>
             <Key ID="STR_DUWS_T_FACILITY_KILLHOUSE">
                 <Original>Killhouse</Original>
                 <English>Killhouse</English>

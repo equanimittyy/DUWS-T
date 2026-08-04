@@ -14,10 +14,11 @@ killhouse_marker_fade_near = 1;    // fully transparent at or inside this range
 killhouse_marker_fade_far  = 30;   // fully opaque at or beyond it
 killhouse_marker_icon      = "\A3\ui_f\data\map\markers\military\dot_CA.paa";
 
-// Draw3D, not the stacked onEachFrame that fnc_draw_HQicon uses: that file clears the whole
-// stack with a bare `onEachFrame {}` once the player leaves the base, and leaving the base is
-// exactly what teleporting into the killhouse does. A stacked handler here could be wiped at
-// the moment it became useful. Draw3D is a separate mission event and cannot be clobbered.
+// Draw3D rather than a stacked onEachFrame: a stacked handler is torn down with a bare
+// `onEachFrame {}`, which clears the whole stack rather than its own entry, so any system that
+// stops drawing takes every other one with it. Draw3D is a separate mission event per handler
+// and cannot be clobbered. Kept out of the shared icon table (client/misc/fnc_draw_world_icons.sqf)
+// because these fade with range and their subjects change as the run goes on.
 addMissionEventHandler ["Draw3D", {
     private _khX = missionNamespace getVariable ["killhouse_centerX", nil];
     if (isNil "_khX") exitWith {};
