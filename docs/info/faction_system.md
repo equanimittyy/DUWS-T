@@ -15,7 +15,7 @@ set (OPFOR mirrors it with `opfor_`):
 |---|---|---|
 | Infantry roles | `blufor_SOLDIER_X`, `_SOLDIER_LAT_X`, `_SOLDIER_GL_X`, `_SOLDIER_TL_X`, `_SOLDIER_SL_X`, `_SOLDIER_AR_X`, `_MARKSMAN_X`, `_OFFICER_X`, `_HELI_PILOT_X` | HQ/FOB guards, patrols, paradrop, rescue-pilot mission |
 | Vehicles | `_CAR_PATROL1_X`, `_APC_PATROL1/2_X`, `_TANK_PATROL1_X`, `_HELI_TRANS_ARM/UNARM_X`, `_HELI_ATTACK_X`, `_PLANE_CAS_X`, `_BOAT_ARMED_X` | Random patrols, support requests, taxi |
-| Static weapons | `_TURRET_AA/AT/HMG/GMG` | HQ/FOB fortification |
+| Static weapons | `_TURRET_AA/AT/HMG/GMG/MORTAR` | HQ/FOB fortification, every zone prefab's guns, three side missions |
 | Operators | `_SPECOPS_X` + 10 role variants | Operative recruit menu |
 | Request slots | `_RQST_UNIT_01..14_X` (14 fixed, `["empty",0,0]`-padded), `_RQST_VEHICLE_01..50_X` | HQ/FOB request menus |
 
@@ -91,9 +91,36 @@ globals on the way. An edited key is written back as a pool rebuilt from the pic
 `fnc_parseFaction` bucket, so a swap keeps the per-spawn variety instead of pinning the role to one class.
 
 `shared/functions/fnc_faction_schema.sqf` is the single source for which keys exist. It returns
-`[key, group, kind]` per side and feeds the screen's rows, `fnc_custom_faction_parse`'s required-key
-validation, and both AutoDetect wrappers' pool-publish lists — which each held their own copy of the list
-before.
+`[key, group, kind, required]` per side and feeds the screen's rows, `fnc_custom_faction_parse`'s
+required-key validation, and both AutoDetect wrappers' pool-publish lists — which each held their own copy
+of the list before.
+
+`required` is false for the five static keys added after the 254 shipped faction files were written. None
+of those files defines them, so requiring one would fail every custom paste a player already has, including
+one copied out of `factions/MODERN/`. The parse clears the whole schema and validates only the required
+subset: narrowing the clear as well would let an optional key survive a re-paste, and stepping back into
+the faction screen re-pastes as a normal navigation path.
+
+### Static weapons resolve at placement
+
+`shared/functions/fnc_static_roles.sqf` holds the placeholder table, the resolver and the placer. A
+composition names a vanilla static because that is what its author dragged into Eden; `DUWS_staticRoles`
+maps that class to a role, and `fnc_static_resolve` turns it into `<side>_TURRET_<ROLE>` drawn per object
+out of the pool. A row that names its own key — the HQ and FOB fences — skips the table.
+
+Four things it refuses to do silently. A class the table does not carry stands as itself, which is what
+keeps a prefab working while the table is incomplete and is the answer for every prop the placer is handed.
+A role the faction never fields falls to that faction's MG nest, the habit 25 of the shipped BLUFOR files
+already wrote by hand; `server_init.sqf` warns once per campaign when a side has no static MG for that to
+reach. An answer that is not `isKindOf "StaticWeapon"` is refused and the placeholder kept, because the zone
+manning hook, its crew-out counterpart and the empty-vehicle cleanup's exemption all key off that test — a
+mod "static" configured as a car would be placed, never crewed, and swept away as abandoned. And the class
+is drawn through `fnc_faction_pick` rather than read off the global, so two MG nests in one zone can be
+different guns.
+
+`fnc_static_place` is the only sanctioned way to put one down. It freezes with `enableSimulationGlobal
+false` at creation — which is what holds a row where its Z put it, since an unsimulated object does not fall
+— and each caller's crew step thaws once a gunner is in.
 
 ## The static template library
 

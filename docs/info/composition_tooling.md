@@ -100,6 +100,15 @@ ignores anything past index 4.
 killhouse is a multi-floor structure that would collapse if snapped, so it declares `z=keep`
 alongside `zbase=_centerSpawnZ` to sit at its original off-map altitude (~1000).
 
+**A static weapon's class is a role token at runtime, not the gun that gets placed.**
+`fnc_static_resolve` (`shared/functions/fnc_static_roles.sqf`) reads the class off the row, looks it
+up in `DUWS_staticRoles`, and stands whatever the placing side's faction fields for that role — so
+swapping a Mk6 mortar for an HMG in Eden changes the role every faction fills there, not just the
+silhouette in the 3D view. Rearranging and rotating are free; retyping a class is a design change.
+The class still decides what the import draws, which is the point of keeping a vanilla one in the
+row: the layout is arranged against the right silhouettes whether or not a mod is loaded. A class
+the table does not carry is placed as itself, so an unmapped gun is quietly no longer faction-aware.
+
 **Export** — after rearranging in Eden, run this in the same console to copy schema-agnostic
 `[class, dx, dy, dz, dir°]` rows (offsets from the import origin):
 
