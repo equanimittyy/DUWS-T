@@ -34,27 +34,38 @@ _centerSpawn = _cachePos;
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
+// Rows are [class, X, Y, Z, dir, isWeapon], offsets from the site centre. One fence, the zone
+// prefabs' convention: the props and the guns stand up in the same breath and are torn down under
+// the same key, so a second fence would only mean two entries in the composition tool for one site.
+// The flag is hand-carried back after a round trip -- the Eden export emits five columns and stops.
+//
+// A gun's class is a placeholder: fnc_static_place stands whatever OPFOR fields for the role, this
+// being their cache. A BLUFOR key here would have the player's own faction defending the enemy's
+// supplies. The row's own class only decides what the Eden import draws.
 // --DUWS-COMPOSITION BEGIN name="Mission: Destroy Cache" schema=A--
 _staticsArray = [
-    ["CamoNet_INDP_open_F", 0.942383, -0.640625, 0, 342.004],
-    ["Land_GarbageHeap_02_F", -1.71191, -1.54443, 3.33786e-06, 93.4817],
-    ["Land_CratesWooden_F", -1.27148, 2.11084, 0, 0],
-    ["Land_GarbageHeap_04_F", -2.4165, -0.706543, -0.0443211, 90.9487],
-    ["Land_CratesWooden_F", 1.46631, -3.19775, 0, 0],
-    ["Land_HBarrier_5_F", -6.48291, -3.77783, 0, 49.5237],
-    ["Land_HBarrier_5_F", -8.11426, 1.68848, 0, 88.8804],
-    ["Land_HBarrier_5_F", 1.946484, -8.04492, 0, 0.520331],
-    ["Land_HBarrier_5_F", -0.718359, 8.46387, 0, 183.745],
-    ["Land_HBarrier_5_F", 3.80957, 6.41455, 0, 45.2709],
-    ["Land_HBarrier_5_F", 9.2251, -1.25684, 0, 269.491],
-    ["Land_BagBunker_Small_F", -7.08691, 7.32031, 0, 134.261],
-    ["Land_BagBunker_Small_F", 8.24512, -6.67188, 0, 314.617]
+    ["CamoNet_INDP_open_F", 0.942383, -0.640625, 0, 342.004, false],
+    ["Land_GarbageHeap_02_F", -1.71191, -1.54443, 3.33786e-06, 93.4817, false],
+    ["Land_CratesWooden_F", -1.27148, 2.11084, 0, 0, false],
+    ["Land_GarbageHeap_04_F", -2.4165, -0.706543, -0.0443211, 90.9487, false],
+    ["Land_CratesWooden_F", 1.46631, -3.19775, 0, 0, false],
+    ["Land_HBarrier_5_F", -6.48291, -3.77783, 0, 49.5237, false],
+    ["Land_HBarrier_5_F", -8.11426, 1.68848, 0, 88.8804, false],
+    ["Land_HBarrier_5_F", 1.946484, -8.04492, 0, 0.520331, false],
+    ["Land_HBarrier_5_F", -0.718359, 8.46387, 0, 183.745, false],
+    ["Land_HBarrier_5_F", 3.80957, 6.41455, 0, 45.2709, false],
+    ["Land_HBarrier_5_F", 9.2251, -1.25684, 0, 269.491, false],
+    ["Land_BagBunker_Small_F", -7.08691, 7.32031, 0, 134.261, false],
+    ["Land_BagBunker_Small_F", 8.24512, -6.67188, 0, 314.617, false],
+    ["O_HMG_01_high_F", -5.52539,  5.98193, 0, 314.218, true],
+    ["O_HMG_01_high_F",  6.7168,  -5.49365, 0, 136.703, true]
 ];
 // --DUWS-COMPOSITION END--
 
 _vehicle = objNull;
 {
-    _x params ["_class", "_posX", "_posY", "_posZ", "_dir"];
+    _x params ["_class", "_posX", "_posY", "_posZ", "_dir", "_isWeapon"];
+    if (_isWeapon) then { continue; };
     _vehicle = createVehicle [_class, [0,0,0], [], 0, "CAN_COLLIDE"];
     _vehicle setDir _dir;
     _vehicle setPosATL [(_centerSpawnX)+_posX,(_centerSpawnY)+_posY,0];
@@ -131,22 +142,16 @@ clearBackpackCargoGlobal _vehicle_8;
 }] remoteExec ["call", 0, true];
 _vehicle_8 setVariable ["arsenalUsed", false, true];
 
-// The cache's two MG nests, fenced so a rearrange in the 3D editor reaches them. Resolved against
-// OPFOR because the objective is an enemy cache: a BLUFOR key here would have the player's own
-// faction defending the enemy's supplies.
-// --DUWS-COMPOSITION BEGIN name="Mission: Destroy Cache guns" schema=A--
-_gunArray = [
-    ["O_HMG_01_high_F", -5.52539,  5.98193, 0, 314.218],
-    ["O_HMG_01_high_F",  6.7168,  -5.49365, 0, 136.703]
-];
-// --DUWS-COMPOSITION END--
-
-private _guns = _gunArray apply {
+// The guns off the same fence, in a second pass because they are placed by the resolver and
+// frozen until crewed, where the props above snap to the terrain and stay simulated.
+private _guns = [];
+{
+    if !(_x select 5) then { continue; };
     private _gun = [_x, [_centerSpawnX, _centerSpawnY], "opfor", "mission_destroy_cache", "pos"] call fnc_static_place;
     _gun allowDamage false;
     _gun setDamage 0;
-    _gun
-};
+    _guns pushBack _gun;
+} forEach _staticsArray;
 _guns params ["_vehicle_9", "_vehicle_10"];
 
 _groupBunker1 = [getpos _vehicle_9, EAST, [opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;

@@ -185,9 +185,12 @@ private _allObjectsData = [
 
 // The base's guns, in the same frame as the walls around them. Their own fence rather than rows on
 // the one above, because the two halves have different lifetimes: the props are built once and the
-// guns are replaced on every redeploy (misc/fnc_redeployHQUnits.sqf), and the Eden export emits
-// nothing past the heading column -- so a permanent/rebuilt flag on one array would survive only by
-// being hand-carried back on every round trip.
+// guns are replaced on every redeploy (misc/fnc_redeployHQUnits.sqf, which replays these rows alone
+// through fnc_placeHQUnits), and the Eden export emits nothing past the heading column -- so a
+// permanent/rebuilt flag on one array would survive only by being hand-carried back across 135 prop
+// rows on every round trip, to mark the two that are guns.
+// Do not merge them into one composition. The zone prefabs' single-fence-plus-isWeapon shape works
+// there only because a prefab is built once and never rebuilt.
 //
 // They were placed off model-space offsets from the sandbag and the HQ building rather than from
 // rows, which is why the composition above carries a hundred and thirty-five props and not one

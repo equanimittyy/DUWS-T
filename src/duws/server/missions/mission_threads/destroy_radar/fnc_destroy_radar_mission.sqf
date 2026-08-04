@@ -31,22 +31,32 @@ _centerSpawn = _radarPos;
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
+// Rows are [class, X, Y, Z, dir, isWeapon], offsets from the site centre. One fence, the zone
+// prefabs' convention: the props and the guns stand up in the same breath and are torn down under
+// the same key, so a second fence would only mean two entries in the composition tool for one site.
+// The flag is hand-carried back after a round trip -- the Eden export emits five columns and stops.
+//
+// A gun's class is a placeholder: fnc_static_place stands whatever OPFOR fields for the role, this
+// being their radar, and the row's own class only decides what the Eden import draws.
 // --DUWS-COMPOSITION BEGIN name="Mission: Destroy Radar" schema=A--
 _staticsArray = [
-    ["Box_FIA_Ammo_F", 3.23633, -0.296875, 0, 0],
-    ["Land_CratesWooden_F", 3.46631, -3.19775, 1, 0],
-    ["Land_HBarrier_5_F", -6.48291, -3.77783, 0, 49.5237],
-    ["Land_HBarrier_5_F", -8.11426, 1.68848, 0, 88.8804],
-    ["Land_HBarrier_5_F", 1.946484, -8.04492, 0, 0.520331],
-    ["Land_HBarrier_5_F", -0.718359, 8.46387, 0, 183.745],
-    ["Land_HBarrier_5_F", 3.80957, 6.41455, 0, 45.2709],
-    ["Land_HBarrier_5_F", 9.2251, -1.25684, 0, 269.491]
+    ["Box_FIA_Ammo_F", 3.23633, -0.296875, 0, 0, false],
+    ["Land_CratesWooden_F", 3.46631, -3.19775, 1, 0, false],
+    ["Land_HBarrier_5_F", -6.48291, -3.77783, 0, 49.5237, false],
+    ["Land_HBarrier_5_F", -8.11426, 1.68848, 0, 88.8804, false],
+    ["Land_HBarrier_5_F", 1.946484, -8.04492, 0, 0.520331, false],
+    ["Land_HBarrier_5_F", -0.718359, 8.46387, 0, 183.745, false],
+    ["Land_HBarrier_5_F", 3.80957, 6.41455, 0, 45.2709, false],
+    ["Land_HBarrier_5_F", 9.2251, -1.25684, 0, 269.491, false],
+    ["B_static_AA_F", -5.52539,  5.98193, 0, 314.218, true],
+    ["B_static_AA_F",  6.7168,  -5.49365, 0, 136.703, true]
 ];
 // --DUWS-COMPOSITION END--
 
 _vehicle = objNull;
 {
-    _x params ["_class", "_posX", "_posY", "_posZ", "_dir"];
+    _x params ["_class", "_posX", "_posY", "_posZ", "_dir", "_isWeapon"];
+    if (_isWeapon) then { continue; };
     _vehicle = createVehicle [_class, [0,0,0], [], 0, "CAN_COLLIDE"];
     _vehicle setDir _dir;
     _vehicle setPosATL [(_centerSpawnX)+_posX,(_centerSpawnY)+_posY,0];
@@ -64,24 +74,18 @@ clearItemCargoGlobal _vehicle_7;
 clearBackpackCargoGlobal _vehicle_7;
 [_vehicle_7, "mission_destroy_radar"] call fnc_duws_keep;
 
-// The radar's air cover, fenced like the barriers above so a rearrange in the 3D editor reaches it.
-// The classes are placeholders resolved against OPFOR, which is whose radar this is; the row's own
-// class only decides what the Eden import draws.
-// --DUWS-COMPOSITION BEGIN name="Mission: Destroy Radar guns" schema=A--
-_gunArray = [
-    ["B_static_AA_F", -5.52539,  5.98193, 0, 314.218],
-    ["B_static_AA_F",  6.7168,  -5.49365, 0, 136.703]
-];
-// --DUWS-COMPOSITION END--
-
-// Invulnerable by design: the objective is the radar, and a launcher the player can shoot off from
-// a ridge is one the mission never asks them to close with.
-private _guns = _gunArray apply {
+// The guns off the same fence, in a second pass because they are placed by the resolver and
+// frozen until crewed, where the props above snap to the terrain and stay simulated.
+private _guns = [];
+{
+    if !(_x select 5) then { continue; };
     private _gun = [_x, [_centerSpawnX, _centerSpawnY], "opfor", "mission_destroy_radar", "pos"] call fnc_static_place;
+    // Invulnerable by design: the objective is the radar, and a launcher the player can shoot off
+    // from a ridge is one the mission never asks them to close with.
     _gun allowDamage false;
     _gun setDamage 0;
-    _gun
-};
+    _guns pushBack _gun;
+} forEach _staticsArray;
 _guns params ["_vehicle_9", "_vehicle_10"];
 
 _groupBunker1 = [getpos _vehicle_9, EAST, [opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;

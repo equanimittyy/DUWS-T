@@ -26,10 +26,14 @@ playSound "loadgun";
 _fobKey = format ["FOB_%1", netId _fob];
 
 // Two fences rather than one, because the halves have different lifetimes: the perimeter is placed
-// on the first fortify and left standing, while a refortify replaces every turret. A single array
-// would have to carry a permanent/rebuilt flag, and the Eden export does not emit anything past the
-// heading column -- so the flag would survive only by being hand-carried back on every round trip.
-// The split makes the lifetime the fence rather than a column.
+// on the first fortify and left standing, while a refortify -- misc/fnc_redeployFOBUnits.sqf calling
+// back in with _refortify true -- replaces every turret. A single array would have to carry a
+// permanent/rebuilt flag, and the Eden export does not emit anything past the heading column, so the
+// flag would survive only by being hand-carried back across 43 rows on every round trip. Lose it and
+// a refortify either duplicates the walls or stops replacing the guns.
+// The split makes the lifetime the fence rather than a column. Do not merge them into one
+// composition; the zone prefabs' single-fence-plus-isWeapon shape works there only because a prefab
+// is built once and never rebuilt.
 //
 // Rows are [class, X, Y, Z, heading], offsets from the FOB centre, which is what lets the layout
 // round-trip through the 3D editor (docs/info/composition_tooling.md).
