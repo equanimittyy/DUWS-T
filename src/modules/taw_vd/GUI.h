@@ -237,7 +237,7 @@ class RscShortcutButton_taw {
 	};
 };
 
-class RscControlsGroup {
+class RscControlsGroup_taw {
 	type = 15;
 	idc = -1;
 	x = 0;
@@ -279,7 +279,7 @@ class RscControlsGroup {
 	class Controls {};
 };
 
-class RscControlsGroupNoScrollbars : RscControlsGroup {
+class RscControlsGroupNoScrollbars : RscControlsGroup_taw {
 	class VScrollbar : VScrollbar {
 		width = 0;
 	};
@@ -580,7 +580,7 @@ class TAW_VDMenu {
 			w = .35; h = .04;
 		};
 
-		class Manager:RscControlsGroup {
+		class Manager:RscControlsGroup_taw {
 			idc = MANAGER_GROUP;
 
 			x = -0.21; y = .2;

@@ -67,14 +67,6 @@ the shape anyone writing a new dialog will expect.
 
 ## Residue a `.sqf`-only text pass could not reach
 
-### One test dialog
-
-`shared/includes/defines.hpp:470-530` defines `RscDisplayTest` (idd 3000): a background, a "Hello
-World" header, an edit box, and OK/Cancel buttons whose actions hint the edit box's text and close
-the display. Nothing calls `createDialog` on it and none of its control ids — 1000, 1001, 1234,
-1700, 1701 — is addressed from SQF. It is scaffolding from whoever first set the file up, and the
-only reason it survived is that the earlier pass read `.sqf` and this is `.hpp`.
-
 ### Four globals written and never read
 
 | Global | Written at |
