@@ -682,3 +682,38 @@ private _rows = (["blufor"] call fnc_faction_schema) + (["opfor"] call fnc_facti
     (_rows select {!(_x select 3)} apply {_x select 0}),
     ["blufor_TURRET_MORTAR", "opfor_TURRET_AA", "opfor_TURRET_AT", "opfor_TURRET_GMG",
      "opfor_TURRET_MORTAR"]] call fnc_assertEq;
+
+// --- fnc_static_resolve: placeholder class to faction class ---
+// The table is stubbed to two rows: what is under test is which key a placeholder asks for and what
+// it answers when the key is empty, not the shipped table's contents. sqf-vm has no CfgVehicles, so
+// isKindOf is false for everything and the type test always fails closed -- which is what makes the
+// last case here assert the refusal rather than the happy path.
+DUWS_staticRoles = [["B_Mortar_01_F", "MORTAR"], ["B_HMG_01_high_F", "HMG"]];
+TEST_ASKED = [];
+fnc_faction_pick = { TEST_ASKED pushBack _this; TEST_PICK };
+TEST_PICK = "";
+
+["static_resolve: a class no row names stands as itself",
+    (["Land_BagFence_Round_F", "opfor"] call fnc_static_resolve),
+    "Land_BagFence_Round_F"] call fnc_assertEq;
+["static_resolve: ... without asking the faction anything", TEST_ASKED, []] call fnc_assertEq;
+
+// The whole point of the table: the placeholder's side is not the placing side.
+TEST_ASKED = [];
+["static_resolve: a mapped class asks its own side for the role the table names",
+    (["B_Mortar_01_F", "opfor"] call fnc_static_resolve), "B_Mortar_01_F"] call fnc_assertEq;
+["static_resolve: ... falling to the side's MG when the role is empty",
+    TEST_ASKED, [["opfor_TURRET_MORTAR"], ["opfor_TURRET_HMG"]]] call fnc_assertEq;
+
+TEST_ASKED = [];
+["static_resolve: a row that names its key skips the table",
+    (["B_Mortar_01_F", "blufor", "blufor_TURRET_AA"] call fnc_static_resolve),
+    "B_Mortar_01_F"] call fnc_assertEq;
+["static_resolve: ... and asks for that key",
+    (TEST_ASKED select 0), ["blufor_TURRET_AA"]] call fnc_assertEq;
+
+// Fail-closed: a mod "static" configured as a car would be placed, never crewed, never crewed out,
+// and swept away as an abandoned vehicle.
+TEST_PICK = "some_mod_car_F";
+["static_resolve: a class that is not a StaticWeapon is refused",
+    (["B_HMG_01_high_F", "blufor"] call fnc_static_resolve), "B_HMG_01_high_F"] call fnc_assertEq;

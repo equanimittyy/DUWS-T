@@ -39,3 +39,4 @@ duws/shared/functions/fnc_faction_pools.sqf::fnc_faction_pick
 duws/shared/functions/fnc_faction_pools.sqf::fnc_faction_resolve
 duws/shared/functions/fnc_faction_schema.sqf::*fnc_faction_schema
 duws/shared/factions/MODERN/fn_factionAutoDetect.sqf::fnc_selectNonEmpty
+duws/shared/functions/fnc_static_roles.sqf::fnc_static_resolve

@@ -369,6 +369,9 @@ fnc_request_vehicle_fob = compile preprocessFileLineNumbers "duws\client\dialog\
 fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dialog\fnc_custom_faction_capture.sqf";publicVariable "fnc_custom_faction_capture";
 // Ahead of faction init, which calls it. Not broadcast: generation and every spawn path are server.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_pools.sqf";
+// Same idiom and the same reason: the table, the resolver reading it and the placer acting on the
+// answer are one file, so which class a static is and how one is put down cannot drift apart.
+[] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_static_roles.sqf";
 // Ahead of the two AutoDetect wrappers and fnc_custom_faction_parse, which both build their key
 // lists from it. Broadcast because the confirmation screen builds its rows from it client-side.
 fnc_faction_schema = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_schema.sqf";publicVariable "fnc_faction_schema";
