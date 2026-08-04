@@ -11,4 +11,10 @@ if (_key == "" || {_key in DUWS_support_permanent}) exitWith {};
 
 DUWS_support_permanent pushBack _key;
 publicVariable "DUWS_support_permanent";
+
+// Announced from here rather than from the buyer's own purchase: this is the one place that runs
+// exactly once per unlock, so the two players who reach a row in the same frame raise one card
+// between them. A permanent row is bought for the whole team, so the whole team is told.
+[format ["unlock_%1", _key], []] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+
 ["INFO", "ECON", format ["permanent support unlocked: %1", _key]] call fnc_log;

@@ -123,5 +123,3 @@ _trg setTriggerArea [5, 5, 0, false, 5];
 // HQ_repairDepot_netId, and an object-keyed id is that object's netId, so the two would evict
 // each other.
 [_depot, netId _trg] remoteExec ["fnc_client_addRepairActions", 0, format ["hq_repair_%1", netId _depot]];
-
-["info", [localize "STR_DUWS_T_vehicle_repair", ""]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];

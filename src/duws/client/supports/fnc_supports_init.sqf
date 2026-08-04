@@ -177,7 +177,6 @@ fnc_support_apply = {
 			private _arsenal = [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 80, true, true, "", "_this == player"];
 			bluHQ_object addAction _arsenal;
 			{ _x addAction _arsenal } forEach Array_of_FOBS;
-			["armory", [localize "STR_DUWS_T_kw2lnaig", ""]] call bis_fnc_showNotification;
 		};
 		case "halo": {
 			private _sites = [bluHQ_object] + Array_of_FOBS;
@@ -188,13 +187,9 @@ fnc_support_apply = {
 					_x addAction [ACT_MOVE("STR_DUWS_T_halo_ai_only"), fnc_ghst_halo, [true,600,70,true], 70, true, true, "", "alive player"];
 				};
 			} forEach _sites;
-			["halo", [localize "STR_DUWS_T_xghf3qqd", ""]] call bis_fnc_showNotification;
 		};
 		case "repair":  { [] remoteExec ["fnc_activateBaseRepairStation", 2] };
 		case "recycle": { [] remoteExec ["fnc_activateBaseRecycleStation", 2] };
-		case "mobile_HQ": {
-			["info", [localize "STR_DUWS_T_b7gmddq3", ""]] call bis_fnc_showNotification;
-		};
 	};
 };
 

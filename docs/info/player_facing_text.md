@@ -104,7 +104,7 @@ is why a CP award call passes a bare number where every other call passes a sent
 
 | Colour | Means | Classes |
 |---|---|---|
-| white `{1,1,1,1}` | neutral information | `info`, `missionclean`, `sitrepinfo`, `arsenal`, `armory`, `halo` |
+| white `{1,1,1,1}` | neutral information | `info`, `missionclean`, `sitrepinfo`, `arsenal`, the `unlock_*` family |
 | blue `{0.2,0.5,1,1}` | something gained | `US_takencontrol`, `repup`, `infosearch` |
 | red `{1,0.2,0.2,1}` | something lost | `alert`, `US_lostcontrol`, `repdown`, `biohazard` |
 | cyan `{0.5,1,1,1}` | economy | the `CPadded*` / `APaddedmission` badge family |
@@ -126,11 +126,12 @@ fixed `$STR_DUWS_T_gwn85uxh` title while serving four of them, so a destroyed MH
 and a rise in escalation all announced themselves as `FOB Lost`. A class whose `title` is anything
 but `"%1"` may carry exactly one event.
 
-**The catalogue — 16 classes, every one in service:**
+**The catalogue — 21 classes in service, plus the `SupportUnlock` base the unlock family inherits
+from, which is never fired itself:**
 
 | Class | Colour | Sites | Carries |
 |---|---|---|---|
-| `info` | white | 16 | the general-purpose card; MHQ, FOB, hire, black market, supports |
+| `info` | white | 13 | the general-purpose card; MHQ, FOB, hire, black market, supports |
 | `arsenal` | white | 5 | the one-time arsenal at a side-mission objective |
 | `biohazard` | red | 4 | RAVAGE / WBK zombie-mode announcements |
 | `missionclean` | white | 2 | the side-mission cleanup countdown |
@@ -141,15 +142,13 @@ but `"%1"` may carry exactly one event.
 | `US_takencontrol` | blue | 2 | zone captured |
 | `US_lostcontrol` | red | 1 | zone lost |
 | `infosearch` | blue | 1 | a search that revealed something |
-| `armory` | white | 1 | the VA Arsenal permanent unlock |
-| `halo` | white | 1 | the HALO Jump permanent unlock |
+| `unlock_armory` · `unlock_halo` · `unlock_mobile_HQ` · `unlock_fob` · `unlock_repair` · `unlock_recycle` | white | 1 each | the six permanent support unlocks |
 | `CPadded` · `CPaddedmission` · `CPaddedattrition` · `APaddedmission` | cyan | 1 each | zone, mission, kill income, mission AP |
 
-**A support unlock is white**, all five of them, whichever class draws it. Blue is reserved for
-ground and standing taken off the enemy — a zone, a reputation, a search that paid — and a purchase
-the player made at their own base is not that. `armory` and `halo` earn a class each over sharing
-`info` only for their icon: `info`'s warning triangle over "VA Arsenal / Unlocked" reads as the
-opposite of what it announces.
+**A support unlock is white**, all six of them. Blue is reserved for ground and standing taken off
+the enemy — a zone, a reputation, a search that paid — and a purchase the player made at their own
+base is not that. The family earns a class per facility only for the icon: `info`'s warning triangle
+over an unlock reads as the opposite of what it announces.
 
 The two rep cards wear the handshake `meet_ca.paa` rather than a flare, because reputation is the
 one figure the player moves by dealing with people rather than by shooting.
@@ -160,16 +159,29 @@ lowercase (`cpadded`, `us_takencontrol`, `us_lostcontrol`, `cpaddedmission`, `ap
 against a CamelCase definition — config lookup is case-insensitive, which is why the drift went
 unnoticed.
 
-## A permanent unlock announces itself and nothing more
+## A permanent unlock is one card, the same card, to the whole team
 
-The five permanent unlocks — the VA Arsenal, HALO Jump, Mobile HQ, and the recycling and vehicle
-modification stations — all fire the same card: the facility's name as the title, the shared
-`STR_DUWS_T_SUPPORT_UNLOCKED` as the description. They used to spend the description telling the
-player how to use what they had just bought (`Scrap vehicles on the pad at the Recycling Station`),
-which is the one thing a four-second card cannot teach and the scroll action on the object itself
-already says. The name keys are the plain noun (`Vehicle Recycling Station`), never the menu row's
-label: a row carries its price, and a card reading `Vehicle Modification Station (5 CP)` prices
-something the player has already paid for.
+The six permanent unlocks — the VA Arsenal, HALO Jump, Mobile HQ, FOBs, and the recycling and
+vehicle modification stations — share one shape: a fixed `Permanent Support Unlocked` title, the
+facility's own icon, and `BLUFOR has unlocked the Vehicle Recycling Station` as the description.
+Nothing is passed in, so no call site can drift from the shape; `SupportUnlock` holds the parts
+they share and each class supplies only its icon and its sentence
+(`shared/includes/notifications.hpp`).
+
+**It fires from `server/supports/fnc_support_perm_grant.sqf`, not from the purchase.** A permanent
+row is bought once for the whole team, and that function is the one place that runs exactly once
+per unlock — two players reaching the same row in the same frame are charged once and announce
+once. Announcing from the buyer's own `fnc_support_buy` reached only the buyer for three of the six
+and raced for all of them.
+
+The description never carries the menu row's label, which is where the price lives: a card reading
+`Vehicle Modification Station (5 CP)` prices something the player has already paid for. Nor does it
+explain the facility (`Scrap vehicles on the pad at the Recycling Station`) — that is the one thing
+a four-second card cannot teach, and the scroll action on the object already says it.
+
+A row that grants a comm item raises the engine's own card as well, naming the radio entry the
+buyer now holds. That is a second message only in appearance: the engine's card is per-player and
+says *you are carrying this*, where the unlock card is the team's news.
 
 ## Hint prose is system prose
 

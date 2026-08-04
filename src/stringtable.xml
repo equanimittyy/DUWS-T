@@ -3305,6 +3305,34 @@
                 <Original>Your radio supports died with you. %1 CP recovered.</Original>
                 <English>Your radio supports died with you. %1 CP recovered.</English>
             </Key>
+            <Key ID="STR_DUWS_T_SUPPORT_UNLOCK_TITLE">
+                <Original>Permanent Support Unlocked</Original>
+                <English>Permanent Support Unlocked</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_ARMORY">
+                <Original>BLUFOR has unlocked the VA Arsenal</Original>
+                <English>BLUFOR has unlocked the VA Arsenal</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_HALO">
+                <Original>BLUFOR has unlocked HALO Jump</Original>
+                <English>BLUFOR has unlocked HALO Jump</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_MOBILE_HQ">
+                <Original>BLUFOR has unlocked the Mobile HQ</Original>
+                <English>BLUFOR has unlocked the Mobile HQ</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_FOB">
+                <Original>BLUFOR has unlocked Forward Operating Bases</Original>
+                <English>BLUFOR has unlocked Forward Operating Bases</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_REPAIR">
+                <Original>BLUFOR has unlocked the Vehicle Modification Station</Original>
+                <English>BLUFOR has unlocked the Vehicle Modification Station</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_RECYCLE">
+                <Original>BLUFOR has unlocked the Vehicle Recycling Station</Original>
+                <English>BLUFOR has unlocked the Vehicle Recycling Station</English>
+            </Key>
         </Container>
         <Container name="Zones &amp; Campaign Flow">
             <Key ID="STR_DUWS_T_heli_moving">
