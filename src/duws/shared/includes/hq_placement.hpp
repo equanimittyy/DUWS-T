@@ -25,9 +25,9 @@ class startup_hq_placement_dialog
 		class hq_placement_panel: RscText
 		{
 			idc = -1;
-			x = 11 * GUI_GRID_W + GUI_GRID_X;
+			x = 8 * GUI_GRID_W + GUI_GRID_X;
 			y = 7 * GUI_GRID_H + GUI_GRID_Y;
-			w = 18 * GUI_GRID_W;
+			w = 24 * GUI_GRID_W;
 			h = 11 * GUI_GRID_H;
 			colorBackground[] = {0.2, 0.4, 0.2, 1};
 		};
@@ -38,9 +38,9 @@ class startup_hq_placement_dialog
 		class hq_placement_inner: RscText
 		{
 			idc = -1;
-			x = 11.3 * GUI_GRID_W + GUI_GRID_X;
+			x = 8.3 * GUI_GRID_W + GUI_GRID_X;
 			y = 7.3 * GUI_GRID_H + GUI_GRID_Y;
-			w = 17.4 * GUI_GRID_W;
+			w = 23.4 * GUI_GRID_W;
 			h = 10.4 * GUI_GRID_H;
 			colorBackground[] = {0,0,0,0.3};
 		};
@@ -48,9 +48,9 @@ class startup_hq_placement_dialog
 		{
 			idc = 1440;
 			text = "$STR_DUWS_T_hq_place_title";
-			x = 11 * GUI_GRID_W + GUI_GRID_X;
+			x = 8 * GUI_GRID_W + GUI_GRID_X;
 			y = 7 * GUI_GRID_H + GUI_GRID_Y;
-			w = 18 * GUI_GRID_W;
+			w = 24 * GUI_GRID_W;
 			h = 11 * GUI_GRID_H;
 		};
 		// Structured rather than plain: the advice runs to several lines at this width and a plain
@@ -59,9 +59,9 @@ class startup_hq_placement_dialog
 		class hq_placement_intro: RscStructuredText
 		{
 			idc = 1441;
-			x = 11.8 * GUI_GRID_W + GUI_GRID_X;
+			x = 8.8 * GUI_GRID_W + GUI_GRID_X;
 			y = 8.4 * GUI_GRID_H + GUI_GRID_Y;
-			w = 16.4 * GUI_GRID_W;
+			w = 22.4 * GUI_GRID_W;
 			h = 4.4 * GUI_GRID_H;
 		};
 
