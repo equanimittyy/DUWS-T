@@ -334,8 +334,8 @@
                 <English>HQ PLACEMENT</English>
             </Key>
             <Key ID="STR_DUWS_T_hq_place_intro">
-                <Original>Place your HQ.&lt;br /&gt;RANDOM HQ drops it on the map for you, but can leave base objects sunk into the ground.&lt;br /&gt;MANUAL HQ lets you place it yourself.</Original>
-                <English>Place your HQ.&lt;br /&gt;RANDOM HQ drops it on the map for you, but can leave base objects sunk into the ground.&lt;br /&gt;MANUAL HQ lets you place it yourself.</English>
+                <Original>Place your HQ.&lt;br /&gt;&lt;br /&gt;RANDOM HQ drops it on the map for you, but can leave base objects sunk into the ground.&lt;br /&gt;&lt;br /&gt;MANUAL HQ lets you place it yourself.</Original>
+                <English>Place your HQ.&lt;br /&gt;&lt;br /&gt;RANDOM HQ drops it on the map for you, but can leave base objects sunk into the ground.&lt;br /&gt;&lt;br /&gt;MANUAL HQ lets you place it yourself.</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_confirm_select">
                 <Original>SELECT</Original>

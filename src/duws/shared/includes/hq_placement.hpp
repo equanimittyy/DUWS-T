@@ -26,9 +26,9 @@ class startup_hq_placement_dialog
 		{
 			idc = -1;
 			x = 8 * GUI_GRID_W + GUI_GRID_X;
-			y = 7 * GUI_GRID_H + GUI_GRID_Y;
+			y = 6 * GUI_GRID_H + GUI_GRID_Y;
 			w = 24 * GUI_GRID_W;
-			h = 11 * GUI_GRID_H;
+			h = 13 * GUI_GRID_H;
 			colorBackground[] = {0.2, 0.4, 0.2, 1};
 		};
 	};
@@ -39,9 +39,9 @@ class startup_hq_placement_dialog
 		{
 			idc = -1;
 			x = 8.3 * GUI_GRID_W + GUI_GRID_X;
-			y = 7.3 * GUI_GRID_H + GUI_GRID_Y;
+			y = 6.3 * GUI_GRID_H + GUI_GRID_Y;
 			w = 23.4 * GUI_GRID_W;
-			h = 10.4 * GUI_GRID_H;
+			h = 12.4 * GUI_GRID_H;
 			colorBackground[] = {0,0,0,0.3};
 		};
 		class hq_placement_frame: RscFrame
@@ -49,9 +49,9 @@ class startup_hq_placement_dialog
 			idc = 1440;
 			text = "$STR_DUWS_T_hq_place_title";
 			x = 8 * GUI_GRID_W + GUI_GRID_X;
-			y = 7 * GUI_GRID_H + GUI_GRID_Y;
+			y = 6 * GUI_GRID_H + GUI_GRID_Y;
 			w = 24 * GUI_GRID_W;
-			h = 11 * GUI_GRID_H;
+			h = 13 * GUI_GRID_H;
 		};
 		// Structured rather than plain: the advice runs to several lines at this width and a plain
 		// control cuts the tail off instead of wrapping. It names both answers and what each costs,
@@ -60,9 +60,9 @@ class startup_hq_placement_dialog
 		{
 			idc = 1441;
 			x = 8.8 * GUI_GRID_W + GUI_GRID_X;
-			y = 8.4 * GUI_GRID_H + GUI_GRID_Y;
+			y = 7.4 * GUI_GRID_H + GUI_GRID_Y;
 			w = 22.4 * GUI_GRID_W;
-			h = 4.4 * GUI_GRID_H;
+			h = 6.4 * GUI_GRID_H;
 		};
 
 		class hq_placement_random_button: RscButton
@@ -70,7 +70,7 @@ class startup_hq_placement_dialog
 			idc = 1600;
 			text = "$STR_DUWS_T_2f55ngq1";
 			x = 12.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 13.1 * GUI_GRID_H + GUI_GRID_Y;
+			y = 14.1 * GUI_GRID_H + GUI_GRID_Y;
 			w = 15 * GUI_GRID_W;
 			h = 2 * GUI_GRID_H;
 			tooltip = "$STR_DUWS_T_50n9sdxk";
@@ -81,7 +81,7 @@ class startup_hq_placement_dialog
 			idc = 1601;
 			text = "$STR_DUWS_T_x0cq7o5y";
 			x = 12.5 * GUI_GRID_W + GUI_GRID_X;
-			y = 15.4 * GUI_GRID_H + GUI_GRID_Y;
+			y = 16.4 * GUI_GRID_H + GUI_GRID_Y;
 			w = 15 * GUI_GRID_W;
 			h = 2 * GUI_GRID_H;
 			tooltip = "$STR_DUWS_T_qwfdr33k";
