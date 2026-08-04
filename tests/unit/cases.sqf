@@ -609,3 +609,58 @@ private _thinned = ["team", 8, 0.5] call DUWS_fnc_teamRoster;
     (_thinned select 0), "cls_TL"] call fnc_assertEq;
 ["teamRoster: full strength thins nothing",
     (count (["team", 8, 1] call DUWS_fnc_teamRoster)), 10] call fnc_assertEq;
+
+// --- fnc_selectNonEmpty: first non-empty candidate, and never nil ---
+["selectNonEmpty: the first non-empty candidate wins",
+    ([[], ["b"], ["c"]] call fnc_selectNonEmpty), ["b"]] call fnc_assertEq;
+// The defect this guards: `select 0` on an empty array is nil, and assigning nil UNDEFINES the
+// role global -- so a faction fielding no static AA took down every later read of _turretAA,
+// including the array fnc_parseFaction returns.
+["selectNonEmpty: every candidate empty gives [], not nil",
+    ([[], [], []] call fnc_selectNonEmpty), []] call fnc_assertEq;
+["selectNonEmpty: no candidates at all gives []",
+    ([] call fnc_selectNonEmpty), []] call fnc_assertEq;
+
+// --- fnc_faction_resolve: ladder walk, kind gate, fallback ---
+// The gate itself reads CfgVehicles, which sqf-vm has none of, so it is stubbed by one that drops
+// a marker class. What is under test is the walk: which rung wins, what reaches the gate, and
+// what a key holds when nothing does.
+fnc_log = {};
+TEST_KIND = "";
+fnc_faction_keep = {
+    params ["_classes", "_kind"];
+    TEST_KIND = _kind;
+    _classes select { _x != "rejected" }
+};
+
+["faction_resolve: the first rung with anything in it wins",
+    (["opfor_AT_SOLDIER_X", [[], ["hat_1"], ["lat_1"]], "O_Soldier_AT_F"] call fnc_faction_resolve),
+    ["hat_1"]] call fnc_assertEq;
+["faction_resolve: and the key holds what was resolved",
+    (missionNamespace getVariable "opfor_AT_SOLDIER_X"), ["hat_1"]] call fnc_assertEq;
+["faction_resolve: kind comes from the schema, not the call site",
+    TEST_KIND, "man"] call fnc_assertEq;
+["faction_resolve: a rung the gate empties is skipped, not accepted",
+    (["opfor_AT_SOLDIER_X", [["rejected"], ["lat_1"]], "O_Soldier_AT_F"] call fnc_faction_resolve),
+    ["lat_1"]] call fnc_assertEq;
+["faction_resolve: every rung empty falls back",
+    (["opfor_AT_SOLDIER_X", [[], []], "O_Soldier_AT_F"] call fnc_faction_resolve),
+    ["O_Soldier_AT_F"]] call fnc_assertEq;
+// A role the faction never fields is left empty on purpose: fnc_faction_pick returns "" and
+// fnc_opforRoles drops it, where inventing a class would hide the gap behind a unit that spawns.
+["faction_resolve: nothing survives, including the fallback, gives []",
+    (["opfor_AT_SOLDIER_X", [[], []], "rejected"] call fnc_faction_resolve), []] call fnc_assertEq;
+["faction_resolve: a vehicle key is gated as a vehicle",
+    (["opfor_MBT_TANK1_X", [["tank_1"]], "O_MBT_02_cannon_F"] call fnc_faction_resolve),
+    ["tank_1"]] call fnc_assertEq;
+["faction_resolve: ... and its kind says so", TEST_KIND, "vehicle"] call fnc_assertEq;
+["faction_resolve: a blufor key reads the blufor schema",
+    (["blufor_TURRET_HMG", [["hmg_1"]], "B_HMG_01_high_F"] call fnc_faction_resolve),
+    ["hmg_1"]] call fnc_assertEq;
+["faction_resolve: ... whose statics are gated as statics", TEST_KIND, "static"] call fnc_assertEq;
+// A misspelled key has no schema row. It resolves ungated rather than silently emptying the role,
+// which is what a typo used to do.
+["faction_resolve: a key outside the schema still resolves",
+    (["blufor_SOLDER_X", [["typo_1"]], "B_Soldier_F"] call fnc_faction_resolve),
+    ["typo_1"]] call fnc_assertEq;
+["faction_resolve: ... with no kind to gate on", TEST_KIND, ""] call fnc_assertEq;

@@ -1,8 +1,12 @@
 // Locality: server -- compiled by fnc_factions_check from server/server_init.sqf:31. The
 // functions it defines run wherever their own callers do, including client dialogs.
-// selects first non empty array
+// First non-empty candidate, or [] when every candidate is empty. Never nil: `select 0` on an
+// empty array returns nil, and assigning nil *undefines* the variable, so a faction that fields
+// no static AA left _turretAA undefined and took down the whole array fnc_parseFaction returns.
 fnc_selectNonEmpty = compileFinal {
-	_this select {_x isNotEqualTo []} select 0
+	private _found = _this select {!(_x isEqualTo [])};
+	if (_found isEqualTo []) exitWith {[]};
+	_found select 0
 };
 
 // spawn, do not call
@@ -204,7 +208,7 @@ fnc_factionGetFilteredByEditorSubcat = {
 				radarType = 4; // Air radar (used for jets and gunships) - shows compass, turret directions and targets
 				radarType = 8; // Compass + turret directions (used for majority of vehicles and their turret positions) - shows compass and turret directions
 			*/
-			case ("artillery" in _factionFilter) :	{getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "artilleryScanner") isEqualTo 1};
+			case ("artillery" in _factionFilter) :	{_factionDataFiltered select {getNumber (configFile >> "CfgVehicles" >> _x >> "artilleryScanner") isEqualTo 1}};
 			case ("tank" in _factionFilter) :		{_factionDataFiltered select {_x iskindOf "Tank"}};
 			case ("apc" in _factionFilter) :		{_factionDataFiltered select {_x iskindOf "Car" && {getNumber (configFile >> "CfgVehicles" >> _x >> "armor") > 300}}};
 			case ("cars" in _factionFilter) :		{_factionDataFiltered select {_x iskindOf "Car"}};
@@ -356,39 +360,49 @@ fnc_unitParseRoles = compileFinal {
 		getNumber(configFile >> "CfgVehicles" >> _type >> "canDeactivateMines") == 1;
 	};
 	
+	// These test the classname as well as the display name, and read it from their own _type
+	// rather than the caller's _x: `call` shares the caller's scope, so the old reads only
+	// worked from inside fnc_unitParseRoles' apply and errored anywhere else.
 	fnc_IsOfficer = compileFinal {
 		params ["_type"];
-		"officer" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"officer" in toLowerANSI _x}
+		"officer" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"officer" in toLowerANSI _type}
 	};
-	
+
+	// Whole classname segment, not a substring: "SL" matched every CUP_O_SLA_* unit, so the
+	// entire Sahrani army read as squad leaders and nothing was left in _grunt. Same for "TL".
 	fnc_IsSquadLead = compileFinal {
 		params ["_type"];
-		"squad" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"SL" in _x}
+		"squad" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"sl" in (toLowerANSI _type splitString "_")}
 	};
-	
+
 	fnc_IsTeamLead = compileFinal {
 		params ["_type"];
-		"team" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"TL" in _x}
+		"team" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"tl" in (toLowerANSI _type splitString "_")}
 	};
-	
+
 	fnc_IsPilot = compileFinal {
 		params ["_type"];
-		"pilot" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"pilot" in _x}
+		"pilot" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"pilot" in toLowerANSI _type}
 	};
-	
+
+	// Segment match on "crew" as well as "crewman": mods split roughly evenly between
+	// rhs_vdv_crew and ..._crewman, and a crewman left in a combat bucket garrisons a zone in
+	// a tanker suit.
 	fnc_IsCrewman = compileFinal {
 		params ["_type"];
-		"crewman" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"crewman" in _x}
+		"crewman" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName)
+			|| {"crewman" in toLowerANSI _type}
+			|| {"crew" in (toLowerANSI _type splitString "_")}
 	};
-	
+
 	fnc_IsDiver = compileFinal {
 		params ["_type"];
-		"diver" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"diver" in _x}
+		"diver" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"diver" in toLowerANSI _type}
 	};
-	
+
 	fnc_IsMarksman = compileFinal {
 		params ["_type"];
-		"marksman" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"marksman" in _x}
+		"marksman" in toLowerANSI ([configFile >> "CfgVehicles" >> _type] call BIS_fnc_displayName) || {"marksman" in toLowerANSI _type}
 	};
 	
 	_grunt = [];
@@ -555,6 +569,14 @@ fnc_unitParseRoles = compileFinal {
 		};	// units with suprressed weapons seen as spec ops
 		
 		switch true do {
+			// Pilots and crew are tested before anything else: they carry the same launchers and
+			// medikits as the line infantry, so further down the list a crewman with an RPG became
+			// an anti-tank rifleman and a zone garrison came out dressed for a cockpit. The two
+			// wrappers each stripped them back out afterwards by classname, and that keyword list
+			// included "officer" -- which emptied the officer role for every faction that spells
+			// its officers "officer".
+			case ( [_x] call fnc_IsPilot ) : { _pilot pushBackUnique _x };
+			case ( [_x] call fnc_IsCrewman ) : { _crew pushBackUnique _x };
 			case ( [_x] call fnc_IsDiver ) : { _diver pushBackUnique _x };
 			case ( [_x] call fnc_IsMedic && {"Medikit" in flatten _backpack} ) : { _medic pushBackUnique _x };
 			case ( [_x] call fnc_IsEngineer ) : { _eng pushBackUnique _x };
@@ -565,8 +587,6 @@ fnc_unitParseRoles = compileFinal {
 			case ( [_x] call fnc_IsOfficer ) : { _officer pushBackUnique _x };
 			case ( [_x] call fnc_IsSquadLead ) : { _sl pushBackUnique _x };
 			case ( [_x] call fnc_IsTeamLead ) : { _tl pushBackUnique _x };
-			case ( [_x] call fnc_IsPilot ) : { _pilot pushBackUnique _x };
-			case ( [_x] call fnc_IsCrewman ) : { _crew pushBackUnique _x };
 			case ( [_primaryType] call fnc_IsSniper ) : { _sniper pushBackUnique _x };
 			case ( [_x] call fnc_IsMarksman || {_primaryWeaponHasLongRangeOptic} ) : { _marksman pushBackUnique _x };
 			case ( [_primaryType] call fnc_IsGrenadier ) : { _gl pushBackUnique _x };
@@ -586,7 +606,12 @@ fnc_unitParseRoles = compileFinal {
 fnc_parseFaction = compileFinal {
 	params [["_faction", if (is3DEN) then [{faction (get3DENSelected "Object" # 0)}, {faction player}] ]];
 	// selected unit faction;
-	_factionData = ("gettext (_x >> 'faction') == _faction" configClasses (configfile >> "CfgVehicles")) apply {configName _x} call BIS_fnc_arrayShuffle;
+	// Config order, not shuffled: fnc_faction_pools publishes element 0 of each role as the
+	// faction's stable representative, and a mod declares its mainstay ahead of its variants.
+	// A shuffle made that representative a different unit every campaign -- which is how a
+	// faction's rifleman and its operator both came out as the same sniper. Variety at spawn
+	// comes from fnc_faction_pick drawing out of the whole pool, not from the order here.
+	_factionData = ("gettext (_x >> 'faction') == _faction" configClasses (configfile >> "CfgVehicles")) apply {configName _x};
 
 	// ignore unarmed infantry
 	_infantry =	([ _factionData, "person" ] call fnc_factionGetFilteredByEditorSubcat) select {
@@ -615,17 +640,21 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	_antiAir =	[ _factionData, "aas" ] call fnc_factionGetFilteredByEditorSubcat;
 	_carArmed =	[ [ [ _factionData, "cars" ] call fnc_factionGetFilteredByEditorSubcat, 2,0 ] call fnc_filterBySeats, true] call fnc_filterByWeapons;
 	_carTransport =	[ [ _factionData, "cars" ] call fnc_factionGetFilteredByEditorSubcat, 1, 6] call fnc_filterBySeats;
-	_carRearm =	[ [ _factionData, "car" ] call fnc_factionGetFilteredByEditorSubcat, "transportAmmo"] call fnc_filterByUtility;
-	_carRepair =	[ [ _factionData, "car" ] call fnc_factionGetFilteredByEditorSubcat, "transportRepair"] call fnc_filterByUtility;
-	_carRefuel =	[ [ _factionData, "car" ] call fnc_factionGetFilteredByEditorSubcat, "transportFuel"] call fnc_filterByUtility;
+	// "cars", not "car": the filter string doubles as the key into the non-standard-subcategory
+	// fallback below, which only has a "cars" case -- so the singular silently returned nothing
+	// for every mod that names its editor subcategories its own way.
+	_carRearm =	[ [ _factionData, "cars" ] call fnc_factionGetFilteredByEditorSubcat, "transportAmmo"] call fnc_filterByUtility;
+	_carRepair =	[ [ _factionData, "cars" ] call fnc_factionGetFilteredByEditorSubcat, "transportRepair"] call fnc_filterByUtility;
+	_carRefuel =	[ [ _factionData, "cars" ] call fnc_factionGetFilteredByEditorSubcat, "transportFuel"] call fnc_filterByUtility;
 	_heliArmed =	[ [ [ _factionData, "helicopters" ] call fnc_factionGetFilteredByEditorSubcat, 2,0 ] call fnc_filterBySeats ] call fnc_filterByPylons;
-	// 修改点：去掉了第三次过滤（基于挂架），_heliTransport 现在只包含座位数符合要求的直升机，不再区分是否武装。
-	// 重新定义运输直升机：只要是直升机，且座位数满足要求（≥6），就纳入
-    _heliTransport = _factionData select {
-    _x isKindOf "Helicopter" &&
-    {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2} &&   // 确保在编辑器中可用
-    {getNumber (configFile >> "CfgVehicles" >> _x >> "transportSoldier") >= 4}  // 至少4个载员座位
-     };
+	// Seats, not pylons: filtering on pylons as well left most factions with no transport
+	// helicopter at all, since a gunship carrying troops is the norm outside vanilla. Four seats
+	// is the floor because that is what the taxi and paradrop calls need to be worth running.
+	_heliTransport = _factionData select {
+		_x isKindOf "Helicopter" &&
+		{getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2} &&
+		{getNumber (configFile >> "CfgVehicles" >> _x >> "transportSoldier") >= 4}
+	};
 	_planeArmed =	[ [ [ _factionData, "planes" ] call fnc_factionGetFilteredByEditorSubcat, 1,0 ] call fnc_filterBySeats ] call fnc_filterByPylons;
 	_planeTransport =	[ [ _factionData, "planes" ] call fnc_factionGetFilteredByEditorSubcat, 6,0 ] call fnc_filterBySeats;
 	[

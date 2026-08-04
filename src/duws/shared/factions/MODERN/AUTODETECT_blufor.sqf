@@ -27,14 +27,6 @@ if (isNil "blufor_autodetect_handler_init") then {
 // fn_factionAutoDetect.sqf helpers are compiled once at init (fnc_factions_check).
 
 
-// ========== 新增：过滤飞行员/乘员的通用函数 ==========
-fnc_filterPilotCrew = {
-	params ["_array", ["_extraKeywords", []]];
-	private _keywords = ["pilot", "crew", "driver", "officer", "helipilot", "aircrew", "pilot_", "_pilot", "_crew"] + _extraKeywords;
-	[_array, _keywords, false] call fnc_filterByClassName
-};
-
-
 fnc_factionGen = {
 	_faction = _this;
 	//systemChat str _faction;
@@ -43,105 +35,63 @@ fnc_factionGen = {
 	_infantryByRoles params ["_grunt","_medic","_sl","_tl","_ar","_mg","_gl","_aa","_lat","_hat","_officer","_spec","_diver","_pilot","_crew","_marksman","_sniper","_eng","_exp","_uavOp"] +
 							["_spec","_spec_medic","_spec_sl","_spec_tl","_spec_ar","_spec_mg","_spec_gl","_spec_aa","_spec_lat","_spec_hat","_spec_marksman","_spec_sniper","_spec_eng","_spec_exp"];
 
-	// ========== 过滤掉所有普通步兵角色中的飞行员/乘员 ==========
-	private _filter = {
-		params ["_arr"];
-		if (_arr isEqualTo []) exitWith {[]};
-		[_arr] call fnc_filterPilotCrew
-	};
+	// Pilots and crew are kept out of the combat buckets by fnc_unitParseRoles, which tests for
+	// them first. This line is only about the basic rifleman: an officer or a parade-dress
+	// variant is a poor stand-in for the man who fills out a patrol.
+	_grunt = [_grunt, ["camo", "officer"], false] call fnc_filterByClassName;
 
-	_grunt = [_grunt] call _filter;
-	_medic = [_medic] call _filter;
-	_sl = [_sl] call _filter;
-	_tl = [_tl] call _filter;
-	_ar = [_ar] call _filter;
-	_mg = [_mg] call _filter;
-	_gl = [_gl] call _filter;
-	_aa = [_aa] call _filter;
-	_lat = [_lat] call _filter;
-	_hat = [_hat] call _filter;
-	_officer = [_officer] call _filter;
-	_spec = [_spec] call _filter;
-	_diver = [_diver] call _filter;
-	_marksman = [_marksman] call _filter;
-	_sniper = [_sniper] call _filter;
-	_eng = [_eng] call _filter;
-	_exp = [_exp] call _filter;
-	_uavOp = [_uavOp] call _filter;
-
-	_spec_medic = [_spec_medic] call _filter;
-	_spec_sl = [_spec_sl] call _filter;
-	_spec_tl = [_spec_tl] call _filter;
-	_spec_ar = [_spec_ar] call _filter;
-	_spec_mg = [_spec_mg] call _filter;
-	_spec_gl = [_spec_gl] call _filter;
-	_spec_aa = [_spec_aa] call _filter;
-	_spec_lat = [_spec_lat] call _filter;
-	_spec_hat = [_spec_hat] call _filter;
-	_spec_marksman = [_spec_marksman] call _filter;
-	_spec_sniper = [_spec_sniper] call _filter;
-	_spec_eng = [_spec_eng] call _filter;
-	_spec_exp = [_spec_exp] call _filter;
-	// ========== 过滤结束 ==========
-
-	_grunt = [_grunt, ["pilot", "crew", "camo", "officer"], false] call fnc_filterByClassName;
+	// The armed-boat key wants a boat with a gun on it, which no detection bucket separates out.
+	private _boatArmed = [_boat, true] call fnc_filterByWeapons;
 
 
-//////////////////////////////////////////////////////////////////////
-/////  UNITS, VEHICLES WITH FIXED, ONE-OFF ROLES
-/////   - Patrols, Guards, Support Units, Task Forces, Side Missions
-/////
-/////  TRY NOT TO ALTER THE UNIT TYPES.  THESE UNITS HAVE FIXED ROLES
-//////////////////////////////////////////////////////////////////////
+// Every role key resolves through one ladder: the first bucket holding anything wins, gated on
+// the schema's kind so a class detection dropped in the wrong bucket cannot reach a spawner.
+// A rung is skipped when the faction has nothing in it, so the ladder reads as what the role
+// degrades through. Fallbacks are vanilla NATO and apply only to a faction that fields nothing
+// for the role at all. Trailing notes say what reads the key.
+//
+// Operators draw from the suppressed-weapon sets the role parser fills, then from the plain role.
+// The old spelling was `_spec arrayIntersect _sl`, recomputed here per key; where it summed
+// buckets it also rated, say, anti-air men equal to light AT for an anti-tank slot.
+{ _x call fnc_faction_resolve } forEach [
+	["blufor_SOLDIER_X",          [_grunt, _sl, _gl, _infantry],                          "B_Soldier_F"],      //patrol, fortify, paradrop
+	["blufor_SOLDIER_LAT_X",      [_lat, _hat, _aa, _grunt, _infantry],                   "B_Soldier_LAT_F"],  //init_hq\fnc_HQguards, supports\fnc_paradrop
+	["blufor_SOLDIER_GL_X",       [_gl, _grunt, _infantry],                               "B_Soldier_GL_F"],   //init_hq\fnc_HQguards, supports\fnc_paradrop
+	["blufor_SOLDIER_TL_X",       [_tl, _sl, _grunt, _infantry],                          "B_Soldier_TL_F"],   //init_hq\fnc_HQguards
+	["blufor_SOLDIER_SL_X",       [_sl, _tl, _officer, _grunt, _infantry],                "B_Soldier_SL_F"],   //Comms voice, Multiplayer slot
+	["blufor_SOLDIER_AR_X",       [_ar, _mg, _grunt, _infantry],                          "B_Soldier_AR_F"],   //supports\fnc_paradrop, init_hq\fnc_HQguards
+	["blufor_MARKSMAN_X",         [_marksman, _sniper, _grunt, _infantry],                "B_soldier_M_F"],    //init_hq\fnc_HQguards
+	["blufor_OFFICER_X",          [_officer, _sl, _tl, _grunt, _infantry],                "B_OFFICER_F"],      //init_hq\fnc_BluHQinit
+	["blufor_HELI_PILOT_X",       [_pilot, _crew, _grunt],                                "B_Helipilot_F"],    //Rescue Pilot mission
 
-blufor_SOLDIER_X =				[_grunt, _sl + _gl, _infantry] call fnc_selectNonEmpty;					//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =		[_lat, _hat, _aa + _infantry] call fnc_selectNonEmpty;				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			[_gl, _grunt, _infantry] call fnc_selectNonEmpty;				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			[_tl, _sl, _grunt] call fnc_selectNonEmpty;				//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			[_sl, _tl, _grunt] call fnc_selectNonEmpty;				//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			[_ar, _mg, _infantry] call fnc_selectNonEmpty;				//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X =			 [_marksman, _grunt, _infantry] call fnc_selectNonEmpty;				//init_hq\fnc_HQguards
-blufor_OFFICER_X =				[_officer, _sl, _infantry] call fnc_selectNonEmpty;					//init_hq\fnc_BluHQinit
-blufor_HELI_PILOT_X	=			[_pilot, _crew, "C_Man_pilot_F"] call fnc_selectNonEmpty;				//Rescue Pilot mission
+	["blufor_BOAT_ARMED_X",       [_boatArmed],                                           "B_Boat_Armed_01_minigun_F"],   //supports\taxi\fnc_boatTaxi
+	["blufor_BOAT_CREW_X",        [_crew],                                                "C_Man_UtilityWorker_01_F"],    //supports\taxi\fnc_boatTaxi
+	["blufor_HELI_TRANS_ARM_X",   [_heliArmed, _heliTransport],                           "B_Heli_Transport_01_F"],       //supports\taxi\fnc_helotaxi, random patrol
+	["blufor_HELI_TRANS_UNARM_X", [_heliTransport, _heliArmed],                           "B_Heli_Transport_03_unarmed_F"],   //random patrol
+	["blufor_HELI_ATTACK_X",      [_heliArmed, _droneAir, _heliTransport],                "B_Heli_Attack_01_F"],          //dialog\fnc_request_hcATTchop, random patrol
+	["blufor_PLANE_CAS_X",        [_planeArmed, _droneAir],                               "B_Plane_CAS_01_F"],            //dialog\fnc_request_hcCAS, random patrol
+	["blufor_CAR_PATROL1_X",      [_carArmed, _apcWheeled, _carTransport],                "B_MRAP_01_hmg_F"],             //random patrol
+	["blufor_APC_PATROL1_X",      [_apcTracked, _apcWheeled, _carArmed],                  "B_APC_Tracked_01_rcws_F"],     //random patrol
+	["blufor_APC_PATROL2_X",      [_apcWheeled, _apcTracked, _carArmed],                  "B_APC_Wheeled_01_cannon_F"],   //random patrol
+	["blufor_TANK_PATROL1_X",     [_tank, _apcTracked, _apcWheeled],                      "B_MBT_01_cannon_F"],           //random patrol
 
-blufor_BOAT_ARMED_X	=			"_boat_Armed_01_hmg_F";		//supports\taxi\fnc_boatTaxi
-blufor_BOAT_CREW_X =			"C_Man_UtilityWorker_01_F";		//supports\taxi\fnc_boatTaxi
+	["blufor_TURRET_AA",          [_turretAA, _turretAT, _turretHMG],                     "B_static_AA_F"],
+	["blufor_TURRET_AT",          [_turretAT, _turretAA, _turretHMG],                     "B_static_AT_F"],
+	["blufor_TURRET_HMG",         [_turretHMG, _turretGMG],                               "B_HMG_01_high_F"],
+	["blufor_TURRET_GMG",         [_turretGMG, _turretHMG],                               "B_GMG_01_high_F"],
 
-blufor_HELI_TRANS_ARM_X =		[_heliArmed, _heliTransport, ["I_Heli_light_03_unarmed_F", "I_Heli_light_03_unarmed_F"]] call fnc_selectNonEmpty;		//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		[_heliTransport, _heliTransport, ["I_Heli_light_03_unarmed_F", "I_Heli_light_03_unarmed_F"]] call fnc_selectNonEmpty;		   //random patrol
-blufor_HELI_ATTACK_X =			[_heliArmed, _heliArmed, ["I_C_Heli_Light_01_Civil_F", "I_C_Heli_Light_01_Civil_F", "I_C_Heli_Light_01_Civil_F"]] call fnc_selectNonEmpty;	//dialog\fnc_request_hcATTchop, random patrol
-blufor_PLANE_CAS_X =			[_planeArmed, _planeArmed, ["I_C_Plane_Civil_01_F", "I_C_Plane_Civil_01_F", "I_C_Plane_Civil_01_F"]] call fnc_selectNonEmpty;		//dialog\fnc_request_hcCAS, random patrol
-blufor_CAR_PATROL1_X =			[_carArmed, _apcWheeled, ["I_G_Offroad_01_armed_F", "I_G_Offroad_01_armed_F", "I_G_Offroad_01_armed_F", "I_G_Offroad_01_armed_F"]] call fnc_selectNonEmpty;						//random patrol
-blufor_APC_PATROL1_X =			[_apcTracked, _apcWheeled, ["I_C_Offroad_02_LMG_F"]] call fnc_selectNonEmpty;			//random patrol
-blufor_APC_PATROL2_X =			[_apcWheeled, _apcTracked, ["I_C_Offroad_01_AT_F"]] call fnc_selectNonEmpty;			//random patrol
-blufor_TANK_PATROL1_X =			[_tank, _tank, ["I_C_Offroad_02_AT_F"]] call fnc_selectNonEmpty;					//random patrol
-
-
-///////////////////////////////////
-//  STATIC WEAPONS - HQ and FOBs
-///////////////////////////////////
-
-blufor_TURRET_AA =				[_turretAA, "B_static_AA_F"] call fnc_selectNonEmpty;
-blufor_TURRET_AT =				[_turretAT, "B_static_AT_F"] call fnc_selectNonEmpty;
-blufor_TURRET_HMG =				[_turretHMG, "B_HMG_01_high_F"] call fnc_selectNonEmpty;
-blufor_TURRET_GMG =				[_turretGMG, "B_GMG_01_high_F"] call fnc_selectNonEmpty;
-
-
-/////////////////////////
-//  OPERATOR REQUEST
-/////////////////////////
-
-blufor_SPECOPS_X =			[_spec arrayIntersect _sl,  _sl, _infantry] call fnc_selectNonEmpty;					//operator
-blufor_SPECOPS_GL_X =			[_spec arrayIntersect _gl,  _gl, _infantry] call fnc_selectNonEmpty;				//operator
-blufor_SPECOPS_LAT_X =			[_spec arrayIntersect _lat,  _hat, _infantry] call fnc_selectNonEmpty;				//operator
-blufor_SPECOPS_HAT_X =			[_spec arrayIntersect _hat,  _hat, _infantry] call fnc_selectNonEmpty;				//operator
-blufor_SPECOPS_AA_X =			[_spec arrayIntersect _aa,  _aa, _infantry] call fnc_selectNonEmpty;				//operator
-blufor_SPECOPS_MG_X =			[_spec arrayIntersect _mg,  _mg, _infantry] call fnc_selectNonEmpty;				//operator
-blufor_SPECOPS_MEDIC_X =		[_spec arrayIntersect _medic,  _medic, _infantry] call fnc_selectNonEmpty;				//operator
-blufor_SPECOPS_MARK_X =			[_spec arrayIntersect _marksman,  _marksman, _infantry] call fnc_selectNonEmpty;					//operator
-blufor_SPECOPS_SNIPER_X =		[_spec arrayIntersect _sniper, _sniper, _infantry] call fnc_selectNonEmpty;					//operator
-blufor_SPECOPS_EXP_X =			[_spec arrayIntersect _exp, _exp, _infantry] call fnc_selectNonEmpty;				//operator
-blufor_SPECOPS_ENG_X =			[_spec arrayIntersect _eng, _eng, _infantry] call fnc_selectNonEmpty;					//operator
+	["blufor_SPECOPS_X",          [_spec_sl, _spec, _sl, _grunt, _infantry],              "B_recon_F"],
+	["blufor_SPECOPS_GL_X",       [_spec_gl, _gl, _grunt, _infantry],                     "B_Soldier_GL_F"],
+	["blufor_SPECOPS_LAT_X",      [_spec_lat, _lat, _hat, _grunt, _infantry],             "B_recon_LAT_F"],
+	["blufor_SPECOPS_HAT_X",      [_spec_hat, _hat, _lat, _grunt, _infantry],             "B_soldier_AT_F"],
+	["blufor_SPECOPS_AA_X",       [_spec_aa, _aa, _hat, _grunt, _infantry],               "B_soldier_AA_F"],
+	["blufor_SPECOPS_MG_X",       [_spec_mg, _spec_ar, _mg, _ar, _grunt, _infantry],      "B_Soldier_AR_F"],
+	["blufor_SPECOPS_MEDIC_X",    [_spec_medic, _medic, _grunt, _infantry],               "B_recon_medic_F"],
+	["blufor_SPECOPS_MARK_X",     [_spec_marksman, _marksman, _sniper, _grunt],           "B_recon_M_F"],
+	["blufor_SPECOPS_SNIPER_X",   [_spec_sniper, _sniper, _marksman, _grunt],             "B_sniper_F"],
+	["blufor_SPECOPS_EXP_X",      [_spec_exp, _exp, _eng, _grunt, _infantry],             "B_recon_exp_F"],
+	["blufor_SPECOPS_ENG_X",      [_spec_eng, _eng, _exp, _grunt, _infantry],             "B_engineer_F"]
+];
 
 
 
@@ -169,19 +119,30 @@ blufor_SPECOPS_ENG_X =			[_spec arrayIntersect _eng, _eng, _infantry] call fnc_s
 ///////////////////////////////
 
 
+// One class per menu row, or "" when the faction fields nothing for it: selectRandom on an empty
+// list is nil, and a nil classname in a request row is an entry the player can buy and no spawner
+// can raise. The empty rows are dropped below rather than offered.
+private _pick = {
+	private _c = _this call fnc_selectNonEmpty;
+	if (_c isEqualType "") exitWith {_c};
+	if (_c isEqualTo []) exitWith {""};
+	selectRandom _c
+};
+
 blufor_RQST_UNITS = [
-	[selectRandom flatten [[_grunt, _grunt, _infantry] call fnc_selectNonEmpty],"Rifleman (2CP)",2],
-	[selectRandom flatten [[_gl, _grunt, _infantry] call fnc_selectNonEmpty],"Grenadier (3CP)",3],
-	[selectRandom flatten [[_ar, _mg, _infantry] call fnc_selectNonEmpty],"Automatic Rifleman (3CP)",3],
-	[selectRandom flatten [[_mg, _ar, _infantry] call fnc_selectNonEmpty],"Heavy Gunner (4CP)",4],
-	[selectRandom flatten [[_medic,  _grunt, _infantry] call fnc_selectNonEmpty],"Medic (4CP)",4],
-	[selectRandom flatten [[_lat, _hat, _infantry] call fnc_selectNonEmpty],"AT Rifleman (3CP)",3],
-	[selectRandom flatten [[_hat, _lat, _infantry] call fnc_selectNonEmpty],"AT Specialist (4CP)",4],
-	[selectRandom flatten [[_aa, _hat + _lat, _infantry] call fnc_selectNonEmpty],"AA Specialist (4CP)",4],
-	[selectRandom flatten [[_eng, _exp, _infantry] call fnc_selectNonEmpty],"Engineer (4CP)",4],
-	[selectRandom flatten [[_marksman, _grunt, _infantry] call fnc_selectNonEmpty],"Marksman (3CP)",3],
-	[selectRandom flatten [[_sniper, _marksman, _infantry] call fnc_selectNonEmpty],"Sniper (4CP)",4]
+	[[_grunt, _infantry] call _pick,             "Rifleman (2CP)",2],
+	[[_gl, _grunt, _infantry] call _pick,        "Grenadier (3CP)",3],
+	[[_ar, _mg, _infantry] call _pick,           "Automatic Rifleman (3CP)",3],
+	[[_mg, _ar, _infantry] call _pick,           "Heavy Gunner (4CP)",4],
+	[[_medic, _grunt, _infantry] call _pick,     "Medic (4CP)",4],
+	[[_lat, _hat, _infantry] call _pick,         "AT Rifleman (3CP)",3],
+	[[_hat, _lat, _infantry] call _pick,         "AT Specialist (4CP)",4],
+	[[_aa, _hat, _lat, _infantry] call _pick,    "AA Specialist (4CP)",4],
+	[[_eng, _exp, _infantry] call _pick,         "Engineer (4CP)",4],
+	[[_marksman, _grunt, _infantry] call _pick,  "Marksman (3CP)",3],
+	[[_sniper, _marksman, _infantry] call _pick, "Sniper (4CP)",4]
 ];
+blufor_RQST_UNITS = blufor_RQST_UNITS select { (_x select 0) != "" };
 
 
 ///////////////////////////////

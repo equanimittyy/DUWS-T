@@ -53,54 +53,17 @@ fnc_factionGen = {
 	_infantryByRoles params ["_grunt","_medic","_sl","_tl","_ar","_mg","_gl","_aa","_lat","_hat","_officer","_spec","_diver","_pilot","_crew","_marksman","_sniper","_eng","_exp","_uavOp"] +
 							["_spec","_spec_medic","_spec_sl","_spec_tl","_spec_ar","_spec_mg","_spec_gl","_spec_aa","_spec_lat","_spec_hat","_spec_marksman","_spec_sniper","_spec_eng","_spec_exp"];
 
-	_grunt = [_grunt, ["pilot", "crew", "camo", "officer"], false] call fnc_filterByClassName;
+	// Pilots and crew are kept out of the combat buckets by fnc_unitParseRoles, which tests for
+	// them first. This line is only about the basic rifleman.
+	_grunt = [_grunt, ["camo", "officer"], false] call fnc_filterByClassName;
 
 
-opfor_SOLDIER_X =				[_grunt, _infantry] call fnc_selectNonEmpty;					//Basic Soldier  (Patrols, Zone Guard, Team)
-opfor_AA_SOLDIER_X =			 [_aa, _lat + _aa, _infantry] call fnc_selectNonEmpty;				//Anti Air   (Patrols, Zone Guard, Team)
-opfor_AR_SOLDIER_X =			 [_ar, _ar + _mg, _infantry] call fnc_selectNonEmpty;			   //Auto Rifleman   (Patrols, Zone Guard, Team)
-opfor_AT_SOLDIER_X =			 [_hat, _lat + _aa, _infantry] call fnc_selectNonEmpty;				//Anti Tank   (Patrols, Zone Guard, Team)
-opfor_GL_SOLDIER_X =			 [_gl, _grunt, _infantry] call fnc_selectNonEmpty;				//Grenadier   (Patrols, Zone Guard, Team)
-opfor_LAT_SOLDIER_X =			[_lat, _lat + _aa, _infantry] call fnc_selectNonEmpty;				 //Lt Anti Tank   (Patrols, Zone Guard, Team)
-opfor_SL_SOLDIER_X =			 [_sl, _grunt, _infantry] call fnc_selectNonEmpty;				//Squad Leader   (Patrols, Zone Guard, Team)
-opfor_TL_SOLDIER_X =			 [_tl, _grunt, _infantry] call fnc_selectNonEmpty;				//Team Leader	(Patrols, Zone Guard, Team)
-opfor_MARK_SOLDIER_X =		   [_marksman, _grunt, _infantry] call fnc_selectNonEmpty;				//Marksman, urban   (Patrols, Zone Guard, Team)
+// The same ladder table AUTODETECT_opfor resolves: the two files differ in how the faction is
+// chosen, not in what a role means once it is.
+{ _x call fnc_faction_resolve } forEach [
+#include "..\..\includes\autodetect_roles_opfor.hpp"
+];
 
-opfor_CREW_X =				   [_crew, _grunt, _infantry] call fnc_selectNonEmpty;						//Crew   (mission target)
-opfor_ENG_SOLDIER_X =			[_eng, _exp, _infantry] call fnc_selectNonEmpty;					//Engineer   (mission guard)
-opfor_SNIPER_SOLDIER_X =		 [_sniper, _marksman, _infantry] call fnc_selectNonEmpty;					//Sniper   (mission target)
-opfor_OFFICER_X =				[_officer, _sl, _infantry] call fnc_selectNonEmpty;					//Officer  (mission target)
-opfor_OPERATOR_X =			   [_spec, _grunt, _infantry] call fnc_selectNonEmpty;					//Recon	(mission guard)
-
-opfor_COVERED_TRUCK_X =		 [_carTransport, _carTransport + _carArmed, ["C_Truck_02_covered_F", "C_Truck_02_transport_F", "C_Van_01_transport_F", "I_G_Van_01_transport_F", "C_Van_02_transport_F"]] call fnc_selectNonEmpty;			//Covered Transport   (static zone)
-opfor_TRANS_TRUCK_X =		   [_carTransport, _carTransport + _carArmed, ["C_Offroad_02_unarmed_F", "C_Offroad_01_F"]] call fnc_selectNonEmpty;		//Open Transport   (static zone, R3F logistics)
-opfor_AMMO_TRUCK_X =			[_carRearm, _carRearm, ["I_Truck_02_ammo_F"]] call fnc_selectNonEmpty;			//Lrg Ammo Truck   (static zone, R3F logistics)
-opfor_REPAIR_TRUCK_X =		  [_carRepair, _carRepair, ["C_Truck_02_box_F", "C_Offroad_01_repair_F", "I_G_Offroad_01_repair_F", "C_Van_02_service_F"]] call fnc_selectNonEmpty;			//Lrg Repair Truck   (static zone)
-opfor_APC1_X =				  [_apcWheeled + _apcTracked, _carArmed, ["I_MRAP_03_hmg_F"]] call fnc_selectNonEmpty;				//APC unarmed   (static zone, mission vehicle) I_MRAP_03_hmg_F/I_MRAP_03_F
-opfor_ARMED_CAR1_X =			[_carArmed, _carTransport + _carArmed, ["I_G_Offroad_01_armed_F", "I_G_Offroad_01_lat_F", "I_C_Offroad_02_LMG_F", "I_C_Offroad_02_lat_F"]] call fnc_selectNonEmpty;			   //Armed Car	  (patrol)
-
-opfor_MBT_TANK1_X =			 [_tank, _tank, ["I_MBT_03_cannon_F"]] call fnc_selectNonEmpty;				//Tank	 (mission vehicle)
-opfor_APC2_X =				  [_apcWheeled + _apcTracked, _apcWheeled + _apcTracked, ["I_APC_tracked_03_cannon_F"]] call fnc_selectNonEmpty;		//APC HMG,GMG	(mission vehicle)
-opfor_AA_APC_X =				[_antiAir, _antiAir, ["I_LT_01_AA_F"]] call fnc_selectNonEmpty;		   //APC AA  (mission vehicle)
-opfor_TRANS_HELI_X =			[_heliTransport, _heliTransport, ["C_Heli_Light_01_civil_F", "I_Heli_light_03_unarmed_F"]] call fnc_selectNonEmpty;			//Transport Heli	(mission vehicle)
-opfor_ATTACK_HELI_X =		   [_heliArmed, _heliArmed, ["I_Heli_light_03_dynamicLoadout_F", "B_UAV_02_dynamicLoadout_F", "O_T_UAV_04_CAS_F"]] call fnc_selectNonEmpty;				//Opfor Atk Heli	  (Patrol, Zone Guard)
-opfor_MISC_AIR_X =			  [_planeArmed, _planeArmed, ["I_Plane_Fighter_03_CAS_F", "B_UAV_02_dynamicLoadout_F", "O_T_UAV_04_CAS_F"]] call fnc_selectNonEmpty;  //Opfor Air Asset	  (Patrol, Zone Guard)
-
-
-opfor_TURRET_HMG =				"B_G_HMG_02_high_F";				//Zone static	
-
-opfor_SPECOPS_X =				[_spec arrayIntersect _sl,  _sl, _infantry] call fnc_selectNonEmpty;					//operator
-opfor_SPECOPS_GL_X =			 [_spec arrayIntersect _gl,  _gl, _infantry] call fnc_selectNonEmpty;				//operator
-opfor_SPECOPS_LAT_X =			[_spec arrayIntersect _lat + _aa,  _lat + _aa, _infantry] call fnc_selectNonEmpty;				//operator
-opfor_SPECOPS_HAT_X =			[_spec arrayIntersect _lat + _aa,  _lat + _aa, _infantry] call fnc_selectNonEmpty;		//operator
-opfor_SPECOPS_AA_X =			 [_spec arrayIntersect _aa,  _aa, _infantry] call fnc_selectNonEmpty;				//operator
-opfor_SPECOPS_MG_X =			 [_spec arrayIntersect _ar + _mg,  _ar + _mg, _infantry] call fnc_selectNonEmpty;		//operator
-opfor_SPECOPS_MEDIC_X =		  [_spec arrayIntersect _medic,  _medic, _infantry] call fnc_selectNonEmpty;				//operator
-opfor_SPECOPS_MARK_X =		   [_spec arrayIntersect _marksman,  _marksman, _infantry] call fnc_selectNonEmpty;					//operator
-opfor_SPECOPS_SNIPER_X =		 [_spec arrayIntersect _sniper, _sniper, _infantry] call fnc_selectNonEmpty;					//operator
-opfor_SPECOPS_EXP_X =			[_spec arrayIntersect _exp, _exp, _infantry] call fnc_selectNonEmpty;				//operator
-opfor_SPECOPS_ENG_X =			[_spec arrayIntersect _eng, _eng, _infantry] call fnc_selectNonEmpty;			//operator
-	
 };
 
 

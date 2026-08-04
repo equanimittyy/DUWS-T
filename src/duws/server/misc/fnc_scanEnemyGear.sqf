@@ -75,11 +75,11 @@ publicVariable "DUWS_enemyGear_scannedUnits";
 // 事件监听：后续新单位
 // Runs for the whole session rather than retiring once the tables stop changing. A dry-streak
 // ceiling was tried and removed: convergence is per unit role, not per faction -- pilot and vehicle
-// crew classes are a separate set the spawners only reach at higher tiers (fnc_filterPilotCrew in
-// shared/factions/MODERN/AUTODETECT_opfor.sqf) -- so a stretch of infantry fighting can satisfy any
-// counter before the campaign has shown its armour. Retiring also meant removing this handler by a
-// stored id, which addresses an index shared with the faction-detection handlers on the same event
-// (docs/info/arma_engine_gotchas.md).
+// crew classes are a separate set the spawners only reach at higher tiers (fnc_unitParseRoles in
+// shared/factions/MODERN/fn_factionAutoDetect.sqf keeps them in their own buckets) -- so a stretch
+// of infantry fighting can satisfy any counter before the campaign has shown its armour. Retiring
+// also meant removing this handler by a stored id, which addresses an index shared with the
+// faction-detection handlers on the same event (docs/info/arma_engine_gotchas.md).
 addMissionEventHandler ["EntityCreated", {
     params ["_entity"];
     if (!isServer) exitWith {};

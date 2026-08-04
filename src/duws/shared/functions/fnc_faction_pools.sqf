@@ -18,8 +18,66 @@
 // for both with seventy permanent scripts and seventy network writes every five minutes, for values
 // only ever read at the instant something spawns.
 
-// The representative is the first entry rather than a random one: a faction's own file lists its
-// mainstay first, and a stable answer is what makes the request menu and the readouts repeatable.
+// The front half of the same job lives here too: fnc_faction_resolve turns a detection bucket into
+// the key's value, fnc_faction_pools_publish turns that value into a pool plus a representative.
+
+// A role key holds classes a spawner hands straight to createUnit or createVehicle, so what
+// reaches it must exist and be the right sort of thing. Kind comes from fnc_faction_schema -- the
+// one place recording which CfgVehicles branch a key may hold -- rather than from the bucket the
+// class arrived in, which is what misplaces classes when a mod names its editor subcategories its
+// own way and detection falls back to guessing by parent class.
+fnc_faction_keep = {
+    params ["_classes", "_kind"];
+    _classes select {
+        _x isEqualType "" && {_x != ""} && {isClass (configFile >> "CfgVehicles" >> _x)} && {
+            switch (_kind) do {
+                case "man":     { _x isKindOf "CAManBase" };
+                case "static":  { _x isKindOf "StaticWeapon" };
+                case "vehicle": { !(_x isKindOf "CAManBase") };
+                default         { true };   // kind unknown: existence is all this can check
+            }
+        }
+    }
+};
+
+// Resolve one role key: the first ladder rung with anything left after the kind gate wins, and the
+// fallback carries a faction that fields nothing for the role at all.
+//
+// The ladder is graded -- one bucket per rung -- rather than the summed pairs the faction files
+// passed before ([_hat, _lat + _aa, _infantry]). Summing rated anti-air men equal to light AT for
+// an anti-tank slot, so which one a faction fielded came down to config order. Separate rungs say
+// what the role degrades through, in order.
+//
+// [] is a legitimate answer: publish below leaves the key empty, fnc_faction_pick returns "" and
+// fnc_opforRoles drops it. Inventing a class here would hide a missing role behind a unit that
+// spawns, which is worse than a role the faction visibly never fields.
+fnc_faction_resolve = {
+    params ["_key", "_ladder", ["_fallback", []]];
+
+    private _side = if (_key select [0, 6] isEqualTo "opfor_") then {"opfor"} else {"blufor"};
+    private _row = ([_side] call fnc_faction_schema) select { (_x select 0) isEqualTo _key };
+    // A key with no schema row is misspelled. Resolve it ungated rather than empty it silently,
+    // and say so: nothing else in the boot compares these names against the schema.
+    private _kind = "";
+    if (_row isEqualTo []) then {
+        ["WARN", "FACTION", format ["%1 is not in the faction schema -- resolved without a kind check", _key]] call fnc_log;
+    } else {
+        _kind = (_row select 0) select 2;
+    };
+
+    private _out = [];
+    {
+        private _kept = [if (_x isEqualType "") then {[_x]} else {_x}, _kind] call fnc_faction_keep;
+        if !(_kept isEqualTo []) exitWith { _out = _kept };
+    } forEach (_ladder + [_fallback]);
+
+    missionNamespace setVariable [_key, _out];
+    _out
+};
+
+// The representative is the first entry rather than a random one: detection hands back classes in
+// the mod's own declaration order, which puts a faction's mainstay ahead of its variants, and a
+// stable answer is what makes the request menu and the readouts repeatable.
 fnc_faction_pools_publish = {
     params ["_names"];
     {
