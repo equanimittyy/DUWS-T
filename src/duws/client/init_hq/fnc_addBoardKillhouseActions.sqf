@@ -18,7 +18,7 @@ _board addAction [
         player setPosWorld _tp;
         hint localize "STR_DUWS_KILLHOUSE_ARRIVE";
     },
-    [], 70, true, true, "", "true"
+    [], 70, true, true, "", "true", ACT_REACH
 ];
 _board addAction [
     ACT_MOVE("STR_DUWS_KILLHOUSE_TELEPORT_B"),
@@ -28,7 +28,7 @@ _board addAction [
         player setPosWorld _tp;
         hint localize "STR_DUWS_KILLHOUSE_ARRIVE";
     },
-    [], 70, true, true, "", "true"
+    [], 70, true, true, "", "true", ACT_REACH
 ];
 
 // No View Map on the board either. It moved into the REQUESTS menu, beside the mission timers and

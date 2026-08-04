@@ -18,7 +18,7 @@ if (isNull _hqBuilding) exitWith {};
 if (_hqBuilding getVariable ["HQ_building_actions_done", false]) exitWith {};
 _hqBuilding setVariable ["HQ_building_actions_done", true];
 
-_hqBuilding addAction [ACT_PRIMARY_MENU("STR_DUWS_T_vw32hahc"), fnc_request_menu, [], 100, true, true, "", "_this == player"];
+_hqBuilding addAction [ACT_PRIMARY_MENU("STR_DUWS_T_vw32hahc"), fnc_request_menu, [], 100, true, true, "", "_this == player", ACT_REACH];
 
 // The black market stays a scroll entry while mission control, which sat beside it, became a
 // request row: this one spends the coins a player takes off civilians, not the CP that command
@@ -37,5 +37,6 @@ _hqBuilding addAction [
     true,
     true,
     "",
-    "true"
+    "true",
+    ACT_REACH
 ];

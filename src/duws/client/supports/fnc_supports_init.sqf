@@ -174,17 +174,17 @@ fnc_support_apply = {
 	params [["_key", ""]];
 	switch (_key) do {
 		case "armory": {
-			private _arsenal = [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 80, true, true, "", "_this == player"];
+			private _arsenal = [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 80, true, true, "", "_this == player", ACT_REACH];
 			bluHQ_object addAction _arsenal;
 			{ _x addAction _arsenal } forEach Array_of_FOBS;
 		};
 		case "halo": {
 			private _sites = [bluHQ_object] + Array_of_FOBS;
 			{
-				_x addAction [ACT_MOVE("STR_DUWS_T_foldimok"), fnc_ghst_halo, [false,600,70], 70, true, true, "", "alive player"];
+				_x addAction [ACT_MOVE("STR_DUWS_T_foldimok"), fnc_ghst_halo, [false,600,70], 70, true, true, "", "alive player", ACT_REACH];
 				if ((vehiclevarname player) in Squad_Leaders) then {
-					_x addAction [ACT_MOVE("STR_DUWS_T_u6btu73i"), fnc_ghst_halo, [true,600,70], 70, true, true, "", "alive player"];
-					_x addAction [ACT_MOVE("STR_DUWS_T_halo_ai_only"), fnc_ghst_halo, [true,600,70,true], 70, true, true, "", "alive player"];
+					_x addAction [ACT_MOVE("STR_DUWS_T_u6btu73i"), fnc_ghst_halo, [true,600,70], 70, true, true, "", "alive player", ACT_REACH];
+					_x addAction [ACT_MOVE("STR_DUWS_T_halo_ai_only"), fnc_ghst_halo, [true,600,70,true], 70, true, true, "", "alive player", ACT_REACH];
 				};
 			} forEach _sites;
 		};

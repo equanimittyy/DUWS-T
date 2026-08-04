@@ -37,3 +37,11 @@
 
 // The rescue-pilot set and the hold-to-search entries take no macro and stay
 // plain; the searches are already identified by their hold icon.
+
+// How close a player stands before a base prop offers its menu, as addAction's
+// radius argument. addAction defaults to 50 m and measures to the model origin,
+// so a command menu on a structure the size of the HQ opened from most of the
+// way across the base -- and the props at a base sit within a few metres of
+// each other, so several answered at once. Facility actions that already carry
+// their own `_this distance _target` condition are tighter still and keep it.
+#define ACT_REACH 15
