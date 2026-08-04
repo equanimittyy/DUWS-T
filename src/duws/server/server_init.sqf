@@ -377,7 +377,7 @@ while {!(["BOOT", "mission_init_complete (zones built, civilians registered)",
 // Paced, not idle: generation signs off by typing MISSION INITIALIZATION COMPLETE across every
 // screen and hinting the settings summary (warcom/fnc_init_OPFOR_WARCOM.sqf), both fired the instant
 // mission_init_complete goes up, and the intro's first act is to black the screen over them. Flying
-// as soon as the clients were ready cut the typing off about a second into a six-second run.
+// as soon as clients were ready cut the six-second typing off a second in; 12s still clipped it.
 sleep 15;
 
 // The pause above does not replace this: the intro remoteExecs a seat onto each client, so every
