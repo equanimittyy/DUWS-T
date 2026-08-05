@@ -32,6 +32,7 @@ duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_vehicleRow
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_specialRow
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_tokenClass
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_spawnFilter
+duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_scaleComposition
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_tokenStrength
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_thinComposition
 duws/shared/functions/fnc_faction_pools.sqf::fnc_faction_pick

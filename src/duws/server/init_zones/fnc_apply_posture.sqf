@@ -104,9 +104,10 @@ switch (_posture) do {
                        "Land_BagBunker_Tower_F", "Land_BagBunker_Large_F"];
         };
 
-        // A fixed floor rather than one position per man: enemyunitMultiplier can double or treble a
-        // squad, and a requirement that tracked it would price every house on the map out at x3 and
-        // drop the whole garrison through to the patrol fallback below.
+        // A fixed floor rather than one position per man. A garrison slot is a squad of about five
+        // whatever the campaign settings say -- the enemy multiplier adds slots rather than men now
+        // -- so a requirement tracking the group's size would only ever move with a roster edit,
+        // and a demanding one prices small houses out and drops the squad to the patrol fallback.
         private _houses = if (_mounted) then { [] } else {
             [_centre, GARRISON_POSITIONS, GARRISON_REACH] call fnc_usableBuildings
         };

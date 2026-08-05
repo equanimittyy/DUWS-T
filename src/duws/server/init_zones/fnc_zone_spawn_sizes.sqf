@@ -15,9 +15,9 @@
 // What a zone of each tier fields, indexed tier-1. Absolute, not cumulative: a tier is the whole
 // garrison, so what a tier IV zone is can be read off one row instead of assembled from four.
 //
-// Every entry is one A3 group: a posture and the team standing up under it. A row is what the zone
-// raises and nothing multiplies it afterwards, so a duplicated entry is how a tier fields two of
-// something -- which is why the infantry lines repeat rather than carrying a count.
+// Every entry is one A3 group: a posture and the team standing up under it. A duplicated entry is
+// how a tier fields two of something -- which is why the infantry lines repeat rather than carrying
+// a count, and it is the same shape the enemy multiplier writes in at spawn.
 //
 // Radius reaches none of this: a zone is its tier, and the ground it holds only decides how far the
 // same men are spread. Scaling a composition by radius puts two zones the map reports at the same
@@ -35,15 +35,18 @@ DUWS_zoneSpawnTiers = [
 ];
 // --DUWS-UNITCOMP END--
 
-// A zone's spawn list: its tier composition, less whatever this side cannot field right now. Takes
-// the tier rather than reading it, so the pick is testable without the engine.
+// A zone's spawn list: its tier composition, less whatever this side cannot field right now, times
+// the campaign's enemy multiplier. The tier is passed rather than read, so the pick is testable
+// against a stand-in tier rather than against zone state.
 //
 // Neither radius nor player count enters into it. A zone is its tier -- one lever the player can see
-// and the commander can spend against.
+// and the commander can spend against. The multiplier is a second lever, but the player set it once
+// at start and it reads the same at every zone, so it cannot make two tier IVs differ.
 DUWS_fnc_zoneSpawnList = {
     params ["_tier"];
     private _t = (((round _tier) max 1) min (count DUWS_zoneSpawnTiers)) - 1;
-    [DUWS_zoneSpawnTiers select _t] call DUWS_fnc_spawnFilter
+    [[DUWS_zoneSpawnTiers select _t] call DUWS_fnc_spawnFilter,
+        missionNamespace getVariable ["enemyunitMultiplier", 1]] call DUWS_fnc_scaleComposition
 };
 
 // Drops the tokens this side cannot field right now. Three separate reasons, one answer: the token
@@ -58,6 +61,33 @@ DUWS_fnc_zoneSpawnList = {
 DUWS_fnc_spawnFilter = {
     params ["_tokens"];
     _tokens select { ([_x] call DUWS_fnc_tokenClass) != "" }
+};
+
+// The enemy multiplier, applied to the composition rather than inside a roster. A x3 zone fields
+// three patrols where it fielded one, instead of one patrol of six men.
+//
+// Scaling men was the older shape and it cost two roster columns to express: a "core" the multiplier
+// repeated and a "tail" added once, so a x3 setting fielded one marksman rather than three. It also
+// made a group's size a campaign setting, which the player reads as one enormous fire team rather
+// than as more of them, and left a squad's leader outnumbered by his own automatic riflemen.
+//
+// Statics are exempt -- the mortar pair is a zone's only indirect fire and three tubes is a
+// different zone, not a harder one. Everything else scales: a token the special table does not
+// claim is a team or a vehicle.
+//
+// Runs after the filter and before the thin: duplicating a token the side cannot field would
+// multiply nothing, and attrition has to reduce the force that is actually going to stand up.
+DUWS_fnc_scaleComposition = {
+    params ["_tokens", ["_mult", 1]];
+    private _n = ((round _mult) max 1);
+    if (_n <= 1) exitWith { +_tokens };
+    private _out = [];
+    {
+        private _token = _x;
+        private _times = if (([_token] call DUWS_fnc_specialRow) isEqualTo []) then { _n } else { 1 };
+        for "_k" from 1 to _times do { _out pushBack _token };
+    } forEach _tokens;
+    _out
 };
 
 // What attrition does to one token. A composition entry is not a unit -- "patrol" is two men, "team"

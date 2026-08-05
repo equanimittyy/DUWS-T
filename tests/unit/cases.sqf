@@ -398,10 +398,11 @@ private _band = ["sniper", "patrol", "patrol", "team", "wpteam", "armored", "air
 // Bare role names, as the shipped table holds them: the side is prepended when the team is raised,
 // which is what lets one row serve both armies.
 DUWS_teamRosters = [
-    ["patrol", ["A_X", "B_X"], [], ""],
-    ["team", ["A_X"], ["C_X"], "TL_X"],
-    ["wpteam", ["A_X"], [], ""],
-    ["thin", ["A_X", "ABSENT_X"], [], ""]
+    ["patrol", ["A_X", "B_X"], ""],
+    ["team", ["A_X", "C_X"], "TL_X"],
+    ["wpteam", ["A_X"], ""],
+    ["thin", ["A_X", "ABSENT_X"], ""],
+    ["big", ["A_X", "A_X", "A_X", "A_X", "A_X", "A_X", "A_X", "A_X", "C_X"], "TL_X"]
 ];
 DUWS_spawnVehicles = [
     ["car",    "opfor_CAR_X",  "",           0],
@@ -534,20 +535,18 @@ private _have = ["patrol","team"];
 // --- DUWS_fnc_teamRoster: the men behind a team name ---
 // Against the fixture above rather than the shipped rosters: what is under test is how a row
 // expands, and asserting on the live tables would fail every time one is rebalanced.
-["teamRoster: the core repeats by the multiplier",
-    (["patrol", "opfor", 3] call DUWS_fnc_teamRoster), ["cls_A","cls_B","cls_A","cls_B","cls_A","cls_B"]] call fnc_assertEq;
-// The whole reason the tail and the leader are their own columns: at x3 this is one marksman and
-// one task leader, not three of each.
-["teamRoster: the tail is added once and the leader leads",
-    (["team", "opfor", 3] call DUWS_fnc_teamRoster), ["cls_TL","cls_A","cls_A","cls_A","cls_C"]] call fnc_assertEq;
-["teamRoster: a multiplier below one still fields the team once",
-    (["patrol", "opfor", 0] call DUWS_fnc_teamRoster), ["cls_A","cls_B"]] call fnc_assertEq;
+// One team, whatever the campaign settings say. How many of it a site fields is the composition's
+// business now (DUWS_fnc_scaleComposition), which is what let the row drop to a role list.
+["teamRoster: a row is one team",
+    (["patrol", "opfor"] call DUWS_fnc_teamRoster), ["cls_A","cls_B"]] call fnc_assertEq;
+["teamRoster: the leader leads",
+    (["team", "opfor"] call DUWS_fnc_teamRoster), ["cls_TL","cls_A","cls_C"]] call fnc_assertEq;
 ["teamRoster: a role this faction does not define is dropped, not spawned as nil",
-    (["thin", "opfor", 1] call DUWS_fnc_teamRoster), ["cls_A"]] call fnc_assertEq;
+    (["thin", "opfor"] call DUWS_fnc_teamRoster), ["cls_A"]] call fnc_assertEq;
 // Nothing rather than a fallback: the caller named a team that does not exist, and inventing men
 // for it would hide the typo behind a garrison that spawns.
 ["teamRoster: an unknown team fields nothing",
-    (["nosuchkind", "opfor", 2] call DUWS_fnc_teamRoster), []] call fnc_assertEq;
+    (["nosuchkind", "opfor"] call DUWS_fnc_teamRoster), []] call fnc_assertEq;
 // The same answer is what tells the spawn path a token is a vehicle class rather than a team.
 ["teamRow: an unknown team has no row",
     (["nosuchkind"] call DUWS_fnc_teamRow), []] call fnc_assertEq;
@@ -575,22 +574,54 @@ private _have = ["patrol","team"];
     ["garrison:team"]] call fnc_assertEq;
 
 // fnc_zone_thin drops at random indices, so a thinned roster is asserted by size and by who leads
-// rather than by contents. One core man at x8 is eight, plus the tail is nine, halved is five.
-private _thinned = ["team", "opfor", 8, 0.5] call DUWS_fnc_teamRoster;
+// rather than by contents. Nine men halved is five, plus the leader.
+private _thinned = ["big", "opfor", 0.5] call DUWS_fnc_teamRoster;
 ["teamRoster: attrition thins the men",
     (count _thinned), 6] call fnc_assertEq;
 // The reason thinning happens before the leader is prepended: a section ground down still has one.
 ["teamRoster: attrition never takes the leader",
     (_thinned select 0), "cls_TL"] call fnc_assertEq;
 ["teamRoster: full strength thins nothing",
-    (count (["team", "opfor", 8, 1] call DUWS_fnc_teamRoster)), 10] call fnc_assertEq;
+    (count (["big", "opfor", 1] call DUWS_fnc_teamRoster)), 10] call fnc_assertEq;
 
 // The join that makes one table serve both armies: the row names a role, the side names the army.
 // Same row, same order, other side's men.
 blufor_A_X = "cls_blu_A";
 blufor_B_X = "cls_blu_B";
 ["teamRoster: the side is prepended, so one row raises either army",
-    (["patrol", "blufor", 1] call DUWS_fnc_teamRoster), ["cls_blu_A", "cls_blu_B"]] call fnc_assertEq;
+    (["patrol", "blufor"] call DUWS_fnc_teamRoster), ["cls_blu_A", "cls_blu_B"]] call fnc_assertEq;
+
+// --- DUWS_fnc_scaleComposition: the enemy multiplier, applied to cards ---
+// A x3 zone fields three patrols rather than one patrol of six men, so a group's size stops being a
+// campaign setting and a squad's leader is not outnumbered by his own automatic riflemen.
+["scaleComposition: teams and vehicles multiply",
+    ([["patrol", "car"], 3] call DUWS_fnc_scaleComposition),
+    ["patrol", "patrol", "patrol", "car", "car", "car"]] call fnc_assertEq;
+// The mortar pair is a zone's only indirect fire, and three tubes is a different zone rather than a
+// harder one.
+["scaleComposition: a special is exempt",
+    ([["patrol", "mortar"], 2] call DUWS_fnc_scaleComposition),
+    ["patrol", "patrol", "mortar"]] call fnc_assertEq;
+["scaleComposition: the posture rides along with the card it belongs to",
+    ([["garrison:team"], 2] call DUWS_fnc_scaleComposition),
+    ["garrison:team", "garrison:team"]] call fnc_assertEq;
+["scaleComposition: x1 leaves the composition as written",
+    ([["patrol", "car", "mortar"], 1] call DUWS_fnc_scaleComposition),
+    ["patrol", "car", "mortar"]] call fnc_assertEq;
+// A campaign that predates the setting reads no multiplier at all; clamping beats fielding nothing.
+["scaleComposition: a multiplier below one still fields the composition once",
+    ([["patrol"], 0] call DUWS_fnc_scaleComposition), ["patrol"]] call fnc_assertEq;
+private _written = ["patrol", "car"];
+[_written, 3] call DUWS_fnc_scaleComposition;
+["scaleComposition: leaves the caller's composition alone",
+    _written, ["patrol", "car"]] call fnc_assertEq;
+
+// The zone band reads the setting itself, so a tier row states one zone and the campaign says how
+// many of it. Restored afterwards: every later case here assumes an unscaled composition.
+enemyunitMultiplier = 2;
+["zoneSpawnList: the campaign's multiplier reaches the tier row",
+    ([1] call DUWS_fnc_zoneSpawnList), ["patrol", "patrol"]] call fnc_assertEq;
+enemyunitMultiplier = 1;
 
 // --- fnc_selectNonEmpty: first non-empty candidate, and never nil ---
 ["selectNonEmpty: the first non-empty candidate wins",

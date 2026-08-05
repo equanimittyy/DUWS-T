@@ -68,7 +68,9 @@ private _fnc_raise = {
     // rather than a composition that is about to lose entries to a campaign setting anyway.
     // Thinned by what the town has left, the way a zone's band is. A town beaten once fields a
     // fraction of its tier from then on, so the composition is the ceiling rather than the promise.
-    private _want = [[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter, _strength] call DUWS_fnc_thinComposition;
+    private _want = [[[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter,
+        missionNamespace getVariable ["enemyunitMultiplier", 1]] call DUWS_fnc_scaleComposition,
+        _strength] call DUWS_fnc_thinComposition;
     private _men = [[_want, _centre, _radius, _strength] call DUWS_fnc_raiseGarrison] call fnc_site_men_of;
 
     // OPFOR standing inside the trigger's own area, which is what makes the town clearable. SEIZED
@@ -304,7 +306,9 @@ private _fnc_tick = {
     // diff of token lists cannot see that. The stored pair can.
     if ((_tier > (_t get "tier") || _strength > (_t get "deployedStrength"))
         && {!_here}) then {
-        private _want = [[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter, _strength] call DUWS_fnc_thinComposition;
+        private _want = [[[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter,
+            missionNamespace getVariable ["enemyunitMultiplier", 1]] call DUWS_fnc_scaleComposition,
+            _strength] call DUWS_fnc_thinComposition;
         private _added = [[_t get "deployedList", _want] call DUWS_fnc_spawnDiff, _centre, _radius, _strength] call DUWS_fnc_raiseGarrison;
         private _addedMen = [_added] call fnc_site_men_of;
         ([[_i] call fnc_town_site_key] call fnc_site_roster) append _addedMen;

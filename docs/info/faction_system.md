@@ -201,11 +201,15 @@ out of: a row names roles bare and `DUWS_fnc_teamRoster` prepends the side. `rec
 roles whoever stands it up. Its own file rather than a block beside the zone spawn band, because the
 BLUFOR squad catalogue is priced at `server_init` before that band is spawned.
 
+A row is a role list and at most one leader, and nothing about how many of the team a site fields —
+that is the composition's to say. The enemy multiplier used to reach inside a row instead, repeating
+a "core" column while a "tail" column was added once so a x3 setting fielded one marksman rather than
+three; it scales whole cards now (`DUWS_fnc_scaleComposition`), so a x3 zone fields three patrols
+rather than one patrol of six men, and the row lost two columns and a rule with it.
+
 `server/init_hq/fnc_BLUFOR_squad_init.sqf` prices the purchasable sections against that table — recon
 team, infantry squad, motorized / mechanized / armor sections — each tagged with a CP price (e.g.
-`blufor_INF_SQUAD_X = [_squad, 12]`). It passes a multiplier of 1: the core column is repeated by
-`enemyunitMultiplier` for an OPFOR garrison, and a price list that hands over five squads for one
-squad's cost is a different catalogue. Squad init runs once at boot — it was re-run every five minutes
+`blufor_INF_SQUAD_X = [_squad, 12]`). Squad init runs once at boot — it was re-run every five minutes
 to track re-rolled classnames, and with the roles stable that rebuild produced identical data, while a
 catalogue whose prices reshuffle under the player is worse than a fixed one.
 

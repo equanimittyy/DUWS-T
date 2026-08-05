@@ -47,15 +47,12 @@ switch (VERSION_X) do {
 				["ERROR", "FACTION", format ["%1 names team %2, which no roster row claims -- it would be sold empty",
 					_var, _team]] call fnc_log;
 			} else {
-				// Multiplier 1: the core column is repeated by enemyunitMultiplier for an OPFOR
-				// garrison, and a price list that hands over five squads for one squad's cost is a
-				// different catalogue.
-				private _roster = [_team, "blufor", 1] call DUWS_fnc_teamRoster;
+				private _roster = [_team, "blufor"] call DUWS_fnc_teamRoster;
 				private _veh = [_vehPool] call _resolve;
 				// Counted against what the row asked for, before the vehicle is prepended and while
 				// the two lists still line up.
-				_row params ["", "_core", "_once", "_leader"];
-				private _wanted = (count _core) + (count _once) + ([0, 1] select (_leader != ""));
+				_row params ["", "_roles", "_leader"];
+				private _wanted = (count _roles) + ([0, 1] select (_leader != ""));
 				private _lost = ((_wanted - count _roster) max 0) + (count _vehPool - count _veh);
 				if (count _veh > 0) then { _roster = [selectRandom _veh] + _roster };
 

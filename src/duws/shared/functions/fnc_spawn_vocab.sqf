@@ -23,10 +23,12 @@
 // test for afterwards -- BIS_fnc_spawnGroup takes the nil and quietly raises a group one man short.
 // Named, it resolves to "" and fnc_factionRoles drops it.
 //
-// The three roster columns are the shape every one of these teams already had: a core repeated by
-// the enemy multiplier, a tail added once so a x5 setting fields one marksman rather than five, and
-// at most one leader, at the front, for the same reason. A caller that must not multiply -- the
-// player's own purchased squads -- passes 1 and the core stands as written.
+// A row is the men and nothing about how many of the team there are. The enemy multiplier used to
+// reach inside here, repeating a "core" column while a "tail" column was added once so a x3 setting
+// fielded one marksman rather than three -- two columns and a rule, to express a count. It scales
+// whole cards now (DUWS_fnc_scaleComposition), so a x3 zone fields three of this team rather than
+// one team three times the size, and the row is just a role list with at most one leader at the
+// front.
 //
 // A team is what an A3 group is made of and nothing about what it does. The orders used to be a
 // column here, which meant a roster and one set of orders were a single decision: fielding these
@@ -59,16 +61,16 @@ DUWS_fnc_tokenPosture = {
     _parts select 0
 };
 
-// --DUWS-UNITCOMP BEGIN name="Teams" kind=team row="team, core, added once, leader" fields="team, core (multiplied), added once, leader" prefix=blufor_,opfor_--
+// --DUWS-UNITCOMP BEGIN name="Teams" kind=team row="team, roles, leader" fields="team, roles, leader" prefix=blufor_,opfor_--
 DUWS_teamRosters = [
-    ["patrol", ["SOLDIER_X", "AR_SOLDIER_X"], [], ""],
-    ["team", ["AR_SOLDIER_X", "GL_SOLDIER_X"], ["MARK_SOLDIER_X", "LAT_SOLDIER_X"], "TL_SOLDIER_X"],
-    ["sniper", ["SNIPER_SOLDIER_X", "SNIPER_SOLDIER_X"], [], ""],
-    ["wpteam", ["SOLDIER_X"], ["AA_SOLDIER_X", "AT_SOLDIER_X", "SPECOPS_MEDIC_X"], "TL_SOLDIER_X"],
-    ["fortified", ["AR_SOLDIER_X", "AT_SOLDIER_X", "GL_SOLDIER_X", "SPECOPS_MEDIC_X"], [], "SL_SOLDIER_X"],
-    ["recon", ["SPECOPS_X", "SPECOPS_GL_X", "SPECOPS_MG_X", "SPECOPS_LAT_X"], [], ""],
-    ["infantry", ["GL_SOLDIER_X", "LAT_SOLDIER_X", "AR_SOLDIER_X"], [], "TL_SOLDIER_X"],
-    ["squad", ["SOLDIER_X", "SOLDIER_X", "GL_SOLDIER_X", "GL_SOLDIER_X", "LAT_SOLDIER_X", "LAT_SOLDIER_X", "AR_SOLDIER_X"], [], "SL_SOLDIER_X"]
+    ["patrol", ["SOLDIER_X", "AR_SOLDIER_X"], ""],
+    ["team", ["AR_SOLDIER_X", "GL_SOLDIER_X", "MARK_SOLDIER_X", "LAT_SOLDIER_X"], "TL_SOLDIER_X"],
+    ["sniper", ["SNIPER_SOLDIER_X", "SNIPER_SOLDIER_X"], ""],
+    ["wpteam", ["SOLDIER_X", "AA_SOLDIER_X", "AT_SOLDIER_X", "SPECOPS_MEDIC_X"], "TL_SOLDIER_X"],
+    ["fortified", ["AR_SOLDIER_X", "AT_SOLDIER_X", "GL_SOLDIER_X", "SPECOPS_MEDIC_X"], "SL_SOLDIER_X"],
+    ["recon", ["SPECOPS_X", "SPECOPS_GL_X", "SPECOPS_MG_X", "SPECOPS_LAT_X"], ""],
+    ["infantry", ["GL_SOLDIER_X", "LAT_SOLDIER_X", "AR_SOLDIER_X"], "TL_SOLDIER_X"],
+    ["squad", ["SOLDIER_X", "SOLDIER_X", "GL_SOLDIER_X", "GL_SOLDIER_X", "LAT_SOLDIER_X", "LAT_SOLDIER_X", "AR_SOLDIER_X"], "SL_SOLDIER_X"]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -86,21 +88,20 @@ DUWS_fnc_teamRow = {
 // A team's men, in spawn order. _side is required rather than defaulted: a row names roles bare, so
 // a caller that forgot to say would silently raise the other army.
 //
-// The multiplier is clamped here rather than at the call sites, and never written back: the setup
-// menu broadcasts enemyunitMultiplier once, so a spawner that corrected the global would corrupt
-// every later build on that machine with nothing to re-broadcast a repair.
-// _strength is attrition, and it is applied to the multiplied men before the leader joins them, so
-// a section ground down still has one rather than sometimes losing it to a coin flip.
+// One team, always: how many of it a site fields is the composition's business, not this function's.
+// _strength is attrition, and it is applied before the leader joins the men, so a section ground
+// down still has one rather than sometimes losing it to a coin flip.
 // An unknown token yields nothing rather than a fallback group -- the caller named a team that does
 // not exist, and inventing men for it would hide the typo behind a garrison that spawns.
 DUWS_fnc_teamRoster = {
-    params ["_token", "_side", ["_mult", 1], ["_strength", 1]];
+    params ["_token", "_side", ["_strength", 1]];
     private _row = [_token] call DUWS_fnc_teamRow;
     if (_row isEqualTo []) exitWith { [] };
-    _row params ["", "_core", "_once", "_leader"];
-    private _men = [];
-    for "_k" from 1 to (_mult max 1) do { _men append _core };
-    _men append _once;
+    _row params ["", "_roles", "_leader"];
+    // Copied, not aliased. The row belongs to the shipped table, so anything written through this
+    // local would edit every later team built from it, for the rest of the session and invisibly.
+    // The shape this replaces built a fresh list by appending and got that for free.
+    private _men = +_roles;
     if (_strength < 1) then { _men = [_men, _strength] call fnc_zone_thin };
     private _names = [];
     if (_leader != "") then { _names pushBack _leader };

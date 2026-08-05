@@ -136,8 +136,9 @@ the whole garrison, so what a tier IV zone is reads off one line instead of bein
 four. Tier reaches only the units a zone spawns alongside itself; the prefab, the fortification
 scatter and their crews are not part of it.
 
-**Tier moves the whole fight, dug-in half included.** A row is what the zone raises and nothing
-multiplies it afterwards, so a repeated entry is how a tier fields two of something. Most of the
+**Tier moves the whole fight, dug-in half included.** A repeated entry is how a tier fields two of
+something; nothing about the *ground* multiplies a row afterwards, and the one thing that does — the
+campaign's enemy multiplier — scales whole cards and applies to every zone alike. Most of the
 ladder's weight is in the dug-in half — the `garrison:fortified` slots and the `mortar` pair — which
 climbs from two slots at tier I to six at tier IV: about thirty men at tier I against about seventy
 at tier IV. Hold that half flat across the rows and the ladder collapses onto the mobile half, which
@@ -188,8 +189,8 @@ protect, since a beaten zone garrison means the zone changed hands
 
 **A composition must not be scaled by a zone's radius.** The map reports a zone's tier, so a radius
 multiplier puts two zones the readout calls tier IV on the ground at different strengths, for a
-reason the player cannot read off either. `DUWS_fnc_zoneSpawnList` therefore takes the tier and
-nothing else.
+reason the player cannot read off either. `DUWS_fnc_zoneSpawnList` therefore takes the tier and the
+campaign's enemy multiplier, which is the same for every zone, and nothing about the site itself.
 
 What radius does decide is where the same men stand and what the ground is worth: the spread
 `DUWS_fnc_raiseGarrison` places them over, the capture trigger's area, the map marker, and the CP

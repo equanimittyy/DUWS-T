@@ -498,9 +498,9 @@ producing the integer result.
 **How to apply:** resolve a fractional multiplier to an integer *before* the loop — e.g.
 `_n = floor _m; if (random 1 < (_m - _n)) then { _n = _n + 1 }` for probabilistic
 rounding — then loop `to _n`. The OPFOR unit-multiplier options are kept integer
-(`enemyunitMultiplier` 1/2/3) for this reason: the enemy-spawn builders in
-`src/duws/server/init_zones/fnc_createop*.sqf` loop `for "_i" from 0 to
-enemyunitMultiplier`, so a fractional option there would not change the unit count.
+(`enemyunitMultiplier` 1/2/3) for this reason, and `DUWS_fnc_scaleComposition`
+(`src/duws/server/init_zones/fnc_zone_spawn_sizes.sqf`) rounds before it loops rather
+than feeding the setting in raw.
 
 ## Scheduled scripts share ~3 ms per frame, so a long loop runs at frame rate
 
