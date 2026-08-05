@@ -85,6 +85,7 @@ function Get-SourceFiles {
 function Clear-SourceCache {
     $script:fileCache = $null
     $script:unitCache = $null
+    $script:staticWeapons = $null
 }
 
 # Invariant-culture number formatting: a comma-decimal locale must not corrupt SQF floats.
@@ -163,6 +164,29 @@ function Get-RowTails($body) {
 # The single transform a whole paste shares, and how much of it agrees. An export taken after the
 # layout was dragged or spun in Eden carries that as a constant on every row, and a constant is
 # indistinguishable from deliberate editing until it is counted.
+# The classes DUWS_staticRoles maps to a turret role. That table is the mission's own answer to "is
+# this a gun", so a row's sixth column is derived from it rather than asked about: every class the
+# shipped compositions flag as a weapon appears in it, and no class they flag as scenery does.
+#
+# Scoped to the fence rather than run over the whole file: the resolver and the placer sit below it,
+# and a bare row regex would pick up whatever array literal either grows later.
+function Get-StaticWeaponClasses {
+    if ($null -ne $script:staticWeapons) { return $script:staticWeapons }
+    $names = @{}
+    $f = Join-Path $srcDir "duws\shared\functions\fnc_static_roles.sqf"
+    if (Test-Path -LiteralPath $f) {
+        $m = [regex]::Match([System.IO.File]::ReadAllText($f),
+            '(?s)--DUWS-UNITCOMP BEGIN.*?--\r?\n(.*?)\r?\n[ \t]*//\s*--DUWS-UNITCOMP END--')
+        if ($m.Success) {
+            foreach ($r in [regex]::Matches($m.Groups[1].Value, '(?m)^\s*\[\s*"([A-Za-z0-9_]+)"\s*,\s*"')) {
+                $names[$r.Groups[1].Value] = $true
+            }
+        }
+    }
+    $script:staticWeapons = $names
+    return $script:staticWeapons
+}
+
 function Get-ModalDelta($values, $places) {
     if ($values.Count -eq 0) { return $null }
     $g = @($values | Group-Object { [math]::Round($_, $places) } | Sort-Object Count -Descending)
@@ -516,9 +540,34 @@ function Update-StaticFence($comp) {
         Write-Host ("  {0} row(s) do not line up by index:" -f $bad.Count) -ForegroundColor Yellow
         foreach ($b in ($bad | Select-Object -First 8)) { Write-Host $b -ForegroundColor Yellow }
         if ($bad.Count -gt 8) { Write-Host ("    ... and {0} more" -f ($bad.Count - 8)) -ForegroundColor Yellow }
-        Write-Host "  Those rows have no source row to take column 6 from, and will be asked about." -ForegroundColor Yellow
     }
     if ($pairs.Count -eq 0) { Write-Host "  Nothing lines up; refusing." -ForegroundColor Red; return }
+
+    # A row that lines up inherits column 6 from the row it replaces, which is the author's own
+    # answer. A row that does not has no such source, and leaving the column off is not a milder
+    # version of the same row: a nil isWeapon makes both of a prefab's guards evaluate to nothing, so
+    # neither pass skips it and the object is built twice -- once ground-snapped as a prop, once
+    # through fnc_static_place as a resolved gun with a gunner seated in it. Derived from the class
+    # rather than asked about, because DUWS_staticRoles already knows which classes are guns.
+    $usesTails = @($tails | Where-Object { $_.Trim() -ne '' }).Count -gt 0
+    $weapons   = Get-StaticWeaponClasses
+    $rowTails  = @()
+    $derived   = New-Object System.Collections.Generic.List[string]
+    for ($i = 0; $i -lt $new.Count; $i++) {
+        if ($i -lt $old.Count -and $i -lt $tails.Count -and $old[$i].Class -eq $new[$i].Class) {
+            $rowTails += $tails[$i]
+        } elseif ($usesTails) {
+            $isW = $weapons.ContainsKey($new[$i].Class)
+            $rowTails += $(if ($isW) { ', true' } else { ', false' })
+            $derived.Add(("    [{0}] {1} -> {2}" -f $i, $new[$i].Class, $(if ($isW) { 'weapon' } else { 'scenery' })))
+        } else {
+            $rowTails += ''
+        }
+    }
+    if ($derived.Count -gt 0) {
+        Write-Host ("  Column 6 derived from DUWS_staticRoles for {0} row(s):" -f $derived.Count) -ForegroundColor Cyan
+        foreach ($d in $derived) { Write-Host $d -ForegroundColor Cyan }
+    }
 
     $dir = Get-ModalDelta @($pairs | ForEach-Object { (($_.N.Dir - $_.O.Dir) % 360 + 360) % 360 }) 2
     $dz  = Get-ModalDelta @($pairs | ForEach-Object { $_.N.OZ - $_.O.OZ }) 3
@@ -542,24 +591,6 @@ function Update-StaticFence($comp) {
     if ((Read-Host ("  Rewrite '{0}' with {1} rows? (y/N)" -f $comp.Name, $new.Count)) -notmatch '^\s*[Yy]') {
         Write-Host "  Nothing written." -ForegroundColor Yellow
         return
-    }
-
-    # A row with no source row to inherit column 6 from is asked about rather than written short.
-    # Leaving the flag off is not a milder version of the same row: a nil isWeapon makes both of the
-    # prefab's guards evaluate to nothing, so neither pass skips the row and the object is built
-    # twice -- once ground-snapped as a prop, once through fnc_static_place as a resolved gun with a
-    # gunner seated in it.
-    $usesTails = @($tails | Where-Object { $_.Trim() -ne '' }).Count -gt 0
-    $rowTails  = @()
-    for ($i = 0; $i -lt $new.Count; $i++) {
-        if ($i -lt $old.Count -and $i -lt $tails.Count -and $old[$i].Class -eq $new[$i].Class) {
-            $rowTails += $tails[$i]
-        } elseif ($usesTails) {
-            $ans = Read-Host ("  Row {0} ({1}): is it a weapon? (y/N)" -f $i, $new[$i].Class)
-            $rowTails += $(if ($ans -match '^\s*[Yy]') { ', true' } else { ', false' })
-        } else {
-            $rowTails += ''
-        }
     }
 
     # The anchor ConvertTo-Rows took off the source rows goes back on: the HQ array stores

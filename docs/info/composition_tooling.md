@@ -174,11 +174,15 @@ index against what is already there and reports what it finds before writing any
 class does not line up, a heading delta the whole paste shares, and a constant Z delta it offers to
 subtract. Comment lines inside the array are not carried over, and it says how many it dropped.
 
-Trailing columns (`isWeapon`) come across from the row at the same index. A row that does not line up
-has none to inherit, and **it is asked about rather than written short**: with column 6 missing,
-`_isWeapon` is nil, both of a prefab's guards evaluate to nothing, and neither pass skips the row — so
-the object is built twice, once ground-snapped as a prop and once through `fnc_static_place` as a
-resolved gun with a gunner in it.
+Trailing columns (`isWeapon`) come across from the row at the same index, which is the author's own
+answer. A row that does not line up has none to inherit, and **the flag is derived from the class
+against `DUWS_staticRoles`** rather than asked about — that table is the mission's own answer to
+which classes are guns, and it agrees with every flag the shipped compositions already carry. What
+was derived is listed before the write, since a class the table does not know reads as scenery.
+
+Writing the row short is not an option: with column 6 missing, `_isWeapon` is nil, both of a prefab's
+guards evaluate to nothing, and neither pass skips the row — so the object is built twice, once
+ground-snapped as a prop and once through `fnc_static_place` as a resolved gun with a gunner in it.
 
 A heading delta shared by the whole paste is reported rather than repaired: it means the layout was
 rotated in Eden, which is a legitimate way to change which way a composition faces, and only the
