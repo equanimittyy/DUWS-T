@@ -370,6 +370,10 @@ fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dial
 // Same idiom and the same reason: the table, the resolver reading it and the placer acting on the
 // answer are one file, so which class a static is and how one is put down cannot drift apart.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_static_roles.sqf";
+// Terrain scoring and the minefield generator: definitions only, read by the siting loop that is yet
+// to be written. Loaded here rather than at zone-gen time so both are in hand before generation runs.
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_siting.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_minefield.sqf";
 // Same idiom again, and ahead of faction init, which is what leaves the keys it fills empty.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_backfill.sqf";
 // Before fnc_BLUFOR_squad_init and the zone spawn band, both of which name a team out of it.

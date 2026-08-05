@@ -782,3 +782,84 @@ TEST_PICK = "";
     (["B_MBT_01_arty_F", "opfor"] call fnc_static_resolve), "B_MBT_01_arty_F"] call fnc_assertEq;
 ["static_resolve: ... without falling to the MG nest a turret role would take",
     TEST_ASKED, [["opfor_ARTY_X"]]] call fnc_assertEq;
+
+// --- fnc_hardpoint_score: terrain suitability multiplier per hardpoint type ---
+// Facts row: [onWater, relElev, slope, roadDist, roadDrop, treeNear, treeWide, buildingCnt, hpDist].
+// Multipliers are asserted within a tolerance; the 0 vetoes are exact.
+
+// Water is unplaceable for every type.
+["hp_score: water vetoes any type",
+    ([[true, 6, 0.2, 0, 4, 0, 0, 0, 1e9], "MG"] call fnc_hardpoint_score), 0] call fnc_assertEq;
+
+// MG/AT on a bare hill, no road: uphill scores, and the missing road is not a veto.
+["hp_score: MG on a roadless hill still places",
+    ([[false, 6, 0.2, 1e9, 0, 0, 0, 0, 1e9], "MG"] call fnc_hardpoint_score), 1.5] call fnc_assertClose;
+["hp_score: AT on a roadless hill still places (no road gate)",
+    ([[false, 6, 0.2, 1e9, 0, 0, 0, 0, 1e9], "AT"] call fnc_hardpoint_score), 1.5] call fnc_assertClose;
+
+// A road below and near multiplies both, AT the harder -- roughly triples where MG gains ~80%.
+["hp_score: MG gains from overwatching a road",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9], "MG"] call fnc_hardpoint_score), 2.7] call fnc_assertClose;
+["hp_score: AT gains more from the road it kills on",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9], "AT"] call fnc_hardpoint_score), 3.75] call fnc_assertClose;
+
+// Flat, low ground with no hill: the floor of the MG reward.
+["hp_score: MG on flat ground scores its floor",
+    ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9], "MG"] call fnc_hardpoint_score), 0.5] call fnc_assertClose;
+
+// AA prefers flat and clear; trees and slope tank it but never veto.
+["hp_score: AA flat and clear",
+    ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9], "AA"] call fnc_hardpoint_score), 1.7] call fnc_assertClose;
+["hp_score: AA under trees is a fraction of that",
+    ([[false, 0, 0.2, 1e9, 0, 0, 6, 0, 1e9], "AA"] call fnc_hardpoint_score), 0.34] call fnc_assertClose;
+["hp_score: AA on a slope drops but is not vetoed",
+    ([[false, 0, 4, 1e9, 0, 0, 0, 0, 1e9], "AA"] call fnc_hardpoint_score), 0.3] call fnc_assertClose;
+
+// Artillery requires level ground: rough is a veto.
+["hp_score: artillery vetoes rough ground",
+    ([[false, 0, 5, 1e9, 0, 0, 0, 0, 1e9], "ARTY"] call fnc_hardpoint_score), 0] call fnc_assertEq;
+["hp_score: artillery on the flat",
+    ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9], "ARTY"] call fnc_hardpoint_score), 2.0] call fnc_assertClose;
+
+// A roadblock needs a road.
+["hp_score: roadblock vetoes no road",
+    ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9], "ROADBLOCK"] call fnc_hardpoint_score), 0] call fnc_assertEq;
+["hp_score: roadblock on the road",
+    ([[false, 0, 0.2, 0, 0, 0, 0, 0, 1e9], "ROADBLOCK"] call fnc_hardpoint_score), 1.5] call fnc_assertClose;
+
+// OP wants height and close cover, but a thicket beyond blinds it.
+["hp_score: OP high with close cover and an open view",
+    ([[false, 6, 0.2, 1e9, 0, 4, 0, 0, 1e9], "OP"] call fnc_hardpoint_score), 3.0] call fnc_assertClose;
+["hp_score: OP in a thicket loses half its view",
+    ([[false, 6, 0.2, 1e9, 0, 4, 20, 0, 1e9], "OP"] call fnc_hardpoint_score), 1.5] call fnc_assertClose;
+["hp_score: OP on low ground scores its floor",
+    ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9], "OP"] call fnc_hardpoint_score), 0.4] call fnc_assertClose;
+
+// Mortar wants defilade: reward below the surroundings, penalise a crest.
+["hp_score: mortar in defilade",
+    ([[false, -6, 0.2, 1e9, 0, 0, 0, 0, 1e9], "MORTAR"] call fnc_hardpoint_score), 1.6] call fnc_assertClose;
+["hp_score: mortar on a crest scores its floor",
+    ([[false, 6, 0.2, 1e9, 0, 0, 0, 0, 1e9], "MORTAR"] call fnc_hardpoint_score), 0.4] call fnc_assertClose;
+
+// Minefield needs open, clear ground; a tree, a building or an emplacement on it is each a veto.
+["hp_score: minefield on open flat ground",
+    ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9], "MINEFIELD"] call fnc_hardpoint_score), 2.0] call fnc_assertClose;
+["hp_score: minefield vetoes a tree on the patch",
+    ([[false, 0, 0.2, 1e9, 0, 1, 1, 0, 1e9], "MINEFIELD"] call fnc_hardpoint_score), 0] call fnc_assertEq;
+["hp_score: minefield vetoes a building nearby",
+    ([[false, 0, 0.2, 1e9, 0, 0, 0, 1, 1e9], "MINEFIELD"] call fnc_hardpoint_score), 0] call fnc_assertEq;
+["hp_score: minefield vetoes another emplacement nearby",
+    ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 20], "MINEFIELD"] call fnc_hardpoint_score), 0] call fnc_assertEq;
+
+// An unmapped type sites anywhere until given a preference.
+["hp_score: an unknown type is neutral",
+    ([[false, 0, 0, 0, 0, 0, 0, 0, 1e9], "WATCHTOWER"] call fnc_hardpoint_score), 1] call fnc_assertEq;
+
+// --- fnc_hardpoint_minefield_lattice: the deterministic mine grid ---
+["hp_lattice: a 2x1 field is centred on the origin",
+    ([2, 1, 4] call fnc_hardpoint_minefield_lattice), [[-2, 0], [2, 0]]] call fnc_assertEq;
+["hp_lattice: a 3x2 field, cols across then rows deep",
+    ([3, 2, 4] call fnc_hardpoint_minefield_lattice),
+    [[-4, -2], [0, -2], [4, -2], [-4, 2], [0, 2], [4, 2]]] call fnc_assertEq;
+["hp_lattice: spacing defaults to 4",
+    ([2, 1] call fnc_hardpoint_minefield_lattice), [[-2, 0], [2, 0]]] call fnc_assertEq;
