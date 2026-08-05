@@ -103,6 +103,18 @@ function Fmt($v) { ([double]$v).ToString($inv) }
 # ones, and normalises away on the next commit so the mess is invisible until someone reads a diff.
 function Get-Newline($text) { if ($text -match "`r`n") { "`r`n" } else { "`n" } }
 
+# A fence may glue its first row onto the declaration -- VAR = [ ["class", ...]. Valid SQF, but the
+# row scans here identify a row by its line starting with ["...], so that first row's line starts with
+# the variable name, fails the test, and is dropped with no warning -- the skip lands before the
+# row-like counter. Split it off at the one place a body is captured, so both readers and the writer's
+# row window see one row per line, and a later rewrite stores it un-glued.
+function Split-GluedFirstRow($body) {
+    $nl = Get-Newline $body
+    return [regex]::Replace($body,
+        '(?m)^([ \t]*(?:private[ \t]+)?[A-Za-z_]\w*[ \t]*=[ \t]*\[)[ \t]*(?=\[")',
+        ('$1' + $nl + '    '))
+}
+
 function Get-Compositions {
     $comps = @()
     $blockRe = [regex]'(?s)--DUWS-COMPOSITION BEGIN\s+(.*?)--\r?\n(.*?)\r?\n[ \t]*//\s*--DUWS-COMPOSITION END--'
@@ -117,7 +129,7 @@ function Get-Compositions {
                 Anchor = Get-Attr $attrs 'anchor=(\w+)' ''
                 ZMode  = Get-Attr $attrs 'z=(\w+)' 'snap'
                 ZBase  = Get-Attr $attrs 'zbase=(\w+)' ''
-                Body   = $m.Groups[2].Value
+                Body   = Split-GluedFirstRow $m.Groups[2].Value
                 Text   = $text
                 File   = $file.Path
             }
