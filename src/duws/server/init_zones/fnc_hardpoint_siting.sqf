@@ -116,18 +116,20 @@ fnc_hardpoint_score = {
 
 // [_cols, _rows, _spacing] call fnc_hardpoint_minefield_lattice -> [[x,y], ...] centred on the origin.
 //
-// One rectangular field, in the composition frame (+Y is the field's facing). _cols is the frontage
-// across the approach, _rows the depth toward it; the commander widens or deepens a field by asking
-// for more of either, and strings fields by laying several origins along a line. Pure: the grid is
-// deterministic so it can be tested, and the placer adds the jitter and lays the mines.
+// One field in the composition frame (+Y is the field's facing). _cols is the frontage across the
+// approach, _rows the depth toward it; the commander widens or deepens a field by asking for more of
+// either, and strings fields by laying several origins along a line. Alternate rows are offset half a
+// spacing so no straight lane runs through -- an aligned grid lets a vehicle thread a column gap
+// untouched. Pure: the grid is deterministic so it can be tested; the placer jitters and lays it.
 fnc_hardpoint_minefield_lattice = {
     params ["_cols", "_rows", ["_spacing", 4]];
     private _x0 = - (_cols - 1) * _spacing / 2;
     private _y0 = - (_rows - 1) * _spacing / 2;
     private _out = [];
     for "_r" from 0 to (_rows - 1) do {
+        private _shift = (_r % 2) * _spacing / 2;
         for "_c" from 0 to (_cols - 1) do {
-            _out pushBack [_x0 + _c * _spacing, _y0 + _r * _spacing];
+            _out pushBack [_x0 + _c * _spacing + _shift, _y0 + _r * _spacing];
         };
     };
     _out

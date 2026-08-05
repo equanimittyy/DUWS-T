@@ -858,8 +858,8 @@ TEST_PICK = "";
 // --- fnc_hardpoint_minefield_lattice: the deterministic mine grid ---
 ["hp_lattice: a 2x1 field is centred on the origin",
     ([2, 1, 4] call fnc_hardpoint_minefield_lattice), [[-2, 0], [2, 0]]] call fnc_assertEq;
-["hp_lattice: a 3x2 field, cols across then rows deep",
+["hp_lattice: a 3x2 field staggers the odd row by half the spacing",
     ([3, 2, 4] call fnc_hardpoint_minefield_lattice),
-    [[-4, -2], [0, -2], [4, -2], [-4, 2], [0, 2], [4, 2]]] call fnc_assertEq;
+    [[-4, -2], [0, -2], [4, -2], [-2, 2], [2, 2], [6, 2]]] call fnc_assertEq;
 ["hp_lattice: spacing defaults to 4",
     ([2, 1] call fnc_hardpoint_minefield_lattice), [[-2, 0], [2, 0]]] call fnc_assertEq;

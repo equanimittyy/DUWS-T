@@ -26,7 +26,7 @@ DUWS_mineVariants = [
 //   _variant "AT" | "AP"     resolved through DUWS_mineVariants; an unknown token falls to AT
 //   _key     site key        files each mine for streaming / teardown; "" leaves them unmanaged
 fnc_hardpoint_minefield = {
-    params ["_center", "_dir", ["_variant", "AT"], ["_cols", 6], ["_rows", 3], ["_spacing", 4], ["_jitter", 1.2], ["_key", ""]];
+    params ["_center", "_dir", ["_variant", "AT"], ["_cols", 6], ["_rows", 3], ["_spacing", 4], ["_jitter", 0.6], ["_key", ""]];
 
     private _hit = DUWS_mineVariants findIf { (_x select 0) isEqualTo (toUpper _variant) };
     private _classes = if (_hit >= 0) then { (DUWS_mineVariants select _hit) select 1 } else { ["ATMine"] };
