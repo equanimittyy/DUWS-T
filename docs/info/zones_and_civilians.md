@@ -139,9 +139,8 @@ scatter and their crews are not part of it.
 **Tier moves the whole fight, dug-in half included.** A repeated entry is how a tier fields two of
 something; nothing about the *ground* multiplies a row afterwards, and the one thing that does — the
 campaign's enemy multiplier — scales whole cards and applies to every zone alike. Most of the
-ladder's weight is in the dug-in half — the `garrison:fortified` slots and the `mortar` pair — which
-climbs from two slots at tier I to six at tier IV: about thirty men at tier I against about seventy
-at tier IV. Hold that half flat across the rows and the ladder collapses onto the mobile half, which
+ladder's weight is in the dug-in half — the `garrison:fortified` slots — which climbs from two slots
+at tier I to six at tier IV: about thirty men at tier I against about seventy at tier IV. Hold that half flat across the rows and the ladder collapses onto the mobile half, which
 is a minority of a zone's men.
 `fnc_zone_tier_roll` refuses to roll twice. `fnc_createzone` is re-entrant by design — `zone_meta_array`
 exists so a zone can be rebuilt through it — and a rebuild that re-rolled would change what the ground
@@ -249,8 +248,7 @@ deleting a transport takes its occupants with it. Everything the zone raises on 
 composition drops the vehicles it can no longer crew (`fnc_zone_spawn_sizes.sqf`) and every team
 thins the men inside it. A garrison slot is a team, so a worn zone holds the **same** buildings with
 fewer men in each rather than fewer buildings — one squad to one structure, however thin the squad
-has become. The mortar pair is the one
-exception — two men, and the zone's only indirect fire, so a fraction of it is none of it.
+has become.
 
 **Attrition and tier are separate axes.** Tier chooses the list, attrition thins whatever that list
 produced. The prefab's gun crews are outside the tier list entirely and scale by attrition alone;

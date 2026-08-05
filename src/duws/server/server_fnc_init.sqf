@@ -59,7 +59,6 @@ fnc_search_flag_group = compile preprocessFileLineNumbers "duws\server\misc\fnc_
 fnc_search_dropItems = compile preprocessFileLineNumbers "duws\server\misc\fnc_search_dropItems.sqf";
 fnc_search_claim = compile preprocessFileLineNumbers "duws\server\misc\fnc_search_claim.sqf";
 fnc_garrisonBuildings = compile preprocessFileLineNumbers "duws\server\misc\fnc_garrisonBuildings.sqf";
-fnc_garrisonMortar = compile preprocessFileLineNumbers "duws\server\misc\fnc_garrisonMortar.sqf";
 fnc_fob_destroyed = compile preprocessFileLineNumbers "duws\server\misc\fnc_fob_destroyed.sqf";
 // Not broadcast: it creates a global marker, so exactly one machine may run it.
 fnc_baseRangeMarker = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseRangeMarker.sqf";

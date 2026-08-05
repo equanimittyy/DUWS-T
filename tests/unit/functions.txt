@@ -29,7 +29,6 @@ duws/shared/functions/fnc_spawn_vocab.sqf::DUWS_fnc_tokenPosture
 duws/shared/functions/fnc_spawn_vocab.sqf::DUWS_fnc_teamRow
 duws/shared/functions/fnc_spawn_vocab.sqf::DUWS_fnc_teamRoster
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_vehicleRow
-duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_specialRow
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_tokenClass
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_spawnFilter
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_scaleComposition

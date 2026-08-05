@@ -187,8 +187,8 @@ Two ideas, and keeping them apart is what makes the menus make sense:
   entry as `posture:token` — one A3 group, its orders and its roster. Typed as one string rather
   than a pair because the row editor below splits on commas and would cut a nested list in half.
 - A **token** is what one name stands for, and the Tokens menu holds every table of them: a team of
-  men (`sniper` is two snipers until you say otherwise), one vehicle, a placer that garrisons ground
-  by a rule rather than from a roster, and the class-to-role map behind a static weapon.
+  men (`sniper` is two snipers until you say otherwise), one vehicle, and the class-to-role map
+  behind a static weapon.
 
 Compositions name tokens; a token is edited in one place and referred to from many. **The unit of
 work is a row, not the table it lives in** — which file a composition sits in is not something the
@@ -225,12 +225,10 @@ picked apart by column instead of by entry index. Pick a row, pick a field, and 
 **already in the line** for editing rather than retyped from scratch; Escape backs out.
 
 Each field keeps the kind it already had, inferred from the value rather than declared: a list stays
-a list, a quoted name stays quoted, and a number or boolean field refuses anything else instead of
-writing a table that will not compile. Booleans matter more than they look: a placer's parameter
-list carries them, and SQF's `params` substitutes its own default for an argument of the wrong type,
-so a quoted `"false"` reads at runtime as a parameter that quietly stopped taking effect.
+a list, a quoted name stays quoted, and a number field refuses anything else instead of writing a
+table that will not compile.
 
-Two vocabularies are checked before a row is changed, and both catch a write that compiles and then
+One vocabulary is checked before a row is changed, and it catches a write that compiles and then
 says nothing at runtime:
 
 - **Role names**, against the slots the faction files under `shared/factions/` actually define. The
@@ -239,9 +237,6 @@ says nothing at runtime:
   thins on the rest — which is the failure the faction auto-detection exists to prevent. A role
   `DUWS_roleFallbacks` names counts as covered: `fnc_faction_backfill` borrows it at load, and
   flagging it would put a hard warning on the mission's own answer to the gap.
-- **Names beginning `fnc_`**, against the globals `server_fnc_init.sqf` compiles. A placer is named
-  by global, and the spawn path falls back to `{grpNull}` for a name nothing defines, so a typo is a
-  row that raises nothing.
 
 A row holding a nested list belongs in a `fields=` table. The flat editor splits typed input on
 commas, which would cut a nested list in half.
@@ -257,10 +252,6 @@ nothing in the mission has to learn the new name:
   under different orders took a second row with an identical roster.
 - The spawn path asks the tables what a token is rather than switching on known names, so a token
   no table claims is a classname a faction file named directly and stands as itself.
-
-A **special** is the exception to spawnable-as-it-stands: its `placer` column names code, so the
-function has to exist before the row does. The tool prompts on a name nothing compiles rather than
-letting the row through to raise nothing.
 
 The values already in a column are offered while typing, so what is on offer is what the tables
 actually hold rather than a list in a doc that rots. A duplicate name is refused: the first column is

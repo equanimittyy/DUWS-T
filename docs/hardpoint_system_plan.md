@@ -599,12 +599,11 @@ The types that justify the tier: persistent enemy assets that act on the campaig
 one changes the player's situation rather than incrementing a counter. Two tiers, sharing one
 fire-mission implementation.
 
-**A zone's own mortar section is a different thing and stays as it is.** Every zone tier already
-fields a `mortar` token — two men carrying a tube and its ammunition, defending the centre
-(`fnc_zone_spawn_sizes.sqf:116-119`, `server/misc/fnc_garrisonMortar.sqf`) — and its fire is
-whatever the engine's AI decides on its own. It is garrison, it despawns with the garrison, and it
-is not counted against the caps below. What is capped is the emplacement kind: a sited, crewed,
-map-marked gun that keeps firing while nobody is there.
+**A zone's own mortar is a different thing and stays as it is.** Several zone prefabs site a tube
+that `fnc_static_resolve` turns into whichever mortar the holding faction fields, and its fire is
+whatever the engine's AI decides on its own. It belongs to the prefab, it is crewed by the zone's
+manning pass, and it is not counted against the caps below. What is capped is the emplacement kind:
+a sited, crewed, map-marked gun that keeps firing while nobody is there.
 
 Real crewed guns, not a virtual effect. `doArtilleryFire` must be issued from the machine where
 the gun is local, and both are server-spawned, so the server issues it — the same locality rule
@@ -988,9 +987,9 @@ spawned by anything.
 
 **Will an AI gunner in a static mortar or a self-propelled gun reliably execute
 `doArtilleryFire`?** Nothing in the mission has ever issued it: `doArtilleryFire`,
-`commandArtilleryFire` and `inRangeOfArtillery` appear nowhere in the tree, and the zone mortar pair
-fires or does not fire entirely on the engine's own judgement
-(`server/misc/fnc_garrisonMortar.sqf`). Answer this with a throwaway console test before writing any
+`commandArtilleryFire` and `inRangeOfArtillery` appear nowhere in the tree, and the mortar a zone
+prefab sites fires or does not fire entirely on the engine's own judgement. Answer this with a
+throwaway console test before writing any
 of [§Indirect-fire hardpoints](#indirect-fire-hardpoints): if the answer is no, the shell-spawn
 fallback becomes the implementation and the gun is a target rather than a weapon, which is a
 different feature wearing the same name.

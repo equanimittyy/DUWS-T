@@ -368,11 +368,6 @@ the zone type: it fits itself to whatever ground it was sited on. Only the class
 `blufor_TURRET_HMG` on a mission whose whole subject is an OPFOR cache, so a mod-equipped BLUFOR
 faction currently defends the enemy's supplies. It resolves as OPFOR with the rest of them.
 
-**`misc/fnc_garrisonMortar.sqf:23-24` stays hardcoded.** Its tube is two backpacks on two men
-(`O_Mortar_01_support_F` / `_weapon_F`), not a static, and there is no faction key for a mortar
-backpack — inventing one to cover a single call site is a sixth key for one consumer. It is
-listed here so its absence reads as a decision.
-
 ## Risks
 
 **Footprint and height.** A row's Z was authored against one silhouette. Ground rows re-snap, but

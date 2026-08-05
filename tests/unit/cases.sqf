@@ -411,10 +411,6 @@ DUWS_spawnVehicles = [
     ["heli",   "opfor_HELI_X", "TEST_Air",   0],
     ["absent", "opfor_GONE_X", "",           0]
 ];
-DUWS_spawnSpecials = [
-    ["buildings", "houses", "fnc_garrisonBuildings", [8, 3, 2, "AUTO", false], true],
-    ["mortar",    "tube",   "fnc_garrisonMortar",    [],                       false]
-];
 opfor_A_X = "cls_A";
 opfor_B_X = "cls_B";
 opfor_C_X = "cls_C";
@@ -454,8 +450,6 @@ opfor_EMPTY_X = [];
     (["apc"] call DUWS_fnc_tokenClass), "cls_apc"] call fnc_assertEq;
 ["tokenClass: a team answers for itself rather than resolving to a vehicle",
     (["patrol"] call DUWS_fnc_tokenClass), "patrol"] call fnc_assertEq;
-["tokenClass: a special is not a vehicle and survives the filter",
-    (["buildings"] call DUWS_fnc_tokenClass), "buildings"] call fnc_assertEq;
 ["tokenClass: a classname no table claims stands as itself",
     (["O_MBT_02_cannon_F"] call DUWS_fnc_tokenClass), "O_MBT_02_cannon_F"] call fnc_assertEq;
 ["tokenClass: a role this faction never defined resolves to nothing",
@@ -491,10 +485,6 @@ TEST_Air = 1;
 // let two zones reported at the same strength differ by twenty men.
 ["tokenStrength: a team thins from the inside and keeps its leader",
     (["patrol", 0.4] call DUWS_fnc_tokenStrength), 0.4] call fnc_assertEq;
-["tokenStrength: a special that thins carries the fraction to its placer",
-    (["buildings", 0.4] call DUWS_fnc_tokenStrength), 0.4] call fnc_assertEq;
-["tokenStrength: the mortar pair is exempt -- half a pair is no tube at all",
-    (["mortar", 0.3] call DUWS_fnc_tokenStrength), 1] call fnc_assertEq;
 ["tokenStrength: a vehicle above half strength stands whole",
     (["apc", 0.5] call DUWS_fnc_tokenStrength), 1] call fnc_assertEq;
 ["tokenStrength: and below it is dropped, since there is no partial vehicle",
@@ -503,8 +493,8 @@ TEST_Air = 1;
     (["apc", 1] call DUWS_fnc_tokenStrength), 1] call fnc_assertEq;
 
 ["thinComposition: a worn zone keeps its men and loses its vehicles",
-    ([["patrol", "team", "car", "apc", "mortar"], 0.4] call DUWS_fnc_thinComposition),
-    ["patrol", "team", "mortar"]] call fnc_assertEq;
+    ([["patrol", "team", "car", "apc"], 0.4] call DUWS_fnc_thinComposition),
+    ["patrol", "team"]] call fnc_assertEq;
 ["thinComposition: full strength changes nothing",
     ([["patrol", "car"], 1] call DUWS_fnc_thinComposition), ["patrol", "car"]] call fnc_assertEq;
 // Deterministic, unlike the entry drop it replaces: a zone the player wore down has to come back as
@@ -597,17 +587,12 @@ blufor_B_X = "cls_blu_B";
 ["scaleComposition: teams and vehicles multiply",
     ([["patrol", "car"], 3] call DUWS_fnc_scaleComposition),
     ["patrol", "patrol", "patrol", "car", "car", "car"]] call fnc_assertEq;
-// The mortar pair is a zone's only indirect fire, and three tubes is a different zone rather than a
-// harder one.
-["scaleComposition: a special is exempt",
-    ([["patrol", "mortar"], 2] call DUWS_fnc_scaleComposition),
-    ["patrol", "patrol", "mortar"]] call fnc_assertEq;
 ["scaleComposition: the posture rides along with the card it belongs to",
     ([["garrison:team"], 2] call DUWS_fnc_scaleComposition),
     ["garrison:team", "garrison:team"]] call fnc_assertEq;
 ["scaleComposition: x1 leaves the composition as written",
-    ([["patrol", "car", "mortar"], 1] call DUWS_fnc_scaleComposition),
-    ["patrol", "car", "mortar"]] call fnc_assertEq;
+    ([["patrol", "car"], 1] call DUWS_fnc_scaleComposition),
+    ["patrol", "car"]] call fnc_assertEq;
 // A campaign that predates the setting reads no multiplier at all; clamping beats fielding nothing.
 ["scaleComposition: a multiplier below one still fields the composition once",
     ([["patrol"], 0] call DUWS_fnc_scaleComposition), ["patrol"]] call fnc_assertEq;

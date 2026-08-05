@@ -559,7 +559,7 @@ function New-UnitTable {
 
     Write-Host ""
     Write-Host "  kind: composition (a list of tokens -- a tier, a squad), team (what one name" -ForegroundColor DarkGray
-    Write-Host "        stands for -- a roster, a vehicle, a placer, a role map)." -ForegroundColor DarkGray
+    Write-Host "        stands for -- a roster, a vehicle, a role map)." -ForegroundColor DarkGray
     $kind = & $ask "  kind (blank = composition)" 'composition'
     if (@('composition', 'team') -notcontains $kind) {
         Write-Host "  kind has to be composition or team." -ForegroundColor Red
@@ -669,22 +669,6 @@ function Get-RoleVocab {
     return $script:roleVocab
 }
 
-# The placer vocabulary: the globals server_fnc_init.sqf compiles. A specials row names its placer by
-# global name and the spawn path falls back to {grpNull} for a name nothing defines, so a typo there
-# is a row that raises nothing, silently -- the same failure the role check below exists to catch.
-function Get-PlacerVocab {
-    if ($null -ne $script:placerVocab) { return $script:placerVocab }
-    $names = @{}
-    $f = Join-Path $srcDir "duws\server\server_fnc_init.sqf"
-    if (Test-Path -LiteralPath $f) {
-        foreach ($m in [regex]::Matches([System.IO.File]::ReadAllText($f), '(?m)^\s*(fnc_\w+)\s*=\s*compile')) {
-            $names[$m.Groups[1].Value] = $true
-        }
-    }
-    $script:placerVocab = $names
-    return $script:placerVocab
-}
-
 # What a typed name is written back as, and how many faction files define it. Coverage -1 means the
 # value is not a role slot at all: a field may legitimately hold a group token or a team key, and
 # those end in neither _X nor a faction prefix, so they are passed through unchecked.
@@ -730,14 +714,10 @@ function Resolve-Role($name, $prefix) {
     return [pscustomobject]@{ Name = $out; Coverage = $cov; Total = [int]$v.Files[$prefix] }
 }
 
-# What is wrong with a resolved name, or $null when nothing is. Two vocabularies, one question: a
-# slot no faction file fills spawns nothing, and a placer nothing compiles raises nothing. Both write
-# a table that compiles, and neither says anything at runtime, so both are worth a prompt.
+# What is wrong with a resolved name, or $null when nothing is. A slot no faction file fills spawns
+# nothing: the table still compiles and nothing is said at runtime, which is what makes it worth a
+# prompt here.
 function Get-NameWarning($r) {
-    if ($r.Name -match '^fnc_') {
-        if ((Get-PlacerVocab).ContainsKey($r.Name)) { return $null }
-        return [pscustomobject]@{ Name = $r.Name; Hard = $true; Note = "nothing compiles this name -- the row would raise nothing." }
-    }
     if ($r.Coverage -lt 0) { return $null }
     if ($r.Coverage -eq 0) {
         return [pscustomobject]@{ Name = $r.Name; Hard = $true; Note = "no faction file defines this slot -- it would spawn nothing." }
@@ -774,9 +754,8 @@ function Show-Field($literal, $prefix) {
 }
 
 # Rebuild a field's literal from typed text, keeping the kind it already had: a list stays a list, a
-# quoted name stays quoted, a number stays a number and a boolean stays a boolean. Inferred from the
-# current value rather than declared per table, because the fence has no schema and every table would
-# have to repeat one.
+# quoted name stays quoted and a number stays a number. Inferred from the current value rather than
+# declared per table, because the fence has no schema and every table would have to repeat one.
 # Returns $null when the text cannot be that kind -- refusing beats writing a table that will not
 # compile. Warnings for every name written are appended to $notes.
 function Format-FieldLiteral($current, $text, $prefix, [ref]$notes) {
@@ -789,21 +768,11 @@ function Format-FieldLiteral($current, $text, $prefix, [ref]$notes) {
     }
     if ($current.StartsWith('[')) {
         $parts = @($text -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' })
-        # A bare true/false is left bare here and not in $qualify below, which also serves string
-        # fields: a placer parameter list carries booleans, and a quoted one is a type the spawner
-        # substitutes its default for, which reads as a parameter that stopped taking effect.
-        return '[' + (($parts | ForEach-Object {
-            if ($_ -match '^(true|false)$') { $_.ToLower() } else { & $qualify $_ }
-        }) -join ', ') + ']'
+        return '[' + (($parts | ForEach-Object { & $qualify $_ }) -join ', ') + ']'
     }
     if ($current.StartsWith('"')) {
         if ($text.Trim() -eq '') { return '""' }
         return (& $qualify $text)
-    }
-    if ($current -match '^(true|false)$') {
-        $t = $text.Trim().ToLower()
-        if ($t -eq 'true' -or $t -eq 'false') { return $t }
-        return $null
     }
     if ($text.Trim() -match '^-?\d+(\.\d+)?([eE][+-]?\d+)?$') { return $text.Trim() }
     return $null
@@ -1167,8 +1136,7 @@ function Add-FieldRow($uc, $rows, $fields) {
 }
 
 # Append a row. A team or a vehicle added here is spawnable as it stands -- the spawn path reads the
-# tables for what a token is, so nothing in the mission has to learn the new name. A special is the
-# one exception: its placer column names code, which is why a name nothing compiles is prompted on.
+# tables for what a token is, so nothing in the mission has to learn the new name.
 function Invoke-AddRow($uc) {
     $rows = Split-Rows $uc.Body
     $fields = @($uc.Fields -split ',' | ForEach-Object { $_.Trim() })
@@ -1304,7 +1272,7 @@ while ($true) {
     Write-Host ""
     Write-Host ("  1. Static compositions   ({0} object layouts, Eden round-trip)" -f (Get-StaticList).Count)
     Write-Host "  2. Unit compositions     (what a zone, town or squad fields)"
-    Write-Host "  3. Tokens                (what one name stands for: men, a vehicle, a placer, a gun)"
+    Write-Host "  3. Tokens                (what one name stands for: men, a vehicle, a gun)"
     Write-Host ""
     Write-Host "   Q. Quit"
     Write-Host ""
@@ -1316,6 +1284,6 @@ while ($true) {
         Show-RowMenu 'composition' 'Unit compositions' 'A composition is a list of teams and vehicles. Open one to see what it fields.'
     }
     elseif ($sel -match '^\s*3\s*$') {
-        Show-RowMenu 'team' 'Tokens' 'What a name stands for: a team of men, one vehicle, a placer, or the role a static class fills. Open one, or add a row.'
+        Show-RowMenu 'team' 'Tokens' 'What a name stands for: a team of men, one vehicle, or the role a static class fills. Open one, or add a row.'
     }
 }

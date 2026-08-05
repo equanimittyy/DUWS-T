@@ -2,7 +2,7 @@
 // Every reader raises men, which only the server does.
 //
 // The shared half of the spawn vocabulary: what a composition token is made of, and every team
-// either side fields. The rest of the framework -- vehicles, placers, the zone tiers that name them
+// either side fields. The rest of the framework -- the vehicles and the zone tiers that name them
 // -- is init_zones/fnc_zone_spawn_sizes, which is OPFOR's and loads later.
 //
 // Its own file rather than a block inside the zone spawn band, for a load-order reason: the BLUFOR
