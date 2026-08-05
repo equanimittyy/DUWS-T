@@ -42,24 +42,28 @@ The origin is one coordinate for the whole run, shown at the top of the menu and
 state rather than a per-import prompt because the export subtracts the same origin back out — answer
 it differently on a second import and the rows come back offset by the difference.
 
-### The front marker
+### The two markers
 
-The import also raises a `FlagPole_F` named **`DUWS_FRONT`**, standing clear of the composition
-along **+Y**.
+The import raises two `FlagPole_F` objects that are not part of the composition: **`DUWS_FRONT`**,
+standing clear of the layout along **+Y**, and **`DUWS_ORIGIN`**, standing at the origin itself.
 
 A composition's rows are offsets in a frame whose +Y is the way the whole thing faces once placed,
 and nothing in the 3D view shows where that frame points — so a rearrange is done blind, and the
-layout can come back rotated with the mistake only surfacing in play. The pole is that frame's
-bearing, made visible.
+layout can come back rotated with the mistake only surfacing in play. `DUWS_FRONT` is that frame's
+bearing, made visible. Its distance is measured from the composition rather than fixed: the furthest
+row's offset plus 15 m, so a 300-object base and a five-prop outpost each get a marker that reads as
+*outside* rather than as one more prop.
 
-Its distance is measured from the composition rather than fixed: the furthest row's offset plus 15 m,
-so a 300-object base and a five-prop outpost each get a marker that reads as *outside* rather than as
-one more prop.
+`DUWS_ORIGIN` is the frame's other half, and it is what the export measures against. **Keep it
+selected with everything else.** Move the layout and the marker moves with it, so the offsets still
+come out in the composition's own terms; leave it behind and the export has no idea the layout went
+anywhere. Rotating the selection is fine and is a legitimate way to change which way a composition
+faces — the rows come back rotated, which is what was asked for.
 
-**It is not part of the composition, and the export below drops it by name.** So `Ctrl+A` is safe —
-select everything and the pole still will not reach the array. The filter matches `DUWS_FRONT`
-rather than `FlagPole_F` because a composition may legitimately hold a flagpole and the killhouse
-already carries a flag; the name is the marker's identity, its class is not.
+**Neither is part of the composition, and the export drops both by name.** So `Ctrl+A` is safe —
+select everything and the poles still will not reach the array. The filter matches the names rather
+than `FlagPole_F` because a composition may legitimately hold a flagpole and the killhouse already
+carries a flag; the name is a marker's identity, its class is not.
 
 That makes the marker safe to leave in place while rearranging, which is the point — it has to stay
 visible for as long as you are working, and a marker you must remember to delete is one that ends up
@@ -135,11 +139,16 @@ clipboard, the way an import is handed over. Select the composition in Eden (`Ct
 marker is dropped by name), run it in the same console, and it copies schema-agnostic
 `[class, dx, dy, dz, dir°]` rows — offsets from the import origin.
 
-Its `_origin` is filled in rather than typed: the session X/Y, and the **Z of the last import**, so a
-`zbase=` layout subtracts the altitude it was actually generated at. A digit mistyped there comes back
-as the whole composition shifted, which reads as a rearrange nobody made. Generate the import first;
-`E` on a fresh session with no import behind it hands you Z 0, which is right for every ground layout
-and wrong for the killhouse.
+**It takes its origin from the `DUWS_ORIGIN` marker**, not from a coordinate. That is what makes the
+round trip survive being moved: an origin typed at import time is only true until the layout is
+dragged or rotated, and after that every row silently carries the difference. Measuring from a marker
+that travels with the composition removes the whole class of mistake, Z included — the marker is
+placed and treated exactly like the objects around it, so it is the baseline they are all measured
+against rather than sea level.
+
+If no marker is found the snippet falls back to the coordinate baked in at generation (session X/Y,
+and the Z of the last import so a `zbase=` layout subtracts its own altitude) and **says so in
+`systemChat`**. That path is only right if nothing has moved since the import.
 
 `getDir` reads each heading in the convention the import wrote (`[0,0,dir]` yaw), so rotation
 round-trips. `Copied N objects` should match what the import reported; a mismatch means rows were
@@ -148,16 +157,20 @@ added or lost in Eden, since the marker is already excluded.
 **Update** — `U` on the static menu folds pasted rows back into an existing fence. It reconciles by
 index against what is already there and reports what it finds before writing anything: rows whose
 class does not line up, a heading delta the whole paste shares, and a constant Z delta it offers to
-subtract. Trailing columns (`isWeapon`) are carried across from the row at the same index, so a row
-that does not line up loses its flag — which is what the mismatch report is for. Comment lines inside
-the array are not carried over, and it says how many it dropped.
+subtract. Comment lines inside the array are not carried over, and it says how many it dropped.
 
-Two systematic differences it can only report, not repair. **A heading delta shared by the whole
-paste means the layout was rotated in Eden**, so its X/Y are offsets in a frame turned by that much;
-folding it in stores the composition facing the other way, which the front marker exists to make
-visible before it gets that far. **X/Y measured against a different origin** cannot be detected at all
-once the layout has also been rotated — export at the origin you imported at, and do not drag the
-selection.
+Trailing columns (`isWeapon`) come across from the row at the same index. A row that does not line up
+has none to inherit, and **it is asked about rather than written short**: with column 6 missing,
+`_isWeapon` is nil, both of a prefab's guards evaluate to nothing, and neither pass skips the row — so
+the object is built twice, once ground-snapped as a prop and once through `fnc_static_place` as a
+resolved gun with a gunner in it.
+
+A heading delta shared by the whole paste is reported rather than repaired: it means the layout was
+rotated in Eden, which is a legitimate way to change which way a composition faces, and only the
+person who turned it knows whether it was meant. **X/Y measured against a stale origin cannot be
+detected at all** once the layout has also been rotated, which is why the export reads `DUWS_ORIGIN`
+instead of being told a coordinate. A paste taken without that marker in the selection is not
+recoverable from the rows alone.
 
 Folding back by hand, if you would rather, by these rules:
 
