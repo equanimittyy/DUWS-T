@@ -174,6 +174,14 @@ index against what is already there and reports what it finds before writing any
 class does not line up, a heading delta the whole paste shares, and a constant Z delta it offers to
 subtract. Comment lines inside the array are not carried over, and it says how many it dropped.
 
+**A paste that lines up with nothing is a replace, and it asks before writing.** A stub fence — one
+placeholder row, written so a layout can be imported and its markers raised before the layout
+exists — pairs with no pasted row, and neither does a paste dropped into the wrong composition. The
+rows cannot tell those two apart, so the question is put rather than answered. A replace also has no
+pair left to measure a Z shift against, so the origin marker's own height is offered in place of the
+measured delta; decline it for a paste taken from a scene with no `DUWS_ORIGIN`, whose rows already
+sit at the height they mean.
+
 Trailing columns (`isWeapon`) come across from the row at the same index, which is the author's own
 answer. A row that does not line up has none to inherit, and **the flag is derived from the class
 against `DUWS_staticRoles`** rather than asked about — that table is the mission's own answer to

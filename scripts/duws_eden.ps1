@@ -58,6 +58,12 @@ $inv   = [System.Globalization.CultureInfo]::InvariantCulture
 $numRe = '-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?'
 $rowRe = '"([^"]+)"\s*,\s*({0})\s*,\s*({0})\s*,\s*({0})\s*,\s*({0})' -f $numRe
 
+# How far DUWS_ORIGIN's getPosWorld sits above the ground it stands on: a FlagPole_F reports a
+# bounding-box centre, so every exported row comes back low by this much. Measured against two
+# classes whose authored Z is already in the tree -- Land_HBarrier_5_F at 0.74071 and
+# Land_BagFence_Short_F at 0.41548 -- which agree on it to a millimetre.
+$markerZ = 3.9775
+
 function Get-Attr($s, $pattern, $default) {
     if ($s -match $pattern) { return $Matches[1] } else { return $default }
 }
@@ -541,7 +547,17 @@ function Update-StaticFence($comp) {
         foreach ($b in ($bad | Select-Object -First 8)) { Write-Host $b -ForegroundColor Yellow }
         if ($bad.Count -gt 8) { Write-Host ("    ... and {0} more" -f ($bad.Count - 8)) -ForegroundColor Yellow }
     }
-    if ($pairs.Count -eq 0) { Write-Host "  Nothing lines up; refusing." -ForegroundColor Red; return }
+    # Nothing lining up is what a stub fence looks like -- one placeholder row, written so this tool
+    # has something to import and raise its markers from -- and equally what a paste dropped into the
+    # wrong composition looks like. The rows cannot tell the two apart, so it is asked rather than
+    # decided: only whoever ran the export knows which fence it came out of.
+    $replaced = $false
+    if ($pairs.Count -eq 0) {
+        Write-Host "  Nothing lines up by index." -ForegroundColor Red
+        $q = "  Replace all {0} row(s) of '{1}' with the {2} pasted? (y/N)" -f $old.Count, $comp.Name, $new.Count
+        if ((Read-Host $q) -notmatch '^\s*[Yy]') { Write-Host "  Nothing written." -ForegroundColor Yellow; return }
+        $replaced = $true
+    }
 
     # A row that lines up inherits column 6 from the row it replaces, which is the author's own
     # answer. A row that does not has no such source, and leaving the column off is not a milder
@@ -585,6 +601,13 @@ function Update-StaticFence($comp) {
     if ($null -ne $dz -and [math]::Abs($dz.Value) -gt 0.001 -and $dz.Rows * 2 -ge $dz.Total) {
         Write-Host ("  {0} of {1} rows shifted by exactly {2} m in Z -- the terrain the export measured from." -f $dz.Rows, $dz.Total, (Fmt $dz.Value)) -ForegroundColor Yellow
         if ((Read-Host ("  Subtract {0} from every Z? (Y/n)" -f (Fmt $dz.Value))) -notmatch '^\s*[Nn]') { $zDrop = $dz.Value }
+    }
+    # A replaced fence has no pair to measure that shift against, so the marker's own height is
+    # offered in its place. Still a question: a paste taken from a scene with no DUWS_ORIGIN measured
+    # from the fallback coordinate instead, and those rows are already at the height they mean.
+    if ($replaced) {
+        Write-Host ("  No rows to measure a Z shift against. An export taken against DUWS_ORIGIN reads {0} m low." -f (Fmt $markerZ)) -ForegroundColor Yellow
+        if ((Read-Host ("  Add {0} to every Z? (Y/n)" -f (Fmt $markerZ))) -notmatch '^\s*[Nn]') { $zDrop = -$markerZ }
     }
 
     Write-Host ""
