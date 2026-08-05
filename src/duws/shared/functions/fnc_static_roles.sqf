@@ -54,7 +54,15 @@ DUWS_staticRoles = [
 
     ["B_Mortar_01_F",      "MORTAR"],
     ["O_Mortar_01_F",      "MORTAR"],
-    ["I_Mortar_01_F",      "MORTAR"]
+    ["I_Mortar_01_F",      "MORTAR"],
+
+    // The one role whose piece is a vehicle rather than a turret, so it resolves through a different
+    // key and past the StaticWeapon gate below. Self-propelled guns and rocket artillery share it:
+    // both answer a fire mission, and no composition cares which silhouette the faction fields.
+    ["B_MBT_01_arty_F",    "ARTY"],
+    ["O_MBT_02_arty_F",    "ARTY"],
+    ["I_Truck_02_MRL_F",   "ARTY"],
+    ["B_MBT_01_mlrs_F",    "ARTY"]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -70,12 +78,19 @@ fnc_static_resolve = {
     if (_key isEqualTo "") then {
         private _hit = DUWS_staticRoles findIf { (_x select 0) isEqualTo _class };
         if (_hit >= 0) then {
-            _key = format ["%1_TURRET_%2", _side, (DUWS_staticRoles select _hit) select 1];
+            private _token = (DUWS_staticRoles select _hit) select 1;
+            _key = if (_token isEqualTo "ARTY") then { format ["%1_ARTY_X", _side] }
+                   else { format ["%1_TURRET_%2", _side, _token] };
         };
     };
     // A class the table does not carry stands as itself: every Land_* prop the placer is handed, and
     // any static nobody mapped. Passing the row through is what keeps a prefab working meanwhile.
     if (_key isEqualTo "") exitWith { _class };
+
+    // Tested against the key rather than the table, so a row naming its own key reaches this branch
+    // too. Neither guard below fits a gun that is a vehicle: an MG substitute would stand a machine
+    // gun where a battery belongs, and the StaticWeapon test refuses every artillery piece there is.
+    private _arty = _key isEqualTo (format ["%1_ARTY_X", _side]);
 
     // Drawn per object rather than read off the global, so two MG nests in one zone can be different
     // guns -- as they already are for infantry and vehicles.
@@ -84,14 +99,14 @@ fnc_static_resolve = {
     // BLUFOR files already wrote by hand: an MG nest is the same tactical answer and it keeps the
     // ground inside the faction the file names. This is the hand-authored and pasted path -- the
     // AutoDetect ladders carry a vanilla tail, so a detected faction's key is never empty.
-    if (_pick isEqualTo "") then { _pick = [format ["%1_TURRET_HMG", _side]] call fnc_faction_pick; };
+    if (_pick isEqualTo "" && {!_arty}) then { _pick = [format ["%1_TURRET_HMG", _side]] call fnc_faction_pick; };
     // No static MG either. server_init warns about that side once; the row stands as itself.
     if (_pick isEqualTo "") exitWith { _class };
 
     // Three systems key off this type test -- the zone manning hook, its crew-out counterpart and the
     // empty-vehicle cleanup's exemption. A mod "static" configured as a car would be placed, never
     // crewed, never crewed out, and swept away as abandoned. Fail closed and keep the placeholder.
-    if !(_pick isKindOf "StaticWeapon") exitWith {
+    if (!_arty && {!(_pick isKindOf "StaticWeapon")}) exitWith {
         // Once per key: a misconfigured mod static is one line, not one per gun per zone.
         private _warned = missionNamespace getVariable ["DUWS_staticRoleWarned", []];
         if !(_key in _warned) then {

@@ -79,6 +79,10 @@ if (_side == "opfor") exitWith {[
     ["opfor_CREW_X",               "SPECIAL",     "man",        true],
     ["opfor_OPERATOR_X",           "SPECIAL",     "man",        true],
     ["opfor_AA_APC_X",             "SPECIAL",     "vehicle",    true],
+    // SPECIAL rather than VEHICLES: the shared sections hold the same keys in the same order on both
+    // sides, and only OPFOR fields a gun. The player's own artillery is a support call that spawns
+    // shells, not a piece anything raises.
+    ["opfor_ARTY_X",               "SPECIAL",     "vehicle",    false],
     ["opfor_TRANS_TRUCK_X",        "SPECIAL",     "vehicle",    true],
     ["opfor_COVERED_TRUCK_X",      "SPECIAL",     "vehicle",    true],
     ["opfor_AMMO_TRUCK_X",         "SPECIAL",     "vehicle",    true],

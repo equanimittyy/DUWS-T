@@ -37,6 +37,10 @@
     ["opfor_APC2_X",            [_apcTracked, _apcWheeled, _carArmed],              "O_APC_Tracked_02_cannon_F"],
     ["opfor_AA_APC_X",          [_antiAir, _apcTracked, _apcWheeled],               "O_APC_Tracked_02_AA_F"],
     ["opfor_MBT_TANK1_X",       [_tank, _apcTracked, _apcWheeled],                  "O_MBT_02_cannon_F"],
+    // One rung and no degrade: every other bucket holds direct-fire vehicles, and a tank standing in
+    // for a gun is a battery that cannot answer a fire mission -- which reads as broken artillery
+    // rather than as a faction that fields none. The vanilla piece is the honest substitute.
+    ["opfor_ARTY_X",            [_arty],                                            "O_MBT_02_arty_F"],
     ["opfor_TRANS_TRUCK_X",     [_carTransport, _carArmed],                         "O_Truck_03_transport_F"],
     ["opfor_COVERED_TRUCK_X",   [_carTransport, _carArmed],                         "O_Truck_03_covered_F"],
     ["opfor_AMMO_TRUCK_X",      [_carRearm, _carTransport],                         "O_Truck_03_ammo_F"],

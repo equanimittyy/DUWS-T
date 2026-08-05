@@ -675,13 +675,13 @@ private _rows = (["blufor"] call fnc_faction_schema) + (["opfor"] call fnc_facti
      "blufor_TURRET_MORTAR", "opfor_TURRET_AA", "opfor_TURRET_AT", "opfor_TURRET_HMG",
      "opfor_TURRET_GMG", "opfor_TURRET_MORTAR"]] call fnc_assertEq;
 // The keys no shipped faction file defines -- the three roles the shared rosters name that BLUFOR
-// has never had, and the statics added after the faction files were written. Marking one required
-// fails every paste a player already has, including one copied out of factions/MODERN/.
+// has never had, and the statics and the gun added after the faction files were written. Marking one
+// required fails every paste a player already has, including one copied out of factions/MODERN/.
 ["faction_schema: the keys no faction file defines are optional",
     (_rows select {!(_x select 3)} apply {_x select 0}),
     ["blufor_AA_SOLDIER_X", "blufor_AT_SOLDIER_X", "blufor_SNIPER_SOLDIER_X",
      "blufor_TURRET_MORTAR", "opfor_TURRET_AA", "opfor_TURRET_AT", "opfor_TURRET_GMG",
-     "opfor_TURRET_MORTAR"]] call fnc_assertEq;
+     "opfor_TURRET_MORTAR", "opfor_ARTY_X"]] call fnc_assertEq;
 
 // What lets a roster name a role bare: the same key in the same slot on both sides. A pair that
 // drifts apart puts one army's row on the wrong line of the confirmation screen and, worse, makes a
@@ -763,3 +763,22 @@ TEST_ASKED = [];
 TEST_PICK = "some_mod_car_F";
 ["static_resolve: a class that is not a StaticWeapon is refused",
     (["B_HMG_01_high_F", "blufor"] call fnc_static_resolve), "B_HMG_01_high_F"] call fnc_assertEq;
+
+// Artillery is the one role whose piece is a vehicle, so both of the guards above are wrong for it:
+// the refusal would reject every gun there is, and the MG substitute would put a machine gun where a
+// battery belongs. isKindOf is false for everything under sqf-vm, which is what makes the first case
+// here a test of the gate being skipped rather than of the class it was handed.
+DUWS_staticRoles = [["B_MBT_01_arty_F", "ARTY"], ["B_HMG_01_high_F", "HMG"]];
+TEST_ASKED = [];
+TEST_PICK = "some_mod_spg_F";
+["static_resolve: an artillery piece is not held to the StaticWeapon test",
+    (["B_MBT_01_arty_F", "opfor"] call fnc_static_resolve), "some_mod_spg_F"] call fnc_assertEq;
+["static_resolve: ... and asks the side's artillery key, not a turret one",
+    TEST_ASKED, [["opfor_ARTY_X"]]] call fnc_assertEq;
+
+TEST_ASKED = [];
+TEST_PICK = "";
+["static_resolve: a side fielding no artillery keeps the placeholder",
+    (["B_MBT_01_arty_F", "opfor"] call fnc_static_resolve), "B_MBT_01_arty_F"] call fnc_assertEq;
+["static_resolve: ... without falling to the MG nest a turret role would take",
+    TEST_ASKED, [["opfor_ARTY_X"]]] call fnc_assertEq;

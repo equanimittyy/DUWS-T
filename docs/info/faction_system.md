@@ -114,7 +114,7 @@ globals on the way. An edited key is written back as a pool rebuilt from the pic
 required-key validation, and both AutoDetect wrappers' pool-publish lists — which each held their own copy
 of the list before.
 
-`required` is false for the five static keys added after the 254 shipped faction files were written. None
+`required` is false for the five static keys and `opfor_ARTY_X`, all added after the 254 shipped faction files were written. None
 of those files defines them, so requiring one would fail every custom paste a player already has, including
 one copied out of `factions/MODERN/`. The parse clears the whole schema and validates only the required
 subset: narrowing the clear as well would let an optional key survive a re-paste, and stepping back into
@@ -126,6 +126,12 @@ the faction screen re-pastes as a normal navigation path.
 composition names a vanilla static because that is what its author dragged into Eden; `DUWS_staticRoles`
 maps that class to a role, and `fnc_static_resolve` turns it into `<side>_TURRET_<ROLE>` drawn per object
 out of the pool. A row that names its own key — the HQ and FOB fences — skips the table.
+
+Artillery is the one role in that table whose piece is a vehicle. It resolves to `<side>_ARTY_X` instead
+of a turret key and skips both guards below — the MG substitute would stand a machine gun where a battery
+belongs, and the `StaticWeapon` test refuses every self-propelled gun there is. A side that fields none
+keeps the composition's own placeholder, since a tank standing in for a gun is a battery that cannot
+answer a fire mission.
 
 Four things it refuses to do silently. A class the table does not carry stands as itself, which is what
 keeps a prefab working while the table is incomplete and is the answer for every prop the placer is handed.
