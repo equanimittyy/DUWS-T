@@ -104,6 +104,18 @@ ignores anything past index 4.
 killhouse is a multi-floor structure that would collapse if snapped, so it declares `z=keep`
 alongside `zbase=_centerSpawnZ` to sit at its original off-map altitude (~1000).
 
+**Under `snap`, weapon rows are the exception and keep their height**, because the mission treats
+them that way: a prop's Z is discarded at spawn and a weapon's is the one number read off the row.
+Snapping them too is what put roof guns inside the building they were meant to stand on. They are
+placed against the terrain at the *origin* rather than the ground beneath each gun, which is the
+datum `fnc_static_place` uses, and corrected by reading `getPosWorld` back — the position attribute
+moves a model's base while the mission writes its centre, so setting one and trusting the other
+leaves a gun half its own height high.
+
+Prop Z stays discarded on both sides. It is not a placement height: `getPosWorld` reports a model's
+centre, so a barrier resting flat on the ground already carries 0.74 in that column and a loudspeaker
+pole 3.50. Honouring those would float every prop by half itself.
+
 **What the offsets mean once the composition is placed.** X is metres east and Y metres north of the
 site's centre, in the frame the front marker above points down. Z is read only for the rows a
 consumer treats as weapons: the zone prefabs hand those to `fnc_static_place` in `"world"` mode,
@@ -142,9 +154,12 @@ marker is dropped by name), run it in the same console, and it copies schema-agn
 **It takes its origin from the `DUWS_ORIGIN` marker**, not from a coordinate. That is what makes the
 round trip survive being moved: an origin typed at import time is only true until the layout is
 dragged or rotated, and after that every row silently carries the difference. Measuring from a marker
-that travels with the composition removes the whole class of mistake, Z included — the marker is
-placed and treated exactly like the objects around it, so it is the baseline they are all measured
-against rather than sea level.
+that travels with the composition removes the whole class of mistake.
+
+Its X and Y are exact. **Its Z is about 4 m high**, because the export measures with `getPosWorld`,
+which reports a bounding-box centre, and the marker is a pole. Every row therefore comes back that
+much low — as one constant, which `U` below detects and offers to subtract. A flatter marker would
+remove the constant and cost the one thing a marker is for, which is being visible while you work.
 
 If no marker is found the snippet falls back to the coordinate baked in at generation (session X/Y,
 and the Z of the last import so a `zbase=` layout subtracts its own altitude) and **says so in

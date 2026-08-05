@@ -90,6 +90,12 @@ function Clear-SourceCache {
 # Invariant-culture number formatting: a comma-decimal locale must not corrupt SQF floats.
 function Fmt($v) { ([double]$v).ToString($inv) }
 
+# The line ending a file already uses, so a rewritten fence keeps it. This script is CRLF and the SQF
+# it writes into is LF (.gitattributes), so a block joined with the script's own convention leaves a
+# file half in each -- which git then reports across every line in the fence, not just the edited
+# ones, and normalises away on the next commit so the mess is invisible until someone reads a diff.
+function Get-Newline($text) { if ($text -match "`r`n") { "`r`n" } else { "`n" } }
+
 function Get-Compositions {
     $comps = @()
     $blockRe = [regex]'(?s)--DUWS-COMPOSITION BEGIN\s+(.*?)--\r?\n(.*?)\r?\n[ \t]*//\s*--DUWS-COMPOSITION END--'
@@ -151,7 +157,7 @@ function Get-RowTails($body) {
         $end  = $rest.LastIndexOf(']')
         $tails.Add($(if ($end -ge 0) { $rest.Substring(0, $end) } else { '' }))
     }
-    return ,@($tails)
+    return ,$tails
 }
 
 # The single transform a whole paste shares, and how much of it agrees. An export taken after the
@@ -175,9 +181,10 @@ function Get-MarkerDistance($rows) {
     return [math]::Round($reach + 15, 2)
 }
 
-function New-ImportScript($name, $schema, $rows, $originX, $originY, $originZ, $zKeep) {
-    $rowStrs = foreach ($r in $rows) {
-        '    ["{0}", {1}, {2}, {3}, {4}]' -f $r.Class, (Fmt $r.OX), (Fmt $r.OY), (Fmt $r.OZ), (Fmt $r.Dir)
+function New-ImportScript($name, $schema, $rows, $originX, $originY, $originZ, $zKeep, $flags) {
+    $rowStrs = foreach ($i in 0..($rows.Count - 1)) {
+        '    ["{0}", {1}, {2}, {3}, {4}, {5}]' -f $rows[$i].Class, (Fmt $rows[$i].OX), (Fmt $rows[$i].OY),
+            (Fmt $rows[$i].OZ), (Fmt $rows[$i].Dir), $(if ($flags[$i]) { 'true' } else { 'false' })
     }
     $markerY = Get-MarkerDistance $rows
     $sb = New-Object System.Text.StringBuilder
@@ -190,13 +197,31 @@ function New-ImportScript($name, $schema, $rows, $originX, $originY, $originZ, $
     [void]$sb.AppendLine('];')
     [void]$sb.AppendLine('')
     [void]$sb.AppendLine('private _made = 0;')
+    # The terrain the mission measures a weapon's height from: fnc_static_place adds the row's Z to
+    # the site centre's ground, not to whatever happens to be under the gun. Read once, so a gun on a
+    # roof and a gun on open dirt are both placed against the same datum here as they are in play.
+    [void]$sb.AppendLine('private _groundZ = getTerrainHeightASL [(_origin select 0), (_origin select 1)];')
     [void]$sb.AppendLine('{')
-    [void]$sb.AppendLine('    _x params ["_class","_ox","_oy","_oz","_dir"];')
-    [void]$sb.AppendLine('    private _z = if (_zKeep) then { (_origin select 2) + _oz } else { 0 };')
+    [void]$sb.AppendLine('    _x params ["_class","_ox","_oy","_oz","_dir",["_isWeapon", false]];')
+    # A ground row is placed on the surface because that is what the mission does with it -- its Z is
+    # discarded at spawn, so honouring it here would arrange the layout against heights the game never
+    # uses. A weapon row is the opposite: its Z is the one number the mission reads off the row, so
+    # flattening it drops every roof gun inside the building it was meant to stand on.
+    [void]$sb.AppendLine('    private _z = if (_zKeep) then { (_origin select 2) + _oz }')
+    [void]$sb.AppendLine('                 else { if (_isWeapon) then { _oz } else { 0 } };')
     [void]$sb.AppendLine('    private _pos = [(_origin select 0) + _ox, (_origin select 1) + _oy, _z];')
     [void]$sb.AppendLine('    private _ent = create3DENEntity ["Object", _class, _pos];')
     [void]$sb.AppendLine('    _ent set3DENAttribute ["rotation", [0, 0, _dir]];   // [pitch, roll, yaw]; bare number = pitch, not heading')
     [void]$sb.AppendLine('    _ent set3DENAttribute ["position", _pos];   // re-assert after rotating: create3DENEntity + rotate can shift the origin')
+    # Two reference points, reconciled by measurement rather than by assuming they agree: the mission
+    # writes a weapon's absolute getPosWorld, while the position attribute moves the model's base, so
+    # setting one and reading the other leaves a gun standing half its own height too high. Corrected
+    # against getPosWorld because that is what the export reads back, which closes the round trip.
+    [void]$sb.AppendLine('    if (_isWeapon && {!_zKeep}) then {')
+    [void]$sb.AppendLine('        private _want = _groundZ + _oz;')
+    [void]$sb.AppendLine('        private _have = (getPosWorld _ent) select 2;')
+    [void]$sb.AppendLine('        _ent set3DENAttribute ["position", [_pos select 0, _pos select 1, (_pos select 2) + (_want - _have)]];')
+    [void]$sb.AppendLine('    };')
     [void]$sb.AppendLine('    _made = _made + 1;')
     [void]$sb.AppendLine('} forEach _rows;')
     [void]$sb.AppendLine('')
@@ -215,8 +240,12 @@ function New-ImportScript($name, $schema, $rows, $originX, $originY, $originZ, $
     [void]$sb.AppendLine('_mark set3DENAttribute ["name", "DUWS_FRONT"];')
     # The frame itself, standing at the origin. The export reads its position rather than being told
     # a coordinate, so dragging or rotating the selection carries the frame with it and the offsets
-    # still come out in the composition's own terms. Its ground is also the Z the export measures
-    # from, which is what the runtime means by a weapon row's height.
+    # still come out in the composition's own terms.
+    #
+    # Its X and Y are exact; its Z is not. The export measures with getPosWorld, which reports a
+    # bounding-box centre, so a pole this tall sits about four metres above the ground it stands on
+    # and every row comes back that much low. Left as a constant for Update-StaticFence to detect and
+    # offer to subtract, rather than traded away for a flatter marker nobody can see in the 3D view.
     [void]$sb.AppendLine('// ORIGIN MARKER -- not part of the composition. The export takes its own')
     [void]$sb.AppendLine('// origin from this, so keep it selected with everything else: move it and')
     [void]$sb.AppendLine('// the whole layout moves with it, which is the point.')
@@ -304,7 +333,15 @@ function Invoke-Generate($comp) {
     }
     # Kept so the export below subtracts what this import added, without asking again.
     $script:originZ = $originZ
-    $importScript = New-ImportScript $comp.Name $comp.Schema $res.Rows $script:originX $script:originY $originZ ($comp.ZMode -eq 'keep')
+    # Column 6 as the zone prefabs mean it, which is a bare boolean. The HQ and FOB turret fences put
+    # a role name in the same slot, and matching only `, true` leaves those rows alone -- they sit at
+    # Z 0 regardless, so there is nothing there to preserve.
+    $tails = Get-RowTails $comp.Body
+    $flags = @()
+    for ($i = 0; $i -lt $res.Rows.Count; $i++) {
+        $flags += ($i -lt $tails.Count -and $tails[$i] -match '^\s*,\s*true\s*$')
+    }
+    $importScript = New-ImportScript $comp.Name $comp.Schema $res.Rows $script:originX $script:originY $originZ ($comp.ZMode -eq 'keep') $flags
     $clip         = Save-And-Copy $importScript $outFile
     Write-Host ""
     Write-Host ("Generated {0} objects from '{1}' (schema {2}, z={3}) at origin {4} {5}." -f $res.Rows.Count, $comp.Name, $comp.Schema, $comp.ZMode, (Fmt $script:originX), (Fmt $script:originY)) -ForegroundColor Green
@@ -350,15 +387,21 @@ function Add-FenceToFile($relPath, $block, $newFileHeader) {
             Write-Host "  Refusing to write: $rel is not valid UTF-8, and appending would corrupt the rest of it." -ForegroundColor Red
             return $false
         }
-        if ($existing.Length -gt 0 -and -not $existing.EndsWith("`n")) { $existing += "`r`n" }
+        if ($existing.Length -gt 0 -and -not $existing.EndsWith("`n")) { $existing += (Get-Newline $existing) }
     } else {
         $existing = $newFileHeader
         New-Item -ItemType Directory -Force -Path (Split-Path -Parent $full) | Out-Null
     }
 
+    # The block and header are built CRLF by their callers; an existing file decides, and a new one
+    # gets LF because that is what .gitattributes holds every .sqf to.
+    $nl = if ($existing -match "`r`n") { "`r`n" } else { "`n" }
+    $out = ($existing + $block) -replace "`r`n", "`n"
+    if ($nl -eq "`r`n") { $out = $out -replace "`n", "`r`n" }
+
     # No BOM: this sits beside SQF the mission compiles, and a BOM in front of a preprocessor
     # directive is an error Arma reports from the wrong line.
-    [System.IO.File]::WriteAllText($full, ($existing + $block), (New-Object System.Text.UTF8Encoding($false)))
+    [System.IO.File]::WriteAllText($full, $out, (New-Object System.Text.UTF8Encoding($false)))
     Clear-SourceCache
     Write-Host ("  Wrote {0}. Review the diff before committing." -f $rel) -ForegroundColor Green
     return $true
@@ -383,9 +426,13 @@ function Read-PastedRows {
     if ($res.Rows.Count -lt $res.Seen) {
         Write-Host ("  WARNING: {0} row-like line(s) did not parse and were dropped." -f ($res.Seen - $res.Rows.Count)) -ForegroundColor Yellow
     }
-    # Comma-wrapped, like every other array this script hands back: a returned list is unrolled by
+    # Comma-wrapped, like every other list this script hands back: a returned list is unrolled by
     # the pipeline, so a one-row paste would arrive as a bare row object rather than as rows.
-    return ,@($res.Rows)
+    #
+    # The comma alone, with no @() inside it. Wrapping an already-enumerable value that way throws
+    # "Argument types do not match" at the comma -- which is not what ,@($x, $y) does a few lines up,
+    # where @() is building the array out of scalars rather than being handed one.
+    return ,$res.Rows
 }
 
 # The variable a new composition's array is assigned to. A leading underscore is a local, and a local
@@ -440,7 +487,12 @@ function Save-CompFence($comp, $newBody) {
 # to the array, so a paste one row short has to read as a gap rather than silently re-key every row
 # after it.
 function Update-StaticFence($comp) {
-    $old   = @((ConvertTo-Rows $comp).Rows)
+    # Taken in steps, and the row list used as it comes back rather than wrapped in @(). The tool
+    # runs with $ErrorActionPreference = "Stop", so a chained one-liner reports the whole line as the
+    # site of a fault and says nothing about which half of it failed. A List indexes and counts the
+    # way an array does, so there was nothing to convert in the first place.
+    $conv  = ConvertTo-Rows $comp
+    $old   = $conv.Rows
     $tails = Get-RowTails $comp.Body
     if ($old.Count -eq 0) { Write-Host "  That composition has no rows this tool can read." -ForegroundColor Red; return }
 
@@ -534,7 +586,8 @@ function Update-StaticFence($comp) {
     # very first line is a row would otherwise fold that line's neighbour into the declaration.
     $pre  = if ($first -gt 0) { @($lines[0..($first - 1)]) } else { @() }
     $post = if ($last -lt ($lines.Count - 1)) { @($lines[($last + 1)..($lines.Count - 1)]) } else { @() }
-    $body = ($pre + ($rowStrs -join ",`r`n") + $post) -join "`r`n"
+    $nl   = Get-Newline $comp.Body
+    $body = ($pre + ($rowStrs -join ",$nl") + $post) -join $nl
 
     if (Save-CompFence $comp $body) {
         Write-Host ("  Rewrote '{0}' in {1}. Review the diff before committing." -f $comp.Name, (Split-Path -Leaf $comp.File)) -ForegroundColor Green
@@ -677,14 +730,14 @@ function Split-Entries($row) {
     return ,([string[]]($parts | Where-Object { $_ -ne '' }))
 }
 
-function Format-UnitBody($varName, $rows, $indent) {
+function Format-UnitBody($varName, $rows, $indent, $nl = "`n") {
     $sb = New-Object System.Text.StringBuilder
     [void]$sb.Append("$varName = [")
-    if ($rows.Count -gt 0) { [void]$sb.Append("`r`n") }
+    if ($rows.Count -gt 0) { [void]$sb.Append($nl) }
     for ($i = 0; $i -lt $rows.Count; $i++) {
         [void]$sb.Append($indent + $rows[$i])
         if ($i -lt $rows.Count - 1) { [void]$sb.Append(',') }
-        [void]$sb.Append("`r`n")
+        [void]$sb.Append($nl)
     }
     [void]$sb.Append('];')
     return $sb.ToString()
@@ -701,7 +754,7 @@ function Format-Entry($s) {
 # Refuses on anything it cannot re-read. The rows are written back into a source file the mission
 # compiles, so the guard is that the regenerated text splits into exactly the rows that produced it.
 function Save-UnitComp($uc, $varName, $rows, $indent) {
-    $newBody = Format-UnitBody $varName $rows $indent
+    $newBody = Format-UnitBody $varName $rows $indent (Get-Newline $uc.Body)
     $check = Split-Rows $newBody
     if ($check.Count -ne $rows.Count) {
         Write-Host "Refusing to write: the regenerated table does not read back as the same rows." -ForegroundColor Red
@@ -1484,7 +1537,19 @@ function Show-StaticMenu {
         elseif ($sel -match '^\s*[Uu]\s*$') {
             $which = Read-Host "  Which composition (number)"
             if ($which -match '^\s*\d+\s*$' -and [int]$which -ge 1 -and [int]$which -le $comps.Count) {
-                Update-StaticFence $comps[[int]$which - 1]
+                # Caught rather than allowed to terminate: this script runs with
+                # $ErrorActionPreference = "Stop", so any fault anywhere below takes the whole TUI
+                # down and the rows just pasted go with it. The site of the failure is worth more
+                # than the stack, so both the message and the offending line are reported.
+                try { Update-StaticFence $comps[[int]$which - 1] }
+                catch {
+                    Write-Host ("  Update failed: {0} ({1})" -f $_.Exception.Message, $_.Exception.GetType().FullName) -ForegroundColor Red
+                    Write-Host ("  line {0}: {1}" -f $_.InvocationInfo.ScriptLineNumber, $_.InvocationInfo.Line.Trim()) -ForegroundColor DarkGray
+                    # The frame chain, not just the top frame: PowerShell reports the statement in
+                    # the failing scope, which names a whole pipeline rather than the call inside it
+                    # that threw.
+                    Write-Host $_.ScriptStackTrace -ForegroundColor DarkGray
+                }
             } else {
                 Write-Host "  No such composition." -ForegroundColor Yellow
             }
