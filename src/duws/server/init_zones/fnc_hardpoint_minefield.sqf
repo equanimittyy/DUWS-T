@@ -10,18 +10,23 @@
 // here forces a mod. east revealMine marks each mine as OPFOR-laid, which keeps OPFOR AI off its own
 // field and leaves BLUFOR to detect and clear it.
 
+// The classes each variant draws from, one picked per lattice cell. A table beside its only reader,
+// the way DUWS_staticRoles sits by its resolver, so the AT/AP sets are edited as data not code.
+DUWS_mineVariants = [
+    ["AT", ["ATMine"]],
+    ["AP", ["APERSMine", "APERSBoundingMine"]]
+];
+
 // [_center, _dir, _variant, _cols, _rows, _spacing, _jitter, _key] call fnc_hardpoint_minefield -> [mines]
 //   _center  [x,y]           field centre in world coordinates
 //   _dir     degrees         facing; +Y of the lattice points down it, clockwise like setDir
-//   _variant "AT" | "AP"     anything but "AP" lays anti-tank, the safe default for a stray token
+//   _variant "AT" | "AP"     resolved through DUWS_mineVariants; an unknown token falls to AT
 //   _key     site key        files each mine for streaming / teardown; "" leaves them unmanaged
 fnc_hardpoint_minefield = {
     params ["_center", "_dir", ["_variant", "AT"], ["_cols", 6], ["_rows", 3], ["_spacing", 4], ["_jitter", 1.2], ["_key", ""]];
 
-    private _classes = switch (toUpper _variant) do {
-        case "AP": { ["APERSMine", "APERSBoundingMine"] };
-        default { ["ATMine"] };
-    };
+    private _hit = DUWS_mineVariants findIf { (_x select 0) isEqualTo (toUpper _variant) };
+    private _classes = if (_hit >= 0) then { (DUWS_mineVariants select _hit) select 1 } else { ["ATMine"] };
 
     private _cx = _center select 0;
     private _cy = _center select 1;
