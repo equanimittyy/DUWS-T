@@ -26,7 +26,15 @@ DUWS_hardpointComp_ROADBLOCK = [
 
 // --DUWS-COMPOSITION BEGIN name="Hardpoint: AA Emplacement" schema=A--
 DUWS_hardpointComp_AA = [
-    ["Land_BagFence_Short_F", 0, 0, 0, 0, false]
+    ["Land_HBarrier_5_F", -7.11267, -0.390625, 0.74121, 89.7718, false],
+    ["Land_HBarrier_5_F", -0.0450439, 5.73145, 0.74121, 359.05, false],
+    ["Land_HBarrier_5_F", 0.215698, -7.01709, 0.74121, 358.861, false],
+    ["Land_HBarrier_5_F", 6.45398, -0.177246, 0.74121, 268.781, false],
+    ["Land_Razorwire_F", -8.6615, -0.244629, 0.75576, 270.581, false],
+    ["Land_Razorwire_F", -0.0549316, 7.15381, 0.75576, 0.9464, false],
+    ["Land_Razorwire_F", 8.07776, -0.302734, 0.75576, 89.3498, false],
+    ["Land_Razorwire_F", 0.194336, -8.58496, 0.75576, 359.237, false],
+    ["I_static_AA_F", -0.138428, -0.65332, 0.98391, 359.369, true]
 ];
 // --DUWS-COMPOSITION END--
 
