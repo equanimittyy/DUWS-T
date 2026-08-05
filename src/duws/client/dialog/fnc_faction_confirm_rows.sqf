@@ -2,10 +2,11 @@
 //
 // Fills the confirmation screen's scroll group with one row per role key, both sides side by side.
 //
-// The two sides are not mirror images -- 35 BLUFOR keys against 42 OPFOR, and different names for
-// the same role -- so rows cannot pair off one to one. Sections align instead: each section is as
-// tall as the longer side's share of it and the shorter side leaves the tail blank, which keeps
-// OPERATORS starting on the same line in both columns.
+// The four shared sections hold the same keys in the same order on both sides, so a role reads
+// across one line. SPECIAL is the exception by design -- what only one army fields, filed there
+// rather than into a shared section precisely so it cannot push the other column out of step.
+// The padding below is what serves it: a section is as tall as the longer side's share of it and
+// the shorter side leaves the tail blank.
 //
 // Everything is created into the one group (idc 8606) so its single scrollbar carries both columns
 // at once. Two groups would need their scroll positions synchronised every frame.
@@ -102,4 +103,4 @@ private _y = 0;
         } forEach _perSide;
         _y = _y + ROW_H;
     };
-} forEach ["INFANTRY", "VEHICLES", "STATIC", "OPERATORS"];
+} forEach ["INFANTRY", "VEHICLES", "STATIC", "OPERATORS", "SPECIAL"];

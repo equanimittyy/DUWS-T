@@ -49,7 +49,7 @@ fnc_faction_keep = {
 // what the role degrades through, in order.
 //
 // [] is a legitimate answer: publish below leaves the key empty, fnc_faction_pick returns "" and
-// fnc_opforRoles drops it. Inventing a class here would hide a missing role behind a unit that
+// fnc_factionRoles drops it. Inventing a class here would hide a missing role behind a unit that
 // spawns, which is worse than a role the faction visibly never fields.
 fnc_faction_resolve = {
     params ["_key", "_ladder", ["_fallback", []]];
@@ -99,7 +99,7 @@ fnc_faction_pools_publish = {
 // the same second field different vehicles -- which is the variety a player actually sees.
 //
 // Falls back to the global for a role with no pool, which is every role a hand-written faction file
-// defines as a plain string, and "" for one the faction never defined at all. fnc_opforRoles drops
+// defines as a plain string, and "" for one the faction never defined at all. fnc_factionRoles drops
 // the empty answer; inventing a class here would hide a missing role behind a unit that spawns.
 fnc_faction_pick = {
     params ["_name"];

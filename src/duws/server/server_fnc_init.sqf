@@ -43,7 +43,6 @@ publicVariable "fnc_intro_heli";
 // SERVER INIT FUNCTIONS
 fnc_init_OPFOR_WARCOM = compile preprocessFileLineNumbers "duws\server\warcom\fnc_init_OPFOR_WARCOM.sqf";
 fnc_OPFOR_faction_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_OPFOR_faction_init.sqf";
-fnc_OPFOR_squad_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_OPFOR_squad_init.sqf";
 // Broadcast: clients re-run the faction file for themselves on join and have to re-apply over it.
 fnc_faction_apply_locked = compile preprocessFileLineNumbers "duws\server\warcom\fnc_faction_apply_locked.sqf";publicVariable "fnc_faction_apply_locked";
 fnc_repetitive_cleanup = compile preprocessFileLineNumbers "duws\server\misc\fnc_repetitive_cleanup.sqf";
@@ -52,7 +51,7 @@ fnc_AI_Master_Control = compile preprocessFileLineNumbers "duws\server\misc\fnc_
 fnc_weather = compile preprocessFileLineNumbers "duws\server\dialog\fnc_weather.sqf";
 fnc_zeus_objects_init = compile preprocessFileLineNumbers "duws\server\misc\fnc_zeus_objects_init.sqf";
 fnc_usableBuildings = compile preprocessFileLineNumbers "duws\server\misc\fnc_usableBuildings.sqf";
-fnc_opforRoles = compile preprocessFileLineNumbers "duws\server\misc\fnc_opforRoles.sqf";
+fnc_factionRoles = compile preprocessFileLineNumbers "duws\server\misc\fnc_factionRoles.sqf";
 fnc_holdBuildingPost = compile preprocessFileLineNumbers "duws\server\misc\fnc_holdBuildingPost.sqf";
 fnc_spreadIntoBuildings = compile preprocessFileLineNumbers "duws\server\misc\fnc_spreadIntoBuildings.sqf";
 fnc_search_drawKind = compile preprocessFileLineNumbers "duws\server\misc\fnc_search_drawKind.sqf";
@@ -372,6 +371,10 @@ fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dial
 // Same idiom and the same reason: the table, the resolver reading it and the placer acting on the
 // answer are one file, so which class a static is and how one is put down cannot drift apart.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_static_roles.sqf";
+// Same idiom again, and ahead of faction init, which is what leaves the keys it fills empty.
+[] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_backfill.sqf";
+// Before fnc_BLUFOR_squad_init and the zone spawn band, both of which name a team out of it.
+[] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_spawn_vocab.sqf";
 // Ahead of the two AutoDetect wrappers and fnc_custom_faction_parse, which both build their key
 // lists from it. Broadcast because the confirmation screen builds its rows from it client-side.
 fnc_faction_schema = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_schema.sqf";publicVariable "fnc_faction_schema";

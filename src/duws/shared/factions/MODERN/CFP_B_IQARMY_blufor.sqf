@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"cfp_b_iqarmy_rifleman";			//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"cfp_b_iqarmy_at";					//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"cfp_b_iqarmy_grenadier";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"cfp_b_iqarmy_officer";				//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"cfp_b_iqarmy_officer";				//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"cfp_b_iqarmy_machinegunner";		//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"cfp_b_iqarmy_sniper";				//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"cfp_b_iqarmy_at";					//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"cfp_b_iqarmy_grenadier";			//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"cfp_b_iqarmy_officer";				//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"cfp_b_iqarmy_officer";				//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"cfp_b_iqarmy_machinegunner";		//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"cfp_b_iqarmy_sniper";				//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"cfp_b_iqarmy_sf_team_leader";		//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"cfp_b_iqarmy_helicopter_pilot_01";	//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"CUP_I_RHIB_RACS";					//supports\taxi\fnc_boatTaxi
 blufor_BOAT_CREW_X =			"B_Competitor_F";					//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"cfp_b_iqarmy_MI24V";				//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"CFP_O_IQARMY_Mi_8MT_01";   		//random patrol
-blufor_HELI_ATTACK_X =			"cfp_b_iqarmy_MI24V";				//dialog\fnc_request_hcATTchop
-blufor_PLANE_CAS_X =			"cfp_b_iqarmy_SU25";				//dialog\fnc_request_hcCAS
-blufor_CAR_PATROL1_X =			"cfp_b_iqarmy_mrap_rg31";			//random patrol
-blufor_APC_PATROL1_X =			"cfp_b_iqarmy_BTR60";				//random patrol
-blufor_APC_PATROL2_X =			"cfp_b_iqarmy_BMP2";				//random patrol
-blufor_TANK_PATROL1_X =			"cfp_b_iqarmy_T72";					//random patrol
+blufor_TRANS_HELI_X =			"CFP_O_IQARMY_Mi_8MT_01";   		//random patrol
+blufor_ATTACK_HELI_X =			"cfp_b_iqarmy_MI24V";				//dialog\fnc_request_hcATTchop
+blufor_MISC_AIR_X =				"cfp_b_iqarmy_SU25";				//dialog\fnc_request_hcCAS
+blufor_ARMED_CAR1_X =			"cfp_b_iqarmy_mrap_rg31";			//random patrol
+blufor_APC1_X =					"cfp_b_iqarmy_BTR60";				//random patrol
+blufor_APC2_X =					"cfp_b_iqarmy_BMP2";				//random patrol
+blufor_MBT_TANK1_X =			"cfp_b_iqarmy_T72";					//random patrol
 
 
 ///////////////////////////////////

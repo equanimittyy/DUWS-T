@@ -52,7 +52,7 @@ private _possibleUnitTypes = [[
     opfor_SL_SOLDIER_X,
     opfor_GL_SOLDIER_X,
     opfor_MARK_SOLDIER_X
-]] call fnc_opforRoles;
+], "opfor"] call fnc_factionRoles;
 
 // ========== 容器类名列表 ==========
 private _containerClasses = [

@@ -14,22 +14,22 @@ _airveh = "";
 switch (VERSION_X) do {
 	case "MODERN": {
 		_anyveh = selectRandomWeighted [
-			blufor_CAR_PATROL1_X,1.0,
-			blufor_APC_PATROL1_X,1.0,
-			blufor_APC_PATROL2_X,1.0,
-			blufor_TANK_PATROL1_X,1.0
+			blufor_ARMED_CAR1_X,1.0,
+			blufor_APC1_X,1.0,
+			blufor_APC2_X,1.0,
+			blufor_MBT_TANK1_X,1.0
 		];
 		_airveh = selectRandomWeighted [
 			blufor_HELI_TRANS_ARM_X,1.0,
-			blufor_HELI_ATTACK_X,1.0,
-			blufor_PLANE_CAS_X,0.7
+			blufor_ATTACK_HELI_X,1.0,
+			blufor_MISC_AIR_X,0.7
 		];
 	};
 };
 
 _createdVehFnc = [];
 if (_vehClass == "car") then {
-	_createdVehFnc = [_vehpos,0,blufor_CAR_PATROL1_X,_side] call bis_fnc_spawnvehicle;
+	_createdVehFnc = [_vehpos,0,blufor_ARMED_CAR1_X,_side] call bis_fnc_spawnvehicle;
 } else {
 	if (_vehClass == "air") then {
 		_vec =[random [-1,0,1], random [-1,0,1], 0];

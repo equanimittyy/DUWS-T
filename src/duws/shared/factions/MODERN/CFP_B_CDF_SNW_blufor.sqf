@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"CUP_B_CDF_Soldier_SNW";			//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"CUP_B_CDF_Soldier_LAT_SNW";		//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"CUP_B_CDF_Soldier_GL_SNW";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"CUP_B_CDF_Soldier_TL_SNW";			//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"CUP_B_CDF_Soldier_TL_SNW";			//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"CUP_B_CDF_Soldier_MG_SNW";			//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"CUP_B_CDF_Soldier_Marksman_SNW";	//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"CUP_B_CDF_Soldier_LAT_SNW";		//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"CUP_B_CDF_Soldier_GL_SNW";			//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"CUP_B_CDF_Soldier_TL_SNW";			//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"CUP_B_CDF_Soldier_TL_SNW";			//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"CUP_B_CDF_Soldier_MG_SNW";			//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"CUP_B_CDF_Soldier_Marksman_SNW";	//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"CUP_B_CDF_Officer_SNW";			//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"CUP_B_CDF_Pilot_SNW";				//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"B_Boat_Armed_01_minigun_F";		//supports\taxi\fnc_boatTa
 blufor_BOAT_CREW_X =			"B_Competitor_F";					//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"CFP_B_CDF_Mi_24D_SNW_01";			//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"CFP_B_CDF_Mi_8MT_VIV_SNW_01";   	//random patrol
-blufor_HELI_ATTACK_X =			"CFP_B_CDF_Mi_24D_SNW_01";			//dialog\fnc_request_hcATTchop, random patrol
-blufor_PLANE_CAS_X =			"CFP_B_CDF_Su_25_Frogfoot_SNW_01";	//dialog\fnc_request_hcCAS, random patrol
-blufor_CAR_PATROL1_X =			"CFP_B_CDF_UAZ_DShKM_SNW_01";		//random patrol
-blufor_APC_PATROL1_X =			"CFP_B_CDF_BTR_80A_SNW_01";			//random patrol
-blufor_APC_PATROL2_X =			"CFP_B_CDF_BMP_2K_SNW_01";			//random patrol
-blufor_TANK_PATROL1_X =			"CFP_B_CDF_T72_SNW_01";				//random patrol
+blufor_TRANS_HELI_X =			"CFP_B_CDF_Mi_8MT_VIV_SNW_01";   	//random patrol
+blufor_ATTACK_HELI_X =			"CFP_B_CDF_Mi_24D_SNW_01";			//dialog\fnc_request_hcATTchop, random patrol
+blufor_MISC_AIR_X =				"CFP_B_CDF_Su_25_Frogfoot_SNW_01";	//dialog\fnc_request_hcCAS, random patrol
+blufor_ARMED_CAR1_X =			"CFP_B_CDF_UAZ_DShKM_SNW_01";		//random patrol
+blufor_APC1_X =					"CFP_B_CDF_BTR_80A_SNW_01";			//random patrol
+blufor_APC2_X =					"CFP_B_CDF_BMP_2K_SNW_01";			//random patrol
+blufor_MBT_TANK1_X =			"CFP_B_CDF_T72_SNW_01";				//random patrol
 
 
 ///////////////////////////////////

@@ -39,7 +39,7 @@ _spawnPos set [2, 50];
 // rather than one class, and BIS_fnc_spawnVehicle takes a string -- handed an array it returns a
 // null vehicle and an empty group, with no error of its own. The vanilla default covers a key that
 // resolved to nothing at all, which no faction file guarantees against.
-private _heliType = missionNamespace getVariable ["blufor_HELI_TRANS_UNARM_X", ""];
+private _heliType = missionNamespace getVariable ["blufor_TRANS_HELI_X", ""];
 if (_heliType isEqualType []) then { _heliType = _heliType param [0, ""]; };
 if (_heliType isEqualTo "") then { _heliType = "B_Heli_Transport_01_F"; };
 

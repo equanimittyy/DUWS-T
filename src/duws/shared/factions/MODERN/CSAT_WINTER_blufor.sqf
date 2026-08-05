@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"RIFLEMAN_WINTER_HEX";				//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"RIFLEMAN_AT_WINTER_HEX";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"GRENADIER_WINTER_HEX";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"TEAM_LEADER_WINTER_HEX";			//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"SQUAD_LEADER_WINTER_HEX";			//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"AUTORIFLEMAN_WINTER_HEX";			//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"MARKSMAN_WINTER_HEX";				//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"RIFLEMAN_AT_WINTER_HEX";			//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"GRENADIER_WINTER_HEX";				//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"TEAM_LEADER_WINTER_HEX";			//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"SQUAD_LEADER_WINTER_HEX";			//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"AUTORIFLEMAN_WINTER_HEX";			//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"MARKSMAN_WINTER_HEX";				//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"OFFICER_COLONEL_WINTER_HEX";		//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"HELICOPTER_PILOT_WINTER_HEX";		//Rescue Pilot mission
 
@@ -24,14 +24,14 @@ blufor_BOAT_ARMED_X	=			"O_Boat_Armed_01_hmg_F";			//supports\taxi\fnc_boatTaxi
 blufor_BOAT_CREW_X =			"C_Man_UtilityWorker_01_F";			//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"ORCA_ARMED_WINTER_HEX";				//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"ORCA_UNARMED_WINTER_HEX";   			//random patrol
-blufor_HELI_ATTACK_X =			"KAJMAN_WINTER_HEX";					//dialog\fnc_request_hcATTchop, random patrol
-blufor_PLANE_CAS_X =			"NEOPHRON_WINTER_HEX";					//dialog\fnc_request_hcCAS, random patrol
-blufor_CAR_PATROL1_X =			"QILIN_MINIGUN_WINTER_HEX";				//random patrol
-blufor_APC_PATROL1_X =			"MSE_MARID_WINTER_HEX";					//random patrol
-blufor_APC_PATROL2_X =			"BTR_K_KAMYSH_WINTER_HEX";				//random patrol
-blufor_TANK_PATROL1_X =			"T140_ANGARA_WINTER_HEX";				//random patrol
-//blufor_TANK_PATROL1_X =		"T100_VARSUK_WINTER_HEX";				Considered using T-100 to nerf player CSAT, but I didn't want to mess with anything
+blufor_TRANS_HELI_X =			"ORCA_UNARMED_WINTER_HEX";   			//random patrol
+blufor_ATTACK_HELI_X =			"KAJMAN_WINTER_HEX";					//dialog\fnc_request_hcATTchop, random patrol
+blufor_MISC_AIR_X =				"NEOPHRON_WINTER_HEX";					//dialog\fnc_request_hcCAS, random patrol
+blufor_ARMED_CAR1_X =			"QILIN_MINIGUN_WINTER_HEX";				//random patrol
+blufor_APC1_X =					"MSE_MARID_WINTER_HEX";					//random patrol
+blufor_APC2_X =					"BTR_K_KAMYSH_WINTER_HEX";				//random patrol
+blufor_MBT_TANK1_X =			"T140_ANGARA_WINTER_HEX";				//random patrol
+//blufor_MBT_TANK1_X =		"T100_VARSUK_WINTER_HEX";				Considered using T-100 to nerf player CSAT, but I didn't want to mess with anything
 
 
 ///////////////////////////////////

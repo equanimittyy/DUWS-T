@@ -34,7 +34,7 @@ _spawnPos = [_posplayer, 400,500,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSaf
 // create the boat
 _boat = createVehicle ["B_Boat_Transport_01_F", _spawnPos,[], 0, "FLY"];
 _boatgroup = createGroup west; 
-_pilot = _boatgroup createUnit [blufor_MARKSMAN_X, [5,5,5], [], 0, "NONE"];
+_pilot = _boatgroup createUnit [blufor_MARK_SOLDIER_X, [5,5,5], [], 0, "NONE"];
 _boatgroup deleteGroupWhenEmpty true;
 _boat addAction [ACT_MOVE("STR_DUWS_T_boattaxi_action_dest"), fnc_mapclickboat, [], 70, true, true, "", "vehicle _this == _target"];
 _pilot setcaptive true; 

@@ -79,7 +79,7 @@ _possibleUnitTypes = [[
     opfor_AT_SOLDIER_X,
     opfor_LAT_SOLDIER_X,
     opfor_SL_SOLDIER_X
-]] call fnc_opforRoles;
+], "opfor"] call fnc_factionRoles;
 
 _bldgUnits = [];
 for "_i" from 1 to _totalUnitsToSpawn do {

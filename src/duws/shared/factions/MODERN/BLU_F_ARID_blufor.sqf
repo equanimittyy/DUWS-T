@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"B_Soldier_F";					//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"B_Soldier_LAT_F";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"B_Soldier_GL_F";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"B_Soldier_TL_F";				//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"B_Soldier_SL_F";				//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"B_Soldier_AR_F";				//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"B_soldier_M_F";				//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"B_Soldier_LAT_F";				//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"B_Soldier_GL_F";				//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"B_Soldier_TL_F";				//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"B_Soldier_SL_F";				//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"B_Soldier_AR_F";				//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"B_soldier_M_F";				//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"B_OFFICER_F";					//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"B_Helipilot_F";				//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"B_Boat_Armed_01_minigun_F";	//supports\taxi\fnc_boatTax
 blufor_BOAT_CREW_X =			"B_Competitor_F";				//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"B_Heli_Transport_01_F";		//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"B_Heli_Transport_03_unarmed_F";   //random patrol
-blufor_HELI_ATTACK_X =			"B_Heli_Attack_01_F";			//dialog\fnc_request_hcATTchop
-blufor_PLANE_CAS_X =			"B_Plane_CAS_01_F";				//dialog\fnc_request_hcCAS
-blufor_CAR_PATROL1_X =			"B_LSV_01_armed_F";				//random patrol
-blufor_APC_PATROL1_X =			"B_APC_Wheeled_01_cannon_F";	//random patrol
-blufor_APC_PATROL2_X =			"B_APC_Tracked_01_AA_F";		//random patrol
-blufor_TANK_PATROL1_X =			"B_MBT_01_TUSK_F";				//random patrol
+blufor_TRANS_HELI_X =			"B_Heli_Transport_03_unarmed_F";   //random patrol
+blufor_ATTACK_HELI_X =			"B_Heli_Attack_01_F";			//dialog\fnc_request_hcATTchop
+blufor_MISC_AIR_X =				"B_Plane_CAS_01_F";				//dialog\fnc_request_hcCAS
+blufor_ARMED_CAR1_X =			"B_LSV_01_armed_F";				//random patrol
+blufor_APC1_X =					"B_APC_Wheeled_01_cannon_F";	//random patrol
+blufor_APC2_X =					"B_APC_Tracked_01_AA_F";		//random patrol
+blufor_MBT_TANK1_X =			"B_MBT_01_TUSK_F";				//random patrol
 
 
 ///////////////////////////////////

@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"cfp_b_ypg_rifleman";				//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"cfp_b_ypg_at";						//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"cfp_b_ypg_grenadier";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"cfp_b_ypg_machinegunner";			//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"cfp_b_ypg_rifleman_dshkm";			//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"cfp_b_ypg_asst_gunner_dshkm";		//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"cfp_b_ypg_sniper";					//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"cfp_b_ypg_at";						//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"cfp_b_ypg_grenadier";				//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"cfp_b_ypg_machinegunner";			//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"cfp_b_ypg_rifleman_dshkm";			//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"cfp_b_ypg_asst_gunner_dshkm";		//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"cfp_b_ypg_sniper";					//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"cfp_b_ypg_leader";					//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"CUP_B_US_Pilot";					//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"B_Boat_Armed_01_minigun_F";	//supports\taxi\fnc_boatTax
 blufor_BOAT_CREW_X =			"B_Competitor_F";				//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"CFP_B_USARMY_2003_UH_60M_DES_01";		//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"CFP_B_USARMY_2003_UH_60M_MEV_WDL_01";  //random patrol
-blufor_HELI_ATTACK_X =			"CFP_B_USARMY_2003_AH_64D_DES_01";		//dialog\fnc_request_hcATTchop
-blufor_PLANE_CAS_X =			"CUP_B_A10_DYN_USA";					//dialog\fnc_request_hcCAS
-blufor_CAR_PATROL1_X =			"CFP_B_YPG_Hilux_ZU_23_01";				//random patrol
-blufor_APC_PATROL1_X =			"CFP_B_YPG_Hilux_DSHKM_01";				//random patrol
-blufor_APC_PATROL2_X =			"CFP_B_YPG_Hilux_DSHKM_01";				//random patrol
-blufor_TANK_PATROL1_X =			"CFP_B_YPG_Hilux_DSHKM_01";				//random patrol
+blufor_TRANS_HELI_X =			"CFP_B_USARMY_2003_UH_60M_MEV_WDL_01";  //random patrol
+blufor_ATTACK_HELI_X =			"CFP_B_USARMY_2003_AH_64D_DES_01";		//dialog\fnc_request_hcATTchop
+blufor_MISC_AIR_X =				"CUP_B_A10_DYN_USA";					//dialog\fnc_request_hcCAS
+blufor_ARMED_CAR1_X =			"CFP_B_YPG_Hilux_ZU_23_01";				//random patrol
+blufor_APC1_X =					"CFP_B_YPG_Hilux_DSHKM_01";				//random patrol
+blufor_APC2_X =					"CFP_B_YPG_Hilux_DSHKM_01";				//random patrol
+blufor_MBT_TANK1_X =			"CFP_B_YPG_Hilux_DSHKM_01";				//random patrol
 
 
 ///////////////////////////////////

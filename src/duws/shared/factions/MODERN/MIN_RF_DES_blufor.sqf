@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"MIN_RF_SOLDIER_DESERT";					//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"MIN_RF_SOLDIER_DESERT_LAT";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"MIN_RF_SOLDIER_DESERT_GL";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"MIN_RF_SOLDIER_DESERT_TL";				//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"MIN_RF_SOLDIER_DESERT_SL";				//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"MIN_RF_SOLDIER_DESERT_AR";				//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"MIN_RF_SOLDIER_DESERT_M";				//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"MIN_RF_SOLDIER_DESERT_LAT";				//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"MIN_RF_SOLDIER_DESERT_GL";				//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"MIN_RF_SOLDIER_DESERT_TL";				//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"MIN_RF_SOLDIER_DESERT_SL";				//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"MIN_RF_SOLDIER_DESERT_AR";				//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"MIN_RF_SOLDIER_DESERT_M";				//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"MIN_RF_OFFICER_DESERT";					//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"MIN_RF_HELIPILOT_DESERT";				//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"O_Boat_Armed_01_hmg_F";		//supports\taxi\fnc_boatTaxi
 blufor_BOAT_CREW_X =			"C_Man_UtilityWorker_01_F";		//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"MIN_RF_HELI_LIGHT_GREY";		//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"MIN_RF_HELI_LIGHT_UNARMED_GREY";   		//random patrol
-blufor_HELI_ATTACK_X =			"MIN_RF_KA_52_GREY";	//dialog\fnc_request_hcATTchop, random patrol
-blufor_PLANE_CAS_X =			"MIN_RF_SU_34_DESERT";		//dialog\fnc_request_hcCAS, random patrol
-blufor_CAR_PATROL1_X =			"MIN_RF_GAZ_2330_HMG_DESERT";						//random patrol
-blufor_APC_PATROL1_X =			"MIN_RF_T_15_DESERT";			//random patrol
-blufor_APC_PATROL2_X =			"MIN_RF_SA_22_DESERT";			//random patrol
-blufor_TANK_PATROL1_X =			"MIN_RF_T_14_DESERT";					//random patrol
+blufor_TRANS_HELI_X =			"MIN_RF_HELI_LIGHT_UNARMED_GREY";   		//random patrol
+blufor_ATTACK_HELI_X =			"MIN_RF_KA_52_GREY";	//dialog\fnc_request_hcATTchop, random patrol
+blufor_MISC_AIR_X =				"MIN_RF_SU_34_DESERT";		//dialog\fnc_request_hcCAS, random patrol
+blufor_ARMED_CAR1_X =			"MIN_RF_GAZ_2330_HMG_DESERT";						//random patrol
+blufor_APC1_X =					"MIN_RF_T_15_DESERT";			//random patrol
+blufor_APC2_X =					"MIN_RF_SA_22_DESERT";			//random patrol
+blufor_MBT_TANK1_X =			"MIN_RF_T_14_DESERT";					//random patrol
 
 
 ///////////////////////////////////

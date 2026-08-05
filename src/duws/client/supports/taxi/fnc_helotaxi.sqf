@@ -42,7 +42,7 @@ _vec =[random [-1,0,1], random [-1,0,1], 0];
 _dist = 2000;
 _vehpos = ((vectorNormalized _vec) vectorMultiply _dist) vectorAdd _vehpos;
 
-_veh = [_vehpos,0,blufor_HELI_TRANS_UNARM_X,WEST] call bis_fnc_spawnvehicle;
+_veh = [_vehpos,0,blufor_TRANS_HELI_X,WEST] call bis_fnc_spawnvehicle;
 
 _helo = _veh select 0 ;// vehicle object
 _helo setPos [_vehpos select 0, _vehpos select 1, 200];// set height

@@ -30,7 +30,7 @@ missionNamespace setVariable ["SIVA_onStation", false];
 
 
 _spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2)+400];
-_grouptype = [blufor_HELI_TRANS_UNARM_X];
+_grouptype = [blufor_TRANS_HELI_X];
 
 _group = [_spawnPos, WEST, _grouptype, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
@@ -78,7 +78,7 @@ _parachute setPos [_location select 0, _location select 1, (_location select 2)+
 _cargo = "";
 switch (VERSION_X) do {
 	case "MODERN": {
-		_cargo = CreateVehicle [blufor_CAR_PATROL1_X, [_location select 0,_location select 1,(_location select 2)+50], [], 0, "CAN_COLLIDE"];
+		_cargo = CreateVehicle [blufor_ARMED_CAR1_X, [_location select 0,_location select 1,(_location select 2)+50], [], 0, "CAN_COLLIDE"];
 	};
 };
 _cargo attachTo [_parachute,[0,0,0]];

@@ -31,7 +31,7 @@ missionNamespace setVariable ["SAWP_onStation", false];
 switch (VERSION_X) do {
 	case "MODERN": {
 		_spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2)+400];
-		_grouptype = [blufor_HELI_TRANS_UNARM_X];
+		_grouptype = [blufor_TRANS_HELI_X];
 		//_grouptype = ["O_Heli_Light_02_unarmed_F"];
 	};
 };

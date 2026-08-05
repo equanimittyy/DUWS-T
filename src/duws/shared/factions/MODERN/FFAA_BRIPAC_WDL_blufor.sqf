@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"ffaa_bripac_fusilero_mochila";			//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"ffaa_bripac_c90";						//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"ffaa_bripac_granadero";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"ffaa_bripac_jefe_peloton";				//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"ffaa_bripac_jefe_escuadra";			//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"ffaa_bripac_mg4";						//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"ffaa_bripac_tirador";					//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"ffaa_bripac_c90";						//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"ffaa_bripac_granadero";				//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"ffaa_bripac_jefe_peloton";				//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"ffaa_bripac_jefe_escuadra";			//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"ffaa_bripac_mg4";						//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"ffaa_bripac_tirador";					//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"ffaa_bripac_oficial";					//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"ffaa_pilot_f18";						//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"B_Boat_Armed_01_minigun_F";			//supports\taxi\fnc_boatT
 blufor_BOAT_CREW_X =			"B_Competitor_F";						//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"ffaa_famet_cougar_armed";				//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"ffaa_nh90_nfh_transport";   			//random patrol
-blufor_HELI_ATTACK_X =			"ffaa_famet_tigre";						//dialog\fnc_request_hcATTchop, random patrol
-blufor_PLANE_CAS_X =			"ffaa_ar_harrier";						//dialog\fnc_request_hcCAS, random patrol
-blufor_CAR_PATROL1_X =			"ffaa_et_lince_m2";						//random patrol
-blufor_APC_PATROL1_X =			"ffaa_et_toa_m2";						//random patrol        
-blufor_APC_PATROL2_X =			"ffaa_et_pizarro_mauser";				//random patrol     
-blufor_TANK_PATROL1_X =			"ffaa_et_leopardo";						//random patrol
+blufor_TRANS_HELI_X =			"ffaa_nh90_nfh_transport";   			//random patrol
+blufor_ATTACK_HELI_X =			"ffaa_famet_tigre";						//dialog\fnc_request_hcATTchop, random patrol
+blufor_MISC_AIR_X =				"ffaa_ar_harrier";						//dialog\fnc_request_hcCAS, random patrol
+blufor_ARMED_CAR1_X =			"ffaa_et_lince_m2";						//random patrol
+blufor_APC1_X =					"ffaa_et_toa_m2";						//random patrol        
+blufor_APC2_X =					"ffaa_et_pizarro_mauser";				//random patrol     
+blufor_MBT_TANK1_X =			"ffaa_et_leopardo";						//random patrol
 
 ///////////////////////////////////
 //  STATIC WEAPONS - HQ and FOBs

@@ -402,7 +402,7 @@ _bluforCrewTypes = [
 for "_i" from 1 to 2 do {
     // ================ 蓝方载具组 ================
     // 生成蓝方装甲运兵车，面向红方进攻方向
-    _bluforAPC = [_MissionPos, _bluforSpawnRadius, blufor_APC_PATROL1_X, _bluforFaceDir] call _fn_waterproofBluforVehicleCenter;
+    _bluforAPC = [_MissionPos, _bluforSpawnRadius, blufor_APC1_X, _bluforFaceDir] call _fn_waterproofBluforVehicleCenter;
     
     _bluforAPCs pushBack _bluforAPC; // [MOD] 记录此APC
 
@@ -437,14 +437,14 @@ for "_i" from 1 to 2 do {
     
     // 步兵类型
     _bluforInfantryTypes = [
-        blufor_SOLDIER_SL_X,
-        blufor_SOLDIER_TL_X,
-        blufor_SOLDIER_AR_X,
-        blufor_MARKSMAN_X,
-        blufor_SOLDIER_SL_X,
-        blufor_SOLDIER_TL_X,
-        blufor_SOLDIER_AR_X,
-        blufor_MARKSMAN_X
+        blufor_SL_SOLDIER_X,
+        blufor_TL_SOLDIER_X,
+        blufor_AR_SOLDIER_X,
+        blufor_MARK_SOLDIER_X,
+        blufor_SL_SOLDIER_X,
+        blufor_TL_SOLDIER_X,
+        blufor_AR_SOLDIER_X,
+        blufor_MARK_SOLDIER_X
     ];
     
     // 使用BIS_fnc_spawnGroup创建步兵组

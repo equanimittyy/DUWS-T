@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"rhs_msv_emr_rifleman";				//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"rhs_msv_emr_LAT";					//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"rhs_msv_emr_grenadier";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"rhs_msv_emr_junior_sergeant";		//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"rhs_msv_emr_sergeant";				//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"rhs_msv_emr_arifleman";			//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"rhs_msv_emr_marksman";				//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"rhs_msv_emr_LAT";					//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"rhs_msv_emr_grenadier";			//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"rhs_msv_emr_junior_sergeant";		//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"rhs_msv_emr_sergeant";				//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"rhs_msv_emr_arifleman";			//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"rhs_msv_emr_marksman";				//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"rhs_msv_emr_officer";				//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"rhs_pilot";						//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"O_Boat_Armed_01_hmg_F";		//supports\taxi\fnc_boatTaxi
 blufor_BOAT_CREW_X =			"C_Man_UtilityWorker_01_F";		//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"RHS_Mi8MTV3_vvsc";				//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"rhs_ka60_c";   				//random patrol
-blufor_HELI_ATTACK_X =			"rhs_mi28n_vvsc";				//dialog\fnc_request_hcATTchop, random patrol
-blufor_PLANE_CAS_X =			"RHS_Su25SM_vvsc";				//dialog\fnc_request_hcCAS, random patrol
-blufor_CAR_PATROL1_X =			"rhs_tigr_sts_msv";				//random patrol
-blufor_APC_PATROL1_X =			"rhs_btr70_msv";				//random patrol
-blufor_APC_PATROL2_X =			"rhs_zsu234_aa";				//random patrol
-blufor_TANK_PATROL1_X =			"rhs_t72be_tv";					//random patrol
+blufor_TRANS_HELI_X =			"rhs_ka60_c";   				//random patrol
+blufor_ATTACK_HELI_X =			"rhs_mi28n_vvsc";				//dialog\fnc_request_hcATTchop, random patrol
+blufor_MISC_AIR_X =				"RHS_Su25SM_vvsc";				//dialog\fnc_request_hcCAS, random patrol
+blufor_ARMED_CAR1_X =			"rhs_tigr_sts_msv";				//random patrol
+blufor_APC1_X =					"rhs_btr70_msv";				//random patrol
+blufor_APC2_X =					"rhs_zsu234_aa";				//random patrol
+blufor_MBT_TANK1_X =			"rhs_t72be_tv";					//random patrol
 
 
 ///////////////////////////////////

@@ -377,6 +377,10 @@
                 <Original>OPERATORS</Original>
                 <English>OPERATORS</English>
             </Key>
+            <Key ID="STR_DUWS_T_faction_group_special">
+                <Original>SPECIAL</Original>
+                <English>SPECIAL</English>
+            </Key>
             <Key ID="STR_DUWS_T_faction_cancel">
                 <Original>CANCEL</Original>
                 <English>CANCEL</English>

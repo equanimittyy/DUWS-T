@@ -85,6 +85,11 @@ while {!createzone_server} do {
 	["INFO", "BOOT", format ["Opfor Warcom Faction init on server complete.  Rifleman: %1", opfor_SOLDIER_X]] call fnc_log;
 	["INFO", "BOOT", format ["Opfor Warcom Faction init on server complete.  Spec Ops: %1", opfor_SPECOPS_X]] call fnc_log;
 
+	// Both sides are resolved and nothing has been shown yet, which is the only point a borrowed
+	// class can still reach the confirmation screen. Filling after the screen painted would leave
+	// the player looking at a blank row the mission then quietly fills behind them.
+	{ [_x] call fnc_faction_backfill; } forEach ["blufor", "opfor"];
+
 	// Publish every role global the screen will show. AutoDetect broadcasts its own and a CUSTOM
 	// paste ships its assignment list, but a static faction file only assigns server-side and the
 	// OPFOR file is never run on a client at all -- so without this the screen would paint whatever
@@ -127,8 +132,6 @@ while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_place
 // beside the resolution that produced them.
 [] call fnc_BLUFOR_squad_init;
 ["INFO", "BOOT", format ["blufor RECON_TEAM: %1", str blufor_RECON_TEAM_X]] call fnc_log;
-[] call fnc_OPFOR_squad_init;
-["INFO", "BOOT", format ["opfor INF_TEAM: %1", str opfor_INFTEAM_X]] call fnc_log;
 
 [] spawn fnc_create_ammo_lists;
 

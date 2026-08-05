@@ -7,6 +7,10 @@
 // in which of two waypoint blocks they ran, which is why a new team used to mean a new file: a team
 // is a row on DUWS_teamRosters now, and the orders it stands up under are fnc_apply_posture's.
 //
+// The side is named where the roster is asked for, not carried as a parameter: that table is shared
+// with BLUFOR and holds bare role names, while everything below -- EAST, opfor_ai_skill -- is this
+// file being the OPFOR zone spawner.
+//
 // Returned rather than only spawned, for the callers that `call` it: the zone band flags what it
 // raised so the capture test can tell this zone's garrison from passers-by, and the town garrison
 // needs the handle to count its strength and to order it out.
@@ -29,7 +33,7 @@ if (_row isEqualTo []) exitWith {
 };
 
 // Not named _roster: callers one frame up use that name for the zone's unit roster.
-private _men = [_team, enemyunitMultiplier, _strength] call DUWS_fnc_teamRoster;
+private _men = [_team, "opfor", enemyunitMultiplier, _strength] call DUWS_fnc_teamRoster;
 private _position = [_center, 50, _radius, 5, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
 private _group = [_position, EAST, _men, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;

@@ -28,7 +28,7 @@ _grouptype = "";
 onStation = false;
 
 _spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2)+400];
-_grouptype = [blufor_HELI_TRANS_UNARM_X];
+_grouptype = [blufor_TRANS_HELI_X];
 
 _group = [_spawnPos, WEST, _grouptype, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;

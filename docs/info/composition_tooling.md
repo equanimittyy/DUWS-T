@@ -212,7 +212,7 @@ DUWS_zoneSpawnTiers = [
 | `row="..."` | what one row means, since a row is a tier in one table and a vehicle in another |
 | `rowname="Tier %1"` | how a row is named in the menu, `%1` being its index in roman. Without it the first column names the row, which is what a team and a squad already do |
 | `fields="a, b, c"` | the row's columns, for a table whose rows are fixed-shape rather than a free-length list. Its presence is what switches the editor into field mode |
-| `prefix=opfor_` | the faction prefix this table's role names carry: stripped for display, re-applied on write |
+| `prefix=opfor_` | the faction prefix this table's role names carry: stripped for display, re-applied on write. A comma-separated pair (`prefix=blufor_,opfor_`) marks a table both armies raise out of — its names are stored bare, the side is prepended at spawn time, and the coverage check below runs against both armies with the worse answer reported |
 
 A row without `fields=` is a plain list — add an entry, drop one, or retype the row. Entries are
 typed unquoted (`patrol, team, car`) and the tool quotes anything that is not a bare number, so a
@@ -236,7 +236,9 @@ says nothing at runtime:
 - **Role names**, against the slots the faction files under `shared/factions/` actually define. The
   count is the point rather than a yes/no: every faction file fills the same slots, so a name none
   of them defines would spawn nothing, and one only some of them define is a roster that quietly
-  thins on the rest — which is the failure the faction auto-detection exists to prevent.
+  thins on the rest — which is the failure the faction auto-detection exists to prevent. A role
+  `DUWS_roleFallbacks` names counts as covered: `fnc_faction_backfill` borrows it at load, and
+  flagging it would put a hard warning on the mission's own answer to the gap.
 - **Names beginning `fnc_`**, against the globals `server_fnc_init.sqf` compiles. A placer is named
   by global, and the spawn path falls back to `{grpNull}` for a name nothing defines, so a typo is a
   row that raises nothing.

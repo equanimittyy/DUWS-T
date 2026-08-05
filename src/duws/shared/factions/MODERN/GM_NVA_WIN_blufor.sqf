@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"gm_gc_army_rifleman_mpiak74n_80_win";			//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"gm_gc_army_antitank_mpiak74n_rpg7_80_win";		//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"gm_gc_army_rifleman_mpiak74n_80_win";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"gm_gc_army_squadleader_mpiak74n_80_win";		//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"gm_gc_army_radioman_mpiak74n_80_win";			//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"gm_gc_army_machinegunner_pk_80_win";			//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"gm_gc_army_marksman_svd_80_win";				//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"gm_gc_army_antitank_mpiak74n_rpg7_80_win";		//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"gm_gc_army_rifleman_mpiak74n_80_win";			//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"gm_gc_army_squadleader_mpiak74n_80_win";		//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"gm_gc_army_radioman_mpiak74n_80_win";			//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"gm_gc_army_machinegunner_pk_80_win";			//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"gm_gc_army_marksman_svd_80_win";				//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"gm_gc_army_officer_80_gry";					//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"gm_gc_airforce_pilot_pm_80_blu";				//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"UK3CB_TKA_B_RHIB_Gunboat";						//supports\taxi\fnc_boa
 blufor_BOAT_CREW_X =			"gm_gc_army_rifleman_mpiak74n_80_win";			//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"UK3CB_CW_SOV_O_EARLY_Mi8";						//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"UK3CB_CW_SOV_O_EARLY_Mi8";   					//random patrol
-blufor_HELI_ATTACK_X =			"UK3CB_CW_SOV_O_EARLY_Mi_24V";					//dialog\fnc_request_hcATTchop, random patrol
-blufor_PLANE_CAS_X =			"UK3CB_CW_SOV_O_EARLY_Su25SM";					//dialog\fnc_request_hcCAS, random patrol
-blufor_CAR_PATROL1_X =			"gm_gc_army_uaz469_dshkm";						//random patrol
-blufor_APC_PATROL1_X =			"gm_gc_army_brdm2";								//random patrol
-blufor_APC_PATROL2_X =			"gm_gc_army_btr60pb";							//random patrol
-blufor_TANK_PATROL1_X =			"gm_gc_army_t55am2b";							//random patrol
+blufor_TRANS_HELI_X =			"UK3CB_CW_SOV_O_EARLY_Mi8";   					//random patrol
+blufor_ATTACK_HELI_X =			"UK3CB_CW_SOV_O_EARLY_Mi_24V";					//dialog\fnc_request_hcATTchop, random patrol
+blufor_MISC_AIR_X =				"UK3CB_CW_SOV_O_EARLY_Su25SM";					//dialog\fnc_request_hcCAS, random patrol
+blufor_ARMED_CAR1_X =			"gm_gc_army_uaz469_dshkm";						//random patrol
+blufor_APC1_X =					"gm_gc_army_brdm2";								//random patrol
+blufor_APC2_X =					"gm_gc_army_btr60pb";							//random patrol
+blufor_MBT_TANK1_X =			"gm_gc_army_t55am2b";							//random patrol
 
 
 ///////////////////////////////////

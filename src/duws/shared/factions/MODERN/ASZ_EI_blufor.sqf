@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"ASZ_EI_rifleman_06A";				//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"ASZ_EI_operator_AT_A";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"ASZ_EI_riflemanGL_04A";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"ASZ_EI_commander_03A";				//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"ASZ_EI_commander_03A";				//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"ASZ_EI_mg_02A";					//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"ASZ_EI_marksman_01A";				//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"ASZ_EI_operator_AT_A";				//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"ASZ_EI_riflemanGL_04A";			//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"ASZ_EI_commander_03A";				//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"ASZ_EI_commander_03A";				//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"ASZ_EI_mg_02A";					//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"ASZ_EI_marksman_01A";				//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"ASZ_EI_commander_08Acap";			//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"ASZ_Pilot_Hely_AM";				//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"B_Boat_Armed_01_minigun_F";		//supports\taxi\fnc_boatTa
 blufor_BOAT_CREW_X =			"B_Competitor_F";					//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"ASZ_NH90_EI_reos";					//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"ASZ_CH47_EI";   					//random patrol
-blufor_HELI_ATTACK_X =			"ASZ_A129_AT";						//dialog\fnc_request_hcATTchop
-blufor_PLANE_CAS_X =			"ASZ_AV8B_MM_GBU";					//dialog\fnc_request_hcCAS
-blufor_CAR_PATROL1_X =			"ASZ_VTML_EI_M2";					//random patrol
-blufor_APC_PATROL1_X =			"ASZ_VCC1_EI_camo";					//random patrol
-blufor_APC_PATROL2_X =			"ASZ_SuperAV_EI_battlefield";		//random patrol
-blufor_TANK_PATROL1_X =			"ASZ_Ariete_camo_plus";				//random patrol
+blufor_TRANS_HELI_X =			"ASZ_CH47_EI";   					//random patrol
+blufor_ATTACK_HELI_X =			"ASZ_A129_AT";						//dialog\fnc_request_hcATTchop
+blufor_MISC_AIR_X =				"ASZ_AV8B_MM_GBU";					//dialog\fnc_request_hcCAS
+blufor_ARMED_CAR1_X =			"ASZ_VTML_EI_M2";					//random patrol
+blufor_APC1_X =					"ASZ_VCC1_EI_camo";					//random patrol
+blufor_APC2_X =					"ASZ_SuperAV_EI_battlefield";		//random patrol
+blufor_MBT_TANK1_X =			"ASZ_Ariete_camo_plus";				//random patrol
 
 
 ///////////////////////////////////

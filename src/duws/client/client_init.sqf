@@ -260,9 +260,9 @@ hint localize "STR_DUWS_T_zu4bxt24";
 
     // 读取基地守卫兵种池（由 fnc_BluHQinit 设置并广播）
     private _guardTypes = missionNamespace getVariable ["HQ_redeploy_guardTypes", [
-        blufor_SOLDIER_X, blufor_SOLDIER_LAT_X, blufor_SOLDIER_GL_X,
-        blufor_SOLDIER_TL_X, blufor_SOLDIER_SL_X, blufor_SOLDIER_AR_X,
-        blufor_MARKSMAN_X
+        blufor_SOLDIER_X, blufor_LAT_SOLDIER_X, blufor_GL_SOLDIER_X,
+        blufor_TL_SOLDIER_X, blufor_SL_SOLDIER_X, blufor_AR_SOLDIER_X,
+        blufor_MARK_SOLDIER_X
     ]];
 
     private _nearbyUnits = nearestObjects [PosOfBLUHQ, ["CAManBase"], 150] select {

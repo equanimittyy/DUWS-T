@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"cwr3_o_soldier";					//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"cwr3_o_soldier_at_rpg7";			//init_hq\guards.sqf, support\paradrop.sqf
-blufor_SOLDIER_GL_X =			"cwr3_o_soldier_gl";				//init_hq\guards.sqf, support\paradrop.sqf
-blufor_SOLDIER_TL_X =			"cwr3_o_soldier_tl";				//init_hq\createpatrol.sqf, init_hq\guards.sqf
-blufor_SOLDIER_SL_X =			"cwr3_o_soldier_sl";				//support\cluster\cluster.sqf (comms voice), Multiplayer slot
-blufor_SOLDIER_AR_X =			"cwr3_o_soldier_ar";				//support\paradrop.sqf, init_hq\guards.sqf
-blufor_MARKSMAN_X = 			"cwr3_o_soldier_marksman";			//init_hq\guards.sqf
+blufor_LAT_SOLDIER_X =			"cwr3_o_soldier_at_rpg7";			//init_hq\guards.sqf, support\paradrop.sqf
+blufor_GL_SOLDIER_X =			"cwr3_o_soldier_gl";				//init_hq\guards.sqf, support\paradrop.sqf
+blufor_TL_SOLDIER_X =			"cwr3_o_soldier_tl";				//init_hq\createpatrol.sqf, init_hq\guards.sqf
+blufor_SL_SOLDIER_X =			"cwr3_o_soldier_sl";				//support\cluster\cluster.sqf (comms voice), Multiplayer slot
+blufor_AR_SOLDIER_X =			"cwr3_o_soldier_ar";				//support\paradrop.sqf, init_hq\guards.sqf
+blufor_MARK_SOLDIER_X =			"cwr3_o_soldier_marksman";			//init_hq\guards.sqf
 blufor_OFFICER_X =				"cwr3_o_officer";					//init_hq\BluHQinit.sqf
 blufor_HELI_PILOT_X	=			"cwr3_o_soldier_pilot";				//missions\missions\pilot\mission.sqf
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"cwr3_o_boat";					//support\taxi\boatTaxi.sqf
 blufor_BOAT_CREW_X =			"cwr3_o_zodiac";				//support\taxi\boatTaxi.sqf
 
 blufor_HELI_TRANS_ARM_X =		"cwr3_o_mi8_mtv3";		//support\taxi\helotaxi.sqf, random patrol
-blufor_HELI_TRANS_UNARM_X =		"cwr3_o_mi8_amt";   	//random patrol
-blufor_HELI_ATTACK_X =			"cwr3_o_mi24d";			//dialog\request_hcATTchop.sqf
-blufor_PLANE_CAS_X =			"cwr3_o_su25";			//dialog\request_hcCAS.sqf
-blufor_CAR_PATROL1_X =			"cwr3_o_uaz_dshkm";		//random patrol
-blufor_APC_PATROL1_X =			"cwr3_o_brdm2";			//random patrol
-blufor_APC_PATROL2_X =			"cwr3_o_bmp2";			//random patrol
-blufor_TANK_PATROL1_X =			"cwr3_o_t72a";			//random patrol
+blufor_TRANS_HELI_X =			"cwr3_o_mi8_amt";   	//random patrol
+blufor_ATTACK_HELI_X =			"cwr3_o_mi24d";			//dialog\request_hcATTchop.sqf
+blufor_MISC_AIR_X =				"cwr3_o_su25";			//dialog\request_hcCAS.sqf
+blufor_ARMED_CAR1_X =			"cwr3_o_uaz_dshkm";		//random patrol
+blufor_APC1_X =					"cwr3_o_brdm2";			//random patrol
+blufor_APC2_X =					"cwr3_o_bmp2";			//random patrol
+blufor_MBT_TANK1_X =			"cwr3_o_t72a";			//random patrol
 
 
 ///////////////////////////////////

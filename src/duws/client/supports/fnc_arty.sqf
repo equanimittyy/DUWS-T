@@ -94,7 +94,7 @@ onStation = false;
 
 if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
 	_spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2)+800];
-	_grouptype = [blufor_PLANE_CAS_X];
+	_grouptype = [blufor_MISC_AIR_X];
 	_group = [_spawnPos, WEST, _grouptype, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
 	_group deleteGroupWhenEmpty true;
 	_pilot = units _group select 0;

@@ -8,16 +8,10 @@ if (!isServer) exitWith {};
 
 ["INFO", "BOOT", "Squad File Init"] call fnc_log;
 
-// Rosters are shared: the mechanised and armour sections field the same infantry team, and the
-// motorised section fields the recon team. Held apart from the squad table below so changing what
-// an infantry team is stays one edit rather than three that can drift.
-// --DUWS-UNITCOMP BEGIN name="BLUFOR teams" kind=team row="team, roles..." fields="team, roles" prefix=blufor_--
-DUWS_bluforTeams = [
-    ["recon", ["blufor_SPECOPS_X", "blufor_SPECOPS_GL_X", "blufor_SPECOPS_MG_X", "blufor_SPECOPS_LAT_X"]],
-    ["infantry", ["blufor_SOLDIER_TL_X", "blufor_SOLDIER_GL_X", "blufor_SOLDIER_LAT_X", "blufor_SOLDIER_AR_X"]],
-    ["squad", ["blufor_SOLDIER_SL_X", "blufor_SOLDIER_X", "blufor_SOLDIER_X", "blufor_SOLDIER_GL_X", "blufor_SOLDIER_GL_X", "blufor_SOLDIER_LAT_X", "blufor_SOLDIER_LAT_X", "blufor_SOLDIER_AR_X"]]
-];
-// --DUWS-UNITCOMP END--
+// The team named in column 3 is a row on DUWS_teamRosters (shared/functions/fnc_spawn_vocab),
+// which the OPFOR zone band raises out of too: a team is a composition of roles, and the side
+// supplies the men. Rosters are shared inside this table as well -- the mechanised and armour
+// sections field the same infantry team, and the motorised section fields the recon team.
 
 // The variable in the first column is the join with the request dialogs: fnc_request_squad and
 // fnc_request_squad_fob switch on a listbox index and read these names directly, so a renamed row
@@ -29,13 +23,14 @@ DUWS_bluforTeams = [
 DUWS_bluforSquads = [
     ["blufor_RECON_TEAM_X", 8, "recon", []],
     ["blufor_INF_SQUAD_X", 12, "squad", []],
-    ["blufor_MOTOR_SECTION_X", 25, "recon", ["blufor_CAR_PATROL1_X"]],
-    ["blufor_MECH_SECTION_X", 40, "infantry", ["blufor_APC_PATROL1_X", "blufor_APC_PATROL2_X"]],
-    ["blufor_ARMOR_SECTION_X", 50, "infantry", ["blufor_TANK_PATROL1_X"]]
+    ["blufor_MOTOR_SECTION_X", 25, "recon", ["blufor_ARMED_CAR1_X"]],
+    ["blufor_MECH_SECTION_X", 40, "infantry", ["blufor_APC1_X", "blufor_APC2_X"]],
+    ["blufor_ARMOR_SECTION_X", 50, "infantry", ["blufor_MBT_TANK1_X"]]
 ];
 // --DUWS-UNITCOMP END--
 
-// Names to classnames, dropping every role the faction table does not define.
+// Names to classnames, dropping every vehicle the faction table does not define. The men come from
+// the shared roster instead, which resolves its own names.
 private _resolve = {
     params ["_names"];
     private _out = [];
@@ -47,23 +42,32 @@ switch (VERSION_X) do {
 	case "MODERN": {
 		{
 			_x params ["_var", "_cost", "_team", "_vehPool"];
-			private _ti = DUWS_bluforTeams findIf { (_x select 0) isEqualTo _team };
-			private _roles = if (_ti < 0) then { [] } else { (DUWS_bluforTeams select _ti) select 1 };
-			private _roster = [_roles] call _resolve;
-			private _veh = [_vehPool] call _resolve;
-			// Counted before the vehicle is prepended, while the two lists still line up with what
-			// the table asked for.
-			private _lost = (count _roles - count _roster) + (count _vehPool - count _veh);
-			if (count _veh > 0) then { _roster = [selectRandom _veh] + _roster };
+			private _row = [_team] call DUWS_fnc_teamRow;
+			if (_row isEqualTo []) then {
+				["ERROR", "FACTION", format ["%1 names team %2, which no roster row claims -- it would be sold empty",
+					_var, _team]] call fnc_log;
+			} else {
+				// Multiplier 1: the core column is repeated by enemyunitMultiplier for an OPFOR
+				// garrison, and a price list that hands over five squads for one squad's cost is a
+				// different catalogue.
+				private _roster = [_team, "blufor", 1] call DUWS_fnc_teamRoster;
+				private _veh = [_vehPool] call _resolve;
+				// Counted against what the row asked for, before the vehicle is prepended and while
+				// the two lists still line up.
+				_row params ["", "_core", "_once", "_leader"];
+				private _wanted = (count _core) + (count _once) + ([0, 1] select (_leader != ""));
+				private _lost = ((_wanted - count _roster) max 0) + (count _vehPool - count _veh);
+				if (count _veh > 0) then { _roster = [selectRandom _veh] + _roster };
 
-			// Broadcast on write: the request dialogs run on the client and read these directly.
-			missionNamespace setVariable [_var, [_roster, _cost], true];
+				// Broadcast on write: the request dialogs run on the client and read these directly.
+				missionNamespace setVariable [_var, [_roster, _cost], true];
 
-			// A section that lost roles still spawns, just thinner, and nothing on the ground says
-			// so -- which is how a faction mod missing one class reads as a balance problem.
-			if (_lost > 0) then {
-				["WARN", "FACTION", format ["%1: %2 of its classes are not defined by this faction",
-					_var, _lost]] call fnc_log;
+				// A section that lost roles still spawns, just thinner, and nothing on the ground says
+				// so -- which is how a faction mod missing one class reads as a balance problem.
+				if (_lost > 0) then {
+					["WARN", "FACTION", format ["%1: %2 of its classes are not defined by this faction",
+						_var, _lost]] call fnc_log;
+				};
 			};
 		} forEach DUWS_bluforSquads;
 	};

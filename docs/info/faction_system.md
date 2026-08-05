@@ -8,20 +8,39 @@ to `src/`. For the wider mission structure see [`architecture.md`](architecture.
 
 Everything hangs off a fixed set of global variables that map an **abstract DUWS role** to a **concrete
 classname** from whatever mod is in use. A "faction" is any code that assigns this schema; every consumer
-(patrols, guards, supports, request menus) reads the globals, never a mod classname directly. The BLUFOR
-set (OPFOR mirrors it with `opfor_`):
+(patrols, guards, supports, request menus) reads the globals, never a mod classname directly.
+`shared/functions/fnc_faction_schema.sqf` is the one place the set is written down.
+
+Both sides spell a role the same way and hold it in the same position, so the names below take either a
+`blufor_` or an `opfor_` prefix. That is what lets a team roster name a role bare and have the side supply
+the man ([§squads](#squads-and-civilians)), and what lets the confirmation screen put a role on one line
+across two columns.
 
 | Group | Variables | Consumed by |
 |---|---|---|
-| Infantry roles | `blufor_SOLDIER_X`, `_SOLDIER_LAT_X`, `_SOLDIER_GL_X`, `_SOLDIER_TL_X`, `_SOLDIER_SL_X`, `_SOLDIER_AR_X`, `_MARKSMAN_X`, `_OFFICER_X`, `_HELI_PILOT_X` | HQ/FOB guards, patrols, paradrop, rescue-pilot mission |
-| Vehicles | `_CAR_PATROL1_X`, `_APC_PATROL1/2_X`, `_TANK_PATROL1_X`, `_HELI_TRANS_ARM/UNARM_X`, `_HELI_ATTACK_X`, `_PLANE_CAS_X`, `_BOAT_ARMED_X` | Random patrols, support requests, taxi |
-| Static weapons | `_TURRET_AA/AT/HMG/GMG/MORTAR` | HQ/FOB fortification, every zone prefab's guns, three side missions |
-| Operators | `_SPECOPS_X` + 10 role variants | Operative recruit menu |
+| Infantry roles | `SOLDIER_X`, `AA_SOLDIER_X`, `AR_SOLDIER_X`, `AT_SOLDIER_X`, `GL_SOLDIER_X`, `LAT_SOLDIER_X`, `SL_SOLDIER_X`, `TL_SOLDIER_X`, `MARK_SOLDIER_X`, `SNIPER_SOLDIER_X`, `OFFICER_X` | Team rosters, HQ/FOB guards, patrols, paradrop |
+| Vehicles | `ARMED_CAR1_X`, `APC1_X`, `APC2_X`, `MBT_TANK1_X`, `TRANS_HELI_X`, `ATTACK_HELI_X`, `MISC_AIR_X` | Zone compositions, random patrols, support requests |
+| Static weapons | `TURRET_AA/AT/HMG/GMG/MORTAR` | HQ/FOB fortification, every zone prefab's guns, three side missions |
+| Operators | `SPECOPS_X` + 10 role variants | Operative recruit menu |
+| Special, BLUFOR only | `HELI_PILOT_X`, `BOAT_ARMED_X`, `BOAT_CREW_X`, `HELI_TRANS_ARM_X` | Rescue-pilot mission, boat and helo taxi |
+| Special, OPFOR only | `ENG_SOLDIER_X`, `CREW_X`, `OPERATOR_X`, `AA_APC_X`, `TRANS_/COVERED_/AMMO_/REPAIR_TRUCK_X` | Side-mission targets and guards, R3F logistics |
 | Request slots | `_RQST_UNIT_01..14_X` (14 fixed, `["empty",0,0]`-padded), `_RQST_VEHICLE_01..50_X` | HQ/FOB request menus |
 
 Each value is a classname string, or an array of candidates (periodically re-rolled — see
 [§autodetect](#the-procedural-generator-autodetect)). Every variable is `publicVariable`d so dedicated
 servers and JIP clients see the same faction.
+
+**A role a side's faction files never named is borrowed, not left empty.**
+`shared/functions/fnc_faction_backfill.sqf` holds a short ladder — `AA_SOLDIER_X` from `SPECOPS_AA_X`,
+then `LAT_SOLDIER_X`, then the rifleman — and `server_init.sqf` runs it once both sides have resolved and
+before the confirmation screen paints, so the player edits the borrowed class rather than a blank row. No
+BLUFOR faction file defines an anti-air, anti-tank or sniper role; a shared roster naming one would
+otherwise raise a man short on every one of them. Every rung names a role the faction file itself defines,
+never another row's target, which is what makes the pass order-independent.
+
+Faction init clears its side's schema keys before running the faction file. A faction file only assigns
+what it defines, so stepping back through the setup screens and picking a second faction would otherwise
+leave the first one's class standing in every key the second omits.
 
 ## Three ways a faction is defined
 
@@ -177,11 +196,17 @@ input; it is server-side and gated behind the custom-faction dialog.
 
 ## Squads and civilians
 
-`server/init_hq/fnc_BLUFOR_squad_init.sqf` and `server/warcom/fnc_OPFOR_squad_init.sqf` compose
-higher-order groups from the role variables — recon team, infantry squad, motorized / mechanized / armor
-sections — each tagged with a CP price (e.g. `blufor_INF_SQUAD_X = [_squad, "Infantry Squad (12CP)", 12]`).
-Squad init runs once at boot. It composed from the role globals and was re-run every five minutes to track
-the re-rolled classnames; with the roles stable that rebuild produced identical data, and a purchasable
+`shared/functions/fnc_spawn_vocab.sqf` holds `DUWS_teamRosters`, one table of teams both armies raise
+out of: a row names roles bare and `DUWS_fnc_teamRoster` prepends the side. `recon` is the same four
+roles whoever stands it up. Its own file rather than a block beside the zone spawn band, because the
+BLUFOR squad catalogue is priced at `server_init` before that band is spawned.
+
+`server/init_hq/fnc_BLUFOR_squad_init.sqf` prices the purchasable sections against that table — recon
+team, infantry squad, motorized / mechanized / armor sections — each tagged with a CP price (e.g.
+`blufor_INF_SQUAD_X = [_squad, 12]`). It passes a multiplier of 1: the core column is repeated by
+`enemyunitMultiplier` for an OPFOR garrison, and a price list that hands over five squads for one
+squad's cost is a different catalogue. Squad init runs once at boot — it was re-run every five minutes
+to track re-rolled classnames, and with the roles stable that rebuild produced identical data, while a
 catalogue whose prices reshuffle under the player is worse than a fixed one.
 
 Civilians are templated separately. `shared/factions/CIV_FACTIONS.sqf` sets `civ_array` from the

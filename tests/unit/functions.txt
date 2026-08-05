@@ -14,7 +14,7 @@ duws/server/misc/fnc_civ_state_init.sqf::fnc_civ_townBand
 duws/server/misc/fnc_civ_state_init.sqf::fnc_civ_townIncome
 duws/server/misc/fnc_civ_liveTarget.sqf::*fnc_civ_liveTarget
 duws/server/misc/fnc_search_drawKind.sqf::*fnc_search_drawKind
-duws/server/misc/fnc_opforRoles.sqf::*fnc_opforRoles
+duws/server/misc/fnc_factionRoles.sqf::*fnc_factionRoles
 duws/server/misc/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonStrength
 duws/server/misc/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonStrengthSet
 duws/server/misc/fnc_garrison_strength_init.sqf::DUWS_fnc_garrisonStrengthRecord
@@ -22,12 +22,12 @@ duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_strength
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_strength_set
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_thin
 duws/server/init_zones/fnc_zone_state_init.sqf::fnc_zone_tier
-duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_tokenName
-duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_tokenPosture
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_zoneSpawnList
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_spawnDiff
-duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_teamRow
-duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_teamRoster
+duws/shared/functions/fnc_spawn_vocab.sqf::DUWS_fnc_tokenName
+duws/shared/functions/fnc_spawn_vocab.sqf::DUWS_fnc_tokenPosture
+duws/shared/functions/fnc_spawn_vocab.sqf::DUWS_fnc_teamRow
+duws/shared/functions/fnc_spawn_vocab.sqf::DUWS_fnc_teamRoster
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_vehicleRow
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_specialRow
 duws/server/init_zones/fnc_zone_spawn_sizes.sqf::DUWS_fnc_tokenClass
@@ -39,3 +39,4 @@ duws/shared/functions/fnc_faction_pools.sqf::fnc_faction_resolve
 duws/shared/functions/fnc_faction_schema.sqf::*fnc_faction_schema
 duws/shared/factions/MODERN/fn_factionAutoDetect.sqf::fnc_selectNonEmpty
 duws/shared/functions/fnc_static_roles.sqf::fnc_static_resolve
+duws/shared/functions/fnc_faction_backfill.sqf::fnc_faction_backfill

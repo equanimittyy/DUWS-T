@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"CUP_B_BAF_Soldier_Rifleman_DDPM";		//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"CUP_B_BAF_Soldier_RiflemanLAT_DDPM";	//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"CUP_B_BAF_Soldier_Grenadier_DDPM";		//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"CUP_B_BAF_Soldier_TeamLeader_DDPM";	//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"CUP_B_BAF_Soldier_SquadLeader_DDPM";	//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"CUP_B_BAF_Soldier_AutoRifleman_DDPM";	//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"CUP_B_BAF_Soldier_Marksman_DDPM";		//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"CUP_B_BAF_Soldier_RiflemanLAT_DDPM";	//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"CUP_B_BAF_Soldier_Grenadier_DDPM";		//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"CUP_B_BAF_Soldier_TeamLeader_DDPM";	//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"CUP_B_BAF_Soldier_SquadLeader_DDPM";	//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"CUP_B_BAF_Soldier_AutoRifleman_DDPM";	//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"CUP_B_BAF_Soldier_Marksman_DDPM";		//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"CUP_B_BAF_Soldier_Officer_DDPM";		//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"CUP_B_BAF_Soldier_Pilot_DDPM";			//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"B_Boat_Armed_01_minigun_F";			//supports\taxi\fnc_boatT
 blufor_BOAT_CREW_X =			"B_Competitor_F";						//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"CUP_B_Merlin_HC3A_Armed_GB";	//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"CUP_B_MH47E_GB";   			//random patrol
-blufor_HELI_ATTACK_X =			"CUP_B_AH1_DL_BAF";				//dialog\fnc_request_hcATTchop
-blufor_PLANE_CAS_X =			"CUP_B_A10_DYN_USA";			//dialog\fnc_request_hcCAS
-blufor_CAR_PATROL1_X =			"CUP_B_Jackal2_L2A1_GB_D";		//random patrol
-blufor_APC_PATROL1_X =			"CUP_B_FV432_Bulldog_GB_D";		//random patrol
-blufor_APC_PATROL2_X =			"CUP_B_FV510_GB_D";				//random patrol
-blufor_TANK_PATROL1_X =			"CUP_B_Challenger2_2CD_BAF";	//random patrol
+blufor_TRANS_HELI_X =			"CUP_B_MH47E_GB";   			//random patrol
+blufor_ATTACK_HELI_X =			"CUP_B_AH1_DL_BAF";				//dialog\fnc_request_hcATTchop
+blufor_MISC_AIR_X =				"CUP_B_A10_DYN_USA";			//dialog\fnc_request_hcCAS
+blufor_ARMED_CAR1_X =			"CUP_B_Jackal2_L2A1_GB_D";		//random patrol
+blufor_APC1_X =					"CUP_B_FV432_Bulldog_GB_D";		//random patrol
+blufor_APC2_X =					"CUP_B_FV510_GB_D";				//random patrol
+blufor_MBT_TANK1_X =			"CUP_B_Challenger2_2CD_BAF";	//random patrol
 
 
 ///////////////////////////////////

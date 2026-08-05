@@ -59,7 +59,7 @@ _basic_optics = _basic_ammoArray select 4;
 _basic_magazines = _basic_ammoArray select 5;
 _extra_weapons = _basic_ammoArray select 6;
 
-_blufor_units = [blufor_SOLDIER_LAT_X,blufor_SPECOPS_MEDIC_X,blufor_SPECOPS_ENG_X];
+_blufor_units = [blufor_LAT_SOLDIER_X,blufor_SPECOPS_MEDIC_X,blufor_SPECOPS_ENG_X];
 _opfor_units = [opfor_LAT_SOLDIER_X,opfor_SPECOPS_MEDIC_X,opfor_SPECOPS_ENG_X];
 
 {

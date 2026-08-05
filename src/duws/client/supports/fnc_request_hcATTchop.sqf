@@ -8,7 +8,7 @@ _spawnPos = getmarkerpos str blu_hq_markername;
 switch (VERSION_X) do {
 	case "MODERN": {
 		_spawnPos = [(_spawnPos select 0)+250, _spawnPos select 1, (_spawnPos select 2)+200];
-		_grouptype = [blufor_HELI_ATTACK_X];
+		_grouptype = [blufor_ATTACK_HELI_X];
 	};
 };
 

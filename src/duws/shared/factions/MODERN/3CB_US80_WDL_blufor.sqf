@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"UK3CB_CW_US_B_LATE_RIF_1";				//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"UK3CB_CW_US_B_LATE_LAT";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"UK3CB_CW_US_B_LATE_GL";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"UK3CB_CW_US_B_LATE_TL";				//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"UK3CB_CW_US_B_LATE_RADIO";				//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"UK3CB_CW_US_B_LATE_AR";				//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"UK3CB_CW_US_B_LATE_MK";				//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"UK3CB_CW_US_B_LATE_LAT";				//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"UK3CB_CW_US_B_LATE_GL";				//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"UK3CB_CW_US_B_LATE_TL";				//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"UK3CB_CW_US_B_LATE_RADIO";				//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"UK3CB_CW_US_B_LATE_AR";				//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"UK3CB_CW_US_B_LATE_MK";				//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"UK3CB_CW_US_B_LATE_OFF";				//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"UK3CB_CW_US_B_LATE_HELI_PILOT";		//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"UK3CB_TKA_B_RHIB_Gunboat";				//supports\taxi\fnc_boatT
 blufor_BOAT_CREW_X =			"UK3CB_CW_US_B_LATE_RIF_1";				//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"UK3CB_CW_US_B_LATE_UH60M";				//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"UK3CB_CW_US_B_LATE_CH47";   			//random patrol
-blufor_HELI_ATTACK_X =			"UK3CB_CW_US_B_LATE_AH64";				//dialog\fnc_request_hcATTchop, random patrol
-blufor_PLANE_CAS_X =			"UK3CB_CW_US_B_LATE_A10";				//dialog\fnc_request_hcCAS, random patrol
-blufor_CAR_PATROL1_X =			"UK3CB_CW_US_B_LATE_M1025_M2";			//random patrol
-blufor_APC_PATROL1_X =			"UK3CB_CW_US_B_LATE_M2A2";				//random patrol
-blufor_APC_PATROL2_X =			"UK3CB_CW_US_B_LATE_LAV25";				//random patrol
-blufor_TANK_PATROL1_X =			"UK3CB_CW_US_B_LATE_M1A1";				//random patrol
+blufor_TRANS_HELI_X =			"UK3CB_CW_US_B_LATE_CH47";   			//random patrol
+blufor_ATTACK_HELI_X =			"UK3CB_CW_US_B_LATE_AH64";				//dialog\fnc_request_hcATTchop, random patrol
+blufor_MISC_AIR_X =				"UK3CB_CW_US_B_LATE_A10";				//dialog\fnc_request_hcCAS, random patrol
+blufor_ARMED_CAR1_X =			"UK3CB_CW_US_B_LATE_M1025_M2";			//random patrol
+blufor_APC1_X =					"UK3CB_CW_US_B_LATE_M2A2";				//random patrol
+blufor_APC2_X =					"UK3CB_CW_US_B_LATE_LAV25";				//random patrol
+blufor_MBT_TANK1_X =			"UK3CB_CW_US_B_LATE_M1A1";				//random patrol
 
 
 ///////////////////////////////////

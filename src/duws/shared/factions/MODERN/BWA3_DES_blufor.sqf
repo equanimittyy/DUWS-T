@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"BWA3_Rifleman_G27_Tropen";			//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"BWA3_RiflemanAT_RGW90_Tropen";		//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"BWA3_Grenadier_G27_Tropen";		//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"BWA3_TL_Tropen";					//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"BWA3_SL_Tropen";					//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"BWA3_MachineGunner_MG5_Tropen";	//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"BWA3_Marksman_Tropen";				//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"BWA3_RiflemanAT_RGW90_Tropen";		//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"BWA3_Grenadier_G27_Tropen";		//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"BWA3_TL_Tropen";					//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"BWA3_SL_Tropen";					//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"BWA3_MachineGunner_MG5_Tropen";	//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"BWA3_Marksman_Tropen";				//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"BWA3_Officer_Tropen";				//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"BWA3_Helipilot";					//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"B_Boat_Armed_01_minigun_F";		//supports\taxi\fnc_boatTa
 blufor_BOAT_CREW_X =			"B_Competitor_F";					//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"NH_90_Trop";							//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"B_Heli_Transport_01_F";   						//random patrol
-blufor_HELI_ATTACK_X =			"BWA3_Tiger_RMK_Heavy";					//dialog\fnc_request_hcATTchop, random patrol
-blufor_PLANE_CAS_X =			"B_Plane_CAS_01_dynamicLoadout_F";		//dialog\fnc_request_hcCAS, random patrol
-blufor_CAR_PATROL1_X =			"BWA3_Dingo2_FLW100_MG3_CG13_Tropen";				//random patrol
-blufor_APC_PATROL1_X =			"KGB_B_MRAP_03_hmg_F_DES";						//random patrol
-blufor_APC_PATROL2_X =			"BWA3_Puma_Tropen";						//random patrol
-blufor_TANK_PATROL1_X =			"BWA3_Leopard2_Tropen";					//random patrol
+blufor_TRANS_HELI_X =			"B_Heli_Transport_01_F";   						//random patrol
+blufor_ATTACK_HELI_X =			"BWA3_Tiger_RMK_Heavy";					//dialog\fnc_request_hcATTchop, random patrol
+blufor_MISC_AIR_X =				"B_Plane_CAS_01_dynamicLoadout_F";		//dialog\fnc_request_hcCAS, random patrol
+blufor_ARMED_CAR1_X =			"BWA3_Dingo2_FLW100_MG3_CG13_Tropen";				//random patrol
+blufor_APC1_X =					"KGB_B_MRAP_03_hmg_F_DES";						//random patrol
+blufor_APC2_X =					"BWA3_Puma_Tropen";						//random patrol
+blufor_MBT_TANK1_X =			"BWA3_Leopard2_Tropen";					//random patrol
 
 
 ///////////////////////////////////

@@ -10,12 +10,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"TFC_C_Soldier_OTW_Rifleman_TW_F";			//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"TFC_C_Soldier_OTW_M72_TW_F";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"TFC_C_Soldier_OTW_Grenadier_TW_F";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"TFC_C_Soldier_OTW_IC_TW_F";				//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"TFC_C_Soldier_OTW_2IC_TW_F";				//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"TFC_C_Soldier_OTW_C9_TW_F";				//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"TFC_C_Soldier_OTW_Rifleman_Lite_TW_F";		//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"TFC_C_Soldier_OTW_M72_TW_F";				//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"TFC_C_Soldier_OTW_Grenadier_TW_F";			//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"TFC_C_Soldier_OTW_IC_TW_F";				//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"TFC_C_Soldier_OTW_2IC_TW_F";				//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"TFC_C_Soldier_OTW_C9_TW_F";				//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"TFC_C_Soldier_OTW_Rifleman_Lite_TW_F";		//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"TFC_C_Instructor_Army_Inf_TW";				//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"TFC_C_Soldier_Aircrew_Pilot_Helo_TW_F";	//Rescue Pilot mission
 
@@ -23,13 +23,13 @@ blufor_BOAT_ARMED_X	=			"rhsusf_mkvsoc";			//supports\taxi\fnc_boatTaxi
 blufor_BOAT_CREW_X =			"B_Competitor_F";			//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"TFC_CH146430_unarmed_F";					//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"TFC_CH146408_unarmed_F";   				//random patrol
-blufor_HELI_ATTACK_X =			"TFC_CH146451_dynamicLoadout_F";			//dialog\fnc_request_hcATTchop, random patrol
-blufor_PLANE_CAS_X =			"RHS_A10";									//dialog\fnc_request_hcCAS, random patrol
-blufor_CAR_PATROL1_X =			"TFC_vs_luvw_armed_F";						//random patrol
-blufor_APC_PATROL1_X =			"TFC_Wheeled_LAV6_ISC";						//random patrol
-blufor_APC_PATROL2_X =			"TFC_Wheeled_LAV6_ISC";						//random patrol
-blufor_TANK_PATROL1_X =			"TFC_Leopard2A_4_cannon_TW";				//random patrol
+blufor_TRANS_HELI_X =			"TFC_CH146408_unarmed_F";   				//random patrol
+blufor_ATTACK_HELI_X =			"TFC_CH146451_dynamicLoadout_F";			//dialog\fnc_request_hcATTchop, random patrol
+blufor_MISC_AIR_X =				"RHS_A10";									//dialog\fnc_request_hcCAS, random patrol
+blufor_ARMED_CAR1_X =			"TFC_vs_luvw_armed_F";						//random patrol
+blufor_APC1_X =					"TFC_Wheeled_LAV6_ISC";						//random patrol
+blufor_APC2_X =					"TFC_Wheeled_LAV6_ISC";						//random patrol
+blufor_MBT_TANK1_X =			"TFC_Leopard2A_4_cannon_TW";				//random patrol
 
 
 ///////////////////////////////////

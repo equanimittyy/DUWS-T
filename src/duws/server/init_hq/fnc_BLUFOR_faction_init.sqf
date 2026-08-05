@@ -16,6 +16,13 @@ if (!isServer) exitWith {};
 
 ["INFO", "FACTION", format ["Faction init: %1", BLUFOR_FactionFile_X]] call fnc_log;
 
+// Cleared before the file runs, because a faction file only assigns the keys it defines -- it never
+// clears the ones it does not. Stepping back through the setup screens and picking a second faction
+// would otherwise leave the first one's class standing in every key the second omits, and
+// fnc_faction_backfill would read that leftover as a role this faction fields.
+// fnc_custom_faction_parse clears the same way, for the same reason.
+{ missionNamespace setVariable [_x select 0, ""]; } forEach (["blufor"] call fnc_faction_schema);
+
 _factionFile = "duws\shared\factions\" + VERSION_X + "\" + BLUFOR_FactionFile_X + "_blufor.sqf";
 fnc_BLUFOR_FactionFile_X = compile preprocessFileLineNumbers _factionFile;
 [] call fnc_BLUFOR_FactionFile_X;

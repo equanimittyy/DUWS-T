@@ -158,13 +158,13 @@ sleep 10;
 
 _friendlyUnits = [];
 _friendlyGroup = [(_targetpos getPos [8, random 360]), WEST, [
-    blufor_SOLDIER_GL_X,
-    blufor_SOLDIER_AR_X,
-    blufor_SOLDIER_AR_X,
-    blufor_SOLDIER_SL_X,
-    blufor_SOLDIER_TL_X,
-    blufor_MARKSMAN_X,
-    blufor_SOLDIER_LAT_X
+    blufor_GL_SOLDIER_X,
+    blufor_AR_SOLDIER_X,
+    blufor_AR_SOLDIER_X,
+    blufor_SL_SOLDIER_X,
+    blufor_TL_SOLDIER_X,
+    blufor_MARK_SOLDIER_X,
+    blufor_LAT_SOLDIER_X
 ]] call BIS_fnc_spawnGroup;
 
 _friendlyUnits = units _friendlyGroup;
@@ -312,10 +312,10 @@ publicVariable "Mission_Active";
         _groundPos = _spawnPos;
         _groundPos set [2, 0];
         _bluforGroup = [_groundPos, WEST, [
-            blufor_SOLDIER_AR_X, blufor_SOLDIER_AR_X,
-            blufor_SOLDIER_AR_X, blufor_SOLDIER_AR_X,
-            blufor_SOLDIER_LAT_X, blufor_SOLDIER_LAT_X,
-            blufor_SOLDIER_GL_X, blufor_SOLDIER_GL_X
+            blufor_AR_SOLDIER_X, blufor_AR_SOLDIER_X,
+            blufor_AR_SOLDIER_X, blufor_AR_SOLDIER_X,
+            blufor_LAT_SOLDIER_X, blufor_LAT_SOLDIER_X,
+            blufor_GL_SOLDIER_X, blufor_GL_SOLDIER_X
         ]] call BIS_fnc_spawnGroup;
         {
             _x allowFleeing 0;

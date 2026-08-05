@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"OPTRE_UNSC_Army_Soldier_Rifleman_BR_WDL";				//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"OPTRE_UNSC_Army_Soldier_Rifleman_AT_WDL";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"OPTRE_UNSC_Army_Soldier_Grenadier_WDL";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"OPTRE_UNSC_Army_Soldier_TeamLead_WDL";			//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"OPTRE_UNSC_Army_Soldier_SquadLead_WDL";			//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"OPTRE_UNSC_Army_Soldier_Autorifleman_WDL";		//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"OPTRE_UNSC_Army_Soldier_Marksman_WDL";				//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"OPTRE_UNSC_Army_Soldier_Rifleman_AT_WDL";				//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"OPTRE_UNSC_Army_Soldier_Grenadier_WDL";			//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"OPTRE_UNSC_Army_Soldier_TeamLead_WDL";			//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"OPTRE_UNSC_Army_Soldier_SquadLead_WDL";			//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"OPTRE_UNSC_Army_Soldier_Autorifleman_WDL";		//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"OPTRE_UNSC_Army_Soldier_Marksman_WDL";				//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"OPTRE_UNSC_Army_Soldier_Officer_WDL";				//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"OPTRE_UNSC_Airforce_Soldier_Airman";				//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"optre_catfish_mg_f";			//supports\taxi\fnc_boatTaxi
 blufor_BOAT_CREW_X =			"OPTRE_UNSC_Marine_Soldier_Rifleman_AR";				//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"OPTRE_UNSC_falcon";						//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"OPTRE_Pelican_armed";  						//random patrol
-blufor_HELI_ATTACK_X =			"OPTRE_UNSC_hornet_CAS";						//dialog\fnc_request_hcATTchop, random patrol
-blufor_PLANE_CAS_X =			"OPTRE_AV22A_Sparrowhawk";							//dialog\fnc_request_hcCAS, random patrol
-blufor_CAR_PATROL1_X =			"OPTRE_M813_TT";				//random patrol
-blufor_APC_PATROL1_X =			"OPTRE_M412_IFV_UNSC";		//random patrol
-blufor_APC_PATROL2_X =			"OPTRE_M413_MGS_UNSC";				//random patrol
-blufor_TANK_PATROL1_X =			"OPTRE_M808B_UNSC";			//random patrol
+blufor_TRANS_HELI_X =			"OPTRE_Pelican_armed";  						//random patrol
+blufor_ATTACK_HELI_X =			"OPTRE_UNSC_hornet_CAS";						//dialog\fnc_request_hcATTchop, random patrol
+blufor_MISC_AIR_X =				"OPTRE_AV22A_Sparrowhawk";							//dialog\fnc_request_hcCAS, random patrol
+blufor_ARMED_CAR1_X =			"OPTRE_M813_TT";				//random patrol
+blufor_APC1_X =					"OPTRE_M412_IFV_UNSC";		//random patrol
+blufor_APC2_X =					"OPTRE_M413_MGS_UNSC";				//random patrol
+blufor_MBT_TANK1_X =			"OPTRE_M808B_UNSC";			//random patrol
 
 
 ///////////////////////////////////

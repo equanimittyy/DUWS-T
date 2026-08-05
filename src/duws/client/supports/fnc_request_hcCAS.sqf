@@ -3,7 +3,7 @@
 CASInUse = true;
 
 _spawnPos = getmarkerpos str blu_hq_markername;
-_grouptype = [blufor_PLANE_CAS_X];
+_grouptype = [blufor_MISC_AIR_X];
 
 switch (VERSION_X) do {
 	case "MODERN": {

@@ -38,9 +38,9 @@ _soldier3 = format ["s3%1%2",round(_MissionPos select 0),round(_MissionPos selec
 
 _group = createGroup west;
 
-blufor_SOLDIER_TL_X createUnit [[(_BuildingPos select 0),(_BuildingPos select 1)+30], _group,format["this setcaptive true; %1 = this",_soldier1],blufor_ai_skill_random];
-blufor_SOLDIER_LAT_X createUnit [[(_BuildingPos select 0),(_BuildingPos select 1)+31], _group,format["this setcaptive true; %1 = this",_soldier2],blufor_ai_skill_random];
-blufor_SOLDIER_AR_X createUnit [[(_BuildingPos select 0),(_BuildingPos select 1)+32], _group,format["this setcaptive true; %1 = this",_soldier3],blufor_ai_skill_random];
+blufor_TL_SOLDIER_X createUnit [[(_BuildingPos select 0),(_BuildingPos select 1)+30], _group,format["this setcaptive true; %1 = this",_soldier1],blufor_ai_skill_random];
+blufor_LAT_SOLDIER_X createUnit [[(_BuildingPos select 0),(_BuildingPos select 1)+31], _group,format["this setcaptive true; %1 = this",_soldier2],blufor_ai_skill_random];
+blufor_AR_SOLDIER_X createUnit [[(_BuildingPos select 0),(_BuildingPos select 1)+32], _group,format["this setcaptive true; %1 = this",_soldier3],blufor_ai_skill_random];
 
 sleep 5;
 _randPos = selectRandom [3,4,5];

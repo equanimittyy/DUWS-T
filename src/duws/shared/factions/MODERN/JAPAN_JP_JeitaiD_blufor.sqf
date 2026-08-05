@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"Japan_JP_Jeitai_Desert_2012_Soldier_Base";		//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"Japan_JP_Jeitai_Desert_2012_Soldier_LAT";		//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"Japan_JP_Jeitai_Desert_2012_Soldier_GL";		//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"Japan_JP_Jeitai_D_Moderne_Soldier_TL";			//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"Japan_JP_Jeitai_D_Moderne_Soldier_SL";			//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"Japan_JP_Jeitai_D_Moderne_soldier_AR";			//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"Japan_JP_Jeitai_Desert_2012_Soldier_M";		//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"Japan_JP_Jeitai_Desert_2012_Soldier_LAT";		//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"Japan_JP_Jeitai_Desert_2012_Soldier_GL";		//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"Japan_JP_Jeitai_D_Moderne_Soldier_TL";			//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"Japan_JP_Jeitai_D_Moderne_Soldier_SL";			//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"Japan_JP_Jeitai_D_Moderne_soldier_AR";			//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"Japan_JP_Jeitai_Desert_2012_Soldier_M";		//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"Japan_JP_Jeitai_D_Moderne_officer";			//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"Japan_JP_Jeitai_Desert_2012_Soldier_F";		//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"B_Boat_Armed_01_minigun_F";		//supports\taxi\fnc_boatTa
 blufor_BOAT_CREW_X =			"B_Competitor_F";					//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"JPA_MH60M";						//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"Jp_Bell_412";   					//random patrol
-blufor_HELI_ATTACK_X =			"Jp_Cobra_Camo_H";					//dialog\fnc_request_hcATTchop
-blufor_PLANE_CAS_X =			"Japan_Plane_Fighter_03_CAS";		//dialog\fnc_request_hcCAS
-blufor_CAR_PATROL1_X =			"Jp_MRZR_Armed_3";					//random patrol
-blufor_APC_PATROL1_X =			"Jp_IFV_Warrior";					//random patrol
-blufor_APC_PATROL2_X =			"Jp_IFV_Warrior";					//random patrol
-blufor_TANK_PATROL1_X =			"Jp_MBT_Kuma";						//random patrol
+blufor_TRANS_HELI_X =			"Jp_Bell_412";   					//random patrol
+blufor_ATTACK_HELI_X =			"Jp_Cobra_Camo_H";					//dialog\fnc_request_hcATTchop
+blufor_MISC_AIR_X =				"Japan_Plane_Fighter_03_CAS";		//dialog\fnc_request_hcCAS
+blufor_ARMED_CAR1_X =			"Jp_MRZR_Armed_3";					//random patrol
+blufor_APC1_X =					"Jp_IFV_Warrior";					//random patrol
+blufor_APC2_X =					"Jp_IFV_Warrior";					//random patrol
+blufor_MBT_TANK1_X =			"Jp_MBT_Kuma";						//random patrol
 
 
 ///////////////////////////////////

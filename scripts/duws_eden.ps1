@@ -14,7 +14,7 @@
 #
 # UNIT (read-write): scans src/ for
 #   // --DUWS-UNITCOMP BEGIN name="..." kind=composition|team row="..." [rowname="Tier %1"]
-#                          [fields="a, b, c"] [prefix=opfor_]--
+#                          [fields="a, b, c"] [prefix=opfor_|blufor_,opfor_]--
 #   <name> = [ <row>, <row>, ... ];
 #   // --DUWS-UNITCOMP END--
 # and edits the rows in place. These are the spawn tables -- tier compositions, team rosters, the
@@ -28,7 +28,9 @@
 # A table declaring `fields=` has fixed columns rather than a free-length list, and is edited a
 # field at a time with the current value seeded into the line. `prefix=` is the faction prefix its
 # role names carry: it is stripped for display and re-applied on write, and names are checked
-# against the slots the faction tables actually define.
+# against the slots the faction tables actually define. Two prefixes mean a table both armies raise
+# out of -- its names are stored bare, the side is prepended at spawn time, and the check runs
+# against both armies with the worse answer reported.
 #
 # Only the fenced body is ever rewritten, so the reasoning above each table survives editing. A
 # write is refused unless the regenerated text parses back to exactly the model it came from, and
@@ -378,7 +380,7 @@ function Get-UnitComps {
                 Name   = Get-Attr $m.Groups[2].Value 'name="([^"]*)"' '(unnamed)'
                 RowOf  = Get-Attr $m.Groups[2].Value 'row="([^"]*)"' 'row'
                 Fields = Get-Attr $m.Groups[2].Value 'fields="([^"]*)"' ''
-                Prefix = Get-Attr $m.Groups[2].Value 'prefix=([A-Za-z0-9_]+)' ''
+                Prefix = Get-Attr $m.Groups[2].Value 'prefix=([A-Za-z0-9_,]+)' ''
                 # Unclassified tables land under Tokens rather than vanishing from the menu: a table
                 # nobody labelled is still one somebody has to be able to edit.
                 Kind   = Get-Attr $m.Groups[2].Value 'kind=(\w+)' 'team'
@@ -579,9 +581,13 @@ function New-UnitTable {
     Write-Host "           lets the first column name the row." -ForegroundColor DarkGray
     $rowName = & $ask "  rowname (blank = none)" ''
 
-    $prefix = & $ask "  prefix, e.g. opfor_ (blank = none)" ''
-    if ($prefix -ne '' -and $prefix -notmatch '^[A-Za-z0-9_]+$') {
-        Write-Host "  A prefix is letters, digits and underscores." -ForegroundColor Red
+    Write-Host ""
+    Write-Host "  prefix: the faction prefix this table's role names carry. List two, comma" -ForegroundColor DarkGray
+    Write-Host "          separated, for a table both armies raise out of -- its names are then" -ForegroundColor DarkGray
+    Write-Host "          stored bare and checked against both." -ForegroundColor DarkGray
+    $prefix = & $ask "  prefix, e.g. opfor_ or blufor_,opfor_ (blank = none)" ''
+    if ($prefix -ne '' -and $prefix -notmatch '^[A-Za-z0-9_]+(,[A-Za-z0-9_]+)*$') {
+        Write-Host "  A prefix is letters, digits and underscores, or a comma-separated list of them." -ForegroundColor Red
         return
     }
 
@@ -615,10 +621,22 @@ function New-UnitTable {
     }
 }
 
+# A table's prefixes. One table's role names now serve both armies, so `prefix=` may list more than
+# one -- and a listed pair means the names are stored bare, with the side prepended at spawn time.
+function Split-Prefixes($prefix) {
+    if (-not $prefix) { return @() }
+    return @($prefix -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne '' })
+}
+
 # The role vocabulary, read from the faction tables rather than hardcoded. Every faction file fills
 # the same slots, so a name none of them defines is a typo that would spawn nothing, and a name only
 # some define is a roster that quietly thins on the rest -- which is the failure mode the whole
 # faction auto-detection exists to avoid. Both are worth saying out loud before a write.
+#
+# Backfilled roles are counted as covered. A role in DUWS_roleFallbacks is one no faction file on
+# some side has ever named and that fnc_faction_backfill borrows for at load -- flagging it as
+# undefined would put a hard warning on the tool's own answer to the gap, which is the fastest way
+# to teach someone to ignore the warnings.
 function Get-RoleVocab {
     if ($script:roleVocab) { return $script:roleVocab }
     $counts = @{}   # slot name -> how many faction files define it
@@ -640,7 +658,14 @@ function Get-RoleVocab {
             }
         }
     }
-    $script:roleVocab = [pscustomobject]@{ Counts = $counts; Files = $files }
+    $borrowed = @{}
+    $bf = Join-Path $srcDir "duws\shared\functions\fnc_faction_backfill.sqf"
+    if (Test-Path -LiteralPath $bf) {
+        foreach ($m in [regex]::Matches([System.IO.File]::ReadAllText($bf), '(?m)^\s*\[\s*"([A-Za-z0-9_]+_X)"\s*,')) {
+            $borrowed[$m.Groups[1].Value] = $true
+        }
+    }
+    $script:roleVocab = [pscustomobject]@{ Counts = $counts; Files = $files; Borrowed = $borrowed }
     return $script:roleVocab
 }
 
@@ -663,9 +688,32 @@ function Get-PlacerVocab {
 # What a typed name is written back as, and how many faction files define it. Coverage -1 means the
 # value is not a role slot at all: a field may legitimately hold a group token or a team key, and
 # those end in neither _X nor a faction prefix, so they are passed through unchecked.
+#
+# A table listing two prefixes stores its names bare and is checked against both armies, with the
+# worse answer reported: a role every BLUFOR file defines and a handful of OPFOR files do is a
+# roster that thins on OPFOR, and saying so is the whole point of the check.
 function Resolve-Role($name, $prefix) {
     if ($name -notmatch '_X$') { return [pscustomobject]@{ Name = $name; Coverage = -1; Total = 0 } }
     $v = Get-RoleVocab
+    $prefixes = Split-Prefixes $prefix
+    $bare = $name
+    foreach ($p in $prefixes) { if ($bare.StartsWith($p)) { $bare = $bare.Substring($p.Length); break } }
+
+    if ($prefixes.Count -gt 1) {
+        # Stored bare, because no one prefix is the table's: the side is prepended when a team is
+        # raised, and writing either one back here would pin the row to one army.
+        $worst = $null
+        foreach ($p in $prefixes) {
+            $cov = [int]$v.Counts[($p + $bare)]
+            $tot = [int]$v.Files[$p]
+            if ($cov -eq 0 -and $v.Borrowed.ContainsKey($bare)) { $cov = $tot }
+            if ($null -eq $worst -or ($cov - $tot) -lt ($worst.Coverage - $worst.Total)) {
+                $worst = [pscustomobject]@{ Name = $bare; Coverage = $cov; Total = $tot }
+            }
+        }
+        return $worst
+    }
+
     $cands = @($name)
     if ($prefix -and -not $name.StartsWith($prefix)) { $cands += ($prefix + $name) }
     foreach ($c in $cands) {
@@ -677,7 +725,9 @@ function Resolve-Role($name, $prefix) {
     # Unknown, so qualify it the way the table stores its other names: a name written bare would
     # resolve to nothing at runtime and read as the roster silently losing a man.
     $out = if ($prefix -and -not $name.StartsWith($prefix)) { $prefix + $name } else { $name }
-    return [pscustomobject]@{ Name = $out; Coverage = 0; Total = [int]$v.Files[$prefix] }
+    $cov = 0
+    if ($v.Borrowed.ContainsKey($bare)) { $cov = [int]$v.Files[$prefix] }
+    return [pscustomobject]@{ Name = $out; Coverage = $cov; Total = [int]$v.Files[$prefix] }
 }
 
 # What is wrong with a resolved name, or $null when nothing is. Two vocabularies, one question: a
@@ -701,7 +751,13 @@ function Get-NameWarning($r) {
 # A field's literal, shown with quotes and the faction prefix taken off. An empty list or string
 # shows as a dash: "no leader" has to be visible rather than reading as a rendering gap.
 function Show-Field($literal, $prefix) {
-    $strip = { param($s) $t = $s.Trim().Trim('"'); if ($prefix -and $t.StartsWith($prefix)) { $t.Substring($prefix.Length) } else { $t } }
+    $prefixes = Split-Prefixes $prefix
+    $strip = {
+        param($s)
+        $t = $s.Trim().Trim('"')
+        foreach ($p in $prefixes) { if ($t.StartsWith($p)) { return $t.Substring($p.Length) } }
+        return $t
+    }
     if ($literal.StartsWith('[')) {
         # Bound to a variable before piping: Split-Entries returns its array comma-wrapped, so
         # piping the call directly would hand ForEach-Object the whole row as one item.

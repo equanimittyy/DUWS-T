@@ -39,7 +39,7 @@ _maxBuildingsToUse = count _selectedBuildings;
 private _possibleUnitTypes = [([
     "opfor_SOLDIER_X", "opfor_AA_SOLDIER_X", "opfor_AR_SOLDIER_X",
     "opfor_AT_SOLDIER_X", "opfor_LAT_SOLDIER_X", "opfor_SL_SOLDIER_X"
-] apply { [_x] call fnc_faction_pick })] call fnc_opforRoles;
+] apply { [_x] call fnc_faction_pick }), "opfor"] call fnc_factionRoles;
 
 private _bldgUnits = [];
 for "_i" from 1 to (_maxBuildingsToUse * _unitsPerBuilding) do {

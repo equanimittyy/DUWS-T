@@ -324,7 +324,7 @@ missionNamespace setVariable ["HQ_redeploy_weaponData", _weaponData apply {
 // 兵种池。Broadcast because client_init reads it to caption the guards, and because a FOB's own
 // patrol draws from it too (init_hq/fnc_guardsFOB.sqf) -- the HQ_ prefix is where it is set, not
 // who may read it.
-private _baseGuardTypes = [blufor_SOLDIER_X, blufor_SOLDIER_LAT_X, blufor_SOLDIER_GL_X, blufor_SOLDIER_TL_X, blufor_SOLDIER_SL_X, blufor_SOLDIER_AR_X, blufor_MARKSMAN_X];
+private _baseGuardTypes = [blufor_SOLDIER_X, blufor_LAT_SOLDIER_X, blufor_GL_SOLDIER_X, blufor_TL_SOLDIER_X, blufor_SL_SOLDIER_X, blufor_AR_SOLDIER_X, blufor_MARK_SOLDIER_X];
 missionNamespace setVariable ["HQ_redeploy_guardTypes", _baseGuardTypes, true];
 
 missionNamespace setVariable ["HQ_redeploy_towers", _allTowersList, true];

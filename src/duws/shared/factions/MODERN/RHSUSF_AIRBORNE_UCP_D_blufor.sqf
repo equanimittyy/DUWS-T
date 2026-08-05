@@ -11,12 +11,12 @@
 //////////////////////////////////////////////////////////////////////
 
 blufor_SOLDIER_X =				"rhsusf_army_ucp_arb_rifleman";				//patrol, fortify, paradrop
-blufor_SOLDIER_LAT_X =			"rhsusf_army_ucp_arb_maaws";				//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_GL_X =			"rhsusf_army_ucp_arb_grenadier";			//init_hq\fnc_HQguards, supports\fnc_paradrop
-blufor_SOLDIER_TL_X =			"rhsusf_army_ucp_arb_teamleader";			//init_hq\fnc_HQguards
-blufor_SOLDIER_SL_X =			"rhsusf_army_ucp_arb_squadleader";			//Comms voice, Multiplayer slot
-blufor_SOLDIER_AR_X =			"rhsusf_army_ucp_arb_machinegunner";		//supports\fnc_paradrop, init_hq\fnc_HQguards
-blufor_MARKSMAN_X = 			"rhsusf_army_ucp_arb_marksman";				//init_hq\fnc_HQguards
+blufor_LAT_SOLDIER_X =			"rhsusf_army_ucp_arb_maaws";				//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_GL_SOLDIER_X =			"rhsusf_army_ucp_arb_grenadier";			//init_hq\fnc_HQguards, supports\fnc_paradrop
+blufor_TL_SOLDIER_X =			"rhsusf_army_ucp_arb_teamleader";			//init_hq\fnc_HQguards
+blufor_SL_SOLDIER_X =			"rhsusf_army_ucp_arb_squadleader";			//Comms voice, Multiplayer slot
+blufor_AR_SOLDIER_X =			"rhsusf_army_ucp_arb_machinegunner";		//supports\fnc_paradrop, init_hq\fnc_HQguards
+blufor_MARK_SOLDIER_X =			"rhsusf_army_ucp_arb_marksman";				//init_hq\fnc_HQguards
 blufor_OFFICER_X =				"rhsusf_socom_swcc_officer";				//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"rhsusf_army_ucp_helipilot";				//Rescue Pilot mission
 
@@ -24,13 +24,13 @@ blufor_BOAT_ARMED_X	=			"B_Boat_Armed_01_minigun_F";			//supports\taxi\fnc_boatT
 blufor_BOAT_CREW_X =			"C_Man_UtilityWorker_01_F";				//supports\taxi\fnc_boatTaxi
 
 blufor_HELI_TRANS_ARM_X =		"RHS_UH60M_d";						//supports\taxi\fnc_helotaxi, random patrol
-blufor_HELI_TRANS_UNARM_X =		"RHS_CH_47F_10";  					//random patrol
-blufor_HELI_ATTACK_X =			"RHS_AH64D";						//dialog\fnc_request_hcATTchop, random patrol
-blufor_PLANE_CAS_X =			"RHS_A10";							//dialog\fnc_request_hcCAS, random patrol
-blufor_CAR_PATROL1_X =			"rhsusf_m1043_d_m2";				//random patrol
-blufor_APC_PATROL1_X =			"rhsusf_stryker_m1126_m2_d";		//random patrol
-blufor_APC_PATROL2_X =			"RHS_M2A3_BUSKIII";					//random patrol
-blufor_TANK_PATROL1_X =			"rhsusf_m1a2sep1d_usarmy";			//random patrol
+blufor_TRANS_HELI_X =			"RHS_CH_47F_10";  					//random patrol
+blufor_ATTACK_HELI_X =			"RHS_AH64D";						//dialog\fnc_request_hcATTchop, random patrol
+blufor_MISC_AIR_X =				"RHS_A10";							//dialog\fnc_request_hcCAS, random patrol
+blufor_ARMED_CAR1_X =			"rhsusf_m1043_d_m2";				//random patrol
+blufor_APC1_X =					"rhsusf_stryker_m1126_m2_d";		//random patrol
+blufor_APC2_X =					"RHS_M2A3_BUSKIII";					//random patrol
+blufor_MBT_TANK1_X =			"rhsusf_m1a2sep1d_usarmy";			//random patrol
 
 
 ///////////////////////////////////

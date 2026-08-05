@@ -31,7 +31,7 @@ missionNamespace setVariable ["PARADROP_onStation", false];
 switch (VERSION_X) do {
 	case "MODERN": {
 		_spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2)+400];
-		_grouptype = [blufor_HELI_TRANS_UNARM_X];
+		_grouptype = [blufor_TRANS_HELI_X];
 		//_grouptype = ["O_Heli_Light_02_unarmed_F"];
 	};
 };
@@ -91,17 +91,17 @@ private ["_soldier1","_soldier2","_soldier3","_soldier4","_soldier5","_soldier6"
 switch (VERSION_X) do {
 	case "MODERN": {
 		_soldier1 = _group2 createUnit [blufor_SOLDIER_X,[0,0,0],[],0,"form"];
-		_soldier2 = _group2 createUnit [blufor_SOLDIER_LAT_X,[0,0,0],[],0,"form"];
-		_soldier3 = _group2 createUnit [blufor_SOLDIER_GL_X,[0,0,0],[],0,"form"];
+		_soldier2 = _group2 createUnit [blufor_LAT_SOLDIER_X,[0,0,0],[],0,"form"];
+		_soldier3 = _group2 createUnit [blufor_GL_SOLDIER_X,[0,0,0],[],0,"form"];
 		_soldier4 = _group2 createUnit [blufor_SPECOPS_ENG_X,[0,0,0],[],0,"form"];
-		_soldier5 = _group2 createUnit [blufor_SOLDIER_AR_X,[0,0,0],[],0,"form"];
+		_soldier5 = _group2 createUnit [blufor_AR_SOLDIER_X,[0,0,0],[],0,"form"];
 		_soldier6 = _group2 createUnit [blufor_SOLDIER_X,[0,0,0],[],0,"form"];
 		_soldier7 = _group2 createUnit [blufor_SPECOPS_MEDIC_X,[0,0,0],[],0,"form"];
-		_soldier8 = _group2 createUnit [blufor_SOLDIER_AR_X,[0,0,0],[],0,"form"];
-		_soldier9 = _group2 createUnit [blufor_SOLDIER_AR_X,[0,0,0],[],0,"form"];
+		_soldier8 = _group2 createUnit [blufor_AR_SOLDIER_X,[0,0,0],[],0,"form"];
+		_soldier9 = _group2 createUnit [blufor_AR_SOLDIER_X,[0,0,0],[],0,"form"];
 		_soldier10 = _group2 createUnit [blufor_SOLDIER_X,[0,0,0],[],0,"form"];
 		_soldier11 = _group2 createUnit [blufor_SPECOPS_MEDIC_X,[0,0,0],[],0,"form"];
-		_soldier12 = _group2 createUnit [blufor_SOLDIER_AR_X,[0,0,0],[],0,"form"];
+		_soldier12 = _group2 createUnit [blufor_AR_SOLDIER_X,[0,0,0],[],0,"form"];
 	};
 };
 

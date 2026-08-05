@@ -281,7 +281,7 @@ blufor_RQST_UNIT_03_X = ["B_engineer_F", "Engineer", 4];
     (["UNIT"] call fnc_faction_rqst_list),
     [["B_Soldier_F", "Rifleman", 2]]] call fnc_assertEq;
 
-// --- fnc_opforRoles: the spawnable role list a faction table actually resolved ---
+// --- fnc_factionRoles: the spawnable role list a faction table actually resolved ---
 // Last block in the file: it captures fnc_log rather than stubbing it away, because the warning
 // is what makes a faction table that resolved nothing visible at all, and it leaves fnc_log
 // captured and opfor_SOLDIER_X undefined behind it.
@@ -294,36 +294,47 @@ opfor_SOLDIER_X = "O_Soldier_F_fake";
 opfor_AA_SOLDIER_X = "O_Soldier_AA_fake";
 opfor_AR_SOLDIER_X = "O_Soldier_AR_fake";
 
-["opforRoles: a table defining every role keeps all of them, in order",
-    ([[opfor_SOLDIER_X, opfor_AA_SOLDIER_X, opfor_AR_SOLDIER_X]] call fnc_opforRoles),
+["factionRoles: a table defining every role keeps all of them, in order",
+    ([[opfor_SOLDIER_X, opfor_AA_SOLDIER_X, opfor_AR_SOLDIER_X], "opfor"] call fnc_factionRoles),
     ["O_Soldier_F_fake", "O_Soldier_AA_fake", "O_Soldier_AR_fake"]] call fnc_assertEq;
 
 // The array literal is built at the call site, so a role the faction table never defined arrives
 // as a nil element. This is the whole reason the list is walked instead of filtered.
-["opforRoles: a role the table never defined is dropped, not spawned as nil",
-    ([[opfor_SOLDIER_X, opfor_MISSING_ROLE_X, opfor_AR_SOLDIER_X]] call fnc_opforRoles),
+["factionRoles: a role the table never defined is dropped, not spawned as nil",
+    ([[opfor_SOLDIER_X, opfor_MISSING_ROLE_X, opfor_AR_SOLDIER_X], "opfor"] call fnc_factionRoles),
     ["O_Soldier_F_fake", "O_Soldier_AR_fake"]] call fnc_assertEq;
 
 opfor_EMPTY_ROLE_X = "";
-["opforRoles: a role defined as an empty string is dropped too",
-    ([[opfor_SOLDIER_X, opfor_EMPTY_ROLE_X]] call fnc_opforRoles),
+["factionRoles: a role defined as an empty string is dropped too",
+    ([[opfor_SOLDIER_X, opfor_EMPTY_ROLE_X], "opfor"] call fnc_factionRoles),
     ["O_Soldier_F_fake"]] call fnc_assertEq;
 
 DUWS_TEST_LOG = [];
-["opforRoles: a table resolving nothing falls back to the rifleman",
-    ([[opfor_MISSING_ROLE_X, opfor_ALSO_MISSING_X]] call fnc_opforRoles),
+["factionRoles: a table resolving nothing falls back to the rifleman",
+    ([[opfor_MISSING_ROLE_X, opfor_ALSO_MISSING_X], "opfor"] call fnc_factionRoles),
     ["O_Soldier_F_fake"]] call fnc_assertEq;
-["opforRoles: the fallback warns rather than degrading silently",
+["factionRoles: the fallback warns rather than degrading silently",
     (count DUWS_TEST_LOG), 1] call fnc_assertEq;
+
+// The side reaches the fallback, which is the reason it is a parameter at all: a BLUFOR roster that
+// resolved nothing must not hand back an enemy rifleman standing inside a friendly squad.
+blufor_SOLDIER_X = "B_Soldier_F_fake";
+["factionRoles: the fallback rifleman comes from the side asked for",
+    ([[blufor_MISSING_ROLE_X], "blufor"] call fnc_factionRoles),
+    ["B_Soldier_F_fake"]] call fnc_assertEq;
 
 // The case the fallback used to miss: with no rifleman defined either, handing back
 // [opfor_SOLDIER_X] returned [nil] -- the exact outcome the guard exists to prevent.
 opfor_SOLDIER_X = nil;
-["opforRoles: with no rifleman defined either, the fallback is a vanilla class",
-    ([[opfor_MISSING_ROLE_X]] call fnc_opforRoles), ["O_Soldier_F"]] call fnc_assertEq;
+["factionRoles: with no rifleman defined either, the fallback is a vanilla class",
+    ([[opfor_MISSING_ROLE_X], "opfor"] call fnc_factionRoles), ["O_Soldier_F"]] call fnc_assertEq;
 
-["opforRoles: no argument at all still yields a spawnable list",
-    ([] call fnc_opforRoles), ["O_Soldier_F"]] call fnc_assertEq;
+blufor_SOLDIER_X = nil;
+["factionRoles: the vanilla fallback is the side's own, not the other army's",
+    ([[blufor_MISSING_ROLE_X], "blufor"] call fnc_factionRoles), ["B_Soldier_F"]] call fnc_assertEq;
+
+["factionRoles: no roles at all still yields a spawnable list",
+    ([[], "opfor"] call fnc_factionRoles), ["O_Soldier_F"]] call fnc_assertEq;
 
 // --- the shared attrition store: what a mauled garrison redeploys at ---
 // Exercised through the zone wrappers, so the delegation is covered along with the arithmetic. A
@@ -384,11 +395,13 @@ private _band = ["sniper", "patrol", "patrol", "team", "wpteam", "armored", "air
 // Stand-in tables, not the shipped ones: these pin the mechanics -- token lookup, the access filter,
 // attrition -- and the shipped numbers are balance, which a test should not freeze. The extractor
 // pulls named functions, not the globals beside them, so they are set here.
+// Bare role names, as the shipped table holds them: the side is prepended when the team is raised,
+// which is what lets one row serve both armies.
 DUWS_teamRosters = [
-    ["patrol", ["opfor_A_X", "opfor_B_X"], [], ""],
-    ["team", ["opfor_A_X"], ["opfor_C_X"], "opfor_TL_X"],
-    ["wpteam", ["opfor_A_X"], [], ""],
-    ["thin", ["opfor_A_X", "opfor_ABSENT_X"], [], ""]
+    ["patrol", ["A_X", "B_X"], [], ""],
+    ["team", ["A_X"], ["C_X"], "TL_X"],
+    ["wpteam", ["A_X"], [], ""],
+    ["thin", ["A_X", "ABSENT_X"], [], ""]
 ];
 DUWS_spawnVehicles = [
     ["car",    "opfor_CAR_X",  "",           0],
@@ -426,7 +439,7 @@ opfor_TEST_X = "cls_a";
 opfor_PLAIN_X = "cls_plain";
 ["faction_pick: a role with no pool falls back to its global",
     (["opfor_PLAIN_X"] call fnc_faction_pick), "cls_plain"] call fnc_assertEq;
-// Fail closed rather than inventing a class: fnc_opforRoles drops the empty answer, where a
+// Fail closed rather than inventing a class: fnc_factionRoles drops the empty answer, where a
 // substitute would hide a missing role behind a unit that spawns.
 ["faction_pick: a role the faction never defined answers with nothing",
     (["opfor_NEVER_X"] call fnc_faction_pick), ""] call fnc_assertEq;
@@ -522,19 +535,19 @@ private _have = ["patrol","team"];
 // Against the fixture above rather than the shipped rosters: what is under test is how a row
 // expands, and asserting on the live tables would fail every time one is rebalanced.
 ["teamRoster: the core repeats by the multiplier",
-    (["patrol", 3] call DUWS_fnc_teamRoster), ["cls_A","cls_B","cls_A","cls_B","cls_A","cls_B"]] call fnc_assertEq;
+    (["patrol", "opfor", 3] call DUWS_fnc_teamRoster), ["cls_A","cls_B","cls_A","cls_B","cls_A","cls_B"]] call fnc_assertEq;
 // The whole reason the tail and the leader are their own columns: at x3 this is one marksman and
 // one task leader, not three of each.
 ["teamRoster: the tail is added once and the leader leads",
-    (["team", 3] call DUWS_fnc_teamRoster), ["cls_TL","cls_A","cls_A","cls_A","cls_C"]] call fnc_assertEq;
+    (["team", "opfor", 3] call DUWS_fnc_teamRoster), ["cls_TL","cls_A","cls_A","cls_A","cls_C"]] call fnc_assertEq;
 ["teamRoster: a multiplier below one still fields the team once",
-    (["patrol", 0] call DUWS_fnc_teamRoster), ["cls_A","cls_B"]] call fnc_assertEq;
+    (["patrol", "opfor", 0] call DUWS_fnc_teamRoster), ["cls_A","cls_B"]] call fnc_assertEq;
 ["teamRoster: a role this faction does not define is dropped, not spawned as nil",
-    (["thin", 1] call DUWS_fnc_teamRoster), ["cls_A"]] call fnc_assertEq;
+    (["thin", "opfor", 1] call DUWS_fnc_teamRoster), ["cls_A"]] call fnc_assertEq;
 // Nothing rather than a fallback: the caller named a team that does not exist, and inventing men
 // for it would hide the typo behind a garrison that spawns.
 ["teamRoster: an unknown team fields nothing",
-    (["nosuchkind", 2] call DUWS_fnc_teamRoster), []] call fnc_assertEq;
+    (["nosuchkind", "opfor", 2] call DUWS_fnc_teamRoster), []] call fnc_assertEq;
 // The same answer is what tells the spawn path a token is a vehicle class rather than a team.
 ["teamRow: an unknown team has no row",
     (["nosuchkind"] call DUWS_fnc_teamRow), []] call fnc_assertEq;
@@ -563,14 +576,21 @@ private _have = ["patrol","team"];
 
 // fnc_zone_thin drops at random indices, so a thinned roster is asserted by size and by who leads
 // rather than by contents. One core man at x8 is eight, plus the tail is nine, halved is five.
-private _thinned = ["team", 8, 0.5] call DUWS_fnc_teamRoster;
+private _thinned = ["team", "opfor", 8, 0.5] call DUWS_fnc_teamRoster;
 ["teamRoster: attrition thins the men",
     (count _thinned), 6] call fnc_assertEq;
 // The reason thinning happens before the leader is prepended: a section ground down still has one.
 ["teamRoster: attrition never takes the leader",
     (_thinned select 0), "cls_TL"] call fnc_assertEq;
 ["teamRoster: full strength thins nothing",
-    (count (["team", 8, 1] call DUWS_fnc_teamRoster)), 10] call fnc_assertEq;
+    (count (["team", "opfor", 8, 1] call DUWS_fnc_teamRoster)), 10] call fnc_assertEq;
+
+// The join that makes one table serve both armies: the row names a role, the side names the army.
+// Same row, same order, other side's men.
+blufor_A_X = "cls_blu_A";
+blufor_B_X = "cls_blu_B";
+["teamRoster: the side is prepended, so one row raises either army",
+    (["patrol", "blufor", 1] call DUWS_fnc_teamRoster), ["cls_blu_A", "cls_blu_B"]] call fnc_assertEq;
 
 // --- fnc_selectNonEmpty: first non-empty candidate, and never nil ---
 ["selectNonEmpty: the first non-empty candidate wins",
@@ -609,7 +629,7 @@ fnc_faction_keep = {
     (["opfor_AT_SOLDIER_X", [[], []], "O_Soldier_AT_F"] call fnc_faction_resolve),
     ["O_Soldier_AT_F"]] call fnc_assertEq;
 // A role the faction never fields is left empty on purpose: fnc_faction_pick returns "" and
-// fnc_opforRoles drops it, where inventing a class would hide the gap behind a unit that spawns.
+// fnc_factionRoles drops it, where inventing a class would hide the gap behind a unit that spawns.
 ["faction_resolve: nothing survives, including the fallback, gives []",
     (["opfor_AT_SOLDIER_X", [[], []], "rejected"] call fnc_faction_resolve), []] call fnc_assertEq;
 ["faction_resolve: a vehicle key is gated as a vehicle",
@@ -638,12 +658,60 @@ private _rows = (["blufor"] call fnc_faction_schema) + (["opfor"] call fnc_facti
     ["blufor_TURRET_AA", "blufor_TURRET_AT", "blufor_TURRET_HMG", "blufor_TURRET_GMG",
      "blufor_TURRET_MORTAR", "opfor_TURRET_AA", "opfor_TURRET_AT", "opfor_TURRET_HMG",
      "opfor_TURRET_GMG", "opfor_TURRET_MORTAR"]] call fnc_assertEq;
-// The keys no shipped faction file defines. Marking one required fails every paste a player
-// already has, including one copied out of factions/MODERN/.
-["faction_schema: the statics added after the faction files are optional",
+// The keys no shipped faction file defines -- the three roles the shared rosters name that BLUFOR
+// has never had, and the statics added after the faction files were written. Marking one required
+// fails every paste a player already has, including one copied out of factions/MODERN/.
+["faction_schema: the keys no faction file defines are optional",
     (_rows select {!(_x select 3)} apply {_x select 0}),
-    ["blufor_TURRET_MORTAR", "opfor_TURRET_AA", "opfor_TURRET_AT", "opfor_TURRET_GMG",
+    ["blufor_AA_SOLDIER_X", "blufor_AT_SOLDIER_X", "blufor_SNIPER_SOLDIER_X",
+     "blufor_TURRET_MORTAR", "opfor_TURRET_AA", "opfor_TURRET_AT", "opfor_TURRET_GMG",
      "opfor_TURRET_MORTAR"]] call fnc_assertEq;
+
+// What lets a roster name a role bare: the same key in the same slot on both sides. A pair that
+// drifts apart puts one army's row on the wrong line of the confirmation screen and, worse, makes a
+// shared team row resolve on one side only.
+// select [7] / select [6] drop "blufor_" and "opfor_", leaving the bare role a roster row names.
+private _shared = ["INFANTRY", "VEHICLES", "STATIC", "OPERATORS"];
+["faction_schema: the shared sections hold the same roles in the same order on both sides",
+    ((["blufor"] call fnc_faction_schema) select {(_x select 1) in _shared}
+        apply {(_x select 0) select [7]}),
+    ((["opfor"] call fnc_faction_schema) select {(_x select 1) in _shared}
+        apply {(_x select 0) select [6]})] call fnc_assertEq;
+
+// --- fnc_faction_backfill: a role one side's faction files never named ---
+// Stand-in table, as everywhere else here: what is under test is that an empty key borrows from the
+// first rung that resolves and a filled one is left alone, not which roles the shipped ladder names.
+DUWS_roleFallbacks = [
+    ["TEST_AA_X",      ["TEST_SPEC_AA_X", "TEST_LAT_X", "TEST_RIFLE_X"]],
+    ["TEST_KEPT_X",    ["TEST_RIFLE_X"]],
+    ["TEST_NOWHERE_X", ["TEST_ABSENT_X"]]
+];
+blufor_TEST_RIFLE_X = "cls_rifle";
+blufor_TEST_LAT_X = ["cls_lat1", "cls_lat2"];
+blufor_TEST_SPEC_AA_X = "";
+blufor_TEST_AA_X = "";
+blufor_TEST_KEPT_X = "cls_kept";
+blufor_TEST_NOWHERE_X = "";
+
+// Captured again rather than silenced: the log line is the borrow being visible at all, which is
+// the whole difference between this and the roles quietly going missing.
+DUWS_TEST_LOG = [];
+fnc_log = { DUWS_TEST_LOG pushBack _this };
+["blufor"] call fnc_faction_backfill;
+
+// The empty rung above it is skipped, so the ladder reads as what the role degrades through. The
+// whole pool crosses rather than one class off the top of it, or the borrowed role would be the one
+// slot in a composition that never varies.
+["backfill: an empty key takes the first rung that resolves, pool and all",
+    blufor_TEST_AA_X, ["cls_lat1", "cls_lat2"]] call fnc_assertEq;
+["backfill: a key the faction defined is left alone",
+    blufor_TEST_KEPT_X, "cls_kept"] call fnc_assertEq;
+// Inventing a class here would hide a missing role behind a man who spawns, which is the failure
+// this whole area is built to avoid.
+["backfill: a key with no rung under it stays empty",
+    blufor_TEST_NOWHERE_X, ""] call fnc_assertEq;
+["backfill: it says so either way -- one borrow and one gap",
+    (count DUWS_TEST_LOG), 2] call fnc_assertEq;
 
 // --- fnc_static_resolve: placeholder class to faction class ---
 // The table is stubbed to two rows: what is under test is which key a placeholder asks for and what
