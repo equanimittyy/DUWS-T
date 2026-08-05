@@ -9,6 +9,11 @@
 // Role token per placeholder class. Every side's variant of each family, not only the classes the
 // shipped compositions use, so a gun swapped in Eden still resolves. The autonomous (_A_F) sentries
 // are deliberately absent: they are unmanned by design, and a role would have the zone crew them.
+//
+// High and crouch-height mounts share a role, so the mount an author placed is not the one that
+// stands. Compositions therefore place the high variant, whose height their Z was measured against.
+// A role per mount would not help: 252 of the 255 faction files name TURRET_HMG by hand and none
+// would name the new key, so each falls back to the gun it already has.
 // --DUWS-UNITCOMP BEGIN name="Static weapon roles" kind=team row="class, role" fields="class, role"--
 DUWS_staticRoles = [
     ["B_HMG_01_F",         "HMG"],

@@ -100,6 +100,19 @@ ignores anything past index 4.
 killhouse is a multi-floor structure that would collapse if snapped, so it declares `z=keep`
 alongside `zbase=_centerSpawnZ` to sit at its original off-map altitude (~1000).
 
+**What the offsets mean once the composition is placed.** X is metres east and Y metres north of the
+site's centre, in the frame the front marker above points down. Z is read only for the rows a
+consumer treats as weapons: the zone prefabs hand those to `fnc_static_place` in `"world"` mode,
+where Z is height above the terrain *at the site centre* and is written absolutely — nothing
+re-snaps it, and the object is frozen until its gunner is seated. Every other row is ground-snapped
+and its Z discarded. So a gun authored to stand on a roof holds its height against the centre while
+the building beneath it finds its own ground, and on a slope the two part company.
+
+**Crew placed in Eden is ignored.** Statics arrive in the editor with gunners; the export writes
+five columns and crew is not one of them, and each prefab spawns and seats its own at build time
+(`fnc_modern_FieldHospital.sqf:142-153`), then the zone re-seats them every streaming cycle.
+Deleting them or leaving them changes nothing.
+
 **A static weapon's class is a role token at runtime, not the gun that gets placed.**
 `fnc_static_resolve` (`shared/functions/fnc_static_roles.sqf`) reads the class off the row, looks it
 up in `DUWS_staticRoles`, and stands whatever the placing side's faction fields for that role — so
@@ -108,6 +121,14 @@ silhouette in the 3D view. Rearranging and rotating are free; retyping a class i
 The class still decides what the import draws, which is the point of keeping a vanilla one in the
 row: the layout is arranged against the right silhouettes whether or not a mod is loaded. A class
 the table does not carry is placed as itself, so an unmapped gun is quietly no longer faction-aware.
+
+**Place the high-mount HMG and GMG, never the crouch-height one.** `DUWS_staticRoles` maps both
+mounts of a family to one role, so which one stands is the faction's choice and not the author's —
+but the row's Z was measured against the silhouette in the 3D view, and a gun a metre shorter than
+the one it was arranged around sits a metre wrong. A second role per mount would not fix that: 252
+of the 255 faction files name `TURRET_HMG` by hand and none would name the new key, so each would
+fall back to the gun it already has. The heights those files actually name spread wider than one
+mount does anyway, from a low `CUP_O_DSHKM_SLA` tripod to `rhs_KORD_high_MSV`.
 
 **Export** — after rearranging in Eden, run this in the same console to copy schema-agnostic
 `[class, dx, dy, dz, dir°]` rows (offsets from the import origin):
@@ -147,10 +168,12 @@ Fold the rows back into the source array by these rules:
   or dir actually moved.
 - **X/Y and direction** drop straight in. For the **HQ**, add `_hqInComp` (10.0413, 11.3066) to X/Y —
   its array stores original composition coordinates, not offsets.
-- **Ignore the exported Z for ground layouts.** It is the terrain baseline of wherever you dropped
-  the composition in Eden, not a real coordinate, and the runtime ignores the Z column anyway. Only
-  the **killhouse** uses Z, as a floor offset: export it with `_origin`'s Z set to its
-  `_centerSpawnZ` (1000) so the values come back raw.
+- **The exported Z does not fold straight back.** It is the terrain baseline of wherever you dropped
+  the composition in Eden, not a real coordinate. Ground rows discard Z at runtime, so it does not
+  matter there. Weapon rows do not — see above — so a gun moved vertically has to have its Z worked
+  out against the site centre rather than copied out of the export. The **killhouse** is the one
+  layout that exports Z usefully: set `_origin`'s Z to its `_centerSpawnZ` (1000) and the floor
+  offsets come back raw.
 - **Keep the trailing fields.** Carry each row's `isWeapon` flag over; a rearrange never changes it
   and the export does not emit it.
 
