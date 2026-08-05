@@ -631,12 +631,18 @@ function Update-StaticFence($comp) {
     # The anchor ConvertTo-Rows took off the source rows goes back on: the HQ array stores
     # composition coordinates, and a paste is offsets.
     $anchor = Get-AnchorXY $comp
-    $lines  = @($comp.Body -split "`r?`n")
-    $first  = 0; while ($first -lt $lines.Count -and $lines[$first] -notmatch '^\s*\["') { $first++ }
-    $last   = $lines.Count - 1; while ($last -ge 0 -and $lines[$last] -notmatch '^\s*\["') { $last-- }
-    if ($first -gt $last) { Write-Host "  Could not find the row lines to replace; refusing." -ForegroundColor Red; return }
-    $indent = if ($lines[$first] -match '^([ \t]+)') { $Matches[1] } else { '    ' }
-    $dropped = @($lines[$first..$last] | Where-Object { $_ -notmatch '^\s*\["' -and $_.Trim() -ne '' }).Count
+    $nl     = Get-Newline $comp.Body
+
+    # Row indent from the first clean row line the body has, else the canonical four spaces. Only the
+    # leading whitespace of the rebuilt rows rides on it.
+    $rowLine = @($comp.Body -split "`r?`n" | Where-Object { $_ -match '^\s*\["' })
+    $indent  = if ($rowLine.Count -gt 0 -and $rowLine[0] -match '^([ \t]+)') { $Matches[1] } else { '    ' }
+
+    # A rebuild from the paste keeps only rows: an interior comment line -- not a row, the declaration
+    # or the close -- does not survive.
+    $dropped = @($comp.Body -split "`r?`n" | Where-Object {
+        $_ -notmatch '^\s*\["' -and $_ -notmatch '=\s*\[' -and $_ -notmatch '\];?\s*$' -and $_.Trim() -ne ''
+    }).Count
     if ($dropped -gt 0) {
         Write-Host ("  Note: {0} comment line(s) inside the array are not carried over." -f $dropped) -ForegroundColor Yellow
     }
@@ -648,12 +654,14 @@ function Update-StaticFence($comp) {
             (Fmt ($new[$i].OX + $anchor[0])), (Fmt ($new[$i].OY + $anchor[1])),
             (Fmt ($new[$i].OZ - $zDrop)), (Fmt $new[$i].Dir), $tail)
     }
-    # Sliced rather than indexed blind: PowerShell reads 0..-1 as "first and last", so a body whose
-    # very first line is a row would otherwise fold that line's neighbour into the declaration.
-    $pre  = if ($first -gt 0) { @($lines[0..($first - 1)]) } else { @() }
-    $post = if ($last -lt ($lines.Count - 1)) { @($lines[($last + 1)..($lines.Count - 1)]) } else { @() }
-    $nl   = Get-Newline $comp.Body
-    $body = ($pre + ($rowStrs -join ",$nl") + $post) -join $nl
+
+    # Rebuilt canonically rather than by splicing the old row span. An export can glue the declaration
+    # onto the first row and the closing "];" onto the last; locating rows by pattern then mis-reads
+    # either as a row -- dropping the "];" or folding a row into the declaration. The declaration is
+    # the body up to and including the array's opening "[" (a variable name carries none), the rows are
+    # the paste, and the close is always its own "];".
+    $decl = ($comp.Body.Substring(0, $comp.Body.IndexOf('[') + 1)).TrimEnd()
+    $body = $decl + $nl + ($rowStrs -join ",$nl") + $nl + '];'
 
     if (Save-CompFence $comp $body) {
         Write-Host ("  Rewrote '{0}' in {1}. Review the diff before committing." -f $comp.Name, (Split-Path -Leaf $comp.File)) -ForegroundColor Green
