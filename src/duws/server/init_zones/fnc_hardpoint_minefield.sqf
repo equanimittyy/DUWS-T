@@ -9,6 +9,9 @@
 // Vanilla mine classes only: the same footing as the Land_* props the compositions use, so nothing
 // here forces a mod. east revealMine marks each mine as OPFOR-laid, which keeps OPFOR AI off its own
 // field and leaves BLUFOR to detect and clear it.
+//
+// A handful of Land_Sign_Mines_F sit inside the field as dressing -- warning enough for a careful
+// player to notice, too sparse and too interior to trace where its edges are.
 
 // The classes each variant draws from, one picked per lattice cell. A table beside its only reader,
 // the way DUWS_staticRoles sits by its resolver, so the AT/AP sets are edited as data not code.
@@ -43,6 +46,22 @@ fnc_hardpoint_minefield = {
         if (_key != "") then { [_mine, _key] call fnc_duws_keep };
         _mines pushBack _mine;
     } forEach ([_cols, _rows, _spacing] call fnc_hardpoint_minefield_lattice);
+
+    // Count scales with the field but caps low, and the roll makes some fields go unmarked. Placed
+    // within the inner 80% so no sign sits on the boundary it would otherwise betray. Signs are
+    // dressing, filed for teardown but kept out of the returned hazard list.
+    private _maxSigns = (round ((_cols * _rows) / 12)) min 4;
+    private _halfW = (_cols - 1) * _spacing / 2;
+    private _halfD = (_rows - 1) * _spacing / 2;
+    for "_i" from 1 to (round (random _maxSigns)) do {
+        private _sx = ((random 2) - 1) * _halfW * 0.8;
+        private _sy = ((random 2) - 1) * _halfD * 0.8;
+        private _wx = _cx + _sx * cos _dir + _sy * sin _dir;
+        private _wy = _cy - _sx * sin _dir + _sy * cos _dir;
+        private _sign = createVehicle ["Land_Sign_Mines_F", [_wx, _wy, 0], [], 0, "CAN_COLLIDE"];
+        _sign setDir (random 360);
+        if (_key != "") then { [_sign, _key] call fnc_duws_keep };
+    };
 
     _mines
 };

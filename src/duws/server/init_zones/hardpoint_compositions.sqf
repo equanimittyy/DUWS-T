@@ -69,12 +69,6 @@ DUWS_hardpointComp_MG = [    ["Land_BagBunker_Small_F", -0.145386, 0.259277, 0.9
 ];
 // --DUWS-COMPOSITION END--
 
-// --DUWS-COMPOSITION BEGIN name="Hardpoint: Minefield" schema=A--
-DUWS_hardpointComp_MINEFIELD = [
-    ["Land_BagFence_Short_F", 0, 0, 0, 0, false]
-];
-// --DUWS-COMPOSITION END--
-
 // --DUWS-COMPOSITION BEGIN name="Hardpoint: Mortar Pit" schema=A--
 DUWS_hardpointComp_MORTAR = [    ["Land_HBarrier_5_F", -5.04614, 0.517578, 0.74121, 89.9076, false],
     ["Land_HBarrier_5_F", 2.62061, 4.30078, 0.74121, 358.18, false],
