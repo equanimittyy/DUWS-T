@@ -381,29 +381,25 @@ private _band = ["sniper", "patrol", "patrol", "team", "wpteam", "armored", "air
     (["untiered"] call fnc_zone_tier), 4] call fnc_assertEq;
 
 // --- the spawn composition framework ---
-// Stand-in tables, not the shipped ones: these pin the mechanics -- category lookup, per-category
-// multiplication, the access filter -- and the shipped numbers are balance, which a test should not
-// freeze. The extractor pulls named functions, not the globals beside them, so they are set here.
-DUWS_spawnCategories = [["infantry"], ["light"], ["armour"], ["air"]];
-// Every token carries its own category on its own row, in whichever table claims it.
-// "misfiled" names a category that does not exist, which the tool lets a user type.
+// Stand-in tables, not the shipped ones: these pin the mechanics -- token lookup, the access filter,
+// attrition -- and the shipped numbers are balance, which a test should not freeze. The extractor
+// pulls named functions, not the globals beside them, so they are set here.
 DUWS_teamRosters = [
-    ["patrol", "infantry", ["opfor_A_X", "opfor_B_X"], [], ""],
-    ["team", "infantry", ["opfor_A_X"], ["opfor_C_X"], "opfor_TL_X"],
-    ["wpteam", "infantry", ["opfor_A_X"], [], ""],
-    ["thin", "infantry", ["opfor_A_X", "opfor_ABSENT_X"], [], ""],
-    ["misfiled", "cavalry", ["opfor_A_X"], [], ""]
+    ["patrol", ["opfor_A_X", "opfor_B_X"], [], ""],
+    ["team", ["opfor_A_X"], ["opfor_C_X"], "opfor_TL_X"],
+    ["wpteam", ["opfor_A_X"], [], ""],
+    ["thin", ["opfor_A_X", "opfor_ABSENT_X"], [], ""]
 ];
 DUWS_spawnVehicles = [
-    ["car",    "light",  "opfor_CAR_X",  "",           0],
-    ["apc",    "armour", "opfor_APC_X",  "",           0],
-    ["tank",   "armour", "opfor_TANK_X", "TEST_Heavy", 100],
-    ["heli",   "air",    "opfor_HELI_X", "TEST_Air",   0],
-    ["absent", "light",  "opfor_GONE_X", "",           0]
+    ["car",    "opfor_CAR_X",  "",           0],
+    ["apc",    "opfor_APC_X",  "",           0],
+    ["tank",   "opfor_TANK_X", "TEST_Heavy", 100],
+    ["heli",   "opfor_HELI_X", "TEST_Air",   0],
+    ["absent", "opfor_GONE_X", "",           0]
 ];
 DUWS_spawnSpecials = [
-    ["buildings", "infantry",      "houses", "fnc_garrisonBuildings", [8, 3, 2, "AUTO", false], true],
-    ["mortar",    "fortification", "tube",   "fnc_garrisonMortar",    [],                       false]
+    ["buildings", "houses", "fnc_garrisonBuildings", [8, 3, 2, "AUTO", false], true],
+    ["mortar",    "tube",   "fnc_garrisonMortar",    [],                       false]
 ];
 opfor_A_X = "cls_A";
 opfor_B_X = "cls_B";
@@ -416,18 +412,8 @@ opfor_HELI_X = "cls_heli";
 TEST_Heavy = 1;
 TEST_Air = 1;
 WARCOM_opfor_ap = 200;
-DUWS_zoneRadiusMult = [[101, 1, 1, 0, 0, 1], [1e11, 3, 1, 2, 1, 1]];
 DUWS_zoneSpawnTiers = [["patrol"], ["patrol", "car"], ["patrol", "apc"],
     ["patrol", "team", "car", "apc", "heli"]];
-
-["spawnCategory: a team is filed by the category on its own row",
-    (["wpteam"] call DUWS_fnc_spawnCategory), "infantry"] call fnc_assertEq;
-["spawnCategory: a vehicle is filed by the category on its own row",
-    (["apc"] call DUWS_fnc_spawnCategory), "armour"] call fnc_assertEq;
-// A faction file may name a vehicle class directly and the spawner places it as itself. It must
-// still spawn, and at one per entry rather than at the armour multiplier.
-["spawnCategory: an unlisted token is treated as light rather than dropped",
-    (["O_MBT_02_cannon_F"] call DUWS_fnc_spawnCategory), "light"] call fnc_assertEq;
 
 // --- fnc_faction_pick: one classname per spawn, drawn from the detected pool ---
 // The pool is what detection found; the global is a stable representative for the two hundred-odd
@@ -454,8 +440,6 @@ opfor_EMPTY_X = [];
     (["apc"] call DUWS_fnc_tokenClass), "cls_apc"] call fnc_assertEq;
 ["tokenClass: a team answers for itself rather than resolving to a vehicle",
     (["patrol"] call DUWS_fnc_tokenClass), "patrol"] call fnc_assertEq;
-["spawnCategory: a special is filed by the category on its own row",
-    (["buildings"] call DUWS_fnc_spawnCategory), "infantry"] call fnc_assertEq;
 ["tokenClass: a special is not a vehicle and survives the filter",
     (["buildings"] call DUWS_fnc_tokenClass), "buildings"] call fnc_assertEq;
 ["tokenClass: a classname no table claims stands as itself",
@@ -476,35 +460,17 @@ WARCOM_opfor_ap = 100;
     (["tank"] call DUWS_fnc_tokenClass), "cls_tank"] call fnc_assertEq;
 WARCOM_opfor_ap = 200;
 
-// A category is editable, so a name that is not one is reachable. The multiplier is found by the
-// category's position in the map, so an unchecked name resolves to index 0 -- the radius ceiling --
-// and the zone would try to field 1e11 groups.
-DUWS_TEST_LOG = [];
-fnc_log = { DUWS_TEST_LOG pushBack _this };
-["spawnCategory: a category that does not exist scales as light rather than by the ceiling",
-    (["misfiled"] call DUWS_fnc_spawnCategory), "light"] call fnc_assertEq;
-["spawnCategory: and says so rather than degrading silently",
-    (count DUWS_TEST_LOG), 1] call fnc_assertEq;
-private _savedTiers = +DUWS_zoneSpawnTiers;
-DUWS_zoneSpawnTiers = [["misfiled"]];
-["zoneSpawnList: a misfiled team fields one group, not the radius ceiling",
-    (count ([1, 50] call DUWS_fnc_zoneSpawnList)), 1] call fnc_assertEq;
-DUWS_zoneSpawnTiers = _savedTiers;
-
-["zoneSpawnList: a small zone drops the categories its band zeroes",
-    ([4, 50] call DUWS_fnc_zoneSpawnList), ["patrol", "team", "car"]] call fnc_assertEq;
-["zoneSpawnList: a large zone repeats each entry by its own category multiplier",
-    ([4, 5000] call DUWS_fnc_zoneSpawnList),
-    ["patrol","patrol","patrol","team","team","team","car","apc","apc","heli"]] call fnc_assertEq;
+["zoneSpawnList: a tier fields its row, one group per entry",
+    ([4] call DUWS_fnc_zoneSpawnList),
+    ["patrol", "team", "car", "apc", "heli"]] call fnc_assertEq;
 TEST_Air = 0;
-["zoneSpawnList: a category the campaign switched off leaves a gap, not a substitute",
-    ([4, 5000] call DUWS_fnc_zoneSpawnList),
-    ["patrol","patrol","patrol","team","team","team","car","apc","apc"]] call fnc_assertEq;
+["zoneSpawnList: a token the campaign switched off leaves a gap, not a substitute",
+    ([4] call DUWS_fnc_zoneSpawnList), ["patrol", "team", "car", "apc"]] call fnc_assertEq;
 TEST_Air = 1;
-["zoneSpawnList: tier picks the composition, radius only scales it",
-    ([1, 5000] call DUWS_fnc_zoneSpawnList), ["patrol","patrol","patrol"]] call fnc_assertEq;
+["zoneSpawnList: the tier is the whole of what a zone fields",
+    ([1] call DUWS_fnc_zoneSpawnList), ["patrol"]] call fnc_assertEq;
 ["zoneSpawnList: a tier above the table clamps rather than faulting",
-    ([9, 50] call DUWS_fnc_zoneSpawnList), ["patrol", "team", "car"]] call fnc_assertEq;
+    ([9] call DUWS_fnc_zoneSpawnList), ["patrol", "team", "car", "apc", "heli"]] call fnc_assertEq;
 
 // --- attrition is a fraction of men, so a token carries its own share of it ---
 // An entry is not a unit: "patrol" is two men and "car" is a vehicle, so dropping entries at random
@@ -572,8 +538,6 @@ private _have = ["patrol","team"];
 // The same answer is what tells the spawn path a token is a vehicle class rather than a team.
 ["teamRow: an unknown team has no row",
     (["nosuchkind"] call DUWS_fnc_teamRow), []] call fnc_assertEq;
-["teamRow: a team's category is on its row",
-    ((["wpteam"] call DUWS_fnc_teamRow) select 1), "infantry"] call fnc_assertEq;
 
 ["tokenName: a posture-carrying token names the team behind it",
     (["garrison:team"] call DUWS_fnc_tokenName), "team"] call fnc_assertEq;
@@ -590,8 +554,6 @@ private _have = ["patrol","team"];
     ((["garrison:team"] call DUWS_fnc_teamRow) select 0), "team"] call fnc_assertEq;
 ["vehicleRow: and so does a vehicle's",
     ((["closepatrol:apc"] call DUWS_fnc_vehicleRow) select 0), "apc"] call fnc_assertEq;
-["spawnCategory: a posture does not change which category scales a token",
-    (["garrison:apc"] call DUWS_fnc_spawnCategory), "armour"] call fnc_assertEq;
 // fnc_spawn_vehicle is handed this as a classname, so the posture has to be gone by here.
 ["tokenClass: a posture-carrying classname passes through without its posture",
     (["garrison:O_MBT_02_cannon_F"] call DUWS_fnc_tokenClass), "O_MBT_02_cannon_F"] call fnc_assertEq;

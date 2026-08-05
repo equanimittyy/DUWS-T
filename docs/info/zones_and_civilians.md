@@ -136,13 +136,12 @@ the whole garrison, so what a tier IV zone is reads off one line instead of bein
 four. Tier reaches only the units a zone spawns alongside itself; the prefab, the fortification
 scatter and their crews are not part of it.
 
-**Tier therefore moves a minority of the fight.** The mobile half of a zone's composition scales
-with the tier row and the radius band; a tier I zone at 500 m is about seventeen men. The dug-in half
-— six `garrison:fortified` slots and the `mortar` pair — sits on every tier row, so it is
-about thirty men, scales with attrition alone, and is identical at every tier. So the whole I-to-IV ladder is worth roughly sixteen men against a garrison
-of fifty, and a tier I zone is not the soft objective the ladder implies. That sameness is now a
-table edit rather than a second spawner: deleting garrison slots off the lower rows is all it takes
-to make a tier I zone genuinely thinner.
+**Tier moves the whole fight, dug-in half included.** A row is what the zone raises and nothing
+multiplies it afterwards, so a repeated entry is how a tier fields two of something. Most of the
+ladder's weight is in the dug-in half — the `garrison:fortified` slots and the `mortar` pair — which
+climbs from two slots at tier I to six at tier IV: about thirty men at tier I against about seventy
+at tier IV. Hold that half flat across the rows and the ladder collapses onto the mobile half, which
+is a minority of a zone's men.
 `fnc_zone_tier_roll` refuses to roll twice. `fnc_createzone` is re-entrant by design — `zone_meta_array`
 exists so a zone can be rebuilt through it — and a rebuild that re-rolled would change what the ground
 is worth behind the player's back and disagree with the garrison peak already measured against the old
@@ -185,30 +184,19 @@ because OPFOR can hold a town whose garrison was just destroyed; there is no equ
 protect, since a beaten zone garrison means the zone changed hands
 ([§The two OPFOR garrison states](#the-two-opfor-garrison-states)).
 
-#### Radius multiplies each category, not the whole list
+#### Radius reaches placement, not composition
 
-A tier composition says *what* a zone fields; its radius says *how many*. Every token belongs to a
-category, carried on its own row in whichever table claims it — `DUWS_teamRosters`,
-`DUWS_spawnVehicles` or `DUWS_spawnSpecials`, with `DUWS_spawnCategories` holding the vocabulary and
-nothing else — and `DUWS_zoneRadiusMult` gives one multiplier per category per radius band, because
-a zone's radius scales its garrison unevenly. More ground needs proportionally more infantry to
-cover it and does not need more aircraft, and a flat multiplier on the whole list would buy the
-biggest zones three times the air support alongside three times the riflemen.
+**A composition must not be scaled by a zone's radius.** The map reports a zone's tier, so a radius
+multiplier puts two zones the readout calls tier IV on the ground at different strengths, for a
+reason the player cannot read off either. `DUWS_fnc_zoneSpawnList` therefore takes the tier and
+nothing else.
 
-**The two tables are positionally locked**: one multiplier per category, in `DUWS_spawnCategories`
-order, after the radius ceiling. Reordering either without the other scales armour by the air column,
-which is a balance change with nothing in the log to show for it. `DUWS_fnc_spawnCategory` checks
-the category it is about to return against that table for the same reason: the multiplier is found
-by the category's *position*, so a name that is not in it would resolve to the radius-ceiling column
-and field that many groups. A team's category is editable, so that is reachable rather than
-theoretical.
+What radius does decide is where the same men stand and what the ground is worth: the spread
+`DUWS_fnc_raiseGarrison` places them over, the capture trigger's area, the map marker, and the CP
+value (`round (radius / 10)`, `fnc_locatorzones_random.sqf:46`). A large zone is the same garrison
+sitting thinner, which is the difference a player can see.
 
-An unlisted token is a vehicle classname a faction file named directly, which `DUWS_fnc_tokenClass`
-passes through unchanged for `fnc_spawn_vehicle` to place. Those count as `light` — multiplier one
-everywhere — so a mod's own class still spawns and never at three times the intended count.
-
-Zones cap at what the largest radius asks of a tier IV composition, which is where the old
-radius-band table topped out. Towns are not multiplied by radius at all — see
+Towns are not scaled by radius either, so both kinds of ground size themselves the same way — see
 [§Garrison tiers 0 to IV](#garrison-tiers-0-to-iv).
 
 #### A posture reaches groups, and only groups
@@ -434,10 +422,10 @@ The compositions live as data in `DUWS_townSpawnTiers`, in the token vocabulary
 `DUWS_fnc_zoneSpawnOne` already understands — the same spawner the zone compositions use, so a town
 garrison inherits faction auto-detection for free.
 
-**A town's set is its own, and is deliberately smaller than any zone's.** It is also *not* multiplied
-by the town's radius the way a zone composition is ([§Radius multiplies each category](#radius-multiplies-each-category-not-the-whole-list)):
-a large town scaled like a large zone stops being a garrison and becomes a zone that happens to have
-civilians in it, which is the distinction static emplacements exist to draw.
+**A town's set is its own, and is deliberately smaller than any zone's.** Neither set is scaled by
+the ground's radius ([§Radius reaches placement, not composition](#radius-reaches-placement-not-composition)):
+a large town scaled up stops being a garrison and becomes a zone that happens to have civilians in
+it, which is the distinction static emplacements exist to draw.
 
 **Rows are absolute, not cumulative** — a row is the whole garrison for that tier. A tier bought
 while the garrison stands raises `DUWS_fnc_spawnDiff` of the standing composition against the new
@@ -659,7 +647,7 @@ about.
 | Step | What happens | State on the readout |
 |---|---|---|
 | Generated | OPFOR-held. Rolls a tier I–IV, weighted to IV. Strength `1.0`. No men | tier + full bar |
-| You come within radius + 400 m | Props deploy, turret crews man the prefab's guns, the band is raised: tier composition × per-category radius multiplier, thinned by strength. Peak published | tier + bar |
+| You come within radius + 400 m | Props deploy, turret crews man the prefab's guns, the band is raised: the tier composition, thinned by strength. Peak published | tier + bar |
 | You leave for 2 min | Survivors counted, strength recorded (never upward), the zone's own men deleted by roster, props stowed, peak cleared | tier + the bar it will return at |
 | You beat it to 20 % **and** outnumber the OPFOR left in the zone | Ownership flips. CP bounty, AP swings. Survivors are sent off and then collected once no player is within 500 m — a capture is watched by definition. The prefab and its turrets stay, yours now | `Held by BLUFOR` |
 | OPFOR retake (`EAST SEIZED`) | Strength floored to `0.3`. Streaming re-latches | **`Mobilising`** |
@@ -767,11 +755,11 @@ more usefully — **which of them cannot be moved alone.**
   deadline further out than *the longest hold* as one a previous session wrote. Add a longer hold
   without moving that bound and a genuine deadline gets discarded as stale.
 
-**Two figures that are arithmetic rather than balance.** Tier IV at the largest radius lands on
-roughly twenty-one groups, which is where the radius-band table it replaced topped out — raising it
-raises the campaign's spawn ceiling, not just that zone. And a town's tier IV carries six
-`garrison:team` slots to match the six `garrison:fortified` on every zone row; changing one without
-the other makes "tier IV reaches the zone benchmark" untrue.
+**Two figures that are arithmetic rather than balance.** A zone's tier IV row lands on twenty groups,
+which is the campaign's spawn ceiling — raising it raises what every tier IV zone on the map costs
+the server, not just the one in front of the player. And a town's tier IV carries six `garrison:team`
+slots to match the six `garrison:fortified` on the zone's tier IV row; changing one without the other
+makes "tier IV reaches the zone benchmark" untrue.
 
 **What has no lever yet.** Nothing prices any of the purchases, because the OPFOR commander does not
 exist — the town's tier and reinforcement hooks are free to call today, and the debug menu is their

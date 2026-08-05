@@ -23,7 +23,7 @@ if (_class == "") exitWith { grpNull };
 
 // Air enters from off the map at altitude and everything else from a safe spot on the ground. Keyed
 // on the class rather than on the token that asked for it: the engine's own answer cannot disagree
-// with what was actually spawned, where a token could be filed under the wrong category.
+// with what was actually spawned, where a table row can be mistyped.
 private _isAir = _class isKindOf "Air";
 private _vehpos = if (_isAir) then {
     private _bearing = random 360;

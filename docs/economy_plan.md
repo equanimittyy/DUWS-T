@@ -565,11 +565,10 @@ archetype decides *where* the money goes, not whether there is anywhere for it t
 ### Town garrisons: I through IV
 
 Towns gain purchasable garrisons on both sides. A zone garrison is the benchmark the ladder climbs
-toward: every zone tier fields a multiplied fortified group with a squad leader, a mortar team, up to
-eight buildings occupied at three units each, and whatever guard towers stand nearby. **Zones carry a
-tier of their own, rolled at generation** — see
-[`info/zones_and_civilians.md`](info/zones_and_civilians.md#zone-tiers). Each tier names its own
-composition and a zone's radius multiplies it per category. Towns and zones draw from one token
+toward: every zone tier fields fortified groups with a squad leader each, a mortar team, occupied
+buildings, and whatever guard towers stand nearby. **Zones carry a tier of their own, rolled at
+generation** — see [`info/zones_and_civilians.md`](info/zones_and_civilians.md#zone-tiers). A tier
+names the whole composition and nothing scales it afterwards. Towns and zones draw from one token
 vocabulary but keep separate composition sets, so tuning what a town fields cannot silently retune
 what a zone does.
 

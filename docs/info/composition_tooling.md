@@ -10,13 +10,13 @@ The mission has two kinds of composition and both used to be hand-edited in sour
 both over one idea: a **marker fence** in the source that the tool parses and Arma's preprocessor
 discards, so marking something up is data-only and costs no runtime.
 
-The top menu is the two kinds, with the unit half split by what a row *is* — a composition, a token,
-or a scaling rule.
+The top menu is the two kinds, with the unit half split by what a row *is* — a composition or a
+token.
 
 | Kind | Marker | What the tool does |
 |---|---|---|
 | **Static** — object layouts (HQ, zone prefabs, killhouse) | `--DUWS-COMPOSITION--` | emits a paste-ready Eden import; writes a new fence from rows pasted back |
-| **Unit** — spawn tables (tier compositions, team rosters, the purchasable squads, the scaling rules) | `--DUWS-UNITCOMP--` | edits rows and writes them back to source; adds rows and whole tables |
+| **Unit** — spawn tables (tier compositions, team rosters, the purchasable squads, the static-weapon role map) | `--DUWS-UNITCOMP--` | edits rows and writes them back to source; adds rows and whole tables |
 
 Static compositions round-trip through the 3D editor because they are *layout* — you want to see
 them. Unit compositions are *data*, so there is nothing to look at in Eden and the tool edits them
@@ -186,23 +186,15 @@ Two ideas, and keeping them apart is what makes the menus make sense:
   [`zones_and_civilians.md`](zones_and_civilians.md#zone-tiers). A garrison composition writes each
   entry as `posture:token` — one A3 group, its orders and its roster. Typed as one string rather
   than a pair because the row editor below splits on commas and would cut a nested list in half.
-- A **token** is what one name raises, and there are three tables of them under the Tokens menu: a
-  team of men (`sniper` is two snipers until you say otherwise), one vehicle, or a placer that
-  garrisons ground by a rule rather than from a roster.
+- A **token** is what one name stands for, and the Tokens menu holds every table of them: a team of
+  men (`sniper` is two snipers until you say otherwise), one vehicle, a placer that garrisons ground
+  by a rule rather than from a roster, and the class-to-role map behind a static weapon.
 
 Compositions name tokens; a token is edited in one place and referred to from many. **The unit of
 work is a row, not the table it lives in** — which file a composition sits in is not something the
 person editing it should have to know — so the menu lists every zone tier, town tier and squad
 together and opening one shows its configuration. A field naming a token shows what that token
 raises beside it, so a reference is never a dead end.
-
-Scaling rules — the radius multipliers — get their own menu. They are how a composition is scaled
-rather than what is in one, and a radius band is only meaningful beside the bands above and below
-it, so those are still edited as whole tables.
-
-The category vocabulary is deliberately not in the tool. Its rows are positionally locked to the
-multiplier table's columns, and every token names a category from its own row in one of three other
-tables, so neither a rename nor an addition is an edit one row editor can complete.
 
 ```sqf
 // --DUWS-UNITCOMP BEGIN name="Zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
@@ -216,15 +208,15 @@ DUWS_zoneSpawnTiers = [
 | Attr | Meaning |
 |---|---|
 | `name="..."` | label in the menu, and the key a write matches on |
-| `kind=` | `composition`, `team` (the Tokens menu) or `rule` — which menu its rows appear under. Anything unlabelled falls to `rule`, so a table nobody classified is still reachable |
-| `row="..."` | what one row means, since a row is a tier in one table and a radius band in another |
+| `kind=` | `composition` or `team` (the Tokens menu) — which menu its rows appear under. Anything unlabelled falls to `team`, so a table nobody classified is still reachable |
+| `row="..."` | what one row means, since a row is a tier in one table and a vehicle in another |
 | `rowname="Tier %1"` | how a row is named in the menu, `%1` being its index in roman. Without it the first column names the row, which is what a team and a squad already do |
 | `fields="a, b, c"` | the row's columns, for a table whose rows are fixed-shape rather than a free-length list. Its presence is what switches the editor into field mode |
 | `prefix=opfor_` | the faction prefix this table's role names carry: stripped for display, re-applied on write |
 
 A row without `fields=` is a plain list — add an entry, drop one, or retype the row. Entries are
 typed unquoted (`patrol, team, car`) and the tool quotes anything that is not a bare number, so a
-multiplier row stays numeric and a token row stays strings.
+numeric column stays numeric and a token row stays strings.
 
 ### Field mode
 
@@ -263,20 +255,17 @@ nothing in the mission has to learn the new name:
   under different orders took a second row with an identical roster.
 - The spawn path asks the tables what a token is rather than switching on known names, so a token
   no table claims is a classname a faction file named directly and stands as itself.
-- `category` is which radius multiplier scales it, held on the row so adding a token is one edit
-  rather than two tables that can disagree. It is column 1 in all three token tables, which is what
-  lets one lookup ask whichever table claims the token.
 
 A **special** is the exception to spawnable-as-it-stands: its `placer` column names code, so the
 function has to exist before the row does. The tool prompts on a name nothing compiles rather than
 letting the row through to raise nothing.
 
-The values already in a column are offered while typing, so the categories on offer are the ones the
-tables actually use rather than a list in a doc that rots. A duplicate name is refused: the
-first column is what compositions refer to, so a second row of the same name could never be reached.
+The values already in a column are offered while typing, so what is on offer is what the tables
+actually hold rather than a list in a doc that rots. A duplicate name is refused: the first column is
+what compositions refer to, so a second row of the same name could never be reached.
 
-Adding a **BLUFOR** team is the same, minus the category column — a squad references it by name and
-`fnc_BLUFOR_squad_init` resolves it.
+Adding a **BLUFOR** team is the same — a squad references it by name and `fnc_BLUFOR_squad_init`
+resolves it.
 
 **Add** is on every menu, not only Tokens: a zone tier, a town tier and a purchasable squad are rows
 like any other. A row of a table that declares no `fields=` is typed as one comma-separated list;
@@ -288,9 +277,9 @@ written there before anything can purchase what the table now offers.
 ### Adding a table
 
 **New table** writes an empty fenced table and prompts for the attributes above, because every one of
-them fails quietly when it is wrong: an unknown `kind=` files the rows under the scaling rules, a
-missing `row=` leaves them described as "row", and a `fields=` that does not match what the rows hold
-switches the editor into field mode against columns that are not there.
+them fails quietly when it is wrong: an unknown `kind=` files the rows under Tokens, a missing `row=`
+leaves them described as "row", and a `fields=` that does not match what the rows hold switches the
+editor into field mode against columns that are not there.
 
 Two are refused outright rather than left to be edited later, because neither is recoverable from
 inside the tool: a **name** another fence already carries, since a write matches a fence by name and

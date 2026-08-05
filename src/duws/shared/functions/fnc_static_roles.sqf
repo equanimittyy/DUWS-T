@@ -9,7 +9,7 @@
 // Role token per placeholder class. Every side's variant of each family, not only the classes the
 // shipped compositions use, so a gun swapped in Eden still resolves. The autonomous (_A_F) sentries
 // are deliberately absent: they are unmanned by design, and a role would have the zone crew them.
-// --DUWS-UNITCOMP BEGIN name="Static weapon roles" kind=rule row="class, role" fields="class, role"--
+// --DUWS-UNITCOMP BEGIN name="Static weapon roles" kind=team row="class, role" fields="class, role"--
 DUWS_staticRoles = [
     ["B_HMG_01_F",         "HMG"],
     ["B_HMG_01_high_F",    "HMG"],

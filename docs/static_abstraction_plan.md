@@ -139,7 +139,7 @@ the edits.
 
 ### The map is a fenced table
 
-`DUWS_staticRoles` lives inside a `--DUWS-UNITCOMP--` fence with `kind=rule` and
+`DUWS_staticRoles` lives inside a `--DUWS-UNITCOMP--` fence with `kind=team` and
 `fields="class, role"`, so adding a placeholder is a TUI edit rather than a code edit
 ([`info/composition_tooling.md`](info/composition_tooling.md#adding-a-table-to-the-tool)).
 
