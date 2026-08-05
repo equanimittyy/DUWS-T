@@ -130,32 +130,16 @@ of the 255 faction files name `TURRET_HMG` by hand and none would name the new k
 fall back to the gun it already has. The heights those files actually name spread wider than one
 mount does anyway, from a low `CUP_O_DSHKM_SLA` tripod to `rhs_KORD_high_MSV`.
 
-**Export** — after rearranging in Eden, run this in the same console to copy schema-agnostic
-`[class, dx, dy, dz, dir°]` rows (offsets from the import origin):
+**Export** — `E` on the static menu writes `temp\eden_export.sqf` and copies the snippet to the
+clipboard, the way an import is handed over. Select the composition in Eden (`Ctrl+A` is safe, the
+marker is dropped by name), run it in the same console, and it copies schema-agnostic
+`[class, dx, dy, dz, dir°]` rows — offsets from the import origin.
 
-```sqf
-// Set _origin to the SAME origin you imported at (the TUI menu shows it; the default is below).
-private _origin = [23100, 18700, 0];
-
-// Dropped by Eden name, not by class: a composition may legitimately contain a flagpole, and the
-// killhouse already carries a flag. The name is the marker's identity; its class is not.
-private _objs = (get3DENSelected "Object") select {
-    ((_x get3DENAttribute "name") param [0, ""]) != "DUWS_FRONT"
-};
-if (_objs isEqualTo []) exitWith { systemChat "Select the composition: click an object in the 3D view, then Ctrl+A."; };
-
-private _rows = _objs apply {
-    private _p = getPosWorld _x;
-    format ["[""%1"", %2, %3, %4, %5]",
-        typeOf _x,
-        (_p select 0) - (_origin select 0),
-        (_p select 1) - (_origin select 1),
-        (_p select 2) - (_origin select 2),
-        getDir _x]
-};
-copyToClipboard (_rows joinString ("," + endl));
-systemChat format ["Copied %1 objects.", count _objs];
-```
+Its `_origin` is filled in rather than typed: the session X/Y, and the **Z of the last import**, so a
+`zbase=` layout subtracts the altitude it was actually generated at. A digit mistyped there comes back
+as the whole composition shifted, which reads as a rearrange nobody made. Generate the import first;
+`E` on a fresh session with no import behind it hands you Z 0, which is right for every ground layout
+and wrong for the killhouse.
 
 `getDir` reads each heading in the convention the import wrote (`[0,0,dir]` yaw), so rotation
 round-trips. `Copied N objects` should match what the import reported; a mismatch means rows were
