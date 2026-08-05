@@ -107,7 +107,7 @@ fnc_static_resolve = {
 // [_row, _origin, _side, _key, _mode] call fnc_static_place -- returns the object.
 //
 // _row    [class, offsetX, offsetY, offsetZ, dir, role], role optional; the shape both fences use
-// _origin [x, y, z]; z is read in "world" mode only
+// _origin [x, y]; z unused -- in "world" mode a weapon's height comes from the terrain under the gun
 // _key    the site key the object is filed under for teardown
 // _mode   "world" when the row states a height, "pos" when its Z means ground
 //
@@ -121,11 +121,13 @@ fnc_static_place = {
     _row params ["_class", "_ox", "_oy", ["_oz", 0], ["_dir", 0], ["_role", "", [""]]];
 
     private _world = _mode isEqualTo "world";
-    private _pos = [
-        (_origin select 0) + _ox,
-        (_origin select 1) + _oy,
-        if (_world) then { (_origin select 2) + _oz } else { _oz }
-    ];
+    private _px = (_origin select 0) + _ox;
+    private _py = (_origin select 1) + _oy;
+    // A weapon's Z is height above the ground under the gun, not above the site centre: the two drop
+    // apart on a slope, so a gun measured from the centre floats off its perch. Per-gun terrain matches
+    // how the ground pass snaps each prop to its own x,y. Clamped at 0 so a coastal gun measures from
+    // the sea, not the seabed -- the same clamp the prefabs apply to the centre height.
+    private _pos = [_px, _py, if (_world) then { ((getTerrainHeightASL [_px, _py]) max 0) + _oz } else { _oz }];
 
     private _obj = createVehicle [
         [_class, _side, _role] call fnc_static_resolve, _pos, [], 0, "CAN_COLLIDE"
