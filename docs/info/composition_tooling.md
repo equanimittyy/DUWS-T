@@ -145,7 +145,21 @@ and wrong for the killhouse.
 round-trips. `Copied N objects` should match what the import reported; a mismatch means rows were
 added or lost in Eden, since the marker is already excluded.
 
-Fold the rows back into the source array by these rules:
+**Update** — `U` on the static menu folds pasted rows back into an existing fence. It reconciles by
+index against what is already there and reports what it finds before writing anything: rows whose
+class does not line up, a heading delta the whole paste shares, and a constant Z delta it offers to
+subtract. Trailing columns (`isWeapon`) are carried across from the row at the same index, so a row
+that does not line up loses its flag — which is what the mismatch report is for. Comment lines inside
+the array are not carried over, and it says how many it dropped.
+
+Two systematic differences it can only report, not repair. **A heading delta shared by the whole
+paste means the layout was rotated in Eden**, so its X/Y are offsets in a frame turned by that much;
+folding it in stores the composition facing the other way, which the front marker exists to make
+visible before it gets that far. **X/Y measured against a different origin** cannot be detected at all
+once the layout has also been rotated — export at the origin you imported at, and do not drag the
+selection.
+
+Folding back by hand, if you would rather, by these rules:
 
 - **Match by order.** The export returns rows in creation order, so line them up 1:1 with the
   existing array by index, confirm the class matches at each row, and change only the rows whose X/Y

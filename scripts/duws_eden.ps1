@@ -106,6 +106,7 @@ function Get-Compositions {
                 ZBase  = Get-Attr $attrs 'zbase=(\w+)' ''
                 Body   = $m.Groups[2].Value
                 Text   = $text
+                File   = $file.Path
             }
         }
     }
@@ -135,6 +136,31 @@ function ConvertTo-Rows($comp) {
         $rows.Add([pscustomobject]@{ Class=$c; OX=($x-$ax); OY=($y-$ay); OZ=$z; Dir=$d })
     }
     return [pscustomobject]@{ Rows=$rows; Seen=$seen }
+}
+
+# Whatever each row carries past the fifth column, indexed alongside ConvertTo-Rows' output. Those
+# columns are the consumer's own -- isWeapon on the zone prefabs, and a gun demoted to a prop is a
+# gun that never gets a gunner -- and nothing upstream of here knows they exist, so a rewrite has to
+# carry them across rather than regenerate them.
+function Get-RowTails($body) {
+    $tails = New-Object System.Collections.Generic.List[string]
+    foreach ($line in ($body -split "`n")) {
+        if ($line -notmatch '^\s*\["') { continue }
+        if ($line -notmatch $rowRe) { continue }
+        $rest = $line.Substring($line.IndexOf($Matches[0]) + $Matches[0].Length)
+        $end  = $rest.LastIndexOf(']')
+        $tails.Add($(if ($end -ge 0) { $rest.Substring(0, $end) } else { '' }))
+    }
+    return ,@($tails)
+}
+
+# The single transform a whole paste shares, and how much of it agrees. An export taken after the
+# layout was dragged or spun in Eden carries that as a constant on every row, and a constant is
+# indistinguishable from deliberate editing until it is counted.
+function Get-ModalDelta($values, $places) {
+    if ($values.Count -eq 0) { return $null }
+    $g = @($values | Group-Object { [math]::Round($_, $places) } | Sort-Object Count -Descending)
+    return [pscustomobject]@{ Value = [math]::Round($g[0].Group[0], $places); Rows = $g[0].Count; Total = $values.Count }
 }
 
 # How far out the front marker stands: clear of the composition's own footprint, so it reads as a
@@ -350,6 +376,130 @@ function Format-Declaration($varName) {
 # Create a static composition from rows arranged in Eden. The tool could only ever open one that
 # already existed, so a new layout meant hand-writing the fence and pasting rows under it, and a
 # mistyped attribute failed by the composition never appearing in the menu.
+# Replaces one composition's row lines in place. The declaration and the closing bracket are carried
+# over rather than regenerated: a fence's array may be declared private, or named something the tool
+# never saw, and rewriting that from a guess turns an edited layout into a file that will not compile.
+#
+# Matched by fence name, like the unit tables, and every other fence in the file is handed back
+# untouched. Strict UTF-8 for the same reason Save-UnitComp is: reading a legacy single-byte file is
+# harmless, writing one back would corrupt everything in it that is not this array.
+function Save-CompFence($comp, $newBody) {
+    $strict = New-Object System.Text.UTF8Encoding($false, $true)
+    try { $text = $strict.GetString([System.IO.File]::ReadAllBytes($comp.File)) }
+    catch {
+        Write-Host "Refusing to write: $($comp.File) is not valid UTF-8, and rewriting it would corrupt the rest of the file." -ForegroundColor Red
+        return $false
+    }
+    $target = $comp.Name
+    $re = [regex]'(?s)(//[ \t]*--DUWS-COMPOSITION BEGIN\s+(.*?)--\r?\n)(.*?)(\r?\n[ \t]*//\s*--DUWS-COMPOSITION END--)'
+    $updated = $re.Replace($text, {
+        param($m)
+        if ((Get-Attr $m.Groups[2].Value 'name="([^"]*)"' '') -ne $target) { return $m.Value }
+        return $m.Groups[1].Value + $newBody + $m.Groups[4].Value
+    })
+    if ($updated -eq $text) {
+        Write-Host "Nothing written: the fence was not found or the body is unchanged." -ForegroundColor Yellow
+        return $false
+    }
+    [System.IO.File]::WriteAllText($comp.File, $updated, (New-Object System.Text.UTF8Encoding($false)))
+    Clear-SourceCache
+    return $true
+}
+
+# The return leg the round trip never had: pasted Eden rows folded back into the fence they came
+# from. Doing it by hand is what this replaces, and the reason it goes wrong is that an export is
+# taken against the origin and heading the layout happened to be sitting at -- drag or rotate the
+# selection between import and export and every row carries that, which reads as a rearrange rather
+# than as the whole composition having moved.
+#
+# So the systematic differences are counted and shown before anything is written. Reconciled by
+# index and never merged by class: two HBarriers are interchangeable to a reader and separate rows
+# to the array, so a paste one row short has to read as a gap rather than silently re-key every row
+# after it.
+function Update-StaticFence($comp) {
+    $old   = @((ConvertTo-Rows $comp).Rows)
+    $tails = Get-RowTails $comp.Body
+    if ($old.Count -eq 0) { Write-Host "  That composition has no rows this tool can read." -ForegroundColor Red; return }
+
+    $new = Read-PastedRows
+    if ($null -eq $new) { return }
+
+    Write-Host ""
+    Write-Host ("  {0}: {1} rows in the source, {2} pasted." -f $comp.Name, $old.Count, $new.Count)
+
+    $pairs = New-Object System.Collections.Generic.List[object]
+    $bad   = New-Object System.Collections.Generic.List[string]
+    for ($i = 0; $i -lt $new.Count; $i++) {
+        $o = if ($i -lt $old.Count) { $old[$i] } else { $null }
+        if ($null -ne $o -and $o.Class -eq $new[$i].Class) {
+            $pairs.Add([pscustomobject]@{ O = $o; N = $new[$i] })
+        } else {
+            $bad.Add(("    [{0}] source {1} / paste {2}" -f $i, $(if ($o) { $o.Class } else { '(none)' }), $new[$i].Class))
+        }
+    }
+    if ($bad.Count -gt 0) {
+        Write-Host ("  {0} row(s) do not line up by index:" -f $bad.Count) -ForegroundColor Yellow
+        foreach ($b in ($bad | Select-Object -First 8)) { Write-Host $b -ForegroundColor Yellow }
+        if ($bad.Count -gt 8) { Write-Host ("    ... and {0} more" -f ($bad.Count - 8)) -ForegroundColor Yellow }
+        Write-Host "  Those rows lose whatever their source row carried past column 5." -ForegroundColor Yellow
+    }
+    if ($pairs.Count -eq 0) { Write-Host "  Nothing lines up; refusing." -ForegroundColor Red; return }
+
+    $dir = Get-ModalDelta @($pairs | ForEach-Object { (($_.N.Dir - $_.O.Dir) % 360 + 360) % 360 }) 2
+    $dz  = Get-ModalDelta @($pairs | ForEach-Object { $_.N.OZ - $_.O.OZ }) 3
+    $rot = ($null -ne $dir -and $dir.Value -gt 0.05 -and $dir.Value -lt 359.95 -and $dir.Rows * 2 -ge $dir.Total)
+
+    if ($rot) {
+        Write-Host ("  The layout was rotated {0} deg as a whole ({1} of {2} rows agree)." -f (Fmt $dir.Value), $dir.Rows, $dir.Total) -ForegroundColor Red
+        Write-Host "  Folding this in stores it rotated, and its X/Y are offsets in the rotated frame." -ForegroundColor Red
+    }
+
+    # Offered rather than applied: a constant Z across the paste is nearly always the sea-level
+    # baseline an export carries when its origin Z is 0, but it is equally what raising the whole
+    # layout by hand looks like, and only the person who moved it knows which.
+    $zDrop = 0.0
+    if ($null -ne $dz -and [math]::Abs($dz.Value) -gt 0.001 -and $dz.Rows * 2 -ge $dz.Total) {
+        Write-Host ("  {0} of {1} rows shifted by exactly {2} m in Z -- the terrain the export measured from." -f $dz.Rows, $dz.Total, (Fmt $dz.Value)) -ForegroundColor Yellow
+        if ((Read-Host ("  Subtract {0} from every Z? (Y/n)" -f (Fmt $dz.Value))) -notmatch '^\s*[Nn]') { $zDrop = $dz.Value }
+    }
+
+    Write-Host ""
+    if ((Read-Host ("  Rewrite '{0}' with {1} rows? (y/N)" -f $comp.Name, $new.Count)) -notmatch '^\s*[Yy]') {
+        Write-Host "  Nothing written." -ForegroundColor Yellow
+        return
+    }
+
+    # The anchor ConvertTo-Rows took off the source rows goes back on: the HQ array stores
+    # composition coordinates, and a paste is offsets.
+    $anchor = Get-AnchorXY $comp
+    $lines  = @($comp.Body -split "`r?`n")
+    $first  = 0; while ($first -lt $lines.Count -and $lines[$first] -notmatch '^\s*\["') { $first++ }
+    $last   = $lines.Count - 1; while ($last -ge 0 -and $lines[$last] -notmatch '^\s*\["') { $last-- }
+    if ($first -gt $last) { Write-Host "  Could not find the row lines to replace; refusing." -ForegroundColor Red; return }
+    $indent = if ($lines[$first] -match '^([ \t]+)') { $Matches[1] } else { '    ' }
+    $dropped = @($lines[$first..$last] | Where-Object { $_ -notmatch '^\s*\["' -and $_.Trim() -ne '' }).Count
+    if ($dropped -gt 0) {
+        Write-Host ("  Note: {0} comment line(s) inside the array are not carried over." -f $dropped) -ForegroundColor Yellow
+    }
+
+    $rowStrs = @()
+    for ($i = 0; $i -lt $new.Count; $i++) {
+        $tail = if ($i -lt $old.Count -and $i -lt $tails.Count -and $old[$i].Class -eq $new[$i].Class) { $tails[$i] } else { '' }
+        $rowStrs += ('{0}["{1}", {2}, {3}, {4}, {5}{6}]' -f $indent, $new[$i].Class,
+            (Fmt ($new[$i].OX + $anchor[0])), (Fmt ($new[$i].OY + $anchor[1])),
+            (Fmt ($new[$i].OZ - $zDrop)), (Fmt $new[$i].Dir), $tail)
+    }
+    # Sliced rather than indexed blind: PowerShell reads 0..-1 as "first and last", so a body whose
+    # very first line is a row would otherwise fold that line's neighbour into the declaration.
+    $pre  = if ($first -gt 0) { @($lines[0..($first - 1)]) } else { @() }
+    $post = if ($last -lt ($lines.Count - 1)) { @($lines[($last + 1)..($lines.Count - 1)]) } else { @() }
+    $body = ($pre + ($rowStrs -join ",`r`n") + $post) -join "`r`n"
+
+    if (Save-CompFence $comp $body) {
+        Write-Host ("  Rewrote '{0}' in {1}. Review the diff before committing." -f $comp.Name, (Split-Path -Leaf $comp.File)) -ForegroundColor Green
+    }
+}
+
 function New-StaticFence {
     Clear-Host
     Write-Host "New static composition" -ForegroundColor Cyan
@@ -1275,6 +1425,7 @@ function Show-StaticMenu {
         Write-Host ""
         Write-Host "   O. Set the import origin      P. Paste your own array (schema A)"
         Write-Host "   E. Copy the Eden export snippet"
+        Write-Host "   U. Update a composition from pasted rows"
         Write-Host "   N. New composition from an Eden export"
         Write-Host "   B. Back"
         Write-Host ""
@@ -1287,6 +1438,15 @@ function Show-StaticMenu {
             Write-Host ""
             Write-Host ("Export snippet at origin {0} {1} {2}." -f (Fmt $script:originX), (Fmt $script:originY), (Fmt $script:originZ)) -ForegroundColor Green
             Write-Host ("Wrote $expFile" + $(if ($clip) { " and copied to clipboard." } else { " (clipboard unavailable; copy the file)." }))
+            Read-Host "Press Enter to continue" | Out-Null
+        }
+        elseif ($sel -match '^\s*[Uu]\s*$') {
+            $which = Read-Host "  Which composition (number)"
+            if ($which -match '^\s*\d+\s*$' -and [int]$which -ge 1 -and [int]$which -le $comps.Count) {
+                Update-StaticFence $comps[[int]$which - 1]
+            } else {
+                Write-Host "  No such composition." -ForegroundColor Yellow
+            }
             Read-Host "Press Enter to continue" | Out-Null
         }
         elseif ($sel -match '^\s*[Nn]\s*$') {
