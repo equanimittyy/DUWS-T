@@ -14,12 +14,15 @@ if (!isServer) exitWith {};
 // emplacement is revealed about when it comes into view rather than when its garrison streams in.
 #define HP_REVEAL_RADIUS 100
 
-// zoneKey call DUWS_fnc_hardpointZoneAwake -> is that zone deployed. A zone-coupled hardpoint reads
-// this instead of its own ring, so a zone's whole defence rises and falls with the garrison rather
-// than each emplacement waking on its own radius. fnc_site_occupant hands back an empty map for a zone
-// not registered yet, whose "awake" defaults false -- so a hardpoint sited before its zone stays down.
+// zoneKey call DUWS_fnc_hardpointZoneAwake -> is that zone up or coming up. A zone-coupled hardpoint
+// reads this instead of its own ring, so its defence rises and falls with the garrison. An
+// unregistered zone reads an empty map, fields default false, so one sited before its zone stays down.
+//
+// raising, not only awake: awake flips true only after the whole garrison spawns -- minutes on a big
+// zone -- so gating on it alone raised the emplacement last or never. raising catches the zone as it commits.
 DUWS_fnc_hardpointZoneAwake = {
-    ([_this, "garrison"] call fnc_site_occupant) getOrDefault ["awake", false]
+    private _o = [_this, "garrison"] call fnc_site_occupant;
+    (_o getOrDefault ["awake", false]) || {_o getOrDefault ["raising", false]}
 };
 
 // Dispatched, not inline: the raise re-crews statics through DUWS_fnc_manStatics, which sleeps in the
