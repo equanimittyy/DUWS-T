@@ -374,10 +374,11 @@ DUWS_hardpointStreaming = createHashMapFromArray [
 // objective before the players who tripped it arrive. Read by fnc_createZone and fnc_zone_stream_init.
 DUWS_streamArrivalMargin = 400;
 
-// The live hardpoint registry, one row per emplacement: [key, pos, type, side, zoneKey, state], state
-// "active" or "cleared". fnc_hardpoint_register appends and republishes; the clearance check flips a
-// row to "cleared". Broadcast so the map readout and, later, OPCOM read it without a server round-trip
-// -- the hardpoint analogue of zone_meta_array.
+// The live hardpoint registry, one row per standing emplacement: [key, pos, type, side, zoneKey].
+// fnc_hardpoint_register appends and republishes; clearance deletes the row, so a cleared hardpoint
+// leaves the array rather than lingering flagged -- its presence here is its liveness, the way a
+// destroyed one is gone from the map. Broadcast so the map readout and, later, OPCOM read it without a
+// server round-trip -- the hardpoint analogue of zone_meta_array.
 DUWS_hardpoints = [];publicVariable "DUWS_hardpoints";
 
 // zoneundercontrolblu

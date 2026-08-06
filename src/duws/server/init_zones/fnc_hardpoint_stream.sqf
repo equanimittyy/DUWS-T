@@ -83,16 +83,19 @@ DUWS_fnc_hardpointClearCheck = {
 };
 
 // Latched -- a cleared hardpoint stays cleared. The site is not retired here: deleting it would mutate
-// the map the poller is mid-iteration over, so the occupant is only marked inert and the composition
-// released to the cleanup sweep. The dev clear and, later, OPCOM retire it from outside the pass.
+// the map the poller is mid-iteration over, so the occupant is only marked inert, its registry row
+// dropped and the composition released to the cleanup sweep. The dev clear and, later, OPCOM retire
+// the inert site from outside the pass.
 DUWS_fnc_hardpointClear = {
     params ["_key", "_o"];
     _o set ["cleared", true];
     missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], nil];
     missionNamespace setVariable [format ["DUWS_hpMines_%1", _key], nil];
+    // Deleted, not flagged: a cleared hardpoint is destroyed, so it leaves the registry rather than
+    // sitting in it as a dead row for OPCOM to filter past every pass.
     private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
     if (_i >= 0) then {
-        (DUWS_hardpoints select _i) set [5, "cleared"];
+        DUWS_hardpoints deleteAt _i;
         publicVariable "DUWS_hardpoints";
     };
     // Wrecks left standing for the sweep, not deleted: release drops the pins and schedules disposal.
@@ -181,8 +184,9 @@ fnc_hardpoint_register = {
             ((DUWS_compositions getOrDefault [_key, []]) select { !isNull _x });
     };
 
-    // Registry row for OPCOM and the map readout: [key, pos, type, side, zone, state].
-    DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey, "active"];
+    // Registry row for OPCOM and the map readout: [key, pos, type, side, zone]. Presence is liveness;
+    // the clearance check deletes the row when the emplacement falls.
+    DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey];
     publicVariable "DUWS_hardpoints";
     [_key, "garrison", DUWS_hardpointHooks] call fnc_site_hooks_set;
 };
