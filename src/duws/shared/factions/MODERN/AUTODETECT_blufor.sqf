@@ -43,6 +43,12 @@ fnc_factionGen = {
 	// The armed-boat key wants a boat with a gun on it, which no detection bucket separates out.
 	private _boatArmed = [_boat, true] call fnc_filterByWeapons;
 
+	// Any static the faction fields, as the last rung under every turret role below: a mod static that
+	// matched no specific weapon bucket still beats the vanilla placeholder. Deduped -- a combo static
+	// can land in more than one bucket.
+	private _turretAny = _turretHMG + _turretGMG + _turretMortar + _turretAA + _turretAT;
+	_turretAny = _turretAny arrayIntersect _turretAny;
+
 
 // Every role key resolves through one ladder: the first bucket holding anything wins, gated on
 // the schema's kind so a class detection dropped in the wrong bucket cannot reach a spawner.
@@ -74,13 +80,13 @@ fnc_factionGen = {
 	["blufor_ATTACK_HELI_X",      [_heliArmed, _droneAir, _heliTransport],                "B_Heli_Attack_01_F"],          //dialog\fnc_request_hcATTchop, random patrol
 	["blufor_MISC_AIR_X",         [_planeArmed, _droneAir],                               "B_Plane_CAS_01_F"],            //dialog\fnc_request_hcCAS, random patrol
 
-	["blufor_TURRET_AA",          [_turretAA, _turretAT, _turretHMG],                     "B_static_AA_F"],
-	["blufor_TURRET_AT",          [_turretAT, _turretAA, _turretHMG],                     "B_static_AT_F"],
-	["blufor_TURRET_HMG",         [_turretHMG, _turretGMG],                               "B_HMG_01_high_F"],
-	["blufor_TURRET_GMG",         [_turretGMG, _turretHMG],                               "B_GMG_01_high_F"],
+	["blufor_TURRET_AA",          [_turretAA, _turretAT, _turretHMG, _turretAny],         "B_static_AA_F"],
+	["blufor_TURRET_AT",          [_turretAT, _turretAA, _turretHMG, _turretAny],         "B_static_AT_F"],
+	["blufor_TURRET_HMG",         [_turretHMG, _turretGMG, _turretAny],                   "B_HMG_01_high_F"],
+	["blufor_TURRET_GMG",         [_turretGMG, _turretHMG, _turretAny],                   "B_GMG_01_high_F"],
 	// The GMG rung before the MG one: a grenade launcher is the nearest thing a faction with no
 	// tube has to arcing HE. Read by fnc_static_resolve, like the four above.
-	["blufor_TURRET_MORTAR",      [_turretMortar, _turretGMG, _turretHMG],                "B_Mortar_01_F"],
+	["blufor_TURRET_MORTAR",      [_turretMortar, _turretGMG, _turretHMG, _turretAny],    "B_Mortar_01_F"],
 
 	["blufor_SPECOPS_X",          [_spec_sl, _spec, _sl, _grunt, _infantry],              "B_recon_F"],
 	["blufor_SPECOPS_GL_X",       [_spec_gl, _gl, _grunt, _infantry],                     "B_Soldier_GL_F"],

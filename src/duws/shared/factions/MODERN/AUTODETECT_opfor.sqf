@@ -40,6 +40,12 @@ fnc_factionGen = {
 	// variant is a poor stand-in for the man who fills out a patrol.
 	_grunt = [_grunt, ["camo", "officer"], false] call fnc_filterByClassName;
 
+	// Any static the faction fields, as the last rung under every turret role: a mod static that
+	// matched no specific weapon bucket still beats the vanilla placeholder. Deduped -- a combo static
+	// can land in more than one bucket.
+	private _turretAny = _turretHMG + _turretGMG + _turretMortar + _turretAA + _turretAT;
+	_turretAny = _turretAny arrayIntersect _turretAny;
+
 
 // One ladder table for every role key, shared with AUTODETECT_RANDOM_opfor so the two cannot
 // drift apart, and gated on the schema's kind so a class detection dropped in the wrong bucket

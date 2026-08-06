@@ -57,6 +57,12 @@ fnc_factionGen = {
 	// them first. This line is only about the basic rifleman.
 	_grunt = [_grunt, ["camo", "officer"], false] call fnc_filterByClassName;
 
+	// Any static the faction fields, as the last rung under every turret role: a mod static that
+	// matched no specific weapon bucket still beats the vanilla placeholder. Deduped -- a combo static
+	// can land in more than one bucket.
+	private _turretAny = _turretHMG + _turretGMG + _turretMortar + _turretAA + _turretAT;
+	_turretAny = _turretAny arrayIntersect _turretAny;
+
 
 // The same ladder table AUTODETECT_opfor resolves: the two files differ in how the faction is
 // chosen, not in what a role means once it is.

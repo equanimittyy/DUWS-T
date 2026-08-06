@@ -627,9 +627,12 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	_droneLand =	 [ [ _factionData, "drones" ] call fnc_factionGetFilteredByEditorSubcat, "LandVehicle" ] call fnc_factionGetFilteredByType;
 	_droneStatic = _turrets select { getText (configFile >> "CfgVehicles" >> _x >> "vehicleClass") isEqualTo "Autonomous" };
 	_submersible =	[ _factionData, "submersibles" ] call fnc_factionGetFilteredByEditorSubcat;
-	_turretHMG =	[ _turrets select {"MGunCore" in ([_x] call fnc_vehicleWeaponType)}, "StaticMGWeapon" ] call fnc_factionGetFilteredByType;
-	_turretGMG =	[ _turrets, "StaticGrenadeLauncher" ] call fnc_factionGetFilteredByType;
-	_turretMortar =	[ _turrets, "StaticMortar" ] call fnc_factionGetFilteredByType;
+	// A mod static that never inherits the vanilla StaticMGWeapon/StaticGrenadeLauncher/StaticMortar
+	// base is still one of these by its weapon or its artillery scanner. Fall back to that signal so a
+	// faction's own gun is not discarded for a vanilla placeholder -- AA/AT below already do this by threat.
+	_turretHMG =	[ [ _turrets select {"MGunCore" in ([_x] call fnc_vehicleWeaponType)}, "StaticMGWeapon" ] call fnc_factionGetFilteredByType, _turrets select {"MGunCore" in ([_x] call fnc_vehicleWeaponType)} ] call fnc_selectNonEmpty;
+	_turretGMG =	[ [ _turrets, "StaticGrenadeLauncher" ] call fnc_factionGetFilteredByType, _turrets select {"GMG_F" in ([_x] call fnc_vehicleWeaponType)} ] call fnc_selectNonEmpty;
+	_turretMortar =	[ [ _turrets, "StaticMortar" ] call fnc_factionGetFilteredByType, _turrets select {getNumber (configFile >> "CfgVehicles" >> _x >> "artilleryScanner") isEqualTo 1} ] call fnc_selectNonEmpty;
 	_turretAA =	 [ [ _turrets, "StaticAAWeapon" ] call fnc_factionGetFilteredByType, _turrets select {[_x] call fnc_isThreatTo isEqualTo "air"}] call fnc_selectNonEmpty;
 	_turretAT =	[ [ _turrets, "StaticATWeapon" ] call fnc_factionGetFilteredByType, _turrets select {[_x] call fnc_isThreatTo isEqualTo "armor"}] call fnc_selectNonEmpty;
 	_turretCannon =	[ [ _factionData, "turrets" ] call fnc_factionGetFilteredByEditorSubcat, "StaticCannon" ] call fnc_factionGetFilteredByType;
@@ -646,16 +649,26 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	_carRearm =	[ [ _factionData, "cars" ] call fnc_factionGetFilteredByEditorSubcat, "transportAmmo"] call fnc_filterByUtility;
 	_carRepair =	[ [ _factionData, "cars" ] call fnc_factionGetFilteredByEditorSubcat, "transportRepair"] call fnc_filterByUtility;
 	_carRefuel =	[ [ _factionData, "cars" ] call fnc_factionGetFilteredByEditorSubcat, "transportFuel"] call fnc_filterByUtility;
-	_heliArmed =	[ [ [ _factionData, "helicopters" ] call fnc_factionGetFilteredByEditorSubcat, 2,0 ] call fnc_filterBySeats ] call fnc_filterByPylons;
+	// Armed = mounts weapons, by pylon OR by turret: a mod gunship that arms through Turrets rather
+	// than a TransportPylonsComponent was otherwise dropped here and the attack-heli role fell to a
+	// vanilla airframe. Union keeps the pylon path for loadout-only aircraft.
+	private _heliSeated = [ [ _factionData, "helicopters" ] call fnc_factionGetFilteredByEditorSubcat, 2,0 ] call fnc_filterBySeats;
+	private _heliByPylon = _heliSeated call fnc_filterByPylons;
+	_heliArmed =	_heliByPylon + (([ _heliSeated, true ] call fnc_filterByWeapons) select {!(_x in _heliByPylon)});
 	// Seats, not pylons: filtering on pylons as well left most factions with no transport
 	// helicopter at all, since a gunship carrying troops is the norm outside vanilla. Four seats
 	// is the floor because that is what the taxi and paradrop calls need to be worth running.
-	_heliTransport = _factionData select {
-		_x isKindOf "Helicopter" &&
-		{getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2} &&
-		{getNumber (configFile >> "CfgVehicles" >> _x >> "transportSoldier") >= 4}
-	};
-	_planeArmed =	[ [ [ _factionData, "planes" ] call fnc_factionGetFilteredByEditorSubcat, 1,0 ] call fnc_filterBySeats ] call fnc_filterByPylons;
+	// Troop room by seat count as well as the legacy transportSoldier config: a mod transport that
+	// carries its cargo in seat proxies leaves transportSoldier at 0, so the old check read a real
+	// troop heli as no transport and the TRANS role fell through to the faction's gunship. Union of
+	// both signals -- broadened, never narrowed. Four cargo seats is the floor the taxi/paradrop want.
+	private _heliList = _factionData select {_x isKindOf "Helicopter" && {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2}};
+	_heliTransport = (_heliList select {getNumber (configFile >> "CfgVehicles" >> _x >> "transportSoldier") >= 4}) + ([_heliList, 1, 4] call fnc_filterBySeats);
+	_heliTransport = _heliTransport arrayIntersect _heliTransport;
+	// Same union as _heliArmed: armed by pylon or by turret weapon.
+	private _planeSeated = [ [ _factionData, "planes" ] call fnc_factionGetFilteredByEditorSubcat, 1,0 ] call fnc_filterBySeats;
+	private _planeByPylon = _planeSeated call fnc_filterByPylons;
+	_planeArmed =	_planeByPylon + (([ _planeSeated, true ] call fnc_filterByWeapons) select {!(_x in _planeByPylon)});
 	_planeTransport =	[ [ _factionData, "planes" ] call fnc_factionGetFilteredByEditorSubcat, 6,0 ] call fnc_filterBySeats;
 	[
 		_infantry,

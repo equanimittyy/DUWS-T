@@ -54,11 +54,11 @@
     // fnc_static_resolve, which turns a composition's vanilla placeholder into the faction's own
     // emplacement. Each bottoms out in the faction's MG before the vanilla tail: an MG nest is the
     // stand-in every role degrades to, and it keeps a zone inside the faction it names.
-    ["opfor_TURRET_AA",         [_turretAA, _turretAT, _turretHMG],                 "O_static_AA_F"],
-    ["opfor_TURRET_AT",         [_turretAT, _turretAA, _turretHMG],                 "O_static_AT_F"],
-    ["opfor_TURRET_HMG",        [_turretHMG, _turretGMG, _turretAT],                "O_HMG_01_high_F"],
-    ["opfor_TURRET_GMG",        [_turretGMG, _turretHMG],                           "O_GMG_01_high_F"],
-    ["opfor_TURRET_MORTAR",     [_turretMortar, _turretGMG, _turretHMG],            "O_Mortar_01_F"],
+    ["opfor_TURRET_AA",         [_turretAA, _turretAT, _turretHMG, _turretAny],     "O_static_AA_F"],
+    ["opfor_TURRET_AT",         [_turretAT, _turretAA, _turretHMG, _turretAny],     "O_static_AT_F"],
+    ["opfor_TURRET_HMG",        [_turretHMG, _turretGMG, _turretAT, _turretAny],    "O_HMG_01_high_F"],
+    ["opfor_TURRET_GMG",        [_turretGMG, _turretHMG, _turretAny],               "O_GMG_01_high_F"],
+    ["opfor_TURRET_MORTAR",     [_turretMortar, _turretGMG, _turretHMG, _turretAny],"O_Mortar_01_F"],
 
     // Operators draw from the suppressed-weapon sets the role parser fills, then from the plain
     // role. The old spelling was `_spec arrayIntersect _lat + _aa`, which parses as
