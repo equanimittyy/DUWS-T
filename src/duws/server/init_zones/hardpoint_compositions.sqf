@@ -70,19 +70,23 @@ DUWS_hardpointComp_MG = [    ["Land_BagBunker_Small_F", -0.145386, 0.259277, 0.9
 // --DUWS-COMPOSITION END--
 
 // --DUWS-COMPOSITION BEGIN name="Hardpoint: Mortar Pit" schema=A--
-DUWS_hardpointComp_MORTAR = [    ["Land_HBarrier_5_F", -5.04614, 0.517578, 0.74121, 89.9076, false],
+DUWS_hardpointComp_MORTAR = [
+    ["Land_HBarrier_5_F", -5.04614, 0.517578, 0.74121, 89.9076, false],
     ["Land_HBarrier_5_F", 2.62061, 4.30078, 0.74121, 358.18, false],
     ["Land_HBarrier_5_F", -2.99255, 4.1875, 0.74121, 358.18, false],
     ["Land_HBarrier_5_F", 4.81384, 0.812988, 0.74121, 89.9076, false],
-    ["Land_HBarrier_5_F", -0.306274, -6.49268, 0.74121, 359.415, false],
-    ["Land_Razorwire_F", 7.58386, -7.02002, 0.75576, 124.469, false],
+    ["Land_Razorwire_F", 7.58386, -7.02002, 0.755762, 124.469, false],
     ["Land_HBarrier_5_F", 6.30579, -6.02344, 0.74121, 125.05, false],
-    ["Land_Razorwire_F", -8.26318, -6.98877, 0.75576, 230.52, false],
+    ["Land_Razorwire_F", -8.26318, -6.98877, 0.755762, 230.52, false],
     ["Land_HBarrier_5_F", -6.95215, -6.03613, 0.74121, 231.101, false],
-    ["Land_Razorwire_F", -0.0106201, 6.03711, 0.75576, 359.228, false],
-    ["I_Mortar_01_F", 0.0826416, -3.24414, 0.72232, 1.35923, true],
-    ["I_Mortar_01_F", 2.39014, -0.189941, 0.72232, 0.686763, true],
-    ["I_Mortar_01_F", -2.00403, -0.265137, 0.72232, 358.9, true]];
+    ["Land_Razorwire_F", -0.0106201, 6.03711, 0.755762, 359.228, false],
+    ["I_Mortar_01_F", 0.0826416, -3.24463, 0.723015, 1.35923, true],
+    ["I_Mortar_01_F", 2.39014, -0.19043, 0.723015, 0.686763, true],
+    ["I_Mortar_01_F", -2.00403, -0.265625, 0.722321, 358.9, true],
+    ["Land_HBarrier_5_F", -0.330444, -8.38818, 0.74121, 359.415, false],
+    ["Box_FIA_Ammo_F", -2.28699, -6.21826, 1.36147, 269.614, false],
+    ["Land_CratesWooden_F", 0.365845, -6.28613, 0.739696, 357.625, false]
+];
 // --DUWS-COMPOSITION END--
 
 // --DUWS-COMPOSITION BEGIN name="Hardpoint: Artillery Battery" schema=A--

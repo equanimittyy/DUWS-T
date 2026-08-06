@@ -93,17 +93,16 @@ _radarOperator setVariable ["BIS_fnc_setUnitInsignia_class", "StayInVehicle", tr
 // being the ground they hold, and the row's own class only decides what the Eden import draws.
 // --DUWS-COMPOSITION BEGIN name="Mission: Hold Position" schema=A--
 _staticsArray = [
-	["Land_HBarrier_5_F", -6.48291, -3.77783, 0, 49.5237, false],
-	["Land_HBarrier_5_F", -8.11426, 1.68848, 0, 88.8804, false],
-	["Land_HBarrier_5_F", 1.946484, -8.04492, 0, 0.520331, false],
-	["Land_HBarrier_5_F", -0.718359, 8.46387, 0, 183.745, false],
-	["Land_HBarrier_5_F", 3.80957, 6.41455, 0, 45.2709, false],
-	["Land_HBarrier_5_F", 9.2251, -1.25684, 0, 269.491, false],
-	["Land_BagBunker_Small_F", -7.08691, 7.32031, 0, 134.261, false],
-	["Land_BagBunker_Small_F", 8.24512, -6.67188, 0, 314.617, false],
-	["I_HMG_02_high_F", -5.52539,  5.98193, 0, 314.218, true],
-	["I_HMG_02_high_F",  6.7168,  -5.49365, 0, 136.703, true],
-	["B_Mortar_01_F",    0.01,    -4.49365, 0, 136.703, true]
+	["Land_HBarrier_5_F", -6.48291, -3.77783, 0.74121, 49.5237, false],
+	["Land_HBarrier_5_F", -8.11426, 1.68848, 0.74121, 88.8804, false],
+	["Land_HBarrier_5_F", 1.94653, -8.04492, 0.74121, 0.520331, false],
+	["Land_HBarrier_5_F", -0.718384, 8.46387, 0.74121, 183.745, false],
+	["Land_HBarrier_5_F", 3.80957, 6.41455, 0.74121, 45.2709, false],
+	["Land_HBarrier_5_F", 9.2251, -1.25684, 0.74121, 269.491, false],
+	["Land_BagBunker_Small_F", -7.08691, 7.32031, 0.966326, 134.261, false],
+	["Land_BagBunker_Small_F", 8.24512, -6.67188, 0.966326, 314.617, false],
+	["I_HMG_02_high_F", -7.0188, 7.60986, 1.68044, 314.218, true],
+	["I_HMG_02_high_F", 8.27234, -6.81934, 1.68044, 136.703, true]
 ];
 // --DUWS-COMPOSITION END--
 
