@@ -13,19 +13,18 @@
 */
 if (!isServer) exitWith {};
 
-// Half the zone gate's grace, deliberately. Towns are disjoint -- the cull in
-// fnc_civ_init_Tomata pushes them apart until they are -- so a player is inside at most one, and a
-// long grace leaves a trail of fully populated towns behind anyone crossing the map. The
-// ceiling thins that trail but does not end it: its floor of three keeps every occupied town
-// holding somebody, so the overshoot tracks how many towns are occupied at once, and the grace is
-// what decides that. A zone can afford the longer clock because there are forty of it at the very most.
-#define DESPAWN_TIMER 60
-
-// How far outside a town its arrival is noticed, so the fill lands before the player does. Not the
-// zone gate's 400: zones sit 1200 m apart by zones_spacing, towns only until their discs stop
-// touching, so two small ones can be 210 m apart. What 200 double-triggers is self-limiting --
-// radius is buildings x 10 floored at 100, so the tight pairs are towns of ten civilians or fewer.
-#define STREAM_BUFFER 200
+// The crowd streams on the "town_crowd" profile in DUWS_streamProfiles. Its grace is half the zone
+// gate's, deliberately. Towns are disjoint -- the cull in fnc_civ_init_Tomata pushes them apart until
+// they are -- so a player is inside at most one, and a long grace leaves a trail of fully populated
+// towns behind anyone crossing the map. The ceiling thins that trail but does not end it: its floor of
+// three keeps every occupied town holding somebody, so the overshoot tracks how many towns are occupied
+// at once, and the grace is what decides that. A zone can afford the longer clock because there are
+// forty of it at the very most.
+//
+// Its buffer is 200, not the zone gate's 400: zones sit 1200 m apart by zones_spacing, towns only until
+// their discs stop touching, so two small ones can be 210 m apart. What 200 double-triggers is
+// self-limiting -- radius is buildings x 10 floored at 100, so the tight pairs are towns of ten
+// civilians or fewer.
 
 // Share of the crowd placed on open ground beside a building rather than inside one. All-indoors
 // reads as a ghost town whose houses happen to be occupied; all-outdoors as a bus queue.
@@ -151,7 +150,7 @@ for "_i" from 0 to (_count - 1) do {
     // Unlatched, unlike a garrison. The latch exists to stop men appearing around a player who was
     // already standing there, and a crowd that never arrives is worse than one that fades in: a town
     // the player happens to start in would otherwise stay empty until they had left it once.
-    private _o = [_key, "crowd", CIVILIAN, STREAM_BUFFER, DESPAWN_TIMER, false, false] call fnc_site_occupant_register;
+    private _o = [_key, "crowd", CIVILIAN, "town_crowd"] call fnc_site_occupant_register_profile;
     // The only field the crowd adds: everything else about where this town is lives on the site.
     _o set ["townIndex", _i];
     [_key, "crowd", createHashMapFromArray [["wake", _fnc_wake], ["sleep", _fnc_empty]]] call fnc_site_hooks_set;

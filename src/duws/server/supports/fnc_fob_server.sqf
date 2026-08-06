@@ -73,7 +73,7 @@ _fob setVariable ["DUWS_siteKey", _fobKey];
 // its AI arm exists to notice BLUFOR arriving on OPFOR ground and at a friendly base it would
 // count the garrison standing in the middle of the radius and never let it sleep.
 {
-	[_fobKey, _x, WEST, 0, base_garrison_sleep_delay, false, false] call fnc_site_occupant_register;
+	[_fobKey, _x, WEST, "base"] call fnc_site_occupant_register_profile;
 } forEach ["infantry", "emplacement"];
 
 [_foundPickupPos, _fob] spawn fnc_guardsFOB;

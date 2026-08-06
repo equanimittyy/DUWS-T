@@ -213,7 +213,7 @@ if (count _patrolSpawnPos > 0 && count _patrolUnits > 0) then {
 // nobody is looking.
 if (!isNil "PosOfBLUHQ") then {
     ["HQ", PosOfBLUHQ, base_garrison_sleep_range, "freeze"] call fnc_site_register;
-    ["HQ", "infantry", WEST, 0, base_garrison_sleep_delay, false, false] call fnc_site_occupant_register;
+    ["HQ", "infantry", WEST, "base"] call fnc_site_occupant_register_profile;
     private _roster = ["HQ", "infantry"] call fnc_site_roster;
     ["HQ", "infantry"] call fnc_site_roster_clear;
     {

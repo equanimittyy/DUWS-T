@@ -83,6 +83,18 @@ fnc_site_occupant_register = {
     _o
 };
 
+// [_key, _kind, _side, _profile] call fnc_site_occupant_register_profile -> occupant
+//
+// Registers an occupant with the presence numbers a named profile carries, so the buffer, grace, latch,
+// AI-aware gate and hold-count for every site kind live in DUWS_streamProfiles rather than inline at
+// each caller. The default is the zone profile -- the same values this function already defaults to.
+fnc_site_occupant_register_profile = {
+    params ["_key", "_kind", "_side", "_profile"];
+    (DUWS_streamProfiles getOrDefault [_profile, [400, 120, true, true, 2]])
+        params ["_buffer", "_grace", "_latch", "_aiAware", "_minAI"];
+    [_key, _kind, _side, _buffer, _grace, _latch, _aiAware, _minAI] call fnc_site_occupant_register
+};
+
 // createHashMap rather than nil for a miss: every caller reads fields off the answer, and a nil
 // would fault the whole pass rather than the one site that was never registered.
 fnc_site_occupant = {

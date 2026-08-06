@@ -111,7 +111,23 @@ base_patrol_squad = 8;
 // costs a frame. The zone streamer's two minutes buy a zone something this does not -- there, the
 // clock stops a garrison being torn down and rebuilt around somebody crossing the radius.
 base_garrison_sleep_range = 500;
-base_garrison_sleep_delay = 10;
+
+// Streaming presence per site profile: [buffer, grace, latch, aiAware, minAI].
+//   buffer   metres added to the site radius to make the ring presence is tested over
+//   grace    seconds the empty ring waits before the site streams out (for a base, re-freezes)
+//   latch    start latched, so a site registered under a player does not raise its garrison around them
+//   aiAware  gate on the AI-aware BLUFOR test (zones, town garrisons) rather than a plain player list
+//   minAI    how many BLUFOR hold the ring to keep an aiAware site up
+// A crowd is noticed 200 m out and cleared after 60 s where the garrison in the same town is 400 and
+// 120: two answers about one town a single pair of fields would force into one. A base is 0 and a short
+// grace because it is frozen where it stands, not streamed off the map. Read by the registration
+// wrapper fnc_site_occupant_register_profile and, for the town's own gate and tick, by fnc_civ_garrison.
+DUWS_streamProfiles = createHashMapFromArray [
+    ["zone",       [400, 120, true,  true,  2]],
+    ["town_crowd", [200,  60, false, false, 2]],
+    ["town_gar",   [400, 120, true,  true,  2]],
+    ["base",       [  0,  10, false, false, 2]]
+];
 
 // The consumable-support slate. support_max_slots is how many a player may hold at once, the
 // campaign-long budget that makes choosing between them mean anything; support_death_refund is

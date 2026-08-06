@@ -37,16 +37,13 @@ private _centres = _locations apply { getPos _x };
 // whole balance: see the clear branch below.
 #define CLEAR_REP 5
 
-// How long the town has to stay empty before its garrison streams out. The same purpose as the
-// zone streaming grace and roughly its length: a player who steps outside the radius to flank has
-// not left, and tearing the garrison down and rebuilding it around them when they step back is both
-// a visible pop and a free reset of everything they had ground down.
-#define DESPAWN_GRACE 120
-
-// How far outside a town a garrison notices an arrival. The zone gate's figure, not the crowd's 200:
-// a garrison is expensive enough to want the longer warning, and the raise below is written against
-// the same ring.
-#define STREAM_BUFFER 400
+// The garrison streams on the "town_gar" profile in DUWS_streamProfiles -- the zone's figures, not the
+// crowd's. Its grace, 120, serves the same purpose as the zone streaming grace and runs roughly its
+// length: a player who steps outside the radius to flank has not left, and tearing the garrison down
+// and rebuilding it around them when they step back is both a visible pop and a free reset of
+// everything they had ground down. Its buffer, 400, is the zone gate's figure and not the crowd's 200:
+// a garrison is expensive enough to want the longer warning, and the gate and tick below are written
+// against the same ring.
 
 // Where a raise files its result for the poll to adopt. Unset while the worker is in flight, [] if
 // it gave up, otherwise the garrison it stood up.
@@ -60,7 +57,7 @@ private _fnc_raise = {
     // Presence is decided the way zones decide it: a five-second re-test after first contact, so
     // grazing the perimeter does not commit a garrison for someone already leaving.
     sleep 5;
-    if !([_centre, _radius + STREAM_BUFFER] call fnc_duws_bluforNear) exitWith {
+    if !([_centre, _radius + ((DUWS_streamProfiles get "town_gar") select 0)] call fnc_duws_bluforNear) exitWith {
         missionNamespace setVariable [RAISE_SLOT(_i), []];
     };
 
@@ -141,7 +138,7 @@ private _towns = [];
 for "_i" from 0 to (_count - 1) do {
     private _key = [_i] call fnc_town_site_key;
     [_key, _centres select _i, _radii param [_i, 500]] call fnc_site_register;
-    _towns pushBack ([_key, "garrison", EAST, STREAM_BUFFER, DESPAWN_GRACE] call fnc_site_occupant_register);
+    _towns pushBack ([_key, "garrison", EAST, "town_gar"] call fnc_site_occupant_register_profile);
 };
 // The town garrison's own cycle, run for it by fnc_site_poller once every pass. Presence, the empty
 // clock and the vacate latch arrive already answered; what is left is everything a garrison responds
@@ -244,7 +241,7 @@ private _fnc_tick = {
         };
     };
 
-    // Streamed out once the town has been empty for DESPAWN_GRACE. Town garrisons used to stand
+    // Streamed out once the town has been empty for the town_gar grace. Town garrisons used to stand
     // for the rest of the campaign wherever the player had ever been, so a long session left
     // live men in every town on the map; this makes a town cost what a zone costs.
     //
@@ -253,7 +250,7 @@ private _fnc_tick = {
     // and the town rebuilds whole. Falls only -- the setter floors it and this never raises it
     // -- so damage accumulates across visits the way a zone's does.
     if (!_here && {(_t get "emptySince") >= 0}
-        && {diag_tickTime > (_t get "emptySince") + DESPAWN_GRACE}) exitWith {
+        && {diag_tickTime > (_t get "emptySince") + ((DUWS_streamProfiles get "town_gar") select 1)}) exitWith {
         private _left = [[_i] call fnc_town_site_key] call fnc_site_alive;
         if ((_t get "baseline") > 0) then {
             private _was = [_i] call fnc_town_garrison_strengthAt;

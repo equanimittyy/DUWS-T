@@ -267,7 +267,7 @@ publicVariable "zones_buildout_done";
 // Two AI to raise a zone and one to hold it: that hysteresis stops a zone flickering off around the
 // edges of the force that just took it.
 [_zoneKey, _spawnPos, _size] call fnc_site_register;
-private _occ = [_zoneKey, "garrison", EAST, 400, 120, true, true, 2] call fnc_site_occupant_register;
+private _occ = [_zoneKey, "garrison", EAST, "zone"] call fnc_site_occupant_register_profile;
 _occ set ["minAIHold", 1];
 [_zoneKey, "garrison", DUWS_zoneHooks] call fnc_site_hooks_set;
 
