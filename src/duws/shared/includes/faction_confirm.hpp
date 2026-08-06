@@ -306,12 +306,31 @@ class startup_faction_key_edit
             w = 16 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
+        class edit_filter_label: RscText
+        {
+            idc = 8631;
+            text = "$STR_DUWS_T_faction_edit_filter";
+            x = 10 * GUI_GRID_W + GUI_GRID_X;
+            y = 6 * GUI_GRID_H + GUI_GRID_Y;
+            w = 4 * GUI_GRID_W;
+            h = 1 * GUI_GRID_H;
+            sizeEx = 0.03;
+        };
+        class edit_filter_box: RscEdit
+        {
+            idc = 8632;
+            x = 14 * GUI_GRID_W + GUI_GRID_X;
+            y = 6 * GUI_GRID_H + GUI_GRID_Y;
+            w = 16 * GUI_GRID_W;
+            h = 1 * GUI_GRID_H;
+            tooltip = "$STR_DUWS_T_faction_edit_filter_tt";
+        };
         class edit_class_label: RscText
         {
             idc = 8624;
             text = "$STR_DUWS_T_faction_edit_class";
             x = 10 * GUI_GRID_W + GUI_GRID_X;
-            y = 6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 7 * GUI_GRID_H + GUI_GRID_Y;
             w = 4 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
             sizeEx = 0.03;
@@ -320,7 +339,7 @@ class startup_faction_key_edit
         {
             idc = 8625;
             x = 14 * GUI_GRID_W + GUI_GRID_X;
-            y = 6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 7 * GUI_GRID_H + GUI_GRID_Y;
             w = 16 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
@@ -329,9 +348,9 @@ class startup_faction_key_edit
             idc = 8626;
             text = "#(argb,8,8,3)color(0,0,0,0.5)";
             x = 10 * GUI_GRID_W + GUI_GRID_X;
-            y = 7.6 * GUI_GRID_H + GUI_GRID_Y;
+            y = 8.2 * GUI_GRID_H + GUI_GRID_Y;
             w = 20 * GUI_GRID_W;
-            h = 11 * GUI_GRID_H;
+            h = 10.4 * GUI_GRID_H;
         };
         // Transparent overlay for the "no preview" caption, so it reads over the picture rather
         // than replacing it.

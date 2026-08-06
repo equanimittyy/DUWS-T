@@ -445,6 +445,18 @@
                 <Original>NO CLASS SELECTED</Original>
                 <English>NO CLASS SELECTED</English>
             </Key>
+            <Key ID="STR_DUWS_T_faction_edit_filter">
+                <Original>Filter</Original>
+                <English>Filter</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_filter_tt">
+                <Original>Type to narrow the class list. Matches the display name or the classname.</Original>
+                <English>Type to narrow the class list. Matches the display name or the classname.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_edit_all">
+                <Original>ALL FACTIONS</Original>
+                <English>ALL FACTIONS</English>
+            </Key>
             <Key ID="STR_DUWS_T_gamemode">
                 <Original>Game Mode</Original>
                 <English>Game Mode</English>
