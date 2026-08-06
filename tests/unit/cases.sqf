@@ -680,8 +680,8 @@ private _rows = (["blufor"] call fnc_faction_schema) + (["opfor"] call fnc_facti
 ["faction_schema: the keys no faction file defines are optional",
     (_rows select {!(_x select 3)} apply {_x select 0}),
     ["blufor_AA_SOLDIER_X", "blufor_AT_SOLDIER_X", "blufor_SNIPER_SOLDIER_X",
-     "blufor_TURRET_MORTAR", "opfor_TURRET_AA", "opfor_TURRET_AT", "opfor_TURRET_GMG",
-     "opfor_TURRET_MORTAR", "opfor_ARTY_X"]] call fnc_assertEq;
+     "blufor_MEDIC_X", "blufor_TURRET_MORTAR", "opfor_MEDIC_X", "opfor_TURRET_AA",
+     "opfor_TURRET_AT", "opfor_TURRET_GMG", "opfor_TURRET_MORTAR", "opfor_ARTY_X"]] call fnc_assertEq;
 
 // What lets a roster name a role bare: the same key in the same slot on both sides. A pair that
 // drifts apart puts one army's row on the wrong line of the confirmation screen and, worse, makes a
