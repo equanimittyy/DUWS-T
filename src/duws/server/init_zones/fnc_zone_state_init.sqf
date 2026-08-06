@@ -26,9 +26,9 @@ fnc_zone_key = {
 // Past the twenty-six the pool pairs two distinct words. Selection is by draw-and-retry rather than
 // by building the 650 pairs, because a campaign runs to tens of zones and would throw the list away.
 fnc_zone_name = {
-	private _words = ["Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel","India",
-		"Juliett","Kilo","Lima","Mike","November","Oscar","Papa","Quebec","Romeo","Sierra","Tango",
-		"Uniform","Victor","Whiskey","Xray","Yankee","Zulu"];
+	private _words = ["ALPHA","BRAVO","CHARLIE","DELTA","ECHO","FOXTROT","GOLF","HOTEL","INDIA",
+		"JULIETT","KILO","LIMA","MIKE","NOVEMBER","OSCAR","PAPA","QUEBEC","ROMEO","SIERRA","TANGO",
+		"UNIFORM","VICTOR","WHISKEY","XRAY","YANKEE","ZULU"];
 	private _used = missionNamespace getVariable ["DUWS_zoneNames", []];
 	private _free = _words select {!(_x in _used)};
 
