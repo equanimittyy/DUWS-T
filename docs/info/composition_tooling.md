@@ -156,10 +156,11 @@ round trip survive being moved: an origin typed at import time is only true unti
 dragged or rotated, and after that every row silently carries the difference. Measuring from a marker
 that travels with the composition removes the whole class of mistake.
 
-Its X and Y are exact. **Its Z is about 4 m high**, because the export measures with `getPosWorld`,
-which reports a bounding-box centre, and the marker is a pole. Every row therefore comes back that
-much low — as one constant, which `U` below detects and offers to subtract. A flatter marker would
-remove the constant and cost the one thing a marker is for, which is being visible while you work.
+Its X and Y are exact, and so is its Z. `getPosWorld` reports a bounding-box centre, so the pole
+reads about 4 m high — but the export drops the origin to the pole's base before measuring, so every
+row comes back as its height over the ground: origin at ground, the same datum the import and the
+mission read a row's Z against. The pole can therefore stay tall enough to see while you work rather
+than being traded for a flat marker nobody can spot.
 
 If no marker is found the snippet falls back to the coordinate baked in at generation (session X/Y,
 and the Z of the last import so a `zbase=` layout subtracts its own altitude) and **says so in
@@ -177,10 +178,7 @@ subtract. Comment lines inside the array are not carried over, and it says how m
 **A paste that lines up with nothing is a replace, and it asks before writing.** A stub fence — one
 placeholder row, written so a layout can be imported and its markers raised before the layout
 exists — pairs with no pasted row, and neither does a paste dropped into the wrong composition. The
-rows cannot tell those two apart, so the question is put rather than answered. A replace also has no
-pair left to measure a Z shift against, so the origin marker's own height is offered in place of the
-measured delta; decline it for a paste taken from a scene with no `DUWS_ORIGIN`, whose rows already
-sit at the height they mean.
+rows cannot tell those two apart, so the question is put rather than answered.
 
 Trailing columns (`isWeapon`) come across from the row at the same index, which is the author's own
 answer. A row that does not line up has none to inherit, and **the flag is derived from the class
@@ -206,12 +204,11 @@ Folding back by hand, if you would rather, by these rules:
   or dir actually moved.
 - **X/Y and direction** drop straight in. For the **HQ**, add `_hqInComp` (10.0413, 11.3066) to X/Y —
   its array stores original composition coordinates, not offsets.
-- **The exported Z does not fold straight back.** It is the terrain baseline of wherever you dropped
-  the composition in Eden, not a real coordinate. Ground rows discard Z at runtime, so it does not
-  matter there. Weapon rows do not — see above — so a gun moved vertically has to have its Z worked
-  out against the site centre rather than copied out of the export. The **killhouse** is the one
-  layout that exports Z usefully: set `_origin`'s Z to its `_centerSpawnZ` (1000) and the floor
-  offsets come back raw.
+- **Exported Z drops straight in.** The export datums off the marker's base, so a row's Z is its
+  height over the ground — what the mission reads a weapon row's Z as, and what a prop row's would
+  mean if it were not discarded at spawn. A gun raised onto a roof keeps that height through the
+  round trip. The **killhouse** rides the same rule at altitude: under `z=keep` its rows datum to
+  `_centerSpawnZ` (1000) and the floor offsets come back raw.
 - **Keep the trailing fields.** Carry each row's `isWeapon` flag over; a rearrange never changes it
   and the export does not emit it.
 

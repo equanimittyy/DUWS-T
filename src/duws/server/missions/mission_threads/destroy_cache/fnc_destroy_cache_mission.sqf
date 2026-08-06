@@ -44,21 +44,21 @@ _centerSpawnY = _centerSpawn select 1;
 // supplies. The row's own class only decides what the Eden import draws.
 // --DUWS-COMPOSITION BEGIN name="Mission: Destroy Cache" schema=A--
 _staticsArray = [
-    ["CamoNet_INDP_open_F", 0.942383, -0.640625, 0, 342.004, false],
-    ["Land_GarbageHeap_02_F", -1.71191, -1.54443, 3.33786e-06, 93.4817, false],
-    ["Land_CratesWooden_F", -1.27148, 2.11084, 0, 0, false],
-    ["Land_GarbageHeap_04_F", -2.4165, -0.706543, -0.0443211, 90.9487, false],
-    ["Land_CratesWooden_F", 1.46631, -3.19775, 0, 0, false],
-    ["Land_HBarrier_5_F", -6.48291, -3.77783, 0, 49.5237, false],
-    ["Land_HBarrier_5_F", -8.11426, 1.68848, 0, 88.8804, false],
-    ["Land_HBarrier_5_F", 1.946484, -8.04492, 0, 0.520331, false],
-    ["Land_HBarrier_5_F", -0.718359, 8.46387, 0, 183.745, false],
-    ["Land_HBarrier_5_F", 3.80957, 6.41455, 0, 45.2709, false],
-    ["Land_HBarrier_5_F", 9.2251, -1.25684, 0, 269.491, false],
-    ["Land_BagBunker_Small_F", -7.08691, 7.32031, 0, 134.261, false],
-    ["Land_BagBunker_Small_F", 8.24512, -6.67188, 0, 314.617, false],
-    ["O_HMG_01_high_F", -5.52539,  5.98193, 0, 314.218, true],
-    ["O_HMG_01_high_F",  6.7168,  -5.49365, 0, 136.703, true]
+    ["CamoNet_INDP_open_F", 0.942383, -0.640625, 1.16854, 342.004, false],
+    ["Land_GarbageHeap_02_F", -1.71191, -1.54443, 0.07052, 93.4817, false],
+    ["Land_CratesWooden_F", -1.27148, 2.11084, 0.7397, 0, false],
+    ["Land_GarbageHeap_04_F", -2.4165, -0.706543, 0.51297, 90.9487, false],
+    ["Land_CratesWooden_F", 1.46631, -3.19775, 0.7397, 0, false],
+    ["Land_HBarrier_5_F", -6.48291, -3.77783, 0.74121, 49.5237, false],
+    ["Land_HBarrier_5_F", -8.11426, 1.68848, 0.74121, 88.8804, false],
+    ["Land_HBarrier_5_F", 1.94653, -8.04492, 0.74121, 0.520331, false],
+    ["Land_HBarrier_5_F", -0.718384, 8.46387, 0.74121, 183.745, false],
+    ["Land_HBarrier_5_F", 3.80957, 6.41455, 0.74121, 45.2709, false],
+    ["Land_HBarrier_5_F", 9.2251, -1.25684, 0.74121, 269.491, false],
+    ["Land_BagBunker_Small_F", -7.08691, 7.32031, 0.96633, 134.261, false],
+    ["Land_BagBunker_Small_F", 8.24512, -6.67188, 0.96633, 314.617, false],
+    ["O_HMG_01_high_F", -6.99316, 7.51807, 1.66099, 314.218, true],
+    ["O_HMG_01_high_F", 8.30847, -6.73242, 1.66099, 136.703, true]
 ];
 // --DUWS-COMPOSITION END--
 

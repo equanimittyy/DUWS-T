@@ -59,9 +59,10 @@ $numRe = '-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?'
 $rowRe = '"([^"]+)"\s*,\s*({0})\s*,\s*({0})\s*,\s*({0})\s*,\s*({0})' -f $numRe
 
 # How far DUWS_ORIGIN's getPosWorld sits above the ground it stands on: a FlagPole_F reports a
-# bounding-box centre, so every exported row comes back low by this much. Measured against two
-# classes whose authored Z is already in the tree -- Land_HBarrier_5_F at 0.74071 and
-# Land_BagFence_Short_F at 0.41548 -- which agree on it to a millimetre.
+# bounding-box centre, so the marker reads this high. New-ExportScript subtracts it so exported rows
+# datum to the marker's base -- the ground -- rather than its centre, which is what keeps origin at
+# ground and closes the round trip. Measured against two classes whose authored Z is already in the
+# tree -- Land_HBarrier_5_F at 0.74071 and Land_BagFence_Short_F at 0.41548 -- agreeing to a millimetre.
 $markerZ = 3.9775
 
 function Get-Attr($s, $pattern, $default) {
@@ -284,10 +285,10 @@ function New-ImportScript($name, $schema, $rows, $originX, $originY, $originZ, $
     # a coordinate, so dragging or rotating the selection carries the frame with it and the offsets
     # still come out in the composition's own terms.
     #
-    # Its X and Y are exact; its Z is not. The export measures with getPosWorld, which reports a
-    # bounding-box centre, so a pole this tall sits about four metres above the ground it stands on
-    # and every row comes back that much low. Left as a constant for Update-StaticFence to detect and
-    # offer to subtract, rather than traded away for a flatter marker nobody can see in the 3D view.
+    # Its X and Y are exact. Its Z reads about four metres high -- getPosWorld reports a bounding-box
+    # centre and this marker is a tall pole -- but the export drops the origin to the pole's base
+    # before measuring, so rows come back grounded rather than that much low. That is what lets the
+    # pole stay tall enough to see in the 3D view instead of being traded for a flat marker nobody can.
     [void]$sb.AppendLine('// ORIGIN MARKER -- not part of the composition. The export takes its own')
     [void]$sb.AppendLine('// origin from this, so keep it selected with everything else: move it and')
     [void]$sb.AppendLine('// the whole layout moves with it, which is the point.')
@@ -317,7 +318,15 @@ function New-ExportScript($originX, $originY, $originZ) {
     [void]$sb.AppendLine('')
     [void]$sb.AppendLine('private _named = { ((_x get3DENAttribute "name") param [0, ""]) };')
     [void]$sb.AppendLine('private _anchor = ((all3DENEntities select 0) select { (_x call _named) == "DUWS_ORIGIN" }) param [0, objNull];')
-    [void]$sb.AppendLine('private _origin = if (isNull _anchor) then { _fallback } else { getPosWorld _anchor };')
+    # getPosWorld reports a bounding-box centre, so the pole reads $markerZ m above the ground it
+    # stands on. Drop the origin's Z to that base, so a row's exported Z is its height over the
+    # ground -- what the import and the mission both read it as -- and origin rests at ground. X/Y
+    # are exact off getPosWorld and stay. Subtracting the constant works at any altitude, so a
+    # zbase= layout off-map keeps datuming to its own floor rather than a terrain lookup that misses.
+    [void]$sb.AppendLine('private _origin = if (isNull _anchor) then { _fallback } else {')
+    [void]$sb.AppendLine('    private _w = getPosWorld _anchor;')
+    [void]$sb.AppendLine("    [_w select 0, _w select 1, (_w select 2) - $(Fmt $markerZ)]   // pole centre -> base (ground)")
+    [void]$sb.AppendLine('};')
     [void]$sb.AppendLine('if (isNull _anchor) then {')
     [void]$sb.AppendLine('    systemChat "No DUWS_ORIGIN marker: falling back to the import coordinate. If the layout was moved or rotated since, these rows are wrong.";')
     [void]$sb.AppendLine('};')
@@ -339,8 +348,9 @@ function New-ExportScript($originX, $originY, $originZ) {
     [void]$sb.AppendLine('        getDir _x]')
     [void]$sb.AppendLine('};')
     [void]$sb.AppendLine('copyToClipboard (_rows joinString ("," + endl));')
-    # Named here because this is the moment the numbers are in hand: a ground row's Z is the terrain
-    # under wherever the composition was dropped, and a weapon row's is height above the site centre.
+    # Named here because this is the moment the numbers are in hand: with the marker, every row's Z is
+    # its height over the ground the marker stands on; a markerless fallback measures from Z 0, so its
+    # rows carry the site's terrain baseline instead and want Update's constant-Z subtract.
     [void]$sb.AppendLine('systemChat format ["Copied %1 objects, origin %2.", count _objs, if (isNull _anchor) then {"the import coordinate"} else {"DUWS_ORIGIN"}];')
     return $sb.ToString()
 }
@@ -563,12 +573,10 @@ function Update-StaticFence($comp) {
     # has something to import and raise its markers from -- and equally what a paste dropped into the
     # wrong composition looks like. The rows cannot tell the two apart, so it is asked rather than
     # decided: only whoever ran the export knows which fence it came out of.
-    $replaced = $false
     if ($pairs.Count -eq 0) {
         Write-Host "  Nothing lines up by index." -ForegroundColor Red
         $q = "  Replace all {0} row(s) of '{1}' with the {2} pasted? (y/N)" -f $old.Count, $comp.Name, $new.Count
         if ((Read-Host $q) -notmatch '^\s*[Yy]') { Write-Host "  Nothing written." -ForegroundColor Yellow; return }
-        $replaced = $true
     }
 
     # A row that lines up inherits column 6 from the row it replaces, which is the author's own
@@ -614,14 +622,6 @@ function Update-StaticFence($comp) {
         Write-Host ("  {0} of {1} rows shifted by exactly {2} m in Z -- the terrain the export measured from." -f $dz.Rows, $dz.Total, (Fmt $dz.Value)) -ForegroundColor Yellow
         if ((Read-Host ("  Subtract {0} from every Z? (Y/n)" -f (Fmt $dz.Value))) -notmatch '^\s*[Nn]') { $zDrop = $dz.Value }
     }
-    # A replaced fence has no pair to measure that shift against, so the marker's own height is
-    # offered in its place. Still a question: a paste taken from a scene with no DUWS_ORIGIN measured
-    # from the fallback coordinate instead, and those rows are already at the height they mean.
-    if ($replaced) {
-        Write-Host ("  No rows to measure a Z shift against. An export taken against DUWS_ORIGIN reads {0} m low." -f (Fmt $markerZ)) -ForegroundColor Yellow
-        if ((Read-Host ("  Add {0} to every Z? (Y/n)" -f (Fmt $markerZ))) -notmatch '^\s*[Nn]') { $zDrop = -$markerZ }
-    }
-
     Write-Host ""
     if ((Read-Host ("  Rewrite '{0}' with {1} rows? (y/N)" -f $comp.Name, $new.Count)) -notmatch '^\s*[Yy]') {
         Write-Host "  Nothing written." -ForegroundColor Yellow
