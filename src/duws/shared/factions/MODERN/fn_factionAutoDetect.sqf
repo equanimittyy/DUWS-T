@@ -1,8 +1,8 @@
-// Locality: server -- compiled by fnc_factions_check from server/server_init.sqf:31. The
-// functions it defines run wherever their own callers do, including client dialogs.
-// First non-empty candidate, or [] when every candidate is empty. Never nil: `select 0` on an
-// empty array returns nil, and assigning nil *undefines* the variable, so a faction that fields
-// no static AA left _turretAA undefined and took down the whole array fnc_parseFaction returns.
+// Server file: compiled by fnc_factions_check (server_init.sqf); the functions it defines run
+// wherever their callers do, client dialogs included.
+// First non-empty candidate, else []. Never nil: `select 0` on an empty array returns nil, and
+// assigning nil *undefines* the variable -- a faction with no static AA left _turretAA undefined
+// and took down the whole array fnc_parseFaction returns.
 fnc_selectNonEmpty = compileFinal {
 	private _found = _this select {!(_x isEqualTo [])};
 	if (_found isEqualTo []) exitWith {[]};
@@ -13,43 +13,35 @@ fnc_selectNonEmpty = compileFinal {
 fnc_vehiclePostInit = compileFinal {
 		params ["_entity", ["_side", west]];
 
-		// wait for vehicle and crew to spawn
+		// let the vehicle and crew spawn in
 		sleep 1;
-		// randomize vehicle armor/camonet configuration
 		[_entity, false, ["showcamonethull", 0.5, "showcamonetturret", 0.5, "showcamonetcannon", 0.5, "showslathull", 0.5]] call BIS_fnc_initVehicle;
 		
-		// ignore parachutes
 		if (_entity isKindOf "ParachuteBase") exitWith {};
 
-		// only act on non player/ai - crewed vehicles, ignore civs
+		// only AI-crewed vehicles of this side: skip empty, civilian, player-crewed, UAV
 		if ({alive _x && {!isPlayer _x}} count crew _entity == 0 || {side _entity == civilian} || {side _entity != _side} || {unitIsUAV _entity}) exitWith {};		
 		
-		// wait until opfor inf units spawned
+		// wait for this side's foot units to exist
 		waitUntil {sleep 1; {alive _x && {!isPlayer _x || {isPlayer leader _x}} && {side _x == _side} && {isNull objectParent _x}} count allUnits > 0 };
 
 		_factionUnitRandom = selectRandom (allUnits select {alive _x && {!isPlayer _x} && {side _x == _side} && {isNull objectParent _x}});
 		_factionVoice = speaker _factionUnitRandom;
 		
-		// if vanilla fallback asset is used... convert crew (appearance/voice) to that of faction in use, and change vehicle texture to something more generic
+		// vanilla fallback asset in use: reskin the crew (loadout/voice) and texture to the real faction
 		if ( faction _factionUnitRandom != getText(configfile >> "CfgVehicles" >> typeOf _entity >> "faction") ) then {
-		// set vehicle crew gear/loadouts/voice to match faction
 		crew _entity select {alive _x} apply { _x setUnitLoadout getUnitLoadout _factionUnitRandom; _x setSpeaker _factionVoice };
 
-		// if vehicle does not belong to current faction, change texture from default to more generic texture if available...
-			// available textures excluding current
 			_availableTextures = ("true" configClasses (configfile >> "CfgVehicles" >> typeOf _entity >> "TextureSources") apply {configName _x}) - [(([_entity] call BIS_fnc_getVehicleCustomization select 0) select 0)];
 			_availableTextureGeneric = selectRandom (_availableTextures select {"blu" in toLower _x || {"black" in toLower _x} || {"oliv" in toLower _x} || {"guer" in toLower _x} || {"gre" in toLower _x} || {"eaf" in toLower _x} || {"ion" in toLower _x} || {"idap" in toLower _x}});
-			// set texture containing search substr
 			if (!isNil "_availableTextureGeneric") then { [_entity, _availableTextureGeneric] call BIS_fnc_initVehicle };
 		};
 };
-//[_entity] spawn fnc_vehiclePostInit;
 
 
-// No caller left in this tree: the request menus it padded slot names for now hold one array each.
-// Kept because it is publicVariable'd with the rest of the detection helpers, so a faction file
-// shipped by somebody else may still call it, and a missing broadcast name fails silently at the
-// call rather than anywhere a linter or the boot self-check would see it.
+// No in-tree caller left, but kept: it is publicVariable'd with the other detection helpers, so
+// a third-party faction file may still call it -- and a missing broadcast name fails silently at
+// the call site, not anywhere a linter or the boot self-check would catch.
 fnc_padZero = compileFinal {
 	switch (True) do { 
 		case (_this < 10): {format ["0%1", str _this]};
@@ -57,10 +49,10 @@ fnc_padZero = compileFinal {
 	};
 };
 
-// eval cost using a reference object created on server
+// cost of a type via a throwaway server-local reference object
 fnc_enumCost = compileFinal {
 	params ["_typeName"];
-	// exclusion for ships, since large ships create mutiple objects
+	// ships spawn multiple objects; skip the ref-object path and flat-rate them
 	if (_typeName isKindOf "Ship") exitWith {20};
 	_refObj = _typeName createVehicleLocal [1000,1000,2000];
 	_refObj setVariable ["BIS_enableRandomization", false];
@@ -72,8 +64,6 @@ fnc_enumCost = compileFinal {
 	_cost
 };
 
-//["O_Quadbike_01_F"] call fnc_enumCost;
-
 fnc_enumCostFormatted = compileFinal {
 	_typeName = _this;
 	_typeCost = _typeName call fnc_enumCost;
@@ -82,13 +72,7 @@ fnc_enumCostFormatted = compileFinal {
 	_typeCostFormatted
 };
 
-//["B_Quadbike_01_F"] call fnc_enumCostFormatted;
-//Output: ["B_Quadbike_01_F","Quad Bike (6CP)",6]
-
-//enumerates value cost of a vehicle as a function of it's capabilities
-/*
-	estimates vehicle value based on vehicle type, weapons, ammunition, armor, sensors, threat value and carrying capacity
-*/
+// heuristic vehicle value from type, weapons, armour, sensors, threat and capacity
 fnc_evalVehicleCost = {
 	_veh  = _this;
 	_vehType = typeOf _veh;
@@ -117,18 +101,8 @@ fnc_evalVehicleCost = {
 	
 	_armorModifier = linearConversion [0, 1000, getNumber (configFile >> "CfgVehicles" >> _vehType >> "armor"), 1, 2];
 
-	/*
-	// unused modifiers - for future use
-	_massModifier = linearConversion [0, 100000, getMass _veh, 1, 2];
-	_slingLoadModifier = linearConversion [0, 13500, getNumber (configFile >> "CfgVehicles" >> _vehType >> "slingLoadMaxCargoMass"), 1, 2]; 	// using taru max sling load limit
-	_vivModifier = linearConversion [0, 10000, getNumber (configFile >> "CfgVehicles" >> _vehType >> "VehicleTransport" >> "Carrier" >> "maxLoadMass"), 1, 2];	// how much can vehicle carry
-	_canBeVehicleCargo = getNumber (configFile >> "CfgVehicles" >> _vehType >> "VehicleTransport" >> "Cargo" >> "canBeTransported") isEqualTo 1;
-	_canBeSlingLoaded = getArray (configFile >> "CfgVehicles" >> _vehType >> "slingLoadCargoMemoryPoints") isNotEqualTo [];
-	_canFloat = getNumber (configFile >> "CfgVehicles" >> _vehType >> "canFloat") isEqualTo 1;
-	*/
-
 	_sensors = flatten listVehicleSensors _veh;
-	_sensors = _sensors arrayIntersect _sensors;	// number of sensors vehicle has
+	_sensors = _sensors arrayIntersect _sensors;	// self-intersect to dedupe the sensor list
 	_sensorModifier = count _sensors * 3;
 	
 	_turretCount = count allTurrets [_veh, false];
@@ -142,49 +116,30 @@ fnc_evalVehicleCost = {
 	_isVehMed = getNumber (configfile >> "CfgVehicles" >> _vehType  >> "attendant") isEqualTo 1;
 	_isVehSupply = true in (["transportAmmo","transportFuel", "transportRepair"] apply {getNumber (configfile >> "CfgVehicles" >> (_vehType)  >> _x) isNotEqualTo 0});
 	_weaponTypes = flatten ((flatten ("getArray (_x >> 'weapons') isNotEqualTo []" configClasses (configFile >> "CfgVehicles" >> _vehType >> "Turrets") apply {getArray (_x >> 'weapons')})) apply { [configFile >> "CfgWeapons" >> _x, true] call BIS_fnc_returnParents }) apply {toLowerANSI _x};
-	// parent classes for primary vehicle weapon, to easily check weapon type
-	//"MGunCore"
-	//"CannonCore"
-	//"GMG_F"
-	//"MGun"
-	//"LauncherCore"
-	
-	// weapon cost modifiers
-	if (_isVehMed || _isVehSupply) then						{_costModifier = _costModifier + 40};	//is supply vehicle
+	// _weaponTypes holds weapon parent classnames: MGunCore, CannonCore, GMG_F, MGun, LauncherCore
+
+	if (_isVehMed || _isVehSupply) then						{_costModifier = _costModifier + 40};
 		
-	if (_isVehArty) then									 {_costModifier = _costModifier + 55};	// is artillery
+	if (_isVehArty) then									 {_costModifier = _costModifier + 55};
 		
-	if ("cannoncore" in _weaponTypes) then					 {_costModifier = _costModifier + 0};	//has cannon
+	if ("cannoncore" in _weaponTypes) then					 {_costModifier = _costModifier + 0};
 		
-	if ("launchercore" in _weaponTypes) then				 {_costModifier = _costModifier + 15};	//has missile launcher
+	if ("launchercore" in _weaponTypes) then				 {_costModifier = _costModifier + 15};
 		
-	if ("autocannon_base_f" in _weaponTypes) then			 {_costModifier = _costModifier + 10};	//has autocannon
+	if ("autocannon_base_f" in _weaponTypes) then			 {_costModifier = _costModifier + 10};
 		
-	if ("gmg_f" in _weaponTypes) then						 {_costModifier = _costModifier + 20};   //has gmg
+	if ("gmg_f" in _weaponTypes) then						 {_costModifier = _costModifier + 20};
 		
-	if ("mguncore" in _weaponTypes) then					 {_costModifier = _costModifier + 5};	//has mg
+	if ("mguncore" in _weaponTypes) then					 {_costModifier = _costModifier + 5};
 		
 	
 	_cost = _cost + _costModifier + _turretCount + _magazineCount + _weaponCount + _pylonCount + _seatCount + _sensorModifier;
 	_cost = _cost * _threatModifier * _armorModifier * _typeMultiplier;
 	round linearConversion [0, 400, _cost, 5, 100, true]
 };
-//cursorObject call fnc_evalVehicleCost
 
 
-
-
-
-//_cost = _veh call fnc_evalVehicleCost;
-
-
-
-
-
-
-
-
-// get object eden editor category - parameter can be object or classname - easy way to find vehicle type
+// editor subcategory of an object or classname -- a quick vehicle-type signal
 fnc_getEditorCategory = compileFinal {
 	toLowerANSI getText ( configfile >> "CfgVehicles" >> ( if (typeName _this isEqualTo "OBJECT") then [{typeOf _this, _this}] ) >> "editorSubcategory" );
 };
@@ -193,21 +148,15 @@ fnc_factionGetFilteredByEditorSubcat = {
 	params ["_factionData", "_factionFilter"];
 	_factionDataFiltered = _factionData select {_factionFilter in toLowerANSI getText ( configfile >> "CfgVehicles" >> _x >> "editorSubcategory" ) && {getNumber (configFile >> "CfgVehicles" >> _x >> "scopeCurator") == 2 || {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2 }}};
 	
-	// failsafe against non standard editor categories - far less accurate but better than nothing...
+	// fallback for non-standard editor categories: less accurate, but better than empty
 	if (_factionDataFiltered isEqualTo []) then {
-		// prefilter to objects available in editor/zeus
+		// only editor/Zeus-available objects (scope/scopeCurator == 2)
 		_factionDataFiltered = _factionData select {getNumber (configFile >> "CfgVehicles" >> _x >> "scopeCurator") == 2 || {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2 }};
 		_factionDataFiltered =  switch true do {
 			case ("person" in _factionFilter) :	 	{_factionDataFiltered select {_x iskindOf "CAManBase"}};
 			case ("turrets" in _factionFilter) :	{_factionDataFiltered select {_x iskindOf "StaticWeapon"}};
 			case ("aas" in _factionFilter) :		{_factionDataFiltered select {_x isKindOf "LandVehicle" && {getNumber(configFile >> "CfgVehicles" >> _x >> "radarType") isEqualTo 2}}};
-			/*
-				radarType = 0; // No radar (used for infantry)
-				radarType = 1; // Tactical display (not used)
-				radarType = 2; // Vehicle radar (used for AAA) - shows compass, turret directions and targets
-				radarType = 4; // Air radar (used for jets and gunships) - shows compass, turret directions and targets
-				radarType = 8; // Compass + turret directions (used for majority of vehicles and their turret positions) - shows compass and turret directions
-			*/
+			// radarType 2 = vehicle radar (AAA, matched here); 0 none, 4 air (jets/gunships), 8 compass+turrets
 			case ("artillery" in _factionFilter) :	{_factionDataFiltered select {getNumber (configFile >> "CfgVehicles" >> _x >> "artilleryScanner") isEqualTo 1}};
 			case ("tank" in _factionFilter) :		{_factionDataFiltered select {_x iskindOf "Tank"}};
 			case ("apc" in _factionFilter) :		{_factionDataFiltered select {_x iskindOf "Car" && {getNumber (configFile >> "CfgVehicles" >> _x >> "armor") > 300}}};
@@ -250,7 +199,6 @@ fnc_filterByClassName = compileFinal {
 	};
 };
 
-// filter classnames by class type
 fnc_factionGetFilteredByType = compileFinal {
 	params ["_factionData", "_factionFilter"];
 	_factionData select {_x isKindOf _factionFilter && {getNumber (configFile >> "CfgVehicles" >> _x >> "scopeCurator") == 2 || {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2 }}};
@@ -259,7 +207,7 @@ fnc_factionGetFilteredByType = compileFinal {
 fnc_filterBySeats = compileFinal {
 	params ["_factionData", "_minCrew", "_minCargo"];
 	_factionData select {
-		_crewCount = [_x, false] call BIS_fnc_crewCount; // Counts all available seats excluding cargo slots. Returns 6 for bench little bird, so FFV seats are counted as crew.
+		_crewCount = [_x, false] call BIS_fnc_crewCount; // crew seats only, no cargo; but FFV seats count as crew (bench Little Bird returns 6)
 		_cargoCount =  ([_x, true] call BIS_fnc_crewCount) - _crewCount;
 		(getNumber (configFile >> "CfgVehicles" >> _x >> "scopeCurator") == 2 || {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2 }) && 
 		{_crewCount >= _minCrew} && 
@@ -267,7 +215,7 @@ fnc_filterBySeats = compileFinal {
 	}; 
 };
 
-// checks if vehicle is one of these types transportAmmo transportRepair transportFuel transportSoldier 
+// _transportType is a config key: transportAmmo / transportRepair / transportFuel / transportSoldier
 fnc_filterByUtility = compileFinal {
 	params ["_factionData", "_transportType"];
 	_factionData select {getNumber (configFile >> "CfgVehicles" >> _x >> _transportType) > 0 && {getNumber (configFile >> "CfgVehicles" >> _x >> "scopeCurator") == 2 || {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2 }}};
@@ -303,25 +251,19 @@ fnc_isThreatTo = compileFinal {
 	_threatTo
 };
 
-// reutrns parent classes for primary vehicle weapon, to easily check weapon type
-//"MGunCore"
-//"CannonCore"
-//"GMG_F"
-//"MGun"
-//"LauncherCore"
+// returns weapon parent classnames (MGunCore, CannonCore, GMG_F, MGun, LauncherCore) for type checks
 fnc_vehicleWeaponType = compileFinal {
 	params ["_type"];
 	flatten ((flatten ("getArray (_x >> 'weapons') isNotEqualTo []" configClasses (configFile >> "CfgVehicles" >> _type >> "Turrets") apply {getArray (_x >> 'weapons')})) apply { [configFile >> "CfgWeapons" >> _x, true] call BIS_fnc_returnParents });
 };
 
-// returns array with units roles parsed
 fnc_unitParseRoles = compileFinal {
-	// Unit role is taken from the units config CfgVehicles > typeof unit > picture which points to a picture defined under the name in CfgVehicleIcons. e.g pictureHeal, pictureRepair, pictureExplosive
-	// Weapon Role is based off of the weapon the unit is currently holding, seems to be in the precedence of secondary then primary, CfgWeapons > primary/secondaryWeapon _unit > UiPicture.
+	// Unit role comes from the config icon (CfgVehicles >> type >> picture -> CfgVehicleIcons:
+	// pictureHeal/Repair/...). Weapon role comes from the held weapon's UIPicture, secondary
+	// before primary.
 	fnc_IsMG = compileFinal {
 		params ["_type"];
-		// Belt-fed first: a 100+ round default magazine is a machine gun whatever icon it ships. 100
-		// clears drum mags (~75) so a drum SMG does not read as an MG. Icon/cursor stay as a fallback.
+		// Belt-fed first (default mag 100+): an MG whatever its icon. 100 clears drums so a drum SMG is not one.
 		private _mag = (getArray (configFile >> "CfgWeapons" >> _type >> "magazines")) param [0, ""];
 		(_mag != "" && {getNumber (configFile >> "CfgMagazines" >> _mag >> "count") >= 100})
 		|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_mg_ca.paa"}
@@ -459,84 +401,15 @@ fnc_unitParseRoles = compileFinal {
 	
 	_this apply {
 		getUnitLoadout _x params ["_primaryWeapon", "_secondaryWeapon", "_handgunWeapon", "_uniform", "_vest", "_backpack", "_headgear", "_facewear", "_binocular", "_assignedItems"];
-		/*
-			Unit Loadout Array
-				Index	Element	Description
-				0	Primary Weapon	
-					classname
-					suppressor
-					pointer
-					optics
-					muzzle 1's magazine and ammunition
-					muzzle 2's magazine and ammunition
-					bipod
-				1	Secondary Weapon	
-					classname
-					suppressor
-					pointer
-					optics
-					muzzle 1's magazine and ammunition
-					muzzle 2's magazine and ammunition
-					bipod
-				2	Handgun Weapon	
-					classname
-					suppressor
-					pointer
-					optics
-					muzzle 1's magazine and ammunition
-					muzzle 2's magazine and ammunition
-					bipod
-				3	Uniform	
-					classname
-					Array of:
-						If item: items name and count
-						If magazine: magazines name, count, and their ammo count
-						If weapon: weapon detail (see the Primary Weapon) and count
-						If container (backpack/vest/uniform): container name and whether it's a backpack (backpacks are defined in CfgVehicles, and vests and uniforms in CfgWeapons)
-				4	Vest	
-					classname
-					Array of:
-						If item: items name and count
-						If magazine: magazines name, count, and their ammo count
-						If weapon: weapon detail (see the Primary Weapon) and count
-						If container (backpack/vest/uniform): container name and whether it's a backpack (backpacks are defined in CfgVehicles, and vests and uniforms in CfgWeapons)
-				5	Backpack	
-					classname
-					Array of:
-						If item: items name and count
-						If magazine: magazines name, count, and their ammo count
-						If weapon: weapon detail (see the Primary Weapon) and count
-						If container (backpack/vest/uniform): container name and whether it's a backpack (backpacks are defined in CfgVehicles, and vests and uniforms in CfgWeapons)
-				6	Headgear	classname (String)
-				7	Goggles/Facewear	classname (String)
-				8	Binoculars	
-					classname
-					suppressor
-					pointer
-					optics
-					muzzle 1's magazine and ammunition
-					muzzle 2's magazine and ammunition
-					bipod
-				9	Assigned Items
-				in a different order
-				than assignedItems
-				no binoculars
-					Map
-					GPS/UAV terminal
-					Radio
-					Compass
-					Watch
-					NVG
-		*/
+		// getUnitLoadout layout. Destructured here: 0 primary weapon, 1 secondary weapon
+		// (weapon sub-index 4 = muzzle-1 magazine+ammo), 9 assigned items. Full array: BIS getUnitLoadout.
 		
 		_primaryWeaponIsSuppressed = if (count _primaryWeapon > 1) then [{_primaryWeapon # 1 isNotEqualTo ""}, {false}];
-		// getUnitLoadout pads a weapon array to seven elements and leaves absent attachments as "",
-		// so `count > 3` only says the unit carries a primary weapon at all -- not that it has an
-		// optic. An iron-sighted rifle looked up CfgWeapons >> "" >> ItemInfo >> OpticsModes, which
-		// holds no classes, so selectMax was handed an empty array and returned nil. Assigning nil
-		// undefines the variable, so both reads below errored on every such unit.
-		// An optic that defines no OpticsModes fails the same way, hence the check on the modes
-		// rather than on the classname alone.
+		// getUnitLoadout pads a weapon array to seven elements, absent attachments as "", so
+		// `count > 3` only means a primary weapon exists, not that it has an optic. An iron-sighted
+		// rifle read OpticsModes under CfgWeapons >> "" (no classes): selectMax got [] and returned
+		// nil, and assigning nil undefines the variable, erroring both reads below. An optic with no
+		// OpticsModes fails the same way, so check the modes, not the classname.
 		private _opticsModes = [];
 		if (count _primaryWeapon > 3 && {(_primaryWeapon # 3) isNotEqualTo ""}) then {
 			_opticsModes = "true" configClasses (configFile >> "CfgWeapons" >> (_primaryWeapon # 3) >> "ItemInfo" >> "OpticsModes");
@@ -583,15 +456,14 @@ fnc_unitParseRoles = compileFinal {
 				case ( [_primaryType] call fnc_IsMG && "rifleman" in toLowerANSI ([configFile >> "CfgVehicles" >> _x] call BIS_fnc_displayName) ) : { _spec_ar pushBackUnique _x };
 				case ( [_primaryType] call fnc_IsMG && !("rifleman" in toLowerANSI ([configFile >> "CfgVehicles" >> _x] call BIS_fnc_displayName)) ) : { _spec_mg pushBackUnique _x };
 			};
-		};	// units with suprressed weapons seen as spec ops
+		};	// suppressed weapon -> classified as spec ops
 		
 		switch true do {
-			// Pilots and crew are tested before anything else: they carry the same launchers and
-			// medikits as the line infantry, so further down the list a crewman with an RPG became
-			// an anti-tank rifleman and a zone garrison came out dressed for a cockpit. The two
-			// wrappers each stripped them back out afterwards by classname, and that keyword list
-			// included "officer" -- which emptied the officer role for every faction that spells
-			// its officers "officer".
+			// Pilots and crew first: they carry the same launchers and medikits as line infantry,
+			// so lower down a crewman with an RPG became an AT rifleman and a garrison came out
+			// dressed for a cockpit. The old fix stripped them back out by classname, but that
+			// keyword list included "officer" and so emptied the officer role for factions that
+			// spell their officers "officer".
 			case ( [_x] call fnc_IsPilot ) : { _pilot pushBackUnique _x };
 			case ( [_x] call fnc_IsCrewman ) : { _crew pushBackUnique _x };
 			case ( [_x] call fnc_IsDiver ) : { _diver pushBackUnique _x };
@@ -622,19 +494,16 @@ fnc_unitParseRoles = compileFinal {
 
 fnc_parseFaction = compileFinal {
 	params [["_faction", if (is3DEN) then [{faction (get3DENSelected "Object" # 0)}, {faction player}] ]];
-	// selected unit faction;
 	// Config order, not shuffled: fnc_faction_pools publishes element 0 of each role as the
-	// faction's stable representative, and a mod declares its mainstay ahead of its variants.
-	// A shuffle made that representative a different unit every campaign -- which is how a
-	// faction's rifleman and its operator both came out as the same sniper. Variety at spawn
-	// comes from fnc_faction_pick drawing out of the whole pool, not from the order here.
+	// faction's stable representative, and a mod declares its mainstay before its variants. A
+	// shuffle changed that representative every campaign (a faction's rifleman and operator both
+	// came out as the same sniper); spawn variety comes from fnc_faction_pick over the pool.
 	_factionData = ("gettext (_x >> 'faction') == _faction" configClasses (configfile >> "CfgVehicles")) apply {configName _x};
 
 	// ignore unarmed infantry
 	_infantry =	([ _factionData, "person" ] call fnc_factionGetFilteredByEditorSubcat) select {
 		_x iskindOf 'CAManBase' && { {!(_x in ["Throw", "Put"])} count (getArray (configFile >> "CfgVehicles" >> _x >> "weapons")) > 0 }
 	};
-// 添加这一行，只保留 scope >= 2 的可用单位
 _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2 };
 	_infantryByRoles = _infantry call fnc_unitParseRoles;
 
@@ -644,9 +513,8 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	_droneLand =	 [ [ _factionData, "drones" ] call fnc_factionGetFilteredByEditorSubcat, "LandVehicle" ] call fnc_factionGetFilteredByType;
 	_droneStatic = _turrets select { getText (configFile >> "CfgVehicles" >> _x >> "vehicleClass") isEqualTo "Autonomous" };
 	_submersible =	[ _factionData, "submersibles" ] call fnc_factionGetFilteredByEditorSubcat;
-	// A mod static that never inherits the vanilla StaticMGWeapon/StaticGrenadeLauncher/StaticMortar
-	// base is still one of these by its weapon or its artillery scanner. Fall back to that signal so a
-	// faction's own gun is not discarded for a vanilla placeholder -- AA/AT below already do this by threat.
+	// Match statics by weapon/scanner, not the vanilla StaticMGWeapon/GrenadeLauncher/Mortar base a mod
+	// need not inherit -- else a faction's own gun is dropped for a vanilla one. AA/AT do it by threat.
 	_turretHMG =	[ [ _turrets select {"MGunCore" in ([_x] call fnc_vehicleWeaponType)}, "StaticMGWeapon" ] call fnc_factionGetFilteredByType, _turrets select {"MGunCore" in ([_x] call fnc_vehicleWeaponType)} ] call fnc_selectNonEmpty;
 	_turretGMG =	[ [ _turrets, "StaticGrenadeLauncher" ] call fnc_factionGetFilteredByType, _turrets select {"GMG_F" in ([_x] call fnc_vehicleWeaponType)} ] call fnc_selectNonEmpty;
 	_turretMortar =	[ [ _turrets, "StaticMortar" ] call fnc_factionGetFilteredByType, _turrets select {getNumber (configFile >> "CfgVehicles" >> _x >> "artilleryScanner") isEqualTo 1} ] call fnc_selectNonEmpty;
@@ -658,11 +526,9 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	_tank =	[ _factionData, "tank" ] call fnc_factionGetFilteredByEditorSubcat;
 	_arty =	[ _factionData, "artillery" ] call fnc_factionGetFilteredByEditorSubcat;
 	_antiAir =	[ _factionData, "aas" ] call fnc_factionGetFilteredByEditorSubcat;
-	// Every wheeled soft-skin the faction fields, cars and trucks alike. Trucks sit under the "Trucks"
-	// editor subcategory, not "cars", and the cars->isKindOf-Car fallback only fires when the cars match
-	// is wholly empty -- so a faction with both kept its offroads, dropped its trucks, and the truck
-	// roles fell to a vanilla placeholder. isKindOf Car covers both; the armor gate leaves wheeled APCs
-	// (armor > 300, their own bucket) out so a transport role cannot grab one.
+	// Every soft-skin wheeled vehicle (isKindOf Car), cars and trucks alike: trucks sit under the
+	// "Trucks" subcategory and the cars fallback only fires when cars is wholly empty, so a faction with
+	// both dropped its trucks. Armor <= 300 keeps wheeled APCs (their own bucket) out of a transport role.
 	private _wheeledSoft = _factionData select {
 		_x isKindOf "Car"
 		&& {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2}
@@ -673,19 +539,14 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	_carRearm =	[ _wheeledSoft, "transportAmmo"] call fnc_filterByUtility;
 	_carRepair =	[ _wheeledSoft, "transportRepair"] call fnc_filterByUtility;
 	_carRefuel =	[ _wheeledSoft, "transportFuel"] call fnc_filterByUtility;
-	// Armed = mounts weapons, by pylon OR by turret: a mod gunship that arms through Turrets rather
-	// than a TransportPylonsComponent was otherwise dropped here and the attack-heli role fell to a
-	// vanilla airframe. Union keeps the pylon path for loadout-only aircraft.
+	// Armed by turret weapon OR pylon: a mod gunship arming through Turrets, not a pylon component, was
+	// dropped and attack-heli fell to a vanilla airframe. Union keeps the pylon path for loadout jets.
 	private _heliSeated = [ [ _factionData, "helicopters" ] call fnc_factionGetFilteredByEditorSubcat, 2,0 ] call fnc_filterBySeats;
 	private _heliByPylon = _heliSeated call fnc_filterByPylons;
 	_heliArmed =	_heliByPylon + (([ _heliSeated, true ] call fnc_filterByWeapons) select {!(_x in _heliByPylon)});
-	// Seats, not pylons: filtering on pylons as well left most factions with no transport
-	// helicopter at all, since a gunship carrying troops is the norm outside vanilla. Four seats
-	// is the floor because that is what the taxi and paradrop calls need to be worth running.
-	// Troop room by seat count as well as the legacy transportSoldier config: a mod transport that
-	// carries its cargo in seat proxies leaves transportSoldier at 0, so the old check read a real
-	// troop heli as no transport and the TRANS role fell through to the faction's gunship. Union of
-	// both signals -- broadened, never narrowed. Four cargo seats is the floor the taxi/paradrop want.
+	// Count cargo seats as well as legacy transportSoldier: a seat-proxy transport reports
+	// transportSoldier 0 and read as no transport, so TRANS fell through to the gunship. Floor of 4
+	// cargo seats, what the taxi and paradrop calls need.
 	private _heliList = _factionData select {_x isKindOf "Helicopter" && {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2}};
 	_heliTransport = (_heliList select {getNumber (configFile >> "CfgVehicles" >> _x >> "transportSoldier") >= 4}) + ([_heliList, 1, 4] call fnc_filterBySeats);
 	_heliTransport = _heliTransport arrayIntersect _heliTransport;
@@ -712,31 +573,18 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 };
 
 
-//([] call fnc_parseFaction) params //["_infantry","_infantryByRoles","_boat","_droneAir","_droneLand","_droneStatic","_submersible","_turretHMG","_turretGMG","_turretMortar","_turretAA","_turretAT","_apcWheeled","_apcTracked","_tank","_arty","_antiAir","_carArmed","_carTransport","_carRearm","_carRepair","_carRefuel","_heliArmed","_heliTransport","_planeArmed","_planeTransport"];
-//
-//_infantryByRoles params ["_grunt","_medic","_sl","_tl","_ar","_mg","_gl","_aa","_lat","_hat","_officer","_spec","_diver","_pilot","_crew","_marksman","_sniper","_eng","_exp","_uavOp"] +
-			//["_spec","_spec_medic","_spec_sl","_spec_tl","_spec_ar","_spec_mg","_spec_gl","_spec_aa","_spec_lat","_spec_hat","_spec_marksman","_spec_sniper","_spec_eng","_spec_exp"];
-
-
-//[[_infantry, ["oefcp"], true] call fnc_filterByClassName, ["pilot", "crew"], false] call fnc_filterByClassName;
-
-//[_tank, ["wood"], false] call fnc_filterByClassName;	// remove any explicitly 'woodland' texture tanks
-
-
-
-// Is this faction class a zombie faction? Matched on display name rather than a per-mod class
-// list: the mission supports two zombie mods and cannot name every faction either of them ships,
-// but both name theirs for what they field. The same test decides both directions -- zombies are
-// kept out of every ordinary pick, and are the only thing the zombie game mode offers OPFOR.
-// Markers live inside the block rather than in a global: the block is what gets published to
-// clients, and a companion global would have to be published in lockstep with it.
+// Zombie faction? Matched on display name, not a per-mod class list: the mission supports two
+// zombie mods and cannot name every faction they ship, but both name theirs for what they field.
+// One test both ways -- zombies stay out of ordinary picks and are the only OPFOR the zombie mode
+// offers. Markers live in the block, not a global: the block is what is published to clients, and
+// a companion global would have to be published in lockstep.
 fnc_factionIsZombie = compileFinal {
 	params ["_factionClass"];
 	private _name = toLower getText (configFile >> "CfgFactionClasses" >> _factionClass >> "displayName");
 	(["zombie", "undead", "infected"] findIf { _name find _x >= 0 }) >= 0
 };
 
-// return list of all valid factions without duplication, such as with one faction duplicated/defined for multiple sides
+// All valid factions, de-duplicated (a faction may be defined for several sides).
 // _wantZombies inverts the zombie filter rather than lifting it: a caller gets the ordinary
 // factions or the zombie ones, never both in one list.
 fnc_getAllFactionsClean = compileFinal {
@@ -754,7 +602,6 @@ fnc_getAllFactionsClean = compileFinal {
 			
 			if (_factionDisplayName isEqualTo "") then {continue};	// faction has no name			
 
-			//_addon = configSourceAddonList (configFile >> "CfgFactionClasses" >> _x) apply {_x regexReplace ["_", " "];};
 			_addon = configSourceMod (configFile >> "CfgFactionClasses" >> _x);
 			_factions append [[format ["%1 - %2", _factionDisplayName, _addon], _x]];
 		};
@@ -762,7 +609,6 @@ fnc_getAllFactionsClean = compileFinal {
 	_factions
 };
 
-// list box with faction selector.
 // One dialog is reused across the BLUFOR then OPFOR rounds: the first round builds
 // it, later rounds relabel and re-enable the same display. It never closes between
 // picks, so the settings/campaign menus stacked underneath stay unreachable until
@@ -770,11 +616,9 @@ fnc_getAllFactionsClean = compileFinal {
 fnc_factionSelector = compileFinal {
 	params [ ["_prompt", "Select Faction"], ["_finalRound", true], ["_wantZombies", false] ];
 
-	// init
 	selectionDone = nil;
 	DUWS_factionSelectFinal = _finalRound;	// read by the ButtonClick handler at click time
 
-	// Listbox
 	factionList = [_wantZombies] call fnc_getAllFactionsClean;
 
 	disableSerialization;
@@ -820,9 +664,8 @@ fnc_factionSelector = compileFinal {
 
 		(displayCtrl 1500) ctrlAddEventHandler ["LBSelChanged", {
 			private _index = _this # 1;
-			// set editor image
 			_faction = ((factionList # _index) # 1);
-			// https://community.bistudio.com/wiki/CfgVehicles_Config_Reference#scope - some factions have misconfigured scopes for their units, so also search for hidden units
+			// some factions misconfigure unit scope, so include hidden units (scope 1) as well as 2
 			private _units = ("(configname _x iskindOf 'CAManBase') && (getNumber(_x >> 'scope') in  [1,2]) && (gettext (_x >> 'faction') == _faction)" configClasses (configfile >> "CfgVehicles")) apply {configName _x};
 
 			if (_units isEqualTo []) exitWith {
@@ -844,7 +687,7 @@ fnc_factionSelector = compileFinal {
 		}];
 
 		(displayCtrl 1600) ctrlAddEventHandler ["ButtonClick", {
-			_selected = factionList # (lbCurSel 1500);	// get selection by using index to select element from array directly ;)
+			_selected = factionList # (lbCurSel 1500);
 			missionNamespace setVariable ["selectedFaction", _selected#1, true];
 
 			// Selection only: the per-side fnc_factionGen is run later, at the
