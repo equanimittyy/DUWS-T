@@ -20,7 +20,9 @@ DUWS_fnc_hardpointRaiseWorker = {
     private _pos = _site get "pos";
     private _ring = (_site get "radius") + (_o get "buffer");
     private _players = (call BIS_fnc_listPlayers) select { alive _x };
-    if ((_players findIf { _x distance _pos < _ring }) < 0) exitWith {
+    // The same presence test the poller used to trigger this, air ring included -- an AA woken by a
+    // jet overhead would fail a ground-only recheck and never actually raise.
+    if !([_players, _pos, _ring, _o getOrDefault ["airRing", 0]] call fnc_site_nearOrAir) exitWith {
         missionNamespace setVariable [HP_RAISE_SLOT(_key), false];
     };
 
@@ -79,21 +81,41 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     };
 }]];
 
-// [_key, _pos, _radius, _men, _grace, _side, _garrison] call fnc_hardpoint_register
+// [_key, _type, _pos, _men, _side, _garrison] call fnc_hardpoint_register
 //
 // Files the hardpoint as a streamed site and adopts the composition and men it was just built with.
+// The streaming spec is the type's, not the caller's: spawnRadius, grace, neverStream and airRing all
+// come from DUWS_hardpointStreaming, so the dev tool, the zone loop and OPCOM all site a given type
+// the same way and one table tunes them. hpSide and hpGarrison are the serialisable spec a later
+// raise rebuilds from.
+//
 // Player-presence, not the AI-aware zone gate: a hardpoint should stand up whenever a player is near
-// enough to fight it, whichever side it is. It starts awake because it is created deployed and manned
-// -- an occupant starting asleep over a standing composition would raise a second garrison on the
-// first tick. hpSide and hpGarrison are the serialisable spec a later raise rebuilds from.
+// enough to fight it, whichever side it is. A streamed one starts awake because it is created
+// deployed and manned -- an occupant starting asleep over a standing composition would raise a second
+// garrison on the first tick.
+//
+// neverStream (mortar, artillery) is kept resident so OPCOM can task it with no player near. It still
+// registers as a site so it can be retired, and its men still roster so a clear reaches them, but its
+// composition is pinned against every stow path and its occupant is marked driven -- the poller skips
+// a driven occupant, so it is neither streamed nor even distance-tested each pass.
 fnc_hardpoint_register = {
-    params ["_key", "_pos", "_radius", ["_men", []], ["_grace", 300], ["_side", "opfor"], ["_garrison", []]];
+    params ["_key", "_type", "_pos", ["_men", []], ["_side", "opfor"], ["_garrison", []]];
+    (DUWS_hardpointStreaming getOrDefault [_type, [600, 300, false, 0]])
+        params ["_radius", "_grace", "_neverStream", "_airRing"];
     [_key, _pos, _radius, "stream"] call fnc_site_register;
     private _occ = [_key, "garrison", EAST, 0, _grace, true, false] call fnc_site_occupant_register;
     _occ set ["hpSide", _side];
     _occ set ["hpGarrison", _garrison];
+    ([_key] call fnc_site_roster) append _men;
+
+    if (_neverStream) exitWith {
+        { [_x, _key, true] call fnc_duws_keep } forEach
+            ((DUWS_compositions getOrDefault [_key, []]) select { !isNull _x });
+        _occ set ["driven", true];
+    };
+
+    _occ set ["airRing", _airRing];
     _occ set ["awake", true];
     _occ set ["lastSeen", time];
-    ([_key] call fnc_site_roster) append _men;
     [_key, "garrison", DUWS_hardpointHooks] call fnc_site_hooks_set;
 };

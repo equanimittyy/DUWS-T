@@ -293,7 +293,7 @@ _occ set ["minAIHold", 1];
 // leaving the composition and its gunners standing for the campaign. The markers and triggers above
 // are deliberately not behind this: only the stow needs the composition to exist.
 waitUntil { scriptDone _prefabScript };
-if !([_spawnPos, _size + 400, 1] call fnc_duws_bluforNear) then {
+if !([_spawnPos, _size + DUWS_streamArrivalMargin, 1] call fnc_duws_bluforNear) then {
 	[_zoneKey] call DUWS_fnc_zoneStow;
 };
 

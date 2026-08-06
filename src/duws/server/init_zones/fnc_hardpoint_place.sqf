@@ -73,26 +73,46 @@ fnc_hardpoint_build = {
 // _garrison is a list of soldier classes -- the loose defenders -- and may be empty, which places
 // none. The array shape is deliberate: an empty garrison needs no special case at the call site, and
 // it is the same shape a zone raises from. The emplacement is manned regardless of it: a gun without
-// a gunner is scenery, not a defence, so every static gun takes a crewman whether or not any loose
-// defender does. Side-generic via BIS_fnc_spawnGroup and the <side>_SOLDIER_X global, so the dev
-// tool's OPFOR and BLUFOR spawns each field their own men. Crewing is DUWS_fnc_manStatics, the path a
-// zone mans its emplacements with -- it thaws the frozen gun, settles it and seats a gunner. A
-// vehicle gun (artillery) is not a StaticWeapon and is left to the resident-crew step.
+// a gunner is scenery, not a defence, so every gun takes a crewman whether or not any loose defender
+// does. Side-generic via BIS_fnc_spawnGroup and the <side>_SOLDIER_X global, so the dev tool's OPFOR
+// and BLUFOR spawns each field their own men.
+//
+// Two kinds of gun, crewed two ways. A static weapon goes through DUWS_fnc_manStatics, the path a
+// zone mans its emplacements with -- it thaws the frozen gun, drops it to settle on the ground and
+// seats a gunner, because a static is placed frozen and sometimes on a bunker roof. Artillery is a
+// vehicle, already sitting on its tracks, so it skips the drop: its gunner is moved straight in and
+// the piece is thawed so OPCOM can task it. artilleryScanner is the config flag the faction
+// auto-detect reads to call a vehicle artillery, so a modded battery is caught the same way.
 fnc_hardpoint_garrison = {
     params ["_objs", "_pos", ["_side", "opfor"], ["_key", "world"], ["_garrison", []]];
     private _sideObj = [EAST, WEST] select (_side isEqualTo "blufor");
+    private _soldier = missionNamespace getVariable [format ["%1_SOLDIER_X", _side],
+        ["O_Soldier_F", "B_Soldier_F"] select (_side isEqualTo "blufor")];
     private _men = [];
 
-    // Emplacements first, always crewed: one man per static gun.
+    // Static guns first, always crewed: one man per gun, dropped and settled.
     private _guns = _objs select { !isNull _x && {alive _x} && {_x isKindOf "StaticWeapon"} };
     if (count _guns > 0) then {
-        private _soldier = missionNamespace getVariable [format ["%1_SOLDIER_X", _side],
-            ["O_Soldier_F", "B_Soldier_F"] select (_side isEqualTo "blufor")];
         private _sp = _pos findEmptyPosition [0, 30, _soldier];
         if (count _sp == 0) then { _sp = _pos };
         private _crew = [_sp, _sideObj, (_guns apply { _soldier }), [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
         _crew deleteGroupWhenEmpty true;
         [_guns, _crew, _key] call DUWS_fnc_manStatics;
+        _men append (units _crew);
+    };
+
+    // Artillery vehicles: a gunner straight in, no drop, and thawed so the battery can fire.
+    private _arty = _objs select { !isNull _x && {alive _x} && {!(_x isKindOf "StaticWeapon")}
+        && {getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "artilleryScanner") isEqualTo 1} };
+    if (count _arty > 0) then {
+        private _sp = _pos findEmptyPosition [0, 30, _soldier];
+        if (count _sp == 0) then { _sp = _pos };
+        private _crew = [_sp, _sideObj, (_arty apply { _soldier }), [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
+        _crew deleteGroupWhenEmpty true;
+        {
+            _x enableSimulationGlobal true;
+            ((units _crew) param [_forEachIndex, objNull]) moveInGunner _x;
+        } forEach _arty;
         _men append (units _crew);
     };
 

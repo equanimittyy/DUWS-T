@@ -345,8 +345,33 @@ zones_number = 6;
 zones_spacing = 1200; 
 // Determine the maximum radius a generated zone can have
 zones_max_radius = 1000;publicVariable "zones_max_radius"; 
-// Determine the minium radius a generated zone can have. SHOULD NOT BE UNDER 200.     
-zones_min_radius = 200;publicVariable "zones_min_radius"; 
+// Determine the minium radius a generated zone can have. SHOULD NOT BE UNDER 200.
+zones_min_radius = 200;publicVariable "zones_min_radius";
+
+// Hardpoint streaming, per type: [spawnRadius, grace, neverStream, airRing].
+//   spawnRadius  distance a player wakes the emplacement at
+//   grace        seconds empty before it stows
+//   neverStream  built once and kept resident and simulated, never stowed -- OPCOM tasks fire
+//                missions on it with no player near, which is why mortar and artillery hold
+//   airRing      a second, larger radius answered only by aircraft; 0 = none. AA reaches out to
+//                catch a jet overhead its ground ring would never notice, without waking on
+//                every distant foot patrol.
+// Server-only: every consumer (the site poller, fnc_hardpoint_register) runs on the server.
+DUWS_hardpointStreaming = createHashMapFromArray [
+    ["OP",        [700, 300, false, 0]],
+    ["MG",        [600, 300, false, 0]],
+    ["AT",        [600, 300, false, 0]],
+    ["ROADBLOCK", [600, 300, false, 0]],
+    ["MINEFIELD", [600, 300, false, 0]],
+    ["AA",        [600, 300, false, 5000]],
+    ["MORTAR",    [600, 300, true,  0]],
+    ["ARTY",      [600, 300, true,  0]]
+];
+
+// The margin beyond a zone's own radius that its streaming reaches: a zone raises and holds its
+// garrison for BLUFOR this much further out than the capture trigger tests, so the men are on the
+// objective before the players who tripped it arrive. Read by fnc_createZone and fnc_zone_stream_init.
+DUWS_streamArrivalMargin = 400;
 
 // zoneundercontrolblu
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";

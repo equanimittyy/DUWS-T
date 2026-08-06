@@ -2,8 +2,9 @@
 
 // Stands a hardpoint up on demand to exercise the placement and streaming primitives before OPCOM or
 // the zone siting loop drives them. A dev path, not a shipped one. Each spawn takes its own key, so it
-// registers as its own streamed site: walk 600 m off and it stows, come back and it raises. The men,
-// which are not composition members, ride the site roster; the menu's clear row retires every dev key.
+// registers as its own streamed site under the type's own radius: walk past it and it stows, come back
+// and it raises -- except mortar and artillery, which the type table keeps resident. The men, which
+// are not composition members, ride the site roster; the menu's clear row retires every dev key.
 params ["_type", "_side", "_pos", ["_dir", 0]];
 if (!isServer) exitWith {};
 
@@ -23,7 +24,7 @@ _this spawn {
     private _garrison = [[_soldier, _soldier, _soldier], []] select (_type isEqualTo "MINEFIELD");
 
     ([_type, _pos, _dir, _side, _key, _garrison] call fnc_hardpoint_spawn) params ["_objs", "_men"];
-    [_key, _pos, 600, _men, 300, _side, _garrison] call fnc_hardpoint_register;
+    [_key, _type, _pos, _men, _side, _garrison] call fnc_hardpoint_register;
     DUWS_hpdevKeys = (missionNamespace getVariable ["DUWS_hpdevKeys", []]) + [_key];
 
     ["INFO", "HARDPOINT", format ["dev spawn: %1 %2 [%3], %4 objects %5 men at %6",

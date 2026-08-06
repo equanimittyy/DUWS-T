@@ -338,7 +338,7 @@ DUWS_fnc_zoneRaiseWorker = {
     // helicopter transiting, or a patrol that turns back at the edge, would otherwise rebuild a
     // whole composition for someone already leaving.
     sleep 5;
-    if !([_pos, _size + 400, 2] call fnc_duws_bluforNear) exitWith {
+    if !([_pos, _size + DUWS_streamArrivalMargin, 2] call fnc_duws_bluforNear) exitWith {
         missionNamespace setVariable [ZONE_RAISE_SLOT(_key), false];
     };
 

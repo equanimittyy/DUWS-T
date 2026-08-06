@@ -279,6 +279,20 @@ fnc_town_site_key = {
 // the town garrison was slower, at thirty.
 #define SITE_TICK 10
 
+// [_players, _pos, _ring, _airRing] call fnc_site_nearOrAir -> is anybody present.
+//
+// The ground ring answers for everyone; the air ring, when an occupant declares one (0 = none),
+// answers additionally for players in aircraft only. An AA emplacement has to wake for a jet passing
+// high overhead, out where its ground ring would never reach, without every distant foot patrol
+// waking it too. Shared by the poller and the hardpoint raise worker so both judge presence the same
+// way -- a wake and its confirmation reaching opposite answers would strand the emplacement.
+fnc_site_nearOrAir = {
+    params ["_players", "_pos", "_ring", ["_airRing", 0]];
+    if ((_players findIf { _x distance _pos < _ring }) >= 0) exitWith { true };
+    if (_airRing <= 0) exitWith { false };
+    (_players findIf { (vehicle _x) isKindOf "Air" && {_x distance _pos < _airRing} }) >= 0
+};
+
 // One thread for every site, replacing a thread per zone plus a sleeper per FOB plus two town loops.
 //
 // The saving is the shared pre-gate rather than the thread count. Each zone thread called
@@ -344,7 +358,7 @@ fnc_site_poller = {
                         [_pos, _ring, _min] call fnc_duws_bluforNear
                     } else { false }
                 } else {
-                    (_players findIf { _x distance _pos < _ring }) >= 0
+                    [_players, _pos, _ring, _o getOrDefault ["airRing", 0]] call fnc_site_nearOrAir
                 };
 
                 // A frozen site wakes on either side. A garrison that cannot be woken by an attacker
