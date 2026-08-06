@@ -36,6 +36,9 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
 
     ["Force side mission", fnc_debug_mission_menu, [], [1,0.667,0,1]],
 
+    ["Spawn OPFOR hardpoint", fnc_debug_hardpoint_menu, "opfor", [1,0.667,0,1]],
+    ["Spawn BLUFOR hardpoint", fnc_debug_hardpoint_menu, "blufor", [1,0.667,0,1]],
+
     // Stub. Planned: a local overlay onto OPFOR-side WARCOM -- commander AP with its
     // income and spend, the wave thresholds it is holding at, a map marker per enemy asset.
     // Deferred assets are the point: zone garrisons still virtual behind the site poller, queued

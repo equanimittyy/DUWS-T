@@ -289,6 +289,7 @@ fnc_intel_payout = compile preprocessFileLineNumbers "duws\server\misc\fnc_intel
 fnc_duws_report = compile preprocessFileLineNumbers "duws\server\misc\fnc_duws_report.sqf";
 fnc_debug_intel_search = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_intel_search.sqf";
 fnc_debug_force_mission = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_force_mission.sqf";
+fnc_debug_spawn_hardpoint = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_spawn_hardpoint.sqf";
 fnc_debug_search_flag = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_search_flag.sqf";
 fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
 fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_restHealServer.sqf";
@@ -374,6 +375,7 @@ fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dial
 // to be written. Loaded here rather than at zone-gen time so both are in hand before generation runs.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_siting.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_minefield.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_place.sqf";
 // Same idiom again, and ahead of faction init, which is what leaves the keys it fills empty.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_backfill.sqf";
 // Before fnc_BLUFOR_squad_init and the zone spawn band, both of which name a team out of it.
@@ -399,6 +401,7 @@ fnc_debug_econ_fill = compile preprocessFileLineNumbers "duws\client\dialog\fnc_
 // itself because any client could send it.
 fnc_debug_econ_server = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_econ_server.sqf";
 fnc_debug_mission_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_mission_menu.sqf";publicVariable "fnc_debug_mission_menu";
+fnc_debug_hardpoint_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_hardpoint_menu.sqf";publicVariable "fnc_debug_hardpoint_menu";
 fnc_debug_search_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_debug_search_menu.sqf";publicVariable "fnc_debug_search_menu";
 fnc_dismissHC = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismissHC.sqf";publicVariable "fnc_dismissHC";
 fnc_dismiss_playerAI = compile preprocessFileLineNumbers "duws\client\dialog\fnc_dismiss_playerAI.sqf";publicVariable "fnc_dismiss_playerAI";
