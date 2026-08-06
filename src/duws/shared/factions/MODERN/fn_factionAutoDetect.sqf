@@ -658,14 +658,21 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	_tank =	[ _factionData, "tank" ] call fnc_factionGetFilteredByEditorSubcat;
 	_arty =	[ _factionData, "artillery" ] call fnc_factionGetFilteredByEditorSubcat;
 	_antiAir =	[ _factionData, "aas" ] call fnc_factionGetFilteredByEditorSubcat;
-	_carArmed =	[ [ [ _factionData, "cars" ] call fnc_factionGetFilteredByEditorSubcat, 2,0 ] call fnc_filterBySeats, true] call fnc_filterByWeapons;
-	_carTransport =	[ [ _factionData, "cars" ] call fnc_factionGetFilteredByEditorSubcat, 1, 6] call fnc_filterBySeats;
-	// "cars", not "car": the filter string doubles as the key into the non-standard-subcategory
-	// fallback below, which only has a "cars" case -- so the singular silently returned nothing
-	// for every mod that names its editor subcategories its own way.
-	_carRearm =	[ [ _factionData, "cars" ] call fnc_factionGetFilteredByEditorSubcat, "transportAmmo"] call fnc_filterByUtility;
-	_carRepair =	[ [ _factionData, "cars" ] call fnc_factionGetFilteredByEditorSubcat, "transportRepair"] call fnc_filterByUtility;
-	_carRefuel =	[ [ _factionData, "cars" ] call fnc_factionGetFilteredByEditorSubcat, "transportFuel"] call fnc_filterByUtility;
+	// Every wheeled soft-skin the faction fields, cars and trucks alike. Trucks sit under the "Trucks"
+	// editor subcategory, not "cars", and the cars->isKindOf-Car fallback only fires when the cars match
+	// is wholly empty -- so a faction with both kept its offroads, dropped its trucks, and the truck
+	// roles fell to a vanilla placeholder. isKindOf Car covers both; the armor gate leaves wheeled APCs
+	// (armor > 300, their own bucket) out so a transport role cannot grab one.
+	private _wheeledSoft = _factionData select {
+		_x isKindOf "Car"
+		&& {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2}
+		&& {getNumber (configFile >> "CfgVehicles" >> _x >> "armor") <= 300}
+	};
+	_carArmed =	[ [ _wheeledSoft, 2,0 ] call fnc_filterBySeats, true] call fnc_filterByWeapons;
+	_carTransport =	[ _wheeledSoft, 1, 6] call fnc_filterBySeats;
+	_carRearm =	[ _wheeledSoft, "transportAmmo"] call fnc_filterByUtility;
+	_carRepair =	[ _wheeledSoft, "transportRepair"] call fnc_filterByUtility;
+	_carRefuel =	[ _wheeledSoft, "transportFuel"] call fnc_filterByUtility;
 	// Armed = mounts weapons, by pylon OR by turret: a mod gunship that arms through Turrets rather
 	// than a TransportPylonsComponent was otherwise dropped here and the attack-heli role fell to a
 	// vanilla airframe. Union keeps the pylon path for loadout-only aircraft.
