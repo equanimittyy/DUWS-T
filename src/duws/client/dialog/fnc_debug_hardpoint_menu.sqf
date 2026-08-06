@@ -1,9 +1,9 @@
 // Locality: client -- the row handlers run on whoever opened the menu. Reached from fnc_debug_menu.
 /*
     fnc_debug_hardpoint_menu.sqf
-    Developer tool: stand a hardpoint of the chosen type up 25 m ahead, guns resolved to the side
-    passed in. Reached from fnc_debug_menu.sqf. Strings are English-only for the same reason as that
-    file. _this is the side, "opfor" or "blufor".
+    Developer tool: pick a hardpoint type, then click the open map to stand it up there, guns resolved
+    to the side passed in. Reached from fnc_debug_menu.sqf. Strings are English-only for the same reason
+    as that file. _this is the side, "opfor" or "blufor".
 */
 if (!hasInterface) exitWith {};
 
@@ -18,11 +18,25 @@ private _rows = [];
 {
     _rows pushBack [_x, {
         params ["_type", "_side"];
-        // The position the player is facing, 25 m out, so a spawn lands where they are looking rather
-        // than on top of them. The layout faces the player's heading.
-        private _p = player getRelPos [25, 0];
-        [_type, _side, [_p select 0, _p select 1], getDir player] remoteExec ["fnc_debug_spawn_hardpoint", 2];
-        hint format ["Spawning a %1 %2 hardpoint 25 m ahead.\n\nDev tool: the composition, its defenders and a gunner\non every static gun, all resolved to the %2 faction.\nStreaming and clearance are the next steps.", _type, _side];
+        // Click-to-place on the open map. Spawned so it can hold the map open and wait on the click in
+        // a scheduled environment; the position is captured client-side, then handed to the server.
+        [_type, _side] spawn {
+            params ["_type", "_side"];
+            DUWS_dbgHPclicked = false;
+            openMap [true, false];
+            waitUntil { !isNull (findDisplay 12) };
+            // Banner, not hint: the engine draws the hint box beneath the open map, so a hint would be
+            // invisible for the whole click phase. Same treatment HQ placement gets.
+            [format ["<t size='2' color='#00ffff'>Click the map to place a %1 %2 hardpoint. </t><br/>Dev tool: composition, defenders and a gunner on every static gun, resolved to the %2 faction. Close the map to cancel.", _type, _side]] call fnc_map_prompt;
+            onMapSingleClick "DUWS_dbgHPpos = _pos; DUWS_dbgHPclicked = true; onMapSingleClick ''; true";
+            waitUntil { DUWS_dbgHPclicked || !visibleMap };
+            onMapSingleClick "";
+            [""] call fnc_map_prompt;
+            if (!DUWS_dbgHPclicked) exitWith {};
+            openMap [false, false];
+            [_type, _side, [DUWS_dbgHPpos select 0, DUWS_dbgHPpos select 1], 0] remoteExec ["fnc_debug_spawn_hardpoint", 2];
+            hint format ["Spawning a %1 %2 hardpoint at the marked spot.\n\nDev tool: the composition, its defenders and a gunner\non every static gun, all resolved to the %2 faction.", _type, _side];
+        };
     }, [_x, _side], [1,0.667,0,1]];
 } forEach _types;
 
