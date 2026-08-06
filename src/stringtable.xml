@@ -457,6 +457,10 @@
                 <Original>ALL FACTIONS</Original>
                 <English>ALL FACTIONS</English>
             </Key>
+            <Key ID="STR_DUWS_T_faction_select_filter_tt">
+                <Original>Type to narrow the faction list. Matches the faction name.</Original>
+                <English>Type to narrow the faction list. Matches the faction name.</English>
+            </Key>
             <Key ID="STR_DUWS_T_gamemode">
                 <Original>Game Mode</Original>
                 <English>Game Mode</English>

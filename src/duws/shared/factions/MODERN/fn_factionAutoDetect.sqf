@@ -663,8 +663,34 @@ fnc_factionSelector = compileFinal {
 	DUWS_factionSelectFinal = _finalRound;	// read by the ButtonClick handler at click time
 
 	factionList = [_wantZombies] call fnc_getAllFactionsClean;
+	// Alphabetical by the display label the player reads, so a long mod list is scannable.
+	factionList sort true;
 
 	disableSerialization;
+
+	// Repaints the listbox from factionList, keeping rows whose label or classname contains the
+	// filter text. Each row carries its faction class as data, so the click handlers read that rather
+	// than indexing factionList by position -- which the sort and the filter both break.
+	duws_faction_select_fill = {
+		params ["_filter"];
+		private _disp = uiNamespace getVariable ["DUWS_factionSelectDisplay", displayNull];
+		if (isNull _disp) exitWith {};
+		private _lb = _disp displayCtrl 1500;
+		_filter = toLower _filter;
+		lbClear _lb;
+		{
+			if (_filter isEqualTo "" || {(toLower (_x # 0)) find _filter >= 0} || {(toLower (_x # 1)) find _filter >= 0}) then {
+				private _i = _lb lbAdd (_x # 0);
+				_lb lbSetData [_i, _x # 1];
+			};
+		} forEach factionList;
+		if (lbSize _lb > 0) then {
+			_lb lbSetCurSel 0;
+		} else {
+			(_disp displayCtrl 1200) ctrlSetText "";
+			(_disp displayCtrl 1201) ctrlSetStructuredText (parseText "<t align='center' size='2' font='PuristaMedium' color='#ff0000'>NO MATCH</t>");
+		};
+	};
 
 	// Display handle lives in uiNamespace: DISPLAY is non-serializable and the mission
 	// namespace is saved, so storing it there errors on save.
@@ -675,7 +701,8 @@ fnc_factionSelector = compileFinal {
 			["quickgui",[[0,0,1,1],0.025,0.04,"GUI_GRID"],0,0,0],
 			[1450,"RscText",[1,"",["0.312812 * safezoneW + safezoneX","0.256 * safezoneH + safezoneY","0.157812 * safezoneW+0.5","0.636 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
 			[1451,"RscText",[1,"",["0.312812 * safezoneW + safezoneX","0.256 * safezoneH + safezoneY","0.157812 * safezoneW+0.5","0.636 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
-			[1500,"RscListBox",[1,"",["0.322812 * safezoneW + safezoneX","0.276 * safezoneH + safezoneY","0.137812 * safezoneW+0.5","0.224 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
+			[1550,"RscEdit",[1,"",["0.322812 * safezoneW + safezoneX","0.276 * safezoneH + safezoneY","0.137812 * safezoneW+0.5","0.026 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
+			[1500,"RscListBox",[1,"",["0.322812 * safezoneW + safezoneX","0.306 * safezoneH + safezoneY","0.137812 * safezoneW+0.5","0.194 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
 			[1600,"RscButton",[1,toUpper _prompt,["0.322812 * safezoneW + safezoneX","0.514 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.028 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
 			[1200,"RscPicture",[1,"#(argb,8,8,3)color(0,0,0,0.5)",["0.322812 * safezoneW + safezoneX","0.552 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.32 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]],
 			[1201,"RscStructuredText",[1,"",["0.322812 * safezoneW + safezoneX","0.672 * safezoneH + safezoneY","0.136 * safezoneW+0.5","0.08 * safezoneH"],[-1,-1,-1,-1],[-1,-1,-1,-1],[-1,-1,-1,-1],"","-1"],[]]
@@ -699,15 +726,20 @@ fnc_factionSelector = compileFinal {
 			};
 			_control ctrlSetPosition ((_x # 2 # 2) apply {call compile _x});
 			_control ctrlCommit 0;
-		} forEach (_guiEditorOutput select [2, 6]);
+		} forEach (_guiEditorOutput select [2, 7]);
 
-		{
-			lbAdd [1500, _x # 0];
-		} forEach factionList;
+		(_display displayCtrl 1550) ctrlSetTooltip (localize "STR_DUWS_T_faction_select_filter_tt");
+		// Retyping rebuilds the list; fill drops the selection to the top match so the preview follows.
+		(_display displayCtrl 1550) ctrlAddEventHandler ["KeyUp", {
+			[ctrlText (_this # 0)] call duws_faction_select_fill;
+		}];
+
+		[""] call duws_faction_select_fill;
 
 		(displayCtrl 1500) ctrlAddEventHandler ["LBSelChanged", {
 			private _index = _this # 1;
-			_faction = ((factionList # _index) # 1);
+			if (_index < 0) exitWith {};
+			_faction = (_this # 0) lbData _index;
 			// some factions misconfigure unit scope, so include hidden units (scope 1) as well as 2
 			private _units = ("(configname _x iskindOf 'CAManBase') && (getNumber(_x >> 'scope') in  [1,2]) && (gettext (_x >> 'faction') == _faction)" configClasses (configfile >> "CfgVehicles")) apply {configName _x};
 
@@ -730,8 +762,9 @@ fnc_factionSelector = compileFinal {
 		}];
 
 		(displayCtrl 1600) ctrlAddEventHandler ["ButtonClick", {
-			_selected = factionList # (lbCurSel 1500);
-			missionNamespace setVariable ["selectedFaction", _selected#1, true];
+			private _sel = lbCurSel 1500;
+			if (_sel < 0) exitWith {};   // the filter emptied the list -- nothing to confirm
+			missionNamespace setVariable ["selectedFaction", lbData [1500, _sel], true];
 
 			// Selection only: the per-side fnc_factionGen is run later, at the
 			// deferred commit, so the picker can show during setup without building
@@ -748,15 +781,20 @@ fnc_factionSelector = compileFinal {
 			} else {
 				ctrlEnable [1500, false];
 				ctrlEnable [1600, false];
+				ctrlEnable [1550, false];
 				ctrlSetText [1600, "PLEASE WAIT..."];
 			};
 		}];
 
 	} else {
-		// Reuse round: relabel + re-enable the controls the previous round locked.
+		// Reuse round: relabel + re-enable the controls the previous round locked, and reset the
+		// filter so the new side opens on its whole list.
 		ctrlSetText [1600, toUpper _prompt];
 		ctrlEnable [1600, true];
 		ctrlEnable [1500, true];
+		ctrlEnable [1550, true];
+		ctrlSetText [1550, ""];
+		[""] call duws_faction_select_fill;
 		(displayCtrl 1200) ctrlSetText "";
 		(displayCtrl 1201) ctrlSetStructuredText (parseText "");
 	};
