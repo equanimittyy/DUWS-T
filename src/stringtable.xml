@@ -298,8 +298,8 @@
                 <English>CONFIRM YOUR FACTIONS</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_confirm_intro">
-                <Original>Review the classname each side will field for every role. SELECT swaps a role, CLEAR empties it. These are the final faction settings for this campaign.</Original>
-                <English>Review the classname each side will field for every role. SELECT swaps a role, CLEAR empties it. These are the final faction settings for this campaign.</English>
+                <Original>Review the unit each side will field for every role. SELECT swaps a role, CLEAR empties it. These are the final faction settings for this campaign and are irreversible.</Original>
+                <English>Review the unit each side will field for every role. SELECT swaps a role, CLEAR empties it. These are the final faction settings for this campaign and are irreversible.</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_confirm_blufor">
                 <Original>BLUFOR</Original>
@@ -314,16 +314,16 @@
                 <English>Request-menu units and vehicles are generated separately and are not listed here.</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_confirm_waiting">
-                <Original>Resolving factions...</Original>
-                <English>Resolving factions...</English>
+                <Original>Building factions...</Original>
+                <English>Building factions...</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_screen_next">
-                <Original>Select your GAME MODE and FACTIONS. HQ placement comes after you confirm them.</Original>
-                <English>Select your GAME MODE and FACTIONS. HQ placement comes after you confirm them.</English>
+                <Original>Select your GAME MODE and FACTIONS, then click the BUILD FACTIONS button above to build and confirm your DUWS units.</Original>
+                <English>Select your GAME MODE and FACTIONS, then click the BUILD FACTIONS button above to build and confirm your DUWS units.</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_screen_resolve">
-                <Original>RESOLVE FACTIONS</Original>
-                <English>RESOLVE FACTIONS</English>
+                <Original>BUILD FACTIONS</Original>
+                <English>BUILD FACTIONS</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_edit_working">
                 <Original>Working...</Original>
@@ -1433,8 +1433,8 @@
                 <German>Welcome to DUWS_T. Bei Fehlern der internen Fraktion nutze die automatische Fraktionserkennung zum Wiederholen.</German>
                 <Spanish>Welcome to DUWS_T. i la facción interna tiene errores, reintenta con detección automática de facciones.</Spanish>
                 <Chinesesimp>欢迎来到DUWS_T。内置阵营出现bug时最好使用自动检测阵营重试一遍</Chinesesimp>
-                <Original>Welcome to DUWS_T. If the built-in faction has bugs, try the auto-detect faction option instead</Original>
-                <English>Welcome to DUWS_T. If the built-in faction has bugs, try the auto-detect faction option instead</English>
+                <Original>Welcome to DUWS_T. If the built-in faction has bugs, try the auto-detect faction option instead.</Original>
+                <English>Welcome to DUWS_T. If the built-in faction has bugs, try the auto-detect faction option instead.</English>
             </Key>
             <Key ID="STR_DUWS_T_ahq99ew0">
                 <German>Klicke auf die Karte, um dein HQ zu platzieren. Das Update v1.3 erlaubt es, das HQ in Gebäudekomplexen zu platzieren. Zur reibungslosen Platzierung werden hindernde Gebäude entfernt.&lt;br/&gt;Mit v1.4 wurde die Hauptquartierstruktur überarbeitet. Platzieren Sie Ihr Hauptquartier möglichst in flachen Gebieten!</German>
