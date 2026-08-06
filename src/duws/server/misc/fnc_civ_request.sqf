@@ -77,7 +77,6 @@ if (_roll < _acceptChance + _bribeChance) exitWith {
     // names neither the row nor the price -- so a client cannot claim a bribe it was never
     // offered, name its own price, or answer a prompt raised for someone else.
     _civilian setVariable ["DUWS_civ_pending", [_caller, _row, _bribe]];
-    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_CIV_BRIBE_ASK"] remoteExec ["fnc_duws_dialogue", _caller];
     [netId _civilian, _bribe] remoteExec ["fnc_civ_bribe_prompt", _caller];
 };
 

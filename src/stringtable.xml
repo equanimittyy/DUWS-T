@@ -2862,10 +2862,6 @@
                 <Original>Alpha 1-1. Infection confirmed in your area. You're cleared to engage the infected at will, but stay sharp: there may still be survivors.</Original>
                 <English>Alpha 1-1. Infection confirmed in your area. You're cleared to engage the infected at will, but stay sharp: there may still be survivors.</English>
             </Key>
-            <Key ID="STR_DUWS_T_CIV_BRIBE_ASK">
-                <Original>Talk like that isn't free around here. Make it worth my while.</Original>
-                <English>Talk like that isn't free around here. Make it worth my while.</English>
-            </Key>
             <Key ID="STR_DUWS_T_CIV_BRIBE_DECLINED">
                 <Original>No money? Then go away.</Original>
                 <English>No money? Then go away.</English>
@@ -2927,8 +2923,8 @@
                 <English>Payment Demanded</English>
             </Key>
             <Key ID="STR_DUWS_T_CIV_BRIBE_DEMAND">
-                <Original>They will do it for %1 cash. Walk away and they are done talking to you.</Original>
-                <English>They will do it for %1 cash. Walk away and they are done talking to you.</English>
+                <Original>Nothing's free around here. %1 cash and it's yours, otherwise we're done.</Original>
+                <English>Nothing's free around here. %1 cash and it's yours, otherwise we're done.</English>
             </Key>
             <Key ID="STR_DUWS_T_CIV_BRIBE_ACCEPT">
                 <Original>Pay</Original>
