@@ -53,9 +53,11 @@ class startup_faction_confirm
         {
             idc = 8603;
             x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 1.2 * GUI_GRID_H + GUI_GRID_Y;
+            // Taller and higher than the standing advice alone needed: it now also carries the
+            // yellow/red colour legend, and runs to the caption row below it at y = 4.
+            y = 0.8 * GUI_GRID_H + GUI_GRID_Y;
             w = 38 * GUI_GRID_W;
-            h = 2.6 * GUI_GRID_H;
+            h = 3.2 * GUI_GRID_H;
         };
         // The side captions sit outside the group so they hold still while the rows scroll under
         // them. Coloured the way the faction dropdowns colour their two lists.

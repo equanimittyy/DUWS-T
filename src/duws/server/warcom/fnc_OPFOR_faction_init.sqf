@@ -11,7 +11,11 @@
 } foreach Factions_Available_OPFOR_X;
 
 // Cleared before the file runs -- see fnc_BLUFOR_faction_init for the leak this closes.
-{ missionNamespace setVariable [_x select 0, ""]; } forEach (["opfor"] call fnc_faction_schema);
+{
+	missionNamespace setVariable [_x select 0, ""];
+	// Clear the row's tier alongside the key -- see fnc_BLUFOR_faction_init for the leftover this closes.
+	missionNamespace setVariable [format ["DUWS_factionTier_%1", _x select 0], 0];
+} forEach (["opfor"] call fnc_faction_schema);
 
 _factionFile = "duws\shared\factions\" + VERSION_X + "\" + OPFOR_FactionFile_X + "_opfor.sqf";
 fnc_OPFOR_FactionFile_X = compile preprocessFileLineNumbers _factionFile;

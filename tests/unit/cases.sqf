@@ -663,6 +663,21 @@ fnc_faction_keep = {
     ["typo_1"]] call fnc_assertEq;
 ["faction_resolve: ... with no kind to gate on", TEST_KIND, ""] call fnc_assertEq;
 
+// The tier the confirmation screen colours from: 0 the faction's own first choice, 1 a lower rung it
+// still fills, 2 the vanilla stand-in or nothing at all. Read off the key the resolve just set.
+["opfor_AT_SOLDIER_X", [["hat_1"], ["lat_1"]], "O_Soldier_AT_F"] call fnc_faction_resolve;
+["faction_resolve: the primary rung is tier 0 (white)",
+    (missionNamespace getVariable "DUWS_factionTier_opfor_AT_SOLDIER_X"), 0] call fnc_assertEq;
+["opfor_AT_SOLDIER_X", [[], ["lat_1"]], "O_Soldier_AT_F"] call fnc_faction_resolve;
+["faction_resolve: a lower rung is tier 1 (yellow)",
+    (missionNamespace getVariable "DUWS_factionTier_opfor_AT_SOLDIER_X"), 1] call fnc_assertEq;
+["opfor_AT_SOLDIER_X", [[], []], "O_Soldier_AT_F"] call fnc_faction_resolve;
+["faction_resolve: the vanilla fallback is tier 2 (red)",
+    (missionNamespace getVariable "DUWS_factionTier_opfor_AT_SOLDIER_X"), 2] call fnc_assertEq;
+["opfor_AT_SOLDIER_X", [[], []], "rejected"] call fnc_faction_resolve;
+["faction_resolve: nothing left at all is tier 2 (red), same as a stand-in",
+    (missionNamespace getVariable "DUWS_factionTier_opfor_AT_SOLDIER_X"), 2] call fnc_assertEq;
+
 // --- fnc_faction_schema: the required column ---
 // A row short of four columns reads `nil` as its required flag, which fnc_custom_faction_parse's
 // filter would treat as false -- silently dropping a core key out of paste validation.

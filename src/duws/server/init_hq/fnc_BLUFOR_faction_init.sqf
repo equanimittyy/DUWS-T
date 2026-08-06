@@ -21,7 +21,13 @@ if (!isServer) exitWith {};
 // would otherwise leave the first one's class standing in every key the second omits, and
 // fnc_faction_backfill would read that leftover as a role this faction fields.
 // fnc_custom_faction_parse clears the same way, for the same reason.
-{ missionNamespace setVariable [_x select 0, ""]; } forEach (["blufor"] call fnc_faction_schema);
+{
+	missionNamespace setVariable [_x select 0, ""];
+	// Same leftover trap for the row's tier: a hand-written file that assigns the key but not a tier
+	// would otherwise show the previous faction's colour. Cleared to 0 (white) so a file that defines
+	// a key straight reads as the faction's own choice unless resolution or backfill says otherwise.
+	missionNamespace setVariable [format ["DUWS_factionTier_%1", _x select 0], 0];
+} forEach (["blufor"] call fnc_faction_schema);
 
 _factionFile = "duws\shared\factions\" + VERSION_X + "\" + BLUFOR_FactionFile_X + "_blufor.sqf";
 fnc_BLUFOR_FactionFile_X = compile preprocessFileLineNumbers _factionFile;

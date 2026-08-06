@@ -298,8 +298,8 @@
                 <English>CONFIRM YOUR FACTIONS</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_confirm_intro">
-                <Original>Review the unit each side will field for every role. SELECT swaps a role, CLEAR empties it. These are the final faction settings for this campaign and are irreversible.</Original>
-                <English>Review the unit each side will field for every role. SELECT swaps a role, CLEAR empties it. These are the final faction settings for this campaign and are irreversible.</English>
+                <Original>Review the unit each side will field for every role. SELECT swaps a role, CLEAR empties it. &lt;t color='#ffd133'&gt;Yellow&lt;/t&gt; is a fallback substitute the faction still fields; &lt;t color='#ff5959'&gt;red&lt;/t&gt; is a vanilla stand-in or a role it does not field. These faction settings are final and irreversible.</Original>
+                <English>Review the unit each side will field for every role. SELECT swaps a role, CLEAR empties it. &lt;t color='#ffd133'&gt;Yellow&lt;/t&gt; is a fallback substitute the faction still fields; &lt;t color='#ff5959'&gt;red&lt;/t&gt; is a vanilla stand-in or a role it does not field. These faction settings are final and irreversible.</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_confirm_blufor">
                 <Original>BLUFOR</Original>
@@ -348,6 +348,14 @@
             <Key ID="STR_DUWS_T_faction_confirm_missing">
                 <Original>-- MISSING --</Original>
                 <English>-- MISSING --</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_tier_yellow">
+                <Original>fallback substitute from this faction</Original>
+                <English>fallback substitute from this faction</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_confirm_tier_red">
+                <Original>vanilla stand-in -- this faction fields no unit for the role</Original>
+                <English>vanilla stand-in -- this faction fields no unit for the role</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_confirm_continue">
                 <Original>CONTINUE</Original>
@@ -404,6 +412,10 @@
             <Key ID="STR_DUWS_T_faction_lock_warn">
                 <Original>Warning: You are missing keys. A missing key may cause issues.</Original>
                 <English>Warning: You are missing keys. A missing key may cause issues.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_faction_lock_warn_standin">
+                <Original>Warning: some roles (red) use a vanilla stand-in. Set them to a faction unit, or continue to accept the stand-in.</Original>
+                <English>Warning: some roles (red) use a vanilla stand-in. Set them to a faction unit, or continue to accept the stand-in.</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_edit_title">
                 <Original>SET ROLE</Original>

@@ -66,12 +66,25 @@ fnc_faction_resolve = {
     };
 
     private _out = [];
+    // How far the answer fell from the faction's own first choice, for the confirmation screen to
+    // colour the row: 0 the primary bucket (white), 1 a lower rung the faction still fills (yellow),
+    // 2 the vanilla stand-in or nothing left at all (red). The stand-in is kept -- the campaign still
+    // needs a class -- but it is flagged as the worst case so a gap in the faction is not hidden.
+    private _tier = 2;
     {
         private _kept = [if (_x isEqualType "") then {[_x]} else {_x}, _kind] call fnc_faction_keep;
-        if !(_kept isEqualTo []) exitWith { _out = _kept };
+        if !(_kept isEqualTo []) exitWith {
+            _out = _kept;
+            _tier = switch true do {
+                case (_forEachIndex == 0):            {0};
+                case (_forEachIndex < count _ladder): {1};
+                default                               {2};   // the appended vanilla _fallback
+            };
+        };
     } forEach (_ladder + [_fallback]);
 
     missionNamespace setVariable [_key, _out];
+    missionNamespace setVariable [format ["DUWS_factionTier_%1", _key], _tier];
     _out
 };
 

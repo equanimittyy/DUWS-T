@@ -100,6 +100,16 @@ while {!createzone_server} do {
 			forEach ([_side] call fnc_faction_schema);
 	} forEach ["blufor", "opfor"];
 
+	// One broadcast of every key's resolution tier, read once here after backfill so a borrow's
+	// yellow is already in. The confirmation screen colours each row from it: 0 white, 1 yellow, 2 red.
+	DUWS_factionTiers = [];
+	{
+		private _side = _x;
+		{ DUWS_factionTiers pushBack [_x select 0, missionNamespace getVariable [format ["DUWS_factionTier_%1", _x select 0], 0]]; }
+			forEach ([_side] call fnc_faction_schema);
+	} forEach ["blufor", "opfor"];
+	publicVariable "DUWS_factionTiers";
+
 	// Answers the request by number, so the screen can tell this round's rows from the last one's.
 	duws_faction_preview_ready = _serving;
 	publicVariable "duws_faction_preview_ready";

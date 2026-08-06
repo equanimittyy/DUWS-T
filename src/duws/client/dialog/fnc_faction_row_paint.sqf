@@ -44,12 +44,27 @@ private _class = _pool select 0;
 private _extra = count _pool - 1;
 private _display = getText (configFile >> "CfgVehicles" >> _class >> "displayName");
 
+// 0 white: the faction's own first choice. 1 yellow: a lower rung or a borrow it still fields.
+// 2 red: a vanilla stand-in, the same worst-case colour a missing role gets. An edit sets the key
+// to 0 (see fnc_faction_key_apply), so a class the player picked stops reading as a fallback.
+private _tiers = missionNamespace getVariable ["duws_faction_tiers", createHashMap];
+private _tier = _tiers getOrDefault [_key, 0];
+
 _label ctrlSetText format ["%1: %2%3", _short, _class,
     if (_extra > 0) then { format [" (+%1)", _extra] } else { "" }];
-_label ctrlSetTextColor [1, 1, 1, 1];
-_label ctrlSetTooltip format ["%1 = %2%3%4",
+_label ctrlSetTextColor (switch (_tier) do {
+    case 1: { [1, 0.82, 0.2, 1] };
+    case 2: { [1, 0.35, 0.35, 1] };
+    default { [1, 1, 1, 1] };
+});
+_label ctrlSetTooltip format ["%1 = %2%3%4%5",
     _key, _class,
     if (_display isEqualTo "") then {""} else {format ["  (%1)", _display]},
-    if (_extra > 0) then { format ["  [%1 in pool]", count _pool] } else { "" }];
+    if (_extra > 0) then { format ["  [%1 in pool]", count _pool] } else { "" },
+    switch (_tier) do {
+        case 1: { format ["  -- %1", localize "STR_DUWS_T_faction_confirm_tier_yellow"] };
+        case 2: { format ["  -- %1", localize "STR_DUWS_T_faction_confirm_tier_red"] };
+        default { "" };
+    }];
 _label ctrlCommit 0;
 if (!isNil "_clear") then { _clear ctrlEnable true; };

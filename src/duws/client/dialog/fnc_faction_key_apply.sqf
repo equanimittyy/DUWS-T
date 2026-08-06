@@ -68,5 +68,9 @@ private _pool = [_class, _parsed] call fnc_faction_pool_for_class;
     if (_i >= 0) exitWith { _rows set [_i, [_key, _pool]]; };
 } forEach duws_faction_table;
 
+// A picked class is the player's own choice, not a fallback: drop the row to white.
+private _tiers = missionNamespace getVariable ["duws_faction_tiers", createHashMap];
+_tiers set [_key, 0];
+
 closeDialog 0;
 [_key] call fnc_faction_row_paint;

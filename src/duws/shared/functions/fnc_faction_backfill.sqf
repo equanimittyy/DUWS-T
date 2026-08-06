@@ -48,6 +48,9 @@ fnc_faction_backfill = {
                 ["WARN", "FACTION", format ["%1 is empty and no rung under it resolved -- a roster naming it raises one man short", _key]] call fnc_log;
             } else {
                 missionNamespace setVariable [_key, _took, true];
+                // A borrow is a degrade the faction still supplies, so the confirmation screen
+                // flags it yellow rather than the vanilla-stand-in red.
+                missionNamespace setVariable [format ["DUWS_factionTier_%1", _key], 1];
                 ["INFO", "FACTION", format ["%1 borrowed from %2", _key, _from]] call fnc_log;
             };
         };

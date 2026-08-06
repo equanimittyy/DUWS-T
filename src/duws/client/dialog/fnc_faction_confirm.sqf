@@ -68,6 +68,12 @@ duws_faction_table = ["blufor", "opfor"] apply {
     }]
 };
 
+// Row colour lookup, keyed by role: 0 white (the faction's own first choice), 1 yellow (a lower
+// rung or a borrow it still fills), 2 red (a vanilla stand-in, or a role it does not field). An edit
+// drops the key to white -- a class the player picked is no longer a fallback.
+duws_faction_tiers = createHashMap;
+{ duws_faction_tiers set [_x select 0, _x select 1]; } forEach (missionNamespace getVariable ["DUWS_factionTiers", []]);
+
 // The line stays up across the table build and the dialog opening, and is cleared only once the
 // screen it was announcing is actually on -- clearing it at the end of the wait above put a gap of
 // blank screen exactly where the player was already wondering whether anything was happening.
