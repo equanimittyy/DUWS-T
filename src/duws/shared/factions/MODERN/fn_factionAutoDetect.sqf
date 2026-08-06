@@ -550,6 +550,16 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	private _heliList = _factionData select {_x isKindOf "Helicopter" && {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") >= 2}};
 	_heliTransport = (_heliList select {getNumber (configFile >> "CfgVehicles" >> _x >> "transportSoldier") >= 4}) + ([_heliList, 1, 4] call fnc_filterBySeats);
 	_heliTransport = _heliTransport arrayIntersect _heliTransport;
+	// Representative is the first entry (fnc_faction_pools_publish), and the taxi, paradrop and intro
+	// spawns read that single global, so order the transports biggest-first by troop capacity. Rank by
+	// transportSoldier or, for the seat-proxy airframes that report it as 0, actual cargo seats -- the
+	// same two measures the filter above accepts. Random patrol still draws variety from the whole pool.
+	private _ranked = _heliTransport apply {
+		private _c = configFile >> "CfgVehicles" >> _x;
+		[(getNumber (_c >> "transportSoldier")) max (([_x, true] call BIS_fnc_crewCount) - ([_x, false] call BIS_fnc_crewCount)), _x]
+	};
+	_ranked sort false;
+	_heliTransport = _ranked apply {_x select 1};
 	// Same union as _heliArmed: armed by pylon or by turret weapon.
 	private _planeSeated = [ [ _factionData, "planes" ] call fnc_factionGetFilteredByEditorSubcat, 1,0 ] call fnc_filterBySeats;
 	private _planeByPylon = [_planeSeated] call fnc_filterByPylons;
