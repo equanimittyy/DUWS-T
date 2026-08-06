@@ -376,6 +376,9 @@ fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dial
 // to be written. Loaded here rather than at zone-gen time so both are in hand before generation runs.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_siting.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_minefield.sqf";
+// Layout data the placer reads by name (DUWS_hardpointComp_<type>). Ahead of the placer so no build
+// finds an empty composition and stands a hardpoint up as bare men on open ground.
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\hardpoint_compositions.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_place.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_stream.sqf";
 // Same idiom again, and ahead of faction init, which is what leaves the keys it fills empty.
