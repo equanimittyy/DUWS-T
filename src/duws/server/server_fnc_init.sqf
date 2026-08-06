@@ -385,6 +385,9 @@ fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dial
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_reveal.sqf";
 // Same idiom again, and ahead of faction init, which is what leaves the keys it fills empty.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_backfill.sqf";
+// The commit-time pass that turns each side's one-class-per-role globals into per-spawn pools. Server
+// only: pools are read only by the spawn paths, which are server-side.
+fnc_faction_augment = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_augment.sqf";
 // Before fnc_BLUFOR_squad_init and the zone spawn band, both of which name a team out of it.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_spawn_vocab.sqf";
 // Ahead of the two AutoDetect wrappers and fnc_custom_faction_parse, which both build their key

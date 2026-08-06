@@ -57,20 +57,10 @@ if (isNil "_parsed") then {
     _cache set [_faction, _parsed];
 };
 
-// Index 1 of the parse is itself a list of per-role infantry buckets; everything else is a flat
-// list of classnames. Flattening one level gives every bucket the class could belong to.
-private _buckets = [];
-{ if (_forEachIndex != 1) then { _buckets pushBack _x; }; } forEach _parsed;
-_buckets append (_parsed select 1);
-
-private _matching = _buckets select { _x isEqualType [] && {!(_x isEqualTo [])} && {_class in _x} };
-
-private _pool = [_class];
-if !(_matching isEqualTo []) then {
-    private _best = _matching select 0;
-    { if (count _x < count _best) then { _best = _x; }; } forEach _matching;
-    _pool = [_class] + (_best select { _x isEqualType "" && {_x != _class} });
-};
+// The pool the row locks and fnc_faction_pick later draws from -- the class plus its faction's
+// tightest role bucket. Same classifier the post-commit augment pass runs, so an edited role and an
+// augmented one build their pool the one way.
+private _pool = [_class, _parsed] call fnc_faction_pool_for_class;
 
 {
     private _rows = _x select 1;

@@ -118,6 +118,12 @@ while {!(["BOOT", "chosen_hq_placement (player is placing HQ)", {chosen_hq_place
 // The player's edits from the confirmation screen, laid over what resolution produced.
 [] call fnc_faction_apply_locked;
 
+// Pools live and are read only on the server, so the confirmation screen (a client) never saw them
+// and locked one class per un-edited role; a hand-written faction defines one class to begin with.
+// Expand each role's final representative back into its faction's bucket, here after the edits land,
+// so both kinds of faction get the per-spawn variety and no edit is overridden. See fnc_faction_augment.
+[] call fnc_faction_augment;
+
 // fnc_static_resolve stands a faction's own MG nest in for any static role it never fields, so a
 // side with no static MG at all leaves each composition's vanilla placeholder standing instead --
 // the one case where a zone garrisons itself with the wrong side's gun. Checked here rather than at

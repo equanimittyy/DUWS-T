@@ -573,6 +573,39 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 };
 
 
+// One curated classname -> the pool fnc_faction_pick draws from at each spawn: the class plus the
+// rest of its faction's tightest bucket that holds it. A rifleman sits in both the whole-infantry
+// list and the grunt list; the smaller bucket is the role being filled, so it is the one expanded.
+// The class stays at the front, where fnc_faction_pools_publish reads the representative from.
+//
+// The buckets come from a parse of the class's own faction. A caller with a parse already in hand
+// (the key editor caches one per screen; the augment pass caches one per faction) passes it; a bare
+// call parses on demand. A class its own faction's parse never bucketed -- or an empty class --
+// yields itself alone, which is what a plain hand-written role global already gives.
+fnc_faction_pool_for_class = compileFinal {
+	params ["_class", ["_parsed", []]];
+	if (_class isEqualTo "") exitWith { [] };
+	if (_parsed isEqualTo []) then {
+		_parsed = [getText (configFile >> "CfgVehicles" >> _class >> "faction")] call fnc_parseFaction;
+	};
+
+	// Index 1 is itself a list of per-role infantry buckets; every other index is a flat classname
+	// list. Flattening it in gives every bucket the class could belong to.
+	private _buckets = [];
+	{ if (_forEachIndex != 1) then { _buckets pushBack _x; }; } forEach _parsed;
+	_buckets append (_parsed select 1);
+
+	private _matching = _buckets select { _x isEqualType [] && {!(_x isEqualTo [])} && {_class in _x} };
+	private _pool = [_class];
+	if !(_matching isEqualTo []) then {
+		private _best = _matching select 0;
+		{ if (count _x < count _best) then { _best = _x; }; } forEach _matching;
+		_pool = [_class] + (_best select { _x isEqualType "" && {_x != _class} });
+	};
+	_pool
+};
+
+
 // Zombie faction? Matched on display name, not a per-mod class list: the mission supports two
 // zombie mods and cannot name every faction they ship, but both name theirs for what they field.
 // One test both ways -- zombies stay out of ordinary picks and are the only OPFOR the zombie mode
@@ -722,4 +755,4 @@ fnc_factionSelector = compileFinal {
 
 };
 
-["fnc_selectNonEmpty","fnc_vehiclePostInit","fnc_padZero","fnc_enumCost","fnc_enumCostFormatted","fnc_evalVehicleCost","fnc_getEditorCategory","fnc_factionGetFilteredByEditorSubcat","fnc_filterByDisplayName","fnc_filterByClassName","fnc_factionGetFilteredByType","fnc_filterBySeats","fnc_filterByUtility","fnc_filterByPylons","fnc_filterByWeapons","fnc_isThreatTo","fnc_vehicleWeaponType","fnc_unitParseRoles","fnc_parseFaction","fnc_factionIsZombie","fnc_getAllFactionsClean","fnc_factionSelector"] apply { publicVariable _x };
+["fnc_selectNonEmpty","fnc_vehiclePostInit","fnc_padZero","fnc_enumCost","fnc_enumCostFormatted","fnc_evalVehicleCost","fnc_getEditorCategory","fnc_factionGetFilteredByEditorSubcat","fnc_filterByDisplayName","fnc_filterByClassName","fnc_factionGetFilteredByType","fnc_filterBySeats","fnc_filterByUtility","fnc_filterByPylons","fnc_filterByWeapons","fnc_isThreatTo","fnc_vehicleWeaponType","fnc_unitParseRoles","fnc_parseFaction","fnc_faction_pool_for_class","fnc_factionIsZombie","fnc_getAllFactionsClean","fnc_factionSelector"] apply { publicVariable _x };
