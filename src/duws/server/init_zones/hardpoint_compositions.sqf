@@ -69,6 +69,14 @@ DUWS_hardpointComp_MG = [    ["Land_BagBunker_Small_F", -0.145386, 0.259277, 0.9
 ];
 // --DUWS-COMPOSITION END--
 
+// --DUWS-COMPOSITION BEGIN name="Hardpoint: GMG Emplacement" schema=A--
+DUWS_hardpointComp_GMG = [    ["CamoNet_BLUFOR_open_F", 0.168701, 0.11084, 1.16854, 0.00104801, false],
+    ["Land_BagFence_Round_F", -3.94617, 0.465332, 0.420007, 94.5918, false],
+    ["Land_BagFence_Round_F", -0.497559, -2.89648, 0.420007, 2.71297, false],
+    ["Land_BagFence_Round_F", 3.24548, -0.0541992, 0.420007, 281.642, false],
+    ["I_GMG_01_high_F", -0.174683, 0.305176, 1.66083, 0, true]];
+// --DUWS-COMPOSITION END--
+
 // --DUWS-COMPOSITION BEGIN name="Hardpoint: Mortar Pit" schema=A--
 DUWS_hardpointComp_MORTAR = [
     ["Land_HBarrier_5_F", -5.04614, 0.517578, 0.74121, 89.9076, false],

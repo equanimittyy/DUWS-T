@@ -802,6 +802,9 @@ TEST_PICK = "";
     ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9], "MG"] call fnc_hardpoint_score), 2.7] call fnc_assertClose;
 ["hp_score: AT gains more from the road it kills on",
     ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9], "AT"] call fnc_hardpoint_score), 3.75] call fnc_assertClose;
+// GMG lobs over cover, so the same overwatch lifts it less than the MG's ~80%.
+["hp_score: GMG gains less from a road it fires over",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9], "GMG"] call fnc_hardpoint_score), 2.25] call fnc_assertClose;
 
 // Flat, low ground with no hill: the floor of the MG reward.
 ["hp_score: MG on flat ground scores its floor",

@@ -166,7 +166,7 @@ fnc_hardpoint_site_zone = {
         ["INFO", "HARDPOINT", format ["%1 rolled 0 hardpoints (cap %2)", _zoneKey, _cap]] call fnc_log;
     };
 
-    private _types = ["ROADBLOCK", "MG", "AT"];
+    private _types = ["ROADBLOCK", "MG", "AT", "GMG"];
     private _placed = 0;
     private _tries = 0;
     while { _placed < _count && {_tries < _count * 8} } do {

@@ -12,7 +12,7 @@ if (!hasInterface) exitWith {};
 if (!((vehiclevarname player) in game_master)) exitWith {};
 
 private _side = _this;
-private _types = ["OP", "ROADBLOCK", "MG", "AT", "AA", "MORTAR", "ARTY", "MINEFIELD"];
+private _types = ["OP", "ROADBLOCK", "MG", "GMG", "AT", "AA", "MORTAR", "ARTY", "MINEFIELD"];
 
 private _rows = [];
 {

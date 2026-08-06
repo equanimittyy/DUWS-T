@@ -386,17 +386,17 @@ DUWS_hardpointStreaming = createHashMapFromArray [
 ];
 
 // How common each hardpoint type is before terrain -- the base weight fnc_hardpoint_score multiplies,
-// for the zone siting loop's weighted roll. MG is the backbone. The loop rolls only these three; OPs,
+// for the zone siting loop's weighted roll. MG is the backbone. The loop rolls only these four; OPs,
 // minefields and the fire-support types are OPCOM's to place, never rolled at init.
 DUWS_hardpointBaseWeight = createHashMapFromArray [
-    ["MG", 3], ["AT", 2], ["ROADBLOCK", 2]
+    ["MG", 3], ["AT", 2], ["ROADBLOCK", 2], ["GMG", 2]
 ];
 
 // Readable name per hardpoint type, for the destroyed-hardpoint notification. English labels; the
 // localisation carries the sentence around them, not these.
 DUWS_hardpointName = createHashMapFromArray [
     ["MG", "MG"], ["AT", "AT"], ["AA", "AA"], ["MORTAR", "Mortar"],
-    ["ARTY", "Artillery"], ["OP", "Obs Post"], ["ROADBLOCK", "Roadblock"]
+    ["ARTY", "Artillery"], ["OP", "Obs Post"], ["ROADBLOCK", "Roadblock"], ["GMG", "GMG"]
 ];
 
 // The margin beyond a zone's own radius that its streaming reaches: a zone raises and holds its

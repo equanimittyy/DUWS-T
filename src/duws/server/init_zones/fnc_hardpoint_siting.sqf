@@ -84,6 +84,10 @@ fnc_hardpoint_score = {
         case "MG":  { (0.5 + 1.0 * _high) * (1 + 0.8 * _overwatch) };
         case "AT":  { (0.5 + 1.0 * _high) * (1 + 1.5 * _overwatch) };
 
+        // A gun nest like the MG, but it lobs grenades over cover rather than firing down a road, so a
+        // road below counts for less.
+        case "GMG": { (0.5 + 1.0 * _high) * (1 + 0.5 * _overwatch) };
+
         // Flat and clear of trees; heading is cosmetic. Trees tank it but do not forbid it -- "prefer".
         case "AA":  { (0.3 + 1.4 * _flat) * (0.2 + 0.8 * (1 - ([_treeWide, 0, 6] call _ramp))) };
 
