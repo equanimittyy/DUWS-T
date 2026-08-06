@@ -16,12 +16,10 @@ _this spawn {
     missionNamespace setVariable ["DUWS_hpdevN", _n + 1];
     private _key = format ["hpdev_%1", _n];
 
-    // Three soldiers for the dev spawn, empty for a minefield -- men would stand on its mines. Chosen
-    // here, the way an authored garrison composition sets it, rather than special-cased in the
-    // primitive. The AP-laddered composition is OPCOM's job later.
-    private _soldier = missionNamespace getVariable [format ["%1_SOLDIER_X", _side],
-        ["O_Soldier_F", "B_Soldier_F"] select (_side isEqualTo "blufor")];
-    private _garrison = [[_soldier, _soldier, _soldier], []] select (_type isEqualTo "MINEFIELD");
+    // The HP's garrison, as data: empty here, so gun crew only. The primitive spawns whatever this
+    // array holds and rides it on the site roster, so a real garrison is a data choice -- OPCOM's to
+    // author later, not something the dev path or the primitive hardcodes.
+    private _garrison = [];
 
     ([_type, _pos, _dir, _side, _key, _garrison] call fnc_hardpoint_spawn) params ["_objs", "_men"];
     [_key, _type, _pos, _men, _side, _garrison] call fnc_hardpoint_register;
