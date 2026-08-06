@@ -12,10 +12,7 @@ setGroupIconsVisible [true,false]; //now everyone can see enemies on map
 // BLACK SCREEN
 titleCut ["", "BLACK FADED", 999];
 waitUntil {sleep 0.1;!isNull player};
-// Host waits for Server init
-//if (isServer) then {
 	while {!(["BOOT", "serverinit_complete from the server", {serverinit_complete}, 300] call fnc_waitLogged)} do {};
-//};
 // Exactly one drain loop per client, and only below the wait above -- the function arrives
 // with the registry the server publishes, so starting it any earlier races that. A line
 // posted before this point is not lost: fnc_duws_dialogue queues without needing the loop.
@@ -68,7 +65,6 @@ playMusic ["LeadTrack02_F", 0];
 if (isMultiplayer) then {
 	
 	if (((vehiclevarname player) != "player1" && !WARCOM_init_done) || WARCOM_init_done) then {
-		//titleCut ["", "BLACK FADED", 999];
 		titleCut ["", "BLACK IN", 10];
 		forceMap true;
 		mapAnimAdd [3, 1, [5000,5000]];
@@ -88,21 +84,17 @@ if (((vehiclevarname player) in game_master) && !HQ_pos_found_generated) then {
 	//  ZONE SETTINGS DIALOG
 	if (!zones_created) then {
 
-		//titleCut ["", "BLACK FADED", 999];
-
 		// SHOW THE STARTUP ENVIRO MENU
 		if (!zones_created) then {
 			sleep 0.1;
 			[] call fnc_startup_faction_flow;
 			while {!(["BOOT", "chosen_settings (player still in setup screens)", {chosen_settings}, 600] call fnc_waitLogged)} do {};
-			//titleCut ["", "BLACK IN", 10];
 		};
 	};
 };
 
 // Open Map for Gamemaster (Random Zones)
 if ((vehiclevarname player) in game_master && !manually_chosen) then {
-	//titleCut ["", "BLACK FADED", 999];
 	titleCut ["", "BLACK IN", 10];
 	forceMap true;
 	mapAnimAdd [3, 1, PosOfBLUHQ];
@@ -115,7 +107,6 @@ waitUntil {isPlayer Player};
 
 if (((vehiclevarname player) in game_master)) then {
 	while {!(["ZONES", "serv_zones_array broadcast by the server", {count serv_zones_array > 0}, 300] call fnc_waitLogged)} do {};
-	//titleCut ["", "BLACK FADED", 999];
 } else {
 	if (!WARCOM_init_done) then {
 		hintsilent "Waiting for serverinit_complete";
@@ -244,9 +235,6 @@ if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1 && {(vehiclevarname play
 
 // Create Diary/Help entry on the Map
 [] spawn fnc_duws_help;
-
-// INIT R3F Logistics
-//execVM "modules\R3F_LOG\init.sqf";
 
 // Add HQ actions for REQUEST Players
 [bluHQ_object] spawn fnc_HQaddactions;

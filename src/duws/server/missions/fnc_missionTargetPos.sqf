@@ -21,7 +21,6 @@ while {!_Posfound} do {
 	_nearBuildings = [];
 	_nearBuildings = nearestTerrainObjects [_randomPos, ["House","BUILDING"], 200, true];
 	if (count(_nearBuildings) == 0) then {
-		//_Building = nearestBuilding _randomPos;
 		_Building = _randomPos;
 		[{hint localize "STR_DUWS_T_pj31ugj0"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 		sleep 5;

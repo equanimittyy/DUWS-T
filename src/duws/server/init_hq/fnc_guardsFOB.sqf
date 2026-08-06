@@ -32,26 +32,18 @@ _groupGuard deleteGroupWhenEmpty true;
 sleep 10;
 
 _HQguard1 = units _groupGuard select 0;
-//_HQguard1 addEventHandler ["Fired",{(_this select 0) setVehicleAmmo 1}];
 _HQguard2 = units _groupGuard select 1;
-//_HQguard2 addEventHandler ["Fired",{(_this select 0) setVehicleAmmo 1}];
 _HQguard3 = units _groupGuard select 2;
-//_HQguard3 addEventHandler ["Fired",{(_this select 0) setVehicleAmmo 1}];
 _HQguard4 = units _groupGuard select 3;
-//_HQguard4 addEventHandler ["Fired",{(_this select 0) setVehicleAmmo 1}];
 
 switch (VERSION_X) do {
 	case "MODERN": {
-		//_HQguard1 = _groupGuard createUnit [blufor_SOLDIER_X, _centerPos, [], 0, "FORM"];
 		_HQguard1 setpos [(_centerPos select 0)-6.5, (_centerPos select 1)-1.6];
 		_HQguard1 setdir 270;
-		//_HQguard2 = _groupGuard createUnit [blufor_SOLDIER_X, _centerPos, [], 0, "FORM"];
 		_HQguard2 setpos [(_centerPos select 0)-6.5, (_centerPos select 1)-4.7];
 		_HQguard2 setdir 270;
-		//_HQguard3 = _groupGuard createUnit [blufor_TL_SOLDIER_X, _centerPos, [], 0, "FORM"];
 		_HQguard3 setpos [(_centerPos select 0), (_centerPos select 1)-7.58];
 		_HQguard3 setdir 180;
-		//_HQguard4 = _groupGuard createUnit [blufor_LAT_SOLDIER_X, _centerPos, [], 0, "FORM"];
 		_HQguard4 setpos [(_centerPos select 0), (_centerPos select 1)-9];
 		_HQguard4 setdir 0;
 	};

@@ -185,7 +185,6 @@ kndr_removeMarker =
 	private ["_mrk", "_obj", "_index"];
 	_obj = _this select 0;
 	_index = kndr_objs find _obj;
-	//_obj = kndr_objs select _index;
 	_mrk = kndr_mrks select _index;
 
 	kndr_objs = kndr_objs - [_obj];

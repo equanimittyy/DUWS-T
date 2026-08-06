@@ -6,6 +6,5 @@ _tracksAmountIndexed = (count _music_list) - 1;
 _dice = round random _tracksAmountIndexed;
 
 _pickedTrack = _music_list select _dice;
-//hint format["%1",_pickedTrack];
 
 _pickedTrack 

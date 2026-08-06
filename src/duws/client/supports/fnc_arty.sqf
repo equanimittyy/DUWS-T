@@ -45,7 +45,6 @@ if (_supportype == 5) then {_ord = localize "STR_DUWS_T_a31378y0"};		//cluster
 if (_supportype == 6) then {_ord = localize "STR_DUWS_T_7sgon7jn"};		//napalm
 
 hint localize "STR_DUWS_T_fqeghaut";
-//hint format["Position: %1\nSalvos:%2\nRadius:%3\nInterval:%4\nRPS:%5\nSupport type:%6\nCost:%7\nAmmo type:%8", _position, _salvos, _radius, _interval, _rps,_supportype,_cost,_ammotype];
 if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
 	[localize "STR_DUWS_T_slingshot", localize "STR_DUWS_T_stmeajce"] remoteExec ["fnc_duws_dialogue", 0];
 } else {
@@ -62,7 +61,6 @@ if (_ammotype == "Bo_Mk82") then {
 };
 
 _markername = format["ord%1%2",_position]; // Define marker name
-//hint _markername;
 _markerstr = createMarker [str(_markername), _position];
 _markerstr setMarkerShape "ELLIPSE";
 str(_markername) setMarkerColor "ColorGrey";
@@ -70,7 +68,6 @@ str(_markername) setMarkerSize [_drawRadius,_drawRadius];
 
 // give marker a label
 _markername2 = format["lbl%1%2",_position]; // Define marker name
-//hint _markername;
 _markerstr2 = createMarker [str(_markername2), _position];
 _markerstr2 setMarkerShape "ICON";
 str(_markername2) setMarkerType "hd_warning";
@@ -126,7 +123,6 @@ _veh_alive = true;
 if (_ammotype == "Laser") then {
 	sleep 15;
 	hint localize "STR_DUWS_T_wlasdnk6";
-	//sleep 15;
 	waitUntil {sleep 0.1;onStation||!alive _vehicle};
 	sleep 2;
 	if (!alive _vehicle) then {_veh_alive = false};
@@ -179,7 +175,6 @@ if (_ammotype == "Laser") then {
 				case 2: {  // Mortar
 					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), 800]; //spawn shells
 					_bomb setVelocity [0,0,-500];
-					//_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)]; //spawn shells
 					sleep ((random 20)/10);
 				};
 				case 3: {  // JDAM

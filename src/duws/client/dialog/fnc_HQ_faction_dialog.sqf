@@ -228,8 +228,6 @@ closeDialog 0;
 publicVariable "BLUFOR_FactionFile_X";
 publicVariable "OPFOR_FactionFile_X";
 publicVariable "duws_gamemode";
-//publicVariable "hardcore_visibleZone_found";
-//publicVariable "hardcore_mode_enable";
 
 
 

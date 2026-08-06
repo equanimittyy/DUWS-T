@@ -46,7 +46,6 @@ _veh = [_vehpos,0,blufor_TRANS_HELI_X,WEST] call bis_fnc_spawnvehicle;
 
 _helo = _veh select 0 ;// vehicle object
 _helo setPos [_vehpos select 0, _vehpos select 1, 200];// set height
-//_helo setvelocity [0,0,200];
 
 _helo flyInHeight 50;
 _helo addAction [ACT_MOVE("STR_DUWS_T_helotaxi_action_wp"), fnc_mapclickhelo, [], 70, true, true, "", "vehicle _this == _target"];
@@ -154,7 +153,6 @@ if (call _check_damage) exitWith {
 playMusic [_music, 0];
 _helo setEffectiveCommander player;  // turn helo "blue" while player is on board.
 
-//_helo lock true;
 	_message = localize "STR_DUWS_T_helotaxioscmk";
 	_speaker = localize "STR_DUWS_T_chariot";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];

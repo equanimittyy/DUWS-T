@@ -49,8 +49,6 @@ while {!(["ZONES", "chosen_settings from the callsign screen",
     (if (isNil "moreUrban") then {"<nil>"} else {moreUrban}),
     (if (isNil "PosOfBLUHQ") then {"<nil>"} else {PosOfBLUHQ})]] call fnc_log;
 
-// Exit if zones manually chosen ???  what about missions
-//if (manually_chosen) exitWith {};
 
 if (zones_max_dist_from_hq > 10000) then {
 	[{hint localize "STR_DUWS_T_eggxrcci"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
@@ -183,4 +181,3 @@ if (moreUrban == 1) then {
 _temp_Locations_Master = _allLocations call BIS_fnc_arrayShuffle;
 _temp_allTowns = _allTowns call BIS_fnc_arrayShuffle;
 MASTER_allLocations_filtered = _temp_allTowns + _temp_Locations_Master;
-//publicVariable "MASTER_allLocations_filtered";

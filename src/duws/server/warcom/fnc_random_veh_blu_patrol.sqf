@@ -61,7 +61,6 @@ _vehGroup deleteGroupWhenEmpty true;
 } foreach units _vehGroup;
 
 // Set the waypoints
-//hint format["%1",_patrolRadius];
 [_vehGroup] spawn fnc_WARCOM_wp_blu_patrol;
 
 

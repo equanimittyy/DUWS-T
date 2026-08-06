@@ -32,7 +32,6 @@ switch (VERSION_X) do {
 	case "MODERN": {
 		_spawnPos = [_spawnPos select 0, _spawnPos select 1, (_spawnPos select 2)+400];
 		_grouptype = [blufor_TRANS_HELI_X];
-		//_grouptype = ["O_Heli_Light_02_unarmed_F"];
 	};
 };
 
@@ -97,7 +96,6 @@ waitUntil {sleep 1; getpos _ammobox select 2 < 0.2};
 [getPos _ammobox] spawn {
 	_spawnPos = _this select 0;
 	_markername = format["lbl%1",_spawnPos]; // Define marker name
-	//hint _markername;
 	createMarker [_markername, _spawnPos];
 	_markername setMarkerShape "ICON";
 	_markername setMarkerType "hd_objective";

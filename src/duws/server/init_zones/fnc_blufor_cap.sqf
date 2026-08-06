@@ -39,7 +39,6 @@ _opfreward = round(_apswing * zone_ap_consolation);
 // MODIFY MARKER ICON
 // Blue for the same reason as the first capture: green is Independent, not friendly.
 str(_markername) setMarkerColor "ColorBlue";
-// hint str(_markername);
 // MODIFY MARKER ELLIPSE
 str(_markername2) setMarkerColor "ColorBlue";
 

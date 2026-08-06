@@ -60,7 +60,6 @@ if (!(["ARTY", format["[_pos,%2,%3,%4,%5,%6,%7,'%8'] spawn fnc_arty; clicked = t
 // the map themselves, and not at all if they called this with the map already up.
 openMap true;
 [localize "STR_DUWS_T_4sqljq58"] call fnc_map_prompt;
-//hint format["Position: %1\nSalvos:%2\nRadius:%3\nInterval:%4\nRPS:%5\nSupport type:%6\nCost:%7\nAmmo type:'%8'", _position, _salvos, _radius, _interval, _rps, _supportype, _cost, _ammotype];
 
 // TIMER
 // Closing the map is how the player backs out now that this opens it, so the wait ends there

@@ -68,7 +68,6 @@ blufor_patrol_count = 0;
 				// find a zone *** end 
 
 				// Find a safe position
-				//_randomZone = [(_randomZone select 0)+40,_randomZone select 1];
 				_spawnLoc = [[(_randomZone select 0), (_randomZone select 1)],300,500,10,0,0.3,0,[],[]] call BIS_fnc_findSafePos;
 				_group = "";
 				
