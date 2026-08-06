@@ -10,6 +10,10 @@ if (!isServer) exitWith {};
 // hands back through ZONE_RAISE_SLOT.
 #define HP_RAISE_SLOT(key) (format ["DUWS_hpRaise_%1", key])
 
+// How close a player must come to mark a hardpoint on the map, tighter than any streaming ring so the
+// emplacement is revealed about when it comes into view rather than when its garrison streams in.
+#define HP_REVEAL_RADIUS 100
+
 // zoneKey call DUWS_fnc_hardpointZoneAwake -> is that zone deployed. A zone-coupled hardpoint reads
 // this instead of its own ring, so a zone's whole defence rises and falls with the garrison rather
 // than each emplacement waking on its own radius. fnc_site_occupant hands back an empty map for a zone
@@ -158,7 +162,27 @@ DUWS_fnc_hardpointClear = {
 DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     params ["_key", "_o", "_here", "_now"];
     if (_o getOrDefault ["cleared", false]) exitWith {};
-    if (_here) then { _o set ["lastSeen", _now] };
+    if (_here) then {
+        _o set ["lastSeen", _now];
+
+        // Proximity reveal, the way walking into a zone reveals it. Behind _here so the precise player
+        // scan only runs when someone is already in the wider streaming ring and this hardpoint is still
+        // hidden, and behind the parent zone for a zone-child hardpoint -- the same gate the intel draw
+        // applies, so closing on a gun never marks it before its zone is found. fnc_hardpoint_reveal
+        // no-ops once the row is flagged, so a player loitering in range does not re-announce it.
+        private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
+        if (_i > -1 && {!((DUWS_hardpoints select _i) select 5)}) then {
+            private _pzk = _o getOrDefault ["hpZoneKey", ""];
+            private _parentUp = _pzk isEqualTo "" ||
+                { (zone_namePOS_pairs findIf { (_x select 2) && {([_x select 1] call fnc_zone_key) isEqualTo _pzk} }) > -1 };
+            if (_parentUp) then {
+                private _hpPos = (DUWS_hardpoints select _i) select 1;
+                if (((call BIS_fnc_listPlayers) findIf { alive _x && {_x distance2D _hpPos < HP_REVEAL_RADIUS} }) > -1) then {
+                    ["ONE", _key] call fnc_hardpoint_reveal;
+                };
+            };
+        };
+    };
 
     [_key, _o] call DUWS_fnc_hardpointClearCheck;
     if (_o getOrDefault ["cleared", false]) exitWith {};
