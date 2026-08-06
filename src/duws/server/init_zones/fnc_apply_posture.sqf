@@ -145,13 +145,16 @@ switch (_posture) do {
         } else {
             private _building = _candidates select _i;
             _building setVariable ["DUWS_garrisonedBy", _group];
-            // Pinned, house and tower alike. Letting a house garrison roam between its own building
-            // positions read as men milling about indoors rather than holding the place, and a man
-            // walking is a man the player watches walk -- so the whole posture is now place, hold,
-            // done. The only thing a structure's kind still decides is stance: a guard on a catwalk
-            // stands, where a house garrison takes whatever the fight calls for.
+            // Every garrison holds by a doMove loop between the building's positions that leaves the
+            // unit's pathing on, so it works the building and fights. Holding a man by switching his
+            // pathing off instead froze the squad mid-firefight -- no repositioning, no breaking for
+            // cover. A withdrawal releases the loop (DUWS_fnc_zoneSendOff clears it and re-enables
+            // PATH), so the hold never outlives a later order. Stance still splits on the structure: a
+            // post stands (UP), a house takes what the fight calls for (AUTO). A tower guard can now
+            // walk between its own platform slots and may occasionally strand itself at the base -- the
+            // accepted cost of not freezing it.
             private _isPost = _building in _posts;
-            [_group, [_building], count units _group, ["AUTO", "UP"] select _isPost, "PIN"]
+            [_group, [_building], count units _group, ["AUTO", "UP"] select _isPost]
                 call fnc_spreadIntoBuildings;
         };
     };

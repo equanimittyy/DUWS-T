@@ -234,7 +234,7 @@ if (isNil "fnc_intel_container_search_server") then {
         
         // No stance argument: the per-unit UP/MIDDLE mix chosen above has to survive the hold
         // loop, and any stance passed here would re-assert one of them onto every unit.
-        [_unit, _building, _positions, "HERD"] spawn fnc_holdBuildingPost;
+        [_unit, _building, _positions] spawn fnc_holdBuildingPost;
         
         _allSpawnedUnits pushBack _unit;
     };

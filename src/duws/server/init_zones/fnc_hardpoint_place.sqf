@@ -126,8 +126,11 @@ fnc_hardpoint_garrison = {
     // holds the position while the team works its approaches. An empty or unknown token places no one.
     private _garrison = [_teamToken, _side] call DUWS_fnc_teamRoster;
     if (count _garrison > 0) then {
-        private _sp = _pos findEmptyPosition [0, 30, _garrison select 0];
-        if (count _sp == 0) then { _sp = _pos };
+        // Spawned out toward the patrol ring, not on the emplacement: at the centre they land among
+        // the bunker, bags and gun and snag on them before the circuit can pull them clear. The
+        // fallback stays off-centre for the same reason -- a bearing off _pos, never _pos itself.
+        private _sp = _pos findEmptyPosition [30, 70, _garrison select 0];
+        if (count _sp == 0) then { _sp = _pos getPos [45, random 360] };
         private _grp = [_sp, _sideObj, _garrison, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
         _grp deleteGroupWhenEmpty true;
         [_grp, "closepatrol", _pos, HP_GARRISON_PATROL_R] call fnc_apply_posture;
