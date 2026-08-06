@@ -351,8 +351,9 @@ zones_min_radius = 200;publicVariable "zones_min_radius";
 // Hardpoint streaming, per type: [spawnRadius, grace, neverStream, airRing].
 //   spawnRadius  distance a player wakes the emplacement at
 //   grace        seconds empty before it stows
-//   neverStream  built once and kept resident and simulated, never stowed -- OPCOM tasks fire
-//                missions on it with no player near, which is why mortar and artillery hold
+//   neverStream  built once and kept resident, never stowed. Mortar and artillery hold so OPCOM can
+//                task them with no player near; a minefield holds so its mines are never stowed off
+//                the map, leaving its own hazard list as the real count of what is armed
 //   airRing      a second, larger radius answered only by aircraft; 0 = none. AA reaches out to
 //                catch a jet overhead its ground ring would never notice, without waking on
 //                every distant foot patrol.
@@ -362,7 +363,7 @@ DUWS_hardpointStreaming = createHashMapFromArray [
     ["MG",        [600, 300, false, 0]],
     ["AT",        [600, 300, false, 0]],
     ["ROADBLOCK", [600, 300, false, 0]],
-    ["MINEFIELD", [600, 300, false, 0]],
+    ["MINEFIELD", [600, 300, true,  0]],
     ["AA",        [600, 300, false, 5000]],
     ["MORTAR",    [600, 300, true,  0]],
     ["ARTY",      [600, 300, true,  0]]
@@ -372,6 +373,12 @@ DUWS_hardpointStreaming = createHashMapFromArray [
 // garrison for BLUFOR this much further out than the capture trigger tests, so the men are on the
 // objective before the players who tripped it arrive. Read by fnc_createZone and fnc_zone_stream_init.
 DUWS_streamArrivalMargin = 400;
+
+// The live hardpoint registry, one row per emplacement: [key, pos, type, side, zoneKey, state], state
+// "active" or "cleared". fnc_hardpoint_register appends and republishes; the clearance check flips a
+// row to "cleared". Broadcast so the map readout and, later, OPCOM read it without a server round-trip
+// -- the hardpoint analogue of zone_meta_array.
+DUWS_hardpoints = [];publicVariable "DUWS_hardpoints";
 
 // zoneundercontrolblu
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";

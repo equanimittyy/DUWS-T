@@ -24,7 +24,8 @@ DUWS_mineVariants = [
 //   _center  [x,y]           field centre in world coordinates
 //   _dir     degrees         facing; +Y of the lattice points down it, clockwise like setDir
 //   _variant "AT" | "AP"     resolved through DUWS_mineVariants; an unknown token falls to AT
-//   _key     site key        files each mine for streaming / teardown; "" leaves them unmanaged
+//   _key     site key        files each mine under the key for teardown and the clearance count;
+//                            "" leaves them unmanaged
 fnc_hardpoint_minefield = {
     params ["_center", "_dir", ["_variant", "AT"], ["_cols", 6], ["_rows", 3], ["_spacing", 4], ["_jitter", 0.6], ["_key", ""]];
 
@@ -62,6 +63,11 @@ fnc_hardpoint_minefield = {
         _sign setDir (random 360);
         if (_key != "") then { [_sign, _key] call fnc_duws_keep };
     };
+
+    // Filed by key so the clearance check can read what is left: the field is spent when no armed mine
+    // remains, and its own hazard list is the only count of that. Signs are not in it -- a warning
+    // marker is not a hazard, and a field of only signs is a cleared field.
+    if (_key != "") then { missionNamespace setVariable [format ["DUWS_hpMines_%1", _key], _mines] };
 
     _mines
 };

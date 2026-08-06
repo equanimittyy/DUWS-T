@@ -1,8 +1,9 @@
 // Locality: server -- the hardpoint streaming hooks and the site registration that reuses the shared
 // poller. A hardpoint is a site like a zone: it registers with fnc_site_register, files one garrison
 // occupant, and the poller in fnc_site_stream_init cycles it against the shared player list. What
-// differs from a zone is only what wakes and sleeps -- one gun-and-garrison emplacement, never
-// contested for, no attrition -- so the hooks here are the zone's shape stripped to that.
+// differs from a zone is the lifecycle -- one gun-and-garrison emplacement that wakes, sleeps and can
+// be cleared, but is never captured or retaken -- so the hooks here are the zone's shape stripped to
+// that and given a clearance check in place of a capture.
 if (!isServer) exitWith {};
 
 // The per-key slot a raise worker files its result in for the tick to adopt, the way a zone's raise
@@ -33,6 +34,8 @@ DUWS_fnc_hardpointRaiseWorker = {
     private _objs = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x };
     private _men = [_objs, _pos, _o get "hpSide", _key, _o get "hpGarrison"] call fnc_hardpoint_garrison;
     ([_key] call fnc_site_roster) append _men;
+    // Peak re-anchored to what actually stood up this cycle, the way a zone re-anchors on raise.
+    missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], [_key] call fnc_site_alive];
     missionNamespace setVariable [HP_RAISE_SLOT(_key), true];
 };
 
@@ -49,13 +52,67 @@ DUWS_fnc_hardpointStow = {
     } forEach ((DUWS_compositions getOrDefault [_key, []]) select { !isNull _x });
     [_key] call fnc_site_collect;
     [_key] call fnc_duws_stow;
+    // The peak goes with the garrison: a stowed hardpoint has an empty roster and must not read as one
+    // beaten. Re-set when it raises again.
+    missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], nil];
+};
+
+// Cleared when its own garrison is beaten: the roster is the crew plus the loose defenders, so an
+// alive count of zero is the emplacement taken. By roster, not proximity -- a passing patrol does not
+// man the gun, and a spatial scan per hardpoint per pass is exactly what the poller forbids inline.
+// Judged only while deployed -- DUWS_hpPeak_<key> present -- so a stowed emplacement's empty roster is
+// never mistaken for a garrison beaten.
+//
+// A minefield has no garrison; it is spent when no armed mine is left. A detonated mine deletes
+// itself and a defused one goes inactive, so its own hazard list is the count. Judged on its own
+// branch because peak, roster and grace say nothing about it -- it never stows, so the mines it holds
+// are always the real ones.
+DUWS_fnc_hardpointClearCheck = {
+    params ["_key", "_o"];
+    if ((_o get "hpType") isEqualTo "MINEFIELD") exitWith {
+        private _mines = missionNamespace getVariable [format ["DUWS_hpMines_%1", _key], []];
+        if (({!isNull _x && {mineActive _x}} count _mines) > 0) exitWith {};
+        [_key, _o] call DUWS_fnc_hardpointClear;
+    };
+    // <= 0 covers a stowed hardpoint (peak nil, defaulted to 0): its men are off the map and there is
+    // no roster to beat. Same guard, same reason, as the zone capture test.
+    if ((missionNamespace getVariable [format ["DUWS_hpPeak_%1", _key], 0]) <= 0) exitWith {};
+    if !(_o get "awake") exitWith {};
+    if (([_key] call fnc_site_alive) > 0) exitWith {};
+    [_key, _o] call DUWS_fnc_hardpointClear;
+};
+
+// Latched -- a cleared hardpoint stays cleared. The site is not retired here: deleting it would mutate
+// the map the poller is mid-iteration over, so the occupant is only marked inert and the composition
+// released to the cleanup sweep. The dev clear and, later, OPCOM retire it from outside the pass.
+DUWS_fnc_hardpointClear = {
+    params ["_key", "_o"];
+    _o set ["cleared", true];
+    missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], nil];
+    missionNamespace setVariable [format ["DUWS_hpMines_%1", _key], nil];
+    private _i = DUWS_hardpoints findIf { (_x select 0) isEqualTo _key };
+    if (_i >= 0) then {
+        (DUWS_hardpoints select _i) set [5, "cleared"];
+        publicVariable "DUWS_hardpoints";
+    };
+    // Wrecks left standing for the sweep, not deleted: release drops the pins and schedules disposal.
+    [_key] call fnc_duws_release;
+    ["INFO", "HARDPOINT", format ["%1 cleared", _key]] call fnc_log;
 };
 
 // One tick per hardpoint per pass, presence answered by the poller. The zone cycle without its
-// withdraw and retake arms: a hardpoint is only present or not.
+// withdraw and retake arms: a hardpoint is present or not, and standing or cleared.
 DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     params ["_key", "_o", "_here", "_now"];
+    if (_o getOrDefault ["cleared", false]) exitWith {};
     if (_here) then { _o set ["lastSeen", _now] };
+
+    [_key, _o] call DUWS_fnc_hardpointClearCheck;
+    if (_o getOrDefault ["cleared", false]) exitWith {};
+
+    // Resident types (mortar, artillery) never raise or stow -- the clearance check above is the whole
+    // tick for them.
+    if (_o get "neverStream") exitWith {};
 
     // A raise in flight owns the hardpoint until it reports, so a player crossing the ring twice
     // cannot start a second raise onto the first.
@@ -81,7 +138,7 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     };
 }]];
 
-// [_key, _type, _pos, _men, _side, _garrison] call fnc_hardpoint_register
+// [_key, _type, _pos, _men, _side, _garrison, _zoneKey] call fnc_hardpoint_register
 //
 // Files the hardpoint as a streamed site and adopts the composition and men it was just built with.
 // The streaming spec is the type's, not the caller's: spawnRadius, grace, neverStream and airRing all
@@ -94,28 +151,38 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
 // deployed and manned -- an occupant starting asleep over a standing composition would raise a second
 // garrison on the first tick.
 //
-// neverStream (mortar, artillery) is kept resident so OPCOM can task it with no player near. It still
-// registers as a site so it can be retired, and its men still roster so a clear reaches them, but its
-// composition is pinned against every stow path and its occupant is marked driven -- the poller skips
-// a driven occupant, so it is neither streamed nor even distance-tested each pass.
+// neverStream (mortar, artillery) is kept resident so OPCOM can task it with no player near: its
+// composition is pinned against every stow and release, so only a clear takes the battery down. It
+// keeps the tick, unlike a zone's driven emplacement -- the tick's raise/stow arm short-circuits for
+// it, but its clearance check still runs, so a destroyed battery is noticed like any other.
+//
+// _zoneKey ties the hardpoint to a parent zone for OPCOM and the map readout, or "" for a standalone
+// one; it and the row appended to DUWS_hardpoints are the only state that leaves this server.
 fnc_hardpoint_register = {
-    params ["_key", "_type", "_pos", ["_men", []], ["_side", "opfor"], ["_garrison", []]];
+    params ["_key", "_type", "_pos", ["_men", []], ["_side", "opfor"], ["_garrison", []], ["_zoneKey", ""]];
     (DUWS_hardpointStreaming getOrDefault [_type, [600, 300, false, 0]])
         params ["_radius", "_grace", "_neverStream", "_airRing"];
     [_key, _pos, _radius, "stream"] call fnc_site_register;
     private _occ = [_key, "garrison", EAST, 0, _grace, true, false] call fnc_site_occupant_register;
     _occ set ["hpSide", _side];
     _occ set ["hpGarrison", _garrison];
-    ([_key] call fnc_site_roster) append _men;
-
-    if (_neverStream) exitWith {
-        { [_x, _key, true] call fnc_duws_keep } forEach
-            ((DUWS_compositions getOrDefault [_key, []]) select { !isNull _x });
-        _occ set ["driven", true];
-    };
-
+    _occ set ["hpType", _type];
     _occ set ["airRing", _airRing];
+    _occ set ["neverStream", _neverStream];
     _occ set ["awake", true];
     _occ set ["lastSeen", time];
+    ([_key] call fnc_site_roster) append _men;
+    // Peak = the garrison it stood up with; its presence marks the hardpoint deployed and worth
+    // judging for clearance.
+    missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], [_key] call fnc_site_alive];
+
+    if (_neverStream) then {
+        { [_x, _key, true] call fnc_duws_keep } forEach
+            ((DUWS_compositions getOrDefault [_key, []]) select { !isNull _x });
+    };
+
+    // Registry row for OPCOM and the map readout: [key, pos, type, side, zone, state].
+    DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey, "active"];
+    publicVariable "DUWS_hardpoints";
     [_key, "garrison", DUWS_hardpointHooks] call fnc_site_hooks_set;
 };
