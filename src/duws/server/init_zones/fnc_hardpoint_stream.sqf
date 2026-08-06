@@ -10,6 +10,14 @@ if (!isServer) exitWith {};
 // hands back through ZONE_RAISE_SLOT.
 #define HP_RAISE_SLOT(key) (format ["DUWS_hpRaise_%1", key])
 
+// zoneKey call DUWS_fnc_hardpointZoneAwake -> is that zone deployed. A zone-coupled hardpoint reads
+// this instead of its own ring, so a zone's whole defence rises and falls with the garrison rather
+// than each emplacement waking on its own radius. fnc_site_occupant hands back an empty map for a zone
+// not registered yet, whose "awake" defaults false -- so a hardpoint sited before its zone stays down.
+DUWS_fnc_hardpointZoneAwake = {
+    ([_this, "garrison"] call fnc_site_occupant) getOrDefault ["awake", false]
+};
+
 // Dispatched, not inline: the raise re-crews statics through DUWS_fnc_manStatics, which sleeps in the
 // drop-and-settle, and the poller holds every other site's clock.
 DUWS_fnc_hardpointRaiseWorker = {
@@ -19,11 +27,17 @@ DUWS_fnc_hardpointRaiseWorker = {
     sleep 5;
     private _site = [_key] call fnc_site_at;
     private _pos = _site get "pos";
-    private _ring = (_site get "radius") + (_o get "buffer");
-    private _players = (call BIS_fnc_listPlayers) select { alive _x };
-    // The same presence test the poller used to trigger this, air ring included -- an AA woken by a
-    // jet overhead would fail a ground-only recheck and never actually raise.
-    if !([_players, _pos, _ring, _o getOrDefault ["airRing", 0]] call fnc_site_nearOrAir) exitWith {
+    // The same trigger that started the raise, re-confirmed after the pause. A zone-coupled hardpoint
+    // follows its zone; a standalone one re-tests presence on its ring, air ring included, so an AA
+    // woken by a jet overhead is not dropped by a ground-only recheck.
+    private _zk = _o getOrDefault ["hpZoneKey", ""];
+    private _stillUp = if (_zk isEqualTo "") then {
+        private _players = (call BIS_fnc_listPlayers) select { alive _x };
+        [_players, _pos, (_site get "radius") + (_o get "buffer"), _o getOrDefault ["airRing", 0]] call fnc_site_nearOrAir
+    } else {
+        _zk call DUWS_fnc_hardpointZoneAwake
+    };
+    if (!_stillUp) exitWith {
         missionNamespace setVariable [HP_RAISE_SLOT(_key), false];
     };
 
@@ -127,13 +141,22 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
         _o set ["awake", _res];
     };
 
+    // Zone-coupled hardpoints mirror their parent zone -- up when its garrison is, so a zone's whole
+    // defence rises and falls together instead of each emplacement waking on its own ring. Standalone
+    // ones wake on presence and stow after their grace, as before.
+    private _zk = _o getOrDefault ["hpZoneKey", ""];
+    private _up = if (_zk isEqualTo "") then {
+        _here || {(_now - (_o getOrDefault ["lastSeen", _now])) < (_o get "grace")}
+    } else {
+        _zk call DUWS_fnc_hardpointZoneAwake
+    };
     if (_o get "awake") then {
-        if (_now - (_o getOrDefault ["lastSeen", _now]) >= (_o get "grace")) then {
+        if (!_up) then {
             _o set ["awake", false];
             [_key] call DUWS_fnc_hardpointStow;
         };
     } else {
-        if (_here) then {
+        if (_up) then {
             _o set ["raising", true];
             missionNamespace setVariable [HP_RAISE_SLOT(_key), nil];
             [_key, _o] spawn DUWS_fnc_hardpointRaiseWorker;
@@ -149,18 +172,19 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
 // the same way and one table tunes them. hpSide and hpGarrison are the serialisable spec a later
 // raise rebuilds from.
 //
-// Player-presence, not the AI-aware zone gate: a hardpoint should stand up whenever a player is near
-// enough to fight it, whichever side it is. A streamed one starts awake because it is created
-// deployed and manned -- an occupant starting asleep over a standing composition would raise a second
-// garrison on the first tick.
+// A standalone hardpoint streams on player presence over its own ring; a zone one -- a _zoneKey names
+// its parent -- instead mirrors that zone's garrison, so a zone's whole defence rises and falls
+// together rather than each emplacement waking on its own radius. Either way it starts awake because it
+// is created deployed and manned -- an occupant asleep over a standing composition would raise a second
+// garrison on the first tick -- and the birth-stow below takes it down at once if nothing wants it up.
 //
 // neverStream (mortar, artillery) is kept resident so OPCOM can task it with no player near: its
 // composition is pinned against every stow and release, so only a clear takes the battery down. It
 // keeps the tick, unlike a zone's driven emplacement -- the tick's raise/stow arm short-circuits for
 // it, but its clearance check still runs, so a destroyed battery is noticed like any other.
 //
-// _zoneKey ties the hardpoint to a parent zone for OPCOM and the map readout, or "" for a standalone
-// one; it and the row appended to DUWS_hardpoints are the only state that leaves this server.
+// _zoneKey ties the hardpoint to a parent zone: it drives streaming (the hardpoint follows that zone)
+// and rides the DUWS_hardpoints row for OPCOM. "" is a standalone hardpoint on its own ring.
 fnc_hardpoint_register = {
     params ["_key", "_type", "_pos", ["_men", []], ["_side", "opfor"], ["_garrison", []], ["_zoneKey", ""]];
     (DUWS_hardpointStreaming getOrDefault [_type, [600, 300, false, 0]])
@@ -172,6 +196,7 @@ fnc_hardpoint_register = {
     _occ set ["hpType", _type];
     _occ set ["airRing", _airRing];
     _occ set ["neverStream", _neverStream];
+    _occ set ["hpZoneKey", _zoneKey];
     _occ set ["awake", true];
     _occ set ["lastSeen", time];
     ([_key] call fnc_site_roster) append _men;
@@ -195,8 +220,13 @@ fnc_hardpoint_register = {
     // a full grace period while the players are still at their HQ. Resident types are exempt: they
     // never stow. The dev tool spawns onto the player, so its hardpoints stay up.
     if (_neverStream) exitWith {};
-    private _players = (call BIS_fnc_listPlayers) select { alive _x };
-    if !([_players, _pos, _radius, _airRing] call fnc_site_nearOrAir) then {
+    private _up = if (_zoneKey isEqualTo "") then {
+        private _players = (call BIS_fnc_listPlayers) select { alive _x };
+        [_players, _pos, _radius, _airRing] call fnc_site_nearOrAir
+    } else {
+        _zoneKey call DUWS_fnc_hardpointZoneAwake
+    };
+    if (!_up) then {
         _occ set ["awake", false];
         [_key] call DUWS_fnc_hardpointStow;
     };
