@@ -320,19 +320,30 @@ fnc_unitParseRoles = compileFinal {
 	// Weapon Role is based off of the weapon the unit is currently holding, seems to be in the precedence of secondary then primary, CfgWeapons > primary/secondaryWeapon _unit > UiPicture.
 	fnc_IsMG = compileFinal {
 		params ["_type"];
-		getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_mg_ca.paa" ||
-		{getText(configFile >> "CfgWeapons" >> _type >> "cursor") == "mg"}
-		// getText(configFile >> "CfgWeapons" >> _type >> "namesound") isEqualTo "Mgun"
+		// Belt-fed first: a 100+ round default magazine is a machine gun whatever icon it ships. 100
+		// clears drum mags (~75) so a drum SMG does not read as an MG. Icon/cursor stay as a fallback.
+		private _mag = (getArray (configFile >> "CfgWeapons" >> _type >> "magazines")) param [0, ""];
+		(_mag != "" && {getNumber (configFile >> "CfgMagazines" >> _mag >> "count") >= 100})
+		|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_mg_ca.paa"}
+		|| {getText(configFile >> "CfgWeapons" >> _type >> "cursor") == "mg"}
 	};
 	
 	fnc_IsAT = compileFinal {
 		params ["_type"];
-		getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_at_ca.paa";
+		// A weapon in the launcher slot that is not an AA piece (the AA case runs before this in the
+		// switch) is AT: rocket/missile launchers inherit the Launcher base whatever their icon.
+		// A grenadier carries the GL as a primary muzzle, not a launcher, so this cannot steal them.
+		(_type != "" && {_type isKindOf ["Launcher", configFile >> "CfgWeapons"]})
+		|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_at_ca.paa"}
 	};
 	
 	fnc_IsAA = compileFinal {
 		params ["_type"];
-		getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_aa_ca.paa";
+		// The launcher's missile locks air (airLock >= 1): the config fact that separates an AA tube
+		// from an AT one, ahead of the icon. A non-launcher secondary has no such magazine and fails.
+		private _mag = (getArray (configFile >> "CfgWeapons" >> _type >> "magazines")) param [0, ""];
+		(_mag != "" && {getNumber (configFile >> "CfgAmmo" >> getText (configFile >> "CfgMagazines" >> _mag >> "ammo") >> "airLock") >= 1})
+		|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_aa_ca.paa"}
 	};
 	
 	fnc_IsSniper = compileFinal {
@@ -342,7 +353,13 @@ fnc_unitParseRoles = compileFinal {
 	
 	fnc_IsGrenadier = compileFinal {
 		params ["_type"];
-		getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_gl_ca.paa";
+		// An underbarrel GL is a second muzzle (not "this") that carries its own magazines. That muzzle,
+		// not the icon, is what a grenadier's rifle has and a plain rifle does not. Icon stays a fallback.
+		private _hasUGL = ((getArray (configFile >> "CfgWeapons" >> _type >> "muzzles")) findIf {
+			_x != "this" && {(getArray (configFile >> "CfgWeapons" >> _type >> _x >> "magazines")) isNotEqualTo []}
+		}) >= 0;
+		_hasUGL
+		|| {getText(configFile >> "CfgWeapons" >> _type >> "UIPicture") == "\a3\weapons_f\data\ui\icon_gl_ca.paa"}
 	};
 	
 	fnc_IsMedic = compileFinal {
