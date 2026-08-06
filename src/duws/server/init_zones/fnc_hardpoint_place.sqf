@@ -21,14 +21,16 @@ fnc_hardpoint_rotate = {
 //   _dir   heading in degrees the layout faces
 //   _side  "opfor" / "blufor"; which faction the guns resolve to
 //   _key   composition key the objects are filed under for teardown
+//   _variant  "AT" / "AP"; MINEFIELD only, ignored by every other type
 fnc_hardpoint_build = {
-    params ["_type", "_pos", ["_dir", 0], ["_side", "opfor"], ["_key", "world"]];
+    params ["_type", "_pos", ["_dir", 0], ["_side", "opfor"], ["_key", "world"], ["_variant", "AT"]];
     private _px = _pos select 0;
     private _py = _pos select 1;
 
-    // The minefield is generated, not composed -- it has no fence to place.
+    // The minefield is generated, not composed -- it has no fence to place. -1 dimensions let the
+    // generator size the field from the variant's own profile.
     if (_type isEqualTo "MINEFIELD") exitWith {
-        [[_px, _py], _dir, "AT", 6, 3, 4, 0.6, _key] call fnc_hardpoint_minefield
+        [[_px, _py], _dir, _variant, -1, -1, -1, -1, _key] call fnc_hardpoint_minefield
     };
 
     private _rows = missionNamespace getVariable ["DUWS_hardpointComp_" + _type, []];
@@ -142,8 +144,8 @@ fnc_hardpoint_garrison = {
 // tool, OPCOM -- fields the same defenders for a type without being told. Sleeps (the drop-and-settle
 // in DUWS_fnc_manStatics), so it must run scheduled.
 fnc_hardpoint_spawn = {
-    params ["_type", "_pos", ["_dir", 0], ["_side", "opfor"], ["_key", "world"]];
-    private _objs = [_type, _pos, _dir, _side, _key] call fnc_hardpoint_build;
+    params ["_type", "_pos", ["_dir", 0], ["_side", "opfor"], ["_key", "world"], ["_variant", "AT"]];
+    private _objs = [_type, _pos, _dir, _side, _key, _variant] call fnc_hardpoint_build;
     private _men = [_objs, _pos, _side, _key, DUWS_hardpointGarrison getOrDefault [_type, ""]] call fnc_hardpoint_garrison;
     [_objs, _men]
 };

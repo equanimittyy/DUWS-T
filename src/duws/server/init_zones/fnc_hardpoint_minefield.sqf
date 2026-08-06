@@ -20,17 +20,37 @@ DUWS_mineVariants = [
     ["AP", ["APERSMine", "APERSBoundingMine"]]
 ];
 
+// Field shape per variant: [cols, rows, spacing_m, jitter_m], the default any dimension left at -1
+// falls back to. AT is the wide vehicle-route belt, about twice the old 6x3 field. AP holds AT's
+// grid at ~1/sqrt(2) the spacing -- twice the mines over the same ground -- and scatters harder,
+// the way an anti-personnel field reads against an anti-tank one.
+DUWS_mineFieldShape = [
+    ["AT", [8, 5, 3.5, 0.8]],
+    ["AP", [8, 5, 2.5, 1.2]]
+];
+
 // [_center, _dir, _variant, _cols, _rows, _spacing, _jitter, _key] call fnc_hardpoint_minefield -> [mines]
 //   _center  [x,y]           field centre in world coordinates
 //   _dir     degrees         facing; +Y of the lattice points down it, clockwise like setDir
 //   _variant "AT" | "AP"     resolved through DUWS_mineVariants; an unknown token falls to AT
+//   _cols _rows _spacing _jitter   -1 on any takes the variant's default from DUWS_mineFieldShape
 //   _key     site key        files each mine under the key for teardown and the clearance count;
 //                            "" leaves them unmanaged
 fnc_hardpoint_minefield = {
-    params ["_center", "_dir", ["_variant", "AT"], ["_cols", 6], ["_rows", 3], ["_spacing", 4], ["_jitter", 0.6], ["_key", ""]];
+    params ["_center", "_dir", ["_variant", "AT"], ["_cols", -1], ["_rows", -1], ["_spacing", -1], ["_jitter", -1], ["_key", ""]];
 
     private _hit = DUWS_mineVariants findIf { (_x select 0) isEqualTo (toUpper _variant) };
     private _classes = if (_hit >= 0) then { (DUWS_mineVariants select _hit) select 1 } else { ["ATMine"] };
+
+    // Any dimension left at -1 takes the variant's default, so a caller can pass just the variant
+    // and get the right-sized field.
+    private _sIdx = DUWS_mineFieldShape findIf { (_x select 0) isEqualTo (toUpper _variant) };
+    (if (_sIdx >= 0) then { (DUWS_mineFieldShape select _sIdx) select 1 } else { [8, 5, 3.5, 0.8] })
+        params ["_dCols", "_dRows", "_dSpacing", "_dJitter"];
+    if (_cols    < 0) then { _cols = _dCols };
+    if (_rows    < 0) then { _rows = _dRows };
+    if (_spacing < 0) then { _spacing = _dSpacing };
+    if (_jitter  < 0) then { _jitter = _dJitter };
 
     private _cx = _center select 0;
     private _cy = _center select 1;

@@ -11,33 +11,47 @@ if (!hasInterface) exitWith {};
 if (!((vehiclevarname player) in game_master)) exitWith {};
 
 private _side = _this;
-private _types = ["OP", "ROADBLOCK", "MG", "GMG", "AT", "AA", "MORTAR", "ARTY", "MINEFIELD"];
+// [menu label, hardpoint type, minefield variant]. The variant is read only by the MINEFIELD build;
+// every other type ignores it. Two minefield rows so both mine patterns are placeable.
+private _specs = [
+    ["OP", "OP", "AT"],
+    ["ROADBLOCK", "ROADBLOCK", "AT"],
+    ["MG", "MG", "AT"],
+    ["GMG", "GMG", "AT"],
+    ["AT", "AT", "AT"],
+    ["AA", "AA", "AT"],
+    ["MORTAR", "MORTAR", "AT"],
+    ["ARTY", "ARTY", "AT"],
+    ["MINEFIELD (AT)", "MINEFIELD", "AT"],
+    ["MINEFIELD (AP)", "MINEFIELD", "AP"]
+];
 
 private _rows = [];
 {
-    _rows pushBack [_x, {
-        params ["_type", "_side"];
+    _x params ["_label", "_type", "_variant"];
+    _rows pushBack [_label, {
+        params ["_type", "_side", "_variant", "_label"];
         // Click-to-place on the open map. Spawned so it can hold the map open and wait on the click in
         // a scheduled environment; the position is captured client-side, then handed to the server.
-        [_type, _side] spawn {
-            params ["_type", "_side"];
+        [_type, _side, _variant, _label] spawn {
+            params ["_type", "_side", "_variant", "_label"];
             DUWS_dbgHPclicked = false;
             openMap [true, false];
             waitUntil { !isNull (findDisplay 12) };
             // Banner, not hint: the engine draws the hint box beneath the open map, so a hint would be
             // invisible for the whole click phase. Same treatment HQ placement gets.
-            [format ["<t size='2' color='#00ffff'>Click the map to place a %1 %2 hardpoint. </t><br/>Dev tool: composition, defenders and a gunner on every static gun, resolved to the %2 faction. Close the map to cancel.", _type, _side]] call fnc_map_prompt;
+            [format ["<t size='2' color='#00ffff'>Click the map to place a %1 %2 hardpoint. </t><br/>Dev tool: composition, defenders and a gunner on every static gun, resolved to the %2 faction. Close the map to cancel.", _label, _side]] call fnc_map_prompt;
             onMapSingleClick "DUWS_dbgHPpos = _pos; DUWS_dbgHPclicked = true; onMapSingleClick ''; true";
             waitUntil { DUWS_dbgHPclicked || !visibleMap };
             onMapSingleClick "";
             [""] call fnc_map_prompt;
             if (!DUWS_dbgHPclicked) exitWith {};
             openMap [false, false];
-            [_type, _side, [DUWS_dbgHPpos select 0, DUWS_dbgHPpos select 1], 0] remoteExec ["fnc_debug_spawn_hardpoint", 2];
-            hint format ["Spawning a %1 %2 hardpoint at the marked spot.\n\nDev tool: the composition, its defenders and a gunner\non every static gun, all resolved to the %2 faction.", _type, _side];
+            [_type, _side, [DUWS_dbgHPpos select 0, DUWS_dbgHPpos select 1], 0, _variant] remoteExec ["fnc_debug_spawn_hardpoint", 2];
+            hint format ["Spawning a %1 %2 hardpoint at the marked spot.\n\nDev tool: the composition, its defenders and a gunner\non every static gun, all resolved to the %2 faction.", _label, _side];
         };
-    }, [_x, _side], [1,0.667,0,1]];
-} forEach _types;
+    }, [_type, _side, _variant, _label], [1,0.667,0,1]];
+} forEach _specs;
 
 _rows pushBack ["Clear dev hardpoints", {
     [] remoteExec ["fnc_debug_clear_hardpoints", 2];
