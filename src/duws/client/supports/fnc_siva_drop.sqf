@@ -25,7 +25,7 @@ _vec =[random [-1,0,1], random [-1,0,1], 0];
 _dist = 1200;
 _spawnPos = ((vectorNormalized _vec) vectorMultiply _dist) vectorAdd _spawnPos;
 _grouptype = "";
-// 使用任务命名空间变量替代全局 onStation
+// mission-namespace variable instead of a global onStation
 missionNamespace setVariable ["SIVA_onStation", false];
 
 
@@ -43,7 +43,6 @@ _vehicle engineOn true;
 _wp1 = _group addWaypoint [_location, -1];
 _wp1 setWaypointType "MOVE";
 _wp1 setWaypointBehaviour "CARELESS";
-// 航点到达时设置任务变量为 true
 _wp1 setWaypointStatements ["true", "missionNamespace setVariable ['SIVA_onStation', true]"]; 
 _wp2 = _group addWaypoint [[0,0], 100];
 _wp2 setWaypointType "MOVE";
@@ -54,18 +53,17 @@ sleep 18;
 [_speaker1, _message1] remoteExec ["fnc_duws_dialogue", 0];
 hint localize "STR_DUWS_T_9tpm5uf6";
 
-// 第一次检查：飞机是否在等待期间被击毁
+// first check: plane destroyed while waiting?
 if (!alive _vehicle) exitWith {
     hint localize "STR_DUWS_T_7h0bmzi7";
     missionNamespace setVariable ["SIVA_onStation", nil];
-    // 清理飞机及组
     { deleteVehicle _x } forEach units _group;
     deleteVehicle _vehicle;
 };
 
 waitUntil {sleep 0.5; missionNamespace getVariable "SIVA_onStation" || !alive _vehicle};
 
-// 第二次检查：飞机是否在到达前被击毁
+// second check: plane destroyed before arrival?
 if (!alive _vehicle) exitWith {
     hint localize "STR_DUWS_T_7h0bmzi7";
     missionNamespace setVariable ["SIVA_onStation", nil];
@@ -103,5 +101,4 @@ sleep 60;
 
 deleteVehicle _vehicle;
 
-// 清理任务变量
 missionNamespace setVariable ["SIVA_onStation", nil];

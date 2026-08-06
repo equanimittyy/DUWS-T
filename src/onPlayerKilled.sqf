@@ -7,6 +7,6 @@ private _searchId = player getVariable ["DUWS_intel_search_actionId", -1];
 if (_searchId >= 0) then { [player, _searchId] call BIS_fnc_holdActionRemove };
 
 player setVariable["Saved_Loadout", getUnitLoadout player];
-player setVariable["Saved_Face", face player];      // 保存面部
-player setVariable["Saved_Speaker", speaker player]; // 保存声音
+player setVariable["Saved_Face", face player];
+player setVariable["Saved_Speaker", speaker player];
 player setVariable["Saved_Goggles", goggles player];

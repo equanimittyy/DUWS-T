@@ -35,9 +35,9 @@
   [2101, index_min_radius_350] call _setDefault;
 
 // AMOUNT ENEMY ZONES
-index_amount_zones_40 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q4"];   // 40个战区
-index_amount_zones_30 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q3"];   // 30个战区
-index_amount_zones_20 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q2"];   // 20个战区
+index_amount_zones_40 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q4"];
+index_amount_zones_30 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q3"];
+index_amount_zones_20 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q2"];
 index_amount_zones_15 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q"];
 index_amount_zones_10 = lbAdd [2102, localize "STR_DUWS_T_8gqzfdui"];
 index_amount_zones_9 = lbAdd [2102, "9"];

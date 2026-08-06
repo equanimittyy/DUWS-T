@@ -25,10 +25,9 @@ player addRating 10000000;
 		sleep 10;
 	};
 };
-// 客户端登机函数（建议放在 client_init.sqf 中）
 fnc_remoteBoard = {
     params ["_heliNetId", "_seatType", "_player"];
-    if (_player != player) exitWith {}; // 确保是自己
+    if (_player != player) exitWith {};
     private _heli = objectFromNetId _heliNetId;
     if (isNull _heli) exitWith { ["ERROR", "INTRO", "Remote board: helicopter not found."] call fnc_log; };
     switch (_seatType) do {
@@ -149,14 +148,14 @@ if (isMultiplayer) then {
 
 };
 
-// CP Death Penalty EventHandler (killhouse 内免罚)
+// CP death-penalty EventHandler (no penalty inside the killhouse).
 player addEventHandler ["killed", {
     private _inKillhouse = false;
     private _khX = missionNamespace getVariable ["killhouse_centerX", nil];
     private _khY = missionNamespace getVariable ["killhouse_centerY", nil];
     private _khZ = missionNamespace getVariable ["killhouse_centerZ", nil];
     if (!isNil "_khX" && !isNil "_khY" && !isNil "_khZ") then {
-        private _deathPos = getPosWorld (_this select 0); // 死亡单位位置
+        private _deathPos = getPosWorld (_this select 0);
         if (_deathPos distance [_khX, _khY, _khZ] < 300) then {
             _inKillhouse = true;
         };
@@ -241,12 +240,12 @@ if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1 && {(vehiclevarname play
 
 hint localize "STR_DUWS_T_zu4bxt24";
 
-// ========== 换装：从基地守卫中随机复制战斗单位装备（白名单版）==========
+// Loadout swap: copy a random base-guard combat unit's gear (whitelisted).
 [] spawn {
     waitUntil { sleep 0.5; !isNil "PosOfBLUHQ" && {count PosOfBLUHQ > 0} };
-    sleep 8;  // 等待基地守卫、巡逻队生成完毕
+    sleep 8;  // wait for base guards and patrols to finish spawning
 
-    // 读取基地守卫兵种池（由 fnc_BluHQinit 设置并广播）
+    // base-guard unit pool, set and broadcast by fnc_BluHQinit
     private _guardTypes = missionNamespace getVariable ["HQ_redeploy_guardTypes", [
         blufor_SOLDIER_X, blufor_LAT_SOLDIER_X, blufor_GL_SOLDIER_X,
         blufor_TL_SOLDIER_X, blufor_SL_SOLDIER_X, blufor_AR_SOLDIER_X,
@@ -257,7 +256,6 @@ hint localize "STR_DUWS_T_zu4bxt24";
         side _x == WEST && alive _x && !isPlayer _x
     };
 
-    // 只保留兵种池内的战斗单位
     private _combatUnits = _nearbyUnits select { typeOf _x in _guardTypes };
 
     if (count _combatUnits > 0) then {
@@ -299,19 +297,17 @@ titleCut ["", "BLACK FADED", 999];
 uiSleep 0.3;
 forceMap false;
 openMap [false, false];
-// ========== 丧尸模式强制客户端薄雾 ==========
+// Zombie mode: force client-side fog.
 if (CIV_PRESENCE == "RAVAGE") then {
-    // 等待玩家完全就绪
     waitUntil {!isNull player};
-    // 设置薄雾：强度0.5，衰减0.1，基准高度10
+    // fog: intensity 0.5, decay 0.1, base height 10
     0 setFog [0.5, 0.1, 10];
     0 setOvercast 0.8;
     forceWeatherChange;
     ["INFO", "BOOT", "RAVAGE mode: Client-side fog forced."] call fnc_log;
 };if (CIV_PRESENCE == "WBK") then {
-    // 等待玩家完全就绪
     waitUntil {!isNull player};
-    // 设置薄雾：强度0.5，衰减0.1，基准高度10
+    // fog: intensity 0.5, decay 0.1, base height 10
     0 setFog [0.5, 0.1, 10];
     0 setOvercast 0.8;
     forceWeatherChange;
@@ -324,9 +320,9 @@ if (CIV_PRESENCE == "RAVAGE") then {
 ["BOOT", "apocalypse_mode broadcast", {!isNil "apocalypse_mode"}, 300] call fnc_waitLogged;
 if (isNil "apocalypse_mode") then { apocalypse_mode = false };
 
-// 定义应用滤镜的函数（以便重生后调用）
+// filter-apply function, kept callable so respawn can reapply it
 DUWS_fnc_applyApocalypseFilter = {
-    // 清除可能存在的旧效果（使用唯一ID）
+    // clear any prior effect first, keyed by a unique ID
     private _idCC = 15001;
     private _idGrain = 15002;
     private _idBlur = 15003;
@@ -335,20 +331,20 @@ DUWS_fnc_applyApocalypseFilter = {
     ppEffectDestroy _idGrain;
     ppEffectDestroy _idBlur;
     
-    // 1. 色彩校正（强末日色调）
+    // colour correction: strong end-of-world tint
     private _cc = ppEffectCreate ["ColorCorrections", _idCC];
     _cc ppEffectEnable true;
     _cc ppEffectAdjust [
-        0.7,        // 亮度降低
-        1.2,        // 高对比度
-        0.0,        // 偏移
-        [0,0,0,0],  // 起始混合
-        [1.0,0.5,0.2,0.9], // 强橙红色调（A=0.9表示强度很高）
-        [0.9,0.9,0.9,0.0]  // 高度去饱和度（几乎黑白，但保留一点色调）
+        0.7,        // brightness down
+        1.2,        // high contrast
+        0.0,        // offset
+        [0,0,0,0],  // start blend
+        [1.0,0.5,0.2,0.9], // strong orange-red tint (A=0.9 = high intensity)
+        [0.9,0.9,0.9,0.0]  // heavily desaturated (near monochrome, slight tint kept)
     ];
     _cc ppEffectCommit 0;
 
-    // 2. 轻微模糊边缘模拟暗角（或使用ChromAberration？但此处用动态模糊简单替代）
+    // slight edge blur to fake a vignette; dynamic blur instead of chromatic aberration
     private _blur = ppEffectCreate ["DynamicBlur", _idBlur];
     _blur ppEffectEnable true;
     _blur ppEffectAdjust [0.02];
@@ -357,17 +353,15 @@ DUWS_fnc_applyApocalypseFilter = {
     ["INFO", "SUPPORT", "Aggressive filters applied."] call fnc_log;
 };
 
-// 如果开启末日模式，立即应用滤镜
 if (apocalypse_mode) then {
     call DUWS_fnc_applyApocalypseFilter;
 };
 
-// 监听公共变量变化（以便 JIP 或中途开启时应用）
+// watch the public variable so it applies on JIP or a mid-game toggle
 "apocalypse_mode" addPublicVariableEventHandler {
     if (_this select 1) then {
         call DUWS_fnc_applyApocalypseFilter;
     } else {
-        // 如果关闭，可清除滤镜（可选）
         ppEffectDestroy 15001;
         ppEffectDestroy 15002;
         ppEffectDestroy 15003;
@@ -402,11 +396,10 @@ if (!(player getVariable ["intro_completed", false]) && {!isNil "PosOfBLUHQ" && 
     ["INFO", "BOOT", format ["Teleported %1 to base.", name player]] call fnc_log;
 };
 
-// 空降完成后，播放音乐和欢迎信息
 playMusic ["EventTrack01a_F_EPA", 0];
 hintsilent format[localize "STR_DUWS_T_ix8g2neb",worldName,profileName];
 
-// 确保天气渲染正常（强制更新）
+// force a weather update so it renders correctly
 forceWeatherChange;
 
 player setVariable["Saved_Loadout", getUnitLoadout player];
@@ -451,7 +444,7 @@ if (isNil {player getVariable "DUWS_disguiseMenu_actionAdded"}) then {
     ] call BIS_fnc_holdActionAdd;
     player setVariable ["DUWS_disguiseMenu_actionAdded", true];
 };
-// 伪装专用：本地设置俘虏状态
+// disguise feature: set captive state locally
 fnc_disguise_setCaptiveLocal = {
     params ["_state"];
     player setCaptive _state;

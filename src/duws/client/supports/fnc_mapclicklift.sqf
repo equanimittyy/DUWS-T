@@ -11,28 +11,25 @@ params ["_target", "_caller", "_actionId", "_arguments"];
 private _liftClickHandler = "player setVariable ['LIFT_TMPPOS', _pos]; player setVariable ['LIFT_CLICKED', true];";
 if (!(["LIFT", _liftClickHandler] call fnc_mapclick_claim)) exitWith {};
 
-// ========== 私有化所有临时变量 ==========
-private _timer = 3000;                     // 超时计数器（5分钟 = 3000 * 0.1秒）
-private _waypoints = [];                   // 存储点击位置
-private _markers = [];                      // 存储已创建的临时标记
-private _clickPos = [];                      // 本次点击位置
-private _safePos = [];                        // 安全位置检查结果
-private _markerName = "";                     // 标记名称
-private _marker = "";                          // 标记对象
+private _timer = 3000;                     // timeout counter (5 min = 3000 * 0.1s)
+private _waypoints = [];
+private _markers = [];
+private _clickPos = [];
+private _safePos = [];
+private _markerName = "";
+private _marker = "";
 
-// 初始化该玩家的变量（如果尚未存在）
 if (isNil {player getVariable "LiftTakeOff"}) then {player setVariable ["LiftTakeOff", false]};
 if (isNil {player getVariable "LiftWaypoints"}) then {player setVariable ["LiftWaypoints", []]};
 if (isNil {player getVariable "LiftWaypointMarkers"}) then {player setVariable ["LiftWaypointMarkers", []]};
 
-// 打开地图
 openMap true;
 // Drawn on the map rather than hinted: the map is force-open for this whole routine, and
 // the hint box renders beneath it.
 [localize "STR_DUWS_T_liftwp_brief"] call fnc_map_prompt;
 
 while {_timer > 0 && count _waypoints < 3} do {
-    // 确保地图始终打开（如果玩家关闭，立即重新打开）
+    // keep the map open: reopen immediately if the player closes it
     if (!visibleMap) then {
         openMap true;
     };
@@ -41,7 +38,7 @@ while {_timer > 0 && count _waypoints < 3} do {
     // same handler.
     ["LIFT", _liftClickHandler] call fnc_mapclick_claim;
 
-    // 等待点击，期间若地图被关闭则立即重新打开
+    // wait for a click, reopening the map if it gets closed
     waitUntil {
         sleep 0.1;
         if (!visibleMap) then {
@@ -50,17 +47,14 @@ while {_timer > 0 && count _waypoints < 3} do {
         player getVariable ["LIFT_CLICKED", false]
     };
 
-    // 玩家已点击地图
     _clickPos = player getVariable ["LIFT_TMPPOS", []];
     player setVariable ["LIFT_TMPPOS", nil];
     player setVariable ["LIFT_CLICKED", false];
 
-    // 检查点击位置是否有效（平坦且可到达）
+    // check the click is on flat, reachable ground
     _safePos = [_clickPos, 0, 50, 5, 0, 0.2, 0, [], [_clickPos, _clickPos]] call BIS_fnc_findSafePos;
     if (_safePos isEqualTo [0,0]) then {
-        // 无效位置，忽略并继续
     } else {
-        // 有效位置，添加到航点列表
         _waypoints pushBack _safePos;
 
         // Same marker convention as the helo taxi: yellow objective icons for the route
@@ -91,23 +85,19 @@ while {_timer > 0 && count _waypoints < 3} do {
     sleep 1.0;
 };
 
-// 将选择的航点保存到玩家变量
 player setVariable ["LiftWaypoints", _waypoints];
 
-// 根据最终状态决定标记的清理
 if (count _waypoints == 3) then {
-    // 三个点已选完，将标记数组保存到玩家变量，由主脚本在释放后清理
+    // all three chosen: hand the marker array to the main script to clear after release
     player setVariable ["LiftWaypointMarkers", _markers];
 } else {
-    // 未完成选择（超时），立即删除标记
+    // incomplete (timed out): delete the markers now
     { deleteMarker _x } forEach _markers;
     player setVariable ["LiftWaypointMarkers", []];
 };
 
-// 标记完成，让主脚本继续
 player setVariable ["LiftTakeOff", true];
 
-// 关闭地图
 openMap false;
 
 // Verdict after the map is out of the way, not before: titleText is drawn on a layer the map
@@ -118,7 +108,6 @@ if (count _waypoints == 3) then {
     titleText [format ["<t color='#ff0000' size='2'>%1</t>", localize "STR_DUWS_T_liftwp_abort"], "PLAIN DOWN", -1, true, true];
 };
 
-// 清理回调及玩家变量
 ["LIFT"] call fnc_mapclick_release;
 player setVariable ["LIFT_CLICKED", nil];
 player setVariable ["LIFT_TMPPOS", nil];

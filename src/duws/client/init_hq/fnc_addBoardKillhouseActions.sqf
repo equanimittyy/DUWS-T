@@ -5,11 +5,11 @@ if (!hasInterface) exitWith {};
 params ["_board"];
 if (isNull _board) exitWith {};
 
-// 防重
+// dedup
 if (_board getVariable ["board_killhouse_actions_done", false]) exitWith {};
 _board setVariable ["board_killhouse_actions_done", true];
 
-// 传送点 A/B 常驻显示，不再折叠进"开始训练"抽屉
+// teleport points A/B are shown permanently, not folded into a submenu
 _board addAction [
     ACT_MOVE("STR_DUWS_KILLHOUSE_TELEPORT_A"),
     {

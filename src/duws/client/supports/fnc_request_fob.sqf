@@ -13,7 +13,7 @@ if (commandpointsblu1 < _cost) exitWith {
 
 // Make sure not too many FOBs
 _tooMany = false;
-private _maxFOB = floor(amount_zones_created * 0.7); // 70% 向下取整
+private _maxFOB = floor(amount_zones_created * 0.7); // 70%, rounded down
 if (count Array_of_FOBS >= _maxFOB) then {
     ["info",[localize "STR_DUWS_T_m7h89a4s",format[localize "STR_DUWS_T_6vjxo4eb",_maxFOB]]] call bis_fnc_showNotification;
     sleep 15;

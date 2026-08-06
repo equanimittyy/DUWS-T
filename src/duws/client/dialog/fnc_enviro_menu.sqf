@@ -39,7 +39,7 @@ time_of_day_midnite = lbAdd [2101, localize "STR_DUWS_T_wmhmoeqt"];
 [2101, time_of_day_dawn] call _setDefault;
 
 // CIVILIAN DENSITY
-// 选项值：5, 10, 15, 20，默认 15
+// option values: 5, 10, 15, 20 (default 15)
 private _civDensityValues = [5, 10, 15, 20];
 {
     private _index = lbAdd [2102, format ["%1", _x]];
@@ -62,7 +62,7 @@ index_apocalypse_true = lbAdd [2105, localize "STR_DUWS_T_vk37aebo"];
 index_apocalypse_false = lbAdd [2105, localize "STR_DUWS_T_x4zs3lsg0"];
 [2105, index_apocalypse_false] call _setDefault;
 
-// ========== 战争升级（替换焦土模式） ==========
+// War escalation (replaces the old scorched-earth mode).
 lbAdd [2106, localize "STR_DUWS_T_x4zs3lsg0"];
 index_escalation_true = lbAdd [2106, localize "STR_DUWS_T_vk37aebo"];
 [2106, index_escalation_true] call _setDefault;
@@ -148,11 +148,10 @@ index_hardcore_false = lbAdd [2110, localize "STR_DUWS_T_x4zs3lsg0"];
 index_hardcore_true = lbAdd [2110, localize "STR_DUWS_T_vk37aebo"];
 [2110, index_hardcore_false] call _setDefault;
 
-// 原来的限制军火库代码替换为叛军模式
+// insurgent mode
 index_insurgent_off = lbAdd [2111, localize "STR_DUWS_T_insoff"];
 index_insurgent_on = lbAdd [2111, localize "STR_DUWS_T_inson"];
 [2111, index_insurgent_off] call _setDefault;
-// 将两个选项的文字颜色设为红色
 lbSetColor [2111, index_insurgent_off, [1,0,0,1]];
 lbSetColor [2111, index_insurgent_on, [1,0,0,1]];
 

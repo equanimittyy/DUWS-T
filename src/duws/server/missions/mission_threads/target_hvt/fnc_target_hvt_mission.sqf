@@ -141,6 +141,6 @@ sleep 1;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 
-// Clean up the other mission props (the APC is not among them).
-
+// Mission over: releases the mission_target_hvt composition, so the APC and statics kept alive
+// above are collected here too, along with the claimed groups.
 [_targetpos,_radius, "mission_target_hvt"] call fnc_mission_end;

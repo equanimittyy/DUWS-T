@@ -27,7 +27,7 @@ if (_revive == 2) then {
 	player setVariable ["AIS_noReviveInit", true];
 };
 
-// ========== 辅助函数：递归提取负载中所有物品类名 ==========
+// helper: recursively pull every item classname from a loadout
 DUWS_fnc_extractLoadoutItems = {
     params ["_data", "_resultArray"];
     if (typeName _data == "STRING") then {
@@ -39,7 +39,7 @@ DUWS_fnc_extractLoadoutItems = {
     };
 };
 
-// ========== 辅助函数：计算两次负载之间变化的物品种类数 ==========
+// helper: count item types that changed between two loadouts
 DUWS_fnc_countLoadoutChanges = {
     params ["_loadout1", "_loadout2"];
     
@@ -54,13 +54,13 @@ DUWS_fnc_countLoadoutChanges = {
     count (_added + _removed)
 };
 
-// ========== 强制移除物品列表（钱币/情报） ==========
+// items force-removed from a loadout: money and intel
 DUWS_forcedRemoveItems = [
     "Money_roll", "Files", "Wallet_ID", "SmartPhone", "MobilePhone", 
     "FlashDisk", "FileTopSecret", "FilesSecret"
 ];
 
-// ========== 检测是否携带钱币/情报（仅检测，不删除） ==========
+// detect money/intel in a loadout; detection only, no removal
 DUWS_fnc_check_money_intel = {
     private _loadout = getUnitLoadout player;
     private _loadoutItems = [];
@@ -76,7 +76,7 @@ DUWS_fnc_check_money_intel = {
     count _foundItems
 };
 
-// ========== 独立函数：仅删除钱币和情报物品 ==========
+// standalone: remove only money and intel items
 DUWS_fnc_remove_money_intel = {
     private _loadout = getUnitLoadout player;
     private _loadoutItems = [];
@@ -136,7 +136,7 @@ DUWS_fnc_remove_money_intel = {
     };
 };
 
-// ========== 定义受限军火库处理函数（完整白名单 + 强制移除钱币/情报） ==========
+// restricted-arsenal handler: whitelist filter plus forced money/intel removal
 DUWS_fnc_arsenal_restricted = {
     private _whitelist = flatten (missionNamespace getVariable ["bis_addVirtualWeaponCargo_cargo", []]);
     _whitelist = _whitelist arrayIntersect _whitelist;
@@ -148,7 +148,7 @@ DUWS_fnc_arsenal_restricted = {
     
     private _removedItems = [];
     
-    // 从玩家负载中解析副武器信息
+    // pull secondary-weapon info from the loadout
     private _handgunSlot = _loadout select 2;
     private _handgunWeapon = "";
     private _handgunItems = [];
@@ -165,7 +165,7 @@ DUWS_fnc_arsenal_restricted = {
         _handgunBase = if (_handgunWeapon != "") then { [_handgunWeapon] call BIS_fnc_baseWeapon } else { "" };
     };
     
-    // 先处理强制移除的物品
+    // force-removed items first
     {
         private _className = _x;
         if (_className in DUWS_forcedRemoveItems) then {
@@ -206,7 +206,7 @@ DUWS_fnc_arsenal_restricted = {
         };
     } forEach _loadoutItems;
     
-    // 再处理白名单过滤
+    // then the whitelist filter
     {
         private _className = _x;
         if (_className in DUWS_forcedRemoveItems) then { continue };
@@ -255,12 +255,11 @@ DUWS_fnc_arsenal_restricted = {
     };
 };
 
-// ========== 定义完整军火库处理函数（不执行任何操作） ==========
+// full-arsenal handler: no-op
 DUWS_fnc_arsenal_full = {
-    // 完整军火库模式下不做任何额外处理
 };
 
-// 默认使用完整模式
+// default to full mode
 DUWS_fnc_arsenal_current = DUWS_fnc_arsenal_full;
 
 [ missionNamespace, "arsenalOpened", {
@@ -269,11 +268,10 @@ DUWS_fnc_arsenal_current = DUWS_fnc_arsenal_full;
         waitUntil { sleep 0.1; !isNull (uiNamespace getVariable ["RscDisplayArsenal", displayNull]) };
         systemChat localize "STR_DUWS_ARSENAL_INIT";
         
-// 进入军火库时检测钱币/情报，仅提醒不删除
+// on arsenal open: warn about money/intel, do not remove it
 private _moneyIntelCount = [] call DUWS_fnc_check_money_intel;
 if (_moneyIntelCount > 0) then {
     systemChat format [localize "STR_DUWS_ARSENAL_MONEY_WARNING", _moneyIntelCount];
-    // 新增：使用 BIS_fnc_showNotification 弹出醒目提醒
     private _title = localize "STR_DUWS_ARSENAL_MONEY_WARNING_TITLE";
     private _desc = format [localize "STR_DUWS_ARSENAL_MONEY_WARNING_DESC", _moneyIntelCount];
     ["alert", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", player];
@@ -296,13 +294,13 @@ if (_moneyIntelCount > 0) then {
                     systemChat format [localize "STR_DUWS_ARSENAL_LARGE_CHANGE_DETECTED", _changeCount];
                 };
                 
-                // 无论小幅还是大幅换装，均删除钱币/情报
+                // remove money/intel on any loadout change, small or large
                 [] call DUWS_fnc_remove_money_intel;
                 
-                // 受限模式下大幅换装额外执行白名单过滤
+                // restricted mode also runs the whitelist filter on a large change
                 if (_isRestricted && _isLargeChange) then {
-                    // 注意：DUWS_fnc_arsenal_restricted 内部已包含删除钱币/情报，但我们已调用过 DUWS_fnc_remove_money_intel
-                    // 为避免重复删除，可仅调用白名单过滤部分，但为了代码简洁，直接调用完整函数亦可（重复删除无影响）
+                    // DUWS_fnc_arsenal_restricted also strips money/intel, already done above by DUWS_fnc_remove_money_intel
+                    // calling the full function double-removes, which is harmless; kept for simplicity
                     [] call DUWS_fnc_arsenal_restricted;
                 };
                 
@@ -310,7 +308,7 @@ if (_moneyIntelCount > 0) then {
             };
         };
         
-        // 退出军火库时不执行任何删除
+        // on arsenal close: no removal
         systemChat localize "STR_DUWS_ARSENAL_EXIT";
         player setVariable ["DUWS_isRestrictedArsenal", nil];
     };

@@ -25,7 +25,7 @@ _vec =[random [-1,0,1], random [-1,0,1], 0];
 _dist = 1200;
 _spawnPos = ((vectorNormalized _vec) vectorMultiply _dist) vectorAdd _spawnPos;
 _grouptype = "";
-// 使用任务命名空间变量替代全局 onStation
+// mission-namespace variable instead of a global onStation
 missionNamespace setVariable ["SAWP_onStation", false];
 
 switch (VERSION_X) do {
@@ -46,7 +46,6 @@ _vehicle engineOn true;
 _wp1 = _group addWaypoint [_location, -1];
 _wp1 setWaypointType "MOVE";
 _wp1 setWaypointBehaviour "CARELESS";
-// 航点到达时设置任务变量为 true
 _wp1 setWaypointStatements ["true", "missionNamespace setVariable ['SAWP_onStation', true]"]; 
 _wp2 = _group addWaypoint [[0,0], 100];
 _wp2 setWaypointType "MOVE";
@@ -57,19 +56,17 @@ hint localize "STR_DUWS_T_sawpibnd";
 sleep 18;
 hint localize "STR_DUWS_T_sawposdt";
 
-// 检查飞机是否在等待期间被击毁
+// plane destroyed while waiting?
 if (!alive _vehicle) exitWith {
     hint localize "STR_DUWS_T_sawpfail";
     missionNamespace setVariable ["SAWP_onStation", nil];
-    // 清理飞机及组
     { deleteVehicle _x } forEach units _group;
     deleteVehicle _vehicle;
 };
 
-// 等待到达或飞机被毁
 waitUntil {sleep 0.5; missionNamespace getVariable "SAWP_onStation" || !alive _vehicle};
 
-// 再次检查飞机是否存活（若因被毁退出循环则进入此分支）
+// re-check the plane is alive; this branch runs if it was destroyed
 if (!alive _vehicle) exitWith {
     hint localize "STR_DUWS_T_sawpfail";
     missionNamespace setVariable ["SAWP_onStation", nil];
@@ -77,7 +74,6 @@ if (!alive _vehicle) exitWith {
     deleteVehicle _vehicle;
 };
 
-// 飞机存活且到达，执行空投
 _parachute = "Steerable_Parachute_F" CreateVehicle _location;
 _parachute setPos [_location select 0, _location select 1, (_location select 2)+100];
 _ammobox = "";
@@ -121,5 +117,4 @@ sleep 60;
 
 deleteVehicle _vehicle;
 
-// 清理任务变量
 missionNamespace setVariable ["SAWP_onStation", nil];

@@ -8,9 +8,7 @@
 // what stays local is exactly what is local by nature: cursorObject, hints, map markers,
 // the player's own addAction, and the geometry maths that only reads positions.
 
-// ==================== 客户端执行部分 ====================
 
-// ========== 1. 目标检查与初始化 ==========
 #include "..\..\shared\includes\action_style.hpp"
 
 _target = cursorObject;
@@ -25,16 +23,15 @@ if !(_target isKindOf "Car" || _target isKindOf "Tank" || _target isKindOf "Heli
     ["helo_lift"] call fnc_support_comm_add;
 };
 
-// 玩家唯一标识
 _playerUID = getPlayerUID player;
 _varPrefix = format ["LiftTask_%1", _playerUID];
 
-// 初始化玩家变量（用于地图点击脚本）
+// init player variables the map-click script reads
 player setVariable ["LiftTakeOff", false];
 player setVariable ["LiftWaypoints", []];
 player setVariable ["LiftWaypointMarkers", []];
 
-// ========== 2. 生成直升机（必须由服务器执行）==========
+// spawn the helicopter -- must run on the server
 missionNamespace setVariable [_varPrefix + "_heloReady", false];
 [player, _target] remoteExec ["fnc_helolift_spawnHeli", 2];
 
@@ -54,7 +51,6 @@ if (isNull _helo) exitWith {
 };
 _pilot = currentPilot _helo;
 
-// ========== 3. 保存目标引用 ==========
 _targetVehicle = _target;
 _originalMass = getMass _targetVehicle;
 
@@ -72,29 +68,24 @@ _abort = {
 };
 
 
-// ========== 添加直升机损坏检测 ==========
 _helo_maxDamage = 0.7;
 _helo_minFuel = 0.4;
 _check_damage = compile format ["(isNull _helo) or (damage _helo > %1) or (fuel _helo < %2) or (vehicle _pilot == _pilot)", _helo_maxDamage, _helo_minFuel];
 
-// ========== 4. 通知并飞往载具位置 ==========
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = format[([localize "STR_DUWS_T_heloliftcall"] call fnc_cs)];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
-// 创建临时吊装点标记
 _hookMarkerName = format ["hook_%1", floor random 10000];
 createMarker [_hookMarkerName, getPos _target];
 _hookMarkerName setMarkerType "hd_dot";
 _hookMarkerName setMarkerColor "ColorBlue";
 _hookMarkerName setMarkerText "HOOK POINT";
 
-// ========== 5. 飞抵目标上空并执行挂钩 ==========
 [player, "clear", []] remoteExec ["fnc_helolift_waypoints", 2];
 
-// 远程调用服务器设置初始航点
 _moveCompletedVar = _varPrefix + "_moveCompleted";
-missionNamespace setVariable [_moveCompletedVar, false]; // 初始化（客户端本地）
+missionNamespace setVariable [_moveCompletedVar, false]; // init, client-local
 [player, "setInitial", [_targetVehicle]] remoteExec ["fnc_helolift_waypoints", 2];
 
 sleep 8;
@@ -120,16 +111,16 @@ _message = format[localize "STR_DUWS_T_helolift3"];
 sleep 6;
 if (call _check_damage) exitWith { call _abort };
 
-// ========== 定义直升机连接点 ==========
+// helicopter rope attach points
 private _heliPoints = [
-    [ 1.4,  2.8, -2],   // 前右
-    [ 1.4, -2.8, -2],   // 前左
-    [-1.4,  2.8, -2],   // 后右
-    [-1.4, -2.8, -2],   // 后左
-    [0, -7, -1]         // 后方中间
+    [ 1.4,  2.8, -2],   // front-right
+    [ 1.4, -2.8, -2],   // front-left
+    [-1.4,  2.8, -2],   // rear-right
+    [-1.4, -2.8, -2],   // rear-left
+    [0, -7, -1]         // rear-centre
 ];
 
-// ========== 获取车辆重心并定义车辆连接点 ==========
+// vehicle centre of mass and rope attach points
 private _com = getCenterOfMass _targetVehicle;
 private _frontRadius = 2.5;
 private _rearRadius = _frontRadius;
@@ -137,7 +128,7 @@ private _heightOffset = 0.3;
 
 private _vehPoints = [];
 
-// 前部两个点
+// front two points
 private _frontAngles = [45, 135];
 {
     private _angle = _x;
@@ -147,7 +138,7 @@ private _frontAngles = [45, 135];
     _vehPoints pushBack [_xPos, _yPos, _zPos];
 } forEach _frontAngles;
 
-// 后部两个点
+// rear two points
 private _rearAngles = [315, 225];
 {
     private _angle = _x;
@@ -157,29 +148,29 @@ private _rearAngles = [315, 225];
     _vehPoints pushBack [_xPos, _yPos, _zPos];
 } forEach _rearAngles;
 
-// 后方中间点
+// rear-centre point
 private _rearX = (_com select 0) + (_rearRadius * cos 270);
 private _rearY = (_com select 1) + (_rearRadius * sin 270);
 private _rearZ = (_com select 2) + _heightOffset;
 _vehPoints pushBack [_rearX, _rearY, _rearZ];
 
-// ========== 定义所有绳索配对 ==========
+// rope pairings (heli point -> vehicle point)
 private _mainPairs = [
-    [0, 0], // 前右 -> 前右
-    [1, 2], // 前左 -> 后右
-    [2, 1], // 后右 -> 前左
-    [3, 3]  // 后左 -> 后左
+    [0, 0], // front-right -> front-right
+    [1, 2], // front-left -> rear-right
+    [2, 1], // rear-right -> front-left
+    [3, 3]  // rear-left -> rear-left
 ];
 private _crossPairs = [
-    [0, 2], // 直升机前右 -> 车辆后右
-    [1, 0], // 直升机前左 -> 车辆前右
-    [2, 3], // 直升机后右 -> 车辆后左
-    [3, 1]  // 直升机后左 -> 车辆前左
+    [0, 2], // heli front-right -> vehicle rear-right
+    [1, 0], // heli front-left -> vehicle front-right
+    [2, 3], // heli rear-right -> vehicle rear-left
+    [3, 1]  // heli rear-left -> vehicle front-left
 ];
 private _rearPair = [4, 4];
 private _allPairs = _mainPairs + _crossPairs + [_rearPair];
 
-// ========== 计算初始松弛长度 ==========
+// initial rope slack length
 private _dists = [];
 {
     _x params ["_heliIdx", "_vehIdx"];
@@ -188,12 +179,11 @@ private _dists = [];
     _dists pushBack (_heliPos distance _vehPos);
 } forEach _allPairs;
 private _maxDist = selectMax _dists;
-private _ropeLength = _maxDist * 1.1; // 10%松弛
+private _ropeLength = _maxDist * 1.1; // 10% slack
 
-// ========== 远程调用服务器创建并收紧绳索（此时服务器会设置 allowDamage false）==========
+// server creates and tightens the ropes, setting allowDamage false
 [player, "create", [_helo, _targetVehicle, _allPairs, _heliPoints, _vehPoints, _ropeLength, _originalMass]] remoteExec ["fnc_helolift_ropes", 2];
 
-// 等待服务器完成绳索收紧
 _ropesTightVar = _varPrefix + "_ropesTight";
 waitUntil {
     sleep 1.5;
@@ -205,7 +195,6 @@ _speaker = localize "STR_DUWS_T_crane";
 _message = format[localize "STR_DUWS_T_helolift5"];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
-// ========== 6. 请求航点 ==========
 [player, "height", [60]] remoteExec ["fnc_helolift_waypoints", 2];
 if (call _check_damage) exitWith { call _abort };
 
@@ -228,8 +217,7 @@ if (call _check_damage) exitWith { call _abort };
 private _waypoints = player getVariable ["LiftWaypoints", []];
 if (count _waypoints < 3) exitWith { hint localize "STR_DUWS_T_liftwp_incomplete"; call _abort };
 
-// ========== 7. 飞往航点路线 ==========
-// 更新最终航点标记位置（客户端视觉反馈）
+// update the final waypoint marker, client-side visual feedback
 private _heloPos = getPos _helo;
 private _finalClickPos = _waypoints select 2;
 private _offsetFinalPos = _finalClickPos getPos [-70, _finalClickPos getDir _heloPos];
@@ -239,7 +227,6 @@ if (count _markers >= 3) then {
     _finalMarker setMarkerPos _offsetFinalPos;
 };
 
-// 远程调用服务器设置航点路线
 _finalReachedVar = _varPrefix + "_finalReached";
 missionNamespace setVariable [_finalReachedVar, false];
 [player, "setRoute", [_waypoints]] remoteExec ["fnc_helolift_waypoints", 2];
@@ -259,20 +246,17 @@ _message = format[localize "STR_DUWS_T_helolift6"];
 sleep 6;
 if (call _check_damage) exitWith { call _abort };
 
-// ========== 8. 执行释放（远程调用服务器放松并销毁绳索，并恢复质量）==========
+// release: server loosens and destroys the ropes and restores the vehicle mass
 [player, "release", [_helo, _ropeLength, _targetVehicle, _originalMass]] remoteExec ["fnc_helolift_ropes", 2];
-sleep 8; // 等待绳索放松
+sleep 8; // wait for the ropes to loosen
 
-// 移除航点标记（客户端）
 private _markers = player getVariable ["LiftWaypointMarkers", []];
 { deleteMarker _x } forEach _markers;
 player setVariable ["LiftWaypointMarkers", []];
 
 
-// ========== 9. 飞离并清理 ==========
 [player, "height", [100]] remoteExec ["fnc_helolift_waypoints", 2];
 [player, "depart", []] remoteExec ["fnc_helolift_waypoints", 2];
-// 再次确保标记已清除
 { deleteMarker _x } forEach _markers;
 player setVariable ["LiftWaypointMarkers", []];
 [player, "cleanup", [_helo]] remoteExec ["fnc_helolift_ropes", 2];

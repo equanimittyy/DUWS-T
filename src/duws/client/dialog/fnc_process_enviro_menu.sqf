@@ -57,7 +57,7 @@ switch (_index) do {
 // are thinned proportionally, down to a floor of three apiece (fnc_civ_liveTarget).
 private _civDensityValues = [5, 10, 15, 20];
 private _index = lbCurSel 2102;
-private _selectedValue = 15; // 默认
+private _selectedValue = 15;
 if (_index >= 0 && _index < count _civDensityValues) then {
     _selectedValue = _civDensityValues select _index;
 };
@@ -90,7 +90,7 @@ switch (_index) do
 };
 publicVariable "apocalypse_mode";
 
-// ========== 战争升级 ==========
+// War escalation
 _index = lbCurSel 2106;
 escalation_enabled = (_index == index_escalation_true);
 publicVariable "escalation_enabled";
@@ -136,7 +136,7 @@ switch (_index) do
     case index_hardcore_true: { hardcore_mode_enable = true; publicVariable "hardcore_mode_enable"; hardcore_visibleZone_found = false; publicVariable "hardcore_visibleZone_found"; };
 };
 
-// 始终启用限制军火库
+// always enable the restricted arsenal
 restricted_arsenal = true;
 
 publicVariable "weather_type";
@@ -148,7 +148,7 @@ publicVariable "simple_zones_enable";
 publicVariable "CIV_PRESENCE";
 publicVariable "restricted_arsenal";
 
-// 叛军模式
+// insurgent mode
 _index = lbCurSel 2111;
 switch (_index) do
 {

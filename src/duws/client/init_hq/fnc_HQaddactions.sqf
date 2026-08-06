@@ -11,7 +11,7 @@
 _hq = _this select 0;
 
 if (isMultiplayer) then {
-    // ===== 防重：如果已添加过动作，直接退出 =====
+    // dedup guard: exit if the actions were already added
     if (_hq getVariable ["HQ_actions_done", false]) exitWith {};
     _hq setVariable ["HQ_actions_done", true];
     // ============================================
@@ -34,7 +34,6 @@ if (support_halo_available) then {
         } forEach (Array_of_FOBS);
     };
 
-// 公共变量事件处理器
 "support_halo_available" addPublicVariableEventHandler {
     bluHQ_object addaction [ACT_MOVE("STR_DUWS_T_foldimok"), fnc_ghst_halo, [false,600,70], 70, true, true, "","alive player", ACT_REACH];
     if ((vehiclevarname player) in Squad_Leaders) then {

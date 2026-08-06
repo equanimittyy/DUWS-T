@@ -5,14 +5,14 @@ if (!hasInterface) exitWith {};
 params ["_depot", "_trgNetId"];
 if (isNull _depot) exitWith {};
 
-// 防重添加
+// dedup
 if (_depot getVariable ["repair_actions_done", false]) exitWith {};
 _depot setVariable ["repair_actions_done", true];
 
 private _trg = objectFromNetId _trgNetId;
 if (isNull _trg) exitWith { ["ERROR", "SUPPORT", "Trigger null on client"] call fnc_log; };
 
-// 外观/挂件是较大的对话框，作为局部代码值随动作参数传入菜单，避免污染全局命名空间
+// appearance/pylons dialogs pass as local code via action params, to avoid globals
 private _fnc_appearance = {
     params ["_trg"];
     private _vehicles = _trg nearEntities [["Car", "Tank", "Air", "Ship"], 5];
@@ -27,21 +27,18 @@ private _fnc_appearance = {
     _listbox ctrlSetPosition [0.3, 0.22, 0.4, 0.4];
     _listbox ctrlCommit 0;
 
-    // 涂装列表（不会变，不用刷新）
+    // skin list: static, no refresh needed
     private _textures = ("true" configClasses (configFile >> "CfgVehicles" >> typeOf _veh >> "TextureSources")) apply {configName _x};
     { _listbox lbAdd format ["Texture: %1", _x]; } forEach _textures;
 
-    // 只有 source == "user" 的动画源
+    // only user-source animations
     private _animations = ("true" configClasses (configFile >> "CfgVehicles" >> typeOf _veh >> "AnimationSources")) select {
         getText (_x >> "source") == "user"
     } apply {configName _x};
 
-    // 填充动画源并刷新列表的函数
     private _fnc_refreshAnimList = {
         lbClear _listbox;
-        // 重新加涂装
         { _listbox lbAdd format ["Texture: %1", _x]; } forEach _textures;
-        // 重新加动画源状态
         {
             private _state = _veh animationSourcePhase _x;
             private _label = if (_state > 0) then { format ["%1 (ON)", _x] } else { format ["%1 (OFF)", _x] };
@@ -50,14 +47,13 @@ private _fnc_appearance = {
         lbSetCurSel [1500, 0];
     };
 
-    // 初始填充
     call _fnc_refreshAnimList;
 
     _display setVariable ["garage_veh", _veh];
     _display setVariable ["garage_animList", _animations];
     _display setVariable ["garage_textureList", _textures];
 
-    // Apply 按钮（不关闭，刷新列表）
+    // Apply button: refresh the list without closing
     private _applyBtn = _display ctrlCreate ["RscButton", 1600];
     _applyBtn ctrlSetText "Apply";
     _applyBtn ctrlSetPosition [0.35, 0.67, 0.1, 0.05];
@@ -76,7 +72,6 @@ private _fnc_appearance = {
             private _state = _veh animationSourcePhase _animName;
             _veh animateSource [_animName, if (_state > 0) then {0} else {1}, true];
         };
-        // 刷新列表以显示新的 ON/OFF 状态
         private _animations = _parent getVariable ["garage_animList", []];
         private _textures = _parent getVariable ["garage_textureList", []];
         private _listbox = _parent displayCtrl 1500;
@@ -90,7 +85,6 @@ private _fnc_appearance = {
         lbSetCurSel [1500, 0];
     }];
 
-    // Close 按钮
     private _closeBtn = _display ctrlCreate ["RscButton", 1601];
     _closeBtn ctrlSetText "Close";
     _closeBtn ctrlSetPosition [0.55, 0.67, 0.1, 0.05];
@@ -98,7 +92,7 @@ private _fnc_appearance = {
     _closeBtn ctrlAddEventHandler ["ButtonClick", { closeDialog 0; }];
 };
 
-// 调整载具挂架 (Pylons) 消耗5CP版
+// adjust vehicle pylons (costs 5 CP)
 private _fnc_pylons = {
     params ["_trg"];
     private _vehicles = _trg nearEntities [["Air"], 5];
@@ -109,11 +103,10 @@ private _fnc_pylons = {
 
     disableSerialization;
     private _display = createDialog ["RscDisplayEmpty", false];
-// ---- 挂架费用提示（带背景）----
 private _txtHint = _display ctrlCreate ["RscText", 1000];
 _txtHint ctrlSetPosition [0.2, 0.15, 0.6, 0.04];
 _txtHint ctrlSetText (localize "STR_DUWS_T_PYLON_COST_HINT");
-_txtHint ctrlSetBackgroundColor [0, 0, 0, 0.3];   // 淡黑色半透明背景
+_txtHint ctrlSetBackgroundColor [0, 0, 0, 0.3];
 _txtHint ctrlCommit 0;
     private _lbPylons = _display ctrlCreate ["RscListBox", 1500];
     _lbPylons ctrlSetPosition [0.2, 0.2, 0.25, 0.5];
@@ -128,7 +121,7 @@ _txtHint ctrlCommit 0;
     private _pylonNamesRaw = getText (configFile >> "CfgVehicles" >> typeOf _veh >> "pylonTopCover");
     private _pylonNames = if (_pylonNamesRaw != "") then { _pylonNamesRaw splitString ";" } else { [] };
 
-    // ---- 辅助函数：获取挂架的 turret 路径（默认使用载具本体 []）----
+    // helper: pylon turret path, defaulting to the vehicle body []
     private _fnc_getPylonTurret = {
         params ["_veh", "_pylonIndex"];
         private _pylonConfig = configFile >> "CfgVehicles" >> typeOf _veh >> "Components" >> "TransportPylonsComponent" >> "Pylons" >> format ["Pylon%1", _pylonIndex];
@@ -140,7 +133,7 @@ _txtHint ctrlCommit 0;
         };
     };
 
-    // ---- 核心刷新函数（左侧列表 + 右侧兼容）----
+    // core refresh: left list plus right-hand compatible list
     private _fnc_refreshAll = {
         private _veh = _display getVariable "garage_veh";
         if (isNull _veh) exitWith {};
@@ -166,7 +159,7 @@ _txtHint ctrlCommit 0;
         if (_leftIdx >= lbSize _lbPylons) then { _leftIdx = 0 };
         lbSetCurSel [1500, _leftIdx];
 
-        // 刷新右侧兼容列表（使用 1-based pylon index）
+        // refresh the right list, using a 1-based pylon index
         private _pylonIndex = _leftIdx + 1;
         private _compatibleMags = _veh getCompatiblePylonMagazines _pylonIndex;
         private _flat = [];
@@ -194,7 +187,6 @@ _txtHint ctrlCommit 0;
 
     _display setVariable ["refreshFn", _fnc_refreshAll];
 
-    // 左侧选中事件
     _lbPylons ctrlAddEventHandler ["LBSelChanged", {
         params ["_ctrl", "_newIdx"];
         private _display = ctrlParent _ctrl;
@@ -225,10 +217,8 @@ _txtHint ctrlCommit 0;
         lbSetCurSel [1501, 0];
     }];
 
-    // 初始填充
     call _fnc_refreshAll;
 
-    // ----- Mount 按钮 -----
     private _mountBtn = _display ctrlCreate ["RscButton", 1600];
     _mountBtn ctrlSetText "Mount";
     _mountBtn ctrlSetPosition [0.6, 0.75, 0.1, 0.05];
@@ -257,10 +247,9 @@ _txtHint ctrlCommit 0;
         private _selectedMag = if (_magIdx == 0) then { "" } else { _flat select (_magIdx - 1) };
         private _turret = [_veh, _pylonIndex] call _fnc_getPylonTurret;
 
-        // 调用服务器函数（扣 CP 并设置挂架）
+        // server call: deduct CP and set the pylon
         [netId _veh, _pylonIndex, _selectedMag, _turret, getPlayerUID player] remoteExec ["fnc_pylon_set_with_cost", 2];
 
-        // 等待服务器完成，然后刷新界面
         (_this select 0) spawn {
             params ["_ctrl"];
             uiSleep 0.1;
@@ -284,7 +273,6 @@ _txtHint ctrlCommit 0;
                 } forEach _pylonMags;
                 lbSetCurSel [1500, 0];
 
-                // 刷新右侧列表（pylon 1）
                 private _compatibleMags = _veh getCompatiblePylonMagazines 1;
                 private _flat = [];
                 {
@@ -309,7 +297,6 @@ _txtHint ctrlCommit 0;
         };
     }];
 
-    // ----- Close 按钮 -----
     private _closeBtn = _display ctrlCreate ["RscButton", 1602];
     _closeBtn ctrlSetText "Close";
     _closeBtn ctrlSetPosition [0.35, 0.85, 0.3, 0.05];
@@ -317,7 +304,7 @@ _txtHint ctrlCommit 0;
     _closeBtn ctrlAddEventHandler ["ButtonClick", { closeDialog 0; }];
 };
 
-// 单一"载具改装"动作打开菜单；各条目沿用原有逻辑
+// one 'vehicle modification' action opens the menu; entries keep their own logic
 _depot addAction [
     ACT_SECONDARY_MENU("STR_DUWS_T_VEHICLE_CUSTOMIZATION"),
     {

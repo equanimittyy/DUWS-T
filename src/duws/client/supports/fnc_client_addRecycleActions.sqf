@@ -25,5 +25,5 @@ _depot addAction [
     true,
     true,
     "",
-    "_this distance _target < 8"   // 限制 8 米内可见
+    "_this distance _target < 8"
 ];

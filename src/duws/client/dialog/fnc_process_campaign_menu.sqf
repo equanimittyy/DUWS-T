@@ -143,7 +143,6 @@ switch (_index) do
     zones_number = 15
     };
 
-    // 新增：
     case index_amount_zones_20: { zones_number = 20 };
     case index_amount_zones_30: { zones_number = 30 };
     case index_amount_zones_40: { zones_number = 40 };

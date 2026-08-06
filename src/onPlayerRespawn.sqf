@@ -30,7 +30,7 @@ if (!isNil "apocalypse_mode" && apocalypse_mode) then {
     call DUWS_fnc_applyApocalypseFilter;
 };
 
-// ========== 清除所有情报物品和金钱 ==========
+// clear all intel items and money on respawn
 private _itemsToRemove = [
     "Money_roll",
     "SmartPhone",
@@ -44,7 +44,6 @@ private _itemsToRemove = [
 
 private _removedList = [];
 
-// 从物品栏中移除
 {
     private _count = 0;
     while {_x in (items player)} do {
@@ -56,7 +55,6 @@ private _removedList = [];
     };
 } forEach _itemsToRemove;
 
-// 从弹匣栏中移除
 {
     private _count = 0;
     while {_x in (magazines player)} do {
@@ -68,7 +66,6 @@ private _removedList = [];
     };
 } forEach _itemsToRemove;
 
-// 如果有物品被移除，发送本地化通知
 if (count _removedList > 0) then {
     private _removedText = _removedList joinString ", ";
     private _title = localize "STR_DUWS_T_RESPAWN_LOSS_TITLE";

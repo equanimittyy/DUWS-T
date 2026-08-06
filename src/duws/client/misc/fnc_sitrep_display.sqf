@@ -6,7 +6,6 @@ if (!hasInterface) exitWith {};
 params [["_rep", "--"]];
 sleep 1;
 
-// 安全获取变量，若未定义则使用默认值
 private _allUnits = if (!isNil "allUnits") then { allUnits } else { [] };
 private _aliveAllUnits = {alive _x} count _allUnits;
 

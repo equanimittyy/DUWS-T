@@ -1,16 +1,16 @@
 // fnc_hirePartisans_clientMap.sqf
-// 客户端执行：打开地图选择游击队部署位置，强制无法关闭地图
+// Client-side: open the map to pick a partisan deploy spot; the map is forced to stay open.
 if (!hasInterface) exitWith {};
 
 params ["_caller", "_count"];
 
-// 防止重复打开地图
+// prevent opening the map twice
 if (!isNil "hirePartisans_mapOpen" && {hirePartisans_mapOpen}) exitWith {
     hint localize "STR_DUWS_T_partisans_placing_busy";
 };
 hirePartisans_mapOpen = true;
 
-// 将参数存入玩家变量（作为全局传递桥梁）
+// stash params on a player variable to bridge them into the spawn below
 player setVariable ["DUWS_partisan_caller", _caller];
 player setVariable ["DUWS_partisan_count", _count];
 
@@ -20,7 +20,7 @@ private _got = ["PARTISANS", {
     openMap false;
     hirePartisans_mapOpen = false;
 
-    // 直接从玩家变量取值，避免 spawn 参数传递问题
+    // read from the player variable; avoids spawn arg-passing issues
     [_pos] spawn {
         params ["_pos"];
         private _caller = player getVariable "DUWS_partisan_caller";
@@ -42,7 +42,7 @@ openMap true;
 // who was then held in a map that refuses to close, with nothing saying why.
 [localize "STR_DUWS_T_partisans_place_brief"] call fnc_map_prompt;
 
-// 强制保持地图打开，直到点击
+// force the map to stay open until a click
 while {hirePartisans_mapOpen} do {
     if (!visibleMap) then {
         openMap true;

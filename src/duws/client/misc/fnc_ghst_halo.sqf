@@ -14,7 +14,7 @@ Params: [typehalo, althalo, altchute, excludePlayer]
 #include "..\..\shared\includes\action_style.hpp"
 
 
-// ========== 定义AI跳伞处理函数（确保服务器可用）==========
+// AI parachute handler, defined so it is available on the server.
 DUWS_fnc_aiHalo = {
     params ["_aiNetIds", "_dropPos", "_startAlt", "_chuteAlt"];
     ["INFO", "HALO", format ["AI Halo started on server with %1 units", count _aiNetIds]] call fnc_log;
@@ -29,41 +29,34 @@ DUWS_fnc_aiHalo = {
     } forEach _aiNetIds;
 
     {
-        // 传送 AI 到目标区域上空（不调用 bis_fnc_halo，让它们自然下落）
+        // teleport AI above the target; no bis_fnc_halo, let them free-fall
         private _offsetX = random [10, 50, 100];
         private _offsetY = random [10, 50, 100];
         _x setPos [(_dropPos select 0) + _offsetX, (_dropPos select 1) - _offsetY, _startAlt];
         if (duws_log_level >= 4) then { ["DEBUG", "HALO", format ["AI %1 setPos to %2", _x, getPos _x]] call fnc_log; };
-        // 设置无敌
         _x allowDamage false;
     } forEach _aiUnits;
 
-    // 自动开伞监控（直接生成降落伞并强制进入）
+    // auto-deploy monitor: spawn a chute and force the AI into it
     {
         [_x, _chuteAlt] spawn {
             params ["_unit", "_alt"];
-            // 等待高度降低到开伞高度
+            // wait until altitude drops to the chute-deploy height
             waitUntil {sleep 0.1; (getPosATL _unit select 2) <= _alt};
             if (duws_log_level >= 4) then { ["DEBUG", "HALO", format ["AI %1 deploying chute via createVehicle and moveInDriver", _unit]] call fnc_log; };
-            // 创建降落伞并放置于 AI 当前位置
             private _chute = createVehicle ["Steerable_Parachute_F", (getPosATL _unit), [], 0, "FLY"];
             _chute setPosATL (getPosATL _unit);
-            // 降落伞也设置无敌
             _chute allowDamage false;
-            // 强制 AI 进入降落伞驾驶员位置
             _unit assignAsDriver _chute;
             _unit moveInDriver _chute;
-            // 确保 AI 真正进入（如果 moveInDriver 失败，尝试 moveInAny）
+            // fallback: if moveInDriver fails, try moveInAny
             if (vehicle _unit != _chute) then {
                 _unit moveInAny _chute;
             };
-            // 等待落地，然后恢复伤害允许
             waitUntil {sleep 0.1; (getPosATL _unit select 2) < 2};
-            // 恢复单位伤害允许
             if (alive _unit) then {
                 _unit allowDamage true;
             };
-            // 恢复降落伞伤害允许（如果还存在）
             if (!isNull _chute) then {
                 _chute allowDamage true;
             };
@@ -72,10 +65,9 @@ DUWS_fnc_aiHalo = {
     ["INFO", "HALO", "AI Halo processing complete"] call fnc_log;
 };
 
-// 公开函数以便 remoteExec 调用
+// published so it can be reached by remoteExec
 publicVariable "DUWS_fnc_aiHalo";
 
-// ========== 主逻辑 ==========
 _host = _this select 0;
 _caller = _this select 1;
 _id = _this select 2;
@@ -96,7 +88,6 @@ if (not alive _host) exitwith {
 
 _caller groupchat localize "STR_DUWS_T_vtkkn80v";
 
-// 保存玩家负载并打开地图
 mapclick = false;
 if (!(["HALO", "clickpos = _pos; mapclick = true; ['HALO'] call fnc_mapclick_release; true;"] call fnc_mapclick_claim)) exitWith {};
 openMap true;
@@ -111,7 +102,6 @@ if (!visibleMap) exitwith {
 };
 _pos = clickpos;
 
-// ========== AI 跳伞处理 ==========
 if (_typehalo) then {
     private _aiUnits = (units group _caller) select {
         isNull objectParent _x && {!isPlayer _x}
@@ -120,10 +110,10 @@ if (_typehalo) then {
         private _aiNetIds = _aiUnits apply {netId _x};
         ["INFO", "HALO", format ["Client sending AI Halo request for %1 units", count _aiNetIds]] call fnc_log;
         if (isServer) then {
-            // 单机模式，直接调用
+            // single-player: call directly
             [_aiNetIds, _pos, _althalo, _altchute] call DUWS_fnc_aiHalo;
         } else {
-            // 多人模式，发送给服务器
+            // multiplayer: hand off to the server
             [_aiNetIds, _pos, _althalo, _altchute] remoteExec ["DUWS_fnc_aiHalo", 2];
         };
     } else {
@@ -131,7 +121,6 @@ if (_typehalo) then {
     };
 };
 
-// ========== 玩家跳伞 ==========
 if (!_excludePlayer) then {
     _caller setpos [(_pos select 0)+30, _pos select 1, _althalo];
     titleCut ["", "BLACK IN", 5];

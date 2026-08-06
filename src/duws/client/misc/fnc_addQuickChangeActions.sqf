@@ -5,10 +5,10 @@ params ["_crate"];
 if (!hasInterface) exitWith {};
 if (isNull _crate) exitWith {};
 
-// 等待数据可用（服务器端已扫描并广播）
+// wait for the data the server scans and broadcasts
 waitUntil {sleep 0.1; !isNil "blufor_quickChange_loadouts_scanned"};
 
-// 防重：移除可能已存在的动作
+// dedup: remove any actions already present
 private _actionAID = _crate getVariable ["quickChange_actionA", -1];
 if (_actionAID != -1) then { _crate removeAction _actionAID; };
 
