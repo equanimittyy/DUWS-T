@@ -189,4 +189,15 @@ fnc_hardpoint_register = {
     DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey];
     publicVariable "DUWS_hardpoints";
     [_key, "garrison", DUWS_hardpointHooks] call fnc_site_hooks_set;
+
+    // Built deployed, but stowed at once if nobody is near to see it -- the way a zone stows at
+    // build-out. Otherwise every hardpoint the siting loop lays at campaign start carries its crew for
+    // a full grace period while the players are still at their HQ. Resident types are exempt: they
+    // never stow. The dev tool spawns onto the player, so its hardpoints stay up.
+    if (_neverStream) exitWith {};
+    private _players = (call BIS_fnc_listPlayers) select { alive _x };
+    if !([_players, _pos, _radius, _airRing] call fnc_site_nearOrAir) then {
+        _occ set ["awake", false];
+        [_key] call DUWS_fnc_hardpointStow;
+    };
 };

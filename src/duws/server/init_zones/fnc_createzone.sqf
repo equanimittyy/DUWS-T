@@ -254,6 +254,11 @@ private _zoneTier = [_zoneKey] call fnc_zone_tier_roll;
 ["INFO", "ZONES", format ["%1 is tier %2, fielding %3", _zoneKey, _zoneTier,
 	DUWS_zoneSpawnTiers select (_zoneTier - 1)]] call fnc_log;
 
+// The deliberate emplacements that replace the fortification ring removed above. Spawned so the
+// sleeping crew-drop does not stall build-out; it caps the count by _size and files each hardpoint
+// under this zone's key for OPCOM to read and top up.
+[_zonePos, _size, _zoneKey] spawn fnc_hardpoint_site_zone;
+
 // Build-out ends here: markers, prefab, fortifications and triggers are all placed. What
 // follows is OPFOR spawning and then a permanent despawn monitor, so this is the last point
 // at which this function can report completion -- it never returns.

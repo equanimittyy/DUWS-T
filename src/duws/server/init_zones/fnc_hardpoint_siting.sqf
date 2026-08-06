@@ -51,7 +51,9 @@ fnc_hardpoint_survey = {
     private _buildingCnt = count (nearestTerrainObjects [_p, ["House", "Building"], 25, false]);
 
     private _hpDist = 1e9;
-    { _hpDist = _hpDist min (_p distance2D _x) } forEach (missionNamespace getVariable ["hardpoint_pos_array", []]);
+    // Measured against the live registry, so a cleared hardpoint no longer blocks new ground and the
+    // siting loop spaces each placement off the ones already down. Row shape [key, pos, type, ...].
+    { _hpDist = _hpDist min (_p distance2D (_x select 1)) } forEach (missionNamespace getVariable ["DUWS_hardpoints", []]);
 
     [_onWater, _relElev, _slope, _roadDist, _roadDrop, _treeNear, _treeWide, _buildingCnt, _hpDist]
 };

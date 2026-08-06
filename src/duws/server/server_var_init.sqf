@@ -369,6 +369,13 @@ DUWS_hardpointStreaming = createHashMapFromArray [
     ["ARTY",      [600, 300, true,  0]]
 ];
 
+// How common each hardpoint type is before terrain -- the base weight fnc_hardpoint_score multiplies,
+// for the zone siting loop's weighted roll. MG is the backbone. The loop rolls only these three; OPs,
+// minefields and the fire-support types are OPCOM's to place, never rolled at init.
+DUWS_hardpointBaseWeight = createHashMapFromArray [
+    ["MG", 3], ["AT", 2], ["ROADBLOCK", 2]
+];
+
 // The margin beyond a zone's own radius that its streaming reaches: a zone raises and holds its
 // garrison for BLUFOR this much further out than the capture trigger tests, so the men are on the
 // objective before the players who tripped it arrive. Read by fnc_createZone and fnc_zone_stream_init.

@@ -140,3 +140,65 @@ fnc_hardpoint_spawn = {
     private _men = [_objs, _pos, _side, _key, _garrison] call fnc_hardpoint_garrison;
     [_objs, _men]
 };
+
+// [_zonePos, _radius, _zoneKey] call fnc_hardpoint_site_zone
+//
+// A zone's deliberate emplacements, replacing the old random fortification ring. The zone's radius
+// caps how many it can hold (bigger zone, more ground to cover and room to cover it); a random count
+// up to that cap is laid at campaign start, and the cap is stored so OPCOM can top the zone back up
+// toward it later. Each slot's type is a terrain-weighted roll over the set the loop places -- an MG
+// on a rise, a roadblock on a road. That set is intentionally narrow: OPs, minefields and the
+// fire-support types are OPCOM's to place, not rolled in at random. No loose garrison is attached --
+// defenders come from the hardpoint's own data later; a gun type still takes its one crewman.
+//
+// Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop, so build-out cannot call it inline.
+// Idempotent per zone -- the stored cap is the guard -- so a rebuild through fnc_createZone lays no
+// second ring.
+#define HP_CAP_STEP 250
+#define HP_SITE_SPACING 50
+fnc_hardpoint_site_zone = {
+    params ["_zonePos", "_radius", "_zoneKey"];
+    if (!isNil { missionNamespace getVariable (format ["DUWS_hpCap_%1", _zoneKey]) }) exitWith {};
+    private _cap = (round (_radius / HP_CAP_STEP)) max 1;
+    missionNamespace setVariable [format ["DUWS_hpCap_%1", _zoneKey], _cap];
+    private _count = round (random _cap);
+    if (_count <= 0) exitWith {
+        ["INFO", "HARDPOINT", format ["%1 rolled 0 hardpoints (cap %2)", _zoneKey, _cap]] call fnc_log;
+    };
+
+    private _types = ["ROADBLOCK", "MG", "AT"];
+    private _placed = 0;
+    private _tries = 0;
+    while { _placed < _count && {_tries < _count * 8} } do {
+        _tries = _tries + 1;
+        // Anywhere in the zone -- the whole area is fair ground for an emplacement -- on land clear of
+        // steep slope and other objects.
+        private _cand = [_zonePos, 0, _radius, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
+        private _facts = [_cand] call fnc_hardpoint_survey;
+        // Spaced off what is already down: hpDist is the distance to the nearest placed hardpoint.
+        if ((_facts select 8) < HP_SITE_SPACING) then { continue };
+        // Weighted by terrain, not argmax: each type's base commonness times the ground's score for it
+        // (the score is a multiplier, per fnc_hardpoint_score), then a weighted roll. So flat open
+        // ground leans minefield and a rise leans MG without either being the only answer. A spot every
+        // type scores 0 on is skipped.
+        private _weighted = [];
+        {
+            private _s = [_facts, _x] call fnc_hardpoint_score;
+            if (_s > 0) then {
+                _weighted pushBack _x;
+                _weighted pushBack (_s * (DUWS_hardpointBaseWeight getOrDefault [_x, 1]));
+            };
+        } forEach _types;
+        if (_weighted isEqualTo []) then { continue };
+        private _best = selectRandomWeighted _weighted;
+
+        // Faced outward, toward the approach it defends against. No loose garrison for now -- the gun
+        // types crew themselves, and per-hardpoint defenders come from the type's own data later.
+        private _dir = _zonePos getDir _cand;
+        private _key = format ["hp_%1_%2", _zoneKey, _placed];
+        ([_best, _cand, _dir, "opfor", _key, []] call fnc_hardpoint_spawn) params ["_objs", "_men"];
+        [_key, _best, _cand, _men, "opfor", [], _zoneKey] call fnc_hardpoint_register;
+        _placed = _placed + 1;
+    };
+    ["INFO", "HARDPOINT", format ["%1 sited %2/%3 hardpoints (cap %4)", _zoneKey, _placed, _count, _cap]] call fnc_log;
+};
