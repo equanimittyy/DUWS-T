@@ -96,6 +96,31 @@ DUWS_fnc_hardpointClearCheck = {
     [_key, _o] call DUWS_fnc_hardpointClear;
 };
 
+// The place a hardpoint is announced by: the nearer of the closest zone and the closest map town, the
+// zone taking a tie and standing in whenever no town is found -- so a name still comes back with the
+// civilian town system off, since zones are always present.
+DUWS_fnc_hardpointNearestPlace = {
+    params ["_pos"];
+    private _zoneName = "";
+    private _zoneDist = 1e9;
+    {
+        private _d = _pos distance2D (_x select 1);
+        if (_d < _zoneDist) then { _zoneDist = _d; _zoneName = _x select 0 };
+    } forEach zone_namePOS_pairs;
+
+    private _townName = "";
+    private _townDist = 1e9;
+    private _near = nearestLocations [_pos, ["NameCity", "NameVillage", "NameCityCapital", "NameLocal"], worldSize];
+    if (count _near > 0) then {
+        _townName = text (_near select 0);
+        _townDist = _pos distance2D (locationPosition (_near select 0));
+    };
+
+    // Town only when strictly closer; the zone takes an exact tie and every case with no town.
+    private _place = if (_townName != "" && {_townDist < _zoneDist}) then { _townName } else { _zoneName };
+    if (_place isEqualTo "") then { "the area" } else { _place }
+};
+
 // Latched -- a cleared hardpoint stays cleared. The site is not retired here: deleting it would mutate
 // the map the poller is mid-iteration over, so the occupant is only marked inert, its registry row
 // dropped and the composition released to the cleanup sweep. The dev clear and, later, OPCOM retire
@@ -115,6 +140,16 @@ DUWS_fnc_hardpointClear = {
     // Wrecks left standing for the sweep, not deleted: release drops the pins and schedules disposal.
     [_key] call fnc_duws_release;
     ["INFO", "HARDPOINT", format ["%1 cleared", _key]] call fnc_log;
+
+    // A standalone strongpoint the player hunted down pays a small bounty and announces itself. A zone
+    // emplacement pays nothing -- taking the zone already credits its defences -- and neither does a
+    // minefield, a hazard cleared rather than a garrison beaten.
+    if !((_o get "hpZoneKey") isEqualTo "") exitWith {};
+    if ((_o get "hpType") isEqualTo "MINEFIELD") exitWith {};
+    [5, "hardpoint_cleared"] call fnc_cp_adjust;
+    private _name = DUWS_hardpointName getOrDefault [_o get "hpType", _o get "hpType"];
+    private _place = [([_key] call fnc_site_at) get "pos"] call DUWS_fnc_hardpointNearestPlace;
+    ["HPdestroyed", [5, _name, _place]] remoteExec ["BIS_fnc_showNotification", [0, -2] select isDedicated, false];
 };
 
 // One tick per hardpoint per pass, presence answered by the poller. The zone cycle without its

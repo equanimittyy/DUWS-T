@@ -376,6 +376,13 @@ DUWS_hardpointBaseWeight = createHashMapFromArray [
     ["MG", 3], ["AT", 2], ["ROADBLOCK", 2]
 ];
 
+// Readable name per hardpoint type, for the destroyed-hardpoint notification. English labels; the
+// localisation carries the sentence around them, not these.
+DUWS_hardpointName = createHashMapFromArray [
+    ["MG", "MG"], ["AT", "AT"], ["AA", "AA"], ["MORTAR", "Mortar"],
+    ["ARTY", "Artillery"], ["OP", "Obs Post"], ["ROADBLOCK", "Roadblock"]
+];
+
 // The margin beyond a zone's own radius that its streaming reaches: a zone raises and holds its
 // garrison for BLUFOR this much further out than the capture trigger tests, so the men are on the
 // objective before the players who tripped it arrive. Read by fnc_createZone and fnc_zone_stream_init.

@@ -48,6 +48,18 @@ class CfgNotifications
         difficulty[] = {};
     };
 
+    // A destroyed standalone enemy hardpoint. title carries the bounty (%1), description the type (%2)
+    // and the place (%3) -- see DUWS_fnc_hardpointClear.
+    class HPdestroyed
+    {
+        title = "+%1 CP";
+        description = "$STR_DUWS_T_HP_destroyed";
+        color[] = {0.5,1,1,1};
+        duration = 5;
+        priority = 0;
+        difficulty[] = {};
+    };
+
     class CPaddedmission
     {
         title = "$STR_DUWS_T_elszwwpc";

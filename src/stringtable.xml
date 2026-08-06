@@ -3350,6 +3350,10 @@
                 <Original>Received additional CP and AP for capturing a zone.</Original>
                 <English>Received additional CP and AP for capturing a zone.</English>
             </Key>
+            <Key ID="STR_DUWS_T_HP_destroyed">
+                <Original>OPFOR %2 near %3 destroyed</Original>
+                <English>OPFOR %2 near %3 destroyed</English>
+            </Key>
             <Key ID="STR_DUWS_T_elszwwpc">
                 <German>CP Bonus: Sekundäre Mission erfolgreich</German>
                 <Chinesesimp>CP点：支线任务完成</Chinesesimp>
