@@ -811,7 +811,9 @@ TEST_PICK = "";
     TEST_ASKED, [["opfor_ARTY_X"]]] call fnc_assertEq;
 
 // --- fnc_hardpoint_score: terrain suitability multiplier per hardpoint type ---
-// Facts row: [onWater, relElev, slope, roadDist, roadDrop, treeNear, treeWide, buildingCnt, hpDist].
+// Facts row: [onWater, relElev, slope, roadDist, roadDrop, treeNear, treeWide, buildingCnt, hpDist,
+// clutter50]. Rows below omit the trailing clutter50, which defaults to 0 (no penalty); the clutter
+// cases append it. aspect/aspectMag feed facing, not scoring, so they are never passed here.
 // Multipliers are asserted within a tolerance; the 0 vetoes are exact.
 
 // Water is unplaceable for every type.
@@ -832,6 +834,28 @@ TEST_PICK = "";
 // GMG lobs over cover, so the same overwatch lifts it less than the MG's ~80%.
 ["hp_score: GMG gains less from a road it fires over",
     ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9], "GMG"] call fnc_hardpoint_score), 2.25] call fnc_assertClose;
+
+// Structures inside 50 m box a gun nest in: the same overwatch MG (2.7) loses arcs as clutter climbs,
+// down to a 0.4 floor, but is never vetoed. The penalty rides on top of the overwatch multiplier.
+["hp_score: MG among a few structures loses some of its arc",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 3], "MG"] call fnc_hardpoint_score), 1.89] call fnc_assertClose;
+["hp_score: MG walled in by a compound floors at 0.4 of its score",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 6], "MG"] call fnc_hardpoint_score), 1.08] call fnc_assertClose;
+["hp_score: GMG takes the same clutter penalty",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 6], "GMG"] call fnc_hardpoint_score), 0.9] call fnc_assertClose;
+// A flat-ground type does not read clutter: the ARTY flat score is unchanged with structures around.
+["hp_score: clutter does not touch a non-nest type",
+    ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9, 6], "ARTY"] call fnc_hardpoint_score), 2.0] call fnc_assertClose;
+
+// Mutual support rides on hpDist (facts[8]): the same overwatch MG (2.7) lifts as a neighbour comes
+// into the interlock band and tapers back out with the gap. The sentinel 1e9 is a lone nest, no bonus.
+["hp_score: MG interlocked with a nearby nest is preferred",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 120], "MG"] call fnc_hardpoint_score), 4.32] call fnc_assertClose;
+["hp_score: MG support tapers as the gap opens",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 225], "MG"] call fnc_hardpoint_score), 3.51] call fnc_assertClose;
+// A flat-ground type does not read support either: ARTY beside a neighbour keeps its flat score.
+["hp_score: support does not touch a non-nest type",
+    ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 120], "ARTY"] call fnc_hardpoint_score), 2.0] call fnc_assertClose;
 
 // Flat, low ground with no hill: the floor of the MG reward.
 ["hp_score: MG on flat ground scores its floor",
@@ -884,6 +908,20 @@ TEST_PICK = "";
 // An unmapped type sites anywhere until given a preference.
 ["hp_score: an unknown type is neutral",
     ([[false, 0, 0, 0, 0, 0, 0, 0, 1e9], "WATCHTOWER"] call fnc_hardpoint_score), 1] call fnc_assertEq;
+
+// --- fnc_hardpoint_facing: [type, aspectDir, aspectMag, radialDir] -> heading ---
+// A pronounced fall line (aspectMag >= 2.5) turns an overwatch nest down the slope; a faint one, or a
+// type whose heading is cosmetic, keeps the radial heading the loop passes in.
+["hp_facing: an MG on a real slope faces the fall line",
+    (["MG", 135, 5, 20] call fnc_hardpoint_facing), 135] call fnc_assertEq;
+["hp_facing: AT and GMG face it too",
+    (["AT", 90, 3, 200] call fnc_hardpoint_facing), 90] call fnc_assertEq;
+["hp_facing: a GMG faces the fall line",
+    (["GMG", 270, 4, 10] call fnc_hardpoint_facing), 270] call fnc_assertEq;
+["hp_facing: on near-flat ground the nest keeps the radial heading",
+    (["MG", 135, 1, 20] call fnc_hardpoint_facing), 20] call fnc_assertEq;
+["hp_facing: a flat type keeps radial even on a slope",
+    (["ROADBLOCK", 135, 5, 20] call fnc_hardpoint_facing), 20] call fnc_assertEq;
 
 // --- fnc_hardpoint_minefield_lattice: the deterministic mine grid ---
 ["hp_lattice: a 2x1 field is centred on the origin",

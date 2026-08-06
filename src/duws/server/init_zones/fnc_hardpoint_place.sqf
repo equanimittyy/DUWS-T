@@ -155,16 +155,19 @@ fnc_hardpoint_spawn = {
 // A zone's deliberate emplacements, replacing the old random fortification ring. The zone's radius
 // caps how many it can hold (bigger zone, more ground to cover and room to cover it); a random count
 // up to that cap is laid at campaign start, and the cap is stored so OPCOM can top the zone back up
-// toward it later. Each slot's type is a terrain-weighted roll over the set the loop places -- an MG
-// on a rise, a roadblock on a road. That set is intentionally narrow: OPs, minefields and the
-// fire-support types are OPCOM's to place, not rolled in at random. Each emplacement is defended by a
-// regular six-man team, drawn from the faction's roles, on top of any gun type's own crew.
+// toward it later. Each slot goes to the best of a small sampled pool of positions, so terrain and
+// mutual support pick the ground rather than chance -- a commanding, interlocking spot over a bare
+// one. Its type is then a terrain-weighted roll over the set the loop places -- an MG on a rise, a
+// roadblock on a road. That set is intentionally narrow: OPs, minefields and the fire-support types
+// are OPCOM's to place, not rolled in at random. Each emplacement is defended by a regular six-man
+// team, drawn from the faction's roles, on top of any gun type's own crew.
 //
 // Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop, so build-out cannot call it inline.
 // Idempotent per zone -- the stored cap is the guard -- so a rebuild through fnc_createZone lays no
 // second ring.
 #define HP_CAP_STEP 250
 #define HP_SITE_SPACING 50
+#define HP_SITE_SAMPLES 6
 fnc_hardpoint_site_zone = {
     params ["_zonePos", "_radius", "_zoneKey"];
     if (!isNil { missionNamespace getVariable (format ["DUWS_hpCap_%1", _zoneKey]) }) exitWith {};
@@ -180,16 +183,30 @@ fnc_hardpoint_site_zone = {
     private _tries = 0;
     while { _placed < _count && {_tries < _count * 8} } do {
         _tries = _tries + 1;
-        // Anywhere in the zone -- the whole area is fair ground for an emplacement -- on land clear of
-        // steep slope and other objects.
-        private _cand = [_zonePos, 0, _radius, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
-        private _facts = [_cand] call fnc_hardpoint_survey;
-        // Spaced off what is already down: hpDist is the distance to the nearest placed hardpoint.
-        if ((_facts select 8) < HP_SITE_SPACING) then { continue };
-        // Weighted by terrain, not argmax: each type's base commonness times the ground's score for it
-        // (the score is a multiplier, per fnc_hardpoint_score), then a weighted roll. So flat open
-        // ground leans minefield and a rise leans MG without either being the only answer. A spot every
-        // type scores 0 on is skipped.
+        // A slot is filled by the best of a sampled pool, not the first spot that clears. Each draw is
+        // anywhere in the zone (on land clear of steep slope and other objects) and is ranked by the
+        // best any placeable type scores there -- height, overwatch of the approach, interlock range to
+        // the nests already down. Still a weighted roll over the pool, not argmax: better ground is
+        // likelier, not certain, so a zone's line of guns is not identical every campaign.
+        private _pool = [];
+        for "_i" from 1 to HP_SITE_SAMPLES do {
+            private _c = [_zonePos, 0, _radius, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
+            private _f = [_c] call fnc_hardpoint_survey;
+            // Spaced off what is already down: hpDist (facts[8]) is the distance to the nearest placed
+            // hardpoint. A draw on top of one is dropped, not scored.
+            if ((_f select 8) < HP_SITE_SPACING) then { continue };
+            private _sv = 0;
+            { _sv = _sv max (([_f, _x] call fnc_hardpoint_score) * (DUWS_hardpointBaseWeight getOrDefault [_x, 1])) } forEach _types;
+            if (_sv <= 0) then { continue };  // no type can hold this spot
+            _pool pushBack [_c, _f];
+            _pool pushBack _sv;
+        };
+        if (_pool isEqualTo []) then { continue };
+        (selectRandomWeighted _pool) params ["_cand", "_facts"];
+
+        // Type by weighted roll at the chosen spot: each type's base commonness times the ground's
+        // score for it (the score is a multiplier, per fnc_hardpoint_score). So flat open ground leans
+        // one way and a rise leans MG without either being the only answer.
         private _weighted = [];
         {
             private _s = [_facts, _x] call fnc_hardpoint_score;
@@ -198,12 +215,12 @@ fnc_hardpoint_site_zone = {
                 _weighted pushBack (_s * (DUWS_hardpointBaseWeight getOrDefault [_x, 1]));
             };
         } forEach _types;
-        if (_weighted isEqualTo []) then { continue };
         private _best = selectRandomWeighted _weighted;
 
-        // Faced outward, toward the approach it defends against. Its garrison is the type's, fielded by
-        // fnc_hardpoint_spawn from DUWS_hardpointGarrison, not chosen here.
-        private _dir = _zonePos getDir _cand;
+        // The overwatch nests face down the slope they overlook; the rest face radially out toward the
+        // approach. fnc_hardpoint_facing picks between the two off the survey's fall line. Its garrison
+        // is the type's, fielded by fnc_hardpoint_spawn from DUWS_hardpointGarrison, not chosen here.
+        private _dir = [_best, _facts select 10, _facts select 11, (_zonePos getDir _cand)] call fnc_hardpoint_facing;
         private _key = format ["hp_%1_%2", _zoneKey, _placed];
         ([_best, _cand, _dir, "opfor", _key] call fnc_hardpoint_spawn) params ["_objs", "_men"];
         [_key, _best, _cand, _men, "opfor", _zoneKey] call fnc_hardpoint_register;

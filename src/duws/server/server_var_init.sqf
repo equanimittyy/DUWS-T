@@ -385,11 +385,12 @@ DUWS_hardpointStreaming = createHashMapFromArray [
     ["ARTY",      [600, 300, true,  0]]
 ];
 
-// How common each hardpoint type is before terrain -- the base weight fnc_hardpoint_score multiplies,
-// for the zone siting loop's weighted roll. MG is the backbone. The loop rolls only these four; OPs,
-// minefields and the fire-support types are OPCOM's to place, never rolled at init.
+// How common each hardpoint type is before terrain -- the base weight the siting loop multiplies the
+// terrain score by for its weighted roll. MG is the backbone; the GMG is the least common of the four,
+// a supporting weapon not a mainstay. The loop rolls only these four; OPs, minefields and the
+// fire-support types are OPCOM's to place, never rolled at init.
 DUWS_hardpointBaseWeight = createHashMapFromArray [
-    ["MG", 3], ["AT", 2], ["ROADBLOCK", 2], ["GMG", 2]
+    ["MG", 3], ["AT", 2], ["ROADBLOCK", 2], ["GMG", 1]
 ];
 
 // Readable name per hardpoint type, for the destroyed-hardpoint notification. English labels; the
