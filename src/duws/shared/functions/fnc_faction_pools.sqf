@@ -88,11 +88,29 @@ fnc_faction_resolve = {
     _out
 };
 
+// A pool is a random draw per spawn, and that only earns its keep where a faction fields
+// interchangeable variants -- infantry and vehicles. A static role holds one canonical piece, so
+// randomising there buys no variety a player sees and risks an import/proxy variant that clears the
+// detection scope gate yet cannot be createVehicle'd, standing the emplacement up gunless. Statics
+// (and any key the schema does not carry) therefore collapse to the representative with no pool, so
+// fnc_faction_pick returns that one class. Kind comes from the schema, the one place it is recorded.
+fnc_faction_poolable_keys = {
+    if (isNil "DUWS_faction_poolableKeys") then {
+        DUWS_faction_poolableKeys = [];
+        {
+            { if ((_x select 2) in ["man", "vehicle"]) then { DUWS_faction_poolableKeys pushBack (_x select 0); }; }
+                forEach ([_x] call fnc_faction_schema);
+        } forEach ["blufor", "opfor"];
+    };
+    DUWS_faction_poolableKeys
+};
+
 // The representative is the first entry rather than a random one: detection hands back classes in
 // the mod's own declaration order, which puts a faction's mainstay ahead of its variants, and a
 // stable answer is what makes the request menu and the readouts repeatable.
 fnc_faction_pools_publish = {
     params ["_names"];
+    private _poolable = call fnc_faction_poolable_keys;
     {
         private _role = _x;
         private _data = missionNamespace getVariable _role;
@@ -100,7 +118,15 @@ fnc_faction_pools_publish = {
             private _pool = if (_data isEqualType []) then { _data } else { [_data] };
             _pool = _pool select { _x isEqualType "" && {_x != ""} };
             if !(_pool isEqualTo []) then {
-                missionNamespace setVariable [format ["DUWS_factionPool_%1", _role], _pool];
+                private _poolVar = format ["DUWS_factionPool_%1", _role];
+                // Cleared, not skipped, for a non-poolable role: a Back-and-re-pick may have left a
+                // static pool from a prior round, and a stale one would keep fnc_faction_pick
+                // randomising a role this pass means to hold single.
+                if (_role in _poolable) then {
+                    missionNamespace setVariable [_poolVar, _pool];
+                } else {
+                    missionNamespace setVariable [_poolVar, nil];
+                };
                 missionNamespace setVariable [_role, _pool select 0, true];
             };
         };

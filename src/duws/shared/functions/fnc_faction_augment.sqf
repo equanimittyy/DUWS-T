@@ -2,9 +2,11 @@
 // draws from one runs on the server, so this rebuilds them where they are used and never has to
 // broadcast an array.
 //
-// Runs once at the commit, after fnc_faction_apply_locked lays the player's confirmed table over the
-// role globals. One pass closes two versions of the same shortfall -- a role holding one class where
-// its faction fields several:
+// Runs twice: at the preview, so the confirmation screen shows the pool a spawn will draw from, and
+// again at the commit, after fnc_faction_apply_locked lays the player's confirmed table over the role
+// globals so the edits are widened too. Idempotent, so the double run costs only the second parse.
+// One pass closes two versions of the same shortfall -- a role holding one class where its faction
+// fields several:
 //
 //   A hand-written faction file assigns one classname per role, so every zone it fills fields the
 //   identical man and vehicle. It never had the per-spawn variety AutoDetect gives.

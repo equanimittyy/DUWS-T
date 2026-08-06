@@ -61,10 +61,15 @@ titleText [_waiting, "PLAIN", 0];
 
 // Snapshot of what resolution produced, one row per schema key. Read once here rather than off the
 // globals per repaint, so an edit shows immediately without waiting on a server round trip.
+// From the pool broadcast rather than the role globals: a global carries only the representative, and
+// the screen shows the whole pool a spawn draws from. Falls back to the global for a key the broadcast
+// never carried -- a pool-less role, or a resolution round that predates it.
+private _previewPools = createHashMapFromArray (missionNamespace getVariable ["DUWS_factionPreviewPools", []]);
 duws_faction_table = ["blufor", "opfor"] apply {
     private _side = _x;
     [_side, ([_side] call fnc_faction_schema) apply {
-        [_x select 0, missionNamespace getVariable [_x select 0, ""]]
+        private _k = _x select 0;
+        [_k, _previewPools getOrDefault [_k, missionNamespace getVariable [_k, ""]]]
     }]
 };
 

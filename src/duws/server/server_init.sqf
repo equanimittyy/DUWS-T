@@ -90,6 +90,12 @@ while {!createzone_server} do {
 	// the player looking at a blank row the mission then quietly fills behind them.
 	{ [_x] call fnc_faction_backfill; } forEach ["blufor", "opfor"];
 
+	// Expand each role's representative into its faction's pool here, not only at the commit, so the
+	// confirmation screen can show the pool a spawn will draw from -- for a hand-written faction as
+	// much as an auto-detected one, since a static file assigns one class per role and only this pass
+	// widens it. Idempotent, and run again over the player's edits at the commit (fnc_faction_augment).
+	[] call fnc_faction_augment;
+
 	// Publish every role global the screen will show. AutoDetect broadcasts its own and a CUSTOM
 	// paste ships its assignment list, but a static faction file only assigns server-side and the
 	// OPFOR file is never run on a client at all -- so without this the screen would paint whatever
@@ -109,6 +115,22 @@ while {!createzone_server} do {
 			forEach ([_side] call fnc_faction_schema);
 	} forEach ["blufor", "opfor"];
 	publicVariable "DUWS_factionTiers";
+
+	// The pools themselves, for the confirmation screen. The per-role globals above carry only the
+	// representative, so without this the screen shows one class where a faction fields several. Kept
+	// in a structure of its own rather than the globals, which must stay single-valued: the spawn
+	// paths and the many direct readers of opfor_SOLDIER_X expect a classname, not a pool. A role with
+	// no pool -- a static, or a single-class faction -- rides its representative.
+	DUWS_factionPreviewPools = [];
+	{
+		private _side = _x;
+		{
+			private _k = _x select 0;
+			private _p = missionNamespace getVariable [format ["DUWS_factionPool_%1", _k], []];
+			DUWS_factionPreviewPools pushBack [_k, if (_p isEqualTo []) then { missionNamespace getVariable [_k, ""] } else { _p }];
+		} forEach ([_side] call fnc_faction_schema);
+	} forEach ["blufor", "opfor"];
+	publicVariable "DUWS_factionPreviewPools";
 
 	// Answers the request by number, so the screen can tell this round's rows from the last one's.
 	duws_faction_preview_ready = _serving;
