@@ -542,7 +542,7 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	// Armed by turret weapon OR pylon: a mod gunship arming through Turrets, not a pylon component, was
 	// dropped and attack-heli fell to a vanilla airframe. Union keeps the pylon path for loadout jets.
 	private _heliSeated = [ [ _factionData, "helicopters" ] call fnc_factionGetFilteredByEditorSubcat, 2,0 ] call fnc_filterBySeats;
-	private _heliByPylon = _heliSeated call fnc_filterByPylons;
+	private _heliByPylon = [_heliSeated] call fnc_filterByPylons;
 	_heliArmed =	_heliByPylon + (([ _heliSeated, true ] call fnc_filterByWeapons) select {!(_x in _heliByPylon)});
 	// Count cargo seats as well as legacy transportSoldier: a seat-proxy transport reports
 	// transportSoldier 0 and read as no transport, so TRANS fell through to the gunship. Floor of 4
@@ -552,7 +552,7 @@ _infantry = _infantry select { getNumber (configFile >> "CfgVehicles" >> _x >> "
 	_heliTransport = _heliTransport arrayIntersect _heliTransport;
 	// Same union as _heliArmed: armed by pylon or by turret weapon.
 	private _planeSeated = [ [ _factionData, "planes" ] call fnc_factionGetFilteredByEditorSubcat, 1,0 ] call fnc_filterBySeats;
-	private _planeByPylon = _planeSeated call fnc_filterByPylons;
+	private _planeByPylon = [_planeSeated] call fnc_filterByPylons;
 	_planeArmed =	_planeByPylon + (([ _planeSeated, true ] call fnc_filterByWeapons) select {!(_x in _planeByPylon)});
 	_planeTransport =	[ [ _factionData, "planes" ] call fnc_factionGetFilteredByEditorSubcat, 6,0 ] call fnc_filterBySeats;
 	[
