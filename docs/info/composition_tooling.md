@@ -299,6 +299,8 @@ says nothing at runtime:
   `DUWS_roleFallbacks` names counts as covered: `fnc_faction_backfill` borrows it at load, and
   flagging it would put a hard warning on the mission's own answer to the gap.
 
+The same resolution is gated headlessly for hand edits, which get none of the above: `tests/lint/check_compositions.py` (in `tests/run.sh`, python only) fails if a role token is absent from `fnc_faction_schema` or a `posture:token` cell names no team or vehicle. It uses the schema as the covered-set, since a required=false key is exactly a `DUWS_roleFallbacks` target.
+
 A row holding a nested list belongs in a `fields=` table. The flat editor splits typed input on
 commas, which would cut a nested list in half.
 

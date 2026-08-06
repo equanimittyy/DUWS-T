@@ -15,6 +15,9 @@ echo
 echo "== lint: retired dialogue functions =="
 python3 "$HERE/lint/check_retired.py" || rc=1
 echo
+echo "== lint: composition fences (role/token resolution) =="
+python3 "$HERE/lint/check_compositions.py" || rc=1
+echo
 
 if [ "${1:-}" = "--no-unit" ]; then
   echo "== unit tests (skipped: --no-unit) =="
