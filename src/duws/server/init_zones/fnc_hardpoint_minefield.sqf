@@ -48,13 +48,13 @@ fnc_hardpoint_minefield = {
         _mines pushBack _mine;
     } forEach ([_cols, _rows, _spacing] call fnc_hardpoint_minefield_lattice);
 
-    // Count scales with the field but caps low, and the roll makes some fields go unmarked. Placed
-    // within the inner 80% so no sign sits on the boundary it would otherwise betray. Signs are
-    // dressing, filed for teardown but kept out of the returned hazard list.
+    // Count scales with the field but caps low, floored at one so no field is left wholly unmarked.
+    // Placed within the inner 80% so no sign sits on the boundary it would otherwise betray. Signs
+    // are dressing, filed for teardown but kept out of the returned hazard list.
     private _maxSigns = (round ((_cols * _rows) / 12)) min 4;
     private _halfW = (_cols - 1) * _spacing / 2;
     private _halfD = (_rows - 1) * _spacing / 2;
-    for "_i" from 1 to (round (random _maxSigns)) do {
+    for "_i" from 1 to (1 max (round (random _maxSigns))) do {
         private _sx = ((random 2) - 1) * _halfW * 0.8;
         private _sy = ((random 2) - 1) * _halfD * 0.8;
         private _wx = _cx + _sx * cos _dir + _sy * sin _dir;
