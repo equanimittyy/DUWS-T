@@ -12,6 +12,7 @@ opfor_LAT_SOLDIER_X = 			"O_Soldier_LAT_F";	 			//Lt Anti Tank   (Patrols, Zone 
 opfor_SL_SOLDIER_X = 			"O_Soldier_SL_F";				//Squad Leader   (Patrols, Zone Guard, Team)
 opfor_TL_SOLDIER_X = 			"O_Soldier_TL_F";				//Team Leader    (Patrols, Zone Guard, Team)
 opfor_MARK_SOLDIER_X = 			"O_soldier_M_F";				//Marksman, urban   (Patrols, Zone Guard, Team)
+opfor_MEDIC_X = 				"O_medic_F";					//Line medic   (Teams, Garrison, WpTeam)
 
 opfor_CREW_X = 					"O_crew_F";						//Crew   (mission target)
 opfor_ENG_SOLDIER_X = 			"O_engineer_F";					//Engineer   (mission guard)

@@ -28,10 +28,10 @@
 // IV zone far closer than the rest of their rows suggest.
 // --DUWS-UNITCOMP BEGIN name="Zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_zoneSpawnTiers = [
-    ["closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:car", "garrison:fortified", "garrison:fortified"],
-    ["closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:wpteam", "widepatrol:wpteam", "closepatrol:car", "closepatrol:apc", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified"],
-    ["closepatrol:sniper", "closepatrol:sniper", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:wpteam", "widepatrol:wpteam", "closepatrol:car", "closepatrol:apc", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified"],
-    ["closepatrol:sniper", "closepatrol:sniper", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:wpteam", "widepatrol:wpteam", "closepatrol:car", "closepatrol:tank", "closepatrol:attackheli", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified", "garrison:fortified"]
+    ["closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:car", "garrison:garrison_element", "garrison:garrison_element"],
+    ["closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:wp_team", "widepatrol:wp_team", "closepatrol:car", "closepatrol:apc", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"],
+    ["closepatrol:sniper_element", "closepatrol:sniper_element", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:wp_team", "widepatrol:wp_team", "closepatrol:car", "closepatrol:apc", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"],
+    ["closepatrol:sniper_element", "closepatrol:sniper_element", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:wp_team", "widepatrol:wp_team", "closepatrol:car", "closepatrol:tank", "closepatrol:attackheli", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"]
 ];
 // --DUWS-UNITCOMP END--
 

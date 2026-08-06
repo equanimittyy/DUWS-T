@@ -139,7 +139,7 @@ scatter and their crews are not part of it.
 **Tier moves the whole fight, dug-in half included.** A repeated entry is how a tier fields two of
 something; nothing about the *ground* multiplies a row afterwards, and the one thing that does — the
 campaign's enemy multiplier — scales whole cards and applies to every zone alike. Most of the
-ladder's weight is in the dug-in half — the `garrison:fortified` slots — which climbs from two slots
+ladder's weight is in the dug-in half — the `garrison:garrison_element` slots — which climbs from two slots
 at tier I to six at tier IV: about thirty men at tier I against about seventy at tier IV. Hold that half flat across the rows and the ladder collapses onto the mobile half, which
 is a minority of a zone's men.
 `fnc_zone_tier_roll` refuses to roll twice. `fnc_createzone` is re-entrant by design — `zone_meta_array`
@@ -757,7 +757,7 @@ more usefully — **which of them cannot be moved alone.**
 **Two figures that are arithmetic rather than balance.** A zone's tier IV row lands on twenty groups,
 which is the campaign's spawn ceiling — raising it raises what every tier IV zone on the map costs
 the server, not just the one in front of the player. And a town's tier IV carries six `garrison:team`
-slots to match the six `garrison:fortified` on the zone's tier IV row; changing one without the other
+slots to match the six `garrison:garrison_element` on the zone's tier IV row; changing one without the other
 makes "tier IV reaches the zone benchmark" untrue.
 
 **What has no lever yet.** Nothing prices any of the purchases, because the OPFOR commander does not

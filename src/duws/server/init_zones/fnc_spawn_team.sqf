@@ -21,7 +21,7 @@
 //
 // _posture defaults to the close patrol every team walked when orders were a column on its roster
 // row, so the side-mission callers that name only a team still get what they always got. A token may
-// carry its own ("garrison:fortified"), which is what DUWS_fnc_zoneSpawnOne passes.
+// carry its own ("garrison:garrison_element"), which is what DUWS_fnc_zoneSpawnOne passes.
 params ["_team", "_center", "_radius", ["_strength", 1], ["_posture", "closepatrol"]];
 
 // grpNull rather than an empty group: DUWS_fnc_raiseGarrison already drops nulls, and a group with

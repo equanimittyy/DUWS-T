@@ -11,7 +11,7 @@ if (!isServer) exitWith {};
 // The team named in column 3 is a row on DUWS_teamRosters (shared/functions/fnc_spawn_vocab),
 // which the OPFOR zone band raises out of too: a team is a composition of roles, and the side
 // supplies the men. Rosters are shared inside this table as well -- the mechanised and armour
-// sections field the same infantry team, and the motorised section fields the recon team.
+// sections field the same team, and the motorised section fields the recon team.
 
 // The variable in the first column is the join with the request dialogs: fnc_request_squad and
 // fnc_request_squad_fob switch on a listbox index and read these names directly, so a renamed row
@@ -24,8 +24,8 @@ DUWS_bluforSquads = [
     ["blufor_RECON_TEAM_X", 8, "recon", []],
     ["blufor_INF_SQUAD_X", 12, "squad", []],
     ["blufor_MOTOR_SECTION_X", 25, "recon", ["blufor_ARMED_CAR1_X"]],
-    ["blufor_MECH_SECTION_X", 40, "infantry", ["blufor_APC1_X", "blufor_APC2_X"]],
-    ["blufor_ARMOR_SECTION_X", 50, "infantry", ["blufor_MBT_TANK1_X"]]
+    ["blufor_MECH_SECTION_X", 40, "team", ["blufor_APC1_X", "blufor_APC2_X"]],
+    ["blufor_ARMOR_SECTION_X", 50, "team", ["blufor_MBT_TANK1_X"]]
 ];
 // --DUWS-UNITCOMP END--
 

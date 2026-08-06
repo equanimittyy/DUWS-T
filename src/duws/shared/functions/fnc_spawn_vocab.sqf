@@ -64,13 +64,12 @@ DUWS_fnc_tokenPosture = {
 // --DUWS-UNITCOMP BEGIN name="Teams" kind=team row="team, roles, leader" fields="team, roles, leader" prefix=blufor_,opfor_--
 DUWS_teamRosters = [
     ["patrol", ["SOLDIER_X", "AR_SOLDIER_X"], ""],
-    ["team", ["AR_SOLDIER_X", "GL_SOLDIER_X", "MARK_SOLDIER_X", "LAT_SOLDIER_X"], "TL_SOLDIER_X"],
-    ["sniper", ["SNIPER_SOLDIER_X", "SNIPER_SOLDIER_X"], ""],
-    ["wpteam", ["SOLDIER_X", "AA_SOLDIER_X", "AT_SOLDIER_X", "SPECOPS_MEDIC_X"], "TL_SOLDIER_X"],
-    ["fortified", ["AR_SOLDIER_X", "AT_SOLDIER_X", "GL_SOLDIER_X", "SPECOPS_MEDIC_X"], "SL_SOLDIER_X"],
-    ["recon", ["SPECOPS_X", "SPECOPS_GL_X", "SPECOPS_MG_X", "SPECOPS_LAT_X"], ""],
-    ["infantry", ["GL_SOLDIER_X", "LAT_SOLDIER_X", "AR_SOLDIER_X"], "TL_SOLDIER_X"],
-    ["squad", ["SOLDIER_X", "SOLDIER_X", "GL_SOLDIER_X", "GL_SOLDIER_X", "LAT_SOLDIER_X", "LAT_SOLDIER_X", "AR_SOLDIER_X"], "SL_SOLDIER_X"]
+    ["team", ["AR_SOLDIER_X", "GL_SOLDIER_X", "MARK_SOLDIER_X", "LAT_SOLDIER_X", "MEDIC_X"], "TL_SOLDIER_X"],
+    ["sniper_element", ["SNIPER_SOLDIER_X", "SNIPER_SOLDIER_X"], ""],
+    ["wp_team", ["SOLDIER_X", "AA_SOLDIER_X", "AT_SOLDIER_X", "AT_SOLDIER_X", "MEDIC_X"], "TL_SOLDIER_X"],
+    ["garrison_element", ["AR_SOLDIER_X", "SOLDIER_X", "SOLDIER_X", "MEDIC_X"], "SL_SOLDIER_X"],
+    ["recon", ["SPECOPS_X", "SPECOPS_GL_X", "SPECOPS_MG_X", "SPECOPS_LAT_X", "SPECOPS_MEDIC_X"], ""],
+    ["squad", ["SOLDIER_X", "MARK_SOLDIER_X", "GL_SOLDIER_X", "GL_SOLDIER_X", "LAT_SOLDIER_X", "LAT_SOLDIER_X", "AR_SOLDIER_X", "MEDIC_X"], "SL_SOLDIER_X"]
 ];
 // --DUWS-UNITCOMP END--
 

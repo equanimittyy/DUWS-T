@@ -248,7 +248,7 @@ Two ideas, and keeping them apart is what makes the menus make sense:
   entry as `posture:token` — one A3 group, its orders and its roster. Typed as one string rather
   than a pair because the row editor below splits on commas and would cut a nested list in half.
 - A **token** is what one name stands for, and the Tokens menu holds every table of them: a team of
-  men (`sniper` is two snipers until you say otherwise), one vehicle, and the class-to-role map
+  men (`sniper_element` is two snipers until you say otherwise), one vehicle, and the class-to-role map
   behind a static weapon.
 
 Compositions name tokens; a token is edited in one place and referred to from many. **The unit of

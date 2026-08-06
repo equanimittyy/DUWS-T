@@ -47,6 +47,8 @@ if (_side == "opfor") exitWith {[
     ["opfor_TL_SOLDIER_X",         "INFANTRY",    "man",        true],
     ["opfor_MARK_SOLDIER_X",       "INFANTRY",    "man",        true],
     ["opfor_SNIPER_SOLDIER_X",     "INFANTRY",    "man",        true],
+    // required=false: only the default faction defines a regular medic; the rest backfill from SPECOPS_MEDIC_X.
+    ["opfor_MEDIC_X",              "INFANTRY",    "man",        false],
     ["opfor_OFFICER_X",            "INFANTRY",    "man",        true],
 
     ["opfor_ARMED_CAR1_X",         "VEHICLES",    "vehicle",    true],
@@ -102,6 +104,8 @@ if (_side == "opfor") exitWith {[
     ["blufor_TL_SOLDIER_X",        "INFANTRY",    "man",        true],
     ["blufor_MARK_SOLDIER_X",      "INFANTRY",    "man",        true],
     ["blufor_SNIPER_SOLDIER_X",    "INFANTRY",    "man",        false],
+    // required=false: only the default faction defines a regular medic; the rest backfill from SPECOPS_MEDIC_X.
+    ["blufor_MEDIC_X",             "INFANTRY",    "man",        false],
     ["blufor_OFFICER_X",           "INFANTRY",    "man",        true],
 
     ["blufor_ARMED_CAR1_X",        "VEHICLES",    "vehicle",    true],

@@ -17,6 +17,7 @@ blufor_TL_SOLDIER_X =			"B_Soldier_TL_F";				//init_hq\fnc_HQguards
 blufor_SL_SOLDIER_X =			"B_Soldier_SL_F";				//Comms voice, Multiplayer slot
 blufor_AR_SOLDIER_X =			"B_Soldier_AR_F";				//supports\fnc_paradrop, init_hq\fnc_HQguards
 blufor_MARK_SOLDIER_X =			"B_soldier_M_F";				//init_hq\fnc_HQguards
+blufor_MEDIC_X =				"B_medic_F";					//line medic (line teams + garrison_element/wp_team)
 blufor_OFFICER_X =				"B_OFFICER_F";					//init_hq\fnc_BluHQinit
 blufor_HELI_PILOT_X	=			"B_Helipilot_F";				//Rescue Pilot mission
 
