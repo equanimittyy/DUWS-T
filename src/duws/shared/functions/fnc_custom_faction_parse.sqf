@@ -1,28 +1,24 @@
 // Locality: server or client -- fnc_custom_faction_init calls it on the server,
-// fnc_custom_faction_capture on a client. It only parses text into locals, so either is
-// safe.
-// Parse pasted custom-faction text into ["<var> = <class>", ...] assignment
-// fragments, then report which required faction keys the paste left missing or
-// pointing at a class that doesn't exist. Shared by the paste screen's submit
-// validation (client) and the deferred faction build (server).
+// fnc_custom_faction_capture on a client; it only parses text into locals, so either is safe.
 //
-// Side effect: compiling the fragments assigns the faction globals. That is the
-// intent server-side; on the client it is a transient pre-check, overwritten when
-// the server's data is applied. Every schema key is cleared first so a leftover
-// value from a previous faction/paste can't mask a key this paste never defines --
-// a misspelled key (blufor_SOLDER_X) leaves its canonical name (blufor_SOLDIER_X)
-// cleared, so it is reported missing rather than silently accepted.
+// Parse pasted custom-faction text into ["<var> = <class>", ...] assignment fragments, then report
+// which required faction keys the paste left missing or pointing at a class that doesn't exist.
+// Shared by the paste screen's submit validation (client) and the deferred faction build (server).
 //
-// Clearing walks the whole schema; validation walks only its required subset. Narrowing
-// the clear to match would let an optional key survive a re-paste, so faction B would
-// field faction A's guns -- and stepping back into the faction screen re-pastes as a
-// normal navigation path, not an edge case.
+// Side effect: compiling the fragments assigns the faction globals -- intended server-side, a
+// transient pre-check on the client (overwritten when the server's data is applied). Every schema
+// key is cleared first so a leftover value can't mask a key this paste never defines: a misspelled
+// key (blufor_SOLDER_X) leaves its canonical name (blufor_SOLDIER_X) cleared, so it reports missing
+// rather than being silently accepted.
+//
+// Clearing walks the whole schema; validation walks only its required subset. Narrowing the clear to
+// match would let an optional key survive a re-paste, so faction B would field faction A's guns --
+// and re-entering the faction screen re-pastes as a normal navigation path, not an edge case.
 //
 // Returns [_pairs, _valid, _bad]:
-//   _pairs   - compiled assignment fragments (consumed by the server build)
-//   _valid   - true when every required key is set to a class that exists
-//   _bad     - full names of required keys that are missing or resolve to a
-//              non-existent class (e.g. "blufor_SOLDIER_X")
+//   _pairs - compiled assignment fragments (consumed by the server build)
+//   _valid - true when every required key is set to a class that exists
+//   _bad   - full names of required keys that are missing or resolve to a non-existent class
 
 params ["_side", "_text"];
 

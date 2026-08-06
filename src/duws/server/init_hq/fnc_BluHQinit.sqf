@@ -183,29 +183,26 @@ private _allObjectsData = [
 ];
 // --DUWS-COMPOSITION END--
 
-// The base's guns, in the same frame as the walls around them. Their own fence rather than rows on
-// the one above, because the two halves have different lifetimes: the props are built once and the
-// guns are replaced on every redeploy (misc/fnc_redeployHQUnits.sqf, which replays these rows alone
-// through fnc_placeHQUnits), and the Eden export emits nothing past the heading column -- so a
-// permanent/rebuilt flag on one array would survive only by being hand-carried back across 135 prop
-// rows on every round trip, to mark the two that are guns.
-// Do not merge them into one composition. The zone prefabs' single-fence-plus-isWeapon shape works
-// there only because a prefab is built once and never rebuilt.
+// The base's guns, in the same frame as the walls around them but on their own fence, not merged
+// into the composition above, because the two halves have different lifetimes: props are built once,
+// guns are replaced on every redeploy (misc/fnc_redeployHQUnits.sqf replays these rows alone through
+// fnc_placeHQUnits). The Eden export emits nothing past the heading column, so a permanent/rebuilt
+// flag on one merged array would survive only by being hand-carried back across 135 prop rows every
+// round trip. Do not merge them: the zone prefabs' single-fence-plus-isWeapon shape works there only
+// because a prefab is built once and never rebuilt. (The guns were originally placed off model-space
+// offsets, which is why the composition above holds 135 props and no weapon -- importing it showed a
+// firing position with no gun.)
 //
-// They were placed off model-space offsets from the sandbag and the HQ building rather than from
-// rows, which is why the composition above carries a hundred and thirty-five props and not one
-// weapon: importing it into the 3D editor showed a firing position with no gun in it.
-//
-// Height is the one thing that cannot be a row. A row's Z is discarded -- the placement loop below
-// snaps every prop to the terrain -- and these two sit above it by a measured amount that was taken
-// against an anchor's getPosWorld, because a building's own modelToWorld Z is unusable
+// Height is the one thing that cannot be a row: a row's Z is discarded (the placement loop below
+// snaps every prop to the terrain), and these two sit above it by a measured amount taken against an
+// anchor's getPosWorld, because a building's own modelToWorld Z is unusable
 // (init_hq/fnc_placeHQUnits.sqf). So the last two columns name the anchor class and the offset,
-// resolved by whatever object of that class is nearest the row: move the gun in Eden and its
-// height follows the thing it stands on.
+// resolved by whatever object of that class is nearest the row -- move the gun in Eden and its height
+// follows the thing it stands on.
 //
-// Column 5 is the faction role holding the classname, or "" for a gun resolved by its class instead.
-// The column 0 class is what the role resolves to on the stock faction, so the import draws the
-// right silhouette whether or not a mod is loaded.
+// Column 5 is the faction role holding the classname, or "" for a gun resolved by its class. The
+// column 0 class is what the role resolves to on the stock faction, so the import draws the right
+// silhouette whether or not a mod is loaded.
 // --DUWS-COMPOSITION BEGIN name="HQ Turrets" schema=A anchor=hqInComp--
 private _weaponData = [
     ["I_HMG_02_high_F", 21.6814, -13.4485, 0,  96.9, "",                  "Land_SandbagBarricade_01_hole_F", 1.21321],

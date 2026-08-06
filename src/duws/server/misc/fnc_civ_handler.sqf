@@ -1,13 +1,11 @@
 // Locality: server -- registered once for all towns by fnc_civ_init_Tomata.
 /*
-    fnc_civ_handler.sqf
     Registers every town's civilian crowd as an occupant of its site and hands the clock to the
     shared poller. No params. Returns once the hooks are in place.
 
     What is left here is the crowd's own three answers -- when it may exist, what it fills with, and
-    how it is collected -- because everything else it used to do is the same question every other
-    site asks. The poll interval, the two-sample confirm, the grace period and the presence test are
-    fnc_site_poller's now.
+    how it is collected. Everything else is the question every site asks, so the poll interval, the
+    two-sample confirm, the grace period and the presence test are fnc_site_poller's.
 
     RAVAGE and WBK keep the older trigger-driven handlers.
 */

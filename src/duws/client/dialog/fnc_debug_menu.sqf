@@ -1,6 +1,5 @@
 // Locality: client -- an addAction function value, so it runs on whoever opened the menu.
 /*
-    fnc_debug_menu.sqf
     Developer tools, attached to the player in client_init.sqf behind the Debug mission
     parameter and game_master. Rows are deliberately not localised: this is a dev surface, so
     English strings here spare the stringtable a set of tags no player ever reads.

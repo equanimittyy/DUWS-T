@@ -1,26 +1,21 @@
 // Locality: server -- called by mission threads only, all server-side.
 /*
-    NAME: missions\fnc_mission_cleanup.sqf
-
-    DESCRIPTION:
     Tears a finished side mission down: hands its composition to the map cleanup, then, once the
     player has had time to leave, deletes what the mission raised.
 
-    USAGE: reached through fnc_mission_end, which owns the rest of a thread's exit and takes the
-    same arguments. Call it directly only for a teardown that is not a mission ending.
-        [_targetpos, _radius] call fnc_mission_end;
-        [_targetpos, _radius, "mission_holdpos", true] call fnc_mission_end;
+    Reached through fnc_mission_end, which owns the rest of a thread's exit and takes the same
+    arguments; call it directly only for a teardown that is not a mission ending.
 
-    _compKey    composition to release, or "" for a mission that owns no built objects.
-    _sweepFriendly  also delete BLUFOR-configured leftovers in the radius pass. Off by default:
-                most missions spawn nothing on that side, and that pass is a blunt proximity delete.
-    _token      which mission instance this is tearing down, from fnc_mission_begin.
+    _compKey        composition to release, or "" for a mission that owns no built objects.
+    _sweepFriendly  also delete BLUFOR-configured leftovers in the radius pass. Off by default: most
+                    missions spawn nothing on that side, and that pass is a blunt proximity delete.
+    _token          which mission instance this is tearing down, from fnc_mission_begin.
 
-    Two passes. The ownership pass finishes the job: map-wide, deleting exactly what
-    fnc_mission_claim filed under this mission, so a guard ring that patrolled a kilometre out is
-    still collected. The radius pass is the backstop for anything raised without a claim, and is
-    the blunt one -- proximity cannot tell a mission's leftovers from a neighbouring garrison, which
-    is why it stands down near an enemy zone.
+    Two passes. The ownership pass finishes the job: map-wide, deleting exactly what fnc_mission_claim
+    filed under this mission, so a guard ring that patrolled a kilometre out is still collected. The
+    radius pass is the backstop for anything raised without a claim, and is blunt -- proximity cannot
+    tell a mission's leftovers from a neighbouring garrison, which is why it stands down near an enemy
+    zone.
 */
 
 params ["_targetpos", "_radius", ["_compKey", ""], ["_sweepFriendly", false], ["_token", -1]];

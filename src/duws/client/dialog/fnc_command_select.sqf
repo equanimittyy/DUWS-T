@@ -1,6 +1,5 @@
 // Locality: client -- a dialog button action, so it runs on whoever pressed it.
 /*
-    fnc_command_select.sqf
     Runs the COMMAND AND CONTROL entry whose slot the player pressed.
 
     The menu closes first only for an entry that says so, which is the three that open a dialog of

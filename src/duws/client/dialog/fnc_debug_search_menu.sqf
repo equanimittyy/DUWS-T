@@ -1,6 +1,5 @@
 // Locality: client -- the row handlers below run on whoever opened the menu.
 /*
-    fnc_debug_search_menu.sqf
     Developer tool: pick which search source to flag the object under the cursor with. Reached
     from fnc_debug_menu.sqf, which captures that object and passes it in. Strings are English-only
     for the same reason as that file.

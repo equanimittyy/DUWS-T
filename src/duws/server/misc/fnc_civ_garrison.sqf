@@ -1,6 +1,5 @@
 // Locality: server -- registered once for all towns by server/misc/fnc_civ_init_Tomata.sqf.
 /*
-    fnc_civ_garrison.sqf
     Owns every town's OPFOR garrison: raise one when BLUFOR arrive at a town the enemy holds,
     reinforce it as the commander buys, stream it out once the town has been empty long enough,
     and settle up when it is cleared. No params. Returns once the hooks are in place.

@@ -1,6 +1,5 @@
 // Locality: server -- civilians are local to it, and doMove is ignored on any other machine.
 /*
-    fnc_civ_panic.sqf
     Breaks one civilian off whatever they were doing and sends them away from a shot, into the
     nearest building if there is one. Params: [_unit, _firer, _spread].
 */

@@ -2,7 +2,6 @@
 // broadcast for the same reason: the search action's condition is evaluated on the client that
 // would draw it.
 /*
-    fnc_debug_search_flag.sqf
     Developer tool: mark whatever the caller was looking at as searchable under a chosen source,
     so a payout table can be exercised on a chair instead of on a garrison that has to be fought
     first. Reached from client/dialog/fnc_debug_search_menu.sqf.

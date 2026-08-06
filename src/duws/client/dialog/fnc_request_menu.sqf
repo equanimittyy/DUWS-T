@@ -1,14 +1,12 @@
 // Locality: client -- an addAction function value, so it runs on whoever opens the menu.
 /*
-    fnc_request_menu.sqf
-    The one request dialog, for the HQ and for every FOB. The FOB used to have a copy of this
-    file and a copy of the layout with three listbox IDCs renamed; it differs in three things
-    and no more: a shorter unit and vehicle list, a squad list without the heavy sections, and
-    no supports at all.
+    The one request dialog, for the HQ and for every FOB. A FOB differs from the HQ in three things
+    and no more: a shorter unit and vehicle list, a squad list without the heavy sections, and no
+    supports at all.
 
-    _this is the addAction argument array -- [target, caller, id, args] -- where args is [true]
-    at a FOB. The target is the base the menu was opened on, which the command column needs: a
-    redeploy rebuilds that base's garrison.
+    _this is the addAction argument array -- [target, caller, id, args] -- where args is [true] at a
+    FOB. The target is the base the menu was opened on, which the command column needs: a redeploy
+    rebuilds that base's garrison.
 
     Every global read here belongs to another file and reaches this one by broadcast, so each read
     falls back rather than naming the global bare. An SQF runtime error unwinds the whole script and

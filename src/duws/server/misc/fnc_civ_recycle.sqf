@@ -1,7 +1,6 @@
 // Locality: server -- driven by the town monitor thread in fnc_civ_handler_ravage, the only
 // caller left since the plain civilian path moved onto the enemy-zone streaming model.
 /*
-    fnc_civ_recycle.sqf
     One pass of a town's civilian stream: drop the people the players have walked away from, and
     refill the crowd around where the players actually are. Params: [_locIndex].
 

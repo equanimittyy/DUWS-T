@@ -1,6 +1,5 @@
 // Locality: server -- reads zone state published by the zone locators.
 /*
-    fnc_civ_selectTowns.sqf
     Picks the map towns that should carry a civilian population: real Locations near the
     fighting, ranked by how many usable buildings they hold. Returns [selected, spare] as
     [location, buildingCount, hqQuota, buildings] quads -- the towns to register, and a

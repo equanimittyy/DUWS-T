@@ -1,6 +1,5 @@
 // Locality: all machines; both actions it adds run on the machine that triggers them, not here.
 /*
-    fnc_civ_clientActions.sqf
     Adds a civilian's two scroll actions in one broadcast.
 
     Kept as a single remoteExec so the unit itself can serve as the JIP id: the engine drops a

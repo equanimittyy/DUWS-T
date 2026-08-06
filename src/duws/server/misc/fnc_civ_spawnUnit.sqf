@@ -1,6 +1,5 @@
 // Locality: server -- creates the unit; the interaction actions it broadcasts run on clients.
 /*
-    fnc_civ_spawnUnit.sqf
     Creates one civilian for a town, wired for interaction, reputation and recycling.
     Params: [_locIndex, _pos, _unitType, _isZombie]. Returns the unit, or objNull.
 */

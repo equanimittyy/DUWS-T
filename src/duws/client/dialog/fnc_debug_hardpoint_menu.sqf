@@ -1,6 +1,5 @@
 // Locality: client -- the row handlers run on whoever opened the menu. Reached from fnc_debug_menu.
 /*
-    fnc_debug_hardpoint_menu.sqf
     Developer tool: pick a hardpoint type, then click the open map to stand it up there, guns resolved
     to the side passed in. Reached from fnc_debug_menu.sqf. Strings are English-only for the same reason
     as that file. _this is the side, "opfor" or "blufor".

@@ -1,6 +1,5 @@
 // Locality: server -- both waypoints and ambient poses are ignored unless the group is local.
 /*
-    fnc_civ_wp_Tomata.sqf
     Gives a freshly spawned crowd something to do: part of it stands and poses, the rest walks a
     short circuit near where it spawned. Params: [_groups, _buildings].
 */

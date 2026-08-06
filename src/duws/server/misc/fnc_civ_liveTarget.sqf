@@ -1,6 +1,5 @@
 // Locality: server -- reads the per-town population and occupancy state the handler publishes.
 /*
-    fnc_civ_liveTarget.sqf
     How many civilians one town may hold at this moment: its own demand, thinned if the towns
     currently occupied add up to more than the campaign-wide ceiling.
     Params: [_density, _locIndex]. Returns a count.

@@ -1,24 +1,17 @@
 // Locality: server -- every mission thread and both patrol builders run there.
 /*
-    NAME: missions\fnc_mission_claim.sqf
-
-    DESCRIPTION:
     Files living entities under the mission that raised them, so the teardown collects by ownership
-    rather than by proximity. A guard ring patrols out to its own radius and a spawned car drives,
-    so what a radius sweep caught depended on where the AI had wandered by the time it ran.
+    rather than by proximity: a guard ring patrols out to its own radius and a spawned car drives, so
+    what a radius sweep caught depended on where the AI had wandered by the time it ran.
 
-    USAGE: groups or units, one or many.
-        [_group] call fnc_mission_claim;
-        [[_grpA, _grpB]] call fnc_mission_claim;
-
-    Props are not claimed here: fnc_duws_keep tracks them by composition key, and refuses living
-    entities for the mirror-image reason.
+    Accepts groups or units, one or many. Props are not claimed here -- fnc_duws_keep tracks them by
+    composition key and refuses living entities, the mirror image.
 
     Never claim what a mission hands the player -- a rescued squad, a recruited civilian, a captured
     vehicle. A claim is a deletion order.
 
-    The token defaults to the running mission's: only fnc_mission_begin advances it, and it cannot
-    run while Mission_available is false.
+    The token defaults to the running mission's: only fnc_mission_begin advances it, and it cannot run
+    while Mission_available is false.
 */
 
 if (!isServer) exitWith {};

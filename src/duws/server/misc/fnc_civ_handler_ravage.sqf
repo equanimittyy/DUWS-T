@@ -1,6 +1,5 @@
 // Locality: server; the trigger bodies that call this run on the machine that triggers them.
 /*
-    fnc_civ_handler_ravage.sqf
     RAVAGE crowd handling for one town: spawn and cleanup. Params: [_locIndex, _mode],
     _mode "spawn" or "cleanup".
 

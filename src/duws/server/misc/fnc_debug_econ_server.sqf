@@ -1,6 +1,5 @@
 // Locality: server -- the debug window remoteExecs to target 2.
 /*
-    fnc_debug_econ_server.sqf
     The half of the CP/AP/town/escalation debug tool that has to run on the server: everything
     below the two campaign pools is server-only state. civ_locations, civ_town_rep, civ_town_ap and
     the escalation counters are never broadcast, so the window cannot read them and cannot write

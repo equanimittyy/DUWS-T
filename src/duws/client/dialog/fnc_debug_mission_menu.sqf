@@ -1,6 +1,5 @@
 // Locality: client -- the row handlers below run on whoever opened the menu.
 /*
-    fnc_debug_mission_menu.sqf
     Developer tool: start one side-mission type immediately, ignoring its cooldown and the
     global mission lock. Reached from fnc_debug_menu.sqf. Strings are English-only for the
     same reason as that file.

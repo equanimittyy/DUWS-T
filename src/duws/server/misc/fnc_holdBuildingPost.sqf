@@ -7,17 +7,15 @@
 // re-derive which building each unit belongs to on every pass, where a per-unit loop captures the
 // building and its position list for free.
 //
-// **Neither mode may outlive an order given later.** A zone that falls sends its survivors off with
-// a MOVE waypoint, and a hold that goes on asserting a position beats that order every time -- so
-// the garrison stayed in its houses and was collected on distance instead of walking out. PIN is a
-// one-shot for that reason and HERD stands down when its post is released.
+// **Neither mode may outlive an order given later.** A zone that falls sends its survivors off with a
+// MOVE waypoint, and a hold that goes on asserting a position beats that order -- the garrison would
+// stay in its houses and be collected on distance instead of walking out. PIN is a one-shot for that
+// reason, and HERD stands down when its post is released.
 //
-// PIN places once, lets the unit settle, and places it again. The re-place is the whole body: a
-// setPosATL taken on the frame a unit spawns is routinely undone as the engine beds it into the
-// geometry, and a tower guard that lands beside his catwalk instead of on it is not a tower guard.
-// It used to hold that spot for the unit's whole life on a 3 m leash, which is what fought the
-// withdrawal -- and cost a permanent thread per man for a unit that has no waypoints to wander on
-// anyway.
+// PIN places once, lets the unit settle, and places it again: a setPosATL taken on the frame a unit
+// spawns is routinely undone as the engine beds it into the geometry, and a tower guard beside his
+// catwalk instead of on it is not a tower guard. It is not a persistent leash -- that fought the
+// withdrawal and cost a thread per man for a unit with no waypoints to wander anyway.
 //
 // _stance "" leaves the caller's stance alone. intel_gathering picks UP or MIDDLE per unit, and
 // re-asserting one stance here would flatten every prone-ish unit to standing.

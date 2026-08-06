@@ -1,52 +1,37 @@
-// Locality: server -- run from server/server_fnc_init.sqf to publish the grammar and table below.
-// Every reader raises men, which only the server does.
+// Locality: server -- published from server/server_fnc_init.sqf. Everything downstream raises men,
+// which only the server does.
 //
-// The shared half of the spawn vocabulary: what a composition token is made of, and every team
-// either side fields. The rest of the framework -- the vehicles and the zone tiers that name them
-// -- is init_zones/fnc_zone_spawn_sizes, which is OPFOR's and loads later.
+// The shared half of the spawn vocabulary: the composition-token grammar and the team rosters both
+// sides field. Vehicles and the zone tiers that name them are OPFOR's and load later, in
+// init_zones/fnc_zone_spawn_sizes.
 //
-// Its own file rather than a block inside the zone spawn band, for a load-order reason: the BLUFOR
-// squad catalogue is built at server_init before that band is spawned, so a table living there
-// would not exist yet when the first squad is priced. The token grammar comes along because the
-// roster lookup below is written in terms of it.
+// Its own file for a load-order reason: the BLUFOR squad catalogue is built at server_init, before
+// the zone-spawn band runs, so a table living in that band would not exist yet when the first squad
+// is priced. The token grammar rides along because the roster lookup below is written in terms of it.
 //
-// A row is self-describing on purpose: a team added here is spawnable without touching code, which
-// is what makes the composition tool able to add one at all.
+// Rows are data: a team added here is spawnable without touching code, which is what lets the
+// composition tool add one at all. Roles are named bare and the side is prepended when the team is
+// raised, so one table serves both armies -- fnc_faction_schema holds the shared role vocabulary and
+// fnc_faction_backfill covers a role one side's files never named.
 //
-// Roles are named bare and the side is prepended when the team is raised, which is the whole point
-// of one table: `recon` is the same four roles whoever stands it up, and each side fills them from
-// its own faction. It only works because both sides spell a role the same way -- fnc_faction_schema
-// holds the shared vocabulary, and fnc_faction_backfill covers a role one side's files never named.
+// Named, not referenced: a faction table that omits a role leaves its global nil, and a nil inside an
+// array literal cannot be tested for after the fact -- BIS_fnc_spawnGroup takes it and quietly raises
+// a group one man short. Named, it resolves to "" and fnc_factionRoles drops it.
 //
-// Named rather than referenced for a second reason: a faction table that omits a role leaves its
-// global undefined, and an undefined name inside an array literal is not something the spawner can
-// test for afterwards -- BIS_fnc_spawnGroup takes the nil and quietly raises a group one man short.
-// Named, it resolves to "" and fnc_factionRoles drops it.
-//
-// A row is the men and nothing about how many of the team there are. The enemy multiplier used to
-// reach inside here, repeating a "core" column while a "tail" column was added once so a x3 setting
-// fielded one marksman rather than three -- two columns and a rule, to express a count. It scales
-// whole cards now (DUWS_fnc_scaleComposition), so a x3 zone fields three of this team rather than
-// one team three times the size, and the row is just a role list with at most one leader at the
-// front.
-//
-// A team is what an A3 group is made of and nothing about what it does. The orders used to be a
-// column here, which meant a roster and one set of orders were a single decision: fielding these
-// same men dug in rather than patrolling took a second row with an identical roster. A composition
-// names the posture now, so one roster covers both.
+// A row is the roster and nothing about how many: DUWS_fnc_scaleComposition scales whole cards, so a
+// x3 zone fields three of this team rather than one team tripled. At most one leader, at the front.
+// Posture is not a column either -- a composition names it, so one roster covers a patrol and a
+// dug-in garrison without a duplicate row.
 
-// A composition token is "posture:name" -- what the group does, and what it is made of. Splitting
-// them is what stops a roster and its orders being one decision: the same five men are a patrol at
-// one zone and a house garrison at the next without a second roster row that duplicates the first.
+// A composition token is "posture:name" -- what the group does and what it is made of. Separating
+// them stops a roster and its orders being one decision: the same five men patrol at one zone and
+// garrison a house at the next without a duplicate roster row.
 //
-// One string rather than a nested pair because these tables are edited through the composition TUI,
-// whose row editor splits typed input on commas and would cut a nested list in half
-// (docs/info/composition_tooling.md). It also leaves DUWS_fnc_spawnDiff comparing strings, so a town
-// reinforcement still diffs what is standing against what is owed without knowing about postures.
+// One string, not a nested pair, because these tables are edited through the composition TUI, whose
+// row editor splits input on commas and would cut a nested list in half
+// (docs/info/composition_tooling.md). It also leaves DUWS_fnc_spawnDiff comparing plain strings.
 //
-// A bare name gets a close patrol, which is the circuit every team and every vehicle walked back when
-// orders were a property of the roster. So a caller that names no posture -- a side mission raising a
-// guard ring, a faction file naming a vehicle classname -- still gets what it has always got.
+// A bare name defaults to closepatrol, so a caller that names no posture still gets what it always got.
 DUWS_fnc_tokenName = {
     params ["_token"];
     private _parts = _token splitString ":";
@@ -73,10 +58,9 @@ DUWS_teamRosters = [
 ];
 // --DUWS-UNITCOMP END--
 
-// The row behind a token, or [] when nothing claims it -- which is how the spawn path tells a team
-// from a vehicle from a classname a faction file named directly.
-// Stripped here rather than at every call site: a token carries its posture everywhere it travels,
-// and a lookup that matched the whole string would find no row for "closepatrol:team".
+// The row behind a token, or [] when nothing claims it -- how the spawn path tells a team from a
+// vehicle from a bare classname. Posture is stripped here, not at each call site: a lookup on the
+// whole string would find no row for "closepatrol:team".
 DUWS_fnc_teamRow = {
     params ["_token"];
     private _name = [_token] call DUWS_fnc_tokenName;
@@ -84,22 +68,18 @@ DUWS_fnc_teamRow = {
     if (_i < 0) then { [] } else { DUWS_teamRosters select _i }
 };
 
-// A team's men, in spawn order. _side is required rather than defaulted: a row names roles bare, so
-// a caller that forgot to say would silently raise the other army.
-//
-// One team, always: how many of it a site fields is the composition's business, not this function's.
-// _strength is attrition, and it is applied before the leader joins the men, so a section ground
-// down still has one rather than sometimes losing it to a coin flip.
-// An unknown token yields nothing rather than a fallback group -- the caller named a team that does
-// not exist, and inventing men for it would hide the typo behind a garrison that spawns.
+// A team's men, in spawn order. _side is required, not defaulted: a row names roles bare, so a
+// caller that forgot would silently raise the other army. One team always -- how many a site fields
+// is the composition's business. _strength is attrition, applied before the leader joins so a
+// ground-down section keeps its leader rather than losing it to a coin flip. An unknown token yields
+// nothing, not a fallback group: inventing men would hide the typo behind a garrison that spawns.
 DUWS_fnc_teamRoster = {
     params ["_token", "_side", ["_strength", 1]];
     private _row = [_token] call DUWS_fnc_teamRow;
     if (_row isEqualTo []) exitWith { [] };
     _row params ["", "_roles", "_leader"];
-    // Copied, not aliased. The row belongs to the shipped table, so anything written through this
-    // local would edit every later team built from it, for the rest of the session and invisibly.
-    // The shape this replaces built a fresh list by appending and got that for free.
+    // Copied, not aliased: the row belongs to the shipped table, so writing through this local would
+    // silently edit every later team built from it for the rest of the session.
     private _men = +_roles;
     if (_strength < 1) then { _men = [_men, _strength] call fnc_zone_thin };
     private _names = [];

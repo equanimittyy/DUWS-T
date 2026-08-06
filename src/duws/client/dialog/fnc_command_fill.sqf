@@ -1,26 +1,20 @@
 // Locality: client -- called from the request dialog, so it runs on whoever opened it.
 /*
-    fnc_command_fill.sqf
-    Fills the COMMAND AND CONTROL button column. One builder for the HQ and every FOB, since a FOB
-    carries the same command set minus what only the HQ has.
+    Fills the COMMAND AND CONTROL button column -- one builder for the HQ and every FOB, since a FOB
+    carries the same command set minus what only the HQ has. What lives here vs the scroll wheel is
+    whoever needs it without asking command.
 
-    The dividing line against the scroll wheel is who needs it and how fast: anything a player
-    reaches for without asking command sits on the prop it belongs to instead.
+    An entry that cannot apply is absent, not greyed: request_menu.hpp declares numbered slots with
+    no text, applicable entries are written in top-down and the rest hidden, so a missing one leaves
+    no hole. Overflow is a layout error and is logged.
 
-    An entry that cannot apply is absent rather than greyed, which is why request_menu.hpp declares
-    numbered slots with no text: applicable entries are written in from the top down and the rest
-    hidden, so a missing one leaves no hole. Overflow is a layout error, so it is logged.
-
-    Row shape: [label, code, args, closes, colour], stashed for fnc_command_select because a
-    control's action is a string and CODE cannot ride in the button.
+    Row shape: [label, code, args, closes, colour], stashed for fnc_command_select because a control's
+    action is a string and CODE cannot ride in the button.
 
     `closes` is set only on the three entries that open a dialog of their own, which would otherwise
-    stack on top of this one. Everything else leaves the menu up: a player buying two things in a row
-    had to walk back to the HQ prop between them.
-
-    `colour` marks what an entry costs, since the labels carry the figure but nothing carries the
-    fact that it is spent the moment you click. Orange is the same "costs money, not yet yours"
-    signal the supports catalogue paints unbought permanents with.
+    stack on this one; everything else leaves the menu up, so buying two things in a row needs no walk
+    back to the HQ prop. `colour` marks what an entry costs -- orange is the same "costs money, not
+    yet yours" signal the supports catalogue paints unbought permanents with.
 */
 #define COST_COLOUR [1, 0.502, 0, 1]
 

@@ -1,22 +1,15 @@
 // Locality: server -- inherited from server/server_init.sqf.
 /*
-    NAME: misc\fnc_repetitive_cleanup.sqf
+    Deletes what play leaves behind: bodies, wrecks, any vehicle left standing empty, dropped
+    weapons, spent smoke, supply crates and parachutes. One lifetime covers all of it, set by the
+    DUWS_CleanupLifetime parameter (0 or less disables the sweep).
 
-    DESCRIPTION:
-    Deletes what play leaves behind: bodies, wrecks, any vehicle left standing with nobody in it,
-    dropped weapons, spent smoke, supply crates and parachutes. One lifetime covers all of it,
-    set by the DUWS_CleanupLifetime parameter.
+    Anything carrying the persistent flag is never touched, whatever its age. fnc_duws_keep sets that
+    flag and files the object under a composition (the HQ, a FOB, a zone prefab, a side-mission
+    objective); fnc_duws_release drops it and hands the parts back here.
 
-    USAGE:
-        [1800] spawn fnc_repetitive_cleanup;   // seconds; 0 or less disables the sweep
-
-    Anything carrying the persistent flag is never touched, whatever its age. fnc_duws_keep
-    sets that flag and files the object under a composition -- the HQ, a FOB, a zone prefab, a
-    side-mission objective -- and fnc_duws_release drops it and hands the parts back here.
-
-    Planted explosives are deliberately absent. They were listed and disabled; folding them
-    into the shared lifetime would start deleting charges a player placed and meant to return
-    to, which is a gameplay change rather than a cleanup one.
+    Planted explosives are deliberately absent: folding them into the shared lifetime would delete
+    charges a player placed and meant to return to, a gameplay change rather than a cleanup one.
 */
 
 if (!isServer) exitWith {};

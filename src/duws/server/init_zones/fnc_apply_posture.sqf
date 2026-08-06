@@ -1,13 +1,9 @@
 // Locality: server -- addWaypoint, setBehaviour and setPos are ignored unless the group is local to
 // the machine issuing them (docs/info/arma_engine_gotchas.md); every caller spawns server-side.
 //
-// usage: [_group, _posture, _centre, _radius, _anchors] call fnc_apply_posture
-//
-// A group's standing orders, held apart from what the group is made of. These were a column on
-// DUWS_teamRosters read by a switch inside fnc_spawn_team, which welded a roster to one set of
-// orders: fielding the same five men dug in rather than patrolling meant a second roster row with an
-// identical roster. A composition names a posture and a team independently instead, so one roster
-// covers both and the orders are a property of the ground rather than of the men.
+// A group's standing orders, held apart from what the group is made of: a composition names a posture
+// and a team independently, so one roster covers both and the orders are a property of the ground
+// rather than of the men.
 //
 // Shared by the zone band, the town garrison, the mission patrol builders and the base guards, which
 // is why it takes a group already standing rather than raising one: a vehicle crew and a rifle

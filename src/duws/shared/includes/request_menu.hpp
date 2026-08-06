@@ -1,29 +1,21 @@
 // The request dialog, shared by the HQ and every FOB. fnc_request_menu fills it and hides the
-// SUPPORTS strip at a FOB, where supports cannot be bought -- the FOB used to have a dialog of
-// its own that was this one with three listbox IDCs renamed and a dead supports box.
+// SUPPORTS strip at a FOB, where supports cannot be bought.
 //
-// Laid out on the 40x25 GUI grid as a main window with the supports strip appended right, and one
-// blank row under both carrying the exit. The window holds MISSIONS over COMMAND AND CONTROL; the
-// strip is the supports catalogue, two dozen rows needing the full height rather than being
-// scrolled blind.
+// Laid out on the 40x25 GUI grid: a main window (MISSIONS over COMMAND AND CONTROL) with the
+// supports catalogue as a strip appended right, and one blank row beneath carrying the exit. The
+// strip needs full height for its two dozen rows rather than being scrolled blind.
 //
 // The grid is absolute -- 40 cells is the whole screen width -- so the strip's width comes out of
-// the main window rather than being added on the right, where there is nothing left. At this split
-// the window's floor is its COMMAND AND CONTROL row, a request frame beside a command button that
-// cannot stack. A strip wider than this one means dropping labels, so past here supports leave the
-// dialog for a screen of their own.
+// the main window, not off the right edge where nothing is left. At this split the window's floor is
+// its COMMAND AND CONTROL row; a wider strip would have to drop labels, so past here supports move
+// to a screen of their own.
 //
-// Every button, combo, caption and list row carries sizeEx 0.025, and a control is as wide as its
-// own label needs rather than an even share of its row. The two go together: one text size across
-// the dialog is only affordable because nothing has to shrink to fit a share it never earned.
-// Sizes set per row drifted apart by whichever pass last touched the row, and the dialog read as
-// three different menus stacked together.
+// One text size across the dialog: every button, combo, caption and row is sizeEx 0.025 and each
+// control is as wide as its own label needs. That is only affordable because nothing shrinks to fit
+// a share it never earned -- per-row sizes drift apart and read as three menus stacked.
 //
-// The two categories are a header and a rule rather than boxes. A box around each drew three nested
-// frames on the same content (window, category, group) and spent the vertical room the left column
-// needed; the header still names the category and the rule still separates them.
-//
-// Every button is 1.5 grid cells tall; sizes used to run 1 or 1.5 by whichever pass added them.
+// The two categories are a header and a rule, not boxes: a box each drew three nested frames on the
+// same content and ate the vertical room the left column needed. Every button is 1.5 grid cells tall.
 class ressourceheader
 {
     idd = -1;

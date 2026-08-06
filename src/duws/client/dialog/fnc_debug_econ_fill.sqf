@@ -1,6 +1,5 @@
 // Locality: the client that asked -- fnc_debug_econ_server answers this with its snapshot.
 /*
-    fnc_debug_econ_fill.sqf
     Draws the server-only half of the debug economy window: the town list and the escalation
     readout. Arrives asynchronously, so it finds its own controls by IDC rather than being handed
     them, and does nothing if the window has since been closed.

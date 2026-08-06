@@ -1,6 +1,5 @@
 // Locality: client -- the button handlers below run on whoever opened the menu.
 /*
-    fnc_debug_econ_menu.sqf
     Developer tool: type a signed amount, click what it lands in. The two campaign pools are read
     and written from here; a town's reputation and worth and the escalation counter are server-only
     state, so those arrive from fnc_debug_econ_server and their edits go back to it.

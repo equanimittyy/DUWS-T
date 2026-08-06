@@ -1,11 +1,9 @@
 // Locality: server -- called from the zone spawn band, the town garrison and the mission patrol
 // builders, all server-side.
-// usage: [token, position, radius, strength, posture] call fnc_spawn_team
-// radius: 50 for a patrol inside a base, 500 for medium, 1300 for island
+// radius: 50 for a patrol inside a base, 500 for medium, 1300 for island.
 //
-// Every OPFOR team is raised here. This replaced four files that differed only in their roster and
-// in which of two waypoint blocks they ran, which is why a new team used to mean a new file: a team
-// is a row on DUWS_teamRosters now, and the orders it stands up under are fnc_apply_posture's.
+// Every OPFOR team is raised here: a team is a row on DUWS_teamRosters, and the orders it stands up
+// under are fnc_apply_posture's.
 //
 // The side is named where the roster is asked for, not carried as a parameter: that table is shared
 // with BLUFOR and holds bare role names, while everything below -- EAST, opfor_ai_skill -- is this

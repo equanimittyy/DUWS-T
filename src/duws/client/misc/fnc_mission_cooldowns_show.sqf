@@ -1,11 +1,7 @@
 // Locality: client -- reads the mission clock and hints, so it runs on whoever asked.
 /*
-    fnc_mission_cooldowns_show.sqf
-    The side-mission cooldown readout, once. The HQ and FOB each carried their own copy of
-    this list as a hand-written switch over mission type, and the two had already drifted.
-
-    Names come from the shared definition table, whose row order is the mission type, so a
-    new side mission needs no edit here.
+    The side-mission cooldown readout, once. Names come from the shared definition table, whose row
+    order is the mission type, so a new side mission needs no edit here.
 */
 if (!hasInterface) exitWith {};
 

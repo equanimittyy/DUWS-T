@@ -1,38 +1,28 @@
 // Locality: any -- a pure table, reads no engine or mission state.
 //
-// The one place the DUWS role schema is written down: every key a side must fill, in the order
-// the faction files fill them, carrying the facts no previous list held -- which section of the
-// faction confirmation screen a key belongs to, what kind of class may sit in it, and whether a
-// pasted faction has to define it at all.
+// The one place the DUWS role schema is written down: every key a side must fill, in fill order,
+// with the section, class kind, and required flag no earlier list carried. Three consumers used to
+// hold their own copy (fnc_custom_faction_parse's required keys, the two AutoDetect pool-publish
+// lists); a fourth for the confirmation screen would only have let the copies disagree.
 //
-// Three consumers each held their own copy of this before: fnc_custom_faction_parse's required
-// keys, and the two AutoDetect wrappers' pool-publish lists. A fourth copy for the confirmation
-// screen would have made the copies disagree with each other rather than any one of them wrong.
-//
-// Returns [[key, group, kind, required], ...]:
+// Returns [key, group, kind, required]:
 //   key      - full global name, e.g. "blufor_AR_SOLDIER_X"
-//   group    - "INFANTRY" | "VEHICLES" | "STATIC" | "OPERATORS" | "SPECIAL"; the confirmation
-//              screen's section
-//   kind     - "man" | "vehicle" | "static"; which CfgVehicles branch the key editor may offer
-//   required - whether a pasted custom faction must define it. False marks a key added after the
-//              shipped faction files were written: every paste a player already has would fail
-//              validation on a key nothing in factions/MODERN/ defines either. The resolver's
-//              fallback covers the empty key instead. Clearing still walks every key, required or
-//              not, or a re-paste would leave the previous faction's value standing.
+//   group    - INFANTRY | VEHICLES | STATIC | OPERATORS | SPECIAL; the confirmation screen's section
+//   kind     - man | vehicle | static; which CfgVehicles branch the key editor may offer
+//   required - must a pasted custom faction define it. False marks a key added after the shipped
+//              faction files: an existing paste has no value for it and nothing in factions/MODERN/
+//              defines it either, so the resolver's fallback covers the empty key. Clearing still
+//              walks every key regardless, or a re-paste would leave the previous faction's value.
 //
-// Both sides spell a role the same way and hold it in the same position, so a composition can name
-// a role bare and the side supplies the man (DUWS_teamRosters). The four shared sections hold the
-// same keys in the same order on both sides, which is what lets the confirmation screen put a role
-// on one line across two columns instead of padding around the mismatch.
+// Both sides spell a role the same way in the same position, so a composition names a role bare and
+// the side supplies the man (DUWS_teamRosters). The four shared sections hold matching keys in
+// matching order, which lets the confirmation screen put a role on one line across two columns.
+// SPECIAL is what genuinely belongs to one side (BLUFOR's boat taxi and rescue pilot, OPFOR's supply
+// trucks and mission-thread roles); filing those shared would gap the other column at every row below.
 //
-// SPECIAL is what genuinely belongs to one side: BLUFOR's boat taxi and rescue pilot, OPFOR's
-// supply trucks and the roles only its mission threads raise. Filing them in a shared section would
-// put a gap in the other column at every row below them.
-//
-// The request-menu catalogues (blufor_RQST_UNITS / blufor_RQST_VEHICLES) are deliberately absent:
-// they are variable-length ordered lists with no OPFOR counterpart, fnc_faction_rqst_list already
-// carries fallbacks for a faction that leaves them short, and neither the validation nor the
-// one-row-per-key screen can express a list.
+// The request-menu catalogues (blufor_RQST_UNITS / blufor_RQST_VEHICLES) are absent on purpose:
+// variable-length ordered lists with no OPFOR counterpart, fnc_faction_rqst_list already has
+// fallbacks, and neither validation nor the one-row-per-key screen can express a list.
 
 params [["_side", "blufor"]];
 
@@ -81,9 +71,8 @@ if (_side == "opfor") exitWith {[
     ["opfor_CREW_X",               "SPECIAL",     "man",        true],
     ["opfor_OPERATOR_X",           "SPECIAL",     "man",        true],
     ["opfor_AA_APC_X",             "SPECIAL",     "vehicle",    true],
-    // SPECIAL rather than VEHICLES: the shared sections hold the same keys in the same order on both
-    // sides, and only OPFOR fields a gun. The player's own artillery is a support call that spawns
-    // shells, not a piece anything raises.
+    // SPECIAL, not VEHICLES: shared sections stay aligned across sides and only OPFOR fields a gun.
+    // The player's own artillery is a support call that spawns shells, not a raised piece.
     ["opfor_ARTY_X",               "SPECIAL",     "vehicle",    false],
     ["opfor_TRANS_TRUCK_X",        "SPECIAL",     "vehicle",    true],
     ["opfor_COVERED_TRUCK_X",      "SPECIAL",     "vehicle",    true],
