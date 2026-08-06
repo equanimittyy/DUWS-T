@@ -224,13 +224,11 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     };
 }]];
 
-// [_key, _type, _pos, _men, _side, _garrison, _zoneKey] call fnc_hardpoint_register
-//
 // Files the hardpoint as a streamed site and adopts the composition and men it was just built with.
-// The streaming spec is the type's, not the caller's: spawnRadius, grace, neverStream and airRing all
-// come from DUWS_hardpointStreaming, so the dev tool, the zone loop and OPCOM all site a given type
-// the same way and one table tunes them. hpSide and hpGarrison are the serialisable spec a later
-// raise rebuilds from.
+// The streaming spec is the type's, not the caller's: spawnRadius, grace, neverStream and airRing come
+// from DUWS_hardpointStreaming and the loose garrison from DUWS_hardpointGarrison, so the dev tool, the
+// zone loop and OPCOM all site a given type the same way and one pair of tables tunes them. hpSide and
+// the garrison token are the serialisable spec a later raise rebuilds from.
 //
 // A standalone hardpoint streams on player presence over its own ring; a zone one -- a _zoneKey names
 // its parent -- instead mirrors that zone's garrison, so a zone's whole defence rises and falls
@@ -246,13 +244,13 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
 // _zoneKey ties the hardpoint to a parent zone: it drives streaming (the hardpoint follows that zone)
 // and rides the DUWS_hardpoints row for OPCOM. "" is a standalone hardpoint on its own ring.
 fnc_hardpoint_register = {
-    params ["_key", "_type", "_pos", ["_men", []], ["_side", "opfor"], ["_garrison", []], ["_zoneKey", ""]];
+    params ["_key", "_type", "_pos", ["_men", []], ["_side", "opfor"], ["_zoneKey", ""]];
     (DUWS_hardpointStreaming getOrDefault [_type, [600, 300, false, 0]])
         params ["_radius", "_grace", "_neverStream", "_airRing"];
     [_key, _pos, _radius, "stream"] call fnc_site_register;
     private _occ = [_key, "garrison", EAST, 0, _grace, true, false] call fnc_site_occupant_register;
     _occ set ["hpSide", _side];
-    _occ set ["hpGarrison", _garrison];
+    _occ set ["hpGarrison", DUWS_hardpointGarrison getOrDefault [_type, ""]];
     _occ set ["hpType", _type];
     _occ set ["airRing", _airRing];
     _occ set ["neverStream", _neverStream];

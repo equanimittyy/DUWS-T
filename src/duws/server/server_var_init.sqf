@@ -399,6 +399,16 @@ DUWS_hardpointName = createHashMapFromArray [
     ["ARTY", "Artillery"], ["OP", "Obs Post"], ["ROADBLOCK", "Roadblock"], ["GMG", "GMG"]
 ];
 
+// The loose garrison each hardpoint type fields, as a DUWS_teamRosters token resolved per side at
+// spawn -- read by fnc_hardpoint_spawn and fnc_hardpoint_register so every placer fields it the same,
+// the way DUWS_hardpointStreaming drives streaming. "" is no loose garrison: a minefield alone gets
+// none, its men would stand on its own mines. The gun crew is separate and always placed.
+DUWS_hardpointGarrison = createHashMapFromArray [
+    ["MG", "team"], ["AT", "team"], ["GMG", "team"], ["ROADBLOCK", "team"],
+    ["OP", "team"], ["AA", "team"], ["MORTAR", "team"], ["ARTY", "team"],
+    ["MINEFIELD", ""]
+];
+
 // The margin beyond a zone's own radius that its streaming reaches: a zone raises and holds its
 // garrison for BLUFOR this much further out than the capture trigger tests, so the men are on the
 // objective before the players who tripped it arrive. Read by fnc_createZone and fnc_zone_stream_init.

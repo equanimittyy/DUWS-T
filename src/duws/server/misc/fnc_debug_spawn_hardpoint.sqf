@@ -16,13 +16,10 @@ _this spawn {
     missionNamespace setVariable ["DUWS_hpdevN", _n + 1];
     private _key = format ["hpdev_%1", _n];
 
-    // The HP's garrison, as data: empty here, so gun crew only. The primitive spawns whatever this
-    // array holds and rides it on the site roster, so a real garrison is a data choice -- OPCOM's to
-    // author later, not something the dev path or the primitive hardcodes.
-    private _garrison = [];
-
-    ([_type, _pos, _dir, _side, _key, _garrison] call fnc_hardpoint_spawn) params ["_objs", "_men"];
-    [_key, _type, _pos, _men, _side, _garrison] call fnc_hardpoint_register;
+    // Garrison is the type's, fielded by the spawn from DUWS_hardpointGarrison -- a dev spawn stands up
+    // the same defenders a shipped one of that type would, and a minefield still gets none.
+    ([_type, _pos, _dir, _side, _key] call fnc_hardpoint_spawn) params ["_objs", "_men"];
+    [_key, _type, _pos, _men, _side] call fnc_hardpoint_register;
     DUWS_hpdevKeys = (missionNamespace getVariable ["DUWS_hpdevKeys", []]) + [_key];
 
     ["INFO", "HARDPOINT", format ["dev spawn: %1 %2 [%3], %4 objects %5 men at %6",

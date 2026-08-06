@@ -68,14 +68,14 @@ fnc_hardpoint_build = {
     _placed
 };
 
-// [_objs, _pos, _side, _key, _garrison] call fnc_hardpoint_garrison -> [men]
+// [_objs, _pos, _side, _key, _teamToken] call fnc_hardpoint_garrison -> [men]
 //
-// _garrison is a list of soldier classes -- the loose defenders -- and may be empty, which places
-// none. The array shape is deliberate: an empty garrison needs no special case at the call site, and
-// it is the same shape a zone raises from. The emplacement is manned regardless of it: a gun without
-// a gunner is scenery, not a defence, so every gun takes a crewman whether or not any loose defender
-// does. Side-generic via BIS_fnc_spawnGroup and the <side>_SOLDIER_X global, so the dev tool's OPFOR
-// and BLUFOR spawns each field their own men.
+// _teamToken names the loose defenders' team in DUWS_teamRosters -- "team" for the regular six, "" for
+// none -- resolved to classnames here rather than passed as a list, so the token is what the site
+// stores and a re-raise draws a fresh team from. The emplacement is manned regardless of it: a gun
+// without a gunner is scenery, not a defence, so every gun takes a crewman whether or not any loose
+// defender does. Side-generic via DUWS_fnc_teamRoster's side prefix and the <side>_SOLDIER_X gun-crew
+// global, so the dev tool's OPFOR and BLUFOR spawns each field their own men.
 //
 // Two kinds of gun, crewed two ways. A static weapon goes through DUWS_fnc_manStatics, the path a
 // zone mans its emplacements with -- it thaws the frozen gun, drops it to settle on the ground and
@@ -83,8 +83,12 @@ fnc_hardpoint_build = {
 // vehicle, already sitting on its tracks, so it skips the drop: its gunner is moved straight in and
 // the piece is thawed so OPCOM can task it. artilleryScanner is the config flag the faction
 // auto-detect reads to call a vehicle artillery, so a modded battery is caught the same way.
+//
+// The loose garrison patrols close, not dug in: this is the radius fnc_apply_posture works its circuit
+// off, kept tight so the men hold the emplacement's approaches rather than roaming the whole zone.
+#define HP_GARRISON_PATROL_R 100
 fnc_hardpoint_garrison = {
-    params ["_objs", "_pos", ["_side", "opfor"], ["_key", "world"], ["_garrison", []]];
+    params ["_objs", "_pos", ["_side", "opfor"], ["_key", "world"], ["_teamToken", ""]];
     private _sideObj = [EAST, WEST] select (_side isEqualTo "blufor");
     private _soldier = missionNamespace getVariable [format ["%1_SOLDIER_X", _side],
         ["O_Soldier_F", "B_Soldier_F"] select (_side isEqualTo "blufor")];
@@ -116,28 +120,31 @@ fnc_hardpoint_garrison = {
         _men append (units _crew);
     };
 
-    // Then the loose defenders. An empty list places no one.
+    // Then the loose defenders, on a close patrol around the emplacement rather than dug in -- the gun
+    // holds the position while the team works its approaches. An empty or unknown token places no one.
+    private _garrison = [_teamToken, _side] call DUWS_fnc_teamRoster;
     if (count _garrison > 0) then {
         private _sp = _pos findEmptyPosition [0, 30, _garrison select 0];
         if (count _sp == 0) then { _sp = _pos };
         private _grp = [_sp, _sideObj, _garrison, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
         _grp deleteGroupWhenEmpty true;
-        [_grp, _pos] call BIS_fnc_taskDefend;
+        [_grp, "closepatrol", _pos, HP_GARRISON_PATROL_R] call fnc_apply_posture;
         _men append (units _grp);
     };
 
     _men
 };
 
-// [_type, _pos, _dir, _side, _key, _garrison] call fnc_hardpoint_spawn -> [objects, men]
+// [_type, _pos, _dir, _side, _key] call fnc_hardpoint_spawn -> [objects, men]
 //
-// Build plus man: the composition, then the loose defenders and a gunner on every static gun. Sleeps
-// (the drop-and-settle in DUWS_fnc_manStatics), so it must run scheduled -- the dev spawner spawns it,
-// and the zone loop and OPCOM will too.
+// Build plus man: the composition, a gunner on every static gun, then the type's loose garrison. The
+// garrison is the type's, read from DUWS_hardpointGarrison, so every placer -- the zone loop, the dev
+// tool, OPCOM -- fields the same defenders for a type without being told. Sleeps (the drop-and-settle
+// in DUWS_fnc_manStatics), so it must run scheduled.
 fnc_hardpoint_spawn = {
-    params ["_type", "_pos", ["_dir", 0], ["_side", "opfor"], ["_key", "world"], ["_garrison", []]];
+    params ["_type", "_pos", ["_dir", 0], ["_side", "opfor"], ["_key", "world"]];
     private _objs = [_type, _pos, _dir, _side, _key] call fnc_hardpoint_build;
-    private _men = [_objs, _pos, _side, _key, _garrison] call fnc_hardpoint_garrison;
+    private _men = [_objs, _pos, _side, _key, DUWS_hardpointGarrison getOrDefault [_type, ""]] call fnc_hardpoint_garrison;
     [_objs, _men]
 };
 
@@ -148,8 +155,8 @@ fnc_hardpoint_spawn = {
 // up to that cap is laid at campaign start, and the cap is stored so OPCOM can top the zone back up
 // toward it later. Each slot's type is a terrain-weighted roll over the set the loop places -- an MG
 // on a rise, a roadblock on a road. That set is intentionally narrow: OPs, minefields and the
-// fire-support types are OPCOM's to place, not rolled in at random. No loose garrison is attached --
-// defenders come from the hardpoint's own data later; a gun type still takes its one crewman.
+// fire-support types are OPCOM's to place, not rolled in at random. Each emplacement is defended by a
+// regular six-man team, drawn from the faction's roles, on top of any gun type's own crew.
 //
 // Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop, so build-out cannot call it inline.
 // Idempotent per zone -- the stored cap is the guard -- so a rebuild through fnc_createZone lays no
@@ -192,12 +199,12 @@ fnc_hardpoint_site_zone = {
         if (_weighted isEqualTo []) then { continue };
         private _best = selectRandomWeighted _weighted;
 
-        // Faced outward, toward the approach it defends against. No loose garrison for now -- the gun
-        // types crew themselves, and per-hardpoint defenders come from the type's own data later.
+        // Faced outward, toward the approach it defends against. Its garrison is the type's, fielded by
+        // fnc_hardpoint_spawn from DUWS_hardpointGarrison, not chosen here.
         private _dir = _zonePos getDir _cand;
         private _key = format ["hp_%1_%2", _zoneKey, _placed];
-        ([_best, _cand, _dir, "opfor", _key, []] call fnc_hardpoint_spawn) params ["_objs", "_men"];
-        [_key, _best, _cand, _men, "opfor", [], _zoneKey] call fnc_hardpoint_register;
+        ([_best, _cand, _dir, "opfor", _key] call fnc_hardpoint_spawn) params ["_objs", "_men"];
+        [_key, _best, _cand, _men, "opfor", _zoneKey] call fnc_hardpoint_register;
         _placed = _placed + 1;
     };
     ["INFO", "HARDPOINT", format ["%1 sited %2/%3 hardpoints (cap %4)", _zoneKey, _placed, _count, _cap]] call fnc_log;
