@@ -381,6 +381,9 @@ fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dial
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\hardpoint_compositions.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_place.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_stream.sqf";
+// Reveals a hardpoint to the intel system, the way fnc_zone_reveal does a zone: flips the row's
+// revealed flag and its marker alpha. Read by fnc_intel_payout.
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_reveal.sqf";
 // Same idiom again, and ahead of faction init, which is what leaves the keys it fills empty.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_backfill.sqf";
 // Before fnc_BLUFOR_squad_init and the zone spawn band, both of which name a team out of it.

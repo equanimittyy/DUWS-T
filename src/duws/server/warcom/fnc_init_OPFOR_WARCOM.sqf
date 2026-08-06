@@ -48,6 +48,22 @@ sleep 1;
     // With civilians on the pass below overwrites it immediately; with civilians off nothing
     // would, and a stale "3 of 4 complete" would sit there until the map closed.
     [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+
+    // Hard Point Generation -- a phase of its own between zones and civilians, so its emplacements read
+    // a fully-built map and the player watches it happen on the same banner the other phases use. Reads
+    // zone_meta_array ([num, pos, size, ...]), which every zone publishes before it bumps
+    // zones_buildout_done, so the array is complete by the wait above. Called, not spawned:
+    // fnc_hardpoint_site_zone sleeps in its crew-drop, and running the zones in sequence is what keeps
+    // the banner honest and finishes the pass before civilians start. Idempotent per zone -- the stored
+    // cap guards a rebuild -- and the key is fnc_zone_key of the centre, the key the siting loop files under.
+    {
+        _x params ["", "_hpPos", "_hpSize"];
+        [format ["Generating hardpoints...<br/>zone %1 of %2", _forEachIndex + 1, count zone_meta_array]]
+            remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+        [_hpPos, _hpSize, [_hpPos] call fnc_zone_key] call fnc_hardpoint_site_zone;
+    } forEach zone_meta_array;
+    [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+
     if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then { [] call fnc_civ_init_Tomata; };
 
     // The one thread that services every site, started once every site a campaign begins with has

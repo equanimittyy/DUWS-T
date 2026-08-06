@@ -24,8 +24,7 @@ private _audience = if (isNull _earner) then { 0 } else { _earner };
 // pool is empty never enters the draw, and a campaign late enough to have found everything
 // reports that instead of silently awarding nothing. They stay separate buckets rather than one
 // merged pool because each picks its member on a different rule, not merely because they live in
-// different arrays. Hidden normal hardpoints and enemy patrols join the draw when the systems
-// behind them exist.
+// different arrays. Enemy patrols join the draw when the system behind them exists.
 private _kinds = [];
 
 private _hiddenZones = zone_namePOS_pairs select {!(_x select 2)};
@@ -48,6 +47,20 @@ if (count _from >= 2) then {
     } forEach (missionNamespace getVariable ["civ_visible", []]);
 };
 if !(_hiddenTowns isEqualTo []) then { _kinds pushBack "CIV" };
+
+// Hardpoints are hidden only under hardcore, like towns, so outside it this stays empty and the
+// payout is unchanged. A zone-child hardpoint is gated behind its parent: it enters the pool only
+// once that zone is revealed, so the player finds the zone before its guns. A standalone hardpoint
+// has no parent and is always eligible. Matched by key -- fnc_zone_key of a revealed zone's centre
+// is the same key the hardpoint row carries (both derive from the one zone-centre position).
+private _revealedZoneKeys = [];
+{
+    if (_x select 2) then { _revealedZoneKeys pushBack ([_x select 1] call fnc_zone_key) };
+} forEach zone_namePOS_pairs;
+private _hiddenHPs = DUWS_hardpoints select {
+    !(_x select 5) && { (_x select 4) isEqualTo "" || {(_x select 4) in _revealedZoneKeys} }
+};
+if !(_hiddenHPs isEqualTo []) then { _kinds pushBack "HP" };
 
 // The dry-pool line lives here rather than at each faucet because four of the six side-mission
 // sites hand their result to a remoteExec and never see the return value, so they could not speak
@@ -85,6 +98,12 @@ switch (selectRandom _kinds) do {
             if (_dist < _bestDist) then { _bestDist = _dist; _closest = _x };
         } forEach _hiddenTowns;
         _awarded = [_closest, _audience, _silent] call fnc_civ_town_reveal;
+    };
+
+    // Random from the eligible unrevealed set, like the zone bucket: a hardpoint is a target the
+    // campaign points the player at, not a place they are measured a distance from.
+    case "HP": {
+        _awarded = ["ONE", (selectRandom _hiddenHPs) select 0, _audience, _silent] call fnc_hardpoint_reveal;
     };
 
 };

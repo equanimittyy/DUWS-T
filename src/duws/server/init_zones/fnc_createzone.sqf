@@ -297,11 +297,10 @@ if !([_spawnPos, _size + DUWS_streamArrivalMargin, 1] call fnc_duws_bluforNear) 
 	[_zoneKey] call DUWS_fnc_zoneStow;
 };
 
-// The deliberate emplacements that replace the fortification ring removed above. Sited after the zone
-// has registered and settled its streamed-or-stowed state, so each hardpoint reads its parent and
-// starts in step with it. Spawned so the sleeping crew-drop does not stall build-out; it caps the
-// count by _size and files each under this zone's key, streaming with the zone from here on.
-[_zonePos, _size, _zoneKey] spawn fnc_hardpoint_site_zone;
+// The deliberate emplacements that replace the fortification ring removed above are sited in their own
+// generation phase after every zone is built (fnc_init_OPFOR_WARCOM.sqf), not here per zone, so the
+// player watches a Hard Point Generation pass between zones and civilians. Siting still keys off this
+// zone's centre, so its cap guard and streaming coupling are unchanged.
 
 // ✅ 修复：将占领触发器和旗杆创建代码移到 while 循环之前，确保它们能够执行
 

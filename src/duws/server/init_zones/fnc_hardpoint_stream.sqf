@@ -137,6 +137,7 @@ DUWS_fnc_hardpointClear = {
         DUWS_hardpoints deleteAt _i;
         publicVariable "DUWS_hardpoints";
     };
+    deleteMarker (format ["hpm_%1", _key]);
     // Wrecks left standing for the sweep, not deleted: release drops the pins and schedules disposal.
     [_key] call fnc_duws_release;
     ["INFO", "HARDPOINT", format ["%1 cleared", _key]] call fnc_log;
@@ -244,10 +245,26 @@ fnc_hardpoint_register = {
             ((DUWS_compositions getOrDefault [_key, []]) select { !isNull _x });
     };
 
-    // Registry row for OPCOM and the map readout: [key, pos, type, side, zone]. Presence is liveness;
-    // the clearance check deletes the row when the emplacement falls.
-    DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey];
+    // Registry row for OPCOM and the map readout: [key, pos, type, side, zone, revealed]. Presence is
+    // liveness; the clearance check deletes the row when the emplacement falls. Revealed follows the
+    // same fog a zone's does -- shown at once with no hardcore fog, hidden until intel finds it under
+    // hardcore -- so a hardpoint sited at campaign start is on the map exactly when its zone would be.
+    DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey, !hardcore_mode_enable];
     publicVariable "DUWS_hardpoints";
+
+    // A small OPFOR-coloured bunker icon carrying the type in caps, no area ring. Created for every
+    // registered hardpoint here so the caller need not, and left standing through stow: a marker is a
+    // map object, not a streamed unit, so a stowed emplacement still marks its ground. Alpha tracks the
+    // reveal flag; fnc_hardpoint_reveal flips it to 1 when the intel system finds this one.
+    private _mk = format ["hpm_%1", _key];
+    createMarker [_mk, _pos];
+    _mk setMarkerShape "ICON";
+    _mk setMarkerType "loc_Bunker";
+    _mk setMarkerColor (["ColorOPFOR", "ColorBLUFOR"] select (_side isEqualTo "blufor"));
+    _mk setMarkerText _type;
+    _mk setMarkerSize [1, 1];
+    _mk setMarkerAlpha ([0, 1] select (!hardcore_mode_enable));
+
     [_key, "garrison", DUWS_hardpointHooks] call fnc_site_hooks_set;
 
     // Built deployed, but stowed at once if nobody is near to see it -- the way a zone stows at
