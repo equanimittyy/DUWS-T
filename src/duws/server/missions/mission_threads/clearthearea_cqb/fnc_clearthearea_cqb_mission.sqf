@@ -90,15 +90,12 @@ _group = [[0,0], east, _bldgUnits,[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 [_group] call fnc_mission_claim;
 
-// ========== 添加随机战利品 ==========
 {
     [_x] call fnc_addRandomLoot;
 } forEach units _group;
-// =================================
 
 _buildingUnitsList = [_group, _selectedBuildings, _unitsPerBuilding, "AUTO"] call fnc_spreadIntoBuildings;
 
-// ========== 监控每个房屋，清理后广播并删除标记 ==========
 {
     _buildingIndex = _forEachIndex + 1;
     _markerName = _buildingMarkers select _forEachIndex;

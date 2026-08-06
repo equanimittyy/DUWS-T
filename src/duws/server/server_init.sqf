@@ -206,7 +206,6 @@ if (CIV_PRESENCE == "RAVAGE") then {
 // NO VCOM WAYPOINTS
 VCM_ADVANCEDMOVEMENT = false;
 publicVariable "VCM_ADVANCEDMOVEMENT";
-//击杀奖励机制
 if (isServer) then {
     if (isNil "playerKillCount") then { playerKillCount = createHashMap; };
     // CP owed for kills by players who have already left, banked until the next sweep.
@@ -220,7 +219,6 @@ if (isServer) then {
         // setVariable is enough: the tag is written and read on the server.
         if (_killed getVariable ["killhouse_enemy", false]) exitWith {};
 
-        // ========== 识别真正的击杀玩家（支持组员击杀） ==========
         private _shooter = objNull;
         if (isPlayer _instigator) then {
             _shooter = _instigator;
@@ -236,7 +234,6 @@ if (isServer) then {
             } forEach allPlayers;
         };
         if (isNull _shooter) exitWith {};
-        // =====================================================
 
         // Only hostiles pay: EntityKilled fires for civilians, friendlies and empty
         // vehicles too, and paying for civilian kills rewards exactly what the town
@@ -300,7 +297,6 @@ if (isServer) then {
         };
     };
 };
-// 服务器端（如 server_init.sqf）
 { 
     [_x] remoteExec ["addRating", _x];
 } forEach allPlayers;
@@ -311,7 +307,6 @@ if (isServer) then {
     private _executed = false;
     
     while {!_executed} do {
-        // 检查是否有玩家距离 HQ 小于 50 米
         private _anyPlayerNear = false;
         {
             if (isPlayer _x && {alive _x} && {_x distance _hqPos < 50}) exitWith {
@@ -324,11 +319,10 @@ if (isServer) then {
             [] call fnc_addNearbyUnitsGearToArsenal;
             _executed = true;
         } else {
-            sleep 5; // 每 5 秒检查一次
+            sleep 5;
         };
     };
 };
-// 触发快速换装数据扫描（当有玩家首次靠近 HQ 50 米内）
 [] spawn {
     waitUntil { sleep 1; !isNil "PosOfBLUHQ" && {count allPlayers > 0} };
     private _hqPos = PosOfBLUHQ;
@@ -358,11 +352,10 @@ if (isServer) then {
         [] spawn fnc_apocalypse_buildings;
     };
 };
-// 在 server_init.sqf 末尾附近添加
 [] spawn {
-    waitUntil { sleep 1; WARCOM_init_done }; // 等待 WARCOM 初始化完成，确保单位已生成
-    sleep 5; // 稍等片刻，让单位稳定
-    [] execVM "duws\server\misc\fnc_collectEquipmentFromUnits.sqf"; // 执行装备收集
+    waitUntil { sleep 1; WARCOM_init_done }; // WARCOM must have spawned the units first
+    sleep 5; // brief settle before reading their gear
+    [] execVM "duws\server\misc\fnc_collectEquipmentFromUnits.sqf";
 };
 [] spawn {
     scriptName "Add to InitServer.sqf -> Prevent AI Abandoning Vehicles";
@@ -379,8 +372,6 @@ if (isServer) then {
         sleep 300.00;    // every 5 minutes
     };
 };
-// ==================== 直升机入场脚本启动 ====================
-// 等待玩家完成参数选择和 HQ 放置
 waitUntil { sleep 1.0; chosen_settings };
 waitUntil { sleep 1.0; HQ_pos_found_generated };
 // Zones and civilians both finish well after HQ placement, so the intro must not fly players
@@ -402,13 +393,12 @@ sleep 15;
         && {(allPlayers findIf {!(_x getVariable ["duws_intro_ready", false])}) isEqualTo -1}}, 60] call fnc_waitLogged;
 ["INFO", "BOOT", "Starting helicopter intro sequence..."] call fnc_log;
 [] spawn fnc_intro_heli;
-// 仅在非僵尸/非WBK模式下扫描平民装备
 if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK" && CIV_PRESENCE != "NONE") then {
     [] spawn fnc_scanCivilianGear;
 };
-// 延迟一段时间后调用扫描，确保阵营变量已初始化
+// Delayed so faction globals are initialised before the enemy-gear scan reads them.
 [] spawn {
-    sleep 15;  // 等待阵营初始化完成
+    sleep 15;
     [] spawn fnc_scanEnemyGear;
 };
 // These cooldowns stamp diag_tickTime, which counts from Arma process start, not mission
@@ -442,7 +432,7 @@ if (isNil "DUWS_cooldownMonitor_running") then {
                 };
             } forEach (call BIS_fnc_listPlayers);
 
-            sleep 60; // 每分钟检查一次
+            sleep 60;
         };
     };
 };

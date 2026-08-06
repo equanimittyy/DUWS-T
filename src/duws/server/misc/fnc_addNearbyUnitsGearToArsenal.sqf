@@ -1,7 +1,7 @@
 
 if (!isServer) exitWith {};
 
-// ===== 排除列表（与 fnc_create_ammo_lists.sqf 保持一致）=====
+// Kept in sync with the exclusion list in fnc_create_ammo_lists.sqf.
 private _excludedItems = [
     "I_UAV_01_backpack_F",
     "B_UAV_01_backpack_F",
@@ -27,7 +27,6 @@ private _excludedItems = [
     "B_Patrol_Respawn_bag_F"
 ];
 
-// 辅助函数：检查背包是否有容量
 _isBackpackWithCapacity = {
     params ["_class"];
     private _cfg = configFile >> "CfgVehicles" >> _class;
@@ -39,23 +38,20 @@ _isBackpackWithCapacity = {
     };
 };
 
-// 获取 HQ 位置
 private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", []];
 if (_hqPos isEqualTo []) exitWith { ["ERROR", "GEAR", "PosOfBLUHQ not defined, abort."] call fnc_log; };
 
-// 收集 HQ 附近 500 米内的所有蓝方人员
 private _nearbyUnits = nearestObjects [_hqPos, ["CAManBase"], 500] select {
     alive _x && side _x == WEST
 };
 
 ["INFO", "GEAR", format ["Found %1 BLUFOR units near HQ.", count _nearbyUnits]] call fnc_log;
 
-// 收集所有装备类名（去重）
 private _allGear = [];
 
 {
     private _loadout = getUnitLoadout _x;
-    // 递归提取所有字符串类名
+    // getUnitLoadout nests classnames inside arrays; recurse to pull every string out.
     private _extractStrings = {
         params ["_data"];
         if (typeName _data == "STRING") then {
@@ -71,20 +67,16 @@ private _allGear = [];
 
 ["INFO", "GEAR", format ["Extracted %1 unique gear classnames.", count _allGear]] call fnc_log;
 
-// 过滤并添加到虚拟军火库
 {
     private _class = _x;
 
-    // 排除列表过滤
     if (_class in _excludedItems) then { continue };
 
     if (_class isKindOf "Bag_Base") then {
-        // 背包：检查容量
         if ([_class] call _isBackpackWithCapacity) then {
             [missionNamespace, _class, true, false] call BIS_fnc_addVirtualBackpackCargo;
         };
     } else {
-        // 其他物品（武器、弹药、装备等）
         [missionNamespace, _class, true, false] call BIS_fnc_addVirtualItemCargo;
         [missionNamespace, _class, true, false] call BIS_fnc_addVirtualMagazineCargo;
         if (isClass(configFile >> "CfgWeapons" >> _class)) then {

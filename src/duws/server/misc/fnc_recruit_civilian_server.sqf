@@ -6,7 +6,7 @@ params ["_civilian", "_caller", "_civNetId", "_callerUID"];
 
 if (!isServer) exitWith {};
 
-// 重新获取对象（防止网络延迟导致对象失效）
+// Re-fetched to guard against network latency invalidating the object.
 if (isNull _civilian) then {
     _civilian = objectFromNetId _civNetId;
 };
@@ -16,7 +16,6 @@ if (isNull _caller) then {
     } forEach allPlayers;
 };
 
-// 有效性检查
 if (isNull _civilian || isNull _caller) exitWith {
     ["ERROR", "CIV", "Error: civilian or caller is null"] call fnc_log;
 };
@@ -29,25 +28,23 @@ if (_civilian getVariable ["recruit_processed_server", false]) exitWith {
 
 _civilian setVariable ["recruit_processed_server", true];
 
-// 记录原组和城镇索引（用于后续清理）
+// Kept for the cleanup below once the civilian leaves this group.
 private _oldGroup = group _civilian;
 private _locIndex = _civilian getVariable ["civ_locIndex", -1];
 
-// 95%成功率
+// 95% success chance.
 if (random 1 < 0.95) then {
     [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_RECRUITconv1"] remoteExec ["fnc_duws_dialogue", _caller];
     sleep 3;
     [localize "STR_DUWS_T_survivor", localize "STR_DUWS_T_RECRUITconv2"] remoteExec ["fnc_duws_dialogue", _caller];
     
-    // ---- 成功招募 ----
-    // 终止漫游脚本（如果存在）
     private _roamHandle = _civilian getVariable ["roamScript", scriptNull];
     if (!isNull _roamHandle) then {
         terminate _roamHandle;
         _civilian setVariable ["roamScript", nil];
     };
     
-    // 将平民转移到玩家组（自动处理阵营变化）
+    // joinSilent also reassigns side, so no separate faction change is needed here.
     [_civilian] joinSilent (group _caller);
     // Off its town's roster as it changes hands, or the next teardown of that town deletes a man
     // standing in the player's squad. The tag goes with it, for the readers that still ask.
@@ -56,7 +53,6 @@ if (random 1 < 0.95) then {
     };
     _civilian setVariable ["civ_locIndex", nil];
 
-    // 确保单位不再被视为俘虏，且启用所有 AI 功能
     _civilian setCaptive false;
     _civilian stop false;
     _civilian enableAI "MOVE";
@@ -65,7 +61,6 @@ if (random 1 < 0.95) then {
     _civilian enableAI "TARGET";
     _civilian setUnitPos "AUTO";
 
-    // 处理原组：如果原组空了，则删除；并从城镇组列表中移除原组
     if (!isNull _oldGroup) then {
         if (count units _oldGroup == 0) then {
             deleteGroup _oldGroup;
@@ -85,7 +80,6 @@ if (random 1 < 0.95) then {
     [_civilian] joinSilent (group _caller);
     _civilian setVariable ["civ_locIndex", nil];
     
-    // 启动回收检测（到达基地时删除并奖励）
     [_civilian, _caller] spawn {
         params ["_unit", "_caller"];
         private _hqPos = PosOfBLUHQ;
@@ -99,24 +93,20 @@ if (random 1 < 0.95) then {
             [localize "STR_DUWS_T_survivor", localize "STR_DUWS_T_RECRUITconv5"] remoteExec ["fnc_duws_dialogue", _caller];
             deleteVehicle _unit;
             
-            // 根据平民模式决定奖励 CP
             private _reward = 5;
             if (CIV_PRESENCE == "WBK") then {
                 _reward = 8;
             };
             [_reward, "civilian_recruited"] remoteExec ["fnc_cp_adjust", 2];
             
-            // 构建动态描述文本，显示实际奖励值
             private _desc = format [localize "STR_DUWS_T_RECRUIT_gainCP", _reward];
             ["repup", [localize "STR_DUWS_T_RECRUIT_SUCCESS2", _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
         };
     };
     
-    // 提示招募者成功
     [localize "STR_DUWS_T_RECRUIT_SUCCESS_MSG"] remoteExec ["hint", _caller];
-    
+
 } else {
-    // ---- 招募失败 ----
     _civilian setBehaviour "CARELESS";
     _civilian doMove (getPos _civilian getPos [random 50, random 360]);
     [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_RECRUITconv1"] remoteExec ["fnc_duws_dialogue", _caller];

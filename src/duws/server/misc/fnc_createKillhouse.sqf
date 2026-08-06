@@ -17,7 +17,6 @@ missionNamespace setVariable ["killhouse_centerY", _centerSpawnY, true];
 missionNamespace setVariable ["killhouse_centerZ", _centerSpawnZ, true];
 missionNamespace setVariable ["killhouse_targetData", _targetsData];
 missionNamespace setVariable ["killhouse_run_active", false];
-// ========== 第一步：生成普通物体 ==========
 private _computerObjects = [];
 private _bellObjects = [];
 {
@@ -34,7 +33,6 @@ private _bellObjects = [];
     _obj enableSimulationGlobal false;
     _obj allowDamage false;
     
-    // 保存电脑对象引用
     if (_class == "Land_MultiScreenComputer_01_olive_F") then {
         _computerObjects pushBack _obj;
     };
@@ -46,13 +44,12 @@ private _bellObjects = [];
 missionNamespace setVariable ["killhouse_bells", _bellObjects];
 
 ["INFO", "SUPPORT", format ["spawned %1 props, %2 targets pending, %3 computers", count _objectsData, count _targetsData, count _computerObjects]] call fnc_log;
-// ========== 计算传送点 A/B 并广播 ==========
 private _flagBlueking = objNull;
 private _flagRedstone = objNull;
 {
     if (_x isKindOf "SignAd_Sponsor_Blueking_F") then { _flagBlueking = _x; };
     if (_x isKindOf "SignAd_Sponsor_Redstone_F") then { _flagRedstone = _x; };
-} forEach _computerObjects;  // 注意：标志物不在 _computerObjects 中，需从所有生成物体中查找
+} forEach _computerObjects;  // Flags never end up in _computerObjects; scanned separately below by proximity.
 
 private _flags = nearestObjects [[_centerSpawnX, _centerSpawnY, _centerSpawnZ], ["SignAd_Sponsor_Blueking_F","SignAd_Sponsor_Redstone_F"], 500];
 {
@@ -71,7 +68,6 @@ if (!isNull _flagRedstone) then {
     missionNamespace setVariable ["killhouse_tpB", _tpB, true];
 };
 ["INFO", "SUPPORT", format ["Teleport A: %1, Teleport B: %2", missionNamespace getVariable "killhouse_tpA", missionNamespace getVariable "killhouse_tpB"]] call fnc_log;
-// ========== 交互功能定义 ==========
 missionNamespace setVariable ["killhouse_targets", []];
 missionNamespace setVariable ["killhouse_enemies", []];
 
@@ -434,21 +430,18 @@ killhouse_srv_start_run = {
     };
 };
 
-// 生成目标
 killhouse_srv_spawn_targets = {
     if (!isServer) exitWith {};
     ["TRAINING"] call killhouse_srv_start_run;
 };
 publicVariable "killhouse_srv_spawn_targets";
 
-// 生成敌人
 killhouse_srv_spawn_enemies = {
     if (!isServer) exitWith {};
     ["CHALLENGE"] call killhouse_srv_start_run;
 };
 publicVariable "killhouse_srv_spawn_enemies";
 
-// 清理场景
 killhouse_srv_cleanup = {
     if (!isServer) exitWith {};
     [true] call killhouse_srv_end_run;
@@ -457,7 +450,6 @@ killhouse_srv_cleanup = {
 };
 publicVariable "killhouse_srv_cleanup";
 
-// ========== 为多屏幕电脑添加交互菜单 ==========
 if (count _computerObjects > 0) then {
     {
         [_x, [

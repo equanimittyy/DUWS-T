@@ -2,13 +2,11 @@ if (!isServer) exitWith {};
 
 params ["_locIndex", "_mode"];
 
-// ========== 全局互斥锁初始化 ==========
 if (isNil "civ_current_active_location") then {
     civ_current_active_location = -1;
     publicVariable "civ_current_active_location";
 };
 
-// ========== 获取城镇数据 ==========
 private _locations = missionNamespace getVariable ["civ_locations", []];
 private _radii = missionNamespace getVariable ["civ_radii", []];
 if (_locIndex >= count _locations) exitWith {
@@ -50,7 +48,6 @@ if (_mode == "cleanup") exitWith {
         [_locIndex] call fnc_civ_mode_releaseLock;
     };
 
-    // 删除所有属于该城镇的单位
     private _allUnits = allUnits;
     private _deletedUnits = 0;
     {
@@ -61,7 +58,6 @@ if (_mode == "cleanup") exitWith {
     } forEach _allUnits;
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Deleted %1 units via allUnits scan", _deletedUnits]] call fnc_log; };
 
-    // 删除记录的组
     private _groups = missionNamespace getVariable [format ["civ_groups_%1", _locIndex], []];
     private _deletedGroups = 0;
     {
@@ -74,7 +70,6 @@ if (_mode == "cleanup") exitWith {
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Deleted %1 groups from civ_groups list", _deletedGroups]] call fnc_log; };
     missionNamespace setVariable [format ["civ_groups_%1", _locIndex], nil];
 
-    // 删除区域内尸体
     private _allDead = allDeadMen;
     private _deletedCorpses = 0;
     {
@@ -90,7 +85,6 @@ if (_mode == "cleanup") exitWith {
     missionNamespace setVariable [_pendingVar, false];
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Spawned key set to false, remaining cleared for %1", _locIndex]] call fnc_log; };
 
-    // 释放互斥锁
     [_locIndex] call fnc_civ_mode_releaseLock;
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Cleanup] Lock released for location %1", _locIndex]] call fnc_log; };
 
@@ -116,7 +110,6 @@ if (_mode == "spawn") then {
     private _usableBuildings = [_centerPos, 2, _triggerRadius] call fnc_usableBuildings;
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Usable buildings count: %1", count _usableBuildings]] call fnc_log; };
 
-    // WBK 特有单位类型定义
     private _survivorTypes = [
         "C_man_p_beggar_F",
         "C_Man_casual_1_F",
@@ -189,7 +182,6 @@ if (_mode == "spawn") then {
 
     private _allGroups = [];
 
-    // 死亡事件处理器
     if (isNil "WBK_unitKilledHandler") then {
         WBK_unitKilledHandler = {
             params ["_dead", "_killer", "_instigator"];
@@ -328,7 +320,6 @@ if (_mode == "spawn") then {
         publicVariable "WBK_fnc_spawnReplacement";
     };
 
-    // 生成幸存者组
     if (_survivorCount > 0) then {
         private _survivorGroupCenter = [_centerPos, 0, _triggerRadius * 0.5, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
         if (_survivorGroupCenter isEqualTo [0,0,0]) then { _survivorGroupCenter = _centerPos; };
@@ -366,7 +357,6 @@ if (_mode == "spawn") then {
         } forEach (units _survivorGroup);
     };
 
-    // 生成僵尸组
     if (_zombieCount > 0) then {
         private _zombieGroupCenter = [_centerPos, 0, _triggerRadius, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
         if (_zombieGroupCenter isEqualTo [0,0,0]) then { _zombieGroupCenter = _centerPos; };
@@ -388,7 +378,6 @@ if (_mode == "spawn") then {
 
     missionNamespace setVariable [format ["civ_groups_%1", _locIndex], _allGroups];
 
-    // 设置路点
     private _zombieGroups = _allGroups select { side (leader _x) == INDEPENDENT };
     {
         while {(count (waypoints _x)) > 0} do { deleteWaypoint ((waypoints _x) select 0); };
@@ -419,7 +408,6 @@ if (_mode == "spawn") then {
     missionNamespace setVariable [_spawningKey, false];
     if (duws_log_level >= 4) then { ["DEBUG", "WBK", format ["[Spawn] Spawning flag cleared for location %1", _locIndex]] call fnc_log; };
 
-    // 后台监控线程
     [_locIndex, _centerPos, _triggerRadius] spawn {
         params ["_locIndex", "_centerPos", "_triggerRadius"];
         private _threadVar = format ["civ_monitor_%1", _locIndex];

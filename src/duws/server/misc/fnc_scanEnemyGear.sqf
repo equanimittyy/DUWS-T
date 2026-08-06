@@ -2,7 +2,6 @@ if (!isServer) exitWith {};
 
 ["INFO", "GEAR", "Starting fixed enemy gear scan (global function + delayed init)."] call fnc_log;
 
-// 初始化全局变量
 if (isNil "DUWS_enemyUniforms") then { DUWS_enemyUniforms = []; };
 if (isNil "DUWS_enemyVests") then { DUWS_enemyVests = []; };
 if (isNil "DUWS_enemyHeadgear") then { DUWS_enemyHeadgear = []; };
@@ -12,17 +11,14 @@ if (isNil "DUWS_enemySecondaryWeapons") then { DUWS_enemySecondaryWeapons = []; 
 if (isNil "DUWS_enemyHandguns") then { DUWS_enemyHandguns = []; };
 if (isNil "DUWS_enemyNVGs") then { DUWS_enemyNVGs = []; };
 
-// 去重用哈希表（全局可见）
 if (isNil "DUWS_enemyGear_scannedUnits") then { DUWS_enemyGear_scannedUnits = createHashMap; };
 
-// 夜视镜判断（全局函数）
 if (isNil "DUWS_fnc_isNVG") then {
     DUWS_fnc_isNVG = {
         (toLowerANSI _this find "nvg" != -1) || {getText (configFile >> "CfgWeapons" >> _this >> "simulation") == "nvgoggles"}
     };
 };
 
-// 定义全局提取函数（关键修复）
 if (isNil "DUWS_fnc_extractEnemyGear") then {
     // Each category broadcasts only when it actually gained an entry. The unconditional publish
     // this replaces was gated on the unit wearing something rather than on the item being new, so
@@ -50,12 +46,12 @@ if (isNil "DUWS_fnc_extractEnemyGear") then {
     };
 };
 
-// 公开这些全局函数/变量，确保 JIP 和事件处理程序可用
+// Published for JIP clients and remote event handlers.
 publicVariable "DUWS_fnc_extractEnemyGear";
 publicVariable "DUWS_fnc_isNVG";
 publicVariable "DUWS_enemyGear_scannedUnits";
 
-// 一次性扫描（等待 WARCOM 初始化完成，并额外延迟 15 秒确保单位已生成）
+// One-time scan: waits for WARCOM init, then an extra 15s for units to finish spawning.
 [] spawn {
     waitUntil { sleep 5; !isNil "WARCOM_init_done" && {WARCOM_init_done} };
     ["INFO", "GEAR", "WARCOM init done, waiting 15s for units to spawn..."] call fnc_log;
@@ -72,7 +68,6 @@ publicVariable "DUWS_enemyGear_scannedUnits";
         count DUWS_enemyUniforms, count DUWS_enemyVests, count DUWS_enemyHeadgear, count DUWS_enemyBackpacks]] call fnc_log;
 };
 
-// 事件监听：后续新单位
 // Runs for the whole session rather than retiring once the tables stop changing. A dry-streak
 // ceiling was tried and removed: convergence is per unit role, not per faction -- pilot and vehicle
 // crew classes are a separate set the spawners only reach at higher tiers (fnc_unitParseRoles in

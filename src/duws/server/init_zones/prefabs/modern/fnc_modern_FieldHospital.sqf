@@ -1,5 +1,4 @@
 // Locality: server -- inherited from server/init_zones/fnc_createzone.sqf.
-// fnc_modern_FieldHospital.sqf (基于 composition 偏移量重构版)
 _centerSpawn = _this select 0;
 // Zone construction is campaign property, filed under the zone it stands in so the whole
 // composition -- turret, sandbag and camo net alike -- can be released together. A wrecked
@@ -12,17 +11,16 @@ _centerSpawnY = _centerSpawn select 1;
 private _newCenterZ = getTerrainHeightASL [_centerSpawnX, _centerSpawnY];
 if (_newCenterZ <= 0) then { _newCenterZ = 0; };
 
-// 保留物理模拟的物体（如载具、可互动物体等）
+// Objects that must keep simulation: vehicles or interactables.
 private _keepSimulation = [
     "B_Slingload_01_Medevac_F",
     "Land_Medevac_house_V1_F",
     "Land_Medevac_HQ_V1_F"
 ];
 
-// 所有物体 [类名, X偏移, Y偏移, Z海拔, 方向度, 是否武器]
+// Each row: [class, offsetX, offsetY, offsetZ, dir, isWeapon].
 // --DUWS-COMPOSITION BEGIN name="Field Hospital" schema=A--
 private _allObjectsData = [
-    // ===== 子层 "Camp Defiance" (36个) =====
     ["Land_HBarrier_5_F", 5.42151, -18.4834, 0.74071, 185.415, false],
     ["Land_HBarrier_5_F", -8.49133, 12.4927, 0.74071, 187.515, false],
     ["Land_HBarrier_5_F", -14.8719, 8.81201, 0.74071, 132.715, false],
@@ -79,7 +77,6 @@ private _allObjectsData = [
 ];
 // --DUWS-COMPOSITION END--
 
-// 需要贴合地形的工事类型
 private _tiltTypes = [
     "Land_HBarrierBig_F","Land_HBarrier_5_F","Land_HBarrier_3_F","Land_HBarrier_1_F",
     "Land_BagBunker_Large_F","Land_BagFence_Round_F","Land_BagFence_Short_F",
@@ -87,7 +84,6 @@ private _tiltTypes = [
     "Land_SandbagBarricade_01_hole_F","Land_Razorwire_F"
 ];
 
-// ── 第一步：非武器物体 贴地 ──
 {
     _x params ["_class","_offsetX","_offsetY","_offsetZ","_dir","_isWeapon"];
     if (_isWeapon) then { continue; };
@@ -99,18 +95,16 @@ private _tiltTypes = [
     [_obj, _zoneKey] call fnc_duws_keep;
     _obj setPosATL [_newX, _newY, 0];
 
-    // 工事倾斜
     if (_class in _tiltTypes) then {
         _obj setVectorUp (surfaceNormal [_newX, _newY]);
     };
     _obj setDir _dir;
 
-    // 保留模拟的不禁用，其余禁用
     if !(_class in _keepSimulation) then {
         _obj enableSimulationGlobal false;
     };
 
-    // 易碎品无敌
+    // Fragile props kept indestructible.
     if (_class in ["Land_Pallets_stack_F","Land_GarbageBarrel_01_F","Land_CratesShabby_F","Land_PortableCabinet_01_medical_F"]) then {
         _obj allowDamage false;
     };
@@ -118,7 +112,6 @@ private _tiltTypes = [
 
 sleep 2;
 
-// ── 第二步：武器 海拔还原 ──
 private _weaponList = [];
 private _origin = [_centerSpawnX, _centerSpawnY, _newCenterZ];
 {
@@ -128,7 +121,6 @@ private _origin = [_centerSpawnX, _centerSpawnY, _newCenterZ];
 } forEach _allObjectsData;
 
 sleep 2;
-// ── 第三步：分配炮手 ──
 // The weapons this composition just placed, taken from the loop that placed them. Searching for them
 // again by classname and radius is what left guns frozen: the thaw below is the only thing that
 // undoes the placement freeze, and a class the search did not name never reached it -- placed, stowed

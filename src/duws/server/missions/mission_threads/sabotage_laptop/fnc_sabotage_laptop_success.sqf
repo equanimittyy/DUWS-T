@@ -31,7 +31,6 @@ _VARtaskgeneratedName = format ["sabotage%1%2",round(_MissionPos select 0),round
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
 
 
-// 发放奖励
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 // Disposal of the laptop, table, pallet and camo net rides on this composition key: they are
 // filed under it by fnc_duws_keep at spawn, and release hands each one to fnc_duws_disposeAfter.

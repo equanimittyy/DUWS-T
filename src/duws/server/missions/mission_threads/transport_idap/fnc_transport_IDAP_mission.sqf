@@ -30,11 +30,9 @@ private _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0)
 _vehPos = _targetpos;
 
 
-// 生成卡车
 _truck1 = "C_IDAP_Truck_02_Transport_F" createVehicle (_vehpos);
 [_truck1, "mission_transport_idap"] call fnc_duws_keep;
 
-// 生成补给箱
 _box1 = "";
 _box2 = "";
 _static1 = "";
@@ -83,7 +81,6 @@ sleep 1;
 {
     [_x] call fnc_addRandomLoot;
 } forEach units _group;
-// 生成随机交付点
 private _targetDeliveryPos = [];
 private _deliveryMarkerName = format ["delivery_%1", floor random 10000];
 private _minDist = 1000;
@@ -99,7 +96,6 @@ if (_targetDeliveryPos isEqualTo []) then {
     _targetDeliveryPos = [_MissionPos, _dist, _dir] call BIS_fnc_relPos;
 };
 
-// 创建交付点标记
 _deliveryMarkerName = format ["civ_marker_%1", round(time + random 1000)];
 createMarker [_deliveryMarkerName, _targetDeliveryPos];
 _deliveryMarkerName setMarkerShape "ICON";
@@ -108,14 +104,12 @@ _deliveryMarkerName setMarkerColor "ColorGreen";
 _deliveryMarkerName setMarkerText "IDAP";
 _deliveryMarkerName setMarkerSize [1, 1];
 
-// 定义清理函数
 _cleanupDelivery = {
     if (!isNil "_deliverySmokeScript") then { terminate _deliverySmokeScript; };
     if (!isNil "_smokeObjects") then { { deleteVehicle _x } forEach _smokeObjects; };
     if (!isNil "_groupDelivery") then { { deleteVehicle _x } forEach units _groupDelivery; deleteGroup _groupDelivery; };
 };
 
-// 生成 5 名 IDAP 工作人员
 _unitClasses = [
     "C_IDAP_Man_Aidworker_01_F",
     "C_IDAP_Man_Aidworker_02_F",
@@ -162,7 +156,6 @@ _deliverySmokeScript = [_targetDeliveryPos, _smokeObjects] spawn {
     };
 };
 
-// 任务前对话
 [_speakerIDAP, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 12;
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
@@ -172,19 +165,16 @@ sleep 5;
 
 // TASK AND NOTIFICATION
 
-sleep 5; // 等待巡逻队生成完毕
+sleep 5; // let the patrols finish spawning
 
 
-// 监控任务完成条件
 waitUntil {
     sleep 2;
     (getdammage _truck1>0.95) || (_truck1 distance _targetDeliveryPos) < 50
 };
 
-// 删除任务区域标记
 [_markername2] call fnc_missionMarkerClear;
 
-// 失败分支
 if (getdammage _truck1>0.95) exitWith {
     deleteMarker _deliveryMarkerName;
     call _cleanupDelivery;
@@ -199,7 +189,6 @@ if (getdammage _truck1>0.95) exitWith {
     [_targetpos,_radius, "mission_transport_idap"] call fnc_mission_end;
 };
 
-// 成功分支
 deleteMarker _deliveryMarkerName;
 [_speakerIDAP, _message3] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;

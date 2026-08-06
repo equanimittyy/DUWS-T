@@ -16,23 +16,20 @@ _mhqDir = getDir MHQ1;
 // gets the same cover a FOB build does. Read before anything is created; handed back at the end.
 private _fadePlayers = ["OUT", getPos MHQ1] call fnc_baseFade;
 
-// 创建完全静止的虚拟驾驶员
 _groupMHQ = [[0,0], WEST, ["C_Soldier_VR_F"], [], [], blufor_ai_skill] call BIS_fnc_spawnGroup; 
 _groupMHQ deleteGroupWhenEmpty true;
 _MHQdriver = units _groupMHQ select 0;
 
-// 彻底隐藏并禁用AI
 hideObjectGlobal _MHQdriver;
-_MHQdriver disableAI "ALL";                     // 禁用所有AI
-_MHQdriver setBehaviour "CARELESS";             // 漠不关心
-_MHQdriver setCombatMode "BLUE";                // 永不接战
-_MHQdriver allowFleeing 0;                      // 禁止逃跑
+_MHQdriver disableAI "ALL";
+_MHQdriver setBehaviour "CARELESS";
+_MHQdriver setCombatMode "BLUE";
+_MHQdriver allowFleeing 0;
 _MHQdriver enableSimulationGlobal false;
-_MHQdriver forceSpeed 0;                        // 速度为0
-_MHQdriver setVariable ["Vcm_Disable", true];   // 禁用VCOM AI（如已安装）
-_MHQdriver setVariable ["lambs_danger_disableAI", true]; // 禁用LAMBS（如已安装）
+_MHQdriver forceSpeed 0;
+_MHQdriver setVariable ["Vcm_Disable", true];   // disable VCOM AI if that mod is loaded
+_MHQdriver setVariable ["lambs_danger_disableAI", true]; // disable LAMBS if that mod is loaded
 
-// 放入载具（货物位，避免影响炮手/驾驶员位）
 _MHQdriver moveInDriver MHQ1;
 
 // Deploy the ammo box

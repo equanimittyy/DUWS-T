@@ -73,13 +73,11 @@ _group deleteGroupWhenEmpty true;
 [_group] call fnc_mission_claim;
 _target = units _group select 0;
 
-// 为军官添加黑贝雷帽
 [_target] spawn {
     params ["_unit"];
     sleep 5;
     _unit addHeadgear "H_Beret_blk";
 };
-// 为军官添加机密情报
 [_target] spawn {
     params ["_unit"];
     sleep 5;
@@ -95,7 +93,7 @@ _wp setWaypointType "MOVE";
 _wp setWaypointBehaviour "SAFE";
 _wp setWaypointTimeout [30, 45, 60];
 
-// 检查 _Building 是否为对象，如果是数组则跳过此路点
+// _Building may be an array when no building was found; skip the waypoint then.
 if (_Building isEqualType objNull) then {
     _posBuilding = getpos _Building;
     _wp = _group addWaypoint [_posBuilding, 0];
@@ -111,20 +109,18 @@ _wp2 setWaypointType "CYCLE";
 _wp2 setWaypointBehaviour "SAFE";
 _wp2 setWaypointTimeout [30, 45, 60];
 
-// ========== 添加死亡情报动作 ==========
 {
     if (!isNull _x) then {
         [_x, "mission"] call fnc_search_flag_group;
     };
 } forEach [_group];
-// ====================================
 
 {
     [_x] call fnc_addRandomLoot;
 } forEach units _group;
 
 
-sleep 5; // 等待巡逻队生成完毕
+sleep 5; // let the patrols finish spawning
 
 
 waitUntil {sleep 0.5; !alive _target || (time - _missionStartTime) > _taskTimeout};
@@ -145,6 +141,6 @@ sleep 1;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 
-// 清理其他任务物体（APC 不在其中）
+// Clean up the other mission props (the APC is not among them).
 
 [_targetpos,_radius, "mission_target_hvt"] call fnc_mission_end;

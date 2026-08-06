@@ -91,4 +91,4 @@ sleep 10;
 // CREATE OPFOR PATROLS
 [_MissionPos, _radius] spawn fnc_missionPatrols;
 
-sleep 5; // 等待巡逻队生成完毕
+sleep 5; // let the patrols finish spawning

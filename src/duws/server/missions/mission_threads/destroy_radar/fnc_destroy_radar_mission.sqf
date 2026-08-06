@@ -120,7 +120,6 @@ _groupBunker1 addVehicle _vehicle_7;
 sleep 1;
 
 [[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
-// ========== 添加死亡情报动作 ==========
 {
     if (!isNull _x) then {
         [_x, "mission"] call fnc_search_flag_group;
@@ -143,7 +142,7 @@ _message = ([localize "STR_DUWS_T_radarcopy"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
 
-sleep 5; // 等待巡逻队生成完毕
+sleep 5;
 
 
 waitUntil {sleep 5; !alive _vehicle_7 || (damage _vehicle_7) == 1};

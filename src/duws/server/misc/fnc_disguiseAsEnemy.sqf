@@ -3,7 +3,6 @@ if (!isServer) exitWith {};
 params ["_caller"];
 if (isNull _caller) exitWith {};
 
-// ========== 冷却检查 ==========
 private _lastUse = _caller getVariable ["DUWS_enemyDisguise_lastUse", -600];
 private _cooldownRemaining = 600 - (diag_tickTime - _lastUse);
 if (_cooldownRemaining > 0) exitWith {
@@ -13,7 +12,6 @@ if (_cooldownRemaining > 0) exitWith {
     [_msg] remoteExec ["hint", _caller];
 };
 
-// ========== 等待敌方装备数据 ==========
 private _timeout = diag_tickTime + 30;
 waitUntil {
     sleep 0.1;
@@ -24,7 +22,6 @@ if (isNil "DUWS_enemyUniforms" || {count DUWS_enemyUniforms == 0}) exitWith {
     [localize "STR_DUWS_T_ENEMY_DISGUISE_NO_ENEMY_DATA"] remoteExec ["hint", _caller];
 };
 
-// ========== 基础条件检查（不检查制服） ==========
 private _vest = vest _caller;
 private _headgear = headgear _caller;
 private _primary = primaryWeapon _caller;
@@ -41,7 +38,6 @@ if (_vest == "") exitWith { [localize "STR_DUWS_T_ENEMY_DISGUISE_NO_VEST"] remot
 if (_headgear == "") exitWith { [localize "STR_DUWS_T_ENEMY_DISGUISE_NO_HEADGEAR"] remoteExec ["hint", _caller]; };
 if (_primary == "") exitWith { [localize "STR_DUWS_T_ENEMY_DISGUISE_NO_PRIMARY"] remoteExec ["hint", _caller]; };
 
-// ========== 重复装束检查（新增）==========
 private _lastVest = _caller getVariable ["DUWS_enemyDisguise_lastVest", ""];
 private _lastHeadgear = _caller getVariable ["DUWS_enemyDisguise_lastHeadgear", ""];
 if (_vest == _lastVest && _headgear == _lastHeadgear) exitWith {
@@ -62,11 +58,12 @@ if (_hasNVG) then {
     if (!_nvgOK) exitWith { [localize "STR_DUWS_T_ENEMY_DISGUISE_WRONG_NVG"] remoteExec ["hint", _caller]; };
 };
 
-// ========== 条件通过：通过 Loadout 替换强制换上敌方制服 ==========
+// Checks passed. Unlike the other gear the enemy uniform is handed over rather than
+// required, so swap it into the loadout's uniform slot.
 private _loadout = getUnitLoadout _caller;
 private _selectedUniform = selectRandom DUWS_enemyUniforms;
 
-// Loadout 结构: [primaryWeapon, secondaryWeapon, handgun, uniform, vest, backpack, headgear, facewear, binocular, items, assignedItems]
+// Loadout structure: [primaryWeapon, secondaryWeapon, handgun, uniform, vest, backpack, headgear, facewear, binocular, items, assignedItems]
 private _uniformData = _loadout select 3;
 if (count _uniformData == 0) then {
     _uniformData = [_selectedUniform, [], []];
@@ -79,14 +76,12 @@ _caller setUnitLoadout _loadout;
 
 _caller setVariable ["DUWS_enemyDisguise_uniform", _selectedUniform];
 
-// ========== 开启伪装 ==========
 _caller setVariable ["DUWS_enemyDisguise_lastUse", diag_tickTime];
 _caller setVariable ["DUWS_enemyDisguised", true, true];
 _caller setCaptive true;
 [true] remoteExec ["fnc_disguise_setCaptiveLocal", _caller];
 [localize "STR_DUWS_T_ENEMY_DISGUISE_ACTIVATED"] remoteExec ["hint", _caller];
 
-// 记录本次使用的背心和头盔（新增）
 _caller setVariable ["DUWS_enemyDisguise_lastVest", _vest, true];
 _caller setVariable ["DUWS_enemyDisguise_lastHeadgear", _headgear, true];
 

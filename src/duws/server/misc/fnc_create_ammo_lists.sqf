@@ -1,8 +1,6 @@
 // CREATE LISTS OF ITEMS FOR ADDING TO AMMOBOXES, VEHICLES, RESTRICTED ARSENAL, etc...
 // SPAWN UNITS, COPY ITEMS
 if (!isServer) exitWith {};
-// ==================================================
-// 定义要排除的物品类名列表（可根据需要修改）
 _excludedItems = [
     "I_UAV_01_backpack_F",
     "B_UAV_01_backpack_F",
@@ -26,9 +24,7 @@ _excludedItems = [
     "B_Mortar_01_weapon_F",
     "O_Mortar_01_weapon_F",
     "B_Patrol_Respawn_bag_F"
-    // 在这里继续添加其他要排除的类名...
 ];
-// ==================================================
 
 // weapons = all weapons
 // magazines = ammo mags, grenades, rockets, explosives
@@ -123,12 +119,9 @@ _opfor_units = [opfor_LAT_SOLDIER_X,opfor_SPECOPS_MEDIC_X,opfor_SPECOPS_ENG_X];
         _total_items = _total_items + _ACE_Items;
     };
 
-    // ==================================================
-    // 从弹药箱列表中移除排除的物品
     _total_weapons = _total_weapons - _excludedItems;
     _total_magazines = _total_magazines - _excludedItems;
     _total_items = _total_items - _excludedItems;
-    // ==================================================
 
     // Create global ammobox arrays
     if (_side == 1) then {
@@ -146,7 +139,6 @@ _opfor_units = [opfor_LAT_SOLDIER_X,opfor_SPECOPS_MEDIC_X,opfor_SPECOPS_ENG_X];
 
 
 waitUntil {sleep 5;chosen_settings};
-// 始终构建受限军械库列表，不再检查 restricted_arsenal
 
 // get blufor faction and create the array of units
 _factionUnitArray = [];
@@ -169,12 +161,9 @@ _temp_factionUnitArray = [];
 //remove duplicates
 _factionUnitArray = _factionUnitArray arrayIntersect _factionUnitArray; 
 
-// ========== 添加快捷换装单位类名 ==========
 private _quickChangeUnits = (["UNIT"] call fnc_faction_rqst_list) apply { _x select 0 };
-// 将快速换装单位加入数组并去重
 _factionUnitArray append _quickChangeUnits;
 _factionUnitArray = _factionUnitArray arrayIntersect _factionUnitArray;
-// =========================================
 
 //array of all loadouts of all units in player faction (original method)
 _factionLoadouts = [];
@@ -218,12 +207,10 @@ _factionLoadouts = _factionLoadouts + _aliveLoadouts;
 _factionLoadouts = _factionLoadouts arrayIntersect _factionLoadouts; // final deduplication
 // === END NEW ===
 
-// ========== 新增：从随机列表中额外收集物品 ==========
 private _randomListItems = [];
 {
     private _cfg = configFile >> "CfgVehicles" >> _x;
     if (isClass _cfg) then {
-        // 处理 uniformList
         private _uniformList = getArray (_cfg >> "uniformList");
         for "_i" from 0 to (count _uniformList - 1) step 2 do {
             private _item = _uniformList select _i;
@@ -231,7 +218,6 @@ private _randomListItems = [];
                 _randomListItems pushBackUnique _item;
             };
         };
-        // 处理 headgearList
         private _headgearList = getArray (_cfg >> "headgearList");
         for "_i" from 0 to (count _headgearList - 1) step 2 do {
             private _item = _headgearList select _i;
@@ -239,7 +225,6 @@ private _randomListItems = [];
                 _randomListItems pushBackUnique _item;
             };
         };
-        // 处理 facewearList
         private _facewearList = getArray (_cfg >> "facewearList");
         for "_i" from 0 to (count _facewearList - 1) step 2 do {
             private _item = _facewearList select _i;
@@ -247,7 +232,6 @@ private _randomListItems = [];
                 _randomListItems pushBackUnique _item;
             };
         };
-        // 处理 vestList
         private _vestList = getArray (_cfg >> "vestList");
         for "_i" from 0 to (count _vestList - 1) step 2 do {
             private _item = _vestList select _i;
@@ -258,19 +242,13 @@ private _randomListItems = [];
     };
 } forEach _factionUnitArray;
 
-// 合并到主列表中
 _factionLoadouts append _randomListItems;
 _factionLoadouts = _factionLoadouts arrayIntersect _factionLoadouts;
-// ==================================================
 
-// ==================================================
-// 从军械库物品列表中移除排除的物品
 _factionLoadouts = _factionLoadouts - _excludedItems;
-// ==================================================
 
 copyToClipboard str _factionLoadouts;
 
-// 辅助函数：检查背包是否有容量（maximumLoad > 0）
 _isBackpackWithCapacity = {
     params ["_class"];
     private _cfg = configFile >> "CfgVehicles" >> _class;
@@ -296,7 +274,6 @@ _isBackpackWithCapacity = {
                 } forEach _possibleBackpack;
                 _possibleBackpackChildren = ("(configname _x isKindOf 'Bag_Base') && (configname _x isKindOf _pack) && (getNumber(_x >> 'scope') == 2)" 
                                             configClasses (configfile >> "CfgVehicles")) apply {configName _x};
-                // 过滤出有容量的背包
                 _validBackpacks = [];
                 {
                     if ([_x] call _isBackpackWithCapacity) then {
@@ -345,11 +322,8 @@ private _filteredBackpacks = [];
 
 // ACE Items from above
 if (isClass (configFile >> "CfgPatches" >> "ace_main")) then {
-    // ACE物品也可能需要排除
     [missionNamespace, _ACE_Items - _excludedItems, true, false] call BIS_fnc_addVirtualItemCargo;
 };
-// ==================================================
-// ========== 将 ACE 食物类名加入军火库白名单 ==========
 private _aceFoods = [
     "ACE_MRE_SteakVegetables",
     "ACE_MRE_MeatballsPasta",

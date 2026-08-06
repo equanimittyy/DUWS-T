@@ -98,27 +98,14 @@ if (count _weaponList > 0) then {
 
 // 2. Tower guards.
 //
-// 塔卫放置流程逻辑总结（纯文本）：
-//
-// 核心问题：Land_GuardTower_02_F只有一个建筑位置，其Z高度不正确。modelToWorld的Z轴也不可用。
-// 最终方案是将模型空间XY与世界空间Z结合。
-//
-// 第一步：在游戏中玩家需要站在塔顶目标位置，打开控制台执行：
-// _tower = nearestObject [player, "Land_GuardTower_02_F"];
-// _playerPos = getPosWorld player;
-// _towerPos = getPosWorld _tower;
-// _heightOffset = (_playerPos select 2) - (_towerPos select 2);
-// _xyModel = _tower worldToModel _playerPos;
-// 系统聊天输出或复制以下值：玩家世界位置、塔世界位置、高度偏移 _heightOffset、
-// 模型XY偏移 _xyModel 中的前两个值
-//
-// 第二步：从输出中记录下关键数据。示例：
-// 塔世界位置Z: 10.5261 / 玩家世界位置Z: 12.163 / 高度偏移: 1.6369
-// 模型XY: [0.05, 1.47] (仅用前两个值，忽略Z)
-//
-// 第三步：在脚本中使用这些固定值 -- 即下方 _anchoredPos 的两个参数。
-// 这样无论塔被放置在何处、何方向，塔卫都能准确站在玩家当初站立测试的位置。
-// 无论如何不要删除这段备注！！
+// The [0.05, 1.47] and 1.6369 fed to _anchoredPos below are a measured tower-top stance: model-space
+// XY with a world-space Z offset, because Land_GuardTower_02_F exposes a single building position at
+// the wrong height and its modelToWorld Z is unusable too. Re-measure by standing a unit on the tower
+// top and reading in the console:
+//   _off = (getPosWorld player select 2) - (getPosWorld _tower select 2);
+//   _xy  = _tower worldToModel getPosWorld player;
+// then feed _xy's first two values and _off. Fixed this way, the guard stands right wherever the tower
+// is placed or turned.
 private _towers = missionNamespace getVariable ["HQ_redeploy_towers", []];
 private _towerGuards = [];
 {

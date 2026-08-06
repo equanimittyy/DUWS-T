@@ -115,19 +115,17 @@ _obj4 = createVehicle [_static2, [(_vehPos select 0)-10, (_vehPos select 1)-10],
 [_obj4, "mission_steal_supply"] call fnc_duws_keep;
 sleep 1;
 
-// 守卫
+// Guards
 _group = [_vehPos, EAST, [opfor_SL_SOLDIER_X, opfor_LAT_SOLDIER_X, opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 [_group] call fnc_mission_claim;
 
 [[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
-// ========== 添加死亡情报动作 ==========
 {
     if (!isNull _x) then {
         [_x, "mission"] call fnc_search_flag_group;
     };
 } forEach [_group];
-// ====================================
 {
     [_x] call fnc_addRandomLoot;
 } forEach units _group;
@@ -140,7 +138,7 @@ sleep 8;
 sleep 8;
 ["arsenal", [localize "STR_DUWS_T_arsenalfound", localize "STR_DUWS_T_arsenalfound2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
-sleep 5; // 等待巡逻队生成完毕
+sleep 5; // let the patrols finish spawning
 
 
 waitUntil {

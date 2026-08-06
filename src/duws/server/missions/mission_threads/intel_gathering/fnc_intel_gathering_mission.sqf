@@ -6,13 +6,11 @@ private _radius = 800;
 private _minBuildings = 20;
 _cpreward = 5;
 _apreward = 5;
-// 获取可用建筑（至少需要3个建筑位置）
 private _usableBuildings = [_MissionPos, 3, _radius] call fnc_usableBuildings;
 
 if (count _usableBuildings < _minBuildings) exitWith {
     ["ERROR", "MISSION", format ["Not enough usable buildings (%1), aborting.", count _usableBuildings]] call fnc_log;
     hint localize "STR_DUWS_T_INTEL_GATHERING_NO_BUILDINGS";
-    // 不设置冷却，直接退出
 };
 
 // Gated after the building check on purpose: too few buildings must not burn the cooldown.
@@ -27,7 +25,6 @@ private _taskID = format ["intel_gathering_%1", round time];
 [_taskID, localize "STR_DUWS_T_INTEL_GATHERING_DESC", _mission_name,
     _randomPos, "search"] call fnc_missionTaskCreate;
 
-// ========== 随机选取最多30个建筑 ==========
 private _maxBuildings = 30;
 private _selectedBuildings = [];
 if (count _usableBuildings <= _maxBuildings) then {
@@ -42,7 +39,6 @@ if (count _usableBuildings <= _maxBuildings) then {
 };
 ["INFO", "MISSION", format ["Selected %1 buildings.", count _selectedBuildings]] call fnc_log;
 
-// ========== 定义敌方单位类型池 ==========
 private _possibleUnitTypes = [[
     opfor_SOLDIER_X,
     opfor_AA_SOLDIER_X,
@@ -54,7 +50,6 @@ private _possibleUnitTypes = [[
     opfor_MARK_SOLDIER_X
 ], "opfor"] call fnc_factionRoles;
 
-// ========== 容器类名列表 ==========
 private _containerClasses = [
     "Land_PaperBox_open_full_F",
     "Land_Ammobox_rounds_F",
@@ -72,9 +67,8 @@ private _containerClasses = [
 
 private _allSpawnedContainers = [];
 private _allSpawnedUnits = [];
-private _buildingMarkers = [];  // 存储建筑标记名称
+private _buildingMarkers = [];
 
-// ========== 定义容器交互动作（客户端函数）==========
 if (isNil "fnc_intel_container_addAction") then {
     fnc_intel_container_addAction = {
         params ["_container"];
@@ -108,14 +102,12 @@ if (isNil "fnc_intel_container_addAction") then {
     publicVariable "fnc_intel_container_addAction";
 };
 
-// ========== 定义服务器端处理函数（物品获取逻辑）==========
 if (isNil "fnc_intel_container_search_server") then {
     fnc_intel_container_search_server = {
         params ["_container", "_caller"];
         if (!isServer) exitWith {};
         if (isNull _container || isNull _caller) exitWith {};
         
-        // 普通物品池
         private _normalIntelItems = [
             "Money_roll",
             "Files",
@@ -124,22 +116,18 @@ if (isNil "fnc_intel_container_search_server") then {
             "MobilePhone",
             "FlashDisk"
         ];
-        // 绝密物品池
         private _topSecretItems = ["FileTopSecret", "FilesSecret"];
         
-        // 80% 概率获得物品
         if (random 1 < 0.8) then {
             private _itemsToGive = [];
             private _hasTopSecret = false;
             
-            // 10% 概率获得一个绝密物品
             if (random 1 < 0.1) then {
                 private _topSecretItem = selectRandom _topSecretItems;
                 _itemsToGive pushBack _topSecretItem;
                 _hasTopSecret = true;
             };
             
-            // 普通物品数量 0-3
             private _normalCount = floor random 4;
             for "_i" from 1 to _normalCount do {
                 _itemsToGive pushBack (selectRandom _normalIntelItems);
@@ -149,7 +137,6 @@ if (isNil "fnc_intel_container_search_server") then {
                 [localize "STR_DUWS_T_CONTAINER_EMPTY"] remoteExec ["hint", _caller];
             };
             
-            // 尝试添加到玩家背包
             private _addedToInventory = true;
             private _droppedItems = [];
             {
@@ -199,14 +186,12 @@ if (isNil "fnc_intel_container_search_server") then {
     publicVariable "fnc_intel_container_search_server";
 };
 
-// ========== 遍历每个建筑：放置士兵、生成容器 ==========
 {
     private _building = _x;
     private _positions = [_building] call BIS_fnc_buildingPositions;
     private _posCount = count _positions;
     if (_posCount == 0) then { continue };
 
-    // 创建建筑标记
     private _buildingPos = getPos _building;
     private _markerName = format ["intel_bldg_%1_%2", round(time), _forEachIndex];
     private _marker = createMarker [_markerName, _buildingPos];
@@ -216,7 +201,6 @@ if (isNil "fnc_intel_container_search_server") then {
     _marker setMarkerSize [0.5, 0.5];
     _buildingMarkers pushBack _markerName;
     
-    // 放置士兵
     private _baseCount = 3;
     private _extraChance = (_posCount / 10) min 1;
     private _extra = floor (random 4);
@@ -255,7 +239,6 @@ if (isNil "fnc_intel_container_search_server") then {
         _allSpawnedUnits pushBack _unit;
     };
     
-    // 生成随机容器（0-3个）
     private _containerCountProb = (_posCount / 10) min 1;
     private _containerCount = 0;
     private _rand = random 1;
@@ -285,7 +268,6 @@ if (isNil "fnc_intel_container_search_server") then {
     
 } forEach _selectedBuildings;
 
-// 在任务区域周围生成额外巡逻队
 [_MissionPos, _radius] spawn fnc_missionPatrols;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_GATHERING1"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 6;

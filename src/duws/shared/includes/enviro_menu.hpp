@@ -190,7 +190,6 @@ class startup_dialog
             h = 1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_APOCALYPSE_TOOLTIP";
         };
-        // ========== 战争升级（原焦土模式控件） ==========
         class SE_frame: RscFrame
         {
             idc = 1807;
@@ -210,7 +209,6 @@ class startup_dialog
             h = 1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_escalation_tooltip";
         };
-        // ============================================
         class time_multiplier_frame: RscFrame
         {
             idc = 1808;

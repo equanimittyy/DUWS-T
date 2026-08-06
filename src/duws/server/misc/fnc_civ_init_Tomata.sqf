@@ -17,8 +17,8 @@ private _fnc_finish = {
     ["INFO", "CIV", "Civilian system initialized."] call fnc_log;
 };
 
-// 读取平民阵营单位. Runs before any abort below: PMC/partisan hiring uses civ_array as a
-// body pool even when no town is ever registered.
+// Runs before any abort below: PMC/partisan hiring uses civ_array as a body pool
+// even when no town is ever registered.
 ["INFO", "CIV", format ["CIV_PRESENCE = %1", CIV_PRESENCE]] call fnc_log;
 [] call fnc_civ_setup_array;
 ["INFO", "CIV", format ["civ_array loaded, count: %1", count civ_array]] call fnc_log;
@@ -35,7 +35,6 @@ private _HQ_RADIUS = 100;
 private _hq = missionNamespace getVariable ["PosOfBLUHQ", []];
 private _hqPos = if (count _hq >= 2) then { [_hq select 0, _hq select 1, 0] } else { [] };
 
-// ========== 第一阶段：计算每个位置的半径、人口 ==========
 private _kept = [];
 private _radii = [];
 private _pops = [];
@@ -56,7 +55,6 @@ while { count _queue > 0 } do {
     [format [localize "STR_DUWS_T_civ_gen_progress", _done, _done + count _queue]]
         remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
-    // 区域半径：每个建筑10米，最小100米，最大500米
     private _radius = (_buildingCount * 10) min 500 max 100;
     private _hqDist = if (count _hqPos > 0) then { _pos distance2D _hqPos } else { -1 };
 
@@ -97,7 +95,6 @@ if (count _locations == 0) exitWith {
     [format ["%1<br/>%2", localize "STR_DUWS_T_CIV_NO_TOWNS_TITLE", localize "STR_DUWS_T_CIV_NO_TOWNS"]] call _fnc_finish;
 };
 
-// ========== 第二阶段：重叠检测，优化距离过近且较小的城镇 ==========
 private _count = count _locations;
 private _toDelete = [];
 private _minRadius = 50;
@@ -232,7 +229,6 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     [] call fnc_civ_garrison;
 };
 
-// ========== 第三阶段：为保留的城镇创建触发器、地图标记，并存储人口变量 ==========
 {
     private _locIndex = _forEachIndex;
     private _pos = getPos _x;
@@ -273,7 +269,6 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     // is what RAVAGE and WBK towns keep: the renderer returns early for them.
     ([0] call fnc_civ_townBand) params ["_areaColour", "_iconColour"];
 
-    // 创建区域标记（半透明椭圆）
     private _markerName = format ["civ_area_%1", _locIndex];
     private _marker = createMarker [_markerName, _pos];
     _marker setMarkerShape "ELLIPSE";
@@ -282,7 +277,6 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     _marker setMarkerAlpha ([0, 0.3] select _shown);
     _marker setMarkerSize [_radius, _radius];
 
-    // 创建城镇图标（位于区域下方）
     private _iconPos = [(_pos select 0), (_pos select 1) - 80];
     private _iconName = format ["civ_icon_%1", _locIndex];
     private _icon = createMarker [_iconName, _iconPos];

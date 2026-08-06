@@ -38,7 +38,6 @@ _centerSpawn = _targetpos;
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
-// ========== 初始化数组记录任务生成的物体 ==========
 _missionUnits = [];
 
 _samSystem = createVehicle ["B_SAM_System_03_F", [0,0,0], [], 0, "CAN_COLLIDE"];
@@ -177,7 +176,7 @@ _friendlyUnits = units _friendlyGroup;
     _x setPosATL _unitPos;
     _x setDir random 360;
     _x disableAI "PATH";
-    _missionUnits pushBack _x;   // 记录友军单位
+    _missionUnits pushBack _x;
 } forEach _friendlyUnits;
 
 _friendlyGroup setFormation "DIAMOND";
@@ -185,16 +184,14 @@ _friendlyGroup setBehaviour "COMBAT";
 _friendlyGroup setCombatMode "RED";
 _friendlyGroup deleteGroupWhenEmpty true;
 
-// ========== 创建触发器，等待任意玩家进入任务区域 ==========
 _startTrigger = createTrigger ["EmptyDetector", _targetpos];
 _startTrigger setTriggerArea [_radius, _radius, 0, false];
 _startTrigger setTriggerActivation ["ANYPLAYER", "PRESENT", false];
-_startTrigger setTriggerStatements ["this", "", ""]; // 空语句，在线程中等待
+_startTrigger setTriggerStatements ["this", "", ""]; // empty statements: the wait runs in the thread below
 
 missionNamespace setVariable [format ["%1_started", _VARtaskgeneratedName], false];
 publicVariable format ["%1_started", _VARtaskgeneratedName];
 
-// 等待线程
 [_startTrigger, _VARtaskgeneratedName] spawn {
     params ["_trg", "_taskName"];
     waitUntil { sleep 1; triggerActivated _trg };
@@ -203,7 +200,6 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
     deleteVehicle _trg;
 };
 
-// ================ 任务完成条件检查线程 ================
 Mission_Active = true;
 publicVariable "Mission_Active";
 
@@ -242,7 +238,6 @@ publicVariable "Mission_Active";
     };
 };
 
-// ================ 部队生成线程（等待玩家进入后开始） ================
 [_targetpos, _radius, _speaker1, _speaker2, _speaker3, _message1, _message2, _message3, _message4, _message5, _VARtaskgeneratedName] spawn {
     params ["_targetpos", "_radius", "_speaker1", "_speaker2", "_speaker3", "_message1", "_message2", "_message3", "_message4", "_message5", "_taskName"];
 

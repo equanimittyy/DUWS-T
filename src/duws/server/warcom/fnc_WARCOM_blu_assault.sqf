@@ -13,7 +13,6 @@ WARCOM_blu_attack_wave_avalaible = false;
 
 // Type of attack wave
 [] spawn {
-// 使用本地化字符串（从stringtable.xml加载
 
 		  
     waitUntil {sleep 30; WARCOM_blufor_ap>=10};
@@ -104,30 +103,25 @@ WARCOM_blu_attack_wave_avalaible = false;
 			[localize "STR_DUWS_T_OVERLORD", format[localize "STR_DUWS_T_7y9is2hm", _TFname]] remoteExec ["fnc_duws_dialogue", 0];
 			[{hint localize "STR_DUWS_T_7y9is2hm2"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 			sleep 10; // give squads a chance to mount up
-			// 让特遣队在基地附近待命（移动到基地附近但不攻击）
+			// Park the task force on standby near base -- move up but hold, not assault.
 private _hqPos = WARCOM_blu_hq_pos;
-// 清除所有现有路点
 while {count (waypoints _group) > 0} do {
     deleteWaypoint ((waypoints _group) select 0);
 };
-// 添加一个移动到基地附近的路点
 _wp = _group addWaypoint [_hqPos, 100];
 _wp setWaypointType "MOVE";
 _wp setWaypointBehaviour "AWARE";
 _wp setWaypointSpeed "NORMAL";
 _wp setWaypointCompletionRadius 100;
-// 添加一个循环路点（可选，让他们在基地附近停留）
 _wp2 = _group addWaypoint [_hqPos, 50];
 _wp2 setWaypointType "CYCLE";
 _wp2 setWaypointBehaviour "AWARE";
 _wp2 setWaypointSpeed "NORMAL";
 
-// 记录该组到待命数组
 private _standby = missionNamespace getVariable ["blu_taskforces_standby", []];
 _standby pushBack _group;
 missionNamespace setVariable ["blu_taskforces_standby", _standby, true];
 
-// 仍然添加 GPS 标记（让玩家能看到他们）
 [_group,_TFname] spawn fnc_WARCOM_gps_marker;
 
 			sleep 5;

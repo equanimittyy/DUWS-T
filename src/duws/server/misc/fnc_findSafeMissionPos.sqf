@@ -17,7 +17,6 @@ params [
 private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", [0,0,0]];
 private _missionLocations = missionNamespace getVariable ["MissionLocations", []];
 
-// 如果没有地点池，使用地图城镇位置
 if (_missionLocations isEqualTo []) then {
     _missionLocations = nearestLocations [getArray (configFile >> "CfgWorlds" >> worldName >> "centerPosition"), ["NameCity","NameVillage","NameCityCapital"], worldSize];
 };

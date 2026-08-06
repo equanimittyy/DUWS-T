@@ -1,5 +1,5 @@
 // fnc_hirePartisans_spawnDeployed.sqf
-// 服务器执行：在指定位置生成游击队并加入高级指挥
+// Server-side: spawn the partisan squad at the chosen position and add it to high command.
 if (!isServer) exitWith {};
 
 params ["_caller", "_clickPos", "_count"];
@@ -20,7 +20,6 @@ private _group = [_spawnPos, WEST, _unitClasses, [], [], [0.5, 0.6]] call BIS_fn
 _group deleteGroupWhenEmpty true;
 private _units = units _group;
 
-// ----- 装备逻辑 -----
 private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", getPos _caller];
 private _nearbyBlu = nearestObjects [_hqPos, ["CAManBase"], 200] select { side _x == WEST && alive _x };
 private _scannedWeapons = [];
@@ -77,7 +76,7 @@ if (count _vestClasses == 0) then { _vestClasses = ["V_TacVest_blk"] };
     _x enableFatigue false;
 } forEach _units;
 
-// 确保有发射器的单位装备背包（平民风格）
+// Give any launcher carrier a backpack -- civilian packs, to match the partisan look.
 {
     private _hasLauncher = (secondaryWeapon _x != "") ||
                            {(primaryWeapon _x) isKindOf ["Launcher", configFile >> "CfgWeapons"]} ||
@@ -95,10 +94,8 @@ if (count _vestClasses == 0) then { _vestClasses = ["V_TacVest_blk"] };
     };
 } forEach _units;
 
-// 补充弹药
 { [_x] call fnc_rearmUnit; } forEach _units;
 
-// ----- 加入高级指挥（HC）-----
 private _playerName = vehiclevarname _caller;
 private _var = format["%1HC", _playerName];
 private _HCgroups = missionNamespace getVariable [_var, []];

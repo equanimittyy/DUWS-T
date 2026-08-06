@@ -2,13 +2,12 @@
 params ["_MissionPos", "_mission_name"];
 if (!([14, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
-// ----- 任务参数 --------------------------------------------------------------
-_searchRadius   = 250;      // 搜索建筑物半径
-_spawnDist      = 230;      // 红方生成距离（边缘）
-_timeLimit      = 360;      // 限定时间（秒）
-_cpReward       = 20;       // 指挥点奖励
-_apReward       = 0;        // 行动点奖励
-_repReward      = 5;        // 成功时声望增加量
+_searchRadius   = 250;
+_spawnDist      = 230;
+_timeLimit      = 360;
+_cpReward       = 20;
+_apReward       = 0;
+_repReward      = 5;
 
 _speaker        = localize "STR_DUWS_T_OVERLORD";
 _speakerinfomat = localize "STR_DUWS_T_infomat";
@@ -22,7 +21,6 @@ _message1       = localize "STR_DUWS_T_pcbequick";
 _message2       = ([localize "STR_DUWS_T_pcend"] call fnc_cs);
 _message3       = ([localize "STR_DUWS_T_pcfail"] call fnc_cs);
 
-// ----- 1. 寻找合适的任务目标位置（含建筑物）--------------------------------
 
 private _site = [_MissionPos, _searchRadius, 14] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
@@ -39,7 +37,6 @@ if (isNull _Building) exitWith {
 
 _buildingPositions = [_Building] call BIS_fnc_buildingPositions;
 if (count _buildingPositions < 4) then {
-    // 需要寻找附近其他建筑物
     private _nearbyBuildings = nearestObjects [_MissionPos, ["House"], _searchRadius];
     private _found = false;
     {
@@ -68,7 +65,6 @@ _markername2 = [_targetpos, _searchRadius] call fnc_missionMarkerData;
 private _VARtaskgeneratedName = format ["protectciv_%1_%2", round(_MissionPos select 0), round(_MissionPos select 1)];
 [_VARtaskgeneratedName, localize "STR_DUWS_T_protectciv", _mission_name, _targetpos, "defend"] call fnc_missionTaskCreate;
 
-// ----- 2. 放置平民（蓝方渔民，持续害怕动画）--------------------------------
 _civilianClass = "C_Man_Fisherman_01_F";
 _civGroup = [[0,0], WEST, [_civilianClass]] call BIS_fnc_spawnGroup;
 _civilian = leader _civGroup;
@@ -76,21 +72,17 @@ _civilian allowDamage true;
 _civilian setCaptive false;
 _civilian setDamage 0.8;
 
-// 使用已保存的 _buildingPositions 放置平民（此时确保≥4个位置）
 if (count _buildingPositions > 0) then {
     _randIndex = floor random count _buildingPositions;
     _civilian setPosATL (_buildingPositions select _randIndex);
 } else {
-    // 理论上不会执行到这里，但保留后备
     _civilian setPosATL (getPosATL _Building);
 };
 
-// 禁止移动，保持害怕姿态
 _civilian disableAI "PATH";
 _civilian setBehaviour "CARELESS";
 _civilian setCombatMode "BLUE";
 
-// ----- 3. 为线人创建地图标记（类似 CQB 任务的标记模板）----------------------
 _civilianMarker = format ["civ_marker_%1", round(time + random 1000)];
 createMarker [_civilianMarker, getPosATL _civilian];
 _civilianMarker setMarkerShape "ICON";
@@ -103,7 +95,6 @@ _civilianMarker setMarkerSize [1, 1];
 // it is one pass across all of them rather than a change here.
 [localize "STR_DUWS_T_c14", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
-// 持续播放惊恐动画
 [_civilian] spawn {
     params ["_unit"];
     sleep 1;
@@ -119,7 +110,6 @@ _civilianMarker setMarkerSize [1, 1];
 
 _civGroup deleteGroupWhenEmpty true;
 
-// ----- 任务前对话（广播）----------------------------------------------------
 [_speakerinfomat, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 [_speaker, _messagewhoau] remoteExec ["fnc_duws_dialogue", 0];
@@ -134,16 +124,14 @@ sleep 5;
 sleep 8;
 [_speakerinfomat, _message1] remoteExec ["fnc_duws_dialogue", 0];
 
-// ========== 新增：创建触发器，等待任意玩家进入任务区域 ==========
 _startTrigger = createTrigger ["EmptyDetector", _targetpos];
 _startTrigger setTriggerArea [_searchRadius, _searchRadius, 0, false];
 _startTrigger setTriggerActivation ["ANYPLAYER", "PRESENT", false];
-_startTrigger setTriggerStatements ["this", "", ""]; // 空语句，在线程中等待
+_startTrigger setTriggerStatements ["this", "", ""]; // empty statements: the wait runs in the thread below
 
 missionNamespace setVariable [format ["%1_started", _VARtaskgeneratedName], false];
 publicVariable format ["%1_started", _VARtaskgeneratedName];
 
-// 等待线程
 [_startTrigger, _VARtaskgeneratedName] spawn {
     params ["_trg", "_taskName"];
     waitUntil { sleep 1; triggerActivated _trg };
@@ -153,17 +141,13 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
     deleteVehicle _trg;
 };
 
-// ----- 7. 任务状态监控线程（统一处理成功/失败/取消 + 删除线人标记）-------
 
-// 启动监控线程，同时传递必要参数
 [_civilian, _VARtaskgeneratedName, _civilianMarker, _timeLimit, _cpReward, _apReward, _repReward, _targetpos, _searchRadius, _markername2] spawn {
     params ["_civ", "_taskID", "_civMarker", "_timeLimit", "_cp", "_ap", "_rep", "_targetPos", "_radius", "_areaMarker"];
 
-    // 等待玩家进入任务区域
     waitUntil { sleep 1; missionNamespace getVariable [format ["%1_started", _taskID], false] };
     private _missionStartTime = missionNamespace getVariable [format ["%1_startTime", _taskID], time];
 
-    // 任务活动标志，用于控制生成线程
     Mission_Active = true;
     publicVariable "Mission_Active";
 
@@ -174,13 +158,10 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
         false
     };
 
-    // 任务结束，立即停止生成线程
     Mission_Active = false;
     publicVariable "Mission_Active";
 
-    // ----- 任务结局判定 -----
     if (!alive _civ) then {
-        // 平民死亡 → 失败
         [_taskID, "FAILED"] call fnc_missionTaskEnd;
         // Reputation is a civilian-system currency: skip its change when off. Charged against
         // the town the escorted civilian belonged to, falling back to the global outside one.
@@ -190,7 +171,6 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
         ["alert", [localize "STR_DUWS_T_cycuqbvj", localize "STR_DUWS_T_ayhemuj4"]] remoteExec ['BIS_fnc_showNotification', [0,-2] select isDedicated, false];
         [_speaker, _message3] remoteExec ["fnc_duws_dialogue", 0];
     } else {
-            // 时间到且平民存活 → 成功
             _speakeracteam  = localize "STR_DUWS_T_actionteam";
             _message2       = ([localize "STR_DUWS_T_pcend"] call fnc_cs);
             [_speakeracteam, _message2] remoteExec ["fnc_duws_dialogue", 0];
@@ -203,9 +183,7 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
             };
     };
 
-    // ----- 任务结束，统一清理 -----
 
-    // ✅ 删除线人标记（无论成功/失败/取消，都会执行）
     if (!isNil "_civMarker" && {_civMarker != ""}) then {
         deleteMarker _civMarker;
     };
@@ -213,19 +191,16 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
         [_areaMarker] call fnc_missionMarkerClear;
     };
 
-    // 调用通用清理函数（清除敌方单位、残骸等）
     [_targetPos, _radius, "", true] call fnc_mission_end;
     // Spawn the "next mission" wait
 };
 
-// ----- 8. 生成红方部队线程（最多四波，受 Mission_Active 控制）-----------
 [_targetpos, _spawnDist, _civilian, _VARtaskgeneratedName] spawn {
     params ["_pos", "_dist", "_civ", "_taskName"];
 
-    // 等待玩家进入任务区域
     waitUntil { sleep 1; missionNamespace getVariable [format ["%1_started", _taskName], false] };
 
-    // 在此内部定义生成函数，确保作用域正确
+    // defined inside the thread so it is in scope here
     private _spawnOpforWave = {
         params ["_center", "_dist", "_targetObject"];
         private _spawnPos = [];
@@ -275,19 +250,16 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
     };
 
     private _waveCount = 0;
-    private _maxWaves = 4;          // 原脚本共生成四波
-    private _initialDelay = 20;      // 第一波前的延迟
+    private _maxWaves = 4;
+    private _initialDelay = 20;
 
-    // 等待初始延迟，期间可被 Mission_Active 中断
     private _endTime = time + _initialDelay;
     waitUntil { sleep 1; time >= _endTime || !Mission_Active };
     if (!Mission_Active) exitWith {};
     sleep 20;
-    // 生成第一波
     [_pos, _dist, _civ] call _spawnOpforWave;
     _waveCount = 1;
 
-    // 后续波次
     while {_waveCount < _maxWaves && Mission_Active} do {
         _endTime = time + 40;
         waitUntil { sleep 1; time >= _endTime || !Mission_Active };

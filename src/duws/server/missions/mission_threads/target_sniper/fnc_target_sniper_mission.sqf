@@ -47,7 +47,6 @@ _target2 = units _group select 2;
 // rate -- the garrison it applies to only started carrying intel when fnc_garrisonBuildings took
 // over, so the gap had never shown.
 
-// 为狙击手添加吉利服
 [_target1] spawn {
     params ["_unit"];
     sleep 5;
@@ -58,13 +57,11 @@ _target2 = units _group select 2;
     sleep 5;
     _unit forceAddUniform "U_B_FullGhillie_sard";
 };
-// 为狙击手添加机密情报
 [_target1] spawn {
     params ["_unit"];
     sleep 5;
     _unit addMagazineGlobal "FileTopSecret";
 };
-// 为狙击手添加机密情报
 [_target2] spawn {
     params ["_unit"];
     sleep 5;
@@ -95,7 +92,7 @@ if (VERSION_X == "MODERN") then {
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 
-sleep 5; // 等待巡逻队生成完毕
+sleep 5; // let the patrols finish spawning
 
 
 waitUntil {sleep 2; (!alive _target1 && !alive _target2)};

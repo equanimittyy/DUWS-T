@@ -84,7 +84,7 @@ sleep 1;
 
 
 
-sleep 5; // 等待巡逻队生成完毕
+sleep 5; // let the patrols finish spawning
 
 
 waitUntil {sleep 2; ((getdammage BLD1)>0.95 || (BLD1 distance PosOfBLUHQ)<50)};

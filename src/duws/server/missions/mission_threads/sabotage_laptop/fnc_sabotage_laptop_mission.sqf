@@ -81,4 +81,4 @@ sleep 8;
 if (hardcore_mode_enable) then {
     [[_laptop], "objective"] call fnc_search_flag_group;
 };
-sleep 5; // 等待巡逻队生成完毕
+sleep 5; // let the patrols finish spawning

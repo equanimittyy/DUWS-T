@@ -73,7 +73,6 @@ if (hardcore_mode_enable) then {
 	str(_markername2) setMarkerAlpha 0.3; 
 };
 
-// ========== 清理战区中心周围的障碍物 ==========
 // Buildings included, unlike the base sites: a prefab is dropped whole onto a centre moreUrban
 // picked for being dense, so a house left standing lands inside it. The cost is that a hide is
 // permanent -- a terrain object cannot be deleted, and nothing here puts the town back.
@@ -302,8 +301,6 @@ if !([_spawnPos, _size + DUWS_streamArrivalMargin, 1] call fnc_duws_bluforNear) 
 // player watches a Hard Point Generation pass between zones and civilians. Siting still keys off this
 // zone's centre, so its cap guard and streaming coupling are unchanged.
 
-// ✅ 修复：将占领触发器和旗杆创建代码移到 while 循环之前，确保它们能够执行
-
 // CREATE ZONE CAPTURABLE TRIGGER
 // Server-local, unlike the notification trigger above it: the capture condition reads the zone's
 // garrison peak, which is a server-side global, so a client evaluating it would answer for state it
@@ -329,21 +326,18 @@ _trg setTriggerStatements ["this && {[thisTrigger] call fnc_zone_capture_ready}"
 // so stepping off the objective restarts it.
 _trg setTriggerTimeout [30, 30, 30, true];
 
-// 存储触发器变量（统一使用 floor abs 避免负号）
+// floor abs so the key carries no minus sign (the capture handlers rebuild the same name)
 private _trgVarName = format["trigger_%1_%2", floor abs (_zonePos select 0), floor abs (_zonePos select 1)];
 missionNamespace setVariable [_trgVarName, _trg];
 _trg setVariable ["isZoneCaptureTrigger", true];
 
 // IF MODERN or SIMPLE ZONES, CREATE ZONE FLAG WITH RANDOM OFFSET AND STORE VARIABLE
 if (VERSION_X == "MODERN" || simple_zones_enable) then {
-    // 随机偏移距离：15 到 25 米
     private _offsetDist = 15 + random 10;
-    // 随机方向
     private _offsetDir = random 360;
-    // 计算偏移后的位置
     private _flagPos = _zonePos getPos [_offsetDist, _offsetDir];
     
-    // 确保旗杆不悬空（使用安全位置查找）
+    // Safe-pos so the flag doesn't hang in the air
     private _safePos = [_flagPos, 0, 3, 1, 0, 0.2, 0] call BIS_fnc_findSafePos;
     if (_safePos isEqualTo [0,0,0]) then { _safePos = _flagPos };
     _safePos set [2, 0];

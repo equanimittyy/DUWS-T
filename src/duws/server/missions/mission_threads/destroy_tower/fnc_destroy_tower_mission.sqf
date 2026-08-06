@@ -91,7 +91,7 @@ sleep 12;
 sleep 12;
 [_speaker, _message2] remoteExec ["fnc_duws_dialogue", 0];
 
-sleep 5; // 等待巡逻队生成完毕
+sleep 5;
 
 
 waitUntil {

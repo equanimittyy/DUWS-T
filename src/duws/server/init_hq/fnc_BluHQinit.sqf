@@ -10,23 +10,19 @@
 
 if (isNil "PosOfBLUHQ") exitWith {};
 
-// 核心坐标定义
 private _hqInCompX = 10.0413;
 private _hqInCompY = 11.3066;
 private _compCenterX = 1041.4962;
 private _compCenterY = 6115.1133;
 
-// 计算偏移
 private _offsetX = _compCenterX - _hqInCompX;
 private _offsetY = _compCenterY - _hqInCompY;
 
-// 基准生成坐标
 private _spawnBaseX = (PosOfBLUHQ select 0) + _offsetX;
 private _spawnBaseY = (PosOfBLUHQ select 1) + _offsetY;
 private _newCenterZ = getTerrainHeightASL [_spawnBaseX, _spawnBaseY];
 if (_newCenterZ <= 0) then { _newCenterZ = 0; };
 
-// 用于存储关键交互对象和建筑对象的变量
 private _hqObj = objNull;
 private _supplyCrate = objNull;
 private _mapBoard = objNull;
@@ -37,7 +33,7 @@ private _repairDepot = objNull;
 private _helipad = objNull;
 private _allTowersList = [];
 
-// 格式: [类名, 世界X, 世界Y, 世界Z海拔, 方向度, 是否武器]
+// Format: [class, world X, world Y, world Z ASL, dir deg, isWeapon]
 // --DUWS-COMPOSITION BEGIN name="HQ Main Base" schema=A anchor=hqInComp--
 private _allObjectsData = [
     ["Land_TimberPile_05_F",                17.9016,   7.8813,  0.5821, 179.9, false],
@@ -65,7 +61,7 @@ private _allObjectsData = [
     ["RoadBarrier_F",                      -22.2731,  21.2998,  0.5566,   0.0, false],
     ["Land_dirt_road_damage_long_02_F",    -22.1962,  13.8916,  0.0,     0.0, false],
     ["Land_WoodenBox_02_F",                 -2.2466,  15.0039,  0.4866,  90.0, false],
-    // 围墙
+    // perimeter wall
     ["Land_CamoConcreteWall_01_l_4m_v1_F", -28.5852,   2.7983,  0.8025,  90.0, false],
     ["Land_CamoConcreteWall_01_l_4m_v1_F", -28.6052,   8.7778,  0.8025,  90.0, false],
     ["Land_CamoConcreteWall_01_l_4m_v1_F", -28.6213,  20.7236,  0.8025,  90.0, false],
@@ -96,7 +92,7 @@ private _allObjectsData = [
     ["Land_CamoConcreteWall_01_l_4m_d_v2_F",-13.7461, -17.8882,  0.7778,   0.0, false],
     ["Land_CamoConcreteWall_01_l_4m_d_v1_F",-28.2026,  14.7295,  0.7778,  90.0, false],
     ["Land_CamoConcreteWall_01_l_4m_d_v1_F", 18.9004,  14.4873,  0.7778, 270.0, false],
-    // 哨塔
+    // guard towers
     ["Land_GuardTower_02_F",                16.5581, -15.4609,  3.7125, 135.0, false],
     ["Land_GuardTower_02_F",                16.5635,  20.7080,  3.7129,  45.0, false],
     ["Land_GuardTower_02_F",               -25.8621,  20.8560,  3.7125, 315.0, false],
@@ -150,13 +146,13 @@ private _allObjectsData = [
     ["Land_PalletTrolley_01_khaki_F",      -3.3298,  19.7393,  0.5478,   0.4, false],
     ["Land_GarbageBarrel_02_F",           -25.3772,  -0.7686,  0.6013, 319.1, false],
     ["Land_GarbageBarrel_02_F",           -25.3188,  -1.5742,  0.6013, 107.4, false],
-    // 火焰区域1
+    // fire feature 1
     ["Land_GarbageBarrel_02_buried_F",     20.0510, -12.6758,  0.3837,  61.2, false],
     ["ModuleEffectsFire_F",                20.1252, -12.6743,  1.4145,  90.0, false],
-    // 火焰区域2
+    // fire feature 2
     ["Land_GarbageBarrel_02_buried_F",     -4.4591, -16.9648,  0.3837,  61.2, false],
     ["ModuleEffectsFire_F",                -4.3849, -16.9634,  1.4145,  90.0, false],
-    // 其余杂物
+    // misc clutter
     ["Land_WoodenCrate_01_F",              -3.5266,  14.8086,  0.3482,  90.0, false],
     ["Land_WoodenCrate_01_stack_x3_F",     18.2676,   3.4175,  0.7079,  90.0, false],
     ["Land_WoodenCrate_01_F",              18.1987,   1.8188,  0.3482, 270.0, false],
@@ -212,7 +208,6 @@ private _weaponData = [
 
 private _lightTypes = ["Land_PortableLight_double_F", "Land_LampShabby_F"];
 
-// 需要设置为无敌的物体类型列表
 private _invulnerableTypes = [
     "Land_PortableLight_double_F",
     "Land_MedicalTent_01_NATO_generic_inner_F",
@@ -249,7 +244,6 @@ private _invulnerableTypes = [
 // building every offset above is measured against.
 [PosOfBLUHQ, 50] call fnc_clear_foliage;
 
-// ========== 生成所有物体并记录关键对象 ==========
 {
     _x params ["_class","_origX","_origY","_origZ","_dir","_isWeapon"];
     if (_isWeapon) then { continue; };
@@ -271,17 +265,14 @@ private _invulnerableTypes = [
         _obj enableSimulationGlobal false;
     };
 
-    // 混凝土墙和伪装网设为无敌（原有逻辑）
     if (_class == "CamoNet_BLUFOR_open_F" || (toLower _class) find "land_camo" == 0) then {
         _obj allowDamage false;
     };
 
-    // 新增：对指定类型物体禁用伤害
     if (_class in _invulnerableTypes) then {
         _obj allowDamage false;
     };
     
-    // 记录关键对象
     if (_class == "Land_Cargo_HQ_V1_F") then { _hqObj = _obj; };
     if (_class == "B_supplyCrate_F") then { _supplyCrate = _obj; };
     if (_class == "MapBoard_altis_F") then { _mapBoard = _obj; };
@@ -293,7 +284,6 @@ private _invulnerableTypes = [
     if (_class == "Land_HelipadSquare_F") then { _helipad = _obj; };
 } forEach _allObjectsData;
 
-// 设置全局 HQ 建筑变量
 bluHQ_object = _hqObj;
 publicVariable "bluHQ_object";
 
@@ -318,7 +308,7 @@ missionNamespace setVariable ["HQ_redeploy_weaponData", _weaponData apply {
     ]
 }, true];
 
-// 兵种池。Broadcast because client_init reads it to caption the guards, and because a FOB's own
+// Unit-type pool. Broadcast because client_init reads it to caption the guards, and because a FOB's own
 // patrol draws from it too (init_hq/fnc_guardsFOB.sqf) -- the HQ_ prefix is where it is set, not
 // who may read it.
 private _baseGuardTypes = [blufor_SOLDIER_X, blufor_LAT_SOLDIER_X, blufor_GL_SOLDIER_X, blufor_TL_SOLDIER_X, blufor_SL_SOLDIER_X, blufor_AR_SOLDIER_X, blufor_MARK_SOLDIER_X];
@@ -326,7 +316,7 @@ missionNamespace setVariable ["HQ_redeploy_guardTypes", _baseGuardTypes, true];
 
 missionNamespace setVariable ["HQ_redeploy_towers", _allTowersList, true];
 
-// 门口双人组：模型XY、高度偏移、朝向、动作
+// Door pair: model XY, height offset, facing, anim
 missionNamespace setVariable ["HQ_redeploy_hqGuardsData", [
     [[-5.49573, -0.923828], -4.10893, 180, "STAND"],
     [[-4.84598, -3.90649], -4.03631, 180, "STAND_IA"]
@@ -336,11 +326,9 @@ missionNamespace setVariable ["HQ_redeploy_medGuardsData", [
     [[3.18945, -5.54492], -1.37312, "STAND"]
 ], true];
 
-// 医疗帐篷与警卫室的网络ID
 if (!isNull _medTent) then { missionNamespace setVariable ["HQ_medTent_netId", netId _medTent, true]; };
 if (!isNull _guardBoxObj) then { missionNamespace setVariable ["HQ_guardBox_netId", netId _guardBoxObj, true]; };
 
-// 巡逻队：随机兵种，出生点用实测的模型坐标和高度偏移
 private _patrolUnits = [];
 for "_i" from 1 to base_patrol_squad do { _patrolUnits pushBack (selectRandom _baseGuardTypes); };
 private _patrolSpawnXY = _hqObj modelToWorld [1.27142, -21.9805, 0];
@@ -353,7 +341,6 @@ missionNamespace setVariable ["HQ_redeploy_patrolSpawnPos", [
 
 call fnc_placeHQUnits;
 
-// 军官：模型XY + 世界Z偏移，精确放置
 private _xyWorld = _hqObj modelToWorld [0.0896273, -0.0180664, 0];
 private _worldPos = [
     _xyWorld select 0,
@@ -367,7 +354,7 @@ _officer allowDamage true;
 // simulating a unit hard-placed at an absolute Z and renders it falling.
 _officer enableSimulationGlobal false;
 _officer setPosWorld _worldPos;
-_officer setDir 180;  // 面朝外，如需调整修改此角度
+_officer setDir 180;  // faces outward
 _officer setBehaviour "CARELESS";
 _officer setCombatMode "BLUE";
 _officer disableAI "TARGET"; _officer disableAI "AUTOTARGET";
@@ -428,7 +415,6 @@ hq_blu1 = _officer; publicVariable "hq_blu1";
     [_u, "acts_StandingSpeakingUnarmed"] remoteExec ["switchMove", 0, format ["hq_pose_%1", netId _u]];
 };
 
-// 路障旁工兵：基于 RoadBarrier 模型XY + 世界Z偏移放置，特定装备
 private _barrierPosX = _spawnBaseX + (-22.2731 - _compCenterX);
 private _barrierPosY = _spawnBaseY + (21.2998 - _compCenterY);
 private _barrier = nearestObject [[_barrierPosX, _barrierPosY, 0] apply { _x + 0 }, "RoadBarrier_F"];
@@ -477,7 +463,6 @@ if (!isNull _barrier) then {
     }];
 };
 
-// ========== 交互动作 ==========
 if (!isNull _supplyCrate) then {
     clearMagazineCargoGlobal _supplyCrate;
     clearWeaponCargoGlobal _supplyCrate;
@@ -506,10 +491,10 @@ if (!isNull _hqObj) then {
     [_hqObj] remoteExec ["fnc_addHQBuildingActions", 0, format ["hq_building_%1", netId _hqObj]];
 };
 
-// 大门自动触发器：使用 netId 传递对象引用
+// Gate auto-trigger: object passed by netId, since the trigger statement is a string
 if (!isNull _barGateObj && {isNil {_barGateObj getVariable "gate_trigger_added"}}) then {
     _barGateObj setVariable ["gate_trigger_added", true, true];
-    private _gateNetId = netId _barGateObj;   // 捕获网络ID
+    private _gateNetId = netId _barGateObj;
     _trgGate = createTrigger ["EmptyDetector", getPosWorld _barGateObj, false];
     _trgGate setTriggerArea [12, 12, 0, false, 12];
     _trgGate setTriggerActivation ["ANYPLAYER", "PRESENT", true];
@@ -523,7 +508,6 @@ if (!isNull _barGateObj && {isNil {_barGateObj getVariable "gate_trigger_added"}
     ];
 };
 
-// ========== 标记、触发器、重生点 ==========
 _markername = format["%1%2",round (PosOfBLUHQ select 0),round (PosOfBLUHQ select 1)];
 blu_hq_markername = _markername; publicVariable "blu_hq_markername";
 createMarker [str(_markername), PosOfBLUHQ];
@@ -540,7 +524,6 @@ _trgWarning setTriggerActivation["EAST","PRESENT",true];
 _trgWarning setTriggerStatements["this", "['Main Base', thisList] call fnc_enemy_contact;", ""];
 _trgWarning setTriggerTimeout [10, 10, 10, true];
 
-// 重生点：帐篷门口 (测量坐标)
 private _respawnXY = _medTent modelToWorld [-0.243752, -7.28516, 0];
 private _respawnPos = [
     _respawnXY select 0,
@@ -549,7 +532,6 @@ private _respawnPos = [
 ];
 "respawn_west" setMarkerPos _respawnPos;
 
-// 保存维修站和停机坪的ID（原有功能）
 if (!isNull _repairDepot) then { missionNamespace setVariable ["HQ_repairDepot_netId", netId _repairDepot, true]; };
 if (!isNull _helipad) then { missionNamespace setVariable ["HQ_helipad_netId", netId _helipad, true]; };
 

@@ -2,7 +2,6 @@ if (!isServer) exitWith {};
 _group = _this select 0;
 _TFname = _this select 1;
 
-// 使用本地化字符串（从stringtable.xml加载）
 
 // get the current primary zone
 _primary_waypoint = [];
@@ -50,7 +49,6 @@ while {true} do {
 	_leader = leader _group; 
 	// IF ALL DEAD OR 1 ALIVE IN VEHICLE, EXIT.
 	if (_units_alive <= 0 || (_units_alive == 1 && (vehicle _leader) != _leader && isTouchingGround (vehicle _leader))) exitWith {  
-		// 从待命数组中移除该组（如果存在）
 		private _standby = missionNamespace getVariable ["blu_taskforces_standby", []];
 		if (_group in _standby) then {
 			_standby = _standby - [_group];
@@ -76,7 +74,7 @@ while {true} do {
 	// or WP reset was sent from AI master control
 	if (BLUFOR_primary_chg == true) then {
 
-		// 仅当该组不在待命列表中时才重置路点
+		// Standby groups keep their parked waypoints; only launched groups follow the primary zone.
 		private _standby = missionNamespace getVariable ["blu_taskforces_standby", []];
 		if !(_group in _standby) then {
 			[_group] spawn fnc_WARCOM_wp_blu_assault;

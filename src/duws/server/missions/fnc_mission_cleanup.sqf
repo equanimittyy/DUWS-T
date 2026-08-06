@@ -62,7 +62,6 @@ _close = false;
     if ((_targetpos distance _x) < (zones_max_radius * 1.2)) exitWith {_close = true};
 } forEach WARCOM_zones_controled_by_OPFOR;
 
-// 定义僵尸类名列表
 private _zombieClasses = ["zombie_runner", "zombie_bolter", "zombie_walker"];
 
 if (_close == false) then {
@@ -87,7 +86,6 @@ if (_close == false) then {
         } forEach (DUWS_occupants getOrDefault [_key, []]);
     } forEach DUWS_sites;
 
-    // 构建受保护对象列表（玩家自身及组员、载具）
     private _protected = [];
     {
         private _player = _x;

@@ -24,7 +24,7 @@ deleteVehicle _trg2;
 // Remove FOB from Array_of_FOBS
 [_fob_pos] call fnc_fob_deregister;
 
-// CLEANUP OBJECTS AFTER 5 min (保留平民)
+// CLEANUP OBJECTS AFTER 5 min (civilians spared)
 [_fob_pos, _fob_name] spawn {  
     _zonePos = _this select 0;
     _fob_name = _this select 1;
@@ -32,7 +32,6 @@ deleteVehicle _trg2;
     sleep 300;  // 5 min
     _zoneObj = nearestObjects [_zonePos, [], _radius];
     {
-        // 只删除非平民的物体（单位或载具）
         if (side _x != CIVILIAN) then {
             deleteVehicle _x;
         };

@@ -3,10 +3,8 @@ params ["_MissionPos", "_mission_name"];
 if (!([4, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 
-// ==================== 定义所有辅助函数（确保在所有机器上执行）====================
 private _fncScript = {
     if (isNil "DUWS_fnc_addCarryAction") then {
-        // ---------- 自动放下飞行员（无动画，用于进入载具时触发） ----------
         DUWS_fnc_autoDropPilot = {
             params ["_caller", "_pilot"];
             if (isNull _caller || isNull _pilot) exitWith {};
@@ -35,7 +33,6 @@ private _fncScript = {
             };
         };
 
-        // ---------- 放下飞行员（到地上，含动画） ----------
         DUWS_fnc_dropPilot = {
             params ["_caller", "_pilot"];
             private _dropAction = _caller getVariable ["dropAction", -1];
@@ -68,7 +65,6 @@ private _fncScript = {
             };
         };
 
-        // ---------- 将飞行员放入载具（客户端入口，请求服务器执行） ----------
         DUWS_fnc_putInVehicle = {
             params ["_caller", "_pilot"];
             private _vehicle = cursorTarget;
@@ -85,7 +81,6 @@ private _fncScript = {
             [_caller, _pilot, _vehicle] remoteExec ["DUWS_fnc_serverPutInVehicle", 2];
         };
 
-        // ---------- 从载具中取出飞行员（客户端入口，请求服务器执行） ----------
         DUWS_fnc_takeOutFromVehicle = {
             params ["_caller", "_pilot"];
             private _vehicle = _pilot getVariable ["inVehicle", objNull];
@@ -94,7 +89,6 @@ private _fncScript = {
             [_caller, _pilot, _vehicle] remoteExec ["DUWS_fnc_serverTakeOutFromVehicle", 2];
         };
 
-        // ---------- 服务器端：实际放入载具 ----------
         DUWS_fnc_serverPutInVehicle = {
             params ["_caller", "_pilot", "_vehicle"];
             if (isNull _vehicle || isNull _pilot || isNull _caller) exitWith {};
@@ -158,7 +152,6 @@ private _fncScript = {
             [_vehicle] remoteExec ["DUWS_fnc_addVehicleTakeOutAction", 0];
         };
 
-        // ---------- 服务器端：实际从载具取出（优化版：取消下车动画） ----------
         DUWS_fnc_serverTakeOutFromVehicle = {
             params ["_caller", "_pilot", "_vehicle"];
             if (isNull _vehicle || isNull _pilot || isNull _caller) exitWith {};
@@ -209,7 +202,6 @@ private _fncScript = {
             };
         };
 
-        // ---------- 为携带者添加放下/放入动作及自动放下监控 ----------
         DUWS_fnc_addCarrierActions = {
             params ["_caller", "_pilot"];
             if (!alive _caller || !alive _pilot) exitWith {};
@@ -270,7 +262,6 @@ private _fncScript = {
             _caller setVariable ["putInVehicleAction", _putInVehicleAction];
         };
 
-        // ---------- 清除携带者身上的所有动作 ----------
         DUWS_fnc_clearCarrierActions = {
             params ["_caller"];
             private _dropAction = _caller getVariable ["dropAction", -1];
@@ -291,7 +282,6 @@ private _fncScript = {
             _caller setVariable ["putInVehicleAction", nil];
         };
 
-        // ---------- 为飞行员添加背起动作（修改：立即移除动作） ----------
         DUWS_fnc_addCarryAction = {
             params ["_pilot"];
             if (!alive _pilot) exitWith {};
@@ -313,7 +303,7 @@ private _fncScript = {
                         
                         [_caller, "AcinPknlMstpSnonWnonDnon_AcinPercMrunSnonWnonDnon"] remoteExec ["switchMove", 0];
                         
-                        // 立即移除飞行员身上的背起动作，防止其他玩家在动画过程中再次点击
+                        // remove the carry action now: blocks a second trigger mid-animation
                         [_target] remoteExec ["DUWS_fnc_removeCarryAction", 0];
                         
                         sleep 2;
@@ -342,7 +332,6 @@ private _fncScript = {
             }] remoteExec ["call", 0, true];
         };
 
-        // ---------- 移除飞行员身上的背起动作 ----------
         DUWS_fnc_removeCarryAction = {
             params ["_pilot"];
             if (isNull _pilot) exitWith {};
@@ -354,7 +343,6 @@ private _fncScript = {
             _pilot setVariable ["carryActionAdded", nil];
         };
 
-        // ---------- 为载具添加"背出飞行员"动作 ----------
         DUWS_fnc_addVehicleTakeOutAction = {
             params ["_vehicle"];
             if (isNull _vehicle) exitWith {};
@@ -377,7 +365,6 @@ private _fncScript = {
             _vehicle setVariable ["takeOutActionID", _actionID];
         };
 
-        // ---------- 移除载具上的"背出飞行员"动作 ----------
         DUWS_fnc_removeVehicleTakeOutAction = {
             params ["_vehicle"];
             if (isNull _vehicle) exitWith {};
@@ -389,7 +376,6 @@ private _fncScript = {
             _vehicle setVariable ["takeOutActionAdded", nil];
         };
 
-        // ---------- 清理所有与飞行员相关的动作和动画 ----------
         DUWS_fnc_cleanupPilotActions = {
             params ["_pilot"];
             if (isNull _pilot) exitWith {};
@@ -412,7 +398,6 @@ private _fncScript = {
 call _fncScript;
 [_fncScript] remoteExec ["call", 0, true];
 
-// ==================== 任务脚本主体 ====================
 _radius = 300;
 _cpreward = 25;
 _apreward = 45;
@@ -466,7 +451,6 @@ removeAllItems _pilot;
 _pilot setDamage 0.8;
 _pilot disableAI "PATH";
 
-// 添加死亡事件处理器，当飞行员死亡时，立即清除携带者身上的动作
 _pilot addEventHandler ["Killed", {
     params ["_unit", "_killer"];
     private _carrier = _unit getVariable ["carrier", objNull];
@@ -491,7 +475,7 @@ _trg setTriggerActivation["WEST","PRESENT",false];
 _trg setTriggerStatements["this","pilot_west_close = true;", ""];
 _trg setTriggerTimeout [10, 10, 10, true ];  
 
-sleep 5; // 等待巡逻队生成完毕
+sleep 5;
 
 
 waitUntil {

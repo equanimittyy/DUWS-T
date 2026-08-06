@@ -1,6 +1,5 @@
 if (!isServer) exitWith {};
 
-// ====== 修理执行 ======
 if (isNil "fnc_veh_repair_action") then {
     fnc_veh_repair_action = {
         params ["_caller", "_trg"];
@@ -40,7 +39,6 @@ if (isNil "fnc_veh_repair_action") then {
     publicVariable "fnc_veh_repair_action";
 };
 
-// ====== 状态检查（完全恢复原始递归收集 + getHitPointDamage） ======
 if (isNil "fnc_veh_repair_check_status") then {
     fnc_veh_repair_check_status = {
         params ["_caller", "_trgNetId"];
@@ -53,7 +51,6 @@ if (isNil "fnc_veh_repair_check_status") then {
         private _veh = _vehicles select 0;
         private _vehName = getText (configFile >> "CfgVehicles" >> typeOf _veh >> "displayName");
 
-        // 收集 HitPoints（原始递归逻辑）
         private _hitPoints = [];
         private _fnc_collectHitpoints = {
             params ["_cfg"];
@@ -72,7 +69,7 @@ if (isNil "fnc_veh_repair_check_status") then {
         } else {
             { if (isClass (_vehCfg >> _x)) then { [_vehCfg >> _x] call _fnc_collectHitpoints; }; } forEach ["HitPoints","Components","Damage"];
         };
-        _hitPoints = _hitPoints arrayIntersect _hitPoints;  // 去重
+        _hitPoints = _hitPoints arrayIntersect _hitPoints;  // self-intersect dedups
 
         private _lines = [format ["=== %1 ===", _vehName]];
         private _hasDamage = false;
@@ -88,7 +85,6 @@ if (isNil "fnc_veh_repair_check_status") then {
             };
         } forEach _hitPoints;
 
-        // 后备：使用 getAllHitPointsDamage
         if (!_hasDamage) then {
             private _hpData = getAllHitPointsDamage _veh;
             private _parts = _hpData select 0;
@@ -108,7 +104,6 @@ if (isNil "fnc_veh_repair_check_status") then {
     publicVariable "fnc_veh_repair_check_status";
 };
 
-// ====== 主逻辑 ======
 private _helipad = objectFromNetId (missionNamespace getVariable ["HQ_helipad_netId", ""]);
 private _depot = objectFromNetId (missionNamespace getVariable ["HQ_repairDepot_netId", ""]);
 if (isNull _helipad || isNull _depot) exitWith { ["ERROR", "SUPPORT", "Helipad/Depot not found"] call fnc_log; };

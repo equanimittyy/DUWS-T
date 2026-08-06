@@ -12,7 +12,6 @@ fnc_disguise_hintFail = {
 };
 publicVariable "fnc_disguise_hintFail";
 
-// ========== 平民载具白名单 ==========
 private _civilianVehicles = [
     "C_Van_01_fuel_F", "C_Van_01_box_F", "C_Van_01_transport_F",
     "C_Tractor_01_F", "C_Hatchback_01_sport_F", "C_Hatchback_01_F",
@@ -23,7 +22,6 @@ private _civilianVehicles = [
     "C_Truck_02_transport_F"
 ];
 
-// ========== 冷却检查 ==========
 private _lastUse = _player getVariable ["DUWS_disguise_lastUse", -300];
 private _cooldownRemaining = 300 - (diag_tickTime - _lastUse);
 if (_cooldownRemaining > 0) exitWith {
@@ -33,7 +31,6 @@ if (_cooldownRemaining > 0) exitWith {
     [_msg] remoteExec ["hint", _player];
 };
 
-// ========== 基础条件检查 ==========
 private _veh = vehicle _player;
 if (_veh != _player) then {
     private _vehType = typeOf _veh;
@@ -47,10 +44,6 @@ if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_ZOMBIE"] call fnc_disguise_hintFail;
 };
 
-// ========== 钱币和情报检查已移除 ==========
-// 原代码在此处检查 _forbiddenItems，现已删除
-
-// ========== 等待平民装备缓存 ==========
 private _timeout = diag_tickTime + 30;
 waitUntil {
     sleep 0.1;
@@ -66,7 +59,6 @@ private _civVests = DUWS_civVests;
 private _civHeadgear = DUWS_civHeadgear;
 private _civBackpacks = DUWS_civBackpacks;
 
-// ========== 检查当前装束 ==========
 if (primaryWeapon _player != "" || secondaryWeapon _player != "" || handgunWeapon _player != "") exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_WEAPON"] call fnc_disguise_hintFail;
 };
@@ -99,7 +91,6 @@ if (_currentBackpack != "" && {!(_currentBackpack in _civBackpacks)}) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_BACKPACK"] call fnc_disguise_hintFail;
 };
 
-// ========== 检查通过，开启伪装 ==========
 _player setVariable ["DUWS_disguise_lastUse", diag_tickTime];
 _player setVariable ["DUWS_disguised", true, true];
 _player setCaptive true;
@@ -117,7 +108,6 @@ _player setVariable ["DUWS_disguise_civilianVehicles", _civilianVehicles];
 [localize "STR_DUWS_T_DISGUISE_ACTIVATED_DESC"] remoteExec ["hint", _player];
 [localize "STR_DUWS_T_DISGUISE_SUCCESS_HINT"] remoteExec ["hint", _player];
 
-// ========== 启动监控线程 ==========
 if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
     _player setVariable ["DUWS_disguise_monitorRunning", true];
     
@@ -162,25 +152,19 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
                 continue;
             };
             
-            // 1. 武器
             if (primaryWeapon _player != "" || secondaryWeapon _player != "" || handgunWeapon _player != "") exitWith {
                 ["STR_DUWS_T_DISGUISE_BROKEN_WEAPON"] call _fnc_breakDisguise;
             };
-            
-            // 2. 手持望远镜 ———— 已移除 ————
-            
-            // 3. 夜视仪
+
             private _assigned = assignedItems _player;
             if ("NVGoggles" in _assigned || "NVGoggles_OPFOR" in _assigned || "NVGoggles_INDEP" in _assigned) exitWith {
                 ["STR_DUWS_T_DISGUISE_BROKEN_NVG"] call _fnc_breakDisguise;
             };
             
-            // 4. 光身子
             if (uniform _player == "") exitWith {
                 ["STR_DUWS_T_DISGUISE_BROKEN_NAKED"] call _fnc_breakDisguise;
             };
-            
-            // 5. 服装合规性
+
             private _invalidGear = false;
             private _breakReason = "";
             if (!(uniform _player in (_player getVariable ["DUWS_disguise_validUniforms", []]))) then {
@@ -202,15 +186,11 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
                 [_breakReason] call _fnc_breakDisguise;
             };
             
-            // 6. 尸体检测
             private _nearCorpses = _player nearObjects ["CAManBase", 20] select { !alive _x };
             if (count _nearCorpses > 0) exitWith {
                 ["STR_DUWS_T_DISGUISE_BROKEN_CORPSE"] call _fnc_breakDisguise;
             };
-            
-            // 7. 战区距离 ———— 已移除 ————
-            
-            // 8. 距离敌人警告
+
             private _nearEnemies = _player nearEntities [["CAManBase"], _alertDistance] select { side _x == EAST && alive _x };
             private _warningActive = _player getVariable ["DUWS_disguise_warningActive", false];
             
@@ -237,7 +217,6 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
             
             if (!(_player getVariable ["DUWS_disguised", false])) exitWith {};
             
-            // 9. 载具
             private _veh = vehicle _player;
             if (_veh != _player) then {
                 private _vehType = typeOf _veh;
@@ -257,7 +236,6 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
             sleep 5;
         };
         
-        // 清理
         if (!isNull _player) then {
             _player setVariable ["DUWS_disguised", false, true];
             if (alive _player) then {

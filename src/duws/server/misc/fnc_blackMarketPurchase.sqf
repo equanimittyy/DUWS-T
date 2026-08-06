@@ -14,14 +14,12 @@ if !([_caller, _amount] call fnc_coins_spend) exitWith {
     [_msg] remoteExec ["hint", _caller];
 };
 
-// ========== 生成随机物品 ==========
 private _itemClass = "";
 private _displayName = "";
 private _isGoggles = false;
 private _isOptic = false;
 
 if (_type == "goggles") then {
-    // 随机护目镜
     private _allGoggles = [];
     {
         if (getNumber (_x >> "scope") == 2) then {
@@ -34,7 +32,7 @@ if (_type == "goggles") then {
     _isGoggles = true;
 } else {
     if (_type == "optic") then {
-        // 随机瞄具：只要类名中包含 "optic"（不区分大小写）即视为瞄具
+        // Optics have no dedicated CfgWeapons flag; classify by classname containing "optic".
         private _allOptics = [];
         {
             private _itemName = configName _x;
@@ -47,7 +45,6 @@ if (_type == "goggles") then {
         _displayName = getText (configFile >> "CfgWeapons" >> _itemClass >> "displayName");
         _isOptic = true;
     } else {
-        // 随机手枪
         private _allPistols = [];
         {
             if (getNumber (_x >> "scope") == 2 && getNumber (_x >> "type") == 2) then {
@@ -63,12 +60,10 @@ if (_type == "goggles") then {
 
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_BLACKMARKET_BOUGHT_sent"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 5;
-// ========== 尝试添加到库存/装备，若失败则掉落在地面 ==========
 private _pos = _caller modelToWorld [0, 1.5, 0];
 private _holder = objNull;
 
 if (_isGoggles) then {
-    // 护目镜作为物品处理
     private _beforeCount = count (items _caller);
     _caller addItem _itemClass;
     private _afterCount = count (items _caller);
@@ -79,7 +74,6 @@ if (_isGoggles) then {
     };
 } else {
     if (_isOptic) then {
-        // 瞄具作为物品处理（与护目镜相同）
         private _beforeCount = count (items _caller);
         _caller addItem _itemClass;
         private _afterCount = count (items _caller);
@@ -89,10 +83,9 @@ if (_isGoggles) then {
             [localize "STR_DUWS_T_BLACKMARKET_DROPPED_ON_GROUND"] remoteExec ["hint", _caller];
         };
     } else {
-        // 手枪处理
         private _handgunSlot = handgunWeapon _caller;
         if (_handgunSlot != "") then {
-            // 副武器栏已满，直接掉落
+            // handgunWeapon returns "" when the slot is free; non-empty means occupied, so drop instead.
             _holder = createVehicle ["GroundWeaponHolder", _pos, [], 0, "CAN_COLLIDE"];
             _holder addWeaponCargoGlobal [_itemClass, 1];
             private _magazine = getArray (configFile >> "CfgWeapons" >> _itemClass >> "magazines") select 0;
@@ -101,7 +94,6 @@ if (_isGoggles) then {
             };
             [localize "STR_DUWS_T_BLACKMARKET_DROPPED_ON_GROUND"] remoteExec ["hint", _caller];
         } else {
-            // 副武器栏空闲，尝试添加
             private _magazine = getArray (configFile >> "CfgWeapons" >> _itemClass >> "magazines") select 0;
             _caller addWeaponGlobal _itemClass;
             if (!isNil "_magazine" && {_magazine != ""}) then {
@@ -117,7 +109,6 @@ if (_isGoggles) then {
         };
     };
 };
-// ========== 广播通知所有玩家 ==========
 private _title = localize "STR_DUWS_T_BLACKMARKET_TITLE";
 private _desc = "";
 if (_type == "goggles") then {

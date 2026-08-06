@@ -3,7 +3,6 @@ if (!isServer) exitWith {};
 params ["_caller"];
 if (isNull _caller) exitWith {};
 
-// ========== 冷却检查（15分钟 = 900秒） ==========
 private _cooldownVar = "DUWS_hirePMC_lastUse";
 private _lastUse = _caller getVariable [_cooldownVar, -900];
 private _cooldownRemaining = 900 - (diag_tickTime - _lastUse);
@@ -16,22 +15,17 @@ if (_cooldownRemaining > 0) exitWith {
     [_msg] remoteExec ["hint", _caller];
 };
 
-// 检查并扣除 15 个 Money_roll
 if !([_caller, 15] call fnc_coins_spend) exitWith {
     private _msg = localize "STR_DUWS_T_NOT_ENOUGH_MONEY_15";
     [_msg] remoteExec ["hint", _caller];
 };
 
-// 记录使用时间
 _caller setVariable [_cooldownVar, diag_tickTime, true];
 
-// 固定生成6名干员
 private _count = 6;
 
-// 获取 HQ 位置
 private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", getPos _caller];
 
-// 在基地附近寻找安全位置
 private _spawnPos = [];
 for "_i" from 1 to 20 do {
     private _angle = random 360;
@@ -42,23 +36,18 @@ for "_i" from 1 to 20 do {
 };
 if (_spawnPos isEqualTo []) then { _spawnPos = _hqPos getPos [50, random 360]; };
 
-// 等待平民数组加载
 waitUntil { !isNil "civ_array" && {count civ_array > 0} };
 private _civArray = +civ_array;
 
-// 生成单位类名数组（6个平民类名）
 private _unitClasses = [];
 for "_i" from 1 to _count do {
     _unitClasses pushBack (selectRandom _civArray);
 };
 
-// 使用 BIS_fnc_spawnGroup 生成干员组
-private _group = [_spawnPos, WEST, _unitClasses, [], [], [0.7, 0.8]] call BIS_fnc_spawnGroup; // 高技能
+private _group = [_spawnPos, WEST, _unitClasses, [], [], [0.7, 0.8]] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 private _units = units _group;
 
-// ========== 定义装备池 ==========
-// 制服
 private _uniforms = [
     "U_I_G_resistanceLeader_F",
     "U_BG_Guerilla2_1",
@@ -71,7 +60,6 @@ private _uniforms = [
     "U_C_ArtTShirt_01_v5_F",
     "U_C_FormalSuit_01_tshirt_black_F"
 ];
-// 背心
 private _vests = [
     "V_TacVestIR_blk",
     "V_I_G_resistanceLeader_F",
@@ -79,13 +67,11 @@ private _vests = [
     "V_PlateCarrier2_blk",
     "V_PlateCarrier2_blk"
 ];
-// 背包
 private _backpacks = [
     "B_AssaultPack_blk",
     "B_RadioBag_01_black_F",
     "B_Messenger_black_F"
 ];
-// 头盔
 private _headgear = [
     "H_Watchcap_blk",
     "H_Watchcap_khk",
@@ -98,7 +84,6 @@ private _headgear = [
     "H_HelmetB_light_black",
     "H_PASGT_basic_black_F"
 ];
-// 面部装备
 private _facewear = [
     "G_Aviator",
     "G_Shades_Black",
@@ -107,7 +92,6 @@ private _facewear = [
     "G_Tactical_Black",
     "G_Tactical_Clear"
 ];
-// 主武器池
 private _primaryWeapons = [
     "SMG_03C_black",
     "SMG_03C_khaki",
@@ -125,25 +109,21 @@ private _primaryWeapons = [
     "arifle_SPAR_02_blk_F",
     "arifle_SPAR_03_blk_F"
 ];
-// 发射器池
 private _launchers = [
     "launch_RPG7_F",
     "launch_I_Titan_short_F",
     "launch_B_Titan_F"
 ];
-// 发射器弹药映射
 private _launcherAmmo = createHashMapFromArray [
     ["launch_RPG7_F", "RPG7_F"],
     ["launch_I_Titan_short_F", "Titan_AT"],
     ["launch_B_Titan_F", "Titan_AT"]
 ];
 
-// ========== 获取附件池 ==========
 private _basicAmmoArray = [] call fnc_basic_ammo_lists;
 private _opticsList = _basicAmmoArray select 4; // _basic_optics
 if (isNil "_opticsList") then { _opticsList = [] };
 
-// 随机添加附件的函数
 private _fnc_addAttachments = {
     params ["_unit", "_weapon"];
     private _num = floor random 4;
@@ -153,42 +133,32 @@ private _fnc_addAttachments = {
     };
 };
 
-// ========== 为每个干员配置装备 ==========
 {
-    // 1. 制服（100%）
     _x forceAddUniform (selectRandom _uniforms);
-    
-    // 2. 背心（100%）
+
     _x addVest (selectRandom _vests);
-    
-    // 3. 主武器（100%）
+
     private _primary = selectRandom _primaryWeapons;
     _x addWeapon _primary;
-    // 添加弹药（5个弹匣）
     private _primaryMags = getArray (configFile >> "CfgWeapons" >> _primary >> "magazines");
     if (count _primaryMags > 0) then {
         for "_j" from 1 to 5 do { _x addMagazineGlobal (_primaryMags select 0); };
     };
-    // 随机添加附件
     [_x, _primary] call _fnc_addAttachments;
-    
-    // 4. 头盔（100%概率）
+
     private _helmet = selectRandom _headgear;
     _x addHeadgear _helmet;
-    
-    // 5. 面部装备（70%概率）
+
     if (random 1 < 0.7) then {
         _x addGoggles (selectRandom _facewear);
     };
-    
-    // 6. 基础装备（地图、GPS、无线电、指南针、手表）
+
     _x linkItem "ItemMap";
     _x linkItem "ItemGPS";
     _x linkItem "ItemRadio";
     _x linkItem "ItemCompass";
     _x linkItem "ItemWatch";
     
-    // 7. 发射器（50%概率）
     private _hasLauncher = false;
     if (random 1 < 0.5) then {
         private _launcher = selectRandom _launchers;
@@ -200,26 +170,22 @@ private _fnc_addAttachments = {
         _hasLauncher = true;
     };
     
-    // 8. 背包（50%概率，但如果装备了发射器则必须装备背包）
+    // Backpack on 50%, or always if this operator got a launcher.
     private _needBackpack = _hasLauncher || (random 1 < 0.5);
     if (_needBackpack) then {
         private _backpack = selectRandom _backpacks;
         _x addBackpackGlobal _backpack;
     };
     
-    // 9. 急救包（2个）
     for "_j" from 1 to 2 do { _x addItemToUniform "FirstAidKit"; };
-    // 10. 手榴弹（2个）
     for "_j" from 1 to 2 do { _x addMagazine "HandGrenade"; };
-    // 11. 烟雾弹（1个）
     _x addMagazine "SmokeShell";
-    
-    // 禁用疲劳
+
     _x enableFatigue false;
     _x setSkill 0.8;
 } forEach _units;
 
-// ========== 确保有发射器的干员一定有背包（保险）并补充弹药 ==========
+// Re-check in case the per-operator pass left a launcher carrier without a backpack.
 {
     private _hasLauncher = (secondaryWeapon _x != "") ||
                            {(primaryWeapon _x) isKindOf ["Launcher", configFile >> "CfgWeapons"]} ||
@@ -227,18 +193,16 @@ private _fnc_addAttachments = {
     if (_hasLauncher && backpack _x == "") then {
         _x addBackpackGlobal (selectRandom _backpacks);
     };
-    // 补充所有武器弹药（修复发射器空弹问题）
+    // Top up every weapon: spawned launchers otherwise carry no rounds.
     [_x] call fnc_rearmUnit;
 } forEach _units;
 
-// ========== 所有干员加入玩家小组 ==========
 {
     [_x] joinSilent (group _caller);
     [_x] joinSilent (group _caller);
     [_x] joinSilent (group _caller);
 } forEach _units;
 
-// 广播成功通知
 private _successMsg = format [localize "STR_DUWS_T_HIRE_PMC_SUCCESS", _count];
 ["info", [localize "STR_DUWS_T_HIRE_PMC_TITLE", _successMsg]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_HIRE_PMC_SUCCESS2"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];

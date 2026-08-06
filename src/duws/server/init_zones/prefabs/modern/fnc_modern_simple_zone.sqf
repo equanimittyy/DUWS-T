@@ -34,7 +34,6 @@ _this setDir 0;
 _this setPosATL [(_centerSpawnX)-0.1, (_centerSpawnY)-0.2, 0];
 [_this,"opfor"] spawn fnc_fill_ammobox; 
 
-// 迫击炮 (随机位置 + 安全检查)
 _found = false;
 _pos = [0,0,0];
 _attempts = 0;
@@ -62,7 +61,6 @@ _vehicle_999 setdamage 0;
   sleep 0.1;
   _vehicle_999 setVectorUp [0,0,1];
 
-// 防空炮1 (随机位置 + 安全检查)
 _found = false;
 _pos = [0,0,0];
 _attempts = 0;
@@ -86,7 +84,6 @@ _vehicle_1000 setdamage 0;
   sleep 0.1;
   _vehicle_1000 setVectorUp [0,0,1];
 
-// 防空炮2 (随机位置 + 安全检查)
 _found = false;
 _pos = [0,0,0];
 _attempts = 0;

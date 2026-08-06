@@ -76,14 +76,11 @@ _wp2 setWaypointType "CYCLE";
 _wp2 setWaypointBehaviour "SAFE";
 _wp2 setWaypointTimeout [30, 45, 60];
 
-// ========== 添加死亡情报动作 ==========
 {
     if (!isNull _x) then {
         [_x, "mission"] call fnc_search_flag_group;
     };
 } forEach [_group];
-// ====================================
-// 为坦克指挥官添加机密情报
 [_target] spawn {
     params ["_unit"];
     sleep 5;
@@ -96,7 +93,7 @@ _wp2 setWaypointTimeout [30, 45, 60];
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 
-sleep 5; // 等待巡逻队生成完毕
+sleep 5; // let the patrols finish spawning
 
 
 // MISSION COMPLETED ?

@@ -77,18 +77,15 @@ for "_i" from 1 to zones_number do {
 		while {!_Posfound} do {
 		
 			if (moreUrban == 1) then {
-				// ========== 改进版：选取建筑群中心 ==========
 				private _anchor = _ZnObjects select (floor (random (count _ZnObjects)));
 				private _anchorPos = getPos _anchor;
 				private _nearBuildings = nearestTerrainObjects [_anchorPos, ["House","Building"], 400, true];
 				
 				if (count _nearBuildings == 0) then {
-					// 没有建筑，回退到原逻辑
 					private _randomPos = [_anchorPos, 100, 400, 10, 0, 0.14, 0, [], [[0,0],[0,0]]] call BIS_fnc_findSafePos;
 					private _building = nearestBuilding _randomPos;
 					_zonePos = getPos _building;
 				} else {
-					// 计算建筑群中心
 					private _centerX = 0;
 					private _centerY = 0;
 					{ _centerX = _centerX + (getPos _x select 0); _centerY = _centerY + (getPos _x select 1); } forEach _nearBuildings;
@@ -96,14 +93,13 @@ for "_i" from 1 to zones_number do {
 					_centerY = _centerY / count _nearBuildings;
 					private _centerPos = [_centerX, _centerY, 0];
 					
-					// 使用与 HQ 相同的安全点查找参数（0-10米）
+					// Same safe-pos search radius as the HQ (0-10m).
 					_zonePos = [_centerPos, 0, 10, 5, 0, 0.14, 0, [], [[0,0],[0,0]]] call BIS_fnc_findSafePos;
 					if (_zonePos isEqualTo [0,0,0]) then {
 						_zonePos = _centerPos;
 					};
 				};
 				
-				// 避免放在道路上
 				private _nearRoad = [_zonePos, 5] call BIS_fnc_nearestRoad;
 				if (!isNull _nearRoad) then {
 					_zonePos = [_zonePos, 5, random 360] call BIS_fnc_relPos;
@@ -112,7 +108,6 @@ for "_i" from 1 to zones_number do {
 				_Posfound = true;
 				
 			} else {
-				// LESS URBAN 保持不变
 				private _count = 1;
 				while {true} do {
 					if (_count > 10) exitWith {};
@@ -156,13 +151,12 @@ for "_i" from 1 to zones_number do {
 			};
      
 if (_found_distance) then {
-    // ========== 原点防护：禁止在距离 [0,0,0] 500 米内生成战区 ==========
+    // Origin guard: refuse to spawn a zone within 500m of [0,0,0].
     if (_zonePos distance2D [0,0,0] < 500) exitWith {
         ["WARN", "ZONES", format ["Zone %1 position %2 is within 500m of origin, retrying...", _i, _zonePos]] call fnc_log;
-        // 不设置 _found = true，让外层循环继续寻找新位置
+        // _found stays false, so the outer loop keeps searching for a new position.
     };
-    // ================================================================
-    
+
     trap = _i;
     publicVariable "trap";
     _zonePos = [round(_zonePos select 0), round(_zonePos select 1)];

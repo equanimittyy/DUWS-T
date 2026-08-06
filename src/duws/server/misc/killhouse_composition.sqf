@@ -9,11 +9,10 @@
 private _centerSpawnZ = 1000;
 
 
-// ========== 普通物体数据 (不含靶子) ==========
 // --DUWS-COMPOSITION BEGIN name="Killhouse: Objects" schema=A z=keep zbase=_centerSpawnZ--
 private _objectsData = [
 
-// ---- Walk-Over-Range 层 ----
+// ---- Walk-Over-Range layer ----
 ["Land_Pallet_F", -33.580444, 17.937378, 5.7953854, 0],
 ["Land_Pallet_F", -33.580933, 16.470581, 5.7953854, 0],
 ["Land_Pallet_F", -33.580444, 15.002319, 5.7953854, 0],
@@ -260,7 +259,7 @@ private _objectsData = [
 ["Land_Plank_01_4m_F", -32.249878, 25.38562, 5.9184904, 79.5716],
 ["Land_Plank_01_4m_F", 30.630005, -37.747681, 5.913209, 79.572],
 
-// ---- 建筑层 (不含 Shoot House Walls / Targets，Objects 层单独处理) ----
+// ---- Buildings (Shoot House Walls / Targets placed separately) ----
 ["Land_Radar_01_kitchen_F", -10.725708, -21.811157, 6.4665394, 82.429],
 ["Land_Pallet_vertical_F", 3.8668213, -14.704224, 3.9427223, 82.429],
 ["Land_Pallet_vertical_F", -21.225464, -29.090454, 3.9477692, 262.3005],
@@ -428,7 +427,7 @@ private _objectsData = [
 ["Land_PortableServer_01_sand_F", -3.6607666, -4.3306885, 2.4545627, 180],
 ["Land_PortableServer_01_sand_F", -1.6417236, -2.3687744, 2.4545627, 132.9688],
 
-// ---- Shoot House Walls (屏蔽) ----
+// ---- Shoot House Walls (screening) ----
 ["Land_Shoot_House_Wall_F", -22.735229, 5.6688232, 3.9569921, 270],
 ["Land_Shoot_House_Wall_F", -21.720093, 16.262573, 3.9569921, 90],
 ["Land_Shoot_House_Wall_F", -21.720093, 18.258179, 3.9569921, 90],
@@ -506,7 +505,7 @@ private _objectsData = [
 ["Land_Shoot_House_Wall_F", 4.2886963, 7.383667, 3.9569921, 0],
 ["Land_Shoot_House_Wall_F", 6.2833252, 7.3841553, 3.9569921, 0],
 
-// ---- Shoot House Corner (屏蔽) ----
+// ---- Shoot House Corner (screening) ----
 ["Land_Shoot_House_Corner_F", -32.292847, 24.348999, 3.9644928, 90],
 ["Land_Shoot_House_Corner_F", 30.790161, 24.332886, 3.9644928, 180],
 ["Land_Shoot_House_Corner_F", 30.773071, -36.609985, 3.9644928, 270],
@@ -526,7 +525,7 @@ private _objectsData = [
 ["Land_Shoot_House_Corner_F", 14.697876, -28.369751, 3.9644928, 90],
 ["Land_Shoot_House_Corner_F", 11.725708, -28.387817, 3.9644928, 180],
 
-// ---- Shoot House Long Wall (屏蔽) ----
+// ---- Shoot House Long Wall (screening) ----
 ["Land_Shoot_House_Wall_Long_F", -25.736206, 24.743042, 3.9569921, 180],
 ["Land_Shoot_House_Wall_Long_F", -29.7323, 24.742554, 3.9569921, 180],
 ["Land_Shoot_House_Wall_Long_F", -15.676636, 24.742554, 3.9569921, 180],
@@ -588,14 +587,14 @@ private _objectsData = [
 ["Land_Shoot_House_Wall_Long_F", -7.6956787, 24.742554, 3.9569921, 180],
 ["Land_Shoot_House_Wall_Long_F", -19.672241, 24.742554, 3.9569921, 180],
 
-// ---- 额外杂物 ----
+// ---- Extra clutter ----
 ["Leaflet_05_Stack_F", -6.1395264, -1.5220947, 3.1782589, 185.4296],
 ["Land_Wreck_BMP2_F", -3.9702148, -33.372192, 3.1455345, 0],
 ["FlagChecked_F", -6.6175537, -4.7923584, 7.3265076, 0],
 ["Land_Wreck_HMMWV_F", -13.686157, -11.447144, 3.1310663, 0],
 ["Land_Wreck_Heli_02_Wreck_01_F", 30.058838, -13.022095, 5.2784767, 0],
 
-// ---- Shoot House Wall 剩下的屏蔽 ----
+// ---- Shoot House Wall (remaining screening) ----
 ["Land_Shoot_House_Wall_F", -27.785522, 0.78503418, 3.9569921, 0],
 ["Land_Shoot_House_Wall_F", -20.600952, -5.2056885, 3.9569921, 0],
 ["Land_Shoot_House_Wall_F", -25.765503, 2.8045654, 3.9569921, 270],
@@ -721,7 +720,6 @@ private _objectsData = [
 ];
 // --DUWS-COMPOSITION END--
 
-// ========== 靶子数据 ==========
 // --DUWS-COMPOSITION BEGIN name="Killhouse: Targets" schema=A z=keep zbase=_centerSpawnZ--
 private _targetsData = [
 ["TargetP_Civ_F", -29.881226, -3.3609619, 3.1395636, 179.6524],

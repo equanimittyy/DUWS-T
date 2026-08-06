@@ -176,23 +176,19 @@ _missionUnits pushBack _guard2;
     _missionUnits pushBack _x;
 } forEach (units _groupBunker2);
 
-// ========== 添加随机战利品（炮塔守卫）==========
 {
     [_x] call fnc_addRandomLoot;
 } forEach units _groupBunker1;
 {
     [_x] call fnc_addRandomLoot;
 } forEach units _groupBunker2;
-// ============================================
 
 [[_cachePos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
-// ========== 添加死亡情报动作 ==========
 {
     if (!isNull _x) then {
         [_x, "mission"] call fnc_search_flag_group;
     };
 } forEach [_groupBunker1, _groupBunker2];
-// ====================================
 
 sleep 1;
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
@@ -206,7 +202,7 @@ _message = ([localize "STR_DUWS_T_cachecopy"] call fnc_cs);
 ["arsenal", [localize "STR_DUWS_T_arsenalfound", localize "STR_DUWS_T_arsenalfound2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
 
-sleep 5; // 等待巡逻队生成完毕
+sleep 5;
 
 
 waitUntil {

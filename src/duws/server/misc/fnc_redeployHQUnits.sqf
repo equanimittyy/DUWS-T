@@ -15,12 +15,9 @@ if (commandpointsblu1 < 2) exitWith {
 // because this path never reaches the purchase handshake.
 [-([2] call fnc_escalation_cost), "hq_redeploy"] call fnc_cp_adjust;
 
-// ---------- 清理旧对象 ----------
-// 武器
 private _oldWeaponList = missionNamespace getVariable ["HQ_redeploy_weaponList", []];
 { if (!isNull _x) then { deleteVehicle _x; }; } forEach _oldWeaponList;
 
-// 人员组
 private _groupsToDelete = [
     "HQ_redeploy_weaponGroup",
     "HQ_redeploy_hqGuardsGroup0",
@@ -38,7 +35,6 @@ private _groupsToDelete = [
     };
 } forEach _groupsToDelete;
 
-// 塔卫
 private _towerGuards = missionNamespace getVariable ["HQ_redeploy_towerGuards", []];
 {
     if (!isNull _x) then {
@@ -47,7 +43,6 @@ private _towerGuards = missionNamespace getVariable ["HQ_redeploy_towerGuards", 
     };
 } forEach _towerGuards;
 
-// ---------- 重新生成 ----------
 // Anchors are already in the namespace from the build; the routine reads them itself.
 call fnc_placeHQUnits;
 

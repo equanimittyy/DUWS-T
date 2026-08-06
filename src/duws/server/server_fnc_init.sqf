@@ -296,7 +296,6 @@ fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\misc\fn
 fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_restHealServer.sqf";
 publicVariable "fnc_restHealServer";
 
-// 如果实现了 HQ 建筑动作，也需添加：
 fnc_addHQBuildingActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addHQBuildingActions.sqf";
 publicVariable "fnc_addHQBuildingActions";
 fnc_blackMarketPurchase = compile preprocessFileLineNumbers "duws\server\misc\fnc_blackMarketPurchase.sqf";

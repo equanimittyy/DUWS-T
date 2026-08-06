@@ -1,17 +1,14 @@
 if (!isServer) exitWith {};
 
-// ====== 价值计算 ======
 if (isNil "DUWS_fnc_calculateVehicleValue") then {
     DUWS_fnc_calculateVehicleValue = compileFinal {
         params ["_veh"];
         private _type = typeOf _veh;
         private _value = 0;
 
-        // 乘员位置
         private _crewCount = count fullCrew [_veh, "", true];
         _value = _value + (_crewCount * 0.5);
 
-        // 统计武器类型
         private _weaponTypes = [];
 
         private _fnc_processTurrets = {
@@ -41,7 +38,6 @@ if (isNil "DUWS_fnc_calculateVehicleValue") then {
             if (("launchercore" in _parents) || ("missilelauncher" in _parents)) then { _value = _value + 6; };
         } forEach _weaponTypes;
 
-        // 补给倍率
         private _isSupply = (getNumber (configFile >> "CfgVehicles" >> _type >> "transportAmmo") > 0) ||
                             (getNumber (configFile >> "CfgVehicles" >> _type >> "transportRepair") > 0) ||
                             (getNumber (configFile >> "CfgVehicles" >> _type >> "transportMedical") > 0);
@@ -58,7 +54,6 @@ if (isNil "DUWS_fnc_calculateVehicleValue") then {
     publicVariable "DUWS_fnc_calculateVehicleValue";
 };
 
-// ====== 预览 ======
 if (isNil "fnc_veh_recycle_preview_server") then {
     fnc_veh_recycle_preview_server = {
         params ["_caller", "_trg"];
@@ -80,7 +75,6 @@ if (isNil "fnc_veh_recycle_preview_server") then {
     publicVariable "fnc_veh_recycle_preview_server";
 };
 
-// ====== 回收执行 ======
 if (isNil "fnc_veh_recycle_action") then {
     fnc_veh_recycle_action = {
         params ["_caller", "_trg"];
@@ -114,7 +108,6 @@ if (isNil "fnc_veh_recycle_action") then {
     publicVariable "fnc_veh_recycle_action";
 };
 
-// ====== 主逻辑 ======
 private _helipad = objectFromNetId (missionNamespace getVariable ["HQ_helipad_netId", ""]);
 private _depot = objectFromNetId (missionNamespace getVariable ["HQ_repairDepot_netId", ""]);
 if (isNull _helipad || isNull _depot) exitWith { ["ERROR", "SUPPORT", "Helipad/Depot not found"] call fnc_log; };

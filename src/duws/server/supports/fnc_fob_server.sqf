@@ -86,7 +86,7 @@ enemy_near_fob = format[localize 'STR_DUWS_T_i0w3u54j',_fobname];
 _trgWarning = createTrigger["EmptyDetector",_foundPickupPos];
 _trgWarning setTriggerArea[300,300,0,false];
 _trgWarning setTriggerActivation["EAST","PRESENT",true];
-// 使用 format 将 FOB 坐标写入字符串，确保触发时能正确传递位置参数
+// FOB pos baked into the statement string; triggers evaluate later with no local scope.
 _trgWarning setTriggerStatements[
     "this", 
     format["[%1, enemy_near_fob] remoteExec ['fnc_duws_dialogue', 0];", str(_foundPickupPos)],

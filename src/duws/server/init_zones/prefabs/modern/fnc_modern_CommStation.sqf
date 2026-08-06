@@ -1,5 +1,4 @@
 // Locality: server -- inherited from server/init_zones/fnc_createzone.sqf.
-// fnc_modern_CommStation.sqf (基于 composition 偏移量重构版)
 _centerSpawn = _this select 0;
 // Zone construction is campaign property, filed under the zone it stands in so the whole
 // composition -- turret, sandbag and camo net alike -- can be released together. A wrecked
@@ -12,10 +11,9 @@ _centerSpawnY = _centerSpawn select 1;
 private _newCenterZ = getTerrainHeightASL [_centerSpawnX, _centerSpawnY];
 if (_newCenterZ <= 0) then { _newCenterZ = 0; };
 
-// 全部物体 [类名, 偏移X, 偏移Y, 原Z海拔, 方向度, 是否武器]
+// Each row: [class, offsetX, offsetY, offsetZ, dir, isWeapon].
 // --DUWS-COMPOSITION BEGIN name="Comm Station" schema=A--
 private _allObjectsData = [
-    // ===== 子层 "Camp Endurance" (50个) =====
     ["Land_HBarrier_5_F", 11.7953, 5.65381, 0.74071, 92.0639, false],
     ["Land_HBarrier_5_F", 10.2622, 10.3057, 0.74071, 51.1638, false],
     ["Land_HBarrier_5_F", -11.2444, 7.2041, 0.74071, 91.4638, false],
@@ -77,7 +75,6 @@ private _allObjectsData = [
 ];
 // --DUWS-COMPOSITION END--
 
-// 需要贴合地形的工事类型
 private _tiltTypes = [
     "Land_HBarrierBig_F","Land_HBarrier_5_F","Land_HBarrier_3_F","Land_HBarrier_1_F",
     "Land_BagBunker_Large_F","Land_BagFence_Round_F","Land_BagFence_Short_F",
@@ -85,7 +82,6 @@ private _tiltTypes = [
     "Land_SandbagBarricade_01_hole_F","Land_Razorwire_F"
 ];
 
-// ── 第一步：非武器物体 贴地 ──
 {
     _x params ["_class","_offsetX","_offsetY","_offsetZ","_dir","_isWeapon"];
     if (_isWeapon) then { continue; };
@@ -102,10 +98,9 @@ private _tiltTypes = [
     };
     _obj setDir _dir;
 
-    // 禁用模拟（所有静态物体）
     _obj enableSimulationGlobal false;
 
-    // 易碎物品无敌
+    // Fragile props kept indestructible.
     if (_class in ["Land_WaterTank_F","Land_PaperBox_closed_F","Land_ToiletBox_F","Land_GarbageBarrel_01_F"]) then {
         _obj allowDamage false;
     };
@@ -113,7 +108,6 @@ private _tiltTypes = [
 
 sleep 2;
 
-// ── 第二步：武器 海拔还原 ──
 private _weaponList = [];
 private _origin = [_centerSpawnX, _centerSpawnY, _newCenterZ];
 {
@@ -123,7 +117,6 @@ private _origin = [_centerSpawnX, _centerSpawnY, _newCenterZ];
 } forEach _allObjectsData;
 
 sleep 2;
-// ── 第三步：分配炮手 ──
 // The weapons this composition just placed, taken from the loop that placed them. Searching for them
 // again by classname and radius is what left guns frozen: the thaw below is the only thing that
 // undoes the placement freeze, and a class the search did not name never reached it -- placed, stowed

@@ -1,5 +1,4 @@
 // fnc_addRandomLoot.sqf
-// 给单个敌人步兵添加随机战利品
 if (!isServer) exitWith {};
 params ["_unit"];
 if (random 1 > 0.8) exitWith {};

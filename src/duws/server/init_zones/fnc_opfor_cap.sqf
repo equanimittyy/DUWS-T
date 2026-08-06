@@ -57,7 +57,6 @@ str(_markername) setMarkerColor "ColorRed";
 // MODIFY MARKER ELLIPSE
 str(_markername2) setMarkerColor "ColorRed";
 
-// ========== 修复：使用统一的变量名获取旗杆并变色 ==========
 if (VERSION_X == "MODERN" || simple_zones_enable) then {
     private _flagVarName = format["flag_%1_%2", floor abs (_flagPos select 0), floor abs (_flagPos select 1)];
     private _flg = missionNamespace getVariable [_flagVarName, objNull];
@@ -66,7 +65,6 @@ if (VERSION_X == "MODERN" || simple_zones_enable) then {
     };
 };
 
-// ========== 修复：使用统一的变量名获取触发器 ==========
 private _trgVarName = format["trigger_%1_%2", floor abs (_triggerPos select 0), floor abs (_triggerPos select 1)];
 private _trg = missionNamespace getVariable [_trgVarName, objNull];
 if (!isNull _trg) then {

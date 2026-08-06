@@ -40,7 +40,6 @@ _opfreward = round(_apswing * zone_ap_consolation);
 ["OPF", _opfreward, "zone_first_capture"] remoteExec ["fnc_ap_adjust", 2];
 ["BLU", _apswing, "zone_first_capture"] remoteExec ["fnc_ap_adjust", 2];
 
-// 将战区旗杆改为蓝色
 if (VERSION_X == "MODERN" || simple_zones_enable) then {
     private _flagVarName = format["flag_%1_%2", floor abs (_triggerPos select 0), floor abs (_triggerPos select 1)];
     private _flg = missionNamespace getVariable [_flagVarName, objNull];
@@ -59,7 +58,6 @@ str(_markername2) setMarkerColor "ColorBlue";
 
 sleep 2;
 
-// 将触发器改为红方可占领
 private _trgVarName = format["trigger_%1_%2", floor abs (_triggerPos select 0), floor abs (_triggerPos select 1)];
 private _trg = missionNamespace getVariable [_trgVarName, objNull];
 if (!isNull _trg) then {

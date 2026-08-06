@@ -5,7 +5,6 @@ params ["_unit"];
 
 if (isNull _unit) exitWith {};
 
-// 定义远程移除函数（确保所有客户端都有）
 if (isNil "fnc_removeStopCommandAction") then {
     fnc_removeStopCommandAction = {
         params ["_unit"];
@@ -26,7 +25,6 @@ private _actionID = _unit addAction [
     [_target] remoteExec ["fnc_removeStopCommandAction", 0];
     [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_STOP"] remoteExec ["fnc_duws_dialogue", _caller];
     
-    // 发送服务器请求，让平民移动到玩家位置
     [_target, _caller] remoteExec ["fnc_civ_moveToPlayerServer", 2];
     sleep 4;
     // The spoken reply is the whole feedback. A hint on top of it narrated the civilian walking

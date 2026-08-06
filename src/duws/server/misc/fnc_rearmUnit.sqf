@@ -7,11 +7,10 @@ if (isNull _unit || {!alive _unit}) exitWith {};
     private _weapon = _x;
     if (_weapon == "") then { continue };
 
-    // 获取兼容弹匣列表
     private _compatibleMags = getArray (configFile >> "CfgWeapons" >> _weapon >> "magazines");
     if (_compatibleMags isEqualTo []) then { continue };
 
-    // 优先使用当前已装配的弹匣类型
+    // Prefer the magazine already loaded before falling back to a random compatible one.
     private _currentMag = switch (_forEachIndex) do {
         case 0: { primaryWeaponMagazine _unit };
         case 1: { secondaryWeaponMagazine _unit };
@@ -22,19 +21,16 @@ if (isNull _unit || {!alive _unit}) exitWith {};
     if (!isNil "_currentMag" && {_currentMag isNotEqualTo []}) then {
         _currentMag = (_currentMag select 0) param [0, ""];
         if (_currentMag != "" && {_currentMag in _compatibleMags}) then {
-            // 把当前弹药补满
             private _ammoCount = getNumber (configFile >> "CfgMagazines" >> _currentMag >> "count");
             _unit setAmmo [_weapon, _ammoCount];
             _selectedMag = _currentMag;
         };
     };
 
-    // 若没有当前弹药或当前弹药不兼容，随机选一个
     if (_selectedMag == "") then {
         _selectedMag = selectRandom _compatibleMags;
     };
 
-    // 添加 2 个弹匣
     for "_i" from 1 to 2 do {
         _unit addMagazineGlobal _selectedMag;
     };

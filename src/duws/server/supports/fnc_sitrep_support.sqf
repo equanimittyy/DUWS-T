@@ -2,7 +2,6 @@
 // the debit below goes through fnc_pool_spend and every line after it broadcasts outward.
 if !(["CP", 1] call fnc_pool_spend) exitWith
 {
-    // CP 不足时的处理：同样广播给所有玩家
     ["sitrepinfo", [localize "STR_DUWS_T_qkkva9tk", format [localize "STR_DUWS_T_p6sb3ply", 1]]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 };
 
@@ -17,6 +16,5 @@ if !(["CP", 1] call fnc_pool_spend) exitWith
 // line is per player, and only the server can resolve it.
 [] remoteExec ["fnc_sitrep_fanout", 2];
 
-// 让所有玩家显示底部 OSD 信息
 [] remoteExec ["fnc_bottom_right_message", 0];
 [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_sitrep"] remoteExec ["fnc_duws_dialogue", 0];

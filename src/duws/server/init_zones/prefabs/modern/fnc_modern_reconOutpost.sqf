@@ -1,5 +1,4 @@
 // Locality: server -- inherited from server/init_zones/fnc_createzone.sqf.
-// 原始 Composition 中心: [1540.2646, 5, 2299.9314] (x, z, y)
 _centerSpawn = _this select 0;
 // Zone construction is campaign property, filed under the zone it stands in so the whole
 // composition -- turret, sandbag and camo net alike -- can be released together. A wrecked
@@ -12,7 +11,7 @@ _centerSpawnY = _centerSpawn select 1;
 private _newCenterZ = getTerrainHeightASL [_centerSpawnX, _centerSpawnY];
 if (_newCenterZ <= 0) then { _newCenterZ = 0; };
 
-// 需要保留模拟的物体（有动画、可驾驶、可交互）
+// Objects that must keep simulation: animated, drivable or interactable.
 private _keepSimulation = [
     "Land_Campfire_F",
     "Land_TentDome_F",
@@ -21,7 +20,7 @@ private _keepSimulation = [
     "Land_Cargo_Tower_V1_F"
 ];
 
-// 所有物体: [类名, X偏移, Y偏移, Z海拔, 方向度数, 是否为武器]
+// Each row: [class, offsetX, offsetY, offsetZ, dir, isWeapon].
 // --DUWS-COMPOSITION BEGIN name="Recon Outpost" schema=A--
 private _allObjectsData = [
     ["Land_Campfire_F", 2.07837, 0.423828, 0.220279, 210, false],
@@ -113,7 +112,6 @@ private _allObjectsData = [
 ];
 // --DUWS-COMPOSITION END--
 
-// 地形倾斜类型
 private _tiltTypes = [
     "Land_HBarrierBig_F", "Land_HBarrier_5_F", "Land_BagBunker_Large_F",
     "Land_BagFence_Round_F", "Land_BagFence_Short_F", "Land_BagFence_Long_F",
@@ -122,7 +120,6 @@ private _tiltTypes = [
     "Land_BagBunker_Tower_F"
 ];
 
-// ========= 第一步：非武器物体贴地 =========
 {
     _x params ["_class", "_offsetX", "_offsetY", "_offsetZ", "_dir", "_isWeapon"];
     if (_isWeapon) then { continue; };
@@ -134,18 +131,16 @@ private _tiltTypes = [
     [_obj, _zoneKey] call fnc_duws_keep;
     _obj setPosATL [_newX, _newY, 0];
 
-    // 工事倾斜
     if (_class in _tiltTypes) then {
         _obj setVectorUp (surfaceNormal [_newX, _newY]);
     };
     _obj setDir _dir;
 
-    // 需要模拟的物体不禁用；其余静态物体禁用模拟
     if !(_class in _keepSimulation) then {
         _obj enableSimulationGlobal false;
     };
 
-    // 易碎装饰无敌
+    // Fragile decorative props kept indestructible.
     if (_class in ["Land_CampingChair_V1_F","Land_Camping_Light_F","Land_TentDome_F","Land_WaterTank_F","Land_Pallets_stack_F","Land_PaperBox_closed_F","Land_Ammobox_rounds_F","Land_WoodenBox_F","Land_CratesShabby_F","Land_FMradio_F","Land_TinContainer_F","Land_CanisterPlastic_F","Land_Axe_F","Land_Bucket_F","Land_Matches_F","Land_ButaneCanister_F","Land_GasCanister_F","Land_Canteen_F","Land_DuctTape_F","Land_PainKillers_F","Land_Bandage_F","Land_Sacks_heap_F","Land_WoodPile_F","Land_MetalWire_F","Land_Gloves_F","Land_BakedBeans_F"]) then {
         _obj allowDamage false;
     };
@@ -153,7 +148,6 @@ private _tiltTypes = [
 
 sleep 2;
 
-// ========= 第二步：武器物体海拔还原 =========
 private _weaponList = [];
 private _origin = [_centerSpawnX, _centerSpawnY, _newCenterZ];
 {
@@ -163,7 +157,6 @@ private _origin = [_centerSpawnX, _centerSpawnY, _newCenterZ];
 } forEach _allObjectsData;
 
 sleep 2;
-// ========= 第三步：分配炮手 =========
 // The weapons this composition just placed, taken from the loop that placed them. Searching for them
 // again by classname and radius is what left guns frozen: the thaw below is the only thing that
 // undoes the placement freeze, and a class the search did not name never reached it -- placed, stowed
@@ -185,7 +178,7 @@ if (count _allWeapons > 0) then {
     [_guardGroup, _centerSpawn] call bis_fnc_taskDefend;
 };
 
-// 营地灯（已有 Land_Camping_Light_F，额外在中心加一个保底）
+// Fallback camp light at the centre, only if the composition left none nearby.
 _lightDefault = nearestObject [_centerSpawn, "Land_Camping_Light_F"];
 if (isNull _lightDefault) then {
     private _light1 = createVehicle ["Land_Camping_Light_F", [_centerSpawnX, _centerSpawnY, 0], [], 0, "NONE"];

@@ -1,5 +1,4 @@
 // Locality: server -- inherited from server/init_zones/fnc_createzone.sqf.
-// 原始 Composition 中心: [1594.1437, 4.375, 2276.9558] (x, z, y)
 _centerSpawn = _this select 0;
 // Zone construction is campaign property, filed under the zone it stands in so the whole
 // composition -- turret, sandbag and camo net alike -- can be released together. A wrecked
@@ -12,10 +11,10 @@ _centerSpawnY = _centerSpawn select 1;
 private _newCenterZ = getTerrainHeightASL [_centerSpawnX, _centerSpawnY];
 if (_newCenterZ <= 0) then { _newCenterZ = 0; };
 
-// 需要保留模拟的物体（如可互动物体）
+// Objects that must keep simulation: none for this composition.
 private _keepSimulation = [];
 
-// 所有物体: [类名, X偏移, Y偏移, Z海拔, 方向度数, 是否为武器]
+// Each row: [class, offsetX, offsetY, offsetZ, dir, isWeapon].
 // --DUWS-COMPOSITION BEGIN name="Storage Bunker" schema=A--
 private _allObjectsData = [
     ["Land_HouseWallRuin_Corner_01_F", 0.231201, -4.93799, 1.04363, 0, false],
@@ -57,7 +56,6 @@ private _allObjectsData = [
 ];
 // --DUWS-COMPOSITION END--
 
-// 需要贴合地形的工事类型
 private _tiltTypes = [
     "Land_HouseWallRuin_Corner_01_F", "Land_HouseWallRuin_Corner_02_F",
     "Land_HouseWallRuin_Door_01_F", "Land_Barricade_01_10m_F",
@@ -65,7 +63,6 @@ private _tiltTypes = [
     "Land_BagFence_Long_F", "Land_BagFence_Short_F", "Land_BagFence_Round_F"
 ];
 
-// ========= 第一步：非武器物体 贴地 =========
 {
     _x params ["_class", "_offsetX", "_offsetY", "_offsetZ", "_dir", "_isWeapon"];
     if (_isWeapon) then { continue; };
@@ -77,23 +74,19 @@ private _tiltTypes = [
     [_obj, _zoneKey] call fnc_duws_keep;
     _obj setPosATL [_newX, _newY, 0];
 
-    // 工事倾斜
     if (_class in _tiltTypes) then {
         _obj setVectorUp (surfaceNormal [_newX, _newY]);
     };
     _obj setDir _dir;
 
-    // 禁用模拟（除了保留列表里的）
     if !(_class in _keepSimulation) then {
         _obj enableSimulationGlobal false;
     };
-    // 全部设为无敌
     _obj allowDamage false;
 } forEach _allObjectsData;
 
 sleep 2;
 
-// ========= 第二步：武器物体 海拔还原 =========
 private _weaponList = [];
 private _origin = [_centerSpawnX, _centerSpawnY, _newCenterZ];
 {
@@ -103,7 +96,6 @@ private _origin = [_centerSpawnX, _centerSpawnY, _newCenterZ];
 } forEach _allObjectsData;
 
 sleep 2;
-// ========= 第三步：分配炮手 =========
 // The weapons this composition just placed, taken from the loop that placed them. Searching for them
 // again by classname and radius is what left guns frozen: the thaw below is the only thing that
 // undoes the placement freeze, and a class the search did not name never reached it -- placed, stowed
@@ -125,7 +117,7 @@ if (count _allWeapons > 0) then {
     [_guardGroup, _centerSpawn] call bis_fnc_taskDefend;
 };
 
-// 营地灯（备用）
+// Backup camp light.
 private _light1 = createVehicle ["Land_Camping_Light_F", [_centerSpawnX, _centerSpawnY, 0], [], 0, "NONE"];
 [_light1, _zoneKey] call fnc_duws_keep;
 _light1 setPosATL [_centerSpawnX, _centerSpawnY, 0];

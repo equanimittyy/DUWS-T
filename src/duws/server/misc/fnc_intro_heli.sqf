@@ -11,7 +11,6 @@ private _abandon = {
     publicVariable "intro_heli_done";
 };
 
-// ==================== 单次执行锁 ====================
 if (!isNil "intro_heli_executed") exitWith { ["WARN", "INTRO", "Already executed, skipping."] call fnc_log; };
 missionNamespace setVariable ["intro_heli_executed", true, true];
 
@@ -19,13 +18,11 @@ missionNamespace setVariable ["intro_heli_executed", true, true];
 // teleports any player whose intro_completed is false. That path also clears the black screen,
 // which the server never did.
 
-// 等待所有玩家就绪
 waitUntil { sleep 0.5; count allPlayers > 0 };
 
 private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", []];
 if (_hqPos isEqualTo []) exitWith { ["PosOfBLUHQ not defined"] call _abandon; };
 
-// ==================== 生成直升机 ====================
 private _spawnPos = [_hqPos, 700, 1000, 10, 0, 0.2, 0] call BIS_fnc_findSafePos;
 if (_spawnPos isEqualTo [0,0,0]) then {
     private _angle = random 360;
@@ -57,7 +54,6 @@ if (isNull _heli) exitWith {
 _heliGroup deleteGroupWhenEmpty true;
 ["INFO", "INTRO", format ["Helicopter spawned: %1, group ID: %2", _heliType, groupId _heliGroup]] call fnc_log;
 
-// 确保有驾驶员
 private _pilot = driver _heli;
 if (isNull _pilot) then {
     private _driverGroup = createGroup WEST;
@@ -67,7 +63,6 @@ if (isNull _pilot) then {
     deleteGroup _driverGroup;
 };
 
-// 设置直升机属性
 _heli allowDamage false;
 _heli setVehicleAmmo 0;
 _heli engineOn true;
@@ -83,7 +78,6 @@ _pilot allowFleeing 0;
 
 { _x setVariable ["Vcm_Disable", true] } forEach units _heliGroup;
 
-// ==================== 座位分配（客户端本地登机）====================
 missionNamespace setVariable ["intro_heli_object", _heli, true];
 private _players = call BIS_fnc_listPlayers;
 private _boardedPlayers = [];
@@ -122,11 +116,10 @@ private _availableSeats = _cargoSeats + _gunnerSeats + _commanderSeats;
     };
 } forEach _players;
 
-// 等待客户端登机
+// Wait for clients to finish boarding.
 sleep 5;
 ["INFO", "INTRO", format ["Boarded players: %1, Unboarded: %2", count _boardedPlayers, count _unboardedPlayers]] call fnc_log;
 
-// 通知客户端可以开始（但不执行淡入，避免干扰）
 missionNamespace setVariable ["intro_heli_fadein", true, true];
 [["", "BLACK IN", 1]] remoteExec ["titleCut", 0];
 // The insertion flight is one of only two places music plays; the other is a side mission opening.
@@ -135,7 +128,6 @@ missionNamespace setVariable ["intro_heli_fadein", true, true];
 [["LeadTrack01_F_EPA", 0]] remoteExec ["playMusic", 0];
 [] spawn fnc_bottom_right_message;
 sleep 0.5;
-// 航点到基地上空 50 米
 private _hoverPos = _hqPos getPos [20, random 360];
 _hoverPos set [2, 50];
 private _wp = _heliGroup addWaypoint [_hoverPos, 0];
@@ -163,11 +155,10 @@ sleep 6;
 sleep 3;
 [["", "PLAIN", 5]] remoteExec ["cutText", 0];
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_heli_ttgtw"] remoteExec ["fnc_duws_dialogue", 0];
-// 等待直升机到达航点，超时 120 秒后强制继续
 private _arrivedVar = "intro_heli_arrived";
 missionNamespace setVariable [_arrivedVar, false];
 private _startTime = time;
-private _timeout = 120; // 超时时间（秒），可根据需要调整
+private _timeout = 120;
 
 waitUntil {
     sleep 0.5;
@@ -175,7 +166,7 @@ waitUntil {
     private _timeoutReached = (time - _startTime) > _timeout;
     if (_timeoutReached) then {
         ["WARN", "INTRO", format ["Helicopter waypoint timeout after %1 seconds, forcing arrival.", _timeout]] call fnc_log;
-        missionNamespace setVariable [_arrivedVar, true]; // 强制标记为到达
+        missionNamespace setVariable [_arrivedVar, true];
     };
     _arrived || !alive _heli || _timeoutReached
 };
@@ -183,7 +174,7 @@ waitUntil {
 [localize "STR_DUWS_T_pilot_intro", localize "STR_DUWS_T_heli_inpos"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 3;
 
-// ==================== 处理脚本执行过程中加入的 JIP 玩家 ====================
+// Catch players who joined while the script ran -- they missed the boarding assignment.
 private _allPlayersNow = call BIS_fnc_listPlayers;
 private _processedPlayers = _boardedPlayers + _unboardedPlayers;
 {
@@ -192,8 +183,6 @@ private _processedPlayers = _boardedPlayers + _unboardedPlayers;
     };
 } forEach _allPlayersNow;
 
-// ==================== 索降模拟 ====================
-// 获取直升机正下方地面点 ASL
 private _heliPos2D = getPos _heli;
 private _groundPosASL = [(_heliPos2D select 0), (_heliPos2D select 1), getTerrainHeightASL [_heliPos2D select 0, _heliPos2D select 1]];
 
@@ -207,7 +196,7 @@ private _dropping = (_boardedPlayers apply {[_x, true]}) + (_unboardedPlayers ap
     _dropThreads pushBack ([_dropPlayer, _wasBoarded, _groundPosASL, _forEachIndex, count _dropping] spawn {
         params ["_player", "_wasBoarded", "_groundPosASL", "_index", "_total"];
 
-        // 登机玩家：黑屏 + 索降音效；未登机玩家只等待相同的节奏
+        // Boarded players get the black screen and rope SFX; unboarded just wait the same beat.
         if (_wasBoarded) then {
             [["", "BLACK OUT", 1.5]] remoteExec ["titleCut", _player];
             sleep 3;
@@ -250,7 +239,6 @@ sleep 8;
 sleep 8;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_heli_money"] remoteExec ["fnc_duws_dialogue", 0];
 
-// 直升机飞离
 _heli flyInHeight 100;
 private _flyAwayPos = _hqPos getPos [15000, random 360];
 _flyAwayPos set [2, 100];

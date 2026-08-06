@@ -2,7 +2,6 @@
 // CREATE MAIN TASK/OBJECTIVE
 if (!isServer) exitWith {};
 
-// 初始化丧尸任务标志
 if (isNil "ZombieTaskCreated") then {
     ZombieTaskCreated = false;
 };
@@ -33,16 +32,12 @@ while {!(["ZONES", "mission_init_complete (zones built, civilians registered)",
     [localize "STR_DUWS_T_92465yls", localize "STR_DUWS_T_q5xntd8z", localize "STR_DUWS_T_q5xntd8z"], objNull, true]
     remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, "Campaign_new"];
 sleep 2;
-// 如果是丧尸模式且尚未创建额外任务，则创建
 if (CIV_PRESENCE == "RAVAGE" && !ZombieTaskCreated) then {
-    // ===== 丧尸模式额外任务（请在此处填写具体内容）=====
     [west, ["ZombieTask"],
         [localize "STR_DUWS_T_deadboltdesc", localize "STR_DUWS_T_deadbolt", localize "STR_DUWS_T_deadbolt"], objNull, true]
         remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, "ZombieTask_new"];
-    // =================================================
     ZombieTaskCreated = true;
 };
-// 如果是 WBK 模式且尚未创建额外任务，则创建
 if (CIV_PRESENCE == "WBK" && !ZombieTaskCreated) then {
     [west, ["WBKTask"],
         [localize "STR_DUWS_T_WBK_TASK_DESC", localize "STR_DUWS_T_deadbolt", localize "STR_DUWS_T_deadbolt"], objNull, true]
@@ -50,7 +45,6 @@ if (CIV_PRESENCE == "WBK" && !ZombieTaskCreated) then {
     ZombieTaskCreated = true;
 };
 
-// 等待区域生成完成和区域被全部占领
 waitUntil {sleep 10; WARCOM_init_done};
 // The zone count has to be checked, not assumed: with none created the comparison reads 0 >= 0
 // and wins the campaign on its first evaluation. Ordering alone is not enough of a guard --

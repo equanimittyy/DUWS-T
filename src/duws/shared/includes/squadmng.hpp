@@ -123,7 +123,6 @@ class squad_mng_dialog
             tooltip = "$STR_DUWS_T_eqa4udnh"; //--- ToDo: Localize;
             action = "closeDialog 0;[] spawn fnc_WARCOM_mapclick_assault";
         };
-// 新增按钮
 class launch_button: RscButton
 {
     idc = 1605;

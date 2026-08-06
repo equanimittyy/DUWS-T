@@ -4,8 +4,6 @@ if (!isServer) exitWith {};
 params ["_caller"];
 if (isNull _caller) exitWith {};
 
-// 定义情报物品与对应 CP 值
-//
 // Two tiers, and which tier an item is in is decided by where it comes from. `Files` and
 // `Wallet_ID` are what fnc_addRandomLoot puts on 80 % of enemies, so they price a corpse and stay
 // low. The rest are only ever handed over by a search, whose whole point is that it beat the 1-3
@@ -27,7 +25,6 @@ private _intelItems = [
 private _totalCP = 0;
 private _removedItems = [];
 
-// 获取玩家弹匣和物品
 private _playerMags = magazines _caller;
 private _playerItems = items _caller;
 
@@ -35,21 +32,17 @@ private _playerItems = items _caller;
     private _itemClass = _x select 0;
     private _cpValue = _x select 1;
 
-    // 统计在弹匣中的数量
     private _countMags = 0;
     { if (_x == _itemClass) then { _countMags = _countMags + 1; }; } forEach _playerMags;
-    // 统计在物品中的数量
     private _countItems = 0;
     { if (_x == _itemClass) then { _countItems = _countItems + 1; }; } forEach _playerItems;
 
     private _totalCount = _countMags + _countItems;
 
     if (_totalCount > 0) then {
-        // 移除弹匣
         for "_i" from 1 to _countMags do {
             _caller removeMagazineGlobal _itemClass;
         };
-        // 移除物品
         for "_i" from 1 to _countItems do {
             _caller removeItem _itemClass;
         };
