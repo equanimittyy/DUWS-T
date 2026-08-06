@@ -22,13 +22,13 @@ private _rows = [];
         // than on top of them. The layout faces the player's heading.
         private _p = player getRelPos [25, 0];
         [_type, _side, [_p select 0, _p select 1], getDir player] remoteExec ["fnc_debug_spawn_hardpoint", 2];
-        hint format ["Spawning a %1 %2 hardpoint 25 m ahead.\n\nDev tool: the composition is built and its guns\nresolve to the %2 faction. No garrison or streaming\nyet -- those are the next steps.", _type, _side];
+        hint format ["Spawning a %1 %2 hardpoint 25 m ahead.\n\nDev tool: the composition, its defenders and a gunner\non every static gun, all resolved to the %2 faction.\nStreaming and clearance are the next steps.", _type, _side];
     }, [_x, _side], [1,0.667,0,1]];
 } forEach _types;
 
 _rows pushBack ["Clear dev hardpoints", {
-    ["hpdev"] remoteExec ["fnc_duws_release", 2];
-    hint "Releasing every dev-spawned hardpoint.\n\nThey drop their persistent flag and the map sweep\ncollects them once no player is within 300 m.";
+    [] remoteExec ["fnc_debug_clear_hardpoints", 2];
+    hint "Clearing every dev-spawned hardpoint.\n\nThe defenders are deleted and the composition drops its\npersistent flag; the map sweep collects the props once\nno player is within 300 m.";
 }, [], [1,0.667,0,1]];
 
 [format ["Spawn %1 hardpoint", _side], _rows] call fnc_open_action_menu;

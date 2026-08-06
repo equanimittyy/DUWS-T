@@ -290,6 +290,7 @@ fnc_duws_report = compile preprocessFileLineNumbers "duws\server\misc\fnc_duws_r
 fnc_debug_intel_search = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_intel_search.sqf";
 fnc_debug_force_mission = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_force_mission.sqf";
 fnc_debug_spawn_hardpoint = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_spawn_hardpoint.sqf";
+fnc_debug_clear_hardpoints = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_clear_hardpoints.sqf";
 fnc_debug_search_flag = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_search_flag.sqf";
 fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
 fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_restHealServer.sqf";

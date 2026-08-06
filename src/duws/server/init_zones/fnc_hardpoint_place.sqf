@@ -67,3 +67,56 @@ fnc_hardpoint_build = {
 
     _placed
 };
+
+// [_objs, _pos, _side, _key, _garrison] call fnc_hardpoint_garrison -> [men]
+//
+// _garrison is a list of soldier classes -- the loose defenders -- and may be empty, which places
+// none. The array shape is deliberate: an empty garrison needs no special case at the call site, and
+// it is the same shape a zone raises from. The emplacement is manned regardless of it: a gun without
+// a gunner is scenery, not a defence, so every static gun takes a crewman whether or not any loose
+// defender does. Side-generic via BIS_fnc_spawnGroup and the <side>_SOLDIER_X global, so the dev
+// tool's OPFOR and BLUFOR spawns each field their own men. Crewing is DUWS_fnc_manStatics, the path a
+// zone mans its emplacements with -- it thaws the frozen gun, settles it and seats a gunner. A
+// vehicle gun (artillery) is not a StaticWeapon and is left to the resident-crew step.
+fnc_hardpoint_garrison = {
+    params ["_objs", "_pos", ["_side", "opfor"], ["_key", "world"], ["_garrison", []]];
+    private _sideObj = [EAST, WEST] select (_side isEqualTo "blufor");
+    private _men = [];
+
+    // Emplacements first, always crewed: one man per static gun.
+    private _guns = _objs select { !isNull _x && {alive _x} && {_x isKindOf "StaticWeapon"} };
+    if (count _guns > 0) then {
+        private _soldier = missionNamespace getVariable [format ["%1_SOLDIER_X", _side],
+            ["O_Soldier_F", "B_Soldier_F"] select (_side isEqualTo "blufor")];
+        private _sp = _pos findEmptyPosition [0, 30, _soldier];
+        if (count _sp == 0) then { _sp = _pos };
+        private _crew = [_sp, _sideObj, (_guns apply { _soldier }), [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
+        _crew deleteGroupWhenEmpty true;
+        [_guns, _crew, _key] call DUWS_fnc_manStatics;
+        _men append (units _crew);
+    };
+
+    // Then the loose defenders. An empty list places no one.
+    if (count _garrison > 0) then {
+        private _sp = _pos findEmptyPosition [0, 30, _garrison select 0];
+        if (count _sp == 0) then { _sp = _pos };
+        private _grp = [_sp, _sideObj, _garrison, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
+        _grp deleteGroupWhenEmpty true;
+        [_grp, _pos] call BIS_fnc_taskDefend;
+        _men append (units _grp);
+    };
+
+    _men
+};
+
+// [_type, _pos, _dir, _side, _key, _garrison] call fnc_hardpoint_spawn -> [objects, men]
+//
+// Build plus man: the composition, then the loose defenders and a gunner on every static gun. Sleeps
+// (the drop-and-settle in DUWS_fnc_manStatics), so it must run scheduled -- the dev spawner spawns it,
+// and the zone loop and OPCOM will too.
+fnc_hardpoint_spawn = {
+    params ["_type", "_pos", ["_dir", 0], ["_side", "opfor"], ["_key", "world"], ["_garrison", []]];
+    private _objs = [_type, _pos, _dir, _side, _key] call fnc_hardpoint_build;
+    private _men = [_objs, _pos, _side, _key, _garrison] call fnc_hardpoint_garrison;
+    [_objs, _men]
+};

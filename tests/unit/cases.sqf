@@ -863,3 +863,11 @@ TEST_PICK = "";
     [[-4, -2], [0, -2], [4, -2], [-2, 2], [2, 2], [6, 2]]] call fnc_assertEq;
 ["hp_lattice: spacing defaults to 4",
     ([2, 1] call fnc_hardpoint_minefield_lattice), [[-2, 0], [2, 0]]] call fnc_assertEq;
+
+// --- empty garrison is a supported shape (zones and hardpoints both raise from a list that may be
+// empty). The composition pipeline must carry [] end to end without special-casing, so a site with
+// no loose defenders raises none and does not fault; its emplacements are crewed separately. ---
+["scaleComposition: an empty composition scales to empty",
+    ([[], 3] call DUWS_fnc_scaleComposition), []] call fnc_assertEq;
+["thinComposition: an empty composition thins to empty",
+    ([[], 1] call DUWS_fnc_thinComposition), []] call fnc_assertEq;
