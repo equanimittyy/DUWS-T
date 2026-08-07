@@ -12,6 +12,12 @@ if (_key == "" || {_key in DUWS_support_permanent}) exitWith {};
 DUWS_support_permanent pushBack _key;
 publicVariable "DUWS_support_permanent";
 
+// The BLUFOR rep amplifier is the count of radio tiers the team owns, recomputed from the permanent
+// record rather than incremented -- gated buying means the count equals the tier -- so it cannot drift
+// and a save that restored the record restores the level with it. Server-only, like the drift that
+// reads it. Not a radio grant leaves it untouched.
+DUWS_bluforRadioLevel = { _x in ["radio1", "radio2", "radio3"] } count DUWS_support_permanent;
+
 // Announced from here rather than from the buyer's own purchase: this is the one place that runs
 // exactly once per unlock, so the two players who reach a row in the same frame raise one card
 // between them. A permanent row is bought for the whole team, so the whole team is told.

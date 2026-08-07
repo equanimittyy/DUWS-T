@@ -64,6 +64,19 @@ if (isNil "support_FOB_available") then {
 	support_FOB_available = false;
 };
 
+// The three BLUFOR radio-tower tiers. Team state like every permanent above, so behind isNil: a
+// joining client is sent the team's values first and an unconditional reset would push the wrong
+// state back out. No comm-item handler twin (the FOB's below) because a radio tier places nothing.
+if (isNil "support_radio1_available") then {
+	support_radio1_available = false;
+};
+if (isNil "support_radio2_available") then {
+	support_radio2_available = false;
+};
+if (isNil "support_radio3_available") then {
+	support_radio3_available = false;
+};
+
 // The FOB unlock hands its comm item to every player, being bought for the team. The
 // publicVariableEventHandler is the hook rather than a broadcast from the buyer: it fires once the
 // flag has landed here, so fnc_support_comm_add's ownership test cannot lose a race with it.

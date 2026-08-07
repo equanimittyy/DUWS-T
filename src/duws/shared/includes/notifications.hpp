@@ -245,6 +245,26 @@ class CfgNotifications
         description = "$STR_DUWS_T_UNLOCK_RECYCLE";
     };
 
+    // The three radio tiers wear the recon-radar glyph the uav_recon comm item wears -- the closest
+    // stock icon to a transmitter, and the amplifier they buy is an information-age effect on the map.
+    class unlock_radio1 : SupportUnlock
+    {
+        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Radar_ca.paa";
+        description = "$STR_DUWS_T_UNLOCK_RADIO1";
+    };
+
+    class unlock_radio2 : SupportUnlock
+    {
+        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Radar_ca.paa";
+        description = "$STR_DUWS_T_UNLOCK_RADIO2";
+    };
+
+    class unlock_radio3 : SupportUnlock
+    {
+        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Radar_ca.paa";
+        description = "$STR_DUWS_T_UNLOCK_RADIO3";
+    };
+
     class arsenal
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.

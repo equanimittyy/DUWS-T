@@ -3518,6 +3518,18 @@
                 <Original>BLUFOR has unlocked the Vehicle Recycling Station</Original>
                 <English>BLUFOR has unlocked the Vehicle Recycling Station</English>
             </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_RADIO1">
+                <Original>BLUFOR has built a Radio Tower</Original>
+                <English>BLUFOR has built a Radio Tower</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_RADIO2">
+                <Original>BLUFOR has upgraded to Radio Tower II</Original>
+                <English>BLUFOR has upgraded to Radio Tower II</English>
+            </Key>
+            <Key ID="STR_DUWS_T_UNLOCK_RADIO3">
+                <Original>BLUFOR has upgraded to Radio Tower III</Original>
+                <English>BLUFOR has upgraded to Radio Tower III</English>
+            </Key>
         </Container>
         <Container name="Zones &amp; Campaign Flow">
             <Key ID="STR_DUWS_T_heli_moving">
@@ -5770,6 +5782,18 @@
             <Key ID="STR_DUWS_T_fob_request_row">
                 <Original>Establish FOB (10 CP) Radio</Original>
                 <English>Establish FOB (10 CP) Radio</English>
+            </Key>
+            <Key ID="STR_DUWS_T_radio_tower_1">
+                <Original>Radio Tower (15CP) Radio</Original>
+                <English>Radio Tower (15CP) Radio</English>
+            </Key>
+            <Key ID="STR_DUWS_T_radio_tower_2">
+                <Original>Radio Tower II (25CP) Radio</Original>
+                <English>Radio Tower II (25CP) Radio</English>
+            </Key>
+            <Key ID="STR_DUWS_T_radio_tower_3">
+                <Original>Radio Tower III (40CP) Radio</Original>
+                <English>Radio Tower III (40CP) Radio</English>
             </Key>
             <Key ID="STR_DUWS_T_slingshot">
                 <German>Schleuder 1-1</German>

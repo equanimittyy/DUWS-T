@@ -25,6 +25,14 @@ fnc_support_defs = {
 		["mobile_HQ", "PERM", 10, "support_mobile_HQ_available",   "STR_DUWS_T_b7gmddq3",             "",           false, false],
 		["fob",       "PERM", 10, "support_FOB_available",         "STR_DUWS_T_fob_request_row",      "fob_support",false, false],
 
+		// The BLUFOR radio towers: three tiers, each a permanent +1 to how hard BLUFOR rep drift pushes
+		// in every town it covers (DUWS_bluforRadioLevel). No comm item -- they place nothing and are
+		// owned once bought, mirroring the enemy's tower amplifier without a structure. Bought in order,
+		// so II and III are hidden until the prior tier is owned (the filter below), the way mhq_slot is.
+		["radio1",    "PERM", 15, "support_radio1_available",      "STR_DUWS_T_radio_tower_1",        "",           false, false],
+		["radio2",    "PERM", 25, "support_radio2_available",      "STR_DUWS_T_radio_tower_2",        "",           false, false],
+		["radio3",    "PERM", 40, "support_radio3_available",      "STR_DUWS_T_radio_tower_3",        "",           false, false],
+
 		// The designation radio, a slot at a time rather than handed to every lead on unlock. Free
 		// because the team paid at the permanent row: what this costs is the slot.
 		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false, false],
@@ -61,6 +69,10 @@ fnc_support_defs = {
 		if (_key == "mhq_slot" && {!(["support_mobile_HQ_available"] call fnc_support_owned)}) then {
 			_keep = false;
 		};
+		// The radio tiers unlock in order: each is hidden until the one below it is owned, so the player
+		// cannot skip to III and the drift's amplifier only ever climbs one step at a time.
+		if (_key == "radio2" && {!(["support_radio1_available"] call fnc_support_owned)}) then { _keep = false };
+		if (_key == "radio3" && {!(["support_radio2_available"] call fnc_support_owned)}) then { _keep = false };
 		_keep
 	}
 };
