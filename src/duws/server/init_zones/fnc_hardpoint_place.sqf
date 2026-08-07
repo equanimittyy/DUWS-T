@@ -245,8 +245,9 @@ fnc_hardpoint_lay = {
             // Terrain picks WHERE among the viable spots: a weighted roll by the type's own score, so its
             // best ground is likeliest without being the only answer.
             (selectRandomWeighted _pool) params ["_cand", "_facts", "_radialDir"];
-            // Overwatch nests face down the slope they overlook; the rest keep the radial the draw carried.
-            private _dir = [_type, _facts select 10, _facts select 11, _radialDir] call fnc_hardpoint_facing;
+            // A roadblock faces along its road; overwatch nests face down the slope they overlook; the
+            // rest keep the radial the draw carried.
+            private _dir = [_type, _facts select 10, _facts select 11, _radialDir, _facts select 12] call fnc_hardpoint_facing;
             private _key = format ["%1_%2", _keyPrefix, _placed];
             ([_type, _cand, _dir, "opfor", _key] call fnc_hardpoint_spawn) params ["_objs", "_men"];
             [_key, _type, _cand, _men, "opfor", _regZoneKey] call fnc_hardpoint_register;

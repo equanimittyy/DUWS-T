@@ -20,6 +20,7 @@
 //   9 clutter50    count  structures within 50 m; a gun nest boxed in by them loses its arcs
 //  10 aspect       deg    bearing of steepest descent (the fall line); which way is downhill
 //  11 aspectMag    m      strength of that fall line; near 0 on flat ground or a symmetric crest
+//  12 roadDir      deg    bearing the nearest road runs; 0 when none is in scan range
 
 fnc_hardpoint_survey = {
     params ["_pos"];
@@ -56,11 +57,22 @@ fnc_hardpoint_survey = {
 
     private _roadDist = 1e9;
     private _roadDrop = 0;
+    private _roadDir = 0;
     private _road = [_p, 40] call BIS_fnc_nearestRoad;
     if (!isNull _road) then {
         private _rp = getPosASL _road;
         _roadDist = _p distance2D _rp;
         _roadDrop = _candZ - (getTerrainHeightASL [_rp select 0, _rp select 1]);
+        // Bearing the road runs, taken from this segment to a connected one so a roadblock can face
+        // along it and sit square across the carriageway. atan2(east, north), the compass convention
+        // the fall line above uses. A dead-end segment has no connection; fall back to its own heading.
+        private _cons = roadsConnectedTo _road;
+        _roadDir = if (count _cons > 0) then {
+            private _c0 = getPosASL (_cons select 0);
+            ((_c0 select 0) - (_rp select 0)) atan2 ((_c0 select 1) - (_rp select 1))
+        } else {
+            getDir _road
+        };
     };
 
     private _treeKinds = ["TREE", "SMALL TREE", "BUSH"];
@@ -76,7 +88,7 @@ fnc_hardpoint_survey = {
     // siting loop spaces each placement off the ones already down. Row shape [key, pos, type, ...].
     { _hpDist = _hpDist min (_p distance2D (_x select 1)) } forEach (missionNamespace getVariable ["DUWS_hardpoints", []]);
 
-    [_onWater, _relElev, _slope, _roadDist, _roadDrop, _treeNear, _treeWide, _buildingCnt, _hpDist, _clutter50, _aspect, _aspectMag]
+    [_onWater, _relElev, _slope, _roadDist, _roadDrop, _treeNear, _treeWide, _buildingCnt, _hpDist, _clutter50, _aspect, _aspectMag, _roadDir]
 };
 
 // [_facts, _type] call fnc_hardpoint_score -> multiplier on the type's base weight; 0 is unplaceable.
@@ -158,17 +170,20 @@ fnc_hardpoint_score = {
     };
 };
 
-// [_type, _aspectDir, _aspectMag, _radialDir] call fnc_hardpoint_facing -> heading in degrees.
+// [_type, _aspectDir, _aspectMag, _radialDir, _roadDir] call fnc_hardpoint_facing -> heading in degrees.
 //
-// The heading a sited emplacement faces. The flat types' heading is cosmetic, so they keep the outward
-// radial one the loop hands in (zone centre toward the approach). The overwatch nests are the point of
-// this: sited on a rise above a road, a radial heading can face the gun back into the hillside while the
-// road it overlooks sits off its shoulder. Those face the fall line instead -- down the slope, at the
-// low ground the position exists to watch. Below a faint gradient there is no single downhill (flat
-// ground, or a symmetric crest whose fall vectors cancel), so they too fall back to radial rather than
-// snap to a bearing that is noise. Pure, so the choice is unit-tested.
+// The heading a sited emplacement faces. A roadblock faces along the road it snapped onto (_roadDir), so
+// its gate and bunkers sit square across the carriageway instead of skewed to it -- the block spans the
+// road rather than angling off it. The overwatch nests are the other point of this: sited on a rise above
+// a road, a radial heading can face the gun back into the hillside while the road it overlooks sits off
+// its shoulder. Those face the fall line instead -- down the slope, at the low ground the position exists
+// to watch. Below a faint gradient there is no single downhill (flat ground, or a symmetric crest whose
+// fall vectors cancel), so they fall back to radial rather than snap to a bearing that is noise. The
+// remaining flat types' heading is cosmetic, so they keep the outward radial the loop hands in (zone
+// centre toward the approach). Pure, so the choice is unit-tested.
 fnc_hardpoint_facing = {
-    params ["_type", "_aspectDir", "_aspectMag", "_radialDir"];
+    params ["_type", "_aspectDir", "_aspectMag", "_radialDir", ["_roadDir", 0]];
+    if (_type isEqualTo "ROADBLOCK") exitWith { _roadDir };
     if (!(_type in ["MG", "AT", "GMG"]) || {_aspectMag < 2.5}) exitWith { _radialDir };
     _aspectDir
 };
