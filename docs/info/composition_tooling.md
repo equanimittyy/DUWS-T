@@ -48,17 +48,19 @@ The import raises two `FlagPole_F` objects that are not part of the composition:
 standing clear of the layout along **+Y**, and **`DUWS_ORIGIN`**, standing at the origin itself.
 
 A composition's rows are offsets in a frame whose +Y is the way the whole thing faces once placed,
-and nothing in the 3D view shows where that frame points — so a rearrange is done blind, and the
-layout can come back rotated with the mistake only surfacing in play. `DUWS_FRONT` is that frame's
-bearing, made visible. Its distance is measured from the composition rather than fixed: the furthest
-row's offset plus 15 m, so a 300-object base and a five-prop outpost each get a marker that reads as
-*outside* rather than as one more prop.
+and nothing else in the 3D view shows where that frame points. `DUWS_FRONT` *is* that frame's +Y: the
+export reads its bearing off `DUWS_ORIGIN` and takes it back out of every row's offset and heading, so
+the rows land in the composition's own frame however the layout was turned. Its distance is measured
+from the composition rather than fixed: the furthest row's offset plus 15 m, so a 300-object base and
+a five-prop outpost each get a marker that reads as *outside* rather than as one more prop.
 
-`DUWS_ORIGIN` is the frame's other half, and it is what the export measures against. **Keep it
-selected with everything else.** Move the layout and the marker moves with it, so the offsets still
-come out in the composition's own terms; leave it behind and the export has no idea the layout went
-anywhere. Rotating the selection is fine and is a legitimate way to change which way a composition
-faces — the rows come back rotated, which is what was asked for.
+`DUWS_ORIGIN` is the frame's other half, and it is what the export measures position against. **Keep
+both selected with everything else.** Move the layout and the markers travel with it, so the offsets
+still come out in the composition's own terms; leave one behind and the export loses that half of the
+frame. Rotating the whole selection — layout and both markers together — is now rotation-proof: the
+front turns with it and the export takes the turn back out, so nothing changes. To *re-face* a
+composition, turn it relative to the front marker — rotate the layout while `DUWS_FRONT` stays put, or
+point `DUWS_FRONT` the new way — and the rows come back rotated, which is what was asked for.
 
 **Neither is part of the composition, and the export drops both by name.** So `Ctrl+A` is safe —
 select everything and the poles still will not reach the array. The filter matches the names rather
@@ -151,10 +153,13 @@ clipboard, the way an import is handed over. Select the composition in Eden (`Ct
 marker is dropped by name), run it in the same console, and it copies schema-agnostic
 `[class, dx, dy, dz, dir°]` rows — offsets from the import origin.
 
-**It takes its origin from the `DUWS_ORIGIN` marker**, not from a coordinate. That is what makes the
-round trip survive being moved: an origin typed at import time is only true until the layout is
-dragged or rotated, and after that every row silently carries the difference. Measuring from a marker
-that travels with the composition removes the whole class of mistake.
+**It takes its origin from the `DUWS_ORIGIN` marker and its facing from `DUWS_FRONT`**, not from a
+coordinate. That is what makes the round trip survive being moved *or turned*: an origin typed at
+import time is only true until the layout is dragged, and a world-axis heading only until it is
+rotated — after either, every row silently carries the difference. Measuring position and facing from
+markers that travel with the composition removes the whole class of mistake. With no `DUWS_FRONT` in
+the selection the export falls back to world axes and says so in `systemChat`: right only if the
+layout still faces north.
 
 Its X and Y are exact, and so is its Z. `getPosWorld` reports a bounding-box centre, so the pole
 reads about 4 m high — but the export drops the origin to the pole's base before measuring, so every
@@ -191,11 +196,11 @@ guards evaluate to nothing, and neither pass skips the row — so the object is 
 ground-snapped as a prop and once through `fnc_static_place` as a resolved gun with a gunner in it.
 
 A heading delta shared by the whole paste is reported rather than repaired: it means the layout was
-rotated in Eden, which is a legitimate way to change which way a composition faces, and only the
-person who turned it knows whether it was meant. **X/Y measured against a stale origin cannot be
-detected at all** once the layout has also been rotated, which is why the export reads `DUWS_ORIGIN`
-instead of being told a coordinate. A paste taken without that marker in the selection is not
-recoverable from the rows alone.
+turned *relative to the front marker* — a deliberate re-face, since a whole-selection turn normalises
+away — and only the person who turned it knows whether it was meant. **X/Y measured against a stale
+origin cannot be detected at all**, which is why the export reads `DUWS_ORIGIN` for position and
+`DUWS_FRONT` for facing instead of being told a coordinate. A paste taken without those markers in the
+selection is not recoverable from the rows alone.
 
 Folding back by hand, if you would rather, by these rules:
 
