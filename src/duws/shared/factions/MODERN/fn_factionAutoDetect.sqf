@@ -415,10 +415,13 @@ fnc_unitParseRoles = compileFinal {
 			_opticsModes = "true" configClasses (configFile >> "CfgWeapons" >> (_primaryWeapon # 3) >> "ItemInfo" >> "OpticsModes");
 		};
 
-		// Zero rather than the no-weapon fallback: a weapon whose optic cannot be read is a weapon
-		// without a long-range optic, and 9999 would claim the opposite.
+		// Zero rather than the no-weapon fallback: a weapon whose optic cannot be read has no long-range
+		// optic, and 9999 would claim the opposite. A continuous-zoom scope carries OpticsModes but no
+		// discreteDistance, so the modes are non-empty yet the distances flatten to []; selectMax [] is
+		// nil, and assigning nil undefines the var and errors the reads below -- so [] falls to 0 too.
 		_primaryWeaponOpticMaxZero = if (_opticsModes isEqualTo []) then {0} else {
-			selectMax flatten (_opticsModes apply {getArray (_x >> "discreteDistance")})
+			private _discreteDistances = flatten (_opticsModes apply {getArray (_x >> "discreteDistance")});
+			if (_discreteDistances isEqualTo []) then {0} else {selectMax _discreteDistances}
 		};
 		_primaryWeaponOpticMaxZoom = if (_opticsModes isEqualTo []) then {0} else {
 			selectMax (_opticsModes apply {getNumber (_x >> "distanceZoomMax")})

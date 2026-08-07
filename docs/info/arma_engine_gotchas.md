@@ -1070,3 +1070,7 @@ Reading an absent attachment compounds it: `configFile >> "CfgWeapons" >> "" >> 
 config with no classes, `configClasses` returns `[]`, and **`selectMax []` returns nil**. Assigning
 nil *undefines* the variable, so the failure surfaces lines later as "Undefined variable in
 expression" at the point of use, not the assignment that caused it. Test the slot, not the length.
+
+A populated optic reaches the same `selectMax []` a second way: a continuous-zoom scope carries
+`OpticsModes` but no `discreteDistance`, so `flatten (_modes apply {getArray (_x >> "discreteDistance")})`
+is `[]` even though the modes list is not. Guard the flattened array, not just the modes list.
