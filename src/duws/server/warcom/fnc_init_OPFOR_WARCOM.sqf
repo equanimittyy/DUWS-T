@@ -61,7 +61,7 @@ sleep 1;
     // before laying any of it, so the banner counts hardpoints toward a real total, not zones. The
     // radio count is rolled here because the seed call and the plan total must be handed the same one.
     private _radioN = 1 + floor random 2;
-    ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_hpTotal"];
+    ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_depthCounts", "_hpTotal"];
     private _hpDone = 0;
     // One banner draw per emplacement, across the zone rings and the band alike, so the count climbs
     // 1..N as each gun goes down rather than jumping a whole zone's batch at once. _hpDone is read live
@@ -78,8 +78,8 @@ sleep 1;
     1 call _tick;
     {
         _x params ["", "_hpPos", "_hpSize"];
-        [_hpPos, _hpSize, [_hpPos] call fnc_zone_key, _zoneCounts select _forEachIndex, _tick] call fnc_hardpoint_site_zone;
-        _hpDone = _hpDone + (_zoneCounts select _forEachIndex);
+        [_hpPos, _hpSize, [_hpPos] call fnc_zone_key, _zoneCounts select _forEachIndex, _tick, _depthCounts select _forEachIndex] call fnc_hardpoint_site_zone;
+        _hpDone = _hpDone + (_zoneCounts select _forEachIndex) + (_depthCounts select _forEachIndex);
     } forEach zone_meta_array;
 
     // The same pass continues into the area of influence -- the countryside the enemy holds outside its

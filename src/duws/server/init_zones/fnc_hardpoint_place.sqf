@@ -295,34 +295,80 @@ fnc_hardpoint_lay = {
     _placed
 };
 
-// [_zonePos, _radius, _zoneKey, _count, _fnTick] call fnc_hardpoint_site_zone
+// [_zonePos] call fnc_hardpoint_threat_bearing -> a compass bearing to bias a zone's depth emplacements
+// toward: the mean direction from the zone to BLU HQ (once placed) and the nearest two other zones -- the
+// corridors a front forms along. Averaged as unit vectors so bearings blend rather than arithmetic-mean
+// (which wraps wrong across 0/360). Random when there is nothing to key on (no HQ, one lone zone) or the
+// bearings cancel, so a degenerate map still places depth, just uniformly.
+fnc_hardpoint_threat_bearing = {
+    params ["_zonePos"];
+    private _bearings = [];
+    if !(PosOfBLUHQ isEqualTo []) then { _bearings pushBack (_zonePos getDir PosOfBLUHQ) };
+    private _others = (zone_meta_array apply { _x select 1 }) select { (_x distance2D _zonePos) > 1 };
+    _others = [_others, [], { _x distance2D _zonePos }, "ASCEND"] call BIS_fnc_sortBy;
+    { _bearings pushBack (_zonePos getDir _x) } forEach (_others select [0, 2]);
+    if (_bearings isEqualTo []) exitWith { random 360 };
+    private _bx = 0;
+    private _by = 0;
+    { _bx = _bx + sin _x; _by = _by + cos _x } forEach _bearings;
+    if (_bx == 0 && {_by == 0}) exitWith { random 360 };
+    _bx atan2 _by
+};
+
+// [_zonePos, _radius, _zoneKey, _count, _fnTick, _depth] call fnc_hardpoint_site_zone
 //
-// A zone's deliberate emplacements, replacing the old random fortification ring. The zone's radius
-// caps how many it can hold (bigger zone, more ground and room to cover it); a random count up to that
-// cap is laid at campaign start, and the cap is stored so OPCOM can top the zone back up toward it
-// later. Candidates are drawn from anywhere in the zone (on land clear of steep slope), facing
-// radially out from the centre.
+// A zone's deliberate emplacements, replacing the old random fortification ring. The zone's radius caps
+// how many it can hold (bigger zone, more ground and room to cover it); a random ring count up to that
+// cap is laid at campaign start, then _depth (1-2) more as defence in depth. The stored cap is the ring
+// cap plus the depth, so OPCOM tops the whole set back up toward it later.
 //
-// Idempotent per zone -- the stored cap is the guard -- so a rebuild through fnc_createZone lays no
-// second ring. Runs spawned, via fnc_hardpoint_lay's crew drop.
+// The ring is drawn from anywhere in the zone, faced radially out. The depth positions are biased toward
+// the threat bearing -- BLU HQ and the nearest zones, where the player will push from -- within a ~120 deg
+// arc at mid-to-outer radius, so the zone reads as layered toward the fight. A bias, not a front: OPFOR
+// has no intel at hour zero, so the ring still rings the whole zone and the depth only leans.
+//
+// Idempotent per zone -- the stored cap is the guard -- so a rebuild through fnc_createZone lays no second
+// set. Runs spawned, via fnc_hardpoint_lay's crew drop. _fnTick climbs the generation banner per gun; the
+// depth pass offsets it past the ring's plan so the count does not jump backwards between the two.
 fnc_hardpoint_site_zone = {
-    // _fnTick, if given, is called with this zone's running placed count after each emplacement, so the
-    // generation banner climbs per gun rather than per zone. Forwarded to fnc_hardpoint_lay untouched.
-    params ["_zonePos", "_radius", "_zoneKey", ["_count", -1], ["_fnTick", {}]];
+    params ["_zonePos", "_radius", "_zoneKey", ["_count", -1], ["_fnTick", {}], ["_depth", -1]];
     if (!isNil { missionNamespace getVariable (format ["DUWS_hpCap_%1", _zoneKey]) }) exitWith {};
     private _cap = (round (_radius / HP_CAP_STEP)) max 1;
-    missionNamespace setVariable [format ["DUWS_hpCap_%1", _zoneKey], _cap];
-    // Count arrives pre-rolled from fnc_hardpoint_plan_counts so the generation banner can total every
-    // emplacement up front; a standalone call (no plan) rolls its own against the cap.
+    // Counts arrive pre-rolled from fnc_hardpoint_plan_counts so the banner can total every emplacement up
+    // front; a standalone call (no plan) rolls its own against the cap.
     if (_count < 0) then { _count = round (random _cap) };
-    if (_count <= 0) exitWith {
-        ["INFO", "HARDPOINT", format ["%1 rolled 0 hardpoints (cap %2)", _zoneKey, _cap]] call fnc_log;
+    if (_depth < 0) then { _depth = 1 + floor random 2 };
+    // Ceiling includes the depth, so a cleared depth emplacement is topped up like a ring one.
+    missionNamespace setVariable [format ["DUWS_hpCap_%1", _zoneKey], _cap + _depth];
+
+    private _placed = 0;
+    if (_count > 0) then {
+        _placed = [_count, format ["hp_%1", _zoneKey], _zoneKey, {
+            private _c = [_zonePos, 0, _radius, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
+            [_c, _zonePos getDir _c]
+        }, _fnTick] call fnc_hardpoint_lay;
     };
-    private _placed = [_count, format ["hp_%1", _zoneKey], _zoneKey, {
-        private _c = [_zonePos, 0, _radius, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
-        [_c, _zonePos getDir _c]
-    }, _fnTick] call fnc_hardpoint_lay;
-    ["INFO", "HARDPOINT", format ["%1 sited %2/%3 hardpoints (cap %4)", _zoneKey, _placed, _count, _cap]] call fnc_log;
+
+    // Depth pass: draw into a wedge toward the threat bearing, at mid-to-outer radius. _realTick and
+    // _ringN are captured under names fnc_hardpoint_lay does not use: the wrapper runs inside lay's scope,
+    // where _fnTick already means the wrapper itself (referencing it would recurse) and _count already
+    // means lay's own count (the depth count, not this ring's) -- so both must be aliased out here.
+    private _depthPlaced = 0;
+    if (_depth > 0) then {
+        private _threat = [_zonePos] call fnc_hardpoint_threat_bearing;
+        private _realTick = _fnTick;
+        private _ringN = _count;
+        private _depthTick = { (_this + _ringN) call _realTick };
+        _depthPlaced = [_depth, format ["hpd_%1", _zoneKey], _zoneKey, {
+            private _ang = _threat + (random 120) - 60;
+            private _bp = _zonePos getPos [_radius * (0.4 + random 0.6), _ang];
+            private _c = [_bp, 0, _radius * 0.35, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
+            [_c, _zonePos getDir _c]
+        }, _depthTick] call fnc_hardpoint_lay;
+    };
+
+    ["INFO", "HARDPOINT", format ["%1 sited %2/%3 ring + %4/%5 depth (cap %6)",
+        _zoneKey, _placed, _count, _depthPlaced, _depth, _cap + _depth]] call fnc_log;
 };
 
 // The band pass's local-search sampler, shared by the campaign-start pass and OPCOM's band build so
@@ -423,24 +469,27 @@ fnc_hardpoint_seed_radio = {
     ["INFO", "HARDPOINT", format ["seeded %1/%2 OPFOR radio towers", _placed, _n]] call fnc_log;
 };
 
-// [_radioN] call fnc_hardpoint_plan_counts -> [_zoneCounts, _total]
+// [_radioN] call fnc_hardpoint_plan_counts -> [_zoneCounts, _depthCounts, _total]
 //
 // Rolls every campaign-start emplacement before any is laid, so the generation banner totals real
-// hardpoints (zone + band) up front instead of counting zones. Per-zone count is round(random cap)
-// under the same radius cap fnc_hardpoint_site_zone stores, returned so that pass lays the same
-// number this total promised; the band adds count serv_zones_array plus the radio count, which the
-// caller rolls (fnc_hardpoint_seed_radio must be handed the same value). Here, not in WARCOM init,
-// so the cap formula is not duplicated away from HP_CAP_STEP.
+// hardpoints (zone ring + depth + band) up front instead of counting zones. Per-zone ring count is
+// round(random cap) under the same radius cap fnc_hardpoint_site_zone stores; the depth count is a flat
+// 1-2. Both are returned so that pass lays the same numbers this total promised; the band adds count
+// serv_zones_array plus the radio count, which the caller rolls (fnc_hardpoint_seed_radio must be handed
+// the same value). Here, not in WARCOM init, so the cap formula is not duplicated away from HP_CAP_STEP.
 fnc_hardpoint_plan_counts = {
     params ["_radioN"];
     private _zoneCounts = [];
+    private _depthCounts = [];
     private _total = (count serv_zones_array) + _radioN;
     {
         _x params ["", "", "_hpSize"];
         private _cap = (round (_hpSize / HP_CAP_STEP)) max 1;
         private _n = round (random _cap);
+        private _d = 1 + floor random 2;
         _zoneCounts pushBack _n;
-        _total = _total + _n;
+        _depthCounts pushBack _d;
+        _total = _total + _n + _d;
     } forEach zone_meta_array;
-    [_zoneCounts, _total]
+    [_zoneCounts, _depthCounts, _total]
 };
