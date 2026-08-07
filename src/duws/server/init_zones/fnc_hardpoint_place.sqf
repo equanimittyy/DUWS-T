@@ -282,7 +282,8 @@ fnc_hardpoint_site_aoi = {
 //
 // Stands _n OPFOR radio towers in the band. A tower is placed deliberately, so this does not roll a
 // type through fnc_hardpoint_lay: it takes a band position from DUWS_fnc_aoi_bandPos, spaces it well
-// off other emplacements so two masts never share ground, and stands a "RADIO" hardpoint there. Each
+// off other emplacements and never inside another tower's AoI, so masts neither share ground nor nest
+// their coverage, and stands a "RADIO" hardpoint there. Each
 // raises DUWS_opforRadioLevel through fnc_hardpoint_register's recount and projects AOI_TOWER_REACH of
 // coverage. A global sequence keys the towers, so a campaign-start seed and OPCOM's later raises never
 // collide. Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop.
@@ -296,6 +297,12 @@ fnc_hardpoint_seed_radio = {
         private _draw = call DUWS_fnc_aoi_bandPos;
         if (_draw isEqualTo []) then { continue };
         private _c = _draw select 0;
+        // Never inside another tower's AoI: reject a draw within AOI_TOWER_REACH of any standing RADIO
+        // tower, so two towers' coverage circles never nest. Checked live against the registry, so the
+        // seed loop's own earlier towers and OPCOM's later single raises both count.
+        if ((DUWS_hardpoints findIf {
+            (_x select 2) isEqualTo "RADIO" && {(_c distance2D (_x select 1)) < AOI_TOWER_REACH}
+        }) >= 0) then { continue };
         if ((([_c] call fnc_hardpoint_survey) select 8) < HP_RADIO_SPACING) then { continue };
 
         private _seq = missionNamespace getVariable ["DUWS_radioSeq", 0];

@@ -58,19 +58,19 @@ the drift reads the primitives directly, so it can add the radio-tower amplifier
 
 | Emitter | Side | Reach beyond its edge |
 |---|---|---|
-| OPFOR radio tower | OPFOR | `AOI_TOWER_REACH` = **7 km** — longest on the map |
-| Zone | its controller | `_size +` `AOI_ZONE_REACH` = **3 km** |
-| Player HQ | BLUFOR | `AOI_HQ_REACH` = **1 km** |
-| FOB | BLUFOR | `AOI_FOB_REACH` = **1 km** |
-| Banded town | its band's side | `civ_radius +` `AOI_TOWN_REACH` = **1 km** |
+| OPFOR radio tower | OPFOR | `AOI_TOWER_REACH` = **5 km** — longest on the map |
+| Zone | its controller | `_size +` `AOI_ZONE_REACH` = **2 km** |
+| Player HQ | BLUFOR | `AOI_HQ_REACH` = **2 km** |
+| FOB | BLUFOR | `AOI_FOB_REACH` = **2 km** |
+| Banded town | its band's side | `civ_radius +` `AOI_TOWN_REACH` = **2 km** |
 
 Reach is measured from each source's outer edge, not its centre, so a naturally large zone claims
-proportionally more ground (`_size + 3 km`) than a small one. The radio tower is the one source with
-no footprint — its 7 km runs from the mast.
+proportionally more ground (`_size + 2 km`) than a small one. The radio tower is the one source with
+no footprint — its 5 km runs from the mast.
 
 The **BLUFOR** radio supports are **not** in this table: with no structure on the map they have no
 reach, and they amplify BLUFOR's drift globally wherever the emitters above already cover
-([§Radio towers](#radio-towers)). The OPFOR tower appears in two roles — a 7 km coverage emitter
+([§Radio towers](#radio-towers)). The OPFOR tower appears in two roles — a 5 km coverage emitter
 here, and the global `-1` amplifier in [§Rep drift](#rep-drift) — because it does both.
 
 **A zone's reach exceeds its own radius, and that gap is the whole mechanic.** The influence extends
@@ -167,7 +167,7 @@ A radio tower does two things for its side, and the OPFOR and BLUFOR versions di
 **amplifier** is common to both: each tower a side has raises how hard its drift pushes in every town
 that side covers, tracked by the scalars `DUWS_opforRadioLevel` and `DUWS_bluforRadioLevel`
 ([§Rep drift](#rep-drift)). The **coverage** is OPFOR's alone: its tower is a real structure with a
-7 km reach that also *extends* where OPFOR influences, the longest-reaching source on the map
+5 km reach that also *extends* where OPFOR influences, the longest-reaching source on the map
 ([§The field](#the-field)). BLUFOR's supports have no structure, so they add the amplifier and never
 coverage.
 
@@ -182,8 +182,10 @@ so the enemy's drift bottoms out at `-6` a tick in ground it fully holds. A few 
 campaign start and the commander builds toward the cap over the campaign
 ([§The OPCOM tick](#the-opcom-tick)); every one is a hardpoint the player can find, garrisoned and
 clearable like any other, and clearing one drops the enemy's global amplifier by a whole point
-everywhere at once — and removes that tower's 7 km of coverage with it, so far towns no zone reaches
-fall out of OPFOR ground entirely.
+everywhere at once — and removes that tower's 5 km of coverage with it, so far towns no zone reaches
+fall out of OPFOR ground entirely. A tower is never sited inside another tower's AoI — the seeder
+rejects any draw within `AOI_TOWER_REACH` of a standing tower — so their coverage circles never nest
+and each new tower reaches into fresh ground rather than thickening cover the field already has.
 
 That is the counterplay a purchased buff could never give. The enemy's rep pressure across the *whole
 map* has a physical cause the player can go and remove, so a player losing the reputation war has
@@ -299,9 +301,9 @@ Two pieces are deferred, each on something that does not exist yet:
 
 ## Open questions
 
-- **The reaches are set but unvalidated in play.** `AOI_TOWER_REACH` = 7 km, `AOI_ZONE_REACH` = 3 km,
-  and the town, FOB and HQ reaches at 1 km are large against Altis by intent — OPFOR AoI blankets most
-  of the map at start and the player opens with 1 km around HQ. That is deliberate back-foot pressure,
+- **The reaches are set but unvalidated in play.** `AOI_TOWER_REACH` = 5 km, `AOI_ZONE_REACH` = 2 km,
+  and the town, FOB and HQ reaches at 2 km are large against Altis by intent — OPFOR AoI blankets most
+  of the map at start and the player opens with 2 km around HQ. That is deliberate back-foot pressure,
   but it leaves little truly neutral ground, so whether the front reads as a line or as a slow
   reconquest of near-total coverage is the first thing to watch.
 - **Whether the ceilings are the right ones.** They are asymmetric by design — BLUFOR tops out at
@@ -335,7 +337,7 @@ Two pieces are deferred, each on something that does not exist yet:
 | File | Change |
 |---|---|
 | `server/misc/fnc_aoi_init.sqf` | New. Defines `fnc_aoi_field_at`, the two coverage primitives, `fnc_aoi_in_any_zone` and the shared band sampler `DUWS_fnc_aoi_bandPos`; compiled and registered ahead of the hardpoint placer that reads it. |
-| `server/server_var_init.sqf` | The `AOI_*` reach constants (`AOI_TOWER_REACH` 7 km, `AOI_ZONE_REACH` 3 km, town/FOB/HQ 1 km) and `AOI_OPFOR_TOWER_CAP` = 5; `DUWS_bluforRadioLevel` and `DUWS_opforRadioLevel` (both init `0`); the OPCOM tick period and AP costs; a `"RADIO"` row in `DUWS_hardpointName`, `DUWS_hardpointGarrison`, `DUWS_hardpointStreaming`. |
+| `server/server_var_init.sqf` | The `AOI_*` reach constants (`AOI_TOWER_REACH` 5 km, `AOI_ZONE_REACH` 2 km, town/FOB/HQ 2 km) and `AOI_OPFOR_TOWER_CAP` = 5; `DUWS_bluforRadioLevel` and `DUWS_opforRadioLevel` (both init `0`); the OPCOM tick period and AP costs; a `"RADIO"` row in `DUWS_hardpointName`, `DUWS_hardpointGarrison`, `DUWS_hardpointStreaming`. |
 | `server/misc/fnc_zonesundercontrol.sqf` | The drift pass added to the top of the 30-min economy tick's town loop, before the income tally; reads the two coverage tests and two amplifier scalars, writes through `fnc_town_rep_adjust`, then pays income on the post-drift band. |
 | `server/misc/fnc_economy_init.sqf` | `fnc_town_rep_adjust` gains a `_silent` flag so the drift writes rep and repaints the town marker without posting a per-town notification card. |
 | `server/init_zones/hardpoint_compositions.sqf` | New `DUWS_hardpointComp_RADIO`, comms mast plus hub and an MG nest. |
