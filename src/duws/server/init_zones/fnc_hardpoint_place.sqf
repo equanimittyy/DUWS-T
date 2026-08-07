@@ -167,12 +167,16 @@ fnc_hardpoint_spawn = {
 #define HP_TYPE_DRAWS 18     // draws spent hunting a spot for one rolled type before it is dropped
 #define HP_POOL_ENOUGH 4     // stop drawing once this many viable spots are in hand, then pick among them
 #define HP_ROAD_SNAP 120     // roadblock: a draw is pulled to the nearest road within this, else discarded
+#define HP_AOI_LOCAL_R 2000  // AoI band pass: the local search radius around each emplacement's anchor
 
 // [_count, _keyPrefix, _regZoneKey, _fnCand] call fnc_hardpoint_lay -> hardpoints placed.
 //
 // The shared placement loop behind both the zone pass and the AoI band pass: they differ only in
 // where a candidate comes from, so that is the one thing passed in. _fnCand is code returning
-// [_pos, _radialDir] for a draw, or [] to skip it (an off-band or in-zone sample).
+// [_pos, _radialDir] for a draw, or [] to skip it (an off-band or in-zone sample). _fnReset, if given,
+// is called once per emplacement before its draws and its result is handed to every _fnCand call as
+// _this: the AoI pass uses it to fix one local search anchor per hardpoint, so the draws stay in a
+// single neighbourhood the survey can compare. The zone pass omits it (anchor []) and ignores _this.
 //
 // Type first, ground second. The whole slate of types is rolled up front from the pass's weight map
 // (the zone or standalone DUWS_hardpointWeight*, picked by _regZoneKey below) -- MG common, AA and
@@ -194,7 +198,7 @@ fnc_hardpoint_spawn = {
 //
 // Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop, so build-out cannot call it inline.
 fnc_hardpoint_lay = {
-    params ["_count", "_keyPrefix", "_regZoneKey", "_fnCand", ["_fnTick", {}]];
+    params ["_count", "_keyPrefix", "_regZoneKey", "_fnCand", ["_fnTick", {}], ["_fnReset", {[]}]];
     // Zone rings and standalone emplacements roll different type mixes: the map's keys are the roll set,
     // its values the base weights. Standalone ground (the AoI band, OPCOM's solo builds) fields AA and
     // more roadblocks; a zone's ring does not. The zoneKey is the discriminator already threaded here.
@@ -210,6 +214,9 @@ fnc_hardpoint_lay = {
     private _tally = createHashMap;
     {
         private _type = _x;
+        // One anchor per emplacement: the AoI pass fixes a local search neighbourhood here; other
+        // passes return [] and their candidate blocks ignore it.
+        private _anchor = call _fnReset;
         // Hunt ground this type can hold: draw candidates, survey each, drop any too close to a nest
         // already down, keep only those it scores above zero on. Stop once a few viable spots are in hand
         // or the draw budget is spent. Roadblock is snapped to a nearby road first -- it vetoes off one --
@@ -219,7 +226,7 @@ fnc_hardpoint_lay = {
         private _draws = 0;
         while { _draws < HP_TYPE_DRAWS && {(count _pool) < HP_POOL_ENOUGH * 2} } do {
             _draws = _draws + 1;
-            private _draw = call _fnCand;
+            private _draw = _anchor call _fnCand;
             if (_draw isEqualTo []) then { continue };
             _draw params ["_c", "_rdir"];
             if (_type isEqualTo "ROADBLOCK") then {
@@ -289,23 +296,47 @@ fnc_hardpoint_site_zone = {
     ["INFO", "HARDPOINT", format ["%1 sited %2/%3 hardpoints (cap %4)", _zoneKey, _placed, _count, _cap]] call fnc_log;
 };
 
+// The band pass's local-search sampler, shared by the campaign-start pass and OPCOM's band build so
+// both hunt ground the same cheap way: one fixed anchor per emplacement, then draws confined to its
+// neighbourhood rather than scattered across every zone's band.
+//
+// [] call fnc_hardpoint_band_anchor -> [_pos, _radialDir, _zoneCentre] or []. One valid in-band
+// anchor; bandPos returns [] on a missed draw, so retry a handful of times rather than dropping the
+// whole hardpoint to a single unlucky roll. Handed to fnc_hardpoint_lay as its per-emplacement reset.
+fnc_hardpoint_band_anchor = {
+    private _a = [];
+    for "_i" from 1 to 8 do { _a = call DUWS_fnc_aoi_bandPos; if !(_a isEqualTo []) exitWith {} };
+    _a
+};
+
+// _anchor call fnc_hardpoint_band_cand -> [_pos, _radialDir] or []. A draw within HP_AOI_LOCAL_R of
+// the anchor, gated like the band (OPFOR-positive, outside every zone) and faced outward from the
+// anchor's source zone. _this is the anchor fnc_hardpoint_lay carries in from the reset above; a
+// missed or in-zone sample returns [] to skip.
+fnc_hardpoint_band_cand = {
+    params [["_anchor", []]];
+    if (_anchor isEqualTo []) exitWith { [] };
+    _anchor params ["_apos", "", ["_azone", []]];
+    private _c = [_apos, 0, HP_AOI_LOCAL_R, 8, 0, 0.35, 0] call BIS_fnc_findSafePos;
+    if (([_c] call fnc_aoi_field_at) <= 0) exitWith { [] };
+    if ([_c] call fnc_aoi_in_any_zone) exitWith { [] };
+    [_c, if (_azone isEqualTo []) then { random 360 } else { _azone getDir _c }]
+};
+
 // [] call fnc_hardpoint_site_aoi
 //
 // The campaign-start band pass: `x` standalone combat hardpoints spread through the OPFOR-positive
-// area of influence, `x = count serv_zones_array` (the authoritative post-generation count). Uniform
-// across the band -- the war has not started, so there is no front to weight toward and no intel to
-// act on; where the enemy fortifies with intent is OPCOM's later builds, not hour zero. It reuses the
-// whole zone-pass tail and differs only in the candidate: an annulus sampled around a random OPFOR
-// zone (from its edge out to AOI_ZONE_REACH), kept only where the field reads OPFOR-positive and
-// outside every zone -- so a hardpoint lands in the countryside the enemy holds, never inside a zone
-// (that ground is the zone hardpoint system's, gated by the capture trigger).
+// area of influence, `x = count serv_zones_array` (the authoritative post-generation count). Anchors
+// are drawn uniformly across the band via fnc_hardpoint_band_anchor/_cand -- the war has not started,
+// so there is no front to weight toward and no intel to act on; where the enemy fortifies with intent
+// is OPCOM's later builds, not hour zero.
 //
 // Runs spawned, like the zone pass: fnc_hardpoint_spawn sleeps in the crew drop.
 fnc_hardpoint_site_aoi = {
     params [["_fnTick", {}]];
     private _count = count serv_zones_array;
     if (_count <= 0) exitWith {};
-    private _placed = [_count, "hpaoi", "", { call DUWS_fnc_aoi_bandPos }, _fnTick] call fnc_hardpoint_lay;
+    private _placed = [_count, "hpaoi", "", fnc_hardpoint_band_cand, _fnTick, fnc_hardpoint_band_anchor] call fnc_hardpoint_lay;
     ["INFO", "HARDPOINT", format ["AoI band pass sited %1/%2 standalone hardpoints", _placed, _count]] call fnc_log;
 };
 

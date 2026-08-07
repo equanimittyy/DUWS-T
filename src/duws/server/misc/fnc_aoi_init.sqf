@@ -86,7 +86,8 @@ fnc_aoi_in_any_zone = {
 // tick so all three sample the same ground the same way. It draws an annulus around a random OPFOR
 // zone (from its edge out to AOI_ZONE_REACH) and keeps the point only where the field reads
 // OPFOR-positive and it is outside every zone -- so it lands in the countryside the enemy holds, never
-// inside a zone. _radialDir is the outward bearing from that zone, for fnc_hardpoint_facing.
+// inside a zone. _radialDir is the outward bearing from that zone, for fnc_hardpoint_facing; the zone
+// centre is appended as a third element so the AoI band pass can face a local hardpoint outward from it.
 DUWS_fnc_aoi_bandPos = {
     private _opforZones = [];
     {
@@ -101,5 +102,5 @@ DUWS_fnc_aoi_bandPos = {
     private _c = [_ozp, _ozs, _ozs + AOI_ZONE_REACH, 8, 0, 0.35, 0] call BIS_fnc_findSafePos;
     if (([_c] call fnc_aoi_field_at) <= 0) exitWith { [] };
     if ([_c] call fnc_aoi_in_any_zone) exitWith { [] };
-    [_c, _ozp getDir _c]
+    [_c, _ozp getDir _c, _ozp]
 };

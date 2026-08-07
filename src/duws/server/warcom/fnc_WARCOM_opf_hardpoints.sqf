@@ -64,11 +64,12 @@ while {true} do {
         };
     };
 
-    // 3. Fortify the band with a standalone emplacement, sampled the same way as the start pass.
+    // 3. Fortify the band with one standalone emplacement, sited the same cheap local-search way as the
+    // start pass: fnc_hardpoint_band_anchor fixes a neighbourhood, then the draws stay within it.
     if (!_acted && {WARCOM_opfor_ap >= OPCOM_AP_BAND}) then {
         private _seq = missionNamespace getVariable ["DUWS_hpOpcomSeq", 0];
         missionNamespace setVariable ["DUWS_hpOpcomSeq", _seq + 1];
-        private _built = [1, format ["hpopcom_%1", _seq], "", { call DUWS_fnc_aoi_bandPos }] call fnc_hardpoint_lay;
+        private _built = [1, format ["hpopcom_%1", _seq], "", fnc_hardpoint_band_cand, {}, fnc_hardpoint_band_anchor] call fnc_hardpoint_lay;
         if (_built > 0) then {
             ["OPF", -OPCOM_AP_BAND, "opcom_band_build"] call fnc_ap_adjust;
         };
