@@ -164,20 +164,27 @@ fnc_hardpoint_spawn = {
 
 #define HP_CAP_STEP 250
 #define HP_SITE_SPACING 50
-#define HP_SITE_SAMPLES 6
+#define HP_TYPE_DRAWS 18     // draws spent hunting a spot for one rolled type before it is dropped
+#define HP_POOL_ENOUGH 4     // stop drawing once this many viable spots are in hand, then pick among them
+#define HP_ROAD_SNAP 120     // roadblock: a draw is pulled to the nearest road within this, else discarded
 
 // [_count, _keyPrefix, _regZoneKey, _fnCand] call fnc_hardpoint_lay -> hardpoints placed.
 //
 // The shared placement loop behind both the zone pass and the AoI band pass: they differ only in
 // where a candidate comes from, so that is the one thing passed in. _fnCand is code returning
-// [_pos, _radialDir] for a draw, or [] to skip it (an off-band or in-zone sample). Each slot goes to
-// the best of a small sampled pool, not the first spot that clears -- ranked by the best any placeable
-// type scores there (height, overwatch, interlock range to nests already down). Still a weighted roll
-// over the pool, not argmax, so a line of guns is not identical every campaign. Its type is then a
-// terrain-weighted roll over the init set for this pass -- MG on a rise, roadblock on a road; the set
-// and its weights are the zone or standalone map (DUWS_hardpointWeight*), picked by _regZoneKey below.
-// OPs, minefields and the fire-support types are in neither, OPCOM's to place, never rolled here.
-// _radialDir is the outward
+// [_pos, _radialDir] for a draw, or [] to skip it (an off-band or in-zone sample).
+//
+// Type first, ground second. The whole slate of types is rolled up front from the pass's weight map
+// (the zone or standalone DUWS_hardpointWeight*, picked by _regZoneKey below) -- MG common, AA and
+// roadblock rarer -- so the realised mix is the weights, not what the terrain favours. Each rolled type
+// is then given the best ground it can hold: a handful of draws surveyed and scored for that one type, a
+// weighted pick among the viable ones, so terrain decides only WHERE a type lands, never WHICH is placed.
+// The old order did the reverse -- pick the best-scoring spot, then roll a type there -- which let high
+// ground (that MG and AT score huge on) win nearly every site and starved the flat-ground type (AA) and
+// the road-gated one (roadblock). A type that finds no ground in its draw budget is dropped and logged,
+// never swapped for another -- swapping is the terrain skew this order removes. Roadblock is snapped to a
+// nearby road first, since it vetoes anywhere off one. OPs, minefields and the fire-support types are in
+// no map, OPCOM's to place, never rolled here. _radialDir is the outward
 // "toward the approach" bearing fnc_hardpoint_facing hands the flat types, while the overwatch nests
 // face their own fall line. _regZoneKey files each row under a parent zone ("" = standalone). Every
 // emplacement carries the type's own garrison from fnc_hardpoint_spawn on top of any gun's crew.
@@ -192,52 +199,64 @@ fnc_hardpoint_lay = {
     // its values the base weights. Standalone ground (the AoI band, OPCOM's solo builds) fields AA and
     // more roadblocks; a zone's ring does not. The zoneKey is the discriminator already threaded here.
     private _weights = if (_regZoneKey isEqualTo "") then { DUWS_hardpointWeightSolo } else { DUWS_hardpointWeightZone };
-    private _types = keys _weights;
+    // Flattened [type, weight, ...] for selectRandomWeighted; the roll reads base weight alone, no ground.
+    private _typeRoll = [];
+    { _typeRoll pushBack _x; _typeRoll pushBack (_weights get _x) } forEach (keys _weights);
+    // The whole slate of types up front, before any terrain is read, so the realised mix is the weights.
+    private _slate = [];
+    for "_i" from 1 to _count do { _slate pushBack (selectRandomWeighted _typeRoll) };
+
     private _placed = 0;
-    private _tries = 0;
-    while { _placed < _count && {_tries < _count * 8} } do {
-        _tries = _tries + 1;
+    private _tally = createHashMap;
+    {
+        private _type = _x;
+        // Hunt ground this type can hold: draw candidates, survey each, drop any too close to a nest
+        // already down, keep only those it scores above zero on. Stop once a few viable spots are in hand
+        // or the draw budget is spent. Roadblock is snapped to a nearby road first -- it vetoes off one --
+        // and, on the standalone passes, discarded if the snap crossed into a zone, since the band must
+        // stay out of zone interiors (zone roadblocks are meant to sit on the zone's own road).
         private _pool = [];
-        for "_i" from 1 to HP_SITE_SAMPLES do {
+        private _draws = 0;
+        while { _draws < HP_TYPE_DRAWS && {(count _pool) < HP_POOL_ENOUGH * 2} } do {
+            _draws = _draws + 1;
             private _draw = call _fnCand;
             if (_draw isEqualTo []) then { continue };
             _draw params ["_c", "_rdir"];
-            private _f = [_c] call fnc_hardpoint_survey;
-            // Spaced off what is already down: hpDist (facts[8]) is the distance to the nearest placed
-            // hardpoint, measured live against the whole registry, so the band pass also clears the zone
-            // nests. A draw on top of one is dropped, not scored.
-            if ((_f select 8) < HP_SITE_SPACING) then { continue };
-            private _sv = 0;
-            { _sv = _sv max (([_f, _x] call fnc_hardpoint_score) * (_weights get _x)) } forEach _types;
-            if (_sv <= 0) then { continue };  // no type can hold this spot
-            _pool pushBack [_c, _f, _rdir];
-            _pool pushBack _sv;
-        };
-        if (_pool isEqualTo []) then { continue };
-        (selectRandomWeighted _pool) params ["_cand", "_facts", "_radialDir"];
-
-        // Type by weighted roll at the chosen spot: each type's base commonness times the ground's
-        // score for it. So flat open ground leans one way and a rise leans MG without either being the
-        // only answer.
-        private _weighted = [];
-        {
-            private _s = [_facts, _x] call fnc_hardpoint_score;
-            if (_s > 0) then {
-                _weighted pushBack _x;
-                _weighted pushBack (_s * (_weights get _x));
+            if (_type isEqualTo "ROADBLOCK") then {
+                private _road = [_c, HP_ROAD_SNAP] call BIS_fnc_nearestRoad;
+                if (isNull _road) then { continue };
+                private _rp = getPosASL _road;
+                _c = [_rp select 0, _rp select 1, 0];
+                if (_regZoneKey isEqualTo "" && {[_c] call fnc_aoi_in_any_zone}) then { continue };
             };
-        } forEach _types;
-        private _best = selectRandomWeighted _weighted;
+            private _f = [_c] call fnc_hardpoint_survey;
+            if ((_f select 8) < HP_SITE_SPACING) then { continue };  // spaced off the nests already down
+            private _s = [_f, _type] call fnc_hardpoint_score;
+            if (_s <= 0) then { continue };  // this ground cannot hold the rolled type
+            _pool pushBack [_c, _f, _rdir];
+            _pool pushBack _s;
+        };
 
-        // The overwatch nests face down the slope they overlook; the rest face the radial the draw
-        // carried. fnc_hardpoint_facing picks between the two off the survey's fall line.
-        private _dir = [_best, _facts select 10, _facts select 11, _radialDir] call fnc_hardpoint_facing;
-        private _key = format ["%1_%2", _keyPrefix, _placed];
-        ([_best, _cand, _dir, "opfor", _key] call fnc_hardpoint_spawn) params ["_objs", "_men"];
-        [_key, _best, _cand, _men, "opfor", _regZoneKey] call fnc_hardpoint_register;
-        _placed = _placed + 1;
-        _placed call _fnTick;
-    };
+        if (_pool isEqualTo []) then {
+            // No ground for this type in the budget -- dropped, not swapped: a swap is the terrain skew
+            // this order removes. A roadblock in roadless country is the usual cause; the log names it.
+            ["INFO", "HARDPOINT", format ["%1 dropped a %2: no spot in %3 draws", _keyPrefix, _type, _draws]] call fnc_log;
+        } else {
+            // Terrain picks WHERE among the viable spots: a weighted roll by the type's own score, so its
+            // best ground is likeliest without being the only answer.
+            (selectRandomWeighted _pool) params ["_cand", "_facts", "_radialDir"];
+            // Overwatch nests face down the slope they overlook; the rest keep the radial the draw carried.
+            private _dir = [_type, _facts select 10, _facts select 11, _radialDir] call fnc_hardpoint_facing;
+            private _key = format ["%1_%2", _keyPrefix, _placed];
+            ([_type, _cand, _dir, "opfor", _key] call fnc_hardpoint_spawn) params ["_objs", "_men"];
+            [_key, _type, _cand, _men, "opfor", _regZoneKey] call fnc_hardpoint_register;
+            _placed = _placed + 1;
+            _tally set [_type, (_tally getOrDefault [_type, 0]) + 1];
+            _placed call _fnTick;
+        };
+    } forEach _slate;
+
+    ["INFO", "HARDPOINT", format ["%1 laid %2/%3 %4", _keyPrefix, _placed, _count, _tally]] call fnc_log;
     _placed
 };
 
