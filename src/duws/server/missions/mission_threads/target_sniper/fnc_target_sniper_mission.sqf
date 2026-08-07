@@ -28,9 +28,9 @@ private _VARtaskgeneratedName = format ["sniperhunt%1%2",round(_MissionPos selec
 [[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 // CREATE PATROLS, NO VEHICLES
 sleep 1;
-["patrol", _missionpos, 15] spawn fnc_spawn_team;
+[_missionpos, 15] spawn { [(["patrol"] + _this) call fnc_spawn_team] call fnc_mission_claim };
 sleep 1;
-["patrol", _randompos, _radius] spawn fnc_spawn_team;
+[_randompos, _radius] spawn { [(["patrol"] + _this) call fnc_spawn_team] call fnc_mission_claim };
 sleep 1;
 [_randompos, _radius] spawn { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
 sleep 1;

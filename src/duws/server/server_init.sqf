@@ -202,8 +202,9 @@ if (dynamic_weather_enable) then {
 	[] spawn fnc_weather;
 };
 
-// One lifetime for every category the sweep collects; 0 turns it off. The default lives in
-// the parameter, not here, so the two cannot drift apart.
+// One lifetime for every category the sweep collects; the sweep is always on (a 0 from an old
+// save is floored, not off). The default lives in the parameter, not here, so the two cannot
+// drift apart.
 [["DUWS_CleanupLifetime", 900] call BIS_fnc_getParamValue] spawn fnc_repetitive_cleanup;
 
 // Cleanup unused players slots.

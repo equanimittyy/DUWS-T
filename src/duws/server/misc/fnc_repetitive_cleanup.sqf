@@ -2,7 +2,8 @@
 /*
     Deletes what play leaves behind: bodies, wrecks, any vehicle left standing empty, dropped
     weapons, spent smoke, supply crates and parachutes. One lifetime covers all of it, set by the
-    DUWS_CleanupLifetime parameter (0 or less disables the sweep).
+    DUWS_CleanupLifetime parameter. The sweep is always on: teardowns hand it their live leftovers
+    (a finished side mission's survivors, a cleared hardpoint's garrison), so it can never be off.
 
     Anything carrying the persistent flag is never touched, whatever its age. fnc_duws_keep sets that
     flag and files the object under a composition (the HQ, a FOB, a zone prefab, a side-mission
@@ -34,7 +35,9 @@ if (!isServer) exitWith {};
 #define LOG_EVERY 30
 
 private _lifetime = [_this, 0, 0, [0]] call BIS_fnc_param;
-if (_lifetime <= 0) exitWith {};
+// Never disabled: teardowns hand their live leftovers to this sweep, so a stopped one would strand
+// them for good. A stray 0 from an old param or save is floored to the shortest real option.
+_lifetime = _lifetime max 300;
 
 // Collected by class, and spared only by the persistent flag. Opt out rather than opt in, so a
 // drop added later is swept without anyone having to remember to register it.
@@ -115,7 +118,11 @@ while {true} do {
         if (!(_x isKindOf "StaticWeapon") && {({alive _x} count crew _x) == 0}) then {
             _candidates pushBack _x;
         } else {
-            if !(_x in _disposed) then { _x setVariable ["DUWS_binAt", nil] };
+            // A flagged vehicle carries a delete order; keeping or regaining crew must not clear its
+            // clock (that reset exists to spare a vehicle put back into service, the opposite case).
+            if (!(_x in _disposed) && {!(_x getVariable ["DUWS_binMe", false])}) then {
+                _x setVariable ["DUWS_binAt", nil];
+            };
         };
     } forEach vehicles;
 
@@ -188,6 +195,29 @@ while {true} do {
             };
         };
     } forEach _sweep;
+
+    // Flagged living entities: a delete order stamped by a teardown, not litter found by class. Own
+    // pass because every shared-sweep spare would protect them -- a living man is his own crew, and a
+    // man and a mission vehicle both read as AllVehicles the base-keep radius would hold. Only
+    // KEEP_RADIUS, the deadline and a forced sweep apply; the flag is itself the not-persistent
+    // decision. Dead flagged men ride the allDeadMen census above.
+    {
+        private _unit = _x;
+        if (!isNull _unit && {alive _unit} && {_unit getVariable ["DUWS_binMe", false]}) then {
+            private _binAt = _unit getVariable "DUWS_binAt";
+            if (isNil "_binAt") then { _binAt = _now + _lifetime; _unit setVariable ["DUWS_binAt", _binAt] };
+            // _unit, not _x, inside findIf: the engine binds _x to the player per element there.
+            if ((_force || {_binAt <= _now})
+                && {(allPlayers findIf {_x distance _unit < KEEP_RADIUS}) < 0}
+                && {(units group _unit) findIf {isPlayer _x} < 0}) then {
+                if (_unit isKindOf "CAManBase") then { deleteVehicle _unit }
+                    else { deleteVehicleCrew _unit; deleteVehicle _unit };
+                _binned = _binned + 1;
+            } else {
+                _tracked = _tracked + 1;
+            };
+        };
+    } forEach (allUnits + vehicles);
 
     if (_force) then {
         ["INFO", "CLEANUP", format ["forced sweep: %1 deleted, %2 held inside %3 m",

@@ -18,14 +18,14 @@ class Params {
     };
 
     // How long litter survives before the map sweep deletes it -- one lifetime for bodies,
-    // wrecks, abandoned vehicles, dropped weapons, smoke, crates and parachutes alike. Off
-    // stops the sweep entirely; on a long campaign that trades framerate for tidiness.
-    // Anything tagged persistent ignores this, so the HQ and side-mission objectives are not
-    // affected by shortening it.
+    // wrecks, abandoned vehicles, dropped weapons, smoke, crates and parachutes alike. The sweep
+    // is always on: teardowns hand it their live leftovers, so there is no off. A longer lifetime
+    // trades framerate for tidiness. Anything tagged persistent ignores this, so the HQ and
+    // side-mission objectives are not affected by shortening it.
     class DUWS_CleanupLifetime {
         title = "Garbage Collection";
-        values[] = {0,300,600,900,1200,1800,2400,3000,3600};
-        texts[] = {"Off","5 minutes","10 minutes","15 minutes","20 minutes","30 minutes","40 minutes","50 minutes","60 minutes"};
+        values[] = {300,600,900,1200,1800,2400,3000,3600};
+        texts[] = {"5 minutes","10 minutes","15 minutes","20 minutes","30 minutes","40 minutes","50 minutes","60 minutes"};
         default = 900;
     };
 

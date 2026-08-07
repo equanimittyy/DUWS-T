@@ -166,11 +166,18 @@ DUWS_fnc_hardpointClear = {
     // coverage falls with it -- far towns no zone reaches leave OPFOR ground entirely.
     if ((_o get "hpType") isEqualTo "RADIO") then { call DUWS_fnc_aoi_opforRecount };
     deleteMarker (format ["hpm_%1", _key]);
-    // The garrison leaves with the emplacement. A hardpoint can now clear with defenders still alive --
-    // a radio tower falls when its mast is wrecked, not its roster -- and the men are not composition
-    // members, so release cannot reach them; uncollected they linger for good. The shared collect
-    // deletes them, emptying the crewed statics, and spares the persistent members for release.
-    [_key] call fnc_site_collect;
+    // The garrison stays where it fell and is handed to the sweep with a delete order, not collected in
+    // the player's face. A radio tower falls when its mast is wrecked, so defenders can still be alive
+    // at clear; deleting them where the player is looking reads as a bug. Flagged, they despawn once the
+    // player is KEEP_RADIUS clear -- the same rule as everything else the sweep bins. The flag lives on
+    // the unit, so the later fnc_site_retire roster-clear cannot strip it, and the men are not
+    // composition members so release never reaches them; this is what now empties the roster.
+    {
+        if (!isNull _x && {alive _x}) then {
+            _x setVariable ["DUWS_binMe", true];
+            _x setVariable ["DUWS_binAt", time + 300];
+        };
+    } forEach ([_key] call fnc_site_roster);
     // Wrecks left standing for the sweep, not deleted: release drops the pins and schedules disposal.
     [_key] call fnc_duws_release;
     ["INFO", "HARDPOINT", format ["%1 cleared", _key]] call fnc_log;

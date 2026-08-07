@@ -9,8 +9,8 @@
 // callers have no use for.
 params ["_targetpos", "_radius", ["_compKey", ""], ["_sweepFriendly", false]];
 
-// Read before the slot is released and carried in: the teardown sleeps for minutes, by which time
-// the next mission may hold the token.
+// This mission's instance id, captured before the slot reopens below so cleanup flags this
+// mission's units and never a successor's.
 private _token = missionNamespace getVariable ["DUWS_mission_token", 0];
 
 // Released here rather than after a delay. The wait between side missions is the per-type cooldown
@@ -20,4 +20,6 @@ Mission_available = true;
 publicVariable "Mission_available";
 ["INFO", "MISSION", "mission slot released, a new side mission can generate"] call fnc_log;
 
-[_targetpos, _radius, _compKey, _sweepFriendly, _token] spawn fnc_mission_cleanup;
+// Called inline now that cleanup no longer sleeps -- it only releases the composition and flags the
+// mission's units for the map sweep, which does the timed deletion on its own clock.
+[_targetpos, _radius, _compKey, _sweepFriendly, _token] call fnc_mission_cleanup;

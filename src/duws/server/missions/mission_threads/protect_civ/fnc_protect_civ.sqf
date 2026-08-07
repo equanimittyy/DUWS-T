@@ -109,6 +109,11 @@ _civilianMarker setMarkerSize [1, 1];
 };
 
 _civGroup deleteGroupWhenEmpty true;
+// The informant is the one WEST unit this thread raises; it used to be swept only by the mission's
+// radius pass. With that gone it needs an explicit owner so the teardown flags it like everything
+// else. Claim sets ownership only -- DUWS_binMe is stamped later at cleanup -- so this cannot delete
+// him mid-escort.
+[_civGroup] call fnc_mission_claim;
 
 [_speakerinfomat, _message] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
