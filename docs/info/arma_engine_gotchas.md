@@ -812,6 +812,34 @@ depends on the object falling, assert it with `enableSimulationGlobal true` — 
 from wherever a frame boundary mid-placement left the object. `DUWS_fnc_dropStatic`
 (`server/init_zones/fnc_zone_stream_init.sqf`) ends on exactly that pair.
 
+## `moveInGunner` into a simulated static leaves the turret dead; seat it frozen, then thaw
+
+**A static weapon crewed *after* its simulation is enabled keeps a gunner who never traverses: the
+gun fires only down the heading it was placed on and ignores targets to either side. `moveInGunner`
+the gunner while the gun is still frozen (`enableSimulationGlobal false`) and enable simulation
+*after*, and the turret comes up live.**
+
+The turret's AI is brought up as the gun transitions from unsimulated to simulated with a gunner
+already aboard; a gunner added to a gun that is already running never gets that pass, so the weapon
+simulates enough to fire but the turret does not slew. The symptom is exact and misleading — a
+crewed, upright, undamaged gun that shoots straight ahead — and it reads as a locked turret or a
+weapon that cannot engage the target type, not as a placement-order bug. `simulationEnabled` is no
+help: it reads `true` either way, because the base *is* simulated; only the turret is inert.
+
+The trap is that the natural order is the wrong one. Freezing a static during placement is required
+(to hold an elevated row, or to lift-and-drop it onto uneven ground), and the obvious sequence is to
+thaw the settled gun and *then* seat the crew. The zone prefabs happened to seat-then-thaw and their
+turrets worked; the drop-and-settle path thawed in `DUWS_fnc_dropStatic` and seated afterward, so its
+turrets were dead — which is why the fault showed only on hardpoints and on zone guns re-crewed after
+streaming (the two paths that route through the drop), while a freshly built zone looked fine.
+
+**How to apply:** seat every static while it is frozen, then thaw. `DUWS_fnc_seatStatic`
+(`server/init_zones/fnc_zone_stream_init.sqf`) is the single seat step — it re-freezes the settled
+gun, `moveInGunner`s, and thaws — and both crewing routines call it: `DUWS_fnc_crewCompositionStatics`
+for the prefab build (thaw in place) and `DUWS_fnc_manStatics` for the stream re-crew and hardpoints
+(iterative drop). Keeping the seat in one function is what stops the order drifting between the two
+again. A crewed gun that fires but will not rotate is this bug until proven otherwise.
+
 ## A hidden terrain object comes back the moment its damage state changes
 
 **A terrain object cannot be deleted, so clearing ground means `hideObjectGlobal`. The engine
