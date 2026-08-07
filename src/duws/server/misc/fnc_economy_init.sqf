@@ -129,9 +129,13 @@ fnc_town_rep_announce = {
 // six different wordings, two announced nothing, and one quoted a figure the clamp had already
 // reduced. Queued off the applied change, so a town pinned at a bound contributes nothing at all
 // instead of claiming a charge it absorbed.
+// _silent suppresses only the notification card, not the write, the marker repaint or the log. The
+// passive AoI drift charges every covered town each economy tick, so a card apiece would post a
+// dozen at once and bury the event cards this queue exists to keep legible; the town's own marker
+// colour is the drift's feedback instead. Every event caller leaves it default, so their cards stand.
 fnc_town_rep_adjust = {
 	if (!isServer) exitWith {};
-	params [["_townIndex", -1], ["_delta", 0], ["_reason", ""]];
+	params [["_townIndex", -1], ["_delta", 0], ["_reason", ""], ["_silent", false]];
 	private _reps = missionNamespace getVariable ["civ_town_rep", []];
 	if (_townIndex < 0 || _townIndex >= count _reps) exitWith {};
 	private _old = _reps select _townIndex;
@@ -142,7 +146,7 @@ fnc_town_rep_adjust = {
 	[_townIndex] call fnc_civ_townRender;
 	["INFO", "CIV", format ["TOWNREP %1: %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 
-	if (_new == _old) exitWith {};
+	if (_new == _old || _silent) exitWith {};
 	private _key = format ["%1:%2", _townIndex, _reason];
 	private _queued = _key in civ_rep_pending;
 	private _entry = civ_rep_pending getOrDefault [_key, [0, 0]];

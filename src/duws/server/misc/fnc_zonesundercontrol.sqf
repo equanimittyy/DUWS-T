@@ -28,12 +28,27 @@ while {true} do {
     // nothing is exactly the case the town economy exists to model.
     private _reps = missionNamespace getVariable ["civ_town_rep", []];
     private _worth = missionNamespace getVariable ["civ_town_ap", []];
+    private _locs = missionNamespace getVariable ["civ_locations", []];
     private _blu = 0;
     private _opf = 0;
-    // Through fnc_civ_townIncome rather than comparing the bands here, so the figure the map
-    // readout prints for a town is the one this loop actually pays it.
+    // Passive AoI rep drift first, then income on the result -- so a town that crosses a band this
+    // tick pays on its new side the same tick. The pushes are asymmetric by design: OPFOR pushes by
+    // holding ground (a flat 1 plus its standing radio towers), BLUFOR only once it has bought a tier
+    // (no base). A contested town nets the difference; an uncovered one drifts nothing. Silent: the
+    // town's marker colour is the feedback, not a card per town (see fnc_town_rep_adjust).
     {
-        ([_x, _worth param [_forEachIndex, 0]] call fnc_civ_townIncome) params ["_income", "_side"];
+        private _townPos = getPos (_locs select _forEachIndex);
+        private _opforPush = 0;
+        private _bluforPush = 0;
+        if (_townPos call fnc_aoi_opfor_covers)  then { _opforPush  = 1 + DUWS_opforRadioLevel };
+        if (_townPos call fnc_aoi_blufor_covers) then { _bluforPush = DUWS_bluforRadioLevel };
+        if (_bluforPush != _opforPush) then {
+            [_forEachIndex, _bluforPush - _opforPush, "aoi_drift", true] call fnc_town_rep_adjust;
+        };
+
+        // Income on the post-drift reputation, read back from the array the adjust just wrote.
+        private _rep = (missionNamespace getVariable ["civ_town_rep", []]) select _forEachIndex;
+        ([_rep, _worth param [_forEachIndex, 0]] call fnc_civ_townIncome) params ["_income", "_side"];
         if (_side isEqualTo "BLU") then { _blu = _blu + _income };
         if (_side isEqualTo "OPF") then { _opf = _opf + _income };
     } forEach _reps;
