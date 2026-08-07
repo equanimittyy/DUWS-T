@@ -135,6 +135,19 @@ SCALAR, expected ARRAY, on index 0` on every draw and the band pass placed nothi
 `private _a = _this`. Keep `params ["_a", "_b", ...]` for when `_this` is a list of distinct arguments
 to spread. Wrapping at the call site (`[X] call code`) works too but pushes it onto every caller.
 
+## A typed `params` template logs to the RPT on mismatch, then falls back
+
+**`params [["_v", default, [typeTemplate]]]` does not *silently* coerce a wrong-typed value to the
+default -- it writes an "Type X, expected Y" error to the RPT first, then uses the default. So a type
+template is the wrong tool for a slot whose type legitimately varies: the fallback works, but every
+mismatch spams the log.**
+
+A static-placement row carried a role *string* at index 5 on the HQ/FOB fences and an isWeapon *bool*
+at the same index on the zone-prefab rows. A `["_role", "", [""]]` template was meant to absorb the
+bool quietly into `""`; instead it logged one type error per gun per site. Read the slot untyped
+(`["_role", ""]`) and coerce by hand -- `if !(_role isEqualType "") then { _role = "" }` -- when a
+value's type is expected to differ and the fallback is the intended path, not an error.
+
 ## `exitWith` exits the nearest loop or call scope, not the enclosing if/then
 
 **Inside a loop, `if (cond) exitWith {...}` terminates the whole loop, even nested several

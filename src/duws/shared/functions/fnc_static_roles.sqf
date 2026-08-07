@@ -130,10 +130,13 @@ fnc_static_resolve = {
 // zero is indistinguishable from one that omitted the column, and the caller knows which it wrote.
 fnc_static_place = {
     params ["_row", "_origin", "_side", "_key", ["_mode", "pos"]];
-    // Index 5 is typed, not just defaulted: it is the role on the HQ and FOB fences but the zone
-    // prefabs' isWeapon flag, and a boolean reaching _role would be read as a key name. A row that
-    // carries the flag falls back to the table lookup, which is what those rows want anyway.
-    _row params ["_class", "_ox", "_oy", ["_oz", 0], ["_dir", 0], ["_role", "", [""]]];
+    // Index 5 is a role name on the HQ and FOB fences but the isWeapon flag on the zone-prefab and
+    // hardpoint rows. A boolean reaching _role would be read as a key name, so it is coerced to "" --
+    // those rows want the table lookup anyway. Coerced by hand rather than by a [""] params template:
+    // that template rejects the bool the same way, but logs the type mismatch to the RPT before it
+    // falls back, once per gun per site, spamming the log with a case that is expected and handled.
+    _row params ["_class", "_ox", "_oy", ["_oz", 0], ["_dir", 0], ["_role", ""]];
+    if !(_role isEqualType "") then { _role = "" };
 
     private _world = _mode isEqualTo "world";
     private _px = (_origin select 0) + _ox;
