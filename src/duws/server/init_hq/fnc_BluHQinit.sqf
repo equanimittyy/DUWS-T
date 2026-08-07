@@ -196,8 +196,8 @@ private _allObjectsData = [
 // silhouette whether or not a mod is loaded.
 // --DUWS-COMPOSITION BEGIN name="HQ Turrets" schema=A anchor=hqInComp--
 private _weaponData = [
-    ["I_HMG_02_high_F", 21.6814, -13.4485, 0,  96.9, "",                  "Land_SandbagBarricade_01_hole_F", 1.21321],
-    ["B_static_AA_F",    9.2279,  10.9924, 0, 269.8, "blufor_TURRET_AA",  "Land_Cargo_HQ_V1_F",              1.252556]
+    ["I_HMG_02_high_F", 31.26595, 28.56276, 0, 352.975, "",                  "Land_SandbagBarricade_01_hole_F", 1.21321],
+    ["B_static_AA_F",   10.54204, 10.59272, 0, 165.875, "blufor_TURRET_AA",  "Land_Cargo_HQ_V1_F",              1.252556]
 ];
 // --DUWS-COMPOSITION END--
 
