@@ -204,11 +204,15 @@ the tower contributes whether or not a player is near enough for it to stream in
 
 The player has no radio-tower hardpoint. BLUFOR's amplifier is bought: three **permanent
 purchasable supports** — **Radio Tower**, **Radio Tower II**, **Radio Tower III** — that mimic the
-enemy's effect without a structure on the map. Each sets `DUWS_bluforRadioLevel` one higher, and
+enemy's effect without a structure on the map. Each raises `DUWS_bluforRadioLevel` one tier, and
 because BLUFOR has no base push, that level *is* the player's whole drift: `+1`, `+2`, `+3` by tier,
-so a fully-invested BLUFOR town drifts up to `+3` a tick and an uninvested one drifts `0`. They live
-in the radio support menu (`shared/includes/supports_radio_modern.hpp`) and cost CP, and being
-*permanent* they are owned once bought rather than spent per use.
+so a fully-invested BLUFOR town drifts up to `+3` a tick and an uninvested one drifts `0`. They are
+three `PERM` rows in the support catalogue (`client/supports/fnc_supports_init.sqf`) rather than a
+bespoke request handler: a tier places nothing and is owned once bought, so it needs only the unlock
+the existing permanent-support machinery already provides — the buy, the team-wide flag, the campaign
+save, and the gate that hides a tier until the one below it is owned. They carry no comm-menu item,
+because there is nothing to activate; the purchase itself is the whole effect, applied server-side
+where `fnc_support_perm_grant` recomputes the level from the permanent record.
 
 **BLUFOR starts at level 0, and level 0 pushes nothing.** The enemy opens the campaign with towers
 already up and a base push besides; the player starts with neither, so the reputation war begins
@@ -328,17 +332,21 @@ Each phase is independently playable and testable, and the order is forced by wh
 
 | File | Change |
 |---|---|
-| `server/misc/fnc_aoi_init.sqf` | New. Defines `fnc_aoi_field_at`, the two coverage primitives and the emitter enumeration; compiled and registered like the other `*_init` families. |
-| `server/server_var_init.sqf` | The `AOI_*` reach constants (`AOI_TOWER_REACH` 7 km, `AOI_ZONE_REACH` 3 km, town/FOB/HQ 1 km) and the OPFOR-tower cap of 5; `DUWS_bluforRadioLevel` (init `0`) and `DUWS_opforRadioLevel`; a `"RADIO"` row in `DUWS_hardpointName`, `DUWS_hardpointGarrison`, `DUWS_hardpointStreaming`. |
-| `server/misc/fnc_zonesundercontrol.sqf` | The drift pass added to the top of the 30-min economy tick's town loop (`:11-12,26-29`), before the income tally; reads the two coverage tests and two amplifier scalars, writes through `fnc_town_rep_adjust`. |
-| `server/init_zones/hardpoint_compositions.sqf` | New `DUWS_hardpointComp_RADIO`, tower core plus comms dressing. |
-| `server/init_zones/fnc_hardpoint_place.sqf` | New `fnc_hardpoint_site_aoi`, sharing the zone pass's survey/score/facing tail; the OPFOR radio-tower seed placement. |
-| `server/init_zones/fnc_hardpoint_stream.sqf` | Recompute `DUWS_opforRadioLevel` (uncleared `"RADIO"` rows, capped at `5`) when one is registered or cleared. |
-| `client/supports/fnc_request_radio_tower.sqf` | New. Debit CP and raise `DUWS_bluforRadioLevel`, gating II and III on owning the prior tier; mirrors `client/supports/fnc_request_fob.sqf`. |
-| `shared/includes/supports_radio_modern.hpp` | Three permanent support entries — Radio Tower, II, III — routed to the request handler. |
-| `server/warcom/fnc_init_OPFOR_WARCOM.sqf` | Call the AoI start pass and the tower seed after zone build-out, beside the zone hardpoint loop at `:59-64`. |
-| `server/warcom/fnc_WARCOM_opf_hardpoints.sqf` | New or shared with the hardpoint director: the OPCOM tick's top-up, band build and tower raising, AP-priced. |
-| `server/server_fnc_init.sqf` | Registry lines for the new functions. |
-| `stringtable.xml` | Radio-tower type name and cleared notification; the three BLUFOR support names and their purchase notification. |
+| `server/misc/fnc_aoi_init.sqf` | New. Defines `fnc_aoi_field_at`, the two coverage primitives, `fnc_aoi_in_any_zone` and the shared band sampler `DUWS_fnc_aoi_bandPos`; compiled and registered ahead of the hardpoint placer that reads it. |
+| `server/server_var_init.sqf` | The `AOI_*` reach constants (`AOI_TOWER_REACH` 7 km, `AOI_ZONE_REACH` 3 km, town/FOB/HQ 1 km) and `AOI_OPFOR_TOWER_CAP` = 5; `DUWS_bluforRadioLevel` and `DUWS_opforRadioLevel` (both init `0`); the OPCOM tick period and AP costs; a `"RADIO"` row in `DUWS_hardpointName`, `DUWS_hardpointGarrison`, `DUWS_hardpointStreaming`. |
+| `server/misc/fnc_zonesundercontrol.sqf` | The drift pass added to the top of the 30-min economy tick's town loop, before the income tally; reads the two coverage tests and two amplifier scalars, writes through `fnc_town_rep_adjust`, then pays income on the post-drift band. |
+| `server/misc/fnc_economy_init.sqf` | `fnc_town_rep_adjust` gains a `_silent` flag so the drift writes rep and repaints the town marker without posting a per-town notification card. |
+| `server/init_zones/hardpoint_compositions.sqf` | New `DUWS_hardpointComp_RADIO`, comms mast plus hub and an MG nest. |
+| `server/init_zones/fnc_hardpoint_place.sqf` | Extract the shared placement loop `fnc_hardpoint_lay` from the zone pass (candidate source is the one thing that varies); new `fnc_hardpoint_site_aoi` and `fnc_hardpoint_seed_radio`, both sampling the band through `DUWS_fnc_aoi_bandPos`. |
+| `server/init_zones/fnc_hardpoint_stream.sqf` | Recompute `DUWS_opforRadioLevel` (uncleared `"RADIO"` rows, capped at `AOI_OPFOR_TOWER_CAP`) when one is registered or cleared. |
+| `client/supports/fnc_supports_init.sqf` | Three `PERM` catalogue rows — `radio1`/`radio2`/`radio3` — CP-priced, no comm item, gated so a tier is hidden until the one below it is owned. Reuses the existing permanent purchase/gate/save machinery, not a bespoke request handler. |
+| `server/supports/fnc_support_perm_grant.sqf` | Recompute `DUWS_bluforRadioLevel` from the permanent record on each grant, so the level survives a save and cannot drift from the flags. |
+| `client/includes/supports_init.hpp` | The three `support_radioN_available` flags, defaulted behind `isNil` like every team-state permanent. |
+| `shared/includes/notifications.hpp` | The three `unlock_radioN` cards. |
+| `server/warcom/fnc_init_OPFOR_WARCOM.sqf` | Call the tower seed then the AoI start pass after zone build-out, beside the zone hardpoint loop, before civilians. |
+| `server/warcom/fnc_WARCOM_opf_hardpoints.sqf` | New. The OPCOM tick's tower raise, zone top-up and band build, one AP-priced build a pass; spawned once by `fnc_WARCOM_init`. |
+| `server/warcom/fnc_WARCOM_init.sqf` | Spawn the OPCOM director beside the BLU threads; the stale "until an OPFOR commander decides it" note updated. |
+| `server/server_fnc_init.sqf` | Registry lines for `fnc_aoi_init` and `fnc_WARCOM_opf_hardpoints`. |
+| `stringtable.xml` | The three BLUFOR support labels and their unlock cards. (The `"RADIO"` type name is an inline English label in `DUWS_hardpointName`, not a stringtable key, like the other hardpoint names.) |
 | `info/zones_and_civilians.md` | Document the field, the drift and the band exclusion as decided behaviour once built. |
 | `info/economy.md` | Note passive rep drift as a new input to town income, and the radio-tower supports as a CP sink. |
