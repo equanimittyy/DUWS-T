@@ -263,57 +263,29 @@ fnc_hardpoint_site_zone = {
 fnc_hardpoint_site_aoi = {
     private _count = count serv_zones_array;
     if (_count <= 0) exitWith {};
-    private _opforZones = [];
-    {
-        _x params ["", "_zp", "_zs"];
-        if ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) < 0) then {
-            _opforZones pushBack [_zp, _zs];
-        };
-    } forEach zone_meta_array;
-    if (_opforZones isEqualTo []) exitWith {
-        ["INFO", "HARDPOINT", "AoI band pass: no OPFOR zones to seed a band around"] call fnc_log;
-    };
-    private _placed = [_count, "hpaoi", "", {
-        (selectRandom _opforZones) params ["_ozp", "_ozs"];
-        private _c = [_ozp, _ozs, _ozs + AOI_ZONE_REACH, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
-        if (([_c] call fnc_aoi_field_at) <= 0) exitWith { [] };
-        if ([_c] call fnc_aoi_in_any_zone) exitWith { [] };
-        [_c, _ozp getDir _c]
-    }] call fnc_hardpoint_lay;
+    private _placed = [_count, "hpaoi", "", { call DUWS_fnc_aoi_bandPos }] call fnc_hardpoint_lay;
     ["INFO", "HARDPOINT", format ["AoI band pass sited %1/%2 standalone hardpoints", _placed, _count]] call fnc_log;
 };
 
-// [_n] call fnc_hardpoint_seed_radio -> radio towers seeded.
+// [_n] call fnc_hardpoint_seed_radio -> radio towers placed.
 //
-// Stands _n OPFOR radio towers in the band at campaign start. A tower is placed deliberately, so this
-// does not roll a type through fnc_hardpoint_lay -- it samples a band position the same way (an annulus
-// around a random OPFOR zone, field OPFOR-positive and outside every zone) and stands a "RADIO"
-// hardpoint there, spaced well off other emplacements so two masts never share ground. Each raises
-// DUWS_opforRadioLevel through fnc_hardpoint_register's recount and projects AOI_TOWER_REACH of
-// coverage, so seeding these before the band HP pass widens the ground those hardpoints spread into.
-// A global sequence keys the towers, so a seed and OPCOM's later builds never collide. Runs spawned:
-// fnc_hardpoint_spawn sleeps in the crew drop.
+// Stands _n OPFOR radio towers in the band. A tower is placed deliberately, so this does not roll a
+// type through fnc_hardpoint_lay: it takes a band position from DUWS_fnc_aoi_bandPos, spaces it well
+// off other emplacements so two masts never share ground, and stands a "RADIO" hardpoint there. Each
+// raises DUWS_opforRadioLevel through fnc_hardpoint_register's recount and projects AOI_TOWER_REACH of
+// coverage. A global sequence keys the towers, so a campaign-start seed and OPCOM's later raises never
+// collide. Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop.
 #define HP_RADIO_SPACING 250
 fnc_hardpoint_seed_radio = {
     params [["_n", 2]];
-    private _opforZones = [];
-    {
-        _x params ["", "_zp", "_zs"];
-        if ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) < 0) then {
-            _opforZones pushBack [_zp, _zs];
-        };
-    } forEach zone_meta_array;
-    if (_opforZones isEqualTo []) exitWith {};
-
     private _placed = 0;
     private _tries = 0;
     while { _placed < _n && {_tries < _n * 12} } do {
         _tries = _tries + 1;
-        (selectRandom _opforZones) params ["_ozp", "_ozs"];
-        private _c = [_ozp, _ozs, _ozs + AOI_ZONE_REACH, 8, 0, 0.35, 0] call BIS_fnc_findSafePos;
-        if (([_c] call fnc_aoi_field_at) <= 0) then { continue };
-        if ([_c] call fnc_aoi_in_any_zone) then { continue };
-        if (((([_c] call fnc_hardpoint_survey) select 8)) < HP_RADIO_SPACING) then { continue };
+        private _draw = call DUWS_fnc_aoi_bandPos;
+        if (_draw isEqualTo []) then { continue };
+        private _c = _draw select 0;
+        if ((([_c] call fnc_hardpoint_survey) select 8) < HP_RADIO_SPACING) then { continue };
 
         private _seq = missionNamespace getVariable ["DUWS_radioSeq", 0];
         missionNamespace setVariable ["DUWS_radioSeq", _seq + 1];

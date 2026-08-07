@@ -448,6 +448,16 @@ AOI_OPFOR_TOWER_CAP = 5;
 DUWS_opforRadioLevel = 0;
 DUWS_bluforRadioLevel = 0;
 
+// OPCOM's hardpoint director: how often it decides (seconds) and the Army Power each build costs. It
+// makes at most one build a pass, in the priority the costs sit in below -- a tower is the dearest and
+// the strongest rep lever, a zone top-up the cheapest. Priced so the enemy spends AP it earns from the
+// towns it holds rather than fortifying for free, which is the escalation loop: rep won earns AP, AP
+// buys fortification, fortification wins more rep. Server-only (OPCOM runs on the server); tuning.
+OPCOM_HP_TICK  = 600;
+OPCOM_AP_TOWER = 30;
+OPCOM_AP_BAND  = 12;
+OPCOM_AP_TOPUP = 8;
+
 // zoneundercontrolblu
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
 

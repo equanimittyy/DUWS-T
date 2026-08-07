@@ -212,6 +212,9 @@ fnc_WARCOM_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fn
 fnc_WARCOM_wp_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_wp_blu_patrol.sqf";
 fnc_random_veh_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_random_veh_blu_patrol.sqf";
 fnc_WARCOM_gps_marker = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_gps_marker.sqf";
+// OPCOM's hardpoint director: the AP-priced tick that tops up zones, thickens the band and raises radio
+// towers. Server-only, spawned once by fnc_WARCOM_init.
+fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_hardpoints.sqf";
 
 // ZONE FUNCTIONS
 fnc_zonesundercontrol = compile preprocessFileLineNumbers "duws\server\misc\fnc_zonesundercontrol.sqf";

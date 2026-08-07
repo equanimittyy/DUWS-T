@@ -49,11 +49,19 @@ publicVariable "WARCOM_zones_controled_by_OPFOR";
 ["INFO", "WARCOM", "Initialize the BLU attack waves"] call fnc_log;
 [] spawn fnc_WARCOM_blu_assault;
 
-// Nothing spawns OPFOR here any more. The roaming patrols, the attack waves and the random air
-// were three timers each dropping live groups on the map for the rest of the campaign, answering
-// to Army Power alone rather than to anything the enemy was trying to achieve -- and they are what
-// put permanently simulated AI between the zones and on the road to the BLUFOR HQ. Enemy presence
-// is zone garrisons and side-mission guards until an OPFOR commander decides it.
+// OPCOM's hardpoint director: the one thing that spawns OPFOR after generation, and the reader the
+// AP pool and the stored zone caps were built waiting for. It spends OPFOR Army Power to fortify the
+// ground the enemy holds -- topping up cleared zone emplacements, thickening the band, raising radio
+// towers -- replacing the blind AP-timers this init deleted with something the enemy is trying to do.
+["INFO", "WARCOM", "Init OPCOM hardpoint director"] call fnc_log;
+[] spawn fnc_WARCOM_opf_hardpoints;
+
+// None of the old blind OPFOR timers run here any more. The roaming patrols, the attack waves and the
+// random air were three timers each dropping live groups on the map for the rest of the campaign,
+// answering to Army Power alone rather than to anything the enemy was trying to achieve -- and they
+// are what put permanently simulated AI between the zones and on the road to the BLUFOR HQ. Enemy
+// presence is now zone garrisons, side-mission guards and OPCOM's deliberate fortification above:
+// emplacements it sites and pays for, not live groups a clock drips onto the map.
 
 WARCOM_init_done = true;
 publicVariable "WARCOM_init_done";

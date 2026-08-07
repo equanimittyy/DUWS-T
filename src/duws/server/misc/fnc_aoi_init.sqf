@@ -80,3 +80,26 @@ fnc_aoi_in_any_zone = {
     params ["_pos"];
     (zone_meta_array findIf { (_pos distance2D (_x select 1)) <= (_x select 2) }) >= 0
 };
+
+// [] call DUWS_fnc_aoi_bandPos -> [_pos, _radialDir] in the OPFOR-positive band, or [] if the draw
+// missed. One candidate for the band, shared by the campaign-start pass, the tower seed and the OPCOM
+// tick so all three sample the same ground the same way. It draws an annulus around a random OPFOR
+// zone (from its edge out to AOI_ZONE_REACH) and keeps the point only where the field reads
+// OPFOR-positive and it is outside every zone -- so it lands in the countryside the enemy holds, never
+// inside a zone. _radialDir is the outward bearing from that zone, for fnc_hardpoint_facing.
+DUWS_fnc_aoi_bandPos = {
+    private _opforZones = [];
+    {
+        _x params ["", "_zp", "_zs"];
+        if ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) < 0) then {
+            _opforZones pushBack [_zp, _zs];
+        };
+    } forEach zone_meta_array;
+    if (_opforZones isEqualTo []) exitWith { [] };
+
+    (selectRandom _opforZones) params ["_ozp", "_ozs"];
+    private _c = [_ozp, _ozs, _ozs + AOI_ZONE_REACH, 8, 0, 0.35, 0] call BIS_fnc_findSafePos;
+    if (([_c] call fnc_aoi_field_at) <= 0) exitWith { [] };
+    if ([_c] call fnc_aoi_in_any_zone) exitWith { [] };
+    [_c, _ozp getDir _c]
+};
