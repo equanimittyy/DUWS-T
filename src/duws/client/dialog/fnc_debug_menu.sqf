@@ -38,11 +38,10 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
     ["Spawn OPFOR hardpoint", fnc_debug_hardpoint_menu, "opfor", [1,0.667,0,1]],
     ["Spawn BLUFOR hardpoint", fnc_debug_hardpoint_menu, "blufor", [1,0.667,0,1]],
 
-    // Stub. Planned: a local overlay onto OPFOR-side WARCOM -- commander AP with its
-    // income and spend, the wave thresholds it is holding at, a map marker per enemy asset.
-    // Deferred assets are the point: zone garrisons still virtual behind the site poller, queued
-    // assault and QRF task forces, hardpoints once they exist. Watch it decide, don't fly over.
-    ["Toggle OPFOR WARCOM (not implemented)", {
-        hint "Not implemented yet.\n\nPlanned: OPFOR commander AP and the wave thresholds\nit is waiting on, plus a map marker for every enemy\nasset -- including zone garrisons and task forces\nnot yet spawned in.";
-    }, [], [0.6,0.6,0.6,1]]
+    // First of the OPCOM debug tooling: opens the map and rings every AoI emitter's reach in faint
+    // white, so the influence field the commander reads is visible rather than inferred from town
+    // colours. Still to come on this theme: commander AP with its income and spend, the wave
+    // thresholds it holds at, and a marker per enemy asset -- including the zone garrisons and task
+    // forces still virtual behind the site poller.
+    ["OPCOM view: toggle AoI overlay", fnc_debug_opcom_view, [], [1,0.667,0,1]]
 ]] call fnc_open_action_menu;
