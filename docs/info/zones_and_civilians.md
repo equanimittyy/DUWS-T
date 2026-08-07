@@ -62,7 +62,7 @@ validation loop.
 (`:89-139`), and wires the spawn-wait, presence and capture triggers. A ring of 3-4 fortification
 towers used to sit between the prefab and the triggers; it was deleted rather than tuned, because
 siting emplacements by a random bearing at a random distance is the job
-[`../hardpoint_system_plan.md`](../hardpoint_system_plan.md) exists to do against terrain.
+[`hardpoints.md`](hardpoints.md) now does against terrain.
 
 **Naming.** `fnc_zone_name` (`fnc_zone_state_init.sqf`) hands each zone one phonetic-alphabet word,
 drawn without repeats and pairing two distinct words past the twenty-sixth. It is called from
@@ -226,7 +226,7 @@ placement — a gun keeps its Z so it lands on the bunker roof rather than in th
 to misread now that the dug-in half of a garrison is six rows of the tier table: those rows scale the
 men *holding* the ground, never what stands on it. Tiering built defences means either weighting the
 prefab draw by tier, or a composition entry that places an object rather than a group — which is what
-[`../hardpoint_system_plan.md`](../hardpoint_system_plan.md) is for.
+[`hardpoints.md`](hardpoints.md) does.
 
 ### Attrition carries between visits
 

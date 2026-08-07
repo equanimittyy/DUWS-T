@@ -139,7 +139,7 @@ it (`server/init_zones/prefabs/modern/*.sqf`).
 **Four of the five emplacement types are static roles, and those are not this plan's to define.**
 `opfor_TURRET_HMG`, `_AT`, `_AA` and `_MORTAR` — what fills them, why the 254 hand-authored faction
 files are not swept to add them, and how a composition's vanilla placeholder resolves to a mod's
-own gun — are [`static_abstraction_plan.md`](static_abstraction_plan.md). That work is a
+own gun — are [`faction_system.md`](info/faction_system.md#static-weapons-resolve-at-placement). That work is a
 prerequisite for the MG nest, the AT position, the AA position and the mortar pit alike, and it is
 worth landing on its own: it also fixes the 41 prefab rows standing NATO guns on CSAT ground.
 
@@ -374,7 +374,7 @@ player keep-outs — a campaign must not open with a hardpoint overlooking the b
 
 **Superseded by the area-of-influence field.** Standalone hardpoints are sited by
 `fnc_hardpoint_site_aoi`, which samples the OPFOR-positive band the field produces rather than a
-hand-drawn corridor ([`opfor_area_of_influence_plan.md`](opfor_area_of_influence_plan.md)). The front
+hand-drawn corridor ([`opfor_area_of_influence.md`](info/opfor_area_of_influence.md)). The front
 line falls out of the field as a by-product, so the pair-anchor heuristic below is not what shipped —
 it is kept as the pre-field rationale the field replaced, and the civilian-town ownership it wished
 for now exists as the drift's `±10` banding.
@@ -876,7 +876,7 @@ is.
 | File | Change |
 |---|---|
 | `server/init_zones/hardpoint_compositions.sqf` | New. One fenced `--DUWS-COMPOSITION--` array per type, authored in Eden through the TUI. Offsets in a frame whose +Y is the hardpoint's facing, so a heading rotates the whole layout ([§Facing](#facing-is-part-of-siting-not-decoration)). |
-| `server/init_zones/fnc_hardpoint_place.sqf` | New. Builds one hardpoint of a given type at a given position and heading: rotates the composition's offsets, resolves the core's faction role, files everything through `fnc_duws_keep` with the core pinned, raises the garrison; returns the core. Shared by both flavours. **The shared placer it borrows does not rotate** — `fnc_static_place` ([`static_abstraction_plan.md`](static_abstraction_plan.md)) resolves the core's class and puts one object down at a world-axis offset with a per-row heading, which is every placer in the tree. Rotating the composition's offsets around the hardpoint's facing is this function's own work. |
+| `server/init_zones/fnc_hardpoint_place.sqf` | New. Builds one hardpoint of a given type at a given position and heading: rotates the composition's offsets, resolves the core's faction role, files everything through `fnc_duws_keep` with the core pinned, raises the garrison; returns the core. Shared by both flavours. **The shared placer it borrows does not rotate** — `fnc_static_place` ([`faction_system.md`](info/faction_system.md#static-weapons-resolve-at-placement)) resolves the core's class and puts one object down at a world-axis offset with a per-row heading, which is every placer in the tree. Rotating the composition's offsets around the hardpoint's facing is this function's own work. |
 | `server/init_zones/fnc_hardpoint_zone_pass.sqf` | New. Count from radius, siting inside the zone, writes `zone_hp_left_<n>` from what was actually placed. |
 | `server/warcom/fnc_WARCOM_opf_hardpoints.sqf` | New. Director: seed subset, corridor picking, AP spend. Folds into the OPFOR commander loop if that lands first. |
 | `server/misc/fnc_hardpoint_monitor.sqf` | New. The single shared loop: clear detection and artillery cadence. Presence belongs to the site poller. |
@@ -889,7 +889,7 @@ is.
 | `server/init_zones/fnc_zone_stream_init.sqf:207-242,254-258` | Exclude pinned cores from the emplacement crew-out, and hardpoint cores from the zone's re-crew and roster. |
 | `server/warcom/fnc_WARCOM_init.sqf:44-50` | Spawn the director beside the two that still launch there. |
 | `server/init_zones/fnc_zone_reveal.sqf:33-34` | Hardcore only: reveal this zone's hardpoint markers with the zone, filtered spatially. |
-| `shared/factions/MODERN/AUTODETECT_opfor.sqf:121`, `AUTODETECT_RANDOM_opfor.sqf:90` | Define `opfor_ARTY_X` from the already-parsed `_arty`. The four turret globals belong to [`static_abstraction_plan.md`](static_abstraction_plan.md). |
+| `shared/factions/MODERN/AUTODETECT_opfor.sqf:121`, `AUTODETECT_RANDOM_opfor.sqf:90` | Define `opfor_ARTY_X` from the already-parsed `_arty`. The four turret globals belong to [`faction_system.md`](info/faction_system.md#static-weapons-resolve-at-placement). |
 | `shared/functions/fnc_pos_claimed.sqf` | Add a hardpoint keep-out to the shared "is this ground claimed" test. One edit reaches every mission siting path at once — `fnc_stratmap.sqf:93`, `fnc_findSafeMissionPos.sqf:33,38`, `fnc_missionTargetPos.sqf:45` — where a bespoke test in one of them leaves the others placing missions on top of an emplacement. |
 | `shared/includes/notifications.hpp` | One notification class for a hardpoint cleared, beside `CPadded:41`. |
 | `stringtable.xml` | Six hardpoint type names, clear notification, incoming-fire warning line (Allseer), marker labels. |
@@ -898,7 +898,7 @@ is.
 
 ## Task list
 
-- [ ] Land [`static_abstraction_plan.md`](static_abstraction_plan.md), which fills the four turret globals. Then add `opfor_ARTY_X` and its fallback to both autodetect generators. Verify: it resolves to a real classname with no mod loaded and with a faction mod loaded, and a hand-authored faction file that defines none of the five still boots.
+- [ ] Land the static roles ([`faction_system.md`](info/faction_system.md#static-weapons-resolve-at-placement)), which fill the four turret globals. Then add `opfor_ARTY_X` and its fallback to both autodetect generators. Verify: it resolves to a real classname with no mod loaded and with a faction mod loaded, and a hand-authored faction file that defines none of the five still boots.
 - [ ] Author the MG nest composition in Eden through the TUI and fence it in source. Verify: import, rearrange, export, re-import returns the identical layout, and `DUWS_FRONT` stands on the side the gun faces.
 - [ ] Write `fnc_hardpoint_place.sqf` for the MG type only, called by hand from the debug console. Verify: core, cover and garrison appear; the whole layout rotates with the heading rather than the core turning inside a fixed ring of sandbags; no hardcoded unit classname is used with a faction mod loaded.
 - [ ] Add `fnc_hardpoint_zone_pass.sqf` and call it from `fnc_createZone`. Verify: `bash tests/run.sh` passes the path lint; hardpoint count per zone tracks radius; nothing lands on water or inside the prefab's 35 m.

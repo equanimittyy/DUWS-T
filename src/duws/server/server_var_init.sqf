@@ -447,7 +447,7 @@ DUWS_hardpoints = [];publicVariable "DUWS_hardpoints";
 // source owns a band outside its own footprint. Read only by fnc_aoi_init's coverage tests, all
 // server-side, so not broadcast (the pattern DUWS_streamArrivalMargin already sets). The values are
 // large against Altis by intent: OPFOR influence blankets most of the map at start and the player
-// opens with 2 km around the HQ. Tuning lives here; see docs/opfor_area_of_influence_plan.md.
+// opens with 2 km around the HQ. Tuning lives here; see docs/info/opfor_area_of_influence.md.
 AOI_TOWER_REACH = 5000;   // OPFOR radio tower, the longest reach on the map
 AOI_ZONE_REACH  = 2000;   // added to a zone's own radius
 AOI_HQ_REACH    = 2000;   // player HQ

@@ -79,7 +79,7 @@ nothing left rather than silently awarding nothing.
 |---|---|---|
 | An unrevealed enemy zone | at random | built |
 | An unrevealed civilian town | nearest to where the intel was earned | built; contributes nothing outside hardcore, where no town is hidden |
-| An unrevealed normal hardpoint | — | waiting on [`../hardpoint_system_plan.md`](../hardpoint_system_plan.md) |
+| An unrevealed hardpoint | at random from the eligible set | built ([`hardpoints.md`](hardpoints.md#reveal)) |
 | An unrevealed enemy patrol | — | waiting on [`../opfor_commander_plan.md`](../opfor_commander_plan.md) |
 
 **Kinds are separate buckets rather than one merged pool, because they are picked on different rules.** A
