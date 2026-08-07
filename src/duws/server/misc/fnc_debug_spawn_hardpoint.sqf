@@ -19,7 +19,7 @@ _this spawn {
     // Garrison is the type's, fielded by the spawn from DUWS_hardpointGarrison -- a dev spawn stands up
     // the same defenders a shipped one of that type would, and a minefield still gets none.
     ([_type, _pos, _dir, _side, _key, _variant] call fnc_hardpoint_spawn) params ["_objs", "_men"];
-    [_key, _type, _pos, _men, _side] call fnc_hardpoint_register;
+    [_key, _type, _pos, _men, _side, "", _dir] call fnc_hardpoint_register;
     DUWS_hpdevKeys = (missionNamespace getVariable ["DUWS_hpdevKeys", []]) + [_key];
 
     ["INFO", "HARDPOINT", format ["dev spawn: %1 %2 [%3], %4 objects %5 men at %6",

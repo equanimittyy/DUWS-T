@@ -225,7 +225,7 @@ fnc_hardpoint_spawn_sited = {
     // the radial the draw carried.
     private _dir = [_type, _facts select 10, _facts select 11, _radialDir, _facts select 12] call fnc_hardpoint_facing;
     private _res = [_type, _cand, _dir, _side, _key] call fnc_hardpoint_spawn;
-    [_key, _type, _cand, _res select 1, _side, _regZoneKey] call fnc_hardpoint_register;
+    [_key, _type, _cand, _res select 1, _side, _regZoneKey, _dir] call fnc_hardpoint_register;
     _res
 };
 
@@ -461,8 +461,9 @@ fnc_hardpoint_seed_radio = {
         private _seq = missionNamespace getVariable ["DUWS_radioSeq", 0];
         missionNamespace setVariable ["DUWS_radioSeq", _seq + 1];
         private _key = format ["hpradio_%1", _seq];
-        (["RADIO", _c, random 360, "opfor", _key] call fnc_hardpoint_spawn) params ["_objs", "_men"];
-        [_key, "RADIO", _c, _men, "opfor", ""] call fnc_hardpoint_register;
+        private _rdir = random 360;
+        (["RADIO", _c, _rdir, "opfor", _key] call fnc_hardpoint_spawn) params ["_objs", "_men"];
+        [_key, "RADIO", _c, _men, "opfor", "", _rdir] call fnc_hardpoint_register;
         _placed = _placed + 1;
         _placed call _fnTick;
     };

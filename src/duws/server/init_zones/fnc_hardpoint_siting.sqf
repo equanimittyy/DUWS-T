@@ -23,6 +23,8 @@
 //  12 roadDir      deg    bearing the nearest road runs; 0 when none is in scan range
 //  13 roadLos      bool   line of sight from the gun to that road clears the terrain between
 //  14 fofDist      m      open field of fire down the fall line before terrain masks the shot
+//  15 nestDist     m      to the nearest MG/AT/GMG neighbour, else a large sentinel
+//  16 nestDir      deg    that neighbour's facing; the interlock check compares it to this fall line
 
 #define HP_FOF_STEP 40    // field-of-fire march: metres between samples down the fall line
 #define HP_FOF_MAX  320   // ... and how far out to look before calling it fully open
@@ -96,8 +98,20 @@ fnc_hardpoint_survey = {
 
     private _hpDist = 1e9;
     // Measured against the live registry, so a cleared hardpoint no longer blocks new ground and the
-    // siting loop spaces each placement off the ones already down. Row shape [key, pos, type, ...].
-    { _hpDist = _hpDist min (_p distance2D (_x select 1)) } forEach (missionNamespace getVariable ["DUWS_hardpoints", []]);
+    // siting loop spaces each placement off the ones already down. Row shape [key, pos, type, ..., dir].
+    // Nearest nest neighbour (MG/AT/GMG) is tracked apart from _hpDist for the interlock score: only guns
+    // that cross direct fire interlock, so an AA or battery next door is not one, and its facing (row
+    // index 6) is what the convergence check reads. hpDist stays nearest-of-any, for spacing.
+    private _nestDist = 1e9;
+    private _nestDir = 0;
+    {
+        private _d = _p distance2D (_x select 1);
+        _hpDist = _hpDist min _d;
+        if (_d < _nestDist && {(_x select 2) in ["MG", "AT", "GMG"]}) then {
+            _nestDist = _d;
+            _nestDir = _x param [6, 0];
+        };
+    } forEach (missionNamespace getVariable ["DUWS_hardpoints", []]);
 
     // Field of fire down the fall line: march out along the facing bearing and find how far a level shot
     // clears before terrain masks it. Along the fall line because that is where an overwatch nest points;
@@ -113,7 +127,7 @@ fnc_hardpoint_survey = {
         };
     };
 
-    [_onWater, _relElev, _slope, _roadDist, _roadDrop, _treeNear, _treeWide, _buildingCnt, _hpDist, _clutter50, _aspect, _aspectMag, _roadDir, _roadLos, _fofDist]
+    [_onWater, _relElev, _slope, _roadDist, _roadDrop, _treeNear, _treeWide, _buildingCnt, _hpDist, _clutter50, _aspect, _aspectMag, _roadDir, _roadLos, _fofDist, _nestDist, _nestDir]
 };
 
 // [_facts, _type] call fnc_hardpoint_score -> multiplier on the type's base weight; 0 is unplaceable.
@@ -126,10 +140,11 @@ fnc_hardpoint_survey = {
 fnc_hardpoint_score = {
     params ["_facts", "_type"];
     // roadDir (index 12) is the facing's, not the score's -- skipped. roadLos/fofDist default to "clear"
-    // and "open" so a fixture row that omits them (the unit tests) reads no LOS or field-of-fire penalty.
-    // 240 is the _fof ramp's open end; a literal, not HP_FOF_MAX -- the score is pure and must not depend
-    // on the survey's march define, which the unit harness does not preprocess.
-    _facts params ["_onWater", "_relElev", "_slope", "_roadDist", "_roadDrop", "_treeNear", "_treeWide", "_buildingCnt", "_hpDist", ["_clutter50", 0], ["_aspect", 0], ["_aspectMag", 0], "", ["_roadLos", 1], ["_fofDist", 240]];
+    // and "open", and nestDist/nestDir to "no neighbour", so a fixture row that omits them (the unit tests)
+    // reads no LOS, field-of-fire or interlock penalty. 240 is the _fof ramp's open end; a literal, not
+    // HP_FOF_MAX -- the score is pure and must not depend on the survey's march define, which the unit
+    // harness does not preprocess.
+    _facts params ["_onWater", "_relElev", "_slope", "_roadDist", "_roadDrop", "_treeNear", "_treeWide", "_buildingCnt", "_hpDist", ["_clutter50", 0], ["_aspect", 0], ["_aspectMag", 0], "", ["_roadLos", 1], ["_fofDist", 240], ["_nestDist", 1e9], ["_nestDir", 0]];
 
     if (_onWater) exitWith { 0 };
 
@@ -140,11 +155,17 @@ fnc_hardpoint_score = {
     private _roadNear = 1 - ([_roadDist, 0, 40] call _ramp);    // 1 on the road, 0 at/over 40 m
     private _overwatch = _roadNear * ([_roadDrop, 0, 4] call _ramp) * _roadLos;  // near, above AND visible
     private _clear = 1 - 0.6 * ([_clutter50, 0, 6] call _ramp); // 1 open, 0.4 walled in by structures
-    // Mutual support: a nest within interlock range of one already down crosses fire with it, so an
-    // approach in one gun's arc is in two. hpDist is the gap to the nearest placed hardpoint; reward the
-    // band a line of guns sits in. Bonus only -- a lone commanding spot is still worth taking. The first
-    // nest in a zone has no neighbour (hpDist is the sentinel) and so takes no bonus.
-    private _support = 1 + 0.6 * (1 - ([_hpDist, 150, 300] call _ramp)); // 1.6 interlocked, 1.0 alone
+    // Interlock: a nest crosses fire with a nearby nest only if their arcs actually overlap. Proximity is
+    // the gap to the nearest OTHER nest (MG/AT/GMG -- an AA or battery next door is no interlock); it lifts
+    // the band a gun line sits in. Convergence gates that on the two guns' facings agreeing: a neighbour
+    // facing the opposite way (delta near 180) covers the other direction and earns nothing, where the old
+    // distance-only bonus paid out regardless. The candidate faces its fall line (_aspect); on flat ground
+    // (aspectMag < 2.5) that facing is the outward radial the score cannot see, so convergence is skipped
+    // (proximity only). A lone nest (_nestDist sentinel) has zero proximity, so no bonus either way.
+    private _delta = abs (_aspect - _nestDir) % 360;
+    if (_delta > 180) then { _delta = 360 - _delta };
+    private _conv = if (_aspectMag < 2.5) then { 1 } else { 1 - ([_delta, 90, 180] call _ramp) };
+    private _support = 1 + 0.6 * (1 - ([_nestDist, 150, 300] call _ramp)) * _conv; // 1.6 interlocked, 1.0 alone/opposed
     // Field of fire: a nest that can shoot only a short way before terrain masks it is worth less than one
     // looking down an open field. Floored at 0.6 -- close cover is still a position, not a veto.
     private _fof = 0.6 + 0.4 * ([_fofDist, 40, 240] call _ramp); // 0.6 boxed in, 1.0 open at 240 m+

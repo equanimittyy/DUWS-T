@@ -818,11 +818,12 @@ TEST_PICK = "";
 
 // --- fnc_hardpoint_score: terrain suitability multiplier per hardpoint type ---
 // Facts row: [onWater, relElev, slope, roadDist, roadDrop, treeNear, treeWide, buildingCnt, hpDist,
-// clutter50, aspect, aspectMag, roadDir, roadLos, fofDist]. Rows below omit the trailing fields: most
-// default to 0, but roadLos defaults to 1 (clear) and fofDist to 240 (open), so an omitted row
-// carries no line-of-sight or field-of-fire penalty. The clutter cases append clutter50, the RADIO cases
-// append aspect/aspectMag, and the LOS/field-of-fire cases fill the row through fofDist (index 14),
-// leaving roadDir at 12 unread by the score. Multipliers are asserted within a tolerance; 0 vetoes exact.
+// clutter50, aspect, aspectMag, roadDir, roadLos, fofDist, nestDist, nestDir]. Rows below omit the
+// trailing fields: most default to 0, but roadLos defaults to 1 (clear), fofDist to 240 (open) and
+// nestDist to 1e9 (no neighbour), so an omitted row carries no LOS, field-of-fire or interlock penalty.
+// The clutter cases append clutter50, the RADIO cases append aspect/aspectMag, and the LOS, field-of-fire
+// and interlock cases fill the row further, leaving roadDir at 12 unread by the score. Multipliers are
+// asserted within a tolerance; 0 vetoes exact.
 
 // Water is unplaceable for every type.
 ["hp_score: water vetoes any type",
@@ -855,15 +856,28 @@ TEST_PICK = "";
 ["hp_score: clutter does not touch a non-nest type",
     ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9, 6], "ARTY"] call fnc_hardpoint_score), 2.0] call fnc_assertClose;
 
-// Mutual support rides on hpDist (facts[8]): the same overwatch MG (2.7) lifts as a neighbour comes
-// into the interlock band and tapers back out with the gap. The sentinel 1e9 is a lone nest, no bonus.
-["hp_score: MG interlocked with a nearby nest is preferred",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 120], "MG"] call fnc_hardpoint_score), 4.32] call fnc_assertClose;
-["hp_score: MG support tapers as the gap opens",
-    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 225], "MG"] call fnc_hardpoint_score), 3.51] call fnc_assertClose;
-// A flat-ground type does not read support either: ARTY beside a neighbour keeps its flat score.
-["hp_score: support does not touch a non-nest type",
-    ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 120], "ARTY"] call fnc_hardpoint_score), 2.0] call fnc_assertClose;
+// Interlock rides on the nearest nest neighbour (nestDist facts[15]) and the two guns' facings agreeing
+// (candidate fall line aspect facts[10] vs neighbour nestDir facts[16]). The overwatch MG (2.7) lifts as
+// an aligned neighbour comes into the band and tapers with the gap; the sentinel 1e9 is a lone nest, no
+// bonus. aspectMag (facts[11]) is set >2.5 so the candidate faces its fall line, not the radial.
+["hp_score: MG interlocked with an aligned nest is preferred",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 5, 0, 1, 240, 120, 0], "MG"] call fnc_hardpoint_score), 4.32] call fnc_assertClose;
+["hp_score: MG interlock tapers as the gap opens",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 5, 0, 1, 240, 225, 0], "MG"] call fnc_hardpoint_score), 3.51] call fnc_assertClose;
+// The complaint fixed: a neighbour in range but facing the opposite way (nestDir 180 vs aspect 0) crosses
+// no fire, so the interlock bonus zeroes and the MG scores as if alone (2.7).
+["hp_score: MG interlock nulled when the neighbour faces opposite",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 5, 0, 1, 240, 120, 180], "MG"] call fnc_hardpoint_score), 2.7] call fnc_assertClose;
+// Between aligned and opposed the bonus tapers with the facing delta: 135 deg is half.
+["hp_score: MG interlock tapers as facings diverge",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 5, 0, 1, 240, 120, 135], "MG"] call fnc_hardpoint_score), 3.51] call fnc_assertClose;
+// On flat ground the candidate faces the radial the score cannot see, so convergence is skipped and the
+// bonus rides on proximity alone -- an opposed neighbour still counts (aspectMag 0 < 2.5).
+["hp_score: MG on flat ground takes interlock on proximity alone",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 1, 240, 120, 180], "MG"] call fnc_hardpoint_score), 4.32] call fnc_assertClose;
+// A flat-ground type does not read interlock: ARTY beside a nest neighbour keeps its flat score.
+["hp_score: interlock does not touch a non-nest type",
+    ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9, 0, 0, 0, 0, 1, 240, 120], "ARTY"] call fnc_hardpoint_score), 2.0] call fnc_assertClose;
 
 // Line of sight gates the road bonus: the overwatch MG (2.7) that cannot see the road it sits above
 // (roadLos 0) falls back to the bare-hill score, as if there were no road. AT loses its larger bonus the

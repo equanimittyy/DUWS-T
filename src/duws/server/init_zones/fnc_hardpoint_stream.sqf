@@ -295,7 +295,7 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
 // _zoneKey ties the hardpoint to a parent zone: it drives streaming (the hardpoint follows that zone)
 // and rides the DUWS_hardpoints row for OPCOM. "" is a standalone hardpoint on its own ring.
 fnc_hardpoint_register = {
-    params ["_key", "_type", "_pos", ["_men", []], ["_side", "opfor"], ["_zoneKey", ""]];
+    params ["_key", "_type", "_pos", ["_men", []], ["_side", "opfor"], ["_zoneKey", ""], ["_dir", 0]];
     (DUWS_hardpointStreaming getOrDefault [_type, [600, 300, false, 0]])
         params ["_radius", "_grace", "_neverStream", "_airRing"];
     [_key, _pos, _radius, "stream"] call fnc_site_register;
@@ -318,11 +318,12 @@ fnc_hardpoint_register = {
             ((DUWS_compositions getOrDefault [_key, []]) select { !isNull _x });
     };
 
-    // Registry row for OPCOM and the map readout: [key, pos, type, side, zone, revealed]. Presence is
-    // liveness; the clearance check deletes the row when the emplacement falls. Revealed follows the
+    // Registry row for OPCOM and the map readout: [key, pos, type, side, zone, revealed, dir]. Presence
+    // is liveness; the clearance check deletes the row when the emplacement falls. Revealed follows the
     // same fog a zone's does -- shown at once with no hardcore fog, hidden until intel finds it under
-    // hardcore -- so a hardpoint sited at campaign start is on the map exactly when its zone would be.
-    DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey, !hardcore_mode_enable];
+    // hardcore -- so a hardpoint sited at campaign start is on the map exactly when its zone would be. Dir
+    // is the heading it faced; the survey reads a nest neighbour's to score interlocking fire.
+    DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey, !hardcore_mode_enable, _dir];
     publicVariable "DUWS_hardpoints";
     // A newly-registered tower raises the amplifier; recount from the row just pushed.
     if (_type isEqualTo "RADIO") then { call DUWS_fnc_aoi_opforRecount };
