@@ -14,6 +14,15 @@ if (!isServer) exitWith {};
 // emplacement is revealed about when it comes into view rather than when its garrison streams in.
 #define HP_REVEAL_RADIUS 100
 
+// The OPFOR radio-tower amplifier is the live count of uncleared "RADIO" rows, capped. Recomputed
+// from the registry whenever a tower is registered or cleared -- never incremented in place -- so it
+// cannot drift out of step with what actually stands, and clearing a mast drops the enemy's global
+// rep push by a point everywhere at once. Called only for RADIO changes; other types leave it be.
+DUWS_fnc_aoi_opforRecount = {
+    DUWS_opforRadioLevel = (({(_x select 2) isEqualTo "RADIO"} count DUWS_hardpoints) min AOI_OPFOR_TOWER_CAP);
+    ["INFO", "HARDPOINT", format ["OPFOR radio level -> %1", DUWS_opforRadioLevel]] call fnc_log;
+};
+
 // zoneKey call DUWS_fnc_hardpointZoneAwake -> is that zone up or coming up. A zone-coupled hardpoint
 // reads this instead of its own ring, so its defence rises and falls with the garrison. An
 // unregistered zone reads an empty map, fields default false, so one sited before its zone stays down.
@@ -144,6 +153,9 @@ DUWS_fnc_hardpointClear = {
         DUWS_hardpoints deleteAt _i;
         publicVariable "DUWS_hardpoints";
     };
+    // A cleared tower is gone from the registry above, so the recount drops the amplifier and its
+    // coverage falls with it -- far towns no zone reaches leave OPFOR ground entirely.
+    if ((_o get "hpType") isEqualTo "RADIO") then { call DUWS_fnc_aoi_opforRecount };
     deleteMarker (format ["hpm_%1", _key]);
     // Wrecks left standing for the sweep, not deleted: release drops the pins and schedules disposal.
     [_key] call fnc_duws_release;
@@ -276,6 +288,8 @@ fnc_hardpoint_register = {
     // hardcore -- so a hardpoint sited at campaign start is on the map exactly when its zone would be.
     DUWS_hardpoints pushBack [_key, _pos, _type, _side, _zoneKey, !hardcore_mode_enable];
     publicVariable "DUWS_hardpoints";
+    // A newly-registered tower raises the amplifier; recount from the row just pushed.
+    if (_type isEqualTo "RADIO") then { call DUWS_fnc_aoi_opforRecount };
 
     // A small OPFOR-coloured bunker icon carrying the type in caps, no area ring. Created for every
     // registered hardpoint here so the caller need not, and left standing through stow: a marker is a

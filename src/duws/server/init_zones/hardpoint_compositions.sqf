@@ -135,3 +135,19 @@ DUWS_hardpointComp_ARTY = [    ["Land_HBarrier_5_F", -15.014, -4.16602, 0.74171,
     ["Land_HBarrier_Big_F", -18.353, -0.506348, 1.2112, 172.467, false]
 ];
 // --DUWS-COMPOSITION END--
+
+// --DUWS-COMPOSITION BEGIN name="Hardpoint: Radio Tower" schema=A--
+// The mast is the CommStation prefab's comms tower, dressed with the OP composition's comms hub. It is
+// scenery like every other prop -- frozen and invulnerable -- so the tower is cleared by beating its
+// garrison, not by demolishing the structure; clearing it drops DUWS_opforRadioLevel and removes its
+// 7 km of coverage. One HMG nest and a six-man team defend it, the same as any combat hardpoint.
+DUWS_hardpointComp_RADIO = [
+    ["Land_TTowerSmall_2_F",                     0,      0,     0,       0,   false],
+    ["RuggedTerminal_01_communications_hub_F",  -3.2,   -2.6,   0,      90,   false],
+    ["Land_BagBunker_Small_F",                   3.4,    1.6,   0,     177,   false],
+    ["I_HMG_02_high_F",                          3.4,    1.9,   1.68094,  0,   true],
+    ["Land_BagFence_Long_F",                    -3.6,    2.4,   0,     178,   false],
+    ["Land_HBarrier_5_F",                        0.2,   -4.6,   0,       0,   false],
+    ["Land_HBarrier_5_F",                       -4.8,   -1.8,   0,      90,   false]
+];
+// --DUWS-COMPOSITION END--

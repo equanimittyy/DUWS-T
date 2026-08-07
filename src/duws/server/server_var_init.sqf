@@ -382,7 +382,10 @@ DUWS_hardpointStreaming = createHashMapFromArray [
     ["MINEFIELD", [600, 300, true,  0]],
     ["AA",        [600, 300, false, 5000]],
     ["MORTAR",    [600, 300, true,  0]],
-    ["ARTY",      [600, 300, true,  0]]
+    ["ARTY",      [600, 300, true,  0]],
+    // A radio tower streams like a combat hardpoint: its coverage and its amplifier read the registry
+    // whether it is up or stowed, but its garrison must be present to be fought and cleared.
+    ["RADIO",     [600, 300, false, 0]]
 ];
 
 // How common each hardpoint type is before terrain -- the base weight the siting loop multiplies the
@@ -397,7 +400,8 @@ DUWS_hardpointBaseWeight = createHashMapFromArray [
 // localisation carries the sentence around them, not these.
 DUWS_hardpointName = createHashMapFromArray [
     ["MG", "MG"], ["AT", "AT"], ["AA", "AA"], ["MORTAR", "Mortar"],
-    ["ARTY", "Artillery"], ["OP", "Obs Post"], ["ROADBLOCK", "Roadblock"], ["GMG", "GMG"]
+    ["ARTY", "Artillery"], ["OP", "Obs Post"], ["ROADBLOCK", "Roadblock"], ["GMG", "GMG"],
+    ["RADIO", "Radio Tower"]
 ];
 
 // The loose garrison each hardpoint type fields, as a DUWS_teamRosters token resolved per side at
@@ -407,7 +411,7 @@ DUWS_hardpointName = createHashMapFromArray [
 DUWS_hardpointGarrison = createHashMapFromArray [
     ["MG", "team"], ["AT", "team"], ["GMG", "team"], ["ROADBLOCK", "team"],
     ["OP", "team"], ["AA", "team"], ["MORTAR", "team"], ["ARTY", "team"],
-    ["MINEFIELD", ""]
+    ["RADIO", "team"], ["MINEFIELD", ""]
 ];
 
 // The margin beyond a zone's own radius that its streaming reaches: a zone raises and holds its

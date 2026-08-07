@@ -68,7 +68,11 @@ sleep 1;
     // band. Called, not spawned, for the same reason as the zone loop: it sleeps in each crew drop and
     // finishing it here keeps the generation banner honest. Runs before civilians because at hour zero
     // the band is defined by the zones and the HQ alone -- towns are neutral and emit nothing yet.
+    //
+    // Radio towers first: their 7 km coverage widens the band the standalone hardpoints then spread
+    // into, and each raises the OPFOR rep amplifier so the reputation war opens on the enemy's terms.
     ["Fortifying the countryside..."] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+    [1 + floor random 2] call fnc_hardpoint_seed_radio;
     [] call fnc_hardpoint_site_aoi;
     [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 

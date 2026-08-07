@@ -282,3 +282,45 @@ fnc_hardpoint_site_aoi = {
     }] call fnc_hardpoint_lay;
     ["INFO", "HARDPOINT", format ["AoI band pass sited %1/%2 standalone hardpoints", _placed, _count]] call fnc_log;
 };
+
+// [_n] call fnc_hardpoint_seed_radio -> radio towers seeded.
+//
+// Stands _n OPFOR radio towers in the band at campaign start. A tower is placed deliberately, so this
+// does not roll a type through fnc_hardpoint_lay -- it samples a band position the same way (an annulus
+// around a random OPFOR zone, field OPFOR-positive and outside every zone) and stands a "RADIO"
+// hardpoint there, spaced well off other emplacements so two masts never share ground. Each raises
+// DUWS_opforRadioLevel through fnc_hardpoint_register's recount and projects AOI_TOWER_REACH of
+// coverage, so seeding these before the band HP pass widens the ground those hardpoints spread into.
+// A global sequence keys the towers, so a seed and OPCOM's later builds never collide. Runs spawned:
+// fnc_hardpoint_spawn sleeps in the crew drop.
+#define HP_RADIO_SPACING 250
+fnc_hardpoint_seed_radio = {
+    params [["_n", 2]];
+    private _opforZones = [];
+    {
+        _x params ["", "_zp", "_zs"];
+        if ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) < 0) then {
+            _opforZones pushBack [_zp, _zs];
+        };
+    } forEach zone_meta_array;
+    if (_opforZones isEqualTo []) exitWith {};
+
+    private _placed = 0;
+    private _tries = 0;
+    while { _placed < _n && {_tries < _n * 12} } do {
+        _tries = _tries + 1;
+        (selectRandom _opforZones) params ["_ozp", "_ozs"];
+        private _c = [_ozp, _ozs, _ozs + AOI_ZONE_REACH, 8, 0, 0.35, 0] call BIS_fnc_findSafePos;
+        if (([_c] call fnc_aoi_field_at) <= 0) then { continue };
+        if ([_c] call fnc_aoi_in_any_zone) then { continue };
+        if (((([_c] call fnc_hardpoint_survey) select 8)) < HP_RADIO_SPACING) then { continue };
+
+        private _seq = missionNamespace getVariable ["DUWS_radioSeq", 0];
+        missionNamespace setVariable ["DUWS_radioSeq", _seq + 1];
+        private _key = format ["hpradio_%1", _seq];
+        (["RADIO", _c, random 360, "opfor", _key] call fnc_hardpoint_spawn) params ["_objs", "_men"];
+        [_key, "RADIO", _c, _men, "opfor", ""] call fnc_hardpoint_register;
+        _placed = _placed + 1;
+    };
+    ["INFO", "HARDPOINT", format ["seeded %1/%2 OPFOR radio towers", _placed, _n]] call fnc_log;
+};
