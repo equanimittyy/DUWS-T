@@ -153,63 +153,54 @@ fnc_hardpoint_spawn = {
     [_objs, _men]
 };
 
-// [_zonePos, _radius, _zoneKey] call fnc_hardpoint_site_zone
-//
-// A zone's deliberate emplacements, replacing the old random fortification ring. The zone's radius
-// caps how many it can hold (bigger zone, more ground to cover and room to cover it); a random count
-// up to that cap is laid at campaign start, and the cap is stored so OPCOM can top the zone back up
-// toward it later. Each slot goes to the best of a small sampled pool of positions, so terrain and
-// mutual support pick the ground rather than chance -- a commanding, interlocking spot over a bare
-// one. Its type is then a terrain-weighted roll over the set the loop places -- an MG on a rise, a
-// roadblock on a road. That set is intentionally narrow: OPs, minefields and the fire-support types
-// are OPCOM's to place, not rolled in at random. Each emplacement is defended by a regular six-man
-// team, drawn from the faction's roles, on top of any gun type's own crew.
-//
-// Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop, so build-out cannot call it inline.
-// Idempotent per zone -- the stored cap is the guard -- so a rebuild through fnc_createZone lays no
-// second ring.
 #define HP_CAP_STEP 250
 #define HP_SITE_SPACING 50
 #define HP_SITE_SAMPLES 6
-fnc_hardpoint_site_zone = {
-    params ["_zonePos", "_radius", "_zoneKey"];
-    if (!isNil { missionNamespace getVariable (format ["DUWS_hpCap_%1", _zoneKey]) }) exitWith {};
-    private _cap = (round (_radius / HP_CAP_STEP)) max 1;
-    missionNamespace setVariable [format ["DUWS_hpCap_%1", _zoneKey], _cap];
-    private _count = round (random _cap);
-    if (_count <= 0) exitWith {
-        ["INFO", "HARDPOINT", format ["%1 rolled 0 hardpoints (cap %2)", _zoneKey, _cap]] call fnc_log;
-    };
 
+// [_count, _keyPrefix, _regZoneKey, _fnCand] call fnc_hardpoint_lay -> hardpoints placed.
+//
+// The shared placement loop behind both the zone pass and the AoI band pass: they differ only in
+// where a candidate comes from, so that is the one thing passed in. _fnCand is code returning
+// [_pos, _radialDir] for a draw, or [] to skip it (an off-band or in-zone sample). Each slot goes to
+// the best of a small sampled pool, not the first spot that clears -- ranked by the best any placeable
+// type scores there (height, overwatch, interlock range to nests already down). Still a weighted roll
+// over the pool, not argmax, so a line of guns is not identical every campaign. Its type is then a
+// terrain-weighted roll over the narrow init set -- MG on a rise, roadblock on a road; OPs, minefields
+// and the fire-support types are OPCOM's to place, never rolled here. _radialDir is the outward
+// "toward the approach" bearing fnc_hardpoint_facing hands the flat types, while the overwatch nests
+// face their own fall line. _regZoneKey files each row under a parent zone ("" = standalone). Every
+// emplacement carries the type's own garrison from fnc_hardpoint_spawn on top of any gun's crew.
+//
+// Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop, so build-out cannot call it inline.
+fnc_hardpoint_lay = {
+    params ["_count", "_keyPrefix", "_regZoneKey", "_fnCand"];
     private _types = ["ROADBLOCK", "MG", "AT", "GMG"];
     private _placed = 0;
     private _tries = 0;
     while { _placed < _count && {_tries < _count * 8} } do {
         _tries = _tries + 1;
-        // A slot is filled by the best of a sampled pool, not the first spot that clears. Each draw is
-        // anywhere in the zone (on land clear of steep slope and other objects) and is ranked by the
-        // best any placeable type scores there -- height, overwatch of the approach, interlock range to
-        // the nests already down. Still a weighted roll over the pool, not argmax: better ground is
-        // likelier, not certain, so a zone's line of guns is not identical every campaign.
         private _pool = [];
         for "_i" from 1 to HP_SITE_SAMPLES do {
-            private _c = [_zonePos, 0, _radius, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
+            private _draw = call _fnCand;
+            if (_draw isEqualTo []) then { continue };
+            _draw params ["_c", "_rdir"];
             private _f = [_c] call fnc_hardpoint_survey;
             // Spaced off what is already down: hpDist (facts[8]) is the distance to the nearest placed
-            // hardpoint. A draw on top of one is dropped, not scored.
+            // hardpoint, measured live against the whole registry, so the band pass also clears the zone
+            // nests. A draw on top of one is dropped, not scored.
             if ((_f select 8) < HP_SITE_SPACING) then { continue };
             private _sv = 0;
             { _sv = _sv max (([_f, _x] call fnc_hardpoint_score) * (DUWS_hardpointBaseWeight getOrDefault [_x, 1])) } forEach _types;
             if (_sv <= 0) then { continue };  // no type can hold this spot
-            _pool pushBack [_c, _f];
+            _pool pushBack [_c, _f, _rdir];
             _pool pushBack _sv;
         };
         if (_pool isEqualTo []) then { continue };
-        (selectRandomWeighted _pool) params ["_cand", "_facts"];
+        (selectRandomWeighted _pool) params ["_cand", "_facts", "_radialDir"];
 
         // Type by weighted roll at the chosen spot: each type's base commonness times the ground's
-        // score for it (the score is a multiplier, per fnc_hardpoint_score). So flat open ground leans
-        // one way and a rise leans MG without either being the only answer.
+        // score for it. So flat open ground leans one way and a rise leans MG without either being the
+        // only answer.
         private _weighted = [];
         {
             private _s = [_facts, _x] call fnc_hardpoint_score;
@@ -220,14 +211,74 @@ fnc_hardpoint_site_zone = {
         } forEach _types;
         private _best = selectRandomWeighted _weighted;
 
-        // The overwatch nests face down the slope they overlook; the rest face radially out toward the
-        // approach. fnc_hardpoint_facing picks between the two off the survey's fall line. Its garrison
-        // is the type's, fielded by fnc_hardpoint_spawn from DUWS_hardpointGarrison, not chosen here.
-        private _dir = [_best, _facts select 10, _facts select 11, (_zonePos getDir _cand)] call fnc_hardpoint_facing;
-        private _key = format ["hp_%1_%2", _zoneKey, _placed];
+        // The overwatch nests face down the slope they overlook; the rest face the radial the draw
+        // carried. fnc_hardpoint_facing picks between the two off the survey's fall line.
+        private _dir = [_best, _facts select 10, _facts select 11, _radialDir] call fnc_hardpoint_facing;
+        private _key = format ["%1_%2", _keyPrefix, _placed];
         ([_best, _cand, _dir, "opfor", _key] call fnc_hardpoint_spawn) params ["_objs", "_men"];
-        [_key, _best, _cand, _men, "opfor", _zoneKey] call fnc_hardpoint_register;
+        [_key, _best, _cand, _men, "opfor", _regZoneKey] call fnc_hardpoint_register;
         _placed = _placed + 1;
     };
+    _placed
+};
+
+// [_zonePos, _radius, _zoneKey] call fnc_hardpoint_site_zone
+//
+// A zone's deliberate emplacements, replacing the old random fortification ring. The zone's radius
+// caps how many it can hold (bigger zone, more ground and room to cover it); a random count up to that
+// cap is laid at campaign start, and the cap is stored so OPCOM can top the zone back up toward it
+// later. Candidates are drawn from anywhere in the zone (on land clear of steep slope), facing
+// radially out from the centre.
+//
+// Idempotent per zone -- the stored cap is the guard -- so a rebuild through fnc_createZone lays no
+// second ring. Runs spawned, via fnc_hardpoint_lay's crew drop.
+fnc_hardpoint_site_zone = {
+    params ["_zonePos", "_radius", "_zoneKey"];
+    if (!isNil { missionNamespace getVariable (format ["DUWS_hpCap_%1", _zoneKey]) }) exitWith {};
+    private _cap = (round (_radius / HP_CAP_STEP)) max 1;
+    missionNamespace setVariable [format ["DUWS_hpCap_%1", _zoneKey], _cap];
+    private _count = round (random _cap);
+    if (_count <= 0) exitWith {
+        ["INFO", "HARDPOINT", format ["%1 rolled 0 hardpoints (cap %2)", _zoneKey, _cap]] call fnc_log;
+    };
+    private _placed = [_count, format ["hp_%1", _zoneKey], _zoneKey, {
+        private _c = [_zonePos, 0, _radius, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
+        [_c, _zonePos getDir _c]
+    }] call fnc_hardpoint_lay;
     ["INFO", "HARDPOINT", format ["%1 sited %2/%3 hardpoints (cap %4)", _zoneKey, _placed, _count, _cap]] call fnc_log;
+};
+
+// [] call fnc_hardpoint_site_aoi
+//
+// The campaign-start band pass: `x` standalone combat hardpoints spread through the OPFOR-positive
+// area of influence, `x = count serv_zones_array` (the authoritative post-generation count). Uniform
+// across the band -- the war has not started, so there is no front to weight toward and no intel to
+// act on; where the enemy fortifies with intent is OPCOM's later builds, not hour zero. It reuses the
+// whole zone-pass tail and differs only in the candidate: an annulus sampled around a random OPFOR
+// zone (from its edge out to AOI_ZONE_REACH), kept only where the field reads OPFOR-positive and
+// outside every zone -- so a hardpoint lands in the countryside the enemy holds, never inside a zone
+// (that ground is the zone hardpoint system's, gated by the capture trigger).
+//
+// Runs spawned, like the zone pass: fnc_hardpoint_spawn sleeps in the crew drop.
+fnc_hardpoint_site_aoi = {
+    private _count = count serv_zones_array;
+    if (_count <= 0) exitWith {};
+    private _opforZones = [];
+    {
+        _x params ["", "_zp", "_zs"];
+        if ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) < 0) then {
+            _opforZones pushBack [_zp, _zs];
+        };
+    } forEach zone_meta_array;
+    if (_opforZones isEqualTo []) exitWith {
+        ["INFO", "HARDPOINT", "AoI band pass: no OPFOR zones to seed a band around"] call fnc_log;
+    };
+    private _placed = [_count, "hpaoi", "", {
+        (selectRandom _opforZones) params ["_ozp", "_ozs"];
+        private _c = [_ozp, _ozs, _ozs + AOI_ZONE_REACH, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
+        if (([_c] call fnc_aoi_field_at) <= 0) exitWith { [] };
+        if ([_c] call fnc_aoi_in_any_zone) exitWith { [] };
+        [_c, _ozp getDir _c]
+    }] call fnc_hardpoint_lay;
+    ["INFO", "HARDPOINT", format ["AoI band pass sited %1/%2 standalone hardpoints", _placed, _count]] call fnc_log;
 };

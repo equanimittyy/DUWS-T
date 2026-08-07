@@ -62,6 +62,14 @@ sleep 1;
             remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
         [_hpPos, _hpSize, [_hpPos] call fnc_zone_key] call fnc_hardpoint_site_zone;
     } forEach zone_meta_array;
+
+    // The countryside the enemy holds outside its zones -- the area of influence -- is fortified with
+    // its own standalone emplacements, `count serv_zones_array` of them, spread uniformly across the
+    // band. Called, not spawned, for the same reason as the zone loop: it sleeps in each crew drop and
+    // finishing it here keeps the generation banner honest. Runs before civilians because at hour zero
+    // the band is defined by the zones and the HQ alone -- towns are neutral and emit nothing yet.
+    ["Fortifying the countryside..."] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+    [] call fnc_hardpoint_site_aoi;
     [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
     if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then { [] call fnc_civ_init_Tomata; };
