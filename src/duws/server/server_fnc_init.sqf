@@ -371,6 +371,9 @@ fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dial
 // Same idiom and the same reason: the table, the resolver reading it and the placer acting on the
 // answer are one file, so which class a static is and how one is put down cannot drift apart.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_static_roles.sqf";
+// The area-of-influence field: the coverage primitives and dominance read by the rep drift and the
+// hardpoint band siting. Ahead of the hardpoint placer, whose band pass reads it. Definitions only.
+[] call compile preprocessFileLineNumbers "duws\server\misc\fnc_aoi_init.sqf";
 // Terrain scoring and the minefield generator: definitions only, read by the siting loop that is yet
 // to be written. Loaded here rather than at zone-gen time so both are in hand before generation runs.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_siting.sqf";
