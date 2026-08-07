@@ -390,8 +390,10 @@ fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dial
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_place.sqf";
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_stream.sqf";
 // Reveals a hardpoint to the intel system, the way fnc_zone_reveal does a zone: flips the row's
-// revealed flag and its marker alpha. Read by fnc_intel_payout.
-[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_reveal.sqf";
+// revealed flag and its marker alpha. Read by fnc_intel_payout. Whole-file-is-the-function idiom, not
+// the [] call above: its body opens with params, so running it at registration errors on the missing
+// argument and defines nothing -- it must be compiled into the global the callers name.
+fnc_hardpoint_reveal = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_reveal.sqf";
 // Same idiom again, and ahead of faction init, which is what leaves the keys it fills empty.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_backfill.sqf";
 // The commit-time pass that turns each side's one-class-per-role globals into per-spawn pools. Server
