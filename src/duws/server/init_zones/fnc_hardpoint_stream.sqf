@@ -122,14 +122,14 @@ DUWS_fnc_hardpointClearCheck = {
     // otherwise retire a battery that still stands. Judged on the same pieces the garrison crews --
     // static mortars, and artillery vehicles by artilleryScanner -- so a modded battery clears alike.
     if ((_o get "hpType") in ["MORTAR", "ARTY"]) exitWith {
-        private _comp = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x && {alive _x} };
-        private _assets = if ((_o get "hpType") isEqualTo "MORTAR") then {
-            _comp count { _x isKindOf "StaticWeapon" }
+        private _comp = DUWS_compositions getOrDefault [_key, []];
+        private _standing = if ((_o get "hpType") isEqualTo "MORTAR") then {
+            _comp findIf { !isNull _x && {alive _x} && {_x isKindOf "StaticWeapon"} }
         } else {
-            _comp count { !(_x isKindOf "StaticWeapon")
+            _comp findIf { !isNull _x && {alive _x} && {!(_x isKindOf "StaticWeapon")}
                 && {getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "artilleryScanner") isEqualTo 1} }
         };
-        if (_assets > 0) exitWith {};
+        if (_standing > -1) exitWith {};
         [_key, _o] call DUWS_fnc_hardpointClear;
     };
     if (([_key] call fnc_site_alive) > 0) exitWith {};
