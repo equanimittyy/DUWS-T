@@ -63,11 +63,22 @@ sleep 1;
     private _radioN = 1 + floor random 2;
     ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_hpTotal"];
     private _hpDone = 0;
+    // One banner draw per emplacement, across the zone rings and the band alike, so the count climbs
+    // 1..N as each gun goes down rather than jumping a whole zone's batch at once. _hpDone is read live
+    // off this scope (dynamic scope holds across the call chain) and holds what prior phases finished,
+    // so _hpDone + _this is the absolute number of the emplacement just laid; each phase then advances
+    // _hpDone by its own plan. Ticked per placement inside every placing pass -- the zone rings, the
+    // radio seed and the AoI band -- so all three drive the one banner the same way.
+    private _tick = {
+        [format ["Generating hardpoints...<br/>%1 of %2", _hpDone + _this, _hpTotal]]
+            remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+    };
+    // Opening frame so the banner is not blank through the first zone's crew drop; the first tick
+    // redraws the same "1 of N".
+    1 call _tick;
     {
         _x params ["", "_hpPos", "_hpSize"];
-        [format ["Generating hardpoints...<br/>%1 of %2", _hpDone, _hpTotal]]
-            remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
-        [_hpPos, _hpSize, [_hpPos] call fnc_zone_key, _zoneCounts select _forEachIndex] call fnc_hardpoint_site_zone;
+        [_hpPos, _hpSize, [_hpPos] call fnc_zone_key, _zoneCounts select _forEachIndex, _tick] call fnc_hardpoint_site_zone;
         _hpDone = _hpDone + (_zoneCounts select _forEachIndex);
     } forEach zone_meta_array;
 
@@ -79,16 +90,6 @@ sleep 1;
     //
     // Radio towers first: their 7 km coverage widens the band the standalone hardpoints then spread
     // into, and each raises the OPFOR rep amplifier so the reputation war opens on the enemy's terms.
-    [format ["Generating hardpoints...<br/>%1 of %2", _hpDone, _hpTotal]]
-        remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
-    // The band phases place the bulk of the emplacements and have no per-zone step to redraw between,
-    // so they take a callback that ticks the banner per placement -- else it froze at the zone-loop
-    // total while radio and AoI ran on unseen. _hpDone is read live off this scope (dynamic scope holds
-    // across the call chain), so it counts absolute; each phase then advances _hpDone by its plan.
-    private _tick = {
-        [format ["Generating hardpoints...<br/>%1 of %2", _hpDone + _this, _hpTotal]]
-            remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
-    };
     [_radioN, _tick] call fnc_hardpoint_seed_radio;
     _hpDone = _hpDone + _radioN;
     [_tick] call fnc_hardpoint_site_aoi;

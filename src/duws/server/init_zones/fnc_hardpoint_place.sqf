@@ -295,7 +295,7 @@ fnc_hardpoint_lay = {
     _placed
 };
 
-// [_zonePos, _radius, _zoneKey, _count] call fnc_hardpoint_site_zone
+// [_zonePos, _radius, _zoneKey, _count, _fnTick] call fnc_hardpoint_site_zone
 //
 // A zone's deliberate emplacements, replacing the old random fortification ring. The zone's radius
 // caps how many it can hold (bigger zone, more ground and room to cover it); a random count up to that
@@ -306,7 +306,9 @@ fnc_hardpoint_lay = {
 // Idempotent per zone -- the stored cap is the guard -- so a rebuild through fnc_createZone lays no
 // second ring. Runs spawned, via fnc_hardpoint_lay's crew drop.
 fnc_hardpoint_site_zone = {
-    params ["_zonePos", "_radius", "_zoneKey", ["_count", -1]];
+    // _fnTick, if given, is called with this zone's running placed count after each emplacement, so the
+    // generation banner climbs per gun rather than per zone. Forwarded to fnc_hardpoint_lay untouched.
+    params ["_zonePos", "_radius", "_zoneKey", ["_count", -1], ["_fnTick", {}]];
     if (!isNil { missionNamespace getVariable (format ["DUWS_hpCap_%1", _zoneKey]) }) exitWith {};
     private _cap = (round (_radius / HP_CAP_STEP)) max 1;
     missionNamespace setVariable [format ["DUWS_hpCap_%1", _zoneKey], _cap];
@@ -319,7 +321,7 @@ fnc_hardpoint_site_zone = {
     private _placed = [_count, format ["hp_%1", _zoneKey], _zoneKey, {
         private _c = [_zonePos, 0, _radius, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
         [_c, _zonePos getDir _c]
-    }] call fnc_hardpoint_lay;
+    }, _fnTick] call fnc_hardpoint_lay;
     ["INFO", "HARDPOINT", format ["%1 sited %2/%3 hardpoints (cap %4)", _zoneKey, _placed, _count, _cap]] call fnc_log;
 };
 
