@@ -108,6 +108,15 @@ DUWS_fnc_hardpointClearCheck = {
     // no roster to beat. Same guard, same reason, as the zone capture test.
     if ((missionNamespace getVariable [format ["DUWS_hpPeak_%1", _key], 0]) <= 0) exitWith {};
     if !(_o get "awake") exitWith {};
+    // A radio tower is taken by wrecking its mast, not by beating its garrison: the mast is the one
+    // live, damageable member (fnc_hardpoint_build), so the tower stands until it is destroyed even with
+    // every defender dead. Judged only while deployed -- the peak guard above -- so the mast being off
+    // the map for a stow is never read as one wrecked.
+    if ((_o get "hpType") isEqualTo "RADIO") exitWith {
+        private _comp = DUWS_compositions getOrDefault [_key, []];
+        if ((_comp findIf { !isNull _x && {alive _x} && {typeOf _x isEqualTo DUWS_radioMastClass} }) > -1) exitWith {};
+        [_key, _o] call DUWS_fnc_hardpointClear;
+    };
     if (([_key] call fnc_site_alive) > 0) exitWith {};
     [_key, _o] call DUWS_fnc_hardpointClear;
 };

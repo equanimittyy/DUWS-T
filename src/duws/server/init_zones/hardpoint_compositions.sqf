@@ -137,11 +137,13 @@ DUWS_hardpointComp_ARTY = [    ["Land_HBarrier_5_F", -15.014, -4.16602, 0.74171,
 // --DUWS-COMPOSITION END--
 
 // --DUWS-COMPOSITION BEGIN name="Hardpoint: Radio Tower" schema=A--
-// The mast is the CommStation prefab's comms tower, dressed with the OP composition's comms hub. It is
-// scenery like every other prop -- frozen and invulnerable -- so the tower is cleared by beating its
-// garrison, not by demolishing the structure; clearing it drops DUWS_opforRadioLevel and removes its
-// 7 km of coverage. It is a fortified base, not a bare nest: HBarrier-walled and razorwire-ringed,
-// with seven crewed HMG nests and an AA static, so it costs the player far more than a combat hardpoint.
+// The mast is the CommStation prefab's comms tower, dressed with the OP composition's comms hub. Unlike
+// every other prop the mast is left live -- simulated and damageable -- so the tower is cleared by
+// destroying the mast, not by beating its garrison: the walls, nests and bunkers stay frozen
+// invulnerable cover, so the defenders can be wiped and the tower still stands until the mast comes
+// down. Clearing it drops DUWS_opforRadioLevel and removes its 7 km of coverage. It is a fortified
+// base, not a bare nest: HBarrier-walled and razorwire-ringed, with seven crewed HMG nests and an AA
+// static, so it costs the player far more than a combat hardpoint.
 DUWS_hardpointComp_RADIO = [
     ["Land_HBarrier_Big_F", -5.17578, 17.6191, 1.2107, 180.105, false],
     ["Land_HBarrier_Big_F", 3.05859, 17.8027, 1.2107, 180.105, false],

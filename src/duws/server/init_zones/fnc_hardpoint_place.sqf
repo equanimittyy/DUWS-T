@@ -42,7 +42,7 @@ fnc_hardpoint_build = {
     private _placed = [];
     // Props first: a weapon row's Z is an absolute height fnc_static_place writes, and the ground pass
     // here would stamp it to terrain like a prop. Props are frozen invulnerable cover, as the prefabs
-    // place them; the gun is what the player destroys.
+    // place them -- except the radio mast, left live below; the gun is what the player destroys.
     {
         _x params ["_class", "_ox", "_oy", "_oz", "_rowDir", ["_isWeapon", false]];
         if (_isWeapon) then { continue };
@@ -52,8 +52,12 @@ fnc_hardpoint_build = {
         [_obj, _key] call fnc_duws_keep;
         _obj setPosATL _wp;
         _obj setDir (_rowDir + _dir);
-        _obj enableSimulationGlobal false;
-        _obj allowDamage false;
+        // The radio mast alone is left simulated and damageable, so the player clears the tower by
+        // destroying it; fnc_hardpoint_stream reads the mast, not the roster. Every other prop stays
+        // frozen and invulnerable.
+        private _isMast = _type isEqualTo "RADIO" && {_class isEqualTo DUWS_radioMastClass};
+        _obj enableSimulationGlobal _isMast;
+        _obj allowDamage _isMast;
         _placed pushBack _obj;
     } forEach _rows;
 

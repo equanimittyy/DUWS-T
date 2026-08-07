@@ -384,9 +384,15 @@ DUWS_hardpointStreaming = createHashMapFromArray [
     ["MORTAR",    [600, 300, true,  0]],
     ["ARTY",      [600, 300, true,  0]],
     // A radio tower streams like a combat hardpoint: its coverage and its amplifier read the registry
-    // whether it is up or stowed, but its garrison must be present to be fought and cleared.
+    // whether it is up or stowed, but its mast must be deployed for the player to reach and destroy it.
     ["RADIO",     [600, 300, false, 0]]
 ];
+
+// The radio tower's mast: the one composition member left simulated and damageable, and the object
+// fnc_hardpoint_stream watches to clear the tower -- destroying it takes the hardpoint, not beating its
+// garrison. The rest of the base stays frozen invulnerable cover. Server-only, like every hardpoint
+// consumer.
+DUWS_radioMastClass = "Land_TTowerBig_2_F";
 
 // How common each hardpoint type is before terrain -- the base weight the siting loop multiplies the
 // terrain score by for its weighted roll. MG is the backbone; the GMG is the least common of the four,
