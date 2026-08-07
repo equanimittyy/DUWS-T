@@ -417,14 +417,17 @@ DUWS_hardpointName = createHashMapFromArray [
     ["RADIO", "Radio Tower"]
 ];
 
-// The loose garrison each hardpoint type fields, as a DUWS_teamRosters token resolved per side at
-// spawn -- read by fnc_hardpoint_spawn and fnc_hardpoint_register so every placer fields it the same,
-// the way DUWS_hardpointStreaming drives streaming. "" is no loose garrison: a minefield alone gets
-// none, its men would stand on its own mines. The gun crew is separate and always placed.
+// The loose garrison each hardpoint type fields: one DUWS_teamRosters token, or an array of them for a
+// type that fields several groups, each resolved per side at spawn -- read by fnc_hardpoint_spawn and
+// fnc_hardpoint_register so every placer fields it the same, the way DUWS_hardpointStreaming drives
+// streaming. "" is no loose garrison: a minefield alone gets none, its men would stand on its own mines.
+// A radio tower is a strategic objective with 5 km of reach, so it fields a heavier patrol than a lone
+// gun -- a rifle team plus two weapons teams (the only AA+AT roster) to contest the air and armour a
+// player brings against it. The gun crew is separate and always placed.
 DUWS_hardpointGarrison = createHashMapFromArray [
     ["MG", "team"], ["AT", "team"], ["GMG", "team"], ["ROADBLOCK", "team"],
     ["OP", "team"], ["AA", "team"], ["MORTAR", "team"], ["ARTY", "team"],
-    ["RADIO", "team"], ["MINEFIELD", ""]
+    ["RADIO", ["team", "wp_team", "wp_team"]], ["MINEFIELD", ""]
 ];
 
 // The margin beyond a zone's own radius that its streaming reaches: a zone raises and holds its

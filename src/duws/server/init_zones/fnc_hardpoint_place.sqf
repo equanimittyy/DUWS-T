@@ -77,8 +77,9 @@ fnc_hardpoint_build = {
 // [_objs, _pos, _side, _key, _teamToken] call fnc_hardpoint_garrison -> [men]
 //
 // _teamToken names the loose defenders' team in DUWS_teamRosters -- "team" for the regular six, "" for
-// none -- resolved to classnames here rather than passed as a list, so the token is what the site
-// stores and a re-raise draws a fresh team from. The emplacement is manned regardless of it: a gun
+// none, or an array of tokens for a site fielding several groups -- resolved to classnames here rather
+// than passed as a list, so the token is what the site stores and a re-raise draws fresh teams from. The
+// emplacement is manned regardless of it: a gun
 // without a gunner is scenery, not a defence, so every gun takes a crewman whether or not any loose
 // defender does. Side-generic via DUWS_fnc_teamRoster's side prefix and the <side>_SOLDIER_X gun-crew
 // global, so the dev tool's OPFOR and BLUFOR spawns each field their own men.
@@ -126,20 +127,24 @@ fnc_hardpoint_garrison = {
         _men append (units _crew);
     };
 
-    // Then the loose defenders, on a close patrol around the emplacement rather than dug in -- the gun
-    // holds the position while the team works its approaches. An empty or unknown token places no one.
-    private _garrison = [_teamToken, _side] call DUWS_fnc_teamRoster;
-    if (count _garrison > 0) then {
-        // Spawned out toward the patrol ring, not on the emplacement: at the centre they land among
-        // the bunker, bags and gun and snag on them before the circuit can pull them clear. The
-        // fallback stays off-centre for the same reason -- a bearing off _pos, never _pos itself.
-        private _sp = _pos findEmptyPosition [30, 70, _garrison select 0];
-        if (count _sp == 0) then { _sp = _pos getPos [45, random 360] };
-        private _grp = [_sp, _sideObj, _garrison, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
-        _grp deleteGroupWhenEmpty true;
-        [_grp, "closepatrol", _pos, HP_GARRISON_PATROL_R] call fnc_apply_posture;
-        _men append (units _grp);
-    };
+    // Then the loose defenders, each on a close patrol around the emplacement rather than dug in -- the
+    // gun holds the position while the teams work its approaches. The token is one team or a list of
+    // them (a radio tower fields several); an empty or unknown token in the list places no one.
+    private _tokens = if (_teamToken isEqualType "") then { [_teamToken] } else { _teamToken };
+    {
+        private _garrison = [_x, _side] call DUWS_fnc_teamRoster;
+        if (count _garrison > 0) then {
+            // Spawned out toward the patrol ring, not on the emplacement: at the centre they land among
+            // the bunker, bags and gun and snag on them before the circuit can pull them clear. The
+            // fallback stays off-centre for the same reason -- a bearing off _pos, never _pos itself.
+            private _sp = _pos findEmptyPosition [30, 70, _garrison select 0];
+            if (count _sp == 0) then { _sp = _pos getPos [45, random 360] };
+            private _grp = [_sp, _sideObj, _garrison, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
+            _grp deleteGroupWhenEmpty true;
+            [_grp, "closepatrol", _pos, HP_GARRISON_PATROL_R] call fnc_apply_posture;
+            _men append (units _grp);
+        };
+    } forEach _tokens;
 
     _men
 };
