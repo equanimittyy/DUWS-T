@@ -166,6 +166,11 @@ DUWS_fnc_hardpointClear = {
     // coverage falls with it -- far towns no zone reaches leave OPFOR ground entirely.
     if ((_o get "hpType") isEqualTo "RADIO") then { call DUWS_fnc_aoi_opforRecount };
     deleteMarker (format ["hpm_%1", _key]);
+    // The garrison leaves with the emplacement. A hardpoint can now clear with defenders still alive --
+    // a radio tower falls when its mast is wrecked, not its roster -- and the men are not composition
+    // members, so release cannot reach them; uncollected they linger for good. The shared collect
+    // deletes them, emptying the crewed statics, and spares the persistent members for release.
+    [_key] call fnc_site_collect;
     // Wrecks left standing for the sweep, not deleted: release drops the pins and schedules disposal.
     [_key] call fnc_duws_release;
     ["INFO", "HARDPOINT", format ["%1 cleared", _key]] call fnc_log;
