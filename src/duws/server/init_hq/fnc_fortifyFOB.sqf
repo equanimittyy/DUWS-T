@@ -97,10 +97,10 @@ private _perimeterData = [
 // wherever the formula put it, and the round trip would silently drop half the edit.
 // --DUWS-COMPOSITION BEGIN name="FOB Turrets" schema=A--
 private _turretData = [
-	["B_GMG_01_high_F",   9.0,   9.5, 0,  43.5, "blufor_TURRET_GMG"],
-	["B_GMG_01_high_F",  -8.5,   7.5, 0, 311.4, "blufor_TURRET_GMG"],
-	["B_static_AT_F",    -8.0,  -9.0, 0, 221.6, "blufor_TURRET_AT"],
-	["B_HMG_01_high_F",   9.5,  -9.5, 0, 135.0, "blufor_TURRET_HMG"]
+	["B_GMG_01_high_F",   9.0,   9.5, 0,  43.5],
+	["B_GMG_01_high_F",  -8.5,   7.5, 0, 311.4],
+	["B_static_AT_F",    -8.0,  -9.0, 0, 221.6],
+	["B_HMG_01_high_F",   9.5,  -9.5, 0, 135.0]
 ];
 // --DUWS-COMPOSITION END--
 
@@ -144,7 +144,7 @@ switch (VERSION_X) do {
 		// gets the same type test as the ring; only its placement is its own.
 		private _roofPos = _fob buildingPos 5;
 		private _aa = createVehicle [
-			["B_static_AA_F", "blufor", "blufor_TURRET_AA"] call fnc_static_resolve,
+			["B_static_AA_F", "blufor"] call fnc_static_resolve,
 			[0,0,0], [], 0, "CAN_COLLIDE"
 		];
 		[_aa, _fobKey] call fnc_duws_keep;

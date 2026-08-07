@@ -197,7 +197,7 @@ private _allObjectsData = [
 // --DUWS-COMPOSITION BEGIN name="HQ Turrets" schema=A anchor=hqInComp--
 private _weaponData = [
     ["I_HMG_02_high_F", 31.26595, 28.56276, 0, 352.975, "",                  "Land_SandbagBarricade_01_hole_F", 1.21321],
-    ["B_static_AA_F",   10.54204, 10.59272, 0, 165.875, "blufor_TURRET_AA",  "Land_Cargo_HQ_V1_F",              1.252556]
+    ["B_static_AA_F",   10.54204, 10.59272, 0, 165.875, "",                  "Land_Cargo_HQ_V1_F",              1.252556]
 ];
 // --DUWS-COMPOSITION END--
 

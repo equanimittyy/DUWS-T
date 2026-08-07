@@ -130,11 +130,12 @@ fnc_static_resolve = {
 // zero is indistinguishable from one that omitted the column, and the caller knows which it wrote.
 fnc_static_place = {
     params ["_row", "_origin", "_side", "_key", ["_mode", "pos"]];
-    // Index 5 is a role name on the HQ and FOB fences but the isWeapon flag on the zone-prefab and
-    // hardpoint rows. A boolean reaching _role would be read as a key name, so it is coerced to "" --
-    // those rows want the table lookup anyway. Coerced by hand rather than by a [""] params template:
-    // that template rejects the bool the same way, but logs the type mismatch to the RPT before it
-    // falls back, once per gun per site, spamming the log with a case that is expected and handled.
+    // Index 5 is the isWeapon flag on zone-prefab and hardpoint rows, and absent or "" on the HQ/FOB
+    // fences, whose arrays are pre-split into turrets and walls. Neither is a role name -- every row
+    // resolves by class through the table below -- but the bool must not reach _role, where it would
+    // be read as a key name. Coerced by hand rather than by a [""] params template: that template
+    // rejects the bool the same way but logs the mismatch to the RPT before falling back, once per gun
+    // per site, spamming an expected case. The _role override stays for a caller that wants to force one.
     _row params ["_class", "_ox", "_oy", ["_oz", 0], ["_dir", 0], ["_role", ""]];
     if !(_role isEqualType "") then { _role = "" };
 
