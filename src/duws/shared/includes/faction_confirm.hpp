@@ -197,7 +197,7 @@ class startup_faction_confirm
             x = 12 * GUI_GRID_W + GUI_GRID_X;
             y = 10.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 16 * GUI_GRID_W;
-            h = 7.5 * GUI_GRID_H;
+            h = 11.5 * GUI_GRID_H;
             colorBackground[] = {0.2, 0.4, 0.2, 1};
         };
         class lock_frame: RscFrame
@@ -207,7 +207,7 @@ class startup_faction_confirm
             x = 12 * GUI_GRID_W + GUI_GRID_X;
             y = 10.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 16 * GUI_GRID_W;
-            h = 7.5 * GUI_GRID_H;
+            h = 11.5 * GUI_GRID_H;
         };
         // One structured control carries both the question and the missing-key warning: the warning
         // is conditional, and a second control would leave a gap on the screens that omit it.
@@ -217,14 +217,14 @@ class startup_faction_confirm
             x = 12.6 * GUI_GRID_W + GUI_GRID_X;
             y = 11.7 * GUI_GRID_H + GUI_GRID_Y;
             w = 14.8 * GUI_GRID_W;
-            h = 4.5 * GUI_GRID_H;
+            h = 8 * GUI_GRID_H;
         };
         class lock_cancel: RscButton
         {
             idc = 8654;
             text = "$STR_DUWS_T_faction_cancel";
             x = 12.8 * GUI_GRID_W + GUI_GRID_X;
-            y = 16.2 * GUI_GRID_H + GUI_GRID_Y;
+            y = 20 * GUI_GRID_H + GUI_GRID_Y;
             w = 6.6 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             colorBackground[] = {0.35, 0.35, 0.35, 0.5};
@@ -235,7 +235,7 @@ class startup_faction_confirm
             idc = 8655;
             text = "$STR_DUWS_T_faction_confirm_continue";
             x = 20.6 * GUI_GRID_W + GUI_GRID_X;
-            y = 16.2 * GUI_GRID_H + GUI_GRID_Y;
+            y = 20 * GUI_GRID_H + GUI_GRID_Y;
             w = 6.6 * GUI_GRID_W;
             h = 1.4 * GUI_GRID_H;
             colorBackground[] = {1, 0, 0, 0.5};

@@ -414,8 +414,8 @@
                 <English>Warning: You are missing keys. A missing key may cause issues.</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_lock_warn_standin">
-                <Original>Warning: some roles (red) use a vanilla stand-in. Set them to a faction unit, or continue to accept the stand-in.</Original>
-                <English>Warning: some roles (red) use a vanilla stand-in. Set them to a faction unit, or continue to accept the stand-in.</English>
+                <Original>Warning: some roles (red) use a vanilla stand-in. Assign a faction unit or accept it.</Original>
+                <English>Warning: some roles (red) use a vanilla stand-in. Assign a faction unit or accept it.</English>
             </Key>
             <Key ID="STR_DUWS_T_faction_edit_title">
                 <Original>SET ROLE</Original>
