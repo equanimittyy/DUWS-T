@@ -169,8 +169,10 @@ fnc_hardpoint_spawn = {
 // the best of a small sampled pool, not the first spot that clears -- ranked by the best any placeable
 // type scores there (height, overwatch, interlock range to nests already down). Still a weighted roll
 // over the pool, not argmax, so a line of guns is not identical every campaign. Its type is then a
-// terrain-weighted roll over the narrow init set -- MG on a rise, roadblock on a road; OPs, minefields
-// and the fire-support types are OPCOM's to place, never rolled here. _radialDir is the outward
+// terrain-weighted roll over the init set for this pass -- MG on a rise, roadblock on a road; the set
+// and its weights are the zone or standalone map (DUWS_hardpointWeight*), picked by _regZoneKey below.
+// OPs, minefields and the fire-support types are in neither, OPCOM's to place, never rolled here.
+// _radialDir is the outward
 // "toward the approach" bearing fnc_hardpoint_facing hands the flat types, while the overwatch nests
 // face their own fall line. _regZoneKey files each row under a parent zone ("" = standalone). Every
 // emplacement carries the type's own garrison from fnc_hardpoint_spawn on top of any gun's crew.
@@ -181,7 +183,11 @@ fnc_hardpoint_spawn = {
 // Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop, so build-out cannot call it inline.
 fnc_hardpoint_lay = {
     params ["_count", "_keyPrefix", "_regZoneKey", "_fnCand", ["_fnTick", {}]];
-    private _types = ["ROADBLOCK", "MG", "AT", "GMG"];
+    // Zone rings and standalone emplacements roll different type mixes: the map's keys are the roll set,
+    // its values the base weights. Standalone ground (the AoI band, OPCOM's solo builds) fields AA and
+    // more roadblocks; a zone's ring does not. The zoneKey is the discriminator already threaded here.
+    private _weights = if (_regZoneKey isEqualTo "") then { DUWS_hardpointWeightSolo } else { DUWS_hardpointWeightZone };
+    private _types = keys _weights;
     private _placed = 0;
     private _tries = 0;
     while { _placed < _count && {_tries < _count * 8} } do {
@@ -197,7 +203,7 @@ fnc_hardpoint_lay = {
             // nests. A draw on top of one is dropped, not scored.
             if ((_f select 8) < HP_SITE_SPACING) then { continue };
             private _sv = 0;
-            { _sv = _sv max (([_f, _x] call fnc_hardpoint_score) * (DUWS_hardpointBaseWeight getOrDefault [_x, 1])) } forEach _types;
+            { _sv = _sv max (([_f, _x] call fnc_hardpoint_score) * (_weights get _x)) } forEach _types;
             if (_sv <= 0) then { continue };  // no type can hold this spot
             _pool pushBack [_c, _f, _rdir];
             _pool pushBack _sv;
@@ -213,7 +219,7 @@ fnc_hardpoint_lay = {
             private _s = [_facts, _x] call fnc_hardpoint_score;
             if (_s > 0) then {
                 _weighted pushBack _x;
-                _weighted pushBack (_s * (DUWS_hardpointBaseWeight getOrDefault [_x, 1]));
+                _weighted pushBack (_s * (_weights get _x));
             };
         } forEach _types;
         private _best = selectRandomWeighted _weighted;

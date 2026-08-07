@@ -395,11 +395,18 @@ DUWS_hardpointStreaming = createHashMapFromArray [
 DUWS_radioMastClass = "Land_TTowerBig_2_F";
 
 // How common each hardpoint type is before terrain -- the base weight the siting loop multiplies the
-// terrain score by for its weighted roll. MG is the backbone; the GMG is the least common of the four,
-// a supporting weapon not a mainstay. The loop rolls only these four; OPs, minefields and the
-// fire-support types are OPCOM's to place, never rolled at init.
-DUWS_hardpointBaseWeight = createHashMapFromArray [
+// terrain score by for its weighted roll, and each map's keys ARE its roll set: a type absent from a
+// map is never rolled for that pass. Two mixes. A zone's fortification ring is the ground-assault set
+// (MG the backbone, GMG the rare supporting weapon). The standalone AoI net that denies the countryside
+// also fields AA -- weighted under MG so it does not out-place the guns on the flat ground it favours --
+// and leans harder on roadblocks. OPs, minefields and the fire-support types are in neither: they are
+// OPCOM's to place, never rolled at init. fnc_hardpoint_lay picks the map by whether the row files under
+// a zone (a zoneKey) or stands alone ("").
+DUWS_hardpointWeightZone = createHashMapFromArray [
     ["MG", 3], ["AT", 2], ["ROADBLOCK", 2], ["GMG", 1]
+];
+DUWS_hardpointWeightSolo = createHashMapFromArray [
+    ["MG", 3], ["AA", 2], ["ROADBLOCK", 3], ["AT", 1], ["GMG", 1]
 ];
 
 // Readable name per hardpoint type, for the destroyed-hardpoint notification. English labels; the

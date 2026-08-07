@@ -200,9 +200,9 @@ It is a hardpoint type: a `"RADIO"` entry in `DUWS_hardpointName`, `DUWS_hardpoi
 `DUWS_hardpointStreaming` and a `DUWS_hardpointComp_RADIO` composition
 (`server/init_zones/hardpoint_compositions.sqf`), the core a destructible tower prop dressed with the
 comms-hub the OP composition already carries (`RuggedTerminal_01_communications_hub_F`,
-`hardpoint_compositions.sqf:26`). It is **not** in `DUWS_hardpointBaseWeight` (`server_var_init.sqf:392`)
-— that table is the init-rollable combat types, and a tower is placed deliberately, never rolled into
-a zone. The amplifier reads the registry: `DUWS_opforRadioLevel` is the count of uncleared `"RADIO"`
+`hardpoint_compositions.sqf:26`). It is **not** in `DUWS_hardpointWeightZone` or
+`DUWS_hardpointWeightSolo` (`server_var_init.sqf`) — those maps are the init-rollable combat types for
+the zone ring and the standalone AoI net, and a tower is placed deliberately, never rolled into a zone. The amplifier reads the registry: `DUWS_opforRadioLevel` is the count of uncleared `"RADIO"`
 rows in `DUWS_hardpoints` (`server_var_init.sqf:423`), recomputed when one is built or cleared, so
 the tower contributes whether or not a player is near enough for it to stream in.
 
