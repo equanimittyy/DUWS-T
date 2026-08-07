@@ -196,10 +196,12 @@ deciding mount, route, dismount, assault. That layer is worth hand-authoring as 
 machine rather than searching.
 
 An **influence map** — a coarse grid holding decayed per-side influence — is the standard upgrade
-to the *reach* and *threat* terms, and it would produce the front line as a by-product, which is
-what [`hardpoint_system_plan.md`](hardpoint_system_plan.md#siting) currently approximates by hand
-with "35-65% along the segment between an OPFOR zone and the nearest BLUFOR anchor". It buys better
-siting and nothing else, so it is an upgrade path rather than part of the first build.
+to the *reach* and *threat* terms. The front line it would produce as a by-product is now produced by
+the area-of-influence coverage field ([`opfor_area_of_influence_plan.md`](opfor_area_of_influence_plan.md)),
+which sites standalone hardpoints in the OPFOR band and replaced the hand-drawn corridor that
+[`hardpoint_system_plan.md`](hardpoint_system_plan.md#siting) once used. The *grid* itself is still
+deferred: it buys a cheap "how contested is this whole region" read for scoring that a point-sampled
+field does not, so it stays an upgrade path rather than part of the first build.
 
 ## The loop against the engine
 

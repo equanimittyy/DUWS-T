@@ -282,19 +282,20 @@ with belief. The scoring pass runs unscheduled inside `isNil { ... }` for the re
 sets out, with `time` for anything that must survive a savegame
 ([`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
 
-## Build order
+## What is built, and what is deferred
 
-Each phase is independently playable and testable, and the order is forced by what the next reads.
+The field, the passive rep drift, the campaign-start band pass, both radio-tower amplifiers and the
+OPCOM tick are built — `server/misc/fnc_aoi_init.sqf` and the files in [§Files](#files-touched). The
+build followed the order the readers force: the field first, then the drift and the siting that read
+it, then the amplifiers the drift reads, then the OPCOM tick that spends against all of them.
 
-| Phase | Contains | Gated here because |
-|---|---|---|
-| **Field** | The coverage tests, the emitter enumeration, the reach constants, a debug overlay drawing coverage at sampled points | Everything reads it, and it can be eyeballed before anything writes through it |
-| **Rep drift** | The per-town drift added to the 30-min economy tick, the flat step | Needs the field; visibly moves towns without any hardpoint or commander |
-| **Start hardpoint pass** | `fnc_hardpoint_site_aoi`, the band mask, `x` standalone HPs at generation, uniform | Needs the field for its mask; reuses the whole zone-pass tail |
-| **BLUFOR radio supports** | Three menu entries writing `DUWS_bluforRadioLevel`, CP-priced, starting at 0 | Needs the drift to read the level; no dependency on any hardpoint work, so it can land first of the amplifiers |
-| **OPFOR radio towers** | The `"RADIO"` hardpoint type, its composition, the seed placement, `DUWS_opforRadioLevel` as the live-count recompute, cap 5 | Needs the drift to read the level, and the hardpoint tail to place and clear |
-| **OPCOM tick** | The AP-priced zone top-up, uniform band build and tower raising, reading `DUWS_hpCap_` and `WARCOM_opfor_ap` | Smallest enemy behaviour that spends; the intel bias waits on belief |
-| **Intel-biased build** | Personality- and belief-weighted placement | Needs `opfor_commander_loop_plan.md`'s belief store and archetype to exist |
+Two pieces are deferred, each on something that does not exist yet:
+
+- **Intel-biased placement.** OPCOM sites uniformly across the band; personality- and belief-weighted
+  placement waits on [`opfor_commander_loop_plan.md`](opfor_commander_loop_plan.md#build-order)'s
+  belief store and archetype weights, which it cannot precede.
+- **A debug coverage overlay.** The field is read at points, never drawn. Whether the player should
+  see an influence overlay at all is an open question below, not a missing tool.
 
 ## Open questions
 
@@ -307,7 +308,8 @@ Each phase is independently playable and testable, and the order is forced by wh
   `+3` a tick and only with investment, OPFOR at `-6` and for free — so at full tilt the enemy
   out-pushes the player by two even before coverage is counted. That is deliberate pressure, but
   whether a maxed player should be able to *hold* a town the enemy has five towers on, or only slow
-  its fall, is a balance call that needs the tick interval and the reaches settled first.
+  its fall, is a balance call that needs the reaches settled first — the tick interval is already
+  fixed at the 30-minute economy tick.
 - **How many OPFOR towers to seed, and how fast the commander builds toward five.** Too many at start
   and the reputation war is lost before the player can contest it; too slow a build and the cap never
   bites. This is the enemy's whole rep-pressure curve and it is pure tuning.

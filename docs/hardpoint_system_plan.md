@@ -372,6 +372,13 @@ player keep-outs — a campaign must not open with a hardpoint overlooking the b
 
 ### Siting
 
+**Superseded by the area-of-influence field.** Standalone hardpoints are sited by
+`fnc_hardpoint_site_aoi`, which samples the OPFOR-positive band the field produces rather than a
+hand-drawn corridor ([`opfor_area_of_influence_plan.md`](opfor_area_of_influence_plan.md)). The front
+line falls out of the field as a by-product, so the pair-anchor heuristic below is not what shipped —
+it is kept as the pre-field rationale the field replaced, and the civilian-town ownership it wished
+for now exists as the drift's `±10` banding.
+
 Anchored on a *pair*: an OPFOR zone (`WARCOM_zones_controled_by_OPFOR`) and the nearest
 BLUFOR-held position. Placed 35-65% along the segment between them with lateral jitter, so
 hardpoints appear on the ground the player has to cross rather than at either end.
