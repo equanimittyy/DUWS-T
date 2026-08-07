@@ -81,8 +81,18 @@ sleep 1;
     // into, and each raises the OPFOR rep amplifier so the reputation war opens on the enemy's terms.
     [format ["Generating hardpoints...<br/>%1 of %2", _hpDone, _hpTotal]]
         remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
-    [_radioN] call fnc_hardpoint_seed_radio;
-    [] call fnc_hardpoint_site_aoi;
+    // The band phases place the bulk of the emplacements and have no per-zone step to redraw between,
+    // so they take a callback that ticks the banner per placement -- else it froze at the zone-loop
+    // total while radio and AoI ran on unseen. _hpDone is read live off this scope (dynamic scope holds
+    // across the call chain), so it counts absolute; each phase then advances _hpDone by its plan.
+    private _tick = {
+        [format ["Generating hardpoints...<br/>%1 of %2", _hpDone + _this, _hpTotal]]
+            remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+    };
+    [_radioN, _tick] call fnc_hardpoint_seed_radio;
+    _hpDone = _hpDone + _radioN;
+    [_tick] call fnc_hardpoint_site_aoi;
+    _hpDone = _hpDone + count serv_zones_array;
     [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
     if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then { [] call fnc_civ_init_Tomata; };

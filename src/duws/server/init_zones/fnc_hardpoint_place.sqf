@@ -175,9 +175,12 @@ fnc_hardpoint_spawn = {
 // face their own fall line. _regZoneKey files each row under a parent zone ("" = standalone). Every
 // emplacement carries the type's own garrison from fnc_hardpoint_spawn on top of any gun's crew.
 //
+// _fnTick, if given, is called with the running placed count after each placement -- a batch pass with
+// no per-zone sub-unit to report between (the AoI band) can still tick the generation banner.
+//
 // Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop, so build-out cannot call it inline.
 fnc_hardpoint_lay = {
-    params ["_count", "_keyPrefix", "_regZoneKey", "_fnCand"];
+    params ["_count", "_keyPrefix", "_regZoneKey", "_fnCand", ["_fnTick", {}]];
     private _types = ["ROADBLOCK", "MG", "AT", "GMG"];
     private _placed = 0;
     private _tries = 0;
@@ -222,6 +225,7 @@ fnc_hardpoint_lay = {
         ([_best, _cand, _dir, "opfor", _key] call fnc_hardpoint_spawn) params ["_objs", "_men"];
         [_key, _best, _cand, _men, "opfor", _regZoneKey] call fnc_hardpoint_register;
         _placed = _placed + 1;
+        _placed call _fnTick;
     };
     _placed
 };
@@ -267,9 +271,10 @@ fnc_hardpoint_site_zone = {
 //
 // Runs spawned, like the zone pass: fnc_hardpoint_spawn sleeps in the crew drop.
 fnc_hardpoint_site_aoi = {
+    params [["_fnTick", {}]];
     private _count = count serv_zones_array;
     if (_count <= 0) exitWith {};
-    private _placed = [_count, "hpaoi", "", { call DUWS_fnc_aoi_bandPos }] call fnc_hardpoint_lay;
+    private _placed = [_count, "hpaoi", "", { call DUWS_fnc_aoi_bandPos }, _fnTick] call fnc_hardpoint_lay;
     ["INFO", "HARDPOINT", format ["AoI band pass sited %1/%2 standalone hardpoints", _placed, _count]] call fnc_log;
 };
 
@@ -283,7 +288,7 @@ fnc_hardpoint_site_aoi = {
 // collide. Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop.
 #define HP_RADIO_SPACING 250
 fnc_hardpoint_seed_radio = {
-    params [["_n", 2]];
+    params [["_n", 2], ["_fnTick", {}]];
     private _placed = 0;
     private _tries = 0;
     while { _placed < _n && {_tries < _n * 12} } do {
@@ -299,6 +304,7 @@ fnc_hardpoint_seed_radio = {
         (["RADIO", _c, random 360, "opfor", _key] call fnc_hardpoint_spawn) params ["_objs", "_men"];
         [_key, "RADIO", _c, _men, "opfor", ""] call fnc_hardpoint_register;
         _placed = _placed + 1;
+        _placed call _fnTick;
     };
     ["INFO", "HARDPOINT", format ["seeded %1/%2 OPFOR radio towers", _placed, _n]] call fnc_log;
 };
