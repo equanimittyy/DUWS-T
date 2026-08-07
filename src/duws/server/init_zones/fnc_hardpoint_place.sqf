@@ -222,7 +222,7 @@ fnc_hardpoint_lay = {
     _placed
 };
 
-// [_zonePos, _radius, _zoneKey] call fnc_hardpoint_site_zone
+// [_zonePos, _radius, _zoneKey, _count] call fnc_hardpoint_site_zone
 //
 // A zone's deliberate emplacements, replacing the old random fortification ring. The zone's radius
 // caps how many it can hold (bigger zone, more ground and room to cover it); a random count up to that
@@ -233,11 +233,13 @@ fnc_hardpoint_lay = {
 // Idempotent per zone -- the stored cap is the guard -- so a rebuild through fnc_createZone lays no
 // second ring. Runs spawned, via fnc_hardpoint_lay's crew drop.
 fnc_hardpoint_site_zone = {
-    params ["_zonePos", "_radius", "_zoneKey"];
+    params ["_zonePos", "_radius", "_zoneKey", ["_count", -1]];
     if (!isNil { missionNamespace getVariable (format ["DUWS_hpCap_%1", _zoneKey]) }) exitWith {};
     private _cap = (round (_radius / HP_CAP_STEP)) max 1;
     missionNamespace setVariable [format ["DUWS_hpCap_%1", _zoneKey], _cap];
-    private _count = round (random _cap);
+    // Count arrives pre-rolled from fnc_hardpoint_plan_counts so the generation banner can total every
+    // emplacement up front; a standalone call (no plan) rolls its own against the cap.
+    if (_count < 0) then { _count = round (random _cap) };
     if (_count <= 0) exitWith {
         ["INFO", "HARDPOINT", format ["%1 rolled 0 hardpoints (cap %2)", _zoneKey, _cap]] call fnc_log;
     };
@@ -295,4 +297,26 @@ fnc_hardpoint_seed_radio = {
         _placed = _placed + 1;
     };
     ["INFO", "HARDPOINT", format ["seeded %1/%2 OPFOR radio towers", _placed, _n]] call fnc_log;
+};
+
+// [_radioN] call fnc_hardpoint_plan_counts -> [_zoneCounts, _total]
+//
+// Rolls every campaign-start emplacement before any is laid, so the generation banner totals real
+// hardpoints (zone + band) up front instead of counting zones. Per-zone count is round(random cap)
+// under the same radius cap fnc_hardpoint_site_zone stores, returned so that pass lays the same
+// number this total promised; the band adds count serv_zones_array plus the radio count, which the
+// caller rolls (fnc_hardpoint_seed_radio must be handed the same value). Here, not in WARCOM init,
+// so the cap formula is not duplicated away from HP_CAP_STEP.
+fnc_hardpoint_plan_counts = {
+    params ["_radioN"];
+    private _zoneCounts = [];
+    private _total = (count serv_zones_array) + _radioN;
+    {
+        _x params ["", "", "_hpSize"];
+        private _cap = (round (_hpSize / HP_CAP_STEP)) max 1;
+        private _n = round (random _cap);
+        _zoneCounts pushBack _n;
+        _total = _total + _n;
+    } forEach zone_meta_array;
+    [_zoneCounts, _total]
 };

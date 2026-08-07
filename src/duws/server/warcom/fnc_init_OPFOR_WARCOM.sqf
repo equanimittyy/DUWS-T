@@ -56,11 +56,19 @@ sleep 1;
     // fnc_hardpoint_site_zone sleeps in its crew-drop, and running the zones in sequence is what keeps
     // the banner honest and finishes the pass before civilians start. Idempotent per zone -- the stored
     // cap guards a rebuild -- and the key is fnc_zone_key of the centre, the key the siting loop files under.
+    //
+    // Roll the whole emplacement plan -- every zone's hardpoint count plus the band pass below --
+    // before laying any of it, so the banner counts hardpoints toward a real total, not zones. The
+    // radio count is rolled here because the seed call and the plan total must be handed the same one.
+    private _radioN = 1 + floor random 2;
+    ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_hpTotal"];
+    private _hpDone = 0;
     {
         _x params ["", "_hpPos", "_hpSize"];
-        [format ["Generating hardpoints...<br/>zone %1 of %2", _forEachIndex + 1, count zone_meta_array]]
+        [format ["Generating hardpoints...<br/>%1 of %2", _hpDone, _hpTotal]]
             remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
-        [_hpPos, _hpSize, [_hpPos] call fnc_zone_key] call fnc_hardpoint_site_zone;
+        [_hpPos, _hpSize, [_hpPos] call fnc_zone_key, _zoneCounts select _forEachIndex] call fnc_hardpoint_site_zone;
+        _hpDone = _hpDone + (_zoneCounts select _forEachIndex);
     } forEach zone_meta_array;
 
     // The same pass continues into the area of influence -- the countryside the enemy holds outside its
@@ -71,8 +79,9 @@ sleep 1;
     //
     // Radio towers first: their 7 km coverage widens the band the standalone hardpoints then spread
     // into, and each raises the OPFOR rep amplifier so the reputation war opens on the enemy's terms.
-    ["Generating hardpoints...<br/>area of influence"] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
-    [1 + floor random 2] call fnc_hardpoint_seed_radio;
+    [format ["Generating hardpoints...<br/>%1 of %2", _hpDone, _hpTotal]]
+        remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+    [_radioN] call fnc_hardpoint_seed_radio;
     [] call fnc_hardpoint_site_aoi;
     [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
