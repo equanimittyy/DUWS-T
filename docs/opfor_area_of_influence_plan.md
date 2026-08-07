@@ -32,10 +32,10 @@ plan needs, for three reasons:
 - **Every read is at a known point.** Rep drift asks the field at each town centre; siting asks it
   at a candidate position. Neither iterates the whole plane, so neither needs the plane precomputed.
   The field is a function `fnc_aoi_field_at [_pos]`, evaluated where a caller stands.
-- **The emitters already persist.** OPFOR and BLUFOR zones, FOBs, the HQ and banded towns are all
-  live campaign state, and the two radio-tower amplifiers are scalars read beside them
-  ([§Rep drift](#rep-drift)). The field is derived from them each time it is asked; there is no
-  second store to keep in step, and nothing new to serialise
+- **The emitters already persist.** OPFOR and BLUFOR zones, FOBs, the HQ, banded towns and the
+  standing OPFOR radio towers are all live campaign state; the BLUFOR support level is one scalar
+  read beside them ([§Rep drift](#rep-drift)). The field is derived from them each time it is asked;
+  there is no second store to keep in step, and nothing new to serialise
   ([`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md#non-serializable-handles-must-not-live-in-the-mission-namespace)).
 - **A grid buys gradients this plan does not spend.** Its value is smooth interpolation and decay
   over time; siting and a per-town drift tick want neither. The grid stays the documented upgrade
@@ -56,16 +56,22 @@ per-emitter strength, because the drift it drives is a flat step rather than a w
 dominance — `+1` OPFOR-only, `-1` BLUFOR-only, `0` contested or empty — which is what siting reads;
 the drift reads the primitives directly, so it can add the radio-tower amplifiers.
 
-| Emitter | Side | Reach |
+| Emitter | Side | Reach beyond its edge |
 |---|---|---|
-| Zone | its controller | `_size + AOI_ZONE_REACH` |
-| FOB | BLUFOR | `AOI_FOB_REACH` |
-| Player HQ | BLUFOR | `AOI_HQ_REACH`, the largest — the base anchors the player's corner |
-| Banded town | its band's side | `civ_radius + AOI_TOWN_REACH` |
+| OPFOR radio tower | OPFOR | `AOI_TOWER_REACH` = **7 km** — longest on the map |
+| Zone | its controller | `_size +` `AOI_ZONE_REACH` = **3 km** |
+| Player HQ | BLUFOR | `AOI_HQ_REACH` = **1 km** |
+| FOB | BLUFOR | `AOI_FOB_REACH` = **1 km** |
+| Banded town | its band's side | `civ_radius +` `AOI_TOWN_REACH` = **1 km** |
 
-Radio towers are **not** in this table. Neither side's tower has a reach of its own: a tower is a
-global amplifier on its side's drift wherever that side already covers, not a source of coverage
-([§Radio towers](#radio-towers)). Coverage is set entirely by the emitters above.
+Reach is measured from each source's outer edge, not its centre, so a naturally large zone claims
+proportionally more ground (`_size + 3 km`) than a small one. The radio tower is the one source with
+no footprint — its 7 km runs from the mast.
+
+The **BLUFOR** radio supports are **not** in this table: with no structure on the map they have no
+reach, and they amplify BLUFOR's drift globally wherever the emitters above already cover
+([§Radio towers](#radio-towers)). The OPFOR tower appears in two roles — a 7 km coverage emitter
+here, and the global `-1` amplifier in [§Rep drift](#rep-drift) — because it does both.
 
 **A zone's reach exceeds its own radius, and that gap is the whole mechanic.** The influence extends
 `AOI_ZONE_REACH` past `_size`, so the band an emitter owns *outside* its footprint is the annulus
@@ -154,14 +160,16 @@ it, the same condition under which any campaign is already lost.
 
 ## Radio towers
 
-A radio tower is a **global amplifier on its side's rep drift**, not a source of coverage. It does
-not decide *where* a side influences — the emitters do that — only *how hard* the drift pushes in
-every town that side already covers. Each tower a side has adds one to that side's push, so the two
-amplifiers `DUWS_opforRadioLevel` and `DUWS_bluforRadioLevel` are the whole of it
-([§Rep drift](#rep-drift)).
+A radio tower does two things for its side, and the OPFOR and BLUFOR versions differ in which. The
+**amplifier** is common to both: each tower a side has raises how hard its drift pushes in every town
+that side covers, tracked by the scalars `DUWS_opforRadioLevel` and `DUWS_bluforRadioLevel`
+([§Rep drift](#rep-drift)). The **coverage** is OPFOR's alone: its tower is a real structure with a
+7 km reach that also *extends* where OPFOR influences, the longest-reaching source on the map
+([§The field](#the-field)). BLUFOR's supports have no structure, so they add the amplifier and never
+coverage.
 
-Both sides work the same way. The one difference is how a side comes by a tower, and it is the point
-of the mechanic: the enemy's are real objects on the map and the player's are not.
+The one fact that makes the mechanic is that the enemy's towers are objects on the map and the
+player's are not.
 
 ### OPFOR towers are hardpoints the player can destroy
 
@@ -171,7 +179,8 @@ so the enemy's drift bottoms out at `-6` a tick in ground it fully holds. A few 
 campaign start and the commander builds toward the cap over the campaign
 ([§The OPCOM tick](#the-opcom-tick)); every one is a hardpoint the player can find, garrisoned and
 clearable like any other, and clearing one drops the enemy's global amplifier by a whole point
-everywhere at once.
+everywhere at once — and removes that tower's 7 km of coverage with it, so far towns no zone reaches
+fall out of OPFOR ground entirely.
 
 That is the counterplay a purchased buff could never give. The enemy's rep pressure across the *whole
 map* has a physical cause the player can go and remove, so a player losing the reputation war has
@@ -282,11 +291,12 @@ Each phase is independently playable and testable, and the order is forced by wh
 
 ## Open questions
 
-- **Reach and interval are unmeasured.** `AOI_ZONE_REACH`, the FOB, HQ and town reaches and the drift
-  tick interval decide how far a source covers and how fast a town falls, and none has a play value
-  yet. The shape — boolean coverage, the flat `±1` base step, the amplifier caps of `5` and `3`,
-  banded-town gating, HQ reach largest — is the decided part; the numbers are for tuning, and the
-  first thing the debug overlay is for.
+- **The reaches are set but unvalidated in play.** `AOI_TOWER_REACH` = 7 km, `AOI_ZONE_REACH` = 3 km,
+  and the town, FOB and HQ reaches at 1 km are large against Altis by intent — OPFOR AoI blankets most
+  of the map at start and the player opens with 1 km around HQ. That is deliberate back-foot pressure,
+  but it leaves little truly neutral ground, so whether the front reads as a line or as a slow
+  reconquest of near-total coverage is the first thing to watch. The drift tick interval is the one
+  timing number still unpicked.
 - **Whether the ceilings are the right ones.** They are asymmetric by design — BLUFOR tops out at
   `+3` a tick and only with investment, OPFOR at `-6` and for free — so at full tilt the enemy
   out-pushes the player by two even before coverage is counted. That is deliberate pressure, but
@@ -317,7 +327,7 @@ Each phase is independently playable and testable, and the order is forced by wh
 | File | Change |
 |---|---|
 | `server/misc/fnc_aoi_init.sqf` | New. Defines `fnc_aoi_field_at`, the two coverage primitives and the emitter enumeration; compiled and registered like the other `*_init` families. |
-| `server/server_var_init.sqf` | The `AOI_*` reach and drift-interval constants and the OPFOR-tower cap; `DUWS_bluforRadioLevel` (init `0`) and `DUWS_opforRadioLevel`; a `"RADIO"` row in `DUWS_hardpointName`, `DUWS_hardpointGarrison`, `DUWS_hardpointStreaming`. |
+| `server/server_var_init.sqf` | The `AOI_*` reach constants (`AOI_TOWER_REACH` 7 km, `AOI_ZONE_REACH` 3 km, town/FOB/HQ 1 km), the drift-interval constant and the OPFOR-tower cap of 5; `DUWS_bluforRadioLevel` (init `0`) and `DUWS_opforRadioLevel`; a `"RADIO"` row in `DUWS_hardpointName`, `DUWS_hardpointGarrison`, `DUWS_hardpointStreaming`. |
 | `server/misc/fnc_civ_state_init.sqf` | The drift tick folded into the town pass beside `fnc_town_garrison_reinforce:189`; the two coverage tests and two amplifier scalars it reads. |
 | `server/init_zones/hardpoint_compositions.sqf` | New `DUWS_hardpointComp_RADIO`, tower core plus comms dressing. |
 | `server/init_zones/fnc_hardpoint_place.sqf` | New `fnc_hardpoint_site_aoi`, sharing the zone pass's survey/score/facing tail; the OPFOR radio-tower seed placement. |
