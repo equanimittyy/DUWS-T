@@ -314,7 +314,9 @@ fnc_hardpoint_band_anchor = {
 // anchor's source zone. _this is the anchor fnc_hardpoint_lay carries in from the reset above; a
 // missed or in-zone sample returns [] to skip.
 fnc_hardpoint_band_cand = {
-    params [["_anchor", []]];
+    // _this IS the anchor array itself, not a wrapper -- params would destructure it element-by-element
+    // and hand back only its first element, so take it whole.
+    private _anchor = _this;
     if (_anchor isEqualTo []) exitWith { [] };
     _anchor params ["_apos", "", ["_azone", []]];
     private _c = [_apos, 0, HP_AOI_LOCAL_R, 8, 0, 0.35, 0] call BIS_fnc_findSafePos;

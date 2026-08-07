@@ -119,6 +119,22 @@ as a mission bug.
 `params` counts as that declaration, which is why a params-declared variable behaves differently
 from its neighbours. The same applies to `for do`, `switch do` and `if then`.
 
+## `params` on a single-array argument destructures it, not binds it
+
+**`X call code` sets `_this` to `X`. When `X` is one array and the block opens with `params ["_a"]`,
+`params` walks the array element-by-element and binds `_a` to `X select 0` — the first element, not
+the whole array. To receive an array argument intact, read `_this` directly.**
+
+The trap is a callback whose single argument happens to itself be an array. A placement loop handed
+each candidate function its anchor as `[_pos, _dir, _zoneCentre]` via `_anchor call _fnCand`; the
+function opened with `params [["_anchor", []]]`, so `_anchor` came back as `_pos` alone, and the next
+destructure read `_pos`'s x-coordinate as the position. `BIS_fnc_findSafePos` then reported `type
+SCALAR, expected ARRAY, on index 0` on every draw and the band pass placed nothing.
+
+**How to apply:** when a `call`/`spawn` block's entire argument is one array you want whole, use
+`private _a = _this`. Keep `params ["_a", "_b", ...]` for when `_this` is a list of distinct arguments
+to spread. Wrapping at the call site (`[X] call code`) works too but pushes it onto every caller.
+
 ## `exitWith` exits the nearest loop or call scope, not the enclosing if/then
 
 **Inside a loop, `if (cond) exitWith {...}` terminates the whole loop, even nested several
