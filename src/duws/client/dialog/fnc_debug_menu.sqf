@@ -38,9 +38,9 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
     ["Spawn OPFOR hardpoint", fnc_debug_hardpoint_menu, "opfor", [1,0.667,0,1]],
     ["Spawn BLUFOR hardpoint", fnc_debug_hardpoint_menu, "blufor", [1,0.667,0,1]],
 
-    // First of the OPCOM debug tooling: opens the map and rings every AoI emitter's reach in faint
-    // white, so the influence field the commander reads is visible rather than inferred from town
-    // colours. Still to come on this theme: commander AP with its income and spend, the wave
+    // First of the OPCOM debug tooling: opens the map and rings every AoI emitter's reach hatched in
+    // its side's colour, so the influence field the commander reads is visible rather than inferred from
+    // town colours. Still to come on this theme: commander AP with its income and spend, the wave
     // thresholds it holds at, and a marker per enemy asset -- including the zone garrisons and task
     // forces still virtual behind the site poller.
     ["OPCOM view: toggle AoI overlay", fnc_debug_opcom_view, [], [1,0.667,0,1]]

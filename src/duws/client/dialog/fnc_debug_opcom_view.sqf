@@ -1,7 +1,7 @@
 // Locality: client -- an fnc_debug_menu row handler, runs on whoever opened the menu. The first of the
-// OPCOM debug tooling: opens the map and overlays every AoI emitter's reach as a faint white ring, so
-// the influence field the commander reads and the drift writes through is visible where it is
-// otherwise only inferred from town colours. A toggle -- a second call clears the overlay. Re-checked
+// OPCOM debug tooling: opens the map and overlays every AoI emitter's reach hatched in its side's
+// colour, so the influence field the commander reads and the drift writes through is visible where it
+// is otherwise only inferred from town colours. A toggle -- a second call clears the overlay. Re-checked
 // against game_master because the function is broadcast to every client. English-only, like the rest of
 // the debug surface.
 if (!hasInterface) exitWith {};
