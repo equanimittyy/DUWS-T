@@ -63,15 +63,15 @@ sleep 1;
         [_hpPos, _hpSize, [_hpPos] call fnc_zone_key] call fnc_hardpoint_site_zone;
     } forEach zone_meta_array;
 
-    // The countryside the enemy holds outside its zones -- the area of influence -- is fortified with
-    // its own standalone emplacements, `count serv_zones_array` of them, spread uniformly across the
-    // band. Called, not spawned, for the same reason as the zone loop: it sleeps in each crew drop and
-    // finishing it here keeps the generation banner honest. Runs before civilians because at hour zero
-    // the band is defined by the zones and the HQ alone -- towns are neutral and emit nothing yet.
+    // The same pass continues into the area of influence -- the countryside the enemy holds outside its
+    // zones -- fortified with `count serv_zones_array` standalone emplacements spread uniformly across
+    // the band. Called, not spawned, like the zone loop: each sleeps in its crew drop, so finishing here
+    // under the one generation banner keeps it honest. Before civilians because at hour zero the band is
+    // the zones and the HQ alone -- towns are neutral and emit nothing yet.
     //
     // Radio towers first: their 7 km coverage widens the band the standalone hardpoints then spread
     // into, and each raises the OPFOR rep amplifier so the reputation war opens on the enemy's terms.
-    ["Fortifying the countryside..."] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+    ["Generating hardpoints...<br/>area of influence"] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
     [1 + floor random 2] call fnc_hardpoint_seed_radio;
     [] call fnc_hardpoint_site_aoi;
     [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
