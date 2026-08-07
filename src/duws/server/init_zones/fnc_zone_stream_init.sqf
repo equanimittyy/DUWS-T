@@ -114,7 +114,15 @@ DUWS_fnc_replaceStatic = {
 // both weakened the zone and left a statue for the player to walk up to.
 DUWS_fnc_seatStatic = {
     params ["_gun", "_unit"];
-    if (((vectorUp _gun) select 2) > STATIC_UPRIGHT_DOT) then { _unit moveInGunner _gun };
+    // Freeze, seat, thaw -- not seat into a running gun. A gunner moved into an already-simulated
+    // static keeps a dead turret: it fires only down its placed heading and never traverses onto a
+    // target. The zone prefabs crew their guns in this order for the same reason. The drop above needs
+    // simulation on to fall, so the settled gun is re-frozen for the seat and thawed straight after.
+    if (((vectorUp _gun) select 2) > STATIC_UPRIGHT_DOT) then {
+        _gun enableSimulationGlobal false;
+        _unit moveInGunner _gun;
+        _gun enableSimulationGlobal true;
+    };
     !isNull _unit && {gunner _gun isEqualTo _unit}
 };
 
@@ -198,6 +206,26 @@ DUWS_fnc_manStatics = {
         // beside a gun he never entered denies the zone its capture while reading as a bug.
         if (!isNull _unit) then { deleteVehicle _unit };
     } forEach _pending;
+};
+
+// [_weapons, _pos] call DUWS_fnc_crewCompositionStatics -> the crew's men
+//
+// Crews the static weapons a prefab has just placed: one gunner per gun, seated through
+// DUWS_fnc_seatStatic -- the same seat-then-thaw the stream re-crew uses, so the order a gunner enters
+// a gun cannot drift between the two and leave a dead turret. The guns stand on the prefab's own
+// prepared ground, so each is thawed where it is rather than dropped from height like DUWS_fnc_manStatics
+// does for a gun coming back onto open terrain -- that is the one thing the two paths do differently.
+DUWS_fnc_crewCompositionStatics = {
+    params ["_weapons", "_pos"];
+    private _guns = _weapons select {!isNull _x};
+    if (_guns isEqualTo []) exitWith { [] };
+    private _spawnPos = _pos findEmptyPosition [0, 30, opfor_SOLDIER_X];
+    if (count _spawnPos == 0) then { _spawnPos = _pos };
+    private _grp = [_spawnPos, EAST, _guns apply {opfor_SOLDIER_X}, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
+    _grp deleteGroupWhenEmpty true;
+    { [_x, (units _grp) param [_forEachIndex, objNull]] call DUWS_fnc_seatStatic } forEach _guns;
+    [_grp, _pos] call bis_fnc_taskDefend;
+    units _grp
 };
 
 // Zone turrets get their gunners from the prefab at build time, and the prefab never runs again --

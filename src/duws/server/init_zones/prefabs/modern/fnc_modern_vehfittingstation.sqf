@@ -116,26 +116,9 @@ private _origin = [_centerSpawnX, _centerSpawnY, _newCenterZ];
 } forEach _allObjectsData;
 
 sleep 2;
-// The weapons this composition just placed, taken from the loop that placed them. Searching for them
-// again by classname and radius is what left guns frozen: the thaw below is the only thing that
-// undoes the placement freeze, and a class the search did not name never reached it -- placed, stowed
-// and redeployed unsimulated, unable to fall or settle, for the rest of the campaign. A radius also
-// claims a neighbouring composition's guns.
-private _allWeapons = _weaponList select {!isNull _x};
-
-if (count _allWeapons > 0) then {
-    private _unitTypes = [];
-    for "_i" from 1 to (count _allWeapons) do { _unitTypes pushBack opfor_SOLDIER_X; };
-    private _spawnPos = _centerSpawn findEmptyPosition [0, 30];
-    if (count _spawnPos == 0) then { _spawnPos = _centerSpawn; };
-    private _guardGroup = [_spawnPos, EAST, _unitTypes, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
-    _guardGroup deleteGroupWhenEmpty true;
-
-    { ((units _guardGroup) param [_forEachIndex, objNull]) moveInGunner _x } forEach _allWeapons;
-
-    { if (!isNull _x) then { _x enableSimulationGlobal true; }; } forEach _allWeapons;
-    [_guardGroup, _centerSpawn] call bis_fnc_taskDefend;
-};
+// Pass the guns this composition placed, not a class+radius search: one a search missed stayed
+// frozen for the campaign, and a radius also claims a neighbouring composition's guns.
+[_weaponList, _centerSpawn] call DUWS_fnc_crewCompositionStatics;
 
 // Backup camp light.
 private _light1 = createVehicle ["Land_Camping_Light_F", [_centerSpawnX, _centerSpawnY, 0], [], 0, "NONE"];
