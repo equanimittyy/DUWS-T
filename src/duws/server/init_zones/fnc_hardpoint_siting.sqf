@@ -21,6 +21,11 @@
 //  10 aspect       deg    bearing of steepest descent (the fall line); which way is downhill
 //  11 aspectMag    m      strength of that fall line; near 0 on flat ground or a symmetric crest
 //  12 roadDir      deg    bearing the nearest road runs; 0 when none is in scan range
+//  13 roadLos      bool   line of sight from the gun to that road clears the terrain between
+//  14 fofDist      m      open field of fire down the fall line before terrain masks the shot
+
+#define HP_FOF_STEP 40    // field-of-fire march: metres between samples down the fall line
+#define HP_FOF_MAX  320   // ... and how far out to look before calling it fully open
 
 fnc_hardpoint_survey = {
     params ["_pos"];
@@ -58,11 +63,17 @@ fnc_hardpoint_survey = {
     private _roadDist = 1e9;
     private _roadDrop = 0;
     private _roadDir = 0;
+    private _roadLos = 0;
     private _road = [_p, 40] call BIS_fnc_nearestRoad;
     if (!isNull _road) then {
         private _rp = getPosASL _road;
         _roadDist = _p distance2D _rp;
-        _roadDrop = _candZ - (getTerrainHeightASL [_rp select 0, _rp select 1]);
+        private _roadZ = getTerrainHeightASL [_rp select 0, _rp select 1];
+        _roadDrop = _candZ - _roadZ;
+        // Line of sight gun -> road: a rise between the two masks the road even when the nest sits above
+        // it, so overwatch must not score a road the gun cannot see. Muzzle ~2 m, a target on the road
+        // ~1 m; terrainIntersectASL is true when the ground blocks the line, so a clear shot is index 0.
+        _roadLos = [1, 0] select (terrainIntersectASL [[_p select 0, _p select 1, _candZ + 2], [_rp select 0, _rp select 1, _roadZ + 1]]);
         // Bearing the road runs, taken from this segment to a connected one so a roadblock can face
         // along it and sit square across the carriageway. atan2(east, north), the compass convention
         // the fall line above uses. A dead-end segment has no connection; fall back to its own heading.
@@ -88,7 +99,21 @@ fnc_hardpoint_survey = {
     // siting loop spaces each placement off the ones already down. Row shape [key, pos, type, ...].
     { _hpDist = _hpDist min (_p distance2D (_x select 1)) } forEach (missionNamespace getVariable ["DUWS_hardpoints", []]);
 
-    [_onWater, _relElev, _slope, _roadDist, _roadDrop, _treeNear, _treeWide, _buildingCnt, _hpDist, _clutter50, _aspect, _aspectMag, _roadDir]
+    // Field of fire down the fall line: march out along the facing bearing and find how far a level shot
+    // clears before terrain masks it. Along the fall line because that is where an overwatch nest points;
+    // flat ground never masks, so it reads fully open. Muzzle and a standing target both ~2 m ASL. A few
+    // terrain-only rays, generation-time only.
+    private _fofDist = HP_FOF_MAX;
+    private _gunEye = [_p select 0, _p select 1, _candZ + 2];
+    for "_d" from HP_FOF_STEP to HP_FOF_MAX step HP_FOF_STEP do {
+        private _tx = (_p select 0) + _d * sin _aspect;
+        private _ty = (_p select 1) + _d * cos _aspect;
+        if (terrainIntersectASL [_gunEye, [_tx, _ty, (getTerrainHeightASL [_tx, _ty]) + 2]]) exitWith {
+            _fofDist = _d - HP_FOF_STEP;
+        };
+    };
+
+    [_onWater, _relElev, _slope, _roadDist, _roadDrop, _treeNear, _treeWide, _buildingCnt, _hpDist, _clutter50, _aspect, _aspectMag, _roadDir, _roadLos, _fofDist]
 };
 
 // [_facts, _type] call fnc_hardpoint_score -> multiplier on the type's base weight; 0 is unplaceable.
@@ -100,7 +125,11 @@ fnc_hardpoint_survey = {
 // road multiplies the score and its absence does not veto it.
 fnc_hardpoint_score = {
     params ["_facts", "_type"];
-    _facts params ["_onWater", "_relElev", "_slope", "_roadDist", "_roadDrop", "_treeNear", "_treeWide", "_buildingCnt", "_hpDist", ["_clutter50", 0], ["_aspect", 0], ["_aspectMag", 0]];
+    // roadDir (index 12) is the facing's, not the score's -- skipped. roadLos/fofDist default to "clear"
+    // and "open" so a fixture row that omits them (the unit tests) reads no LOS or field-of-fire penalty.
+    // 240 is the _fof ramp's open end; a literal, not HP_FOF_MAX -- the score is pure and must not depend
+    // on the survey's march define, which the unit harness does not preprocess.
+    _facts params ["_onWater", "_relElev", "_slope", "_roadDist", "_roadDrop", "_treeNear", "_treeWide", "_buildingCnt", "_hpDist", ["_clutter50", 0], ["_aspect", 0], ["_aspectMag", 0], "", ["_roadLos", 1], ["_fofDist", 240]];
 
     if (_onWater) exitWith { 0 };
 
@@ -109,24 +138,29 @@ fnc_hardpoint_score = {
     private _high = [_relElev, 0, 6] call _ramp;                // local rise, 0..1
     private _flat = 1 - ([_slope, 0.6, 4] call _ramp);          // 1 flat, 0 rough
     private _roadNear = 1 - ([_roadDist, 0, 40] call _ramp);    // 1 on the road, 0 at/over 40 m
-    private _overwatch = _roadNear * ([_roadDrop, 0, 4] call _ramp);  // near AND above the road
+    private _overwatch = _roadNear * ([_roadDrop, 0, 4] call _ramp) * _roadLos;  // near, above AND visible
     private _clear = 1 - 0.6 * ([_clutter50, 0, 6] call _ramp); // 1 open, 0.4 walled in by structures
     // Mutual support: a nest within interlock range of one already down crosses fire with it, so an
     // approach in one gun's arc is in two. hpDist is the gap to the nearest placed hardpoint; reward the
     // band a line of guns sits in. Bonus only -- a lone commanding spot is still worth taking. The first
     // nest in a zone has no neighbour (hpDist is the sentinel) and so takes no bonus.
     private _support = 1 + 0.6 * (1 - ([_hpDist, 150, 300] call _ramp)); // 1.6 interlocked, 1.0 alone
+    // Field of fire: a nest that can shoot only a short way before terrain masks it is worth less than one
+    // looking down an open field. Floored at 0.6 -- close cover is still a position, not a veto.
+    private _fof = 0.6 + 0.4 * ([_fofDist, 40, 240] call _ramp); // 0.6 boxed in, 1.0 open at 240 m+
 
     switch (_type) do {
-        // Uphill is the whole point; a road below to fire along multiplies it. AT gains more from the
-        // road because the road is what its gun kills on, so with a good one it roughly triples. All
-        // three fall off as structures crowd the arc (_clear) and lift where they interlock (_support).
-        case "MG":  { (0.5 + 1.0 * _high) * (1 + 0.8 * _overwatch) * _clear * _support };
-        case "AT":  { (0.5 + 1.0 * _high) * (1 + 1.5 * _overwatch) * _clear * _support };
+        // Uphill is the whole point; a road below to fire along multiplies it, but only a road the gun
+        // can see -- _overwatch is gated by line of sight, so a rise masking the road scores no bonus. AT
+        // gains more from the road because the road is what its gun kills on, so with a good one it
+        // roughly triples. All three fall off as structures crowd the arc (_clear) or a short field of
+        // fire boxes them in (_fof), and lift where they interlock (_support).
+        case "MG":  { (0.5 + 1.0 * _high) * (1 + 0.8 * _overwatch) * _clear * _support * _fof };
+        case "AT":  { (0.5 + 1.0 * _high) * (1 + 1.5 * _overwatch) * _clear * _support * _fof };
 
         // A gun nest like the MG, but it lobs grenades over cover rather than firing down a road, so a
         // road below counts for less.
-        case "GMG": { (0.5 + 1.0 * _high) * (1 + 0.5 * _overwatch) * _clear * _support };
+        case "GMG": { (0.5 + 1.0 * _high) * (1 + 0.5 * _overwatch) * _clear * _support * _fof };
 
         // Flat and clear of trees; heading is cosmetic. Trees tank it but do not forbid it -- "prefer".
         case "AA":  { (0.3 + 1.4 * _flat) * (0.2 + 0.8 * (1 - ([_treeWide, 0, 6] call _ramp))) };

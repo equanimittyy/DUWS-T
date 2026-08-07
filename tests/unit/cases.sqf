@@ -818,9 +818,11 @@ TEST_PICK = "";
 
 // --- fnc_hardpoint_score: terrain suitability multiplier per hardpoint type ---
 // Facts row: [onWater, relElev, slope, roadDist, roadDrop, treeNear, treeWide, buildingCnt, hpDist,
-// clutter50, aspect, aspectMag]. Rows below omit the trailing fields, which default to 0; the clutter
-// cases append clutter50, and the RADIO cases append aspect/aspectMag, which only that type's crest
-// preference reads. Multipliers are asserted within a tolerance; the 0 vetoes are exact.
+// clutter50, aspect, aspectMag, roadDir, roadLos, fofDist]. Rows below omit the trailing fields: most
+// default to 0, but roadLos defaults to 1 (clear) and fofDist to 240 (open), so an omitted row
+// carries no line-of-sight or field-of-fire penalty. The clutter cases append clutter50, the RADIO cases
+// append aspect/aspectMag, and the LOS/field-of-fire cases fill the row through fofDist (index 14),
+// leaving roadDir at 12 unread by the score. Multipliers are asserted within a tolerance; 0 vetoes exact.
 
 // Water is unplaceable for every type.
 ["hp_score: water vetoes any type",
@@ -862,6 +864,25 @@ TEST_PICK = "";
 // A flat-ground type does not read support either: ARTY beside a neighbour keeps its flat score.
 ["hp_score: support does not touch a non-nest type",
     ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 120], "ARTY"] call fnc_hardpoint_score), 2.0] call fnc_assertClose;
+
+// Line of sight gates the road bonus: the overwatch MG (2.7) that cannot see the road it sits above
+// (roadLos 0) falls back to the bare-hill score, as if there were no road. AT loses its larger bonus the
+// same way. Row filled through fofDist (open) so only roadLos varies.
+["hp_score: MG blind to its road scores as if roadless",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 0, 320], "MG"] call fnc_hardpoint_score), 1.5] call fnc_assertClose;
+["hp_score: AT blind to its road loses its bonus too",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 0, 320], "AT"] call fnc_hardpoint_score), 1.5] call fnc_assertClose;
+
+// Field of fire scales the nest: the overwatch MG (2.7) tapers toward a 0.6 floor as terrain masks its
+// shot sooner. fofDist 0 is boxed in, 140 is mid, 240+ is fully open (the default the other rows carry).
+["hp_score: MG boxed in by a short field of fire floors at 0.6",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 1, 0], "MG"] call fnc_hardpoint_score), 1.62] call fnc_assertClose;
+["hp_score: MG field of fire tapers with the masking distance",
+    ([[false, 6, 0.2, 0, 4, 0, 0, 0, 1e9, 0, 0, 0, 0, 1, 140], "MG"] call fnc_hardpoint_score), 2.16] call fnc_assertClose;
+
+// A flat-ground type reads neither: AA with the road blind and the field boxed keeps its flat-clear score.
+["hp_score: LOS and field of fire do not touch a non-nest type",
+    ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9, 0, 0, 0, 0, 0, 0], "AA"] call fnc_hardpoint_score), 1.7] call fnc_assertClose;
 
 // Flat, low ground with no hill: the floor of the MG reward.
 ["hp_score: MG on flat ground scores its floor",
