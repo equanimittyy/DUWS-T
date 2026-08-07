@@ -13,15 +13,15 @@ private _names = [];
     private _nm = format ["duws_aoi_dbg_%1", _forEachIndex];
     createMarkerLocal [_nm, [_c select 0, _c select 1]];
     _nm setMarkerShapeLocal "ELLIPSE";
-    // Same ELLIPSE mechanic the zone rings draw with -- SolidBorder fill in the emitter's side colour
-    // at low alpha (fnc_createzone, fnc_baseRangeMarker) -- because the diagonal-hatch brushes tried
-    // before did not paint on these local markers. Side by colour, not brush: OPFOR ColorEAST, BLUFOR
-    // ColorWEST. Alpha 0.3 like the zone rings, so overlapping coverage tints rather than whites out.
+    // Same ELLIPSE mechanic as the zone rings -- a SolidBorder fill -- because the diagonal-hatch
+    // brushes tried before did not paint on these local markers. Side by colour: pink OPFOR, cyan
+    // BLUFOR, as inline #(argb) strings not CfgMarkerColors names (the map has no cyan). Colour-string
+    // alpha stays 1; the 0.5 is the marker alpha, so overlapping coverage tints rather than whites out.
     private _blu = _side isEqualTo "blufor";
     _nm setMarkerBrushLocal "SolidBorder";
-    _nm setMarkerColorLocal (["ColorEAST", "ColorWEST"] select _blu);
+    _nm setMarkerColorLocal (["#(argb,8,8,3)color(1,0.08,0.58,1)", "#(argb,8,8,3)color(0,1,1,1)"] select _blu);
     _nm setMarkerSizeLocal [_r, _r];
-    _nm setMarkerAlphaLocal 0.3;
+    _nm setMarkerAlphaLocal 0.5;
     _names pushBack _nm;
 } forEach _circles;
 missionNamespace setVariable ["DUWS_dbgAoiMarkers", _names];

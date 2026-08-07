@@ -812,9 +812,9 @@ TEST_PICK = "";
 
 // --- fnc_hardpoint_score: terrain suitability multiplier per hardpoint type ---
 // Facts row: [onWater, relElev, slope, roadDist, roadDrop, treeNear, treeWide, buildingCnt, hpDist,
-// clutter50]. Rows below omit the trailing clutter50, which defaults to 0 (no penalty); the clutter
-// cases append it. aspect/aspectMag feed facing, not scoring, so they are never passed here.
-// Multipliers are asserted within a tolerance; the 0 vetoes are exact.
+// clutter50, aspect, aspectMag]. Rows below omit the trailing fields, which default to 0; the clutter
+// cases append clutter50, and the RADIO cases append aspect/aspectMag, which only that type's crest
+// preference reads. Multipliers are asserted within a tolerance; the 0 vetoes are exact.
 
 // Water is unplaceable for every type.
 ["hp_score: water vetoes any type",
@@ -904,6 +904,18 @@ TEST_PICK = "";
     ([[false, 0, 0.2, 1e9, 0, 0, 0, 1, 1e9], "MINEFIELD"] call fnc_hardpoint_score), 0] call fnc_assertEq;
 ["hp_score: minefield vetoes another emplacement nearby",
     ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 20], "MINEFIELD"] call fnc_hardpoint_score), 0] call fnc_assertEq;
+
+// A radio mast wants a hilltop crest: high above the ring (relElev) with the ground falling away on
+// every bearing (aspectMag near 0). A one-sided slope is docked, never vetoed; a flat plain has no
+// fall line either, so the rise is what tells a crest from the flat.
+["hp_score: radio mast on a symmetric crest",
+    ([[false, 6, 4, 1e9, 0, 0, 0, 0, 1e9, 0, 0, 0], "RADIO"] call fnc_hardpoint_score), 2.0] call fnc_assertClose;
+["hp_score: radio mast on a one-sided slope is docked",
+    ([[false, 6, 4, 1e9, 0, 0, 0, 0, 1e9, 0, 90, 12], "RADIO"] call fnc_hardpoint_score), 0.8] call fnc_assertClose;
+["hp_score: radio mast on a half-formed crest",
+    ([[false, 6, 4, 1e9, 0, 0, 0, 0, 1e9, 0, 45, 7.25], "RADIO"] call fnc_hardpoint_score), 1.4] call fnc_assertClose;
+["hp_score: radio mast on a flat plain scores its floor",
+    ([[false, 0, 0.2, 1e9, 0, 0, 0, 0, 1e9, 0, 0, 0], "RADIO"] call fnc_hardpoint_score), 0.3] call fnc_assertClose;
 
 // An unmapped type sites anywhere until given a preference.
 ["hp_score: an unknown type is neutral",

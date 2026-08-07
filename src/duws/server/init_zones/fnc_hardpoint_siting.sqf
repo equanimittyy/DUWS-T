@@ -88,7 +88,7 @@ fnc_hardpoint_survey = {
 // road multiplies the score and its absence does not veto it.
 fnc_hardpoint_score = {
     params ["_facts", "_type"];
-    _facts params ["_onWater", "_relElev", "_slope", "_roadDist", "_roadDrop", "_treeNear", "_treeWide", "_buildingCnt", "_hpDist", ["_clutter50", 0]];
+    _facts params ["_onWater", "_relElev", "_slope", "_roadDist", "_roadDrop", "_treeNear", "_treeWide", "_buildingCnt", "_hpDist", ["_clutter50", 0], ["_aspect", 0], ["_aspectMag", 0]];
 
     if (_onWater) exitWith { 0 };
 
@@ -141,6 +141,16 @@ fnc_hardpoint_score = {
         case "MINEFIELD": {
             if (_treeNear > 0 || {_buildingCnt > 0} || {_hpDist < 30}) exitWith { 0 };
             0.4 + 1.6 * _flat
+        };
+
+        // A radio mast wants a hilltop crest: high above the ring, with the ground falling away on
+        // every bearing. _high rewards the rise; _crest rewards a fall line that cancels (aspectMag
+        // near 0, a symmetric dome) and docks a one-sided slope (a hillside, high aspectMag). A flat
+        // plain has no fall line either, so _high is what tells a crest from the flat. Never zero:
+        // terrain is a preference for the deliberate seed, never a veto.
+        case "RADIO": {
+            private _crest = 1 - ([_aspectMag, 2.5, 12] call _ramp);  // 1 symmetric, 0 one clear downhill
+            (0.3 + 1.7 * _high) * (0.4 + 0.6 * _crest)
         };
 
         // An unmapped type sites anywhere until it is given a preference.

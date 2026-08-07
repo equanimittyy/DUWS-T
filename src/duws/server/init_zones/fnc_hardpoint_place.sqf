@@ -281,29 +281,43 @@ fnc_hardpoint_site_aoi = {
 // [_n] call fnc_hardpoint_seed_radio -> radio towers placed.
 //
 // Stands _n OPFOR radio towers in the band. A tower is placed deliberately, so this does not roll a
-// type through fnc_hardpoint_lay: it takes a band position from DUWS_fnc_aoi_bandPos, spaces it well
-// off other emplacements and never inside another tower's AoI, so masts neither share ground nor nest
-// their coverage, and stands a "RADIO" hardpoint there. Each
+// type through fnc_hardpoint_lay: for each mast it samples a pool of band positions from
+// DUWS_fnc_aoi_bandPos, drops any inside another tower's AoI or too close to an emplacement, and
+// stands the "RADIO" hardpoint on the best-scoring hilltop of what survives -- so masts neither share
+// ground nor nest coverage, and each crowns the highest crest in its pool. Each
 // raises DUWS_opforRadioLevel through fnc_hardpoint_register's recount and projects AOI_TOWER_REACH of
 // coverage. A global sequence keys the towers, so a campaign-start seed and OPCOM's later raises never
 // collide. Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop.
 #define HP_RADIO_SPACING 250
+#define HP_RADIO_SAMPLES 6
 fnc_hardpoint_seed_radio = {
     params [["_n", 2], ["_fnTick", {}]];
     private _placed = 0;
     private _tries = 0;
     while { _placed < _n && {_tries < _n * 12} } do {
         _tries = _tries + 1;
-        private _draw = call DUWS_fnc_aoi_bandPos;
-        if (_draw isEqualTo []) then { continue };
-        private _c = _draw select 0;
-        // Never inside another tower's AoI: reject a draw within AOI_TOWER_REACH of any standing RADIO
-        // tower, so two towers' coverage circles never nest. Checked live against the registry, so the
-        // seed loop's own earlier towers and OPCOM's later single raises both count.
-        if ((DUWS_hardpoints findIf {
-            (_x select 2) isEqualTo "RADIO" && {(_c distance2D (_x select 1)) < AOI_TOWER_REACH}
-        }) >= 0) then { continue };
-        if ((([_c] call fnc_hardpoint_survey) select 8) < HP_RADIO_SPACING) then { continue };
+
+        // Stand the mast on the best hilltop in a sampled pool, not the first band draw that clears: a
+        // tower wants a crest that reaches. Each candidate is surveyed once (the survey serves both the
+        // spacing gate and the RADIO score), and the top spot is kept. A draw inside another tower's AoI
+        // -- within AOI_TOWER_REACH of a standing RADIO, checked live so nested coverage never forms --
+        // or too close to an emplacement is dropped before scoring.
+        private _best = [];
+        private _bestScore = -1;
+        for "_i" from 1 to HP_RADIO_SAMPLES do {
+            private _draw = call DUWS_fnc_aoi_bandPos;
+            if (_draw isEqualTo []) then { continue };
+            private _cand = _draw select 0;
+            if ((DUWS_hardpoints findIf {
+                (_x select 2) isEqualTo "RADIO" && {(_cand distance2D (_x select 1)) < AOI_TOWER_REACH}
+            }) >= 0) then { continue };
+            private _f = [_cand] call fnc_hardpoint_survey;
+            if ((_f select 8) < HP_RADIO_SPACING) then { continue };
+            private _s = [_f, "RADIO"] call fnc_hardpoint_score;
+            if (_s > _bestScore) then { _bestScore = _s; _best = _cand };
+        };
+        if (_best isEqualTo []) then { continue };
+        private _c = _best;
 
         private _seq = missionNamespace getVariable ["DUWS_radioSeq", 0];
         missionNamespace setVariable ["DUWS_radioSeq", _seq + 1];

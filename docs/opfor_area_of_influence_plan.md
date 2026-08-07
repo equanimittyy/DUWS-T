@@ -185,7 +185,11 @@ clearable like any other, and clearing one drops the enemy's global amplifier by
 everywhere at once — and removes that tower's 5 km of coverage with it, so far towns no zone reaches
 fall out of OPFOR ground entirely. A tower is never sited inside another tower's AoI — the seeder
 rejects any draw within `AOI_TOWER_REACH` of a standing tower — so their coverage circles never nest
-and each new tower reaches into fresh ground rather than thickening cover the field already has.
+and each new tower reaches into fresh ground rather than thickening cover the field already has. The
+seeder also prefers high ground: it samples a pool of band draws and stands the mast on the
+best-scoring hilltop — raised above its surroundings with the ground falling away on every bearing (a
+symmetric crest, not a hillside) — through the `"RADIO"` case in `fnc_hardpoint_score`, so a tower
+crowns a peak that sees far rather than sitting in a hollow.
 
 That is the counterplay a purchased buff could never give. The enemy's rep pressure across the *whole
 map* has a physical cause the player can go and remove, so a player losing the reputation war has
