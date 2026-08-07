@@ -444,6 +444,12 @@ DUWS_factionPool_opfor_EMPTY_X = [];
 opfor_EMPTY_X = [];
 ["faction_pick: an empty pool answers with nothing, not nil",
     (["opfor_EMPTY_X"] call fnc_faction_pick), ""] call fnc_assertEq;
+// A static with no pool var but an array global -- a re-pick that left the global un-collapsed --
+// answers with the representative, never a random draw. The pool gate clears a static's pool var, so
+// randomising here would field the uncreatable variant that gate exists to keep out.
+opfor_STATIC_ARR_X = ["cls_gun", "cls_variant"];
+["faction_pick: a pool-less array global answers with the representative, not a random draw",
+    (["opfor_STATIC_ARR_X"] call fnc_faction_pick), "cls_gun"] call fnc_assertEq;
 
 // --- fnc_faction_poolable_keys: which roles fnc_faction_pools_publish gives a pool ---
 // Pooling (a random draw per spawn) is for man and vehicle roles, which field interchangeable

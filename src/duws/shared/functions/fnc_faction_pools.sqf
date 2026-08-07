@@ -147,5 +147,10 @@ fnc_faction_pick = {
     private _v = missionNamespace getVariable [_name, ""];
     if !(_v isEqualType []) exitWith { _v };
     if (_v isEqualTo []) exitWith { "" };
-    selectRandom _v
+    // No pool var yet an array global: a non-poolable role -- a static -- whose global a Back-and-
+    // re-pick left un-collapsed. Variety is the pool var's job alone, and the gate in
+    // fnc_faction_pools_publish clears that var for a static on purpose, so here the representative
+    // (the first entry) is the answer, never a random draw. Randomising would field the very
+    // uncreatable variant the gate exists to keep out of an emplacement.
+    _v select 0
 };
