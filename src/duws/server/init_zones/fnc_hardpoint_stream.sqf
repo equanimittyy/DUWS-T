@@ -117,6 +117,21 @@ DUWS_fnc_hardpointClearCheck = {
         if ((_comp findIf { !isNull _x && {alive _x} && {typeOf _x isEqualTo DUWS_radioMastClass} }) > -1) exitWith {};
         [_key, _o] call DUWS_fnc_hardpointClear;
     };
+    // A mortar pit or artillery battery is taken by wrecking its guns, not by killing their crews:
+    // the pieces are pinned resident for OPCOM to task, so a crew killed off an intact gun would
+    // otherwise retire a battery that still stands. Judged on the same pieces the garrison crews --
+    // static mortars, and artillery vehicles by artilleryScanner -- so a modded battery clears alike.
+    if ((_o get "hpType") in ["MORTAR", "ARTY"]) exitWith {
+        private _comp = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x && {alive _x} };
+        private _assets = if ((_o get "hpType") isEqualTo "MORTAR") then {
+            _comp count { _x isKindOf "StaticWeapon" }
+        } else {
+            _comp count { !(_x isKindOf "StaticWeapon")
+                && {getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "artilleryScanner") isEqualTo 1} }
+        };
+        if (_assets > 0) exitWith {};
+        [_key, _o] call DUWS_fnc_hardpointClear;
+    };
     if (([_key] call fnc_site_alive) > 0) exitWith {};
     [_key, _o] call DUWS_fnc_hardpointClear;
 };
