@@ -130,7 +130,7 @@ turns all that hard-won BLUFOR coverage into a pull at last.
 The two amplifiers are global scalars, not per-town ([§Radio towers](#radio-towers)):
 `DUWS_opforRadioLevel` is the number of the enemy's radio-tower hardpoints still standing, capped at
 `5`, and `DUWS_bluforRadioLevel` is the tier the player has bought, `0` to `3`. The base step is flat
-— the *speed* of the war is the tick interval and the amplifiers, never a weighted distance.
+— the *speed* of the war is the amplifiers and the reaches on a fixed tick, never a weighted distance.
 
 The writer is the existing one — `fnc_town_rep_adjust` (`server/misc/fnc_economy_init.sqf:132-153`),
 already clamped to `[-20, 20]`. The field adds a passive caller beside its event callers (civilian
@@ -139,13 +139,16 @@ consumer. Everything rep already drives — the OPFOR/BLUFOR band, town income
 (`fnc_civ_state_init.sqf:296-301`), the reaction weights, the map marker colour
 (`fnc_civ_townBand:285-290`) — follows for free.
 
-**The tick interval is the balance lever, because the step is fixed.** At `-1` a tick, one heal
-(`+1`) offsets one tick and a cleared garrison (`+5`) buys five back, so player action stays legible
-against the drift only while a tick is minutes, not seconds. Ten ticks band a neutral town, five
-under a tower; set the interval so that reads as an hour of neglect rather than a detour. Folding the
-tick into the existing town pass — `fnc_town_garrison_reinforce`
-(`server/misc/fnc_civ_state_init.sqf:189`) is the template — keeps it off its own `while {true}` in
-a tree that already carries too many.
+**The drift rides the 30-minute economy tick — it is not a loop of its own.**
+`server/misc/fnc_zonesundercontrol.sqf` already wakes every 1800 s and loops every town to tally
+`fnc_civ_townIncome` (`:11-12,26-29`); the drift pass slots into the top of that same iteration, so
+it costs no new `while {true}` in a tree that already carries too many, and a town that crosses a band
+this tick pays income on its new side the same tick. The interval is therefore fixed at 30 minutes,
+not a tuning knob — the balance levers are the amplifier caps and the reaches. At `-1` a tick that is
+ten ticks, five hours, to band a neutral town from neglect alone; under the enemy's towers it is far
+faster — an hour at the `-6` cap, which is the pace the seeded towers exist to set. Between ticks a
+heal (`+1`) or a cleared garrison (`+5`) still lands at once, so player action stays legible against a
+drift that only moves twice an hour.
 
 **No separate anti-runaway clamp is needed, because the counter-play is the clamp.** OPFOR starts
 holding every zone with towers already up, so the map opens OPFOR-positive and towns fall — that
@@ -282,7 +285,7 @@ Each phase is independently playable and testable, and the order is forced by wh
 | Phase | Contains | Gated here because |
 |---|---|---|
 | **Field** | The coverage tests, the emitter enumeration, the reach constants, a debug overlay drawing coverage at sampled points | Everything reads it, and it can be eyeballed before anything writes through it |
-| **Rep drift** | The per-town tick folded into the town pass, the flat step, the interval constant | Needs the field; visibly moves towns without any hardpoint or commander |
+| **Rep drift** | The per-town drift added to the 30-min economy tick, the flat step | Needs the field; visibly moves towns without any hardpoint or commander |
 | **Start hardpoint pass** | `fnc_hardpoint_site_aoi`, the band mask, `x` standalone HPs at generation, uniform | Needs the field for its mask; reuses the whole zone-pass tail |
 | **BLUFOR radio supports** | Three menu entries writing `DUWS_bluforRadioLevel`, CP-priced, starting at 0 | Needs the drift to read the level; no dependency on any hardpoint work, so it can land first of the amplifiers |
 | **OPFOR radio towers** | The `"RADIO"` hardpoint type, its composition, the seed placement, `DUWS_opforRadioLevel` as the live-count recompute, cap 5 | Needs the drift to read the level, and the hardpoint tail to place and clear |
@@ -295,8 +298,7 @@ Each phase is independently playable and testable, and the order is forced by wh
   and the town, FOB and HQ reaches at 1 km are large against Altis by intent — OPFOR AoI blankets most
   of the map at start and the player opens with 1 km around HQ. That is deliberate back-foot pressure,
   but it leaves little truly neutral ground, so whether the front reads as a line or as a slow
-  reconquest of near-total coverage is the first thing to watch. The drift tick interval is the one
-  timing number still unpicked.
+  reconquest of near-total coverage is the first thing to watch.
 - **Whether the ceilings are the right ones.** They are asymmetric by design — BLUFOR tops out at
   `+3` a tick and only with investment, OPFOR at `-6` and for free — so at full tilt the enemy
   out-pushes the player by two even before coverage is counted. That is deliberate pressure, but
@@ -327,8 +329,8 @@ Each phase is independently playable and testable, and the order is forced by wh
 | File | Change |
 |---|---|
 | `server/misc/fnc_aoi_init.sqf` | New. Defines `fnc_aoi_field_at`, the two coverage primitives and the emitter enumeration; compiled and registered like the other `*_init` families. |
-| `server/server_var_init.sqf` | The `AOI_*` reach constants (`AOI_TOWER_REACH` 7 km, `AOI_ZONE_REACH` 3 km, town/FOB/HQ 1 km), the drift-interval constant and the OPFOR-tower cap of 5; `DUWS_bluforRadioLevel` (init `0`) and `DUWS_opforRadioLevel`; a `"RADIO"` row in `DUWS_hardpointName`, `DUWS_hardpointGarrison`, `DUWS_hardpointStreaming`. |
-| `server/misc/fnc_civ_state_init.sqf` | The drift tick folded into the town pass beside `fnc_town_garrison_reinforce:189`; the two coverage tests and two amplifier scalars it reads. |
+| `server/server_var_init.sqf` | The `AOI_*` reach constants (`AOI_TOWER_REACH` 7 km, `AOI_ZONE_REACH` 3 km, town/FOB/HQ 1 km) and the OPFOR-tower cap of 5; `DUWS_bluforRadioLevel` (init `0`) and `DUWS_opforRadioLevel`; a `"RADIO"` row in `DUWS_hardpointName`, `DUWS_hardpointGarrison`, `DUWS_hardpointStreaming`. |
+| `server/misc/fnc_zonesundercontrol.sqf` | The drift pass added to the top of the 30-min economy tick's town loop (`:11-12,26-29`), before the income tally; reads the two coverage tests and two amplifier scalars, writes through `fnc_town_rep_adjust`. |
 | `server/init_zones/hardpoint_compositions.sqf` | New `DUWS_hardpointComp_RADIO`, tower core plus comms dressing. |
 | `server/init_zones/fnc_hardpoint_place.sqf` | New `fnc_hardpoint_site_aoi`, sharing the zone pass's survey/score/facing tail; the OPFOR radio-tower seed placement. |
 | `server/init_zones/fnc_hardpoint_stream.sqf` | Recompute `DUWS_opforRadioLevel` (uncleared `"RADIO"` rows, capped at `5`) when one is registered or cleared. |
