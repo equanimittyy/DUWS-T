@@ -71,8 +71,15 @@ sleep 1;
     // scope holds across the call chain) and holds what prior passes finished, so _hpDone + _this is the
     // absolute number of the emplacement just laid; each pass then advances _hpDone by its own plan.
     private _tick = {
-        [format ["Generating hardpoints...<br/>%1 of %2", _hpDone + _this, _hpTotal]]
-            remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+        private _msg = format ["Generating hardpoints...<br/>%1 of %2", _hpDone + _this, _hpTotal];
+        [_msg] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
+        // Same climb in text chat, for when the map is closed and the overlay is unseen -- the mirror
+        // zone generation runs (fnc_locatorzones_random). globalChat must run where player is local, so
+        // it fires client-side via BIS_fnc_Spawn; the spawned code can only reach globals, so the line
+        // crosses as a publicVariable rather than a captured local. Chat drops the <br/> the overlay uses.
+        DUWS_hpChatMsg = format ["Placing hardpoint %1 of %2...", _hpDone + _this, _hpTotal];
+        publicVariable "DUWS_hpChatMsg";
+        [{player globalChat DUWS_hpChatMsg}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
     };
     // Opening frame so the banner is not blank through the first zone's crew drop; the first tick
     // redraws the same "1 of N".

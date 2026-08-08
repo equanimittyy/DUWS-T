@@ -299,27 +299,6 @@ fnc_hardpoint_lay = {
     _placed
 };
 
-// [_zonePos] call fnc_hardpoint_threat_bearing -> a compass bearing to bias a zone's flank emplacements
-// toward: the mean direction from the zone to BLU HQ (once placed) and the nearest two other zones -- the
-// corridors a front forms along. The frontline leans into this bearing, the backline into its reverse.
-// Averaged as unit vectors so bearings blend rather than arithmetic-mean
-// (which wraps wrong across 0/360). Random when there is nothing to key on (no HQ, one lone zone) or the
-// bearings cancel, so a degenerate map still places depth, just uniformly.
-fnc_hardpoint_threat_bearing = {
-    params ["_zonePos"];
-    private _bearings = [];
-    if !(PosOfBLUHQ isEqualTo []) then { _bearings pushBack (_zonePos getDir PosOfBLUHQ) };
-    private _others = (zone_meta_array apply { _x select 1 }) select { (_x distance2D _zonePos) > 1 };
-    _others = [_others, [], { _x distance2D _zonePos }, "ASCEND"] call BIS_fnc_sortBy;
-    { _bearings pushBack (_zonePos getDir _x) } forEach (_others select [0, 2]);
-    if (_bearings isEqualTo []) exitWith { random 360 };
-    private _bx = 0;
-    private _by = 0;
-    { _bx = _bx + sin _x; _by = _by + cos _x } forEach _bearings;
-    if (_bx == 0 && {_by == 0}) exitWith { random 360 };
-    _bx atan2 _by
-};
-
 // [_zonePos, _radius, _zoneKey, _count, _fnTick] call fnc_hardpoint_site_zone
 //
 // A zone's own fortification ring, drawn from anywhere in the zone and faced radially out. The zone's
@@ -379,44 +358,56 @@ fnc_hardpoint_band_cand = {
     [_c, if (_azone isEqualTo []) then { random 360 } else { _azone getDir _c }]
 };
 
+// The band anchors a flank emplacement samples before keeping the one the flank wants; a lean toward HQ,
+// not a hard cut, so nests still scatter through the band rather than lining one contour.
+#define HP_FLANK_SAMPLES 5
+
 // [_count, _toHQ, _fnTick] call fnc_hardpoint_site_flank -> emplacements placed.
 //
-// A flank line of gun nests (MG/AT/GMG, DUWS_hardpointWeightNest) anchored to the zones but standing
-// outside their rings, on one side of the fight. _toHQ true is the frontline -- offset toward the threat
-// bearing (BLU HQ and the nearest zones, where the player pushes from) and faced at HQ, so a flat-ground
-// nest points down the approach the player drives in on; a real slope still wins the fall line, overwatch
-// beating a nominal bearing (fnc_hardpoint_facing). _toHQ false is the backline -- the far side, threat
-// bearing reversed, faced radially out. Each emplacement draws a fresh random zone, so the count spreads
-// across the map rather than ringing one zone. Standalone rows ("") -- these are AoI emplacements keyed to
-// a zone's geometry, not part of its own ring cap, so a cleared one is not something OPCOM tops the zone up
-// for. Runs spawned, like the zone pass: fnc_hardpoint_spawn sleeps in the crew drop.
+// A flank line of gun nests (MG/AT/GMG, DUWS_hardpointWeightNest) spread through the OPFOR band and weighted
+// by distance to BLU HQ, not tied to any one zone -- the same band the roadblock and AA nets draw from.
+// _toHQ true is the frontline -- biased toward the HQ side of the band (the forward positions facing where
+// the player pushes from) and faced at HQ, so a flat-ground nest points down the approach; a real slope
+// still wins the fall line (fnc_hardpoint_facing). _toHQ false is the backline -- biased to the far side,
+// faced away from HQ. The bias is a sampled lean: each emplacement draws HP_FLANK_SAMPLES band anchors and
+// keeps the one nearest (front) or farthest (back) from HQ, then hunts ground around it like the AoI band
+// pass. No HQ placed yet leaves nothing to weight toward, so it falls back to a plain band anchor.
+// Standalone rows ("") -- band emplacements, not part of any zone's ring cap. Runs spawned: fnc_hardpoint_spawn
+// sleeps in the crew drop.
 //
 // _toHQ is read from this scope by the reset and candidate blocks below -- they run inside fnc_hardpoint_lay
 // but resolve it up the call stack (SQF dynamic scope), so it need not be threaded through lay's params.
 fnc_hardpoint_site_flank = {
     params ["_count", "_toHQ", ["_fnTick", {}]];
     if (_count <= 0) exitWith { 0 };
-    if (zone_meta_array isEqualTo []) exitWith { 0 };
     private _prefix = ["hpback", "hpfront"] select _toHQ;
     private _placed = [_count, _prefix, "", {
-        // _this is the reset's anchor: [zoneCentre, radius, bearing].
-        _this params ["_zc", "_zr", "_bearing"];
-        // Frontline hugs the ring's edge on the HQ side (0.9-1.3 R); backline stands further out on the
-        // far side (1.0-1.6 R), a deeper second line. A wedge, not a point, so the line reads scattered.
-        private _base = [1.0, 0.9] select _toHQ;
-        private _span = [0.6, 0.4] select _toHQ;
-        private _ang = _bearing + (random 90) - 45;
-        private _bp = _zc getPos [_zr * (_base + random _span), _ang];
-        private _c = [_bp, 0, _zr * 0.4, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
-        // Frontline prefers to face HQ (radial = candidate -> HQ, which the facing keeps on flat ground);
-        // backline faces radially out from its zone. No HQ yet placed falls back to the zone radial.
-        private _rdir = if (_toHQ && {!(PosOfBLUHQ isEqualTo [])}) then { _c getDir PosOfBLUHQ } else { _zc getDir _c };
+        // _this is the reset's HQ-weighted band anchor. band_cand hunts a local draw and gates it
+        // (OPFOR-positive, outside zones); only its outward facing is swapped for one keyed to HQ.
+        private _d = _this call fnc_hardpoint_band_cand;
+        if (_d isEqualTo []) exitWith { [] };
+        _d params ["_c"];
+        // Frontline faces HQ (kept on flat ground by fnc_hardpoint_facing); backline faces away. No HQ yet
+        // keeps the band's own outward radial.
+        private _rdir = if (PosOfBLUHQ isEqualTo []) then { _d select 1 }
+            else { [PosOfBLUHQ getDir _c, _c getDir PosOfBLUHQ] select _toHQ };
         [_c, _rdir]
     }, _fnTick, {
-        (selectRandom zone_meta_array) params ["", "_azc", "_azr"];
-        private _b = [_azc] call fnc_hardpoint_threat_bearing;
-        if (!_toHQ) then { _b = _b + 180 };
-        [_azc, _azr, _b]
+        // Sample a handful of band anchors and keep the one the flank wants: nearest HQ for the frontline,
+        // farthest for the backline. No HQ to weight toward -> the first plain band anchor.
+        if (PosOfBLUHQ isEqualTo []) exitWith { call fnc_hardpoint_band_anchor };
+        private _best = [];
+        private _bestD = [-1, 1e12] select _toHQ;
+        for "_i" from 1 to HP_FLANK_SAMPLES do {
+            private _a = call fnc_hardpoint_band_anchor;
+            if (_a isEqualTo []) then { continue };
+            private _dist = (_a select 0) distance2D PosOfBLUHQ;
+            if ((_toHQ && {_dist < _bestD}) || {!_toHQ && {_dist > _bestD}}) then {
+                _bestD = _dist;
+                _best = _a;
+            };
+        };
+        _best
     }, DUWS_hardpointWeightNest] call fnc_hardpoint_lay;
     ["INFO", "HARDPOINT", format ["%1 line sited %2/%3 nests", _prefix, _placed, _count]] call fnc_log;
     _placed
