@@ -22,7 +22,9 @@ for p in "$F" "$BG"; do
 done
 
 OUT=$1; TITLE=$2; H=${3:-100}; DARK=${4:-60}; PS=${5:-50}
-W=950; TX=85; K=2                            # TX matches the sub-banner's text inset
+# W sized to the longest title ("System, Options & Configuration") at PS=50 plus a
+# ~50px right margin, so the diary's max render width no longer clips its tail.
+W=886; TX=85; K=2                            # TX matches the sub-banner's text inset
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 py () { python3 -c "print($1)"; }
 CAP=$(py "0.7035*$PS"); TBASE=$(py "round(($H+$CAP)/2)")   # optically centred on cap height

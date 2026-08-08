@@ -14,7 +14,7 @@
 
 // Heading banner for a page: the topic strip, then a gap before the body.
 private _bnr = {
-    format ["<img image='image\%1' width='420' height='44'/><br/><br/>", _this]
+    format ["<img image='image\%1' width='390' height='44'/><br/><br/>", _this]
 };
 // Sub-header + body, for topics folded into a page as one section.
 private _sec = {
@@ -23,7 +23,7 @@ private _sec = {
 };
 
 private _coverBody =
-    "<img image='image\duws_t_man_cover.jpg' width='456' height='257'/><br/>"
+    "<img image='image\duws_t_man_cover.jpg' width='456' height='257'/><br/><br/>"
     + (localize "STR_DUWS_T_MAN_COVER_BODY");
 
 private _howToBody = ("duws_t_man_how_to_play.jpg" call _bnr) + ([
@@ -36,10 +36,12 @@ private _howToBody = ("duws_t_man_how_to_play.jpg" call _bnr) + ([
     ["STR_DUWS_T_o31d875x",           "STR_DUWS_T_3c1ygiga"] call _sec,      // Supports
     ["STR_DUWS_T_arsenal",            "STR_DUWS_T_arsenal1"] call _sec,      // Arsenal System
     ["STR_DUWS_T_HELP_SUPPORTS",      "STR_DUWS_T_HELP_SUPPORTS_HINT"] call _sec, // Unlocking the Arsenal
-    ["STR_DUWS_T_MAN_L_SUPPDETAIL",   "STR_DUWS_T_supportguide1"] call _sec,
     ["STR_DUWS_T_MAN_L_SIDEMISSIONS", "STR_DUWS_T_617kjc41"] call _sec,
     ["STR_DUWS_T_MAN_L_REPUTATION",   "STR_DUWS_T_m204wqqq"] call _sec
-] joinString "<br/><br/>");
+] joinString "<br/><br/>")
+// The support catalogue closes the page under its own banner - the one strip that
+// leads a list rather than a topic. Its own text carries the PERM/CONS split.
++ "<br/><br/>" + ("duws_t_man_supports_list.jpg" call _bnr) + (localize "STR_DUWS_T_supportguide1");
 
 private _economyBody = ("duws_t_man_economy.jpg" call _bnr) + ([
     ["STR_DUWS_T_uzx258em", "STR_DUWS_T_r3x8czon"] call _sec,      // Command Points
@@ -65,7 +67,7 @@ private _configBody = ("duws_t_man_config.jpg" call _bnr) + ([
 // subheaders yet, just the page and its banner.
 private _modesBody = ("duws_t_man_other_modes.jpg" call _bnr) + (localize "STR_DUWS_T_MAN_MODES_BODY");
 
-private _aboutBody = ([
+private _aboutBody = ("duws_t_man_about.jpg" call _bnr) + ([
     ["STR_DUWS_T_0f4f5uo2", "STR_DUWS_T_q4wns5y7"] call _sec,      // About DUWS-T
     ["STR_DUWS_T_7vfkrl61", "STR_DUWS_T_zho04a1k"] call _sec,      // Credits
     ["STR_DUWS_T_getwuiuy", "STR_DUWS_T_6ku0lc19"] call _sec       // Feedback / bug report
