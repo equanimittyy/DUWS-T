@@ -135,7 +135,12 @@ fnc_evalVehicleCost = {
 	
 	_cost = _cost + _costModifier + _turretCount + _magazineCount + _weaponCount + _pylonCount + _seatCount + _sensorModifier;
 	_cost = _cost * _threatModifier * _armorModifier * _typeMultiplier;
-	round linearConversion [0, 400, _cost, 5, 100, true]
+	// Map the heuristic to a 1-100 CP band. All vehicles are CP-only -- tanks included -- so the
+	// whole catalogue lives on one scale, and tiering (not price) is what gates armour. The low
+	// anchor sits at 10, not 0, so a bare unarmed light vehicle (a quad, a soft-skin transport)
+	// clamps to the 1-2 floor while armour, weapons, threat and sensors -- all read from config, so
+	// modded vehicles price themselves -- carry the armed and heavy end up toward 100.
+	round linearConversion [10, 400, _cost, 1, 100, true]
 };
 
 
