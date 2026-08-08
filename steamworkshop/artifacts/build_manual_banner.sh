@@ -21,9 +21,10 @@ for p in "$F" "$BG"; do
   [ -r "$p" ] || { echo "missing input: $p (set DUWS_FONT / DUWS_TOPO)" >&2; exit 1; }
 done
 
-OUT=$1; TITLE=$2; H=${3:-100}; DARK=${4:-60}; PS=${5:-50}
-# W sized to the longest title ("System, Options & Configuration") at PS=50 plus a
-# ~50px right margin, so the diary's max render width no longer clips its tail.
+OUT=$1; TITLE=$2; H=${3:-100}; DARK=${4:-60}; PS=${5:-45}
+# W clears the longest title ("System, Options & Configuration") with room to spare,
+# so the diary's max render width never clips its tail; the shorter PS just widens
+# the right margin.
 W=886; TX=85; K=2                            # TX matches the sub-banner's text inset
 T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
 py () { python3 -c "print($1)"; }

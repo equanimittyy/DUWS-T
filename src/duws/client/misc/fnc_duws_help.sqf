@@ -14,7 +14,7 @@
 
 // Heading banner for a page: the topic strip, then a gap before the body.
 private _bnr = {
-    format ["<img image='image\%1' width='390' height='44'/><br/><br/>", _this]
+    format ["<img image='image\%1' width='350' height='40'/><br/><br/>", _this]
 };
 // Sub-header + body, for topics folded into a page as one section.
 private _sec = {
@@ -33,15 +33,17 @@ private _howToBody = ("duws_t_man_how_to_play.jpg" call _bnr) + ([
     ["STR_DUWS_T_auhmznp6",           "STR_DUWS_T_m267zqr7"] call _sec,      // Recruiting Operatives
     ["STR_DUWS_T_ulm497s5",           "STR_DUWS_T_16wnqdrz"] call _sec,      // Task Forces
     ["STR_DUWS_T_4yxb8s2k",           "STR_DUWS_T_4elv35h6"] call _sec,      // Establish a FOB
-    ["STR_DUWS_T_o31d875x",           "STR_DUWS_T_3c1ygiga"] call _sec,      // Supports
     ["STR_DUWS_T_arsenal",            "STR_DUWS_T_arsenal1"] call _sec,      // Arsenal System
     ["STR_DUWS_T_HELP_SUPPORTS",      "STR_DUWS_T_HELP_SUPPORTS_HINT"] call _sec, // Unlocking the Arsenal
     ["STR_DUWS_T_MAN_L_SIDEMISSIONS", "STR_DUWS_T_617kjc41"] call _sec,
     ["STR_DUWS_T_MAN_L_REPUTATION",   "STR_DUWS_T_m204wqqq"] call _sec
 ] joinString "<br/><br/>")
 // The support catalogue closes the page under its own banner - the one strip that
-// leads a list rather than a topic. Its own text carries the PERM/CONS split.
-+ "<br/><br/>" + ("duws_t_man_supports_list.jpg" call _bnr) + (localize "STR_DUWS_T_supportguide1");
+// leads a list rather than a topic. The Supports blurb heads it, a rule splits that
+// off, then the PERM/CONS list (its own text carries the split and the colours).
++ "<br/><br/>" + ("duws_t_man_supports_list.jpg" call _bnr)
++ (localize "STR_DUWS_T_3c1ygiga") + "<br/>---<br/><br/>"
++ (localize "STR_DUWS_T_supportguide1");
 
 private _economyBody = ("duws_t_man_economy.jpg" call _bnr) + ([
     ["STR_DUWS_T_uzx258em", "STR_DUWS_T_r3x8czon"] call _sec,      // Command Points
