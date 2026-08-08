@@ -74,6 +74,15 @@ if (random 1 < 0.10 && {[getPos _caller, _caller] call fnc_intel_payout}) exitWi
 };
 
 private _finalCP = floor _totalCP;
+// Capped per economy tick so loot-farming cannot out-earn holding ground: the loot faucet has no
+// cooldown and rides ~80% of enemies, so an unbounded turn-in scales with how much is fought rather
+// than how much is held. DUWS_intel_tick_paid is [tick, paidThisTick], reset when econ_tick moves.
+// The overflow past the cap is dropped, not deferred -- the documents are still consumed, so dumping
+// a stack past the ceiling in one tick wastes the excess, which is the anti-farm bite.
+DUWS_intel_tick_paid params ["_capTick", "_capPaid"];
+if (_capTick != econ_tick) then { _capTick = econ_tick; _capPaid = 0; };
+_finalCP = _finalCP min ((intel_cp_cap_per_tick - _capPaid) max 0);
+DUWS_intel_tick_paid = [_capTick, _capPaid + _finalCP];
 [_finalCP, "intel_analysis"] remoteExec ["fnc_cp_adjust", 2];
 private _desc = format [localize "STR_DUWS_T_INTEL_ANALYSIS_BROADCAST", name _caller, _itemsList, _finalCP];
 ["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
