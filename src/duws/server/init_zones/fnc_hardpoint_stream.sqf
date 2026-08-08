@@ -253,10 +253,16 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
 
     // Zone-coupled hardpoints mirror their parent zone -- up when its garrison is, so a zone's whole
     // defence rises and falls together instead of each emplacement waking on its own ring. Standalone
-    // ones wake on presence and stow after their grace, as before.
+    // ones hold while near, within grace, or in a fight: a roster in COMBAT is the engine's own contact
+    // state (fnc_apply_posture spawns them SAFE, the engine promotes them the moment they detect anything),
+    // so a gun dueling a player from beyond its ring is not stowed out from under the fight and re-raised
+    // at full strength when the player closes again. The roster scan is the bounded list the clear-check
+    // already walks, and || defers it to the stow-decision frame -- out of ring and past grace.
     private _zk = _o getOrDefault ["hpZoneKey", ""];
     private _up = if (_zk isEqualTo "") then {
-        _here || {(_now - (_o getOrDefault ["lastSeen", _now])) < (_o get "grace")}
+        _here
+        || {(_now - (_o getOrDefault ["lastSeen", _now])) < (_o get "grace")}
+        || {([_key] call fnc_site_roster) findIf { alive _x && {behaviour _x isEqualTo "COMBAT"} } > -1}
     } else {
         _zk call DUWS_fnc_hardpointZoneAwake
     };
