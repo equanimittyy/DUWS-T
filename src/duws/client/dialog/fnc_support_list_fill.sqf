@@ -49,6 +49,13 @@ private _rows = [];   // listbox index -> its def, [] for a heading
         if (_escalated && !_free) then {
             _label = format [localize "STR_DUWS_T_escalation_row", _label, [_cost] call fnc_escalation_cost];
         };
+        // The AP half of an advanced support's dual price, appended after the CP label (which bakes
+        // its own number). Append, never substitute -- same reason as the escalation surcharge above:
+        // a %1 added to English but not the other four languages would strand the baked figure.
+        private _apCost = _x param [8, 0];
+        if (_apCost > 0) then {
+            _label = format [localize "STR_DUWS_T_support_ap_suffix", _label, _apCost];
+        };
         private _row = lbAdd [2103, _label];
         private _colour = [1, 1, 1, 1];
         if (_defKind == "PERM") then { _colour = [1, 0.502, 0, 1] };

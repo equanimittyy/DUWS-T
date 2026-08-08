@@ -2003,6 +2003,10 @@
                 <Original>%1  -&gt;  %2 CP</Original>
                 <English>%1  -&gt;  %2 CP</English>
             </Key>
+            <Key ID="STR_DUWS_T_support_ap_suffix">
+                <Original>%1  +%2 AP</Original>
+                <English>%1  +%2 AP</English>
+            </Key>
             <Key ID="STR_DUWS_T_escalation_level">
                 <Original>Escalation is now level %1. Supports cost more</Original>
                 <English>Escalation is now level %1. Supports cost more</English>

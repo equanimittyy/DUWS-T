@@ -231,19 +231,38 @@ fnc_pool_try_spend = {
 	// purchase sites all reach here via fnc_pool_spend, which knows the cost but not what
 	// the player was buying.
 	private _who = format ["purchase by %1", name _requester];
-	// One application point for the escalation multiplier: every fnc_pool_spend site reaches
-	// here, so scaling on entry covers all of them. The four server-side paths that call
-	// fnc_cp_adjust directly bypass this handshake and apply it themselves.
-	_cost = [_cost] call fnc_escalation_cost;
+	// What was actually charged, sent back with the verdict so a refund pays exactly this and
+	// never the base price. A scalar for CP/AP, a [cp, ap] pair for the dual case. Escalation is
+	// applied here and nowhere else, and only to CP: an AP purchase is permanent, so scaling it
+	// would make buying early strictly better than buying well. The four server-side paths that
+	// call fnc_cp_adjust directly bypass this handshake and apply escalation themselves.
+	private _charged = 0;
 	switch (_pool) do {
-		case "CP": { if (commandpointsblu1 >= _cost) then { [-_cost, _who] call fnc_cp_adjust; _ok = true; }; };
-		case "AP": { if (WARCOM_blufor_ap >= _cost) then { ["BLU", -_cost, _who] call fnc_ap_adjust; _ok = true; }; };
+		case "CP": {
+			private _c = [_cost] call fnc_escalation_cost;
+			if (commandpointsblu1 >= _c) then { [-_c, _who] call fnc_cp_adjust; _ok = true; };
+			_charged = _c;
+		};
+		case "AP": {
+			if (WARCOM_blufor_ap >= _cost) then { ["BLU", -_cost, _who] call fnc_ap_adjust; _ok = true; };
+			_charged = _cost;
+		};
+		// Dual price, one purchase. Both pools are tested before either is debited and both debits
+		// are adjacent statements against the one server copy, so partial success is impossible and
+		// no other machine's spend lands between them -- the single-pool race, closed one level up.
+		case "CPAP": {
+			_cost params [["_cp", 0], ["_ap", 0]];
+			private _cpScaled = [_cp] call fnc_escalation_cost;
+			if (commandpointsblu1 >= _cpScaled && {WARCOM_blufor_ap >= _ap}) then {
+				[-_cpScaled, _who] call fnc_cp_adjust;
+				["BLU", -_ap, _who] call fnc_ap_adjust;
+				_ok = true;
+			};
+			_charged = [_cpScaled, _ap];
+		};
 		default { ["ERROR", "ECON", format ["fnc_pool_try_spend: unrecognised pool '%1', refused %2", _pool, _cost]] call fnc_log; };
 	};
-	// The scaled figure goes back with the verdict: it is computed here and nowhere else, and a
-	// support refund that pays the base price instead under-pays a player who bought late and
-	// mints the difference for one who bought early.
-	[_replyVar, _ok, _cost] remoteExec ["fnc_pool_reply", _requester];
+	[_replyVar, _ok, _charged] remoteExec ["fnc_pool_reply", _requester];
 };
 
 // Client half of the purchase handshake: blocks until the server rules on the request,
@@ -257,7 +276,12 @@ fnc_pool_try_spend = {
 fnc_pool_spend = {
 	params [["_pool", "CP"], ["_cost", 0]];
 	duws_last_charge = 0;
-	if (_cost <= 0) exitWith { true };
+	// Zero cost short-circuits: several comm-menu supports are charged at unlock and pass 0 here. A
+	// dual price is [cp, ap] and short-circuits only when both halves are zero. duws_last_charge then
+	// carries a [cp, ap] pair back to the one caller that records it (the support refund), a scalar
+	// otherwise, matching what fnc_pool_try_spend replied.
+	private _zero = if (_pool == "CPAP") then { (_cost param [0, 0]) <= 0 && {(_cost param [1, 0]) <= 0} } else { _cost <= 0 };
+	if (_zero) exitWith { true };
 	duws_spend_seq = (missionNamespace getVariable ["duws_spend_seq", 0]) + 1;
 	private _replyVar = format ["duws_spend_reply_%1", duws_spend_seq];
 	[_pool, _cost, player, _replyVar] remoteExec ["fnc_pool_try_spend", 2];

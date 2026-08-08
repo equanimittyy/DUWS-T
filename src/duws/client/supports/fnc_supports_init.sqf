@@ -15,7 +15,11 @@
 // indices agreed between those two files, so adding a row anywhere but the end silently
 // repointed every row below it at another support's price, flag and comm item.
 //
-// [key, kind, cost, flag, label, comm item, insurgent-blocked, MODERN-only]
+// [key, kind, cost, flag, label, comm item, insurgent-blocked, MODERN-only, AP cost]
+// The 9th column is the Army Power half of an advanced support's dual price -- artillery, mortar,
+// cluster, napalm and the two High Command aircraft. Absent (read as 0 via `param [8, 0]`) on every
+// regular row, which pays CP only. AP is what actually decides an advanced purchase under an abundant
+// CP pool; the CP half is carried for one price format across the catalogue.
 fnc_support_defs = {
 	private _defs = [
 		["armory",    "PERM", 10, "support_armory_available",      "STR_DUWS_T_kw2lnaig",             "",           false, false],
@@ -44,14 +48,14 @@ fnc_support_defs = {
 		["helotaxi",  "CONS",  5, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false, true],
 		["helolift",  "CONS", 10, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false, true],
 		["boattaxi",  "CONS",  2, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  false, false],
-		["arty",      "CONS", 20, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  false],
-		["mortar",    "CONS", 10, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false, false],
+		["arty",      "CONS", 20, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  false, 30],
+		["mortar",    "CONS", 15, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false, false, 20],
 		["jdam",      "CONS", 10, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,  true],
 		["laser",     "CONS", 10, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,  true],
-		["cluster",   "CONS", 25, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  true],
-		["napalm",    "CONS", 20, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  false],
-		["hcAttChop", "CONS", 20, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  true],
-		["hcCAS",     "CONS", 25, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  true],
+		["cluster",   "CONS", 25, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  true,  35],
+		["napalm",    "CONS", 20, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  false, 25],
+		["hcAttChop", "CONS", 20, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  true,  30],
+		["hcCAS",     "CONS", 25, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  true,  40],
 		["paradrop",  "CONS", 20, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   true,  false]
 	];
 
@@ -143,6 +147,7 @@ fnc_support_buy = {
 	params [["_def", []]];
 	if (_def isEqualTo []) exitWith { false };
 	_def params ["_key", "_kind", "_cost", "_flagVar", "_labelKey", "_commItem", "_insBlocked"];
+	private _apCost = _def param [8, 0];
 
 	private _insurgent = !isNil "insurgent_mode_enable" && {insurgent_mode_enable};
 	if (_insBlocked && _insurgent) exitWith { hint localize "STR_DUWS_T_inssupport"; false };
@@ -155,7 +160,15 @@ fnc_support_buy = {
 	// The mode gives the Mobile HQ away; its label says so.
 	if (_key == "mobile_HQ" && _insurgent) then { _cost = 0 };
 
-	if !(["CP", _cost] call fnc_pool_spend) exitWith { hint localize "STR_DUWS_T_e95mc4lv"; false };
+	// An advanced support charges both pools atomically; a regular one charges CP alone. The dual
+	// verdict is single -- both halves debit or neither does -- so a refusal here never leaves the
+	// player charged for half a purchase.
+	private _bought = if (_apCost > 0) then {
+		["CPAP", [_cost, _apCost]] call fnc_pool_spend
+	} else {
+		["CP", _cost] call fnc_pool_spend
+	};
+	if !(_bought) exitWith { hint localize "STR_DUWS_T_e95mc4lv"; false };
 
 	missionNamespace setVariable [_flagVar, true];
 	if (_kind == "PERM") then {
@@ -163,12 +176,13 @@ fnc_support_buy = {
 		[_key] remoteExec ["fnc_support_perm_grant", 2];
 	} else {
 		support_count = support_count + 1;
-		// What the server actually debited, not the base price. fnc_pool_try_spend scales every
-		// cost by escalation_multiplier on entry, so a refund computed from the base under-pays a
-		// player who bought late and one computed at the current multiplier mints the difference
-		// for a player who bought early.
+		// What the server actually debited, not the base price, and always stored as a [cp, ap] pair
+		// so the refund path is one shape. fnc_pool_try_spend scales the CP half by escalation on
+		// entry, so a refund computed from the base under-pays a player who bought late and one
+		// computed at the current multiplier mints the difference for a player who bought early. For
+		// a dual purchase duws_last_charge is already [cp, ap]; a CP-only one is wrapped with 0 AP.
 		private _paid = missionNamespace getVariable ["DUWS_support_paid", createHashMap];
-		_paid set [_key, duws_last_charge];
+		_paid set [_key, if (_apCost > 0) then { duws_last_charge } else { [duws_last_charge, 0] }];
 		missionNamespace setVariable ["DUWS_support_paid", _paid];
 	};
 
@@ -223,16 +237,23 @@ fnc_support_refund = {
 	};
 
 	private _paid = missionNamespace getVariable ["DUWS_support_paid", createHashMap];
-	private _back = _paid getOrDefault [_key, 0];
+	(_paid getOrDefault [_key, [0, 0]]) params [["_backCP", 0], ["_backAP", 0]];
 	_paid deleteAt _key;
 	missionNamespace setVariable ["DUWS_support_paid", _paid];
 
 	[_commItem] call fnc_support_comm_drop;
 	missionNamespace setVariable [_flagVar, false];
 	support_count = (support_count - 1) max 0;
-	if (_back > 0) then { [_back, "support_refund"] remoteExec ["fnc_cp_adjust", 2] };
+	// Both halves come back at what they charged: a dual support returns its AP too, or refunding
+	// would quietly tax the scarce pool the purchase was meant to be reversible in.
+	if (_backCP > 0) then { [_backCP, "support_refund"] remoteExec ["fnc_cp_adjust", 2] };
+	if (_backAP > 0) then { ["BLU", _backAP, "support_refund"] remoteExec ["fnc_ap_adjust", 2] };
 	// No purchase sound: the cue belongs to spending, and a refund firing it read as a second buy.
-	hint format [localize "STR_DUWS_T_SUPPORT_REFUNDED", _back];
+	// The AP figure is appended to the CP message, not baked into a stringtable that carries one
+	// number, the same append discipline the escalation surcharge uses.
+	private _msg = format [localize "STR_DUWS_T_SUPPORT_REFUNDED", _backCP];
+	if (_backAP > 0) then { _msg = _msg + format [" (+%1 AP)", _backAP] };
+	hint _msg;
 	true
 };
 
@@ -242,9 +263,12 @@ fnc_support_refund = {
 fnc_support_wipe = {
 	private _paid = missionNamespace getVariable ["DUWS_support_paid", createHashMap];
 	if (count _paid == 0) exitWith {};
-	private _total = 0;
-	{ _total = _total + _y } forEach _paid;
-	private _back = round (_total * support_death_refund);
+	// Only the CP halves soften a death; AP is not refunded on a wipe. The premium pool is too
+	// scarce to leak through dying, and the death refund exists to cushion a CP loss, not to hand
+	// back the campaign's rarest currency. _paid entries are [cp, ap] pairs.
+	private _totalCP = 0;
+	{ _totalCP = _totalCP + (_y param [0, 0]) } forEach _paid;
+	private _back = round (_totalCP * support_death_refund);
 
 	{
 		missionNamespace setVariable [(_x select 3), false];
