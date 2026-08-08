@@ -468,11 +468,11 @@ alongside it is.
 
 One actor, one pool, one archetype. The director in this document, the director that builds
 hardpoints ([`info/opfor_area_of_influence.md`](info/opfor_area_of_influence.md#band-siting), with
-its escalation ladder in [`opfor_commander_plan.md`](opfor_commander_plan.md#what-the-commander-builds))
+its escalation ladder in [`opcom_plan.md`](opcom_plan.md#what-the-commander-builds))
 and the commander that makes low-reputation towns fight back are the same thing under different
 names, and they share `WARCOM_opfor_ap`. How that one actor decides — what it wakes on, what it is
 allowed to know, and how it ranks targets — is
-[`opfor_commander_plan.md`](opfor_commander_plan.md); this section is its shopping list.
+[`opcom_plan.md`](opcom_plan.md); this section is its shopping list.
 
 Director spends call `fnc_ap_adjust` directly, as `["OPF", -_cost, _reason] call fnc_ap_adjust`.
 There is no second writer to race — the director is server-side and single — so the purchase
@@ -488,7 +488,7 @@ handshake would only add a frame boundary between its test and its debit.
 
 **Town events are not a sink.** IEDs, ambushes and sabotage out of a low-reputation town fire on
 their own, rolled against the town's reputation, and cost the commander nothing
-([`opfor_commander_plan.md`](opfor_commander_plan.md)). Reputation is already the input that
+([`opcom_plan.md`](opcom_plan.md)). Reputation is already the input that
 decides whether a town garrisons and what it pays, so making the same towns also *charge* for
 acting on it would price a thing the player has already paid for by letting the town fall. Stated
 here because the shape invites the opposite: a free enemy behaviour sitting next to three

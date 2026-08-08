@@ -13,7 +13,7 @@ persistable when a single function can build it from numbers and strings.** Zone
 it (`zone_meta_array` is exactly the argument list of `fnc_createZone`); FOBs nearly do; player
 fortifications will only if they are designed that way from the start
 ([§Features not built yet](#features-not-built-yet)), and the enemy commander's state carries the
-same contract into [`opfor_commander_plan.md`](opfor_commander_plan.md#persistence).
+same contract into [`opcom_plan.md`](opcom_plan.md#persistence).
 
 ## Where the save lives
 
@@ -466,7 +466,7 @@ that dropped it would repair every turned town back to ungarrisoned.
 **The commander's own state is deferred with the commander.** The archetype, its standing orders
 (taskings) and — if it is ever wanted — its belief store are snapshot content only once OPCOM exists,
 and their persistable shape and serialisation contract are
-[`opfor_commander_plan.md`](opfor_commander_plan.md#persistence)'s to define, not this plan's. The
+[`opcom_plan.md`](opcom_plan.md#persistence)'s to define, not this plan's. The
 snapshot is a name-keyed hashmap ([§The snapshot](#the-snapshot)), so it gains those keys when the
 commander lands and omitting them until then costs a restore nothing.
 
