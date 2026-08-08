@@ -202,7 +202,7 @@ DUWS_cleanup_force = false;
 DUWS_cleanup_lifetime = 1800;
 
 // Death Penalty
-DUWSMP_CP_death_cost = 0;publicVariable "DUWSMP_CP_death_cost";
+DUWSMP_CP_death_cost = 2;publicVariable "DUWSMP_CP_death_cost";
 
 // dynamic_weather_enable
 dynamic_weather_enable = true;publicVariable "dynamic_weather_enable";	

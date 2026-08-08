@@ -165,7 +165,7 @@ player addEventHandler ["killed", {
         // Told to the player who paid it. The deduction itself only ever reached the RPT and
         // control 1000, which is the counter inside the request dialog and so invisible unless
         // that dialog happens to be open -- CP left the shared pool with nothing on screen.
-        // Skipped at zero, which is the default until the campaign menu sets a penalty.
+        // Skipped at zero, which the campaign menu can still select.
         // Spawned because an event-handler body is unscheduled and the notification queue is not.
         if (DUWSMP_CP_death_cost > 0) then {
             [DUWSMP_CP_death_cost] spawn {
