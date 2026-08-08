@@ -5105,6 +5105,18 @@
                 <Original>Deploying Chute</Original>
                 <English>Deploying Chute</English>
             </Key>
+            <Key ID="STR_DUWS_T_halo_confirm_title">
+                <Original>HALO Insertion</Original>
+                <English>HALO Insertion</English>
+            </Key>
+            <Key ID="STR_DUWS_T_halo_confirm">
+                <Original>HALO insertion: %1 personnel, %2 km from HQ. Cost: %3 CP. Confirm?</Original>
+                <English>HALO insertion: %1 personnel, %2 km from HQ. Cost: %3 CP. Confirm?</English>
+            </Key>
+            <Key ID="STR_DUWS_T_halo_no_units">
+                <Original>No units available for HALO insertion.</Original>
+                <English>No units available for HALO insertion.</English>
+            </Key>
             <Key ID="STR_DUWS_T_y91vei53">
                 <German>Nachschub Abwurf unterwegs. ETA: 1 min</German>
                 <Spanish>Entrega de suministros en camino. TEA: 1 min</Spanish>

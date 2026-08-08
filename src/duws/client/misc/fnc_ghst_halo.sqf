@@ -101,11 +101,47 @@ if (!visibleMap) exitwith {
     player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
 };
 _pos = clickpos;
+// Selection is done; close the map so the confirm dialog below draws on top of it.
+openMap false;
 
+// Everyone who will actually leave the plane: the player unless excluded, plus any on-foot
+// AI in the squad. Counted once here so the price reflects the real headcount, and reused by
+// the AI dispatch below rather than gathered twice.
+private _aiUnits = [];
 if (_typehalo) then {
-    private _aiUnits = (units group _caller) select {
+    _aiUnits = (units group _caller) select {
         isNull objectParent _x && {!isPlayer _x}
     };
+};
+private _jumpers = (count _aiUnits) + ([1, 0] select _excludePlayer);
+
+if (_jumpers <= 0) exitWith {
+    _caller groupchat localize "STR_DUWS_T_halo_no_units";
+    player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
+};
+
+// 1 CP per jumper per km from HQ, distance rounded up so any real jump costs something.
+private _distKm = ceil ((PosOfBLUHQ distance2D _pos) / 1000);
+private _cost = _jumpers * _distKm;
+
+// Advisory read before the confirm, so the player is not asked to fund a jump they cannot
+// afford. fnc_pool_spend below stays the authoritative gate against a mid-window change.
+if (commandpointsblu1 < _cost) exitWith {
+    _caller groupchat format [localize "STR_DUWS_T_p6sb3ply", _cost];
+    player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
+};
+
+if !([format [localize "STR_DUWS_T_halo_confirm", _jumpers, _distKm, _cost], localize "STR_DUWS_T_halo_confirm_title", true, true] call BIS_fnc_guiMessage) exitWith {
+    _caller groupchat localize "STR_DUWS_T_q639bywa";
+    player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
+};
+
+if !(["CP", _cost] call fnc_pool_spend) exitWith {
+    _caller groupchat format [localize "STR_DUWS_T_p6sb3ply", _cost];
+    player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
+};
+
+if (_typehalo) then {
     if (count _aiUnits > 0) then {
         private _aiNetIds = _aiUnits apply {netId _x};
         ["INFO", "HALO", format ["Client sending AI Halo request for %1 units", count _aiNetIds]] call fnc_log;
