@@ -93,15 +93,29 @@ They are collected here so the next pass tunes from one list rather than hunting
 
 ## Balance items to watch
 
+These flow from the deferred sinks, not from bugs — most resolve when the demand side is built. The
+warning that ties them together: **do not re-tune the faucets down to make the currencies feel scarce
+while the sinks are absent.** Scarcity is supposed to come from the tier ladder, the combat-vehicle
+gate, BLUFOR garrisons and the OPFOR commander. Cutting a faucet now would leave the economy starved
+once those land.
+
+- **AP is not scarce for a zone-holding BLUFOR yet.** Its only sink is the ~6 advanced supports,
+  180 AP for the whole set, realistically 90–130 AP bought. Supply is 20 AP × zone count one-time
+  (~120 at six zones), plus ~60 AP/hr trickle at full control, plus 5–20 a mission — so liberating
+  the map nearly funds the entire AP catalogue from captures alone. The two-currency premise does not
+  bite until the combat-vehicle gate, garrisons and commander give AP something to buy.
 - **Kill income is uncapped** (1 CP per 10 kills per player, `server/server_init.sqf`), unlike intel
   analysis. A large co-op team in a long firefight banks it off activity alone. Whether it needs its
   own ceiling is [open in the plan](economy_plan.md#open-questions).
 - **First-capture front-loading.** 25 CP + 20 AP times the zone count is a lump paid in the opening
-  hours. On a large map that is a meaningful head start; the throttle does not touch it, since it
-  rewards an action rather than a holding.
+  hours, ~2/3 of everything AP can currently buy. On a large map that is a meaningful head start; the
+  throttle does not touch it, since it rewards an action rather than a holding.
 - **OPFOR AP accumulation.** Until the commander lands, OPFOR earns from four faucets and spends only
-  on hardpoints, so the pool climbs with nowhere to go. This is expected and resolves when the
-  commander's sinks are built; it is not a leak.
+  on hardpoints, so the pool climbs with nowhere to go — and it trips the live `WARCOM_opfor_ap > 100`
+  gate in `server/missions/fnc_missionPatrols.sqf` / `fnc_missionPatrolswithintel.sqf` near
+  permanently, so side-mission guards are almost always armoured. Widening town worth to 1–5 raised
+  the OPFOR AP faucet by roughly half, which compounds this. Expected, and resolves when the
+  commander's sinks drain the pool; it is not a leak.
 - **CP abundance versus vehicle price.** Light vehicles now cost ~1–5 CP against a CP economy the
   reroute roughly doubled, so their price is close to free. That is intended — hiring and light
   transport are not meant to be gated by cost — but it means the CP half of the catalogue is legible,
