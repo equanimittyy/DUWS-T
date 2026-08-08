@@ -108,7 +108,11 @@ private _pop = missionNamespace getVariable [format ["civ_pop_%1", _hit], 0];
 private _reps = missionNamespace getVariable ["civ_town_rep", []];
 private _hasRep = _hit < count _reps;
 private _rep = if (_hasRep) then { _reps select _hit } else { 0 };
-private _ap = (missionNamespace getVariable ["civ_town_ap", []]) param [_hit, 0];
+// Throttled and rounded to match what the tick actually credits: the tick pays
+// round(worth * DUWS_econ_throttle) (server/misc/fnc_zonesundercontrol.sqf), so a readout showing
+// the raw worth would promise income the tick never pays on a large campaign, which is exactly the
+// disagreement fnc_civ_townIncome is documented to prevent.
+private _ap = round (((missionNamespace getVariable ["civ_town_ap", []]) param [_hit, 0]) * (missionNamespace getVariable ["DUWS_econ_throttle", 1]));
 ([_rep, _ap] call fnc_civ_townIncome) params ["_income", "_side"];
 
 // Worth travels alongside the income, not instead of it. They are the same number for a town that

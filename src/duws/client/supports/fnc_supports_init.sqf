@@ -249,10 +249,11 @@ fnc_support_refund = {
 	if (_backCP > 0) then { [_backCP, "support_refund"] remoteExec ["fnc_cp_adjust", 2] };
 	if (_backAP > 0) then { ["BLU", _backAP, "support_refund"] remoteExec ["fnc_ap_adjust", 2] };
 	// No purchase sound: the cue belongs to spending, and a refund firing it read as a second buy.
-	// The AP figure is appended to the CP message, not baked into a stringtable that carries one
-	// number, the same append discipline the escalation surcharge uses.
+	// The AP figure is appended through the same stringtable suffix the row label uses, so the other
+	// four languages get a localised fragment rather than an English one, and the CP message keeps
+	// its single %1.
 	private _msg = format [localize "STR_DUWS_T_SUPPORT_REFUNDED", _backCP];
-	if (_backAP > 0) then { _msg = _msg + format [" (+%1 AP)", _backAP] };
+	if (_backAP > 0) then { _msg = format [localize "STR_DUWS_T_support_ap_suffix", _msg, _backAP] };
 	hint _msg;
 	true
 };
