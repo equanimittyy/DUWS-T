@@ -149,7 +149,7 @@ tier. A zone with no tier recorded reads as IV, so a save written before tiers e
 the strength it had rather than silently halving.
 
 **A zone's tier is fixed because nothing can yet move it, not because it must never move.** The
-OPFOR commander will upgrade *and* reinforce zones exactly as it does towns — both sinks reach both
+OPCOM will upgrade *and* reinforce zones exactly as it does towns — both sinks reach both
 kinds of ground, and the roll only decides where a zone starts. It is fixed today because the
 commander does not exist, and the town side is merely further along: it has the hooks written
 ([§Garrison tiers 0 to IV](#garrison-tiers-0-to-iv)).
@@ -399,7 +399,7 @@ so the thresholds are a contract between them:
 
 **Reputation decides *whether* a town garrisons; it does not decide how hard.** Crossing `-10` is the
 capture — it writes tier I and nothing deeper in the negative writes more. Tiers II to IV are the
-OPFOR commander's to buy, so a town the player has merely ruined is not automatically a hard one:
+OPCOM's to buy, so a town the player has merely ruined is not automatically a hard one:
 the enemy has to have spent on it. Tier 0 is a town OPFOR does not hold, which is where both the
 neutral and the BLUFOR band sit.
 
@@ -760,7 +760,7 @@ the server, not just the one in front of the player. And a town's tier IV carrie
 slots to match the six `garrison:garrison_element` on the zone's tier IV row; changing one without the other
 makes "tier IV reaches the zone benchmark" untrue.
 
-**What has no lever yet.** Nothing prices any of the purchases, because the OPFOR commander does not
+**What has no lever yet.** Nothing prices any of the purchases, because OPCOM does not
 exist — the town's tier and reinforcement hooks are free to call today, and the debug menu is their
 only caller. Zones have no hooks at all yet, though the same two sinks are meant to reach them
 ([§Zone tiers](#zone-tiers)); when they do, whether a zone costs a town's price or more is the first

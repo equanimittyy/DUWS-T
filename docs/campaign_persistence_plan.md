@@ -11,8 +11,9 @@ the vehicles the player parked at a base.
 One rule governs everything below, including the features that are not built yet: **a thing is
 persistable when a single function can build it from numbers and strings.** Zones already satisfy
 it (`zone_meta_array` is exactly the argument list of `fnc_createZone`); FOBs nearly do; player
-fortifications and OPFOR taskings will only if they are designed that way from the start
-([§Features not built yet](#features-not-built-yet)).
+fortifications will only if they are designed that way from the start
+([§Features not built yet](#features-not-built-yet)), and the enemy commander's state carries the
+same contract into [`opfor_commander_plan.md`](opfor_commander_plan.md#persistence).
 
 ## Where the save lives
 
@@ -201,12 +202,12 @@ optimisation here; without it a dedicated server loses the campaign every time t
 the configuration this mission wants for a persistent campaign, and it raises a design question
 the mission has never had to answer: the 30-minute economy tick keeps paying, WARCOM keeps
 spawning waves, the side-mission generator keeps rolling and expiring missions, and — once the
-[OPFOR director](economy_plan.md#what-the-commander-spends-on) lands — the enemy keeps
+[OPCOM](economy_plan.md#what-the-commander-spends-on) lands — the enemy keeps
 buying garrisons and hardpoints against a player who is asleep.
 
 **Decided: the campaign idles at zero players.** A player who logs off overnight and returns to a
 poorer wallet and a fully upgraded enemy has lost ground by not playing, which is not a mechanic
-anyone chose — the OPFOR commander spending an unattended night buying garrisons is the sharp
+anyone chose — OPCOM spending an unattended night buying garrisons is the sharp
 edge of it. The server also burns CPU simulating a war nobody is watching. The gate goes on the
 campaign clocks — the economy tick, the WARCOM wave threads, the side-mission generator, the
 hardpoint and director build ticks — not on everything. The zone spawn/despawn checker and the JIP
@@ -279,14 +280,17 @@ substitute for it. That dead parameter pre-dates this plan and is left alone her
 None of these is persistence work, and all of them must land first. Each is independently worth
 doing.
 
-1. **Prove the store on a dedicated server.** Dedicated servers have historically written
+1. **Confirm the store reads back on our dedicated server.** Dedicated servers historically wrote
    profile-namespace variables to disk correctly and failed to read them back on the next start.
-   That is reported fixed, and the entire plan rests on it. Write one key, restart, read it: this
-   is a ten-minute check and every other task assumes its answer. **Run it with a fixed `-profiles`
-   and `-name`.** The namespace is read back for the profile that wrote it, so a server whose profile
-   identity moves between starts saves each session under a different one and presents as the engine
-   bug rather than as a launch-parameter mistake — and a probe that does not control for it cannot
-   tell the two apart.
+   What de-risks that is not that it is reported fixed but that the store is Antistasi's
+   `missionProfileNamespace`, which Antistasi runs in production on dedicated servers today
+   ([`campaign_save_format.md`](campaign_save_format.md)) — a mechanism with that much live mileage
+   is not the open unknown the plan rests on. The remaining failure mode is ours, not the engine's:
+   the namespace is read back for the profile that wrote it, so **run the check with a fixed
+   `-profiles` and `-name`.** A server whose profile identity moves between starts saves each session
+   under a different one and presents as the engine bug rather than as a launch-parameter mistake,
+   and a probe that does not control for it cannot tell the two apart. Write one key, restart, read
+   it — a ten-minute confirmation, not a gate the design hangs on.
 2. **Make `fnc_fob_server` replayable.** It needs an optional name, for the naming reason in the
    table above. Silencing its announcement belongs on `fnc_duws_dialogue`, not here: a restore
    replays several builders, and a per-function flag has to be re-invented at every one of them.
@@ -443,14 +447,8 @@ multiplier and the loss condition together.
 
 | Group | Kind | Contents |
 |---|---|---|
-| Commander | input | the archetype rolled at WARCOM init |
-| Town garrisons | outcome | purchased tier per town |
+| Town garrisons | outcome | purchased tier per town (`DUWS_townGarrisonTier`) |
 | Hardpoints | input | `hardpoint_pos_array`, `hardpoint_type_array`, `hardpoint_zone_array`, `hardpoint_state_array`, the `zone_hp_left_<n>` counters |
-| Taskings | outcome | one row per standing order: type, target, and budget already spent |
-
-The commander archetype is rolled once per campaign and never re-rolled
-([`economy_plan.md`](economy_plan.md#the-commander-has-an-archetype)), so a restore that
-re-rolls it changes the war the player has been fighting. One string.
 
 Hardpoints are an input for the same reason zones are:
 [`info/hardpoints.md`](info/hardpoints.md#siting) sites them in a generation phase after zone
@@ -460,11 +458,17 @@ standalone hardpoints run in that one phase and share the one registry, so a sin
 both. Cores and garrison groups are live objects rebuilt on approach from the stored composition,
 so they stay out of the save.
 
-**Taskings persist as orders, not as squads.** A tasking is bought for a squad the director was
-spawning anyway, so the purchase buys intent; the squad is live state and is regenerated like every
-other. Restoring the order lets the director re-issue it to the next squad it spawns, which is what
-the player experiences as continuity. Storing anything about the squad itself would be storing a
-group handle.
+Town garrison tier is stored because the store already exists: `DUWS_townGarrisonTier` is written the
+moment a town crosses `-10` into the OPFOR band, independently of the commander
+([`info/zones_and_civilians.md`](info/zones_and_civilians.md#garrison-tiers-0-to-iv)), so a restore
+that dropped it would repair every turned town back to ungarrisoned.
+
+**The commander's own state is deferred with the commander.** The archetype, its standing orders
+(taskings) and — if it is ever wanted — its belief store are snapshot content only once OPCOM exists,
+and their persistable shape and serialisation contract are
+[`opfor_commander_plan.md`](opfor_commander_plan.md#persistence)'s to define, not this plan's. The
+snapshot is a name-keyed hashmap ([§The snapshot](#the-snapshot)), so it gains those keys when the
+commander lands and omitting them until then costs a restore nothing.
 
 ### The players
 
@@ -739,7 +743,7 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 Discarding live units discards what was *spent* on them. A save taken while a WARCOM wave is in
 the air deletes the wave and the AP that bought it; a support in flight takes its CP with it. Over
 a campaign of restarts that is a slow leak out of both economies, and it gets worse once the
-[OPFOR director](economy_plan.md#what-the-commander-spends-on) is buying continuously.
+[OPCOM](economy_plan.md#what-the-commander-spends-on) is buying continuously.
 
 Antistasi reconciles this at save time rather than living with it: before writing, it walks live
 vehicles and units and folds their value back into the pools it is about to save — a full refund
@@ -787,7 +791,7 @@ refund attached to the one restore that consumes it.
 
 ## Task list
 
-- [ ] Prerequisites 1-3 above, each as its own change. Prerequisite 1 gates the rest.
+- [ ] Prerequisites 1-3 above, each as its own change; land Prerequisite 1's confirmation first.
 - [ ] Write `fnc_campaign_store.sqf`: namespace resolution, accessors, index, commit, scan. Verify: two campaigns written under separate IDs both appear in the index with correct headers; a commit replaces its own row rather than appending; `_prev` holds the previous payload.
 - [ ] Write `fnc_campaign_save.sqf` and dump a snapshot to the log without restoring. Verify: `toJSON` then `fromJSON` round-trips it unchanged, and nothing in it is an object, group, side or `netId`.
 - [ ] Write `fnc_campaign_restore.sqf` covering pools, bounties and ownership only. Verify: restart mid-campaign and confirm CP, AP, reputation and a farmed zone's reduced bounty all return, and that the campaign resumes on the date and hour it was saved at rather than on day three.

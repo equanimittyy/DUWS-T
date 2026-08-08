@@ -72,7 +72,7 @@ Mobile WARCOM groups only:
 | Vehicle crews for the above | `server/warcom/fnc_random_veh_blu_patrol.sqf:56-61` |
 
 The OPFOR half of this table is empty on purpose: the enemy patrol, assault and air spawners were
-deleted, so until an OPFOR commander replaces them nothing mobile spawns on that side. Whatever it
+deleted, so until OPCOM replaces them nothing mobile spawns on that side. Whatever it
 turns out to spawn is what this plan will hand off, and it is the reason the plan is worth keeping.
 
 Zone garrisons — `server/init_zones/fnc_spawn_team.sqf` and the garrison placers in

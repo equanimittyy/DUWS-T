@@ -131,7 +131,7 @@ standalone emplacement — priced `OPCOM_AP_TOWER`/`OPCOM_AP_TOPUP`/`OPCOM_AP_BA
 (`server_var_init.sqf:472-475`) in that priority order. Its band placement is still uniform, drawn
 through the same `DUWS_fnc_aoi_bandPos` sampler as the start pass — it has no belief about where
 the player operates to weight toward. That weighting, and the personality behind which action a
-commander prefers, is [`../opfor_commander_loop_plan.md`](../opfor_commander_loop_plan.md)'s to
+commander prefers, is [`../opfor_commander_plan.md`](../opfor_commander_plan.md)'s to
 add; nothing here reads a belief store or an archetype.
 
 A dev-only coverage overlay exists for inspecting the field in play: `fnc_debug_opcom_view` remote
