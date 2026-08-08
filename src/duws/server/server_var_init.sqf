@@ -326,6 +326,12 @@ WARCOM_blufor_ap = 0;publicVariable "WARCOM_blufor_ap";
 WARCOM_opfor_ap = 0;publicVariable "WARCOM_opfor_ap";
 WARCOM_init_done = false;publicVariable "WARCOM_init_done";
 
+// Declared here, not just in fnc_WARCOM_init: the area-of-influence read (DUWS_fnc_aoi_covers /
+// _bandPos) resolves zone control off this list, and hardpoint generation samples the band a full
+// phase before fnc_WARCOM_init runs. Undefined there, every band draw threw and the flank/AA/roadblock
+// passes placed nothing. Empty = every zone OPFOR, which is the truth at hour zero; WARCOM_init resets it.
+WARCOM_zones_controled_by_BLUFOR = [];
+
 // PATROL TYPES
 WARCOM_blu_attack_wave_type = [];
 
