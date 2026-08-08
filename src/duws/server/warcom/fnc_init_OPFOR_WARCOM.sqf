@@ -57,18 +57,19 @@ sleep 1;
     // the banner honest and finishes the pass before civilians start. Idempotent per zone -- the stored
     // cap guards a rebuild -- and the key is fnc_zone_key of the centre, the key the siting loop files under.
     //
-    // Roll the whole emplacement plan -- every zone's hardpoint count plus the band pass below --
-    // before laying any of it, so the banner counts hardpoints toward a real total, not zones. The
-    // radio count is rolled here because the seed call and the plan total must be handed the same one.
+    // Roll the whole emplacement plan -- every zone's ring count and the two flank lines -- before laying
+    // any of it, so the banner counts hardpoints toward a real total, not zones. The radio, AA and
+    // roadblock counts are deterministic (radio rolled here so the seed call and the plan total share it;
+    // AA and roadblocks each count serv_zones_array), so the plan hands back only the rolled ones.
     private _radioN = 1 + floor random 2;
-    ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_depthCounts", "_hpTotal"];
+    ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_backline", "_frontline", "_hpTotal"];
+    private _aaN = count serv_zones_array;
+    private _roadN = count serv_zones_array;
     private _hpDone = 0;
-    // One banner draw per emplacement, across the zone rings and the band alike, so the count climbs
-    // 1..N as each gun goes down rather than jumping a whole zone's batch at once. _hpDone is read live
-    // off this scope (dynamic scope holds across the call chain) and holds what prior phases finished,
-    // so _hpDone + _this is the absolute number of the emplacement just laid; each phase then advances
-    // _hpDone by its own plan. Ticked per placement inside every placing pass -- the zone rings, the
-    // radio seed and the AoI band -- so all three drive the one banner the same way.
+    // One banner draw per emplacement, across every pass alike, so the count climbs 1..N as each gun goes
+    // down rather than jumping a whole pass's batch at once. _hpDone is read live off this scope (dynamic
+    // scope holds across the call chain) and holds what prior passes finished, so _hpDone + _this is the
+    // absolute number of the emplacement just laid; each pass then advances _hpDone by its own plan.
     private _tick = {
         [format ["Generating hardpoints...<br/>%1 of %2", _hpDone + _this, _hpTotal]]
             remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
@@ -76,24 +77,38 @@ sleep 1;
     // Opening frame so the banner is not blank through the first zone's crew drop; the first tick
     // redraws the same "1 of N".
     1 call _tick;
+
+    // Zone rings first: each zone's own fortification, capped by its radius.
     {
         _x params ["", "_hpPos", "_hpSize"];
-        [_hpPos, _hpSize, [_hpPos] call fnc_zone_key, _zoneCounts select _forEachIndex, _tick, _depthCounts select _forEachIndex] call fnc_hardpoint_site_zone;
-        _hpDone = _hpDone + (_zoneCounts select _forEachIndex) + (_depthCounts select _forEachIndex);
+        [_hpPos, _hpSize, [_hpPos] call fnc_zone_key, _zoneCounts select _forEachIndex, _tick] call fnc_hardpoint_site_zone;
+        _hpDone = _hpDone + (_zoneCounts select _forEachIndex);
     } forEach zone_meta_array;
 
-    // The same pass continues into the area of influence -- the countryside the enemy holds outside its
-    // zones -- fortified with `count serv_zones_array` standalone emplacements spread uniformly across
-    // the band. Called, not spawned, like the zone loop: each sleeps in its crew drop, so finishing here
+    // Then the standalone passes across the area of influence -- the countryside the enemy holds outside
+    // its zones. Called, not spawned, like the zone loop: each sleeps in its crew drop, so finishing here
     // under the one generation banner keeps it honest. Before civilians because at hour zero the band is
     // the zones and the HQ alone -- towns are neutral and emit nothing yet.
     //
-    // Radio towers first: their 7 km coverage widens the band the standalone hardpoints then spread
-    // into, and each raises the OPFOR rep amplifier so the reputation war opens on the enemy's terms.
+    // Radio towers first: their coverage widens the band the rest spread into, and each raises the OPFOR
+    // rep amplifier so the reputation war opens on the enemy's terms.
     [_radioN, _tick] call fnc_hardpoint_seed_radio;
     _hpDone = _hpDone + _radioN;
-    [_tick] call fnc_hardpoint_site_aoi;
-    _hpDone = _hpDone + count serv_zones_array;
+
+    // Flank lines: gun nests leaning away from the fight (backline) and into it (frontline), offset from
+    // the zones rather than ringing them.
+    [_backline, false, _tick] call fnc_hardpoint_site_flank;
+    _hpDone = _hpDone + _backline;
+    [_frontline, true, _tick] call fnc_hardpoint_site_flank;
+    _hpDone = _hpDone + _frontline;
+
+    // AA spread uniformly through the countryside to deny the airspace, then roadblocks on the player's
+    // approaches and at large. The AA net reuses the band sampler with an AA-only mix.
+    [_aaN, "hpaa", "", fnc_hardpoint_band_cand, _tick, fnc_hardpoint_band_anchor, createHashMapFromArray [["AA", 1]]] call fnc_hardpoint_lay;
+    _hpDone = _hpDone + _aaN;
+    [_roadN, _tick] call fnc_hardpoint_site_roadblocks;
+    _hpDone = _hpDone + _roadN;
+
     [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 
     if (!isNil "CIV_PRESENCE" && {CIV_PRESENCE != "NONE"}) then { [] call fnc_civ_init_Tomata; };

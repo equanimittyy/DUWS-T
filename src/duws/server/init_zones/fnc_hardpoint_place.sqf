@@ -229,7 +229,7 @@ fnc_hardpoint_spawn_sited = {
     _res
 };
 
-// [_count, _keyPrefix, _regZoneKey, _fnCand] call fnc_hardpoint_lay -> hardpoints placed.
+// [_count, _keyPrefix, _regZoneKey, _fnCand, _fnTick, _fnReset, _weights] call fnc_hardpoint_lay -> hardpoints placed.
 //
 // The shared placement loop behind both the zone pass and the AoI band pass: they differ only in
 // where a candidate comes from, so that is the one thing passed in. _fnCand is code returning
@@ -257,11 +257,15 @@ fnc_hardpoint_spawn_sited = {
 //
 // Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop, so build-out cannot call it inline.
 fnc_hardpoint_lay = {
-    params ["_count", "_keyPrefix", "_regZoneKey", "_fnCand", ["_fnTick", {}], ["_fnReset", {[]}]];
+    params ["_count", "_keyPrefix", "_regZoneKey", "_fnCand", ["_fnTick", {}], ["_fnReset", {[]}], ["_weights", []]];
     // Zone rings and standalone emplacements roll different type mixes: the map's keys are the roll set,
     // its values the base weights. Standalone ground (the AoI band, OPCOM's solo builds) fields AA and
     // more roadblocks; a zone's ring does not. The zoneKey is the discriminator already threaded here.
-    private _weights = if (_regZoneKey isEqualTo "") then { DUWS_hardpointWeightSolo } else { DUWS_hardpointWeightZone };
+    // A scenario pass (a flank line, the AA net, the roadblock net) hands its own single-purpose map and
+    // skips that choice; [] means "unset, pick by zoneKey" for the callers that do not care.
+    if (_weights isEqualTo []) then {
+        _weights = if (_regZoneKey isEqualTo "") then { DUWS_hardpointWeightSolo } else { DUWS_hardpointWeightZone };
+    };
     // Flattened [type, weight, ...] for selectRandomWeighted; the roll reads base weight alone, no ground.
     private _typeRoll = [];
     { _typeRoll pushBack _x; _typeRoll pushBack (_weights get _x) } forEach (keys _weights);
@@ -295,9 +299,10 @@ fnc_hardpoint_lay = {
     _placed
 };
 
-// [_zonePos] call fnc_hardpoint_threat_bearing -> a compass bearing to bias a zone's depth emplacements
+// [_zonePos] call fnc_hardpoint_threat_bearing -> a compass bearing to bias a zone's flank emplacements
 // toward: the mean direction from the zone to BLU HQ (once placed) and the nearest two other zones -- the
-// corridors a front forms along. Averaged as unit vectors so bearings blend rather than arithmetic-mean
+// corridors a front forms along. The frontline leans into this bearing, the backline into its reverse.
+// Averaged as unit vectors so bearings blend rather than arithmetic-mean
 // (which wraps wrong across 0/360). Random when there is nothing to key on (no HQ, one lone zone) or the
 // bearings cancel, so a degenerate map still places depth, just uniformly.
 fnc_hardpoint_threat_bearing = {
@@ -315,31 +320,24 @@ fnc_hardpoint_threat_bearing = {
     _bx atan2 _by
 };
 
-// [_zonePos, _radius, _zoneKey, _count, _fnTick, _depth] call fnc_hardpoint_site_zone
+// [_zonePos, _radius, _zoneKey, _count, _fnTick] call fnc_hardpoint_site_zone
 //
-// A zone's deliberate emplacements, replacing the old random fortification ring. The zone's radius caps
-// how many it can hold (bigger zone, more ground and room to cover it); a random ring count up to that
-// cap is laid at campaign start, then _depth (1-2) more as defence in depth. The stored cap is the ring
-// cap plus the depth, so OPCOM tops the whole set back up toward it later.
-//
-// The ring is drawn from anywhere in the zone, faced radially out. The depth positions are biased toward
-// the threat bearing -- BLU HQ and the nearest zones, where the player will push from -- within a ~120 deg
-// arc at mid-to-outer radius, so the zone reads as layered toward the fight. A bias, not a front: OPFOR
-// has no intel at hour zero, so the ring still rings the whole zone and the depth only leans.
+// A zone's own fortification ring, drawn from anywhere in the zone and faced radially out. The zone's
+// radius caps how many it can hold (bigger zone, more ground and room to cover it); a random count up to
+// that cap is laid at campaign start, and the cap is stored so OPCOM tops the ring back up toward it later.
+// The layered defence around the zone -- nests leaning toward and away from the fight -- is the flank
+// passes' job now (fnc_hardpoint_site_flank), spread across the map rather than ringed per zone.
 //
 // Idempotent per zone -- the stored cap is the guard -- so a rebuild through fnc_createZone lays no second
-// set. Runs spawned, via fnc_hardpoint_lay's crew drop. _fnTick climbs the generation banner per gun; the
-// depth pass offsets it past the ring's plan so the count does not jump backwards between the two.
+// set. Runs spawned, via fnc_hardpoint_lay's crew drop. _fnTick climbs the generation banner per gun.
 fnc_hardpoint_site_zone = {
-    params ["_zonePos", "_radius", "_zoneKey", ["_count", -1], ["_fnTick", {}], ["_depth", -1]];
+    params ["_zonePos", "_radius", "_zoneKey", ["_count", -1], ["_fnTick", {}]];
     if (!isNil { missionNamespace getVariable (format ["DUWS_hpCap_%1", _zoneKey]) }) exitWith {};
     private _cap = (round (_radius / HP_CAP_STEP)) max 1;
-    // Counts arrive pre-rolled from fnc_hardpoint_plan_counts so the banner can total every emplacement up
-    // front; a standalone call (no plan) rolls its own against the cap.
+    // The count arrives pre-rolled from fnc_hardpoint_plan_counts so the banner can total every emplacement
+    // up front; a standalone call (no plan) rolls its own against the cap.
     if (_count < 0) then { _count = round (random _cap) };
-    if (_depth < 0) then { _depth = 1 + floor random 2 };
-    // Ceiling includes the depth, so a cleared depth emplacement is topped up like a ring one.
-    missionNamespace setVariable [format ["DUWS_hpCap_%1", _zoneKey], _cap + _depth];
+    missionNamespace setVariable [format ["DUWS_hpCap_%1", _zoneKey], _cap];
 
     private _placed = 0;
     if (_count > 0) then {
@@ -349,26 +347,7 @@ fnc_hardpoint_site_zone = {
         }, _fnTick] call fnc_hardpoint_lay;
     };
 
-    // Depth pass: draw into a wedge toward the threat bearing, at mid-to-outer radius. _realTick and
-    // _ringN are captured under names fnc_hardpoint_lay does not use: the wrapper runs inside lay's scope,
-    // where _fnTick already means the wrapper itself (referencing it would recurse) and _count already
-    // means lay's own count (the depth count, not this ring's) -- so both must be aliased out here.
-    private _depthPlaced = 0;
-    if (_depth > 0) then {
-        private _threat = [_zonePos] call fnc_hardpoint_threat_bearing;
-        private _realTick = _fnTick;
-        private _ringN = _count;
-        private _depthTick = { (_this + _ringN) call _realTick };
-        _depthPlaced = [_depth, format ["hpd_%1", _zoneKey], _zoneKey, {
-            private _ang = _threat + (random 120) - 60;
-            private _bp = _zonePos getPos [_radius * (0.4 + random 0.6), _ang];
-            private _c = [_bp, 0, _radius * 0.35, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
-            [_c, _zonePos getDir _c]
-        }, _depthTick] call fnc_hardpoint_lay;
-    };
-
-    ["INFO", "HARDPOINT", format ["%1 sited %2/%3 ring + %4/%5 depth (cap %6)",
-        _zoneKey, _placed, _count, _depthPlaced, _depth, _cap + _depth]] call fnc_log;
+    ["INFO", "HARDPOINT", format ["%1 sited %2/%3 ring (cap %4)", _zoneKey, _placed, _count, _cap]] call fnc_log;
 };
 
 // The band pass's local-search sampler, shared by the campaign-start pass and OPCOM's band build so
@@ -400,21 +379,81 @@ fnc_hardpoint_band_cand = {
     [_c, if (_azone isEqualTo []) then { random 360 } else { _azone getDir _c }]
 };
 
-// [] call fnc_hardpoint_site_aoi
+// [_count, _toHQ, _fnTick] call fnc_hardpoint_site_flank -> emplacements placed.
 //
-// The campaign-start band pass: `x` standalone combat hardpoints spread through the OPFOR-positive
-// area of influence, `x = count serv_zones_array` (the authoritative post-generation count). Anchors
-// are drawn uniformly across the band via fnc_hardpoint_band_anchor/_cand -- the war has not started,
-// so there is no front to weight toward and no intel to act on; where the enemy fortifies with intent
-// is OPCOM's later builds, not hour zero.
+// A flank line of gun nests (MG/AT/GMG, DUWS_hardpointWeightNest) anchored to the zones but standing
+// outside their rings, on one side of the fight. _toHQ true is the frontline -- offset toward the threat
+// bearing (BLU HQ and the nearest zones, where the player pushes from) and faced at HQ, so a flat-ground
+// nest points down the approach the player drives in on; a real slope still wins the fall line, overwatch
+// beating a nominal bearing (fnc_hardpoint_facing). _toHQ false is the backline -- the far side, threat
+// bearing reversed, faced radially out. Each emplacement draws a fresh random zone, so the count spreads
+// across the map rather than ringing one zone. Standalone rows ("") -- these are AoI emplacements keyed to
+// a zone's geometry, not part of its own ring cap, so a cleared one is not something OPCOM tops the zone up
+// for. Runs spawned, like the zone pass: fnc_hardpoint_spawn sleeps in the crew drop.
 //
-// Runs spawned, like the zone pass: fnc_hardpoint_spawn sleeps in the crew drop.
-fnc_hardpoint_site_aoi = {
-    params [["_fnTick", {}]];
-    private _count = count serv_zones_array;
-    if (_count <= 0) exitWith {};
-    private _placed = [_count, "hpaoi", "", fnc_hardpoint_band_cand, _fnTick, fnc_hardpoint_band_anchor] call fnc_hardpoint_lay;
-    ["INFO", "HARDPOINT", format ["AoI band pass sited %1/%2 standalone hardpoints", _placed, _count]] call fnc_log;
+// _toHQ is read from this scope by the reset and candidate blocks below -- they run inside fnc_hardpoint_lay
+// but resolve it up the call stack (SQF dynamic scope), so it need not be threaded through lay's params.
+fnc_hardpoint_site_flank = {
+    params ["_count", "_toHQ", ["_fnTick", {}]];
+    if (_count <= 0) exitWith { 0 };
+    if (zone_meta_array isEqualTo []) exitWith { 0 };
+    private _prefix = ["hpback", "hpfront"] select _toHQ;
+    private _placed = [_count, _prefix, "", {
+        // _this is the reset's anchor: [zoneCentre, radius, bearing].
+        _this params ["_zc", "_zr", "_bearing"];
+        // Frontline hugs the ring's edge on the HQ side (0.9-1.3 R); backline stands further out on the
+        // far side (1.0-1.6 R), a deeper second line. A wedge, not a point, so the line reads scattered.
+        private _base = [1.0, 0.9] select _toHQ;
+        private _span = [0.6, 0.4] select _toHQ;
+        private _ang = _bearing + (random 90) - 45;
+        private _bp = _zc getPos [_zr * (_base + random _span), _ang];
+        private _c = [_bp, 0, _zr * 0.4, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
+        // Frontline prefers to face HQ (radial = candidate -> HQ, which the facing keeps on flat ground);
+        // backline faces radially out from its zone. No HQ yet placed falls back to the zone radial.
+        private _rdir = if (_toHQ && {!(PosOfBLUHQ isEqualTo [])}) then { _c getDir PosOfBLUHQ } else { _zc getDir _c };
+        [_c, _rdir]
+    }, _fnTick, {
+        (selectRandom zone_meta_array) params ["", "_azc", "_azr"];
+        private _b = [_azc] call fnc_hardpoint_threat_bearing;
+        if (!_toHQ) then { _b = _b + 180 };
+        [_azc, _azr, _b]
+    }, DUWS_hardpointWeightNest] call fnc_hardpoint_lay;
+    ["INFO", "HARDPOINT", format ["%1 line sited %2/%3 nests", _prefix, _placed, _count]] call fnc_log;
+    _placed
+};
+
+// [_count, _fnTick] call fnc_hardpoint_site_roadblocks -> roadblocks placed.
+//
+// Roadblocks spread two ways, chosen per block: on the approaches the player drives in on (a point sampled
+// along the line from BLU HQ to a random zone) and at large across the OPFOR band. Either way the block is
+// a raw draw; fnc_hardpoint_best_ground snaps it to the nearest road and (standalone "") rejects a snap
+// that crossed into a zone, so the block sits on an open road, not a zone interior. A corridor is only
+// chosen when both HQ and a zone exist; otherwise the block falls back to a band draw. Standalone rows.
+// Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop.
+fnc_hardpoint_site_roadblocks = {
+    params ["_count", ["_fnTick", {}]];
+    if (_count <= 0) exitWith { 0 };
+    private _placed = [_count, "hproad", "", {
+        // _this is the reset's anchor: ["corridor", zoneCentre] or ["band", bandAnchor].
+        _this params ["_mode", "_ref"];
+        if (_mode isEqualTo "corridor") exitWith {
+            private _f = 0.3 + random 0.6;
+            private _hx = PosOfBLUHQ select 0;
+            private _hy = PosOfBLUHQ select 1;
+            private _p = [_hx + ((_ref select 0) - _hx) * _f, _hy + ((_ref select 1) - _hy) * _f, 0];
+            private _c = [_p, 0, HP_ROAD_SNAP, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
+            [_c, 0]  // heading is the road's, resolved by fnc_hardpoint_facing after the snap
+        };
+        _ref call fnc_hardpoint_band_cand
+    }, _fnTick, {
+        // Half the blocks aim at a corridor when there is one to aim at; the rest go to the band.
+        if (random 1 < 0.5 && {!(PosOfBLUHQ isEqualTo [])} && {!(zone_meta_array isEqualTo [])}) exitWith {
+            ["corridor", (selectRandom zone_meta_array) select 1]
+        };
+        ["band", call fnc_hardpoint_band_anchor]
+    }, createHashMapFromArray [["ROADBLOCK", 1]]] call fnc_hardpoint_lay;
+    ["INFO", "HARDPOINT", format ["roadblock pass sited %1/%2", _placed, _count]] call fnc_log;
+    _placed
 };
 
 // [_n] call fnc_hardpoint_seed_radio -> radio towers placed.
@@ -470,27 +509,33 @@ fnc_hardpoint_seed_radio = {
     ["INFO", "HARDPOINT", format ["seeded %1/%2 OPFOR radio towers", _placed, _n]] call fnc_log;
 };
 
-// [_radioN] call fnc_hardpoint_plan_counts -> [_zoneCounts, _depthCounts, _total]
+// [_radioN] call fnc_hardpoint_plan_counts -> [_zoneCounts, _backline, _frontline, _total]
 //
 // Rolls every campaign-start emplacement before any is laid, so the generation banner totals real
-// hardpoints (zone ring + depth + band) up front instead of counting zones. Per-zone ring count is
-// round(random cap) under the same radius cap fnc_hardpoint_site_zone stores; the depth count is a flat
-// 1-2. Both are returned so that pass lays the same numbers this total promised; the band adds count
-// serv_zones_array plus the radio count, which the caller rolls (fnc_hardpoint_seed_radio must be handed
-// the same value). Here, not in WARCOM init, so the cap formula is not duplicated away from HP_CAP_STEP.
+// hardpoints up front instead of counting zones. The six scenarios: per-zone ring (round(random cap)
+// under the same radius cap fnc_hardpoint_site_zone stores, returned so that pass lays the same numbers);
+// the two flank lines (each a random count between half the zones and all of them); radio (rolled by the
+// caller and passed in, since the seed call must be handed the same value); and the AA and roadblock nets,
+// each a flat count serv_zones_array the caller derives. The rolled numbers are returned; the deterministic
+// ones (radio, AA, roadblocks) are only summed into the total. Here, not in WARCOM init, so the cap and
+// count-range formulas are not duplicated away from HP_CAP_STEP.
 fnc_hardpoint_plan_counts = {
     params ["_radioN"];
+    private _zc = count serv_zones_array;
     private _zoneCounts = [];
-    private _depthCounts = [];
-    private _total = (count serv_zones_array) + _radioN;
+    // Radio + AA (_zc) + roadblocks (_zc) are the deterministic passes; sum them straight in.
+    private _total = _radioN + _zc + _zc;
     {
         _x params ["", "", "_hpSize"];
         private _cap = (round (_hpSize / HP_CAP_STEP)) max 1;
         private _n = round (random _cap);
-        private _d = 1 + floor random 2;
         _zoneCounts pushBack _n;
-        _depthCounts pushBack _d;
-        _total = _total + _n + _d;
+        _total = _total + _n;
     } forEach zone_meta_array;
-    [_zoneCounts, _depthCounts, _total]
+    // Each flank line: a random count between half the zones (floored) and all of them.
+    private _lo = floor (_zc / 2);
+    private _backline = _lo + floor random (_zc - _lo + 1);
+    private _frontline = _lo + floor random (_zc - _lo + 1);
+    _total = _total + _backline + _frontline;
+    [_zoneCounts, _backline, _frontline, _total]
 };

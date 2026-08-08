@@ -408,6 +408,11 @@ DUWS_hardpointWeightZone = createHashMapFromArray [
 DUWS_hardpointWeightSolo = createHashMapFromArray [
     ["MG", 3], ["AA", 2], ["ROADBLOCK", 3], ["AT", 1], ["GMG", 1]
 ];
+// The gun-nest set the flank passes draw from -- backline and frontline both field only direct-fire nests,
+// so AA and roadblocks (their own passes) stay out of the mix. Same MG-backbone weighting as the zone ring.
+DUWS_hardpointWeightNest = createHashMapFromArray [
+    ["MG", 3], ["AT", 2], ["GMG", 1]
+];
 
 // Readable name per hardpoint type, for the destroyed-hardpoint notification. English labels; the
 // localisation carries the sentence around them, not these.
