@@ -18,8 +18,8 @@ see [`info/economy.md`](info/economy.md). This plan covers what changes.
 
 ## Where each currency comes from
 
-Territory type decides currency, the way Company of Heroes ties a resource to a point type. The
-two kinds of ground the mission already generates carry the right scarcity for it:
+Territory type decides currency — each kind of ground pays one pool. The two kinds of ground the
+mission already generates carry the right scarcity for it:
 
 - **Zones** — few, heavily garrisoned, hard-won — are the **Army Power** source. Six by default,
   against a map of roughly 15-22 towns on Altis (estimated from the selection rules, not a fixed
@@ -29,9 +29,9 @@ two kinds of ground the mission already generates carry the right scarcity for i
 
 A zone pays over its life in two currencies, split event-versus-hold. **Holding** it pays a per-tick
 AP *trickle* (the strategic dividend). **Taking** it pays on the event: the first capture ever pays
-BLUFOR a one-time CP + AP liberation bonus, tracked in the save so it never pays twice; each later
-recapture pays only the decaying CP bounty; and OPFOR is paid AP every time it loses the zone, so a
-fast advance funds the counter-attack. A town pays its holder a per-tick income while its reputation
+BLUFOR a one-time CP + AP liberation bonus, tracked in the save so it never pays twice — a recapture
+pays nothing, the zone's reward having been earned once; and OPFOR is paid AP every time it loses
+the zone, so a fast advance funds the counter-attack. A town pays its holder a per-tick income while its reputation
 sits in that side's band.
 
 **The routing is per side.** For BLUFOR the split is clean — towns pay CP, zones pay AP. OPFOR
@@ -64,17 +64,17 @@ the rates below untouched. Above it, total passive income at full control grows 
 more; it stops paying *proportionally* more.
 
 **Only passive hold income is throttled.** Event income is left alone: mission rewards are paced by
-their own cooldown and do not scale with zone count, and a zone capture bounty rewards an action
+their own cooldown and do not scale with zone count, and the first-capture bonus rewards an action
 rather than a holding. The factor multiplies the BLUFOR zone AP trickle and town CP income, and the
 OPFOR zone AP trickle and town AP income — every passive faucet on both sides, so a large campaign
 does not hand the enemy a proportionally larger war chest either.
 
 | zones | throttle | zone AP/hr, full (BLUFOR) | town CP/hr, full (BLUFOR) |
 |---|---|---|---|
-| 6 | 1.00 | 60 | 90 |
-| 12 | 0.71 | 85 | 127 |
-| 18 | 0.58 | 104 | 156 |
-| 24 | 0.50 | 120 | 180 |
+| 6 | 1.00 | 60 | 108 |
+| 12 | 0.71 | 85 | 153 |
+| 18 | 0.58 | 104 | 187 |
+| 24 | 0.50 | 120 | 216 |
 
 Both constants are the tuning surface: `k` toward 1 flattens total income across campaign sizes,
 toward 0 restores the linear payout; `REF_ZONES` sets the size below which nothing throttles and
@@ -93,13 +93,11 @@ Most of the tree already holds this, which is why the constraint is cheap:
 | Figure | Derived at | Integer by |
 |---|---|---|
 | Zone worth | `server/init_zones/fnc_locatorzones_random.sqf:49` | `round (radius / 10)` |
-| Zone bounty | generation, from worth × `zone_cp_capture` | rounded at generation |
-| Bounty decay | `fnc_captured.sqf:70`, `fnc_blufor_cap.sqf:69` | `round (_bounty * zone_cp_recapture)` |
 | Retake / consolation swing | `fnc_opfor_cap.sqf`, and the BLUFOR-capture consolation | `round (_points * zone_ap_swing)` |
 | First-capture bonus | `fnc_captured.sqf`, once ever per zone | authored CP + AP, whole |
 | Escalation-scaled price | `fnc_escalation_cost` | `ceil` |
 | Mission CP reward | `server/missions/fnc_mission_reward.sqf:14` | multiplier is 1-5, whole |
-| Town income | `civ_town_ap` | authored 1-4 (CP to BLUFOR, AP to OPFOR) |
+| Town income | `civ_town_ap` | CP 1-5 by town size (BLUFOR); AP its own rate (OPFOR) |
 | Zone AP trickle | econ tick, per held zone | `5` per zone, whole |
 | Campaign-size throttle | `DUWS_econ_throttle`, set at generation | fraction; each faucet rounds after scaling |
 
@@ -134,8 +132,9 @@ That is a design constraint, not a nicety, and it is why the answer to "make CP 
 The CP faucet moves from zones to towns
 ([§Where each currency comes from](#where-each-currency-comes-from)), but its shape is unchanged:
 passive hold pays a recurring income no one-time unlock can absorb. Banded towns pay their worth
-every 30 minutes, throttled by campaign size, and zone captures pay a decaying CP bounty on top —
-against eight permanent unlocks at 5-25 CP, roughly 200 CP across a campaign. A one-time unlock
+(1-5 CP by town size) every 30 minutes, throttled by campaign size, and each zone's first capture
+pays a one-time CP lump on top — against eight permanent unlocks at 5-25 CP, roughly 200 CP across
+a campaign. A one-time unlock
 cost cannot absorb a recurring faucet at any price, and raising the shopping list only postpones
 the same problem.
 
@@ -256,8 +255,9 @@ wallet and never the counter. The two ladders therefore ride the recurring fauce
 actually earns — the zone trickle and missions for BLUFOR, town income and the flat floor for
 OPFOR — which are the ones contested over time rather than banked in a rush.
 
-This is the same split the CP bounty already makes by decaying on recapture, and nothing enforces
-it structurally on either side.
+The first-capture bonus makes this split structural on the player's side — a zone's CP and AP are
+earned once and never again, so there is nothing to farm — where the enemy's wallet swing is still
+enforced by hand.
 
 `fnc_ap_adjust` stays the sole writer and owns both counters, so the integer invariant and the log
 stay in one place. Each counter is a running sum of already-rounded positive deltas and is
@@ -339,9 +339,9 @@ never pays it twice. That is what makes the anti-farm invariant structural rathe
 BLUFOR earns a zone's AP exactly once, so lose-then-retake yields no fresh AP however often it
 flips. It maps onto the two capture paths already in the tree — `fnc_captured.sqf` is the first-ever
 capture and pays the bonus, crediting the wallet and the earned counter; `fnc_blufor_cap.sqf` is a
-recapture and pays only the decaying CP bounty (`round (_bounty * zone_cp_recapture)`), no AP. The
-bonus is a flat authored CP+AP pair, not a worth fraction, so a small zone is worth liberating too;
-the amounts are tuning ([open](#open-questions)).
+recapture and pays nothing — the zone's CP and AP were both earned at the first capture, so there is
+no reflip income at all. The bonus is a flat authored CP+AP pair, not a worth fraction, so a small
+zone is worth liberating too; the amounts are tuning ([open](#open-questions)).
 
 **Passive is not idle.** An earlier draft forbade any passive AP, on the reasoning that a trickle
 makes tier gates a matter of waiting. The zone trickle is passive per tick yet earned per zone: it
@@ -815,7 +815,7 @@ Each phase is independently shippable, and the ordering is forced rather than ch
 | Phase | Contains | Why it is gated here |
 |---|---|---|
 | **Floor** | `fnc_ap_adjust` integer invariant; both earned counters and both tier globals, seeded by the presets; the eight live pool reads switched to tiers; CP, AP and tier in the map readout; presets regenerated to the rungs | Without the tier globals the first AP spend downgrades that side's own patrols. Without a readout, deciding what to buy is guesswork |
-| **Faucet reroute** | Town income routed BLUFOR→CP, OPFOR→AP; the 5 AP/zone hold trickle on both sides; `DUWS_econ_throttle` on every passive faucet; the one-time first-capture CP+AP bonus (persisted, BLUFOR); OPFOR consolation AP on every zone loss; mission AP remapped to a 5-20 band; mission CP lifted with no town reputation; the OPFOR flat income; delete the AP-to-CP converter | This is the model. Playable the moment it lands; nothing downstream matters until the faucets are right |
+| **Faucet reroute** | Town income routed BLUFOR→CP (1-5 by town size), OPFOR→AP; the 5 AP/zone hold trickle on both sides; `DUWS_econ_throttle` on every passive faucet; the one-time first-capture CP+AP bonus (persisted, BLUFOR); delete the CP capture bounty and its recapture decay; OPFOR consolation AP on every zone loss; mission AP remapped to a 5-20 band; mission CP lifted with no town reputation; the OPFOR flat income; delete the AP-to-CP converter | This is the model. Playable the moment it lands; nothing downstream matters until the faucets are right |
 | **CP becomes a flow** | Per-use CP on supports; the intel-analysis cap | Independent of AP entirely |
 | **AP becomes spendable** | The dual case in `fnc_pool_try_spend`; AP halves on advanced supports and combat vehicles; the refund's second currency | The permanent/consumable split and the CP refund are in; what is left is the second pool |
 | **The commander** | One director thread, one archetype roll, four sinks; town garrisons I-IV; hardpoints; town events | Everything above is its budget |
@@ -850,9 +850,8 @@ Each phase is independently shippable, and the ordering is forced rather than ch
   commander that banks could still fortify hard in its strongest hours. Only play shows whether the
   throttle and the counter exclusion together are enough.
 - **The first-capture bonus and consolation amounts.** The one-time CP + AP liberation bonus and
-  the OPFOR per-loss consolation are placeholders. The plan has the bonus *replace* the first
-  capture's decaying bounty (recaptures pay the bounty, first captures the bonus); whether it should
-  instead stack on top is a play question, as are the two figures and the consolation rate.
+  the OPFOR per-loss consolation are placeholders — the two bonus figures and the consolation rate
+  want play-test. Recapture pays BLUFOR nothing, so there is no bounty to weigh them against.
 - **The AP component of each advanced support and combat vehicle.** The starting values here are
   round numbers against a 300 AP campaign budget; what they should be is a play-test question.
 - **Where the boundary falls for armed cars and wheeled APCs.** Tanks and unarmed transport are
