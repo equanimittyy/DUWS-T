@@ -275,27 +275,30 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     };
 }]];
 
-// Files the hardpoint as a streamed site and adopts the composition and men it was just built with.
-// The streaming spec is the type's, not the caller's: spawnRadius, grace, neverStream and airRing come
-// from DUWS_hardpointStreaming and the loose garrison from DUWS_hardpointGarrison, so the dev tool, the
-// zone loop and OPCOM all site a given type the same way and one pair of tables tunes them. hpSide and
-// the garrison token are the serialisable spec a later raise rebuilds from.
+// Files the hardpoint as a streamed site over the composition the caller just built, and either crews it
+// now or stows it uncrewed. The streaming spec is the type's, not the caller's: spawnRadius, grace,
+// neverStream and airRing come from DUWS_hardpointStreaming and the loose garrison from
+// DUWS_hardpointGarrison, so the dev tool, the zone loop and OPCOM all site a given type the same way and
+// one pair of tables tunes them. hpSide and the garrison token are the serialisable spec a later raise
+// rebuilds from.
 //
-// A standalone hardpoint streams on player presence over its own ring; a zone one -- a _zoneKey names
-// its parent -- instead mirrors that zone's garrison, so a zone's whole defence rises and falls
-// together rather than each emplacement waking on its own radius. Either way it starts awake because it
-// is created deployed and manned -- an occupant asleep over a standing composition would raise a second
-// garrison on the first tick -- and the birth-stow below takes it down at once if nothing wants it up.
+// A standalone hardpoint streams on player presence over its own ring; a zone one -- a _zoneKey names its
+// parent -- instead mirrors that zone's garrison, so a zone's whole defence rises and falls together
+// rather than each emplacement waking on its own radius. The caller builds but never mans it: an
+// emplacement a player is already near (or a resident type) is crewed here and stands deployed, and every
+// other is stowed uncrewed at once and re-crewed by the raise worker on approach -- the zone lifecycle,
+// where a garrison rises on stream-in, not at build. So campaign start never pays the drop-and-settle for
+// the emplacements nobody is near, and an occupant is never left asleep over a standing composition.
 //
-// neverStream (mortar, artillery) is kept resident so OPCOM can task it with no player near: its
-// composition is pinned against every stow and release, so only a clear takes the battery down. It
-// keeps the tick, unlike a zone's driven emplacement -- the tick's raise/stow arm short-circuits for
-// it, but its clearance check still runs, so a destroyed battery is noticed like any other.
+// neverStream (mortar, artillery, minefield) is kept resident so OPCOM can task it with no player near:
+// its composition is pinned against every stow and release, so only a clear takes it down. It keeps the
+// tick, unlike a zone's driven emplacement -- the tick's raise/stow arm short-circuits for it, but its
+// clearance check still runs, so a destroyed battery is noticed like any other.
 //
 // _zoneKey ties the hardpoint to a parent zone: it drives streaming (the hardpoint follows that zone)
 // and rides the DUWS_hardpoints row for OPCOM. "" is a standalone hardpoint on its own ring.
 fnc_hardpoint_register = {
-    params ["_key", "_type", "_pos", ["_men", []], ["_side", "opfor"], ["_zoneKey", ""], ["_dir", 0]];
+    params ["_key", "_type", "_pos", ["_side", "opfor"], ["_zoneKey", ""], ["_dir", 0]];
     (DUWS_hardpointStreaming getOrDefault [_type, [600, 300, false, 0]])
         params ["_radius", "_grace", "_neverStream", "_airRing"];
     [_key, _pos, _radius, "stream"] call fnc_site_register;
@@ -306,17 +309,7 @@ fnc_hardpoint_register = {
     _occ set ["airRing", _airRing];
     _occ set ["neverStream", _neverStream];
     _occ set ["hpZoneKey", _zoneKey];
-    _occ set ["awake", true];
     _occ set ["lastSeen", time];
-    ([_key] call fnc_site_roster) append _men;
-    // Peak = the garrison it stood up with; its presence marks the hardpoint deployed and worth
-    // judging for clearance.
-    missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], [_key] call fnc_site_alive];
-
-    if (_neverStream) then {
-        { [_x, _key, true] call fnc_duws_keep } forEach
-            ((DUWS_compositions getOrDefault [_key, []]) select { !isNull _x });
-    };
 
     // Registry row for OPCOM and the map readout: [key, pos, type, side, zone, revealed, dir]. Presence
     // is liveness; the clearance check deletes the row when the emplacement falls. Revealed follows the
@@ -343,19 +336,39 @@ fnc_hardpoint_register = {
 
     [_key, "garrison", DUWS_hardpointHooks] call fnc_site_hooks_set;
 
-    // Built deployed, but stowed at once if nobody is near to see it -- the way a zone stows at
-    // build-out. Otherwise every hardpoint the siting loop lays at campaign start carries its crew for
-    // a full grace period while the players are still at their HQ. Resident types are exempt: they
-    // never stow. The dev tool spawns onto the player, so its hardpoints stay up.
-    if (_neverStream) exitWith {};
+    // Crew now or stow. The caller built the composition but never manned it, so the drop-and-settle is
+    // paid here only for an emplacement that will actually stand: a resident type, or one a player is
+    // already near. Everything else -- every hardpoint the siting loop lays while the players are still at
+    // their HQ -- is stowed uncrewed at once and re-crewed by the raise worker when someone approaches, so
+    // campaign start no longer pays the settle for emplacements nobody is near. The dev tool spawns onto
+    // the player, so its hardpoints read up and crew immediately.
+    private _objs = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x };
+    private _crewNow = {
+        private _men = [_objs, _pos, _side, _key, _occ get "hpGarrison"] call fnc_hardpoint_garrison;
+        ([_key] call fnc_site_roster) append _men;
+        _occ set ["awake", true];
+        // Peak = the garrison it stood up with; its presence marks the hardpoint deployed and worth
+        // judging for clearance.
+        missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], [_key] call fnc_site_alive];
+    };
+
+    if (_neverStream) exitWith {
+        // Resident (mortar, artillery, minefield): pinned against every stow so OPCOM can task it with no
+        // player near and a minefield's mines are never stowed off the map. Always manned, never stows.
+        { [_x, _key, true] call fnc_duws_keep } forEach _objs;
+        call _crewNow;
+    };
+
     private _up = if (_zoneKey isEqualTo "") then {
         private _players = (call BIS_fnc_listPlayers) select { alive _x };
         [_players, _pos, _radius, _airRing] call fnc_site_nearOrAir
     } else {
         _zoneKey call DUWS_fnc_hardpointZoneAwake
     };
-    if (!_up) then {
+    if (_up) then {
+        call _crewNow;
+    } else {
         _occ set ["awake", false];
-        [_key] call DUWS_fnc_hardpointStow;
+        [_key] call DUWS_fnc_hardpointStow;   // stows the uncrewed composition; the raise re-crews on approach
     };
 };

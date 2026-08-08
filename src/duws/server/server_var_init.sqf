@@ -423,8 +423,8 @@ DUWS_hardpointName = createHashMapFromArray [
 ];
 
 // The loose garrison each hardpoint type fields: one DUWS_teamRosters token, or an array of them for a
-// type that fields several groups, each resolved per side at spawn -- read by fnc_hardpoint_spawn and
-// fnc_hardpoint_register so every placer fields it the same, the way DUWS_hardpointStreaming drives
+// type that fields several groups, each resolved per side when crewed -- read by fnc_hardpoint_register
+// and the raise worker so every placer fields it the same, the way DUWS_hardpointStreaming drives
 // streaming. "" is no loose garrison: a minefield alone gets none, its men would stand on its own mines.
 // A radio tower is a strategic objective with 5 km of reach, so it fields a heavier patrol than a lone
 // gun -- a rifle team plus two weapons teams (the only AA+AT roster) to contest the air and armour a

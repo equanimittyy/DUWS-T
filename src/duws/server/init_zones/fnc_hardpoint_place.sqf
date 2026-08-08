@@ -149,19 +149,6 @@ fnc_hardpoint_garrison = {
     _men
 };
 
-// [_type, _pos, _dir, _side, _key] call fnc_hardpoint_spawn -> [objects, men]
-//
-// Build plus man: the composition, a gunner on every static gun, then the type's loose garrison. The
-// garrison is the type's, read from DUWS_hardpointGarrison, so every placer -- the zone loop, the dev
-// tool, OPCOM -- fields the same defenders for a type without being told. Sleeps (the drop-and-settle
-// in DUWS_fnc_manStatics), so it must run scheduled.
-fnc_hardpoint_spawn = {
-    params ["_type", "_pos", ["_dir", 0], ["_side", "opfor"], ["_key", "world"], ["_variant", "AT"]];
-    private _objs = [_type, _pos, _dir, _side, _key, _variant] call fnc_hardpoint_build;
-    private _men = [_objs, _pos, _side, _key, DUWS_hardpointGarrison getOrDefault [_type, ""]] call fnc_hardpoint_garrison;
-    [_objs, _men]
-};
-
 #define HP_CAP_STEP 250
 #define HP_SITE_SPACING 50
 #define HP_TYPE_DRAWS 18     // draws spent hunting a spot for one rolled type before it is dropped
@@ -208,14 +195,19 @@ fnc_hardpoint_best_ground = {
     selectRandomWeighted _pool
 };
 
-// [_type, _fnCand, _key, _regZoneKey, _anchor, _side] call fnc_hardpoint_spawn_sited -> [_objs, _men] | []
+// [_type, _fnCand, _key, _regZoneKey, _anchor, _side] call fnc_hardpoint_spawn_sited -> [_objs, []] | []
 //
 // Directed smart-spawn: hunt the best ground a named type can hold among _fnCand's draws (survey + score,
-// LOS and field of fire included), face it, spawn it and file it under _key. Returns [] if no draw held
+// LOS and field of fire included), face it, build it and file it under _key. Returns [] if no draw held
 // the type. This is the tail fnc_hardpoint_lay runs per rolled type; a caller that already knows the type
 // it wants -- OPCOM reinforcing a specific gap with a specific weapon -- calls here instead of rolling a
 // slate. _regZoneKey files the row under a parent zone ("" = standalone, which also gates the roadblock
-// snap out of zone interiors). Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop.
+// snap out of zone interiors).
+//
+// Build, then register -- register decides whether to crew now or stow: a hardpoint out of a player's reach
+// is stowed uncrewed and only re-crewed when someone approaches, so campaign start never pays the
+// drop-and-settle for emplacements nobody is near. Runs spawned: register sleeps in the crew drop when it
+// does crew one inline.
 fnc_hardpoint_spawn_sited = {
     params ["_type", "_fnCand", "_key", ["_regZoneKey", ""], ["_anchor", []], ["_side", "opfor"]];
     private _best = [_type, _fnCand, _anchor, _regZoneKey isEqualTo ""] call fnc_hardpoint_best_ground;
@@ -224,9 +216,10 @@ fnc_hardpoint_spawn_sited = {
     // A roadblock faces along its road; overwatch nests face down the slope they overlook; the rest keep
     // the radial the draw carried.
     private _dir = [_type, _facts select 10, _facts select 11, _radialDir, _facts select 12] call fnc_hardpoint_facing;
-    private _res = [_type, _cand, _dir, _side, _key] call fnc_hardpoint_spawn;
-    [_key, _type, _cand, _res select 1, _side, _regZoneKey, _dir] call fnc_hardpoint_register;
-    _res
+    private _objs = [_type, _cand, _dir, _side, _key] call fnc_hardpoint_build;
+    if (_objs isEqualTo []) exitWith { [] };  // no composition for the type -- nothing sited
+    [_key, _type, _cand, _side, _regZoneKey, _dir] call fnc_hardpoint_register;
+    [_objs, []]
 };
 
 // [_count, _keyPrefix, _regZoneKey, _fnCand, _fnTick, _fnReset, _weights] call fnc_hardpoint_lay -> hardpoints placed.
@@ -250,12 +243,14 @@ fnc_hardpoint_spawn_sited = {
 // and the fire-support types are in no map, OPCOM's to place, never rolled here. _radialDir is the outward
 // "toward the approach" bearing fnc_hardpoint_facing hands the flat types, while the overwatch nests
 // face their own fall line. _regZoneKey files each row under a parent zone ("" = standalone). Every
-// emplacement carries the type's own garrison from fnc_hardpoint_spawn on top of any gun's crew.
+// emplacement carries the type's own garrison, fielded by fnc_hardpoint_register when it crews (or by the
+// raise that later crews it), on top of any gun's crew.
 //
 // _fnTick, if given, is called with the running placed count after each placement -- a batch pass with
 // no per-zone sub-unit to report between (the AoI band) can still tick the generation banner.
 //
-// Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop, so build-out cannot call it inline.
+// Runs spawned: fnc_hardpoint_register sleeps in the crew drop when it crews one inline, so build-out
+// cannot call it inline.
 fnc_hardpoint_lay = {
     params ["_count", "_keyPrefix", "_regZoneKey", "_fnCand", ["_fnTick", {}], ["_fnReset", {[]}], ["_weights", []]];
     // Zone rings and standalone emplacements roll different type mixes: the map's keys are the roll set,
@@ -372,8 +367,8 @@ fnc_hardpoint_band_cand = {
 // faced away from HQ. The bias is a sampled lean: each emplacement draws HP_FLANK_SAMPLES band anchors and
 // keeps the one nearest (front) or farthest (back) from HQ, then hunts ground around it like the AoI band
 // pass. No HQ placed yet leaves nothing to weight toward, so it falls back to a plain band anchor.
-// Standalone rows ("") -- band emplacements, not part of any zone's ring cap. Runs spawned: fnc_hardpoint_spawn
-// sleeps in the crew drop.
+// Standalone rows ("") -- band emplacements, not part of any zone's ring cap. Runs spawned:
+// fnc_hardpoint_register sleeps in the crew drop when it crews one inline.
 //
 // _toHQ is read from this scope by the reset and candidate blocks below -- they run inside fnc_hardpoint_lay
 // but resolve it up the call stack (SQF dynamic scope), so it need not be threaded through lay's params.
@@ -420,7 +415,7 @@ fnc_hardpoint_site_flank = {
 // a raw draw; fnc_hardpoint_best_ground snaps it to the nearest road and (standalone "") rejects a snap
 // that crossed into a zone, so the block sits on an open road, not a zone interior. A corridor is only
 // chosen when both HQ and a zone exist; otherwise the block falls back to a band draw. Standalone rows.
-// Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop.
+// Runs spawned: fnc_hardpoint_register sleeps in the crew drop when it crews one inline.
 fnc_hardpoint_site_roadblocks = {
     params ["_count", ["_fnTick", {}]];
     if (_count <= 0) exitWith { 0 };
@@ -456,7 +451,7 @@ fnc_hardpoint_site_roadblocks = {
 // ground nor nest coverage, and each crowns the highest crest in its pool. Each
 // raises DUWS_opforRadioLevel through fnc_hardpoint_register's recount and projects AOI_TOWER_REACH of
 // coverage. A global sequence keys the towers, so a campaign-start seed and OPCOM's later raises never
-// collide. Runs spawned: fnc_hardpoint_spawn sleeps in the crew drop.
+// collide. Runs spawned: fnc_hardpoint_register sleeps in the crew drop when it crews one inline.
 #define HP_RADIO_SPACING 250
 #define HP_RADIO_SAMPLES 6
 fnc_hardpoint_seed_radio = {
@@ -492,8 +487,8 @@ fnc_hardpoint_seed_radio = {
         missionNamespace setVariable ["DUWS_radioSeq", _seq + 1];
         private _key = format ["hpradio_%1", _seq];
         private _rdir = random 360;
-        (["RADIO", _c, _rdir, "opfor", _key] call fnc_hardpoint_spawn) params ["_objs", "_men"];
-        [_key, "RADIO", _c, _men, "opfor", "", _rdir] call fnc_hardpoint_register;
+        ["RADIO", _c, _rdir, "opfor", _key] call fnc_hardpoint_build;
+        [_key, "RADIO", _c, "opfor", "", _rdir] call fnc_hardpoint_register;
         _placed = _placed + 1;
         _placed call _fnTick;
     };
