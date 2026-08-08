@@ -291,18 +291,26 @@ fnc_town_site_key = {
 // the town garrison was slower, at thirty.
 #define SITE_TICK 10
 
-// [_players, _pos, _ring, _airRing] call fnc_site_nearOrAir -> is anybody present.
+// [_players, _pos, _ring] call fnc_site_near -> is any player within the ring. The presence test
+// for occupants that answer to players alone -- a town's crowd, and a base thawing on approach.
+fnc_site_near = {
+    params ["_players", "_pos", "_ring"];
+    (_players findIf { _x distance _pos < _ring }) >= 0
+};
+
+// [_pos, _ring, _minAI, _airRing] call fnc_site_bluforOrAir -> BLUFOR present.
 //
-// The ground ring answers for everyone; the air ring, when an occupant declares one (0 = none),
-// answers additionally for players in aircraft only. An AA emplacement has to wake for a jet passing
-// high overhead, out where its ground ring would never reach, without every distant foot patrol
-// waking it too. Shared by the poller and the hardpoint raise worker so both judge presence the same
-// way -- a wake and its confirmation reaching opposite answers would strand the emplacement.
-fnc_site_nearOrAir = {
-    params ["_players", "_pos", "_ring", ["_airRing", 0]];
-    if ((_players findIf { _x distance _pos < _ring }) >= 0) exitWith { true };
+// The ground ring is answered by fnc_duws_bluforNear (a player, or _minAI friendly AI); the air
+// ring, when an occupant declares one (0 = none), additionally by any single BLUFOR aircraft --
+// player or AI flown -- reaching in from beyond it. An AA emplacement must wake for a jet high
+// overhead its ground ring never reaches, and bluforNear discounts anything airborne, so the air
+// answer is folded back in here. The hardpoint form of presence, shared by the raise worker and
+// the register so a wake and its confirmation cannot reach opposite answers and strand the gun.
+fnc_site_bluforOrAir = {
+    params ["_pos", "_ring", ["_minAI", 2], ["_airRing", 0]];
+    if ([_pos, _ring, _minAI] call fnc_duws_bluforNear) exitWith { true };
     if (_airRing <= 0) exitWith { false };
-    (_players findIf { (vehicle _x) isKindOf "Air" && {_x distance _pos < _airRing} }) >= 0
+    ((_pos nearEntities [["Air"], _airRing]) findIf { ({ side _x == WEST } count (crew _x)) > 0 }) >= 0
 };
 
 // One thread for every site, replacing a thread per zone plus a sleeper per FOB plus two town loops.
@@ -332,6 +340,10 @@ fnc_site_poller = {
         // occupant says which it wants -- but neither costs a spatial query until somebody is
         // actually within reach of the site being asked about.
         private _west = (allUnits select { side _x == WEST }) apply { getPosATL _x };
+        // WEST aircraft positions, for the air ring an AA occupant declares. Built once beside _west
+        // so the ring test stays a distance check; _west alone cannot answer it, keeping no note of
+        // who is airborne.
+        private _westAir = (allUnits select { side _x == WEST && {(vehicle _x) isKindOf "Air"} }) apply { getPosATL _x };
         // The hostile half of the same gate, for the frozen sites below. Built here rather than
         // asked per site, because a base with nothing near it would otherwise pay a spatial query
         // every pass for the whole campaign -- and with the HQ plus a FOB per zone and a half, that
@@ -357,20 +369,27 @@ fnc_site_poller = {
                 if (_o getOrDefault ["driven", false]) then { continue };
                 private _ring = _radius + (_o get "buffer");
                 private _here = if (_o get "aiAware") then {
-                    // The cheap list gates the expensive helper rather than answering in its
-                    // place: fnc_duws_bluforNear still decides every arrival, so zones and towns go
-                    // on deciding it the same way. What the gate removes is a spatial query per
-                    // site per pass across a map that is nearly always empty of anyone.
                     // Fewer AI hold a site than raise one. That hysteresis stops a zone flickering
                     // off around the edges of the force that just took it.
                     private _min = if (_o get "awake") then {
                         _o getOrDefault ["minAIHold", _o get "minAI"]
                     } else { _o get "minAI" };
-                    if ((_west findIf { _x distance _pos < _ring }) >= 0) then {
-                        [_pos, _ring, _min] call fnc_duws_bluforNear
-                    } else { false }
+                    // The cheap list gates the expensive helper rather than answering in its place:
+                    // fnc_duws_bluforNear still decides every ground arrival, so zones and towns go on
+                    // deciding it the same way. What the gate removes is a spatial query per site per
+                    // pass across a map that is nearly always empty of anyone.
+                    private _ground = (_west findIf { _x distance _pos < _ring }) >= 0
+                        && { [_pos, _ring, _min] call fnc_duws_bluforNear };
+                    // Air ring: any BLUFOR aircraft, player or AI flown, reaching in from beyond the
+                    // ground ring. Only an occupant that declares one (AA) pays it, and it stays a
+                    // distance test over the prebuilt list. bluforNear discounts anything airborne, so
+                    // this is the whole of an emplacement's reach against aircraft.
+                    _ground || {
+                        private _ar = _o getOrDefault ["airRing", 0];
+                        _ar > 0 && {(_westAir findIf { _x distance _pos < _ar }) >= 0}
+                    }
                 } else {
-                    [_players, _pos, _ring, _o getOrDefault ["airRing", 0]] call fnc_site_nearOrAir
+                    [_players, _pos, _ring] call fnc_site_near
                 };
 
                 // A frozen site wakes on either side. A garrison that cannot be woken by an attacker

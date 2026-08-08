@@ -48,8 +48,7 @@ DUWS_fnc_hardpointRaiseWorker = {
     // woken by a jet overhead is not dropped by a ground-only recheck.
     private _zk = _o getOrDefault ["hpZoneKey", ""];
     private _stillUp = if (_zk isEqualTo "") then {
-        private _players = (call BIS_fnc_listPlayers) select { alive _x };
-        [_players, _pos, (_site get "radius") + (_o get "buffer"), _o getOrDefault ["airRing", 0]] call fnc_site_nearOrAir
+        [_pos, (_site get "radius") + (_o get "buffer"), _o get "minAI", _o getOrDefault ["airRing", 0]] call fnc_site_bluforOrAir
     } else {
         _zk call DUWS_fnc_hardpointZoneAwake
     };
@@ -282,10 +281,11 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
 // one pair of tables tunes them. hpSide and the garrison token are the serialisable spec a later raise
 // rebuilds from.
 //
-// A standalone hardpoint streams on player presence over its own ring; a zone one -- a _zoneKey names its
+// A standalone hardpoint streams on BLUFOR presence over its own ring -- a player, friendly AI, or an
+// aircraft in its air ring, the same arrival test a zone answers to; a zone one -- a _zoneKey names its
 // parent -- instead mirrors that zone's garrison, so a zone's whole defence rises and falls together
 // rather than each emplacement waking on its own radius. The caller builds but never mans it: an
-// emplacement a player is already near (or a resident type) is crewed here and stands deployed, and every
+// emplacement BLUFOR are already near (or a resident type) is crewed here and stands deployed, and every
 // other is stowed uncrewed at once and re-crewed by the raise worker on approach -- the zone lifecycle,
 // where a garrison rises on stream-in, not at build. So campaign start never pays the drop-and-settle for
 // the emplacements nobody is near, and an occupant is never left asleep over a standing composition.
@@ -302,7 +302,7 @@ fnc_hardpoint_register = {
     (DUWS_hardpointStreaming getOrDefault [_type, [600, 300, false, 0]])
         params ["_radius", "_grace", "_neverStream", "_airRing"];
     [_key, _pos, _radius, "stream"] call fnc_site_register;
-    private _occ = [_key, "garrison", EAST, 0, _grace, true, false] call fnc_site_occupant_register;
+    private _occ = [_key, "garrison", EAST, 0, _grace, true, true] call fnc_site_occupant_register;
     _occ set ["hpSide", _side];
     _occ set ["hpGarrison", DUWS_hardpointGarrison getOrDefault [_type, ""]];
     _occ set ["hpType", _type];
@@ -337,7 +337,7 @@ fnc_hardpoint_register = {
     [_key, "garrison", DUWS_hardpointHooks] call fnc_site_hooks_set;
 
     // Crew now or stow. The caller built the composition but never manned it, so the drop-and-settle is
-    // paid here only for an emplacement that will actually stand: a resident type, or one a player is
+    // paid here only for an emplacement that will actually stand: a resident type, or one BLUFOR are
     // already near. Everything else -- every hardpoint the siting loop lays while the players are still at
     // their HQ -- is stowed uncrewed at once and re-crewed by the raise worker when someone approaches, so
     // campaign start no longer pays the settle for emplacements nobody is near. The dev tool spawns onto
@@ -360,8 +360,7 @@ fnc_hardpoint_register = {
     };
 
     private _up = if (_zoneKey isEqualTo "") then {
-        private _players = (call BIS_fnc_listPlayers) select { alive _x };
-        [_players, _pos, _radius, _airRing] call fnc_site_nearOrAir
+        [_pos, _radius, _occ get "minAI", _airRing] call fnc_site_bluforOrAir
     } else {
         _zoneKey call DUWS_fnc_hardpointZoneAwake
     };
