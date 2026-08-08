@@ -964,8 +964,8 @@ TEST_PICK = "";
 
 // --- fnc_hardpoint_facing: [type, aspectDir, aspectMag, radialDir, roadDir] -> heading ---
 // A pronounced fall line (aspectMag >= 2.5) turns an overwatch nest down the slope; a faint one, or a
-// type whose heading is cosmetic, keeps the radial heading the loop passes in. A roadblock ignores both
-// and faces along its road.
+// type whose heading is cosmetic, keeps the radial heading the loop passes in. A roadblock stays square
+// across its road, taking whichever of the road's two headings sits nearer radialDir.
 ["hp_facing: an MG on a real slope faces the fall line",
     (["MG", 135, 5, 20] call fnc_hardpoint_facing), 135] call fnc_assertEq;
 ["hp_facing: AT and GMG face it too",
@@ -974,8 +974,13 @@ TEST_PICK = "";
     (["GMG", 270, 4, 10] call fnc_hardpoint_facing), 270] call fnc_assertEq;
 ["hp_facing: on near-flat ground the nest keeps the radial heading",
     (["MG", 135, 1, 20] call fnc_hardpoint_facing), 20] call fnc_assertEq;
-["hp_facing: a roadblock faces along its road, not the slope or radial",
+// radialDir 20 is within 90 deg of the road's 75, so the block keeps the road heading as-is.
+["hp_facing: a roadblock keeps the road heading nearer the radial",
     (["ROADBLOCK", 135, 5, 20, 75] call fnc_hardpoint_facing), 75] call fnc_assertEq;
+// radialDir 200 sits on the far side of the road (delta 170 > 90), so the block flips to roadDir+180 to
+// face the approach the radial points down rather than the ground behind it.
+["hp_facing: a roadblock flips to the road heading facing the approach",
+    (["ROADBLOCK", 0, 0, 200, 30] call fnc_hardpoint_facing), 210] call fnc_assertEq;
 
 // --- fnc_hardpoint_minefield_lattice: the deterministic mine grid ---
 ["hp_lattice: a 2x1 field is centred on the origin",

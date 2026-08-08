@@ -178,7 +178,13 @@ fnc_hardpoint_best_ground = {
         if (_draw isEqualTo []) then { continue };
         _draw params ["_c", "_rdir"];
         if (_type isEqualTo "ROADBLOCK") then {
-            private _road = [_c, HP_ROAD_SNAP] call BIS_fnc_nearestRoad;
+            // Prefer a main road (MSV) within snap range, else any road: a block earns more astride the
+            // arteries the enemy resupplies on. getRoadInfo's first field is the road-class string.
+            private _mains = (_c nearRoads HP_ROAD_SNAP) select { toUpper ((getRoadInfo _x) param [0, ""]) isEqualTo "MAIN ROAD" };
+            private _road = objNull;
+            private _bestD = 1e9;
+            { private _d = _c distance2D _x; if (_d < _bestD) then { _bestD = _d; _road = _x } } forEach _mains;
+            if (isNull _road) then { _road = [_c, HP_ROAD_SNAP] call BIS_fnc_nearestRoad };
             if (isNull _road) then { continue };
             private _rp = getPosASL _road;
             _c = [_rp select 0, _rp select 1, 0];
@@ -408,37 +414,52 @@ fnc_hardpoint_site_flank = {
     _placed
 };
 
-// [_count, _fnTick] call fnc_hardpoint_site_roadblocks -> roadblocks placed.
+// [_roadCounts, _fnTick] call fnc_hardpoint_site_roadblocks -> roadblocks placed.
 //
-// Roadblocks spread two ways, chosen per block: on the approaches the player drives in on (a point sampled
-// along the line from BLU HQ to a random zone) and at large across the OPFOR band. Either way the block is
-// a raw draw; fnc_hardpoint_best_ground snaps it to the nearest road and (standalone "") rejects a snap
-// that crossed into a zone, so the block sits on an open road, not a zone interior. A corridor is only
-// chosen when both HQ and a zone exist; otherwise the block falls back to a band draw. Standalone rows.
-// Runs spawned: fnc_hardpoint_register sleeps in the crew drop when it crews one inline.
+// One roadblock net per campaign: each zone contributes _roadCounts (0..2, rolled in fnc_hardpoint_plan_counts)
+// blocks on the approach the player drives in on -- a point on the line from BLU HQ to that zone at a random
+// depth, kept only where the OPFOR field is positive so a block never lands in friendly ground.
+// fnc_hardpoint_best_ground snaps the draw to a road (main road preferred) and rejects a snap that crossed
+// into a zone, so the block sits on an open approach road, not a zone interior; each then faces along that
+// road toward BLU HQ so its guns cover the way in. No HQ placed yet -> a plain band draw so the pass still
+// lays. Standalone rows ("").
+//
+// One lay call, not one per zone, so the generation banner climbs unbroken: a target list holds each zone's
+// centre repeated its block count and the per-emplacement reset hands out the next, so a dropped block (no
+// road it can hold) still consumes its target and the banner total stays honest. Runs spawned:
+// fnc_hardpoint_register sleeps in the crew drop when it crews one inline.
 fnc_hardpoint_site_roadblocks = {
-    params ["_count", ["_fnTick", {}]];
+    params ["_roadCounts", ["_fnTick", {}]];
+    private _targets = [];
+    {
+        private _n = _roadCounts param [_forEachIndex, 0];
+        for "_i" from 1 to _n do { _targets pushBack (_x select 1) };
+    } forEach zone_meta_array;
+    private _count = count _targets;
     if (_count <= 0) exitWith { 0 };
+    private _idx = 0;
     private _placed = [_count, "hproad", "", {
-        // _this is the reset's anchor: ["corridor", zoneCentre] or ["band", bandAnchor].
-        _this params ["_mode", "_ref"];
-        if (_mode isEqualTo "corridor") exitWith {
-            private _f = 0.3 + random 0.6;
-            private _hx = PosOfBLUHQ select 0;
-            private _hy = PosOfBLUHQ select 1;
-            private _p = [_hx + ((_ref select 0) - _hx) * _f, _hy + ((_ref select 1) - _hy) * _f, 0];
-            private _c = [_p, 0, HP_ROAD_SNAP, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
-            [_c, 0]  // heading is the road's, resolved by fnc_hardpoint_facing after the snap
+        // _this is the reset's assigned zone centre. Draw along BLU HQ -> zone at a random depth and keep it
+        // only in OPFOR-held ground; best_ground then snaps it to a road and faces it along the road toward HQ.
+        private _zc = _this;
+        if (PosOfBLUHQ isEqualTo []) exitWith {
+            private _a = call fnc_hardpoint_band_anchor;
+            if (_a isEqualTo []) exitWith { [] };
+            [_a select 0, (_a select 0) getDir _zc]
         };
-        _ref call fnc_hardpoint_band_cand
+        private _f = 0.3 + random 0.6;
+        private _hx = PosOfBLUHQ select 0;
+        private _hy = PosOfBLUHQ select 1;
+        private _p = [_hx + ((_zc select 0) - _hx) * _f, _hy + ((_zc select 1) - _hy) * _f, 0];
+        private _c = [_p, 0, HP_ROAD_SNAP, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
+        if (([_c] call fnc_aoi_field_at) <= 0) exitWith { [] };  // OPFOR-held approach only
+        [_c, _c getDir PosOfBLUHQ]  // prefer bearing toward HQ; facing snaps to the road heading nearer it
     }, _fnTick, {
-        // Half the blocks aim at a corridor when there is one to aim at; the rest go to the band.
-        if (random 1 < 0.5 && {!(PosOfBLUHQ isEqualTo [])} && {!(zone_meta_array isEqualTo [])}) exitWith {
-            ["corridor", (selectRandom zone_meta_array) select 1]
-        };
-        ["band", call fnc_hardpoint_band_anchor]
+        private _t = _targets select _idx;
+        _idx = _idx + 1;
+        _t
     }, createHashMapFromArray [["ROADBLOCK", 1]]] call fnc_hardpoint_lay;
-    ["INFO", "HARDPOINT", format ["roadblock pass sited %1/%2", _placed, _count]] call fnc_log;
+    ["INFO", "HARDPOINT", format ["roadblock net sited %1/%2", _placed, _count]] call fnc_log;
     _placed
 };
 
@@ -495,33 +516,37 @@ fnc_hardpoint_seed_radio = {
     ["INFO", "HARDPOINT", format ["seeded %1/%2 OPFOR radio towers", _placed, _n]] call fnc_log;
 };
 
-// [_radioN] call fnc_hardpoint_plan_counts -> [_zoneCounts, _backline, _frontline, _total]
+// [_radioN] call fnc_hardpoint_plan_counts -> [_zoneCounts, _backline, _frontline, _roadCounts, _total]
 //
 // Rolls every campaign-start emplacement before any is laid, so the generation banner totals real
 // hardpoints up front instead of counting zones. The six scenarios: per-zone ring (round(random cap)
 // under the same radius cap fnc_hardpoint_site_zone stores, returned so that pass lays the same numbers);
-// the two flank lines (each a random count between half the zones and all of them); radio (rolled by the
-// caller and passed in, since the seed call must be handed the same value); and the AA and roadblock nets,
-// each a flat count serv_zones_array the caller derives. The rolled numbers are returned; the deterministic
-// ones (radio, AA, roadblocks) are only summed into the total. Here, not in WARCOM init, so the cap and
-// count-range formulas are not duplicated away from HP_CAP_STEP.
+// per-zone roadblocks (round(random 2), 0..2 on each zone's approach, returned for the same reason); the
+// two flank lines (each a random count between half the zones and all of them); radio (rolled by the caller
+// and passed in, since the seed call must be handed the same value); and the AA net (one per zone, derived
+// by the caller). The rolled per-zone arrays are returned; radio and AA are only summed into the total.
+// Here, not in WARCOM init, so the cap and count-range formulas are not duplicated away from HP_CAP_STEP.
 fnc_hardpoint_plan_counts = {
     params ["_radioN"];
     private _zc = count serv_zones_array;
     private _zoneCounts = [];
-    // Radio + AA (_zc) + roadblocks (_zc) are the deterministic passes; sum them straight in.
-    private _total = _radioN + _zc + _zc;
+    private _roadCounts = [];
+    // Radio + AA (_zc) are the deterministic passes; sum them straight in. Ring and roadblock counts are
+    // rolled per zone below.
+    private _total = _radioN + _zc;
     {
         _x params ["", "", "_hpSize"];
         private _cap = (round (_hpSize / HP_CAP_STEP)) max 1;
         private _n = round (random _cap);
         _zoneCounts pushBack _n;
-        _total = _total + _n;
+        private _rn = round (random 2);   // 0..2 roadblocks on this zone's approach
+        _roadCounts pushBack _rn;
+        _total = _total + _n + _rn;
     } forEach zone_meta_array;
     // Each flank line: a random count between half the zones (floored) and all of them.
     private _lo = floor (_zc / 2);
     private _backline = _lo + floor random (_zc - _lo + 1);
     private _frontline = _lo + floor random (_zc - _lo + 1);
     _total = _total + _backline + _frontline;
-    [_zoneCounts, _backline, _frontline, _total]
+    [_zoneCounts, _backline, _frontline, _roadCounts, _total]
 };

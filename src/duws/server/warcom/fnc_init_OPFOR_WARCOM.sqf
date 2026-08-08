@@ -57,14 +57,13 @@ sleep 1;
     // the banner honest and finishes the pass before civilians start. Idempotent per zone -- the stored
     // cap guards a rebuild -- and the key is fnc_zone_key of the centre, the key the siting loop files under.
     //
-    // Roll the whole emplacement plan -- every zone's ring count and the two flank lines -- before laying
-    // any of it, so the banner counts hardpoints toward a real total, not zones. The radio, AA and
-    // roadblock counts are deterministic (radio rolled here so the seed call and the plan total share it;
-    // AA and roadblocks each count serv_zones_array), so the plan hands back only the rolled ones.
+    // Roll the whole emplacement plan -- every zone's ring and roadblock count and the two flank lines --
+    // before laying any of it, so the banner counts hardpoints toward a real total, not zones. Radio and AA
+    // are deterministic (radio rolled here so the seed call and the plan total share it; AA counts
+    // serv_zones_array), so the plan hands back the rolled per-zone arrays and those two are derived here.
     private _radioN = 1 + floor random 2;
-    ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_backline", "_frontline", "_hpTotal"];
+    ([_radioN] call fnc_hardpoint_plan_counts) params ["_zoneCounts", "_backline", "_frontline", "_roadCounts", "_hpTotal"];
     private _aaN = count serv_zones_array;
-    private _roadN = count serv_zones_array;
     private _hpDone = 0;
     // One banner draw per emplacement, across every pass alike, so the count climbs 1..N as each gun goes
     // down rather than jumping a whole pass's batch at once. _hpDone is read live off this scope (dynamic
@@ -109,12 +108,13 @@ sleep 1;
     [_frontline, true, _tick] call fnc_hardpoint_site_flank;
     _hpDone = _hpDone + _frontline;
 
-    // AA spread uniformly through the countryside to deny the airspace, then roadblocks on the player's
-    // approaches and at large. The AA net reuses the band sampler with an AA-only mix.
+    // AA spread uniformly through the countryside to deny the airspace, then roadblocks on the approaches
+    // the player drives in on -- each zone's own, 0..2 on the BLU HQ -> zone line. The AA net reuses the
+    // band sampler with an AA-only mix.
     [_aaN, "hpaa", "", fnc_hardpoint_band_cand, _tick, fnc_hardpoint_band_anchor, createHashMapFromArray [["AA", 1]]] call fnc_hardpoint_lay;
     _hpDone = _hpDone + _aaN;
-    [_roadN, _tick] call fnc_hardpoint_site_roadblocks;
-    _hpDone = _hpDone + _roadN;
+    [_roadCounts, _tick] call fnc_hardpoint_site_roadblocks;
+    { _hpDone = _hpDone + _x } forEach _roadCounts;
 
     [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 

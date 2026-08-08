@@ -227,18 +227,23 @@ fnc_hardpoint_score = {
 
 // [_type, _aspectDir, _aspectMag, _radialDir, _roadDir] call fnc_hardpoint_facing -> heading in degrees.
 //
-// The heading a sited emplacement faces. A roadblock faces along the road it snapped onto (_roadDir), so
-// its gate and bunkers sit square across the carriageway instead of skewed to it -- the block spans the
-// road rather than angling off it. The overwatch nests are the other point of this: sited on a rise above
-// a road, a radial heading can face the gun back into the hillside while the road it overlooks sits off
-// its shoulder. Those face the fall line instead -- down the slope, at the low ground the position exists
-// to watch. Below a faint gradient there is no single downhill (flat ground, or a symmetric crest whose
-// fall vectors cancel), so they fall back to radial rather than snap to a bearing that is noise. The
-// remaining flat types' heading is cosmetic, so they keep the outward radial the loop hands in (zone
-// centre toward the approach). Pure, so the choice is unit-tested.
+// The heading a sited emplacement faces. A roadblock sits square across the carriageway -- its gate spans
+// the road -- and of the road's two headings takes the one nearer _radialDir, so its guns point up the
+// approach rather than back down the road behind it. _radialDir is outward from the zone for the ring, and
+// toward BLU HQ for the corridor pass, so a corridor block faces the way the player drives in. The overwatch
+// nests are the other point of this: sited on a rise above a road, a radial heading can face the gun back
+// into the hillside while the road it overlooks sits off its shoulder. Those face the fall line instead --
+// down the slope, at the low ground the position exists to watch. Below a faint gradient there is no single
+// downhill (flat ground, or a symmetric crest whose fall vectors cancel), so they fall back to radial rather
+// than snap to a bearing that is noise. The remaining flat types' heading is cosmetic, so they keep the
+// outward radial the loop hands in (zone centre toward the approach). Pure, so the choice is unit-tested.
 fnc_hardpoint_facing = {
     params ["_type", "_aspectDir", "_aspectMag", "_radialDir", ["_roadDir", 0]];
-    if (_type isEqualTo "ROADBLOCK") exitWith { _roadDir };
+    if (_type isEqualTo "ROADBLOCK") exitWith {
+        private _d = abs (_roadDir - _radialDir) % 360;
+        if (_d > 180) then { _d = 360 - _d };
+        [_roadDir, _roadDir + 180] select (_d > 90)
+    };
     if (!(_type in ["MG", "AT", "GMG"]) || {_aspectMag < 2.5}) exitWith { _radialDir };
     _aspectDir
 };

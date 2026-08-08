@@ -36,7 +36,7 @@ One core weapon or structure per hardpoint; garrison and streaming are per type,
 | `AT` | `opfor_TURRET_AT` | one team | covers a road |
 | `GMG` | `opfor_TURRET_GMG` | one team | rare supporting weapon |
 | `AA` | `opfor_TURRET_AA` | one team | wakes on a 5,000 m air ring, not just its ground ring |
-| `ROADBLOCK` | gate flanked by two `opfor_TURRET_HMG` nests | one team | faces along the road it sits on |
+| `ROADBLOCK` | gate flanked by two `opfor_TURRET_HMG` nests | one team | faces along the road, toward the approach |
 | `OP` | vanilla bunker/tower prop | one team | defined and placeable, not yet rolled by generation or the director |
 | `MORTAR` | `opfor_TURRET_MORTAR` | one team | resident (never streams); cleared by destroying the tube |
 | `ARTY` | `opfor_ARTY_X` | one team | resident; cleared by destroying the piece |
@@ -91,9 +91,10 @@ roadblock of the flat or roaded ground they need. Rolling type first means the r
 base weights, and terrain decides only *where* a type lands, never *whether* it is the one placed.
 
 **Facing has no separate registry field.** `fnc_hardpoint_facing [_type, _aspectDir, _aspectMag,
-_radialDir, _roadDir]` (`fnc_hardpoint_siting.sqf:184-193`) picks a heading per type — a roadblock
-faces along its road, MG/AT/GMG face down the fall line when one is pronounced enough to trust,
-everything else keeps the outward-radial bearing the siting loop hands in. `fnc_hardpoint_build`
+_radialDir, _roadDir]` (`fnc_hardpoint_siting.sqf:240-253`) picks a heading per type — a roadblock stays
+square across its road and takes whichever of its two headings faces the approach (`_radialDir`: outward
+for a zone ring, toward BLU HQ for the corridor pass), MG/AT/GMG face down the fall line when one is
+pronounced enough to trust, everything else keeps the outward-radial bearing the siting loop hands in. `fnc_hardpoint_build`
 (`fnc_hardpoint_place.sqf:25-73`) then rotates every composition offset around that heading
 (`fnc_hardpoint_rotate`, `:13-16`) before placing each object, so the heading is baked into each
 prop's own position and direction at creation rather than stored beside it. Stowing a hardpoint later
@@ -117,10 +118,10 @@ Every mine is `east revealMine`d so OPFOR AI does not walk its own field, leavin
 clearance to BLUFOR. It has no fence to place through `fnc_hardpoint_lay`, and no garrison: the score
 function vetoes any candidate with a tree, building or hardpoint already on the footprint.
 
-**Standalone band and radio towers.** Standalone hardpoints are sited by sampling the OPFOR-positive
-area-of-influence band rather than a hand-drawn corridor between zone and BLUFOR ground; radio
-towers are their own hardpoint type, scored for hilltop crests and spaced off each other's coverage
-radius. Both the band sampler and the campaign's radio-tower economics —
+**Standalone band and radio towers.** Most standalone hardpoints are sited by sampling the OPFOR-positive
+area-of-influence band; the roadblock net is the exception, drawing each block on the line from BLU HQ to
+a zone (kept where the OPFOR field is positive) and snapping it to a road, a main road preferred. Radio
+towers are their own hardpoint type, scored for hilltop crests and spaced off each other's coverage radius. Both the band sampler and the campaign's radio-tower economics —
 `DUWS_opforRadioLevel`, its cap, and the OPCOM director's build priority and AP pricing — belong to
 [`opfor_area_of_influence.md`](opfor_area_of_influence.md#band-siting): this file owns the
 terrain survey, per-type score, facing and spacing every band placement shares with the zone ring;
@@ -129,8 +130,8 @@ that one owns what the band *is* and what a tower buys the enemy.
 All of it — the zone ring, radio-tower seeding, and the standalone band — runs in one generation
 phase between zone build-out finishing and civilians starting (`fnc_init_OPFOR_WARCOM.sqf:52-96`),
 under the same progress banner the other phases use. `fnc_hardpoint_plan_counts`
-(`fnc_hardpoint_place.sqf:403-415`) rolls every zone's count and the radio count before any of it is
-laid, so the banner totals real hardpoints rather than counting zones.
+(`fnc_hardpoint_place.sqf:529`) rolls every zone's ring and roadblock count and the radio count before
+any of it is laid, so the banner totals real hardpoints rather than counting zones.
 
 ## Streaming and garrison
 
