@@ -38,18 +38,26 @@ fnc_cp_adjust = {
 // callers remoteExec a signed delta, nothing else assigns the pools. An unrecognised
 // side drops the delta and logs rather than crediting the wrong pool; no HUD counter
 // to refresh. Floored at 0 like CP: losing a zone subtracts the zone's full worth, so
-// an unclamped pool could sit deeply negative, and every WARCOM wave threshold reads
-// "above N" anyway, so 0 and -45 already behave identically.
+// an unclamped pool could sit deeply negative.
+//
+// Integer invariant, the CP writer's verbatim: every ladder gate reads "> N", so a pool
+// resting at 39.97 fails a > 40 gate while a rounded readout prints 40 and the player has
+// no way to tell why. Round the total rather than the delta -- that also normalises a pool
+// already holding a fraction. Sub-point payouts must accumulate whole points at the caller;
+// rounding here would swallow them, so a fractional delta is logged.
 fnc_ap_adjust = {
 	if (!isServer) exitWith {};
 	params [["_side", ""], ["_delta", 0], ["_reason", ""]];
+	if (_delta != round _delta) then {
+		["WARN", "ECON", format ["fractional AP delta %1 rounded into the pool (%2)", _delta, _reason]] call fnc_log;
+	};
 	switch (_side) do {
 		case "OPF": {
-			WARCOM_opfor_ap = (WARCOM_opfor_ap + _delta) max 0; publicVariable "WARCOM_opfor_ap";
+			WARCOM_opfor_ap = round ((WARCOM_opfor_ap + _delta) max 0); publicVariable "WARCOM_opfor_ap";
 			["INFO", "ECON", format ["OPF AP %1 -> %2 (%3)", _delta, WARCOM_opfor_ap, _reason]] call fnc_log;
 		};
 		case "BLU": {
-			WARCOM_blufor_ap = (WARCOM_blufor_ap + _delta) max 0; publicVariable "WARCOM_blufor_ap";
+			WARCOM_blufor_ap = round ((WARCOM_blufor_ap + _delta) max 0); publicVariable "WARCOM_blufor_ap";
 			["INFO", "ECON", format ["BLU AP %1 -> %2 (%3)", _delta, WARCOM_blufor_ap, _reason]] call fnc_log;
 		};
 		default { ["ERROR", "ECON", format ["fnc_ap_adjust: unrecognised side '%1', dropped delta %2", _side, _delta]] call fnc_log; };
