@@ -1968,12 +1968,12 @@
                 <English>Reputation: %1</English>
             </Key>
             <Key ID="STR_DUWS_T_civ_mapview_income_none">
-                <Original>Income: %1 AP/30min to No-one</Original>
-                <English>Income: %1 AP/30min to No-one</English>
+                <Original>Worth: %1/30min if turned (CP to BLUFOR, AP to OPFOR)</Original>
+                <English>Worth: %1/30min if turned (CP to BLUFOR, AP to OPFOR)</English>
             </Key>
             <Key ID="STR_DUWS_T_civ_mapview_income_blu">
-                <Original>Income: %1 AP/30min to BLUFOR</Original>
-                <English>Income: %1 AP/30min to BLUFOR</English>
+                <Original>Income: %1 CP/30min to BLUFOR</Original>
+                <English>Income: %1 CP/30min to BLUFOR</English>
             </Key>
             <Key ID="STR_DUWS_T_civ_mapview_income_opf">
                 <Original>Income: %1 AP/30min to OPFOR</Original>

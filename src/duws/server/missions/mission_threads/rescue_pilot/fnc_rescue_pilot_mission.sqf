@@ -400,7 +400,7 @@ call _fncScript;
 
 _radius = 300;
 _cpreward = 25;
-_apreward = 45;
+_apreward = 20;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _speaker1 = localize "STR_DUWS_T_pilot_downed";
 _message = localize "STR_DUWS_T_pilotletsdothis";

@@ -318,9 +318,11 @@ _trg setTriggerActivation ["WEST", "PRESENT", true];
 // and the statement.
 _trg setVariable ["DUWS_zonePos", _zonePos];
 _trg setVariable ["DUWS_zoneKey", _zoneKey];
-// Seventh argument is the zone's opening CP bounty; _points stays its permanent worth. The
-// two travel together for the rest of the campaign, round the capture handlers and back here.
-_trg setTriggerStatements ["this && {[thisTrigger] call fnc_zone_capture_ready}", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_captured", _name, _points, _markername, _markername2, _zonePos, _size, round(_points * zone_cp_capture)], ""];
+// Seventh argument is the retired CP-bounty slot, now always 0: the first capture pays a flat
+// liberation bonus (fnc_captured) rather than a worth-scaled bounty, and no CP rides a recapture.
+// _points stays the zone's permanent worth and drives the AP swings. The slot is kept so the 7-arg
+// signature is unchanged across the capture handlers.
+_trg setTriggerStatements ["this && {[thisTrigger] call fnc_zone_capture_ready}", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_captured", _name, _points, _markername, _markername2, _zonePos, _size, 0], ""];
 // Flat, not the usual min/mid/max spread: the hold is a rule the player learns, and a capture that
 // sometimes lands at 30 s and sometimes at 50 reads as the mechanic being unreliable. Interruptable,
 // so stepping off the objective restarts it.

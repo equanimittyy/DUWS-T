@@ -31,7 +31,7 @@ _sol3 setcaptive false;
 } forEach [_sol1,_sol2,_sol3];
 
 _cpreward = 45;
-_apreward = 15;
+_apreward = 12;
 
 sleep 30;
 

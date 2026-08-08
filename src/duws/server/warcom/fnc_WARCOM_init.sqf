@@ -25,9 +25,20 @@ publicVariable "WARCOM_blu_hq_pos";
 
 sleep 5;
 
-// SORT ARRAY OF OPFOR ZONES ACCORDING TO DISTANCE FROM BLUHQ 
+// SORT ARRAY OF OPFOR ZONES ACCORDING TO DISTANCE FROM BLUHQ
 WARCOM_createdZones = [_array_of_zones_total,[WARCOM_blu_hq_pos],{_input0 distance _x},"ASCEND"] call BIS_fnc_sortBy;
 publicVariable "WARCOM_createdZones";
+
+// Campaign-size throttle, from the ACTUAL count rather than the requested zones_number (generation
+// can fall short). At or below the reference size the factor is 1 and nothing throttles; above it
+// total passive income at full control grows as sqrt(zones), so four times the zones pay twice the
+// passive income, not four -- which is what stops a host's high zones_number from handing everyone a
+// proportionally larger war chest. k toward 1 flattens income across sizes, toward 0 restores the
+// linear payout. Both are the tuning surface.
+private _REF_ZONES = 6;
+private _k = 0.5;
+DUWS_econ_throttle = (_REF_ZONES / ((count WARCOM_createdZones) max _REF_ZONES)) ^ _k;
+["INFO", "ECON", format ["econ throttle %1 for %2 zones", DUWS_econ_throttle, count WARCOM_createdZones]] call fnc_log;
 
 // ARRAY OF ZONES UNDER BLUFOR CONTROL
 WARCOM_zones_controled_by_BLUFOR = [];

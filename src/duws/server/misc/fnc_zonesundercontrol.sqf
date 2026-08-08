@@ -1,12 +1,15 @@
 if (!isServer) exitWith {};
 /*
-    The campaign economy tick: one 30-minute clock paying territory CP, town Army Power and
-    kill income together. Each used to keep its own timer of the same nominal period, which is
-    not the same clock -- a suspended thread resumes when the scheduler reaches it, so every
-    loop accrues its own slop and they walk apart over a session. Merged this way round because
-    this loop is spawned unconditionally by WARCOM init while the civilian economy only runs
-    when CIV_PRESENCE is not "NONE" -- hosting the tick there would delete territory income on
-    a civs-off campaign. Civs off leaves the town arrays empty, so the AP half pays nothing.
+    The campaign economy tick: one 30-minute clock paying the zone AP trickle (both sides), town
+    income (BLUFOR CP, OPFOR AP), the OPFOR flat floor and kill income together. Each used to keep
+    its own timer of the same nominal period, which is not the same clock -- a suspended thread
+    resumes when the scheduler reaches it, so every loop accrues its own slop and they walk apart
+    over a session. Merged this way round because this loop is spawned unconditionally by WARCOM
+    init while the civilian economy only runs when CIV_PRESENCE is not "NONE" -- hosting the tick
+    there would delete zone income on a civs-off campaign. Civs off leaves the town arrays empty,
+    so town income pays nobody, but the zone trickle and the OPFOR flat floor still pay: neither
+    reads a town. BLUFOR's passive CP therefore goes to zero on civs-off, which the mission-CP lift
+    restores (server/missions/fnc_mission_reward.sqf).
 */
 while {true} do {
     sleep 1800;
@@ -24,13 +27,14 @@ while {true} do {
     // finite population the reaction curve already prices, so this one stays.
     { _x setVariable ["DUWS_civ_intel_asked", false, true] } forEach allPlayers;
 
-    // AP is not gated on zone holdings: the enemy banking its towns while the player holds
-    // nothing is exactly the case the town economy exists to model.
+    // Income is not gated on zone holdings: the enemy banking its towns while the player holds
+    // nothing is exactly the case the town economy exists to model. Territory type decides the
+    // pool -- a banded town pays its holder, as CP for BLUFOR and AP for OPFOR.
     private _reps = missionNamespace getVariable ["civ_town_rep", []];
     private _worth = missionNamespace getVariable ["civ_town_ap", []];
     private _locs = missionNamespace getVariable ["civ_locations", []];
-    private _blu = 0;
-    private _opf = 0;
+    private _bluTownWorth = 0;
+    private _opfTownWorth = 0;
     // Passive AoI rep drift first, then income on the result -- so a town that crosses a band this
     // tick pays on its new side the same tick. The pushes are asymmetric by design: OPFOR pushes by
     // holding ground (a flat 1 plus its standing radio towers), BLUFOR only once it has bought a tier
@@ -47,32 +51,42 @@ while {true} do {
         };
 
         // Income on the post-drift reputation, read back from the array the adjust just wrote.
+        // The worth is the same figure either way; the side it lands on decides which pool it pays.
         private _rep = (missionNamespace getVariable ["civ_town_rep", []]) select _forEachIndex;
         ([_rep, _worth param [_forEachIndex, 0]] call fnc_civ_townIncome) params ["_income", "_side"];
-        if (_side isEqualTo "BLU") then { _blu = _blu + _income };
-        if (_side isEqualTo "OPF") then { _opf = _opf + _income };
+        if (_side isEqualTo "BLU") then { _bluTownWorth = _bluTownWorth + _income };
+        if (_side isEqualTo "OPF") then { _opfTownWorth = _opfTownWorth + _income };
     } forEach _reps;
-    // Two calls, not one per town: fnc_ap_adjust publicVariables and logs every time, so
-    // per-town calls would broadcast the same global twenty times a tick for one net change.
-    if (_blu > 0) then { ["BLU", _blu, "civ_town_income"] call fnc_ap_adjust };
-    if (_opf > 0) then { ["OPF", _opf, "civ_town_income"] call fnc_ap_adjust };
+
+    // Every passive faucet is scaled by the campaign-size throttle and rounded once, after
+    // scaling, so no fraction reaches a pool writer. Town income routes per side (BLUFOR CP,
+    // OPFOR AP); the zone trickle pays both sides AP for the ground each holds; OPFOR also draws
+    // an unthrottled flat floor. Held zone counts: BLUFOR from zoneundercontrolblu, OPFOR from
+    // the control list.
+    private _bluCP    = round (_bluTownWorth * DUWS_econ_throttle);
+    private _opfTownAP = round (_opfTownWorth * DUWS_econ_throttle);
+    private _bluZoneAP = round (zoneundercontrolblu * zone_ap_trickle * DUWS_econ_throttle);
+    private _opfZoneAP = round ((count WARCOM_zones_controled_by_OPFOR) * zone_ap_trickle * DUWS_econ_throttle);
+    private _opfAP = _opfTownAP + _opfZoneAP + opfor_flat_ap_income;
+
+    // One call per pool per side, not one per town: fnc_ap_adjust/fnc_cp_adjust publicVariable and
+    // log every time, so per-town calls would broadcast the same global a dozen times a tick.
+    // Called inline rather than remoteExec'd to self: this loop is server-side, and call lands the
+    // credit this frame where remoteExec [...,2] queues it for the next.
+    if (_bluCP > 0)     then { [_bluCP, "civ_town_income"] call fnc_cp_adjust };
+    if (_bluZoneAP > 0) then { ["BLU", _bluZoneAP, "zone_trickle"] call fnc_ap_adjust };
+    if (_opfAP > 0)     then { ["OPF", _opfAP, "opfor_income"] call fnc_ap_adjust };
 
     // Pays and notifies each player its own kill award; deliberately absent from Overlord's
     // report below, which speaks for territory only. Naming attrition there would advertise
     // kill farming as an income route.
     call fnc_kill_income_sweep;
 
-    private _cp = 0;
-    if (zoneundercontrolblu > 0) then {
-        _cp = zoneundercontrolblu * 6;
-        [_cp, "territory_income"] remoteExec ["fnc_cp_adjust", 2];
-    };
-
-    // One line for what territory earned, in place of a notification per faucet: popups
-    // landing on the same frame read as spam, and the total is what tells the player whether
-    // holding ground is paying.
-    if (_cp > 0 || {_blu > 0}) then {
-        [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_econtickreport", _cp, _blu]]
+    // One line for what territory earned BLUFOR this tick, in place of a notification per faucet:
+    // popups on the same frame read as spam, and the pair is what tells the player whether holding
+    // ground is paying. CP is the town faucet, AP the zone trickle.
+    if (_bluCP > 0 || {_bluZoneAP > 0}) then {
+        [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_econtickreport", _bluCP, _bluZoneAP]]
             remoteExec ["fnc_duws_dialogue", 0];
     };
 };

@@ -9,7 +9,7 @@ private _missionUnits = [];
 
 _radius = 400;
 _cpreward = 30;
-_apreward = 15;
+_apreward = 10;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_cacheletsdothis";
 

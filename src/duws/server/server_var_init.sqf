@@ -148,20 +148,33 @@ MHQ_lockout_seconds = 1800; publicVariable "MHQ_lockout_seconds";
 // as a scatter of named globals a restore would have to know one at a time.
 DUWS_support_permanent = []; publicVariable "DUWS_support_permanent";
 
-// Zone payouts, all shares rather than absolutes so they scale with a zone's size. Two
-// separate figures ride the capture triggers: the zone's *worth*, fixed at generation from
-// its radius and never reassigned, and its *bounty*, the CP the next capture pays.
+// Zone payouts. Capture is an event reward; holding is an Army Power trickle paid on the
+// economy tick (zone_ap_trickle, below).
 //
-// AP is measured against the worth, so taking or losing a zone always swings the same
-// momentum however many times it has changed hands -- a contested zone is still worth
-// holding. The bounty shrinks on every capture instead: ground fought over repeatedly has
-// been looted already, and a zone that keeps flipping should stop being a payday. That decay
-// is deliberate, which is why it is a constant here rather than an artefact of the
-// arithmetic. Server-only: the capture handlers all run server-side.
-zone_cp_capture = 0.5;      // first capture pays this share of the zone's worth
-zone_cp_recapture = 1/3;    // each recapture pays this share of the previous bounty
-zone_ap_swing = 0.5;        // AP the taking side gains, as a share of worth; the loser sheds the same
-zone_ap_consolation = 0.5;  // OPFOR's share of that swing when BLUFOR is the one taking
+// A first BLUFOR capture pays a flat liberation bonus -- CP and AP both, authored rather than
+// a share of worth so a small zone is worth taking too -- and pays it once ever per zone
+// (DUWS_zone_first_captured), so a zone lost and retaken is not a farm. A recapture pays
+// BLUFOR nothing: the zone's reward was earned at liberation. There is no CP bounty and no
+// bounty decay -- both retired with the town->CP reroute, which is where passive CP now lives.
+//
+// The AP swings are shares of the zone's worth so a contested zone swings the same momentum
+// however often it flips. OPFOR is paid a consolation every time BLUFOR takes a zone
+// (anti-steamroll: a fast advance funds the counter-attack) and the full swing when it retakes
+// one; BLUFOR sheds the swing when it loses one. Server-only: the capture handlers run server-side.
+zone_first_capture_cp = 25;  // flat CP the first time BLUFOR ever takes a zone
+zone_first_capture_ap = 20;  // flat AP paid alongside it, into the wallet
+zone_ap_swing = 0.15;        // OPFOR's AP gain on retaking a zone, and BLUFOR's loss on losing one
+zone_ap_consolation = 0.15;  // OPFOR's AP whenever BLUFOR takes a zone, as a share of worth
+
+// The strategic dividend: AP per held zone, per economy tick, each side, scaled by
+// DUWS_econ_throttle. Passive per tick yet earned per zone -- it pays only for ground taken
+// and held and stops when a zone is lost, so standing still earns nothing new.
+zone_ap_trickle = 5;
+
+// First-captured zone keys, one entry per zone BLUFOR has ever taken. The liberation bonus
+// reads this so it never pays twice -- a reload or a retaken zone finds its key already here.
+// Save state: it lives in the mission namespace so a campaign save carries it.
+DUWS_zone_first_captured = [];
 
 // [object, seconds] pairs awaiting pickup by the map cleanup, written through
 // fnc_duws_disposeAfter and drained every pass. Server-only: the sweep runs here and clients
@@ -498,6 +511,25 @@ DUWS_base_keep_radius = 250;
 // Sequence number of the 30-minute campaign economy tick (fnc_zonesundercontrol.sqf).
 // Not broadcast: only server-side payout caps read it.
 econ_tick = 0;
+
+// Campaign-size throttle on every passive faucet: the zone AP trickle and town income on both
+// sides. Computed once after generation from the ACTUAL zone count (fnc_WARCOM_init), so a large
+// campaign does not pay linearly more on every tick -- total passive income grows as sqrt(zones)
+// above the reference size rather than in proportion. 1 until WARCOM init sets it, so the default
+// six-zone campaign is unthrottled and any tick before init pays the base rate. Server-only.
+DUWS_econ_throttle = 1;
+
+// OPFOR's flat AP floor, per economy tick, independent of what it holds. Insurance for a director
+// that has lost its towns, not the faucet that paces escalation -- town income outweighs it several
+// times over while the enemy holds its zone-adjacent towns. Wallet only. Server-only; tuning.
+opfor_flat_ap_income = 2;
+
+// Intel analysis converts looted documents to CP with no cooldown, against loot on ~80% of enemies,
+// so a co-op team can bank it faster than territory pays. Capped per economy tick to keep activity
+// from out-earning holding ground. DUWS_intel_tick_paid is [tick, paidThisTick], reset when the
+// clock advances. Server-only: fnc_intelAnalysis runs server-side.
+intel_cp_cap_per_tick = 20;
+DUWS_intel_tick_paid = [-1, 0];
 
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
 

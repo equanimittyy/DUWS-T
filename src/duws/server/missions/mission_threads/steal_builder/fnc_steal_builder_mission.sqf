@@ -12,7 +12,7 @@ if (!isNil "BLD1" && {alive BLD1}) exitWith {
 if (!([6, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 _cpreward = 15;
-_apreward = 15;
+_apreward = 10;
 
 
 _radius = 500;

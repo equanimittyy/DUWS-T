@@ -166,18 +166,10 @@ class ressourceheader
             action = "[] spawn fnc_request_map_view";
             tooltip = "$STR_DUWS_T_civ_mapview_action";
         };
-        class convertCPbutton: RscButton
-        {
-            idc = 1627;
-            text = "$STR_DUWS_T_convert_ap";
-            sizeEx = 0.025;
-            x = 16.4 * GUI_GRID_W + GUI_GRID_X;
-            y = 5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 4.3 * GUI_GRID_W;
-            h = 1.5 * GUI_GRID_H;
-            action = "[] spawn fnc_convertAPtoCP";
-            tooltip = "$STR_DUWS_T_a72vvbgp";
-        };
+        // The AP->CP converter is deleted: selling the scarce currency for the abundant one is
+        // strictly wrong under the territory split, and with AP now buying advanced supports it
+        // competed with them. No CP<->AP path exists in either direction, or the abundant pool
+        // launders into the scarce one and the split collapses.
 
         // --- COMMAND AND CONTROL: what command sends on the left, what it administers on the right
         // The right column is slots, not fixed entries: fnc_command_fill writes the applicable ones

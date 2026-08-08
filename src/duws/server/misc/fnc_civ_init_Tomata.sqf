@@ -192,10 +192,12 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
         private _buildings = _pops select _forEachIndex;
 
         // Rank within the campaign's own kept set, not an absolute building count: Altis cities
-        // and a small map's hamlets both have to span 1 to 3. Counting strictly smaller towns
-        // means ties pay equally and the expression cannot reach 4.
+        // and a small map's hamlets both have to span 1 to 5. Counting strictly smaller towns
+        // means ties pay equally and the expression cannot reach 6 (the largest town has _n-1
+        // smaller, so 5*(_n-1)/_n floors to at most 4). The figure is the town's worth per tick,
+        // paid as CP to a BLUFOR-banded town and AP to an OPFOR-banded one.
         private _smaller = { _x < _buildings } count _pops;
-        _townAp pushBack (1 + floor (3 * _smaller / _n));
+        _townAp pushBack (1 + floor (5 * _smaller / _n));
 
         // A civilian area whose edge reaches into an enemy zone still puts civilians inside it,
         // so the town starts on the enemy's books rather than neutral.

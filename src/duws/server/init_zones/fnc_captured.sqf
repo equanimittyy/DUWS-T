@@ -5,8 +5,9 @@ _markername = _this select 2;
 _markername2 = _this select 3;
 _triggerPos = _this select 4;
 _radius = _this select 5;
-// The CP this capture pays. Separate from _points, the zone's permanent worth: the bounty
-// decays as the zone changes hands, the worth never does.
+// Retired: the CP capture bounty is gone with the town->CP reroute. Still read so the 7-arg
+// trigger signature is unchanged across the three cap handlers, but no longer paid -- the first
+// capture pays a flat liberation bonus instead, and a recapture pays nothing.
 _bounty = _this select 6;
 
 // Server-only: this credits the shared CP/AP pools and read-modify-writes several
@@ -26,19 +27,26 @@ if (_triggerPos in WARCOM_zones_controled_by_BLUFOR) exitWith {};
 // Pause TFs if no opfor zones are visible
 call fnc_hardcore_visible_recalc;
 
-// ADD COMMAND POINTS  1000m zone of worth 100 opens at a bounty of 50
-// Skipped once the bounty has decayed to nothing, or a zone flipped enough times announces
-// a payday of zero.
-if (_bounty > 0) then {
-    [_bounty, "zone_first_capture"] remoteExec ["fnc_cp_adjust", 2];
+// First-ever capture pays a flat liberation bonus in both currencies, once per zone. The key is
+// recorded in DUWS_zone_first_captured so a reload -- or this zone lost and later retaken through
+// fnc_blufor_cap -- never pays it again: a zone's reward is earned exactly once, which is what
+// makes the anti-farm invariant structural rather than arithmetic. A recapture (fnc_blufor_cap)
+// pays BLUFOR nothing at all.
+private _zoneKey = [_triggerPos] call fnc_zone_key;
+private _firstEver = !(_zoneKey in DUWS_zone_first_captured);
+if (_firstEver) then {
+    DUWS_zone_first_captured pushBack _zoneKey;
+    [zone_first_capture_cp, "zone_first_capture"] remoteExec ["fnc_cp_adjust", 2];
+    ["BLU", zone_first_capture_ap, "zone_first_capture"] remoteExec ["fnc_ap_adjust", 2];
 };
 
-// MODIFY ARMY POWER - measured against the worth, not the bounty, so a zone swings the same
-// momentum however often it has changed hands. OPF gains a consolation share of the swing.
-_apswing = round(_points * zone_ap_swing);
-_opfreward = round(_apswing * zone_ap_consolation);
-["OPF", _opfreward, "zone_first_capture"] remoteExec ["fnc_ap_adjust", 2];
-["BLU", _apswing, "zone_first_capture"] remoteExec ["fnc_ap_adjust", 2];
+// OPFOR is paid a consolation whenever it loses a zone -- a share of the worth, so losing a big
+// zone funds a bigger counter-attack. This is the anti-steamroll floor: a fast advance arms the
+// resistance. Wallet only, and paid every capture rather than only the first.
+_opfreward = round(_points * zone_ap_consolation);
+if (_opfreward > 0) then {
+    ["OPF", _opfreward, "zone_lost_consolation"] remoteExec ["fnc_ap_adjust", 2];
+};
 
 if (VERSION_X == "MODERN" || simple_zones_enable) then {
     private _flagVarName = format["flag_%1_%2", floor abs (_triggerPos select 0), floor abs (_triggerPos select 1)];
@@ -62,11 +70,10 @@ private _trgVarName = format["trigger_%1_%2", floor abs (_triggerPos select 0), 
 private _trg = missionNamespace getVariable [_trgVarName, objNull];
 if (!isNull _trg) then {
     _trg setTriggerActivation ["EAST SEIZED", "PRESENT", true];
-    // The bounty handed on is what the *next* capture pays, so the decay is applied here
-    // rather than on arrival: whoever takes this zone back finds it already devalued.
-    _trg setTriggerStatements ["this", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_opfor_cap", _place, _points, _markername, _markername2, _triggerPos, _radius, round(_bounty * zone_cp_recapture)], ""];
+    // The 7th arg is the retired bounty slot, passed 0: no CP rides a recapture any more.
+    _trg setTriggerStatements ["this", format["[""%1"",%2,""%3"",""%4"",%5,%6,%7] spawn fnc_opfor_cap", _place, _points, _markername, _markername2, _triggerPos, _radius, 0], ""];
 };
 
-if (_bounty > 0) then {
-    ["cpadded",[_bounty,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
+if (_firstEver) then {
+    ["cpadded",[zone_first_capture_cp,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 };
