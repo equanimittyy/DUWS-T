@@ -268,7 +268,7 @@ correct for a fresh campaign, and each is resolved in the design below.
 | Zone names are drawn at random from a pool that records what it has spent | `server/init_zones/fnc_zone_state_init.sqf`, `fnc_createzone.sqf` | Replaying the builder renames every zone on the map. The names *and* the used list have to be restored, and the builder must not re-draw |
 | Campaign settings are set *and* broadcast by a client | `client/dialog/fnc_process_campaign_menu.sqf:480-515`, `fnc_process_enviro_menu.sqf:88-194` | A restore that only assigns them server-side leaves every client on defaults |
 | Arsenal contents are resolved at boot from whatever mods are loaded | `server/misc/fnc_create_ammo_lists.sqf` | Storing the resolved classnames pins the campaign to that mod set |
-| Hardpoints are sited inside `fnc_createZone`, if [`hardpoint_system_plan.md`](hardpoint_system_plan.md) lands | — | Replaying zones re-rolls every hardpoint position and orphans its cleared state |
+| Hardpoints are sited in a generation phase after zone build-out and stored in `DUWS_hardpoints` ([`info/hardpoints.md`](info/hardpoints.md#siting)) | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:52-96` | Replaying generation re-rolls every hardpoint position and orphans its cleared state |
 
 One thing that looks like a blocker and is not: `fnc_fob_server` takes a `_fob_owner` object
 (`:5`) and hands it to `fnc_FOBactions.sqf:3`, which reads it and never uses it. Restore needs no
@@ -453,12 +453,12 @@ The commander archetype is rolled once per campaign and never re-rolled
 re-rolls it changes the war the player has been fighting. One string.
 
 Hardpoints are an input for the same reason zones are:
-[`hardpoint_system_plan.md`](hardpoint_system_plan.md) sites them inside `fnc_createZone`, so the
-siting pass has to accept a restored registry instead of rolling fresh positions, or a restore
-moves every hardpoint and orphans its cleared state. The campaign-start batch of normal hardpoints
-is a second siting pass outside `fnc_createZone` and needs the same guard for the same reason.
-Cores and garrison groups are objects and stay out — they live in server-local
-`hardpoint_core_<i>` keys and are rebuilt from the registry.
+[`info/hardpoints.md`](info/hardpoints.md#siting) sites them in a generation phase after zone
+build-out, so the siting pass has to accept a restored `DUWS_hardpoints` registry instead of rolling
+fresh positions, or a restore moves every hardpoint and orphans its cleared state. Zone-ring and
+standalone hardpoints run in that one phase and share the one registry, so a single guard covers
+both. Cores and garrison groups are live objects rebuilt on approach from the stored composition,
+so they stay out of the save.
 
 **Taskings persist as orders, not as squads.** A tasking is bought for a squad the director was
 spawning anyway, so the purchase buys intent; the squad is live state and is regenerated like every

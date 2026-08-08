@@ -467,9 +467,11 @@ alongside it is.
 ## The OPFOR commander
 
 One actor, one pool, one archetype. The director in this document, the director that builds
-hardpoints in [`hardpoint_system_plan.md`](hardpoint_system_plan.md) and the commander that makes
-low-reputation towns fight back in [`opfor_commander_plan.md`](opfor_commander_plan.md) are the
-same thing under three names, and they share `WARCOM_opfor_ap`. How that one actor decides — what
+hardpoints ([`info/opfor_area_of_influence.md`](info/opfor_area_of_influence.md#band-siting), with
+its escalation ladder in [`opfor_commander_loop_plan.md`](opfor_commander_loop_plan.md#what-the-commander-builds))
+and the commander that makes low-reputation towns fight back in
+[`opfor_commander_plan.md`](opfor_commander_plan.md) are the same thing under three names, and they
+share `WARCOM_opfor_ap`. How that one actor decides — what
 it wakes on, what it is allowed to know, and how it ranks targets — is
 [`opfor_commander_loop_plan.md`](opfor_commander_loop_plan.md); this section is its shopping list.
 
