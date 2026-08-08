@@ -16,6 +16,11 @@ the faucet is wrong.
 Where the shipped CP economy is documented — pools, writers, faucets, the purchase handshake —
 see [`info/economy.md`](info/economy.md). This plan covers what changes.
 
+The first pass implemented the faucet reroute, the dual CP+AP price on advanced supports, the
+metadata-driven vehicle pricing and the writer and cap hardening. The tier ladder, the tier gates on
+vehicles and squads, the OPFOR commander and per-use CP on supports were deferred, and are tracked
+with the tuning surface in [`economy_second_pass.md`](economy_second_pass.md).
+
 ## Where each currency comes from
 
 Territory type decides currency — each kind of ground pays one pool. The two kinds of ground the
