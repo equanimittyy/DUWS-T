@@ -169,36 +169,12 @@ _opfor_units = [opfor_LAT_SOLDIER_X,opfor_SPECOPS_MEDIC_X,opfor_SPECOPS_ENG_X];
 
 waitUntil {sleep 5;chosen_settings};
 
-// get blufor faction and create the array of units
-_factionUnitArray = [];
-_temp_factionUnitArray = [];
-{
-    _group = createGroup west;
-    _group deleteGroupWhenEmpty true;
-    _unit = "";
-    _unit = _group createUnit [_x,[0,0], [], 0, "FORM"];
-    _faction = [format["%1",faction _unit]] select 0;
-    sleep 1;
-    deleteVehicle _unit;
-
-    //array of all units in player faction
-    _temp_factionUnitArray = ("(configname _x isKindOf 'CAManBase') && (gettext (_x >> 'faction') == _faction) && (getNumber (_x >> 'scope') == 2)" configClasses (configfile >> "CfgVehicles")) apply {configName _x};
-    _factionUnitArray = _factionUnitArray + _temp_factionUnitArray;
-
-} foreach [blufor_SOLDIER_X,blufor_SPECOPS_X,blufor_SPECOPS_MEDIC_X];
-
-//remove duplicates
-_factionUnitArray = _factionUnitArray arrayIntersect _factionUnitArray; 
-
-private _quickChangeUnits = (["UNIT"] call fnc_faction_rqst_list) apply { _x select 0 };
-_factionUnitArray append _quickChangeUnits;
-_factionUnitArray = _factionUnitArray arrayIntersect _factionUnitArray;
-
-// Union in every unit the DUWS role keys resolve to -- globals and their spawn pools. The sweep
-// above only reaches the faction its seed units belong to, so a key a custom faction overrode to a
-// unit of another faction would otherwise leave that unit's gear out of the arsenal.
-_factionUnitArray append (["blufor"] call fnc_faction_unit_keylist);
-_factionUnitArray = _factionUnitArray arrayIntersect _factionUnitArray;
+// The arsenal draws only from the units the DUWS role keys resolve to -- each key's representative
+// plus its spawn pool. The old config-faction sweep (spawn a seed unit, read its faction, pull every
+// CfgVehicles man of that faction) was dropped: it rode on faction detection being right and, when it
+// was not, stocked the arsenal with another faction's gear. The keylist is exactly what the quick
+// kits already draw from, so both surfaces now offer the same units.
+_factionUnitArray = ["blufor"] call fnc_faction_unit_keylist;
 
 //array of all loadouts of all units in player faction (original method)
 _factionLoadouts = [];
