@@ -74,8 +74,12 @@ while {true} do {
     // Called inline rather than remoteExec'd to self: this loop is server-side, and call lands the
     // credit this frame where remoteExec [...,2] queues it for the next.
     if (_bluCP > 0)     then { [_bluCP, "civ_town_income"] call fnc_cp_adjust };
-    if (_bluZoneAP > 0) then { ["BLU", _bluZoneAP, "zone_trickle"] call fnc_ap_adjust };
-    if (_opfAP > 0)     then { ["OPF", _opfAP, "opfor_income"] call fnc_ap_adjust };
+    // The 4th arg is the tier-crediting portion. BLUFOR's zone trickle is a faucet it earns, so the
+    // whole delta credits the counter. OPFOR's tier climbs on town and flat income but NOT its zone
+    // trickle: it holds every zone at hour zero, so crediting the trickle would front-load a tier it
+    // never fought for. So the OPFOR wallet takes all three, the counter only town + flat.
+    if (_bluZoneAP > 0) then { ["BLU", _bluZoneAP, "zone_trickle", _bluZoneAP] call fnc_ap_adjust };
+    if (_opfAP > 0)     then { ["OPF", _opfAP, "opfor_income", _opfTownAP + opfor_flat_ap_income] call fnc_ap_adjust };
 
     // Pays and notifies each player its own kill award; deliberately absent from Overlord's
     // report below, which speaks for territory only. Naming attrition there would advertise

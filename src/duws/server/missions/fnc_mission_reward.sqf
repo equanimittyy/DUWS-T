@@ -23,7 +23,8 @@ _cp_multiplied_reward = round (_cpreward * cp_reward_multiplier * _civsOffLift);
 	_mission_name, _cp_multiplied_reward, _apreward]] call fnc_log;
 [_cp_multiplied_reward, format ["mission %1", _mission_name]] remoteExec ["fnc_cp_adjust", 2];
 
-["BLU", _apreward, format ["mission %1", _mission_name]] remoteExec ["fnc_ap_adjust", 2];
+// Missions are a faucet BLUFOR earns, so the whole AP reward credits the tier counter (4th arg).
+["BLU", _apreward, format ["mission %1", _mission_name], _apreward] remoteExec ["fnc_ap_adjust", 2];
 
 [] spawn fnc_operative_mission_complete;
 

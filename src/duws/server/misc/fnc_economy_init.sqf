@@ -34,6 +34,18 @@ fnc_cp_adjust = {
 	if (hasInterface) then { ctrlSetText [1000, format ["%1", commandpointsblu1]]; };
 };
 
+// The Army Power tier ladder. A side's tier is how many rungs its EARNED counter has crossed -- a
+// one-way ratchet, because the earned counter only ever rises (fnc_ap_adjust credits it from the
+// recurring faucets and spending never touches it), so a wallet spent down cannot drop the tier.
+// Capability sites read the earned counter directly against their own thresholds; this integer is
+// the coarse summary of the same climb, for the readout and (later) the save. The seven starting-AP
+// presets are these rungs plus zero, so a preset lands one on each tier: 0 = tier 0 ... 150 = tier 6.
+DUWS_ap_tier_rungs = [10, 40, 65, 100, 136, 150];
+DUWS_fnc_ap_tier = {
+	params ["_earned"];
+	{ _earned >= _x } count DUWS_ap_tier_rungs
+};
+
 // Server-authoritative Army Power mutation -- same delta contract as fnc_cp_adjust:
 // callers remoteExec a signed delta, nothing else assigns the pools. An unrecognised
 // side drops the delta and logs rather than crediting the wrong pool; no HUD counter
@@ -47,17 +59,38 @@ fnc_cp_adjust = {
 // rounding here would swallow them, so a fractional delta is logged.
 fnc_ap_adjust = {
 	if (!isServer) exitWith {};
-	params [["_side", ""], ["_delta", 0], ["_reason", ""]];
+	// _earned is the part of a positive delta that also credits the one-way earned counter and so can
+	// raise the tier. The recurring faucets each side genuinely earns pass it -- BLUFOR's zone trickle,
+	// missions and first-capture bonus; OPFOR's town and flat income (never its zone trickle). Spends,
+	// swings, consolation and refunds leave it 0, so ground regained and money spent never move the
+	// ladder. Never negative: the counter only rises, which is what makes the tier a ratchet.
+	params [["_side", ""], ["_delta", 0], ["_reason", ""], ["_earned", 0]];
 	if (_delta != round _delta) then {
 		["WARN", "ECON", format ["fractional AP delta %1 rounded into the pool (%2)", _delta, _reason]] call fnc_log;
 	};
 	switch (_side) do {
 		case "OPF": {
 			WARCOM_opfor_ap = round ((WARCOM_opfor_ap + _delta) max 0); publicVariable "WARCOM_opfor_ap";
+			if (_earned > 0) then {
+				WARCOM_opfor_ap_earned = round (WARCOM_opfor_ap_earned + _earned); publicVariable "WARCOM_opfor_ap_earned";
+				private _t = [WARCOM_opfor_ap_earned] call DUWS_fnc_ap_tier;
+				if (_t != WARCOM_opfor_tier) then {
+					WARCOM_opfor_tier = _t; publicVariable "WARCOM_opfor_tier";
+					["INFO", "ECON", format ["OPF tier -> %1 (earned %2)", _t, WARCOM_opfor_ap_earned]] call fnc_log;
+				};
+			};
 			["INFO", "ECON", format ["OPF AP %1 -> %2 (%3)", _delta, WARCOM_opfor_ap, _reason]] call fnc_log;
 		};
 		case "BLU": {
 			WARCOM_blufor_ap = round ((WARCOM_blufor_ap + _delta) max 0); publicVariable "WARCOM_blufor_ap";
+			if (_earned > 0) then {
+				WARCOM_blufor_ap_earned = round (WARCOM_blufor_ap_earned + _earned); publicVariable "WARCOM_blufor_ap_earned";
+				private _t = [WARCOM_blufor_ap_earned] call DUWS_fnc_ap_tier;
+				if (_t != WARCOM_blufor_tier) then {
+					WARCOM_blufor_tier = _t; publicVariable "WARCOM_blufor_tier";
+					["INFO", "ECON", format ["BLU tier -> %1 (earned %2)", _t, WARCOM_blufor_ap_earned]] call fnc_log;
+				};
+			};
 			["INFO", "ECON", format ["BLU AP %1 -> %2 (%3)", _delta, WARCOM_blufor_ap, _reason]] call fnc_log;
 		};
 		default { ["ERROR", "ECON", format ["fnc_ap_adjust: unrecognised side '%1', dropped delta %2", _side, _delta]] call fnc_log; };

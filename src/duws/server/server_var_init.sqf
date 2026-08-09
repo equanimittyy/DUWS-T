@@ -352,6 +352,15 @@ time_Multiplier = 1;publicVariable "time_Multiplier";
 // STARTING ARMY POWER
 WARCOM_blufor_ap = 0;publicVariable "WARCOM_blufor_ap";
 WARCOM_opfor_ap = 0;publicVariable "WARCOM_opfor_ap";
+// Ladder input and its tier, per side. The earned counter only ever rises (credited by the recurring
+// faucets, never by spending), so the tier derived from it is a one-way ratchet a spent-down wallet
+// cannot lower. Seeded to match a starting-AP preset in fnc_WARCOM_init; these are the pre-preset
+// defaults. Not yet carried by the campaign save -- a reload re-derives the tier from a wallet since
+// spent down, which the persistence pass closes (docs/campaign_persistence_plan.md).
+WARCOM_blufor_ap_earned = 0;publicVariable "WARCOM_blufor_ap_earned";
+WARCOM_opfor_ap_earned = 0;publicVariable "WARCOM_opfor_ap_earned";
+WARCOM_blufor_tier = 0;publicVariable "WARCOM_blufor_tier";
+WARCOM_opfor_tier = 0;publicVariable "WARCOM_opfor_tier";
 WARCOM_init_done = false;publicVariable "WARCOM_init_done";
 
 // Declared here, not just in fnc_WARCOM_init: the area-of-influence read (DUWS_fnc_aoi_covers /

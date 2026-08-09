@@ -37,7 +37,9 @@ private _firstEver = !(_zoneKey in DUWS_zone_first_captured);
 if (_firstEver) then {
     DUWS_zone_first_captured pushBack _zoneKey;
     [zone_first_capture_cp, "zone_first_capture"] remoteExec ["fnc_cp_adjust", 2];
-    ["BLU", zone_first_capture_ap, "zone_first_capture"] remoteExec ["fnc_ap_adjust", 2];
+    // Liberating a zone is earned ground, so the bonus AP credits the tier counter (4th arg). Paid
+    // once ever per zone (DUWS_zone_first_captured), so a recapture adds nothing to the ladder either.
+    ["BLU", zone_first_capture_ap, "zone_first_capture", zone_first_capture_ap] remoteExec ["fnc_ap_adjust", 2];
 };
 
 // OPFOR is paid a consolation whenever it loses a zone -- a share of the worth, so losing a big
