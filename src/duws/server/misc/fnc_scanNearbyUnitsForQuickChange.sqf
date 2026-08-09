@@ -1,40 +1,21 @@
 // Runs once, the first time a player comes within 50 m of HQ -- the caller owns that trigger.
 
 if (!isServer) exitWith {};
-sleep 10;
-private _hqPos = missionNamespace getVariable ["PosOfBLUHQ", []];
-if (_hqPos isEqualTo []) exitWith { ["ERROR", "GEAR", "PosOfBLUHQ not defined, abort."] call fnc_log; };
 
-private _nearbyUnits = nearestObjects [_hqPos, ["CAManBase"], 500] select {
-    alive _x && side _x == WEST && !isPlayer _x
-};
-
-["INFO", "GEAR", format ["Found %1 BLUFOR AI units near HQ.", count _nearbyUnits]] call fnc_log;
-
-private _loadouts = [];
-
-{
-    private _unit = _x;
-    private _className = typeOf _unit;
-    private _displayName = getText (configFile >> "CfgVehicles" >> _className >> "displayName");
-    private _loadout = getUnitLoadout _unit;
-    
-    _loadouts pushBack [_className, _displayName, _loadout];
-    
-} forEach _nearbyUnits;
-
+// Quick kits mirror the DUWS role keys exactly: the player adopts a kit that belongs to a unit the
+// faction actually fields, never gear copied off whatever WEST unit wandered near HQ. getUnitLoadout
+// takes a classname here, so the kit is the unit's config loadout, not one live instance's.
 private _uniqueLoadouts = [];
 {
-    private _className = _x select 0;
-    if !(_className in (_uniqueLoadouts apply {_x select 0})) then {
-        _uniqueLoadouts pushBack _x;
-    };
-} forEach _loadouts;
+    private _className = _x;
+    private _displayName = getText (configFile >> "CfgVehicles" >> _className >> "displayName");
+    _uniqueLoadouts pushBack [_className, _displayName, getUnitLoadout _className];
+} forEach (["blufor"] call fnc_faction_unit_keylist);
 
 blufor_quickChange_loadouts_scanned = _uniqueLoadouts;
 publicVariable "blufor_quickChange_loadouts_scanned";
 
-["INFO", "GEAR", format ["Collected %1 unique unit types.", count _uniqueLoadouts]] call fnc_log;
+["INFO", "GEAR", format ["Collected %1 quick-kit unit types from role keys.", count _uniqueLoadouts]] call fnc_log;
 
 private _addedWeapons = [];
 private _addedMagazines = [];

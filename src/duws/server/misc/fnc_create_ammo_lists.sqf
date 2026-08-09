@@ -165,6 +165,12 @@ private _quickChangeUnits = (["UNIT"] call fnc_faction_rqst_list) apply { _x sel
 _factionUnitArray append _quickChangeUnits;
 _factionUnitArray = _factionUnitArray arrayIntersect _factionUnitArray;
 
+// Union in every unit the DUWS role keys resolve to -- globals and their spawn pools. The sweep
+// above only reaches the faction its seed units belong to, so a key a custom faction overrode to a
+// unit of another faction would otherwise leave that unit's gear out of the arsenal.
+_factionUnitArray append (["blufor"] call fnc_faction_unit_keylist);
+_factionUnitArray = _factionUnitArray arrayIntersect _factionUnitArray;
+
 //array of all loadouts of all units in player faction (original method)
 _factionLoadouts = [];
 { 

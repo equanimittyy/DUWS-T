@@ -344,7 +344,7 @@ if (isServer) then {
     waitUntil { sleep 1; !isNil "PosOfBLUHQ" && {count allPlayers > 0} };
     private _hqPos = PosOfBLUHQ;
     private _executed = false;
-    
+
     while {!_executed} do {
         private _anyPlayerNear = false;
         {
@@ -352,31 +352,9 @@ if (isServer) then {
                 _anyPlayerNear = true;
             };
         } forEach (call BIS_fnc_listPlayers);
-        
+
         if (_anyPlayerNear) then {
-            ["INFO", "GEAR", "Player detected within 50m of HQ. Scanning nearby units' gear..."] call fnc_log;
-            [] call fnc_addNearbyUnitsGearToArsenal;
-            _executed = true;
-        } else {
-            sleep 5;
-        };
-    };
-};
-[] spawn {
-    waitUntil { sleep 1; !isNil "PosOfBLUHQ" && {count allPlayers > 0} };
-    private _hqPos = PosOfBLUHQ;
-    private _executed = false;
-    
-    while {!_executed} do {
-        private _anyPlayerNear = false;
-        {
-            if (isPlayer _x && {alive _x} && {_x distance _hqPos < 50}) exitWith {
-                _anyPlayerNear = true;
-            };
-        } forEach (call BIS_fnc_listPlayers);
-        
-        if (_anyPlayerNear) then {
-            ["INFO", "GEAR", "Player detected within 50m of HQ. Scanning nearby units..."] call fnc_log;
+            ["INFO", "GEAR", "Player detected within 50m of HQ. Building quick kits..."] call fnc_log;
             [] call fnc_scanNearbyUnitsForQuickChange;
             _executed = true;
         } else {

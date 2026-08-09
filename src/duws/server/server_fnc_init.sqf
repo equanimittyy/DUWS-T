@@ -406,6 +406,7 @@ fnc_faction_schema = compile preprocessFileLineNumbers "duws\shared\functions\fn
 fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\functions\fnc_custom_faction_parse.sqf";publicVariable "fnc_custom_faction_parse";
 // Broadcast: both request menus and all four request handlers are client-side.
 fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_rqst_list.sqf";publicVariable "fnc_faction_rqst_list";
+fnc_faction_unit_keylist = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_unit_keylist.sqf";
 fnc_custom_faction_init = compile preprocessFileLineNumbers "duws\server\dialog\fnc_custom_faction_init.sqf";publicVariable "fnc_custom_faction_init";
 fnc_request_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_menu.sqf";publicVariable "fnc_request_menu";
 fnc_request_map_view = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_map_view.sqf";publicVariable "fnc_request_map_view";
@@ -511,8 +512,6 @@ fnc_addQuickChangeActions = compile preprocessFileLineNumbers "duws\client\misc\
 publicVariable "fnc_addQuickChangeActions";
 fnc_quick_kits_menu = compile preprocessFileLineNumbers "duws\client\misc\fnc_quick_kits_menu.sqf";
 publicVariable "fnc_quick_kits_menu";
-fnc_addNearbyUnitsGearToArsenal = compile preprocessFileLineNumbers "duws\server\misc\fnc_addNearbyUnitsGearToArsenal.sqf";
-publicVariable "fnc_addNearbyUnitsGearToArsenal";
 fnc_scanNearbyUnitsForQuickChange = compile preprocessFileLineNumbers "duws\server\misc\fnc_scanNearbyUnitsForQuickChange.sqf";
 publicVariable "fnc_scanNearbyUnitsForQuickChange";
 fnc_rearmUnit = compile preprocessFileLineNumbers "duws\server\misc\fnc_rearmUnit.sqf";
