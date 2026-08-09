@@ -505,13 +505,22 @@ shared arrays and the markers they drive are global, so there is no per-player r
 Making reveal personal is a design change to the intel system, not a persistence feature, and it
 would mean per-player markers everywhere.
 
-### The arsenal is not stored
+### The friendly arsenal is not stored; the captured pool will be
 
-Faction init rebuilds the virtual cargo from scratch (`server/misc/fnc_create_ammo_lists.sqf`), so
-all a restore loses is gear added during play by
-`server/misc/fnc_addNearbyUnitsGearToArsenal.sqf`. Storing those classnames would pin the campaign
-to the mod set that produced them, which is exactly what the mission's no-hard-dependency rule
-exists to avoid.
+Faction init rebuilds the friendly virtual cargo from scratch
+(`server/misc/fnc_create_ammo_lists.sqf`), so a restore re-resolves it against whatever mods are
+loaded now. Storing those classnames would pin the campaign to the mod set that produced them, which
+is exactly what the no-hard-dependency rule exists to avoid. The friendly shelf therefore stays out
+of the snapshot.
+
+The **captured-materiel pool** ([`arsenal_plan.md`](arsenal_plan.md)) is the opposite case, and is
+the one arsenal state that will be persisted. It is player-earned and scarce — the enemy gear brought
+back and banked — so losing it on reload loses progress, the same argument that puts the vehicle
+stockpile in the snapshot rather than the friendly cargo. Like the stockpile it is data, one
+`class -> count` map, and like it, it pins to the mod that produced the classnames: a removed enemy
+mod drops those entries, so restore validates each class and discards the unknown rather than
+restoring a name that resolves to nothing. It joins the snapshot as one key, deferred with the pool
+itself — the group lands when the arsenal work does.
 
 ## The vehicle persistence zone
 
