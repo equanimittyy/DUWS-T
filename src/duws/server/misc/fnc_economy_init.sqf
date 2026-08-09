@@ -430,7 +430,10 @@ fnc_captured_pool_settle = {
 	private _excess = [];
 	{
 		private _cls = _x;
-		if (_cls in DUWS_friendlyArsenal) then { continue };
+		// Ammo untracked: magazines never touch the pool. Hybrid keeps friendly as the unlimited
+		// floor and skips it; Limited tracks friendly too, so that skip is dropped.
+		if (!DUWS_trackAmmo && {isClass (configFile >> "CfgMagazines" >> _cls)}) then { continue };
+		if (!DUWS_arsenalLimited && {_cls in DUWS_friendlyArsenal}) then { continue };
 		private _net = (_closeC getOrDefault [_cls, 0]) - (_openC getOrDefault [_cls, 0]);
 		if (_net == 0) then { continue };
 		private _cur = [_cls] call fnc_captured_pool_getCount;
@@ -446,17 +449,19 @@ fnc_captured_pool_settle = {
 	if (_replyVar != "") then { [_replyVar, true, _excess] remoteExec ["fnc_pool_reply", _requester]; };
 };
 
-// Deposit every foreign class in a whole loadout (server). The quick-kit swap wipes the player's
-// gear, so its pre-swap loadout is banked wholesale -- friendly classes filtered out here.
+// Deposit a whole loadout (server). The quick-kit swap wipes the player's gear, so its pre-swap
+// loadout is banked wholesale. Same exemptions as settle: untracked ammo and (outside Limited)
+// friendly gear are not pooled.
 fnc_captured_pool_deposit_loadout = {
 	if (!isServer) exitWith {};
 	params [["_loadout", []]];
 	call fnc_captured_pool_friendly;
 	private _c = [_loadout] call fnc_captured_loadout_counts;
 	{
-		if (!(_x in DUWS_friendlyArsenal)) then {
-			[_x, ([_x] call fnc_captured_pool_getCount) + (_c get _x)] call fnc_captured_pool_setCount;
-		};
+		private _cls = _x;
+		if (!DUWS_trackAmmo && {isClass (configFile >> "CfgMagazines" >> _cls)}) then { continue };
+		if (!DUWS_arsenalLimited && {_cls in DUWS_friendlyArsenal}) then { continue };
+		[_cls, ([_cls] call fnc_captured_pool_getCount) + (_c get _cls)] call fnc_captured_pool_setCount;
 	} forEach (keys _c);
 	publicVariable "DUWS_capturedPool";
 };

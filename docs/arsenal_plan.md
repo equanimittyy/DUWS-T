@@ -123,13 +123,24 @@ chat spam. The counts have to be held out of the editable loadout for the whole 
 once, on close. Net: the player leaves with exactly the balance they entered with, minus only what
 would not fit, which is on the floor beside them.
 
-## Full arsenal stays a host option
+## Three modes, plus an ammo switch
 
-The arsenal defaults to full today: `DUWS_fnc_arsenal_current` is `DUWS_fnc_arsenal_full`, a no-op
-(`initPlayerLocal.sqf:259-263`), and `DUWS_isRestrictedArsenal` defaults false (`:280`,
-`client/misc/fnc_duws_Arsenal.sqf:5`). The hybrid (standard-issue-unlimited + captured-tracked)
-becomes the new default; the unlimited-everything arsenal is kept as a host setting for a group that
-wants it. One setting, read where the mode is chosen.
+The arsenal mode is a lobby parameter (`DUWS_ArsenalMode`), read where the arsenal opens
+(`client/misc/fnc_duws_Arsenal.sqf`):
+
+- **Hybrid** (default) -- standard issue unlimited, captured foreign gear count-tracked. The model the
+  rest of this plan describes.
+- **Full** -- everything unlimited; the legacy `["Open", true]` arsenal, kept for groups that want it.
+- **Limited** -- nothing is unlimited, the player's own faction included. There is no standard-issue
+  floor, so the whole friendly set is seeded into the pool at boot (`DUWS_limitedSeed`, default 100
+  each) and the shelf hides any class that reaches zero. Otherwise it reuses Hybrid's machinery
+  wholesale -- the close-diff simply stops skipping friendly classes.
+
+A second lobby parameter, **`DUWS_TrackAmmo`** (default off), decides whether magazines are in scope.
+Off, ammo is never pooled in any mode: friendly mags come free from the boot build and the enemy
+faction's mags are added to the shelf on open, so a captured weapon always has ammo. On, magazines
+are tracked exactly like gear -- foreign ammo under Hybrid, all ammo under Limited -- for scarcity
+scenarios such as zombie mode. It is orthogonal to the mode; Full ignores it.
 
 **The mission-reward loot arsenals stock the pool instead of opening a full one.** `destroy_cache`
 (`server/missions/mission_threads/destroy_cache/fnc_destroy_cache_mission.sqf:96,131`) and

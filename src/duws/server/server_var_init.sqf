@@ -73,6 +73,16 @@ chosen_settings = false;publicVariable "chosen_settings";
 // and each re-broadcasts after a change; clients read it as a view to stock the arsenal shelf.
 DUWS_capturedPool = [];publicVariable "DUWS_capturedPool";
 
+// Arsenal mode and ammo tracking, resolved once from the lobby params so the server-side pool writers
+// and the client shelf logic read one authoritative answer. Limited count-tracks the player's own
+// faction too (no unlimited floor); trackAmmo folds magazines into whatever the mode tracks.
+DUWS_arsenalLimited = (["DUWS_ArsenalMode", 0] call BIS_fnc_getParamValue) == 2;publicVariable "DUWS_arsenalLimited";
+DUWS_trackAmmo = (["DUWS_TrackAmmo", 0] call BIS_fnc_getParamValue) == 1;publicVariable "DUWS_trackAmmo";
+
+// Limited's starting armoury: every standard-issue class is seeded into the pool at this count at
+// boot, since Limited removes the unlimited friendly floor. Tunable; a playtest value.
+DUWS_limitedSeed = 100;
+
 // The faction confirmation screen's handshake. Request and ready are counters, not flags: stepping
 // back from the environment screen re-enters faction selection and the screen asks again, and a
 // flag cleared by the server can race a fresh request raised by the client. The screen waits for

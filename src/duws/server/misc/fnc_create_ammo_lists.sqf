@@ -56,6 +56,13 @@ _snapFriendly = {
     } forEach ["bis_addVirtualWeaponCargo_cargo", "bis_addVirtualItemCargo_cargo",
         "bis_addVirtualMagazineCargo_cargo", "bis_addVirtualBackpackCargo_cargo"];
     DUWS_friendlyArsenal = _u arrayIntersect _u;
+    publicVariable "DUWS_friendlyArsenal";
+    // Limited has no unlimited floor, so stock the whole standard-issue set into the pool at boot.
+    // Magazines are seeded too; the seed is simply unused while ammo is untracked.
+    if (DUWS_arsenalLimited) then {
+        { [_x, DUWS_limitedSeed] call fnc_captured_pool_setCount; } forEach DUWS_friendlyArsenal;
+        publicVariable "DUWS_capturedPool";
+    };
     ["INFO", "GEAR", format ["Friendly arsenal snapshot: %1 classes", count DUWS_friendlyArsenal]] call fnc_log;
 };
 

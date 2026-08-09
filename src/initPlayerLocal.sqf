@@ -248,18 +248,51 @@ DUWS_fnc_shelfForeign = {
         // foreign withdrawal. Never reassigned; _refLoadout tracks live edits separately.
         private _openLoadout = getUnitLoadout player;
 
-        // Stock the captured pool onto the local shelf so banked foreign gear is takeable, and so the
-        // whitelist strip below (which reads the cargo) permits it.
+        // Stock the shelf. Tracked here for the close cleanup: foreign gear added, friendly hidden
+        // (Limited), and the enemy magazines added while ammo is untracked.
         private _addedForeign = [];
+        private _hiddenFriendly = [];
+        private _ammoList = [];
         if (_isRestricted) then {
+            private _limited = missionNamespace getVariable ["DUWS_arsenalLimited", false];
+            private _trackAmmo = missionNamespace getVariable ["DUWS_trackAmmo", false];
+            private _friendly = missionNamespace getVariable ["DUWS_friendlyArsenal", []];
+            private _pool = missionNamespace getVariable ["DUWS_capturedPool", []];
+
+            // Banked foreign gear onto the shelf so it is takeable and the whitelist strip permits it.
+            // Friendly-in-pool (Limited's seed) is already on the shelf from the boot build, so only
+            // truly-foreign classes are added here.
             {
                 _x params ["_cls", "_cnt"];
-                if (_cnt > 0) then {
+                if (_cnt > 0 && {!(_cls in _friendly)}) then {
                     private _type = [_cls] call DUWS_fnc_cargoType;
                     [_cls, _type, true] call DUWS_fnc_shelfForeign;
                     _addedForeign pushBack [_cls, _type];
                 };
-            } forEach (missionNamespace getVariable ["DUWS_capturedPool", []]);
+            } forEach _pool;
+
+            // Limited hides friendly gear that is fully depleted, so the shelf shows only what is in
+            // stock. Magazines are exempt while ammo is untracked -- they are always free.
+            if (_limited) then {
+                {
+                    private _cls = _x;
+                    if (!((isClass (configFile >> "CfgMagazines" >> _cls)) && !_trackAmmo)) then {
+                        private _i = _pool findIf { (_x select 0) isEqualTo _cls };
+                        if (_i < 0 || {((_pool select _i) select 1) <= 0}) then {
+                            private _type = [_cls] call DUWS_fnc_cargoType;
+                            [_cls, _type, false] call DUWS_fnc_shelfForeign;
+                            _hiddenFriendly pushBack [_cls, _type];
+                        };
+                    };
+                } forEach _friendly;
+            };
+
+            // Ammo untracked: put the enemy faction's magazines on the shelf so captured weapons have
+            // ammo. Friendly mags are already there; subtract them so the close removal cannot strip one.
+            if (!_trackAmmo) then {
+                _ammoList = (missionNamespace getVariable ["opfor_ammobox_magazines", []]) - _friendly;
+                [missionNamespace, _ammoList, true] call BIS_fnc_addVirtualMagazineCargo;
+            };
         };
 
         private _refLoadout = getUnitLoadout player;
@@ -292,7 +325,11 @@ DUWS_fnc_shelfForeign = {
             missionNamespace setVariable [_replyVar, nil];
             { _x params ["_cls", "_ex"]; [_cls, _ex] call DUWS_fnc_strip_n; } forEach _excess;
 
+            // Undo the shelf edits: clear the foreign gear, restore any friendly hidden as depleted,
+            // and pull the free enemy magazines back off.
             { _x params ["_cls", "_type"]; [_cls, _type, false] call DUWS_fnc_shelfForeign; } forEach _addedForeign;
+            { _x params ["_cls", "_type"]; [_cls, _type, true] call DUWS_fnc_shelfForeign; } forEach _hiddenFriendly;
+            if (count _ammoList > 0) then { [missionNamespace, _ammoList, false] call BIS_fnc_addVirtualMagazineCargo; };
         };
 
         // Hand the money back: into inventory where it fits, dropped at the player's feet where it

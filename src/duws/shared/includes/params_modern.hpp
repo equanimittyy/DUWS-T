@@ -34,8 +34,18 @@ class Params {
     // opens the arsenal (client/misc/fnc_duws_Arsenal.sqf), so every opener reads the same value.
     class DUWS_ArsenalMode {
         title = "Arsenal";
+        values[] = {0,1,2};
+        texts[] = {"Hybrid (captured gear tracked)","Full (everything unlimited)","Limited (all gear tracked)"};
+        default = 0;
+    };
+
+    // Off (default) leaves magazines unlimited in every mode: ammo is never pooled, and a captured
+    // enemy weapon gets its ammo free on the shelf. On folds magazines into whatever the mode tracks
+    // (Hybrid pools foreign ammo, Limited pools all of it) -- for scarcity scenarios like zombie mode.
+    class DUWS_TrackAmmo {
+        title = "Arsenal: track ammo";
         values[] = {0,1};
-        texts[] = {"Hybrid (captured gear tracked)","Full (everything unlimited)"};
+        texts[] = {"Off (ammo unlimited)","On (ammo tracked)"};
         default = 0;
     };
 
