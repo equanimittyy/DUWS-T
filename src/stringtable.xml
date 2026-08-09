@@ -5084,6 +5084,10 @@
                 <Original>No units available for HALO insertion.</Original>
                 <English>No units available for HALO insertion.</English>
             </Key>
+            <Key ID="STR_DUWS_T_halo_select_title">
+                <Original>SELECT DROP ZONE</Original>
+                <English>SELECT DROP ZONE</English>
+            </Key>
             <Key ID="STR_DUWS_T_y91vei53">
                 <German>Nachschub Abwurf unterwegs. ETA: 1 min</German>
                 <Spanish>Entrega de suministros en camino. TEA: 1 min</Spanish>

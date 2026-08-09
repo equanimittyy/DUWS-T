@@ -86,18 +86,27 @@ if (not alive _host) exitwith {
     _host removeaction _id;
 };
 
-_caller groupchat localize "STR_DUWS_T_vtkkn80v";
+// On-screen notice in place of the bottom-right chatbox: a titleText radio brief, the surface
+// the helo taxi uses. Green for status, red for a cancel or a cost the player cannot pay.
+private _fnc_notice = {
+    params ["_msg", ["_color", "#00ff00"]];
+    titleText [format ["<t color='%2' size='2'>%1</t>", _msg, _color], "PLAIN DOWN", -1, true, true];
+};
 
 mapclick = false;
 if (!(["HALO", "clickpos = _pos; mapclick = true; ['HALO'] call fnc_mapclick_release; true;"] call fnc_mapclick_claim)) exitWith {};
 openMap true;
 player setVariable["Saved_Loadout", getUnitLoadout player];
+// Banner not chatbox: the engine draws hints/chat beneath the open map, so a map-display
+// control is the only prompt visible during selection. Same surface HQ placement uses.
+waitUntil { !isNull findDisplay 12 };
+[format ["<t size='2' color='#00ffff'>%1</t><br/>%2", localize "STR_DUWS_T_halo_select_title", localize "STR_DUWS_T_vtkkn80v"]] call fnc_map_prompt;
 waituntil {mapclick or !(visiblemap)};
 // Released on the abort path too: the player closing the map ends the jump, and without this
 // the slot would stay owned by a mode that is no longer running.
 ["HALO"] call fnc_mapclick_release;
 if (!visibleMap) exitwith {
-    _caller groupchat localize "STR_DUWS_T_q639bywa";
+    [localize "STR_DUWS_T_q639bywa", "#ff3333"] call _fnc_notice;
     player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
 };
 _pos = clickpos;
@@ -116,28 +125,28 @@ if (_typehalo) then {
 private _jumpers = (count _aiUnits) + ([1, 0] select _excludePlayer);
 
 if (_jumpers <= 0) exitWith {
-    _caller groupchat localize "STR_DUWS_T_halo_no_units";
+    [localize "STR_DUWS_T_halo_no_units", "#ff3333"] call _fnc_notice;
     player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
 };
 
-// 1 CP per jumper per km from HQ, distance rounded up so any real jump costs something.
+// 1 CP per jumper per 5 km from HQ, distance rounded up so any real jump costs something.
 private _distKm = ceil ((PosOfBLUHQ distance2D _pos) / 1000);
-private _cost = _jumpers * _distKm;
+private _cost = _jumpers * ceil (_distKm / 5);
 
 // Advisory read before the confirm, so the player is not asked to fund a jump they cannot
 // afford. fnc_pool_spend below stays the authoritative gate against a mid-window change.
 if (commandpointsblu1 < _cost) exitWith {
-    _caller groupchat format [localize "STR_DUWS_T_p6sb3ply", _cost];
+    [format [localize "STR_DUWS_T_p6sb3ply", _cost], "#ff3333"] call _fnc_notice;
     player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
 };
 
 if !([format [localize "STR_DUWS_T_halo_confirm", _jumpers, _distKm, _cost], localize "STR_DUWS_T_halo_confirm_title", true, true] call BIS_fnc_guiMessage) exitWith {
-    _caller groupchat localize "STR_DUWS_T_q639bywa";
+    [localize "STR_DUWS_T_q639bywa", "#ff3333"] call _fnc_notice;
     player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
 };
 
 if !(["CP", _cost] call fnc_pool_spend) exitWith {
-    _caller groupchat format [localize "STR_DUWS_T_p6sb3ply", _cost];
+    [format [localize "STR_DUWS_T_p6sb3ply", _cost], "#ff3333"] call _fnc_notice;
     player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
 };
 
@@ -164,7 +173,7 @@ if (!_excludePlayer) then {
 
     _bis_fnc_halo_action = _caller addaction [ACT_MOVE("STR_DUWS_T_bd22lcos"),"A3\functions_f\misc\fn_HALO.sqf",[],70,true,true,"Eject","true"];
     sleep 5;
-    _caller groupchat localize "STR_DUWS_T_sjk84cdc";
+    [localize "STR_DUWS_T_sjk84cdc"] call _fnc_notice;
 
     waituntil {sleep 0.1;(position _caller select 2) <= _altchute};
     _caller removeaction _bis_fnc_halo_action;
@@ -174,7 +183,7 @@ if (!_excludePlayer) then {
         player setUnitLoadout(player getVariable["Saved_Loadout",[]]);
     };
 
-    _caller groupchat localize "STR_DUWS_T_o3yt6tzg";
+    [localize "STR_DUWS_T_o3yt6tzg"] call _fnc_notice;
     [_caller] spawn bis_fnc_halo;
 
     waitUntil {sleep 0.1;isTouchingGround player};
