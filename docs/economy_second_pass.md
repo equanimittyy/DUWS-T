@@ -380,8 +380,9 @@ which `setTimeMultiplier` does not scale; side-mission cooldowns are stamped aga
 date`, which it does
 ([`info/arma_engine_gotchas.md`](info/arma_engine_gotchas.md#diag_ticktime-counts-from-process-start-and-is-not-restored-by-a-savegame)).
 At the host's higher multipliers a mission type recharges many times faster while the trickle pays
-at an unchanged real rate, so missions come to dominate and the 75/25 ordering inverts. Every share
-here holds at `time_Multiplier = 1`; which clock the tick should run on is [open](#open-questions).
+at an unchanged real rate, so missions come to dominate and the 75/25 ordering inverts. The tick
+stays on `sleep 1800`: every share here holds at `time_Multiplier = 1`, and the high-multiplier
+divergence is an accepted limitation rather than something to redesign the clock around.
 
 ### Where OPFOR army power comes from
 
@@ -767,13 +768,13 @@ Two consequences worth settling before this is built:
 the purchase handshake — a client testing its own copy of a networked pool is a round trip out of
 date, so two co-op players can both pass one gate.
 
-**Who may spend AP is unsettled, and the leaning is toward `game_master`.** Both pools are shared,
-any squad lead can spend them today, and permanence means a bad AP purchase cannot be worked off
-the way a wasted CP one can. Moving the support call to `game_master` alone — which already owns
-campaign-level control and reads naturally as the BLUFOR commander — makes one player answerable
-for the campaign's premium currency rather than making every squad lead trustworthy. That is a
-role decision as much as a permissions one, and in a two-player session it may just mean one of
-them cannot buy.
+**AP spends on the same authority as CP: any `Squad_Leader`.** Both pools are shared and every
+squad lead can already spend CP, so AP keeps that parity rather than moving the call to
+`game_master` alone. The trade is taken deliberately: permanence means a bad AP purchase cannot be
+worked off the way a wasted CP one can, and any lead can make one — but a separate premium-currency
+permission is a role split the mission does not otherwise carry, and gating AP to one player would,
+in a two-player session, just mean the other cannot buy. Spend authority stays the single edit to
+`Squad_Leaders` it already is for CP.
 
 ## Reading the war from the map
 
@@ -913,14 +914,6 @@ is where a second array goes.
   the constant cannot be set before it.
 - **The flat income figure**, which falls out of the answer above once OPFOR town income is
   measured on a real map rather than estimated.
-- **Which clock the economy tick runs on.** The zone AP trickle and town income ride `sleep 1800`,
-  which `setTimeMultiplier` does not scale; side-mission cooldowns ride the campaign date, which it
-  does. The two therefore diverge by exactly the host's multiplier, and at 32x missions supply
-  almost all of the player's AP instead of a quarter of it
-  ([above](#where-blufor-army-power-comes-from)) — so every share and every constant in this plan
-  holds at 1x alone. Moving the tick onto the campaign date makes one clock of the two, at the
-  cost of paying passive income as many times faster as the campaign is running, which is
-  proportionate but is not what the tick does today.
 - **The throttle constants `k` and `REF_ZONES`.** `k = 0.5` and `REF_ZONES = 6` are starting
   values: `k` sets how hard a large campaign is throttled and `REF_ZONES` the size below which
   nothing is, and both want play against real campaign sizes rather than paper.
@@ -953,8 +946,6 @@ is where a second array goes.
 - **Where the boundary falls for armed cars and wheeled APCs.** Tanks and unarmed transport are
   clear; the middle of the catalogue is where a rule stated as "armed costs AP" starts pricing an
   armed offroad like a main battle tank.
-- **Whether the support call moves to `game_master` alone**, and what a squad lead sees when it
-  does.
 - **Whether the player can learn the commander's archetype, and how.** One the player can never
   perceive is variance rather than a mechanic; the intel system is the obvious route
   ([`info/intel_system.md`](info/intel_system.md)), and observed behaviour is the free one.
