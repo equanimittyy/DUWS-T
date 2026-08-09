@@ -87,8 +87,8 @@ switch (_kind) do {
 			_lines pushBack format [localize "STR_DUWS_T_civ_mapview_rep", _rep];
 			// A neutral town prints what it is worth, not the nothing it currently pays: reading the
 			// map before moving is how the player picks which town to work on, and a bare "none"
-			// makes every unturned town look equally pointless. _income is what the tick actually
-			// credits, _ap what the town becomes worth once it picks a side.
+			// makes every unturned town look equally pointless. Both figures are the town's worth --
+			// _income side-gated to what a banded town pays, _ap the worth a neutral one turns into.
 			_lines pushBack (switch (_side) do {
 				case "BLU": { format [localize "STR_DUWS_T_civ_mapview_income_blu", _income] };
 				case "OPF": { format [localize "STR_DUWS_T_civ_mapview_income_opf", _income] };
