@@ -19,7 +19,7 @@ private _bnr = {
 // Sub-header + body, for topics folded into a page as one section.
 private _sec = {
     params ["_titleId", "_bodyId"];
-    "<t size='1.15' color='#e5b100'>" + (localize _titleId) + "</t><br/>" + (localize _bodyId)
+    "<t size='1.15' color='#4da6ff'>" + (localize _titleId) + "</t><br/>" + (localize _bodyId)
 };
 
 private _coverBody =
@@ -59,10 +59,11 @@ private _configBody = ("duws_t_man_config.jpg" call _bnr) + ([
     ["STR_DUWS_T_timemanagement", "STR_DUWS_T_timemanagement2"] call _sec,
     ["STR_DUWS_T_ojav7yf4",       "STR_DUWS_T_d38s8oac"] call _sec,          // Hardcore Mode
     ["STR_DUWS_T_deathpenalty",   "STR_DUWS_T_deathpenalty2"] call _sec,
-    "<t size='1.15' color='#e5b100'>" + (localize "STR_DUWS_T_subtitlesystem") + "</t><br/>"
+    "<t size='1.15' color='#4da6ff'>" + (localize "STR_DUWS_T_subtitlesystem") + "</t><br/>"
         + ([localize "STR_DUWS_T_subtitlesystem2"] call fnc_cs),             // Subtitles (needs fnc_cs)
     ["STR_DUWS_T_ty006zz4",       "STR_DUWS_T_8o0fomss"] call _sec,          // Saving
-    ["STR_DUWS_T_ljw9ndqz",       "STR_DUWS_T_nk0wa9zo"] call _sec           // Multiplayer
+    ["STR_DUWS_T_ljw9ndqz",       "STR_DUWS_T_nk0wa9zo"] call _sec,          // Multiplayer
+    ["STR_DUWS_T_MAN_L_OTHERMAPS", "STR_DUWS_T_MAN_B_OTHERMAPS"] call _sec   // Playing on Other Maps
 ] joinString "<br/><br/>");
 
 // Other Game Modes: Guerilla and WBK fold in here once fleshed out - no per-mode
