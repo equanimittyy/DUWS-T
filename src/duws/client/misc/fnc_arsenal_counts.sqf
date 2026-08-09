@@ -22,6 +22,10 @@ DUWS_fnc_arsenal_countFor = {
     params ["_cls"];
     // Full mode leaves the whole arsenal unlimited; the enforcer marks it non-restricted.
     if (!(player getVariable ["DUWS_isRestrictedArsenal", false])) exitWith { -1 };
+    // Startup kit stays the player's to re-draw: the gear deployed with is unlimited in every
+    // restricted mode, including a BLUFOR default class the detected faction never fields -- absent
+    // from the friendly snapshot, it would otherwise read as an empty pool ([0]).
+    if (_cls in (player getVariable ["DUWS_startupKit", []])) exitWith { -1 };
     // Ammo untracked (the default): magazines are free in every mode, so never counted.
     if ((isClass (configFile >> "CfgMagazines" >> _cls)) && {!(missionNamespace getVariable ["DUWS_trackAmmo", false])}) exitWith { -1 };
     // Hybrid keeps standard-issue gear unlimited; Limited tracks it too, so only Hybrid short-circuits.

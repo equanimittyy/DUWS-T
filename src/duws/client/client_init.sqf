@@ -406,7 +406,13 @@ hintsilent format[localize "STR_DUWS_T_ix8g2neb",worldName,profileName];
 forceWeatherChange;
 
 player setVariable["Saved_Loadout", getUnitLoadout player];
-player setdamage 0;	
+// Flat classname set of the deploy kit, for the restricted arsenal to keep it unlimited. Taken here,
+// after the base-guard loadout copy has had time to land, so it reflects what the player actually
+// carries rather than the editor default.
+private _startupKit = [];
+[getUnitLoadout player, _startupKit] call DUWS_fnc_extractLoadoutItems;
+player setVariable ["DUWS_startupKit", _startupKit];
+player setdamage 0;
 player allowDamage true;
 // Zeus disconnect fix and Add SITREP to Gamemaster	
 if ((vehiclevarname player) in game_master || !isMultiplayer) then {
