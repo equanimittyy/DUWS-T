@@ -35,7 +35,7 @@ class civ_dialog
             h = 21.9 * GUI_GRID_H;
             moving = 1;
         };
-        class civ_coins: RscText
+        class civ_money: RscText
         {
             idc = 8310;
             text = "";
@@ -234,7 +234,7 @@ class civ_bribe_dialog
             colorText[] = {1, 1, 1, 1};
             sizeEx = 0.033;
         };
-        class civb_coins: RscText
+        class civb_money: RscText
         {
             idc = 8411;
             text = "";

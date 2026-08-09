@@ -28,9 +28,9 @@ if (!_accepted) exitWith {
 };
 
 // The prompt greys Accept when the player is short, but that count came from the player's own
-// machine and in co-op two players can spend the same coins. fnc_coins_spend is the read that
+// machine and in co-op two players can spend the same money. fnc_money_spend is the read that
 // decides, and it tests and deducts in one place so nothing lands between the two.
-if !([_caller, _bribe] call fnc_coins_spend) exitWith {
+if !([_caller, _bribe] call fnc_money_spend) exitWith {
     [_civilian, _caller, _row] call fnc_civ_close;
 };
 

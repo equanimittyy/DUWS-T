@@ -286,10 +286,10 @@ MASTER_allLocationsPos = [];publicVariable "MASTER_allLocationsPos";
 //
 // [successChance, [[payoutKind, weight], ...], nothingKey]
 DUWS_searchSources = createHashMapFromArray [
-    ["garrison",  [0.5,  [["intel", 2], ["pool", 3], ["coins", 2], ["document", 1]], "STR_DUWS_T_INTEL_FOUND_n"]],
+    ["garrison",  [0.5,  [["intel", 2], ["pool", 3], ["money", 2], ["document", 1]], "STR_DUWS_T_INTEL_FOUND_n"]],
     ["mission",   [0.15, [["intel", 3], ["pool", 2]],                                "STR_DUWS_T_INTEL_FOUND_n"]],
     ["objective", [1,    [["intel", 1]],                                             "STR_DUWS_T_INTEL_FOUND_n"]],
-    ["civ_frisk", [1,    [["coins", 3], ["document", 1], ["nothing", 4]],            "STR_DUWS_T_INTEL_FOUND_n"]]
+    ["civ_frisk", [1,    [["money", 3], ["document", 1], ["nothing", 4]],            "STR_DUWS_T_INTEL_FOUND_n"]]
 ];
 
 // manually_chosen

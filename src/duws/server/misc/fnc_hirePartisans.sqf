@@ -15,7 +15,7 @@ if (_cooldownRemaining > 0) exitWith {
     [_msg] remoteExec ["hint", _caller];
 };
 
-if !([_caller, 10] call fnc_coins_spend) exitWith {
+if !([_caller, 10] call fnc_money_spend) exitWith {
     private _msg = localize "STR_DUWS_T_NOT_ENOUGH_MONEY";
     [_msg] remoteExec ["hint", _caller];
 };

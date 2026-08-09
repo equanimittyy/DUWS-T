@@ -241,7 +241,7 @@ fnc_town_garrison_setTier = {
 // Piecewise linear with a kink at zero, because accept climbs faster above neutral than below
 // it. Bribe is the remainder, a symmetric tent peaking at neutral: a town that neither likes
 // nor hates the player is where money talks loudest, and at both extremes standing decides
-// instead of coins. Neither end is a wall -- a town at -20 still takes a bribe one time in ten,
+// instead of money. Neither end is a wall -- a town at -20 still takes a bribe one time in ten,
 // so ground the player has ruined is expensive rather than closed.
 fnc_civ_reaction_weights = {
 	params [["_rep", 0]];

@@ -1,7 +1,7 @@
 // Locality: the player who opened it. Draws the civilian panel and greys the rows the server
 // would refuse anyway.
 //
-// Everything greyed here is advisory. The coin count is this machine's snapshot, the state flags
+// Everything greyed here is advisory. The money count is this machine's snapshot, the state flags
 // are a broadcast copy, and the range is read once rather than polled -- the server re-tests all
 // three when a row is actually picked. Greying spares the player a click that would fail; it
 // decides nothing.
@@ -17,8 +17,8 @@ DUWS_civ_target = _civilian;
 if (!createDialog "civ_dialog") exitWith {};
 waitUntil { dialog };
 
-private _coins = [player] call fnc_coins_count;
-ctrlSetText [8310, format [localize "STR_DUWS_T_CIV_MENU_COINS", _coins]];
+private _money = [player] call fnc_money_count;
+ctrlSetText [8310, format [localize "STR_DUWS_T_CIV_MENU_MONEY", _money]];
 
 private _closed = _civilian getVariable ["DUWS_civ_closed", false];
 

@@ -21,7 +21,7 @@ _hqBuilding setVariable ["HQ_building_actions_done", true];
 _hqBuilding addAction [ACT_PRIMARY_MENU("STR_DUWS_T_vw32hahc"), fnc_request_menu, [], 100, true, true, "", "_this == player", ACT_REACH];
 
 // The black market stays a scroll entry while mission control, which sat beside it, became a
-// request row: this one spends the coins a player takes off civilians, not the CP that command
+// request row: this one spends the money a player takes off civilians, not the CP that command
 // answers for, so it is nobody's business to ask permission for.
 _hqBuilding addAction [
     ACT_SECONDARY_MENU("STR_DUWS_T_BLACKMARKET_TITLE"),

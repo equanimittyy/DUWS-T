@@ -1,4 +1,4 @@
-// Command points, arsenal points, coins and the shared spend pools.
+// Command points, arsenal points, money and the shared spend pools.
 //
 // Executed by the registry rather than stored as one function: this file defines several.
 // Broadcasts stay in server_fnc_init.sqf beside the load, so the manifest remains the one
@@ -173,30 +173,30 @@ fnc_escalation_cost = {
 	ceil (_cost * (missionNamespace getVariable ["escalation_multiplier", 1]))
 };
 
-// Coins in hand. Money_roll is added as a magazine, but the ground pickup and the arsenal can
+// Money in hand. Money_roll is added as a magazine, but the ground pickup and the arsenal can
 // land one in either the magazine or the item slots, so both are counted: itemsWithMagazines is
-// the union and cannot report fewer coins than the player is holding. Counting magazines alone
+// the union and cannot report less money than the player is holding. Counting magazines alone
 // -- which two of the four purchase paths used to do -- can only ever undercount, and an
 // undercount tells a player who can afford something that they cannot.
 // Available on clients too: the civilian menu shows the player what they are carrying.
-fnc_coins_count = {
+fnc_money_count = {
 	params ["_unit"];
 	if (isNull _unit) exitWith { 0 };
 	{ _x == "Money_roll" } count (itemsWithMagazines _unit)
 };
 
-// Spends coins and reports whether it could. Server-only, and the caller says nothing about the
+// Spends money and reports whether it could. Server-only, and the caller says nothing about the
 // price until this returns: a client's count is a snapshot, and in co-op two players can spend
-// the same coins, so this read and the removal are adjacent statements on the one machine that
+// the same money, so this read and the removal are adjacent statements on the one machine that
 // owns the inventory -- the same reason fnc_pool_try_spend exists for CP.
 //
 // Both removal commands are needed because both slots are counted, and each ignores the other's.
 // Callers own the refusal message: the four purchase paths word it differently and one of them
 // closes a civilian on top.
-fnc_coins_spend = {
+fnc_money_spend = {
 	if (!isServer) exitWith { false };
 	params ["_unit", ["_amount", 0]];
-	if (([_unit] call fnc_coins_count) < _amount) exitWith { false };
+	if (([_unit] call fnc_money_count) < _amount) exitWith { false };
 	private _left = _amount;
 	{
 		if (_x == "Money_roll" && _left > 0) then {

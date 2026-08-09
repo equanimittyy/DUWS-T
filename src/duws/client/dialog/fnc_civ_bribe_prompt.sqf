@@ -19,12 +19,12 @@ DUWS_civ_bribe_accepted = false;
 if (!createDialog "civ_bribe_dialog") exitWith {};
 waitUntil { dialog };
 
-private _coins = [player] call fnc_coins_count;
+private _money = [player] call fnc_money_count;
 ctrlSetText [8410, format [localize "STR_DUWS_T_CIV_BRIBE_DEMAND", _bribe]];
-ctrlSetText [8411, format [localize "STR_DUWS_T_CIV_MENU_COINS", _coins]];
+ctrlSetText [8411, format [localize "STR_DUWS_T_CIV_MENU_MONEY", _money]];
 
-// Advisory, like everything else the menu greys: the server reads the player's coins again
+// Advisory, like everything else the menu greys: the server reads the player's money again
 // before it deducts, because in co-op two players can spend the same ones. What greying buys is
 // that an unaffordable demand reads as unaffordable instead of failing on click -- and since
 // being unable to pay closes the civilian either way, the player at least sees the price first.
-ctrlEnable [8420, _coins >= _bribe];
+ctrlEnable [8420, _money >= _bribe];

@@ -2902,7 +2902,7 @@
                 <Original>Civilian Interaction</Original>
                 <English>Civilian Interaction</English>
             </Key>
-            <Key ID="STR_DUWS_T_CIV_MENU_COINS">
+            <Key ID="STR_DUWS_T_CIV_MENU_MONEY">
                 <Original>In Inventory: %1 money</Original>
                 <English>In Inventory: %1 money</English>
             </Key>

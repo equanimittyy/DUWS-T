@@ -102,7 +102,7 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
 
         case "pool": { call _payPool; _paid = true };
 
-        case "coins": {
+        case "money": {
             private _items = [];
             for "_i" from 1 to (1 + floor random 5) do { _items pushBack "Item_Money_roll" };
             [_items, _origin] call fnc_search_dropItems;
