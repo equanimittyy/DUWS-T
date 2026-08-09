@@ -250,7 +250,7 @@ only server-side caps read it.
 Open balance questions — the territory snowball, the loot-to-analysis faucet, recycle ownership, AP
 inflation and the bribe figures — are in
 [`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#economy-balance); the redesign that would spend AP is
-[`../economy_plan.md`](../economy_plan.md).
+[`../economy_second_pass.md`](../economy_second_pass.md).
 
 ## Who may spend
 

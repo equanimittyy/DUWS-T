@@ -3,7 +3,7 @@
 The arsenal splits gear by origin. Your own faction's gear is **standard issue** — unlimited, and
 resolved at boot exactly the way it is today. Everything foreign is **captured materiel** — scarce,
 count-tracked, and stocked only by the enemy gear you carry back and take off. Scarcity lives on the
-foreign shelf the way it lives in Army Power ([`economy_plan.md`](economy_plan.md)): one place in the
+foreign shelf the way it lives in Army Power ([`economy_second_pass.md`](economy_second_pass.md)): one place in the
 system holds the constraint, and the rest is abundant so it stays legible.
 
 The worked example throughout: a US-vs-RU campaign. US gear is derived by the current system and is
@@ -60,7 +60,7 @@ second site the pool can change, when the close-diff below already sees every re
 manual deposit is ever wanted it is additive — it feeds the same pool through the same server writer.
 
 **Banking stocks the pool and nothing else** — no CP, AP or intel for a deposit. Recycling gear for
-currency is a separate faucet with its own balance cost ([`economy_plan.md`](economy_plan.md)); the
+currency is a separate faucet with its own balance cost ([`economy_second_pass.md`](economy_second_pass.md)); the
 pool is materiel, not income.
 
 ## Spending the pool: withdraw and the overdraw problem

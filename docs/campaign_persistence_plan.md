@@ -157,7 +157,7 @@ session instead of one interval.
 
 One limit of the manual path is temporary. SITREP costs 1 CP today, so a player spent down to
 nothing cannot save at all — and that price is being removed, with a cooldown in its place
-([`economy_plan.md`](economy_plan.md#sitrep-becomes-free)). Off is a second reason for that
+([`economy_second_pass.md`](economy_second_pass.md#sitrep-becomes-free)). Off is a second reason for that
 change to land rather than a reason to withhold the option, because it promotes the manual save
 from a convenience to the only in-session one. The grant itself follows the `game_master` slot
 rather than the person (`server/server_var_init.sqf`), so a co-op team whose game master leaves
@@ -202,7 +202,7 @@ optimisation here; without it a dedicated server loses the campaign every time t
 the configuration this mission wants for a persistent campaign, and it raises a design question
 the mission has never had to answer: the 30-minute economy tick keeps paying, WARCOM keeps
 spawning waves, the side-mission generator keeps rolling and expiring missions, and — once the
-[OPCOM](economy_plan.md#what-the-commander-spends-on) lands — the enemy keeps
+[OPCOM](economy_second_pass.md#what-the-commander-spends-on) lands — the enemy keeps
 buying garrisons and hardpoints against a player who is asleep.
 
 **Decided: the campaign idles at zero players.** A player who logs off overnight and returns to a
@@ -416,7 +416,7 @@ for every one they have already farmed.
 **The tier ratchet is state, not a threshold test.** Once AP is spendable, deriving the tier from
 the live pool re-derives it from a number that has since been spent down, silently un-unlocking an
 enemy that had already reached armour — the failure mode
-[`economy_plan.md`](economy_plan.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites)
+[`economy_second_pass.md`](economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites)
 describes. A ratchet whose only record is a number that goes both ways is not a ratchet.
 
 **Kill income needs one existing handler changed to survive a restore.**
@@ -752,7 +752,7 @@ reconstructed arguments. Regenerating instead means they start the way they alwa
 Discarding live units discards what was *spent* on them. A save taken while a WARCOM wave is in
 the air deletes the wave and the AP that bought it; a support in flight takes its CP with it. Over
 a campaign of restarts that is a slow leak out of both economies, and it gets worse once the
-[OPCOM](economy_plan.md#what-the-commander-spends-on) is buying continuously.
+[OPCOM](economy_second_pass.md#what-the-commander-spends-on) is buying continuously.
 
 Antistasi reconciles this at save time rather than living with it: before writing, it walks live
 vehicles and units and folds their value back into the pools it is about to save — a full refund
@@ -781,7 +781,7 @@ refund attached to the one restore that consumes it.
 | `server/misc/fnc_campaign_reconcile.sqf` | New. Folds the value of live units and vehicles back into the pools, before every write. |
 | `server/misc/fnc_campaign_vehicles.sqf` | New. Collects and respawns the stockpile around each anchor. |
 | `server/misc/fnc_autoSave.sqf` | Rewritten to call the new save; drop `saveGame`. Owns the interval loop and the no-overlap guard. |
-| `server/supports/fnc_sitrep_support.sqf:13` | Nothing here for persistence — it already asks the server to save. Its price and cooldown are [`economy_plan.md`](economy_plan.md#sitrep-becomes-free)'s business. |
+| `server/supports/fnc_sitrep_support.sqf:13` | Nothing here for persistence — it already asks the server to save. Its price and cooldown are [`economy_second_pass.md`](economy_second_pass.md#sitrep-becomes-free)'s business. |
 | `server/server_init.sqf` | Early gate before `:15` — scan, wait for the fork, apply; save triggers and the disconnect/end event handlers. Re-apply the saved date after `:159`, and stop the connect handler at `:214` zeroing a restored kill tally. Keep `enableSaving [false,false]` at `:113`; the engine save is no longer the mechanism. |
 | `server/warcom/fnc_init_OPFOR_WARCOM.sqf:8-16,54,97` | Branch to the restore path for zones; feed saved towns to civilian init; replay ownership and reveal after `WARCOM_init_done`. |
 | `server/supports/fnc_fob_server.sqf:7,20-24` | Accept a name; the announcement is silenced by the router, not a flag here. |

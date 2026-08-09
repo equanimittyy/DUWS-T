@@ -4,7 +4,7 @@ OPCOM is one server-side actor that turns the enemy's Army Power into pressure o
 player: it garrisons towns, tasks squads, builds hardpoints, and lets low-reputation towns fight
 back. This document owns how it decides — what it wakes on, what it is allowed to know, how it ranks
 one target against another — what it builds, and the town events it triggers. Its wallet, its sinks
-and its archetype are the economy's ([`economy_plan.md`](economy_plan.md#opcom-the-opposing-commander)); the
+and its archetype are the economy's ([`economy_second_pass.md`](economy_second_pass.md#opcom-the-opposing-commander)); the
 shipped hardpoint mechanics it draws from are [`info/hardpoints.md`](info/hardpoints.md); the
 standalone-siting economics already in play are
 [`info/opfor_area_of_influence.md`](info/opfor_area_of_influence.md#band-siting).
@@ -29,7 +29,7 @@ this doc is cheaper than that layer is valuable.
 
 Cheating in a strategy AI is three things — resource bonuses, spawn-on-demand, and map hack. The
 economy plan already refuses the first two: enemy income comes from towns and retakes the player
-can contest ([§Where OPFOR army power comes from](economy_plan.md#where-opfor-army-power-comes-from)),
+can contest ([§Where OPFOR army power comes from](economy_second_pass.md#where-opfor-army-power-comes-from)),
 and enemy capability is ratcheted by a tier the player can watch. **Map hack is the one nothing
 currently forbids, and in SQF it is the default** — `allPlayers` and `getPos` are free, and every
 OPFOR behaviour the mission has ever shipped read them directly.
@@ -72,7 +72,7 @@ Each writer is something the player can find and kill.
 | Observation post | an OP hardpoint covering ground stamps what it sees | the mechanic [§Observation is the trigger](#observation-is-the-trigger) specifies |
 | Banded town | a player inside a town at reputation `<= -10` stamps a low-strength, delayed entry | players x banded towns distance tests |
 | Zone or FOB flip | stamps exactly and free — the enemy knows what it lost | event-driven |
-| Intel patrol tasking | a purchased sensor, which is what `economy_plan.md` already wants it to be | the tasking's own cost |
+| Intel patrol tasking | a purchased sensor, which is what `economy_second_pass.md` already wants it to be | the tasking's own cost |
 
 **`knowsAbout` with a side on the left is the whole sighting sweep.** It is a side-wide query, so
 "has any OPFOR unit seen this player" is one call per player — no `nearEntities`, no scan over
@@ -131,7 +131,7 @@ Five, and no more, or nobody will be able to tune it.
 | **price** | the AP cost, as a divisor |
 
 Archetype scales the terms rather than gating the sinks, which is what
-[`economy_plan.md`](economy_plan.md#the-commander-has-an-archetype) already committed to when it
+[`economy_second_pass.md`](economy_second_pass.md#the-commander-has-an-archetype) already committed to when it
 chose weights over switches: Defensive weights value and vulnerability on ground it holds,
 Aggressive weights threat and reach against ground the player holds.
 
@@ -229,7 +229,7 @@ of one file.
 
 ## What the commander builds
 
-`economy_plan.md` names the sinks and the wallet; this section is how the escalation ladder and the
+`economy_second_pass.md` names the sinks and the wallet; this section is how the escalation ladder and the
 indirect-fire assets behave once the commander is spending on them.
 
 **This is the intended ladder, not the shipped director.** What shipped is deliberately simpler: a
@@ -243,7 +243,7 @@ escalation this loop is meant to layer onto that director.
 ### The director and the escalation ladder
 
 **The director pays to build; clearing refunds nothing.** Construction is one of the OPFOR Army
-Power sinks in [`economy_plan.md`](economy_plan.md), so an emplacement competes with town garrisons
+Power sinks in [`economy_second_pass.md`](economy_second_pass.md), so an emplacement competes with town garrisons
 and tasking orders for the same points — that competition is the reason the sink exists. The refund
 is what stays forbidden: cost-and-refund is farmable — build 25, clear −25, repeat, and the enemy's
 pool never reaches the escalation thresholds that make it dangerous. Clearing pays the player CP and
@@ -543,7 +543,7 @@ Decided:
 - **Events are free and rolled, not bought.** Reputation is the whole input: a town deep enough
   into the OPFOR band generates them on its own, and the commander that buys garrisons, taskings
   and hardpoints neither funds them nor schedules them
-  ([`economy_plan.md`](economy_plan.md#what-the-commander-spends-on)). Charging Army Power for
+  ([`economy_second_pass.md`](economy_second_pass.md#what-the-commander-spends-on)). Charging Army Power for
   them would price a thing the player has already paid for by letting the town fall.
 - **Rapport moves a town's reputation; events are what a low reputation does.** Both act on a town
   in the OPFOR band, so the division has to be stated or the two drift into each other. Rapport is
@@ -613,9 +613,9 @@ campaign. What the commander contributes to the snapshot:
 
 | State | Kind | Contract |
 |---|---|---|
-| Archetype | input | The one string rolled at OPCOM init. Restore feeds it back before the loop runs and never re-rolls it, or the war the player has been fighting changes under them ([`economy_plan.md`](economy_plan.md#the-commander-has-an-archetype)) |
+| Archetype | input | The one string rolled at OPCOM init. Restore feeds it back before the loop runs and never re-rolls it, or the war the player has been fighting changes under them ([`economy_second_pass.md`](economy_second_pass.md#the-commander-has-an-archetype)) |
 | Standing orders (taskings) | outcome | One row per order — type, target, budget already spent. Persisted as orders, not squads: the squad was live state the director was spawning anyway, so restore re-issues the order to the next squad the director spawns. Storing anything about the squad would store a group handle |
-| Tiers | outcome | `OPCOM_opfor_tier` and its earned counter, owned by [`economy_plan.md`](economy_plan.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites); the archetype rides in the snapshot beside them |
+| Tiers | outcome | `OPCOM_opfor_tier` and its earned counter, owned by [`economy_second_pass.md`](economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites); the archetype rides in the snapshot beside them |
 
 Every persisted field is a number, a string, or an array of those — the same rule the belief store
 and the intent records already follow ([§Shape](#shape), [§Commitment: intents are sticky](#commitment-intents-are-sticky)),
@@ -679,7 +679,7 @@ Each phase is independently playable, and the ordering is forced by what the nex
 | **Belief** | The four arrays, the sighting sweep, town and flip sensors, decay, a debug readout | Independently useful and independently testable — the artillery observation gate and the intel patrol both consume it, and it can be verified before a commander exists |
 | **The loop** | One thread, the tick, the five terms, two sinks (garrison upgrade and hardpoint build), flat archetype weights | Smallest thing that produces visible enemy behaviour |
 | **Intents** | The record, minimum lifetimes, release on completion or death | Lands with the third sink: taskings are where thrash starts costing |
-| **Archetype** | The weight sets from [`economy_plan.md`](economy_plan.md#the-commander-has-an-archetype) | Tuning, and it needs the loop it modifies |
+| **Archetype** | The weight sets from [`economy_second_pass.md`](economy_second_pass.md#the-commander-has-an-archetype) | Tuning, and it needs the loop it modifies |
 | **Town events** | The rebuilt hostile-conversion and IED/ambush/sabotage behaviours, rolled off reputation outside the presence trigger | Reads the belief store and the OPFOR-band definition the loop establishes; the free consequence of a turned town, not a sink |
 
 ## Open questions

@@ -774,7 +774,7 @@ and their expense.
 
 That garrison is planned to start at **tier I with zero strength** and climb by **30 % per
 reinforcement**, so four reinforcements bring it to full
-([`../economy_plan.md`](../economy_plan.md#town-garrisons-i-through-iv)). It shares nothing with what
+([`../economy_second_pass.md`](../economy_second_pass.md#town-garrisons-i-through-iv)). It shares nothing with what
 OPFOR left behind: the enemy's attrition figure is theirs, is floored at `0.3`, and is re-read only
 when they take the ground back.
 
@@ -799,7 +799,7 @@ Three cases, and the distinction that separates them is whether the player asked
   respawn, so there is no arrival to hide.
 
 **A BLUFOR-held town will be the first BLUFOR force in the second case.** The tier ladder is planned
-for both sides ([`../economy_plan.md`](../economy_plan.md#town-garrisons-i-through-iv)), and a town
+for both sides ([`../economy_second_pass.md`](../economy_second_pass.md#town-garrisons-i-through-iv)), and a town
 the player holds will stream on the same rules a town the enemy holds does — so it will need the same
 latch, and whoever builds it should reuse the machinery rather than re-derive it.
 

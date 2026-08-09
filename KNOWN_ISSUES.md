@@ -517,7 +517,7 @@ other way, so late-game CP outruns anything to spend it on. This is the central 
 if a demanding economy is the goal, the levers are per-zone/garrison upkeep, diminishing per-zone passive
 scale, or a CP cap. Paying it in AP instead was considered and rejected — a holdings-scaled AP faucet
 feeds the escalation ladder, and the enemy starts holding the map
-([`docs/economy_plan.md`](docs/economy_plan.md)).
+([`docs/economy_second_pass.md`](docs/economy_second_pass.md)).
 
 **Enemy-loot → intel-analysis is an unbounded, cooldown-free faucet.** `fnc_addRandomLoot.sqf` puts
 `Files` (2 CP) / `Wallet_ID` (1.5 CP) on ~80% of spawned enemies, and terminal analysis
@@ -538,7 +538,7 @@ director reads it as gates — BLUFOR wave tiers at 10, 40, 65, 100 and 136
 (`fnc_WARCOM_blu_assault.sqf:19-33`) and mission-guard armour above 100 (`fnc_missionPatrols.sqf:30`)
 — and the only subtractions are losing a zone and the AP→CP converter. The enemy half of that ladder
 is a single rung now; the rest went with the WARCOM OPFOR spawners. Turning it into a currency both sides spend, without breaking the ladder, is
-[`docs/economy_plan.md`](docs/economy_plan.md). A 20-town campaign averaging 2 AP pays at most 40 AP per
+[`docs/economy_second_pass.md`](docs/economy_second_pass.md). A 20-town campaign averaging 2 AP pays at most 40 AP per
 30 min with every town banded, against 25 for capturing a 500 m zone and 50 for a 1000 m one — worth is
 `round(radius/10)` (`fnc_locatorzones_random.sqf:56`), halved by `zone_ap_swing`. So at its ceiling
 civilian income substitutes for a capture rather than supplementing one; how far below that ceiling a real
