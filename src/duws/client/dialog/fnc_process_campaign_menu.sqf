@@ -280,6 +280,7 @@ switch (_index) do
     case index_blufor_ap_t4: { WARCOM_blufor_ap = 100; };
     case index_blufor_ap_t5: { WARCOM_blufor_ap = 136; };
     case index_blufor_ap_t6: { WARCOM_blufor_ap = 150; };
+    case index_blufor_ap_t7: { WARCOM_blufor_ap = 200; };
 };
 
 // ARMY POWER OPFOR
@@ -294,6 +295,7 @@ switch (_index) do
     case index_opfor_ap_t4: { WARCOM_opfor_ap = 100; };
     case index_opfor_ap_t5: { WARCOM_opfor_ap = 136; };
     case index_opfor_ap_t6: { WARCOM_opfor_ap = 150; };
+    case index_opfor_ap_t7: { WARCOM_opfor_ap = 200; };
 };
 
 // AI BLUFOR Skill

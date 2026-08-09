@@ -314,12 +314,12 @@ ratchet.
 
 ### The starting-AP presets become the ladder's own rungs, plus zero
 
-Each side's opening pool is picked from seven options — 10, 50, 80, 110, 150, 170, 200
-(`client/dialog/fnc_process_campaign_menu.sqf:278-308,319-349`) — none of which except 10 and 150
-lands on a threshold, so the preset sets a position part-way between tiers and the host cannot
-tell which one they picked. Replacing them with `0, 10, 40, 65, 100, 136, 150` is the same seven
-options expressed as "start at this tier", and it is exact: those are the wave rungs plus OPFOR
-air.
+Each side's opening pool was picked from seven options — 10, 50, 80, 110, 150, 170, 200 — none of
+which except 10 and 150 landed on a threshold, so the preset set a position part-way between tiers
+and the host could not tell which one they picked. They are now `0, 10, 40, 65, 100, 136, 150, 200`,
+eight options expressed as "start at this tier" and exact: the wave rungs, plus zero at the bottom
+and 200 at the top so a preset can still pre-unlock BLUFOR air, which gates above 199. Tier 7 (200)
+is the only rung above the OPFOR-air rung at 150.
 
 Zero is the genuinely new option, and it matters more under a spendable pool: a 200 AP start
 hands a side several permanent purchases before the first shot. Zero is what a campaign that
