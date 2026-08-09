@@ -6,37 +6,19 @@ if (!isServer) exitWith {};
 // faction actually fields, never gear copied off whatever WEST unit wandered near HQ. getUnitLoadout
 // takes a classname here, so the kit is the unit's config loadout, not one live instance's.
 
-// The class each man role key resolves to -- the kit that is a DUWS key proper, as opposed to the
-// extra variants faction detection folded into its pool.
-private _reps = [];
-{
-    if ((_x select 2) isEqualTo "man") then {
-        private _v = missionNamespace getVariable [(_x select 0), ""];
-        private _rep = if (_v isEqualType []) then { _v param [0, ""] } else { _v };
-        if (_rep != "") then { _reps pushBackUnique _rep };
-    };
-} forEach (["blufor"] call fnc_faction_schema);
-
-// Decorate with a lowercased display-name key, sort lexicographically, strip the key. Alphabetical
-// order goes through `sort` on strings because BIS_fnc_sortBy only orders numbers; the className in
-// the key breaks display-name ties without ever comparing the loadout arrays.
-private _sortByName = {
-    private _decorated = _this apply { [toLower (_x select 1), _x select 0, _x] };
-    _decorated sort true;
-    _decorated apply { _x select 2 }
-};
-
-// Key kits before pool variants, each block alphabetical.
-private _keyKits = [];
-private _poolKits = [];
+private _uniqueLoadouts = [];
 {
     private _className = _x;
     private _displayName = getText (configFile >> "CfgVehicles" >> _className >> "displayName");
-    private _entry = [_className, _displayName, getUnitLoadout _className];
-    if (_className in _reps) then { _keyKits pushBack _entry } else { _poolKits pushBack _entry };
+    _uniqueLoadouts pushBack [_className, _displayName, getUnitLoadout _className];
 } forEach (["blufor"] call fnc_faction_unit_keylist);
 
-private _uniqueLoadouts = (_keyKits call _sortByName) + (_poolKits call _sortByName);
+// Alphabetical by display name (what the player reads). Decorate with a lowercased key, sort, strip:
+// `sort` orders strings, where BIS_fnc_sortBy only orders numbers; the className breaks ties so the
+// loadout arrays are never compared.
+_uniqueLoadouts = _uniqueLoadouts apply { [toLower (_x select 1), _x select 0, _x] };
+_uniqueLoadouts sort true;
+_uniqueLoadouts = _uniqueLoadouts apply { _x select 2 };
 
 blufor_quickChange_loadouts_scanned = _uniqueLoadouts;
 publicVariable "blufor_quickChange_loadouts_scanned";
