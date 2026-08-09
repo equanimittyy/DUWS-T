@@ -55,6 +55,14 @@ _basic_optics = _basic_ammoArray select 4;
 _basic_magazines = _basic_ammoArray select 5;
 _extra_weapons = _basic_ammoArray select 6;
 
+// ACE medical, detected off ACE's own CfgWeapons flag rather than a hardcoded list, so the set
+// tracks the installed ACE version and catches medical items ACE-patched faction mods add.
+private _aceMedical = [];
+if (isClass (configFile >> "CfgPatches" >> "ace_medical")) then {
+    _aceMedical = ("getNumber (_x >> 'ACE_isMedicalItem') == 1 && {getNumber (_x >> 'scope') == 2}"
+        configClasses (configFile >> "CfgWeapons")) apply { configName _x };
+};
+
 _blufor_units = [blufor_LAT_SOLDIER_X,blufor_SPECOPS_MEDIC_X,blufor_SPECOPS_ENG_X];
 _opfor_units = [opfor_LAT_SOLDIER_X,opfor_SPECOPS_MEDIC_X,opfor_SPECOPS_ENG_X];
 
@@ -116,7 +124,7 @@ _opfor_units = [opfor_LAT_SOLDIER_X,opfor_SPECOPS_MEDIC_X,opfor_SPECOPS_ENG_X];
     } forEach _temp_items;
 
     if (isClass (configFile >> "CfgPatches" >> "ace_main")) then {
-        _total_items = _total_items + _ACE_Items;
+        _total_items = _total_items + _ACE_Items + _aceMedical;
     };
 
     _total_weapons = _total_weapons - _excludedItems;
@@ -326,9 +334,30 @@ private _filteredBackpacks = [];
 //extra weapons
 [missionNamespace, _extra_weapons - _excludedItems, true, false ] call BIS_fnc_addVirtualWeaponCargo;
 
-// ACE Items from above
+// ACE items: scanned medical, curated tools, and extra utility gear. Route each by where it actually
+// lives -- CfgWeapons to item cargo, CfgMagazines to throwable cargo -- and skip-with-warn any class
+// that resolves to neither, so a missing mod or a renamed class drops one item, not the whole batch.
 if (isClass (configFile >> "CfgPatches" >> "ace_main")) then {
-    [missionNamespace, _ACE_Items - _excludedItems, true, false] call BIS_fnc_addVirtualItemCargo;
+    [missionNamespace, _aceMedical - _excludedItems, true, false] call BIS_fnc_addVirtualItemCargo;
+
+    private _aceExtra = [
+        "ACE_EarPlugs", "ACE_MapTools", "ACE_Kestrel4500", "ACE_microDAGR", "ACE_SpareBarrel",
+        "ACE_CableTie", "ACE_EntrenchingTool", "ACE_Flashlight_MX991", "ACE_Flashlight_KSF1",
+        "ACE_Flashlight_XL50", "ACE_HuntIR_monitor", "ACE_HuntIR_M203", "ACE_SpottingScope",
+        "ACE_Tripod", "ACE_SpraypaintBlack", "ACE_SpraypaintRed", "ACE_SpraypaintGreen",
+        "ACE_SpraypaintBlue", "ACE_Chemlight_IR"
+    ];
+    {
+        switch (true) do {
+            case (isClass (configFile >> "CfgWeapons" >> _x)): {
+                [missionNamespace, _x, true, false] call BIS_fnc_addVirtualItemCargo;
+            };
+            case (isClass (configFile >> "CfgMagazines" >> _x)): {
+                [missionNamespace, _x, true, false] call BIS_fnc_addVirtualMagazineCargo;
+            };
+            default { ["WARN", "GEAR", format ["ACE arsenal item not found, skipped: %1", _x]] call fnc_log; };
+        };
+    } forEach ((_ACE_Items + _aceExtra) - _excludedItems);
 };
 private _aceFoods = [
     "ACE_MRE_SteakVegetables",

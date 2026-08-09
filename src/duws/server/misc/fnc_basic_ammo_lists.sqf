@@ -3,17 +3,10 @@
 // LIST OF ALL ITEMS TO SUPPLEMENT RESTRICTED ARSENAL
 // SOME FACTIONS DON'T HAVE GOOD BASIC GEAR
 
+// Curated ACE tools/flares/tables only. Medical items are detected dynamically in
+// fnc_create_ammo_lists off ACE's own ACE_isMedicalItem flag, so that set tracks the installed ACE
+// version and catches ACE-patched faction mods instead of rotting as a hardcoded list here.
 _ACE_Items = [
-	"ACE_fieldDressing",
-	"ACE_bloodIV_500",
-	"ACE_bloodIV",
-	"ACE_epinephrine",
-	"ACE_morphine",
-	"ACE_bodyBag",
-	"ACE_elasticBandage",
-	"ACE_quikclot",
-	"ACE_packingBandage",
-	"ACE_tourniquet",
 	"ACE_Vector",
 	"ACE_DefusalKit",
 	"ACE_Clacker",
@@ -31,10 +24,7 @@ _ACE_Items = [
 	"ACE_artillerytable",
 	"ACE_atragmx",
 	"ACE_rangecard",
-	"ACE_m26_cracker",
-	"ACE_personalaidkit",
-	"ACE_splint",
-	"ACE_surgicalkit"
+	"ACE_m26_cracker"
 ];
 
 _basic_backpacks = [
