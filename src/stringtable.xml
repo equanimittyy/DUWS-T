@@ -3582,6 +3582,14 @@
                 <Original>This is Overlord. Held territory has returned %1 CP and %2 AP.</Original>
                 <English>This is Overlord. Held territory has returned %1 CP and %2 AP.</English>
             </Key>
+            <Key ID="STR_DUWS_T_econ_reduced_title">
+                <Original>Reduced Income</Original>
+                <English>Reduced Income</English>
+            </Key>
+            <Key ID="STR_DUWS_T_econ_reduced_desc">
+                <Original>Income reduced by %1% due to campaign size</Original>
+                <English>Income reduced by %1% due to campaign size</English>
+            </Key>
             <Key ID="STR_DUWS_T_takencontrol">
                 <German>Alle Einheiten im Einsatzgebiet, Achtung. Wir haben eine feindliche Zone eingenommen. Gut gemacht.</German>
                 <Spanish>Todas las unidades en la zona de operaciones, atención. Hemos capturado una zona enemiga. Buen trabajo.</Spanish>

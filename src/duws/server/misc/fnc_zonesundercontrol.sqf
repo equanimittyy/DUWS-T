@@ -88,5 +88,16 @@ while {true} do {
     if (_bluCP > 0 || {_bluZoneAP > 0}) then {
         [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_econtickreport", _bluCP, _bluZoneAP]]
             remoteExec ["fnc_duws_dialogue", 0];
+
+        // Carded, not spoken: the throttle is a standing campaign condition (fixed at generation as
+        // (REF_ZONES/zones)^k), not a line of this tick's report, and folding it into the dialogue
+        // would reword Overlord every tick with a number that never changes. Team news, so an A3
+        // card to all rather than a per-player hint. Only when it bites, and only alongside a paid
+        // tick -- "reduced" with no income line to reduce would read as an error.
+        if (DUWS_econ_throttle < 1) then {
+            private _cut = round ((1 - DUWS_econ_throttle) * 100);
+            ["sitrepinfo", [localize "STR_DUWS_T_econ_reduced_title", format [localize "STR_DUWS_T_econ_reduced_desc", _cut]]]
+                remoteExec ["BIS_fnc_showNotification", [0, -2] select isDedicated, false];
+        };
     };
 };
