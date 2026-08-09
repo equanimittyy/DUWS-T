@@ -124,7 +124,9 @@ DUWS_fnc_tokenClass = {
     // Missing setting defaults to on: a campaign that predates a new rule fields what it always did
     // rather than quietly losing the token.
     if (_setting != "" && {(missionNamespace getVariable [_setting, 1]) != 1}) exitWith { "" };
-    if (_ap > 0 && {(missionNamespace getVariable ["WARCOM_opfor_ap", 0]) < _ap}) exitWith { "" };
+    // Gated on the earned counter, not the spendable wallet: OPCOM draws the OPFOR wallet down as it
+    // buys, and a token the enemy has reached the tier for must not vanish because the wallet dipped.
+    if (_ap > 0 && {(missionNamespace getVariable ["WARCOM_opfor_ap_earned", 0]) < _ap}) exitWith { "" };
     // Drawn per spawn, not held as one value the whole campaign fields at once: two zones raised in
     // the same second should not both put down the identical APC.
     [_role] call fnc_faction_pick
