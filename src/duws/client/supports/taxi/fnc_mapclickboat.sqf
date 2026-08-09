@@ -7,7 +7,7 @@ _actionID = _this select 2;
   
 // Claimed before the action is removed: a refusal must leave the player able to try again.
 if (!(["BOATTAXI", "ClickedTaxiPos = _pos; clicked = true;"] call fnc_mapclick_claim)) exitWith {};
-titleText [localize "STR_DUWS_T_boattaxiwp_brief", "PLAIN DOWN"];
+[localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxiwp_brief"] remoteExec ["fnc_duws_dialogue", 0];
 _helo removeAction _actionID;
 
 
@@ -20,10 +20,10 @@ while {_timer>0} do {
     if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) then {
 		if (ClickedTaxiPos distance player < 100) exitWith {
 		clicked = false;
-		[localize "STR_DUWS_T_boattaxiwp_close"] call fnc_map_prompt;
+		[localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxiwp_close"] remoteExec ["fnc_duws_dialogue", 0];
 		};
 	clicked = false;
-	[localize "STR_DUWS_T_boattaxiwp_bad"] call fnc_map_prompt;
+	[localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxiwp_bad"] remoteExec ["fnc_duws_dialogue", 0];
 	}
 	else
 	{["BOATTAXI"] call fnc_mapclick_release;_timer = 0;taxiCanTakeOff = true;}

@@ -87,7 +87,7 @@ if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 // everything is ok, player is in boat
 playMusic [_music, 0];
 _boat lock true;
-titleText [localize "STR_DUWS_T_boattaxi_oscarmike", "PLAIN DOWN"];
+[localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_oscarmike"] remoteExec ["fnc_duws_dialogue", 0];
 str(_markerpickup) setMarkerPos ClickedTaxiPos; 
 str(_markerpickup) setMarkerText "DROP POINT";
 
@@ -98,8 +98,10 @@ str(_markerpickup) setMarkerText "DROP POINT";
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 // *****************************
 
-// TELEPORT BOAT NEAR DROP POINT
-titleText [localize "STR_DUWS_T_boattaxi_enroute", "BLACK OUT", 3];
+// TELEPORT BOAT NEAR DROP POINT. The fade masks the hop; the pilot's call goes through the
+// dialogue system rather than riding the fade's text slot.
+titleCut ["", "BLACK OUT", 3];
+[localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_enroute"] remoteExec ["fnc_duws_dialogue", 0];
 _teleportPoint = [ClickedTaxiPos, 400,500,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 sleep 3.5;
 _boat setpos _teleportPoint;
@@ -108,7 +110,7 @@ _wp = _boatgroup addWaypoint [ClickedTaxiPos,0];
 _wp setWaypointType "MOVE";
 [_boatgroup, 1] setWaypointCombatMode "BLUE";
 sleep 3;
-titleText [localize "STR_DUWS_T_boattaxi_enroute", "BLACK IN", 4];
+titleCut ["", "BLACK IN", 4];
 _boat lock false;
 
 
@@ -123,7 +125,7 @@ waitUntil {sleep 0.5;(getpos _boat select 2 < 4 && _boat distance ClickedTaxiPos
 // IF THE PILOT IS DEAD OR GUNBOAT DOWN  **************
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
 // *****************************
-titleText [localize "STR_DUWS_T_boattaxi_arrived", "PLAIN DOWN"];
+[localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_arrived"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Same turn-out as the helo taxi, and for the same reasons: doGetOut is an order only AI take, so
 // the caller was never moved, and passengers outside the caller's group were never considered.

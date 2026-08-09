@@ -5566,20 +5566,20 @@
                 <English>Drop point</English>
             </Key>
             <Key ID="STR_DUWS_T_liftwp_set">
-                <Original>Route received. Mule 1-1 inbound.</Original>
-                <English>Route received. Mule 1-1 inbound.</English>
+                <Original>Route received. Inbound.</Original>
+                <English>Route received. Inbound.</English>
             </Key>
             <Key ID="STR_DUWS_T_liftwp_abort">
-                <Original>No route received. Mule 1-1 aborting the tasking.</Original>
-                <English>No route received. Mule 1-1 aborting the tasking.</English>
+                <Original>No route received. Aborting the tasking.</Original>
+                <English>No route received. Aborting the tasking.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxiwp_brief">
-                <Original>Chariot 1-1, ready to copy your route. Two waypoints and an LZ, over.</Original>
-                <English>Chariot 1-1, ready to copy your route. Two waypoints and an LZ, over.</English>
+                <Original>Ready to copy your route. Two waypoints and an LZ, over.</Original>
+                <English>Ready to copy your route. Two waypoints and an LZ, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxiwp_nolz">
-                <Original>Chariot 1-1, no clear LZ at that grid. Send another, over.</Original>
-                <English>Chariot 1-1, no clear LZ at that grid. Send another, over.</English>
+                <Original>No clear LZ at that grid. Send another, over.</Original>
+                <English>No clear LZ at that grid. Send another, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxiwp_reopen">
                 <Original>Air taxi standing by. Open your map to continue.</Original>
@@ -5602,32 +5602,32 @@
                 <English>To Alpha 1-1, you are not aboard. Get in and we'll move out, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxi_oscarmike">
-                <Original>Swordfish 1-1, roger. We are oscar mike.</Original>
-                <English>Swordfish 1-1, roger. We are oscar mike.</English>
+                <Original>Roger. We are oscar mike.</Original>
+                <English>Roger. We are oscar mike.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxi_enroute">
                 <Original>En route to the drop point.</Original>
                 <English>En route to the drop point.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxi_arrived">
-                <Original>Swordfish 1-1, we are at the drop point. Disembark.</Original>
-                <English>Swordfish 1-1, we are at the drop point. Disembark.</English>
+                <Original>We are at the drop point. Disembark.</Original>
+                <English>We are at the drop point. Disembark.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxi_rtb">
                 <Original>Returning to base. Boat taxi available again in two minutes.</Original>
                 <English>Returning to base. Boat taxi available again in two minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxiwp_brief">
-                <Original>Swordfish 1-1, ready to copy. Mark your drop point on the map, over.</Original>
-                <English>Swordfish 1-1, ready to copy. Mark your drop point on the map, over.</English>
+                <Original>Ready to copy. Mark your drop point on the map, over.</Original>
+                <English>Ready to copy. Mark your drop point on the map, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxiwp_close">
-                <Original>Swordfish 1-1, that grid is too close to our position. Send another, over.</Original>
-                <English>Swordfish 1-1, that grid is too close to our position. Send another, over.</English>
+                <Original>That grid is too close to our position. Send another, over.</Original>
+                <English>That grid is too close to our position. Send another, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_boattaxiwp_bad">
-                <Original>Swordfish 1-1, we cannot reach that grid. Send another, over.</Original>
-                <English>Swordfish 1-1, we cannot reach that grid. Send another, over.</English>
+                <Original>We cannot reach that grid. Send another, over.</Original>
+                <English>We cannot reach that grid. Send another, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_helotaxi_action_wp">
                 <Original>Set Waypoints</Original>

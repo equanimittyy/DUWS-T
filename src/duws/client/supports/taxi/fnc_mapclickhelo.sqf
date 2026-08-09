@@ -15,7 +15,7 @@ while {_timer>0} do {
 
 	// Claimed before the action is removed: a refusal must leave the player able to try again.
 	if (!(["TAXI", "ClickedPos1 = _pos; clicked = true;"] call fnc_mapclick_claim)) exitWith {};
-	titleText [format ["<t color='#00ff00' size='2'>%1</t>", localize "STR_DUWS_T_helotaxiwp_brief"], "PLAIN DOWN", -1, true, true];
+	[localize "STR_DUWS_T_chariot", localize "STR_DUWS_T_helotaxiwp_brief"] remoteExec ["fnc_duws_dialogue", 0];
 	_helo removeAction _actionID;
 
 	// TIMER & MAPCLICK
@@ -74,7 +74,7 @@ while {_timer>0} do {
 
 			if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) then {
 				clicked = false;
-				[format ["<t color='#ff0000'>%1</t>", localize "STR_DUWS_T_helotaxiwp_nolz"]] call fnc_map_prompt;
+				[localize "STR_DUWS_T_chariot", localize "STR_DUWS_T_helotaxiwp_nolz"] remoteExec ["fnc_duws_dialogue", 0];
 			} else {
 				ClickedTaxiPos = _foundPickupPos;
 				["TAXI"] call fnc_mapclick_release;

@@ -100,12 +100,11 @@ player setVariable ["LiftTakeOff", true];
 
 openMap false;
 
-// Verdict after the map is out of the way, not before: titleText is drawn on a layer the map
-// covers, so both of these used to fire into a screen the player could not see.
+// The pilot's verdict, spoken once the map is closed and the route committed.
 if (count _waypoints == 3) then {
-    titleText [format ["<t color='#00ff00' size='2'>%1</t>", localize "STR_DUWS_T_liftwp_set"], "PLAIN DOWN", -1, true, true];
+    [localize "STR_DUWS_T_crane", localize "STR_DUWS_T_liftwp_set"] remoteExec ["fnc_duws_dialogue", 0];
 } else {
-    titleText [format ["<t color='#ff0000' size='2'>%1</t>", localize "STR_DUWS_T_liftwp_abort"], "PLAIN DOWN", -1, true, true];
+    [localize "STR_DUWS_T_crane", localize "STR_DUWS_T_liftwp_abort"] remoteExec ["fnc_duws_dialogue", 0];
 };
 
 ["LIFT"] call fnc_mapclick_release;
