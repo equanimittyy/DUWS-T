@@ -7459,21 +7459,19 @@
 					\nAIRCRAFT: %6
 					\n\nYou Have %2 Command Points
 					\n\nLocal Town Standing: %9
-					\nFriendly Army Power: %3
-					\nEnemy Army Power: %4
+					\nFriendly Army Power: %3 (Tier %20)
+					\nEnemy Army Power: %4 (Tier %21)
 					\n\nBLUFOR Zones: %7
 					\nOPFOR Zones: %8
 					\nPrimary Target: %10
 					\n\nWeather: %11
 					\nTime of Day: %12
-					\nTaxi Fast Travel: %13
-					\nFOB Fast Travel: %14
+					\nFast Travel: %14
 					\nZeus Visibility: %15
 					\nStamina: %16
-					\nduws VCOM: %17
-					\nTime Mult: %18
-					\nSimple Zones: %19
-					\nCiv Presence: %20
+					\nTime Mult: %17
+					\nSimple Zones: %18
+					\nCiv Presence: %19
 				</Original>
                 <English>SITREP:
 					\n\nTOTAL UNITS: %1
@@ -7481,21 +7479,19 @@
 					\nAIRCRAFT: %6
 					\n\nYou Have %2 Command Points
 					\n\nLocal Town Standing: %9
-					\nFriendly Army Power: %3
-					\nEnemy Army Power: %4
+					\nFriendly Army Power: %3 (Tier %20)
+					\nEnemy Army Power: %4 (Tier %21)
 					\n\nBLUFOR Zones: %7
 					\nOPFOR Zones: %8
 					\nPrimary Target: %10
 					\n\nWeather: %11
 					\nTime of Day: %12
-					\nTaxi Fast Travel: %13
-					\nFOB Fast Travel: %14
+					\nFast Travel: %14
 					\nZeus Visibility: %15
 					\nStamina: %16
-					\nduws VCOM: %17
-					\nTime Mult: %18
-					\nSimple Zones: %19
-					\nCiv Presence: %20
+					\nTime Mult: %17
+					\nSimple Zones: %18
+					\nCiv Presence: %19
 				</English>
             </Key>
             <Key ID="STR_DUWS_T_b68ftbvf">
