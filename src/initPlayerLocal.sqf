@@ -329,7 +329,13 @@ DUWS_fnc_shelfForeign = {
         private _refLoadout = getUnitLoadout player;
         private _changeThreshold = 10;
 
+        // Item-count overlay: paint once now so counts show the instant the arsenal draws, then again
+        // each loop tick so a tab switch or a taken item repaints within one poll interval.
+        [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
+
         while { sleep 0.2; !isNull (uiNamespace getVariable ["RscDisplayArsenal", displayNull]) } do {
+            [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
+
             private _currentLoadout = getUnitLoadout player;
             if (_currentLoadout isNotEqualTo _refLoadout) then {
                 private _changeCount = [_refLoadout, _currentLoadout] call DUWS_fnc_countLoadoutChanges;

@@ -8,6 +8,9 @@
 ["INFO", "BOOT", format ["client_init start, player %1", profileName]] call fnc_log;
 fnc_hirePartisans_clientMap = compile preprocessFileLineNumbers "duws\client\misc\fnc_hirePartisans_clientMap.sqf";
 publicVariable "fnc_hirePartisans_clientMap";
+// Defines DUWS_fnc_arsenal_countFor / _paintCounts (arsenal item-count overlay); the enforcer loop
+// in initPlayerLocal.sqf calls the painter each tick while the arsenal is open.
+[] call compile preprocessFileLineNumbers "duws\client\misc\fnc_arsenal_counts.sqf";
 setGroupIconsVisible [true,false]; //now everyone can see enemies on map
 // BLACK SCREEN
 titleCut ["", "BLACK FADED", 999];
