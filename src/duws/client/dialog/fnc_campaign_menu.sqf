@@ -96,25 +96,26 @@ index_cp_death_penalty_8 = lbAdd [2107, "8"];
 index_cp_death_penalty_10 = lbAdd [2107, "10"];
 [2107, index_cp_death_penalty_2] call _setDefault;
 
-// BLUFOR AP
-index_blufor_ap_10 = lbAdd [2108, "10"];
-index_blufor_ap_50 = lbAdd [2108, localize "STR_DUWS_T_bluforap50"];
-index_blufor_ap_80 = lbAdd [2108, "80"];
-index_blufor_ap_110 = lbAdd [2108, localize "STR_DUWS_T_57jjx7d6"];
-index_blufor_ap_150 = lbAdd [2108, "150"];
-index_blufor_ap_170 = lbAdd [2108, "170"];
-index_blufor_ap_200 = lbAdd [2108, localize "STR_DUWS_T_rf9c6kt2"];
-[2108, index_blufor_ap_50] call _setDefault;
+// BLUFOR AP -- the starting tier: the ladder's rungs plus zero, so each row is "begin at tier N"
+// (0 AP = tier 0 ... 150 AP = tier 6). fnc_WARCOM_init seeds the earned counter and tier from this.
+index_blufor_ap_t0 = lbAdd [2108, "0"];
+index_blufor_ap_t1 = lbAdd [2108, "10"];
+index_blufor_ap_t2 = lbAdd [2108, "40"];
+index_blufor_ap_t3 = lbAdd [2108, "65"];
+index_blufor_ap_t4 = lbAdd [2108, "100"];
+index_blufor_ap_t5 = lbAdd [2108, "136"];
+index_blufor_ap_t6 = lbAdd [2108, "150"];
+[2108, index_blufor_ap_t2] call _setDefault;
 
-// OPFOR AP
-index_opfor_ap_10 = lbAdd [2109, "10"];
-index_opfor_ap_50 = lbAdd [2109, "50"];
-index_opfor_ap_80 = lbAdd [2109, localize "STR_DUWS_T_opforap80"];
-index_opfor_ap_110 = lbAdd [2109, localize "STR_DUWS_T_57jjx7d6"];
-index_opfor_ap_150 = lbAdd [2109, "150"];
-index_opfor_ap_170 = lbAdd [2109, "170"];
-index_opfor_ap_200 = lbAdd [2109, localize "STR_DUWS_T_rf9c6kt2"];
-[2109, index_opfor_ap_80] call _setDefault;
+// OPFOR AP -- same rungs.
+index_opfor_ap_t0 = lbAdd [2109, "0"];
+index_opfor_ap_t1 = lbAdd [2109, "10"];
+index_opfor_ap_t2 = lbAdd [2109, "40"];
+index_opfor_ap_t3 = lbAdd [2109, "65"];
+index_opfor_ap_t4 = lbAdd [2109, "100"];
+index_opfor_ap_t5 = lbAdd [2109, "136"];
+index_opfor_ap_t6 = lbAdd [2109, "150"];
+[2109, index_opfor_ap_t3] call _setDefault;
 
 // AI BLU SKILL
 index_blu_skill_elite = lbAdd [2110, localize "STR_DUWS_T_7ovwb13n"];

@@ -271,83 +271,29 @@ switch (_index) do {
 _index = lbCurSel 2108;
 switch (_index) do
 {
-
-    case index_blufor_ap_10:
-    {
-    WARCOM_blufor_ap = 10;
-    };
-
-    case index_blufor_ap_50:
-    {
-    WARCOM_blufor_ap = 50;
-    };
-
-    case index_blufor_ap_80:
-    {
-    WARCOM_blufor_ap = 80;
-    };
-
-    case index_blufor_ap_110:
-    {
-    WARCOM_blufor_ap = 110;
-    };
-
-	case index_blufor_ap_150:
-    {
-    WARCOM_blufor_ap = 150;
-    };
-
-	case index_blufor_ap_170:
-    {
-    WARCOM_blufor_ap = 170;
-    };
-
-	case index_blufor_ap_200:
-    {
-    WARCOM_blufor_ap = 200;
-    };
-
+    // Starting tier -> starting AP: the seven rows are the ladder's rungs plus zero, so a preset
+    // lands one on each tier. fnc_WARCOM_init seeds the earned counter and tier from this value.
+    case index_blufor_ap_t0: { WARCOM_blufor_ap = 0; };
+    case index_blufor_ap_t1: { WARCOM_blufor_ap = 10; };
+    case index_blufor_ap_t2: { WARCOM_blufor_ap = 40; };
+    case index_blufor_ap_t3: { WARCOM_blufor_ap = 65; };
+    case index_blufor_ap_t4: { WARCOM_blufor_ap = 100; };
+    case index_blufor_ap_t5: { WARCOM_blufor_ap = 136; };
+    case index_blufor_ap_t6: { WARCOM_blufor_ap = 150; };
 };
 
 // ARMY POWER OPFOR
 _index = lbCurSel 2109;
 switch (_index) do
 {
-    case index_opfor_ap_10:
-    {
-    WARCOM_opfor_ap = 10;
-    };
-
-    case index_opfor_ap_50:
-    {
-    WARCOM_opfor_ap = 50;
-    };
-
-    case index_opfor_ap_80:
-    {
-    WARCOM_opfor_ap = 80;
-    };
-
-    case index_opfor_ap_110:
-    {
-    WARCOM_opfor_ap = 110;
-    };
-
-	case index_opfor_ap_150:
-    {
-    WARCOM_opfor_ap = 150;
-    };
-
-	case index_opfor_ap_170:
-    {
-    WARCOM_opfor_ap = 170;
-    };
-
-	case index_opfor_ap_200:
-    {
-    WARCOM_opfor_ap = 200;
-    };
-
+    // Same rungs on the OPFOR side.
+    case index_opfor_ap_t0: { WARCOM_opfor_ap = 0; };
+    case index_opfor_ap_t1: { WARCOM_opfor_ap = 10; };
+    case index_opfor_ap_t2: { WARCOM_opfor_ap = 40; };
+    case index_opfor_ap_t3: { WARCOM_opfor_ap = 65; };
+    case index_opfor_ap_t4: { WARCOM_opfor_ap = 100; };
+    case index_opfor_ap_t5: { WARCOM_opfor_ap = 136; };
+    case index_opfor_ap_t6: { WARCOM_opfor_ap = 150; };
 };
 
 // AI BLUFOR Skill
