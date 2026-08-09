@@ -46,15 +46,15 @@ clearBackpackCargoGlobal _truck1;
 
 [_truck1, {
     private _actionID = _this addAction [
-        ACT_EQUIP("STR_DUWS_T_FULL_ARSENAL_ONCE"),
+        ACT_EQUIP("STR_DUWS_T_CACHE_SEIZE"),
         {
             params ["_target", "_caller", "_actionId"];
             if (!(_target getVariable ["arsenalUsed", false])) then {
                 _target setVariable ["arsenalUsed", true, true];
                 _target removeAction _actionId;
                 [_target] remoteExec ["fnc_removeArsenalAction", 0];
-                ["arsenal", [localize "STR_DUWS_T_arsenalused", localize "STR_DUWS_T_arsenalused2"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
-                ["Open", true] call BIS_fnc_arsenal;
+                ["arsenal", [localize "STR_DUWS_T_CACHE_SEIZED_TITLE", localize "STR_DUWS_T_CACHE_SEIZED_DESC"]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
+                [] remoteExec ["fnc_captured_pool_cache_deposit", 2];
             };
         },
         [],

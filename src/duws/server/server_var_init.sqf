@@ -68,6 +68,11 @@ chosen_hq_placement = false;publicVariable "chosen_hq_placement";
 // chosen_settings
 chosen_settings = false;publicVariable "chosen_settings";
 
+// Captured-materiel pool: foreign (non-friendly) gear the player has banked, as an array of
+// [classname, count] pairs. Server-authoritative -- only the fnc_captured_pool_* writers assign it,
+// and each re-broadcasts after a change; clients read it as a view to stock the arsenal shelf.
+DUWS_capturedPool = [];publicVariable "DUWS_capturedPool";
+
 // The faction confirmation screen's handshake. Request and ready are counters, not flags: stepping
 // back from the environment screen re-enters faction selection and the screen asks again, and a
 // flag cleared by the server can race a fresh request raised by the client. The screen waits for

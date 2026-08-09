@@ -29,6 +29,16 @@ class Params {
         default = 900;
     };
 
+    // Hybrid keeps the player's own faction unlimited but count-tracks captured foreign gear against
+    // the banked pool; Full restores the legacy everything-unlimited arsenal. Read on the machine that
+    // opens the arsenal (client/misc/fnc_duws_Arsenal.sqf), so every opener reads the same value.
+    class DUWS_ArsenalMode {
+        title = "Arsenal";
+        values[] = {0,1};
+        texts[] = {"Hybrid (captured gear tracked)","Full (everything unlimited)"};
+        default = 0;
+    };
+
     // Read by INIT.sqf into duws_log_level before either init script compiles fnc_log_init.
     // No default is repeated on the script side -- fnc_log_init owns it and only applies it
     // when the variable is still nil, so the two cannot drift apart.

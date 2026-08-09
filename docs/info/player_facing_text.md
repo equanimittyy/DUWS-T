@@ -132,11 +132,11 @@ from, which is never fired itself:**
 | Class | Colour | Sites | Carries |
 |---|---|---|---|
 | `info` | white | 13 | the general-purpose card; MHQ, FOB, hire, black market, supports |
-| `arsenal` | white | 5 | the one-time arsenal at a side-mission objective |
+| `arsenal` | white | 5 | the captured-materiel reward at a side-mission objective -- its advertisement and its seized confirmation |
 | `biohazard` | red | 4 | RAVAGE / WBK zombie-mode announcements |
 | `missionclean` | white | 2 | the side-mission cleanup countdown |
 | `repup` | blue | 3 | reputation gained |
-| `alert` | red | 5 | MHQ or FOB destroyed, informant killed, escalation risen, arsenal kit warning |
+| `alert` | red | 4 | MHQ or FOB destroyed, informant killed, escalation risen |
 | `repdown` | red | 1 | reputation lost |
 | `sitrepinfo` | white | 2 | the SITREP support |
 | `US_takencontrol` | blue | 2 | zone captured |
@@ -357,7 +357,7 @@ hung off the HQ structure rather than a terminal of their own, so the one that s
 | --- | --- | --- |
 | Arsenal | `STR_DUWS_T_160jkc3a` | HQ, FOB, MHQ ammobox, airdropped ammobox, multi-screen computer |
 | Quick Kits | `STR_DUWS_T_QUICK_KITS` | Supply crate, multi-screen computer |
-| Full Arsenal | `STR_DUWS_T_FULL_ARSENAL_ONCE` | Cache boxes, supply truck |
+| Seize Enemy Materiel | `STR_DUWS_T_CACHE_SEIZE` | Cache boxes, supply truck |
 | Disguise | `STR_DUWS_T_DISGUISE_MENU_ACTION` | `player` (hold, 1 s) |
 
 ### Move

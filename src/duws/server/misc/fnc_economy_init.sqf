@@ -214,6 +214,29 @@ fnc_money_spend = {
 	_left <= 0
 };
 
+// Drops [class, count] pairs into one ground holder at a position. Server-only: createVehicle is
+// global. Used for money/intel that will not fit back into a full inventory when the arsenal closes.
+// A holder with addItemCargo/addMagazineCargo takes raw inventory classes directly, so it handles the
+// intel items too, which have no "Item_" ground variant to hand to fnc_search_dropItems. Untagged, so
+// the map cleanup -- which keys off composition membership -- leaves the player's cash where it fell.
+fnc_money_drop = {
+	if (!isServer) exitWith {};
+	params [["_pairs", []], ["_pos", [0,0,0]]];
+	if (_pairs isEqualTo []) exitWith {};
+	private _holder = createVehicle ["GroundWeaponHolder", [0,0,0], [], 0, "CAN_COLLIDE"];
+	_holder setPosATL [_pos select 0, _pos select 1, (_pos select 2) + 0.05];
+	{
+		_x params ["_cls", ["_n", 0]];
+		if (_n > 0) then {
+			if (isClass (configFile >> "CfgMagazines" >> _cls)) then {
+				_holder addMagazineCargoGlobal [_cls, _n];
+			} else {
+				_holder addItemCargoGlobal [_cls, _n];
+			};
+		};
+	} forEach _pairs;
+};
+
 // Server-authoritative purchase. The writers above own the arithmetic but not the
 // decision: a client testing its own copy of a pool is a network round trip out of date,
 // so two clients each seeing 10 CP both pass a 10 CP gate and the floor absorbs the
@@ -300,4 +323,196 @@ fnc_pool_spend = {
 fnc_pool_reply = {
 	params [["_replyVar", ""], ["_ok", false], ["_charged", 0]];
 	missionNamespace setVariable [_replyVar, [_ok, _charged]];
+};
+
+// ---------------------------------------------------------------------------
+// Captured-materiel pool. Server-authoritative like the CP/AP pools above: the read and the write
+// are adjacent statements on the one machine that owns DUWS_capturedPool, so two clients banking or
+// drawing the last of a class cannot both win. Clients never assign the pool; they remoteExec these
+// writers to the server, which mutates and re-broadcasts.
+
+// The friendly set the classifier tests against: standard-issue gear is unlimited and never pooled.
+// Captured once at boot by fnc_create_ammo_lists, before any foreign class can reach the cargo (the
+// client's shelf-stocking on arsenal open adds foreign only to its own local cargo). This lazy
+// fallback rebuilds it from the server cargo if the boot capture was somehow missed -- still
+// foreign-free, because foreign never enters the server's cargo.
+fnc_captured_pool_friendly = {
+	if (!isServer) exitWith {};
+	if (!isNil "DUWS_friendlyArsenal") exitWith {};
+	private _u = [];
+	{
+		_u append flatten (missionNamespace getVariable [_x, []]);
+	} forEach ["bis_addVirtualWeaponCargo_cargo", "bis_addVirtualItemCargo_cargo",
+		"bis_addVirtualMagazineCargo_cargo", "bis_addVirtualBackpackCargo_cargo"];
+	DUWS_friendlyArsenal = _u arrayIntersect _u;
+};
+
+// Count of one class in the pool. Reads the broadcast array, so it is correct on the server; the
+// pool is [[class, count], ...] with zero-count classes dropped, so absence means zero.
+fnc_captured_pool_getCount = {
+	params ["_cls"];
+	private _i = DUWS_capturedPool findIf { (_x select 0) isEqualTo _cls };
+	if (_i < 0) then { 0 } else { (DUWS_capturedPool select _i) select 1 }
+};
+
+// Server-only. Sets a class to an absolute count, dropping the entry at zero so "present" means
+// "count > 0". Does not broadcast -- callers batch several writes then publicVariable once.
+fnc_captured_pool_setCount = {
+	if (!isServer) exitWith {};
+	params ["_cls", "_n"];
+	private _i = DUWS_capturedPool findIf { (_x select 0) isEqualTo _cls };
+	if (_n <= 0) then {
+		if (_i >= 0) then { DUWS_capturedPool deleteAt _i; };
+	} else {
+		if (_i >= 0) then { DUWS_capturedPool set [_i, [_cls, _n]]; }
+		else { DUWS_capturedPool pushBack [_cls, _n]; };
+	};
+};
+
+// Tally class -> count from a getUnitLoadout array. The loadout nests counts in three shapes -- a
+// weapon's loaded magazine is [mag, ammo] (one magazine), a container holds [class, count] pairs,
+// and worn/assigned slots are bare strings -- so a flat pushBackUnique scan would both lose counts
+// and miss magazines. Returns a HashMap.
+fnc_captured_loadout_counts = {
+	params [["_loadout", []]];
+	private _counts = createHashMap;
+	private _bump = {
+		params ["_cls", ["_n", 1]];
+		if (_cls isEqualType "" && {_cls != ""}) then {
+			_counts set [_cls, (_counts getOrDefault [_cls, 0]) + _n];
+		};
+	};
+	// primary/secondary/handgun/binocular share this shape: 0 name, 1 muzzle, 2 pointer, 3 optic,
+	// 4/5 [mag, ammo], 6 bipod.
+	private _weapon = {
+		params ["_w"];
+		if (!(_w isEqualType []) || {_w isEqualTo []}) exitWith {};
+		{ [_w param [_x, ""]] call _bump; } forEach [0, 1, 2, 3, 6];
+		{
+			private _m = _w param [_x, []];
+			if (_m isEqualType [] && {(count _m) >= 1}) then { [_m select 0, 1] call _bump; };
+		} forEach [4, 5];
+	};
+	// uniform/vest/backpack: [name, [[class, count], ...]].
+	private _container = {
+		params ["_c"];
+		if (!(_c isEqualType []) || {_c isEqualTo []}) exitWith {};
+		[_c param [0, ""]] call _bump;
+		private _contents = _c param [1, []];
+		if (_contents isEqualType []) then {
+			{
+				if (_x isEqualType [] && {(count _x) >= 1}) then { [_x select 0, _x param [1, 1]] call _bump; };
+			} forEach _contents;
+		};
+	};
+	{ [_loadout param [_x, []]] call _weapon; } forEach [0, 1, 2, 8];
+	{ [_loadout param [_x, []]] call _container; } forEach [3, 4, 5];
+	[_loadout param [6, ""]] call _bump;   // headgear
+	[_loadout param [7, ""]] call _bump;   // facewear
+	private _assigned = _loadout param [9, []];
+	if (_assigned isEqualType []) then { { [_x] call _bump; } forEach _assigned; };
+	_counts
+};
+
+// Arsenal close (server). Diffs the loadout the player opened with against the one they closed with,
+// per foreign class: a class present at close but not open (or in a greater count) was withdrawn from
+// the shelf; a lesser count was deposited. net = close - open. A friendly class is skipped -- it is
+// unlimited and never touches the pool. Overdraw (net beyond what the pool held) is answered by
+// replying the excess back to the client to strip, which is what makes a count-1 rifle yield one.
+fnc_captured_pool_settle = {
+	if (!isServer) exitWith {};
+	params [["_openLoadout", []], ["_closeLoadout", []], ["_requester", objNull], ["_replyVar", ""]];
+	call fnc_captured_pool_friendly;
+	private _openC = [_openLoadout] call fnc_captured_loadout_counts;
+	private _closeC = [_closeLoadout] call fnc_captured_loadout_counts;
+	private _classes = (keys _openC) + (keys _closeC);
+	_classes = _classes arrayIntersect _classes;
+	private _excess = [];
+	{
+		private _cls = _x;
+		if (_cls in DUWS_friendlyArsenal) then { continue };
+		private _net = (_closeC getOrDefault [_cls, 0]) - (_openC getOrDefault [_cls, 0]);
+		if (_net == 0) then { continue };
+		private _cur = [_cls] call fnc_captured_pool_getCount;
+		if (_net < 0) then {
+			[_cls, _cur + (- _net)] call fnc_captured_pool_setCount;
+		} else {
+			private _grant = _net min _cur;
+			[_cls, _cur - _grant] call fnc_captured_pool_setCount;
+			if (_net - _grant > 0) then { _excess pushBack [_cls, _net - _grant]; };
+		};
+	} forEach _classes;
+	publicVariable "DUWS_capturedPool";
+	if (_replyVar != "") then { [_replyVar, true, _excess] remoteExec ["fnc_pool_reply", _requester]; };
+};
+
+// Deposit every foreign class in a whole loadout (server). The quick-kit swap wipes the player's
+// gear, so its pre-swap loadout is banked wholesale -- friendly classes filtered out here.
+fnc_captured_pool_deposit_loadout = {
+	if (!isServer) exitWith {};
+	params [["_loadout", []]];
+	call fnc_captured_pool_friendly;
+	private _c = [_loadout] call fnc_captured_loadout_counts;
+	{
+		if (!(_x in DUWS_friendlyArsenal)) then {
+			[_x, ([_x] call fnc_captured_pool_getCount) + (_c get _x)] call fnc_captured_pool_setCount;
+		};
+	} forEach (keys _c);
+	publicVariable "DUWS_capturedPool";
+};
+
+// Deposit explicit [class, count] pairs (server). Friendly classes are skipped: pooling one is
+// harmless (friendly is unlimited regardless) but pointless. Used by the loot caches.
+fnc_captured_pool_deposit_counts = {
+	if (!isServer) exitWith {};
+	params [["_pairs", []]];
+	call fnc_captured_pool_friendly;
+	{
+		_x params ["_cls", ["_n", 0]];
+		if (_n > 0 && {!(_cls in DUWS_friendlyArsenal)}) then {
+			[_cls, ([_cls] call fnc_captured_pool_getCount) + _n] call fnc_captured_pool_setCount;
+		};
+	} forEach _pairs;
+	publicVariable "DUWS_capturedPool";
+};
+
+// Loot-cache reward (server). Spreads the pool wide and shallow: a fixed few kinds of OPFOR gear,
+// each at a small random count, so clearing a cache broadens the shelf rather than stockpiling one
+// item. Weapons come from the built OPFOR ammobox list; wearables and attachments are read from the
+// OPFOR role units' config loadouts, since the ammobox item list holds neither worn nor mounted gear.
+fnc_captured_pool_cache_deposit = {
+	if (!isServer) exitWith {};
+	private _pick = {
+		params ["_src", "_n"];
+		private _bag = +_src;
+		private _out = [];
+		for "_i" from 1 to (_n min (count _bag)) do { _out pushBack (_bag deleteAt (floor random (count _bag))); };
+		_out
+	};
+	private _wear = [];
+	private _attach = [];
+	{
+		private _uc = _x;
+		if (_uc isEqualType "" && {_uc != ""} && {isClass (configFile >> "CfgVehicles" >> _uc)}) then {
+			private _l = getUnitLoadout _uc;
+			{
+				private _c = _l param [_x, []];
+				if (_c isEqualType [] && {(_c param [0, ""]) != ""}) then { _wear pushBackUnique (_c select 0); };
+			} forEach [3, 4, 5];   // uniform/vest/backpack
+			private _hg = _l param [6, ""];
+			if (_hg != "") then { _wear pushBackUnique _hg; };
+			{
+				private _w = _l param [_x, []];
+				if (_w isEqualType []) then {
+					{ private _a = _w param [_x, ""]; if (_a != "") then { _attach pushBackUnique _a; }; } forEach [1, 2, 3, 6];
+				};
+			} forEach [0, 1, 2];   // primary/secondary/handgun attachment slots
+		};
+	} forEach [opfor_SOLDIER_X, opfor_SPECOPS_X, opfor_SPECOPS_MEDIC_X, opfor_LAT_SOLDIER_X];
+	private _pairs = [];
+	// rand(3-10) inclusive per line.
+	{ _pairs pushBack [_x, 3 + floor random 8]; } forEach (
+		([opfor_ammobox_weapons, 3] call _pick) + ([_wear, 2] call _pick) + ([_attach, 2] call _pick)
+	);
+	[_pairs] call fnc_captured_pool_deposit_counts;
 };

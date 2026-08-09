@@ -45,6 +45,20 @@ opfor_ammobox_weapons = [];
 opfor_ammobox_magazines = [];
 opfor_ammobox_items = [];
 
+// The friendly set the captured-materiel classifier tests against: standard-issue gear is unlimited
+// and never pooled. Snapshotted from the assembled virtual cargo once, at the end of this build and
+// before any foreign class can reach it -- the client's shelf-stocking on arsenal open adds foreign
+// only to its own local cargo, never here. Called at both exits so it covers the non-MODERN path too.
+_snapFriendly = {
+    private _u = [];
+    {
+        _u append flatten (missionNamespace getVariable [_x, []]);
+    } forEach ["bis_addVirtualWeaponCargo_cargo", "bis_addVirtualItemCargo_cargo",
+        "bis_addVirtualMagazineCargo_cargo", "bis_addVirtualBackpackCargo_cargo"];
+    DUWS_friendlyArsenal = _u arrayIntersect _u;
+    ["INFO", "GEAR", format ["Friendly arsenal snapshot: %1 classes", count DUWS_friendlyArsenal]] call fnc_log;
+};
+
 // Create the base list for Restricted Arsenal
 _basic_ammoArray = [] call fnc_basic_ammo_lists;
 _ACE_Items = _basic_ammoArray select 0;
@@ -313,7 +327,7 @@ _isBackpackWithCapacity = {
 
 //Add additional basic items that some factions may lack, especially backpacks.
 //basic backpacks - multicolor variants to make them as usable with as many factions as possible
-if (VERSION_X != "MODERN") exitWith {};
+if (VERSION_X != "MODERN") exitWith { call _snapFriendly; };
 
 private _filteredBackpacks = [];
 {
@@ -393,3 +407,5 @@ private _opfFaction = "";
 } forEach [opfor_SOLDIER_X, opfor_SPECOPS_X, opfor_SPECOPS_MEDIC_X];
 
 ["INFO", "CIV", format ["Detected factions: BLU=%1, OPF=%2", _bluFaction, _opfFaction]] call fnc_log;
+
+call _snapFriendly;

@@ -60,85 +60,16 @@ DUWS_forcedRemoveItems = [
     "FlashDisk", "FileTopSecret", "FilesSecret"
 ];
 
-// detect money/intel in a loadout; detection only, no removal
-DUWS_fnc_check_money_intel = {
-    private _loadout = getUnitLoadout player;
-    private _loadoutItems = [];
-    [_loadout, _loadoutItems] call DUWS_fnc_extractLoadoutItems;
-    
-    private _foundItems = [];
-    {
-        if (_x in DUWS_forcedRemoveItems) then {
-            _foundItems pushBackUnique _x;
-        };
-    } forEach _loadoutItems;
-    
-    count _foundItems
-};
-
-// standalone: remove only money and intel items
-DUWS_fnc_remove_money_intel = {
-    private _loadout = getUnitLoadout player;
-    private _loadoutItems = [];
-    [_loadout, _loadoutItems] call DUWS_fnc_extractLoadoutItems;
-    
-    private _removedCount = 0;
-    
-    {
-        private _className = _x;
-        if (_className in DUWS_forcedRemoveItems) then {
-            private _itemData = ([_className] call BIS_fnc_itemType);
-            private _category = _itemData select 0;
-            private _subcategory = _itemData select 1;
-            
-            if (_category == "Weapon") then {
-                player removeWeaponGlobal _className;
-                _removedCount = _removedCount + 1;
-            } else {
-                if (_category == "Item") then {
-                    while {_className in (items player)} do {
-                        player removeItem _className;
-                        _removedCount = _removedCount + 1;
-                    };
-                } else {
-                    if (_category == "Equipment") then {
-                        if (_subcategory == "Uniform") then {
-                            removeUniform player;
-                            _removedCount = _removedCount + 1;
-                        } else {
-                            if (_subcategory == "Backpack") then {
-                                removeBackpackGlobal player;
-                                _removedCount = _removedCount + 1;
-                            } else {
-                                if (_subcategory == "Vest") then {
-                                    removeVest player;
-                                    _removedCount = _removedCount + 1;
-                                } else {
-                                    if (_subcategory == "Headgear") then {
-                                        removeHeadgear player;
-                                        _removedCount = _removedCount + 1;
-                                    };
-                                };
-                            };
-                        };
-                    } else {
-                        private _countBefore = {_x == _className} count magazines player;
-                        player removeMagazines _className;
-                        _removedCount = _removedCount + _countBefore;
-                    };
-                };
-            };
-        };
-    } forEach _loadoutItems;
-    
-    if (_removedCount > 0) then {
-        systemChat format [localize "STR_DUWS_ARSENAL_MONEY_REMOVED", _removedCount];
-    };
-};
-
 // restricted-arsenal handler: whitelist filter plus forced money/intel removal
 DUWS_fnc_arsenal_restricted = {
-    private _whitelist = flatten (missionNamespace getVariable ["bis_addVirtualWeaponCargo_cargo", []]);
+    // Whitelist is every virtual shelf, not just weapons: the strip below runs on all categories, so
+    // a weapons-only whitelist would strip every friendly uniform, vest and item. The foreign pool is
+    // stocked onto these same cargo vars on open, so banked captured gear is permitted here too.
+    private _whitelist = [];
+    {
+        _whitelist append flatten (missionNamespace getVariable [_x, []]);
+    } forEach ["bis_addVirtualWeaponCargo_cargo", "bis_addVirtualItemCargo_cargo",
+        "bis_addVirtualMagazineCargo_cargo", "bis_addVirtualBackpackCargo_cargo"];
     _whitelist = _whitelist arrayIntersect _whitelist;
     _whitelist append ( _whitelist select { ([_x] call BIS_fnc_itemType)#0 isEqualTo "Weapon" } apply { configName inheritsFrom (configFile >> "CfgWeapons" >> _x) } );
     
@@ -255,61 +186,140 @@ DUWS_fnc_arsenal_restricted = {
     };
 };
 
-// full-arsenal handler: no-op
-DUWS_fnc_arsenal_full = {
+// Remove N instances of a class from the player, category-appropriate: weapons via
+// removeWeaponGlobal, magazines via removeMagazine, everything else via removeItem. Each call
+// removes one instance, so the loop strips exactly the overdraw and leaves the granted count.
+DUWS_fnc_strip_n = {
+    params ["_cls", "_n"];
+    private _isWeapon = isClass (configFile >> "CfgWeapons" >> _cls) && {(([_cls] call BIS_fnc_itemType) select 0) isEqualTo "Weapon"};
+    private _isMag = isClass (configFile >> "CfgMagazines" >> _cls);
+    for "_i" from 1 to _n do {
+        if (_isWeapon) then { player removeWeaponGlobal _cls; }
+        else {
+            if (_isMag) then { player removeMagazine _cls; } else { player removeItem _cls; };
+        };
+    };
 };
 
-// default to full mode
-DUWS_fnc_arsenal_current = DUWS_fnc_arsenal_full;
+// Which virtual-cargo shelf a class belongs on. Weapons, magazines and backpacks each have their
+// own; everything else is an item.
+DUWS_fnc_cargoType = {
+    params ["_cls"];
+    if (isClass (configFile >> "CfgWeapons" >> _cls) && {(([_cls] call BIS_fnc_itemType) select 0) isEqualTo "Weapon"}) exitWith { "weapon" };
+    if (isClass (configFile >> "CfgMagazines" >> _cls)) exitWith { "magazine" };
+    if (isClass (configFile >> "CfgVehicles" >> _cls) && {getNumber (configFile >> "CfgVehicles" >> _cls >> "isBackpack") == 1}) exitWith { "backpack" };
+    "item"
+};
+
+// Add (_add true) or clear (_add false) a foreign class on the local shelf. The captured pool is
+// stocked onto the client's own cargo on open and cleared back off on close, so the shelf shows the
+// pool's current contents and never accumulates stale foreign gear across sessions.
+DUWS_fnc_shelfForeign = {
+    params ["_cls", "_type", "_add"];
+    switch (_type) do {
+        case "weapon":   { [missionNamespace, _cls, _add] call BIS_fnc_addVirtualWeaponCargo; };
+        case "magazine": { [missionNamespace, _cls, _add] call BIS_fnc_addVirtualMagazineCargo; };
+        case "backpack": { [missionNamespace, _cls, _add] call BIS_fnc_addVirtualBackpackCargo; };
+        default          { [missionNamespace, _cls, _add] call BIS_fnc_addVirtualItemCargo; };
+    };
+};
 
 [ missionNamespace, "arsenalOpened", {
     [] spawn {
-        scriptName "Arsenal whitelist enforcer";
+        scriptName "Arsenal enforcer";
         waitUntil { sleep 0.1; !isNull (uiNamespace getVariable ["RscDisplayArsenal", displayNull]) };
-        systemChat localize "STR_DUWS_ARSENAL_INIT";
-        
-// on arsenal open: warn about money/intel, do not remove it
-private _moneyIntelCount = [] call DUWS_fnc_check_money_intel;
-if (_moneyIntelCount > 0) then {
-    systemChat format [localize "STR_DUWS_ARSENAL_MONEY_WARNING", _moneyIntelCount];
-    private _title = localize "STR_DUWS_ARSENAL_MONEY_WARNING_TITLE";
-    private _desc = format [localize "STR_DUWS_ARSENAL_MONEY_WARNING_DESC", _moneyIntelCount];
-    ["alert", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", player];
-};
-        
+
         private _isRestricted = player getVariable ["DUWS_isRestrictedArsenal", false];
-        
+
+        // Money/intel out of the editable loadout for the whole session, then restored on close. The
+        // arsenal deletes items on edit and the player's balance IS the Money_roll they carry, so
+        // leaving it in would burn it. Both modes -- this is the money bug, independent of the pool.
+        private _moneyStash = [];
+        {
+            private _cls = _x;
+            private _n = { _x == _cls } count (itemsWithMagazines player);
+            if (_n > 0) then {
+                _moneyStash pushBack [_cls, _n];
+                for "_i" from 1 to _n do { player removeItem _cls; player removeMagazine _cls; };
+            };
+        } forEach DUWS_forcedRemoveItems;
+
+        // Close-diff baseline: taken after money removal, so neither money nor intel can register as a
+        // foreign withdrawal. Never reassigned; _refLoadout tracks live edits separately.
+        private _openLoadout = getUnitLoadout player;
+
+        // Stock the captured pool onto the local shelf so banked foreign gear is takeable, and so the
+        // whitelist strip below (which reads the cargo) permits it.
+        private _addedForeign = [];
+        if (_isRestricted) then {
+            {
+                _x params ["_cls", "_cnt"];
+                if (_cnt > 0) then {
+                    private _type = [_cls] call DUWS_fnc_cargoType;
+                    [_cls, _type, true] call DUWS_fnc_shelfForeign;
+                    _addedForeign pushBack [_cls, _type];
+                };
+            } forEach (missionNamespace getVariable ["DUWS_capturedPool", []]);
+        };
+
         private _refLoadout = getUnitLoadout player;
         private _changeThreshold = 10;
-        
+
         while { sleep 0.2; !isNull (uiNamespace getVariable ["RscDisplayArsenal", displayNull]) } do {
             private _currentLoadout = getUnitLoadout player;
             if (_currentLoadout isNotEqualTo _refLoadout) then {
-                systemChat localize "STR_DUWS_ARSENAL_LOADOUT_CHANGED";
-                
                 private _changeCount = [_refLoadout, _currentLoadout] call DUWS_fnc_countLoadoutChanges;
-                private _isLargeChange = (_changeCount >= _changeThreshold);
-                
-                if (_isLargeChange) then {
-                    systemChat format [localize "STR_DUWS_ARSENAL_LARGE_CHANGE_DETECTED", _changeCount];
-                };
-                
-                // remove money/intel on any loadout change, small or large
-                [] call DUWS_fnc_remove_money_intel;
-                
-                // restricted mode also runs the whitelist filter on a large change
-                if (_isRestricted && _isLargeChange) then {
-                    // DUWS_fnc_arsenal_restricted also strips money/intel, already done above by DUWS_fnc_remove_money_intel
-                    // calling the full function double-removes, which is harmless; kept for simplicity
+
+                // Restricted mode strips anything off the shelf (friendly plus pooled foreign) on a
+                // large change; per-class counts are settled on close.
+                if (_isRestricted && {_changeCount >= _changeThreshold}) then {
                     [] call DUWS_fnc_arsenal_restricted;
                 };
-                
+
                 _refLoadout = _currentLoadout;
             };
         };
-        
-        // on arsenal close: no removal
-        systemChat localize "STR_DUWS_ARSENAL_EXIT";
+
+        // Close. Settle the captured pool first so overdrawn foreign is stripped, then clear the
+        // stocked foreign back off the shelf.
+        if (_isRestricted) then {
+            duws_pool_seq = (missionNamespace getVariable ["duws_pool_seq", 0]) + 1;
+            private _replyVar = format ["duws_pool_reply_%1", duws_pool_seq];
+            [_openLoadout, getUnitLoadout player, player, _replyVar] remoteExec ["fnc_captured_pool_settle", 2];
+            private _deadline = diag_tickTime + 5;
+            waitUntil { !isNil _replyVar || {diag_tickTime > _deadline} };
+            (missionNamespace getVariable [_replyVar, [false, []]]) params ["_ok", "_excess"];
+            missionNamespace setVariable [_replyVar, nil];
+            { _x params ["_cls", "_ex"]; [_cls, _ex] call DUWS_fnc_strip_n; } forEach _excess;
+
+            { _x params ["_cls", "_type"]; [_cls, _type, false] call DUWS_fnc_shelfForeign; } forEach _addedForeign;
+        };
+
+        // Hand the money back: into inventory where it fits, dropped at the player's feet where it
+        // does not, so a full-inventory player loses none of it. canAdd is checked per instance so a
+        // piece that will not fit is never added and then double-counted onto the ground.
+        private _dropPairs = [];
+        {
+            _x params ["_cls", "_n"];
+            private _isMag = isClass (configFile >> "CfgMagazines" >> _cls);
+            private _over = 0;
+            for "_i" from 1 to _n do {
+                if (player canAdd _cls) then {
+                    if (_isMag) then { player addMagazine _cls; } else { player addItem _cls; };
+                } else {
+                    _over = _over + 1;
+                };
+            };
+            if (_over > 0) then { _dropPairs pushBack [_cls, _over]; };
+        } forEach _moneyStash;
+        if (count _dropPairs > 0) then { [_dropPairs, getPosATL player] remoteExec ["fnc_money_drop", 2]; };
+
+        // Dropped cash is the player's own news at the moment they closed the arsenal, so it goes to
+        // the hint box (per-player), not a team card. Only money is reported: it is the balance.
+        private _moneyDropped = 0;
+        { if ((_x select 0) isEqualTo "Money_roll") then { _moneyDropped = _x select 1; }; } forEach _dropPairs;
+        if (_moneyDropped > 0) then { hint format [localize "STR_DUWS_ARSENAL_MONEY_DROPPED", _moneyDropped]; };
+
         player setVariable ["DUWS_isRestrictedArsenal", nil];
     };
 }] call BIS_fnc_addScriptedEventHandler;

@@ -2114,62 +2114,19 @@
             </Key>
 </Container>
         <Container name="Arsenal">
-            <Key ID="STR_DUWS_ARSENAL_MONEY_WARNING_TITLE">
-                <Original>Money and Intel in Your Kit</Original>
-                <English>Money and Intel in Your Kit</English>
-                <Chinesesimp>检测到钱币/情报</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_ARSENAL_MONEY_WARNING_DESC">
-                <Original>Changing loadout here destroys %1 cash and intel items</Original>
-                <English>Changing loadout here destroys %1 cash and intel items</English>
-                <Chinesesimp>你携带了%1个钱币/情报物品。若换装则会被移除。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_ARSENAL_MONEY_WARNING">
-                <Original>Warning: You are carrying %1 types of money/intel items. They will be removed if you change your gear. Exit the Arsenal and put them in a safe container.</Original>
-                <English>Warning: You are carrying %1 types of money/intel items. They will be removed if you change your gear. Exit the Arsenal and put them in a safe container.</English>
-                <Chinesesimp>警告：你携带了 %1 类钱币/情报物品。更换装备时它们将被移除。退出军火库并将它们移到安全地点。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_ARSENAL_INIT">
-                <Original>Arsenal enforcer initialized. It will check for loadout changes and all intel/cash items. Do not carry cash or intel while changing gear, or they will be deleted.</Original>
-                <English>Arsenal enforcer initialized. It will check for loadout changes and all intel/cash items. Do not carry cash or intel while changing gear, or they will be deleted.</English>
-                <Chinesesimp>军火库检查已启动，其会检查装备预设变化以及所有情报/钱币物品。不要携带钱币/情报更换装备，否则会被删除。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_ARSENAL_LOADOUT_CHANGED">
-                <Original>Loadout Changed</Original>
-                <English>Loadout Changed</English>
-                <Chinesesimp>装备已变更</Chinesesimp>
+            <Key ID="STR_DUWS_ARSENAL_MONEY_DROPPED">
+                <Original>Inventory full. %1 money dropped at your feet.</Original>
+                <English>Inventory full. %1 money dropped at your feet.</English>
             </Key>
             <Key ID="STR_DUWS_T_loadout_copy_none">
                 <Original>No base guard found to copy from. Keeping your default loadout.</Original>
                 <English>No base guard found to copy from. Keeping your default loadout.</English>
                 <Chinesesimp>未找到可复制的战斗单位，保留默认装备。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_ARSENAL_LARGE_CHANGE_DETECTED">
-                <Original>Detected loadout change, enforcing full restricted check.</Original>
-                <English>Detected loadout change, enforcing full restricted check.</English>
-                <Chinesesimp>检测到大幅度换装，正在执行检查</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_ARSENAL_EXIT">
-                <Original>Arsenal enforcer exit.</Original>
-                <English>Arsenal enforcer exit.</English>
-                <Chinesesimp>军火库检查已结束</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_ARSENAL_MONEY_REMOVED">
-                <Original>[Money/Intel] Removed %1 items.</Original>
-                <English>[Money/Intel] Removed %1 items.</English>
-                <Chinesesimp>[钱币/情报] 已移除 %1 个物品。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_ARSENAL_RESTRICTED_REMOVED">
                 <Original>[Arsenal] %1 restricted items removed.</Original>
                 <English>[Arsenal] %1 restricted items removed.</English>
                 <Chinesesimp>[军火库] 已移除 %1 个受限物品。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_FULL_ARSENAL_ONCE">
-                <Original>Full Arsenal</Original>
-                <English>Full Arsenal</English>
-                <Chinesesimp>完整军火库(一次性)</Chinesesimp>
-                <German>Vollständiges Arsenal (einmalig)</German>
-                <Spanish>Arsenal completo (una sola vez)</Spanish>
             </Key>
             <Key ID="STR_DUWS_T_arsenal">
                 <German>Überarbeitetes Arsenal-System</German>
@@ -2189,29 +2146,27 @@
                 <Spanish>Arsenal completo disponible.</Spanish>
                 <German>Vollständiges Arsenal verfügbar.</German>
                 <Chinesesimp>有可用的完整军火库</Chinesesimp>
-                <Original>Full arsenal available</Original>
-                <English>Full arsenal available</English>
+                <Original>Enemy materiel available</Original>
+                <English>Enemy materiel available</English>
             </Key>
             <Key ID="STR_DUWS_T_arsenalfound2">
                 <Spanish>Los objetos clave de esta misión incluyen un arsenal completo de un solo uso. ¡No olvides usarlos!</Spanish>
                 <German>Die Schlüsselgegenstände dieser Mission haben ein einmaliges Vollarsenal – vergiss nicht, es zu nutzen!</German>
                 <Chinesesimp>该任务的关键物品配备了一次性的完整军火库，别忘了使用它们</Chinesesimp>
-                <Original>A one-time arsenal here. Use it before you leave</Original>
-                <English>A one-time arsenal here. Use it before you leave</English>
+                <Original>Seize the enemy gear here before you leave</Original>
+                <English>Seize the enemy gear here before you leave</English>
             </Key>
-            <Key ID="STR_DUWS_T_arsenalused2">
-                <Spanish>Un jugador ha usado el arsenal completo de un solo uso, y este ha sido consumido.</Spanish>
-                <German>Ein Spieler hat das Einmal-Vollarsenal benutzt, es wurde verbraucht.</German>
-                <Chinesesimp>有玩家使用了一次性军火库，该军火库已被消耗。</Chinesesimp>
-                <Original>Someone has used the one-time full arsenal. It's gone now</Original>
-                <English>Someone has used the one-time full arsenal. It's gone now</English>
+            <Key ID="STR_DUWS_T_CACHE_SEIZE">
+                <Original>Seize enemy materiel</Original>
+                <English>Seize enemy materiel</English>
             </Key>
-            <Key ID="STR_DUWS_T_arsenalused">
-                <Spanish>El arsenal de un solo uso ha sido consumido.</Spanish>
-                <German>Einmal-Arsenal wurde verbraucht.</German>
-                <Chinesesimp>一次性军火库被消耗</Chinesesimp>
-                <Original>One-time arsenal has been consumed</Original>
-                <English>One-time arsenal has been consumed</English>
+            <Key ID="STR_DUWS_T_CACHE_SEIZED_TITLE">
+                <Original>Enemy materiel seized</Original>
+                <English>Enemy materiel seized</English>
+            </Key>
+            <Key ID="STR_DUWS_T_CACHE_SEIZED_DESC">
+                <Original>Captured weapons and gear added to the arsenal</Original>
+                <English>Captured weapons and gear added to the arsenal</English>
             </Key>
         </Container>
         <Container name="Enemy Disguise">
