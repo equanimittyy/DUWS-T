@@ -3212,10 +3212,6 @@
                 <English>No intel items to analyze.</English>
                 <Chinesesimp>你没有可分析的情报物品！</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_ANALYSIS_CAP">
-                <Original>Intelligence backlog full this cycle. Documents filed; no CP paid until the next analysis window.</Original>
-                <English>Intelligence backlog full this cycle. Documents filed; no CP paid until the next analysis window.</English>
-            </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_BROADCAST">
                 <Original>%1 turned in intel for %3 CP: %2.</Original>
                 <English>%1 turned in intel for %3 CP: %2.</English>

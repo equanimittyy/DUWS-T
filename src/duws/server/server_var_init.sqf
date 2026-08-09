@@ -524,14 +524,6 @@ DUWS_econ_throttle = 1;
 // times over while the enemy holds its zone-adjacent towns. Wallet only. Server-only; tuning.
 opfor_flat_ap_income = 2;
 
-// Intel analysis converts looted documents to CP with no cooldown, against loot on ~80% of enemies,
-// so a player can bank it faster than territory pays. Capped per player per economy tick to keep
-// activity from out-earning holding ground. Per player, not shared, or in co-op the first turn-in of
-// a tick would eat the whole budget and zero everyone else for the half hour. Keyed by UID ->
-// [tick, paidThisTick], reset when the clock advances. Server-only: fnc_intelAnalysis runs there.
-intel_cp_cap_per_tick = 20;
-DUWS_intel_tick_paid = createHashMap;
-
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
 
 // Campaign game mode: "duws", "guerilla" or "zombies". Republished by the faction screen once the

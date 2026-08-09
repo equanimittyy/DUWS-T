@@ -84,7 +84,8 @@ They are collected here so the next pass tunes from one list rather than hunting
 | `zone_ap_swing` | `server/server_var_init.sqf` | 0.15 | OPFOR retake gain / BLUFOR loss, share of worth |
 | `zone_ap_consolation` | `server/server_var_init.sqf` | 0.15 | OPFOR's AP per BLUFOR capture, share of worth |
 | `opfor_flat_ap_income` | `server/server_var_init.sqf` | 2 | flat OPFOR floor per tick, unthrottled |
-| `intel_cp_cap_per_tick` | `server/server_var_init.sqf` | 20 | CP ceiling on loot analysis per econ tick |
+| intel loot drop | `server/misc/fnc_addRandomLoot.sqf` | ~60% | share of enemies carrying loot; thins intel + coins at source |
+| intel per-item CP | `server/misc/fnc_intelAnalysis.sqf` | 1–5 | turn-in value by document; corpse loot 1, search items above it |
 | throttle `k` / `REF_ZONES` | `server/warcom/fnc_WARCOM_init.sqf` | 0.5 / 6 | strength, and the size below which nothing throttles |
 | town worth | `server/misc/fnc_civ_init_Tomata.sqf` | 1–5 by size | CP to a BLUFOR town, AP to an OPFOR one |
 | mission AP band | `server/missions/mission_threads/*` | 5–20 | per-thread literal, ranked by difficulty |
@@ -104,9 +105,10 @@ once those land.
   (~120 at six zones), plus ~60 AP/hr trickle at full control, plus 5–20 a mission — so liberating
   the map nearly funds the entire AP catalogue from captures alone. The two-currency premise does not
   bite until the combat-vehicle gate, garrisons and commander give AP something to buy.
-- **Kill income is uncapped** (1 CP per 10 kills per player, `server/server_init.sqf`), unlike intel
-  analysis. A large co-op team in a long firefight banks it off activity alone. Whether it needs its
-  own ceiling is [open in the plan](economy_plan.md#open-questions).
+- **Kill income is untouched** (1 CP per 10 kills per player, `server/server_init.sqf`). Intel is
+  held down by a smaller reward and a thinner drop rather than a cap; kill income has had neither. A
+  large co-op team in a long firefight banks it off activity alone, so whether it needs the same
+  treatment is [open in the plan](economy_plan.md#open-questions).
 - **First-capture front-loading.** 25 CP + 20 AP times the zone count is a lump paid in the opening
   hours, ~2/3 of everything AP can currently buy. On a large map that is a meaningful head start; the
   throttle does not touch it, since it rewards an action rather than a holding.

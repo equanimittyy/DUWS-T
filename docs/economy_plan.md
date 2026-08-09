@@ -172,10 +172,13 @@ Two CP faucets scale with how much the player fights rather than with what they 
 watch, because activity-scaled income is what quietly turns "abundant" into "meaningless" under a
 territory economy, and neither was priced into the rebalance above.
 
-**Intel analysis is capped per tick.** `server/misc/fnc_intelAnalysis.sqf` converts loot to CP with
-no cap and no cooldown, against `fnc_addRandomLoot.sqf` putting items on roughly 80% of spawned
-enemies — the larger and less bounded of the two. The cap keys off `econ_tick`, which exists for
-exactly this and already has one caller in `fnc_civ_healed.sqf`.
+**Intel analysis is thinned at the source.** `server/misc/fnc_intelAnalysis.sqf` converts loot to CP
+with no cooldown, against `fnc_addRandomLoot.sqf` putting items on spawned enemies — the larger and
+less bounded of the two. Rather than a per-tick cap on the turn-in, the pressure is cut where the loot
+is made: `fnc_addRandomLoot` now seeds roughly three enemies in five rather than four, and the per-item
+CP values in `fnc_intelAnalysis` are kept modest. A cap was tried and rejected — it either punishes a
+co-op team by zeroing the shared budget after one turn-in, or needs per-player accounting for a faucet
+that a smaller reward controls more simply.
 
 **Kill income is the smaller sibling, and wants the same scrutiny.** `fnc_kill_income_sweep`
 (`server/server_init.sqf`) pays `kill_cp_award` CP per `kill_cp_kills` kills per player, banked on
@@ -184,8 +187,8 @@ defaults 1 CP per 10 kills). It is deliberately absent from Overlord's tick repo
 advertise kill-farming, and it is modest by design — but a large co-op team in a long firefight
 banks a real sum off activity alone. Neither faucet should be removed: kills and captured intel
 *should* pay something, or clearing a garrison feels unrewarded. They simply must not pay so much
-that holding ground stops being the point — whether kill income needs its own ceiling, and where
-both ceilings sit, is [open](#open-questions).
+that holding ground stops being the point — intel is held down by a smaller reward and a thinner
+drop, and whether kill income needs the same treatment is [open](#open-questions).
 
 ### The AP-to-CP converter is deleted
 
@@ -877,10 +880,10 @@ Each phase is independently shippable, and the ordering is forced rather than ch
   combat-vehicle AP halves (`fnc_evalVehicleCost` yields only CP today), the radio tiers — is new
   and unset. This is a tuning pass once the faucets land, not a redesign.
 - **How the activity-scaled CP faucets are tuned against the territory economy.** Intel analysis is
-  capped per tick; kill income (1 CP / 10 kills / player) is not, and a large co-op team banks it
-  off combat alone. Whether kill income needs its own ceiling or a rate change, and where both
-  ceilings sit, is a play question — but they must be priced in, not left to scale with playtime
-  while territory is what the economy is built to reward.
+  held down by a smaller per-item reward and a thinner drop (roughly three enemies in five carry
+  loot); kill income (1 CP / 10 kills / player) is untouched, and a large co-op team banks it off
+  combat alone. Whether kill income needs the same treatment or a rate change is a play question —
+  but activity income must not scale with playtime while territory is what the economy rewards.
 - **The AP component of each advanced support and combat vehicle.** The starting values here are
   round numbers against a 300 AP campaign budget; what they should be is a play-test question.
 - **Where the boundary falls for armed cars and wheeled APCs.** Tanks and unarmed transport are

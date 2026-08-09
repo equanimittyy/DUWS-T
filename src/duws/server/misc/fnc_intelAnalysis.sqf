@@ -4,22 +4,23 @@ if (!isServer) exitWith {};
 params ["_caller"];
 if (isNull _caller) exitWith {};
 
-// Two tiers, and which tier an item is in is decided by where it comes from. `Files` and
-// `Wallet_ID` are what fnc_addRandomLoot puts on 80 % of enemies, so they price a corpse and stay
-// low. The rest are only ever handed over by a search, whose whole point is that it beat the 1-3
-// CP the pool pays on the spot -- so every one of them clears 3.
+// Two tiers, decided by where an item comes from. `Files` and `Wallet_ID` are what fnc_addRandomLoot
+// puts on the enemies that carry loot, so they price a corpse and stay at 1. The rest are only ever
+// handed over by a search, so they sit above the corpse tier. Values are kept modest on purpose:
+// intel rewards clearing a garrison, it must not out-earn holding ground -- which is why the reward
+// is small and the drop is thinned at the source rather than a per-tick cap being bolted on.
 //
 // Whole numbers throughout: the total is floored once at the end, so a fractional value made two
 // of a kind worth more than twice one.
 private _intelItems = [
-    ["SmartPhone", 6],
-    ["MobilePhone", 4],
-    ["FlashDisk", 5],
-    ["Files", 2],
-    ["FilesSecret", 8],
+    ["SmartPhone", 4],
+    ["MobilePhone", 2],
+    ["FlashDisk", 3],
+    ["Files", 1],
+    ["FilesSecret", 5],
     ["Wallet_ID", 1],
-    ["Wallet_traitor", 4],
-    ["FileTopSecret", 8]
+    ["Wallet_traitor", 2],
+    ["FileTopSecret", 5]
 ];
 
 private _totalCP = 0;
@@ -74,21 +75,6 @@ if (random 1 < 0.10 && {[getPos _caller, _caller] call fnc_intel_payout}) exitWi
 };
 
 private _finalCP = floor _totalCP;
-// Capped per player per economy tick so loot-farming cannot out-earn holding ground: the loot faucet
-// has no cooldown and rides ~80% of enemies, so an unbounded turn-in scales with how much is fought
-// rather than how much is held. The overflow past the cap is dropped, not deferred -- the documents
-// are already consumed above, so dumping a stack past the ceiling in one tick wastes the excess,
-// which is the anti-farm bite; the player is told why rather than handed a silent zero.
-private _uid = getPlayerUID _caller;
-(DUWS_intel_tick_paid getOrDefault [_uid, [-1, 0]]) params ["_capTick", "_capPaid"];
-if (_capTick != econ_tick) then { _capPaid = 0; };
-_finalCP = _finalCP min ((intel_cp_cap_per_tick - _capPaid) max 0);
-DUWS_intel_tick_paid set [_uid, [econ_tick, _capPaid + _finalCP]];
-
-if (_finalCP <= 0) exitWith {
-    [localize "STR_DUWS_T_INTEL_ANALYSIS_CAP"] remoteExec ["hint", _caller];
-};
-
 [_finalCP, "intel_analysis"] remoteExec ["fnc_cp_adjust", 2];
 private _desc = format [localize "STR_DUWS_T_INTEL_ANALYSIS_BROADCAST", name _caller, _itemsList, _finalCP];
 ["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
