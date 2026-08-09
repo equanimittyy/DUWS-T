@@ -56,9 +56,48 @@ DUWS_fnc_countLoadoutChanges = {
 
 // items force-removed from a loadout: money and intel
 DUWS_forcedRemoveItems = [
-    "Money_roll", "Files", "Wallet_ID", "SmartPhone", "MobilePhone", 
+    "Money_roll", "Files", "Wallet_ID", "SmartPhone", "MobilePhone",
     "FlashDisk", "FileTopSecret", "FilesSecret"
 ];
+
+// The player's balance IS the Money_roll (plus intel) they carry, so any operation that rewrites the
+// whole inventory -- an arsenal edit, a quick-kit setUnitLoadout -- would delete it. Stash pulls
+// every carried money/intel class out and returns [[class, n], ...]; regrant hands that back, into
+// inventory where it fits and dropped at the player's feet where it does not, so a full pack loses
+// none. canAdd is checked per instance so a piece that will not fit is never added and then also
+// dropped. Both run client-local on player; the overflow drop is a server-side remoteExec.
+DUWS_fnc_money_stash = {
+    private _stash = [];
+    {
+        private _cls = _x;
+        private _n = { _x == _cls } count (itemsWithMagazines player);
+        if (_n > 0) then {
+            _stash pushBack [_cls, _n];
+            for "_i" from 1 to _n do { player removeItem _cls; player removeMagazine _cls; };
+        };
+    } forEach DUWS_forcedRemoveItems;
+    _stash
+};
+
+DUWS_fnc_money_regrant = {
+    params [["_stash", []]];
+    private _dropPairs = [];
+    {
+        _x params ["_cls", "_n"];
+        private _isMag = isClass (configFile >> "CfgMagazines" >> _cls);
+        private _over = 0;
+        for "_i" from 1 to _n do {
+            if (player canAdd _cls) then {
+                if (_isMag) then { player addMagazine _cls; } else { player addItem _cls; };
+            } else {
+                _over = _over + 1;
+            };
+        };
+        if (_over > 0) then { _dropPairs pushBack [_cls, _over]; };
+    } forEach _stash;
+    if (count _dropPairs > 0) then { [_dropPairs, getPosATL player] remoteExec ["fnc_money_drop", 2]; };
+    _dropPairs
+};
 
 // restricted-arsenal handler: whitelist filter plus forced money/intel removal
 DUWS_fnc_arsenal_restricted = {
@@ -234,15 +273,7 @@ DUWS_fnc_shelfForeign = {
         // Money/intel out of the editable loadout for the whole session, then restored on close. The
         // arsenal deletes items on edit and the player's balance IS the Money_roll they carry, so
         // leaving it in would burn it. Both modes -- this is the money bug, independent of the pool.
-        private _moneyStash = [];
-        {
-            private _cls = _x;
-            private _n = { _x == _cls } count (itemsWithMagazines player);
-            if (_n > 0) then {
-                _moneyStash pushBack [_cls, _n];
-                for "_i" from 1 to _n do { player removeItem _cls; player removeMagazine _cls; };
-            };
-        } forEach DUWS_forcedRemoveItems;
+        private _moneyStash = call DUWS_fnc_money_stash;
 
         // Close-diff baseline: taken after money removal, so neither money nor intel can register as a
         // foreign withdrawal. Never reassigned; _refLoadout tracks live edits separately.
@@ -332,24 +363,8 @@ DUWS_fnc_shelfForeign = {
             if (count _ammoList > 0) then { [missionNamespace, _ammoList, false] call BIS_fnc_addVirtualMagazineCargo; };
         };
 
-        // Hand the money back: into inventory where it fits, dropped at the player's feet where it
-        // does not, so a full-inventory player loses none of it. canAdd is checked per instance so a
-        // piece that will not fit is never added and then double-counted onto the ground.
-        private _dropPairs = [];
-        {
-            _x params ["_cls", "_n"];
-            private _isMag = isClass (configFile >> "CfgMagazines" >> _cls);
-            private _over = 0;
-            for "_i" from 1 to _n do {
-                if (player canAdd _cls) then {
-                    if (_isMag) then { player addMagazine _cls; } else { player addItem _cls; };
-                } else {
-                    _over = _over + 1;
-                };
-            };
-            if (_over > 0) then { _dropPairs pushBack [_cls, _over]; };
-        } forEach _moneyStash;
-        if (count _dropPairs > 0) then { [_dropPairs, getPosATL player] remoteExec ["fnc_money_drop", 2]; };
+        // Hand the money back into inventory, overflow dropped at the player's feet.
+        private _dropPairs = [_moneyStash] call DUWS_fnc_money_regrant;
 
         // Dropped cash is the player's own news at the moment they closed the arsenal, so it goes to
         // the hint box (per-player), not a team card. Only money is reported: it is the balance.
