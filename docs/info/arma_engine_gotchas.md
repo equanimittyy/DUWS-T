@@ -1087,3 +1087,17 @@ expression" at the point of use, not the assignment that caused it. Test the slo
 A populated optic reaches the same `selectMax []` a second way: a continuous-zoom scope carries
 `OpticsModes` but no `discreteDistance`, so `flatten (_modes apply {getArray (_x >> "discreteDistance")})`
 is `[]` even though the modes list is not. Guard the flattened array, not just the modes list.
+
+## The diary ignores `<t>`; structured-text colour there comes from `<font>`
+
+`createDiaryRecord` bodies are structured text, but only a subset of the tags a
+`ctrlSetStructuredText`/`parseText` control accepts render in the map's Notes. `<t>` is
+**not** one of them -- it is silently dropped, taking its `color` and `size` with it, so
+the text still shows but in the default colour. Diary records colour via `<font color='#RRGGBB'>`
+instead; `<br/>` and `<img .../>` render in both contexts. Mixing the two is the trap: a
+`<t color=...>` copied from a dialog string into a diary body compiles, shows, and stays
+uncoloured, which reads as "the colour code is wrong" rather than "wrong tag".
+
+One further mismatch on conversion: `<font size='N'>` is absolute pixels, whereas `<t size='N'>`
+is a multiplier of the default. Copying `size='1.15'` or `size='2'` across renders ~1-2px text,
+effectively invisible -- drop the size or pick a real pixel value.

@@ -2,13 +2,16 @@
 // fnc_duws_help.sqf
 // Builds the single "DUWS-T Manual" subject in the map's Notes (diary) as one
 // record (page) per top-level topic, each led by its heading banner. Sub-topics
-// that don't warrant their own page fold into the owning page as inline <t>
+// that don't warrant their own page fold into the owning page as inline
 // sub-headers.
 //
 // Engine notes (docs/info/arma_engine_gotchas.md):
 //  - The diary displays records newest-first, so the list is built top-down then
 //    reversed before creation (the first row ends up on top).
-//  - Record bodies are structured text: <br/>, <t ...> and <img .../> render.
+//  - Record bodies are structured text, but colour comes from <font>, NOT <t>:
+//    the diary ignores <t> (a parseText/ctrlSetStructuredText tag), so its
+//    colour/size drop silently. <font color=...>, <br/> and <img .../> render;
+//    <font size> is absolute px, not the <t> multiplier.
 //  - Banner path uses format, not "...image\"+leaf: a backslash right before a
 //    string's closing quote can be mis-read by the CfgFunctions preprocessor.
 
@@ -19,7 +22,7 @@ private _bnr = {
 // Sub-header + body, for topics folded into a page as one section.
 private _sec = {
     params ["_titleId", "_bodyId"];
-    "<t size='1.15' color='#4da6ff'>" + (localize _titleId) + "</t><br/>" + (localize _bodyId)
+    "<font color='#4da6ff'>" + (localize _titleId) + "</font><br/>" + (localize _bodyId)
 };
 
 private _coverBody =
@@ -59,7 +62,7 @@ private _configBody = ("duws_t_man_config.jpg" call _bnr) + ([
     ["STR_DUWS_T_timemanagement", "STR_DUWS_T_timemanagement2"] call _sec,
     ["STR_DUWS_T_ojav7yf4",       "STR_DUWS_T_d38s8oac"] call _sec,          // Hardcore Mode
     ["STR_DUWS_T_deathpenalty",   "STR_DUWS_T_deathpenalty2"] call _sec,
-    "<t size='1.15' color='#4da6ff'>" + (localize "STR_DUWS_T_subtitlesystem") + "</t><br/>"
+    "<font color='#4da6ff'>" + (localize "STR_DUWS_T_subtitlesystem") + "</font><br/>"
         + ([localize "STR_DUWS_T_subtitlesystem2"] call fnc_cs),             // Subtitles (needs fnc_cs)
     ["STR_DUWS_T_ty006zz4",       "STR_DUWS_T_8o0fomss"] call _sec,          // Saving
     ["STR_DUWS_T_ljw9ndqz",       "STR_DUWS_T_nk0wa9zo"] call _sec,          // Multiplayer
