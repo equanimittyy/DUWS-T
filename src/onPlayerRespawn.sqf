@@ -73,25 +73,18 @@ if (count _removedList > 0) then {
     ["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", player];
 };
 sleep 10;
-// Single hold-action opens the disguise panel (fnc_disguise_menu), which fronts
-// both modes -- replaces the two per-mode re-adds. Guard cleared so respawn re-adds.
+// Scroll-menu action opens the disguise panel (see client_init) -- re-added because
+// respawn spawns a fresh unit that carries no prior actions. Guard cleared first.
 player setVariable ["DUWS_disguiseMenu_actionAdded", nil];
-[
-    player,
+player addAction [
     ACT_EQUIP("STR_DUWS_T_DISGUISE_MENU_ACTION"),
-    "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
-    "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
-    "alive _target && vehicle _target == _target",
-    "alive _target && vehicle _target == _target",
-    {},
-    {},
     { [] spawn fnc_disguise_menu; },
-    {},
-    [],
+    nil,
     1,
-    80,
     false,
-    false
-] call BIS_fnc_holdActionAdd;
+    true,
+    "",
+    "alive _target && vehicle _target == _target"
+];
 player setVariable ["DUWS_disguiseMenu_actionAdded", true];
 player setCaptive false;

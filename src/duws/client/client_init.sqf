@@ -421,27 +421,22 @@ if ((vehiclevarname player) in game_master || !isMultiplayer) then {
 };
 
 sleep 20;
-// Single hold-action opens the disguise panel (fnc_disguise_menu), which fronts
-// both modes. Replaces the two per-mode hold-actions that triggered each disguise
-// directly; the civ-mode CIV_PRESENCE gate now lives inside the panel.
+// Scroll-menu action opens the disguise panel (fnc_disguise_menu), which fronts both
+// modes. A hold-action was rejected: its "Hold Space" prompt sits centre-screen the
+// whole time the show-condition holds (alive, on foot -> effectively always) and blocks
+// the view. showWindow=false keeps this off-centre -- it appears only in the scroll
+// menu. The civ-mode CIV_PRESENCE gate lives inside the panel.
 if (isNil {player getVariable "DUWS_disguiseMenu_actionAdded"}) then {
-    [
-        player,
+    player addAction [
         ACT_EQUIP("STR_DUWS_T_DISGUISE_MENU_ACTION"),
-        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
-        "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_hack_ca.paa",
-        "alive _target && vehicle _target == _target",
-        "alive _target && vehicle _target == _target",
-        {},
-        {},
         { [] spawn fnc_disguise_menu; },
-        {},
-        [],
+        nil,
         1,
-        80,
         false,
-        false
-    ] call BIS_fnc_holdActionAdd;
+        true,
+        "",
+        "alive _target && vehicle _target == _target"
+    ];
     player setVariable ["DUWS_disguiseMenu_actionAdded", true];
 };
 // disguise feature: set captive state locally
