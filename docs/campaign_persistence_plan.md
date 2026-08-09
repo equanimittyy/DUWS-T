@@ -396,10 +396,10 @@ which radii survive. A Location's position comes out of the map's config and doe
 |---|---|---|
 | Pools | outcome | `commandpointsblu1`, `WARCOM_blufor_ap`, `WARCOM_opfor_ap` |
 | Ownership | outcome | the positions of BLUFOR-held zones, and nothing else |
-| Zone bounty | outcome | the current bounty per zone, keyed by zone number |
+| First capture | outcome | `DUWS_zone_first_captured`, the per-zone flags that gate the one-time liberation bonus |
 | Town reputation | outcome | `civ_town_rep` and `civ_town_ap` |
 | Escalation | outcome | `escalation_destroyed`. One integer; the census re-runs on the restored world |
-| Tier ratchet | outcome | the AP tier reached by each side |
+| Tier ratchet | outcome | per-side earned counters `WARCOM_blufor_ap_earned` / `WARCOM_opfor_ap_earned`, and the tiers derived from them (`WARCOM_blufor_tier`, `WARCOM_opfor_tier`) |
 | Kill income | outcome | the per-player kill tally awaiting conversion, keyed by UID, and the CP already banked for players who have left |
 
 **Ownership is stored as held positions and nothing derived from them.** Restore applies each as
@@ -408,16 +408,19 @@ together and broadcasts them atomically (`server/init_zones/fnc_zone_state_init.
 `zoneundercontrolblu` and `amount_zones_captured` come out consistent instead of being separately
 restored and separately wrong.
 
-**The zone bounty is not derivable.** A zone's *worth* is fixed at generation and comes back with
-`zone_meta_array`, but its CP bounty decays on every capture by design
-([`info/economy.md`](info/economy.md)). Not storing it refunds the player a full-price zone
-for every one they have already farmed.
+**The first-capture flags are not derivable.** `DUWS_zone_first_captured`
+(`server/init_zones/fnc_captured.sqf`) records which zones have ever paid their one-time CP+AP
+liberation bonus. Without it a restore re-pays the bonus for every zone already taken — and because
+that bonus also credits the AP tier counter, it silently re-ratchets the ladder on top. (The CP
+capture bounty this row used to carry is retired with the town→CP reroute.)
 
-**The tier ratchet is state, not a threshold test.** Once AP is spendable, deriving the tier from
-the live pool re-derives it from a number that has since been spent down, silently un-unlocking an
-enemy that had already reached armour — the failure mode
+**The tier ratchet is state, not a threshold test.** The tier derives from a per-side *earned*
+counter that only ever rises (`WARCOM_*_ap_earned`), never from the spendable wallet, so the earned
+counter is the source of truth the save must carry — the tier is re-derivable from it on load
+(`DUWS_fnc_ap_tier`). Deriving the tier from the live wallet instead reads a number since spent down,
+silently un-unlocking an enemy that had already reached armour — the failure mode
 [`economy_second_pass.md`](economy_second_pass.md#the-ratchet-is-otherwise-structural-and-only-in-half-the-read-sites)
-describes. A ratchet whose only record is a number that goes both ways is not a ratchet.
+describes. Floor shipped these globals broadcast but unsaved; this snapshot is what closes that.
 
 **Kill income needs one existing handler changed to survive a restore.**
 `server/server_init.sqf:214` zeroes a UID's tally on `PlayerConnected` so that a rejoining player
@@ -804,7 +807,7 @@ refund attached to the one restore that consumes it.
 - [ ] Prerequisites 1-3 above, each as its own change; land Prerequisite 1's confirmation first.
 - [ ] Write `fnc_campaign_store.sqf`: namespace resolution, accessors, index, commit, scan. Verify: two campaigns written under separate IDs both appear in the index with correct headers; a commit replaces its own row rather than appending; `_prev` holds the previous payload.
 - [ ] Write `fnc_campaign_save.sqf` and dump a snapshot to the log without restoring. Verify: `toJSON` then `fromJSON` round-trips it unchanged, and nothing in it is an object, group, side or `netId`.
-- [ ] Write `fnc_campaign_restore.sqf` covering pools, bounties and ownership only. Verify: restart mid-campaign and confirm CP, AP, reputation and a farmed zone's reduced bounty all return, and that the campaign resumes on the date and hour it was saved at rather than on day three.
+- [ ] Write `fnc_campaign_restore.sqf` covering pools, the first-capture flags, the AP tier and ownership only. Verify: restart mid-campaign and confirm CP, AP, reputation, each side's AP tier and a re-taken zone paying no fresh liberation bonus all return, and that the campaign resumes on the date and hour it was saved at rather than on day three.
 - [ ] Add zone replay through `fnc_createZone`, then the ownership and reveal passes after `WARCOM_init_done`. Verify: restored zones sit in the same places with the same radii, a captured zone comes back captured, a hardcore campaign's found zones stay found, and `amount_zones_created` matches the zone count instead of double it.
 - [ ] Add HQ, FOB and civilian-town replay. Verify: HQ actions work, FOB triggers fire, FOB names and towns come back where they were, and the restore replays no FOB radio announcements.
 - [ ] Add the vehicle persistence zone. Verify: a vehicle parked at a FOB returns with its damage, fuel, cargo and paint; a FOB's turret ring is not duplicated; the cap drops the furthest vehicle and logs it.
