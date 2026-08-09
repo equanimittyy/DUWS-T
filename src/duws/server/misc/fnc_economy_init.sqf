@@ -62,9 +62,9 @@ fnc_ap_adjust = {
 	if (!isServer) exitWith {};
 	// _earned is the part of a positive delta that also credits the one-way earned counter and so can
 	// raise the tier. The recurring faucets each side genuinely earns pass it -- BLUFOR's zone trickle,
-	// missions and first-capture bonus; OPFOR's town and flat income (never its zone trickle). Spends,
-	// swings, consolation and refunds leave it 0, so ground regained and money spent never move the
-	// ladder. Never negative: the counter only rises, which is what makes the tier a ratchet.
+	// missions and first-capture bonus; OPFOR's town, zone and flat income. Spends, swings, consolation
+	// and refunds leave it 0, so ground regained and money spent never move the ladder. Never negative:
+	// the counter only rises, which is what makes the tier a ratchet.
 	params [["_side", ""], ["_delta", 0], ["_reason", ""], ["_earned", 0]];
 	if (_delta != round _delta) then {
 		["WARN", "ECON", format ["fractional AP delta %1 rounded into the pool (%2)", _delta, _reason]] call fnc_log;

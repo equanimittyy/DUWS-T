@@ -202,8 +202,9 @@ DUWS_fnc_raiseGarrison = {
 //         that omits a role leaves its global undefined, and an undefined name inside an array
 //         literal is not something the spawner can test for afterwards.
 // setting -- a campaign setting that must read 1, or "" for a vehicle nothing gates.
-// ap -- the Army Power the OPFOR side must have reached, 0 for a vehicle available from the start.
-//       Which tokens hang off which rung is a balance decision; the mechanism is the point here.
+// ap -- the earned Army Power (WARCOM_opfor_ap_earned) the OPFOR side must have reached, 0 for a
+//       vehicle available from the start. These mirror BLUFOR's wave/vehicle thresholds so both sides
+//       climb one honest ladder; which token hangs off which rung is a balance decision, and tuning.
 // --DUWS-UNITCOMP BEGIN name="OPFOR vehicles" kind=team row="token, role, setting, ap" fields="token, faction role, campaign setting, AP required" prefix=opfor_--
 DUWS_spawnVehicles = [
     ["car",        "opfor_ARMED_CAR1_X",    "",           0],
@@ -211,13 +212,13 @@ DUWS_spawnVehicles = [
     ["transport",  "opfor_TRANS_TRUCK_X",   "",           0],
     ["ammo",       "opfor_AMMO_TRUCK_X",    "",           0],
     ["repair",     "opfor_REPAIR_TRUCK_X",  "",           0],
-    ["apc",        "opfor_APC1_X",          "",           0],
-    ["ifv",        "opfor_APC2_X",          "",           0],
-    ["aa",         "opfor_AA_APC_X",        "",           0],
+    ["apc",        "opfor_APC1_X",          "",           40],
+    ["ifv",        "opfor_APC2_X",          "",           65],
+    ["aa",         "opfor_AA_APC_X",        "",           65],
     ["tank",       "opfor_MBT_TANK1_X",     "HeavyArmor", 100],
-    ["attackheli", "opfor_ATTACK_HELI_X",   "AttackHeli", 0],
+    ["attackheli", "opfor_ATTACK_HELI_X",   "AttackHeli", 136],
     ["transheli",  "opfor_TRANS_HELI_X",    "AttackHeli", 0],
-    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 0]
+    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 150]
 ];
 // --DUWS-UNITCOMP END--
 

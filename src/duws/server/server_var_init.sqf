@@ -177,7 +177,7 @@ DUWS_support_permanent = []; publicVariable "DUWS_support_permanent";
 // (anti-steamroll: a fast advance funds the counter-attack) and the full swing when it retakes
 // one; BLUFOR sheds the swing when it loses one. Server-only: the capture handlers run server-side.
 zone_first_capture_cp = 25;  // flat CP the first time BLUFOR ever takes a zone
-zone_first_capture_ap = 20;  // flat AP paid alongside it, into the wallet
+zone_first_capture_ap = 50;  // flat AP alongside it; credits the tier, the main lever balancing OPFOR's hour-zero zones
 zone_ap_swing = 0.15;        // OPFOR's AP gain on retaking a zone, and BLUFOR's loss on losing one
 zone_ap_consolation = 0.15;  // OPFOR's AP whenever BLUFOR takes a zone, as a share of worth
 
@@ -545,8 +545,15 @@ DUWS_econ_throttle = 1;
 
 // OPFOR's flat AP floor, per economy tick, independent of what it holds. Insurance for a director
 // that has lost its towns, not the faucet that paces escalation -- town income outweighs it several
-// times over while the enemy holds its zone-adjacent towns. Wallet only. Server-only; tuning.
+// times over while the enemy holds its zone-adjacent towns. Credits the tier with the rest of OPFOR
+// income; left out of opfor_income_factor below, being a floor rather than a faucet. Server; tuning.
 opfor_flat_ap_income = 2;
+
+// Side-balance scalar on OPFOR town + zone income (not the flat floor). OPFOR holds every zone at
+// hour zero, so on the symmetric tier ladder it would out-earn BLUFOR on ground alone; this keeps the
+// two faucets comparable without making the ladder itself asymmetric. Below 1 favours BLUFOR; the
+// BLUFOR capture bounty (zone_first_capture_ap) is the other half of the balance. Server; tuning.
+opfor_income_factor = 0.6;
 
 insurgent_mode_enable = false; publicVariable "insurgent_mode_enable";
 

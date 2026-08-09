@@ -58,15 +58,16 @@ while {true} do {
         if (_side isEqualTo "OPF") then { _opfTownWorth = _opfTownWorth + _income };
     } forEach _reps;
 
-    // Every passive faucet is scaled by the campaign-size throttle and rounded once, after
-    // scaling, so no fraction reaches a pool writer. Town income routes per side (BLUFOR CP,
-    // OPFOR AP); the zone trickle pays both sides AP for the ground each holds; OPFOR also draws
-    // an unthrottled flat floor. Held zone counts: BLUFOR from zoneundercontrolblu, OPFOR from
-    // the control list.
+    // Every passive faucet is scaled by the campaign-size throttle and rounded once, after scaling,
+    // so no fraction reaches a pool writer. Town income routes per side (BLUFOR CP, OPFOR AP); the
+    // zone trickle pays both sides AP for the ground each holds; OPFOR also draws a flat floor.
+    // OPFOR's town and zone income carries a second, side-balance factor (opfor_income_factor): it
+    // holds every zone at hour zero, so without it OPFOR out-earns BLUFOR on ground alone. The flat
+    // floor is left unscaled -- it is insurance for a director that has lost its towns, not a faucet.
     private _bluCP    = round (_bluTownWorth * DUWS_econ_throttle);
-    private _opfTownAP = round (_opfTownWorth * DUWS_econ_throttle);
+    private _opfTownAP = round (_opfTownWorth * DUWS_econ_throttle * opfor_income_factor);
     private _bluZoneAP = round (zoneundercontrolblu * zone_ap_trickle * DUWS_econ_throttle);
-    private _opfZoneAP = round ((count WARCOM_zones_controled_by_OPFOR) * zone_ap_trickle * DUWS_econ_throttle);
+    private _opfZoneAP = round ((count WARCOM_zones_controled_by_OPFOR) * zone_ap_trickle * DUWS_econ_throttle * opfor_income_factor);
     private _opfAP = _opfTownAP + _opfZoneAP + opfor_flat_ap_income;
 
     // One call per pool per side, not one per town: fnc_ap_adjust/fnc_cp_adjust publicVariable and
@@ -74,12 +75,12 @@ while {true} do {
     // Called inline rather than remoteExec'd to self: this loop is server-side, and call lands the
     // credit this frame where remoteExec [...,2] queues it for the next.
     if (_bluCP > 0)     then { [_bluCP, "civ_town_income"] call fnc_cp_adjust };
-    // The 4th arg is the tier-crediting portion. BLUFOR's zone trickle is a faucet it earns, so the
-    // whole delta credits the counter. OPFOR's tier climbs on town and flat income but NOT its zone
-    // trickle: it holds every zone at hour zero, so crediting the trickle would front-load a tier it
-    // never fought for. So the OPFOR wallet takes all three, the counter only town + flat.
+    // The 4th arg is the tier-crediting portion, and each side credits the whole of what it earns:
+    // BLUFOR its zone trickle, OPFOR all of town + zone + flat. OPFOR's zone income does front-load
+    // its tier from the ground it starts on -- opfor_income_factor above and the BLUFOR capture bounty
+    // (zone_first_capture_ap) are what balance that, so the ladder itself stays symmetric.
     if (_bluZoneAP > 0) then { ["BLU", _bluZoneAP, "zone_trickle", _bluZoneAP] call fnc_ap_adjust };
-    if (_opfAP > 0)     then { ["OPF", _opfAP, "opfor_income", _opfTownAP + opfor_flat_ap_income] call fnc_ap_adjust };
+    if (_opfAP > 0)     then { ["OPF", _opfAP, "opfor_income", _opfAP] call fnc_ap_adjust };
 
     // Pays and notifies each player its own kill award; deliberately absent from Overlord's
     // report below, which speaks for territory only. Naming attrition there would advertise
