@@ -30,6 +30,19 @@ class CfgFunctions
 	#include "modules\vcom\cfgFunctions.hpp"
 };
 
+// Rename the money item so the player's inventory and any engine-generated text read "Money", not
+// the vanilla "Money Roll" -- "you need 5 Money Rolls" reads wrong for a currency. Money_roll is
+// added and removed as a magazine (server/misc/fnc_addRandomLoot.sqf, fnc_economy_init.sqf), so it
+// lives in CfgMagazines; overriding only displayName merges over the base class and leaves the
+// item's behaviour untouched.
+class CfgMagazines
+{
+	class Money_roll
+	{
+		displayName = "Money";
+	};
+};
+
 //////////////////////////
 //////////////////////////
 

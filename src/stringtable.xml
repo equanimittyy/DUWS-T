@@ -2115,8 +2115,8 @@
 </Container>
         <Container name="Arsenal">
             <Key ID="STR_DUWS_ARSENAL_MONEY_WARNING_TITLE">
-                <Original>Cash and Intel in Your Kit</Original>
-                <English>Cash and Intel in Your Kit</English>
+                <Original>Money and Intel in Your Kit</Original>
+                <English>Money and Intel in Your Kit</English>
                 <Chinesesimp>检测到钱币/情报</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_ARSENAL_MONEY_WARNING_DESC">
@@ -2607,13 +2607,13 @@
                 <Chinesesimp>%1 名游击队现已听你指挥。注意：你的声望越高，一次能雇佣的游击队就越多(最多12名)。游击队的装备完全随机。每次雇佣间有30分钟的冷却时间。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_NOT_ENOUGH_MONEY">
-                <Original>You need 10 cash.</Original>
-                <English>You need 10 cash.</English>
+                <Original>You need 10 money.</Original>
+                <English>You need 10 money.</English>
                 <Chinesesimp>需要10个钱币。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_NOT_ENOUGH_MONEY_15">
-                <Original>You need 15 cash.</Original>
-                <English>You need 15 cash.</English>
+                <Original>You need 15 money.</Original>
+                <English>You need 15 money.</English>
                 <Chinesesimp>需要15个钱币。</Chinesesimp>
             </Key>
                     <Key ID="STR_DUWS_T_partisans_placing_busy">
@@ -2903,8 +2903,8 @@
                 <English>Civilian Interaction</English>
             </Key>
             <Key ID="STR_DUWS_T_CIV_MENU_COINS">
-                <Original>In Inventory: %1 cash</Original>
-                <English>In Inventory: %1 cash</English>
+                <Original>In Inventory: %1 money</Original>
+                <English>In Inventory: %1 money</English>
             </Key>
             <Key ID="STR_DUWS_T_CIV_ASK">
                 <Original>Ask</Original>
@@ -3307,8 +3307,8 @@
                 <Chinesesimp>%1 购买了瞄具：%2</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_NOT_ENOUGH_MONEY">
-                <Original>Not enough cash. This costs %1; you have %2.</Original>
-                <English>Not enough cash. This costs %1; you have %2.</English>
+                <Original>Not enough money. This costs %1; you have %2.</Original>
+                <English>Not enough money. This costs %1; you have %2.</English>
                 <Chinesesimp>需要 %1 个纸币，你只有 %2 个</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_BLACKMARKET_BOUGHT_GOGGLES">
