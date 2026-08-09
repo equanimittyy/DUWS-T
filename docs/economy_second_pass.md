@@ -277,8 +277,8 @@ forth pump a tier that can never come down. On the player's side that means `fnc
 credits and `fnc_blufor_cap.sqf` does not. On the enemy's side the same rule needs no test at all:
 every zone OPFOR takes is one the player took from it first, so `fnc_opfor_cap.sqf` credits the
 wallet and never the counter. The two ladders therefore ride the recurring faucets each side
-actually earns — the zone trickle and missions for BLUFOR, town income and the flat floor for
-OPFOR — which are the ones contested over time rather than banked in a rush.
+actually earns — the zone trickle and missions for BLUFOR, town, zone and flat income for OPFOR —
+the hold-and-earn income, never the one-off capture or retake swings.
 
 The first-capture bonus makes this split structural on the player's side — a zone's CP and AP are
 earned once and never again, so there is nothing to farm — where the enemy's wallet swing is still
@@ -388,9 +388,9 @@ divergence is an accepted limitation rather than something to redesign the clock
 
 | Faucet | Amount | Credits |
 |---|---|---|
-| Zone hold trickle | per held OPFOR zone, per 30-min tick, × `DUWS_econ_throttle` (5 each) | wallet only |
-| Town income | banded OPFOR towns, OPFOR's own per-town AP rate, per tick, × `DUWS_econ_throttle` | wallet + tier |
-| Flat income | one constant per tick, independent of everything | wallet + tier |
+| Zone hold trickle | per held OPFOR zone, per tick, × `DUWS_econ_throttle` × `opfor_income_factor` (5 each) | wallet + tier |
+| Town income | banded OPFOR towns, per tick, × `DUWS_econ_throttle` × `opfor_income_factor` | wallet + tier |
+| Flat income | one constant per tick, independent of everything (not scaled by `opfor_income_factor`) | wallet + tier |
 | Zone retaken | `round (worth * zone_ap_swing)` | wallet only |
 | Zone lost | consolation AP whenever BLUFOR takes an OPFOR zone | wallet only |
 
@@ -414,16 +414,23 @@ several towns already banded and already paying — OPFOR town income outweighs 
 constant several times over at hour zero. The constant is sized for a director holding nothing,
 and the figure that has to be checked is the combined one.
 
-**The zone trickle fills the wallet, not the tier.** OPFOR holds every zone at hour zero, so
-crediting that trickle to the earned counter would front-load a permanent tier the enemy never
-fought for — and the counter only ever rises
-([§The ladder input is not the wallet](#the-ladder-input-is-not-the-wallet)), so a ceiling banked
-in those strong early hours would survive being pushed back to a last zone. The wallet/counter
-split already answers this: the trickle pays the wallet, which is what OPCOM spends on fortification
-([§What the commander spends on](#what-the-commander-spends-on)), but the tier climbs only on the
-faucets OPFOR contests — towns it must win, the flat floor, zones it retakes. So the enemy gets
-richer for holding ground and harder only for earning it. `zones_number` running 1 to 40 is handled
-separately, by the throttle on every passive faucet.
+**The zone trickle credits the tier, and the front-load is balanced on the faucet.** OPFOR holds
+every zone at hour zero, so crediting that trickle to a one-way counter front-loads the tier from
+ground the enemy started on rather than fought for — the reason an earlier design paid the trickle
+to the wallet alone. That exclusion is dropped: the ladder is kept **symmetric** — both sides credit
+the whole of what they hold — and the head start is answered on the faucet instead of by carving a
+hole in one side's ladder. `opfor_income_factor` (0.6) scales OPFOR's town and zone income below
+BLUFOR's, and the BLUFOR capture bounty (`zone_first_capture_ap`, 50) climbs the player's own tier as
+they take that same ground, so OPFOR opens ahead and the player closes the gap by advancing. The
+retake swing and the consolation stay wallet-only — losing ground must still never raise the enemy's
+permanent ceiling. `zones_number` running 1 to 40 is handled separately, by the throttle on every
+passive faucet.
+
+Both sides gate capability on raw `earned` against the same thresholds (BLUFOR's wave/vehicle steps,
+OPFOR's per-vehicle `_ap` in `DUWS_spawnVehicles`, now APC 40 / IFV·AA 65 / tank 100 / heli 136 /
+plane 150 — the same rung values). The tier integer is the readout summary of that climb. OPFOR's
+ladder is still thinner than BLUFOR's in *rungs used*; filling it out (more gated vehicles) is
+commander-phase work.
 
 ### The enemy ceiling is 100, and one gate stands behind it
 
@@ -855,11 +862,14 @@ They are collected here so the next pass tunes from one list rather than hunting
 
 | Constant | Where | Value | Note |
 |---|---|---|---|
-| `zone_first_capture_cp` / `_ap` | `server/server_var_init.sqf` | 25 / 20 | flat, once ever per zone; front-loads with zone count |
-| `zone_ap_trickle` | `server/server_var_init.sqf` | 5 | AP per held zone per tick, each side |
-| `zone_ap_swing` | `server/server_var_init.sqf` | 0.15 | OPFOR retake gain / BLUFOR loss, share of worth |
-| `zone_ap_consolation` | `server/server_var_init.sqf` | 0.15 | OPFOR's AP per BLUFOR capture, share of worth |
+| `zone_first_capture_cp` / `_ap` | `server/server_var_init.sqf` | 25 / 50 | flat, once ever per zone; the AP half is the main BLUFOR lever balancing OPFOR's zone tier |
+| `zone_ap_trickle` | `server/server_var_init.sqf` | 5 | AP per held zone per tick, each side; credits both wallet and tier |
+| `zone_ap_swing` | `server/server_var_init.sqf` | 0.15 | OPFOR retake gain / BLUFOR loss, share of worth; wallet only |
+| `zone_ap_consolation` | `server/server_var_init.sqf` | 0.15 | OPFOR's AP per BLUFOR capture, share of worth; wallet only |
 | `opfor_flat_ap_income` | `server/server_var_init.sqf` | 2 | flat OPFOR floor per tick, unthrottled |
+| `opfor_income_factor` | `server/server_var_init.sqf` | 0.6 | scales OPFOR town+zone income (not flat); balances OPFOR's hour-zero zones on the symmetric ladder |
+| `DUWS_ap_tier_rungs` | `server/misc/fnc_economy_init.sqf` | 10/40/65/100/136/150/200 | tier boundaries and preset rungs; display summary, not the capability gate |
+| OPFOR vehicle AP gates | `server/init_zones/fnc_zone_spawn_sizes.sqf` | APC 40 / IFV·AA 65 / tank 100 / heli 136 / plane 150 | OPFOR's capability ladder, mirrors BLUFOR's earned thresholds |
 | intel loot drop | `server/misc/fnc_addRandomLoot.sqf` | ~60% | share of enemies carrying loot; thins intel + coins at source |
 | intel per-item CP | `server/misc/fnc_intelAnalysis.sqf` | 1–5 | turn-in value by document; corpse loot 1, search items above it |
 | throttle `k` / `REF_ZONES` | `server/warcom/fnc_WARCOM_init.sqf` | 0.5 / 6 | strength, and the size below which nothing throttles |
@@ -877,23 +887,24 @@ gate, BLUFOR garrisons and the OPFOR commander. Cutting a faucet now would leave
 once those land.
 
 - **AP is not scarce for a zone-holding BLUFOR yet.** Its only sink is the ~6 advanced supports,
-  180 AP for the whole set, realistically 90–130 AP bought. Supply is 20 AP × zone count one-time
-  (~120 at six zones), plus ~60 AP/hr trickle at full control, plus 5–20 a mission — so liberating
-  the map nearly funds the entire AP catalogue from captures alone. The two-currency premise does not
-  bite until the combat-vehicle gate, garrisons and commander give AP something to buy.
+  180 AP for the whole set, realistically 90–130 AP bought. Supply is 50 AP × zone count one-time
+  (~300 at six zones), plus ~60 AP/hr trickle at full control, plus 5–20 a mission — so liberating
+  the map more than funds the entire AP catalogue from captures alone. The raised capture bounty
+  deepens this on the wallet even as it earns the tier; the two-currency premise does not bite until
+  the combat-vehicle gate, garrisons and commander give AP something to buy.
 - **Kill income is untouched** (1 CP per 10 kills per player, `server/server_init.sqf`). Intel is
   held down by a smaller reward and a thinner drop rather than a cap; kill income has had neither. A
   large co-op team in a long firefight banks it off activity alone, so whether it needs the same
   treatment is [open below](#open-questions).
-- **First-capture front-loading.** 25 CP + 20 AP times the zone count is a lump paid in the opening
-  hours, ~2/3 of everything AP can currently buy. On a large map that is a meaningful head start; the
-  throttle does not touch it, since it rewards an action rather than a holding.
-- **OPFOR AP accumulation.** Until the commander lands, OPFOR earns from four faucets and spends only
-  on hardpoints, so the pool climbs with nowhere to go — and it trips the live `WARCOM_opfor_ap > 100`
-  gate in `server/missions/fnc_missionPatrols.sqf` / `fnc_missionPatrolswithintel.sqf` near
-  permanently, so side-mission guards are almost always armoured. Widening town worth to 1–5 raised
-  the OPFOR AP faucet by roughly half, which compounds this. Expected, and resolves when the
-  commander's sinks drain the pool; it is not a leak.
+- **First-capture front-loading.** 25 CP + 50 AP times the zone count is a lump paid in the opening
+  hours, and the AP half also climbs BLUFOR's tier — deliberately, to answer OPFOR's hour-zero zone
+  tier. On a large map it is a meaningful head start on both wallet and ladder; the throttle does not
+  touch it, since it rewards an action rather than a holding.
+- **OPFOR AP accumulation.** Until the commander lands, OPFOR's wallet has only the hardpoint director
+  as a sink, so it climbs with little to spend it on — now dampened by `opfor_income_factor`. Its
+  earned counter meanwhile crosses the tank rung (100) off town+zone income, so side-mission and zone
+  armour appear once OPFOR has held enough ground; that gate reads the earned counter (the token
+  `_ap`), not the wallet. Expected, and the wallet drains when the commander's sinks land; not a leak.
 - **CP abundance versus vehicle price.** Light vehicles now cost ~1–5 CP against a CP economy the
   reroute roughly doubled, so their price is close to free. That is intended — hiring and light
   transport are not meant to be gated by cost — but it means the CP half of the catalogue is legible,
