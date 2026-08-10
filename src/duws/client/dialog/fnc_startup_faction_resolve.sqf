@@ -47,9 +47,9 @@ switch (OPFOR_FactionFile_X) do {
         waitUntil { sleep 0.1; duws_custom_faction_back || {OPFfactionDataTemp != ""} };
     };
     case "AUTODETECT": {
-        // The zombie mode picks its enemy from the zombie factions and nothing else; every other
+        // The apocalypse mode picks its enemy from the zombie factions and nothing else; every other
         // mode gets the list with those filtered out.
-        ["Select Opfor Faction", true, duws_gamemode isEqualTo "zombies"] call fnc_factionSelector;
+        ["Select Opfor Faction", true, duws_gamemode isEqualTo "apocalypse"] call fnc_factionSelector;
         selectedFaction_OPF = selectedFaction; publicVariable "selectedFaction_OPF";
     };
 };

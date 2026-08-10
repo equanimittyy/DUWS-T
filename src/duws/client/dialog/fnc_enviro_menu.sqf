@@ -57,11 +57,6 @@ index_zeus_params_blufor = lbAdd [2104, localize "STR_DUWS_T_nque25op"];
 index_zeus_params_none = lbAdd [2104, localize "STR_DUWS_T_3i1vcc0n"];
 [2104, index_zeus_params_blufor] call _setDefault;
 
-// APOCALYPSE MODE
-index_apocalypse_true = lbAdd [2105, localize "STR_DUWS_T_vk37aebo"];
-index_apocalypse_false = lbAdd [2105, localize "STR_DUWS_T_x4zs3lsg0"];
-[2105, index_apocalypse_false] call _setDefault;
-
 // War escalation (replaces the old scorched-earth mode).
 lbAdd [2106, localize "STR_DUWS_T_x4zs3lsg0"];
 index_escalation_true = lbAdd [2106, localize "STR_DUWS_T_vk37aebo"];
@@ -95,9 +90,9 @@ private _addCiv = {
     _i
 };
 
-// The zombie modes draw their crowd from the mod they name, so those two rows are the whole list
+// The apocalypse mode draws its crowd from the mod it names, so those two rows are the whole list
 // and civilians cannot be turned off; every other mode gets the list without them.
-if (duws_gamemode == "zombies") then {
+if (duws_gamemode == "apocalypse") then {
     private _iRavage = ["STR_DUWS_T_ravage", "RAVAGE"] call _addCiv;
     private _iWbk = ["STR_DUWS_T_wbk", "WBK"] call _addCiv;
     lbSetColor [2109, _iRavage, [1,0,0,1]];
@@ -148,16 +143,12 @@ index_hardcore_false = lbAdd [2110, localize "STR_DUWS_T_x4zs3lsg0"];
 index_hardcore_true = lbAdd [2110, localize "STR_DUWS_T_vk37aebo"];
 [2110, index_hardcore_false] call _setDefault;
 
-// insurgent mode
-index_insurgent_off = lbAdd [2111, localize "STR_DUWS_T_insoff"];
-index_insurgent_on = lbAdd [2111, localize "STR_DUWS_T_inson"];
-[2111, index_insurgent_off] call _setDefault;
-lbSetColor [2111, index_insurgent_off, [1,0,0,1]];
-lbSetColor [2111, index_insurgent_on, [1,0,0,1]];
-
-// Restore selections when returning here via the campaign screen's Back button.
+// Restore selections when returning here via the campaign screen's Back button. The combos are no
+// longer a contiguous 2100-range, so the restore zips stored values against an explicit idc list
+// that MUST stay in lockstep with the snapshot in fnc_process_enviro_menu.sqf.
 if (!isNil "duws_enviro_sel") then {
-    { lbSetCurSel [2100 + _forEachIndex, _x]; } forEach duws_enviro_sel;
+    private _idcs = [2100,2101,2102,2103,2104,2106,2107,2108,2109,2110];
+    { lbSetCurSel [_idcs select _forEachIndex, _x]; } forEach duws_enviro_sel;
 };
 
 // PRESET
@@ -176,7 +167,7 @@ private _display = uiNamespace getVariable ["duws_startup_display", displayNull]
         if (duws_preset_applying) exitWith {};
         lbSetCurSel [2200, duws_preset_custom];
     }];
-} forEach [2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2110,2111];
+} forEach [2100,2101,2102,2103,2104,2106,2107,2108,2109,2110];
 
 duws_preset_applying = false;
 // Writes the description line under the row. Re-applies the preset too, which is a no-op:

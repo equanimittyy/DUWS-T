@@ -481,15 +481,15 @@
                 <Original>OPFOR outnumber and outgun you from the start. Fewer supports, heavier enemy forces, and every weapon and supply crate has to be earned. By you.</Original>
                 <English>OPFOR outnumber and outgun you from the start. Fewer supports, heavier enemy forces, and every weapon and supply crate has to be earned. By you.</English>
             </Key>
-            <Key ID="STR_DUWS_T_gamemode_zombies">
-                <Original>Zombies</Original>
-                <English>Zombies</English>
+            <Key ID="STR_DUWS_T_gamemode_apocalypse">
+                <Original>Apocalypse</Original>
+                <English>Apocalypse</English>
             </Key>
-            <Key ID="STR_DUWS_T_gamemode_zombies_missing">
-                <Original>Zombies needs the Ravage or WBK mod, and neither is loaded. Game mode set back to DUWS.</Original>
-                <English>Zombies needs the Ravage or WBK mod, and neither is loaded. Game mode set back to DUWS.</English>
+            <Key ID="STR_DUWS_T_gamemode_apocalypse_missing">
+                <Original>Apocalypse needs the Ravage or WBK mod, and neither is loaded. Game mode set back to DUWS.</Original>
+                <English>Apocalypse needs the Ravage or WBK mod, and neither is loaded. Game mode set back to DUWS.</English>
             </Key>
-            <Key ID="STR_DUWS_T_gamemode_zombies_desc">
+            <Key ID="STR_DUWS_T_gamemode_apocalypse_desc">
                 <Original>Fight back infected hordes or demons. Build up a survivor base, survive, and get off the island. Needs the Ravage or WBK mod.</Original>
                 <English>Fight back infected hordes or demons. Build up a survivor base, survive, and get off the island. Needs the Ravage or WBK mod.</English>
             </Key>

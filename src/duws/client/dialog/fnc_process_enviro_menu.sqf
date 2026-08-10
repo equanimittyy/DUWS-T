@@ -1,7 +1,9 @@
 // Locality: client -- invoked from a dialog action.
 // Snapshot selections so the campaign screen's Back button can restore them.
 // Must read before closeDialog while the controls still exist.
-duws_enviro_sel = [2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2110,2111] apply { lbCurSel _x };
+// idc list MUST stay in lockstep with the restore in fnc_enviro_menu.sqf: position, not idc value,
+// is the join key between snapshot and restore.
+duws_enviro_sel = [2100,2101,2102,2103,2104,2106,2107,2108,2109,2110] apply { lbCurSel _x };
 // Same reason: the civilian row carries its CIV_PRESENCE value as item data, and that has to come
 // off the control while the control is still there.
 private _civValue = lbData [2109, lbCurSel 2109];
@@ -81,15 +83,6 @@ switch (_index) do
     case index_zeus_params_none: { ZeusStatus = 0; };
 };
 
-// APOCALYPSE MODE
-_index = lbCurSel 2105;
-switch (_index) do
-{
-    case index_apocalypse_true: { apocalypse_mode = true; };
-    case index_apocalypse_false: { apocalypse_mode = false; };
-};
-publicVariable "apocalypse_mode";
-
 // War escalation
 _index = lbCurSel 2106;
 escalation_enabled = (_index == index_escalation_true);
@@ -147,15 +140,6 @@ publicVariable "time_Multiplier";
 publicVariable "simple_zones_enable";
 publicVariable "CIV_PRESENCE";
 publicVariable "restricted_arsenal";
-
-// insurgent mode
-_index = lbCurSel 2111;
-switch (_index) do
-{
-    case index_insurgent_off: { insurgent_mode_enable = false; };
-    case index_insurgent_on: { insurgent_mode_enable = true; };
-};
-publicVariable "insurgent_mode_enable";
 
 // OPEN THE NEXT MENU
 [] spawn fnc_campaign_menu;

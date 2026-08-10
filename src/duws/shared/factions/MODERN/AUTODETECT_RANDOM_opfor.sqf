@@ -26,9 +26,9 @@ if (isNil "opfor_autodetect_handler_init") then {
 
 
 // Same filter the AutoDetect picker applies: the roll draws from the zombie factions in the
-// zombie mode and from everything else in the others, so a random OPFOR can never be zombies in
+// apocalypse mode and from everything else in the others, so a random OPFOR can never be zombies in
 // a campaign that is not about them -- nor an army in one that is.
-_wantZombies = (missionNamespace getVariable ["duws_gamemode", "duws"]) isEqualTo "zombies";
+_wantZombies = (missionNamespace getVariable ["duws_gamemode", "duws"]) isEqualTo "apocalypse";
 
 _factions = (call BIS_fnc_getFactions) select {
 	getNumber (configFile >> "CfgFactionClasses" >> _x >> "side") in [0,1,2] &&

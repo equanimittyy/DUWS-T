@@ -82,15 +82,16 @@ _dropdownOPF ctrlSetPosition [0.52, 0.540, 0.3675, 0.04];
 _dropdownOPF ctrlCommit 0;
 
 // Rebuilt whenever the game mode changes, which is why it is a block rather than a loop in place.
-// The zombie mode fields zombies, and zombies exist only as detected factions -- a static faction
-// file or a pasted one would put an army in the campaign that is supposed to have none -- so its
-// OPFOR list is the two AutoDetect rows, both of which the picker and the roll narrow to zombies.
+// The apocalypse mode fields zombies, and zombies exist only as detected factions -- a static
+// faction file or a pasted one would put an army in the campaign that is supposed to have none --
+// so its OPFOR list is the two AutoDetect rows, both of which the picker and the roll narrow to
+// zombies.
 duws_fill_opfor_combo = {
 	params ["_ctrl"];
 	lbClear _ctrl;
 
 	private _rows = Factions_Available_OPFOR_X;
-	if (duws_gamemode isEqualTo "zombies") then {
+	if (duws_gamemode isEqualTo "apocalypse") then {
 		_rows = _rows select {(_x select 2) in ["AUTODETECT", "AUTODETECT_RANDOM"]};
 		// The faction the untouched default names is no longer in the list, so the row the combo
 		// opens on has to become the answer; otherwise only a click ever writes this.
@@ -124,7 +125,7 @@ _dropdownOPF ctrlAddEventHandler ["LBSelChanged",
 duws_gamemodes = [
 	["duws", "STR_DUWS_T_gamemode_duws", "STR_DUWS_T_gamemode_duws_desc"],
 	["guerilla", "STR_DUWS_T_gamemode_guerilla", "STR_DUWS_T_gamemode_guerilla_desc"],
-	["zombies", "STR_DUWS_T_gamemode_zombies", "STR_DUWS_T_gamemode_zombies_desc"]
+	["apocalypse", "STR_DUWS_T_gamemode_apocalypse", "STR_DUWS_T_gamemode_apocalypse_desc"]
 ];
 if (isNil "duws_gamemode") then { duws_gamemode = "duws"; };
 
@@ -195,8 +196,8 @@ _dropdownMode ctrlAddEventHandler ["LBSelChanged",
 
 	// With neither zombie mod loaded the mode has nothing to field: say which two it takes and
 	// put the row back on DUWS, rather than start a campaign whose enemy pool is empty.
-	if (_token isEqualTo "zombies" && {!duws_zombie_factions_found}) exitWith {
-		hint localize "STR_DUWS_T_gamemode_zombies_missing";
+	if (_token isEqualTo "apocalypse" && {!duws_zombie_factions_found}) exitWith {
+		hint localize "STR_DUWS_T_gamemode_apocalypse_missing";
 		_control lbSetCurSel 0;
 	};
 
