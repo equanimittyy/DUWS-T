@@ -199,7 +199,7 @@ requestAssets = requestAssets arrayIntersect requestAssets;	// remove potential 
 {
 	
 	_typeName = _x;
-	_typeCost = _typeName call fnc_enumCost;
+	_typeCost = [_typeName] call DUWS_fnc_vehPrice;
 	_typeDisplayName = getText (configFile >> "CfgVehicles" >> _typeName >> "displayName");
 	_typeCostFormatted = [_typeName, _typeDisplayName + ' (' + str(_typeCost) + 'CP)', _typeCost];
 	blufor_RQST_VEHICLES pushBack _typeCostFormatted;

@@ -418,6 +418,16 @@ publicVariable "DUWS_fnc_vehTier";
 publicVariable "DUWS_fnc_tierListFill";
 publicVariable "DUWS_blufor_squads";
 publicVariable "DUWS_fnc_squadRow";
+// Broadcast: the request-list reader reprices every vehicle client-side through DUWS_fnc_vehPrice,
+// and DUWS_fnc_vehTier (above) shares the DUWS_fnc_vehKind classifier, so both halves must resolve
+// on every machine. The file sets the tuning constants, the band map and the classifier chain.
+[] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_veh_price.sqf";
+{ publicVariable _x } forEach [
+    "DUWS_vehp_ARMOR_REF", "DUWS_vehp_WEAPON_REF", "DUWS_vehp_CAP_REF", "DUWS_vehp_SEAT_REF",
+    "DUWS_vehp_RATE_PIVOT", "DUWS_vehp_RATE_W", "DUWS_vehp_CAP_W", "DUWS_vehp_PYLON_W",
+    "DUWS_vehPriceBands", "DUWS_fnc_vehTurretWeapons", "DUWS_fnc_vehWeapons", "DUWS_fnc_vehPylonCount",
+    "DUWS_fnc_vehArmed", "DUWS_fnc_vehKind", "DUWS_fnc_vehWeaponScore", "DUWS_fnc_vehPrice"
+];
 fnc_faction_unit_keylist = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_unit_keylist.sqf";
 fnc_custom_faction_init = compile preprocessFileLineNumbers "duws\server\dialog\fnc_custom_faction_init.sqf";publicVariable "fnc_custom_faction_init";
 fnc_request_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_menu.sqf";publicVariable "fnc_request_menu";

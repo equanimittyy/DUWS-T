@@ -12,25 +12,43 @@
 // globals are built at runtime and no linter sees them.
 params [["_kind", "UNIT"]];
 
+private _rows = [];
+
 // Filtered to the same rule the numbered walk below enforces, and for the same reason: the array
 // is written by a faction file this mission does not own, and callers read `select 2` off every row
 // they are handed. A short row would take down the whole menu build rather than cost one entry.
 private _list = missionNamespace getVariable [format ["blufor_RQST_%1S", _kind], []];
-if !(_list isEqualTo []) exitWith { _list select { _x isEqualType [] && {count _x >= 3} } };
-
-// Same stopping rule the numbered menus always used: the first unset, "empty" or zero-cost slot
-// ends the list, so a faction may leave gaps at the end but not in the middle. The walk runs to 99
-// rather than the documented 50-slot ceiling because the old menu builder did, and an unconverted
-// third-party faction is exactly the case this fallback exists to carry.
-private _out = [];
-for "_i" from 1 to 99 do {
-    private _var = format ["blufor_RQST_%1_%2_X", _kind, if (_i < 10) then { "0" + str _i } else { str _i }];
-    if (isNil _var) exitWith {};
-    private _entry = missionNamespace getVariable [_var, []];
-    if (count _entry < 3) exitWith {};
-    // `==`, not isEqualTo: string equality here has to stay case-insensitive, because the padding
-    // is spelled "empty" in most faction files and "Empty" in a handful.
-    if ((_entry select 0) == "empty" || {(_entry select 2) == 0}) exitWith {};
-    _out pushBack _entry;
+if !(_list isEqualTo []) then {
+    _rows = _list select { _x isEqualType [] && {count _x >= 3} };
+} else {
+    // Same stopping rule the numbered menus always used: the first unset, "empty" or zero-cost slot
+    // ends the list, so a faction may leave gaps at the end but not in the middle. The walk runs to 99
+    // rather than the documented 50-slot ceiling because the old menu builder did, and an unconverted
+    // third-party faction is exactly the case this fallback exists to carry.
+    for "_i" from 1 to 99 do {
+        private _var = format ["blufor_RQST_%1_%2_X", _kind, if (_i < 10) then { "0" + str _i } else { str _i }];
+        if (isNil _var) exitWith {};
+        private _entry = missionNamespace getVariable [_var, []];
+        if (count _entry < 3) exitWith {};
+        // `==`, not isEqualTo: string equality here has to stay case-insensitive, because the padding
+        // is spelled "empty" in most faction files and "Empty" in a handful.
+        if ((_entry select 0) == "empty" || {(_entry select 2) == 0}) exitWith {};
+        _rows pushBack _entry;
+    };
 };
-_out
+
+// Vehicles are repriced through the kind classifier, the single source of truth for CP: the authored
+// or auto-detected cost in `select 2` is overwritten and the label rebuilt, so a shipped table, a
+// modded faction and the autodetect path all price alike, and the price agrees with the tier gate
+// that shares the classifier. Row order and count are preserved -- the menu stores the row index in
+// lbData. Units pass through untouched.
+if (_kind == "VEHICLE") then {
+    _rows = _rows apply {
+        private _class = _x select 0;
+        private _cp = [_class] call DUWS_fnc_vehPrice;
+        private _name = getText (configFile >> "CfgVehicles" >> _class >> "displayName");
+        if (_name == "") then { _name = _x select 1 };
+        [_class, format ["%1 (%2CP)", _name, _cp], _cp]
+    };
+};
+_rows

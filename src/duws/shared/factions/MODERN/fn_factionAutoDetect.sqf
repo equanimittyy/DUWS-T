@@ -49,101 +49,6 @@ fnc_padZero = compileFinal {
 	};
 };
 
-// cost of a type via a throwaway server-local reference object
-fnc_enumCost = compileFinal {
-	params ["_typeName"];
-	// ships spawn multiple objects; skip the ref-object path and flat-rate them
-	if (_typeName isKindOf "Ship") exitWith {20};
-	_refObj = _typeName createVehicleLocal [1000,1000,2000];
-	_refObj setVariable ["BIS_enableRandomization", false];
-	_refObj setPhysicsCollisionFlag false;
-	_refObj enableSimulation false;
-	getPosATL _refObj nearObjects 300 select {_x isNotEqualTo _refObj} apply { deleteVehicle _x };
-	_cost = _refObj call fnc_evalVehicleCost;
-	deleteVehicle _refObj;
-	_cost
-};
-
-fnc_enumCostFormatted = compileFinal {
-	_typeName = _this;
-	_typeCost = _typeName call fnc_enumCost;
-	_typeDisplayName = getText (configFile >> "CfgVehicles" >> _typeName >> "displayName");
-	_typeCostFormatted = [_typeName, _typeDisplayName + ' (' + str(_typeCost) + 'CP)', _typeCost];
-	_typeCostFormatted
-};
-
-// heuristic vehicle value from type, weapons, armour, sensors, threat and capacity
-fnc_evalVehicleCost = {
-	_veh  = _this;
-	_vehType = typeOf _veh;
-	
-	_typeMultiplier = switch true do {
-		case (getText (configFile >> "CfgVehicles" >> _vehType >> "vehicleClass") isEqualTo "Autonomous")	:	{3};	// UAV
-		case (_veh isKindOf "Plane" )		:	{2.5};
-		case (_veh isKindOf "Helicopter" )	:	{2};
-		case (_veh isKindOf "Tank" )	:	{1.1};
-		case (_veh isKindOf "Car" )	:	{1.5};
-		case (_veh isKindOf "StaticWeapon" )	:	{2};
-		default {1};
-	};
-	
-	_cost = 5;	// base cost
-	_costModifier = 0;
-	_threatModifier = 0;
-	
-	getArray (configFile >> "CfgVehicles" >> _vehType >> "threat") params [["_threatToInf", 0], ["_threatToArmor", 0], ["_threatToAir", 0]];	// {Soft, Armor, Air}
-	_threatModifier = switch selectMax [_threatToInf, _threatToArmor, _threatToAir] do {
-		case _threatToInf : {1.3};
-		case _threatToArmor : {1.8};
-		case _threatToAir : {3.5};
-		default {1}
-	};
-	
-	_armorModifier = linearConversion [0, 1000, getNumber (configFile >> "CfgVehicles" >> _vehType >> "armor"), 1, 2];
-
-	_sensors = flatten listVehicleSensors _veh;
-	_sensors = _sensors arrayIntersect _sensors;	// self-intersect to dedupe the sensor list
-	_sensorModifier = count _sensors * 3;
-	
-	_turretCount = count allTurrets [_veh, false];
-	_magazineCount = count magazines _veh;
-	_seatCount  = count fullCrew [_veh, "", true];
-	_pylonCount  = count getAllPylonsInfo _veh;
-	_passengers = getNumber (configFile >> "CfgVehicles" >> _vehType >> "transportSoldier");
-	_weaponCount = count weapons _veh;
-	
-	_isVehArty = getNumber (configFile >> "CfgVehicles" >> _vehType >> "artilleryScanner") isEqualTo 1;
-	_isVehMed = getNumber (configfile >> "CfgVehicles" >> _vehType  >> "attendant") isEqualTo 1;
-	_isVehSupply = true in (["transportAmmo","transportFuel", "transportRepair"] apply {getNumber (configfile >> "CfgVehicles" >> (_vehType)  >> _x) isNotEqualTo 0});
-	_weaponTypes = flatten ((flatten ("getArray (_x >> 'weapons') isNotEqualTo []" configClasses (configFile >> "CfgVehicles" >> _vehType >> "Turrets") apply {getArray (_x >> 'weapons')})) apply { [configFile >> "CfgWeapons" >> _x, true] call BIS_fnc_returnParents }) apply {toLowerANSI _x};
-	// _weaponTypes holds weapon parent classnames: MGunCore, CannonCore, GMG_F, MGun, LauncherCore
-
-	if (_isVehMed || _isVehSupply) then						{_costModifier = _costModifier + 40};
-		
-	if (_isVehArty) then									 {_costModifier = _costModifier + 55};
-		
-	if ("cannoncore" in _weaponTypes) then					 {_costModifier = _costModifier + 0};
-		
-	if ("launchercore" in _weaponTypes) then				 {_costModifier = _costModifier + 15};
-		
-	if ("autocannon_base_f" in _weaponTypes) then			 {_costModifier = _costModifier + 10};
-		
-	if ("gmg_f" in _weaponTypes) then						 {_costModifier = _costModifier + 20};
-		
-	if ("mguncore" in _weaponTypes) then					 {_costModifier = _costModifier + 5};
-		
-	
-	_cost = _cost + _costModifier + _turretCount + _magazineCount + _weaponCount + _pylonCount + _seatCount + _sensorModifier;
-	_cost = _cost * _threatModifier * _armorModifier * _typeMultiplier;
-	// Map the heuristic to a 1-100 CP band. All vehicles are CP-only -- tanks included -- so the
-	// whole catalogue lives on one scale, and tiering (not price) is what gates armour. The low
-	// anchor sits at 10, not 0, so a bare unarmed light vehicle (a quad, a soft-skin transport)
-	// clamps to the 1-2 floor while armour, weapons, threat and sensors -- all read from config, so
-	// modded vehicles price themselves -- carry the armed and heavy end up toward 100.
-	round linearConversion [10, 400, _cost, 1, 100, true]
-};
-
-
 // editor subcategory of an object or classname -- a quick vehicle-type signal
 fnc_getEditorCategory = compileFinal {
 	toLowerANSI getText ( configfile >> "CfgVehicles" >> ( if (typeName _this isEqualTo "OBJECT") then [{typeOf _this, _this}] ) >> "editorSubcategory" );
@@ -811,4 +716,4 @@ fnc_factionSelector = compileFinal {
 
 };
 
-["fnc_selectNonEmpty","fnc_vehiclePostInit","fnc_padZero","fnc_enumCost","fnc_enumCostFormatted","fnc_evalVehicleCost","fnc_getEditorCategory","fnc_factionGetFilteredByEditorSubcat","fnc_filterByDisplayName","fnc_filterByClassName","fnc_factionGetFilteredByType","fnc_filterBySeats","fnc_filterByUtility","fnc_filterByPylons","fnc_filterByWeapons","fnc_isThreatTo","fnc_vehicleWeaponType","fnc_unitParseRoles","fnc_parseFaction","fnc_faction_pool_for_class","fnc_factionIsZombie","fnc_getAllFactionsClean","fnc_factionSelector"] apply { publicVariable _x };
+["fnc_selectNonEmpty","fnc_vehiclePostInit","fnc_padZero","fnc_getEditorCategory","fnc_factionGetFilteredByEditorSubcat","fnc_filterByDisplayName","fnc_filterByClassName","fnc_factionGetFilteredByType","fnc_filterBySeats","fnc_filterByUtility","fnc_filterByPylons","fnc_filterByWeapons","fnc_isThreatTo","fnc_vehicleWeaponType","fnc_unitParseRoles","fnc_parseFaction","fnc_faction_pool_for_class","fnc_factionIsZombie","fnc_getAllFactionsClean","fnc_factionSelector"] apply { publicVariable _x };

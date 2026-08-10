@@ -15,29 +15,33 @@ DUWS_fnc_ap_unlocked = {
     (missionNamespace getVariable [_earnedVar, 0]) >= _need
 };
 
-// The ladder tier a purchasable vehicle sits at, read from its config kind rather than a per-faction
-// table -- the shop pulls arbitrary classnames from faction files this mission does not own. A carrier
+// The ladder tier a purchasable vehicle sits at, mapped from the same DUWS_fnc_vehKind classifier the
+// price reads -- so the rung that unlocks a vehicle and the CP it costs can never disagree. A carrier
 // that seats a squad is a tier below the pure gun platform of the same chassis: an APC or IFV (T3)
-// against an MBT (T4), a transport helicopter (T3) against a gunship (T4). A car of two seats or fewer
-// (a quad, a light runabout) drops to T1; a larger one is T2. Anything the kinds below do not claim --
-// a truck, a boat, a logistics vehicle -- is T1.
+// against an MBT (T4), a transport helicopter (T3) against a gunship (T4). Logistics, boats, drones and
+// any unclassed vehicle are T1; an unarmed car splits on seats -- a quad or runabout T1, a larger
+// passenger car T2. DUWS_fnc_vehKind lives in shared/functions/fnc_veh_price.sqf, broadcast alongside.
 DUWS_fnc_vehTier = {
     params ["_class"];
     if (_class == "") exitWith { 1 };
-    private _cfg = configFile >> "CfgVehicles" >> _class;
-    private _cargo = getNumber (_cfg >> "transportSoldier");
-    if (_class isKindOf "Plane") exitWith { 5 };
-    if (_class isKindOf "Helicopter") exitWith { [4, 3] select (_cargo >= 4) };
-    if (_class isKindOf "Tank" || {_class isKindOf "Wheeled_APC_F"}) exitWith {
-        [4, 3] select (_cargo >= 4)
-    };
-    if (_class isKindOf "Car") exitWith {
-        // Total seats from config, not fullCrew: fullCrew needs a spawned object, but this runs on a
-        // classname in the menu build. Driver + cargo + gunner turrets; a quad or 2-seat runabout is T1.
-        private _seats = (getNumber (_cfg >> "hasDriver")) + _cargo + count ("true" configClasses (_cfg >> "Turrets"));
-        [2, 1] select (_seats <= 2)
-    };
-    1
+    switch ([_class] call DUWS_fnc_vehKind) do {
+        case "planeArmed": { 5 };
+        case "planeTransport": { 5 };
+        case "tank": { 4 };
+        case "aa": { 4 };
+        case "arty": { 4 };
+        case "heliArmed": { 4 };
+        case "apcIfv": { 3 };
+        case "heliTransport": { 3 };
+        case "armedCar": { 2 };
+        case "lightUnarmed": {
+            private _cfg = configFile >> "CfgVehicles" >> _class;
+            private _seats = (getNumber (_cfg >> "hasDriver")) + (getNumber (_cfg >> "transportSoldier"))
+                + count ("true" configClasses (_cfg >> "Turrets"));
+            [2, 1] select (_seats <= 2)
+        };
+        default { 1 };
+    }
 };
 
 // The BLUFOR squad catalogue the request menu offers and its two handlers resolve. The section token
