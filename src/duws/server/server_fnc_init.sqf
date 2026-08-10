@@ -139,6 +139,8 @@ fnc_map_readout_draw = compile preprocessFileLineNumbers "duws\client\misc\fnc_m
 publicVariable "fnc_map_readout_draw";
 fnc_map_readout_open = compile preprocessFileLineNumbers "duws\client\misc\fnc_map_readout_open.sqf";
 publicVariable "fnc_map_readout_open";
+fnc_map_sidebar = compile preprocessFileLineNumbers "duws\client\misc\fnc_map_sidebar.sqf";
+publicVariable "fnc_map_sidebar";
 fnc_civ_wp_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_wp_Tomata.sqf";
 // Server-only, and deliberately not broadcast: the FiredNear handler that calls it is added on
 // this machine alone, and a client that could run it could scatter a town at will.
@@ -310,6 +312,10 @@ fnc_intelAnalysis = compile preprocessFileLineNumbers "duws\server\misc\fnc_inte
 publicVariable "fnc_intelAnalysis";
 // MISSION FUNCTIONS
 fnc_stratmap = compile preprocessFileLineNumbers "duws\client\missions\fnc_stratmap.sqf";publicVariable "fnc_stratmap";
+// The shared batch generator (cache + safe-pos search) and the in-map picker. Both run on the
+// client viewing the map; broadcast so the request-menu action and map controls can reach them.
+fnc_sidemission_generate = compile preprocessFileLineNumbers "duws\client\missions\fnc_sidemission_generate.sqf";publicVariable "fnc_sidemission_generate";
+fnc_sidemission_picker = compile preprocessFileLineNumbers "duws\client\missions\fnc_sidemission_picker.sqf";publicVariable "fnc_sidemission_picker";
 // Broadcast: the strategic map's mission blocks call it on whoever opened the map.
 fnc_mission_launch = compile preprocessFileLineNumbers "duws\client\missions\fnc_mission_launch.sqf";publicVariable "fnc_mission_launch";
 fnc_missionLocator = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionLocator.sqf";publicVariable "fnc_missionLocator";

@@ -1979,6 +1979,46 @@
                 <Original>Income: %1 AP/30min to OPFOR</Original>
                 <English>Income: %1 AP/30min to OPFOR</English>
             </Key>
+            <Key ID="STR_DUWS_T_sidemission_sidebar_btn">
+                <Original>Side Missions</Original>
+                <English>Side Missions</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sidemission_busy">
+                <Original>A side mission is already in progress.</Original>
+                <English>A side mission is already in progress.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sidemission_gm">
+                <Original>Only the commander can call in side missions.</Original>
+                <English>Only the commander can call in side missions.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sidemission_none">
+                <Original>No sites could be found for a side mission right now.</Original>
+                <English>No sites could be found for a side mission right now.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sidemission_prev">
+                <Original>&lt;</Original>
+                <English>&lt;</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sidemission_next">
+                <Original>&gt;</Original>
+                <English>&gt;</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sidemission_launch">
+                <Original>Launch mission</Original>
+                <English>Launch mission</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sidemission_confirm_prompt">
+                <Original>Launch %1?</Original>
+                <English>Launch %1?</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sidemission_confirm">
+                <Original>Confirm</Original>
+                <English>Confirm</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sidemission_cancel">
+                <Original>Cancel</Original>
+                <English>Cancel</English>
+            </Key>
             <Key ID="STR_DUWS_T_escalation_title">
                 <Original>Escalation</Original>
                 <English>Escalation</English>
