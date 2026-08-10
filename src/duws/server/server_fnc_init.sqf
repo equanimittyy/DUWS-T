@@ -358,6 +358,8 @@ fnc_support_sel_changed = compile preprocessFileLineNumbers "duws\client\dialog\
 // several functions, and all of them run on the buyer's machine.
 [] call compile preprocessFileLineNumbers "duws\client\supports\fnc_supports_init.sqf";
 publicVariable "fnc_support_defs";
+publicVariable "DUWS_support_tiers";
+publicVariable "fnc_support_tier";
 publicVariable "fnc_support_owned";
 publicVariable "fnc_support_comm_add";
 publicVariable "fnc_support_comm_used";
