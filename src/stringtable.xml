@@ -4813,8 +4813,8 @@
                 <German>JDAM Luftschlag (10CP) Funk</German>
                 <Spanish>Ataque JDAM (10 CP) Radio</Spanish>
                 <Chinesesimp>JDAM炸弹(10CP)</Chinesesimp>
-                <Original>JDAM strike (10 CP)</Original>
-                <English>JDAM strike (10 CP)</English>
+                <Original>JDAM strike</Original>
+                <English>JDAM strike</English>
             </Key>
             <Key ID="STR_DUWS_T_wcohwh4p">
                 <German>JDAM Luftschlag</German>
@@ -4827,8 +4827,8 @@
                 <German>Lasergelenkte Bombe (10CP) Funk</German>
                 <Spanish>Bomba Guiada por Láser (10 CP) Radio</Spanish>
                 <Chinesesimp>激光制导炸弹(10CP)</Chinesesimp>
-                <Original>Laser Guided Bomb (10 CP)</Original>
-                <English>Laser Guided Bomb (10 CP)</English>
+                <Original>Laser Guided Bomb</Original>
+                <English>Laser Guided Bomb</English>
             </Key>
             <Key ID="STR_DUWS_T_ifnnl0j7">
                 <German>Lasergelenkte Bombe</German>
