@@ -4656,11 +4656,11 @@
                 <English>Supply drop (5 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_32rh9x5x">
-                <German>Versorgungsabwurf (2 CP)</German>
-                <Spanish>Entrega de suministros (2 CP)</Spanish>
-                <Chinesesimp>空投补给(2 CP)</Chinesesimp>
-                <Original>Supply drop (2 CP)</Original>
-                <English>Supply drop (2 CP)</English>
+                <German>Versorgungsabwurf</German>
+                <Spanish>Entrega de suministros</Spanish>
+                <Chinesesimp>空投补给</Chinesesimp>
+                <Original>Supply drop</Original>
+                <English>Supply drop</English>
             </Key>
             <Key ID="STR_DUWS_T_kw2lnaig">
                 <German>Virtuelles Arsenal (10CP)</German>
@@ -4684,11 +4684,11 @@
                 <English>Squad Infil Vehicle Airdrop(10 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_jjzzkt02">
-                <German>Luftabwurf des Truppenteileinfiltrierungsfahrzeugs(10CP)</German>
-                <Spanish>Lanzamiento aéreo de vehículos de infiltración de escuadrón(10CP)</Spanish>
-                <Chinesesimp>班组渗透载具空投(10CP)</Chinesesimp>
-                <Original>Squad Infil Vehicle Airdrop(10 CP)</Original>
-                <English>Squad Infil Vehicle Airdrop(10 CP)</English>
+                <German>Luftabwurf des Truppenteileinfiltrierungsfahrzeugs</German>
+                <Spanish>Lanzamiento aéreo de vehículos de infiltración de escuadrón</Spanish>
+                <Chinesesimp>班组渗透载具空投</Chinesesimp>
+                <Original>Squad Infil Vehicle Airdrop</Original>
+                <English>Squad Infil Vehicle Airdrop</English>
             </Key>
             <Key ID="STR_DUWS_T_sawp1234">
                 <German>Truppen-Sturmwaffen-Set (10 CP)</German>
@@ -4698,18 +4698,18 @@
                 <English>Squad Assault Weapon Pack (10 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_cwflheuj">
-                <German>Notfall Fahrzeugabwurf (5 CP)</German>
-                <Spanish>Entrega de vehículo de emergancia (5 CP)</Spanish>
-                <Chinesesimp>紧急载具空投(5CP)</Chinesesimp>
-                <Original>Emergency Vehicle drop (5 CP)</Original>
-                <English>Emergency Vehicle drop (5 CP)</English>
+                <German>Notfall Fahrzeugabwurf</German>
+                <Spanish>Entrega de vehículo de emergancia</Spanish>
+                <Chinesesimp>紧急载具空投</Chinesesimp>
+                <Original>Emergency Vehicle drop</Original>
+                <English>Emergency Vehicle drop</English>
             </Key>
             <Key ID="STR_DUWS_T_sawp4321">
-                <German>Truppen-Sturmwaffen-Set (10 CP)</German>
-                <Spanish>Pack de Armas de Asalto de Escuadrón (10 CP)</Spanish>
-                <Chinesesimp>班组突击武器包(10CP)</Chinesesimp>
-                <Original>Squad Assault Weapon Pack (10 CP)</Original>
-                <English>Squad Assault Weapon Pack (10 CP)</English>
+                <German>Truppen-Sturmwaffen-Set</German>
+                <Spanish>Pack de Armas de Asalto de Escuadrón</Spanish>
+                <Chinesesimp>班组突击武器包</Chinesesimp>
+                <Original>Squad Assault Weapon Pack</Original>
+                <English>Squad Assault Weapon Pack</English>
             </Key>
             <Key ID="STR_DUWS_T_h3uo0102">
                 <German>FOB errichten (10 CP)</German>
@@ -4733,11 +4733,11 @@
                 <English>UAV Recon (10 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_n17vw60y">
-                <German>Drohnen Aufklärung (5 CP)</German>
-                <Spanish>Reconocimiento VANT (5 CP)</Spanish>
-                <Chinesesimp>特种UAV(5CP)</Chinesesimp>
-                <Original>UAV Recon (5 CP)</Original>
-                <English>UAV Recon (5 CP)</English>
+                <German>Drohnen Aufklärung</German>
+                <Spanish>Reconocimiento VANT</Spanish>
+                <Chinesesimp>特种UAV</Chinesesimp>
+                <Original>UAV Recon</Original>
+                <English>UAV Recon</English>
             </Key>
             <Key ID="STR_DUWS_T_witoiij3">
                 <German>Helikopter-Transport (5CP) Funk</German>
@@ -4789,11 +4789,11 @@
                 <English>Artillery Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_q3roy1kl">
-                <German>Artillerieschlag (10 CP)</German>
-                <Spanish>Ataque de artillería (10 CP)</Spanish>
-                <Chinesesimp>155毫米炮支援(10CP)</Chinesesimp>
-                <Original>Artillery Strike (10 CP)</Original>
-                <English>Artillery Strike (10 CP)</English>
+                <German>Artillerieschlag</German>
+                <Spanish>Ataque de artillería</Spanish>
+                <Chinesesimp>155毫米炮支援</Chinesesimp>
+                <Original>Artillery Strike</Original>
+                <English>Artillery Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_xca5aaxu">
                 <German>Mörserschlag (10CP) Funk</German>
@@ -4803,11 +4803,11 @@
                 <English>Mortar Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_d0x7zj1h">
-                <German>Mörserschlag (5 CP)</German>
-                <Spanish>Ataque de morteros (5 CP)</Spanish>
-                <Chinesesimp>迫击炮支援(5CP)</Chinesesimp>
-                <Original>Mortar Strike (5 CP)</Original>
-                <English>Mortar Strike (5 CP)</English>
+                <German>Mörserschlag</German>
+                <Spanish>Ataque de morteros</Spanish>
+                <Chinesesimp>迫击炮支援</Chinesesimp>
+                <Original>Mortar Strike</Original>
+                <English>Mortar Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_mbhh2q2e">
                 <German>JDAM Luftschlag (10CP) Funk</German>
@@ -4817,11 +4817,11 @@
                 <English>JDAM strike (10 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_wcohwh4p">
-                <German>JDAM Luftschlag (3 CP)</German>
-                <Spanish>Ataque JDAM (3 CP)</Spanish>
-                <Chinesesimp>JDAM炸弹(3CP)</Chinesesimp>
-                <Original>JDAM strike (3 CP)</Original>
-                <English>JDAM strike (3 CP)</English>
+                <German>JDAM Luftschlag</German>
+                <Spanish>Ataque JDAM</Spanish>
+                <Chinesesimp>JDAM炸弹</Chinesesimp>
+                <Original>JDAM strike</Original>
+                <English>JDAM strike</English>
             </Key>
             <Key ID="STR_DUWS_T_xja6gemx">
                 <German>Lasergelenkte Bombe (10CP) Funk</German>
@@ -4831,11 +4831,11 @@
                 <English>Laser Guided Bomb (10 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_ifnnl0j7">
-                <German>Lasergelenkte Bombe (1 CP)</German>
-                <Spanish>Bomba Guiada por Láser (1 CP)</Spanish>
-                <Chinesesimp>激光制导炸弹(1CP)</Chinesesimp>
-                <Original>Laser Guided Bomb (1 CP)</Original>
-                <English>Laser Guided Bomb (1 CP)</English>
+                <German>Lasergelenkte Bombe</German>
+                <Spanish>Bomba Guiada por Láser</Spanish>
+                <Chinesesimp>激光制导炸弹</Chinesesimp>
+                <Original>Laser Guided Bomb</Original>
+                <English>Laser Guided Bomb</English>
             </Key>
             <Key ID="STR_DUWS_T_d5qzh6mj">
                 <German>Mk.20 Streubomben (25CP) Funk</German>
@@ -4845,11 +4845,11 @@
                 <English>Mk.20 Cluster Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_jznptb3c">
-                <German>Mk.20 Streubomben (20 CP)</German>
-                <Spanish>Ataque con Bomba de racimo (20 CP)</Spanish>
-                <Chinesesimp>Mk.20集束炸弹(20CP)</Chinesesimp>
-                <Original>Mk.20 Cluster Strike (20 CP)</Original>
-                <English>Mk.20 Cluster Strike (20 CP)</English>
+                <German>Mk.20 Streubomben</German>
+                <Spanish>Ataque con Bomba de racimo</Spanish>
+                <Chinesesimp>Mk.20集束炸弹</Chinesesimp>
+                <Original>Mk.20 Cluster Strike</Original>
+                <English>Mk.20 Cluster Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_owven8ki">
                 <German>Napalm Luftschlag (20CP) Funk</German>
@@ -4859,11 +4859,11 @@
                 <English>Napalm Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_bhmydfkv">
-                <German>Napalm Luftschlag (15 CP)</German>
-                <Spanish>Ataque con Napalm (15 CP)</Spanish>
-                <Chinesesimp>凝固汽油弹(15CP)</Chinesesimp>
-                <Original>Napalm Strike (15 CP)</Original>
-                <English>Napalm Strike (15 CP)</English>
+                <German>Napalm Luftschlag</German>
+                <Spanish>Ataque con Napalm</Spanish>
+                <Chinesesimp>凝固汽油弹</Chinesesimp>
+                <Original>Napalm Strike</Original>
+                <English>Napalm Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_t4jo046q">
                 <German>HC Angriffshelikopter (20CP) Funk</German>
@@ -4901,11 +4901,11 @@
                 <English>Airborne troops (20 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_nafdmcoy">
-                <German>Fallschirmspringer (12 CP)</German>
-                <Spanish>Paracaídistas (12 CP)</Spanish>
-                <Chinesesimp>空降部队(12CP)</Chinesesimp>
-                <Original>Airborne troops (12 CP)</Original>
-                <English>Airborne troops (12 CP)</English>
+                <German>Fallschirmspringer</German>
+                <Spanish>Paracaídistas</Spanish>
+                <Chinesesimp>空降部队</Chinesesimp>
+                <Original>Airborne troops</Original>
+                <English>Airborne troops</English>
             </Key>
             <Key ID="STR_DUWS_T_b7gmddq3">
                 <German>Baue Mobiles HQ (10CP) Funk</German>
