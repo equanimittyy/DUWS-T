@@ -15,21 +15,21 @@ WARCOM_blu_attack_wave_avalaible = false;
 [] spawn {
 
 		  
-    waitUntil {sleep 30; WARCOM_blufor_ap_earned>=10};
+    waitUntil {sleep 30; WARCOM_blufor_ap_earned>=50};
     WARCOM_blu_attack_wave_avalaible = true;
     WARCOM_blu_attack_wave_type = (blufor_RECON_TEAM_X select 0);
 
-    waitUntil {sleep 30; WARCOM_blufor_ap_earned>40};          
+    waitUntil {sleep 30; WARCOM_blufor_ap_earned>100};          
     WARCOM_blu_attack_wave_type = (blufor_INF_SQUAD_X select 0); 
           
 	switch (VERSION_X) do {
 	
 		case "MODERN": {
-			waitUntil {sleep 30; WARCOM_blufor_ap_earned>65};          
+			waitUntil {sleep 30; WARCOM_blufor_ap_earned>175};          
 			WARCOM_blu_attack_wave_type = (blufor_MOTOR_SECTION_X select 0); 
 
-			waitUntil {sleep 30; WARCOM_blufor_ap_earned>100};
-			while {WARCOM_blufor_ap_earned<136} do {
+			waitUntil {sleep 30; WARCOM_blufor_ap_earned>300};
+			while {WARCOM_blufor_ap_earned<500} do {
 				WARCOM_blu_attack_wave_type = selectRandom [
 					(blufor_MECH_SECTION_X select 0),
 					(blufor_MECH_SECTION_X select 0),

@@ -38,10 +38,11 @@ fnc_cp_adjust = {
 // one-way ratchet, because the earned counter only ever rises (fnc_ap_adjust credits it from the
 // recurring faucets and spending never touches it), so a wallet spent down cannot drop the tier.
 // Capability sites read the earned counter directly against their own thresholds; this integer is
-// the coarse summary of the same climb, for the readout and (later) the save. The eight starting-AP
-// presets are these rungs plus zero, so a preset lands one on each tier: 0 = tier 0 ... 200 = tier 7.
-// The top rung is 200 because BLUFOR air gates above 199, so tier 7 is what pre-unlocks it.
-DUWS_ap_tier_rungs = [10, 40, 65, 100, 136, 150, 200];
+// the coarse summary of the same climb, for the readout and (later) the save, and the shared scale
+// both sides' capability gates sit on. The rungs run an exponential curve (~x1.7 a step) so that,
+// against OPFOR's ~94 AP/hr from six zones, the unlocks pace out over hours rather than minutes:
+// tier 2 ~1 h, tier 4 ~3 h, the top ~15 h. The eight starting-tier presets are these rungs plus zero.
+DUWS_ap_tier_rungs = [50, 100, 175, 300, 500, 850, 1400];
 DUWS_fnc_ap_tier = {
 	params ["_earned"];
 	{ _earned >= _x } count DUWS_ap_tier_rungs

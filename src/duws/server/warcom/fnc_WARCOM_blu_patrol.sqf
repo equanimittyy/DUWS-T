@@ -7,16 +7,16 @@ WARCOM_blu_patrol_type = "";
 
 	WARCOM_blu_patrol_type = (blufor_RECON_TEAM_X select 0);
 
-	waitUntil {sleep 30; WARCOM_blufor_ap_earned>40};          
+	waitUntil {sleep 30; WARCOM_blufor_ap_earned>100};          
 	WARCOM_blu_patrol_type = (blufor_INF_SQUAD_X select 0); 
           
 	switch (VERSION_X) do {
 		case "MODERN": {
-			waitUntil {sleep 30; WARCOM_blufor_ap_earned>65};          
+			waitUntil {sleep 30; WARCOM_blufor_ap_earned>175};          
 			WARCOM_blu_patrol_type = (blufor_MOTOR_SECTION_X select 0); 
           
-			waitUntil {sleep 30; WARCOM_blufor_ap_earned>100};          
-			while {WARCOM_blufor_ap_earned<136} do {
+			waitUntil {sleep 30; WARCOM_blufor_ap_earned>300};          
+			while {WARCOM_blufor_ap_earned<500} do {
 				WARCOM_blu_patrol_type = selectRandom [
 					(blufor_MECH_SECTION_X select 0),
 					(blufor_MECH_SECTION_X select 0),
@@ -87,15 +87,15 @@ blufor_patrol_count = 0;
 				switch (VERSION_X) do {
 					case "MODERN": {
 						// spawn car
-						if (WARCOM_blufor_ap_earned>99) then {
+						if (WARCOM_blufor_ap_earned>300) then {
 							[BLUFOR_Faction_X,"car",_spawnLoc] spawn fnc_random_veh_blu_patrol;
 						};
 						// spawn armored
-						if (WARCOM_blufor_ap_earned>149) then {
+						if (WARCOM_blufor_ap_earned>850) then {
 							[BLUFOR_Faction_X,"armored",_spawnLoc] spawn fnc_random_veh_blu_patrol;
 						};
 						// spawn air	
-						if (WARCOM_blufor_ap_earned>199) then {
+						if (WARCOM_blufor_ap_earned>1400) then {
 							[BLUFOR_Faction_X,"air",_spawnLoc] spawn fnc_random_veh_blu_patrol;
 						};
 					};

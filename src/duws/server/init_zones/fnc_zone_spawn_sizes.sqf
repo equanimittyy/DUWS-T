@@ -212,13 +212,13 @@ DUWS_spawnVehicles = [
     ["transport",  "opfor_TRANS_TRUCK_X",   "",           0],
     ["ammo",       "opfor_AMMO_TRUCK_X",    "",           0],
     ["repair",     "opfor_REPAIR_TRUCK_X",  "",           0],
-    ["apc",        "opfor_APC1_X",          "",           40],
-    ["ifv",        "opfor_APC2_X",          "",           65],
-    ["aa",         "opfor_AA_APC_X",        "",           65],
-    ["tank",       "opfor_MBT_TANK1_X",     "HeavyArmor", 100],
-    ["attackheli", "opfor_ATTACK_HELI_X",   "AttackHeli", 136],
+    ["apc",        "opfor_APC1_X",          "",           100],
+    ["ifv",        "opfor_APC2_X",          "",           175],
+    ["aa",         "opfor_AA_APC_X",        "",           175],
+    ["tank",       "opfor_MBT_TANK1_X",     "HeavyArmor", 300],
+    ["attackheli", "opfor_ATTACK_HELI_X",   "AttackHeli", 500],
     ["transheli",  "opfor_TRANS_HELI_X",    "AttackHeli", 0],
-    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 150]
+    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 850]
 ];
 // --DUWS-UNITCOMP END--
 
