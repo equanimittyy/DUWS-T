@@ -105,7 +105,7 @@ Most of the tree already holds this, which is why the constraint is cheap:
 | Retake / consolation swing | `fnc_opfor_cap.sqf`, and the BLUFOR-capture consolation | `round (_points * zone_ap_swing)` |
 | First-capture bonus | `fnc_captured.sqf`, once ever per zone | authored CP + AP, whole |
 | Escalation-scaled price | `fnc_escalation_cost` | `ceil` |
-| Mission CP reward | `server/missions/fnc_mission_reward.sqf:14` | multiplier is 1-5, whole |
+| Mission CP + AP reward | `server/missions/fnc_mission_reward.sqf:14` | reward multiplier 1-5 scales both, whole |
 | Town income | `civ_town_ap` | CP 1-5 by town size (BLUFOR); AP its own rate (OPFOR) |
 | Zone AP trickle | econ tick, per held zone | `5` per zone, whole |
 | Campaign-size throttle | `DUWS_econ_throttle`, set at generation | fraction; each faucet rounds after scaling |
@@ -361,12 +361,15 @@ handful of zones, but the mission faucet is deliberately strong enough to climb 
 its own pace: at the small-map end a two-mission-an-hour runner now matches or beats the trickle, so
 missions are a real second route to the rungs, not only a top-up.
 
-**Mission AP is capped, not multiplied.** The 17 threads ship paying 0-45 AP each
-(`server/missions/mission_threads/*/fnc_*_mission.sqf`), so one hard mission out-paid an hour of
-territory. They are remapped into a 10-40 band ranked by difficulty, edited as the literal beside
-each thread's CP figure — there is no shared table to turn one knob against, and the ordering
-across mission types is the balance decision a scalar cannot express, since a multiplier preserves
-the 0 and 45 outliers the cap exists to remove.
+**The mission AP band is capped per thread, then scaled by the campaign reward multiplier.** The 17
+threads ship paying 0-45 AP each (`server/missions/mission_threads/*/fnc_*_mission.sqf`), so one hard
+mission out-paid an hour of territory. They are remapped into a 10-40 band ranked by difficulty,
+edited as the literal beside each thread's CP figure — there is no shared table to turn one knob
+against, and the ordering across mission types is the balance decision a flat scalar cannot express,
+since it would preserve the 0 and 45 outliers the cap exists to remove. On top of that fixed band the
+player's reward multiplier (`cp_reward_multiplier`, 1-5) scales the AP payout as it does the CP one,
+so a high-reward campaign climbs the tier ladder proportionally faster — a host setup choice, not a
+per-mission balance lever.
 
 **First capture pays a one-time bonus.** The first time BLUFOR ever takes a zone it pays a one-off
 CP + AP liberation bonus — the marquee reward for opening the map, and where BLUFOR's capture AP now

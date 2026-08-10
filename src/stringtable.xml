@@ -588,15 +588,15 @@
                 <German>CP Belohnungs-Multiplikator</German>
                 <Spanish>Multiplicador de recompensas de CP</Spanish>
                 <Chinesesimp>CP奖励倍数</Chinesesimp>
-                <Original>CP Reward Multiplier</Original>
-                <English>CP Reward Multiplier</English>
+                <Original>Reward Multiplier</Original>
+                <English>Reward Multiplier</English>
             </Key>
             <Key ID="STR_DUWS_T_4jqlply9">
                 <German>Setze den Multiplikator, der für die Ausschüttung der CP nach jeder Mission angewendet werden soll.</German>
                 <Spanish>Defina el multiplicador que se aplicará a la recompensa en CP de cada misión</Spanish>
                 <Chinesesimp>设置应用于每个任务的CP收入的乘数。</Chinesesimp>
-                <Original>Set the multiplier applied to the CP payout for each mission.</Original>
-                <English>Set the multiplier applied to the CP payout for each mission.</English>
+                <Original>Set the multiplier applied to the CP and AP payout for each mission.</Original>
+                <English>Set the multiplier applied to the CP and AP payout for each mission.</English>
             </Key>
             <Key ID="STR_DUWS_T_ngtt96xa">
                 <German>CP Strafe bei Tod</German>
