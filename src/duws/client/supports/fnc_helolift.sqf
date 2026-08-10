@@ -23,6 +23,10 @@ if !(_target isKindOf "Car" || _target isKindOf "Tank" || _target isKindOf "Heli
     ["helo_lift"] call fnc_support_comm_add;
 };
 
+// One-time use: a valid lift target is confirmed and the job is committed, so spend it. Deferred to
+// here so the no-target and bad-target exits above leave the item for the player to keep.
+["helo_lift"] call fnc_support_consume;
+
 _playerUID = getPlayerUID player;
 _varPrefix = format ["LiftTask_%1", _playerUID];
 

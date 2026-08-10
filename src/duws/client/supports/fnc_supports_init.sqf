@@ -128,27 +128,33 @@ fnc_support_comm_add = {
 
 // Called from the comm-menu expression itself (shared/includes/supports_radio_modern.hpp), which
 // is the only place the engine's own removal is observable.
-fnc_support_comm_used = {
+// Spends a one-use consumable: clears the flag -- which frees its slot and makes fnc_support_comm_add
+// refuse the re-add -- and drops its paid record, so it is gone until re-bought at an HQ or FOB.
+// Guarded on ownership so a stray call cannot drive support_count negative; CONS only, so the PERM
+// FOB is never consumed and stays reusable at its per-use price.
+fnc_support_consume = {
 	params [["_class", ""]];
+	private _def = ([] call fnc_support_defs) select { (_x select 5) == _class };
+	if (count _def == 0) exitWith {};
+	(_def select 0) params ["_key", "_kind", "", "_flagVar"];
+	if (_kind == "CONS" && {[_flagVar] call fnc_support_owned}) then {
+		missionNamespace setVariable [_flagVar, false];
+		support_count = (support_count - 1) max 0;
+		private _paid = missionNamespace getVariable ["DUWS_support_paid", createHashMap];
+		_paid deleteAt _key;
+		missionNamespace setVariable ["DUWS_support_paid", _paid];
+	};
+};
+
+fnc_support_comm_used = {
+	params [["_class", ""], ["_defer", false]];
 	private _held = missionNamespace getVariable ["DUWS_support_comm", createHashMap];
 	_held deleteAt _class;
 	missionNamespace setVariable ["DUWS_support_comm", _held];
-
-	// One-time use: using a consumable spends it. Clearing the flag frees its slot and makes
-	// fnc_support_comm_add refuse the mission-end re-add, so the item is gone until re-bought at an
-	// HQ or FOB. Guarded on ownership so a stray call cannot drive support_count negative, and CONS
-	// only -- the FOB is PERM and stays reusable at its per-use price.
-	private _def = ([] call fnc_support_defs) select { (_x select 5) == _class };
-	if (count _def > 0) then {
-		(_def select 0) params ["_key", "_kind", "", "_flagVar"];
-		if (_kind == "CONS" && {[_flagVar] call fnc_support_owned}) then {
-			missionNamespace setVariable [_flagVar, false];
-			support_count = (support_count - 1) max 0;
-			private _paid = missionNamespace getVariable ["DUWS_support_paid", createHashMap];
-			_paid deleteAt _key;
-			missionNamespace setVariable ["DUWS_support_paid", _paid];
-		};
-	};
+	// One-time use: an immediate support is spent the moment it is selected. A map-click support
+	// passes _defer -- it can still be aborted (map closed, no LZ) after selection, so it consumes
+	// itself at its own commit point instead, and an abort leaves the item to be handed back.
+	if (!_defer) then { [_class] call fnc_support_consume };
 };
 
 // Removing one item may or may not renumber the others: whether an item id is a stable handle or

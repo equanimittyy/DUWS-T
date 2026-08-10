@@ -24,15 +24,15 @@ _message = localize "STR_DUWS_T_artycall";
 	
 if (isNil "arty_Blufor_close") exitWith {arty_Blufor_close = false};
 
-// Charged here, ahead of every side effect, rather than after the target markers are
-// drawn: the balance was last read in fnc_mapclickarty before a map-click window of up to
-// 45 s, so this is the first point the answer can be trusted. arty_Blufor_close stays
-// true on refusal, which routes the caller down its ordinary post-strike path and gives
-// the comm-menu item back after the cooldown.
-if !(["CP", _cost] call fnc_pool_spend) exitWith {
-	[_supportype] remoteExec ["fnc_support_release", 2];
-	["info",[localize "STR_DUWS_T_e95mc4lv",format[localize "STR_DUWS_T_p6sb3ply",_cost]]] call bis_fnc_showNotification;
+// One-time use: the strike is committed here -- blufor confirmed in range, target picked -- so the
+// item is spent at this point rather than at selection. A map-click the player backs out of in the
+// 45 s window never reaches here, leaving the flag set for fnc_mapclickarty to hand the item back.
+// Paid at purchase, so no per-fire charge.
+private _consumeClass = switch (_supportype) do {
+	case 1: {"artillery"}; case 2: {"mortar"}; case 3: {"jdam"};
+	case 4: {"laser"}; case 5: {"cluster"}; case 6: {"napalm"}; default {""};
 };
+if (_consumeClass isNotEqualTo "") then { [_consumeClass] call fnc_support_consume };
 
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 

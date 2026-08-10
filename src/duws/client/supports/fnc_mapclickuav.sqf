@@ -50,5 +50,10 @@ while {_timer>0 AND !clicked} do {
 // TIMER ELLAPSED OR CLICKED
 ["UAV"] call fnc_mapclick_release;
 openMap false;
-sleep 80;
-["uav_recon"] call fnc_support_comm_add;
+// One-time use: a dispatched UAV is spent; a backed-out click (map closed, timer out) leaves the
+// flag set and hands the item back instead.
+if (clicked) then {
+	["uav_recon"] call fnc_support_consume;
+} else {
+	["uav_recon"] call fnc_support_comm_add;
+};

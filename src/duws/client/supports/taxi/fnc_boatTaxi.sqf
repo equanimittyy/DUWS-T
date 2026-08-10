@@ -15,6 +15,10 @@ _foundPickupPos = [_posplayer, 0,_radius,10,2,5,0,[],[[0,0],[0,0]]] call BIS_fnc
 // try to find a pos, if no pos is found exit the script
 if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_boattaxi_noshore"; sleep 10; ["boat_taxi"] call fnc_support_comm_add;};
 
+// One-time use: a shore was found and the taxi is committed, so spend it. Deferred to here so the
+// no-shore exit above leaves the item for the player to keep.
+["boat_taxi"] call fnc_support_consume;
+
 // A POS NEAR THE PLAYER HAS BEEN FOUND, GUNBOAT EN ROUTE
 
 // create marker on LZ

@@ -16,6 +16,10 @@ _foundPickupPos = [_posplayer, 20,_radius,20,0,0.5,0,[],[[0,0],[0,0]]] call BIS_
 // try to find a pos, if no pos is found exit the script
 if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_nolz"; sleep 10; ["helo_taxi"] call fnc_support_comm_add;};
 
+// One-time use: an LZ was found and the taxi is committed, so spend it. Deferred to here so the
+// no-LZ exit above leaves the item for the player to keep.
+["helo_taxi"] call fnc_support_consume;
+
 // A POS NEAR THE PLAYER HAS BEEN FOUND, CHOPPA EN ROUTE
 _speakeracteam = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_helotaxicall0"] call fnc_cs);

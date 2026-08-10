@@ -9,7 +9,7 @@ class CfgCommunicationMenu
         text = "$STR_DUWS_T_q3roy1kl"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
 		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
-        expression = "['artillery'] call fnc_support_comm_used; [6, 100, 8, 3, 1, 0, 'Sh_155mm_AMOS'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase, not per fire
+        expression = "['artillery', true] call fnc_support_comm_used; [6, 100, 8, 3, 1, 0, 'Sh_155mm_AMOS'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase, not per fire
         icon = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\artillery_ca.paa"; // Icon displayed permanently next to the command menu
         cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -20,7 +20,7 @@ class CfgCommunicationMenu
         text = "$STR_DUWS_T_d0x7zj1h"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
 		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
-        expression = "['mortar'] call fnc_support_comm_used; [8, 50, 5, 3, 2, 0, 'Sh_82mm_AMOS'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase
+        expression = "['mortar', true] call fnc_support_comm_used; [8, 50, 5, 3, 2, 0, 'Sh_82mm_AMOS'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase
         icon = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\mortar_ca.paa";
         cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -31,7 +31,7 @@ class CfgCommunicationMenu
         text = "$STR_DUWS_T_wcohwh4p"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
 		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
-        expression = "['jdam'] call fnc_support_comm_used; [1, 2, 1, 1, 3, 0, 'Bo_Mk82'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase
+        expression = "['jdam', true] call fnc_support_comm_used; [1, 2, 1, 1, 3, 0, 'Bo_Mk82'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase
         icon = "\a3\ui_f\data\gui\cfg\CommunicationMenu\cas_ca.paa";
         cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -42,7 +42,7 @@ class CfgCommunicationMenu
         text = "$STR_DUWS_T_ifnnl0j7"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
 		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
-        expression = "['laser'] call fnc_support_comm_used; [1, 50, 1, 1, 4, 0, 'Laser'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase
+        expression = "['laser', true] call fnc_support_comm_used; [1, 50, 1, 1, 4, 0, 'Laser'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase
         icon = "\a3\ui_f\data\gui\cfg\hints\Head_ca.paa";
         cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -53,7 +53,7 @@ class CfgCommunicationMenu
         text = "$STR_DUWS_T_jznptb3c"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
 		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
-        expression = "['cluster'] call fnc_support_comm_used; [1, 175, 1, 90, 5, 0, 'Cluster'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase
+        expression = "['cluster', true] call fnc_support_comm_used; [1, 175, 1, 90, 5, 0, 'Cluster'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase
         icon = "\a3\ui_f\data\gui\cfg\hints\Death_ca.paa";
         cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -64,7 +64,7 @@ class CfgCommunicationMenu
         text = "$STR_DUWS_T_bhmydfkv"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
 		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
-        expression = "['napalm'] call fnc_support_comm_used; [1, 50, 1, 8, 6, 0, 'Napalm'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase
+        expression = "['napalm', true] call fnc_support_comm_used; [1, 50, 1, 8, 6, 0, 'Napalm'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase
         icon = "\a3\ui_f\data\gui\cfg\hints\Death_ca.paa";
         cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -134,7 +134,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_n17vw60y"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "['uav_recon'] call fnc_support_comm_used; [0] spawn fnc_mapclickuav"; // cost 0: one-time use, paid at purchase
+        expression = "['uav_recon', true] call fnc_support_comm_used; [0] spawn fnc_mapclickuav"; // cost 0: one-time use, paid at purchase
         icon = "\a3\ui_f\data\gui\cfg\hints\Radar_ca.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -154,7 +154,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_1ptvv5b1"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "['helo_taxi'] call fnc_support_comm_used; [getpos player,100, 0] spawn fnc_helotaxi"; 
+        expression = "['helo_taxi', true] call fnc_support_comm_used; [getpos player,100, 0] spawn fnc_helotaxi"; 
         icon = "\A3\ui_f\data\Map\VehicleIcons\iconHelicopter_ca.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -164,7 +164,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_helolift"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "['helo_lift'] call fnc_support_comm_used; [getpos player,100, 0] spawn fnc_helolift"; 
+        expression = "['helo_lift', true] call fnc_support_comm_used; [getpos player,100, 0] spawn fnc_helolift"; 
         icon = "\A3\ui_f\data\Map\VehicleIcons\iconHelicopter_ca.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
@@ -174,7 +174,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_evqwlyhz"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "['boat_taxi'] call fnc_support_comm_used; [getpos player,10, 0] spawn fnc_boattaxi"; 
+        expression = "['boat_taxi', true] call fnc_support_comm_used; [getpos player,10, 0] spawn fnc_boattaxi"; 
         icon = "\A3\ui_f\data\Map\VehicleIcons\iconShip_ca.paa";
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
