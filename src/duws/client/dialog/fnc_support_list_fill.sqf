@@ -13,8 +13,8 @@
 // the two drift apart again.
 //
 // Colour carries state, not category: green is owned, orange is a permanent nobody has bought yet,
-// grey is withheld by insurgent mode. Category is carried by the two headings and the order under
-// them, so a bought permanent turning green loses nothing.
+// grey is withheld by insurgent mode or by the AP tier. Category is carried by the two headings and
+// the order under them, so a bought permanent turning green loses nothing.
 params [["_keepSel", 1]];
 
 lbClear 2103;
@@ -34,6 +34,13 @@ private _rows = [];   // listbox index -> its def, [] for a heading
     private _headRow = lbAdd [2103, _heading];
     lbSetColor [2103, _headRow, [0.5, 0.5, 0.5, 1]];
     _rows pushBack [];
+
+    // Tier-locked rows drop to the bottom of the section, the curated order kept within the open and
+    // the locked halves. A support below BLUFOR's earned tier is greyed and tier-tagged rather than
+    // dropped, so the player reads what the ladder still owes them.
+    private _sectionDefs = _defs select { (_x select 1) == _kind };
+    private _openDefs = _sectionDefs select { ["BLU", [_x select 0] call fnc_support_tier] call DUWS_fnc_ap_unlocked };
+    private _lockedDefs = _sectionDefs select { !(["BLU", [_x select 0] call fnc_support_tier] call DUWS_fnc_ap_unlocked) };
 
     {
         _x params ["_key", "_defKind", "_cost", "_flagVar", "_labelKey", "_commItem",
@@ -56,14 +63,22 @@ private _rows = [];   // listbox index -> its def, [] for a heading
         if (_apCost > 0) then {
             _label = format [localize "STR_DUWS_T_support_ap_suffix", _label, _apCost];
         };
+        // The tier tag, appended after the price. A locked row is greyed below, whatever state colour
+        // it would otherwise have carried.
+        private _tier = [_key] call fnc_support_tier;
+        private _tierLocked = !(["BLU", _tier] call DUWS_fnc_ap_unlocked);
+        if (_tierLocked) then {
+            _label = _label + " " + format [localize "STR_DUWS_T_tier_tag", _tier];
+        };
         private _row = lbAdd [2103, _label];
         private _colour = [1, 1, 1, 1];
         if (_defKind == "PERM") then { _colour = [1, 0.502, 0, 1] };
         if (missionNamespace getVariable [_flagVar, false]) then { _colour = [0, 1, 0, 1] };
         if (_insBlocked && _insurgent) then { _colour = [0.5, 0.5, 0.5, 1] };
+        if (_tierLocked) then { _colour = [0.5, 0.5, 0.5, 1] };
         lbSetColor [2103, _row, _colour];
         _rows pushBack _x;
-    } forEach (_defs select { (_x select 1) == _kind });
+    } forEach (_openDefs + _lockedDefs);
 } forEach ["PERM", "CONS"];
 
 uiNamespace setVariable ["DUWS_support_rows", _rows];

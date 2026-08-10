@@ -81,6 +81,20 @@ fnc_support_defs = {
 	}
 };
 
+// The AP tier each advanced support sits behind, keyed by support key; anything unlisted is tier 1
+// and always available. Mirrors the vehicle rungs -- transport lift and indirect fire at tier 3, the
+// gunship and heavy fire at tier 4, the CAS jet and HALO insertion at tier 5.
+DUWS_support_tiers = [
+	["mortar", 3], ["jdam", 3], ["laser", 3], ["siva", 3], ["sawp", 3], ["paradrop", 3], ["helolift", 3],
+	["arty", 4], ["cluster", 4], ["napalm", 4], ["hcAttChop", 4],
+	["hcCAS", 5], ["halo", 5]
+];
+fnc_support_tier = {
+	params ["_key"];
+	private _i = DUWS_support_tiers findIf { (_x select 0) == _key };
+	if (_i < 0) then { 1 } else { (DUWS_support_tiers select _i) select 1 }
+};
+
 fnc_support_owned = {
 	params [["_flagVar", ""]];
 	missionNamespace getVariable [_flagVar, false]
@@ -148,6 +162,13 @@ fnc_support_buy = {
 	if (_def isEqualTo []) exitWith { false };
 	_def params ["_key", "_kind", "_cost", "_flagVar", "_labelKey", "_commItem", "_insBlocked"];
 	private _apCost = _def param [8, 0];
+
+	// Tier gate: a support below BLUFOR's earned tier is refused before any charge, the same lock the
+	// greyed row in the list advertises.
+	private _tier = [_key] call fnc_support_tier;
+	if !(["BLU", _tier] call DUWS_fnc_ap_unlocked) exitWith {
+		hint format [localize "STR_DUWS_T_tier_locked_hint", _tier]; false
+	};
 
 	private _insurgent = !isNil "insurgent_mode_enable" && {insurgent_mode_enable};
 	if (_insBlocked && _insurgent) exitWith { hint localize "STR_DUWS_T_inssupport"; false };
