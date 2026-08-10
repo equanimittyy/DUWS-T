@@ -9,7 +9,7 @@
 DUWS_fnc_ap_unlocked = {
     params ["_side", "_tier"];
     if (_tier <= 1) exitWith { true };
-    private _rungs = missionNamespace getVariable ["DUWS_ap_tier_rungs", [100, 175, 300, 500]];
+    private _rungs = missionNamespace getVariable ["DUWS_ap_tier_rungs", [100, 300, 550, 900]];
     private _need = _rungs param [_tier - 2, 1e9];
     private _earnedVar = ["WARCOM_opfor_ap_earned", "WARCOM_blufor_ap_earned"] select (_side == "BLU");
     (missionNamespace getVariable [_earnedVar, 0]) >= _need

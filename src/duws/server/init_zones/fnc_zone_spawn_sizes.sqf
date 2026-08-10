@@ -214,13 +214,13 @@ DUWS_spawnVehicles = [
     ["transport",  "opfor_TRANS_TRUCK_X",   "",           0],
     ["ammo",       "opfor_AMMO_TRUCK_X",    "",           0],
     ["repair",     "opfor_REPAIR_TRUCK_X",  "",           0],
-    ["apc",        "opfor_APC1_X",          "",           175],
-    ["ifv",        "opfor_APC2_X",          "",           175],
-    ["aa",         "opfor_AA_APC_X",        "",           175],
-    ["tank",       "opfor_MBT_TANK1_X",     "HeavyArmor", 300],
-    ["attackheli", "opfor_ATTACK_HELI_X",   "AttackHeli", 300],
-    ["transheli",  "opfor_TRANS_HELI_X",    "AttackHeli", 175],
-    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 500]
+    ["apc",        "opfor_APC1_X",          "",           300],
+    ["ifv",        "opfor_APC2_X",          "",           300],
+    ["aa",         "opfor_AA_APC_X",        "",           300],
+    ["tank",       "opfor_MBT_TANK1_X",     "HeavyArmor", 550],
+    ["attackheli", "opfor_ATTACK_HELI_X",   "AttackHeli", 550],
+    ["transheli",  "opfor_TRANS_HELI_X",    "AttackHeli", 300],
+    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 900]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -233,12 +233,12 @@ DUWS_spawnVehicles = [
 // TRANS_HELI_X is the taxi the support functions fly and is left to them.
 DUWS_spawnVehiclesBlu = [
     ["car",        "blufor_ARMED_CAR1_X",     "", 100],
-    ["apc",        "blufor_APC1_X",           "", 175],
-    ["ifv",        "blufor_APC2_X",           "", 175],
-    ["tank",       "blufor_MBT_TANK1_X",      "", 300],
-    ["transheli",  "blufor_HELI_TRANS_ARM_X", "", 175],
-    ["attackheli", "blufor_ATTACK_HELI_X",    "", 300],
-    ["plane",      "blufor_MISC_AIR_X",       "", 500]
+    ["apc",        "blufor_APC1_X",           "", 300],
+    ["ifv",        "blufor_APC2_X",           "", 300],
+    ["tank",       "blufor_MBT_TANK1_X",      "", 550],
+    ["transheli",  "blufor_HELI_TRANS_ARM_X", "", 300],
+    ["attackheli", "blufor_ATTACK_HELI_X",    "", 550],
+    ["plane",      "blufor_MISC_AIR_X",       "", 900]
 ];
 
 DUWS_fnc_vehicleRow = {

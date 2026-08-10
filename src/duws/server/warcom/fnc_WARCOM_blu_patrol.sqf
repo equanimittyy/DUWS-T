@@ -13,8 +13,8 @@ WARCOM_blu_patrol_type = "";
 			waitUntil {sleep 30; WARCOM_blufor_ap_earned>100};   // tier 2: motorised
 			WARCOM_blu_patrol_type = (blufor_MOTOR_SECTION_X select 0);
 
-			waitUntil {sleep 30; WARCOM_blufor_ap_earned>175};   // tier 3: mechanised
-			while {WARCOM_blufor_ap_earned<300} do {
+			waitUntil {sleep 30; WARCOM_blufor_ap_earned>300};   // tier 3: mechanised
+			while {WARCOM_blufor_ap_earned<550} do {
 				WARCOM_blu_patrol_type = selectRandom [
 					(blufor_MECH_SECTION_X select 0),
 					(blufor_MECH_SECTION_X select 0),
@@ -89,11 +89,11 @@ blufor_patrol_count = 0;
 						[BLUFOR_Faction_X,"car",_spawnLoc] spawn fnc_random_veh_blu_patrol;
 					};
 					// spawn armored -- tier 3 (mechanised)
-					if (WARCOM_blufor_ap_earned>175) then {
+					if (WARCOM_blufor_ap_earned>300) then {
 						[BLUFOR_Faction_X,"armored",_spawnLoc] spawn fnc_random_veh_blu_patrol;
 					};
 					// spawn air -- tier 3 (transport heli); attack heli joins at tier 4, jet at tier 5
-					if (WARCOM_blufor_ap_earned>175) then {
+					if (WARCOM_blufor_ap_earned>300) then {
 						[BLUFOR_Faction_X,"air",_spawnLoc] spawn fnc_random_veh_blu_patrol;
 					};
 				};

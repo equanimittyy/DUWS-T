@@ -76,8 +76,8 @@ Add `DUWS_spawnVehiclesBlu`, a mirror of the OPFOR `DUWS_spawnVehicles` table
 `"OPF"`, so every existing OPFOR caller is unchanged; the side selects table and earned
 variable. Route `fnc_random_veh_blu_patrol` through `tokenClass "BLU"`: the air pick
 becomes a weighted random over the {transheli, attackheli, plane} tokens that resolve
-non-`""` at the current BLUFOR earned count, and the patrol air trigger drops from
-`>300` to `>175` so the transport heli appears at its own rung.
+non-`""` at the current BLUFOR earned count, and the patrol air trigger drops to the
+transport-heli rung so it appears at tier 3.
 
 ## Slice 2 — BLUFOR garrison verification
 
