@@ -34,11 +34,15 @@ private _placeGuard = {
     _unit setUnitPos "UP";
     _unit disableAI "PATH";
     _unit setDir _dir;
-    [_unit, _anim, "FULL"] call BIS_fnc_ambientAnimCombat;
-    [_unit, _wake] spawn {
-        params ["_u", "_wake"];
+    [_unit, _anim, _wake] spawn {
+        params ["_u", "_anim", "_wake"];
         sleep _wake;
-        if (!isNull _u && alive _u) then { _u enableSimulationGlobal true; };
+        if (isNull _u || {!alive _u}) exitWith {};
+        _u enableSimulationGlobal true;
+        // Anim applied after the thaw, not before it: a frozen unit does not reliably take an
+        // ambient animation, so one guard in a batch keeps the default stance while the rest
+        // pose. Same post-thaw ordering the officer pose uses.
+        [_u, _anim, "FULL"] call BIS_fnc_ambientAnimCombat;
     };
     _grp
 };
@@ -122,7 +126,7 @@ private _hqGuardsGroups = [];
 {
     _x params ["_xyModel", "_hOffset", "_dir", "_anim"];
     private _worldPos = [_hqObj, _xyModel, _hOffset] call _anchoredPos;
-    _hqGuardsGroups pushBack ([_worldPos, selectRandom _guardTypes, _dir, _anim, 0.5] call _placeGuard);
+    _hqGuardsGroups pushBack ([_worldPos, selectRandom _guardTypes, (getDir _hqObj) + _dir, _anim, 0.5] call _placeGuard);
 } forEach _hqGuardsData;
 missionNamespace setVariable ["HQ_redeploy_hqGuardsGroup0", _hqGuardsGroups select 0, true];
 missionNamespace setVariable ["HQ_redeploy_hqGuardsGroup1", _hqGuardsGroups select 1, true];

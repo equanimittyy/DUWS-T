@@ -311,10 +311,12 @@ missionNamespace setVariable ["HQ_redeploy_guardTypes", _baseGuardTypes, true];
 
 missionNamespace setVariable ["HQ_redeploy_towers", _allTowersList, true];
 
-// Door pair: model XY, height offset, facing, anim
+// Door pair: model XY, height offset, facing offset from the HQ building heading, anim.
+// The facing is relative to the building, not absolute: re-exporting the composition rotates the
+// whole frame, and an absolute facing stays behind and ends up turning the pair inward.
 missionNamespace setVariable ["HQ_redeploy_hqGuardsData", [
-    [[-5.49573, -0.923828], -4.10893, 180, "STAND"],
-    [[-4.84598, -3.90649], -4.03631, 180, "STAND_IA"]
+    [[-5.49573, -0.923828], -4.10893, -90, "STAND"],
+    [[-4.84598, -3.90649], -4.03631, -90, "STAND_IA"]
 ], true];
 missionNamespace setVariable ["HQ_redeploy_medGuardsData", [
     [[1.49021, -5.54492], -1.37312, "STAND_IA"],
@@ -349,7 +351,7 @@ _officer allowDamage true;
 // simulating a unit hard-placed at an absolute Z and renders it falling.
 _officer enableSimulationGlobal false;
 _officer setPosWorld _worldPos;
-_officer setDir 180;  // faces outward
+_officer setDir ((getDir _hqObj) - 90);  // outward, relative to the building so a re-exported frame carries it
 _officer setBehaviour "CARELESS";
 _officer setCombatMode "BLUE";
 _officer disableAI "TARGET"; _officer disableAI "AUTOTARGET";
