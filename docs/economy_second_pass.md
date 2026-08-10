@@ -596,192 +596,13 @@ The cost figure stays `fnc_evalVehicleCost`, which already reads armour, threat 
 multipliers from config. What changes is which pool it draws from and what the AP component
 alongside it is.
 
-## OPCOM: the opposing commander
+## What OPFOR Army Power buys
 
-One actor, one pool, one archetype. The director in this document, the director that builds
-hardpoints ([`info/opfor_area_of_influence.md`](info/opfor_area_of_influence.md#band-siting), with
-its escalation ladder in [`opcom_plan.md`](opcom_plan.md#what-the-commander-builds))
-and the commander that makes low-reputation towns fight back are the same thing under different
-names, and they share `WARCOM_opfor_ap`. How that one actor decides — what it wakes on, what it is
-allowed to know, and how it ranks targets — is
-[`opcom_plan.md`](opcom_plan.md); this section is its shopping list.
-
-Director spends call `fnc_ap_adjust` directly, as `["OPF", -_cost, _reason] call fnc_ap_adjust`.
-There is no second writer to race — the director is server-side and single — so the purchase
-handshake would only add a frame boundary between its test and its debit.
-
-### What the commander spends on
-
-| Sink | Effect | Throttled by | Saturates? |
-|---|---|---|---|
-| Town garrison upgrade | Raises the purchased tier of one town | Tier ceiling of IV times the towns in the OPFOR band | Yes |
-| Tasking order | Gives a newly spawned squad a job | The rate squads spawn at | No |
-| Hardpoint construction | Builds an emplacement | One build attempt every 20-30 min | No, but capped at one purchase per tick |
-
-**Town events are not a sink.** IEDs, ambushes and sabotage out of a low-reputation town fire on
-their own, rolled against the town's reputation, and cost the commander nothing
-([`opcom_plan.md`](opcom_plan.md)). Reputation is already the input that
-decides whether a town garrisons and what it pays, so making the same towns also *charge* for
-acting on it would price a thing the player has already paid for by letting the town fall. Stated
-here because the shape invites the opposite: a free enemy behaviour sitting next to three
-purchased ones reads like an omission until the reason is written down.
-
-The consequence is a deliberate double dividend on a turned town — it pays the enemy AP and acts
-against the player for free — and that is what makes dragging a town back out of the OPFOR band
-the player's sharpest move.
-
-**Every remaining sink is rate-limited, and none of them absorbs a surplus.** Garrisons saturate
-outright at tier IV across the towns in the band; the other two are throttled by a build tick and
-by how fast squads spawn, so neither can be bought faster than its clock allows however rich the
-commander is. A commander that out-earns all three banks the difference.
-
-Under split counters that costs the campaign nothing directly — the ladder rides income, so
-banking neither accelerates nor stalls escalation. What it costs is felt: an enemy sitting on an
-unspent wallet is one that has quietly stopped pressuring anybody. What the commander should do
-with a surplus is unsettled, and it is in [§Open questions](#open-questions) rather than answered
-here.
-
-A tasking order is bought for a squad the director is spawning anyway, so the price buys *intent*,
-not units:
-
-| Tasking | Job |
-|---|---|
-| QRF | Respond to contact, under a commander that decides whether to spend the reserve rather than a handler that always does |
-| Supply | Move between held towns and zones, restoring garrison strength en route |
-| Rapport | Occupy a town and drag its reputation toward OPFOR |
-| Intel patrol | Sweep for BLUFOR and report what it finds, feeding target selection |
-
-The intel patrol is deliberately the weak one — a cheap tasking that buys knowledge rather than
-force, and unlike the other three it goes looking for the player instead of circulating around
-what the enemy already holds. `reveal` against EAST is the mechanism.
-
-**Rapport owns dragging a town toward OPFOR; the town-event sink does not.** Both act on a town in
-the OPFOR band and the division has to be stated or they will drift into each other: rapport moves
-reputation, events spend the reputation a town already has. Today a town only moves toward OPFOR
-through the player's own mistakes, and rapport is what makes the town economy two-sided.
-
-### The commander has an archetype
-
-One archetype is rolled per campaign and decides how the director splits its income across the
-sinks above. Two campaigns on the same map with the same settings should not produce the same war.
-
-| Archetype | Spends toward |
-|---|---|
-| Defensive | Town garrisons and hardpoints; fortifies what it holds and cedes initiative |
-| Balanced | No strong lean — the baseline the others are tuned against |
-| Aggressive | Taskings, especially QRF and rapport; projects force and leaves its ground thin |
-
-A single authored list rather than a second independent roll on top: each archetype can then be
-tuned and named as a whole, where a second roll multiplies out combinations nobody has balanced.
-Further leans worth having — indirect fire, armour — become entries in this list.
-
-Three properties keep it from becoming a problem:
-
-- **Weights, not switches.** An archetype biases the roll; it never removes a sink. A Defensive
-  commander that could not order QRF would hand the player a permanent read on the campaign and
-  delete a mechanic from it. `selectRandomWeighted` is the mission's idiom for exactly this.
-- **It cannot override the ladder.** An Aggressive commander with no armour tier reached still
-  fields no armour. Archetype decides what the enemy buys, never what it may buy, so the tier
-  gates stay the one honest signal of how dangerous the enemy is.
-- **It is not difficulty.** `opfor_ai_skill` already sets how well the enemy shoots. A Defensive
-  commander is not an easier one — it is a slower, more fortified campaign.
-
-Rolled once at WARCOM init and never re-rolled, so it is campaign state and belongs in the
-persistence snapshot alongside the tiers.
-
-Because each sink is throttled differently, no archetype reliably outspends another, and each has
-its own way of running out of things to buy — a Defensive commander whose towns are all at IV is
-left with the build tick alone, an Aggressive one facing a quiet player has no squads to task.
-Whichever runs dry first banks the surplus, which is the same open question by another route:
-archetype decides *where* the money goes, not whether there is anywhere for it to go.
-
-### Town garrisons: I through IV
-
-Towns gain purchasable garrisons on both sides. A zone garrison is the benchmark the ladder climbs
-toward: every zone tier fields fortified groups with a squad leader each, occupied buildings, and
-whatever guard towers stand nearby. **Zones carry a tier of their own, rolled at
-generation** — see [`info/zones_and_civilians.md`](info/zones_and_civilians.md#zone-tiers). A tier
-names the whole composition and nothing scales it afterwards. Towns and zones draw from one token
-vocabulary but keep separate composition sets, so tuning what a town fields cannot silently retune
-what a zone does.
-
-**Both sinks reach both kinds of ground.** The commander upgrades and reinforces zones exactly as it
-does towns; the town is simply where the hooks were written first. A retaken zone is floored to `0.3`
-precisely so there is something to buy back — the floor is the bill, not a permanent brand
-([`info/zones_and_civilians.md`](info/zones_and_civilians.md#zone-tiers)).
-
-Extending it needs no new machinery: a zone's tier is already stored per zone, the composition table
-is already indexed by it, and `fnc_zone_strength_set` already names the zone's key to the same store
-`fnc_town_garrison_reinforce` steps. What is missing is the pair of wrappers — one applying the
-reinforcement step to a zone key, one writing a tier with a clamp.
-
-Two things to settle when it lands:
-
-- **Whether a zone costs a town's price or more.** A zone garrison is the benchmark the town ladder
-  climbs toward, so charging the same for both would make a zone the better buy at every tier.
-- **Whether zone tiers are capped by the roll.** A zone rolled at I could be bought to IV, which makes
-  the generation weighting a starting position rather than a character; capping at the rolled tier
-  keeps it a character but leaves a soft zone permanently soft. That is a play question.
-
-**No purchase refusal is needed on the zone side.** A town's `REGROUPING` hold blocks both sinks
-because OPFOR can hold a town whose garrison the player has just destroyed. A zone has no such state —
-a beaten zone garrison means the zone changed hands, and ground the player owns is not spendable on.
-
-The OPFOR side of the ladder is built: tiers 0 to IV live in `DUWS_townSpawnTiers` and the per-town
-tier in `DUWS_townGarrisonTier`, written through `fnc_town_garrison_setTier`. Full contract in
-[`info/zones_and_civilians.md`](info/zones_and_civilians.md#garrison-tiers-0-to-iv).
-
-- **Reputation decides *whether* a town garrisons; AP decides *how hard*.** Crossing `-10` writes
-  tier I and nothing deeper writes more.
-- **Clearing a town destroys the purchase, not the ownership.** The tier falls to I rather than to
-  0, and there is no refund: with one, a player clearing towns would hand the enemy its AP back and
-  the enemy would never climb. The director must spend again to restore it — and cannot, for the
-  three hours the town spends regrouping
-  ([`info/zones_and_civilians.md`](info/zones_and_civilians.md#what-clearing-a-garrison-actually-buys)).
-- **A cleared town is permanently cheaper to hold and permanently weaker.** Its garrison is pinned
-  to the `0.3` floor for the rest of the campaign, so AP spent on a town the player keeps clearing
-  buys progressively less. Whether that makes such towns a trap for the director to avoid, or a sink
-  it should abandon, is a tuning question for when the appraisal exists.
-- **Tier IV is more units, not fortifications.** Static emplacements are what make a zone an
-  objective and a town must not compete with one, so IV reaches the zone benchmark by occupying
-  buildings.
-
-| Tier | Adds | Reached by | Starting price |
-|---|---|---|---|
-| I | Patrol plus one team | reputation `<= -10` | — |
-| II | Second team, light vehicle | purchase | 25 |
-| III | Armour | purchase | 40 |
-| IV | Building-occupying units, on the zone pattern | purchase | 60 |
-
-Tier I is unpriced because nothing buys it: it is what the band grants. A commander that wants a
-town garrisoned turns the town instead, through rapport.
-
-### BLUFOR garrisons accumulate; they are not inherited
-
-BLUFOR garrisons are new ground: the BLUFOR band (`>= 10`) has no garrison today, so a player
-buying tier I at a town they hold is creating something that has never existed rather than
-upgrading something that has. It is the player's answer to the enemy taking towns back.
-
-**Taking ground hands the player nothing.** A captured zone or town carries no tier and no strength —
-there is no inherited garrison and no destroyed state to inherit. What OPFOR left behind is OPFOR's:
-their attrition figure is floored at `0.3` and re-read only when they retake the ground
-([`info/zones_and_civilians.md`](info/zones_and_civilians.md#blufor-inherits-nothing)).
-
-**So the ladder runs the other way on this side.** Buying tier I creates a garrison at **zero
-strength**, and each reinforcement adds **30 %** — four to reach full from nothing, three from the
-`0.3` floor an OPFOR town is knocked to. A tenth-multiple because both strength stores quantise to
-tenths, so a finer step would be rounded up on the way in and the table would promise a figure the
-store cannot hold. An OPFOR garrison decays from a tier it was given; a BLUFOR one accumulates from
-nothing.
-
-Two consequences worth settling before this is built:
-
-- **Reinforcement is a second sink, not a second purchase.** The tier says what the garrison *would*
-  field and the strength says how much of it stands, so a player who buys tier III and stops has
-  bought an empty establishment. Whether the two draw on the same pool at the same rate is open.
-- **Nothing here needs the OPFOR holds.** `Mobilising` and `Regrouping` exist because OPFOR arrive on
-  ground they already own; a BLUFOR garrison never arrives, so there is nothing to defer and no state
-  to show. The presence latch is still wanted, since a BLUFOR town garrison will stream.
+OPFOR Army Power is spent by one server-side actor — the commander. Its sinks (town and zone
+garrisons, taskings, hardpoint construction), the archetype that weights how it splits income
+across them, and the two-sided garrison ladders are designed in
+[`opcom_plan.md`](opcom_plan.md#what-the-commander-spends-on); the wallet and the faucets that
+fill it stay here ([§Army Power](#army-power)). Spend authority is [below](#spending-authority).
 
 ## Spending authority
 
@@ -866,7 +687,7 @@ reroute has shipped; the phases below it are the remaining work, in sequence.
 | **Floor** | `fnc_ap_adjust` integer invariant; both earned counters and both tier globals, seeded by the presets; the eight live pool reads switched to tiers; CP, AP and tier in the map readout; presets regenerated to the rungs | Without the tier globals the first AP spend downgrades that side's own patrols. Without a readout, deciding what to buy is guesswork |
 | **CP becomes a flow** | Per-use CP on supports; the intel-analysis cap | Independent of AP entirely |
 | **AP becomes spendable** | The dual case in `fnc_pool_try_spend`; AP halves on advanced supports and combat vehicles; the refund's second currency | The permanent/consumable split and the CP refund are in; what is left is the second pool |
-| **The commander** | One director thread, one archetype roll, four sinks; town garrisons I-IV; hardpoints; town events | Everything above is its budget |
+| **The commander** | The OPCOM director, its archetype and four sinks (town and zone garrisons, taskings, hardpoints), plus town events — designed in [`opcom_plan.md`](opcom_plan.md) | Everything above is its budget |
 | **Reconcile the reference** | Rewrite `info/economy.md`'s pre-reroute passages: AP now spends from menus, the AP→CP converter is gone, town income routes CP to BLUFOR and AP to OPFOR, the zone CP bounty and its recapture decay are replaced by the one-time first-capture bonus, and `zones_held × 6` CP is now the AP trickle | Last: it documents shipped machinery, so it lags until the machinery stops moving |
 
 ## The tuning surface
@@ -971,18 +792,6 @@ is where a second array goes.
 - **Where the boundary falls for armed cars and wheeled APCs.** Tanks and unarmed transport are
   clear; the middle of the catalogue is where a rule stated as "armed costs AP" starts pricing an
   armed offroad like a main battle tank.
-- **Whether the player can learn the commander's archetype, and how.** One the player can never
-  perceive is variance rather than a mechanic; the intel system is the obvious route
-  ([`info/intel_system.md`](info/intel_system.md)), and observed behaviour is the free one.
-- **What the commander does with a surplus.** All three sinks are throttled and one saturates
-  outright, so a commander that out-earns them banks the difference and the map stops changing.
-  Anything that absorbs it has to be something the player still notices — reinforcing a garrison
-  rather than upgrading it, or replacing losses, would work without an ever-growing map. Town
-  events cannot be it: they are free and rep-driven by decision
-  ([above](#what-the-commander-spends-on)).
-- **Whether the commander should be required to spend** rather than merely able to. Banking costs
-  it nothing now, so nothing pushes it to buy. A forced-spend rule is a policy, though, and
-  policies are where AI directors become predictable.
 - **Whether flipping towns out of the OPFOR band suppresses escalation too well.** It is now the
   player's whole lever on enemy income, so it wants to work; the question is whether a diligent
   player freezes the war, and only play answers that.
