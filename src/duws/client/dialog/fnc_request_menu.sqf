@@ -84,16 +84,27 @@ switch (VERSION_X) do {
 };
 lbSetCurSel [2101, 0];
 
-// REQUEST VEHICLES-STATICS -- ten at a FOB against the HQ's full list.
+// REQUEST VEHICLES-STATICS -- ten at a FOB against the HQ's full list. Rows are gated on the BLUFOR
+// AP ladder: a locked one stays, greyed and tier-tagged, sorted below the unlocked. The faction-list
+// index rides in lbData because the sort breaks the position the handler once read off lbCurSel.
 lbAdd [2102, localize "STR_DUWS_T_zo6ih0pt"];   // 0
 lbAdd [2102, ""];                               // 1
 
 private _vehicles = ["VEHICLE"] call fnc_faction_rqst_list;
 if (_isFob) then { _vehicles = _vehicles select [0, 10] };
+private _vehRows = [];
 {
-    private _displayName = [configFile >> "CfgVehicles" >> (_x select 0)] call BIS_fnc_displayName;
-    lbAdd [2102, _displayName + " (" + str (_x select 2) + "cp)"];
+    private _class = _x select 0;
+    private _displayName = [configFile >> "CfgVehicles" >> _class] call BIS_fnc_displayName;
+    private _tier = [_class] call DUWS_fnc_vehTier;
+    _vehRows pushBack [
+        _displayName + " (" + str (_x select 2) + "cp)",
+        _tier,
+        ["BLU", _tier] call DUWS_fnc_ap_unlocked,
+        str _forEachIndex
+    ];
 } forEach _vehicles;
+[2102, _vehRows] call DUWS_fnc_tierListFill;
 lbSetCurSel [2102, 0];
 
 // Mission Timers is a fixed button rather than a command slot, so its Game Master gate has to hide

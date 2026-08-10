@@ -2007,6 +2007,14 @@
                 <Original>%1  +%2 AP</Original>
                 <English>%1  +%2 AP</English>
             </Key>
+            <Key ID="STR_DUWS_T_tier_tag">
+                <Original>[Tier %1]</Original>
+                <English>[Tier %1]</English>
+            </Key>
+            <Key ID="STR_DUWS_T_tier_locked_hint">
+                <Original>Not yet available. Requires Tier %1.</Original>
+                <English>Not yet available. Requires Tier %1.</English>
+            </Key>
             <Key ID="STR_DUWS_T_escalation_level">
                 <Original>Escalation is now level %1. Supports cost more</Original>
                 <English>Escalation is now level %1. Supports cost more</English>

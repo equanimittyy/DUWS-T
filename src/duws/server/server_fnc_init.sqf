@@ -406,6 +406,12 @@ fnc_faction_schema = compile preprocessFileLineNumbers "duws\shared\functions\fn
 fnc_custom_faction_parse = compile preprocessFileLineNumbers "duws\shared\functions\fnc_custom_faction_parse.sqf";publicVariable "fnc_custom_faction_parse";
 // Broadcast: both request menus and all four request handlers are client-side.
 fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_rqst_list.sqf";publicVariable "fnc_faction_rqst_list";
+// Broadcast: the request menus grey and sort rows by the AP ladder client-side, and the squad server
+// guards read the same gate. The file sets the three globals; each is broadcast in turn.
+[] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_ap_gate.sqf";
+publicVariable "DUWS_fnc_ap_unlocked";
+publicVariable "DUWS_fnc_vehTier";
+publicVariable "DUWS_fnc_tierListFill";
 fnc_faction_unit_keylist = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_unit_keylist.sqf";
 fnc_custom_faction_init = compile preprocessFileLineNumbers "duws\server\dialog\fnc_custom_faction_init.sqf";publicVariable "fnc_custom_faction_init";
 fnc_request_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_menu.sqf";publicVariable "fnc_request_menu";
