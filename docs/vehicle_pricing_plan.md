@@ -35,9 +35,9 @@ an AA tank and an arty piece are both `isKindOf "Tank"`, so their specific signa
 | 3 | `aa` | `radarType == 2` (vehicle AA radar; jets are `4`, so excluded) |
 | 4 | `planeArmed` / `planeTransport` | `isKindOf "Plane"`, split on any turret weapon or pylon |
 | 5 | `heliArmed` / `heliTransport` | `isKindOf "Helicopter"`, split on weapon/pylon; transport also needs `transportSoldier >= 4` |
-| 6 | `tank` | `isKindOf "Tank"` |
+| 6 | `tank` | `isKindOf "Tank"` **and** mounts a main cannon (not an autocannon) |
 | 7 | `logi` | `isKindOf "Car"` and (`transportRepair`/`transportAmmo`/`transportFuel` non-zero, or `attendant == 1`) |
-| 8 | `apcIfv` | `isKindOf "Wheeled_APC_F"`, or `isKindOf "Car"` with `armor > 300` |
+| 8 | `apcIfv` | `isKindOf "Wheeled_APC_F"`; a tracked `isKindOf "Tank"` with no main cannon (autocannon or MG only); or `isKindOf "Car"` with `armor > 300` |
 | 9 | `armedCar` | `isKindOf "Car"` with a turret weapon |
 | 10 | `lightUnarmed` | `isKindOf "Car"` |
 | 11 | `boat` | `isKindOf "Ship"` |
@@ -103,22 +103,25 @@ seatsN = clamp01 (transportSoldier / SEAT_REF)              # SEAT_REF ~ 14
 ```
 
 The score is a **weighted sum of all three terms**, the weights set per kind so every vehicle reads
-armour, armament and seats but each kind leans on what actually varies for it — armour for a tank,
-the gun for a car, capacity for a transport. Weights per row sum to 1:
+armour, armament and seats but each kind leans on what actually varies for it. Armament leads for
+anything that fights — so an unarmed or lightly-gunned hull sits near its band floor however heavily
+armoured, and armour only spreads it secondarily; a transport leans on capacity instead. Weights per
+row sum to 1:
 
 | Kind | wArmour | wWeapon | wSeats |
 |------|--------:|--------:|-------:|
-| `tank` | 0.55 | 0.40 | 0.05 |
-| `apcIfv` | 0.45 | 0.30 | 0.25 |
-| `aa` | 0.35 | 0.65 | 0.00 |
-| `armedCar` | 0.20 | 0.75 | 0.05 |
+| `tank` | 0.30 | 0.65 | 0.05 |
+| `apcIfv` | 0.30 | 0.50 | 0.20 |
+| `aa` | 0.25 | 0.75 | 0.00 |
+| `armedCar` | 0.10 | 0.85 | 0.05 |
 | `heliArmed` | 0.10 | 0.80 | 0.10 |
 | `planeArmed` | 0.05 | 0.95 | 0.00 |
-| `heliTransport` | 0.20 | 0.10 | 0.70 |
+| `heliTransport` | 0.15 | 0.15 | 0.70 |
 | `planeTransport` | 0.10 | 0.00 | 0.90 |
 | `logi` | 0.10 | 0.00 | 0.90 |
 | `lightUnarmed` | 0.00 | 0.00 | 1.00 |
-| `boat` | 0.10 | 0.60 | 0.30 |
+| `arty` | 0.20 | 0.80 | 0.00 |
+| `boat` | 0.10 | 0.70 | 0.20 |
 | `uav` | 0.00 | 1.00 | 0.00 |
 | `default` | — flat 0.5 — |||
 

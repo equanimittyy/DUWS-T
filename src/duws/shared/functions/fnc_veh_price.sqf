@@ -17,21 +17,23 @@ DUWS_vehp_CAP_W      = 0.3;    // how much magazine capacity lifts it
 DUWS_vehp_PYLON_W    = 2;      // per dynamic-loadout hardpoint
 
 // Per kind: [lo, hi, wArmour, wWeapon, wSeats]. The band fixes the category ordering as a hard
-// constraint (a car can never reach a tank's band); the weights decide where in the band the
-// heaviness score lands, leaning on whatever actually varies for that kind. Weights sum to 1.
+// constraint (a car can never reach a tank's band); the weights place the score inside it. Armament
+// is the main driver for anything that fights, so an unarmed or lightly-gunned hull sits near its
+// band floor however heavily armoured -- armour only spreads it secondarily. Transports lean on
+// capacity instead, having little armament to read. Weights sum to 1.
 DUWS_vehPriceBands = createHashMapFromArray [
-    ["tank",           [34, 46, 0.55, 0.40, 0.05]],
-    ["apcIfv",         [24, 32, 0.45, 0.30, 0.25]],
-    ["aa",             [28, 32, 0.35, 0.65, 0.00]],
-    ["armedCar",       [12, 22, 0.20, 0.75, 0.05]],
+    ["tank",           [34, 46, 0.30, 0.65, 0.05]],
+    ["apcIfv",         [24, 32, 0.30, 0.50, 0.20]],
+    ["aa",             [28, 32, 0.25, 0.75, 0.00]],
+    ["armedCar",       [12, 22, 0.10, 0.85, 0.05]],
     ["heliArmed",      [40, 48, 0.10, 0.80, 0.10]],
     ["planeArmed",     [52, 65, 0.05, 0.95, 0.00]],
-    ["heliTransport",  [20, 30, 0.20, 0.10, 0.70]],
+    ["heliTransport",  [20, 30, 0.15, 0.15, 0.70]],
     ["planeTransport", [42, 48, 0.10, 0.00, 0.90]],
     ["logi",           [14, 18, 0.10, 0.00, 0.90]],
     ["lightUnarmed",   [ 1,  8, 0.00, 0.00, 1.00]],
-    ["arty",           [66, 75, 0.30, 0.70, 0.00]],
-    ["boat",           [16, 24, 0.10, 0.60, 0.30]],
+    ["arty",           [66, 75, 0.20, 0.80, 0.00]],
+    ["boat",           [16, 24, 0.10, 0.70, 0.20]],
     ["uav",            [ 5, 22, 0.00, 1.00, 0.00]],
     ["default",        [10, 10, 0.00, 0.00, 0.00]]
 ];
@@ -69,6 +71,19 @@ DUWS_fnc_vehArmed = {
     (count ([_cfg] call DUWS_fnc_vehWeapons) > 0) || {([_cfg] call DUWS_fnc_vehPylonCount) > 0}
 };
 
+// A main tank gun -- a cannon that is not an autocannon -- is what separates an MBT from a tracked
+// IFV or APC, since all three are isKindOf "Tank". A seat count cannot: vanilla MBTs carry hull
+// riders (the Slammer's transportSoldier is >= 4), so cargo reads them as carriers.
+DUWS_fnc_vehHasMainGun = {
+    params ["_cfg"];
+    private _has = false;
+    {
+        private _chain = ([configFile >> "CfgWeapons" >> _x, true] call BIS_fnc_returnParents) apply { toLowerANSI _x };
+        if (("cannoncore" in _chain) && {(_chain joinString " ") find "autocannon" < 0}) exitWith { _has = true };
+    } forEach ([_cfg] call DUWS_fnc_vehWeapons);
+    _has
+};
+
 // The vehicle's kind, matched in priority order -- the specific signals (artillery, AA radar) are
 // tested before the broad isKindOf families they also belong to, so a Cheetah reads as AA not tank.
 DUWS_fnc_vehKind = {
@@ -84,10 +99,11 @@ DUWS_fnc_vehKind = {
         private _cargo = getNumber (_cfg >> "transportSoldier");
         ["heliTransport", "heliArmed"] select (_armed && {_cargo < 4})
     };
-    // Tracked IFVs and APCs are isKindOf "Tank" too; a squad-carrying hull is the IFV band, a pure
-    // gun platform the tank band -- the same cargo split the tier gate has always used.
+    // Tracked IFVs and APCs are isKindOf "Tank" too. The main gun tells them apart: an MBT mounts a
+    // cannon, an IFV an autocannon, an APC only an MG -- so a cannon is the tank band, anything else
+    // the IFV band.
     if (_class isKindOf "Tank") exitWith {
-        ["tank", "apcIfv"] select (getNumber (_cfg >> "transportSoldier") >= 4)
+        ["apcIfv", "tank"] select ([_cfg] call DUWS_fnc_vehHasMainGun)
     };
     if (_class isKindOf "Car") exitWith {
         private _isLogi = (getNumber (_cfg >> "transportRepair") != 0)
