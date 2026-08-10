@@ -92,8 +92,8 @@ blufor_patrol_count = 0;
 					if (WARCOM_blufor_ap_earned>175) then {
 						[BLUFOR_Faction_X,"armored",_spawnLoc] spawn fnc_random_veh_blu_patrol;
 					};
-					// spawn air -- tier 4 (attack heli; a mixed heli/jet bucket)
-					if (WARCOM_blufor_ap_earned>300) then {
+					// spawn air -- tier 3 (transport heli); attack heli joins at tier 4, jet at tier 5
+					if (WARCOM_blufor_ap_earned>175) then {
 						[BLUFOR_Faction_X,"air",_spawnLoc] spawn fnc_random_veh_blu_patrol;
 					};
 				};

@@ -112,21 +112,23 @@ DUWS_fnc_thinComposition = {
 // The classname behind a token, or "" when it cannot be fielded. A team is not this function's
 // business and answers itself -- fnc_factionRoles already drops the roles a faction leaves undefined.
 DUWS_fnc_tokenClass = {
-    params ["_token"];
+    params ["_token", ["_side", "OPF"]];
     // The posture goes here rather than downstream: the passthrough below hands its answer to
     // fnc_spawn_vehicle as a classname, and "closepatrol:O_MBT_02_cannon_F" is not one.
     private _name = [_token] call DUWS_fnc_tokenName;
     if !(([_name] call DUWS_fnc_teamRow) isEqualTo []) exitWith { _name };
-    private _row = [_name] call DUWS_fnc_vehicleRow;
+    private _row = [_name, _side] call DUWS_fnc_vehicleRow;
     // Not in either table: a faction file named a classname directly, and it stands as itself.
     if (_row isEqualTo []) exitWith { _name };
     _row params ["", "_role", "_setting", "_ap"];
     // Missing setting defaults to on: a campaign that predates a new rule fields what it always did
     // rather than quietly losing the token.
     if (_setting != "" && {(missionNamespace getVariable [_setting, 1]) != 1}) exitWith { "" };
-    // Gated on the earned counter, not the spendable wallet: OPCOM draws the OPFOR wallet down as it
-    // buys, and a token the enemy has reached the tier for must not vanish because the wallet dipped.
-    if (_ap > 0 && {(missionNamespace getVariable ["WARCOM_opfor_ap_earned", 0]) < _ap}) exitWith { "" };
+    // Gated on the earned counter for the side raising the token, not the spendable wallet: a
+    // commander draws its wallet down as it buys, and a token the side has reached the tier for must
+    // not vanish because the wallet dipped.
+    private _earnedVar = ["WARCOM_opfor_ap_earned", "WARCOM_blufor_ap_earned"] select (_side == "BLU");
+    if (_ap > 0 && {(missionNamespace getVariable [_earnedVar, 0]) < _ap}) exitWith { "" };
     // Drawn per spawn, not held as one value the whole campaign fields at once: two zones raised in
     // the same second should not both put down the identical APC.
     [_role] call fnc_faction_pick
@@ -222,11 +224,29 @@ DUWS_spawnVehicles = [
 ];
 // --DUWS-UNITCOMP END--
 
+// BLUFOR's vehicles: the mirror of the table above -- the same tokens and the same rungs, resolving
+// to BLUFOR's own role globals. BLUFOR fields a smaller set than OPFOR (it defines no truck, ammo or
+// AA roles of its own), so only the tokens it actually raises are listed. No setting column gates
+// these: the asset toggles (HeavyArmor, AttackHeli) are the enemy's, and BLUFOR air and armour answer
+// to the ladder alone. Kept in lockstep with DUWS_spawnVehicles by hand -- the rungs are shared.
+// transheli resolves to the armed transport HELI_TRANS_ARM_X, the combat bird; the unarmed
+// TRANS_HELI_X is the taxi the support functions fly and is left to them.
+DUWS_spawnVehiclesBlu = [
+    ["car",        "blufor_ARMED_CAR1_X",     "", 100],
+    ["apc",        "blufor_APC1_X",           "", 175],
+    ["ifv",        "blufor_APC2_X",           "", 175],
+    ["tank",       "blufor_MBT_TANK1_X",      "", 300],
+    ["transheli",  "blufor_HELI_TRANS_ARM_X", "", 175],
+    ["attackheli", "blufor_ATTACK_HELI_X",    "", 300],
+    ["plane",      "blufor_MISC_AIR_X",       "", 500]
+];
+
 DUWS_fnc_vehicleRow = {
-    params ["_token"];
+    params ["_token", ["_side", "OPF"]];
     private _name = [_token] call DUWS_fnc_tokenName;
-    private _i = DUWS_spawnVehicles findIf { (_x select 0) isEqualTo _name };
-    if (_i < 0) then { [] } else { DUWS_spawnVehicles select _i }
+    private _table = [DUWS_spawnVehicles, DUWS_spawnVehiclesBlu] select (_side == "BLU");
+    private _i = _table findIf { (_x select 0) isEqualTo _name };
+    if (_i < 0) then { [] } else { _table select _i }
 };
 
 // Called rather than spawned, for the group each one hands back: the capture test counts this
