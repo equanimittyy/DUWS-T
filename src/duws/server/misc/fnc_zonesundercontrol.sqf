@@ -58,16 +58,16 @@ while {true} do {
         if (_side isEqualTo "OPF") then { _opfTownWorth = _opfTownWorth + _income };
     } forEach _reps;
 
-    // Every passive faucet is scaled by the campaign-size throttle and rounded once, after scaling,
-    // so no fraction reaches a pool writer. Town income routes per side (BLUFOR CP, OPFOR AP); the
-    // zone trickle pays both sides AP for the ground each holds; OPFOR also draws a flat floor.
-    // OPFOR's town and zone income carries a second, side-balance factor (opfor_income_factor): it
-    // holds every zone at hour zero, so without it OPFOR out-earns BLUFOR on ground alone. The flat
-    // floor is left unscaled -- it is insurance for a director that has lost its towns, not a faucet.
+    // Every passive faucet is scaled by the same shared campaign-size throttle (DUWS_econ_throttle)
+    // and rounded once, after scaling, so no fraction reaches a pool writer. Town income routes per
+    // side (BLUFOR CP, OPFOR AP); the zone trickle pays both sides AP for the ground each holds, on
+    // that one throttle; OPFOR also draws a flat floor, unscaled, as insurance for a director that has
+    // lost its towns. OPFOR carries no per-side income handicap -- it opens holding every zone, but
+    // that head start is answered by the BLUFOR capture bounty (below), not by penalising its faucet.
     private _bluCP    = round (_bluTownWorth * DUWS_econ_throttle);
-    private _opfTownAP = round (_opfTownWorth * DUWS_econ_throttle * opfor_income_factor);
+    private _opfTownAP = round (_opfTownWorth * DUWS_econ_throttle);
     private _bluZoneAP = round (zoneundercontrolblu * zone_ap_trickle * DUWS_econ_throttle);
-    private _opfZoneAP = round ((count WARCOM_zones_controled_by_OPFOR) * zone_ap_trickle * DUWS_econ_throttle * opfor_income_factor);
+    private _opfZoneAP = round ((count WARCOM_zones_controled_by_OPFOR) * zone_ap_trickle * DUWS_econ_throttle);
     private _opfAP = _opfTownAP + _opfZoneAP + opfor_flat_ap_income;
 
     // One call per pool per side, not one per town: fnc_ap_adjust/fnc_cp_adjust publicVariable and
@@ -77,8 +77,8 @@ while {true} do {
     if (_bluCP > 0)     then { [_bluCP, "civ_town_income"] call fnc_cp_adjust };
     // The 4th arg is the tier-crediting portion, and each side credits the whole of what it earns:
     // BLUFOR its zone trickle, OPFOR all of town + zone + flat. OPFOR's zone income does front-load
-    // its tier from the ground it starts on -- opfor_income_factor above and the BLUFOR capture bounty
-    // (zone_first_capture_ap) are what balance that, so the ladder itself stays symmetric.
+    // its tier from the ground it starts on -- the BLUFOR capture bounty (zone_first_capture_ap) is
+    // what balances that, climbing the player's own tier as they take the same ground.
     if (_bluZoneAP > 0) then { ["BLU", _bluZoneAP, "zone_trickle", _bluZoneAP] call fnc_ap_adjust };
     if (_opfAP > 0)     then { ["OPF", _opfAP, "opfor_income", _opfAP] call fnc_ap_adjust };
 
