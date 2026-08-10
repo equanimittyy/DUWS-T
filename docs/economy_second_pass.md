@@ -388,9 +388,9 @@ divergence is an accepted limitation rather than something to redesign the clock
 
 | Faucet | Amount | Credits |
 |---|---|---|
-| Zone hold trickle | per held OPFOR zone, per tick, × `DUWS_econ_throttle` × `opfor_income_factor` (5 each) | wallet + tier |
-| Town income | banded OPFOR towns, per tick, × `DUWS_econ_throttle` × `opfor_income_factor` | wallet + tier |
-| Flat income | one constant per tick, independent of everything (not scaled by `opfor_income_factor`) | wallet + tier |
+| Zone hold trickle | per held OPFOR zone, per tick, × `DUWS_econ_throttle` (5 each) | wallet + tier |
+| Town income | banded OPFOR towns, per tick, × `DUWS_econ_throttle` | wallet + tier |
+| Flat income | one constant per tick, independent of everything | wallet + tier |
 | Zone retaken | `round (worth * zone_ap_swing)` | wallet only |
 | Zone lost | consolation AP whenever BLUFOR takes an OPFOR zone | wallet only |
 
@@ -414,17 +414,17 @@ several towns already banded and already paying — OPFOR town income outweighs 
 constant several times over at hour zero. The constant is sized for a director holding nothing,
 and the figure that has to be checked is the combined one.
 
-**The zone trickle credits the tier, and the front-load is balanced on the faucet.** OPFOR holds
-every zone at hour zero, so crediting that trickle to a one-way counter front-loads the tier from
-ground the enemy started on rather than fought for — the reason an earlier design paid the trickle
-to the wallet alone. That exclusion is dropped: the ladder is kept **symmetric** — both sides credit
-the whole of what they hold — and the head start is answered on the faucet instead of by carving a
-hole in one side's ladder. `opfor_income_factor` (0.6) scales OPFOR's town and zone income below
-BLUFOR's, and the BLUFOR capture bounty (`zone_first_capture_ap`, 50) climbs the player's own tier as
-they take that same ground, so OPFOR opens ahead and the player closes the gap by advancing. The
-retake swing and the consolation stay wallet-only — losing ground must still never raise the enemy's
-permanent ceiling. `zones_number` running 1 to 40 is handled separately, by the throttle on every
-passive faucet.
+**The zone trickle credits the tier, and the front-load is balanced on the bounty, not a handicap.**
+OPFOR holds every zone at hour zero, so crediting that trickle to a one-way counter front-loads the
+tier from ground the enemy started on rather than fought for — the reason an earlier design paid the
+trickle to the wallet alone. That exclusion is dropped: the ladder is kept **symmetric** — both sides
+credit the whole of what they hold, and both scale on the one shared campaign-size throttle
+(`DUWS_econ_throttle`), with no per-side income handicap. The head start is answered by the BLUFOR
+capture bounty (`zone_first_capture_ap`, 50): it climbs the player's own tier as they take that same
+ground, so OPFOR opens ahead and the player closes the gap by advancing, rather than by OPFOR being
+penalised for holding. The retake swing and the consolation stay wallet-only — losing ground must
+still never raise the enemy's permanent ceiling. `zones_number` running 1 to 40 is handled separately,
+by the throttle on every passive faucet.
 
 Both sides gate capability on raw `earned` against the same thresholds (BLUFOR's wave/vehicle steps,
 OPFOR's per-vehicle `_ap` in `DUWS_spawnVehicles`, now APC 40 / IFV·AA 65 / tank 100 / heli 136 /
@@ -867,7 +867,6 @@ They are collected here so the next pass tunes from one list rather than hunting
 | `zone_ap_swing` | `server/server_var_init.sqf` | 0.15 | OPFOR retake gain / BLUFOR loss, share of worth; wallet only |
 | `zone_ap_consolation` | `server/server_var_init.sqf` | 0.15 | OPFOR's AP per BLUFOR capture, share of worth; wallet only |
 | `opfor_flat_ap_income` | `server/server_var_init.sqf` | 2 | flat OPFOR floor per tick, unthrottled |
-| `opfor_income_factor` | `server/server_var_init.sqf` | 0.6 | scales OPFOR town+zone income (not flat); balances OPFOR's hour-zero zones on the symmetric ladder |
 | `DUWS_ap_tier_rungs` | `server/misc/fnc_economy_init.sqf` | 10/40/65/100/136/150/200 | tier boundaries and preset rungs; display summary, not the capability gate |
 | OPFOR vehicle AP gates | `server/init_zones/fnc_zone_spawn_sizes.sqf` | APC 40 / IFV·AA 65 / tank 100 / heli 136 / plane 150 | OPFOR's capability ladder, mirrors BLUFOR's earned thresholds |
 | intel loot drop | `server/misc/fnc_addRandomLoot.sqf` | ~60% | share of enemies carrying loot; thins intel + coins at source |
@@ -901,7 +900,7 @@ once those land.
   tier. On a large map it is a meaningful head start on both wallet and ladder; the throttle does not
   touch it, since it rewards an action rather than a holding.
 - **OPFOR AP accumulation.** Until the commander lands, OPFOR's wallet has only the hardpoint director
-  as a sink, so it climbs with little to spend it on — now dampened by `opfor_income_factor`. Its
+  as a sink, so it climbs with little to spend it on. Its
   earned counter meanwhile crosses the tank rung (100) off town+zone income, so side-mission and zone
   armour appear once OPFOR has held enough ground; that gate reads the earned counter (the token
   `_ap`), not the wallet. Expected, and the wallet drains when the commander's sinks land; not a leak.
