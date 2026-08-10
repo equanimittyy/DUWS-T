@@ -122,12 +122,10 @@ class ressourceheader
             h = 1.1 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
         };
-        // Four across a 19.9-cell row, each sized to its own label rather than to a quarter share:
-        // evenly divided, "Mission Timers" alone overruns its share. The conversion rate moved off
-        // the convert button and into the confirmation it now raises, because the label carrying it
-        // was 24 characters and the row cannot seat a fourth button beside it. Mission Timers is
-        // Game Master only and is hidden rather than written in from a list, so a player without
-        // the gate sees a gap here.
+        // Three buttons split the row evenly across its 19.9 cells with a 0.3-cell gutter between,
+        // filling the width the deleted converter left behind. Mission Timers is Game Master only
+        // and is hidden rather than written in from a list, so a player without the gate sees a
+        // gap where its middle slot sits.
         class sidemissionbutton: RscButton
         {
             idc = 1605;
@@ -135,7 +133,7 @@ class ressourceheader
             sizeEx = 0.025;
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 5.4 * GUI_GRID_W;
+            w = 6.43 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             // The one entry that still closes the menu: it hands the screen to the strategic map,
             // which a dialog would draw straight over.
@@ -147,9 +145,9 @@ class ressourceheader
             idc = 1609;
             text = "$STR_DUWS_T_SHOW_MISSION_COOLDOWNS";
             sizeEx = 0.025;
-            x = 6.5 * GUI_GRID_W + GUI_GRID_X;
+            x = 7.53 * GUI_GRID_W + GUI_GRID_X;
             y = 5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 5.7 * GUI_GRID_W;
+            w = 6.43 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_mission_cooldowns_show";
             tooltip = "$STR_DUWS_T_SHOW_MISSION_COOLDOWNS";
@@ -159,9 +157,9 @@ class ressourceheader
             idc = 1608;
             text = "$STR_DUWS_T_civ_mapview_action";
             sizeEx = 0.025;
-            x = 12.5 * GUI_GRID_W + GUI_GRID_X;
+            x = 14.26 * GUI_GRID_W + GUI_GRID_X;
             y = 5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 3.6 * GUI_GRID_W;
+            w = 6.44 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_request_map_view";
             tooltip = "$STR_DUWS_T_civ_mapview_action";
