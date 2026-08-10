@@ -31,7 +31,12 @@ DUWS_fnc_vehTier = {
     if (_class isKindOf "Tank" || {_class isKindOf "Wheeled_APC_F"}) exitWith {
         [4, 3] select (_cargo >= 4)
     };
-    if (_class isKindOf "Car") exitWith { [2, 1] select ((count fullCrew [_class, "", true]) <= 2) };
+    if (_class isKindOf "Car") exitWith {
+        // Total seats from config, not fullCrew: fullCrew needs a spawned object, but this runs on a
+        // classname in the menu build. Driver + cargo + gunner turrets; a quad or 2-seat runabout is T1.
+        private _seats = (getNumber (_cfg >> "hasDriver")) + _cargo + count ("true" configClasses (_cfg >> "Turrets"));
+        [2, 1] select (_seats <= 2)
+    };
     1
 };
 
