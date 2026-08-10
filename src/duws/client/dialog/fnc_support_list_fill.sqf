@@ -35,12 +35,21 @@ private _rows = [];   // listbox index -> its def, [] for a heading
     lbSetColor [2103, _headRow, [0.5, 0.5, 0.5, 1]];
     _rows pushBack [];
 
-    // Tier-locked rows drop to the bottom of the section, the curated order kept within the open and
-    // the locked halves. A support below BLUFOR's earned tier is greyed and tier-tagged rather than
-    // dropped, so the player reads what the ladder still owes them.
+    // Tier-locked rows drop to the bottom of the section. The open half keeps the curated catalogue
+    // order; the locked half is bucketed by tier (ascending, alphabetical within), so what the ladder
+    // still owes reads tier by tier. A support below BLUFOR's earned tier is greyed and tier-tagged
+    // rather than dropped.
     private _sectionDefs = _defs select { (_x select 1) == _kind };
     private _openDefs = _sectionDefs select { ["BLU", [_x select 0] call fnc_support_tier] call DUWS_fnc_ap_unlocked };
     private _lockedDefs = _sectionDefs select { !(["BLU", [_x select 0] call fnc_support_tier] call DUWS_fnc_ap_unlocked) };
+    // Sort key [str tier + lowercased label, index]: the tier segment buckets, the label orders within,
+    // the index is a scalar tie-break so sort never compares the def arrays.
+    private _lockedKeyed = [];
+    {
+        _lockedKeyed pushBack [(str ([_x select 0] call fnc_support_tier)) + toLower (localize (_x select 4)), _forEachIndex];
+    } forEach _lockedDefs;
+    _lockedKeyed sort true;
+    _lockedDefs = _lockedKeyed apply { _lockedDefs select (_x select 1) };
 
     {
         _x params ["_key", "_defKind", "_cost", "_flagVar", "_labelKey", "_commItem",

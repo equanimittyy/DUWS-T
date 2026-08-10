@@ -72,20 +72,28 @@ DUWS_fnc_squadRow = {
     if (_i < 0) then { [] } else { DUWS_blufor_squads select _i }
 };
 
-// Fills a listbox from tier-tagged rows: unlocked first, then locked, each block alphabetical by
-// label. A locked row is greyed and its tier appended, so the player reads what is coming and what it
-// costs to reach without the row vanishing. The row's identity rides in lbData for the buy handler,
-// which can no longer trust position once the list is sorted.
+// Fills a listbox from tier-tagged rows: unlocked first (alphabetical), then locked bucketed by tier
+// -- each tier's locked rows kept together, ascending, alphabetical within the tier. A locked row is
+// greyed and its tier appended, so the player reads what is coming and what it costs to reach without
+// the row vanishing. The row's identity rides in lbData for the buy handler, which can no longer trust
+// position once the list is sorted.
 //   _rows: [[_label, _tier, _unlocked, _data], ...]
 DUWS_fnc_tierListFill = {
     params ["_ctrl", "_rows"];
-    // Sort key is [ "0"/"1" + lowercased label, original index ]: the prefix puts unlocked ahead of
-    // locked, the label orders each block, and the index is a scalar tie-break so sort never has to
-    // compare the row payloads -- two identical labels would otherwise drop it onto a boolean it
-    // cannot order.
+    // Sort key is [prefix + tier segment + lowercased label, original index]. The prefix ("0" open,
+    // "1" locked) puts unlocked ahead; a locked row inserts its tier so locked rows bucket by tier
+    // before the label orders within; open rows carry no tier, staying one alphabetical block. The
+    // index is a scalar tie-break so sort never compares the row payloads (two equal labels would
+    // otherwise drop it onto a boolean it cannot order).
     private _keyed = [];
     {
-        _keyed pushBack [(["1", "0"] select (_x select 2)) + toLower (_x select 0), _forEachIndex];
+        private _unlocked = _x select 2;
+        private _key = if (_unlocked) then {
+            "0" + toLower (_x select 0)
+        } else {
+            "1" + str (_x select 1) + toLower (_x select 0)
+        };
+        _keyed pushBack [_key, _forEachIndex];
     } forEach _rows;
     _keyed sort true;
     {
