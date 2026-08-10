@@ -41,7 +41,9 @@ fnc_faction_keep = {
 };
 
 // Resolve one role key: the first ladder rung with anything left after the kind gate wins, and the
-// fallback carries a faction that fields nothing for the role at all.
+// fallback -- the vanilla stand-in the role degrades to -- carries a faction that fields nothing for
+// the role at all. A call omitting the fallback takes the key's vanillaDefault from the schema, the
+// one place that class is written, so the AutoDetect tables never spell a stand-in a second time.
 //
 // The ladder is graded -- one bucket per rung -- rather than the summed pairs the faction files
 // passed before ([_hat, _lat + _aa, _infantry]). Summing rated anti-air men equal to light AT for
@@ -63,6 +65,10 @@ fnc_faction_resolve = {
         ["WARN", "FACTION", format ["%1 is not in the faction schema -- resolved without a kind check", _key]] call fnc_log;
     } else {
         _kind = (_row select 0) select 2;
+        // Omitted fallback defaults to the schema's vanilla stand-in for the key. An explicit []
+        // cannot tell "caller passed nothing" from "caller wants no stand-in", but nothing wants the
+        // latter -- every ladder ends in the vanilla class, so the default is always what was meant.
+        if (_fallback isEqualTo []) then { _fallback = (_row select 0) select 4; };
     };
 
     private _out = [];

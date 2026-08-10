@@ -696,12 +696,22 @@ fnc_faction_keep = {
 ["faction_resolve: nothing left at all is tier 2 (red), same as a stand-in",
     (missionNamespace getVariable "DUWS_factionTier_opfor_AT_SOLDIER_X"), 2] call fnc_assertEq;
 
-// --- fnc_faction_schema: the required column ---
-// A row short of four columns reads `nil` as its required flag, which fnc_custom_faction_parse's
-// filter would treat as false -- silently dropping a core key out of paste validation.
+// Omitting the fallback takes the key's vanilla default from the schema -- what the AutoDetect
+// tables now rely on, having dropped their inline column so a stand-in is written in one place.
+["opfor_MBT_TANK1_X", [[]]] call fnc_faction_resolve;
+["faction_resolve: an omitted fallback comes from the schema vanillaDefault",
+    (missionNamespace getVariable "opfor_MBT_TANK1_X"), ["O_MBT_02_cannon_F"]] call fnc_assertEq;
+
+// --- fnc_faction_schema: the required and vanilla-default columns ---
+// A row short of the required flag reads `nil` there, which fnc_custom_faction_parse's filter would
+// treat as false -- silently dropping a core key out of paste validation. The fifth column is the
+// stand-in fnc_faction_resolve and fnc_faction_vanilla_fill both read; a row missing it would hand
+// "" to a spawner as the fallback.
 private _rows = (["blufor"] call fnc_faction_schema) + (["opfor"] call fnc_faction_schema);
-["faction_schema: every row carries all four columns",
-    (_rows findIf { count _x != 4 }), -1] call fnc_assertEq;
+["faction_schema: every row carries all five columns",
+    (_rows findIf { count _x != 5 }), -1] call fnc_assertEq;
+["faction_schema: every row's vanilla default is a classname string",
+    (_rows findIf { !((_x select 4) isEqualType "") }), -1] call fnc_assertEq;
 ["faction_schema: both sides field the same five statics",
     (_rows select {(_x select 1) isEqualTo "STATIC"} apply {_x select 0}),
     ["blufor_TURRET_AA", "blufor_TURRET_AT", "blufor_TURRET_HMG", "blufor_TURRET_GMG",
@@ -761,6 +771,41 @@ fnc_log = { DUWS_TEST_LOG pushBack _this };
     blufor_TEST_NOWHERE_X, ""] call fnc_assertEq;
 ["backfill: it says so either way -- one borrow and one gap",
     (count DUWS_TEST_LOG), 2] call fnc_assertEq;
+
+// --- fnc_faction_vanilla_fill: the schema stand-in for a key a preset or paste left empty ---
+// Stubbed gate again, dropping "" and two markers: "absent" for a value the install lacks, and the
+// real O_Mortar_01_F so the default-missing branch has something to reject. Everything else is kept,
+// as a present class would be. The schema is real, so the defaults come from the shipped table.
+fnc_faction_keep = {
+    params ["_classes", "_kind"];
+    _classes select { _x != "" && {_x != "absent"} && {_x != "O_Mortar_01_F"} }
+};
+fnc_log = {};
+
+opfor_SOLDIER_X = "cls_native";
+missionNamespace setVariable ["DUWS_factionTier_opfor_SOLDIER_X", 0];
+opfor_ARTY_X = "";
+opfor_APC1_X = "absent";
+opfor_TURRET_MORTAR = "";
+missionNamespace setVariable ["DUWS_factionTier_opfor_TURRET_MORTAR", 0];
+
+["opfor"] call fnc_faction_vanilla_fill;
+
+["vanilla_fill: a key the faction filled is left alone",
+    opfor_SOLDIER_X, "cls_native"] call fnc_assertEq;
+["vanilla_fill: ... and keeps its tier",
+    (missionNamespace getVariable "DUWS_factionTier_opfor_SOLDIER_X"), 0] call fnc_assertEq;
+["vanilla_fill: an empty key takes the schema vanilla default",
+    opfor_ARTY_X, ["O_MBT_02_arty_F"]] call fnc_assertEq;
+["vanilla_fill: ... flagged tier 2 (red), same as a resolved stand-in",
+    (missionNamespace getVariable "DUWS_factionTier_opfor_ARTY_X"), 2] call fnc_assertEq;
+["vanilla_fill: a key pointing at an absent class is refilled from the default",
+    opfor_APC1_X, ["O_APC_Tracked_02_cannon_F"]] call fnc_assertEq;
+// A stand-in the install itself lacks is no better than "": left empty and never flagged filled.
+["vanilla_fill: an empty key whose default is absent stays empty",
+    opfor_TURRET_MORTAR, ""] call fnc_assertEq;
+["vanilla_fill: ... and is not marked tier 2",
+    (missionNamespace getVariable "DUWS_factionTier_opfor_TURRET_MORTAR"), 0] call fnc_assertEq;
 
 // --- fnc_static_resolve: placeholder class to faction class ---
 // The table is stubbed to two rows: what is under test is which key a placeholder asks for and what

@@ -44,3 +44,4 @@ duws/server/init_zones/fnc_hardpoint_siting.sqf::fnc_hardpoint_score
 duws/server/init_zones/fnc_hardpoint_siting.sqf::fnc_hardpoint_facing
 duws/server/init_zones/fnc_hardpoint_siting.sqf::fnc_hardpoint_minefield_lattice
 duws/shared/functions/fnc_faction_backfill.sqf::fnc_faction_backfill
+duws/shared/functions/fnc_faction_vanilla_fill.sqf::fnc_faction_vanilla_fill

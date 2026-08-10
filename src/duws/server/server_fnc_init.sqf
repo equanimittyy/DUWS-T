@@ -397,6 +397,8 @@ fnc_custom_faction_capture = compile preprocessFileLineNumbers "duws\client\dial
 fnc_hardpoint_reveal = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardpoint_reveal.sqf";
 // Same idiom again, and ahead of faction init, which is what leaves the keys it fills empty.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_backfill.sqf";
+// The vanilla stand-in mop-up that runs after backfill for a preset or pasted faction's leftover keys.
+[] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_vanilla_fill.sqf";
 // The commit-time pass that turns each side's one-class-per-role globals into per-spawn pools. Server
 // only: pools are read only by the spawn paths, which are server-side.
 fnc_faction_augment = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_augment.sqf";

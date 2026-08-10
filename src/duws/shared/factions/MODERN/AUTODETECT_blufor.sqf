@@ -53,57 +53,58 @@ fnc_factionGen = {
 // Every role key resolves through one ladder: the first bucket holding anything wins, gated on
 // the schema's kind so a class detection dropped in the wrong bucket cannot reach a spawner.
 // A rung is skipped when the faction has nothing in it, so the ladder reads as what the role
-// degrades through. Fallbacks are vanilla NATO and apply only to a faction that fields nothing
-// for the role at all. Trailing notes say what reads the key.
+// degrades through. The vanilla-NATO stand-in each role falls back to when the faction fields
+// nothing lives in the schema (its vanillaDefault column), which fnc_faction_resolve appends as the
+// last rung; rows here carry no fallback so it is written in one place. Trailing notes say what reads the key.
 //
 // Operators draw from the suppressed-weapon sets the role parser fills, then from the plain role.
 // The old spelling was `_spec arrayIntersect _sl`, recomputed here per key; where it summed
 // buckets it also rated, say, anti-air men equal to light AT for an anti-tank slot.
 { _x call fnc_faction_resolve } forEach [
-	["blufor_SOLDIER_X",          [_grunt, _sl, _gl, _infantry],                          "B_Soldier_F"],      //patrol, fortify, paradrop
-	["blufor_AA_SOLDIER_X",       [_aa, _hat, _lat, _grunt, _infantry],                   "B_soldier_AA_F"],   //shared team rosters
-	["blufor_AR_SOLDIER_X",       [_ar, _mg, _grunt, _infantry],                          "B_Soldier_AR_F"],   //supports\fnc_paradrop, init_hq\fnc_HQguards
-	["blufor_AT_SOLDIER_X",       [_hat, _lat, _aa, _grunt, _infantry],                   "B_soldier_AT_F"],   //shared team rosters
-	["blufor_GL_SOLDIER_X",       [_gl, _grunt, _infantry],                               "B_Soldier_GL_F"],   //init_hq\fnc_HQguards, supports\fnc_paradrop
-	["blufor_LAT_SOLDIER_X",      [_lat, _hat, _aa, _grunt, _infantry],                   "B_Soldier_LAT_F"],  //init_hq\fnc_HQguards, supports\fnc_paradrop
-	["blufor_SL_SOLDIER_X",       [_sl, _tl, _officer, _grunt, _infantry],                "B_Soldier_SL_F"],   //Comms voice, Multiplayer slot
-	["blufor_TL_SOLDIER_X",       [_tl, _sl, _grunt, _infantry],                          "B_Soldier_TL_F"],   //init_hq\fnc_HQguards
-	["blufor_MARK_SOLDIER_X",     [_marksman, _sniper, _grunt, _infantry],                "B_soldier_M_F"],    //init_hq\fnc_HQguards
-	["blufor_SNIPER_SOLDIER_X",   [_sniper, _marksman, _grunt, _infantry],                "B_sniper_F"],       //shared team rosters
-	["blufor_OFFICER_X",          [_officer, _sl, _tl, _grunt, _infantry],                "B_OFFICER_F"],      //init_hq\fnc_BluHQinit
+	["blufor_SOLDIER_X",          [_grunt, _sl, _gl, _infantry]],      //patrol, fortify, paradrop
+	["blufor_AA_SOLDIER_X",       [_aa, _hat, _lat, _grunt, _infantry]],   //shared team rosters
+	["blufor_AR_SOLDIER_X",       [_ar, _mg, _grunt, _infantry]],   //supports\fnc_paradrop, init_hq\fnc_HQguards
+	["blufor_AT_SOLDIER_X",       [_hat, _lat, _aa, _grunt, _infantry]],   //shared team rosters
+	["blufor_GL_SOLDIER_X",       [_gl, _grunt, _infantry]],   //init_hq\fnc_HQguards, supports\fnc_paradrop
+	["blufor_LAT_SOLDIER_X",      [_lat, _hat, _aa, _grunt, _infantry]],  //init_hq\fnc_HQguards, supports\fnc_paradrop
+	["blufor_SL_SOLDIER_X",       [_sl, _tl, _officer, _grunt, _infantry]],   //Comms voice, Multiplayer slot
+	["blufor_TL_SOLDIER_X",       [_tl, _sl, _grunt, _infantry]],   //init_hq\fnc_HQguards
+	["blufor_MARK_SOLDIER_X",     [_marksman, _sniper, _grunt, _infantry]],    //init_hq\fnc_HQguards
+	["blufor_SNIPER_SOLDIER_X",   [_sniper, _marksman, _grunt, _infantry]],       //shared team rosters
+	["blufor_OFFICER_X",          [_officer, _sl, _tl, _grunt, _infantry]],      //init_hq\fnc_BluHQinit
 
-	["blufor_ARMED_CAR1_X",       [_carArmed, _apcWheeled, _carTransport],                "B_MRAP_01_hmg_F"],             //random patrol
-	["blufor_APC1_X",             [_apcTracked, _apcWheeled, _carArmed],                  "B_APC_Tracked_01_rcws_F"],     //random patrol
-	["blufor_APC2_X",             [_apcWheeled, _apcTracked, _carArmed],                  "B_APC_Wheeled_01_cannon_F"],   //random patrol
-	["blufor_MBT_TANK1_X",        [_tank, _apcTracked, _apcWheeled],                      "B_MBT_01_cannon_F"],           //random patrol
-	["blufor_TRANS_HELI_X",       [_heliTransport, _heliArmed],                           "B_Heli_Transport_03_unarmed_F"],   //random patrol
-	["blufor_ATTACK_HELI_X",      [_heliArmed, _droneAir, _heliTransport],                "B_Heli_Attack_01_F"],          //dialog\fnc_request_hcATTchop, random patrol
-	["blufor_MISC_AIR_X",         [_planeArmed, _droneAir],                               "B_Plane_CAS_01_F"],            //dialog\fnc_request_hcCAS, random patrol
+	["blufor_ARMED_CAR1_X",       [_carArmed, _apcWheeled, _carTransport]],             //random patrol
+	["blufor_APC1_X",             [_apcTracked, _apcWheeled, _carArmed]],     //random patrol
+	["blufor_APC2_X",             [_apcWheeled, _apcTracked, _carArmed]],   //random patrol
+	["blufor_MBT_TANK1_X",        [_tank, _apcTracked, _apcWheeled]],           //random patrol
+	["blufor_TRANS_HELI_X",       [_heliTransport, _heliArmed]],   //random patrol
+	["blufor_ATTACK_HELI_X",      [_heliArmed, _droneAir, _heliTransport]],          //dialog\fnc_request_hcATTchop, random patrol
+	["blufor_MISC_AIR_X",         [_planeArmed, _droneAir]],            //dialog\fnc_request_hcCAS, random patrol
 
-	["blufor_TURRET_AA",          [_turretAA, _turretAT, _turretHMG, _turretAny],         "B_static_AA_F"],
-	["blufor_TURRET_AT",          [_turretAT, _turretAA, _turretHMG, _turretAny],         "B_static_AT_F"],
-	["blufor_TURRET_HMG",         [_turretHMG, _turretGMG, _turretAny],                   "B_HMG_01_high_F"],
-	["blufor_TURRET_GMG",         [_turretGMG, _turretHMG, _turretAny],                   "B_GMG_01_high_F"],
+	["blufor_TURRET_AA",          [_turretAA, _turretAT, _turretHMG, _turretAny]],
+	["blufor_TURRET_AT",          [_turretAT, _turretAA, _turretHMG, _turretAny]],
+	["blufor_TURRET_HMG",         [_turretHMG, _turretGMG, _turretAny]],
+	["blufor_TURRET_GMG",         [_turretGMG, _turretHMG, _turretAny]],
 	// The GMG rung before the MG one: a grenade launcher is the nearest thing a faction with no
 	// tube has to arcing HE. Read by fnc_static_resolve, like the four above.
-	["blufor_TURRET_MORTAR",      [_turretMortar, _turretGMG, _turretHMG, _turretAny],    "B_Mortar_01_F"],
+	["blufor_TURRET_MORTAR",      [_turretMortar, _turretGMG, _turretHMG, _turretAny]],
 
-	["blufor_SPECOPS_X",          [_spec_sl, _spec, _sl, _grunt, _infantry],              "B_recon_F"],
-	["blufor_SPECOPS_GL_X",       [_spec_gl, _gl, _grunt, _infantry],                     "B_Soldier_GL_F"],
-	["blufor_SPECOPS_LAT_X",      [_spec_lat, _lat, _hat, _grunt, _infantry],             "B_recon_LAT_F"],
-	["blufor_SPECOPS_HAT_X",      [_spec_hat, _hat, _lat, _grunt, _infantry],             "B_soldier_AT_F"],
-	["blufor_SPECOPS_AA_X",       [_spec_aa, _aa, _hat, _grunt, _infantry],               "B_soldier_AA_F"],
-	["blufor_SPECOPS_MG_X",       [_spec_mg, _spec_ar, _mg, _ar, _grunt, _infantry],      "B_Soldier_AR_F"],
-	["blufor_SPECOPS_MEDIC_X",    [_spec_medic, _medic, _grunt, _infantry],               "B_recon_medic_F"],
-	["blufor_SPECOPS_MARK_X",     [_spec_marksman, _marksman, _sniper, _grunt],           "B_recon_M_F"],
-	["blufor_SPECOPS_SNIPER_X",   [_spec_sniper, _sniper, _marksman, _grunt],             "B_sniper_F"],
-	["blufor_SPECOPS_EXP_X",      [_spec_exp, _exp, _eng, _grunt, _infantry],             "B_recon_exp_F"],
-	["blufor_SPECOPS_ENG_X",      [_spec_eng, _eng, _exp, _grunt, _infantry],             "B_engineer_F"],
+	["blufor_SPECOPS_X",          [_spec_sl, _spec, _sl, _grunt, _infantry]],
+	["blufor_SPECOPS_GL_X",       [_spec_gl, _gl, _grunt, _infantry]],
+	["blufor_SPECOPS_LAT_X",      [_spec_lat, _lat, _hat, _grunt, _infantry]],
+	["blufor_SPECOPS_HAT_X",      [_spec_hat, _hat, _lat, _grunt, _infantry]],
+	["blufor_SPECOPS_AA_X",       [_spec_aa, _aa, _hat, _grunt, _infantry]],
+	["blufor_SPECOPS_MG_X",       [_spec_mg, _spec_ar, _mg, _ar, _grunt, _infantry]],
+	["blufor_SPECOPS_MEDIC_X",    [_spec_medic, _medic, _grunt, _infantry]],
+	["blufor_SPECOPS_MARK_X",     [_spec_marksman, _marksman, _sniper, _grunt]],
+	["blufor_SPECOPS_SNIPER_X",   [_spec_sniper, _sniper, _marksman, _grunt]],
+	["blufor_SPECOPS_EXP_X",      [_spec_exp, _exp, _eng, _grunt, _infantry]],
+	["blufor_SPECOPS_ENG_X",      [_spec_eng, _eng, _exp, _grunt, _infantry]],
 
-	["blufor_HELI_PILOT_X",       [_pilot, _crew, _grunt],                                "B_Helipilot_F"],    //Rescue Pilot mission
-	["blufor_BOAT_ARMED_X",       [_boatArmed],                                           "B_Boat_Armed_01_minigun_F"],   //supports\taxi\fnc_boatTaxi
-	["blufor_BOAT_CREW_X",        [_crew],                                                "C_Man_UtilityWorker_01_F"],    //supports\taxi\fnc_boatTaxi
-	["blufor_HELI_TRANS_ARM_X",   [_heliArmed, _heliTransport],                           "B_Heli_Transport_01_F"]        //supports\taxi\fnc_helotaxi
+	["blufor_HELI_PILOT_X",       [_pilot, _crew, _grunt]],    //Rescue Pilot mission
+	["blufor_BOAT_ARMED_X",       [_boatArmed]],   //supports\taxi\fnc_boatTaxi
+	["blufor_BOAT_CREW_X",        [_crew]],    //supports\taxi\fnc_boatTaxi
+	["blufor_HELI_TRANS_ARM_X",   [_heliArmed, _heliTransport]]        //supports\taxi\fnc_helotaxi
 ];
 
 

@@ -90,6 +90,11 @@ while {!createzone_server} do {
 	// the player looking at a blank row the mission then quietly fills behind them.
 	{ [_x] call fnc_faction_backfill; } forEach ["blufor", "opfor"];
 
+	// After the same-side borrow, drop the schema's vanilla stand-in into any key a hand-written or
+	// pasted faction still left empty (or pointing at a class this install lacks). AutoDetect resolved
+	// its own; this is what keeps a preset that omits a role from reaching a spawner as MISSING.
+	{ [_x] call fnc_faction_vanilla_fill; } forEach ["blufor", "opfor"];
+
 	// Expand each role's representative into its faction's pool here, not only at the commit, so the
 	// confirmation screen can show the pool a spawn will draw from -- for a hand-written faction as
 	// much as an auto-detected one, since a static file assigns one class per role and only this pass
