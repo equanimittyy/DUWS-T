@@ -101,6 +101,12 @@ fnc_hardpoint_garrison = {
         ["O_Soldier_F", "B_Soldier_F"] select (_side isEqualTo "blufor")];
     private _men = [];
 
+    // Emplacement defenders must actually see the player. spawnGroup's overall-skill roll leaves spotting
+    // to the difficulty curve, which reads low enough here that a nest gets walked up on before it reacts.
+    // Force max detection (distance + reaction) on every defender; aiming stays on the skill roll, so they
+    // spot without becoming an aimbot.
+    private _maxSpot = { { _x setSkill ["spotDistance", 1]; _x setSkill ["spotTime", 1] } forEach _this };
+
     // Static guns first, always crewed: one man per gun, dropped and settled.
     private _guns = _objs select { !isNull _x && {alive _x} && {_x isKindOf "StaticWeapon"} };
     if (count _guns > 0) then {
@@ -108,6 +114,7 @@ fnc_hardpoint_garrison = {
         if (count _sp == 0) then { _sp = _pos };
         private _crew = [_sp, _sideObj, (_guns apply { _soldier }), [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
         _crew deleteGroupWhenEmpty true;
+        (units _crew) call _maxSpot;
         [_guns, _crew, _key] call DUWS_fnc_manStatics;
         _men append (units _crew);
     };
@@ -120,6 +127,7 @@ fnc_hardpoint_garrison = {
         if (count _sp == 0) then { _sp = _pos };
         private _crew = [_sp, _sideObj, (_arty apply { _soldier }), [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
         _crew deleteGroupWhenEmpty true;
+        (units _crew) call _maxSpot;
         {
             _x enableSimulationGlobal true;
             ((units _crew) param [_forEachIndex, objNull]) moveInGunner _x;
@@ -141,6 +149,7 @@ fnc_hardpoint_garrison = {
             if (count _sp == 0) then { _sp = _pos getPos [45, random 360] };
             private _grp = [_sp, _sideObj, _garrison, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
             _grp deleteGroupWhenEmpty true;
+            (units _grp) call _maxSpot;
             [_grp, "closepatrol", _pos, HP_GARRISON_PATROL_R] call fnc_apply_posture;
             _men append (units _grp);
         };
