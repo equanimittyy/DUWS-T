@@ -1101,3 +1101,20 @@ uncoloured, which reads as "the colour code is wrong" rather than "wrong tag".
 One further mismatch on conversion: `<font size='N'>` is absolute pixels, whereas `<t size='N'>`
 is a multiplier of the default. Copying `size='1.15'` or `size='2'` across renders ~1-2px text,
 effectively invisible -- drop the size or pick a real pixel value.
+
+## Seat and crew queries (`fullCrew`, `crew`) need a spawned object, not a classname
+
+**`fullCrew` takes a vehicle Object. Handed a classname String it throws `Type String, expected
+Object` and returns nothing. A capability check that runs in a menu build has only the classname --
+no vehicle exists yet -- so it cannot ask a crewed object how many seats it has.**
+
+When the throw lands inside a `call`ed classifier, the function returns nil rather than a tier, and
+a gate built on that verdict fails open: the below-tier test errors instead of refusing, execution
+falls through, and the purchase proceeds. One unhandled config-query error silently unlocks
+everything it was meant to gate.
+
+**How to apply:** count seats from config, which needs no object -- `getNumber (_cfg >> "hasDriver")
++ getNumber (_cfg >> "transportSoldier") + count ("true" configClasses (_cfg >> "Turrets"))`.
+`isKindOf`, `getNumber` and `configClasses` all take a classname; the seat/crew *object* commands
+(`fullCrew`, `crew`, `assignedDriver`) do not. `DUWS_fnc_vehTier`
+(`src/duws/shared/functions/fnc_ap_gate.sqf`) classifies purchasable vehicles this way.
