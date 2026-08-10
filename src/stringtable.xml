@@ -3422,8 +3422,8 @@
                 <English>Last Mobile HQ destroyed. Name another in %1 min</English>
             </Key>
             <Key ID="STR_DUWS_T_mhq_slot_row">
-                <Original>Mobile HQ Designation (0 CP) Radio</Original>
-                <English>Mobile HQ Designation (0 CP) Radio</English>
+                <Original>Mobile HQ Designation (0 CP)</Original>
+                <English>Mobile HQ Designation (0 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_MHQ_RELEASED_TITLE">
                 <Original>Mobile HQ Released</Original>
@@ -4632,8 +4632,8 @@
                 <German>Versorgungsabwurf (5CP) Funk</German>
                 <Spanish>Entrega de suministros (5 CP) Radio</Spanish>
                 <Chinesesimp>空投补给(5CP)</Chinesesimp>
-                <Original>Supply drop (5 CP) Radio</Original>
-                <English>Supply drop (5 CP) Radio</English>
+                <Original>Supply drop (5 CP)</Original>
+                <English>Supply drop (5 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_32rh9x5x">
                 <German>Versorgungsabwurf (2 CP)</German>
@@ -4653,8 +4653,8 @@
                 <German>Notfall Fahrzeugabwurf (5 CP) Funk</German>
                 <Spanish>Entrega de vehículo de emergencia (5 CP) Radio</Spanish>
                 <Chinesesimp>紧急载具空投(5CP)</Chinesesimp>
-                <Original>Emergency Vehicle drop (5 CP) Radio</Original>
-                <English>Emergency Vehicle drop (5 CP) Radio</English>
+                <Original>Emergency Vehicle drop (5 CP)</Original>
+                <English>Emergency Vehicle drop (5 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_jjzzkt01">
                 <German>Luftabwurf des Truppenteileinfiltrierungsfahrzeugs(10CP)</German>
@@ -4709,8 +4709,8 @@
                 <German>Drohnen Aufklärung (10CP) Funk</German>
                 <Spanish>Reconocimiento VANT (10 CP) Radio</Spanish>
                 <Chinesesimp>特种UAV(10CP)</Chinesesimp>
-                <Original>UAV Recon (10 CP) Radio</Original>
-                <English>UAV Recon (10 CP) Radio</English>
+                <Original>UAV Recon (10 CP)</Original>
+                <English>UAV Recon (10 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_n17vw60y">
                 <German>Drohnen Aufklärung (5 CP)</German>
@@ -4723,8 +4723,8 @@
                 <German>Helikopter-Transport (5CP) Funk</German>
                 <Spanish>Helicóptero Taxi (5 CP) Radio</Spanish>
                 <Chinesesimp>直升机运输(5CP)</Chinesesimp>
-                <Original>Helicopter Taxi (5 CP) Radio</Original>
-                <English>Helicopter Taxi (5 CP) Radio</English>
+                <Original>Helicopter Taxi (5 CP)</Original>
+                <English>Helicopter Taxi (5 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_1ptvv5b1">
                 <German>Helikopter-Transport</German>
@@ -4751,8 +4751,8 @@
                 <German>Boot-Transport (2CP) Funk</German>
                 <Spanish>Bote Taxi (2 CP) Radio</Spanish>
                 <Chinesesimp>船运(2CP)</Chinesesimp>
-                <Original>Boat Taxi (2 CP) Radio</Original>
-                <English>Boat Taxi (2 CP) Radio</English>
+                <Original>Boat Taxi (2 CP)</Original>
+                <English>Boat Taxi (2 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_evqwlyhz">
                 <German>Boot-Transport</German>
@@ -4765,8 +4765,8 @@
                 <German>Artillerieschlag (20CP) Funk</German>
                 <Spanish>Ataque de artillería (20 CP) Radio</Spanish>
                 <Chinesesimp>155毫米炮支援(20CP)</Chinesesimp>
-                <Original>Artillery Strike (20 CP) Radio</Original>
-                <English>Artillery Strike (20 CP) Radio</English>
+                <Original>Artillery Strike</Original>
+                <English>Artillery Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_q3roy1kl">
                 <German>Artillerieschlag (10 CP)</German>
@@ -4779,8 +4779,8 @@
                 <German>Mörserschlag (10CP) Funk</German>
                 <Spanish>Ataque de morteros (10 CP) Radio</Spanish>
                 <Chinesesimp>迫击炮支援(10CP)</Chinesesimp>
-                <Original>Mortar Strike (10 CP) Radio</Original>
-                <English>Mortar Strike (10 CP) Radio</English>
+                <Original>Mortar Strike</Original>
+                <English>Mortar Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_d0x7zj1h">
                 <German>Mörserschlag (5 CP)</German>
@@ -4793,8 +4793,8 @@
                 <German>JDAM Luftschlag (10CP) Funk</German>
                 <Spanish>Ataque JDAM (10 CP) Radio</Spanish>
                 <Chinesesimp>JDAM炸弹(10CP)</Chinesesimp>
-                <Original>JDAM strike (10 CP) Radio</Original>
-                <English>JDAM strike (10 CP) Radio</English>
+                <Original>JDAM strike (10 CP)</Original>
+                <English>JDAM strike (10 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_wcohwh4p">
                 <German>JDAM Luftschlag (3 CP)</German>
@@ -4807,8 +4807,8 @@
                 <German>Lasergelenkte Bombe (10CP) Funk</German>
                 <Spanish>Bomba Guiada por Láser (10 CP) Radio</Spanish>
                 <Chinesesimp>激光制导炸弹(10CP)</Chinesesimp>
-                <Original>Laser Guided Bomb (10 CP) Radio</Original>
-                <English>Laser Guided Bomb (10 CP) Radio</English>
+                <Original>Laser Guided Bomb (10 CP)</Original>
+                <English>Laser Guided Bomb (10 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_ifnnl0j7">
                 <German>Lasergelenkte Bombe (1 CP)</German>
@@ -4821,8 +4821,8 @@
                 <German>Mk.20 Streubomben (25CP) Funk</German>
                 <Spanish>Ataque con Bomba de racimo (25 CP) Radio</Spanish>
                 <Chinesesimp>Mk.20集束炸弹(25CP)</Chinesesimp>
-                <Original>Mk.20 Cluster Strike (25 CP) Radio</Original>
-                <English>Mk.20 Cluster Strike (25 CP) Radio</English>
+                <Original>Mk.20 Cluster Strike</Original>
+                <English>Mk.20 Cluster Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_jznptb3c">
                 <German>Mk.20 Streubomben (20 CP)</German>
@@ -4835,8 +4835,8 @@
                 <German>Napalm Luftschlag (20CP) Funk</German>
                 <Spanish>Ataque con Napalm (20 CP) Radio</Spanish>
                 <Chinesesimp>凝固汽油弹(20CP)</Chinesesimp>
-                <Original>Napalm Strike (20 CP) Radio</Original>
-                <English>Napalm Strike (20 CP) Radio</English>
+                <Original>Napalm Strike</Original>
+                <English>Napalm Strike</English>
             </Key>
             <Key ID="STR_DUWS_T_bhmydfkv">
                 <German>Napalm Luftschlag (15 CP)</German>
@@ -4849,8 +4849,8 @@
                 <German>HC Angriffshelikopter (20CP) Funk</German>
                 <Spanish>Helicóptero de ataque del Alto Mando (20 CP) Radio</Spanish>
                 <Chinesesimp>HC 攻击直升机(20CP)</Chinesesimp>
-                <Original>HC Attack Helicopter (20 CP) Radio</Original>
-                <English>HC Attack Helicopter (20 CP) Radio</English>
+                <Original>HC Attack Helicopter</Original>
+                <English>HC Attack Helicopter</English>
             </Key>
             <Key ID="STR_DUWS_T_9bxjbidl">
                 <German>HC Angriffshelikopter</German>
@@ -4863,8 +4863,8 @@
                 <German>HC CAS Jet (25CP) Funk</German>
                 <Spanish>Jet de Apoyo Áereo del Alto Mando (25 CP) Radio</Spanish>
                 <Chinesesimp>HC CAS战斗机(25CP)</Chinesesimp>
-                <Original>HC CAS Jet (25 CP) Radio</Original>
-                <English>HC CAS Jet (25 CP) Radio</English>
+                <Original>HC CAS Jet</Original>
+                <English>HC CAS Jet</English>
             </Key>
             <Key ID="STR_DUWS_T_f5y7ue87">
                 <German>HC CAS Jet</German>
@@ -4877,8 +4877,8 @@
                 <German>Fallschirmspringer (20CP) Funk</German>
                 <Spanish>Paracaídistas (20 CP)</Spanish>
                 <Chinesesimp>空降部队(20CP)</Chinesesimp>
-                <Original>Airborne troops (20 CP) Radio</Original>
-                <English>Airborne troops (20 CP) Radio</English>
+                <Original>Airborne troops (20 CP)</Original>
+                <English>Airborne troops (20 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_nafdmcoy">
                 <German>Fallschirmspringer (12 CP)</German>
@@ -5771,20 +5771,20 @@
                 <English>To Alpha 1-1, I'm on station over HQ. Ready to hit any enemy vehicles you spot.</English>
             </Key>
             <Key ID="STR_DUWS_T_fob_request_row">
-                <Original>Establish FOB (10 CP) Radio</Original>
-                <English>Establish FOB (10 CP) Radio</English>
+                <Original>Establish FOB (10 CP)</Original>
+                <English>Establish FOB (10 CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_radio_tower_1">
-                <Original>Radio Tower (15CP) Radio</Original>
-                <English>Radio Tower (15CP) Radio</English>
+                <Original>Radio Tower (15CP)</Original>
+                <English>Radio Tower (15CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_radio_tower_2">
-                <Original>Radio Tower II (25CP) Radio</Original>
-                <English>Radio Tower II (25CP) Radio</English>
+                <Original>Radio Tower II (25CP)</Original>
+                <English>Radio Tower II (25CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_radio_tower_3">
-                <Original>Radio Tower III (40CP) Radio</Original>
-                <English>Radio Tower III (40CP) Radio</English>
+                <Original>Radio Tower III (40CP)</Original>
+                <English>Radio Tower III (40CP)</English>
             </Key>
             <Key ID="STR_DUWS_T_slingshot">
                 <German>Schleuder 1-1</German>

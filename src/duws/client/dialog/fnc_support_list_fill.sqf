@@ -47,21 +47,20 @@ private _rows = [];   // listbox index -> its def, [] for a heading
             "_insBlocked", "_modernOnly"];
         private _free = _key == "mobile_HQ" && _insurgent;
         private _label = localize ([_labelKey, "STR_DUWS_T_b7gmddq3_free"] select _free);
-        // Escalation surcharge, appended rather than substituted. Each label carries its base cost
-        // inside its own stringtable text ("Supply Drop (5CP) Radio"), so the written number stays
-        // the base and the scaled figure follows it. Stripping the numbers out and re-formatting
-        // from a placeholder is tidier and rejected: a %1 added to English but not to the other
-        // four languages leaves them printing the stale baked figure, which is a wrong number
-        // rather than an untranslated one. A row the mode gives away is already labelled 0 CP.
-        if (_escalated && !_free) then {
-            _label = format [localize "STR_DUWS_T_escalation_row", _label, [_cost] call fnc_escalation_cost];
-        };
-        // The AP half of an advanced support's dual price, appended after the CP label (which bakes
-        // its own number). Append, never substitute -- same reason as the escalation surcharge above:
-        // a %1 added to English but not the other four languages would strand the baked figure.
+        // The price bracket. A dual-cost support carries its whole price built here -- its CP half was
+        // lifted out of the English and Original label strings so the AP can join it in one bracket --
+        // while a CP-only row keeps the base cost baked in its label and takes only the escalation
+        // surcharge appended. Both scale the CP by escalation; the mode's free rows carry a 0 CP label
+        // and take neither. Only English and Original were stripped, so the other languages still show
+        // their own baked bracket ahead of this one until they are retranslated.
         private _apCost = _x param [8, 0];
         if (_apCost > 0) then {
-            _label = format [localize "STR_DUWS_T_support_ap_suffix", _label, _apCost];
+            private _cp = if (_escalated && !_free) then { [_cost] call fnc_escalation_cost } else { _cost };
+            _label = _label + format [" (%1CP, %2AP)", _cp, _apCost];
+        } else {
+            if (_escalated && !_free) then {
+                _label = format [localize "STR_DUWS_T_escalation_row", _label, [_cost] call fnc_escalation_cost];
+            };
         };
         // The tier tag, appended after the price. A locked row is greyed below, whatever state colour
         // it would otherwise have carried.
