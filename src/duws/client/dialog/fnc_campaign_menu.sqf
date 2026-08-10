@@ -96,29 +96,23 @@ index_cp_death_penalty_8 = lbAdd [2107, "8"];
 index_cp_death_penalty_10 = lbAdd [2107, "10"];
 [2107, index_cp_death_penalty_2] call _setDefault;
 
-// BLUFOR starting tier -- the campaign begins with BLUFOR's capability ladder already at this tier
-// (fnc_WARCOM_init seeds earned + tier, opens the wallet at 0). Tier 0 starts from scratch; tier 7
-// opens with air pre-unlocked. Labelled by tier, not AP, since the number is no longer a spendable bank.
-index_blufor_ap_t0 = lbAdd [2108, "Tier 0"];
+// BLUFOR starting tier (1-5) -- the campaign begins with BLUFOR's capability ladder already at this
+// tier (fnc_WARCOM_init seeds earned + tier, opens the wallet at 0). Tier 1 is infantry from scratch;
+// tier 5 opens with jets. Labelled by tier, not AP, since the number is no longer a spendable bank.
 index_blufor_ap_t1 = lbAdd [2108, "Tier 1"];
 index_blufor_ap_t2 = lbAdd [2108, "Tier 2"];
 index_blufor_ap_t3 = lbAdd [2108, "Tier 3"];
 index_blufor_ap_t4 = lbAdd [2108, "Tier 4"];
 index_blufor_ap_t5 = lbAdd [2108, "Tier 5"];
-index_blufor_ap_t6 = lbAdd [2108, "Tier 6"];
-index_blufor_ap_t7 = lbAdd [2108, "Tier 7"];
-[2108, index_blufor_ap_t2] call _setDefault;
+[2108, index_blufor_ap_t1] call _setDefault;
 
 // OPFOR starting tier -- same ladder.
-index_opfor_ap_t0 = lbAdd [2109, "Tier 0"];
 index_opfor_ap_t1 = lbAdd [2109, "Tier 1"];
 index_opfor_ap_t2 = lbAdd [2109, "Tier 2"];
 index_opfor_ap_t3 = lbAdd [2109, "Tier 3"];
 index_opfor_ap_t4 = lbAdd [2109, "Tier 4"];
 index_opfor_ap_t5 = lbAdd [2109, "Tier 5"];
-index_opfor_ap_t6 = lbAdd [2109, "Tier 6"];
-index_opfor_ap_t7 = lbAdd [2109, "Tier 7"];
-[2109, index_opfor_ap_t3] call _setDefault;
+[2109, index_opfor_ap_t2] call _setDefault;
 
 // AI BLU SKILL
 index_blu_skill_elite = lbAdd [2110, localize "STR_DUWS_T_7ovwb13n"];

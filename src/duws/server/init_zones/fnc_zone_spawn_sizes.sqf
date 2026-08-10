@@ -207,18 +207,18 @@ DUWS_fnc_raiseGarrison = {
 //       climb one honest ladder; which token hangs off which rung is a balance decision, and tuning.
 // --DUWS-UNITCOMP BEGIN name="OPFOR vehicles" kind=team row="token, role, setting, ap" fields="token, faction role, campaign setting, AP required" prefix=opfor_--
 DUWS_spawnVehicles = [
-    ["car",        "opfor_ARMED_CAR1_X",    "",           0],
+    ["car",        "opfor_ARMED_CAR1_X",    "",           100],
     ["truck",      "opfor_COVERED_TRUCK_X", "",           0],
     ["transport",  "opfor_TRANS_TRUCK_X",   "",           0],
     ["ammo",       "opfor_AMMO_TRUCK_X",    "",           0],
     ["repair",     "opfor_REPAIR_TRUCK_X",  "",           0],
-    ["apc",        "opfor_APC1_X",          "",           100],
+    ["apc",        "opfor_APC1_X",          "",           175],
     ["ifv",        "opfor_APC2_X",          "",           175],
     ["aa",         "opfor_AA_APC_X",        "",           175],
     ["tank",       "opfor_MBT_TANK1_X",     "HeavyArmor", 300],
-    ["attackheli", "opfor_ATTACK_HELI_X",   "AttackHeli", 500],
-    ["transheli",  "opfor_TRANS_HELI_X",    "AttackHeli", 0],
-    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 850]
+    ["attackheli", "opfor_ATTACK_HELI_X",   "AttackHeli", 300],
+    ["transheli",  "opfor_TRANS_HELI_X",    "AttackHeli", 175],
+    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 500]
 ];
 // --DUWS-UNITCOMP END--
 

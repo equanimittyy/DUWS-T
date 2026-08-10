@@ -271,16 +271,13 @@ switch (_index) do {
 _index = lbCurSel 2108;
 switch (_index) do
 {
-    // Starting tier -> the rung seeded into the earned counter: fnc_WARCOM_init reads this as the
-    // ladder position, then opens the wallet at 0. The eight rows are DUWS_ap_tier_rungs plus zero.
-    case index_blufor_ap_t0: { WARCOM_blufor_ap = 0; };
-    case index_blufor_ap_t1: { WARCOM_blufor_ap = 50; };
+    // Starting tier -> the earned AP seeded into the counter: fnc_WARCOM_init reads this as the ladder
+    // position (tier 1 = infantry at 0), then opens the wallet at 0. Values are 0 + DUWS_ap_tier_rungs.
+    case index_blufor_ap_t1: { WARCOM_blufor_ap = 0; };
     case index_blufor_ap_t2: { WARCOM_blufor_ap = 100; };
     case index_blufor_ap_t3: { WARCOM_blufor_ap = 175; };
     case index_blufor_ap_t4: { WARCOM_blufor_ap = 300; };
     case index_blufor_ap_t5: { WARCOM_blufor_ap = 500; };
-    case index_blufor_ap_t6: { WARCOM_blufor_ap = 850; };
-    case index_blufor_ap_t7: { WARCOM_blufor_ap = 1400; };
 };
 
 // ARMY POWER OPFOR
@@ -288,14 +285,11 @@ _index = lbCurSel 2109;
 switch (_index) do
 {
     // Same rungs on the OPFOR side.
-    case index_opfor_ap_t0: { WARCOM_opfor_ap = 0; };
-    case index_opfor_ap_t1: { WARCOM_opfor_ap = 50; };
+    case index_opfor_ap_t1: { WARCOM_opfor_ap = 0; };
     case index_opfor_ap_t2: { WARCOM_opfor_ap = 100; };
     case index_opfor_ap_t3: { WARCOM_opfor_ap = 175; };
     case index_opfor_ap_t4: { WARCOM_opfor_ap = 300; };
     case index_opfor_ap_t5: { WARCOM_opfor_ap = 500; };
-    case index_opfor_ap_t6: { WARCOM_opfor_ap = 850; };
-    case index_opfor_ap_t7: { WARCOM_opfor_ap = 1400; };
 };
 
 // AI BLUFOR Skill

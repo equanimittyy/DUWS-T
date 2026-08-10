@@ -39,13 +39,14 @@ fnc_cp_adjust = {
 // recurring faucets and spending never touches it), so a wallet spent down cannot drop the tier.
 // Capability sites read the earned counter directly against their own thresholds; this integer is
 // the coarse summary of the same climb, for the readout and (later) the save, and the shared scale
-// both sides' capability gates sit on. The rungs run an exponential curve (~x1.7 a step) so that,
-// against OPFOR's ~94 AP/hr from six zones, the unlocks pace out over hours rather than minutes:
-// tier 2 ~1 h, tier 4 ~3 h, the top ~15 h. The eight starting-tier presets are these rungs plus zero.
-DUWS_ap_tier_rungs = [50, 100, 175, 300, 500, 850, 1400];
+// both sides' capability gates sit on. Five tiers: tier 1 is infantry at 0 AP (always available), and
+// the four rungs gate the vehicle classes above it on an exponential curve (~x1.7 a step). Against
+// OPFOR's ~94 AP/hr from six zones that paces motorised ~1 h, mechanised ~2 h, armour ~3 h, jets ~5 h.
+DUWS_ap_tier_rungs = [100, 175, 300, 500];
+// Tier 1 (infantry) is the floor at earned 0, so the tier is one plus the rungs crossed, ranging 1-5.
 DUWS_fnc_ap_tier = {
 	params ["_earned"];
-	{ _earned >= _x } count DUWS_ap_tier_rungs
+	1 + ({ _earned >= _x } count DUWS_ap_tier_rungs)
 };
 
 // Server-authoritative Army Power mutation -- same delta contract as fnc_cp_adjust:
