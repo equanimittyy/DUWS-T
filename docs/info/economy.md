@@ -1,11 +1,14 @@
 # Economy: CP, AP and reputation
 
-Command Points (CP, the global `commandpointsblu1`) are the single currency the player spends — on
+Command Points (CP, the global `commandpointsblu1`) are the player's throughput currency — spent on
 support unlocks, reinforcements, vehicles, FOBs, operatives and transport. Army Power (AP,
-`WARCOM_blufor_ap`) is a separate war-momentum score the WARCOM director reads; it is not spent from
-menus. Town reputation is a third pool, per town rather than campaign-wide. The three meet in one
-place: the AP→CP converter (`fnc_convertAPtoCP.sqf`). Faction-specific purchase prices live in the
-`blufor_RQST_*` variables and `fnc_evalVehicleCost` — see [`faction_system.md`](faction_system.md).
+`WARCOM_blufor_ap`) is the earned-capability currency: it gates the tier ladder, and it is now also
+spent from the menus — on advanced supports today, with combat vehicles priced CP-only for the
+moment. Town reputation is a third pool, per town rather than campaign-wide, and its band routes a
+town's passive income to a side: CP to a BLUFOR town, AP to an OPFOR one. Vehicle prices come from
+`DUWS_fnc_vehPrice` (`shared/functions/fnc_veh_price.sqf`) over the shipped `blufor_RQST_*` tables —
+see [`faction_system.md`](faction_system.md). The full reroute and the work still open on it are
+[`../economy_second_pass.md`](../economy_second_pass.md).
 
 ## Authority: one server-side writer per pool
 
@@ -35,10 +38,9 @@ Both pools floor at 0 as CP does: losing a zone sheds the same AP swing that tak
 unclamped pool could sit deeply negative, and every WARCOM wave threshold reads *"above N"* anyway.
 Two deliberate differences from `fnc_cp_adjust`: an unrecognised side drops the delta and logs it
 rather than crediting the wrong pool, so a bad call shows up in the RPT instead of corrupting a pool
-or throwing; and there is no display refresh, because AP has no HUD counter and no
-`publicVariableEventHandler` — which is why `fnc_convertAPtoCP.sqf` paints control 1002 from its own
-expected post-spend total instead of re-reading the pool, whose local copy is still pre-spend at that
-point.
+or throwing; and there is no display refresh, because AP has no live HUD counter and no
+`publicVariableEventHandler` — it surfaces on demand in the map readout and in the request-menu
+labels of what it now buys, not through a pushed update.
 
 **Reputation is territory, and `fnc_town_rep_adjust` is its only writer.** Same contract with one
 addition: the writer owns the rounding as well as the write. Reputation is the only pool taking
@@ -116,7 +118,8 @@ in `supports/taxi/` spend nothing.
 paths listed above as handshake exceptions each apply it themselves, and are the only places that have
 to remember to. It is defined beside the pool writers rather than in `fnc_escalation.sqf` so the
 purchase path does not depend on whether escalation ever started — with no multiplier published it is
-the identity.
+the identity. It scales CP only: on a dual CP+AP price (the advanced supports) `fnc_pool_try_spend`
+multiplies the CP half and leaves the AP half at face value, so escalation is a CP lever, not an AP one.
 
 The multiplier is `publicVariable`d because the request menu displays it. Base costs are baked into
 each row's stringtable label (`"Supply Drop (5CP) Radio"`), so `client/dialog/fnc_request_menu.sqf`
@@ -180,52 +183,50 @@ which inverts what the death penalty is for.
 
 | Source | File | Amount |
 |---|---|---|
-| Zone capture (first time) | `server/init_zones/fnc_captured.sqf:46` | the zone's bounty — ≈50 for a 1000 m zone |
-| Zone recapture (after loss) | `server/init_zones/fnc_blufor_cap.sqf:61` | the bounty as decayed by prior captures — ≈17, then ≈6, … |
-| Passive territory hold | `server/misc/fnc_zonesundercontrol.sqf:54-56` | `zones_held × 6`, every 30 min |
-| Side-mission reward | `server/missions/fnc_mission_reward.sqf` | `reward × cp_reward_multiplier` (multiplier default 1) |
-| Town Army Power | `server/misc/fnc_zonesundercontrol.sqf:32-46` | AP, not CP: each banded town's worth of 1–3 to whichever side holds it, every 30 min |
+| Zone first capture | `server/init_zones/fnc_captured.sqf:37-43` | once ever per zone: `zone_first_capture_cp` (25) CP + `zone_first_capture_ap` (50) AP; the AP credits BLUFOR's tier |
+| Zone recapture | `server/init_zones/fnc_blufor_cap.sqf` | nothing — a zone's reward is earned once, so trading it back and forth is not a faucet |
+| Zone hold (AP trickle) | `server/misc/fnc_zonesundercontrol.sqf:69-82` | AP each side: `zones_held × zone_ap_trickle` (5), throttled, every 30 min; credits that side's tier |
+| Town income | `server/misc/fnc_zonesundercontrol.sqf:56-83` (`fnc_civ_townIncome`) | each banded town's worth (1–5 by size, `civ_town_ap`) to its holder every 30 min, throttled — CP to a BLUFOR town, AP to an OPFOR one |
+| OPFOR flat income | `server/misc/fnc_zonesundercontrol.sqf:71` | AP: flat `opfor_flat_ap_income` (2) per tick, unscaled — a floor for a director that has lost its towns |
+| OPFOR capture consolation | `fnc_captured.sqf:48-51`, `fnc_blufor_cap.sqf:32-35` | AP to OPFOR on every BLUFOR capture: `worth × zone_ap_consolation` (0.15), wallet only |
+| Zone-loss swing | `server/init_zones/fnc_opfor_cap.sqf:51-53` | AP: `worth × zone_ap_swing` (0.15) to OPFOR, the same figure removed from BLUFOR |
+| Side-mission reward | `server/missions/fnc_mission_reward.sqf` | CP `reward × cp_reward_multiplier` (×1.5 when civs-off), plus a BLUFOR AP reward that credits the tier |
 | Recruit rescued civilian | `server/misc/fnc_recruit_civilian_server.sqf` | +5 (+8 in WBK mode) |
-| Intel analysis (terminal) | `server/misc/fnc_intelAnalysis.sqf` | 1–2 for the two corpse-loot items, 4–6 for the four a search drops, 8 for either secret file |
-| Enemy corpse loot | `server/misc/fnc_addRandomLoot.sqf` → analysis | ~80% of enemies carry 0–2 of Money/Files/Wallet |
+| Intel analysis (terminal) | `server/misc/fnc_intelAnalysis.sqf` | 1 CP for a `Files`/`Wallet_ID` corpse item, 2 for `Wallet_traitor`, 5 for a `FilesSecret`/`FileTopSecret` document |
+| Enemy corpse loot | `server/misc/fnc_addRandomLoot.sqf` → analysis | ~60% of enemies carry 0–2 of Money/Files/Wallet |
 | Search payout (`pool` kind) | `server/misc/fnc_search_claim.sqf` | +1–3 CP, on a flagged body or objective whose payout draw lands on `pool` |
 | Vehicle recycle | `server/supports/fnc_activateBaseRecycleStation.sqf` | `DUWS_fnc_calculateVehicleValue` per empty vehicle, summed then rounded |
 | Kill income | `server/server_init.sqf:257-276` | +1 per 10 hostile kills, swept on the economy tick; the remainder carries |
 | Killhouse training | `server/misc/fnc_createKillhouse.sqf:1072` | +1 (targets) or +10 (challenge), once, on clearing all 100 |
 | Rare-zombie kill (WBK) | `server/misc/fnc_civ_handler_wbk.sqf:359` | +10, or +30 for the Goliath |
-| AP→CP conversion | `client/dialog/fnc_convertAPtoCP.sqf` | 15 AP → 10 CP, one-way |
 | Support refund | `client/supports/fnc_supports_init.sqf` | the recorded charge in full; `support_death_refund` of the slate when its holder dies |
 
-**A zone carries two figures, and they behave differently on purpose.** Both ride the capture triggers
-— `fnc_createzone.sqf:280` → `fnc_captured.sqf` → `fnc_opfor_cap.sqf` → `fnc_blufor_cap.sqf` and round
-again — as arguments 2 and 7:
+**A zone's worth is one figure now, not two.** `_points` (the worth) rides the capture triggers —
+`fnc_createzone.sqf:280` → `fnc_captured.sqf` → `fnc_opfor_cap.sqf` → `fnc_blufor_cap.sqf` — as
+argument 2, is set from the zone's radius at generation and stored in `zone_meta_array`, and is never
+reassigned: a zone swings the same AP however often it changes hands. The old per-capture CP *bounty*
+(argument 7, `worth × zone_cp_capture` decaying by `zone_cp_recapture`) is retired with the town→CP
+reroute — the three cap handlers still read the 7th arg to keep one trigger signature, but it is
+passed `0` and no CP rides a capture. A zone's CP is now the one-time liberation bonus at its first
+capture; everything else it drives is AP.
 
-| Figure | Set by | Behaviour |
-|---|---|---|
-| **Worth** (`_points`) | zone radius at generation, also stored in `zone_meta_array` | Never reassigned. AP is measured against it, so a zone swings the same momentum however often it changes hands |
-| **Bounty** (`_bounty`) | `round(worth × zone_cp_capture)` at generation | The CP the next capture pays. Multiplied by `zone_cp_recapture` on every capture, so it decays as the zone flips |
-
-The split is the design: ground fought over repeatedly has been looted already and should stop being a
-payday, but it has not become less strategically valuable, so the AP swing must not decay with it.
-Deriving both from one variable is what the earlier code did, and it compounded around the ownership
-loop — a contested zone decayed toward paying nothing in *either* currency while `zone_meta_array`
-still recorded its original worth. Tuning constants are grouped in `server/server_var_init.sqf`:
-`zone_cp_capture`, `zone_cp_recapture`, `zone_ap_swing`, `zone_ap_consolation`.
-
-Losing a zone pays no CP, so `fnc_opfor_cap` passes the bounty through untouched; only a capture decays
-it. Once it rounds to 0 the CP award and its notification are skipped rather than announcing a payday
-of nothing.
+What worth drives, all tuned in `server/server_var_init.sqf`: the OPFOR AP swing on a BLUFOR loss
+(`zone_ap_swing`, the same figure removed from BLUFOR), and the OPFOR consolation on a BLUFOR capture
+(`zone_ap_consolation`). Both are wallet-only shares of worth, and neither decays as the zone flips —
+ground fought over repeatedly is no less strategically valuable, so its AP must not thin with it.
 
 **The passive-hold loop is the campaign's single economy clock.** It is spawned exactly once
-(`server/warcom/fnc_init_OPFOR_WARCOM.sqf:20`), so territory income does not stack per zone captured,
-and territory CP, town AP and kill income are all paid from the same 30-minute iteration. Equal nominal
-periods are not one clock — a suspended thread resumes when the scheduler reaches it, so separate loops
-accrue their own slop and walk apart. The tick reports itself in one Overlord line carrying the
-territory take, CP and AP. Kill income is paid on the same tick but kept out of that figure and
-announced only to the player who earned it: naming attrition in a campaign-wide report would advertise
-kill farming as an income route. Only the territory CP is gated on `zoneundercontrolblu > 0` — AP pays
-unconditionally, since the enemy banking its towns while the player holds nothing is the case the town
-economy exists to model.
+(`server/warcom/fnc_init_OPFOR_WARCOM.sqf:17`), so income does not stack per zone captured, and every
+passive faucet — the zone AP trickle both sides, BLUFOR town CP, OPFOR town AP, the OPFOR flat floor
+and kill income — is paid from the same 30-minute iteration. Equal nominal periods are not one clock:
+a suspended thread resumes when the scheduler reaches it, so separate loops accrue their own slop and
+walk apart. No faucet is gated on holdings — a side with no towns or zones simply computes 0 from
+them, and OPFOR's flat floor still pays — because the enemy banking its towns while the player holds
+nothing is exactly the case the town economy exists to model. The tick reports BLUFOR's take in one
+Overlord line (town CP and zone AP), and cards the throttle percentage beside it when campaign size
+is cutting the faucets. Kill income rides the same tick but is kept out of that line and announced
+only to the player who earned it: naming attrition in a campaign-wide report would advertise kill
+farming as an income route.
 
 Each iteration bumps `econ_tick`, the clock's sequence number. Anything wanting a "once per payout
 window" cap keys off that rather than starting a timer of its own — `fnc_civ_healed.sqf` is the one
@@ -236,9 +237,9 @@ only server-side caps read it.
 
 | Category | Where | Cost |
 |---|---|---|
-| Support unlocks | `client/supports/fnc_supports_init.sqf` | 2–25 (boat taxi 2 … CAS/CAP 25); refundable if consumable, see [above](#supports-permanent-and-consumable) |
+| Support unlocks | `client/supports/fnc_supports_init.sqf` | CP 2–25 (boat taxi 2 … CAS/CAP 25), plus AP 20–40 on the advanced rows (catalogue column 8); refundable if consumable, see [above](#supports-permanent-and-consumable) |
 | Reinforcement units | `dialog/fnc_request_unit*.sqf` | 2–4 (from `blufor_RQST_UNIT_*`) |
-| Vehicles | `dialog/fnc_request_vehicle*.sqf` | 5–100 (from `fnc_evalVehicleCost`, clamped) |
+| Vehicles | `dialog/fnc_request_vehicle*.sqf` | CP only today, from `DUWS_fnc_vehPrice` (`shared/functions/fnc_veh_price.sqf`): a kind band set by role, a heaviness score placing the vehicle inside it |
 | Squads | `dialog/fnc_request_squad*.sqf` | per squad table |
 | FOB deploy | `client/supports/fnc_request_fob.sqf` | fixed |
 | Operatives | `client/operative/fnc_operator_recruit.sqf:29` | 8 (re-deploying a healed one is free) |
@@ -249,8 +250,8 @@ only server-side caps read it.
 
 Open balance questions — the territory snowball, the loot-to-analysis faucet, recycle ownership, AP
 inflation and the bribe figures — are in
-[`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#economy-balance); the redesign that would spend AP is
-[`../economy_second_pass.md`](../economy_second_pass.md).
+[`../../KNOWN_ISSUES.md`](../../KNOWN_ISSUES.md#economy-balance); the reroute that put AP on the menus
+and the work still open on it are [`../economy_second_pass.md`](../economy_second_pass.md).
 
 ## Who may spend
 
@@ -260,7 +261,7 @@ and checked as `(vehiclevarname player) in <list>`:
 | List | Owns |
 |---|---|
 | `game_master` | campaign-level control — the setup flow, side-mission requests (`client/missions/fnc_stratmap.sqf:24`), the global heal |
-| `Squad_Leaders` | everything that spends CP — request menus, radio supports, MHQ, FOB redeploy — plus High Command |
+| `Squad_Leaders` | everything that spends CP or AP — request menus, radio supports, MHQ, FOB redeploy — plus High Command |
 
 `Squad_Leaders` lists every playable slot as shipped, so it restricts nothing today. It exists to be
 trimmed: on a dedicated server, cutting it to the real squad-lead slots restricts all of the above in a
