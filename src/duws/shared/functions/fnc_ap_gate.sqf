@@ -59,15 +59,17 @@ DUWS_fnc_squadRow = {
 //   _rows: [[_label, _tier, _unlocked, _data], ...]
 DUWS_fnc_tierListFill = {
     params ["_ctrl", "_rows"];
-    // Composite string key: "0"/"1" puts unlocked ahead of locked, the lowercased label orders each
-    // block. SQF sort takes string subarray keys, so no numeric collation is needed.
-    private _keyed = _rows apply {
-        _x params ["_label", "", "_unlocked"];
-        [(["1", "0"] select _unlocked) + toLower _label, _x]
-    };
+    // Sort key is [ "0"/"1" + lowercased label, original index ]: the prefix puts unlocked ahead of
+    // locked, the label orders each block, and the index is a scalar tie-break so sort never has to
+    // compare the row payloads -- two identical labels would otherwise drop it onto a boolean it
+    // cannot order.
+    private _keyed = [];
+    {
+        _keyed pushBack [(["1", "0"] select (_x select 2)) + toLower (_x select 0), _forEachIndex];
+    } forEach _rows;
     _keyed sort true;
     {
-        (_x select 1) params ["_label", "_tier", "_unlocked", "_data"];
+        (_rows select (_x select 1)) params ["_label", "_tier", "_unlocked", "_data"];
         private _text = _label;
         if (!_unlocked) then { _text = _text + " " + format [localize "STR_DUWS_T_tier_tag", _tier] };
         private _i = lbAdd [_ctrl, _text];
