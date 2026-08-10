@@ -10,7 +10,6 @@ if (!hasInterface) exitWith {};
 
 closeDialog 0;
 call fnc_map_readout_open;
-call fnc_map_sidebar;
 
 // Bounded, because the readout refuses to open while another map mode holds the click claim. On a
 // refusal there is no map to wait for and the menu goes straight back up. Real time rather than

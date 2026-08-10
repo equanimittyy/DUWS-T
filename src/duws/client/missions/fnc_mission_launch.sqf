@@ -21,8 +21,3 @@ if (_slot isEqualTo []) exitWith {
 
 _slot params ["_pos", "_name"];
 [_pos, _name] remoteExec [(_defs select _type) select 0, 2];
-
-// Consume the cached batch: its positions were placed once, and the next generation must draw a
-// fresh set. Cleared here, the one point both the map picker and the old strategic map reach, so
-// neither reopens onto a batch holding the mission just launched.
-uiNamespace setVariable ["DUWS_sideMissionCache", nil];
