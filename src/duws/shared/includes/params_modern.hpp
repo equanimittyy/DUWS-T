@@ -7,28 +7,6 @@ class Params {
         default = 0;
     };
 
-    // Whether the developer menu exists at all, not who may open it: a parameter is mission
-    // config, so every machine in a session reads the same value. client_init.sqf gates the
-    // menu on game_master as well, or this would hand it to every client on the server.
-    class DUWS_Debug {
-        title = "Debug";
-        values[] = {0,1};
-        texts[] = {"Disabled","Enabled"};
-        default = 0;
-    };
-
-    // How long litter survives before the map sweep deletes it -- one lifetime for bodies,
-    // wrecks, abandoned vehicles, dropped weapons, smoke, crates and parachutes alike. The sweep
-    // is always on: teardowns hand it their live leftovers, so there is no off. A longer lifetime
-    // trades framerate for tidiness. Anything tagged persistent ignores this, so the HQ and
-    // side-mission objectives are not affected by shortening it.
-    class DUWS_CleanupLifetime {
-        title = "Garbage Collection";
-        values[] = {300,600,900,1200,1800,2400,3000,3600};
-        texts[] = {"5 minutes","10 minutes","15 minutes","20 minutes","30 minutes","40 minutes","50 minutes","60 minutes"};
-        default = 900;
-    };
-
     // Hybrid keeps the player's own faction unlimited but count-tracks captured foreign gear against
     // the banked pool; Full restores the legacy everything-unlimited arsenal. Read on the machine that
     // opens the arsenal (client/misc/fnc_duws_Arsenal.sqf), so every opener reads the same value.
@@ -46,6 +24,37 @@ class Params {
         title = "Track Ammo";
         values[] = {0,1};
         texts[] = {"Off (ammo unlimited)","On (ammo tracked)"};
+        default = 0;
+    };
+
+    // How long litter survives before the map sweep deletes it -- one lifetime for bodies,
+    // wrecks, abandoned vehicles, dropped weapons, smoke, crates and parachutes alike. The sweep
+    // is always on: teardowns hand it their live leftovers, so there is no off. A longer lifetime
+    // trades framerate for tidiness. Anything tagged persistent ignores this, so the HQ and
+    // side-mission objectives are not affected by shortening it.
+    class DUWS_CleanupLifetime {
+        title = "Garbage Collection";
+        values[] = {300,600,900,1200,1800,2400,3000,3600};
+        texts[] = {"5 minutes","10 minutes","15 minutes","20 minutes","30 minutes","40 minutes","50 minutes","60 minutes"};
+        default = 900;
+    };
+
+    // Inert separator: a value-less row the engine renders but never reads, splitting the
+    // gameplay options above from the developer options below.
+    class DUWS_Divider_Dev {
+        title = "--------- Developer ---------";
+        values[] = {0};
+        texts[] = {""};
+        default = 0;
+    };
+
+    // Whether the developer menu exists at all, not who may open it: a parameter is mission
+    // config, so every machine in a session reads the same value. client_init.sqf gates the
+    // menu on game_master as well, or this would hand it to every client on the server.
+    class DUWS_Debug {
+        title = "Debug";
+        values[] = {0,1};
+        texts[] = {"Disabled","Enabled"};
         default = 0;
     };
 
