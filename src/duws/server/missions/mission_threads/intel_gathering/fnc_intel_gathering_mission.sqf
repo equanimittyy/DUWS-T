@@ -5,7 +5,7 @@ params ["_MissionPos", "_mission_name"];
 private _radius = 800;
 private _minBuildings = 20;
 _cpreward = 5;
-_apreward = 5;
+_apreward = 10;
 private _usableBuildings = [_MissionPos, 3, _radius] call fnc_usableBuildings;
 
 if (count _usableBuildings < _minBuildings) exitWith {

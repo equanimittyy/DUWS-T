@@ -5,7 +5,7 @@
 params ["_object", "_missionPos", "_targetPos", "_mission_name", "_markername2", "_radius"];
 
 _cpreward = 10;
-_apreward = 18;
+_apreward = 36;
 
 // setObjectTexture is local, so the dead screen only ever showed for the player who did the
 // hacking; everyone else kept looking at a live laptop on a finished mission. The global form

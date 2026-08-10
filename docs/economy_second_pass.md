@@ -351,18 +351,19 @@ a garrison or two — about 300 AP of spending.
 
 | Faucet | Rule | Per event | Share, mid-late |
 |---|---|---|---|
-| Zone hold trickle | per held zone, per 30-min tick, × `DUWS_econ_throttle` | 5 AP/zone (10/hr) | ~75% |
-| Side mission | remapped to a 5-20 band by difficulty | 5-20 | ~25% |
+| Zone hold trickle | per held zone, per 30-min tick, × `DUWS_econ_throttle` | 5 AP/zone (10/hr) | ~60% |
+| Side mission | remapped to a 10-40 band by difficulty | 10-40 | ~40% |
 | First capture (once ever) | one-time CP + AP bonus, persistence-tracked | bonus | — |
 
 A six-zone campaign held whole pays 60 AP/hr from the trickle, a small four-zone one 40; missions
-add roughly 13 at one completion an hour. Zones supply 70-82% of BLUFOR AP once the player is
-rolling — territory is the AP economy, missions the top-up, and a mission-grinder cannot out-earn
-holding ground.
+add roughly 26 at one completion an hour, ~52 at two. Territory still leads once the player holds a
+handful of zones, but the mission faucet is deliberately strong enough to climb the tier ladder on
+its own pace: at the small-map end a two-mission-an-hour runner now matches or beats the trickle, so
+missions are a real second route to the rungs, not only a top-up.
 
 **Mission AP is capped, not multiplied.** The 17 threads ship paying 0-45 AP each
 (`server/missions/mission_threads/*/fnc_*_mission.sqf`), so one hard mission out-paid an hour of
-territory. They are remapped into a 5-20 band ranked by difficulty, edited as the literal beside
+territory. They are remapped into a 10-40 band ranked by difficulty, edited as the literal beside
 each thread's CP figure — there is no shared table to turn one knob against, and the ordering
 across mission types is the balance decision a scalar cannot express, since a multiplier preserves
 the 0 and 45 outliers the cap exists to remove.
@@ -858,7 +859,7 @@ reroute has shipped; the phases below it are the remaining work, in sequence.
 
 | Phase | Contains | Why it is gated here |
 |---|---|---|
-| **Faucet reroute** — shipped | Town income routed BLUFOR→CP (1-5 by town size), OPFOR→AP; the 5 AP/zone hold trickle on both sides; `DUWS_econ_throttle` on every passive faucet; the one-time first-capture CP+AP bonus (persisted, BLUFOR); delete the CP capture bounty and its recapture decay; OPFOR consolation AP on every zone loss; mission AP remapped to a 5-20 band; mission CP lifted with no town reputation; the OPFOR flat income; delete the AP-to-CP converter | This is the model. Playable the moment it lands; nothing downstream matters until the faucets are right |
+| **Faucet reroute** — shipped | Town income routed BLUFOR→CP (1-5 by town size), OPFOR→AP; the 5 AP/zone hold trickle on both sides; `DUWS_econ_throttle` on every passive faucet; the one-time first-capture CP+AP bonus (persisted, BLUFOR); delete the CP capture bounty and its recapture decay; OPFOR consolation AP on every zone loss; mission AP remapped to a 10-40 band; mission CP lifted with no town reputation; the OPFOR flat income; delete the AP-to-CP converter | This is the model. Playable the moment it lands; nothing downstream matters until the faucets are right |
 | **Floor** | `fnc_ap_adjust` integer invariant; both earned counters and both tier globals, seeded by the presets; the eight live pool reads switched to tiers; CP, AP and tier in the map readout; presets regenerated to the rungs | Without the tier globals the first AP spend downgrades that side's own patrols. Without a readout, deciding what to buy is guesswork |
 | **CP becomes a flow** | Per-use CP on supports; the intel-analysis cap | Independent of AP entirely |
 | **AP becomes spendable** | The dual case in `fnc_pool_try_spend`; AP halves on advanced supports and combat vehicles; the refund's second currency | The permanent/consumable split and the CP refund are in; what is left is the second pool |
@@ -884,7 +885,7 @@ They are collected here so the next pass tunes from one list rather than hunting
 | intel per-item CP | `server/misc/fnc_intelAnalysis.sqf` | 1–5 | turn-in value by document; corpse loot 1, search items above it |
 | throttle `k` / `REF_ZONES` | `server/warcom/fnc_WARCOM_init.sqf` | 0.5 / 6 | strength, and the size below which nothing throttles |
 | town worth | `server/misc/fnc_civ_init_Tomata.sqf` | 1–5 by size | CP to a BLUFOR town, AP to an OPFOR one |
-| mission AP band | `server/missions/mission_threads/*` | 5–20 | per-thread literal, ranked by difficulty |
+| mission AP band | `server/missions/mission_threads/*` | 10–40 | per-thread literal, ranked by difficulty |
 | civs-off CP lift | `server/missions/fnc_mission_reward.sqf` | ×1.5 | applied when `civ_town_rep` is empty |
 | advanced-support AP | `client/supports/fnc_supports_init.sqf` | 20–40 | 9th catalogue column, per row |
 
@@ -898,7 +899,7 @@ once those land.
 
 - **AP is not scarce for a zone-holding BLUFOR yet.** Its only sink is the ~6 advanced supports,
   180 AP for the whole set, realistically 90–130 AP bought. Supply is 50 AP × zone count one-time
-  (~300 at six zones), plus ~60 AP/hr trickle at full control, plus 5–20 a mission — so liberating
+  (~300 at six zones), plus ~60 AP/hr trickle at full control, plus 10–40 a mission — so liberating
   the map more than funds the entire AP catalogue from captures alone. The raised capture bounty
   deepens this on the wallet even as it earns the tier; the two-currency premise does not bite until
   the combat-vehicle gate, garrisons and commander give AP something to buy.

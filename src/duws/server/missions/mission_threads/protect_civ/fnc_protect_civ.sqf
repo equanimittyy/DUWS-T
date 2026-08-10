@@ -6,7 +6,7 @@ _searchRadius   = 250;
 _spawnDist      = 230;
 _timeLimit      = 360;
 _cpReward       = 20;
-_apReward       = 5;
+_apReward       = 10;
 _repReward      = 5;
 
 _speaker        = localize "STR_DUWS_T_OVERLORD";

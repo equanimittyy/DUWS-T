@@ -5,7 +5,7 @@ if (!([10, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_beg
 
 _radius = 400;
 _cpreward = 25;
-_apreward = 12;
+_apreward = 24;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_radarletsdothis";
 _message1 = ([localize "STR_DUWS_T_radarend"] call fnc_cs);
