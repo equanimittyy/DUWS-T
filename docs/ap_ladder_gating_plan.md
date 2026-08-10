@@ -45,8 +45,8 @@ Vehicle classifier (`isKindOf`):
 
 | Tier | Kind |
 |------|------|
-| 1 | utility truck (transport / ammo / repair / fuel), and any class the classifier cannot place |
-| 2 | Car |
+| 1 | utility truck (transport / ammo / repair / fuel); any car with 2 seats or fewer (e.g. quad bike); and any class the classifier cannot place |
+| 2 | Car with more than 2 seats |
 | 3 | APC, IFV, transport helicopter |
 | 4 | Tank, attack helicopter |
 | 5 | Plane |
