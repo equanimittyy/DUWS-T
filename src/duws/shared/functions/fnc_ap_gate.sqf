@@ -35,6 +35,23 @@ DUWS_fnc_vehTier = {
     1
 };
 
+// The BLUFOR squad catalogue the request menu offers and its two handlers resolve. The section token
+// in lbData is "<HC|TF>:<type>"; this maps <type> to the faction global holding [roster, cost], the
+// High Command squad-type label the server names counters by, the menu string key, and the AP tier
+// that gates it.  [type, global, HCsquadtype, labelKey, tier]
+DUWS_blufor_squads = [
+    ["Recon", "blufor_RECON_TEAM_X",    "Infantry", "STR_DUWS_T_SQUAD_RECON", 1],
+    ["Inf",   "blufor_INF_SQUAD_X",     "Infantry", "STR_DUWS_T_SQUAD_INF",   1],
+    ["Motor", "blufor_MOTOR_SECTION_X", "Motor",    "STR_DUWS_T_SQUAD_MOTOR", 2],
+    ["Mech",  "blufor_MECH_SECTION_X",  "Mech",     "STR_DUWS_T_SQUAD_MECH",  3],
+    ["Armor", "blufor_ARMOR_SECTION_X", "Armor",    "STR_DUWS_T_SQUAD_ARMOR", 4]
+];
+DUWS_fnc_squadRow = {
+    params ["_type"];
+    private _i = DUWS_blufor_squads findIf { (_x select 0) == _type };
+    if (_i < 0) then { [] } else { DUWS_blufor_squads select _i }
+};
+
 // Fills a listbox from tier-tagged rows: unlocked first, then locked, each block alphabetical by
 // label. A locked row is greyed and its tier appended, so the player reads what is coming and what it
 // costs to reach without the row vanishing. The row's identity rides in lbData for the buy handler,

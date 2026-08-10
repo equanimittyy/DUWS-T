@@ -412,6 +412,8 @@ fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\functions
 publicVariable "DUWS_fnc_ap_unlocked";
 publicVariable "DUWS_fnc_vehTier";
 publicVariable "DUWS_fnc_tierListFill";
+publicVariable "DUWS_blufor_squads";
+publicVariable "DUWS_fnc_squadRow";
 fnc_faction_unit_keylist = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_unit_keylist.sqf";
 fnc_custom_faction_init = compile preprocessFileLineNumbers "duws\server\dialog\fnc_custom_faction_init.sqf";publicVariable "fnc_custom_faction_init";
 fnc_request_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_menu.sqf";publicVariable "fnc_request_menu";

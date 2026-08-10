@@ -1,5 +1,12 @@
 if (!isServer) exitWith {};
-params ["_spawnPos","_grouptype","_TFname"];
+params ["_spawnPos","_grouptype","_TFname",["_tier",1]];
+
+// Tier gate, matching the client's own refusal. A task force carries no squad-type the server can
+// re-derive from, so the tier is passed rather than recomputed -- the same client-trust surface the
+// vehicle and support gates already stand on.
+if !(["BLU", _tier] call DUWS_fnc_ap_unlocked) exitWith {
+	["WARN", "WARCOM", format ["TF squad tier %1 above BLUFOR earned; spawn refused", _tier]] call fnc_log;
+};
 
 _group = [_spawnPos, WEST, _grouptype, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;

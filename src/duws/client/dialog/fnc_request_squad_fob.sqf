@@ -1,71 +1,34 @@
 // Locality: client -- invoked from a dialog action (shared/includes/request_menu.hpp, the FOB form).
+// Identical to fnc_request_squad: the menu build already trims the FOB's High Command list, so the
+// handler only resolves the lbData token the row carries.
 
-_index = lbCurSel 2101;
+_sel = lbCurSel 2101;
+if (_sel < 0) exitWith {};
 
-_grouptype = "";
-_HCsquadtype = "";
-_cost = 0;
-_task_force = false;
+// The section token rides in lbData -- "<HC|TF>:<type>" -- because tier-locked squads sort to the
+// bottom and the row's position no longer names it. A heading or spacer carries no data.
+_data = lbData [2101, _sel];
+if (_data == "") exitWith {hint localize "STR_DUWS_T_9607znvh"};
+_parts = _data splitString ":";
+_task_force = (_parts select 0) == "TF";
+_row = [_parts select 1] call DUWS_fnc_squadRow;
+if (_row isEqualTo []) exitWith {hint localize "STR_DUWS_T_9607znvh"};
+_row params ["", "_globalName", "_HCsquadtype", "", "_tier"];
 
-switch (VERSION_X) do {
-	
-	case "MODERN": {	///  8 SQUADS MAX
+_squad = missionNamespace getVariable [_globalName, []];
+if (count _squad < 2) exitWith {hint localize "STR_DUWS_T_9607znvh"};
+_cost = _squad select 1;
+_grouptype = _squad select 0;
 
-		if (_index < 2 || _index == 5) exitWith {hint localize "STR_DUWS_T_9607znvh"};
-		
-		switch (_index) do
-		{
-			case 2: {
-				_cost = blufor_RECON_TEAM_X select 1;
-				_grouptype = (blufor_RECON_TEAM_X select 0);
-				_HCsquadtype = "Infantry";
-			};
-			case 3: {
-				_cost = blufor_INF_SQUAD_X select 1;
-				_grouptype = (blufor_INF_SQUAD_X select 0);
-				_HCsquadtype = "Infantry";
-			};
-			case 4: {
-				_cost = blufor_MOTOR_SECTION_X select 1;
-				_grouptype = (blufor_MOTOR_SECTION_X select 0);
-				_HCsquadtype = "Motor";
-			};
-	
-		//  case 5: EMPTY	
+// Tier gate before the charge, the same lock the greyed row advertises.
+if !(["BLU", _tier] call DUWS_fnc_ap_unlocked) exitWith {
+	hint format [localize "STR_DUWS_T_tier_locked_hint", _tier];
+};
 
-			case 6: {
-				_cost = blufor_RECON_TEAM_X select 1;
-				_grouptype = (blufor_RECON_TEAM_X select 0);
-				_task_force = true;
-			};
-			case 7: {
-				_cost = blufor_INF_SQUAD_X select 1;
-				_grouptype = (blufor_INF_SQUAD_X select 0);
-				_task_force = true;
-			};
-			case 8: {
-				_cost = blufor_MOTOR_SECTION_X select 1;
-				_grouptype = (blufor_MOTOR_SECTION_X select 0);
-				_task_force = true;
-			};
-			case 9: {
-				_cost = blufor_MECH_SECTION_X select 1;
-				_grouptype = (blufor_MECH_SECTION_X select 0);
-				_task_force = true;
-			};
-			case 10: {
-				_cost = blufor_ARMOR_SECTION_X select 1;
-				_grouptype = (blufor_ARMOR_SECTION_X select 0);
-				_task_force = true;
-			};
-		};
-	};
-};	
-
-if (_task_force == true && hardcore_visibleZone_found == false) exitWith {hint localize "STR_DUWS_T_b20y3byh"};
+if (_task_force && hardcore_visibleZone_found == false) exitWith {hint localize "STR_DUWS_T_b20y3byh"};
 
 _spawnPos = getpos player;
-if (_task_force == true) then {_spawnPos = PosOfBLUHQ;};
+if (_task_force) then {_spawnPos = PosOfBLUHQ;};
 _spawnPos = [[(_spawnPos select 0), (_spawnPos select 1)],300,400,15,0,0.3,0,[],[]] call BIS_fnc_findSafePos;
 
 _TFname = [1] call fnc_random_name;
@@ -75,19 +38,18 @@ sleep 2;
 // not leave a squad standing.
 if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
 
-if (_task_force == true) then {
-	[_spawnPos,_grouptype, _TFname] remoteExec ["fnc_playerTF_spawn", 2, false];
+if (_task_force) then {
+	[_spawnPos, _grouptype, _TFname, _tier] remoteExec ["fnc_playerTF_spawn", 2, false];
 } else {
 	// Spawn, name, register and muster all happen on the server; it hands
 	// hcSetGroup back here, since that needs this machine's own player.
 	[_spawnPos, _grouptype, _HCsquadtype, player] remoteExec ["fnc_HCsquad_spawn", 2];
 };
 
-if (_task_force == true) exitWith {hint localize "STR_DUWS_T_0a6o9dsm"};
+// if TF squad, exit
+if (_task_force) exitWith {hint localize "STR_DUWS_T_0a6o9dsm" + _TFname};
 
 hint localize "STR_DUWS_T_gu6cbc5f";
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_squadready"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-
-

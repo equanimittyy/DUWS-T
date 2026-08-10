@@ -45,41 +45,53 @@ if (_isFob) then { _units = _units select [0, 5] };
 } forEach _units;
 lbSetCurSel [2100, 0];
 
-// REQUEST SQUADS. Row indices are the argument fnc_request_squad and its FOB twin switch on,
-// so the blank row that separates High Command from task forces is load-bearing padding: the
-// two heavy sections a FOB cannot field are absent, which shifts every row below them.
-//
-// A section's global is [roster, cost], written by server/init_hq/fnc_BLUFOR_squad_init.sqf. The
-// name is menu text and lives here; the price is read live off that broadcast so the two cannot
-// disagree. The shape is checked rather than assumed -- it has changed under this file before, and
-// a section that fails the check has to keep its row anyway or every index below it shifts.
-private _section = {
-    params ["_prefix", "_nameKey", "_var"];
-    private _def = missionNamespace getVariable [_var, []];
-    if ((_def param [1, ""]) isEqualType 0) exitWith {
-        format ["%1 %2 (%3cp)", _prefix, localize _nameKey, _def select 1]
-    };
-    ["WARN", "UI", format ["fnc_request_menu: %1 is %2, not [roster, cost]", _var, _def]] call fnc_log;
-    format ["%1 %2 (n/a)", _prefix, localize _nameKey]
-};
-
+// REQUEST SQUADS. High Command first, then task forces. The section token "<HC|TF>:<type>" rides in
+// lbData rather than the row index the handlers once switched on: a tier-locked squad drops to the
+// bottom of its section, so the position no longer names it. A section's [roster, cost] global is read
+// live so the menu price cannot drift from the spawn; the catalogue and tiers are DUWS_blufor_squads.
 switch (VERSION_X) do {
     case "MODERN": {
-        lbAdd [2101, localize "STR_DUWS_T_zo6ih0pt"];               // 0
-        lbAdd [2101, ""];                                           // 1
-        lbAdd [2101, ["HC", "STR_DUWS_T_SQUAD_RECON", "blufor_RECON_TEAM_X"] call _section];       // 2
-        lbAdd [2101, ["HC", "STR_DUWS_T_SQUAD_INF", "blufor_INF_SQUAD_X"] call _section];          // 3
-        lbAdd [2101, ["HC", "STR_DUWS_T_SQUAD_MOTOR", "blufor_MOTOR_SECTION_X"] call _section];    // 4
-        if (!_isFob) then {
-            lbAdd [2101, ["HC", "STR_DUWS_T_SQUAD_MECH", "blufor_MECH_SECTION_X"] call _section];  // 5
-            lbAdd [2101, ["HC", "STR_DUWS_T_SQUAD_ARMOR", "blufor_ARMOR_SECTION_X"] call _section]; // 6
+        lbAdd [2101, localize "STR_DUWS_T_zo6ih0pt"];   // heading
+        lbAdd [2101, ""];                               // spacer
+
+        private _addSquad = {
+            params ["_label", "_data", "_unlocked"];
+            private _i = lbAdd [2101, _label];
+            lbSetData [2101, _i, _data];
+            if (!_unlocked) then { lbSetColor [2101, _i, [0.5, 0.5, 0.5, 1]] };
         };
-        lbAdd [2101, ""];                                           // 7 at the HQ, 5 at a FOB
-        lbAdd [2101, ["TF", "STR_DUWS_T_SQUAD_RECON", "blufor_RECON_TEAM_X"] call _section];
-        lbAdd [2101, ["TF", "STR_DUWS_T_SQUAD_INF", "blufor_INF_SQUAD_X"] call _section];
-        lbAdd [2101, ["TF", "STR_DUWS_T_SQUAD_MOTOR", "blufor_MOTOR_SECTION_X"] call _section];
-        lbAdd [2101, ["TF", "STR_DUWS_T_SQUAD_MECH", "blufor_MECH_SECTION_X"] call _section];
-        lbAdd [2101, ["TF", "STR_DUWS_T_SQUAD_ARMOR", "blufor_ARMOR_SECTION_X"] call _section];
+        // Locked squads drop to the bottom of their section, the ascending-capability order kept in
+        // both halves. The [roster, cost] shape is checked, not assumed -- it has changed before -- and
+        // a section that fails keeps its row labelled (n/a) rather than vanishing.
+        private _fillSquads = {
+            params ["_prefix", "_types"];
+            private _open = [];
+            private _locked = [];
+            {
+                private _row = [_x] call DUWS_fnc_squadRow;
+                if !(_row isEqualTo []) then {
+                    _row params ["_type", "_globalName", "", "_labelKey", "_tier"];
+                    private _squad = missionNamespace getVariable [_globalName, []];
+                    private _costOk = (_squad param [1, ""]) isEqualType 0;
+                    if (!_costOk) then {
+                        ["WARN", "UI", format ["fnc_request_menu: %1 is not [roster, cost]", _globalName]] call fnc_log;
+                    };
+                    private _costTxt = if (_costOk) then { str (_squad select 1) } else { "n/a" };
+                    private _unlocked = ["BLU", _tier] call DUWS_fnc_ap_unlocked;
+                    private _label = format ["%1 %2 (%3cp)", _prefix, localize _labelKey, _costTxt];
+                    if (!_unlocked) then { _label = _label + " " + format [localize "STR_DUWS_T_tier_tag", _tier] };
+                    private _entry = [_label, _prefix + ":" + _type, _unlocked];
+                    if (_unlocked) then { _open pushBack _entry } else { _locked pushBack _entry };
+                };
+            } forEach _types;
+            { _x call _addSquad } forEach (_open + _locked);
+        };
+
+        // A FOB fields the light High Command squads only; task forces are unchanged.
+        private _hcTypes = if (_isFob) then { ["Recon", "Inf", "Motor"] } else { ["Recon", "Inf", "Motor", "Mech", "Armor"] };
+        ["HC", _hcTypes] call _fillSquads;
+        lbAdd [2101, ""];   // spacer between High Command and task forces
+        ["TF", ["Recon", "Inf", "Motor", "Mech", "Armor"]] call _fillSquads;
     };
 };
 lbSetCurSel [2101, 0];

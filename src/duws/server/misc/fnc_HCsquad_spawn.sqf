@@ -10,6 +10,18 @@ if (!isServer) exitWith {};
 params ["_spawnPos", "_grouptype", "_HCsquadtype", "_caller"];
 if (isNull _caller) exitWith {};
 
+// Server-authoritative tier gate: the tier is derived from the squad type the caller asked for, not
+// trusted from the client, so a tampered request cannot field a section the ladder has not reached.
+private _tier = switch (_HCsquadtype) do {
+	case "Motor": { 2 };
+	case "Mech":  { 3 };
+	case "Armor": { 4 };
+	default { 1 };
+};
+if !(["BLU", _tier] call DUWS_fnc_ap_unlocked) exitWith {
+	["WARN", "WARCOM", format ["HC squad type %1 (tier %2) above BLUFOR earned; spawn refused", _HCsquadtype, _tier]] call fnc_log;
+};
+
 private _group = [_spawnPos, WEST, _grouptype, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 _group setFormation "STAG COLUMN";
