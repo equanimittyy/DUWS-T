@@ -314,23 +314,27 @@ ratchet.
 
 ### The starting-AP presets become the ladder's own rungs, plus zero
 
-Each side's opening pool was picked from seven options — 10, 50, 80, 110, 150, 170, 200 — none of
-which except 10 and 150 landed on a threshold, so the preset set a position part-way between tiers
-and the host could not tell which one they picked. They are now `0, 10, 40, 65, 100, 136, 150, 200`,
-eight options expressed as "start at this tier" and exact: the wave rungs, plus zero at the bottom
-and 200 at the top so a preset can still pre-unlock BLUFOR air, which gates above 199. Tier 7 (200)
-is the only rung above the OPFOR-air rung at 150.
+Each side's opening pool once picked a raw AP figure; it now picks a **starting tier** (0–7) — the
+campaign begins with that side's ladder already at the chosen rung. The eight rows are
+`DUWS_ap_tier_rungs` plus zero: `0, 50, 100, 175, 300, 500, 850, 1400`, labelled by tier because the
+number is no longer a spendable bank (below).
 
-Zero is the genuinely new option, and it matters more under a spendable pool: a 200 AP start
-hands a side several permanent purchases before the first shot. Zero is what a campaign that
-wants both economies earned from nothing selects.
+**The rungs run an exponential curve (~×1.7 a step), sized around OPFOR income.** At OPFOR's
+~94 AP/hr from six zones (throttle 1 at the reference size) the unlocks pace out over hours rather
+than minutes: APC ~1 h (100), IFV ~2 h (175), tank ~3 h (300), attack heli ~5 h (500), plane ~9 h
+(850), the top rung ~15 h (1400). BLUFOR climbs the same rungs on its own income — captures, missions
+and its zone trickle once it holds ground — so its times differ, and the capture bounty is what keeps
+it in the race.
 
-**A preset seeds the earned counter as well as the wallet**, or "start at tier 4" would hand a
-side a wallet at tier 0 and the option would stop meaning what it says.
+**A preset seeds the tier, not the wallet.** It writes the earned counter (and the tier derived from
+it) to the chosen rung, then opens the wallet at 0. Seeding the wallet to the rung too — which the
+earlier, small-rung version did — would hand a tier-7 side 1400 spendable AP before the first shot,
+several times the whole AP catalogue. The tier is capability reached; the wallet is earned from zero.
+Tier 0 is the from-scratch option, both counters empty.
 
-The seven values are *derived* from the thresholds, not chosen alongside them. If the ladder is
-retuned, the presets are regenerated from the new rungs rather than re-picked — a preset that no
-longer lands on a threshold has silently gone back to meaning nothing.
+Retune `DUWS_ap_tier_rungs` and the presets follow, since their seeds are those rung values. The
+BLUFOR patrol/assault gates and the OPFOR vehicle `_ap` values hold the same rung numbers as literals
+today and must be kept in step with the array until they are centralised on it.
 
 ### Where BLUFOR army power comes from
 
@@ -427,8 +431,8 @@ still never raise the enemy's permanent ceiling. `zones_number` running 1 to 40 
 by the throttle on every passive faucet.
 
 Both sides gate capability on raw `earned` against the same thresholds (BLUFOR's wave/vehicle steps,
-OPFOR's per-vehicle `_ap` in `DUWS_spawnVehicles`, now APC 40 / IFV·AA 65 / tank 100 / heli 136 /
-plane 150 — the same rung values). The tier integer is the readout summary of that climb. OPFOR's
+OPFOR's per-vehicle `_ap` in `DUWS_spawnVehicles`, now APC 100 / IFV·AA 175 / tank 300 / heli 500 /
+plane 850 — the same rung values). The tier integer is the readout summary of that climb. OPFOR's
 ladder is still thinner than BLUFOR's in *rungs used*; filling it out (more gated vehicles) is
 commander-phase work.
 
@@ -867,8 +871,9 @@ They are collected here so the next pass tunes from one list rather than hunting
 | `zone_ap_swing` | `server/server_var_init.sqf` | 0.15 | OPFOR retake gain / BLUFOR loss, share of worth; wallet only |
 | `zone_ap_consolation` | `server/server_var_init.sqf` | 0.15 | OPFOR's AP per BLUFOR capture, share of worth; wallet only |
 | `opfor_flat_ap_income` | `server/server_var_init.sqf` | 2 | flat OPFOR floor per tick, unthrottled |
-| `DUWS_ap_tier_rungs` | `server/misc/fnc_economy_init.sqf` | 10/40/65/100/136/150/200 | tier boundaries and preset rungs; display summary, not the capability gate |
-| OPFOR vehicle AP gates | `server/init_zones/fnc_zone_spawn_sizes.sqf` | APC 40 / IFV·AA 65 / tank 100 / heli 136 / plane 150 | OPFOR's capability ladder, mirrors BLUFOR's earned thresholds |
+| `DUWS_ap_tier_rungs` | `server/misc/fnc_economy_init.sqf` | 50/100/175/300/500/850/1400 | exponential; tier boundaries, preset seeds, and the shared capability scale (BLUFOR gates + OPFOR `_ap` hold the same values as literals) |
+| OPFOR vehicle AP gates | `server/init_zones/fnc_zone_spawn_sizes.sqf` | APC 100 / IFV·AA 175 / tank 300 / heli 500 / plane 850 | OPFOR's capability ladder, on the shared rungs |
+| BLUFOR wave/vehicle gates | `server/warcom/fnc_WARCOM_blu_patrol.sqf`, `fnc_WARCOM_blu_assault.sqf` | inf 100 / motor 175 / mech·car 300 / armor 500 / armored 850 / air 1400 | BLUFOR's capability ladder, on the shared rungs |
 | intel loot drop | `server/misc/fnc_addRandomLoot.sqf` | ~60% | share of enemies carrying loot; thins intel + coins at source |
 | intel per-item CP | `server/misc/fnc_intelAnalysis.sqf` | 1–5 | turn-in value by document; corpse loot 1, search items above it |
 | throttle `k` / `REF_ZONES` | `server/warcom/fnc_WARCOM_init.sqf` | 0.5 / 6 | strength, and the size below which nothing throttles |
