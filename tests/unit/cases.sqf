@@ -478,13 +478,15 @@ TEST_Air = 0;
 ["spawnFilter: and the composition loses it rather than gaining a substitute",
     ([["patrol", "heli", "car"]] call DUWS_fnc_spawnFilter), ["patrol", "car"]] call fnc_assertEq;
 TEST_Air = 1;
-WARCOM_opfor_ap = 40;
+// Gated on the earned counter, not the spendable wallet -- the var DUWS_fnc_tokenClass reads, so a
+// tier the side reached does not relock when the commander spends its wallet down.
+WARCOM_opfor_ap_earned = 40;
 ["tokenClass: below its Army Power rung a token is not yet unlocked",
     (["tank"] call DUWS_fnc_tokenClass), ""] call fnc_assertEq;
-WARCOM_opfor_ap = 100;
+WARCOM_opfor_ap_earned = 100;
 ["tokenClass: reaching the rung unlocks it",
     (["tank"] call DUWS_fnc_tokenClass), "cls_tank"] call fnc_assertEq;
-WARCOM_opfor_ap = 200;
+WARCOM_opfor_ap_earned = 200;
 
 ["zoneSpawnList: a tier fields its row, one group per entry",
     ([4] call DUWS_fnc_zoneSpawnList),
