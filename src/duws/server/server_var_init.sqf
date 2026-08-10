@@ -144,14 +144,13 @@ DUWS_streamProfiles = createHashMapFromArray [
     ["base",       [  0,  10, false, false, 2]]
 ];
 
-// The consumable-support slate. support_max_slots is how many a player may hold at once, the
-// campaign-long budget that makes choosing between them mean anything; support_death_refund is
-// the share of what they paid that comes back when they die holding it. That share is deliberately
-// small: a generous one would make dying a cheaper way to liquidate a slate than walking back to a
-// base and refunding it, which is the opposite of what the death penalty is for. Both are read on
+// The consumable-support slate. support_max_slots is how many one-use items a player may carry at
+// once; support_death_refund is the share of what they paid -- both currencies -- that comes back
+// when they die holding unused ones. Half: forgiving, but still short of a full manual refund, so
+// walking an unused item back to a base returns more than dying with it does. Both are read on
 // clients, so both are broadcast.
 support_max_slots = 8;      publicVariable "support_max_slots";
-support_death_refund = 0.1; publicVariable "support_death_refund";
+support_death_refund = 0.5; publicVariable "support_death_refund";
 
 // How long a destroyed Mobile HQ locks designation out for. Losing it has to cost something, or
 // leaving it parked at the objective and letting it burn is cheaper than driving it home -- the

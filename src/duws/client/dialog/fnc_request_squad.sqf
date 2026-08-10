@@ -17,6 +17,8 @@ _squad = missionNamespace getVariable [_globalName, []];
 if (count _squad < 2) exitWith {hint localize "STR_DUWS_T_9607znvh"};
 _cost = _squad select 1;
 _grouptype = _squad select 0;
+// AP is charged only for the vehicle-fielding sections; infantry carries a 0 here.
+_apCost = _squad param [2, 0];
 
 // Tier gate before the charge, the same lock the greyed row advertises.
 if !(["BLU", _tier] call DUWS_fnc_ap_unlocked) exitWith {
@@ -34,7 +36,10 @@ sleep 2;
 
 // Charge before spawning: the server rules on affordability, so a refused request must
 // not leave a squad standing.
-if !(["CP", _cost] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
+// A section with a vehicle charges both pools atomically; infantry charges CP alone. One verdict
+// -- both halves debit or neither -- so a refusal never leaves the player charged for half a squad.
+private _bought = if (_apCost > 0) then { ["CPAP", [_cost, _apCost]] call fnc_pool_spend } else { ["CP", _cost] call fnc_pool_spend };
+if !(_bought) exitWith {hint localize "STR_DUWS_T_e95mc4lv";};
 
 if (_task_force) then {
 	[_spawnPos, _grouptype, _TFname, _tier] remoteExec ["fnc_playerTF_spawn", 2, false];

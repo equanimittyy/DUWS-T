@@ -40,23 +40,23 @@ fnc_support_defs = {
 		// The designation radio, a slot at a time rather than handed to every lead on unlock. Free
 		// because the team paid at the permanent row: what this costs is the slot.
 		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false, false],
-		["supply",    "CONS",  5, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       false, false],
+		["supply",    "CONS",  4, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       false, false],
 		["veh_drop",  "CONS",  5, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   false, true],
-		["siva",      "CONS", 10, "support_siva_drop_available",   "STR_DUWS_T_jjzzkt01",             "siva_drop",  true,  true],
-		["sawp",      "CONS", 10, "support_sawp_drop_available",   "STR_DUWS_T_sawp1234",             "sawp_drop",  true,  false],
-		["uav",       "CONS", 10, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true,  true],
-		["helotaxi",  "CONS",  5, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false, true],
-		["helolift",  "CONS", 10, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false, true],
+		["siva",      "CONS",  5, "support_siva_drop_available",   "STR_DUWS_T_jjzzkt01",             "siva_drop",  true,  true],
+		["sawp",      "CONS",  5, "support_sawp_drop_available",   "STR_DUWS_T_sawp1234",             "sawp_drop",  true,  false],
+		["uav",       "CONS",  6, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true,  true],
+		["helotaxi",  "CONS",  4, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false, true],
+		["helolift",  "CONS",  6, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false, true],
 		["boattaxi",  "CONS",  2, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  false, false],
-		["arty",      "CONS", 20, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  false, 30],
-		["mortar",    "CONS", 15, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false, false, 20],
-		["jdam",      "CONS", 10, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,  true],
-		["laser",     "CONS", 10, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,  true],
-		["cluster",   "CONS", 25, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  true,  35],
-		["napalm",    "CONS", 20, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  false, 25],
-		["hcAttChop", "CONS", 20, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  true,  30],
-		["hcCAS",     "CONS", 25, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  true,  40],
-		["paradrop",  "CONS", 20, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   true,  false]
+		["arty",      "CONS",  9, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  false, 22],
+		["mortar",    "CONS",  6, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false, false, 12],
+		["jdam",      "CONS",  5, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,  true,  10],
+		["laser",     "CONS",  4, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,  true,   8],
+		["cluster",   "CONS", 11, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  true,  26],
+		["napalm",    "CONS",  7, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  false, 15],
+		["hcAttChop", "CONS",  8, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  true,  18],
+		["hcCAS",     "CONS", 12, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  true,  30],
+		["paradrop",  "CONS",  6, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   true,  false]
 	];
 
 	// A row that cannot apply is absent rather than greyed, so nothing downstream needs a second
@@ -133,6 +133,22 @@ fnc_support_comm_used = {
 	private _held = missionNamespace getVariable ["DUWS_support_comm", createHashMap];
 	_held deleteAt _class;
 	missionNamespace setVariable ["DUWS_support_comm", _held];
+
+	// One-time use: using a consumable spends it. Clearing the flag frees its slot and makes
+	// fnc_support_comm_add refuse the mission-end re-add, so the item is gone until re-bought at an
+	// HQ or FOB. Guarded on ownership so a stray call cannot drive support_count negative, and CONS
+	// only -- the FOB is PERM and stays reusable at its per-use price.
+	private _def = ([] call fnc_support_defs) select { (_x select 5) == _class };
+	if (count _def > 0) then {
+		(_def select 0) params ["_key", "_kind", "", "_flagVar"];
+		if (_kind == "CONS" && {[_flagVar] call fnc_support_owned}) then {
+			missionNamespace setVariable [_flagVar, false];
+			support_count = (support_count - 1) max 0;
+			private _paid = missionNamespace getVariable ["DUWS_support_paid", createHashMap];
+			_paid deleteAt _key;
+			missionNamespace setVariable ["DUWS_support_paid", _paid];
+		};
+	};
 };
 
 // Removing one item may or may not renumber the others: whether an item id is a stable handle or
@@ -285,12 +301,14 @@ fnc_support_refund = {
 fnc_support_wipe = {
 	private _paid = missionNamespace getVariable ["DUWS_support_paid", createHashMap];
 	if (count _paid == 0) exitWith {};
-	// Only the CP halves soften a death; AP is not refunded on a wipe. The premium pool is too
-	// scarce to leak through dying, and the death refund exists to cushion a CP loss, not to hand
-	// back the campaign's rarest currency. _paid entries are [cp, ap] pairs.
+	// A death returns support_death_refund of the slate in both currencies -- a dying player is not
+	// taxed the AP its advanced supports cost, the same both-halves shape the manual refund uses.
+	// _paid entries are [cp, ap] pairs.
 	private _totalCP = 0;
-	{ _totalCP = _totalCP + (_y param [0, 0]) } forEach _paid;
-	private _back = round (_totalCP * support_death_refund);
+	private _totalAP = 0;
+	{ _totalCP = _totalCP + (_y param [0, 0]); _totalAP = _totalAP + (_y param [1, 0]); } forEach _paid;
+	private _backCP = round (_totalCP * support_death_refund);
+	private _backAP = round (_totalAP * support_death_refund);
 
 	{
 		missionNamespace setVariable [(_x select 3), false];
@@ -302,10 +320,12 @@ fnc_support_wipe = {
 	missionNamespace setVariable ["DUWS_support_comm", createHashMap];
 	support_count = 0;
 
-	if (_back > 0) then { [_back, "support_death_refund"] remoteExec ["fnc_cp_adjust", 2] };
-	[_back] spawn {
-		params ["_back"];
-		["info", [localize "STR_DUWS_T_SUPPORT_LOST_TITLE",
-			format [localize "STR_DUWS_T_SUPPORT_LOST_MSG", _back]]] call bis_fnc_showNotification;
+	if (_backCP > 0) then { [_backCP, "support_death_refund"] remoteExec ["fnc_cp_adjust", 2] };
+	if (_backAP > 0) then { ["BLU", _backAP, "support_death_refund"] remoteExec ["fnc_ap_adjust", 2] };
+	[_backCP, _backAP] spawn {
+		params ["_backCP", "_backAP"];
+		private _msg = format [localize "STR_DUWS_T_SUPPORT_LOST_MSG", _backCP];
+		if (_backAP > 0) then { _msg = format [localize "STR_DUWS_T_support_ap_suffix", _msg, _backAP] };
+		["info", [localize "STR_DUWS_T_SUPPORT_LOST_TITLE", _msg]] call bis_fnc_showNotification;
 	};
 };

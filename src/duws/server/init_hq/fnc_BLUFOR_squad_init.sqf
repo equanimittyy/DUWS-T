@@ -19,13 +19,16 @@ if (!isServer) exitWith {};
 // built in shared/includes/request_menu.hpp, not from this table.
 // The vehicle pool is drawn once, at boot rather than per purchase: a section's transport is a
 // property of the campaign, so the same request twice does not hand back two different vehicles.
-// --DUWS-UNITCOMP BEGIN name="BLUFOR squads" kind=composition row="variable, CP cost, team, vehicle pool" fields="variable, CP cost, team, vehicle pool" prefix=blufor_--
+// --DUWS-UNITCOMP BEGIN name="BLUFOR squads" kind=composition row="variable, CP cost, team, vehicle pool, AP cost" fields="variable, CP cost, team, vehicle pool, AP cost" prefix=blufor_--
+// AP cost is a light spend on the sections that field a vehicle -- the crewed capability, distinct
+// from the empty vehicles the request menu hands out CP-only. Infantry is 0: it is the accessible
+// tier-1 baseline. Charged on both the High Command and Task Force forms, since both field the hull.
 DUWS_bluforSquads = [
-    ["blufor_RECON_TEAM_X", 8, "recon", []],
-    ["blufor_INF_SQUAD_X", 12, "squad", []],
-    ["blufor_MOTOR_SECTION_X", 25, "recon", ["blufor_ARMED_CAR1_X"]],
-    ["blufor_MECH_SECTION_X", 40, "team", ["blufor_APC1_X", "blufor_APC2_X"]],
-    ["blufor_ARMOR_SECTION_X", 50, "team", ["blufor_MBT_TANK1_X"]]
+    ["blufor_RECON_TEAM_X", 8, "recon", [], 0],
+    ["blufor_INF_SQUAD_X", 12, "squad", [], 0],
+    ["blufor_MOTOR_SECTION_X", 25, "recon", ["blufor_ARMED_CAR1_X"], 5],
+    ["blufor_MECH_SECTION_X", 40, "team", ["blufor_APC1_X", "blufor_APC2_X"], 15],
+    ["blufor_ARMOR_SECTION_X", 50, "team", ["blufor_MBT_TANK1_X"], 25]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -41,7 +44,7 @@ private _resolve = {
 switch (VERSION_X) do {
 	case "MODERN": {
 		{
-			_x params ["_var", "_cost", "_team", "_vehPool"];
+			_x params ["_var", "_cost", "_team", "_vehPool", ["_apCost", 0]];
 			private _row = [_team] call DUWS_fnc_teamRow;
 			if (_row isEqualTo []) then {
 				["ERROR", "FACTION", format ["%1 names team %2, which no roster row claims -- it would be sold empty",
@@ -57,7 +60,7 @@ switch (VERSION_X) do {
 				if (count _veh > 0) then { _roster = [selectRandom _veh] + _roster };
 
 				// Broadcast on write: the request dialogs run on the client and read these directly.
-				missionNamespace setVariable [_var, [_roster, _cost], true];
+				missionNamespace setVariable [_var, [_roster, _cost, _apCost], true];
 
 				// A section that lost roles still spawns, just thinner, and nothing on the ground says
 				// so -- which is how a faction mod missing one class reads as a balance problem.
