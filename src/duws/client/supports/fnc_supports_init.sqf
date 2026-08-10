@@ -167,7 +167,7 @@ fnc_support_buy = {
 	// greyed row in the list advertises.
 	private _tier = [_key] call fnc_support_tier;
 	if !(["BLU", _tier] call DUWS_fnc_ap_unlocked) exitWith {
-		hint format [localize "STR_DUWS_T_tier_locked_hint", _tier]; false
+		hint format [localize "STR_DUWS_T_tier_locked_hint", [_tier] call DUWS_fnc_tierName]; false
 	};
 
 	private _insurgent = !isNil "insurgent_mode_enable" && {insurgent_mode_enable};

@@ -67,7 +67,7 @@ private _rows = [];   // listbox index -> its def, [] for a heading
         private _tier = [_key] call fnc_support_tier;
         private _tierLocked = !(["BLU", _tier] call DUWS_fnc_ap_unlocked);
         if (_tierLocked) then {
-            _label = _label + " " + format [localize "STR_DUWS_T_tier_tag", _tier];
+            _label = _label + " " + format [localize "STR_DUWS_T_tier_tag", [_tier] call DUWS_fnc_tierName];
         };
         private _row = lbAdd [2103, _label];
         private _colour = [1, 1, 1, 1];

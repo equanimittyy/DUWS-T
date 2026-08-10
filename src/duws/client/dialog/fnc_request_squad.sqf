@@ -20,7 +20,7 @@ _grouptype = _squad select 0;
 
 // Tier gate before the charge, the same lock the greyed row advertises.
 if !(["BLU", _tier] call DUWS_fnc_ap_unlocked) exitWith {
-	hint format [localize "STR_DUWS_T_tier_locked_hint", _tier];
+	hint format [localize "STR_DUWS_T_tier_locked_hint", [_tier] call DUWS_fnc_tierName];
 };
 
 if (_task_force && hardcore_visibleZone_found == false) exitWith {hint localize "STR_DUWS_T_b20y3byh"};

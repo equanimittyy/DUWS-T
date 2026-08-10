@@ -79,7 +79,7 @@ switch (VERSION_X) do {
                     private _costTxt = if (_costOk) then { str (_squad select 1) } else { "n/a" };
                     private _unlocked = ["BLU", _tier] call DUWS_fnc_ap_unlocked;
                     private _label = format ["%1 %2 (%3cp)", _prefix, localize _labelKey, _costTxt];
-                    if (!_unlocked) then { _label = _label + " " + format [localize "STR_DUWS_T_tier_tag", _tier] };
+                    if (!_unlocked) then { _label = _label + " " + format [localize "STR_DUWS_T_tier_tag", [_tier] call DUWS_fnc_tierName] };
                     private _entry = [_label, _prefix + ":" + _type, _unlocked];
                     if (_unlocked) then { _open pushBack _entry } else { _locked pushBack _entry };
                 };

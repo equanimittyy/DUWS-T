@@ -20,7 +20,7 @@ if (_vehicle isEqualTo []) exitWith {hint localize "STR_DUWS_T_9607znvh"};
 // The row may be visible but locked. Refuse before the spend, naming the tier it needs.
 _tier = [_vehicle select 0] call DUWS_fnc_vehTier;
 if !(["BLU", _tier] call DUWS_fnc_ap_unlocked) exitWith {
-    hint format [localize "STR_DUWS_T_tier_locked_hint", _tier];
+    hint format [localize "STR_DUWS_T_tier_locked_hint", [_tier] call DUWS_fnc_tierName];
 };
 
 if !(["CP", _vehicle select 2] call fnc_pool_spend) exitWith {hint localize "STR_DUWS_T_e95mc4lv"};

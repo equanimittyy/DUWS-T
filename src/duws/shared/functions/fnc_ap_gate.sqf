@@ -15,6 +15,17 @@ DUWS_fnc_ap_unlocked = {
     (missionNamespace getVariable [_earnedVar, 0]) >= _need
 };
 
+// The display name a ladder tier carries on locked menu rows and in the campaign setup -- the
+// capability the rung unlocks, not a bare number. An out-of-range tier falls back to the infantry
+// floor rather than returning an empty string.
+DUWS_fnc_tierName = {
+    params ["_tier"];
+    localize ([
+        "STR_DUWS_T_tiername1", "STR_DUWS_T_tiername2", "STR_DUWS_T_tiername3",
+        "STR_DUWS_T_tiername4", "STR_DUWS_T_tiername5"
+    ] param [_tier - 1, "STR_DUWS_T_tiername1"])
+};
+
 // The ladder tier a purchasable vehicle sits at, mapped from the same DUWS_fnc_vehKind classifier the
 // price reads -- so the rung that unlocks a vehicle and the CP it costs can never disagree. A carrier
 // that seats a squad is a tier below the pure gun platform of the same chassis: an APC or IFV (T3)
@@ -80,7 +91,7 @@ DUWS_fnc_tierListFill = {
     {
         (_rows select (_x select 1)) params ["_label", "_tier", "_unlocked", "_data"];
         private _text = _label;
-        if (!_unlocked) then { _text = _text + " " + format [localize "STR_DUWS_T_tier_tag", _tier] };
+        if (!_unlocked) then { _text = _text + " " + format [localize "STR_DUWS_T_tier_tag", [_tier] call DUWS_fnc_tierName] };
         private _i = lbAdd [_ctrl, _text];
         lbSetData [_ctrl, _i, _data];
         if (!_unlocked) then { lbSetColor [_ctrl, _i, [0.5, 0.5, 0.5, 1]] };

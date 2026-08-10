@@ -414,6 +414,7 @@ fnc_faction_rqst_list = compile preprocessFileLineNumbers "duws\shared\functions
 // guards read the same gate. The file sets the three globals; each is broadcast in turn.
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_ap_gate.sqf";
 publicVariable "DUWS_fnc_ap_unlocked";
+publicVariable "DUWS_fnc_tierName";
 publicVariable "DUWS_fnc_vehTier";
 publicVariable "DUWS_fnc_tierListFill";
 publicVariable "DUWS_blufor_squads";

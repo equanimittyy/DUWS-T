@@ -2008,12 +2008,32 @@
                 <English>%1  +%2 AP</English>
             </Key>
             <Key ID="STR_DUWS_T_tier_tag">
-                <Original>[Tier %1]</Original>
-                <English>[Tier %1]</English>
+                <Original>[%1]</Original>
+                <English>[%1]</English>
             </Key>
             <Key ID="STR_DUWS_T_tier_locked_hint">
-                <Original>Not yet available. Requires Tier %1.</Original>
-                <English>Not yet available. Requires Tier %1.</English>
+                <Original>Not yet available. Requires %1.</Original>
+                <English>Not yet available. Requires %1.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_tiername1">
+                <Original>Infantry</Original>
+                <English>Infantry</English>
+            </Key>
+            <Key ID="STR_DUWS_T_tiername2">
+                <Original>Motorised</Original>
+                <English>Motorised</English>
+            </Key>
+            <Key ID="STR_DUWS_T_tiername3">
+                <Original>Mechanised</Original>
+                <English>Mechanised</English>
+            </Key>
+            <Key ID="STR_DUWS_T_tiername4">
+                <Original>Armour</Original>
+                <English>Armour</English>
+            </Key>
+            <Key ID="STR_DUWS_T_tiername5">
+                <Original>Air</Original>
+                <English>Air</English>
             </Key>
             <Key ID="STR_DUWS_T_escalation_level">
                 <Original>Escalation is now level %1. Supports cost more</Original>

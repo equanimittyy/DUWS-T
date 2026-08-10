@@ -98,21 +98,22 @@ index_cp_death_penalty_10 = lbAdd [2107, "10"];
 
 // BLUFOR starting tier (1-5) -- the campaign begins with BLUFOR's capability ladder already at this
 // tier (fnc_WARCOM_init seeds earned + tier, opens the wallet at 0). Tier 1 is infantry from scratch;
-// tier 5 opens with jets. The label shows the earned-AP floor of the tier (the rung it seeds), the
-// tier it reaches in brackets -- the number is the earned counter, not a spendable bank.
-index_blufor_ap_t1 = lbAdd [2108, "0 (Tier 1)"];
-index_blufor_ap_t2 = lbAdd [2108, "100 (Tier 2)"];
-index_blufor_ap_t3 = lbAdd [2108, "300 (Tier 3)"];
-index_blufor_ap_t4 = lbAdd [2108, "550 (Tier 4)"];
-index_blufor_ap_t5 = lbAdd [2108, "900 (Tier 5)"];
+// tier 5 opens with jets. The label shows the earned-AP floor of the tier (the rung it seeds) and the
+// capability it reaches named in brackets; the infantry floor shows the raw AP alone, since starting
+// with nothing unlocked needs no name. The number is the earned counter, not a spendable bank.
+index_blufor_ap_t1 = lbAdd [2108, "0"];
+index_blufor_ap_t2 = lbAdd [2108, format ["100 (%1)", localize "STR_DUWS_T_tiername2"]];
+index_blufor_ap_t3 = lbAdd [2108, format ["300 (%1)", localize "STR_DUWS_T_tiername3"]];
+index_blufor_ap_t4 = lbAdd [2108, format ["550 (%1)", localize "STR_DUWS_T_tiername4"]];
+index_blufor_ap_t5 = lbAdd [2108, format ["900 (%1)", localize "STR_DUWS_T_tiername5"]];
 [2108, index_blufor_ap_t1] call _setDefault;
 
 // OPFOR starting tier -- same ladder.
-index_opfor_ap_t1 = lbAdd [2109, "0 (Tier 1)"];
-index_opfor_ap_t2 = lbAdd [2109, "100 (Tier 2)"];
-index_opfor_ap_t3 = lbAdd [2109, "300 (Tier 3)"];
-index_opfor_ap_t4 = lbAdd [2109, "550 (Tier 4)"];
-index_opfor_ap_t5 = lbAdd [2109, "900 (Tier 5)"];
+index_opfor_ap_t1 = lbAdd [2109, "0"];
+index_opfor_ap_t2 = lbAdd [2109, format ["100 (%1)", localize "STR_DUWS_T_tiername2"]];
+index_opfor_ap_t3 = lbAdd [2109, format ["300 (%1)", localize "STR_DUWS_T_tiername3"]];
+index_opfor_ap_t4 = lbAdd [2109, format ["550 (%1)", localize "STR_DUWS_T_tiername4"]];
+index_opfor_ap_t5 = lbAdd [2109, format ["900 (%1)", localize "STR_DUWS_T_tiername5"]];
 [2109, index_opfor_ap_t2] call _setDefault;
 
 // AI BLU SKILL
