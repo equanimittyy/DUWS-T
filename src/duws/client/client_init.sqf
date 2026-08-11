@@ -268,9 +268,11 @@ hint localize "STR_DUWS_T_zu4bxt24";
         systemChat localize "STR_DUWS_T_loadout_copy_none";
     };
 
-    // Final snapshot: the restricted arsenal keeps startup-kit classes unlimited, and the copied gear
-    // (a detected-faction class absent from the friendly snapshot) would otherwise read [0]. The inline
-    // capture below may run before this spawn, so re-take it here where the loadout is settled.
+    // Final snapshot: both the restricted arsenal (startup-kit classes stay unlimited, else the copied
+    // gear reads [0]) and respawn (Saved_Loadout restores the deploy kit) must see the loadout AFTER
+    // this copy. The inline captures below may run before this spawn, so re-take both here where the
+    // loadout is settled.
+    player setVariable ["Saved_Loadout", getUnitLoadout player];
     private _kit = [];
     [getUnitLoadout player, _kit] call DUWS_fnc_extractLoadoutItems;
     player setVariable ["DUWS_startupKit", _kit];
@@ -412,10 +414,10 @@ hintsilent format[localize "STR_DUWS_T_ix8g2neb",worldName,profileName];
 // force a weather update so it renders correctly
 forceWeatherChange;
 
+// Saved_Loadout and DUWS_startupKit are provisional here: the base-guard loadout copy runs in the spawn
+// above and may land after this line, so the copy spawn re-takes both once the loadout is final -- else
+// respawn restores the editor default and the copied gear reads [0] in the restricted arsenal.
 player setVariable["Saved_Loadout", getUnitLoadout player];
-// Flat classname set of the deploy kit, for the restricted arsenal to keep it unlimited. Provisional:
-// the base-guard loadout copy runs in the spawn above and may land after this line, so the copy spawn
-// re-takes this once the loadout is final -- else the copied gear reads [0] in the restricted arsenal.
 private _startupKit = [];
 [getUnitLoadout player, _startupKit] call DUWS_fnc_extractLoadoutItems;
 player setVariable ["DUWS_startupKit", _startupKit];
