@@ -48,6 +48,19 @@ class CfgNotifications
         difficulty[] = {};
     };
 
+    // Loss twin of the CP-gain family: red instead of cyan, "-%1" badge. The %1 (cost) feeds
+    // both the badge and the description sentence.
+    class CPlost
+    {
+        title = "$STR_DUWS_T_DEATH_CP_TITLE";
+        iconPicture = "\a3\ui_f\data\gui\cfg\hints\Death_ca.paa";
+        iconText = "-%1";
+        description = "$STR_DUWS_T_DEATH_CP_MSG";
+        color[] = {1,0.2,0.2,1};
+        priority = 0;
+        difficulty[] = {};
+    };
+
     // A destroyed standalone enemy hardpoint, carded like the rest of the CP-gain family: iconText the
     // bounty (%1), description the type (%2) and the place (%3) -- see DUWS_fnc_hardpointClear.
     class HPdestroyed

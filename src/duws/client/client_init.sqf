@@ -173,8 +173,7 @@ player addEventHandler ["killed", {
         if (DUWSMP_CP_death_cost > 0) then {
             [DUWSMP_CP_death_cost] spawn {
                 params ["_cost"];
-                ["info", [localize "STR_DUWS_T_DEATH_CP_TITLE",
-                    format [localize "STR_DUWS_T_DEATH_CP_MSG", _cost]]] call bis_fnc_showNotification;
+                ["CPlost", [_cost]] call bis_fnc_showNotification;
             };
         };
         // The consumable slate dies with the body. Inside the killhouse it does not, for the same
