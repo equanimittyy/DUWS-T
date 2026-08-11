@@ -63,7 +63,6 @@ switch (_one_or_all) do {
 // and the array disagreeing about what the player has found.
 if (_revealed) then {
     publicVariable "zone_namePOS_pairs";
-    call fnc_hardcore_visible_recalc;
 };
 
 _revealed

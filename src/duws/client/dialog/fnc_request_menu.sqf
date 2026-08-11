@@ -45,10 +45,10 @@ if (_isFob) then { _units = _units select [0, 5] };
 } forEach _units;
 lbSetCurSel [2100, 0];
 
-// REQUEST SQUADS. High Command first, then task forces. The section token "<HC|TF>:<type>" rides in
-// lbData rather than the row index the handlers once switched on: a tier-locked squad drops to the
-// bottom of its section, so the position no longer names it. A section's [roster, cost] global is read
-// live so the menu price cannot drift from the spawn; the catalogue and tiers are DUWS_blufor_squads.
+// REQUEST SQUADS -- High Command only. The section token "HC:<type>" rides in lbData rather than the
+// row index the handlers once switched on: a tier-locked squad drops to the bottom of the list, so the
+// position no longer names it. The [roster, cost] global is read live so the menu price cannot drift
+// from the spawn; the catalogue and tiers are DUWS_blufor_squads.
 switch (VERSION_X) do {
     case "MODERN": {
         lbAdd [2101, localize "STR_DUWS_T_zo6ih0pt"];   // heading
@@ -60,9 +60,9 @@ switch (VERSION_X) do {
             lbSetData [2101, _i, _data];
             if (!_unlocked) then { lbSetColor [2101, _i, [0.5, 0.5, 0.5, 1]] };
         };
-        // Locked squads drop to the bottom of their section, the ascending-capability order kept in
-        // both halves. The [roster, cost] shape is checked, not assumed -- it has changed before -- and
-        // a section that fails keeps its row labelled (n/a) rather than vanishing.
+        // Locked squads drop to the bottom of the list, keeping ascending-capability order. The
+        // [roster, cost] shape is checked, not assumed -- it has changed before -- and a row that
+        // fails keeps its label (n/a) rather than vanishing.
         private _fillSquads = {
             params ["_prefix", "_types"];
             private _open = [];
@@ -93,11 +93,9 @@ switch (VERSION_X) do {
             { _x call _addSquad } forEach (_open + _locked);
         };
 
-        // A FOB fields the light High Command squads only; task forces are unchanged.
+        // A FOB fields the light High Command squads only.
         private _hcTypes = if (_isFob) then { ["Recon", "Inf", "Motor"] } else { ["Recon", "Inf", "Motor", "Mech", "Armor"] };
         ["HC", _hcTypes] call _fillSquads;
-        lbAdd [2101, ""];   // spacer between High Command and task forces
-        ["TF", ["Recon", "Inf", "Motor", "Mech", "Armor"]] call _fillSquads;
     };
 };
 lbSetCurSel [2101, 0];

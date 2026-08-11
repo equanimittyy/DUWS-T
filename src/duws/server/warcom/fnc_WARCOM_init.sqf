@@ -68,10 +68,6 @@ publicVariable "WARCOM_zones_controled_by_OPFOR";
 ["INFO", "WARCOM", "Init BLU patrols"] call fnc_log;
 [] spawn fnc_WARCOM_blu_patrol;
 
-// Initialize the BLU attack waves
-["INFO", "WARCOM", "Initialize the BLU attack waves"] call fnc_log;
-[] spawn fnc_WARCOM_blu_assault;
-
 // OPCOM's hardpoint director: the one thing that spawns OPFOR after generation, and the reader the
 // AP pool and the stored zone caps were built waiting for. It spends OPFOR Army Power to fortify the
 // ground the enemy holds -- topping up cleared zone emplacements, thickening the band, raising radio

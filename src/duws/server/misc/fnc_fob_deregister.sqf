@@ -20,7 +20,10 @@ if (_i < 0) exitWith {
 // on for the rest of the campaign, and a frozen site pays a spatial query for that answer.
 // Read off the building before the index entry goes, since the key is where fnc_fob_server filed it.
 private _siteKey = (Array_of_FOBS select _i) getVariable ["DUWS_siteKey", ""];
-if (_siteKey != "") then { [_siteKey] call fnc_site_retire };
+// Garrison deleted by roster before retire (which only untracks); with no TF to gather them the men
+// would otherwise idle where the base stood. By roster, never proximity -- a sweep takes a neighbour's
+// men. Both player removal and enemy-destruction funnel through here.
+if (_siteKey != "") then { [_siteKey, "infantry"] call fnc_site_collect; [_siteKey] call fnc_site_retire };
 
 Array_of_FOBS deleteAt _i;
 Array_of_FOBname deleteAt _i;

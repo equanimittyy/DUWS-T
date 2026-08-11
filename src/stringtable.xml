@@ -11,13 +11,6 @@
                 <Original>OPFOR</Original>
                 <English>OPFOR</English>
             </Key>
-            <Key ID="STR_DUWS_T_26hvx0yt">
-                <Spanish>Cancelado</Spanish>
-                <German>Abgebrochen</German>
-                <Chinesesimp>已取消</Chinesesimp>
-                <Original>Cancelled.</Original>
-                <English>Cancelled.</English>
-            </Key>
         </Container>
         <Container name="Campaign Parameters">
             <Key ID="STR_DUWS_T_vk37aebo">
@@ -5058,13 +5051,6 @@
                 <Original>A Mobile HQ is already assigned, and is marked on your map. Only one exists at a time. To move it, undeploy it, drive it and deploy it again. To hand it back and choose a different vehicle, undeploy it and use Release Mobile HQ.</Original>
                 <English>A Mobile HQ is already assigned, and is marked on your map. Only one exists at a time. To move it, undeploy it, drive it and deploy it again. To hand it back and choose a different vehicle, undeploy it and use Release Mobile HQ.</English>
             </Key>
-            <Key ID="STR_DUWS_T_0a6o9dsm">
-                <German>Setze TF Gruppe ein!</German>
-                <Spanish>¡Desplegando fuerza de ataque!</Spanish>
-                <Chinesesimp>特遣队部署中！</Chinesesimp>
-                <Original>Deploying TF squad.</Original>
-                <English>Deploying TF squad.</English>
-            </Key>
             <Key ID="STR_DUWS_T_gu6cbc5f">
                 <German>Gruppe bereit!\nBefehlige die Gruppe mit [L.STRG - LEER]</German>
                 <Spanish>¡Escuadrón listo!\n Accede a él con [CTRL.Izq. + Espacio]</Spanish>
@@ -6201,11 +6187,6 @@
                 <Original>Longbow 1-1</Original>
                 <English>Longbow 1-1</English>
             </Key>
-            <Key ID="STR_DUWS_T_tf_primary_target">
-                <Chinesesimp>特遣队主要目标：%1</Chinesesimp>
-                <Original>Task force primary target: %1.</Original>
-                <English>Task force primary target: %1.</English>
-            </Key>
             <Key ID="STR_DUWS_T_pilot_intro">
                 <Chinesesimp>飞行员</Chinesesimp>
                 <Original>Pilot</Original>
@@ -6256,46 +6237,6 @@
             </Key>
         </Container>
         <Container name="Task Forces &amp; High Command">
-            <Key ID="STR_DUWS_T_launch_attack">
-                <Original>Launch Attack</Original>
-                <English>Launch Attack</English>
-                <Chinesesimp>立刻开始进攻</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_launch_attack_tooltip">
-                <Original>Order all standby task forces to begin the assault</Original>
-                <English>Order all standby task forces to begin the assault</English>
-                <Chinesesimp>命令所有待命中的特遣队开始进攻</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_no_standby_tf">
-                <Original>No standby task forces</Original>
-                <English>No standby task forces</English>
-                <Chinesesimp>没有待命的特遣队</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_no_standby_tf_desc">
-                <Original>There are no task forces waiting to attack</Original>
-                <English>There are no task forces waiting to attack</English>
-                <Chinesesimp>当前没有待命中的特遣队。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_taskforces_launchrqst">
-                <Original>All task forces standing by, commence the assault.</Original>
-                <English>All task forces standing by, commence the assault.</English>
-                <Chinesesimp>所有待命特遣队注意，可以开始突击任务。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_taskforces_launched">
-                <Original>All standby task forces have the attack order. Mission is a go.</Original>
-                <English>All standby task forces have the attack order. Mission is a go.</English>
-                <Chinesesimp>所有待命中的特遣队已收到进攻命令。任务可以开始。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_taskforces_launched_title">
-                <Original>Attack order issued</Original>
-                <English>Attack order issued</English>
-                <Chinesesimp>进攻命令已下达</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_taskforces_launched_desc">
-                <Original>All standby task forces are now moving to engage the enemy</Original>
-                <English>All standby task forces are now moving to engage the enemy</English>
-                <Chinesesimp>所有待命中的特遣队现在开始向敌人发起进攻。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_5i5rdhy7">
                 <German>Dem gelben Trupp sind keine Einheiten zugeordnet</German>
                 <Spanish>No hay unidades asignadas al equipo Amarillo.</Spanish>
@@ -6526,27 +6467,6 @@
                 <Original>Exit the squad manager</Original>
                 <English>Exit the squad manager</English>
             </Key>
-            <Key ID="STR_DUWS_T_0oym1zgn">
-                <German>Ändere das Zonen-Primärziel</German>
-                <Spanish>Cambiar la zona objetivo primario</Spanish>
-                <Chinesesimp>更改主要目标战区</Chinesesimp>
-                <Original>Change Primary Target Zone</Original>
-                <English>Change Primary Target Zone</English>
-            </Key>
-            <Key ID="STR_DUWS_T_eqa4udnh">
-                <German>Ändere das Zonen-Primärziel für Task Forces</German>
-                <Spanish>Cambia el objetivo primario para las fuerzas de ataque</Spanish>
-                <Chinesesimp>给特遣部队改变主要目标</Chinesesimp>
-                <Original>Change the Primary Target for Task Forces</Original>
-                <English>Change the Primary Target for Task Forces</English>
-            </Key>
-            <Key ID="STR_DUWS_T_32ci6fa1">
-                <German>"Overlord 1-1" an alle Einheiten, Einsatztruppe %1 betritt den Operationsbereich.</German>
-                <Spanish>"Overlord 1-1" a todas las unidades, el grupo de tareas %1 está entrando en la zona de operaciones.</Spanish>
-                <Chinesesimp>所有单位， %1 特遣队正进入行动区域。</Chinesesimp>
-                <Original>To all units, Task Force %1 is entering the AO.</Original>
-                <English>To all units, Task Force %1 is entering the AO.</English>
-            </Key>
             <Key ID="STR_DUWS_T_8mtxjfj3">
                 <Spanish>Escuadrón de ataque áereo %1</Spanish>
                 <German>Luftlandeeinheit %1</German>
@@ -6589,34 +6509,6 @@
                 <Original>There is a 10-minute cooldown before each rest period.</Original>
                 <English>There is a 10-minute cooldown before each rest period.</English>
             </Key>
-            <Key ID="STR_DUWS_T_7y9is2hm">
-                <German>„Oberherr 1-1“ an alle Einheiten, eine verbündete Einsatztruppe betritt das AO, wir halten uns derzeit um die Basis bereit. Rufzeichen: %1</German>
-                <Spanish>"Imperador 1-1" a todas las unidades, un grupo especial aliado está entrando en el AO, estamos esperando órdenes alrededor de la base. Indicativo: %1</Spanish>
-                <Chinesesimp>所有单位，一支友军特遣队正进入行动区域，现正在基地周围待命。代号：%1</Chinesesimp>
-                <Original>To all units, a friendly task force is entering the AO and standing by near base. Callsign %1.</Original>
-                <English>To all units, a friendly task force is entering the AO and standing by near base. Callsign %1.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_7y9is2hm2">
-                <German>Eine befreundete Task Force steht nun zur Verfügung — befehle ihnen, feindliche Gebiete über das Menü „Kaderverwaltung“ anzugreifen.</German>
-                <Spanish>Un grupo de tarea aliado ya está disponible — ordénale atacar zonas enemigas desde el menú de Gestión de Escuadras.</Spanish>
-                <Chinesesimp>一支友军特遣队现已可用————在"小队管理"界面命令他们进攻敌区。</Chinesesimp>
-                <Original>A BLUFOR task force is now available. Command them to assault enemy zones from the Squad Manager menu.</Original>
-                <English>A BLUFOR task force is now available. Command them to assault enemy zones from the Squad Manager menu.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_y6pvcegu">
-                <Spanish>Atención todas las unidades, aquí es "Overlord". La Fuerza de Tarea %1 ha dejado de informar su estado…</Spanish>
-                <German>Alle Einheiten, hier ist "Overlord". Task Force %1 hat die Statusmeldung eingestellt…</German>
-                <Chinesesimp>所有单位。特遣部队%1刚刚停止了情况报告...</Chinesesimp>
-                <Original>All units. Task Force %1 has stopped reporting status…</Original>
-                <English>All units. Task Force %1 has stopped reporting status…</English>
-            </Key>
-            <Key ID="STR_DUWS_T_3azcote7">
-                <Spanish>Fuerza de ataque %2 - Objetivo primario cambiado a: %1</Spanish>
-                <German>TF %2 - Primärziel wurde geändert auf: %1</German>
-                <Chinesesimp>TF %2 - 主要目标改变为: %1</Chinesesimp>
-                <Original>All units in the AO, be advised. Task Force %2 is now assaulting %1.</Original>
-                <English>All units in the AO, be advised. Task Force %2 is now assaulting %1.</English>
-            </Key>
             <Key ID="STR_DUWS_T_jl4gqjpf">
                 <Spanish>Inicializando WARCOM</Spanish>
                 <German>Initialisiere WARCOM...</German>
@@ -6637,20 +6529,6 @@
                 <Chinesesimp>战网初始化完成！</Chinesesimp>
                 <Original>WARCOM initialized!</Original>
                 <English>WARCOM initialized!</English>
-            </Key>
-            <Key ID="STR_DUWS_T_0v7xnprx">
-                <Spanish>Haga clic en el mapa (radio: 100m) para seleccionar el objetivo prioritario para las fuerzas de ataque BLUFOR</Spanish>
-                <German>Klicke auf die Karte (100m Radius) um das Primärziel für die BLUFOR Task Forces zu wählen </German>
-                <Chinesesimp>在地图上点击 (100m rad) 来选择蓝军特遣部队主要目标</Chinesesimp>
-                <Original>Click an enemy zone on the map to make it the task forces' primary target.</Original>
-                <English>Click an enemy zone on the map to make it the task forces' primary target.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_astchange">
-                <Spanish>Todas las unidades en la zona de operaciones, atención. El objetivo principal del cuerpo especial ha cambiado.</Spanish>
-                <German>Alle Einheiten im Einsatzgebiet, Achtung. Das Hauptziel der Task Force hat sich geändert.</German>
-                <Chinesesimp>战区所有单位注意，特遣队的主要目标改变了。</Chinesesimp>
-                <Original>All units in the AO, be advised. The main objective of the task force has changed.</Original>
-                <English>All units in the AO, be advised. The main objective of the task force has changed.</English>
             </Key>
                     <Key ID="STR_DUWS_T_operative_no_points">
                 <Original>You have no points available.</Original>
@@ -7396,13 +7274,6 @@
                 <Chinesesimp>请进行选择！</Chinesesimp>
                 <Original>Make a selection first.</Original>
                 <English>Make a selection first.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_b20y3byh">
-                <German>Es muss mindestens eine feindliche Zone auf der Karte sichtbar sein. Versuche es später erneut.</German>
-                <Spanish>Debe de haber al menos una zona enemiga visible en el mapa. Intente más tarde.</Spanish>
-                <Chinesesimp>地图上必须至少有一个敌人战区可见，请稍后重试。</Chinesesimp>
-                <Original>There must be at least one enemy zone visible on the map. Try again later.</Original>
-                <English>There must be at least one enemy zone visible on the map. Try again later.</English>
             </Key>
             <Key ID="STR_DUWS_T_n66cx0eh">
                 <German>SCHLIESSEN</German>

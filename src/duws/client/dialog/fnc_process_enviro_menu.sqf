@@ -126,7 +126,7 @@ _index = lbCurSel 2110;
 switch (_index) do
 {
     case index_hardcore_false: { hardcore_mode_enable = false; publicVariable "hardcore_mode_enable"; };
-    case index_hardcore_true: { hardcore_mode_enable = true; publicVariable "hardcore_mode_enable"; hardcore_visibleZone_found = false; publicVariable "hardcore_visibleZone_found"; };
+    case index_hardcore_true: { hardcore_mode_enable = true; publicVariable "hardcore_mode_enable"; };
 };
 
 // always enable the restricted arsenal

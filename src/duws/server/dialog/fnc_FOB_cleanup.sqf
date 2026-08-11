@@ -27,7 +27,6 @@ deleteVehicle _trg2;
 // CLEANUP OBJECTS AFTER 5 min (civilians spared)
 [_fob_pos, _fob_name] spawn {  
     _zonePos = _this select 0;
-    _fob_name = _this select 1;
     _radius = 15;
     sleep 300;  // 5 min
     _zoneObj = nearestObjects [_zonePos, [], _radius];
@@ -36,18 +35,4 @@ deleteVehicle _trg2;
             deleteVehicle _x;
         };
     } foreach _zoneObj;
-    
-    // Make a Task Force with the leftover units
-    _nearestUnits = nearestObjects [_zonePos,["Man"],200];
-    _group = createGroup west;
-    {
-        if ((side _x) == WEST) then {[_x] joinSilent _group};
-    } forEach _nearestUnits;
-    if (count (units _group) > 0) then {
-        _group deleteGroupWhenEmpty true;
-        _TFname = format["FOB_%1", _fob_name];
-        [_group] spawn fnc_WARCOM_wp_blu_assault;
-        [_group,_TFname] spawn fnc_WARCOM_gps_marker;
-        waitUntil {sleep 5;(count WARCOM_zones_controled_by_OPFOR) > 0};
-    };
 };

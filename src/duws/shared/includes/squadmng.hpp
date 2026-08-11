@@ -112,28 +112,6 @@ class squad_mng_dialog
             tooltip = "$STR_DUWS_T_bhlgx74f"; //--- ToDo: Localize;
             action = "closeDialog 0";
         };
-        class zone_button: RscButton
-        {
-            idc = 1604;
-            text = "$STR_DUWS_T_0oym1zgn"; //--- ToDo: Localize;
-            x = 2 * GUI_GRID_W + GUI_GRID_X;
-            y = 21.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 11 * GUI_GRID_W;
-            h = 2 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_eqa4udnh"; //--- ToDo: Localize;
-            action = "closeDialog 0;[] spawn fnc_WARCOM_mapclick_assault";
-        };
-class launch_button: RscButton
-{
-    idc = 1605;
-    text = "$STR_DUWS_T_launch_attack";
-    x = 13.6 * GUI_GRID_W + GUI_GRID_X;
-    y = 21.5 * GUI_GRID_H + GUI_GRID_Y;
-    w = 11 * GUI_GRID_W;
-    h = 2 * GUI_GRID_H;
-    tooltip = "$STR_DUWS_T_launch_attack_tooltip";
-    action = "[] spawn fnc_blu_taskforces_launch; closeDialog 0;";
-};
         // GUI EDITOR OUTPUT END
     };
 };

@@ -208,11 +208,9 @@ publicVariable "fnc_recruitSuccessServer";
 
 // WARCOM FUNCTIONS
 fnc_WARCOM_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_init.sqf";
-fnc_WARCOM_wp_blu_assault = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_wp_blu_assault.sqf";
 fnc_WARCOM_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_blu_patrol.sqf";
 fnc_WARCOM_wp_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_wp_blu_patrol.sqf";
 fnc_random_veh_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_random_veh_blu_patrol.sqf";
-fnc_WARCOM_gps_marker = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_gps_marker.sqf";
 // OPCOM's hardpoint director: the AP-priced tick that tops up zones, thickens the band and raises radio
 // towers. Server-only, spawned once by fnc_WARCOM_init.
 fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_hardpoints.sqf";
@@ -235,7 +233,6 @@ fnc_apply_posture = compile preprocessFileLineNumbers "duws\server\init_zones\fn
 fnc_spawn_team = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawn_team.sqf";
 fnc_spawn_vehicle = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawn_vehicle.sqf";
 fnc_zone_reveal = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_reveal.sqf";
-fnc_hardcore_visible_recalc = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_hardcore_visible_recalc.sqf";
 fnc_zone_spawn_sizes = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_spawn_sizes.sqf";
 
 // ZONE PREFABS
@@ -277,7 +274,6 @@ publicVariable "fnc_mapclick_release";
 // GLOBAL FUNCTIONS
 fnc_duws_Arsenal = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_Arsenal.sqf";publicVariable "fnc_duws_Arsenal";
 fnc_ghst_halo = compile preprocessFileLineNumbers "duws\client\misc\fnc_ghst_halo.sqf";publicVariable "fnc_ghst_halo";
-fnc_WARCOM_blu_assault = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_blu_assault.sqf";publicVariable "fnc_WARCOM_blu_assault";
 fnc_random_name = compile preprocessFileLineNumbers "duws\shared\functions\fnc_random_name.sqf";publicVariable "fnc_random_name";
 fnc_BLUFOR_squad_init = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BLUFOR_squad_init.sqf";publicVariable "fnc_BLUFOR_squad_init";
 fnc_BLUFOR_faction_init = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BLUFOR_faction_init.sqf";publicVariable "fnc_BLUFOR_faction_init";
@@ -531,7 +527,6 @@ fnc_duws_senior_name = compile preprocessFileLineNumbers "duws\shared\functions\
 fnc_duws_dialogue = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_dialogue.sqf";publicVariable "fnc_duws_dialogue";
 fnc_duws_dialogue_drain = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_dialogue_drain.sqf";publicVariable "fnc_duws_dialogue_drain";
 fnc_autoSave = compile preprocessFileLineNumbers "duws\server\misc\fnc_autoSave.sqf";publicVariable "fnc_autoSave";
-fnc_playerTF_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_playerTF_spawn.sqf";publicVariable "fnc_playerTF_spawn";
 // Not broadcast: server-only, so an accidental client call fails loud.
 fnc_HCsquad_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_HCsquad_spawn.sqf";
 fnc_sitrep_fanout = compile preprocessFileLineNumbers "duws\server\supports\fnc_sitrep_fanout.sqf";
@@ -559,15 +554,11 @@ fnc_redeployHQUnits = compile preprocessFileLineNumbers "duws\server\misc\fnc_re
 publicVariable "fnc_redeployHQUnits";
 fnc_createKillhouse = compile preprocessFileLineNumbers "duws\server\misc\fnc_createKillhouse.sqf";
 publicVariable "fnc_createKillhouse";
-// WARCOM FUNCTIONS
-fnc_WARCOM_mapclick_assault = compile preprocessFileLineNumbers "duws\client\warcom\fnc_WARCOM_mapclick_assault.sqf";publicVariable "fnc_WARCOM_mapclick_assault";
 fnc_lbselected = compile preprocessFileLineNumbers "duws\client\operative\fnc_lbselected.sqf";publicVariable "fnc_lbselected";
 fnc_operative_mission_complete = compile preprocessFileLineNumbers "duws\server\misc\fnc_operative_mission_complete.sqf";publicVariable "fnc_operative_mission_complete";
 fnc_operator_init = compile preprocessFileLineNumbers "duws\client\operative\fnc_operator_init.sqf";publicVariable "fnc_operator_init";
 fnc_operator_open = compile preprocessFileLineNumbers "duws\client\operative\fnc_operator_open.sqf";publicVariable "fnc_operator_open";
 fnc_operator_recruit = compile preprocessFileLineNumbers "duws\client\operative\fnc_operator_recruit.sqf";publicVariable "fnc_operator_recruit";
-fnc_blu_taskforces_launch = compile preprocessFileLineNumbers "duws\server\warcom\fnc_blu_taskforces_launch.sqf";
-publicVariable "fnc_blu_taskforces_launch";
 fnc_apocalypse_buildings = compile preprocessFileLineNumbers "duws\server\supports\fnc_apocalypse_buildings.sqf";
 publicVariable "fnc_apocalypse_buildings";
 fnc_removeArsenalAction = compile preprocessFileLineNumbers "duws\client\misc\fnc_removeArsenalAction.sqf";

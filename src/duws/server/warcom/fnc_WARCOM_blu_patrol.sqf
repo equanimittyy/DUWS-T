@@ -79,7 +79,6 @@ blufor_patrol_count = 0;
 
 			sleep 10; // give squads a chance to mount up
 			[_group] spawn fnc_WARCOM_wp_blu_patrol;
-			//[_group,"derp"] spawn fnc_WARCOM_gps_marker;
 
 			// SPAWN VEHICLE
 			switch (VERSION_X) do {

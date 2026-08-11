@@ -24,9 +24,6 @@ if (_triggerPos in WARCOM_zones_controled_by_BLUFOR) exitWith {};
 ["us_takencontrol",[_place,""]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_takencontrol"] remoteExec ["fnc_duws_dialogue", 0];
 
-// Pause TFs if no opfor zones are visible
-call fnc_hardcore_visible_recalc;
-
 // First-ever capture pays a flat liberation bonus in both currencies, once per zone. The key is
 // recorded in DUWS_zone_first_captured so a reload -- or this zone lost and later retaken through
 // fnc_blufor_cap -- never pays it again: a zone's reward is earned exactly once, which is what

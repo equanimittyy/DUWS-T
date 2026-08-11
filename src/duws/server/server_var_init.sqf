@@ -59,9 +59,6 @@ AttackHeli = 1;publicVariable "AttackHeli";
 // set the default skill range
 blufor_ai_skill = [0.85,1.0];publicVariable "blufor_ai_skill";
 
-// change primary target
-BLUFOR_primary_chg = false;publicVariable "BLUFOR_primary_chg";
-
 // chosen_hq_placement
 chosen_hq_placement = false;publicVariable "chosen_hq_placement";
 
@@ -257,9 +254,6 @@ failsafe_zones_not_found2 = false;//publicVariable "failsafe_zones_not_found2";
 
 // FOB_removed keeps fnc_fob_destroyed from running
 FOB_removed = false;//publicVariable "FOB_removed";
-
-// allow TFs to begin assault, hardcore mode will set false
-hardcore_visibleZone_found = true;publicVariable "hardcore_visibleZone_found";
 
 // Hardcore Mode
 hardcore_mode_enable = false;publicVariable "hardcore_mode_enable";

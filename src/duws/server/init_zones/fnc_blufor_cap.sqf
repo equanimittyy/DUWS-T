@@ -23,9 +23,6 @@ if (_triggerPos in WARCOM_zones_controled_by_BLUFOR) exitWith {};
 ["us_takencontrol",[_place,""]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated,false];
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_takencontrol"] remoteExec ["fnc_duws_dialogue", 0];
 
-// Pause TFs if no opfor zones are visible
-call fnc_hardcore_visible_recalc;
-
 // BLUFOR gains no AP for a recapture -- the liberation bonus was a once-ever reward, so a zone
 // flipped back and forth yields nothing fresh. OPFOR still takes its consolation on every loss,
 // a share of the worth: the anti-steamroll floor does not care how often the zone has flipped.

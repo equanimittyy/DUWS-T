@@ -54,17 +54,5 @@ if (!isServer) exitWith {};
 	};
 };
 
-// Reset TF waypoints every 30 min
-// and nudge any vehicles that have "stalled"
-[] spawn {
-	
-	while {true} do {
-		BLUFOR_primary_chg = true;publicVariable "BLUFOR_primary_chg";
-		//wait until the gps loops (4sec) finish
-		sleep 4.1;
-		BLUFOR_primary_chg = false;publicVariable "BLUFOR_primary_chg";
-		sleep 1800;
-	};
-};
 
 
