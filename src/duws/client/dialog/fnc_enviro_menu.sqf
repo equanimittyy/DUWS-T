@@ -90,6 +90,15 @@ private _addCiv = {
     _i
 };
 
+// Adds a row only when every body model it needs is present, so a set backed by a mod or DLC that
+// is not loaded never appears as a dead choice that would spawn nothing. Probes are the lead models
+// the set draws from in CIV_FACTIONS.sqf, so a hidden row could not have filled anyway.
+private _addCivIf = {
+    params ["_labelKey", "_value", "_probes"];
+    if (_probes findIf { !isClass (configFile >> "CfgVehicles" >> _x) } != -1) exitWith { -1 };
+    [_labelKey, _value] call _addCiv
+};
+
 // The apocalypse mode draws its crowd from the mod it names, so those two rows are the whole list
 // and civilians cannot be turned off; every other mode gets the list without them.
 if (duws_gamemode == "apocalypse") then {
@@ -125,15 +134,15 @@ if (duws_gamemode == "apocalypse") then {
             ["STR_DUWS_T_7yc3uncm", "IFA3"] call _addCiv;
         };
     };
-    private _iMed = ["STR_DUWS_T_1777ggdk", "med"] call _addCiv;
-    ["STR_DUWS_T_2j83vkge", "tanoa"] call _addCiv;
-    ["STR_DUWS_T_c0v3wxlw", "Vafrica"] call _addCiv;
-    ["STR_DUWS_T_be1dhnmv", "asia"] call _addCiv;
-    ["STR_DUWS_T_3tbqvi73", "sumeuro"] call _addCiv;
-    ["STR_DUWS_T_1777ggdkw", "MAX_WOMENm"] call _addCiv;
-    ["STR_DUWS_T_2j83vkgew", "MAX_WOMENt"] call _addCiv;
-    ["STR_DUWS_T_be1dhnmvw", "MAX_WOMENa"] call _addCiv;
-    ["STR_DUWS_T_3tbqvi73w", "MAX_WOMENs"] call _addCiv;
+    private _iMed = ["STR_DUWS_T_1777ggdk", "med", []] call _addCivIf;
+    ["STR_DUWS_T_2j83vkge", "tanoa", ["C_Man_casual_4_F_tanoan"]] call _addCivIf;
+    ["STR_DUWS_T_c0v3wxlw", "Vafrica", ["C_man_p_beggar_F_afro"]] call _addCivIf;
+    ["STR_DUWS_T_be1dhnmv", "asia", ["C_man_p_beggar_F_asia"]] call _addCivIf;
+    ["STR_DUWS_T_3tbqvi73", "sumeuro", ["C_Man_1_enoch_F"]] call _addCivIf;
+    ["STR_DUWS_T_1777ggdkw", "MAX_WOMENm", ["Max_woman1"]] call _addCivIf;
+    ["STR_DUWS_T_2j83vkgew", "MAX_WOMENt", ["Max_woman1", "C_Man_casual_4_F_tanoan"]] call _addCivIf;
+    ["STR_DUWS_T_be1dhnmvw", "MAX_WOMENa", ["Max_woman1", "C_man_p_beggar_F_asia"]] call _addCivIf;
+    ["STR_DUWS_T_3tbqvi73w", "MAX_WOMENs", ["Max_woman1", "C_Man_1_enoch_F"]] call _addCivIf;
 
     [2109, _iMed] call _setDefault;
 };
