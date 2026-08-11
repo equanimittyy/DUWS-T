@@ -105,5 +105,23 @@ private _extractStrings = {
     } forEach _allClasses;
 } forEach _uniqueLoadouts;
 
+// Fold the freshly-added classes into the friendly set. This runs after fnc_create_ammo_lists took its
+// DUWS_friendlyArsenal snapshot at boot, so these standard-issue role-key classes are absent from it --
+// without this the count overlay reads them as an empty pool ([0]): unlimited in Hybrid, unseeded in
+// Limited. Only genuinely-new classes are seeded, so a boot-seeded count is never reset here.
+private _addedClasses = _addedWeapons + _addedMagazines + _addedItems + _addedBackpacks;
+private _friendly = missionNamespace getVariable ["DUWS_friendlyArsenal", []];
+private _newFriendly = _addedClasses select { !(_x in _friendly) };
+if (count _newFriendly > 0) then {
+    DUWS_friendlyArsenal = _friendly + _newFriendly;
+    publicVariable "DUWS_friendlyArsenal";
+    // Limited has no unlimited floor: seed the new standard-issue classes into the pool at the boot
+    // seed count, matching fnc_create_ammo_lists, so they start stocked instead of at zero.
+    if (DUWS_arsenalLimited) then {
+        { [_x, DUWS_limitedSeed] call fnc_captured_pool_setCount; } forEach _newFriendly;
+        publicVariable "DUWS_capturedPool";
+    };
+};
+
 ["INFO", "GEAR", format ["arsenal updated: %1 weapons, %2 magazines, %3 items, %4 backpacks added",
     count _addedWeapons, count _addedMagazines, count _addedItems, count _addedBackpacks]] call fnc_log;
