@@ -538,8 +538,8 @@ fnc_addQuickChangeActions = compile preprocessFileLineNumbers "duws\client\misc\
 publicVariable "fnc_addQuickChangeActions";
 fnc_quick_kits_menu = compile preprocessFileLineNumbers "duws\client\misc\fnc_quick_kits_menu.sqf";
 publicVariable "fnc_quick_kits_menu";
-fnc_scanNearbyUnitsForQuickChange = compile preprocessFileLineNumbers "duws\server\misc\fnc_scanNearbyUnitsForQuickChange.sqf";
-publicVariable "fnc_scanNearbyUnitsForQuickChange";
+fnc_buildQuickKits = compile preprocessFileLineNumbers "duws\server\misc\fnc_buildQuickKits.sqf";
+publicVariable "fnc_buildQuickKits";
 fnc_rearmUnit = compile preprocessFileLineNumbers "duws\server\misc\fnc_rearmUnit.sqf";
 publicVariable "fnc_rearmUnit";
 fnc_activateBaseRecycleStation = compile preprocessFileLineNumbers "duws\server\supports\fnc_activateBaseRecycleStation.sqf";

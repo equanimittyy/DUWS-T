@@ -360,7 +360,7 @@ if (isServer) then {
 
         if (_anyPlayerNear) then {
             ["INFO", "GEAR", "Player detected within 50m of HQ. Building quick kits..."] call fnc_log;
-            [] call fnc_scanNearbyUnitsForQuickChange;
+            [] call fnc_buildQuickKits;
             _executed = true;
         } else {
             sleep 5;
