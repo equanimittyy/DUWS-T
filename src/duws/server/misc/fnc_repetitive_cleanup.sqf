@@ -1,7 +1,8 @@
 // Locality: server -- inherited from server/server_init.sqf.
 /*
-    Deletes what play leaves behind: bodies, wrecks, any vehicle left standing empty, dropped
-    weapons, spent smoke, supply crates and parachutes. One lifetime covers all of it, set by the
+    Deletes what play leaves behind: bodies, wrecks, any vehicle left standing empty (or immobilised
+    with its crew still aboard), dropped weapons, spent smoke, supply crates and parachutes. One
+    lifetime covers all of it, set by the
     DUWS_CleanupLifetime parameter. The sweep is always on: teardowns hand it their live leftovers
     (a finished side mission's survivors, a cleared hardpoint's garrison), so it can never be off.
 
@@ -107,19 +108,29 @@ while {true} do {
     _candidates append allDeadMen;
     _candidates append ((allDead - allDeadMen) select { _x == vehicle _x });
 
-    // Idling vehicles: unmanned is the whole test. It also demanded !canMove, so only a broken-down
-    // vehicle was ever a candidate and a campaign of requisitioned trucks parked where they were
-    // last needed never went. They are still held by DUWS_base_keep_radius and by the persistent
-    // flag, the same two things that hold everything else.
-    // Statics stay excluded: a turret is unmanned by design, and collecting those would take a
+    // A vehicle counts as in use -- and so is spared -- when a living player, or a player's AI
+    // squadmate, is aboard, or when living AI crew still has a mobile hull under them. A crewed hull
+    // that cannot move is wreckage its crew never bailed from, not a vehicle in service, so it ages
+    // out on the clock like an empty one: this is what finally collects an immobilised-but-manned
+    // vehicle the old unmanned-only test never touched. A static is never mobile, so it is spared on
+    // any living crew instead -- collecting a manned emplacement would strip a held zone.
+    private _inUse = {
+        params ["_v"];
+        if ((crew _v) findIf {alive _x && {isPlayer _x || {(units group _x) findIf {isPlayer _x} >= 0}}} >= 0) exitWith { true };
+        ({alive _x} count crew _v > 0) && {_v isKindOf "StaticWeapon" || {canMove _v}}
+    };
+
+    // Idling and immobilised vehicles: not-in-use is the whole test now. They are still held by
+    // DUWS_base_keep_radius and by the persistent flag, the same two things that hold everything
+    // else. Statics stay excluded: a turret is unmanned by design, and collecting those would take a
     // zone's emplacements the moment its captor steps away.
-    // Regaining crew clears the clock, unless the vehicle was retired deliberately.
+    // Returning to service clears the clock, unless the vehicle was retired deliberately.
     {
-        if (!(_x isKindOf "StaticWeapon") && {({alive _x} count crew _x) == 0}) then {
+        if (!(_x isKindOf "StaticWeapon") && {!(_x call _inUse)}) then {
             _candidates pushBack _x;
         } else {
-            // A flagged vehicle carries a delete order; keeping or regaining crew must not clear its
-            // clock (that reset exists to spare a vehicle put back into service, the opposite case).
+            // A flagged vehicle carries a delete order; returning to service must not clear its clock
+            // (that reset exists to spare a vehicle put back into use, the opposite case).
             if (!(_x in _disposed) && {!(_x getVariable ["DUWS_binMe", false])}) then {
                 _x setVariable ["DUWS_binAt", nil];
             };
@@ -173,12 +184,13 @@ while {true} do {
                 _binAt = _now + _lifetime;
                 _obj setVariable ["DUWS_binAt", _binAt];
             };
-            // Living crew spares it as surely as a nearby player does. A released emplacement
-            // can be manned by an AI squadmate, and allPlayers cannot see one. Corpses, wrecks
-            // and litter all report no living crew, so this only ever spares something in use.
+            // In-use spares it as surely as a nearby player does (see _inUse): a mobile AI-crewed
+            // vehicle, or a released emplacement a squadmate mans, stays. A crewed hull that cannot
+            // move no longer counts, so it is collectable here. Corpses, wrecks and litter report no
+            // living crew and drop straight through.
             if ((_force || {_binAt <= _now})
                 && {(allPlayers findIf {_x distance _obj < KEEP_RADIUS}) < 0}
-                && {({alive _x} count crew _obj) == 0}) then {
+                && {!(_obj call _inUse)}) then {
                 // Checked last: it is the only test that walks a list, and by here everything
                 // else has already agreed the object should go. Intact vehicles only, so a
                 // player can park anything driveable at a base and keep it.
@@ -187,6 +199,9 @@ while {true} do {
                 if (_parked) then {
                     _tracked = _tracked + 1;
                 } else {
+                    // Clear any AI still seated before the hull -- an immobilised vehicle reaches
+                    // here manned, and deleteVehicle alone would strand its crew in a null vehicle.
+                    if (!(_obj isKindOf "CAManBase") && {count crew _obj > 0}) then { deleteVehicleCrew _obj };
                     deleteVehicle _obj;
                     _binned = _binned + 1;
                 };
