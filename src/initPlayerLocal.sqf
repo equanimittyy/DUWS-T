@@ -355,6 +355,11 @@ DUWS_fnc_arsenal_unstock = {
         private _stock = if (_isRestricted) then { call DUWS_fnc_arsenal_stock } else { [[], [], []] };
         _stock params ["_addedForeign", "_hiddenFriendly", "_ammoList"];
 
+        // Live re-stock needs the friendly set (foreign is never friendly) and the classes already on
+        // the shelf, so the loop only adds genuinely-new banked gear.
+        private _friendly = missionNamespace getVariable ["DUWS_friendlyArsenal", []];
+        private _stockedForeign = _addedForeign apply { _x select 0 };
+
         private _refLoadout = getUnitLoadout player;
         private _changeThreshold = 10;
 
@@ -392,6 +397,20 @@ DUWS_fnc_arsenal_unstock = {
         private _lastPaint = diag_tickTime;
         while { sleep 0.2; !isNull (uiNamespace getVariable ["RscDisplayArsenal", displayNull]) } do {
             if (_isRestricted && {diag_tickTime - _lastPaint > 0.5}) then {
+                // Live re-stock: a foreign class banked into the pool since open (a just-dropped item
+                // settled, a loot cache) goes on the shelf here so it appears without a full close/reopen
+                // -- available immediately, drawn as a row on the next list redraw (tab switch). Tracked
+                // in _addedForeign so the close cleanup still clears it back off.
+                {
+                    _x params ["_cls", "_cnt"];
+                    if (_cnt > 0 && {!(_cls in _friendly)} && {!(_cls in _stockedForeign)}) then {
+                        private _type = [_cls] call DUWS_fnc_cargoType;
+                        [_cls, _type, true] call DUWS_fnc_shelfForeign;
+                        _addedForeign pushBack [_cls, _type];
+                        _stockedForeign pushBack _cls;
+                    };
+                } forEach (missionNamespace getVariable ["DUWS_capturedPool", []]);
+
                 [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
                 _lastPaint = diag_tickTime;
             };
