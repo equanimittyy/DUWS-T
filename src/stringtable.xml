@@ -3926,6 +3926,13 @@
                 <Original>Mission Type: Rescue&lt;br /&gt;An assault element was ambushed in this area and is pinned inside a building, hostiles cordoned all around it. Break the cordon and bring them out.&lt;br /&gt;&lt;br /&gt;CP: 45&lt;br /&gt;AP: 15</Original>
                 <English>Mission Type: Rescue&lt;br /&gt;An assault element was ambushed in this area and is pinned inside a building, hostiles cordoned all around it. Break the cordon and bring them out.&lt;br /&gt;&lt;br /&gt;CP: 45&lt;br /&gt;AP: 15</English>
             </Key>
+            <Key ID="STR_DUWS_T_reward_boost_tag">
+                <German>Bonus Reward: 1.5x CP/AP</German>
+                <Spanish>Bonus Reward: 1.5x CP/AP</Spanish>
+                <Chinesesimp>Bonus Reward: 1.5x CP/AP</Chinesesimp>
+                <Original>Bonus Reward: 1.5x CP/AP</Original>
+                <English>Bonus Reward: 1.5x CP/AP</English>
+            </Key>
             <Key ID="STR_DUWS_T_xdbfx123">
                 <German>Die Truppe wurde vom Feind entdeckt! Beeilt euch, sie zu retten!</German>
                 <Spanish>El escuadrón ha sido detectado por el enemigo! Apresúrense a rescatarlos!</Spanish>

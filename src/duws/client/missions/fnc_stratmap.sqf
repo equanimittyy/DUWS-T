@@ -197,6 +197,38 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
         _counter = _counter + 1;
 	};
   };
+
+  // The two deepest offers pay more: rank the built offers by how far their position sits from
+  // friendly-held ground (the same anchors the frontier search used) and flag the two farthest by
+  // name. fnc_mission_reward reads DUWS_rewardBoost back on the server and scales their payout, so
+  // pushing deep into enemy territory is worth the risk. Overwritten each request -- safe because a
+  // request is gated shut while a mission is live (Mission_available).
+  private _depths = array_of_missions apply {
+      private _mp = _x select 0;
+      private _d = if (_friendlyAnchors isEqualTo []) then {
+          _mp distance PosOfBLUHQ
+      } else {
+          selectMin (_friendlyAnchors apply {_mp distance2D _x})
+      };
+      [_d, _x select 2]
+  };
+  _depths sort false;
+  DUWS_rewardBoost = (_depths select [0, 2]) apply {_x select 1};
+  publicVariable "DUWS_rewardBoost";
+
+  // Surface the bonus on the map so the incentive is visible: append a red structured-text tag to
+  // each flagged offer's description. The description control renders structured text -- the
+  // per-type briefings already carry <br /> and their base CP/AP figures.
+  private _boostTag = format ["<br /><br /><t color='#ff0000'>%1</t>", localize "STR_DUWS_T_reward_boost_tag"];
+  {
+      private _bn = _x;
+      private _ri = array_of_missions findIf {(_x select 2) isEqualTo _bn};
+      if (_ri >= 0) then {
+          private _row = array_of_missions select _ri;
+          _row set [3, (_row select 3) + _boostTag];
+      };
+  } forEach DUWS_rewardBoost;
+
   missionSearchDone = 1;
 };
 

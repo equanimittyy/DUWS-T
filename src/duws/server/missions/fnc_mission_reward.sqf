@@ -18,11 +18,15 @@ _mission_name = _this select 2;
 // a fourth mode added later inherits it. BLUFOR only -- OPFOR keeps its flat floor and a symmetric
 // lift would over-pay it; AP is untouched, coming from zones every configuration has.
 private _civsOffLift = if ((count (missionNamespace getVariable ["civ_town_rep", []])) == 0) then { 1.5 } else { 1 };
-_cp_multiplied_reward = round (_cpreward * cp_reward_multiplier * _civsOffLift);
+// Depth bounty: the two offers farthest into enemy territory are flagged by name at request time
+// (client/missions/fnc_stratmap.sqf). Unlike the civs-off lift this is a worth multiplier on the
+// mission itself, so it scales both currencies. Absent list or unflagged name pays flat.
+private _depthBoost = if (!isNil "DUWS_rewardBoost" && {_mission_name in DUWS_rewardBoost}) then { 1.5 } else { 1 };
+_cp_multiplied_reward = round (_cpreward * cp_reward_multiplier * _civsOffLift * _depthBoost);
 // The player's reward multiplier scales both mission currencies, so one campaign knob governs CP and
 // AP payouts alike. The civs-off lift is not applied to AP: it substitutes for the absent town-CP
 // faucet, and AP already comes from zones in every configuration.
-_ap_multiplied_reward = round (_apreward * cp_reward_multiplier);
+_ap_multiplied_reward = round (_apreward * cp_reward_multiplier * _depthBoost);
 ["INFO", "MISSION", format ["'%1' succeeded, paying %2 CP and %3 AP",
 	_mission_name, _cp_multiplied_reward, _ap_multiplied_reward]] call fnc_log;
 [_cp_multiplied_reward, format ["mission %1", _mission_name]] remoteExec ["fnc_cp_adjust", 2];
