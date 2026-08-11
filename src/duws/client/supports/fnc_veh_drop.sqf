@@ -10,8 +10,11 @@ private _location = getpos _caller;
 
 // A light transport and nothing heavier: cars and armed cars, no APC/tank/air/UAV/truck. Kind is the
 // request-menu classifier, so a modded faction's hulls sort here exactly as they do in its request list.
+// Tier-locked hulls are dropped from the list here so the player only sees what the ladder has unlocked;
+// the post-pick tier check below still guards a co-op AP drop mid-dialog.
 private _list = (["VEHICLE"] call fnc_faction_rqst_list) select {
-    ([_x select 0] call DUWS_fnc_vehKind) in ["lightUnarmed", "armedCar"]
+    (([_x select 0] call DUWS_fnc_vehKind) in ["lightUnarmed", "armedCar"])
+    && {["BLU", [_x select 0] call DUWS_fnc_vehTier] call DUWS_fnc_ap_unlocked}
 };
 if (_list isEqualTo []) exitWith {
     hint localize "STR_DUWS_T_veh_drop_none";
