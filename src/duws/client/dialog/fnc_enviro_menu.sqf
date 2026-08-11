@@ -108,41 +108,42 @@ if (duws_gamemode == "apocalypse") then {
     lbSetColor [2109, _iWbk, [1,0,0,1]];
     [2109, _iRavage] call _setDefault;
 } else {
-    ["STR_DUWS_T_civoff", "NONE"] call _addCiv;
-    switch (civ_mod) do {
-        case "cup" : {
-            ["STR_DUWS_T_CUPslfr", "CUPslav"] call _addCiv;
-            ["STR_DUWS_T_CUPzdr", "CUPmeast"] call _addCiv;
-            ["STR_DUWS_T_CUPslfrw", "CUPslavw"] call _addCiv;
-            ["STR_DUWS_T_CUPzdrw", "CUPmeastw"] call _addCiv;
-        };
-        case "propfor" : {
-            ["STR_DUWS_T_lez0jp04", "Pcoldeuro"] call _addCiv;
-            ["STR_DUWS_T_wnfbjquf", "Pmideast"] call _addCiv;
-            ["STR_DUWS_T_ycoll66i", "Pafrica"] call _addCiv;
-        };
-        case "cfp" : {
-            ["STR_DUWS_T_uv3r9klr", "Ccoldeuro"] call _addCiv;
-            ["STR_DUWS_T_fkysvpi4", "Cmideast"] call _addCiv;
-            ["STR_DUWS_T_rlykfz31", "Cafghan"] call _addCiv;
-            ["STR_DUWS_T_p7ahis16", "Cafrica"] call _addCiv;
-        };
-        case "Unsung" : {
-            ["STR_DUWS_T_5kow9zoj", "Unsung"] call _addCiv;
-        };
-        case "ifa3" : {
-            ["STR_DUWS_T_7yc3uncm", "IFA3"] call _addCiv;
-        };
-    };
-    private _iMed = ["STR_DUWS_T_1777ggdk", "med", []] call _addCivIf;
-    ["STR_DUWS_T_2j83vkge", "tanoa", ["C_Man_casual_4_F_tanoan"]] call _addCivIf;
-    ["STR_DUWS_T_c0v3wxlw", "Vafrica", ["C_man_p_beggar_F_afro"]] call _addCivIf;
-    ["STR_DUWS_T_be1dhnmv", "asia", ["C_man_p_beggar_F_asia"]] call _addCivIf;
-    ["STR_DUWS_T_3tbqvi73", "sumeuro", ["C_Man_1_enoch_F"]] call _addCivIf;
-    ["STR_DUWS_T_1777ggdkw", "MAX_WOMENm", ["Max_woman1"]] call _addCivIf;
-    ["STR_DUWS_T_2j83vkgew", "MAX_WOMENt", ["Max_woman1", "C_Man_casual_4_F_tanoan"]] call _addCivIf;
-    ["STR_DUWS_T_be1dhnmvw", "MAX_WOMENa", ["Max_woman1", "C_man_p_beggar_F_asia"]] call _addCivIf;
-    ["STR_DUWS_T_3tbqvi73w", "MAX_WOMENs", ["Max_woman1", "C_Man_1_enoch_F"]] call _addCivIf;
+    // Every set is offered only when the body models it draws from are loaded, so the list shows
+    // exactly what this install can spawn. One presence check per set replaces the old civ_mod
+    // switch, which both left CUP/CFP/propfor sets ungated at the tail and could never reach the
+    // Unsung/IFA3 cases (civ_mod detection only ever sets vanilla/cup/propfor/cfp). Probes are lead
+    // models from CIV_FACTIONS.sqf; a mixed CUP+CFP set probes a CFP class so CUP alone won't pass.
+    // NONE and med carry none: Off is always offered and med is vanilla base classes, the default.
+    private _civSets = [
+        ["STR_DUWS_T_civoff",    "NONE",       []],
+        ["STR_DUWS_T_1777ggdk",  "med",        []],
+        ["STR_DUWS_T_2j83vkge",  "tanoa",      ["C_Man_casual_4_F_tanoan"]],
+        ["STR_DUWS_T_c0v3wxlw",  "Vafrica",    ["C_man_p_beggar_F_afro"]],
+        ["STR_DUWS_T_be1dhnmv",  "asia",       ["C_man_p_beggar_F_asia"]],
+        ["STR_DUWS_T_3tbqvi73",  "sumeuro",    ["C_Man_1_enoch_F"]],
+        ["STR_DUWS_T_1777ggdkw", "MAX_WOMENm", ["Max_woman1"]],
+        ["STR_DUWS_T_2j83vkgew", "MAX_WOMENt", ["Max_woman1", "C_Man_casual_4_F_tanoan"]],
+        ["STR_DUWS_T_be1dhnmvw", "MAX_WOMENa", ["Max_woman1", "C_man_p_beggar_F_asia"]],
+        ["STR_DUWS_T_3tbqvi73w", "MAX_WOMENs", ["Max_woman1", "C_Man_1_enoch_F"]],
+        ["STR_DUWS_T_CUPslfr",   "CUPslav",    ["CUP_C_C_Bully_01"]],
+        ["STR_DUWS_T_CUPzdr",    "CUPmeast",   ["CUP_C_TK_Man_01"]],
+        ["STR_DUWS_T_CUPslfrw",  "CUPslavw",   ["CUP_C_C_Bully_01", "Max_woman1"]],
+        ["STR_DUWS_T_CUPzdrw",   "CUPmeastw",  ["CUP_C_TK_Man_01", "Max_Tak_woman1"]],
+        ["STR_DUWS_T_uv3r9klr",  "Ccoldeuro",  ["CFP_C_CHERNO_WIN_Civilian_02"]],
+        ["STR_DUWS_T_fkysvpi4",  "Cmideast",   ["CFP_C_ME_Civ_2_01"]],
+        ["STR_DUWS_T_rlykfz31",  "Cafghan",    ["CFP_C_AFG_Civilian_02"]],
+        ["STR_DUWS_T_p7ahis16",  "Cafrica",    ["CFP_C_AFRCHRISTIAN_Civ_8_01"]],
+        ["STR_DUWS_T_lez0jp04",  "Pcoldeuro",  ["LOP_CHR_Civ_Citizen_03"]],
+        ["STR_DUWS_T_wnfbjquf",  "Pmideast",   ["LOP_Tak_Civ_Man_06"]],
+        ["STR_DUWS_T_ycoll66i",  "Pafrica",    ["LOP_AFR_Civ_Man_01"]],
+        ["STR_DUWS_T_5kow9zoj",  "Unsung",     ["uns_civilian1"]],
+        ["STR_DUWS_T_7yc3uncm",  "IFA3",       ["LIB_CIV_Citizen_1"]]
+    ];
+    private _iMed = -1;
+    {
+        private _i = _x call _addCivIf;
+        if ((_x select 1) == "med") then { _iMed = _i };
+    } forEach _civSets;
 
     [2109, _iMed] call _setDefault;
 };
