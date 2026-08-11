@@ -13,17 +13,17 @@ private _names = [];
     private _nm = format ["duws_aoi_dbg_%1", _forEachIndex];
     createMarkerLocal [_nm, [_c select 0, _c select 1]];
     _nm setMarkerShapeLocal "ELLIPSE";
-    // Same ELLIPSE mechanic as the zone rings -- a SolidBorder fill -- because the diagonal-hatch
-    // brushes tried before did not paint on these local markers. Side by colour: pink OPFOR, cyan
-    // BLUFOR, as the inline #(r,g,b,a) marker form not CfgMarkerColors names (the map has no cyan).
-    // The #(argb,8,8,3)color(...) procedural-texture form matches no marker colour and draws nothing.
-    // Colour-string alpha stays 1; the 0.5 is the marker alpha, so overlapping coverage tints rather
-    // than whites out.
+    // Solid fill, no border: the per-circle border ring made overlapping reaches read as separate
+    // discs, so dropping it blends a side's coverage into one soft field. Diagonal-hatch brushes did
+    // not paint on these local markers. Colour is the inline #(r,g,b,a) form, not a CfgMarkerColors
+    // name (the map has no cyan); the marker alpha below -- not the string's 4th channel -- is kept
+    // low so a double overlap barely darkens, holding the union close to flat. Pastel rose OPFOR,
+    // pastel sky BLUFOR, lightened from the old saturated pink/cyan to sit easier on the eyes.
     private _blu = _side isEqualTo "blufor";
-    _nm setMarkerBrushLocal "SolidBorder";
-    _nm setMarkerColorLocal (["#(1,0.08,0.58,1)", "#(0,1,1,1)"] select _blu);
+    _nm setMarkerBrushLocal "Solid";
+    _nm setMarkerColorLocal (["#(1,0.62,0.72,1)", "#(0.6,0.82,1,1)"] select _blu);
     _nm setMarkerSizeLocal [_r, _r];
-    _nm setMarkerAlphaLocal 0.5;
+    _nm setMarkerAlphaLocal 0.28;
     _names pushBack _nm;
 } forEach _circles;
 missionNamespace setVariable ["DUWS_dbgAoiMarkers", _names];
