@@ -5,7 +5,10 @@
     [_locIndex, _centerPos, _radius]. Returns nothing.
 
     Parked cars ride the town's "crowd" roster, so the site poller's empty hook collects them with
-    the pedestrians when the town sleeps. Driving cars must not: they leave for another town, and
+    the pedestrians when the town sleeps. A parked car a player gets into leaves that roster and
+    costs the town a point of reputation: off the roster the sleep sweep cannot delete a car the
+    player drove off, and once abandoned the map cleanup sweep reaps it like any other empty
+    vehicle. Driving cars must not ride the roster: they leave for another town, and
     deleting them on their origin town's sleep pops them in front of whoever they drove up to.
     Instead they carry DUWS_binMe -- the map cleanup sweep reaps them only when no player is within
     its keep radius, so one you are following stays and the rest are collected once out of sight.
@@ -63,7 +66,20 @@ while { _parked < _nPark && _tries < _nPark * 3 } do {
     private _dir = [_road] call _fnc_roadDir;
     private _pos = (getPosATL _road) getPos [3, _dir + 90];
     if (count (nearestObjects [_pos, ["Car", "Truck"], 4]) > 0) then { continue };
-    _roster pushBack ([_pos, _dir] call _fnc_spawnCar);
+    private _car = [_pos, _dir] call _fnc_spawnCar;
+    // Stamped for the EH: its {} does not close over this scope, so town and site key travel on the
+    // car. The car is server-local (createVehicle here), so a server-added GetIn fires here when any
+    // player takes it. Removed on the first player in, so a passenger after does not charge twice.
+    _car setVariable ["DUWS_civCarTown", _locIndex];
+    _car setVariable ["DUWS_civCarKey", _key];
+    _car addEventHandler ["GetIn", {
+        params ["_veh", "", "_unit"];
+        if (!isPlayer _unit) exitWith {};
+        _veh removeEventHandler ["GetIn", _thisEventHandler];
+        [_veh getVariable ["DUWS_civCarKey", ""], _veh, "crowd"] call fnc_site_roster_drop;
+        [_veh getVariable ["DUWS_civCarTown", -1], -1, "vehicle_stolen"] call fnc_town_rep_adjust;
+    }];
+    _roster pushBack _car;
     _parked = _parked + 1;
     // Staggered like the pedestrian fill (this runs in that same scheduled thread): a burst of
     // createVehicle in one frame hitches the server.
