@@ -85,6 +85,7 @@ fnc_support_defs = {
 // and always available. Mirrors the vehicle rungs -- transport lift and indirect fire at tier 3, the
 // gunship and heavy fire at tier 4, the CAS jet and HALO insertion at tier 5.
 DUWS_support_tiers = [
+	["uav", 2],
 	["mortar", 3], ["jdam", 3], ["laser", 3], ["siva", 3], ["sawp", 3], ["paradrop", 3], ["helolift", 3],
 	["arty", 4], ["cluster", 4], ["napalm", 4], ["hcAttChop", 4],
 	["hcCAS", 5], ["halo", 5]

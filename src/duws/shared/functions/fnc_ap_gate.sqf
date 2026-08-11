@@ -29,9 +29,12 @@ DUWS_fnc_tierName = {
 // The ladder tier a purchasable vehicle sits at, mapped from the same DUWS_fnc_vehKind classifier the
 // price reads -- so the rung that unlocks a vehicle and the CP it costs can never disagree. A carrier
 // that seats a squad is a tier below the pure gun platform of the same chassis: an APC or IFV (T3)
-// against an MBT (T4), a transport helicopter (T3) against a gunship (T4). Logistics, boats, drones and
-// any unclassed vehicle are T1; an unarmed car splits on seats -- a quad or runabout T1, a larger
-// passenger car T2. DUWS_fnc_vehKind lives in shared/functions/fnc_veh_price.sqf, broadcast alongside.
+// against an MBT (T4), a transport helicopter (T3) against a gunship (T4). UAVs sit at Mechanised (T3)
+// armed or not -- even a recon drone outranges what infantry can field, and the armed ones carry more
+// than a car. Logistics and boats are T1; an unarmed car splits on seats -- a quad or runabout T1, a
+// larger passenger car T2. Anything the classifier cannot place falls to Mechanised (T3), not the
+// infantry floor: an unrecognised hull -- most likely a modded one -- is gated rather than handed over
+// free mid-game. DUWS_fnc_vehKind lives in shared/functions/fnc_veh_price.sqf, broadcast alongside.
 DUWS_fnc_vehTier = {
     params ["_class"];
     if (_class == "") exitWith { 1 };
@@ -44,6 +47,7 @@ DUWS_fnc_vehTier = {
         case "heliArmed": { 4 };
         case "apcIfv": { 3 };
         case "heliTransport": { 3 };
+        case "uav": { 3 };
         case "armedCar": { 2 };
         case "lightUnarmed": {
             private _cfg = configFile >> "CfgVehicles" >> _class;
@@ -51,7 +55,9 @@ DUWS_fnc_vehTier = {
                 + count ("true" configClasses (_cfg >> "Turrets"));
             [2, 1] select (_seats <= 2)
         };
-        default { 1 };
+        case "logi": { 1 };
+        case "boat": { 1 };
+        default { 3 };
     }
 };
 
