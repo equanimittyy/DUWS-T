@@ -55,6 +55,7 @@ _abort = {
     _boat lock false;
     deleteMarker str(_markerpickup);
     [localize "STR_DUWS_T_OVERLORD", ([localize _msg] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
+    [_boat, _boatgroup, 45, false] call fnc_support_despawn;
 };
 
 _wp = _boatgroup addWaypoint [[_foundPickupPos select 0, (_foundPickupPos select 1)-75], 0];
@@ -151,7 +152,4 @@ if (getdammage _boat > 0.7 or !alive _pilot) exitWith { ["STR_DUWS_T_boattaxi_rt
 // *****************************
 
 
-sleep 118;
-
-deleteVehicle _pilot;
-deleteVehicle _boat;
+[_boat, _boatgroup, 118, false] call fnc_support_despawn;

@@ -85,10 +85,7 @@ _abort = {
 	_message = format[localize "STR_DUWS_T_helotaxidamaged", localize "STR_DUWS_T_chariot"];
 	_speaker = localize "STR_DUWS_T_OVERLORD";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-	_helo land "LAND";
-	_helo engineOn false;
-	{deleteVehicle _x;} foreach units _helogroup;
-	deleteVehicle _helo;
+	[_helo, _helogroup, 45, true] call fnc_support_despawn;
 };
 
 // wait until the helo is near the lz
@@ -280,8 +277,7 @@ if (call _check_damage) exitWith {
 	_message = format[localize "STR_DUWS_T_helotaxirtbdown", localize "STR_DUWS_T_chariot"];
 	_speaker = localize "STR_DUWS_T_OVERLORD";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-	{deleteVehicle _x;} foreach units _helogroup;
-	deleteVehicle _helo;
+	[_helo, _helogroup, 45, true] call fnc_support_despawn;
 };
 
 // *****************************
@@ -296,5 +292,4 @@ terminate _pickupSpawnclose;
 terminate _LzSpawnopen;
 terminate _LzSpawnclose;
 
-{deleteVehicle _x;} foreach units _helogroup;
-deleteVehicle _helo;
+[_helo, _helogroup] call fnc_support_despawn;

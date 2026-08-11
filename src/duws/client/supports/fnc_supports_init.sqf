@@ -157,6 +157,24 @@ fnc_support_comm_used = {
 	if (!_defer) then { [_class] call fnc_support_consume };
 };
 
+// A killable support that dies is a wreck or corpse the mission garbage collector reaps on its own.
+// The other half is a support still ALIVE (clean drop, or a survived abort): never a corpse, so
+// nothing else collects it -- despawn it here on a controlled clock rather than let a live aircraft
+// loiter. _land brings an aircraft down first, _delay lets it clear; spawns so the caller never blocks.
+fnc_support_despawn = {
+	params ["_veh", ["_group", grpNull], ["_delay", 0], ["_land", false]];
+	if (isNull _veh || {!alive _veh}) exitWith {};
+	[_veh, _group, _delay, _land] spawn {
+		params ["_veh", "_group", "_delay", "_land"];
+		if (_land) then { _veh land "LAND"; _veh engineOn false; };
+		if (_delay > 0) then { sleep _delay };
+		if (!isNull _veh && {alive _veh}) then {
+			{ deleteVehicle _x } forEach units _group;
+			deleteVehicle _veh;
+		};
+	};
+};
+
 // Removing one item may or may not renumber the others: whether an item id is a stable handle or
 // an index into a compacting array is undocumented, and the answer decides whether every other
 // recorded id is still valid afterwards. Rather than depend on it, the whole slate is torn down
