@@ -43,6 +43,10 @@ DUWS_fnc_arsenal_paintCounts = {
     params [["_display", displayNull]];
     if (isNull _display) exitWith {};
 
+    // Full leaves the whole-config arsenal unlimited and unrestricted: no per-row count means anything,
+    // and stamping thousands of rows only fights BIS's own repopulation of that list. Paint nothing.
+    if (!(player getVariable ["DUWS_isRestrictedArsenal", false])) exitWith {};
+
     // Every browsable category list, left panel then right. Each control id is the shared list base
     // plus the category's tab offset.
     private _tabs = [
@@ -63,13 +67,21 @@ DUWS_fnc_arsenal_paintCounts = {
     {
         private _ctrl = _display displayCtrl (IDC_RSCDISPLAYARSENAL_LIST + _x);
         if (isNull _ctrl || {!(ctrlShown _ctrl)}) then { continue };
-        // Cargo lists can be CT_LISTNBOX (multi-column); the rest are CT_LISTBOX. Class is column 0,
-        // the visible name column 1, matching the arsenal's own row layout.
-        private _isN = (ctrlType _ctrl) == 102;
+        // Walk only the two list shapes the arsenal actually uses: a cargo list is a CT_LISTNBOX (102,
+        // multi-column, class in column 0), every other tab a CT_LISTBOX (5). Skip any other type -- a
+        // not-yet-shaped control mid-rebuild, or a non-list control in the id space -- so lnb*/lb* is
+        // never called on a control that cannot take it, the shape that errored on rapid tab clicks.
+        private _t = ctrlType _ctrl;
+        if (_t != 5 && {_t != 102}) then { continue };
+        private _isN = _t == 102;
         private _rows = if (_isN) then { (lnbSize _ctrl) select 0 } else { lbSize _ctrl };
         for "_i" from 0 to (_rows - 1) do {
             private _cls = if (_isN) then { _ctrl lnbData [_i, 0] } else { _ctrl lbData _i };
             if (_cls == "") then { continue };
+            // Ammo untracked: magazines are unlimited as a whole category (countFor rule 3). Mirror the
+            // Full no-op -- leave BIS's plain name rather than stamping [∞], so the untracked-ammo shape
+            // renders the same clean way the whole-unlimited Full arsenal does.
+            if (!(missionNamespace getVariable ["DUWS_trackAmmo", false]) && {isClass (configFile >> "CfgMagazines" >> _cls)}) then { continue };
             private _amt = [_cls] call DUWS_fnc_arsenal_countFor;
             // Prefix is rebuilt onto the config display name, never onto the row's current text, so a
             // repaint cannot stack "[3] [3] name".

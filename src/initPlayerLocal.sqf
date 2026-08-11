@@ -329,12 +329,25 @@ DUWS_fnc_shelfForeign = {
         private _refLoadout = getUnitLoadout player;
         private _changeThreshold = 10;
 
-        // Item-count overlay: paint once now so counts show the instant the arsenal draws, then again
-        // each loop tick so a tab switch or a taken item repaints within one poll interval.
-        [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
-
-        while { sleep 0.2; !isNull (uiNamespace getVariable ["RscDisplayArsenal", displayNull]) } do {
+        // Item-count overlay. Restricted modes only -- Full is the whole-config unlimited arsenal,
+        // where a per-row [∞] stamp is meaningless and only races BIS's repopulation of a huge list.
+        // Paint once on open, then repaint on BIS's arsenalEquipped event (raised after it rebuilds the
+        // list) for the responsive path, with the slow heartbeat below as the safety net for tab and
+        // search changes that raise no event. The strip poll is separate and drives the loop regardless.
+        private _equipEH = -1;
+        if (_isRestricted) then {
             [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
+            _equipEH = [missionNamespace, "arsenalEquipped", {
+                [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
+            }] call BIS_fnc_addScriptedEventHandler;
+        };
+
+        private _lastPaint = diag_tickTime;
+        while { sleep 0.2; !isNull (uiNamespace getVariable ["RscDisplayArsenal", displayNull]) } do {
+            if (_isRestricted && {diag_tickTime - _lastPaint > 0.5}) then {
+                [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
+                _lastPaint = diag_tickTime;
+            };
 
             private _currentLoadout = getUnitLoadout player;
             if (_currentLoadout isNotEqualTo _refLoadout) then {
@@ -350,8 +363,13 @@ DUWS_fnc_shelfForeign = {
             };
         };
 
-        // Close. Settle the captured pool first so overdrawn foreign is stripped, then clear the
-        // stocked foreign back off the shelf.
+        // Close. Drop the equip repaint handler first so it cannot fire against a tearing-down display.
+        if (_equipEH >= 0) then {
+            [missionNamespace, "arsenalEquipped", _equipEH] call BIS_fnc_removeScriptedEventHandler;
+        };
+
+        // Settle the captured pool first so overdrawn foreign is stripped, then clear the stocked
+        // foreign back off the shelf.
         if (_isRestricted) then {
             duws_pool_seq = (missionNamespace getVariable ["duws_pool_seq", 0]) + 1;
             private _replyVar = format ["duws_pool_reply_%1", duws_pool_seq];
