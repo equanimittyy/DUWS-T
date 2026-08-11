@@ -3933,6 +3933,13 @@
                 <Original>Bonus Reward: 1.5x CP/AP</Original>
                 <English>Bonus Reward: 1.5x CP/AP</English>
             </Key>
+            <Key ID="STR_DUWS_T_reward_civsoff_tag">
+                <German>Civilians Off: 1.5x CP</German>
+                <Spanish>Civilians Off: 1.5x CP</Spanish>
+                <Chinesesimp>Civilians Off: 1.5x CP</Chinesesimp>
+                <Original>Civilians Off: 1.5x CP</Original>
+                <English>Civilians Off: 1.5x CP</English>
+            </Key>
             <Key ID="STR_DUWS_T_xdbfx123">
                 <German>Die Truppe wurde vom Feind entdeckt! Beeilt euch, sie zu retten!</German>
                 <Spanish>El escuadrón ha sido detectado por el enemigo! Apresúrense a rescatarlos!</Spanish>

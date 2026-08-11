@@ -229,6 +229,15 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
       };
   } forEach DUWS_rewardBoost;
 
+  // Civs-off CP lift: with no town-rep economy (civilians off, or the RAVAGE/WBK modes) mission CP is
+  // paid x1.5 to substitute the absent town-CP faucet (server/missions/fnc_mission_reward.sqf). The gate
+  // there is civ_town_rep being empty, which is server-only; CIV_PRESENCE is the broadcast setting that
+  // decides it, so the client reproduces the same condition to surface the lift on every offer.
+  if ((isNil "CIV_PRESENCE") || {CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"]}) then {
+      private _civTag = format ["<br /><br /><t color='#ff0000'>%1</t>", localize "STR_DUWS_T_reward_civsoff_tag"];
+      { _x set [3, (_x select 3) + _civTag] } forEach array_of_missions;
+  };
+
   missionSearchDone = 1;
 };
 
