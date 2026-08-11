@@ -95,6 +95,8 @@ private _fnc_fill = {
     };
 
     [_groups, _buildings] spawn fnc_civ_wp_Tomata;
+    // Cars share the crowd roster, so _fnc_empty collects them with the pedestrians.
+    [_locIndex, _centerPos, _radius] call fnc_civ_traffic;
     if (duws_log_level >= 4) then {
         ["DEBUG", "CIV", format ["Town %1 filled with %2 of a target %3", _locIndex, count _groups, _target]] call fnc_log;
     };
