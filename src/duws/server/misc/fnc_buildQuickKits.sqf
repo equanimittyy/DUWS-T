@@ -123,5 +123,10 @@ if (count _newFriendly > 0) then {
     };
 };
 
+// Log unconditionally (even when 0 new) so an RPT proves this merge branch ran: a stale build without
+// the fix prints no such line, making "did the count fix load?" answerable from the log alone.
+["INFO", "GEAR", format ["friendly set: folded %1 new of %2 role-key classes (mode: %3)",
+    count _newFriendly, count _addedClasses, ["Hybrid", "Limited"] select DUWS_arsenalLimited]] call fnc_log;
+
 ["INFO", "GEAR", format ["arsenal updated: %1 weapons, %2 magazines, %3 items, %4 backpacks added",
     count _addedWeapons, count _addedMagazines, count _addedItems, count _addedBackpacks]] call fnc_log;
