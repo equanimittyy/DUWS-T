@@ -232,7 +232,7 @@ DUWSMP_CP_death_cost = 2;publicVariable "DUWSMP_CP_death_cost";
 dynamic_weather_enable = true;publicVariable "dynamic_weather_enable";	
 
 // commandpointsblu1
-commandpointsblu1 = 20;publicVariable "commandpointsblu1";
+commandpointsblu1 = 30;publicVariable "commandpointsblu1";
 
 // Zones built out and civilians registered, successfully or not. Everything the player sees
 // as "the campaign has started" -- the completion banner, the intro helicopter, the map
