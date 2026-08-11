@@ -79,3 +79,26 @@ publicVariable "DUWS_civBackpacks";
 
 ["INFO", "CIV", format ["cached %1 uniforms, %2 vests, %3 headgear, %4 backpacks",
     count _civUniforms, count _civVests, count _civHeadgear, count _civBackpacks]] call fnc_log;
+
+// Fold civilian disguise gear into the friendly set. This scan runs tens of seconds after
+// fnc_create_ammo_lists snapshotted DUWS_friendlyArsenal, so these classes are absent from it --
+// without this the count overlay reads them as an empty pool ([0]) in Hybrid and the disguise gear
+// cannot be drawn. Only genuinely-new classes are seeded, so a boot-seeded count is never reset.
+private _civAdded = _civUniforms + _civVests + _civHeadgear + _civBackpacks;
+private _friendly = missionNamespace getVariable ["DUWS_friendlyArsenal", []];
+private _newFriendly = _civAdded select { !(_x in _friendly) };
+if (count _newFriendly > 0) then {
+    DUWS_friendlyArsenal = _friendly + _newFriendly;
+    publicVariable "DUWS_friendlyArsenal";
+    // Limited has no unlimited floor: seed the new classes at the boot seed count so they start
+    // stocked instead of at zero, matching fnc_create_ammo_lists.
+    if (DUWS_arsenalLimited) then {
+        { [_x, DUWS_limitedSeed] call fnc_captured_pool_setCount; } forEach _newFriendly;
+        publicVariable "DUWS_capturedPool";
+    };
+};
+
+// Log unconditionally (even when 0 new) so an RPT proves this fold ran: a stale build lacking it
+// prints no such line, making "did the civ-gear fix load?" answerable from the log alone.
+["INFO", "CIV", format ["friendly set: folded %1 new of %2 civilian classes (mode: %3)",
+    count _newFriendly, count _civAdded, ["Hybrid", "Limited"] select DUWS_arsenalLimited]] call fnc_log;
