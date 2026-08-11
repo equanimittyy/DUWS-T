@@ -267,6 +267,13 @@ hint localize "STR_DUWS_T_zu4bxt24";
     } else {
         systemChat localize "STR_DUWS_T_loadout_copy_none";
     };
+
+    // Final snapshot: the restricted arsenal keeps startup-kit classes unlimited, and the copied gear
+    // (a detected-faction class absent from the friendly snapshot) would otherwise read [0]. The inline
+    // capture below may run before this spawn, so re-take it here where the loadout is settled.
+    private _kit = [];
+    [getUnitLoadout player, _kit] call DUWS_fnc_extractLoadoutItems;
+    player setVariable ["DUWS_startupKit", _kit];
 };
 
 // Hold the map open until zones and towns are both registered. The generation progress
@@ -406,9 +413,9 @@ hintsilent format[localize "STR_DUWS_T_ix8g2neb",worldName,profileName];
 forceWeatherChange;
 
 player setVariable["Saved_Loadout", getUnitLoadout player];
-// Flat classname set of the deploy kit, for the restricted arsenal to keep it unlimited. Taken here,
-// after the base-guard loadout copy has had time to land, so it reflects what the player actually
-// carries rather than the editor default.
+// Flat classname set of the deploy kit, for the restricted arsenal to keep it unlimited. Provisional:
+// the base-guard loadout copy runs in the spawn above and may land after this line, so the copy spawn
+// re-takes this once the loadout is final -- else the copied gear reads [0] in the restricted arsenal.
 private _startupKit = [];
 [getUnitLoadout player, _startupKit] call DUWS_fnc_extractLoadoutItems;
 player setVariable ["DUWS_startupKit", _startupKit];
