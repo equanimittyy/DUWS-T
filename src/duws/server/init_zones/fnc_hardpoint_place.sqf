@@ -423,48 +423,44 @@ fnc_hardpoint_site_flank = {
     _placed
 };
 
-// [_roadCounts, _fnTick] call fnc_hardpoint_site_roadblocks -> roadblocks placed.
+// [_roadTargets, _fnTick] call fnc_hardpoint_site_roadblocks -> roadblocks placed.
 //
-// One roadblock net per campaign: each zone contributes _roadCounts (0..2, rolled in fnc_hardpoint_plan_counts)
-// blocks on the approach the player drives in on -- a point on the line from BLU HQ to that zone at a random
-// depth, kept only where the OPFOR field is positive so a block never lands in friendly ground.
-// fnc_hardpoint_best_ground snaps the draw to a road (main road preferred) and rejects a snap that crossed
-// into a zone, so the block sits on an open approach road, not a zone interior; each then faces along that
-// road toward BLU HQ so its guns cover the way in. No HQ placed yet -> a plain band draw so the pass still
-// lays. Standalone rows ("").
+// Lays the roadblock net rolled in fnc_hardpoint_plan_counts. Each target is [zonePos, endpointPos]: a block
+// is a point along endpoint -> zone at a random depth, kept only where the OPFOR field is positive so it
+// never lands in friendly ground. fnc_hardpoint_best_ground snaps the draw to a road (main road preferred)
+// and rejects a snap that crossed into a zone, so the block sits on an open road, not a zone interior; each
+// then faces back along that road toward its endpoint -- HQ for the approach pass, the neighbour zone for the
+// inter-zone pass -- so its guns cover the way through. Endpoint [] (no HQ at plan time) -> a plain band draw
+// near the zone so the pass still lays. Standalone rows ("").
 //
-// One lay call, not one per zone, so the generation banner climbs unbroken: a target list holds each zone's
-// centre repeated its block count and the per-emplacement reset hands out the next, so a dropped block (no
-// road it can hold) still consumes its target and the banner total stays honest. Runs spawned:
-// fnc_hardpoint_register sleeps in the crew drop when it crews one inline.
+// One lay call over the whole pre-expanded target list, so the generation banner climbs unbroken: the
+// per-emplacement reset hands out the next target, and a dropped block (no road it can hold) still consumes
+// its target so the banner total stays honest. Runs spawned: fnc_hardpoint_register sleeps in the crew drop
+// when it crews one inline.
 fnc_hardpoint_site_roadblocks = {
-    params ["_roadCounts", ["_fnTick", {}]];
-    private _targets = [];
-    {
-        private _n = _roadCounts param [_forEachIndex, 0];
-        for "_i" from 1 to _n do { _targets pushBack (_x select 1) };
-    } forEach zone_meta_array;
-    private _count = count _targets;
+    params ["_roadTargets", ["_fnTick", {}]];
+    private _count = count _roadTargets;
     if (_count <= 0) exitWith { 0 };
     private _idx = 0;
     private _placed = [_count, "hproad", "", {
-        // _this is the reset's assigned zone centre. Draw along BLU HQ -> zone at a random depth and keep it
-        // only in OPFOR-held ground; best_ground then snaps it to a road and faces it along the road toward HQ.
-        private _zc = _this;
-        if (PosOfBLUHQ isEqualTo []) exitWith {
+        // _this is the reset's assigned [zonePos, endpointPos]. Draw along endpoint -> zone at a random depth
+        // and keep it only in OPFOR-held ground; best_ground then snaps it to a road and faces it back toward
+        // the endpoint. No endpoint (no HQ at plan time) -> a band draw near the zone.
+        _this params ["_zpos", "_epos"];
+        if (_epos isEqualTo []) exitWith {
             private _a = call fnc_hardpoint_band_anchor;
             if (_a isEqualTo []) exitWith { [] };
-            [_a select 0, (_a select 0) getDir _zc]
+            [_a select 0, (_a select 0) getDir _zpos]
         };
         private _f = 0.3 + random 0.6;
-        private _hx = PosOfBLUHQ select 0;
-        private _hy = PosOfBLUHQ select 1;
-        private _p = [_hx + ((_zc select 0) - _hx) * _f, _hy + ((_zc select 1) - _hy) * _f, 0];
+        private _ex = _epos select 0;
+        private _ey = _epos select 1;
+        private _p = [_ex + ((_zpos select 0) - _ex) * _f, _ey + ((_zpos select 1) - _ey) * _f, 0];
         private _c = [_p, 0, HP_ROAD_SNAP, 6, 0, 0.35, 0] call BIS_fnc_findSafePos;
         if (([_c] call fnc_aoi_field_at) <= 0) exitWith { [] };  // OPFOR-held approach only
-        [_c, _c getDir PosOfBLUHQ]  // prefer bearing toward HQ; facing snaps to the road heading nearer it
+        [_c, _c getDir _epos]  // face back toward the endpoint; facing snaps to the road heading nearer it
     }, _fnTick, {
-        private _t = _targets select _idx;
+        private _t = _roadTargets select _idx;
         _idx = _idx + 1;
         _t
     }, createHashMapFromArray [["ROADBLOCK", 1]]] call fnc_hardpoint_lay;
@@ -525,37 +521,84 @@ fnc_hardpoint_seed_radio = {
     ["INFO", "HARDPOINT", format ["seeded %1/%2 OPFOR radio towers", _placed, _n]] call fnc_log;
 };
 
-// [_radioN] call fnc_hardpoint_plan_counts -> [_zoneCounts, _backline, _frontline, _roadCounts, _total]
+// [_radioN] call fnc_hardpoint_plan_counts -> [_zoneCounts, _backline, _frontline, _roadTargets, _total]
 //
 // Rolls every campaign-start emplacement before any is laid, so the generation banner totals real
-// hardpoints up front instead of counting zones. The six scenarios: per-zone ring (round(random cap)
-// under the same radius cap fnc_hardpoint_site_zone stores, returned so that pass lays the same numbers);
-// per-zone roadblocks (round(random 2), 0..2 on each zone's approach, returned for the same reason); the
-// two flank lines (each a random count between half the zones and all of them); radio (rolled by the caller
-// and passed in, since the seed call must be handed the same value); and the AA net (one per zone, derived
-// by the caller). The rolled per-zone arrays are returned; radio and AA are only summed into the total.
-// Here, not in WARCOM init, so the cap and count-range formulas are not duplicated away from HP_CAP_STEP.
+// hardpoints up front instead of counting zones. The passes: per-zone ring (round(random cap) under the
+// same radius cap fnc_hardpoint_site_zone stores, returned so that pass lays the same numbers); the
+// roadblock net (two passes, below); the two flank lines; radio (rolled by the caller and passed in, since
+// the seed call must be handed the same value); and the AA net (one per zone, derived by the caller). Radio
+// and AA are only summed into the total. Here, not in WARCOM init, so the count formulas are not duplicated
+// away from HP_CAP_STEP.
+//
+// Flank throttle: gun nests offset from the zones matter most on a small map, where a zone stands alone and
+// its flanks are open. As zones multiply they screen each other, so the same per-zone flank density just
+// carpets the countryside. Below HP_FLANK_KNEE the flank lines track the zone count exactly (a 4-6 zone game
+// is unchanged); above it each extra zone adds only HP_FLANK_SLOPE of a zone to the flank budget, so density
+// per zone falls as the map grows. Rings and AA are left per-zone, untouched here.
+//
+// Roadblocks in two passes, not one hub-and-spoke: a spray of blocks all sat on the BLU HQ -> zone lines
+// reads as an arrow pointing home. Pass A keeps that approach block (0..2 per zone, faced at HQ); pass B adds
+// an inter-zone block (0..1 per zone) on the line to a random zone that is NOT the nearest one -- a longer,
+// off-axis link the player cannot read as "toward HQ". The nearest zone is excluded so the link is not the
+// obvious short hop to the neighbour already beside it; under 3 zones no such neighbour exists, so pass B is
+// skipped. Each block is handed to fnc_hardpoint_site_roadblocks as a [zonePos, endpointPos] target, drawn
+// along endpoint -> zone and faced at the endpoint, so pass A faces HQ and pass B faces its neighbour. No HQ
+// yet -> pass A's endpoint is [] and that block falls back to a band draw. The expanded target list is
+// returned so the banner totals real blocks; the 1.0/0.5-per-zone split lands the net at ~1.5x zones.
+#define HP_FLANK_KNEE 6
+#define HP_FLANK_SLOPE 0.5
 fnc_hardpoint_plan_counts = {
     params ["_radioN"];
     private _zc = count serv_zones_array;
     private _zoneCounts = [];
-    private _roadCounts = [];
-    // Radio + AA (_zc) are the deterministic passes; sum them straight in. Ring and roadblock counts are
-    // rolled per zone below.
+    private _roadTargets = [];
+    // Radio + AA (_zc) are the deterministic passes; sum them straight in. Rings roll per zone below.
     private _total = _radioN + _zc;
     {
         _x params ["", "", "_hpSize"];
         private _cap = (round (_hpSize / HP_CAP_STEP)) max 1;
         private _n = round (random _cap);
         _zoneCounts pushBack _n;
-        private _rn = round (random 2);   // 0..2 roadblocks on this zone's approach
-        _roadCounts pushBack _rn;
-        _total = _total + _n + _rn;
+        _total = _total + _n;
     } forEach zone_meta_array;
-    // Each flank line: a random count between half the zones (floored) and all of them.
-    private _lo = floor (_zc / 2);
-    private _backline = _lo + floor random (_zc - _lo + 1);
-    private _frontline = _lo + floor random (_zc - _lo + 1);
+
+    // Roadblock net, two passes (see header). Endpoints resolved here: HQ for pass A, a random non-closest
+    // zone for pass B.
+    private _hqSet = !(PosOfBLUHQ isEqualTo []);
+    {
+        private _zpos = _x select 1;
+        private _zi = _forEachIndex;
+        // Pass A: the HQ approach block, 0..2. Endpoint [] with no HQ -> a band draw at lay time.
+        private _hqN = round (random 2);
+        for "_i" from 1 to _hqN do { _roadTargets pushBack [_zpos, if (_hqSet) then { PosOfBLUHQ } else { [] }] };
+        // Pass B: an inter-zone block, 0..1, to a random zone that is not the nearest.
+        if (_zc >= 3) then {
+            private _closest = -1;
+            private _cd = 1e12;
+            {
+                if (_forEachIndex != _zi) then {
+                    private _d = _zpos distance2D (_x select 1);
+                    if (_d < _cd) then { _cd = _d; _closest = _forEachIndex };
+                };
+            } forEach zone_meta_array;
+            private _cands = [];
+            {
+                if (_forEachIndex != _zi && {_forEachIndex != _closest}) then { _cands pushBack (_x select 1) };
+            } forEach zone_meta_array;
+            if (count _cands > 0) then {
+                private _nbrN = round (random 1);
+                for "_i" from 1 to _nbrN do { _roadTargets pushBack [_zpos, selectRandom _cands] };
+            };
+        };
+    } forEach zone_meta_array;
+    _total = _total + count _roadTargets;
+
+    // Flank lines, throttled above the knee so a big map is not carpeted (see header).
+    private _fz = if (_zc <= HP_FLANK_KNEE) then { _zc } else { HP_FLANK_KNEE + round ((_zc - HP_FLANK_KNEE) * HP_FLANK_SLOPE) };
+    private _lo = floor (_fz / 2);
+    private _backline = _lo + floor random (_fz - _lo + 1);
+    private _frontline = _lo + floor random (_fz - _lo + 1);
     _total = _total + _backline + _frontline;
-    [_zoneCounts, _backline, _frontline, _roadCounts, _total]
+    [_zoneCounts, _backline, _frontline, _roadTargets, _total]
 };
