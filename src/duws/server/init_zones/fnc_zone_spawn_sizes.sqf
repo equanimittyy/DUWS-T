@@ -214,13 +214,13 @@ DUWS_spawnVehicles = [
     ["transport",  "opfor_TRANS_TRUCK_X",   "",           0],
     ["ammo",       "opfor_AMMO_TRUCK_X",    "",           0],
     ["repair",     "opfor_REPAIR_TRUCK_X",  "",           0],
-    ["apc",        "opfor_APC1_X",          "",           200],
-    ["ifv",        "opfor_APC2_X",          "",           200],
-    ["aa",         "opfor_AA_APC_X",        "",           200],
+    ["apc",        "opfor_APC1_X",          "",           150],
+    ["ifv",        "opfor_APC2_X",          "",           150],
+    ["aa",         "opfor_AA_APC_X",        "",           150],
     ["tank",       "opfor_MBT_TANK1_X",     "HeavyArmor", 350],
     ["attackheli", "opfor_ATTACK_HELI_X",   "AttackHeli", 350],
-    ["transheli",  "opfor_TRANS_HELI_X",    "AttackHeli", 200],
-    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 500]
+    ["transheli",  "opfor_TRANS_HELI_X",    "AttackHeli", 150],
+    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 600]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -233,12 +233,12 @@ DUWS_spawnVehicles = [
 // TRANS_HELI_X is the taxi the support functions fly and is left to them.
 DUWS_spawnVehiclesBlu = [
     ["car",        "blufor_ARMED_CAR1_X",     "", 60],
-    ["apc",        "blufor_APC1_X",           "", 200],
-    ["ifv",        "blufor_APC2_X",           "", 200],
+    ["apc",        "blufor_APC1_X",           "", 150],
+    ["ifv",        "blufor_APC2_X",           "", 150],
     ["tank",       "blufor_MBT_TANK1_X",      "", 350],
-    ["transheli",  "blufor_HELI_TRANS_ARM_X", "", 200],
+    ["transheli",  "blufor_HELI_TRANS_ARM_X", "", 150],
     ["attackheli", "blufor_ATTACK_HELI_X",    "", 350],
-    ["plane",      "blufor_MISC_AIR_X",       "", 500]
+    ["plane",      "blufor_MISC_AIR_X",       "", 600]
 ];
 
 DUWS_fnc_vehicleRow = {

@@ -275,9 +275,9 @@ switch (_index) do
     // position (tier 1 = infantry at 0), then opens the wallet at 0. Values are 0 + DUWS_ap_tier_rungs.
     case index_blufor_ap_t1: { WARCOM_blufor_ap = 0; };
     case index_blufor_ap_t2: { WARCOM_blufor_ap = 60; };
-    case index_blufor_ap_t3: { WARCOM_blufor_ap = 200; };
+    case index_blufor_ap_t3: { WARCOM_blufor_ap = 150; };
     case index_blufor_ap_t4: { WARCOM_blufor_ap = 350; };
-    case index_blufor_ap_t5: { WARCOM_blufor_ap = 500; };
+    case index_blufor_ap_t5: { WARCOM_blufor_ap = 600; };
 };
 
 // ARMY POWER OPFOR
@@ -287,9 +287,9 @@ switch (_index) do
     // Same rungs on the OPFOR side.
     case index_opfor_ap_t1: { WARCOM_opfor_ap = 0; };
     case index_opfor_ap_t2: { WARCOM_opfor_ap = 60; };
-    case index_opfor_ap_t3: { WARCOM_opfor_ap = 200; };
+    case index_opfor_ap_t3: { WARCOM_opfor_ap = 150; };
     case index_opfor_ap_t4: { WARCOM_opfor_ap = 350; };
-    case index_opfor_ap_t5: { WARCOM_opfor_ap = 500; };
+    case index_opfor_ap_t5: { WARCOM_opfor_ap = 600; };
 };
 
 // AI BLUFOR Skill

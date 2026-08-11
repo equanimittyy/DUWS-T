@@ -41,8 +41,8 @@ fnc_cp_adjust = {
 // the coarse summary of the same climb, for the readout and (later) the save, and the shared scale
 // both sides' capability gates sit on. Five tiers: tier 1 is infantry at 0 AP (always available), and
 // the four rungs gate the vehicle classes above it, steepening past tier 2. Against OPFOR's ~94 AP/hr
-// from six zones that paces motorised ~0.6 h, mechanised ~2 h, armour ~4 h, jets ~5 h.
-DUWS_ap_tier_rungs = [60, 200, 350, 500]; publicVariable "DUWS_ap_tier_rungs";
+// from six zones that paces motorised ~0.6 h, mechanised ~1.6 h, armour ~3.7 h, jets ~6.4 h.
+DUWS_ap_tier_rungs = [60, 150, 350, 600]; publicVariable "DUWS_ap_tier_rungs";
 // Tier 1 (infantry) is the floor at earned 0, so the tier is one plus the rungs crossed, ranging 1-5.
 DUWS_fnc_ap_tier = {
 	params ["_earned"];
