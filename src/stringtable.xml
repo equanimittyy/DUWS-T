@@ -2037,8 +2037,8 @@
                 <English>Escalation is now level %1. Supports cost more</English>
             </Key>
             <Key ID="STR_DUWS_T_escalation_tooltip">
-                <Original>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of Altis and the campaign is lost.</Original>
-                <English>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of Altis and the campaign is lost.</English>
+                <Original>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of it and the campaign is lost.</Original>
+                <English>When enabled, every non-military building destroyed anywhere on the map raises support costs for both sides. Flatten enough of it and the campaign is lost.</English>
             </Key>
             <Key ID="STR_DUWS_T_repair_no_need">
                 <Original>Vehicle status does not meet repair standards (fuel ≤ 80% and component damage over 70%). Repair unavailable.</Original>
