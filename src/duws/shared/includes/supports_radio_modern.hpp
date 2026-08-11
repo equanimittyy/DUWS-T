@@ -26,6 +26,17 @@ class CfgCommunicationMenu
         enable = "1"; // Simple expression condition for enabling the item
         removeAfterExpressionCall = 1; // 1 to remove the item after calling
     };
+    class mortar_smoke
+    {
+        text = "$STR_DUWS_T_mortar_smoke_menu"; // Text displayed in the menu and in a notification
+        submenu = ""; // Submenu opened upon activation
+		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
+        expression = "['mortar_smoke', true] call fnc_support_comm_used; [4, 60, 4, 2, 7, 0, 'Sh_82mm_Smoke'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase
+        icon = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\mortar_ca.paa";
+        cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
+        enable = "1"; // Simple expression condition for enabling the item
+        removeAfterExpressionCall = 1; // 1 to remove the item after calling
+    };
     class jdam
     {
         text = "$STR_DUWS_T_wcohwh4p"; // Text displayed in the menu and in a notification
@@ -94,7 +105,7 @@ class CfgCommunicationMenu
     {
         text = "$STR_DUWS_T_cwflheuj"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
-        expression = "['veh_drop'] call fnc_support_comm_used; [player, 0] spawn fnc_veh_drop"; // cost 0: one-time use, paid at purchase
+        expression = "['veh_drop', true] call fnc_support_comm_used; [player] spawn fnc_veh_drop"; // deferred: the picker can be cancelled, so it consumes at its own commit point
         icon = "\A3\ui_f\data\Map\VehicleIcons\iconParachute_ca.paa"; // Icon displayed permanently next to the command menu
         cursor = ""; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item

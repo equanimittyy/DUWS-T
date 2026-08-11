@@ -1,7 +1,9 @@
 // Locality: client -- inherited from client/supports/fnc_mapclickarty.sqf.
 // [position,salvos, radius, interval between salvos, rounds per salvo, supportType, cost, ammoType] spawn fnc_arty
-// AMMO TYPES:  Arty (Sh_120mm_HE) / Laser (Bo_Mk82) / Mortar(R_80mm_HE) / JDAM (Bo_Mk82) / Cluster(R_60mm_HE)
-// SUPPORT TYPE: 1 = arty, 2 = mortar, 3 = jdam, 4 = laser, 5 = cluster, 6 = napalm
+// Arty (1) and mortar (2 HE, 7 smoke) resolve their round from the faction's blufor_ARTY_X /
+// blufor_MORTAR_X vehicle via DUWS_fnc_deriveShell; the ammoType passed is only the vanilla fallback.
+// The air-delivered types carry a sentinel the fire switch reads: Laser / Cluster / Napalm, JDAM's Bo_Mk82.
+// SUPPORT TYPE: 1 = arty, 2 = mortar, 3 = jdam, 4 = laser, 5 = cluster, 6 = napalm, 7 = mortar smoke
 
 _position = _this select 0;
 _salvos = _this select 1;
@@ -15,6 +17,23 @@ _rpsinit = _rps;
 _fireObjects = [];  // for napalm flames
 _speaker = localize "STR_DUWS_T_actionteam";
 _message = localize "STR_DUWS_T_artycall";
+
+// Swap the fallback shell for the faction's own round where a piece is named. Unset key -> "" -> keep
+// the passed vanilla shell, so an undeclared faction fires exactly as before.
+switch (_supportype) do {
+	case 1: {
+		private _r = [missionNamespace getVariable ["blufor_ARTY_X", ""], "he"] call DUWS_fnc_deriveShell;
+		if (_r != "") then { _ammotype = _r };
+	};
+	case 2: {
+		private _r = [missionNamespace getVariable ["blufor_MORTAR_X", ""], "he"] call DUWS_fnc_deriveShell;
+		if (_r != "") then { _ammotype = _r };
+	};
+	case 7: {
+		private _r = [missionNamespace getVariable ["blufor_MORTAR_X", ""], "smoke"] call DUWS_fnc_deriveShell;
+		if (_r != "") then { _ammotype = _r };
+	};
+};
 
 // make sure blufor has someone in range
 
@@ -30,7 +49,8 @@ if (isNil "arty_Blufor_close") exitWith {arty_Blufor_close = false};
 // Paid at purchase, so no per-fire charge.
 private _consumeClass = switch (_supportype) do {
 	case 1: {"artillery"}; case 2: {"mortar"}; case 3: {"jdam"};
-	case 4: {"laser"}; case 5: {"cluster"}; case 6: {"napalm"}; default {""};
+	case 4: {"laser"}; case 5: {"cluster"}; case 6: {"napalm"};
+		case 7: {"mortar_smoke"}; default {""};
 };
 if (_consumeClass isNotEqualTo "") then { [_consumeClass] call fnc_support_consume };
 
@@ -43,6 +63,7 @@ if (_supportype == 3) then {_ord = localize "STR_DUWS_T_sa5k8p4r"};			//jdam
 if (_supportype == 4) then {_ord = localize "STR_DUWS_T_4o24llvl"};		//laser
 if (_supportype == 5) then {_ord = localize "STR_DUWS_T_a31378y0"};		//cluster
 if (_supportype == 6) then {_ord = localize "STR_DUWS_T_7sgon7jn"};		//napalm
+if (_supportype == 7) then {_ord = localize "STR_DUWS_T_mortar_smoke_ord"};	//mortar smoke
 
 hint localize "STR_DUWS_T_fqeghaut";
 if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
@@ -172,6 +193,11 @@ if (_ammotype == "Laser") then {
 				};
 				case 2: {  // Mortar
 					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), 800]; //spawn shells
+					_bomb setVelocity [0,0,-500];
+					sleep ((random 20)/10);
+				};
+				case 7: {  // Mortar smoke -- same delivery, a smoke round instead of HE
+					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), 800];
 					_bomb setVelocity [0,0,-500];
 					sleep ((random 20)/10);
 				};

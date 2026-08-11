@@ -433,6 +433,10 @@ publicVariable "DUWS_fnc_squadRow";
     "DUWS_vehPriceBands", "DUWS_fnc_vehTurretWeapons", "DUWS_fnc_vehWeapons", "DUWS_fnc_vehPylonCount",
     "DUWS_fnc_vehArmed", "DUWS_fnc_vehHasMainGun", "DUWS_fnc_vehKind", "DUWS_fnc_vehWeaponScore", "DUWS_fnc_vehPrice"
 ];
+// Broadcast: the fire-mission strike runs client-side and resolves a faction's real mortar/arty
+// shell through this, so it must exist on every machine that can call a battery.
+[] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_derive_shell.sqf";
+publicVariable "DUWS_fnc_deriveShell";
 fnc_faction_unit_keylist = compile preprocessFileLineNumbers "duws\shared\functions\fnc_faction_unit_keylist.sqf";
 fnc_custom_faction_init = compile preprocessFileLineNumbers "duws\server\dialog\fnc_custom_faction_init.sqf";publicVariable "fnc_custom_faction_init";
 fnc_request_menu = compile preprocessFileLineNumbers "duws\client\dialog\fnc_request_menu.sqf";publicVariable "fnc_request_menu";

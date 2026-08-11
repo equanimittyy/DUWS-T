@@ -24,6 +24,7 @@ _fnc_restoreCommMenu = {
 		case 4: {"laser"};
 		case 5: {"cluster"};
 		case 6: {"napalm"};
+		case 7: {"mortar_smoke"};
 		default {""};
 	};
 	if (_item isNotEqualTo "") then { [_item] call fnc_support_comm_add };

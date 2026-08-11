@@ -53,7 +53,7 @@ private _rows = [];   // listbox index -> its def, [] for a heading
 
     {
         _x params ["_key", "_defKind", "_cost", "_flagVar", "_labelKey", "_commItem",
-            "_insBlocked", "_modernOnly"];
+            "_insBlocked"];
         private _free = _key == "mobile_HQ" && _insurgent;
         private _label = localize ([_labelKey, "STR_DUWS_T_b7gmddq3_free"] select _free);
         // The price bracket. A dual-cost support carries its whole price built here -- its CP half was
@@ -62,7 +62,7 @@ private _rows = [];   // listbox index -> its def, [] for a heading
         // surcharge appended. Both scale the CP by escalation; the mode's free rows carry a 0 CP label
         // and take neither. Only English and Original were stripped, so the other languages still show
         // their own baked bracket ahead of this one until they are retranslated.
-        private _apCost = _x param [8, 0];
+        private _apCost = _x param [7, 0];
         if (_apCost > 0) then {
             private _cp = if (_escalated && !_free) then { [_cost] call fnc_escalation_cost } else { _cost };
             _label = _label + format [" (%1CP, %2AP)", _cp, _apCost];

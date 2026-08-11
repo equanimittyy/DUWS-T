@@ -15,48 +15,49 @@
 // indices agreed between those two files, so adding a row anywhere but the end silently
 // repointed every row below it at another support's price, flag and comm item.
 //
-// [key, kind, cost, flag, label, comm item, insurgent-blocked, MODERN-only, AP cost]
-// The 9th column is the Army Power half of an advanced support's dual price -- artillery, mortar,
-// cluster, napalm and the two High Command aircraft. Absent (read as 0 via `param [8, 0]`) on every
+// [key, kind, cost, flag, label, comm item, insurgent-blocked, AP cost]
+// The 8th column is the Army Power half of an advanced support's dual price -- artillery, mortar,
+// cluster, napalm and the two High Command aircraft. Absent (read as 0 via `param [7, 0]`) on every
 // regular row, which pays CP only. AP is what actually decides an advanced purchase under an abundant
 // CP pool; the CP half is carried for one price format across the catalogue.
 fnc_support_defs = {
 	private _defs = [
-		["armory",    "PERM", 10, "support_armory_available",      "STR_DUWS_T_kw2lnaig",             "",           false, false],
-		["halo",      "PERM", 15, "support_halo_available",        "STR_DUWS_T_xghf3qqd",             "",           true,  false],
-		["repair",    "PERM",  5, "support_veh_repair_available",  "STR_DUWS_T_vehicle_repair",       "",           false, false],
-		["recycle",   "PERM",  5, "support_veh_recycle_available", "STR_DUWS_T_recyclestation1",    "",           false, false],
-		["mobile_HQ", "PERM", 10, "support_mobile_HQ_available",   "STR_DUWS_T_b7gmddq3",             "",           false, false],
-		["fob",       "PERM", 10, "support_FOB_available",         "STR_DUWS_T_fob_request_row",      "fob_support",false, false],
+		["armory",    "PERM", 10, "support_armory_available",      "STR_DUWS_T_kw2lnaig",             "",           false],
+		["halo",      "PERM", 15, "support_halo_available",        "STR_DUWS_T_xghf3qqd",             "",           true],
+		["repair",    "PERM",  5, "support_veh_repair_available",  "STR_DUWS_T_vehicle_repair",       "",           false],
+		["recycle",   "PERM",  5, "support_veh_recycle_available", "STR_DUWS_T_recyclestation1",    "",           false],
+		["mobile_HQ", "PERM", 10, "support_mobile_HQ_available",   "STR_DUWS_T_b7gmddq3",             "",           false],
+		["fob",       "PERM", 10, "support_FOB_available",         "STR_DUWS_T_fob_request_row",      "fob_support",false],
 
 		// The BLUFOR radio towers: three tiers, each a permanent +1 to how hard BLUFOR rep drift pushes
 		// in every town it covers (DUWS_bluforRadioLevel). No comm item -- they place nothing and are
 		// owned once bought, mirroring the enemy's tower amplifier without a structure. Bought in order,
 		// so II and III are hidden until the prior tier is owned (the filter below), the way mhq_slot is.
-		["radio1",    "PERM", 15, "support_radio1_available",      "STR_DUWS_T_radio_tower_1",        "",           false, false],
-		["radio2",    "PERM", 25, "support_radio2_available",      "STR_DUWS_T_radio_tower_2",        "",           false, false],
-		["radio3",    "PERM", 40, "support_radio3_available",      "STR_DUWS_T_radio_tower_3",        "",           false, false],
+		["radio1",    "PERM", 15, "support_radio1_available",      "STR_DUWS_T_radio_tower_1",        "",           false],
+		["radio2",    "PERM", 25, "support_radio2_available",      "STR_DUWS_T_radio_tower_2",        "",           false],
+		["radio3",    "PERM", 40, "support_radio3_available",      "STR_DUWS_T_radio_tower_3",        "",           false],
 
 		// The designation radio, a slot at a time rather than handed to every lead on unlock. Free
 		// because the team paid at the permanent row: what this costs is the slot.
-		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false, false],
-		["supply",    "CONS",  4, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       false, false],
-		["veh_drop",  "CONS",  5, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   false, true],
-		["siva",      "CONS",  5, "support_siva_drop_available",   "STR_DUWS_T_jjzzkt01",             "siva_drop",  true,  true],
-		["sawp",      "CONS",  5, "support_sawp_drop_available",   "STR_DUWS_T_sawp1234",             "sawp_drop",  true,  false],
-		["uav",       "CONS",  6, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true,  true],
-		["helotaxi",  "CONS",  4, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false, true],
-		["helolift",  "CONS",  6, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false, true],
-		["boattaxi",  "CONS",  2, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  false, false],
-		["arty",      "CONS",  9, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  false, 22],
-		["mortar",    "CONS",  6, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false, false, 12],
-		["jdam",      "CONS",  5, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,  true,  10],
-		["laser",     "CONS",  4, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,  true,   8],
-		["cluster",   "CONS", 11, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  true,  26],
-		["napalm",    "CONS",  7, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  false, 15],
-		["hcAttChop", "CONS",  8, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  true,  18],
-		["hcCAS",     "CONS", 12, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  true,  30],
-		["paradrop",  "CONS",  6, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   true,  false]
+		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false],
+		["supply",    "CONS",  4, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       false],
+		["veh_drop",  "CONS",  5, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   false],
+		["siva",      "CONS",  5, "support_siva_drop_available",   "STR_DUWS_T_jjzzkt01",             "siva_drop",  true],
+		["sawp",      "CONS",  5, "support_sawp_drop_available",   "STR_DUWS_T_sawp1234",             "sawp_drop",  true],
+		["uav",       "CONS",  6, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true],
+		["helotaxi",  "CONS",  4, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false],
+		["helolift",  "CONS",  6, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false],
+		["boattaxi",  "CONS",  2, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  false],
+		["arty",      "CONS",  9, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  22],
+		["mortar",    "CONS",  6, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false, 12],
+		["mortar_smoke","CONS",5, "support_mortar_smoke_available","STR_DUWS_T_mortar_smoke_row",     "mortar_smoke",false],
+		["jdam",      "CONS",  5, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,  10],
+		["laser",     "CONS",  4, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,   8],
+		["cluster",   "CONS", 11, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  26],
+		["napalm",    "CONS",  7, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  15],
+		["hcAttChop", "CONS",  8, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  18],
+		["hcCAS",     "CONS", 12, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  30],
+		["paradrop",  "CONS",  6, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   true]
 	];
 
 	// A row that cannot apply is absent rather than greyed, so nothing downstream needs a second
@@ -65,7 +66,6 @@ fnc_support_defs = {
 	_defs select {
 		private _key = _x select 0;
 		private _keep = true;
-		if ((_x select 7) && {VERSION_X != "MODERN"}) then { _keep = false };
 		// A FOB is not offered until a zone has been taken, which is what the comm item it grants
 		// used to wait on.
 		if (_key == "fob" && {zoneundercontrolblu < 1}) then { _keep = false };
@@ -86,7 +86,7 @@ fnc_support_defs = {
 // gunship and heavy fire at tier 4, the CAS jet and HALO insertion at tier 5.
 DUWS_support_tiers = [
 	["uav", 2],
-	["mortar", 3], ["jdam", 3], ["laser", 3], ["siva", 3], ["sawp", 3], ["paradrop", 3], ["helolift", 3],
+	["mortar", 3], ["mortar_smoke", 3], ["jdam", 3], ["laser", 3], ["siva", 3], ["sawp", 3], ["paradrop", 3], ["helolift", 3],
 	["arty", 4], ["cluster", 4], ["napalm", 4], ["hcAttChop", 4],
 	["hcCAS", 5], ["halo", 5]
 ];
@@ -202,7 +202,7 @@ fnc_support_buy = {
 	params [["_def", []]];
 	if (_def isEqualTo []) exitWith { false };
 	_def params ["_key", "_kind", "_cost", "_flagVar", "_labelKey", "_commItem", "_insBlocked"];
-	private _apCost = _def param [8, 0];
+	private _apCost = _def param [7, 0];
 
 	// Tier gate: a support below BLUFOR's earned tier is refused before any charge, the same lock the
 	// greyed row in the list advertises.

@@ -4711,6 +4711,34 @@
                 <Original>Emergency Vehicle drop</Original>
                 <English>Emergency Vehicle drop</English>
             </Key>
+            <Key ID="STR_DUWS_T_veh_drop_title">
+                <German>Emergency Vehicle Drop</German>
+                <Spanish>Emergency Vehicle Drop</Spanish>
+                <Chinesesimp>Emergency Vehicle Drop</Chinesesimp>
+                <Original>Emergency Vehicle Drop</Original>
+                <English>Emergency Vehicle Drop</English>
+            </Key>
+            <Key ID="STR_DUWS_T_veh_drop_confirm">
+                <German>Request Drop</German>
+                <Spanish>Request Drop</Spanish>
+                <Chinesesimp>Request Drop</Chinesesimp>
+                <Original>Request Drop</Original>
+                <English>Request Drop</English>
+            </Key>
+            <Key ID="STR_DUWS_T_veh_drop_none">
+                <German>No light vehicles available to requisition.</German>
+                <Spanish>No light vehicles available to requisition.</Spanish>
+                <Chinesesimp>No light vehicles available to requisition.</Chinesesimp>
+                <Original>No light vehicles available to requisition.</Original>
+                <English>No light vehicles available to requisition.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_veh_drop_nosel">
+                <German>Select a vehicle first.</German>
+                <Spanish>Select a vehicle first.</Spanish>
+                <Chinesesimp>Select a vehicle first.</Chinesesimp>
+                <Original>Select a vehicle first.</Original>
+                <English>Select a vehicle first.</English>
+            </Key>
             <Key ID="STR_DUWS_T_sawp4321">
                 <German>Truppen-Sturmwaffen-Set</German>
                 <Spanish>Pack de Armas de Asalto de Escuadrón</Spanish>
@@ -4815,6 +4843,27 @@
                 <Chinesesimp>迫击炮支援</Chinesesimp>
                 <Original>Mortar Strike</Original>
                 <English>Mortar Strike</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mortar_smoke_row">
+                <German>Mortar Smoke Screen (5CP)</German>
+                <Spanish>Mortar Smoke Screen (5CP)</Spanish>
+                <Chinesesimp>Mortar Smoke Screen (5CP)</Chinesesimp>
+                <Original>Mortar Smoke Screen (5CP)</Original>
+                <English>Mortar Smoke Screen (5CP)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mortar_smoke_menu">
+                <German>Mortar Smoke</German>
+                <Spanish>Mortar Smoke</Spanish>
+                <Chinesesimp>Mortar Smoke</Chinesesimp>
+                <Original>Mortar Smoke</Original>
+                <English>Mortar Smoke</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mortar_smoke_ord">
+                <German>Smoke</German>
+                <Spanish>Smoke</Spanish>
+                <Chinesesimp>Smoke</Chinesesimp>
+                <Original>Smoke</Original>
+                <English>Smoke</English>
             </Key>
             <Key ID="STR_DUWS_T_mbhh2q2e">
                 <German>JDAM Luftschlag (10CP) Funk</German>
