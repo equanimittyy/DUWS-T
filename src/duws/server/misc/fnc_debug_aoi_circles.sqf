@@ -36,4 +36,7 @@ private _radii = missionNamespace getVariable ["civ_radii", []];
     };
 } forEach _reps;
 
-_circles remoteExec ["fnc_debug_aoi_draw", _requester];
+// Wrapped: the draw side reads params [["_circles", []]], so the list must arrive as the single
+// argument. Sent bare, params would bind _circles to its first triple and the draw would iterate
+// that triple's members, reading a coordinate number where it expects a [pos, radius, side] row.
+[_circles] remoteExec ["fnc_debug_aoi_draw", _requester];
