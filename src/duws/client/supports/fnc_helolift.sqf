@@ -39,8 +39,7 @@ player setVariable ["LiftWaypointMarkers", []];
 missionNamespace setVariable [_varPrefix + "_heloReady", false];
 [player, _target] remoteExec ["fnc_helolift_spawnHeli", 2];
 
-// Bail rather than hang: a lost request would otherwise wedge this thread forever and the
-// comm-menu entry never comes back.
+// Bail rather than hang: a lost request would otherwise wedge this thread forever.
 _spawnDeadline = diag_tickTime + 30;
 waitUntil {
     sleep 0.5;
@@ -50,8 +49,6 @@ _helo = missionNamespace getVariable [_varPrefix + "_helo", objNull];
 _heloGroup = missionNamespace getVariable [_varPrefix + "_heloGroup", grpNull];
 if (isNull _helo) exitWith {
     hint localize "STR_DUWS_T_helolift_noheli";
-    sleep 10;
-    ["helo_lift"] call fnc_support_comm_add;
 };
 _pilot = currentPilot _helo;
 
@@ -60,15 +57,14 @@ _originalMass = getMass _targetVehicle;
 
 // Single teardown for every failure below, replacing nine near-identical copies. The
 // server owns the aircraft, so the rope/mass/landing cleanup is its call -- this half only
-// clears the player's own map markers and hands the support back.
+// clears the player's own map markers. One-time use: the support was spent at commit and is
+// not handed back on a failed lift.
 _abort = {
     private _markers = player getVariable ["LiftWaypointMarkers", []];
     { deleteMarker _x } forEach _markers;
     player setVariable ["LiftWaypointMarkers", []];
     [localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_heloliftabort"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
     [player, "abort", [_helo, _targetVehicle, _originalMass, _heloGroup]] remoteExec ["fnc_helolift_ropes", 2];
-    sleep 300;
-    ["helo_lift"] call fnc_support_comm_add;
 };
 
 
@@ -264,5 +260,3 @@ player setVariable ["LiftWaypointMarkers", []];
 { deleteMarker _x } forEach _markers;
 player setVariable ["LiftWaypointMarkers", []];
 [player, "cleanup", [_helo]] remoteExec ["fnc_helolift_ropes", 2];
-sleep 120;
-["helo_lift"] call fnc_support_comm_add;

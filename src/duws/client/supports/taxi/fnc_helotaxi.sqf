@@ -58,10 +58,8 @@ _heloGroup = _veh select 2;
 _heloGroup deleteGroupWhenEmpty true;
 
 _pilot = currentPilot _helo;
-_pilot setcaptive true;
 _pilot allowfleeing 0;
-_pilot disableAI "Target"; 
-_pilot allowDamage false;
+_pilot disableAI "Target";
 
 // Disable VCOM on CREW
 {
@@ -89,8 +87,6 @@ _abort = {
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 	_helo land "LAND";
 	_helo engineOn false;
-	sleep 300;
-	["helo_taxi"] call fnc_support_comm_add;
 	{deleteVehicle _x;} foreach units _helogroup;
 	deleteVehicle _helo;
 };
@@ -160,8 +156,8 @@ _helo setEffectiveCommander player;  // turn helo "blue" while player is on boar
 	_message = localize "STR_DUWS_T_helotaxioscmk";
 	_speaker = localize "STR_DUWS_T_chariot";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-str(_markerpickup) setMarkerPos ClickedTaxiPos; 
-sleep 2;   // spacer: 118 + 2 = the 120s success cooldown
+str(_markerpickup) setMarkerPos ClickedTaxiPos;
+sleep 2;
 openMap false;
 hint "";
 
@@ -284,11 +280,9 @@ if (call _check_damage) exitWith {
 	_message = format[localize "STR_DUWS_T_helotaxirtbdown", localize "STR_DUWS_T_chariot"];
 	_speaker = localize "STR_DUWS_T_OVERLORD";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-	sleep 300;
-	["helo_taxi"] call fnc_support_comm_add;
 	{deleteVehicle _x;} foreach units _helogroup;
 	deleteVehicle _helo;
-}; 
+};
 
 // *****************************
 	_message = localize "STR_DUWS_T_helotaxirtb";
@@ -304,6 +298,3 @@ terminate _LzSpawnclose;
 
 {deleteVehicle _x;} foreach units _helogroup;
 deleteVehicle _helo;
-
-sleep 2;
-["helo_taxi"] call fnc_support_comm_add;

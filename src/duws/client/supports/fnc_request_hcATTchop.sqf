@@ -21,7 +21,6 @@ _vehicle = vehicle _leader;
 // store the current attack heli in a global for event-handler sync
 HC_ATTchop_currentVehicle = _vehicle;
 HC_ATTchop_active = true;
-HC_ATTchop_killedPending = false;
 
 player hcsetgroup [_group,""];
 DUWS_number_attackchopa = DUWS_number_attackchopa + 1;
@@ -36,51 +35,24 @@ _message = ([localize "STR_DUWS_T_longbowin"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 hint localize "STR_DUWS_T_rjuehu36";
 
-// Killed EH, with a guard against conflicting with the Deleted EH
+// State is reset the instant the gunship is lost, not after a cooldown: the support is spent at
+// selection and never re-added, so a stale handler must not linger and reset a re-bought gunship's
+// tracking. Killed handles a shoot-down; Deleted handles a despawn with the crew still alive.
 _vehicle addEventHandler ["Killed", {
-    _this spawn {
-        params ["_killedVehicle"];
+    params ["_killedVehicle"];
     if (!HC_ATTchop_active) exitWith {};
     if (_killedVehicle != HC_ATTchop_currentVehicle) exitWith {};
-
-    HC_ATTchop_killedPending = true;  // mark Killed as handling so the Deleted EH skips it
-
-    _speaker = localize "STR_DUWS_T_OVERLORD";
-    _message = localize "STR_DUWS_T_casdownlb";
-    [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-
-    sleep 580;
-
-    // after the sleep, check the Deleted EH didn't already reset it
-    if (!HC_ATTchop_active) exitWith {};
-
-    ["hc_ATTchop"] call fnc_support_comm_add;
-    AttChopInUse = false;
     HC_ATTchop_active = false;
     HC_ATTchop_currentVehicle = nil;
-    HC_ATTchop_killedPending = false;
-
-    _speaker = localize "STR_DUWS_T_OVERLORD";
-    _message1 = ([localize "STR_DUWS_T_casreservelb"] call fnc_cs);
-    [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-    };
+    AttChopInUse = false;
+    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_casdownlb"] remoteExec ["fnc_duws_dialogue", 0];
 }];
 
-// Deleted EH: heli removed directly while its crew survives
 _vehicle addEventHandler ["Deleted", {
     params ["_deletedVehicle"];
     if (!HC_ATTchop_active) exitWith {};
     if (_deletedVehicle != HC_ATTchop_currentVehicle) exitWith {};
-
-    // if a Killed EH is already pending, let it handle this and skip
-    if (HC_ATTchop_killedPending) exitWith {};
-
-    // re-add the HC menu item now, since the crew is still alive
-    ["hc_ATTchop"] call fnc_support_comm_add;
-    AttChopInUse = false;
     HC_ATTchop_active = false;
     HC_ATTchop_currentVehicle = nil;
-    _speaker = localize "STR_DUWS_T_OVERLORD";
-    _message = ([localize "STR_DUWS_T_casreservelb"] call fnc_cs);  // reuse the "available" hint
-    [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+    AttChopInUse = false;
 }];

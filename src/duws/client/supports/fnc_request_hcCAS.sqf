@@ -24,7 +24,6 @@ _vehicle engineOn true;
 // store the current CAS jet in a global for event-handler sync
 HC_CAS_currentVehicle = _vehicle;
 HC_CAS_active = true;
-HC_CAS_killedPending = false;
 
 switch (VERSION_X) do {
 	case "MODERN": {
@@ -43,51 +42,24 @@ _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = ([localize "STR_DUWS_T_squadready"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
-// Killed EH, spawned so it can sleep, with a state guard
+// State is reset the instant the jet is lost, not after a cooldown: the support is spent at
+// selection and never re-added, so a stale handler must not linger and reset a re-bought jet's
+// tracking. Killed handles a shoot-down; Deleted handles a despawn with the crew still alive.
 _vehicle addEventHandler ["Killed", {
-    _this spawn {
-        params ["_killedVehicle"];
-        if (!HC_CAS_active) exitWith {};
-        if (_killedVehicle != HC_CAS_currentVehicle) exitWith {};
-
-        HC_CAS_killedPending = true;  // mark Killed as handling so the Deleted EH skips it
-
-        _speaker = localize "STR_DUWS_T_OVERLORD";
-        _message = localize "STR_DUWS_T_casdownkoi";
-        [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-
-        sleep 600;
-
-        // after the sleep, check the Deleted EH didn't already reset it
-        if (!HC_CAS_active) exitWith {};
-
-        ["hc_CAS"] call fnc_support_comm_add;
-        CASInUse = false;
-        HC_CAS_active = false;
-        HC_CAS_currentVehicle = nil;
-        HC_CAS_killedPending = false;
-
-        _speaker = localize "STR_DUWS_T_OVERLORD";
-        _message1 = ([localize "STR_DUWS_T_casreservekoi"] call fnc_cs);
-        [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-    };
+    params ["_killedVehicle"];
+    if (!HC_CAS_active) exitWith {};
+    if (_killedVehicle != HC_CAS_currentVehicle) exitWith {};
+    HC_CAS_active = false;
+    HC_CAS_currentVehicle = nil;
+    CASInUse = false;
+    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_casdownkoi"] remoteExec ["fnc_duws_dialogue", 0];
 }];
 
-// Deleted EH: plane removed directly while its crew survives
 _vehicle addEventHandler ["Deleted", {
     params ["_deletedVehicle"];
     if (!HC_CAS_active) exitWith {};
     if (_deletedVehicle != HC_CAS_currentVehicle) exitWith {};
-
-    // if a Killed EH is already pending, let it handle this and skip
-    if (HC_CAS_killedPending) exitWith {};
-
-    // re-add the HC menu item now, since the crew is still alive
-    ["hc_CAS"] call fnc_support_comm_add;
-    CASInUse = false;
     HC_CAS_active = false;
     HC_CAS_currentVehicle = nil;
-    _speaker = localize "STR_DUWS_T_OVERLORD";
-    _message = ([localize "STR_DUWS_T_casreservekoi"] call fnc_cs);  // reuse the "available" hint
-    [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
+    CASInUse = false;
 }];

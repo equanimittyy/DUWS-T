@@ -95,14 +95,12 @@ if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || 
 	_group = [_spawnPos, WEST, _grouptype, [], [], blufor_ai_skill] call BIS_fnc_spawnGroup;
 	_group deleteGroupWhenEmpty true;
 	_pilot = units _group select 0;
-	_pilot setcaptive true;
 	_pilot allowfleeing 0;
 	_pilot disableAI "Target"; 
 	_vehicle = vehicle _pilot;
 	_vehicle engineOn true;
 	_vehicle flyInHeight 150;
 	_vehicle setVehicleAmmo 0;
-	_vehicle allowDamage false;
 	_wp1 = _group addWaypoint [_position, -1];
 	_wp1 setWaypointType "MOVE";
 	_wp1 setWaypointBehaviour "CARELESS";

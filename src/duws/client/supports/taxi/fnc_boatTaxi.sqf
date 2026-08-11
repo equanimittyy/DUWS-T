@@ -41,7 +41,6 @@ _boatgroup = createGroup west;
 _pilot = _boatgroup createUnit [blufor_MARK_SOLDIER_X, [5,5,5], [], 0, "NONE"];
 _boatgroup deleteGroupWhenEmpty true;
 _boat addAction [ACT_MOVE("STR_DUWS_T_boattaxi_action_dest"), fnc_mapclickboat, [], 70, true, true, "", "vehicle _this == _target"];
-_pilot setcaptive true; 
 _pilot moveindriver _boat;
 
 
@@ -56,8 +55,6 @@ _abort = {
     _boat lock false;
     deleteMarker str(_markerpickup);
     [localize "STR_DUWS_T_OVERLORD", ([localize _msg] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-    sleep 300;
-    ["boat_taxi"] call fnc_support_comm_add;
 };
 
 _wp = _boatgroup addWaypoint [[_foundPickupPos select 0, (_foundPickupPos select 1)-75], 0];
@@ -158,7 +155,3 @@ sleep 118;
 
 deleteVehicle _pilot;
 deleteVehicle _boat;
-
-
-sleep 2;   // spacer: 118 + 2 = the 120s success cooldown
-["boat_taxi"] call fnc_support_comm_add;
