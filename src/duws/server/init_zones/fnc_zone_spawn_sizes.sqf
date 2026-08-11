@@ -220,7 +220,7 @@ DUWS_spawnVehicles = [
     ["tank",       "opfor_MBT_TANK1_X",     "HeavyArmor", 350],
     ["attackheli", "opfor_ATTACK_HELI_X",   "AttackHeli", 350],
     ["transheli",  "opfor_TRANS_HELI_X",    "AttackHeli", 200],
-    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 600]
+    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 500]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -238,7 +238,7 @@ DUWS_spawnVehiclesBlu = [
     ["tank",       "blufor_MBT_TANK1_X",      "", 350],
     ["transheli",  "blufor_HELI_TRANS_ARM_X", "", 200],
     ["attackheli", "blufor_ATTACK_HELI_X",    "", 350],
-    ["plane",      "blufor_MISC_AIR_X",       "", 600]
+    ["plane",      "blufor_MISC_AIR_X",       "", 500]
 ];
 
 DUWS_fnc_vehicleRow = {
