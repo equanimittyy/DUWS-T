@@ -55,6 +55,17 @@ private _fnc_spawnCar = {
     _veh
 };
 
+// A parked car came to rest clean when it is roughly level, still where it was put, and on the
+// ground. A spot 3 m off the carriageway sometimes lands the car clipping a roadside building, and
+// the collision impulse pitches it over, slides it off its spot or throws it onto a roof -- any of
+// which is a failed placement to re-roll rather than keep.
+private _fnc_settledClean = {
+    params ["_veh", "_pos"];
+    ((vectorUp _veh) select 2) > 0.85
+    && { (_veh distance2D _pos) < 3 }
+    && { abs ((getPosATL _veh) select 2) < 2 }
+};
+
 // Parked cars: pulled 3 m off the carriageway centre so a lane stays passable, and skipped where
 // one already stands so a short road does not stack them nose to tail. "up to" the target -- a
 // town with few road segments parks fewer.
@@ -67,6 +78,13 @@ while { _parked < _nPark && _tries < _nPark * 3 } do {
     private _pos = (getPosATL _road) getPos [3, _dir + 90];
     if (count (nearestObjects [_pos, ["Car", "Truck"], 4]) > 0) then { continue };
     private _car = [_pos, _dir] call _fnc_spawnCar;
+    // Invulnerable through the settle so a clipped spawn is shoved clear instead of detonating, then
+    // read back: a car that did not come to rest clean is dropped for a fresh road point. Damage is
+    // restored only once it has placed -- a parked car the player cannot destroy is worse than none.
+    _car allowDamage false;
+    sleep 0.5;
+    if !([_car, _pos] call _fnc_settledClean) then { deleteVehicle _car; continue };
+    _car allowDamage true;
     // Stamped for the EH: its {} does not close over this scope, so town and site key travel on the
     // car. The car is server-local (createVehicle here), so a server-added GetIn fires here when any
     // player takes it. Removed on the first player in, so a passenger after does not charge twice.
