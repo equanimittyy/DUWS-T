@@ -371,6 +371,24 @@ DUWS_fnc_arsenal_unstock = {
             }] call BIS_fnc_addScriptedEventHandler;
         };
 
+        // TEMP DIAGNOSTIC: name the shelf classes that read [0] so a missing friendly entry is traced,
+        // not guessed. Assembles the shelf class list the same way the boot snapshot does (flatten the
+        // BIS cargo vars, keep strings), then reports friendly/pool sizes and a sample of the [0] set.
+        if (_isRestricted) then {
+            private _shelf = [];
+            {
+                _shelf append ((flatten (missionNamespace getVariable [_x, []])) select { _x isEqualType "" });
+            } forEach ["bis_addVirtualWeaponCargo_cargo", "bis_addVirtualItemCargo_cargo",
+                       "bis_addVirtualMagazineCargo_cargo", "bis_addVirtualBackpackCargo_cargo"];
+            _shelf = _shelf arrayIntersect _shelf;
+            private _zeros = _shelf select { ([_x] call DUWS_fnc_arsenal_countFor) == 0 };
+            ["INFO", "GEAR", format ["arsenal open: shelf=%1 friendly=%2 pool=%3 zeros=%4; sample=%5",
+                count _shelf,
+                count (missionNamespace getVariable ["DUWS_friendlyArsenal", []]),
+                count (missionNamespace getVariable ["DUWS_capturedPool", []]),
+                count _zeros, _zeros select [0, 40]]] call fnc_log;
+        };
+
         private _lastPaint = diag_tickTime;
         while { sleep 0.2; !isNull (uiNamespace getVariable ["RscDisplayArsenal", displayNull]) } do {
             if (_isRestricted && {diag_tickTime - _lastPaint > 0.5}) then {
