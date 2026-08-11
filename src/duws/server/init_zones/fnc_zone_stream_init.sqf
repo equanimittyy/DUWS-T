@@ -21,9 +21,9 @@ if (!isServer) exitWith {};
 #define ZONE_RAISE_SLOT(K) format ["DUWS_zoneRaise_%1", K]
 
 // How many times an emplacement is dropped before it is given up on, and how long it is given to
-// fall and come to rest before the result is read.
+// fall and come to rest before its lean is read.
 #define STATIC_DROP_ATTEMPTS 5
-#define STATIC_SETTLE_WAIT 5
+#define STATIC_SETTLE_WAIT 2
 
 // Drop height, as clearance plus a step per attempt -- 0.35 m on the first, 0.75 m on the last. The
 // clearance is not slack: the position a drop is measured from is the one the composition recorded,
@@ -33,10 +33,22 @@ if (!isServer) exitWith {};
 #define STATIC_DROP_BASE 0.25
 #define STATIC_DROP_STEP 0.1
 
-// How far a gun may lean before it counts as fallen, as the cosine of the angle between its own up
-// and vertical -- about 45 degrees. Vertical rather than the terrain normal, which reads backwards
-// on steep ground: a gun standing on a 50-degree slope scores below this and would be read as down,
-// while one lying on that same hill scores above it and would be read as standing.
+// A gun that did not settle standing is on ground that tips it, not merely sunk -- a straight-down
+// re-drop lands it back on the same edge. Each failed round widens a findEmptyPosition probe by this
+// much and re-drops onto whatever clear ground it finds, hunting a spot the gun stands on, up to ~3 m.
+#define STATIC_SHUFFLE_STEP 0.6
+
+// The lean the shuffle hunts to beat: a gun that came to rest steeper than this off vertical (~26
+// degrees) is not force-stood where it landed but re-dropped on a nudged x/y, so its gunner ends up
+// on a gun that actually stands rather than one snapped upright on ground that tips it back. Looser
+// than truly vertical on purpose -- siting caps ground at ~19 degrees, and a gun resting on that legal
+// slope must still read as standing or every slope emplacement would shuffle itself unmanned.
+#define STATIC_STANDING_DOT 0.9
+
+// The seat-time floor, the cosine of ~45 degrees. Below it a gun is on its side and the engine will
+// not keep a gunner in it. STATIC_STANDING_DOT is the stricter bar the drop loop holds guns to; this
+// looser one still guards the prefab crewing path (DUWS_fnc_crewCompositionStatics), whose guns are
+// placed on prepared ground and never dropped, so they are not shuffle-hunted for a standing spot.
 #define STATIC_UPRIGHT_DOT 0.7
 
 // Stand a gun upright and drop it from _height above where its composition put it.
@@ -48,10 +60,8 @@ if (!isServer) exitWith {};
 // standing it up first means it never begins the fall on its side.
 DUWS_fnc_dropStatic = {
     params ["_gun", "_base", "_height"];
-    // Every drop lands a physics body on hard ground and takes a bite out of its health, so a run of
-    // them wrecks the gun outright -- the recovery would then be the thing that removed the
-    // emplacement. Cheap to undo here, and the gun is standing on ground OPFOR still hold.
-    _gun setDamage 0;
+    // No heal here: the caller holds the gun undamageable for the whole run of drops, so a landing
+    // that once wrecked it now only shoves it.
     // Only the heading survives a fall worth keeping, and a gun that went over its nose has not even
     // that: its dir points into the ground, and handing that to setVectorDirAndUp against a vertical
     // up gives the engine two near-parallel vectors and an orientation it can make nothing of. North
@@ -71,39 +81,6 @@ DUWS_fnc_dropStatic = {
     _gun enableSimulationGlobal true;
 };
 
-// Put back a gun the drops themselves destroyed, at ground level and on the composition's books.
-//
-// The drops are the cause worth assuming: each one heals the gun before it falls, so it goes into
-// every attempt intact, and a raise happens before the players who triggered it are on the objective.
-// Leaving the wreck would let the recovery quietly disarm the zone -- the emplacement is a defence
-// the garrison is counted as having, and nothing else ever rebuilds one. Ground level rather than the
-// recorded position, because that position is the one the gun could not be landed on.
-DUWS_fnc_replaceStatic = {
-    params ["_gun", "_base", "_key"];
-    private _class = typeOf _gun;
-    private _dir = direction _gun;
-    // Read before the wreck goes. A pinned member keeps its crew and never stows -- an artillery
-    // piece or an AA gun -- so a rebuild that dropped the flag would start stowing a capability the
-    // zone is counted as fielding.
-    private _pinned = _gun getVariable ["DUWS_noStow", false];
-    // The wreck first, so fnc_duws_keep prunes its slot on the way in rather than filing the
-    // replacement beside a dead member the next stow would try to record.
-    deleteVehicle _gun;
-
-    private _fresh = createVehicle [_class, [_base select 0, _base select 1, 0], [], 0, "CAN_COLLIDE"];
-    _fresh setVectorUp [0, 0, 1];
-    _fresh setDir _dir;
-    // Written after the rotation, which displaces the object -- the order the prefabs place in.
-    _fresh setPosATL [_base select 0, _base select 1, 0];
-    // Back on the books: persistent, so no cleanup sweep takes it, and under the key, so it stows and
-    // returns with the rest of the composition. An unfiled gun is one the zone loses on the next
-    // streaming cycle with nothing to say where it went.
-    [_fresh, _key, _pinned] call fnc_duws_keep;
-    ["WARN", "ZONES", format ["emplacement %1 was wrecked while being placed; rebuilt at ground level",
-        _class]] call fnc_log;
-    _fresh
-};
-
 // Seat one man on one gun that has come to rest, and answer whether he took it.
 //
 // moveInGunner reports nothing either way, so the only proof is read back off the gun. It is refused
@@ -120,6 +97,11 @@ DUWS_fnc_seatStatic = {
     // simulation on to fall, so the settled gun is re-frozen for the seat and thawed straight after.
     if (((vectorUp _gun) select 2) > STATIC_UPRIGHT_DOT) then {
         _gun enableSimulationGlobal false;
+        // Stand it dead upright before the gunner takes it. The gate above passes a gun that came to
+        // rest leaning up to 45 degrees, and thawing a crewed gun at that lean is what leaves a manned
+        // gun lying on its side. Snapped square while frozen -- the thaw below settles the small gap the
+        // rotation opens under the base, and it settles vertical rather than back onto the old lean.
+        _gun setVectorUp [0, 0, 1];
         _unit moveInGunner _gun;
         _gun enableSimulationGlobal true;
     };
@@ -130,19 +112,26 @@ DUWS_fnc_seatStatic = {
 //
 // In rounds over every gun rather than gun by gun: a drop can only be read once the gun has fallen
 // and settled, and one wait covers every gun in the air, so a six-gun zone costs the same seconds
-// as a one-gun zone instead of six times as many. The seat is the test rather than the lean, for the
-// reason DUWS_fnc_seatStatic gives, and a gun that refuses one is dropped again from higher up.
+// as a one-gun zone instead of six times as many. A gun is crewed only where it came to rest standing
+// (STATIC_STANDING_DOT); one that settled leaning is not force-stood there but dropped again -- higher,
+// and shuffled onto nearby clear ground -- because the spot that tipped it will tip it again, and a
+// straight-down re-drop lands it back on the same edge. The lean is read after the settle, not the
+// seat: a snapped-upright gun on tipping ground reads as seated and then falls over crewed.
 DUWS_fnc_manStatics = {
-    params ["_guns", "_grp", "_key"];
+    params ["_guns", "_grp"];
     // Indexed off the spawned group rather than assumed one-to-one: a group that came back short
     // would otherwise throw here every despawn cycle for the rest of the campaign.
     private _men = units _grp;
     private _pending = [];
     {
+        // Undamageable for the whole run of drops: a landing on hard ground or a clip into composition
+        // clutter used to wreck the gun outright, which made the recovery the thing that removed the
+        // emplacement. Off, the same landing only shoves it, so no gun is lost to its own placement --
+        // which is what let the wreck-and-rebuild path this loop used to carry go.
+        _x allowDamage false;
         _pending pushBack [_x, getPosWorld _x, _men param [_forEachIndex, objNull]];
     } forEach _guns;
 
-    private _wrecked = [];
     for "_drop" from 1 to STATIC_DROP_ATTEMPTS do {
         if (count _pending == 0) exitWith {};
         {
@@ -154,48 +143,32 @@ DUWS_fnc_manStatics = {
         private _next = [];
         {
             _x params ["_gun", "_base", "_unit"];
-            // Out of the rounds the moment it dies, and rebuilt once they are over: dropping a wreck
-            // again would only wreck its replacement, and rebuilding mid-pass would put a fresh gun
-            // under the next round's drop.
-            if (!alive _gun) then {
-                _wrecked pushBack [_gun, _base, _unit];
-            } else {
-                // Replaced rather than abandoned: the gun is a defence the zone is still counting
-                // on, and the man may have been shot over the seconds the drops take.
-                if (!alive _unit) then {
-                    _unit = _grp createUnit [opfor_SOLDIER_X, getPos _gun, [], 0, "NONE"];
-                };
-                if !([_gun, _unit] call DUWS_fnc_seatStatic) then {
-                    _next pushBack [_gun, _base, _unit];
-                };
+            // Replaced rather than abandoned: the gun is a defence the zone is still counting on, and
+            // the man may have been shot over the seconds the drops take.
+            if (!alive _unit) then {
+                _unit = _grp createUnit [opfor_SOLDIER_X, getPos _gun, [], 0, "NONE"];
+            };
+            // Seat only where it came to rest standing: a gun leaning past STATIC_STANDING_DOT is on
+            // ground that tipped it, so snapping it square and seating there would just leave a manned
+            // gun on its side. && short-circuits, so a leaning gun is never handed a gunner.
+            private _placed = ((vectorUp _gun) select 2) > STATIC_STANDING_DOT
+                && {[_gun, _unit] call DUWS_fnc_seatStatic};
+            if (!_placed) then {
+                // Hunt a spot it stands on: probe the ring around the base for ground the gun's own class
+                // fits (findEmptyPosition tests object collision and terrain slope both) and re-drop there
+                // next round, widening the search each time. Keeps the world Z so the drop height math
+                // holds over the small step; [] (nothing clear near) leaves the base rather than trade down.
+                private _shuffle = [_base select 0, _base select 1] findEmptyPosition [0.5, STATIC_SHUFFLE_STEP * _drop, typeOf _gun];
+                if !(_shuffle isEqualTo []) then { _base = [_shuffle select 0, _shuffle select 1, _base select 2] };
+                _next pushBack [_gun, _base, _unit];
             };
         } forEach _pending;
         _pending = _next;
     };
 
-    private _rebuilt = [];
-    {
-        _x params ["_gun", "_base", "_unit"];
-        private _fresh = [_gun, _base, _key] call DUWS_fnc_replaceStatic;
-        // Whatever took the gun is as likely to have taken the man standing beside it.
-        if (!alive _unit) then {
-            _unit = _grp createUnit [opfor_SOLDIER_X, getPos _fresh, [], 0, "NONE"];
-        };
-        _rebuilt pushBack [_fresh, _base, _unit];
-    } forEach _wrecked;
-
-    // One settle for the rebuilds, then one seat attempt each. A gun created upright on level ground
-    // is the best placement this pass has to offer, so a seat it still refuses is not worth another
-    // drop -- and dropping a gun that was just rebuilt from a wreck only earns a second wreck.
-    if (count _rebuilt > 0) then {
-        sleep STATIC_SETTLE_WAIT;
-        {
-            _x params ["_gun", "_base", "_unit"];
-            if !([_gun, _unit] call DUWS_fnc_seatStatic) then {
-                _pending pushBack [_gun, _base, _unit];
-            };
-        } forEach _rebuilt;
-    };
+    // Damageable again now the drops are done: an emplacement the player cannot destroy is worse than
+    // one that placed badly. Every gun, seated or not -- an unmanned gun is still ground to fight over.
+    { _x allowDamage true } forEach _guns;
 
     {
         _x params ["_gun", "_base", "_unit"];
@@ -258,7 +231,7 @@ DUWS_fnc_zoneManStatics = {
     if (count _spawn == 0) then { _spawn = _pos };
     private _grp = [_spawn, EAST, _types, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
     _grp deleteGroupWhenEmpty true;
-    [_guns, _grp, _key] call DUWS_fnc_manStatics;
+    [_guns, _grp] call DUWS_fnc_manStatics;
     // On the roster like everything DUWS_fnc_raiseGarrison raises: these are the zone's garrison
     // too, and a blunt radius sweep has no other way to know it.
     _roster append (units _grp);

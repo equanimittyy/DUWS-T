@@ -115,7 +115,7 @@ fnc_hardpoint_garrison = {
         private _crew = [_sp, _sideObj, (_guns apply { _soldier }), [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
         _crew deleteGroupWhenEmpty true;
         (units _crew) call _maxSpot;
-        [_guns, _crew, _key] call DUWS_fnc_manStatics;
+        [_guns, _crew] call DUWS_fnc_manStatics;
         _men append (units _crew);
     };
 

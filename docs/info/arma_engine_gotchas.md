@@ -872,6 +872,26 @@ seat a gun sunk *into* it refuses. `DUWS_fnc_seatStatic` and `DUWS_fnc_manStatic
 man is deleted rather than left standing, with a `WARN` naming the gun, and the emplacement stays as
 scenery the player can use.
 
+## A physics body spawned clipping geometry takes a lethal collision impulse, not a nudge
+
+**`createVehicle`, or a lift-and-drop `setPosWorld` then thaw, that lands a simulated body overlapping
+a building, another vehicle or terrain clutter has the engine resolve the overlap with an ejection
+impulse — and the damage that impulse deals can destroy the object outright the frame it appears. It
+reads as a vehicle that explodes for no reason the instant it spawns, or an emplacement that wrecks
+itself being placed.**
+
+The overlap resolves the frame simulation runs, so the damage lands before any later line inspects
+the placement. Healing after the fact — `setDamage 0` once it has settled — races that frame and loses
+when one landing carries enough impulse to kill, and cannot help a body already gone. Parked civilian
+cars pulled off a carriageway sometimes land inside a roadside house; the drop-and-settle gun path
+lands a body on hard ground every attempt.
+
+**How to apply:** hold the object `allowDamage false` across the whole settle window — set before the
+position is written, cleared only once it has come to rest — so the same clip merely shoves it, then
+restore `allowDamage true` (an object the player can never destroy is its own bug). `fnc_civ_traffic`
+(parked cars) and `DUWS_fnc_manStatics` (`server/init_zones/fnc_zone_stream_init.sqf`, the gun drop
+loop) both wrap placement this way, which is what let the gun path drop its heal-and-rebuild recovery.
+
 ## A static weapon that goes over throws its gunner out and refuses a new one
 
 **A gun knocked onto its side does not keep the man — the engine ejects him — and refuses a new one
@@ -897,7 +917,14 @@ horizontal plane — a gun over its nose has a dir into the ground, and that aga
 leaves the engine two near-parallel vectors and no orientation. `DUWS_fnc_dropStatic` stands the gun
 up and drops it; the settle wait that makes the result readable is one per round in
 `DUWS_fnc_manStatics` (`server/init_zones/fnc_zone_stream_init.sqf`). Neither half works without the
-other.
+other. And a lean short of the angle the engine ejects at still keeps its gunner, so a gun that
+settled tilted but not flat reads as seated and stands there crewed and askew: crew only a gun that
+came to rest genuinely standing (a dot near vertical, well above the on-its-side floor), and re-drop
+one that did not — nudged on x/y (`findEmptyPosition`) to hunt ground it stands on, since the spot
+that tipped it will tip it again. Snapping the up-vector square (`setVectorUp [0,0,1]`) at the seat
+tidies the last degree, but on tipping ground the snap alone is undone the moment it thaws; the
+standing bar and the shuffle are what make it hold. `DUWS_fnc_manStatics` reads the lean, shuffles,
+and seats; `DUWS_fnc_seatStatic` does the square-and-seat.
 
 ## `doStop` outlives the orders it was issued against, and new waypoints do not release it
 
