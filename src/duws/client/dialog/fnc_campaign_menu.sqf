@@ -102,18 +102,18 @@ index_cp_death_penalty_10 = lbAdd [2107, "10"];
 // capability it reaches named in brackets; the infantry floor shows the raw AP alone, since starting
 // with nothing unlocked needs no name. The number is the earned counter, not a spendable bank.
 index_blufor_ap_t1 = lbAdd [2108, "0"];
-index_blufor_ap_t2 = lbAdd [2108, format ["100 (%1)", localize "STR_DUWS_T_tiername2"]];
-index_blufor_ap_t3 = lbAdd [2108, format ["300 (%1)", localize "STR_DUWS_T_tiername3"]];
-index_blufor_ap_t4 = lbAdd [2108, format ["550 (%1)", localize "STR_DUWS_T_tiername4"]];
-index_blufor_ap_t5 = lbAdd [2108, format ["900 (%1)", localize "STR_DUWS_T_tiername5"]];
+index_blufor_ap_t2 = lbAdd [2108, format ["60 (%1)", localize "STR_DUWS_T_tiername2"]];
+index_blufor_ap_t3 = lbAdd [2108, format ["200 (%1)", localize "STR_DUWS_T_tiername3"]];
+index_blufor_ap_t4 = lbAdd [2108, format ["350 (%1)", localize "STR_DUWS_T_tiername4"]];
+index_blufor_ap_t5 = lbAdd [2108, format ["600 (%1)", localize "STR_DUWS_T_tiername5"]];
 [2108, index_blufor_ap_t1] call _setDefault;
 
 // OPFOR starting tier -- same ladder.
 index_opfor_ap_t1 = lbAdd [2109, "0"];
-index_opfor_ap_t2 = lbAdd [2109, format ["100 (%1)", localize "STR_DUWS_T_tiername2"]];
-index_opfor_ap_t3 = lbAdd [2109, format ["300 (%1)", localize "STR_DUWS_T_tiername3"]];
-index_opfor_ap_t4 = lbAdd [2109, format ["550 (%1)", localize "STR_DUWS_T_tiername4"]];
-index_opfor_ap_t5 = lbAdd [2109, format ["900 (%1)", localize "STR_DUWS_T_tiername5"]];
+index_opfor_ap_t2 = lbAdd [2109, format ["60 (%1)", localize "STR_DUWS_T_tiername2"]];
+index_opfor_ap_t3 = lbAdd [2109, format ["200 (%1)", localize "STR_DUWS_T_tiername3"]];
+index_opfor_ap_t4 = lbAdd [2109, format ["350 (%1)", localize "STR_DUWS_T_tiername4"]];
+index_opfor_ap_t5 = lbAdd [2109, format ["600 (%1)", localize "STR_DUWS_T_tiername5"]];
 [2109, index_opfor_ap_t2] call _setDefault;
 
 // AI BLU SKILL
