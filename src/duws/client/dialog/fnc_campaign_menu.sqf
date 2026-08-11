@@ -74,7 +74,6 @@ index_amount_cp_50 = lbAdd [2104, "50"];
 index_amount_cp_100 = lbAdd [2104, "100"];
 index_amount_cp_200 = lbAdd [2104, "200"];
 index_amount_cp_300 = lbAdd [2104, "300"];
-index_amount_cp_400 = lbAdd [2104, localize "STR_DUWS_T_startcp400"];
 [2104, index_amount_cp_30] call _setDefault;
 
 // Reward Multiplier (scales both CP and AP mission payouts)

@@ -215,7 +215,6 @@ switch (_index) do
 	case index_amount_cp_100: { commandpointsblu1 = 100 };
 	case index_amount_cp_200: { commandpointsblu1 = 200 };
 	case index_amount_cp_300: { commandpointsblu1 = 300 };
-	case index_amount_cp_400: { commandpointsblu1 = 400 };
 };
 
 // CP REWARD

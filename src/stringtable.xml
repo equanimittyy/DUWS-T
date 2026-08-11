@@ -230,13 +230,6 @@
                 <Original>15km</Original>
                 <English>15km</English>
             </Key>
-            <Key ID="STR_DUWS_T_startcp400">
-                <German>400 (Einfacher)</German>
-                <Spanish>400 (Más Fácil)</Spanish>
-                <Chinesesimp>400 (更容易)</Chinesesimp>
-                <Original>400 (Easier)</Original>
-                <English>400 (Easier)</English>
-            </Key>
             <Key ID="STR_DUWS_T_bluforap50">
                 <German>50</German>
                 <Spanish>50</Spanish>
