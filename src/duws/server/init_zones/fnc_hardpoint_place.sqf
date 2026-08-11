@@ -33,7 +33,7 @@ fnc_hardpoint_build = {
         [[_px, _py], _dir, _variant, -1, -1, -1, -1, _key] call fnc_hardpoint_minefield
     };
 
-    private _rows = missionNamespace getVariable ["DUWS_hardpointComp_" + _type, []];
+    private _rows = [_type] call fnc_hardpoint_comp;
     if (_rows isEqualTo []) exitWith {
         ["WARN", "HARDPOINT", format ["no composition for type %1", _type]] call fnc_log;
         []

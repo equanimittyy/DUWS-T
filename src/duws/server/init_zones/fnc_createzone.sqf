@@ -130,32 +130,15 @@ private _prefabName = "";
 private _prefabScript = scriptNull;
 
 // CREATE PREFAB
+private _zonePrefabs = call fnc_zone_prefab_set;   // [weightedList, simpleEntry], MODERN-floored
 if (_prefab) then {
-	_array_of_prefabs = [];
+	_array_of_prefabs = _zonePrefabs select 0;
+	// Flatten [.,.,.,weight] rows into selectRandomWeighted's [item, weight, ...] form over the whole
+	// list rather than a fixed count, so an era set of any length picks correctly.
+	private _weighted = [];
+	{ _weighted append [_x, _x select 3] } forEach _array_of_prefabs;
+	_prefab_array = selectRandomWeighted _weighted;
 
-	switch (VERSION_X) do {
-		case "MODERN": {
-			_array_of_prefabs = [
-				["Vehicle Refit",true,fnc_modern_vehfittingstation,0.1],
-				["Storage Bunker",true,fnc_modern_StorageBunker,0.12],
-				["Comm Station",true,fnc_modern_CommStation,0.14],
-				["Recon Outpost",true,fnc_modern_reconOutpost,0.1],
-				["Outpost",true,fnc_modern_outpost1,0.1],
-				["Outpost",true,fnc_modern_Outpost2,0.1],
-                ["Field Hospital", true, fnc_modern_FieldHospital, 0.2]
-			];
-		};
-	};
-	_prefab_array = selectRandomWeighted [
-		(_array_of_prefabs select 0),((_array_of_prefabs select 0) select 3),	
-		(_array_of_prefabs select 1),((_array_of_prefabs select 1) select 3),	
-		(_array_of_prefabs select 2),((_array_of_prefabs select 2) select 3),	
-		(_array_of_prefabs select 3),((_array_of_prefabs select 3) select 3),	
-		(_array_of_prefabs select 4),((_array_of_prefabs select 4) select 3),	
-		(_array_of_prefabs select 5),((_array_of_prefabs select 5) select 3),
-		(_array_of_prefabs select 6),((_array_of_prefabs select 6) select 3)
-	];
-	 
 	// The composition's kind, not the zone's name -- it used to overwrite the name, which is why a
 	// capture reported "Comm Station" while the map called the same ground Zone 4. It stays a map
 	// label, on the marker and in the readout; radio traffic uses the callsign alone, because that is
@@ -168,11 +151,7 @@ if (_prefab) then {
 	str(_markername) setMarkerText format["%1 (%2)", _name, _prefabName];
 
 } else {
-	switch (VERSION_X) do {
-		case "MODERN": {
-			_prefab = ["Outpost",true,fnc_modern_simple_zone];
-		};
-	};
+	_prefab = _zonePrefabs select 1;
 	_prefabName = _prefab select 0;
 	_fortified = _prefab select 1;
 	_path = _prefab select 2;
