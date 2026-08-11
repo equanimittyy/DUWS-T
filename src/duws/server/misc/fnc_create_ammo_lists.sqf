@@ -176,12 +176,21 @@ waitUntil {sleep 5;chosen_settings};
 // kits already draw from, so both surfaces now offer the same units.
 _factionUnitArray = ["blufor"] call fnc_faction_unit_keylist;
 
-//array of all loadouts of all units in player faction (original method)
+// Loadouts of the key units, read from spawned instances rather than getUnitLoadout on the classname.
+// A unit whose primary is assigned by a randomised or scripted loadout returns an empty primary when
+// queried by class, so its rifle never reaches the friendly set and reads [0] in the arsenal. Spawning
+// resolves the loadout the engine actually issues. Spawn all, let init apply it once, read, delete.
 _factionLoadouts = [];
-{ 
-    _factionLoadouts append (flatten getUnitLoadout _x);
-    sleep 0.1;
+private _probeGroup = createGroup west;
+private _probeUnits = [];
+{
+    private _u = _probeGroup createUnit [_x, [0,0], [], 0, "FORM"];
+    if (!isNull _u) then { _probeUnits pushBack _u; };
 } forEach _factionUnitArray;
+sleep 1;
+{ _factionLoadouts append (flatten getUnitLoadout _x); } forEach _probeUnits;
+{ deleteVehicle _x; } forEach _probeUnits;
+deleteGroup _probeGroup;
 
 //remove duplicates
 _factionLoadouts = _factionLoadouts arrayIntersect _factionLoadouts;
