@@ -538,16 +538,19 @@ fnc_hardpoint_seed_radio = {
 // per zone falls as the map grows. Rings and AA are left per-zone, untouched here.
 //
 // Roadblocks in two passes, not one hub-and-spoke: a spray of blocks all sat on the BLU HQ -> zone lines
-// reads as an arrow pointing home. Pass A keeps that approach block (0..2 per zone, faced at HQ); pass B adds
-// an inter-zone block (0..1 per zone) on the line to a random zone that is NOT the nearest one -- a longer,
-// off-axis link the player cannot read as "toward HQ". The nearest zone is excluded so the link is not the
-// obvious short hop to the neighbour already beside it; under 3 zones no such neighbour exists, so pass B is
-// skipped. Each block is handed to fnc_hardpoint_site_roadblocks as a [zonePos, endpointPos] target, drawn
-// along endpoint -> zone and faced at the endpoint, so pass A faces HQ and pass B faces its neighbour. No HQ
-// yet -> pass A's endpoint is [] and that block falls back to a band draw. The expanded target list is
-// returned so the banner totals real blocks; the 1.0/0.5-per-zone split lands the net at ~1.5x zones.
+// reads as an arrow pointing home. Pass A places the approach block with probability HP_ROAD_HQ_P (faced at
+// HQ); pass B places an inter-zone block with probability HP_ROAD_NBR_P on the line to a random zone that is
+// NOT the nearest one -- a longer, off-axis link the player cannot read as "toward HQ". The nearest zone is
+// excluded so the link is not the obvious short hop to the neighbour already beside it; under 3 zones no such
+// neighbour exists, so pass B is skipped. Each block is handed to fnc_hardpoint_site_roadblocks as a
+// [zonePos, endpointPos] target, drawn along endpoint -> zone and faced at the endpoint, so pass A faces HQ
+// and pass B faces its neighbour. No HQ yet -> pass A's endpoint is [] and that block falls back to a band
+// draw. The list is returned so the banner totals real blocks; the HP_ROAD_HQ_P + HP_ROAD_NBR_P per-zone
+// rates land the net at ~1.2x zones, at most one block per pass.
 #define HP_FLANK_KNEE 6
 #define HP_FLANK_SLOPE 0.5
+#define HP_ROAD_HQ_P 0.8    // per-zone chance of an HQ approach roadblock
+#define HP_ROAD_NBR_P 0.4   // per-zone chance of an off-axis inter-zone roadblock
 fnc_hardpoint_plan_counts = {
     params ["_radioN"];
     private _zc = count serv_zones_array;
@@ -569,10 +572,10 @@ fnc_hardpoint_plan_counts = {
     {
         private _zpos = _x select 1;
         private _zi = _forEachIndex;
-        // Pass A: the HQ approach block, 0..2. Endpoint [] with no HQ -> a band draw at lay time.
-        private _hqN = round (random 2);
-        for "_i" from 1 to _hqN do { _roadTargets pushBack [_zpos, if (_hqSet) then { PosOfBLUHQ } else { [] }] };
-        // Pass B: an inter-zone block, 0..1, to a random zone that is not the nearest.
+        // Pass A: the HQ approach block, present with probability HP_ROAD_HQ_P. Endpoint [] with no HQ -> a
+        // band draw at lay time.
+        if (random 1 < HP_ROAD_HQ_P) then { _roadTargets pushBack [_zpos, if (_hqSet) then { PosOfBLUHQ } else { [] }] };
+        // Pass B: an inter-zone block with probability HP_ROAD_NBR_P, to a random zone that is not the nearest.
         if (_zc >= 3) then {
             private _closest = -1;
             private _cd = 1e12;
@@ -586,10 +589,7 @@ fnc_hardpoint_plan_counts = {
             {
                 if (_forEachIndex != _zi && {_forEachIndex != _closest}) then { _cands pushBack (_x select 1) };
             } forEach zone_meta_array;
-            if (count _cands > 0) then {
-                private _nbrN = round (random 1);
-                for "_i" from 1 to _nbrN do { _roadTargets pushBack [_zpos, selectRandom _cands] };
-            };
+            if (count _cands > 0 && {random 1 < HP_ROAD_NBR_P}) then { _roadTargets pushBack [_zpos, selectRandom _cands] };
         };
     } forEach zone_meta_array;
     _total = _total + count _roadTargets;
