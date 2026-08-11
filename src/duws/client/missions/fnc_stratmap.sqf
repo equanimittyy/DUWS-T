@@ -57,6 +57,45 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   // ten extra times to build a list no one reads to the bottom of.
   _missionDraw = 7 min (count _missionCount);
 
+  // Frontier weighting for the anchor search. Anchors are drawn toward OPFOR ground nearest
+  // friendly-held territory -- the HQ, FOBs and captured zones -- so a request rarely lands
+  // behind the enemy's full depth on the far side of the map. As zones fall the friendly set
+  // grows and the reachable band advances with the front. Reuses the ownership store the AoI
+  // field reads; the friendly-AoI exclusion itself is applied server-side in fnc_missionTargetPos.
+  private _frontierBias = 2;      // inverse-distance exponent: higher hugs the front harder
+  private _frontierBand = 2000;   // metres past an OPFOR zone edge the countryside search spans
+
+  private _bluHeld = if (isNil "WARCOM_zones_controled_by_BLUFOR") then {[]} else {WARCOM_zones_controled_by_BLUFOR};
+  private _friendlyAnchors = +_bluHeld;
+  if (!(PosOfBLUHQ isEqualTo [])) then { _friendlyAnchors pushBack PosOfBLUHQ };
+  if (!(isNil "Array_of_FOBpos")) then { { _friendlyAnchors pushBack _x } forEach Array_of_FOBpos };
+
+  // OPFOR-held zones as [[pos,radius], pos] pairs, precomputed once: ownership is fixed for
+  // the few seconds this picker runs. A zone is OPFOR unless its centre sits in the BLUFOR-held
+  // list -- the same control test the capture triggers and the AoI field use.
+  private _opforZoneCands = [];
+  {
+      _x params ["", "_zp", "_zs"];
+      if ((_bluHeld findIf {(_x distance2D _zp) < 1}) < 0) then {
+          _opforZoneCands pushBack [[_zp, _zs], _zp];
+      };
+  } forEach zone_meta_array;
+
+  // [_cands, _anchors, _bias] -> one item. _cands are [item, pos] pairs; weight is
+  // 1 / dist(pos, nearest anchor)^_bias, so ground near the front is favoured but the deep
+  // rear is thinned, not banned -- the spread stays. No anchors (campaign hour zero) -> flat random.
+  private _fnFrontierPick = {
+      params ["_cands", "_anchors", "_bias"];
+      private _items = _cands apply {_x select 0};
+      if (_anchors isEqualTo []) exitWith { selectRandom _items };
+      private _weights = _cands apply {
+          private _cpos = _x select 1;
+          private _d = (selectMin (_anchors apply {_cpos distance2D _x})) max 1;
+          1 / (_d ^ _bias)
+      };
+      _items selectRandomWeighted _weights
+  };
+
   while {_counter < _missionDraw} do {
 
 	// Proportional to the draw, not a fixed 0.1 a step: that constant was sized for the old
@@ -73,14 +112,20 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 	while {!_Posfound} do {
 		
 		if (moreUrban == 1 && failsafe_not_found2 == false) then {
-			// MORE URBAN
-			_ZnAnchor = position (MissionLocations select (floor (random (count MissionLocations))));
+			// MORE URBAN -- named location, frontier-weighted toward the front
+			_ZnAnchor = position ([MissionLocations apply {[_x, position _x]}, _friendlyAnchors, _frontierBias] call _fnFrontierPick);
 			_ZnLocation = [_ZnAnchor, 100, 400,10,0,0.3,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 			_Building = nearestBuilding _ZnLocation;
 			_foundSafePos = [(getpos _Building select 0),(getpos _Building select 1)];
 		}else{
-			// LESS URBAN
-			_foundSafePos = [PosOfBLUHQ, 0, (zones_max_dist_from_hq*1.5),5,0,0.3,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
+			// LESS URBAN -- OPFOR countryside band, frontier-weighted. Falls back to the old
+			// HQ ring only when every zone is already BLUFOR-held (win state).
+			if (_opforZoneCands isEqualTo []) then {
+				_foundSafePos = [PosOfBLUHQ, 0, (zones_max_dist_from_hq*1.5),5,0,0.3,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
+			} else {
+				([_opforZoneCands, _friendlyAnchors, _frontierBias] call _fnFrontierPick) params ["_pzp", "_pzs"];
+				_foundSafePos = [_pzp, _pzs, _pzs + _frontierBand,5,0,0.3,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
+			};
 		};
 
 		_Posfound = true;

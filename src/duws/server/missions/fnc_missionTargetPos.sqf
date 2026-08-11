@@ -33,15 +33,18 @@ while {!_Posfound} do {
 
 	// DON'T SPAWN ON ROADS
 	_nearRoad = [_targetpos,15] call BIS_fnc_nearestRoad;
-	// And on ground nothing else owns: not inside a zone, not inside a civilian town. This is the
-	// position the mission is actually built on and garrisons around, and it drifts from the anchor
-	// the strategic map cleared -- up to _radius on each axis to _randomPos, then another 10-50 m
-	// off a building -- so an anchor outside everything is no guarantee the objective is. Tested
-	// here as well because this is the loop that can re-roll it.
+	// And on ground nothing else owns: not inside a zone, not inside a civilian town, and not
+	// inside BLUFOR's own area of influence. This is the position the mission is actually built on
+	// and garrisons around, and it drifts from the anchor the strategic map cleared -- up to _radius
+	// on each axis to _randomPos, then another 10-50 m off a building -- so an anchor outside
+	// everything is no guarantee the objective is. Tested here as well because this is the loop that
+	// can re-roll it. The friendly-AoI gate keeps a drifted objective out of the player's controlled
+	// bubble; the far-side bias itself lives in the client anchor search (fnc_stratmap).
 	if (_targetpos select 0 != 0 &&
 		_targetpos select 1 != 0 &&
 		isNull _nearRoad &&
-		!([_targetpos] call fnc_pos_claimed)) then {_Posfound=true;};
+		!([_targetpos] call fnc_pos_claimed) &&
+		!([_targetpos] call fnc_aoi_blufor_covers)) then {_Posfound=true;};
 
 	// Logged rather than left to the caller's generic abort: with zones and towns both excluded this
 	// is the loop that starves first on a crowded map, and the abort alone does not say which
