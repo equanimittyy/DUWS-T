@@ -209,18 +209,18 @@ DUWS_fnc_raiseGarrison = {
 //       climb one honest ladder; which token hangs off which rung is a balance decision, and tuning.
 // --DUWS-UNITCOMP BEGIN name="OPFOR vehicles" kind=team row="token, role, setting, ap" fields="token, faction role, campaign setting, AP required" prefix=opfor_--
 DUWS_spawnVehicles = [
-    ["car",        "opfor_ARMED_CAR1_X",    "",           100],
+    ["car",        "opfor_ARMED_CAR1_X",    "",           60],
     ["truck",      "opfor_COVERED_TRUCK_X", "",           0],
     ["transport",  "opfor_TRANS_TRUCK_X",   "",           0],
     ["ammo",       "opfor_AMMO_TRUCK_X",    "",           0],
     ["repair",     "opfor_REPAIR_TRUCK_X",  "",           0],
-    ["apc",        "opfor_APC1_X",          "",           300],
-    ["ifv",        "opfor_APC2_X",          "",           300],
-    ["aa",         "opfor_AA_APC_X",        "",           300],
-    ["tank",       "opfor_MBT_TANK1_X",     "HeavyArmor", 550],
-    ["attackheli", "opfor_ATTACK_HELI_X",   "AttackHeli", 550],
-    ["transheli",  "opfor_TRANS_HELI_X",    "AttackHeli", 300],
-    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 900]
+    ["apc",        "opfor_APC1_X",          "",           200],
+    ["ifv",        "opfor_APC2_X",          "",           200],
+    ["aa",         "opfor_AA_APC_X",        "",           200],
+    ["tank",       "opfor_MBT_TANK1_X",     "HeavyArmor", 350],
+    ["attackheli", "opfor_ATTACK_HELI_X",   "AttackHeli", 350],
+    ["transheli",  "opfor_TRANS_HELI_X",    "AttackHeli", 200],
+    ["plane",      "opfor_MISC_AIR_X",      "AttackHeli", 600]
 ];
 // --DUWS-UNITCOMP END--
 
@@ -232,13 +232,13 @@ DUWS_spawnVehicles = [
 // transheli resolves to the armed transport HELI_TRANS_ARM_X, the combat bird; the unarmed
 // TRANS_HELI_X is the taxi the support functions fly and is left to them.
 DUWS_spawnVehiclesBlu = [
-    ["car",        "blufor_ARMED_CAR1_X",     "", 100],
-    ["apc",        "blufor_APC1_X",           "", 300],
-    ["ifv",        "blufor_APC2_X",           "", 300],
-    ["tank",       "blufor_MBT_TANK1_X",      "", 550],
-    ["transheli",  "blufor_HELI_TRANS_ARM_X", "", 300],
-    ["attackheli", "blufor_ATTACK_HELI_X",    "", 550],
-    ["plane",      "blufor_MISC_AIR_X",       "", 900]
+    ["car",        "blufor_ARMED_CAR1_X",     "", 60],
+    ["apc",        "blufor_APC1_X",           "", 200],
+    ["ifv",        "blufor_APC2_X",           "", 200],
+    ["tank",       "blufor_MBT_TANK1_X",      "", 350],
+    ["transheli",  "blufor_HELI_TRANS_ARM_X", "", 200],
+    ["attackheli", "blufor_ATTACK_HELI_X",    "", 350],
+    ["plane",      "blufor_MISC_AIR_X",       "", 600]
 ];
 
 DUWS_fnc_vehicleRow = {

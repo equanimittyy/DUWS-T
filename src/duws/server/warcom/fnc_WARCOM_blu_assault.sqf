@@ -21,11 +21,11 @@ WARCOM_blu_attack_wave_avalaible = false;
 
 	switch (VERSION_X) do {
 		case "MODERN": {
-			waitUntil {sleep 30; WARCOM_blufor_ap_earned>100};   // tier 2: motorised
+			waitUntil {sleep 30; WARCOM_blufor_ap_earned>60};   // tier 2: motorised
 			WARCOM_blu_attack_wave_type = (blufor_MOTOR_SECTION_X select 0);
 
-			waitUntil {sleep 30; WARCOM_blufor_ap_earned>300};   // tier 3: mechanised
-			while {WARCOM_blufor_ap_earned<550} do {
+			waitUntil {sleep 30; WARCOM_blufor_ap_earned>200};   // tier 3: mechanised
+			while {WARCOM_blufor_ap_earned<350} do {
 				WARCOM_blu_attack_wave_type = selectRandom [
 					(blufor_MECH_SECTION_X select 0),
 					(blufor_MECH_SECTION_X select 0),
