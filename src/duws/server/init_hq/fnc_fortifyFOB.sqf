@@ -143,12 +143,16 @@ switch (VERSION_X) do {
 		// Its class still goes through the resolver, so the roof gun is drawn from the same pool and
 		// gets the same type test as the ring; only its placement is its own.
 		private _roofPos = _fob buildingPos 5;
+		private _aaClass = "B_static_AA_F";
 		private _aa = createVehicle [
-			["B_static_AA_F", "blufor"] call fnc_static_resolve,
+			[_aaClass, "blufor"] call fnc_static_resolve,
 			[0,0,0], [], 0, "CAN_COLLIDE"
 		];
 		[_aa, _fobKey] call fnc_duws_keep;
-		_aa setPosATL [(_roofPos select 0) - 3, (_roofPos select 1) - 5, _roofPos select 2];
+		// Seat the base on the roof, not the model origin: a faction swap to a taller AA would sink its
+		// base through the roof. Same correction fnc_static_place makes for composition guns.
+		private _delta = ([_aaClass] call fnc_static_baseZ) - ([typeOf _aa] call fnc_static_baseZ);
+		_aa setPosATL [(_roofPos select 0) - 3, (_roofPos select 1) - 5, (_roofPos select 2) + _delta];
 		_turrets pushBack _aa;
 
 		// Permanent, so first fortify only: a refortify replaces the guns above and leaves the

@@ -1145,3 +1145,26 @@ everything it was meant to gate.
 `isKindOf`, `getNumber` and `configClasses` all take a classname; the seat/crew *object* commands
 (`fullCrew`, `crew`, `assignedDriver`) do not. `DUWS_fnc_vehTier`
 (`src/duws/shared/functions/fnc_ap_gate.sqf`) classifies purchasable vehicles this way.
+
+## `setPos*` seats the model origin, not the model's base, so a swapped class of different height sinks
+
+**`setPosWorld`, `setPosATL` and `createVehicle`'s own placement put the object's model **origin**
+[0,0,0] at the height you name -- not its lowest point. Two guns whose origins sit different
+distances above their bases end up with their bases at different heights from the same command.**
+
+A composition authors each weapon's Z against a placeholder class in Eden, eyeballed so that
+placeholder sits on its surface -- which bakes the placeholder's origin-above-base into the number.
+When faction auto-detect swaps the class for the faction's own gun (a ZU-23 for the vanilla static
+AA), the Z is reused unchanged. The ZU-23's origin sits higher over its base, so the same Z drives
+its base below the surface: the gun spawns underground and reads as never placed. A shorter
+substitute floats instead. The drop-and-settle in `fnc_zone_stream_init.sqf` only rescues guns it
+later crews, and it lifts from the buried position, so a deep sink never recovers; a gun on a
+prefab roof or the FOB roof has no settle at all.
+
+**How to apply:** the base offset is `(boundingBoxReal _obj select 0) select 2` -- how far the
+lowest point sits below the origin (<= 0), read off a spawned object. To seat a swapped class's
+base where the placeholder's base sat, shift by `baseZ(placeholder) - baseZ(resolved)`; this
+preserves the row's real elevation, so a ground gun stays grounded and a roof gun stays on the roof.
+`fnc_static_baseZ` (`src/duws/shared/functions/fnc_static_roles.sqf`) probes and caches the offset
+per class; `fnc_static_place` there applies the shift only when the class actually changed, so an
+unmodded faction is untouched.

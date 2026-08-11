@@ -119,6 +119,21 @@ fnc_static_resolve = {
     _pick
 };
 
+// [_class] call fnc_static_baseZ -- how far the model's base sits below its origin (<= 0), read once
+// per class off a throwaway probe and cached. boundingBoxReal needs a spawned object, so a class that
+// never spawns is never probed and one placed many times is measured once.
+fnc_static_baseZ = {
+    params ["_class"];
+    private _cache = missionNamespace getVariable ["DUWS_staticBaseZ", createHashMap];
+    if (_class in _cache) exitWith { _cache get _class };
+    private _probe = createVehicle [_class, [0, 0, 0], [], 0, "CAN_COLLIDE"];
+    private _z = (boundingBoxReal _probe select 0) select 2;
+    deleteVehicle _probe;
+    _cache set [_class, _z];
+    missionNamespace setVariable ["DUWS_staticBaseZ", _cache];
+    _z
+};
+
 // [_row, _origin, _side, _key, _mode] call fnc_static_place -- returns the object.
 //
 // _row    [class, offsetX, offsetY, offsetZ, dir, role], role optional; the shape both fences use
@@ -148,9 +163,8 @@ fnc_static_place = {
     // the sea, not the seabed -- the same clamp the prefabs apply to the centre height.
     private _pos = [_px, _py, if (_world) then { ((getTerrainHeightASL [_px, _py]) max 0) + _oz } else { _oz }];
 
-    private _obj = createVehicle [
-        [_class, _side, _role] call fnc_static_resolve, _pos, [], 0, "CAN_COLLIDE"
-    ];
+    private _resolved = [_class, _side, _role] call fnc_static_resolve;
+    private _obj = createVehicle [_resolved, _pos, [], 0, "CAN_COLLIDE"];
     [_obj, _key] call fnc_duws_keep;
     // The freeze is what holds an elevated row where the row put it: an unsimulated object does not
     // fall. Global, or every client goes on simulating a gun the server has parked and renders it
@@ -161,6 +175,15 @@ fnc_static_place = {
     if (_world) then { _obj setPosWorld _pos } else { _obj setPos _pos };
     _obj setDir _dir;
     if (_world) then { _obj setPosWorld _pos } else { _obj setPos _pos };
+
+    // The row's Z seats the authored placeholder's model origin. A swap to a gun whose base sits lower
+    // under that origin -- a ZU-23 for the static AA -- drives the new base underground (or floats a
+    // shorter one). Shift the resolved gun so its base rests where the placeholder's would have: the
+    // row's real elevation holds, so a ground gun stays grounded and a rampart/roof gun stays perched.
+    if (_world && {!(_resolved isEqualTo _class)}) then {
+        private _delta = ([_class] call fnc_static_baseZ) - ([_resolved] call fnc_static_baseZ);
+        _obj setPosWorld ((getPosWorld _obj) vectorAdd [0, 0, _delta]);
+    };
 
     _obj
 };
