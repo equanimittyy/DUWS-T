@@ -78,10 +78,6 @@ DUWS_fnc_arsenal_paintCounts = {
         for "_i" from 0 to (_rows - 1) do {
             private _cls = if (_isN) then { _ctrl lnbData [_i, 0] } else { _ctrl lbData _i };
             if (_cls == "") then { continue };
-            // Ammo untracked: magazines are unlimited as a whole category (countFor rule 3). Mirror the
-            // Full no-op -- leave BIS's plain name rather than stamping [∞], so the untracked-ammo shape
-            // renders the same clean way the whole-unlimited Full arsenal does.
-            if (!(missionNamespace getVariable ["DUWS_trackAmmo", false]) && {isClass (configFile >> "CfgMagazines" >> _cls)}) then { continue };
             private _amt = [_cls] call DUWS_fnc_arsenal_countFor;
             // Debug aid: record [0]-stamped classes for the enforcer's close-time diagnostic. The nil
             // guard keeps this free unless a DEBUG-level arsenal session armed the collector.

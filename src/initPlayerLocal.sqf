@@ -374,30 +374,49 @@ DUWS_fnc_arsenal_unstock = {
         private _equipEH = -1;
         if (_isRestricted) then {
             [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
+            // Coalesce equip bursts: the event only timestamps, the loop repaints once clicks settle.
+            // Painting inside the event races BIS's async rebuild of a weapon's attachment/cargo
+            // sublists, so spam-clicking a weapon flickered [∞] onto rows BIS was tearing down.
+            missionNamespace setVariable ["DUWS_arsenal_lastEquip", 0];
+            missionNamespace setVariable ["DUWS_arsenal_paintDue", false];
             _equipEH = [missionNamespace, "arsenalEquipped", {
-                [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
+                missionNamespace setVariable ["DUWS_arsenal_lastEquip", diag_tickTime];
+                missionNamespace setVariable ["DUWS_arsenal_paintDue", true];
             }] call BIS_fnc_addScriptedEventHandler;
         };
 
         private _lastPaint = diag_tickTime;
+        private _lastRestock = diag_tickTime;
         while { sleep 0.2; !isNull (uiNamespace getVariable ["RscDisplayArsenal", displayNull]) } do {
-            if (_isRestricted && {diag_tickTime - _lastPaint > 0.5}) then {
-                // Live re-stock: a foreign class banked into the pool since open (a just-dropped item
-                // settled, a loot cache) goes on the shelf here so it appears without a full close/reopen
-                // -- available immediately, drawn as a row on the next list redraw (tab switch). Tracked
-                // in _addedForeign so the close cleanup still clears it back off.
-                {
-                    _x params ["_cls", "_cnt"];
-                    if (_cnt > 0 && {!(_cls in _friendly)} && {!(_cls in _stockedForeign)}) then {
-                        private _type = [_cls] call DUWS_fnc_cargoType;
-                        [_cls, _type, true] call DUWS_fnc_shelfForeign;
-                        _addedForeign pushBack [_cls, _type];
-                        _stockedForeign pushBack _cls;
-                    };
-                } forEach (missionNamespace getVariable ["DUWS_capturedPool", []]);
+            if (_isRestricted) then {
+                private _now = diag_tickTime;
+                if (_now - _lastRestock > 0.5) then {
+                    _lastRestock = _now;
+                    // Live re-stock: a foreign class banked into the pool since open (a just-dropped item
+                    // settled, a loot cache) goes on the shelf here so it appears without a full close/reopen
+                    // -- available immediately, drawn as a row on the next list redraw (tab switch). Tracked
+                    // in _addedForeign so the close cleanup still clears it back off.
+                    {
+                        _x params ["_cls", "_cnt"];
+                        if (_cnt > 0 && {!(_cls in _friendly)} && {!(_cls in _stockedForeign)}) then {
+                            private _type = [_cls] call DUWS_fnc_cargoType;
+                            [_cls, _type, true] call DUWS_fnc_shelfForeign;
+                            _addedForeign pushBack [_cls, _type];
+                            _stockedForeign pushBack _cls;
+                        };
+                    } forEach (missionNamespace getVariable ["DUWS_capturedPool", []]);
+                };
 
-                [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
-                _lastPaint = diag_tickTime;
+                // Repaint once equip clicks have settled (>0.15 s quiet), or on the slow heartbeat for
+                // tab/search changes that raise no event. The settle gate keeps a click burst from ever
+                // painting a list mid-rebuild.
+                private _le = missionNamespace getVariable ["DUWS_arsenal_lastEquip", 0];
+                private _due = missionNamespace getVariable ["DUWS_arsenal_paintDue", false];
+                if (_now - _le > 0.15 && {(_now - _lastPaint > 0.5) || _due}) then {
+                    [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
+                    missionNamespace setVariable ["DUWS_arsenal_paintDue", false];
+                    _lastPaint = _now;
+                };
             };
 
             private _currentLoadout = getUnitLoadout player;
