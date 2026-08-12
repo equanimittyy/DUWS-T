@@ -21,7 +21,7 @@ private _civsOffLift = if ((count (missionNamespace getVariable ["civ_town_rep",
 // Depth bounty: the two offers farthest into enemy territory are flagged by name at request time
 // (client/missions/fnc_stratmap.sqf). Unlike the civs-off lift this is a worth multiplier on the
 // mission itself, so it scales both currencies. Absent list or unflagged name pays flat.
-private _depthBoost = if (!isNil "DUWS_rewardBoost" && {_mission_name in DUWS_rewardBoost}) then { 1.5 } else { 1 };
+private _depthBoost = if (!isNil "DUWS_rewardBoost" && {_mission_name in DUWS_rewardBoost}) then { 2 } else { 1 };
 _cp_multiplied_reward = round (_cpreward * cp_reward_multiplier * _civsOffLift * _depthBoost);
 // The player's reward multiplier scales both mission currencies, so one campaign knob governs CP and
 // AP payouts alike. The civs-off lift is not applied to AP: it substitutes for the absent town-CP

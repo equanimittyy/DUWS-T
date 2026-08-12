@@ -57,22 +57,31 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   // ten extra times to build a list no one reads to the bottom of.
   _missionDraw = 7 min (count _missionCount);
 
-  // Frontier weighting for the anchor search. Anchors are drawn toward OPFOR ground nearest
-  // friendly-held territory -- the HQ, FOBs and captured zones -- so a request rarely lands
-  // behind the enemy's full depth on the far side of the map. As zones fall the friendly set
-  // grows and the reachable band advances with the front. Reuses the ownership store the AoI
-  // field reads; the friendly-AoI exclusion itself is applied server-side in fnc_missionTargetPos.
-  private _frontierBias = 2;      // inverse-distance exponent: higher hugs the front harder
-  private _frontierBand = 2000;   // metres past an OPFOR zone edge the countryside search spans
+  // Weighting for the anchor search. A request is drawn onto the frontline -- the seam where
+  // friendly-held ground (HQ, FOBs, captured zones) meets OPFOR-held ground -- with a broad enough
+  // spread that offers straddle it into both sides rather than piling on one point. The fortified
+  // positions push back: a zone hard, a hardpoint gently, so an offer lands in the no-man's-land near
+  // the objectives without dropping onto one. As zones fall the seam advances with the front. Reads the
+  // same ownership and hardpoint stores the map readout uses; the friendly-AoI exclusion is server-side.
+  private _frontWidth = 0.3;     // frontline spread: half-weight this fraction either side of the seam; larger spreads wider
+  private _zoneRepel   = 1200;   // zone-edge standoff the weight fights for, metres -- aggressive
+  private _hpRepel     = 300;    // hardpoint standoff the weight fights for, metres -- soft
+  private _frontierBand = 2000;  // metres past an OPFOR zone edge the countryside search spans
 
   private _bluHeld = if (isNil "WARCOM_zones_controled_by_BLUFOR") then {[]} else {WARCOM_zones_controled_by_BLUFOR};
   private _friendlyAnchors = +_bluHeld;
   if (!(PosOfBLUHQ isEqualTo [])) then { _friendlyAnchors pushBack PosOfBLUHQ };
   if (!(isNil "Array_of_FOBpos")) then { { _friendlyAnchors pushBack _x } forEach Array_of_FOBpos };
 
-  // OPFOR-held zones as [[pos,radius], pos] pairs, precomputed once: ownership is fixed for
-  // the few seconds this picker runs. A zone is OPFOR unless its centre sits in the BLUFOR-held
-  // list -- the same control test the capture triggers and the AoI field use.
+  // Repulsor footprints as [pos, radius]: every zone by its own radius, every live hardpoint as a
+  // point (radius 0). Precomputed once -- ownership and the hardpoint registry are fixed for the few
+  // seconds this picker runs.
+  private _zoneFoot = zone_meta_array apply {_x params ["", "_zp", "_zs"]; [_zp, _zs]};
+  private _hpFoot = if (isNil "DUWS_hardpoints") then {[]} else {DUWS_hardpoints apply {[_x select 1, 0]}};
+
+  // OPFOR-held zones: candidates for the countryside branch, and the enemy reference the urban weight
+  // measures toward. A zone is OPFOR unless its centre sits in the BLUFOR-held list -- the same
+  // control test the capture triggers and the AoI field use.
   private _opforZoneCands = [];
   {
       _x params ["", "_zp", "_zs"];
@@ -80,20 +89,50 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
           _opforZoneCands pushBack [[_zp, _zs], _zp];
       };
   } forEach zone_meta_array;
+  private _opforCenters = _opforZoneCands apply {_x select 1};
 
-  // [_cands, _anchors, _bias] -> one item. _cands are [item, pos] pairs; weight is
-  // 1 / dist(pos, nearest anchor)^_bias, so ground near the front is favoured but the deep
-  // rear is thinned, not banned -- the spread stays. No anchors (campaign hour zero) -> flat random.
-  private _fnFrontierPick = {
-      params ["_cands", "_anchors", "_bias"];
+  // Soft repulsion from a footprint set: 0 on top of the nearest feature's edge, 0.5 at _scale beyond
+  // it, approaching 1 far out. A larger _scale fights harder and from farther. Empty set -> 1 (no push).
+  private _fnRepel = {
+      params ["_pos", "_feats", "_scale"];
+      if (_feats isEqualTo []) exitWith {1};
+      private _d = 0 max (selectMin (_feats apply {(_pos distance2D (_x select 0)) - (_x select 1)}));
+      _d / (_d + _scale)
+  };
+
+  // [_cands, _fnWeight] -> one item. _cands are [item, pos] pairs; _fnWeight scores a position in
+  // [0,1]. All weights zero (or no candidates) -> flat random, so a degenerate map never returns nil.
+  // The weight blocks read _friendlyAnchors / _opforCenters / the repel sets from this scope -- valid
+  // because call keeps the picker's locals in view down the stack.
+  private _fnPick = {
+      params ["_cands", "_fnWeight"];
       private _items = _cands apply {_x select 0};
-      if (_anchors isEqualTo []) exitWith { selectRandom _items };
-      private _weights = _cands apply {
-          private _cpos = _x select 1;
-          private _d = (selectMin (_anchors apply {_cpos distance2D _x})) max 1;
-          1 / (_d ^ _bias)
-      };
+      if (_items isEqualTo []) exitWith {objNull};
+      private _weights = _cands apply {(_x select 1) call _fnWeight};
+      if ((_weights findIf {_x > 0}) < 0) exitWith {selectRandom _items};
       _items selectRandomWeighted _weights
+  };
+
+  // Urban weight: a bell peaked on the frontline. enemyness is 0 in the friendly rear, 0.5 on the seam,
+  // ->1 deep in enemy ground; the bell peaks at 0.5 and thins toward either extreme (never zero, so the
+  // spread into both sides survives), then zones push hard and hardpoints gently.
+  private _fnUrbanWeight = {
+      private _pos = _this;
+      private _dFri = if (_friendlyAnchors isEqualTo []) then {1e6} else {selectMin (_friendlyAnchors apply {_pos distance2D _x})};
+      private _dOpf = if (_opforCenters isEqualTo []) then {_dFri} else {selectMin (_opforCenters apply {_pos distance2D _x})};
+      private _enemyness = _dFri / ((_dFri + _dOpf) max 1);
+      private _front = 1 / (1 + (((_enemyness - 0.5) / _frontWidth) ^ 2));
+      _front
+        * ([_pos, _zoneFoot, _zoneRepel] call _fnRepel)
+        * ([_pos, _hpFoot, _hpRepel] call _fnRepel)
+  };
+
+  // Countryside weight: among OPFOR zones favour the ones on the front -- nearest friendly ground --
+  // softly, so several front zones share the draw rather than the single closest taking it. The band
+  // search and fnc_pos_claimed give the zone standoff here, so no repulsor term.
+  private _fnZoneWeight = {
+      private _dFri = if (_friendlyAnchors isEqualTo []) then {1} else {1 max (selectMin (_friendlyAnchors apply {_this distance2D _x}))};
+      1 / _dFri
   };
 
   while {_counter < _missionDraw} do {
@@ -112,18 +151,18 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 	while {!_Posfound} do {
 		
 		if (moreUrban == 1 && failsafe_not_found2 == false) then {
-			// MORE URBAN -- named location, frontier-weighted toward the front
-			_ZnAnchor = position ([MissionLocations apply {[_x, position _x]}, _friendlyAnchors, _frontierBias] call _fnFrontierPick);
+			// MORE URBAN -- named location, weighted onto the frontline and off the fortifications
+			_ZnAnchor = position ([MissionLocations apply {[_x, position _x]}, _fnUrbanWeight] call _fnPick);
 			_ZnLocation = [_ZnAnchor, 100, 400,10,0,0.3,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 			_Building = nearestBuilding _ZnLocation;
 			_foundSafePos = [(getpos _Building select 0),(getpos _Building select 1)];
 		}else{
-			// LESS URBAN -- OPFOR countryside band, frontier-weighted. Falls back to the old
+			// LESS URBAN -- OPFOR countryside band, front zones favoured. Falls back to the old
 			// HQ ring only when every zone is already BLUFOR-held (win state).
 			if (_opforZoneCands isEqualTo []) then {
 				_foundSafePos = [PosOfBLUHQ, 0, (zones_max_dist_from_hq*1.5),5,0,0.3,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 			} else {
-				([_opforZoneCands, _friendlyAnchors, _frontierBias] call _fnFrontierPick) params ["_pzp", "_pzs"];
+				([_opforZoneCands, _fnZoneWeight] call _fnPick) params ["_pzp", "_pzs"];
 				_foundSafePos = [_pzp, _pzs, _pzs + _frontierBand,5,0,0.3,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 			};
 		};
@@ -219,7 +258,7 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   // Surface the bonus on the map so the incentive is visible: append a red structured-text tag to
   // each flagged offer's description. The description control renders structured text -- the
   // per-type briefings already carry <br /> and their base CP/AP figures.
-  private _boostTag = format ["<br /><br /><t color='#ff0000'>%1</t>", localize "STR_DUWS_T_reward_boost_tag"];
+  private _boostTag = format ["<br /><t color='#ff0000'>%1</t>", localize "STR_DUWS_T_reward_boost_tag"];
   {
       private _bn = _x;
       private _ri = array_of_missions findIf {(_x select 2) isEqualTo _bn};
@@ -234,7 +273,7 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   // there is civ_town_rep being empty, which is server-only; CIV_PRESENCE is the broadcast setting that
   // decides it, so the client reproduces the same condition to surface the lift on every offer.
   if ((isNil "CIV_PRESENCE") || {CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"]}) then {
-      private _civTag = format ["<br /><br /><t color='#ff0000'>%1</t>", localize "STR_DUWS_T_reward_civsoff_tag"];
+      private _civTag = format ["<br /><t color='#ff0000'>%1</t>", localize "STR_DUWS_T_reward_civsoff_tag"];
       { _x set [3, (_x select 3) + _civTag] } forEach array_of_missions;
   };
 
