@@ -109,7 +109,10 @@ private _extractStrings = {
 // DUWS_friendlyArsenal snapshot at boot, so these standard-issue role-key classes are absent from it --
 // without this the count overlay reads them as an empty pool ([0]): unlimited in Hybrid, unseeded in
 // Limited. Only genuinely-new classes are seeded, so a boot-seeded count is never reset here.
-private _addedClasses = _addedWeapons + _addedMagazines + _addedItems + _addedBackpacks;
+// Weapons are preset classes; fold their arsenal base rows too, or a base row the player is issued
+// (e.g. srifle_DMR_02_camo_F under the camo MAR-10 preset) reads [0].
+private _addedClasses = _addedWeapons + ([_addedWeapons] call fnc_arsenal_base_weapons)
+    + _addedMagazines + _addedItems + _addedBackpacks;
 private _friendly = missionNamespace getVariable ["DUWS_friendlyArsenal", []];
 private _newFriendly = _addedClasses select { !(_x in _friendly) };
 if (count _newFriendly > 0) then {

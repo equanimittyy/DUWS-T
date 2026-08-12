@@ -66,6 +66,7 @@ fnc_baseRangeMarker = compile preprocessFileLineNumbers "duws\server\misc\fnc_ba
 fnc_baseFade = compile preprocessFileLineNumbers "duws\server\misc\fnc_baseFade.sqf";
 fnc_create_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_create_ammo_lists.sqf";
 fnc_basic_ammo_lists = compile preprocessFileLineNumbers "duws\server\misc\fnc_basic_ammo_lists.sqf";
+fnc_arsenal_base_weapons = compile preprocessFileLineNumbers "duws\server\misc\fnc_arsenal_base_weapons.sqf";
 fnc_escalation = compile preprocessFileLineNumbers "duws\server\misc\fnc_escalation.sqf";
 fnc_civ_garrison = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_garrison.sqf";
 fnc_opfor_count_at = compile preprocessFileLineNumbers "duws\server\misc\fnc_opfor_count_at.sqf";

@@ -65,16 +65,9 @@ _snapFriendly = {
     // set holds classnames alone.
     private _s = _u select { _x isEqualType "" };
     // Loadouts carry preset weapons (e.g. arifle_MX_ACO_pointer_F); the arsenal lists each as its base
-    // weapon (arifle_MX_F) row, so the friendly set needs the base too or that row reads [0]. Add each
-    // weapon's baseWeapon; non-weapons and already-base weapons contribute nothing new.
-    private _bases = [];
-    {
-        if (isClass (configFile >> "CfgWeapons" >> _x)) then {
-            private _b = getText (configFile >> "CfgWeapons" >> _x >> "baseWeapon");
-            if (_b != "") then { _bases pushBack _b; };
-        };
-    } forEach _s;
-    _s append _bases;
+    // weapon row, so the friendly set needs that base too or the row reads [0]. Resolve both the
+    // config-baseWeapon and the inheritance-parent forms of that base.
+    _s append ([_s] call fnc_arsenal_base_weapons);
     DUWS_friendlyArsenal = _s arrayIntersect _s;
     publicVariable "DUWS_friendlyArsenal";
     // Limited has no unlimited floor, so stock the whole standard-issue set into the pool at boot.
