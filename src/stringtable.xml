@@ -2471,15 +2471,14 @@
                 <English>Disguise broken: Recognised by the locals here.</English>
                 <Chinesesimp>伪装暴露：负声望进入城镇——你的伪装在居住当地多年的民众面前不值一提。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_CANT_NOCIVDATA">
-                <Original>Cannot disguise: Not ready yet, try again shortly.</Original>
-                <English>Cannot disguise: Not ready yet, try again shortly.</English>
-                <Chinesesimp>无法获取平民服装数据。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_CANT_ZOMBIE">
                 <Original>Cannot disguise: Not available in this scenario.</Original>
                 <English>Cannot disguise: Not available in this scenario.</English>
                 <Chinesesimp>丧尸模式下无法伪装成平民。</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_DISGUISE_CANT_NOCIV">
+                <Original>Cannot disguise: There is no civilian population to blend into.</Original>
+                <English>Cannot disguise: There is no civilian population to blend into.</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_CANT_VEHICLE">
                 <Original>Cannot disguise: You are in a non-civilian vehicle.</Original>

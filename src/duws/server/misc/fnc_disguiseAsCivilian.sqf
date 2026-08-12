@@ -12,6 +12,36 @@ fnc_disguise_hintFail = {
 };
 publicVariable "fnc_disguise_hintFail";
 
+// Civilian by config, not by the scanned wardrobe: the uniform's linked unit carries side 3
+// (TCivilian), so any civilian shirt passes -- including modded clothes and classes no spawned
+// local happened to wear. Shared by the activation gate and the maintenance monitor so the two
+// agree; if they diverged the disguise would activate then break on the next tick. Server-only
+// (the whole file is), so no broadcast.
+fnc_disguise_isCivUniform = {
+    params ["_uniform"];
+    if (_uniform == "") exitWith { false };
+    private _unit = getText (configFile >> "CfgWeapons" >> _uniform >> "ItemInfo" >> "uniformClass");
+    if (_unit == "") exitWith { false };
+    getNumber (configFile >> "CfgVehicles" >> _unit >> "side") == 3
+};
+
+// Vests and headgear are CfgWeapons items with no side field, so they cannot be classed civilian
+// by config the way the uniform is. An accessory reads civilian when the slot is empty, when a
+// local civilian is seen wearing the class (the population scan, mod-adaptive), or when it is on a
+// curated allowlist below. Shared by gate and monitor so the two cannot drift.
+fnc_disguise_isCivGear = {
+    params ["_item", "_scanned", "_whitelist"];
+    _item == "" || {_item in _scanned} || {_item in _whitelist}
+};
+
+// Curated civilian classes the population scan can miss: gear a player loots but no local NPC
+// spawns wearing. Vanilla civilians almost never wear a vest, so the press vest is seeded to keep
+// a safety/hi-viz style vest valid; add mod safety-vest classes here. Headgear/backpack lean on
+// the scan (civilians do wear caps and civilian packs), so their allowlists start empty.
+DUWS_disguise_civVestWhitelist = ["V_Press_F"];
+DUWS_disguise_civHeadgearWhitelist = [];
+DUWS_disguise_civBackpackWhitelist = [];
+
 private _civilianVehicles = [
     "C_Van_01_fuel_F", "C_Van_01_box_F", "C_Van_01_transport_F",
     "C_Tractor_01_F", "C_Hatchback_01_sport_F", "C_Hatchback_01_F",
@@ -39,25 +69,12 @@ if (_veh != _player) then {
     };
 };
 
-if (CIV_PRESENCE == "NONE") exitWith {};
+if (CIV_PRESENCE == "NONE") exitWith {
+    [_player, "STR_DUWS_T_DISGUISE_CANT_NOCIV"] call fnc_disguise_hintFail;
+};
 if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_ZOMBIE"] call fnc_disguise_hintFail;
 };
-
-private _timeout = diag_tickTime + 30;
-waitUntil {
-    sleep 0.1;
-    (!isNil "DUWS_civUniforms" && !isNil "DUWS_civVests" && !isNil "DUWS_civHeadgear" && !isNil "DUWS_civBackpacks") || diag_tickTime > _timeout
-};
-
-if (isNil "DUWS_civUniforms" || isNil "DUWS_civVests" || isNil "DUWS_civHeadgear" || isNil "DUWS_civBackpacks") exitWith {
-    [_player, "STR_DUWS_T_DISGUISE_CANT_NOCIVDATA"] call fnc_disguise_hintFail;
-};
-
-private _civUniforms = DUWS_civUniforms;
-private _civVests = DUWS_civVests;
-private _civHeadgear = DUWS_civHeadgear;
-private _civBackpacks = DUWS_civBackpacks;
 
 if (primaryWeapon _player != "" || secondaryWeapon _player != "" || handgunWeapon _player != "") exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_WEAPON"] call fnc_disguise_hintFail;
@@ -72,22 +89,19 @@ private _currentUniform = uniform _player;
 if (_currentUniform == "") exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_NAKED"] call fnc_disguise_hintFail;
 };
-if (!(_currentUniform in _civUniforms)) exitWith {
+if !([_currentUniform] call fnc_disguise_isCivUniform) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_UNIFORM"] call fnc_disguise_hintFail;
 };
 
-private _currentVest = vest _player;
-if (_currentVest != "" && {!(_currentVest in _civVests)}) exitWith {
+// Accessories must read civilian too, or a military plate carrier or helmet under a civilian
+// shirt would still pass.
+if !([vest _player, missionNamespace getVariable ["DUWS_civVests", []], DUWS_disguise_civVestWhitelist] call fnc_disguise_isCivGear) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_VEST"] call fnc_disguise_hintFail;
 };
-
-private _currentHeadgear = headgear _player;
-if (_currentHeadgear != "" && {!(_currentHeadgear in _civHeadgear)}) exitWith {
+if !([headgear _player, missionNamespace getVariable ["DUWS_civHeadgear", []], DUWS_disguise_civHeadgearWhitelist] call fnc_disguise_isCivGear) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_HEADGEAR"] call fnc_disguise_hintFail;
 };
-
-private _currentBackpack = backpack _player;
-if (_currentBackpack != "" && {!(_currentBackpack in _civBackpacks)}) exitWith {
+if !([backpack _player, missionNamespace getVariable ["DUWS_civBackpacks", []], DUWS_disguise_civBackpackWhitelist] call fnc_disguise_isCivGear) exitWith {
     [_player, "STR_DUWS_T_DISGUISE_CANT_BACKPACK"] call fnc_disguise_hintFail;
 };
 
@@ -99,10 +113,6 @@ _player setCaptive true;
 _player setVariable ["DUWS_disguise_warningActive", false, true];
 _player setVariable ["DUWS_disguise_warningPos", nil, true];
 _player setVariable ["DUWS_disguise_paused", false, true];
-_player setVariable ["DUWS_disguise_validUniforms", _civUniforms];
-_player setVariable ["DUWS_disguise_validVests", _civVests];
-_player setVariable ["DUWS_disguise_validHeadgear", _civHeadgear];
-_player setVariable ["DUWS_disguise_validBackpacks", _civBackpacks];
 _player setVariable ["DUWS_disguise_civilianVehicles", _civilianVehicles];
 
 [localize "STR_DUWS_T_DISGUISE_ACTIVATED_DESC"] remoteExec ["hint", _player];
@@ -164,26 +174,17 @@ if (!(_player getVariable ["DUWS_disguise_monitorRunning", false])) then {
             if (uniform _player == "") exitWith {
                 ["STR_DUWS_T_DISGUISE_BROKEN_NAKED"] call _fnc_breakDisguise;
             };
-
-            private _invalidGear = false;
-            private _breakReason = "";
-            if (!(uniform _player in (_player getVariable ["DUWS_disguise_validUniforms", []]))) then {
-                _invalidGear = true; _breakReason = "STR_DUWS_T_DISGUISE_BROKEN_UNIFORM";
+            if !([uniform _player] call fnc_disguise_isCivUniform) exitWith {
+                ["STR_DUWS_T_DISGUISE_BROKEN_UNIFORM"] call _fnc_breakDisguise;
             };
-            private _vest = vest _player;
-            if (!_invalidGear && _vest != "" && {!(_vest in (_player getVariable ["DUWS_disguise_validVests", []]))}) then {
-                _invalidGear = true; _breakReason = "STR_DUWS_T_DISGUISE_BROKEN_VEST";
+            if !([vest _player, missionNamespace getVariable ["DUWS_civVests", []], DUWS_disguise_civVestWhitelist] call fnc_disguise_isCivGear) exitWith {
+                ["STR_DUWS_T_DISGUISE_BROKEN_VEST"] call _fnc_breakDisguise;
             };
-            private _headgear = headgear _player;
-            if (!_invalidGear && _headgear != "" && {!(_headgear in (_player getVariable ["DUWS_disguise_validHeadgear", []]))}) then {
-                _invalidGear = true; _breakReason = "STR_DUWS_T_DISGUISE_BROKEN_HEADGEAR";
+            if !([headgear _player, missionNamespace getVariable ["DUWS_civHeadgear", []], DUWS_disguise_civHeadgearWhitelist] call fnc_disguise_isCivGear) exitWith {
+                ["STR_DUWS_T_DISGUISE_BROKEN_HEADGEAR"] call _fnc_breakDisguise;
             };
-            private _backpack = backpack _player;
-            if (!_invalidGear && _backpack != "" && {!(_backpack in (_player getVariable ["DUWS_disguise_validBackpacks", []]))}) then {
-                _invalidGear = true; _breakReason = "STR_DUWS_T_DISGUISE_BROKEN_BACKPACK";
-            };
-            if (_invalidGear) exitWith {
-                [_breakReason] call _fnc_breakDisguise;
+            if !([backpack _player, missionNamespace getVariable ["DUWS_civBackpacks", []], DUWS_disguise_civBackpackWhitelist] call fnc_disguise_isCivGear) exitWith {
+                ["STR_DUWS_T_DISGUISE_BROKEN_BACKPACK"] call _fnc_breakDisguise;
             };
             
             private _nearCorpses = _player nearObjects ["CAManBase", 20] select { !alive _x };
