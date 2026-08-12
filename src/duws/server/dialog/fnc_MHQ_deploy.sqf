@@ -1,6 +1,6 @@
 // Locality: server (callers remoteExec to target 2). It attaches no entries itself: the deploy and
-// undeploy entries come from fnc_MHQ_addActions and the crate's from fnc_ammobox_actions, both
-// broadcast to every machine and run there.
+// undeploy entries come from fnc_MHQ_addActions and the crate's from fnc_field_box_actions plus
+// fnc_addQuickChangeActions, both broadcast to every machine and run there.
 
 // MHQ must be empty to Deploy
 
@@ -45,10 +45,18 @@ switch (VERSION_X) do {
 
 MHQ_ammobox setDir _mhqDir;
 
-// Put some crap in the ammobox
-[MHQ_ammobox,"blufor"] spawn fnc_fill_ammobox; 
+// A field loadout station, not a loot crate: strip whatever cargo the class ships with so the box is
+// empty and its only gear comes through the Arsenal.
+clearWeaponCargoGlobal MHQ_ammobox;
+clearMagazineCargoGlobal MHQ_ammobox;
+clearItemCargoGlobal MHQ_ammobox;
+clearBackpackCargoGlobal MHQ_ammobox;
 
-[MHQ_ammobox] remoteExec ["fnc_ammobox_actions", [0,-2] select isDedicated, MHQ_ammobox];
+// Two broadcasts, two JIP ids: the Arsenal/rearm pair keys on the box (its queue entry dies with the
+// crate), and Quick Kits takes a distinct string id -- a second broadcast against the same id would
+// evict the first and leave late joiners with only one of the two.
+[MHQ_ammobox] remoteExec ["fnc_field_box_actions", [0,-2] select isDedicated, MHQ_ammobox];
+[MHQ_ammobox] remoteExec ["fnc_addQuickChangeActions", 0, format ["mhq_quickchange_%1", netId MHQ_ammobox]];
 
 sleep 0.2;
 

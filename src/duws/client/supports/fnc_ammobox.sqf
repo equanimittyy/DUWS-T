@@ -1,6 +1,7 @@
 // Locality: client -- invoked from the comm menu (shared/includes/supports_radio_modern.hpp:87).
-// The crate's scroll entries are attached by shared/functions/fnc_ammobox_actions.sqf, which this
-// broadcasts to every machine.
+// Drops an empty crate as a field loadout station: its Arsenal + rearm entries come from
+// shared/functions/fnc_field_box_actions.sqf and the Quick Kits menu from fnc_addQuickChangeActions,
+// both broadcast to every machine.
 
 
 _target = _this select 0;
@@ -75,6 +76,12 @@ switch (VERSION_X) do {
 		_ammobox = CreateVehicle ["B_supplyCrate_F", [_location select 0,_location select 1,(_location select 2)+50], [], 0, "CAN_COLLIDE"];
 	};
 };
+// A field loadout station, not a loot crate: strip whatever cargo the class ships with so the box
+// is empty and its only gear comes through the Arsenal.
+clearWeaponCargoGlobal _ammobox;
+clearMagazineCargoGlobal _ammobox;
+clearItemCargoGlobal _ammobox;
+clearBackpackCargoGlobal _ammobox;
 _ammobox attachTo [_parachute,[0,0,0]];
 
 hint localize "STR_DUWS_T_wdttb5b8";
@@ -97,8 +104,11 @@ waitUntil {sleep 1; getpos _ammobox select 2 < 0.2};
 
 "SmokeShellGreen" CreateVehicle (getpos _ammobox);
 ["info",[localize "STR_DUWS_T_lyxq9zpm",localize "STR_DUWS_T_5p6d9535"]] call bis_fnc_showNotification;
-[_ammobox] remoteExec ["fnc_ammobox_actions", [0,-2] select isDedicated, _ammobox];
-[_ammobox,"blufor"] spawn fnc_fill_ammobox; 
+// Two broadcasts, two JIP ids: the Arsenal/rearm pair keys on the box (so its queue entry dies with
+// the crate), and Quick Kits takes a distinct string id -- a second broadcast against the same id
+// would evict the first and leave late joiners with only one of the two.
+[_ammobox] remoteExec ["fnc_field_box_actions", [0,-2] select isDedicated, _ammobox];
+[_ammobox] remoteExec ["fnc_addQuickChangeActions", 0, format ["supplydrop_quickchange_%1", netId _ammobox]];
 
 sleep 60;
 {

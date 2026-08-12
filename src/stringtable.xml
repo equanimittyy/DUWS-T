@@ -7011,8 +7011,8 @@
                 <English>Assigns a Mobile HQ designation radio to a squad lead; spends a support slot, not CP.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_supply">
-                <Original>An equipment crate with its own Arsenal.</Original>
-                <English>An equipment crate with its own Arsenal.</English>
+                <Original>The Virtual Arsenal if the armory is unlocked, Quick Kits, and a squad heal and rearm.</Original>
+                <English>The Virtual Arsenal if the armory is unlocked, Quick Kits, and a squad heal and rearm.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_veh_drop">
                 <Original>A helicopter drops a civilian transport vehicle.</Original>
