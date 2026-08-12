@@ -37,7 +37,6 @@ failsafe_not_found2 = false;
 _handle = [] spawn {  // Spawn the MAIN SEARCH
 
   _counter = 0;
-  [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_missionlook"] remoteExec ["fnc_duws_dialogue", 0];
   _kibot_pos_array_missionPos = [[-99999,-99999,-99999]];
 
   // Included inside the block, not above it: a spawned block captures no locals.

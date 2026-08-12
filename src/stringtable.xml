@@ -5208,13 +5208,6 @@
                 <Original>This is Courier 1-1, deploying a supply crate to your position. ETA forty seconds.</Original>
                 <English>This is Courier 1-1, deploying a supply crate to your position. ETA forty seconds.</English>
             </Key>
-            <Key ID="STR_DUWS_T_missionlook">
-                <German>Überprüfung des Auftragsstatus im Einsatzgebiet...</German>
-                <Spanish>Verificando el estado de la misión en la zona de operaciones...</Spanish>
-                <Chinesesimp>正检查战区情况...</Chinesesimp>
-                <Original>Checking AO status...</Original>
-                <English>Checking AO status...</English>
-            </Key>
             <Key ID="STR_DUWS_T_i_got_u">
                 <German>Ich trage dich, entspann dich.</German>
                 <Spanish>Yo te llevo, relájate.</Spanish>
