@@ -6185,8 +6185,8 @@
                 <German>HC und TF Gruppen</German>
                 <Chinesesimp>HC和TF小队</Chinesesimp>
                 <Spanish>Escuadrónes de Alto Mando y fuerzas de ataque</Spanish>
-                <Original>HC and TF SQUADS</Original>
-                <English>HC and TF SQUADS</English>
+                <Original>HC SQUADS</Original>
+                <English>HC SQUADS</English>
             </Key>
             <Key ID="STR_DUWS_T_uskdohql">
                 <German>LEERE FAHRZEUGE</German>
@@ -6220,8 +6220,8 @@
                 <German>Forder eine High Command oder Taskforce Gruppe an</German>
                 <Chinesesimp>招募一个高级指挥或特遣小队</Chinesesimp>
                 <Spanish>Solicita un escuadrón de Alto Mando o una Fuerza de Ataque</Spanish>
-                <Original>Request a High Command or Task Force squad</Original>
-                <English>Request a High Command or Task Force squad</English>
+                <Original>Request a High Command squad</Original>
+                <English>Request a High Command squad</English>
             </Key>
             <Key ID="STR_DUWS_T_hf8ph7ss">
                 <German>Fordere ein LEERES Fahrzeug an, das an deiner Position gespawnt wird</German>
