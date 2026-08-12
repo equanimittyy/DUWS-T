@@ -100,13 +100,15 @@ fnc_support_cost_bracket = {
 	else { format [" (%1 CP)", _cp] }
 };
 
-// The AP tier each advanced support sits behind, keyed by support key; anything unlisted is tier 1
-// and always available. Mirrors the vehicle rungs -- transport lift, HALO insertion and indirect fire
-// at tier 3, the gunship and heavy fire at tier 4, the CAS jet at tier 5.
+// The AP tier each support sits behind, keyed by support key; anything unlisted is tier 1 and always
+// available. Mirrors the vehicle rungs -- Mobile HQ and the first radio tower at Motorised (tier 2),
+// transport lift, HALO insertion and indirect fire at tier 3, the gunship and heavy fire at tier 4,
+// the CAS jet at tier 5. The three radio towers climb the ladder in lockstep with their own I/II/III
+// levels, so each tier of the drift amplifier is earned rather than bought straight off.
 DUWS_support_tiers = [
-	["uav", 2],
-	["mortar", 3], ["mortar_smoke", 3], ["jdam", 3], ["laser", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3],
-	["arty", 4], ["cluster", 4], ["napalm", 4], ["hcAttChop", 4],
+	["mobile_HQ", 2], ["radio1", 2], ["uav", 2],
+	["mortar", 3], ["mortar_smoke", 3], ["jdam", 3], ["laser", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3], ["radio2", 3],
+	["arty", 4], ["cluster", 4], ["napalm", 4], ["hcAttChop", 4], ["radio3", 4],
 	["hcCAS", 5]
 ];
 fnc_support_tier = {
