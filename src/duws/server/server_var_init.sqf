@@ -475,16 +475,18 @@ DUWS_hardpointName = createHashMapFromArray [
 // generic section. The trade is anti-infantry punch -- wp_team has no AR, GL or marksman -- so those two
 // hold harder against armour and air but lighter against a dismounted assault.
 // A radio tower is a strategic objective with 5 km of reach, so it fields a heavier patrol than a lone
-// gun -- a rifle team plus two weapons teams to contest the air and armour a player brings against it. The
+// gun -- a rifle team plus two weapons teams to contest the air and armour a player brings against it,
+// part of it screening wide (widepatrol) to meet the approach while the rest hold the mast close. The
 // gun crew is separate and always placed.
 // Artillery and mortars are batteries OPCOM fires from, so their loose garrison scales to what a player
 // brings when they come to destroy the guns: artillery, with the longer reach and the greater loss, holds
 // two weapons teams and a rifle team; a mortar holds one weapons team and a light patrol. Their gun crews
 // are separate and stay resident even while the loose garrison streams, so OPCOM keeps firing between raids.
+// On each, one element screens wide (widepatrol) to catch the assault on the rim while the rest hold close.
 DUWS_hardpointGarrison = createHashMapFromArray [
     ["MG", "team"], ["AT", "wp_team"], ["GMG", "team"], ["ROADBLOCK", "team"],
-    ["OP", "team"], ["AA", "wp_team"], ["MORTAR", ["wp_team", "patrol"]], ["ARTY", ["wp_team", "wp_team", "team"]],
-    ["RADIO", ["team", "wp_team", "wp_team"]], ["MINEFIELD", ""]
+    ["OP", "team"], ["AA", "wp_team"], ["MORTAR", ["wp_team", "widepatrol:patrol"]], ["ARTY", ["wp_team", "wp_team", "widepatrol:team"]],
+    ["RADIO", ["wp_team", "widepatrol:wp_team", "widepatrol:team"]], ["MINEFIELD", ""]
 ];
 
 // Per-posture spawn band and circuit radius, each a fraction of the spawn radius the caller passes.
