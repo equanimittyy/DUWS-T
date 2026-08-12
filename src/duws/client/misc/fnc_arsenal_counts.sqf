@@ -83,6 +83,9 @@ DUWS_fnc_arsenal_paintCounts = {
             // renders the same clean way the whole-unlimited Full arsenal does.
             if (!(missionNamespace getVariable ["DUWS_trackAmmo", false]) && {isClass (configFile >> "CfgMagazines" >> _cls)}) then { continue };
             private _amt = [_cls] call DUWS_fnc_arsenal_countFor;
+            // Debug aid: record [0]-stamped classes for the enforcer's close-time diagnostic. The nil
+            // guard keeps this free unless a DEBUG-level arsenal session armed the collector.
+            if (_amt == 0 && {!isNil "DUWS_dbg_zeroRows"}) then { DUWS_dbg_zeroRows pushBackUnique _cls; };
             // Prefix is rebuilt onto the config display name, never onto the row's current text, so a
             // repaint cannot stack "[3] [3] name".
             private _pfx = if (_amt < 0) then { "[∞] " } else { format ["[%1] ", _amt] };
