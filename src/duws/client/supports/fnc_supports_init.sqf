@@ -57,7 +57,10 @@ fnc_support_catalogue = {
 		["mortar",    "CONS",  5, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false, 12],
 		["mortar_smoke","CONS",5, "support_mortar_smoke_available","STR_DUWS_T_mortar_smoke_row",     "mortar_smoke",false],
 		["jdam",      "CONS",  5, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,  10],
-		["laser",     "CONS",  5, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,  10],
+		// Same warhead as JDAM (identical scripted damage in fnc_arty) but 2 AP cheaper: the laser is
+		// the man-in-the-loop option -- the player earns the discount by painting and holding the target,
+		// where JDAM is fire-and-forget on map coordinates.
+		["laser",     "CONS",  5, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,   8],
 		["cluster",   "CONS", 11, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  26],
 		["napalm",    "CONS",  7, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  15],
 		["hcAttChop", "CONS",  8, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  18],
