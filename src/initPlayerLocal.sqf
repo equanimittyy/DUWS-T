@@ -310,6 +310,11 @@ DUWS_fnc_arsenal_stock = {
         [missionNamespace, _ammoList, true] call BIS_fnc_addVirtualMagazineCargo;
     };
 
+    if (duws_log_level >= 4) then {
+        ["DEBUG", "GEAR", format ["arsenal stock@open: poolN=%1 stockedForeign=%2",
+            count _pool, _addedForeign apply { _x select 0 }]] call fnc_log;
+    };
+
     [_addedForeign, _hiddenFriendly, _ammoList]
 };
 

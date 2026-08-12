@@ -146,10 +146,14 @@ DUWS_fnc_arsenal_insert = {
             };
         };
     };
-    if (_off < 0) exitWith {};
+    if (_off < 0) exitWith {
+        if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["insert %1: unresolved (cat=%2 sub=%3)", _cls, _cat, _sub]] call fnc_log; };
+    };
 
     private _ctrl = _display displayCtrl (IDC_RSCDISPLAYARSENAL_LIST + _off);
-    if (isNull _ctrl) exitWith {};
+    if (isNull _ctrl) exitWith {
+        if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["insert %1: null list ctrl (off=%2)", _cls, _off]] call fnc_log; };
+    };
 
     private _cfg = configFile >> "CfgWeapons" >> _cls;
     if (!isClass _cfg) then { _cfg = configFile >> "CfgMagazines" >> _cls; };
@@ -179,4 +183,6 @@ DUWS_fnc_arsenal_insert = {
             if (_pic != "") then { _ctrl lbSetPicture [_row, _pic]; };
         };
     };
+
+    if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["insert %1 off=%2 shown=%3 %4", _cls, _off, ctrlShown _ctrl, ["added", "already-present"] select _has]] call fnc_log; };
 };

@@ -497,6 +497,7 @@ fnc_captured_pool_settle = {
 			if (_net - _grant > 0) then { _excess pushBack [_cls, _net - _grant]; };
 		};
 	} forEach _classes;
+	if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["pool settle: touched=%1 excess=%2", _classes, _excess]] call fnc_log; };
 	publicVariable "DUWS_capturedPool";
 	if (_replyVar != "") then { [_replyVar, true, _excess] remoteExec ["fnc_pool_reply", _requester]; };
 };
@@ -515,6 +516,7 @@ fnc_captured_pool_deposit_loadout = {
 		if (!DUWS_arsenalLimited && {_cls in DUWS_friendlyArsenal}) then { continue };
 		[_cls, ([_cls] call fnc_captured_pool_getCount) + (_c get _cls)] call fnc_captured_pool_setCount;
 	} forEach (keys _c);
+	if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["pool deposit_loadout: %1", keys _c]] call fnc_log; };
 	publicVariable "DUWS_capturedPool";
 };
 
@@ -530,6 +532,7 @@ fnc_captured_pool_deposit_counts = {
 			[_cls, ([_cls] call fnc_captured_pool_getCount) + _n] call fnc_captured_pool_setCount;
 		};
 	} forEach _pairs;
+	if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["pool deposit_counts: %1", _pairs]] call fnc_log; };
 	publicVariable "DUWS_capturedPool";
 };
 
