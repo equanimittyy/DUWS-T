@@ -31,9 +31,16 @@ DUWS_fnc_arsenal_countFor = {
     // Hybrid keeps standard-issue gear unlimited; Limited tracks it too, so only Hybrid short-circuits.
     if ((_cls in (missionNamespace getVariable ["DUWS_friendlyArsenal", []])) && {!(missionNamespace getVariable ["DUWS_arsenalLimited", false])}) exitWith { -1 };
     // Count-tracked: the pool is [[class, n], ...] with zero-count classes dropped, so absence is zero.
+    // The pool only settles on arsenal close, so takes/returns this session are reflected live by
+    // subtracting the open-time loadout delta the enforcer keeps in DUWS_arsenalTaken (a class held now
+    // but not at open was withdrawn -> one fewer available). Display only: the pool is untouched, and
+    // close still settles the authoritative count.
     private _pool = missionNamespace getVariable ["DUWS_capturedPool", []];
     private _i = _pool findIf { (_x select 0) isEqualTo _cls };
-    if (_i < 0) then { 0 } else { (_pool select _i) select 1 }
+    private _n = if (_i < 0) then { 0 } else { (_pool select _i) select 1 };
+    private _taken = missionNamespace getVariable "DUWS_arsenalTaken";
+    private _off = if (isNil "_taken") then { 0 } else { _taken getOrDefault [_cls, 0] };
+    (_n - _off) max 0
 };
 
 // Repaint every populated, visible item list under the arsenal display. Only shown lists are walked:

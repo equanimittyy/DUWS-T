@@ -4,6 +4,8 @@
 #include "..\shared\includes\action_style.hpp"
 
 [] call compile preprocessFileLineNumbers "duws\shared\functions\fnc_log_init.sqf";
+// Shared loadout tally; the arsenal overlay's live-count loop (initPlayerLocal) calls it per edit.
+fnc_captured_loadout_counts = compile preprocessFileLineNumbers "duws\shared\functions\fnc_captured_loadout_counts.sqf";
 ["INFO", "BOOT", format ["Client_init: %1", profileName]] call fnc_log;
 ["INFO", "BOOT", format ["client_init start, player %1", profileName]] call fnc_log;
 fnc_hirePartisans_clientMap = compile preprocessFileLineNumbers "duws\client\misc\fnc_hirePartisans_clientMap.sqf";

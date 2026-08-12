@@ -368,6 +368,12 @@ DUWS_fnc_arsenal_unstock = {
         private _refLoadout = getUnitLoadout player;
         private _changeThreshold = 10;
 
+        // Open-time per-class loadout tally. The count overlay subtracts (now - open) per class so a
+        // take or return re-numbers the shelf live, no close/reopen. Restricted only; the pool still
+        // settles on close, so DUWS_arsenalTaken is display state, reset each open.
+        private _openC = if (_isRestricted) then { [_openLoadout] call fnc_captured_loadout_counts } else { createHashMap };
+        if (_isRestricted) then { missionNamespace setVariable ["DUWS_arsenalTaken", createHashMap]; };
+
         // Item-count overlay. Restricted modes only -- Full is the whole-config unlimited arsenal,
         // where a per-row [∞] stamp is meaningless and only races BIS's repopulation of a huge list.
         // Painted every frame: BIS rebuilds a weapon's attachment sublists on each selection with no
@@ -430,6 +436,19 @@ DUWS_fnc_arsenal_unstock = {
                 // large change; per-class counts are settled on close.
                 if (_isRestricted && {_changeCount >= _changeThreshold}) then {
                     [] call DUWS_fnc_arsenal_restricted;
+                };
+
+                // Re-tally holdings vs open so the overlay can subtract takes/returns live; forcePaint
+                // re-stamps the affected rows this frame.
+                if (_isRestricted) then {
+                    private _curC = [_currentLoadout] call fnc_captured_loadout_counts;
+                    private _taken = createHashMap;
+                    {
+                        private _d = (_curC getOrDefault [_x, 0]) - (_openC getOrDefault [_x, 0]);
+                        if (_d != 0) then { _taken set [_x, _d]; };
+                    } forEach ((keys _curC) + (keys _openC));
+                    missionNamespace setVariable ["DUWS_arsenalTaken", _taken];
+                    missionNamespace setVariable ["DUWS_arsenal_forcePaint", true];
                 };
 
                 _refLoadout = _currentLoadout;
