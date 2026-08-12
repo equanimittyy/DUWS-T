@@ -368,6 +368,7 @@ DUWS_fnc_arsenal_unstock = {
         // Paint once on open, then repaint on BIS's arsenalEquipped event (raised after it rebuilds the
         // list) for the responsive path, with the slow heartbeat below as the safety net for tab and
         // search changes that raise no event. The strip poll is separate and drives the loop regardless.
+        DUWS_dbg_zeroRows = [];   // TEMP probe: paintCounts fills this with the classes it stamps [0]
         private _equipEH = -1;
         if (_isRestricted) then {
             [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
@@ -409,6 +410,16 @@ DUWS_fnc_arsenal_unstock = {
 
                 _refLoadout = _currentLoadout;
             };
+        };
+
+        // TEMP PROBE: classes the display stamped [0] with their friendly-set membership, plus a direct
+        // MX check -- separates a missing-friendly gap from a paint/countFor mismatch (in friendly but
+        // still [0]).
+        if (_isRestricted) then {
+            private _fr = missionNamespace getVariable ["DUWS_friendlyArsenal", []];
+            private _z = DUWS_dbg_zeroRows apply { [_x, _x in _fr] };
+            private _mx = ["arifle_MX_F", "arifle_MXC_F", "arifle_MXM_F", "arifle_MX_GL_F"] apply { [_x, _x in _fr, [_x] call DUWS_fnc_arsenal_countFor] };
+            ["INFO", "GEAR", format ["painted[0] (cls,inFriendly)=%1 | MX (cls,inFriendly,count)=%2", _z, _mx]] call fnc_log;
         };
 
         // Close. Drop the equip repaint handler first so it cannot fire against a tearing-down display.
