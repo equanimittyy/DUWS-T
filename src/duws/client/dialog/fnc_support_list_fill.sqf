@@ -21,7 +21,6 @@ lbClear 2103;
 
 private _defs = [] call fnc_support_defs;
 private _insurgent = !isNil "insurgent_mode_enable" && {insurgent_mode_enable};
-private _escalated = (missionNamespace getVariable ["escalation_multiplier", 1]) > 1;
 private _rows = [];   // listbox index -> its def, [] for a heading
 
 {
@@ -55,22 +54,11 @@ private _rows = [];   // listbox index -> its def, [] for a heading
         _x params ["_key", "_defKind", "_cost", "_flagVar", "_labelKey", "_commItem",
             "_insBlocked"];
         private _free = _key == "mobile_HQ" && _insurgent;
-        private _label = localize ([_labelKey, "STR_DUWS_T_b7gmddq3_free"] select _free);
-        // The price bracket. A dual-cost support carries its whole price built here -- its CP half was
-        // lifted out of the English and Original label strings so the AP can join it in one bracket --
-        // while a CP-only row keeps the base cost baked in its label and takes only the escalation
-        // surcharge appended. Both scale the CP by escalation; the mode's free rows carry a 0 CP label
-        // and take neither. Only English and Original were stripped, so the other languages still show
-        // their own baked bracket ahead of this one until they are retranslated.
-        private _apCost = _x param [7, 0];
-        if (_apCost > 0) then {
-            private _cp = if (_escalated && !_free) then { [_cost] call fnc_escalation_cost } else { _cost };
-            _label = _label + format [" (%1CP, %2AP)", _cp, _apCost];
-        } else {
-            if (_escalated && !_free) then {
-                _label = format [localize "STR_DUWS_T_escalation_row", _label, [_cost] call fnc_escalation_cost];
-            };
-        };
+        // Name plus the shared price bracket (fnc_supports_init.sqf): the CP is read from the
+        // catalogue and scaled by escalation, never baked into the label. English and Original label
+        // strings carry the name alone now; the other languages still bake their own bracket until
+        // retranslated, so those transiently show it ahead of this one.
+        private _label = (localize _labelKey) + ([_cost, _x param [7, 0], _free] call fnc_support_cost_bracket);
         // The tier tag, appended after the price. A locked row is greyed below, whatever state colour
         // it would otherwise have carried.
         private _tier = [_key] call fnc_support_tier;

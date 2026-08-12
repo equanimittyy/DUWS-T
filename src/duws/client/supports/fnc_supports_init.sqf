@@ -10,18 +10,22 @@
 // they actually needed.
 #include "..\..\shared\includes\action_style.hpp"
 
-// The catalogue: one ordered list, permanent rows first, read by both the menu build
-// (client/dialog/fnc_request_menu.sqf) and the buy/refund handler. Row order used to be literal
-// indices agreed between those two files, so adding a row anywhere but the end silently
-// repointed every row below it at another support's price, flag and comm item.
+// The catalogue: one ordered list, permanent rows first. This raw form is read by the manual
+// (client/misc/fnc_duws_help.sqf), which lists every support as a reference; the menu build
+// (client/dialog/fnc_request_menu.sqf) and the buy/refund handler take the filtered view
+// (fnc_support_defs) below. Row order used to be literal indices agreed between those files, so
+// adding a row anywhere but the end silently repointed every row below it at another support's
+// price, flag and comm item.
 //
 // [key, kind, cost, flag, label, comm item, insurgent-blocked, AP cost]
 // The 8th column is the Army Power half of an advanced support's dual price -- artillery, mortar,
 // cluster, napalm and the two High Command aircraft. Absent (read as 0 via `param [7, 0]`) on every
 // regular row, which pays CP only. AP is what actually decides an advanced purchase under an abundant
 // CP pool; the CP half is carried for one price format across the catalogue.
-fnc_support_defs = {
-	private _defs = [
+//
+// A support's manual description is keyed by convention, not carried here: STR_DUWS_T_sdesc_<key>.
+fnc_support_catalogue = {
+	[
 		["armory",    "PERM", 20, "support_armory_available",      "STR_DUWS_T_kw2lnaig",             "",           false],
 		["halo",      "PERM", 20, "support_halo_available",        "STR_DUWS_T_xghf3qqd",             "",           true],
 		// One vehicle depot buys both services -- its apply case activates the repair and recycle
@@ -61,12 +65,14 @@ fnc_support_defs = {
 		["hcAttChop", "CONS",  8, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  18],
 		["hcCAS",     "CONS", 12, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  30],
 		["paradrop",  "CONS",  6, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   true]
-	];
+	]
+};
 
-	// A row that cannot apply is absent rather than greyed, so nothing downstream needs a second
-	// condition to refuse it. Insurgent-blocked rows are the exception and stay: they are greyed,
-	// because a support the mode withholds is worth showing as withheld.
-	_defs select {
+// A row that cannot apply is absent rather than greyed, so nothing downstream needs a second
+// condition to refuse it. Insurgent-blocked rows are the exception and stay: they are greyed,
+// because a support the mode withholds is worth showing as withheld.
+fnc_support_defs = {
+	([] call fnc_support_catalogue) select {
 		private _key = _x select 0;
 		private _keep = true;
 		// A FOB is not offered until a zone has been taken, which is what the comm item it grants
@@ -82,6 +88,18 @@ fnc_support_defs = {
 		if (_key == "radio3" && {!(["support_radio2_available"] call fnc_support_owned)}) then { _keep = false };
 		_keep
 	}
+};
+
+// The price bracket printed after a support's name, shared by the buy menu (fnc_support_list_fill)
+// and the manual (fnc_duws_help) so both read one price from the catalogue rather than a baked
+// label. CP runs through fnc_escalation_cost -- identity until escalation starts, so this is the
+// base price in the manual (built at mission start) and the live price in the menu. A dual-cost
+// support prints both halves; a free row prints 0 CP.
+fnc_support_cost_bracket = {
+	params ["_cost", ["_apCost", 0], ["_free", false]];
+	private _cp = if (_free) then { 0 } else { [_cost] call fnc_escalation_cost };
+	if (_apCost > 0) then { format [" (%1 CP, %2 AP)", _cp, _apCost] }
+	else { format [" (%1 CP)", _cp] }
 };
 
 // The AP tier each advanced support sits behind, keyed by support key; anything unlisted is tier 1

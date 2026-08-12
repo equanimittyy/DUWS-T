@@ -1989,10 +1989,6 @@
                 <Original>Your commanding officer is dead. Operation is a failure.</Original>
                 <English>Your commanding officer is dead. Operation is a failure.</English>
             </Key>
-            <Key ID="STR_DUWS_T_escalation_row">
-                <Original>%1  -&gt;  %2 CP</Original>
-                <English>%1  -&gt;  %2 CP</English>
-            </Key>
             <Key ID="STR_DUWS_T_support_ap_suffix">
                 <Original>%1  +%2 AP</Original>
                 <English>%1  +%2 AP</English>
@@ -2039,8 +2035,8 @@
                 <Chinesesimp>载具状态不符合维修标准（油量≤80%且有部件损伤超过70%），无法修理。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_vehicle_repair">
-                <Original>Vehicle Depot (20 CP)</Original>
-                <English>Vehicle Depot (20 CP)</English>
+                <Original>Vehicle Depot</Original>
+                <English>Vehicle Depot</English>
                 <Chinesesimp>载具改装站(5CP)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_repair_vehicle">
@@ -3432,8 +3428,8 @@
                 <English>Last Mobile HQ destroyed. Name another in %1 min</English>
             </Key>
             <Key ID="STR_DUWS_T_mhq_slot_row">
-                <Original>Mobile HQ Designation (0 CP)</Original>
-                <English>Mobile HQ Designation (0 CP)</English>
+                <Original>Mobile HQ Designation</Original>
+                <English>Mobile HQ Designation</English>
             </Key>
             <Key ID="STR_DUWS_T_MHQ_RELEASED_TITLE">
                 <Original>Mobile HQ Released</Original>
@@ -4645,8 +4641,8 @@
                 <German>Versorgungsabwurf (5CP) Funk</German>
                 <Spanish>Entrega de suministros (5 CP) Radio</Spanish>
                 <Chinesesimp>空投补给(5CP)</Chinesesimp>
-                <Original>Supply drop (5 CP)</Original>
-                <English>Supply drop (5 CP)</English>
+                <Original>Supply drop</Original>
+                <English>Supply drop</English>
             </Key>
             <Key ID="STR_DUWS_T_32rh9x5x">
                 <German>Versorgungsabwurf</German>
@@ -4659,22 +4655,22 @@
                 <German>Virtuelles Arsenal (10CP)</German>
                 <Spanish>Arsenal VA (10 CP)</Spanish>
                 <Chinesesimp>虚拟军火库(10CP)</Chinesesimp>
-                <Original>VA Arsenal (20 CP)</Original>
-                <English>VA Arsenal (20 CP)</English>
+                <Original>VA Arsenal</Original>
+                <English>VA Arsenal</English>
             </Key>
             <Key ID="STR_DUWS_T_oq3q7yrq">
                 <German>Notfall Fahrzeugabwurf (5 CP) Funk</German>
                 <Spanish>Entrega de vehículo de emergencia (5 CP) Radio</Spanish>
                 <Chinesesimp>紧急载具空投(5CP)</Chinesesimp>
-                <Original>Emergency Vehicle drop (5 CP)</Original>
-                <English>Emergency Vehicle drop (5 CP)</English>
+                <Original>Emergency Vehicle drop</Original>
+                <English>Emergency Vehicle drop</English>
             </Key>
             <Key ID="STR_DUWS_T_jjzzkt01">
                 <German>Luftabwurf des Truppenteileinfiltrierungsfahrzeugs(10CP)</German>
                 <Spanish>Lanzamiento aéreo de vehículos de infiltración de escuadrón(10CP)</Spanish>
                 <Chinesesimp>班组渗透载具空投(10CP)</Chinesesimp>
-                <Original>Squad Infil Vehicle Airdrop(10 CP)</Original>
-                <English>Squad Infil Vehicle Airdrop(10 CP)</English>
+                <Original>Squad Infil Vehicle Airdrop</Original>
+                <English>Squad Infil Vehicle Airdrop</English>
             </Key>
             <Key ID="STR_DUWS_T_jjzzkt02">
                 <German>Luftabwurf des Truppenteileinfiltrierungsfahrzeugs</German>
@@ -4687,8 +4683,8 @@
                 <German>Truppen-Sturmwaffen-Set (10 CP)</German>
                 <Spanish>Pack de Armas de Asalto de Escuadrón (10 CP)</Spanish>
                 <Chinesesimp>班组突击武器包(10CP)</Chinesesimp>
-                <Original>Squad Assault Weapon Pack (10 CP)</Original>
-                <English>Squad Assault Weapon Pack (10 CP)</English>
+                <Original>Squad Assault Weapon Pack</Original>
+                <English>Squad Assault Weapon Pack</English>
             </Key>
             <Key ID="STR_DUWS_T_cwflheuj">
                 <German>Notfall Fahrzeugabwurf</German>
@@ -4743,15 +4739,15 @@
                 <German>HALO Absprung (15CP)</German>
                 <Spanish>Salto HALO (15 CP)</Spanish>
                 <Chinesesimp>空降(15CP)</Chinesesimp>
-                <Original>HALO Jump (20 CP)</Original>
-                <English>HALO Jump (20 CP)</English>
+                <Original>HALO Jump</Original>
+                <English>HALO Jump</English>
             </Key>
             <Key ID="STR_DUWS_T_892wo8h0">
                 <German>Drohnen Aufklärung (10CP) Funk</German>
                 <Spanish>Reconocimiento VANT (10 CP) Radio</Spanish>
                 <Chinesesimp>特种UAV(10CP)</Chinesesimp>
-                <Original>UAV Recon (10 CP)</Original>
-                <English>UAV Recon (10 CP)</English>
+                <Original>UAV Recon</Original>
+                <English>UAV Recon</English>
             </Key>
             <Key ID="STR_DUWS_T_n17vw60y">
                 <German>Drohnen Aufklärung</German>
@@ -4764,8 +4760,8 @@
                 <German>Helikopter-Transport (5CP) Funk</German>
                 <Spanish>Helicóptero Taxi (5 CP) Radio</Spanish>
                 <Chinesesimp>直升机运输(5CP)</Chinesesimp>
-                <Original>Helicopter Taxi (5 CP)</Original>
-                <English>Helicopter Taxi (5 CP)</English>
+                <Original>Helicopter Taxi</Original>
+                <English>Helicopter Taxi</English>
             </Key>
             <Key ID="STR_DUWS_T_1ptvv5b1">
                 <German>Helikopter-Transport</German>
@@ -4785,15 +4781,15 @@
                 <German>Schwerer Hubschrauber-Fahrzeugtransport(10CP)</German>
                 <Spanish>Transporte de Vehículos por Helicóptero Pesado(10CP)</Spanish>
                 <Chinesesimp>重型直升机载具运输(10CP)</Chinesesimp>
-                <Original>Heavy Heli Vehicle Transport(10 CP)</Original>
-                <English>Heavy Heli Vehicle Transport(10 CP)</English>
+                <Original>Heavy Heli Vehicle Transport</Original>
+                <English>Heavy Heli Vehicle Transport</English>
             </Key>
             <Key ID="STR_DUWS_T_3wiovyga">
                 <German>Boot-Transport (2CP) Funk</German>
                 <Spanish>Bote Taxi (2 CP) Radio</Spanish>
                 <Chinesesimp>船运(2CP)</Chinesesimp>
-                <Original>Boat Taxi (2 CP)</Original>
-                <English>Boat Taxi (2 CP)</English>
+                <Original>Boat Taxi</Original>
+                <English>Boat Taxi</English>
             </Key>
             <Key ID="STR_DUWS_T_evqwlyhz">
                 <German>Boot-Transport</German>
@@ -4834,8 +4830,8 @@
                 <German>Mortar Smoke Screen (5CP)</German>
                 <Spanish>Mortar Smoke Screen (5CP)</Spanish>
                 <Chinesesimp>Mortar Smoke Screen (5CP)</Chinesesimp>
-                <Original>Mortar Smoke Screen (5CP)</Original>
-                <English>Mortar Smoke Screen (5CP)</English>
+                <Original>Mortar Smoke Screen</Original>
+                <English>Mortar Smoke Screen</English>
             </Key>
             <Key ID="STR_DUWS_T_mortar_smoke_menu">
                 <German>Mortar Smoke</German>
@@ -4939,8 +4935,8 @@
                 <German>Fallschirmspringer (20CP) Funk</German>
                 <Spanish>Paracaídistas (20 CP)</Spanish>
                 <Chinesesimp>空降部队(20CP)</Chinesesimp>
-                <Original>Airborne troops (20 CP)</Original>
-                <English>Airborne troops (20 CP)</English>
+                <Original>Airborne troops</Original>
+                <English>Airborne troops</English>
             </Key>
             <Key ID="STR_DUWS_T_nafdmcoy">
                 <German>Fallschirmspringer</German>
@@ -4953,8 +4949,8 @@
                 <German>Baue Mobiles HQ (10CP) Funk</German>
                 <Spanish>Construir Cuartel General móvil (10 CP) Radio</Spanish>
                 <Chinesesimp>建立机动指挥部(10CP)</Chinesesimp>
-                <Original>Mobile HQ (10 CP)</Original>
-                <English>Mobile HQ (10 CP)</English>
+                <Original>Mobile HQ</Original>
+                <English>Mobile HQ</English>
             </Key>
             <Key ID="STR_DUWS_T_ooi6w4yh">
                 <German>Baue Mobiles HQ</German>
@@ -5085,13 +5081,6 @@
                 <Chinesesimp>载具生成</Chinesesimp>
                 <Original>Vehicle Spawn</Original>
                 <English>Vehicle Spawn</English>
-            </Key>
-            <Key ID="STR_DUWS_T_b7gmddq3_free">
-                <Original>Mobile HQ (0 CP)</Original>
-                <English>Mobile HQ (0 CP)</English>
-                <German>Baue Mobiles HQ (0KP) Funk</German>
-                <Spanish>Construir CGM (0PC) Radio</Spanish>
-                <Chinesesimp>建立机动指挥部(0CP)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_royy580r">
                 <German>HALO nicht verfügbar</German>
@@ -5826,20 +5815,20 @@
                 <English>To Alpha 1-1, I'm on station over HQ. Ready to hit any enemy vehicles you spot.</English>
             </Key>
             <Key ID="STR_DUWS_T_fob_request_row">
-                <Original>Establish FOB (10 CP)</Original>
-                <English>Establish FOB (10 CP)</English>
+                <Original>Establish FOB</Original>
+                <English>Establish FOB</English>
             </Key>
             <Key ID="STR_DUWS_T_radio_tower_1">
-                <Original>Radio Tower (15CP)</Original>
-                <English>Radio Tower (15CP)</English>
+                <Original>Radio Tower</Original>
+                <English>Radio Tower</English>
             </Key>
             <Key ID="STR_DUWS_T_radio_tower_2">
-                <Original>Radio Tower II (40CP)</Original>
-                <English>Radio Tower II (40CP)</English>
+                <Original>Radio Tower II</Original>
+                <English>Radio Tower II</English>
             </Key>
             <Key ID="STR_DUWS_T_radio_tower_3">
-                <Original>Radio Tower III (60CP)</Original>
-                <English>Radio Tower III (60CP)</English>
+                <Original>Radio Tower III</Original>
+                <English>Radio Tower III</English>
             </Key>
             <Key ID="STR_DUWS_T_slingshot">
                 <German>Schleuder 1-1</German>
@@ -7103,12 +7092,121 @@
                 <Original>Detailed Explanation of the Reworked Support Options</Original>
                 <English>Detailed Explanation of the Reworked Support Options</English>
             </Key>
-            <Key ID="STR_DUWS_T_supportguide1">
-                <German>Supply Drop (5CP zum Freischalten, 2CP pro Einsatz. Enthält Haupt-Infanterieausrüstung von BLUFOR.) Virtual Arsenal (10CP zum Freischalten. Das virtuelle Arsenal kann an Hauptquartieren, Mobilen Kommandoposten, Vorwärtsoperationbasen (FOBs) und Luftabwurf-Versorgungskisten genutzt werden.) Notfahrzeug-Airdrop (5CP zum Freischalten, 5CP pro Einsatz. Nach dem Ruf wirft ein freundlicher Hubschrauber ein ziviles Transportfahrzeug für den Anrufer ab.) Squad Infil Vehicle Airdrop (10CP zum Freischalten, 10CP pro Einsatz. Nach dem Ruf wirft ein freundlicher Hubschrauber ein leicht bewaffnetes Fahrzeug der BLUFOR-Fraktion für den Anrufer ab.) Squad Assault Weapon Pack (10CP zum Freischalten, 10CP pro Einsatz. Nach dem Ruf wirft ein freundlicher Hubschrauber ein Paket für den Anrufer ab mit: 2 automatischen Granatentürmen, 1 Drohnenterminal, 1 ED-1D, 1 Laserdesignator.) HALO (15CP zum Freischalten.) Fahrzeug-Recycling-Station (5 CP zum Kauf, kostenlos pro Abruf. Nach der Bereitstellung erhält der Spieler die Fähigkeit zur Fahrzeugbergung.) Spezialaufklärungsdrohne (10CP zum Freischalten, 5CP pro Einsatz. Nach dem Ruf scannt eine freundliche Aufklärungsdrohne befreundete und feindliche Einheiten in Reichweite und synchronisiert ihre Positionen auf deiner Karte.) Hubschraubertransport (5CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf holt ein freundlicher Transporthubschrauber die Squad des Anrufers ab und transportiert sie.) Schwertransporthubschrauber-Fahrzeugtransport (10 CP zum Kauf des Zugangs, kostenlos pro Abruf. Nach dem Abruf holen befreundete Schwertransporthubschrauber das festgelegte Fahrzeug an den Zielort.)  Bootsverkehr (2CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf holt ein freundliches Bootsteam die Squad des Anrufers ab und transportiert sie. Diese Funktion hat manchmal Bugs.) 155mm-Artillerieunterstützung (20CP zum Freischalten, 10CP pro Einsatz. Nach dem Ruf bombardiert eine außerhalb der Karte liegende 155mm-Artilleriegruppe den angegebenen Ort des Anrufers eine Minute lang ununterbrochen.) Mörserunterstützung (10CP zum Freischalten, 5CP pro Einsatz. Nach dem Ruf bombardiert eine außerhalb der Karte liegende Mörsergruppe den angegebenen Ort des Anrufers eine Minute lang ununterbrochen.) JDAM-Bombe (10CP zum Freischalten, 3CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine JDAM-Bombe auf den angegebenen Ort des Anrufers ab.) Lasergelenkte Bombe (10CP zum Freischalten, 1CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine lasergelenkte Bombe auf den angegebenen Ort des Anrufers ab. Der Anrufer muss den Laserdesignator ständig auf das Ziel richten.) Mk.20-Clustergleitbombe (25CP zum Freischalten, 20CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine Mk.20-Clustergleitbombe auf den angegebenen Ort ab, die Flächenschaden verursacht.) Napalm-Bombe (20CP zum Freischalten, 15CP pro Einsatz. Nach dem Ruf wirft ein freundliches Starrflügelflugzeug eine Napalm-Bombe auf den angegebenen Ort ab, die anhaltendes Feuer verursacht und die KI-Pfadfindung stört.) High Command: Angriffshubschrauber (20CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf wird ein Angriffshubschrauber zum High-Command-System des Anrufers hinzugefügt. Der Anrufer kann nicht erneut rufen, bis der Angriffshubschrauber zerstört ist.) High Command: CAS-Starrflügelflugzeug (25CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf wird ein Close-Air-Support-Starrflügelflugzeug zum High-Command-System des Anrufers hinzugefügt. Der Anrufer kann nicht erneut rufen, bis das Flugzeug zerstört ist.) Airborne (20CP zum Freischalten, 12CP pro Einsatz. Nach dem Ruf wird eine Squad freundlicher Infanterie um den Anrufer abgeworfen und schließt sich seiner Squad an.) Mobiles HQ errichten (10CP zum Freischalten, kostenlos pro Einsatz. Nach dem Ruf wird das Fahrzeug vor dem Anrufer in ein Mobiles HQ umgewandelt. Das Mobile HQ dient als Respawn-Punkt, wenn es eingesetzt ist.)</German>
-                <Spanish>Supply Drop (5CP para desbloquear, 2CP por uso. Contiene el equipo de infantería principal de BLUFOR.) Arsenal Virtual (10CP para desbloquear. El arsenal virtual se puede utilizar en el Cuartel General, los Puestos de Mando Móviles, las Bases de Operaciones Avanzadas (FOBs) y las cajas de suministro por airdrop.) Lanzamiento Aéreo de Vehículo de Emergencia (5CP para desbloquear, 5CP por uso. Al llamar, un helicóptero amigante lanzará un vehículo de transporte civil para el solicitante.) Lanzamiento Aéreo de Vehículo de Infiltración de Escuadra (10CP para desbloquear, 10CP por uso. Al llamar, un helicóptero amigante lanzará un vehículo ligero armado de la facción BLUFOR para el solicitante.) Paquete de Armas de Asalto de Escuadra (10CP para desbloquear, 10CP por uso. Al llamar, un helicóptero amigante lanzará un paquete para el solicitante que contiene: 2 torretas granaderas automáticas, 1 terminal de dron, 1 ED-1D, 1 designador láser.) Estación de Reciclaje de Vehículos (5 CP para comprar, gratuita cada llamada. Una vez desplegada, otorga al jugador la capacidad de recuperar vehículos.) HALO (15CP para desbloquear.) Dron de Reconocimiento Especial (10CP para desbloquear, 5CP por uso. Al llamar, un dron de reconocimiento amigante escaneará unidades amigantes y enemigas en rango y sincronizará sus posiciones en tu mapa.) Transporte en Helicóptero (5CP para desbloquear, uso gratuito. Al llamar, un helicóptero de transporte amigante recogerá y transportará al escuadra del solicitante.) Transporte de Vehículos con Helicóptero Pesado (10 CP para comprar acceso, gratuito cada llamada. Después de llamar, helicópteros pesados amigos izarán el vehículo designado hasta la ubicación objetivo.) Transporte en Barco (2CP para desbloquear, uso gratuito. Al llamar, un equipo de embarcaciones amigante recogerá y transportará al escuadra del solicitante. Esta función a veces tiene errores.) Apoyo de Artillería de 155mm (20CP para desbloquear, 10CP por uso. Al llamar, una batería de artillería de 155mm fuera del mapa bombardeará la ubicación designada por el solicitante de forma continua durante un minuto.) Apoyo de Mortero (10CP para desbloquear, 5CP por uso. Al llamar, un equipo de morteros fuera del mapa bombardeará la ubicación designada por el solicitante de forma continua durante un minuto.) Bomba JDAM (10CP para desbloquear, 3CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba JDAM en la ubicación designada por el solicitante.) Bomba Guiada por Láser (10CP para desbloquear, 1CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba guiada por láser en la ubicación designada por el solicitante. El solicitante debe mantener el designador láser apuntando al objetivo de forma continua.) Bomba de Racimo Mk.20 (25CP para desbloquear, 20CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba de racimo Mk.20 en la ubicación designada, causando daño en área amplia.) Bomba Napalm (20CP para desbloquear, 15CP por uso. Al llamar, un avión de ala fija amigante lanzará una bomba napalm en la ubicación designada, causando fuego continuo y perturbando la navegación de la IA.) Alto Mando: Helicóptero de Ataque (20CP para desbloquear, uso gratuito. Al llamar, un helicóptero de ataque se añadirá al sistema de Alto Mando del solicitante. El solicitante no podrá volver a llamar hasta que el helicóptero de ataque sea destruido.) Alto Mando: Avión de Ala Fija de Apoyo Aéreo Cercano (25CP para desbloquear, uso gratuito. Al llamar, un avión de ala fija de apoyo aéreo cercano se añadirá al sistema de Alto Mando del solicitante. El solicitante no podrá volver a llamar hasta que el avión sea destruido.) Airborne (20CP para desbloquear, 12CP por uso. Al llamar, un escuadra de infantería amigante será lanzada por paracaídas alrededor del solicitante y se unirá a su escuadra.) Establecer Cuartel General Móvil (10CP para desbloquear, uso gratuito. Al llamar, el vehículo frente al solicitante se convertirá en un Cuartel General Móvil. El Cuartel General Móvil actúa como punto de reaparición cuando está desplegado.)</Spanish>
-                <Chinesesimp>空投补给(5CP购买使用权，每次呼叫消耗2CP。补给内含一个受限制的虚拟军火库。)  虚拟军火库(10CP购买使用权。虚拟军火库可以在总部、机动指挥部、前线作战基地以及空投的补给箱里使用。)  紧急载具空投(5CP购买使用权，每次呼叫消耗5CP。呼叫后友军直升机会为呼叫者投放一辆民用运输载具。)  班组渗透载具空投(10CP购买使用权，每次呼叫消耗10CP。呼叫后友军直升机会为呼叫者投放一辆蓝方阵营的轻型武装车辆)  班组突击武器包(10CP购买使用权，每次呼叫消耗10CP。呼叫后友军直升机会为呼叫者投放包裹，内含：两架自动化榴弹机枪，一个无人机终端，一个ED-1D，一个激光指示器。)   空降(15CP购买使用权。)  特种无人侦察机(10CP购买使用权，每次呼叫消耗5CP。呼叫后友军无人侦察机会扫描范围内的友军和敌军单位，并同步位置到你的地图上。)  直升机运输(5CP购买使用权，每次呼叫免费。呼叫后友军运输直升机可以来接送呼叫者的小队。)  重型直升机载具运输 ( 10CP 购买使用权，每次呼叫免费。呼叫后友军重型直升机会来吊装指定载具到目标位置。) 船运(2CP购买使用权，每次呼叫免费。呼叫后友军舟艇小队可以来接送呼叫者的小队。有时这个功能会出bug。)  载具回收站 (5CP 购买，每次呼叫免费。部署后使玩家拥有载具回收能力。) 155毫米炮支援(20CP购买使用权，每次呼叫10CP。呼叫后地图外的155毫米炮炮组会朝着呼叫者给出的地点持续炮击一分钟。)  迫击炮支援(10CP购买使用权，每次呼叫5CP。呼叫后地图外的迫击炮炮组会朝着呼叫者给出的地点持续炮击一分钟。)  杰达姆炸弹(10CP购买使用权，每次呼叫3CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚杰达姆炸弹)  激光指导炸弹(10CP购买使用权，每次呼叫1CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚激光制导炸弹。呼叫者需要使用激光指示器持续对准目标。)  Mk.20集束炸弹(25CP购买使用权，每次呼叫20CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚Mk.20集束炸弹，造成大面积伤害。)  凝固汽油弹(20CP购买使用权，每次呼叫15CP。呼叫后友军固定翼飞机会朝着呼叫者给出的地点投放一枚凝固汽油弹，造成持续性的燃烧并扰乱AI寻路。)  高级指挥攻击直升机(20CP购买使用权，每次呼叫免费。呼叫后，一架攻击直升机会添加到呼叫者的高级指挥系统里。呼叫者将无法再次呼叫，直到攻击直升机被摧毁。)  高级指挥近空支援固定翼飞机(25CP购买使用权，每次呼叫免费。呼叫后，一架近空支援固定翼飞机会添加到呼叫者的高级指挥系统里。呼叫者将无法再次呼叫，直到近空支援固定翼飞机被摧毁。)  空降部队(20CP购买使用权，每次呼叫消耗12CP。呼叫后，一队友军步兵将被空降到呼叫者周围并加入呼叫者的班组。)  建立机动指挥部(10CP购买使用权，每次呼叫免费。呼叫后，呼叫者面前的车辆会被改造为机动指挥部。机动指挥部部署时可以作为复活点。)</Chinesesimp>
-                <Original>&lt;font color='#4da6ff'&gt;Permanent Supports&lt;/font&gt;&lt;br/&gt;&lt;font color='#ff8000'&gt;Virtual Arsenal&lt;/font&gt; (10CP): usable at HQ, MHQ, FOBs and airdropped crates.&lt;br/&gt;&lt;br/&gt;&lt;font color='#ff8000'&gt;HALO&lt;/font&gt; (15CP): high-altitude jump insertion.&lt;br/&gt;&lt;br/&gt;&lt;font color='#ff8000'&gt;Vehicle Recycling Station&lt;/font&gt; (5CP, free/use): once deployed, gives vehicle recovery.&lt;br/&gt;&lt;br/&gt;&lt;font color='#ff8000'&gt;Establish Mobile HQ&lt;/font&gt; (10CP, free/use): turns the vehicle ahead into an MHQ and respawn point.&lt;br/&gt;&lt;br/&gt;&lt;font color='#ff8000'&gt;Establish FOB&lt;/font&gt; (10CP, 10CP/use): a forward base with its own garrison, patrol and logistics; appears once the first zone is taken.&lt;br/&gt;&lt;br/&gt;---&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Squad Supports&lt;/font&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Supply Drop&lt;/font&gt; (5CP, 2CP/use): an equipment crate with an Arsenal.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Emergency Vehicle Airdrop&lt;/font&gt; (5CP, 5CP/use): a helicopter drops a civilian transport.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Squad Infil Vehicle Airdrop&lt;/font&gt; (10CP, 10CP/use): a helicopter drops a light armed BLUFOR vehicle.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Squad Assault Weapon Pack&lt;/font&gt; (10CP, 10CP/use): a helicopter drops 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D and 1 laser designator.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Special Recon Drone&lt;/font&gt; (10CP, 5CP/use): scans units in range and marks them on your map.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Helicopter Transport&lt;/font&gt; (5CP, free/use): a transport helicopter moves your squad.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Heavy Helicopter Vehicle Transport&lt;/font&gt; (10CP, free/use): lifts a chosen vehicle to a target.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Boat Transport&lt;/font&gt; (2CP, free/use): a boat team moves your squad; can be buggy.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;155mm Artillery&lt;/font&gt; (20CP, 10CP/use): off-map guns shell your mark for one minute.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Mortar&lt;/font&gt; (10CP, 5CP/use): an off-map mortar team shells your mark for one minute.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;JDAM Bomb&lt;/font&gt; (10CP, 3CP/use): one JDAM on your mark.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Laser-Guided Bomb&lt;/font&gt; (10CP, 1CP/use): one guided bomb; keep the designator on target throughout.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Mk.20 Cluster Bomb&lt;/font&gt; (25CP, 20CP/use): wide-area damage on your mark.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Napalm Bomb&lt;/font&gt; (20CP, 15CP/use): sustained fire on your mark; also disrupts enemy pathfinding.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;High Command: Attack Helicopter&lt;/font&gt; (20CP, free/use): adds one attack helicopter to high command; no recall until it is destroyed.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;High Command: CAS Fixed-Wing&lt;/font&gt; (25CP, free/use): adds one CAS aircraft to high command; no recall until it is destroyed.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Airborne&lt;/font&gt; (20CP, 12CP/use): an infantry squad drops around you and joins your squad.</Original>
-                <English>&lt;font color='#4da6ff'&gt;Permanent Supports&lt;/font&gt;&lt;br/&gt;&lt;font color='#ff8000'&gt;Virtual Arsenal&lt;/font&gt; (10CP): usable at HQ, MHQ, FOBs and airdropped crates.&lt;br/&gt;&lt;br/&gt;&lt;font color='#ff8000'&gt;HALO&lt;/font&gt; (15CP): high-altitude jump insertion.&lt;br/&gt;&lt;br/&gt;&lt;font color='#ff8000'&gt;Vehicle Recycling Station&lt;/font&gt; (5CP, free/use): once deployed, gives vehicle recovery.&lt;br/&gt;&lt;br/&gt;&lt;font color='#ff8000'&gt;Establish Mobile HQ&lt;/font&gt; (10CP, free/use): turns the vehicle ahead into an MHQ and respawn point.&lt;br/&gt;&lt;br/&gt;&lt;font color='#ff8000'&gt;Establish FOB&lt;/font&gt; (10CP, 10CP/use): a forward base with its own garrison, patrol and logistics; appears once the first zone is taken.&lt;br/&gt;&lt;br/&gt;---&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Squad Supports&lt;/font&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Supply Drop&lt;/font&gt; (5CP, 2CP/use): an equipment crate with an Arsenal.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Emergency Vehicle Airdrop&lt;/font&gt; (5CP, 5CP/use): a helicopter drops a civilian transport.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Squad Infil Vehicle Airdrop&lt;/font&gt; (10CP, 10CP/use): a helicopter drops a light armed BLUFOR vehicle.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Squad Assault Weapon Pack&lt;/font&gt; (10CP, 10CP/use): a helicopter drops 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D and 1 laser designator.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Special Recon Drone&lt;/font&gt; (10CP, 5CP/use): scans units in range and marks them on your map.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Helicopter Transport&lt;/font&gt; (5CP, free/use): a transport helicopter moves your squad.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Heavy Helicopter Vehicle Transport&lt;/font&gt; (10CP, free/use): lifts a chosen vehicle to a target.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Boat Transport&lt;/font&gt; (2CP, free/use): a boat team moves your squad; can be buggy.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;155mm Artillery&lt;/font&gt; (20CP, 10CP/use): off-map guns shell your mark for one minute.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Mortar&lt;/font&gt; (10CP, 5CP/use): an off-map mortar team shells your mark for one minute.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;JDAM Bomb&lt;/font&gt; (10CP, 3CP/use): one JDAM on your mark.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Laser-Guided Bomb&lt;/font&gt; (10CP, 1CP/use): one guided bomb; keep the designator on target throughout.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Mk.20 Cluster Bomb&lt;/font&gt; (25CP, 20CP/use): wide-area damage on your mark.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Napalm Bomb&lt;/font&gt; (20CP, 15CP/use): sustained fire on your mark; also disrupts enemy pathfinding.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;High Command: Attack Helicopter&lt;/font&gt; (20CP, free/use): adds one attack helicopter to high command; no recall until it is destroyed.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;High Command: CAS Fixed-Wing&lt;/font&gt; (25CP, free/use): adds one CAS aircraft to high command; no recall until it is destroyed.&lt;br/&gt;&lt;br/&gt;&lt;font color='#4da6ff'&gt;Airborne&lt;/font&gt; (20CP, 12CP/use): an infantry squad drops around you and joins your squad.</English>
+            <Key ID="STR_DUWS_T_MAN_SUP_PERM">
+                <Original>Permanent Supports</Original>
+                <English>Permanent Supports</English>
+            </Key>
+            <Key ID="STR_DUWS_T_MAN_SUP_CONS">
+                <Original>Squad Supports</Original>
+                <English>Squad Supports</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_armory">
+                <Original>Usable at HQ, the Mobile HQ, every FOB and airdropped supply crates.</Original>
+                <English>Usable at HQ, the Mobile HQ, every FOB and airdropped supply crates.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_halo">
+                <Original>High-altitude jump insertion from HQ or any FOB.</Original>
+                <English>High-altitude jump insertion from HQ or any FOB.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_vehicle_depot">
+                <Original>Repair, refuel and recycle vehicles at HQ and every FOB.</Original>
+                <English>Repair, refuel and recycle vehicles at HQ and every FOB.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_mobile_HQ">
+                <Original>Turns the vehicle ahead of you into a Mobile HQ and respawn point.</Original>
+                <English>Turns the vehicle ahead of you into a Mobile HQ and respawn point.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_fob">
+                <Original>A forward base with its own garrison, patrol and logistics, available once the first zone is taken; each FOB you establish draws CP.</Original>
+                <English>A forward base with its own garrison, patrol and logistics, available once the first zone is taken; each FOB you establish draws CP.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_radio1">
+                <Original>Amplifies how fast BLUFOR reputation recovers in the towns it covers (tier I).</Original>
+                <English>Amplifies how fast BLUFOR reputation recovers in the towns it covers (tier I).</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_radio2">
+                <Original>A stronger reputation amplifier across covered towns (tier II); requires tier I.</Original>
+                <English>A stronger reputation amplifier across covered towns (tier II); requires tier I.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_radio3">
+                <Original>The strongest reputation amplifier across covered towns (tier III); requires tier II.</Original>
+                <English>The strongest reputation amplifier across covered towns (tier III); requires tier II.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_mhq_slot">
+                <Original>Assigns a Mobile HQ designation radio to a squad lead; spends a support slot, not CP.</Original>
+                <English>Assigns a Mobile HQ designation radio to a squad lead; spends a support slot, not CP.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_supply">
+                <Original>An equipment crate with its own Arsenal.</Original>
+                <English>An equipment crate with its own Arsenal.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_veh_drop">
+                <Original>A helicopter drops a civilian transport vehicle.</Original>
+                <English>A helicopter drops a civilian transport vehicle.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_siva">
+                <Original>A helicopter drops a light armed BLUFOR vehicle.</Original>
+                <English>A helicopter drops a light armed BLUFOR vehicle.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_sawp">
+                <Original>A helicopter drops a pack: 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D and 1 laser designator.</Original>
+                <English>A helicopter drops a pack: 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D and 1 laser designator.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_uav">
+                <Original>A recon drone scans units in range and marks them on your map.</Original>
+                <English>A recon drone scans units in range and marks them on your map.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_helotaxi">
+                <Original>A transport helicopter moves your squad.</Original>
+                <English>A transport helicopter moves your squad.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_helolift">
+                <Original>A heavy helicopter lifts a chosen vehicle to a target.</Original>
+                <English>A heavy helicopter lifts a chosen vehicle to a target.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_boattaxi">
+                <Original>A boat team moves your squad; can be buggy.</Original>
+                <English>A boat team moves your squad; can be buggy.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_arty">
+                <Original>Off-map 155mm guns shell your mark for one minute.</Original>
+                <English>Off-map 155mm guns shell your mark for one minute.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_mortar">
+                <Original>An off-map mortar team shells your mark for one minute.</Original>
+                <English>An off-map mortar team shells your mark for one minute.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_mortar_smoke">
+                <Original>An off-map mortar team lays a smoke screen on your mark.</Original>
+                <English>An off-map mortar team lays a smoke screen on your mark.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_jdam">
+                <Original>One JDAM bomb on your mark.</Original>
+                <English>One JDAM bomb on your mark.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_laser">
+                <Original>One laser-guided bomb; keep the designator on target throughout.</Original>
+                <English>One laser-guided bomb; keep the designator on target throughout.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_cluster">
+                <Original>One Mk.20 cluster bomb for wide-area damage on your mark.</Original>
+                <English>One Mk.20 cluster bomb for wide-area damage on your mark.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_napalm">
+                <Original>A napalm bomb: sustained fire on your mark that also disrupts enemy pathfinding.</Original>
+                <English>A napalm bomb: sustained fire on your mark that also disrupts enemy pathfinding.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_hcAttChop">
+                <Original>Adds one attack helicopter to your High Command; no recall until it is destroyed.</Original>
+                <English>Adds one attack helicopter to your High Command; no recall until it is destroyed.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_hcCAS">
+                <Original>Adds one CAS fixed-wing to your High Command; no recall until it is destroyed.</Original>
+                <English>Adds one CAS fixed-wing to your High Command; no recall until it is destroyed.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sdesc_paradrop">
+                <Original>An infantry squad drops around you and joins your squad.</Original>
+                <English>An infantry squad drops around you and joins your squad.</English>
             </Key>
             <Key ID="STR_DUWS_T_m204wqqq">
                 <German>Das nervige Kriegsverbrechersystem aus DUWS_X wurde entfernt und überarbeitet. Die Anzahl an Zivilisten (einschließlich bewaffneter Zivilisten) wurde ebenfalls stark erhöht. In DUWS_T führt ein zu niedriger Ruf nicht zu einer Reduzierung der CP/AP-Punkte oder einem Spielende. BLUFOR startet mit 1 Rufpunkt. Der Ruf sinkt, wenn Zivilisten sterben (aus irgendeinem Grund) oder Gebäude zerstört werden. Ist der Ruf negativ, bewaffnen sich Zivilisten und greifen BLUFOR an. Der Ruf erholt sich nicht automatisch; Spieler müssen Nebenmissionen zur Hilfe von Zivilisten erledigen, um Ruf zu erhalten. (Schätze deinen Ruf! Bewaffnete Zivilisten können extrem tödlich sein!)</German>

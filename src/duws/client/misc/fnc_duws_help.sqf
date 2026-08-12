@@ -25,6 +25,29 @@ private _sec = {
     "<font color='#4da6ff'>" + (localize _titleId) + "</font><br/>" + (localize _bodyId)
 };
 
+// The supports list, generated from the catalogue (client/supports/fnc_supports_init.sqf) so a
+// price change there is the only edit -- name, the shared cost bracket and a keyed description
+// (STR_DUWS_T_sdesc_<key>) per row, permanent then squad. Reads the raw catalogue, not the menu's
+// filtered view, so rows still locked at mission start are listed all the same.
+private _supportRows = {
+    params ["_kind", "_colour"];
+    (([] call fnc_support_catalogue) select { (_x select 1) == _kind }) apply {
+        _x params ["_key", "", "_cost", "", "_labelKey"];
+        format ["<font color='%1'>%2</font>%3: %4",
+            _colour, localize _labelKey,
+            [_cost, _x param [7, 0]] call fnc_support_cost_bracket,
+            localize (format ["STR_DUWS_T_sdesc_%1", _key])]
+    } joinString "<br/><br/>"
+};
+// The catalogue and bracket functions are compiled on the server and broadcast; a JIP client can
+// reach this init-time build before they arrive, so hold until both are defined.
+waitUntil { !isNil "fnc_support_catalogue" && {!isNil "fnc_support_cost_bracket"} };
+private _supportsList =
+    "<font color='#4da6ff'>" + (localize "STR_DUWS_T_MAN_SUP_PERM") + "</font><br/>"
+    + (["PERM", "#ff8000"] call _supportRows)
+    + "<br/><br/>---<br/><br/><font color='#4da6ff'>" + (localize "STR_DUWS_T_MAN_SUP_CONS") + "</font><br/>"
+    + (["CONS", "#4da6ff"] call _supportRows);
+
 private _coverBody =
     "<img image='image\duws_t_man_cover.jpg' width='456' height='257'/><br/><br/>"
     + (localize "STR_DUWS_T_MAN_COVER_BODY");
@@ -46,7 +69,7 @@ private _howToBody = ("duws_t_man_how_to_play.jpg" call _bnr) + ([
 // off, then the PERM/CONS list (its own text carries the split and the colours).
 + "<br/><br/>" + ("duws_t_man_supports_list.jpg" call _bnr)
 + (localize "STR_DUWS_T_3c1ygiga") + "<br/>---<br/><br/>"
-+ (localize "STR_DUWS_T_supportguide1");
++ _supportsList;
 
 private _economyBody = ("duws_t_man_economy.jpg" call _bnr) + ([
     ["STR_DUWS_T_uzx258em", "STR_DUWS_T_r3x8czon"] call _sec,      // Command Points

@@ -355,7 +355,9 @@ fnc_support_sel_changed = compile preprocessFileLineNumbers "duws\client\dialog\
 // The support catalogue and both of its mechanisms. Executed rather than stored: the file defines
 // several functions, and all of them run on the buyer's machine.
 [] call compile preprocessFileLineNumbers "duws\client\supports\fnc_supports_init.sqf";
+publicVariable "fnc_support_catalogue";
 publicVariable "fnc_support_defs";
+publicVariable "fnc_support_cost_bracket";
 publicVariable "DUWS_support_tiers";
 publicVariable "fnc_support_tier";
 publicVariable "fnc_support_owned";
