@@ -64,6 +64,14 @@ DUWS_fnc_arsenal_paintCounts = {
         IDC_RSCDISPLAYARSENAL_TAB_CARGOMISC
     ];
 
+    // Called every frame, so it must be near-free when nothing changed. A rebuilt list (tab switch, or
+    // BIS repopulating a weapon's attachment sublists on selection) comes back BIS-plain; a list this
+    // pass already stamped starts its first row with the "[" of our prefix. Skip the stamped ones and
+    // only walk the freshly-rebuilt list -- that re-stamp lands within a frame of the rebuild, so the
+    // plain state is never on screen long enough to flicker. `_force` (set after a live re-stock or
+    // insert appends an unstamped row to an already-stamped list) overrides the skip for one pass.
+    private _force = missionNamespace getVariable ["DUWS_arsenal_forcePaint", false];
+
     {
         private _ctrl = _display displayCtrl (IDC_RSCDISPLAYARSENAL_LIST + _x);
         if (isNull _ctrl || {!(ctrlShown _ctrl)}) then { continue };
@@ -75,6 +83,12 @@ DUWS_fnc_arsenal_paintCounts = {
         if (_t != 5 && {_t != 102}) then { continue };
         private _isN = _t == 102;
         private _rows = if (_isN) then { (lnbSize _ctrl) select 0 } else { lbSize _ctrl };
+        // Already stamped and not forced: BIS has not rebuilt this list since our last pass, so leave
+        // it. Our prefix always begins with "[", which no config display name does.
+        if (!_force && {_rows > 0}) then {
+            private _first = if (_isN) then { _ctrl lnbText [0, 1] } else { _ctrl lbText 0 };
+            if ((_first select [0, 1]) == "[") then { continue };
+        };
         for "_i" from 0 to (_rows - 1) do {
             private _cls = if (_isN) then { _ctrl lnbData [_i, 0] } else { _ctrl lbData _i };
             if (_cls == "") then { continue };
@@ -94,4 +108,78 @@ DUWS_fnc_arsenal_paintCounts = {
             else { _ctrl lbSetText [_i, _pfx + _name]; };
         };
     } forEach _tabs;
+
+    if (_force) then { missionNamespace setVariable ["DUWS_arsenal_forcePaint", false]; };
+};
+
+// Make a class banked or quick-kitted while the arsenal is open appear without a tab switch. BIS only
+// refills a category on (re)entry and its category selector is buttons we cannot reselect, so the row
+// is added to the matching category list directly; a later natural rebuild replaces it with BIS's
+// sorted row (the class stays in the virtual cargo). Name and picture are read from config exactly as
+// BIS builds the row; the count prefix is left to the next paintCounts. A class BIS_fnc_itemType does
+// not resolve to a handled tab is skipped -- it still appears on the next tab switch, never an error.
+DUWS_fnc_arsenal_insert = {
+    params [["_display", displayNull], ["_cls", ""]];
+    if (isNull _display || {_cls == ""}) exitWith {};
+
+    ([_cls] call BIS_fnc_itemType) params ["_cat", "_sub"];
+    private _off = switch (_sub) do {
+        case "Handgun": { IDC_RSCDISPLAYARSENAL_TAB_HANDGUN };
+        case "Launcher"; case "MissileLauncher"; case "RocketLauncher": { IDC_RSCDISPLAYARSENAL_TAB_SECONDARYWEAPON };
+        case "Uniform": { IDC_RSCDISPLAYARSENAL_TAB_UNIFORM };
+        case "Vest": { IDC_RSCDISPLAYARSENAL_TAB_VEST };
+        case "Backpack": { IDC_RSCDISPLAYARSENAL_TAB_BACKPACK };
+        case "Headgear": { IDC_RSCDISPLAYARSENAL_TAB_HEADGEAR };
+        case "Glasses": { IDC_RSCDISPLAYARSENAL_TAB_GOGGLES };
+        case "NVGoggles": { IDC_RSCDISPLAYARSENAL_TAB_NVGS };
+        case "Binocular": { IDC_RSCDISPLAYARSENAL_TAB_BINOCULARS };
+        // Attachments are omitted on purpose: their lists are filtered to the selected weapon, so an
+        // inserted attachment could land under a weapon it does not fit. BIS surfaces it on the next
+        // compatible-weapon selection instead.
+        case "Map": { IDC_RSCDISPLAYARSENAL_TAB_MAP };
+        case "GPS": { IDC_RSCDISPLAYARSENAL_TAB_GPS };
+        case "Radio": { IDC_RSCDISPLAYARSENAL_TAB_RADIO };
+        case "Compass": { IDC_RSCDISPLAYARSENAL_TAB_COMPASS };
+        case "Watch": { IDC_RSCDISPLAYARSENAL_TAB_WATCH };
+        default {
+            switch (_cat) do {
+                case "Weapon": { IDC_RSCDISPLAYARSENAL_TAB_PRIMARYWEAPON };
+                case "Magazine": { IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL };
+                default { -1 };
+            };
+        };
+    };
+    if (_off < 0) exitWith {};
+
+    private _ctrl = _display displayCtrl (IDC_RSCDISPLAYARSENAL_LIST + _off);
+    if (isNull _ctrl) exitWith {};
+
+    private _cfg = configFile >> "CfgWeapons" >> _cls;
+    if (!isClass _cfg) then { _cfg = configFile >> "CfgMagazines" >> _cls; };
+    if (!isClass _cfg) then { _cfg = configFile >> "CfgVehicles" >> _cls; };
+    private _name = getText (_cfg >> "displayName");
+    if (_name == "") then { _name = _cls; };
+    private _pic = getText (_cfg >> "picture");
+
+    private _has = false;
+    if (ctrlType _ctrl == 102) then {
+        private _rows = (lnbSize _ctrl) select 0;
+        for "_i" from 0 to (_rows - 1) do { if ((_ctrl lnbData [_i, 0]) == _cls) exitWith { _has = true } };
+        if (!_has) then {
+            private _cols = (lnbSize _ctrl) select 1;
+            private _blank = []; for "_c" from 1 to _cols do { _blank pushBack "" };
+            private _row = _ctrl lnbAddRow _blank;
+            _ctrl lnbSetData [[_row, 0], _cls];
+            _ctrl lnbSetText [[_row, 1], _name];
+            if (_pic != "") then { _ctrl lnbSetPicture [[_row, 0], _pic]; };
+        };
+    } else {
+        private _rows = lbSize _ctrl;
+        for "_i" from 0 to (_rows - 1) do { if ((_ctrl lbData _i) == _cls) exitWith { _has = true } };
+        if (!_has) then {
+            private _row = _ctrl lbAdd _name;
+            _ctrl lbSetData [_row, _cls];
+            if (_pic != "") then { _ctrl lbSetPicture [_row, _pic]; };
+        };
+    };
 };

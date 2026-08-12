@@ -365,57 +365,58 @@ DUWS_fnc_arsenal_unstock = {
 
         // Item-count overlay. Restricted modes only -- Full is the whole-config unlimited arsenal,
         // where a per-row [∞] stamp is meaningless and only races BIS's repopulation of a huge list.
-        // Paint once on open, then repaint on BIS's arsenalEquipped event (raised after it rebuilds the
-        // list) for the responsive path, with the slow heartbeat below as the safety net for tab and
-        // search changes that raise no event. The strip poll is separate and drives the loop regardless.
+        // Painted every frame: BIS rebuilds a weapon's attachment sublists on each selection with no
+        // event to hook, so only a per-frame re-stamp catches the rebuild before the plain rows are on
+        // screen long enough to flicker. paintCounts is near-free on frames where nothing was rebuilt
+        // (it skips any list already carrying the prefix); forcePaint makes the first frame stamp, and
+        // later makes a live re-stock or insert re-stamp the list it appended an unprefixed row to.
         // Debug aid (DEBUG level only): arm the [0]-row collector paintCounts fills, so the close-time
         // diagnostic below can report what the overlay stamped [0] and why. Free when DEBUG is off.
         if (duws_log_level >= 4) then { DUWS_dbg_zeroRows = [] };
-        private _equipEH = -1;
+        private _paintEH = -1;
         if (_isRestricted) then {
-            [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
-            // Coalesce equip bursts: the event only timestamps, the loop repaints once clicks settle.
-            // Painting inside the event races BIS's async rebuild of a weapon's attachment/cargo
-            // sublists, so spam-clicking a weapon flickered [∞] onto rows BIS was tearing down.
-            missionNamespace setVariable ["DUWS_arsenal_lastEquip", 0];
-            missionNamespace setVariable ["DUWS_arsenal_paintDue", false];
-            _equipEH = [missionNamespace, "arsenalEquipped", {
-                missionNamespace setVariable ["DUWS_arsenal_lastEquip", diag_tickTime];
-                missionNamespace setVariable ["DUWS_arsenal_paintDue", true];
-            }] call BIS_fnc_addScriptedEventHandler;
+            missionNamespace setVariable ["DUWS_arsenal_forcePaint", true];
+            _paintEH = addMissionEventHandler ["EachFrame", {
+                private _d = uiNamespace getVariable ["RscDisplayArsenal", displayNull];
+                if (!isNull _d) then { [_d] call DUWS_fnc_arsenal_paintCounts; };
+            }];
         };
 
-        private _lastPaint = diag_tickTime;
         private _lastRestock = diag_tickTime;
         while { sleep 0.2; !isNull (uiNamespace getVariable ["RscDisplayArsenal", displayNull]) } do {
             if (_isRestricted) then {
                 private _now = diag_tickTime;
                 if (_now - _lastRestock > 0.5) then {
                     _lastRestock = _now;
+                    private _display = uiNamespace getVariable ["RscDisplayArsenal", displayNull];
+                    private _inserted = false;
                     // Live re-stock: a foreign class banked into the pool since open (a just-dropped item
-                    // settled, a loot cache) goes on the shelf here so it appears without a full close/reopen
-                    // -- available immediately, drawn as a row on the next list redraw (tab switch). Tracked
-                    // in _addedForeign so the close cleanup still clears it back off.
+                    // settled, a loot cache) goes on the shelf and straight into its category list, so it
+                    // appears without a full close/reopen or tab switch. Tracked in _addedForeign so the
+                    // close cleanup still clears it back off.
                     {
                         _x params ["_cls", "_cnt"];
                         if (_cnt > 0 && {!(_cls in _friendly)} && {!(_cls in _stockedForeign)}) then {
                             private _type = [_cls] call DUWS_fnc_cargoType;
                             [_cls, _type, true] call DUWS_fnc_shelfForeign;
+                            [_display, _cls] call DUWS_fnc_arsenal_insert;
                             _addedForeign pushBack [_cls, _type];
                             _stockedForeign pushBack _cls;
+                            _inserted = true;
                         };
                     } forEach (missionNamespace getVariable ["DUWS_capturedPool", []]);
-                };
 
-                // Repaint once equip clicks have settled (>0.15 s quiet), or on the slow heartbeat for
-                // tab/search changes that raise no event. The settle gate keeps a click burst from ever
-                // painting a list mid-rebuild.
-                private _le = missionNamespace getVariable ["DUWS_arsenal_lastEquip", 0];
-                private _due = missionNamespace getVariable ["DUWS_arsenal_paintDue", false];
-                if (_now - _le > 0.15 && {(_now - _lastPaint > 0.5) || _due}) then {
-                    [uiNamespace getVariable ["RscDisplayArsenal", displayNull]] call DUWS_fnc_arsenal_paintCounts;
-                    missionNamespace setVariable ["DUWS_arsenal_paintDue", false];
-                    _lastPaint = _now;
+                    // Standard-issue gear folded in after open (a quick-kit built on first HQ approach)
+                    // grows the friendly set; surface that delta the same way, so new guns show at once.
+                    private _liveFriendly = missionNamespace getVariable ["DUWS_friendlyArsenal", []];
+                    if (count _liveFriendly != count _friendly) then {
+                        { [_display, _x] call DUWS_fnc_arsenal_insert; } forEach (_liveFriendly - _friendly);
+                        _friendly = _liveFriendly;
+                        _inserted = true;
+                    };
+
+                    // A freshly-inserted row has no count prefix yet; force a full re-stamp next frame.
+                    if (_inserted) then { missionNamespace setVariable ["DUWS_arsenal_forcePaint", true]; };
                 };
             };
 
@@ -447,9 +448,9 @@ DUWS_fnc_arsenal_unstock = {
             ["DEBUG", "GEAR", format ["arsenal [0] rows (cls, presetInFriendly)=%1", _detail]] call fnc_log;
         };
 
-        // Close. Drop the equip repaint handler first so it cannot fire against a tearing-down display.
-        if (_equipEH >= 0) then {
-            [missionNamespace, "arsenalEquipped", _equipEH] call BIS_fnc_removeScriptedEventHandler;
+        // Close. Drop the per-frame painter first so it cannot run against a tearing-down display.
+        if (_paintEH >= 0) then {
+            removeMissionEventHandler ["EachFrame", _paintEH];
         };
 
         if (_isRestricted) then {
