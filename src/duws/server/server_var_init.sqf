@@ -408,9 +408,12 @@ zones_min_radius = 200;publicVariable "zones_min_radius";
 // Hardpoint streaming, per type: [spawnRadius, grace, neverStream, airRing].
 //   spawnRadius  distance BLUFOR wake the emplacement at (a fight holds it past this; see the tick)
 //   grace        seconds empty before it stows
-//   neverStream  built once and kept resident, never stowed. Mortar and artillery hold so OPCOM can
-//                task them with no player near; a minefield holds so its mines are never stowed off
-//                the map, leaving its own hazard list as the real count of what is armed
+//   neverStream  the composition is built once and kept resident, never stowed. Mortar and artillery
+//                hold so OPCOM can task them with no player near; a minefield holds so its mines are
+//                never stowed off the map, leaving its own hazard list as the real count of what is
+//                armed. Only the composition is pinned: the loose garrison still streams, so a battery's
+//                defenders stow when its ring is empty and raise on approach rather than patrolling for
+//                the whole campaign. The pinned gun crew is the exception -- a frozen crew cannot fire
 //   airRing      a second, larger radius answered only by aircraft; 0 = none. AA reaches out to
 //                catch a jet overhead its ground ring would never notice, without waking on
 //                every distant foot patrol.

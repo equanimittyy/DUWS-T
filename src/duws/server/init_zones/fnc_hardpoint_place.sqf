@@ -93,9 +93,14 @@ fnc_hardpoint_build = {
 //
 // The loose garrison patrols close, not dug in: this is the radius fnc_apply_posture works its circuit
 // off, kept tight so the men hold the emplacement's approaches rather than roaming the whole zone.
+// _looseOnly skips the gun and artillery crewing and places only the loose defenders. A resident battery
+// (mortar, artillery) keeps its crew pinned on the pieces across a garrison stow, so the raise that brings
+// its defenders back must not re-crew guns that were never emptied. The battery files crew and loose men
+// under separate site rosters (crew on a driven occupant, loose on the streamed one), so a garrison stow
+// collects the loose roster through fnc_site_collect and never reaches the crew.
 #define HP_GARRISON_PATROL_R 100
 fnc_hardpoint_garrison = {
-    params ["_objs", "_pos", ["_side", "opfor"], ["_key", "world"], ["_teamToken", ""]];
+    params ["_objs", "_pos", ["_side", "opfor"], ["_key", "world"], ["_teamToken", ""], ["_looseOnly", false]];
     private _sideObj = [EAST, WEST] select (_side isEqualTo "blufor");
     private _soldier = missionNamespace getVariable [format ["%1_SOLDIER_X", _side],
         ["O_Soldier_F", "B_Soldier_F"] select (_side isEqualTo "blufor")];
@@ -109,7 +114,7 @@ fnc_hardpoint_garrison = {
 
     // Static guns first, always crewed: one man per gun, dropped and settled.
     private _guns = _objs select { !isNull _x && {alive _x} && {_x isKindOf "StaticWeapon"} };
-    if (count _guns > 0) then {
+    if (!_looseOnly && {count _guns > 0}) then {
         private _sp = _pos findEmptyPosition [0, 30, _soldier];
         if (count _sp == 0) then { _sp = _pos };
         private _crew = [_sp, _sideObj, (_guns apply { _soldier }), [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
@@ -122,7 +127,7 @@ fnc_hardpoint_garrison = {
     // Artillery vehicles: a gunner straight in, no drop, and thawed so the battery can fire.
     private _arty = _objs select { !isNull _x && {alive _x} && {!(_x isKindOf "StaticWeapon")}
         && {getNumber (configFile >> "CfgVehicles" >> typeOf _x >> "artilleryScanner") isEqualTo 1} };
-    if (count _arty > 0) then {
+    if (!_looseOnly && {count _arty > 0}) then {
         private _sp = _pos findEmptyPosition [0, 30, _soldier];
         if (count _sp == 0) then { _sp = _pos };
         private _crew = [_sp, _sideObj, (_arty apply { _soldier }), [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;

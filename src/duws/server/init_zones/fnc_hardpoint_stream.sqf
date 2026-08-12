@@ -10,6 +10,11 @@ if (!isServer) exitWith {};
 // hands back through ZONE_RAISE_SLOT.
 #define HP_RAISE_SLOT(key) (format ["DUWS_hpRaise_%1", key])
 
+// The same handback slot for a resident battery's loose-garrison raise, kept distinct from HP_RAISE_SLOT
+// so a mortar or artillery hardpoint can cycle its defenders without disturbing the composition raise it
+// never runs.
+#define HP_LOOSE_SLOT(key) (format ["DUWS_hpLooseRaise_%1", key])
+
 // How close a player must come to mark a hardpoint on the map, tighter than any streaming ring so the
 // emplacement is revealed about when it comes into view rather than when its garrison streams in.
 #define HP_REVEAL_RADIUS 100
@@ -66,6 +71,27 @@ DUWS_fnc_hardpointRaiseWorker = {
     // Peak re-anchored to what actually stood up this cycle, the way a zone re-anchors on raise.
     missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], [_key] call fnc_site_alive];
     missionNamespace setVariable [HP_RAISE_SLOT(_key), true];
+};
+
+// A resident battery's loose garrison, brought back on approach. The composition and its gun crew never
+// left -- they are pinned so OPCOM can fire the battery with no player near -- so this raises only the
+// defenders (fnc_hardpoint_garrison's _looseOnly) and appends them to the standing roster. No composition
+// deploy and no re-crew: the pieces are already up and manned. Peak is not touched -- the pieces define
+// clearance for these types and are always deployed, so it stays anchored on the crew set from register.
+DUWS_fnc_hardpointLooseRaiseWorker = {
+    params ["_key", "_o"];
+    // Confirmed after a pause, like the composition raise: a helicopter transiting the ring must not
+    // stand the defenders up for someone already leaving.
+    sleep 5;
+    private _site = [_key] call fnc_site_at;
+    private _pos = _site get "pos";
+    private _up = [_pos, (_site get "radius") + (_o get "buffer"), _o get "minAI",
+        _o getOrDefault ["airRing", 0]] call fnc_site_bluforOrAir;
+    if (!_up) exitWith { missionNamespace setVariable [HP_LOOSE_SLOT(_key), false] };
+    private _objs = (DUWS_compositions getOrDefault [_key, []]) select { !isNull _x };
+    private _men = [_objs, _pos, _o get "hpSide", _key, _o get "hpGarrison", true] call fnc_hardpoint_garrison;
+    ([_key] call fnc_site_roster) append _men;
+    missionNamespace setVariable [HP_LOOSE_SLOT(_key), true];
 };
 
 // Uncrew, collect, stow -- the zone teardown order, so a gun is empty before its composition stows
@@ -186,12 +212,18 @@ DUWS_fnc_hardpointClear = {
     // player is KEEP_RADIUS clear -- the same rule as everything else the sweep bins. The flag lives on
     // the unit, so the later fnc_site_retire roster-clear cannot strip it, and the men are not
     // composition members so release never reaches them; this is what now empties the roster.
+    //
+    // Both rosters: a resident battery keeps its crew on a separate "crew" roster, so binning only the
+    // loose garrison would strand the gunners. The crew roster is empty for every other type, so the
+    // second pass is a no-op there.
     {
-        if (!isNull _x && {alive _x}) then {
-            _x setVariable ["DUWS_binMe", true];
-            _x setVariable ["DUWS_binAt", time + 300];
-        };
-    } forEach ([_key] call fnc_site_roster);
+        {
+            if (!isNull _x && {alive _x}) then {
+                _x setVariable ["DUWS_binMe", true];
+                _x setVariable ["DUWS_binAt", time + 300];
+            };
+        } forEach ([_key, _x] call fnc_site_roster);
+    } forEach ["garrison", "crew"];
     // Wrecks left standing for the sweep, not deleted: release drops the pins and schedules disposal.
     [_key] call fnc_duws_release;
     ["INFO", "HARDPOINT", format ["%1 cleared", _key]] call fnc_log;
@@ -237,9 +269,40 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     [_key, _o] call DUWS_fnc_hardpointClearCheck;
     if (_o getOrDefault ["cleared", false]) exitWith {};
 
-    // Resident types (mortar, artillery) never raise or stow -- the clearance check above is the whole
-    // tick for them.
-    if (_o get "neverStream") exitWith {};
+    // Resident-composition types (mortar, artillery, minefield): the pieces and their gun crew are pinned
+    // and never stream -- OPCOM tasks the battery with no player near -- but the loose garrison does, so a
+    // battery no longer stands its defenders in an empty field for the whole campaign. awake stays true (the
+    // pieces are the clearance target and are always up); a private looseUp cycle drives just the defenders.
+    // A minefield fields no loose garrison, so the arm falls straight through for it.
+    if (_o get "neverStream") exitWith {
+        if ((_o get "hpGarrison") isEqualTo "") exitWith {};   // no loose garrison (minefield): nothing to cycle
+        // A loose raise in flight owns the garrison until it reports, the way the composition raise arm does.
+        if (_o getOrDefault ["looseRaising", false]) exitWith {
+            private _res = missionNamespace getVariable [HP_LOOSE_SLOT(_key), nil];
+            if (isNil "_res") exitWith {};
+            missionNamespace setVariable [HP_LOOSE_SLOT(_key), nil];
+            _o set ["looseRaising", false];
+            _o set ["looseUp", _res];
+        };
+        // Held while near, within grace, or with a defender in a fight -- the standalone stow rule. The
+        // garrison roster is the loose men alone (the crew is a separate driven occupant), so a defender in
+        // COMBAT holds the stow while the crew dueling from a pinned gun does not.
+        private _up = _here
+            || {(_now - (_o getOrDefault ["lastSeen", _now])) < (_o get "grace")}
+            || {([_key] call fnc_site_roster) findIf { alive _x && {behaviour _x isEqualTo "COMBAT"} } > -1};
+        if (_o getOrDefault ["looseUp", false]) then {
+            if (!_up) then {
+                _o set ["looseUp", false];
+                [_key] call fnc_site_collect;   // loose roster only; the crew occupant is untouched
+            };
+        } else {
+            if (_up) then {
+                _o set ["looseRaising", true];
+                missionNamespace setVariable [HP_LOOSE_SLOT(_key), nil];
+                [_key, _o] spawn DUWS_fnc_hardpointLooseRaiseWorker;
+            };
+        };
+    };
 
     // A raise in flight owns the hardpoint until it reports, so a player crossing the ring twice
     // cannot start a second raise onto the first.
@@ -296,10 +359,13 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
 // where a garrison rises on stream-in, not at build. So campaign start never pays the drop-and-settle for
 // the emplacements nobody is near, and an occupant is never left asleep over a standing composition.
 //
-// neverStream (mortar, artillery, minefield) is kept resident so OPCOM can task it with no player near:
-// its composition is pinned against every stow and release, so only a clear takes it down. It keeps the
-// tick, unlike a zone's driven emplacement -- the tick's raise/stow arm short-circuits for it, but its
-// clearance check still runs, so a destroyed battery is noticed like any other.
+// neverStream (mortar, artillery, minefield) keeps its composition resident so OPCOM can task it with no
+// player near: the pieces and their gun crew are pinned against every stow and release, so only a clear
+// takes them down. What still streams is the loose garrison -- the defenders are stowed while the ring is
+// empty and raised on approach, so a battery does not stand its patrol in a field nobody visits for the
+// whole campaign. It keeps the tick, unlike a zone's driven emplacement: the composition raise/stow arm
+// short-circuits for it, but its clearance check runs and, below the short-circuit, a loose-garrison-only
+// stow/raise arm cycles the defenders. A minefield has no loose garrison, so only its mines remain.
 //
 // _zoneKey ties the hardpoint to a parent zone: it drives streaming (the hardpoint follows that zone)
 // and rides the DUWS_hardpoints row for OPCOM. "" is a standalone hardpoint on its own ring.
@@ -359,10 +425,30 @@ fnc_hardpoint_register = {
     };
 
     if (_neverStream) exitWith {
-        // Resident (mortar, artillery, minefield): pinned against every stow so OPCOM can task it with no
-        // player near and a minefield's mines are never stowed off the map. Always manned, never stows.
+        // Resident composition (mortar, artillery, minefield): the pieces are pinned against every stow so
+        // OPCOM can task the battery with no player near, and a minefield's mines are never stowed off the
+        // map. Two occupants -- the zone shape for a site whose parts stream on opposite terms. The gun crew
+        // rides a driven "crew" occupant the poller never touches (a frozen crew cannot fire the mission that
+        // justifies residency), and the loose garrison stays on the streamed "garrison" occupant, so its stow
+        // is the ordinary fnc_site_collect over a crew-free roster. awake stays true (the pieces are the
+        // clearance target and are always deployed); looseUp drives just the defenders.
         { [_x, _key, true] call fnc_duws_keep } forEach _objs;
-        call _crewNow;
+        // Crew the pieces once, resident. Token "" crews the guns and places no loose men. Under a driven
+        // occupant so the poller skips it and the clearance peak reads a garrison that is always present.
+        private _crew = [_objs, _pos, _side, _key, ""] call fnc_hardpoint_garrison;
+        if (count _crew > 0) then {
+            ([_key, "crew"] call fnc_site_occupant_register) set ["driven", true];
+            ([_key, "crew"] call fnc_site_roster) append _crew;
+        };
+        _occ set ["awake", true];
+        missionNamespace setVariable [format ["DUWS_hpPeak_%1", _key], [_key, "crew"] call fnc_site_alive];
+        // Loose garrison: stood up now only if BLUFOR are already near, cycled by the tick thereafter.
+        private _up = [_pos, _radius, _occ get "minAI", _airRing] call fnc_site_bluforOrAir;
+        _occ set ["looseUp", _up];
+        if (_up) then {
+            ([_key] call fnc_site_roster) append
+                ([_objs, _pos, _side, _key, _occ get "hpGarrison", true] call fnc_hardpoint_garrison);
+        };
     };
 
     private _up = if (_zoneKey isEqualTo "") then {
