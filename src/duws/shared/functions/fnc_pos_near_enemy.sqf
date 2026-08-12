@@ -6,7 +6,7 @@
 // server rebuilds from civ_town_rep on every band crossing -- civ_town_rep itself is not broadcast, so
 // the derived positions are what reaches a client.
 fnc_pos_near_enemy = {
-    params ["_pos", ["_radius", 1000]];
+    params ["_pos", ["_radius", 2000]];
     private _zones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
     if (_zones findIf { _pos distance2D _x < _radius } >= 0) exitWith { true };
     private _towns = missionNamespace getVariable ["DUWS_enemy_town_pos", []];

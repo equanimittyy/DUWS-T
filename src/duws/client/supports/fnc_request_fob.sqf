@@ -3,7 +3,7 @@ _position = _this select 0;
 _size = _this select 1;
 _cost  = _this select 2;
 
-// A FOB is a forward base, so it is refused within 1 km of enemy ground -- any OPFOR-held zone or
+// A FOB is a forward base, so it is refused within 2 km of enemy ground -- any OPFOR-held zone or
 // town in the OPFOR band. Checked before the survey and the charge so a bad site costs nothing but
 // the hint; the comm item is handed back the same way the other refusals below do.
 if ([_position] call fnc_pos_near_enemy) exitWith {
