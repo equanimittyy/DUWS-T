@@ -483,6 +483,7 @@ fnc_fob_server = compile preprocessFileLineNumbers "duws\server\supports\fnc_fob
 fnc_ammobox = compile preprocessFileLineNumbers "duws\client\supports\fnc_ammobox.sqf";publicVariable "fnc_ammobox";
 fnc_medtent_actions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_medtent_actions.sqf";publicVariable "fnc_medtent_actions";
 fnc_field_box_actions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_field_box_actions.sqf";publicVariable "fnc_field_box_actions";
+fnc_pos_near_enemy = compile preprocessFileLineNumbers "duws\shared\functions\fnc_pos_near_enemy.sqf";publicVariable "fnc_pos_near_enemy";
 fnc_arty = compile preprocessFileLineNumbers "duws\client\supports\fnc_arty.sqf";publicVariable "fnc_arty";
 fnc_mapclickarty = compile preprocessFileLineNumbers "duws\client\supports\fnc_mapclickarty.sqf";publicVariable "fnc_mapclickarty";
 fnc_mapclickuav = compile preprocessFileLineNumbers "duws\client\supports\fnc_mapclickuav.sqf";publicVariable "fnc_mapclickuav";

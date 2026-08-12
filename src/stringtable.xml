@@ -3427,6 +3427,10 @@
                 <Original>Last Mobile HQ destroyed. Name another in %1 min</Original>
                 <English>Last Mobile HQ destroyed. Name another in %1 min</English>
             </Key>
+            <Key ID="STR_DUWS_T_too_close_enemy">
+                <Original>Too close to enemy territory. Keep at least 1 km from enemy zones and towns.</Original>
+                <English>Too close to enemy territory. Keep at least 1 km from enemy zones and towns.</English>
+            </Key>
             <Key ID="STR_DUWS_T_mhq_slot_row">
                 <Original>Mobile HQ Designation</Original>
                 <English>Mobile HQ Designation</English>

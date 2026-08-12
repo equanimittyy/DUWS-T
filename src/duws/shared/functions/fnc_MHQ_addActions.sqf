@@ -41,7 +41,13 @@ if (_addAction == "select") then {
 if (_addAction == "deploy") then {
 	if ((vehiclevarname player) in Squad_Leaders) then {
 		removeAllActions MHQ1;
-		MHQ1 addaction [ACT_COMMIT("STR_DUWS_T_rqzxlvf4"),{[] remoteExec ["fnc_MHQ_deploy",2]},[],10,true,true,"","true"];
+		// Deploying plants a forward respawn, so it is refused within 1 km of enemy ground. Checked at
+		// the click on the deploying machine -- fnc_pos_near_enemy reads broadcast globals, so it answers
+		// the same here as on the server -- and the deploy action stays, to retry once the vehicle moves.
+		MHQ1 addaction [ACT_COMMIT("STR_DUWS_T_rqzxlvf4"),{
+			if ([getPos MHQ1] call fnc_pos_near_enemy) exitWith { hint localize "STR_DUWS_T_too_close_enemy" };
+			[] remoteExec ["fnc_MHQ_deploy",2]
+		},[],10,true,true,"","true"];
 		MHQ1 addaction [ACT_COMMIT("STR_DUWS_T_MHQ_RELEASE"),{[] remoteExec ["fnc_MHQ_release",2]},[],10,true,true,"","true"];
 	};
 };

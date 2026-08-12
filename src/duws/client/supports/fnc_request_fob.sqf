@@ -3,6 +3,15 @@ _position = _this select 0;
 _size = _this select 1;
 _cost  = _this select 2;
 
+// A FOB is a forward base, so it is refused within 1 km of enemy ground -- any OPFOR-held zone or
+// town in the OPFOR band. Checked before the survey and the charge so a bad site costs nothing but
+// the hint; the comm item is handed back the same way the other refusals below do.
+if ([_position] call fnc_pos_near_enemy) exitWith {
+  hint localize "STR_DUWS_T_too_close_enemy";
+  sleep 15;
+  ["fob_support"] call fnc_support_comm_add;
+};
+
 // Advisory only -- it saves a player with no CP the 10 s site survey below. The charge
 // itself is the server's call, once a site has been cleared.
 if (commandpointsblu1 < _cost) exitWith {

@@ -213,6 +213,9 @@ if !(CIV_PRESENCE in ["RAVAGE", "WBK"]) then {
     } forEach _locations;
     missionNamespace setVariable ["civ_town_rep", _townRep];
     missionNamespace setVariable ["civ_town_ap", _townAp];
+    // Seed the placement keep-out list from the starting reputations: towns overlapping an enemy zone
+    // begin at -20, so they are enemy ground before the first band crossing would ever fire the rebuild.
+    [] call fnc_enemy_towns_refresh;
     // Tier I is the floor for a town that starts in the OPFOR band -- the ones seeded at -20 for
     // overlapping an enemy zone are enemy ground before anyone has played a minute, and reading
     // them as ungarrisoned until the first garrison cycle would let the commander appraise them
