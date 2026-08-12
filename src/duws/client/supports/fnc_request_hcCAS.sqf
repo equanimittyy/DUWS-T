@@ -63,3 +63,26 @@ _vehicle addEventHandler ["Deleted", {
     HC_CAS_currentVehicle = nil;
     CASInUse = false;
 }];
+
+// On-station leash: the jet holds for a fixed window, then breaks off, flies home and despawns. A
+// one-time support that only ever ended by being shot down was permanent once bought; this makes it a
+// sortie. Runs on this thread -- nothing follows the handlers, and a shoot-down ends the wait early so
+// the leash never fights its own Killed handler for the cleanup.
+private _leash = time + (missionNamespace getVariable ["HC_air_station_seconds", 1800]);
+waitUntil { sleep 5; time > _leash || !alive _vehicle };
+if (alive _vehicle && HC_CAS_active) then {
+    [localize "STR_DUWS_T_koipilot", [localize "STR_DUWS_T_hc_cas_rtb"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+    private _hq = getmarkerpos str blu_hq_markername;
+    while { count waypoints _group > 0 } do { deleteWaypoint [_group, 0] };
+    _group setBehaviour "CARELESS";
+    private _wp = _group addWaypoint [_hq, 0];
+    _wp setWaypointType "MOVE";
+    _wp setWaypointSpeed "FULL";
+    // Grace cap so a damaged or blocked aircraft that never reaches home still cleans up.
+    private _grace = time + 180;
+    waitUntil { sleep 3; !alive _vehicle || _vehicle distance _hq < 400 || time > _grace };
+    HC_CAS_active = false;
+    HC_CAS_currentVehicle = nil;
+    CASInUse = false;
+    [_vehicle, _group] call fnc_support_despawn;
+};

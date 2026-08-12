@@ -5664,6 +5664,14 @@
                 <Original>Longbow 1-1 is down. A replacement aircraft is deploying to the AO, ETA ten minutes.</Original>
                 <English>Longbow 1-1 is down. A replacement aircraft is deploying to the AO, ETA ten minutes.</English>
             </Key>
+            <Key ID="STR_DUWS_T_hc_attchop_rtb">
+                <Original>To Alpha 1-1, on-station time expired, returning to base.</Original>
+                <English>To Alpha 1-1, on-station time expired, returning to base.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_hc_cas_rtb">
+                <Original>To Alpha 1-1, on-station time expired, returning to base.</Original>
+                <English>To Alpha 1-1, on-station time expired, returning to base.</English>
+            </Key>
             <Key ID="STR_DUWS_T_casreservekoi">
                 <German>Einsatzteam, beachten Sie, Leitstelle hier. Neue Nahluftunterstützungseinheit im Anflug. Rufzeichen: "Koi".</German>
                 <Spanish>Equipo de acción, atención, despacho aquí. Nueva unidad de apoyo aéreo cercano entrando. Indicativo: "Koi".</Spanish>
