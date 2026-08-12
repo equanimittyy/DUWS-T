@@ -35,4 +35,24 @@ publicVariable "Mission_available";
 DUWS_mission_token = (missionNamespace getVariable ["DUWS_mission_token", 0]) + 1;
 ["INFO", "MISSION", format ["start type=%1 name=%2 pos=%3 token=%4",
 	_missionType, _mission_name, _MissionPos, DUWS_mission_token]] call fnc_log;
+
+// Reward and deadline for this type, read from the one table so a thread never restates them. Set
+// here, on the single chokepoint every thread already calls first with its own index, so the threads
+// carry no reward literals and no launcher argument has to thread the numbers through. DUWS_curReward
+// / DUWS_curDeadlineAt hold for exactly this mission: nothing else runs while Mission_available is
+// false, so a thread reads them any time before it ends.
+private _missionDefs = [
+#include "..\..\shared\includes\mission_types.hpp"
+];
+(_missionDefs select _missionType) params ["", "", "", "", "", "", "_mcp", "_map", "_mrep", "_mdl"];
+DUWS_curReward = [_mcp, _map, _mrep];
+_mdl params ["_dlMinH", "_dlMaxH"];
+// Fixed clock when the bounds meet; otherwise a random 10-minute step inside them. Rolled once, at
+// the mission's start, so the enforced deadline sits behind the band the map advertised.
+private _dlSecs = if (_dlMinH >= _dlMaxH) then { _dlMinH * 3600 } else {
+	private _steps = round ((_dlMaxH - _dlMinH) * 6);
+	(_dlMinH * 3600) + ((floor (random (_steps + 1))) * 600)
+};
+DUWS_curDeadlineAt = time + _dlSecs;
+
 true

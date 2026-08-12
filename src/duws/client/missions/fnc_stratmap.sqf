@@ -231,9 +231,20 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 		// Add each mission type to stratmap array. The row supplies the description, the icon and
 		// the launcher; the search supplies the position and the name, which go into the shared
 		// slot array the launcher reads back.
-		(_missionDefs select _currentMission) params ["", "", "_desc", "_icon", "", "_launcher"];
+		(_missionDefs select _currentMission) params ["", "", "_desc", "_icon", "", "_launcher", "_mcp", "_map", "_mrep", "_mdl"];
 		private _name = [0] call fnc_random_name;
 		DUWS_missionSlots set [_currentMission, [_foundSafepos, _name]];
+
+		// Reward and deadline lines built from the table, not written into the briefing string, so
+		// editing the number in mission_types.hpp moves the map figure and the paid figure together.
+		// REP is printed only where the type grants it. The reward-boost and civs-off tags below
+		// append to this same description control, which renders the <br /> structured text.
+		private _descFull = (localize _desc) + format [localize "STR_DUWS_T_mission_cpap", _mcp, _map];
+		if (_mrep > 0) then { _descFull = _descFull + format [localize "STR_DUWS_T_mission_rep", _mrep] };
+		_mdl params ["_dlMinH", "_dlMaxH"];
+		_descFull = _descFull + (if (_dlMinH >= _dlMaxH)
+			then { format [localize "STR_DUWS_T_mission_time_fixed", _dlMinH] }
+			else { format [localize "STR_DUWS_T_mission_time_range", _dlMinH, _dlMaxH] });
 
 		// Record hard offers with their depth from friendly-held ground; the loop's tail turns
 		// depth into the 1.5x-2x multiplier. Same anchor set the frontier search measured against.
@@ -250,7 +261,7 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 			_foundSafepos,
 			_launcher,
 			_name,
-			localize _desc,
+			_descFull,
 			"",
 			_icon,
 			1,

@@ -2845,8 +2845,8 @@
                 <German>Ein Lieferwagen einer internationalen humanitären Organisation wurde von feindlichen Kräften beschlagnahmt. Wir müssen den Wagen zurückerobern und zur nahen Übergabestelle der internationalen humanitären Organisation bringen. (Low CP, no AP, high rep)</German>
                 <Spanish>Un camión de suministros de una organización humanitaria internacional ha sido robado por las fuerzas enemigas. Tenemos que recuperar el camión y devolverlo al punto de entrega de la organización humanitaria internacional cercano. (Low CP, no AP, high rep)</Spanish>
                 <Chinesesimp>国际公益组织的补给卡车被敌人抢走了，我们需要把卡车抢回来，并还给不远处的国际公益组织交付点。(低CP，无AP，高声望)</Chinesesimp>
-                <Original>Mission Type: Requisition&lt;br /&gt;Enemy forces have seized a truck belonging to an international aid organization. Recover it and drive it to the aid delivery point nearby.&lt;br /&gt;CP: 20&lt;br /&gt;AP: 0&lt;br /&gt;REP: +5</Original>
-                <English>Mission Type: Requisition&lt;br /&gt;Enemy forces have seized a truck belonging to an international aid organization. Recover it and drive it to the aid delivery point nearby.&lt;br /&gt;CP: 20&lt;br /&gt;AP: 0&lt;br /&gt;REP: +5</English>
+                <Original>Mission Type: Requisition&lt;br /&gt;Enemy forces have seized a truck belonging to an international aid organization. Recover it and drive it to the aid delivery point nearby.</Original>
+                <English>Mission Type: Requisition&lt;br /&gt;Enemy forces have seized a truck belonging to an international aid organization. Recover it and drive it to the aid delivery point nearby.</English>
             </Key>
             <Key ID="STR_DUWS_T_idapletsdothis">
                 <German>Hallo? Kann mich jemand hören? Hier ist IDAP. Vor einer Stunde wurde einer unserer Lieferwagen mit humanitärer Hilfe von OPFOR beschlagnahmt... Wir bitten Sie um Hilfe bei der Rückeroberung des Wagens. Seine ungefähre Richtung und der Übergabepunkt wurden auf dem GPS aktualisiert.</German>
@@ -2901,8 +2901,8 @@
                 <German>Wir haben einen Informanten, dessen Identität aufgeflogen ist. Er versteckt sich irgendwo in einem Gebäude. Geh dorthin und beschütze ihn, bevor der Feind ihn einholt und verhaftet — ja, wir können ihn noch nicht aus dem Gebiet evakuieren, weil wir ihn brauchen, um weiterhin vor Ort Informationen für uns zu sammeln. (Slightly low CP, no AP, high Rep)</German>
                 <Spanish>Tenemos un informante cuya identidad ha sido expuesta. Se está ocultando dentro de un edificio en algún lugar. Ve allí y protégelo antes de que el enemigo lo alcance y lo arresta — sí, aún no podemos sacarlo de la zona, porque necesitamos que siga recopilando información para nosotros localmente. (Slightly low CP, no AP, high Rep)</Spanish>
                 <Chinesesimp>我们有一个线人暴露了身份，他现在躲在某地的建筑物内。在敌人追上并逮捕他之前赶到那里保护他————是的，他还不能离开当地，我们需要他继续为我们收集情报。(稍低CP，无AP，高声望)</Chinesesimp>
-                <Original>Mission Type: Defence&lt;br /&gt;One of our informants has been made and is holed up in a building somewhere in this area, with a hit team closing on him. Get to him and hold them off. No extraction: we need him in place and still gathering.&lt;br /&gt;CP: 20&lt;br /&gt;AP: 0&lt;br /&gt;REP: +5</Original>
-                <English>Mission Type: Defence&lt;br /&gt;One of our informants has been made and is holed up in a building somewhere in this area, with a hit team closing on him. Get to him and hold them off. No extraction: we need him in place and still gathering.&lt;br /&gt;CP: 20&lt;br /&gt;AP: 0&lt;br /&gt;REP: +5</English>
+                <Original>Mission Type: Defence&lt;br /&gt;One of our informants has been made and is holed up in a building somewhere in this area, with a hit team closing on him. Get to him and hold them off. No extraction: we need him in place and still gathering.</Original>
+                <English>Mission Type: Defence&lt;br /&gt;One of our informants has been made and is holed up in a building somewhere in this area, with a hit team closing on him. Get to him and hold them off. No extraction: we need him in place and still gathering.</English>
             </Key>
             <Key ID="STR_DUWS_T_pcfail">
                 <German>"Overlord 1-1" an Einsatztrupp. Der Informant ist tot. Zieht euch sofort zurück. Wir können nichts mehr tun.</German>
@@ -2998,9 +2998,29 @@
                 <Chinesesimp>"霸王1-1"收到，务必带回它。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING_DESC">
-                <Original>Mission Type: Requisition&lt;br /&gt;Our assault scattered an enemy command post. What's left of them is bagging up their intel and pulling out. Search the buildings in this area and take whatever they haven't carried off. Allseer closes the mission out in 15 minutes.&lt;br /&gt;CP: 5&lt;br /&gt;AP: 5</Original>
-                <English>Mission Type: Requisition&lt;br /&gt;Our assault scattered an enemy command post. What's left of them is bagging up their intel and pulling out. Search the buildings in this area and take whatever they haven't carried off. Allseer closes the mission out in 15 minutes.&lt;br /&gt;CP: 5&lt;br /&gt;AP: 5</English>
+                <Original>Mission Type: Requisition&lt;br /&gt;Our assault scattered an enemy command post. What's left of them is bagging up their intel and pulling out. Search the buildings in this area and take whatever they haven't carried off. Allseer closes the mission out in 15 minutes.</Original>
+                <English>Mission Type: Requisition&lt;br /&gt;Our assault scattered an enemy command post. What's left of them is bagging up their intel and pulling out. Search the buildings in this area and take whatever they haven't carried off. Allseer closes the mission out in 15 minutes.</English>
                 <Chinesesimp>敌人一个指挥部在我们的一次攻击行动后被打散了，他们正在收拾区域内的各类情报并逃脱。你的小队需要搜索区域内的建筑以获取情报物品。任务在15分钟后自动结束。(极低CP，极低AP)</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_mission_cpap">
+                <Original>&lt;br /&gt;CP: %1&lt;br /&gt;AP: %2</Original>
+                <English>&lt;br /&gt;CP: %1&lt;br /&gt;AP: %2</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mission_rep">
+                <Original>&lt;br /&gt;REP: +%1</Original>
+                <English>&lt;br /&gt;REP: +%1</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mission_time_fixed">
+                <Original>&lt;br /&gt;Time: %1hrs</Original>
+                <English>&lt;br /&gt;Time: %1hrs</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mission_time_range">
+                <Original>&lt;br /&gt;Time: %1-%2hrs</Original>
+                <English>&lt;br /&gt;Time: %1-%2hrs</English>
+            </Key>
+            <Key ID="STR_DUWS_T_mission_deadline_fail">
+                <Original>Mission failed: you ran out of time.</Original>
+                <English>Mission failed: you ran out of time.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_GATHERING_NO_BUILDINGS">
                 <Original>Not enough suitable buildings in the area. Mission cancelled.</Original>
@@ -3760,8 +3780,8 @@
                 <German>Eine verbündete Angriffstruppe wurde überfallen! Sie verbirgt sich in einem Gebäude in diesem Gebiet, mit feindlichen Truppen ringsherum. Hilf ihnen, sich durchzubrechen!  (Very high CP, low AP)</German>
                 <Spanish>Un escuadrón de asalto aliado ha sido emboscado! Se oculta en un edificio de esta zona, con fuerzas enemigas a su alrededor. Ayúdalos a romper el cerco!  (Very high CP, low AP)</Spanish>
                 <Chinesesimp>友军的一支突击小队被伏击了，他们藏在这片区域的某个建筑内，且周围全是敌军。去帮他们突围！(极高CP，低AP)</Chinesesimp>
-                <Original>Mission Type: Rescue&lt;br /&gt;An assault element was ambushed in this area and is pinned inside a building, hostiles cordoned all around it. Break the cordon and bring them out.&lt;br /&gt;CP: 45&lt;br /&gt;AP: 15</Original>
-                <English>Mission Type: Rescue&lt;br /&gt;An assault element was ambushed in this area and is pinned inside a building, hostiles cordoned all around it. Break the cordon and bring them out.&lt;br /&gt;CP: 45&lt;br /&gt;AP: 15</English>
+                <Original>Mission Type: Rescue&lt;br /&gt;An assault element was ambushed in this area and is pinned inside a building, hostiles cordoned all around it. Break the cordon and bring them out.</Original>
+                <English>Mission Type: Rescue&lt;br /&gt;An assault element was ambushed in this area and is pinned inside a building, hostiles cordoned all around it. Break the cordon and bring them out.</English>
             </Key>
             <Key ID="STR_DUWS_T_reward_boost_tag">
                 <German>Distance Bonus: 2x CP, AP</German>
@@ -3788,22 +3808,22 @@
                 <German>Wir haben derzeit akute Versorgungsmängel, und unser Satellit hat in diesem Gebiet die grobe Position eines feindlichen Versorgungslasters grob ermittelt. Im Laster befindet sich eine große Menge an Versorgungsgütern und ein Waffenschrank. Bring es zurück zur Basis, bevor der Feind unsere Absichten erkennt und es vernichtet. Du hast 20 Minuten Zeit. (High CP, avg AP)</German>
                 <Spanish>Actualmente tenemos escasez de suministros, y nuestro satélite ha localizado aproximadamente la posición general de un camión de suministros enemigo en esta zona. En el camión hay una gran cantidad de suministros y un arsenal. Tráelo de vuelta a la base antes de que el enemigo descubra nuestra intención y lo destruya. Tienes 20 minutos. (High CP, avg AP)</Spanish>
                 <Chinesesimp>我们现在物资紧缺，刚好我们的卫星在这片地区粗略定位到了敌人补给卡车的大概方位，卡车里面有着大量物资和一个武器库，在敌人发现我们的意图并将它销毁前带它回基地。(你有20分钟时间)(高CP，平均AP)</Chinesesimp>
-                <Original>Mission Type: Requisition&lt;br /&gt;We're low on supplies. Satellite has an enemy supply truck in this area, loaded with stores and an arsenal cache. Take it and drive it back to base inside 20 minutes, before the enemy destroys it once they work out what we're doing.&lt;br /&gt;CP: 35&lt;br /&gt;AP: 25</Original>
-                <English>Mission Type: Requisition&lt;br /&gt;We're low on supplies. Satellite has an enemy supply truck in this area, loaded with stores and an arsenal cache. Take it and drive it back to base inside 20 minutes, before the enemy destroys it once they work out what we're doing.&lt;br /&gt;CP: 35&lt;br /&gt;AP: 25</English>
+                <Original>Mission Type: Requisition&lt;br /&gt;We're low on supplies. Satellite has an enemy supply truck in this area, loaded with stores and an arsenal cache. Take it and drive it back to base inside 20 minutes, before the enemy destroys it once they work out what we're doing.</Original>
+                <English>Mission Type: Requisition&lt;br /&gt;We're low on supplies. Satellite has an enemy supply truck in this area, loaded with stores and an arsenal cache. Take it and drive it back to base inside 20 minutes, before the enemy destroys it once they work out what we're doing.</English>
             </Key>
             <Key ID="STR_DUWS_T_19ajhe1d">
                 <German>Der Nachrichtendienst hat gerade ermittelt, dass eine feindliche vorläufige Kommandotruppe sich hier vorübergehend versammelt hat – eliminiere den Offizier in der Truppe! Nach der Eliminierung des Offiziers braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Zielerfüllung zu bestätigen.(Diese Mission ist extrem zeitsensitiv; sie schlägt fehl, falls sie innerhalb von 8 Minuten nicht abgeschlossen wird.) (High CP, high AP)</German>
                 <Spanish>El servicio de inteligencia acaba de detectar que un equipo de comando temporal enemigo se ha reunido aquí temporalmente — elimína al oficial del equipo! Después de que el oficial sea eliminado, el servicio de inteligencia necesitará unos minutos adicionales para confirmar la consecución del objetivo.(Esta misión es extremadamente sensible al tiempo; fracasará si no se completa dentro de 8 minutos.) (High CP, high AP)</Spanish>
                 <Chinesesimp>情报部门刚刚发现，敌军的临时指挥班组在这里短暂聚集，去干掉班组里的军官！军官死亡后，情报部门需要额外几分钟确认目标完成。(此任务具有极强时效性，若未在8分钟内完成任务则会失败。)(高CP，高AP)</Chinesesimp>
-                <Original>Mission Type: Elimination&lt;br /&gt;Allseer has eyes on an enemy command team assembled here. Kill the officer. The team disperses in 8 minutes, so move now.&lt;br /&gt;CP: 35&lt;br /&gt;AP: 35</Original>
-                <English>Mission Type: Elimination&lt;br /&gt;Allseer has eyes on an enemy command team assembled here. Kill the officer. The team disperses in 8 minutes, so move now.&lt;br /&gt;CP: 35&lt;br /&gt;AP: 35</English>
+                <Original>Mission Type: Elimination&lt;br /&gt;Allseer has eyes on an enemy command team assembled here. Kill the officer. The team disperses in 8 minutes, so move now.</Original>
+                <English>Mission Type: Elimination&lt;br /&gt;Allseer has eyes on an enemy command team assembled here. Kill the officer. The team disperses in 8 minutes, so move now.</English>
             </Key>
             <Key ID="STR_DUWS_T_dgpqenyw">
                 <German>Ein freundlicher Signalturm in diesem Gebiet wurde von feindlichen Truppen eingenommen. Feindliche Truppen sind in der Nähe stationiert und entschlüsseln kritische Informationen. Sprenge den Turm, bevor die Feinde das Entschlüsseln abschließen! (Nur noch 15 Minuten, bis kritische Informationen an die Feinde gelangen!) (Slightly low CP, avg AP)</German>
                 <Spanish>Una torre de señales aliada en esta zona ha sido tomada por fuerzas enemigas. Las tropas enemigas están acantonadas cerca y descifrando información crítica. Destruye la torre con explosivos antes de que terminen el descifrado! (¡Quedan solo 15 minutos para que la información crítica se filtre!) (Slightly low CP, avg AP)</Spanish>
                 <Chinesesimp>友军部队在该地的一座信号塔被占领了，敌军正在旁边驻扎并破译关键信息。在敌军完成破译前去把塔炸掉！(距离关键信息泄露仅剩15分钟)(稍低CP，平均AP)</Chinesesimp>
-                <Original>Mission Type: Sabotage&lt;br /&gt;OPFOR has taken a friendly signal tower in this area and is decoding the traffic off it from a position nearby. Bring explosives and drop the tower. They finish decoding in 15 minutes.&lt;br /&gt;CP: 20&lt;br /&gt;AP: 25</Original>
-                <English>Mission Type: Sabotage&lt;br /&gt;OPFOR has taken a friendly signal tower in this area and is decoding the traffic off it from a position nearby. Bring explosives and drop the tower. They finish decoding in 15 minutes.&lt;br /&gt;CP: 20&lt;br /&gt;AP: 25</English>
+                <Original>Mission Type: Sabotage&lt;br /&gt;OPFOR has taken a friendly signal tower in this area and is decoding the traffic off it from a position nearby. Bring explosives and drop the tower. They finish decoding in 15 minutes.</Original>
+                <English>Mission Type: Sabotage&lt;br /&gt;OPFOR has taken a friendly signal tower in this area and is decoding the traffic off it from a position nearby. Bring explosives and drop the tower. They finish decoding in 15 minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_towerdecrypt">
                 <German>Unsere kritischen Informationen werden gerade entschlüsselt! Du und deine Truppe müsst euch beeilen!</German>
@@ -3823,8 +3843,8 @@
                 <German>Eines unserer Flugzeuge wurde in der Nähe dieses Ortes abgeschossen. Satellitenmeldungen zeigen, dass der Pilot schwere Verletzungen erlitten hat und stark blutet – beeil dich zum Absturzort und bring ihn sicher zurück zur Basis. (Nur noch 10 Minuten, bis der Pilot an Blutverlust stirbt!) (Avg CP, very high AP)</German>
                 <Spanish>Uno de nuestros aviones fue derribado cerca de esta posición. Los informes satelitales indican que el piloto sufre graves heridas y hemorragia intensa – apúrate al lugar del accidente aéreo y tráelo seguro de vuelta a la base. (¡Quedan solo 10 minutos hasta que el piloto muera por hemorragia!) (Avg CP, very high AP)</Spanish>
                 <Chinesesimp>我们的一架飞机在这个位置附近被击落。卫星报告显示飞行员重伤失血，快到坠机地点把他安全带回基地。(距离飞行员失血而死仅有10分钟)(平均CP，极高AP)</Chinesesimp>
-                <Original>Mission Type: Rescue&lt;br /&gt;One of our aircraft went down near this position. The pilot's alive but bleeding out. Get to the crash site and carry him back to base; he has about 10 minutes.&lt;br /&gt;CP: 25&lt;br /&gt;AP: 45</Original>
-                <English>Mission Type: Rescue&lt;br /&gt;One of our aircraft went down near this position. The pilot's alive but bleeding out. Get to the crash site and carry him back to base; he has about 10 minutes.&lt;br /&gt;CP: 25&lt;br /&gt;AP: 45</English>
+                <Original>Mission Type: Rescue&lt;br /&gt;One of our aircraft went down near this position. The pilot's alive but bleeding out. Get to the crash site and carry him back to base; he has about 10 minutes.</Original>
+                <English>Mission Type: Rescue&lt;br /&gt;One of our aircraft went down near this position. The pilot's alive but bleeding out. Get to the crash site and carry him back to base; he has about 10 minutes.</English>
             </Key>
             <Key ID="STR_DUWS_T_drop_pilot">
                 <German>Pilot absetzen</German>
@@ -3912,29 +3932,29 @@
                 <German>Der Nachrichtendienst hat zwei feindliche Scharfschützen in diesem Bereich gesichtet – eliminiere sie! (Nach der Eliminierung der Scharfschützen braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Mission abschließend zu bestätigen.) (Slightly high CP, Slightly high AP)</German>
                 <Spanish>El servicio de inteligencia ha detectado a dos francotiradores enemigos en esta zona — elimínalos! (Después de que los francotiradores sean eliminados, el servicio de inteligencia necesitará unos minutos adicionales para confirmar la finalización de la misión.) (Slightly high CP, Slightly high AP)</Spanish>
                 <Chinesesimp>这个区域有敌军的两名狙击手，干掉他们。(狙击手死亡后，情报部门需要额外几分钟确认目标完成。)(稍高CP，稍高AP)</Chinesesimp>
-                <Original>Mission Type: Elimination&lt;br /&gt;Allseer has tracked two enemy snipers working this area. Kill both.&lt;br /&gt;CP: 30&lt;br /&gt;AP: 30</Original>
-                <English>Mission Type: Elimination&lt;br /&gt;Allseer has tracked two enemy snipers working this area. Kill both.&lt;br /&gt;CP: 30&lt;br /&gt;AP: 30</English>
+                <Original>Mission Type: Elimination&lt;br /&gt;Allseer has tracked two enemy snipers working this area. Kill both.</Original>
+                <English>Mission Type: Elimination&lt;br /&gt;Allseer has tracked two enemy snipers working this area. Kill both.</English>
             </Key>
             <Key ID="STR_DUWS_T_cqbdesc">
                 <German>Ein feindliches Eindringlungsteam ist hier blockiert! Vernichtet sie! (Low CP, Low AP)</German>
                 <Spanish>Hay un equipo de infiltración enemigo atrapado aquí! ¡Elimínalos! (Low CP, Low AP)</Spanish>
                 <Chinesesimp>敌人的渗透小队被困在这里了！去干掉他们！(低CP，低AP)</Chinesesimp>
-                <Original>Mission Type: Elimination&lt;br /&gt;An enemy infiltration team has gone to ground in the buildings here. Clear them out.&lt;br /&gt;CP: 15&lt;br /&gt;AP: 15</Original>
-                <English>Mission Type: Elimination&lt;br /&gt;An enemy infiltration team has gone to ground in the buildings here. Clear them out.&lt;br /&gt;CP: 15&lt;br /&gt;AP: 15</English>
+                <Original>Mission Type: Elimination&lt;br /&gt;An enemy infiltration team has gone to ground in the buildings here. Clear them out.</Original>
+                <English>Mission Type: Elimination&lt;br /&gt;An enemy infiltration team has gone to ground in the buildings here. Clear them out.</English>
             </Key>
             <Key ID="STR_DUWS_T_holdposdesc">
                 <German>Unser hochwertiges taktisches Asset befindet sich hier. Du musst das Ziel schnell erreichen und es für eine Weile halten, bis die Verstärkung eintrifft. (Slightly high CP, high AP)</German>
                 <Spanish>Nuestro activo táctico de alto valor está aquí. Debes llegar al destino con prisa y mantener la posición durante un tiempo hasta que lleguen los refuerzos. (Slightly high CP, high AP)</Spanish>
                 <Chinesesimp>我方高价值战术资产在这里，你需要快点到达目的地并坚守一段时间，直到援军抵达。(稍高CP，高AP)</Chinesesimp>
-                <Original>Mission Type: Defence&lt;br /&gt;A friendly SAM battery and its radar have broken down in this area, with recon fireteam Express 2-1 holding a thin perimeter around them. Relief is 9 minutes out from mission start, and both pieces have to be intact when it arrives. Bring a toolkit.&lt;br /&gt;CP: 30&lt;br /&gt;AP: 35</Original>
-                <English>Mission Type: Defence&lt;br /&gt;A friendly SAM battery and its radar have broken down in this area, with recon fireteam Express 2-1 holding a thin perimeter around them. Relief is 9 minutes out from mission start, and both pieces have to be intact when it arrives. Bring a toolkit.&lt;br /&gt;CP: 30&lt;br /&gt;AP: 35</English>
+                <Original>Mission Type: Defence&lt;br /&gt;A friendly SAM battery and its radar have broken down in this area, with recon fireteam Express 2-1 holding a thin perimeter around them. Relief is 9 minutes out from mission start, and both pieces have to be intact when it arrives. Bring a toolkit.</Original>
+                <English>Mission Type: Defence&lt;br /&gt;A friendly SAM battery and its radar have broken down in this area, with recon fireteam Express 2-1 holding a thin perimeter around them. Relief is 9 minutes out from mission start, and both pieces have to be intact when it arrives. Bring a toolkit.</English>
             </Key>
             <Key ID="STR_DUWS_T_domination">
                 <German>Freundliche mechanisierte Infanteriestrupp kämpft gegen feindliche schwere Panzerverbände. Eure Einheit muss sofort reagieren und alle feindlichen Panzer-Einheiten im Zielbereich um jeden Preis eliminieren. Hinweis: Bei der Auswahl des AO für diese Mission sollten vorzugsweise wasserfreie Binnenbereiche gewählt werden. (Very low CP, avg AP)</German>
                 <Spanish>Escuadrón de infantería mecanizada aliado está en combate con unidades de blindaje pesado enemigas. Tu unidad debe responder inmediatamente y eliminar todas las unidades de blindaje enemigas en el área objetivo a cualquier costo. Nota: al seleccionar el AO para esta misión, es preferible elegir zonas interiores sin agua. (Very low CP, avg AP)</Spanish>
                 <Chinesesimp>友军机械化步兵班正与敌人重型装甲单位交火，你的单位需要立即响应，不惜代价歼灭目标区域所有敌军装甲单位。(注意，此任务的行动区域在选取时最好在无水的内陆) (极低CP，平均AP)</Chinesesimp>
-                <Original>Mission Type: Elimination&lt;br /&gt;A friendly mechanized element has run into an enemy heavy armor platoon and is coming apart. Destroy every enemy armored vehicle in the objective area. Take this one when the objective sits inland, because armor can't fight its way across water.&lt;br /&gt;CP: 10&lt;br /&gt;AP: 25</Original>
-                <English>Mission Type: Elimination&lt;br /&gt;A friendly mechanized element has run into an enemy heavy armor platoon and is coming apart. Destroy every enemy armored vehicle in the objective area. Take this one when the objective sits inland, because armor can't fight its way across water.&lt;br /&gt;CP: 10&lt;br /&gt;AP: 25</English>
+                <Original>Mission Type: Elimination&lt;br /&gt;A friendly mechanized element has run into an enemy heavy armor platoon and is coming apart. Destroy every enemy armored vehicle in the objective area. Take this one when the objective sits inland, because armor can't fight its way across water.</Original>
+                <English>Mission Type: Elimination&lt;br /&gt;A friendly mechanized element has run into an enemy heavy armor platoon and is coming apart. Destroy every enemy armored vehicle in the objective area. Take this one when the objective sits inland, because armor can't fight its way across water.</English>
             </Key>
             <Key ID="STR_DUWS_T_hound">
                 <German>Hund</German>
@@ -3989,36 +4009,36 @@
                 <German>Der Nachrichtendienst hat angegeben, dass die Feinde hier ein Ingenieurfahrzeug aufgestellt haben. Ergreife es und bring es zurück zur Basis. Es kann zu einer mobilen Fabrik umgewandelt werden. (Low CP, low AP)</German>
                 <Spanish>El servicio de inteligencia ha indicado que el enemigo ha desplegado un vehículo de ingeniería aquí. Aprópialo y tráelo de vuelta a la base. Puede ser convertido en una fábrica móvil. (Low CP, low AP)</Spanish>
                 <Chinesesimp>情报部门指出，敌人在这里部署了一辆工程载具。去把它抢回基地。它可以被改造为移动工厂。(低CP，低AP)</Chinesesimp>
-                <Original>Mission Type: Requisition&lt;br /&gt;Allseer has an enemy engineering vehicle parked here. Take it and drive it back to base; our engineers can convert it into a mobile factory.&lt;br /&gt;CP: 15&lt;br /&gt;AP: 15</Original>
-                <English>Mission Type: Requisition&lt;br /&gt;Allseer has an enemy engineering vehicle parked here. Take it and drive it back to base; our engineers can convert it into a mobile factory.&lt;br /&gt;CP: 15&lt;br /&gt;AP: 15</English>
+                <Original>Mission Type: Requisition&lt;br /&gt;Allseer has an enemy engineering vehicle parked here. Take it and drive it back to base; our engineers can convert it into a mobile factory.</Original>
+                <English>Mission Type: Requisition&lt;br /&gt;Allseer has an enemy engineering vehicle parked here. Take it and drive it back to base; our engineers can convert it into a mobile factory.</English>
             </Key>
             <Key ID="STR_DUWS_T_y7z1cx6j">
                 <German>Die feindliche Panzerbesatzung legt hier eine kurze Pause ein – eliminiere ihren Kommandanten! (Nach der Eliminierung des Panzerkommandanten braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Mission abschließend zu bestätigen.) (Low CP, low AP)</German>
                 <Spanish>La tripulación de tanque enemiga está tomando un descanso breve aquí — elimína a su comandante! (Después de que el comandante de tanque sea eliminado, el servicio de inteligencia necesitará unos minutos adicionales para confirmar la finalización de la misión.) (Low CP, low AP)</Spanish>
                 <Chinesesimp>敌人的坦克车组正在这里稍作休息，干掉他们的车长！(车长死亡后，情报部门需要额外几分钟确认目标完成。)(低CP，低AP)</Chinesesimp>
-                <Original>Mission Type: Elimination&lt;br /&gt;An enemy tank crew is stood down here. Kill their commander.&lt;br /&gt;CP: 15&lt;br /&gt;AP: 15</Original>
-                <English>Mission Type: Elimination&lt;br /&gt;An enemy tank crew is stood down here. Kill their commander.&lt;br /&gt;CP: 15&lt;br /&gt;AP: 15</English>
+                <Original>Mission Type: Elimination&lt;br /&gt;An enemy tank crew is stood down here. Kill their commander.</Original>
+                <English>Mission Type: Elimination&lt;br /&gt;An enemy tank crew is stood down here. Kill their commander.</English>
             </Key>
             <Key ID="STR_DUWS_T_j97ecrsh">
                 <German>Die Späher melden, dass die Feinde hier laptopartige elektronische Kampfgeräte aufgestellt haben, in denen möglicherweise Informationen über die Standorte feindlicher Truppenstellungen enthalten sind. Suchen Sie das Gerät auf, laden Sie alle nützlichen Informationen herunter und zerstören Sie es, falls es keine gibt. (Very low CP, high AP)</German>
                 <Spanish>Los exploradores informan de que el enemigo ha desplegado un dispositivo de guerra electrónica de estilo portátil aquí, que puede contener información sobre las posiciones de despliegue enemigo. Localiza el dispositivo, descarga toda la información útil y destrúyelo si no hay ninguna. (Very low CP, high AP)</Spanish>
                 <Chinesesimp>侦察兵报告了敌人在这里部署了笔记本样式的电子战设备，里面可能有关于敌军部署位置的信息。找到设备，下载一切有用信息，没有的话就把它毁掉。(极低CP，高AP)</Chinesesimp>
-                <Original>Mission Type: Sabotage&lt;br /&gt;Scouts report enemy electronic warfare gear set up here: a field laptop that may hold their deployment positions. Find it, pull whatever intel is on it, and destroy it if there's nothing worth taking.&lt;br /&gt;CP: 10&lt;br /&gt;AP: 35</Original>
-                <English>Mission Type: Sabotage&lt;br /&gt;Scouts report enemy electronic warfare gear set up here: a field laptop that may hold their deployment positions. Find it, pull whatever intel is on it, and destroy it if there's nothing worth taking.&lt;br /&gt;CP: 10&lt;br /&gt;AP: 35</English>
+                <Original>Mission Type: Sabotage&lt;br /&gt;Scouts report enemy electronic warfare gear set up here: a field laptop that may hold their deployment positions. Find it, pull whatever intel is on it, and destroy it if there's nothing worth taking.</Original>
+                <English>Mission Type: Sabotage&lt;br /&gt;Scouts report enemy electronic warfare gear set up here: a field laptop that may hold their deployment positions. Find it, pull whatever intel is on it, and destroy it if there's nothing worth taking.</English>
             </Key>
             <Key ID="STR_DUWS_T_geryeddp">
                 <German>Der kleine feindliche Waffenschatz befindet sich hier. Sprenge ihn! (Slightly high CP, low AP)</German>
                 <Spanish>El pequeño depósito de armas enemigo está aquí. Destrúyelo con explosivos! (Slightly high CP, low AP)</Spanish>
                 <Chinesesimp>敌人的小型军火库储存在这里，去炸了它。(稍高CP，低AP)</Chinesesimp>
-                <Original>Mission Type: Sabotage&lt;br /&gt;The enemy runs a small ammunition cache out of this area. Bring explosives and level it.&lt;br /&gt;CP: 30&lt;br /&gt;AP: 15</Original>
-                <English>Mission Type: Sabotage&lt;br /&gt;The enemy runs a small ammunition cache out of this area. Bring explosives and level it.&lt;br /&gt;CP: 30&lt;br /&gt;AP: 15</English>
+                <Original>Mission Type: Sabotage&lt;br /&gt;The enemy runs a small ammunition cache out of this area. Bring explosives and level it.</Original>
+                <English>Mission Type: Sabotage&lt;br /&gt;The enemy runs a small ammunition cache out of this area. Bring explosives and level it.</English>
             </Key>
             <Key ID="STR_DUWS_T_n4uc7t2x">
                 <German>Der Feind hat in diesem Gebiet ein Luftverteidigungsradar aufgestellt, und es stört unsere Luftoperationen. Du musst es zerstören. (Nach der Zerstörung des Radars braucht der Nachrichtendienst noch ein paar Minuten, um zu bestätigen, dass das Radar neutralisiert wurde.) (Avg CP, slightly low AP)</German>
                 <Spanish>El enemigo ha desplegado un radar de defensa aérea en esta área, y está interrumpiendo nuestras operaciones aéreas. Debes destruirlo. (Después de que el radar sea destruido, el servicio de inteligencia necesitará unos minutos para confirmar que el radar ha sido neutralizado.) (Avg CP, slightly low AP)</Spanish>
                 <Chinesesimp>敌人在这一地区部署了防空雷达，它正在骚扰我们的空中行动。你必须摧毁它。(雷达被摧毁后，情报部门需要几分钟确认雷达已被无效化。)(平均CP，稍低AP)</Chinesesimp>
-                <Original>Mission Type: Sabotage&lt;br /&gt;An enemy AA radar in this area is shutting our aircraft out of the sky. Destroy it.&lt;br /&gt;CP: 25&lt;br /&gt;AP: 20</Original>
-                <English>Mission Type: Sabotage&lt;br /&gt;An enemy AA radar in this area is shutting our aircraft out of the sky. Destroy it.&lt;br /&gt;CP: 25&lt;br /&gt;AP: 20</English>
+                <Original>Mission Type: Sabotage&lt;br /&gt;An enemy AA radar in this area is shutting our aircraft out of the sky. Destroy it.</Original>
+                <English>Mission Type: Sabotage&lt;br /&gt;An enemy AA radar in this area is shutting our aircraft out of the sky. Destroy it.</English>
             </Key>
             <Key ID="STR_DUWS_T_dmfmwmfp">
                 <German>Lade Missions-Positionen...</German>
