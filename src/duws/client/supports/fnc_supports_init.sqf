@@ -54,7 +54,7 @@ fnc_support_catalogue = {
 		["helolift",  "CONS",  6, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false],
 		["boattaxi",  "CONS",  2, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  false],
 		["arty",      "CONS",  9, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  22],
-		["mortar",    "CONS",  6, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false, 12],
+		["mortar",    "CONS",  5, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false, 12],
 		["mortar_smoke","CONS",5, "support_mortar_smoke_available","STR_DUWS_T_mortar_smoke_row",     "mortar_smoke",false],
 		["jdam",      "CONS",  5, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,  10],
 		["laser",     "CONS",  4, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,   8],
@@ -101,15 +101,16 @@ fnc_support_cost_bracket = {
 };
 
 // The AP tier each support sits behind, keyed by support key; anything unlisted is tier 1 and always
-// available. Mirrors the vehicle rungs -- Mobile HQ and the first radio tower at Motorised (tier 2),
-// transport lift, HALO insertion and indirect fire at tier 3, the gunship and heavy fire at tier 4,
-// the CAS jet at tier 5. The three radio towers climb the ladder in lockstep with their own I/II/III
-// levels, so each tier of the drift amplifier is earned rather than bought straight off.
+// available. Mirrors the vehicle rungs -- Mobile HQ (and its slot), the first radio tower, UAV recon
+// and the smoke mortar at Motorised (tier 2); transport lift, HALO insertion and lethal indirect fire
+// at tier 3; artillery and the gunship at tier 4; the CAS jet and the area munitions (cluster, napalm)
+// at tier 5. The three radio towers climb the ladder in lockstep with their own I/II/III levels, so
+// each tier of the drift amplifier is earned rather than bought straight off.
 DUWS_support_tiers = [
-	["mobile_HQ", 2], ["radio1", 2], ["uav", 2],
-	["mortar", 3], ["mortar_smoke", 3], ["jdam", 3], ["laser", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3], ["radio2", 3],
-	["arty", 4], ["cluster", 4], ["napalm", 4], ["hcAttChop", 4], ["radio3", 4],
-	["hcCAS", 5]
+	["mobile_HQ", 2], ["mhq_slot", 2], ["radio1", 2], ["uav", 2], ["mortar_smoke", 2],
+	["mortar", 3], ["jdam", 3], ["laser", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3], ["radio2", 3],
+	["arty", 4], ["hcAttChop", 4], ["radio3", 4],
+	["hcCAS", 5], ["cluster", 5], ["napalm", 5]
 ];
 fnc_support_tier = {
 	params ["_key"];
