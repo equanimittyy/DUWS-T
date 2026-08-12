@@ -32,7 +32,17 @@ if (_row isEqualTo []) exitWith {
 
 // Not named _roster: callers one frame up use that name for the zone's unit roster.
 private _men = [_team, "opfor", _strength] call DUWS_fnc_teamRoster;
-private _position = [_center, 50, _radius, 5, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
+// Spawn distance follows the posture: a wide patrol starts on the outer ring, a close one near the
+// objective, from DUWS_postureBands so the spawn and the circuit agree. A posture the table does not
+// name keeps the old 50..radius band.
+private _band = DUWS_postureBands getOrDefault [_posture, []];
+private _minR = 50;
+private _maxR = _radius;
+if (_band isNotEqualTo []) then {
+    _minR = (_band select 0) * _radius;
+    _maxR = (_band select 1) * _radius;
+};
+private _position = [_center, _minR, _maxR, 5, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
 private _group = [_position, EAST, _men, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 

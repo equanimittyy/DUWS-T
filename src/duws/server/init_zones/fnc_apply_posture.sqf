@@ -21,7 +21,11 @@ if (isNull _group) exitWith {};
 // bought men who were already alert before the player had done anything to alert them.
 _group setBehaviour "SAFE";
 
-private _patrolRadius = round (_radius / 1.25);
+// Circuit radius follows the posture, from the same DUWS_postureBands the spawn band reads, so a wide
+// patrol's waypoints reach the ring it spawned on. A posture the table does not name falls back to 0.8
+// of the radius -- what every posture walked before the bands split close from wide.
+private _patrolFrac = (DUWS_postureBands getOrDefault [_posture, [0, 0, 0.8]]) select 2;
+private _patrolRadius = round (_radius * _patrolFrac);
 // A mounted group cannot walk into a house or hold a tower, so the two postures that place men
 // inside a structure answer differently for one. Read off the leader's vehicle rather than off the
 // token that asked, because the engine's own answer cannot disagree with what was actually spawned.

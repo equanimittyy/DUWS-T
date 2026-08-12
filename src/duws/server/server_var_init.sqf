@@ -487,6 +487,20 @@ DUWS_hardpointGarrison = createHashMapFromArray [
     ["RADIO", ["team", "wp_team", "wp_team"]], ["MINEFIELD", ""]
 ];
 
+// Per-posture spawn band and circuit radius, each a fraction of the spawn radius the caller passes.
+// [minFrac, maxFrac, patrolFrac]: a group spawns between minFrac and maxFrac of that radius from the
+// centre and walks its circuit at patrolFrac of it. Read by fnc_spawn_team and fnc_spawn_vehicle for
+// where the group is placed and by fnc_apply_posture for how far its waypoints reach -- from one table
+// so the placement and the circuit cannot disagree: a wide patrol both spawns and lives on the outer
+// ring, a close one hugs the objective. A posture absent here (hqpatrol, none) keeps the old uniform
+// band, since those place their own men; garrison spawns inner and then claims structures within its
+// own fixed reach, so its patrolFrac only applies on the patrol fallback when it finds nothing to hold.
+DUWS_postureBands = createHashMapFromArray [
+    ["closepatrol", [0.1, 0.5, 0.4]],
+    ["widepatrol",  [0.5, 1.0, 0.9]],
+    ["garrison",    [0.1, 0.5, 0.4]]
+];
+
 // The margin beyond a zone's own radius that its streaming reaches: a zone raises and holds its
 // garrison for BLUFOR this much further out than the capture trigger tests, so the men are on the
 // objective before the players who tripped it arrive. Read by fnc_createZone and fnc_zone_stream_init.

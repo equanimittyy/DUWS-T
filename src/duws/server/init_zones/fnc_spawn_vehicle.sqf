@@ -24,7 +24,16 @@ private _vehpos = if (_isAir) then {
     private _p = _patrolCenter getPos [_dist, _bearing];
     [_p select 0, _p select 1, 800]
 } else {
-    [_patrolCenter, 100, 200, 15, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos
+    // Ground vehicles follow the posture band like a rifle section, so a wide vehicle patrol does not
+    // spawn on top of the objective it is meant to screen. Air stays unbanded: it enters from off the map.
+    private _band = DUWS_postureBands getOrDefault [_posture, []];
+    private _minR = 100;
+    private _maxR = 200;
+    if (_band isNotEqualTo []) then {
+        _minR = (_band select 0) * _radius;
+        _maxR = (_band select 1) * _radius;
+    };
+    [_patrolCenter, _minR, _maxR, 15, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos
 };
 
 private _created = [_vehpos, 0, _class, EAST] call BIS_fnc_spawnVehicle;
