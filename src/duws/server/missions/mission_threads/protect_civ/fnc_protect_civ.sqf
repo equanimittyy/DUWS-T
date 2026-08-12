@@ -5,9 +5,10 @@ if (!([14, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_beg
 _searchRadius   = 250;
 _spawnDist      = 230;
 _timeLimit      = 360;
-_cpReward       = 20;
-_apReward       = 10;
-_repReward      = 5;
+_cpReward       = DUWS_curReward select 0;
+_apReward       = DUWS_curReward select 1;
+_repReward      = DUWS_curReward select 2;
+_deadline       = DUWS_curDeadlineAt;
 
 _speaker        = localize "STR_DUWS_T_OVERLORD";
 _speakerinfomat = localize "STR_DUWS_T_infomat";
@@ -147,10 +148,19 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
 };
 
 
-[_civilian, _VARtaskgeneratedName, _civilianMarker, _timeLimit, _cpReward, _apReward, _repReward, _targetpos, _searchRadius, _markername2] spawn {
-    params ["_civ", "_taskID", "_civMarker", "_timeLimit", "_cp", "_ap", "_rep", "_targetPos", "_radius", "_areaMarker"];
+[_civilian, _VARtaskgeneratedName, _civilianMarker, _timeLimit, _cpReward, _apReward, _repReward, _targetpos, _searchRadius, _markername2, _deadline] spawn {
+    params ["_civ", "_taskID", "_civMarker", "_timeLimit", "_cp", "_ap", "_rep", "_targetPos", "_radius", "_areaMarker", "_deadline"];
 
-    waitUntil { sleep 1; missionNamespace getVariable [format ["%1_started", _taskID], false] };
+    // The escort only starts once a player reaches the informant. The deadline covers the abandon
+    // case: an offer never engaged fails and frees the slot rather than waiting on the trigger forever.
+    waitUntil { sleep 1; (missionNamespace getVariable [format ["%1_started", _taskID], false]) || time > _deadline };
+    if (time > _deadline && !(missionNamespace getVariable [format ["%1_started", _taskID], false])) exitWith {
+        [_taskID, "FAILED"] call fnc_missionTaskEnd;
+        if (!isNil "_civMarker" && {_civMarker != ""}) then { deleteMarker _civMarker; };
+        if (!isNil "_areaMarker" && {_areaMarker != ""}) then { [_areaMarker] call fnc_missionMarkerClear; };
+        [{hint localize "STR_DUWS_T_mission_deadline_fail"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
+        [_targetPos, _radius, "", true] call fnc_mission_end;
+    };
     private _missionStartTime = missionNamespace getVariable [format ["%1_startTime", _taskID], time];
 
     Mission_Active = true;

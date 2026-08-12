@@ -30,8 +30,8 @@ _sol3 setcaptive false;
 	remoteExec ["", format ["rescue_pose_%1", netId _x]];
 } forEach [_sol1,_sol2,_sol3];
 
-_cpreward = 45;
-_apreward = 24;
+_cpreward = DUWS_curReward select 0;
+_apreward = DUWS_curReward select 1;
 
 sleep 30;
 

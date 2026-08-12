@@ -4,8 +4,9 @@ if (!([5, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 
 
 _radius = 400;
-_cpreward = 30;
-_apreward = 30;
+_cpreward = DUWS_curReward select 0;
+_apreward = DUWS_curReward select 1;
+_deadline = DUWS_curDeadlineAt;
 _speaker = localize "STR_DUWS_T_Viper";
 _message = localize "STR_DUWS_T_sniperletsdothis";
 _message1 = ([localize "STR_DUWS_T_sniperend"] call fnc_cs);
@@ -95,7 +96,11 @@ sleep 8;
 sleep 5; // let the patrols finish spawning
 
 
-waitUntil {sleep 2; (!alive _target1 && !alive _target2)};
+waitUntil {sleep 2; (!alive _target1 && !alive _target2) || time > _deadline};
+
+if ((alive _target1 || alive _target2) && time > _deadline) exitWith {
+    [_VARtaskgeneratedName, _markername2, "", _targetpos, _radius] call fnc_mission_deadline_fail;
+};
 
 [_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
 [_markername2] call fnc_missionMarkerClear;

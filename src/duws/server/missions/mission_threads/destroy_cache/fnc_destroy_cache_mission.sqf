@@ -8,8 +8,9 @@ if (!([9, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 private _missionUnits = [];
 
 _radius = 400;
-_cpreward = 30;
-_apreward = 20;
+_cpreward = DUWS_curReward select 0;
+_apreward = DUWS_curReward select 1;
+_deadline = DUWS_curDeadlineAt;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_cacheletsdothis";
 
@@ -207,7 +208,11 @@ sleep 5;
 
 waitUntil {
     sleep 5;
-    ( (!alive _vehicle_7 || damage _vehicle_7 == 1) && (!alive _vehicle_8 || damage _vehicle_8 == 1) )
+    ( (!alive _vehicle_7 || damage _vehicle_7 == 1) && (!alive _vehicle_8 || damage _vehicle_8 == 1) ) || time > _deadline
+};
+
+if (time > _deadline && !((!alive _vehicle_7 || damage _vehicle_7 == 1) && (!alive _vehicle_8 || damage _vehicle_8 == 1))) exitWith {
+    [_VARtaskgeneratedName, _markername2, "mission_destroy_cache", _targetpos, _radius] call fnc_mission_deadline_fail;
 };
 
 // Units only, and deleted rather than handed to the sweep: they are not composition, and

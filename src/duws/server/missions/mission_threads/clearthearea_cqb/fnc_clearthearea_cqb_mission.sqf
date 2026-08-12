@@ -3,8 +3,9 @@ params ["_MissionPos", "_mission_name"];
 if (!([11, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 _radius = 200;
-_cpreward = 15;
-_apreward = 20;
+_cpreward = DUWS_curReward select 0;
+_apreward = DUWS_curReward select 1;
+_deadline = DUWS_curDeadlineAt;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _speakeracteam = localize "STR_DUWS_T_actionteam";
 _message = localize "STR_DUWS_T_cqbletsdothis";
@@ -132,7 +133,11 @@ waitUntil {
             _allDead = false;
         };
     } forEach units _group;
-    (_allDead && count _bldgUnits > 0)
+    (_allDead && count _bldgUnits > 0) || time > _deadline
+};
+
+if (time > _deadline && ({alive _x} count units _group > 0)) exitWith {
+    [_VARtaskgeneratedName, _markername2, "", _targetpos, _radius] call fnc_mission_deadline_fail;
 };
 
 [_markername2] call fnc_missionMarkerClear;

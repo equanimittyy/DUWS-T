@@ -3,8 +3,9 @@ params ["_MissionPos", "_mission_name"];
 if (!([12, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 _radius = 300;
-_cpreward = 30;
-_apreward = 36;
+_cpreward = DUWS_curReward select 0;
+_apreward = DUWS_curReward select 1;
+_deadline = DUWS_curDeadlineAt;
 
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_ENEMY_APPROACHING";
@@ -203,10 +204,21 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
 Mission_Active = true;
 publicVariable "Mission_Active";
 
-[_samSystem, _radarSystem, _countdownDuration, _markername2, _VARtaskgeneratedName, _cpreward, _apreward, _mission_name, _targetpos, _radius, _missionUnits] spawn {
-    params ["_samSystem", "_radarSystem", "_countdownDuration", "_markername2", "_VARtaskgeneratedName", "_cpreward", "_apreward", "_mission_name", "_targetpos", "_radius", "_missionUnits"];
+[_samSystem, _radarSystem, _countdownDuration, _markername2, _VARtaskgeneratedName, _cpreward, _apreward, _mission_name, _targetpos, _radius, _missionUnits, _deadline] spawn {
+    params ["_samSystem", "_radarSystem", "_countdownDuration", "_markername2", "_VARtaskgeneratedName", "_cpreward", "_apreward", "_mission_name", "_targetpos", "_radius", "_missionUnits", "_deadline"];
 
-    waitUntil { sleep 1; missionNamespace getVariable [format ["%1_started", _VARtaskgeneratedName], false] };
+    // The hold only starts once a player reaches the position. The deadline covers the abandon case:
+    // an offer never engaged fails and frees the slot rather than waiting on the trigger forever.
+    waitUntil { sleep 1; (missionNamespace getVariable [format ["%1_started", _VARtaskgeneratedName], false]) || time > _deadline };
+    if (time > _deadline && !(missionNamespace getVariable [format ["%1_started", _VARtaskgeneratedName], false])) exitWith {
+        [_markername2] call fnc_missionMarkerClear;
+        [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
+        [_targetpos, _radius, "mission_holdpos", true] call fnc_mission_end;
+        Mission_Active = false;
+        publicVariable "Mission_Active";
+        { deleteVehicle _x } forEach _missionUnits;
+        [{hint localize "STR_DUWS_T_mission_deadline_fail"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
+    };
     private _missionStartTime = missionNamespace getVariable [format ["%1_startTime", _VARtaskgeneratedName], time];
 
     while {true} do {

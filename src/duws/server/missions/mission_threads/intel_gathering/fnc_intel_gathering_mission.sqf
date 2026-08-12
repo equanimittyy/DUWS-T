@@ -4,8 +4,6 @@ params ["_MissionPos", "_mission_name"];
 
 private _radius = 800;
 private _minBuildings = 20;
-_cpreward = 5;
-_apreward = 10;
 private _usableBuildings = [_MissionPos, 3, _radius] call fnc_usableBuildings;
 
 if (count _usableBuildings < _minBuildings) exitWith {
@@ -15,6 +13,11 @@ if (count _usableBuildings < _minBuildings) exitWith {
 
 // Gated after the building check on purpose: too few buildings must not burn the cooldown.
 if (!([16, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+
+// Reward from the shared table. No deadline check: this mission closes itself out on a fixed 900 s
+// timer below, always well inside the deadline, so the clock the map prints is nominal here.
+_cpreward = DUWS_curReward select 0;
+_apreward = DUWS_curReward select 1;
 
 // Marked before anything is built. The ellipse and the task are the only things telling the
 // player where the objective is, and the container seeding below runs for tens of seconds.

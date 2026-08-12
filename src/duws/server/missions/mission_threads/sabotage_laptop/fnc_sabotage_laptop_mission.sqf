@@ -82,3 +82,14 @@ if (hardcore_mode_enable) then {
     [[_laptop], "objective"] call fnc_search_flag_group;
 };
 sleep 5; // let the patrols finish spawning
+
+// Success comes through the laptop's addAction, not a wait here, so the deadline runs on a watcher:
+// fail the mission if the clock runs out while it is still live (slot shut, token unadvanced).
+[DUWS_curDeadlineAt, _VARtaskgeneratedName, _markername2, _targetpos, _radius] spawn {
+    params ["_deadline", "_taskId", "_marker", "_tpos", "_radius"];
+    private _token = DUWS_mission_token;
+    waitUntil { sleep 5; time > _deadline || Mission_available || DUWS_mission_token != _token };
+    if (time > _deadline && !Mission_available && DUWS_mission_token == _token) then {
+        [_taskId, _marker, "mission_sabotage_laptop", _tpos, _radius, false] call fnc_mission_deadline_fail;
+    };
+};

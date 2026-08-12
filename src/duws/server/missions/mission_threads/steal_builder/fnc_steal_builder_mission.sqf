@@ -11,8 +11,9 @@ if (!isNil "BLD1" && {alive BLD1}) exitWith {
 
 if (!([6, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
-_cpreward = 15;
-_apreward = 20;
+_cpreward = DUWS_curReward select 0;
+_apreward = DUWS_curReward select 1;
+_deadline = DUWS_curDeadlineAt;
 
 
 _radius = 500;
@@ -87,7 +88,7 @@ sleep 1;
 sleep 5; // let the patrols finish spawning
 
 
-waitUntil {sleep 2; ((getdammage BLD1)>0.95 || (BLD1 distance PosOfBLUHQ)<50)};
+waitUntil {sleep 2; ((getdammage BLD1)>0.95 || (BLD1 distance PosOfBLUHQ)<50 || time > _deadline)};
 
 [_markername2] call fnc_missionMarkerClear;
 
@@ -95,6 +96,10 @@ if (getdammage BLD1>0.95) exitWith {
     [{hint localize "STR_DUWS_T_obc4591x"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [_targetpos,_radius, "mission_steal_builder"] call fnc_mission_end;
+};
+
+if (getdammage BLD1 <= 0.95 && (BLD1 distance PosOfBLUHQ) >= 50 && time > _deadline) exitWith {
+    [_VARtaskgeneratedName, "", "mission_steal_builder", _targetpos, _radius] call fnc_mission_deadline_fail;
 };
 
 [_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;

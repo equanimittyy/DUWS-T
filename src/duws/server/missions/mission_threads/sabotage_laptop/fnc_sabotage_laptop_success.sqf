@@ -4,8 +4,8 @@
 // has no server-side form; only the action's own removal has to stay there.
 params ["_object", "_missionPos", "_targetPos", "_mission_name", "_markername2", "_radius"];
 
-_cpreward = 10;
-_apreward = 36;
+_cpreward = DUWS_curReward select 0;
+_apreward = DUWS_curReward select 1;
 
 // setObjectTexture is local, so the dead screen only ever showed for the player who did the
 // hacking; everyone else kept looking at a live laptop on a finished mission. The global form

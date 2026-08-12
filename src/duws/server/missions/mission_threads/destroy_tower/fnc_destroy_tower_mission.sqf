@@ -4,17 +4,14 @@ if (!([3, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 
 
 _radius = 400;
-_cpreward = 20;
-_apreward = 30;
+_cpreward = DUWS_curReward select 0;
+_apreward = DUWS_curReward select 1;
+_deadline = DUWS_curDeadlineAt;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _speaker1 = localize "STR_DUWS_T_Cobra";
 _message = localize "STR_DUWS_T_towerletsdothis";
 _message1 = localize "STR_DUWS_T_towersignallost";
 _message2 = localize "STR_DUWS_T_toweroverlord";
-
-_taskTimeout_tower = 900;
-_missionStartTime = time;
-_hasShown2MinHint = false;
 
 _markerText2 = localize "STR_DUWS_T_c3";
 
@@ -96,15 +93,11 @@ sleep 5;
 
 waitUntil {
     sleep 5;
-    if ((time - _missionStartTime) >= (_taskTimeout_tower - 120) && !_hasShown2MinHint) then {
-        [{hint localize "STR_DUWS_T_towerdecrypt"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-        _hasShown2MinHint = true;
-    };
-    !alive _vehicle_7 || (damage _vehicle_7) == 1 || (time - _missionStartTime) > _taskTimeout_tower
+    !alive _vehicle_7 || (damage _vehicle_7) == 1 || time > _deadline
 };
 
 
-if ((alive _vehicle_7 && (damage _vehicle_7) < 1) && (time - _missionStartTime) > _taskTimeout_tower) exitWith {
+if ((alive _vehicle_7 && (damage _vehicle_7) < 1) && time > _deadline) exitWith {
     [{hint localize "STR_DUWS_T_xhtbpyl1"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     _speaker = localize "STR_DUWS_T_OVERLORD";

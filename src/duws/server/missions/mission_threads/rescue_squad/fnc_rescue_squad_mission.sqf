@@ -92,3 +92,15 @@ sleep 10;
 [_MissionPos, _radius] spawn fnc_missionPatrols;
 
 sleep 5; // let the patrols finish spawning
+
+// The rescue succeeds through a trigger, not a wait in this thread, so the deadline runs on its own
+// watcher: fail the mission if the clock runs out while it is still the live one -- the slot still
+// shut and the token unadvanced. A success, or a mission that supersedes this one, clears both first.
+[DUWS_curDeadlineAt, _VARtaskgeneratedName, _markername2, _targetpos, _radius] spawn {
+    params ["_deadline", "_taskId", "_marker", "_tpos", "_radius"];
+    private _token = DUWS_mission_token;
+    waitUntil { sleep 5; time > _deadline || Mission_available || DUWS_mission_token != _token };
+    if (time > _deadline && !Mission_available && DUWS_mission_token == _token) then {
+        [_taskId, _marker, "", _tpos, _radius, false] call fnc_mission_deadline_fail;
+    };
+};

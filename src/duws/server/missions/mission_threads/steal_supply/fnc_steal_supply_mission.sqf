@@ -6,16 +6,14 @@ if (!([1, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 
 
 _radius = 600;
-_cpreward = 35;
-_apreward = 24;
+_cpreward = DUWS_curReward select 0;
+_apreward = DUWS_curReward select 1;
+_deadline = DUWS_curDeadlineAt;
 _speaker = localize "STR_DUWS_T_Signal2";
 _message = localize "STR_DUWS_T_supplytruckletsdothis";
 _speaker1 = localize "STR_DUWS_T_OVERLORD";
 _message1 = ([localize "STR_DUWS_T_supplytruckoverlord"] call fnc_cs);
 _message2 = ([localize "STR_DUWS_T_supplytruckfail"] call fnc_cs);
-
-_taskTimeLimit = 1200;
-_taskStartTime = time;
 
 _markerText2 = localize "STR_DUWS_T_c1";
 
@@ -145,12 +143,12 @@ waitUntil {
     sleep 1;
     (!alive _truck1) ||
     (_truck1 distance PosOfBLUHQ < 100) ||
-    (time - _taskStartTime > _taskTimeLimit)
+    (time > _deadline)
 };
 
 [_markername2] call fnc_missionMarkerClear;
 
-if (!alive _truck1 || (time - _taskStartTime > _taskTimeLimit)) exitWith {
+if (!alive _truck1 || time > _deadline) exitWith {
     _truck1 removeEventHandler ["GetIn", _truckGetInEH];
     _truck1 setDamage 1;
     [{hint localize "STR_DUWS_T_jsg7ys0w"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];

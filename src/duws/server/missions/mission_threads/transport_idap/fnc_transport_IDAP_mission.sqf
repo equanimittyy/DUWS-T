@@ -4,8 +4,9 @@ if (!([15, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_beg
 
 
 _radius = 600;
-_cpreward = 20;
-_apreward = 10;
+_cpreward = DUWS_curReward select 0;
+_apreward = DUWS_curReward select 1;
+_deadline = DUWS_curDeadlineAt;
 _speakerIDAP = localize "STR_DUWS_T_IDAP";
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _speakeracteam  = localize "STR_DUWS_T_actionteam";
@@ -170,7 +171,7 @@ sleep 5; // let the patrols finish spawning
 
 waitUntil {
     sleep 2;
-    (getdammage _truck1>0.95) || (_truck1 distance _targetDeliveryPos) < 50
+    (getdammage _truck1>0.95) || (_truck1 distance _targetDeliveryPos) < 50 || time > _deadline
 };
 
 [_markername2] call fnc_missionMarkerClear;
@@ -185,6 +186,17 @@ if (getdammage _truck1>0.95) exitWith {
     // town is resolved from the delivery point, falling back to the global outside every radius.
     if (CIV_PRESENCE != "NONE") then {
         [[_targetpos] call fnc_civ_townAt, -5, "idap_failed"] call fnc_town_rep_adjust;
+    };
+    [_targetpos,_radius, "mission_transport_idap"] call fnc_mission_end;
+};
+
+if (time > _deadline && getdammage _truck1 <= 0.95 && (_truck1 distance _targetDeliveryPos) >= 50) exitWith {
+    deleteMarker _deliveryMarkerName;
+    call _cleanupDelivery;
+    [{hint localize "STR_DUWS_T_mission_deadline_fail"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
+    if (CIV_PRESENCE != "NONE") then {
+        [[_targetpos] call fnc_civ_townAt, -5, "idap_deadline"] call fnc_town_rep_adjust;
     };
     [_targetpos,_radius, "mission_transport_idap"] call fnc_mission_end;
 };

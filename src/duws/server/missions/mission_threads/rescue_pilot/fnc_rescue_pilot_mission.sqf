@@ -399,17 +399,14 @@ call _fncScript;
 [_fncScript] remoteExec ["call", 0, true];
 
 _radius = 300;
-_cpreward = 25;
-_apreward = 40;
+_cpreward = DUWS_curReward select 0;
+_apreward = DUWS_curReward select 1;
+_deadline = DUWS_curDeadlineAt;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _speaker1 = localize "STR_DUWS_T_pilot_downed";
 _message = localize "STR_DUWS_T_pilotletsdothis";
 _message1 = localize "STR_DUWS_T_pilotfound";
 _message2 = localize "STR_DUWS_T_pilotend";
-
-_taskTimeout_approach = 600;
-_missionStartTime = time;
-_hasShown2MinHint = false;
 
 _markerText2 = localize "STR_DUWS_T_c4";
 
@@ -479,18 +476,14 @@ sleep 5;
 
 
 waitUntil {
-    sleep 1; 
-    if ((time - _missionStartTime) >= (_taskTimeout_approach - 120) && !_hasShown2MinHint) then {
-        [{hint localize "STR_DUWS_T_fxyys123"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-        _hasShown2MinHint = true;
-    };
-    pilot_west_close || !(alive _pilot) || (time - _missionStartTime) > _taskTimeout_approach
+    sleep 1;
+    pilot_west_close || !(alive _pilot) || time > _deadline
 };
 
 #define CLEANUP_PILOT(pilot) \
     [pilot] call DUWS_fnc_cleanupPilotActions; \
     [pilot] remoteExec ["DUWS_fnc_cleanupPilotActions", 0];
-if (!pilot_west_close && (time - _missionStartTime) > _taskTimeout_approach) exitWith {
+if (!pilot_west_close && time > _deadline) exitWith {
     CLEANUP_PILOT(_pilot);
     if (!isNull attachedTo _pilot) then { detach _pilot; };
     [_markername2] call fnc_missionMarkerClear;
@@ -517,7 +510,16 @@ _pilot disableAI "PATH";
 
 sleep 55;
 
-waitUntil {sleep 1; (_pilot distance PosOfBLUHQ)<50 OR !(alive _pilot)};
+waitUntil {sleep 1; (_pilot distance PosOfBLUHQ)<50 OR !(alive _pilot) OR time > _deadline};
+
+if (alive _pilot && (_pilot distance PosOfBLUHQ) >= 50 && time > _deadline) exitWith {
+    CLEANUP_PILOT(_pilot);
+    if (!isNull attachedTo _pilot) then { detach _pilot; };
+    [_markername2] call fnc_missionMarkerClear;
+    [{hint localize "STR_DUWS_T_mission_deadline_fail"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+    [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
+    [_targetpos,_radius, "mission_rescue_pilot"] call fnc_mission_end;
+};
 
 if (!(alive _pilot)) exitWith {
     CLEANUP_PILOT(_pilot);

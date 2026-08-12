@@ -4,8 +4,9 @@ if (!([10, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_beg
 
 
 _radius = 400;
-_cpreward = 25;
-_apreward = 24;
+_cpreward = DUWS_curReward select 0;
+_apreward = DUWS_curReward select 1;
+_deadline = DUWS_curDeadlineAt;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_radarletsdothis";
 _message1 = ([localize "STR_DUWS_T_radarend"] call fnc_cs);
@@ -145,7 +146,11 @@ _message = ([localize "STR_DUWS_T_radarcopy"] call fnc_cs);
 sleep 5;
 
 
-waitUntil {sleep 5; !alive _vehicle_7 || (damage _vehicle_7) == 1};
+waitUntil {sleep 5; !alive _vehicle_7 || (damage _vehicle_7) == 1 || time > _deadline};
+
+if (time > _deadline && alive _vehicle_7 && (damage _vehicle_7) < 1) exitWith {
+    [_VARtaskgeneratedName, _markername2, "mission_destroy_radar", _targetpos, _radius] call fnc_mission_deadline_fail;
+};
 
 // Overlord's line, not the player's: _speaker was reassigned to the player callsign above
 // for the intervening exchange, which left this congratulation attributed to Alpha 1-1.
