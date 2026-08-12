@@ -5330,8 +5330,8 @@
                 <German>Action Squad an "Overlord" – Anfrage zum Luftabwurf eines zivilen Notfahrzeugs an meiner Position, over.</German>
                 <Spanish>Action Squad a "Overlord" – solicito el lanzamiento aéreo de un vehículo de emergencia civil en mi posición, over.</Spanish>
                 <Chinesesimp>"霸王"，我的位置需要投送一辆民用紧急载具，完毕。</Chinesesimp>
-                <Original>To Overlord, requesting a civilian vehicle drop on my position, over.</Original>
-                <English>To Overlord, requesting a civilian vehicle drop on my position, over.</English>
+                <Original>To Overlord, requesting a vehicle drop on my position, over.</Original>
+                <English>To Overlord, requesting a vehicle drop on my position, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_uavscancall">
                 <German>Alle AO-Einheiten, hier ist "Overlord 1-1" – UAV-Aufklärung ist an markierter Position online.</German>
@@ -7019,8 +7019,8 @@
                 <English>The Virtual Arsenal if the armory is unlocked, Quick Kits, and a squad heal and rearm.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_veh_drop">
-                <Original>A helicopter drops a civilian transport vehicle.</Original>
-                <English>A helicopter drops a civilian transport vehicle.</English>
+                <Original>A helicopter drops a light vehicle of your choice.</Original>
+                <English>A helicopter drops a light vehicle of your choice.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_uav">
                 <Original>A recon drone scans units in range and marks them on your map.</Original>
