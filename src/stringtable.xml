@@ -3763,8 +3763,8 @@
                 <German>Distance Bonus: 2x CP, AP</German>
                 <Spanish>Distance Bonus: 2x CP, AP</Spanish>
                 <Chinesesimp>Distance Bonus: 2x CP, AP</Chinesesimp>
-                <Original>Distance Bonus: 2x CP, AP</Original>
-                <English>Distance Bonus: 2x CP, AP</English>
+                <Original>Difficulty Bonus: %1x CP, AP</Original>
+                <English>Difficulty Bonus: %1x CP, AP</English>
             </Key>
             <Key ID="STR_DUWS_T_reward_civsoff_tag">
                 <German>Civilians Off: 1.5x CP</German>

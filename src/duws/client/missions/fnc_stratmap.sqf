@@ -56,6 +56,13 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   // ten extra times to build a list no one reads to the bottom of.
   _missionDraw = 7 min (count _missionCount);
 
+  // Split the draw by difficulty: most offers seat near the frontline (easy, base pay); the rest push
+  // deep into enemy ground (hard, a difficulty-scaled bonus). Hard is capped at 3 and easy takes the
+  // remainder, so a short pool degrades to fewer hard rather than a negative easy count.
+  private _hardCount = 3 min _missionDraw;
+  private _easyCount = _missionDraw - _hardCount;
+  private _hardOffers = [];   // [name, depth-from-friendly] per hard offer -> multiplier after the loop
+
   // Weighting for the anchor search. A request is drawn onto the frontline -- the seam where
   // friendly-held ground (HQ, FOBs, captured zones) meets OPFOR-held ground -- with a broad enough
   // spread that offers straddle it into both sides rather than piling on one point. The fortified
@@ -112,26 +119,27 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
       _items selectRandomWeighted _weights
   };
 
-  // Urban weight: a bell peaked on the frontline. enemyness is 0 in the friendly rear, 0.5 on the seam,
-  // ->1 deep in enemy ground; the bell peaks at 0.5 and thins toward either extreme (never zero, so the
-  // spread into both sides survives), then zones push hard and hardpoints gently.
+  // Urban weight: a bell peaked on _peakEnemyness (set per offer). enemyness is 0 in the friendly rear,
+  // 0.5 on the seam, ->1 deep in enemy ground; the bell peaks on that per-offer target and thins toward
+  // either extreme (never zero, so the spread survives), then zones push hard and hardpoints gently. An
+  // easy offer targets the seam (0.5); a hard offer a deeper target pulls it into enemy ground.
   private _fnUrbanWeight = {
       private _pos = _this;
       private _dFri = if (_friendlyAnchors isEqualTo []) then {1e6} else {selectMin (_friendlyAnchors apply {_pos distance2D _x})};
       private _dOpf = if (_opforCenters isEqualTo []) then {_dFri} else {selectMin (_opforCenters apply {_pos distance2D _x})};
       private _enemyness = _dFri / ((_dFri + _dOpf) max 1);
-      private _front = 1 / (1 + (((_enemyness - 0.5) / _frontWidth) ^ 2));
+      private _front = 1 / (1 + (((_enemyness - _peakEnemyness) / _frontWidth) ^ 2));
       _front
         * ([_pos, _zoneFoot, _zoneRepel] call _fnRepel)
         * ([_pos, _hpFoot, _hpRepel] call _fnRepel)
   };
 
-  // Countryside weight: among OPFOR zones favour the ones on the front -- nearest friendly ground --
-  // softly, so several front zones share the draw rather than the single closest taking it. The band
-  // search and fnc_pos_claimed give the zone standoff here, so no repulsor term.
+  // Countryside weight: among OPFOR zones an easy offer favours the front ones -- nearest friendly
+  // ground -- and a hard offer the deep ones, softly, so several zones share the draw rather than the
+  // single closest/farthest taking it. The band search and fnc_pos_claimed give the standoff, no repulsor.
   private _fnZoneWeight = {
       private _dFri = if (_friendlyAnchors isEqualTo []) then {1} else {1 max (selectMin (_friendlyAnchors apply {_this distance2D _x}))};
-      1 / _dFri
+      if (_hard) then {_dFri} else {1 / _dFri}
   };
 
   while {_counter < _missionDraw} do {
@@ -140,6 +148,12 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 	// full-pool loop and would now stall the bar at 0.6.
 	_progress = _counter / _missionDraw;
 	progressLoadingScreen _progress;
+
+	// This offer's difficulty: the last _hardCount of the draw push deep, the rest seat on the front.
+	// Read by both weight functions (urban via _peakEnemyness, countryside via _hard) down the call
+	// stack -- SQF resolves them dynamically through the callers, the same way the anchors are read.
+	private _hard = _counter >= _easyCount;
+	private _peakEnemyness = if (_hard) then {0.8} else {0.5};
 
 	// DUWS_T "More Urban": near a building, clear of zone centres.
 
@@ -221,6 +235,17 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 		private _name = [0] call fnc_random_name;
 		DUWS_missionSlots set [_currentMission, [_foundSafepos, _name]];
 
+		// Record hard offers with their depth from friendly-held ground; the loop's tail turns
+		// depth into the 1.5x-2x multiplier. Same anchor set the frontier search measured against.
+		if (_hard) then {
+			private _depth = if (_friendlyAnchors isEqualTo []) then {
+				_foundSafepos distance PosOfBLUHQ
+			} else {
+				selectMin (_friendlyAnchors apply {_foundSafepos distance2D _x})
+			};
+			_hardOffers pushBack [_name, _depth];
+		};
+
 		array_of_missions pushBack [
 			_foundSafepos,
 			_launcher,
@@ -236,34 +261,32 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 	};
   };
 
-  // The two deepest offers pay more: rank the built offers by how far their position sits from
-  // friendly-held ground (the same anchors the frontier search used) and flag the two farthest by
-  // name. fnc_mission_reward reads DUWS_rewardBoost back on the server and scales their payout, so
-  // pushing deep into enemy territory is worth the risk. Overwritten each request -- safe because a
-  // request is gated shut while a mission is live (Mission_available).
-  private _depths = array_of_missions apply {
-      private _mp = _x select 0;
-      private _d = if (_friendlyAnchors isEqualTo []) then {
-          _mp distance PosOfBLUHQ
-      } else {
-          selectMin (_friendlyAnchors apply {_mp distance2D _x})
-      };
-      [_d, _x select 2]
+  // Hard offers pay a difficulty-scaled bonus: their multiplier spans 1.5x (shallowest of the hard
+  // set) to 2x (deepest), linear in depth from friendly-held ground. Easy offers get no entry and pay
+  // flat. fnc_mission_reward reads DUWS_rewardBoost back on the server as [name, multiplier] pairs.
+  // Overwritten each request -- safe because a request is gated shut while a mission is live
+  // (Mission_available).
+  private _hardDepths = _hardOffers apply {_x select 1};
+  private _dmin = if (_hardDepths isEqualTo []) then {0} else {selectMin _hardDepths};
+  private _dmax = if (_hardDepths isEqualTo []) then {0} else {selectMax _hardDepths};
+  private _span = (_dmax - _dmin) max 1;   // guard a single hard offer (or a depth tie) against /0
+  DUWS_rewardBoost = _hardOffers apply {
+      _x params ["_nm", "_dp"];
+      [_nm, 1.5 + 0.5 * ((_dp - _dmin) / _span)]
   };
-  _depths sort false;
-  DUWS_rewardBoost = (_depths select [0, 2]) apply {_x select 1};
   publicVariable "DUWS_rewardBoost";
 
-  // Surface the bonus on the map so the incentive is visible: append a red structured-text tag to
-  // each flagged offer's description. The description control renders structured text -- the
-  // per-type briefings already carry <br /> and their base CP/AP figures.
-  private _boostTag = format ["<br /><t color='#ff0000'>%1</t>", localize "STR_DUWS_T_reward_boost_tag"];
+  // Surface the bonus on the map so the incentive is visible: append a red structured-text tag, with
+  // the offer's own multiplier, to each hard offer's description. The description control renders
+  // structured text -- the per-type briefings already carry <br /> and their base CP/AP figures.
   {
-      private _bn = _x;
+      _x params ["_bn", "_bm"];
       private _ri = array_of_missions findIf {(_x select 2) isEqualTo _bn};
       if (_ri >= 0) then {
+          private _tag = format ["<br /><t color='#ff0000'>%1</t>",
+              format [localize "STR_DUWS_T_reward_boost_tag", (round (_bm * 10)) / 10]];
           private _row = array_of_missions select _ri;
-          _row set [3, (_row select 3) + _boostTag];
+          _row set [3, (_row select 3) + _tag];
       };
   } forEach DUWS_rewardBoost;
 
