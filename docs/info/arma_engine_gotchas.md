@@ -1168,3 +1168,42 @@ preserves the row's real elevation, so a ground gun stays grounded and a roof gu
 `fnc_static_baseZ` (`src/duws/shared/functions/fnc_static_roles.sqf`) probes and caches the offset
 per class; `fnc_static_place` there applies the shift only when the class actually changed, so an
 unmodded faction is untouched.
+
+## An empty group is never freed, and each side caps at 144 groups
+
+**`createGroup` claims a group slot that lives until it is explicitly freed. Nothing reclaims an
+empty group on its own — a group self-deletes only if created with `createGroup [side, true]`
+(delete-when-empty) or handed to `deleteGroup`. Each side has a hard cap of 144 groups; once it is
+reached `createGroup` and `BIS_fnc_spawnGroup` return `grpNull` silently, so no new AI spawns at
+all.**
+
+The napalm strike allocated an empty WEST group per fire object — a stray
+`[_bomb] joinSilent createGroup WEST` that grouped a projectile (never a unit, so the group stays
+empty) to a throwaway group, 32 per call, none freed. A handful of napalm calls exhausted the
+side's slots, after which every group-spawning path — reinforcements, taxis, the HC aircraft,
+patrols — failed with no error, surfacing campaign-wide and hours from the strike that caused it.
+`client/supports/fnc_arty.sqf`.
+
+**How to apply:** create transient groups with `createGroup [side, true]`, or `deleteGroup _g` once
+the last member is gone; never leave a `createGroup` whose members can all die or be deleted without
+one of the two. Grouping a non-unit (a projectile, an object) leaks a slot immediately and is always
+a mistake. When AI stops spawning mid-campaign with a clean RPT, read `count allGroups` before
+suspecting the spawner.
+
+## A script marker is never garbage-collected, so every exit path must delete its own
+
+**`createMarker` makes a marker that lives until `deleteMarker` names it. The engine never reaps one
+— not on unit death, not by GC, not at mission end within a session. A path that creates a marker
+and returns before its `deleteMarker` orphans it for the rest of the mission.**
+
+The fire-mission strikes drop two target markers up front and clear them in a tail cleanup. The
+jet-shootdown early-out (`if (!_veh_alive) exitWith {...}`) released the support slot and returned
+without reaching that cleanup, so every air strike — JDAM, laser, cluster, napalm — lost before its
+drop left two grey ellipses on the map for good. Nothing errors; the map just accretes stale
+markers. `client/supports/fnc_arty.sqf`.
+
+**How to apply:** pair every `createMarker` with a `deleteMarker` that *each* exit path reaches —
+clean inside every `exitWith` that can fire after creation, or funnel all paths through one cleanup.
+This is the marker analogue of the group-slot leak above: a script-owned resource the engine will
+not reclaim. Wrecks and corpses differ — the engine's GC does reap those — so an early-out that also
+deletes the downed aircraft is belt-and-braces for the wreck but load-bearing for the markers.
