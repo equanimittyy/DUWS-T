@@ -477,9 +477,13 @@ DUWS_hardpointName = createHashMapFromArray [
 // A radio tower is a strategic objective with 5 km of reach, so it fields a heavier patrol than a lone
 // gun -- a rifle team plus two weapons teams to contest the air and armour a player brings against it. The
 // gun crew is separate and always placed.
+// Artillery and mortars are batteries OPCOM fires from, so their loose garrison scales to what a player
+// brings when they come to destroy the guns: artillery, with the longer reach and the greater loss, holds
+// two weapons teams and a rifle team; a mortar holds one weapons team and a light patrol. Their gun crews
+// are separate and stay resident even while the loose garrison streams, so OPCOM keeps firing between raids.
 DUWS_hardpointGarrison = createHashMapFromArray [
     ["MG", "team"], ["AT", "wp_team"], ["GMG", "team"], ["ROADBLOCK", "team"],
-    ["OP", "team"], ["AA", "wp_team"], ["MORTAR", "team"], ["ARTY", "team"],
+    ["OP", "team"], ["AA", "wp_team"], ["MORTAR", ["wp_team", "patrol"]], ["ARTY", ["wp_team", "wp_team", "team"]],
     ["RADIO", ["team", "wp_team", "wp_team"]], ["MINEFIELD", ""]
 ];
 
