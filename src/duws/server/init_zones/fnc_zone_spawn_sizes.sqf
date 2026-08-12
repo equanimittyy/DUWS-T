@@ -24,11 +24,12 @@
 // tier on the ground at different strengths, for a reason the player cannot read off either.
 //
 // Tier therefore carries the whole spread, and the dug-in half is where it is carried: garrison
-// slots climb two to six across the rows. A flat count on every row leaves a tier I zone and a tier
-// IV zone far closer than the rest of their rows suggest.
+// slots climb from none at tier I to six at tier IV, so the lightest zone is all mobile and only the
+// heavier ones dig in. A flat count on every row leaves a tier I zone and a tier IV zone far closer
+// than the rest of their rows suggest.
 // --DUWS-UNITCOMP BEGIN name="Zone tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_zoneSpawnTiers = [
-    ["closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:car", "garrison:garrison_element", "garrison:garrison_element"],
+    ["closepatrol:patrol", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:wp_team", "closepatrol:car"],
     ["closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:wp_team", "widepatrol:wp_team", "closepatrol:car", "closepatrol:apc", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"],
     ["closepatrol:sniper_element", "closepatrol:sniper_element", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:wp_team", "widepatrol:wp_team", "closepatrol:car", "closepatrol:apc", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"],
     ["closepatrol:sniper_element", "closepatrol:sniper_element", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:patrol", "closepatrol:team", "closepatrol:team", "widepatrol:wp_team", "widepatrol:wp_team", "closepatrol:car", "closepatrol:tank", "closepatrol:attackheli", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"]
