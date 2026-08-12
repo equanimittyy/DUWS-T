@@ -51,18 +51,20 @@ fnc_support_catalogue = {
 		["veh_drop",  "CONS",  5, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   false],
 		["uav",       "CONS",  6, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true],
 		["helotaxi",  "CONS",  4, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false],
-		["helolift",  "CONS",  6, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false],
+		["helolift",  "CONS",  5, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false],
 		["boattaxi",  "CONS",  2, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  false],
 		["arty",      "CONS",  9, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  22],
 		["mortar",    "CONS",  5, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false, 12],
 		["mortar_smoke","CONS",5, "support_mortar_smoke_available","STR_DUWS_T_mortar_smoke_row",     "mortar_smoke",false],
 		["jdam",      "CONS",  5, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,  10],
-		["laser",     "CONS",  4, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,   8],
+		["laser",     "CONS",  5, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,  10],
 		["cluster",   "CONS", 11, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  26],
 		["napalm",    "CONS",  7, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  15],
 		["hcAttChop", "CONS",  8, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  18],
 		["hcCAS",     "CONS", 12, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  30],
-		["paradrop",  "CONS",  6, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   true]
+		// Twelve men dropped behind the line (client/supports/fnc_paradrop.sqf). Priced a shade over the
+		// 12-CP High Command rifle squad it mirrors -- same headcount, the premium being the air insertion.
+		["paradrop",  "CONS", 15, "support_paradrop_available",    "STR_DUWS_T_9hmlads9",             "paradrop",   true]
 	]
 };
 
