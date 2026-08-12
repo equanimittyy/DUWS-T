@@ -370,9 +370,6 @@ DUWS_fnc_arsenal_unstock = {
         // screen long enough to flicker. paintCounts is near-free on frames where nothing was rebuilt
         // (it skips any list already carrying the prefix); forcePaint makes the first frame stamp, and
         // later makes a live re-stock or insert re-stamp the list it appended an unprefixed row to.
-        // Debug aid (DEBUG level only): arm the [0]-row collector paintCounts fills, so the close-time
-        // diagnostic below can report what the overlay stamped [0] and why. Free when DEBUG is off.
-        if (duws_log_level >= 4) then { DUWS_dbg_zeroRows = [] };
         private _paintEH = -1;
         if (_isRestricted) then {
             missionNamespace setVariable ["DUWS_arsenal_forcePaint", true];
@@ -432,20 +429,6 @@ DUWS_fnc_arsenal_unstock = {
 
                 _refLoadout = _currentLoadout;
             };
-        };
-
-        // Debug aid: report each class the overlay stamped [0] with whether some friendly class lists it
-        // as baseWeapon -- true means a preset is friendly but its base row was not folded (a preset/base
-        // arsenal mismatch), false means the class reached the shelf from a path the friendly build never
-        // saw. DEBUG level only; armed at open.
-        if (_isRestricted && {!isNil "DUWS_dbg_zeroRows"}) then {
-            private _fr = missionNamespace getVariable ["DUWS_friendlyArsenal", []];
-            private _detail = DUWS_dbg_zeroRows apply {
-                private _c = _x;
-                private _hasPreset = (_fr findIf { isClass (configFile >> "CfgWeapons" >> _x) && {getText (configFile >> "CfgWeapons" >> _x >> "baseWeapon") == _c} }) >= 0;
-                [_c, _hasPreset]
-            };
-            ["DEBUG", "GEAR", format ["arsenal [0] rows (cls, presetInFriendly)=%1", _detail]] call fnc_log;
         };
 
         // Close. Drop the per-frame painter first so it cannot run against a tearing-down display.

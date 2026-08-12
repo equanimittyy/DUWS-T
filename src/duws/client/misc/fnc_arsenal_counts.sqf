@@ -93,9 +93,6 @@ DUWS_fnc_arsenal_paintCounts = {
             private _cls = if (_isN) then { _ctrl lnbData [_i, 0] } else { _ctrl lbData _i };
             if (_cls == "") then { continue };
             private _amt = [_cls] call DUWS_fnc_arsenal_countFor;
-            // Debug aid: record [0]-stamped classes for the enforcer's close-time diagnostic. The nil
-            // guard keeps this free unless a DEBUG-level arsenal session armed the collector.
-            if (_amt == 0 && {!isNil "DUWS_dbg_zeroRows"}) then { DUWS_dbg_zeroRows pushBackUnique _cls; };
             // Prefix is rebuilt onto the config display name, never onto the row's current text, so a
             // repaint cannot stack "[3] [3] name".
             private _pfx = if (_amt < 0) then { "[∞] " } else { format ["[%1] ", _amt] };
