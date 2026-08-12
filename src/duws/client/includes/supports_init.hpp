@@ -43,9 +43,6 @@ support_count = 0;
 DUWS_support_paid = createHashMap;
 DUWS_support_comm = createHashMap;
 
-if (isNil "support_veh_recycle_available") then {
-    support_veh_recycle_available = false;
-};
 if (isNil "support_mobile_HQ_available") then {
     support_mobile_HQ_available = false;
 };

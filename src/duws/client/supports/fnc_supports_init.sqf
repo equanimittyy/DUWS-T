@@ -22,10 +22,13 @@
 // CP pool; the CP half is carried for one price format across the catalogue.
 fnc_support_defs = {
 	private _defs = [
-		["armory",    "PERM", 10, "support_armory_available",      "STR_DUWS_T_kw2lnaig",             "",           false],
-		["halo",      "PERM", 15, "support_halo_available",        "STR_DUWS_T_xghf3qqd",             "",           true],
-		["repair",    "PERM",  5, "support_veh_repair_available",  "STR_DUWS_T_vehicle_repair",       "",           false],
-		["recycle",   "PERM",  5, "support_veh_recycle_available", "STR_DUWS_T_recyclestation1",    "",           false],
+		["armory",    "PERM", 20, "support_armory_available",      "STR_DUWS_T_kw2lnaig",             "",           false],
+		["halo",      "PERM", 20, "support_halo_available",        "STR_DUWS_T_xghf3qqd",             "",           true],
+		// One vehicle depot buys both services -- its apply case activates the repair and recycle
+		// stations together. The flag keeps its pre-merge name (support_veh_repair_available): it is
+		// canonical here (drives the world icon and the unlock card), and renaming it would make a
+		// depot bought in an existing campaign save read as un-owned on load.
+		["vehicle_depot", "PERM", 20, "support_veh_repair_available", "STR_DUWS_T_vehicle_repair",     "",           false],
 		["mobile_HQ", "PERM", 10, "support_mobile_HQ_available",   "STR_DUWS_T_b7gmddq3",             "",           false],
 		["fob",       "PERM", 10, "support_FOB_available",         "STR_DUWS_T_fob_request_row",      "fob_support",false],
 
@@ -34,8 +37,8 @@ fnc_support_defs = {
 		// owned once bought, mirroring the enemy's tower amplifier without a structure. Bought in order,
 		// so II and III are hidden until the prior tier is owned (the filter below), the way mhq_slot is.
 		["radio1",    "PERM", 15, "support_radio1_available",      "STR_DUWS_T_radio_tower_1",        "",           false],
-		["radio2",    "PERM", 25, "support_radio2_available",      "STR_DUWS_T_radio_tower_2",        "",           false],
-		["radio3",    "PERM", 40, "support_radio3_available",      "STR_DUWS_T_radio_tower_3",        "",           false],
+		["radio2",    "PERM", 40, "support_radio2_available",      "STR_DUWS_T_radio_tower_2",        "",           false],
+		["radio3",    "PERM", 60, "support_radio3_available",      "STR_DUWS_T_radio_tower_3",        "",           false],
 
 		// The designation radio, a slot at a time rather than handed to every lead on unlock. Free
 		// because the team paid at the permanent row: what this costs is the slot.
@@ -82,13 +85,13 @@ fnc_support_defs = {
 };
 
 // The AP tier each advanced support sits behind, keyed by support key; anything unlisted is tier 1
-// and always available. Mirrors the vehicle rungs -- transport lift and indirect fire at tier 3, the
-// gunship and heavy fire at tier 4, the CAS jet and HALO insertion at tier 5.
+// and always available. Mirrors the vehicle rungs -- transport lift, HALO insertion and indirect fire
+// at tier 3, the gunship and heavy fire at tier 4, the CAS jet at tier 5.
 DUWS_support_tiers = [
 	["uav", 2],
-	["mortar", 3], ["mortar_smoke", 3], ["jdam", 3], ["laser", 3], ["siva", 3], ["sawp", 3], ["paradrop", 3], ["helolift", 3],
+	["mortar", 3], ["mortar_smoke", 3], ["jdam", 3], ["laser", 3], ["siva", 3], ["sawp", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3],
 	["arty", 4], ["cluster", 4], ["napalm", 4], ["hcAttChop", 4],
-	["hcCAS", 5], ["halo", 5]
+	["hcCAS", 5]
 ];
 fnc_support_tier = {
 	params ["_key"];
@@ -276,8 +279,10 @@ fnc_support_apply = {
 				};
 			} forEach _sites;
 		};
-		case "repair":  { [] remoteExec ["fnc_activateBaseRepairStation", 2] };
-		case "recycle": { [] remoteExec ["fnc_activateBaseRecycleStation", 2] };
+		case "vehicle_depot": {
+			[] remoteExec ["fnc_activateBaseRepairStation", 2];
+			[] remoteExec ["fnc_activateBaseRecycleStation", 2];
+		};
 	};
 };
 

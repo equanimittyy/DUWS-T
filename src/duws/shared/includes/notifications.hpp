@@ -244,18 +244,13 @@ class CfgNotifications
         description = "$STR_DUWS_T_UNLOCK_FOB";
     };
 
-    // The two depot stations share the engine's repair action icon: they are one pair of vehicle
-    // services at the base, and no stock glyph depicts recycling to tell them apart with.
-    class unlock_repair : SupportUnlock
+    // The combined vehicle depot (repair + recycle) wears the engine's repair action icon: no stock
+    // glyph depicts recycling, and repair is the closer of the pair. Class name matches the "repair"
+    // support key's successor -- the perm-grant card is raised as unlock_<key>.
+    class unlock_vehicle_depot : SupportUnlock
     {
         iconPicture = "\A3\ui_f\data\IGUI\Cfg\Actions\repair_ca.paa";
         description = "$STR_DUWS_T_UNLOCK_REPAIR";
-    };
-
-    class unlock_recycle : SupportUnlock
-    {
-        iconPicture = "\A3\ui_f\data\IGUI\Cfg\Actions\repair_ca.paa";
-        description = "$STR_DUWS_T_UNLOCK_RECYCLE";
     };
 
     // The three radio tiers wear the recon-radar glyph the uav_recon comm item wears -- the closest
