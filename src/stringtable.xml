@@ -2217,16 +2217,16 @@
                 <English>Activate</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_STATUS_NONE">
-                <Original>You are not currently disguised.</Original>
-                <English>You are not currently disguised.</English>
+                <Original>Active Disguise: None</Original>
+                <English>Active Disguise: None</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_STATUS_CIV">
-                <Original>Active disguise: civilian.</Original>
-                <English>Active disguise: civilian.</English>
+                <Original>Active Disguise: Civilian</Original>
+                <English>Active Disguise: Civilian</English>
             </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_STATUS_ENEMY">
-                <Original>Active disguise: enemy soldier.</Original>
-                <English>Active disguise: enemy soldier.</English>
+                <Original>Active Disguise: OPFOR</Original>
+                <English>Active Disguise: OPFOR</English>
             </Key>
             <Key ID="STR_DUWS_T_ENEMY_DISGUISE_SAME_GEAR">
                 <Original>Your vest and helmet are already known to the enemy. Use different gear and try again.</Original>

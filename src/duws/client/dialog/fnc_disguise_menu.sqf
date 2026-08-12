@@ -4,21 +4,32 @@
 // are read once on open (re-open to refresh) -- no polling loop needed for a picker.
 if (!hasInterface) exitWith {};
 
-if (!createDialog "disguise_dialog") exitWith {};
-waitUntil { dialog };
+disableSerialization;
+private _display = createDialog ["disguise_dialog", false];
+if (isNull _display) exitWith {};
 
 // DUWS_disguised / DUWS_enemyDisguised carry the global flag (the disguise functions
 // broadcast them), so the current-state line is correct on the client without a round-trip.
-private _status = if (player getVariable ["DUWS_disguised", false]) then {
-    localize "STR_DUWS_T_DISGUISE_MENU_STATUS_CIV"
+// The status row doubles as a state light -- civilian purple, OPFOR red, none light grey. Only
+// this one row is tinted, so the panel reads at a glance which cover (if any) is live. None is a
+// dark grey rather than light, to hold contrast against the white row text.
+private _status = "";
+private _statusBg = [];
+if (player getVariable ["DUWS_disguised", false]) then {
+    _status = localize "STR_DUWS_T_DISGUISE_MENU_STATUS_CIV";
+    _statusBg = [0.4, 0, 0.5, 0.7];
 } else {
     if (player getVariable ["DUWS_enemyDisguised", false]) then {
-        localize "STR_DUWS_T_DISGUISE_MENU_STATUS_ENEMY"
+        _status = localize "STR_DUWS_T_DISGUISE_MENU_STATUS_ENEMY";
+        _statusBg = [0.5, 0, 0, 0.7];
     } else {
-        localize "STR_DUWS_T_DISGUISE_MENU_STATUS_NONE"
+        _status = localize "STR_DUWS_T_DISGUISE_MENU_STATUS_NONE";
+        _statusBg = [0.25, 0.25, 0.25, 0.7];
     };
 };
-ctrlSetText [8100, _status];
+private _statusCtrl = _display displayCtrl 8100;
+_statusCtrl ctrlSetText _status;
+_statusCtrl ctrlSetBackgroundColor _statusBg;
 
 // Civilian mode needs a living population to blend into: same gate the old civ
 // hold-action used. Grey the button and swap the card text when it can't run.
@@ -27,6 +38,6 @@ ctrlSetText [8100, _status];
 // drift out of sync.
 private _civAllowed = (isNil "CIV_PRESENCE") || {!(CIV_PRESENCE in ["NONE", "RAVAGE", "WBK"])};
 if (!_civAllowed) then {
-    ctrlEnable [8201, false];
-    ctrlSetText [8101, localize "STR_DUWS_T_DISGUISE_MENU_CIV_UNAVAIL"];
+    (_display displayCtrl 8201) ctrlEnable false;
+    (_display displayCtrl 8101) ctrlSetText (localize "STR_DUWS_T_DISGUISE_MENU_CIV_UNAVAIL");
 };
