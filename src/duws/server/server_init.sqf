@@ -418,11 +418,6 @@ sleep 15;
 if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK" && CIV_PRESENCE != "NONE") then {
     [] spawn fnc_scanCivilianGear;
 };
-// Delayed so faction globals are initialised before the enemy-gear scan reads them.
-[] spawn {
-    sleep 15;
-    [] spawn fnc_scanEnemyGear;
-};
 // These cooldowns stamp diag_tickTime, which counts from Arma process start, not mission
 // start. Resuming an autosave in a fresh Arma session restarts that clock, so every stamp
 // then sits in the future and wedges its action for as long as the old session had run.
@@ -435,7 +430,6 @@ if (isNil "DUWS_cooldownMonitor_running") then {
 
     [] spawn {
         private _cooldownVars = [
-            "DUWS_enemyDisguise_lastUse",
             "DUWS_disguise_lastUse",
             "DUWS_hirePartisans_lastUse",
             "DUWS_hirePMC_lastUse"

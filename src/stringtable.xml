@@ -2183,7 +2183,7 @@
                 <English>Captured weapons and gear added to the arsenal</English>
             </Key>
         </Container>
-        <Container name="Enemy Disguise">
+        <Container name="Disguise Menu">
             <Key ID="STR_DUWS_T_DISGUISE_MENU_ACTION">
                 <Original>Disguise</Original>
                 <English>Disguise</English>
@@ -2204,14 +2204,6 @@
                 <Original>Not available in this campaign - there is no civilian population to blend into.</Original>
                 <English>Not available in this campaign - there is no civilian population to blend into.</English>
             </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_MENU_ENEMY_TITLE">
-                <Original>Enemy</Original>
-                <English>Enemy</English>
-            </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_MENU_ENEMY_DESC">
-                <Original>Pass as an enemy soldier for a short window. Needs a full set of enemy vest, helmet and primary weapon; the uniform is applied for you. Cover breaks if you fire, change gear, or get too close.</Original>
-                <English>Pass as an enemy soldier for a short window. Needs a full set of enemy vest, helmet and primary weapon; the uniform is applied for you. Cover breaks if you fire, change gear, or get too close.</English>
-            </Key>
             <Key ID="STR_DUWS_T_DISGUISE_MENU_ACTIVATE">
                 <Original>Activate</Original>
                 <English>Activate</English>
@@ -2223,150 +2215,6 @@
             <Key ID="STR_DUWS_T_DISGUISE_MENU_STATUS_CIV">
                 <Original>Active Disguise: Civilian</Original>
                 <English>Active Disguise: Civilian</English>
-            </Key>
-            <Key ID="STR_DUWS_T_DISGUISE_MENU_STATUS_ENEMY">
-                <Original>Active Disguise: OPFOR</Original>
-                <English>Active Disguise: OPFOR</English>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_SAME_GEAR">
-                <Original>Your vest and helmet are already known to the enemy. Use different gear and try again.</Original>
-                <English>Your vest and helmet are already known to the enemy. Use different gear and try again.</English>
-                <Chinesesimp>你不能使用与上次完全相同的背心和头盔，请更换伪装装备后再试。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_ACTIVATED">
-                <Original>Disguise active. Keep your distance, hold fire.</Original>
-                <English>Disguise active. Keep your distance, hold fire.</English>
-                <Chinesesimp>敌人伪装已激活。远离敌人，非必要情况下不要随意开火。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_RADIO_1">
-                <Original>Delta 1-3, this is Siren 1-4. Form up on me, over.</Original>
-                <English>Delta 1-3, this is Siren 1-4. Form up on me, over.</English>
-                <Chinesesimp>"德尔塔1-3，这里是塞壬1-4，向我集合，完毕。"</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_RADIO_2">
-                <Original>Siren 1-4 to Delta 1-3, send your status, over... Where the hell are you?</Original>
-                <English>Siren 1-4 to Delta 1-3, send your status, over... Where the hell are you?</English>
-                <Chinesesimp>"这里是塞壬1-4，德尔塔1-3，报告情况，完毕...你们他妈人呢？"</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_RADIO_3">
-                <Original>All units, this is HQ. Report your status. Delta 1-3, sitrep, now.</Original>
-                <English>All units, this is HQ. Report your status. Delta 1-3, sitrep, now.</English>
-                <Chinesesimp>"所有单位，这里是总部，报告你们的位置。德尔塔1-3，立刻情况报告！"</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_RADIO_4">
-                <Original>Delta 1-3, your tracker's been moving nonstop. Is that your element? Send a sitrep, over.</Original>
-                <English>Delta 1-3, your tracker's been moving nonstop. Is that your element? Send a sitrep, over.</English>
-                <Chinesesimp>"德尔塔1-3，我们看到你的GPS终端方位在不停更新，那是你的单位吗？确认情况！完毕！"</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_RADIO_5">
-                <Original>All units, this is HQ. Delta 1-3 is presumed KIA. Assume BLUFOR saboteurs are in the area. Stay sharp.</Original>
-                <English>All units, this is HQ. Delta 1-3 is presumed KIA. Assume BLUFOR saboteurs are in the area. Stay sharp.</English>
-                <Chinesesimp>"总部呼叫所有单位，德尔塔1-3疑似已经在行动中阵亡！蓝军的渗透部队很可能在周围活动！保持警惕！"</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_WARNING">
-                <Original>Too close to an enemy. Move away within 5 seconds or you are exposed.</Original>
-                <English>Too close to an enemy. Move away within 5 seconds or you are exposed.</English>
-                <Chinesesimp>你离敌人太近了！5秒内远离否则将暴露。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_FIRE">
-                <Original>Disguise broken: You fired a weapon.</Original>
-                <English>Disguise broken: You fired a weapon.</English>
-                <Chinesesimp>伪装暴露：你开了枪。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_DISTANCE">
-                <Original>Disguise broken: You stayed too close to an enemy.</Original>
-                <English>Disguise broken: You stayed too close to an enemy.</English>
-                <Chinesesimp>伪装暴露：你距离敌人过近且未及时远离。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_GEAR">
-                <Original>Disguise broken: uniform, vest, helmet or weapon changed.</Original>
-                <English>Disguise broken: uniform, vest, helmet or weapon changed.</English>
-                <Chinesesimp>伪装暴露：你更换了制服、背心、头盔或主武器。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_BACKPACK">
-                <Original>Disguise broken: backpack is not enemy issue.</Original>
-                <English>Disguise broken: backpack is not enemy issue.</English>
-                <Chinesesimp>伪装暴露：你更换了非敌军类型的背包。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_SECONDARY">
-                <Original>Disguise broken: launcher is not enemy issue.</Original>
-                <English>Disguise broken: launcher is not enemy issue.</English>
-                <Chinesesimp>伪装暴露：你装备了非敌军副手武器。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_HANDGUN">
-                <Original>Disguise broken: You drew a handgun that isn't enemy issue.</Original>
-                <English>Disguise broken: You drew a handgun that isn't enemy issue.</English>
-                <Chinesesimp>伪装暴露：你装备了非敌军手枪。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_BROKEN_NVG">
-                <Original>Disguise broken: NVGs not enemy issue.</Original>
-                <English>Disguise broken: NVGs not enemy issue.</English>
-                <Chinesesimp>伪装暴露：你装备了非敌军夜视仪。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_EXPIRED">
-                <Original>Enemy disguise expired. You are now vulnerable.</Original>
-                <English>Enemy disguise expired. You are now vulnerable.</English>
-                <Chinesesimp>敌人伪装已失效。你现在是正常状态。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_COOLDOWN">
-                <Original>Enemy disguise cooldown: %1 min %2 sec remaining</Original>
-                <English>Enemy disguise cooldown: %1 min %2 sec remaining</English>
-                <Chinesesimp>敌人伪装冷却剩余：%1 分 %2 秒。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_NO_ENEMY_DATA">
-                <Original>Enemy gear data not yet available.</Original>
-                <English>Enemy gear data not yet available.</English>
-                <Chinesesimp>敌军装备数据不可用，请稍等。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_NO_VEST">
-                <Original>You must wear an enemy vest.</Original>
-                <English>You must wear an enemy vest.</English>
-                <Chinesesimp>你必须穿着敌军背心。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_NO_HEADGEAR">
-                <Original>You must wear an enemy helmet/headgear.</Original>
-                <English>You must wear an enemy helmet/headgear.</English>
-                <Chinesesimp>你必须佩戴敌军头盔/头饰。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_NO_PRIMARY">
-                <Original>You must equip an enemy primary weapon.</Original>
-                <English>You must equip an enemy primary weapon.</English>
-                <Chinesesimp>你必须装备敌军主武器。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_WRONG_VEST">
-                <Original>Your vest does not match the enemy's.</Original>
-                <English>Your vest does not match the enemy's.</English>
-                <Chinesesimp>你的背心不是敌军类型。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_WRONG_HEADGEAR">
-                <Original>Your headgear does not match the enemy's.</Original>
-                <English>Your headgear does not match the enemy's.</English>
-                <Chinesesimp>你的头盔不是敌军类型。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_WRONG_PRIMARY">
-                <Original>Your primary weapon does not match the enemy's.</Original>
-                <English>Your primary weapon does not match the enemy's.</English>
-                <Chinesesimp>你的主武器不是敌军类型。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_WRONG_BACKPACK">
-                <Original>Your backpack does not match the enemy's.</Original>
-                <English>Your backpack does not match the enemy's.</English>
-                <Chinesesimp>你的背包不是敌军类型。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_WRONG_SECONDARY">
-                <Original>Your secondary weapon does not match the enemy's.</Original>
-                <English>Your secondary weapon does not match the enemy's.</English>
-                <Chinesesimp>你的副手武器不是敌军类型。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_WRONG_HANDGUN">
-                <Original>Your handgun does not match the enemy's.</Original>
-                <English>Your handgun does not match the enemy's.</English>
-                <Chinesesimp>你的手枪不是敌军类型。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_ENEMY_DISGUISE_WRONG_NVG">
-                <Original>Your night vision goggles do not match the enemy's.</Original>
-                <English>Your night vision goggles do not match the enemy's.</English>
-                <Chinesesimp>你的夜视仪不是敌军类型。</Chinesesimp>
             </Key>
         </Container>
         <Container name="Civilian Disguise">

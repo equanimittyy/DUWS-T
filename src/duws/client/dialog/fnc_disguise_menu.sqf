@@ -8,24 +8,18 @@ disableSerialization;
 private _display = createDialog ["disguise_dialog", false];
 if (isNull _display) exitWith {};
 
-// DUWS_disguised / DUWS_enemyDisguised carry the global flag (the disguise functions
-// broadcast them), so the current-state line is correct on the client without a round-trip.
-// The status row doubles as a state light -- civilian purple, OPFOR red, none light grey. Only
-// this one row is tinted, so the panel reads at a glance which cover (if any) is live. None is a
-// dark grey rather than light, to hold contrast against the white row text.
+// DUWS_disguised carries the global flag (fnc_disguiseAsCivilian broadcasts it), so the
+// current-state line is correct on the client without a round-trip. The status row doubles as a
+// state light -- civilian purple, none dark grey (dark, not light, to hold contrast against the
+// white row text). Only this one row is tinted.
 private _status = "";
 private _statusBg = [];
 if (player getVariable ["DUWS_disguised", false]) then {
     _status = localize "STR_DUWS_T_DISGUISE_MENU_STATUS_CIV";
     _statusBg = [0.4, 0, 0.5, 0.7];
 } else {
-    if (player getVariable ["DUWS_enemyDisguised", false]) then {
-        _status = localize "STR_DUWS_T_DISGUISE_MENU_STATUS_ENEMY";
-        _statusBg = [0.5, 0, 0, 0.7];
-    } else {
-        _status = localize "STR_DUWS_T_DISGUISE_MENU_STATUS_NONE";
-        _statusBg = [0.25, 0.25, 0.25, 0.7];
-    };
+    _status = localize "STR_DUWS_T_DISGUISE_MENU_STATUS_NONE";
+    _statusBg = [0.25, 0.25, 0.25, 0.7];
 };
 private _statusCtrl = _display displayCtrl 8100;
 _statusCtrl ctrlSetText _status;

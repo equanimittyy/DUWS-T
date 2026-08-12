@@ -513,10 +513,6 @@ fnc_hirePartisans = compile preprocessFileLineNumbers "duws\server\misc\fnc_hire
 publicVariable "fnc_hirePartisans";
 fnc_hirePMC = compile preprocessFileLineNumbers "duws\server\misc\fnc_hirePMC.sqf";
 publicVariable "fnc_hirePMC";
-fnc_scanEnemyGear = compile preprocessFileLineNumbers "duws\server\misc\fnc_scanEnemyGear.sqf";
-publicVariable "fnc_scanEnemyGear";
-fnc_disguiseAsEnemy = compile preprocessFileLineNumbers "duws\server\misc\fnc_disguiseAsEnemy.sqf";
-publicVariable "fnc_disguiseAsEnemy";
 fnc_moreUrban_locations = compile preprocessFileLineNumbers "duws\server\misc\fnc_moreUrban_locations.sqf";publicVariable "fnc_moreUrban_locations";
 fnc_hc_init = compile preprocessFileLineNumbers "duws\client\misc\fnc_hc_init.sqf";publicVariable "fnc_hc_init";
 fnc_zones_bonus = compile preprocessFileLineNumbers "duws\client\misc\fnc_zones_bonus.sqf";publicVariable "fnc_zones_bonus";
