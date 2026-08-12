@@ -19,9 +19,9 @@
 //
 // [key, kind, cost, flag, label, comm item, insurgent-blocked, AP cost]
 // The 8th column is the Army Power half of a support's dual price -- carried by the indirect-fire and
-// air-strike rows and, alone among the permanent unlocks, by HALO. Absent (read as 0 via `param [7, 0]`)
-// on every other row, which pays CP only. AP is what actually decides an advanced purchase under an
-// abundant CP pool; the CP half is carried for one price format across the catalogue.
+// air-strike rows and, among the permanent unlocks, by HALO and the upper two radio towers. Absent
+// (read as 0 via `param [7, 0]`) on every other row, which pays CP only. AP is what actually decides
+// an advanced purchase under an abundant CP pool; the CP half is carried for one price across the catalogue.
 //
 // A support's manual description is keyed by convention, not carried here: STR_DUWS_T_sdesc_<key>.
 fnc_support_catalogue = {
@@ -41,21 +41,21 @@ fnc_support_catalogue = {
 		// owned once bought, mirroring the enemy's tower amplifier without a structure. Bought in order,
 		// so II and III are hidden until the prior tier is owned (the filter below), the way mhq_slot is.
 		["radio1",    "PERM", 15, "support_radio1_available",      "STR_DUWS_T_radio_tower_1",        "",           false],
-		["radio2",    "PERM", 40, "support_radio2_available",      "STR_DUWS_T_radio_tower_2",        "",           false],
-		["radio3",    "PERM", 60, "support_radio3_available",      "STR_DUWS_T_radio_tower_3",        "",           false],
+		["radio2",    "PERM", 40, "support_radio2_available",      "STR_DUWS_T_radio_tower_2",        "",           false, 10],
+		["radio3",    "PERM", 60, "support_radio3_available",      "STR_DUWS_T_radio_tower_3",        "",           false, 20],
 
 		// The designation radio, a slot at a time rather than handed to every lead on unlock. Free
 		// because the team paid at the permanent row: what this costs is the slot.
 		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false],
 		["supply",    "CONS",  4, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       false],
 		["veh_drop",  "CONS",  4, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   false],
-		["uav",       "CONS",  6, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true],
+		["uav",       "CONS",  5, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true],
 		["helotaxi",  "CONS",  4, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false],
 		["helolift",  "CONS",  5, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false],
 		["boattaxi",  "CONS",  2, "support_boattaxi_available",    "STR_DUWS_T_3wiovyga",             "boat_taxi",  false],
 		["arty",      "CONS", 10, "support_arty_available",        "STR_DUWS_T_btiiyafy",             "artillery",  true,  25],
-		["mortar",    "CONS",  5, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false, 12],
-		["mortar_smoke","CONS",5, "support_mortar_smoke_available","STR_DUWS_T_mortar_smoke_row",     "mortar_smoke",false],
+		["mortar",    "CONS",  8, "support_mortar_available",      "STR_DUWS_T_xca5aaxu",             "mortar",     false,  8],
+		["mortar_smoke","CONS",3, "support_mortar_smoke_available","STR_DUWS_T_mortar_smoke_row",     "mortar_smoke",false],
 		["jdam",      "CONS",  5, "support_jdam_available",        "STR_DUWS_T_mbhh2q2e",             "jdam",       true,  10],
 		// Same warhead as JDAM (identical scripted damage in fnc_arty) but 2 AP cheaper: the laser is
 		// the man-in-the-loop option -- the player earns the discount by painting and holding the target,
@@ -63,7 +63,7 @@ fnc_support_catalogue = {
 		["laser",     "CONS",  5, "support_laser_available",       "STR_DUWS_T_xja6gemx",             "laser",      true,   8],
 		["cluster",   "CONS", 12, "support_cluster_available",     "STR_DUWS_T_d5qzh6mj",             "cluster",    true,  30],
 		["napalm",    "CONS", 10, "support_napalm_available",      "STR_DUWS_T_owven8ki",             "napalm",     true,  18],
-		["hcAttChop", "CONS", 15, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  15],
+		["hcAttChop", "CONS", 15, "support_hcAttChop_available",   "STR_DUWS_T_t4jo046q",             "hc_ATTchop", true,  12],
 		["hcCAS",     "CONS", 30, "support_hcCAS_available",       "STR_DUWS_T_6khosjp7",             "hc_CAS",     true,  25],
 		// Twelve men dropped behind the line (client/supports/fnc_paradrop.sqf). Priced a shade over the
 		// 12-CP High Command rifle squad it mirrors -- same headcount, the premium being the air insertion.
