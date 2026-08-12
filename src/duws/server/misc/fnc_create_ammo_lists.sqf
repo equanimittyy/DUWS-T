@@ -50,12 +50,32 @@ opfor_ammobox_items = [];
 // before any foreign class can reach it -- the client's shelf-stocking on arsenal open adds foreign
 // only to its own local cargo, never here. Called at both exits so it covers the non-MODERN path too.
 _snapFriendly = {
+    // The BIS cargo vars only ever reflect the sampled unit loadouts, so curated classes added to the
+    // shelf that no unit wears -- the extra weapons (base MX, DMRs, snipers) and basic items -- are
+    // absent from them and read [0]. `_extra` carries those known-added lists so they join the set; it
+    // is passed on the MODERN path where those adds happen, and defaults empty for the legacy exit.
+    params [["_extra", []]];
     private _u = [];
     {
         _u append flatten (missionNamespace getVariable [_x, []]);
     } forEach ["bis_addVirtualWeaponCargo_cargo", "bis_addVirtualItemCargo_cargo",
         "bis_addVirtualMagazineCargo_cargo", "bis_addVirtualBackpackCargo_cargo"];
-    DUWS_friendlyArsenal = _u arrayIntersect _u;
+    _u append _extra;
+    // Strings only: flatten pulls magazine counts (numbers) out of the loadouts too; drop them so the
+    // set holds classnames alone.
+    private _s = _u select { _x isEqualType "" };
+    // Loadouts carry preset weapons (e.g. arifle_MX_ACO_pointer_F); the arsenal lists each as its base
+    // weapon (arifle_MX_F) row, so the friendly set needs the base too or that row reads [0]. Add each
+    // weapon's baseWeapon; non-weapons and already-base weapons contribute nothing new.
+    private _bases = [];
+    {
+        if (isClass (configFile >> "CfgWeapons" >> _x)) then {
+            private _b = getText (configFile >> "CfgWeapons" >> _x >> "baseWeapon");
+            if (_b != "") then { _bases pushBack _b; };
+        };
+    } forEach _s;
+    _s append _bases;
+    DUWS_friendlyArsenal = _s arrayIntersect _s;
     publicVariable "DUWS_friendlyArsenal";
     // Limited has no unlimited floor, so stock the whole standard-issue set into the pool at boot.
     // Magazines are seeded too; the seed is simply unused while ammo is untracked.
@@ -176,21 +196,12 @@ waitUntil {sleep 5;chosen_settings};
 // kits already draw from, so both surfaces now offer the same units.
 _factionUnitArray = ["blufor"] call fnc_faction_unit_keylist;
 
-// Loadouts of the key units, read from spawned instances rather than getUnitLoadout on the classname.
-// A unit whose primary is assigned by a randomised or scripted loadout returns an empty primary when
-// queried by class, so its rifle never reaches the friendly set and reads [0] in the arsenal. Spawning
-// resolves the loadout the engine actually issues. Spawn all, let init apply it once, read, delete.
+//array of all loadouts of all units in player faction
 _factionLoadouts = [];
-private _probeGroup = createGroup west;
-private _probeUnits = [];
 {
-    private _u = _probeGroup createUnit [_x, [0,0], [], 0, "FORM"];
-    if (!isNull _u) then { _probeUnits pushBack _u; };
+    _factionLoadouts append (flatten getUnitLoadout _x);
+    sleep 0.1;
 } forEach _factionUnitArray;
-sleep 1;
-{ _factionLoadouts append (flatten getUnitLoadout _x); } forEach _probeUnits;
-{ deleteVehicle _x; } forEach _probeUnits;
-deleteGroup _probeGroup;
 
 //remove duplicates
 _factionLoadouts = _factionLoadouts arrayIntersect _factionLoadouts;
@@ -400,4 +411,7 @@ private _opfFaction = "";
 
 ["INFO", "CIV", format ["Detected factions: BLU=%1, OPF=%2", _bluFaction, _opfFaction]] call fnc_log;
 
-call _snapFriendly;
+// Pass the curated basic/extra classes so they join the friendly set: these are on the shelf but no
+// sampled unit wears them, so the cargo scan alone leaves them at [0].
+[(_extra_weapons + _basic_vests + _basic_items + _basic_optics + _basic_magazines
+    + _filteredBackpacks + _aceMedical + _aceFoods) - _excludedItems] call _snapFriendly;
