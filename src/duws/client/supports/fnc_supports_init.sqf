@@ -49,8 +49,6 @@ fnc_support_catalogue = {
 		["mhq_slot",  "CONS",  0, "support_mobile_HQ_slot_available", "STR_DUWS_T_mhq_slot_row",      "mobile_HQ",  false],
 		["supply",    "CONS",  4, "support_supplydrop_available",  "STR_DUWS_T_5n277nzo",             "ammo",       false],
 		["veh_drop",  "CONS",  5, "support_veh_drop_available",    "STR_DUWS_T_oq3q7yrq",             "veh_drop",   false],
-		["siva",      "CONS",  5, "support_siva_drop_available",   "STR_DUWS_T_jjzzkt01",             "siva_drop",  true],
-		["sawp",      "CONS",  5, "support_sawp_drop_available",   "STR_DUWS_T_sawp1234",             "sawp_drop",  true],
 		["uav",       "CONS",  6, "support_uav_recon_available",   "STR_DUWS_T_892wo8h0",             "uav_recon",  true],
 		["helotaxi",  "CONS",  4, "support_helotaxi_available",    "STR_DUWS_T_witoiij3",             "helo_taxi",  false],
 		["helolift",  "CONS",  6, "support_helolift_available",    "STR_DUWS_T_heloliftbuy",          "helo_lift",  false],
@@ -107,7 +105,7 @@ fnc_support_cost_bracket = {
 // at tier 3, the gunship and heavy fire at tier 4, the CAS jet at tier 5.
 DUWS_support_tiers = [
 	["uav", 2],
-	["mortar", 3], ["mortar_smoke", 3], ["jdam", 3], ["laser", 3], ["siva", 3], ["sawp", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3],
+	["mortar", 3], ["mortar_smoke", 3], ["jdam", 3], ["laser", 3], ["paradrop", 3], ["helolift", 3], ["halo", 3],
 	["arty", 4], ["cluster", 4], ["napalm", 4], ["hcAttChop", 4],
 	["hcCAS", 5]
 ];

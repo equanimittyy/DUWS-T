@@ -4665,27 +4665,6 @@
                 <Original>Emergency Vehicle drop</Original>
                 <English>Emergency Vehicle drop</English>
             </Key>
-            <Key ID="STR_DUWS_T_jjzzkt01">
-                <German>Luftabwurf des Truppenteileinfiltrierungsfahrzeugs(10CP)</German>
-                <Spanish>Lanzamiento aéreo de vehículos de infiltración de escuadrón(10CP)</Spanish>
-                <Chinesesimp>班组渗透载具空投(10CP)</Chinesesimp>
-                <Original>Squad Infil Vehicle Airdrop</Original>
-                <English>Squad Infil Vehicle Airdrop</English>
-            </Key>
-            <Key ID="STR_DUWS_T_jjzzkt02">
-                <German>Luftabwurf des Truppenteileinfiltrierungsfahrzeugs</German>
-                <Spanish>Lanzamiento aéreo de vehículos de infiltración de escuadrón</Spanish>
-                <Chinesesimp>班组渗透载具空投</Chinesesimp>
-                <Original>Squad Infil Vehicle Airdrop</Original>
-                <English>Squad Infil Vehicle Airdrop</English>
-            </Key>
-            <Key ID="STR_DUWS_T_sawp1234">
-                <German>Truppen-Sturmwaffen-Set (10 CP)</German>
-                <Spanish>Pack de Armas de Asalto de Escuadrón (10 CP)</Spanish>
-                <Chinesesimp>班组突击武器包(10CP)</Chinesesimp>
-                <Original>Squad Assault Weapon Pack</Original>
-                <English>Squad Assault Weapon Pack</English>
-            </Key>
             <Key ID="STR_DUWS_T_cwflheuj">
                 <German>Notfall Fahrzeugabwurf</German>
                 <Spanish>Entrega de vehículo de emergancia</Spanish>
@@ -4720,13 +4699,6 @@
                 <Chinesesimp>Select a vehicle first.</Chinesesimp>
                 <Original>Select a vehicle first.</Original>
                 <English>Select a vehicle first.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_sawp4321">
-                <German>Truppen-Sturmwaffen-Set</German>
-                <Spanish>Pack de Armas de Asalto de Escuadrón</Spanish>
-                <Chinesesimp>班组突击武器包</Chinesesimp>
-                <Original>Squad Assault Weapon Pack</Original>
-                <English>Squad Assault Weapon Pack</English>
             </Key>
             <Key ID="STR_DUWS_T_h3uo0102">
                 <German>FOB errichten (10 CP)</German>
@@ -5147,26 +5119,12 @@
                 <Original>Supply Drop Inbound. ETA: 1 min.</Original>
                 <English>Supply Drop Inbound. ETA: 1 min.</English>
             </Key>
-            <Key ID="STR_DUWS_T_sawpdown">
-                <German>SAWP befindet sich auf dem Weg. Geschätzte Ankunftszeit: 1 Minute</German>
-                <Spanish>El SAWP está en tránsito. Tiempo de llegada estimado: 1 minuto</Spanish>
-                <Chinesesimp>SAWP正在运送。预计到达时间：1分钟</Chinesesimp>
-                <Original>SAWP is en route. ETA: 1 minute.</Original>
-                <English>SAWP is en route. ETA: 1 minute.</English>
-            </Key>
             <Key ID="STR_DUWS_T_17hh9rx4">
                 <German>Nachschub Abwurf unterwegs</German>
                 <Spanish>Entrega de suministros en camino</Spanish>
                 <Chinesesimp>补给正在投送</Chinesesimp>
                 <Original>Supply Drop Inbound.</Original>
                 <English>Supply Drop Inbound.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_sawpibnd">
-                <German>SAWP wird luftabgeworfen</German>
-                <Spanish>El SAWP está siendo lanzado por aire</Spanish>
-                <Chinesesimp>SAWP下降</Chinesesimp>
-                <Original>SAWP is being airdropped.</Original>
-                <English>SAWP is being airdropped.</English>
             </Key>
             <Key ID="STR_DUWS_T_zhiugl0g">
                 <German>Nachschub Abwurf bereit</German>
@@ -5175,26 +5133,12 @@
                 <Original>Supply Drop On Station.</Original>
                 <English>Supply Drop On Station.</English>
             </Key>
-            <Key ID="STR_DUWS_T_sawposdt">
-                <German>SAWP ist bereitgestellt</German>
-                <Spanish>El SAWP está en posición</Spanish>
-                <Chinesesimp>SAWP已就位</Chinesesimp>
-                <Original>SAWP is in position.</Original>
-                <English>SAWP is in position.</English>
-            </Key>
             <Key ID="STR_DUWS_T_supplydropfail">
                 <German>Nachschub Abwurf wurde abgeschossen. Abwurf fehlgeschlagen.</German>
                 <Spanish>Los suministros ha sido derribados. Entrega de suministros fallida.</Spanish>
                 <Chinesesimp>空投补给被击落了，空投补给失败。</Chinesesimp>
                 <Original>The transport was shot down. Supply drop failed.</Original>
                 <English>The transport was shot down. Supply drop failed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_sawpfail">
-                <German>SAWP wurde abgeschossen. Luftabwurfmission fehlgeschlagen.</German>
-                <Spanish>El SAWP fue derribado. Misión de lanzamiento aéreo fallida.</Spanish>
-                <Chinesesimp>SAWP被击落了，空投行动失败。</Chinesesimp>
-                <Original>The transport was shot down. SAWP airdrop failed.</Original>
-                <English>The transport was shot down. SAWP airdrop failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_wdttb5b8">
                 <German>Eine Nachschub-Kiste wurde in der Nähe deiner Position abgeworfen</German>
@@ -5203,33 +5147,12 @@
                 <Original>A supply crate has been dropped near your location.</Original>
                 <English>A supply crate has been dropped near your location.</English>
             </Key>
-            <Key ID="STR_DUWS_T_sawpnts1">
-                <German>Ein Trupp-Sturmwaffenpaket (SAWP) wurde in Ihrer Nähe luftabgeworfen.</German>
-                <Spanish>Un paquete de armas de asalto de escuadrón (SAWP) ha sido lanzado por aire cerca de tu posición.</Spanish>
-                <Chinesesimp>一个班组突击武器包(SAWP)被投放至你的位置附近</Chinesesimp>
-                <Original>A Squad Assault Weapon Pack (SAWP) has been airdropped near your position.</Original>
-                <English>A Squad Assault Weapon Pack (SAWP) has been airdropped near your position.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_sawpnts2">
-                <German>Das SAWP ist mit grünem Rauch markiert und seine Position im GPS-System synchronisiert.</German>
-                <Spanish>El SAWP está marcado con humo verde y su posición se ha sincronizado en el sistema GPS.</Spanish>
-                <Chinesesimp>SAWP被以绿色烟雾标记并已在GPS系统同步位置。</Chinesesimp>
-                <Original>SAWP marked with green smoke, its position is on your map.</Original>
-                <English>SAWP marked with green smoke, its position is on your map.</English>
-            </Key>
             <Key ID="STR_DUWS_T_lyxq9zpm">
                 <German>Nachschub-Abwurf</German>
                 <Spanish>Entrega de suministros</Spanish>
                 <Chinesesimp>空投补给</Chinesesimp>
                 <Original>Supply Drop</Original>
                 <English>Supply Drop</English>
-            </Key>
-            <Key ID="STR_DUWS_T_sawpinfo">
-                <German>SAWP Drop</German>
-                <Spanish>SAWP Drop</Spanish>
-                <Chinesesimp>SAWP Drop</Chinesesimp>
-                <Original>SAWP Drop</Original>
-                <English>SAWP Drop</English>
             </Key>
             <Key ID="STR_DUWS_T_5p6d9535">
                 <German>Der Nachschub wurde mit grünem Rauch markiert. Prüfe deine Karte.</German>
@@ -5399,20 +5322,6 @@
                 <Original>Be advised: one paratrooper squad is now under your command.</Original>
                 <English>Be advised: one paratrooper squad is now under your command.</English>
             </Key>
-            <Key ID="STR_DUWS_T_sawpcall">
-                <German>Action Squad an "Overlord 1-1" – Anfrage nach einem Squad Assault Weapon Pack Abwurf an meiner Position, over.</German>
-                <Spanish>Action Squad a "Overlord 1-1" – solicito el lanzamiento del Squad Assault Weapon Pack en mi posición, over.</Spanish>
-                <Chinesesimp>"霸王1-1"，请求在我的位置投送班组突击武器包，完毕。</Chinesesimp>
-                <Original>To Overlord, requesting a Squad Assault Weapon Pack on my position, over.</Original>
-                <English>To Overlord, requesting a Squad Assault Weapon Pack on my position, over.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_sivacall">
-                <German>Hier ist Action Squad – Anfrage zum Squad Infil Vehicle Airdrop an aktueller Position, over.</German>
-                <Spanish>Este es Action Squad – solicito Squad Infil Vehicle Airdrop en posición actual, over.</Spanish>
-                <Chinesesimp>请求在当前位置进行班组渗透载具空投，完毕。</Chinesesimp>
-                <Original>Requesting a Squad Infil Vehicle airdrop on my position, over.</Original>
-                <English>Requesting a Squad Infil Vehicle airdrop on my position, over.</English>
-            </Key>
             <Key ID="STR_DUWS_T_vehdropcall">
                 <German>Action Squad an "Overlord" – Anfrage zum Luftabwurf eines zivilen Notfahrzeugs an meiner Position, over.</German>
                 <Spanish>Action Squad a "Overlord" – solicito el lanzamiento aéreo de un vehículo de emergencia civil en mi posición, over.</Spanish>
@@ -5440,20 +5349,6 @@
                 <Chinesesimp>这里是伞兵投送，我能看见目标地点了，注意对接。</Chinesesimp>
                 <Original>This is Chalk 2-1, I have the LZ in sight. Stand by for linkup.</Original>
                 <English>This is Chalk 2-1, I have the LZ in sight. Stand by for linkup.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_sivacallend">
-                <German>Hier ist SIVA Einsatz – ETA 30 Sekunden, bereite dich auf die Verbindung vor.</German>
-                <Spanish>Este es SIVA Despliegue – ETA 30 segundos, prepárate para el acoplamiento.</Spanish>
-                <Chinesesimp>这里是SIVA投送，预计到达时间30秒，准备对接。</Chinesesimp>
-                <Original>This is Ranger 1-1, ETA thirty seconds. Stand by for linkup.</Original>
-                <English>This is Ranger 1-1, ETA thirty seconds. Stand by for linkup.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_sawpcallend">
-                <German>Action Squad, hier ist SAWP Einsatz – ETA 40 Sekunden, achte auf die Verbindung.</German>
-                <Spanish>Action Squad, este es SAWP Despliegue – ETA 40 segundos, prepárate para el acoplamiento.</Spanish>
-                <Chinesesimp>行动组注意，这里是SAWP投送，预计到达时间40秒，注意对接。</Chinesesimp>
-                <Original>Alpha 1-1, this is Courier 3-1, ETA forty seconds. Stand by for linkup.</Original>
-                <English>Alpha 1-1, this is Courier 3-1, ETA forty seconds. Stand by for linkup.</English>
             </Key>
             <Key ID="STR_DUWS_T_supplydropcallend">
                 <German>Hier ist "Courier 1-1" – Lieferkiste per Luftabwurf zu Ihrer Position unterwegs, ETA: 40 Sekunden.</German>
@@ -5977,13 +5872,6 @@
                 <Original>The UAV is returning to base.</Original>
                 <English>The UAV is returning to base.</English>
             </Key>
-            <Key ID="STR_DUWS_T_q76uei82">
-                <Spanish>Vehículo en camino. TEL: 1 min</Spanish>
-                <German>Fahrzeugabwurf unterwegs. ETA: 1 min</German>
-                <Chinesesimp>载具空投进场，预计时间：1分钟</Chinesesimp>
-                <Original>Vehicle Drop Inbound. ETA: 1 min.</Original>
-                <English>Vehicle Drop Inbound. ETA: 1 min.</English>
-            </Key>
             <Key ID="STR_DUWS_T_6cwj6h8z">
                 <Spanish>Entrega de vehículo de emergencia en camino</Spanish>
                 <German>Notfall Fahrzeugabwurf unterwegs</German>
@@ -6012,13 +5900,6 @@
                 <Original>Alpha 1-1. New combat elements inbound.</Original>
                 <English>Alpha 1-1. New combat elements inbound.</English>
             </Key>
-            <Key ID="STR_DUWS_T_jjzzkt03">
-                <Spanish>El SIVA se encuentra en aproximación.</Spanish>
-                <German>Das SIVA befindet sich im Einflug.</German>
-                <Chinesesimp>班组渗透载具进场</Chinesesimp>
-                <Original>SIVA is inbound.</Original>
-                <English>SIVA is inbound.</English>
-            </Key>
             <Key ID="STR_DUWS_T_9tpm5uf6">
                 <Spanish>Entrega de vehículo de emergencia en estación</Spanish>
                 <German>Notfall Fahrzeugabwurf im Einsatgebiet</German>
@@ -6039,13 +5920,6 @@
                 <Chinesesimp>一辆紧急载具已经降落在你的位置附近</Chinesesimp>
                 <Original>An Emergency Vehicle has been dropped near your location.</Original>
                 <English>An Emergency Vehicle has been dropped near your location.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_jjzzkt04">
-                <Spanish>El SIVA ha finalizado.</Spanish>
-                <German>SIVA ist abgeschlossen.</German>
-                <Chinesesimp>班组渗透载具已空投</Chinesesimp>
-                <Original>SIVA is complete.</Original>
-                <English>SIVA is complete.</English>
             </Key>
             <Key ID="STR_DUWS_T_2oefoo3j">
                 <Spanish>Vehículo entregado</Spanish>
@@ -7143,14 +7017,6 @@
             <Key ID="STR_DUWS_T_sdesc_veh_drop">
                 <Original>A helicopter drops a civilian transport vehicle.</Original>
                 <English>A helicopter drops a civilian transport vehicle.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_sdesc_siva">
-                <Original>A helicopter drops a light armed BLUFOR vehicle.</Original>
-                <English>A helicopter drops a light armed BLUFOR vehicle.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_sdesc_sawp">
-                <Original>A helicopter drops a pack: 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D and 1 laser designator.</Original>
-                <English>A helicopter drops a pack: 2 automatic grenade turrets, 1 drone terminal, 1 ED-1D and 1 laser designator.</English>
             </Key>
             <Key ID="STR_DUWS_T_sdesc_uav">
                 <Original>A recon drone scans units in range and marks them on your map.</Original>

@@ -111,26 +111,6 @@ class CfgCommunicationMenu
         enable = "1"; // Simple expression condition for enabling the item
         removeAfterExpressionCall = 1; // one-time use: removed on use, consumed by fnc_support_comm_used
     };
-    class siva_drop
-    {
-        text = "$STR_DUWS_T_jjzzkt02"; // Text displayed in the menu and in a notification
-        submenu = ""; // Submenu opened upon activation
-        expression = "['siva_drop'] call fnc_support_comm_used; [player, 0] spawn fnc_siva_drop"; // cost 0: one-time use, paid at purchase
-        icon = "\A3\ui_f\data\Map\VehicleIcons\iconParachute_ca.paa"; // Icon displayed permanently next to the command menu
-        cursor = ""; // Custom cursor displayed when the item is selected
-        enable = "1"; // Simple expression condition for enabling the item
-        removeAfterExpressionCall = 1; // one-time use: removed on use, consumed by fnc_support_comm_used
-    };
-    class sawp_drop
-    {
-        text = "$STR_DUWS_T_sawp4321"; // Text displayed in the menu and in a notification
-        submenu = ""; // Submenu opened upon activation
-        expression = "['sawp_drop'] call fnc_support_comm_used; [player, 0] spawn fnc_sawp_drop"; // cost 0: one-time use, paid at purchase
-        icon = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\supplydrop_ca.paa"; // Icon displayed permanently next to the command menu
-        cursor = ""; // Custom cursor displayed when the item is selected
-        enable = "1"; // Simple expression condition for enabling the item
-        removeAfterExpressionCall = 1; // one-time use: removed on use, consumed by fnc_support_comm_used
-    };
     class paradrop
     {
         text = "$STR_DUWS_T_nafdmcoy"; // Text displayed in the menu and in a notification

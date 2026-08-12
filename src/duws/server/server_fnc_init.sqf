@@ -493,8 +493,6 @@ fnc_request_hcATTchop = compile preprocessFileLineNumbers "duws\client\supports\
 fnc_request_hcCAS = compile preprocessFileLineNumbers "duws\client\supports\fnc_request_hcCAS.sqf";publicVariable "fnc_request_hcCAS";
 fnc_sitrep_support = compile preprocessFileLineNumbers "duws\server\supports\fnc_sitrep_support.sqf";publicVariable "fnc_sitrep_support";
 fnc_veh_drop = compile preprocessFileLineNumbers "duws\client\supports\fnc_veh_drop.sqf";publicVariable "fnc_veh_drop";
-fnc_sawp_drop = compile preprocessFileLineNumbers "duws\client\supports\fnc_sawp_drop.sqf";publicVariable "fnc_sawp_drop";
-fnc_siva_drop = compile preprocessFileLineNumbers "duws\client\supports\fnc_siva_drop.sqf";publicVariable "fnc_siva_drop";
 fnc_helotaxi = compile preprocessFileLineNumbers "duws\client\supports\taxi\fnc_helotaxi.sqf";publicVariable "fnc_helotaxi";
 fnc_helolift = compile preprocessFileLineNumbers "duws\client\supports\fnc_helolift.sqf";publicVariable "fnc_helolift";
 // Not broadcast: fnc_helolift only ever remoteExecs these to target 2, which resolves the
@@ -534,7 +532,6 @@ fnc_HCsquad_spawn = compile preprocessFileLineNumbers "duws\server\misc\fnc_HCsq
 fnc_sitrep_fanout = compile preprocessFileLineNumbers "duws\server\supports\fnc_sitrep_fanout.sqf";
 fnc_sitrep_display = compile preprocessFileLineNumbers "duws\client\misc\fnc_sitrep_display.sqf";publicVariable "fnc_sitrep_display";
 fnc_fill_ammobox = compile preprocessFileLineNumbers "duws\server\misc\fnc_fill_ammobox.sqf";publicVariable "fnc_fill_ammobox";
-fnc_fill_sawpbox = compile preprocessFileLineNumbers "duws\server\misc\fnc_fill_sawpbox.sqf";publicVariable "fnc_fill_sawpbox";
 fnc_delete_napalm = compile preprocessFileLineNumbers "duws\server\misc\fnc_delete_napalm.sqf";publicVariable "fnc_delete_napalm";
 fnc_addQuickChangeActions = compile preprocessFileLineNumbers "duws\client\misc\fnc_addQuickChangeActions.sqf";
 publicVariable "fnc_addQuickChangeActions";

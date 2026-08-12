@@ -9,8 +9,6 @@
 
 support_supplydrop_available = false;
 support_veh_drop_available = false;
-support_siva_drop_available = false;
-support_sawp_drop_available = false;
 support_uav_recon_available = false;
 support_helotaxi_available = false;
 support_helolift_available = false;
