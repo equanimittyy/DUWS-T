@@ -31,7 +31,7 @@ private _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0)
 _vehPos = _targetpos;
 
 
-_truck1 = "C_IDAP_Truck_02_Transport_F" createVehicle (_vehpos);
+_truck1 = "C_Truck_02_transport_F" createVehicle (_vehpos);
 [_truck1, "mission_transport_idap"] call fnc_duws_keep;
 
 _box1 = "";
