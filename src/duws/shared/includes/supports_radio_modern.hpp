@@ -31,7 +31,7 @@ class CfgCommunicationMenu
         text = "$STR_DUWS_T_mortar_smoke_menu"; // Text displayed in the menu and in a notification
         submenu = ""; // Submenu opened upon activation
 		//_null = [salvos, radius, interval between salvos(in seconds), rounds per salvo, support type, CP cost, ammotype]
-        expression = "['mortar_smoke', true] call fnc_support_comm_used; [4, 60, 4, 2, 7, 0, 'Sh_82mm_Smoke'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase
+        expression = "['mortar_smoke', true] call fnc_support_comm_used; [4, 80, 4, 3, 7, 0, 'Sh_82mm_Smoke'] spawn fnc_mapclickarty"; // cost 0: one-time use, paid at purchase
         icon = "\a3\Ui_f\data\GUI\Cfg\CommunicationMenu\mortar_ca.paa";
         cursor = "\a3\Ui_f\data\IGUI\Cfg\Cursors\iconCursorSupport_ca.paa"; // Custom cursor displayed when the item is selected
         enable = "1"; // Simple expression condition for enabling the item
