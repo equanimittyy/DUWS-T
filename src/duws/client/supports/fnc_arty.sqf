@@ -157,6 +157,13 @@ if (_ammotype == "Laser") then {
 
 if (!_veh_alive) exitWith {
 	[_supportype] remoteExec ["fnc_support_release", 2];
+	// This early-out skips the tail cleanup, so wipe the target markers and the downed aircraft here
+	// or they leak: script markers are never GC'd and would orphan for the rest of the mission, and the
+	// wreck and its group would linger 3 km out.
+	deletemarker str(_markername);
+	deletemarker str(_markername2);
+	{ deleteVehicle _x } forEach units _group;
+	deleteVehicle _vehicle;
 	hint localize "STR_DUWS_T_9wu0cgea";
 };
 
@@ -217,11 +224,13 @@ if (_ammotype == "Laser") then {
 				};
 				case 6: {  // Napalm
 					_bomb= "Bo_Mk82" createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)]; //spawn shells
+					// A carpet of fire across the radius. Count kept low on purpose: the fire object is a
+					// heavy particle-and-light emitter, and this multiplies by rounds-per-salvo, so every
+					// extra one here lands eight on the ground at once.
 					{
-						_burnthefuckers = "test_EmptyObjectForFireBig" createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)];
-						_fireObjects pushBack _burnthefuckers;
-						[_bomb] joinSilent createGroup WEST;
-					} foreach [1,2,3,4];
+						_fire = "test_EmptyObjectForFireBig" createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), (_position select 2)];
+						_fireObjects pushBack _fire;
+					} foreach [1,2,3];
 					sleep ((random 1)/50);
 				};
 			};
