@@ -50,6 +50,12 @@ private _fnc_roadDir = {
 private _fnc_spawnCar = {
     params ["_pos", "_dir"];
     private _veh = createVehicle [selectRandom _pool, _pos, [], 0, "NONE"];
+    // Vanilla civilian cars carry a default FirstAidKit in cargo -- a free medkit the player would
+    // loot off every roadside spawn. Strip the inventory so a stolen car yields nothing.
+    clearItemCargoGlobal _veh;
+    clearMagazineCargoGlobal _veh;
+    clearWeaponCargoGlobal _veh;
+    clearBackpackCargoGlobal _veh;
     _veh setDir _dir;
     _veh setPosATL _pos;
     _veh
