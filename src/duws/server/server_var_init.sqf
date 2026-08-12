@@ -467,12 +467,16 @@ DUWS_hardpointName = createHashMapFromArray [
 // type that fields several groups, each resolved per side when crewed -- read by fnc_hardpoint_register
 // and the raise worker so every placer fields it the same, the way DUWS_hardpointStreaming drives
 // streaming. "" is no loose garrison: a minefield alone gets none, its men would stand on its own mines.
+// AT and AA field the weapons team, not the rifle team: its defenders carry the launchers that match the
+// emplaced gun's role, so an AT nest brings its own standoff AT and an AA nest its own MANPADS instead of a
+// generic section. The trade is anti-infantry punch -- wp_team has no AR, GL or marksman -- so those two
+// hold harder against armour and air but lighter against a dismounted assault.
 // A radio tower is a strategic objective with 5 km of reach, so it fields a heavier patrol than a lone
-// gun -- a rifle team plus two weapons teams (the only AA+AT roster) to contest the air and armour a
-// player brings against it. The gun crew is separate and always placed.
+// gun -- a rifle team plus two weapons teams to contest the air and armour a player brings against it. The
+// gun crew is separate and always placed.
 DUWS_hardpointGarrison = createHashMapFromArray [
-    ["MG", "team"], ["AT", "team"], ["GMG", "team"], ["ROADBLOCK", "team"],
-    ["OP", "team"], ["AA", "team"], ["MORTAR", "team"], ["ARTY", "team"],
+    ["MG", "team"], ["AT", "wp_team"], ["GMG", "team"], ["ROADBLOCK", "team"],
+    ["OP", "team"], ["AA", "wp_team"], ["MORTAR", "team"], ["ARTY", "team"],
     ["RADIO", ["team", "wp_team", "wp_team"]], ["MINEFIELD", ""]
 ];
 
