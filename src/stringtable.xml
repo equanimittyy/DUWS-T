@@ -2132,6 +2132,10 @@
                 <Original>Inventory full. %1 money dropped at your feet.</Original>
                 <English>Inventory full. %1 money dropped at your feet.</English>
             </Key>
+            <Key ID="STR_DUWS_ARSENAL_UNOBTAINED">
+                <Original>You were unable to obtain:</Original>
+                <English>You were unable to obtain:</English>
+            </Key>
             <Key ID="STR_DUWS_T_loadout_copy_none">
                 <Original>No base guard found to copy from. Keeping your default loadout.</Original>
                 <English>No base guard found to copy from. Keeping your default loadout.</English>

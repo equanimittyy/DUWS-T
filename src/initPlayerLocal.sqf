@@ -320,7 +320,8 @@ DUWS_fnc_arsenal_stock = {
 
 // Close a restricted arsenal: settle the captured pool (server strips the overdrawn foreign), then
 // undo the shelf edits DUWS_fnc_arsenal_stock made. Takes the open-time baseline loadout and the three
-// edit lists it returned. Caller guards on restricted mode.
+// edit lists it returned. Caller guards on restricted mode. Returns the stripped excess [[cls, n], ...]
+// -- gear the player drew but the shared pool ran out of -- so the caller can report it.
 DUWS_fnc_arsenal_unstock = {
     params ["_openLoadout", "_addedForeign", "_hiddenFriendly", "_ammoList"];
 
@@ -338,6 +339,8 @@ DUWS_fnc_arsenal_unstock = {
     { _x params ["_cls", "_type"]; [_cls, _type, false] call DUWS_fnc_shelfForeign; } forEach _addedForeign;
     { _x params ["_cls", "_type"]; [_cls, _type, true] call DUWS_fnc_shelfForeign; } forEach _hiddenFriendly;
     if (count _ammoList > 0) then { [missionNamespace, _ammoList, false] call BIS_fnc_addVirtualMagazineCargo; };
+
+    _excess
 };
 
 [ missionNamespace, "arsenalOpened", {
@@ -460,18 +463,36 @@ DUWS_fnc_arsenal_unstock = {
             removeMissionEventHandler ["EachFrame", _paintEH];
         };
 
-        if (_isRestricted) then {
-            [_openLoadout, _addedForeign, _hiddenFriendly, _ammoList] call DUWS_fnc_arsenal_unstock;
-        };
+        private _excess = if (_isRestricted) then {
+            [_openLoadout, _addedForeign, _hiddenFriendly, _ammoList] call DUWS_fnc_arsenal_unstock
+        } else { [] };
 
         // Hand the money back into inventory, overflow dropped at the player's feet.
         private _dropPairs = [_moneyStash] call DUWS_fnc_money_regrant;
-
-        // Dropped cash is the player's own news at the moment they closed the arsenal, so it goes to
-        // the hint box (per-player), not a team card. Only money is reported: it is the balance.
         private _moneyDropped = 0;
         { if ((_x select 0) isEqualTo "Money_roll") then { _moneyDropped = _x select 1; }; } forEach _dropPairs;
-        if (_moneyDropped > 0) then { hint format [localize "STR_DUWS_ARSENAL_MONEY_DROPPED", _moneyDropped]; };
+
+        // Close news to the player's own hint box (per-player), never a team card: gear the shared pool
+        // ran out of before this player's draw settled (stripped on close), then any cash that would not
+        // fit back into inventory. Built as one string -- a second hint call would replace the box.
+        private _msg = "";
+        if (count _excess > 0) then {
+            _msg = localize "STR_DUWS_ARSENAL_UNOBTAINED";
+            {
+                _x params ["_cls", "_n"];
+                private _cfg = configFile >> "CfgWeapons" >> _cls;
+                if (!isClass _cfg) then { _cfg = configFile >> "CfgMagazines" >> _cls; };
+                if (!isClass _cfg) then { _cfg = configFile >> "CfgVehicles" >> _cls; };
+                private _name = getText (_cfg >> "displayName");
+                if (_name == "") then { _name = _cls; };
+                _msg = _msg + format ["\n%1x %2", _n, _name];
+            } forEach _excess;
+        };
+        if (_moneyDropped > 0) then {
+            if (_msg != "") then { _msg = _msg + "\n\n"; };
+            _msg = _msg + format [localize "STR_DUWS_ARSENAL_MONEY_DROPPED", _moneyDropped];
+        };
+        if (_msg != "") then { hint _msg; };
 
         player setVariable ["DUWS_isRestrictedArsenal", nil];
     };
