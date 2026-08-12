@@ -1,4 +1,4 @@
-// Emergency vehicle requisition picker. One listbox of the motorised-or-lower hulls the faction's
+// Vehicle drop requisition picker. One listbox of the motorised-or-lower hulls the faction's
 // request list carries, filled by client/supports/fnc_veh_drop.sqf after the dialog opens (idd = -1,
 // so the fill and the confirm reach the controls by idc). The confirm button stashes the selected
 // class and a flag in globals the spawning script reads once the dialog closes -- an action string

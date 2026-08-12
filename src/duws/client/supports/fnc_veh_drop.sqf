@@ -1,7 +1,7 @@
 // Locality: client -- invoked from the comm menu (shared/includes/supports_radio_modern.hpp), which
 // defers the consume so a cancelled pick hands the item back.
 //
-// Emergency vehicle requisition. The player buys a motorised-or-lower faction hull from the same
+// Vehicle drop requisition. The player buys a motorised-or-lower faction hull from the same
 // list the request menu prices and it is para-dropped empty on their position. The support unlock
 // already charged the delivery fee, so the drop itself costs only the vehicle's own CP.
 if (!hasInterface) exitWith {};

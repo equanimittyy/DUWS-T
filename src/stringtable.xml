@@ -4666,22 +4666,22 @@
                 <German>Notfall Fahrzeugabwurf (5 CP) Funk</German>
                 <Spanish>Entrega de vehículo de emergencia (5 CP) Radio</Spanish>
                 <Chinesesimp>紧急载具空投(5CP)</Chinesesimp>
-                <Original>Emergency Vehicle drop</Original>
-                <English>Emergency Vehicle drop</English>
+                <Original>Vehicle Drop</Original>
+                <English>Vehicle Drop</English>
             </Key>
             <Key ID="STR_DUWS_T_cwflheuj">
                 <German>Notfall Fahrzeugabwurf</German>
                 <Spanish>Entrega de vehículo de emergancia</Spanish>
                 <Chinesesimp>紧急载具空投</Chinesesimp>
-                <Original>Emergency Vehicle drop</Original>
-                <English>Emergency Vehicle drop</English>
+                <Original>Vehicle Drop</Original>
+                <English>Vehicle Drop</English>
             </Key>
             <Key ID="STR_DUWS_T_veh_drop_title">
                 <German>Emergency Vehicle Drop</German>
                 <Spanish>Emergency Vehicle Drop</Spanish>
                 <Chinesesimp>Emergency Vehicle Drop</Chinesesimp>
-                <Original>Emergency Vehicle Drop</Original>
-                <English>Emergency Vehicle Drop</English>
+                <Original>Vehicle Drop</Original>
+                <English>Vehicle Drop</English>
             </Key>
             <Key ID="STR_DUWS_T_veh_drop_confirm">
                 <German>Request Drop</German>
@@ -5330,8 +5330,8 @@
                 <German>Action Squad an "Overlord" – Anfrage zum Luftabwurf eines zivilen Notfahrzeugs an meiner Position, over.</German>
                 <Spanish>Action Squad a "Overlord" – solicito el lanzamiento aéreo de un vehículo de emergencia civil en mi posición, over.</Spanish>
                 <Chinesesimp>"霸王"，我的位置需要投送一辆民用紧急载具，完毕。</Chinesesimp>
-                <Original>To Overlord, requesting an emergency civilian vehicle drop on my position, over.</Original>
-                <English>To Overlord, requesting an emergency civilian vehicle drop on my position, over.</English>
+                <Original>To Overlord, requesting a civilian vehicle drop on my position, over.</Original>
+                <English>To Overlord, requesting a civilian vehicle drop on my position, over.</English>
             </Key>
             <Key ID="STR_DUWS_T_uavscancall">
                 <German>Alle AO-Einheiten, hier ist "Overlord 1-1" – UAV-Aufklärung ist an markierter Position online.</German>
@@ -5880,8 +5880,8 @@
                 <Spanish>Entrega de vehículo de emergencia en camino</Spanish>
                 <German>Notfall Fahrzeugabwurf unterwegs</German>
                 <Chinesesimp>紧急载具空投进场</Chinesesimp>
-                <Original>Emergency Vehicle Drop Inbound.</Original>
-                <English>Emergency Vehicle Drop Inbound.</English>
+                <Original>Vehicle Drop Inbound.</Original>
+                <English>Vehicle Drop Inbound.</English>
             </Key>
             <Key ID="STR_DUWS_T_vehicleready">
                 <Spanish>Despacho, el vehículo solicitado ya ha sido desplegado. Revisa tu terminal GPS.</Spanish>
@@ -5922,8 +5922,8 @@
                 <Spanish>Un vehículo de emergencia ha sido soltado cerca de su locación</Spanish>
                 <German>Ein Notfall Fahrzeug wurde in der Nähe deiner Position abgeworfen</German>
                 <Chinesesimp>一辆紧急载具已经降落在你的位置附近</Chinesesimp>
-                <Original>An Emergency Vehicle has been dropped near your location.</Original>
-                <English>An Emergency Vehicle has been dropped near your location.</English>
+                <Original>A vehicle has been dropped near your location.</Original>
+                <English>A vehicle has been dropped near your location.</English>
             </Key>
             <Key ID="STR_DUWS_T_2oefoo3j">
                 <Spanish>Vehículo entregado</Spanish>
