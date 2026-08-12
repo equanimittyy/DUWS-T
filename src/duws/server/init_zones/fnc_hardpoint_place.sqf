@@ -140,9 +140,11 @@ fnc_hardpoint_garrison = {
         _men append (units _crew);
     };
 
-    // Then the loose defenders, each on a close patrol around the emplacement rather than dug in -- the
-    // gun holds the position while the teams work its approaches. The token is one team or a list of
-    // them (a radio tower fields several); an empty or unknown token in the list places no one.
+    // Then the loose defenders. Each holds the posture its token names (DUWS_fnc_tokenPosture): a bare
+    // token defaults to a close patrol around the emplacement -- the gun holds the position while the
+    // teams work its approaches -- and a posture-prefixed token (widepatrol:team) screens wider instead.
+    // The token is one team or a list of them (a radio tower fields several); an empty or unknown token
+    // in the list places no one.
     private _tokens = if (_teamToken isEqualType "") then { [_teamToken] } else { _teamToken };
     {
         private _garrison = [_x, _side] call DUWS_fnc_teamRoster;
@@ -155,7 +157,7 @@ fnc_hardpoint_garrison = {
             private _grp = [_sp, _sideObj, _garrison, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
             _grp deleteGroupWhenEmpty true;
             (units _grp) call _maxSpot;
-            [_grp, "closepatrol", _pos, HP_GARRISON_PATROL_R] call fnc_apply_posture;
+            [_grp, [_x] call DUWS_fnc_tokenPosture, _pos, HP_GARRISON_PATROL_R] call fnc_apply_posture;
             _men append (units _grp);
         };
     } forEach _tokens;
