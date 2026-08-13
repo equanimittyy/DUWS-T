@@ -14,9 +14,10 @@
 
 if (!isServer) exitWith { false };
 
-// The fraction below which a garrison is finished. One number for it across the campaign, so a
-// player learns it once.
-#define BREAK_FRACTION 0.2
+// The fraction of a zone's full fighting potential -- garrison plus its whole reserve pool -- below
+// which the zone can be taken. One tenth: a zone falls only once nine tenths of everything it can
+// field, waves included, is beaten. One number across the campaign, so a player learns it once.
+#define BREAK_FRACTION 0.1
 
 params ["_trg"];
 private _pos = _trg getVariable ["DUWS_zonePos", []];
@@ -33,7 +34,13 @@ if (_peak <= 0) exitWith { false };
 // This zone's own garrison, by roster and wherever it is standing -- not by proximity. A side
 // mission's guards, or a neighbouring town's garrison, are not this zone's and cannot restore it;
 // a patrol that has wandered past the ring is still the zone's and still has to be dealt with.
-if (([_key] call fnc_zone_garrison_count) > BREAK_FRACTION * _peak) exitWith { false };
+//
+// Plus the men its reserve pool still owes: a reserve is deferred force, not lost force, so the owed
+// count holds the zone above the break line until the waves have actually spawned and been beaten. A
+// zone with a pool cannot fall on the strength of an empty perimeter -- the player has to draw the
+// reinforcements out. At multiplier 1 the pool is empty and this is the garrison alone, as before.
+private _remaining = ([_key] call fnc_zone_garrison_count) + ([_key] call DUWS_fnc_zoneReserveMen);
+if (_remaining > BREAK_FRACTION * _peak) exitWith { false };
 
 // Who holds the ground, over the trigger's own area so both sides are counted across the same
 // circle. Deliberately unkeyed, unlike the test above: anyone standing here counts for their side

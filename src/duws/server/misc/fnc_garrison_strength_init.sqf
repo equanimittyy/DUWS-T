@@ -23,9 +23,9 @@ DUWS_fnc_garrisonStrength = {
 // use. The epsilon absorbs float slop rather than shifting the rule: SQF scalars are 32-bit floats,
 // and a division landing a hair above an exact tenth would buy the garrison a whole free step.
 //
-// **The 0.3 floor is the mechanic, not a guard.** Against the 0.2 break line both capture tests use,
-// a garrison at the floor still sits a tenth above beaten, so retaking ground you softened is a
-// fight rather than a walk-in. For a zone it is also structural: one allowed to redeploy empty would
+// **The 0.3 floor is the mechanic, not a guard.** Against the 0.1 break line the zone capture test
+// uses, a garrison at the floor still sits two tenths above beaten, so retaking ground you softened is
+// a fight rather than a walk-in. For a zone it is also structural: one allowed to redeploy empty would
 // be uncapturable outright, because a zero peak refuses capture.
 DUWS_fnc_garrisonStrengthSet = {
 	params ["_key", "_frac"];
