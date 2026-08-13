@@ -55,17 +55,18 @@ fnc_civ_repAt = {
 // reads off one line. A tier bought while the garrison stands raises DUWS_fnc_spawnDiff of the two
 // rows, which is what keeps reinforcement an addition rather than a second garrison.
 //
-// A town's own set, deliberately smaller than any zone's, and not multiplied by its radius the way
-// a zone's is. Static emplacements are what make a zone an objective and a town must not compete
-// with one for the player's attention -- so a large town stays a garrison rather than becoming a
-// zone that happens to have civilians in it, and IV reaches the zone benchmark by occupying
-// buildings rather than by digging in.
+// A town's own set, kept apart from the zone tiers so the two can still diverge, and not multiplied
+// by its radius the way a zone's is. It carries a zone tier's infantry weight now, not the smaller
+// garrison it once did, but drops the heavy end a zone is known by: no tanks, no attack helicopters,
+// armour held to a lone IFV at tier IV. That omission, with the static emplacements a town never
+// gets, is what keeps a large town a garrison rather than a zone that happens to have civilians in
+// it, and IV digs into buildings rather than fielding the armour a zone of its tier would.
 // --DUWS-UNITCOMP BEGIN name="Town tiers" kind=composition rowname="Tier %1" row="tier I..IV"--
 DUWS_townSpawnTiers = [
-	["closepatrol:patrol", "closepatrol:team"],
-	["closepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:car"],
-	["closepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:car", "closepatrol:apc"],
-	["closepatrol:patrol", "closepatrol:team", "closepatrol:team", "closepatrol:car", "closepatrol:apc", "garrison:team", "garrison:team", "garrison:team", "garrison:team", "garrison:team", "garrison:team"]
+	["widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car"],
+	["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "closepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "garrison:garrison_element", "garrison:garrison_element"],
+	["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:apc", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"],
+	["widepatrol:sniper_element", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "widepatrol:patrol", "closepatrol:team", "widepatrol:team", "widepatrol:team", "closepatrol:wp_team", "widepatrol:wp_team", "widepatrol:wp_team", "widepatrol:car", "widepatrol:car", "closepatrol:apc", "closepatrol:apc", "closepatrol:ifv", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element", "garrison:garrison_element"]
 ];
 // --DUWS-UNITCOMP END--
 

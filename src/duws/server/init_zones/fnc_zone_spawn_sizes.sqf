@@ -8,9 +8,10 @@
 // out of them, and that file loads early enough to price the BLUFOR squad catalogue. What is here is
 // OPFOR's -- the vehicles and the tiers that name them.
 //
-// Zones and towns keep separate composition sets -- a town garrison must not field what a zone does,
-// or the two stop reading differently on the ground -- but share the token vocabulary, the tables
-// and the spawner here, so a new team or vehicle is added in one place rather than two.
+// Zones and towns keep separate composition sets so the two can diverge -- a town fields a zone
+// tier's infantry but none of its heavy armour or air, which is what keeps the two reading
+// differently on the ground -- but share the token vocabulary, the tables and the spawner here, so
+// a new team or vehicle is added in one place rather than two.
 
 // What a zone of each tier fields, indexed tier-1. Absolute, not cumulative: a tier is the whole
 // garrison, so what a tier IV zone is can be read off one row instead of assembled from four.

@@ -412,19 +412,20 @@ appraise them as neutral.
 | Tier | Fields | Reached by |
 |---|---|---|
 | 0 | — | not OPFOR ground |
-| I | Patrol, team | reputation `<= -10` |
-| II | Patrol, two teams, light vehicle | purchase |
-| III | Patrol, two teams, light vehicle, armour | purchase |
-| IV | The above plus building-occupying units | purchase |
+| I | Patrols, a team, a weapons team, a car | reputation `<= -10` |
+| II | The above heavier, plus a sniper pair, an APC and dug-in elements | purchase |
+| III | The above heavier, with wide-patrol teams and a second APC | purchase |
+| IV | The above, plus a lone IFV and more building-occupying units | purchase |
 
 The compositions live as data in `DUWS_townSpawnTiers`, in the token vocabulary
 `DUWS_fnc_zoneSpawnOne` already understands — the same spawner the zone compositions use, so a town
 garrison inherits faction auto-detection for free.
 
-**A town's set is its own, and is deliberately smaller than any zone's.** Neither set is scaled by
-the ground's radius ([§Radius reaches placement, not composition](#radius-reaches-placement-not-composition)):
+**A town's set is its own, carrying a zone tier's infantry weight but none of its heavy armour or
+air — no tanks, no attack helicopters, armour held to a lone IFV at tier IV.** Neither set is scaled
+by the ground's radius ([§Radius reaches placement, not composition](#radius-reaches-placement-not-composition)):
 a large town scaled up stops being a garrison and becomes a zone that happens to have civilians in
-it, which is the distinction static emplacements exist to draw.
+it, which is the distinction static emplacements and armour exist to draw.
 
 **Rows are absolute, not cumulative** — a row is the whole garrison for that tier. A tier bought
 while the garrison stands raises `DUWS_fnc_spawnDiff` of the standing composition against the new
