@@ -172,3 +172,41 @@ DUWS_fnc_townStrengthKey = {
 	params ["_townIndex"];
 	[_townIndex] call fnc_town_site_key
 };
+
+// The dev readout for one site's ledger: the four numbers the model turns on -- full potential, what
+// still stands, what is dead, and the strength maths tying them. Read-only, and every value comes from
+// the accessors above rather than being recomputed, so what it prints is what the model acts on. The
+// Debug menu's garrison row and its server query are the only callers.
+DUWS_fnc_garrisonDebug = {
+	params ["_key"];
+	private _full = [_key] call DUWS_fnc_garrisonFull;
+	private _lost = [_key] call DUWS_fnc_garrisonLost;
+	private _surv = [_key] call DUWS_fnc_garrisonSurviving;
+	private _fullMen = [_key] call DUWS_fnc_garrisonFullMen;
+	private _lostMen = [_lost] call DUWS_fnc_tokenListMen;
+	private _survMen = [_surv] call DUWS_fnc_tokenListMen;
+
+	// Multiset tally: "2x closepatrol:team, 1x armour:tank" rather than a raw flat list, which for a x3
+	// garrison runs off the hint box. First-seen order, so full/available/dead columns read alike.
+	private _tally = {
+		params ["_tokens"];
+		if (_tokens isEqualTo []) exitWith { "(none)" };
+		private _seen = [];
+		private _num = [];
+		{
+			private _i = _seen find _x;
+			if (_i < 0) then { _seen pushBack _x; _num pushBack 1 }
+			else { _num set [_i, (_num select _i) + 1] };
+		} forEach _tokens;
+		(_seen apply { format ["%1x %2", _num select (_seen find _x), _x] }) joinString ", "
+	};
+
+	[
+		format ["[GARRISON %1]", _key],
+		format ["  live on ground: %1", [_key] call DUWS_fnc_garrisonHeld],
+		format ["  max tokens: %1 (%2 men)  %3", count _full, _fullMen, [_full] call _tally],
+		format ["  available:  %1 (%2 men)  %3", count _surv, _survMen, [_surv] call _tally],
+		format ["  dead:       %1 (%2 men)  %3", count _lost, _lostMen, [_lost] call _tally],
+		format ["  strength: (%1 full - %2 dead) / %1 = %3", _fullMen, _lostMen, [_key] call DUWS_fnc_garrisonStrength]
+	]
+};

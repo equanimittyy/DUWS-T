@@ -307,6 +307,7 @@ fnc_debug_clear_hardpoints = compile preprocessFileLineNumbers "duws\server\misc
 // them back to the caller to draw. Read-only, so an accidental client call fails loud, not harmfully.
 fnc_debug_aoi_circles = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_aoi_circles.sqf";
 fnc_debug_search_flag = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_search_flag.sqf";
+fnc_debug_garrison_query = compile preprocessFileLineNumbers "duws\server\misc\fnc_debug_garrison_query.sqf";
 fnc_intel_search_action = compile preprocessFileLineNumbers "duws\client\misc\fnc_intel_search_action.sqf";publicVariable "fnc_intel_search_action";
 fnc_restHealServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_restHealServer.sqf";
 publicVariable "fnc_restHealServer";

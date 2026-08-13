@@ -38,6 +38,26 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
     ["Spawn OPFOR hardpoint", fnc_debug_hardpoint_menu, "opfor", [1,0.667,0,1]],
     ["Spawn BLUFOR hardpoint", fnc_debug_hardpoint_menu, "blufor", [1,0.667,0,1]],
 
+    // Click-to-inspect on the open map, same idiom as the hardpoint placer: read one site's garrison
+    // ledger -- max, available and dead tokens with the strength maths -- from the server, which owns it.
+    ["Garrison ledger: click a site", {
+        [] spawn {
+            DUWS_dbgGarrClicked = false;
+            openMap [true, false];
+            waitUntil { !isNull (findDisplay 12) };
+            // Banner, not hint: the engine draws the hint box beneath the open map, so it is invisible
+            // while the map is up. The answer arrives as a hint once the map is closed, below.
+            [format ["<t size='2' color='#00ffff'>Click a zone or town to read its garrison ledger. </t><br/>Dev tool: max, available and dead tokens with the strength maths. Close the map to cancel."]] call fnc_map_prompt;
+            onMapSingleClick "DUWS_dbgGarrPos = _pos; DUWS_dbgGarrClicked = true; onMapSingleClick ''; true";
+            waitUntil { DUWS_dbgGarrClicked || !visibleMap };
+            onMapSingleClick "";
+            [""] call fnc_map_prompt;
+            if (!DUWS_dbgGarrClicked) exitWith {};
+            openMap [false, false];
+            [[DUWS_dbgGarrPos select 0, DUWS_dbgGarrPos select 1, 0], player] remoteExec ["fnc_debug_garrison_query", 2];
+        };
+    }, [], [1,0.667,0,1]],
+
     // First of the OPCOM debug tooling: opens the map and rings every AoI emitter's reach hatched in
     // its side's colour, so the influence field the commander reads is visible rather than inferred from
     // town colours. Still to come on this theme: commander AP with its income and spend, the wave
