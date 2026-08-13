@@ -69,10 +69,19 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   // positions push back: a zone hard, a hardpoint gently, so an offer lands in the no-man's-land near
   // the objectives without dropping onto one. As zones fall the seam advances with the front. Reads the
   // same ownership and hardpoint stores the map readout uses; the friendly-AoI exclusion is server-side.
+  // Easy offers use this seam weighting; hard offers instead route to _fnHardScore below -- deep, hugging
+  // enemy zones/hardpoints, no repulsion.
   private _frontWidth = 0.3;     // frontline spread: half-weight this fraction either side of the seam; larger spreads wider
   private _zoneRepel   = 1200;   // zone-edge standoff the weight fights for, metres -- aggressive
   private _hpRepel     = 300;    // hardpoint standoff the weight fights for, metres -- soft
   private _frontierBand = 2000;  // metres past an OPFOR zone edge the countryside search spans
+
+  // Hard-offer scoring: deep behind friendly lines, surrounded by enemy placements, behind a gauntlet.
+  // Easy offers never read these -- they only feed _fnHardScore.
+  private _depthScale  = 1500;   // depth half-weight distance from friendly-held ground, metres
+  private _densRadius  = 1500;   // an enemy zone/hardpoint within this ring feeds the "surrounded" score, metres
+  private _gauntCorr   = 400;    // approach-corridor half-width, metres -- enemy features inside it gate the objective
+  private _hardBand    = 800;    // countryside: metres past a chosen zone edge a hard objective may drift; tighter than the easy band, to hug the cluster
 
   private _bluHeld = if (isNil "WARCOM_zones_controled_by_BLUFOR") then {[]} else {WARCOM_zones_controled_by_BLUFOR};
   private _friendlyAnchors = +_bluHeld;
@@ -97,6 +106,10 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   } forEach zone_meta_array;
   private _opforCenters = _opforZoneCands apply {_x select 1};
 
+  // Enemy attractors for the hard score: OPFOR zone centres + live hardpoints. The repulsors above keep
+  // easy offers off these; hard offers are pulled toward them, so the same stores read with opposite sign.
+  private _enemyPts = _opforCenters + (_hpFoot apply {_x select 0});
+
   // Soft repulsion from a footprint set: 0 on top of the nearest feature's edge, 0.5 at _scale beyond
   // it, approaching 1 far out. A larger _scale fights harder and from farther. Empty set -> 1 (no push).
   private _fnRepel = {
@@ -119,12 +132,56 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
       _items selectRandomWeighted _weights
   };
 
-  // Urban weight: a bell peaked on _peakEnemyness (set per offer). enemyness is 0 in the friendly rear,
-  // 0.5 on the seam, ->1 deep in enemy ground; the bell peaks on that per-offer target and thins toward
-  // either extreme (never zero, so the spread survives), then zones push hard and hardpoints gently. An
-  // easy offer targets the seam (0.5); a hard offer a deeper target pulls it into enemy ground.
+  // Perpendicular distance from feature _f to the approach segment _a->_p, plus the raw projection
+  // parameter _t (0 at _a, 1 at _p). Lets the hard score spot enemy features straddling the approach.
+  private _fnSegDist = {
+      params ["_a", "_p", "_f"];
+      private _dx = (_p select 0) - (_a select 0);
+      private _dy = (_p select 1) - (_a select 1);
+      private _len2 = _dx*_dx + _dy*_dy;
+      if (_len2 < 1) exitWith {[_f distance2D _a, 0]};   // _a ~ _p: no meaningful approach line
+      private _t = (((_f select 0) - (_a select 0))*_dx + ((_f select 1) - (_a select 1))*_dy) / _len2;
+      private _tc = 0 max (_t min 1);
+      private _cx = (_a select 0) + _tc*_dx;
+      private _cy = (_a select 1) + _tc*_dy;
+      [sqrt ((((_f select 0)-_cx)^2) + (((_f select 1)-_cy)^2)), _t]
+  };
+
+  // Hard-offer score: product of three positive signals, each floored so a spot strong on one axis still
+  // competes. Deep behind friendly lines, surrounded by enemy zones/hardpoints, and behind a gauntlet
+  // (enemy features on the straight approach from the nearest friendly anchor -- the player's likely
+  // staging point). selectRandomWeighted normalises, so magnitudes only need to rank. No repulsors:
+  // hard offers are meant to hug the enemy; the 400 m fnc_pos_claimed gate still keeps them off a zone.
+  private _fnHardScore = {
+      private _pos = _this;
+      private _fDists = if (_friendlyAnchors isEqualTo []) then {[]} else {_friendlyAnchors apply {_pos distance2D _x}};
+      private _dFri = if (_fDists isEqualTo []) then {_depthScale} else {selectMin _fDists};
+      private _fDepth = _dFri / (_dFri + _depthScale);
+
+      private _dens = 0;
+      { _dens = _dens + (_densRadius / (_densRadius + (_pos distance2D _x))) } forEach _enemyPts;
+      private _fDens = _dens / (_dens + 1);
+
+      private _fGaunt = 0.2;
+      if !(_fDists isEqualTo []) then {
+          private _a = _friendlyAnchors select (_fDists find _dFri);
+          {
+              ([_a, _pos, _x] call _fnSegDist) params ["_perp", "_t"];
+              if (_perp < _gauntCorr && _t > 0.15 && _t < 0.95) then {
+                  _fGaunt = _fGaunt + (1 - _perp / _gauntCorr);
+              };
+          } forEach _enemyPts;
+      };
+
+      (0.05 + _fDepth) * (0.05 + _fDens) * _fGaunt
+  };
+
+  // Urban weight (easy offers): a bell peaked on the seam. enemyness is 0 in the friendly rear, 0.5 on the
+  // seam, ->1 deep in enemy ground; the bell peaks on 0.5 and thins toward either extreme (never zero, so
+  // the spread survives), then zones push hard and hardpoints gently. Hard offers exit early to _fnHardScore.
   private _fnUrbanWeight = {
       private _pos = _this;
+      if (_hard) exitWith { _pos call _fnHardScore };
       private _dFri = if (_friendlyAnchors isEqualTo []) then {1e6} else {selectMin (_friendlyAnchors apply {_pos distance2D _x})};
       private _dOpf = if (_opforCenters isEqualTo []) then {_dFri} else {selectMin (_opforCenters apply {_pos distance2D _x})};
       private _enemyness = _dFri / ((_dFri + _dOpf) max 1);
@@ -134,12 +191,14 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
         * ([_pos, _hpFoot, _hpRepel] call _fnRepel)
   };
 
-  // Countryside weight: among OPFOR zones an easy offer favours the front ones -- nearest friendly
-  // ground -- and a hard offer the deep ones, softly, so several zones share the draw rather than the
-  // single closest/farthest taking it. The band search and fnc_pos_claimed give the standoff, no repulsor.
+  // Countryside weight: among OPFOR zones an easy offer favours the front ones -- nearest friendly ground.
+  // A hard offer scores each zone by _fnHardScore at its centre, so the draw prefers a zone that is deep,
+  // ringed by other enemy placements, and behind a gauntlet. The band search and fnc_pos_claimed give the
+  // standoff, no repulsor.
   private _fnZoneWeight = {
+      if (_hard) exitWith { _this call _fnHardScore };
       private _dFri = if (_friendlyAnchors isEqualTo []) then {1} else {1 max (selectMin (_friendlyAnchors apply {_this distance2D _x}))};
-      if (_hard) then {_dFri} else {1 / _dFri}
+      1 / _dFri
   };
 
   while {_counter < _missionDraw} do {
@@ -150,10 +209,10 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 	progressLoadingScreen _progress;
 
 	// This offer's difficulty: the last _hardCount of the draw push deep, the rest seat on the front.
-	// Read by both weight functions (urban via _peakEnemyness, countryside via _hard) down the call
-	// stack -- SQF resolves them dynamically through the callers, the same way the anchors are read.
+	// _hard is read by both weight functions down the call stack -- SQF resolves it dynamically through
+	// the callers, the same way the anchors are read. Hard routes to _fnHardScore, easy to the seam.
 	private _hard = _counter >= _easyCount;
-	private _peakEnemyness = if (_hard) then {0.8} else {0.5};
+	private _peakEnemyness = 0.5;   // seam target for the easy urban bell; hard offers ignore it
 
 	// DUWS_T "More Urban": near a building, clear of zone centres.
 
@@ -176,7 +235,9 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 				_foundSafePos = [PosOfBLUHQ, 0, (zones_max_dist_from_hq*1.5),5,0,0.3,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 			} else {
 				([_opforZoneCands, _fnZoneWeight] call _fnPick) params ["_pzp", "_pzs"];
-				_foundSafePos = [_pzp, _pzs, _pzs + _frontierBand,5,0,0.3,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
+				// Hard drifts a tighter band so the objective stays inside the enemy cluster it picked.
+				private _band = if (_hard) then {_hardBand} else {_frontierBand};
+				_foundSafePos = [_pzp, _pzs, _pzs + _band,5,0,0.3,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 			};
 		};
 
