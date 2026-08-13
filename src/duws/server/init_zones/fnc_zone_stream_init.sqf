@@ -282,10 +282,10 @@ DUWS_fnc_zoneStow = {
     params ["_key"];
     [_key, [_key, "emplacement"] call fnc_site_occupant] call (DUWS_zoneEmplacementHooks get "sleep");
     [_key, [_key, "structure"] call fnc_site_occupant] call (DUWS_zoneStructureHooks get "sleep");
-    // The reserve pool is per-awake-session. Cleared here, after fnc_zone_strength_record has folded
-    // its owed men into the recorded strength, and reseeded by fnc_zone_spawn on the next raise -- so a
-    // stowed zone reads no owed reserve and comes back consistent with the strength it packed up at.
-    [_key] call DUWS_fnc_zoneReserveClear;
+    // The reserve pool is per-awake-session. Cleared here -- losses were recorded live as groups fell,
+    // so there is nothing to fold in on the way out -- and reseeded by fnc_zone_spawn on the next raise,
+    // so a stowed zone reads no owed reserve and comes back consistent with the ledger it packed up with.
+    [_key] call DUWS_fnc_garrisonReserveClear;
 };
 
 // Survivors of a zone that has fallen: ordered off the objective here, collected by the tick once
@@ -426,13 +426,14 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
     // fnc_zone_capture_ready refuses while more than its break fraction of the peak is alive on the
     // roster anywhere, so this is a tenth of a garrison at worst.
     if !(_opforHolds) exitWith {
-        // Before the split: the garrison is about to be walked off and the zone has changed hands,
-        // and either ends what the capture test was judging. A peak surviving into this reads a
-        // pack-up as a garrison wiped.
+        // Before the split: the garrison is about to be walked off and the zone has changed hands, and
+        // either ends what the capture test was judging. A live flag surviving into this reads a pack-up
+        // as a garrison beaten.
         [_key] call fnc_zone_garrison_dropped;
-        // The pool goes with the peak: OPFOR no longer own this ground, so there is nothing to reinforce
-        // and no owed reserve to count. A retake reseeds it from the scratch strength fnc_opfor_cap floors.
-        [_key] call DUWS_fnc_zoneReserveClear;
+        // The pool goes with the live flag: OPFOR no longer own this ground, so there is nothing to
+        // reinforce and no owed reserve to count. A retake reseeds it from the scratch ledger
+        // fnc_opfor_cap seeds to 0.3 survival.
+        [_key] call DUWS_fnc_garrisonReserveClear;
         private _leftovers = [_key, _pos] call DUWS_fnc_zoneSendOff;
         [_key, "withdrawing"] call fnc_site_roster_clear;
         ([_key, "withdrawing"] call fnc_site_roster) append _leftovers;
@@ -458,10 +459,9 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
     // than the timer left the zone standing for the rest of the campaign.
     if (!_here && {(_o get "emptySince") >= 0}
         && {diag_tickTime > (_o get "emptySince") + (_o get "grace")}) exitWith {
-        // What the player left of the garrison, off the roster and above the line below: the record
-        // reads the peak to tell a garrison that finished arriving from one still being placed, and
-        // the next statement clears it.
-        [_key] call fnc_zone_strength_record;
+        // What the player left is already in the ledger -- each wiped group recorded its token as it
+        // fell, and the survivors of groups that were not wiped come back whole. So the teardown only
+        // marks the garrison no longer live and collects the men; there is nothing to record here.
         [_key] call fnc_zone_garrison_dropped;
         // The shared collection: men by roster, their vehicles once nothing living is aboard, and
         // the groups they empty. A town streams out by the same rules, so the rules live in one

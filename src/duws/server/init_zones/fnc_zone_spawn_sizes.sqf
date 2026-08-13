@@ -85,33 +85,6 @@ DUWS_fnc_scaleComposition = {
     _out
 };
 
-// What attrition does to one token. A composition entry is not a unit -- "patrol" is two men, "team"
-// is five, "car" is a vehicle -- so dropping entries at random meant two zones reported at the same
-// strength could differ by twenty men, and the bar the readout draws did not mean what it said.
-// Attrition is a fraction of *men*, and every token carries its own share of it.
-//
-// Two answers, and which one a token gets is what it is made of rather than which system raised it:
-//
-//   _strength  a team, which drops men and keeps its leader. A garrison slot is a team too, so a
-//              worn zone holds the same buildings with fewer men in each rather than fewer
-//              buildings: one squad to one structure, however thin the squad has become.
-//   0 or 1     a vehicle, whole or not at all. There is no partial vehicle -- a crew short of a
-//              driver is a wreck the player walks past -- so a zone ground below half stops
-//              fielding them, which is one rule a player can learn.
-DUWS_fnc_tokenStrength = {
-    params ["_token", ["_strength", 1]];
-    if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith { _strength };
-    [0, 1] select (_strength >= 0.5)
-};
-
-// The composition a site actually raises: every token that still places something. Nothing is
-// dropped at random here -- the tokens that survive are the same ones at the same strength every
-// time, so a zone the player wore down comes back as the zone they wore down.
-DUWS_fnc_thinComposition = {
-    params ["_tokens", ["_strength", 1]];
-    _tokens select { ([_x, _strength] call DUWS_fnc_tokenStrength) > 0 }
-};
-
 // The classname behind a token, or "" when it cannot be fielded. A team is not this function's
 // business and answers itself -- fnc_factionRoles already drops the roles a faction leaves undefined.
 DUWS_fnc_tokenClass = {
@@ -161,16 +134,12 @@ DUWS_fnc_spawnDiff = {
 //
 // Returns groups rather than appending to a caller's roster, so a caller that keeps one appends
 // after. Nothing reads a zone's roster meaningfully while its band is still placing -- the capture
-// test refuses on the missing peak, and the peak is taken after this returns.
+// test refuses while the garrison is not yet live, and the live flag is set after this returns.
 DUWS_fnc_raiseGarrison = {
-    params ["_tokens", "_pos", "_radius", ["_strength", 1]];
+    params ["_tokens", "_pos", "_radius"];
     private _grps = [];
     {
-        // Attrition reaches every token here, as its own share of the fraction, rather than by
-        // taking entries out of the list before it arrives.
-        private _tokenStrength = [_x, _strength] call DUWS_fnc_tokenStrength;
-
-        private _grp = [_x, _pos, _radius, _tokenStrength] call DUWS_fnc_zoneSpawnOne;
+        private _grp = [_x, _pos, _radius] call DUWS_fnc_zoneSpawnOne;
         if (!isNull _grp) then {
             // Flagged where the group is raised, so the two cannot drift: every spawner here already
             // carried the loot pass and none of them carried this one, which once left the 50 %
@@ -266,18 +235,25 @@ DUWS_fnc_vehicleRow = {
 // side rather than in the token's own radius band -- so the two override the posture the token names
 // and the position the spawner would pick. Empty defaults leave the ordinary garrison path untouched.
 DUWS_fnc_zoneSpawnOne = {
-    params ["_token", "_pos", "_size", ["_strength", 1], ["_postureOverride", ""], ["_spawnPos", []]];
+    params ["_token", "_pos", "_size", ["_postureOverride", ""], ["_spawnPos", []]];
     private _posture = [_token] call DUWS_fnc_tokenPosture;
     if (_postureOverride != "") then { _posture = _postureOverride };
-    if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) exitWith {
-        [_token, _pos, _size, _strength, _posture, _spawnPos] call fnc_spawn_team
+    private _grp = grpNull;
+    if !(([_token] call DUWS_fnc_teamRow) isEqualTo []) then {
+        _grp = [_token, _pos, _size, _posture, _spawnPos] call fnc_spawn_team;
+    } else {
+        private _class = [_token] call DUWS_fnc_tokenClass;
+        if (_class == "") exitWith {
+            ["WARN", "ZONES", format ["%1 cannot be fielded here and was not filtered out", _token]] call fnc_log;
+            grpNull
+        };
+        _grp = [_class, _pos, _size, _posture, _spawnPos] call fnc_spawn_vehicle;
     };
-    private _class = [_token] call DUWS_fnc_tokenClass;
-    if (_class == "") exitWith {
-        ["WARN", "ZONES", format ["%1 cannot be fielded here and was not filtered out", _token]] call fnc_log;
-        grpNull
-    };
-    [_class, _pos, _size, _posture, _spawnPos] call fnc_spawn_vehicle
+    // The source token rides the group so the killed handler can record which composition entry died
+    // (DUWS_fnc_garrisonReserveWatch reads it back and copies it to each unit). A vehicle that failed to
+    // field left through the exit above, so a tagged group is always a real one.
+    if (!isNull _grp) then { _grp setVariable ["DUWS_srcToken", _token] };
+    _grp
 };
 
 // Called by the zone raise worker, which owns the streaming decisions around it. Nothing guards a
@@ -295,65 +271,37 @@ fnc_zone_spawn = {
             _tier, _zoneKey]] call fnc_log;
     };
 
-    // Reserve depth: the initial garrison is always the x1 list, and the surplus (mult-1) copies of it
-    // wait as the reserve pool. The refill draws from it at random, so order carries nothing -- what
-    // matters is the multiset, (mult-1) of every x1 token, so a lost tank might be answered by a tank
-    // or by a rifle section. Overwrites any stale pool: it is per-awake-session, never persisted, and a
-    // re-raise reseeds it from the current strength.
+    // Reserve depth: the multiplier is how many copies of the x1 list make up the zone's full fighting
+    // potential, not how many stand up at once. Stamp that full potential, then let the ledger say what
+    // survives -- full minus the tokens the zone has lost across every visit. The survivors split by the
+    // x1 shape: the first x1's worth stand up as the garrison, the surplus waits as the reserve pool, so
+    // a lost token comes out of the pool before it thins the garrison. Reseeded every raise from the
+    // ledger, so the pool is per-awake-session while the losses behind it persist.
     private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-    private _pool = [];
-    for "_k" from 2 to _mult do { _pool append _x1 };
-    [_zoneKey, _pool] call DUWS_fnc_zoneReserveSet;
+    ([_zoneKey, _x1, _mult] call DUWS_fnc_garrisonDerive) params ["_spawns", "_pool"];
 
-    // The composition is what the zone fields intact; it deploys at whatever its garrison was ground
-    // down to. Without this, breaking a garrison and leaving buys the player nothing -- the same
-    // fight is waiting at full strength when they come back.
-    //
-    // The list only loses what a fraction cannot place at all; everything else carries the fraction
-    // into the raise and fields its own reduced share.
-    private _strength = [_zoneKey] call fnc_zone_strength;
-    private _spawns = [_x1, _strength] call DUWS_fnc_thinComposition;
-
-    private _grps = [_spawns, _spawnPos, _size, _strength] call DUWS_fnc_raiseGarrison;
+    private _grps = [_spawns, _spawnPos, _size] call DUWS_fnc_raiseGarrison;
     { _roster append (units _x) } forEach _grps;
 
-    // The group ceiling the refill tops up to: the zone's full fielded-able capacity, the x1 token
-    // count, not the count that just deployed. A zone raised thin stands up fewer groups (vehicles
-    // drop below half strength), and reserves exist precisely to bring it back to full -- so the
-    // ceiling is what a full garrison is, and the pool refills toward it. Filtered, so a token the side
-    // cannot yet field is not a slot the refill chases forever; per awake session, since the filter can
-    // change between raises as OPFOR earns AP. The killed handler watches the deployed groups (and any
-    // reserve that later joins them) so a deep dip pulls an immediate wave.
+    // The group ceiling the refill tops up to: the zone's full fielded-able x1 count, not the count that
+    // just deployed. A zone raised mauled stands up fewer groups (its lost tokens are simply absent), and
+    // reserves exist precisely to bring it back to full -- so the ceiling is what a full garrison is, and
+    // the pool refills toward it. Filtered, so a token the side cannot yet field is not a slot the refill
+    // chases forever; per awake session, since the filter can change between raises as OPFOR earns AP.
+    // The killed handler watches the deployed groups (and any reserve that later joins them) so a deep dip
+    // pulls an immediate wave, and records each wiped group's token into the ledger.
     missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _zoneKey], count _x1];
-    [_zoneKey, _grps] call DUWS_fnc_zoneReserveWatch;
+    [_zoneKey, _grps] call DUWS_fnc_garrisonReserveWatch;
 
-    // The strength fnc_zone_capture_ready judges this zone against, and the only place it is set.
-    // fnc_zone_garrison_dropped is the only place it is cleared, and states the contract binding
-    // the two.
-    //
-    // Anchored to the men this zone's first completed cycle placed, not to what just deployed: a
-    // garrison that comes back at six tenths is still measured against the ten, so the men killed
-    // last visit stay killed. Re-basing the peak on the reduced garrison would restore the whole
-    // 80%-to-beat every time the zone streamed out, which is the refund attrition exists to stop.
-    //
-    // The full intended force, not the x1 placement: the measured x1 men plus the men a full
-    // (mult-1)-deep pool owes. Measured for the x1 half, so vehicle crews are counted once and no
-    // men-per-tier table is needed; the pool half counts infantry only, matching DUWS_fnc_zoneReserveMen
-    // -- a pooled vehicle owes no men there and its crew arrives as a handful of extra bodies, bounded
-    // and well inside the tenths the strength model quantises to. At mult 1 the pool owes nothing and
-    // this collapses to the placement exactly.
-    private _placed = [_zoneKey] call fnc_zone_garrison_count;
-    private _baseVar = format ["DUWS_zoneBase_%1", _zoneKey];
-    private _baseline = missionNamespace getVariable [_baseVar, 0];
-    if (_baseline <= 0) then {
-        _baseline = _placed + (_mult - 1) * ([_x1, 1] call DUWS_fnc_tokenListMen);
-        missionNamespace setVariable [_baseVar, _baseline];
-    };
-    missionNamespace setVariable [format ["DUWS_zonePeak_%1", _zoneKey], _baseline];
-    // Men are standing, so the zone has finished mobilising. Cleared beside the peak rather than at
-    // the head of the spawn, because the peak is the point at which the garrison is real -- a band
-    // still placing has neither, and a torn-down one exits above without publishing either.
+    // Live and mobilised: men are standing, so the capture test may judge the zone and the reserve pass
+    // may top it up. Cleared by the stow or capture that walks the garrison off (fnc_zone_garrison_dropped).
+    // The men the capture test measures against are the ledger's full potential (DUWS_fnc_garrisonFullMen,
+    // stamped above), fixed across visits -- so a garrison that comes back mauled is still judged against
+    // the whole, and the men killed last visit stay killed because they stay in the ledger, not because a
+    // peak was anchored to them.
+    [_zoneKey, true] call DUWS_fnc_garrisonSetLive;
     missionNamespace setVariable [format ["DUWS_zoneMobilising_%1", _zoneKey], nil];
-    ["INFO", "ZONES", format ["%1 deployed %2 men (%3 groups) at tier %4, %5 strength; peak %6, reserve pool %7",
-        _zoneKey, _placed, count _grps, _tier, [_zoneKey] call fnc_zone_strength, _baseline, count _pool]] call fnc_log;
+    private _placed = [_zoneKey] call fnc_zone_garrison_count;
+    ["INFO", "ZONES", format ["%1 deployed %2 men (%3 groups) at tier %4, %5 strength; full %6 men, reserve pool %7",
+        _zoneKey, _placed, count _grps, _tier, [_zoneKey] call fnc_zone_strength, [_zoneKey] call DUWS_fnc_garrisonFullMen, count _pool]] call fnc_log;
 };

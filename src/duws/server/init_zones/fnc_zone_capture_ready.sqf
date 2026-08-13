@@ -14,33 +14,22 @@
 
 if (!isServer) exitWith { false };
 
-// The fraction of a zone's full fighting potential -- garrison plus its whole reserve pool -- below
-// which the zone can be taken. One tenth: a zone falls only once nine tenths of everything it can
-// field, waves included, is beaten. One number across the campaign, so a player learns it once.
-#define BREAK_FRACTION 0.1
-
 params ["_trg"];
 private _pos = _trg getVariable ["DUWS_zonePos", []];
 private _key = _trg getVariable ["DUWS_zoneKey", ""];
 if (_pos isEqualTo [] || {_key == ""}) exitWith { false };
 
-private _peak = missionNamespace getVariable [format ["DUWS_zonePeak_%1", _key], 0];
+// Not live means the zone is stowed, mid-spawn, or not OPFOR's. Refusing here stops a player walking
+// onto empty ground and taking it before its garrison has been placed -- and it only holds while every
+// teardown discharges fnc_zone_garrison_dropped, which is where that contract is stated.
+if !([_key] call DUWS_fnc_garrisonHeld) exitWith { false };
 
-// No peak means the zone is stowed, mid-spawn, or not OPFOR's. Refusing here is what stops a player
-// walking onto empty ground and taking it before its garrison has been placed -- and it only holds
-// while every teardown discharges fnc_zone_garrison_dropped, which is where that contract is stated.
-if (_peak <= 0) exitWith { false };
-
-// This zone's own garrison, by roster and wherever it is standing -- not by proximity. A side
-// mission's guards, or a neighbouring town's garrison, are not this zone's and cannot restore it;
-// a patrol that has wandered past the ring is still the zone's and still has to be dealt with.
-//
-// Plus the men its reserve pool still owes: a reserve is deferred force, not lost force, so the owed
-// count holds the zone above the break line until the waves have actually spawned and been beaten. A
-// zone with a pool cannot fall on the strength of an empty perimeter -- the player has to draw the
-// reinforcements out. At multiplier 1 the pool is empty and this is the garrison alone, as before.
-private _remaining = ([_key] call fnc_zone_garrison_count) + ([_key] call DUWS_fnc_zoneReserveMen);
-if (_remaining > BREAK_FRACTION * _peak) exitWith { false };
+// The garrison beaten: this zone's own roster men -- wherever they are standing, a wandered patrol still
+// counts, a neighbour's garrison never does -- plus the men its reserve pool still owes, worn to a tenth
+// of the zone's full fighting potential (DUWS_fnc_garrisonBeaten). The owed reserves hold the zone above
+// the line until the waves have spawned and been beaten, so it cannot fall on an empty perimeter; at
+// multiplier 1 the pool is empty and this is the garrison alone, the one break line across the campaign.
+if !([_key] call DUWS_fnc_garrisonBeaten) exitWith { false };
 
 // Who holds the ground, over the trigger's own area so both sides are counted across the same
 // circle. Deliberately unkeyed, unlike the test above: anyone standing here counts for their side

@@ -13,10 +13,6 @@
 // raised so the capture test can tell this zone's garrison from passers-by, and the town garrison
 // needs the handle to count its strength and to order it out.
 
-// _strength is attrition, and only a caller whose token escapes the composition thin passes it: the
-// fortification tokens wear down inside themselves rather than by being dropped, and everything else
-// was already thinned as a list before it reached here. Thinning both ways would halve twice.
-//
 // _posture defaults to the close patrol every team walked when orders were a column on its roster
 // row, so the side-mission callers that name only a team still get what they always got. A token may
 // carry its own ("garrison:garrison_element"), which is what DUWS_fnc_zoneSpawnOne passes.
@@ -24,7 +20,7 @@
 // _spawnPos is the reserve path's alone: a reinforcement is placed on a point the reserve pass chose
 // on the zone's far side, not in the posture's own radius band. Empty means the ordinary team, which
 // spawns in its band off the centre.
-params ["_team", "_center", "_radius", ["_strength", 1], ["_posture", "closepatrol"], ["_spawnPos", []]];
+params ["_team", "_center", "_radius", ["_posture", "closepatrol"], ["_spawnPos", []]];
 
 // grpNull rather than an empty group: DUWS_fnc_raiseGarrison already drops nulls, and a group with
 // no men would sit on the zone roster forever holding the capture test open.
@@ -35,7 +31,7 @@ if (_row isEqualTo []) exitWith {
 };
 
 // Not named _roster: callers one frame up use that name for the zone's unit roster.
-private _men = [_team, "opfor", _strength] call DUWS_fnc_teamRoster;
+private _men = [_team, "opfor"] call DUWS_fnc_teamRoster;
 // Spawn distance follows the posture: a wide patrol starts on the outer ring, a close one near the
 // objective, from DUWS_postureBands so the spawn and the circuit agree. A posture the table does not
 // name keeps the old 50..radius band. A caller-supplied point overrides the band outright -- a
