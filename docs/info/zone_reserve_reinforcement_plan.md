@@ -160,10 +160,37 @@ its full intended force whether or not the pool has arrived yet.
 
 ## Placement and posture
 
-**Placement — far side, toward friendly ground, away from the player.** Bearing off the zone centre:
-away from the BLUFOR centroid (players + WEST units within `radius + margin`), nudged toward the
-nearest other zone (weight ~0.7 away, 0.3 toward); spawn at `centre getPos [radius * 0.9, bearing]`
-then `BIS_fnc_findSafePos`. No BLUFOR found → the toward vector alone.
+**Placement — from the enemy rear, preferably unseen.** The requirement is that a player never
+watches a squad appear and never gets flanked out of nowhere. Three pulls, in priority order, with a
+flat distance as the floor.
+
+- **Opposite the BLUFOR approach (primary, non-negotiable).** Spawn on the side of the zone away from
+  the players: `-bluDir`, where `bluDir` is the zone-centre-to-player-centroid direction. Reserves
+  then come from the far side and meet the players **head-on as they advance, never from the
+  approach direction behind them**. This is the anti-flank rule.
+- **Weighted toward another enemy zone (soft).** The bearing is nudged toward the nearest other OPFOR
+  zone so reserves read as coming from friendly territory when the geometry allows — a preference,
+  yielded whenever it would fight the anti-flank direction.
+- **Preferably out of sight (best-effort).** At the chosen distance and bearing, try a small number
+  of candidate `BIS_fnc_findSafePos` points and prefer one with no line of sight to any player; take
+  the farthest / most-occluded if none is fully hidden within the attempts. A preference, not a hard
+  gate — see the cost note.
+
+Distance is the floor: `DUWS_zoneReserveSpawnDist` (default 400 m) minimum from every player, anchored
+on the nearest one so it reads the same at a 50 m base and a 1300 m island (a zone-radius-relative
+distance would drop reserves a kilometre out of the island and on top of the player in the base).
+From there they run in at FULL speed — ~70-80 s for infantry, quicker for vehicles.
+
+**Line-of-sight cost.** Not heavy here. `lineIntersectsSurfaces` is a raycast, expensive only when run
+per-frame for many units; this runs at spawn only — a few candidates times the players present, once
+per wave every few minutes — so it is dozens of casts spread over time, not per-frame. Bounding the
+attempts (prefer-hidden, accept-best) keeps it constant-cost and never blocks a spawn, and a
+terrain-only `terrainIntersectASL` is the cheaper option if ridgeline masking is enough and building
+occlusion is not needed.
+
+Co-op caveat: with players surrounding a zone no single bearing is head-on for all of them, so the
+distance floor and the prefer-hidden pass carry most of the weight and the enemy-rear bearing is
+best-effort for the group's centre of mass.
 
 **Posture — a new `"hunt"` case** in `fnc_apply_posture`: a `SAD` waypoint on the **nearest player's
 position**, `AWARE`, speed `FULL`, then a `CYCLE`. Speed is deliberate — a reinforcement runs, it
@@ -213,6 +240,10 @@ with the zone's recorded strength.
 - **Priority under load** is by player count — most-crowded contested zone first.
 - **Reserve orders** are a new `"hunt"` posture: `AWARE`, speed `FULL`, `SAD` on the nearest player —
   reinforcements run in for urgency.
+- **Spawn placement** guards against pop-in and cheap flanking, in priority: opposite the BLUFOR
+  approach (head-on, never from behind), nudged toward another enemy zone (soft), preferably out of
+  line of sight (best-effort, bounded), with a flat `DUWS_zoneReserveSpawnDist` (400 m) floor from the
+  nearest player — not zone-relative, so it reads the same at a 50 m base and a 1300 m island.
 - **Recaptured zones** are not special-cased: reserves inherit the 0.3 scratch strength and arrive
   light, moot in practice since little is owed at 0.3.
 
@@ -220,7 +251,7 @@ with the zone's recorded strength.
 
 | File | Change |
 |---|---|
-| `server_var_init.sqf` | `DUWS_zoneGroupCeiling`, `DUWS_zoneReinforceFrac` |
+| `server_var_init.sqf` | `DUWS_zoneGroupCeiling`, `DUWS_zoneReinforceFrac`, `DUWS_zoneReserveSpawnDist` |
 | `fnc_zone_state_init.sqf` | `zoneGroupCount`, `opforGroupCount`, `zoneReserveMen`, reserve-pool accessors; `+ reserveMen` in strength record/refresh |
 | `fnc_zone_spawn_sizes.sqf` | initial spawn = x1 tier (drop the live `scaleComposition`); seed the pool with `(mult - 1)` copies; peak = `mult x` tier men |
 | `fnc_zone_capture_ready.sqf` | remaining = garrison_count + reserveMen |
@@ -234,7 +265,7 @@ with the zone's recorded strength.
 2. Multiplier recast: initial = x1 tier, seed pool `(mult - 1) x`, peak = `mult x` men.
 3. Capture / strength reconciliation (`+ reserveMen`) — the correctness core.
 4. Stow pool-clear in the right order.
-5. Reinforcement spawn (placement math + `"hunt"` posture, infantry and vehicles).
+5. Reinforcement spawn: anti-approach bearing + toward-zone nudge + bounded prefer-hidden placement, `"hunt"` posture, infantry and vehicles.
 6. Refill pass: 5-minute loop + the event-driven `killed`-handler path + the global throttle + launch.
 7. Tests.
 
