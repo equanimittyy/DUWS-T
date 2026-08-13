@@ -244,7 +244,7 @@ fnc_zone_spawn_sizes = compile preprocessFileLineNumbers "duws\server\init_zones
 // way fnc_zone_stream_init is. Its refill and accounting hook fnc_zone_spawn (defined when
 // fnc_zone_spawn_sizes is spawned) and the state helpers in fnc_zone_state_init, both in hand before
 // the first zone raise.
-[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_reserve.sqf";
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_garrison_reserve.sqf";
 
 // ZONE PREFABS
 // MODERN is the baseline composition era, always compiled: fnc_zone_prefab_set falls back to it for

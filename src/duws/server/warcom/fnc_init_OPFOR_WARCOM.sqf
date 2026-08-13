@@ -135,7 +135,7 @@ sleep 1;
         // The reserve heartbeat rides beside the poller, and on the same latch: one server loop that
         // refills fought-over zones from their pools every few minutes. Inert until a zone with a
         // multiplier pool is contested, so starting it here costs nothing on a campaign at x1.
-        [] spawn DUWS_fnc_zoneReserveLoop;
+        [] spawn DUWS_fnc_garrisonReserveLoop;
     };
 
     // Last step of generation, and called rather than spawned so it is: its census is a
