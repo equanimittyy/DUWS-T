@@ -263,6 +263,10 @@
                 <Original>Classic</Original>
                 <English>Classic</English>
             </Key>
+            <Key ID="STR_DUWS_T_preset_hardcore">
+                <Original>Hardcore</Original>
+                <English>Hardcore</English>
+            </Key>
             <Key ID="STR_DUWS_T_preset_custom">
                 <Original>Custom</Original>
                 <English>Custom</English>
@@ -270,6 +274,10 @@
             <Key ID="STR_DUWS_T_preset_classic_desc">
                 <Original>For a classic flavoured DUWS campaign. A short (4) zone campaign. All zones are revealed on start.</Original>
                 <English>For a classic flavoured DUWS campaign. A short (4) zone campaign. All zones are revealed on start.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_preset_hardcore_desc">
+                <Original>A harder 6 zone campaign. Zones run up to 1km, and Hardcore mode hides them until you find them.</Original>
+                <English>A harder 6 zone campaign. Zones run up to 1km, and Hardcore mode hides them until you find them.</English>
             </Key>
             <Key ID="STR_DUWS_T_preset_custom_desc">
                 <Original>Your own campaign. Every option on this screen and the next is yours to set.</Original>

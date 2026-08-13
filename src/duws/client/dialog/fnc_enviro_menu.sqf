@@ -165,8 +165,13 @@ if (!isNil "duws_enviro_sel") then {
 // Filled last so the row reflects whatever the restore above ended on: a player who came back
 // from the campaign screen having changed something there is already on Custom.
 duws_preset_classic = lbAdd [2200, localize "STR_DUWS_T_preset_classic"];
+duws_preset_hardcore = lbAdd [2200, localize "STR_DUWS_T_preset_hardcore"];
 duws_preset_custom = lbAdd [2200, localize "STR_DUWS_T_preset_custom"];
-lbSetCurSel [2200, [duws_preset_classic, duws_preset_custom] select (duws_preset == "custom")];
+lbSetCurSel [2200, switch (duws_preset) do {
+    case "hardcore": { duws_preset_hardcore };
+    case "custom": { duws_preset_custom };
+    default { duws_preset_classic };
+}];
 
 // Attached from here rather than declared per combo in the dialog config, so that filling the
 // combos above -- twelve preselections and a restore, all of which raise LBSelChanged -- cannot

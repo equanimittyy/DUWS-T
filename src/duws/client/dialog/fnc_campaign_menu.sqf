@@ -145,9 +145,15 @@ index_enemyunit_multiplier_2 = lbAdd [2113, "2x"];
 index_enemyunit_multiplier_3 = lbAdd [2113, "3x"];
 [2113, index_enemyunit_multiplier_1] call _setDefault;
 
-// Restore selections when the player returns to this screen via the Back button.
+// Restore selections when the player returns to this screen via the Back button. With no snapshot
+// to restore, a preset that owes this screen values applies them here, where its combos exist.
 if (!isNil "duws_campaign_sel") then {
     { lbSetCurSel [2100 + _forEachIndex, _x]; } forEach duws_campaign_sel;
+} else {
+    if (duws_preset == "hardcore") then {
+        lbSetCurSel [2100, index_max_radius_1000];
+        lbSetCurSel [2102, index_amount_zones_6];
+    };
 };
 
 // The preset row lives on the environment screen, which is answered before this one, so there is
