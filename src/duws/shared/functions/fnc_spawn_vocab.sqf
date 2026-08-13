@@ -70,22 +70,41 @@ DUWS_fnc_teamRow = {
 
 // A team's men, in spawn order. _side is required, not defaulted: a row names roles bare, so a
 // caller that forgot would silently raise the other army. One team always -- how many a site fields
-// is the composition's business. _strength is attrition, applied before the leader joins so a
-// ground-down section keeps its leader rather than losing it to a coin flip. An unknown token yields
-// nothing, not a fallback group: inventing men would hide the typo behind a garrison that spawns.
+// is the composition's business, and whole: attrition is a ledger of lost tokens now, not a men-thin,
+// so a team that stands up stands up full. An unknown token yields nothing, not a fallback group:
+// inventing men would hide the typo behind a garrison that spawns.
 DUWS_fnc_teamRoster = {
-    params ["_token", "_side", ["_strength", 1]];
+    params ["_token", "_side"];
     private _row = [_token] call DUWS_fnc_teamRow;
     if (_row isEqualTo []) exitWith { [] };
     _row params ["", "_roles", "_leader"];
     // Copied, not aliased: the row belongs to the shipped table, so writing through this local would
     // silently edit every later team built from it for the rest of the session.
     private _men = +_roles;
-    if (_strength < 1) then { _men = [_men, _strength] call fnc_zone_thin };
     private _names = [];
     if (_leader != "") then { _names pushBack _leader };
     _names append _men;
     // Drawn at the moment the team is raised, so two squads standing up in the same second are not
     // the same five men. The pool behind each role is fnc_faction_pools.
     [_names apply { [format ["%1_%2", _side, _x]] call fnc_faction_pick }, _side] call fnc_factionRoles
+};
+
+// How many men a composition token places, counted rather than built. Mirrors teamRoster's roster --
+// leader plus roles -- but resolves no faction pick and raises nothing, so the strength projection and
+// the reserve owed-count can read it several times a second without paying a roster raise. A vehicle or
+// bare-class token owes no infantry men and answers 0. Whole tokens only: attrition is a ledger of lost
+// whole tokens now, so a token that is placed is placed at full and nothing thins the men inside it.
+DUWS_fnc_tokenMenCount = {
+    params ["_token"];
+    private _row = [_token] call DUWS_fnc_teamRow;
+    if (_row isEqualTo []) exitWith { 0 };
+    _row params ["", "_roles", "_leader"];
+    (count _roles) + ([0, 1] select (_leader != ""))
+};
+
+DUWS_fnc_tokenListMen = {
+    params ["_tokens"];
+    private _n = 0;
+    { _n = _n + ([_x] call DUWS_fnc_tokenMenCount) } forEach _tokens;
+    _n
 };

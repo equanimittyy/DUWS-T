@@ -8,48 +8,167 @@
 // and both have to come back at what was left rather than at what they started with. So this is one
 // store keyed by a string: `zone_<x>_<y>` for a zone, `town_<n>` for a town. Callers own their key
 // format and nothing here inspects it.
+//
+// Attrition is a **ledger of lost whole tokens**, not a scalar men-thin. A garrison's full fighting
+// potential is a multiset of composition tokens (mult copies of its filtered tier list); the ledger
+// records which of those tokens have been destroyed, and everything a site fields is derived from
+// full minus lost. A token is lost when its group is wiped -- destroy one tank, lose one tank -- so a
+// zone the player mauled comes back specifically the units it lost, not thinner everywhere. The model
+// is docs/info/garrison_strength_ledger_plan.md. spawnDiff and tokenListMen resolve at call time and
+// live in fnc_zone_spawn_sizes and fnc_spawn_vocab; every function here runs at gameplay, long after
+// both are loaded.
 
-// The strength a garrison redeploys at, as a fraction. Full for ground nobody has fought over.
+// The full fighting potential, stamped once at raise (and re-stamped on a town tier buy, which grows
+// it). Stored as the token list and its men count both: the list drives surviving/seed/loss, the men
+// count is the projection's and the break test's denominator and is read often enough to keep hot.
+DUWS_fnc_garrisonFull = {
+	params ["_key"];
+	missionNamespace getVariable [format ["DUWS_garrisonFull_%1", _key], []]
+};
+
+DUWS_fnc_garrisonFullMen = {
+	params ["_key"];
+	missionNamespace getVariable [format ["DUWS_garrisonFullMen_%1", _key], 0]
+};
+
+DUWS_fnc_garrisonSetFull = {
+	params ["_key", "_full"];
+	missionNamespace setVariable [format ["DUWS_garrisonFull_%1", _key], _full];
+	missionNamespace setVariable [format ["DUWS_garrisonFullMen_%1", _key], [_full] call DUWS_fnc_tokenListMen];
+};
+
+// The lost ledger: a flat token list, a multiset by value. Persists across a stow -- attrition is what
+// outlives a garrison leaving -- and is cleared only by a fresh campaign or a seed (recapture / clear).
+DUWS_fnc_garrisonLost = {
+	params ["_key"];
+	missionNamespace getVariable [format ["DUWS_garrisonLost_%1", _key], []]
+};
+
+// What still stands: the full multiset less the lost one. spawnDiff removes one full entry per lost
+// entry by value, so multiplicity is exact -- two patrols lost against three owed leaves one.
+DUWS_fnc_garrisonSurviving = {
+	params ["_key"];
+	[[_key] call DUWS_fnc_garrisonLost, [_key] call DUWS_fnc_garrisonFull] call DUWS_fnc_spawnDiff
+};
+
+// The whole-token derivation a zone raise and a town raise share: given the filtered x1 tier list and
+// the multiplier, stamp the site's full potential (mult copies of x1), seed its live reserve pool, and
+// return [garrison, pool]. The survivors split by the x1 shape -- the first x1's worth are the garrison,
+// the surplus is the pool -- so a site's losses come out of its reserve depth before they thin the
+// garrison. The caller raises the garrison and tops it up from the pool; here is only the accounting.
+DUWS_fnc_garrisonDerive = {
+	params ["_key", "_x1", "_mult"];
+	private _full = [_x1, _mult] call DUWS_fnc_scaleComposition;
+	[_key, _full] call DUWS_fnc_garrisonSetFull;
+	private _surviving = [_key] call DUWS_fnc_garrisonSurviving;
+	private _pool = [_x1, _surviving] call DUWS_fnc_spawnDiff;
+	private _garrison = [_pool, _surviving] call DUWS_fnc_spawnDiff;
+	[_key, _pool] call DUWS_fnc_garrisonReserveSet;
+	[_garrison, _pool]
+};
+
+// Records one destroyed token. Bounded at its count in full: a garrison cannot lose more tanks than it
+// ever had, and the bound is also what makes a double-fire of the killed handler -- which runs per unit
+// -- a no-op once a token's copies are all accounted for. A token not in full is ignored rather than
+// recorded, so a stray group tagged from elsewhere cannot drive strength negative.
+DUWS_fnc_garrisonRecordLoss = {
+	params ["_key", "_token"];
+	private _cap = { _x isEqualTo _token } count ([_key] call DUWS_fnc_garrisonFull);
+	if (_cap <= 0) exitWith {};
+	private _var = format ["DUWS_garrisonLost_%1", _key];
+	private _lost = missionNamespace getVariable [_var, []];
+	if (({ _x isEqualTo _token } count _lost) >= _cap) exitWith {};
+	_lost pushBack _token;
+	missionNamespace setVariable [_var, _lost];
+};
+
+// The strength a garrison redeploys at, as a fraction: surviving men over full men. Full for ground
+// nobody has fought over (no full stamped yet). The map bar reads this; the raise reads the surviving
+// tokens directly. Falls only for a zone -- the ledger only grows -- and rises for a town only when the
+// commander buys reserves back (Unlose). No quantisation or floor here: those were the scalar model's,
+// and the break test's own tenth is the one number that gates capture.
 DUWS_fnc_garrisonStrength = {
 	params ["_key"];
-	missionNamespace getVariable [format ["DUWS_garrisonStrength_%1", _key], 1]
+	private _fullMen = [_key] call DUWS_fnc_garrisonFullMen;
+	if (_fullMen <= 0) exitWith { 1 };
+	private _lostMen = [[_key] call DUWS_fnc_garrisonLost] call DUWS_fnc_tokenListMen;
+	(((_fullMen - _lostMen) / _fullMen) max 0) min 1
 };
 
-// The only writer, so a mechanic that lets either side rebuild a mauled garrison has a single place
-// to go through and inherits the quantisation and the floor rather than restating them.
-//
-// **Tenths, because this is a spawn budget and not a casualty ledger.** What it scales is whole
-// groups, whole buildings and whole emplacements, so finer resolution rounds away at the point of
-// use. The epsilon absorbs float slop rather than shifting the rule: SQF scalars are 32-bit floats,
-// and a division landing a hair above an exact tenth would buy the garrison a whole free step.
-//
-// **The 0.3 floor is the mechanic, not a guard.** Against the 0.1 break line the zone capture test
-// uses, a garrison at the floor still sits two tenths above beaten, so retaking ground you softened is
-// a fight rather than a walk-in. For a zone it is also structural: one allowed to redeploy empty would
-// be uncapturable outright, because a zero peak refuses capture.
-DUWS_fnc_garrisonStrengthSet = {
+// Seeds the ledger to a target survival fraction by marking random tokens lost until survival is at or
+// under it. The reserve/garrison split at raise fills the garrison before the pool, so dropping to a
+// low fraction empties the pool first and leaves a thin single garrison -- which is what a recaptured
+// zone or a cleared town should redeploy as. Vehicles owe no men, so a low seed sheds them freely,
+// matching the old 0.3 scratch force that fielded no armour.
+DUWS_fnc_garrisonSeed = {
 	params ["_key", "_frac"];
-	private _q = ((ceil ((_frac * 10) - 0.0001)) / 10) max 0.3 min 1;
-	missionNamespace setVariable [format ["DUWS_garrisonStrength_%1", _key], _q];
-	_q
+	private _target = _frac * ([_key] call DUWS_fnc_garrisonFullMen);
+	private _surv = +([_key] call DUWS_fnc_garrisonFull);
+	private _lost = [];
+	while { count _surv > 0 && {([_surv] call DUWS_fnc_tokenListMen) > _target} } do {
+		_lost pushBack (_surv deleteAt (floor random count _surv));
+	};
+	missionNamespace setVariable [format ["DUWS_garrisonLost_%1", _key], _lost];
 };
 
-// Records what a garrison was ground down to: survivors against the force it was given, and never
-// upward. Clamped to what it already deployed at because every consumer rounds its own share up and
-// keeps at least one of whatever it is placing -- a garrison sent out at three tenths stands nearer
-// four, so a raw measurement would have an untouched one climb a step on every visit and heal itself
-// back to full for free.
-// A zero or missing baseline means no cycle ever finished placing, so there is nothing to measure
-// against and what is standing describes a garrison that was still arriving.
-DUWS_fnc_garrisonStrengthRecord = {
-	params ["_key", "_left", "_base"];
-	if (_base <= 0) exitWith { [_key] call DUWS_fnc_garrisonStrength };
-	[_key, (_left / _base) min ([_key] call DUWS_fnc_garrisonStrength)] call DUWS_fnc_garrisonStrengthSet
+// Buys destroyed tokens back: removes random lost entries until survival reaches the target fraction.
+// The town reinforce purchase's hook -- a paid replacement, the one thing that raises strength, and
+// deliberately not a heal (it costs, and the men still have to walk in on the next refill wave).
+DUWS_fnc_garrisonUnlose = {
+	params ["_key", "_target"];
+	private _fullMen = [_key] call DUWS_fnc_garrisonFullMen;
+	if (_fullMen <= 0) exitWith {};
+	private _var = format ["DUWS_garrisonLost_%1", _key];
+	private _lost = +(missionNamespace getVariable [_var, []]);
+	private _targetMen = _target * _fullMen;
+	while { count _lost > 0 && {(_fullMen - ([_lost] call DUWS_fnc_tokenListMen)) < _targetMen} } do {
+		_lost deleteAt (floor random count _lost);
+	};
+	missionNamespace setVariable [_var, _lost];
 };
 
-// The key a town files under. Zones derive theirs through fnc_zone_key, which predates this and is
-// used for far more than strength; a town has no such key, so this is the whole of it.
+// Forgets a site's garrison entirely: full potential and loss ledger both cleared. For a site that
+// stops being a garrison at all -- a town worked back out of the OPFOR band -- so if it becomes one
+// again it starts fresh, rather than redeploying the remains of a garrison the ground no longer holds.
+// A zone is never forgotten: it is always OPFOR-generated ground, and a recapture seeds it instead.
+DUWS_fnc_garrisonForget = {
+	params ["_key"];
+	missionNamespace setVariable [format ["DUWS_garrisonFull_%1", _key], nil];
+	missionNamespace setVariable [format ["DUWS_garrisonFullMen_%1", _key], nil];
+	missionNamespace setVariable [format ["DUWS_garrisonLost_%1", _key], nil];
+};
+
+// Liveness: a garrison is live from the moment its raise finishes placing men to the stow or capture
+// that tears it down. The capture and clear tests refuse on a garrison that is not live -- stowed,
+// mid-raise, or gone -- so empty ground cannot be taken before its men have arrived, and the reserve
+// pass has nothing to top up. Per awake session; the ledger and the full potential outlive it. Both a
+// zone and a town set and clear it, the one signal that the garrison on the ground is real. It replaces
+// the peak's old double duty: the men denominator is DUWS_fnc_garrisonFullMen now, this is the liveness.
+DUWS_fnc_garrisonHeld = {
+	params ["_key"];
+	missionNamespace getVariable [format ["DUWS_garrisonLive_%1", _key], false]
+};
+
+DUWS_fnc_garrisonSetLive = {
+	params ["_key", "_live"];
+	missionNamespace setVariable [format ["DUWS_garrisonLive_%1", _key], _live];
+	// The live sites are also the registry the reserve pass iterates -- the one list where a zone and a
+	// town meet as garrison sites. Kept in lockstep with the flag: a site is on it exactly while live.
+	private _sites = missionNamespace getVariable ["DUWS_garrisonSites", []];
+	if (_live) then {
+		_sites pushBackUnique _key;
+	} else {
+		private _i = _sites find _key;
+		if (_i >= 0) then { _sites deleteAt _i };
+	};
+	missionNamespace setVariable ["DUWS_garrisonSites", _sites];
+};
+
+// The key a town files under. Delegates to fnc_town_site_key -- the one derivation of a town's key --
+// rather than repeating its format, so the ledger this file keys and the site store the garrison code
+// keys can never drift apart on a town. Zones derive theirs through fnc_zone_key; a town has no such
+// key of its own, so this is the whole of it.
 DUWS_fnc_townStrengthKey = {
 	params ["_townIndex"];
-	format ["town_%1", _townIndex]
+	[_townIndex] call fnc_town_site_key
 };
