@@ -1,7 +1,7 @@
 # Zone reserve / reinforcement model — design plan
 
-Status: proposal, not yet implemented. This doc is for review; its decisions section holds the
-settled parameters.
+Status: implemented. The decisions section holds the settled parameters; the implementation-notes
+section below records where the built code deliberately refined the spec.
 
 ## Problem
 
@@ -31,12 +31,12 @@ rather than a lag spike.
   today's.
 - **Per-zone live *group* ceiling = the tier's x1 token count.** Each token is one group, so the
   ceiling is `count (DUWS_zoneSpawnTiers select (tier - 1))` — no new table.
-- **The pool covers the whole composition**, infantry and vehicles alike: `(mult - 1)` ordered copies
-  of the x1 tier list. A destroyed tank can be backfilled by a reserve tank, a wiped squad by a
-  reserve squad.
-- **Refill to the ceiling, never above.** When a zone's live group count falls below its x1 count,
-  reserve squads spawn to restore it. Live groups per zone are therefore hard-bounded at the x1 count
-  forever; the multiplier only deepens the pool behind it.
+- **The pool covers the whole composition**, infantry and vehicles alike: `(mult - 1)` copies of the
+  x1 tier list, drawn from at *random*. A lost group is answered by any token in the pool — a downed
+  tank might bring another tank or a rifle section — so order carries nothing; the pool is a multiset.
+- **Refill to the ceiling, never above.** When a zone's live composition group count falls below its x1
+  count, reserve squads spawn to restore it. Live composition groups per zone are therefore
+  hard-bounded at the x1 count forever; the multiplier only deepens the pool behind it.
 - **Reserves ride the hunt posture** (below), spawned on the far side of the zone.
 
 Worked, tier IV x3: 27 live (18 infantry + 9 vehicle groups), reserve pool = 2 x 27 = 54 more.
@@ -82,7 +82,10 @@ ceiling's whole job.
 
 Both server config settings (`server_var_init.sqf`), fixed:
 
-- **Per-zone live group ceiling** — derived, not stored: the x1 tier token count. Refill stops here.
+- **Per-zone live group ceiling** — the zone's full fielded-able x1 capacity (`count` of the filtered
+  x1 list), stored per awake session as `DUWS_zoneCeiling_<key>`. Composition groups only: prefab
+  static-weapon crews share the roster but are emplacement occupants, not composition, and are excluded
+  from the count the refill compares against. Refill stops here.
 - `DUWS_zoneGroupCeiling` (default `130`) — the global OPFOR-side group throttle. When
   `count (allGroups select {side _x == east})` reaches it, zone garrison spawns and refills pause and
   their tokens stay in the pool. Leaves ~14 groups of slack below 144 for transient spikes. This is
@@ -133,7 +136,8 @@ published peak, a non-empty pool, and BLUFOR near (`fnc_duws_bluforNear` over `r
 contested one. Then for each, in that order:
 
 - while `DUWS_fnc_zoneGroupCount(key) < x1-ceiling` **and** the pool is non-empty **and**
-  `DUWS_fnc_opforGroupCount < DUWS_zoneGroupCeiling`: pop the next pool token, spawn it as a
+  `DUWS_fnc_opforGroupCount < DUWS_zoneGroupCeiling`: pop a **random fieldable** pool token (a vehicle
+  only counts as fieldable at half strength or better, matching the garrison's own thin), spawn it as a
   reinforcement at the zone's **current** strength, append its units to the zone roster.
 
 A quiet zone (no BLUFOR near) is skipped; its pool waits until it is being fought. Reinforcements
@@ -147,10 +151,12 @@ strength model exists to prevent.
 Three reads of "remaining garrison" must all count the pool, or a zone that spawned short reads as
 already-beaten, or one records phantom casualties on stow:
 
-- `fnc_zone_capture_ready.sqf:36` — break test becomes
-  `(fnc_zone_garrison_count(key) + DUWS_fnc_zoneReserveMen(key)) > BREAK_FRACTION * peak`. A zone with
-  a pool cannot fall: the owed men hold `remaining` above the line until the reserves have spawned and
-  been killed. The player must draw the waves out and beat them.
+- `fnc_zone_capture_ready.sqf` — break test becomes
+  `(fnc_zone_garrison_count(key) + DUWS_fnc_zoneReserveMen(key)) > BREAK_FRACTION * peak`, with
+  `BREAK_FRACTION` **0.1**: a zone falls only once one tenth of its full fighting potential — garrison
+  plus its whole reserve pool — is all that remains. A zone with a pool cannot fall on an empty
+  perimeter: the owed men hold `remaining` above the line until the reserves have spawned and been
+  killed, so the player must draw the waves out and beat nine tenths of everything before taking it.
 - `fnc_zone_strength_record` (`fnc_zone_state_init.sqf:117`) — `_left` becomes
   `garrison_count + reserveMen`, so a zone that stows with a pool preserves it as strength.
 - `fnc_zone_strength_refresh` (`fnc_zone_state_init.sqf:140`) — same `+ reserveMen` on the map read.
@@ -230,9 +236,12 @@ with the zone's recorded strength.
 ## Decisions
 
 - **Multiplier** is reserve depth: initial garrison always x1, pool = `(mult - 1) x` the x1 list,
-  covering infantry **and** vehicles.
-- **Per-zone live groups** are hard-capped at the tier's x1 token count; refill tops up to it, never
-  beyond.
+  covering infantry **and** vehicles, drawn from at random.
+- **Per-zone live composition groups** are hard-capped at the tier's full fielded-able x1 count; refill
+  tops up to it from the pool, never beyond, and answers a loss with a random token rather than a like
+  replacement.
+- **Capture threshold** is `BREAK_FRACTION` **0.1**: a zone falls only once one tenth of its full
+  fighting potential (garrison plus its whole reserve pool) remains.
 - **Global throttle** `DUWS_zoneGroupCeiling` (130) pauses zone spawns/refills near the engine's
   144-per-side limit — the co-op / hardpoint-dense backstop.
 - **Refill cadence**: 5-minute heartbeat plus an event wave when a zone dips below
@@ -246,6 +255,43 @@ with the zone's recorded strength.
   nearest player — not zone-relative, so it reads the same at a 50 m base and a 1300 m island.
 - **Recaptured zones** are not special-cased: reserves inherit the 0.3 scratch strength and arrive
   light, moot in practice since little is owed at 0.3.
+
+## Implementation notes
+
+Places where the built code refined the spec above, each a decided thing a reader of the source will
+meet:
+
+- **The x1 group ceiling is the full fielded-able capacity, and refill draws at random.** The ceiling
+  is `count` of the filtered x1 list — what a full garrison of this tier *can* field given current AP
+  and settings — stored per awake session as `DUWS_zoneCeiling_<key>`. Reserves therefore bring a
+  mauled or recaptured zone back to its designed group count, not merely back to whatever last
+  deployed. The refill draws a random fieldable token each time (a vehicle counts as fieldable only at
+  half strength or better), so a lost group is answered by any of the pool, and a token deleted by
+  value located fresh keeps two concurrent refills of one zone from stale-index corruption without a
+  lock.
+- **The refill's live count excludes prefab static crews.** `DUWS_fnc_zoneGroupCount` counts only
+  groups the streaming garrison raised — those tagged by `DUWS_fnc_zoneReserveWatch` — so it measures
+  the same composition-only population the ceiling does. A prefab's manned static weapons sit on the
+  same roster (they count toward the capture peak and `remaining`, consistently) but must not read as
+  filling composition slots, or a zone with guns would refill short.
+- **Owed men are counted, not built.** `DUWS_fnc_zoneReserveMen` sums `DUWS_fnc_tokenMenCount` over the
+  pool rather than `count (DUWS_fnc_teamRoster …)`. The capture trigger polls the owed count several
+  times a second; building a roster each poll would both pay faction resolution and jitter the capture
+  line, because the roster thin drops men at random. `tokenMenCount` mirrors the roster arithmetic
+  (leader kept, the rest thinned to `ceil(strength·count)` min 1) deterministically. It counts role
+  slots, so a faction that leaves a role undefined counts a hair high — bounded, and it cancels against
+  the baseline, which is built in the same slot units.
+- **Peak is measured plus owed, not a men-per-tier table.** `baseline = placed + (mult-1) ·
+  tokenListMen(x1, 1)`: the x1 half is the *measured* placement, so vehicle crews are counted once and
+  no per-tier men table is needed; the pool half is the infantry-slot count matching
+  `DUWS_fnc_zoneReserveMen`. At a full pool `remaining` equals `peak` exactly. The one imprecision is
+  that a pooled vehicle's crew arrives as a few extra bodies on `garrison_count` when it spawns — owed
+  as zero, arriving as two or three — which is well inside the tenths the strength model quantises to.
+
+Reserves route through `DUWS_fnc_zoneSpawnOne` with a posture override and an explicit spawn position
+(new optional trailing params on `fnc_spawn_team` / `fnc_spawn_vehicle`), so the far-side placement and
+the hunt orders reuse the ordinary spawners rather than a parallel path. The killed handler tags each
+unit with its zone key (not its group, which a dead man can outlive).
 
 ## Files touched
 
@@ -278,3 +324,17 @@ with the zone's recorded strength.
 - **Manual / integration:** a tier IV x3 zone holds at 27 live groups while a 54-group pool grinds in
   as waves; two hot IV zones stay under the global ceiling; neither is capturable until its pool plus
   alive garrison is beaten below the break fraction.
+
+## Deferred: attrition by lost tokens, not a random thin
+
+Strength today is a single fraction, and a fraction below one thins each team's *men* at random
+(`fnc_zone_thin`) and drops vehicles whole below half. That thins the whole garrison's manpower
+uniformly and cheaply, but it does not remember *what* the player destroyed: kill a zone's tank and the
+zone comes back a bit thinner everywhere rather than specifically a tank down. The reserve model rides
+this same fraction, so a reserve wave is thinned the same undifferentiated way.
+
+The intended replacement — a large enough behaviour change to get its own plan — is to track the actual
+tokens a zone has lost and derive strength from that: destroy one tank, and that tank is gone from the
+zone's future raises and from its reserve pool, not amortised across every squad. This turns strength
+from a scalar into a ledger of surviving composition, and the reserve pool's contents follow from it
+directly. Out of scope here; to be specified separately before any code moves.
