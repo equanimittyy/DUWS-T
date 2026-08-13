@@ -155,16 +155,16 @@ sleep 1;
     [{player globalChat format[localize "STR_DUWS_T_d5e848d8",
         getText(configFile >> "cfgWorlds" >> worldName >> "description"), profileName]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [{player globalChat localize "STR_DUWS_T_518bqchj"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
-    // Twelve arguments against the twelve the text asks for, in its order. It read thirteen, one of
-    // which was staminaEnabled -- a variable nothing has ever assigned, so the whole format threw
-    // and no player has seen this summary. The count was wrong with it: the extra argument pushed
-    // every row from Zeus onward onto the wrong label, and format discards the surplus silently
-    // (docs/info/arma_engine_gotchas.md), so Civ Presence was reporting simple zones. Stamina has no
-    // row now because it has no setting -- client/client_init.sqf forces it on for everyone.
+    // Eleven arguments in the order the summary rows expect. Two undefined variables have been pulled
+    // from this list over its life -- staminaEnabled, then VCOM_AI_enable when the VCOM option went --
+    // each assigned by nothing, so the whole format threw and no player saw the summary. Order matters
+    // as much as count: a surplus argument pushes every row from its point onward onto the wrong label,
+    // and format discards the overflow silently (docs/info/arma_engine_gotchas.md). Stamina has no row
+    // now because it has no setting -- client/client_init.sqf forces it on for everyone.
     [{hint format[localize "STR_DUWS_T_7mog9k78",
         zones_number,zones_max_radius,zones_min_radius,zones_max_dist_from_hq,
         weather_type,time_of_day,enable_fast_travel,
-        ZeusStatus,VCOM_AI_enable,time_Multiplier,simple_zones_enable,CIV_PRESENCE
+        ZeusStatus,time_Multiplier,simple_zones_enable,CIV_PRESENCE
     ]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [{[
         [

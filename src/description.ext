@@ -27,7 +27,6 @@ class CfgFunctions
 {
 	#include "modules\AIS\cfgFunctions.hpp"
 	#include "modules\taw_vd\CfgFunctions.hpp"
-	#include "modules\vcom\cfgFunctions.hpp"
 };
 
 // Rename the money item so the player's inventory and any engine-generated text read "Money", not

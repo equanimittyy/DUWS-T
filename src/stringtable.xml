@@ -1406,10 +1406,9 @@
 					\nTime of Day: %6
 					\nFast Travel: %7
 					\nZeus Visibility: %8
-					\nVcom AI: %9
-					\nTime Mult: %10
-					\nSimple Zones: %11
-					\nCiv Presence: %12
+					\nTime Mult: %9
+					\nSimple Zones: %10
+					\nCiv Presence: %11
 				</Original>
                 <English>
 					MISSION INITIALIZATION COMPLETE
@@ -1423,10 +1422,9 @@
 					\nTime of Day: %6
 					\nFast Travel: %7
 					\nZeus Visibility: %8
-					\nVcom AI: %9
-					\nTime Mult: %10
-					\nSimple Zones: %11
-					\nCiv Presence: %12
+					\nTime Mult: %9
+					\nSimple Zones: %10
+					\nCiv Presence: %11
 				</English>
             </Key>
             <Key ID="STR_DUWS_T_37xxl2nt">
