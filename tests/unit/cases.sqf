@@ -336,54 +336,8 @@ blufor_SOLDIER_X = nil;
 ["factionRoles: no roles at all still yields a spawnable list",
     ([[], "opfor"] call fnc_factionRoles), ["O_Soldier_F"]] call fnc_assertEq;
 
-// --- the shared attrition store: what a mauled garrison redeploys at ---
-// Exercised through the zone wrappers, so the delegation is covered along with the arithmetic. A
-// town reads the same functions under a town_<n> key.
-// Tenths rounded up, floored at 0.3, capped at 1. The floor is the mechanic: against the 0.2 break
-// line, a garrison at three tenths is still a tenth of the zone's original strength from beaten.
-["garrisonStrength: rounds up to the next tenth",
-    (["k1", 0.55] call fnc_zone_strength_set), 0.6] call fnc_assertEq;
-["garrisonStrength: an exact tenth does not step up",
-    (["k1", 0.7] call fnc_zone_strength_set), 0.7] call fnc_assertEq;
-["garrisonStrength: a wiped garrison redeploys at the floor",
-    (["k1", 0] call fnc_zone_strength_set), 0.3] call fnc_assertEq;
-["garrisonStrength: just under the floor is the floor, not a rounding of it",
-    (["k1", 0.24] call fnc_zone_strength_set), 0.3] call fnc_assertEq;
-["garrisonStrength: an untouched garrison stays at full",
-    (["k1", 1] call fnc_zone_strength_set), 1] call fnc_assertEq;
-["garrisonStrength: reads back what it stored",
-    (["k1"] call fnc_zone_strength), 1] call fnc_assertEq;
-["garrisonStrength: a zone that has never been fought over is full strength",
-    (["never_touched"] call fnc_zone_strength), 1] call fnc_assertEq;
-
-// --- DUWS_fnc_garrisonStrengthRecord: survivors against the force it was given ---
-["rec1", 1] call fnc_zone_strength_set;
-["strengthRecord: records what is left, quantised up",
-    (["rec1", 5, 10] call DUWS_fnc_garrisonStrengthRecord), 0.5] call fnc_assertEq;
-// Falls only. An untouched garrison measured raw would climb a step every visit, because every
-// consumer rounds its own share up and keeps at least one of whatever it places.
-["strengthRecord: never raises what is already lower",
-    (["rec1", 10, 10] call DUWS_fnc_garrisonStrengthRecord), 0.5] call fnc_assertEq;
-["strengthRecord: a wiped garrison lands on the floor, not on zero",
-    (["rec1", 0, 10] call DUWS_fnc_garrisonStrengthRecord), 0.3] call fnc_assertEq;
-// No baseline means no cycle ever finished placing, so there is nothing to measure against and what
-// is standing describes a garrison that was still arriving.
-["rec2", 1] call fnc_zone_strength_set;
-["strengthRecord: a zero baseline records nothing",
-    (["rec2", 3, 0] call DUWS_fnc_garrisonStrengthRecord), 1] call fnc_assertEq;
-
-// --- fnc_zone_thin: scaling a spawn list by that strength ---
-private _band = ["sniper", "patrol", "patrol", "team", "wpteam", "armored", "air", "car", "car", "patrol"];
-["zone_thin: keeps the ceiling of the fraction",
-    (count ([_band, 0.55] call fnc_zone_thin)), 6] call fnc_assertEq;
-["zone_thin: full strength keeps the whole band",
-    (count ([_band, 1] call fnc_zone_thin)), 10] call fnc_assertEq;
-// A zone that placed nothing publishes no peak, and fnc_zone_capture_ready refuses capture on a
-// zero peak -- so a thinned band must never come back empty.
-["zone_thin: never empties a list",
-    (count ([["patrol", "team"], 0.1] call fnc_zone_thin)), 1] call fnc_assertEq;
-["zone_thin: leaves the caller's list alone",
-    (count _band), 10] call fnc_assertEq;
+// The shared attrition ledger (surviving / derive / seed / unlose / recordLoss / projection) is
+// exercised below, after the stand-in composition tables it reads token men through are defined.
 
 // --- fnc_zone_tier: a zone's inherent size ---
 // fnc_zone_tier_roll is absent here on purpose: it needs selectRandomWeighted, which sqf-vm does not
@@ -500,29 +454,6 @@ TEST_Air = 1;
 ["zoneSpawnList: a tier above the table clamps rather than faulting",
     ([9] call DUWS_fnc_zoneSpawnList), ["patrol", "team", "car", "apc", "heli"]] call fnc_assertEq;
 
-// --- attrition is a fraction of men, so a token carries its own share of it ---
-// An entry is not a unit: "patrol" is two men and "car" is a vehicle, so dropping entries at random
-// let two zones reported at the same strength differ by twenty men.
-["tokenStrength: a team thins from the inside and keeps its leader",
-    (["patrol", 0.4] call DUWS_fnc_tokenStrength), 0.4] call fnc_assertEq;
-["tokenStrength: a vehicle above half strength stands whole",
-    (["apc", 0.5] call DUWS_fnc_tokenStrength), 1] call fnc_assertEq;
-["tokenStrength: and below it is dropped, since there is no partial vehicle",
-    (["apc", 0.49] call DUWS_fnc_tokenStrength), 0] call fnc_assertEq;
-["tokenStrength: full strength leaves everything whole",
-    (["apc", 1] call DUWS_fnc_tokenStrength), 1] call fnc_assertEq;
-
-["thinComposition: a worn zone keeps its men and loses its vehicles",
-    ([["patrol", "team", "car", "apc"], 0.4] call DUWS_fnc_thinComposition),
-    ["patrol", "team"]] call fnc_assertEq;
-["thinComposition: full strength changes nothing",
-    ([["patrol", "car"], 1] call DUWS_fnc_thinComposition), ["patrol", "car"]] call fnc_assertEq;
-// Deterministic, unlike the entry drop it replaces: a zone the player wore down has to come back as
-// the zone they wore down, not as a fresh roll of which entries survived.
-["thinComposition: the same composition and strength give the same answer twice",
-    ([["patrol", "team", "car", "apc"], 0.6] call DUWS_fnc_thinComposition),
-    ([["patrol", "team", "car", "apc"], 0.6] call DUWS_fnc_thinComposition)] call fnc_assertEq;
-
 // --- DUWS_fnc_spawnDiff: what an upgrade owes ---
 ["spawnDiff: only what the new composition adds",
     ([["patrol","team"], ["patrol","team","armored"]] call DUWS_fnc_spawnDiff), ["armored"]] call fnc_assertEq;
@@ -579,20 +510,12 @@ private _have = ["patrol","team"];
 // fnc_spawn_vehicle is handed this as a classname, so the posture has to be gone by here.
 ["tokenClass: a posture-carrying classname passes through without its posture",
     (["garrison:O_MBT_02_cannon_F"] call DUWS_fnc_tokenClass), "O_MBT_02_cannon_F"] call fnc_assertEq;
-["thinComposition: attrition reads a posture-carrying token by what it is made of",
-    ([["garrison:team", "closepatrol:apc"], 0.4] call DUWS_fnc_thinComposition),
-    ["garrison:team"]] call fnc_assertEq;
-
-// fnc_zone_thin drops at random indices, so a thinned roster is asserted by size and by who leads
-// rather than by contents. Nine men halved is five, plus the leader.
-private _thinned = ["big", "opfor", 0.5] call DUWS_fnc_teamRoster;
-["teamRoster: attrition thins the men",
-    (count _thinned), 6] call fnc_assertEq;
-// The reason thinning happens before the leader is prepended: a section ground down still has one.
-["teamRoster: attrition never takes the leader",
-    (_thinned select 0), "cls_TL"] call fnc_assertEq;
-["teamRoster: full strength thins nothing",
-    (count (["big", "opfor", 1] call DUWS_fnc_teamRoster)), 10] call fnc_assertEq;
+// A team stands up whole now -- attrition is the ledger of lost tokens, not a men-thin -- and its
+// leader still leads.
+["teamRoster: a team stands up whole",
+    (count (["big", "opfor"] call DUWS_fnc_teamRoster)), 10] call fnc_assertEq;
+["teamRoster: the leader leads",
+    ((["big", "opfor"] call DUWS_fnc_teamRoster) select 0), "cls_TL"] call fnc_assertEq;
 
 // The join that makes one table serve both armies: the row names a role, the side names the army.
 // Same row, same order, other side's men.
@@ -601,36 +524,93 @@ blufor_B_X = "cls_blu_B";
 ["teamRoster: the side is prepended, so one row raises either army",
     (["patrol", "blufor"] call DUWS_fnc_teamRoster), ["cls_blu_A", "cls_blu_B"]] call fnc_assertEq;
 
-// --- DUWS_fnc_tokenMenCount / tokenListMen: owed reserve men, counted not built ---
+// --- DUWS_fnc_tokenMenCount / tokenListMen: owed men, counted not built ---
 // The reserve accounting cannot build a roster to size the pool: the capture trigger polls the owed
-// count several times a second, and a build would resolve faction picks and roll a fresh random thin
-// -- a cost and a source of jitter on the very line the capture test reads. So the count mirrors
-// DUWS_fnc_teamRoster's arithmetic directly: leader kept, the rest thinned to ceil(strength*count).
+// count several times a second, and a build would resolve faction picks and raise men. So the count
+// mirrors DUWS_fnc_teamRoster's arithmetic directly -- leader plus roles -- raising nothing. Whole
+// tokens: attrition is a ledger of lost tokens now, so a placed token owes its full men.
 ["tokenMenCount: a leaderless team is its role count",
     (["patrol"] call DUWS_fnc_tokenMenCount), 2] call fnc_assertEq;
 ["tokenMenCount: a led team counts its leader",
     (["team"] call DUWS_fnc_tokenMenCount), 3] call fnc_assertEq;
-// The same nine-plus-leader the built roster reports at half strength (six), reached without building.
-["tokenMenCount: attrition thins the same way the roster does",
-    (["big", 0.5] call DUWS_fnc_tokenMenCount), 6] call fnc_assertEq;
-["tokenMenCount: full strength is the whole team",
-    (["big", 1] call DUWS_fnc_tokenMenCount), 10] call fnc_assertEq;
+["tokenMenCount: a whole team is its full roster and leader",
+    (["big"] call DUWS_fnc_tokenMenCount), 10] call fnc_assertEq;
 // The posture prefix is the group's orders, not its size: stripped before the row is counted.
 ["tokenMenCount: the posture prefix does not change the count",
     (["garrison:team"] call DUWS_fnc_tokenMenCount), 3] call fnc_assertEq;
-// A vehicle or bare-class token owes no infantry men: the pool counts crews as zero, which is the
-// same measure the baseline's pool half uses, so the two stay consistent.
+// A vehicle or bare-class token owes no infantry men: the pool counts crews as zero, the same measure
+// the projection's denominator uses, so the two stay consistent.
 ["tokenMenCount: a vehicle token owes no infantry men",
     (["car"] call DUWS_fnc_tokenMenCount), 0] call fnc_assertEq;
 ["tokenMenCount: an unknown token owes nothing",
     (["nosuchkind"] call DUWS_fnc_tokenMenCount), 0] call fnc_assertEq;
-// The pool's owed men are the sum over its tokens: patrol two, team three, car none.
+// The men a list owes are the sum over its tokens: patrol two, team three, car none.
 ["tokenListMen: sums the tokens it is given",
-    ([["patrol", "team", "car"], 1] call DUWS_fnc_tokenListMen), 5] call fnc_assertEq;
-["tokenListMen: an empty pool owes nothing",
-    ([[], 1] call DUWS_fnc_tokenListMen), 0] call fnc_assertEq;
-["tokenListMen: strength thins every token in the sum",
-    ([["big", "big"], 0.5] call DUWS_fnc_tokenListMen), 12] call fnc_assertEq;
+    ([["patrol", "team", "car"]] call DUWS_fnc_tokenListMen), 5] call fnc_assertEq;
+["tokenListMen: an empty list owes nothing",
+    ([[]] call DUWS_fnc_tokenListMen), 0] call fnc_assertEq;
+["tokenListMen: two whole teams are twice the men",
+    ([["big", "big"]] call DUWS_fnc_tokenListMen), 20] call fnc_assertEq;
+
+// --- the garrison strength ledger: full minus lost, whole tokens ---
+// The ledger keys off the site key, so each case seeds its own key's state and reads it back. A zone
+// and a town read exactly these functions; the split below is what both raises derive their garrison
+// and reserve pool from.
+missionNamespace setVariable ["DUWS_garrisonLost_svk", ["patrol"]];
+["svk", ["patrol", "patrol", "team"]] call DUWS_fnc_garrisonSetFull;
+["garrisonSurviving: full potential minus the lost ledger, by value",
+    (["svk"] call DUWS_fnc_garrisonSurviving), ["patrol", "team"]] call fnc_assertEq;
+
+// The split: the first x1's worth stand up as the garrison and the surplus is the reserve pool, so a
+// lost token comes out of the pool before it thins the garrison. Arbitrary string tokens -- the split
+// is by multiset value, not by men.
+missionNamespace setVariable ["DUWS_garrisonLost_dvk", []];
+["garrisonDerive: a full ledger stands up the x1 garrison and pools the surplus",
+    (["dvk", ["a", "b", "c"], 2] call DUWS_fnc_garrisonDerive),
+    [["a", "b", "c"], ["a", "b", "c"]]] call fnc_assertEq;
+missionNamespace setVariable ["DUWS_garrisonLost_dvk", ["a"]];
+["garrisonDerive: a lost token comes out of the pool, not the garrison",
+    (["dvk", ["a", "b", "c"], 2] call DUWS_fnc_garrisonDerive),
+    [["a", "b", "c"], ["b", "c"]]] call fnc_assertEq;
+
+// recordLoss: bounded at a token's count in full, so a double-fired killed handler cannot overcount and
+// a token that was never in the composition cannot drive strength negative.
+missionNamespace setVariable ["DUWS_garrisonLost_rk", []];
+["rk", ["patrol", "patrol"]] call DUWS_fnc_garrisonSetFull;
+["rk", "patrol"] call DUWS_fnc_garrisonRecordLoss;
+["rk", "patrol"] call DUWS_fnc_garrisonRecordLoss;
+["rk", "patrol"] call DUWS_fnc_garrisonRecordLoss;
+["recordLoss: a token cannot be lost more times than it exists",
+    (count (["rk"] call DUWS_fnc_garrisonLost)), 2] call fnc_assertEq;
+["rk", "team"] call DUWS_fnc_garrisonRecordLoss;
+["recordLoss: a token not in the full potential is ignored",
+    (count (["rk"] call DUWS_fnc_garrisonLost)), 2] call fnc_assertEq;
+
+// The projection the map bar reads: surviving men over full men. Full for ground with no full stamped.
+missionNamespace setVariable ["DUWS_garrisonLost_pk", []];
+["pk", ["patrol", "patrol"]] call DUWS_fnc_garrisonSetFull;
+["garrisonStrength: a fresh ledger is full strength",
+    (["pk"] call DUWS_fnc_garrisonStrength), 1] call fnc_assertClose;
+missionNamespace setVariable ["DUWS_garrisonLost_pk", ["patrol"]];
+["garrisonStrength: surviving men over full men",
+    (["pk"] call DUWS_fnc_garrisonStrength), 0.5] call fnc_assertClose;
+["garrisonStrength: a site with no full stamped reads full",
+    (["untouched_key"] call DUWS_fnc_garrisonStrength), 1] call fnc_assertClose;
+
+// seed: mark tokens lost until survival meets a target fraction -- a recaptured zone, a cleared town.
+missionNamespace setVariable ["DUWS_garrisonLost_seedk", []];
+["seedk", ["patrol", "patrol", "patrol", "patrol"]] call DUWS_fnc_garrisonSetFull;
+["seedk", 0.5] call DUWS_fnc_garrisonSeed;
+["garrisonSeed: drops tokens until survival meets the target fraction",
+    (["seedk"] call DUWS_fnc_garrisonStrength), 0.5] call fnc_assertClose;
+
+// unlose: a paid reinforcement buys destroyed tokens back up to a target -- the one thing that raises
+// strength.
+missionNamespace setVariable ["DUWS_garrisonLost_uk", ["patrol", "patrol", "patrol"]];
+["uk", ["patrol", "patrol", "patrol", "patrol"]] call DUWS_fnc_garrisonSetFull;
+["uk", 0.5] call DUWS_fnc_garrisonUnlose;
+["garrisonUnlose: buys survival back up to the target",
+    (["uk"] call DUWS_fnc_garrisonStrength), 0.5] call fnc_assertClose;
 
 // --- DUWS_fnc_scaleComposition: the enemy multiplier, applied to cards ---
 // A x3 zone fields three patrols rather than one patrol of six men, so a group's size stops being a
@@ -1076,5 +1056,6 @@ TEST_PICK = "";
 // no loose defenders raises none and does not fault; its emplacements are crewed separately. ---
 ["scaleComposition: an empty composition scales to empty",
     ([[], 3] call DUWS_fnc_scaleComposition), []] call fnc_assertEq;
-["thinComposition: an empty composition thins to empty",
-    ([[], 1] call DUWS_fnc_thinComposition), []] call fnc_assertEq;
+missionNamespace setVariable ["DUWS_garrisonLost_emptyk", []];
+["garrisonDerive: an empty composition derives an empty garrison and pool",
+    (["emptyk", [], 3] call DUWS_fnc_garrisonDerive), [[], []]] call fnc_assertEq;
