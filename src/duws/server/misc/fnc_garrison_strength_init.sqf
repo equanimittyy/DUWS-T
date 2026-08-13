@@ -186,6 +186,14 @@ DUWS_fnc_garrisonDebug = {
 	private _lostMen = [_lost] call DUWS_fnc_tokenListMen;
 	private _survMen = [_surv] call DUWS_fnc_tokenListMen;
 
+	// Awake-session fielding: the x1 group ceiling (the most that stands on the ground at once), what is
+	// on it right now, and the reserve pool waiting to backfill. All three are nil/empty once the site
+	// stows, so they read as 0 unless the site is live -- the "live on ground" line below says which.
+	private _ceiling = missionNamespace getVariable [format ["DUWS_zoneCeiling_%1", _key], 0];
+	private _onGround = [_key] call DUWS_fnc_garrisonGroupCount;
+	private _pool = [_key] call DUWS_fnc_garrisonReserve;
+	private _poolMen = [_key] call DUWS_fnc_garrisonReserveMen;
+
 	// Multiset tally: "2x closepatrol:team, 1x armour:tank" rather than a raw flat list, which for a x3
 	// garrison runs off the hint box. First-seen order, so full/available/dead columns read alike.
 	private _tally = {
@@ -206,6 +214,8 @@ DUWS_fnc_garrisonDebug = {
 		format ["  live on ground: %1", [_key] call DUWS_fnc_garrisonHeld],
 		format ["  max tokens: %1 (%2 men)  %3", count _full, _fullMen, [_full] call _tally],
 		format ["  available:  %1 (%2 men)  %3", count _surv, _survMen, [_surv] call _tally],
+		format ["    on ground: %1 / %2 groups (x1 cap)", _onGround, _ceiling],
+		format ["    reserve:   %1 (%2 men)  %3", count _pool, _poolMen, [_pool] call _tally],
 		format ["  dead:       %1 (%2 men)  %3", count _lost, _lostMen, [_lost] call _tally],
 		format ["  strength: (%1 full - %2 dead) / %1 = %3", _fullMen, _lostMen, [_key] call DUWS_fnc_garrisonStrength]
 	]
