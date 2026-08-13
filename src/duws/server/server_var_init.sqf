@@ -538,11 +538,10 @@ DUWS_zoneReservePollPeriod = 300;
 // Debounce for the event path, in seconds: a mass-casualty moment triggers one wave, not fifty.
 DUWS_zoneReserveEventDebounce = 20;
 
-// The largest infantry token, in men, that infiltrates a reinforcement wave on foot. Above it a token
-// rides in aboard a transport and debusses short of the objective; at or below it -- a two-man sniper
-// element or patrol -- a truck is both wasteful and wrong for the role, so it walks in from the
-// prefer-hidden far-side point. Read by fnc_garrison_reserve's spawn split.
-DUWS_reserveFootMax = 2;
+// Where the empty truck runs to once its load is down: this far beyond the zone radius on the far side,
+// so the driver drives it off the debus point instead of idling in the fight while it waits to be reaped.
+// Read by fnc_garrison_reserve's dispatch monitor.
+DUWS_reserveEscapeDist = 900;
 
 // Where a truck-borne wave debusses: this far beyond the zone radius, on the far side toward the
 // objective, so it dismounts short of the fight and closes on foot rather than driving a soft truck
