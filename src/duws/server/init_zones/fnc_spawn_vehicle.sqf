@@ -51,9 +51,6 @@ _vehGroup deleteGroupWhenEmpty true;
 if (_isAir) then {
     _veh engineOn true;
     _veh flyInHeight 150;
-    private _speaker = localize "STR_DUWS_T_OVERLORD";
-    private _message = localize "STR_DUWS_T_opforairspotted";
-    [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 };
 
 [_vehGroup, _posture, _patrolCenter, _radius] call fnc_apply_posture;

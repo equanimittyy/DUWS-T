@@ -5817,13 +5817,6 @@
                 <Original>The vehicle has been marked with green smoke.</Original>
                 <English>The vehicle has been marked with green smoke.</English>
             </Key>
-            <Key ID="STR_DUWS_T_opforairspotted">
-                <Spanish>"Overlord" llama a todas las unidades, unidades aéreas enemigas detectadas en la zona de operaciones. ¡Mantengan la vigilancia!</Spanish>
-                <German>"Overlord" an alle Einheiten, feindliche Luftfahrzeuge im Einsatzgebiet erkannt. Bleibt wachsam!</German>
-                <Chinesesimp>全体单位，敌区内发现敌人空中单位。保持警惕！</Chinesesimp>
-                <Original>All units in the AO, be advised. Enemy aircraft detected over enemy zones.</Original>
-                <English>All units in the AO, be advised. Enemy aircraft detected over enemy zones.</English>
-            </Key>
             <Key ID="STR_DUWS_T_SUPPORT_BUSY">
                 <Original>That battery is already firing for another element. Stand by.</Original>
                 <English>That battery is already firing for another element. Stand by.</English>
