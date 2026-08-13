@@ -57,9 +57,9 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   _missionDraw = 7 min (count _missionCount);
 
   // Split the draw by difficulty: most offers seat near the frontline (easy, base pay); the rest push
-  // deep into enemy ground (hard, a difficulty-scaled bonus). Hard is capped at 3 and easy takes the
+  // deep into enemy ground (hard, a difficulty-scaled bonus). Hard is capped at 2 and easy takes the
   // remainder, so a short pool degrades to fewer hard rather than a negative easy count.
-  private _hardCount = 3 min _missionDraw;
+  private _hardCount = 2 min _missionDraw;
   private _easyCount = _missionDraw - _hardCount;
   private _hardOffers = [];   // [name, depth-from-friendly] per hard offer -> multiplier after the loop
 
@@ -79,7 +79,7 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   // Hard-offer scoring: deep behind friendly lines, surrounded by enemy placements, behind a gauntlet.
   // Easy offers never read these -- they only feed _fnHardScore.
   private _depthScale  = 1500;   // depth half-weight distance from friendly-held ground, metres
-  private _densRadius  = 1500;   // an enemy zone/hardpoint within this ring feeds the "surrounded" score, metres
+  private _densRadius  = 1500;   // hard cutoff: only enemy zones/hardpoints within this of the spot feed the "surrounded" score, metres. Nothing in range -> the offer is dropped
   private _gauntCorr   = 400;    // approach-corridor half-width, metres -- enemy features inside it gate the objective
   private _hardBand    = 800;    // countryside: metres past a chosen zone edge a hard objective may drift; tighter than the easy band, to hug the cluster
 
@@ -106,9 +106,11 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   } forEach zone_meta_array;
   private _opforCenters = _opforZoneCands apply {_x select 1};
 
-  // Enemy attractors for the hard score: OPFOR zone centres + live hardpoints. The repulsors above keep
-  // easy offers off these; hard offers are pulled toward them, so the same stores read with opposite sign.
-  private _enemyPts = _opforCenters + (_hpFoot apply {_x select 0});
+  // Enemy attractors for the hard score as [pos, radius]: OPFOR zones by their own radius, hardpoints as
+  // points. The repulsors above keep easy offers off these; hard offers are pulled toward them, so the
+  // same stores read with opposite sign. The radius lets the density score measure distance to a zone's
+  // edge, not its centre, so a large zone reads as near from farther out.
+  private _enemyPts = (_opforZoneCands apply {[_x select 1, (_x select 0) select 1]}) + _hpFoot;
 
   // Soft repulsion from a footprint set: 0 on top of the nearest feature's edge, 0.5 at _scale beyond
   // it, approaching 1 far out. A larger _scale fights harder and from farther. Empty set -> 1 (no push).
@@ -147,33 +149,43 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
       [sqrt ((((_f select 0)-_cx)^2) + (((_f select 1)-_cy)^2)), _t]
   };
 
-  // Hard-offer score: product of three positive signals, each floored so a spot strong on one axis still
-  // competes. Deep behind friendly lines, surrounded by enemy zones/hardpoints, and behind a gauntlet
-  // (enemy features on the straight approach from the nearest friendly anchor -- the player's likely
-  // staging point). selectRandomWeighted normalises, so magnitudes only need to rank. No repulsors:
-  // hard offers are meant to hug the enemy; the 400 m fnc_pos_claimed gate still keeps them off a zone.
+  // Hard-offer score. Density of nearby enemy placements leads and gates: a spot with no enemy zone or
+  // hardpoint within _densRadius scores 0 and is never offered, so hard missions stop landing isolated.
+  // Depth behind friendly lines and an approach gauntlet only rank the survivors. selectRandomWeighted
+  // normalises, so magnitudes only need to rank. No repulsors: hard offers hug the enemy; the 400 m
+  // fnc_pos_claimed gate still keeps them off a zone.
   private _fnHardScore = {
       private _pos = _this;
+
+      // Surrounded by enemy placements -- the lead term and the gate. Linear falloff to the zone edge,
+      // summed over every placement inside _densRadius; a hard cutoff, so distant zones no longer leak in
+      // through a fat tail. Squared below, so a spot ringed by several placements far outweighs one that
+      // merely grazes a single edge. Empty sum -> isolated -> dropped.
+      private _dens = 0;
+      {
+          private _de = 0 max ((_pos distance2D (_x select 0)) - (_x select 1));
+          if (_de < _densRadius) then { _dens = _dens + (1 - _de / _densRadius) };
+      } forEach _enemyPts;
+      if (_dens <= 0) exitWith {0};
+
+      // Deep behind friendly lines -- a mild tiebreak among the surrounded spots, not a rescue for lonely ones.
       private _fDists = if (_friendlyAnchors isEqualTo []) then {[]} else {_friendlyAnchors apply {_pos distance2D _x}};
       private _dFri = if (_fDists isEqualTo []) then {_depthScale} else {selectMin _fDists};
       private _fDepth = _dFri / (_dFri + _depthScale);
 
-      private _dens = 0;
-      { _dens = _dens + (_densRadius / (_densRadius + (_pos distance2D _x))) } forEach _enemyPts;
-      private _fDens = _dens / (_dens + 1);
-
+      // Run the gauntlet -- enemy features straddling the approach from the nearest friendly anchor.
       private _fGaunt = 0.2;
       if !(_fDists isEqualTo []) then {
           private _a = _friendlyAnchors select (_fDists find _dFri);
           {
-              ([_a, _pos, _x] call _fnSegDist) params ["_perp", "_t"];
+              ([_a, _pos, _x select 0] call _fnSegDist) params ["_perp", "_t"];
               if (_perp < _gauntCorr && _t > 0.15 && _t < 0.95) then {
                   _fGaunt = _fGaunt + (1 - _perp / _gauntCorr);
               };
           } forEach _enemyPts;
       };
 
-      (0.05 + _fDepth) * (0.05 + _fDens) * _fGaunt
+      (_dens ^ 2) * (0.15 + _fDepth) * _fGaunt
   };
 
   // Urban weight (easy offers): a bell peaked on the seam. enemyness is 0 in the friendly rear, 0.5 on the
