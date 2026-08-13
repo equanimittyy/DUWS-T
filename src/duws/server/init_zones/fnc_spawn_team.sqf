@@ -20,7 +20,11 @@
 // _posture defaults to the close patrol every team walked when orders were a column on its roster
 // row, so the side-mission callers that name only a team still get what they always got. A token may
 // carry its own ("garrison:garrison_element"), which is what DUWS_fnc_zoneSpawnOne passes.
-params ["_team", "_center", "_radius", ["_strength", 1], ["_posture", "closepatrol"]];
+//
+// _spawnPos is the reserve path's alone: a reinforcement is placed on a point the reserve pass chose
+// on the zone's far side, not in the posture's own radius band. Empty means the ordinary team, which
+// spawns in its band off the centre.
+params ["_team", "_center", "_radius", ["_strength", 1], ["_posture", "closepatrol"], ["_spawnPos", []]];
 
 // grpNull rather than an empty group: DUWS_fnc_raiseGarrison already drops nulls, and a group with
 // no men would sit on the zone roster forever holding the capture test open.
@@ -34,15 +38,18 @@ if (_row isEqualTo []) exitWith {
 private _men = [_team, "opfor", _strength] call DUWS_fnc_teamRoster;
 // Spawn distance follows the posture: a wide patrol starts on the outer ring, a close one near the
 // objective, from DUWS_postureBands so the spawn and the circuit agree. A posture the table does not
-// name keeps the old 50..radius band.
-private _band = DUWS_postureBands getOrDefault [_posture, []];
-private _minR = 50;
-private _maxR = _radius;
-if (_band isNotEqualTo []) then {
-    _minR = (_band select 0) * _radius;
-    _maxR = (_band select 1) * _radius;
+// name keeps the old 50..radius band. A caller-supplied point overrides the band outright -- a
+// reserve is placed where the pass put it, and its hunt orders carry no band anyway.
+private _position = if (_spawnPos isNotEqualTo []) then { _spawnPos } else {
+    private _band = DUWS_postureBands getOrDefault [_posture, []];
+    private _minR = 50;
+    private _maxR = _radius;
+    if (_band isNotEqualTo []) then {
+        _minR = (_band select 0) * _radius;
+        _maxR = (_band select 1) * _radius;
+    };
+    [_center, _minR, _maxR, 5, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos
 };
-private _position = [_center, _minR, _maxR, 5, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
 private _group = [_position, EAST, _men, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 

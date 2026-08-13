@@ -11,7 +11,11 @@
 // group like any other once it is standing. The postures that put men inside a structure answer for
 // a mounted group by patrolling instead, so a composition may name any of them without having to
 // know what it is naming.
-params ["_class", "_patrolCenter", "_radius", ["_posture", "closepatrol"]];
+//
+// _spawnPos is the reserve path's, as in fnc_spawn_team: a reinforcement vehicle is placed on the
+// point the pass chose. It reaches ground vehicles only -- air still enters from off the map, since a
+// reserve gunship makes no sense parked on the far ridge at zero altitude.
+params ["_class", "_patrolCenter", "_radius", ["_posture", "closepatrol"], ["_spawnPos", []]];
 if (_class == "") exitWith { grpNull };
 
 // Air enters from off the map at altitude and everything else from a safe spot on the ground. Keyed
@@ -25,15 +29,18 @@ private _vehpos = if (_isAir) then {
     [_p select 0, _p select 1, 800]
 } else {
     // Ground vehicles follow the posture band like a rifle section, so a wide vehicle patrol does not
-    // spawn on top of the objective it is meant to screen. Air stays unbanded: it enters from off the map.
-    private _band = DUWS_postureBands getOrDefault [_posture, []];
-    private _minR = 100;
-    private _maxR = 200;
-    if (_band isNotEqualTo []) then {
-        _minR = (_band select 0) * _radius;
-        _maxR = (_band select 1) * _radius;
-    };
-    [_patrolCenter, _minR, _maxR, 15, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos
+    // spawn on top of the objective it is meant to screen. Air stays unbanded: it enters from off the
+    // map. A caller-supplied point overrides the band, the way it does for a team.
+    if (_spawnPos isNotEqualTo []) then { _spawnPos } else {
+        private _band = DUWS_postureBands getOrDefault [_posture, []];
+        private _minR = 100;
+        private _maxR = 200;
+        if (_band isNotEqualTo []) then {
+            _minR = (_band select 0) * _radius;
+            _maxR = (_band select 1) * _radius;
+        };
+        [_patrolCenter, _minR, _maxR, 15, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos
+    }
 };
 
 private _created = [_vehpos, 0, _class, EAST] call BIS_fnc_spawnVehicle;
