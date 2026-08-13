@@ -51,7 +51,8 @@ private _centres = _locations apply { getPos _x };
 // Spawned per raise. Nothing from this scope reaches it -- spawn breaks the scope chain -- so it
 // takes everything it needs as parameters and hands its result back through the mission namespace.
 private _fnc_raise = {
-    params ["_i", "_centre", "_radius", "_tier", "_strength"];
+    params ["_i", "_centre", "_radius", "_tier"];
+    private _key = [_i] call fnc_town_site_key;
 
     // Presence is decided the way zones decide it: a five-second re-test after first contact, so
     // grazing the perimeter does not commit a garrison for someone already leaving.
@@ -60,27 +61,28 @@ private _fnc_raise = {
         missionNamespace setVariable [RAISE_SLOT(_i), []];
     };
 
-    // Filtered before it is thinned, so attrition reduces the force the side can actually field
-    // rather than a composition that is about to lose entries to a campaign setting anyway.
-    // Thinned by what the town has left, the way a zone's band is. A town beaten once fields a
-    // fraction of its tier from then on, so the composition is the ceiling rather than the promise.
-    private _want = [[[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter,
-        missionNamespace getVariable ["enemyunitMultiplier", 1]] call DUWS_fnc_scaleComposition,
-        _strength] call DUWS_fnc_thinComposition;
-    private _men = [[_want, _centre, _radius, _strength] call DUWS_fnc_raiseGarrison] call fnc_site_men_of;
+    // Reserve depth, the zone's model: the filtered x1 town tier stands up as the garrison and the
+    // surplus (mult-1) copies wait as the pool, less whatever the loss ledger says the town has lost
+    // across its visits. Filtered before the derivation, so a token the side cannot field is not counted
+    // into full and later chased by the refill. The garrison raises whole; attrition is the ledger.
+    private _x1 = [DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter;
+    private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+    ([_key, _x1, _mult] call DUWS_fnc_garrisonDerive) params ["_garrison", "_pool"];
+    missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key], count _x1];
+    private _grps = [_garrison, _centre, _radius] call DUWS_fnc_raiseGarrison;
+    private _men = [_grps] call fnc_site_men_of;
 
-    // OPFOR standing inside the trigger's own area, which is what makes the town clearable. SEIZED
-    // is satisfied by an empty town as readily as by a fought-out one, so nothing else can tell the
-    // two apart.
+    // OPFOR actually standing inside the town: the confirmation that the raise placed men before the
+    // tick adopts it. A spawner that failed to find a safe position leaves the town holding the player
+    // and nobody else, and a garrison nobody can field is not one to roster.
     private _fnc_opforPresent = {
         ({side _x == EAST} count (_centre nearEntities [["CAManBase"], _radius])) > 0
     };
 
-    // Armed only once the garrison is standing in it. Each spawner resolves a safe position before
-    // it places anything, and one that fails leaves the town holding the player and nobody else --
-    // which is precisely what WEST SEIZED reports as cleared. A trigger armed beside the spawn
-    // therefore hands the town its whole reputation debt back for a garrison nobody fought, which
-    // reads in play as reputation climbing out of the negative band from standing in the town.
+    // Adopted only once the garrison is standing. Each spawner resolves a safe position before it places
+    // anything, and one that fails would file a garrison of nobody; the tick would then roster an empty
+    // town and read it, on the next capture check, as already beaten. So the raise waits up to a minute
+    // for men to appear and files nothing if none do.
     private _deadline = diag_tickTime + 60;
     waitUntil { sleep 2; (call _fnc_opforPresent) || {diag_tickTime > _deadline} };
     if !(call _fnc_opforPresent) exitWith {
@@ -91,24 +93,15 @@ private _fnc_raise = {
         // is nobody there to watch it go.
         { deleteVehicle _x } forEach _men;
         missionNamespace setVariable [RAISE_SLOT(_i), []];
-        ["WARN", "CIV", format ["Garrison tier %1 at town %2 placed no OPFOR within %3 m in 60 s; not armed",
+        ["WARN", "CIV", format ["Garrison tier %1 at town %2 placed no OPFOR within %3 m in 60 s; not adopted",
             _tier, _i, _radius]] call fnc_log;
     };
 
-    // SEIZED is the engine's own "this side present, the opposing side absent" test, and it decides
-    // the clear rather than the roster does: a garrison that withdrew has cleared the town as surely
-    // as one that was wiped, and only the trigger sees both. The roster is read for strength alone.
-    // The interruptable timeout restarts if OPFOR walk back in, so the town has to be held clear
-    // rather than sprinted through.
-    // Whether CIVILIAN-side units block SEIZED is unconfirmed; if they do, this needs a plain
-    // condition trigger counting hostile units in thisList instead.
-    private _trg = createTrigger ["EmptyDetector", _centre, false];
-    _trg setTriggerArea [_radius, _radius, 0, false];
-    _trg setTriggerActivation ["WEST SEIZED", "PRESENT", true];
-    _trg setTriggerTimeout [30, 40, 50, true];
-    _trg setTriggerStatements ["this", "", ""];
-
-    missionNamespace setVariable [RAISE_SLOT(_i), [_men, _want, _tier, _strength, _trg]];
+    // Filed for the tick to adopt: the groups it raised (the tick rosters them, hangs the killed watch
+    // and marks the site live) and the tier they were raised at. No SEIZED trigger any more -- a town is
+    // cleared on the shared garrisonBeaten break test now, evaluated on the poller tick, not by an engine
+    // detector, so a town has to be beaten rather than merely emptied.
+    missionNamespace setVariable [RAISE_SLOT(_i), [_grps, _tier]];
 };
 
 // One record per town, held in the shared site store: the town garrison is an occupant of the same
@@ -128,11 +121,11 @@ private _fnc_raise = {
 // it. The garrison streams out on this, so a step outside the radius does not tear it down and walk
 // it back.
 //
-// deployed, deployedStrength and deployedList are what is standing, against what the town owes. The
-// list is held beside the numbers because reinforcement is the difference between two compositions,
-// not between two tiers -- a table retuned mid-campaign would otherwise have a standing garrison
-// reinforced from a row it was never raised against. Tier and strength are separate purchases: a
-// reinforcement moves the strength and not the tier, and an upgrade the reverse.
+// tier is the deployed tier -- what is standing, distinct from the owned tier the reputation band and
+// the commander set. A tier buy that outruns the deployed tier re-derives the reserve pool at the new
+// row and lets the refill deliver the growth in waves. The strength, the loss ledger, the reserve pool
+// and the live flag are the shared garrison state (fnc_garrison_strength_init), keyed by the same town
+// key, not town-record fields -- so a town wears down and reinforces by exactly a zone's rules.
 private _towns = [];
 for "_i" from 0 to (_count - 1) do {
     private _key = [_i] call fnc_town_site_key;
@@ -160,10 +153,6 @@ private _fnc_tick = {
 
     private _rep = [_i] call fnc_civ_repAt;
     private _tier = [_i] call fnc_town_garrison_tierAt;
-    // Read once per cycle beside the tier, because both branches below need it and they must
-    // agree: the spawn thins its composition by this, and the reinforcement test compares it
-    // against what the standing garrison was raised at.
-    private _strength = [_i] call fnc_town_garrison_strengthAt;
 
     // The gate, and the only place reputation writes a tier. Seeded whether or not anyone is
     // near: a town is OPFOR ground from the moment it crosses the band, which is what lets the
@@ -206,23 +195,18 @@ private _fnc_tick = {
         _t set ["raising", false];
         missionNamespace setVariable [RAISE_SLOT(_i), nil];
         if !(_res isEqualTo []) then {
-            _res params ["_gotRoster", "_gotWant", "_gotTier", "_gotStrength", "_gotTrg"];
-            ([[_i] call fnc_town_site_key] call fnc_site_roster) append _gotRoster;
-            // Anchored to the men the town's first garrison placed, not re-measured from what
-            // just arrived. A garrison that comes back at six tenths is still measured against
-            // the ten, so the men killed last visit stay killed -- re-basing on the reduced
-            // garrison restores the whole figure to beat on every visit, which is the refund
-            // attrition exists to stop. The zone's rule, applied to towns.
-            if ((_t get "baseline") <= 0) then {
-                _t set ["baseline", {alive _x} count _gotRoster];
-            };
+            _res params ["_gotGrps", "_gotTier"];
+            private _roster = [_key] call fnc_site_roster;
+            { _roster append (units _x) } forEach _gotGrps;
+            // The garrison is real: mark the site live -- which also enlists it in the reserve pass -- and
+            // hang the killed watch, so the town reinforces in hunt waves and records each wiped group's
+            // token into the ledger, exactly as a zone does. Losses live in the ledger from here on.
+            [_key, _gotGrps] call DUWS_fnc_garrisonReserveWatch;
+            [_key, true] call DUWS_fnc_garrisonSetLive;
             _t set ["tier", _gotTier];
-            _t set ["deployedList", _gotWant];
-            _t set ["deployedStrength", _gotStrength];
-            _t set ["trg", _gotTrg];
             _t set ["awake", true];
             ["INFO", "CIV", format ["Garrison tier %1 spawned at town %2 (rep %3), %4 men",
-                _gotTier, _i, _rep, _t get "baseline"]] call fnc_log;
+                _gotTier, _i, _rep, [_key] call fnc_site_alive]] call fnc_log;
         };
     };
 
@@ -236,7 +220,7 @@ private _fnc_tick = {
             && {_here}) then {
             _t set ["raising", true];
             missionNamespace setVariable [RAISE_SLOT(_i), nil];
-            [_i, _centre, _radius, _tier, _strength] spawn (missionNamespace getVariable "DUWS_town_raise");
+            [_i, _centre, _radius, _tier] spawn (missionNamespace getVariable "DUWS_town_raise");
         };
     };
 
@@ -250,74 +234,44 @@ private _fnc_tick = {
     // -- so damage accumulates across visits the way a zone's does.
     if (!_here && {(_t get "emptySince") >= 0}
         && {diag_tickTime > (_t get "emptySince") + ((DUWS_streamProfiles get "town_gar") select 1)}) exitWith {
-        private _left = [[_i] call fnc_town_site_key] call fnc_site_alive;
-        if ((_t get "baseline") > 0) then {
-            private _was = [_i] call fnc_town_garrison_strengthAt;
-            [_i, (_left / (_t get "baseline")) min _was] call fnc_town_garrison_setStrength;
-        };
-        // The trigger goes with the men. Left armed over an empty town it would read WEST
-        // SEIZED the moment a player walked back into ground the garrison had streamed out of,
-        // and pay them a clear for a fight that never happened.
-        deleteVehicle (_t get "trg");
-        // The men, the vehicles they crewed and the groups they empty, on the same rules a zone
-        // streams out by. The vehicle half is why this is shared rather than local: a town tier
-        // fields a car and an APC, and deleting only the crew left both standing in an emptied town
-        // on every visit, for the litter sweep to collect on a lifetime the campaign can switch off.
-        [[_i] call fnc_town_site_key] call fnc_site_collect;
-        ["INFO", "CIV", format ["Town %1 garrison streamed out holding %2 of %3; returns at %4 strength",
-            _i, _left, _t get "baseline", [_i] call fnc_town_garrison_strengthAt]] call fnc_log;
+        private _left = [_key] call fnc_site_alive;
+        // Losses were recorded live as groups fell, and the survivors of groups that were not wiped come
+        // back whole -- so the teardown records nothing. It marks the town no longer live (which also
+        // deregisters it from the reserve pass), clears its per-session pool, and collects the men, on the
+        // same rules a zone streams out by. The ledger persists, so the town redeploys at what it was worn
+        // to. The vehicle half of the collection matters: a town tier fields a car and an APC, and
+        // deleting only the crew left both standing in an emptied town for the litter sweep.
+        [_key, false] call DUWS_fnc_garrisonSetLive;
+        [_key] call DUWS_fnc_garrisonReserveClear;
+        [_key] call fnc_site_collect;
+        ["INFO", "CIV", format ["Town %1 garrison streamed out holding %2 men; redeploys at %3 strength",
+            _i, _left, [_i] call fnc_town_garrison_strengthAt]] call fnc_log;
         _t set ["awake", false];
-        _t set ["trg", objNull];
-        // The baseline is not cleared here: it is what the next visit is measured against.
+        // Deployed tier back to nothing standing; the owned tier (reputation/commander) is untouched, so
+        // the next visit raises it whole again. The reinforcement test below must not read a live deployed
+        // tier against an emptied town and re-derive, which is why this exits the tick.
         _t set ["tier", 0];
-        _t set ["deployedStrength", 0];
-        _t set ["deployedList", []];
-        // Nothing below this describes a town that no longer has a garrison, and the
-        // reinforcement test in particular would read the emptied deployed tier against a live
-        // one and raise the whole composition again -- streaming the garrison out and straight
-        // back in, on the one cycle nobody is there to see either.
     };
 
-    // Bought while the garrison stands, so only what the new composition has and the standing
-    // one does not is raised -- reinforcement arrives beside the survivors rather than as a
-    // second garrison beside the first. Counting duplicates is the whole point: a tier that
-    // goes from one team to two owes one team, not two.
+    // A commander tier buy grows the town's composition. Re-derive its full potential and reserve pool at
+    // the new tier -- the same whole-token split the raise uses -- and raise the ceiling; the refill pass
+    // then delivers the growth as hunt waves when the town is fought, exactly as a mauled garrison is
+    // topped back up. No bespoke reinforcement raise: a town reinforces the way a zone does now, and the
+    // strength half of a purchase is fnc_town_garrison_reinforce un-losing tokens back into the pool.
     //
-    // INVARIANT: this is downstream of the hold gate and must stay there. Only the gated branch
-    // above raises a garrison, so a tier bought while a town is held cannot reach here -- it
-    // raises the stored tier and the first spawn reads it whole once the hold and the latch are
-    // both clear. A second spawn path that set garrisoned without that gate would silently let
-    // an upgrade land on a town captured seconds ago, which is what MOBILISING exists to stop.
-    //
-    // Refused while BLUFOR are near, because reinforcement that materialises around the player
-    // mid-fight is the pop-in the holds exist to prevent, and worse here -- men appearing behind
-    // someone in contact reads as the mission cheating.
-    // Buying and arriving are separate acts: the commander may raise a contested town's tier at
-    // any time, and the men walk in once nobody is watching. The tier stays owed either way, so
-    // it lands on a later cycle rather than being lost, the way a hold defers a first garrison.
-    //
-    // Tested against the stored pair rather than by diffing recomputed lists. The composition is
-    // deterministic now, so the two agree -- but strength no longer shows in the list at all: a
-    // town ground down and then recovered fields the same tokens at a different share, and a
-    // diff of token lists cannot see that. The stored pair can.
-    if ((_tier > (_t get "tier") || _strength > (_t get "deployedStrength"))
-        && {!_here}) then {
-        private _want = [[[DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter,
-            missionNamespace getVariable ["enemyunitMultiplier", 1]] call DUWS_fnc_scaleComposition,
-            _strength] call DUWS_fnc_thinComposition;
-        private _added = [[_t get "deployedList", _want] call DUWS_fnc_spawnDiff, _centre, _radius, _strength] call DUWS_fnc_raiseGarrison;
-        private _addedMen = [_added] call fnc_site_men_of;
-        ([[_i] call fnc_town_site_key] call fnc_site_roster) append _addedMen;
-        // Added to the baseline rather than re-measured from the roster. A garrison ground down
-        // to three men and then reinforced by six is nine men against a baseline that still
-        // counts the dead; re-basing on the alive count would refund every casualty the player
-        // has already paid for.
-        _t set ["baseline", (_t get "baseline") + ({alive _x} count _addedMen)];
+    // INVARIANT: downstream of the hold gate, and must stay there. Only the gated branch above raises the
+    // first garrison, so a tier bought while a town is still held cannot reach here -- it raises the owned
+    // tier and the first spawn reads it whole once the hold and latch clear. Guarded on awake so a town
+    // that has streamed out (deployed tier zeroed above) re-raises whole rather than re-deriving a pool
+    // against a garrison that is not standing.
+    if (_tier > (_t get "tier") && {_t get "awake"}) then {
+        private _x1 = [DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter;
+        private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+        [_key, _x1, _mult] call DUWS_fnc_garrisonDerive;
+        missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key], count _x1];
         _t set ["tier", _tier];
-        _t set ["deployedList", _want];
-        _t set ["deployedStrength", _strength];
-        ["INFO", "CIV", format ["Town %1 garrison reinforced to tier %2; baseline now %3 men",
-            _i, _tier, _t get "baseline"]] call fnc_log;
+        ["INFO", "CIV", format ["Town %1 garrison tier raised to %2; refill brings it up in waves",
+            _i, _tier]] call fnc_log;
     };
 
     // Tier 0 is the town no longer being OPFOR ground -- the band test above zeroes it when aid
@@ -327,55 +281,50 @@ private _fnc_tick = {
     // fire with the player standing in the town, and it already took living men out of their sight
     // to get here -- leaving the transport those men were sitting in would be the odd half.
     if (_tier == 0) then {
-        deleteVehicle (_t get "trg");
-        _t set ["trg", objNull];
+        [_key, false] call DUWS_fnc_garrisonSetLive;
+        [_key] call DUWS_fnc_garrisonReserveClear;
         _t set ["awake", false];
-        [[_i] call fnc_town_site_key] call fnc_site_collect;
-        // The one place the anchor goes, because the town is no longer enemy ground: whatever
-        // it holds next is a new garrison rather than the remains of this one.
-        _t set ["baseline", 0];
+        [_key] call fnc_site_collect;
+        // The town is no longer enemy ground: forget its garrison entirely, so if it crosses back into
+        // the band it starts fresh rather than redeploying the remains of a garrison the ground no longer
+        // holds. Whatever it holds next is a new garrison.
+        [_key] call DUWS_fnc_garrisonForget;
         _t set ["tier", 0];
-        _t set ["deployedStrength", 0];
-        _t set ["deployedList", []];
         ["INFO", "CIV", format ["Town %1 left the OPFOR band at rep %2; garrison cleared",
             _i, _rep]] call fnc_log;
     } else {
-        if (!isNull (_t get "trg") && {triggerActivated (_t get "trg")}) then {
-            deleteVehicle (_t get "trg");
-            _t set ["trg", objNull];
+        // Cleared when its garrison and owed reserves are beaten to a tenth of full potential -- the same
+        // break test a zone falls on, owed reserves included, so a town is not finished while its waves
+        // are still inbound. What being beaten *does* stays the town's own: a reputation credit, the
+        // garrison seeded to a scratch 0.3, and a REGROUPING hold, rather than a change of owner.
+        if (_t get "awake" && {[_key] call DUWS_fnc_garrisonBeaten}) then {
+            [_key, false] call DUWS_fnc_garrisonSetLive;
+            [_key] call DUWS_fnc_garrisonReserveClear;
+            [_key] call fnc_site_roster_clear;
             _t set ["awake", false];
-            [[_i] call fnc_town_site_key] call fnc_site_roster_clear;
-            // Baseline survives a clear too -- what was beaten is the purchase, not the anchor.
             _t set ["tier", 0];
-            _t set ["deployedStrength", 0];
-            _t set ["deployedList", []];
-            // Clearing destroys the purchase but not the ownership. The tier files back down to
-            // I rather than to 0: the town is still enemy ground, and it is the commander's
-            // spending that was beaten, not the enemy's claim. No refund either -- with one, a
-            // player clearing towns would hand the enemy its AP back and it would never climb.
+            // Clearing destroys the purchase but not the ownership. The tier files back down to I rather
+            // than to 0: the town is still enemy ground, and it is the commander's spending that was
+            // beaten, not the enemy's claim. No refund either -- a player clearing towns would otherwise
+            // hand the enemy its AP back and it would never climb.
             [_i, 1, "garrison cleared"] call fnc_town_garrison_setTier;
-            // An instalment, not absolution. Discharging the whole debt let a player ruin a town
-            // to -20 and walk away square on one fight, which made the reputation the garrison
-            // was supposed to be the price of effectively free. A clear is worth a fixed step
-            // back toward neutral, so a town driven to the floor takes four of them.
-            // Self-limiting: only a town at or below the band can hold a garrison to clear, so
-            // the most this can ever reach is one step above the band and it can never turn a
-            // town friendly by force.
+            // An instalment, not absolution. Discharging the whole debt let a player ruin a town to -20
+            // and walk away square on one fight. A clear is worth a fixed step back toward neutral, so a
+            // town driven to the floor takes four of them. Self-limiting: only a town at or below the band
+            // can hold a garrison to clear, so it can never turn a town friendly by force.
             [_i, CLEAR_REP, "garrison_cleared"] call fnc_town_rep_adjust;
-            // Beaten to the floor and left there. Nothing restores it, so what comes back is a
-            // shell for the rest of the campaign -- the lasting half of what clearing a town
-            // buys, against the reputation step which is only an instalment.
-            [_i, 0.3] call fnc_town_garrison_setStrength;
-            // Left alone afterwards, and the hold is per-town state rather than a local because
-            // two other things read it: fnc_town_garrison_setTier refuses a purchase through it,
-            // so the commander cannot buy a beaten town up to IV while nobody is looking, and
-            // the map readout prints the town as regrouping.
+            // Seeded to a scratch 0.3 survival -- a thin garrison with no reserve depth, the seed spending
+            // the pool copies first -- and left there. Nothing restores it but a paid reinforcement, so
+            // what comes back is a shell: the lasting half of what clearing a town buys, against the
+            // reputation step which is only an instalment.
+            [_key, 0.3] call DUWS_fnc_garrisonSeed;
+            // Read by two others: fnc_town_garrison_setTier refuses a purchase through it, so the commander
+            // cannot buy a beaten town up while nobody looks, and the map readout prints it regrouping.
             [_i, "REGROUPING"] call fnc_town_garrison_setHold;
-            // The player is standing in the town they just cleared. Nothing may spawn here
-            // until they have left once, or the garrison the hold expires into would appear
-            // around them.
+            // The player is standing in the town they just cleared. Nothing may spawn here until they have
+            // left once, or the garrison the hold expires into would appear around them.
             _t set ["awaitVacate", true];
-            ["INFO", "CIV", format ["Town %1 cleared at tier %2; rep %3 + %4, garrison broken to 0.3 and regrouping",
+            ["INFO", "CIV", format ["Town %1 cleared at tier %2; rep %3 + %4, garrison seeded to 0.3 and regrouping",
                 _i, _tier, _rep, CLEAR_REP]] call fnc_log;
         };
     };

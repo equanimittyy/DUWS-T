@@ -152,9 +152,10 @@ fnc_town_garrison_clearHold = {
 	(missionNamespace getVariable ["DUWS_townGarrisonHoldKind", []]) set [_townIndex, ""];
 };
 
-// What fraction of its tier composition a town actually fields, and the writer for it. Both name the
-// town's key to the shared attrition store, which owns the tenths rule, the 0.3 floor and the
-// lower-only record -- a zone wears down by exactly the same rules and reads the same functions.
+// What fraction of its tier composition a town actually fields: the shared attrition ledger's
+// projection, keyed by the town's key -- a zone reads the very same function. There is no setter; the
+// ledger is written by losses (recorded live as groups fall), by a seed (a clear), and by an un-lose (a
+// reinforcement purchase, below).
 fnc_town_garrison_strengthAt = {
 	if (!isServer) exitWith { 1 };
 	params [["_townIndex", -1]];
@@ -162,44 +163,45 @@ fnc_town_garrison_strengthAt = {
 	[[_townIndex] call DUWS_fnc_townStrengthKey] call DUWS_fnc_garrisonStrength
 };
 
-fnc_town_garrison_setStrength = {
-	if (!isServer) exitWith {};
-	params [["_townIndex", -1], ["_frac", 1]];
-	if (_townIndex < 0) exitWith {};
-	[[_townIndex] call DUWS_fnc_townStrengthKey, _frac] call DUWS_fnc_garrisonStrengthSet
-};
-
-// What one reinforcement buys. A tenth-multiple because the setter above quantises to tenths: a
-// finer step would be rounded up on the way in, so the table would promise a figure the store cannot
-// hold. Three reinforcements from the floor to full, four from nothing -- and the same step the
-// BLUFOR garrison climbs by, so the two sides read as one rule rather than two tunings.
+// What one reinforcement buys back. Three from the floor to full, four from nothing -- and the same step
+// the BLUFOR garrison climbs by, so the two sides read as one rule rather than two tunings.
 #define REINFORCE_STEP 0.3
 
 // Reinforcement buys strength; a tier buys composition. **Two sinks, deliberately independent.** The
-// tier says what the town would field and the strength says how much of it stands, so the commander
-// can hold a tier IV town hollow, fill a tier I one, or pay for both -- and each costs separately.
-// Folding them into one purchase would make a beaten town cheap to restore precisely because it was
-// beaten, since a single payment would buy back the composition and the men together.
+// tier says what the town would field and the strength says how much of it stands, so the commander can
+// pay for either or both, each separately. Under the ledger, buying strength un-loses destroyed tokens
+// back -- a paid replacement, the one thing that raises a garrison's strength, and not a heal: it costs,
+// and the men still have to walk in on the next refill wave.
 //
 // Refused under REGROUPING, and this is the one thing that hold blocks which matters: with the men
-// already gone, a commander who could still spend here would erase what clearing the town bought
-// before the player had left the map. A MOBILISING hold does not refuse -- ground that has only just
-// fallen is exactly what the enemy should be free to commit to.
+// already gone, a commander who could still spend here would erase what clearing the town bought before
+// the player had left the map. A MOBILISING hold does not refuse -- ground that has only just fallen is
+// exactly what the enemy should be free to commit to.
 // Returns the new strength, or -1 when refused, so a caller that is paying can tell.
 fnc_town_garrison_reinforce = {
 	if (!isServer) exitWith { -1 };
 	params [["_townIndex", -1], ["_reason", ""]];
-	// Bounded by the town registry rather than by a strength array: strength now lives in the shared
-	// keyed store, which has no per-town length to range-check against.
 	if (_townIndex < 0 || _townIndex >= count (missionNamespace getVariable ["DUWS_townGarrisonTier", []])) exitWith { -1 };
 	if (([_townIndex] call fnc_town_garrison_holdKindAt) == "REGROUPING") exitWith {
 		["INFO", "CIV", format ["Town %1 reinforcement refused (%2): regrouping for another %3 s",
 			_townIndex, _reason, round ([_townIndex] call fnc_town_garrison_holdAt)]] call fnc_log;
 		-1
 	};
-	private _old = [_townIndex] call fnc_town_garrison_strengthAt;
-	[_townIndex, _old + REINFORCE_STEP] call fnc_town_garrison_setStrength;
-	private _new = [_townIndex] call fnc_town_garrison_strengthAt;
+	private _key = [_townIndex] call DUWS_fnc_townStrengthKey;
+	private _old = [_key] call DUWS_fnc_garrisonStrength;
+	[_key, _old + REINFORCE_STEP] call DUWS_fnc_garrisonUnlose;
+	// A standing garrison re-seeds its reserve pool from the recovered survivors, so the refill pass walks
+	// them in as hunt waves; a stowed one needs nothing more -- its next raise fields the recovered
+	// strength straight off the ledger.
+	if ([_key] call DUWS_fnc_garrisonHeld) then {
+		private _tier = [_townIndex] call fnc_town_garrison_tierAt;
+		if (_tier > 0) then {
+			private _x1 = [DUWS_townSpawnTiers select (_tier - 1)] call DUWS_fnc_spawnFilter;
+			private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
+			[_key, _x1, _mult] call DUWS_fnc_garrisonDerive;
+		};
+	};
+	private _new = [_key] call DUWS_fnc_garrisonStrength;
 	["INFO", "CIV", format ["Town %1 reinforced %2 -> %3 (%4)", _townIndex, _old, _new, _reason]] call fnc_log;
 	_new
 };
