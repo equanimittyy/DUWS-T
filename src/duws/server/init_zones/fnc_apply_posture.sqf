@@ -186,6 +186,37 @@ switch (_posture) do {
         };
     };
 
+    case "hunt": {
+        // A reinforcement wave, not a garrison: it runs at the players and engages rather than
+        // settling into a circuit. AWARE and speed FULL are the urgency the wave carries -- a
+        // reinforcement runs, it does not stroll -- and override the SAFE set above for this posture
+        // alone. Works for a mounted group and an aircraft unchanged: each hunts at its own speed.
+        //
+        // The SAD target is the nearest player's position at spawn, not a live track: spawned on the
+        // far edge with the players on the near side, one destination across the zone is enough to
+        // drive the group onto them, and it engages whatever it meets on the way in. The centre is the
+        // fallback when no player is up -- the pass only launches a wave with BLUFOR near, so this is
+        // the rare race where they left between the pass gating and the group standing.
+        private _lead = getPosATL _leader;
+        private _players = (call BIS_fnc_ListPlayers) select { alive _x };
+        private _target = _centre;
+        if (_players isNotEqualTo []) then {
+            _players = [_players, [], { _lead distance2D (getPosATL _x) }, "ASCEND"] call BIS_fnc_sortBy;
+            _target = getPosATL (_players select 0);
+        };
+        _group setBehaviour "AWARE";
+        _group setCombatMode "YELLOW";
+        _group setSpeedMode "FULL";
+        private _wp = _group addWaypoint [_target, 0];
+        _wp setWaypointType "SAD";
+        _wp setWaypointBehaviour "AWARE";
+        _wp setWaypointSpeed "FULL";
+        private _cycle = _group addWaypoint [_target, 30];
+        _cycle setWaypointType "CYCLE";
+        _cycle setWaypointBehaviour "AWARE";
+        _cycle setWaypointSpeed "FULL";
+    };
+
     // The caller places the group and gives it orders itself. Matched rather than left to the
     // default below, so a posture nobody implements is still reported.
     case "none": {};

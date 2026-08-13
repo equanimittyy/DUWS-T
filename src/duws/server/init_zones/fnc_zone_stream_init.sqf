@@ -282,6 +282,10 @@ DUWS_fnc_zoneStow = {
     params ["_key"];
     [_key, [_key, "emplacement"] call fnc_site_occupant] call (DUWS_zoneEmplacementHooks get "sleep");
     [_key, [_key, "structure"] call fnc_site_occupant] call (DUWS_zoneStructureHooks get "sleep");
+    // The reserve pool is per-awake-session. Cleared here, after fnc_zone_strength_record has folded
+    // its owed men into the recorded strength, and reseeded by fnc_zone_spawn on the next raise -- so a
+    // stowed zone reads no owed reserve and comes back consistent with the strength it packed up at.
+    [_key] call DUWS_fnc_zoneReserveClear;
 };
 
 // Survivors of a zone that has fallen: ordered off the objective here, collected by the tick once
@@ -420,12 +424,15 @@ DUWS_zoneHooks = createHashMapFromArray [["tick", {
     // radius while streaming reaches 400 m further, so the zone can flip with everything in that
     // ring still alive: those units were never inside the test. Bounded rather than open-ended:
     // fnc_zone_capture_ready refuses while more than its break fraction of the peak is alive on the
-    // roster anywhere, so this is a fifth of a garrison at worst.
+    // roster anywhere, so this is a tenth of a garrison at worst.
     if !(_opforHolds) exitWith {
         // Before the split: the garrison is about to be walked off and the zone has changed hands,
         // and either ends what the capture test was judging. A peak surviving into this reads a
         // pack-up as a garrison wiped.
         [_key] call fnc_zone_garrison_dropped;
+        // The pool goes with the peak: OPFOR no longer own this ground, so there is nothing to reinforce
+        // and no owed reserve to count. A retake reseeds it from the scratch strength fnc_opfor_cap floors.
+        [_key] call DUWS_fnc_zoneReserveClear;
         private _leftovers = [_key, _pos] call DUWS_fnc_zoneSendOff;
         [_key, "withdrawing"] call fnc_site_roster_clear;
         ([_key, "withdrawing"] call fnc_site_roster) append _leftovers;

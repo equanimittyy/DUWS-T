@@ -239,6 +239,12 @@ fnc_spawn_team = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_s
 fnc_spawn_vehicle = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawn_vehicle.sqf";
 fnc_zone_reveal = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_reveal.sqf";
 fnc_zone_spawn_sizes = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_spawn_sizes.sqf";
+// The zone reserve / reinforcement engine: the refill pass, the far-side placement and the two
+// triggers that fire it. Server-only, so not broadcast; executed at load to define its functions the
+// way fnc_zone_stream_init is. Its refill and accounting hook fnc_zone_spawn (defined when
+// fnc_zone_spawn_sizes is spawned) and the state helpers in fnc_zone_state_init, both in hand before
+// the first zone raise.
+[] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_reserve.sqf";
 
 // ZONE PREFABS
 // MODERN is the baseline composition era, always compiled: fnc_zone_prefab_set falls back to it for
