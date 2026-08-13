@@ -624,3 +624,21 @@ fnc_hardpoint_plan_counts = {
     _total = _total + _backline + _frontline;
     [_zoneCounts, _backline, _frontline, _roadTargets, _total]
 };
+
+// [_zoneKey, _radius] call fnc_hardpoint_debug -> the dev readout for a zone's ring: its cap split into
+// the radius and tier halves, and how many stand against it. Zone-only -- towns raise no ring -- so the
+// garrison query appends it for a zone, not a town. Reads fnc_hardpoint_zone_cap and the live registry
+// and recomputes neither, so what it prints is the cap OPCOM tops the ring up toward.
+fnc_hardpoint_debug = {
+    params ["_zoneKey", "_radius"];
+    private _tier = [_zoneKey] call fnc_zone_tier;
+    private _cap = [_zoneKey, _radius] call fnc_hardpoint_zone_cap;
+    private _tierBonus = 0 max (_tier - 1);
+    private _radiusCap = _cap - _tierBonus;
+    private _live = { (_x select 4) isEqualTo _zoneKey } count DUWS_hardpoints;
+    [
+        format ["[HARDPOINTS %1]", _zoneKey],
+        format ["  ring cap = %1 (radius %2m) + %3 (tier %4) = %5 max", _radiusCap, round _radius, _tierBonus, _tier, _cap],
+        format ["  on ground: %1 / %2", _live, _cap]
+    ]
+};

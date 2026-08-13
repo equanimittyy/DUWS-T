@@ -11,6 +11,7 @@ if (isNull _caller) exitWith {};
 // keeps off the map. Zone circles and town discs overlap by design, so the nearer centre wins.
 private _key = "";
 private _what = "";
+private _radius = 0;
 private _best = 1e11;
 
 {
@@ -19,6 +20,7 @@ private _best = 1e11;
 	if (_d < _zSize && {_d < _best}) then {
 		_key = [_zPos] call fnc_zone_key;
 		_what = "zone";
+		_radius = _zSize;
 		_best = _d;
 	};
 } forEach zone_meta_array;
@@ -39,6 +41,8 @@ if (_key isEqualTo "") exitWith {
 };
 
 private _lines = [_key] call DUWS_fnc_garrisonDebug;
+// A zone also carries a hardpoint ring; a town raises none, so its readout is the ledger alone.
+if (_what isEqualTo "zone") then { _lines append ([_key, _radius] call fnc_hardpoint_debug) };
 // To the log for the .rpt trail and to the caller's hint box. The map is closed by the time this
 // returns, so the hint is visible; the lines join with \n, which hint renders as line breaks.
 diag_log format ["[DUWS garrison debug] %1", _what];
