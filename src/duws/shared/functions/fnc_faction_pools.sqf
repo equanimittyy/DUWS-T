@@ -94,17 +94,18 @@ fnc_faction_resolve = {
     _out
 };
 
-// A pool is a random draw per spawn, and that only earns its keep where a faction fields
-// interchangeable variants -- infantry and vehicles. A static role holds one canonical piece, so
-// randomising there buys no variety a player sees and risks an import/proxy variant that clears the
-// detection scope gate yet cannot be createVehicle'd, standing the emplacement up gunless. Statics
-// (and any key the schema does not carry) therefore collapse to the representative with no pool, so
-// fnc_faction_pick returns that one class. Kind comes from the schema, the one place it is recorded.
+// A pool is a random draw per spawn, restricted to vehicles: a faction's interchangeable vehicle
+// variants are worth randomising, but infantry are deliberately held to a single representative so
+// every zone fields the one confirmed rifleman rather than a spread of variants. A static role holds
+// one canonical piece anyway, and randomising there risks an import/proxy variant that clears the
+// detection scope gate yet cannot be createVehicle'd, standing the emplacement up gunless. Infantry,
+// statics, and any key the schema does not carry therefore collapse to the representative with no
+// pool, so fnc_faction_pick returns that one class. Kind comes from the schema, its one record.
 fnc_faction_poolable_keys = {
     if (isNil "DUWS_faction_poolableKeys") then {
         DUWS_faction_poolableKeys = [];
         {
-            { if ((_x select 2) in ["man", "vehicle"]) then { DUWS_faction_poolableKeys pushBack (_x select 0); }; }
+            { if ((_x select 2) isEqualTo "vehicle") then { DUWS_faction_poolableKeys pushBack (_x select 0); }; }
                 forEach ([_x] call fnc_faction_schema);
         } forEach ["blufor", "opfor"];
     };
@@ -140,8 +141,8 @@ fnc_faction_pools_publish = {
 };
 
 // One classname for a role, drawn at the moment of use. Called by the spawn funnels rather than by
-// every reader: a squad raised now gets men from across its faction's pool, and two zones raised in
-// the same second field different vehicles -- which is the variety a player actually sees.
+// every reader: two zones raised in the same second field different vehicles -- the variety a player
+// actually sees -- while infantry and every other single role hand back their representative.
 //
 // Falls back to the global for a role with no pool, which is every role a hand-written faction file
 // defines as a plain string, and "" for one the faction never defined at all. fnc_factionRoles drops
