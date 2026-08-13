@@ -453,7 +453,35 @@ fnc_captured_pool_settle = {
 			if (_net - _grant > 0) then { _excess pushBack [_cls, _net - _grant]; };
 		};
 	} forEach _classes;
-	if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["pool settle: touched=%1 excess=%2", _classes, _excess]] call fnc_log; };
+	// A worn container that overdrew -- uniform/vest/backpack -- is pulled off the player by
+	// removeUniform/Vest/Backpack, and those also destroy its contents, including gear the pool DID
+	// cover and already debited. Re-credit that covered gear to the shelf so it returns to stock
+	// rather than leaking out of the economy when the client strips the container. Only the covered
+	// part: a content class that itself overdrew was never granted, and the draw's own skips (friendly
+	// floor, untracked ammo) keep a class the pool never debited from being credited now. Reading the
+	// destroyed container's OWN contents, not the flat per-class total, makes the credit match what
+	// removeVest burns; subtracting the flat excess can only under-credit on a rare cross-container
+	// split, never mint stock, so it errs toward the shelf, never inflation.
+	private _exMap = createHashMap;
+	{ _exMap set [_x select 0, _x select 1]; } forEach _excess;
+	private _salvaged = [];
+	{
+		_x params ["_cls"];
+		private _idx = [3, 4, 5] findIf { ((_closeLoadout param [_x, []]) param [0, ""]) isEqualTo _cls };
+		if (_idx < 0) then { continue };   // not a worn container (headgear/goggles/loose item)
+		{
+			_x params ["_cc", ["_cn", 1]];
+			if (!DUWS_trackAmmo && {isClass (configFile >> "CfgMagazines" >> _cc)}) then { continue };
+			if (!DUWS_arsenalLimited && {_cc in DUWS_friendlyArsenal}) then { continue };
+			private _keep = _cn - (_exMap getOrDefault [_cc, 0]);
+			if (_keep > 0) then {
+				[_cc, ([_cc] call fnc_captured_pool_getCount) + _keep] call fnc_captured_pool_setCount;
+				_salvaged pushBack [_cc, _keep];
+			};
+		} forEach ((_closeLoadout param [([3, 4, 5] select _idx), []]) param [1, []]);
+	} forEach _excess;
+
+	if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["pool settle: touched=%1 excess=%2 salvaged=%3", _classes, _excess, _salvaged]] call fnc_log; };
 	publicVariable "DUWS_capturedPool";
 	if (_replyVar != "") then { [_replyVar, true, _excess] remoteExec ["fnc_pool_reply", _requester]; };
 };
