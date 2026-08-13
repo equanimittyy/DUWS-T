@@ -103,12 +103,14 @@ records that same per-object transform — `[typeOf, getPosWorld, [vectorDir, ve
 hardpoint that streams out and back in faces exactly where it did without being sited again.
 
 **Zone ring.** `fnc_hardpoint_site_zone [_zonePos, _radius, _zoneKey, _count]`
-(`fnc_hardpoint_place.sqf:281-304`) stores a per-zone cap, `round(_radius / 250) max 1`, the first
-time it runs for that zone and refuses to run again — a rebuild through `fnc_createZone` lays no
-second ring. At campaign generation a random count up to that cap (`round (random _cap)`, which can
-be zero) is laid, candidates drawn anywhere inside the zone on land clear of steep slope, facing
-radially out from the centre. The cap itself is the standing target the director tops zones back
-toward later.
+(`fnc_hardpoint_place.sqf`) caps a zone's ring at `fnc_hardpoint_zone_cap`: `round(_radius / 250) max 1`
+plus one per tier above I. It stores the radius half the first time it runs for that zone and refuses to
+run again — a rebuild through `fnc_createZone` lays no second ring. The tier bonus is re-added live at
+every count decision rather than baked into the stored cap, so a zone OPCOM later buys up to a higher
+tier earns a higher ceiling with no rewrite. At campaign generation a random count up to the cap
+(`round (random _cap)`, which can be zero) is laid, candidates drawn anywhere inside the zone on land
+clear of steep slope, facing radially out from the centre. The cap is the standing target the director
+tops zones back toward later.
 
 **Minefields are generated, not composed.** `fnc_hardpoint_minefield`
 (`server/init_zones/fnc_hardpoint_minefield.sqf`) lays a lattice of vanilla mine objects — `ATMine`

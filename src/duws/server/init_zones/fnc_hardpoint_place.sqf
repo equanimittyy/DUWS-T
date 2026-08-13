@@ -316,11 +316,24 @@ fnc_hardpoint_lay = {
     _placed
 };
 
+// [_zoneKey, _radius] call fnc_hardpoint_zone_cap -> how many emplacements a zone's ring may hold.
+//
+// Radius sets the ground there is to cover, stepped every HP_CAP_STEP metres and floored at one. Tier
+// adds one per step above I -- the fortification OPCOM has bought into the zone -- so radius and tier are
+// the two levers, the map's and the commander's. Read live at every count decision (the campaign-start
+// roll, the plan pre-roll, OPCOM's top-up) rather than cached, so the three never drift and a zone that
+// climbs tier earns a higher ceiling without the stored radius cap being rewritten.
+fnc_hardpoint_zone_cap = {
+    params ["_zoneKey", "_radius"];
+    private _radiusCap = (round (_radius / HP_CAP_STEP)) max 1;
+    _radiusCap + (0 max (([_zoneKey] call fnc_zone_tier) - 1))
+};
+
 // [_zonePos, _radius, _zoneKey, _count, _fnTick] call fnc_hardpoint_site_zone
 //
-// A zone's own fortification ring, drawn from anywhere in the zone and faced radially out. The zone's
-// radius caps how many it can hold (bigger zone, more ground and room to cover it); a random count up to
-// that cap is laid at campaign start, and the cap is stored so OPCOM tops the ring back up toward it later.
+// A zone's own fortification ring, drawn from anywhere in the zone and faced radially out. Radius and
+// tier cap how many it can hold (fnc_hardpoint_zone_cap: bigger zone or higher tier, more emplacements);
+// a random count up to that cap is laid at campaign start, and OPCOM tops the ring back up toward it later.
 // The layered defence around the zone -- nests leaning toward and away from the fight -- is the flank
 // passes' job now (fnc_hardpoint_site_flank), spread across the map rather than ringed per zone.
 //
@@ -329,11 +342,13 @@ fnc_hardpoint_lay = {
 fnc_hardpoint_site_zone = {
     params ["_zonePos", "_radius", "_zoneKey", ["_count", -1], ["_fnTick", {}]];
     if (!isNil { missionNamespace getVariable (format ["DUWS_hpCap_%1", _zoneKey]) }) exitWith {};
-    private _cap = (round (_radius / HP_CAP_STEP)) max 1;
+    private _cap = [_zoneKey, _radius] call fnc_hardpoint_zone_cap;
     // The count arrives pre-rolled from fnc_hardpoint_plan_counts so the banner can total every emplacement
-    // up front; a standalone call (no plan) rolls its own against the cap.
+    // up front; a standalone call (no plan) rolls its own against the tier-boosted cap.
     if (_count < 0) then { _count = round (random _cap) };
-    missionNamespace setVariable [format ["DUWS_hpCap_%1", _zoneKey], _cap];
+    // Store the radius cap alone -- the idempotency guard, and a baseline that survives a tier buy
+    // untouched, since every reader re-adds the tier bonus through fnc_hardpoint_zone_cap.
+    missionNamespace setVariable [format ["DUWS_hpCap_%1", _zoneKey], (round (_radius / HP_CAP_STEP)) max 1];
 
     private _placed = 0;
     if (_count > 0) then {
@@ -566,8 +581,8 @@ fnc_hardpoint_plan_counts = {
     // Radio + AA (_zc) are the deterministic passes; sum them straight in. Rings roll per zone below.
     private _total = _radioN + _zc;
     {
-        _x params ["", "", "_hpSize"];
-        private _cap = (round (_hpSize / HP_CAP_STEP)) max 1;
+        _x params ["", "_zpos", "_hpSize"];
+        private _cap = [[_zpos] call fnc_zone_key, _hpSize] call fnc_hardpoint_zone_cap;
         private _n = round (random _cap);
         _zoneCounts pushBack _n;
         _total = _total + _n;

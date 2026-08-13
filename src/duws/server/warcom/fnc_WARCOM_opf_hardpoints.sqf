@@ -35,14 +35,14 @@ while {true} do {
     };
 
     // 2. Top up a zone the player has thinned below its cap. A zone's live count is its rows in the
-    //    registry; the cap was stored when the zone was first sited.
+    //    registry; the cap is radius plus the zone's current tier, read live so a tier buy raises it.
     if (!_acted && {WARCOM_opfor_ap >= OPCOM_AP_TOPUP}) then {
         private _depleted = [];
         {
             _x params ["", "_zp", "_zs"];
             if ((WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zp) < 1}) >= 0) then { continue };
             private _zk = [_zp] call fnc_zone_key;
-            private _cap = missionNamespace getVariable [format ["DUWS_hpCap_%1", _zk], 0];
+            private _cap = [_zk, _zs] call fnc_hardpoint_zone_cap;
             private _live = { (_x select 4) isEqualTo _zk } count DUWS_hardpoints;
             if (_live < _cap) then { _depleted pushBack [_zp, _zs, _zk] };
         } forEach zone_meta_array;
