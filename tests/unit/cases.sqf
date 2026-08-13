@@ -1051,6 +1051,22 @@ TEST_PICK = "";
 ["hp_lattice: spacing defaults to 4",
     ([2, 1] call fnc_hardpoint_minefield_lattice), [[-2, 0], [2, 0]]] call fnc_assertEq;
 
+// --- fnc_hardpoint_zone_cap: a zone ring's cap is its radius step plus one per tier above I ---
+// HP_CAP_STEP is a #define in the source; the extractor lifts the function body, not the define, so it
+// is restated here as the global the extracted body reads in the VM (value mirrors the source constant).
+HP_CAP_STEP = 250;
+missionNamespace setVariable ["DUWS_zoneTier_hpcapk", 1];
+["hardpoint_zone_cap: tier I adds nothing to the radius cap",
+    (["hpcapk", 250] call fnc_hardpoint_zone_cap), 1] call fnc_assertEq;
+missionNamespace setVariable ["DUWS_zoneTier_hpcapk", 4];
+["hardpoint_zone_cap: tier IV adds three to the radius cap",
+    (["hpcapk", 250] call fnc_hardpoint_zone_cap), 4] call fnc_assertEq;
+["hardpoint_zone_cap: a small radius floors the cap at one, tier still stacks",
+    (["hpcapk", 50] call fnc_hardpoint_zone_cap), 4] call fnc_assertEq;
+missionNamespace setVariable ["DUWS_zoneTier_hpcapk", 2];
+["hardpoint_zone_cap: radius steps every HP_CAP_STEP metres",
+    (["hpcapk", 800] call fnc_hardpoint_zone_cap), 4] call fnc_assertEq;
+
 // --- empty garrison is a supported shape (zones and hardpoints both raise from a list that may be
 // empty). The composition pipeline must carry [] end to end without special-casing, so a site with
 // no loose defenders raises none and does not fault; its emplacements are crewed separately. ---
