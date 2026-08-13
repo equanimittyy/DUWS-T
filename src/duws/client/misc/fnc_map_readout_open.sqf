@@ -14,11 +14,6 @@ private _got = ["MAPREADOUT", {
 }] call fnc_mapclick_claim;
 if (!_got) exitWith {};
 
-// Asked for once here rather than per click: the readout is a snapshot taken when the map opens,
-// and the alternative -- recording strength on a timer -- would run for every zone for the whole
-// campaign to serve a screen nobody has open.
-[] remoteExec ["fnc_zone_strength_refresh", 2];
-
 DUWS_mapReadoutOpen = true;
 openMap true;
 [localize "STR_DUWS_T_civ_mapview_open"] call fnc_map_prompt;

@@ -57,25 +57,22 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 	private _held = (WARCOM_zones_controled_by_BLUFOR findIf {(_x distance2D _zPos) < 1}) >= 0;
 
 	// A zone that is streamed in reports what is alive right now; a stowed one reports what it will
-	// come back at, which is what its last refresh or teardown recorded. Both answer "how strong is
-	// this zone", so the readout never has to tell the player which side of the streaming boundary
-	// they are on.
-	private _peak = missionNamespace getVariable [format ["DUWS_zonePeak_%1", _key], 0];
-	private _base = missionNamespace getVariable [format ["DUWS_zoneBase_%1", _key], 0];
-	private _live = _peak > 0 && {_base > 0};
-	private _frac = if (_live) then {
-		([_key] call fnc_zone_garrison_count) / _base
+	// come back at, which the ledger projection gives live off the tokens still surviving. Both answer
+	// "how strong is this zone", so the readout never has to tell the player which side of the streaming
+	// boundary they are on.
+	private _live = [_key] call DUWS_fnc_garrisonHeld;
+	private _fullMen = [_key] call DUWS_fnc_garrisonFullMen;
+	private _frac = if (_live && {_fullMen > 0}) then {
+		([_key] call fnc_zone_garrison_count) / _fullMen
 	} else {
 		[_key] call fnc_zone_strength
 	};
 
 	// Twenty segments rather than ten, so a full garrison reads as a solid bar. A deployed zone is
-	// counted off live men and gets the whole resolution -- one segment per twentieth, so a couple
-	// of kills move it. A stowed one is quantised to the tenths its strength is stored in and then
-	// doubled, so its bar cannot disagree by a segment with the strength it is about to redeploy at;
-	// it moves two segments at a time by design. Rounded up on the same epsilon as
-	// fnc_zone_strength_set, and capped because a full-strength cycle can place a few men over the
-	// baseline it is measured against.
+	// counted off live men over the full potential and gets the whole resolution -- one segment per
+	// twentieth, so a couple of kills move it. A stowed one reports the ledger projection, doubled off
+	// tenths so it moves in visible steps rather than by single men. Rounded up on a float epsilon and
+	// capped, since a full cycle can place a few vehicle crew over the infantry-slot denominator.
 	private _seg = if (_live) then {
 		ceil ((_frac * 20) - 0.0001)
 	} else {
