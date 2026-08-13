@@ -601,6 +601,37 @@ blufor_B_X = "cls_blu_B";
 ["teamRoster: the side is prepended, so one row raises either army",
     (["patrol", "blufor"] call DUWS_fnc_teamRoster), ["cls_blu_A", "cls_blu_B"]] call fnc_assertEq;
 
+// --- DUWS_fnc_tokenMenCount / tokenListMen: owed reserve men, counted not built ---
+// The reserve accounting cannot build a roster to size the pool: the capture trigger polls the owed
+// count several times a second, and a build would resolve faction picks and roll a fresh random thin
+// -- a cost and a source of jitter on the very line the capture test reads. So the count mirrors
+// DUWS_fnc_teamRoster's arithmetic directly: leader kept, the rest thinned to ceil(strength*count).
+["tokenMenCount: a leaderless team is its role count",
+    (["patrol"] call DUWS_fnc_tokenMenCount), 2] call fnc_assertEq;
+["tokenMenCount: a led team counts its leader",
+    (["team"] call DUWS_fnc_tokenMenCount), 3] call fnc_assertEq;
+// The same nine-plus-leader the built roster reports at half strength (six), reached without building.
+["tokenMenCount: attrition thins the same way the roster does",
+    (["big", 0.5] call DUWS_fnc_tokenMenCount), 6] call fnc_assertEq;
+["tokenMenCount: full strength is the whole team",
+    (["big", 1] call DUWS_fnc_tokenMenCount), 10] call fnc_assertEq;
+// The posture prefix is the group's orders, not its size: stripped before the row is counted.
+["tokenMenCount: the posture prefix does not change the count",
+    (["garrison:team"] call DUWS_fnc_tokenMenCount), 3] call fnc_assertEq;
+// A vehicle or bare-class token owes no infantry men: the pool counts crews as zero, which is the
+// same measure the baseline's pool half uses, so the two stay consistent.
+["tokenMenCount: a vehicle token owes no infantry men",
+    (["car"] call DUWS_fnc_tokenMenCount), 0] call fnc_assertEq;
+["tokenMenCount: an unknown token owes nothing",
+    (["nosuchkind"] call DUWS_fnc_tokenMenCount), 0] call fnc_assertEq;
+// The pool's owed men are the sum over its tokens: patrol two, team three, car none.
+["tokenListMen: sums the tokens it is given",
+    ([["patrol", "team", "car"], 1] call DUWS_fnc_tokenListMen), 5] call fnc_assertEq;
+["tokenListMen: an empty pool owes nothing",
+    ([[], 1] call DUWS_fnc_tokenListMen), 0] call fnc_assertEq;
+["tokenListMen: strength thins every token in the sum",
+    ([["big", "big"], 0.5] call DUWS_fnc_tokenListMen), 12] call fnc_assertEq;
+
 // --- DUWS_fnc_scaleComposition: the enemy multiplier, applied to cards ---
 // A x3 zone fields three patrols rather than one patrol of six men, so a group's size stops being a
 // campaign setting and a squad's leader is not outnumbered by his own automatic riflemen.
@@ -621,11 +652,13 @@ private _written = ["patrol", "car"];
 ["scaleComposition: leaves the caller's composition alone",
     _written, ["patrol", "car"]] call fnc_assertEq;
 
-// The zone band reads the setting itself, so a tier row states one zone and the campaign says how
-// many of it. Restored afterwards: every later case here assumes an unscaled composition.
-enemyunitMultiplier = 2;
-["zoneSpawnList: the campaign's multiplier reaches the tier row",
-    ([1] call DUWS_fnc_zoneSpawnList), ["patrol", "patrol"]] call fnc_assertEq;
+// The multiplier is reserve depth now, not a live-force scale: the spawn list is the x1 tier row
+// whatever the campaign multiplier says, and the surplus copies seed a reserve pool instead of
+// standing on the ground. The pool and the peak are fnc_zone_spawn's, which raises men and so is out
+// of the unit suite's reach; here the contract is only that the live list stops scaling.
+enemyunitMultiplier = 3;
+["zoneSpawnList: the multiplier no longer scales the live composition",
+    ([1] call DUWS_fnc_zoneSpawnList), ["patrol"]] call fnc_assertEq;
 enemyunitMultiplier = 1;
 
 // --- fnc_selectNonEmpty: first non-empty candidate, and never nil ---
