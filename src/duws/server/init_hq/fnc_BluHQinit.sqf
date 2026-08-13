@@ -2,10 +2,11 @@
 // SQF names are case-insensitive.
 #include "..\..\shared\includes\action_style.hpp"
 
-// The officer is invulnerable until OPFOR come within this of him -- wider than the 200 m the
-// contact alert calls the base, so a marksman on a ridge stays a loss worth keeping, and drawn on
-// no map. It gates on enemy presence near him, never on where a shot came from: with anything
-// hostile inside the ring, a strike called in from kilometres away kills him the same as a rifle.
+// The officer is invulnerable (allowDamage false) until OPFOR come within this of him -- wider than
+// the 200 m the contact alert calls the base, so a marksman on a ridge stays a loss worth keeping,
+// and drawn on no map. Enemy presence in the ring, not the source of a shot, is what makes him
+// mortal; while mortal, a HandleDamage veto still drops identifiable friendly fire so it cannot end
+// the campaign.
 #define OFFICER_GUARD_RADIUS 500
 
 if (isNil "PosOfBLUHQ") exitWith {};
@@ -346,7 +347,7 @@ private _worldPos = [
 ];
 private _offGrp = [_worldPos, WEST, [blufor_OFFICER_X], [], [], [0.4,0.6]] call BIS_fnc_spawnGroup;
 private _officer = (units _offGrp) select 0;
-_officer allowDamage true;
+_officer allowDamage false;  // the proximity monitor below flips this true only while OPFOR hold the ring
 // Global: the local form freezes the officer on the server alone, so every client keeps
 // simulating a unit hard-placed at an absolute Z and renders it falling.
 _officer enableSimulationGlobal false;
@@ -373,25 +374,27 @@ _officer addEventHandler ["Killed", {
     // prevent, arriving by the other route.
     remoteExec ["", format ["hq_pose_%1", netId _unit]];
 }];
-// He is a campaign loss condition, so he cannot be one the team can end. WEST damage never lands
-// (_instigator names the player behind an explosive or vehicle, _source the thing that dealt it),
-// and nothing lands at all with no OPFOR inside OFFICER_GUARD_RADIUS -- which closes the captured
-// enemy vehicle and the unattributed explosion a source-side check alone walks straight past.
+// Loss condition: friendly fire must never end the campaign. The proximity gate below (allowDamage)
+// blocks all damage while OPFOR are outside OFFICER_GUARD_RADIUS, so this only fires once they breach
+// it -- there it drops any hit an identifiable WEST shooter dealt (_instigator the player behind an
+// explosive or vehicle, _source a direct hit). Unattributed blasts still land, as the ring intends.
 _officer addEventHandler ["HandleDamage", {
     params ["_unit", "", "_damage", "_source", "", "", "_instigator"];
     private _by = [_source, _instigator] select (!isNull _instigator);
     if (!isNull _by && {side _by == WEST}) exitWith { 0 };
-    if (([getPos _unit, OFFICER_GUARD_RADIUS] call fnc_opfor_count_at) == 0) exitWith { 0 };
     _damage
 }];
 hq_blu1 = _officer; publicVariable "hq_blu1";
 [_officer] spawn {
-    // Polled rather than hung off the Killed event handler above: the handler runs wherever the
-    // officer is local, and campaign_lost_ending is deliberately not broadcast, so a handler that
-    // ever fired on a client would leave the server without the ending it names. One second
-    // because the loss is the player's answer to a kill he just watched -- escalation publishes
-    // its loss inside the destroyed-building handler, with no wait of its own to match.
-    waitUntil {sleep 1; !alive hq_blu1};
+    // Polled, not hung off the Killed handler above: that runs wherever the officer is local and
+    // campaign_lost_ending is deliberately not broadcast, so a client-side firing would leave the
+    // server without the ending it names. The same poll gates his mortality via allowDamage -- the
+    // reliable primitive, stopping bullets, blasts and setDamage alike while the ring is clear,
+    // which a per-hit HandleDamage veto could not. Killable only while OPFOR hold the ring.
+    while { alive hq_blu1 } do {
+        hq_blu1 allowDamage (([getPos hq_blu1, OFFICER_GUARD_RADIUS] call fnc_opfor_count_at) > 0);
+        sleep 1;
+    };
     campaign_lost = true;
     campaign_lost_body = "STR_DUWS_T_CAMPAIGN_LOST_OFFICER";
     // Names the outro card as well as the hint: both endings are worded, and the debriefing
