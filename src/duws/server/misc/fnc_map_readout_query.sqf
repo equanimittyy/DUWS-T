@@ -68,16 +68,11 @@ if ((_pick select 0) isEqualTo "ZONE") exitWith {
 		[_key] call fnc_zone_strength
 	};
 
-	// Twenty segments rather than ten, so a full garrison reads as a solid bar. A deployed zone is
-	// counted off live men over the full potential and gets the whole resolution -- one segment per
-	// twentieth, so a couple of kills move it. A stowed one reports the ledger projection, doubled off
-	// tenths so it moves in visible steps rather than by single men. Rounded up on a float epsilon and
-	// capped, since a full cycle can place a few vehicle crew over the infantry-slot denominator.
-	private _seg = if (_live) then {
-		ceil ((_frac * 20) - 0.0001)
-	} else {
-		2 * (ceil ((_frac * 10) - 0.0001))
-	};
+	// Twenty segments, one per five per cent of the garrison's full potential, floored to the nearest --
+	// a real fraction now, so a bar shows only once its five per cent is actually held and a full garrison
+	// reads solid. A deployed zone counts live men over the full potential; a stowed one reads the ledger
+	// projection. Capped, since a full cycle can place a few vehicle crew over the infantry-slot denominator.
+	private _seg = floor (_frac * 20);
 	_seg = (_seg max 0) min 20;
 
 	// Rolled when the zone was generated and fixed for the campaign, so this is what the ground is
@@ -126,10 +121,9 @@ private _tier = [_hit] call fnc_town_garrison_tierAt;
 // none: a player who had just fought one out would read it as having failed to.
 private _hold = [_hit] call fnc_town_garrison_holdKindAt;
 
-// The same twenty-segment scale a stowed zone reports on, and by the same arithmetic: town strength
-// is stored in tenths, so it is quantised to ten and doubled rather than measured off live men. A
-// town has no equivalent of a deployed zone's live count -- the roster lives inside the garrison
-// thread and is never published -- so this is the one figure there is, standing garrison or not.
-private _seg = 2 * (ceil ((([_hit] call fnc_town_garrison_strengthAt) * 10) - 0.0001));
+// The same twenty-segment five-per-cent scale a zone reports on, floored. A town has no equivalent of a
+// deployed zone's live count -- the roster lives inside the garrison thread and is never published -- so
+// this is the ledger projection, standing garrison or not.
+private _seg = floor (([_hit] call fnc_town_garrison_strengthAt) * 20);
 _seg = (_seg max 0) min 20;
 ["TOWN", [_name, _pop, _hasRep, _rep, _income, _side, _ap, _tier, _hold, _seg]] remoteExec ["fnc_map_readout_draw", _caller];
