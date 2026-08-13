@@ -1207,3 +1207,23 @@ clean inside every `exitWith` that can fire after creation, or funnel all paths 
 This is the marker analogue of the group-slot leak above: a script-owned resource the engine will
 not reclaim. Wrecks and corpses differ — the engine's GC does reap those — so an early-out that also
 deletes the downed aircraft is belt-and-braces for the wreck but load-bearing for the markers.
+
+## AI cargo bails a vehicle on contact by default; `setUnloadInCombat [false, false]` holds them
+
+**AI riding as cargo disembarks on its own the moment the vehicle enters combat — takes fire, spots
+an enemy, takes damage. It is engine behaviour, not a waypoint, so nothing in the SQF shows it. A
+squad trucked toward an objective empties out into the open the instant the first round cracks past,
+hundreds of metres short.**
+
+`vehicle setUnloadInCombat [allowCargo, allowTurret]` is the switch; the default is `[true, true]`,
+which is the auto-bail. `[false, false]` suppresses it for cargo and turret both, so the group rides
+through contact to where the script means to unload them.
+
+**How to apply:** set it once after the men are aboard. It disables only the *automatic* dismount —
+the engine's own decision — so once suppressed, script owns every dismount and must provide one:
+nothing gets them out otherwise. A truck-borne reinforcement holds cargo with it and dismounts from a
+monitor that fires on arrival, on the truck dying, or on a ride-time ceiling
+(`server/init_zones/fnc_garrison_reserve.sqf`). Pair it with `moveOut`, not an ordered get-out: a
+dead, dying or still-moving vehicle refuses the ordered dismount, and a locked-in squad in a burning
+truck is worse than the foot approach the lock was meant to improve — so the escape must be
+unconditional.

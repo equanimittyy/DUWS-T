@@ -192,18 +192,13 @@ switch (_posture) do {
         // reinforcement runs, it does not stroll -- and override the SAFE set above for this posture
         // alone. Works for a mounted group and an aircraft unchanged: each hunts at its own speed.
         //
-        // The SAD target is the nearest player's position at spawn, not a live track: spawned on the
-        // far edge with the players on the near side, one destination across the zone is enough to
-        // drive the group onto them, and it engages whatever it meets on the way in. The centre is the
-        // fallback when no player is up -- the pass only launches a wave with BLUFOR near, so this is
-        // the rare race where they left between the pass gating and the group standing.
-        private _lead = getPosATL _leader;
-        private _players = (call BIS_fnc_ListPlayers) select { alive _x };
+        // The SAD target is the zone centre, not the player: the wave's job is to retake the objective,
+        // so it drives onto the middle and engages whatever holds it -- the player while they are still
+        // on it, and the ground itself once they pull off. Aiming at the player's spawn-time position
+        // instead walked the reserve off the zone whenever the player withdrew, leaving the objective
+        // taken and the counterattack chasing empty ground. Spawned on the far side, a centre destination
+        // still crosses the group through the players on the way in.
         private _target = _centre;
-        if (_players isNotEqualTo []) then {
-            _players = [_players, [], { _lead distance2D (getPosATL _x) }, "ASCEND"] call BIS_fnc_sortBy;
-            _target = getPosATL (_players select 0);
-        };
         _group setBehaviour "AWARE";
         _group setCombatMode "YELLOW";
         _group setSpeedMode "FULL";

@@ -538,6 +538,30 @@ DUWS_zoneReservePollPeriod = 300;
 // Debounce for the event path, in seconds: a mass-casualty moment triggers one wave, not fifty.
 DUWS_zoneReserveEventDebounce = 20;
 
+// The largest infantry token, in men, that infiltrates a reinforcement wave on foot. Above it a token
+// rides in aboard a transport and debusses short of the objective; at or below it -- a two-man sniper
+// element or patrol -- a truck is both wasteful and wrong for the role, so it walks in from the
+// prefer-hidden far-side point. Read by fnc_garrison_reserve's spawn split.
+DUWS_reserveFootMax = 2;
+
+// Where a truck-borne wave debusses: this far beyond the zone radius, on the far side toward the
+// objective, so it dismounts short of the fight and closes on foot rather than driving a soft truck
+// onto the guns. Read by fnc_garrison_reserve.
+DUWS_reserveDebusOffset = 200;
+
+// How near the debus point the truck must reach, in metres, to count as arrived and unload.
+DUWS_reserveDebusRadius = 40;
+
+// The truck damage above which the wave bails early. Paired with setUnloadInCombat [false,false], which
+// suppresses the engine's own combat dismount so the squad holds under fire to the debus point -- but a
+// transport this far gone is about to brew up with everyone still inside, so this overrides the hold.
+DUWS_reserveDebusDamageBail = 0.6;
+
+// The hard ride ceiling, in seconds. A mobility kill is caught by canMove, but a truck that still moves
+// yet is wedged or circling an unreachable debus point would carry the squad forever; this dumps them
+// out to finish on foot. Generous, so a normal few-hundred-metre ride never trips it.
+DUWS_reserveMaxRide = 150;
+
 // The live hardpoint registry, one row per standing emplacement: [key, pos, type, side, zoneKey].
 // fnc_hardpoint_register appends and republishes; clearance deletes the row, so a cleared hardpoint
 // leaves the array rather than lingering flagged -- its presence here is its liveness, the way a

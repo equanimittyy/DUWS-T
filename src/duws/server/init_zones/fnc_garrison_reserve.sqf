@@ -67,11 +67,12 @@ DUWS_fnc_garrisonReservePos = {
         _antiDir = _antiDir + ((_delta max -50) min 50);
     };
 
-    // The floor clears every contesting player, not just the nearest: reach past the farthest one so a
-    // spread-out fireteam is still the full distance clear of where the wave starts.
-    private _spread = 0;
-    { _spread = _spread max (_center distance2D _x) } forEach _players;
-    private _baseDist = _radius + _spread + DUWS_zoneReserveSpawnDist;
+    // Start the ray just past the zone on the far side. The per-player reject in the candidate loop below
+    // is the real floor -- it keeps every man DUWS_zoneReserveSpawnDist clear of the players -- so the
+    // base distance only has to clear the objective, not reach past the fireteam. Adding the farthest
+    // player's range on top of that stood the wave a kilometre out the back of the zone, a blob too far
+    // to close on the objective before the fight was over.
+    private _baseDist = _radius + DUWS_zoneReserveSpawnDist;
 
     // A few candidate bearings off the anti-approach line; keep the one the fewest players can see.
     // Bounded, and cast at spawn time only -- a wave every few minutes, a handful of rays per candidate
@@ -141,14 +142,109 @@ DUWS_fnc_garrisonReserveOnKill = {
     [_key] spawn DUWS_fnc_garrisonReserveRefillOne;
 };
 
-// Raises one pool token as a reinforcement: placed on the far side, ordered to hunt whatever posture it
-// carried in the pool. Flagged as garrison like the initial band, so the search/loot system and the
-// roster-scoped teardown treat a reinforcement as the site's own. Whole token: a reserve arrives at full
-// strength, since attrition is the ledger of lost tokens, not a thin.
+// Rides a truck-borne infantry token to the objective: the squad stands up on the far side, crews an
+// empty truck with one of its own men, and is driven to a debus point short of the zone, held aboard
+// through contact, then dropped in cover to close on foot. Returns the infantry group -- the thing the
+// caller rosters and killed-watches -- while a spawned monitor owns the drive, the debus and the
+// disposal of the truck. The truck is an empty delivery asset, never flagged garrison and never on the
+// roster: the driver is one of the squad's own men who gets out to fight, and the empty lorry is left
+// for the map cleanup sweep to reap. Falls back to a plain foot spawn when the side fields no transport
+// or its truck seats no one, so a faction without a troop lorry still gets its reinforcement.
+DUWS_fnc_garrisonReserveTruckIn = {
+    params ["_key", "_center", "_radius", "_tok", "_spawnPos"];
+
+    private _tclass = ["truck", "OPF"] call DUWS_fnc_tokenClass;
+    if (_tclass == "") then { _tclass = ["transport", "OPF"] call DUWS_fnc_tokenClass };
+    if (_tclass == "") exitWith {
+        [_tok, _center, _radius, "hunt", _spawnPos] call DUWS_fnc_zoneSpawnOne
+    };
+
+    // The squad raises with no orders ("none"): it rides, then takes the hunt order at the debus.
+    // zoneSpawnOne also stamps the source token on the group, which the caller's killed-watch reads back.
+    private _grp = [_tok, _center, _radius, "none", _spawnPos] call DUWS_fnc_zoneSpawnOne;
+    if (isNull _grp) exitWith { grpNull };
+
+    // An empty truck the squad crews itself: one man drives, the rest ride, and all of them dismount to
+    // fight -- no throwaway driver to raise, count against the group cap, or delete out from a live scene.
+    private _truck = createVehicle [_tclass, _spawnPos, [], 0, "NONE"];
+    _truck setDir (_spawnPos getDir _center);
+    private _crew = units _grp;
+    (_crew select 0) moveInDriver _truck;
+    { _x moveInCargo _truck } forEach (_crew select [1, (count _crew) - 1]);
+    // A "truck" the faction resolves to something with no seats would strand the squad: if nobody got
+    // aboard, scrap the lorry and walk them in instead.
+    if (({ vehicle _x == _truck } count _crew) == 0) exitWith {
+        // Empty lorry left for the cleanup sweep, like every debussed truck below.
+        [_grp, "hunt", _center, _radius] call fnc_apply_posture;
+        _grp
+    };
+
+    // Hold everyone aboard through contact -- the whole point of trucking them in. The monitor below is
+    // then the only thing that dismounts them, on arrival or on the truck dying, never the engine.
+    _truck setUnloadInCombat [false, false];
+
+    private _debusRaw = _center getPos [_radius + DUWS_reserveDebusOffset, _center getDir _spawnPos];
+    private _debusPos = [_debusRaw, 0, 80, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
+    if (_debusPos isEqualTo []) then { _debusPos = _debusRaw };
+
+    // CARELESS so the man at the wheel runs the route instead of stopping to fight -- the same trick the
+    // support transports use to drive/fly through fire (fnc_paradrop, fnc_request_hcCAS). The waypoint is
+    // the squad's own, since its own driver is at the wheel; the debus hunt order overrides CARELESS.
+    _grp setBehaviour "CARELESS";
+    _grp setSpeedMode "FULL";
+    private _wp = _grp addWaypoint [_debusPos, 0];
+    _wp setWaypointType "MOVE";
+
+    [_key, _truck, _grp, _center, _radius, _debusPos] spawn {
+        params ["_key", "_truck", "_grp", "_center", "_radius", "_debusPos"];
+        private _rideStart = diag_tickTime;
+        waitUntil {
+            uiSleep 1;
+            !alive _truck
+            || {!alive (driver _truck)}    // driver down -- get out and fight, do not sit out the timeout
+            || {!canMove _truck}
+            || {damage _truck > DUWS_reserveDebusDamageBail}
+            || {(_truck distance2D _debusPos) < DUWS_reserveDebusRadius}
+            || {diag_tickTime - _rideStart > DUWS_reserveMaxRide}
+        };
+        // Drop the ride waypoint so it does not fight the debus orders the hunt posture adds below.
+        for "_i" from ((count (waypoints _grp)) - 1) to 0 step -1 do { deleteWaypoint [_grp, _i] };
+        // A capture or stow during the ride takes the objective out from under the wave: scrap it rather
+        // than debus men onto ground that is no longer OPFOR -- the same call the refill loop makes when
+        // a site flips mid-spawn. The men are already on the roster, so this matches its delete path.
+        if !([_key] call DUWS_fnc_garrisonHeld) exitWith {
+            { deleteVehicle _x } forEach units _grp;
+        };
+        // moveOut, not a get-out order: the truck may be dead, dying or still rolling on the timeout
+        // path, and an ordered dismount only happens from a stopped, live vehicle. A hard eject is the
+        // one exit that fires in every one of those states. Guarded on alive, since the men may have
+        // brewed up with the truck -- their loss is already recorded by the caller's killed-watch.
+        { if (alive _x) then { unassignVehicle _x; moveOut _x } } forEach units _grp;
+        if (({ alive _x } count units _grp) > 0) then {
+            [_grp, "hunt", _center, _radius] call fnc_apply_posture;
+        };
+        // The empty truck is left where it stopped: the map cleanup sweep (fnc_repetitive_cleanup) reaps
+        // any not-in-use vehicle on its own clock and spares it while a player is near, so an explicit
+        // delete would only rob the scene of an abandoned transport and risk a poof in someone's view.
+    };
+
+    _grp
+};
+
+// Raises one pool token as a reinforcement. The delivery splits on what the token is: a vehicle drives
+// itself in, an infantry token above DUWS_reserveFootMax rides a truck to the objective's edge and
+// debusses, and a two-man element infiltrates on foot from the prefer-hidden far-side point -- a truck
+// for two men reads wrong, most of all for a sniper. Flagged as garrison like the initial band, so the
+// search/loot system and the roster-scoped teardown treat a reinforcement as the site's own. Whole
+// token: a reserve arrives at full strength, since attrition is the ledger of lost tokens, not a thin.
 DUWS_fnc_garrisonReserveSpawnOne = {
     params ["_key", "_center", "_radius", "_tok"];
     private _spawnPos = [_center, _radius] call DUWS_fnc_garrisonReservePos;
-    private _grp = [_tok, _center, _radius, "hunt", _spawnPos] call DUWS_fnc_zoneSpawnOne;
+    private _grp = if (([_tok] call DUWS_fnc_tokenMenCount) > DUWS_reserveFootMax) then {
+        [_key, _center, _radius, _tok, _spawnPos] call DUWS_fnc_garrisonReserveTruckIn
+    } else {
+        [_tok, _center, _radius, "hunt", _spawnPos] call DUWS_fnc_zoneSpawnOne
+    };
     if (!isNull _grp) then { [_grp, "garrison"] call fnc_search_flag_group };
     _grp
 };
