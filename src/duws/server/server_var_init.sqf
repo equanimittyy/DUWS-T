@@ -508,6 +508,36 @@ DUWS_postureBands = createHashMapFromArray [
 // objective before the players who tripped it arrive. Read by fnc_createZone and fnc_zone_stream_init.
 DUWS_streamArrivalMargin = 400;
 
+// Zone reserve / reinforcement tuning. The enemy multiplier is reserve depth: a zone always fields at
+// most its x1 tier composition on the ground, and the surplus (mult-1) copies wait as a pool that
+// refills the garrison to that x1 group count as casualties are taken. Server-side only, so not
+// broadcast (the DUWS_streamArrivalMargin pattern). Read by fnc_zone_reserve and fnc_zone_spawn_sizes;
+// the model is docs/info/zone_reserve_reinforcement_plan.md.
+//
+// The global OPFOR-side group throttle. When the live east group count reaches this, zone garrison
+// spawns and refills pause and their tokens stay pooled. Below the engine's 144-groups-per-side hard
+// cap (past which createGroup returns grpNull silently) with slack for transient spikes: the co-op
+// backstop for several players in several zones plus hardpoints summing past the wall, which the
+// per-zone ceilings alone would not catch.
+DUWS_zoneGroupCeiling = 130;
+
+// The event trigger fraction. A zone whose live groups fall below this fraction of its x1 ceiling
+// pulls an immediate refill wave rather than waiting for the poll, so reinforcement reads as waves
+// rather than one-in-one-out.
+DUWS_zoneReinforceFrac = 0.5;
+
+// The floor distance a reinforcement spawns from the nearest player, in metres. Flat, not
+// zone-relative, so it reads the same at a 50 m base and a 1300 m island -- a radius-relative distance
+// would drop reserves a kilometre out of the island and on top of the player in the base.
+DUWS_zoneReserveSpawnDist = 400;
+
+// The heartbeat period of the refill loop, in seconds. Tops zones back up during a steady grind; the
+// event path above covers deep dips between beats.
+DUWS_zoneReservePollPeriod = 300;
+
+// Debounce for the event path, in seconds: a mass-casualty moment triggers one wave, not fifty.
+DUWS_zoneReserveEventDebounce = 20;
+
 // The live hardpoint registry, one row per standing emplacement: [key, pos, type, side, zoneKey].
 // fnc_hardpoint_register appends and republishes; clearance deletes the row, so a cleared hardpoint
 // leaves the array rather than lingering flagged -- its presence here is its liveness, the way a

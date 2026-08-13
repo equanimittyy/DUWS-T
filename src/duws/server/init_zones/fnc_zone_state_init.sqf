@@ -114,7 +114,10 @@ fnc_zone_strength_record = {
 	// No baseline means no cycle of this zone has ever finished placing, so there is nothing to
 	// measure against and what is standing describes a garrison that was still arriving.
 	if (_base <= 0) exitWith {};
-	private _left = [_zoneKey] call fnc_zone_garrison_count;
+	// The pool counts as still-standing: a zone that packs up with reserves un-arrived preserves them
+	// as strength rather than recording them as casualties nobody inflicted. Baseline is the full
+	// intended force (multiplier x the x1 men), so alive-plus-owed over it is the true fraction left.
+	private _left = ([_zoneKey] call fnc_zone_garrison_count) + ([_zoneKey] call DUWS_fnc_zoneReserveMen);
 	private _s = [_zoneKey, _left, _base] call DUWS_fnc_garrisonStrengthRecord;
 	["INFO", "ZONES", format ["%1 packed up holding %2 of %3; redeploys at %4 strength",
 		_zoneKey, _left, _base, _s]] call fnc_log;
@@ -137,7 +140,9 @@ fnc_zone_strength_refresh = {
 		// No peak means stowed or still arriving. Stowed already reads what it last recorded, and a
 		// garrison mid-placement would be recorded as casualties nobody inflicted.
 		if (!isNil {missionNamespace getVariable (format ["DUWS_zonePeak_%1", _key])} && {_base > 0}) then {
-			private _left = [_key] call fnc_zone_garrison_count;
+			// Same as the teardown record: alive plus the men the pool still owes, over the full
+			// intended force, so a mauled zone read off the map counts its reserves as strength.
+			private _left = ([_key] call fnc_zone_garrison_count) + ([_key] call DUWS_fnc_zoneReserveMen);
 			[_key, (_left / _base) min ([_key] call fnc_zone_strength)] call fnc_zone_strength_set;
 		};
 	} forEach zone_meta_array;
@@ -190,6 +195,91 @@ fnc_zone_thin = {
 	private _keep = (ceil (_frac * count _out)) max 1;
 	while {count _out > _keep} do { _out deleteAt (floor random count _out) };
 	_out
+};
+
+// The enemy multiplier is reserve depth, not a live-force multiplier: a zone always stands up its x1
+// tier garrison and holds the surplus (mult-1) copies as a pool that refills the garrison to its x1
+// group count as casualties are taken. These are the accounting the capture test, the attrition record
+// and the refill pass all read; the pass, the placement and the hunt orders are fnc_zone_reserve's.
+// The model is docs/info/zone_reserve_reinforcement_plan.md.
+
+// The pool is per-awake-session state: seeded by fnc_zone_spawn, spent by the refill pass, cleared on
+// stow and reseeded on the next raise. An ordered token list, popped head-first; empty at multiplier 1
+// where the whole model is inert and every measure below collapses to the garrison alone.
+DUWS_fnc_zoneReserve = {
+	params ["_key"];
+	missionNamespace getVariable [format ["DUWS_zoneReserve_%1", _key], []]
+};
+
+DUWS_fnc_zoneReserveSet = {
+	params ["_key", "_pool"];
+	missionNamespace setVariable [format ["DUWS_zoneReserve_%1", _key], _pool];
+};
+
+// Everything the awake session put down that the next raise rebuilds from scratch: the pool, the group
+// ceiling the refill tops up to, and the event debounce stamp. Baseline and strength are left alone --
+// those outlive a stow, which is how attrition accumulates across visits.
+DUWS_fnc_zoneReserveClear = {
+	params ["_key"];
+	missionNamespace setVariable [format ["DUWS_zoneReserve_%1", _key], []];
+	missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _key], nil];
+	missionNamespace setVariable [format ["DUWS_zoneReserveEventAt_%1", _key], nil];
+};
+
+// How many men a composition token places, counted rather than built. Mirrors DUWS_fnc_teamRoster's
+// own arithmetic -- leader kept, the rest thinned to ceil(strength * count) min 1 -- but resolves no
+// faction picks and rolls no random thin, because the capture trigger polls the owed count several
+// times a second and a build would both cost a roster raise and jitter the line it feeds from one poll
+// to the next. A vehicle or bare-class token owes no infantry men and answers 0.
+DUWS_fnc_tokenMenCount = {
+	params ["_token", ["_strength", 1]];
+	private _row = [_token] call DUWS_fnc_teamRow;
+	if (_row isEqualTo []) exitWith { 0 };
+	_row params ["", "_roles", "_leader"];
+	private _base = count _roles;
+	private _men = if (_strength < 1) then { (ceil (_strength * _base)) max 1 } else { _base };
+	_men + ([0, 1] select (_leader != ""))
+};
+
+DUWS_fnc_tokenListMen = {
+	params ["_tokens", ["_strength", 1]];
+	private _n = 0;
+	{ _n = _n + ([_x, _strength] call DUWS_fnc_tokenMenCount) } forEach _tokens;
+	_n
+};
+
+// The men the pool still owes, at the zone's current strength. Counted at current strength, not the
+// strength when a token was pooled, so a queued reserve never backfills men the zone has already lost:
+// as the player wears the garrison down further while reserves wait, this shrinks with it. Feeds the
+// "remaining" half of the capture and attrition contract -- a reserve is deferred force, not lost.
+DUWS_fnc_zoneReserveMen = {
+	params ["_key"];
+	[[_key] call DUWS_fnc_zoneReserve, [_key] call fnc_zone_strength] call DUWS_fnc_tokenListMen
+};
+
+// The zone's live *composition* group count: distinct groups, with a man still standing, that the
+// streaming garrison raised -- the initial band and its reserves. Compared to the x1 ceiling to decide
+// refills, so the two must count the same population, and the ceiling is composition tokens only. A
+// prefab's static-weapon crews sit on the same roster but are emplacement occupants, not composition
+// groups: they carry no reserve key (DUWS_fnc_zoneReserveWatch tags only what it raises), so they are
+// excluded here, and a zone with manned guns does not read as already at its ceiling.
+DUWS_fnc_zoneGroupCount = {
+	params ["_key"];
+	private _grps = [];
+	{
+		if (alive _x && {(_x getVariable ["DUWS_reserveZoneKey", ""]) == _key}) then {
+			_grps pushBackUnique (group _x);
+		};
+	} forEach ([_key] call fnc_zone_roster);
+	count _grps
+};
+
+// Every OPFOR group anywhere -- the global throttle input. Against the 144-per-side cap, not a zone's
+// own count: hardpoints and town garrisons raise their own groups on their own rules and are not
+// pooled or per-zone bounded, but they do count here, so a dense field pushes zones to back off and
+// leave the engine headroom.
+DUWS_fnc_opforGroupCount = {
+	count (allGroups select { side _x == east })
 };
 
 // Server-authoritative reorder of the OPFOR assault queue. The map-click picker runs
