@@ -333,8 +333,7 @@ uniformly and cheaply, but it does not remember *what* the player destroyed: kil
 zone comes back a bit thinner everywhere rather than specifically a tank down. The reserve model rides
 this same fraction, so a reserve wave is thinned the same undifferentiated way.
 
-The intended replacement — a large enough behaviour change to get its own plan — is to track the actual
-tokens a zone has lost and derive strength from that: destroy one tank, and that tank is gone from the
-zone's future raises and from its reserve pool, not amortised across every squad. This turns strength
-from a scalar into a ledger of surviving composition, and the reserve pool's contents follow from it
-directly. Out of scope here; to be specified separately before any code moves.
+The intended replacement turns strength from a scalar into a ledger of surviving composition — destroy
+one tank, and that tank is gone from the zone's future raises and from its reserve pool. It is a large
+enough behaviour change to get its own plan, and its mechanics are specified in
+[`garrison_strength_ledger_plan.md`](garrison_strength_ledger_plan.md). Out of scope for this model.
