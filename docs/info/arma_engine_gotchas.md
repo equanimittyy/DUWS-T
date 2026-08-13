@@ -1227,3 +1227,18 @@ monitor that fires on arrival, on the truck dying, or on a ride-time ceiling
 dead, dying or still-moving vehicle refuses the ordered dismount, and a locked-in squad in a burning
 truck is worse than the foot approach the lock was meant to improve — so the escape must be
 unconditional.
+
+## `removeItem` cannot remove a worn uniform, vest, backpack, headgear or goggles
+
+**`removeItem "class"` only reaches loose items — magazines, attachments, things *inside* a
+uniform/vest/pack, and assigned kit (map, compass, radio, GPS, watch, NVG, binocular). The worn
+container/head/eyewear slots are addressed by their own no-argument commands, so `removeItem` on a
+worn uniform is a silent no-op: it returns without error and the uniform stays on. Code that strips
+gear generically through `removeItem` therefore leaves clothing behind while looking like it worked.**
+
+Dispatch the five worn slots to their own commands: `removeUniform`, `removeVest`, `removeBackpack`,
+`removeHeadgear`, `removeGoggles` — each takes no class (a unit wears one), so guard on the worn class
+(`uniform player == _cls`, etc.) to strip only the intended one. `removeUniform`/`removeVest`/
+`removeBackpack` also discard the container's contents; there is no keep-contents variant, so re-add
+them afterward if they must survive. `DUWS_fnc_strip_n` (`initPlayerLocal.sqf`) does this dispatch,
+which is why the arsenal and quick-kit overdraw strip can claw back a whole kit, not just its guns.

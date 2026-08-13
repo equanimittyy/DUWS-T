@@ -228,8 +228,18 @@ DUWS_fnc_arsenal_restricted = {
 // Remove N instances of a class from the player, category-appropriate: weapons via
 // removeWeaponGlobal, magazines via removeMagazine, everything else via removeItem. Each call
 // removes one instance, so the loop strips exactly the overdraw and leaves the granted count.
+// Worn uniform/vest/backpack/headgear/goggles are slots, not container contents, so removeItem
+// never reaches them -- dispatch each to its own command, guarded on the worn class so only the
+// overdrawn one is pulled. A worn slot holds one instance, so it short-circuits the count loop.
+// removeUniform/Vest/Backpack also drop the container's contents, which is acceptable here: an
+// overdraw means the pool never had this piece, so forfeiting the kit built on it is the point.
 DUWS_fnc_strip_n = {
     params ["_cls", "_n"];
+    if (uniform player == _cls) exitWith { removeUniform player };
+    if (vest player == _cls) exitWith { removeVest player };
+    if (backpack player == _cls) exitWith { removeBackpack player };
+    if (headgear player == _cls) exitWith { removeHeadgear player };
+    if (goggles player == _cls) exitWith { removeGoggles player };
     private _isWeapon = isClass (configFile >> "CfgWeapons" >> _cls) && {(([_cls] call BIS_fnc_itemType) select 0) isEqualTo "Weapon"};
     private _isMag = isClass (configFile >> "CfgMagazines" >> _cls);
     for "_i" from 1 to _n do {
