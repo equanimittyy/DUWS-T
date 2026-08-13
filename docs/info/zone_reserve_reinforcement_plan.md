@@ -1,257 +1,249 @@
 # Zone reserve / reinforcement model — design plan
 
-Status: proposal, not yet implemented. This doc is for review; its open-questions section
-holds the decisions still owed before code starts.
+Status: proposal, not yet implemented. This doc is for review; its decisions section holds the
+settled parameters.
 
 ## Problem
 
-A zone spawns its whole tier composition the moment a player streams it in. `enemyunitMultiplier`
-scales that composition wholesale (`DUWS_fnc_scaleComposition`), so a tier IV zone at 80 infantry
-becomes 160 at x2 and 240 at x3 — and two tier IV zones hot at once double that again. Streaming
-caps AI at the *zone* level (a zone is wholly awake or wholly stowed by proximity), but inside an
-awake zone every unit simulates. Nothing bounds the total live count across simultaneously-active
-zones, and AI count is the dominant server/client CPU cost.
+A zone spawns its whole tier composition the moment a player streams it in, and
+`enemyunitMultiplier` scales that composition wholesale (`DUWS_fnc_scaleComposition`) — it duplicates
+every token. A composition token *is* a group (a team is a group, a vehicle is a group), so the
+multiplier is a group multiplier. Tier IV is 27 groups at x1, 54 at x2, 81 at x3, and two tier IV
+zones hot at once at x3 want 162 groups from the garrisons alone. The engine caps each side at **144
+groups**; past it `createGroup` and `BIS_fnc_spawnGroup` return `grpNull` silently and no AI spawns
+(`docs/info/arma_engine_gotchas.md`). So the multiplier both drives the group wall and, as a blunt
+"everyone on the field at once" swarm, tanks framerate on the very zones a player is fighting.
 
 ## Goal
 
-Bound the number of simultaneously-simulated *zone-garrison* infantry with a global cap, without
-making any zone worth less or any fight easier. The multiplier becomes **depth** (reinforcement
-waves) rather than **simultaneity** (everyone on the field at once). A zone the player would have
-faced at 80 men still costs 80 men to take; they just arrive in waves as the global count allows.
+Turn the multiplier into **reserve depth**, and hard-bound the live group count. A zone always fields
+at most its x1 tier composition; the multiplier sets how much *more* force waits behind that as a
+reserve pool, delivered in waves that refill the garrison to its x1 ceiling as casualties are taken.
+A x3 zone is still worth 3x the men to take — you just never see more than the x1 count of groups on
+the ground at once, so the 144 wall is structurally out of reach and the fight is a paced grind
+rather than a lag spike.
 
-## Core model — the invariant
+## Core model
 
-**A reserve is deferred garrison, not lost garrison.** When the cap would be exceeded, an infantry
-group is not spawned; its token is pushed to the zone's reserve queue. That queued token counts as
-*still-standing garrison* for every measure of the zone's strength — the capture test, the attrition
-record, the map readout — until it either spawns-and-dies or the zone stows. The cap changes only
-*when* a unit physically simulates, never *how many* the zone is worth or *how hard* it is to take.
+- **Multiplier = reserve depth.** `mult` (1/2/3) sets total intended force = `mult x garrison`. The
+  initial garrison is always the x1 tier composition; the surplus `(mult - 1) x` is a reserve pool
+  from the start. At x1 the pool is empty and the whole system is inert — behaviour is exactly
+  today's.
+- **Per-zone live *group* ceiling = the tier's x1 token count.** Each token is one group, so the
+  ceiling is `count (DUWS_zoneSpawnTiers select (tier - 1))` — no new table.
+- **The pool covers the whole composition**, infantry and vehicles alike: `(mult - 1)` ordered copies
+  of the x1 tier list. A destroyed tank can be backfilled by a reserve tank, a wiped squad by a
+  reserve squad.
+- **Refill to the ceiling, never above.** When a zone's live group count falls below its x1 count,
+  reserve squads spawn to restore it. Live groups per zone are therefore hard-bounded at the x1 count
+  forever; the multiplier only deepens the pool behind it.
+- **Reserves ride the hunt posture** (below), spawned on the far side of the zone.
 
-Concretely, everywhere a zone's remaining garrison is measured, the quantity becomes:
+Worked, tier IV x3: 27 live (18 infantry + 9 vehicle groups), reserve pool = 2 x 27 = 54 more.
+Player grinds 81 groups' worth of men total, but never faces more than 27 groups at once. Two hot IV
+zones cap at 54 live + hardpoints, comfortably under 144.
+
+| tier | x1 group ceiling | infantry groups | vehicle groups |
+|---|---|---|---|
+| I | 7 | 6 | 1 |
+| II | 14 | 11 | 3 |
+| III | 20 | 15 | 5 |
+| IV | 27 | 18 | 9 |
+
+## The invariant
+
+**A reserve is deferred force, not lost force.** The pool counts as still-standing garrison for every
+measure of the zone's strength until it either spawns-and-dies or the zone stows:
 
 ```
-remaining = alive-roster-men + owed-reserve-men
-peak      = men-placed-at-raise + owed-reserve-men-at-raise   (= full intended garrison)
+peak      = mult x (x1 tier men)          // full intended garrison over the whole grind
+remaining = alive-roster-men + pool-men   // what the capture/attrition contract measures
 ```
 
-When the cap is never hit, the queue is empty, `owed = 0`, and every formula collapses to today's
-behaviour exactly. The change is inert until multiple zones are hot at once.
+At `mult = 1` the pool is empty, `remaining = alive`, and every formula collapses to today's exactly.
+The reserve delivery never changes `remaining` — a refill moves men from pool to alive by the same
+count; only kills move the number.
 
-## Scope — what the cap counts, what it ignores
+## Scope — what the ceilings govern
 
-The cap is tied specifically to **zone rosters** (`fnc_zone_roster` = `fnc_site_roster`).
+| Population | In a zone's x1 group ceiling? | Reserve-pooled by the multiplier? | In the global tally? |
+|---|---|---|---|
+| Zone garrison (infantry + vehicles) | yes | yes | yes |
+| Hardpoint garrisons | no (separate sites/rosters) | no | yes — counted, not throttled |
+| Town / civilian garrisons | no | no | yes — counted, not throttled |
+| BLUFOR | no | no | no |
 
-| Population | Counts toward tally? | Spawn gated by cap? |
-|---|---|---|
-| Zone garrison infantry | yes — one per on-foot man | **yes** (deferred to reserve) |
-| Zone garrison vehicles | yes — **one per vehicle**, crew not counted | no — vehicles always spawn |
-| Hardpoint garrisons | no (separate sites/rosters) | no |
-| Town / civilian garrisons | no (separate rosters) | no |
-| BLUFOR | no | n/a |
+Hardpoints and towns spawn their own groups on their own rules; the multiplier does not deepen them
+and the per-zone ceiling does not bound them. They do count toward the **global** group tally, so a
+dense hardpoint field pushes zones to back off and leave engine headroom — which is the global
+ceiling's whole job.
 
-Hardpoints are exempt by construction: they are their own streaming sites with their own rosters,
-so scoping the tally to zone rosters excludes them without a special case. Vehicles are exempt from
-the *gate* by explicit rule (a half-spawned armour push reads worse than a few extra infantry). A
-crewed vehicle counts as **one** AI entity in the tally, not its crew man-count — a manoeuvring
-vehicle is roughly one entity's worth of cost, and counting each occupant would price armour out of
-the cap for no performance reason.
+## The two ceilings
+
+Both server config settings (`server_var_init.sqf`), fixed:
+
+- **Per-zone live group ceiling** — derived, not stored: the x1 tier token count. Refill stops here.
+- `DUWS_zoneGroupCeiling` (default `130`) — the global OPFOR-side group throttle. When
+  `count (allGroups select {side _x == east})` reaches it, zone garrison spawns and refills pause and
+  their tokens stay in the pool. Leaves ~14 groups of slack below 144 for transient spikes. This is
+  the co-op backstop: several players in several zones, plus hardpoints, can sum past 144 even at x1,
+  and per-zone bounds alone would not catch it.
+- `DUWS_zoneReinforceFrac` (default `0.5`) — the event trigger. A zone whose live groups fall below
+  this fraction of its x1 ceiling pulls an immediate refill wave rather than waiting for the poll, so
+  reinforcement reads as waves, not one-in-one-out whack-a-mole.
+
+## Multiplier application
+
+`DUWS_fnc_zoneSpawnList` stops scaling the live composition. The initial garrison is the **x1** tier
+list (thinned by strength, filtered by what the side can field). A new step seeds the zone's reserve
+pool with `(mult - 1)` ordered copies of the same x1 list. `DUWS_fnc_scaleComposition` retires from
+the live path; the multiplier now sizes the pool, not the garrison. Vehicles in the pool still gate
+on earned AP at spawn (`DUWS_fnc_tokenClass`), so a reserve tank fields only once OPFOR has the rung.
 
 ## Data and helpers
 
-New globals (`server_var_init.sqf`, both server config settings, fixed — not scaled by player count):
-
-- `DUWS_zoneAICap` — the entity threshold, default `100`. Above it, further infantry groups defer.
-- `DUWS_zoneAIReinforceFrac` — default `0.6`. When the live tally falls below this fraction of the
-  cap, the event-driven reinforcement pass fires (see the poll section).
-
-New functions (home: `fnc_zone_state_init.sqf`, which already owns roster/strength/peak/tier and is
-load-ordered before any zone spawns — see the load-order note in that file):
-
-- `DUWS_fnc_zoneAILive` — the live **entity** tally: across every zone in `zone_meta_array`, count
-  alive on-foot men (`vehicle _x == _x`) plus alive vehicles, one each. Distinct from
-  `fnc_zone_garrison_count` (men), which the strength and capture model keep using — the tally
-  governs only spawn/defer, the men-count governs how beaten a zone is, and the two need not agree.
-- `DUWS_fnc_zoneReserveMen {key}` — the owed **men**: `Σ count (DUWS_fnc_teamRoster [token, "opfor",
-  strength])` over the queue. Exact rather than `roster × strength`, so the capture threshold stays
-  honest against the leader-kept, men-thinned roster (attrition drops men within a team, never the
-  team; a deferred squad is worth its thinned size, floor one for the leader).
-
 New per-zone state:
 
-- `DUWS_zoneReserve_<key>` — the deferred-token queue (array of composition tokens). Lives only while
-  the zone is awake; cleared on stow and rebuilt by the gate on re-raise.
+- `DUWS_zoneReserve_<key>` — the reserve pool: an ordered token list. Lives only while the zone is
+  awake; cleared on stow, rebuilt on re-raise. At `mult = 1` it is empty.
 
-## Spawn-time gate
+New functions (home: `fnc_zone_state_init.sqf`, which already owns roster/strength/peak/tier and is
+load-ordered before any zone spawns):
 
-`DUWS_fnc_raiseGarrison` (`fnc_zone_spawn_sizes.sqf:162`) is the per-token spawn loop. It gains
-cap-awareness: for each token, before spawning,
+- `DUWS_fnc_zoneGroupCount {key}` — the zone's live group count: distinct alive groups in its roster.
+  Compared against the x1 ceiling to decide refills.
+- `DUWS_fnc_opforGroupCount` — `count (allGroups select {side _x == east})`, the global throttle input.
+- `DUWS_fnc_zoneReserveMen {key}` — owed men: `Sigma count (DUWS_fnc_teamRoster [token, "opfor",
+  strength])` over the pool, exact against the leader-kept, men-thinned roster. Feeds `remaining`.
 
-- vehicle token → spawn always (never gated);
-- infantry token → if `DUWS_fnc_zoneAILive >= DUWS_zoneAICap`, **do not spawn**; append the token to
-  this zone's reserve queue and continue.
+## Refill — the reinforcement pass
 
-Because the tally already includes this zone's own men as they land, the running total is naturally
-correct across the staggered raise — no separate bookkeeping. `raiseGarrison` returns the groups it
-raised as today; the deferred tokens are read back from the queue by the caller.
-
-`fnc_zone_spawn` (`fnc_zone_spawn_sizes.sqf:278`) then sets the peak from the **intended** force:
-
-```
-_placed   = fnc_zone_garrison_count(key)          // what actually stood up (incl. vehicle crews)
-_owed     = DUWS_fnc_zoneReserveMen(key)          // what the cap deferred
-_intended = _placed + _owed
-```
-
-and publishes `DUWS_zoneBase_<key>` / `DUWS_zonePeak_<key>` from `_intended` rather than `_placed`.
-When nothing deferred, `_owed = 0` and this is byte-for-byte today's behaviour.
-
-## Capture and attrition reconciliation (the delicate part)
-
-These three read "remaining garrison" and all must count owed reserves, or the model breaks in one
-of two directions — a zone that spawned short reads as already-beaten (captured without a fight), or
-a zone records phantom casualties on stow (comes back permanently weaker).
-
-- `fnc_zone_capture_ready.sqf:36` — change the break test to
-  `(fnc_zone_garrison_count(key) + DUWS_fnc_zoneReserveMen(key)) > BREAK_FRACTION * peak`.
-  A zone with owed reserves cannot fall: the owed men hold `remaining` above the 0.2 line until the
-  reserves have actually spawned and been killed. The player must draw the waves out and beat them.
-- `fnc_zone_strength_record` (`fnc_zone_state_init.sqf:117`) — `_left` becomes
-  `garrison_count + reserveMen`, so a zone that stows with reserves still owed preserves them as
-  strength instead of recording them as casualties.
-- `fnc_zone_strength_refresh` (`fnc_zone_state_init.sqf:140`) — same `+ reserveMen` on the map-read
-  path.
-
-## The reinforcement poll (5-minute timer)
-
-The reinforcement pass is one function, `DUWS_fnc_zoneReservePass`, fired from two triggers:
+One function, `DUWS_fnc_zoneReservePass`, fired from two triggers:
 
 - **Primary — a 5-minute loop.** A single server-side `while {true}` launched once at server init
-  beside the other loops (pattern: `fnc_zonesundercontrol.sqf`, `fnc_repetitive_cleanup.sqf`),
-  `uiSleep 300`. The steady heartbeat that trickles waves in even during a slow grind.
-- **Event-driven — on a sharp drain.** When the live tally crosses below
-  `DUWS_zoneAIReinforceFrac × DUWS_zoneAICap` (0.6 × cap), fire the pass immediately, so a wave that
-  gets wiped pulls the next one in seconds rather than up to five minutes later. Implementation: a
-  debounced `killed` handler on zone-roster units re-checks the tally on each death and invokes the
-  pass once when it dips under the fraction (debounce so a mass-casualty moment fires one pass, not
-  fifty). A short watchdog loop is the simpler alternative if per-unit handlers prove noisy.
+  beside the other loops (pattern: `fnc_zonesundercontrol.sqf`), `uiSleep 300`. The heartbeat that
+  tops zones back up during a steady grind.
+- **Event-driven — on a deep dip.** A debounced `killed` handler on zone-roster units re-checks the
+  zone when a group dies; if live groups fall below `DUWS_zoneReinforceFrac` of the x1 ceiling, it
+  fires the pass at once (debounced so a mass-casualty moment triggers one wave, not fifty).
 
 Each pass, take the contested OPFOR zones — those in `WARCOM_zones_controled_by_OPFOR` with a
-published peak, a non-empty reserve queue, and BLUFOR near (`fnc_duws_bluforNear` over
-`radius + margin`) — and **sort them by player count present, most players first**, so the fight the
-most people are in gets resupplied before a lightly-contested one. Then for each, in that order:
+published peak, a non-empty pool, and BLUFOR near (`fnc_duws_bluforNear` over `radius + margin`) — and
+**sort by player count present, most first**, so the most-crowded fight resupplies before a lightly
+contested one. Then for each, in that order:
 
-- while the queue is non-empty **and** `DUWS_fnc_zoneAILive < DUWS_zoneAICap`: pop a token, spawn it
-  as a reinforcement squad at the zone's **current** strength, append its units to the zone roster.
-  `owed` shrinks and `alive` grows by the same men, so `remaining` is unchanged by the arrival
-  itself — only by kills.
+- while `DUWS_fnc_zoneGroupCount(key) < x1-ceiling` **and** the pool is non-empty **and**
+  `DUWS_fnc_opforGroupCount < DUWS_zoneGroupCeiling`: pop the next pool token, spawn it as a
+  reinforcement at the zone's **current** strength, append its units to the zone roster.
 
-Because the tally counts men (each on-foot man is one entity), the loop spends cap headroom
-per man, so a worn zone's thin teams pack in denser — the same headroom fields more small teams than
-few full ones, with no special logic. Reinforcements spawn at the zone's current strength, not the
-strength when the token was deferred: if the player wears the zone down further while reserves wait,
-`zoneReserveMen` shrinks with it and the arriving teams are thinner, so a queued reserve never
-backfills men the zone has already lost. Refunding that attrition is the one thing the strength model
-exists to prevent, and the reserve must not reopen it.
+A quiet zone (no BLUFOR near) is skipped; its pool waits until it is being fought. Reinforcements
+spawn at current strength, not the strength when pooled: if the player wears the zone down further
+while reserves wait, `zoneReserveMen` shrinks with it and arriving squads are thinner, so a queued
+reserve never backfills men the zone has already lost — refunding that attrition is the one thing the
+strength model exists to prevent.
 
-A quiet zone (no BLUFOR near) is skipped: its reserves wait until it is actually being fought.
+## Capture and attrition reconciliation
 
-## Reinforcement placement and posture
+Three reads of "remaining garrison" must all count the pool, or a zone that spawned short reads as
+already-beaten, or one records phantom casualties on stow:
 
-**Same squads.** A reinforcement is the exact token the cap deferred — same roster, same strength —
-so the zone fields precisely what it would have without the cap. Only the placement and the orders
-differ from a normal garrison raise.
+- `fnc_zone_capture_ready.sqf:36` — break test becomes
+  `(fnc_zone_garrison_count(key) + DUWS_fnc_zoneReserveMen(key)) > BREAK_FRACTION * peak`. A zone with
+  a pool cannot fall: the owed men hold `remaining` above the line until the reserves have spawned and
+  been killed. The player must draw the waves out and beat them.
+- `fnc_zone_strength_record` (`fnc_zone_state_init.sqf:117`) — `_left` becomes
+  `garrison_count + reserveMen`, so a zone that stows with a pool preserves it as strength.
+- `fnc_zone_strength_refresh` (`fnc_zone_state_init.sqf:140`) — same `+ reserveMen` on the map read.
 
-**Placement — far side, toward friendly ground, away from the player.** Compute a spawn bearing off
-the zone centre:
+`peak` is published from `mult x (x1 tier men)` in `fnc_zone_spawn`, so a x3 zone is measured against
+its full intended force whether or not the pool has arrived yet.
 
-- *away vector*: from the centroid of BLUFOR (players + WEST units within `radius + margin`) through
-  the zone centre and out the far side;
-- *toward vector*: from the zone centre toward the nearest *other* zone (`zone_meta_array` minus
-  self) — the direction reinforcements would plausibly come from;
-- blend (suggest weight 0.7 away, 0.3 toward), take the bearing, spawn at `centre getPos [radius*0.9,
-  bearing]`, then `BIS_fnc_findSafePos`. If no BLUFOR is found (edge), fall back to the toward vector
-  alone.
+## Placement and posture
 
-**Posture — a new `"hunt"` case.** Reinforcements do not patrol or garrison. A new posture in
-`fnc_apply_posture` gives them one order: a `SAD` (search-and-destroy) waypoint on the **nearest
-player's position**, `AWARE` behaviour, then a `CYCLE`. Spawned on the far edge with the player on
-the near/BLUFOR side, this drives them straight across the zone onto the player and lets them engage
-on contact. The waypoint takes the nearest player at spawn; `SAD` + `AWARE` means they sweep that
-area and fight whatever they meet, so a player who has moved on is still hunted rather than walked
-around. The token's own stored posture is ignored for reserves. Living in `fnc_apply_posture` keeps
-the order with the other postures rather than inline in the spawn path.
+**Placement — far side, toward friendly ground, away from the player.** Bearing off the zone centre:
+away from the BLUFOR centroid (players + WEST units within `radius + margin`), nudged toward the
+nearest other zone (weight ~0.7 away, 0.3 toward); spawn at `centre getPos [radius * 0.9, bearing]`
+then `BIS_fnc_findSafePos`. No BLUFOR found → the toward vector alone.
+
+**Posture — a new `"hunt"` case** in `fnc_apply_posture`: a `SAD` waypoint on the **nearest player's
+position**, `AWARE`, speed `FULL`, then a `CYCLE`. Speed is deliberate — a reinforcement runs, it
+does not stroll; the wave has to carry a sense of urgency, arriving as pressure rather than a slow
+trickle. Spawned on the far edge with the player on the near side, this drives reserves at a run
+across the zone onto the player. It applies to a mounted group too — a reserve vehicle hunts the same
+way. The pool token's own stored posture is ignored for reserves.
 
 ## Streaming interaction
 
-When a zone stows (`DUWS_fnc_zoneStow`, `fnc_zone_stream_init.sqf:281`), the order matters and follows
-the existing strength contract:
+When a zone stows (`DUWS_fnc_zoneStow`, `fnc_zone_stream_init.sqf:281`), order follows the strength
+contract:
 
-1. `fnc_zone_strength_record` (now counting owed) — preserves un-arrived reserves as strength;
+1. `fnc_zone_strength_record` (now counting the pool) — preserves un-arrived reserves as strength;
 2. clear `DUWS_zoneReserve_<key>`;
 3. collect the roster;
 4. `fnc_zone_garrison_dropped` (clears the peak).
 
-On re-raise, `fnc_zone_spawn` thins the full intended list by the recorded strength and the gate
-re-defers whatever is still over cap, rebuilding the queue. The queue is therefore per-awake-session
-state, never persisted, and always consistent with the zone's recorded strength.
+On re-raise, `fnc_zone_spawn` fields the x1 tier thinned by the recorded strength and reseeds the pool
+with `(mult - 1)` copies, so the pool is per-awake-session state, never persisted, always consistent
+with the zone's recorded strength.
 
 ## Failure modes and edge cases
 
-- **Global cap saturated by several hot zones.** Reserves for a zone spawn only as slots free. But a
-  player making progress kills men, which frees slots, which spawns the next wave on the following
-  tick — self-resolving while the player advances. A player who sits still gets no waves and takes no
-  ground; that stalemate is intended, not a bug.
-- **Cap below one squad.** The gate defers at `>= cap`; at tally 0 it still spawns one squad (a
-  slight overshoot), so no deadlock. A sane floor (`cap >= largest squad`) avoids the overshoot.
-- **owed-men vs the tally.** Two different measures on purpose. Owed men (`zoneReserveMen`) is the
-  exact thinned roster a deferred token will spawn, feeding the men-based capture/strength contract;
-  the tally (`zoneAILive`) is an entity count feeding the cap. A deferred infantry token thus removes
-  its whole roster from the tally at once but is owed at the man level — the gate and the strength
-  model stay each in their own unit, which is why the queue stores tokens, not counts.
-- **Reinforcements pathing through the player.** Possible when the "far side" still lies across the
-  player's axis; accepted — they are reinforcing a contested objective.
+- **Global ceiling saturated by many zones + hardpoints.** New spawns and refills pause; pools hold.
+  As the player kills, `opforGroupCount` falls and the next pass resumes. A player making progress
+  always frees room; a player sitting still gets no waves and takes no ground, which is intended.
+- **grpNull backstop.** Every group is `deleteGroupWhenEmpty true` so dead groups free their slot, and
+  a spawn that still hits the engine limit returns `grpNull` and is dropped rather than erroring — the
+  130 ceiling keeps the fight off that edge, the drop catches the rare overrun.
+- **Refill vs strength.** A refill moves men pool -> alive without changing `remaining`; only kills
+  reduce it. So refilling to the group ceiling never restores strength — the pool is spent, not
+  regenerated.
+- **Reinforcements pathing through the player.** Possible when the far side lies across the player's
+  axis; accepted — they are reinforcing a contested objective.
 
 ## Decisions
 
-Settled parameters, reflected in the sections above:
-
-- **Cap** is a fixed server config setting (`DUWS_zoneAICap`, 100), not scaled by player count.
-- **Two triggers**: the 5-minute heartbeat plus an event-driven pass at `DUWS_zoneAIReinforceFrac`
-  (0.6) of the cap, so a wiped wave pulls the next in immediately.
-- **Priority under load** is by player count — the most-crowded contested zone resupplies first.
-- **Reserve orders** are a new `"hunt"` posture: `AWARE`, `SAD` on the nearest player.
-- **Tally** counts a vehicle as one entity, not its crew.
+- **Multiplier** is reserve depth: initial garrison always x1, pool = `(mult - 1) x` the x1 list,
+  covering infantry **and** vehicles.
+- **Per-zone live groups** are hard-capped at the tier's x1 token count; refill tops up to it, never
+  beyond.
+- **Global throttle** `DUWS_zoneGroupCeiling` (130) pauses zone spawns/refills near the engine's
+  144-per-side limit — the co-op / hardpoint-dense backstop.
+- **Refill cadence**: 5-minute heartbeat plus an event wave when a zone dips below
+  `DUWS_zoneReinforceFrac` (0.5) of its ceiling.
+- **Priority under load** is by player count — most-crowded contested zone first.
+- **Reserve orders** are a new `"hunt"` posture: `AWARE`, speed `FULL`, `SAD` on the nearest player —
+  reinforcements run in for urgency.
 - **Recaptured zones** are not special-cased: reserves inherit the 0.3 scratch strength and arrive
-  light, which is moot in practice — at 0.3 a retaken zone already has most of its (thin) garrison on
-  the ground, so little is ever owed.
+  light, moot in practice since little is owed at 0.3.
 
 ## Files touched
 
 | File | Change |
 |---|---|
-| `server_var_init.sqf` | `DUWS_zoneAICap`, `DUWS_zoneAIReinforceFrac` |
-| `fnc_zone_state_init.sqf` | `zoneAILive` (entity tally), `zoneReserveMen` (exact), reserve-queue accessors; `+ reserveMen` in strength record/refresh |
-| `fnc_zone_spawn_sizes.sqf` | gate infantry tokens in `raiseGarrison`; peak = placed + owed in `fnc_zone_spawn` |
+| `server_var_init.sqf` | `DUWS_zoneGroupCeiling`, `DUWS_zoneReinforceFrac` |
+| `fnc_zone_state_init.sqf` | `zoneGroupCount`, `opforGroupCount`, `zoneReserveMen`, reserve-pool accessors; `+ reserveMen` in strength record/refresh |
+| `fnc_zone_spawn_sizes.sqf` | initial spawn = x1 tier (drop the live `scaleComposition`); seed the pool with `(mult - 1)` copies; peak = `mult x` tier men |
 | `fnc_zone_capture_ready.sqf` | remaining = garrison_count + reserveMen |
-| `fnc_zone_stream_init.sqf` | clear reserve queue in `DUWS_fnc_zoneStow`, after the strength record |
+| `fnc_zone_stream_init.sqf` | clear reserve pool in `DUWS_fnc_zoneStow`, after the strength record |
 | `fnc_apply_posture.sqf` | new `"hunt"` posture (SAD on nearest player, AWARE, cycle) |
-| new `fnc_zone_reserve.sqf` (or fold into state_init) | reinforcement spawn fn, the 5-minute loop, and the debounced `killed`-handler event path; launched at server init |
+| new `fnc_zone_reserve.sqf` (or fold into state_init) | reinforcement pass, the 5-minute loop, and the debounced `killed`-handler event path; launched at server init |
 
 ## Task breakdown
 
-1. Cap + entity tally (`zoneAILive`) + exact `zoneReserveMen` helpers (no behaviour change).
-2. Gate + reserve queue + peak = placed + owed.
+1. Ceilings + `zoneGroupCount` + `opforGroupCount` + exact `zoneReserveMen` helpers (no behaviour change).
+2. Multiplier recast: initial = x1 tier, seed pool `(mult - 1) x`, peak = `mult x` men.
 3. Capture / strength reconciliation (`+ reserveMen`) — the correctness core.
-4. Stow queue-clear in the right order.
-5. Reinforcement spawn (placement math + `"hunt"` posture).
-6. Five-minute loop + the event-driven `killed`-handler path + launch.
+4. Stow pool-clear in the right order.
+5. Reinforcement spawn (placement math + `"hunt"` posture, infantry and vehicles).
+6. Refill pass: 5-minute loop + the event-driven `killed`-handler path + the global throttle + launch.
 7. Tests.
 
 ## Test plan
 
-- **Unit (sqf-vm, alongside the existing 303):** `zoneAILive` counts on-foot men plus one per
-  vehicle; `zoneReserveMen` sums the exact thinned roster; the gate defers the right tokens against a
-  stubbed cap; `peak = placed + owed`; capture remaining counts owed; strength record counts owed.
-- **Manual/integration:** two tier IV zones with `cap = 100` → total live holds near 100, deferred
-  groups queue, reinforcements arrive far-side over successive 5-minute ticks, and neither zone is
-  capturable until its owed + alive garrison is beaten below the break fraction.
+- **Unit (sqf-vm, alongside the existing 303):** the x1 ceiling equals the tier token count; the pool
+  is `(mult - 1)` copies; `zoneReserveMen` sums the exact thinned roster; a refill stops at the
+  ceiling and pauses at the global throttle; `peak = mult x` men; capture remaining counts the pool;
+  strength record counts the pool.
+- **Manual / integration:** a tier IV x3 zone holds at 27 live groups while a 54-group pool grinds in
+  as waves; two hot IV zones stay under the global ceiling; neither is capturable until its pool plus
+  alive garrison is beaten below the break fraction.
