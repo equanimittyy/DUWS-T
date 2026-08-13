@@ -394,6 +394,9 @@ DUWS_fnc_arsenal_unstock = {
         };
 
         private _lastRestock = diag_tickTime;
+        // Seeded to the open-time pool; the restock tick re-stamps counts whenever this diverges from
+        // the live broadcast (a loot cache, a co-op peer's settle), which BIS never rebuilds a row for.
+        private _lastPool = +(missionNamespace getVariable ["DUWS_capturedPool", []]);
         while { sleep 0.2; !isNull (uiNamespace getVariable ["RscDisplayArsenal", displayNull]) } do {
             if (_isRestricted) then {
                 private _now = diag_tickTime;
@@ -425,6 +428,15 @@ DUWS_fnc_arsenal_unstock = {
                         _friendly = _liveFriendly;
                         _inserted = true;
                     };
+
+                    // A count-only change to an already-shelved class -- a loot cache topping it up, a
+                    // co-op peer's deposit/draw settling, any server rebroadcast -- rebuilds no BIS row,
+                    // so the insert scan above misses it and the stamped number would freeze at its
+                    // open-time value. Diff the live pool and re-stamp on any change. Poll-based, not a
+                    // PVEH: publicVariable does not fire its own handler on the sender, so a hosted host
+                    // would miss cache updates on its own machine -- the poll sees every source alike.
+                    private _livePool = missionNamespace getVariable ["DUWS_capturedPool", []];
+                    if (_livePool isNotEqualTo _lastPool) then { _lastPool = +_livePool; _inserted = true; };
 
                     // A freshly-inserted row has no count prefix yet; force a full re-stamp next frame.
                     if (_inserted) then { missionNamespace setVariable ["DUWS_arsenal_forcePaint", true]; };

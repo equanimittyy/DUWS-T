@@ -458,24 +458,6 @@ fnc_captured_pool_settle = {
 	if (_replyVar != "") then { [_replyVar, true, _excess] remoteExec ["fnc_pool_reply", _requester]; };
 };
 
-// Deposit a whole loadout (server). The quick-kit swap wipes the player's gear, so its pre-swap
-// loadout is banked wholesale. Same exemptions as settle: untracked ammo and (outside Limited)
-// friendly gear are not pooled.
-fnc_captured_pool_deposit_loadout = {
-	if (!isServer) exitWith {};
-	params [["_loadout", []]];
-	call fnc_captured_pool_friendly;
-	private _c = [_loadout] call fnc_captured_loadout_counts;
-	{
-		private _cls = _x;
-		if (!DUWS_trackAmmo && {isClass (configFile >> "CfgMagazines" >> _cls)}) then { continue };
-		if (!DUWS_arsenalLimited && {_cls in DUWS_friendlyArsenal}) then { continue };
-		[_cls, ([_cls] call fnc_captured_pool_getCount) + (_c get _cls)] call fnc_captured_pool_setCount;
-	} forEach (keys _c);
-	if (duws_log_level >= 4) then { ["DEBUG", "GEAR", format ["pool deposit_loadout: %1", keys _c]] call fnc_log; };
-	publicVariable "DUWS_capturedPool";
-};
-
 // Deposit explicit [class, count] pairs (server). Friendly classes are skipped: pooling one is
 // harmless (friendly is unlimited regardless) but pointless. Used by the loot caches.
 fnc_captured_pool_deposit_counts = {

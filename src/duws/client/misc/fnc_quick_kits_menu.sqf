@@ -12,27 +12,43 @@ if (_loadouts isEqualTo []) exitWith { hint localize "STR_DUWS_T_QUICK_KITS_NONE
         format [localize "STR_DUWS_T_CHANGE_TO", _displayName],
         {
             params ["_loadout", "_displayName"];
-            // The money/intel the player carries IS their balance, and the swap below would wipe it.
-            // Stash it out and re-grant after, the same shape the arsenal enforcer uses. Stashed
-            // before the pool deposit so cash never banks as captured gear (the deposit reads the live
-            // loadout, and money is not friendly gear).
-            private _moneyStash = call DUWS_fnc_money_stash;
+            // Scheduled thread: the settle below waits on the server's reply, and this fires from an
+            // unscheduled UI button handler, where waitUntil is illegal.
+            [_loadout, _displayName] spawn {
+                params ["_loadout", "_displayName"];
+                // The money/intel the player carries IS their balance, and setUnitLoadout would wipe it.
+                // Stash it out and re-grant after, the same shape the arsenal enforcer uses. Stashed
+                // before the settle so cash is out of both loadouts and never banks as captured gear.
+                private _moneyStash = call DUWS_fnc_money_stash;
 
-            // The kit overwrites the whole loadout, so any foreign gear it displaces is banked to the
-            // captured pool first -- hybrid only, since Full mode never draws the pool. The server
-            // classifies the pre-swap loadout and keeps only what is not standard issue.
-            if ((["DUWS_ArsenalMode", 0] call BIS_fnc_getParamValue) == 0) then {
-                [getUnitLoadout player] remoteExec ["fnc_captured_pool_deposit_loadout", 2];
-            };
-            player setUnitLoadout _loadout;
+                private _old = getUnitLoadout player;
+                player setUnitLoadout _loadout;
 
-            private _dropPairs = [_moneyStash] call DUWS_fnc_money_regrant;
-            private _moneyDropped = 0;
-            { if ((_x select 0) isEqualTo "Money_roll") then { _moneyDropped = _x select 1; }; } forEach _dropPairs;
-            if (_moneyDropped > 0) then {
-                hint format [localize "STR_DUWS_ARSENAL_MONEY_DROPPED", _moneyDropped];
-            } else {
-                hint format [localize "STR_DUWS_T_CHANGED_TO", _displayName];
+                // The swap is an arsenal edit from _old to the kit, so settle it exactly like the arsenal
+                // close: the server nets close-open per class -- deposits gear the kit drops, draws gear
+                // it adds (capped at stock), and replies the overdraw to strip off the equipped kit, so a
+                // depleted pool yields a partial kit, never free gear. Full (mode 1) never touches the
+                // pool. Same path as DUWS_fnc_arsenal_unstock.
+                if ((["DUWS_ArsenalMode", 0] call BIS_fnc_getParamValue) != 1) then {
+                    private _new = getUnitLoadout player;
+                    duws_pool_seq = (missionNamespace getVariable ["duws_pool_seq", 0]) + 1;
+                    private _replyVar = format ["duws_pool_reply_%1", duws_pool_seq];
+                    [_old, _new, player, _replyVar] remoteExec ["fnc_captured_pool_settle", 2];
+                    private _deadline = diag_tickTime + 5;
+                    waitUntil { !isNil _replyVar || {diag_tickTime > _deadline} };
+                    private _excess = (missionNamespace getVariable [_replyVar, [false, []]]) select 1;
+                    missionNamespace setVariable [_replyVar, nil];
+                    { _x params ["_cls", "_ex"]; [_cls, _ex] call DUWS_fnc_strip_n; } forEach _excess;
+                };
+
+                private _dropPairs = [_moneyStash] call DUWS_fnc_money_regrant;
+                private _moneyDropped = 0;
+                { if ((_x select 0) isEqualTo "Money_roll") then { _moneyDropped = _x select 1; }; } forEach _dropPairs;
+                if (_moneyDropped > 0) then {
+                    hint format [localize "STR_DUWS_ARSENAL_MONEY_DROPPED", _moneyDropped];
+                } else {
+                    hint format [localize "STR_DUWS_T_CHANGED_TO", _displayName];
+                };
             };
         },
         [_loadout, _displayName]

@@ -7,9 +7,10 @@
 // repainted on every list redraw, backed by the authoritative pool. The arsenal underneath stays a
 // dumb present/absent set.
 //
-// The number shown is the pool stock as broadcast, i.e. what was in stock when the arsenal opened. It
-// does not tick down live as the player pulls items this session -- the pool is only settled on close
-// (fnc_captured_pool_settle), which is where overdraw is stripped.
+// The number shown is the live broadcast pool minus this session's local takes. The pool value
+// refreshes under an open arsenal on any server rebroadcast (the enforcer's restock tick diffs it and
+// forces a re-stamp), and DUWS_arsenalTaken subtracts the player's own uncommitted draws. The
+// authoritative settle still lands on close (fnc_captured_pool_settle), where overdraw is stripped.
 //
 // The IDC macros (IDC_RSCDISPLAYARSENAL_LIST base + IDC_RSCDISPLAYARSENAL_TAB_* offsets) come from
 // BIS's own header, so the control ids track the engine version instead of being hardcoded numbers.
@@ -55,7 +56,9 @@ DUWS_fnc_arsenal_paintCounts = {
     if (!(player getVariable ["DUWS_isRestrictedArsenal", false])) exitWith {};
 
     // Every browsable category list, left panel then right. Each control id is the shared list base
-    // plus the category's tab offset.
+    // plus the category's tab offset. Both magazine lists are walked: the compact "compatible mags"
+    // list (CARGOMAG, the default view) is a separate control from "all mags" (CARGOMAGALL), so
+    // stamping only the latter left the default mag tab uncounted.
     private _tabs = [
         IDC_RSCDISPLAYARSENAL_TAB_PRIMARYWEAPON, IDC_RSCDISPLAYARSENAL_TAB_SECONDARYWEAPON,
         IDC_RSCDISPLAYARSENAL_TAB_HANDGUN, IDC_RSCDISPLAYARSENAL_TAB_UNIFORM,
@@ -66,7 +69,8 @@ DUWS_fnc_arsenal_paintCounts = {
         IDC_RSCDISPLAYARSENAL_TAB_RADIO, IDC_RSCDISPLAYARSENAL_TAB_COMPASS,
         IDC_RSCDISPLAYARSENAL_TAB_WATCH, IDC_RSCDISPLAYARSENAL_TAB_ITEMOPTIC,
         IDC_RSCDISPLAYARSENAL_TAB_ITEMACC, IDC_RSCDISPLAYARSENAL_TAB_ITEMMUZZLE,
-        IDC_RSCDISPLAYARSENAL_TAB_ITEMBIPOD, IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL,
+        IDC_RSCDISPLAYARSENAL_TAB_ITEMBIPOD,
+        IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG, IDC_RSCDISPLAYARSENAL_TAB_CARGOMAGALL,
         IDC_RSCDISPLAYARSENAL_TAB_CARGOTHROW, IDC_RSCDISPLAYARSENAL_TAB_CARGOPUT,
         IDC_RSCDISPLAYARSENAL_TAB_CARGOMISC
     ];
