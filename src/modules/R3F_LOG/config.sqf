@@ -41,7 +41,7 @@
  * Si true :  tous les objets sont inactifs par défaut
  *            Vous pouvez activer quelques objets avec : objet setVariable ["R3F_LOG_disabled", false];
  */
-R3F_LOG_CFG_disabled_by_default = false;
+R3F_LOG_CFG_disabled_by_default = true;
 
 /**
  * LOCK THE LOGISTICS FEATURES TO SIDE, FACTION OR PLAYER
