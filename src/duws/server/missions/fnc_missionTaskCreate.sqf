@@ -7,6 +7,29 @@
 params ["_taskId", "_description", "_title", "_destination", ["_type", "unknown"]];
 if (!isServer) exitWith {};
 
+// Journal footer, built once here so all 17 threads share it: mission text, the deadline as an in-game
+// wall clock, a blank line, then the reward block. Only the journal shows the clock -- the map picker
+// stays a relative band, or a deadline read while browsing overstates the time actually left once the
+// mission is picked. DUWS_curDeadlineAt is an absolute engine-time (seconds) and daytime advances 1:1
+// with engine seconds -- the same assumption fnc_mission_begin built the deadline on -- so the seconds
+// left convert straight to a clock. Guarded on a live future deadline; a stale/unset global adds nothing.
+private _dl = missionNamespace getVariable ["DUWS_curDeadlineAt", -1];
+if (_dl > time) then {
+	private _clock = (daytime + (_dl - time) / 3600) mod 24;
+	private _h = floor _clock;
+	private _m = floor ((_clock - _h) * 60);
+	private _pad = { if (_this < 10) then { "0" + str _this } else { str _this } };
+	_description = _description
+		+ format [localize "STR_DUWS_T_mission_deadline_desc", format ["%1:%2", _h call _pad, _m call _pad]]
+		+ "<br />";  // second break: blank line between the deadline line and the reward block
+
+	(missionNamespace getVariable ["DUWS_curReward", [0,0,0]]) params ["_cp", "_ap", "_rep"];
+	_description = _description + format [localize "STR_DUWS_T_mission_cpap", _cp, _ap];
+	if (_rep > 0) then { _description = _description + format [localize "STR_DUWS_T_mission_rep", _rep] };
+	// Concrete rolled duration, rounded: the map's pre-pick range has collapsed to one value by now.
+	_description = _description + format [localize "STR_DUWS_T_mission_time_fixed", round ((_dl - time) / 3600)];
+};
+
 // The JIP key must not be the bare task id: fnc_missionTaskEnd files the state change under
 // that, and a same-key entry replaces rather than joins the queue, so a joiner would be handed
 // the completion of a task that was never created on their machine.
