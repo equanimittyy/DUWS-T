@@ -83,15 +83,8 @@ DUWS_fnc_garrisonReservePos = {
         private _cand = [_center getPos [_baseDist, _antiDir + _x], 0, 200, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
         // Snap onto the nearest road so the truck-borne wave stands up on drivable ground. Done before
         // the seen-check and the floor reject so both judge the point the wave actually spawns on: a road
-        // segment can sit closer to the players or in worse cover than the raw candidate. No road in
-        // DUWS_zoneReserveRoadSearch leaves the off-road candidate rather than blocking the bearing.
-        if (_cand isNotEqualTo []) then {
-            private _roads = _cand nearRoads DUWS_zoneReserveRoadSearch;
-            if (_roads isNotEqualTo []) then {
-                private _road = ([_roads, [], { _cand distance2D _x }, "ASCEND"] call BIS_fnc_sortBy) select 0;
-                _cand = getPosATL _road;
-            };
-        };
+        // segment can sit closer to the players or in worse cover than the raw candidate.
+        if (_cand isNotEqualTo []) then { _cand = [_cand] call DUWS_fnc_reserveRoadSnap };
         // Reject an empty result (findSafePos hands back [] on bad ground) and one it pulled back
         // inside the floor. An empty candidate must not reach the spawners: they read [] as "no
         // override" and would drop the reserve into the objective band, on top of the players.
@@ -108,6 +101,63 @@ DUWS_fnc_garrisonReservePos = {
         _center getPos [_baseDist, _antiDir]
     };
     _best
+};
+
+// Nearest road to a point, or the point unchanged when none is within DUWS_zoneReserveRoadSearch. The
+// reserve rides trucks, so a wave stands up on drivable ground. Sorted here rather than trusting
+// nearRoads' own order.
+DUWS_fnc_reserveRoadSnap = {
+    params ["_pos"];
+    private _roads = _pos nearRoads DUWS_zoneReserveRoadSearch;
+    if (_roads isEqualTo []) exitWith { _pos };
+    getPosATL (([_roads, [], { _pos distance2D _x }, "ASCEND"] call BIS_fnc_sortBy) select 0)
+};
+
+// One spaced spawn slot for a wave. The lead point is pushed _i gaps back along _dir -- the outbound
+// bearing, so the tail runs away from the objective and the players, never toward them -- then snapped to
+// a road near there. A multi-vehicle wave lines up nose-to-tail on drivable ground with room between, and
+// successive vehicles can take different roads rather than stacking on one point. If the snapped or the
+// plain point would land within a gap of one already placed this wave, it steps another gap out and
+// retries: good spacing outranks being exactly on a road, since two vehicles on one point brew up on
+// spawn. Bounded retries, then the plain spaced point regardless.
+DUWS_fnc_reserveConvoySlot = {
+    params ["_lead", "_dir", "_i", "_slots"];
+    private _out = [];
+    private _step = _i;
+    private _tries = 0;
+    while { _out isEqualTo [] && {_tries < 6} } do {
+        _tries = _tries + 1;
+        private _raw = _lead getPos [_step * DUWS_reserveConvoyGap, _dir];
+        private _snap = [_raw] call DUWS_fnc_reserveRoadSnap;
+        if ((_slots findIf { (_snap distance2D _x) < DUWS_reserveConvoyGap }) < 0) then {
+            _out = _snap;
+        } else {
+            if ((_slots findIf { (_raw distance2D _x) < DUWS_reserveConvoyGap }) < 0) then {
+                _out = _raw;
+            } else {
+                _step = _step + 1;
+            };
+        };
+    };
+    if (_out isEqualTo []) then { _out = _lead getPos [_step * DUWS_reserveConvoyGap, _dir] };
+    _out
+};
+
+// Hands the next convoy slot for a refill wave and records it. _wave carries the wave's lead point and
+// outbound bearing, chosen once on the first call and reused after, so every vehicle in the wave lines up
+// off the same lead rather than each re-picking a far-side point and stacking on it. Both _wave and
+// _slots are the caller's own arrays, mutated in place (arrays pass by reference), so the running wave
+// state lives in the refill loop, not here.
+DUWS_fnc_reserveWaveSlot = {
+    params ["_center", "_radius", "_wave", "_slots"];
+    if (_wave isEqualTo []) then {
+        private _lead = [_center, _radius] call DUWS_fnc_garrisonReservePos;
+        _wave set [0, _lead];
+        _wave set [1, _center getDir _lead];
+    };
+    private _pos = [_wave select 0, _wave select 1, count _slots, _slots] call DUWS_fnc_reserveConvoySlot;
+    _slots pushBack _pos;
+    _pos
 };
 
 // Hangs a killed handler on a site's groups. It does two jobs: records the group's token into the loss
@@ -323,6 +373,11 @@ DUWS_fnc_garrisonReserveRefillOne = {
     private _cap = 0;
     private _used = 0;
     private _aboard = [];
+    // Convoy staging for the wave: _wave holds the lead point and outbound bearing (set on the first
+    // spawn, reused after); _slots is every point placed so far, so each vehicle lines up spaced off the
+    // lead rather than stacking on it. The whole wave shares one convoy line.
+    private _wave = [];
+    private _slots = [];
     // Set when the pool holds nothing the side can field right now, to break the loop cleanly and still
     // reach the flush below. A bare exitWith here is ambiguous -- it may exit the whole function rather
     // than just the loop -- and would then strand a part-loaded truck undispatched.
@@ -350,7 +405,7 @@ DUWS_fnc_garrisonReserveRefillOne = {
                 private _men = [_tok] call DUWS_fnc_tokenMenCount;
                 if (_men == 0) then {
                     // A vehicle or bare-class token owes no infantry men: it drives itself in, unbatched.
-                    private _pos = [_center, _radius] call DUWS_fnc_garrisonReservePos;
+                    private _pos = [_center, _radius, _wave, _slots] call DUWS_fnc_reserveWaveSlot;
                     private _grp = [_tok, _center, _radius, "hunt", _pos] call DUWS_fnc_zoneSpawnOne;
                     if (!isNull _grp) then { [_grp, "garrison"] call fnc_search_flag_group };
                     [_key, _grp, _roster] call DUWS_fnc_garrisonReserveCommit;
@@ -363,7 +418,7 @@ DUWS_fnc_garrisonReserveRefillOne = {
                         _truck = objNull; _drv = grpNull; _aboard = []; _used = 0; _cap = 0; _trkPos = [];
                     };
                     if (isNull _truck) then {
-                        private _pos = [_center, _radius] call DUWS_fnc_garrisonReservePos;
+                        private _pos = [_center, _radius, _wave, _slots] call DUWS_fnc_reserveWaveSlot;
                         private _made = [_pos, _center] call DUWS_fnc_garrisonReserveTruckSpawn;
                         if (_made isNotEqualTo []) then {
                             _made params ["_mt", "_md", "_mc"];
@@ -379,7 +434,7 @@ DUWS_fnc_garrisonReserveRefillOne = {
                             deleteVehicle _truck;
                             _truck = objNull; _drv = grpNull; _cap = 0; _trkPos = [];
                         };
-                        private _pos = [_center, _radius] call DUWS_fnc_garrisonReservePos;
+                        private _pos = [_center, _radius, _wave, _slots] call DUWS_fnc_reserveWaveSlot;
                         private _grp = [_tok, _center, _radius, "hunt", _pos] call DUWS_fnc_zoneSpawnOne;
                         if (!isNull _grp) then { [_grp, "garrison"] call fnc_search_flag_group };
                         [_key, _grp, _roster] call DUWS_fnc_garrisonReserveCommit;

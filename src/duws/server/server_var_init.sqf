@@ -537,6 +537,12 @@ DUWS_zoneReserveSpawnDist = 400;
 // bearing. No road in range leaves the off-road point -- some approaches simply have none.
 DUWS_zoneReserveRoadSearch = 150;
 
+// Spacing between vehicles in a reserve wave, in metres. The wave stages as a convoy line rather than
+// all standing up on one point -- two vehicles sharing a point brew up on spawn. Also the minimum gap a
+// road-snapped slot must clear from an already-placed one before it steps further out. Comfortably wider
+// than the longest vehicle so a truck and a tank nose-to-tail never clip.
+DUWS_reserveConvoyGap = 35;
+
 // The heartbeat period of the refill loop, in seconds. Tops zones back up during a steady grind; the
 // event path above covers deep dips between beats.
 DUWS_zoneReservePollPeriod = 300;
