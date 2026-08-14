@@ -211,11 +211,9 @@ switch (_index) do
 	case index_amount_cp_10:  { commandpointsblu1 = 10 };
 	case index_amount_cp_20:  { commandpointsblu1 = 20 };
 	case index_amount_cp_30:  { commandpointsblu1 = 30 };
-	case index_amount_cp_50:  { commandpointsblu1 = 50 };
 	case index_amount_cp_60:  { commandpointsblu1 = 60 };
 	case index_amount_cp_100: { commandpointsblu1 = 100 };
 	case index_amount_cp_150: { commandpointsblu1 = 150 };
-	case index_amount_cp_200: { commandpointsblu1 = 200 };
 	case index_amount_cp_300: { commandpointsblu1 = 300 };
 	case index_amount_cp_350: { commandpointsblu1 = 350 };
 	case index_amount_cp_600: { commandpointsblu1 = 600 };
