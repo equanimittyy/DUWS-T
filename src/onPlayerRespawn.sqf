@@ -39,6 +39,7 @@ private _itemsToRemove = [
     "Files",
     "FilesSecret",
     "Wallet_ID",
+    "Wallet_traitor",
     "FileTopSecret"
 ];
 
