@@ -15,7 +15,7 @@ if (isNull _caller) exitWith {};
 if !((vehicleVarName _caller) in game_master) exitWith {};
 
 private _classes = ["SmartPhone", "MobilePhone", "FlashDisk", "Files",
-    "FilesSecret", "Wallet_ID", "Wallet_traitor", "FileTopSecret"];
+    "FilesSecret", "Wallet_ID", "FileTopSecret"];
 
 private _base = getPosATL _caller;
 private _drop = _caller getPos [2, getDir _caller];

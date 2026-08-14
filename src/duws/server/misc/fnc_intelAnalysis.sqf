@@ -21,7 +21,6 @@ private _intelItems = [
     ["Files", 1, 0.05],
     ["FilesSecret", 5, 1.00],
     ["Wallet_ID", 1, 0.05],
-    ["Wallet_traitor", 1, 0.05],
     ["FileTopSecret", 5, 1.00]
 ];
 

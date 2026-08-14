@@ -56,7 +56,7 @@ DUWS_fnc_countLoadoutChanges = {
 
 // items force-removed from a loadout: money and intel
 DUWS_forcedRemoveItems = [
-    "Money_roll", "Files", "Wallet_ID", "Wallet_traitor", "SmartPhone", "MobilePhone",
+    "Money_roll", "Files", "Wallet_ID", "SmartPhone", "MobilePhone",
     "FlashDisk", "FileTopSecret", "FilesSecret"
 ];
 
