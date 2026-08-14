@@ -531,6 +531,12 @@ DUWS_zoneReinforceFrac = 0.5;
 // would drop reserves a kilometre out of the island and on top of the player in the base.
 DUWS_zoneReserveSpawnDist = 400;
 
+// How far to look for a road around a chosen far-side spawn point, in metres. A reserve wave rides
+// trucks now, so it stands up on drivable ground rather than on a hillside a truck cannot leave. Wide
+// enough to find a road off most approaches, tight enough that the road pick stays near the anti-flank
+// bearing. No road in range leaves the off-road point -- some approaches simply have none.
+DUWS_zoneReserveRoadSearch = 150;
+
 // The heartbeat period of the refill loop, in seconds. Tops zones back up during a steady grind; the
 // event path above covers deep dips between beats.
 DUWS_zoneReservePollPeriod = 300;

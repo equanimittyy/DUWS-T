@@ -81,6 +81,17 @@ DUWS_fnc_garrisonReservePos = {
     private _bestSeen = 1e9;
     {
         private _cand = [_center getPos [_baseDist, _antiDir + _x], 0, 200, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
+        // Snap onto the nearest road so the truck-borne wave stands up on drivable ground. Done before
+        // the seen-check and the floor reject so both judge the point the wave actually spawns on: a road
+        // segment can sit closer to the players or in worse cover than the raw candidate. No road in
+        // DUWS_zoneReserveRoadSearch leaves the off-road candidate rather than blocking the bearing.
+        if (_cand isNotEqualTo []) then {
+            private _roads = _cand nearRoads DUWS_zoneReserveRoadSearch;
+            if (_roads isNotEqualTo []) then {
+                private _road = ([_roads, [], { _cand distance2D _x }, "ASCEND"] call BIS_fnc_sortBy) select 0;
+                _cand = getPosATL _road;
+            };
+        };
         // Reject an empty result (findSafePos hands back [] on bad ground) and one it pulled back
         // inside the floor. An empty candidate must not reach the spawners: they read [] as "no
         // override" and would drop the reserve into the objective band, on top of the players.
