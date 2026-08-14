@@ -142,29 +142,26 @@ DUWS_fnc_garrisonReserveOnKill = {
     [_key] spawn DUWS_fnc_garrisonReserveRefillOne;
 };
 
-// Picks the reserve's delivery truck: an actual truck (isKindOf "Truck"), armed or not, never a car or
-// MRAP. The transport role filters on seats alone -- crew plus a six-plus cargo bay -- so a wheeled
-// soft-skin car passes it; the kind test here is what keeps troops off a technical. Bounded redraws,
-// because the pick is random per call and a pool can mix trucks with cars; "" when the side fields no
-// truck at all, and the caller then walks the squad in. Rare and off the frame budget: a wave every few
-// minutes.
+// Picks the reserve's delivery truck: the faction's own troop-transport keys -- the covered
+// (opfor_COVERED_TRUCK_X, the "truck" token) and the open (opfor_TRANS_TRUCK_X, the "transport" token).
+// Both are defined per faction as actual troop carriers, so no kind test is needed to keep infantry off a
+// car or a technical: these keys never name one, and the earlier isKindOf "Truck" gate only rejected
+// legitimate mod trucks that do not inherit from the vanilla Truck class, dropping the whole wave to foot.
+// Resolved through tokenClass so an auto-detected faction's pooled variant is drawn the same as a
+// hand-written class; empties dropped. selectRandom for variety across a wave; "" when the side defines
+// neither key, and the caller then walks the squad in.
 DUWS_fnc_reserveTruckClass = {
-    private _out = "";
-    private _tries = 0;
-    while { _out == "" && {_tries < 12} } do {
-        _tries = _tries + 1;
-        private _c = ["truck", "OPF"] call DUWS_fnc_tokenClass;
-        if (_c == "") then { _c = ["transport", "OPF"] call DUWS_fnc_tokenClass };
-        if (_c != "" && {_c isKindOf "Truck"}) then { _out = _c };
-    };
-    _out
+    private _opts = ["truck", "transport"] apply { [_x, "OPF"] call DUWS_fnc_tokenClass };
+    _opts = _opts select { _x != "" };
+    if (_opts isEqualTo []) exitWith { "" };
+    selectRandom _opts
 };
 
 // Stands up an empty delivery truck and its lone driver on the far side, ready to be loaded. The driver
 // is the truck's own configured crew class raised into an east group of its own -- decoupled from the
 // squads it carries, so a lost squad never costs the truck its driver and the driver never sits on any
-// squad's roster. One driver only, even on an armed truck: the gun rides unmanned, this is a taxi. The
-// truck is never rostered or garrison-flagged; the dispatch monitor owns its whole life. Returns
+// squad's roster. One driver only: it is a taxi, and the covered and open troop trucks it draws carry no
+// gun to crew. The truck is never rostered or garrison-flagged; the dispatch monitor owns its whole life. Returns
 // [truck, driverGroup, cargoSeats], or [] when no truck resolves or none seats a driver.
 DUWS_fnc_garrisonReserveTruckSpawn = {
     params ["_spawnPos", "_center"];
