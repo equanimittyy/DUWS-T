@@ -71,10 +71,11 @@ town's civilians; the player finds and kills him before he leaves by car for a d
 `src/duws/server/missions/mission_threads/intel_gathering/fnc_intel_gathering_mission.sqf`.
 
 **Siting.** `fnc_intel_gathering_site` (the per-type finder) accepts a picker candidate only where a
-live Tomata civil town sits within 2.5 km, returning that town's centre; civilians off / RAVAGE / WBK
-reject, so the offer is dropped rather than sited on empty ground. The finder runs client-side in the
-picker, so it reads `duws_town_circles` (broadcast) and `CIV_PRESENCE`, never the server-only
-`civ_town_rep`.
+live Tomata civil town sits within 2.5 km *and* an OPFOR-held zone sits at least 1 km off (the
+informant's escape, below), returning that town's centre; civilians off / RAVAGE / WBK, or a town with
+no enemy zone to flee to, reject -- so the offer is dropped rather than sited where it cannot play out.
+The finder runs client-side in the picker, so it reads only broadcast state: `duws_town_circles`,
+`CIV_PRESENCE`, and `WARCOM_zones_controled_by_OPFOR`, never the server-only `civ_town_rep`.
 
 **The informant.** A civilian-model unit in an EAST group (side follows the group), `setCaptive true`
 so BLUFOR AI ignores him while he blends. Killing him wins; a kill within townRadius + 300 m of the
@@ -91,8 +92,9 @@ garrison via `fnc_town_garrison_tierAt`):
 - enemy -- no asking; the informant leaves much sooner, so the player camps the described vehicle.
 
 **The escape.** He leaves at a fixed world-clock time (shown in the briefing) or the moment shots are
-fired near him, walks to his car and drives to the nearest zone >=1 km off; reaching it fails the
-mission. Three decoy cars -- one guaranteed his class, so the vehicle description never pins a single
+fired near him, walks to his car and drives to the nearest OPFOR-held zone >=1 km off -- enemy ground,
+never a BLUFOR zone or the player's FOB; reaching it fails the mission. If the last enemy zone in reach
+is captured between the offer and the spawn, the thread aborts (there is nowhere left for him to run). Three decoy cars -- one guaranteed his class, so the vehicle description never pins a single
 car -- scatter on random bearings when he boards. Car destroyed before he boards, and he arms a pistol
 and flees on foot as an open combatant. His leave time is rolled in 10-minute steps of in-game time
 via `fnc_time_deadline` -- the same shape and clock the mission deadline uses, correct at any time

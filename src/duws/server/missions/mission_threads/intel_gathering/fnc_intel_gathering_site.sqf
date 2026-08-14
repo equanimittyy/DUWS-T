@@ -33,4 +33,12 @@ private _bestD = 1e9;
 } forEach _circles;
 
 if (_bestPos isEqualTo [] || {_bestD > _ACCEPT_RADIUS}) exitWith { [] };
+
+// The informant flees to enemy ground: with no OPFOR-held zone at least 1 km off there is nowhere for
+// him to run (fleeing to a BLUFOR zone or the player's own FOB is nonsense), so the offer is dropped
+// rather than sited here. WARCOM_zones_controled_by_OPFOR is broadcast, so the client picker can see
+// it; every zone starts OPFOR-held and moves to the BLUFOR list only when captured.
+private _enemyZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
+if ((_enemyZones findIf { _x distance2D _bestPos >= 1000 }) < 0) exitWith { [] };
+
 [_bestPos]

@@ -46,19 +46,26 @@ private _leaveSteps = if (_enemyTown) then { 1 } else { 2 };
 private _leaveAt = [_leaveSteps] call fnc_time_deadline;
 private _clock = [_leaveAt] call fnc_time_clock;
 
-// Escape destination: the nearest named zone at least 1 km off, so the drive is a real leg, the fail
-// is reachable, and the zone can be named in the briefing. No zone that far (a tiny map) falls back to
-// a point 1.5 km out. TUNABLE.
+// Escape destination: the nearest OPFOR-held zone at least 1 km off. The informant runs to enemy
+// ground, never to a BLUFOR zone or the player's own, so there is no fallback -- the finder guaranteed
+// one existed at offer time, and if the last was captured between the offer and now the mission cannot
+// run and aborts. zone_namePOS_pairs carries the name; WARCOM_zones_controled_by_OPFOR carries which
+// zones are enemy-held, matched by position. TUNABLE distance.
 private _MINDIST = 1000;
+private _enemyZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
 private _zx  = [];
-private _zoneName = "open country";
+private _zoneName = "";
 private _zxD = 1e9;
 {
     _x params ["_zn", "_zp"];
     private _d = _zp distance2D _townPos;
-    if (_d >= _MINDIST && _d < _zxD) then { _zxD = _d; _zx = _zp; _zoneName = _zn };
+    if (_d >= _MINDIST && _d < _zxD && {(_enemyZones findIf { _x distance2D _zp < 50 }) >= 0}) then {
+        _zxD = _d; _zx = _zp; _zoneName = _zn;
+    };
 } forEach zone_namePOS_pairs;
-if (_zx isEqualTo []) then { _zx = _townPos getPos [1500, random 360] };
+if (_zx isEqualTo []) exitWith {
+    [16, "STR_DUWS_T_crtzxs0j"] call fnc_mission_abort;
+};
 
 private _townName = text (_locs select _townIndex);
 
