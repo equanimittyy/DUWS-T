@@ -459,7 +459,7 @@ DUWS_fnc_garrisonReserveRefillOne = {
                     // A vehicle or bare-class token owes no infantry men: it drives itself in, unbatched.
                     private _pos = [_center, _radius, _wave, _slots] call DUWS_fnc_reserveWaveSlot;
                     private _grp = [_tok, _center, _radius, "hunt", _pos] call DUWS_fnc_zoneSpawnOne;
-                    if (!isNull _grp) then { [_grp, "garrison"] call fnc_search_flag_group };
+                    if (!isNull _grp) then { [_grp, "combat"] call fnc_search_flag_group };
                     [_key, _grp, _roster] call DUWS_fnc_garrisonReserveCommit;
                 } else {
                     // Send the open truck off if this squad will not fit what is left in it, then make sure
@@ -488,7 +488,7 @@ DUWS_fnc_garrisonReserveRefillOne = {
                         };
                         private _pos = [_center, _radius, _wave, _slots] call DUWS_fnc_reserveWaveSlot;
                         private _grp = [_tok, _center, _radius, "hunt", _pos] call DUWS_fnc_zoneSpawnOne;
-                        if (!isNull _grp) then { [_grp, "garrison"] call fnc_search_flag_group };
+                        if (!isNull _grp) then { [_grp, "combat"] call fnc_search_flag_group };
                         [_key, _grp, _roster] call DUWS_fnc_garrisonReserveCommit;
                     } else {
                         // Raise the squad orderless so it rides then hunts at the debus, board it, and
@@ -498,7 +498,7 @@ DUWS_fnc_garrisonReserveRefillOne = {
                         private _grp = [_tok, _center, _radius, "none", _trkPos] call DUWS_fnc_zoneSpawnOne;
                         if (!isNull _grp) then {
                             { _x moveInCargo _truck } forEach units _grp;
-                            [_grp, "garrison"] call fnc_search_flag_group;
+                            [_grp, "combat"] call fnc_search_flag_group;
                             _roster append (units _grp);
                             [_key, [_grp]] call DUWS_fnc_garrisonReserveWatch;
                             _aboard pushBack _grp;

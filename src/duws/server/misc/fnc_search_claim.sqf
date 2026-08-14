@@ -59,14 +59,15 @@ private _fnc_notify = {
 private _documents = ["Item_Wallet_traitor", "Item_FlashDisk", "Item_SmartPhone",
     "Item_MobilePhone"];
 
-// The two kinds the substitute draw can also pay, hoisted so it does not need a second copy of
-// either. `call` shares the caller's scope, so both read _documents, _origin, _caller, _fnc_report
+// Hoisted because the main draw and the intel-exhausted fallback both pay it -- the draw a 1-3
+// roll, the fallback a flat 2 passed in. `call` shares the caller's scope, so it reads _fnc_report
 // and _fnc_notify from here.
 //
-// CP only, and rolled: a search is a windfall for the player who made it, not a shift in the
-// war's momentum, which is what AP measures and what every WARCOM wave threshold reads.
-private _payPool = {
-    private _cp = 1 + floor random 3;
+// CP, never AP: a search is a windfall for the player who made it, not a shift in the war's
+// momentum, which is what AP measures and what every WARCOM wave threshold reads.
+private _payCp = {
+    params [["_amt", -1]];
+    private _cp = if (_amt > 0) then { _amt } else { 1 + floor random 3 };
     [_cp, "search_pool"] call fnc_cp_adjust;
     [localize "STR_DUWS_T_INTEL_FOUND_x"] call _fnc_report;
     [localize "STR_DUWS_T_INTEL_BONUS_TITLE",
@@ -100,7 +101,7 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
             };
         };
 
-        case "pool": { call _payPool; _paid = true };
+        case "cp": { call _payCp; _paid = true };
 
         case "money": {
             private _items = [];
@@ -123,18 +124,9 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
     _remaining = _remaining select { (_x select 0) != _kind };
 };
 
-// Every kind declined, so intel was the last one standing and there was nothing hidden left for it
-// to reveal. One branch for both modes, because they differ only in what is hidden: hardcore
-// reaches this once the map has been found, normal mode reaches it on every search of an
-// intel-only source, and the search itself behaves the same either way.
-//
-// Half of these still come up empty. Paying every time would make a source that can only draw
-// intel strictly better than one that can draw anything, since a body can roll `nothing` too --
-// the substitute replaces what intel was worth, it does not add a floor the other kinds lack.
+// Intel was the last kind standing and the reveal pool is dry: reached by an intel-only source --
+// a mission objective, and any source once every position is found. Pays a flat 2 CP in place of
+// the reveal it cannot make, so a dry pool costs the search its best outcome, not its whole worth.
 if (!_paid) then {
-    switch ([[["document", 1], ["pool", 1], ["nothing", 2]]] call fnc_search_drawKind) do {
-        case "document": { call _payDocument };
-        case "pool": { call _payPool };
-        default { [_nothingLine] call _fnc_report };
-    };
+    [2] call _payCp;
 };

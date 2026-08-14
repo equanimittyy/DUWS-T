@@ -123,7 +123,7 @@ sleep 1;
 [[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 {
     if (!isNull _x) then {
-        [_x, "mission"] call fnc_search_flag_group;
+        [_x, "combat"] call fnc_search_flag_group;
     };
 } forEach [_groupBunker1, _groupBunker2];
 {

@@ -125,16 +125,16 @@ one commodity is the point — a hardcore player out of one currency still has a
 
 | Source | Capped |
 |---|---|
-| Body search | by the flagged materiel on the ground, not by a clock — 50 % of a garrison, 15 % of a mission group |
+| Body search | by the flagged materiel on the ground, not by a clock — a third of any combat group, zone garrison and side-mission patrol alike |
 | Side-mission objective | flagged with certainty; reaching the object is the gate |
 | Walking into a zone or town | not applicable; it reveals the ground the player is standing on and rolls nothing |
 | Civilian frisk | flagged with certainty; the arrest is the price, and its payout table carries the odds |
 
-**Half a garrison is searchable, so a fight is a reliable route to intel rather than a lottery.** The rate
-was an eighth of that and read in play as a broken action: a player who cleared a position and found no
-prompt on any body had no way to tell a cold roll from a feature that never worked. What keeps the search
-from collapsing into a kill count is its payout table, where intel is one weight of four, not its flag
-rate — so a garrison pays *something* most of the time and pays intel far less often than that.
+**A third of a combat group is searchable, so a fight is a reliable route to intel rather than a lottery.**
+A much lower rate read in play as a broken action: a player who cleared a position and found no prompt on
+any body had no way to tell a cold roll from a feature that never worked. What keeps the search from
+collapsing into a kill count is its payout table, where intel is one kind of four, not its flag rate — so
+a combat group pays *something* most of the time and pays intel far less often than that.
 
 The sources draw from one finite pool, so they compete rather than stack, and the hidden-map phase ends when
 the last hidden position is found however that happened. That is the intended arc — but it means adding a
@@ -180,16 +180,14 @@ false once every position is revealed — and when it does, that kind drops out 
 A dry pool therefore costs a search its best outcome rather than its voice, which is the failure this mission
 already paid for once when a dry pool returned quietly.
 
-**When every kind declines, a second draw decides what stands in for intel** — one document at 1 / 4, the
-pool's 1–3 CP at 1 / 4, nothing at 2 / 4. Reachable only where intel was the last kind standing, which
-hardcore hits once the map has been found and normal mode hits on every search of an intel-only source; the
-branch is the same either way.
+**When intel is exhausted, the search pays a flat 2 CP in its place.** Reachable only where intel was the last
+kind standing — an intel-only source such as a mission objective, which hardcore reaches once the map has been
+found and normal mode reaches on every such search. Reaching the objective still pays, so a reveal pool going
+dry costs the search its best outcome rather than its whole worth.
 
-Half of them still come up empty, deliberately. A source that can only draw intel would otherwise be strictly
-better than one that can draw anything, since a body can roll `nothing` too — the substitute replaces what
-intel was worth, rather than adding a floor the other kinds do not have. `fnc_search_claim` silences its own call into
-`fnc_intel_payout` outright for the related reason: announcing an empty search and then handing over a
-document says two different things about one draw.
+`fnc_search_claim` silences its own call into `fnc_intel_payout`, so a live reveal is reported in the
+searcher's voice rather than announced twice; the flat consolation above is spoken the same way when there is
+nothing left to reveal.
 
 `nothing` is a row rather than the absence of one, and a weight of zero is how a source opts out of a kind.
 The empty-handed line is per-source too, because a body that held nothing and a detainee who was carrying

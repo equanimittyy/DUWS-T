@@ -76,7 +76,7 @@ sleep 1;
 
 {
     if (!isNull _x) then {
-        [_x, "mission"] call fnc_search_flag_group;
+        [_x, "combat"] call fnc_search_flag_group;
     };
 } forEach [_group];
 {

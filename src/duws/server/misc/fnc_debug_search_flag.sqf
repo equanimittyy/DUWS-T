@@ -8,7 +8,7 @@
 */
 if (!isServer) exitWith {};
 
-params ["_caller", ["_target", objNull], ["_source", "garrison"]];
+params ["_caller", ["_target", objNull], ["_source", "combat"]];
 if (isNull _caller) exitWith {};
 
 // Re-checked here rather than trusted to the menu: this is reachable by remoteExec from any
@@ -24,8 +24,8 @@ if (_config isEqualTo []) exitWith {
     [format ["Search flag (debug)\n\nNo source named '%1' in DUWS_searchSources.", _source]] remoteExec ["hint", _caller];
 };
 
-// Stage one's roll is skipped rather than faked: waiting out an 8% garrison chance to reach the
-// payout under test is the whole reason this exists. Everything past the flag is the real path,
+// Stage one's roll is skipped rather than faked: waiting out the stage-one spawn chance to reach
+// the payout under test is the whole reason this exists. Everything past the flag is the real path,
 // so the claim is still taken on the server and still broadcast -- one search for the team.
 // Written locally first, then broadcast. An object with no network id -- a terrain building, a
 // wall, map clutter -- cannot carry a public variable, and the public form is the one that gets

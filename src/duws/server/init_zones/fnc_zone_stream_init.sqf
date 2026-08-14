@@ -238,7 +238,7 @@ DUWS_fnc_zoneManStatics = {
     // Searchable on the same terms as the rest of the garrison. A gunner is the one defender a
     // player is certain to have to kill, so leaving him unflagged made the objective itself the
     // least rewarding thing in the zone.
-    [_grp, "garrison"] call fnc_search_flag_group;
+    [_grp, "combat"] call fnc_search_flag_group;
     [_grp, _pos] call bis_fnc_taskDefend;
 };
 

@@ -3,7 +3,7 @@
 // per sample. The stage-one chance is reported rather than obeyed. Nothing else is faked.
 if (!isServer) exitWith {};
 
-params ["_caller", ["_source", "mission"]];
+params ["_caller", ["_source", "combat"]];
 if (isNull _caller) exitWith {};
 
 private _config = DUWS_searchSources getOrDefault [_source, []];

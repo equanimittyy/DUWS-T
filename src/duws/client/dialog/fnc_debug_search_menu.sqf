@@ -18,7 +18,7 @@ if (isNull _target) exitWith {
 // Named here because DUWS_searchSources is server-only and never broadcast. The server answers a
 // name it does not hold with a hint, so a source renamed out from under this list fails loudly
 // rather than flagging nothing.
-private _sources = ["garrison", "mission", "objective", "civ_frisk"];
+private _sources = ["combat", "objective", "civ_frisk"];
 
 private _rows = [];
 {

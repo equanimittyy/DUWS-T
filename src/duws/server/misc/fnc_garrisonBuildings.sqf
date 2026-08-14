@@ -50,7 +50,7 @@ _buildingGroup deleteGroupWhenEmpty true;
 
 [_buildingGroup, _selectedBuildings, _unitsPerBuilding, "AUTO"] call fnc_spreadIntoBuildings;
 
-[_buildingGroup, "garrison"] call fnc_search_flag_group;
+[_buildingGroup, "combat"] call fnc_search_flag_group;
 { [_x] call fnc_addRandomLoot } forEach units _buildingGroup;
 
 _buildingGroup

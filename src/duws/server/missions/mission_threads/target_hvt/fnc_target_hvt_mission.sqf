@@ -109,7 +109,7 @@ _wp2 setWaypointTimeout [30, 45, 60];
 
 {
     if (!isNull _x) then {
-        [_x, "mission"] call fnc_search_flag_group;
+        [_x, "combat"] call fnc_search_flag_group;
     };
 } forEach [_group];
 

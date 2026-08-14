@@ -18,7 +18,7 @@
 // shape consistently.
 if (!isServer) exitWith {};
 
-params ["_units", ["_source", "garrison"]];
+params ["_units", ["_source", "combat"]];
 
 private _config = DUWS_searchSources getOrDefault [_source, []];
 if (_config isEqualTo []) exitWith {
