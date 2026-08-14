@@ -15,12 +15,8 @@ if (!isServer) exitWith {};
 // left convert straight to a clock. Guarded on a live future deadline; a stale/unset global adds nothing.
 private _dl = missionNamespace getVariable ["DUWS_curDeadlineAt", -1];
 if (_dl > time) then {
-	private _clock = (daytime + (_dl - time) / 3600) mod 24;
-	private _h = floor _clock;
-	private _m = floor ((_clock - _h) * 60);
-	private _pad = { if (_this < 10) then { "0" + str _this } else { str _this } };
 	_description = _description
-		+ format [localize "STR_DUWS_T_mission_deadline_desc", format ["%1:%2", _h call _pad, _m call _pad]]
+		+ format [localize "STR_DUWS_T_mission_deadline_desc", [_dl] call fnc_time_clock]
 		+ "<br />";  // second break: blank line between the deadline line and the reward block
 
 	(missionNamespace getVariable ["DUWS_curReward", [0,0,0]]) params ["_cp", "_ap", "_rep"];

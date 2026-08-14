@@ -94,13 +94,15 @@ garrison via `fnc_town_garrison_tierAt`):
 fired near him, walks to his car and drives to the nearest zone >=1 km off; reaching it fails the
 mission. Three decoy cars -- one guaranteed his class, so the vehicle description never pins a single
 car -- scatter on random bearings when he boards. Car destroyed before he boards, and he arms a pistol
-and flees on foot as an open combatant. The leave timer counts `daytime`, not real seconds (see
-[`arma_engine_gotchas.md`](info/arma_engine_gotchas.md) on the two clocks).
+and flees on foot as an open combatant. His leave time is rolled in 10-minute steps on the playtime
+clock via `fnc_time_roll` -- the same shape and clock the mission deadline uses -- and shown in the
+briefing as a world clock via `fnc_time_clock` (so it reads like a deadline, e.g. 13:20, not a round
+:X0).
 
-Tunables (defaults, all in the thread): leave ~20 min friendly / ~10 min enemy of in-game time,
-snapped to the nearest 10-minute world-clock step so the departure lands on a round :X0; +16 crowd,
-zone-reach 60 m, rep-penalty radius +300 m, pistol `hgun_Rook40_F`, shots trigger = `FiredNear` on the
-informant, ask/bribe price 3. Not yet play-tested in-engine -- sqfvm covers parse + the pure helpers only.
+Tunables (defaults, all in the thread): leave 2 steps friendly / 1 step enemy (10-min steps via
+`fnc_time_roll`); +16 crowd, zone-reach 60 m, rep-penalty radius +300 m, pistol `hgun_Rook40_F`, shots
+trigger = `FiredNear` on the informant, ask/bribe price 3. Not yet play-tested in-engine -- sqfvm
+covers parse + the pure helpers only.
 
 ## Mission catalogue (how each actually plays)
 

@@ -1245,16 +1245,23 @@ which is why the arsenal and quick-kit overdraw strip can claw back a whole kit,
 
 ## `time` and `daytime` are different clocks; a world-clock timer cannot be built on `time`
 
-**`time` is real elapsed mission seconds — it advances with the simulation and is scaled by
-`setAccTime`, but the day/night cycle multiplier (`setTimeMultiplier`) does not touch it. `daytime`
-is the world clock in hours (0–24), which `setTimeMultiplier` speeds up or slows down. A campaign
-that accelerates the day therefore moves `daytime` far faster than `time`, so a timer meant to track
-the world clock — "the informant leaves at 11:00" — is wrong if it counts `time` seconds, and the
-mission deadline (`DUWS_curDeadlineAt = time + secs`, `fnc_mission_begin.sqf`) runs on the other
-clock entirely.**
+**`time` is real elapsed mission seconds — advanced by the simulation, scaled by `setAccTime`, but
+untouched by the day/night multiplier (`setTimeMultiplier`, which this mission exposes as
+`time_Multiplier`, 1–60×). `daytime` is the world clock in hours (0–24), which that multiplier speeds
+up. So at anything above 1× they diverge: `daytime` runs `time_Multiplier` times faster than `time`.**
 
-To wait a span of *in-game world time*, accumulate `daytime` deltas rather than sleeping real
-seconds, and add 24 on a negative delta so the count survives midnight:
+The mission's convention is to build every timed thing on `time`, in 10-minute steps, and only
+*render* it as a world clock: `fnc_time_roll [minSteps, maxSteps]` returns the seconds, callers add
+them to `time` (mission deadlines in `fnc_mission_begin.sqf`, the informant's leave), and
+`fnc_time_clock [target]` prints "HH:MM" as `(daytime + (target - time)/3600) mod 24`. That render
+assumes 1× — it is exact only when `daytime` tracks `time` — so above 1× the printed clock understates
+where the world clock will actually stand at the target. This is a tolerated approximation applied
+uniformly to every deadline, not a per-mission bug; keeping one clock for all timing is worth more
+than a clock string that is correct under a multiplier most players never raise.
+
+If a future feature genuinely needs a *true* world-clock timer (correct at any multiplier), do not
+count `time`; accumulate `daytime` deltas, adding 24 on a negative delta so the count survives
+midnight:
 
 ```sqf
 private _elapsed = 0;         // in-game seconds
@@ -1268,8 +1275,6 @@ while { _elapsed < _targetSecs } do {
 };
 ```
 
-Consequence to accept, not fix: under a time multiplier a world-clock timer and a `time`-based
-deadline drift apart — the world-clock span elapses in fewer real seconds than its number reads.
-Also, when formatting `daytime` into a clock string, round to whole minutes before splitting hours
-and minutes — `floor` on the raw float lands a minute short whenever the fractional hour sits just
-under an integer (10.20 h × 60 = 611.99 → `floor` 611 → 10:11, not 10:12).
+Either way, when formatting an hours value into a clock string, round to whole minutes before
+splitting h:mm — `floor` on the raw float lands a minute short whenever the fractional hour sits just
+under an integer (10.20 h × 60 = 611.99 → `floor` 611 → 10:11, not 10:12). `fnc_time_clock` does this.

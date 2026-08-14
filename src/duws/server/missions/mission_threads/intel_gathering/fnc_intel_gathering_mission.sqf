@@ -40,22 +40,11 @@ if (!([16, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_beg
 private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 
-// Leave timer runs on the in-game world clock (daytime), not real seconds: a campaign accelerating
-// the day/night cycle should move the informant's departure with it. A nominal minutes-to-leave is
-// snapped to the nearest 10-minute step so the departure the briefing prints -- and enforces -- lands
-// on a round :X0, the same 10-minute granularity the mission deadline rolls on. TUNABLE minutes.
-private _leaveMin = if (_enemyTown) then { 10 } else { 20 };
-private _step = 1/6;   // 10 in-game minutes, expressed in hours
-private _targetDay = (round ((daytime + _leaveMin / 60) / _step)) * _step;
-if (_targetDay <= daytime) then { _targetDay = _targetDay + _step };   // never at or behind now
-// In-game seconds from now to that world-clock mark; the exfil watcher counts daytime up to it.
-private _leaveSecs = ((_targetDay - daytime + 24) mod 24) * 3600;
-// Whole-minute round before splitting h:mm -- floor on the raw float lands a minute short when it
-// falls just under an integer (10.999h could read 10:60 without it).
-private _totalMin = round ((_targetDay mod 24) * 60);
-private _lh = (floor (_totalMin / 60)) mod 24;
-private _lm = _totalMin mod 60;
-private _clock = format ["%1%2:%3%4", ["0", ""] select (_lh >= 10), _lh, ["0", ""] select (_lm >= 10), _lm];
+// Leave built on the shared mission-timing shape (10-minute steps on the playtime clock, the same
+// shape and clock the deadline uses): enemy towns give one step, friendly two. TUNABLE steps.
+private _leaveSteps = if (_enemyTown) then { 1 } else { 2 };
+private _leaveAt = time + ([_leaveSteps] call fnc_time_roll);
+private _clock = [_leaveAt] call fnc_time_clock;
 
 // Escape destination: the nearest zone at least 1 km off, so the drive is a real leg and the fail is
 // reachable. No zone that far (a tiny map) falls back to a point 1.5 km out. TUNABLE.
@@ -214,18 +203,12 @@ if (isNil "DUWS_fnc_intel_footFlee") then {
 
 // Exfil watcher: hold until the leave clock elapses or a firefight starts, then get him out. Kept off
 // the main thread so the win/fail monitor below runs against it in parallel.
-[_informant, _informantCar, _decoys, _zx, _leaveSecs, _townPos] spawn {
-    params ["_inf", "_car", "_decoys", "_zx", "_leaveSecs", "_townPos"];
+[_informant, _informantCar, _decoys, _zx, _leaveAt, _townPos] spawn {
+    params ["_inf", "_car", "_decoys", "_zx", "_leaveAt", "_townPos"];
 
-    private _elapsed = 0;
-    private _last = daytime;
     waitUntil {
         sleep 2;
-        private _d = daytime - _last;
-        if (_d < 0) then { _d = _d + 24 };   // midnight wrap
-        _elapsed = _elapsed + _d * 3600;
-        _last = daytime;
-        (_elapsed >= _leaveSecs) || (_inf getVariable ["DUWS_intel_loud", false]) || !alive _inf
+        (time > _leaveAt) || (_inf getVariable ["DUWS_intel_loud", false]) || !alive _inf
     };
     if (!alive _inf) exitWith {};
 

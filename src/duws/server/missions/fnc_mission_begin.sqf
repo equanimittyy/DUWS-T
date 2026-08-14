@@ -47,12 +47,9 @@ private _missionDefs = [
 (_missionDefs select _missionType) params ["", "", "", "", "", "", "_mcp", "_map", "_mrep", "_mdl"];
 DUWS_curReward = [_mcp, _map, _mrep];
 _mdl params ["_dlMinH", "_dlMaxH"];
-// Fixed clock when the bounds meet; otherwise a random 10-minute step inside them. Rolled once, at
-// the mission's start, so the enforced deadline sits behind the band the map advertised.
-private _dlSecs = if (_dlMinH >= _dlMaxH) then { _dlMinH * 3600 } else {
-	private _steps = round ((_dlMaxH - _dlMinH) * 6);
-	(_dlMinH * 3600) + ((floor (random (_steps + 1))) * 600)
-};
-DUWS_curDeadlineAt = time + _dlSecs;
+// Rolled once at the mission's start, in 10-minute steps, so the enforced deadline sits behind the
+// band the map advertised. The hours in the table become steps here; fnc_time_roll is the shared
+// shape deadlines and timed triggers both use.
+DUWS_curDeadlineAt = time + ([round (_dlMinH * 6), round (_dlMaxH * 6)] call fnc_time_roll);
 
 true
