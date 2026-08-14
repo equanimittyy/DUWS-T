@@ -129,11 +129,18 @@ runs client-side in the picker, so it reads only broadcast state (`zone_namePOS_
 by the global site poller (`fnc_site_stream_init`), and waking it there would mean either widening a
 live occupant's buffer (wakes on mere proximity) or a shared-file present-hook -- both touch global
 streaming, and both hand the player a live garrison that wanders off the spot it is meant to be
-scouted at. Instead the thread runs its own streamer: a small faction element (`fnc_spawn_team`,
-`garrison` posture, `YELLOW` combat mode so it holds rather than chases an 800 m spotter) plus a tent
-anchor, raised when a player reaches the overwatch ring and stood down after they leave. It owns its
-spawns outright -- not claimed to the mission token -- so the end sweep has nothing of its to race.
-The global poller is never touched.
+scouted at. Instead the thread runs its own streamer: when a player reaches the overwatch ring it
+builds the target zone's OWN prefab -- the real structures and crewed statics, through the zone's own
+builder fn, resolved from the stored kind name (`DUWS_zoneKind_<key>`) via `fnc_zone_prefab_set` --
+plus two representative infantry teams (`fnc_spawn_team`, `YELLOW` so they hold rather than chase an
+800 m spotter) and one car (`fnc_spawn_vehicle`), teams and car alike on `closepatrol` around the
+position. The prefab is built a step (`PREFAB_OFFSET`)
+off the zone centre so its `zone_<x>_<y>` key (fnc_zone_key rounds the position) stays distinct from
+the real zone's -- releasing the recon copy must not retire the live zone. Teardown rides
+`fnc_mission_end`: the prefab through its compKey (`fnc_duws_release`), and the gunners, teams and car
+through the claimed-token sweep -- the builder crews its statics but orphans the gunners, so they are
+claimed by a proximity pass (the real zone is streamed out, so nothing else is there to catch). The
+global poller is never touched.
 
 **Observing.** The player-facing half (`client/missions/fnc_recon_observe_layer.sqf`, pushed to all
 clients JIP-keyed) draws a 3D "look here" icon over the target while the player is in the overwatch
@@ -149,10 +156,11 @@ see and fire, but the mission never auto-fails on detection.
 mission speaks its own line, not Overlord's AO-wide zone-spotted broadcast), then the standard CP/AP.
 
 Tunables (defaults, all in the thread): overwatch band 600-800 m and LOS range 900 m (finder + layer),
-observe area 75 m, hold 12 s, stream ring 200 m / despawn 300 m after 30 s empty, 2 `team`s at 100 m,
-tent `Land_TentDome_F`. Targets zones only for now -- hardpoint targeting (reveal via
-`fnc_hardpoint_reveal`) is a later add. Not yet play-tested in-engine -- sqfvm covers parse + the pure
-helpers only.
+observe area 75 m, hold 12 s, approach ring 200 m, 2 representative `team`s at 100 m and a car at
+150 m (all `closepatrol`), prefab offset 25 m off the centre, gunner-claim radius 60 m. Targets zones
+only for now --
+hardpoint targeting (reveal via `fnc_hardpoint_reveal`) is a later add. Not yet play-tested in-engine
+-- sqfvm covers parse + the pure helpers only.
 
 ## Mission catalogue (how each actually plays)
 
@@ -179,7 +187,7 @@ the campaign advances while their pay is fixed.
 | 3 | Destroy tower | sabotage | cmd | tower destroyed | tower **pre-broken to 0.8** | 400 | 2 | 20/30/0 |
 | 8 | Sabotage laptop | sabotage | cmd | one hold-action | compact, light verb | 200 | 1 | 10/36/0 |
 | 16 | Informant hunt | elimination | cmd | informant killed before he escapes | hunt in a town crowd; ask/ping or camp the car; decoys + car escape | 800 | 3 | 5/10/0 |
-| 17 | Recon overwatch | recon | cmd | hold binocular LOS on the target from the overwatch | mission-owned element streamed at the target only while observed; reveals the zone on the map | -- | 2 | 20/8/0 |
+| 17 | Recon overwatch | recon | cmd | hold binocular LOS on the target from the overwatch | mission-owned copy of the zone's own prefab (crewed statics) + representative teams + a roving car, raised on approach; reveals the zone | -- | 2 | 20/8/0 |
 | 14 | Protect civilian | defend | civ | -- | not yet analysed | -- | -- | 20/10/5 |
 | 15 | Transport IDAP | escort | civ | -- | not yet analysed | -- | -- | 20/10/5 |
 

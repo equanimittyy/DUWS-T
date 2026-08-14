@@ -37,9 +37,11 @@ if (isNil "DUWS_fnc_recon_los") then {
         params ["_p", "_tgt", "_range"];
         if ((_p distance2D _tgt) > _range) exitWith { false };
         private _eye = eyePos _p;   // ASL
-        // Aim height held in step with the finder and thread (target ground + 5), so a player cannot
-        // fail LOS at the very overwatch those two certified as clear.
-        private _to  = [_tgt select 0, _tgt select 1, (getTerrainHeightASL _tgt) + 5];
+        // Aim above the prefab's own structures (towers ~5 m, barriers ~2.5 m): the finder and thread
+        // certified LOS to +5 over empty ground, but the observed point now carries the recon's own
+        // composition, and a central piece would otherwise occlude the hold the overwatch was picked for.
+        // Higher is strictly more terrain-clear, so +8 keeps the +5 certification valid and clears the camp.
+        private _to  = [_tgt select 0, _tgt select 1, (getTerrainHeightASL _tgt) + 8];
         if (terrainIntersectASL [_eye, _to]) exitWith { false };
         (lineIntersectsSurfaces [_eye, _to, _p, vehicle _p]) isEqualTo []
     };
@@ -56,7 +58,7 @@ DUWS_recon_ehDraw = addMissionEventHandler ["Draw3D", {
     private _pct = round (DUWS_recon_progress * 100);
     private _label = if (_pct > 0) then { format ["OBSERVING %1%2", _pct, "%"] } else { "OBSERVE" };
     drawIcon3D ["\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa", [0.2, 1, 0.2, 0.8],
-        [_a select 0, _a select 1, 6], 1, 1, 0, _label, 1, 0.03, "TahomaB"];
+        [_a select 0, _a select 1, 8], 1, 1, 0, _label, 1, 0.03, "TahomaB"];
 }];
 
 // The hold. Accrues real elapsed time while the player stays in the area, glassing, with LOS; any break
