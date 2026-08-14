@@ -403,6 +403,19 @@ DUWS_fnc_arsenal_unstock = {
             }];
         };
 
+        // BIS builds the category lists from the virtual cargo as the display opens, before the stock
+        // above runs, so gear banked while the arsenal was shut (a quick-kit swap's deposit, a loot
+        // cache) is in the cargo but not in the already-built list. paintCounts only stamps existing
+        // rows, and the live-restock tick skips these (they are in _stockedForeign), so without this
+        // they stay hidden until a tab switch rebuilds the list or the arsenal is reopened. Insert each
+        // stocked class into its list now; DUWS_fnc_arsenal_insert dedups, so a class BIS did list is
+        // left alone, and forcePaint stamps the counts onto the new rows next frame.
+        if (_isRestricted && {count _addedForeign > 0}) then {
+            private _d = uiNamespace getVariable ["RscDisplayArsenal", displayNull];
+            { [_d, _x select 0] call DUWS_fnc_arsenal_insert; } forEach _addedForeign;
+            missionNamespace setVariable ["DUWS_arsenal_forcePaint", true];
+        };
+
         private _lastRestock = diag_tickTime;
         // Seeded to the open-time pool; the restock tick re-stamps counts whenever this diverges from
         // the live broadcast (a loot cache, a co-op peer's settle), which BIS never rebuilds a row for.
