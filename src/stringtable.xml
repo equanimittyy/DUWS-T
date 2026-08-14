@@ -3004,25 +3004,25 @@
                 <Chinesesimp>"霸王1-1"收到，务必带回它。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_DESC">
-                <Original>Mission Type: Recon&lt;br /&gt;An enemy informant is hiding among the townsfolk here. Find him and kill him before he leaves by car. In a friendly town the locals may point you to him; in a hostile one, watch the roads for his vehicle.</Original>
-                <English>Mission Type: Recon&lt;br /&gt;An enemy informant is hiding among the townsfolk here. Find him and kill him before he leaves by car. In a friendly town the locals may point you to him; in a hostile one, watch the roads for his vehicle.</English>
+                <Original>Mission Type: Recon&lt;br /&gt;An enemy informant is operating among the civilians in this town. Find and kill him before he slips out of the area by car. In a friendly town the locals can point you to him; in a hostile one, watch the roads for his vehicle.</Original>
+                <English>Mission Type: Recon&lt;br /&gt;An enemy informant is operating among the civilians in this town. Find and kill him before he slips out of the area by car. In a friendly town the locals can point you to him; in a hostile one, watch the roads for his vehicle.</English>
                 <Chinesesimp>敌人一个指挥部在我们的一次攻击行动后被打散了，他们正在收拾区域内的各类情报并逃脱。你的小队需要搜索区域内的建筑以获取情报物品。任务在15分钟后自动结束。(极低CP，极低AP)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_TASK">
-                <Original>An enemy informant is hiding among the civilians. Kill him before he escapes. He will leave at %1 — or sooner if shots are fired — in a %2.</Original>
-                <English>An enemy informant is hiding among the civilians. Kill him before he escapes. He will leave at %1 — or sooner if shots are fired — in a %2.</English>
+                <Original>An enemy informant is hiding among the civilians. Kill him before he escapes to %1. He will leave at %2, or sooner if shots are fired, in a %3.</Original>
+                <English>An enemy informant is hiding among the civilians. Kill him before he escapes to %1. He will leave at %2, or sooner if shots are fired, in a %3.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_BRIEF">
-                <Original>All units. An enemy informant is holed up in this town. Find him and put him down. He's set to leave at %1 in a %2, and he'll bolt early if shooting starts.</Original>
-                <English>All units. An enemy informant is holed up in this town. Find him and put him down. He's set to leave at %1 in a %2, and he'll bolt early if shooting starts.</English>
+                <Original>All units, an enemy informant is operating out of %1. Locate and eliminate him before he reaches %2 by vehicle. He is set to leave at %3 in a %4, and will displace early if a firefight breaks out.</Original>
+                <English>All units, an enemy informant is operating out of %1. Locate and eliminate him before he reaches %2 by vehicle. He is set to leave at %3 in a %4, and will displace early if a firefight breaks out.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_KILLED">
-                <Original>Informant's down. Good work. That's the mission.</Original>
-                <English>Informant's down. Good work. That's the mission.</English>
+                <Original>Informant's down. Good work Alpha 1-1.</Original>
+                <English>Informant's down. Good work Alpha 1-1.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_ESCAPED">
-                <Original>The informant slipped out of the area. Mission failed.</Original>
-                <English>The informant slipped out of the area. Mission failed.</English>
+                <Original>The informant has reached %1. Mission failed.</Original>
+                <English>The informant has reached %1. Mission failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_ASK_ACTION">
                 <Original>Ask about informant</Original>
@@ -3033,8 +3033,8 @@
                 <English>The informant is about %1 m %2 of you.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_ASK_GONE">
-                <Original>Him? Gone. You're too late.</Original>
-                <English>Him? Gone. You're too late.</English>
+                <Original>Him? I think I just saw him leave town heading %1.</Original>
+                <English>Him? I think I just saw him leave town heading %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_mission_cpap">
                 <Original>&lt;br /&gt;CP: %1&lt;br /&gt;AP: %2</Original>

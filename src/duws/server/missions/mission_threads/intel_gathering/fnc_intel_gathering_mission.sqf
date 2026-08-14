@@ -46,17 +46,26 @@ private _leaveSteps = if (_enemyTown) then { 1 } else { 2 };
 private _leaveAt = [_leaveSteps] call fnc_time_deadline;
 private _clock = [_leaveAt] call fnc_time_clock;
 
-// Escape destination: the nearest zone at least 1 km off, so the drive is a real leg and the fail is
-// reachable. No zone that far (a tiny map) falls back to a point 1.5 km out. TUNABLE.
+// Escape destination: the nearest named zone at least 1 km off, so the drive is a real leg, the fail
+// is reachable, and the zone can be named in the briefing. No zone that far (a tiny map) falls back to
+// a point 1.5 km out. TUNABLE.
 private _MINDIST = 1000;
 private _zx  = [];
+private _zoneName = "open country";
 private _zxD = 1e9;
 {
-    _x params ["", "_zp", ""];
+    _x params ["_zn", "_zp"];
     private _d = _zp distance2D _townPos;
-    if (_d >= _MINDIST && _d < _zxD) then { _zxD = _d; _zx = _zp };
-} forEach zone_meta_array;
+    if (_d >= _MINDIST && _d < _zxD) then { _zxD = _d; _zx = _zp; _zoneName = _zn };
+} forEach zone_namePOS_pairs;
 if (_zx isEqualTo []) then { _zx = _townPos getPos [1500, random 360] };
+
+private _townName = text (_locs select _townIndex);
+
+// The compass direction he heads when he leaves, for the civilian "saw him leave" line: the 16-point
+// bearing from the town to his destination.
+private _compass16 = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+private _leaveDir = _compass16 select (floor (((([_townPos, _zx] call BIS_fnc_dirTo) + 11.25) mod 360) / 22.5));
 
 // The getaway car, and three decoys that scatter when he drives so the described vehicle never points
 // at one car. One decoy is guaranteed his class, the other two random, so the description narrows the
@@ -72,7 +81,7 @@ private _vehName = getText (configFile >> "CfgVehicles" >> _informantClass >> "d
 private _radius = _townRadius max 200;
 private _markername2 = [_townPos, _radius] call fnc_missionMarkerData;
 private _taskID = format ["intel_informant_%1", round time];
-[_taskID, format [localize "STR_DUWS_T_INTEL_INFORMANT_TASK", _clock, _vehName], _mission_name, _townPos, "search"] call fnc_missionTaskCreate;
+[_taskID, format [localize "STR_DUWS_T_INTEL_INFORMANT_TASK", _zoneName, _clock, _vehName], _mission_name, _townPos, "search"] call fnc_missionTaskCreate;
 
 // Parks a car of a given class on a road point near the town, stripped of the free medkit vanilla
 // civilian cars carry, sitting where put rather than bounced to a clear spot.
@@ -157,6 +166,11 @@ _informant addEventHandler ["FiredNear", { (_this select 0) setVariable ["DUWS_i
 // broadcast flag the client-side ask action gates on.
 missionNamespace setVariable ["DUWS_intel_informant", _informant];
 missionNamespace setVariable ["DUWS_intel_townIndex", _townIndex];
+// Read server-side by fnc_intel_ask_reveal: town bounds tell "still here" from "has left", and the
+// leave direction is what a local reports once he is gone.
+missionNamespace setVariable ["DUWS_intel_townPos", _townPos];
+missionNamespace setVariable ["DUWS_intel_townRadius", _townRadius];
+missionNamespace setVariable ["DUWS_intel_leaveDir", _leaveDir];
 DUWS_intel_active = true;
 publicVariable "DUWS_intel_active";
 
@@ -199,7 +213,7 @@ if (isNil "DUWS_fnc_intel_footFlee") then {
     };
 };
 
-[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_INTEL_INFORMANT_BRIEF", _clock, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_INTEL_INFORMANT_BRIEF", _townName, _zoneName, _clock, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
 
 // Exfil watcher: hold until the leave clock elapses or a firefight starts, then get him out. Kept off
 // the main thread so the win/fail monitor below runs against it in parallel.
@@ -274,13 +288,14 @@ publicVariable "DUWS_intel_active";
 
 if (_outcome isEqualTo "WIN") then {
     [_taskID, "SUCCEEDED"] call fnc_missionTaskEnd;
-    [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_INTEL_INFORMANT_KILLED"] remoteExec ["fnc_duws_dialogue", 0];
+    [localize "STR_DUWS_T_allseer", [localize "STR_DUWS_T_INTEL_INFORMANT_KILLED"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
     [_townPos, _radius, ""] call fnc_mission_end;
     [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 } else {
     [_taskID, "FAILED"] call fnc_missionTaskEnd;
-    private _failKey = ["STR_DUWS_T_INTEL_INFORMANT_ESCAPED", "STR_DUWS_T_mission_deadline_fail"] select (_outcome isEqualTo "TIMEOUT");
-    [_failKey, {hint localize _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
+    // Both fails read the same way: on a timeout we simply assume he made it to the zone.
+    private _failText = format [localize "STR_DUWS_T_INTEL_INFORMANT_ESCAPED", _zoneName];
+    [_failText, {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
     [_townPos, _radius, ""] call fnc_mission_end;
 };
 

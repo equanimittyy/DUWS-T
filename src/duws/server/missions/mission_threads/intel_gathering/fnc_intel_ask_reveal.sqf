@@ -6,11 +6,17 @@ params ["_civilian", "_caller"];
 if (isNull _caller) exitWith {};
 
 private _inf = missionNamespace getVariable ["DUWS_intel_informant", objNull];
-if (isNull _inf || !alive _inf) exitWith {
-    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_INTEL_INFORMANT_ASK_GONE"] remoteExec ["fnc_duws_dialogue", _caller];
+private _townPos = missionNamespace getVariable ["DUWS_intel_townPos", [0, 0, 0]];
+private _townRadius = missionNamespace getVariable ["DUWS_intel_townRadius", 200];
+
+// Once he has left town -- driving out, or already gone -- the locals only know which way he went, not
+// where he is. A direction, not a live fix.
+if (isNull _inf || !alive _inf || {(_inf distance2D _townPos) > _townRadius}) exitWith {
+    private _leaveDir = missionNamespace getVariable ["DUWS_intel_leaveDir", ""];
+    [localize "STR_DUWS_T_civ", format [localize "STR_DUWS_T_INTEL_INFORMANT_ASK_GONE", _leaveDir]] remoteExec ["fnc_duws_dialogue", _caller];
 };
 
-// 16-point compass, offset by half a sector so each name spans its arc; distance to the nearest 5 m.
+// Still in town: a live bearing + distance from the asking player, to the nearest 5 m.
 private _dir = _caller getDir _inf;
 private _dist = round ((_caller distance2D _inf) / 5) * 5;
 private _pts = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
