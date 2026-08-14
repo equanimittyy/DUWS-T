@@ -55,8 +55,13 @@ private _fnc_notify = {
 // with an `Item_` ground variant go here: createVehicle needs one, and an item that lacks one
 // vanishes when a player drops it. Wallet_traitor lacks that variant, so it stays out and no
 // longer spawns at all.
-private _documents = ["Item_FlashDisk", "Item_SmartPhone", "Item_MobilePhone",
-    "Item_Files", "Item_Wallet_ID", "Item_FilesSecret"];
+//
+// Weighted, not uniform: cheap 1-CP items dominate and the guaranteed-reveal FilesSecret is rare,
+// so a search reveals the map on the order of once or twice per ten document draws rather than
+// every third. Weights are parallel to _documents.
+private _documents = ["Item_MobilePhone", "Item_Wallet_ID", "Item_SmartPhone",
+    "Item_FlashDisk", "Item_Files", "Item_FilesSecret"];
+private _documentWeights = [30, 30, 20, 10, 6, 4];
 
 // Hoisted because the main draw and the intel-exhausted fallback both pay it -- the draw a 1-3
 // roll, the fallback a flat 2 passed in. `call` shares the caller's scope, so it reads _fnc_report
@@ -76,7 +81,7 @@ private _payCp = {
 // One item, not a handful: three documents off one body is three searches' worth of CP for a
 // single search.
 private _payDocument = {
-    [[selectRandom _documents], _origin] call fnc_search_dropItems;
+    [[_documents selectRandomWeighted _documentWeights], _origin] call fnc_search_dropItems;
     [localize "STR_DUWS_T_LOOT2"] call _fnc_report;
 };
 
