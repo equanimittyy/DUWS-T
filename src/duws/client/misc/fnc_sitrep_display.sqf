@@ -31,6 +31,9 @@ private _opfZonesCount = count _opfZones;
 private _weather = if (!isNil "weather_type") then { weather_type } else { "" };
 private _timeOfDay = if (!isNil "time_of_day") then { time_of_day } else { 0 };
 private _fastTravel = if (!isNil "enable_fast_travel") then { enable_fast_travel } else { false };
+// %13 feeds a separate taxi-travel line the other-language SITREP strings print but English omits.
+// Mirror the one fast-travel toggle so the slot is defined and the lagging translations' arg order holds.
+private _chopper = _fastTravel;
 private _zeus = if (!isNil "ZeusStatus") then { ZeusStatus } else { 0 };
 private _stamina = if (!isNil "staminaEnabled") then { staminaEnabled } else { true };
 private _simpleZones = if (!isNil "simple_zones_enable") then { simple_zones_enable } else { false };
