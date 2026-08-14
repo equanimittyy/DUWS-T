@@ -56,7 +56,7 @@ DUWS_recon_ehDraw = addMissionEventHandler ["Draw3D", {
     if (!([player] call DUWS_fnc_recon_glassing)) exitWith {};
     private _a = DUWS_recon_anchorPos;
     private _pct = round (DUWS_recon_progress * 100);
-    private _label = if (_pct > 0) then { format ["OBSERVING %1%2", _pct, "%"] } else { "OBSERVE" };
+    private _label = if (_pct > 0) then { format ["Observing... (%1%2)", _pct, "%"] } else { "Observe" };
     drawIcon3D ["\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa", [0.2, 1, 0.2, 0.8],
         [_a select 0, _a select 1, 8], 1, 1, 0, _label, 1, 0.03, "TahomaB"];
 }];

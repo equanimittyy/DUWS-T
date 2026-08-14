@@ -4,12 +4,10 @@
 // position the player has not seen yet, so a zone already on the strategic map is no target -- the
 // reveal is the whole payoff.
 //
-// It returns the TARGET, not the overwatch, on purpose: fnc_mission_findSite keeps only `select 0`
-// of a finder's result, so the thread cannot be handed both. Re-deriving the target from an overwatch
-// position ("nearest unrevealed OPFOR zone") is ambiguous where zones sit close -- it can resolve to a
-// different zone than the one LOS was verified against, leaving the hold unwinnable. Handing back the
-// target makes the thread's re-derivation exact (distance ~0), and the thread computes the overwatch
-// itself with the fuller terrain+object check.
+// It returns the TARGET, not the overwatch, on purpose: fnc_mission_findSite keeps only `select 0` of a
+// finder's result, and re-deriving the target from an overwatch ("nearest unrevealed OPFOR zone") is
+// ambiguous where zones sit close -- it can pick a different zone than LOS was verified against and leave
+// the hold unwinnable. The target re-derives exactly; the thread computes the overwatch itself.
 //
 // Runs client-side inside the picker (client/missions/fnc_stratmap.sqf), so it reads only broadcast
 // state: zone_namePOS_pairs (name, pos, revealed -- published by fnc_zone_reveal) and

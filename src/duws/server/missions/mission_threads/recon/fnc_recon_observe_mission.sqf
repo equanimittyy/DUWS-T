@@ -31,22 +31,19 @@ params ["_MissionPos", "_mission_name"];
 #define PREFAB_OFFSET   25
 #define PREFAB_RADIUS   60
 
-// Target: the finder handed back a zone position as _MissionPos, so the nearest unrevealed OPFOR-held
-// zone to it is that zone (distance ~0) -- an exact re-derivation, not the ambiguous "nearest to an
-// overwatch" the finder avoids. If it was captured or revealed between offer and launch the next
-// nearest still resolves; with none left there is nothing to scout and the mission aborts. The exact
-// stored position is kept, not a copy -- fnc_zone_reveal matches its target by str(pos), so the reveal
-// below must hand back the same value the array holds.
+// Target: the finder returned the zone position as _MissionPos, so the nearest unrevealed OPFOR-held
+// zone to it is that zone -- an exact re-derivation, not the ambiguous "nearest to an overwatch". If it
+// was captured or revealed since the offer the next nearest resolves; none left aborts. The stored pos
+// is kept, not a copy -- fnc_zone_reveal matches its target by str(pos).
 private _pairs = missionNamespace getVariable ["zone_namePOS_pairs", []];
 private _enemyZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
 private _target = [];
-private _targetName = "";
 private _bestD = 1e9;
 {
-    _x params ["_zn", "_zp", "_revealed"];
+    _x params ["", "_zp", "_revealed"];
     if (!_revealed && {(_enemyZones findIf { _x distance2D _zp < 50 }) >= 0}) then {
         private _d = _zp distance2D _MissionPos;
-        if (_d < _bestD) then { _bestD = _d; _target = _zp; _targetName = _zn };
+        if (_d < _bestD) then { _bestD = _d; _target = _zp };
     };
 } forEach _pairs;
 if (_target isEqualTo []) exitWith {
@@ -57,12 +54,10 @@ if (!([17, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_beg
 private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 
-// The overwatch the player is sent to. Sample bearings across the friendly-facing arc at 600-800 m and
-// keep the one with clear line-of-sight to the target -- terrain (terrainIntersectASL, elevation) and
-// structures (lineIntersectsSurfaces) both -- and the greatest height advantage over it. Aimed a little
-// above the target's ground so the ray clears the lip of terrain it sits in. The finder confirmed a
-// terrain-clear bearing existed at offer time; if object occlusion has since closed every one, abort
-// rather than send the player to a spot they cannot scout from.
+// The overwatch. Sample bearings across the friendly-facing arc at 600-800 m and keep the one with
+// clear line-of-sight to the target -- terrain (terrainIntersectASL) and structures
+// (lineIntersectsSurfaces) both -- and the most height over it. The finder confirmed a terrain-clear
+// bearing existed; if object occlusion has since closed every one, abort rather than site a blind spot.
 private _tgtASL    = [_target select 0, _target select 1, (getTerrainHeightASL _target) + 5];
 private _tgtGround = getTerrainHeightASL _target;
 private _fAnchors = +(missionNamespace getVariable ["WARCOM_zones_controled_by_BLUFOR", []]);
@@ -90,11 +85,10 @@ if (_overwatch isEqualTo []) exitWith {
     [17, "STR_DUWS_T_crtzxs0j"] call fnc_mission_abort;
 };
 
-// What the player glasses: the zone's own prefab, built a short step off the centre toward the
-// overwatch. The offset does two things -- it keeps the prefab's zone_<x>_<y> key (fnc_zone_key rounds
-// the position) distinct from the real zone's, so releasing the recon copy cannot retire the live zone,
-// and it puts the structures fractionally nearer the player than the centre the overwatch LOS was
-// verified to, so line-of-sight only improves. The anchor (3D marker + hold LOS) rides the prefab.
+// The prefab, built a step off the zone centre toward the overwatch. The offset keeps its zone_<x>_<y>
+// key (fnc_zone_key rounds the position) distinct from the real zone's, so releasing the recon copy
+// cannot retire the live zone; it also sits the structures nearer the player than the centre the
+// overwatch was verified to, so LOS only improves. The anchor (3D marker + hold LOS) rides it.
 private _prefabPos = _target getPos [PREFAB_OFFSET, _target getDir _overwatch];
 private _prefabKey = [_prefabPos] call fnc_zone_key;
 private _anchor = _prefabPos;
@@ -112,7 +106,7 @@ private _kind = missionNamespace getVariable [format ["DUWS_zoneKind_%1", [_targ
 private _radius = OBS_AREA;
 private _markername = [_overwatch, _radius] call fnc_missionMarkerData;
 private _taskID = format ["recon_%1", round time];
-[_taskID, format [localize "STR_DUWS_T_RECON_OBSERVE_TASK", _targetName], _mission_name, _overwatch, "scout"] call fnc_missionTaskCreate;
+[_taskID, localize "STR_DUWS_T_RECON_OBSERVE_TASK", _mission_name, _overwatch, "scout"] call fnc_missionTaskCreate;
 
 // Mission-owned observe state. DUWS_recon_active is the broadcast switch every client half gates on and
 // the monitor clears at the end; DUWS_recon_done is the win flag the client success report raises.
@@ -124,13 +118,12 @@ publicVariable "DUWS_recon_active";
 // on end below, or the key would replay the layer at the next joiner after the mission is gone.
 [_overwatch, _anchor, OBS_AREA, OBS_RANGE, HOLD_TIME] remoteExec ["fnc_recon_observe_layer", 0, "DUWS_recon_layer_jip"];
 
-[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_RECON_OBSERVE_BRIEF", _targetName]] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_RECON_OBSERVE_BRIEF"] remoteExec ["fnc_duws_dialogue", 0];
 
-// The mission's own streamer. Waits for a player to reach the overwatch ring, then builds the element
-// once and exits -- at standoff there is something to scout without the global poller ever being asked.
-// Everything it raises is claimed to the mission token (or released by fnc_mission_end's compKey), so
-// there is no teardown loop here: the mission's exit collects it. Building at approach range, ~700 m
-// from the target, keeps the spawn off the player's magnified view.
+// The mission's own streamer: waits for a player to reach the overwatch ring, builds the element once
+// and exits -- standoff scouting without the global poller. No teardown loop; everything it raises is
+// claimed to the token or released by fnc_mission_end's compKey, so the mission's exit collects it.
+// Building ~700 m from the target keeps the spawn off the player's magnified view.
 [_target, _prefabPos, _builder, _overwatch] spawn {
     params ["_target", "_prefabPos", "_builder", "_overwatch"];
     waitUntil { sleep 3; !DUWS_recon_active || {(allPlayers findIf { alive _x && {(_x distance2D _overwatch) < SPAWN_R} }) >= 0} };
@@ -140,11 +133,10 @@ publicVariable "DUWS_recon_active";
     // WIN/fail exit hands to fnc_mission_end to release.
     [_prefabPos] call _builder;
 
-    // The builder crews its statics but hands the gunners to no owner, so claim the EAST men it just
-    // seated (unowned, on the prefab) to the mission token -- the end sweep then bins them with the
-    // composition rather than leaving live gunners standing on deleted guns. The real zone is streamed
-    // out at this range, so nothing but the recon's own gunners is here to catch. Claimed before the
-    // teams spawn, so this proximity pass sees only them.
+    // The builder crews its statics but leaves the gunners unowned, so claim the EAST men on the prefab
+    // to the token -- the sweep then bins them with the composition instead of leaving live gunners on
+    // deleted guns. The real zone is streamed out here, so only the recon's own gunners are in reach;
+    // done before the teams spawn so this proximity pass catches only them.
     private _gunners = allUnits select { (side _x == EAST) && {isNil {_x getVariable "DUWS_missionOwner"}} && {(_x distance2D _prefabPos) < PREFAB_RADIUS} };
     [_gunners] call fnc_mission_claim;
 
@@ -187,11 +179,11 @@ if (_outcome isEqualTo "WIN") then {
     // The payoff: the scouted zone comes up on the strategic map. Quiet reveal -- the line here is the
     // mission's own, not Overlord's AO-wide zone-spotted broadcast.
     ["ONE", _target, 0, true] call fnc_zone_reveal;
-    [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_RECON_OBSERVE_DONE", _targetName]] remoteExec ["fnc_duws_dialogue", 0];
+    [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_RECON_OBSERVE_DONE"] remoteExec ["fnc_duws_dialogue", 0];
     [_overwatch, _radius, _prefabKey] call fnc_mission_end;
     [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 } else {
     [_taskID, "FAILED"] call fnc_missionTaskEnd;
-    [format [localize "STR_DUWS_T_RECON_OBSERVE_FAILED", _targetName], {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
+    [localize "STR_DUWS_T_RECON_OBSERVE_FAILED", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
     [_overwatch, _radius, _prefabKey] call fnc_mission_end;
 };

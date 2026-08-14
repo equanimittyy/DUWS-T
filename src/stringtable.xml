@@ -2959,24 +2959,24 @@
                 <English>The informant has reached %1. Mission failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_DESC">
-                <Original>Mission Type: Recon&lt;br /&gt;An unscouted enemy position needs eyes on it. Move to the marked overwatch, raise your binoculars, and hold observation on the target until it is scouted. You have no cover of darkness or concealment guaranteed, so pick your ground. Scouting the position reveals the enemy zone on your map.</Original>
-                <English>Mission Type: Recon&lt;br /&gt;An unscouted enemy position needs eyes on it. Move to the marked overwatch, raise your binoculars, and hold observation on the target until it is scouted. You have no cover of darkness or concealment guaranteed, so pick your ground. Scouting the position reveals the enemy zone on your map.</English>
+                <Original>Mission Type: Recon&lt;br /&gt;An unscouted enemy position needs eyes on it. Move to the marked overwatch, raise your binoculars, and hold observation until Allseer confirms intel on the enemy position. Its location is then marked on your map.</Original>
+                <English>Mission Type: Recon&lt;br /&gt;An unscouted enemy position needs eyes on it. Move to the marked overwatch, raise your binoculars, and hold observation until Allseer confirms intel on the enemy position. Its location is then marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_TASK">
-                <Original>Reach the marked overwatch, raise your binoculars, and hold observation on %1 until it is scouted. The scouted zone is then revealed on your map.</Original>
-                <English>Reach the marked overwatch, raise your binoculars, and hold observation on %1 until it is scouted. The scouted zone is then revealed on your map.</English>
+                <Original>Reach the marked overwatch, raise your binoculars, and hold observation on the enemy position until Allseer confirms the intel. Its location is then marked on your map.</Original>
+                <English>Reach the marked overwatch, raise your binoculars, and hold observation on the enemy position until Allseer confirms the intel. Its location is then marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_BRIEF">
-                <Original>All units, we need eyes on %1. Move to the marked overwatch, glass the position, and hold observation until it is scouted.</Original>
-                <English>All units, we need eyes on %1. Move to the marked overwatch, glass the position, and hold observation until it is scouted.</English>
+                <Original>All units, we have an unscouted enemy position out there. Move to the marked overwatch and observe it through binoculars until Allseer confirms intel on the enemy position.</Original>
+                <English>All units, we have an unscouted enemy position out there. Move to the marked overwatch and observe it through binoculars until Allseer confirms intel on the enemy position.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_DONE">
-                <Original>Eyes-on confirmed. %1 is marked on your map. Good work Alpha 1-1.</Original>
-                <English>Eyes-on confirmed. %1 is marked on your map. Good work Alpha 1-1.</English>
+                <Original>Alpha 1-1, we've received your intel and have confirmed the enemy position. It's now marked on your map.</Original>
+                <English>Alpha 1-1, we've received your intel and have confirmed the enemy position. It's now marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_FAILED">
-                <Original>Recon on %1 timed out. Mission failed.</Original>
-                <English>Recon on %1 timed out. Mission failed.</English>
+                <Original>The recon timed out. Mission failed.</Original>
+                <English>The recon timed out. Mission failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_ASK_ACTION">
                 <Original>Ask about informant</Original>
