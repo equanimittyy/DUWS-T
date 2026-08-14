@@ -239,6 +239,9 @@ if ((["DUWS_Debug", 0] call BIS_fnc_getParamValue) == 1 && {(vehiclevarname play
 // Create Diary/Help entry on the Map
 [] spawn fnc_duws_help;
 
+// Campaign config readout -- its own Notes subject, spawned after the manual so it lists second.
+[] spawn fnc_duws_config;
+
 // Add HQ actions for REQUEST Players
 [bluHQ_object] spawn fnc_HQaddactions;
 
