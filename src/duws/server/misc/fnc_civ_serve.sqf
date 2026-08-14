@@ -38,9 +38,9 @@ switch (toUpper _row) do {
     };
 
     // The informant-hunt ask, reached only when its bribe was paid: the ping lives with the mission
-    // (fnc_intel_ask_reveal), reused here so a paid answer and a free one say the same thing.
+    // (fnc_informant_ask_reveal), reused here so a paid answer and a free one say the same thing.
     case "INFORMANT": {
-        [_civilian, _caller] call fnc_intel_ask_reveal;
+        [_civilian, _caller] call fnc_informant_ask_reveal;
     };
 
     // Clears captive and broadcasts it itself, so no client-side setCaptive pairs with this.

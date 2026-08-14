@@ -2937,59 +2937,9 @@
                 <English>Inventory full. Items dropped on the ground.</English>
                 <Chinesesimp>背包已满，物品已掉落在地面。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_GATHERING">
-                <Original>Intel Gathering</Original>
-                <English>Intel Gathering</English>
-                <Chinesesimp>情报搜集</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_GATHERING_TMLEFT">
-                <Original>Mission time remaining: 5 minutes</Original>
-                <English>Mission time remaining: 5 minutes</English>
-                <Chinesesimp>任务有效时间还剩5分钟</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_GATHERING1">
-                <Original>All units. Thirty minutes ago our assault hit an enemy command post in town. They're scrambling to recover the intel gear they left behind.</Original>
-                <English>All units. Thirty minutes ago our assault hit an enemy command post in town. They're scrambling to recover the intel gear they left behind.</English>
-                <Chinesesimp>战区所有单位。半小时前，我们的攻击行动击溃了敌人位于某城镇的临时指挥部，他们现在正在抢救他们部署在当地的情报设施。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_GATHERING2">
-                <Original>Alpha 1-1, you're running the follow-up assault on the post. Allseer 1-1, you'll process whatever intel Alpha 1-1 recovers and handle the rest.</Original>
-                <English>Alpha 1-1, you're running the follow-up assault on the post. Allseer 1-1, you'll process whatever intel Alpha 1-1 recovers and handle the rest.</English>
-                <Chinesesimp>行动组，你们负责稍后对于临时指挥部的再次进攻，"全视眼"，你们负责处理行动组带回来的情报以及任务后续工作。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_GATHERING3">
-                <Original>Copy.</Original>
-                <English>Copy.</English>
-                <Chinesesimp>收到命令。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_GATHERING4">
-                <Original>Grab as much intel as you can before the enemy clears it out. Bring vehicles if you can; the post covers a lot of ground.</Original>
-                <English>Grab as much intel as you can before the enemy clears it out. Bring vehicles if you can; the post covers a lot of ground.</English>
-                <Chinesesimp>在敌人带着情报撤离前带回越多情报越好。另外，搞几辆载具过去最好————那个临时指挥部覆盖的范围相当大。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_GATHERING5">
-                <Original>Roger that, moving out now.</Original>
-                <English>Roger that, moving out now.</English>
-                <Chinesesimp>明白了，我们待会就出发。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_GATHERING6">
-                <Original>Drone feeds show most of the enemy has pulled out of the post. Once you've got enough intel, extract and we'll call it a success.</Original>
-                <English>Drone feeds show most of the enemy has pulled out of the post. Once you've got enough intel, extract and we'll call it a success.</English>
-                <Chinesesimp>无人机显示大部分敌人都从临时指挥部撤离了。如果你们带回了足够多的情报就离开那里吧，任务可以宣布成功。</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_GATHERINGTS1">
-                <Original>Overlord. We've found a classified document, looks highly sensitive.</Original>
-                <English>Overlord. We've found a classified document, looks highly sensitive.</English>
-                <Chinesesimp>呃...我们发现了一份疑似高度机密的情报文件</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_GATHERINGTS2">
-                <Original>Copy. Bring it back, whatever it takes.</Original>
-                <English>Copy. Bring it back, whatever it takes.</English>
-                <Chinesesimp>"霸王1-1"收到，务必带回它。</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_DESC">
-                <Original>Mission Type: Recon&lt;br /&gt;An enemy informant is operating among the civilians in this town. Find and kill him before he slips out of the area by car. Be advised that hostile locals will not offer you any information, and it is advisable you wait for his departure.&lt;br /&gt;&lt;br /&gt;Note: Killing the informant too close to town (300m) will cause reputational damage with the locals.</Original>
-                <English>Mission Type: Recon&lt;br /&gt;An enemy informant is operating among the civilians in this town. Find and kill him before he slips out of the area by car. Be advised that hostile locals will not offer you any information, and it is advisable you wait for his departure.&lt;br /&gt;&lt;br /&gt;Note: Killing the informant too close to town (300m) will cause reputational damage with the locals.</English>
+                <Original>Mission Type: Elimination&lt;br /&gt;An enemy informant is operating among the civilians in this town. Find and kill him before he slips out of the area by car. Be advised that hostile locals will not offer you any information, and it is advisable you wait for his departure.&lt;br /&gt;&lt;br /&gt;Note: Killing the informant too close to town (300m) will cause reputational damage with the locals.</Original>
+                <English>Mission Type: Elimination&lt;br /&gt;An enemy informant is operating among the civilians in this town. Find and kill him before he slips out of the area by car. Be advised that hostile locals will not offer you any information, and it is advisable you wait for his departure.&lt;br /&gt;&lt;br /&gt;Note: Killing the informant too close to town (300m) will cause reputational damage with the locals.</English>
                 <Chinesesimp>敌人一个指挥部在我们的一次攻击行动后被打散了，他们正在收拾区域内的各类情报并逃脱。你的小队需要搜索区域内的建筑以获取情报物品。任务在15分钟后自动结束。(极低CP，极低AP)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_TASK">
@@ -3043,11 +2993,6 @@
             <Key ID="STR_DUWS_T_mission_deadline_fail">
                 <Original>Mission failed: you ran out of time.</Original>
                 <English>Mission failed: you ran out of time.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_GATHERING_NO_BUILDINGS">
-                <Original>Not enough suitable buildings in the area. Mission cancelled.</Original>
-                <English>Not enough suitable buildings in the area. Mission cancelled.</English>
-                <Chinesesimp>区域内可用建筑不足，任务已取消。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_ACTION">
                 <Original>Analyse Intel</Original>
@@ -3782,8 +3727,8 @@
                 <German>Sturmkommandozentrale</German>
                 <Spanish>Puesto de Mando de Asalto</Spanish>
                 <Chinesesimp>突击指挥部</Chinesesimp>
-                <Original>Assault Command Post</Original>
-                <English>Assault Command Post</English>
+                <Original>Eliminate the Informant</Original>
+                <English>Eliminate the Informant</English>
             </Key>
             <Key ID="STR_DUWS_T_missioncleanup">
                 <German>Missionsbereiniger</German>

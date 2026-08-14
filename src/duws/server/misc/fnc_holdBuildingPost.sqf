@@ -14,7 +14,7 @@
 // in its houses and be collected on distance instead of walking out. So the loop stands down the
 // moment its post is released.
 //
-// _stance "" leaves the caller's stance alone. intel_gathering picks UP or MIDDLE per unit, and
+// _stance "" leaves the caller's stance alone. The informant hunt picks UP or MIDDLE per unit, and
 // re-asserting one stance here would flatten every prone-ish unit to standing.
 params ["_unit", "_building", "_positions", ["_stance", ""]];
 

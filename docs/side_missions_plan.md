@@ -30,7 +30,7 @@ Today the picker (`fnc_stratmap`) chooses every offer's position with one generi
 and hands it to the thread, which can only refine locally (`fnc_mission_launch.sqf:22-23` → the
 thread's `fnc_mission_site`). A mission cannot demand terrain that fits it: intel needs a
 ≥20-building town, but the picker never looks for one, so intel is offered on open ground and then
-aborts *after* the player picks (`fnc_intel_gathering_mission.sqf:9`).
+aborts *after* the player picks (`fnc_informant_mission.sqf:9`).
 
 **Model -- propose and accept.** The picker keeps generating candidate positions with its existing
 weighting (easy offers repelled from zones/hardpoints via `_fnUrbanWeight`; hard offers pulled deep
@@ -61,16 +61,16 @@ the 7 drawn get offered), never an unbounded search.
 1. Dispatch + generic finder + the picker gate, behaviour-preserving (generic accepts every
    candidate, so a mission without a finder draws exactly as before).
 2. Intel -- done: reworked into an informant hunt with its own town finder (see
-   [§Intel gathering: informant hunt](#intel-gathering-informant-hunt)).
+   [§Informant hunt](#informant-hunt)).
 3. Other missions gain finders as their reworks require.
 
-## Intel gathering: informant hunt
+## Informant hunt
 
-The recon mission is a manhunt, not a building sweep. An OPFOR informant hides disguised among a
+The informant mission is a manhunt, not a building sweep. An OPFOR informant hides disguised among a
 town's civilians; the player finds and kills him before he leaves by car for a distant zone. Thread:
-`src/duws/server/missions/mission_threads/intel_gathering/fnc_intel_gathering_mission.sqf`.
+`src/duws/server/missions/mission_threads/informant/fnc_informant_mission.sqf`.
 
-**Siting.** `fnc_intel_gathering_site` (the per-type finder) accepts a picker candidate only where a
+**Siting.** `fnc_informant_site` (the per-type finder) accepts a picker candidate only where a
 live Tomata civil town sits within 2.5 km *and* an OPFOR-held zone sits at least 1 km off (the
 informant's escape, below), returning that town's centre; civilians off / RAVAGE / WBK, or a town with
 no enemy zone to flee to, reject -- so the offer is dropped rather than sited where it cannot play out.
@@ -130,7 +130,7 @@ the campaign advances while their pay is fixed.
 | 0 | Rescue squad | rescue | cmd | reach squad (100m) | **no escort back** -- ends on arrival | 300 | 2 | 45/24/0 |
 | 3 | Destroy tower | sabotage | cmd | tower destroyed | tower **pre-broken to 0.8** | 400 | 2 | 20/30/0 |
 | 8 | Sabotage laptop | sabotage | cmd | one hold-action | compact, light verb | 200 | 1 | 10/36/0 |
-| 16 | Intel gathering | recon | cmd | informant killed before he escapes | hunt in a town crowd; ask/ping or camp the car; decoys + car escape | 800 | 3 | 5/10/0 |
+| 16 | Informant hunt | elimination | cmd | informant killed before he escapes | hunt in a town crowd; ask/ping or camp the car; decoys + car escape | 800 | 3 | 5/10/0 |
 | 14 | Protect civilian | defend | civ | -- | not yet analysed | -- | -- | 20/10/5 |
 | 15 | Transport IDAP | escort | civ | -- | not yet analysed | -- | -- | 20/10/5 |
 
@@ -156,7 +156,7 @@ recovered. Proposed column is a starting point, not decided.
 | Rescue squad | 2 | 45/24 | 18/18 | **biggest overpay today** |
 | Destroy tower | 2 | 20/30 | 16/18 | gimme (pre-broken) |
 | Sabotage laptop | 1 | 10/36 | 18/16 | AP was overpaid for one hold-action |
-| Intel gathering | 3 | 5/10 | -- | now a real manhunt, not passive income; reprice after play-test |
+| Informant hunt | 3 | 5/10 | -- | now a real manhunt, not passive income; reprice after play-test |
 
 ## Per-mission rework tracker
 
@@ -179,7 +179,7 @@ Gameplay-change ideas below come from the play-through analysis; all are unconfi
 | Rescue squad | proposed | add an escort-back leg so effort matches a rescue | idea |
 | Destroy tower | proposed | spawn the tower intact so destruction is real work | idea |
 | Sabotage laptop | proposed | fine as a quick mission; keep light | idea |
-| Intel gathering | proposed | reworked into an informant manhunt (see §Intel gathering: informant hunt) | done |
+| Informant hunt | proposed | reworked into an informant manhunt (see §Informant hunt) | done |
 
 ## Open decisions
 

@@ -9,20 +9,20 @@ if (!isServer) exitWith {};
 params ["_civilian", "_caller"];
 if (isNull _civilian || isNull _caller || !alive _civilian) exitWith {};
 if (_caller distance _civilian > 3) exitWith {};
-if (_civilian getVariable ["DUWS_intel_asked", false]) exitWith {};
+if (_civilian getVariable ["DUWS_informant_asked", false]) exitWith {};
 // No live hunt -> nothing to ask about.
-if (isNull (missionNamespace getVariable ["DUWS_intel_informant", objNull])) exitWith {};
+if (isNull (missionNamespace getVariable ["DUWS_informant_unit", objNull])) exitWith {};
 
 // Claimed before the roll and broadcast, so two players at the same civilian in co-op cannot both
 // spend it.
-_civilian setVariable ["DUWS_intel_asked", true, true];
+_civilian setVariable ["DUWS_informant_asked", true, true];
 
 private _rep = [_civilian getVariable ["civ_locIndex", -1]] call fnc_civ_repAt;
 ([_rep] call fnc_civ_reaction_weights) params ["_accept", "_bribe"];
 private _roll = random 1;
 
 if (_roll < _accept) exitWith {
-    [_civilian, _caller] call fnc_intel_ask_reveal;
+    [_civilian, _caller] call fnc_informant_ask_reveal;
     [_civilian] call fnc_civ_resume;
 };
 

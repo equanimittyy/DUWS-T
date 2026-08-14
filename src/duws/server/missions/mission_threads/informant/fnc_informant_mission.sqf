@@ -1,12 +1,12 @@
 // Locality: server -- callers remoteExec to target 2.
 //
 // Informant hunt. An OPFOR informant hides disguised among a town's civilians; the player locates and
-// kills him before he leaves by car for a distant zone. The site-finder (fnc_intel_gathering_site)
+// kills him before he leaves by car for a distant zone. The site-finder (fnc_informant_site)
 // guarantees _MissionPos is a populated Tomata town, so this thread never has to test for one.
 //
 // Two shapes, chosen by the town's reputation band:
 //   friendly/neutral -- the crowd is thickened and every civilian can be asked about the informant
-//                       (fnc_intel_ask_addAction, added in the ask-action layer); the player narrows
+//                       (fnc_informant_ask_addAction, added in the ask-action layer); the player narrows
 //                       him down by talking, and has time.
 //   enemy            -- no asking; the informant leaves much sooner, so the player camps the
 //                       described vehicle and intercepts.
@@ -87,7 +87,7 @@ private _vehName = getText (configFile >> "CfgVehicles" >> _informantClass >> "d
 // player has to go on while the spawn runs.
 private _radius = _townRadius max 200;
 private _markername2 = [_townPos, _radius] call fnc_missionMarkerData;
-private _taskID = format ["intel_informant_%1", round time];
+private _taskID = format ["informant_%1", round time];
 [_taskID, format [localize "STR_DUWS_T_INTEL_INFORMANT_TASK", _zoneName, _clock, _vehName], _mission_name, _townPos, "search"] call fnc_missionTaskCreate;
 
 // Parks a car of a given class on a road point near the town, stripped of the free medkit vanilla
@@ -156,7 +156,7 @@ _allUnits pushBack _informant;
 // the road is free, one in the crowd is not. Nearest town within its edge + 300 m pays -1. TUNABLE.
 _informant addEventHandler ["Killed", {
     params ["_unit"];
-    _unit setVariable ["DUWS_intel_dead", true];
+    _unit setVariable ["DUWS_informant_dead", true];
     private _p = getPosATL _unit;
     private _tl = missionNamespace getVariable ["civ_locations", []];
     private _tr = missionNamespace getVariable ["civ_radii", []];
@@ -167,19 +167,19 @@ _informant addEventHandler ["Killed", {
     };
 }];
 // A firefight near him is the signal to run, in either branch.
-_informant addEventHandler ["FiredNear", { (_this select 0) setVariable ["DUWS_intel_loud", true] }];
+_informant addEventHandler ["FiredNear", { (_this select 0) setVariable ["DUWS_informant_loud", true] }];
 
-// The informant object stays server-side (the reveal reads it there); DUWS_intel_active is the
+// The informant object stays server-side (the reveal reads it there); DUWS_informant_active is the
 // broadcast flag the client-side ask action gates on.
-missionNamespace setVariable ["DUWS_intel_informant", _informant];
-missionNamespace setVariable ["DUWS_intel_townIndex", _townIndex];
-// Read server-side by fnc_intel_ask_reveal: town bounds tell "still here" from "has left", and the
+missionNamespace setVariable ["DUWS_informant_unit", _informant];
+missionNamespace setVariable ["DUWS_informant_townIndex", _townIndex];
+// Read server-side by fnc_informant_ask_reveal: town bounds tell "still here" from "has left", and the
 // leave direction is what a local reports once he is gone.
-missionNamespace setVariable ["DUWS_intel_townPos", _townPos];
-missionNamespace setVariable ["DUWS_intel_townRadius", _townRadius];
-missionNamespace setVariable ["DUWS_intel_leaveDir", _leaveDir];
-DUWS_intel_active = true;
-publicVariable "DUWS_intel_active";
+missionNamespace setVariable ["DUWS_informant_townPos", _townPos];
+missionNamespace setVariable ["DUWS_informant_townRadius", _townRadius];
+missionNamespace setVariable ["DUWS_informant_leaveDir", _leaveDir];
+DUWS_informant_active = true;
+publicVariable "DUWS_informant_active";
 
 // Thicken the crowd only where the player can work it -- a friendly/neutral town he can walk. Each
 // added civilian is a real town local (same index, so harming one costs the town), and gets the ask
@@ -194,16 +194,16 @@ if (!_enemyTown) then {
             _crowd pushBack _c;
             _allUnits pushBack _c;
             // JIP-keyed on the civilian so a client that connects mid-hunt still gets the action.
-            [_c] remoteExec ["fnc_intel_ask_addAction", 0, _c];
+            [_c] remoteExec ["fnc_informant_ask_addAction", 0, _c];
         };
     };
 };
-missionNamespace setVariable ["DUWS_intel_crowd", _crowd];
+missionNamespace setVariable ["DUWS_informant_crowd", _crowd];
 
 // Foot flight: car gone, so he drops the disguise, pulls a pistol and runs for the zone as an open
 // combatant. Faction-agnostic sidearm for now.
-if (isNil "DUWS_fnc_intel_footFlee") then {
-    DUWS_fnc_intel_footFlee = {
+if (isNil "DUWS_fnc_informant_footFlee") then {
+    DUWS_fnc_informant_footFlee = {
         params ["_inf", "_dest"];
         if (!alive _inf) exitWith {};
         _inf setCaptive false;
@@ -229,7 +229,7 @@ if (isNil "DUWS_fnc_intel_footFlee") then {
 
     waitUntil {
         sleep 2;
-        (time > _leaveAt) || (_inf getVariable ["DUWS_intel_loud", false]) || !alive _inf
+        (time > _leaveAt) || (_inf getVariable ["DUWS_informant_loud", false]) || !alive _inf
     };
     if (!alive _inf) exitWith {};
 
@@ -245,7 +245,7 @@ if (isNil "DUWS_fnc_intel_footFlee") then {
     };
 
     if (!_boarded) exitWith {
-        if (alive _inf) then { [_inf, _zx] call DUWS_fnc_intel_footFlee };
+        if (alive _inf) then { [_inf, _zx] call DUWS_fnc_informant_footFlee };
     };
 
     // He is away: the decoys break in random directions away from town (never toward the zone), so
@@ -272,7 +272,7 @@ if (isNil "DUWS_fnc_intel_footFlee") then {
     // Car killed under him mid-drive and he lives: onto foot, armed.
     waitUntil { sleep 2; !alive _car || !alive _inf || (_inf distance2D _zx) < 60 };
     if ((alive _inf) && !alive _car && !(_inf in _car)) then {
-        [_inf, _zx] call DUWS_fnc_intel_footFlee;
+        [_inf, _zx] call DUWS_fnc_informant_footFlee;
     };
 };
 
@@ -281,17 +281,17 @@ private _deadline = DUWS_curDeadlineAt;
 private _outcome = "";
 waitUntil {
     sleep 2;
-    if ((_informant getVariable ["DUWS_intel_dead", false]) || !alive _informant) exitWith { _outcome = "WIN"; true };
+    if ((_informant getVariable ["DUWS_informant_dead", false]) || !alive _informant) exitWith { _outcome = "WIN"; true };
     if (!isNull _informant && {(_informant distance2D _zx) < 60}) exitWith { _outcome = "ESCAPED"; true };
     if (time > _deadline) exitWith { _outcome = "TIMEOUT"; true };
     false
 };
 
 [_markername2] call fnc_missionMarkerClear;
-missionNamespace setVariable ["DUWS_intel_informant", objNull];
-missionNamespace setVariable ["DUWS_intel_crowd", []];
-DUWS_intel_active = false;
-publicVariable "DUWS_intel_active";
+missionNamespace setVariable ["DUWS_informant_unit", objNull];
+missionNamespace setVariable ["DUWS_informant_crowd", []];
+DUWS_informant_active = false;
+publicVariable "DUWS_informant_active";
 
 if (_outcome isEqualTo "WIN") then {
     [_taskID, "SUCCEEDED"] call fnc_missionTaskEnd;

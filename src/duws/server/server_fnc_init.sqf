@@ -130,12 +130,12 @@ fnc_sabotage_laptop_mission = compile preprocessFileLineNumbers "duws\server\mis
 fnc_sabotage_laptop_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\sabotage_laptop\fnc_sabotage_laptop_success.sqf";
 fnc_destroy_cache_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_cache\fnc_destroy_cache_mission.sqf";
 fnc_destroy_radar_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_radar\fnc_destroy_radar_mission.sqf";
-fnc_intel_gathering_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\intel_gathering\fnc_intel_gathering_mission.sqf";
-publicVariable "fnc_intel_gathering_mission";
-fnc_intel_gathering_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\intel_gathering\fnc_intel_gathering_site.sqf";publicVariable "fnc_intel_gathering_site";
-fnc_intel_ask_addAction = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\intel_gathering\fnc_intel_ask_addAction.sqf";publicVariable "fnc_intel_ask_addAction";
-fnc_intel_ask_request = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\intel_gathering\fnc_intel_ask_request.sqf";
-fnc_intel_ask_reveal = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\intel_gathering\fnc_intel_ask_reveal.sqf";
+fnc_informant_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_mission.sqf";
+publicVariable "fnc_informant_mission";
+fnc_informant_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_site.sqf";publicVariable "fnc_informant_site";
+fnc_informant_ask_addAction = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_ask_addAction.sqf";publicVariable "fnc_informant_ask_addAction";
+fnc_informant_ask_request = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_ask_request.sqf";
+fnc_informant_ask_reveal = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_ask_reveal.sqf";
 // CIVILIAN FUNCTIONS
 fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_init_Tomata.sqf";
 fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_setup_array.sqf";

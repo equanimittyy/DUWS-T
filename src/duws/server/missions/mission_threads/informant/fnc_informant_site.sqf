@@ -1,4 +1,4 @@
-// Site-finder for the intel mission (informant hunt): accepts a picker candidate only where a
+// Site-finder for the informant hunt: accepts a picker candidate only where a
 // populated civilian town sits, and returns that town's centre. The hunt needs a crowd to hide the
 // informant in and the Tomata town-reputation system for the "ask about informant" roll, so any map
 // or mode without it -- civilians off, RAVAGE, WBK -- rejects every candidate and the offer is

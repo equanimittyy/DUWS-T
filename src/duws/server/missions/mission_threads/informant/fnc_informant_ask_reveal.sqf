@@ -1,18 +1,18 @@
 // Locality: server. The informant ping: a hint to the asking player giving the informant's bearing
 // and distance from where they stand, so walking and asking around triangulates him. Reached from the
-// reaction roll (fnc_intel_ask_request) and from a paid bribe (fnc_civ_serve's INFORMANT case).
+// reaction roll (fnc_informant_ask_request) and from a paid bribe (fnc_civ_serve's INFORMANT case).
 if (!isServer) exitWith {};
 params ["_civilian", "_caller"];
 if (isNull _caller) exitWith {};
 
-private _inf = missionNamespace getVariable ["DUWS_intel_informant", objNull];
-private _townPos = missionNamespace getVariable ["DUWS_intel_townPos", [0, 0, 0]];
-private _townRadius = missionNamespace getVariable ["DUWS_intel_townRadius", 200];
+private _inf = missionNamespace getVariable ["DUWS_informant_unit", objNull];
+private _townPos = missionNamespace getVariable ["DUWS_informant_townPos", [0, 0, 0]];
+private _townRadius = missionNamespace getVariable ["DUWS_informant_townRadius", 200];
 
 // Once he has left town -- driving out, or already gone -- the locals only know which way he went, not
 // where he is. A direction, not a live fix.
 if (isNull _inf || !alive _inf || {(_inf distance2D _townPos) > _townRadius}) exitWith {
-    private _leaveDir = missionNamespace getVariable ["DUWS_intel_leaveDir", ""];
+    private _leaveDir = missionNamespace getVariable ["DUWS_informant_leaveDir", ""];
     [localize "STR_DUWS_T_civ", format [localize "STR_DUWS_T_INTEL_INFORMANT_ASK_GONE", _leaveDir]] remoteExec ["fnc_duws_dialogue", _caller];
 };
 

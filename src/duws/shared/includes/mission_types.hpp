@@ -54,4 +54,4 @@
 ["fnc_domination_mission",       "STR_DUWS_T_c13", "STR_DUWS_T_domination", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Domination",               { [13] call fnc_mission_launch }, 10, 30, 0, [3,3], "command", "assault"],
 ["fnc_protect_civ_mission",      "STR_DUWS_T_c14", "STR_DUWS_T_protectciv", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Protect civilian",         { [14] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "defend"],
 ["fnc_transport_IDAP_mission",   "STR_DUWS_T_c15", "STR_DUWS_T_transIDAP",  "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Transport IDAP",           { [15] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "escort"],
-["fnc_intel_gathering_mission",  "STR_DUWS_T_c16", "STR_DUWS_T_INTEL_INFORMANT_DESC", "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Intel gathering", { [16] call fnc_mission_launch }, 5, 10, 0, [3,3], "command", "recon"]
+["fnc_informant_mission",        "STR_DUWS_T_c16", "STR_DUWS_T_INTEL_INFORMANT_DESC", "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Eliminate informant", { [16] call fnc_mission_launch }, 5, 10, 0, [3,3], "command", "elimination"]
