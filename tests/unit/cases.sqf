@@ -406,13 +406,14 @@ opfor_STATIC_ARR_X = ["cls_gun", "cls_variant"];
     (["opfor_STATIC_ARR_X"] call fnc_faction_pick), "cls_gun"] call fnc_assertEq;
 
 // --- fnc_faction_poolable_keys: which roles fnc_faction_pools_publish gives a pool ---
-// Pooling (a random draw per spawn) is for man and vehicle roles, which field interchangeable
-// variants. A static holds one canonical piece, and a random draw there risks an import/proxy
-// variant that clears detection's scope gate yet cannot be createVehicle'd -- a gunless emplacement.
+// Pooling (a random draw per spawn) is for vehicle roles only: spawn variety is deliberately a
+// vehicle feature, so a man role collapses to its single detected representative. A static holds one
+// canonical piece, and a random draw there risks an import/proxy variant that clears detection's
+// scope gate yet cannot be createVehicle'd -- a gunless emplacement.
 // The gate reads the kind column of the schema, so it tracks whatever the schema files as a static.
 DUWS_faction_poolableKeys = nil;                   // force a fresh build off the schema
 private _poolable = call fnc_faction_poolable_keys;
-["poolable_keys: an infantry role is poolable", "opfor_SOLDIER_X" in _poolable, true] call fnc_assertEq;
+["poolable_keys: an infantry role is not poolable", "opfor_SOLDIER_X" in _poolable, false] call fnc_assertEq;
 ["poolable_keys: a vehicle role is poolable", "opfor_APC1_X" in _poolable, true] call fnc_assertEq;
 ["poolable_keys: a static role is not poolable", "opfor_TURRET_AT" in _poolable, false] call fnc_assertEq;
 ["poolable_keys: a key the schema does not carry is not poolable", "opfor_MADEUP_X" in _poolable, false] call fnc_assertEq;
