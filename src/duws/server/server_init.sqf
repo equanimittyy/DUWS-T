@@ -237,13 +237,7 @@ if (ZeusStatus != 0) then {
 
 // Set the date/time AFTER setting the current weather
 setDate [2035, 8, 3, time_of_day, 0];
-	
-	
-// Speed up Time
-if (time_Multiplier > 1) then {
-	setTimeMultiplier time_Multiplier;
-};
-	
+
 if (CIV_PRESENCE == "RAVAGE") then {
     [] spawn fnc_night_horde_event;
 };

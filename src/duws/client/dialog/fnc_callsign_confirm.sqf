@@ -59,5 +59,5 @@ chosen_settings = true;publicVariable "chosen_settings";
     "HeavyArmor", "AttackHeli",
     "weather_type", "dynamic_weather_enable", "restricted_arsenal", "escalation_enabled",
     "hardcore_mode_enable", "insurgent_mode_enable", "enable_fast_travel",
-    "CIV_PRESENCE", "ZeusStatus", "time_of_day", "time_Multiplier", "player_fatigue"
+    "CIV_PRESENCE", "ZeusStatus", "time_of_day", "player_fatigue"
 ];

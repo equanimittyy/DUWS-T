@@ -66,8 +66,8 @@ publicVariable "escalation_multiplier";
 
 // Every second the census is up is a frozen frame, so the first frame the player can actually
 // see is the one after this clears -- the banner reads as a flash. Held with the game live
-// instead, and after the state above is set so nothing waits on it. uiSleep, not sleep:
-// setTimeMultiplier is applied long before this and would scale a delay this short to nothing.
+// instead, and after the state above is set so nothing waits on it. uiSleep, not sleep: it is
+// measured in real time, so the banner holds its full 1.5s regardless of the sim clock.
 uiSleep 1.5;
 [""] remoteExec ["fnc_map_prompt", [0,-2] select isDedicated];
 

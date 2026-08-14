@@ -153,7 +153,6 @@ private _forcesBody = ("FORCES, ECONOMY & WORLD" call _hdr)
     + ("World & Rules" call _sub) + ([
     ["Weather", _weather],
     ["Time of Day", _tod],
-    ["Time Acceleration", format ["%1x", "time_Multiplier" call _S]],
     ["Civilians", _civ],
     ["Zeus", _zeus],
     ["Fast Travel", ["enable_fast_travel"] call _yn],

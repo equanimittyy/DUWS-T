@@ -873,20 +873,6 @@
                 <Original>Define what level of Zeus is allowed</Original>
                 <English>Define what level of Zeus is allowed</English>
             </Key>
-            <Key ID="STR_DUWS_T_9f7m3bn3">
-                <German>Zeit-Multiplikator</German>
-                <Spanish>Multiplicador de tiempo</Spanish>
-                <Chinesesimp>时间倍数</Chinesesimp>
-                <Original>Time Multiplier</Original>
-                <English>Time Multiplier</English>
-            </Key>
-            <Key ID="STR_DUWS_T_6kdpe8ew">
-                <German>Zeitbeschleunigung (Diese Funktion ist im Mehrspielermodus nicht langfristig nutzbar)</German>
-                <Spanish>Acelerar el tiempo (Esta función no se puede mantener en modo multijugador)</Spanish>
-                <Chinesesimp>加快时间(这个功能在多人模式无法长期实现)</Chinesesimp>
-                <Original>Speed Up Time (This feature is not supported in multiplayer)</Original>
-                <English>Speed Up Time (This feature is not supported in multiplayer)</English>
-            </Key>
             <Key ID="STR_DUWS_T_bm4k1vwo">
                 <German>Simplere Zonen</German>
                 <Spanish>Zonas simples</Spanish>
@@ -1414,9 +1400,8 @@
 					\nTime of Day: %6
 					\nFast Travel: %7
 					\nZeus Visibility: %8
-					\nTime Mult: %9
-					\nSimple Zones: %10
-					\nCiv Presence: %11
+					\nSimple Zones: %9
+					\nCiv Presence: %10
 				</Original>
                 <English>
 					MISSION INITIALIZATION COMPLETE
@@ -1430,9 +1415,8 @@
 					\nTime of Day: %6
 					\nFast Travel: %7
 					\nZeus Visibility: %8
-					\nTime Mult: %9
-					\nSimple Zones: %10
-					\nCiv Presence: %11
+					\nSimple Zones: %9
+					\nCiv Presence: %10
 				</English>
             </Key>
             <Key ID="STR_DUWS_T_37xxl2nt">
@@ -7286,8 +7270,8 @@
 					\nAIRCRAFT: %6
 					\n\nYou Have %2 Command Points
 					\n\nLocal Town Standing: %9
-					\nFriendly Army Power: %3 (Tier %20)
-					\nEnemy Army Power: %4 (Tier %21)
+					\nFriendly Army Power: %3 (Tier %19)
+					\nEnemy Army Power: %4 (Tier %20)
 					\n\nBLUFOR Zones: %7
 					\nOPFOR Zones: %8
 					\nPrimary Target: %10
@@ -7296,9 +7280,8 @@
 					\nFast Travel: %14
 					\nZeus Visibility: %15
 					\nStamina: %16
-					\nTime Mult: %17
-					\nSimple Zones: %18
-					\nCiv Presence: %19
+					\nSimple Zones: %17
+					\nCiv Presence: %18
 				</Original>
                 <English>SITREP:
 					\n\nTOTAL UNITS: %1
@@ -7306,8 +7289,8 @@
 					\nAIRCRAFT: %6
 					\n\nYou Have %2 Command Points
 					\n\nLocal Town Standing: %9
-					\nFriendly Army Power: %3 (Tier %20)
-					\nEnemy Army Power: %4 (Tier %21)
+					\nFriendly Army Power: %3 (Tier %19)
+					\nEnemy Army Power: %4 (Tier %20)
 					\n\nBLUFOR Zones: %7
 					\nOPFOR Zones: %8
 					\nPrimary Target: %10
@@ -7316,9 +7299,8 @@
 					\nFast Travel: %14
 					\nZeus Visibility: %15
 					\nStamina: %16
-					\nTime Mult: %17
-					\nSimple Zones: %18
-					\nCiv Presence: %19
+					\nSimple Zones: %17
+					\nCiv Presence: %18
 				</English>
             </Key>
             <Key ID="STR_DUWS_T_b68ftbvf">

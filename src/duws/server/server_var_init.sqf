@@ -338,9 +338,6 @@ simple_zones_enable = false;publicVariable "simple_zones_enable";
 
 apocalypse_mode = false; publicVariable "apocalypse_mode";
 
-// time_Multiplier
-time_Multiplier = 1;publicVariable "time_Multiplier";
-
 // STARTING ARMY POWER
 WARCOM_blufor_ap = 0;publicVariable "WARCOM_blufor_ap";
 WARCOM_opfor_ap = 0;publicVariable "WARCOM_opfor_ap";

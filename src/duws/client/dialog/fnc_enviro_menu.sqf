@@ -63,17 +63,6 @@ index_escalation_true = lbAdd [2106, localize "STR_DUWS_T_vk37aebo"];
 [2106, index_escalation_true] call _setDefault;
 // =========================================
 
-// TIME MULITPLIER
-index_timemult_1 = lbAdd [2107, "1x"];
-index_timemult_2 = lbAdd [2107, "2x"];
-index_timemult_4 = lbAdd [2107, "4x"];
-index_timemult_8 = lbAdd [2107, "8x"];
-index_timemult_16 = lbAdd [2107, "16x"];
-index_timemult_24 = lbAdd [2107, "24x"];
-index_timemult_32 = lbAdd [2107, "32x"];
-index_timemult_60 = lbAdd [2107, "60x"];
-[2107, index_timemult_1] call _setDefault;
-
 // ENABLE SIMPLE ZONES
 index_simpzones_false = lbAdd [2108, localize "STR_DUWS_T_x4zs3lsg0"];
 index_simpzones_true = lbAdd [2108, localize "STR_DUWS_T_vk37aebo"];
@@ -157,7 +146,7 @@ index_hardcore_true = lbAdd [2110, localize "STR_DUWS_T_vk37aebo"];
 // longer a contiguous 2100-range, so the restore zips stored values against an explicit idc list
 // that MUST stay in lockstep with the snapshot in fnc_process_enviro_menu.sqf.
 if (!isNil "duws_enviro_sel") then {
-    private _idcs = [2100,2101,2102,2103,2104,2106,2107,2108,2109,2110];
+    private _idcs = [2100,2101,2102,2103,2104,2106,2108,2109,2110];
     { lbSetCurSel [_idcs select _forEachIndex, _x]; } forEach duws_enviro_sel;
 };
 
@@ -182,7 +171,7 @@ private _display = uiNamespace getVariable ["duws_startup_display", displayNull]
         if (duws_preset_applying) exitWith {};
         lbSetCurSel [2200, duws_preset_custom];
     }];
-} forEach [2100,2101,2102,2103,2104,2106,2107,2108,2109,2110];
+} forEach [2100,2101,2102,2103,2104,2106,2108,2109,2110];
 
 duws_preset_applying = false;
 // Writes the description line under the row. Re-applies the preset too, which is a no-op:

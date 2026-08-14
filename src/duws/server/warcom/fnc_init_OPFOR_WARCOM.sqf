@@ -164,7 +164,7 @@ sleep 1;
     [{hint format[localize "STR_DUWS_T_7mog9k78",
         zones_number,zones_max_radius,zones_min_radius,zones_max_dist_from_hq,
         weather_type,time_of_day,enable_fast_travel,
-        ZeusStatus,time_Multiplier,simple_zones_enable,CIV_PRESENCE
+        ZeusStatus,simple_zones_enable,CIV_PRESENCE
     ]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
     [{[
         [

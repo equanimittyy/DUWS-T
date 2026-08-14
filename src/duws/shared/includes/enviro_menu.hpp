@@ -190,30 +190,11 @@ class startup_dialog
             h = 1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_escalation_tooltip";
         };
-        class time_multiplier_frame: RscFrame
-        {
-            idc = 1808;
-            text = "$STR_DUWS_T_9f7m3bn3";
-            x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 13.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 18.5 * GUI_GRID_W;
-            h = 2.5 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_6kdpe8ew";
-        };
-        class time_multiplier_combo: RscCombo
-        {
-            idc = 2107;
-            x = 1.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 14.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 17.5 * GUI_GRID_W;
-            h = 1 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_6kdpe8ew";
-        };
         class simple_zones_frame: RscFrame
         {
             idc = 1809;
             text = "$STR_DUWS_T_bm4k1vwo";
-            x = 20.5 * GUI_GRID_W + GUI_GRID_X;
+            x = 1 * GUI_GRID_W + GUI_GRID_X;
             y = 13.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 18.5 * GUI_GRID_W;
             h = 2.5 * GUI_GRID_H;
@@ -222,7 +203,7 @@ class startup_dialog
         class simple_zones_combo: RscCombo
         {
             idc = 2108;
-            x = 21 * GUI_GRID_W + GUI_GRID_X;
+            x = 1.5 * GUI_GRID_W + GUI_GRID_X;
             y = 14.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 17.5 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
@@ -232,8 +213,8 @@ class startup_dialog
         {
             idc = 1810;
             text = "$STR_DUWS_T_psaz6ueo";
-            x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 16.5 * GUI_GRID_H + GUI_GRID_Y;
+            x = 20.5 * GUI_GRID_W + GUI_GRID_X;
+            y = 13.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 18.5 * GUI_GRID_W;
             h = 2.5 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_5qklarv1";
@@ -241,8 +222,8 @@ class startup_dialog
         class civ_type_combo: RscCombo
         {
             idc = 2109;
-            x = 1.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 17.5 * GUI_GRID_H + GUI_GRID_Y;
+            x = 21 * GUI_GRID_W + GUI_GRID_X;
+            y = 14.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 17.5 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_5qklarv1";
@@ -251,7 +232,7 @@ class startup_dialog
         {
             idc = 1811;
             text = "$STR_DUWS_T_uxvi77tr";
-            x = 20.5 * GUI_GRID_W + GUI_GRID_X;
+            x = 1 * GUI_GRID_W + GUI_GRID_X;
             y = 16.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 18.5 * GUI_GRID_W;
             h = 2.5 * GUI_GRID_H;
@@ -260,7 +241,7 @@ class startup_dialog
         class hardcore_mode_combo: RscCombo
         {
             idc = 2110;
-            x = 21 * GUI_GRID_W + GUI_GRID_X;
+            x = 1.5 * GUI_GRID_W + GUI_GRID_X;
             y = 17.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 17.5 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;

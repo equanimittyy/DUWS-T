@@ -76,8 +76,7 @@ private _pass = 0;
 while {true} do {
     // Interruptible interval, not a flat sleep: a forced sweep asked for just after a pass began
     // waiting would otherwise sit out the whole interval, and a debug button that does nothing
-    // for ten seconds reads as broken. Gated on time rather than a counted poll so the interval
-    // still tracks setTimeMultiplier exactly as the sleep it replaces did.
+    // for ten seconds reads as broken.
     private _nextPass = time + 10;
     waitUntil { sleep 0.5; DUWS_cleanup_force || {time >= _nextPass} };
 

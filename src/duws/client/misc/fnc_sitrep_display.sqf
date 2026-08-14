@@ -33,12 +33,11 @@ private _timeOfDay = if (!isNil "time_of_day") then { time_of_day } else { 0 };
 private _fastTravel = if (!isNil "enable_fast_travel") then { enable_fast_travel } else { false };
 private _zeus = if (!isNil "ZeusStatus") then { ZeusStatus } else { 0 };
 private _stamina = if (!isNil "staminaEnabled") then { staminaEnabled } else { true };
-private _timeMult = if (!isNil "time_Multiplier") then { time_Multiplier } else { 1 };
 private _simpleZones = if (!isNil "simple_zones_enable") then { simple_zones_enable } else { false };
 private _civ = if (!isNil "CIV_PRESENCE") then { CIV_PRESENCE } else { "NONE" };
 // The ladder tier beside each side's Army Power wallet: the pool figure alone stops describing
 // capability the moment spending starts, so the readout prints what each side has reached as well as
-// what it holds. Appended as args 20/21 so the existing 1-19 order the other languages rely on is
+// what it holds. Appended as args 19/20 so the existing 1-18 order the other languages rely on is
 // untouched; only the English string references the new placeholders.
 private _bluTier = if (!isNil "WARCOM_blufor_tier") then { WARCOM_blufor_tier } else { 0 };
 private _opfTier = if (!isNil "WARCOM_opfor_tier") then { WARCOM_opfor_tier } else { 0 };
@@ -47,6 +46,6 @@ hint format [localize "STR_DUWS_T_jjl0pm74",
     _aliveAllUnits, _cp, _bluAp, _opfAp, _aliveAllTanks, _aliveAllAir,
     _bluZones, _opfZonesCount, _rep, _primary_target,
     _weather, _timeOfDay, _chopper, _fastTravel,
-    _zeus, _stamina, _timeMult, _simpleZones, _civ,
+    _zeus, _stamina, _simpleZones, _civ,
     _bluTier, _opfTier
 ];

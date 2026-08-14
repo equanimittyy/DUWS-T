@@ -3,7 +3,7 @@
 // Must read before closeDialog while the controls still exist.
 // idc list MUST stay in lockstep with the restore in fnc_enviro_menu.sqf: position, not idc value,
 // is the join key between snapshot and restore.
-duws_enviro_sel = [2100,2101,2102,2103,2104,2106,2107,2108,2109,2110] apply { lbCurSel _x };
+duws_enviro_sel = [2100,2101,2102,2103,2104,2106,2108,2109,2110] apply { lbCurSel _x };
 // Same reason: the civilian row carries its CIV_PRESENCE value as item data, and that has to come
 // off the control while the control is still there.
 private _civValue = lbData [2109, lbCurSel 2109];
@@ -88,20 +88,6 @@ _index = lbCurSel 2106;
 escalation_enabled = (_index == index_escalation_true);
 publicVariable "escalation_enabled";
 
-// ENABLE TIME MULTI
-_index = lbCurSel 2107;
-switch (_index) do
-{
-    case index_timemult_1: { time_Multiplier = 1; };
-    case index_timemult_2: { time_Multiplier = 2; };
-    case index_timemult_4: { time_Multiplier = 4; };
-    case index_timemult_8: { time_Multiplier = 8; };
-    case index_timemult_16: { time_Multiplier = 16; };
-    case index_timemult_24: { time_Multiplier = 24; };
-    case index_timemult_32: { time_Multiplier = 32; };
-    case index_timemult_60: { time_Multiplier = 60; };
-};
-
 // ENABLE SIMPLE ZONES
 _index = lbCurSel 2108;
 switch (_index) do
@@ -136,7 +122,6 @@ publicVariable "weather_type";
 publicVariable "time_of_day";
 publicVariable "enable_fast_travel";
 publicVariable "ZeusStatus";
-publicVariable "time_Multiplier";
 publicVariable "simple_zones_enable";
 publicVariable "CIV_PRESENCE";
 publicVariable "restricted_arsenal";
