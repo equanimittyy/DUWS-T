@@ -25,9 +25,9 @@
 // (protect_civ, transport_IDAP), but a future civilian mission need not pay REP, nor a command one be
 // barred from it. No consumer branches on it yet -- it exists to let one differentiate the two sets.
 //
-// objective is the mission's archetype -- what the player does to win, the axis that will drive the
-// reward tier: elimination, assault, sabotage, requisition, rescue, defend, escort, recon. Orthogonal
-// to category (who issues it). Read from the win condition, not the name: "Destroy armour" succeeds on
+// objective is the mission's archetype -- what the player does to win: elimination, assault, sabotage,
+// requisition, rescue, defend, escort, recon. Orthogonal to category (who issues it). Read from the win
+// condition, not the name: "Destroy armour" succeeds on
 // killing the tank commander, so it is elimination; "Destroy tower" drops a fixed installation like the
 // radar and cache missions, so sabotage. No consumer branches on it yet.
 //
