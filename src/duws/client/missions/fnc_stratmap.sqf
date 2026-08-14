@@ -63,282 +63,52 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   private _easyCount = _missionDraw - _hardCount;
   private _hardOffers = [];   // [name, depth-from-friendly] per hard offer -> multiplier after the loop
 
-  // Weighting for the anchor search. A request is drawn onto the frontline -- the seam where
-  // friendly-held ground (HQ, FOBs, captured zones) meets OPFOR-held ground -- with a broad enough
-  // spread that offers straddle it into both sides rather than piling on one point. The fortified
-  // positions push back: a zone hard, a hardpoint gently, so an offer lands in the no-man's-land near
-  // the objectives without dropping onto one. As zones fall the seam advances with the front. Reads the
-  // same ownership and hardpoint stores the map readout uses; the friendly-AoI exclusion is server-side.
-  // Easy offers use this seam weighting; hard offers instead route to _fnHardScore below -- deep, hugging
-  // enemy zones/hardpoints, no repulsion.
-  private _frontWidth = 0.3;     // frontline spread: half-weight this fraction either side of the seam; larger spreads wider
-  private _zoneRepel   = 1200;   // zone-edge standoff the weight fights for, metres -- aggressive
-  private _hpRepel     = 300;    // hardpoint standoff the weight fights for, metres -- soft
-  private _frontierBand = 2000;  // metres past an OPFOR zone edge the countryside search spans
-
-  // Hard-offer scoring: deep behind friendly lines, surrounded by enemy placements, behind a gauntlet.
-  // Easy offers never read these -- they only feed _fnHardScore.
-  private _depthScale  = 1500;   // depth half-weight distance from friendly-held ground, metres
-  private _densRadius  = 1500;   // hard cutoff: only enemy zones/hardpoints within this of the spot feed the "surrounded" score, metres. Nothing in range -> the offer is dropped
-  private _gauntCorr   = 400;    // approach-corridor half-width, metres -- enemy features inside it gate the objective
-  private _hardBand    = 800;    // countryside: metres past a chosen zone edge a hard objective may drift; tighter than the easy band, to hug the cluster
-
+  // Anchors for the hard-offer depth calc below: friendly-held ground is HQ, FOBs, and captured
+  // zones. The placement weighting that used to live here -- frontline seam, deep-enemy score, the
+  // OPFOR-zone band search, the finder handshake -- now lives in server/missions/fnc_mission_findSite,
+  // called per offer below, so the debug force tool sites through the same logic instead of a copy.
   private _bluHeld = if (isNil "WARCOM_zones_controled_by_BLUFOR") then {[]} else {WARCOM_zones_controled_by_BLUFOR};
   private _friendlyAnchors = +_bluHeld;
   if (!(PosOfBLUHQ isEqualTo [])) then { _friendlyAnchors pushBack PosOfBLUHQ };
   if (!(isNil "Array_of_FOBpos")) then { { _friendlyAnchors pushBack _x } forEach Array_of_FOBpos };
 
-  // Repulsor footprints as [pos, radius]: every zone by its own radius, every live hardpoint as a
-  // point (radius 0). Precomputed once -- ownership and the hardpoint registry are fixed for the few
-  // seconds this picker runs.
-  private _zoneFoot = zone_meta_array apply {_x params ["", "_zp", "_zs"]; [_zp, _zs]};
-  private _hpFoot = if (isNil "DUWS_hardpoints") then {[]} else {DUWS_hardpoints apply {[_x select 1, 0]}};
-
-  // OPFOR-held zones: candidates for the countryside branch, and the enemy reference the urban weight
-  // measures toward. A zone is OPFOR unless its centre sits in the BLUFOR-held list -- the same
-  // control test the capture triggers and the AoI field use.
-  private _opforZoneCands = [];
-  {
-      _x params ["", "_zp", "_zs"];
-      if ((_bluHeld findIf {(_x distance2D _zp) < 1}) < 0) then {
-          _opforZoneCands pushBack [[_zp, _zs], _zp];
-      };
-  } forEach zone_meta_array;
-  private _opforCenters = _opforZoneCands apply {_x select 1};
-
-  // Enemy attractors for the hard score as [pos, radius]: OPFOR zones by their own radius, hardpoints as
-  // points. The repulsors above keep easy offers off these; hard offers are pulled toward them, so the
-  // same stores read with opposite sign. The radius lets the density score measure distance to a zone's
-  // edge, not its centre, so a large zone reads as near from farther out.
-  private _enemyPts = (_opforZoneCands apply {[_x select 1, (_x select 0) select 1]}) + _hpFoot;
-
-  // Soft repulsion from a footprint set: 0 on top of the nearest feature's edge, 0.5 at _scale beyond
-  // it, approaching 1 far out. A larger _scale fights harder and from farther. Empty set -> 1 (no push).
-  private _fnRepel = {
-      params ["_pos", "_feats", "_scale"];
-      if (_feats isEqualTo []) exitWith {1};
-      private _d = 0 max (selectMin (_feats apply {(_pos distance2D (_x select 0)) - (_x select 1)}));
-      _d / (_d + _scale)
-  };
-
-  // [_cands, _fnWeight] -> one item. _cands are [item, pos] pairs; _fnWeight scores a position in
-  // [0,1]. All weights zero (or no candidates) -> flat random, so a degenerate map never returns nil.
-  // The weight blocks read _friendlyAnchors / _opforCenters / the repel sets from this scope -- valid
-  // because call keeps the picker's locals in view down the stack.
-  private _fnPick = {
-      params ["_cands", "_fnWeight"];
-      private _items = _cands apply {_x select 0};
-      if (_items isEqualTo []) exitWith {objNull};
-      private _weights = _cands apply {(_x select 1) call _fnWeight};
-      if ((_weights findIf {_x > 0}) < 0) exitWith {selectRandom _items};
-      _items selectRandomWeighted _weights
-  };
-
-  // Perpendicular distance from feature _f to the approach segment _a->_p, plus the raw projection
-  // parameter _t (0 at _a, 1 at _p). Lets the hard score spot enemy features straddling the approach.
-  private _fnSegDist = {
-      params ["_a", "_p", "_f"];
-      private _dx = (_p select 0) - (_a select 0);
-      private _dy = (_p select 1) - (_a select 1);
-      private _len2 = _dx*_dx + _dy*_dy;
-      if (_len2 < 1) exitWith {[_f distance2D _a, 0]};   // _a ~ _p: no meaningful approach line
-      private _t = (((_f select 0) - (_a select 0))*_dx + ((_f select 1) - (_a select 1))*_dy) / _len2;
-      private _tc = 0 max (_t min 1);
-      private _cx = (_a select 0) + _tc*_dx;
-      private _cy = (_a select 1) + _tc*_dy;
-      [sqrt ((((_f select 0)-_cx)^2) + (((_f select 1)-_cy)^2)), _t]
-  };
-
-  // Hard-offer score. Density of nearby enemy placements leads and gates: a spot with no enemy zone or
-  // hardpoint within _densRadius scores 0 and is never offered, so hard missions stop landing isolated.
-  // Depth behind friendly lines and an approach gauntlet only rank the survivors. selectRandomWeighted
-  // normalises, so magnitudes only need to rank. No repulsors: hard offers hug the enemy; the 400 m
-  // fnc_pos_claimed gate still keeps them off a zone.
-  private _fnHardScore = {
-      private _pos = _this;
-
-      // Surrounded by enemy placements -- the lead term and the gate. Linear falloff to the zone edge,
-      // summed over every placement inside _densRadius; a hard cutoff, so distant zones no longer leak in
-      // through a fat tail. Squared below, so a spot ringed by several placements far outweighs one that
-      // merely grazes a single edge. Empty sum -> isolated -> dropped.
-      private _dens = 0;
-      {
-          private _de = 0 max ((_pos distance2D (_x select 0)) - (_x select 1));
-          if (_de < _densRadius) then { _dens = _dens + (1 - _de / _densRadius) };
-      } forEach _enemyPts;
-      if (_dens <= 0) exitWith {0};
-
-      // Deep behind friendly lines -- a mild tiebreak among the surrounded spots, not a rescue for lonely ones.
-      private _fDists = if (_friendlyAnchors isEqualTo []) then {[]} else {_friendlyAnchors apply {_pos distance2D _x}};
-      private _dFri = if (_fDists isEqualTo []) then {_depthScale} else {selectMin _fDists};
-      private _fDepth = _dFri / (_dFri + _depthScale);
-
-      // Run the gauntlet -- enemy features straddling the approach from the nearest friendly anchor.
-      private _fGaunt = 0.2;
-      if !(_fDists isEqualTo []) then {
-          private _a = _friendlyAnchors select (_fDists find _dFri);
-          {
-              ([_a, _pos, _x select 0] call _fnSegDist) params ["_perp", "_t"];
-              if (_perp < _gauntCorr && _t > 0.15 && _t < 0.95) then {
-                  _fGaunt = _fGaunt + (1 - _perp / _gauntCorr);
-              };
-          } forEach _enemyPts;
-      };
-
-      (_dens ^ 2) * (0.15 + _fDepth) * _fGaunt
-  };
-
-  // Urban weight (easy offers): a bell peaked on the seam. enemyness is 0 in the friendly rear, 0.5 on the
-  // seam, ->1 deep in enemy ground; the bell peaks on 0.5 and thins toward either extreme (never zero, so
-  // the spread survives), then zones push hard and hardpoints gently. Hard offers exit early to _fnHardScore.
-  private _fnUrbanWeight = {
-      private _pos = _this;
-      if (_hard) exitWith { _pos call _fnHardScore };
-      private _dFri = if (_friendlyAnchors isEqualTo []) then {1e6} else {selectMin (_friendlyAnchors apply {_pos distance2D _x})};
-      private _dOpf = if (_opforCenters isEqualTo []) then {_dFri} else {selectMin (_opforCenters apply {_pos distance2D _x})};
-      private _enemyness = _dFri / ((_dFri + _dOpf) max 1);
-      private _front = 1 / (1 + (((_enemyness - _peakEnemyness) / _frontWidth) ^ 2));
-      _front
-        * ([_pos, _zoneFoot, _zoneRepel] call _fnRepel)
-        * ([_pos, _hpFoot, _hpRepel] call _fnRepel)
-  };
-
-  // Countryside weight: among OPFOR zones an easy offer favours the front ones -- nearest friendly ground.
-  // A hard offer scores each zone by _fnHardScore at its centre, so the draw prefers a zone that is deep,
-  // ringed by other enemy placements, and behind a gauntlet. The band search and fnc_pos_claimed give the
-  // standoff, no repulsor.
-  private _fnZoneWeight = {
-      if (_hard) exitWith { _this call _fnHardScore };
-      private _dFri = if (_friendlyAnchors isEqualTo []) then {1} else {1 max (selectMin (_friendlyAnchors apply {_this distance2D _x}))};
-      1 / _dFri
-  };
-
-  // Per-offer site-finder handshake: the drawn type's finder accepts a candidate position or rejects
-  // it; a rejected candidate is redrawn like a claimed one, and _finderReject bounds a picky finder
-  // (e.g. intel demanding a town) so it drops its offer rather than starving the whole draw.
-  private _finderReject = 0;
-  private _finderCap = 20;
   while {_counter < _missionDraw} do {
 
 	// Proportional to the draw, not a fixed 0.1 a step: that constant was sized for the old
 	// full-pool loop and would now stall the bar at 0.6.
-	_progress = _counter / _missionDraw;
-	progressLoadingScreen _progress;
+	progressLoadingScreen (_counter / _missionDraw);
 
-	// This offer's type is fixed up front (it was assigned at commit): the finder below needs it to
-	// judge candidates. Use fnc_site_<name> if the mission defines one, else the generic accept-all.
 	_currentMission = _missionShuffle select _counter;
 	private _threadName = (_missionDefs select _currentMission) select 0;
-	private _finder = missionNamespace getVariable [
-		(_threadName select [0, (count _threadName) - 8]) + "_site", fnc_site_generic];
 
 	// This offer's difficulty: the last _hardCount of the draw push deep, the rest seat on the front.
-	// _hard is read by both weight functions down the call stack -- SQF resolves it dynamically through
-	// the callers, the same way the anchors are read. Hard routes to _fnHardScore, easy to the seam.
 	private _hard = _counter >= _easyCount;
-	private _peakEnemyness = 0.5;   // seam target for the easy urban bell; hard offers ignore it
+	// "More Urban" seats offers in named locations; drop it once its 20s failsafe has fired.
+	private _allowUrban = (moreUrban == 1) && !failsafe_not_found2;
 
-	// DUWS_T "More Urban": near a building, clear of zone centres.
+	// Same siting the debug force tool uses. _kibot_pos_array_missionPos is the keep-apart list, seeded
+	// with a sentinel at the top of this thread; a [] result means the finder found no fit -> drop it.
+	private _foundSafePos = [_threadName, _hard, getPos player, _kibot_pos_array_missionPos, _allowUrban] call fnc_mission_findSite;
 
-	_Posfound = false;
-	_ZnLocation = [];
-	_foundSafePos = [];
+	if (_foundSafePos isEqualTo []) then {
+		["INFO", "MISSION", format ["site: type %1 found no fit, dropping offer", _currentMission]] call fnc_log;
+		_counter = _counter + 1;
+	} else {
+		_kibot_pos_array_missionPos pushBack _foundSafePos;
 
-	while {!_Posfound} do {
-		
-		if (moreUrban == 1 && failsafe_not_found2 == false) then {
-			// MORE URBAN -- named location, weighted onto the frontline and off the fortifications
-			_ZnAnchor = position ([MissionLocations apply {[_x, position _x]}, _fnUrbanWeight] call _fnPick);
-			_ZnLocation = [_ZnAnchor, 100, 400,10,0,0.3,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
-			_Building = nearestBuilding _ZnLocation;
-			_foundSafePos = [(getpos _Building select 0),(getpos _Building select 1)];
-		}else{
-			// LESS URBAN -- OPFOR countryside band, front zones favoured. Falls back to the old
-			// HQ ring only when every zone is already BLUFOR-held (win state).
-			if (_opforZoneCands isEqualTo []) then {
-				_foundSafePos = [PosOfBLUHQ, 0, (zones_max_dist_from_hq*1.5),5,0,0.3,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
-			} else {
-				([_opforZoneCands, _fnZoneWeight] call _fnPick) params ["_pzp", "_pzs"];
-				// Hard drifts a tighter band so the objective stays inside the enemy cluster it picked.
-				private _band = if (_hard) then {_hardBand} else {_frontierBand};
-				_foundSafePos = [_pzp, _pzs, _pzs + _band,5,0,0.3,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
-			};
-		};
-
-		_Posfound = true;
-
-		// Clear of every zone, by the zone's own radius rather than the campaign ceiling. The 400 m
-		// on top is roughly what a mission's objective drifts from the anchor offered here
-		// (fnc_missionTargetPos), so an anchor accepted a metre outside a zone does not hand that
-		// thread fifty rejections and an abort. The drifted position is tested again there, which is
-		// the test that actually decides; this one only keeps the offer off a zone.
-		if ([_foundSafePos, 400] call fnc_pos_claimed) then {_Posfound = false};
-
-	};
- 
-	// CREATE AN ARRAY OF POSSIBLE POSITIONS
-    _found_dist_away = true;
-    _kibot_distances_array = [];
-    // for each element of the array of safe positions, 
-    for [{_t=1}, {_t <= count _kibot_pos_array_missionPos}, {_t=_t+1}] do 
-    {                                         
-        // get the index of the element
-        _kibot_pos_array_missionPos_index = _t-1;
-        // create an array of all missionPos distances to current _foundSafePos.
-        _kibot_distances_array = _kibot_distances_array +[(_kibot_pos_array_missionPos select _kibot_pos_array_missionPos_index) distance (_foundSafePos)]; 
-    };
-    // for each element of the array of distances we just generated...
-    for [{_t=1}, {_t<=count _kibot_distances_array}, {_t=_t+1}] do
-    {                                           
-        // get the index of the tested element
-        _kibot_distances_array_index = _t-1;
-        // select an element with index so we can check it
-        _check = (_kibot_distances_array select _kibot_distances_array_index);
-        // check the distances contained in the distances array 1 by 1. If a distance is inferior to defined values, dump it.
-        if (_check < 250) then {
-            // If any mission is <250m away, tell it to this variable;
-            _found_dist_away = false;   
-        };
-    };
-
-    if (_foundsafePos distance player > 1500
-        && _found_dist_away
-        && _foundsafePos distance hq_blu1 < (zones_max_dist_from_hq*1.5)) then {
-
-		// The mission's own finder gets the last word on this candidate. Reject -> count it, and once
-		// _finderCap candidates have been refused, drop the offer; otherwise fall through so the outer
-		// loop redraws. Accept -> the finder's precise position replaces the anchor.
-		private _site = [_foundSafePos] call _finder;
-		if (_site isEqualTo []) exitWith {
-			_finderReject = _finderReject + 1;
-			if (_finderReject >= _finderCap) then {
-				["INFO", "MISSION", format ["site: type %1 found no fit in %2 tries, dropping offer",
-					_currentMission, _finderReject]] call fnc_log;
-				_finderReject = 0;
-				_counter = _counter + 1;
-			};
-		};
-		_foundSafePos = _site select 0;
-		_finderReject = 0;
-
-        // A VALID POS HAS BEEN FOUND add the position to the array of missionPos
-        _kibot_pos_array_missionPos = _kibot_pos_array_missionPos + [_foundSafePos];
-		
-		// Clears against the draw, not the pool: the loop stops at _missionDraw, so comparing
-		// with the full pool size leaves the failsafe armed and aborts every request.
+		// Clears against the draw, not the pool: the loop stops at _missionDraw, so comparing with the
+		// full pool size leaves the failsafe armed and aborts every request.
 		if (_counter == _missionDraw-1) then {failsafe_not_found = false;};
 
-		// Add each mission type to stratmap array. The row supplies the description, the icon and
-		// the launcher; the search supplies the position and the name, which go into the shared
-		// slot array the launcher reads back.
+		// The row supplies the description, the icon and the launcher; the search supplies the position
+		// and the name, which go into the shared slot array the launcher reads back.
 		(_missionDefs select _currentMission) params ["", "", "_desc", "_icon", "", "_launcher", "_mcp", "_map", "_mrep", "_mdl"];
 		private _name = [0] call fnc_random_name;
 		DUWS_missionSlots set [_currentMission, [_foundSafepos, _name]];
 
 		// Reward and deadline lines built from the table, not written into the briefing string, so
 		// editing the number in mission_types.hpp moves the map figure and the paid figure together.
-		// REP is printed only where the type grants it. The reward-boost and civs-off tags below
-		// append to this same description control, which renders the <br /> structured text.
+		// REP prints only where the type grants it.
 		private _descFull = (localize _desc) + format [localize "STR_DUWS_T_mission_cpap", _mcp, _map];
 		if (_mrep > 0) then { _descFull = _descFull + format [localize "STR_DUWS_T_mission_rep", _mrep] };
 		_mdl params ["_dlMinH", "_dlMaxH"];
@@ -346,8 +116,8 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 			then { format [localize "STR_DUWS_T_mission_time_fixed", _dlMinH] }
 			else { format [localize "STR_DUWS_T_mission_time_range", _dlMinH, _dlMaxH] });
 
-		// Record hard offers with their depth from friendly-held ground; the loop's tail turns
-		// depth into the 1.5x-2x multiplier. Same anchor set the frontier search measured against.
+		// Record hard offers with their depth from friendly-held ground; the loop's tail turns depth
+		// into the 1.5x-2x multiplier. Same anchor set the frontier search measures against.
 		if (_hard) then {
 			private _depth = if (_friendlyAnchors isEqualTo []) then {
 				_foundSafepos distance PosOfBLUHQ
@@ -368,7 +138,7 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 			[]
 		];
 
-        _counter = _counter + 1;
+		_counter = _counter + 1;
 	};
   };
 

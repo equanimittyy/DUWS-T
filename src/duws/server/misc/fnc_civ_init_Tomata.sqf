@@ -139,7 +139,7 @@ _toDelete = _toDelete arrayIntersect _toDelete;
 
 // The losers are dropped from the registry only. These are the map's own Locations now, and
 // deleteLocation would remove them from the engine for the rest of the mission -- side
-// mission siting (fnc_findSafeMissionPos) and the player's location readout both read them
+// mission siting (fnc_mission_findSite) and the player's location readout both read them
 // back out of nearestLocations.
 private _newLocations = [];
 private _newRadii = [];

@@ -91,6 +91,7 @@ fnc_missionTargetPos = compile preprocessFileLineNumbers "duws\server\missions\f
 fnc_mission_abort = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_abort.sqf";
 fnc_mission_site = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_site.sqf";
 fnc_site_generic = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_generic.sqf";publicVariable "fnc_site_generic";
+fnc_mission_findSite = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_findSite.sqf";publicVariable "fnc_mission_findSite";
 fnc_mission_end = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_end.sqf";
 fnc_mission_deadline_fail = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_deadline_fail.sqf";
 fnc_missionMarkerData = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionMarkerData.sqf";
@@ -100,8 +101,6 @@ fnc_missionTaskEnd = compile preprocessFileLineNumbers "duws\server\missions\fnc
 fnc_missionPatrols = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrols.sqf";
 fnc_missionPatrolswithintel = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionPatrolswithintel.sqf";
 fnc_mission_cleanup = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_cleanup.sqf";
-fnc_findSafeMissionPos = compile preprocessFileLineNumbers "duws\server\misc\fnc_findSafeMissionPos.sqf";
-publicVariable "fnc_findSafeMissionPos";
 fnc_mission_cooldown_left = compile preprocessFileLineNumbers "duws\shared\functions\fnc_mission_cooldown_left.sqf";publicVariable "fnc_mission_cooldown_left";
 fnc_pos_claimed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_pos_claimed.sqf";publicVariable "fnc_pos_claimed";
 fnc_mission_cooldowns_show = compile preprocessFileLineNumbers "duws\client\misc\fnc_mission_cooldowns_show.sqf";publicVariable "fnc_mission_cooldowns_show";
