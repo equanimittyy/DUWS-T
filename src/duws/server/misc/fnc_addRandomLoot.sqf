@@ -1,13 +1,14 @@
 // fnc_addRandomLoot.sqf
 if (!isServer) exitWith {};
 params ["_unit"];
-// Roughly three enemies in five carry anything, thinned from four in five: intel is the input to a
-// CP faucet with no cooldown, so fewer bodies holding documents is what keeps loot from out-earning
-// held ground, rather than a cap on the turn-in.
+// Roughly three enemies in five carry money, thinned from four in five so battlefield pickups do
+// not out-earn holding ground.
+//
+// Money only. Files/Wallet_ID used to drop here as raw magazine classes with no ground variant, so
+// a looted one vanished the instant the player dropped it -- removed for that. Intel documents come
+// from the search gate instead, which drops only ground-item classes that survive being dropped.
 if (random 1 > 0.6) exitWith {};
-private _lootPool = ["Money_roll", "Files", "Wallet_ID"];
 private _count = floor random 3; // 0,1,2
 for "_i" from 1 to _count do {
-    private _item = selectRandom _lootPool;
-    _unit addMagazineGlobal _item;
+    _unit addMagazineGlobal "Money_roll";
 };

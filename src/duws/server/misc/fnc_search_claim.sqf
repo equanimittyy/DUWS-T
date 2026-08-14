@@ -51,11 +51,10 @@ private _fnc_notify = {
     ["infosearch", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 };
 
-// What a document draw hands over, named once because the intel substitute at the bottom draws
-// from it too. Every member clears the 1-3 CP the pool pays on the spot, which is what makes the
-// trip back to the terminal worth taking. `Item_Files` is deliberately absent: the file is also
-// what fnc_addRandomLoot puts on 80 % of enemies, so pricing it for a search prices every corpse
-// in the campaign.
+// What the document kind drops on the ground, analysed later at the terminal for CP. Only classes
+// with an `Item_` ground variant go here: createVehicle needs one, and an item that lacks one
+// vanishes when a player drops it. Files/Wallet_ID lack that variant, so they stay out and no
+// longer spawn at all.
 private _documents = ["Item_Wallet_traitor", "Item_FlashDisk", "Item_SmartPhone",
     "Item_MobilePhone"];
 
