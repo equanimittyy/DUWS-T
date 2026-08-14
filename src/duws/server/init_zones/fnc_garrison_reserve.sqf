@@ -241,9 +241,10 @@ DUWS_fnc_reserveTruckClass = {
 // Stands up an empty delivery truck and its lone driver on the far side, ready to be loaded. The driver
 // is the truck's own configured crew class raised into an east group of its own -- decoupled from the
 // squads it carries, so a lost squad never costs the truck its driver and the driver never sits on any
-// squad's roster. One driver only: it is a taxi, and the covered and open troop trucks it draws carry no
-// gun to crew. The truck is never rostered or garrison-flagged; the dispatch monitor owns its whole life. Returns
-// [truck, driverGroup, cargoSeats], or [] when no truck resolves or none seats a driver.
+// squad's roster. A driver always; plus a gunner for each armed turret, so a mod transport that mounts a
+// gun does not roll in with it dead -- all crew share the driver's group, so every teardown path that
+// clears the driver clears them too. The truck is never rostered or garrison-flagged; the dispatch monitor
+// owns its whole life. Returns [truck, driverGroup, cargoSeats], or [] when no truck resolves or none seats a driver.
 DUWS_fnc_garrisonReserveTruckSpawn = {
     params ["_spawnPos", "_center"];
     private _tclass = call DUWS_fnc_reserveTruckClass;
@@ -261,6 +262,15 @@ DUWS_fnc_garrisonReserveTruckSpawn = {
     _driver moveInDriver _truck;
     // A truck that seated no driver would never move: scrap it and let the caller walk the squad in.
     if (isNull (driver _truck)) exitWith { deleteVehicle _driver; deleteVehicle _truck; deleteGroup _drv; [] };
+    // An armed transport (some mod trucks mount an MG) would otherwise roll in with a dead gun. Crew every
+    // weapon turret from the driver's group, so the gunners fight and are torn down on the same paths that
+    // delete the driver. Non-FFV turrets only -- allTurrets skips the cargo firing seats, which are passengers.
+    {
+        if ((_truck weaponsTurret _x) isNotEqualTo []) then {
+            private _gunner = _drv createUnit [_crewCls, _spawnPos, [], 0, "NONE"];
+            _gunner moveInTurret [_truck, _x];
+        };
+    } forEach allTurrets _truck;
     // The engine reaps the driver group the moment it empties, so every teardown path below -- despawn,
     // mid-ride scrap, the oversize-squad scrap -- only has to delete the driver, never the group, and a
     // long campaign's worth of delivery runs cannot leak empty groups toward the per-side group cap.
