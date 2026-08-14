@@ -83,6 +83,10 @@ while { _parked < _nPark && _tries < _nPark * 3 } do {
     private _dir = [_road] call _fnc_roadDir;
     private _pos = (getPosATL _road) getPos [3, _dir + 90];
     if (count (nearestObjects [_pos, ["Car", "Truck"], 4]) > 0) then { continue };
+    // The 3 m verge offset above sometimes lands the car on a roadside stone wall, which the settle
+    // check below passes when the clip stays level -- then allowDamage true detonates it. Reject the
+    // point outright rather than trust the settle to shove clear of a wall it is embedded in.
+    if !((nearestTerrainObjects [_pos, ["WALL", "FENCE", "ROCK", "TREE"], 4]) isEqualTo []) then { continue };
     private _car = [_pos, _dir] call _fnc_spawnCar;
     // Invulnerable through the settle so a clipped spawn is shoved clear instead of detonating, then
     // read back: a car that did not come to rest clean is dropped for a fresh road point. Damage is

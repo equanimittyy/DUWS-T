@@ -1280,3 +1280,28 @@ while { _elapsed < _targetSecs } do {
 When formatting an hours value into a clock string, round to whole minutes before splitting h:mm —
 `floor` on the raw float lands a minute short whenever the fractional hour sits just under an integer
 (10.20 h × 60 = 611.99 → `floor` 611 → 10:11, not 10:12). `fnc_time_clock` does this.
+
+## A road segment's `getDir` is not the direction of the road
+
+**`getDir` on a `"ROAD"`/`"TRACK"` terrain object returns the model's own heading, which for most
+road pieces is `0`, not the way the carriageway runs. A vehicle placed with `setDir (getDir _road)`
+parks broadside across the road and blocks it.**
+
+The direction of travel is the bearing to an adjacent segment, which `roadsConnectedTo` gives:
+
+```sqf
+private _cons = roadsConnectedTo _road;
+private _dir = if (_cons isEqualTo []) then { getDir _road } else { _road getDir (_cons select 0) };
+```
+
+The `getDir _road` fallback covers a dead-end segment with nothing connected — rare, and any heading
+is as good as another there. `fnc_civ_traffic` and the informant hunt's decoy cars both place on
+roads this way.
+
+Placing on a road is also where cars detonate on spawn: `createVehicle [..., "NONE"]` drops the
+vehicle exactly where told, so a point holding a stone wall, a rock, or an already-parked car spawns
+the new one clipping it and the collision impulse blows it up. Roadside **stone walls** are the usual
+culprit for a car pulled onto the verge to clear a lane — the settle-and-reroll check passes a clip
+that stays level, then re-enabling damage detonates it. Reject the point up front with
+`nearestTerrainObjects [_p, ["WALL","FENCE","ROCK","TREE"], 4]` and `nearestObjects [_p, ["Car"], r]`
+rather than trusting the settle to shove clear.

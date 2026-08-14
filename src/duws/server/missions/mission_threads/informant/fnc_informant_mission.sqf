@@ -87,7 +87,9 @@ private _vehName = getText (configFile >> "CfgVehicles" >> _informantClass >> "d
 // player has to go on while the spawn runs.
 private _radius = _townRadius max 200;
 private _markername2 = [_townPos, _radius] call fnc_missionMarkerData;
-private _taskID = format ["informant_%1", round time];
+// Position-based, matching every other mission thread: unique per town and stable, where a
+// round-time id collides when two missions are created in the same second.
+private _taskID = format ["informant%1%2", round (_townPos select 0), round (_townPos select 1)];
 [_taskID, format [localize "STR_DUWS_T_INTEL_INFORMANT_TASK", _zoneName, _clock, _vehName], _mission_name, _townPos, "search"] call fnc_missionTaskCreate;
 
 // Parks a car of a given class on a road point near the town, stripped of the free medkit vanilla
@@ -103,15 +105,28 @@ private _fnc_spawnCar = {
 };
 
 private _roads = nearestTerrainObjects [_townPos, ["MAIN ROAD", "ROAD", "TRACK"], _radius max 200, false, true];
+// A road point is usable only if it is clear of the walls, rocks and trees that line an Altis town
+// road and of any car already placed: a car dropped onto an occupied point with "NONE" clips the
+// object and detonates on spawn, and the car check keeps the four cars off one another's segment.
+private _fnc_carClear = {
+    params ["_p"];
+    (nearestTerrainObjects [_p, ["WALL", "FENCE", "ROCK", "TREE"], 4]) isEqualTo []
+    && { (nearestObjects [_p, ["Car"], 7]) isEqualTo [] }
+};
 private _fnc_carPos = {
-    // A road point when the town has roads, otherwise a safe patch of ground -- a car in a field is
-    // still a car to drive off in.
-    if (_roads isEqualTo []) exitWith {
+    // A clear road point when the town has one, otherwise a safe patch of ground -- a car in a field
+    // is still a car to drive off in.
+    private _clear = _roads select { [getPosATL _x] call _fnc_carClear };
+    if (_clear isEqualTo []) exitWith {
         private _p = [_townPos, 0, _townRadius, 5, 0, 0.3, 0] call BIS_fnc_findSafePos;
         [if (_p isEqualTo [0,0,0]) then { _townPos } else { _p }, random 360]
     };
-    private _road = selectRandom _roads;
-    [getPosATL _road, getDir _road]
+    private _road = selectRandom _clear;
+    // Heading ALONG the road, from the bearing to a connected segment: a road piece's own getDir is
+    // frequently 0, which parks the car broadside across the carriageway and blocks it.
+    private _cons = roadsConnectedTo _road;
+    private _dir = if (_cons isEqualTo []) then { getDir _road } else { _road getDir (_cons select 0) };
+    [getPosATL _road, _dir]
 };
 
 private _allCars = [];
@@ -182,19 +197,57 @@ DUWS_informant_active = true;
 publicVariable "DUWS_informant_active";
 
 // Thicken the crowd only where the player can work it -- a friendly/neutral town he can walk. Each
-// added civilian is a real town local (same index, so harming one costs the town), and gets the ask
-// action if that layer is loaded. TUNABLE count.
+// added civilian is a real town local (same index, so harming one costs the town), gets the ask
+// action if that layer is loaded, and wanders on the town's own movement pass rather than standing
+// frozen. Spawned two to a group beside each other: a civilian gets its own group, and 16 solo groups
+// eat the engine's ~144-per-side cap the town crowd and the decoy drivers also draw on. TUNABLE
+// count (pairs x 2).
 private _crowd = [];
 if (!_enemyTown) then {
-    for "_i" from 1 to 16 do {
-        private _cpos = [_townPos, 0, _townRadius, 2, 0, 0.35, 0] call BIS_fnc_findSafePos;
-        if (_cpos isEqualTo [0,0,0]) then { _cpos = _townPos };
-        private _c = [_townIndex, _cpos, selectRandom _civBodies, false] call fnc_civ_spawnUnit;
-        if (!isNull _c) then {
-            _crowd pushBack _c;
-            _allUnits pushBack _c;
-            // JIP-keyed on the civilian so a client that connects mid-hunt still gets the action.
-            [_c] remoteExec ["fnc_informant_ask_addAction", 0, _c];
+    // Re-open every local already in town: a hunt reuses bodies that survived an earlier one on the
+    // same town, where DUWS_informant_asked would otherwise still read spent from last time. Fresh
+    // and streamed-in bodies default to unspent, so only the ones already here need clearing.
+    { _x setVariable ["DUWS_informant_asked", false, true] } forEach
+        (allUnits select { (_x getVariable ["civ_locIndex", -1]) == _townIndex });
+
+    private _crowdGroups = [];
+    for "_i" from 1 to 8 do {
+        private _anchor = [_townPos, 0, _townRadius, 2, 0, 0.35, 0] call BIS_fnc_findSafePos;
+        if (_anchor isEqualTo [0,0,0]) then { _anchor = _townPos };
+        private _grp = grpNull;
+        for "_j" from 0 to 1 do {
+            private _cpos = _anchor getPos [_j * 3, random 360];
+            private _c = [_townIndex, _cpos, selectRandom _civBodies, false] call fnc_civ_spawnUnit;
+            if (!isNull _c) then {
+                _crowd pushBack _c;
+                _allUnits pushBack _c;
+                // Second of the pair joins the first's group; the emptied group deletes itself
+                // (fnc_civ_spawnUnit makes them deleteWhenEmpty).
+                if (isNull _grp) then { _grp = group _c } else { [_c] joinSilent _grp };
+            };
+        };
+        if (!isNull _grp) then { _crowdGroups pushBack _grp };
+    };
+    // The town's own walk-and-pose pass, so the added locals move like the rest of the crowd.
+    private _townBuildings = (missionNamespace getVariable [format ["civ_buildings_%1", _townIndex], []]) select { !isNull _x };
+    [_crowdGroups, _townBuildings] spawn fnc_civ_wp_Tomata;
+
+    // The ask action reaches every town local for the hunt's duration -- the thickening crowd above,
+    // the baseline locals, and any that stream in as the player nears the town or after it sleeps and
+    // refills. A poll rather than a one-off sweep because the crowd is not all present when the hunt
+    // starts: the offer is usually taken from the map, far from the town. The askable flag makes each
+    // body a one-time add; the loop ends with the hunt, and the action hides itself once
+    // DUWS_informant_active goes false. JIP-keyed on the civilian so a mid-hunt joiner still gets it.
+    [_townIndex] spawn {
+        params ["_ti"];
+        while { missionNamespace getVariable ["DUWS_informant_active", false] } do {
+            {
+                if !(_x getVariable ["DUWS_informant_askable", false]) then {
+                    _x setVariable ["DUWS_informant_askable", true];
+                    [_x] remoteExec ["fnc_informant_ask_addAction", 0, _x];
+                };
+            } forEach (allUnits select { (_x getVariable ["civ_locIndex", -1]) == _ti });
+            sleep 5;
         };
     };
 };
