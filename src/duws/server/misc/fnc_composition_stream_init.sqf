@@ -43,6 +43,10 @@ fnc_duws_keep = {
     // that logic for control of the same entity.
     if (_obj isKindOf "CAManBase") exitWith {};
     _obj setVariable ["persistent", true, true];
+    // Server-local, not broadcast: only the server-side BuildingChanged handler reads it, and a
+    // broadcast would cost a JIP entry per prop. It lets that handler re-file a building's
+    // replacement under the same key when the engine swaps the object on a damage-state change.
+    _obj setVariable ["DUWS_compKey", _key];
     if (_pinned) then { _obj setVariable ["DUWS_noStow", true] };
     // Filing anything under a retired key revives it, so a hardpoint rebuilt at the same rounded
     // coordinates as a cleared one does not inherit its predecessor's retirement.
@@ -63,6 +67,10 @@ fnc_duws_release = {
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_release", 2] };
     {
         _x setVariable ["persistent", false, true];
+        // Cleared with the flag: a released building still carrying its key would re-file itself
+        // through the BuildingChanged handler if destroyed inside its disposal window, reviving the
+        // retired key and re-protecting the wreck the release just handed to the sweep.
+        _x setVariable ["DUWS_compKey", nil];
         [_x, _ttd] call fnc_duws_disposeAfter;
     } forEach (DUWS_compositions getOrDefault [_key, []]);
     DUWS_compositions deleteAt _key;
@@ -105,9 +113,11 @@ fnc_duws_stow = {
     };
     private _records = [];
     {
-        // Dead members go unrecorded, so what a player destroyed stays destroyed. A ruined
-        // building is a separate object the BuildingChanged handler has already claimed.
-        if (alive _x) then {
+        // A live member, or a building's ruin, is recorded so deploy rebuilds it in the same state.
+        // Other dead members -- a static weapon's wreck -- go unrecorded: destruction collects those,
+        // so what the player wrecked stays wrecked. A ruin can census as not-alive, so the flag the
+        // BuildingChanged handler stamps is what keeps it, independent of the alive test.
+        if (alive _x || {_x getVariable ["DUWS_ruin", false]}) then {
             // Cargo travels with the crate. Contents are rolled by fnc_fill_ammobox and drawn down
             // by players, so replaying the classname alone hands back a crate someone emptied.
             private _cargo = [];
@@ -115,11 +125,12 @@ fnc_duws_stow = {
                 _cargo = [getWeaponCargo _x, getMagazineCargo _x,
                     getItemCargo _x, getBackpackCargo _x];
             };
-            // Simulation and damage state are recorded because the prefabs set them per object --
-            // props ship with simulation off and several are invulnerable. A deploy that guessed
-            // would quietly re-simulate every prop on the map.
+            // Simulation, invulnerability and damage are recorded because the prefabs set them per
+            // object -- props ship with simulation off and several are invulnerable, and a destroyed
+            // building has to come back as its ruin. A deploy that guessed would re-simulate every
+            // prop and repair every wreck.
             _records pushBack [typeOf _x, getPosWorld _x, [vectorDir _x, vectorUp _x],
-                simulationEnabled _x, isDamageAllowed _x, _cargo];
+                simulationEnabled _x, isDamageAllowed _x, _cargo, damage _x];
         };
         deleteVehicle _x;
     } forEach _streamable;
@@ -141,7 +152,7 @@ fnc_duws_deploy = {
     params ["_key"];
     if (!isServer) exitWith { _this remoteExec ["fnc_duws_deploy", 2] };
     {
-        _x params ["_class", "_pos", "_vectorDirUp", "_sim", "_damageAllowed", "_cargo"];
+        _x params ["_class", "_pos", "_vectorDirUp", "_sim", "_damageAllowed", "_cargo", ["_dmg", 0]];
         private _obj = createVehicle [_class, _pos, [], 0, "CAN_COLLIDE"];
         // Before it is placed, not after: this loop is scheduled code, so the engine can suspend it
         // between any two statements, and a prop that is still simulated over a frame boundary
@@ -170,6 +181,15 @@ fnc_duws_deploy = {
             { _obj addBackpackCargoGlobal [_x, _bCounts select _forEachIndex] } forEach _bTypes;
         };
         [_obj, _key] call fnc_duws_keep;
+        // Replayed after filing: a wrecked building must return wrecked, not repaired. [dmg, false]
+        // suppresses the cook-off and secondary effects a live hit triggers. If setDamage makes the
+        // engine swap the building for its ruin, the BuildingChanged handler finds the key just filed
+        // and re-files the ruin; if it does not, the flag set here marks the wreck so a second stow
+        // keeps it rather than dropping it as an ordinary dead member.
+        if (_dmg > 0) then {
+            _obj setDamage [_dmg, false];
+            if (_dmg >= 1) then { _obj setVariable ["DUWS_ruin", true] };
+        };
     } forEach (DUWS_stowed getOrDefault [_key, []]);
     DUWS_stowed deleteAt _key;
 };

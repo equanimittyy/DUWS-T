@@ -225,11 +225,6 @@ DUWS_retired = [];
 // the wait for a 30 min deadline, but not KEEP_RADIUS and not the persistent flag.
 DUWS_cleanup_force = false;
 
-// The configured litter lifetime, published by the sweep once it reads the parameter. A global
-// because the BuildingChanged handler needs it too, and an event handler cannot see the locals
-// of the script that registered it.
-DUWS_cleanup_lifetime = 1800;
-
 // Death Penalty
 DUWSMP_CP_death_cost = 2;publicVariable "DUWSMP_CP_death_cost";
 

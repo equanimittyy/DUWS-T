@@ -50,21 +50,20 @@ private _litterClasses = ["WeaponHolder", "GroundWeaponHolder", "WeaponHolderSim
     "Land_BodyBag_01_base_F", "Land_BodyBag_01_F", "Land_BodyBag_01_black_F",
     "Land_BodyBag_01_blue_F", "ACE_bodyBagObject"];
 
-// Buildings reach the sweep only through here. They are Static rather than AllVehicles, so no
-// census query returns them -- and the engine does not damage one in place, it deletes it and
-// spawns a replacement, which is why the tracked member goes null and its flag with it. The ruin
-// therefore has to be claimed as it appears or it is never seen again.
-DUWS_cleanup_lifetime = _lifetime;
+// A building never reaches the sweep by census -- it is Static, not AllVehicles. The engine also
+// never damages one in place: it deletes the object and spawns a replacement, so the tracked member
+// goes null and its key with it. The replacement has to be re-filed as it appears or the building
+// drops out of its composition -- orphaned on the map, neither stowable nor releasable with the zone.
 addMissionEventHandler ["BuildingChanged", {
     params ["_old", "_new", "_isRuin"];
-    if !(_old getVariable ["persistent", false]) exitWith {};
-    if (_isRuin) then {
-        [_new, DUWS_cleanup_lifetime] call fnc_duws_disposeAfter;
-    } else {
-        // A damage stage, not destruction: the replacement is still part of the composition, and
-        // dropping the flag here would leave the eventual ruin unrecognised.
-        _new setVariable ["persistent", true, true];
-    };
+    private _key = _old getVariable "DUWS_compKey";
+    if (isNil "_key") exitWith {};
+    // Re-file the replacement under the same key, for a damage stage and a ruin alike: it stays
+    // persistent and streams and releases with the zone, and re-filing prunes the null slot _old
+    // left behind. A building's ruin is part of the zone, not litter -- a central structure blinking
+    // out reads worse than its wreck left standing.
+    [_new, _key] call fnc_duws_keep;
+    if (_isRuin) then { _new setVariable ["DUWS_ruin", true] };
 }];
 
 // Objects handed over explicitly, chiefly by fnc_duws_release retiring a composition. A standing
