@@ -3003,7 +3003,7 @@
                 <English>Copy. Bring it back, whatever it takes.</English>
                 <Chinesesimp>"霸王1-1"收到，务必带回它。</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_GATHERING_DESC">
+            <Key ID="STR_DUWS_T_INTEL_INFORMANT_DESC">
                 <Original>Mission Type: Recon&lt;br /&gt;An enemy informant is hiding among the townsfolk here. Find him and kill him before he leaves by car. In a friendly town the locals may point you to him; in a hostile one, watch the roads for his vehicle.</Original>
                 <English>Mission Type: Recon&lt;br /&gt;An enemy informant is hiding among the townsfolk here. Find him and kill him before he leaves by car. In a friendly town the locals may point you to him; in a hostile one, watch the roads for his vehicle.</English>
                 <Chinesesimp>敌人一个指挥部在我们的一次攻击行动后被打散了，他们正在收拾区域内的各类情报并逃脱。你的小队需要搜索区域内的建筑以获取情报物品。任务在15分钟后自动结束。(极低CP，极低AP)</Chinesesimp>
@@ -3024,15 +3024,15 @@
                 <Original>The informant slipped out of the area. Mission failed.</Original>
                 <English>The informant slipped out of the area. Mission failed.</English>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_ASK_ACTION">
+            <Key ID="STR_DUWS_T_INTEL_INFORMANT_ASK_ACTION">
                 <Original>Ask about informant</Original>
                 <English>Ask about informant</English>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_ASK_REVEAL">
+            <Key ID="STR_DUWS_T_INTEL_INFORMANT_ASK_REVEAL">
                 <Original>The informant is about %1 m %2 of you.</Original>
                 <English>The informant is about %1 m %2 of you.</English>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_ASK_GONE">
+            <Key ID="STR_DUWS_T_INTEL_INFORMANT_ASK_GONE">
                 <Original>Him? Gone. You're too late.</Original>
                 <English>Him? Gone. You're too late.</English>
             </Key>

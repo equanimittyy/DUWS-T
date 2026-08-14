@@ -9,7 +9,7 @@ params ["_civ"];
 if (isNull _civ) exitWith {};
 
 _civ addAction [
-    localize "STR_DUWS_T_INTEL_ASK_ACTION",
+    localize "STR_DUWS_T_INTEL_INFORMANT_ASK_ACTION",
     { [_target, _caller] remoteExec ["fnc_intel_ask_request", 2] },
     nil,
     1.5,
