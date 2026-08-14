@@ -295,7 +295,7 @@ publicVariable "DUWS_intel_active";
 
 if (_outcome isEqualTo "WIN") then {
     [_taskID, "SUCCEEDED"] call fnc_missionTaskEnd;
-    [localize "STR_DUWS_T_allseer", [localize "STR_DUWS_T_INTEL_INFORMANT_KILLED"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+    [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_INTEL_INFORMANT_KILLED"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
     [_townPos, _radius, ""] call fnc_mission_end;
     [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 } else {
