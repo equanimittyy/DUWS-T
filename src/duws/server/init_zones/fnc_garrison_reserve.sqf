@@ -94,13 +94,28 @@ DUWS_fnc_garrisonReservePos = {
         };
     } forEach [0, 30, -30, 60, -60];
 
-    if (_best isEqualTo []) exitWith {
-        // No bearing cleared the floor -- bad ground on every one. Better a far visible spawn than
-        // none: the plain anti-approach point at the base distance, floor unenforced. getPos is used
-        // rather than findSafePos so this can never itself return [] and collapse into the band.
-        _center getPos [_baseDist, _antiDir]
-    };
-    _best
+    if (_best isNotEqualTo []) exitWith { _best };
+
+    // The preferred arc was all bad ground -- a far side facing the sea, most often, where every
+    // findSafePos above refused the water (waterMode 0 lands nothing offshore). Widen to the rest of
+    // the circle for any land that still clears the floor: the anti-flank bearing is given up before a
+    // spawn in the water, because a wave dropped offshore is lost outright -- it drowns or strands a
+    // kilometre out -- which is strictly worse than one that comes in from a poor angle. First land
+    // wins here rather than fewest-seen: being on the map at all outranks cover.
+    private _wide = [];
+    {
+        if (_wide isEqualTo []) then {
+            private _c = [_center getPos [_baseDist, _antiDir + _x], 0, 200, 8, 0, 0.5, 0, [], []] call BIS_fnc_findSafePos;
+            if (_c isNotEqualTo []) then { _c = [_c] call DUWS_fnc_reserveRoadSnap };
+            if (_c isNotEqualTo [] && {(_players findIf { (_c distance2D _x) < DUWS_zoneReserveSpawnDist }) < 0}) then { _wide = _c };
+        };
+    } forEach [90, -90, 120, -120, 150, -150, 180];
+    if (_wide isNotEqualTo []) exitWith { _wide };
+
+    // Water and blocked ground the whole way round -- a speck of an island. The plain anti-approach
+    // point, floor unenforced: getPos rather than findSafePos so this can never return [] and collapse
+    // the spawn into the objective band on top of the players.
+    _center getPos [_baseDist, _antiDir]
 };
 
 // Nearest road to a point, or the point unchanged when none is within DUWS_zoneReserveRoadSearch. The
@@ -116,10 +131,10 @@ DUWS_fnc_reserveRoadSnap = {
 // One spaced spawn slot for a wave. The lead point is pushed _i gaps back along _dir -- the outbound
 // bearing, so the tail runs away from the objective and the players, never toward them -- then snapped to
 // a road near there. A multi-vehicle wave lines up nose-to-tail on drivable ground with room between, and
-// successive vehicles can take different roads rather than stacking on one point. If the snapped or the
-// plain point would land within a gap of one already placed this wave, it steps another gap out and
-// retries: good spacing outranks being exactly on a road, since two vehicles on one point brew up on
-// spawn. Bounded retries, then the plain spaced point regardless.
+// successive vehicles can take different roads rather than stacking on one point. A slot that lands within
+// a gap of one already placed this wave, or on water, is rejected and the ray steps another gap out to
+// retry: good spacing outranks being exactly on a road (two vehicles on one point brew up on spawn), and
+// neither outranks staying out of the sea. Bounded retries, then the lead point -- land by construction.
 DUWS_fnc_reserveConvoySlot = {
     params ["_lead", "_dir", "_i", "_slots"];
     private _out = [];
@@ -129,17 +144,22 @@ DUWS_fnc_reserveConvoySlot = {
         _tries = _tries + 1;
         private _raw = _lead getPos [_step * DUWS_reserveConvoyGap, _dir];
         private _snap = [_raw] call DUWS_fnc_reserveRoadSnap;
-        if ((_slots findIf { (_snap distance2D _x) < DUWS_reserveConvoyGap }) < 0) then {
+        // A slot over water is no slot: the outbound bearing can run a coastal wave off the shoreline
+        // step by step, and a vehicle stood up on the sea surface sinks. Reject it like a collision and
+        // step further out to look for land past it.
+        if (!surfaceIsWater _snap && {(_slots findIf { (_snap distance2D _x) < DUWS_reserveConvoyGap }) < 0}) then {
             _out = _snap;
         } else {
-            if ((_slots findIf { (_raw distance2D _x) < DUWS_reserveConvoyGap }) < 0) then {
+            if (!surfaceIsWater _raw && {(_slots findIf { (_raw distance2D _x) < DUWS_reserveConvoyGap }) < 0}) then {
                 _out = _raw;
             } else {
                 _step = _step + 1;
             };
         };
     };
-    if (_out isEqualTo []) then { _out = _lead getPos [_step * DUWS_reserveConvoyGap, _dir] };
+    // Every stepped slot was water or crowded: fall back to the wave lead, which garrisonReservePos
+    // guarantees is on land. Crowding a vehicle onto the lead is recoverable; the sea is not.
+    if (_out isEqualTo []) then { _out = _lead };
     _out
 };
 
