@@ -32,13 +32,39 @@ callsign no matter what the host chose. Fixed callsigns (`Overlord`, `Allseer`, 
 never wrapped. Substitution matches the English literal only, which is a second reason the localised
 tags cannot simply be aligned key-for-key.
 
-## Register
+## Register: how the prose sounds
 
-The reference for radio prose is the `Support & Radio` container: speaker-first callsign framing
-(`Alpha 1-1, this is Overlord.` / `Swordfish 1-1 to Alpha 1-1, ...`), procedure words (*be advised,
-roger, stand by, over, out*), numbers spelled out in spoken lines but numerals in HUD text, and flat
-declaratives — Overlord does not shout, and neither does the hint box: no exclamation marks, and no
-shouted words mid-sentence (`Targeting FAILED`).
+The prose is a professional military voice: flat declaratives in the present tense, procedure verbs
+(*locate, eliminate, displace, be advised, stand by, roger, over, out*), and no theatrics. It does
+not shout — no exclamation marks, no words shouted mid-sentence (`Targeting FAILED`) — and it does
+not narrate the software. The `Support & Radio` container is the reference for radio framing:
+speaker-first callsign (`Alpha 1-1, this is Overlord.` / `Swordfish 1-1 to Alpha 1-1, ...`), and a
+team broadcast opening on the address (`All units, ...`). Numbers are spelled out in spoken lines and
+written as numerals in HUD text.
+
+**Name the concrete nouns the player plans against** — the place, the clock, the vehicle — rather
+than gesturing at them. The informant brief is the worked example: *All units, an enemy informant is
+operating out of %1. Locate and eliminate him before he reaches %2 by vehicle. He is set to leave at
+%3 in a %4, and will displace early if a firefight breaks out.* — %1 the town, %2 the named escape
+zone, %3 the leave clock, %4 the vehicle class. The pass that produced it turned "slipped out of the
+area" into "has reached {zone}": a named place the player reads off the map beats an abstraction, and
+the fail line names where he got to.
+
+**No em-dashes in player prose.** A parenthetical goes in commas, not dashes — the same brief once
+read *leave at %1 — or sooner if shots are fired — in a %2* and now reads *at %2, or sooner if shots
+are fired, in a %3*. A transmission is punctuated in clipped clauses, not literary asides. The rule
+is applied as each subsystem's text is reworked, not swept across the file at once, so older strings
+still carry the dash: standing prose debt, the same kind as the lagging localised tags and the seven
+off-voice side-mission hints below, not a bug to fix in passing.
+
+**Who is speaking sets the register, not only the words.** The command net (Overlord, Allseer) is
+clipped and procedural and names the player's callsign on a result (*Informant's down. Good work
+Alpha 1-1.*). A civilian answering in the world speaks in character and imprecisely: the informant
+ask-reveal gives a live bearing and range while he is in town (*about %1 m %2 of you*) but, once he
+has driven off, only a bystander's guess (*Him? I think I just saw him leave town heading %1*) — the
+system knows where he is; a local only saw which way he went. The hint box has no persona at all
+([§Hint prose is system prose](#hint-prose-is-system-prose)), and dialogue always has one
+([§Dialogue: the voiced surface](#dialogue-the-voiced-surface)).
 
 **Terminal punctuation is decided by the surface, not by the sentence.** Prose surfaces are
 punctuated as prose; the two surfaces that exist to be glanced at are kept bare.
@@ -60,7 +86,12 @@ substituted value (`Squad renamed to:` + the name).
 
 ## Which surface a message goes to, and never both
 
-Two mechanisms put text on screen and they are not interchangeable. **A message uses one of them.**
+Three surfaces put text on screen. **Dialogue** is the voiced channel — a persona (Overlord, Allseer,
+a support callsign, a civilian) speaking over the radio or in the room, through `fnc_duws_dialogue`;
+it is chosen whenever a line has someone to say it, and its mechanics are in
+[§Dialogue: the voiced surface](#dialogue-the-voiced-surface). The other two are the system's own
+voice, with no persona, and they are not interchangeable with each other. **A system message uses one
+of them.**
 
 | Surface | Command | Use it for | Length |
 |---|---|---|---|
@@ -206,6 +237,48 @@ piecemeal now would be re-editing text that is about to be replaced wholesale:
 
 They are listed here rather than commented beside their keys because `stringtable.xml` carries no
 XML comments today, and this is not the change that should find out whether the parser accepts them.
+
+## Dialogue: the voiced surface
+
+`fnc_duws_dialogue` is the only path that gives a line a *speaker*. Everything else on screen is the
+system talking; this is a persona — Overlord and Allseer on the command net, a support callsign, an
+intro or downed pilot in the room, a civilian answering a question. The call is
+`[_speaker, _text, _channel]` with both strings already `localize`d and `_channel` normally `""`,
+which lets the speaker decide the channel.
+
+**Callsign substitution is automatic here.** The body runs `fnc_cs` on the speaker and the text
+itself, so a dialogue call site passes the raw `localize`d keys and does **not** wrap them — unlike a
+hint, card or task, which has no such step and must wrap any `Alpha 1-1` string at the call site
+([§Player callsign substitution](#player-callsign-substitution)). Only the speaker label takes the
+senior's name (`Alpha 1-1 (steph)`); the text does not, because the callsign also appears mid-line,
+where `Alpha 1-1 (steph), move out` would read as part of the sentence.
+
+**Two channels, and the speaker picks by default.** `fnc_duws_dialogue_channel` routes to NET or
+VOICE. NET is the explicit list in `fnc_duws_dialogue` — radio callsigns (Allseer, the supports, the
+air drops) — and plays a squelch tone so it reads as a transmission. VOICE is everyone in the room
+with the player, and is the default: **a new speaker with no table entry lands on VOICE**, the loud
+visible surface, rather than disappearing into a channel nobody watches. A radio callsign added later
+squelches only once it is on the NET list. Overlord is the lone VOICE speaker that still squelches —
+the tone marks an incoming transmission — and the player callsign is on neither list, because you do
+not hear your own key-up.
+
+**One subtitle slot, VOICE first.** The engine subtitle is a single line; a second replaces the
+first mid-read, so `fnc_duws_dialogue_drain` holds one line at a time. VOICE drains first and
+entirely — it answers something the player just did, and waiting behind radio chatter reads as a
+dropped button press — and never expires. NET is dropped once it has waited over 8 s, because a stale
+"rounds out" reads worse than silence. Two lines in the same frame are ordinary (two supports talking
+over each other), so nothing at the call site serialises them.
+
+**Address the hearers; never re-broadcast.** Every call site reaches the function through
+`remoteExec`: `0` for the whole team (a mission brief), a single client for a one-player answer (the
+ask-reveal goes only to `_caller`). The body then runs on each machine already addressed and must not
+broadcast again, or N clients each send to N. Like every client-called support, the function is
+`publicVariable`'d in `server_fnc_init`, and the speaker tables build lazily on first use because a
+JIP client can be handed a line before its own init has run.
+
+**A result with a persona to voice it goes to dialogue, not a hint.** The informant win is Allseer's
+line; the fail, which has no one to say it, is a plain hint. Pick by whether someone is there to
+speak — but do not double a voiced line with a hint that repeats it.
 
 ## Side-mission briefings carry their own reward block
 
