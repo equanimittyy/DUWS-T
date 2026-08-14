@@ -228,15 +228,22 @@ DUWS_fnc_hardpointClear = {
     [_key] call fnc_duws_release;
     ["INFO", "HARDPOINT", format ["%1 cleared", _key]] call fnc_log;
 
-    // A standalone strongpoint the player hunted down pays a small bounty and announces itself. A zone
-    // emplacement pays nothing -- taking the zone already credits its defences -- and neither does a
-    // minefield, a hazard cleared rather than a garrison beaten.
+    // A standalone strongpoint the player hunted down pays a bounty scaled to its type (DUWS_hardpointBounty)
+    // and announces itself. A zone emplacement pays nothing -- taking the zone already credits its defences
+    // -- and neither does a minefield, a hazard cleared rather than a garrison beaten.
     if !((_o get "hpZoneKey") isEqualTo "") exitWith {};
     if ((_o get "hpType") isEqualTo "MINEFIELD") exitWith {};
-    [5, "hardpoint_cleared"] call fnc_cp_adjust;
+    (DUWS_hardpointBounty getOrDefault [_o get "hpType", [5, 0]]) params ["_cp", "_ap"];
+    [_cp, "hardpoint_cleared"] call fnc_cp_adjust;
+    if (_ap > 0) then { ["BLU", _ap, "hardpoint_cleared", _ap] call fnc_ap_adjust; };
     private _name = DUWS_hardpointName getOrDefault [_o get "hpType", _o get "hpType"];
     private _place = [([_key] call fnc_site_at) get "pos"] call DUWS_fnc_hardpointNearestPlace;
-    ["HPdestroyed", [5, _name, _place]] remoteExec ["BIS_fnc_showNotification", [0, -2] select isDedicated, false];
+    private _tgt = [0, -2] select isDedicated;
+    if (_ap > 0) then {
+        ["HPdestroyedAP", [_cp, _name, _place, _ap]] remoteExec ["BIS_fnc_showNotification", _tgt, false];
+    } else {
+        ["HPdestroyed", [_cp, _name, _place]] remoteExec ["BIS_fnc_showNotification", _tgt, false];
+    };
 };
 
 // One tick per hardpoint per pass, presence answered by the poller. The zone cycle without its

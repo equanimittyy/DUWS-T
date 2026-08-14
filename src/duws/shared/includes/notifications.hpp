@@ -73,6 +73,18 @@ class CfgNotifications
         difficulty[] = {};
     };
 
+    // The variant for a strongpoint that also pays Army Power (the radio tower): iconText the CP
+    // bounty (%1), description the type (%2), the place (%3) and the AP (%4).
+    class HPdestroyedAP
+    {
+        title = "$STR_DUWS_T_HP_destroyed_ap_title";
+        iconText = "+%1";
+        description = "$STR_DUWS_T_HP_destroyed_ap";
+        color[] = {0.5,1,1,1};
+        priority = 0;
+        difficulty[] = {};
+    };
+
     class CPaddedmission
     {
         title = "$STR_DUWS_T_elszwwpc";

@@ -466,6 +466,15 @@ DUWS_hardpointName = createHashMapFromArray [
     ["RADIO", "Radio Tower"]
 ];
 
+// Bounty for destroying a standalone hardpoint, [CP, AP], read by fnc_hardpoint_stream when it clears.
+// Types not listed pay the base 5 CP and no AP: only the strategic emplacements a player crosses the
+// map to kill pay above the floor -- the batteries OPCOM fires from (ARTY, MORTAR) and the radio tower,
+// whose 5 km reach makes it the greatest single loss to OPFOR and the only one that also credits Army
+// Power. The AP is earned (raises the BLUFOR tier), the mission-reward contract, not a spend.
+DUWS_hardpointBounty = createHashMapFromArray [
+    ["RADIO", [20, 10]], ["ARTY", [20, 0]], ["MORTAR", [10, 0]]
+];
+
 // The loose garrison each hardpoint type fields: one DUWS_teamRosters token, or an array of them for a
 // type that fields several groups, each resolved per side when crewed -- read by fnc_hardpoint_register
 // and the raise worker so every placer fields it the same, the way DUWS_hardpointStreaming drives
