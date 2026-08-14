@@ -176,13 +176,14 @@ Two CP faucets scale with how much the player fights rather than with what they 
 watch, because activity-scaled income is what quietly turns "abundant" into "meaningless" under a
 territory economy, and neither was priced into the rebalance above.
 
-**Intel analysis is thinned at the source.** `server/misc/fnc_intelAnalysis.sqf` converts loot to CP
-with no cooldown, against `fnc_addRandomLoot.sqf` putting items on spawned enemies — the larger and
-less bounded of the two. Rather than a per-tick cap on the turn-in, the pressure is cut where the loot
-is made: `fnc_addRandomLoot` now seeds roughly three enemies in five rather than four, and the per-item
-CP values in `fnc_intelAnalysis` are kept modest. A cap was tried and rejected — it either punishes a
-co-op team by zeroing the shared budget after one turn-in, or needs per-player accounting for a faucet
-that a smaller reward controls more simply.
+**Intel analysis is thinned at the source.** `server/misc/fnc_intelAnalysis.sqf` converts documents to
+CP with no cooldown — the larger and less bounded of the two activity faucets. Documents come from the
+body-search `document` draw (`fnc_search_claim.sqf`), so supply is bounded by the search flag rate
+rolled at spawn and that draw's document weight — a function of how much OPFOR was fought, not of how
+often the turn-in is pressed. Rather than a per-tick cap on the turn-in, the pressure is cut where the
+documents are made, and the per-item CP values in `fnc_intelAnalysis` are kept modest. A cap was tried
+and rejected — it either punishes a co-op team by zeroing the shared budget after one turn-in, or needs
+per-player accounting for a faucet that a smaller reward controls more simply.
 
 **Kill income is the smaller sibling, and wants the same scrutiny.** `fnc_kill_income_sweep`
 (`server/server_init.sqf`) pays `kill_cp_award` CP per `kill_cp_kills` kills per player, banked on
@@ -705,8 +706,8 @@ They are collected here so the next pass tunes from one list rather than hunting
 | `DUWS_ap_tier_rungs` | `server/misc/fnc_economy_init.sqf` | 100/300/550/900 | steepens past tier 2; the four rungs above tier 1 (infantry, 0). Preset seeds and the shared capability scale (BLUFOR gates + OPFOR `_ap` hold the same values as literals) |
 | OPFOR vehicle AP gates | `server/init_zones/fnc_zone_spawn_sizes.sqf` | car 100 (T2) / APC·IFV·AA·trans-heli 300 (T3) / tank·attack-heli 550 (T4) / plane 900 (T5) | OPFOR's capability ladder; utility trucks ungated |
 | BLUFOR wave/vehicle gates | `server/warcom/fnc_WARCOM_blu_patrol.sqf`, `fnc_WARCOM_blu_assault.sqf` | motor·car 100 (T2) / mech·armored·air 300 (T3) / armour 550 (T4); infantry free (T1) | BLUFOR's capability ladder, on the shared rungs |
-| intel loot drop | `server/misc/fnc_addRandomLoot.sqf` | ~60% | share of enemies carrying loot; thins intel + coins at source |
-| intel per-item CP | `server/misc/fnc_intelAnalysis.sqf` | 1–5 | turn-in value by document; corpse loot 1, search items above it |
+| corpse money drop | `server/misc/fnc_addRandomLoot.sqf` | ~60% | share of enemies carrying `Money_roll`; intel documents no longer dropped here |
+| intel per-item CP | `server/misc/fnc_intelAnalysis.sqf` | 1–5 | turn-in CP by document, always paid; each also rolls a per-item reveal chance |
 | throttle `k` / `REF_ZONES` | `server/warcom/fnc_WARCOM_init.sqf` | 0.5 / 6 | strength, and the size below which nothing throttles |
 | town worth | `server/misc/fnc_civ_init_Tomata.sqf` | 1–5 by size | CP to a BLUFOR town, AP to an OPFOR one |
 | mission AP band | `server/missions/mission_threads/*` | 10–40 | per-thread literal, ranked by difficulty |
