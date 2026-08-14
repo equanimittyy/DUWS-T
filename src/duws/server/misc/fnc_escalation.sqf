@@ -14,6 +14,11 @@ if (CIV_PRESENCE == "RAVAGE" || CIV_PRESENCE == "WBK") exitWith {};
 // five-hundred-and-eighty-third of the map -- thirty houses on Altis.
 #define ESCALATION_FRACTION (1 / 53)
 #define ESCALATION_MAX_LEVEL 11
+// Floor the per-level step, not the budget: on a house-sparse map the fraction drives the step
+// toward zero, which would make every single house its own level. Pin it to an absolute minimum so
+// the loss threshold is a real count of ruin rather than a fraction of a tiny census -- keeps this
+// portable off Altis. Inert on Altis, where the fraction already yields thirty.
+#define ESCALATION_MIN_TIER 15
 
 // The census is one engine call that cannot yield -- measured at 5.03 s for Altis's 17472
 // houses -- so it is a frame stall, not 5 s of shared scheduler time, and no amount of
@@ -52,8 +57,8 @@ private _total = count (nearestTerrainObjects
     [[worldSize / 2, worldSize / 2, 0], ["House"], worldSize * 0.7072, false]);
 private _censusCost = diag_tickTime - _censusStart;
 
-escalation_budget = round (_total * ESCALATION_FRACTION) max ESCALATION_MAX_LEVEL;
-escalation_tier = escalation_budget / ESCALATION_MAX_LEVEL;
+escalation_tier = (round (_total * ESCALATION_FRACTION / ESCALATION_MAX_LEVEL)) max ESCALATION_MIN_TIER;
+escalation_budget = escalation_tier * ESCALATION_MAX_LEVEL;
 escalation_destroyed = 0;
 escalation_level = 0;
 // Read by the request menus to show what a purchase will actually cost, so it has to travel.
