@@ -23,10 +23,12 @@ DUWS_fnc_arsenal_countFor = {
     params ["_cls"];
     // Full mode leaves the whole arsenal unlimited; the enforcer marks it non-restricted.
     if (!(player getVariable ["DUWS_isRestrictedArsenal", false])) exitWith { -1 };
-    // Startup kit stays the player's to re-draw: the gear deployed with is unlimited in every
-    // restricted mode, including a BLUFOR default class the detected faction never fields -- absent
-    // from the friendly snapshot, it would otherwise read as an empty pool ([0]).
-    if (_cls in (player getVariable ["DUWS_startupKit", []])) exitWith { -1 };
+    // Startup kit stays the player's to re-draw in Hybrid: the gear deployed with is unlimited there,
+    // including a BLUFOR default class the detected faction never fields -- absent from the friendly
+    // snapshot, it would otherwise read as an empty pool ([0]). Limited tracks everything and has no
+    // unlimited floor, so the kit counts down like any other gear; its friendly classes are pool-seeded
+    // at boot, so only a rare non-fielded default reads [0] there.
+    if (!(missionNamespace getVariable ["DUWS_arsenalLimited", false]) && {_cls in (player getVariable ["DUWS_startupKit", []])}) exitWith { -1 };
     // Ammo untracked (the default): magazines are free in every mode, so never counted.
     if ((isClass (configFile >> "CfgMagazines" >> _cls)) && {!(missionNamespace getVariable ["DUWS_trackAmmo", false])}) exitWith { -1 };
     // Hybrid keeps standard-issue gear unlimited; Limited tracks it too, so only Hybrid short-circuits.
@@ -104,6 +106,12 @@ DUWS_fnc_arsenal_paintCounts = {
             private _cls = if (_isN) then { _ctrl lnbData [_i, 0] } else { _ctrl lbData _i };
             if (_cls == "") then { continue };
             private _amt = [_cls] call DUWS_fnc_arsenal_countFor;
+            // Diagnostic: dump the compatible-mag list's own row data so a stale [0] there can be
+            // compared against the same class on the all-mags tab. Remove once the mismatch is found.
+            if (duws_log_level >= 4 && {_x == IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG}) then {
+                ["DEBUG", "GEAR", format ["cargomag row=%1 cls=%2 amt=%3 text=%4", _i, _cls,
+                    _amt, if (_isN) then { _ctrl lnbText [_i, 1] } else { _ctrl lbText _i }]] call fnc_log;
+            };
             // Prefix is rebuilt onto the config display name, never onto the row's current text, so a
             // repaint cannot stack "[3] [3] name".
             private _pfx = if (_amt < 0) then { "[∞] " } else { format ["[%1] ", _amt] };
