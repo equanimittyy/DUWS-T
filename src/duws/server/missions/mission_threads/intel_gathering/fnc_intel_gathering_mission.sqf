@@ -40,10 +40,10 @@ if (!([16, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_beg
 private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 
-// Leave built on the shared mission-timing shape (10-minute steps on the playtime clock, the same
-// shape and clock the deadline uses): enemy towns give one step, friendly two. TUNABLE steps.
+// Leave built on the shared mission-timing shape (10-minute steps of in-game time, the same shape and
+// clock the deadline uses): enemy towns give one step, friendly two. TUNABLE steps.
 private _leaveSteps = if (_enemyTown) then { 1 } else { 2 };
-private _leaveAt = time + ([_leaveSteps] call fnc_time_roll);
+private _leaveAt = [_leaveSteps] call fnc_time_deadline;
 private _clock = [_leaveAt] call fnc_time_clock;
 
 // Escape destination: the nearest zone at least 1 km off, so the drive is a real leg and the fail is

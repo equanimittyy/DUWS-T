@@ -47,9 +47,9 @@ private _missionDefs = [
 (_missionDefs select _missionType) params ["", "", "", "", "", "", "_mcp", "_map", "_mrep", "_mdl"];
 DUWS_curReward = [_mcp, _map, _mrep];
 _mdl params ["_dlMinH", "_dlMaxH"];
-// Rolled once at the mission's start, in 10-minute steps, so the enforced deadline sits behind the
-// band the map advertised. The hours in the table become steps here; fnc_time_roll is the shared
-// shape deadlines and timed triggers both use.
-DUWS_curDeadlineAt = time + ([round (_dlMinH * 6), round (_dlMaxH * 6)] call fnc_time_roll);
+// Rolled once at the mission's start, in 10-minute steps of in-game time, so the enforced deadline
+// sits behind the band the map advertised. The table's hours become steps here; fnc_time_deadline is
+// the shared shape deadlines and timed triggers both use, and holds the deadline in in-game time.
+DUWS_curDeadlineAt = [round (_dlMinH * 6), round (_dlMaxH * 6)] call fnc_time_deadline;
 
 true

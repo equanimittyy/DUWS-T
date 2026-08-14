@@ -1250,18 +1250,20 @@ untouched by the day/night multiplier (`setTimeMultiplier`, which this mission e
 `time_Multiplier`, 1–60×). `daytime` is the world clock in hours (0–24), which that multiplier speeds
 up. So at anything above 1× they diverge: `daytime` runs `time_Multiplier` times faster than `time`.**
 
-The mission's convention is to build every timed thing on `time`, in 10-minute steps, and only
-*render* it as a world clock: `fnc_time_roll [minSteps, maxSteps]` returns the seconds, callers add
-them to `time` (mission deadlines in `fnc_mission_begin.sqf`, the informant's leave), and
-`fnc_time_clock [target]` prints "HH:MM" as `(daytime + (target - time)/3600) mod 24`. That render
-assumes 1× — it is exact only when `daytime` tracks `time` — so above 1× the printed clock understates
-where the world clock will actually stand at the target. This is a tolerated approximation applied
-uniformly to every deadline, not a per-mission bug; keeping one clock for all timing is worth more
-than a clock string that is correct under a multiplier most players never raise.
+Every duration in the mission is meant in *in-game* time, but targets are still stored on the `time`
+clock so the many `time > deadline` checks across the mission threads keep working. The `fnc_time_*`
+module bridges the two: `fnc_time_roll [minSteps, maxSteps]` rolls an in-game duration in 10-minute
+steps; `fnc_time_deadline` turns it into a `time` target by dividing by `time_Multiplier` (real
+seconds = in-game seconds ÷ multiplier); `fnc_time_remaining [target]` scales the gap back up by the
+multiplier; and `fnc_time_clock [target]` renders "HH:MM" off that. So a "3-hour" deadline is three
+*in-game* hours at any multiplier — at 4× it fires in 45 real minutes, and the printed clock is
+correct, not a 1× approximation.
 
-If a future feature genuinely needs a *true* world-clock timer (correct at any multiplier), do not
-count `time`; accumulate `daytime` deltas, adding 24 on a negative delta so the count survives
-midnight:
+The multiplier is baked in when the target is made (`fnc_time_deadline`). That is safe only because
+`time_Multiplier` is set once at setup (`server_var_init.sqf` defaults it to 1; the enviro menu picks
+it before start) and nothing re-applies `setTimeMultiplier` mid-run. A feature that let the multiplier
+change mid-mission would make every already-set target drift — it would need `daytime`-based targets
+instead: accumulate `daytime` deltas, adding 24 on a negative delta so the count survives midnight:
 
 ```sqf
 private _elapsed = 0;         // in-game seconds
@@ -1275,6 +1277,6 @@ while { _elapsed < _targetSecs } do {
 };
 ```
 
-Either way, when formatting an hours value into a clock string, round to whole minutes before
-splitting h:mm — `floor` on the raw float lands a minute short whenever the fractional hour sits just
-under an integer (10.20 h × 60 = 611.99 → `floor` 611 → 10:11, not 10:12). `fnc_time_clock` does this.
+When formatting an hours value into a clock string, round to whole minutes before splitting h:mm —
+`floor` on the raw float lands a minute short whenever the fractional hour sits just under an integer
+(10.20 h × 60 = 611.99 → `floor` 611 → 10:11, not 10:12). `fnc_time_clock` does this.

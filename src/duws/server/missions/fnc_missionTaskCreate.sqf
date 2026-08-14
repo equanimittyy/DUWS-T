@@ -22,8 +22,9 @@ if (_dl > time) then {
 	(missionNamespace getVariable ["DUWS_curReward", [0,0,0]]) params ["_cp", "_ap", "_rep"];
 	_description = _description + format [localize "STR_DUWS_T_mission_cpap", _cp, _ap];
 	if (_rep > 0) then { _description = _description + format [localize "STR_DUWS_T_mission_rep", _rep] };
-	// Concrete rolled duration, rounded: the map's pre-pick range has collapsed to one value by now.
-	_description = _description + format [localize "STR_DUWS_T_mission_time_fixed", round ((_dl - time) / 3600)];
+	// Concrete rolled duration in in-game hours, rounded: the map's pre-pick range has collapsed to one
+	// value by now.
+	_description = _description + format [localize "STR_DUWS_T_mission_time_fixed", round (([_dl] call fnc_time_remaining) / 3600)];
 };
 
 // The JIP key must not be the bare task id: fnc_missionTaskEnd files the state change under
