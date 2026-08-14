@@ -12,13 +12,11 @@ if (isNull _caller) exitWith {};
 // CP is kept modest: the turn-in rewards clearing enemies, it must not out-earn holding ground.
 // Whole numbers, floored once at the end, so a fractional value cannot make two of a kind worth
 // more than twice one.
-//
-// Files, Wallet_ID and FilesSecret have no spawn source today -- kept for future use.
 private _intelItems = [
-    ["SmartPhone", 4, 0.10],
+    ["SmartPhone", 2, 0.10],
     ["MobilePhone", 1, 0.05],
     ["FlashDisk", 3, 0.50],
-    ["Files", 1, 0.05],
+    ["Files", 4, 0.50],
     ["FilesSecret", 5, 1.00],
     ["Wallet_ID", 1, 0.05],
     ["FileTopSecret", 5, 1.00]

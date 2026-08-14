@@ -55,7 +55,8 @@ private _fnc_notify = {
 // with an `Item_` ground variant go here: createVehicle needs one, and an item that lacks one
 // vanishes when a player drops it. Wallet_traitor lacks that variant, so it stays out and no
 // longer spawns at all.
-private _documents = ["Item_FlashDisk", "Item_SmartPhone", "Item_MobilePhone"];
+private _documents = ["Item_FlashDisk", "Item_SmartPhone", "Item_MobilePhone",
+    "Item_Files", "Item_Wallet_ID", "Item_FilesSecret"];
 
 // Hoisted because the main draw and the intel-exhausted fallback both pay it -- the draw a 1-3
 // roll, the fallback a flat 2 passed in. `call` shares the caller's scope, so it reads _fnc_report
