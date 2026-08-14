@@ -106,6 +106,54 @@ Tunables (defaults, all in the thread): leave 2 steps friendly / 1 step enemy (1
 trigger = `FiredNear` on the informant, ask/bribe price 3. Not yet play-tested in-engine -- sqfvm
 covers parse + the pure helpers only.
 
+## Recon overwatch
+
+A standoff scout, not a fight. The player infils to a mission-chosen overwatch position, raises
+binoculars, and holds eyes-on an unrevealed OPFOR zone long enough to scout it; success lifts that
+zone's fog of war on the strategic map. Thread:
+`src/duws/server/missions/mission_threads/recon/fnc_recon_observe_mission.sqf`.
+
+**Siting.** `fnc_recon_observe_site` (the per-type finder) snaps a picker candidate to the nearest
+unrevealed OPFOR-held zone within 2.5 km and confirms at least one 600-800 m bearing has clear terrain
+LOS onto it, then returns the **target zone** -- not the overwatch. `fnc_mission_findSite` keeps only
+`select 0` of a finder's result, so the thread cannot be handed both; re-deriving the target from an
+overwatch position ("nearest unrevealed OPFOR zone") is ambiguous where zones sit close and can resolve
+to a different zone than LOS was verified against, leaving the hold unwinnable. Handing back the target
+makes the thread's re-derivation exact, and the thread computes the overwatch (fuller terrain+object
+LOS, friendly-facing arc, height-favoured) once for the launched mission. A revealed zone is no target
+-- the reveal is the whole payoff -- so with none unrevealed in reach the offer is dropped. The finder
+runs client-side in the picker, so it reads only broadcast state (`zone_namePOS_pairs`,
+`WARCOM_zones_controled_by_OPFOR`) and a single cheap `terrainIntersectASL` per bearing.
+
+**Custom streaming, this mission only.** At an 800 m standoff the real zone garrison is streamed out
+by the global site poller (`fnc_site_stream_init`), and waking it there would mean either widening a
+live occupant's buffer (wakes on mere proximity) or a shared-file present-hook -- both touch global
+streaming, and both hand the player a live garrison that wanders off the spot it is meant to be
+scouted at. Instead the thread runs its own streamer: a small faction element (`fnc_spawn_team`,
+`garrison` posture, `YELLOW` combat mode so it holds rather than chases an 800 m spotter) plus a tent
+anchor, raised when a player reaches the overwatch ring and stood down after they leave. It owns its
+spawns outright -- not claimed to the mission token -- so the end sweep has nothing of its to race.
+The global poller is never touched.
+
+**Observing.** The player-facing half (`client/missions/fnc_recon_observe_layer.sqf`, pushed to all
+clients JIP-keyed) draws a 3D "look here" icon over the target while the player is in the overwatch
+area with binoculars up, and runs the hold: continuous binocular LOS (`cameraView == "GUNNER"` and
+the binocular is `currentWeapon`) on the target from within the area, any break resetting it. LOS is
+re-checked client-side per tick (`terrainIntersectASL` for terrain, `lineIntersectsSurfaces` for
+structures). On a completed hold the client reports once to `fnc_recon_observe_success`, which raises
+the flag the thread's monitor wins on -- a second player or a stale JIP report cannot double-pay,
+since the monitor reads the flag once and clears `DUWS_recon_active`. Soft stealth: the element can
+see and fire, but the mission never auto-fails on detection.
+
+**Payoff.** `fnc_zone_reveal` lifts the scouted zone onto the strategic map (quiet reveal -- the
+mission speaks its own line, not Overlord's AO-wide zone-spotted broadcast), then the standard CP/AP.
+
+Tunables (defaults, all in the thread): overwatch band 600-800 m and LOS range 900 m (finder + layer),
+observe area 75 m, hold 12 s, stream ring 200 m / despawn 300 m after 30 s empty, 2 `team`s at 100 m,
+tent `Land_TentDome_F`. Targets zones only for now -- hardpoint targeting (reveal via
+`fnc_hardpoint_reveal`) is a later add. Not yet play-tested in-engine -- sqfvm covers parse + the pure
+helpers only.
+
 ## Mission catalogue (how each actually plays)
 
 Effort is a 1-5 read of the *required* fight, from a thread-by-thread analysis. Shared force per
@@ -131,6 +179,7 @@ the campaign advances while their pay is fixed.
 | 3 | Destroy tower | sabotage | cmd | tower destroyed | tower **pre-broken to 0.8** | 400 | 2 | 20/30/0 |
 | 8 | Sabotage laptop | sabotage | cmd | one hold-action | compact, light verb | 200 | 1 | 10/36/0 |
 | 16 | Informant hunt | elimination | cmd | informant killed before he escapes | hunt in a town crowd; ask/ping or camp the car; decoys + car escape | 800 | 3 | 5/10/0 |
+| 17 | Recon overwatch | recon | cmd | hold binocular LOS on the target from the overwatch | mission-owned element streamed at the target only while observed; reveals the zone on the map | -- | 2 | 20/8/0 |
 | 14 | Protect civilian | defend | civ | -- | not yet analysed | -- | -- | 20/10/5 |
 | 15 | Transport IDAP | escort | civ | -- | not yet analysed | -- | -- | 20/10/5 |
 

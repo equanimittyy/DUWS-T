@@ -136,6 +136,10 @@ fnc_informant_site = compile preprocessFileLineNumbers "duws\server\missions\mis
 fnc_informant_ask_addAction = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_ask_addAction.sqf";publicVariable "fnc_informant_ask_addAction";
 fnc_informant_ask_request = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_ask_request.sqf";
 fnc_informant_ask_reveal = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\informant\fnc_informant_ask_reveal.sqf";
+fnc_recon_observe_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_mission.sqf";
+fnc_recon_observe_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_site.sqf";publicVariable "fnc_recon_observe_site";
+fnc_recon_observe_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_success.sqf";
+fnc_recon_observe_layer = compile preprocessFileLineNumbers "duws\client\missions\fnc_recon_observe_layer.sqf";publicVariable "fnc_recon_observe_layer";
 // CIVILIAN FUNCTIONS
 fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_init_Tomata.sqf";
 fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_setup_array.sqf";
