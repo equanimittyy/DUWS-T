@@ -1242,3 +1242,34 @@ Dispatch the five worn slots to their own commands: `removeUniform`, `removeVest
 `removeBackpack` also discard the container's contents; there is no keep-contents variant, so re-add
 them afterward if they must survive. `DUWS_fnc_strip_n` (`initPlayerLocal.sqf`) does this dispatch,
 which is why the arsenal and quick-kit overdraw strip can claw back a whole kit, not just its guns.
+
+## `time` and `daytime` are different clocks; a world-clock timer cannot be built on `time`
+
+**`time` is real elapsed mission seconds — it advances with the simulation and is scaled by
+`setAccTime`, but the day/night cycle multiplier (`setTimeMultiplier`) does not touch it. `daytime`
+is the world clock in hours (0–24), which `setTimeMultiplier` speeds up or slows down. A campaign
+that accelerates the day therefore moves `daytime` far faster than `time`, so a timer meant to track
+the world clock — "the informant leaves at 11:00" — is wrong if it counts `time` seconds, and the
+mission deadline (`DUWS_curDeadlineAt = time + secs`, `fnc_mission_begin.sqf`) runs on the other
+clock entirely.**
+
+To wait a span of *in-game world time*, accumulate `daytime` deltas rather than sleeping real
+seconds, and add 24 on a negative delta so the count survives midnight:
+
+```sqf
+private _elapsed = 0;         // in-game seconds
+private _last = daytime;
+while { _elapsed < _targetSecs } do {
+    sleep 2;
+    private _d = daytime - _last;
+    if (_d < 0) then { _d = _d + 24 };   // midnight wrap
+    _elapsed = _elapsed + _d * 3600;
+    _last = daytime;
+};
+```
+
+Consequence to accept, not fix: under a time multiplier a world-clock timer and a `time`-based
+deadline drift apart — the world-clock span elapses in fewer real seconds than its number reads.
+Also, when formatting `daytime` into a clock string, round to whole minutes before splitting hours
+and minutes — `floor` on the raw float lands a minute short whenever the fractional hour sits just
+under an integer (10.20 h × 60 = 611.99 → `floor` 611 → 10:11, not 10:12).

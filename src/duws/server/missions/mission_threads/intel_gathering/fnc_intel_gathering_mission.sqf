@@ -1,315 +1,311 @@
 // Locality: server -- callers remoteExec to target 2.
+//
+// Informant hunt. An OPFOR informant hides disguised among a town's civilians; the player locates and
+// kills him before he leaves by car for a distant zone. The site-finder (fnc_intel_gathering_site)
+// guarantees _MissionPos is a populated Tomata town, so this thread never has to test for one.
+//
+// Two shapes, chosen by the town's reputation band:
+//   friendly/neutral -- the crowd is thickened and every civilian can be asked about the informant
+//                       (fnc_intel_ask_addAction, added in the ask-action layer); the player narrows
+//                       him down by talking, and has time.
+//   enemy            -- no asking; the informant leaves much sooner, so the player camps the
+//                       described vehicle and intercepts.
+// Both leave early the moment a firefight starts near the informant.
 params ["_MissionPos", "_mission_name"];
 
-
-private _radius = 800;
-private _minBuildings = 20;
-private _usableBuildings = [_MissionPos, 3, _radius] call fnc_usableBuildings;
-
-if (count _usableBuildings < _minBuildings) exitWith {
-    ["ERROR", "MISSION", format ["Not enough usable buildings (%1), aborting.", count _usableBuildings]] call fnc_log;
-    hint localize "STR_DUWS_T_INTEL_GATHERING_NO_BUILDINGS";
+// Resolve the town this offer sits on. The finder returned a town centre, so the nearest registered
+// town to it is that town; civ_town_rep / civ_radii are server-only and this thread is server-side.
+private _locs  = missionNamespace getVariable ["civ_locations", []];
+private _radii = missionNamespace getVariable ["civ_radii", []];
+if (_locs isEqualTo []) exitWith {
+    [16, "STR_DUWS_T_crtzxs0j"] call fnc_mission_abort;
 };
-
-// Gated after the building check on purpose: too few buildings must not burn the cooldown.
-if (!([16, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
-
-// Reward from the shared table. No deadline check: this mission closes itself out on a fixed 900 s
-// timer below, always well inside the deadline, so the clock the map prints is nominal here.
-_cpreward = DUWS_curReward select 0;
-_apreward = DUWS_curReward select 1;
-
-// Marked before anything is built. The ellipse and the task are the only things telling the
-// player where the objective is, and the container seeding below runs for tens of seconds.
-private _randomPos = [_MissionPos, 0, _radius, 5, 0, 0.2, 0] call BIS_fnc_findSafePos;
-if (_randomPos isEqualTo [0,0,0]) then { _randomPos = _MissionPos; };
-_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
-private _taskID = format ["intel_gathering_%1", round time];
-[_taskID, localize "STR_DUWS_T_INTEL_GATHERING_DESC", _mission_name,
-    _randomPos, "search"] call fnc_missionTaskCreate;
-
-private _maxBuildings = 30;
-private _selectedBuildings = [];
-if (count _usableBuildings <= _maxBuildings) then {
-    _selectedBuildings = _usableBuildings;
-} else {
-    private _tempArray = +_usableBuildings;
-    for "_i" from 1 to _maxBuildings do {
-        private _index = floor random (count _tempArray);
-        _selectedBuildings pushBack (_tempArray select _index);
-        _tempArray deleteAt _index;
-    };
-};
-["INFO", "MISSION", format ["Selected %1 buildings.", count _selectedBuildings]] call fnc_log;
-
-private _possibleUnitTypes = [[
-    opfor_SOLDIER_X,
-    opfor_AA_SOLDIER_X,
-    opfor_AR_SOLDIER_X,
-    opfor_AT_SOLDIER_X,
-    opfor_LAT_SOLDIER_X,
-    opfor_SL_SOLDIER_X,
-    opfor_GL_SOLDIER_X,
-    opfor_MARK_SOLDIER_X
-], "opfor"] call fnc_factionRoles;
-
-private _containerClasses = [
-    "Land_PaperBox_open_full_F",
-    "Land_Ammobox_rounds_F",
-    "Land_Suitcase_F",
-    "Land_PaperBox_01_small_ransacked_brown_F",
-    "Land_PaperBox_01_small_destroyed_brown_F",
-    "Land_WoodenCrate_01_F",
-    "Land_WoodenBox_F",
-    "Land_PaperBox_01_small_destroyed_white_IDAP_F",
-    "Land_PaperBox_01_small_ransacked_white_IDAP_F",
-    "Land_WoodenBox_02_F",
-    "Land_MetalCase_01_small_F",
-    "Land_PlasticCase_01_small_olive_CBRN_F"
-];
-
-private _allSpawnedContainers = [];
-private _allSpawnedUnits = [];
-private _buildingMarkers = [];
-
-if (isNil "fnc_intel_container_addAction") then {
-    fnc_intel_container_addAction = {
-        params ["_container"];
-        if (isNull _container) exitWith {};
-        if (_container getVariable ["container_action_added", false]) exitWith {};
-        _container setVariable ["container_action_added", true];
-        
-        [
-            _container,
-            localize "STR_DUWS_T_SEARCH_CONTAINER",
-            "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_search_ca.paa",
-            "\a3\ui_f\data\IGUI\Cfg\holdactions\holdAction_search_ca.paa",
-            "_this distance _target < 3",
-            "_caller distance _target < 3",
-            {},
-            {},
-            {
-                params ["_target", "_caller", "_actionId", "_arguments"];
-                [_target, _caller] remoteExec ["fnc_intel_container_search_server", 2];
-                _target removeAction _actionId;
-                _target setVariable ["container_action_added", nil];
-            },
-            {},
-            [],
-            1,
-            30,
-            true,
-            false
-        ] call BIS_fnc_holdActionAdd;
-    };
-    publicVariable "fnc_intel_container_addAction";
-};
-
-if (isNil "fnc_intel_container_search_server") then {
-    fnc_intel_container_search_server = {
-        params ["_container", "_caller"];
-        if (!isServer) exitWith {};
-        if (isNull _container || isNull _caller) exitWith {};
-        
-        private _normalIntelItems = [
-            "Money_roll",
-            "Files",
-            "Wallet_ID",
-            "SmartPhone",
-            "MobilePhone",
-            "FlashDisk"
-        ];
-        private _topSecretItems = ["FileTopSecret", "FilesSecret"];
-        
-        if (random 1 < 0.8) then {
-            private _itemsToGive = [];
-            private _hasTopSecret = false;
-            
-            if (random 1 < 0.1) then {
-                private _topSecretItem = selectRandom _topSecretItems;
-                _itemsToGive pushBack _topSecretItem;
-                _hasTopSecret = true;
-            };
-            
-            private _normalCount = floor random 4;
-            for "_i" from 1 to _normalCount do {
-                _itemsToGive pushBack (selectRandom _normalIntelItems);
-            };
-            
-            if (count _itemsToGive == 0) exitWith {
-                [localize "STR_DUWS_T_CONTAINER_EMPTY"] remoteExec ["hint", _caller];
-            };
-            
-            private _addedToInventory = true;
-            private _droppedItems = [];
-            {
-                private _class = _x;
-                private _added = false;
-                if (isClass (configFile >> "CfgWeapons" >> _class)) then {
-                    if (count (items _caller) < 10) then {
-                        _caller addItem _class;
-                        _added = true;
-                    };
-                };
-                if (!_added) then {
-                    if (count (magazines _caller) < 20) then {
-                        _caller addMagazineGlobal _class;
-                        _added = true;
-                    };
-                };
-                if (!_added) then {
-                    _addedToInventory = false;
-                    _droppedItems pushBack _class;
-                };
-            } forEach _itemsToGive;
-            
-            if (!_addedToInventory) then {
-                private _pos = getPosATL _caller;
-                private _holder = createVehicle ["GroundWeaponHolder", _pos, [], 0, "CAN_COLLIDE"];
-                {
-                    _holder addItemCargoGlobal [_x, 1];
-                } forEach _droppedItems;
-                [localize "STR_DUWS_T_ITEMS_DROPPED"] remoteExec ["hint", _caller];
-            } else {
-                [format [localize "STR_DUWS_T_ITEMS_FOUND", count _itemsToGive]] remoteExec ["hint", _caller];
-            };
-            
-            if (_hasTopSecret) then {
-                private _title = localize "STR_DUWS_T_TOPSECRET_TITLE";
-                private _desc = format [localize "STR_DUWS_T_TOPSECRET_DESC", name _caller];
-                ["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
-                [localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_INTEL_GATHERINGTS1"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-                sleep 6;
-                [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_GATHERINGTS2"] remoteExec ["fnc_duws_dialogue", 0];
-            };
-        } else {
-            [localize "STR_DUWS_T_CONTAINER_EMPTY"] remoteExec ["hint", _caller];
-        };
-    };
-    publicVariable "fnc_intel_container_search_server";
-};
-
+private _townIndex = -1;
+private _bestD = 1e9;
 {
-    private _building = _x;
-    private _positions = [_building] call BIS_fnc_buildingPositions;
-    private _posCount = count _positions;
-    if (_posCount == 0) then { continue };
+    private _d = (getPos _x) distance2D _MissionPos;
+    if (_d < _bestD) then { _bestD = _d; _townIndex = _forEachIndex };
+} forEach _locs;
+if (_townIndex < 0) exitWith {
+    [16, "STR_DUWS_T_crtzxs0j"] call fnc_mission_abort;
+};
+private _townPos    = getPos (_locs select _townIndex);
+private _townRadius = _radii param [_townIndex, 200];
 
-    private _buildingPos = getPos _building;
-    private _markerName = format ["intel_bldg_%1_%2", round(time), _forEachIndex];
-    private _marker = createMarker [_markerName, _buildingPos];
-    _marker setMarkerShape "ICON";
-    _marker setMarkerType "o_unknown";
-    _marker setMarkerColor "ColorRed";
-    _marker setMarkerSize [0.5, 0.5];
-    _buildingMarkers pushBack _markerName;
-    
-    private _baseCount = 3;
-    private _extraChance = (_posCount / 10) min 1;
-    private _extra = floor (random 4);
-    if (random 1 < _extraChance) then {
-        _extra = _extra + floor (random 3);
-    };
-    private _unitCount = (_baseCount + _extra) min 6;
-    if (_unitCount > _posCount) then { _unitCount = _posCount };
-    
-    private _unitTypes = [];
-    for "_i" from 1 to _unitCount do {
-        _unitTypes pushBack (selectRandom _possibleUnitTypes);
-    };
-    
-    private _group = [_MissionPos, EAST, _unitTypes, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
-    _group deleteGroupWhenEmpty true;
-    [_group] call fnc_mission_claim;
-    
-    private _unitsArray = units _group;
-    for "_i" from 0 to (_unitCount - 1) do {
-        private _unit = _unitsArray select _i;
-        private _randPosIndex = floor random _posCount;
-        private _unitPos = _building buildingPos _randPosIndex;
-        private _unitPositions = ["UP", "MIDDLE"];
-        _unit setUnitPos (selectRandom _unitPositions);
-        _unit setPosATL _unitPos;
-        _unit setBehaviour "AWARE";
-        _unit setCombatMode "RED";
-        
-        [_unit] call fnc_addRandomLoot;
-        
-        // No stance argument: the per-unit UP/MIDDLE mix chosen above has to survive the hold
-        // loop, and any stance passed here would re-assert one of them onto every unit.
-        [_unit, _building, _positions] spawn fnc_holdBuildingPost;
-        
-        _allSpawnedUnits pushBack _unit;
-    };
-    
-    private _containerCountProb = (_posCount / 10) min 1;
-    private _containerCount = 0;
-    private _rand = random 1;
-    if (_rand < _containerCountProb * 0.33) then {
-        _containerCount = 1;
-    } else {
-        if (_rand < _containerCountProb * 0.66) then {
-            _containerCount = 2;
-        } else {
-            if (_rand < _containerCountProb) then {
-                _containerCount = 3;
-            };
-        };
-    };
-    
-    for "_c" from 1 to _containerCount do {
-        private _containerClass = selectRandom _containerClasses;
-        private _containerPosIndex = floor random _posCount;
-        private _containerPos = _building buildingPos _containerPosIndex;
-        private _container = createVehicle [_containerClass, _containerPos, [], 0, "CAN_COLLIDE"];
-        _container setPosATL _containerPos;
-        _container setDir random 360;
-        _allSpawnedContainers pushBack _container;
-        
-        [_container] remoteExec ["fnc_intel_container_addAction", 0, _container];
-    };
-    
-} forEach _selectedBuildings;
+// Enemy town: OPFOR-banded, or holding a garrison the reputation band has not caught up to yet.
+private _rep       = [_townIndex] call fnc_civ_repAt;
+private _enemyTown = (_rep <= -10) || {([_townIndex] call fnc_town_garrison_tierAt) > 0};
 
-[_MissionPos, _radius] spawn fnc_missionPatrols;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_GATHERING1"] remoteExec ["fnc_duws_dialogue", 0];
-sleep 6;
-[localize "STR_DUWS_T_OVERLORD", ([localize "STR_DUWS_T_INTEL_GATHERING2"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
+if (!([16, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
+private _cpreward = DUWS_curReward select 0;
+private _apreward = DUWS_curReward select 1;
 
-[localize "STR_DUWS_T_actionteam", ([localize "STR_DUWS_T_INTEL_GATHERING3"] call fnc_cs)] remoteExec ["fnc_duws_dialogue", 0];
-sleep 6;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_GATHERING4"] remoteExec ["fnc_duws_dialogue", 0];
-sleep 6;
-[localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_INTEL_GATHERING5"] remoteExec ["fnc_duws_dialogue", 0];
+// Leave timer runs on the in-game world clock (daytime), not real seconds: a campaign accelerating
+// the day/night cycle should move the informant's departure with it. A nominal minutes-to-leave is
+// snapped to the nearest 10-minute step so the departure the briefing prints -- and enforces -- lands
+// on a round :X0, the same 10-minute granularity the mission deadline rolls on. TUNABLE minutes.
+private _leaveMin = if (_enemyTown) then { 10 } else { 20 };
+private _step = 1/6;   // 10 in-game minutes, expressed in hours
+private _targetDay = (round ((daytime + _leaveMin / 60) / _step)) * _step;
+if (_targetDay <= daytime) then { _targetDay = _targetDay + _step };   // never at or behind now
+// In-game seconds from now to that world-clock mark; the exfil watcher counts daytime up to it.
+private _leaveSecs = ((_targetDay - daytime + 24) mod 24) * 3600;
+// Whole-minute round before splitting h:mm -- floor on the raw float lands a minute short when it
+// falls just under an integer (10.999h could read 10:60 without it).
+private _totalMin = round ((_targetDay mod 24) * 60);
+private _lh = (floor (_totalMin / 60)) mod 24;
+private _lm = _totalMin mod 60;
+private _clock = format ["%1%2:%3%4", ["0", ""] select (_lh >= 10), _lh, ["0", ""] select (_lm >= 10), _lm];
 
+// Escape destination: the nearest zone at least 1 km off, so the drive is a real leg and the fail is
+// reachable. No zone that far (a tiny map) falls back to a point 1.5 km out. TUNABLE.
+private _MINDIST = 1000;
+private _zx  = [];
+private _zxD = 1e9;
+{
+    _x params ["", "_zp", ""];
+    private _d = _zp distance2D _townPos;
+    if (_d >= _MINDIST && _d < _zxD) then { _zxD = _d; _zx = _zp };
+} forEach zone_meta_array;
+if (_zx isEqualTo []) then { _zx = _townPos getPos [1500, random 360] };
 
-// The area ellipse is not deleted here: this branch and the countdown below both fire at 900 s,
-// and the countdown owns the removal.
-[_taskID, _MissionPos, _radius, _allSpawnedContainers, _buildingMarkers, _cpreward, _apreward, _mission_name] spawn {
-    params ["_taskID", "_pos", "_rad", "_containers", "_bldgMarkers", "_cpreward", "_apreward", "_mission_name"];
+// The getaway car, and three decoys that scatter when he drives so the described vehicle never points
+// at one car. One decoy is guaranteed his class, the other two random, so the description narrows the
+// field to at least two identical cars without ever pinning the informant.
+private _vehPool = missionNamespace getVariable ["civ_veh_array", []];
+if (_vehPool isEqualTo []) then { _vehPool = ["C_Offroad_01_F", "C_Hatchback_01_F", "C_SUV_01_F"] };
+private _informantClass = selectRandom _vehPool;
+private _decoyClasses = [_informantClass, selectRandom _vehPool, selectRandom _vehPool] call BIS_fnc_arrayShuffle;
+private _vehName = getText (configFile >> "CfgVehicles" >> _informantClass >> "displayName");
 
-    sleep 900;
+// Objective marker + task on the town. Marked before the crowd is built, since the ellipse is all the
+// player has to go on while the spawn runs.
+private _radius = _townRadius max 200;
+private _markername2 = [_townPos, _radius] call fnc_missionMarkerData;
+private _taskID = format ["intel_informant_%1", round time];
+[_taskID, format [localize "STR_DUWS_T_INTEL_INFORMANT_TASK", _clock, _vehName], _mission_name, _townPos, "search"] call fnc_missionTaskCreate;
 
-    [_taskID, "SUCCEEDED"] call fnc_missionTaskEnd;
-
-    {
-        deleteMarker _x;
-    } forEach _bldgMarkers;
-
-    [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_INTEL_GATHERING6"] remoteExec ["fnc_duws_dialogue", 0];
-
-    [_pos, _rad] call fnc_mission_end;
-
-    [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-
-    sleep 360;
-
-    {
-        if (!isNull _x) then { deleteVehicle _x };
-    } forEach _containers;
+// Parks a car of a given class on a road point near the town, stripped of the free medkit vanilla
+// civilian cars carry, sitting where put rather than bounced to a clear spot.
+private _fnc_spawnCar = {
+    params ["_class", "_pos", "_dir"];
+    private _veh = createVehicle [_class, _pos, [], 0, "NONE"];
+    clearItemCargoGlobal _veh; clearMagazineCargoGlobal _veh;
+    clearWeaponCargoGlobal _veh; clearBackpackCargoGlobal _veh;
+    _veh setDir _dir;
+    _veh setPosATL _pos;
+    _veh
 };
 
-sleep 600;
-["info",[localize "STR_DUWS_T_INTEL_GATHERING",localize "STR_DUWS_T_INTEL_GATHERING_TMLEFT"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated];
-sleep 300;
+private _roads = nearestTerrainObjects [_townPos, ["MAIN ROAD", "ROAD", "TRACK"], _radius max 200, false, true];
+private _fnc_carPos = {
+    // A road point when the town has roads, otherwise a safe patch of ground -- a car in a field is
+    // still a car to drive off in.
+    if (_roads isEqualTo []) exitWith {
+        private _p = [_townPos, 0, _townRadius, 5, 0, 0.3, 0] call BIS_fnc_findSafePos;
+        [if (_p isEqualTo [0,0,0]) then { _townPos } else { _p }, random 360]
+    };
+    private _road = selectRandom _roads;
+    [getPosATL _road, getDir _road]
+};
+
+private _allCars = [];
+private _allUnits = [];
+
+// The informant's car first, empty: he is on foot in the crowd and only walks to it when he leaves.
+([] call _fnc_carPos) params ["_icp", "_icd"];
+private _informantCar = [_informantClass, _icp, _icd] call _fnc_spawnCar;
+_allCars pushBack _informantCar;
+
+// Decoy cars, each with a civilian already at the wheel so they can pull away the instant he does.
+private _decoys = [];
+{
+    (call _fnc_carPos) params ["_dp", "_dd"];
+    private _dCar = [_x, _dp, _dd] call _fnc_spawnCar;
+    private _driver = [_townIndex, _dp, selectRandom (missionNamespace getVariable ["civ_array", []]), false] call fnc_civ_spawnUnit;
+    if (!isNull _driver) then {
+        _driver moveInDriver _dCar;
+        (group _driver) setBehaviour "CARELESS";
+        _decoys pushBack _dCar;
+        _allCars pushBack _dCar;
+        _allUnits pushBack _driver;
+    } else {
+        deleteVehicle _dCar;
+    };
+} forEach _decoyClasses;
+
+// The informant: a civilian-model unit in an EAST group, so he reads as a local but counts as OPFOR
+// for the kill. Captive and unarmed while he blends; he only arms if forced onto foot (below).
+private _civBodies = missionNamespace getVariable ["civ_array", []];
+private _informantSpawn = [_townPos, 0, _townRadius, 3, 0, 0.3, 0] call BIS_fnc_findSafePos;
+if (_informantSpawn isEqualTo [0,0,0]) then { _informantSpawn = _townPos };
+private _iGroup = createGroup [EAST, true];
+private _informant = _iGroup createUnit [selectRandom _civBodies, _informantSpawn, [], 0, "NONE"];
+removeAllWeapons _informant;
+_informant setCaptive true;
+_informant setBehaviour "SAFE";
+_informant setUnitPos "UP";
+_allUnits pushBack _informant;
+
+// Killed here so the near-town reputation cost is charged off his death position: a clean kill out on
+// the road is free, one in the crowd is not. Nearest town within its edge + 300 m pays -1. TUNABLE.
+_informant addEventHandler ["Killed", {
+    params ["_unit"];
+    _unit setVariable ["DUWS_intel_dead", true];
+    private _p = getPosATL _unit;
+    private _tl = missionNamespace getVariable ["civ_locations", []];
+    private _tr = missionNamespace getVariable ["civ_radii", []];
+    private _ti = -1; private _bd = 1e9;
+    { private _dd = (getPos _x) distance2D _p; if (_dd < _bd) then { _bd = _dd; _ti = _forEachIndex } } forEach _tl;
+    if (_ti >= 0 && {_bd <= (_tr param [_ti, 200]) + 300}) then {
+        [_ti, -1, "informant_killed_near_town"] call fnc_town_rep_adjust;
+    };
+}];
+// A firefight near him is the signal to run, in either branch.
+_informant addEventHandler ["FiredNear", { (_this select 0) setVariable ["DUWS_intel_loud", true] }];
+
+// The informant object stays server-side (the reveal reads it there); DUWS_intel_active is the
+// broadcast flag the client-side ask action gates on.
+missionNamespace setVariable ["DUWS_intel_informant", _informant];
+missionNamespace setVariable ["DUWS_intel_townIndex", _townIndex];
+DUWS_intel_active = true;
+publicVariable "DUWS_intel_active";
+
+// Thicken the crowd only where the player can work it -- a friendly/neutral town he can walk. Each
+// added civilian is a real town local (same index, so harming one costs the town), and gets the ask
+// action if that layer is loaded. TUNABLE count.
+private _crowd = [];
+if (!_enemyTown) then {
+    for "_i" from 1 to 16 do {
+        private _cpos = [_townPos, 0, _townRadius, 2, 0, 0.35, 0] call BIS_fnc_findSafePos;
+        if (_cpos isEqualTo [0,0,0]) then { _cpos = _townPos };
+        private _c = [_townIndex, _cpos, selectRandom _civBodies, false] call fnc_civ_spawnUnit;
+        if (!isNull _c) then {
+            _crowd pushBack _c;
+            _allUnits pushBack _c;
+            // JIP-keyed on the civilian so a client that connects mid-hunt still gets the action.
+            [_c] remoteExec ["fnc_intel_ask_addAction", 0, _c];
+        };
+    };
+};
+missionNamespace setVariable ["DUWS_intel_crowd", _crowd];
+
+// Foot flight: car gone, so he drops the disguise, pulls a pistol and runs for the zone as an open
+// combatant. Faction-agnostic sidearm for now.
+if (isNil "DUWS_fnc_intel_footFlee") then {
+    DUWS_fnc_intel_footFlee = {
+        params ["_inf", "_dest"];
+        if (!alive _inf) exitWith {};
+        _inf setCaptive false;
+        _inf addMagazine "16Rnd_9x21_Mag";
+        _inf addWeapon "hgun_Rook40_F";
+        private _grp = group _inf;
+        while { (count (waypoints _grp)) > 0 } do { deleteWaypoint [_grp, 0] };
+        _grp setBehaviour "COMBAT";
+        _grp setCombatMode "RED";
+        _grp setSpeedMode "FULL";
+        private _wp = _grp addWaypoint [_dest, 0];
+        _wp setWaypointType "MOVE";
+        _wp setWaypointSpeed "FULL";
+    };
+};
+
+[localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_INTEL_INFORMANT_BRIEF", _clock, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
+
+// Exfil watcher: hold until the leave clock elapses or a firefight starts, then get him out. Kept off
+// the main thread so the win/fail monitor below runs against it in parallel.
+[_informant, _informantCar, _decoys, _zx, _leaveSecs, _townPos] spawn {
+    params ["_inf", "_car", "_decoys", "_zx", "_leaveSecs", "_townPos"];
+
+    private _elapsed = 0;
+    private _last = daytime;
+    waitUntil {
+        sleep 2;
+        private _d = daytime - _last;
+        if (_d < 0) then { _d = _d + 24 };   // midnight wrap
+        _elapsed = _elapsed + _d * 3600;
+        _last = daytime;
+        (_elapsed >= _leaveSecs) || (_inf getVariable ["DUWS_intel_loud", false]) || !alive _inf
+    };
+    if (!alive _inf) exitWith {};
+
+    (group _inf) setBehaviour "CARELESS";
+
+    private _boarded = false;
+    if (alive _car) then {
+        _inf assignAsDriver _car;
+        [_inf] orderGetIn true;
+        private _giveUp = diag_tickTime + 60;
+        waitUntil { sleep 1; (_inf in _car) || !alive _inf || !alive _car || diag_tickTime > _giveUp };
+        _boarded = (alive _inf) && (_inf in _car);
+    };
+
+    if (!_boarded) exitWith {
+        if (alive _inf) then { [_inf, _zx] call DUWS_fnc_intel_footFlee };
+    };
+
+    // He is away: the decoys break in random directions away from town (never toward the zone), so
+    // four cars leave at once and only eyes-on says which is his.
+    {
+        if (alive _x && {!isNull (driver _x)}) then {
+            private _dg = group (driver _x);
+            _dg setBehaviour "CARELESS";
+            _dg setSpeedMode "FULL";
+            private _dest = _townPos getPos [1500 + random 500, random 360];
+            private _wp = _dg addWaypoint [_dest, 0];
+            _wp setWaypointType "MOVE";
+            _wp setWaypointSpeed "FULL";
+        };
+    } forEach _decoys;
+
+    private _grp = group _inf;
+    _grp setSpeedMode "FULL";
+    private _wp = _grp addWaypoint [_zx, 0];
+    _wp setWaypointType "MOVE";
+    _wp setWaypointSpeed "FULL";
+    _wp setWaypointBehaviour "CARELESS";
+
+    // Car killed under him mid-drive and he lives: onto foot, armed.
+    waitUntil { sleep 2; !alive _car || !alive _inf || (_inf distance2D _zx) < 60 };
+    if ((alive _inf) && !alive _car && !(_inf in _car)) then {
+        [_inf, _zx] call DUWS_fnc_intel_footFlee;
+    };
+};
+
+// Win/fail monitor. Killed -> win; reaches the zone -> escaped; deadline -> timeout.
+private _deadline = DUWS_curDeadlineAt;
+private _outcome = "";
+waitUntil {
+    sleep 2;
+    if ((_informant getVariable ["DUWS_intel_dead", false]) || !alive _informant) exitWith { _outcome = "WIN"; true };
+    if (!isNull _informant && {(_informant distance2D _zx) < 60}) exitWith { _outcome = "ESCAPED"; true };
+    if (time > _deadline) exitWith { _outcome = "TIMEOUT"; true };
+    false
+};
+
 [_markername2] call fnc_missionMarkerClear;
+missionNamespace setVariable ["DUWS_intel_informant", objNull];
+missionNamespace setVariable ["DUWS_intel_crowd", []];
+DUWS_intel_active = false;
+publicVariable "DUWS_intel_active";
+
+if (_outcome isEqualTo "WIN") then {
+    [_taskID, "SUCCEEDED"] call fnc_missionTaskEnd;
+    [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_INTEL_INFORMANT_KILLED"] remoteExec ["fnc_duws_dialogue", 0];
+    [_townPos, _radius, ""] call fnc_mission_end;
+    [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
+} else {
+    [_taskID, "FAILED"] call fnc_missionTaskEnd;
+    private _failKey = ["STR_DUWS_T_INTEL_INFORMANT_ESCAPED", "STR_DUWS_T_mission_deadline_fail"] select (_outcome isEqualTo "TIMEOUT");
+    [_failKey, {hint localize _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
+    [_townPos, _radius, ""] call fnc_mission_end;
+};
+
+// Same cleanup for everything the mission put down -- informant, all four cars, decoy drivers and the
+// added crowd -- once the players have had a moment with the result.
+[_allCars, _allUnits] spawn {
+    params ["_cars", "_units"];
+    sleep 10;
+    { if (!isNull _x) then { deleteVehicle _x } } forEach _cars;
+    { if (!isNull _x) then { deleteVehicle _x } } forEach _units;
+};

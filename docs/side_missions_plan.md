@@ -59,10 +59,48 @@ the 7 drawn get offered), never an unbounded search.
 
 **Phases:**
 1. Dispatch + generic finder + the picker gate, behaviour-preserving (generic accepts every
-   candidate, so the current draw is unchanged).
-2. Intel: a town finder (accept only where a ≥20-building town sits, return its centre) + the thread
-   trusts the finder's position; then the intel internals rework.
+   candidate, so a mission without a finder draws exactly as before).
+2. Intel -- done: reworked into an informant hunt with its own town finder (see
+   [§Intel gathering: informant hunt](#intel-gathering-informant-hunt)).
 3. Other missions gain finders as their reworks require.
+
+## Intel gathering: informant hunt
+
+The recon mission is a manhunt, not a building sweep. An OPFOR informant hides disguised among a
+town's civilians; the player finds and kills him before he leaves by car for a distant zone. Thread:
+`src/duws/server/missions/mission_threads/intel_gathering/fnc_intel_gathering_mission.sqf`.
+
+**Siting.** `fnc_intel_gathering_site` (the per-type finder) accepts a picker candidate only where a
+live Tomata civil town sits within 2.5 km, returning that town's centre; civilians off / RAVAGE / WBK
+reject, so the offer is dropped rather than sited on empty ground. The finder runs client-side in the
+picker, so it reads `duws_town_circles` (broadcast) and `CIV_PRESENCE`, never the server-only
+`civ_town_rep`.
+
+**The informant.** A civilian-model unit in an EAST group (side follows the group), `setCaptive true`
+so BLUFOR AI ignores him while he blends. Killing him wins; a kill within townRadius + 300 m of the
+nearest town costs -1 reputation (`fnc_town_rep_adjust`), so a clean kill is on the road, not in the
+crowd.
+
+**Two branches, on the town's reputation band** (`fnc_civ_repAt`; enemy = OPFOR band or a standing
+garrison via `fnc_town_garrison_tierAt`):
+- friendly / neutral -- the crowd is thickened, and every added local carries an "Ask about informant"
+  action (`fnc_intel_ask_*`) that rolls the shared civilian reaction curve (`fnc_civ_reaction_weights`)
+  and, on success, hints his bearing + distance (16-point compass, nearest 5 m) from the asker. A
+  bribe result reuses the civilian bribe popup, routed back through `fnc_civ_serve`'s INFORMANT case
+  (with a matching `fnc_civ_rowPrice` entry).
+- enemy -- no asking; the informant leaves much sooner, so the player camps the described vehicle.
+
+**The escape.** He leaves at a fixed world-clock time (shown in the briefing) or the moment shots are
+fired near him, walks to his car and drives to the nearest zone >=1 km off; reaching it fails the
+mission. Three decoy cars -- one guaranteed his class, so the vehicle description never pins a single
+car -- scatter on random bearings when he boards. Car destroyed before he boards, and he arms a pistol
+and flees on foot as an open combatant. The leave timer counts `daytime`, not real seconds (see
+[`arma_engine_gotchas.md`](info/arma_engine_gotchas.md) on the two clocks).
+
+Tunables (defaults, all in the thread): leave ~20 min friendly / ~10 min enemy of in-game time,
+snapped to the nearest 10-minute world-clock step so the departure lands on a round :X0; +16 crowd,
+zone-reach 60 m, rep-penalty radius +300 m, pistol `hgun_Rook40_F`, shots trigger = `FiredNear` on the
+informant, ask/bribe price 3. Not yet play-tested in-engine -- sqfvm covers parse + the pure helpers only.
 
 ## Mission catalogue (how each actually plays)
 
@@ -88,12 +126,9 @@ the campaign advances while their pay is fixed.
 | 0 | Rescue squad | rescue | cmd | reach squad (100m) | **no escort back** -- ends on arrival | 300 | 2 | 45/24/0 |
 | 3 | Destroy tower | sabotage | cmd | tower destroyed | tower **pre-broken to 0.8** | 400 | 2 | 20/30/0 |
 | 8 | Sabotage laptop | sabotage | cmd | one hold-action | compact, light verb | 200 | 1 | 10/36/0 |
-| 16 | Intel gathering | recon | cmd | 900s timer, auto-success | **guaranteed payout**, combat optional | 800 | 2* | 5/10/0 |
+| 16 | Intel gathering | recon | cmd | informant killed before he escapes | hunt in a town crowd; ask/ping or camp the car; decoys + car escape | 800 | 3 | 5/10/0 |
 | 14 | Protect civilian | defend | civ | -- | not yet analysed | -- | -- | 20/10/5 |
 | 15 | Transport IDAP | escort | civ | -- | not yet analysed | -- | -- | 20/10/5 |
-
-`*` intel's *required* effort is ~1 (payout is guaranteed on a timer); its ambient force is the
-largest on the map but entirely avoidable.
 
 ## Pricing rework (command missions)
 
@@ -117,7 +152,7 @@ recovered. Proposed column is a starting point, not decided.
 | Rescue squad | 2 | 45/24 | 18/18 | **biggest overpay today** |
 | Destroy tower | 2 | 20/30 | 16/18 | gimme (pre-broken) |
 | Sabotage laptop | 1 | 10/36 | 18/16 | AP was overpaid for one hold-action |
-| Intel gathering | 2* | 5/10 | 12/12 | price as passive income |
+| Intel gathering | 3 | 5/10 | -- | now a real manhunt, not passive income; reprice after play-test |
 
 ## Per-mission rework tracker
 
@@ -140,7 +175,7 @@ Gameplay-change ideas below come from the play-through analysis; all are unconfi
 | Rescue squad | proposed | add an escort-back leg so effort matches a rescue | idea |
 | Destroy tower | proposed | spawn the tower intact so destruction is real work | idea |
 | Sabotage laptop | proposed | fine as a quick mission; keep light | idea |
-| Intel gathering | proposed | tie payout to an actual search instead of a blind 900s timer | idea |
+| Intel gathering | proposed | reworked into an informant manhunt (see §Intel gathering: informant hunt) | done |
 
 ## Open decisions
 

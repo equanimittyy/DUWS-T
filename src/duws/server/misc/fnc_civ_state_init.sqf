@@ -271,6 +271,7 @@ fnc_civ_rowPrice = {
 	params [["_row", ""]];
 	switch (toUpper _row) do {
 		case "INTEL": { 3 };
+		case "INFORMANT": { 3 };
 		case "RECRUIT": { 2 };
 		case "AID": { 2 };
 		case "TOOLKIT": { 2 };
