@@ -5,6 +5,12 @@ params ["_crate"];
 if (!hasInterface) exitWith {};
 if (isNull _crate) exitWith {};
 
+// Quick kits hand out a full standard-issue role loadout on demand. Hybrid can afford that -- friendly
+// gear is the unlimited floor -- but Limited tracks every class, so an on-demand kit would bypass the
+// pool the mode exists to enforce. Offer no quick-kit action there. Set at boot in server_var_init and
+// broadcast, so it is already known by the time any crate this attaches to exists.
+if (missionNamespace getVariable ["DUWS_arsenalLimited", false]) exitWith {};
+
 // wait for the data the server scans and broadcasts
 waitUntil {sleep 0.1; !isNil "blufor_quickChange_loadouts_scanned"};
 

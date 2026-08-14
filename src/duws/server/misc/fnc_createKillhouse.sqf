@@ -481,8 +481,12 @@ if (count _computerObjects > 0) then {
         // entry on the same terminal would evict the first, and these props are never deleted.
         [_x, [ACT_EQUIP("STR_DUWS_T_160jkc3a"), fnc_duws_Arsenal, [], 80, false, false, "",
             "_this distance _target < 8 && support_armory_available"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["killhouse_arsenal_%1", netId _x]];
-        [_x, [ACT_EQUIP("STR_DUWS_T_QUICK_KITS"), { [] call fnc_quick_kits_menu; }, [], 80, false, false, "",
-            "_this distance _target < 8"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["killhouse_kits_%1", netId _x]];
+        // No quick kits in Limited: an on-demand role loadout bypasses the tracked pool the mode
+        // enforces (same reason as fnc_addQuickChangeActions).
+        if (!DUWS_arsenalLimited) then {
+            [_x, [ACT_EQUIP("STR_DUWS_T_QUICK_KITS"), { [] call fnc_quick_kits_menu; }, [], 80, false, false, "",
+                "_this distance _target < 8"]] remoteExec ["addAction", [0,-2] select isDedicated, format ["killhouse_kits_%1", netId _x]];
+        };
     } forEach _computerObjects;
 };
 
