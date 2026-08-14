@@ -188,9 +188,10 @@ player addEventHandler ["killed", {
     [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_playerdown"] remoteExec ["fnc_duws_dialogue", 0];
 }];
 
-// ENABLE STAMINA (forced on)
-player_fatigue = 1;
-player enableStamina true;
+// Stamina/fatigue from the lobby param (default off). Drives the player here and the AI units
+// they field: recruits/requests/paradrops read player_fatigue at spawn.
+player_fatigue = ["DUWS_Fatigue", 0] call BIS_fnc_getParamValue;
+player enableStamina (player_fatigue != 0);
 // Traits go to everyone, deliberately not gated: any player should be able to use a medkit or
 // toolkit on a squadmate, and a UAV terminal is a personal tool rather than a command
 // privilege. Keeping these out of Squad_Leaders is what lets that array be trimmed to a few

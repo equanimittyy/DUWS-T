@@ -7,6 +7,16 @@ class Params {
         default = 0;
     };
 
+    // Stamina/fatigue for the player and the AI they field -- recruits, requested units and
+    // paradrops read player_fatigue at spawn. Off (default) disables it for all of them; On
+    // restores the engine's drain. Read into player_fatigue in client_init and onPlayerRespawn.
+    class DUWS_Fatigue {
+        title = "Fatigue";
+        values[] = {0,1};
+        texts[] = {"Off","On"};
+        default = 0;
+    };
+
     // Hybrid keeps the player's own faction unlimited but count-tracks captured foreign gear against
     // the banked pool; Full restores the legacy everything-unlimited arsenal. Read on the machine that
     // opens the arsenal (client/misc/fnc_duws_Arsenal.sqf), so every opener reads the same value.

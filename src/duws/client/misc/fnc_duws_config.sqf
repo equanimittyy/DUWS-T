@@ -86,6 +86,7 @@ private _faction = {
 private _paramsBody = ("MISSION PARAMETERS" call _hdr) + ([
     ["Revive", ["Revive", 0,
         ["None", "AIS (drag/carry)", "Vanilla"], [0,1,2]] call _param],
+    ["Fatigue", ["DUWS_Fatigue", 0, ["Off", "On"], [0,1]] call _param],
     ["Arsenal Mode", ["DUWS_ArsenalMode", 0,
         ["Hybrid (captured gear tracked)", "Full (unlimited)", "Limited (all tracked)"], [0,1,2]] call _param],
     ["Track Ammo", ["DUWS_TrackAmmo", 0, ["Off", "On"], [0,1]] call _param],
@@ -159,7 +160,6 @@ private _forcesBody = ("FORCES, ECONOMY & WORLD" call _hdr)
     ["Hardcore Mode", ["hardcore_mode_enable"] call _yn],
     ["Insurgent Mode", ["insurgent_mode_enable"] call _yn],
     ["Restricted Arsenal", ["restricted_arsenal"] call _yn],
-    ["Player Fatigue", ["player_fatigue", "On", "Off"] call _yn],
     ["Preset", _preset]
 ] apply {_x call _row} joinString "<br/>");
 
