@@ -228,13 +228,35 @@ DUWS_fnc_garrisonReserveOnKill = {
 // Both are defined per faction as actual troop carriers, so no kind test is needed to keep infantry off a
 // car or a technical: these keys never name one, and the earlier isKindOf "Truck" gate only rejected
 // legitimate mod trucks that do not inherit from the vanilla Truck class, dropping the whole wave to foot.
+// True when the vehicle class fields any turret weapon. Walked over the config, not a spawned object: the
+// pick happens before the truck exists. A stack over nested Turrets so a commander cupola on a mod hull
+// drawn as transport counts too; a turret with an empty weapons[] (cargo/FFV firing seats) does not.
+DUWS_fnc_classIsArmed = {
+    params ["_class"];
+    private _queue = "true" configClasses (configFile >> "CfgVehicles" >> _class >> "Turrets");
+    private _armed = false;
+    while { !_armed && {count _queue > 0} } do {
+        private _t = _queue deleteAt 0;
+        if (count (getArray (_t >> "weapons")) > 0) then {
+            _armed = true;
+        } else {
+            _queue append ("true" configClasses (_t >> "Turrets"));
+        };
+    };
+    _armed
+};
+
 // Resolved through tokenClass so an auto-detected faction's pooled variant is drawn the same as a
-// hand-written class; empties dropped. selectRandom for variety across a wave; "" when the side defines
+// hand-written class; empties dropped. Weighted toward an unarmed hull: the truck is a taxi, and an
+// unarmed one needs no gunner and cannot be held up trading fire on the run in -- an armed one is drawn
+// only when the faction offers nothing else, and is then crewed on spawn. "" when the side defines
 // neither key, and the caller then walks the squad in.
 DUWS_fnc_reserveTruckClass = {
     private _opts = ["truck", "transport"] apply { [_x, "OPF"] call DUWS_fnc_tokenClass };
     _opts = _opts select { _x != "" };
     if (_opts isEqualTo []) exitWith { "" };
+    private _unarmed = _opts select { !([_x] call DUWS_fnc_classIsArmed) };
+    if (_unarmed isNotEqualTo []) exitWith { selectRandom _unarmed };
     selectRandom _opts
 };
 
