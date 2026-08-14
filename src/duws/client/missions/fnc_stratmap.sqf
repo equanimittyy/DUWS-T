@@ -213,12 +213,24 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
       1 / _dFri
   };
 
+  // Per-offer site-finder handshake: the drawn type's finder accepts a candidate position or rejects
+  // it; a rejected candidate is redrawn like a claimed one, and _finderReject bounds a picky finder
+  // (e.g. intel demanding a town) so it drops its offer rather than starving the whole draw.
+  private _finderReject = 0;
+  private _finderCap = 20;
   while {_counter < _missionDraw} do {
 
 	// Proportional to the draw, not a fixed 0.1 a step: that constant was sized for the old
 	// full-pool loop and would now stall the bar at 0.6.
 	_progress = _counter / _missionDraw;
 	progressLoadingScreen _progress;
+
+	// This offer's type is fixed up front (it was assigned at commit): the finder below needs it to
+	// judge candidates. Use fnc_site_<name> if the mission defines one, else the generic accept-all.
+	_currentMission = _missionShuffle select _counter;
+	private _threadName = (_missionDefs select _currentMission) select 0;
+	private _finder = missionNamespace getVariable [
+		(_threadName select [0, (count _threadName) - 8]) + "_site", fnc_site_generic];
 
 	// This offer's difficulty: the last _hardCount of the draw push deep, the rest seat on the front.
 	// _hard is read by both weight functions down the call stack -- SQF resolves it dynamically through
@@ -293,13 +305,28 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
         && _found_dist_away
         && _foundsafePos distance hq_blu1 < (zones_max_dist_from_hq*1.5)) then {
 
+		// The mission's own finder gets the last word on this candidate. Reject -> count it, and once
+		// _finderCap candidates have been refused, drop the offer; otherwise fall through so the outer
+		// loop redraws. Accept -> the finder's precise position replaces the anchor.
+		private _site = [_foundSafePos] call _finder;
+		if (_site isEqualTo []) exitWith {
+			_finderReject = _finderReject + 1;
+			if (_finderReject >= _finderCap) then {
+				["INFO", "MISSION", format ["site: type %1 found no fit in %2 tries, dropping offer",
+					_currentMission, _finderReject]] call fnc_log;
+				_finderReject = 0;
+				_counter = _counter + 1;
+			};
+		};
+		_foundSafePos = _site select 0;
+		_finderReject = 0;
+
         // A VALID POS HAS BEEN FOUND add the position to the array of missionPos
         _kibot_pos_array_missionPos = _kibot_pos_array_missionPos + [_foundSafePos];
 		
 		// Clears against the draw, not the pool: the loop stops at _missionDraw, so comparing
 		// with the full pool size leaves the failsafe armed and aborts every request.
 		if (_counter == _missionDraw-1) then {failsafe_not_found = false;};
-		_currentMission = _missionShuffle select _counter;
 
 		// Add each mission type to stratmap array. The row supplies the description, the icon and
 		// the launcher; the search supplies the position and the name, which go into the shared

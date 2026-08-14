@@ -90,6 +90,7 @@ fnc_mission_reward = compile preprocessFileLineNumbers "duws\server\missions\fnc
 fnc_missionTargetPos = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTargetPos.sqf";
 fnc_mission_abort = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_abort.sqf";
 fnc_mission_site = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_site.sqf";
+fnc_site_generic = compile preprocessFileLineNumbers "duws\server\missions\fnc_site_generic.sqf";publicVariable "fnc_site_generic";
 fnc_mission_end = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_end.sqf";
 fnc_mission_deadline_fail = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_deadline_fail.sqf";
 fnc_missionMarkerData = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionMarkerData.sqf";
