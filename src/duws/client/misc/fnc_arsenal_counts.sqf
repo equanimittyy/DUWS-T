@@ -38,6 +38,14 @@ DUWS_fnc_arsenal_countFor = {
     // subtracting the open-time loadout delta the enforcer keeps in DUWS_arsenalTaken (a class held now
     // but not at open was withdrawn -> one fewer available). Display only: the pool is untouched, and
     // close still settles the authoritative count.
+    // The compatible-magazines list hands back lowercased classnames (BIS folds case building it from
+    // the weapon's config mag list), while the pool and DUWS_arsenalTaken key on the config's own case.
+    // isEqualTo and the HashMap key are both case-sensitive, so a lowercased class read [0]. Canonicalise
+    // to the declared case first; configName resolves it (a tracked class is always in one of these).
+    private _canon = configName (configFile >> "CfgMagazines" >> _cls);
+    if (_canon == "") then { _canon = configName (configFile >> "CfgWeapons" >> _cls) };
+    if (_canon == "") then { _canon = configName (configFile >> "CfgVehicles" >> _cls) };
+    if (_canon != "") then { _cls = _canon };
     private _pool = missionNamespace getVariable ["DUWS_capturedPool", []];
     private _i = _pool findIf { (_x select 0) isEqualTo _cls };
     private _n = if (_i < 0) then { 0 } else { (_pool select _i) select 1 };
@@ -106,12 +114,6 @@ DUWS_fnc_arsenal_paintCounts = {
             private _cls = if (_isN) then { _ctrl lnbData [_i, 0] } else { _ctrl lbData _i };
             if (_cls == "") then { continue };
             private _amt = [_cls] call DUWS_fnc_arsenal_countFor;
-            // Diagnostic: dump the compatible-mag list's own row data so a stale [0] there can be
-            // compared against the same class on the all-mags tab. Remove once the mismatch is found.
-            if (duws_log_level >= 4 && {_x == IDC_RSCDISPLAYARSENAL_TAB_CARGOMAG}) then {
-                ["DEBUG", "GEAR", format ["cargomag row=%1 cls=%2 amt=%3 text=%4", _i, _cls,
-                    _amt, if (_isN) then { _ctrl lnbText [_i, 1] } else { _ctrl lbText _i }]] call fnc_log;
-            };
             // Prefix is rebuilt onto the config display name, never onto the row's current text, so a
             // repaint cannot stack "[3] [3] name".
             private _pfx = if (_amt < 0) then { "[∞] " } else { format ["[%1] ", _amt] };
