@@ -15,16 +15,16 @@ _blu_attack_delay =_this select 5;
 // INIT VARIABLES
 // WARCOM uses PosOfBLUHQ+16m to keep waypoints and spawn points away from HQ building
 WARCOM_blu_hq_pos = [_blu_hq_pos select 0, (_blu_hq_pos select 1) + 16];
-// The preset picks a starting TIER, not a spendable bank: it seeds the earned counter (the ladder
-// input) and the tier derived from it, but the wallet opens at 0. With the rungs widened onto their
-// exponential curve, seeding the wallet to the tier's rung would hand a side hundreds of AP to spend
-// before the first shot -- the tier is capability reached, the wallet is earned through play from here.
+// The preset seeds both halves from the same value: the earned counter (the ladder input, and the
+// tier derived from it) and the spendable wallet. A side set to start at a tier begins with the wallet
+// to act at it -- OPCOM can fortify, BLUFOR can field -- instead of idling at capability it cannot pay
+// for until income accrues. The earned counter is the one-way ratchet; the wallet is spent from here.
 WARCOM_blufor_ap_earned = _blufor_ap;
 WARCOM_opfor_ap_earned = _opfor_ap;
 WARCOM_blufor_tier = [_blufor_ap] call DUWS_fnc_ap_tier;
 WARCOM_opfor_tier = [_opfor_ap] call DUWS_fnc_ap_tier;
-WARCOM_blufor_ap = 0;
-WARCOM_opfor_ap = 0;
+WARCOM_blufor_ap = _blufor_ap;
+WARCOM_opfor_ap = _opfor_ap;
 WARCOM_blu_attack_delay = _blu_attack_delay;
 WARCOM_marker_num = 0;
 publicVariable "WARCOM_blufor_ap";

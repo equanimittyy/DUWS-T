@@ -270,8 +270,8 @@ switch (_index) do {
 _index = lbCurSel 2108;
 switch (_index) do
 {
-    // Starting tier -> the earned AP seeded into the counter: fnc_WARCOM_init reads this as the ladder
-    // position (tier 1 = infantry at 0), then opens the wallet at 0. Values are 0 + DUWS_ap_tier_rungs.
+    // Starting tier -> seeded by fnc_WARCOM_init into both the earned counter (ladder position, tier 1
+    // = infantry at 0) and the spendable wallet at the same value. Values are 0 + DUWS_ap_tier_rungs.
     case index_blufor_ap_t1: { WARCOM_blufor_ap = 0; };
     case index_blufor_ap_t2: { WARCOM_blufor_ap = 60; };
     case index_blufor_ap_t3: { WARCOM_blufor_ap = 150; };
