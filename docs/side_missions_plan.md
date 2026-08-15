@@ -115,12 +115,14 @@ zone's fog of war on the strategic map. Thread:
 
 **Siting.** `fnc_recon_observe_site` (the per-type finder) snaps a picker candidate to the nearest
 unrevealed OPFOR-held zone within 2.5 km and confirms at least one 600-800 m bearing has clear terrain
-LOS onto it, then returns the **target zone** -- not the overwatch. `fnc_mission_findSite` keeps only
+LOS onto it *and* stands clear of every other enemy zone and hardpoint, then returns the **target
+zone** -- not the overwatch. `fnc_mission_findSite` keeps only
 `select 0` of a finder's result, so the thread cannot be handed both; re-deriving the target from an
 overwatch position ("nearest unrevealed OPFOR zone") is ambiguous where zones sit close and can resolve
 to a different zone than LOS was verified against, leaving the hold unwinnable. Handing back the target
 makes the thread's re-derivation exact, and the thread computes the overwatch (fuller terrain+object
-LOS, friendly-facing arc, height-favoured) once for the launched mission. A revealed zone is no target
+LOS, friendly-facing arc, height-favoured, clear of every other enemy zone by its radius and of every
+standing hardpoint) once for the launched mission. A revealed zone is no target
 -- the reveal is the whole payoff -- so with none unrevealed in reach the offer is dropped. The finder
 runs client-side in the picker, so it reads only broadcast state (`zone_namePOS_pairs`,
 `WARCOM_zones_controled_by_OPFOR`) and a single cheap `terrainIntersectASL` per bearing.
@@ -152,15 +154,19 @@ the flag the thread's monitor wins on -- a second player or a stale JIP report c
 since the monitor reads the flag once and clears `DUWS_recon_active`. Soft stealth: the element can
 see and fire, but the mission never auto-fails on detection.
 
-**Payoff.** `fnc_zone_reveal` lifts the scouted zone onto the strategic map (quiet reveal -- the
-mission speaks its own line, not Overlord's AO-wide zone-spotted broadcast), then the standard CP/AP.
+**Payoff.** `fnc_zone_reveal` lifts the scouted zone onto the strategic map (quiet -- Allseer speaks the
+mission's own confirmation line, not the zone-reveal's AO-wide broadcast). The scout also reveals
+`rand(0-2)` of the nearest unrevealed positions -- the target's own hardpoints (discoverable once its
+zone is up), standalone or already-revealed-zone hardpoints, and unrevealed enemy zones, ranked by
+distance to the target -- then the standard CP/AP. The hardpoint parent gate is respected: a hardpoint
+under a still-hidden zone is not offered as bonus intel, so no marker floats without its zone.
 
 Tunables (defaults, all in the thread): overwatch band 600-800 m and LOS range 900 m (finder + layer),
 observe area 75 m, hold 12 s, approach ring 200 m, 2 representative `team`s at 100 m and a car at
-150 m (all `closepatrol`), prefab offset 25 m off the centre, gunner-claim radius 60 m. Targets zones
-only for now --
-hardpoint targeting (reveal via `fnc_hardpoint_reveal`) is a later add. Not yet play-tested in-engine
--- sqfvm covers parse + the pure helpers only.
+150 m (all `closepatrol`), prefab offset 25 m off the centre, gunner-claim radius 60 m, overwatch
+clearance 250 m from other enemy zones and 300 m from hardpoints, up to 2 bonus reveals. Targets zones
+only for now -- hardpoint targeting as the primary objective is a later add. Not yet play-tested
+in-engine -- sqfvm covers parse + the pure helpers only.
 
 ## Mission catalogue (how each actually plays)
 

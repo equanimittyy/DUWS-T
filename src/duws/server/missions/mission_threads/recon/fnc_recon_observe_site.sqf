@@ -23,6 +23,8 @@ params ["_pos"];
 #define OBS_MIN_DIST   600
 #define OBS_MAX_DIST   800
 #define ACCEPT_RADIUS  2500
+#define ZONE_CLEAR     250
+#define HP_CLEAR       300
 
 private _pairs = missionNamespace getVariable ["zone_namePOS_pairs", []];
 if (_pairs isEqualTo []) exitWith { [] };
@@ -43,18 +45,26 @@ private _bestD = 1e9;
 } forEach _pairs;
 if (_target isEqualTo [] || {_bestD > ACCEPT_RADIUS}) exitWith { [] };
 
-// Feasibility: at least one standoff bearing has clear terrain LOS onto the target, aimed a little
-// above the ground so the ray clears the lip of terrain the target sits in. No clear standoff on any
-// sampled bearing (target boxed in by higher ground) rejects, so the offer is never sited where the
-// hold cannot be met -- the thread would otherwise abort after the player picked.
+// Feasibility: at least one standoff bearing has clear terrain LOS onto the target AND stands clear of
+// every other enemy zone and hardpoint. None qualifying rejects, so a target whose overwatches are all
+// blind or on enemy ground is never offered -- the thread would otherwise abort after the pick.
 private _tgtASL = [_target select 0, _target select 1, (getTerrainHeightASL _target) + 5];
+private _avoidZones = (missionNamespace getVariable ["zone_meta_array", []]) select {
+    private _zp = _x select 1;
+    (_zp distance2D _target > 1) && {(_enemyZones findIf { _x distance2D _zp < 50 }) >= 0}
+};
+private _hps = missionNamespace getVariable ["DUWS_hardpoints", []];
 private _feasible = false;
 for "_i" from 0 to 11 do {
     if (!_feasible) then {
         private _r = OBS_MIN_DIST + random (OBS_MAX_DIST - OBS_MIN_DIST);
         private _cand = _target getPos [_r, _i * 30];
         private _eyeASL = [_cand select 0, _cand select 1, (getTerrainHeightASL _cand) + 1.5];
-        if (!(terrainIntersectASL [_eyeASL, _tgtASL])) then { _feasible = true };
+        if (
+            !(terrainIntersectASL [_eyeASL, _tgtASL])
+            && {(_avoidZones findIf { _cand distance2D (_x select 1) < ((_x select 2) + ZONE_CLEAR) }) < 0}
+            && {(_hps findIf { _cand distance2D (_x select 1) < HP_CLEAR }) < 0}
+        ) then { _feasible = true };
     };
 };
 if (!_feasible) exitWith { [] };

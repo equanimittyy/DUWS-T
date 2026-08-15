@@ -15,10 +15,10 @@
 // zone's, and torn down through fnc_mission_end's composition release plus the claimed-unit sweep.
 params ["_MissionPos", "_mission_name"];
 
-// TUNABLE, all here. Standoff band (kept in step with the finder); observe area the player holds within;
-// LOS range slack over the band; hold seconds; the ring a player must reach to raise the element; the
-// representative teams, their patrol radius and the roving car's; the prefab offset off the zone centre
-// and the radius its crewed gunners are claimed within.
+// TUNABLE, all here. Standoff band (kept with the finder); observe area; LOS range slack; hold seconds;
+// approach ring; representative teams, their patrol radius and the car's; prefab offset and gunner-claim
+// radius; the clearance the overwatch keeps from other enemy zones and hardpoints; and the most bonus
+// positions a scout also reveals.
 #define OBS_MIN_DIST    600
 #define OBS_MAX_DIST    800
 #define OBS_AREA        75
@@ -30,6 +30,9 @@ params ["_MissionPos", "_mission_name"];
 #define PATROL_RADIUS   150
 #define PREFAB_OFFSET   25
 #define PREFAB_RADIUS   60
+#define ZONE_CLEAR      250
+#define HP_CLEAR        300
+#define BONUS_MAX       2
 
 // Target: the finder returned the zone position as _MissionPos, so the nearest unrevealed OPFOR-held
 // zone to it is that zone -- an exact re-derivation, not the ambiguous "nearest to an overwatch". If it
@@ -54,12 +57,21 @@ if (!([17, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_beg
 private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 
-// The overwatch. Sample bearings across the friendly-facing arc at 600-800 m and keep the one with
-// clear line-of-sight to the target -- terrain (terrainIntersectASL) and structures
-// (lineIntersectsSurfaces) both -- and the most height over it. The finder confirmed a terrain-clear
-// bearing existed; if object occlusion has since closed every one, abort rather than site a blind spot.
+// The overwatch. Sample bearings across the friendly-facing arc at 600-800 m and keep the highest one
+// with clear line-of-sight to the target -- terrain (terrainIntersectASL) and structures
+// (lineIntersectsSurfaces) both -- that also stands clear of every OTHER enemy zone and hardpoint, so
+// the player never observes from on top of one. Nothing left after that filter aborts the mission.
 private _tgtASL    = [_target select 0, _target select 1, (getTerrainHeightASL _target) + 5];
 private _tgtGround = getTerrainHeightASL _target;
+
+// Enemy ground the overwatch must stand clear of: every OPFOR zone but the target (each by its own
+// radius plus a margin), and every standing enemy hardpoint. The target is watched from the band, not
+// avoided. DUWS_hardpoints rows are all opfor -- a captured or fallen one is deleted, not re-sided.
+private _avoidZones = (missionNamespace getVariable ["zone_meta_array", []]) select {
+    private _zp = _x select 1;
+    (_zp distance2D _target > 1) && {(_enemyZones findIf { _x distance2D _zp < 50 }) >= 0}
+};
+private _hps = missionNamespace getVariable ["DUWS_hardpoints", []];
 private _fAnchors = +(missionNamespace getVariable ["WARCOM_zones_controled_by_BLUFOR", []]);
 if (!(isNil "PosOfBLUHQ") && {!(PosOfBLUHQ isEqualTo [])}) then { _fAnchors pushBack PosOfBLUHQ };
 if (!(isNil "Array_of_FOBpos")) then { { _fAnchors pushBack _x } forEach Array_of_FOBpos };
@@ -76,7 +88,12 @@ for "_i" from 0 to 17 do {
     private _cand    = _target getPos [_r, _b];
     private _ground  = getTerrainHeightASL _cand;
     private _eyeASL  = [_cand select 0, _cand select 1, _ground + 1.5];
-    if (!(terrainIntersectASL [_eyeASL, _tgtASL]) && {(lineIntersectsSurfaces [_eyeASL, _tgtASL]) isEqualTo []}) then {
+    if (
+        !(terrainIntersectASL [_eyeASL, _tgtASL])
+        && {(lineIntersectsSurfaces [_eyeASL, _tgtASL]) isEqualTo []}
+        && {(_avoidZones findIf { _cand distance2D (_x select 1) < ((_x select 2) + ZONE_CLEAR) }) < 0}
+        && {(_hps findIf { _cand distance2D (_x select 1) < HP_CLEAR }) < 0}
+    ) then {
         private _score = _ground - _tgtGround;   // prefer looking down onto the target
         if (_score > _bestScore) then { _bestScore = _score; _overwatch = _cand };
     };
@@ -177,8 +194,37 @@ remoteExec ["", "DUWS_recon_layer_jip"];
 if (_outcome isEqualTo "WIN") then {
     [_taskID, "SUCCEEDED"] call fnc_missionTaskEnd;
     // The payoff: the scouted zone comes up on the strategic map. Quiet reveal -- the line here is the
-    // mission's own, not Overlord's AO-wide zone-spotted broadcast.
+    // mission's own, not the zone-reveal's AO-wide broadcast.
     ["ONE", _target, 0, true] call fnc_zone_reveal;
+
+    // Bonus intel: the scout also picks up rand(0-2) of the nearest unrevealed positions -- the target's
+    // own hardpoints (now discoverable), standalone or already-revealed-zone hardpoints, and unrevealed
+    // enemy zones -- ranked by distance to the target. Quiet, like the target reveal; the markers appear.
+    private _targetKey = [_target] call fnc_zone_key;
+    private _revealedKeys = [_targetKey];
+    { _x params ["", "_zp2", "_rev2"]; if (_rev2) then { _revealedKeys pushBack ([_zp2] call fnc_zone_key) } } forEach _pairs;
+    private _extra = [];
+    {
+        _x params ["", "_zp", "_rev"];
+        if (!_rev && {_zp distance2D _target > 1} && {(_enemyZones findIf { _x distance2D _zp < 50 }) >= 0}) then {
+            _extra pushBack ["zone", _zp, _zp distance2D _target];
+        };
+    } forEach _pairs;
+    {
+        if (!(_x select 5) && {((_x select 4) isEqualTo "") || {(_x select 4) in _revealedKeys}}) then {
+            _extra pushBack ["hp", _x select 0, (_x select 1) distance2D _target];
+        };
+    } forEach (missionNamespace getVariable ["DUWS_hardpoints", []]);
+    private _idx = [];
+    { _idx pushBack [_x select 2, _forEachIndex] } forEach _extra;
+    _idx sort true;
+    private _n = (floor (random (BONUS_MAX + 1))) min (count _idx);
+    for "_k" from 0 to (_n - 1) do {
+        (_extra select ((_idx select _k) select 1)) params ["_kind", "_ref"];
+        if (_kind isEqualTo "zone") then { ["ONE", _ref, 0, true] call fnc_zone_reveal }
+        else { ["ONE", _ref, 0, true] call fnc_hardpoint_reveal };
+    };
+
     [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_RECON_OBSERVE_DONE"] remoteExec ["fnc_duws_dialogue", 0];
     [_overwatch, _radius, _prefabKey] call fnc_mission_end;
     [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
