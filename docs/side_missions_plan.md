@@ -192,8 +192,8 @@ the campaign advances while their pay is fixed.
 | 0 | Rescue squad | rescue | cmd | reach squad (100m) | **no escort back** -- ends on arrival | 300 | 2 | 45/24/0 |
 | 3 | Destroy tower | sabotage | cmd | tower destroyed | tower **pre-broken to 0.8** | 400 | 2 | 20/30/0 |
 | 8 | Sabotage laptop | sabotage | cmd | one hold-action | compact, light verb | 200 | 1 | 10/36/0 |
-| 16 | Informant hunt | elimination | cmd | informant killed before he escapes | hunt in a town crowd; ask/ping or camp the car; decoys + car escape | 800 | 3 | 5/10/0 |
-| 17 | Recon overwatch | recon | cmd | hold binocular LOS on the target from the overwatch | mission-owned copy of the zone's own prefab (crewed statics) + representative teams + a roving car, raised on approach; reveals the zone | -- | 2 | 20/8/0 |
+| 16 | Informant hunt | elimination | cmd | informant killed before he escapes | hunt in a town crowd; ask/ping or camp the car; decoys + car escape | 800 | 3 | 30/25/0 |
+| 17 | Recon overwatch | recon | cmd | hold binocular LOS on the target from the overwatch | mission-owned copy of the zone's own prefab (crewed statics) + representative teams + a roving car, raised on approach; reveals the zone | -- | 2 | 10/5/0 |
 | 14 | Protect civilian | defend | civ | -- | not yet analysed | -- | -- | 20/10/5 |
 | 15 | Transport IDAP | escort | civ | -- | not yet analysed | -- | -- | 20/10/5 |
 
@@ -219,7 +219,7 @@ recovered. Proposed column is a starting point, not decided.
 | Rescue squad | 2 | 45/24 | 18/18 | **biggest overpay today** |
 | Destroy tower | 2 | 20/30 | 16/18 | gimme (pre-broken) |
 | Sabotage laptop | 1 | 10/36 | 18/16 | AP was overpaid for one hold-action |
-| Informant hunt | 3 | 5/10 | -- | now a real manhunt, not passive income; reprice after play-test |
+| Informant hunt | 3 | 30/25 | -- | now a real manhunt, not passive income |
 
 ## Per-mission rework tracker
 
