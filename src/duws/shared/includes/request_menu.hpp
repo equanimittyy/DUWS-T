@@ -54,10 +54,9 @@ class ressourceheader
             w = 19.9 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
         };
-        // Three unequal frames rather than three sixths of the row. "Zones under control" is
-        // nineteen characters against "Army Power"'s ten, so an even split sets the dialog's text
-        // size from the longest caption in it and shrinks the other two to suit -- which is how
-        // this row came to be the one place carrying smaller text than everything around it.
+        // Four unequal frames rather than even quarters: each is only as wide as its caption and
+        // value need, so "AP Earned" and its "525 (600)" get room the two-character "Tier" does not.
+        // They carry sizeEx 0.025, smaller than the rest of the dialog, so the four fit the row width.
         class RscFrame_1805: RscFrame
         {
             idc = 1805;
@@ -104,21 +103,40 @@ class ressourceheader
         class RscFrame_1806: RscFrame
         {
             idc = 1806;
-            text = "$STR_DUWS_T_dvt8byhj";
+            text = "$STR_DUWS_T_REQ_TIER";
             sizeEx = 0.025;
             x = 12.1 * GUI_GRID_W + GUI_GRID_X;
             y = 2.8 * GUI_GRID_H + GUI_GRID_Y;
-            w = 8.6 * GUI_GRID_W;
+            w = 2.9 * GUI_GRID_W;
             h = 1.9 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_8ibx2y3c";
         };
         class RscText_1001: RscText
         {
             idc = 1001;
-            text = "ZUC:XXX";
+            text = "--";
             x = 12.5 * GUI_GRID_W + GUI_GRID_X;
             y = 3.25 * GUI_GRID_H + GUI_GRID_Y;
-            w = 7.8 * GUI_GRID_W;
+            w = 2.1 * GUI_GRID_W;
+            h = 1.1 * GUI_GRID_H;
+            colorText[] = {1,1,1,1};
+        };
+        class RscFrame_1809: RscFrame
+        {
+            idc = 1809;
+            text = "$STR_DUWS_T_REQ_AP_EARNED";
+            sizeEx = 0.025;
+            x = 15.35 * GUI_GRID_W + GUI_GRID_X;
+            y = 2.8 * GUI_GRID_H + GUI_GRID_Y;
+            w = 5.35 * GUI_GRID_W;
+            h = 1.9 * GUI_GRID_H;
+        };
+        class RscText_1003: RscText
+        {
+            idc = 1003;
+            text = "--";
+            x = 15.75 * GUI_GRID_W + GUI_GRID_X;
+            y = 3.25 * GUI_GRID_H + GUI_GRID_Y;
+            w = 4.55 * GUI_GRID_W;
             h = 1.1 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
         };

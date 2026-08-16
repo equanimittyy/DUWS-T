@@ -26,12 +26,30 @@ if (isNull _display) exitWith {};
 // uiNamespace because it is display state, and the mission namespace is written into save games.
 uiNamespace setVariable ["DUWS_requestMenu_ctx", [_site, _isFob]];
 
-// These three are drawn before any row is added, so they are the reads with the whole menu behind
-// them. "--" is the honest answer for a pool whose value has not arrived: a defaulted 0 would read
-// as an empty account.
+// These are drawn before any row is added, so they are the reads with the whole menu behind them.
+// "--" is the honest answer for a value that has not arrived: a defaulted 0 would read as an empty
+// account, and a defaulted tier would name a rank the player has not reached.
 ctrlSetText [1000, format ["%1", missionNamespace getVariable ["commandpointsblu1", "--"]]];
-ctrlSetText [1001, format ["%1", missionNamespace getVariable ["zoneundercontrolblu", "--"]]];
 ctrlSetText [1002, format ["%1", missionNamespace getVariable ["WARCOM_blufor_ap", "--"]]];
+
+// Tier and the AP-earned readout both derive from the one-way earned counter, so the tier shown can
+// never disagree with the rung figure beside it. Tier is 1 + rungs crossed (fnc_economy's ap_tier,
+// inlined because that writer is server-only); the next rung is the first the counter has yet to
+// pass, or none at the top tier, where the earned figure stands alone.
+private _earned = missionNamespace getVariable ["WARCOM_blufor_ap_earned", -1];
+if (_earned < 0) then {
+    ctrlSetText [1001, "--"];
+    ctrlSetText [1003, "--"];
+} else {
+    private _rungs = missionNamespace getVariable ["DUWS_ap_tier_rungs", [60, 150, 350, 600]];
+    private _tier = 1 + ({ _earned >= _x } count _rungs);
+    ctrlSetText [1001, localize ([
+        "STR_DUWS_T_tiername1_abbr", "STR_DUWS_T_tiername2_abbr", "STR_DUWS_T_tiername3_abbr",
+        "STR_DUWS_T_tiername4_abbr", "STR_DUWS_T_tiername5_abbr"
+    ] param [_tier - 1, "STR_DUWS_T_tiername1_abbr"])];
+    private _next = _rungs findIf { _x > _earned };
+    ctrlSetText [1003, if (_next < 0) then { str _earned } else { format ["%1 (%2)", _earned, _rungs select _next] }];
+};
 
 // REQUEST UNITS -- a FOB offers the first five of the faction's units, the HQ all of them.
 lbAdd [2100, localize "STR_DUWS_T_zo6ih0pt"];   // 0

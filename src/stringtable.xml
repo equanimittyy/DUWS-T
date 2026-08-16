@@ -964,20 +964,6 @@
                 <Original>Command points available</Original>
                 <English>Command points available</English>
             </Key>
-            <Key ID="STR_DUWS_T_dvt8byhj">
-                <German>Zonen unter Kontrolle</German>
-                <Chinesesimp>控制的战区数</Chinesesimp>
-                <Spanish>ZOnas bajo control</Spanish>
-                <Original>Zones under control</Original>
-                <English>Zones under control</English>
-            </Key>
-            <Key ID="STR_DUWS_T_8ibx2y3c">
-                <German>Anzahl der Zonen die du auf dieser Insel erobert hast</German>
-                <Chinesesimp>在这个图上你已经夺取的战区数</Chinesesimp>
-                <Spanish>Número de zonas que ha capturado en esta isla</Spanish>
-                <Original>Number of zones you have captured on this island</Original>
-                <English>Number of zones you have captured on this island</English>
-            </Key>
             <Key ID="STR_DUWS_T_rplkhwfu">
                 <German>WÄHLE SEKUNDÄRE MISSION</German>
                 <Chinesesimp>选择支线任务</Chinesesimp>
@@ -1779,6 +1765,14 @@
                 <Original>MISSIONS</Original>
                 <English>MISSIONS</English>
             </Key>
+            <Key ID="STR_DUWS_T_REQ_TIER">
+                <Original>Tier</Original>
+                <English>Tier</English>
+            </Key>
+            <Key ID="STR_DUWS_T_REQ_AP_EARNED">
+                <Original>AP Earned</Original>
+                <English>AP Earned</English>
+            </Key>
             <Key ID="STR_DUWS_T_REQ_COMMAND">
                 <Original>COMMAND AND CONTROL</Original>
                 <English>COMMAND AND CONTROL</English>
@@ -2008,6 +2002,26 @@
                 <English>Armour</English>
             </Key>
             <Key ID="STR_DUWS_T_tiername5">
+                <Original>Air</Original>
+                <English>Air</English>
+            </Key>
+            <Key ID="STR_DUWS_T_tiername1_abbr">
+                <Original>Inf.</Original>
+                <English>Inf.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_tiername2_abbr">
+                <Original>Mot.</Original>
+                <English>Mot.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_tiername3_abbr">
+                <Original>Mech.</Original>
+                <English>Mech.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_tiername4_abbr">
+                <Original>Arm.</Original>
+                <English>Arm.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_tiername5_abbr">
                 <Original>Air</Original>
                 <English>Air</English>
             </Key>
