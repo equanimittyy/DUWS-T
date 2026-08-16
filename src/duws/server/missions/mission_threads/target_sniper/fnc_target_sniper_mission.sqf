@@ -1,113 +1,58 @@
 // Locality: server -- callers remoteExec to target 2.
+// Kill both snipers (units 1 and 2 of the spawned group; unit 0 is their spotter/leader). No
+// vehicle or kept props, so no composition key. Shared spine: fnc_mission_run.
 params ["_MissionPos", "_mission_name"];
-if (!([5, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
+private _build = {
+    params ["_targetpos", "_randomPos", "_radius"];
 
-_radius = 400;
-_cpreward = DUWS_curReward select 0;
-_apreward = DUWS_curReward select 1;
-_deadline = DUWS_curDeadlineAt;
-_speaker = localize "STR_DUWS_T_Viper";
-_message = localize "STR_DUWS_T_sniperletsdothis";
-_message1 = ([localize "STR_DUWS_T_sniperend"] call fnc_cs);
+    [[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 
-_markerText2 = localize "STR_DUWS_T_c5";
+    [_targetpos, 15] spawn { [(["patrol"] + _this) call fnc_spawn_team] call fnc_mission_claim };
+    sleep 1;
+    [_randomPos, _radius] spawn { [(["patrol"] + _this) call fnc_spawn_team] call fnc_mission_claim };
+    sleep 1;
+    [_randomPos, _radius] spawn { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
+    sleep 1;
+    [_randomPos, _radius] spawn { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
 
-private _site = [_MissionPos, _radius, 5] call fnc_mission_site;
-if (_site isEqualTo []) exitWith {};
-_site params ["_randomPos", "_Building", "_targetpos"];
+    private _group = [_targetpos, east, [opfor_SL_SOLDIER_X, opfor_SNIPER_SOLDIER_X, opfor_SNIPER_SOLDIER_X], [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
+    _group deleteGroupWhenEmpty true;
+    [_group] call fnc_mission_claim;
+    private _target1 = units _group select 1;
+    private _target2 = units _group select 2;
 
-// Marked before anything is built. The ellipse and the task are the only things telling the
-// player where the objective is, and the spawn-up below runs for tens of seconds.
-_markername2 = [_randomPos, _radius] call fnc_missionMarkerData;
-private _VARtaskgeneratedName = format ["sniperhunt%1%2",round(_MissionPos select 0),round(_MissionPos select 1)];
-[_VARtaskgeneratedName, localize "STR_DUWS_T_16dh939j", _mission_name, _randomPos, "kill"] call fnc_missionTaskCreate;
+    [_target1] spawn { params ["_unit"]; sleep 5; _unit forceAddUniform "U_B_FullGhillie_sard" };
+    [_target2] spawn { params ["_unit"]; sleep 5; _unit forceAddUniform "U_B_FullGhillie_sard" };
+    [_target1] spawn { params ["_unit"]; sleep 5; _unit addMagazineGlobal "FileTopSecret" };
+    [_target2] spawn { params ["_unit"]; sleep 5; _unit addMagazineGlobal "FileTopSecret" };
 
-[_markerText2,{hint _this}] remoteExec ["BIS_fnc_Spawn",  [0,-2] select isDedicated];
+    if (hardcore_mode_enable) then {
+        [[units _group select 0], "objective"] call fnc_search_flag_group;
+    };
 
+    if (VERSION_X == "MODERN") then {
+        if !(("OPTRE" in BLUFOR_FactionFile_X)
+            or ("HL2ECR" in BLUFOR_FactionFile_X)
+            or ("TIOW" in BLUFOR_FactionFile_X)) then {
+            removeheadgear _target1;
+            removeheadgear _target2;
+            _target1 addHeadgear "H_Shemag_khk";
+            _target2 addHeadgear "H_Shemag_khk";
+        };
+    };
 
-[[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
-// CREATE PATROLS, NO VEHICLES
-sleep 1;
-[_missionpos, 15] spawn { [(["patrol"] + _this) call fnc_spawn_team] call fnc_mission_claim };
-sleep 1;
-[_randompos, _radius] spawn { [(["patrol"] + _this) call fnc_spawn_team] call fnc_mission_claim };
-sleep 1;
-[_randompos, _radius] spawn { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
-sleep 1;
-[_randompos, _radius] spawn { [(["team"] + _this) call fnc_spawn_team] call fnc_mission_claim };
+    [_group, _targetpos, _radius] call bis_fnc_taskPatrol;
+    { [_x] call fnc_addRandomLoot } forEach units _group;
 
-_group = [_targetpos, east, [opfor_SL_SOLDIER_X, opfor_SNIPER_SOLDIER_X, opfor_SNIPER_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
-_group deleteGroupWhenEmpty true;
-[_group] call fnc_mission_claim;
-_target1 = units _group select 1;
-_target2 = units _group select 2;
-
-// What a searched corpse reveals. Absent here, the reveal branch of the body search had nothing to
-// mark, so it returned silently and this mission paid at the roll's lower band instead of its full
-// rate -- the garrison it applies to only started carrying intel when fnc_garrisonBuildings took
-// over, so the gap had never shown.
-
-[_target1] spawn {
-    params ["_unit"];
-    sleep 5;
-    _unit forceAddUniform "U_B_FullGhillie_sard";
-};
-[_target2] spawn {
-    params ["_unit"];
-    sleep 5;
-    _unit forceAddUniform "U_B_FullGhillie_sard";
-};
-[_target1] spawn {
-    params ["_unit"];
-    sleep 5;
-    _unit addMagazineGlobal "FileTopSecret";
-};
-[_target2] spawn {
-    params ["_unit"];
-    sleep 5;
-    _unit addMagazineGlobal "FileTopSecret";
-};
-// Put an intel action on leader
-if (hardcore_mode_enable) then {
-	[[units _group select 0], "objective"] call fnc_search_flag_group;
+    [_target1, _target2]
 };
 
-if (VERSION_X == "MODERN") then {
-	if !(("OPTRE" in BLUFOR_FactionFile_X) 
-		or ("HL2ECR" in BLUFOR_FactionFile_X)
-		or ("TIOW" in BLUFOR_FactionFile_X)) then {
-		removeheadgear _target1;
-		removeheadgear _target2;
-		_target1 addHeadgear "H_Shemag_khk";
-		_target2 addHeadgear "H_Shemag_khk";
-	};
-};
-
-[_group, _targetpos, _radius] call bis_fnc_taskPatrol;
-{
-    [_x] call fnc_addRandomLoot;
-} forEach units _group;
-
-// TASK AND NOTIFICATION
-[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
-
-sleep 5; // let the patrols finish spawning
-
-
-waitUntil {sleep 2; (!alive _target1 && !alive _target2) || time > _deadline};
-
-if ((alive _target1 || alive _target2) && time > _deadline) exitWith {
-    [_VARtaskgeneratedName, _markername2, "", _targetpos, _radius] call fnc_mission_deadline_fail;
-};
-
-[_speaker, _message1] remoteExec ["fnc_duws_dialogue", 0];
-[_markername2] call fnc_missionMarkerClear;
-
-[_VARtaskgeneratedName, "SUCCEEDED"] call fnc_missionTaskEnd;
-
-sleep 1;
-
-[_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
-[_targetpos,_radius] call fnc_mission_end;
+private _spec = [
+    5, 400, "kill", "STR_DUWS_T_16dh939j", "STR_DUWS_T_c5", "sniperhunt",
+    _build,
+    { params ["_target1", "_target2"]; !alive _target1 && !alive _target2 },
+    [["STR_DUWS_T_Viper", "STR_DUWS_T_sniperletsdothis", 8]],
+    ["STR_DUWS_T_Viper", "STR_DUWS_T_sniperend"]
+];
+[_MissionPos, _mission_name, _spec] call fnc_mission_run;
