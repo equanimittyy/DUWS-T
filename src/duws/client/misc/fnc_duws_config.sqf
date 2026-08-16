@@ -20,9 +20,16 @@ waitUntil { !isNil "commandpointsblu1" && {!isNil "chosen_settings"} };
 
 private _hdr = { format ["<font size='22' color='#4da6ff'>%1</font><br/><br/>", _this] };
 private _sub = { format ["<br/><font color='#7fbfff'>%1</font><br/>", _this] };
-// One "label: value" row; value in amber so it reads apart from the label.
+// One "label: value" row; value in amber so it reads apart from the label. The value is escaped
+// for structured text: a runtime string (faction name, callsign) carrying &, < or > would open an
+// XML entity or tag the diary cannot close and void the whole body, blanking the tab while its
+// title still lists. & first, so the &amp; it writes is not re-hit by the < and > passes. Labels
+// are hardcoded and need no escape.
 private _row = {
     params ["_label", "_val"];
+    _val = _val regexReplace ["&", "&amp;"];
+    _val = _val regexReplace ["<", "&lt;"];
+    _val = _val regexReplace [">", "&gt;"];
     format ["<font color='#4da6ff'>%1:</font> <font color='#ffcc66'>%2</font>", _label, _val]
 };
 
