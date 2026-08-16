@@ -86,6 +86,9 @@ fnc_ap_adjust = {
 		};
 		case "BLU": {
 			WARCOM_blufor_ap = round ((WARCOM_blufor_ap + _delta) max 0); publicVariable "WARCOM_blufor_ap";
+			// PV handler updates ctrl 1002 on remote clients; do it here for the host, whose own
+			// publicVariableEventHandler does not fire for its own broadcast (the request menu AP box).
+			if (hasInterface) then { ctrlSetText [1002, format ["%1", WARCOM_blufor_ap]]; };
 			if (_earned > 0) then {
 				WARCOM_blufor_ap_earned = round (WARCOM_blufor_ap_earned + _earned); publicVariable "WARCOM_blufor_ap_earned";
 				private _t = [WARCOM_blufor_ap_earned] call DUWS_fnc_ap_tier;

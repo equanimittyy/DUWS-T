@@ -134,6 +134,8 @@ if (isMultiplayer) then {
 
 	// change the shown CP for request dialog
 	"commandpointsblu1" addPublicVariableEventHandler {ctrlSetText [1000, format["%1",commandpointsblu1]]; };
+	// same for the AP wallet, so a spend shows on the request dialog's AP box at once, like CP
+	"WARCOM_blufor_ap" addPublicVariableEventHandler {ctrlSetText [1002, format["%1",WARCOM_blufor_ap]]; };
 	
 	["INFO", "BOOT", format ["BLUFOR Faction init for JIP: %1", BLUFOR_FactionFile_X]] call fnc_log;
 	if (BLUFOR_FactionFile_X == "CUSTOM") then {
