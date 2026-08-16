@@ -195,7 +195,7 @@ class startup_dialog
             idc = 1809;
             text = "$STR_DUWS_T_bm4k1vwo";
             x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 13.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 16.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 18.5 * GUI_GRID_W;
             h = 2.5 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_34g1rdwe";
@@ -204,7 +204,7 @@ class startup_dialog
         {
             idc = 2108;
             x = 1.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 14.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 17.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 17.5 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_r69kq1g1";
@@ -233,7 +233,7 @@ class startup_dialog
             idc = 1811;
             text = "$STR_DUWS_T_uxvi77tr";
             x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 16.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 13.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 18.5 * GUI_GRID_W;
             h = 2.5 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_8vvbwo7p";
@@ -242,7 +242,7 @@ class startup_dialog
         {
             idc = 2110;
             x = 1.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 17.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 14.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 17.5 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_8vvbwo7p";
