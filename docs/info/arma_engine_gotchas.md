@@ -453,6 +453,19 @@ and calls `reverse` once before the `forEach`, so the source reads the way the p
 only that array changes when reordering. Reuse that pattern rather than hand-ordering
 `createDiaryRecord` calls.
 
+## An unescaped `&`/`<`/`>` in a diary body blanks the body but leaves the title
+
+**Diary record text is structured-text XML, so a bare `&`, `<` or `>` anywhere in the body voids
+the whole body parse. The title is plain text and still shows, so the symptom is a tab that lists
+in the subject but renders empty — not an obvious parse error.**
+
+The record is a `[title, text]` pair and only `text` is parsed. A section header like
+`"FORCES, ECONOMY & WORLD"` compiles and the tab appears, but the `&` opens an XML entity that
+never closes and the engine drops the body silently. Escape body literals as `&amp;` (`&lt;`,
+`&gt;`) — the same rule the stringtable note above states, applied to SQF-built bodies too. It
+also covers any dynamic value spliced in: a faction name or callsign carrying `&` reintroduces
+the fault in whichever tab shows it.
+
 ## `for "_i" from A to N step 1` runs `floor(N)+1` times, truncating a fractional bound
 
 **The counter advances in whole steps while `counter <= N`, so a fractional `N` (e.g. `1.5`) stops

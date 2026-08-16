@@ -1,6 +1,6 @@
 // Locality: client -- inherited from client/client_init.sqf.
 // fnc_duws_config.sqf
-// Builds the "DUWS Campaign Config" subject in the map's Notes (diary), separate from the
+// Builds the "DUWS Config" subject in the map's Notes (diary), separate from the
 // DUWS-T Manual: one read-only page group listing the live campaign config -- the lobby
 // parameters and the setup-screen choices as they were actually committed for this run.
 // Spawned after the manual so it lists second, and after chosen_settings so every
@@ -136,8 +136,8 @@ private _preset = if (isNil "duws_preset") then {"-"} else {
     switch (duws_preset) do { case "hardcore":{"Hardcore"}; case "custom":{"Custom"}; default {"Classic"} }
 };
 
-private _forcesBody = ("FORCES, ECONOMY & WORLD" call _hdr)
-    + ("Forces & Economy" call _sub) + ([
+private _forcesBody = ("FORCES, ECONOMY &amp; WORLD" call _hdr)
+    + ("Forces &amp; Economy" call _sub) + ([
     ["Starting CP", "commandpointsblu1" call _S],
     ["Reward Multiplier", format ["%1x", "cp_reward_multiplier" call _S]],
     ["CP Death Penalty", "DUWSMP_CP_death_cost" call _S],
@@ -150,7 +150,7 @@ private _forcesBody = ("FORCES, ECONOMY & WORLD" call _hdr)
     ["OPFOR Attack Helis", ["AttackHeli", "Yes", "No"] call _yn],
     ["War Escalation", ["escalation_enabled"] call _yn]
 ] apply {_x call _row} joinString "<br/>")
-    + ("World & Rules" call _sub) + ([
+    + ("World &amp; Rules" call _sub) + ([
     ["Weather", _weather],
     ["Time of Day", _tod],
     ["Civilians", _civ],
@@ -169,6 +169,6 @@ private _records = [
     ["Forces & World", _forcesBody]
 ];
 
-player createDiarySubject ["duws_config", "DUWS Campaign Config"];
+player createDiarySubject ["duws_config", "DUWS Config"];
 reverse _records;
 { player createDiaryRecord ["duws_config", _x] } forEach _records;
