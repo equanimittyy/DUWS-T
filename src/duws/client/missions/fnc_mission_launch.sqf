@@ -21,3 +21,7 @@ if (_slot isEqualTo []) exitWith {
 
 _slot params ["_pos", "_name"];
 [_pos, _name] remoteExec [(_defs select _type) select 0, 2];
+
+// The picked set is spent: clear the picker's cache (fnc_stratmap) so the next availability window
+// rolls a fresh set instead of re-offering this now-live mission.
+DUWS_missionOffers = [];

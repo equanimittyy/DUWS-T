@@ -24,6 +24,20 @@ sleep 4;
 
 if (!((vehiclevarname player) in game_master)) exitWith {hint ([localize "STR_DUWS_T_eck4xh9m"] call fnc_cs)};
 
+// Reuse a still-current offer set instead of re-rolling it. Regenerating on every open handed a
+// player who backed out to reconsider seven brand-new missions; the set now persists until one is
+// picked (fnc_mission_launch clears it) or the debug re-roll fires. Reached only past the
+// Mission_available and game_master gates above, so a cached open still obeys the cooldown.
+private _cachedOffers = missionNamespace getVariable ["DUWS_missionOffers", []];
+if !(_cachedOffers isEqualTo []) exitWith {
+	array_of_missions = _cachedOffers select 0;
+	DUWS_missionSlots = _cachedOffers select 1;
+	DUWS_rewardBoost  = _cachedOffers select 2;
+	hint localize "STR_DUWS_T_mission_selector_title";
+	private _night = (daytime > 20) || (daytime < 5);
+	[(findDisplay 46), getpos player, array_of_missions, [], [], [], 1, _night] call BIS_fnc_strategicMapOpen;
+};
+
 // init the array of missions
 array_of_missions = [];
 
@@ -197,6 +211,10 @@ endLoadingScreen;
 terminate _handle;
 
 if (failsafe_not_found == true) exitWith {hint localize "STR_DUWS_T_crtzxs0j"};
+
+// Cache the freshly rolled set so a back-out and reopen shows the same missions rather than a new
+// roll. Only a successful roll is stored (past the failsafe above); cleared on pick or debug re-roll.
+DUWS_missionOffers = [array_of_missions, DUWS_missionSlots, DUWS_rewardBoost];
 
 hint localize "STR_DUWS_T_mission_selector_title";
 

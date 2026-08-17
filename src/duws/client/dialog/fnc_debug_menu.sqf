@@ -39,6 +39,13 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
 
     ["Force side mission", fnc_debug_mission_menu, [], [1,0.667,0,1]],
 
+    // Clears fnc_stratmap's cached offer set and reopens the picker, rolling a fresh seven. The cache
+    // is what keeps a normal back-out on the same offers; this is the intended way to roll new ones.
+    ["Re-roll side missions", {
+        DUWS_missionOffers = [];
+        [] spawn fnc_stratmap;
+    }, [], [1,0.667,0,1]],
+
     ["Spawn OPFOR hardpoint", fnc_debug_hardpoint_menu, "opfor", [1,0.667,0,1]],
     ["Spawn BLUFOR hardpoint", fnc_debug_hardpoint_menu, "blufor", [1,0.667,0,1]],
 
