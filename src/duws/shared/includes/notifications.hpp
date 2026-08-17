@@ -297,4 +297,20 @@ class CfgNotifications
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
 
+    // Raised once by the server when the Game Master slot (player1) is empty after setup begins:
+    // only that slot drives faction/HQ placement, so with it empty the setup gates never clear and
+    // the campaign hangs with no on-screen cause. Held far longer than the 4s default -- it asks for
+    // a restart and fires a single time, so it must survive being glanced past.
+    class no_gamemaster
+    {
+        title = "$STR_DUWS_T_NO_GM_TITLE";
+        iconPicture = "\A3\ui_f\data\map\markers\military\warning_ca.paa";
+        iconText = "";
+        description = "$STR_DUWS_T_NO_GM_MSG";
+        color[] = {1,0.2,0.2,1};
+        duration = 20;
+        priority = 10;
+        difficulty[] = {};
+    };
+
 };

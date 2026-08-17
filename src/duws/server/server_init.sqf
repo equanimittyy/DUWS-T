@@ -41,6 +41,22 @@ sleep 1;
 serverinit_complete = true;
 publicVariable "serverinit_complete";
 
+// Game Master slot watchdog. Only player1 drives setup (faction pick + HQ placement), so if that
+// slot holds no human the setup gates below never clear and the campaign hangs with nothing on
+// screen to say why. Warn every machine to restart with the slot filled. Spawned, not inline: the
+// main thread is about to block on those very gates, so an inline check would never run. MP only --
+// SP forces the local player into game_master, so the slot is never empty there.
+if (isMultiplayer) then {
+	[] spawn {
+		sleep 5;
+		private _gm = missionNamespace getVariable ["player1", objNull];
+		if (isNull _gm || {!isPlayer _gm}) then {
+			["ERROR", "BOOT", "Game Master slot (player1) empty -- setup cannot run, campaign will hang"] call fnc_log;
+			["no_gamemaster", []] remoteExec ["BIS_fnc_showNotification", 0];
+		};
+	};
+};
+
 // Faction resolution answers the confirmation screen, which shows the player the classname each
 // side will field for every role and is the last point they can change one -- so it cannot wait
 // for the commit. Served in a loop rather than once: stepping back from the environment screen

@@ -7328,6 +7328,14 @@
                 <Original>Waiting for the host to finish mission setup...</Original>
                 <English>Waiting for the host to finish mission setup...</English>
             </Key>
+            <Key ID="STR_DUWS_T_NO_GM_TITLE">
+                <Original>No Game Master</Original>
+                <English>No Game Master</English>
+            </Key>
+            <Key ID="STR_DUWS_T_NO_GM_MSG">
+                <Original>The Game Master slot (Slot 1) is empty. Restart the mission with a player in it</Original>
+                <English>The Game Master slot (Slot 1) is empty. Restart the mission with a player in it</English>
+            </Key>
             <Key ID="STR_DUWS_T_2rc0nvug">
                 <Spanish>Alternar tapones</Spanish>
                 <German>Ohrenstöpsel umschalten</German>
