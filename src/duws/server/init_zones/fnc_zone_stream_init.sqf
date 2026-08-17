@@ -345,7 +345,7 @@ DUWS_fnc_zoneRaiseWorker = {
     // wake used: a committed aircraft holds the raise, where fnc_duws_bluforNear alone -- discounting
     // anything airborne -- would confirm an air wake straight back off and never let the zone stand.
     sleep 5;
-    if !([_pos, _size + DUWS_streamArrivalMargin, 2, DUWS_zoneAirRing, DUWS_zoneAirCommitSpeed] call fnc_site_bluforOrAir) exitWith {
+    if !([_pos, _size + DUWS_streamArrivalMargin, 2, DUWS_zoneAirRing, DUWS_zoneAirCommitSpeed, true] call fnc_site_bluforOrAir) exitWith {
         missionNamespace setVariable [ZONE_RAISE_SLOT(_key), false];
     };
 

@@ -307,16 +307,19 @@ fnc_site_near = {
 // answer is folded back in here. The hardpoint form of presence, shared by the raise worker and
 // the register so a wake and its confirmation cannot reach opposite answers and strand the gun.
 //
-// _airSpeed (0 = no gate) filters the air answer by commitment: a zone counts only aircraft under it
-// -- a helicopter inbound, a UAV on-station -- so a jet transiting at cruise is not a wake, where AA
-// passes 0 because catching exactly that jet is what an AA ring is for. It matches the poller's
-// prebuilt committed-air list, so a zone's wake and this re-confirmation cannot disagree.
+// _airSpeed (0 = no gate) and _playerAir filter the air answer to a zone's kind of threat: aircraft
+// under the speed, and -- when _playerAir -- only player-crewed ones or a UAV, so an AI transit or an
+// AI support heli is not a wake. AA passes neither (speed 0, _playerAir false): catching any jet at
+// cruise is what an AA ring is for. Both match the poller's prebuilt committed-air list, so a zone's
+// wake and this re-confirmation cannot disagree.
 fnc_site_bluforOrAir = {
-    params ["_pos", "_ring", ["_minAI", 2], ["_airRing", 0], ["_airSpeed", 0]];
+    params ["_pos", "_ring", ["_minAI", 2], ["_airRing", 0], ["_airSpeed", 0], ["_playerAir", false]];
     if ([_pos, _ring, _minAI] call fnc_duws_bluforNear) exitWith { true };
     if (_airRing <= 0) exitWith { false };
     ((_pos nearEntities [["Air"], _airRing]) findIf {
-        ({ side _x == WEST } count (crew _x)) > 0 && {_airSpeed <= 0 || {speed _x < _airSpeed}}
+        ({ side _x == WEST } count (crew _x)) > 0
+        && {_airSpeed <= 0 || {speed _x < _airSpeed}}
+        && {!_playerAir || {unitIsUAV _x || {(crew _x) findIf { isPlayer _x } >= 0}}}
     }) >= 0
 };
 
@@ -347,14 +350,27 @@ fnc_site_poller = {
         // occupant says which it wants -- but neither costs a spatial query until somebody is
         // actually within reach of the site being asked about.
         private _west = (allUnits select { side _x == WEST }) apply { getPosATL _x };
-        // WEST aircraft positions, for the air ring an occupant declares. Built once beside _west so
-        // the ring test stays a distance check; _west alone cannot answer it, keeping no note of who
-        // is airborne. Two lists off the one scan: every aircraft, for an AA ring that must catch a
-        // jet at cruise; and only the committed (under DUWS_zoneAirCommitSpeed -- a helicopter inbound,
-        // a UAV on-station), for a zone ring a transiting jet must not wake.
-        private _westAirUnits = allUnits select { side _x == WEST && {(vehicle _x) isKindOf "Air"} };
-        private _westAir = _westAirUnits apply { getPosATL _x };
-        private _westAirCommitted = (_westAirUnits select { speed (vehicle _x) < DUWS_zoneAirCommitSpeed }) apply { getPosATL _x };
+        // WEST aircraft positions, for the air ring an occupant declares. Off the engine's vehicle
+        // list, not allUnits: one entry per aircraft rather than one per crew seat, and a far shorter
+        // list to walk than every man in the mission. Two of them, built in one pass:
+        //   _westAir           every WEST aircraft, for an AA ring that must catch any jet, AI-flown
+        //                      included -- that is the emplacement's whole job.
+        //   _westAirCommitted  a zone's kind of threat only: player-crewed aircraft (a player in a
+        //                      seat, or any UAV -- a player drives one by terminal with its body never
+        //                      aboard, so its crew never reads as a player) holding under
+        //                      DUWS_zoneAirCommitSpeed. An AI transit or an AI support heli is neither,
+        //                      so it never stands a garrison up.
+        private _westAir = [];
+        private _westAirCommitted = [];
+        {
+            if !(({ side _x == WEST } count (crew _x)) > 0) then { continue };
+            private _ap = getPosATL _x;
+            _westAir pushBack _ap;
+            if (speed _x < DUWS_zoneAirCommitSpeed
+                && {unitIsUAV _x || {(crew _x) findIf { isPlayer _x } >= 0}}) then {
+                _westAirCommitted pushBack _ap;
+            };
+        } forEach (vehicles select { _x isKindOf "Air" });
         // The hostile half of the same gate, for the frozen sites below. Built here rather than
         // asked per site, because a base with nothing near it would otherwise pay a spatial query
         // every pass for the whole campaign -- and with the HQ plus a FOB per zone and a half, that
@@ -391,16 +407,16 @@ fnc_site_poller = {
                     // pass across a map that is nearly always empty of anyone.
                     private _ground = (_west findIf { _x distance _pos < _ring }) >= 0
                         && { [_pos, _ring, _min] call fnc_duws_bluforNear };
-                    // Air ring: a BLUFOR aircraft, player or AI flown, reaching in from beyond the
-                    // ground ring. Only an occupant that declares one (AA, or a zone) pays it, and it
-                    // stays a distance test over a prebuilt list. bluforNear discounts anything
-                    // airborne, so this is the whole of a site's reach against aircraft. airRingSlow
-                    // picks the committed list -- a zone wakes for a heli inbound or a UAV on-station,
-                    // not a jet at cruise; AA leaves it unset to catch that jet.
+                    // Air ring: a BLUFOR aircraft reaching in from beyond the ground ring. Only an
+                    // occupant that declares one (AA, or a zone) pays it, and it stays a distance test
+                    // over a prebuilt list. bluforNear discounts anything airborne, so this is the
+                    // whole of a site's reach against aircraft. airRingCommitted picks the committed
+                    // list -- a zone wakes only for player-crewed air or a UAV holding on-station; AA
+                    // leaves it unset and reads every aircraft, to catch a jet at cruise.
                     _ground || {
                         private _ar = _o getOrDefault ["airRing", 0];
                         _ar > 0 && {
-                            private _air = if (_o getOrDefault ["airRingSlow", false]) then { _westAirCommitted } else { _westAir };
+                            private _air = if (_o getOrDefault ["airRingCommitted", false]) then { _westAirCommitted } else { _westAir };
                             (_air findIf { _x distance _pos < _ar }) >= 0
                         }
                     }

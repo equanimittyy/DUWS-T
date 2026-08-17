@@ -423,15 +423,16 @@ DUWS_hardpointStreaming = createHashMapFromArray [
     ["RADIO",     [ 800, 300, false, 0]]
 ];
 
-// Zone air streaming: a helicopter or UAV committing to a zone wakes its garrison, where the ground
-// ring discounts anything airborne (fnc_duws_bluforNear, "a helicopter on the deck is still nobody
-// arriving"). Committing, not transiting -- only aircraft under DUWS_zoneAirCommitSpeed count, so a
-// heli inbound or a UAV on-station wakes the zone while a jet crossing at cruise places nothing. This
-// is the zone's own reach; AA keeps the raw, ungated air ring above so it still catches that jet.
-// Ring 0 turns the feature off -- the zone's air answer falls back to ground only. Server-only: the
-// consumers (fnc_createzone, the site poller, the zone raise worker) all run on the server.
+// Zone air streaming: a player-crewed aircraft or a UAV committing to a zone wakes its garrison, where
+// the ground ring discounts anything airborne (fnc_duws_bluforNear, "a helicopter on the deck is still
+// nobody arriving"). Committing, not transiting, and player-crewed, not AI: only a player-flown heli or
+// a UAV holding under DUWS_zoneAirCommitSpeed counts, so a jet at cruise, an AI transit, or an AI
+// support heli places nothing -- no garrison stood up for aircraft the player is not steering. This is
+// the zone's own reach; AA keeps the raw, ungated air ring above so it still catches any jet. Ring 0
+// turns the feature off -- the zone's air answer falls back to ground only. Server-only: the consumers
+// (fnc_createzone, the site poller, the zone raise worker) all run on the server.
 DUWS_zoneAirRing = 1500;
-DUWS_zoneAirCommitSpeed = 250;   // km/h; a heli inbound or UAV on-station sits under it, a jet at cruise does not
+DUWS_zoneAirCommitSpeed = 250;   // km/h; a player heli inbound or UAV on-station sits under it, a jet at cruise does not
 
 // The radio tower's mast: the one composition member left simulated and damageable, and the object
 // fnc_hardpoint_stream watches to clear the tower -- destroying it takes the hardpoint, not beating its
