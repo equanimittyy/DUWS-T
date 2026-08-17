@@ -1,13 +1,9 @@
-// Locality: server -- both waypoints and ambient poses are ignored unless the group is local.
+// Locality: server -- waypoints are ignored unless the group is local.
 /*
-    Gives a freshly spawned crowd something to do: part of it stands and poses, the rest walks a
-    short circuit near where it spawned. Params: [_groups, _buildings].
+    Gives a freshly spawned crowd something to do: every civilian walks a short circuit near where
+    it spawned. Params: [_groups, _buildings].
 */
 if (!isServer) exitWith {};
-
-// Share of the crowd that poses instead of walking. A town where everyone is in motion reads as
-// an evacuation; one where nobody is reads as a waxworks.
-#define IDLE_SHARE 0.45
 
 // How far a walker's circuit reaches from where it spawned. Wide enough that two neighbours do
 // not trace the same path, short enough to keep the crowd in the cluster the spawn packed it
@@ -17,19 +13,6 @@ if (!isServer) exitWith {};
 params ["_groups", "_buildings"];
 
 _buildings = _buildings select {!isNull _x && {_x isKindOf "Building"}};
-
-// Poses that need no prop. The crowd is placed by findSafePos and by building positions, so a
-// pose wanting a chair or a table would be played on open ground.
-//
-// Names are exact and unvalidated by the engine: BIS_fnc_ambientAnim has no SMOKING set and no
-// bare WATCH, and an unknown name leaves the civilian standing in the default stance with
-// nothing logged.
-//
-// The _U suffix is what makes a set unarmed, and only the unarmed sets belong on a civilian: the
-// armed idles animate the hands around a rifle the civilian is not carrying, so STAND, STAND_IA,
-// LEAN and the WATCH pair all read on screen as a man holding an invisible gun. Three poses
-// rather than eight is the price of that, and the walking share carries most of the variety.
-private _idlePoses = ["STAND_U1", "STAND_U2", "STAND_U3"];
 
 // Water is the one surface worth rejecting: an unreachable waypoint inland is left behind by the
 // timeout, but a coastal town will happily walk someone into the sea.
@@ -84,30 +67,6 @@ private _fnc_hunt = {
     // which is a crouching sprint and the reason the crowd looked panicked before anyone fired.
     _group setBehaviour "SAFE";
     _group setSpeedMode "LIMITED";
-
-    // Rolled once per civilian and then remembered. This function is what re-issues orders after
-    // a conversation and after a panic, and re-rolling each time meant someone who had stood on
-    // the same corner all afternoon wandered off the moment they were spoken to. The share above
-    // therefore decides the composition of a town once, at its fill, rather than every time
-    // anything happens to anyone in it.
-    private _idler = _unit getVariable "civ_idler";
-    if (isNil "_idler") then {
-        _idler = random 1 < IDLE_SHARE;
-        _unit setVariable ["civ_idler", _idler];
-    };
-
-    if (_idler) then {
-        // Ambient poses rather than a raw switchMove: BIS_fnc_ambientAnim installs the handlers
-        // that break the animation on death, where a hand-rolled pose leaves the corpse standing
-        // upright and shrugging off hits. It owns the unit's AI until terminated, which is why
-        // the call-over has to release it before a doMove will take.
-        [_unit, selectRandom _idlePoses] call BIS_fnc_ambientAnim;
-        // Our own flag, not one of the function's internals: the call-over and the panic sweep
-        // both have to know whether there is a pose to release, and keying that on a variable
-        // BI sets privately would break silently the day it is renamed.
-        _unit setVariable ["civ_posed", true];
-        continue;
-    };
 
     private _origin = getPos _unit;
     private _first = [];

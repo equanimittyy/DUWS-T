@@ -40,13 +40,6 @@ _unit setVariable ["DUWS_civ_panicked", true, true];
 // carries it: someone running for cover is not standing still to be talked to.
 _unit setVariable ["DUWS_civ_stopped", false, true];
 
-// The pose holds the unit's AI while it runs, so a civilian left mid-smoke would stand through
-// the whole firefight.
-if (_unit getVariable ["civ_posed", false]) then {
-    [_unit] call BIS_fnc_ambientAnim__terminate;
-    _unit setVariable ["civ_posed", false];
-};
-
 private _group = group _unit;
 
 // Back to front: deleteWaypoint shifts every later index down, so a forward pass over the list
@@ -106,15 +99,8 @@ _unit doMove _dest;
     _unit setVariable ["DUWS_civ_panicked", false, true];
     // UP rather than AUTO: AUTO hands the stance back to an AI that has just been shot at and can
     // keep them flat, so a calmed civilian would crawl their circuit. A civilian has no tactical
-    // reason to be anywhere but on their feet -- the pose above is the only place one goes down.
+    // reason to be anywhere but on their feet.
     _unit setUnitPos "UP";
-    // Everyone who fled one shot took the same bearing into the same nearestBuilding, so resuming
-    // the remembered role would leave a stack of them standing in one house for the rest of the
-    // occupancy. Walking is what breaks the clump: the circuits are drawn around each unit, so a
-    // group that arrived together disperses over the roam radius. Cleared rather than passed as an
-    // override because the flag dies with the unit -- a town's crowd is deleted when it empties,
-    // so this cannot drift the stander/walker mix beyond the visit the firefight happened in.
-    _unit setVariable ["civ_idler", false];
     [_unit] call fnc_civ_resume;
 };
 

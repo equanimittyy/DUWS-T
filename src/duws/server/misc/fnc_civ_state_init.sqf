@@ -337,13 +337,6 @@ fnc_civ_moveToPlayerServer = {
     // body so a client cannot open the menu on a local it never actually stopped.
     _unit setVariable ["DUWS_civ_stopped", true, true];
 
-    // An idler is held in an ambient pose that owns their AI, so the doMove below is silently
-    // ignored until the pose is released -- the civilian stands and smokes through being called.
-    if (_unit getVariable ["civ_posed", false]) then {
-        [_unit] call BIS_fnc_ambientAnim__terminate;
-        _unit setVariable ["civ_posed", false];
-    };
-
     // Back to front: deleteWaypoint shifts every later index down, so a forward pass over the
     // list deletes every other waypoint and leaves the rest to pull the civilian away mid-walk.
     // `reverse` cannot be inlined into the forEach -- it reverses in place and returns Nothing.
