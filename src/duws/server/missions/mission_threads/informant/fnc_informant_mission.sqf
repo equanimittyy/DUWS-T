@@ -93,21 +93,23 @@ private _taskID = format ["informant%1%2", round (_townPos select 0), round (_to
 [_taskID, format [localize "STR_DUWS_T_INTEL_INFORMANT_TASK", _zoneName, _clock, _vehName], _mission_name, _townPos, "search"] call fnc_missionTaskCreate;
 
 // Parks a car of a given class on a road point near the town, stripped of the free medkit vanilla
-// civilian cars carry, sitting where put rather than bounced to a clear spot.
+// civilian cars carry. Binary createVehicle, the drop every other mission thread uses: the engine
+// settles the car onto clear ground by the point, where the old "NONE" placement plus a forced
+// setPosATL pinned it to the exact point and a car landing on a wall, rock or another car detonated.
 private _fnc_spawnCar = {
     params ["_class", "_pos", "_dir"];
-    private _veh = createVehicle [_class, _pos, [], 0, "NONE"];
+    private _veh = _class createVehicle _pos;
     clearItemCargoGlobal _veh; clearMagazineCargoGlobal _veh;
     clearWeaponCargoGlobal _veh; clearBackpackCargoGlobal _veh;
     _veh setDir _dir;
-    _veh setPosATL _pos;
     _veh
 };
 
 private _roads = nearestTerrainObjects [_townPos, ["MAIN ROAD", "ROAD", "TRACK"], _radius max 200, false, true];
 // A road point is usable only if it is clear of the walls, rocks and trees that line an Altis town
-// road and of any car already placed: a car dropped onto an occupied point with "NONE" clips the
-// object and detonates on spawn, and the car check keeps the four cars off one another's segment.
+// road and of any car already placed: the spawn settles onto the nearest open ground, so starting
+// from an open point keeps the car on the road rather than shoved off it, and the car check keeps
+// the four cars off one another's segment.
 private _fnc_carClear = {
     params ["_p"];
     (nearestTerrainObjects [_p, ["WALL", "FENCE", "ROCK", "TREE"], 4]) isEqualTo []
@@ -331,8 +333,8 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
 
 // Exfil watcher: hold until the leave clock elapses or a firefight starts, then get him out. Kept off
 // the main thread so the win/fail monitor below runs against it in parallel.
-[_informant, _informantCar, _decoys, _zx, _leaveAt, _townPos] spawn {
-    params ["_inf", "_car", "_decoys", "_zx", "_leaveAt", "_townPos"];
+[_informant, _informantCar, _decoys, _zx, _leaveAt, _townPos, _townRadius] spawn {
+    params ["_inf", "_car", "_decoys", "_zx", "_leaveAt", "_townPos", "_townRadius"];
 
     // Why he leaves sets the tempo. A firefight -- the crowd scattering, read off the same alarm the
     // civilians raise (fnc_civ_panic's DUWS_civ_panicked, propagated across the town within its 150 m
@@ -342,7 +344,9 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
     waitUntil {
         sleep 2;
         if (!alive _inf) exitWith { true };
-        if (((_inf nearEntities ["CAManBase", 150]) findIf { _x getVariable ["DUWS_civ_panicked", false] }) >= 0) exitWith { _loud = true; true };
+        // Across the town, not one alarm hop: the panic chain thins where the crowd does, so read a
+        // town-wide radius off his position rather than trust a panicked civ to stand within 150 m.
+        if (((_inf nearEntities ["CAManBase", (_townRadius max 200) + 150]) findIf { _x getVariable ["DUWS_civ_panicked", false] }) >= 0) exitWith { _loud = true; true };
         time > _leaveAt
     };
     if (!alive _inf) exitWith {};
@@ -368,9 +372,18 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
     private _boarded = false;
     if (alive _car) then {
         _inf assignAsDriver _car;
-        [_inf] orderGetIn true;
+        // Run him to the car under his own doMove: at FULL a firefight makes him sprint to it the way
+        // the panicking crowd runs (fnc_civ_panic drives its flight the same, CARELESS + FULL), where
+        // orderGetIn alone walks a lone unit to the door whatever his speed mode. Board once he is on
+        // it. Pace tracks _speed, so a calm scheduled exit still walks over.
         private _giveUp = diag_tickTime + 60;
-        waitUntil { sleep 1; (_inf in _car) || !alive _inf || !alive _car || diag_tickTime > _giveUp };
+        waitUntil {
+            sleep 1;
+            if (alive _inf && {alive _car} && {!(_inf in _car)}) then {
+                if (_inf distance _car > 5) then { _inf doMove (getPosATL _car) } else { [_inf] orderGetIn true };
+            };
+            (_inf in _car) || !alive _inf || !alive _car || diag_tickTime > _giveUp
+        };
         _boarded = (alive _inf) && (_inf in _car);
     };
 
