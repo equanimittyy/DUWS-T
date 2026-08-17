@@ -326,6 +326,10 @@ fnc_civ_townRender = {
 	_area setMarkerAlpha ([0, 0.3] select _shown);
 };
 
+// Seconds a call-over holds before it lapses and the civilian is handed back their routine. Matched
+// to the panic calm-down (fnc_civ_panic CALM_DELAY) so the two civilian timers read the same.
+#define HALT_LAPSE 60
+
 fnc_civ_moveToPlayerServer = {
     params ["_unit", "_caller"];
     if (!isServer) exitWith {};
@@ -347,4 +351,26 @@ fnc_civ_moveToPlayerServer = {
     _unit setSpeedMode "NORMAL";
     sleep 5;
     doStop _unit;
+
+    // The halt is not permanent. A local called over and then left alone drifts back to their
+    // routine after this, and the call-over action -- hidden by its DUWS_civ_stopped clause while
+    // the flag is up -- reappears, so the same person can be hailed again. Counted flat from the
+    // call-over and never extended, like the panic calm-down. A completed exchange, an arrest, a
+    // surrender or a panic each own the civilian's next move, so the guard leaves those to it and
+    // lapses only a halt that went nowhere; the re-test guards against a flag flipping mid-sleep.
+    [_unit] spawn {
+        params ["_unit"];
+        sleep HALT_LAPSE;
+        if (
+            alive _unit
+            && {_unit getVariable ["DUWS_civ_stopped", false]}
+            && {!(_unit getVariable ["DUWS_civ_panicked", false])}
+            && {!(_unit getVariable ["DUWS_civ_closed", false])}
+            && {!(_unit getVariable ["DUWS_civ_arrested", false])}
+            && {!(_unit getVariable ["isSurrendered", false])}
+        ) then {
+            _unit setVariable ["DUWS_civ_stopped", false, true];
+            [_unit] call fnc_civ_resume;
+        };
+    };
 };

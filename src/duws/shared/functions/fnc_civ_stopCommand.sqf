@@ -5,24 +5,11 @@ params ["_unit"];
 
 if (isNull _unit) exitWith {};
 
-if (isNil "fnc_removeStopCommandAction") then {
-    fnc_removeStopCommandAction = {
-        params ["_unit"];
-        private _id = _unit getVariable ["stopCommandActionID", -1];
-        if (_id != -1) then {
-            _unit removeAction _id;
-            _unit setVariable ["stopCommandActionID", nil];
-        };
-    };
-    publicVariable "fnc_removeStopCommandAction";
-};
-
-private _actionID = _unit addAction [
+_unit addAction [
     ACT_CIVILIAN_INTERACTION("STR_DUWS_T_CIV_STOP"),
 {
     params ["_target", "_caller", "_actionId"];
-    
-    [_target] remoteExec ["fnc_removeStopCommandAction", 0];
+
     [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_STOP"] remoteExec ["fnc_duws_dialogue", _caller];
     
     [_target, _caller] remoteExec ["fnc_civ_moveToPlayerServer", 2];
@@ -50,7 +37,10 @@ private _actionID = _unit addAction [
     // Panicking civilians drop out: someone running from gunfire is not stopping to be called,
     // and the entry coming back is what tells the player the town has settled. fnc_civ_panic
     // broadcasts the flag and clears it once they are pathing normally again.
-    "_this distance _target < 6 && {abs (180 - (_this getRelDir _target)) > 165} && {!(_target getVariable ['DUWS_civ_panicked', false])}"
+    //
+    // Hidden while already halted, rather than removed on click: DUWS_civ_stopped goes up when the
+    // call-over lands and stays up until the halt lapses (fnc_civ_moveToPlayerServer's expiry) or a
+    // panic clears it, at which point this entry returns on its own. That is what makes the halt
+    // re-usable -- the condition does the one-shot, no add/remove round trip across every machine.
+    "_this distance _target < 6 && {abs (180 - (_this getRelDir _target)) > 165} && {!(_target getVariable ['DUWS_civ_panicked', false])} && {!(_target getVariable ['DUWS_civ_stopped', false])}"
 ];
-
-_unit setVariable ["stopCommandActionID", _actionID];
