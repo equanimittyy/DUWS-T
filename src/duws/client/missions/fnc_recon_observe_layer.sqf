@@ -51,16 +51,17 @@ if (isNil "DUWS_fnc_recon_los") then {
     };
 };
 
-// The icon draws only while the player is set up to observe -- inside the designated overwatch area,
-// binoculars up. It rides the fixed anchor position (z is metres above it, the array-source convention
-// fnc_draw_world_icons uses) and carries the live hold percentage so the marker is the progress read-out.
+// The icon draws once the player is inside the designated overwatch area. It rides the fixed anchor
+// position (z is metres above it, the array-source convention fnc_draw_world_icons uses). Its text is
+// the one action still owed: "Raise binoculars" until the player is glassing, then the live hold percent.
 DUWS_recon_ehDraw = addMissionEventHandler ["Draw3D", {
     if (!(missionNamespace getVariable ["DUWS_recon_active", false])) exitWith {};
     if ((player distance2D DUWS_recon_overwatch) > DUWS_recon_area) exitWith {};
-    if (!([player] call DUWS_fnc_recon_glassing)) exitWith {};
     private _a = DUWS_recon_anchorPos;
-    private _pct = round (DUWS_recon_progress * 100);
-    private _label = if (_pct > 0) then { format ["Observing... (%1%2)", _pct, "%"] } else { "Observe" };
+    private _label = if (!([player] call DUWS_fnc_recon_glassing)) then { "Raise binoculars" } else {
+        private _pct = round (DUWS_recon_progress * 100);
+        if (_pct > 0) then { format ["Observing... (%1%2)", _pct, "%"] } else { "Observe" }
+    };
     drawIcon3D ["\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa", [0.2, 1, 0.2, 0.8],
         [_a select 0, _a select 1, 8], 1, 1, 0, _label, 1, 0.03, "TahomaB"];
 }];
