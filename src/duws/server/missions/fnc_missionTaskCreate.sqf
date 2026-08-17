@@ -7,23 +7,36 @@
 params ["_taskId", "_description", "_title", "_destination", ["_type", "unknown"]];
 if (!isServer) exitWith {};
 
-// Journal footer, built once here so all 17 threads share it: mission text, the deadline as an in-game
-// wall clock, a blank line, then the reward block. Only the journal shows the clock -- the map picker
-// stays a relative band, or a deadline read while browsing overstates the time actually left once the
-// mission is picked. DUWS_curDeadlineAt is an absolute engine-time (seconds) and daytime advances 1:1
-// with engine seconds -- the same assumption fnc_mission_begin built the deadline on -- so the seconds
-// left convert straight to a clock. Guarded on a live future deadline; a stale/unset global adds nothing.
+// Journal footer, built once here so all threads share it. Order: the mission body (passed in), a blank
+// line and the deadline as an in-game wall clock, the optional Note line, then a divider and the stats
+// block -- mission name, type, reward, time. Only the journal shows the clock; the map picker
+// (fnc_stratmap) builds the same stats block but prints a time band, since a deadline read while browsing
+// overstates the time left once the mission is picked. DUWS_curDeadlineAt is an absolute engine-time
+// (seconds) and daytime advances 1:1 with engine seconds, so the seconds left convert straight to a
+// clock. Guarded on a live future deadline; a stale/unset global adds nothing.
+//
+// Name, type and note are single-sourced from mission_types.hpp through fnc_mission_begin's globals: the
+// type token is title-cased into its display word, and the note renders only when the type carries one.
 private _dl = missionNamespace getVariable ["DUWS_curDeadlineAt", -1];
 if (_dl > time) then {
-	_description = _description
-		+ format [localize "STR_DUWS_T_mission_deadline_desc", [_dl] call fnc_time_clock]
-		+ "<br />";  // second break: blank line between the deadline line and the reward block
+	// A blank line opens each section: the line strings carry one leading break, so a second one here
+	// leaves an empty line between the body, the deadline, the note and the divider.
+	_description = _description + "<br />" + format [localize "STR_DUWS_T_mission_deadline_desc", [_dl] call fnc_time_clock];
+
+	private _noteKey = missionNamespace getVariable ["DUWS_curNoteKey", ""];
+	if (_noteKey != "") then {
+		_description = _description + "<br />" + format [localize "STR_DUWS_T_mission_note_line", localize _noteKey];
+	};
+
+	_description = _description + "<br />" + localize "STR_DUWS_T_mission_divider";
+	_description = _description + format [localize "STR_DUWS_T_mission_name_line", localize (missionNamespace getVariable ["DUWS_curNameKey", ""])];
+	private _obj = missionNamespace getVariable ["DUWS_curObjective", ""];
+	_description = _description + format [localize "STR_DUWS_T_mission_type_line", (toUpper (_obj select [0,1])) + (_obj select [1])];
 
 	(missionNamespace getVariable ["DUWS_curReward", [0,0,0]]) params ["_cp", "_ap", "_rep"];
 	_description = _description + format [localize "STR_DUWS_T_mission_cpap", _cp, _ap];
 	if (_rep > 0) then { _description = _description + format [localize "STR_DUWS_T_mission_rep", _rep] };
-	// Concrete rolled duration in in-game hours, rounded: the map's pre-pick range has collapsed to one
-	// value by now.
+	// Concrete rolled duration in in-game hours, rounded: the map's pre-pick range has collapsed to one value.
 	_description = _description + format [localize "STR_DUWS_T_mission_time_fixed", round (([_dl] call fnc_time_remaining) / 3600)];
 };
 

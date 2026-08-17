@@ -9,7 +9,7 @@
 // tables that agreed only because somebody checked them.
 //
 // Columns: [thread, cooldown-ready name, strategic-map description, map icon, debug label, launcher,
-//           CP, AP, REP, deadline, category, objective]
+//           CP, AP, REP, deadline, category, objective, note]
 //
 // CP/AP/REP are the mission's base payout, the single source for both the reward the thread pays
 // (via fnc_mission_begin -> DUWS_curReward) and the figures the strategic map prints -- edit the
@@ -29,7 +29,13 @@
 // requisition, rescue, defend, escort, recon. Orthogonal to category (who issues it). Read from the win
 // condition, not the name: "Destroy armour" succeeds on
 // killing the tank commander, so it is elimination; "Destroy tower" drops a fixed installation like the
-// radar and cache missions, so sabotage. No consumer branches on it yet.
+// radar and cache missions, so sabotage. Title-cased, it is the "Mission Type" line of the briefing
+// stats block (fnc_missionTaskCreate and fnc_stratmap), which is why the token is the display word.
+//
+// note is an optional stringtable key for a caveat shown as its own "Note:" line in the briefing, after
+// the deadline and before the stats block. Empty for a type without one. It lives here rather than baked
+// into the description string so the description stays the plain objective and the note renders in its
+// own slot on both the journal task and the map picker.
 //
 // The launcher is a literal block per row rather than something built from the thread column:
 // BIS_fnc_strategicMapOpen runs it with no arguments and an SQF block captures no locals, so the
@@ -38,21 +44,21 @@
 //
 // The debug label is deliberately English-only, matching fnc_debug_mission_menu.
 
-["fnc_rescue_squad_mission",     "STR_DUWS_T_c0",  "STR_DUWS_T_kievbwmd",   "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Rescue squad",              { [0]  call fnc_mission_launch }, 45, 24, 0, [3,3], "command", "rescue"],
-["fnc_steal_supply_mission",     "STR_DUWS_T_c1",  "STR_DUWS_T_p7qawzl4",   "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Steal supply truck",       { [1]  call fnc_mission_launch }, 35, 24, 0, [3,3], "command", "requisition"],
-["fnc_target_hvt_mission",       "STR_DUWS_T_c2",  "STR_DUWS_T_19ajhe1d",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Kill HVT",                 { [2]  call fnc_mission_launch }, 35, 36, 0, [3,3], "command", "elimination"],
-["fnc_destroy_tower_mission",    "STR_DUWS_T_c3",  "STR_DUWS_T_dgpqenyw",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy tower",            { [3]  call fnc_mission_launch }, 20, 30, 0, [3,3], "command", "sabotage"],
-["fnc_rescue_pilot_mission",     "STR_DUWS_T_c4",  "STR_DUWS_T_njsu8ofz",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Rescue pilot",             { [4]  call fnc_mission_launch }, 25, 40, 0, [3,3], "command", "rescue"],
-["fnc_target_sniper_mission",    "STR_DUWS_T_c5",  "STR_DUWS_T_16dh939j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Kill snipers",             { [5]  call fnc_mission_launch }, 30, 30, 0, [3,3], "command", "elimination"],
-["fnc_steal_builder_mission",    "STR_DUWS_T_c6",  "STR_DUWS_T_czpvn5z1",   "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Steal engineering vehicle",{ [6]  call fnc_mission_launch }, 15, 20, 0, [3,3], "command", "requisition"],
-["fnc_target_armor_mission",     "STR_DUWS_T_c7",  "STR_DUWS_T_y7z1cx6j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Destroy armour",           { [7]  call fnc_mission_launch }, 15, 20, 0, [3,3], "command", "elimination"],
-["fnc_sabotage_laptop_mission",  "STR_DUWS_T_c8",  "STR_DUWS_T_j97ecrsh",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Sabotage laptop",          { [8]  call fnc_mission_launch }, 10, 36, 0, [3,3], "command", "sabotage"],
-["fnc_destroy_cache_mission",    "STR_DUWS_T_c9",  "STR_DUWS_T_geryeddp",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy cache",            { [9]  call fnc_mission_launch }, 30, 20, 0, [3,3], "command", "sabotage"],
-["fnc_destroy_radar_mission",    "STR_DUWS_T_c10", "STR_DUWS_T_n4uc7t2x",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy radar",            { [10] call fnc_mission_launch }, 25, 24, 0, [3,3], "command", "sabotage"],
-["fnc_clearthearea_cqb_mission", "STR_DUWS_T_c11", "STR_DUWS_T_cqbdesc", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Clear the area (CQB)", { [11] call fnc_mission_launch }, 15, 20, 0, [3,3], "command", "assault"],
-["fnc_holdposition_mission",     "STR_DUWS_T_c12", "STR_DUWS_T_holdposdesc", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Hold position",        { [12] call fnc_mission_launch }, 30, 36, 0, [3,3], "command", "defend"],
-["fnc_domination_mission",       "STR_DUWS_T_c13", "STR_DUWS_T_domination", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Domination",               { [13] call fnc_mission_launch }, 10, 30, 0, [3,3], "command", "assault"],
-["fnc_protect_civ_mission",      "STR_DUWS_T_c14", "STR_DUWS_T_protectciv", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Protect civilian",         { [14] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "defend"],
-["fnc_transport_IDAP_mission",   "STR_DUWS_T_c15", "STR_DUWS_T_transIDAP",  "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Transport IDAP",           { [15] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "escort"],
-["fnc_informant_mission",        "STR_DUWS_T_c16", "STR_DUWS_T_INTEL_INFORMANT_DESC", "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Eliminate informant", { [16] call fnc_mission_launch }, 30, 25, 0, [3,3], "command", "elimination"],
-["fnc_recon_observe_mission",    "STR_DUWS_T_c17", "STR_DUWS_T_RECON_OBSERVE_DESC",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Recon observe",       { [17] call fnc_mission_launch }, 10, 5,  0, [3,3], "command", "recon"]
+["fnc_rescue_squad_mission",     "STR_DUWS_T_c0",  "STR_DUWS_T_kievbwmd",   "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Rescue squad",              { [0]  call fnc_mission_launch }, 45, 24, 0, [3,3], "command", "rescue", ""],
+["fnc_steal_supply_mission",     "STR_DUWS_T_c1",  "STR_DUWS_T_p7qawzl4",   "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Steal supply truck",       { [1]  call fnc_mission_launch }, 35, 24, 0, [3,3], "command", "requisition", ""],
+["fnc_target_hvt_mission",       "STR_DUWS_T_c2",  "STR_DUWS_T_19ajhe1d",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Kill HVT",                 { [2]  call fnc_mission_launch }, 35, 36, 0, [3,3], "command", "elimination", ""],
+["fnc_destroy_tower_mission",    "STR_DUWS_T_c3",  "STR_DUWS_T_dgpqenyw",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy tower",            { [3]  call fnc_mission_launch }, 20, 30, 0, [3,3], "command", "sabotage", ""],
+["fnc_rescue_pilot_mission",     "STR_DUWS_T_c4",  "STR_DUWS_T_njsu8ofz",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Rescue pilot",             { [4]  call fnc_mission_launch }, 25, 40, 0, [3,3], "command", "rescue", ""],
+["fnc_target_sniper_mission",    "STR_DUWS_T_c5",  "STR_DUWS_T_16dh939j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Kill snipers",             { [5]  call fnc_mission_launch }, 30, 30, 0, [3,3], "command", "elimination", ""],
+["fnc_steal_builder_mission",    "STR_DUWS_T_c6",  "STR_DUWS_T_czpvn5z1",   "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Steal engineering vehicle",{ [6]  call fnc_mission_launch }, 15, 20, 0, [3,3], "command", "requisition", ""],
+["fnc_target_armor_mission",     "STR_DUWS_T_c7",  "STR_DUWS_T_y7z1cx6j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Destroy armour",           { [7]  call fnc_mission_launch }, 15, 20, 0, [3,3], "command", "elimination", ""],
+["fnc_sabotage_laptop_mission",  "STR_DUWS_T_c8",  "STR_DUWS_T_j97ecrsh",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Sabotage laptop",          { [8]  call fnc_mission_launch }, 10, 36, 0, [3,3], "command", "sabotage", ""],
+["fnc_destroy_cache_mission",    "STR_DUWS_T_c9",  "STR_DUWS_T_geryeddp",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy cache",            { [9]  call fnc_mission_launch }, 30, 20, 0, [3,3], "command", "sabotage", ""],
+["fnc_destroy_radar_mission",    "STR_DUWS_T_c10", "STR_DUWS_T_n4uc7t2x",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy radar",            { [10] call fnc_mission_launch }, 25, 24, 0, [3,3], "command", "sabotage", ""],
+["fnc_clearthearea_cqb_mission", "STR_DUWS_T_c11", "STR_DUWS_T_cqbdesc", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Clear the area (CQB)", { [11] call fnc_mission_launch }, 15, 20, 0, [3,3], "command", "assault", ""],
+["fnc_holdposition_mission",     "STR_DUWS_T_c12", "STR_DUWS_T_holdposdesc", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Hold position",        { [12] call fnc_mission_launch }, 30, 36, 0, [3,3], "command", "defend", ""],
+["fnc_domination_mission",       "STR_DUWS_T_c13", "STR_DUWS_T_domination", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Domination",               { [13] call fnc_mission_launch }, 10, 30, 0, [3,3], "command", "assault", ""],
+["fnc_protect_civ_mission",      "STR_DUWS_T_c14", "STR_DUWS_T_protectciv", "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Protect civilian",         { [14] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "defend", ""],
+["fnc_transport_IDAP_mission",   "STR_DUWS_T_c15", "STR_DUWS_T_transIDAP",  "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Transport IDAP",           { [15] call fnc_mission_launch }, 20, 10, 5, [3,3], "civilian", "escort", ""],
+["fnc_informant_mission",        "STR_DUWS_T_c16", "STR_DUWS_T_INTEL_INFORMANT_DESC", "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Eliminate informant", { [16] call fnc_mission_launch }, 30, 25, 0, [3,3], "command", "elimination", "STR_DUWS_T_INTEL_INFORMANT_NOTE"],
+["fnc_recon_observe_mission",    "STR_DUWS_T_c17", "STR_DUWS_T_RECON_OBSERVE_DESC",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Recon observe",       { [17] call fnc_mission_launch }, 10, 5,  0, [3,3], "command", "recon", ""]

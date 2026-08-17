@@ -44,8 +44,14 @@ DUWS_mission_token = (missionNamespace getVariable ["DUWS_mission_token", 0]) + 
 private _missionDefs = [
 #include "..\..\shared\includes\mission_types.hpp"
 ];
-(_missionDefs select _missionType) params ["", "", "", "", "", "", "_mcp", "_map", "_mrep", "_mdl"];
+(_missionDefs select _missionType) params ["", "_mnameKey", "", "", "", "", "_mcp", "_map", "_mrep", "_mdl", "", "_mobj", ["_mnote", ""]];
 DUWS_curReward = [_mcp, _map, _mrep];
+// Name key, objective and optional note key for the briefing stats block. Server-local like the reward
+// and deadline above, and read the same way: nothing else runs while Mission_available is false, so
+// fnc_missionTaskCreate reads them for exactly this mission before it ends.
+DUWS_curNameKey = _mnameKey;
+DUWS_curObjective = _mobj;
+DUWS_curNoteKey = _mnote;
 _mdl params ["_dlMinH", "_dlMaxH"];
 // Rolled once at the mission's start, in 10-minute steps of in-game time, so the enforced deadline
 // sits behind the band the map advertised. The table's hours become steps here; fnc_time_deadline is
