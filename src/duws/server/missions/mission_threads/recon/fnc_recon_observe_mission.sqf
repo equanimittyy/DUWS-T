@@ -202,7 +202,12 @@ if (_outcome isEqualTo "WIN") then {
         else { ["ONE", _ref, 0, true] call fnc_hardpoint_reveal };
     };
 
-    [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_RECON_OBSERVE_DONE"] remoteExec ["fnc_duws_dialogue", 0];
+    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_RECON_OBSERVE_DONE"] remoteExec ["fnc_duws_dialogue", 0];
+    // Only when the scout actually picked up extras: the queue plays this behind the confirm above, so
+    // the player hears the target marked, then the bonus. Silent when the roll revealed nothing.
+    if (_n > 0) then {
+        [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_RECON_OBSERVE_BONUS"] remoteExec ["fnc_duws_dialogue", 0];
+    };
     [_overwatch, _radius, ""] call fnc_mission_end;
     [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 } else {

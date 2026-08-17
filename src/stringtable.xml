@@ -3009,12 +3009,16 @@
                 <English>Reach the marked overwatch, raise your binoculars, and hold observation on the enemy position until Allseer confirms the intel. Its location is then marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_BRIEF">
-                <Original>All units, we have an unscouted enemy position out there. Move to the marked overwatch and observe it through binoculars until Allseer confirms intel on the enemy position.</Original>
-                <English>All units, we have an unscouted enemy position out there. Move to the marked overwatch and observe it through binoculars until Allseer confirms intel on the enemy position.</English>
+                <Original>Alpha 1-1, we have an unscouted enemy position out there. Move to the marked overwatch and observe it through binoculars until Allseer confirms intel on the enemy position.</Original>
+                <English>Alpha 1-1, we have an unscouted enemy position out there. Move to the marked overwatch and observe it through binoculars until Allseer confirms intel on the enemy position.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_DONE">
-                <Original>Alpha 1-1, we've received your intel and have confirmed the enemy position. It's now marked on your map.</Original>
-                <English>Alpha 1-1, we've received your intel and have confirmed the enemy position. It's now marked on your map.</English>
+                <Original>Alpha 1-1, Allseer has received your intel and confirmed the enemy position. It's now marked on your map.</Original>
+                <English>Alpha 1-1, Allseer has received your intel and confirmed the enemy position. It's now marked on your map.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RECON_OBSERVE_BONUS">
+                <Original>We've got intel that there are additional positions in the area. It's also now marked on your map.</Original>
+                <English>We've got intel that there are additional positions in the area. It's also now marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_FAILED">
                 <Original>The recon timed out. Mission failed.</Original>
