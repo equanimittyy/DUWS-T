@@ -154,12 +154,14 @@ private _decoys = [];
     };
 } forEach _decoyClasses;
 
-// The informant: a civilian-model unit in an EAST group, so he reads as a local but counts as OPFOR
-// for the kill. Captive and unarmed while he blends; he only arms if forced onto foot (below).
+// The informant: a genuine civilian-side unit. On CIVILIAN, third-party AI mods (which manage units
+// by side) leave him alone, so his scripted stroll never breaks into a tactical reaction when BLUFOR
+// closes in and outs him. Captive and unarmed while he blends; only if his car is gone and he is
+// under fire -- already blown -- does he flip to EAST and fight out (footFlee, below).
 private _civBodies = missionNamespace getVariable ["civ_array", []];
 private _informantSpawn = [_townPos, 0, _townRadius, 3, 0, 0.3, 0] call BIS_fnc_findSafePos;
 if (_informantSpawn isEqualTo [0,0,0]) then { _informantSpawn = _townPos };
-private _iGroup = createGroup [EAST, true];
+private _iGroup = createGroup [CIVILIAN, true];
 private _informant = _iGroup createUnit [selectRandom _civBodies, _informantSpawn, [], 0, "NONE"];
 removeAllWeapons _informant;
 _informant setCaptive true;
@@ -170,8 +172,16 @@ _allUnits pushBack _informant;
 // Killed here so the near-town reputation cost is charged off his death position: a clean kill out on
 // the road is free, one in the crowd is not. Nearest town within its edge + 300 m pays -1. TUNABLE.
 _informant addEventHandler ["Killed", {
-    params ["_unit"];
+    params ["_unit", "_killer", "_instigator"];
     _unit setVariable ["DUWS_informant_dead", true];
+    // Putting him on CIVILIAN re-armed the engine's civ-kill rating penalty, which the old EAST unit
+    // never took. The -1 town rep below is the whole intended social cost; a global rating tank that
+    // can eventually turn the player's own AI hostile is not. Cancel it -- but only for a civilian
+    // death: if he flipped to EAST (car gone, fighting) that kill was neutral and needs no restore.
+    if (side _unit == CIVILIAN) then {
+        private _who = _instigator; if (isNull _who) then { _who = _killer };
+        if (!isNull _who) then { _who addRating 500 }; // TUNABLE
+    };
     private _p = getPosATL _unit;
     private _tl = missionNamespace getVariable ["civ_locations", []];
     private _tr = missionNamespace getVariable ["civ_radii", []];
@@ -283,6 +293,12 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
         while { (count (waypoints _grp)) > 0 } do { deleteWaypoint [_grp, 0] };
         if (_armed) then {
             _inf setCaptive false;
+            // Car gone and under fire -- already blown, so AI-mod combat behaviour no longer gives him
+            // away. Onto EAST so the pistol fight actually engages WEST (a CIVILIAN unit set COMBAT
+            // still won't shoot the player). Rebind _grp: the waypoint and behaviour orders below must
+            // task his new group, not the emptied civilian one.
+            [_inf] joinSilent (createGroup [EAST, true]);
+            _grp = group _inf;
             _inf addMagazine "16Rnd_9x21_Mag";
             _inf addWeapon "hgun_Rook40_F";
             _grp setBehaviour "COMBAT";
