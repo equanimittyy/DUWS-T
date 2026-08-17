@@ -20,8 +20,8 @@ if (isNull _inf || !alive _inf || {(_inf distance2D _townPos) > _townRadius}) ex
 // distance too, to the nearest 50; inside 50 m the distance collapses to "nearby", where rounding
 // would read "0 m".
 private _dir = _caller getDir _inf;
-private _pts = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
-private _compass = _pts select (floor (((_dir + 11.25) mod 360) / 22.5));
+private _pts = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+private _compass = _pts select (floor (((_dir + 22.5) mod 360) / 45));
 private _raw = _caller distance2D _inf;
 private _reveal = if (_raw < 50) then {
     format [localize "STR_DUWS_T_INTEL_INFORMANT_ASK_NEAR", _compass]
