@@ -56,12 +56,20 @@ private _fnc_notify = {
 private _documents = ["Item_MobilePhone", "Item_Wallet_ID", "Item_SmartPhone",
     "Item_FlashDisk", "Item_Files", "Item_FilesSecret"];
 private _documentWeights = [30, 30, 20, 10, 6, 4];
+// Parallel to _documents: the label a hint names the find by. Kept here rather than read from each
+// item's config displayName -- these are base-game Item_ ground holders with generic or empty
+// names, so the readable label is the mission's to own.
+private _documentLabels = ["STR_DUWS_T_INTEL_ITEM_phone", "STR_DUWS_T_INTEL_ITEM_wallet",
+    "STR_DUWS_T_INTEL_ITEM_smartphone", "STR_DUWS_T_INTEL_ITEM_flashdrive",
+    "STR_DUWS_T_INTEL_ITEM_files", "STR_DUWS_T_INTEL_ITEM_filessecret"];
 
 // One item, not a handful: three documents off one body is three searches' worth of CP for a
-// single search.
+// single search. The hint names which one, so the player knows its worth before the terminal.
 private _payDocument = {
-    [[_documents selectRandomWeighted _documentWeights], _origin] call fnc_search_dropItems;
-    [localize "STR_DUWS_T_LOOT2"] call _fnc_hint;
+    private _class = _documents selectRandomWeighted _documentWeights;
+    [[_class], _origin] call fnc_search_dropItems;
+    private _label = localize (_documentLabels select (_documents find _class));
+    [format [localize "STR_DUWS_T_LOOT2", _label]] call _fnc_hint;
 };
 
 // Drawn without replacement. A kind that reports nothing left to give drops out and the rest are
@@ -84,10 +92,11 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
         };
 
         case "money": {
+            private _count = 1 + floor random 3;
             private _items = [];
-            for "_i" from 1 to (1 + floor random 3) do { _items pushBack "Item_Money_roll" };
+            for "_i" from 1 to _count do { _items pushBack "Item_Money_roll" };
             [_items, _origin] call fnc_search_dropItems;
-            [localize "STR_DUWS_T_LOOT4"] call _fnc_hint;
+            [format [localize "STR_DUWS_T_LOOT4", _count]] call _fnc_hint;
             _paid = true;
         };
 

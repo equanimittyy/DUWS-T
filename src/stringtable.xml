@@ -2580,18 +2580,42 @@
                 <English>Fucking BLUFOR...</English>
             </Key>
             <Key ID="STR_DUWS_T_LOOT2">
-                <Original>Documents found! Worth CP at the terminal.</Original>
-                <English>Documents found! Worth CP at the terminal.</English>
+                <Original>Found document: %1. Analyse intel at HQ.</Original>
+                <English>Found document: %1. Analyse intel at HQ.</English>
                 <German>Heh... du Bastard... Hey! Ich habe etwas Interessantes gefunden!</German>
                 <Spanish>Je... hijo de puta... Oye! He encontrado algo interesante!</Spanish>
                 <Chinesesimp>哈哈...你这狗杂碎...嘿！我这儿找到了点有意思的！</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_LOOT4">
-                <Original>Money found!</Original>
-                <English>Money found!</English>
+                <Original>Found %1 money.</Original>
+                <English>Found %1 money.</English>
                 <German>Das ist verdammter Krieg, Bruder... du brauchst das nicht.</German>
                 <Spanish>Es una puta guerra, hermano... no necesitas esto.</Spanish>
                 <Chinesesimp>这他妈是战争，兄弟...你不需要这些东西。</Chinesesimp>
+            </Key>
+            <Key ID="STR_DUWS_T_INTEL_ITEM_phone">
+                <Original>Mobile Phone</Original>
+                <English>Mobile Phone</English>
+            </Key>
+            <Key ID="STR_DUWS_T_INTEL_ITEM_wallet">
+                <Original>ID Wallet</Original>
+                <English>ID Wallet</English>
+            </Key>
+            <Key ID="STR_DUWS_T_INTEL_ITEM_smartphone">
+                <Original>Smartphone</Original>
+                <English>Smartphone</English>
+            </Key>
+            <Key ID="STR_DUWS_T_INTEL_ITEM_flashdrive">
+                <Original>Flash Drive</Original>
+                <English>Flash Drive</English>
+            </Key>
+            <Key ID="STR_DUWS_T_INTEL_ITEM_files">
+                <Original>Field Notes</Original>
+                <English>Field Notes</English>
+            </Key>
+            <Key ID="STR_DUWS_T_INTEL_ITEM_filessecret">
+                <Original>Classified Files</Original>
+                <English>Classified Files</English>
             </Key>
             <Key ID="STR_DUWS_T_askopforloc">
                 <Original>Have you seen any enemy movement around here? We'll pay for anything useful.</Original>
@@ -3108,8 +3132,8 @@
                 <English>Debug</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_FOUND_n">
-                <Original>You found nothing.</Original>
-                <English>You found nothing.</English>
+                <Original>Found nothing.</Original>
+                <English>Found nothing.</English>
                 <German>Nichts? Na gut…</German>
                 <Spanish>¿Nada? Bueno…</Spanish>
                 <Chinesesimp>什么都没有？好吧...</Chinesesimp>
