@@ -16,13 +16,20 @@ if (isNull _inf || !alive _inf || {(_inf distance2D _townPos) > _townRadius}) ex
     [localize "STR_DUWS_T_civ", format [localize "STR_DUWS_T_INTEL_INFORMANT_ASK_GONE", _leaveDir]] remoteExec ["fnc_duws_dialogue", _caller];
 };
 
-// Still in town: a live bearing + distance from the asking player, to the nearest 5 m.
+// Still in town: a live bearing from the asking player either way. Beyond 50 m it carries the
+// distance too, to the nearest 50; inside 50 m the distance collapses to "nearby", where rounding
+// would read "0 m".
 private _dir = _caller getDir _inf;
-private _dist = round ((_caller distance2D _inf) / 5) * 5;
 private _pts = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
 private _compass = _pts select (floor (((_dir + 11.25) mod 360) / 22.5));
+private _raw = _caller distance2D _inf;
+private _reveal = if (_raw < 50) then {
+    format [localize "STR_DUWS_T_INTEL_INFORMANT_ASK_NEAR", _compass]
+} else {
+    format [localize "STR_DUWS_T_INTEL_INFORMANT_ASK_REVEAL", round (_raw / 50) * 50, _compass]
+};
 
 // The local's voice on the subtitle, the bearing on the hint box: the line sells the tip, the hint
 // carries the fix. Reached from the free roll and the paid bribe alike, so both read the same.
 [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_INTEL_INFORMANT_ASK_HIT"] remoteExec ["fnc_duws_dialogue", _caller];
-[format [localize "STR_DUWS_T_INTEL_INFORMANT_ASK_REVEAL", _dist, _compass]] remoteExec ["hint", _caller];
+[_reveal] remoteExec ["hint", _caller];

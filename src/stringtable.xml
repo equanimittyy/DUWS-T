@@ -3005,8 +3005,8 @@
                 <English>The informant is about %1 m %2 of you.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_ASK_NEAR">
-                <Original>The informant is nearby.</Original>
-                <English>The informant is nearby.</English>
+                <Original>The informant is nearby, %1 of you.</Original>
+                <English>The informant is nearby, %1 of you.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_ASK_GONE">
                 <Original>Him? I think I just saw him leave town heading %1.</Original>
