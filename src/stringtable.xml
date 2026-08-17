@@ -4307,8 +4307,8 @@
                 <German>Hier ist Viper 1-5. Wir haben das feindliche Scharfschützenteam lokalisiert — sie tragen Ghillie-Anzüge. Deine Einheit kann handeln! Vorsicht, in ihrer Nähe sind viele Feinde.</German>
                 <Spanish>Aquí Víbora 1-5. Acabamos de localizar al equipo de francotiradores enemigo — llevan trajes ghillie. Tu unidad puede actuar! Ten cuidado, hay muchos enemigos a su alrededor.</Spanish>
                 <Chinesesimp>我们刚刚找到了敌人的狙击小组————他们穿着吉利服。你的单位可以行动了！小心点，他们周围人还挺多。</Chinesesimp>
-                <Original>We've located the enemy sniper team, they're in ghillie suits. You're clear to engage.</Original>
-                <English>We've located the enemy sniper team, they're in ghillie suits. You're clear to engage.</English>
+                <Original>We've located the enemy sniper team. You're clear to engage.</Original>
+                <English>We've located the enemy sniper team. You're clear to engage.</English>
             </Key>
             <Key ID="STR_DUWS_T_hvtseen">
                 <German>Hier ist "Viper 1-5". Dieser Hurensohn trägt eine schwarze Barett – damit solltest du erkennen, welches das hochwertige Ziel ist.</German>

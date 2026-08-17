@@ -82,8 +82,6 @@ private _build = {
     } forEach [_target1, _target2];
     _group setBehaviour "COMBAT";
 
-    [_target1] spawn { params ["_unit"]; sleep 5; _unit forceAddUniform "U_B_FullGhillie_sard" };
-    [_target2] spawn { params ["_unit"]; sleep 5; _unit forceAddUniform "U_B_FullGhillie_sard" };
     [_target1] spawn { params ["_unit"]; sleep 5; _unit addMagazineGlobal "FileTopSecret" };
     [_target2] spawn { params ["_unit"]; sleep 5; _unit addMagazineGlobal "FileTopSecret" };
 
