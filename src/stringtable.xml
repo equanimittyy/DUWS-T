@@ -6261,20 +6261,6 @@
                 <Original>To Overlord, we're back to full combat effectiveness and ready for tasking.</Original>
                 <English>To Overlord, we're back to full combat effectiveness and ready for tasking.</English>
             </Key>
-            <Key ID="STR_DUWS_T_restcooldown">
-                <Spanish>Aquí es "Overlord 1-1", solicitud denegada. Permanezcan en posición.</Spanish>
-                <German>Hier ist "Overlord 1-1", Anfrage abgelehnt. Bleiben Sie in Stellung.</German>
-                <Chinesesimp>请求驳回。原地待命。</Chinesesimp>
-                <Original>Request denied. Stand by.</Original>
-                <English>Request denied. Stand by.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_restcooldownhint">
-                <Spanish>Hay un tiempo de enfriamiento de 10 minutos entre el inicio y cada periodo de descanso.</Spanish>
-                <German>Zwischen dem Start und jeder Pause gibt es eine 10-minütige Abkühlzeit.</German>
-                <Chinesesimp>开局时和每次休息之间有十分钟的冷却时间</Chinesesimp>
-                <Original>There is a 10-minute cooldown before each rest period.</Original>
-                <English>There is a 10-minute cooldown before each rest period.</English>
-            </Key>
             <Key ID="STR_DUWS_T_jl4gqjpf">
                 <Spanish>Inicializando WARCOM</Spanish>
                 <German>Initialisiere WARCOM...</German>
@@ -7058,8 +7044,8 @@
                 <German>Anders als DUWS_X haben Spieler in DUWS_T nur sehr wenige Möglichkeiten, die Zeit frei zu überspringen. Spieler können 3 Stunden im HQ und an Vorwärtsoperationsstützpunkten überspringen (mit einer 10-minütigen Abkühlzeit). Nachdem die Abkühlzeit einer Nebenmission abgeschlossen ist, werden automatisch 3 Stunden übersprungen. Du kannst wählen, tagsüber offen gegen Feinde zu kämpfen oder nachts heimlich feindliche Hochwertziele und Vermögenswerte zu zerstören.</German>
                 <Spanish>A diferencia de DUWS_X, en DUWS_T los jugadores tienen muy pocas oportunidades de saltarse el tiempo libremente. Los jugadores pueden saltarse 3 horas en el Cuartel General y en las Bases de Operaciones Avanzadas (con un tiempo de enfriamiento de 10 minutos). Cuando se complete el tiempo de enfriamiento de una misión secundaria, también se saltarán 3 horas automáticamente. Puedes elegir enfrentarte a los enemigos de frente durante el día o destruir sigilosamente objetivos de alto valor y activos enemigos por la noche.</Spanish>
                 <Chinesesimp>不像DUWS_X，在DUWS_T中，玩家能自由跳过时间的机会很少。玩家可以在总部和前线作战基地跳过3小时(有10分钟的冷却时间)，支线任务冷却完毕后也会自动跳过3小时时间。你可以选择在白天和敌人正面对决，在黑夜偷偷摧毁敌方重要人物和资产。</Chinesesimp>
-                <Original>Time skips are rare by design. Skip 3 hours at HQ or a FOB (10-minute cooldown), and 3 hours pass automatically when a side-mission cooldown ends. Fight in daylight, or hit high-value targets under cover of night.</Original>
-                <English>Time skips are rare by design. Skip 3 hours at HQ or a FOB (10-minute cooldown), and 3 hours pass automatically when a side-mission cooldown ends. Fight in daylight, or hit high-value targets under cover of night.</English>
+                <Original>Time skips are rare by design. Skip 3 hours at HQ or a FOB, and 3 hours pass automatically when a side-mission cooldown ends. Fight in daylight, or hit high-value targets under cover of night.</Original>
+                <English>Time skips are rare by design. Skip 3 hours at HQ or a FOB, and 3 hours pass automatically when a side-mission cooldown ends. Fight in daylight, or hit high-value targets under cover of night.</English>
             </Key>
         </Container>
         <Container name="System &amp; Multiplayer">

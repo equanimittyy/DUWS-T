@@ -436,7 +436,6 @@ if (CIV_PRESENCE != "RAVAGE" && CIV_PRESENCE != "WBK" && CIV_PRESENCE != "NONE")
 // then sits in the future and wedges its action for as long as the old session had run.
 // A stamp ahead of the clock has no other cause, so drop it and let each function's own
 // "never used" default apply. Stamps far in the past are just unused actions -- not faults.
-// GM_Heal_LastUsedTime is deliberately absent: it stamps mission time, which savegames restore.
 if (isNil "DUWS_cooldownMonitor_running") then {
     DUWS_cooldownMonitor_running = true;
     publicVariable "DUWS_cooldownMonitor_running";

@@ -26,8 +26,7 @@ if (support_halo_available) then {
 
 _fob addaction [ACT_AID("STR_DUWS_T_xfgokhbc"),fnc_AI_rearm,[], 60, false, false, "", "_this distance _target < 12"];
 
-// The server decides, not the pressing client: the old copy stamped and published the cooldown from
-// its own machine, so two players inside one propagation window both passed.
+// Run on the server, not the pressing client: fnc_rest_heal deletes and heals server-local AI.
 if ((vehiclevarname player) in game_master) then {
     _fob addAction [ACT_AID("STR_DUWS_T_9eiwr3bt"), {
         params ["_target"];

@@ -12,8 +12,7 @@ if (isNull _tent) exitWith {};
 
 _tent addAction [ACT_AID("STR_DUWS_T_xfgokhbc"), { [] spawn fnc_AI_rearm }, [], 60, false, true, "", "_this distance _target < 12"];
 
-// The server decides, not the pressing client: the old FOB copy stamped and published the cooldown
-// from its own machine, so two players inside one propagation window both passed.
+// Run on the server, not the pressing client: fnc_rest_heal deletes and heals server-local AI.
 if ((vehiclevarname player) in game_master) then {
     _tent addAction [ACT_AID("STR_DUWS_T_9eiwr3bt"), {
         params ["_target"];
