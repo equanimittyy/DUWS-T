@@ -233,7 +233,7 @@ publicVariable "DUWS_informant_active";
 // Thicken the crowd only where the player can work it -- a friendly/neutral town he can walk. Each
 // added civilian is a real town local (same index, so harming one costs the town), gets the ask
 // action if that layer is loaded, and wanders on the town's own movement pass rather than standing
-// frozen. Spawned two to a group beside each other: a civilian gets its own group, and 16 solo groups
+// frozen. Spawned two to a group beside each other: a civilian gets its own group, and 48 solo groups
 // eat the engine's ~144-per-side cap the town crowd and the decoy drivers also draw on. TUNABLE
 // count (pairs x 2).
 private _crowd = [];
@@ -245,7 +245,7 @@ if (!_enemyTown) then {
         (allUnits select { (_x getVariable ["civ_locIndex", -1]) == _townIndex });
 
     private _crowdGroups = [];
-    for "_i" from 1 to 8 do {
+    for "_i" from 1 to 24 do {
         private _anchor = [_townPos, 0, _townRadius, 2, 0, 0.35, 0] call BIS_fnc_findSafePos;
         if (_anchor isEqualTo [0,0,0]) then { _anchor = _townPos };
         private _grp = grpNull;

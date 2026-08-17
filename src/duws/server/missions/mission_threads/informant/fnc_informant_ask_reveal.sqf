@@ -1,6 +1,6 @@
 // Locality: server. The informant ping: a hint to the asking player giving the informant's bearing
 // and distance from where they stand, so walking and asking around triangulates him. Reached from the
-// reaction roll (fnc_informant_ask_request) and from a paid bribe (fnc_civ_serve's INFORMANT case).
+// reaction roll (fnc_informant_ask_request).
 if (!isServer) exitWith {};
 params ["_civilian", "_caller"];
 if (isNull _caller) exitWith {};
@@ -30,6 +30,6 @@ private _reveal = if (_raw < 50) then {
 };
 
 // The local's voice on the subtitle, the bearing on the hint box: the line sells the tip, the hint
-// carries the fix. Reached from the free roll and the paid bribe alike, so both read the same.
+// carries the fix.
 [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_INTEL_INFORMANT_ASK_HIT"] remoteExec ["fnc_duws_dialogue", _caller];
 [_reveal] remoteExec ["hint", _caller];
