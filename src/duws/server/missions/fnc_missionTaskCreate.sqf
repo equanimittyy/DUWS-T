@@ -35,7 +35,13 @@ if (_dl > time) then {
 // mission that made it, and a deleted object reaches the joiner as null while a position still
 // draws where the mission was. _type names a CfgTaskTypes class and only picks the icon; an
 // unrecognised one falls back to the default rather than failing.
-[west, [_taskId], [_description, _title, _title], _destination, true, 1, true, _type, true]
+//
+// sharedTarget (last arg) is false: it makes BIS_fnc_taskCreate share the destination across the
+// network by its netId, but a position has no netId, so each frame BIS_fnc_setTaskLocal tried to
+// resolve one and threw "groupFromNetId/objectFromNetId: type TASK, expected STRING" for the whole
+// life of the task. On an open strategic map that per-frame throw also broke the task figure's
+// tooltip and click. The position is already global, so nothing needs sharing.
+[west, [_taskId], [_description, _title, _title], _destination, true, 1, true, _type, false]
 	remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, _taskId + "_new"];
 
 // The card rides with the broadcast, not with the thread's entry gate: a thread that fails to find

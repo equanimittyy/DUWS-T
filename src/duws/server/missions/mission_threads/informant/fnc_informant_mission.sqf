@@ -181,8 +181,6 @@ _informant addEventHandler ["Killed", {
         [_ti, -1, "informant_killed_near_town"] call fnc_town_rep_adjust;
     };
 }];
-// A firefight near him is the signal to run, in either branch.
-_informant addEventHandler ["FiredNear", { (_this select 0) setVariable ["DUWS_informant_loud", true] }];
 
 // The informant object stays server-side (the reveal reads it there); DUWS_informant_active is the
 // broadcast flag the client-side ask action gates on.
@@ -253,23 +251,30 @@ if (!_enemyTown) then {
 };
 missionNamespace setVariable ["DUWS_informant_crowd", _crowd];
 
-// Foot flight: car gone, so he drops the disguise, pulls a pistol and runs for the zone as an open
-// combatant. Faction-agnostic sidearm for now.
+// Foot flight when there is no car to take. Two independent axes: _armed decides whether he breaks
+// cover -- only with his car gone does he drop the disguise, pull a pistol and fight out; a shot
+// alone never unmasks him. _run decides pace -- FULL when hurrying (under fire, or car gone),
+// LIMITED when he walks out still blended. Faction-agnostic sidearm.
 if (isNil "DUWS_fnc_informant_footFlee") then {
     DUWS_fnc_informant_footFlee = {
-        params ["_inf", "_dest"];
+        params ["_inf", "_dest", ["_run", true], ["_armed", false]];
         if (!alive _inf) exitWith {};
-        _inf setCaptive false;
-        _inf addMagazine "16Rnd_9x21_Mag";
-        _inf addWeapon "hgun_Rook40_F";
         private _grp = group _inf;
         while { (count (waypoints _grp)) > 0 } do { deleteWaypoint [_grp, 0] };
-        _grp setBehaviour "COMBAT";
-        _grp setCombatMode "RED";
-        _grp setSpeedMode "FULL";
+        if (_armed) then {
+            _inf setCaptive false;
+            _inf addMagazine "16Rnd_9x21_Mag";
+            _inf addWeapon "hgun_Rook40_F";
+            _grp setBehaviour "COMBAT";
+            _grp setCombatMode "RED";
+        } else {
+            _grp setBehaviour "CARELESS";
+        };
+        private _speed = ["LIMITED", "FULL"] select _run;
+        _grp setSpeedMode _speed;
         private _wp = _grp addWaypoint [_dest, 0];
         _wp setWaypointType "MOVE";
-        _wp setWaypointSpeed "FULL";
+        _wp setWaypointSpeed _speed;
     };
 };
 
@@ -280,13 +285,25 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
 [_informant, _informantCar, _decoys, _zx, _leaveAt, _townPos] spawn {
     params ["_inf", "_car", "_decoys", "_zx", "_leaveAt", "_townPos"];
 
+    // Why he leaves sets the tempo. A firefight -- the crowd scattering, read off the same alarm the
+    // civilians raise (fnc_civ_panic's DUWS_civ_panicked, propagated across the town within its 150 m
+    // radius) -- makes him bolt; a reached deadline is a calm scheduled exit he walks. The finder
+    // guarantees a populated town, so there are always locals around him to read.
+    private _loud = false;
     waitUntil {
         sleep 2;
-        (time > _leaveAt) || (_inf getVariable ["DUWS_informant_loud", false]) || !alive _inf
+        if (!alive _inf) exitWith { true };
+        if (((_inf nearEntities ["CAManBase", 150]) findIf { _x getVariable ["DUWS_civ_panicked", false] }) >= 0) exitWith { _loud = true; true };
+        time > _leaveAt
     };
     if (!alive _inf) exitWith {};
 
+    // FULL when he bolts, LIMITED (a walk on foot, a calm roll in the car) when he leaves on schedule.
+    // The one pace drives his approach to the car, the getaway, and the decoys alike, so a calm exit
+    // and a panicked one each leave four cars moving the same and speed cannot pick him out. TUNABLE.
+    private _speed = ["LIMITED", "FULL"] select _loud;
     (group _inf) setBehaviour "CARELESS";
+    (group _inf) setSpeedMode _speed;
 
     private _boarded = false;
     if (alive _car) then {
@@ -298,34 +315,39 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
     };
 
     if (!_boarded) exitWith {
-        if (alive _inf) then { [_inf, _zx] call DUWS_fnc_informant_footFlee };
+        if (alive _inf) then {
+            // Only a car that is gone (destroyed, or never spawned) unmasks him; a boarding that just
+            // timed out with the car intact keeps him disguised. He hurries under fire or with no ride.
+            private _carGone = !alive _car;
+            [_inf, _zx, _loud || _carGone, _carGone] call DUWS_fnc_informant_footFlee;
+        };
     };
 
     // He is away: the decoys break in random directions away from town (never toward the zone), so
-    // four cars leave at once and only eyes-on says which is his.
+    // four cars leave at once -- at his pace, so eyes-on, not speed, is the only tell.
     {
         if (alive _x && {!isNull (driver _x)}) then {
             private _dg = group (driver _x);
             _dg setBehaviour "CARELESS";
-            _dg setSpeedMode "FULL";
+            _dg setSpeedMode _speed;
             private _dest = _townPos getPos [1500 + random 500, random 360];
             private _wp = _dg addWaypoint [_dest, 0];
             _wp setWaypointType "MOVE";
-            _wp setWaypointSpeed "FULL";
+            _wp setWaypointSpeed _speed;
         };
     } forEach _decoys;
 
     private _grp = group _inf;
-    _grp setSpeedMode "FULL";
+    _grp setSpeedMode _speed;
     private _wp = _grp addWaypoint [_zx, 0];
     _wp setWaypointType "MOVE";
-    _wp setWaypointSpeed "FULL";
+    _wp setWaypointSpeed _speed;
     _wp setWaypointBehaviour "CARELESS";
 
-    // Car killed under him mid-drive and he lives: onto foot, armed.
+    // Car killed under him mid-drive and he lives: onto foot, armed and running -- his ride is gone.
     waitUntil { sleep 2; !alive _car || !alive _inf || (_inf distance2D _zx) < 60 };
     if ((alive _inf) && !alive _car && !(_inf in _car)) then {
-        [_inf, _zx] call DUWS_fnc_informant_footFlee;
+        [_inf, _zx, true, true] call DUWS_fnc_informant_footFlee;
     };
 };
 
