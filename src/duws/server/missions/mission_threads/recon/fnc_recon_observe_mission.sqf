@@ -7,33 +7,27 @@
 // thread computes the overwatch itself -- terrain and object line-of-sight, on the friendly-facing side,
 // favouring height over the target.
 //
-// A zone and a hardpoint are observed differently, because their streaming ranges differ. A zone's
-// garrison is asleep at the 600-800 m overwatch band (its stream ring is tighter), so waking it would mean
-// touching shared streaming and handing the player a live garrison that wanders off the spot it is meant
-// to be scouted at; instead the mission builds its OWN stand-in when a player reaches the overwatch -- the
-// zone's prefab (crewed statics and all) plus a couple of representative infantry teams and one roving
-// car, built a little off the centre so its zone_<x>_<y> key cannot collide with the real (stowed) zone's,
-// and torn down through fnc_mission_end's composition release plus the claimed-unit sweep. A hardpoint's
-// stream ring (800-1000 m) already covers that band, so approaching the overwatch wakes the REAL
-// emplacement through its own streamer: the mission builds nothing for it, observes the real gun coming
-// up, and reveals it on success.
+// Both a zone and a hardpoint are observed where they really stand -- the mission builds no stand-in for
+// either, so the double where a stand-in overlapped the real garrison a player then walked into is gone.
+// A hardpoint's stream ring already covers the 600-800 m overwatch band, so approaching the outlook wakes
+// the REAL emplacement through its own site poller. A zone's ring is tighter and its garrison would be
+// asleep out here; rather than build a copy, the mission widens the zone's stream radius for its own
+// lifetime (restored on end), which brings the overwatch inside the ring and lets the shared poller wake
+// the REAL zone as the player nears the outlook and stow it again when they leave. Only the site record's
+// radius moves -- the capture triggers bake their own geometry at build -- so the zone still captures over
+// its true size, and the one prefab the player ever sees is the zone's own.
 params ["_MissionPos", "_mission_name"];
 
 // TUNABLE, all here. Standoff band (kept with the finder); observe area; LOS range slack; hold seconds;
-// approach ring; representative teams, their patrol radius and the car's; prefab offset and gunner-claim
-// radius; the clearance the overwatch keeps from other enemy zones and hardpoints; and the most bonus
-// positions a scout also reveals.
+// the lead the real zone is woken within of the overwatch, so its garrison is up before the hold begins;
+// the clearance the overwatch keeps from other enemy zones and hardpoints; and the most bonus positions a
+// scout also reveals.
 #define OBS_MIN_DIST    600
 #define OBS_MAX_DIST    800
 #define OBS_AREA        75
 #define OBS_RANGE       900
 #define HOLD_TIME       12
 #define SPAWN_R         200
-#define GARRISON_TEAMS  2
-#define GARRISON_RADIUS 100
-#define PATROL_RADIUS   150
-#define PREFAB_OFFSET   25
-#define PREFAB_RADIUS   60
 #define ZONE_CLEAR      250
 #define HP_CLEAR        300
 #define BONUS_MAX       2
@@ -104,28 +98,16 @@ if (_overwatch isEqualTo []) exitWith {
     [17, "STR_DUWS_T_crtzxs0j"] call fnc_mission_abort;
 };
 
-// The anchor the 3D marker and the hold LOS ride. An HP is observed where it really stands. A zone's
-// stand-in is built a step off the centre toward the overwatch, and the anchor rides that: the offset
-// keeps its zone_<x>_<y> key (fnc_zone_key rounds the position) distinct from the real zone's, so
-// releasing the recon copy cannot retire the live zone, and it sits the structures nearer the player than
-// the centre the overwatch was verified to, so LOS only improves. An HP builds nothing, so it needs no
-// prefab key and no builder.
-private _anchor    = _target;
-private _prefabPos = _target;
-private _prefabKey = "";
-private _builder   = {};
-if (_kind isEqualTo "zone") then {
-    _prefabPos = _target getPos [PREFAB_OFFSET, _target getDir _overwatch];
-    _prefabKey = [_prefabPos] call fnc_zone_key;
-    _anchor    = _prefabPos;
-    // The builder for the zone's own kind. Only the kind's NAME is stored (DUWS_zoneKind_<key>), so map
-    // it back through the same weighted set the zone drew from; an unknown or missing kind falls to the
-    // simple-zone builder rather than nothing.
-    private _sets = call fnc_zone_prefab_set;
-    _builder = (_sets select 1) select 2;
-    private _kindName = missionNamespace getVariable [format ["DUWS_zoneKind_%1", [_target] call fnc_zone_key], ""];
-    { if ((_x select 0) == _kindName) exitWith { _builder = _x select 2 } } forEach (_sets select 0);
-};
+// The anchor the 3D marker and the hold LOS ride: the real target, which the overwatch was verified to
+// have clear line-of-sight to. Both kinds are observed at the true position now that a zone's real
+// garrison streams in there rather than an offset stand-in.
+private _anchor = _target;
+
+// A zone target's site key and its true stream radius, saved so the mission can hand the radius back on
+// end (the widen happens once the layer is pushed, below). Left "" / 0 for a hardpoint, which streams on
+// its own ring and is never touched here.
+private _zoneSiteKey   = "";
+private _zoneOrigRadius = 0;
 
 // Objective marker + task on the OVERWATCH, since that is where the player is sent. The task type only
 // picks the map icon; "scout" falls back to default on any faction pack that lacks it.
@@ -146,42 +128,21 @@ publicVariable "DUWS_recon_active";
 
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_RECON_OBSERVE_BRIEF"] remoteExec ["fnc_duws_dialogue", 0];
 
-// A zone's own streamer: waits for a player to reach the overwatch ring, builds the stand-in once and
-// exits -- standoff scouting without the global poller. No teardown loop; everything it raises is claimed
-// to the token or released by fnc_mission_end's compKey, so the mission's exit collects it. Building
-// ~700 m from the target keeps the spawn off the player's magnified view. An HP builds nothing here: its
-// real emplacement wakes through its own site poller when the player reaches the overwatch (inside its
-// stream ring), and doubling that garrison is exactly what must not happen.
+// Wake the REAL zone by widening its stream radius, so the shared poller raises it as the player nears the
+// outlook instead of the mission standing up a copy. The ring the poller wakes on is the site radius plus
+// the garrison's buffer; pushed to reach the overwatch plus SPAWN_R of lead, the poller raises the zone
+// before the player is set and holds it up while they stay (lastSeen stays fresh inside the ring), then
+// stows it on the normal grace once they leave. max() never shrinks a zone whose ring already reaches, and
+// the raise worker re-confirms against this same radius, so wake and confirm cannot disagree. The site
+// record's radius alone moves; the capture triggers keep their own geometry, so the zone captures over its
+// true size. Handed back on end below.
 if (_kind isEqualTo "zone") then {
-    [_target, _prefabPos, _builder, _overwatch] spawn {
-        params ["_target", "_prefabPos", "_builder", "_overwatch"];
-        waitUntil { sleep 3; !DUWS_recon_active || {(allPlayers findIf { alive _x && {(_x distance2D _overwatch) < SPAWN_R} }) >= 0} };
-        if (!DUWS_recon_active) exitWith {};   // ended before anyone arrived; nothing built
-
-        // The zone's own prefab -- structures and crewed statics -- filed under _prefabPos's key, which the
-        // WIN/fail exit hands to fnc_mission_end to release.
-        [_prefabPos] call _builder;
-
-        // The builder crews its statics but leaves the gunners unowned, so claim the EAST men on the prefab
-        // to the token -- the sweep then bins them with the composition instead of leaving live gunners on
-        // deleted guns. The real zone is streamed out here, so only the recon's own gunners are in reach;
-        // done before the teams spawn so this proximity pass catches only them.
-        private _gunners = allUnits select { (side _x == EAST) && {isNil {_x getVariable "DUWS_missionOwner"}} && {(_x distance2D _prefabPos) < PREFAB_RADIUS} };
-        [_gunners] call fnc_mission_claim;
-
-        // Representative infantry -- a stand-in patrol pair, not the real garrison -- and one car, all on
-        // close patrol around the position, all claimed for the sweep. YELLOW so they hold and fire rather
-        // than abandon the position to chase an 800 m spotter, which would turn a scout into a firefight the
-        // mission is not built around.
-        for "_i" from 1 to GARRISON_TEAMS do {
-            private _g = ["team", _prefabPos, GARRISON_RADIUS, "closepatrol"] call fnc_spawn_team;
-            if (!isNull _g) then { _g setCombatMode "YELLOW"; [units _g] call fnc_mission_claim };
-        };
-        private _carClass = ["car"] call DUWS_fnc_tokenClass;
-        if (_carClass != "") then {
-            private _carGrp = [_carClass, _prefabPos, PATROL_RADIUS, "closepatrol"] call fnc_spawn_vehicle;
-            if (!isNull _carGrp) then { _carGrp setCombatMode "YELLOW"; [units _carGrp] call fnc_mission_claim };
-        };
+    _zoneSiteKey = [_target] call fnc_zone_key;
+    private _site = [_zoneSiteKey] call fnc_site_at;
+    _zoneOrigRadius = _site getOrDefault ["radius", 0];
+    if (_zoneOrigRadius > 0) then {
+        private _buffer = ([_zoneSiteKey, "garrison"] call fnc_site_occupant) getOrDefault ["buffer", 400];
+        _site set ["radius", (((_overwatch distance2D _target) + SPAWN_R - _buffer) max _zoneOrigRadius)];
     };
 };
 
@@ -195,13 +156,15 @@ waitUntil {
     false
 };
 
-// Stand the client layer down before scoring, and release the streamer's approach-wait if nobody ever
-// arrived: both gate on this flag. A cleared JIP key stops the layer reaching a later joiner. The
-// element itself is torn down by fnc_mission_end below -- the prefab through its compKey, the claimed
-// gunners, teams and car through the token sweep.
+// Stand the client layer down before scoring: the observe layer gates on this flag, and a cleared JIP key
+// stops it reaching a later joiner. The real zone is not torn down here -- it is campaign state the zone
+// poller owns; only its widened stream radius is handed back, so from now it streams on its true ring,
+// stowing when the player leaves and waking again if they close to assault. A hardpoint target left the
+// key "" and never moved.
 DUWS_recon_active = false;
 publicVariable "DUWS_recon_active";
 remoteExec ["", "DUWS_recon_layer_jip"];
+if (_zoneSiteKey isNotEqualTo "") then { ([_zoneSiteKey] call fnc_site_at) set ["radius", _zoneOrigRadius] };
 [_markername] call fnc_missionMarkerClear;
 
 if (_outcome isEqualTo "WIN") then {
@@ -240,10 +203,10 @@ if (_outcome isEqualTo "WIN") then {
     };
 
     [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_RECON_OBSERVE_DONE"] remoteExec ["fnc_duws_dialogue", 0];
-    [_overwatch, _radius, _prefabKey] call fnc_mission_end;
+    [_overwatch, _radius, ""] call fnc_mission_end;
     [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 } else {
     [_taskID, "FAILED"] call fnc_missionTaskEnd;
     [localize "STR_DUWS_T_RECON_OBSERVE_FAILED", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
-    [_overwatch, _radius, _prefabKey] call fnc_mission_end;
+    [_overwatch, _radius, ""] call fnc_mission_end;
 };
