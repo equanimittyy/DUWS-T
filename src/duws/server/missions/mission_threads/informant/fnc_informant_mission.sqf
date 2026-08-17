@@ -194,6 +194,26 @@ missionNamespace setVariable ["DUWS_informant_leaveDir", _leaveDir];
 DUWS_informant_active = true;
 publicVariable "DUWS_informant_active";
 
+// While he waits he strolls the whole town rather than standing a fixed pin in the crowd: a fresh safe
+// point anywhere in the town radius, re-tasked on arrival or after a cap so a blocked path never freezes
+// him mid-town. LIMITED so he reads as a local out for a walk. Ends the instant the exfil watcher takes
+// over (DUWS_informant_leaving), so this doMove never fights the getaway's waypoints. TUNABLE cap.
+[_informant, _townPos, _townRadius] spawn {
+    params ["_inf", "_tp", "_tr"];
+    (group _inf) setSpeedMode "LIMITED";
+    while { alive _inf && !(_inf getVariable ["DUWS_informant_leaving", false]) } do {
+        private _dest = [_tp, 0, _tr, 3, 0, 0.35, 0] call BIS_fnc_findSafePos;
+        if (_dest isEqualTo [0,0,0]) then { _dest = _tp };
+        _inf doMove _dest;
+        private _until = diag_tickTime + 90;
+        waitUntil {
+            sleep 3;
+            !alive _inf || (_inf getVariable ["DUWS_informant_leaving", false])
+              || (_inf distance2D _dest < 8) || diag_tickTime > _until
+        };
+    };
+};
+
 // Thicken the crowd only where the player can work it -- a friendly/neutral town he can walk. Each
 // added civilian is a real town local (same index, so harming one costs the town), gets the ask
 // action if that layer is loaded, and wanders on the town's own movement pass rather than standing
@@ -297,6 +317,10 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
         time > _leaveAt
     };
     if (!alive _inf) exitWith {};
+
+    // Stops the wander loop before the leave orders go in: his getaway waypoints must not race the
+    // stroll's doMove for the same group.
+    _inf setVariable ["DUWS_informant_leaving", true];
 
     // FULL when he bolts, LIMITED (a walk on foot, a calm roll in the car) when he leaves on schedule.
     // The one pace drives his approach to the car, the getaway, and the decoys alike, so a calm exit
