@@ -247,6 +247,12 @@ publicVariable "zones_buildout_done";
 [_zoneKey, _spawnPos, _size] call fnc_site_register;
 private _occ = [_zoneKey, "garrison", EAST, "zone"] call fnc_site_occupant_register_profile;
 _occ set ["minAIHold", 1];
+// A committing aircraft -- a helicopter inbound, a UAV on-station -- wakes the garrison the ground
+// ring discounts as airborne (fnc_duws_bluforNear). airRingSlow picks the poller's speed-gated air
+// list, so a jet transiting at cruise is not a wake; AA keeps the raw list to catch exactly that jet.
+// DUWS_zoneAirRing at 0 leaves the air answer off: the zone falls back to a ground-only wake.
+_occ set ["airRing", DUWS_zoneAirRing];
+_occ set ["airRingSlow", true];
 [_zoneKey, "garrison", DUWS_zoneHooks] call fnc_site_hooks_set;
 
 // The zone's other two occupants: the prefab it stands on and the guns bolted to it. Driven by the

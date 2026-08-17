@@ -341,9 +341,11 @@ DUWS_fnc_zoneRaiseWorker = {
     params ["_key", "_pos", "_size"];
     // Confirmed after a pause rather than acted on the moment anyone clips the perimeter. A
     // helicopter transiting, or a patrol that turns back at the edge, would otherwise rebuild a
-    // whole composition for someone already leaving.
+    // whole composition for someone already leaving. Air is folded in the same terms the poller's
+    // wake used: a committed aircraft holds the raise, where fnc_duws_bluforNear alone -- discounting
+    // anything airborne -- would confirm an air wake straight back off and never let the zone stand.
     sleep 5;
-    if !([_pos, _size + DUWS_streamArrivalMargin, 2] call fnc_duws_bluforNear) exitWith {
+    if !([_pos, _size + DUWS_streamArrivalMargin, 2, DUWS_zoneAirRing, DUWS_zoneAirCommitSpeed] call fnc_site_bluforOrAir) exitWith {
         missionNamespace setVariable [ZONE_RAISE_SLOT(_key), false];
     };
 
