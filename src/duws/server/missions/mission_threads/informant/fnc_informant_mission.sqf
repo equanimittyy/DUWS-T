@@ -204,6 +204,12 @@ missionNamespace setVariable ["DUWS_informant_leaveDir", _leaveDir];
 DUWS_informant_active = true;
 publicVariable "DUWS_informant_active";
 
+// He blends in full: a player who walks up can call him over and open the same interaction menu
+// every town local carries, so the one silent civilian with no menu is not the tell. Broadcast the
+// way fnc_civ_spawnUnit does it, keyed on the unit so a JIP client still gets it -- he is spawned
+// raw, so this is the only path by which he receives the actions.
+[_informant] remoteExec ["fnc_civ_clientActions", 0, _informant];
+
 // While he waits he strolls the whole town rather than standing a fixed pin in the crowd: a fresh safe
 // point anywhere in the town radius, re-tasked on arrival or after a cap so a blocked path never freezes
 // him mid-town. LIMITED so he reads as a local out for a walk. Ends the instant the exfil watcher takes
@@ -278,6 +284,13 @@ if (!_enemyTown) then {
             sleep 5;
         };
     };
+
+    // The informant carries the same ask action as every other local -- the one man who could not
+    // be asked about the informant would be the tell. He is spawned raw and sits outside the poll's
+    // civ_locIndex set, so add it to him directly, unspent. fnc_informant_ask_request refuses the
+    // moment the asked local is the informant, so asking him never gives his own position away.
+    _informant setVariable ["DUWS_informant_asked", false, true];
+    [_informant] remoteExec ["fnc_informant_ask_addAction", 0, _informant];
 };
 missionNamespace setVariable ["DUWS_informant_crowd", _crowd];
 
@@ -337,6 +350,13 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
     // Stops the wander loop before the leave orders go in: his getaway waypoints must not race the
     // stroll's doMove for the same group.
     _inf setVariable ["DUWS_informant_leaving", true];
+
+    // Drop any waypoints an interaction left on him. Talking to him runs fnc_civ_resume, which hands
+    // his group a stroll CYCLE; a CYCLE sitting ahead of the getaway MOVE below would loop the car
+    // through town instead of driving it out. Back-to-front -- deleteWaypoint shifts later indices.
+    private _leftover = waypoints (group _inf);
+    reverse _leftover;
+    { deleteWaypoint _x } forEach _leftover;
 
     // FULL when he bolts, LIMITED (a walk on foot, a calm roll in the car) when he leaves on schedule.
     // The one pace drives his approach to the car, the getaway, and the decoys alike, so a calm exit

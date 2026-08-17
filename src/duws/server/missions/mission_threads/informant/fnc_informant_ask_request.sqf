@@ -17,6 +17,14 @@ if (isNull (missionNamespace getVariable ["DUWS_informant_unit", objNull])) exit
 // spend it.
 _civilian setVariable ["DUWS_informant_asked", true, true];
 
+// The informant never fingers himself. Asked about the informant, he answers like a local who has
+// nothing -- the ask is spent above and greys out, so he reads no different from the third who
+// refuse. Guarded before the roll: he never reaches the reveal or the bribe that would sell his
+// own position.
+if (_civilian isEqualTo (missionNamespace getVariable ["DUWS_informant_unit", objNull])) exitWith {
+    [localize "STR_DUWS_T_civ", localize "STR_DUWS_T_INTEL_INFORMANT_ASK_MISS"] remoteExec ["fnc_duws_dialogue", _caller];
+};
+
 // Flat 60 reveal / 10 bribe / 30 refuse, not the civ menu's rep curve: a hunt sits in one town and
 // its locals answer the same regardless of standing -- a town hostile enough to shift the odds never
 // offers the ask in the first place. 0.70 is the reveal+bribe cutoff, so the last 30 % refuses.
