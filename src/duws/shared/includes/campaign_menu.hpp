@@ -139,25 +139,6 @@ class startup_dialog2
             h = 1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_lwq336is";
         };
-        class more_urban_frame: RscFrame
-        {
-            idc = 1806;
-            text = "$STR_DUWS_T_enmvtlks";
-            x = 20.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 7.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 18.5 * GUI_GRID_W;
-            h = 2.5 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_cr4pww43";
-        };
-        class more_urban_combo: RscCombo
-        {
-            idc = 2105;
-            x = 21 * GUI_GRID_W + GUI_GRID_X;
-            y = 8.5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 17.5 * GUI_GRID_W;
-            h = 1 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_cr4pww43";
-        };
         class cp_reward_multiplier_frame: RscFrame
         {
             idc = 1807;
@@ -182,7 +163,7 @@ class startup_dialog2
             idc = 1808;
             text = "$STR_DUWS_T_ngtt96xa";
             x = 20.5 * GUI_GRID_W + GUI_GRID_X;
-            y = 10.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 7.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 18.5 * GUI_GRID_W;
             h = 2.5 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_a84c45ax";
@@ -191,7 +172,7 @@ class startup_dialog2
         {
             idc = 2107;
             x = 21 * GUI_GRID_W + GUI_GRID_X;
-            y = 11.5 * GUI_GRID_H + GUI_GRID_Y;
+            y = 8.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 17.5 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_a84c45ax";
@@ -276,8 +257,8 @@ class startup_dialog2
         {
             idc = 1813;
             text = "$STR_DUWS_T_5jbcoh7i";
-            x = 1 * GUI_GRID_W + GUI_GRID_X;
-            y = 19.5 * GUI_GRID_H + GUI_GRID_Y;
+            x = 20.5 * GUI_GRID_W + GUI_GRID_X;
+            y = 10.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 18.5 * GUI_GRID_W;
             h = 2.5 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_ovqhayce";
@@ -285,11 +266,30 @@ class startup_dialog2
         class opfor_air_combo: RscCombo
         {
             idc = 2112;
+            x = 21 * GUI_GRID_W + GUI_GRID_X;
+            y = 11.5 * GUI_GRID_H + GUI_GRID_Y;
+            w = 17.5 * GUI_GRID_W;
+            h = 1 * GUI_GRID_H;
+            tooltip = "$STR_DUWS_T_ovqhayce";
+        };
+        class garrison_density_frame: RscFrame
+        {
+            idc = 1815;
+            text = "$STR_DUWS_T_garrison_density_title";
+            x = 1 * GUI_GRID_W + GUI_GRID_X;
+            y = 19.5 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18.5 * GUI_GRID_W;
+            h = 2.5 * GUI_GRID_H;
+            tooltip = "$STR_DUWS_T_garrison_density_tooltip";
+        };
+        class garrison_density_combo: RscCombo
+        {
+            idc = 2114;
             x = 1.5 * GUI_GRID_W + GUI_GRID_X;
             y = 20.5 * GUI_GRID_H + GUI_GRID_Y;
             w = 17.5 * GUI_GRID_W;
             h = 1 * GUI_GRID_H;
-            tooltip = "$STR_DUWS_T_ovqhayce";
+            tooltip = "$STR_DUWS_T_garrison_density_tooltip";
         };
 		class opfor_multiplier_frame: RscFrame
 		{

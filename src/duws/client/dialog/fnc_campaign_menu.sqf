@@ -60,11 +60,6 @@ index_max_dist_hq_150 = lbAdd [2103, localize "STR_DUWS_T_hqdistmax15km"];
 index_max_dist_hq_200 = lbAdd [2103, "20 km"];
 [2103, index_max_dist_hq_150] call _setDefault;
 
-// MORE URBAN
-index_more_urban_yes = lbAdd [2105, localize "STR_DUWS_T_x4zs3lsg2"];
-index_more_urban_no = lbAdd [2105, localize "STR_DUWS_T_x4zs3lsg1"];
-[2105, index_more_urban_yes] call _setDefault;
-
 // STARTING CP AVAILABLE
 index_amount_cp_0 = lbAdd [2104, "0"];
 index_amount_cp_10 = lbAdd [2104, "10"];
@@ -148,10 +143,21 @@ index_enemyunit_multiplier_2 = lbAdd [2113, "2x"];
 index_enemyunit_multiplier_3 = lbAdd [2113, "3x"];
 [2113, index_enemyunit_multiplier_1] call _setDefault;
 
+// GARRISON DENSITY -- the share of a zone's mobile garrison that stands up at once; the rest wait as
+// reserve. Value labels carry the percentage; the readback maps them to a fraction.
+index_garrison_density_50 = lbAdd [2114, "50%"];
+index_garrison_density_80 = lbAdd [2114, "80%"];
+index_garrison_density_100 = lbAdd [2114, "100%"];
+[2114, index_garrison_density_100] call _setDefault;
+
 // Restore selections when the player returns to this screen via the Back button. With no snapshot
 // to restore, a preset that owes this screen values applies them here, where its combos exist.
 if (!isNil "duws_campaign_sel") then {
-    { lbSetCurSel [2100 + _forEachIndex, _x]; } forEach duws_campaign_sel;
+    // No longer a contiguous 2100-range: More Urban (2105) moved to the environment screen, so the
+    // restore zips stored values against an explicit idc list that MUST stay in lockstep with the
+    // snapshot in fnc_startup_next.sqf.
+    private _idcs = [2100,2101,2102,2103,2104,2106,2107,2108,2109,2110,2111,2112,2113,2114];
+    { lbSetCurSel [_idcs select _forEachIndex, _x]; } forEach duws_campaign_sel;
 } else {
     if (duws_preset == "hardcore") then {
         lbSetCurSel [2100, index_max_radius_1000];
@@ -168,7 +174,7 @@ private _display = uiNamespace getVariable ["duws_startup_display", displayNull]
         if (duws_preset_applying) exitWith {};
         duws_preset = "custom";
     }];
-} forEach [2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2110,2111,2112,2113];
+} forEach [2100,2101,2102,2103,2104,2106,2107,2108,2109,2110,2111,2112,2113,2114];
 
 duws_preset_applying = false;
 

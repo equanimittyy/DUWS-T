@@ -185,24 +185,6 @@ switch (_index) do
     };
 };
 
-// MORE URBAN
-_index = lbCurSel 2105;
-switch (_index) do
-{
-
-    case index_more_urban_yes:
-    {
-    moreUrban = 1;
-    };
-
-    case index_more_urban_no:
-    {
-    moreUrban = 0;
-    };
-
-};
-
-
 // Starting CP
 _index = lbCurSel 2104;
 switch (_index) do
@@ -410,6 +392,16 @@ switch (_index) do
 
 };
 
+// GARRISON DENSITY -- the share of a zone's mobile garrison fielded at once, as a fraction. Below 1,
+// the rest wait as reserve and reinforce the zone as its patrols fall (fnc_zone_spawn_sizes).
+_index = lbCurSel 2114;
+switch (_index) do
+{
+    case index_garrison_density_50: { garrison_density = 0.5; };
+    case index_garrison_density_80: { garrison_density = 0.8; };
+    case index_garrison_density_100: { garrison_density = 1; };
+};
+
 // CHECK IF MAX/MIN RADIUS PARAMETERS CORRECT
 if (zones_max_radius <= zones_min_radius) then {
 	_swap1 = zones_min_radius;
@@ -427,8 +419,8 @@ publicVariable "zones_min_radius";
 publicVariable "zones_number";
 publicVariable "zones_max_dist_from_hq";
 
-publicVariable "moreUrban";
 publicVariable "commandpointsblu1";
+publicVariable "garrison_density";
 
 publicVariable "cp_reward_multiplier";
 publicVariable "DUWSMP_CP_death_cost";

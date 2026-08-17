@@ -53,15 +53,21 @@ DUWS_fnc_garrisonSurviving = {
 
 // The whole-token derivation a zone raise and a town raise share: given the filtered x1 tier list and
 // the multiplier, stamp the site's full potential (mult copies of x1), seed its live reserve pool, and
-// return [garrison, pool]. The survivors split by the x1 shape -- the first x1's worth are the garrison,
+// return [garrison, pool]. The survivors split by the standing template -- its worth is the garrison,
 // the surplus is the pool -- so a site's losses come out of its reserve depth before they thin the
 // garrison. The caller raises the garrison and tops it up from the pool; here is only the accounting.
+//
+// _stand is the standing template, a subset of x1 (default x1). A zone passes a garrison-density-thinned
+// list so fewer patrols stand at once and the trimmed ones fall to the pool; full potential stays mult
+// copies of x1 either way -- density defers force, it does not remove it. A town passes none and gets
+// the whole x1 as before.
 DUWS_fnc_garrisonDerive = {
-	params ["_key", "_x1", "_mult"];
+	params ["_key", "_x1", "_mult", ["_stand", []]];
+	if (_stand isEqualTo []) then { _stand = _x1 };
 	private _full = [_x1, _mult] call DUWS_fnc_scaleComposition;
 	[_key, _full] call DUWS_fnc_garrisonSetFull;
 	private _surviving = [_key] call DUWS_fnc_garrisonSurviving;
-	private _pool = [_x1, _surviving] call DUWS_fnc_spawnDiff;
+	private _pool = [_stand, _surviving] call DUWS_fnc_spawnDiff;
 	private _garrison = [_pool, _surviving] call DUWS_fnc_spawnDiff;
 	[_key, _pool] call DUWS_fnc_garrisonReserveSet;
 	[_garrison, _pool]

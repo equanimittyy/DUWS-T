@@ -5,7 +5,7 @@
 // the callsign screen. Zone placement (random/manual) and the commit are chosen there.
 [] call fnc_process_campaign_menu;
 
-duws_campaign_sel = [2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2110,2111,2112,2113] apply { lbCurSel _x };
+duws_campaign_sel = [2100,2101,2102,2103,2104,2106,2107,2108,2109,2110,2111,2112,2113,2114] apply { lbCurSel _x };
 duws_campaign_forward = true;   // startup_dialog2's onUnload must not reopen the enviro screen
 closeDialog 0;
 [] spawn fnc_callsign_menu;

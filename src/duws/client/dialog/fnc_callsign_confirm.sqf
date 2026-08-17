@@ -55,7 +55,7 @@ chosen_settings = true;publicVariable "chosen_settings";
     "zones_max_dist_from_hq", "moreUrban", "AO_direction", "PosOfBLUHQ",
     "BLUFOR_FactionFile_X", "OPFOR_FactionFile_X", "BLUFOR_Faction_X", "OPFOR_Faction_X",
     "commandpointsblu1", "WARCOM_blufor_ap", "WARCOM_opfor_ap", "cp_reward_multiplier",
-    "DUWSMP_CP_death_cost", "blufor_ai_skill", "opfor_ai_skill", "enemyunitMultiplier",
+    "DUWSMP_CP_death_cost", "blufor_ai_skill", "opfor_ai_skill", "enemyunitMultiplier", "garrison_density",
     "HeavyArmor", "AttackHeli",
     "weather_type", "dynamic_weather_enable", "restricted_arsenal", "escalation_enabled",
     "hardcore_mode_enable", "insurgent_mode_enable", "enable_fast_travel",

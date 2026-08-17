@@ -257,6 +257,36 @@ DUWS_fnc_zoneSpawnOne = {
     _grp
 };
 
+// The standing garrison a zone fields at once, thinned to garrison_density of its mobile tokens. Only
+// patrol-posture tokens (widepatrol/closepatrol) are held back; dug-in garrison-posture tokens always
+// stand, so a lower density thins the screen without abandoning the strongpoint. The trimmed patrols
+// fall to the reserve pool and lower the group ceiling, so even a x1 zone reinforces back up to this
+// reduced count as its patrols are killed. Thinned evenly across the patrols rather than off the tail,
+// so the standing force keeps the composition's mix instead of shedding every vehicle first. Density 1
+// (the default) returns x1 unchanged and the whole feature stays inert.
+DUWS_fnc_zoneDensityStand = {
+	params ["_x1"];
+	private _d = ((missionNamespace getVariable ["garrison_density", 1]) max 0) min 1;
+	if (_d >= 1) exitWith { +_x1 };
+	private _patrolN = { ([_x] call DUWS_fnc_tokenPosture) != "garrison" } count _x1;
+	if (_patrolN == 0) exitWith { +_x1 };            // an all-static garrison has nothing to thin
+	private _keepN = ((round (_d * _patrolN)) max 1); // never thin the screen to nothing
+	private _stand = [];
+	private _p = 0;
+	{
+		if (([_x] call DUWS_fnc_tokenPosture) == "garrison") then {
+			_stand pushBack _x;
+		} else {
+			// Keep this patrol when the running keep-count steps past the last: keepN kept, evenly spread.
+			if ((floor ((_p + 1) * _keepN / _patrolN)) > (floor (_p * _keepN / _patrolN))) then {
+				_stand pushBack _x;
+			};
+			_p = _p + 1;
+		};
+	} forEach _x1;
+	_stand
+};
+
 // Called by the zone raise worker, which owns the streaming decisions around it. Nothing guards a
 // stale cycle here any more: the worker holds the raise flag for the whole placement, and the tick
 // that set it will not start a second one or tear the zone down until it reports.
@@ -275,23 +305,28 @@ fnc_zone_spawn = {
     // Reserve depth: the multiplier is how many copies of the x1 list make up the zone's full fighting
     // potential, not how many stand up at once. Stamp that full potential, then let the ledger say what
     // survives -- full minus the tokens the zone has lost across every visit. The survivors split by the
-    // x1 shape: the first x1's worth stand up as the garrison, the surplus waits as the reserve pool, so
+    // standing template: its worth stands up as the garrison, the surplus waits as the reserve pool, so
     // a lost token comes out of the pool before it thins the garrison. Reseeded every raise from the
     // ledger, so the pool is per-awake-session while the losses behind it persist.
+    //
+    // Garrison density thins the standing template below the full x1 (patrols only), deepening the pool
+    // so even a x1 zone holds a reserve; full potential is unchanged, so density defers force not removes it.
     private _mult = (round (missionNamespace getVariable ["enemyunitMultiplier", 1])) max 1;
-    ([_zoneKey, _x1, _mult] call DUWS_fnc_garrisonDerive) params ["_spawns", "_pool"];
+    private _stand = [_x1] call DUWS_fnc_zoneDensityStand;
+    ([_zoneKey, _x1, _mult, _stand] call DUWS_fnc_garrisonDerive) params ["_spawns", "_pool"];
 
     private _grps = [_spawns, _spawnPos, _size] call DUWS_fnc_raiseGarrison;
     { _roster append (units _x) } forEach _grps;
 
-    // The group ceiling the refill tops up to: the zone's full fielded-able x1 count, not the count that
-    // just deployed. A zone raised mauled stands up fewer groups (its lost tokens are simply absent), and
-    // reserves exist precisely to bring it back to full -- so the ceiling is what a full garrison is, and
-    // the pool refills toward it. Filtered, so a token the side cannot yet field is not a slot the refill
-    // chases forever; per awake session, since the filter can change between raises as OPFOR earns AP.
-    // The killed handler watches the deployed groups (and any reserve that later joins them) so a deep dip
-    // pulls an immediate wave, and records each wiped group's token into the ledger.
-    missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _zoneKey], count _x1];
+    // The group ceiling the refill tops up to: the standing template's count, not the count that just
+    // deployed. A zone raised mauled stands up fewer groups (its lost tokens are simply absent), and
+    // reserves exist precisely to bring it back to this ceiling -- so it is what a full standing garrison
+    // is, and the pool refills toward it. Density-thinned (patrols held back) and filtered (a token the
+    // side cannot yet field is not a slot the refill chases forever); per awake session, since both the
+    // density stand and the filter can change between raises as OPFOR earns AP. The killed handler watches
+    // the deployed groups (and any reserve that later joins them) so a deep dip pulls an immediate wave,
+    // and records each wiped group's token into the ledger.
+    missionNamespace setVariable [format ["DUWS_zoneCeiling_%1", _zoneKey], count _stand];
     [_zoneKey, _grps] call DUWS_fnc_garrisonReserveWatch;
 
     // Live and mobilised: men are standing, so the capture test may judge the zone and the reserve pass

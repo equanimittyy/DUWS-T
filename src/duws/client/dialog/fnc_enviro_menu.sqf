@@ -68,6 +68,11 @@ index_simpzones_false = lbAdd [2108, localize "STR_DUWS_T_x4zs3lsg0"];
 index_simpzones_true = lbAdd [2108, localize "STR_DUWS_T_vk37aebo"];
 [2108, index_simpzones_false] call _setDefault;
 
+// MORE URBAN
+index_more_urban_yes = lbAdd [2105, localize "STR_DUWS_T_x4zs3lsg2"];
+index_more_urban_no = lbAdd [2105, localize "STR_DUWS_T_x4zs3lsg1"];
+[2105, index_more_urban_yes] call _setDefault;
+
 // ENABLE CIVILIANS
 // Each row carries its CIV_PRESENCE value as item data rather than recording its index in a
 // global: the game mode decides which rows exist, so an index means nothing outside the list it
@@ -146,7 +151,7 @@ index_hardcore_true = lbAdd [2110, localize "STR_DUWS_T_vk37aebo"];
 // longer a contiguous 2100-range, so the restore zips stored values against an explicit idc list
 // that MUST stay in lockstep with the snapshot in fnc_process_enviro_menu.sqf.
 if (!isNil "duws_enviro_sel") then {
-    private _idcs = [2100,2101,2102,2103,2104,2106,2108,2109,2110];
+    private _idcs = [2100,2101,2102,2103,2104,2105,2106,2108,2109,2110];
     { lbSetCurSel [_idcs select _forEachIndex, _x]; } forEach duws_enviro_sel;
 };
 
@@ -171,7 +176,7 @@ private _display = uiNamespace getVariable ["duws_startup_display", displayNull]
         if (duws_preset_applying) exitWith {};
         lbSetCurSel [2200, duws_preset_custom];
     }];
-} forEach [2100,2101,2102,2103,2104,2106,2108,2109,2110];
+} forEach [2100,2101,2102,2103,2104,2105,2106,2108,2109,2110];
 
 duws_preset_applying = false;
 // Writes the description line under the row. Re-applies the preset too, which is a no-op:

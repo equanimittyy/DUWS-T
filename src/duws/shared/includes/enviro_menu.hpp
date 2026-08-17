@@ -209,6 +209,25 @@ class startup_dialog
             h = 1 * GUI_GRID_H;
             tooltip = "$STR_DUWS_T_r69kq1g1";
         };
+        class more_urban_frame: RscFrame
+        {
+            idc = 1806;
+            text = "$STR_DUWS_T_enmvtlks";
+            x = 20.5 * GUI_GRID_W + GUI_GRID_X;
+            y = 16.5 * GUI_GRID_H + GUI_GRID_Y;
+            w = 18.5 * GUI_GRID_W;
+            h = 2.5 * GUI_GRID_H;
+            tooltip = "$STR_DUWS_T_cr4pww43";
+        };
+        class more_urban_combo: RscCombo
+        {
+            idc = 2105;
+            x = 21 * GUI_GRID_W + GUI_GRID_X;
+            y = 17.5 * GUI_GRID_H + GUI_GRID_Y;
+            w = 17.5 * GUI_GRID_W;
+            h = 1 * GUI_GRID_H;
+            tooltip = "$STR_DUWS_T_cr4pww43";
+        };
         class civ_type_frame: RscFrame
         {
             idc = 1810;

@@ -3,7 +3,7 @@
 // Must read before closeDialog while the controls still exist.
 // idc list MUST stay in lockstep with the restore in fnc_enviro_menu.sqf: position, not idc value,
 // is the join key between snapshot and restore.
-duws_enviro_sel = [2100,2101,2102,2103,2104,2106,2108,2109,2110] apply { lbCurSel _x };
+duws_enviro_sel = [2100,2101,2102,2103,2104,2105,2106,2108,2109,2110] apply { lbCurSel _x };
 // Same reason: the civilian row carries its CIV_PRESENCE value as item data, and that has to come
 // off the control while the control is still there.
 private _civValue = lbData [2109, lbCurSel 2109];
@@ -96,6 +96,14 @@ switch (_index) do
     case index_simpzones_true: { simple_zones_enable = true; };
 };
 
+// MORE URBAN
+_index = lbCurSel 2105;
+switch (_index) do
+{
+    case index_more_urban_yes: { moreUrban = 1; };
+    case index_more_urban_no: { moreUrban = 0; };
+};
+
 // ENABLE CIVILIANS
 // A row with no value is a bug, not a mode: every row the menu adds carries one. Take civilians
 // off rather than leave the previous value standing, and log it -- silently keeping the old value
@@ -123,6 +131,7 @@ publicVariable "time_of_day";
 publicVariable "enable_fast_travel";
 publicVariable "ZeusStatus";
 publicVariable "simple_zones_enable";
+publicVariable "moreUrban";
 publicVariable "CIV_PRESENCE";
 publicVariable "restricted_arsenal";
 

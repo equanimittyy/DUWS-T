@@ -1957,6 +1957,14 @@
                 <Original>Escalation</Original>
                 <English>Escalation</English>
             </Key>
+            <Key ID="STR_DUWS_T_garrison_density_title">
+                <Original>Garrison Density</Original>
+                <English>Garrison Density</English>
+            </Key>
+            <Key ID="STR_DUWS_T_garrison_density_tooltip">
+                <Original>How much of a zone's mobile garrison stands guard at once. Below 100%, the rest wait as reserves and reinforce the zone as its patrols fall. Dug-in defenders are unaffected.</Original>
+                <English>How much of a zone's mobile garrison stands guard at once. Below 100%, the rest wait as reserves and reinforce the zone as its patrols fall. Dug-in defenders are unaffected.</English>
+            </Key>
             <Key ID="STR_DUWS_T_CAMPAIGN_LOST_TITLE">
                 <Original>Campaign Lost</Original>
                 <English>Campaign Lost</English>

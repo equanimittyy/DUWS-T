@@ -4,6 +4,6 @@
 // reopen, then close. startup_dialog's onUnload (fnc_startup_enviro_closed)
 // routes to fnc_startup_faction_flow because chosen_settings is still false.
 // Selections must be read before closeDialog while the controls still exist.
-duws_enviro_sel = [2100,2101,2102,2103,2104,2106,2108,2109,2110] apply { lbCurSel _x };
+duws_enviro_sel = [2100,2101,2102,2103,2104,2105,2106,2108,2109,2110] apply { lbCurSel _x };
 duws_faction_reselect = true;
 closeDialog 0;
