@@ -3004,6 +3004,14 @@
                 <Original>Him? I think I just saw him leave town heading %1.</Original>
                 <English>Him? I think I just saw him leave town heading %1.</English>
             </Key>
+            <Key ID="STR_DUWS_T_INTEL_INFORMANT_ASK_HIT">
+                <Original>Him? I thought I saw him over there...</Original>
+                <English>Him? I thought I saw him over there...</English>
+            </Key>
+            <Key ID="STR_DUWS_T_INTEL_INFORMANT_ASK_MISS">
+                <Original>Him? Sorry, don't know him.</Original>
+                <English>Him? Sorry, don't know him.</English>
+            </Key>
             <Key ID="STR_DUWS_T_mission_cpap">
                 <Original>&lt;br /&gt;CP: %1&lt;br /&gt;AP: %2</Original>
                 <English>&lt;br /&gt;CP: %1&lt;br /&gt;AP: %2</English>

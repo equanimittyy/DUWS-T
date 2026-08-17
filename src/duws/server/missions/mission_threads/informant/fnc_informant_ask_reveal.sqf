@@ -22,4 +22,7 @@ private _dist = round ((_caller distance2D _inf) / 5) * 5;
 private _pts = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
 private _compass = _pts select (floor (((_dir + 11.25) mod 360) / 22.5));
 
+// The local's voice on the subtitle, the bearing on the hint box: the line sells the tip, the hint
+// carries the fix. Reached from the free roll and the paid bribe alike, so both read the same.
+[localize "STR_DUWS_T_civ", localize "STR_DUWS_T_INTEL_INFORMANT_ASK_HIT"] remoteExec ["fnc_duws_dialogue", _caller];
 [format [localize "STR_DUWS_T_INTEL_INFORMANT_ASK_REVEAL", _dist, _compass]] remoteExec ["hint", _caller];
