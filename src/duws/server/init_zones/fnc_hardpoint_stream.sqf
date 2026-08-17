@@ -226,6 +226,14 @@ DUWS_fnc_hardpointClear = {
     } forEach ["garrison", "crew"];
     // Wrecks left standing for the sweep, not deleted: release drops the pins and schedules disposal.
     [_key] call fnc_duws_release;
+    // The auto-gate trigger is keyed to the composition, not a member, so release never reaches it;
+    // drop it here or it evaluates over a cleared key for the rest of the campaign. objNull for every
+    // non-roadblock key, so the lookup is a harmless no-op there.
+    private _gateTrg = missionNamespace getVariable [format ["DUWS_gateTrg_%1", _key], objNull];
+    if (!isNull _gateTrg) then {
+        deleteVehicle _gateTrg;
+        missionNamespace setVariable [format ["DUWS_gateTrg_%1", _key], nil];
+    };
     ["INFO", "HARDPOINT", format ["%1 cleared", _key]] call fnc_log;
 
     // A standalone strongpoint the player hunted down pays a bounty scaled to its type (DUWS_hardpointBounty)
@@ -350,6 +358,40 @@ DUWS_hardpointHooks = createHashMapFromArray [["tick", {
     };
 }]];
 
+// [_key, _open] call fnc_roadblock_gate_set -- raise (_open 1) or lower (0) the live boom of the
+// roadblock filed under _key. Re-resolved from the composition every call rather than held as a
+// reference: the boom is a streamed prop fnc_duws_deploy re-creates as a new object on each raise, so a
+// stored handle would point at a deleted one after the first stow. A no-op while the composition is
+// stowed (no member is the gate) -- the trigger below re-opens it on the next arrival once it is back.
+fnc_roadblock_gate_set = {
+    params ["_key", "_open"];
+    private _members = DUWS_compositions getOrDefault [_key, []];
+    private _i = _members findIf { !isNull _x && {typeOf _x isEqualTo "Land_BarGate_F"} };
+    if (_i < 0) exitWith {};
+    (_members select _i) animate ["door_1_rot", _open];
+};
+
+// Arms the roadblock's boom as a side-aware auto-gate, mirroring the BLUFOR HQ gate (fnc_BluHQinit) but
+// keyed to the composition, not the object: the boom streams, so a netId-bound trigger like the HQ one
+// dangles after the first stow. Server-local trigger, so its statements run only where DUWS_compositions
+// lives. The boom rises while any unit that is not the opposite side stands in the area and drops when
+// only the enemy -- or nobody -- is left, so it bars the opposite side alone and passes everyone else.
+fnc_roadblock_gate_arm = {
+    params ["_key", "_pos", "_side"];
+    if !(isNull (missionNamespace getVariable [format ["DUWS_gateTrg_%1", _key], objNull])) exitWith {};
+    private _trg = createTrigger ["EmptyDetector", _pos, false];
+    _trg setTriggerArea [12, 12, 0, false, 12];
+    _trg setTriggerActivation ["ANY", "PRESENT", true];
+    _trg setVariable ["DUWS_gateKey", _key];
+    _trg setVariable ["DUWS_gateEnemy", [WEST, EAST] select (_side isEqualTo "blufor")];
+    _trg setTriggerStatements [
+        "{ side _x != (thisTrigger getVariable 'DUWS_gateEnemy') } count thisList > 0",
+        "[thisTrigger getVariable 'DUWS_gateKey', 1] call fnc_roadblock_gate_set",
+        "[thisTrigger getVariable 'DUWS_gateKey', 0] call fnc_roadblock_gate_set"
+    ];
+    missionNamespace setVariable [format ["DUWS_gateTrg_%1", _key], _trg];
+};
+
 // Files the hardpoint as a streamed site over the composition the caller just built, and either crews it
 // now or stows it uncrewed. The streaming spec is the type's, not the caller's: spawnRadius, grace,
 // neverStream and airRing come from DUWS_hardpointStreaming and the loose garrison from
@@ -414,6 +456,10 @@ fnc_hardpoint_register = {
     _mk setMarkerAlpha ([0, 1] select (!hardcore_mode_enable));
 
     [_key, "garrison", DUWS_hardpointHooks] call fnc_site_hooks_set;
+
+    // The boom opens for its own side and bars the enemy; armed once per key, the trigger outlives the
+    // stow/deploy cycles the composition goes through.
+    if (_type isEqualTo "ROADBLOCK") then { [_key, _pos, _side] call fnc_roadblock_gate_arm; };
 
     // Crew now or stow. The caller built the composition but never manned it, so the drop-and-settle is
     // paid here only for an emplacement that will actually stand: a resident type, or one BLUFOR are
