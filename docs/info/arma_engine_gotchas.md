@@ -1318,3 +1318,18 @@ culprit for a car pulled onto the verge to clear a lane — the settle-and-rerol
 that stays level, then re-enabling damage detonates it. Reject the point up front with
 `nearestTerrainObjects [_p, ["WALL","FENCE","ROCK","TREE"], 4]` and `nearestObjects [_p, ["Car"], r]`
 rather than trusting the settle to shove clear.
+
+## A broadcast-created task with a destination floods `objectFromNetId` every frame the map is open
+
+**A task given a destination is stored as a shared *target* and re-resolved by netId each frame the
+map is drawn. When the same `BIS_fnc_taskCreate` is `remoteExec`'d to every client (so all machines
+run its sharing logic), that metadata crosses and the resolve is handed the task object itself,
+throwing `[BIS_fnc_objectFromNetId]/[BIS_fnc_groupFromNetId] Error: type TASK, expected STRING, in
+Task <id>` — a per-frame flood for the task's whole life. The flood jams the strategic map's task
+figure, its tooltip, and map clicks (including the side-mission picker).**
+
+The last `BIS_fnc_taskCreate` argument is `visibleIn3D`, not a "sharedTarget" toggle — flipping it
+does nothing to the throw. There is no argument that disables the destination sharing. The fix is to
+pass no destination at all (`[]`) and mark the mission's location some other way; DUWS uses the area
+circle from `fnc_missionMarkerData`, so the task pin was redundant anyway. `fnc_missionTaskCreate`
+creates every side-mission task and takes this route.

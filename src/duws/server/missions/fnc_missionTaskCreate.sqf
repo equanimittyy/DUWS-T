@@ -44,17 +44,15 @@ if (_dl > time) then {
 // that, and a same-key entry replaces rather than joins the queue, so a joiner would be handed
 // the completion of a task that was never created on their machine.
 //
-// _destination is a position rather than the target object on purpose: a JIP entry outlives the
-// mission that made it, and a deleted object reaches the joiner as null while a position still
-// draws where the mission was. _type names a CfgTaskTypes class and only picks the icon; an
-// unrecognised one falls back to the default rather than failing.
-//
-// sharedTarget (last arg) is false: it makes BIS_fnc_taskCreate share the destination across the
-// network by its netId, but a position has no netId, so each frame BIS_fnc_setTaskLocal tried to
-// resolve one and threw "groupFromNetId/objectFromNetId: type TASK, expected STRING" for the whole
-// life of the task. On an open strategic map that per-frame throw also broke the task figure's
-// tooltip and click. The position is already global, so nothing needs sharing.
-[west, [_taskId], [_description, _title, _title], _destination, true, 1, true, _type, false]
+// No destination is handed to the engine (the arg is []). A task destination is stored as a shared
+// target and re-resolved by netId every frame the map is open; broadcast creation crosses that
+// metadata, so the resolve is fed the task object itself and throws
+// "objectFromNetId/groupFromNetId: type TASK, expected STRING" for the task's whole life -- a
+// per-frame flood that jams the strategic map's tooltip and click. The area circle
+// (fnc_missionMarkerData) already marks where the mission is, so the task needs no pin of its own.
+// _destination is still accepted so callers stay uniform, but is deliberately not forwarded. _type
+// names a CfgTaskTypes class and only picks the icon; an unrecognised one falls back to the default.
+[west, [_taskId], [_description, _title, _title], [], true, 1, true, _type, false]
 	remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, _taskId + "_new"];
 
 // The card rides with the broadcast, not with the thread's entry gate: a thread that fails to find
