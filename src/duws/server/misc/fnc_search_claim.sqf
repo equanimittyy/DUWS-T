@@ -22,9 +22,6 @@ _target setVariable ["DUWS_search_done", true, true];
 private _config = DUWS_searchSources getOrDefault [_source, []];
 if (_config isEqualTo []) exitWith {};
 
-// Every search speaks as the searcher, a frisk included: the player did the searching, so the
-// report is theirs whether the pockets belonged to a corpse, a laptop or a detainee.
-private _speaker = name _caller;
 private _nothingLine = localize (_config param [2, "STR_DUWS_T_INTEL_FOUND_n"]);
 // ATL throughout: fnc_search_dropItems places with setPosATL, and a body on a roof drops its
 // items through it if the two disagree.
@@ -32,20 +29,17 @@ private _origin = getPosATL _target;
 private _remaining = +(_config select 1);
 private _paid = false;
 
-// What a search found is one player's news, and the searcher is the only one told: a body is
-// searched alone and a co-op session where every pocket emptied is announced to everyone reads as
-// spam rather than as reporting. Bound to the searcher here so the six outcomes below each pass a
-// line and nothing else; fnc_duws_report owns which surfaces a result lands on.
-private _fnc_report = {
+// What a search found is one player's news, shown in the searcher's hint box alone: a body is
+// searched alone, and a co-op session where every emptied pocket is announced to everyone reads as
+// spam. No subtitle -- a search is the player rifling a corpse, not a character speaking a line.
+private _fnc_hint = {
     params ["_line"];
-    [_speaker, _line, _caller] call fnc_duws_report;
+    [_line] remoteExec ["hint", _caller];
 };
 
-// The one exception to the rule above, and the reason it is a separate helper rather than a flag on
-// it: a revealed position and a topped-up CP pool are shared state that lands on every player's map
-// and terminal, so the team is told through a notification even though the search that bought it is
-// still reported locally. Money, a document and an empty pocket move nothing anyone else can see
-// and stay with the searcher.
+// The one outcome the whole team is told about: a revealed position lands on every player's map, so
+// the reveal is broadcast as a notification card. CP, money, a document and an empty pocket move
+// nothing anyone else can see and stay in the searcher's hint box.
 private _fnc_notify = {
     params ["_title", "_desc"];
     ["infosearch", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
@@ -63,26 +57,11 @@ private _documents = ["Item_MobilePhone", "Item_Wallet_ID", "Item_SmartPhone",
     "Item_FlashDisk", "Item_Files", "Item_FilesSecret"];
 private _documentWeights = [30, 30, 20, 10, 6, 4];
 
-// Hoisted because the main draw and the intel-exhausted fallback both pay it -- the draw a 1-3
-// roll, the fallback a flat 2 passed in. `call` shares the caller's scope, so it reads _fnc_report
-// and _fnc_notify from here.
-//
-// CP, never AP: a search is a windfall for the player who made it, not a shift in the war's
-// momentum, which is what AP measures and what every WARCOM wave threshold reads.
-private _payCp = {
-    params [["_amt", -1]];
-    private _cp = if (_amt > 0) then { _amt } else { 1 + floor random 3 };
-    [_cp, "search_pool"] call fnc_cp_adjust;
-    [localize "STR_DUWS_T_INTEL_FOUND_x"] call _fnc_report;
-    [localize "STR_DUWS_T_INTEL_BONUS_TITLE",
-        format [localize "STR_DUWS_T_INTEL_BONUS_DESC", _cp]] call _fnc_notify;
-};
-
 // One item, not a handful: three documents off one body is three searches' worth of CP for a
 // single search.
 private _payDocument = {
     [[_documents selectRandomWeighted _documentWeights], _origin] call fnc_search_dropItems;
-    [localize "STR_DUWS_T_LOOT2"] call _fnc_report;
+    [localize "STR_DUWS_T_LOOT2"] call _fnc_hint;
 };
 
 // Drawn without replacement. A kind that reports nothing left to give drops out and the rest are
@@ -93,25 +72,22 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
 
     switch (_kind) do {
         // The only kind that can decline: fnc_intel_payout returns false once every zone, town
-        // and hardpoint is already revealed. Silenced either way, so the substitute below is free
-        // to answer a decline without the two lines contradicting each other, and a reveal is
-        // reported here in the searcher's voice instead of as an Overlord broadcast to the AO.
+        // and hardpoint is already revealed. Silenced when it declines, so the fallback below is
+        // free to answer a decline without contradiction; a successful reveal is the one search
+        // outcome the whole team sees, broadcast as a notification card.
         case "intel": {
             _paid = [_origin, _caller, true] call fnc_intel_payout;
             if (_paid) then {
-                [localize "STR_DUWS_T_INTEL_FOUND_map"] call _fnc_report;
                 [localize "STR_DUWS_T_INTEL_MAP_TITLE",
                     localize "STR_DUWS_T_INTEL_MAP_DESC"] call _fnc_notify;
             };
         };
 
-        case "cp": { call _payCp; _paid = true };
-
         case "money": {
             private _items = [];
-            for "_i" from 1 to (1 + floor random 5) do { _items pushBack "Item_Money_roll" };
+            for "_i" from 1 to (1 + floor random 3) do { _items pushBack "Item_Money_roll" };
             [_items, _origin] call fnc_search_dropItems;
-            [localize "STR_DUWS_T_LOOT4"] call _fnc_report;
+            [localize "STR_DUWS_T_LOOT4"] call _fnc_hint;
             _paid = true;
         };
 
@@ -120,7 +96,7 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
         // A row, not the absence of one. A search that finds nothing has to say so: four of six
         // faucets could not speak that outcome before, so a dry result read as a broken action.
         case "nothing": {
-            [_nothingLine] call _fnc_report;
+            [_nothingLine] call _fnc_hint;
             _paid = true;
         };
     };
@@ -129,8 +105,8 @@ while {!_paid && {!(_remaining isEqualTo [])}} do {
 };
 
 // Intel was the last kind standing and the reveal pool is dry: reached by an intel-only source --
-// a mission objective, and any source once every position is found. Pays a flat 2 CP in place of
+// a mission objective, and any source once every position is found. Drops a document in place of
 // the reveal it cannot make, so a dry pool costs the search its best outcome, not its whole worth.
 if (!_paid) then {
-    [2] call _payCp;
+    call _payDocument;
 };

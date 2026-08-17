@@ -3107,37 +3107,12 @@
                 <Original>Debug</Original>
                 <English>Debug</English>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_BONUS_TITLE">
-                <Original>Additional Intel</Original>
-                <English>Additional Intel</English>
-                <German>Zusätzliche Informationen erfasst</German>
-                <Spanish>Inteligencia adicional obtenida</Spanish>
-                <Chinesesimp>发现额外情报</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_BONUS_DESC">
-                <Original>Intel recovered in the field. The pool gains %1 CP.</Original>
-                <English>Intel recovered in the field. The pool gains %1 CP.</English>
-                <German>Du hast zusätzliche Informationen erfasst und %1 CP erhalten.</German>
-                <Spanish>Has obtenido inteligencia adicional y ganado %1 CP.</Spanish>
-                <Chinesesimp>你发现了额外的情报，获得了%1 CP</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_FOUND_x">
-                <Original>Intel found! Credited to the pool.</Original>
-                <English>Intel found! Credited to the pool.</English>
-                <German>Hey! Etwas Interessantes gefunden!</German>
-                <Spanish>¡Oye! Encontré algo interesante!</Spanish>
-                <Chinesesimp>嘿！我这找到点有意思的！</Chinesesimp>
-            </Key>
             <Key ID="STR_DUWS_T_INTEL_FOUND_n">
                 <Original>You found nothing.</Original>
                 <English>You found nothing.</English>
                 <German>Nichts? Na gut…</German>
                 <Spanish>¿Nada? Bueno…</Spanish>
                 <Chinesesimp>什么都没有？好吧...</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_FOUND_map">
-                <Original>Intel found! Position marked on your map.</Original>
-                <English>Intel found! Position marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_MAP_TITLE">
                 <Original>Position Marked</Original>
