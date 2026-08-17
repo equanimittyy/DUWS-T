@@ -233,9 +233,9 @@ publicVariable "DUWS_informant_active";
 // Thicken the crowd only where the player can work it -- a friendly/neutral town he can walk. Each
 // added civilian is a real town local (same index, so harming one costs the town), gets the ask
 // action if that layer is loaded, and wanders on the town's own movement pass rather than standing
-// frozen. Spawned two to a group beside each other: a civilian gets its own group, and 48 solo groups
+// frozen. Spawned three to a group beside each other: a civilian gets its own group, and 48 solo groups
 // eat the engine's ~144-per-side cap the town crowd and the decoy drivers also draw on. TUNABLE
-// count (pairs x 2).
+// count (trios x 3).
 private _crowd = [];
 if (!_enemyTown) then {
     // Re-open every local already in town: a hunt reuses bodies that survived an earlier one on the
@@ -245,17 +245,17 @@ if (!_enemyTown) then {
         (allUnits select { (_x getVariable ["civ_locIndex", -1]) == _townIndex });
 
     private _crowdGroups = [];
-    for "_i" from 1 to 24 do {
+    for "_i" from 1 to 16 do {
         private _anchor = [_townPos, 0, _townRadius, 2, 0, 0.35, 0] call BIS_fnc_findSafePos;
         if (_anchor isEqualTo [0,0,0]) then { _anchor = _townPos };
         private _grp = grpNull;
-        for "_j" from 0 to 1 do {
+        for "_j" from 0 to 2 do {
             private _cpos = _anchor getPos [_j * 3, random 360];
             private _c = [_townIndex, _cpos, selectRandom _civBodies, false] call fnc_civ_spawnUnit;
             if (!isNull _c) then {
                 _crowd pushBack _c;
                 _allUnits pushBack _c;
-                // Second of the pair joins the first's group; the emptied group deletes itself
+                // Later members of the trio join the first's group; the emptied group deletes itself
                 // (fnc_civ_spawnUnit makes them deleteWhenEmpty).
                 if (isNull _grp) then { _grp = group _c } else { [_c] joinSilent _grp };
             };
