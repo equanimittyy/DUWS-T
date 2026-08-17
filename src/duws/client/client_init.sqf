@@ -21,7 +21,14 @@ waitUntil {sleep 0.1;!isNull player};
 // Exactly one drain loop per client, and only below the wait above -- the function arrives
 // with the registry the server publishes, so starting it any earlier races that. A line
 // posted before this point is not lost: fnc_duws_dialogue queues without needing the loop.
-[] spawn fnc_duws_dialogue_drain;
+//
+// Guarded against re-entry: a JIP client re-runs INIT.sqf and so client_init, and a second
+// drain would race the first popping the same queue into the one subtitle slot, playing
+// queued lines out of order. The flag rides uiNamespace, where the queues it drains live.
+if !(uiNamespace getVariable ["DUWS_dialogueDrainLive", false]) then {
+	uiNamespace setVariable ["DUWS_dialogueDrainLive", true];
+	[] spawn fnc_duws_dialogue_drain;
+};
 player addRating 10000000;
 // KEEP DIPSHITS FROM DROWNING
 [] spawn {
