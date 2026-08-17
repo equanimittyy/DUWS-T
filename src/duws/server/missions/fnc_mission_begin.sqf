@@ -57,13 +57,5 @@ _mdl params ["_dlMinH", "_dlMaxH"];
 // sits behind the band the map advertised. The table's hours become steps here; fnc_time_deadline is
 // the shared shape deadlines and timed triggers both use, and holds the deadline in in-game time.
 DUWS_curDeadlineAt = [round (_dlMinH * 6), round (_dlMaxH * 6)] call fnc_time_deadline;
-// Snap that up to the next in-game 10-minute mark, so "You have until HH:MM" reads a round time (14:40,
-// not 14:32): the roll is a clean 10-minute duration, but the mission starts at an arbitrary minute and
-// the absolute deadline inherits it. daytime advances 1:1 with engine seconds (the time system's
-// standing assumption), so a minute of clock is 60 s of deadline, and ceil only ever adds time -- it
-// cannot shorten the rolled run. _clockMin is invariant as time passes (daytime gains what the remaining
-// loses), so the snapped reading holds for the mission's life.
-private _clockMin = daytime * 60 + (DUWS_curDeadlineAt - time) / 60;
-DUWS_curDeadlineAt = DUWS_curDeadlineAt + (ceil (_clockMin / 10) * 10 - _clockMin) * 60;
 
 true
