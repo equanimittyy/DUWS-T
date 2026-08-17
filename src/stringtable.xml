@@ -7333,8 +7333,16 @@
                 <English>No Game Master</English>
             </Key>
             <Key ID="STR_DUWS_T_NO_GM_MSG">
-                <Original>The Game Master slot (Slot 1) is empty. Restart the mission with a player in it</Original>
-                <English>The Game Master slot (Slot 1) is empty. Restart the mission with a player in it</English>
+                <Original>Slot 1 empty. Restart the mission</Original>
+                <English>Slot 1 empty. Restart the mission</English>
+            </Key>
+            <Key ID="STR_DUWS_T_NO_GM_ABORT_BTN">
+                <Original>Abort Mission</Original>
+                <English>Abort Mission</English>
+            </Key>
+            <Key ID="STR_DUWS_T_NO_GM_ABORT_CARD">
+                <Original>Setup aborted. Restart with a player in Slot 1</Original>
+                <English>Setup aborted. Restart with a player in Slot 1</English>
             </Key>
             <Key ID="STR_DUWS_T_2rc0nvug">
                 <Spanish>Alternar tapones</Spanish>

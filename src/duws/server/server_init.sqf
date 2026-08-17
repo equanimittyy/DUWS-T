@@ -53,6 +53,9 @@ if (isMultiplayer) then {
 		if (isNull _gm || {!isPlayer _gm}) then {
 			["ERROR", "BOOT", "Game Master slot (player1) empty -- setup cannot run, campaign will hang"] call fnc_log;
 			["no_gamemaster", []] remoteExec ["BIS_fnc_showNotification", 0];
+			// The card warns; this gives them the way out, since the setup screens leave no menu to
+			// reach. Interface machines only guard themselves inside fnc_no_gm_prompt.
+			remoteExec ["fnc_no_gm_prompt", 0];
 		};
 	};
 };

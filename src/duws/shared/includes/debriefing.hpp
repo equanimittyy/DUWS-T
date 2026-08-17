@@ -32,4 +32,16 @@ class CfgDebriefing
 		picture = "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa";
 		pictureColor[] = {1,0,0,1};
 	};
+
+	// The card the abort button raises when the Game Master slot was never filled: not a campaign
+	// loss (nothing was ever generated), so its own title and card text rather than the shared ones.
+	class setup_aborted
+	{
+		title = "$STR_DUWS_T_NO_GM_TITLE";
+		subtitle = "";
+		description = "$STR_DUWS_T_NO_GM_ABORT_CARD";
+		pictureBackground = "";
+		picture = "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa";
+		pictureColor[] = {1,0,0,1};
+	};
 };
