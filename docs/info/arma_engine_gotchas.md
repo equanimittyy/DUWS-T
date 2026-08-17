@@ -1330,6 +1330,7 @@ figure, its tooltip, and map clicks (including the side-mission picker).**
 
 The last `BIS_fnc_taskCreate` argument is `visibleIn3D`, not a "sharedTarget" toggle — flipping it
 does nothing to the throw. There is no argument that disables the destination sharing. The fix is to
-pass no destination at all (`[]`) and mark the mission's location some other way; DUWS uses the area
-circle from `fnc_missionMarkerData`, so the task pin was redundant anyway. `fnc_missionTaskCreate`
-creates every side-mission task and takes this route.
+pass no destination to `BIS_fnc_taskCreate` (`[]`), then set the pin per client with
+`_task setSimpleTaskDestination _pos`: that writes a plain position onto the local simple task and is
+never resolved by netId, so the pin draws with no flood. `fnc_missionTaskCreate` creates every
+side-mission task and takes this route, broadcast with a JIP key so a joiner's pin lands too.
