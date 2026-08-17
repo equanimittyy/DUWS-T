@@ -92,6 +92,7 @@ for "_i" from 0 to 17 do {
     if (
         !(terrainIntersectASL [_eyeASL, _tgtASL])
         && {(lineIntersectsSurfaces [_eyeASL, _tgtASL]) isEqualTo []}
+        && {[_eyeASL, _tgtASL] call fnc_recon_observe_foliageClear}
         && {(_avoidZones findIf { _cand distance2D (_x select 1) < ((_x select 2) + ZONE_CLEAR) }) < 0}
         && {(_hps findIf { _cand distance2D (_x select 1) < HP_CLEAR }) < 0}
     ) then {

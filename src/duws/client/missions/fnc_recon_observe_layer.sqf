@@ -43,7 +43,11 @@ if (isNil "DUWS_fnc_recon_los") then {
         // Higher is strictly more terrain-clear, so +8 keeps the +5 certification valid and clears the camp.
         private _to  = [_tgt select 0, _tgt select 1, (getTerrainHeightASL _tgt) + 8];
         if (terrainIntersectASL [_eye, _to]) exitWith { false };
-        (lineIntersectsSurfaces [_eye, _to, _p, vehicle _p]) isEqualTo []
+        if !((lineIntersectsSurfaces [_eye, _to, _p, vehicle _p]) isEqualTo []) exitWith { false };
+        // Foliage the geometry ray misses -- canopy over a look-down sight, low bushes -- sampled on the
+        // target end. The thread's overwatch was picked through the same helper, so this cannot reject a
+        // hold the thread certified.
+        [_eye, _to] call fnc_recon_observe_foliageClear
     };
 };
 

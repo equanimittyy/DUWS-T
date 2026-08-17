@@ -140,6 +140,7 @@ fnc_informant_ask_reveal = compile preprocessFileLineNumbers "duws\server\missio
 fnc_recon_observe_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_mission.sqf";
 fnc_recon_observe_pick = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_pick.sqf";publicVariable "fnc_recon_observe_pick";
 fnc_recon_observe_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_site.sqf";publicVariable "fnc_recon_observe_site";
+fnc_recon_observe_foliageClear = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_foliageClear.sqf";publicVariable "fnc_recon_observe_foliageClear";
 fnc_recon_observe_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_success.sqf";
 fnc_recon_observe_layer = compile preprocessFileLineNumbers "duws\client\missions\fnc_recon_observe_layer.sqf";publicVariable "fnc_recon_observe_layer";
 // CIVILIAN FUNCTIONS
