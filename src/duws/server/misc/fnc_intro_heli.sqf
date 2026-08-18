@@ -130,6 +130,11 @@ missionNamespace setVariable ["intro_heli_fadein", true, true];
 sleep 0.5;
 private _hoverPos = _hqPos getPos [20, random 360];
 _hoverPos set [2, 50];
+// Init before the waypoint, never after: the heli covers the 700-1000 m to the hover point in
+// ~10-14 s, well inside the dialogue block below, so the completion statement fires the flag early.
+// A reset placed after the waypoint stomps that true, and a completed MOVE waypoint never re-fires
+// -- the arrival waitUntil would then only ever exit on the 120 s timeout.
+missionNamespace setVariable ["intro_heli_arrived", false];
 private _wp = _heliGroup addWaypoint [_hoverPos, 0];
 _wp setWaypointType "MOVE";
 _wp setWaypointBehaviour "CARELESS";
@@ -156,7 +161,6 @@ sleep 3;
 [["", "PLAIN", 5]] remoteExec ["cutText", 0];
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_heli_ttgtw"] remoteExec ["fnc_duws_dialogue", 0];
 private _arrivedVar = "intro_heli_arrived";
-missionNamespace setVariable [_arrivedVar, false];
 private _startTime = time;
 private _timeout = 120;
 
