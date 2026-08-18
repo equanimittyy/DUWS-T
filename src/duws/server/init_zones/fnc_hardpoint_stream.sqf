@@ -374,13 +374,14 @@ fnc_roadblock_gate_set = {
 // Arms the roadblock's boom as a side-aware auto-gate, mirroring the BLUFOR HQ gate (fnc_BluHQinit) but
 // keyed to the composition, not the object: the boom streams, so a netId-bound trigger like the HQ one
 // dangles after the first stow. Server-local trigger, so its statements run only where DUWS_compositions
-// lives. The boom rises only while a friendly *mobile vehicle* stands in the area and drops when none
-// does, so it passes its own traffic (car, truck, APC/IFV, tank, bike) and bars the opposite side.
-// Gated on LandVehicle-minus-StaticWeapon, not any unit, on purpose: the roadblock's own crewed statics
-// and foot garrison sit inside the 12m area and, counted as friendlies, would pin the boom open forever
-// -- the road never barred. StaticWeapon is itself a LandVehicle, so it is carved back out explicitly,
-// or the guns re-pin it. A boom stops vehicles, not men (who walk around it), so keying on mobile
-// vehicles is also what it physically does.
+// lives. The boom rises only while an own-side or civilian *mobile vehicle* stands in the area and drops
+// when none does, so it passes its own traffic (car, truck, APC/IFV, tank, bike) and civilians, and bars
+// the enemy -- and the third party too, unlike a bare "not the enemy" test, which would wave an
+// independent faction through the checkpoint. Gated on LandVehicle-minus-StaticWeapon, not any unit, on
+// purpose: the roadblock's own crewed statics and foot garrison sit inside the 12m area and, counted as
+// friendlies, would pin the boom open forever -- the road never barred. StaticWeapon is itself a
+// LandVehicle, so it is carved back out explicitly, or the guns re-pin it. A boom stops vehicles, not men
+// (who walk around it), so keying on mobile vehicles is also what it physically does.
 fnc_roadblock_gate_arm = {
     params ["_key", "_pos", "_side"];
     if !(isNull (missionNamespace getVariable [format ["DUWS_gateTrg_%1", _key], objNull])) exitWith {};
@@ -388,9 +389,9 @@ fnc_roadblock_gate_arm = {
     _trg setTriggerArea [12, 12, 0, false, 12];
     _trg setTriggerActivation ["ANY", "PRESENT", true];
     _trg setVariable ["DUWS_gateKey", _key];
-    _trg setVariable ["DUWS_gateEnemy", [WEST, EAST] select (_side isEqualTo "blufor")];
+    _trg setVariable ["DUWS_gateOwn", [EAST, WEST] select (_side isEqualTo "blufor")];
     _trg setTriggerStatements [
-        "{ side _x != (thisTrigger getVariable 'DUWS_gateEnemy') && {(vehicle _x) isKindOf 'LandVehicle'} && {!((vehicle _x) isKindOf 'StaticWeapon')} } count thisList > 0",
+        "{ (side _x == (thisTrigger getVariable 'DUWS_gateOwn') || {side _x == civilian}) && {(vehicle _x) isKindOf 'LandVehicle'} && {!((vehicle _x) isKindOf 'StaticWeapon')} } count thisList > 0",
         "[thisTrigger getVariable 'DUWS_gateKey', 1] call fnc_roadblock_gate_set",
         "[thisTrigger getVariable 'DUWS_gateKey', 0] call fnc_roadblock_gate_set"
     ];
