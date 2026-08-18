@@ -1334,3 +1334,19 @@ pass no destination to `BIS_fnc_taskCreate` (`[]`), then set the pin per client 
 `_task setSimpleTaskDestination _pos`: that writes a plain position onto the local simple task and is
 never resolved by netId, so the pin draws with no flood. `fnc_missionTaskCreate` creates every
 side-mission task and takes this route, broadcast with a JIP key so a joiner's pin lands too.
+
+## `uiNamespace` outlives a mission restart, but spawned loops do not
+
+**Variables in `uiNamespace` survive from one mission to the next in the same game process; scripts
+`spawn`ed by a mission are terminated when it ends. So a `uiNamespace` bool used to guard "this loop
+is already running" strands set with no loop alive: the first mission of a session spawns the loop
+and sets the flag, a restart kills the loop but leaves the flag, and every mission after skips the
+respawn.** This silenced the whole subtitle system (`fnc_duws_dialogue_drain`, the sole consumer of
+the `uiNamespace` dialogue queues) from the second mission of a session on — only the first run had a
+live drain.
+
+Guard on the loop's script handle, not a bool: `scriptDone` reads true once the loop is gone (a
+restart) and false while it runs (a JIP re-init inside the same mission, which is the double-spawn the
+guard exists to stop). `client_init.sqf` keeps the drain handle in `uiNamespace` and respawns on
+`isNull || scriptDone`. The same trap waits for any once-per-session guard kept in `uiNamespace`; a
+per-mission guard belongs in `missionNamespace`, which is torn down with the mission.

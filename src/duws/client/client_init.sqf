@@ -23,11 +23,14 @@ waitUntil {sleep 0.1;!isNull player};
 // posted before this point is not lost: fnc_duws_dialogue queues without needing the loop.
 //
 // Guarded against re-entry: a JIP client re-runs INIT.sqf and so client_init, and a second
-// drain would race the first popping the same queue into the one subtitle slot, playing
-// queued lines out of order. The flag rides uiNamespace, where the queues it drains live.
-if !(uiNamespace getVariable ["DUWS_dialogueDrainLive", false]) then {
-	uiNamespace setVariable ["DUWS_dialogueDrainLive", true];
-	[] spawn fnc_duws_dialogue_drain;
+// drain would race the first popping the same queue into the one subtitle slot, playing queued
+// lines out of order. Guarded on the loop's own handle, not a bool: uiNamespace outlives a
+// mission restart but the spawned loop does not, so a bool would strand the guard set with no
+// loop running and silence every subtitle from the second mission of a session on. scriptDone
+// reads true once the loop is gone (restart) and false while it runs (JIP re-init this mission).
+private _drain = uiNamespace getVariable ["DUWS_dialogueDrainHandle", scriptNull];
+if (isNull _drain || {scriptDone _drain}) then {
+	uiNamespace setVariable ["DUWS_dialogueDrainHandle", [] spawn fnc_duws_dialogue_drain];
 };
 player addRating 10000000;
 // KEEP DIPSHITS FROM DROWNING
