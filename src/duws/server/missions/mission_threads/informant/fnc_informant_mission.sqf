@@ -97,12 +97,18 @@ private _taskID = format ["informant%1%2", round (_townPos select 0), round (_to
 [_taskID, format [localize "STR_DUWS_T_INTEL_INFORMANT_TASK", _zoneName, _clock, _vehName], _mission_name, _townPos, "search"] call fnc_missionTaskCreate;
 
 // Parks a car of a given class on a road point near the town, stripped of the free medkit vanilla
-// civilian cars carry. Binary createVehicle, the drop every other mission thread uses: the engine
-// settles the car onto clear ground by the point, where the old "NONE" placement plus a forced
-// setPosATL pinned it to the exact point and a car landing on a wall, rock or another car detonated.
+// civilian cars carry. findEmptyPosition tests THIS car's own footprint against the buildings, walls
+// and cars around the point and returns a spot it genuinely fits: a road point on its own -- and
+// binary createVehicle's weak relocate -- still drops a car into a house wall in a built-up town,
+// where it detonates on spawn. Nothing within reach fits -> open ground off the road, never the point.
 private _fnc_spawnCar = {
     params ["_class", "_pos", "_dir"];
-    private _veh = _class createVehicle _pos;
+    private _fit = _pos findEmptyPosition [0, 25, _class];
+    if (_fit isEqualTo []) then {
+        _fit = [_pos, 0, 25, (sizeOf _class) max 6, 0, 0.3, 0] call BIS_fnc_findSafePos;
+        if (_fit isEqualTo [0,0,0]) then { _fit = _pos };
+    };
+    private _veh = _class createVehicle _fit;
     clearItemCargoGlobal _veh; clearMagazineCargoGlobal _veh;
     clearWeaponCargoGlobal _veh; clearBackpackCargoGlobal _veh;
     _veh setDir _dir;
