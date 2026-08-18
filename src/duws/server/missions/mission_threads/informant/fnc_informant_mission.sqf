@@ -86,6 +86,10 @@ private _vehName = getText (configFile >> "CfgVehicles" >> _informantClass >> "d
 // Objective marker + task on the town. Marked before the crowd is built, since the ellipse is all the
 // player has to go on while the spawn runs.
 private _radius = _townRadius max 200;
+// Everything the hunt spawns -- cars, decoys, the informant and the thickened crowd -- clusters
+// within this, so the player works one tight knot near the centre instead of a town-wide sweep and
+// the informant stays among the crowd he hides in. The task ellipse still marks the whole town.
+private _spawnRadius = (_townRadius * 0.5) max 100; // TUNABLE.
 private _markername2 = [_townPos, _radius] call fnc_missionMarkerData;
 // Position-based, matching every other mission thread: unique per town and stable, where a
 // round-time id collides when two missions are created in the same second.
@@ -105,7 +109,7 @@ private _fnc_spawnCar = {
     _veh
 };
 
-private _roads = nearestTerrainObjects [_townPos, ["MAIN ROAD", "ROAD", "TRACK"], _radius max 200, false, true];
+private _roads = nearestTerrainObjects [_townPos, ["MAIN ROAD", "ROAD", "TRACK"], _spawnRadius, false, true];
 // A road point is usable only if it is clear of the walls, rocks and trees that line an Altis town
 // road and of any car already placed: the spawn settles onto the nearest open ground, so starting
 // from an open point keeps the car on the road rather than shoved off it, and the car check keeps
@@ -120,7 +124,7 @@ private _fnc_carPos = {
     // is still a car to drive off in.
     private _clear = _roads select { [getPosATL _x] call _fnc_carClear };
     if (_clear isEqualTo []) exitWith {
-        private _p = [_townPos, 0, _townRadius, 5, 0, 0.3, 0] call BIS_fnc_findSafePos;
+        private _p = [_townPos, 0, _spawnRadius, 5, 0, 0.3, 0] call BIS_fnc_findSafePos;
         [if (_p isEqualTo [0,0,0]) then { _townPos } else { _p }, random 360]
     };
     private _road = selectRandom _clear;
@@ -161,7 +165,7 @@ private _decoys = [];
 // closes in and outs him. Captive and unarmed while he blends; only if his car is gone and he is
 // under fire -- already blown -- does he flip to EAST and fight out (footFlee, below).
 private _civBodies = missionNamespace getVariable ["civ_array", []];
-private _informantSpawn = [_townPos, 0, _townRadius, 3, 0, 0.3, 0] call BIS_fnc_findSafePos;
+private _informantSpawn = [_townPos, 0, _spawnRadius, 3, 0, 0.3, 0] call BIS_fnc_findSafePos;
 if (_informantSpawn isEqualTo [0,0,0]) then { _informantSpawn = _townPos };
 private _iGroup = createGroup [CIVILIAN, true];
 private _informant = _iGroup createUnit [selectRandom _civBodies, _informantSpawn, [], 0, "NONE"];
@@ -212,11 +216,12 @@ publicVariable "DUWS_informant_active";
 // raw, so this is the only path by which he receives the actions.
 [_informant] remoteExec ["fnc_civ_clientActions", 0, _informant];
 
-// While he waits he strolls the whole town rather than standing a fixed pin in the crowd: a fresh safe
-// point anywhere in the town radius, re-tasked on arrival or after a cap so a blocked path never freezes
-// him mid-town. LIMITED so he reads as a local out for a walk. Ends the instant the exfil watcher takes
-// over (DUWS_informant_leaving), so this doMove never fights the getaway's waypoints. TUNABLE cap.
-[_informant, _townPos, _townRadius] spawn {
+// While he waits he strolls the spawned cluster rather than standing a fixed pin in the crowd: a fresh
+// safe point within the spawn radius, re-tasked on arrival or after a cap so a blocked path never
+// freezes him. Kept to the cluster so he never wanders out of the crowd that hides him. LIMITED so he
+// reads as a local out for a walk. Ends the instant the exfil watcher takes over
+// (DUWS_informant_leaving), so this doMove never fights the getaway's waypoints. TUNABLE cap.
+[_informant, _townPos, _spawnRadius] spawn {
     params ["_inf", "_tp", "_tr"];
     (group _inf) setSpeedMode "LIMITED";
     while { alive _inf && !(_inf getVariable ["DUWS_informant_leaving", false]) } do {
@@ -248,7 +253,7 @@ if (!_enemyTown) then {
 
     private _crowdGroups = [];
     for "_i" from 1 to 16 do {
-        private _anchor = [_townPos, 0, _townRadius, 2, 0, 0.35, 0] call BIS_fnc_findSafePos;
+        private _anchor = [_townPos, 0, _spawnRadius, 2, 0, 0.35, 0] call BIS_fnc_findSafePos;
         if (_anchor isEqualTo [0,0,0]) then { _anchor = _townPos };
         private _grp = grpNull;
         for "_j" from 0 to 2 do {
