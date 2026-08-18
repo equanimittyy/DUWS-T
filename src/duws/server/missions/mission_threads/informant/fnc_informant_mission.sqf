@@ -246,9 +246,9 @@ publicVariable "DUWS_informant_active";
 // Thicken the crowd only where the player can work it -- a friendly/neutral town he can walk. Each
 // added civilian is a real town local (same index, so harming one costs the town), gets the ask
 // action if that layer is loaded, and wanders on the town's own movement pass rather than standing
-// frozen. Spawned three to a group beside each other: a civilian gets its own group, and 48 solo groups
-// eat the engine's ~144-per-side cap the town crowd and the decoy drivers also draw on. TUNABLE
-// count (trios x 3).
+// frozen. Spawned three to a group beside each other: a civilian gets its own group, and 24 solo
+// groups eat the engine's ~144-per-side cap the town crowd and the decoy drivers also draw on. Eight
+// trios in the half-radius cluster is roughly twice the town's own density, not four times. TUNABLE.
 private _crowd = [];
 if (!_enemyTown) then {
     // Re-open every local already in town: a hunt reuses bodies that survived an earlier one on the
@@ -258,7 +258,7 @@ if (!_enemyTown) then {
         (allUnits select { (_x getVariable ["civ_locIndex", -1]) == _townIndex });
 
     private _crowdGroups = [];
-    for "_i" from 1 to 16 do {
+    for "_i" from 1 to 8 do {
         private _anchor = [_townPos, 0, _spawnRadius, 2, 0, 0.35, 0] call BIS_fnc_findSafePos;
         if (_anchor isEqualTo [0,0,0]) then { _anchor = _townPos };
         private _grp = grpNull;
@@ -334,6 +334,10 @@ if (isNil "DUWS_fnc_informant_footFlee") then {
         };
         private _speed = ["LIMITED", "FULL"] select _run;
         _grp setSpeedMode _speed;
+        // Upright, never prone: he bolts like a panicking civilian (fnc_civ_panic keeps them on their
+        // feet), where the EAST combat group above otherwise lets the danger AI drop him prone to fight
+        // from cover -- a disguised man running for it does not go to ground.
+        _inf setUnitPos "UP";
         private _wp = _grp addWaypoint [_dest, 0];
         _wp setWaypointType "MOVE";
         _wp setWaypointSpeed _speed;
