@@ -1350,3 +1350,9 @@ restart) and false while it runs (a JIP re-init inside the same mission, which i
 guard exists to stop). `client_init.sqf` keeps the drain handle in `uiNamespace` and respawns on
 `isNull || scriptDone`. The same trap waits for any once-per-session guard kept in `uiNamespace`; a
 per-mission guard belongs in `missionNamespace`, which is torn down with the mission.
+
+The persisted *data* is the other half: the dialogue queues also live in `uiNamespace` (deliberately —
+they must not serialize into save games), so a restart leaves the previous mission's un-played lines
+sitting there, and the freshly respawned drain flushes the whole backlog at once. A respawn must
+therefore clear the queues it owns, not just start the loop. Per-mission state in `uiNamespace` needs
+an explicit reset on restart; the engine won't do it.

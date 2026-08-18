@@ -30,6 +30,12 @@ waitUntil {sleep 0.1;!isNull player};
 // reads true once the loop is gone (restart) and false while it runs (JIP re-init this mission).
 private _drain = uiNamespace getVariable ["DUWS_dialogueDrainHandle", scriptNull];
 if (isNull _drain || {scriptDone _drain}) then {
+	// A restart leaves last mission's queued lines in uiNamespace -- it outlives the mission and the
+	// dead drain never played them. Drop both queues so the fresh drain starts clean instead of
+	// flushing a backlog of stale dialogue at mission start. Safe: nothing queues a line before this
+	// point (it sits below the serverinit_complete wait), so no live line is lost.
+	uiNamespace setVariable ["DUWS_dialogueQueueVoice", []];
+	uiNamespace setVariable ["DUWS_dialogueQueueNet", []];
 	uiNamespace setVariable ["DUWS_dialogueDrainHandle", [] spawn fnc_duws_dialogue_drain];
 };
 player addRating 10000000;
