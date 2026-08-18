@@ -20,6 +20,12 @@ duws_preset = ["classic", "hardcore", "custom"] select _sel;
 // player put it.
 if (duws_preset == "custom") exitWith {};
 
+// The preset the config now descends from. duws_preset itself is flipped to "custom" by the first
+// edit on either screen, so it cannot answer "did this config start from Hardcore" once the player
+// tweaks anything. The campaign screen seeds its Hardcore overrides off this instead, so editing an
+// unrelated environment option no longer drops that screen back to Classic defaults.
+duws_preset_base = duws_preset;
+
 duws_enviro_sel = nil;
 duws_campaign_sel = nil;
 

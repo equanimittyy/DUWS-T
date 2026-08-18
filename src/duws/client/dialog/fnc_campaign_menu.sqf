@@ -159,7 +159,7 @@ if (!isNil "duws_campaign_sel") then {
     private _idcs = [2100,2101,2102,2103,2104,2106,2107,2108,2109,2110,2111,2112,2113,2114];
     { lbSetCurSel [_idcs select _forEachIndex, _x]; } forEach duws_campaign_sel;
 } else {
-    if (duws_preset == "hardcore") then {
+    if (duws_preset_base == "hardcore") then {
         lbSetCurSel [2100, index_max_radius_1000];
         lbSetCurSel [2102, index_amount_zones_6];
     };
