@@ -7086,8 +7086,8 @@
                 <German>SITREP (1 CP)</German>
                 <Spanish>Reporte de situación (1 CP)</Spanish>
                 <Chinesesimp>报告(1CP)</Chinesesimp>
-                <Original>SITREP (1 CP)</Original>
-                <English>SITREP (1 CP)</English>
+                <Original>SITREP</Original>
+                <English>SITREP</English>
             </Key>
             <Key ID="STR_DUWS_T_e95mc4lv">
                 <German>Nicht genug Command Points</German>
