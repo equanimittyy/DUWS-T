@@ -32,7 +32,7 @@ private _build = {
 
     for "_t" from 1 to _teamCount do {
         // Best prone overlook anywhere in the ring: score every land sample on how high it stands over
-        // its 30 m surroundings and how far it sees down eight bearings, and keep the best. Terrain-only
+        // its 60 m surroundings and how far it sees down eight bearings, and keep the best. Terrain-only
         // rays, generation-time; getPos on a position array is the same relative-point form the recon
         // site-finder uses. Two bests are tracked: the best that also clears SNIPER_MIN_SEP from every
         // team already placed (preferred, so the teams spread), and the best regardless (used only when
@@ -46,7 +46,7 @@ private _build = {
             if (!(surfaceIsWater _cand)) then {
                 private _z = getTerrainHeightASL _cand;
                 private _ringSum = 0;
-                { _ringSum = _ringSum + getTerrainHeightASL (_cand getPos [30, _x]) } forEach _ring;
+                { _ringSum = _ringSum + getTerrainHeightASL (_cand getPos [60, _x]) } forEach _ring;
                 private _relElev = _z - _ringSum / 8;
                 private _eye = [_cand select 0, _cand select 1, _z + 0.5];
                 private _openSum = 0;
@@ -64,7 +64,11 @@ private _build = {
                     _openSum = _openSum + _clear;
                     if (_clear > _candBestRay) then { _candBestRay = _clear; _candBestDir = _dir };
                 } forEach _ring;
-                private _score = _relElev * 8 + _openSum;
+                // Elevation leads, openness is a bounded tie-breaker. Rays cap at 700 m/bearing, so a
+                // flat open plain reads as "sees far" as a hill and, weighted raw, out-scored it -- that
+                // put teams down low. Normalise openness to a 0..5 m-equivalent so height (metres)
+                // decides the perch and openness only spreads teams / breaks near-ties.
+                private _score = _relElev + 5 * (_openSum / 5600);
                 if (_score > _scoreAny) then { _scoreAny = _score; _perchAny = _cand; _dirAny = _candBestDir };
                 if ((_placedPerches findIf { _cand distance2D _x < SNIPER_MIN_SEP }) < 0) then {
                     if (_score > _scoreSep) then { _scoreSep = _score; _perchSep = _cand; _dirSep = _candBestDir };
