@@ -42,6 +42,9 @@ _heli setCaptive true;
 _heli lockedCargo true;
 _heli flyInHeight 40;
 { _x setCaptive true } forEach crew _heli;
+// Without this VCOM's squad FSM seizes the WEST/AI group and ignores its scripted MOVE waypoint,
+// leaving the bird idle at spawn. Every other scripted transport heli sets it for the same reason.
+{ _x setVariable ["Vcm_Disable", true] } forEach units _heliGrp;
 _heliGrp setBehaviour "CARELESS";
 _heliGrp setCombatMode "BLUE";
 _heliGrp deleteGroupWhenEmpty true;
