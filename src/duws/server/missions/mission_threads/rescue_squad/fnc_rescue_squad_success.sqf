@@ -73,7 +73,24 @@ private _fail = {
     [_marker] call fnc_missionMarkerClear;
     [_taskId, "FAILED"] call fnc_missionTaskEnd;
     [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_squadfail"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
-    if (!isNil "_heli" && {alive _heli}) then { { deleteVehicle _x } forEach crew _heli; deleteVehicle _heli };
+    // No one left to lift. Send the empty bird off and delete it once it is clear of the AO, rather than
+    // vanishing it in front of the player. Its LZ run is dropped for a departure leg; a detached watcher
+    // deletes it when far (or on a timeout) so this fail path finishes and tears down now. mission_end
+    // releases the composition but only schedules disposal, so nothing poofs the bird before it leaves.
+    if (!isNil "_heli" && {alive _heli}) then {
+        _heliGrp setBehaviour "CARELESS";
+        _heli flyInHeight 80;
+        for "_i" from (count (waypoints _heliGrp) - 1) to 1 step -1 do { deleteWaypoint [_heliGrp, _i] };
+        private _wpAway = _heliGrp addWaypoint [_bpos getPos [4000, _bearing], 0];
+        _wpAway setWaypointType "MOVE";
+        _wpAway setWaypointSpeed "FULL";
+        [_heli, _bpos] spawn {
+            params ["_h", "_ref"];
+            private _t = time + 120;
+            waitUntil { sleep 2; !alive _h || {(_h distance2D _ref) > 2500} || {time > _t} };
+            if (!isNull _h) then { { deleteVehicle _x } forEach crew _h; deleteVehicle _h };
+        };
+    };
     if (!isNil "_helipad") then { deleteVehicle _helipad };
     [_tpos, _radius, _compKey] call fnc_mission_end;
 };
