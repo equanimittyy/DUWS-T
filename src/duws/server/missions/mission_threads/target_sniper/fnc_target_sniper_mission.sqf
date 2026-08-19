@@ -57,7 +57,11 @@ private _build = {
         };
     };
 
-    private _group = [_perch, east, [opfor_SNIPER_SOLDIER_X, opfor_SNIPER_SOLDIER_X], [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
+    // Roster from the "sniper_element" token, not a class literal, so the composition tool owns the pair
+    // and faction pools resolve it. Spawned here rather than via fnc_spawn_team: the perch siting above
+    // replaces the token's own findSafePos/posture.
+    private _men = ["sniper_element", "opfor"] call DUWS_fnc_teamRoster;
+    private _group = [_perch, east, _men, [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
     _group deleteGroupWhenEmpty true;
     [_group] call fnc_mission_claim;
     private _target1 = units _group select 0;
