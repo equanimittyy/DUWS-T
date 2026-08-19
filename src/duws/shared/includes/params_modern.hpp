@@ -17,10 +17,13 @@ class Params {
         default = 0;
     };
 
+    // Snap the player back to first person whenever they pop to third. Camera is client-local,
+    // so this is enforced per-client in client_init. Mode 2 leaves third person alone while
+    // mounted, matching the engine's vehicles-only difficulty option.
     class DUWS_RestrictFirstPerson {
         title = "Restrict to 1P";
-        values[] = {0,1};
-        texts[] = {"Off","On"};
+        values[] = {0,1,2};
+        texts[] = {"Off","On (all views)","On (vehicle 3P allowed)"};
         default = 0;
     };
 

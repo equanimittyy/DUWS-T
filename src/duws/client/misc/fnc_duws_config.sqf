@@ -94,6 +94,8 @@ private _paramsBody = ("MISSION PARAMETERS" call _hdr) + ([
     ["Revive", ["Revive", 0,
         ["None", "AIS (drag/carry)", "Vanilla"], [0,1,2]] call _param],
     ["Fatigue", ["DUWS_Fatigue", 0, ["Off", "On"], [0,1]] call _param],
+    ["Restrict to 1P", ["DUWS_RestrictFirstPerson", 0,
+        ["Off", "On (all)", "Vehicle 3P"], [0,1,2]] call _param],
     ["Arsenal Mode", ["DUWS_ArsenalMode", 0,
         ["Hybrid (captured gear tracked)", "Full (unlimited)", "Limited (all tracked)"], [0,1,2]] call _param],
     ["Track Ammo", ["DUWS_TrackAmmo", 0, ["Off", "On"], [0,1]] call _param],

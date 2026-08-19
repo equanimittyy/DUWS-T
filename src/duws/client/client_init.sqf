@@ -220,6 +220,25 @@ player addEventHandler ["killed", {
 // they field: recruits/requests/paradrops read player_fatigue at spawn.
 player_fatigue = ["DUWS_Fatigue", 0] call BIS_fnc_getParamValue;
 player enableStamina (player_fatigue != 0);
+
+// First-person restriction from the lobby param (default off). Camera view is local, so the
+// watch runs here on each client. The inner wait for mode 2 is load-bearing: without it, sitting
+// in permitted vehicle third person would spin the loop every frame (outer waitUntil keeps
+// returning while cameraView stays EXTERNAL). isNull objectParent player == on foot.
+private _restrict1P = ["DUWS_RestrictFirstPerson", 0] call BIS_fnc_getParamValue;
+if (_restrict1P > 0) then {
+	[_restrict1P] spawn {
+		params ["_mode"];
+		while {true} do {
+			waitUntil { alive player && {cameraView == "EXTERNAL"} };
+			if (_mode == 2 && {!isNull objectParent player}) then {
+				waitUntil { cameraView != "EXTERNAL" || {isNull objectParent player} || {!alive player} };
+			} else {
+				player switchCamera "INTERNAL";
+			};
+		};
+	};
+};
 // Traits go to everyone, deliberately not gated: any player should be able to use a medkit or
 // toolkit on a squadmate, and a UAV terminal is a personal tool rather than a command
 // privilege. Keeping these out of Squad_Leaders is what lets that array be trimmed to a few
