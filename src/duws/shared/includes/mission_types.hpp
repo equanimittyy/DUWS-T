@@ -46,7 +46,7 @@
 
 ["fnc_rescue_squad_mission",     "STR_DUWS_T_c0",  "STR_DUWS_T_kievbwmd",   "\a3\ui_f\data\gui\cfg\hints\ActionMenu_ca.paa", "Rescue squad",              { [0]  call fnc_mission_launch }, 45, 24, 0, [3,3], "command", "rescue", ""],
 ["fnc_steal_supply_mission",     "STR_DUWS_T_c1",  "STR_DUWS_T_p7qawzl4",   "\a3\ui_f\data\gui\cfg\hints\BasicSpeed_ca.paa", "Steal supply truck",       { [1]  call fnc_mission_launch }, 35, 24, 0, [3,3], "command", "requisition", ""],
-["fnc_target_hvt_mission",       "STR_DUWS_T_c2",  "STR_DUWS_T_19ajhe1d",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Kill HVT",                 { [2]  call fnc_mission_launch }, 35, 36, 0, [3,3], "command", "elimination", ""],
+["fnc_target_hvt_mission",       "STR_DUWS_T_c2",  "STR_DUWS_T_19ajhe1d",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Hunt HVT convoy",          { [2]  call fnc_mission_launch }, 35, 36, 0, [3,3], "command", "elimination", ""],
 ["fnc_destroy_tower_mission",    "STR_DUWS_T_c3",  "STR_DUWS_T_dgpqenyw",   "\a3\ui_f\data\gui\cfg\hints\IEDs_ca.paa",       "Destroy tower",            { [3]  call fnc_mission_launch }, 20, 30, 0, [3,3], "command", "sabotage", ""],
 ["fnc_rescue_pilot_mission",     "STR_DUWS_T_c4",  "STR_DUWS_T_njsu8ofz",   "\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa",  "Rescue pilot",             { [4]  call fnc_mission_launch }, 25, 40, 0, [3,3], "command", "rescue", ""],
 ["fnc_target_sniper_mission",    "STR_DUWS_T_c5",  "STR_DUWS_T_16dh939j",   "\a3\ui_f\data\gui\cfg\hints\Annoucning_ca.paa", "Kill snipers",             { [5]  call fnc_mission_launch }, 20, 15, 0, [3,3], "command", "elimination", ""],
