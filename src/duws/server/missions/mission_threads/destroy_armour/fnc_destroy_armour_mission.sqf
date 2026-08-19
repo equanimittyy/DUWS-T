@@ -1,15 +1,17 @@
 // Locality: server -- callers remoteExec to target 2; the watcher threads spawned here inherit it.
 //
 // A broken-down enemy MBT sits abandoned in the field. Its crew is inbound by road convoy to get it
-// running again: three crew (one an engineer) riding an unarmed transport, an armed car escorting, and
-// a rifle team along for security. The convoy enters ~1 km out from the nearest OPFOR-held zone and
-// drives to the tank; an orange arrow on the map marks where it comes from and which way it heads. The
-// player either ambushes the crew at the tank or intercepts the convoy on the road.
+// running again: three crew (one an engineer) riding one or two unarmed transports, an escort scaled to
+// what OPFOR can field (a car, an IFV or a tank), and a rifle team along for security. The convoy enters
+// ~1 km out from the nearest OPFOR-held zone and drives to the tank; an orange arrow on the map marks
+// where it comes from and which way it heads. The player either ambushes the crew at the tank or
+// intercepts the convoy on the road.
 //
 // Win = the tank denied to the enemy: every crewman dead, or the tank destroyed (blowing the derelict
 // before they reach it counts). Fail = the crew reach it, repair it to operational, and drive it clear
-// of the site, or the deadline. The tank is left unclaimed and persistent, so a player who clears the
-// crew can take it -- a claim is a deletion order, and this one may end up the player's.
+// of the site, or the deadline. The tank is protected from cleanup only while the mission runs, and is
+// never claimed on a win, so a player who clears the crew can drive it home -- a claim is a deletion
+// order, and this one may end up the player's.
 //
 // Not on the fnc_mission_run spine: that spine wins-or-times-out on a one-shot predicate, and this has
 // a distinct scripted fail (the repair race) the spine has no hook for. Shares the same helpers a spine
@@ -134,7 +136,7 @@ private _escortGrp = _escortSpawn select 2;
 private _place = [_randomPos] call fnc_place_name;
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_destroyarmour_start", _place]] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
-[localize "STR_DUWS_T_Signal", localize "STR_DUWS_T_destroyarmour_convoy"] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_destroyarmour_convoy"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Teardown shared by both outcomes: clear both markers and end the task, then hand the objective to the
 // map cleanup. mission_end flags claimed units on a ~5-minute far-clock rather than poofing them, so a
@@ -173,7 +175,7 @@ while { true } do {
 
     if (time > _deadline) exitWith {
         ["FAILED"] call _finish;
-        [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_destroyarmour_fail"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+        [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_destroyarmour_fail_time"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
     };
 
     if (!_dismounted) then {
@@ -218,7 +220,7 @@ while { true } do {
                     private _twp = _crewGrp addWaypoint [_home, 0];
                     _twp setWaypointType "MOVE";
                     _twp setWaypointSpeed "FULL";
-                    [localize "STR_DUWS_T_Signal", localize "STR_DUWS_T_destroyarmour_repaired"] remoteExec ["fnc_duws_dialogue", 0];
+                    [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_destroyarmour_repaired"] remoteExec ["fnc_duws_dialogue", 0];
                 };
             } else {
                 _repairAt = -1;   // pushed off the tank -- the work does not carry over

@@ -4180,28 +4180,32 @@
                 <English>An enemy tank sits broken down in the open. Its crew is inbound by convoy to get it running and drive it off. Kill the crew or destroy the tank before they recover it. The orange arrow marks the convoy's approach.</English>
             </Key>
             <Key ID="STR_DUWS_T_destroyarmour_start">
-                <Original>Alpha 1-1, Overlord. We've spotted a broken-down enemy tank near %1. Their crew is rolling in to repair it - stop them, or wreck the tank yourself.</Original>
-                <English>Alpha 1-1, Overlord. We've spotted a broken-down enemy tank near %1. Their crew is rolling in to repair it - stop them, or wreck the tank yourself.</English>
+                <Original>Alpha 1-1, our close air support disabled an enemy tank near %1 and its crew is moving up to recover it. Destroy the tank or eliminate the crew before it's recovered.</Original>
+                <English>Alpha 1-1, our close air support disabled an enemy tank near %1 and its crew is moving up to recover it. Destroy the tank or eliminate the crew before it's recovered.</English>
             </Key>
             <Key ID="STR_DUWS_T_destroyarmour_convoy">
-                <Original>Signal 3-1 - the repair convoy is inbound along the marked arrow, armed escort with them. Hit them on the road or set your ambush at the tank.</Original>
-                <English>Signal 3-1 - the repair convoy is inbound along the marked arrow, armed escort with them. Hit them on the road or set your ambush at the tank.</English>
+                <Original>Alpha 1-1, eyes on the recovery convoy, inbound along the marked approach with an armed escort.</Original>
+                <English>Alpha 1-1, eyes on the recovery convoy, inbound along the marked approach with an armed escort.</English>
             </Key>
             <Key ID="STR_DUWS_T_destroyarmour_arrow">
                 <Original>Enemy repair convoy</Original>
                 <English>Enemy repair convoy</English>
             </Key>
             <Key ID="STR_DUWS_T_destroyarmour_repaired">
-                <Original>Signal 3-1 - they have the tank running and they are pulling out. Kill it before it reaches their lines.</Original>
-                <English>Signal 3-1 - they have the tank running and they are pulling out. Kill it before it reaches their lines.</English>
+                <Original>Alpha 1-1, the enemy tank is operational and withdrawing toward their lines.</Original>
+                <English>Alpha 1-1, the enemy tank is operational and withdrawing toward their lines.</English>
             </Key>
             <Key ID="STR_DUWS_T_destroyarmour_end">
-                <Original>Good work, Alpha 1-1. That armor is staying right where it is - the enemy will not be driving it anywhere.</Original>
-                <English>Good work, Alpha 1-1. That armor is staying right where it is - the enemy will not be driving it anywhere.</English>
+                <Original>Alpha 1-1, that enemy armor is confirmed out of action. Good work.</Original>
+                <English>Alpha 1-1, that enemy armor is confirmed out of action. Good work.</English>
             </Key>
             <Key ID="STR_DUWS_T_destroyarmour_fail">
-                <Original>Alpha 1-1, the enemy recovered their tank and pulled it back to their lines. We missed our window on that one.</Original>
-                <English>Alpha 1-1, the enemy recovered their tank and pulled it back to their lines. We missed our window on that one.</English>
+                <Original>Alpha 1-1, the enemy have recovered their armor and have withdrawn.</Original>
+                <English>Alpha 1-1, the enemy have recovered their armor and have withdrawn.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_destroyarmour_fail_time">
+                <Original>Alpha 1-1, we're out of time and the enemy have recovered their armor.</Original>
+                <English>Alpha 1-1, we're out of time and the enemy have recovered their armor.</English>
             </Key>
             <Key ID="STR_DUWS_T_radarend">
                 <German>"Overlord 1-1" an Action Squad, Radar zerstört – bestätigt. Gute Arbeit.</German>
@@ -5946,8 +5950,8 @@
                 <German>"Allseer 1-1"</German>
                 <Spanish>"Allseer 1-1"</Spanish>
                 <Chinesesimp>全视眼 1-1</Chinesesimp>
-                <Original>Allseer 1-1</Original>
-                <English>Allseer 1-1</English>
+                <Original>Allseer</Original>
+                <English>Allseer</English>
             </Key>
             <Key ID="STR_DUWS_T_Cobra">
                 <German>Kobra 1-3</German>
