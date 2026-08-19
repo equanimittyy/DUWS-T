@@ -4175,8 +4175,8 @@
                 <German>Seien Sie informiert, Action Squad, hier spricht "Overlord". Der vorläufige feindliche Kommandant ist eliminierter – bestätigt. Perfekte Operation.</German>
                 <Spanish>Tengan conocimiento, Action Squad, aquí "Overlord". Comandante temporal enemigo eliminado, confirmado. Operación perfecta.</Spanish>
                 <Chinesesimp>行动组请。敌人的临时指挥官已被确认击杀，完美的行动。</Chinesesimp>
-                <Original>Alpha 1-1. Enemy field commander confirmed down. Good work.</Original>
-                <English>Alpha 1-1. Enemy field commander confirmed down. Good work.</English>
+                <Original>To Alpha 1-1, enemy field commander confirmed KIA. Good work.</Original>
+                <English>To Alpha 1-1, enemy field commander confirmed KIA. Good work.</English>
             </Key>
             <Key ID="STR_DUWS_T_1sp94d75">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDie Aufklärungspatrouille wurde getötet!</German>
@@ -4336,8 +4336,8 @@
                 <German>"Overlord 1-1" an alle Einheiten, Notfall! Wir haben gerade die vorläufige feindliche Kommandomannschaft gesichtet – alle Bereitschaftseinheiten sollen sich bewegen und den vorläufigen Kommandanten sofort eliminieren!</German>
                 <Spanish>"Overlord 1-1" a todas las unidades, emergencia! Acabamos de localizar el equipo de comando temporal enemigo – todas las unidades en espera deben desplazarse y eliminar al comandante temporal de inmediato!</Spanish>
                 <Chinesesimp>全体单位，紧急情况！我们刚刚发现了敌人的临时指挥小组，现在需要所有待命单位前往消灭临时指挥官！</Chinesesimp>
-                <Original>To all units, be advised: we have the enemy's field command team in the open. Any element on standby, move in and take the commander down.</Original>
-                <English>To all units, be advised: we have the enemy's field command team in the open. Any element on standby, move in and take the commander down.</English>
+                <Original>Alpha 1-1, we've located the enemy's field commander in the AO, marked on your map. Move in and take him down.</Original>
+                <English>Alpha 1-1, we've located the enemy's field commander in the AO, marked on your map. Move in and take him down.</English>
             </Key>
             <Key ID="STR_DUWS_T_armorletsdothis">
                 <German>Hier spricht "Overlord", gute Nachricht: Eine feindliche Panzerzug wurde gerade von unserer Nahluftunterstützung vernichtet, der Führerpanzer liegt im Gelände defekt. Ihre Einheit hat die Aufgabe, ihren Zugführer zu eliminieren, solange sie Feldreparaturen durchführen – sein Panzer zu beschlagnahmen, falls möglich.</German>
@@ -4350,15 +4350,15 @@
                 <German>Hier ist Viper 1-5. Wir haben das feindliche Scharfschützenteam lokalisiert — sie tragen Ghillie-Anzüge. Deine Einheit kann handeln! Vorsicht, in ihrer Nähe sind viele Feinde.</German>
                 <Spanish>Aquí Víbora 1-5. Acabamos de localizar al equipo de francotiradores enemigo — llevan trajes ghillie. Tu unidad puede actuar! Ten cuidado, hay muchos enemigos a su alrededor.</Spanish>
                 <Chinesesimp>我们刚刚找到了敌人的狙击小组————他们穿着吉利服。你的单位可以行动了！小心点，他们周围人还挺多。</Chinesesimp>
-                <Original>We've located the enemy sniper team. You're clear to engage.</Original>
-                <English>We've located the enemy sniper team. You're clear to engage.</English>
+                <Original>Alpha 1-1, Allseer has located an enemy sniper team in the AO, marked on your map. Eliminate them.</Original>
+                <English>Alpha 1-1, Allseer has located an enemy sniper team in the AO, marked on your map. Eliminate them.</English>
             </Key>
             <Key ID="STR_DUWS_T_sniperend">
                 <German>"Viper 1-5" an Action Squad, gut gemacht! Wir haben bestätigt, dass der feindliche Scharfschütze vollständig eliminiert wurde!</German>
                 <Spanish>"Viper 1-5" a Action Squad, ¡muy bien hecho! Hemos confirmado que el francotirador enemigo fue eliminado con éxito!</Spanish>
                 <Chinesesimp>行动组，干得漂亮！我们观察到敌人的狙击手被歼灭了！</Chinesesimp>
-                <Original>To Alpha 1-1, well done. We have visual confirmation the enemy sniper is down.</Original>
-                <English>To Alpha 1-1, well done. We have visual confirmation the enemy sniper is down.</English>
+                <Original>To Alpha 1-1, Allseer confirms the enemy sniper team has been eliminated. Good work.</Original>
+                <English>To Alpha 1-1, Allseer confirms the enemy sniper team has been eliminated. Good work.</English>
             </Key>
             <Key ID="STR_DUWS_T_cqbend">
                 <German>Action Squad an "Overlord", das feindliche Infiltrationskommando wurde vollständig eliminiert.</German>
