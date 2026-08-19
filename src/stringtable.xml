@@ -2984,8 +2984,8 @@
                 <Chinesesimp>背包已满，物品已掉落在地面。</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_DESC">
-                <Original>An enemy informant is operating among the civilians in this town. Find and kill him before he slips out of the area by car. Be advised that hostile locals will not offer you any information, and it is advisable you wait for his departure.</Original>
-                <English>An enemy informant is operating among the civilians in this town. Find and kill him before he slips out of the area by car. Be advised that hostile locals will not offer you any information, and it is advisable you wait for his departure.</English>
+                <Original>An enemy informant is operating among the civilians in this town. Find and kill him before he slips out of the area by car. Be advised that in the event locals are hostile, they will not offer you any information, and it is advisable you wait for his departure.</Original>
+                <English>An enemy informant is operating among the civilians in this town. Find and kill him before he slips out of the area by car. Be advised that in the event locals are hostile, they will not offer you any information, and it is advisable you wait for his departure.</English>
                 <Chinesesimp>敌人一个指挥部在我们的一次攻击行动后被打散了，他们正在收拾区域内的各类情报并逃脱。你的小队需要搜索区域内的建筑以获取情报物品。任务在15分钟后自动结束。(极低CP，极低AP)</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_NOTE">
