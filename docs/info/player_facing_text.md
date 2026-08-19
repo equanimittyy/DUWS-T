@@ -148,7 +148,7 @@ is why a CP award call passes a bare number where every other call passes a sent
 |---|---|---|
 | white `{1,1,1,1}` | neutral information | `info`, `missionclean`, `sitrepinfo`, `arsenal`, the `unlock_*` family |
 | blue `{0.2,0.5,1,1}` | something gained | `US_takencontrol`, `repup`, `infosearch` |
-| red `{1,0.2,0.2,1}` | something lost | `alert`, `US_lostcontrol`, `repdown`, `biohazard` |
+| red `{1,0.2,0.2,1}` | something lost, or a critical failure the player must act on | `alert`, `US_lostcontrol`, `repdown`, `biohazard`, `critical` |
 | cyan `{0.5,1,1,1}` | economy | the `CPadded*` / `APaddedmission` badge family |
 
 Gain and loss are the two sides' own colours, taken from the pair the setup screen already paints
@@ -163,22 +163,31 @@ light background and read as muddy text on the card's black one.
 `alert` is the old `info2`, which was white and carried one card -- a FOB being destroyed, reported
 in the same colour as a repair station opening.
 
+**Red carries a second sense beyond loss: the critical failure.** `critical` is the exception to
+white-is-information -- the campaign-defeat card and the enemy-contact card go red not because
+something is gone but because the player has to act, and neither can be allowed to read as neutral
+chatter scrolling past. The campaign card branches on the outcome: a win keeps white `info`, a defeat
+takes `critical`. The enemy-contact card is one call site (`fnc_enemy_contact`) raised from the HQ,
+every held zone and every FOB alike -- the FOB warning was a subtitle line before and now matches the
+HQ's card and map mark.
+
 **A class that carries more than one event takes its title from the call site.** `alert` held a
 fixed `$STR_DUWS_T_gwn85uxh` title while serving four of them, so a destroyed MHQ, a dead informant
 and a rise in escalation all announced themselves as `FOB Lost`. A class whose `title` is anything
 but `"%1"` may carry exactly one event.
 
-**The catalogue — 21 classes in service, plus the `SupportUnlock` base the unlock family inherits
+**The catalogue — 22 classes in service, plus the `SupportUnlock` base the unlock family inherits
 from, which is never fired itself:**
 
 | Class | Colour | Sites | Carries |
 |---|---|---|---|
-| `info` | white | 13 | the general-purpose card; MHQ, FOB, hire, black market, supports |
+| `info` | white | 12 | the general-purpose card; MHQ, FOB, hire, black market, supports; the campaign-victory card |
 | `arsenal` | white | 5 | the captured-materiel reward at a side-mission objective -- its advertisement and its seized confirmation |
 | `biohazard` | red | 4 | RAVAGE / WBK zombie-mode announcements |
 | `missionclean` | white | 2 | the side-mission cleanup countdown |
 | `repup` | blue | 3 | reputation gained |
 | `alert` | red | 4 | MHQ or FOB destroyed, informant killed, escalation risen |
+| `critical` | red | 2 | the campaign-defeat card, and the enemy-contact card (HQ, FOBs, held zones) |
 | `repdown` | red | 1 | reputation lost |
 | `sitrepinfo` | white | 2 | the SITREP support |
 | `US_takencontrol` | blue | 2 | zone captured |

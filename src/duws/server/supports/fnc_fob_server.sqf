@@ -81,15 +81,15 @@ _fob setVariable ["DUWS_siteKey", _fobKey];
 // No arrival trigger: it existed only to announce a friendly element reaching the FOB, and the
 // hardcore reveal fnc_enterlocation still does is keyed on a zone name, which a FOB never has.
 
-// warning trigger when an enemy approaches the camp
-enemy_near_fob = format[localize 'STR_DUWS_T_i0w3u54j',_fobname];
+// warning trigger when an enemy approaches the camp -- the same red contact card and map mark the
+// HQ raises, through fnc_enemy_contact. The FOB label is baked into the statement as a literal:
+// the trigger evaluates later with no local scope, so _fobname is out of reach by then.
 _trgWarning = createTrigger["EmptyDetector",_foundPickupPos];
 _trgWarning setTriggerArea[300,300,0,false];
 _trgWarning setTriggerActivation["EAST","PRESENT",true];
-// FOB pos baked into the statement string; triggers evaluate later with no local scope.
 _trgWarning setTriggerStatements[
-    "this", 
-    format["[%1, enemy_near_fob] remoteExec ['fnc_duws_dialogue', 0];", str(_foundPickupPos)],
+    "this",
+    format["[%1, thisList] call fnc_enemy_contact;", str(format ["FOB %1", _fobname])],
     ""
 ];
 // Filed under the rounded trigger position, which is the only key fnc_FOB_cleanup can rebuild

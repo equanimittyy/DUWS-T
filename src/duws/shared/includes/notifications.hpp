@@ -153,6 +153,22 @@ class CfgNotifications
         difficulty[] = {}; // Required difficulty settings. All listed difficulties has to be enabled
     };
 
+    // Red like the loss family, but a distinct category: the failure/critical card the player is
+    // told about because they have to act, not because a thing is already gone. Carries the campaign
+    // defeat card and the enemy-contact card (HQ, FOBs, held zones). Kept off white info deliberately
+    // -- these must not read as neutral chatter. Title and body both come from the call site.
+    class critical
+    {
+        title = "%1";
+        iconPicture = "\A3\ui_f\data\map\markers\military\warning_ca.paa";
+        iconText = "";
+        description = "%2";
+        color[] = {1,0.2,0.2,1};
+        duration = 4;
+        priority = 0;
+        difficulty[] = {};
+    };
+
     class sitrepinfo
     {
         title = "%1"; // Tile displayed as text on black background. Filled by arguments.

@@ -79,7 +79,9 @@ private _body = format [[localize (missionNamespace getVariable
     ["campaign_lost_body", "STR_DUWS_T_CAMPAIGN_LOST"]), localize "STR_DUWS_T_CAMPAIGN_WON"] select _won,
     getText (configFile >> "cfgWorlds" >> worldName >> "description")];
 
-["info", [_title, _body]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
+// Defeat wears the red critical class; a win stays neutral. Losing the campaign must not be
+// reported in the same colour as a cost line.
+[["critical", "info"] select _won, [_title, _body]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
 [format ["%1\n\n%2", _title, _body], {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
 ["Campaign", ["FAILED", "SUCCEEDED"] select _won] remoteExec ["BIS_fnc_taskSetState", [0,-2] select isDedicated, "Campaign"];

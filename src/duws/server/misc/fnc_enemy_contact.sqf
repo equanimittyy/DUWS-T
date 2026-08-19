@@ -7,7 +7,7 @@
 params ["_place", ["_units", []]];
 if (!isServer) exitWith {};
 
-["info", [localize "STR_DUWS_T_enemy_contact_title",
+["critical", [localize "STR_DUWS_T_enemy_contact_title",
     format [localize "STR_DUWS_T_enemy_contact", _place]]]
     remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated, false];
 

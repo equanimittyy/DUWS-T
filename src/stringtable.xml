@@ -5204,13 +5204,6 @@
                 <Original>The FOB has been deployed.</Original>
                 <English>The FOB has been deployed.</English>
             </Key>
-            <Key ID="STR_DUWS_T_i0w3u54j">
-                <German>FOB %1 an alle Einheiten im Einsatzgebiet, Feind in der Nähe, über.</German>
-                <Spanish>FOB %1 a todas las unidades en la zona, enemigos cerca, fuera.</Spanish>
-                <Chinesesimp>FOB %1呼叫战区所有单位，我们周边有敌情报告，完毕</Chinesesimp>
-                <Original>FOB %1 to all units in the AO, taking contact at our position, over.</Original>
-                <English>FOB %1 to all units in the AO, taking contact at our position, over.</English>
-            </Key>
             <Key ID="STR_DUWS_T_supplydropcall">
                 <German>Action Squad an "Overlord 1-1" – Supply-Drop an meiner Position angefordert, over.</German>
                 <Spanish>Action Squad a "Overlord 1-1" – solicito supply drop en mi posición, over.</Spanish>
