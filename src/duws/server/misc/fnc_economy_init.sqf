@@ -434,6 +434,16 @@ fnc_captured_pool_settle = {
 	if (!isServer) exitWith {};
 	params [["_openLoadout", []], ["_closeLoadout", []], ["_requester", objNull], ["_replyVar", ""]];
 	call fnc_captured_pool_friendly;
+	// A disposable launcher (CUP NLAW/M136/RPG18) is stocked and shown by its base row but leaves the
+	// arsenal as a distinct loaded fire-class (CUP_launch_NLAW -> CUP_launch_NLAW_Loaded) the raw
+	// friendly set never holds. Resolve back to the arsenal base -- the same mapping that built the set
+	// -- before the unlimited-floor skip, else the unlimited launcher settles as a count-0 foreign
+	// overdraw and is stripped off the player.
+	private _friendlyHit = {
+		params ["_c"];
+		if (_c in DUWS_friendlyArsenal) exitWith { true };
+		count (([[_c]] call fnc_arsenal_base_weapons) arrayIntersect DUWS_friendlyArsenal) > 0
+	};
 	private _openC = [_openLoadout] call fnc_captured_loadout_counts;
 	private _closeC = [_closeLoadout] call fnc_captured_loadout_counts;
 	private _classes = (keys _openC) + (keys _closeC);
@@ -444,7 +454,7 @@ fnc_captured_pool_settle = {
 		// Ammo untracked: magazines never touch the pool. Hybrid keeps friendly as the unlimited
 		// floor and skips it; Limited tracks friendly too, so that skip is dropped.
 		if (!DUWS_trackAmmo && {isClass (configFile >> "CfgMagazines" >> _cls)}) then { continue };
-		if (!DUWS_arsenalLimited && {_cls in DUWS_friendlyArsenal}) then { continue };
+		if (!DUWS_arsenalLimited && {[_cls] call _friendlyHit}) then { continue };
 		private _net = (_closeC getOrDefault [_cls, 0]) - (_openC getOrDefault [_cls, 0]);
 		if (_net == 0) then { continue };
 		private _cur = [_cls] call fnc_captured_pool_getCount;
@@ -475,7 +485,7 @@ fnc_captured_pool_settle = {
 		{
 			_x params ["_cc", ["_cn", 1]];
 			if (!DUWS_trackAmmo && {isClass (configFile >> "CfgMagazines" >> _cc)}) then { continue };
-			if (!DUWS_arsenalLimited && {_cc in DUWS_friendlyArsenal}) then { continue };
+			if (!DUWS_arsenalLimited && {[_cc] call _friendlyHit}) then { continue };
 			private _keep = _cn - (_exMap getOrDefault [_cc, 0]);
 			if (_keep > 0) then {
 				[_cc, ([_cc] call fnc_captured_pool_getCount) + _keep] call fnc_captured_pool_setCount;
