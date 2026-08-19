@@ -4391,8 +4391,8 @@
                 <German>"Signal 3-1" an alle Einheiten! Wir wurden an den aktuellen Koordinaten überfallen, schwere Verluste! Ich und ein paar Männer sind in einem nahe gelegenen Gebäude versteckt, wir brauchen dringend Evakuierung!</German>
                 <Spanish>"Signal 3-1" a todas las unidades! Fuimos emboscados en las coordenadas actuales, muchas bajas! Yo y unos pocos hombres estamos escondidos en un edificio cercano, necesitamos rescate urgentemente!</Spanish>
                 <Chinesesimp>所有单位，我们在当前坐标被伏击了，损失很多。现在我和几个人躲在附近的建筑物里，需要救援！</Chinesesimp>
-                <Original>All units, we've been ambushed and have taken heavy casualties. A few of us are holed up in a building nearby. We need extraction.</Original>
-                <English>All units, we've been ambushed and have taken heavy casualties. A few of us are holed up in a building nearby. We need extraction.</English>
+                <Original>All units, we've been ambushed and have taken heavy casualties. A few of us are holed up in a building near %1. We need extraction.</Original>
+                <English>All units, we've been ambushed and have taken heavy casualties. A few of us are holed up in a building near %1. We need extraction.</English>
             </Key>
             <Key ID="STR_DUWS_T_squadoverlord">
                 <German>"Overlord 1-1" an "Signal 3-1"! Eine Soforteinsatztruppe ist auf dem Weg zu Ihrer Position. Halten Sie durch!</German>
