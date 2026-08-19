@@ -3,11 +3,13 @@
 // support teams -- the teams on their perches are the whole objective, so the win is unambiguous and
 // the field is empty but for them. Shared spine: fnc_mission_run.
 //
-// Each team is sited independently by the hardpoint terrain-ray technique (fnc_hardpoint_siting):
-// sample ground within the ring, keep what stands above its surroundings (an eight-point elevation
-// ring) AND looks down open terrain (rays marched out on eight bearings until the ground masks them).
-// The pair is laid prone facing the most open bearing -- an overwatch, not a garrison. Prone eye
-// height is modelled in the ray (z + 0.5) so the perch is chosen for the stance they actually hold.
+// Each team is sited independently across the full objective ring by the hardpoint terrain-ray
+// technique (fnc_hardpoint_siting): sample ground anywhere in the ring and score each on how high it
+// stands over its surroundings (an eight-point elevation ring) and how far it looks down open terrain
+// (rays marched out on eight bearings until the ground masks them) -- best score wins, and teams are
+// held at least SNIPER_MIN_SEP apart so the pairs do not stack. The pair is laid prone facing the most
+// open bearing -- an overwatch, not a garrison. Prone eye height is modelled in the ray (z + 0.5) so
+// the perch is chosen for the stance they actually hold.
 //
 // Elite by override, not by campaign difficulty: their sub-skills are forced to 1 so they are as
 // accurate and quick to spot as the engine allows, whatever opfor_ai_skill is. A reveal loop pins
@@ -18,6 +20,7 @@
 params ["_MissionPos", "_mission_name"];
 
 #define SNIPER_FLUSH_DIST 500   // a player this close, or a hit, releases a team to move
+#define SNIPER_MIN_SEP    400   // teams sited at least this far apart when the ring allows it
 
 private _build = {
     params ["_targetpos", "_randomPos", "_radius"];
@@ -25,44 +28,53 @@ private _build = {
     private _teamCount = 1 + floor random 3;   // 1..3 two-man teams
     private _allSnipers = [];
     private _allGroups = [];
+    private _placedPerches = [];   // perch of each team already sited, to space the next one off them
 
     for "_t" from 1 to _teamCount do {
-        // Best prone overlook near the found ground: high above its ring and looking down open terrain.
-        // Terrain-only rays, generation-time; getPos on a position array is the same relative-point form
-        // the recon site-finder uses. Falls back to _targetpos if nothing within reach clears the bar.
-        private _perch = _targetpos;
-        private _perchDir = 0;
-        private _bestScore = -1;
+        // Best prone overlook anywhere in the ring: score every land sample on how high it stands over
+        // its 30 m surroundings and how far it sees down eight bearings, and keep the best. Terrain-only
+        // rays, generation-time; getPos on a position array is the same relative-point form the recon
+        // site-finder uses. Two bests are tracked: the best that also clears SNIPER_MIN_SEP from every
+        // team already placed (preferred, so the teams spread), and the best regardless (used only when
+        // the ring is too tight to honour the separation). Elevation is scored, not gated, so a flat AO
+        // no longer collapses every team onto _targetpos.
         private _ring = [0, 45, 90, 135, 180, 225, 270, 315];
+        private _perchAny = _targetpos;  private _dirAny = 0;  private _scoreAny = -1000000;
+        private _perchSep = _targetpos;  private _dirSep = 0;  private _scoreSep = -1000000;
         for "_i" from 0 to 23 do {
-            private _cand = _targetpos getPos [50 + random 450, random 360];
+            private _cand = _targetpos getPos [50 + random (_radius - 50), random 360];
             if (!(surfaceIsWater _cand)) then {
                 private _z = getTerrainHeightASL _cand;
                 private _ringSum = 0;
                 { _ringSum = _ringSum + getTerrainHeightASL (_cand getPos [30, _x]) } forEach _ring;
                 private _relElev = _z - _ringSum / 8;
-                if (_relElev >= 2) then {
-                    private _eye = [_cand select 0, _cand select 1, _z + 0.5];
-                    private _openSum = 0;
-                    private _candBestRay = 0;
-                    private _candBestDir = 0;
-                    {
-                        private _dir = _x;
-                        private _clear = 700;
-                        for "_d" from 70 to 700 step 70 do {
-                            private _tp = _cand getPos [_d, _dir];
-                            if (terrainIntersectASL [_eye, [_tp select 0, _tp select 1, (getTerrainHeightASL _tp) + 1]]) exitWith {
-                                _clear = _d - 70;
-                            };
+                private _eye = [_cand select 0, _cand select 1, _z + 0.5];
+                private _openSum = 0;
+                private _candBestRay = 0;
+                private _candBestDir = 0;
+                {
+                    private _dir = _x;
+                    private _clear = 700;
+                    for "_d" from 70 to 700 step 70 do {
+                        private _tp = _cand getPos [_d, _dir];
+                        if (terrainIntersectASL [_eye, [_tp select 0, _tp select 1, (getTerrainHeightASL _tp) + 1]]) exitWith {
+                            _clear = _d - 70;
                         };
-                        _openSum = _openSum + _clear;
-                        if (_clear > _candBestRay) then { _candBestRay = _clear; _candBestDir = _dir };
-                    } forEach _ring;
-                    private _score = _relElev * 8 + _openSum;
-                    if (_score > _bestScore) then { _bestScore = _score; _perch = _cand; _perchDir = _candBestDir };
+                    };
+                    _openSum = _openSum + _clear;
+                    if (_clear > _candBestRay) then { _candBestRay = _clear; _candBestDir = _dir };
+                } forEach _ring;
+                private _score = _relElev * 8 + _openSum;
+                if (_score > _scoreAny) then { _scoreAny = _score; _perchAny = _cand; _dirAny = _candBestDir };
+                if ((_placedPerches findIf { _cand distance2D _x < SNIPER_MIN_SEP }) < 0) then {
+                    if (_score > _scoreSep) then { _scoreSep = _score; _perchSep = _cand; _dirSep = _candBestDir };
                 };
             };
         };
+        private _perch = _perchAny;
+        private _perchDir = _dirAny;
+        if (_scoreSep > -1000000) then { _perch = _perchSep; _perchDir = _dirSep };
+        _placedPerches pushBack _perch;
 
         // Roster from the "sniper_element" token, not a class literal, so the composition tool owns the
         // pair and faction pools resolve it. Spawned here rather than via fnc_spawn_team: the perch
