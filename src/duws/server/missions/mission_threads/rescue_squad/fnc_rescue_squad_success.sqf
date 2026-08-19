@@ -10,12 +10,13 @@ params ["_squad", "_bld", "_marker", "_taskId", "_tpos", "_radius", "_compKey", 
 private _bpos = getPos _bld;
 private _alive = _squad select {alive _x};
 
-// Squad up and safe for the pickup: release the garrison hold so its doMove loop stops fighting the evac
-// move order, stand them up, and set captive so the extraction is not lost to a stray round now the fight
-// is won. Released here as well as at break-out: on a cordon-wiped win the main thread can flip
-// DUWS_rsq_relieved before the un-captive thread runs, so without this the squad holds its posts forever.
+// Squad up and safe for the pickup: unpin them (PATH/MOVE on) so they can walk to the bird, stand them
+// up, and set captive so the extraction is not lost to a stray round now the fight is won. Unpinned here
+// as well as at break-out: on a cordon-wiped win the main thread can flip DUWS_rsq_relieved before the
+// un-captive thread runs, so without this the squad stays pinned in the building and never boards.
 {
-    _x setVariable ["DUWS_postReleased", true];
+    _x enableAI "PATH";
+    _x enableAI "MOVE";
     _x setCaptive true;
     _x setUnitPos "AUTO";
 } forEach _alive;

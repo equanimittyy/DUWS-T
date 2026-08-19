@@ -36,8 +36,8 @@ private _squadSize = count _squadClasses;
 // Site: enterable buildings near the offer that can garrison the whole squad, minus any sitting in a
 // zone (its own radius plus a margin) or inside a civilian town. fnc_civ_townAt is -1 when clear -- and
 // always -1 with civilians off, so the town half of the filter simply passes then. The seating check
-// counts BIS_fnc_buildingPositions -- the same list fnc_spreadIntoBuildings places into -- so a chosen
-// building actually holds the squad indoors rather than spilling it into the open around a stub.
+// counts BIS_fnc_buildingPositions -- the same list each man is later dropped on by index -- so a chosen
+// building has a distinct indoor slot per man rather than spilling the squad into the open around a stub.
 private _zoneMeta = missionNamespace getVariable ["zone_meta_array", []];
 private _candidates = ([_MissionPos, 2, SEARCH_R] call fnc_usableBuildings) select {
     private _bp = getPos _x;
@@ -50,6 +50,10 @@ if (_candidates isEqualTo []) exitWith {
 };
 private _Building = selectRandom _candidates;
 private _BuildingPos = getPos _Building;
+
+// Settlement by the building, for the distress call's "near %1". Keyed on the building -- which can
+// sit up to SEARCH_R off the offer point -- so it names the squad's ground, not the offer's.
+private _place = [_BuildingPos] call fnc_place_name;
 
 // Marked on the building itself, not the offer point: the building can sit up to SEARCH_R away, and
 // the ellipse and the task are the only things pointing the player at the objective.
@@ -64,14 +68,22 @@ private _squadGroup = [_BuildingPos, WEST, _squadClasses, [], [], 1] call BIS_fn
 _squadGroup deleteGroupWhenEmpty true;
 [_squadGroup] call fnc_mission_claim;
 private _squadUnits = units _squadGroup;
-{ _x setCaptive true; _x setSkill 1 } forEach _squadUnits;
 
-// Garrison the building through the shared hold system rather than pinning them with disableAI "PATH":
-// fnc_spreadIntoBuildings drops each man on a building position and starts a per-unit doMove loop
-// (fnc_holdBuildingPost) that keeps pathing on, so they work the windows and fight from cover instead of
-// freezing on one spot. "MIDDLE" keeps the holed-up crouch; the hold re-asserts it each pass, so it never
-// sticks the way the old raw switchMove pose did. Released per unit via DUWS_postReleased on break-out.
-[_squadGroup, [_Building], (count _squadUnits), "MIDDLE"] call fnc_spreadIntoBuildings;
+// Pinned inside the building and inert while captive: each man dropped on his own building position,
+// movement off (disableAI "PATH") so he cannot wander out, and firing off (combat mode BLUE, autotarget
+// off) so the squad does not one-sidedly shoot the cordon that -- being captive -- will not shoot back.
+// A roaming garrison hold read wrong here: doMove walked them out of the building and combat pulled them
+// into a fight the cordon could not answer. setUnitPos "MIDDLE" holds the crouch with a living idle.
+private _positions = [_Building] call BIS_fnc_buildingPositions;
+{
+    _x setCaptive true;
+    _x setSkill 1;
+    _x setPosATL (_positions select _forEachIndex);
+    _x setUnitPos "MIDDLE";
+    _x disableAI "PATH";
+    _x disableAI "AUTOTARGET";
+} forEach _squadUnits;
+_squadGroup setCombatMode "BLUE";
 
 // The cordon: four OPFOR teams held at the cardinal points on a ring round the building -- three
 // rifle teams and one weapons team, from the shared token vocabulary. Posture "none" so fnc_spawn_team
@@ -107,7 +119,7 @@ if (!isNull _car) then {
     { _cordonUnits pushBack _x } forEach units _car;
 };
 
-[localize "STR_DUWS_T_Signal", localize "STR_DUWS_T_squadletsdothis"] remoteExec ["fnc_duws_dialogue", 0];
+[localize "STR_DUWS_T_Signal", format [localize "STR_DUWS_T_squadletsdothis", _place]] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadoverlord"] remoteExec ["fnc_duws_dialogue", 0];
 
@@ -167,8 +179,8 @@ DUWS_rsq_relieved = false;
 // the building from cover instead of charging a still-intact cordon. They break out and path freely only
 // once the tide has turned enough to keep them alive: at least half the cordon down AND the armed car
 // destroyed (a car that never spawned counts as gone, so the gate falls back to the half-cordon check).
-[_squadUnits, _Building, _cordonUnits, _car, _deadline] spawn {
-    params ["_sq", "_bld", "_cordon", "_carv", "_dl"];
+[_squadUnits, _squadGroup, _Building, _cordonUnits, _car, _deadline] spawn {
+    params ["_sq", "_grp", "_bld", "_cordon", "_carv", "_dl"];
     waitUntil {
         sleep 1;
         DUWS_rsq_relieved
@@ -178,14 +190,19 @@ DUWS_rsq_relieved = false;
     };
     if (!DUWS_rsq_relieved && {time <= _dl}) then {
         DUWS_rsq_relieved = true;
-        // Active and killable, but still holding their posts -- they fight from the building, not out in
-        // the open. Stance stays with the hold loop (crouched) until the post is released below.
-        { if (alive _x) then { _x setCaptive false } } forEach _sq;
+        // Now active and killable, and cleared to fire back (autotarget on, combat mode RED), but still
+        // pinned in the building -- PATH stays off, so they defend from cover instead of charging out.
+        {
+            if (alive _x) then {
+                _x setCaptive false;
+                _x enableAI "AUTOTARGET";
+            };
+        } forEach _sq;
+        _grp setCombatMode "RED";
         [localize "STR_DUWS_T_Signal", localize "STR_DUWS_T_lyjjiteq"] remoteExec ["fnc_duws_dialogue", 0];
 
-        // Hold the garrison until the tide turns, then release the posts so they can manoeuvre and, once
-        // the cordon is fully broken, walk to the evac. Standing them up here lets the crouch drop as they
-        // break cover; the hold loop stops re-asserting it once DUWS_postReleased is set.
+        // Hold in the building until the tide turns, then release movement so they can manoeuvre and, once
+        // the cordon is fully broken, walk to the evac. Standing them up lets the crouch drop as they move.
         private _half = (count _cordon) / 2;
         waitUntil {
             sleep 2;
@@ -193,7 +210,7 @@ DUWS_rsq_relieved = false;
             || {(_cordon findIf {alive _x}) < 0}
             || { (({alive _x} count _cordon) <= _half) && {isNull _carv || {!alive _carv}} }
         };
-        { if (alive _x) then { _x setVariable ["DUWS_postReleased", true]; _x setUnitPos "AUTO" } } forEach _sq;
+        { if (alive _x) then { _x enableAI "PATH"; _x setUnitPos "AUTO" } } forEach _sq;
     };
 };
 
@@ -208,9 +225,6 @@ waitUntil {
 
 if (((_cordonUnits findIf {alive _x}) >= 0) || {(_squadUnits findIf {alive _x}) < 0}) exitWith {
     DUWS_rsq_relieved = true;
-    // Stand the posts down at once: cleanup deletes the squad on a timed sweep, and a held loop would
-    // keep reissuing doMove on the survivors until then.
-    { _x setVariable ["DUWS_postReleased", true] } forEach _squadUnits;
     [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_squadfail"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
     [_marker] call fnc_missionMarkerClear;
     [_taskId, "FAILED"] call fnc_missionTaskEnd;
