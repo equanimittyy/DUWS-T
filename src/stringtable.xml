@@ -3009,8 +3009,8 @@
                 <English>The informant has reached %1. Mission failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_HVT_CONVOY_TASK">
-                <Original>The HVT is escaping to %1 with three armed convoys on separate routes. He rides in a %2, and only one convoy carries him. Find it and kill him before it reaches %1.</Original>
-                <English>The HVT is escaping to %1 with three armed convoys on separate routes. He rides in a %2, and only one convoy carries him. Find it and kill him before it reaches %1.</English>
+                <Original>The HVT is fleeing to %1 by convoy, in a %2. We have intel that he is leaving in one of three convoys. Kill him before he reaches %1.</Original>
+                <English>The HVT is fleeing to %1 by convoy, in a %2. We have intel that he is leaving in one of three convoys. Kill him before he reaches %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_HVT_CONVOY_ESCAPED">
                 <Original>The HVT's convoy reached %1. Target extracted, mission failed.</Original>
@@ -3878,8 +3878,8 @@
                 <German>Der Nachrichtendienst hat gerade ermittelt, dass eine feindliche vorläufige Kommandotruppe sich hier vorübergehend versammelt hat – eliminiere den Offizier in der Truppe! Nach der Eliminierung des Offiziers braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Zielerfüllung zu bestätigen.(Diese Mission ist extrem zeitsensitiv; sie schlägt fehl, falls sie innerhalb von 8 Minuten nicht abgeschlossen wird.) (High CP, high AP)</German>
                 <Spanish>El servicio de inteligencia acaba de detectar que un equipo de comando temporal enemigo se ha reunido aquí temporalmente — elimína al oficial del equipo! Después de que el oficial sea eliminado, el servicio de inteligencia necesitará unos minutos adicionales para confirmar la consecución del objetivo.(Esta misión es extremadamente sensible al tiempo; fracasará si no se completa dentro de 8 minutos.) (High CP, high AP)</Spanish>
                 <Chinesesimp>情报部门刚刚发现，敌军的临时指挥班组在这里短暂聚集，去干掉班组里的军官！军官死亡后，情报部门需要额外几分钟确认目标完成。(此任务具有极强时效性，若未在8分钟内完成任务则会失败。)(高CP，高AP)</Chinesesimp>
-                <Original>A high-value target is fleeing by road. Three armed convoys are converging on an OPFOR-held zone, and only one carries the HVT, riding in a single distinct vehicle. Spot that convoy and kill him before it reaches the zone.</Original>
-                <English>A high-value target is fleeing by road. Three armed convoys are converging on an OPFOR-held zone, and only one carries the HVT, riding in a single distinct vehicle. Spot that convoy and kill him before it reaches the zone.</English>
+                <Original>A high-value target is fleeing to an OPFOR-held zone under armed escort. Intercept and kill him before he reaches the zone.</Original>
+                <English>A high-value target is fleeing to an OPFOR-held zone under armed escort. Intercept and kill him before he reaches the zone.</English>
             </Key>
             <Key ID="STR_DUWS_T_dgpqenyw">
                 <German>Ein freundlicher Signalturm in diesem Gebiet wurde von feindlichen Truppen eingenommen. Feindliche Truppen sind in der Nähe stationiert und entschlüsseln kritische Informationen. Sprenge den Turm, bevor die Feinde das Entschlüsseln abschließen! (Nur noch 15 Minuten, bis kritische Informationen an die Feinde gelangen!) (Slightly low CP, avg AP)</German>
