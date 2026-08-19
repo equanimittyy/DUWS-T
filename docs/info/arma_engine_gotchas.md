@@ -1356,3 +1356,23 @@ they must not serialize into save games), so a restart leaves the previous missi
 sitting there, and the freshly respawned drain flushes the whole backlog at once. A respawn must
 therefore clear the queues it owns, not just start the loop. Per-mission state in `uiNamespace` needs
 an explicit reset on restart; the engine won't do it.
+
+## `BIS_fnc_strategicMapOpen` offsets an icon's click hotspot when the offer position carries a Z
+
+**An offer handed to `BIS_fnc_strategicMapOpen` with a 3D `[x,y,z]` position draws its icon at the flat
+`[x,y]` projection but places the icon's clickable hotspot using the full 3D point. A Z away from the
+surface slides the hotspot off the drawn icon: a small `|Z|` leaves one corner of the icon dead, a
+large one misses the icon entirely. The offer looks present but won't select, and nothing reaches the
+RPT — the click never gets as far as the offer's activation code.**
+
+The trap is a finder that snaps an offer onto a `getPos`-derived feature centre — a town, a prefab —
+whose Z the picker never sanitises. `getPos` on a coastal town Location returns a below-surface Z
+(observed −11 to −32 m), and every finder-relocated offer inherits it while `BIS_fnc_findSafePos`-placed
+offers stay flat 2D. So the failure is intermittent by geography: the same mission type is fully
+clickable in one town, dead in a corner in the next (the visible tell — part of the icon selects, part
+does not), and wholly dead in a third.
+
+**How to apply:** keep every strategic-map offer position 2D. `fnc_mission_findSite` flattens each
+finder's returned position to `[x,y]` before it becomes an offer, so a snapping finder
+(`fnc_informant_site`, `fnc_recon_observe_site`) cannot leak a Z. The threads derive their own ground
+positions later and only ever measure the offer point with `distance2D`, so the Z was dead weight anyway.

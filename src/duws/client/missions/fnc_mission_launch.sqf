@@ -6,8 +6,6 @@
 // no locals, so the block can carry nothing but a literal index. This turns that index back into
 // the position and name the search picked for it.
 params ["_type"];
-["INFO", "MISSION", format ["launch: onActivate fired, type=%1, slot=%2",
-    _type, DUWS_missionSlots param [_type, []]]] call fnc_log;
 
 private _defs = [
 #include "..\..\shared\includes\mission_types.hpp"

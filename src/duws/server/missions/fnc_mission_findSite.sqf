@@ -206,7 +206,12 @@ while {_result isEqualTo [] && {_finderReject < _finderCap} && {_tries < _maxTri
     if (_site isEqualTo []) then {
         _finderReject = _finderReject + 1;
     } else {
-        _result = _site select 0;
+        // Flatten to 2D: a snapping finder can return a getPos-derived town/prefab centre whose Z sits
+        // below the surface. A 3D offer position offsets its strategic-map icon's clickable hotspot from
+        // the drawn icon -- the larger the |Z|, the more of the icon goes dead -- so match the flat [x,y]
+        // every findSafePos-based offer already carries.
+        private _p = _site select 0;
+        _result = [_p select 0, _p select 1];
     };
 };
 

@@ -158,6 +158,9 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 			[]
 		];
 
+		["INFO", "MISSION", format ["offer: type=%1 name=%2 pos=%3",
+			_currentMission, _name, _foundSafepos]] call fnc_log;
+
 		_counter = _counter + 1;
 	};
   };
