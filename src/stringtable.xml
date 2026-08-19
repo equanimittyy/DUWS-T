@@ -7088,8 +7088,8 @@
                 <German>"Allseer" an alle Einheiten im Einsatzgebiet. Der Sitrep wurde an das Terminal hochgeladen.</German>
                 <Spanish>"Allseer" a todas las unidades en la zona de operaciones. El sitrep ha sido subido al terminal.</Spanish>
                 <Chinesesimp>战区单位，情况报告已经上传到终端。</Chinesesimp>
-                <Original>To all units in the AO. Sitrep incoming.</Original>
-                <English>To all units in the AO. Sitrep incoming.</English>
+                <Original>To all units in the AO. Sitrep uploaded to your terminal.</Original>
+                <English>To all units in the AO. Sitrep uploaded to your terminal.</English>
             </Key>
             <Key ID="STR_DUWS_T_puy8tdeb">
                 <German>SITREP (1 CP)</German>
