@@ -20,6 +20,14 @@ if (!([0, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 #define UNCAPTIVE_RANGE 50
 #define CORDON_RING     120
 
+// Faked-suppression audio: a firefight heard from the house, played via playSound3D so it leans on no
+// mod content and no AI weapon choice. RSQ_FIRE_SND is a vanilla MX full-auto rifle sample; .wss, not
+// .ogg, since ogg carries a start delay that reads wrong on a weapon. If BI's folder move ever silences
+// it, the newer path is "a3\sounds_f\arsenal\weapons\rifles\mx\mx_short_01.wss", or drop in any weapon file.
+#define RSQ_FIRE_SND    "A3\sounds_f\weapons\mx\mx-st-full-1.wss"
+#define RSQ_FIRE_VOL    5
+#define RSQ_FIRE_MAXD   400
+
 private _compKey = "mission_rescue_squad";
 private _radius = 300;
 private _cpreward = DUWS_curReward select 0;
@@ -90,11 +98,10 @@ _squadGroup setCombatMode "BLUE";
 // drops each on the exact ring point rather than in its own band; then each holds facing in on combat
 // mode YELLOW. CORDON_RING sits past 100 m and PATH is disabled on every cordon man, so the ring holds
 // static -- no one advances inside 100 m of the building while the hold stands. Movement is handed back
-// only when the player breaks the hold (below); until then the ring just holds and suppresses the
-// building, and the player owns the ground inside it, where the squad is reached.
+// only when the player breaks the hold (below); until then the ring just holds while a firefight is heard
+// from the house, and the player owns the ground inside it, where the squad is reached.
 private _cordonTokens = ["team", "team", "team", "wp_team"];
 private _cordonUnits = [];
-private _suppressUnits = [];
 {
     private _bearing = _forEachIndex * 90;
     private _cpos = _BuildingPos getPos [CORDON_RING, _bearing];
@@ -109,7 +116,6 @@ private _suppressUnits = [];
         {
             _x disableAI "PATH";          // hold the ring static; no advance inside 100 m of the building
             _cordonUnits pushBack _x;
-            _suppressUnits pushBack _x;   // every cordon team suppresses, not just one
         } forEach units _g;
     };
 } forEach _cordonTokens;
@@ -129,49 +135,37 @@ if (!isNull _car) then {
 sleep 8;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadoverlord"] remoteExec ["fnc_duws_dialogue", 0];
 
-// Relief flag: raised the moment the squad comes out, read by the suppression thread (which stops
-// hosing the building once its occupants are up) and guarding the un-captive against a double fire.
+// Relief flag: raised the moment the squad comes out, read by the firefight-audio thread (which cuts the
+// house audio once its occupants are up) and guarding the un-captive against a double fire.
 DUWS_rsq_relieved = false;
 // Hold flag: raised when the player breaks the cordon's hold -- the assault lands (a cordon man takes
-// fire), the cordon starts dropping, or the squad is relieved. Ends the suppression and hands movement
+// fire), the cordon starts dropping, or the squad is relieved. Cuts the house audio and hands movement
 // back to the ring (below). Separate from _relieved: the squad can be freed by the cordon being cleared
 // from range, and the hold can break before the squad is out.
 DUWS_rsq_holdBroken = false;
 
-// Native small-arms suppression on the held building, to sell the squad being pinned. Fires only while a
-// player is in the outer band (SUPPRESS_RANGE) and the squad is still holed up, and stops on the first of:
-// the hold breaking, the squad being relieved, SUPPRESS_MAX seconds of firing, the cordon dying, or the
-// deadline. Not on mere proximity -- a player sneaking to within a few dozen metres should not silence the
-// cordon. The timeout counts from the first shot, not from spawn, so a slow approach still gets the show.
-//
-// doSuppressiveFire is the engine's own suppression order: the AI hoses the target's position on its own
-// cadence, so this only re-issues it every few seconds to keep it alive (the order lapses). selectWeapon on
-// the primary each pass keeps it to small arms -- an AT man's launcher is his secondary, so it is never
-// what fires. The tradeoff the old forceWeaponFire hack avoided is that this needs line of sight: a shooter
-// with no view of the building stays quiet. Accepted -- the ring sits in the open at the cardinals, so
-// enough of it sees the building to read as sustained fire.
-[_suppressUnits, _Building, _deadline] spawn {
-    params ["_shooters", "_bld", "_dl"];
+// The pinned squad is sold with sound, not fire. The cordon does not shoot the building: a weapon-choice
+// mod (VCOM et al.) overrides the forced rifle and sends a launcher into it, so the "suppression" is a
+// firefight heard from the house instead -- a positional gunfire sample looped from the building via
+// playSound3D, which depends on no AI weapon and no mod content. Plays only while a player is in the outer
+// band (SUPPRESS_RANGE) and the squad is holed up; stops on the first of the hold breaking, the squad
+// being relieved, SUPPRESS_MAX seconds, or the deadline. Not on mere proximity -- a player sneaking to
+// within a few dozen metres should not silence it. The timeout counts from the first burst, so a slow
+// approach still gets the show. remoteExec'd to every client because a server-thread playSound3D is heard
+// only on the host; the 3D falloff (RSQ_FIRE_MAXD) then mutes it for anyone out of earshot.
+[_Building, _deadline] spawn {
+    params ["_bld", "_dl"];
     private _startedAt = -1;
     while {
         (time < _dl)
-        && {(_shooters findIf {alive _x}) >= 0}
         && {!DUWS_rsq_relieved}
         && {!DUWS_rsq_holdBroken}
         && {_startedAt < 0 || {(time - _startedAt) < SUPPRESS_MAX}}
     } do {
         if (((call BIS_fnc_ListPlayers) findIf { alive _x && {(_x distance2D _bld) < SUPPRESS_RANGE} }) >= 0) then {
             if (_startedAt < 0) then { _startedAt = time };
-            {
-                if (alive _x) then {
-                    private _w = primaryWeapon _x;
-                    if (_w != "") then {
-                        _x selectWeapon _w;
-                        _x doSuppressiveFire _bld;
-                    };
-                };
-            } forEach _shooters;
-            sleep 4;
+            [RSQ_FIRE_SND, _bld, false, getPosASL _bld, RSQ_FIRE_VOL, 1, RSQ_FIRE_MAXD] remoteExec ["playSound3D", 0];
+            sleep (0.5 + random 0.6);
         } else {
             sleep 1;
         };
