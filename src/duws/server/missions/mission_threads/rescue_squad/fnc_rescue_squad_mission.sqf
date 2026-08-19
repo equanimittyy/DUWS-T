@@ -90,7 +90,8 @@ _squadGroup setCombatMode "BLUE";
 // drops each on the exact ring point rather than in its own band; then each holds facing in on combat
 // mode YELLOW (fire at will, keep formation) so it works the ring and never charges the objective. The
 // ring keeps them off the building -- the player owns the last UNCAPTIVE_RANGE metres, where the squad
-// is reached. One rifle team suppresses (below); the rest hold and engage on contact.
+// is reached. Every cordon team suppresses the held building (below) while a player is in the band,
+// then reverts to working the ring the moment the assault begins.
 private _cordonTokens = ["team", "team", "team", "wp_team"];
 private _cordonUnits = [];
 private _suppressUnits = [];
@@ -105,15 +106,19 @@ private _suppressUnits = [];
         _g setFormDir (_cpos getDir _BuildingPos);
         private _wp = _g addWaypoint [_cpos, 0];
         _wp setWaypointType "HOLD";
-        { _cordonUnits pushBack _x } forEach units _g;
-        if (_forEachIndex == 0) then { _suppressUnits = units _g };
+        {
+            _cordonUnits pushBack _x;
+            _suppressUnits pushBack _x;   // every cordon team suppresses, not just one
+        } forEach units _g;
     };
 } forEach _cordonTokens;
 
-// One armed car on a wide patrol, screening the approaches. Its crew count toward the relief like the
+// One armed car idling near the building rather than patrolling. Posture "none" parks it ~100-200 m out
+// (the band table's fallback for an unlisted posture) on SAFE with no circuit -- a static overwatch that
+// the engine wakes to fight the moment it detects the player. Its crew count toward the relief like the
 // ring teams -- breaking the cordon means the car as well -- so its units join the win set. Killing
 // the car kills them; a crew that bails is mopped up on foot like any other cordon man.
-private _car = [["car"] call DUWS_fnc_tokenClass, _BuildingPos, 400, "widepatrol"] call fnc_spawn_vehicle;
+private _car = [["car"] call DUWS_fnc_tokenClass, _BuildingPos, 400, "none"] call fnc_spawn_vehicle;
 if (!isNull _car) then {
     [_car] call fnc_mission_claim;
     { _cordonUnits pushBack _x } forEach units _car;
@@ -151,21 +156,34 @@ DUWS_rsq_relieved = false;
     } do {
         if (((call BIS_fnc_ListPlayers) findIf { alive _x && {(_x distance2D _bld) < SUPPRESS_RANGE} }) >= 0) then {
             if (_startedAt < 0) then { _startedAt = time };
+            // Roll through the shooters with a short per-man stagger so the fire reads as a sustained
+            // crackle, not one synchronised volley every few seconds. No bottom sleep on this branch:
+            // the stagger IS the cadence, and the while head re-checks the stop conditions each pass.
             {
                 if (alive _x) then {
                     _x doWatch _bpos;
                     private _w = primaryWeapon _x;
                     if (_w != "") then {
                         private _modes = getArray (configFile >> "CfgWeapons" >> _w >> "modes");
-                        private _mode = if (_modes isEqualTo []) then {_w} else {_modes select 0};
-                        // Some weapons list ["this"], meaning the mode config sits on the weapon itself.
+                        // Prefer a burst/auto mode -- more rounds per forced shot; the first mode is
+                        // usually single. Some weapons list ["this"]: the mode config sits on the weapon.
+                        private _mode = _w;
+                        if !(_modes isEqualTo []) then {
+                            _mode = _modes select 0;
+                            {
+                                private _lc = toLower _x;
+                                if ((_lc find "burst") >= 0 || {(_lc find "auto") >= 0} || {(_lc find "full") >= 0}) exitWith { _mode = _x };
+                            } forEach _modes;
+                        };
                         if (_mode == "this") then { _mode = _w };
                         _x forceWeaponFire [_w, _mode];
                     };
                 };
+                sleep (0.2 + random 0.3);
             } forEach _shooters;
+        } else {
+            sleep 1;
         };
-        sleep 3;
     };
     { if (alive _x) then { _x doWatch objNull } } forEach _shooters;
 };
