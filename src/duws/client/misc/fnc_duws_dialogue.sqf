@@ -42,10 +42,10 @@ if (_channel isEqualTo "") then {
     _channel = [_speaker, DUWS_netSpeakers, DUWS_subnetSpeakers] call fnc_duws_dialogue_channel;
 };
 
-// Decided here, played by the drain loop when the line actually reaches the screen: the tone
-// marks a transmission arriving, and this line may sit behind others before it gets there.
-// NET only -- SUB-NET is deliberately silent, and VOICE is in the room, not on the radio.
-private _squelch = _channel isEqualTo "NET";
+// The tone marks a radio transmission arriving, so both radio channels earn it; VOICE is in
+// the room and does not. NET's plays from the drain when the line reaches the screen (it may
+// sit behind others first); SUB-NET's plays below, when it prints.
+private _squelch = _channel in ["NET", "SUB-NET"];
 
 // Callsign substitution belongs here rather than at the call site, and below the decision
 // above: the table holds the stringtable's "Alpha 1-1", so a host who has renamed the team
@@ -70,8 +70,10 @@ if (_speaker isEqualTo ([localize "STR_DUWS_T_actionteam"] call fnc_cs)) then {
 
 // SUB-NET goes straight to the bottom-left chat box, not the subtitle queue: the chat box
 // stacks lines and persists, so there is no single slot to serialise and nothing to drain.
-// The speaker is folded into the text because systemChat has no name column of its own.
+// The speaker is folded into the text because systemChat has no name column of its own. The
+// squelch takes its own thread so it lands off the print frame, matching the drain.
 if (_channel isEqualTo "SUB-NET") exitWith {
+    if (_squelch) then { [] spawn { playSound "DUWS_Radio_Start" } };
     systemChat format ["%1: %2", _speaker, _text];
 };
 

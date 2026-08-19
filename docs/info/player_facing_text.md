@@ -273,8 +273,9 @@ where `Alpha 1-1 (steph), move out` would read as part of the sentence.
 VOICE, or SUB-NET off two explicit lists in `fnc_duws_dialogue`. **NET** is the prominent command net
 — Overlord alone — on the subtitle with a squelch tone, because its briefs and results are the lines
 the player least wants to miss. **SUB-NET** is every other radio callsign (Allseer, the supports, the
-air drops, the rescued squad): it renders to the bottom-left chat box instead of the subtitle, silent
-and persistent, so radio chatter is present without burying an in-room line or an Overlord brief.
+air drops, the rescued squad): it renders to the bottom-left chat box instead of the subtitle,
+squelched like any transmission but persistent, so radio chatter is present without burying an
+in-room line or an Overlord brief.
 **VOICE** is everyone in the room with the player, on the subtitle, and is the default: **a new
 speaker on no list lands on VOICE**, the loud visible surface, rather than on the chat box. The
 player callsign is on no list, because you do not hear your own key-up.
