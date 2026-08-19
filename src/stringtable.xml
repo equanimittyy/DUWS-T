@@ -4163,6 +4163,38 @@
                 <Original>To Alpha 1-1, that's a confirmed kill on the enemy armor commander. Good work.</Original>
                 <English>To Alpha 1-1, that's a confirmed kill on the enemy armor commander. Good work.</English>
             </Key>
+            <Key ID="STR_DUWS_T_c18">
+                <Original>Destroy enemy armor</Original>
+                <English>Destroy enemy armor</English>
+            </Key>
+            <Key ID="STR_DUWS_T_destroyarmour_desc">
+                <Original>An enemy tank sits broken down in the open. Its crew is inbound by convoy to get it running and drive it off. Kill the crew or destroy the tank before they recover it. The orange arrow marks the convoy's approach.</Original>
+                <English>An enemy tank sits broken down in the open. Its crew is inbound by convoy to get it running and drive it off. Kill the crew or destroy the tank before they recover it. The orange arrow marks the convoy's approach.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_destroyarmour_start">
+                <Original>Alpha 1-1, Overlord. We've spotted a broken-down enemy tank near %1. Their crew is rolling in to repair it - stop them, or wreck the tank yourself.</Original>
+                <English>Alpha 1-1, Overlord. We've spotted a broken-down enemy tank near %1. Their crew is rolling in to repair it - stop them, or wreck the tank yourself.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_destroyarmour_convoy">
+                <Original>Signal 3-1 - the repair convoy is inbound along the marked arrow, armed escort with them. Hit them on the road or set your ambush at the tank.</Original>
+                <English>Signal 3-1 - the repair convoy is inbound along the marked arrow, armed escort with them. Hit them on the road or set your ambush at the tank.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_destroyarmour_arrow">
+                <Original>Enemy repair convoy</Original>
+                <English>Enemy repair convoy</English>
+            </Key>
+            <Key ID="STR_DUWS_T_destroyarmour_repaired">
+                <Original>Signal 3-1 - they have the tank running and they are pulling out. Kill it before it reaches their lines.</Original>
+                <English>Signal 3-1 - they have the tank running and they are pulling out. Kill it before it reaches their lines.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_destroyarmour_end">
+                <Original>Good work, Alpha 1-1. That armor is staying right where it is - the enemy will not be driving it anywhere.</Original>
+                <English>Good work, Alpha 1-1. That armor is staying right where it is - the enemy will not be driving it anywhere.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_destroyarmour_fail">
+                <Original>Alpha 1-1, the enemy recovered their tank and pulled it back to their lines. We missed our window on that one.</Original>
+                <English>Alpha 1-1, the enemy recovered their tank and pulled it back to their lines. We missed our window on that one.</English>
+            </Key>
             <Key ID="STR_DUWS_T_radarend">
                 <German>"Overlord 1-1" an Action Squad, Radar zerstört – bestätigt. Gute Arbeit.</German>
                 <Spanish>"Overlord 1-1" a Action Squad, radar destruido, confirmado. Muy bien hecho.</Spanish>
