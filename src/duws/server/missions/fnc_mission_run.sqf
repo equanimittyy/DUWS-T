@@ -50,9 +50,16 @@ private _taskId = format ["%1%2%3", _idPrefix, round (_MissionPos select 0), rou
 private _handles = [_targetpos, _randomPos, _radius, _Building] call _build;
 if (isNil "_handles") then { _handles = [] };
 
+// Nearest named settlement to the marker, for the "marked near <place>" briefs. Altis names are
+// dense enough the ring effectively always resolves; the grid fallback covers the empty edge.
+private _place = format ["grid %1", mapGridPosition _randomPos];
+{
+    if (text _x != "") exitWith { _place = text _x };
+} forEach nearestLocations [_randomPos, ["NameCityCapital", "NameCity", "NameVillage", "NameLocal", "NameMarine"], 5000];
+
 {
     _x params ["_spk", "_msg", ["_delay", 0]];
-    [localize _spk, localize _msg] remoteExec ["fnc_duws_dialogue", 0];
+    [localize _spk, format [localize _msg, _place]] remoteExec ["fnc_duws_dialogue", 0];
     if (_delay > 0) then { sleep _delay };
 } forEach _brief;
 

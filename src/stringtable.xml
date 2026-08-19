@@ -4336,22 +4336,22 @@
                 <German>"Overlord 1-1" an alle Einheiten, Notfall! Wir haben gerade die vorläufige feindliche Kommandomannschaft gesichtet – alle Bereitschaftseinheiten sollen sich bewegen und den vorläufigen Kommandanten sofort eliminieren!</German>
                 <Spanish>"Overlord 1-1" a todas las unidades, emergencia! Acabamos de localizar el equipo de comando temporal enemigo – todas las unidades en espera deben desplazarse y eliminar al comandante temporal de inmediato!</Spanish>
                 <Chinesesimp>全体单位，紧急情况！我们刚刚发现了敌人的临时指挥小组，现在需要所有待命单位前往消灭临时指挥官！</Chinesesimp>
-                <Original>Alpha 1-1, we've located the enemy's field commander in the AO, marked on your map. Move in and eliminate him.</Original>
-                <English>Alpha 1-1, we've located the enemy's field commander in the AO, marked on your map. Move in and eliminate him.</English>
+                <Original>Alpha 1-1, we've located the enemy's field commander, marked near %1. Move in and eliminate him.</Original>
+                <English>Alpha 1-1, we've located the enemy's field commander, marked near %1. Move in and eliminate him.</English>
             </Key>
             <Key ID="STR_DUWS_T_armorletsdothis">
                 <German>Hier spricht "Overlord", gute Nachricht: Eine feindliche Panzerzug wurde gerade von unserer Nahluftunterstützung vernichtet, der Führerpanzer liegt im Gelände defekt. Ihre Einheit hat die Aufgabe, ihren Zugführer zu eliminieren, solange sie Feldreparaturen durchführen – sein Panzer zu beschlagnahmen, falls möglich.</German>
                 <Spanish>Aquí "Overlord", buenas noticias: Un pelotón de blindados enemigos acaba de ser destruido por nuestro apoyo aéreo cercano, el tanque líder se averió en el campo. La misión de tu unidad es eliminar a su pelotón comandante mientras realizan reparaciones de campo; roba su tanque si es posible.</Spanish>
                 <Chinesesimp>好消息：敌人的一个装甲排刚刚被我们的近空支援摧毁，领头的坦克在野外抛锚了。你单位的任务是在他们实施野战修理的时候干掉他们的排长，最好也把他的坦克抢过来。</Chinesesimp>
-                <Original>Alpha 1-1, our close air support crippled an enemy armor platoon and left its lead tank stranded in the AO, marked on your map. Eliminate the platoon leader while his crew handles repairs, and seize the tank if you can.</Original>
-                <English>Alpha 1-1, our close air support crippled an enemy armor platoon and left its lead tank stranded in the AO, marked on your map. Eliminate the platoon leader while his crew handles repairs, and seize the tank if you can.</English>
+                <Original>Alpha 1-1, our close air support crippled an enemy armor platoon and left its lead tank stranded near %1. Eliminate the platoon leader while his crew handles repairs, and seize the tank if you can.</Original>
+                <English>Alpha 1-1, our close air support crippled an enemy armor platoon and left its lead tank stranded near %1. Eliminate the platoon leader while his crew handles repairs, and seize the tank if you can.</English>
             </Key>
             <Key ID="STR_DUWS_T_sniperletsdothis">
                 <German>Hier ist Viper 1-5. Wir haben das feindliche Scharfschützenteam lokalisiert — sie tragen Ghillie-Anzüge. Deine Einheit kann handeln! Vorsicht, in ihrer Nähe sind viele Feinde.</German>
                 <Spanish>Aquí Víbora 1-5. Acabamos de localizar al equipo de francotiradores enemigo — llevan trajes ghillie. Tu unidad puede actuar! Ten cuidado, hay muchos enemigos a su alrededor.</Spanish>
                 <Chinesesimp>我们刚刚找到了敌人的狙击小组————他们穿着吉利服。你的单位可以行动了！小心点，他们周围人还挺多。</Chinesesimp>
-                <Original>Alpha 1-1, Allseer has located an enemy sniper team in the AO, marked on your map. Eliminate them.</Original>
-                <English>Alpha 1-1, Allseer has located an enemy sniper team in the AO, marked on your map. Eliminate them.</English>
+                <Original>Alpha 1-1, Allseer has located an enemy sniper team, marked near %1. Eliminate them.</Original>
+                <English>Alpha 1-1, Allseer has located an enemy sniper team, marked near %1. Eliminate them.</English>
             </Key>
             <Key ID="STR_DUWS_T_sniperend">
                 <German>"Viper 1-5" an Action Squad, gut gemacht! Wir haben bestätigt, dass der feindliche Scharfschütze vollständig eliminiert wurde!</German>
