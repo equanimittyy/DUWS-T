@@ -104,7 +104,7 @@ class RscTitles {
             class log: RscStructuredText {
                 idc = 8812;
                 x = 0.02 * safezoneW + safezoneX;
-                y = 0.75 * safezoneH + safezoneY;
+                y = 0.70 * safezoneH + safezoneY;
                 w = 0.34 * safezoneW;
                 h = 0.16 * safezoneH;
                 size = 0.032;
