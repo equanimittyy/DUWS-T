@@ -28,19 +28,19 @@ if (_lz isEqualTo [] || {(_lz select 0) == 0}) then { _lz = _bpos getPos [45, ra
 
 private _bearing = random 360;
 private _vehpos = _bpos getPos [2500, _bearing];
-// Spawn crewed and flight-ready in one call, then lift to altitude (setPos z is above ground level, so
-// it clears whatever terrain the far spawn point sits on) and set the cruise height -- the helo-taxi's
-// pattern (client/supports/taxi/fnc_helotaxi.sqf). createVehicle "FLY" with a later createVehicleCrew
-// left the bird airborne with no pilot for a moment -- long enough to nose into the ground -- and its
-// height came only from the position z, never an explicit setPos.
+// Spawn and fly the bird on the helo-taxi's shape (client/supports/taxi/fnc_helotaxi.sqf), the one
+// transport pattern that lands reliably here. BIS_fnc_spawnVehicle gives a crewed, flight-ready bird in
+// one call (no pilotless window); setPos z is above ground level, so 200 clears whatever terrain the far
+// spawn sits on; flyInHeight sets the cruise. The invisible helipad and the pinned pilot below are what
+// turn an inconsistent approach into a clean put-down.
 private _veh = [_vehpos, 0, blufor_TRANS_HELI_X, WEST] call BIS_fnc_spawnVehicle;
 private _heli = _veh select 0;
 private _heliGrp = _veh select 2;
-_heli setPos [_vehpos select 0, _vehpos select 1, 120];
+_heli setPos [_vehpos select 0, _vehpos select 1, 200];
 [_heli, _compKey] call fnc_duws_keep;
 _heli setCaptive true;
 _heli lockCargo true;
-_heli flyInHeight 40;
+_heli flyInHeight 50;
 { _x setCaptive true } forEach crew _heli;
 // Without this VCOM's squad FSM seizes the WEST/AI group and ignores its scripted MOVE waypoint,
 // leaving the bird idle at spawn. Every other scripted transport heli sets it for the same reason.
@@ -49,8 +49,19 @@ _heliGrp setBehaviour "CARELESS";
 _heliGrp setCombatMode "BLUE";
 _heliGrp deleteGroupWhenEmpty true;
 
-// In to the LZ, then land and let the squad board on foot. `land "GET IN"` puts the bird down and
-// lifts it again on its own once everyone assigned is aboard.
+// Pilot will not abort the run: allowFleeing 0 stops it bugging out on damage, disableAI "Target" stops
+// it breaking off to engage. Straight off the taxi.
+private _pilot = currentPilot _heli;
+_pilot allowFleeing 0;
+_pilot disableAI "Target";
+
+// Invisible helipad on the LZ: this is what makes `land` put down on the exact spot rather than the AI
+// choosing its own and hovering. Kept under the composition key so teardown sweeps it with the rest.
+private _helipad = createVehicle ["Land_HelipadEmpty_F", _lz, [], 0, "NONE"];
+[_helipad, _compKey] call fnc_duws_keep;
+
+// In to the LZ, then land and let the squad board on foot. `land "GET IN"` puts the bird down and lifts
+// it again on its own once everyone assigned is aboard.
 private _wpIn = _heliGrp addWaypoint [_lz, 0];
 _wpIn setWaypointType "MOVE";
 _wpIn setWaypointSpeed "FULL";
@@ -63,14 +74,14 @@ private _fail = {
     [_taskId, "FAILED"] call fnc_missionTaskEnd;
     [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_squadfail"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
     if (!isNil "_heli" && {alive _heli}) then { { deleteVehicle _x } forEach crew _heli; deleteVehicle _heli };
+    if (!isNil "_helipad") then { deleteVehicle _helipad };
     [_tpos, _radius, _compKey] call fnc_mission_end;
 };
 
 private _tApproach = time + 150;
-waitUntil { sleep 1; !alive _heli || {(_heli distance2D _lz) < 120} || {time > _tApproach} || {(_squad findIf {alive _x}) < 0} };
+waitUntil { sleep 1; !alive _heli || {(_heli distance2D _lz) < 350} || {time > _tApproach} || {(_squad findIf {alive _x}) < 0} };
 if ((_squad findIf {alive _x}) < 0) exitWith { call _fail };
 if (alive _heli) then {
-    _heli move _lz;
     _heli land "GET IN";
     { _x assignAsCargo _heli } forEach (_squad select {alive _x});
     (_squad select {alive _x}) orderGetIn true;
@@ -103,6 +114,7 @@ sleep 5;
 
 { deleteVehicle _x } forEach crew _heli;
 deleteVehicle _heli;
+deleteVehicle _helipad;
 { deleteVehicle _x } forEach _squad;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
