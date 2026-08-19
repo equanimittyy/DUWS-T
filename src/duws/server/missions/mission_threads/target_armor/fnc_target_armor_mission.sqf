@@ -1,7 +1,7 @@
 // Locality: server -- callers remoteExec to target 2.
-// "Destroy armour" is won by killing the tank commander (unit 0), not the tank: the tank spawns
-// pre-damaged as set dressing and is kept alive so the abandoned-vehicle collector cannot remove
-// the objective mid-mission. Released with the composition on end. Shared spine: fnc_mission_run.
+// Elimination: won by killing the tank commander (unit 0). The crippled tank is set dressing --
+// spawned pre-damaged and kept alive so the abandoned-vehicle collector cannot remove the objective
+// mid-mission. Released with the composition on end. Shared spine: fnc_mission_run.
 params ["_MissionPos", "_mission_name"];
 
 private _build = {
@@ -60,7 +60,7 @@ private _build = {
 };
 
 private _spec = [
-    7, 200, "destroy", "STR_DUWS_T_y7z1cx6j", "STR_DUWS_T_c7", "targetarmor",
+    7, 200, "kill", "STR_DUWS_T_y7z1cx6j", "STR_DUWS_T_c7", "targetarmor",
     _build,
     { params ["_target"]; !alive _target },
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_armorletsdothis", 8]],
