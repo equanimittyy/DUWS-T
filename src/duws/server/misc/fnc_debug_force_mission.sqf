@@ -1,6 +1,6 @@
 // Locality: server -- client/dialog/fnc_debug_mission_menu.sqf remoteExecs it to target 2.
 
-// Forces one side-mission type to start now. The type's cooldown and the global mission lock are
+// Forces one side-mission type to start now. The start gate and the global mission lock are
 // *cleared* rather than bypassed, so the thread still opens through fnc_mission_begin exactly as
 // a player-requested mission does -- a debug path that skipped that gate would stop exercising
 // the code the real one runs, which is the opposite of what a test tool is for.
@@ -33,7 +33,9 @@ if (_pos isEqualTo []) exitWith {
 	["ERROR", "MISSION", format ["debug force: %1 found no site its finder accepts", _threadName]] call fnc_log;
 };
 
-missionNamespace setVariable [format ["mission_cooldown_%1", _type], 0, true];
+// Open the gate so the forced thread's own fnc_mission_begin check passes; it re-stamps on start.
+DUWS_lastMissionStartDate = 0;
+publicVariable "DUWS_lastMissionStartDate";
 Mission_available = true;
 publicVariable "Mission_available";
 

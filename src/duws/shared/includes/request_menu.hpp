@@ -140,10 +140,7 @@ class ressourceheader
             h = 1.1 * GUI_GRID_H;
             colorText[] = {1,1,1,1};
         };
-        // Three buttons split the row evenly across its 19.9 cells with a 0.3-cell gutter between,
-        // filling the width the deleted converter left behind. Mission Timers is Game Master only
-        // and is hidden rather than written in from a list, so a player without the gate sees a
-        // gap where its middle slot sits.
+        // Two buttons split the row evenly across its 19.9 cells with a 0.3-cell gutter between.
         class sidemissionbutton: RscButton
         {
             idc = 1605;
@@ -151,33 +148,21 @@ class ressourceheader
             sizeEx = 0.025;
             x = 0.8 * GUI_GRID_W + GUI_GRID_X;
             y = 5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 6.43 * GUI_GRID_W;
+            w = 9.8 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             // The one entry that still closes the menu: it hands the screen to the strategic map,
             // which a dialog would draw straight over.
             action = "closeDialog 0; [] spawn fnc_stratmap";
             tooltip = "$STR_DUWS_T_k9t3ub5d";
         };
-        class missiontimersbutton: RscButton
-        {
-            idc = 1609;
-            text = "$STR_DUWS_T_SHOW_MISSION_COOLDOWNS";
-            sizeEx = 0.025;
-            x = 7.53 * GUI_GRID_W + GUI_GRID_X;
-            y = 5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 6.43 * GUI_GRID_W;
-            h = 1.5 * GUI_GRID_H;
-            action = "[] spawn fnc_mission_cooldowns_show";
-            tooltip = "$STR_DUWS_T_SHOW_MISSION_COOLDOWNS";
-        };
         class viewmapbutton: RscButton
         {
             idc = 1608;
             text = "$STR_DUWS_T_civ_mapview_action";
             sizeEx = 0.025;
-            x = 14.26 * GUI_GRID_W + GUI_GRID_X;
+            x = 10.9 * GUI_GRID_W + GUI_GRID_X;
             y = 5 * GUI_GRID_H + GUI_GRID_Y;
-            w = 6.44 * GUI_GRID_W;
+            w = 9.8 * GUI_GRID_W;
             h = 1.5 * GUI_GRID_H;
             action = "[] spawn fnc_request_map_view";
             tooltip = "$STR_DUWS_T_civ_mapview_action";

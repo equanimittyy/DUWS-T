@@ -11,16 +11,17 @@
 // a single-criterion caller may omit it and the hint key stands in.
 params ["_missionType", ["_hintKey", "STR_DUWS_T_crtzxs0j"], ["_reason", ""]];
 
-// fnc_mission_begin stamps the full cooldown before the thread has found so much as a position, so
-// a thread that gives up here left the type greyed out on the strategic map having spawned nothing.
-// Cleared rather than restored to a previous value: the type never ran, so it has no cooldown to
-// serve. Zero reads as expired on any clock, so this needs no knowledge of which one is in use.
-missionNamespace setVariable [format ["mission_cooldown_%1", _missionType], 0, true];
+// fnc_mission_begin stamps the gate before the thread has found so much as a position, so a thread
+// that gives up here would burn three in-game hours having spawned nothing. Cleared rather than
+// restored to a previous value: the mission never ran, so it has no wait to serve. Zero reads as
+// long past on the campaign clock, so the gate opens again at once.
+DUWS_lastMissionStartDate = 0;
+publicVariable "DUWS_lastMissionStartDate";
 Mission_available = true;
 publicVariable "Mission_available";
 
 // Explicit reason where the caller gave one; the hint key stands in for single-criterion callers.
 private _why = [_reason, _hintKey] select (_reason isEqualTo "");
-["WARN", "MISSION", format ["type=%1 aborted before spawning: %2, slot and cooldown released",
+["WARN", "MISSION", format ["type=%1 aborted before spawning: %2, slot and gate released",
     _missionType, _why]] call fnc_log;
 [_hintKey, {hint localize _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];

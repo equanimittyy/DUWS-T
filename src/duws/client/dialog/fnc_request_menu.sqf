@@ -141,12 +141,6 @@ private _vehRows = [];
 [2102, _vehRows] call DUWS_fnc_tierListFill;
 lbSetCurSel [2102, 0];
 
-// Mission Timers is a fixed button rather than a command slot, so its Game Master gate has to hide
-// the control: a player without it sees the quarter of the row empty rather than the row close up.
-if !((vehiclevarname player) in (missionNamespace getVariable ["game_master", []])) then {
-    (_display displayCtrl 1609) ctrlShow false;
-};
-
 [_display, _site, _isFob] call fnc_command_fill;
 
 // A FOB buys no supports, so the strip goes entirely. The main window keeps its size.

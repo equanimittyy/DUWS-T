@@ -305,12 +305,16 @@ manually_chosen = false;publicVariable "manually_chosen";
 // Side Mission wait
 Mission_available = true;publicVariable "Mission_available";
 
-// How long a side-mission type sits on cooldown, in mission seconds -- see
-// shared/functions/fnc_mission_cooldown_left.sqf for which clock that is and why. Half an hour,
-// which is the whole wait between side missions: the slot itself frees the moment a mission ends,
-// so this is the only thing pacing them.
+// The side-mission gate: a new mission may start only once this many in-game hours have passed since
+// the last one started -- see shared/functions/fnc_mission_gate_left.sqf for the clock and why. This
+// is the whole wait between missions: the slot itself frees the moment one ends, so this paces them.
+// A rest at HQ skips three in-game hours and so clears the gate in one go.
 // Broadcast because the readout and the strategic map both read it on the client.
-mission_cooldown_seconds = 1800;publicVariable "mission_cooldown_seconds";
+mission_gate_hours = 3;publicVariable "mission_gate_hours";
+
+// The last mission's start, stamped as a campaign-date number (dateToNumber date). Zero until the
+// first mission, which reads as long past and so opens the gate.
+DUWS_lastMissionStartDate = 0;publicVariable "DUWS_lastMissionStartDate";
 
 // Locations for mission placement
 MissionLocations = [];publicVariable "MissionLocations";

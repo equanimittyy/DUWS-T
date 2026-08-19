@@ -4111,8 +4111,8 @@
             </Key>
             <Key ID="STR_DUWS_T_MISSION_COOLDOWN">
                 <Chinesesimp>这个任务正处于冷却状态，剩余时间 %1 分 %2 秒</Chinesesimp>
-                <Original>This mission is on cooldown, %1 min %2 s remaining.</Original>
-                <English>This mission is on cooldown, %1 min %2 s remaining.</English>
+                <Original>No new tasking yet. %1h %2m of in-game time to go, or rest at HQ to skip ahead.</Original>
+                <English>No new tasking yet. %1h %2m of in-game time to go, or rest at HQ to skip ahead.</English>
             </Key>
             <Key ID="STR_DUWS_T_q3iy1vcz">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer Pilot wurde getötet !</German>
@@ -7074,15 +7074,6 @@
                 <Chinesesimp>你的小队成员已经完全治愈和重新武装。</Chinesesimp>
                 <Original>Your squad members have been fully Healed and Re-Armed.</Original>
                 <English>Your squad members have been fully Healed and Re-Armed.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_SHOW_MISSION_COOLDOWNS">
-                <Original>Mission Timers</Original>
-                <English>Mission Timers</English>
-            </Key>
-            <Key ID="STR_DUWS_T_COOLDOWN_READY">
-                <Original>Ready</Original>
-                <English>Ready</English>
-                <Chinesesimp>就绪</Chinesesimp>
             </Key>
             <Key ID="STR_DUWS_T_sitrep">
                 <German>"Allseer" an alle Einheiten im Einsatzgebiet. Der Sitrep wurde an das Terminal hochgeladen.</German>

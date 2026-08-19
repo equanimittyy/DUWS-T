@@ -24,10 +24,19 @@ sleep 4;
 
 if (!((vehiclevarname player) in game_master)) exitWith {hint ([localize "STR_DUWS_T_eck4xh9m"] call fnc_cs)};
 
+// Gate the whole list, not each type: with one gate for every mission, browsing offers none of which
+// can be started is just noise. Same three-in-game-hour wait fnc_mission_begin enforces server-side,
+// checked here so the player is told before the map opens. Placed ahead of the cached-offer reuse
+// below so a cached open obeys the gate too.
+private _gateLeft = [] call fnc_mission_gate_left;
+if (_gateLeft > 0) exitWith {
+	hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", floor _gateLeft, floor ((_gateLeft % 1) * 60)];
+};
+
 // Reuse a still-current offer set instead of re-rolling it. Regenerating on every open handed a
 // player who backed out to reconsider seven brand-new missions; the set now persists until one is
 // picked (fnc_mission_launch clears it) or the debug re-roll fires. Reached only past the
-// Mission_available and game_master gates above, so a cached open still obeys the cooldown.
+// Mission_available and game_master gates above, so a cached open still obeys the start gate.
 private _cachedOffers = missionNamespace getVariable ["DUWS_missionOffers", []];
 if !(_cachedOffers isEqualTo []) exitWith {
 	array_of_missions = _cachedOffers select 0;
