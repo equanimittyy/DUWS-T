@@ -15,7 +15,7 @@ wording live for anyone whose game language isn't listed on that key.
 
 The `<German>`, `<Spanish>` and `<Chinesesimp>` tags were translated from the pre-rework text and
 have not been carried through the English prose passes. They still hold the retired callsigns
-(`Action Squad`, `Overlord 1-1`), the old unnamed-department phrasing for Allseer, and pre-rework
+(`Action Squad`, `Overlord 1-1`, `Viper 1-5`), the old unnamed-department phrasing for Allseer, and pre-rework
 briefings whose timings and reward tags no longer match the English.
 
 This is known divergence, not corruption: **do not treat a German/Spanish/Chinese tag that
@@ -42,6 +42,11 @@ speaker-first callsign (`Alpha 1-1, this is Overlord.` / `Swordfish 1-1 to Alpha
 team broadcast opening on the address (`All units, ...`). Numbers are spelled out in spoken lines and
 written as numerals in HUD text.
 
+**A kill is confirmed in service vocabulary, not shooter-game idiom.** A result reads *eliminated*,
+*neutralised*, *confirmed KIA*, *confirmed kill*, *disposed of* — never *take him down*, *tango
+down*, or *he's down*. The verb is varied across the elimination missions so four near-identical
+confirmations do not read as one template.
+
 **Name the concrete nouns the player plans against** — the place, the clock, the vehicle — rather
 than gesturing at them. The informant brief is the worked example: *All units, an enemy informant is
 operating out of %1. Locate and eliminate him before he reaches %2 by vehicle. He is set to leave at
@@ -49,6 +54,12 @@ operating out of %1. Locate and eliminate him before he reaches %2 by vehicle. H
 zone, %3 the leave clock, %4 the vehicle class. The pass that produced it turned "slipped out of the
 area" into "has reached {zone}": a named place the player reads off the map beats an abstraction, and
 the fail line names where he got to.
+
+The three spec-based elimination briefs (armour, HVT, snipers) name the place in code rather than in
+the string: `fnc_mission_run` finds the nearest named settlement to the objective marker
+(`nearestLocations`, a 5 km ring, a grid reference as fallback) and folds it into the brief's `%1`,
+so *marked near %1* prints *marked near Agglelesh*. The DUWS zone the objective sits in is not named
+— the settlement alone locates it.
 
 **No em-dashes in player prose.** A parenthetical goes in commas, not dashes — the same brief once
 read *leave at %1 — or sooner if shots are fired — in a %2* and now reads *at %2, or sooner if shots
@@ -58,8 +69,8 @@ still carry the dash: standing prose debt, the same kind as the lagging localise
 off-voice side-mission hints below, not a bug to fix in passing.
 
 **Who is speaking sets the register, not only the words.** The command net (Overlord, Allseer) is
-clipped and procedural and names the player's callsign on a result (*Informant's down. Good work
-Alpha 1-1.*). A civilian answering in the world speaks in character and imprecisely: the informant
+clipped and procedural and names the player's callsign on a result (*To Alpha 1-1, the informant
+has been disposed of. Good work.*). A civilian answering in the world speaks in character and imprecisely: the informant
 ask-reveal gives a live bearing and range while he is in town (*about %1 m %2 of you*) but, once he
 has driven off, only a bystander's guess (*Him? I think I just saw him leave town heading %1*) — the
 system knows where he is; a local only saw which way he went. The hint box has no persona at all
@@ -246,6 +257,12 @@ intro or downed pilot in the room, a civilian answering a question. The call is
 `[_speaker, _text, _channel]` with both strings already `localize`d and `_channel` normally `""`,
 which lets the speaker decide the channel.
 
+**A dialogue voice is a real element in the fiction, not a callsign invented to carry a line.**
+Overlord and Allseer on the net, a support callsign the player called, an intro or downed pilot, a
+civilian in the world — each is demonstrably on the net or in the room when its line plays. A one-off
+callsign wired to nothing the player can see or call is not a voice: a brief and its result come from
+an established element, not from a name minted for the occasion.
+
 **Callsign substitution is automatic here.** The body runs `fnc_cs` on the speaker and the text
 itself, so a dialogue call site passes the raw `localize`d keys and does **not** wrap them — unlike a
 hint, card or task, which has no such step and must wrap any `Alpha 1-1` string at the call site
@@ -276,7 +293,7 @@ broadcast again, or N clients each send to N. Like every client-called support, 
 `publicVariable`'d in `server_fnc_init`, and the speaker tables build lazily on first use because a
 JIP client can be handed a line before its own init has run.
 
-**A result with a persona to voice it goes to dialogue, not a hint.** The informant win is Allseer's
+**A result with a persona to voice it goes to dialogue, not a hint.** The informant win is Overlord's
 line; the fail, which has no one to say it, is a plain hint. Pick by whether someone is there to
 speak — but do not double a voiced line with a hint that repeats it.
 
