@@ -40,6 +40,11 @@ if (isNil "DUWS_netSpeakers") then {
         // introduces its own, so a shared slot contradicted the line it was attached to.
         "STR_DUWS_T_chalk", "STR_DUWS_T_courier", "STR_DUWS_T_courier3", "STR_DUWS_T_ranger"
     ] apply { localize _x };
+
+    // The SUB-NET speakers who are OPFOR, so the log tints them red instead of the BLUFOR blue
+    // default. Only the disguise ruse speaks for the enemy today; the list is the seam to widen
+    // if more enemy radio is ever added.
+    DUWS_subnetOpforSpeakers = ["STR_DUWS_T_DISGUISE_OPFOR_SPEAKER"] apply { localize _x };
 };
 
 if (_channel isEqualTo "") then {
@@ -72,21 +77,23 @@ if (_speaker isEqualTo ([localize "STR_DUWS_T_actionteam"] call fnc_cs)) then {
     _speaker = format ["%1 (%2)", _speaker, _who];
 };
 
-// SUB-NET goes to the bottom-left chat box, not the subtitle queue: the box stacks lines and
-// persists, so there is no single slot to serialise. But lines that arrive bunched -- two
-// threads keying up in the same beat -- would print at once and read as garbled cross-talk, so
-// each claims the next free slot on a shared cursor and prints when it comes up. Bunched lines
-// space out to SUBNET_GAP apart; a scripted exchange that already sleeps between its own lines
-// finds the cursor long passed and prints with no added delay -- the gap only bites when the
-// net is genuinely busy. The speaker is folded into the text: systemChat has no name column.
+// SUB-NET goes to the bottom-left radio log (fnc_duws_subnet_log), not the subtitle queue: it
+// stacks lines and persists, so there is no single slot to serialise. But lines that arrive
+// bunched -- two threads keying up in the same beat -- would print at once and read as garbled
+// cross-talk, so each claims the next free slot on a shared cursor and prints when it comes up.
+// Bunched lines space out to SUBNET_GAP apart; a scripted exchange that already sleeps between
+// its own lines finds the cursor long passed and prints with no added delay -- the gap only
+// bites when the net is genuinely busy. The speaker is tinted by faction: blue for BLUFOR, red
+// for the enemy, so the disguise ruse reads as hostile at a glance.
 if (_channel isEqualTo "SUB-NET") exitWith {
+    private _colour = ["6d9eff", "ff6b6b"] select (_speaker in DUWS_subnetOpforSpeakers);
     private _slot = time max (uiNamespace getVariable ["DUWS_subnetNextAt", 0]);
     uiNamespace setVariable ["DUWS_subnetNextAt", _slot + SUBNET_GAP];
-    [_speaker, _text, _squelch, _slot - time] spawn {
-        params ["_sp", "_tx", "_sq", "_wait"];
+    [_speaker, _text, _squelch, _colour, _slot - time] spawn {
+        params ["_sp", "_tx", "_sq", "_col", "_wait"];
         if (_wait > 0) then { sleep _wait };
         if (_sq) then { playSound "DUWS_Radio_Start" };
-        systemChat format ["%1: %2", _sp, _tx];
+        [_sp, _tx, _col] call fnc_duws_subnet_log;
     };
 };
 

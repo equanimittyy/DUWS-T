@@ -37,6 +37,16 @@ if (isNull _drain || {scriptDone _drain}) then {
 	uiNamespace setVariable ["DUWS_dialogueQueueVoice", []];
 	uiNamespace setVariable ["DUWS_dialogueQueueNet", []];
 	uiNamespace setVariable ["DUWS_dialogueDrainHandle", [] spawn fnc_duws_dialogue_drain];
+
+	// SUB-NET radio log: drop last mission's lines and pacing cursor, then raise the overlay on
+	// its own layer so nothing else's cutRsc replaces it (or it, theirs). Held up all mission by
+	// its huge duration; fnc_duws_subnet_render redraws it, ageing and fading each line.
+	uiNamespace setVariable ["DUWS_subnetLines", []];
+	uiNamespace setVariable ["DUWS_subnetNextAt", 0];
+	("DUWS_SubnetLog" call BIS_fnc_rscLayer) cutRsc ["DUWS_SubnetLog", "PLAIN", 0, false];
+	private _render = uiNamespace getVariable ["DUWS_subnetRenderHandle", scriptNull];
+	if (!isNull _render) then { terminate _render };
+	uiNamespace setVariable ["DUWS_subnetRenderHandle", [] spawn fnc_duws_subnet_render];
 };
 player addRating 10000000;
 // KEEP DIPSHITS FROM DROWNING

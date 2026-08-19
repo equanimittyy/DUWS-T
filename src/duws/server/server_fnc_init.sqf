@@ -552,6 +552,7 @@ fnc_bottom_right_message = compile preprocessFileLineNumbers "duws\client\misc\f
 fnc_duws_senior_name = compile preprocessFileLineNumbers "duws\shared\functions\fnc_duws_senior_name.sqf";publicVariable "fnc_duws_senior_name";
 fnc_duws_dialogue = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_dialogue.sqf";publicVariable "fnc_duws_dialogue";
 fnc_duws_subnet_log = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_subnet_log.sqf";publicVariable "fnc_duws_subnet_log";
+fnc_duws_subnet_render = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_subnet_render.sqf";publicVariable "fnc_duws_subnet_render";
 fnc_duws_dialogue_drain = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_dialogue_drain.sqf";publicVariable "fnc_duws_dialogue_drain";
 fnc_autoSave = compile preprocessFileLineNumbers "duws\server\misc\fnc_autoSave.sqf";publicVariable "fnc_autoSave";
 // Not broadcast: server-only, so an accidental client call fails loud.

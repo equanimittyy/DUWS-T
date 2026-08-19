@@ -273,16 +273,21 @@ where `Alpha 1-1 (steph), move out` would read as part of the sentence.
 VOICE, or SUB-NET off two explicit lists in `fnc_duws_dialogue`. **NET** is the prominent command net
 — Overlord alone — on the subtitle with a squelch tone, because its briefs and results are the lines
 the player least wants to miss. **SUB-NET** is every other radio callsign (Allseer, the supports, the
-air drops, the rescued squad): it renders to the bottom-left chat box instead of the subtitle,
-squelched like any transmission but persistent, so radio chatter is present without burying an
-in-room line or an Overlord brief.
+air drops, the rescued squad): it renders to a bottom-left radio log — its own structured-text overlay
+(`fnc_duws_subnet_log`, RscTitles `DUWS_SubnetLog`), not the engine's `systemChat`, because that
+cannot tint a speaker — with the speaker coloured by faction (blue BLUFOR, red enemy, so the disguise
+ruse reads hostile at a glance). Squelched like any transmission but persistent, so radio chatter is
+present without burying an in-room line or an Overlord brief. `fnc_duws_subnet_render` redraws the
+overlay on a tick, fading each line over its ten-second life (older lines progressively more
+transparent) and dropping it when spent, so the box thins out during a lull rather than sitting
+frozen.
 **VOICE** is everyone in the room with the player, on the subtitle, and is the default: **a new
 speaker on no list lands on VOICE**, the loud visible surface, rather than on the chat box. The
 player callsign is on no list, because you do not hear your own key-up.
 
 **One subtitle slot, VOICE first.** The engine subtitle is a single line; a second replaces the first
 mid-read, so `fnc_duws_dialogue_drain` holds one line at a time — and only NET and VOICE reach it,
-since SUB-NET prints to the chat box, which stacks and needs no slot. SUB-NET has no drain, but a
+since SUB-NET prints to the radio log, which stacks and needs no slot. SUB-NET has no drain, but a
 shared cursor in `fnc_duws_dialogue` spaces *bunched* lines a couple of seconds apart, so two threads
 keying up in the same beat do not dump at once and read as garbled cross-talk; an exchange that
 already sleeps between its own lines prints with no added delay. VOICE drains first and

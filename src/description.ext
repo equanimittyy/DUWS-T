@@ -78,7 +78,7 @@ class RscTitles {
         duration = 5;
         class controls {
             class splash: RscPicture
-		    {			
+		    {
 			idc = 1002;
 			text = "duws\shared\sounds_npics\support\DUWS_T.paa";
 			x = 0.15 * safezoneW + safezoneX;
@@ -86,7 +86,37 @@ class RscTitles {
 			w = 0.7 * safezoneW;
 			h = 1 * safezoneH;
 			fade = 0;
-		    };	
+		    };
+        };
+    };
+
+    // Bottom-left radio log for SUB-NET dialogue. Held up for the whole mission (huge duration,
+    // shown once from client_init) and updated in place: onLoad stashes the display so
+    // fnc_duws_subnet_log can rewrite the structured-text control as lines arrive and age out.
+    class DUWS_SubnetLog {
+        idd = -1;
+        movingEnable = false;
+        duration = 1000000000;
+        fadein = 0;
+        fadeout = 0;
+        onLoad = "uiNamespace setVariable ['DUWS_subnetDisplay', _this select 0];";
+        class controls {
+            class log: RscStructuredText {
+                idc = 8812;
+                x = 0.02 * safezoneW + safezoneX;
+                y = 0.75 * safezoneH + safezoneY;
+                w = 0.34 * safezoneW;
+                h = 0.16 * safezoneH;
+                size = 0.032;
+                text = "";
+                class Attributes {
+                    font = "PuristaMedium";
+                    color = "#ffffff";
+                    align = "left";
+                    valign = "bottom";
+                    shadow = 1;
+                };
+            };
         };
     };
 };
