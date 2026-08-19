@@ -1,7 +1,7 @@
-// Opens the disguise panel. Single entry point that replaces the two disguise
-// hold-actions; the mode buttons remoteExec the unchanged server functions, which
-// keep all requirement, cooldown and cover-break logic. Status and civ availability
-// are read once on open (re-open to refresh) -- no polling loop needed for a picker.
+// Opens the disguise panel. The Activate button remoteExecs the unchanged server
+// function, which keeps all requirement, cooldown and cover-break logic. Status and
+// civ availability are read once on open (re-open to refresh) -- no polling loop
+// needed for a picker.
 if (!hasInterface) exitWith {};
 
 disableSerialization;
