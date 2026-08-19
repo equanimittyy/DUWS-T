@@ -74,7 +74,7 @@ if (_convoyStart isEqualTo [] || {(_convoyStart select 0) == 0}) then { _convoyS
 private _arrow = format ["da_arrow_%1%2", round (_targetpos select 0), round (_targetpos select 1)];
 deleteMarker _arrow;   // a rounded-position name can collide with a prior mission's leftover
 createMarker [_arrow, _convoyStart];
-_arrow setMarkerType "mil_arrow2";
+_arrow setMarkerType "mil_arrow";
 _arrow setMarkerColor "ColorOrange";
 _arrow setMarkerDir (_convoyStart getDir _targetpos);
 _arrow setMarkerSize [1.1, 1.1];
