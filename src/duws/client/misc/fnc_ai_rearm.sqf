@@ -13,6 +13,4 @@ if (_result) then {
 	
 	player setDamage 0;
 	hint localize "STR_DUWS_T_3y5r8lzq";
-	sleep 2;
-	[] spawn fnc_bottom_right_message;
 };
