@@ -127,11 +127,8 @@ publicVariable "DUWS_recon_active";
 [_overwatch, _anchor, OBS_AREA, OBS_RANGE, HOLD_TIME] remoteExec ["fnc_recon_observe_layer", 0, "DUWS_recon_layer_jip"];
 
 // Nearest named settlement to the scouted target (not the overwatch the player is sent to): the
-// overwatch is already map-marked, so the brief names where the enemy is. Same resolver as fnc_mission_run.
-private _place = format ["grid %1", mapGridPosition _target];
-{
-    if (text _x != "") exitWith { _place = text _x };
-} forEach nearestLocations [_target, ["NameCityCapital", "NameCity", "NameVillage", "NameLocal", "NameMarine"], 5000];
+// overwatch is already map-marked, so the brief names where the enemy is.
+private _place = [_target] call fnc_place_name;
 
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_RECON_OBSERVE_BRIEF", _place]] remoteExec ["fnc_duws_dialogue", 0];
 

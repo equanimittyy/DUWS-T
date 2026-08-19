@@ -95,6 +95,7 @@ fnc_mission_findSite = compile preprocessFileLineNumbers "duws\server\missions\f
 fnc_mission_end = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_end.sqf";
 fnc_mission_deadline_fail = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_deadline_fail.sqf";
 fnc_missionMarkerData = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionMarkerData.sqf";
+fnc_place_name = compile preprocessFileLineNumbers "duws\server\missions\fnc_place_name.sqf";
 fnc_missionMarkerClear = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionMarkerClear.sqf";
 fnc_missionTaskCreate = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTaskCreate.sqf";
 fnc_missionTaskEnd = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTaskEnd.sqf";
