@@ -378,7 +378,7 @@ fnc_roadblock_gate_set = {
 // when none does, so it passes its own traffic (car, truck, APC/IFV, tank, bike) and civilians, and bars
 // the enemy -- and the third party too, unlike a bare "not the enemy" test, which would wave an
 // independent faction through the checkpoint. Gated on LandVehicle-minus-StaticWeapon, not any unit, on
-// purpose: the roadblock's own crewed statics and foot garrison sit inside the 12m area and, counted as
+// purpose: the roadblock's own crewed statics and foot garrison sit inside the 20m area and, counted as
 // friendlies, would pin the boom open forever -- the road never barred. StaticWeapon is itself a
 // LandVehicle, so it is carved back out explicitly, or the guns re-pin it. A boom stops vehicles, not men
 // (who walk around it), so keying on mobile vehicles is also what it physically does.
@@ -386,7 +386,7 @@ fnc_roadblock_gate_arm = {
     params ["_key", "_pos", "_side"];
     if !(isNull (missionNamespace getVariable [format ["DUWS_gateTrg_%1", _key], objNull])) exitWith {};
     private _trg = createTrigger ["EmptyDetector", _pos, false];
-    _trg setTriggerArea [12, 12, 0, false, 12];
+    _trg setTriggerArea [20, 20, 0, false, 12];
     _trg setTriggerActivation ["ANY", "PRESENT", true];
     _trg setVariable ["DUWS_gateKey", _key];
     _trg setVariable ["DUWS_gateOwn", [EAST, WEST] select (_side isEqualTo "blufor")];
