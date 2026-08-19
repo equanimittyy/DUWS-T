@@ -94,6 +94,7 @@ if (getdammage BLD1>0.95) exitWith {
 };
 
 if (getdammage BLD1 <= 0.95 && (BLD1 distance PosOfBLUHQ) >= 50 && time > _deadline) exitWith {
+    // TODO: give this mission a bespoke Overlord timeout-fail line; fnc_mission_deadline_fail emits the generic.
     [_VARtaskgeneratedName, "", "mission_steal_builder", _targetpos, _radius] call fnc_mission_deadline_fail;
 };
 

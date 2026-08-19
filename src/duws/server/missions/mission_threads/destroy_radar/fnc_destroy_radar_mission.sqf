@@ -144,6 +144,7 @@ sleep 5;
 waitUntil {sleep 5; !alive _vehicle_7 || (damage _vehicle_7) == 1 || time > _deadline};
 
 if (time > _deadline && alive _vehicle_7 && (damage _vehicle_7) < 1) exitWith {
+    // TODO: give this mission a bespoke Overlord timeout-fail line; fnc_mission_deadline_fail emits the generic.
     [_VARtaskgeneratedName, _markername2, "mission_destroy_radar", _targetpos, _radius] call fnc_mission_deadline_fail;
 };
 

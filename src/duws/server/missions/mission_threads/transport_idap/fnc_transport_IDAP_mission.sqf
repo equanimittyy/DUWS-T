@@ -188,6 +188,7 @@ if (getdammage _truck1>0.95) exitWith {
 if (time > _deadline && getdammage _truck1 <= 0.95 && (_truck1 distance _targetDeliveryPos) >= 50) exitWith {
     deleteMarker _deliveryMarkerName;
     call _cleanupDelivery;
+    // TODO: give this mission a bespoke Overlord timeout-fail line instead of the generic notice.
     call fnc_mission_timeout_notice;
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     if (CIV_PRESENCE != "NONE") then {

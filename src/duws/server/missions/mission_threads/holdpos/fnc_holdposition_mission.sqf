@@ -217,6 +217,7 @@ publicVariable "Mission_Active";
         Mission_Active = false;
         publicVariable "Mission_Active";
         { deleteVehicle _x } forEach _missionUnits;
+        // TODO: give this mission a bespoke Overlord timeout-fail line instead of the generic notice.
         call fnc_mission_timeout_notice;
     };
     private _missionStartTime = missionNamespace getVariable [format ["%1_startTime", _VARtaskgeneratedName], time];

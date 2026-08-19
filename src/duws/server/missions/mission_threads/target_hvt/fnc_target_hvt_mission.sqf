@@ -226,6 +226,7 @@ if (_outcome == "WIN") then {
     if (_outcome == "ESCAPED") then {
         [[_destName], { params ["_z"]; hint format [localize "STR_DUWS_T_HVT_CONVOY_ESCAPED", _z] }] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
     } else {
+        // TODO: give this mission a bespoke Overlord timeout-fail line instead of the generic notice.
         call fnc_mission_timeout_notice;
     };
     [_taskId, "FAILED"] call fnc_missionTaskEnd;

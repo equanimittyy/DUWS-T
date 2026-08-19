@@ -207,6 +207,7 @@ waitUntil {
 };
 
 if (time > _deadline && !((!alive _vehicle_7 || damage _vehicle_7 == 1) && (!alive _vehicle_8 || damage _vehicle_8 == 1))) exitWith {
+    // TODO: give this mission a bespoke Overlord timeout-fail line; fnc_mission_deadline_fail emits the generic.
     [_VARtaskgeneratedName, _markername2, "mission_destroy_cache", _targetpos, _radius] call fnc_mission_deadline_fail;
 };
 

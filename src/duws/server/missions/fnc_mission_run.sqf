@@ -66,6 +66,7 @@ private _deadline = DUWS_curDeadlineAt;
 waitUntil {sleep 2; (_handles call _done) || time > _deadline};
 
 if (!(_handles call _done) && time > _deadline) exitWith {
+    // TODO: fails all spine missions with the generic notice; add a bespoke fail line to the mission spec (like _endLine).
     [_taskId, _marker, _compKey, _targetpos, _radius, _sweep] call fnc_mission_deadline_fail;
 };
 

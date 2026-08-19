@@ -583,6 +583,7 @@ if (time > _deadline && !_allCrewDead) exitWith {
     [_markername2] call fnc_missionMarkerClear;
     deleteMarker _arrowMarkerName;
     { deleteMarker _x; } forEach _apcMarkers;
+    // TODO: give this mission a bespoke Overlord timeout-fail line instead of the generic notice.
     call fnc_mission_timeout_notice;
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [_MissionPos, _radius, "", true] call fnc_mission_end;

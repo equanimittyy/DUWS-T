@@ -137,6 +137,7 @@ waitUntil {
 };
 
 if (time > _deadline && ({alive _x} count units _group > 0)) exitWith {
+    // TODO: give this mission a bespoke Overlord timeout-fail line; fnc_mission_deadline_fail emits the generic.
     [_VARtaskgeneratedName, _markername2, "", _targetpos, _radius] call fnc_mission_deadline_fail;
 };
 
