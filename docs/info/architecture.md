@@ -114,7 +114,7 @@ does not imply server-only.
 |---|---|
 | `init_zones/` | Procedural zone generation: garrisons, patrols, fortifications, capture logic. Siting (the "More Urban" town detection) and the civilian town system are in [`zones_and_civilians.md`](zones_and_civilians.md) |
 | `init_hq/` | HQ and FOB setup: base init, fortify/guard, FOB patrols. How the Main Base layout is built and rearranged is in [`hq_layout_editing.md`](hq_layout_editing.md); the tool that edits it and the spawn tables is in [`composition_tooling.md`](composition_tooling.md) |
-| `missions/` | Side missions: spawner (`fnc_missionLocator`), rewards, timers; `mission_threads/` holds one folder per mission type |
+| `missions/` | Side missions: spawner (`fnc_missionLocator`), rewards, timers; `mission_threads/` holds one folder per mission type. How to add a type, and the design bar it must clear, in [`side_mission_authoring.md`](side_mission_authoring.md) |
 | `supports/` | Support requests: CAS, artillery, UAV, paradrop, heli-lift, vehicle drop, FOB deploy, transport |
 | `warcom/` | War Command — the dynamic AI director for both sides (assault and patrol task forces reacting to the front line) |
 | `dialog/` | Runtime UI: HQ/FOB request menus, mobile-HQ deploy, campaign menu, faction dialog, the CP/AP economy |
