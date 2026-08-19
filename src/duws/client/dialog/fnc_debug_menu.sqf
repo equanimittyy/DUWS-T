@@ -42,6 +42,11 @@ if (!((vehiclevarname player) in game_master)) exitWith {};
     // Clears fnc_stratmap's cached offer set and reopens the picker, rolling a fresh seven. The cache
     // is what keeps a normal back-out on the same offers; this is the intended way to roll new ones.
     ["Re-roll side missions", {
+        // Clear the start gate too, the way the force tool does (stamp to 0): a dev re-roll that still
+        // tripped the three-hour wait would open the picker but roll a set none of which could start.
+        // fnc_mission_begin re-stamps on the next start, so the gate resumes after one mission.
+        DUWS_lastMissionStartDate = 0;
+        publicVariable "DUWS_lastMissionStartDate";
         DUWS_missionOffers = [];
         [] spawn fnc_stratmap;
     }, [], [1,0.667,0,1]],
