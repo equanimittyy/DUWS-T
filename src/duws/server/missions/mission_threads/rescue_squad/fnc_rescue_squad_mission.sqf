@@ -18,7 +18,7 @@ if (!([0, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 #define SUPPRESS_RANGE  300
 #define SUPPRESS_MAX    150
 #define UNCAPTIVE_RANGE 50
-#define CORDON_RING     80
+#define CORDON_RING     120
 
 private _compKey = "mission_rescue_squad";
 private _radius = 300;
@@ -88,10 +88,10 @@ _squadGroup setCombatMode "BLUE";
 // The cordon: four OPFOR teams held at the cardinal points on a ring round the building -- three
 // rifle teams and one weapons team, from the shared token vocabulary. Posture "none" so fnc_spawn_team
 // drops each on the exact ring point rather than in its own band; then each holds facing in on combat
-// mode YELLOW (fire at will, keep formation) so it works the ring and never charges the objective. The
-// ring keeps them off the building -- the player owns the last UNCAPTIVE_RANGE metres, where the squad
-// is reached. Every cordon team suppresses the held building (below) while a player is in the band,
-// then reverts to working the ring the moment the assault begins.
+// mode YELLOW. CORDON_RING sits past 100 m and PATH is disabled on every cordon man, so the ring holds
+// static -- no one advances inside 100 m of the building while the hold stands. Movement is handed back
+// only when the player breaks the hold (below); until then the ring just holds and suppresses the
+// building, and the player owns the ground inside it, where the squad is reached.
 private _cordonTokens = ["team", "team", "team", "wp_team"];
 private _cordonUnits = [];
 private _suppressUnits = [];
@@ -107,6 +107,7 @@ private _suppressUnits = [];
         private _wp = _g addWaypoint [_cpos, 0];
         _wp setWaypointType "HOLD";
         {
+            _x disableAI "PATH";          // hold the ring static; no advance inside 100 m of the building
             _cordonUnits pushBack _x;
             _suppressUnits pushBack _x;   // every cordon team suppresses, not just one
         } forEach units _g;
@@ -131,61 +132,66 @@ sleep 8;
 // Relief flag: raised the moment the squad comes out, read by the suppression thread (which stops
 // hosing the building once its occupants are up) and guarding the un-captive against a double fire.
 DUWS_rsq_relieved = false;
+// Hold flag: raised when the player breaks the cordon's hold -- the assault lands (a cordon man takes
+// fire), the cordon starts dropping, or the squad is relieved. Ends the suppression and hands movement
+// back to the ring (below). Separate from _relieved: the squad can be freed by the cordon being cleared
+// from range, and the hold can break before the squad is out.
+DUWS_rsq_holdBroken = false;
 
-// Scripted small-arms suppression on the held building, to sell the squad being pinned. Fires only
-// while a player is in the outer band (SUPPRESS_RANGE) and the squad is still holed up. It backs off --
-// and the cordon reverts to fighting the player normally -- once any of: a suppress unit takes fire (the
-// assault has begun), SUPPRESS_MAX seconds of firing elapse, the cordon breaks, or the deadline passes.
-// Not on mere proximity -- a player sneaking to within a few dozen metres should not silence the cordon.
-// The timeout counts from the first shot, not from spawn, so a slow approach still gets the full show.
+// Native small-arms suppression on the held building, to sell the squad being pinned. Fires only while a
+// player is in the outer band (SUPPRESS_RANGE) and the squad is still holed up, and stops on the first of:
+// the hold breaking, the squad being relieved, SUPPRESS_MAX seconds of firing, the cordon dying, or the
+// deadline. Not on mere proximity -- a player sneaking to within a few dozen metres should not silence the
+// cordon. The timeout counts from the first shot, not from spawn, so a slow approach still gets the show.
 //
-// forceWeaponFire on the primary weapon, not doSuppressiveFire on the building: doSuppressiveFire needs
-// line of sight -- nothing happens when the shooter cannot see the building -- and picks whatever weapon
-// the unit holds, so a launcher levels the building on the first shot. Forcing the rifle keeps it to
-// small arms and fires in the held direction with no target or LOS needed; doWatch points them in, and
-// is dropped when suppression ends so they re-acquire the player instead of staring at the wall.
-[_suppressUnits, _Building, _BuildingPos, _deadline] spawn {
-    params ["_shooters", "_bld", "_bpos", "_dl"];
+// doSuppressiveFire is the engine's own suppression order: the AI hoses the target's position on its own
+// cadence, so this only re-issues it every few seconds to keep it alive (the order lapses). selectWeapon on
+// the primary each pass keeps it to small arms -- an AT man's launcher is his secondary, so it is never
+// what fires. The tradeoff the old forceWeaponFire hack avoided is that this needs line of sight: a shooter
+// with no view of the building stays quiet. Accepted -- the ring sits in the open at the cardinals, so
+// enough of it sees the building to read as sustained fire.
+[_suppressUnits, _Building, _deadline] spawn {
+    params ["_shooters", "_bld", "_dl"];
     private _startedAt = -1;
     while {
         (time < _dl)
         && {(_shooters findIf {alive _x}) >= 0}
         && {!DUWS_rsq_relieved}
-        && {(_shooters findIf {(damage _x) > 0}) < 0}
+        && {!DUWS_rsq_holdBroken}
         && {_startedAt < 0 || {(time - _startedAt) < SUPPRESS_MAX}}
     } do {
         if (((call BIS_fnc_ListPlayers) findIf { alive _x && {(_x distance2D _bld) < SUPPRESS_RANGE} }) >= 0) then {
             if (_startedAt < 0) then { _startedAt = time };
-            // Roll through the shooters with a short per-man stagger so the fire reads as a sustained
-            // crackle, not one synchronised volley every few seconds. No bottom sleep on this branch:
-            // the stagger IS the cadence, and the while head re-checks the stop conditions each pass.
             {
                 if (alive _x) then {
-                    _x doWatch _bpos;
                     private _w = primaryWeapon _x;
                     if (_w != "") then {
-                        private _modes = getArray (configFile >> "CfgWeapons" >> _w >> "modes");
-                        // Prefer a burst/auto mode -- more rounds per forced shot; the first mode is
-                        // usually single. Some weapons list ["this"]: the mode config sits on the weapon.
-                        private _mode = _w;
-                        if !(_modes isEqualTo []) then {
-                            _mode = _modes select 0;
-                            {
-                                private _lc = toLower _x;
-                                if ((_lc find "burst") >= 0 || {(_lc find "auto") >= 0} || {(_lc find "full") >= 0}) exitWith { _mode = _x };
-                            } forEach _modes;
-                        };
-                        if (_mode == "this") then { _mode = _w };
-                        _x forceWeaponFire [_w, _mode];
+                        _x selectWeapon _w;
+                        _x doSuppressiveFire _bld;
                     };
                 };
-                sleep (0.2 + random 0.3);
             } forEach _shooters;
+            sleep 4;
         } else {
             sleep 1;
         };
     };
-    { if (alive _x) then { _x doWatch objNull } } forEach _shooters;
+};
+
+// Breaks the hold and hands movement back to the ring. Watches for the assault landing (a cordon man
+// takes fire), the cordon starting to drop, the squad being relieved, or the deadline; on any of them the
+// ring's PATH is re-enabled so survivors manoeuvre and fight instead of holding static.
+[_cordonUnits, _deadline] spawn {
+    params ["_cordon", "_dl"];
+    waitUntil {
+        sleep 1;
+        (time > _dl)
+        || {DUWS_rsq_relieved}
+        || {(_cordon findIf {alive _x && {(damage _x) > 0}}) >= 0}
+        || {(_cordon findIf {!alive _x}) >= 0}
+    };
+    DUWS_rsq_holdBroken = true;
+    { if (alive _x) then { _x enableAI "PATH" } } forEach _cordon;
 };
 
 // Un-captive on the first of: player within UNCAPTIVE_RANGE, or the cordon wiped (so a player who
