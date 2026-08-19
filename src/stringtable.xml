@@ -4336,8 +4336,8 @@
                 <German>"Overlord 1-1" an alle Einheiten, Notfall! Wir haben gerade die vorläufige feindliche Kommandomannschaft gesichtet – alle Bereitschaftseinheiten sollen sich bewegen und den vorläufigen Kommandanten sofort eliminieren!</German>
                 <Spanish>"Overlord 1-1" a todas las unidades, emergencia! Acabamos de localizar el equipo de comando temporal enemigo – todas las unidades en espera deben desplazarse y eliminar al comandante temporal de inmediato!</Spanish>
                 <Chinesesimp>全体单位，紧急情况！我们刚刚发现了敌人的临时指挥小组，现在需要所有待命单位前往消灭临时指挥官！</Chinesesimp>
-                <Original>Alpha 1-1, we've located the enemy's field commander in the AO, marked on your map. Move in and take him down.</Original>
-                <English>Alpha 1-1, we've located the enemy's field commander in the AO, marked on your map. Move in and take him down.</English>
+                <Original>Alpha 1-1, we've located the enemy's field commander in the AO, marked on your map. Move in and eliminate him.</Original>
+                <English>Alpha 1-1, we've located the enemy's field commander in the AO, marked on your map. Move in and eliminate him.</English>
             </Key>
             <Key ID="STR_DUWS_T_armorletsdothis">
                 <German>Hier spricht "Overlord", gute Nachricht: Eine feindliche Panzerzug wurde gerade von unserer Nahluftunterstützung vernichtet, der Führerpanzer liegt im Gelände defekt. Ihre Einheit hat die Aufgabe, ihren Zugführer zu eliminieren, solange sie Feldreparaturen durchführen – sein Panzer zu beschlagnahmen, falls möglich.</German>
