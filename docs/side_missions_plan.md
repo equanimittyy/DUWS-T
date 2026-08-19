@@ -57,6 +57,13 @@ queries (local, no locality issue).
 **Bound.** Each offer tries at most K candidates; K rejects drops the offer and logs it (fewer than
 the 7 drawn get offered), never an unbounded search.
 
+**Abort criteria (click-time).** A finder gate stops a bad offer being *made*, but some criteria can
+only fail *after* the pick, when war state moves between offer and click (the informant's escape zone
+is captured in the gap). A thread that gives up then calls `fnc_mission_abort` with a `_reason`: a
+stable snake_case slug naming the failed criterion, optionally `slug: human detail`. It is the grep
+key for why a type aborts, so the log distinguishes criteria that share one player-facing hint; keep
+the slug stable when the wording changes.
+
 **Phases:**
 1. Dispatch + generic finder + the picker gate, behaviour-preserving (generic accepts every
    candidate, so a mission without a finder draws exactly as before).

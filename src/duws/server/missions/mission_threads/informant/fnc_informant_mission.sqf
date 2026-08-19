@@ -18,7 +18,7 @@ params ["_MissionPos", "_mission_name"];
 private _locs  = missionNamespace getVariable ["civ_locations", []];
 private _radii = missionNamespace getVariable ["civ_radii", []];
 if (_locs isEqualTo []) exitWith {
-    [16, "STR_DUWS_T_crtzxs0j"] call fnc_mission_abort;
+    [16, "STR_DUWS_T_crtzxs0j", "no_towns_registered: civ_locations empty"] call fnc_mission_abort;
 };
 private _townIndex = -1;
 private _bestD = 1e9;
@@ -27,7 +27,7 @@ private _bestD = 1e9;
     if (_d < _bestD) then { _bestD = _d; _townIndex = _forEachIndex };
 } forEach _locs;
 if (_townIndex < 0) exitWith {
-    [16, "STR_DUWS_T_crtzxs0j"] call fnc_mission_abort;
+    [16, "STR_DUWS_T_crtzxs0j", "no_town_match: offer pos matched no registered town"] call fnc_mission_abort;
 };
 private _townPos    = getPos (_locs select _townIndex);
 private _townRadius = _radii param [_townIndex, 200];
@@ -64,7 +64,7 @@ private _zxD = 1e9;
     };
 } forEach zone_namePOS_pairs;
 if (_zx isEqualTo []) exitWith {
-    [16, "STR_DUWS_T_crtzxs0j"] call fnc_mission_abort;
+    [16, "STR_DUWS_T_crtzxs0j", "escape_zone_missing: no OPFOR-held zone >=1km from town"] call fnc_mission_abort;
 };
 
 private _townName = text (_locs select _townIndex);
