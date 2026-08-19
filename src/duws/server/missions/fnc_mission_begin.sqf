@@ -9,16 +9,16 @@
 params ["_missionType", "_MissionPos", "_mission_name", ["_requester", 0]];
 private _remaining = [] call fnc_mission_gate_left;
 if (_remaining > 0) exitWith {
-	// _remaining is in-game hours, fractional: split into whole hours and minutes for the hint,
-	// or an unfloored remainder reaches format at full precision and reads "1.73 h 43.8 m".
-	private _parts = [floor _remaining, floor ((_remaining % 1) * 60)];
+	// The in-game clock time the gate opens, formatted server-side: a plain "HH:MM" string,
+	// language-independent, so the receiving machine only slots it into its own localised line.
+	private _openTime = [] call fnc_mission_gate_time;
 	// Localised on the receiving machine: the server's language is not the player's.
 	if (_requester > 0) then {
-		[_parts, {
-			hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _this select 0, _this select 1];
+		[_openTime, {
+			hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _this];
 		}] remoteExec ["spawn", _requester];
 	} else {
-		hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _parts select 0, _parts select 1];
+		hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", _openTime];
 	};
 	["DEBUG", "MISSION", format ["type=%1 refused, %2 in-game h until the gate opens",
 		_missionType, _remaining]] call fnc_log;

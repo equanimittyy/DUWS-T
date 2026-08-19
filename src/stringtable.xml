@@ -4111,8 +4111,8 @@
             </Key>
             <Key ID="STR_DUWS_T_MISSION_COOLDOWN">
                 <Chinesesimp>这个任务正处于冷却状态，剩余时间 %1 分 %2 秒</Chinesesimp>
-                <Original>No new tasking yet. %1h %2m of in-game time to go, or rest at HQ to skip ahead.</Original>
-                <English>No new tasking yet. %1h %2m of in-game time to go, or rest at HQ to skip ahead.</English>
+                <Original>Side mission tasking unavailable until %1. Rest at HQ to fast-forward time by 3 hours.</Original>
+                <English>Side mission tasking unavailable until %1. Rest at HQ to fast-forward time by 3 hours.</English>
             </Key>
             <Key ID="STR_DUWS_T_q3iy1vcz">
                 <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDer Pilot wurde getötet !</German>

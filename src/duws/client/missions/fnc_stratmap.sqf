@@ -30,7 +30,7 @@ if (!((vehiclevarname player) in game_master)) exitWith {hint ([localize "STR_DU
 // below so a cached open obeys the gate too.
 private _gateLeft = [] call fnc_mission_gate_left;
 if (_gateLeft > 0) exitWith {
-	hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", floor _gateLeft, floor ((_gateLeft % 1) * 60)];
+	hint format [localize "STR_DUWS_T_MISSION_COOLDOWN", [] call fnc_mission_gate_time];
 };
 
 // Reuse a still-current offer set instead of re-rolling it. Regenerating on every open handed a
