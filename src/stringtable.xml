@@ -4409,12 +4409,16 @@
                 <English>Alpha 1-1, we've lost contact with Signal 3-1. They're presumed KIA. Nothing more we can do.</English>
             </Key>
             <Key ID="STR_DUWS_T_squadevac">
-                <Original>Signal 3-1, cordon's broken. Evac helicopter inbound, move to it for extraction.</Original>
-                <English>Signal 3-1, cordon's broken. Evac helicopter inbound, move to it for extraction.</English>
+                <Original>Alpha 1-1, cordon has been lifted. Evac inbound for Signal 3-1.</Original>
+                <English>Alpha 1-1, cordon has been lifted. Evac inbound for Signal 3-1.</English>
             </Key>
             <Key ID="STR_DUWS_T_squadevacout">
                 <Original>Signal 3-1 is out. Good work.</Original>
                 <English>Signal 3-1 is out. Good work.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_squadthanks">
+                <Original>Thanks, Overlord. We owe you for the assist, Alpha 1-1.</Original>
+                <English>Thanks, Overlord. We owe you for the assist, Alpha 1-1.</English>
             </Key>
             <Key ID="STR_DUWS_T_towerletsdothis">
                 <German>"Kobra" an Kommando! Wir bekämpfen feindliches schweres Feuer am verbündeten Funkturm! Ich wiederhole...</German>

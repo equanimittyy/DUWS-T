@@ -98,6 +98,8 @@ if ((_squad findIf {alive _x}) < 0) exitWith { call _fail };
 [_marker] call fnc_missionMarkerClear;
 [_taskId, "SUCCEEDED"] call fnc_missionTaskEnd;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadevacout"] remoteExec ["fnc_duws_dialogue", 0];
+sleep 5;
+[localize "STR_DUWS_T_Signal", localize "STR_DUWS_T_squadthanks"] remoteExec ["fnc_duws_dialogue", 0];
 
 { deleteVehicle _x } forEach crew _heli;
 deleteVehicle _heli;
