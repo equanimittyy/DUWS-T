@@ -6248,6 +6248,10 @@
                 <Original>To Overlord, we're back to full combat effectiveness and ready for tasking.</Original>
                 <English>To Overlord, we're back to full combat effectiveness and ready for tasking.</English>
             </Key>
+            <Key ID="STR_DUWS_T_restcooldownhint">
+                <Original>Resting too fast, please try again in a moment.</Original>
+                <English>Resting too fast, please try again in a moment.</English>
+            </Key>
             <Key ID="STR_DUWS_T_jl4gqjpf">
                 <Spanish>Inicializando WARCOM</Spanish>
                 <German>Initialisiere WARCOM...</German>
