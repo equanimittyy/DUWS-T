@@ -2888,15 +2888,15 @@
                 <German>Hallo? Kann mich jemand hören? Hier ist IDAP. Vor einer Stunde wurde einer unserer Lieferwagen mit humanitärer Hilfe von OPFOR beschlagnahmt... Wir bitten Sie um Hilfe bei der Rückeroberung des Wagens. Seine ungefähre Richtung und der Übergabepunkt wurden auf dem GPS aktualisiert.</German>
                 <Spanish>¿Hola? ¿Alguien me oye? Soy IDAP. Hace una hora, uno de nuestros camiones de suministros cargado de ayuda humanitaria fue robado por OPFOR... Les pedimos ayuda para recuperar el camión. Su dirección aproximada y el punto de entrega han sido actualizados en el GPS.</Spanish>
                 <Chinesesimp>喂？可以听到吗？我是IDAP的工作人员，一小时之前我们的一辆装满人道主义物资的补给卡车被红方抢走了...我们请求你们帮忙将卡车夺回来，卡车的大致去向和交付点已经在GPS上更新。</Chinesesimp>
-                <Original>Hello? Can anyone hear me? This is IDAP. An hour ago OPFOR seized one of our trucks loaded with humanitarian aid... We need help getting it back. Its last known position and our delivery point are on your map.</Original>
-                <English>Hello? Can anyone hear me? This is IDAP. An hour ago OPFOR seized one of our trucks loaded with humanitarian aid... We need help getting it back. Its last known position and our delivery point are on your map.</English>
+                <Original>Hello? Can anyone hear me? This is IDAP. An hour ago armed men seized one of our trucks loaded with humanitarian aid. We need help getting it back. Its last known position and our delivery point are marked on your map.</Original>
+                <English>Hello? Can anyone hear me? This is IDAP. An hour ago armed men seized one of our trucks loaded with humanitarian aid. We need help getting it back. Its last known position and our delivery point are marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_idapcopy">
                 <German>Hier ist BLUFOR-Kommando. Wir haben Ihre Anfrage erhalten. Einheiten sind zum markierten Ort unterwegs ———— "Overlord 1-1" an Einsatzteam, habt ihr die Übertragung alle verstanden?</German>
                 <Spanish>Aquí mando BLUFOR. Hemos recibido su solicitud. Unidades en camino a la ubicación marcada ———— "Overlord 1-1" llamando al Equipo de Acción, ¿escuchasteis esa transmisión?</Spanish>
                 <Chinesesimp>我们收到了你的请求。正在派出部队前往标记位置————"霸王1-1"呼叫行动组，刚刚的通话你们都听到了吧。</Chinesesimp>
-                <Original>We have your request. Units are moving to the marked location. Alpha 1-1, you copy all that?</Original>
-                <English>We have your request. Units are moving to the marked location. Alpha 1-1, you copy all that?</English>
+                <Original>IDAP, we copy. Units are moving to the marked location. Alpha 1-1, you copy all that?</Original>
+                <English>IDAP, we copy. Units are moving to the marked location. Alpha 1-1, you copy all that?</English>
             </Key>
             <Key ID="STR_DUWS_T_idapacteamgo">
                 <German>Einsatzteam verstanden, wir beginnen die Operation sobald der Plan festgelegt ist, Ende.</German>
@@ -3017,16 +3017,16 @@
                 <English>Reach the marked overwatch, raise your binoculars, and hold observation on the enemy position until Allseer confirms the intel. Its location is then marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_BRIEF">
-                <Original>Alpha 1-1, we have an unscouted enemy position out there. Move to the marked overwatch and observe it through binoculars until Allseer confirms intel on the enemy position.</Original>
-                <English>Alpha 1-1, we have an unscouted enemy position out there. Move to the marked overwatch and observe it through binoculars until Allseer confirms intel on the enemy position.</English>
+                <Original>Alpha 1-1, we have an unscouted enemy position near %1. Move to the marked overwatch and observe it through binoculars until Allseer confirms the intel.</Original>
+                <English>Alpha 1-1, we have an unscouted enemy position near %1. Move to the marked overwatch and observe it through binoculars until Allseer confirms the intel.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_DONE">
                 <Original>Alpha 1-1, Allseer has received your intel and confirmed the enemy position. It's now marked on your map.</Original>
                 <English>Alpha 1-1, Allseer has received your intel and confirmed the enemy position. It's now marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_BONUS">
-                <Original>We've got intel that there are additional positions in the area. It's also now marked on your map.</Original>
-                <English>We've got intel that there are additional positions in the area. It's also now marked on your map.</English>
+                <Original>We've got intel on more enemy positions in the area. They're now marked on your map too.</Original>
+                <English>We've got intel on more enemy positions in the area. They're now marked on your map too.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_FAILED">
                 <Original>The recon timed out. Mission failed.</Original>
@@ -4140,8 +4140,8 @@
                 <German>Scheiße... Mein Bein ist verletzt. Hast du ein Sanitätspaket?</German>
                 <Spanish>Joder... Me he lastimado la pierna. ¿Tienes un botiquín?</Spanish>
                 <Chinesesimp>该死...我腿伤了。你有医疗包吗？</Chinesesimp>
-                <Original>My leg's in bad shape. Have you got a medkit?</Original>
-                <English>My leg's in bad shape. Have you got a medkit?</English>
+                <Original>My leg's in bad shape, I can't walk. You'll have to carry me.</Original>
+                <English>My leg's in bad shape, I can't walk. You'll have to carry me.</English>
             </Key>
             <Key ID="STR_DUWS_T_pilotend">
                 <German>Endlich zurück! Vielen Dank an euch!</German>
@@ -4154,8 +4154,8 @@
                 <German>„Overlord“ an Einsatztrupp, gut gemacht. Ich wette, dieser Pilot vergisst euch sein ganzes Leben lang nicht.</German>
                 <Spanish>"Overlord" al escuadrón de acción, bien hecho. Apuesto a que ese piloto nunca os olvida en toda su vida.</Spanish>
                 <Chinesesimp>行动组，干得漂亮。我估计那个飞行员这辈子忘不掉你们了。</Chinesesimp>
-                <Original>To Alpha 1-1, well done. The pilot has been recovered safe.</Original>
-                <English>To Alpha 1-1, well done. The pilot has been recovered safe.</English>
+                <Original>To Alpha 1-1, the pilot is back safe. Good work.</Original>
+                <English>To Alpha 1-1, the pilot is back safe. Good work.</English>
             </Key>
             <Key ID="STR_DUWS_T_armorend">
                 <German>"Overlord" an Action Squad, Überwachungstrupp bestätigt die Eliminierung des Panzerzugskommandanten. Fehlerlose Operation.</German>
@@ -4399,8 +4399,8 @@
                 <German>Lass mich dich im Fahrzeug unterbringen, sei vorsichtig.</German>
                 <Spanish>Déjame acomodarte en el vehículo, ten cuidado.</Spanish>
                 <Chinesesimp>让我把你安置到载具里，小心点。</Chinesesimp>
-                <Original>Let me get you settled in the vehicle, be careful.</Original>
-                <English>Let me get you settled in the vehicle, be careful.</English>
+                <Original>Let me get you into the vehicle. Easy now.</Original>
+                <English>Let me get you into the vehicle. Easy now.</English>
             </Key>
             <Key ID="STR_DUWS_T_squadletsdothis">
                 <German>"Signal 3-1" an alle Einheiten! Wir wurden an den aktuellen Koordinaten überfallen, schwere Verluste! Ich und ein paar Männer sind in einem nahe gelegenen Gebäude versteckt, wir brauchen dringend Evakuierung!</German>
@@ -4413,8 +4413,8 @@
                 <German>"Overlord 1-1" an "Signal 3-1"! Eine Soforteinsatztruppe ist auf dem Weg zu Ihrer Position. Halten Sie durch!</German>
                 <Spanish>"Imperador 1-1" a "Signal 3-1"! Una fuerza de reacción rápida está de camino a tu posición. Resiste!</Spanish>
                 <Chinesesimp>"信号3-1"，现已派出快反部队前往你所在的位置，坚持住！</Chinesesimp>
-                <Original>To Signal 3-1, a quick reaction force is en route. Hold what you have.</Original>
-                <English>To Signal 3-1, a quick reaction force is en route. Hold what you have.</English>
+                <Original>To Signal 3-1, a quick reaction force is en route. Hold your position.</Original>
+                <English>To Signal 3-1, a quick reaction force is en route. Hold your position.</English>
             </Key>
             <Key ID="STR_DUWS_T_squadfail">
                 <German>Action Squad, hier ist "Overlord". Wir haben den Kontakt zu "Signal 3-1" verloren... Verlasse das AO.</German>
@@ -4476,8 +4476,8 @@
                 <German>Dies ist „Oberherr 1-1“. Ein verbündetes Hubschrauber stürzte vor zehn Minuten an der markierten Position ab. Glücklicherweise steht der Pilot noch mit dem Kommando in Verbindung. Ihre Einheit soll als Soforteinsatztruppe vorgehen und den Piloten evakuieren.</German>
                 <Spanish>Este es "Imperador 1-1". Un helicóptero aliado se estrelló en la posición marcada hace diez minutos. Por suerte, el piloto sigue en contacto con el mando. Tu unidad debe actuar como fuerza de reacción rápida y rescatar al piloto.</Spanish>
                 <Chinesesimp>十分钟前，友军直升机在标记位置坠毁。好在飞行员仍和指挥部保持联系。你的单位现在需要作为快反部队，将飞行员救出来。</Chinesesimp>
-                <Original>A friendly helicopter went down at the marked position ten minutes ago. The pilot's still in contact with command. Move in as a quick reaction force and get him out.</Original>
-                <English>A friendly helicopter went down at the marked position ten minutes ago. The pilot's still in contact with command. Move in as a quick reaction force and get him out.</English>
+                <Original>Alpha 1-1, a friendly helicopter went down at the marked position ten minutes ago. The pilot is still in contact with command. Move in and get him out.</Original>
+                <English>Alpha 1-1, a friendly helicopter went down at the marked position ten minutes ago. The pilot is still in contact with command. Move in and get him out.</English>
             </Key>
             <Key ID="STR_DUWS_T_cqblookslike">
                 <German>Sieht so aus, als wäre dies der letzte von ihnen...</German>
