@@ -125,7 +125,7 @@ private _spec = [
     5, 1000, "kill", "STR_DUWS_T_16dh939j", "STR_DUWS_T_c5", "sniperhunt",
     _build,
     { params ["_target1", "_target2"]; !alive _target1 && !alive _target2 },
-    [["STR_DUWS_T_Viper", "STR_DUWS_T_sniperletsdothis", 8]],
-    ["STR_DUWS_T_Viper", "STR_DUWS_T_sniperend"]
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_sniperletsdothis", 8]],
+    ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_sniperend"]
 ];
 [_MissionPos, _mission_name, _spec] call fnc_mission_run;

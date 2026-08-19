@@ -79,7 +79,7 @@ private _spec = [
     2, 600, "kill", "STR_DUWS_T_19ajhe1d", "STR_DUWS_T_c2", "rescue",
     _build,
     { params ["_target"]; !alive _target },
-    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_hvtletsdothis", 8], ["STR_DUWS_T_Viper", "STR_DUWS_T_hvtseen", 0]],
+    [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_hvtletsdothis", 8]],
     ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_hvtend"],
     "mission_target_hvt"
 ];

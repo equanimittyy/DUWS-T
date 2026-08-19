@@ -4353,13 +4353,6 @@
                 <Original>We've located the enemy sniper team. You're clear to engage.</Original>
                 <English>We've located the enemy sniper team. You're clear to engage.</English>
             </Key>
-            <Key ID="STR_DUWS_T_hvtseen">
-                <German>Hier ist "Viper 1-5". Dieser Hurensohn trägt eine schwarze Barett – damit solltest du erkennen, welches das hochwertige Ziel ist.</German>
-                <Spanish>Aquí "Viper 1-5". Ese hijo de puta lleva una boina negra — eso debería permitirles distinguir cuál es el objetivo de alto valor.</Spanish>
-                <Chinesesimp>那个狗杂碎戴着顶黑色贝雷帽————这应该能让你们分辨出哪个是高价值目标。</Chinesesimp>
-                <Original>Your target's the one in the black beret.</Original>
-                <English>Your target's the one in the black beret.</English>
-            </Key>
             <Key ID="STR_DUWS_T_sniperend">
                 <German>"Viper 1-5" an Action Squad, gut gemacht! Wir haben bestätigt, dass der feindliche Scharfschütze vollständig eliminiert wurde!</German>
                 <Spanish>"Viper 1-5" a Action Squad, ¡muy bien hecho! Hemos confirmado que el francotirador enemigo fue eliminado con éxito!</Spanish>
@@ -5932,13 +5925,6 @@
                 <Chinesesimp>眼镜蛇1-3</Chinesesimp>
                 <Original>Cobra 1-3</Original>
                 <English>Cobra 1-3</English>
-            </Key>
-            <Key ID="STR_DUWS_T_Viper">
-                <German>Viper 1-5</German>
-                <Spanish>Viper 1-5</Spanish>
-                <Chinesesimp>毒蛇1-5</Chinesesimp>
-                <Original>Viper 1-5</Original>
-                <English>Viper 1-5</English>
             </Key>
             <Key ID="STR_DUWS_T_Signal">
                 <German>Signal 3-1</German>
