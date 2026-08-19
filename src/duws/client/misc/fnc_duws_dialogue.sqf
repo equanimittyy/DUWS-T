@@ -4,8 +4,12 @@
 // [_speaker, _text, _channel] -- _channel "" means decide from the speaker.
 //
 // NET and VOICE are queued for fnc_duws_dialogue_drain, which owns the single subtitle slot;
-// SUB-NET is printed straight to the chat box here, since that surface stacks and has no slot
-// to contend for. Either way the body returns without waiting: ten sites reach it by call.
+// SUB-NET is sent to the chat box here, since that surface stacks and has no slot to contend
+// for. Either way the body returns without waiting: ten sites reach it by call.
+
+// Seconds SUB-NET spaces bunched lines by, so two threads keying up together do not dump at
+// once and read as garbled cross-talk. One constant to tune if the net's cadence reads wrong.
+#define SUBNET_GAP 2
 
 params [["_speaker", ""], ["_text", ""], ["_channel", ""]];
 
@@ -68,13 +72,22 @@ if (_speaker isEqualTo ([localize "STR_DUWS_T_actionteam"] call fnc_cs)) then {
     _speaker = format ["%1 (%2)", _speaker, _who];
 };
 
-// SUB-NET goes straight to the bottom-left chat box, not the subtitle queue: the chat box
-// stacks lines and persists, so there is no single slot to serialise and nothing to drain.
-// The speaker is folded into the text because systemChat has no name column of its own. The
-// squelch takes its own thread so it lands off the print frame, matching the drain.
+// SUB-NET goes to the bottom-left chat box, not the subtitle queue: the box stacks lines and
+// persists, so there is no single slot to serialise. But lines that arrive bunched -- two
+// threads keying up in the same beat -- would print at once and read as garbled cross-talk, so
+// each claims the next free slot on a shared cursor and prints when it comes up. Bunched lines
+// space out to SUBNET_GAP apart; a scripted exchange that already sleeps between its own lines
+// finds the cursor long passed and prints with no added delay -- the gap only bites when the
+// net is genuinely busy. The speaker is folded into the text: systemChat has no name column.
 if (_channel isEqualTo "SUB-NET") exitWith {
-    if (_squelch) then { [] spawn { playSound "DUWS_Radio_Start" } };
-    systemChat format ["%1: %2", _speaker, _text];
+    private _slot = time max (uiNamespace getVariable ["DUWS_subnetNextAt", 0]);
+    uiNamespace setVariable ["DUWS_subnetNextAt", _slot + SUBNET_GAP];
+    [_speaker, _text, _squelch, _slot - time] spawn {
+        params ["_sp", "_tx", "_sq", "_wait"];
+        if (_wait > 0) then { sleep _wait };
+        if (_sq) then { playSound "DUWS_Radio_Start" };
+        systemChat format ["%1: %2", _sp, _tx];
+    };
 };
 
 // Two queues rather than one with a priority insert: the drain loop empties VOICE first, which

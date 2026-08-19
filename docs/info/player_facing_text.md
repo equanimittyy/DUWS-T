@@ -282,7 +282,10 @@ player callsign is on no list, because you do not hear your own key-up.
 
 **One subtitle slot, VOICE first.** The engine subtitle is a single line; a second replaces the first
 mid-read, so `fnc_duws_dialogue_drain` holds one line at a time — and only NET and VOICE reach it,
-since SUB-NET prints straight to the chat box, which stacks and needs no slot. VOICE drains first and
+since SUB-NET prints to the chat box, which stacks and needs no slot. SUB-NET has no drain, but a
+shared cursor in `fnc_duws_dialogue` spaces *bunched* lines a couple of seconds apart, so two threads
+keying up in the same beat do not dump at once and read as garbled cross-talk; an exchange that
+already sleeps between its own lines prints with no added delay. VOICE drains first and
 entirely — it answers something the player just did, and waiting behind an Overlord brief reads as a
 dropped button press — and never expires. NET is dropped once it has waited over 8 s, because an
 Overlord line queued behind a long in-room exchange reads worse late than silent. Two lines in the
