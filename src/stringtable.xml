@@ -3133,19 +3133,13 @@
                 <English>No intel items to analyze.</English>
                 <Chinesesimp>你没有可分析的情报物品！</Chinesesimp>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_ANALYSIS_BROADCAST">
-                <Original>%1 turned in intel for %3 CP: %2.</Original>
-                <English>%1 turned in intel for %3 CP: %2.</English>
-                <Chinesesimp>%1 分析了情报物品：%2</Chinesesimp>
+            <Key ID="STR_DUWS_T_INTEL_ANALYSIS_AWARD">
+                <Original>Intel awarded: %1 CP</Original>
+                <English>Intel awarded: %1 CP</English>
             </Key>
-            <Key ID="STR_DUWS_T_INTEL_ANALYSIS_HINT">
-                <Original>Analysis complete! Gained %1 CP.\nAnalyzed items: %2.</Original>
-                <English>Analysis complete! Gained %1 CP.\nAnalyzed items: %2.</English>
-                <Chinesesimp>分析完成！获得 %1 CP。\n已分析物品：%2</Chinesesimp>
-            </Key>
-            <Key ID="STR_DUWS_T_INTEL_ANALYSIS_REVEAL">
-                <Original>%1 turned in intel: %2. The analysts pulled a location out of it.</Original>
-                <English>%1 turned in intel: %2. The analysts pulled a location out of it.</English>
+            <Key ID="STR_DUWS_T_INTEL_ANALYSIS_AWARD_INTEL">
+                <Original>Intel awarded: %1 CP and intel</Original>
+                <English>Intel awarded: %1 CP and intel</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_SEARCH_ACTION">
                 <Original>Search</Original>

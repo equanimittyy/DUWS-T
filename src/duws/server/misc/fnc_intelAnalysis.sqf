@@ -24,7 +24,6 @@ private _intelItems = [
 
 private _totalCP = 0;
 private _revealTriggered = false;
-private _removedItems = [];
 
 private _playerMags = magazines _caller;
 private _playerItems = items _caller;
@@ -51,7 +50,6 @@ private _playerItems = items _caller;
 
         private _reward = _totalCount * _cpValue;
         _totalCP = _totalCP + _reward;
-        _removedItems pushBack format ["%1 x%2", _itemClass, _totalCount];
 
         // Rolled per instance, so more (or better) documents raise the odds; one hit anywhere in the
         // delivery arms the single reveal below.
@@ -68,21 +66,22 @@ if (_totalCP == 0) exitWith {
 sleep 5;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_INTEL_ANALYSIS_roger"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 5;
-private _itemsList = _removedItems joinString ", ";
+
+// Analysis is not instant: a random up-to-a-minute delay before the award lands, so the turn-in
+// reads as work being done rather than an instant payout.
+sleep (random 60);
+
 private _title = localize "STR_DUWS_T_INTEL_ANALYSIS_TITLE";
 
 private _finalCP = floor _totalCP;
 [_finalCP, "intel_analysis"] remoteExec ["fnc_cp_adjust", 2];
-private _desc = format [localize "STR_DUWS_T_INTEL_ANALYSIS_BROADCAST", name _caller, _itemsList, _finalCP];
-["info", [_title, _desc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
 
-private _hintMsg = format [localize "STR_DUWS_T_INTEL_ANALYSIS_HINT", _finalCP, _itemsList];
-_hintMsg remoteExec ["hint", 0];
+// The reveal is a bonus on top of the guaranteed CP, armed by the per-item rolls above and gated on
+// pool stock; at most one per delivery, so a hoarded batch cannot dump the map. Resolve it here --
+// fnc_intel_payout does the reveal as its side effect -- so a hit folds into the single award line
+// below rather than firing a second card.
+private _gotIntel = _revealTriggered && {[getPos _caller, _caller] call fnc_intel_payout};
 
-// The reveal is a bonus on top of the guaranteed CP now, not a replacement. The per-item rolls
-// above arm it; one reveal at most per delivery, so a hoarded batch cannot dump the map, and it is
-// still gated on pool stock -- a dry pool pays the CP and reveals nothing.
-if (_revealTriggered && {[getPos _caller, _caller] call fnc_intel_payout}) then {
-    private _revealDesc = format [localize "STR_DUWS_T_INTEL_ANALYSIS_REVEAL", name _caller, _itemsList];
-    ["info", [_title, _revealDesc]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
-};
+private _awardKey = ["STR_DUWS_T_INTEL_ANALYSIS_AWARD", "STR_DUWS_T_INTEL_ANALYSIS_AWARD_INTEL"] select _gotIntel;
+private _line = format [localize _awardKey, _finalCP];
+["info", [_title, _line]] remoteExec ["BIS_fnc_showNotification", [0,-2] select isDedicated];
