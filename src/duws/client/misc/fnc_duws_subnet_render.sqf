@@ -5,7 +5,7 @@
 // each line's colour as a leading ARGB alpha byte and the whole block is rebuilt every tick.
 if (!hasInterface) exitWith {};
 
-#define SUBNET_LIFETIME 10
+#define SUBNET_LIFETIME 20
 #define HEXDIGITS "0123456789abcdef"
 
 private _lastEmpty = false;
