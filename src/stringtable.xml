@@ -3848,8 +3848,8 @@
                 <German>Eine verbündete Angriffstruppe wurde überfallen! Sie verbirgt sich in einem Gebäude in diesem Gebiet, mit feindlichen Truppen ringsherum. Hilf ihnen, sich durchzubrechen!  (Very high CP, low AP)</German>
                 <Spanish>Un escuadrón de asalto aliado ha sido emboscado! Se oculta en un edificio de esta zona, con fuerzas enemigas a su alrededor. Ayúdalos a romper el cerco!  (Very high CP, low AP)</Spanish>
                 <Chinesesimp>友军的一支突击小队被伏击了，他们藏在这片区域的某个建筑内，且周围全是敌军。去帮他们突围！(极高CP，低AP)</Chinesesimp>
-                <Original>An assault element was ambushed in this area and is pinned inside a building, hostiles cordoned all around it. Break the cordon and bring them out.</Original>
-                <English>An assault element was ambushed in this area and is pinned inside a building, hostiles cordoned all around it. Break the cordon and bring them out.</English>
+                <Original>An assault element was ambushed in this area and is pinned inside a building, surrounded by hostiles. Break the cordon and bring them out.</Original>
+                <English>An assault element was ambushed in this area and is pinned inside a building, surrounded by hostiles. Break the cordon and bring them out.</English>
             </Key>
             <Key ID="STR_DUWS_T_reward_boost_tag">
                 <German>Distance Bonus: 2x CP, AP</German>
@@ -3864,13 +3864,6 @@
                 <Chinesesimp>Civilians Off: 1.5x CP</Chinesesimp>
                 <Original>Civilians Off: 1.5x CP</Original>
                 <English>Civilians Off: 1.5x CP</English>
-            </Key>
-            <Key ID="STR_DUWS_T_xdbfx123">
-                <German>Die Truppe wurde vom Feind entdeckt! Beeilt euch, sie zu retten!</German>
-                <Spanish>El escuadrón ha sido detectado por el enemigo! Apresúrense a rescatarlos!</Spanish>
-                <Chinesesimp>小队被敌人发现了！快去营救他们！</Chinesesimp>
-                <Original>The enemy's found the squad. Move now.</Original>
-                <English>The enemy's found the squad. Move now.</English>
             </Key>
             <Key ID="STR_DUWS_T_p7qawzl4">
                 <German>Wir haben derzeit akute Versorgungsmängel, und unser Satellit hat in diesem Gebiet die grobe Position eines feindlichen Versorgungslasters grob ermittelt. Im Laster befindet sich eine große Menge an Versorgungsgütern und ein Waffenschrank. Bring es zurück zur Basis, bevor der Feind unsere Absichten erkennt und es vernichtet. Du hast 20 Minuten Zeit. (High CP, avg AP)</German>
@@ -4190,26 +4183,12 @@
                 <Original>To Alpha 1-1, enemy field commander confirmed KIA. Good work.</Original>
                 <English>To Alpha 1-1, enemy field commander confirmed KIA. Good work.</English>
             </Key>
-            <Key ID="STR_DUWS_T_1sp94d75">
-                <German>==SEKUNDÄRE MISSION FEHLGESCHLAGEN==\n\nDie Aufklärungspatrouille wurde getötet!</German>
-                <Spanish>==MISIÓN SECUNDARIA FALLIDA==\n\n ¡La patrulla de reconocimiento ha muerto!</Spanish>
-                <Chinesesimp>==支线任务失败==\n\n特种小队全体阵亡!</Chinesesimp>
-                <Original>==SIDE MISSION FAILED==\n\nThe assault squad was wiped out.</Original>
-                <English>==SIDE MISSION FAILED==\n\nThe assault squad was wiped out.</English>
-            </Key>
             <Key ID="STR_DUWS_T_lyjjiteq">
                 <German>Ihr seid endlich da! Evakuiert sofort – Feinde sind überall um uns herum! </German>
                 <Spanish>¡Finalmente llegaron! ¡Evacuense rápido! Hay enemigos por todas partes a nuestro alrededor.</Spanish>
                 <Chinesesimp>你们终于来了，快撤离吧，周围全是敌人。</Chinesesimp>
-                <Original>You're here. Get us out — they're all around us.</Original>
-                <English>You're here. Get us out — they're all around us.</English>
-            </Key>
-            <Key ID="STR_DUWS_T_q9yne5ax">
-                <German>==SEKUNDÄRE MISSION ERFOLGREICH==\n\nDie Aufklärungspatrouille wurde erfolgreich gerettet!</German>
-                <Spanish>==MISIÓN SECUNDARIA COMPLETADA==\n\n ¡La patrulla de reconocimiento fue rescatada con éxito!</Spanish>
-                <Chinesesimp>==支线任务完成==\n\n特种小队成功被解救!</Chinesesimp>
-                <Original>==SIDE MISSION COMPLETED==\n\nThe assault squad is out.</Original>
-                <English>==SIDE MISSION COMPLETED==\n\nThe assault squad is out.</English>
+                <Original>Good to see you, Alpha 1-1. We're up and ready to move.</Original>
+                <English>Good to see you, Alpha 1-1. We're up and ready to move.</English>
             </Key>
             <Key ID="STR_DUWS_T_p3200mf5">
                 <German>Sabotage</German>
@@ -4418,8 +4397,8 @@
                 <German>"Signal 3-1" an alle Einheiten! Wir wurden an den aktuellen Koordinaten überfallen, schwere Verluste! Ich und ein paar Männer sind in einem nahe gelegenen Gebäude versteckt, wir brauchen dringend Evakuierung!</German>
                 <Spanish>"Signal 3-1" a todas las unidades! Fuimos emboscados en las coordenadas actuales, muchas bajas! Yo y unos pocos hombres estamos escondidos en un edificio cercano, necesitamos rescate urgentemente!</Spanish>
                 <Chinesesimp>所有单位，我们在当前坐标被伏击了，损失很多。现在我和几个人躲在附近的建筑物里，需要救援！</Chinesesimp>
-                <Original>To all units, we've been ambushed, heavy casualties. A few of us are holed up in a building nearby, we need extraction.</Original>
-                <English>To all units, we've been ambushed, heavy casualties. A few of us are holed up in a building nearby, we need extraction.</English>
+                <Original>All units, we've been ambushed and taken heavy casualties. A few of us are holed up in a building nearby. We need extraction.</Original>
+                <English>All units, we've been ambushed and taken heavy casualties. A few of us are holed up in a building nearby. We need extraction.</English>
             </Key>
             <Key ID="STR_DUWS_T_squadoverlord">
                 <German>"Overlord 1-1" an "Signal 3-1"! Eine Soforteinsatztruppe ist auf dem Weg zu Ihrer Position. Halten Sie durch!</German>
@@ -4432,8 +4411,16 @@
                 <German>Action Squad, hier ist "Overlord". Wir haben den Kontakt zu "Signal 3-1" verloren... Verlasse das AO.</German>
                 <Spanish>Action Squad, este es "Overlord". Hemos perdido el contacto con "Signal 3-1"... Retírate del AO.</Spanish>
                 <Chinesesimp>行动组。我们失去了"信号3-1"的联系...从行动区域撤出来吧。</Chinesesimp>
-                <Original>Alpha 1-1. We've lost contact with Signal 3-1... extract from the AO.</Original>
-                <English>Alpha 1-1. We've lost contact with Signal 3-1... extract from the AO.</English>
+                <Original>Alpha 1-1, we've lost contact with Signal 3-1. They're presumed KIA. Nothing more we can do.</Original>
+                <English>Alpha 1-1, we've lost contact with Signal 3-1. They're presumed KIA. Nothing more we can do.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_squadevac">
+                <Original>Signal 3-1, cordon's broken. Evac helicopter inbound, move to it for extraction.</Original>
+                <English>Signal 3-1, cordon's broken. Evac helicopter inbound, move to it for extraction.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_squadevacout">
+                <Original>Signal 3-1 is out. Good work.</Original>
+                <English>Signal 3-1 is out. Good work.</English>
             </Key>
             <Key ID="STR_DUWS_T_towerletsdothis">
                 <German>"Kobra" an Kommando! Wir bekämpfen feindliches schweres Feuer am verbündeten Funkturm! Ich wiederhole...</German>

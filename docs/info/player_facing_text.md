@@ -232,7 +232,7 @@ it does not exclaim, and it does not speak — callsign framing and procedure wo
 `fnc_duws_dialogue` and the subtitle line, never to the hint box. A support that cannot fly says
 `Heavy transport could not reach your position`, not `Mule 1-1 failed to reach your position`.
 
-**Seven side-mission hints are knowingly in the wrong voice** and are left that way. They narrate
+**Six side-mission hints are knowingly in the wrong voice** and are left that way. They narrate
 rather than report, and the revision that rewrites the side missions owns them — fixing the prose
 piecemeal now would be re-editing text that is about to be replaced wholesale:
 
@@ -240,7 +240,6 @@ piecemeal now would be re-editing text that is about to be replaced wholesale:
 |---|---|
 | `STR_DUWS_T_fxyys123` | The pilot's fading fast. Two minutes, maybe less. |
 | `STR_DUWS_T_fxysw123` | …The pilot stopped answering the radio. He's most likely bled out. |
-| `STR_DUWS_T_xdbfx123` | The enemy's found the squad. Move now. |
 | `STR_DUWS_T_towerdecrypt` | They're nearly through the intel. Two minutes left. |
 | `STR_DUWS_T_fxkczy00` | The enemy rigged the truck with a timed charge and there's no disarming it in the field… |
 | `STR_DUWS_T_3jmpthvi` | Unloading complete. The truck's yours. |
