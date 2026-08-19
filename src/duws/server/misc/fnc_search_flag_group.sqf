@@ -16,6 +16,13 @@
 //
 // Takes a group or a plain array of units, because the mission patrol spawners hold neither
 // shape consistently.
+//
+// Only the objective and civ_frisk sources reach here now: combat corpses are searched flag-free
+// (any enemy body, per-player clock, roll at the search). The bodies flagged here still hold their
+// state on the object -- so a body-swapping garbage collector (the AGC mod) that deletes a distant
+// corpse and rebuilds it near a player drops the flag with it. These are single, hardcore-only
+// objective bodies, so the fix is to exempt them by name: TODO exempt with `setVariable
+// ['GCblackList', true]` at the flag point once the objective corpse-search is revisited.
 if (!isServer) exitWith {};
 
 params ["_units", ["_source", "combat"]];

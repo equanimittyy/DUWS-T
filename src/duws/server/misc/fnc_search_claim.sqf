@@ -14,15 +14,37 @@ if (!isServer) exitWith {};
 params ["_target", "_caller"];
 if (isNull _target || {isNull _caller}) exitWith {};
 
+// A flagged body not yet claimed pays its objective/frisk table once. Anything else -- an unflagged
+// corpse, or a flagged body already claimed -- is an ordinary combat search: gated by the per-player
+// clock and, since combat no longer rolls at spawn, rolled here (below). The clock is enforced here
+// rather than only in the action's condition, because the claim is the authoritative point and a
+// condition a client evaluates is a condition a client can be made to skip.
 private _source = _target getVariable ["DUWS_search_src", ""];
-if (_source isEqualTo "") exitWith {};
-if (_target getVariable ["DUWS_search_done", false]) exitWith {};
-_target setVariable ["DUWS_search_done", true, true];
+private _flagged = (_source != "") && {!(_target getVariable ["DUWS_search_done", false])};
+if (!_flagged) then { _source = "combat" };
+
+// Cooldown gated here at the top level, not nested in the else below. exitWith unwinds past a
+// then/else to the whole function (see arma_engine_gotchas), so a guard nested in the else would
+// read as skipping only the stamp while in fact abandoning the payout -- gating here keeps it plain.
+if (!_flagged && {time - (_caller getVariable ["DUWS_lastSearch", -1e10]) < DUWS_searchCooldown}) exitWith {};
+
+if (_flagged) then {
+    _target setVariable ["DUWS_search_done", true, true];
+} else {
+    // The attempt spends the clock whether or not it finds anything -- a dry search is still a search.
+    _caller setVariable ["DUWS_lastSearch", time, true];
+};
 
 private _config = DUWS_searchSources getOrDefault [_source, []];
 if (_config isEqualTo []) exitWith {};
 
 private _nothingLine = localize (_config param [2, "STR_DUWS_T_INTEL_FOUND_n"]);
+
+// The success roll, spent here rather than at spawn now that combat flags nothing: whether this
+// body held anything is decided at the search. Objective and civ_frisk carry chance 1 and never
+// miss, so this only ever thins the combat source.
+if (random 1 >= (_config select 0)) exitWith { [_nothingLine] remoteExec ["hint", _caller] };
+
 // ATL throughout: fnc_search_dropItems places with setPosATL, and a body on a roof drops its
 // items through it if the two disagree.
 private _origin = getPosATL _target;

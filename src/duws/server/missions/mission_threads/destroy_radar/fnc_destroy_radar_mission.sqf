@@ -122,11 +122,6 @@ sleep 1;
 
 [[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
 {
-    if (!isNull _x) then {
-        [_x, "combat"] call fnc_search_flag_group;
-    };
-} forEach [_groupBunker1, _groupBunker2];
-{
     [_x] call fnc_addRandomLoot;
 } forEach units _groupBunker1;
 {

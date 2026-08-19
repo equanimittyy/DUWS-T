@@ -235,10 +235,6 @@ DUWS_fnc_zoneManStatics = {
     // On the roster like everything DUWS_fnc_raiseGarrison raises: these are the zone's garrison
     // too, and a blunt radius sweep has no other way to know it.
     _roster append (units _grp);
-    // Searchable on the same terms as the rest of the garrison. A gunner is the one defender a
-    // player is certain to have to kill, so leaving him unflagged made the objective itself the
-    // least rewarding thing in the zone.
-    [_grp, "combat"] call fnc_search_flag_group;
     [_grp, _pos] call bis_fnc_taskDefend;
 };
 

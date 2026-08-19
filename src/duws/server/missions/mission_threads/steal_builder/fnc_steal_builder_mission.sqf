@@ -75,11 +75,6 @@ _group deleteGroupWhenEmpty true;
     [_x] call fnc_addRandomLoot;
 } forEach units _group;
 [[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
-{
-    if (!isNull _x) then {
-        [_x, "combat"] call fnc_search_flag_group;
-    };
-} forEach [_group];
 sleep 1;
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 

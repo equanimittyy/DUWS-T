@@ -271,12 +271,14 @@ HQ_pos_found_generated = false;publicVariable "HQ_pos_found_generated";
 MASTER_allLocations_filtered = [];//publicVariable "MASTER_allLocations_filtered";
 MASTER_allLocationsPos = [];publicVariable "MASTER_allLocationsPos";
 
-// [successChance, [[payoutKind, weight], ...]] per search source.
+// [successChance, [[payoutKind, weight], ...], nothingKey] per search source.
 //
-// The success roll is spent when the entity is created, not when it is searched. What the player
-// can find is then a function of how much OPFOR the campaign put on the ground rather than of how
-// often a key was pressed, which is what lets the per-player search clock go: the price of a
-// search is the fight that produced the thing being searched.
+// combat is unflagged and rolls at the search, not at spawn: any enemy corpse is searchable, its
+// success rolled when the player searches it, and the per-player clock (DUWS_searchCooldown) is
+// what bounds intel volume. Its chance is high because that clock already caps volume -- a rarer
+// roll would only tax a five-minute wait with an empty result. objective and civ_frisk are flagged
+// at spawn and carry chance 1, so they never miss and are single-use; they read this table for
+// their kinds, not for a gate.
 //
 // Weights, not a cumulative if-ladder. Every band in a ladder depends on the one above it, so
 // adding a kind means re-deriving each constant below it; adding a row here is adding a row.
@@ -294,10 +296,17 @@ MASTER_allLocationsPos = [];publicVariable "MASTER_allLocationsPos";
 //
 // [successChance, [[payoutKind, weight], ...], nothingKey]
 DUWS_searchSources = createHashMapFromArray [
-    ["combat",    [0.20, [["intel", 2], ["money", 11], ["document", 7]],           "STR_DUWS_T_INTEL_FOUND_n"]],
+    ["combat",    [0.80, [["intel", 2], ["money", 11], ["document", 7]],           "STR_DUWS_T_INTEL_FOUND_n"]],
     ["objective", [1,    [["intel", 1]],                                             "STR_DUWS_T_INTEL_FOUND_n"]],
     ["civ_frisk", [1,    [["money", 3], ["document", 1], ["nothing", 4]],            "STR_DUWS_T_INTEL_FOUND_n"]]
 ];
+
+// Seconds a player must wait between combat-corpse searches. The combat source no longer flags
+// bodies at spawn: any enemy corpse is searchable and the success roll is spent at the search, so
+// this clock -- not troop density -- is what bounds intel volume. Deliberately long to keep that
+// volume low without per-source balancing. Objective and civ_frisk searches are single-use and bypass it.
+// Broadcast because the search action's condition gates the prompt on the client.
+DUWS_searchCooldown = 300; publicVariable "DUWS_searchCooldown";
 
 // manually_chosen
 manually_chosen = false;publicVariable "manually_chosen";

@@ -75,11 +75,6 @@ sleep 1;
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 
 {
-    if (!isNull _x) then {
-        [_x, "combat"] call fnc_search_flag_group;
-    };
-} forEach [_group];
-{
     [_x] call fnc_addRandomLoot;
 } forEach units _group;
 private _targetDeliveryPos = [];

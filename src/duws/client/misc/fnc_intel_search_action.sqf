@@ -13,28 +13,34 @@ if (!hasInterface) exitWith {};
 
 // Clause order is load-bearing: an action on the player is evaluated constantly, because the
 // player is never out of range of themselves. Each && takes a code block, so evaluation
-// short-circuits, and the cheapest and most-often-false clauses come first -- only a body
-// actually under the cursor and within reach reaches the two getVariable lookups.
+// short-circuits, and the cheapest, most-often-false clauses come first -- only a body under the
+// cursor and within reach reaches the branch below. Everything is read off cursorObject (the thing
+// looked at), not _target (the player).
 //
-// The flag clauses are read off cursorObject rather than _target: _target is the player, and the
-// thing being searched is whatever they are looking at. An unflagged body offers no action at
-// all, which is what keeps the prompt off the bodies that hold nothing.
-// The flag is the gate, so this covers bodies and the objects a mission places -- a laptop, a
-// piece of armour -- through one condition rather than giving those objects an action of their
-// own. Nothing is flagged that is not meant to be searchable, which is what lets the type test go.
-//
-// Living men are the one exclusion the flag cannot express: a garrison is flagged when it spawns,
-// so without this an enemy could be frisked upright at 3 m. Scoped to men, because a laptop is
-// never dead and an intact vehicle is still worth opening -- and surrender is the other way a man
-// becomes searchable, which is the whole of what an arrest buys.
+// Two ways a thing is searchable. Flagged branch: an objective body or a placed object (laptop,
+// armour) a mission marked, or a surrendered detainee -- single-use, and the type test it carries
+// is what lets a laptop and a living-but-surrendered man through where a corpse test could not.
+// Combat branch: any enemy corpse, flag-free, gated only by the per-player clock -- this is what
+// makes every enemy body searchable without flagging one at spawn. A claimed objective body (done)
+// fails the flagged branch and drops to the combat branch, so it becomes an ordinary corpse rather
+// than going dead under the cursor. Cooldown read via getVariable with a default: the broadcast
+// DUWS_searchCooldown may not have landed when this first evaluates.
 private _cond =
     "!isNull cursorObject"
   + " && {cursorObject distance _target < 3}"
-  + " && {(cursorObject getVariable ['DUWS_search_src', '']) != ''}"
-  + " && {!(cursorObject getVariable ['DUWS_search_done', false])}"
-  + " && {!(cursorObject isKindOf 'CAManBase')"
-  + "     || {!alive cursorObject}"
-  + "     || {cursorObject getVariable ['isSurrendered', false]}}";
+  + " && {"
+  + "     ("
+  + "       (cursorObject getVariable ['DUWS_search_src', '']) != ''"
+  + "       && {!(cursorObject getVariable ['DUWS_search_done', false])}"
+  + "       && {!(cursorObject isKindOf 'CAManBase') || {!alive cursorObject} || {cursorObject getVariable ['isSurrendered', false]}}"
+  + "     )"
+  + "     || {"
+  + "       cursorObject isKindOf 'CAManBase'"
+  + "       && {!alive cursorObject}"
+  + "       && {side cursorObject == east}"
+  + "       && {time - (_target getVariable ['DUWS_lastSearch', -1e10]) > (missionNamespace getVariable ['DUWS_searchCooldown', 300])}"
+  + "     }"
+  + "   }";
 
 private _id = [
     player,

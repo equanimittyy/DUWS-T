@@ -1,6 +1,7 @@
 // Locality: server -- called by mission threads only, all server-side.
 //
-// The guard ring plus the corpse-search flag, for the missions whose bodies are worth searching.
+// The guard ring for a mission site. Its bodies are searchable as any enemy corpse now, so this no
+// longer flags them -- it only spawns the ring.
 params ["_missionPos", "_radius"];
 
 // See fnc_missionPatrols for why the claim lives here and why each builder runs in its own thread.
@@ -26,16 +27,3 @@ sleep 1;
     };
 } forEach ["tank", "car"];
 [["car"] call DUWS_fnc_tokenClass, [(_missionPos select 0)+28, (_missionPos select 1)+12], _radius] spawn _fnc_claimVeh;
-
-// Swept rather than claimed: the flag has to reach a neighbouring zone's garrison too.
-[_missionPos, _radius] spawn {
-    params ["_pos", "_rad"];
-    sleep 5; // let the ring finish spawning
-    private _units = _pos nearEntities [["CAManBase", "LandVehicle", "Air"], _rad * 1.5];
-    {
-        if (side _x == EAST && !isPlayer _x && !(_x getVariable ["intel_action_added", false])) then {
-            [[_x], "combat"] call fnc_search_flag_group;
-            _x setVariable ["intel_action_added", true];
-        };
-    } forEach _units;
-};

@@ -69,7 +69,6 @@ private _build = {
     _wp2 setWaypointBehaviour "SAFE";
     _wp2 setWaypointTimeout [30, 45, 60];
 
-    [_group, "combat"] call fnc_search_flag_group;
     { [_x] call fnc_addRandomLoot } forEach units _group;
 
     [_target]

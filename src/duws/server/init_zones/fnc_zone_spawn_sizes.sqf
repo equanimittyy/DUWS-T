@@ -142,10 +142,6 @@ DUWS_fnc_raiseGarrison = {
     {
         private _grp = [_x, _pos, _radius] call DUWS_fnc_zoneSpawnOne;
         if (!isNull _grp) then {
-            // Flagged where the group is raised, so the two cannot drift: every spawner here already
-            // carried the loot pass and none of them carried this one, which once left the 50 %
-            // garrison rate firing on side-mission garrisons and nowhere else.
-            [_grp, "combat"] call fnc_search_flag_group;
             _grps pushBack _grp;
         };
         if (_forEachIndex < (count _tokens) - 1) then { sleep 5 };
