@@ -3001,8 +3001,8 @@
                 <English>All units, an enemy informant is operating out of %1. Locate and eliminate him before he reaches %2 by vehicle. He is set to leave at %3 in a %4, and will displace early if a firefight breaks out.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_KILLED">
-                <Original>Informant's down. Good work Alpha 1-1.</Original>
-                <English>Informant's down. Good work Alpha 1-1.</English>
+                <Original>To Alpha 1-1, the informant has been disposed of. Good work.</Original>
+                <English>To Alpha 1-1, the informant has been disposed of. Good work.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_ESCAPED">
                 <Original>The informant has reached %1. Mission failed.</Original>
@@ -4161,8 +4161,8 @@
                 <German>"Overlord" an Action Squad, Überwachungstrupp bestätigt die Eliminierung des Panzerzugskommandanten. Fehlerlose Operation.</German>
                 <Spanish>"Overlord" a Action Squad, el equipo de vigilancia confirma la eliminación del comandante del pelotón de blindados. Operación impecable.</Spanish>
                 <Chinesesimp>行动组，监听小组确认了装甲排指挥官的击杀。毫无破绽的行动。</Chinesesimp>
-                <Original>To Alpha 1-1, surveillance confirms the armor platoon commander is down. Good work.</Original>
-                <English>To Alpha 1-1, surveillance confirms the armor platoon commander is down. Good work.</English>
+                <Original>To Alpha 1-1, that's a confirmed kill on the enemy armor commander. Good work.</Original>
+                <English>To Alpha 1-1, that's a confirmed kill on the enemy armor commander. Good work.</English>
             </Key>
             <Key ID="STR_DUWS_T_radarend">
                 <German>"Overlord 1-1" an Action Squad, Radar zerstört – bestätigt. Gute Arbeit.</German>
@@ -4343,8 +4343,8 @@
                 <German>Hier spricht "Overlord", gute Nachricht: Eine feindliche Panzerzug wurde gerade von unserer Nahluftunterstützung vernichtet, der Führerpanzer liegt im Gelände defekt. Ihre Einheit hat die Aufgabe, ihren Zugführer zu eliminieren, solange sie Feldreparaturen durchführen – sein Panzer zu beschlagnahmen, falls möglich.</German>
                 <Spanish>Aquí "Overlord", buenas noticias: Un pelotón de blindados enemigos acaba de ser destruido por nuestro apoyo aéreo cercano, el tanque líder se averió en el campo. La misión de tu unidad es eliminar a su pelotón comandante mientras realizan reparaciones de campo; roba su tanque si es posible.</Spanish>
                 <Chinesesimp>好消息：敌人的一个装甲排刚刚被我们的近空支援摧毁，领头的坦克在野外抛锚了。你单位的任务是在他们实施野战修理的时候干掉他们的排长，最好也把他的坦克抢过来。</Chinesesimp>
-                <Original>Our close air support tore up an enemy armor platoon and their lead tank is stranded in the field. Take out the platoon leader while they're still working on repairs, and seize his tank if you can.</Original>
-                <English>Our close air support tore up an enemy armor platoon and their lead tank is stranded in the field. Take out the platoon leader while they're still working on repairs, and seize his tank if you can.</English>
+                <Original>Alpha 1-1, our close air support crippled an enemy armor platoon and left its lead tank stranded in the AO, marked on your map. Eliminate the platoon leader while his crew handles repairs, and seize the tank if you can.</Original>
+                <English>Alpha 1-1, our close air support crippled an enemy armor platoon and left its lead tank stranded in the AO, marked on your map. Eliminate the platoon leader while his crew handles repairs, and seize the tank if you can.</English>
             </Key>
             <Key ID="STR_DUWS_T_sniperletsdothis">
                 <German>Hier ist Viper 1-5. Wir haben das feindliche Scharfschützenteam lokalisiert — sie tragen Ghillie-Anzüge. Deine Einheit kann handeln! Vorsicht, in ihrer Nähe sind viele Feinde.</German>
