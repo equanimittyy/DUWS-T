@@ -5,7 +5,7 @@
 // taking stray fire from a passing patrol on the way out is not a failure the player earned. The bird
 // lands at an LZ off the building and the squad boards on foot; a straggler stuck on geometry is moved
 // into cargo on a timeout so one man cannot hang the extraction. Player and allies cannot board
-// (lockedCargo).
+// (lockCargo).
 params ["_squad", "_bld", "_marker", "_taskId", "_tpos", "_radius", "_compKey", "_mission_name", "_cpreward", "_apreward"];
 private _bpos = getPos _bld;
 private _alive = _squad select {alive _x};
@@ -39,7 +39,7 @@ private _heliGrp = _veh select 2;
 _heli setPos [_vehpos select 0, _vehpos select 1, 120];
 [_heli, _compKey] call fnc_duws_keep;
 _heli setCaptive true;
-_heli lockedCargo true;
+_heli lockCargo true;
 _heli flyInHeight 40;
 { _x setCaptive true } forEach crew _heli;
 // Without this VCOM's squad FSM seizes the WEST/AI group and ignores its scripted MOVE waypoint,
