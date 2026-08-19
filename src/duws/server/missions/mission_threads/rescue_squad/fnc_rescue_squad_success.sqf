@@ -4,8 +4,9 @@
 // and helicopter are both set captive for the pickup: the fight is already won, and a scripted bird
 // taking stray fire from a passing patrol on the way out is not a failure the player earned. The bird
 // lands at an LZ off the building and the squad boards on foot; a straggler stuck on geometry is moved
-// into cargo on a timeout so one man cannot hang the extraction. Player and allies cannot board
-// (lockCargo).
+// into cargo on a timeout so one man cannot hang the extraction. The player and allies are kept off the
+// bird -- any that board while it is down are turned out before it lifts, then cargo is locked for the
+// flight -- so the teardown only ever deletes the flight crew and the squad.
 params ["_squad", "_bld", "_marker", "_taskId", "_tpos", "_radius", "_compKey", "_mission_name", "_cpreward", "_apreward"];
 private _bpos = getPos _bld;
 private _alive = _squad select {alive _x};
@@ -22,9 +23,11 @@ private _alive = _squad select {alive _x};
 } forEach _alive;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadevac"] remoteExec ["fnc_duws_dialogue", 0];
 
-// A clear spot just off the building to put down on.
-private _lz = [_bpos, 25, 70, 10, 0, 0.35, 0] call BIS_fnc_findSafePos;
-if (_lz isEqualTo [] || {(_lz select 0) == 0}) then { _lz = _bpos getPos [45, random 360] };
+// A safe, flat spot to put down on -- anywhere clear within reach of the building, not pinned right
+// beside it, so the bird gets real open ground instead of a cramped slot against the walls. Wide band
+// and the taxi's gradient tolerance for a reliable find; the squad boards on foot, so it stays walkable.
+private _lz = [_bpos, 40, 200, 15, 0, 0.5, 0] call BIS_fnc_findSafePos;
+if (_lz isEqualTo [] || {(_lz select 0) == 0}) then { _lz = _bpos getPos [60, random 360] };
 
 private _bearing = random 360;
 private _vehpos = _bpos getPos [2500, _bearing];
@@ -39,9 +42,12 @@ private _heliGrp = _veh select 2;
 _heli setPos [_vehpos select 0, _vehpos select 1, 200];
 [_heli, _compKey] call fnc_duws_keep;
 _heli setCaptive true;
-_heli lockCargo true;
 _heli flyInHeight 50;
 { _x setCaptive true } forEach crew _heli;
+// The flight crew, captured before anyone boards: teardown deletes exactly these plus the squad, never a
+// blanket crew _heli, so a player or ally who rode along is never caught by the delete. Cargo starts
+// unlocked so the squad can board on foot; it is locked once they are aboard (below).
+private _heliCrew = crew _heli;
 // Without this VCOM's squad FSM seizes the WEST/AI group and ignores its scripted MOVE waypoint,
 // leaving the bird idle at spawn. Every other scripted transport heli sets it for the same reason.
 { _x setVariable ["Vcm_Disable", true] } forEach units _heliGrp;
@@ -84,11 +90,11 @@ private _fail = {
         private _wpAway = _heliGrp addWaypoint [_bpos getPos [4000, _bearing], 0];
         _wpAway setWaypointType "MOVE";
         _wpAway setWaypointSpeed "FULL";
-        [_heli, _bpos] spawn {
-            params ["_h", "_ref"];
+        [_heli, _bpos, _heliCrew] spawn {
+            params ["_h", "_ref", "_crew"];
             private _t = time + 120;
             waitUntil { sleep 2; !alive _h || {(_h distance2D _ref) > 2500} || {time > _t} };
-            if (!isNull _h) then { { deleteVehicle _x } forEach crew _h; deleteVehicle _h };
+            if (!isNull _h) then { { deleteVehicle _x } forEach _crew; deleteVehicle _h };
         };
     };
     if (!isNil "_helipad") then { deleteVehicle _helipad };
@@ -110,6 +116,11 @@ waitUntil { sleep 1; !alive _heli || {({ alive _x && {!(_x in _heli)} } count _s
 if ((_squad findIf {alive _x}) < 0) exitWith { call _fail };
 if (alive _heli) then {
     { if (alive _x && {!(_x in _heli)}) then { _x moveInCargo _heli } } forEach _squad;
+    // Seal the bird for the flight out: turn out anyone who is not the squad or the flight crew -- a
+    // player or ally who hopped in while it was down -- then lock cargo so none board mid-air. moveOut
+    // runs on the machine that owns the unit.
+    { if !(_x in _squad || {_x in _heliCrew}) then { _x remoteExec ["moveOut", _x] } } forEach crew _heli;
+    _heli lockCargo true;
     _heli land "NONE";
 };
 
@@ -129,7 +140,7 @@ if ((_squad findIf {alive _x}) < 0) exitWith { call _fail };
 sleep 5;
 [localize "STR_DUWS_T_Signal", localize "STR_DUWS_T_squadthanks"] remoteExec ["fnc_duws_dialogue", 0];
 
-{ deleteVehicle _x } forEach crew _heli;
+{ deleteVehicle _x } forEach _heliCrew;
 deleteVehicle _heli;
 deleteVehicle _helipad;
 { deleteVehicle _x } forEach _squad;
