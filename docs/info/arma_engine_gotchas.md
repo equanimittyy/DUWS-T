@@ -706,6 +706,13 @@ to be noticed and nothing forces the set to be, so the set needs a JIP key and t
 must drop that entry — `remoteExec ["", _key]` — or a player joining after the death is handed the
 pose for a corpse. `playMoveNow` is local the same way.
 
+**For a held stance rather than a gesture, prefer `setUnitPos`.** When a unit only needs to hold a
+posture (crouched, prone, pinned) and not perform a specific `acts_` gesture, `setUnitPos "MIDDLE"` /
+`"DOWN"` beats a raw `switchMove`: the stance keeps a living idle animation, and its effect is global
+for a server-owned unit, so no per-client broadcast, JIP key, or death handler is needed. A raw
+`switchMove` into an `acts_` crouch idle can freeze mid-transition into a visibly wrong half-crouch --
+seen in Zeus on a captive squad while the player was still far off. Reset with `setUnitPos "AUTO"`.
+
 ## `enableSimulation` is local, so a server-side freeze leaves clients simulating
 
 **`enableSimulation` only affects the machine it runs on; `enableSimulationGlobal` (server-only)
@@ -1376,3 +1383,20 @@ does not), and wholly dead in a third.
 finder's returned position to `[x,y]` before it becomes an offer, so a snapping finder
 (`fnc_informant_site`, `fnc_recon_observe_site`) cannot leak a Z. The threads derive their own ground
 positions later and only ever measure the offer point with `distance2D`, so the Z was dead weight anyway.
+
+## `doSuppressiveFire` needs line of sight and picks the heaviest weapon, so it levels a building
+
+**`unit doSuppressiveFire target` does nothing when the unit cannot see the target, and when it does
+fire it chooses whatever weapon the AI rates best for the job -- a rifleman carrying a launcher fires
+the launcher.** Suppressing a building the squad is meant to keep intact then either produces no fire
+at all (no LOS from the ring) or destroys the objective on the first shot (a rocket into the wall).
+
+The two failures look unrelated in play -- "suppression does nothing" and "the building blew up" -- but
+they are the same command behaving as documented: LOS-gated, and free to pick the launcher.
+
+**How to apply:** to force small-arms suppression in a direction with no target or LOS, use
+`unit forceWeaponFire [primaryWeapon unit, mode]` instead -- it fires the named weapon regardless of
+LOS or target, and naming the primary weapon keeps it to the rifle so no launcher is ever selected.
+Point the unit first with `doWatch pos`. Resolve `mode` from the weapon config
+(`getArray (configFile >> "CfgWeapons" >> _w >> "modes") select 0`); a `["this"]` modes list means the
+mode name is the weapon name. `fnc_rescue_squad_mission.sqf` suppresses the held building this way.
