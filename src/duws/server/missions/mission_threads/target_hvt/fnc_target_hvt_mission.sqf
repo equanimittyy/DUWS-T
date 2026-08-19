@@ -223,8 +223,11 @@ if (_outcome == "WIN") then {
     sleep 1;
     [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 } else {
-    private _hintKey = ["STR_DUWS_T_mission_deadline_fail", "STR_DUWS_T_HVT_CONVOY_ESCAPED"] select (_outcome == "ESCAPED");
-    [[_hintKey, _destName], { params ["_k", "_z"]; hint format [localize _k, _z] }] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
+    if (_outcome == "ESCAPED") then {
+        [[_destName], { params ["_z"]; hint format [localize "STR_DUWS_T_HVT_CONVOY_ESCAPED", _z] }] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
+    } else {
+        call fnc_mission_timeout_notice;
+    };
     [_taskId, "FAILED"] call fnc_missionTaskEnd;
 };
 

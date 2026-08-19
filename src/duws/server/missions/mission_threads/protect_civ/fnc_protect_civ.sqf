@@ -158,7 +158,7 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
         [_taskID, "FAILED"] call fnc_missionTaskEnd;
         if (!isNil "_civMarker" && {_civMarker != ""}) then { deleteMarker _civMarker; };
         if (!isNil "_areaMarker" && {_areaMarker != ""}) then { [_areaMarker] call fnc_missionMarkerClear; };
-        [{hint localize "STR_DUWS_T_mission_deadline_fail"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
+        call fnc_mission_timeout_notice;
         [_targetPos, _radius, "", true] call fnc_mission_end;
     };
     private _missionStartTime = missionNamespace getVariable [format ["%1_startTime", _taskID], time];

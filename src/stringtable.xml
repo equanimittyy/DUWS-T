@@ -3009,12 +3009,12 @@
                 <English>The informant has reached %1. Mission failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_HVT_CONVOY_TASK">
-                <Original>The HVT is fleeing to %1 by convoy, in a %2. We have intel that he is leaving in one of three convoys. Kill him before he reaches %1.</Original>
-                <English>The HVT is fleeing to %1 by convoy, in a %2. We have intel that he is leaving in one of three convoys. Kill him before he reaches %1.</English>
+                <Original>The high-value target is fleeing to %1 by convoy, riding in a %2. Intel puts him in one of three columns running separate routes. Eliminate him before his column reaches %1.</Original>
+                <English>The high-value target is fleeing to %1 by convoy, riding in a %2. Intel puts him in one of three columns running separate routes. Eliminate him before his column reaches %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_HVT_CONVOY_ESCAPED">
-                <Original>The HVT's convoy reached %1. Target extracted, mission failed.</Original>
-                <English>The HVT's convoy reached %1. Target extracted, mission failed.</English>
+                <Original>The high-value target's convoy reached %1. Mission failed.</Original>
+                <English>The high-value target's convoy reached %1. Mission failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_DESC">
                 <Original>An unscouted enemy position needs eyes on it. Move to the marked overwatch, raise your binoculars, and hold observation until Allseer confirms the intel. Its location is then marked on your map.</Original>
@@ -3113,8 +3113,8 @@
                 <English>&lt;br /&gt;You have until %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_mission_deadline_fail">
-                <Original>Mission failed: you ran out of time.</Original>
-                <English>Mission failed: you ran out of time.</English>
+                <Original>Alpha 1-1, we're out of time. Mission is a failure.</Original>
+                <English>Alpha 1-1, we're out of time. Mission is a failure.</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_ANALYSIS_ACTION">
                 <Original>Analyse Intel</Original>
@@ -3878,8 +3878,8 @@
                 <German>Der Nachrichtendienst hat gerade ermittelt, dass eine feindliche vorläufige Kommandotruppe sich hier vorübergehend versammelt hat – eliminiere den Offizier in der Truppe! Nach der Eliminierung des Offiziers braucht der Nachrichtendienst noch ein paar Minuten zusätzlich, um die Zielerfüllung zu bestätigen.(Diese Mission ist extrem zeitsensitiv; sie schlägt fehl, falls sie innerhalb von 8 Minuten nicht abgeschlossen wird.) (High CP, high AP)</German>
                 <Spanish>El servicio de inteligencia acaba de detectar que un equipo de comando temporal enemigo se ha reunido aquí temporalmente — elimína al oficial del equipo! Después de que el oficial sea eliminado, el servicio de inteligencia necesitará unos minutos adicionales para confirmar la consecución del objetivo.(Esta misión es extremadamente sensible al tiempo; fracasará si no se completa dentro de 8 minutos.) (High CP, high AP)</Spanish>
                 <Chinesesimp>情报部门刚刚发现，敌军的临时指挥班组在这里短暂聚集，去干掉班组里的军官！军官死亡后，情报部门需要额外几分钟确认目标完成。(此任务具有极强时效性，若未在8分钟内完成任务则会失败。)(高CP，高AP)</Chinesesimp>
-                <Original>A high-value target is fleeing to an OPFOR-held zone under armed escort. Intercept and kill him before he reaches the zone.</Original>
-                <English>A high-value target is fleeing to an OPFOR-held zone under armed escort. Intercept and kill him before he reaches the zone.</English>
+                <Original>A high-value target is fleeing to an OPFOR-held zone by convoy under armed escort. Identify his vehicle and eliminate him before he reaches the zone.</Original>
+                <English>A high-value target is fleeing to an OPFOR-held zone by convoy under armed escort. Identify his vehicle and eliminate him before he reaches the zone.</English>
             </Key>
             <Key ID="STR_DUWS_T_dgpqenyw">
                 <German>Ein freundlicher Signalturm in diesem Gebiet wurde von feindlichen Truppen eingenommen. Feindliche Truppen sind in der Nähe stationiert und entschlüsseln kritische Informationen. Sprenge den Turm, bevor die Feinde das Entschlüsseln abschließen! (Nur noch 15 Minuten, bis kritische Informationen an die Feinde gelangen!) (Slightly low CP, avg AP)</German>
@@ -4218,8 +4218,8 @@
                 <German>Seien Sie informiert, Action Squad, hier spricht "Overlord". Der vorläufige feindliche Kommandant ist eliminierter – bestätigt. Perfekte Operation.</German>
                 <Spanish>Tengan conocimiento, Action Squad, aquí "Overlord". Comandante temporal enemigo eliminado, confirmado. Operación perfecta.</Spanish>
                 <Chinesesimp>行动组请。敌人的临时指挥官已被确认击杀，完美的行动。</Chinesesimp>
-                <Original>To Alpha 1-1, the HVT is confirmed dead. His convoy never reached the zone. Good work.</Original>
-                <English>To Alpha 1-1, the HVT is confirmed dead. His convoy never reached the zone. Good work.</English>
+                <Original>Alpha 1-1, the high-value target is confirmed dead. Good work.</Original>
+                <English>Alpha 1-1, the high-value target is confirmed dead. Good work.</English>
             </Key>
             <Key ID="STR_DUWS_T_lyjjiteq">
                 <German>Ihr seid endlich da! Evakuiert sofort – Feinde sind überall um uns herum! </German>
@@ -4365,8 +4365,8 @@
                 <German>"Overlord 1-1" an alle Einheiten, Notfall! Wir haben gerade die vorläufige feindliche Kommandomannschaft gesichtet – alle Bereitschaftseinheiten sollen sich bewegen und den vorläufigen Kommandanten sofort eliminieren!</German>
                 <Spanish>"Overlord 1-1" a todas las unidades, emergencia! Acabamos de localizar el equipo de comando temporal enemigo – todas las unidades en espera deben desplazarse y eliminar al comandante temporal de inmediato!</Spanish>
                 <Chinesesimp>全体单位，紧急情况！我们刚刚发现了敌人的临时指挥小组，现在需要所有待命单位前往消灭临时指挥官！</Chinesesimp>
-                <Original>Alpha 1-1, Overlord. A high-value target is running for %1 by convoy, three columns on different routes. He rides in a %2. Find that column and kill him before it reaches the zone.</Original>
-                <English>Alpha 1-1, Overlord. A high-value target is running for %1 by convoy, three columns on different routes. He rides in a %2. Find that column and kill him before it reaches the zone.</English>
+                <Original>Alpha 1-1, a high-value target is fleeing to %1 by convoy. Intel puts him in one of three columns running separate routes, riding in a %2. Find that vehicle and eliminate him before his column reaches the zone.</Original>
+                <English>Alpha 1-1, a high-value target is fleeing to %1 by convoy. Intel puts him in one of three columns running separate routes, riding in a %2. Find that vehicle and eliminate him before his column reaches the zone.</English>
             </Key>
             <Key ID="STR_DUWS_T_armorletsdothis">
                 <German>Hier spricht "Overlord", gute Nachricht: Eine feindliche Panzerzug wurde gerade von unserer Nahluftunterstützung vernichtet, der Führerpanzer liegt im Gelände defekt. Ihre Einheit hat die Aufgabe, ihren Zugführer zu eliminieren, solange sie Feldreparaturen durchführen – sein Panzer zu beschlagnahmen, falls möglich.</German>

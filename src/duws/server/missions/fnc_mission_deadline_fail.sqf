@@ -11,7 +11,7 @@
 params ["_taskId", ["_marker", ""], ["_compKey", ""], ["_tpos", [0,0,0]], ["_radius", 0], ["_sweepFriendly", false]];
 if (!isServer) exitWith {};
 
-[{hint localize "STR_DUWS_T_mission_deadline_fail"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
+call fnc_mission_timeout_notice;
 [_taskId, "FAILED"] call fnc_missionTaskEnd;
 if (_marker != "") then { [_marker] call fnc_missionMarkerClear };
 [_tpos, _radius, _compKey, _sweepFriendly] call fnc_mission_end;

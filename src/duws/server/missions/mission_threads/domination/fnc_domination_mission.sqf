@@ -583,7 +583,7 @@ if (time > _deadline && !_allCrewDead) exitWith {
     [_markername2] call fnc_missionMarkerClear;
     deleteMarker _arrowMarkerName;
     { deleteMarker _x; } forEach _apcMarkers;
-    [{hint localize "STR_DUWS_T_mission_deadline_fail"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+    call fnc_mission_timeout_notice;
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     [_MissionPos, _radius, "", true] call fnc_mission_end;
 };

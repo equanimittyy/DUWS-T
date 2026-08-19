@@ -217,7 +217,7 @@ publicVariable "Mission_Active";
         Mission_Active = false;
         publicVariable "Mission_Active";
         { deleteVehicle _x } forEach _missionUnits;
-        [{hint localize "STR_DUWS_T_mission_deadline_fail"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated, false];
+        call fnc_mission_timeout_notice;
     };
     private _missionStartTime = missionNamespace getVariable [format ["%1_startTime", _VARtaskgeneratedName], time];
 

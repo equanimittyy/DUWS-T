@@ -188,7 +188,7 @@ if (getdammage _truck1>0.95) exitWith {
 if (time > _deadline && getdammage _truck1 <= 0.95 && (_truck1 distance _targetDeliveryPos) >= 50) exitWith {
     deleteMarker _deliveryMarkerName;
     call _cleanupDelivery;
-    [{hint localize "STR_DUWS_T_mission_deadline_fail"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
+    call fnc_mission_timeout_notice;
     [_VARtaskgeneratedName, "FAILED"] call fnc_missionTaskEnd;
     if (CIV_PRESENCE != "NONE") then {
         [[_targetpos] call fnc_civ_townAt, -5, "idap_deadline"] call fnc_town_rep_adjust;
