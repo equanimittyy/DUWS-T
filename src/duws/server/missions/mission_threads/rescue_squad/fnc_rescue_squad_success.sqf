@@ -124,26 +124,40 @@ if (alive _heli) then {
     _heli land "NONE";
 };
 
-// Out the far side and off the map.
+// Off the deck and away. The win lands the moment the bird is up with the squad aboard, so pay out and
+// close ~10 s after takeoff rather than blocking on the long flight home -- the empty run to the map edge
+// and the despawn happen in the background below.
 private _departPos = _bpos getPos [3500, _bearing];
 private _wpOut = _heliGrp addWaypoint [_departPos, 0];
 _wpOut setWaypointType "MOVE";
 _wpOut setWaypointSpeed "FULL";
 
-private _tOut = time + 180;
-waitUntil { sleep 2; !alive _heli || {(_heli distance2D _bpos) > 2500} || {time > _tOut} };
-if ((_squad findIf {alive _x}) < 0) exitWith { call _fail };
+sleep 10;
+if (!alive _heli) exitWith { call _fail };   // lost the bird on the way up: fail, do not pay a dead squad
 
 [_marker] call fnc_missionMarkerClear;
 [_taskId, "SUCCEEDED"] call fnc_missionTaskEnd;
-[localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadevacout"] remoteExec ["fnc_duws_dialogue", 0];
-sleep 5;
-[localize "STR_DUWS_T_Signal", localize "STR_DUWS_T_squadthanks"] remoteExec ["fnc_duws_dialogue", 0];
 
-{ deleteVehicle _x } forEach _heliCrew;
-deleteVehicle _heli;
+// Radio exchange, spawned so the beat between the two lines does not hold up the payout below.
+[] spawn {
+    [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadevacout"] remoteExec ["fnc_duws_dialogue", 0];
+    sleep 5;
+    [localize "STR_DUWS_T_Signal", localize "STR_DUWS_T_squadthanks"] remoteExec ["fnc_duws_dialogue", 0];
+};
+
 deleteVehicle _helipad;
-{ deleteVehicle _x } forEach _squad;
+
+// The bird flies itself off and despawns in the background; the win does not wait on it. Crew and squad
+// go with it once it is clear of the AO (or on a timeout). mission_end releases the composition but only
+// schedules disposal, so nothing poofs the bird before it leaves.
+[_heli, _heliCrew, _squad, _bpos] spawn {
+    params ["_h", "_crew", "_sq", "_ref"];
+    private _t = time + 180;
+    waitUntil { sleep 2; !alive _h || {(_h distance2D _ref) > 2500} || {time > _t} };
+    { deleteVehicle _x } forEach _crew;
+    { deleteVehicle _x } forEach _sq;
+    if (!isNull _h) then { deleteVehicle _h };
+};
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [_tpos, _radius, _compKey] call fnc_mission_end;
