@@ -269,21 +269,23 @@ hint, card or task, which has no such step and must wrap any `Alpha 1-1` string 
 senior's name (`Alpha 1-1 (steph)`); the text does not, because the callsign also appears mid-line,
 where `Alpha 1-1 (steph), move out` would read as part of the sentence.
 
-**Two channels, and the speaker picks by default.** `fnc_duws_dialogue_channel` routes to NET or
-VOICE. NET is the explicit list in `fnc_duws_dialogue` — radio callsigns (Allseer, the supports, the
-air drops) — and plays a squelch tone so it reads as a transmission. VOICE is everyone in the room
-with the player, and is the default: **a new speaker with no table entry lands on VOICE**, the loud
-visible surface, rather than disappearing into a channel nobody watches. A radio callsign added later
-squelches only once it is on the NET list. Overlord is the lone VOICE speaker that still squelches —
-the tone marks an incoming transmission — and the player callsign is on neither list, because you do
-not hear your own key-up.
+**Three channels, and the speaker picks by default.** `fnc_duws_dialogue_channel` routes to NET,
+VOICE, or SUB-NET off two explicit lists in `fnc_duws_dialogue`. **NET** is the prominent command net
+— Overlord alone — on the subtitle with a squelch tone, because its briefs and results are the lines
+the player least wants to miss. **SUB-NET** is every other radio callsign (Allseer, the supports, the
+air drops, the rescued squad): it renders to the bottom-left chat box instead of the subtitle, silent
+and persistent, so radio chatter is present without burying an in-room line or an Overlord brief.
+**VOICE** is everyone in the room with the player, on the subtitle, and is the default: **a new
+speaker on no list lands on VOICE**, the loud visible surface, rather than on the chat box. The
+player callsign is on no list, because you do not hear your own key-up.
 
-**One subtitle slot, VOICE first.** The engine subtitle is a single line; a second replaces the
-first mid-read, so `fnc_duws_dialogue_drain` holds one line at a time. VOICE drains first and
-entirely — it answers something the player just did, and waiting behind radio chatter reads as a
-dropped button press — and never expires. NET is dropped once it has waited over 8 s, because a stale
-"rounds out" reads worse than silence. Two lines in the same frame are ordinary (two supports talking
-over each other), so nothing at the call site serialises them.
+**One subtitle slot, VOICE first.** The engine subtitle is a single line; a second replaces the first
+mid-read, so `fnc_duws_dialogue_drain` holds one line at a time — and only NET and VOICE reach it,
+since SUB-NET prints straight to the chat box, which stacks and needs no slot. VOICE drains first and
+entirely — it answers something the player just did, and waiting behind an Overlord brief reads as a
+dropped button press — and never expires. NET is dropped once it has waited over 8 s, because an
+Overlord line queued behind a long in-room exchange reads worse late than silent. Two lines in the
+same frame are ordinary, so nothing at the call site serialises them.
 
 **Address the hearers; never re-broadcast.** Every call site reaches the function through
 `remoteExec`: `0` for the whole team (a mission brief), a single client for a one-player answer (the

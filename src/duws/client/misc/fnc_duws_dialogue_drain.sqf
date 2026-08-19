@@ -15,16 +15,16 @@ while {true} do {
         sleep 0.25;
     } else {
         // VOICE drains first and entirely: it is someone in the room answering a player
-        // action, and waiting behind artillery chatter reads as the game ignoring the button
-        // press. Radio starving under a long face-to-face exchange is the intended trade --
+        // action, and waiting behind an Overlord brief reads as the game ignoring the button
+        // press. NET starving under a long face-to-face exchange is the intended trade --
         // those lines expire below rather than queue up and play back out of order.
         private _fromVoice = !(_voice isEqualTo []);
         private _entry = if (_fromVoice) then {_voice deleteAt 0} else {_net deleteAt 0};
         _entry params ["_speaker", "_text", "_stamp", "_squelch"];
 
-        // Radio held this long is dropped rather than shown late: the shells have landed by
-        // now, and a stale "rounds out" reads worse than silence. VOICE never expires -- it
-        // answers something the player just did, so late still beats swallowed.
+        // A NET line held this long is dropped rather than shown late: an Overlord brief that
+        // surfaces long after the moment it answered reads worse than silence. VOICE never
+        // expires -- it answers something the player just did, so late still beats swallowed.
         if (_fromVoice || {time - _stamp < 8}) then {
             // The tone takes its own thread so it lands on a different frame from the
             // subtitle below. Playing it on the same frame froze the client during the

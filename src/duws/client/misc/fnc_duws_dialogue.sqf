@@ -3,8 +3,9 @@
 // re-broadcast, or N clients each send to N clients.
 // [_speaker, _text, _channel] -- _channel "" means decide from the speaker.
 //
-// Nothing is drawn here. The line is queued and fnc_duws_dialogue_drain owns the screen: ten
-// sites reach this through a synchronous call, so the body must return without waiting.
+// NET and VOICE are queued for fnc_duws_dialogue_drain, which owns the single subtitle slot;
+// SUB-NET is printed straight to the chat box here, since that surface stacks and has no slot
+// to contend for. Either way the body returns without waiting: ten sites reach it by call.
 
 params [["_speaker", ""], ["_text", ""], ["_channel", ""]];
 
@@ -13,35 +14,38 @@ if (!hasInterface) exitWith {};
 // Built on first use, not at init: this function is publicVariable'd from the server and a
 // JIP client can be handed a line before any init hook of its own has run.
 if (isNil "DUWS_netSpeakers") then {
-    // Keys, not literals, so the table holds in every language. allseer and Scout collapse
-    // to one string in English and stay distinct in German; both are NET either way.
-    DUWS_netSpeakers = [
+    // NET is the prominent command net: Overlord alone, on the subtitle with a squelch. Its
+    // briefs and results are the lines the player least wants to miss.
+    DUWS_netSpeakers = ["STR_DUWS_T_OVERLORD"] apply { localize _x };
+
+    // SUB-NET is every other radio callsign -- supports, air drops, the rescued squad, the
+    // recon net -- routed to the bottom-left chat box: present but out of the subtitle's way,
+    // so radio chatter never buries an in-room line or an Overlord brief. Keys, not literals,
+    // so the table holds in every language (allseer and Scout collapse to one English string
+    // and stay distinct in German; both are SUB-NET either way).
+    DUWS_subnetSpeakers = [
         "STR_DUWS_T_allseer", "STR_DUWS_T_Scout", "STR_DUWS_T_Express",
         "STR_DUWS_T_Rein", "STR_DUWS_T_koipilot",
         "STR_DUWS_T_longbowpilot", "STR_DUWS_T_slingshot", "STR_DUWS_T_Cobra",
         "STR_DUWS_T_hound", "STR_DUWS_T_Signal", "STR_DUWS_T_Signal2",
         "STR_DUWS_T_DISGUISE_OPFOR_SPEAKER",
-        // Supports the player calls and then listens to. The two Pilot keys are absent on
-        // purpose: the intro and downed pilots are in the room, not on the net.
+        // The two Pilot keys are absent on purpose: the intro and downed pilots are in the
+        // room, not on the net.
         "STR_DUWS_T_chariot", "STR_DUWS_T_crane", "STR_DUWS_T_swordfish",
         // One callsign per air drop rather than one shared across all four: each body already
         // introduces its own, so a shared slot contradicted the line it was attached to.
         "STR_DUWS_T_chalk", "STR_DUWS_T_courier", "STR_DUWS_T_courier3", "STR_DUWS_T_ranger"
     ] apply { localize _x };
-
-    // VOICE speakers who are nonetheless on the radio. The squelch marks an incoming
-    // transmission, not a category, so Overlord earns one and the player callsign does not
-    // -- you do not hear your own key-up. Everyone else in VOICE is in the room with you.
-    DUWS_voiceSquelchSpeakers = ["STR_DUWS_T_OVERLORD"] apply { localize _x };
 };
 
 if (_channel isEqualTo "") then {
-    _channel = [_speaker, DUWS_netSpeakers] call fnc_duws_dialogue_channel;
+    _channel = [_speaker, DUWS_netSpeakers, DUWS_subnetSpeakers] call fnc_duws_dialogue_channel;
 };
 
 // Decided here, played by the drain loop when the line actually reaches the screen: the tone
 // marks a transmission arriving, and this line may sit behind others before it gets there.
-private _squelch = (_channel isEqualTo "NET") || {_speaker in DUWS_voiceSquelchSpeakers};
+// NET only -- SUB-NET is deliberately silent, and VOICE is in the room, not on the radio.
+private _squelch = _channel isEqualTo "NET";
 
 // Callsign substitution belongs here rather than at the call site, and below the decision
 // above: the table holds the stringtable's "Alpha 1-1", so a host who has renamed the team
@@ -62,6 +66,13 @@ if (_speaker isEqualTo ([localize "STR_DUWS_T_actionteam"] call fnc_cs)) then {
     // callsign beats an undefined-variable error taking the whole line with it.
     private _who = if (isNil "fnc_duws_senior_name") then {"None"} else {call fnc_duws_senior_name};
     _speaker = format ["%1 (%2)", _speaker, _who];
+};
+
+// SUB-NET goes straight to the bottom-left chat box, not the subtitle queue: the chat box
+// stacks lines and persists, so there is no single slot to serialise and nothing to drain.
+// The speaker is folded into the text because systemChat has no name column of its own.
+if (_channel isEqualTo "SUB-NET") exitWith {
+    systemChat format ["%1: %2", _speaker, _text];
 };
 
 // Two queues rather than one with a priority insert: the drain loop empties VOICE first, which
