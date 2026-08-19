@@ -17,6 +17,13 @@ class Params {
         default = 0;
     };
 
+    class DUWS_RestrictFirstPerson {
+        title = "Restrict to 1P";
+        values[] = {0,1};
+        texts[] = {"Off","On"};
+        default = 0;
+    };
+
     // Hybrid keeps the player's own faction unlimited but count-tracks captured foreign gear against
     // the banked pool; Full restores the legacy everything-unlimited arsenal. Read on the machine that
     // opens the arsenal (client/misc/fnc_duws_Arsenal.sqf), so every opener reads the same value.
