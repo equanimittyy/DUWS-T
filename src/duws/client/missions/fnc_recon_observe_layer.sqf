@@ -58,9 +58,9 @@ DUWS_recon_ehDraw = addMissionEventHandler ["Draw3D", {
     if (!(missionNamespace getVariable ["DUWS_recon_active", false])) exitWith {};
     if ((player distance2D DUWS_recon_overwatch) > DUWS_recon_area) exitWith {};
     private _a = DUWS_recon_anchorPos;
-    private _label = if (!([player] call DUWS_fnc_recon_glassing)) then { "Raise binoculars" } else {
+    private _label = if (!([player] call DUWS_fnc_recon_glassing)) then { localize "STR_DUWS_T_RECON_OBSERVE_RAISE" } else {
         private _pct = round (DUWS_recon_progress * 100);
-        if (_pct > 0) then { format ["Observing... (%1%2)", _pct, "%"] } else { "Observe" }
+        if (_pct > 0) then { format [localize "STR_DUWS_T_RECON_OBSERVE_HOLDING", _pct, "%"] } else { localize "STR_DUWS_T_RECON_OBSERVE_OBSERVE" }
     };
     drawIcon3D ["\a3\ui_f\data\gui\cfg\hints\Direction_ca.paa", [0.2, 1, 0.2, 0.8],
         [_a select 0, _a select 1, 8], 1, 1, 0, _label, 1, 0.03, "TahomaB"];

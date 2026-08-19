@@ -3009,8 +3009,8 @@
                 <English>The informant has reached %1. Mission failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_DESC">
-                <Original>An unscouted enemy position needs eyes on it. Move to the marked overwatch, raise your binoculars, and hold observation until Allseer confirms intel on the enemy position. Its location is then marked on your map.</Original>
-                <English>An unscouted enemy position needs eyes on it. Move to the marked overwatch, raise your binoculars, and hold observation until Allseer confirms intel on the enemy position. Its location is then marked on your map.</English>
+                <Original>An unscouted enemy position needs eyes on it. Move to the marked overwatch, raise your binoculars, and hold observation until Allseer confirms the intel. Its location is then marked on your map.</Original>
+                <English>An unscouted enemy position needs eyes on it. Move to the marked overwatch, raise your binoculars, and hold observation until Allseer confirms the intel. Its location is then marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_TASK">
                 <Original>Reach the marked overwatch, raise your binoculars, and hold observation on the enemy position until Allseer confirms the intel. Its location is then marked on your map.</Original>
@@ -3031,6 +3031,18 @@
             <Key ID="STR_DUWS_T_RECON_OBSERVE_FAILED">
                 <Original>The recon timed out. Mission failed.</Original>
                 <English>The recon timed out. Mission failed.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RECON_OBSERVE_RAISE">
+                <Original>Raise binoculars</Original>
+                <English>Raise binoculars</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RECON_OBSERVE_HOLDING">
+                <Original>Observing... (%1%2)</Original>
+                <English>Observing... (%1%2)</English>
+            </Key>
+            <Key ID="STR_DUWS_T_RECON_OBSERVE_OBSERVE">
+                <Original>Observe</Original>
+                <English>Observe</English>
             </Key>
             <Key ID="STR_DUWS_T_INTEL_INFORMANT_ASK_ACTION">
                 <Original>Ask about informant</Original>
