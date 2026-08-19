@@ -64,6 +64,8 @@ private _spec = [
     { params ["_target"]; !alive _target },
     [["STR_DUWS_T_OVERLORD", "STR_DUWS_T_armorletsdothis", 8]],
     ["STR_DUWS_T_OVERLORD", "STR_DUWS_T_armorend"],
+    // TODO: give this mission a bespoke timeout-fail line here (see target_sniper's _failLine).
+    [],
     "mission_target_armor"
 ];
 [_MissionPos, _mission_name, _spec] call fnc_mission_run;

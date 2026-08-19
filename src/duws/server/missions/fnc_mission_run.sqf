@@ -26,12 +26,13 @@
 //                   mission won by a trigger or an action tests its own flag here (see recon).
 //   _brief    array optional [[speakerKey,msgKey,delayAfter], ...] -- intro dialogue, played in order
 //   _endLine  array optional [speakerKey,msgKey] -- success line, callsign-substituted via fnc_cs
+//   _failLine array optional [speakerKey,msgKey] -- timeout fail line, replaces the generic notice
 //   _compKey  str   optional composition key handed to fnc_mission_end / _deadline_fail for teardown
 //   _sweep    bool  optional, forwarded to teardown
 params ["_MissionPos", "_mission_name", "_spec"];
 _spec params [
     "_index", "_radius", "_taskType", "_descKey", "_nameKey", "_idPrefix", "_build", "_done",
-    ["_brief", []], ["_endLine", []], ["_compKey", ""], ["_sweep", false]
+    ["_brief", []], ["_endLine", []], ["_failLine", []], ["_compKey", ""], ["_sweep", false]
 ];
 
 if (!([_index, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
@@ -66,8 +67,7 @@ private _deadline = DUWS_curDeadlineAt;
 waitUntil {sleep 2; (_handles call _done) || time > _deadline};
 
 if (!(_handles call _done) && time > _deadline) exitWith {
-    // TODO: fails all spine missions with the generic notice; add a bespoke fail line to the mission spec (like _endLine).
-    [_taskId, _marker, _compKey, _targetpos, _radius, _sweep] call fnc_mission_deadline_fail;
+    [_taskId, _marker, _compKey, _targetpos, _radius, _sweep, _failLine] call fnc_mission_deadline_fail;
 };
 
 if (!(_endLine isEqualTo [])) then {

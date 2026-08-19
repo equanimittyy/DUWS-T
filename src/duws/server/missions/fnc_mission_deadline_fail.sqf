@@ -8,10 +8,16 @@
 //
 // _marker / _compKey / _sweepFriendly default empty so a mission that owns no marker or built
 // composition can omit them; _compKey and _sweepFriendly are handed straight to fnc_mission_end.
-params ["_taskId", ["_marker", ""], ["_compKey", ""], ["_tpos", [0,0,0]], ["_radius", 0], ["_sweepFriendly", false]];
+// _failLine, [speakerKey, msgKey], overrides the generic timeout notice with a bespoke spoken line.
+params ["_taskId", ["_marker", ""], ["_compKey", ""], ["_tpos", [0,0,0]], ["_radius", 0], ["_sweepFriendly", false], ["_failLine", []]];
 if (!isServer) exitWith {};
 
-call fnc_mission_timeout_notice;
+if (_failLine isEqualTo []) then {
+    call fnc_mission_timeout_notice;
+} else {
+    _failLine params ["_spk", "_msg"];
+    [localize _spk, [localize _msg] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+};
 [_taskId, "FAILED"] call fnc_missionTaskEnd;
 if (_marker != "") then { [_marker] call fnc_missionMarkerClear };
 [_tpos, _radius, _compKey, _sweepFriendly] call fnc_mission_end;

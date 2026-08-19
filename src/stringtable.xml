@@ -3016,6 +3016,10 @@
                 <Original>The high-value target's convoy reached %1. Mission failed.</Original>
                 <English>The high-value target's convoy reached %1. Mission failed.</English>
             </Key>
+            <Key ID="STR_DUWS_T_HVT_CONVOY_TIMEOUT">
+                <Original>Alpha 1-1, we're out of time. The high-value target got away. Mission failed.</Original>
+                <English>Alpha 1-1, we're out of time. The high-value target got away. Mission failed.</English>
+            </Key>
             <Key ID="STR_DUWS_T_RECON_OBSERVE_DESC">
                 <Original>An unscouted enemy position needs eyes on it. Move to the marked overwatch, raise your binoculars, and hold observation until Allseer confirms the intel. Its location is then marked on your map.</Original>
                 <English>An unscouted enemy position needs eyes on it. Move to the marked overwatch, raise your binoculars, and hold observation until Allseer confirms the intel. Its location is then marked on your map.</English>
@@ -4388,6 +4392,10 @@
                 <Chinesesimp>行动组，干得漂亮！我们观察到敌人的狙击手被歼灭了！</Chinesesimp>
                 <Original>To Alpha 1-1, Allseer confirms the enemy sniper element has been eliminated. Good work.</Original>
                 <English>To Alpha 1-1, Allseer confirms the enemy sniper element has been eliminated. Good work.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_sniperfail">
+                <Original>Alpha 1-1, we're out of time. Allseer's lost the sniper element. Mission failed.</Original>
+                <English>Alpha 1-1, we're out of time. Allseer's lost the sniper element. Mission failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_cqbend">
                 <German>Action Squad an "Overlord", das feindliche Infiltrationskommando wurde vollständig eliminiert.</German>
