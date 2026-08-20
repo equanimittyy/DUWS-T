@@ -29,7 +29,11 @@
 fnc_faction_keep = {
     params ["_classes", "_kind"];
     _classes select {
-        _x isEqualType "" && {_x != ""} && {isClass (configFile >> "CfgVehicles" >> _x)} && {
+        // scope must read 2 (public): a curator-import variant carries scopeCurator 2 but scope < 2,
+        // so it clears detection's Zeus gate yet createVehicle/createUnit refuses it as an abstract
+        // type. Gated here, the one funnel every source passes through, so no pool can field one.
+        _x isEqualType "" && {_x != ""} && {isClass (configFile >> "CfgVehicles" >> _x)}
+            && {getNumber (configFile >> "CfgVehicles" >> _x >> "scope") == 2} && {
             switch (_kind) do {
                 case "man":     { _x isKindOf "CAManBase" };
                 case "static":  { _x isKindOf "StaticWeapon" };
