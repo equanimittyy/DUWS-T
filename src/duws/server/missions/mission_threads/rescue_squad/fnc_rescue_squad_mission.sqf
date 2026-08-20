@@ -22,9 +22,9 @@ if (!([0, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 
 // Faked-suppression audio: a firefight heard from the house, played via playSound3D so it leans on no
 // mod content and no AI weapon choice. RSQ_FIRE_SND is a vanilla MX full-auto rifle sample; .wss, not
-// .ogg, since ogg carries a start delay that reads wrong on a weapon. If BI's folder move ever silences
-// it, the newer path is "a3\sounds_f\arsenal\weapons\rifles\mx\mx_short_01.wss", or drop in any weapon file.
-#define RSQ_FIRE_SND    "A3\sounds_f\weapons\mx\mx-st-full-1.wss"
+// .ogg, since ogg carries a start delay that reads wrong on a weapon. Path is the post-arsenal-refactor
+// location; the pre-refactor "A3\sounds_f\weapons\mx\mx-st-full-1.wss" no longer resolves and plays silent.
+#define RSQ_FIRE_SND    "a3\sounds_f\arsenal\weapons\rifles\mx\mx_short_01.wss"
 #define RSQ_FIRE_VOL    5
 #define RSQ_FIRE_MAXD   400
 
