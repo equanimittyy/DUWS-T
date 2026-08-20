@@ -11,9 +11,9 @@
 // other, so that is the floor.
 params ["_group", "_vehicles", ["_sep", 25]];
 
-_group setUnloadInCombat [false, false];
 {
     _x setConvoySeparation _sep;
+    _x setUnloadInCombat [false, false];
     _x forceFollowRoad true;
     _x allowCrewInImmobile true;
 } forEach _vehicles;

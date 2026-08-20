@@ -1248,6 +1248,28 @@ dead, dying or still-moving vehicle refuses the ordered dismount, and a locked-i
 truck is worse than the foot approach the lock was meant to improve — so the escape must be
 unconditional.
 
+## A runtime error inside a `call`ed function halts the whole calling script, not just the callee
+
+**An unhandled runtime error — a wrong type to a command, a nil where a value is needed — in a
+`call`ed helper does not fail that one statement and carry on. It unwinds the entire call chain and
+stops the scheduled script that entered the `call`, right at the call site: every statement after
+that `call` never runs. The rpt names only the innermost file and line (the helper), so nothing in
+the log hints that the caller died too.**
+
+The sharp edge is a mission thread that `call`s a setup helper before its own win/fail monitor loop.
+If the helper throws, the thread stops at the `call` — the monitor never spawns, and the mission can
+neither be won nor failed. The mission looks dead for no reason a reader can see, because the only
+error line points at the unrelated-looking helper.
+
+`setConvoySeparation` and `setUnloadInCombat` are how this bit here: both take an **Object** (the
+vehicle) on the left, not a Group — the wiki's `groupName` wording misleads. Passing a group throws
+`Type Group, expected Object`, and as the first statement of the shared convoy setup helper it killed
+the calling mission thread before its monitor, so killing the target did nothing.
+
+**How to apply:** apply per-vehicle in a `forEach _vehicles`, never to the group. More generally,
+treat any `call` before a load-bearing loop as able to take the whole script with it: keep such setup
+type-safe, or the one line you can't see fails the whole mission silently.
+
 ## `removeItem` cannot remove a worn uniform, vest, backpack, headgear or goggles
 
 **`removeItem "class"` only reaches loose items — magazines, attachments, things *inside* a
