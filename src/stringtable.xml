@@ -4176,8 +4176,8 @@
                 <English>To Alpha 1-1, that's a confirmed kill on the enemy armor commander. Good work.</English>
             </Key>
             <Key ID="STR_DUWS_T_c18">
-                <Original>Destroy enemy armor</Original>
-                <English>Destroy enemy armor</English>
+                <Original>Deny enemy armor</Original>
+                <English>Deny enemy armor</English>
             </Key>
             <Key ID="STR_DUWS_T_destroyarmour_desc">
                 <Original>An enemy tank sits broken down in the open. Its crew is inbound by convoy to get it running and drive it off. Kill the crew or destroy the tank before they recover it. The orange arrow marks the convoy's approach.</Original>
