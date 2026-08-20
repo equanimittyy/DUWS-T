@@ -4377,8 +4377,8 @@
                 <English>Alpha 1-1, be advised, we have reports the enemy columns have begun moving towards %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_hvtmidpoint">
-                <Original>Alpha 1-1, fresh intel on the enemy columns. Their mid-route points are marked on your map, arrows showing each column's heading.</Original>
-                <English>Alpha 1-1, fresh intel on the enemy columns. Their mid-route points are marked on your map, arrows showing each column's heading.</English>
+                <Original>Alpha 1-1, fresh intel on the enemy columns. Their mid-route points are now marked on your map.</Original>
+                <English>Alpha 1-1, fresh intel on the enemy columns. Their mid-route points are now marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_armorletsdothis">
                 <German>Hier spricht "Overlord", gute Nachricht: Eine feindliche Panzerzug wurde gerade von unserer Nahluftunterstützung vernichtet, der Führerpanzer liegt im Gelände defekt. Ihre Einheit hat die Aufgabe, ihren Zugführer zu eliminieren, solange sie Feldreparaturen durchführen – sein Panzer zu beschlagnahmen, falls möglich.</German>
