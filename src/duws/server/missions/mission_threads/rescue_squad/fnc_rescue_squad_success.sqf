@@ -4,8 +4,11 @@
 // and helicopter are both set captive for the pickup: the fight is already won, and a scripted bird
 // taking stray fire from a passing patrol on the way out is not a failure the player earned. The bird
 // lands at an LZ off the building and the squad boards on foot; a straggler stuck on geometry is moved
-// into cargo on a timeout so one man cannot hang the extraction. The player and allies are kept off the
-// bird -- any that board while it is down are turned out before it lifts, then cargo is locked for the
+// into cargo on a timeout so one man cannot hang the extraction. A bird lost while the squad is still on
+// foot -- on approach or on the deck -- costs the lift, not the mission: the survivors walk off the AO and
+// the reward still pays. Once they are sealed aboard they are committed to it, so a crash from there
+// (before the reward) is a loss; a wiped squad is a KIA fail either way. The player and allies are kept off
+// the bird -- any that board while it is down are turned out before it lifts, then cargo is locked for the
 // flight -- so the teardown only ever deletes the flight crew and the squad.
 params ["_squad", "_bld", "_marker", "_taskId", "_tpos", "_radius", "_compKey", "_mission_name", "_cpreward", "_apreward"];
 private _bpos = getPos _bld;
@@ -101,28 +104,74 @@ private _fail = {
     [_tpos, _radius, _compKey] call fnc_mission_end;
 };
 
+// The evac bird is down, but the fight was already won and the squad is up, so losing the lift is not a
+// failure the player earned: the survivors walk off the AO on foot and the mission still succeeds. Only a
+// squad with no one left to walk -- wiped before this, or lost in a crash with them aboard -- falls through
+// to the KIA fail. Radio tone is borrowed from the helo-taxi's own bird-down call.
+private _exfilFoot = {
+    // Let a crash blast finish resolving before calling this a save. If the bird went down on top of the
+    // squad their deaths can land a beat after the wreck is flagged dead, so a bare survivor check would
+    // pay out a squad that is about to die. Settle, then require someone actually left to walk out.
+    sleep 10;
+    private _out = _squad select {alive _x};
+    if (_out isEqualTo []) exitWith { call _fail };
+    // Cancel any boarding order, turn out anyone caught in the wreck, and stand them up to walk.
+    {
+        unassignVehicle _x;
+        if (_x in _heli) then { _x remoteExec ["moveOut", _x] };
+        _x enableAI "PATH";
+        _x enableAI "MOVE";
+        _x setUnitPos "AUTO";
+    } forEach _out;
+    // March the group clear of the AO on its own legs; wipe the boarding waypoints first so it walks out
+    // instead of chasing the dead bird's LZ.
+    private _grp = group (_out select 0);
+    _grp setBehaviour "AWARE";
+    for "_i" from (count (waypoints _grp) - 1) to 0 step -1 do { deleteWaypoint [_grp, _i] };
+    private _wpFoot = _grp addWaypoint [_bpos getPos [3000, _bearing], 0];
+    _wpFoot setWaypointType "MOVE";
+    _wpFoot setWaypointSpeed "FULL";
+    if (!isNil "_helipad") then { deleteVehicle _helipad };
+    [_marker] call fnc_missionMarkerClear;
+    [_taskId, "SUCCEEDED"] call fnc_missionTaskEnd;
+    [] spawn {
+        [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadevacfoot"] remoteExec ["fnc_duws_dialogue", 0];
+        sleep 5;
+        [localize "STR_DUWS_T_Signal", localize "STR_DUWS_T_squadfootout"] remoteExec ["fnc_duws_dialogue", 0];
+    };
+    // Survivors and the dead bird's crew are swept once the squad is clear of the AO (or on a timeout).
+    [_out, _heli, _heliCrew, _bpos] spawn {
+        params ["_sq", "_h", "_crew", "_ref"];
+        private _t = time + 180;
+        waitUntil { sleep 2; ({ alive _x && {(_x distance2D _ref) < 2500} } count _sq) == 0 || {time > _t} };
+        { deleteVehicle _x } forEach _sq;
+        { deleteVehicle _x } forEach _crew;
+        if (!isNull _h) then { deleteVehicle _h };
+    };
+    [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
+    [_tpos, _radius, _compKey] call fnc_mission_end;
+};
+
 private _tApproach = time + 150;
 waitUntil { sleep 1; !alive _heli || {(_heli distance2D _lz) < 350} || {time > _tApproach} || {(_squad findIf {alive _x}) < 0} };
 if ((_squad findIf {alive _x}) < 0) exitWith { call _fail };
-if (alive _heli) then {
-    _heli land "GET IN";
-    { _x assignAsCargo _heli } forEach (_squad select {alive _x});
-    (_squad select {alive _x}) orderGetIn true;
-};
+if (!alive _heli) exitWith { call _exfilFoot };
+_heli land "GET IN";
+{ _x assignAsCargo _heli } forEach (_squad select {alive _x});
+(_squad select {alive _x}) orderGetIn true;
 
 // Board on foot; teleport any straggler on a timeout so a man stuck on geometry cannot hang it.
 private _tBoard = time + 75;
 waitUntil { sleep 1; !alive _heli || {({ alive _x && {!(_x in _heli)} } count _squad) == 0} || {time > _tBoard} };
 if ((_squad findIf {alive _x}) < 0) exitWith { call _fail };
-if (alive _heli) then {
-    { if (alive _x && {!(_x in _heli)}) then { _x moveInCargo _heli } } forEach _squad;
-    // Seal the bird for the flight out: turn out anyone who is not the squad or the flight crew -- a
-    // player or ally who hopped in while it was down -- then lock cargo so none board mid-air. moveOut
-    // runs on the machine that owns the unit.
-    { if !(_x in _squad || {_x in _heliCrew}) then { _x remoteExec ["moveOut", _x] } } forEach crew _heli;
-    _heli lockCargo true;
-    _heli land "NONE";
-};
+if (!alive _heli) exitWith { call _exfilFoot };
+{ if (alive _x && {!(_x in _heli)}) then { _x moveInCargo _heli } } forEach _squad;
+// Seal the bird for the flight out: turn out anyone who is not the squad or the flight crew -- a
+// player or ally who hopped in while it was down -- then lock cargo so none board mid-air. moveOut
+// runs on the machine that owns the unit.
+{ if !(_x in _squad || {_x in _heliCrew}) then { _x remoteExec ["moveOut", _x] } } forEach crew _heli;
+_heli lockCargo true;
+_heli land "NONE";
 
 // Off the deck and away. The win lands the moment the bird is up with the squad aboard, so pay out and
 // close ~10 s after takeoff rather than blocking on the long flight home -- the empty run to the map edge
@@ -133,7 +182,9 @@ _wpOut setWaypointType "MOVE";
 _wpOut setWaypointSpeed "FULL";
 
 sleep 10;
-if (!alive _heli) exitWith { call _fail };   // lost the bird on the way up: fail, do not pay a dead squad
+// Sealed aboard and lifting: the squad is committed to the bird, so a crash here -- before the reward is
+// paid -- is a loss, not an on-foot recovery. Fail rather than pay a squad that went down with the bird.
+if (!alive _heli) exitWith { call _fail };
 
 [_marker] call fnc_missionMarkerClear;
 [_taskId, "SUCCEEDED"] call fnc_missionTaskEnd;

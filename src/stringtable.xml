@@ -4472,6 +4472,14 @@
                 <Original>Thanks, Overlord. We owe you for the assist, Alpha 1-1.</Original>
                 <English>Thanks, Overlord. We owe you for the assist, Alpha 1-1.</English>
             </Key>
+            <Key ID="STR_DUWS_T_squadevacfoot">
+                <Original>Signal 3-1, your bird's down and we've nothing else in the air. Exfil on foot, we've got you the rest of the way.</Original>
+                <English>Signal 3-1, your bird's down and we've nothing else in the air. Exfil on foot, we've got you the rest of the way.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_squadfootout">
+                <Original>Copy, Overlord. We're moving out on foot. We owe you for the assist, Alpha 1-1.</Original>
+                <English>Copy, Overlord. We're moving out on foot. We owe you for the assist, Alpha 1-1.</English>
+            </Key>
             <Key ID="STR_DUWS_T_towerletsdothis">
                 <German>"Kobra" an Kommando! Wir bekämpfen feindliches schweres Feuer am verbündeten Funkturm! Ich wiederhole...</German>
                 <Spanish>"Cobra" al Mando! Estamos combatiendo contra fuego pesado enemigo en la torre de señales aliada! Repito...</Spanish>
