@@ -161,8 +161,3 @@ deleteVehicle _helipad;
 
 [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
 [_tpos, _radius, _compKey] call fnc_mission_end;
-
-// If HARDCORE, Rescue pays intel. Called rather than spawned into a client function: the shape this
-// replaced ran from a server thread through one that began `if (!hasInterface) exitWith {}`, so on a
-// dedicated server the reward evaporated. The mission site stands in for the earner's position.
-if (hardcore_mode_enable) then { [_tpos] call fnc_intel_payout };
