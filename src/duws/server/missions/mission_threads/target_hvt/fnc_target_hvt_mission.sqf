@@ -283,8 +283,32 @@ sleep _graceSec;
 
 private _outcome = "";
 private _split = false;
+// Midpoint intel: a rolled 30-60 s hold after the columns move, then Allseer names their mid-route
+// points and drops an arrow on each pointing at the destination, so the player reads where the routes
+// bend and can move to cut one short. Run inside the monitor, not a side thread, so a kill or arrival
+// before the reveal ends the mission with nothing left to clear -- _viaMarkers stays empty and teardown
+// deletes nothing.
+private _viaMarkers = [];
+private _revealAt = time + (30 + round random 30);
+private _revealed = false;
 waitUntil {
     sleep 2;
+    if (!_revealed && {time > _revealAt}) then {
+        _revealed = true;
+        {
+            private _mn = format ["hvtconvoyvia_%1_%2", round (_x select 0), round (_x select 1)];
+            deleteMarker _mn;   // a rounded-position name can collide with a prior mission's leftover
+            createMarker [_mn, _x];
+            _mn setMarkerShape "ICON";
+            _mn setMarkerType "mil_arrow";
+            _mn setMarkerColor "ColorEAST";
+            _mn setMarkerDir (_x getDir _destPos);   // arrow on the midpoint, heading into the zone
+            _mn setMarkerSize [1.1, 1.1];
+            _mn setMarkerAlpha 0.8;
+            _viaMarkers pushBack _mn;
+        } forEach _vias;
+        [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_hvtmidpoint"] remoteExec ["fnc_duws_dialogue", 0];
+    };
     // First contact: peel the car out of the column into its own CARELESS group so it runs for the
     // zone instead of halting to fight alongside the escorts. Triggered by the column going COMBAT or
     // the car taking a hit. Its crew keep their claim stamp, so teardown still collects them.
@@ -318,6 +342,7 @@ if (!isNull _carGrp) then { _carGrp setVariable ["DUWS_convoy_stop", true] };
 
 [_marker] call fnc_missionMarkerClear;
 { deleteMarker _x } forEach _startMarkers;
+{ deleteMarker _x } forEach _viaMarkers;
 deleteMarker _destMarker;
 
 if (_outcome == "WIN") then {
