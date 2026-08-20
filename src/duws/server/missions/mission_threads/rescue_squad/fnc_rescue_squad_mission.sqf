@@ -162,23 +162,31 @@ DUWS_rsq_relieved = false;
 // back to the ring. Separate from _relieved: the hold can break before the squad is out.
 DUWS_rsq_holdBroken = false;
 
-// The cordon hoses the building on the engine's own suppression order, to sell the squad being pinned.
-// Fires only while a player is in the outer band (SUPPRESS_RANGE) and the squad is still holed up; stops on
-// the first of the hold breaking, the squad being relieved, SUPPRESS_MAX seconds, every shooter down, or
-// the deadline. Not on mere proximity -- a player inside a few dozen metres should not silence it. The
-// timeout counts from the first burst, so a slow approach still gets the show.
+// The cordon hoses the building on full auto to sell the squad being pinned. Fires only while a player is
+// in the outer band (SUPPRESS_RANGE) and the squad is still holed up; stops on the first of the hold
+// breaking, the squad being relieved, SUPPRESS_MAX seconds, every shooter down, or the deadline. Not on mere
+// proximity -- a player inside a few dozen metres should not silence it. The timeout counts from the first
+// burst, so a slow approach still gets the show.
 //
-// Each shooter rays from its eyes at the building's upper structure and hoses the first solid thing in the
-// way -- a wall, a wreck -- but never a friendly body or a bare terrain point: those fall back to the
-// building itself, so every shooter always has a real target and the whole ring fires, not just the one man
-// with a clean line. doSuppressiveFire lapses on its own, so it is re-issued every few seconds; grenadiers
-// and launcher men were cut, so nothing explosive is aimed in, and selectWeapon keeps each on its primary.
+// forceWeaponFire, not doSuppressiveFire: the latter fires nothing when a ring man has no sightline, and is
+// free to pick the heaviest weapon (a rifleman levels the building with his launcher). forceWeaponFire
+// discharges the named primary regardless of LOS or target, so every shooter fires and nothing explosive is
+// ever selected -- grenadiers and launcher men are already cut upstream. doWatch points each man at the
+// building first so the rounds go downrange; the mode is forced to full auto so the ring rips rather than
+// tapping single shots.
 [_suppressUnits, _Building, _deadline] spawn {
     params ["_shooters", "_bld", "_dl"];
-    // Aim at ~0.6 of the building's height (its own bbox), not a near-ground point: a flat ray from a
-    // shooter 120 m out to a low point skims terrain and returns dirt, which the AI will not fire on.
-    private _bb = boundingBoxReal _bld;
-    private _aimPos = (getPosASL _bld) vectorAdd [0, 0, ((((_bb select 1) select 2) - ((_bb select 0) select 2)) * 0.6) max 3];
+    // Full-auto mode name for a weapon: a mode named auto/full, else the last mode (auto is listed last by
+    // convention) -- so the ring fires on auto across faction packs. An empty or ["this"] modes list is a
+    // single-mode weapon whose mode name is the weapon name itself.
+    private _autoMode = {
+        params ["_wpn"];
+        private _ms = getArray (configFile >> "CfgWeapons" >> _wpn >> "modes");
+        if (_ms isEqualTo [] || {_ms isEqualTo ["this"]}) exitWith { _wpn };
+        private _i = _ms findIf { private _l = toLower _x; (_l find "auto" >= 0) || {_l find "full" >= 0} };
+        if (_i < 0) then { _i = (count _ms) - 1 };
+        _ms select _i
+    };
     private _startedAt = -1;
     while {
         (time < _dl)
@@ -193,16 +201,8 @@ DUWS_rsq_holdBroken = false;
                 if (alive _x) then {
                     private _w = primaryWeapon _x;
                     if (_w != "") then {
-                        _x selectWeapon _w;
-                        // Default to the building; upgrade to an intervening solid (wall/wreck), never a man
-                        // or terrain, so a blocked or dirt-skimming ray still leaves a real target to hose.
-                        private _tgt = _bld;
-                        private _hits = lineIntersectsSurfaces [eyePos _x, _aimPos, _x, objNull, true, 1, "FIRE", "VIEW"];
-                        if (_hits isNotEqualTo []) then {
-                            (_hits select 0) params ["", "", "_hitObj"];
-                            if (!isNull _hitObj && {!(_hitObj isKindOf "CAManBase")}) then { _tgt = _hitObj };
-                        };
-                        _x doSuppressiveFire _tgt;
+                        _x doWatch _bld;
+                        _x forceWeaponFire [_w, [_w] call _autoMode];
                     };
                 };
             } forEach _shooters;
