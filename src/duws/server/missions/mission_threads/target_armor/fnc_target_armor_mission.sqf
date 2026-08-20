@@ -17,13 +17,14 @@ private _build = {
     if (_vehClass == "") then { _vehClass = opfor_ARMED_CAR1_X; _token = "car" };
     if (_vehClass == "") then { _vehClass = opfor_TRANS_TRUCK_X };
 
-    // Reward scales with the tier fielded: +10 CP per step above a car patrol (AP flat), so CP runs
-    // 15 / 25 / 35 for car / IFV / armour. The briefing and strategic map print the base -- both are built
+    // Reward scales with the tier fielded: +10 CP and +5 AP per step above a car patrol, so car / IFV /
+    // armour pay 15/20, 25/25, 35/30. The briefing and strategic map print the base -- both are built
     // before this rolls -- so a heavier patrol pays the step-up as an unadvertised bonus at completion.
     // Inherent to rolling the tier at spawn, not a display bug to chase. One mission runs at a time
-    // (Mission_available gate), so the in-place CP bump is safe.
-    private _tierBonus = 10 * (["car", "ifv", "tank"] find _token);
-    DUWS_curReward set [0, (DUWS_curReward select 0) + _tierBonus];
+    // (Mission_available gate), so the in-place reward bump is safe.
+    private _tier = ["car", "ifv", "tank"] find _token;
+    DUWS_curReward set [0, (DUWS_curReward select 0) + (10 * _tier)];
+    DUWS_curReward set [1, (DUWS_curReward select 1) + (5 * _tier)];
 
     // Patrol points around the ring, snapped to roads so the column rides the network rather than cutting
     // cross-country between them (Arma routes vehicles badly off-road -- see fnc_convoy_setup). Centred on
