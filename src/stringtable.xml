@@ -4077,8 +4077,8 @@
                 <English>Allseer has an enemy engineering vehicle parked here. Take it and drive it back to base; our engineers can convert it into a mobile factory.</English>
             </Key>
             <Key ID="STR_DUWS_T_y7z1cx6j">
-                <Original>An enemy vehicle patrol is roving this area. Destroy the whole column.</Original>
-                <English>An enemy vehicle patrol is roving this area. Destroy the whole column.</English>
+                <Original>An enemy vehicle patrol is operating in this area. Destroy the whole column.</Original>
+                <English>An enemy vehicle patrol is operating in this area. Destroy the whole column.</English>
             </Key>
             <Key ID="STR_DUWS_T_j97ecrsh">
                 <German>Die Späher melden, dass die Feinde hier laptopartige elektronische Kampfgeräte aufgestellt haben, in denen möglicherweise Informationen über die Standorte feindlicher Truppenstellungen enthalten sind. Suchen Sie das Gerät auf, laden Sie alle nützlichen Informationen herunter und zerstören Sie es, falls es keine gibt. (Very low CP, high AP)</German>
@@ -4167,8 +4167,12 @@
                 <English>To Alpha 1-1, that patrol's wiped out. Every vehicle confirmed destroyed. Good work.</English>
             </Key>
             <Key ID="STR_DUWS_T_armorfail">
-                <Original>Alpha 1-1, we're out of time. That patrol's still rolling. Mission failed.</Original>
-                <English>Alpha 1-1, we're out of time. That patrol's still rolling. Mission failed.</English>
+                <Original>Alpha 1-1, we're out of time. We've missed our window of opportunity. Mission failed.</Original>
+                <English>Alpha 1-1, we're out of time. We've missed our window of opportunity. Mission failed.</English>
+            </Key>
+            <Key ID="STR_DUWS_T_armornote">
+                <Original>Patrol scales with enemy strength. Motorised: 15/20, Mechanised: 25/25, Armor: 35/30 (CP/AP)</Original>
+                <English>Patrol scales with enemy strength. Motorised: 15/20, Mechanised: 25/25, Armor: 35/30 (CP/AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_c18">
                 <Original>Deny enemy armor</Original>
@@ -4376,8 +4380,8 @@
                 <English>Alpha 1-1, fresh intel on the enemy columns. Their mid-route points are now marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_armorletsdothis">
-                <Original>Alpha 1-1, an enemy vehicle patrol is running a circuit near %1. Hunt the column down and destroy every vehicle.</Original>
-                <English>Alpha 1-1, an enemy vehicle patrol is running a circuit near %1. Hunt the column down and destroy every vehicle.</English>
+                <Original>Alpha 1-1, an enemy vehicle patrol is operating near %1. Hunt the column down and destroy every vehicle.</Original>
+                <English>Alpha 1-1, an enemy vehicle patrol is operating near %1. Hunt the column down and destroy every vehicle.</English>
             </Key>
             <Key ID="STR_DUWS_T_sniperletsdothis">
                 <German>Hier ist Viper 1-5. Wir haben das feindliche Scharfschützenteam lokalisiert — sie tragen Ghillie-Anzüge. Deine Einheit kann handeln! Vorsicht, in ihrer Nähe sind viele Feinde.</German>
