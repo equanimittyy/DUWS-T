@@ -89,18 +89,6 @@ private _repairTime = linearConversion [DA_REPAIR_NEARDIST, DA_REPAIR_FARDIST, _
 private _convoyStart = [_targetpos getPos [_convoyDist, _bearing], 0, 80, 8, 0, 0.4, 0] call BIS_fnc_findSafePos;
 if (_convoyStart isEqualTo [] || {(_convoyStart select 0) == 0}) then { _convoyStart = _targetpos getPos [_convoyDist, _bearing] };
 
-// Orange arrow at the convoy's entry point, pointing the way it drives. Approach direction only -- the
-// ellipse already marks the tank -- so it stays static and is cleared once the convoy is in and engaged.
-private _arrow = format ["da_arrow_%1%2", round (_targetpos select 0), round (_targetpos select 1)];
-deleteMarker _arrow;   // a rounded-position name can collide with a prior mission's leftover
-createMarker [_arrow, _convoyStart];
-_arrow setMarkerType "mil_arrow";
-_arrow setMarkerColor "ColorOrange";
-_arrow setMarkerDir (_convoyStart getDir _targetpos);
-_arrow setMarkerSize [1.1, 1.1];
-_arrow setMarkerAlpha 0.8;
-_arrow setMarkerText localize "STR_DUWS_T_destroyarmour_arrow";
-
 // The tank crew: two crewmen and the engineer who does the repairing, their own group so the win test
 // reads exactly these three.
 private _crewGrp = [_convoyStart, EAST, [opfor_CREW_X, opfor_CREW_X, opfor_ENG_SOLDIER_X], [], [], opfor_ai_skill] call BIS_fnc_spawnGroup;
@@ -163,7 +151,21 @@ _wp setWaypointCompletionRadius 40;
 
 private _place = [_randomPos] call fnc_place_name;
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_destroyarmour_start", _place]] remoteExec ["fnc_duws_dialogue", 0];
-sleep 8;
+
+// Hold the convoy intel a beat: neither the approach arrow nor the eyes-on report is handed over the
+// instant the mission opens. Overlord's brief lands first; 10s on, the arrow drops and Allseer calls it.
+sleep 10;
+// Orange arrow at the convoy's entry point, pointing the way it drives. Approach direction only -- the
+// ellipse already marks the tank -- so it stays static and is cleared once the convoy is in and engaged.
+private _arrow = format ["da_arrow_%1%2", round (_targetpos select 0), round (_targetpos select 1)];
+deleteMarker _arrow;   // a rounded-position name can collide with a prior mission's leftover
+createMarker [_arrow, _convoyStart];
+_arrow setMarkerType "mil_arrow";
+_arrow setMarkerColor "ColorOrange";
+_arrow setMarkerDir (_convoyStart getDir _targetpos);
+_arrow setMarkerSize [1.1, 1.1];
+_arrow setMarkerAlpha 0.8;
+_arrow setMarkerText localize "STR_DUWS_T_destroyarmour_arrow";
 [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_destroyarmour_convoy"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Teardown shared by both outcomes: clear both markers and end the task, then hand the objective to the
