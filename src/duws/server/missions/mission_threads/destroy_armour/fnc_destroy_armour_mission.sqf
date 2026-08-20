@@ -182,10 +182,24 @@ private _finish = {
 };
 
 // The repair race. WIN the moment the tank is denied -- every crewman dead, or the tank destroyed.
-// FAIL when a live crew drives the repaired tank back to its home zone, or on the deadline. In between: once
-// the transport is near the tank (or destroyed, so the crew bail), the crew and escort dismount and the
-// crew work on the tank; the clock only advances while a crewman stands at it and no player has taken it.
+// FAIL when a live crew drives the repaired tank back to its home zone, or on the deadline. In between: the
+// tank crew dismount once their transport reaches the tank (or is destroyed) and work on the hull; the
+// security team stays mounted and only pours out if the convoy is hit; the clock advances only while a
+// crewman stands at the tank and no player has taken it.
+private _escort = _escortSpawn select 0;
+// Convoy vehicles and their drivers/gunners, snapshotted for the under-attack test. _trucks is final here
+// (a second truck, raised only on cargo overflow, was pushed during loading above).
+private _convoyVeh = _trucks + [_escort];
+private _convoyCrew = units _convoyGrp;
+// Under attack = a convoy vehicle damaged or destroyed, or any man down. Keeps the security team riding on
+// an untouched run so it rides back out with the tank, and pours it out to fight the moment the column is hit.
+private _underAttack = {
+    (_convoyVeh findIf { !alive _x || {damage _x > 0.1} }) >= 0
+    || {(_convoyCrew findIf { !alive _x }) >= 0}
+    || {((_crewUnits + _teamUnits) findIf { !alive _x }) >= 0}
+};
 private _dismounted = false;
+private _teamOut = false;
 private _repairAt = -1;
 private _repaired = false;
 
@@ -206,9 +220,26 @@ while { true } do {
         [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_destroyarmour_fail_time"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
     };
 
+    // The security team pours out only once the convoy is actually hit, and fights where it stands -- at the
+    // tank if the ambush lands there, on the road if the player jumped the column en route.
+    if (!_teamOut && {call _underAttack}) then {
+        _teamOut = true;
+        deleteMarker _arrow;
+        {
+            if (alive _x) then { moveOut _x; unassignVehicle _x };
+        } forEach _teamUnits;
+        if (!isNull _teamGrp) then {
+            _teamGrp setBehaviour "COMBAT";
+            _teamGrp setCombatMode "RED";
+            private _anchor = position (_teamUnits select { alive _x } param [0, _tank]);
+            private _gwp = _teamGrp addWaypoint [_anchor, 0];
+            _gwp setWaypointType "GUARD";
+        };
+    };
+
     if (!_dismounted) then {
-        // Dismount when a transport reaches the tank, or once none is left alive (survivors bail and finish
-        // on foot). The crew make for the tank; the escort team holds around it as an ambush to break.
+        // The tank crew dismount when a transport reaches the tank, or once none is left alive (survivors
+        // bail and finish on foot), and make for the hull to work on it.
         private _aliveTrucks = _trucks select { alive _x };
         if (_aliveTrucks isEqualTo [] || {(_aliveTrucks findIf { (_x distance2D _tank) < DA_DISEMBARK }) >= 0}) then {
             _dismounted = true;
@@ -216,15 +247,6 @@ while { true } do {
             {
                 if (alive _x) then { moveOut _x; unassignVehicle _x; _x doMove _vehpos };
             } forEach _crewUnits;
-            {
-                if (alive _x) then { moveOut _x; unassignVehicle _x };
-            } forEach _teamUnits;
-            if (!isNull _teamGrp) then {
-                _teamGrp setBehaviour "COMBAT";
-                _teamGrp setCombatMode "RED";
-                private _gwp = _teamGrp addWaypoint [_vehpos, 0];
-                _gwp setWaypointType "GUARD";
-            };
         };
     } else {
         if (!_repaired) then {
@@ -238,16 +260,26 @@ while { true } do {
                     _repaired = true;
                     _tank setDamage 0;
                     _tank setFuel 1;
-                    // Seat the survivors and drive it home -- to the zone itself, so how far it must get is
-                    // the real distance to their lines. Reuse the crew group so it moves as one; fill driver
-                    // first so a crew short a man still rolls.
+                    // Seat the survivors -- driver first, so a crew short a man still rolls -- then fold the
+                    // tank into the convoy: the crew join the convoy group so the tank road-marches home with
+                    // the trucks and escort as one column to the zone itself, the real distance to their lines,
+                    // rather than driving off alone. The mounted security team rides back in the trucks; a team
+                    // already pulled out by an ambush is turned for home too.
                     private _seats = [{ _this moveInDriver _tank }, { _this moveInCommander _tank }, { _this moveInGunner _tank }];
                     { _x call (_seats param [_forEachIndex, {}]) } forEach _liveCrew;
-                    _crewGrp setBehaviour "AWARE";
-                    _crewGrp setCombatMode "YELLOW";
-                    private _twp = _crewGrp addWaypoint [_zonePos, 0];
+                    (units _crewGrp) joinSilent _convoyGrp;
+                    _convoyGrp setBehaviour "AWARE";
+                    _convoyGrp setCombatMode "YELLOW";
+                    _convoyGrp setSpeedMode "FULL";
+                    _convoyGrp setFormation "COLUMN";
+                    private _twp = _convoyGrp addWaypoint [_zonePos, 0];
                     _twp setWaypointType "MOVE";
                     _twp setWaypointSpeed "FULL";
+                    if (!isNull _teamGrp && {_teamOut}) then {
+                        _teamGrp setBehaviour "AWARE";
+                        private _rtb = _teamGrp addWaypoint [_zonePos, 0];
+                        _rtb setWaypointType "MOVE";
+                    };
                     [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_destroyarmour_repaired"] remoteExec ["fnc_duws_dialogue", 0];
                 };
             } else {
