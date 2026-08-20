@@ -42,9 +42,19 @@ private _site = [_MissionPos, DA_RADIUS, 18] call fnc_mission_site;
 if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
-// The tank's exact ground: a flat, vehicle-clear spot by the site so it reads as a derelict on open
-// ground rather than wedged in a stub, and so the crew can drive it out once repaired.
-private _vehpos = [_targetpos, 5, 25, 8, 0, 0.2, 0] call BIS_fnc_findSafePos;
+// The tank's exact ground: flat, hull-clear, and within ~100 m of a road so the inbound convoy can ride
+// the network to within fnc_convoy_watch's final-hop of the hull rather than road-locking short of an
+// off-network spot, and so the repaired tank starts its run home on that same network. Still set off the
+// carriageway so it reads as a derelict abandoned in the field. No road near the objective (a remote
+// site) falls back to the plain safe-pos by the target, accepting the longer off-road approach.
+private _vehpos = [];
+private _tankRoads = _targetpos nearRoads 100;
+if !(_tankRoads isEqualTo []) then {
+    _vehpos = [getPosATL (selectRandom _tankRoads), 8, 30, 12, 0, 0.2, 0] call BIS_fnc_findSafePos;
+};
+if (_vehpos isEqualTo [] || {(_vehpos select 0) == 0}) then {
+    _vehpos = [_targetpos, 5, 25, 12, 0, 0.2, 0] call BIS_fnc_findSafePos;
+};
 if (_vehpos isEqualTo [] || {(_vehpos select 0) == 0}) then { _vehpos = _targetpos };
 
 // Marked before anything is built: the ellipse and the task are the only things pointing the player at
@@ -311,6 +321,13 @@ while { true } do {
                     private _twp = _convoyGrp addWaypoint [_zonePos, 0];
                     _twp setWaypointType "MOVE";
                     _twp setWaypointSpeed _homeSpeed;
+                    // Fold the tank into the convoy's reliability layer for the run home: forceFollowRoad
+                    // and a stuck watchdog on the hull too, so the escape is a real drive the player must
+                    // intercept rather than one the AI hands back by wedging. A watchdog of its own covers
+                    // just the tank -- the one spawned at the start still holds the trucks and escort -- and
+                    // both read this group's live home waypoint and end together in _finish.
+                    [_convoyGrp, [_tank]] call fnc_convoy_setup;
+                    [_convoyGrp, [_tank]] spawn fnc_convoy_watch;
                     if (!isNull _teamGrp && {_teamOut}) then {
                         _teamGrp setBehaviour "AWARE";
                         private _rtb = _teamGrp addWaypoint [_zonePos, 0];
