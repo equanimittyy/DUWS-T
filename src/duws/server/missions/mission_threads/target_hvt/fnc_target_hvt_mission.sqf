@@ -133,11 +133,13 @@ private _legHalf = (_MissionPos distance2D _destPos) * 0.5;
 
 private _hvtIdx = floor random 3;
 private _groups = [];         // one group per convoy, index-aligned with the roll-out and the claim
+private _groupVehs = [];      // matching vehicle list per convoy, for the reliability layer + watchdog
 private _vias   = [];         // matching via point per convoy, index-aligned with _groups
 private _convoyStarts = [];   // one per convoy, for exactly three start markers (no tell)
 private _hvt = objNull;       // the target; split into his own CARELESS group on first contact
 private _car = objNull;       // his unarmed car -- watched by the monitor to trigger that split
 private _hvtColGrp = grpNull; // his column's group until the split
+private _carGrp = grpNull;    // the car's own group once split out -- held here so teardown ends its watchdog
 
 for "_i" from 0 to 2 do {
     private _lat = [-1, 0, 1] select _i;
@@ -170,12 +172,14 @@ for "_i" from 0 to 2 do {
         // its own CARELESS group on first contact so it commits to the run and drives through the
         // firefight rather than halting -- the player has to stop the car, not just spook the column.
         _hvtColGrp = createGroup EAST;
+        private _hvtEscorts = [];   // escorts only -- the car peels off with its own watchdog at the split
         {
             private _p = [_start getPos [_x, _heading + 180]] call _onRoad;
             private _r = [_p, _heading, call _rollEsc, EAST] call BIS_fnc_spawnVehicle;
             (_r select 0) setDir _heading;
             (_r select 2) deleteGroupWhenEmpty true;
             (_r select 1) joinSilent _hvtColGrp;
+            _hvtEscorts pushBack (_r select 0);
         } forEach [0, 36];
         private _cp = [_start getPos [18, _heading + 180]] call _onRoad;
         _car = createVehicle [_hvtCarClass, _cp, [], 0, "NONE"];
@@ -193,10 +197,12 @@ for "_i" from 0 to 2 do {
         _hvtColGrp deleteGroupWhenEmpty true;
         { [_x] call fnc_addRandomLoot } forEach units _hvtColGrp;
         _groups pushBack _hvtColGrp;
+        _groupVehs pushBack _hvtEscorts;
         _vias pushBack _via;
     } else {
-        ([[call _rollEsc, call _rollEsc, call _rollEsc], _start, _heading, "AWARE", "LIMITED"] call _spawnLine) params ["_grp"];
+        ([[call _rollEsc, call _rollEsc, call _rollEsc], _start, _heading, "AWARE", "LIMITED"] call _spawnLine) params ["_grp", "_gvehs"];
         _groups pushBack _grp;
+        _groupVehs pushBack _gvehs;
         _vias pushBack _via;
     };
 };
@@ -262,6 +268,15 @@ sleep _graceSec;
     _wpEnd setWaypointType "MOVE";
     _wpEnd setWaypointCompletionRadius 40;
 } forEach _groups;
+// Reliability layer per column, once they are rolling: road-lock + spacing + keep-crew-aboard, plus a
+// stuck watchdog that nudges any jammed hull and lifts the road-lock for the run into the off-road zone.
+// Spawned only now, after the grace hold, so it does not fight the columns sitting still at their starts.
+// Ended at teardown via DUWS_convoy_stop.
+{
+    private _gv = _groupVehs select _forEachIndex;
+    [_x, _gv] call fnc_convoy_setup;
+    [_x, _gv] spawn fnc_convoy_watch;
+} forEach _groups;
 // Allseer calls the move the instant the columns are ordered out, so the player reads the race as
 // starting rather than watching for it.
 [localize "STR_DUWS_T_ALLSEER", format [localize "STR_DUWS_T_hvtmoveout", _destName]] remoteExec ["fnc_duws_dialogue", 0];
@@ -278,20 +293,28 @@ waitUntil {
         || damage _car > 0
     }) then {
         _split = true;
-        private _sg = createGroup EAST;
-        [_hvt, driver _car] joinSilent _sg;
-        _sg setBehaviour "CARELESS";
-        _sg setSpeedMode "FULL";
-        _sg deleteGroupWhenEmpty true;
-        private _wp = _sg addWaypoint [_destPos, 0];
+        _carGrp = createGroup EAST;
+        [_hvt, driver _car] joinSilent _carGrp;
+        _carGrp setBehaviour "CARELESS";
+        _carGrp setSpeedMode "FULL";
+        _carGrp deleteGroupWhenEmpty true;
+        private _wp = _carGrp addWaypoint [_destPos, 0];
         _wp setWaypointType "MOVE";
         _wp setWaypointCompletionRadius 40;
+        // The peeled car gets its own reliability layer + watchdog: it commits to the zone alone now, so
+        // a jam on the final stretch would hand the player a win the mission does not intend.
+        [_carGrp, [_car]] call fnc_convoy_setup;
+        [_carGrp, [_car]] spawn fnc_convoy_watch;
     };
     if (!alive _hvt) exitWith { _outcome = "WIN"; true };
     if (_hvt distance2D _destPos < _arrive) exitWith { _outcome = "ESCAPED"; true };
     if (time > _deadline) exitWith { _outcome = "TIMEOUT"; true };
     false
 };
+
+// End every convoy watchdog: the column groups and, if it split out, the HVT car's own group.
+{ _x setVariable ["DUWS_convoy_stop", true] } forEach _groups;
+if (!isNull _carGrp) then { _carGrp setVariable ["DUWS_convoy_stop", true] };
 
 [_marker] call fnc_missionMarkerClear;
 { deleteMarker _x } forEach _startMarkers;

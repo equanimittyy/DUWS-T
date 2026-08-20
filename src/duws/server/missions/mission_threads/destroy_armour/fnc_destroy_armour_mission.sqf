@@ -86,8 +86,15 @@ if !(_opforZones isEqualTo []) then {
 if (_zonePos isEqualTo []) then { _zonePos = _targetpos getPos [_convoyDist + 500, _bearing] };
 // Longer window near the enemy's lines, shorter far out (see the DA_REPAIR_* defines).
 private _repairTime = linearConversion [DA_REPAIR_NEARDIST, DA_REPAIR_FARDIST, _zoneDist, DA_REPAIR_NEAR, DA_REPAIR_FAR, true];
-private _convoyStart = [_targetpos getPos [_convoyDist, _bearing], 0, 80, 8, 0, 0.4, 0] call BIS_fnc_findSafePos;
-if (_convoyStart isEqualTo [] || {(_convoyStart select 0) == 0}) then { _convoyStart = _targetpos getPos [_convoyDist, _bearing] };
+// Spawn the convoy on the road network where possible: an off-road start makes the column fight the
+// pathfinder from the first metre. Nearest road to the jittered entry point (nearRoads is distance
+// sorted), falling back to a safe-pos when the entry lands off the network.
+private _entry = _targetpos getPos [_convoyDist, _bearing];
+private _entryRoads = _entry nearRoads 300;
+private _convoyStart = if !(_entryRoads isEqualTo []) then { getPosATL (_entryRoads select 0) } else {
+    private _sp = [_entry, 0, 80, 8, 0, 0.4, 0] call BIS_fnc_findSafePos;
+    if (_sp isEqualTo [] || {(_sp select 0) == 0}) then { _entry } else { _sp }
+};
 
 // The tank crew: two crewmen and the engineer who does the repairing, their own group so the win test
 // reads exactly these three.
@@ -136,6 +143,10 @@ private _convoyGrp = _truckGrps select 0;
     if (_x != _convoyGrp) then { (units _x) joinSilent _convoyGrp; deleteGroup _x };
 } forEach (_truckGrps + [_escortGrp]);
 
+// The convoy's vehicles, snapshotted here for the reliability layer and the under-attack test below.
+// _trucks is final (a second truck, raised only on cargo overflow, was pushed during loading above).
+private _convoyVeh = _trucks + [_escortSpawn select 0];
+
 { [_x] call fnc_mission_claim } forEach [_crewGrp, _teamGrp, _convoyGrp];
 
 // Drive to the tank at a road pace the player can race: LIMITED speed, AWARE so they still fight if jumped
@@ -148,6 +159,13 @@ _convoyGrp setFormation "COLUMN";
 private _wp = _convoyGrp addWaypoint [_vehpos, 0];
 _wp setWaypointType "MOVE";
 _wp setWaypointCompletionRadius 40;
+
+// Reliability layer: road-lock + spacing + keep-crew-aboard, then the stuck watchdog. Arma's vehicle
+// route calculation stalls convoys on open ground and geometry; the watchdog nudges any hull that jams
+// and lifts the road-lock for the final hop to the tank. It reads the group's current waypoint live, so
+// it carries over when the repaired tank folds in and the column is re-tasked home. Ended in _finish.
+[_convoyGrp, _convoyVeh] call fnc_convoy_setup;
+[_convoyGrp, _convoyVeh] spawn fnc_convoy_watch;
 
 private _place = [_randomPos] call fnc_place_name;
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_destroyarmour_start", _place]] remoteExec ["fnc_duws_dialogue", 0];
@@ -177,6 +195,7 @@ private _finish = {
     // cleanup rules (spared while crewed or near base, reaped once abandoned in the field), and a claimed
     // one that got away must not be spared by the persistent flag when cleanup comes for it.
     _tank setVariable ["persistent", false];
+    _convoyGrp setVariable ["DUWS_convoy_stop", true];
     deleteMarker _arrow;
     [_marker] call fnc_missionMarkerClear;
     [_taskId, _status] call fnc_missionTaskEnd;
@@ -188,10 +207,6 @@ private _finish = {
 // tank crew dismount once their transport reaches the tank (or is destroyed) and work on the hull; the
 // security team stays mounted and only pours out if the convoy is hit; the clock advances only while a
 // crewman stands at the tank and no player has taken it.
-private _escort = _escortSpawn select 0;
-// Convoy vehicles and their drivers/gunners, snapshotted for the under-attack test. _trucks is final here
-// (a second truck, raised only on cargo overflow, was pushed during loading above).
-private _convoyVeh = _trucks + [_escort];
 private _convoyCrew = units _convoyGrp;
 // Under attack = a convoy vehicle damaged or destroyed, or any man down. Keeps the security team riding on
 // an untouched run so it rides back out with the tank, and pours it out to fight the moment the column is hit.

@@ -114,6 +114,10 @@ fnc_mission_begin = compile preprocessFileLineNumbers "duws\server\missions\fnc_
 fnc_mission_claim = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_claim.sqf";
 fnc_mission_run = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_run.sqf";
 
+// Shared convoy driving: reliability config + stuck watchdog, used by the HVT hunt and the deny-armour convoy.
+fnc_convoy_setup = compile preprocessFileLineNumbers "duws\server\misc\fnc_convoy_setup.sqf";
+fnc_convoy_watch = compile preprocessFileLineNumbers "duws\server\misc\fnc_convoy_watch.sqf";
+
 // SIDE MISSION THREADS
 fnc_rescue_squad_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_mission.sqf";
 fnc_rescue_squad_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_success.sqf";
