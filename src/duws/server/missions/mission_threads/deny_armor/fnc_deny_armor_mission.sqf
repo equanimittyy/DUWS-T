@@ -33,7 +33,7 @@ if (!([18, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_beg
 #define DA_REPAIR_NEARDIST  1000
 #define DA_REPAIR_FARDIST   4000
 
-private _compKey = "mission_destroy_armour";
+private _compKey = "mission_deny_armor";
 private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 private _deadline = DUWS_curDeadlineAt;
