@@ -19,15 +19,21 @@
 //   _avoid       positions to stay >=250 m from, so co-offered missions do not stack on one spot
 //   _allowUrban  true lets the urban named-location branch run; the picker drops it after its 20s
 //                failsafe, and it is forced off where the map has no named locations
+//   _spawnRule   the type's placement contract from mission_types.hpp: [needDestZone, minCorridor,
+//                routeAvoidBlufor]. Drives the destination-zone pick below; default sites with none.
 //
-// Contract: [_threadName, _hard, _origin, _avoid, _allowUrban] -> _pos | [].
+// Contract: [_threadName, _hard, _origin, _avoid, _allowUrban, _spawnRule] -> [_pos, _dest] | [].
+// _dest is the vetted OPFOR-held destination zone when the rule asks for one, else []. A convoy thread
+// runs to _dest instead of recomputing its own haven.
 params [
     "_threadName",
     ["_hard", false],
     ["_origin", PosOfBLUHQ],
     ["_avoid", []],
-    ["_allowUrban", ((missionNamespace getVariable ["moreUrban", 0]) == 1)]
+    ["_allowUrban", ((missionNamespace getVariable ["moreUrban", 0]) == 1)],
+    ["_spawnRule", [false, 0, false]]
 ];
+_spawnRule params ["_needDest", "_minCorridor", "_routeAvoid"];
 
 // The type's site-finder: fnc_<name>_site if the mission defines one, else the accept-all generic.
 // Stripping "_mission" (8 chars) off the thread name is the same rule the picker used inline; keeping
@@ -44,11 +50,34 @@ private _densRadius     = 1500; // hard: only enemy features within this feed th
 private _gauntCorr      = 400;  // hard: approach-corridor half-width, metres
 private _hardBand       = 800;  // hard: metres past a chosen zone edge the objective may drift -- tight, to hug the cluster
 private _peakEnemyness  = 0.5;  // seam target for the easy urban bell; hard offers ignore it
+private _routeClearReach = 1200; // convoy corridor: metres a route sample must keep from BLUFOR ground
 
 private _bluHeld = if (isNil "WARCOM_zones_controled_by_BLUFOR") then {[]} else {WARCOM_zones_controled_by_BLUFOR};
 private _friendlyAnchors = +_bluHeld;
 if (!(PosOfBLUHQ isEqualTo [])) then { _friendlyAnchors pushBack PosOfBLUHQ };
 if (!(isNil "Array_of_FOBpos")) then { { _friendlyAnchors pushBack _x } forEach Array_of_FOBpos };
+
+// Straight-line proxy for a convoy corridor _a->_b: reject if any interior sample sits within
+// _routeClearReach of BLUFOR-held ground. Endpoints are enemy (an anchor and an OPFOR zone), so only
+// the interior is tested. Not the actual road path: convoys snap to roads and follow the bearing, and
+// a per-node path test is far heavier for a picker that runs unscheduled, once per offer candidate.
+private _fnRouteClear = {
+    params ["_a", "_b"];
+    if (_friendlyAnchors isEqualTo []) exitWith {true};
+    private _d = _a distance2D _b;
+    if (_d < 1) exitWith {true};
+    private _steps = ceil (_d / 250);
+    private _ok = true;
+    private _i = 1;
+    while {_ok && _i < _steps} do {
+        private _t = _i / _steps;
+        private _px = (_a select 0) + ((_b select 0) - (_a select 0)) * _t;
+        private _py = (_a select 1) + ((_b select 1) - (_a select 1)) * _t;
+        if ((_friendlyAnchors findIf {[_px, _py] distance2D _x < _routeClearReach}) >= 0) then { _ok = false };
+        _i = _i + 1;
+    };
+    _ok
+};
 
 private _zoneFoot = zone_meta_array apply {_x params ["", "_zp", "_zs"]; [_zp, _zs]};
 private _hpFoot = if (isNil "DUWS_hardpoints") then {[]} else {DUWS_hardpoints apply {[_x select 1, 0]}};
@@ -211,7 +240,23 @@ while {_result isEqualTo [] && {_finderReject < _finderCap} && {_tries < _maxTri
         // the drawn icon -- the larger the |Z|, the more of the icon goes dead -- so match the flat [x,y]
         // every findSafePos-based offer already carries.
         private _p = _site select 0;
-        _result = [_p select 0, _p select 1];
+        private _pos2d = [_p select 0, _p select 1];
+        if (_needDest) then {
+            // Destination = the nearest OPFOR-held zone at least _minCorridor out whose straight corridor
+            // from here clears BLUFOR ground. No such zone -> this anchor cannot run a convoy, so count it
+            // against the finder cap and redraw rather than offer a convoy with nowhere clean to drive.
+            private _destCands = _opforCenters select {
+                (_pos2d distance2D _x) >= _minCorridor && {(!_routeAvoid) || {[_pos2d, _x] call _fnRouteClear}}
+            };
+            if (_destCands isEqualTo []) then {
+                _finderReject = _finderReject + 1;
+            } else {
+                private _dest = [_destCands, [_pos2d], {_input0 distance2D _x}, "ASCEND"] call BIS_fnc_sortBy select 0;
+                _result = [_pos2d, _dest];
+            };
+        } else {
+            _result = [_pos2d, []];
+        };
     };
 };
 

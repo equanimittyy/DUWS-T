@@ -59,7 +59,6 @@ failsafe_not_found2 = false;
 
 _handle = [] spawn {  // Spawn the MAIN SEARCH
 
-  _counter = 0;
   _kibot_pos_array_missionPos = [[-99999,-99999,-99999]];
 
   // Included inside the block, not above it: a spawned block captures no locals.
@@ -71,63 +70,69 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
   DUWS_missionSlots = [];
   { DUWS_missionSlots pushBack [] } forEach _missionDefs;
 
-  _missionCount = [];
-  { _missionCount pushBack _forEachIndex } forEach _missionDefs;
-  _missionShuffle = _missionCount call BIS_fnc_arrayShuffle;
-  // Seven drawn from the shuffled seventeen, not all of them. Every candidate costs a
-  // BIS_fnc_findSafePos search before it can be offered, so the full pool spent that search
-  // ten extra times to build a list no one reads to the bottom of.
-  _missionDraw = 7 min (count _missionCount);
+  // Weighted draw bag: [index, weight, hardEligible] per type. Types are drawn WITHOUT replacement, so
+  // the offer set holds distinct types and a type that fails to site is dropped and another drawn for
+  // the slot -- never leaving the slot empty the way the old fixed shuffle did on a no-fit. weight (rule
+  // field 4) biases the draw; hardEligible (rule field 3) is whether the type may take a deep hard slot.
+  private _bag = [];
+  { private _r = _x select 13; _bag pushBack [_forEachIndex, _r select 4, _r select 3] } forEach _missionDefs;
 
-  // Split the draw by difficulty: most offers seat near the frontline (easy, base pay); the rest push
-  // deep into enemy ground (hard, a difficulty-scaled bonus). Hard is capped at 2 and easy takes the
-  // remainder, so a short pool degrades to fewer hard rather than a negative easy count.
-  private _hardCount = 2 min _missionDraw;
-  private _easyCount = _missionDraw - _hardCount;
+  private _missionDraw = 7 min (count _bag);
+
+  // Two offers push deep into enemy ground (hard, a difficulty-scaled bonus); the rest seat on the
+  // frontline (easy, base pay). Hard slots draw only from hardEligible types placed deep; once they are
+  // filled -- or the hardEligible pool empties -- the draw opens to the whole bag as easy. A short or
+  // all-easy pool degrades to fewer hard rather than stalling.
+  private _hardWant = 2 min _missionDraw;
+  private _filled = 0;
+  private _hardFilled = 0;
   private _hardOffers = [];   // [name, depth-from-friendly] per hard offer -> multiplier after the loop
 
-  // Anchors for the hard-offer depth calc below: friendly-held ground is HQ, FOBs, and captured
-  // zones. The placement weighting that used to live here -- frontline seam, deep-enemy score, the
-  // OPFOR-zone band search, the finder handshake -- now lives in server/missions/fnc_mission_findSite,
-  // called per offer below, so the debug force tool sites through the same logic instead of a copy.
+  // Anchors for the hard-offer depth calc below: friendly-held ground is HQ, FOBs, and captured zones.
+  // The placement weighting lives in server/missions/fnc_mission_findSite, called per offer below, so
+  // the debug force tool sites through the same logic instead of a copy.
   private _bluHeld = if (isNil "WARCOM_zones_controled_by_BLUFOR") then {[]} else {WARCOM_zones_controled_by_BLUFOR};
   private _friendlyAnchors = +_bluHeld;
   if (!(PosOfBLUHQ isEqualTo [])) then { _friendlyAnchors pushBack PosOfBLUHQ };
   if (!(isNil "Array_of_FOBpos")) then { { _friendlyAnchors pushBack _x } forEach Array_of_FOBpos };
 
-  while {_counter < _missionDraw} do {
+  // Each pass removes one type from the bag whether or not it sited, so the loop always terminates on an
+  // empty bag; _filled advances only on a real offer.
+  while {_filled < _missionDraw && {count _bag > 0}} do {
 
-	// Proportional to the draw, not a fixed 0.1 a step: that constant was sized for the old
-	// full-pool loop and would now stall the bar at 0.6.
-	progressLoadingScreen (_counter / _missionDraw);
+	progressLoadingScreen (_filled / _missionDraw);
 
-	_currentMission = _missionShuffle select _counter;
-	private _threadName = (_missionDefs select _currentMission) select 0;
+	// Fill the hard slots first, from hardEligible types only; when the hardEligible pool empties before
+	// they are filled, _hardWant collapses to _hardFilled so the remaining slots stop asking for hard and
+	// draw easy from the whole bag.
+	private _wantHard = _hardFilled < _hardWant;
+	private _pool = if (_wantHard) then { _bag select { _x select 2 } } else { _bag };
+	if (_pool isEqualTo []) then { _wantHard = false; _hardWant = _hardFilled; _pool = _bag };
 
-	// This offer's difficulty: the last _hardCount of the draw push deep, the rest seat on the front.
-	private _hard = _counter >= _easyCount;
+	private _idx = (_pool apply {_x select 0}) selectRandomWeighted (_pool apply {_x select 1});
+	_bag = _bag select { (_x select 0) != _idx };
+
+	private _threadName = (_missionDefs select _idx) select 0;
 	// "More Urban" seats offers in named locations; drop it once its 20s failsafe has fired.
 	private _allowUrban = (moreUrban == 1) && !failsafe_not_found2;
 
 	// Same siting the debug force tool uses. _kibot_pos_array_missionPos is the keep-apart list, seeded
-	// with a sentinel at the top of this thread; a [] result means the finder found no fit -> drop it.
-	private _foundSafePos = [_threadName, _hard, getPos player, _kibot_pos_array_missionPos, _allowUrban] call fnc_mission_findSite;
+	// with a sentinel at the top of this thread. The rule (column 13) makes siting vet and hand back a
+	// convoy destination zone; a [] result means no fit -> draw a different type for this slot.
+	private _rule = (_missionDefs select _idx) select 13;
+	private _found = [_threadName, _wantHard, getPos player, _kibot_pos_array_missionPos, _allowUrban, _rule] call fnc_mission_findSite;
 
-	if (_foundSafePos isEqualTo []) then {
-		["INFO", "MISSION", format ["site: type %1 found no fit, dropping offer", _currentMission]] call fnc_log;
-		_counter = _counter + 1;
+	if (_found isEqualTo []) then {
+		["INFO", "MISSION", format ["site: type %1 found no fit, drawing another", _idx]] call fnc_log;
 	} else {
+		_found params ["_foundSafePos", "_destZone"];
 		_kibot_pos_array_missionPos pushBack _foundSafePos;
-
-		// Clears against the draw, not the pool: the loop stops at _missionDraw, so comparing with the
-		// full pool size leaves the failsafe armed and aborts every request.
-		if (_counter == _missionDraw-1) then {failsafe_not_found = false;};
 
 		// The row supplies the description, the icon and the launcher; the search supplies the position
 		// and the name, which go into the shared slot array the launcher reads back.
-		(_missionDefs select _currentMission) params ["", "_nameKey", "_desc", "_icon", "", "_launcher", "_mcp", "_map", "_mrep", "_mdl", "", "_obj", ["_note", ""]];
+		(_missionDefs select _idx) params ["", "_nameKey", "_desc", "_icon", "", "_launcher", "_mcp", "_map", "_mrep", "_mdl", "", "_obj", ["_note", ""]];
 		private _name = [0] call fnc_random_name;
-		DUWS_missionSlots set [_currentMission, [_foundSafepos, _name]];
+		DUWS_missionSlots set [_idx, [_foundSafepos, _name, _destZone]];
 
 		// The stats block mirrors the journal's (fnc_missionTaskCreate) but prints a time band, not a
 		// deadline clock: pre-pick, the deadline has not been rolled. Name, type and note come from the
@@ -147,13 +152,14 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 
 		// Record hard offers with their depth from friendly-held ground; the loop's tail turns depth
 		// into the 1.5x-2x multiplier. Same anchor set the frontier search measures against.
-		if (_hard) then {
+		if (_wantHard) then {
 			private _depth = if (_friendlyAnchors isEqualTo []) then {
 				_foundSafepos distance PosOfBLUHQ
 			} else {
 				selectMin (_friendlyAnchors apply {_foundSafepos distance2D _x})
 			};
 			_hardOffers pushBack [_name, _depth];
+			_hardFilled = _hardFilled + 1;
 		};
 
 		array_of_missions pushBack [
@@ -168,11 +174,14 @@ _handle = [] spawn {  // Spawn the MAIN SEARCH
 		];
 
 		["INFO", "MISSION", format ["offer: type=%1 name=%2 pos=%3",
-			_currentMission, _name, _foundSafepos]] call fnc_log;
+			_idx, _name, _foundSafepos]] call fnc_log;
 
-		_counter = _counter + 1;
+		_filled = _filled + 1;
 	};
   };
+
+  // Offers found -> arm the map open; an empty set (nothing sited anywhere) still trips the failsafe.
+  failsafe_not_found = (array_of_missions isEqualTo []);
 
   // Hard offers pay a difficulty-scaled bonus: their multiplier spans 1.5x (shallowest of the hard
   // set) to 2x (deepest), linear in depth from friendly-held ground. Easy offers get no entry and pay

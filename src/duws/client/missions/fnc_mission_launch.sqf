@@ -19,8 +19,10 @@ if (_slot isEqualTo []) exitWith {
     ["ERROR", "MISSION", format ["launch: type %1 has no slot; the map offered a mission the search never filled", _type]] call fnc_log;
 };
 
-_slot params ["_pos", "_name"];
-[_pos, _name] remoteExec [(_defs select _type) select 0, 2];
+// _dest is the vetted convoy destination zone (fnc_mission_findSite); [] for every non-convoy type,
+// which its thread ignores. Forwarded so the convoy runs to the offer's vetted haven, not its own pick.
+_slot params ["_pos", "_name", ["_dest", []]];
+[_pos, _name, _dest] remoteExec [(_defs select _type) select 0, 2];
 
 // The picked set is spent: clear the picker's cache (fnc_stratmap) so the next availability window
 // rolls a fresh set instead of re-offering this now-live mission.

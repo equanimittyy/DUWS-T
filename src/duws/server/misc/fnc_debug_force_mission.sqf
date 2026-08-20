@@ -28,10 +28,12 @@ if (_thread isEqualTo {}) exitWith {
 // thread then aborts out of. Anchored on HQ, since the force runs server-side with no requesting player,
 // and offered as an easy (frontline-seam) mission. A finder that never accepts -- intel with no
 // town-plus-enemy-zone in reach -- returns [] and the force fails cleanly.
-private _pos = [_threadName, false, PosOfBLUHQ, []] call fnc_mission_findSite;
-if (_pos isEqualTo []) exitWith {
+private _rule = (_defs select _type) select 13;
+private _found = [_threadName, false, PosOfBLUHQ, [], ((missionNamespace getVariable ["moreUrban", 0]) == 1), _rule] call fnc_mission_findSite;
+if (_found isEqualTo []) exitWith {
 	["ERROR", "MISSION", format ["debug force: %1 found no site its finder accepts", _threadName]] call fnc_log;
 };
+_found params ["_pos", "_destZone"];
 
 // Open the gate so the forced thread's own fnc_mission_begin check passes; it re-stamps on start.
 DUWS_lastMissionStartDate = 0;
@@ -41,4 +43,4 @@ publicVariable "Mission_available";
 
 private _name = [0] call fnc_random_name;
 ["INFO", "MISSION", format ["debug force: type=%1 name=%2 pos=%3", _type, _name, _pos]] call fnc_log;
-[_pos, _name] spawn _thread;
+[_pos, _name, _destZone] spawn _thread;

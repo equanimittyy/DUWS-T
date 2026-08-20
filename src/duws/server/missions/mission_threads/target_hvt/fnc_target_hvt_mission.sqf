@@ -9,26 +9,33 @@
 // Off the fnc_mission_run spine on purpose: the win is a race, not a one-shot predicate polled at a
 // fixed spot (see fnc_mission_run's header), so this owns its own site pick, spawn and monitor the
 // way the informant hunt and the IDAP escort do.
-params ["_MissionPos", "_mission_name"];
+params ["_MissionPos", "_mission_name", ["_destZone", []]];
 if (!([2, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 private _deadline = DUWS_curDeadlineAt;
 
-// Destination: the OPFOR-held zone nearest the sited position -- the safe haven the convoys run for.
-// Matched by position against WARCOM_zones_controled_by_OPFOR the way the informant hunt picks its
-// escape zone. None held (the last fell between offer and start) -> abort, releasing gate and slot.
+// Destination: the OPFOR-held zone the convoys run for. Prefer the one the siting pass vetted (far
+// enough out, corridor clear of BLUFOR) -- but only while it is still OPFOR-held: a zone captured
+// between offer and start is no haven. Otherwise (debug force sends none, or the vetted zone just
+// fell) fall back to the nearest still-held zone. None held at all -> abort, releasing gate and slot.
 private _enemyZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
 private _destPos = [];
 private _destName = "";
-private _destD = 1e9;
-{
-    _x params ["_zn", "_zp"];
-    if ((_enemyZones findIf { _x distance2D _zp < 50 }) >= 0 && {(_zp distance2D _MissionPos) < _destD}) then {
-        _destD = _zp distance2D _MissionPos; _destPos = _zp; _destName = _zn;
-    };
-} forEach zone_namePOS_pairs;
+if (!(_destZone isEqualTo []) && {(_enemyZones findIf { _x distance2D _destZone < 50 }) >= 0}) then {
+    _destPos = _destZone;
+    { _x params ["_zn", "_zp"]; if (_zp distance2D _destZone < 50) exitWith { _destName = _zn } } forEach zone_namePOS_pairs;
+};
+if (_destPos isEqualTo []) then {
+    private _destD = 1e9;
+    {
+        _x params ["_zn", "_zp"];
+        if ((_enemyZones findIf { _x distance2D _zp < 50 }) >= 0 && {(_zp distance2D _MissionPos) < _destD}) then {
+            _destD = _zp distance2D _MissionPos; _destPos = _zp; _destName = _zn;
+        };
+    } forEach zone_namePOS_pairs;
+};
 if (_destPos isEqualTo []) exitWith {
     [2, "STR_DUWS_T_crtzxs0j", "dest_zone_missing: no OPFOR-held zone to run the convoy to"] call fnc_mission_abort;
 };

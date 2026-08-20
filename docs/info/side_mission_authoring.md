@@ -65,7 +65,20 @@ Add a row to `src/duws/shared/includes/mission_types.hpp`, index-aligned with th
 Columns (full contract in the file header): thread name, cooldown-ready name key, strategic-map
 description key, map icon, English debug label, launcher `{ [N] call fnc_mission_launch }`, base CP,
 AP, REP, deadline `[minHours,maxHours]`, category (`command`/`civilian`), objective archetype, optional
-note key. CP/AP/REP and the deadline are read only from here — the thread carries no reward literals.
+note key, and a `spawnRule`. CP/AP/REP and the deadline are read only from here — the thread carries no
+reward literals.
+
+`spawnRule` is `[needDestZone, minCorridor, routeAvoidBlufor, hardEligible, weight]`. The last two feed
+the strategic-map draw: `weight` biases the odds a type is offered (drawn without replacement, so it
+shifts presence and order, not duplication), and `hardEligible` is whether the type may take one of the
+two deep, difficulty-boosted offer slots — set it false for a type whose finder needs a town or friendly
+ground it cannot reach behind enemy lines. The first three are for road convoys: `needDestZone` makes
+`fnc_mission_findSite` pick and vet an OPFOR-held destination (at least `minCorridor` out, and with
+`routeAvoidBlufor` its straight corridor kept clear of BLUFOR ground) and hand that zone to the thread as
+a third `params` argument, so the convoy runs to a haven the offer already vetted. The thread must still
+re-check the zone is OPFOR-held at start (it can flip in the gap) and fall back to its own search — which
+also covers the debug-force path, where no destination is handed. Default `[false, 0, false, ...]` sites
+with no destination.
 
 The thread's global (`fnc_<name>_mission`) must also be registered in the compile list in
 `src/duws/server/server_fnc_init.sqf`; there is no manifest of `fnc_*` globals beyond that file.

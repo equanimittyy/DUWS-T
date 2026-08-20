@@ -16,7 +16,7 @@
 // Not on the fnc_mission_run spine: that spine wins-or-times-out on a one-shot predicate, and this has
 // a distinct scripted fail (the repair race) the spine has no hook for. Shares the same helpers a spine
 // thread does -- fnc_mission_begin/site/reward/end, the marker and task calls -- just not its loop.
-params ["_MissionPos", "_mission_name"];
+params ["_MissionPos", "_mission_name", ["_destZone", []]];
 if (!([18, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 #define DA_RADIUS      300      // objective ring drawn and searched within
@@ -84,8 +84,17 @@ private _bearing = random 360;
 private _convoyDist = DA_CONVOY_DIST;
 private _zoneDist = DA_REPAIR_NEARDIST;   // no zone known -> treat as the near case, the full repair window
 private _zonePos = [];                     // the tank's home once repaired: the zone it drives back to
-if !(_opforZones isEqualTo []) then {
-    private _nearest = [_opforZones, [_targetpos], {_input0 distance2D _x}, "ASCEND"] call BIS_fnc_sortBy select 0;
+// Prefer the home zone the siting pass vetted (corridor clear of BLUFOR), while it is still OPFOR-held;
+// else the nearest held zone to the tank. Neither -> the synthetic exfil below stands in.
+private _nearest = [];
+if (!(_destZone isEqualTo []) && {(_opforZones findIf { _x distance2D _destZone < 50 }) >= 0}) then {
+    _nearest = _destZone;
+} else {
+    if !(_opforZones isEqualTo []) then {
+        _nearest = [_opforZones, [_targetpos], {_input0 distance2D _x}, "ASCEND"] call BIS_fnc_sortBy select 0;
+    };
+};
+if !(_nearest isEqualTo []) then {
     _zonePos = _nearest;
     _zoneDist = _targetpos distance2D _nearest;
     _bearing = (_targetpos getDir _nearest) + (random 30 - 15);
