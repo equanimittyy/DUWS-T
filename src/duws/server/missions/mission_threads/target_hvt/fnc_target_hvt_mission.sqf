@@ -33,13 +33,16 @@ if (_destPos isEqualTo []) exitWith {
     [2, "STR_DUWS_T_crtzxs0j", "dest_zone_missing: no OPFOR-held zone to run the convoy to"] call fnc_mission_abort;
 };
 
-// The convoys start ringed around the zone on three bearings ~120 deg apart, so the approaches
-// diverge and the player cannot cover them all. TUNABLE: ring gives roughly the intercept window
-// (bigger = more travel time), grace holds the columns at their start so a player inserting from
-// across the map has time to reach one before it rolls, arrive is the zone-edge fail band.
-private _ring    = 4500;
-private _graceSec = 120;
-private _arrive   = 80;
+// The convoys start bunched in the mission area on a small radius, then fork onto three separate
+// roads to the zone, each via a divergent mid-route point, so the approaches split and the player
+// cannot cover them all. TUNABLE: spawnR is the start cluster's radius, viaSpread the lateral offset
+// that pushes the three columns onto different roads (bigger = wider fork), grace holds the columns
+// at their start so a player inserting from across the map has time to reach them before they roll,
+// arrive is the zone-edge fail band.
+private _spawnR    = 300;
+private _viaSpread = 1200;
+private _graceSec  = 120;
+private _arrive    = 80;
 
 // Escort classes roll per vehicle across armed car, IFV and armour, gated by OPFOR's earned Army
 // Power through DUWS_fnc_tokenClass -- a low-AP campaign fields cars, a high one can field tanks. The
@@ -110,59 +113,69 @@ private _spawnLine = {
     [_grp, _vehs]
 };
 
+// Bearing from the mission area to the destination: the columns spawn fanned around it and each
+// forks to a via point offset to one side of it.
+private _dirZone = [_MissionPos, _destPos] call BIS_fnc_dirTo;
+private _legHalf = (_MissionPos distance2D _destPos) * 0.5;
+
 private _hvtIdx = floor random 3;
-private _base = random 360;
-private _groups = [];         // every convoy group, for the delayed roll-out and the claim
+private _groups = [];         // one group per convoy, index-aligned with the roll-out and the claim
+private _vias   = [];         // matching via point per convoy, index-aligned with _groups
 private _convoyStarts = [];   // one per convoy, for exactly three start markers (no tell)
-private _hvt = objNull;
+private _hvt = objNull;       // the target; split into his own CARELESS group on first contact
+private _car = objNull;       // his unarmed car -- watched by the monitor to trigger that split
+private _hvtColGrp = grpNull; // his column's group until the split
 
 for "_i" from 0 to 2 do {
-    private _bearing = _base + (_i * 120) + (random 40 - 20);
-    private _raw = _destPos getPos [_ring, _bearing];
-    // On a road: a convoy that spawns off the network fights the pathfinder the whole way. nearRoads
-    // returns nearest-first; a safe patch is the fallback where the ring point is roadless.
-    private _roads = _raw nearRoads 600;
-    private _start = if (count _roads > 0) then { getPosATL (_roads select 0) }
-        else { [_raw, 0, 150, 10, 0, 0.5, 0] call BIS_fnc_findSafePos };
-    private _heading = [_start, _destPos] call BIS_fnc_dirTo;
+    private _lat = [-1, 0, 1] select _i;
+    // Start: bunched in the mission area, fanned a little off the zone bearing so the three columns
+    // don't stack, snapped to a road -- a convoy off the network fights the pathfinder the whole way.
+    private _sCand = _MissionPos getPos [_spawnR, _dirZone + (_lat * 40)];
+    private _sRoads = _sCand nearRoads 400;
+    private _start = if (count _sRoads > 0) then { getPosATL (_sRoads select 0) }
+        else { [_sCand, 0, 120, 8, 0, 0.6, 0] call BIS_fnc_findSafePos };
+    // Via: a road point offset to one side of the midpoint, so the pathfinder routes this column its
+    // own way in; the centre column (lat 0) runs the direct line. Snap to a road, else take the raw
+    // point -- the pathfinder still favours roads getting there.
+    private _vCand = (_MissionPos getPos [_legHalf, _dirZone]) getPos [abs _lat * _viaSpread, _dirZone + (90 * _lat)];
+    private _vRoads = _vCand nearRoads 900;
+    private _via = if (count _vRoads > 0) then { getPosATL (_vRoads select 0) } else { _vCand };
+    private _heading = [_start, _via] call BIS_fnc_dirTo;
     _convoyStarts pushBack _start;
 
     if (_i == _hvtIdx) then {
-        // Two armed escorts fore and aft, defending (AWARE, return fire); the HVT's car is its own
-        // CARELESS group between them so it commits to the run and drives through a firefight rather
-        // than halting with the escorts -- the player has to stop the car, not just spook the column.
-        private _escGrp = createGroup EAST;
+        // One group so the escorts and the HVT's car drive together; the monitor peels the car into
+        // its own CARELESS group on first contact so it commits to the run and drives through the
+        // firefight rather than halting -- the player has to stop the car, not just spook the column.
+        _hvtColGrp = createGroup EAST;
         {
             private _p = _start getPos [_x, _heading + 180];
             private _r = [_p, _heading, call _rollEsc, EAST] call BIS_fnc_spawnVehicle;
             (_r select 0) setDir _heading;
             (_r select 2) deleteGroupWhenEmpty true;
-            (_r select 1) joinSilent _escGrp;
+            (_r select 1) joinSilent _hvtColGrp;
         } forEach [0, 36];
-        _escGrp setBehaviour "AWARE";
-        _escGrp setCombatMode "YELLOW";
-        _escGrp setSpeedMode "LIMITED";
-        _escGrp setFormation "COLUMN";
-        _escGrp deleteGroupWhenEmpty true;
-        { [_x] call fnc_addRandomLoot } forEach units _escGrp;
-
         private _cp = _start getPos [18, _heading + 180];
-        private _car = createVehicle [_hvtCarClass, _cp, [], 0, "NONE"];
+        _car = createVehicle [_hvtCarClass, _cp, [], 0, "NONE"];
         _car setDir _heading;
-        private _hvtGrp = createGroup EAST;
-        private _driver = _hvtGrp createUnit [opfor_SOLDIER_X, _cp, [], 0, "NONE"];
+        private _driver = _hvtColGrp createUnit [opfor_SOLDIER_X, _cp, [], 0, "NONE"];
         _driver moveInDriver _car;
-        _hvt = _hvtGrp createUnit [opfor_OFFICER_X, _cp, [], 0, "NONE"];
+        _hvt = _hvtColGrp createUnit [opfor_OFFICER_X, _cp, [], 0, "NONE"];
         _hvt moveInCargo _car;
         _hvt addHeadgear "H_Beret_blk";
         _hvt addMagazineGlobal "FileTopSecret";
-        _hvtGrp setBehaviour "CARELESS";
-        _hvtGrp setSpeedMode "LIMITED";
-        _hvtGrp deleteGroupWhenEmpty true;
-        _groups append [_escGrp, _hvtGrp];
+        _hvtColGrp setBehaviour "AWARE";
+        _hvtColGrp setCombatMode "YELLOW";
+        _hvtColGrp setSpeedMode "LIMITED";
+        _hvtColGrp setFormation "COLUMN";
+        _hvtColGrp deleteGroupWhenEmpty true;
+        { [_x] call fnc_addRandomLoot } forEach units _hvtColGrp;
+        _groups pushBack _hvtColGrp;
+        _vias pushBack _via;
     } else {
         ([[call _rollEsc, call _rollEsc, call _rollEsc], _start, _heading, "AWARE", "LIMITED"] call _spawnLine) params ["_grp"];
         _groups pushBack _grp;
+        _vias pushBack _via;
     };
 };
 
@@ -182,10 +195,16 @@ private _marker = [_destPos, _radius] call fnc_missionMarkerData;
 private _startMarkers = [];
 {
     private _mn = format ["hvtconvoy_%1_%2", round (_x select 0), round (_x select 1)];
+    deleteMarker _mn;   // a rounded-position name can collide with a prior mission's leftover
     createMarker [_mn, _x];
     _mn setMarkerShape "ICON";
-    _mn setMarkerType "o_motor_inf";
+    _mn setMarkerType "mil_arrow";
     _mn setMarkerColor "ColorEAST";
+    // Points the way this column drives off the start -- its heading toward its own via point, so the
+    // player reads the three routes apart and picks one to run down.
+    _mn setMarkerDir (_x getDir (_vias select _forEachIndex));
+    _mn setMarkerSize [1.1, 1.1];
+    _mn setMarkerAlpha 0.8;
     _mn setMarkerText "Convoy";
     _startMarkers pushBack _mn;
 } forEach _convoyStarts;
@@ -197,17 +216,40 @@ private _taskId = format ["hvtconvoy%1%2", round (_MissionPos select 0), round (
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_hvtletsdothis", _destName, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
 
 // Grace: the columns hold at their start points, so a player inserting from range has a window before
-// the race begins. Then every group is ordered to the zone at once.
+// the race begins. Then every column is ordered to the zone via its own mid-route point at once, so
+// the three take separate roads in.
 sleep _graceSec;
 {
-    private _wp = _x addWaypoint [_destPos, 0];
-    _wp setWaypointType "MOVE";
-    _wp setWaypointCompletionRadius 40;
+    private _via = _vias select _forEachIndex;
+    private _wpVia = _x addWaypoint [_via, 0];
+    _wpVia setWaypointType "MOVE";
+    _wpVia setWaypointCompletionRadius 60;
+    private _wpEnd = _x addWaypoint [_destPos, 0];
+    _wpEnd setWaypointType "MOVE";
+    _wpEnd setWaypointCompletionRadius 40;
 } forEach _groups;
 
 private _outcome = "";
+private _split = false;
 waitUntil {
     sleep 2;
+    // First contact: peel the car out of the column into its own CARELESS group so it runs for the
+    // zone instead of halting to fight alongside the escorts. Triggered by the column going COMBAT or
+    // the car taking a hit. Its crew keep their claim stamp, so teardown still collects them.
+    if (!_split && alive _car && {
+        (!isNull _hvtColGrp && {count units _hvtColGrp > 0} && {behaviour (leader _hvtColGrp) == "COMBAT"})
+        || damage _car > 0
+    }) then {
+        _split = true;
+        private _sg = createGroup EAST;
+        [_hvt, driver _car] joinSilent _sg;
+        _sg setBehaviour "CARELESS";
+        _sg setSpeedMode "FULL";
+        _sg deleteGroupWhenEmpty true;
+        private _wp = _sg addWaypoint [_destPos, 0];
+        _wp setWaypointType "MOVE";
+        _wp setWaypointCompletionRadius 40;
+    };
     if (!alive _hvt) exitWith { _outcome = "WIN"; true };
     if (_hvt distance2D _destPos < _arrive) exitWith { _outcome = "ESCAPED"; true };
     if (time > _deadline) exitWith { _outcome = "TIMEOUT"; true };
