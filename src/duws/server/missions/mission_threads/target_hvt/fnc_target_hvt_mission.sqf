@@ -36,11 +36,13 @@ if (_destPos isEqualTo []) exitWith {
 // The convoys start bunched in the mission area on a small radius, then fork onto three separate
 // roads to the zone, each via a divergent mid-route point, so the approaches split and the player
 // cannot cover them all. TUNABLE: spawnR is the start cluster's radius, viaSpread the lateral offset
-// that pushes the three columns onto different roads (bigger = wider fork), grace holds the columns
-// at their start so a player inserting from across the map has time to reach them before they roll,
-// arrive is the zone-edge fail band.
+// that pushes the three columns onto different roads (bigger = wider fork), startSep the minimum gap
+// between two starts so no two columns snap to the same road, grace holds the columns at their start
+// so a player inserting from across the map has time to reach them before they roll, arrive is the
+// zone-edge fail band.
 private _spawnR    = 300;
 private _viaSpread = 1200;
+private _startSep  = 200;
 private _graceSec  = 120;
 private _arrive    = 80;
 
@@ -128,12 +130,21 @@ private _hvtColGrp = grpNull; // his column's group until the split
 
 for "_i" from 0 to 2 do {
     private _lat = [-1, 0, 1] select _i;
-    // Start: bunched in the mission area, fanned a little off the zone bearing so the three columns
-    // don't stack, snapped to a road -- a convoy off the network fights the pathfinder the whole way.
-    private _sCand = _MissionPos getPos [_spawnR, _dirZone + (_lat * 40)];
+    // Start: bunched in the mission area, fanned off the zone bearing so each column searches its own
+    // arc, then snapped to the nearest road at least _startSep from every start already placed -- so no
+    // two columns share a segment and spawn stacked. A road-dense area with nothing far enough falls
+    // back to the nearest road; a convoy off the network fights the pathfinder the whole way.
+    private _sCand = _MissionPos getPos [_spawnR, _dirZone + (_lat * 70)];
     private _sRoads = _sCand nearRoads 400;
-    private _start = if (count _sRoads > 0) then { getPosATL (_sRoads select 0) }
-        else { [_sCand, 0, 120, 8, 0, 0.6, 0] call BIS_fnc_findSafePos };
+    private _start = [];
+    {
+        private _rp = getPosATL _x;
+        if (_convoyStarts findIf { _x distance2D _rp < _startSep } < 0) exitWith { _start = _rp };
+    } forEach _sRoads;
+    if (_start isEqualTo []) then {
+        _start = if (count _sRoads > 0) then { getPosATL (_sRoads select 0) }
+            else { [_sCand, 0, 120, 8, 0, 0.6, 0] call BIS_fnc_findSafePos };
+    };
     // Via: a road point offset to one side of the midpoint, so the pathfinder routes this column its
     // own way in; the centre column (lat 0) runs the direct line. Snap to a road, else take the raw
     // point -- the pathfinder still favours roads getting there.
