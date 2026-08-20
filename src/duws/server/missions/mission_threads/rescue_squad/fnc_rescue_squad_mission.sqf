@@ -17,6 +17,8 @@ if (!([0, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 #define ZONE_MARGIN     150
 #define UNCAPTIVE_RANGE 50
 #define CORDON_RING     120
+#define SUPPRESS_RANGE  300     // suppression plays only while a player is this close to the building
+#define SUPPRESS_MAX    150     // seconds of suppression from the first burst before it lapses on its own
 
 private _compKey = "mission_rescue_squad";
 private _radius = 300;
@@ -88,10 +90,20 @@ _squadGroup setCombatMode "BLUE";
 // drops each on the exact ring point rather than in its own band; then each holds facing in on combat
 // mode YELLOW. CORDON_RING sits past 100 m and PATH is disabled on every cordon man, so the ring holds
 // static -- no one advances inside 100 m of the building while the hold stands. Movement is handed back
-// only when the player breaks the hold (below); until then the ring just holds while a firefight is heard
-// from the house, and the player owns the ground inside it, where the squad is reached.
+// only when the player breaks the hold (below); until then the ring holds and its autoriflemen suppress the
+// building, and the player owns the ground inside it, where the squad is reached.
+//
+// Marks an autorifleman/MG gunner by weapon, not role, so it holds across faction packs that never named
+// the role: a belt- or drum-fed primary carries far more than a rifleman's 30-round box (RPK drums at 45,
+// belts at 100-200). Only these suppress -- gating on the weapon keeps an AT man's launcher out of the
+// building, the bug that sank the last, force-everyone go at this.
+private _isAutoRifle = {
+    private _mag = (primaryWeaponMagazine _this) param [0, ""];
+    _mag != "" && {(getNumber (configFile >> "CfgMagazines" >> _mag >> "count")) >= 40}
+};
 private _cordonTokens = ["team", "team", "team", "wp_team"];
 private _cordonUnits = [];
+private _suppressUnits = [];
 {
     private _bearing = _forEachIndex * 90;
     private _cpos = _BuildingPos getPos [CORDON_RING, _bearing];
@@ -106,6 +118,7 @@ private _cordonUnits = [];
         {
             _x disableAI "PATH";          // hold the ring static; no advance inside 100 m of the building
             _cordonUnits pushBack _x;
+            if (_x call _isAutoRifle) then { _suppressUnits pushBack _x };
         } forEach units _g;
     };
 } forEach _cordonTokens;
@@ -126,12 +139,56 @@ sleep 8;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadoverlord"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Relief flag: raised the moment the squad comes out, guarding the un-captive against a double fire and
-// read by the ring-release thread below.
+// read by both the suppression thread (which stops hosing the building once its occupants are up) and the
+// ring-release thread below.
 DUWS_rsq_relieved = false;
+// Hold flag: raised when the ring-release thread fires -- the assault lands (a cordon man takes fire), the
+// cordon starts dropping, the squad is relieved, or the deadline. Stops the suppression and hands movement
+// back to the ring. Separate from _relieved: the hold can break before the squad is out.
+DUWS_rsq_holdBroken = false;
+
+// The cordon's autoriflemen hose the building on the engine's own suppression order, to sell the squad
+// being pinned. Fires only while a player is in the outer band (SUPPRESS_RANGE) and the squad is still
+// holed up; stops on the first of the hold breaking, the squad being relieved, SUPPRESS_MAX seconds, every
+// shooter down, or the deadline. Not on mere proximity -- a player inside a few dozen metres should not
+// silence it. The timeout counts from the first burst, so a slow approach still gets the show.
+//
+// doSuppressiveFire lapses on its own, so it is re-issued every few seconds. Only autoriflemen were
+// collected, so there is nothing but the MG to fire -- an AT launcher into the building was what sank the
+// last go -- and selectWeapon on the primary keeps each on the MG rather than a sidearm. It needs line of
+// sight: a shooter with no view stays quiet, but the ring sits in the open at the cardinals, so enough of
+// it sees the building to read as sustained fire.
+[_suppressUnits, _Building, _deadline] spawn {
+    params ["_shooters", "_bld", "_dl"];
+    private _startedAt = -1;
+    while {
+        (time < _dl)
+        && {(_shooters findIf {alive _x}) >= 0}
+        && {!DUWS_rsq_relieved}
+        && {!DUWS_rsq_holdBroken}
+        && {_startedAt < 0 || {(time - _startedAt) < SUPPRESS_MAX}}
+    } do {
+        if (((call BIS_fnc_ListPlayers) findIf { alive _x && {(_x distance2D _bld) < SUPPRESS_RANGE} }) >= 0) then {
+            if (_startedAt < 0) then { _startedAt = time };
+            {
+                if (alive _x) then {
+                    private _w = primaryWeapon _x;
+                    if (_w != "") then {
+                        _x selectWeapon _w;
+                        _x doSuppressiveFire _bld;
+                    };
+                };
+            } forEach _shooters;
+            sleep 4;
+        } else {
+            sleep 1;
+        };
+    };
+};
 
 // Hands movement back to the ring. Watches for the assault landing (a cordon man takes fire), the cordon
-// starting to drop, the squad being relieved, or the deadline; on any of them the ring's PATH is
-// re-enabled so survivors manoeuvre and fight instead of holding static.
+// starting to drop, the squad being relieved, or the deadline; on any of them the hold is marked broken --
+// stopping the suppression -- and the ring's PATH is re-enabled so survivors manoeuvre instead of holding.
 [_cordonUnits, _deadline] spawn {
     params ["_cordon", "_dl"];
     waitUntil {
@@ -141,6 +198,7 @@ DUWS_rsq_relieved = false;
         || {(_cordon findIf {alive _x && {(damage _x) > 0}}) >= 0}
         || {(_cordon findIf {!alive _x}) >= 0}
     };
+    DUWS_rsq_holdBroken = true;
     { if (alive _x) then { _x enableAI "PATH" } } forEach _cordon;
 };
 
