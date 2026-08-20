@@ -15,18 +15,8 @@ if (!([0, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 
 #define SEARCH_R        400
 #define ZONE_MARGIN     150
-#define SUPPRESS_RANGE  300
-#define SUPPRESS_MAX    150
 #define UNCAPTIVE_RANGE 50
 #define CORDON_RING     120
-
-// Faked-suppression audio: a firefight heard from the house, played via playSound3D so it leans on no
-// mod content and no AI weapon choice. RSQ_FIRE_SND is a vanilla MX full-auto rifle sample; .wss, not
-// .ogg, since ogg carries a start delay that reads wrong on a weapon. Path is the post-arsenal-refactor
-// location; the pre-refactor "A3\sounds_f\weapons\mx\mx-st-full-1.wss" no longer resolves and plays silent.
-#define RSQ_FIRE_SND    "a3\sounds_f\arsenal\weapons\rifles\mx\mx_short_01.wss"
-#define RSQ_FIRE_VOL    5
-#define RSQ_FIRE_MAXD   400
 
 private _compKey = "mission_rescue_squad";
 private _radius = 300;
@@ -135,46 +125,13 @@ if (!isNull _car) then {
 sleep 8;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadoverlord"] remoteExec ["fnc_duws_dialogue", 0];
 
-// Relief flag: raised the moment the squad comes out, read by the firefight-audio thread (which cuts the
-// house audio once its occupants are up) and guarding the un-captive against a double fire.
+// Relief flag: raised the moment the squad comes out, guarding the un-captive against a double fire and
+// read by the ring-release thread below.
 DUWS_rsq_relieved = false;
-// Hold flag: raised when the player breaks the cordon's hold -- the assault lands (a cordon man takes
-// fire), the cordon starts dropping, or the squad is relieved. Cuts the house audio and hands movement
-// back to the ring (below). Separate from _relieved: the squad can be freed by the cordon being cleared
-// from range, and the hold can break before the squad is out.
-DUWS_rsq_holdBroken = false;
 
-// The pinned squad is sold with sound, not fire. The cordon does not shoot the building: a weapon-choice
-// mod (VCOM et al.) overrides the forced rifle and sends a launcher into it, so the "suppression" is a
-// firefight heard from the house instead -- a positional gunfire sample looped from the building via
-// playSound3D, which depends on no AI weapon and no mod content. Plays only while a player is in the outer
-// band (SUPPRESS_RANGE) and the squad is holed up; stops on the first of the hold breaking, the squad
-// being relieved, SUPPRESS_MAX seconds, or the deadline. Not on mere proximity -- a player sneaking to
-// within a few dozen metres should not silence it. The timeout counts from the first burst, so a slow
-// approach still gets the show. remoteExec'd to every client because a server-thread playSound3D is heard
-// only on the host; the 3D falloff (RSQ_FIRE_MAXD) then mutes it for anyone out of earshot.
-[_Building, _deadline] spawn {
-    params ["_bld", "_dl"];
-    private _startedAt = -1;
-    while {
-        (time < _dl)
-        && {!DUWS_rsq_relieved}
-        && {!DUWS_rsq_holdBroken}
-        && {_startedAt < 0 || {(time - _startedAt) < SUPPRESS_MAX}}
-    } do {
-        if (((call BIS_fnc_ListPlayers) findIf { alive _x && {(_x distance2D _bld) < SUPPRESS_RANGE} }) >= 0) then {
-            if (_startedAt < 0) then { _startedAt = time };
-            [RSQ_FIRE_SND, _bld, false, getPosASL _bld, RSQ_FIRE_VOL, 1, RSQ_FIRE_MAXD] remoteExec ["playSound3D", 0];
-            sleep (0.5 + random 0.6);
-        } else {
-            sleep 1;
-        };
-    };
-};
-
-// Breaks the hold and hands movement back to the ring. Watches for the assault landing (a cordon man
-// takes fire), the cordon starting to drop, the squad being relieved, or the deadline; on any of them the
-// ring's PATH is re-enabled so survivors manoeuvre and fight instead of holding static.
+// Hands movement back to the ring. Watches for the assault landing (a cordon man takes fire), the cordon
+// starting to drop, the squad being relieved, or the deadline; on any of them the ring's PATH is
+// re-enabled so survivors manoeuvre and fight instead of holding static.
 [_cordonUnits, _deadline] spawn {
     params ["_cordon", "_dl"];
     waitUntil {
@@ -184,7 +141,6 @@ DUWS_rsq_holdBroken = false;
         || {(_cordon findIf {alive _x && {(damage _x) > 0}}) >= 0}
         || {(_cordon findIf {!alive _x}) >= 0}
     };
-    DUWS_rsq_holdBroken = true;
     { if (alive _x) then { _x enableAI "PATH" } } forEach _cordon;
 };
 
