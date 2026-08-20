@@ -37,13 +37,13 @@ if (_destPos isEqualTo []) exitWith {
 // roads to the zone, each via a divergent mid-route point, so the approaches split and the player
 // cannot cover them all. TUNABLE: spawnR is the start cluster's radius, viaSpread the lateral offset
 // that pushes the three columns onto different roads (bigger = wider fork), startSep the minimum gap
-// between two starts so no two columns snap to the same road, grace holds the columns at their start
-// so a player inserting from across the map has time to reach them before they roll, arrive is the
+// between two starts so no two columns snap to the same road, graceSec the rolled hold the columns
+// keep at their start before they roll -- Allseer calls the move when it ends -- arrive is the
 // zone-edge fail band.
 private _spawnR    = 300;
 private _viaSpread = 1200;
 private _startSep  = 200;
-private _graceSec  = 120;
+private _graceSec  = 30 + round random 30;
 private _arrive    = 80;
 
 // Escort classes roll per vehicle across armed car, IFV and armour, gated by OPFOR's earned Army
@@ -199,10 +199,11 @@ if (isNull _hvt) exitWith {
 
 { [_x] call fnc_mission_claim } forEach _groups;
 
-// Interdiction ellipse on the zone, plus a fix on each convoy's start so the player has three columns
-// to run down. The starts are one-shot: nothing tracks the convoys live, or there would be no hunt.
+// Search ellipse on the convoy start cluster -- where the player is sent -- with a fix on each
+// convoy's start inside it. The starts are one-shot: nothing tracks the convoys live, or there would
+// be no hunt. The destination the convoys run for is marked separately just below.
 private _radius = 1500;
-private _marker = [_destPos, _radius] call fnc_missionMarkerData;
+private _marker = [_MissionPos, _radius] call fnc_missionMarkerData;
 private _startMarkers = [];
 {
     private _mn = format ["hvtconvoy_%1_%2", round (_x select 0), round (_x select 1)];
@@ -220,8 +221,19 @@ private _startMarkers = [];
     _startMarkers pushBack _mn;
 } forEach _convoyStarts;
 
+// The safe-haven zone the convoys run for, marked so the player reads the direction of the race and
+// can move to cut a column off short of it. Its rounded position names the marker, cleared with the
+// rest at mission end.
+private _destMarker = format ["hvtconvoydest_%1_%2", round (_destPos select 0), round (_destPos select 1)];
+deleteMarker _destMarker;
+createMarker [_destMarker, _destPos];
+_destMarker setMarkerShape "ICON";
+_destMarker setMarkerType "mil_end";
+_destMarker setMarkerColor "ColorEAST";
+_destMarker setMarkerText "Destination";
+
 private _taskId = format ["hvtconvoy%1%2", round (_MissionPos select 0), round (_MissionPos select 1)];
-[_taskId, format [localize "STR_DUWS_T_HVT_CONVOY_TASK", _destName, _vehName], _mission_name, _destPos, "kill"] call fnc_missionTaskCreate;
+[_taskId, format [localize "STR_DUWS_T_HVT_CONVOY_TASK", _destName, _vehName], _mission_name, _MissionPos, "kill"] call fnc_missionTaskCreate;
 [localize "STR_DUWS_T_c2", {hint _this}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated];
 
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_hvtletsdothis", _destName, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
@@ -239,6 +251,9 @@ sleep _graceSec;
     _wpEnd setWaypointType "MOVE";
     _wpEnd setWaypointCompletionRadius 40;
 } forEach _groups;
+// Allseer calls the move the instant the columns are ordered out, so the player reads the race as
+// starting rather than watching for it.
+[localize "STR_DUWS_T_ALLSEER", format [localize "STR_DUWS_T_hvtmoveout", _destName]] remoteExec ["fnc_duws_dialogue", 0];
 
 private _outcome = "";
 private _split = false;
@@ -269,6 +284,7 @@ waitUntil {
 
 [_marker] call fnc_missionMarkerClear;
 { deleteMarker _x } forEach _startMarkers;
+deleteMarker _destMarker;
 
 if (_outcome == "WIN") then {
     [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_hvtend"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];

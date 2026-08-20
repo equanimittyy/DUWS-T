@@ -4372,6 +4372,10 @@
                 <Original>Alpha 1-1, a high-value target is fleeing to %1 by convoy. Intel puts him in one of three columns running separate routes, riding in a %2. Find that vehicle and eliminate him before his column reaches the zone.</Original>
                 <English>Alpha 1-1, a high-value target is fleeing to %1 by convoy. Intel puts him in one of three columns running separate routes, riding in a %2. Find that vehicle and eliminate him before his column reaches the zone.</English>
             </Key>
+            <Key ID="STR_DUWS_T_hvtmoveout">
+                <Original>Alpha 1-1, be advised, we have reports the enemy columns have begun moving to %1.</Original>
+                <English>Alpha 1-1, be advised, we have reports the enemy columns have begun moving to %1.</English>
+            </Key>
             <Key ID="STR_DUWS_T_armorletsdothis">
                 <German>Hier spricht "Overlord", gute Nachricht: Eine feindliche Panzerzug wurde gerade von unserer Nahluftunterstützung vernichtet, der Führerpanzer liegt im Gelände defekt. Ihre Einheit hat die Aufgabe, ihren Zugführer zu eliminieren, solange sie Feldreparaturen durchführen – sein Panzer zu beschlagnahmen, falls möglich.</German>
                 <Spanish>Aquí "Overlord", buenas noticias: Un pelotón de blindados enemigos acaba de ser destruido por nuestro apoyo aéreo cercano, el tanque líder se averió en el campo. La misión de tu unidad es eliminar a su pelotón comandante mientras realizan reparaciones de campo; roba su tanque si es posible.</Spanish>
@@ -5932,6 +5936,10 @@
                 <Chinesesimp>霸王1-1</Chinesesimp>
                 <Original>Overlord</Original>
                 <English>Overlord</English>
+            </Key>
+            <Key ID="STR_DUWS_T_ALLSEER">
+                <Original>Allseer</Original>
+                <English>Allseer</English>
             </Key>
             <Key ID="STR_DUWS_T_Express">
                 <German>Kurier 2-1</German>
