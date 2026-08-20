@@ -8,32 +8,37 @@
 // exactly where a picked one could and the weighting lives in one place rather than drifting between
 // a real copy and a debug copy.
 //
-// Frontline-seam vs deep-enemy weighting, the OPFOR-zone band search, the fnc_pos_claimed standoff,
-// the origin/HQ distance gates, and the per-type site-finder handshake all happen here. Returns the
-// finder's precise position, or [] when no candidate satisfied the finder within the reject cap: the
-// picker drops that offer, the debug tool logs and aborts.
+// Placement runs in two phases. Phase 2 SURVEYS the map: it walks the candidate features -- OPFOR zones,
+// or towns for a town-survey type -- and keeps the ones that pass cheap validity (inside HQ reach, and
+// for a convoy that a far-enough destination zone with a BLUFOR-clear corridor exists), each scored by
+// the placement dial. Phase 3 picks one feature from that shortlist weighted by the dial (frontline for
+// easy, deep for hard) and only then REALISES an exact position -- BIS_fnc_findSafePos, the fnc_pos_claimed
+// standoff, the origin/HQ gates, the per-type finder -- retrying the next feature on a reject. findSafePos,
+// the costly step, runs only on the few features actually picked, never on the whole survey.
+//
+// Returns [_pos, _dest], or [] when the shortlist is empty or no feature realised within the cap: the
+// picker draws a different type, the debug tool logs and aborts. _dest is the vetted OPFOR destination
+// zone when the rule asks for one, else []; a convoy thread runs to it instead of recomputing its own.
 //
 //   _threadName  the mission thread's global name; its finder is fnc_<name>_site, else the accept-all generic
-//   _hard        true routes to the deep-enemy score, false to the frontline seam
+//   _hard        the placement dial: true favours deep enemy ground, false the frontline seam
 //   _origin      the requester reference for the >1500 m keep-away gate (picker: the player; debug: HQ)
 //   _avoid       positions to stay >=250 m from, so co-offered missions do not stack on one spot
-//   _allowUrban  true lets the urban named-location branch run; the picker drops it after its 20s
-//                failsafe, and it is forced off where the map has no named locations
+//   _allowUrban  the "More Urban" global override: true forces the town survey for every type
 //   _spawnRule   the type's placement contract from mission_types.hpp: [needDestZone, minCorridor,
-//                routeAvoidBlufor]. Drives the destination-zone pick below; default sites with none.
+//                routeAvoidBlufor, hardEligible, weight, surveyKind]. This reads the destination fields
+//                (1-3) and surveyKind (6); the draw (fnc_stratmap) reads hardEligible/weight.
 //
 // Contract: [_threadName, _hard, _origin, _avoid, _allowUrban, _spawnRule] -> [_pos, _dest] | [].
-// _dest is the vetted OPFOR-held destination zone when the rule asks for one, else []. A convoy thread
-// runs to _dest instead of recomputing its own haven.
 params [
     "_threadName",
     ["_hard", false],
     ["_origin", PosOfBLUHQ],
     ["_avoid", []],
     ["_allowUrban", ((missionNamespace getVariable ["moreUrban", 0]) == 1)],
-    ["_spawnRule", [false, 0, false]]
+    ["_spawnRule", [false, 0, false, false, 1, "zone"]]
 ];
-_spawnRule params ["_needDest", "_minCorridor", "_routeAvoid"];
+_spawnRule params ["_needDest", "_minCorridor", "_routeAvoid", "", "", ["_surveyKind", "zone"]];
 
 // The type's site-finder: fnc_<name>_site if the mission defines one, else the accept-all generic.
 // Stripping "_mission" (8 chars) off the thread name is the same rule the picker used inline; keeping
@@ -100,17 +105,6 @@ private _fnRepel = {
     if (_feats isEqualTo []) exitWith {1};
     private _d = 0 max (selectMin (_feats apply {(_pos distance2D (_x select 0)) - (_x select 1)}));
     _d / (_d + _scale)
-};
-
-// [_cands, _fnWeight] -> one item. _cands are [item, pos] pairs; _fnWeight scores a position in
-// [0,1]. All weights zero (or no candidates) -> flat random, so a degenerate map never returns nil.
-private _fnPick = {
-    params ["_cands", "_fnWeight"];
-    private _items = _cands apply {_x select 0};
-    if (_items isEqualTo []) exitWith {objNull};
-    private _weights = _cands apply {(_x select 1) call _fnWeight};
-    if ((_weights findIf {_x > 0}) < 0) exitWith {selectRandom _items};
-    _items selectRandomWeighted _weights
 };
 
 // Perpendicular distance from feature _f to the approach segment _a->_p, plus the projection
@@ -180,45 +174,96 @@ private _fnZoneWeight = {
     1 / _dFri
 };
 
-// The urban branch samples MissionLocations; with none present (server may not carry them) it cannot
-// run, so force the countryside branch rather than picking objNull.
+// Town survey samples MissionLocations; with none present (a server may not carry them) it cannot run,
+// so a town-survey type -- or the "More Urban" override -- falls back to the zone survey.
 private _mLocs = missionNamespace getVariable ["MissionLocations", []];
-_allowUrban = _allowUrban && {!(_mLocs isEqualTo [])};
+private _useTown = ((_surveyKind isEqualTo "town") || _allowUrban) && {!(_mLocs isEqualTo [])};
+private _band = if (_hard) then {_hardBand} else {_frontierBand};
 
-// Per-offer search. Only a finder reject counts toward the cap that drops the offer; a claimed or
-// out-of-gate candidate is redrawn for free, exactly as the picker did. _maxTries is a backstop the
-// picker did not need: it ran in a spawned thread the loadingscreen terminated at 60s, but this runs
-// as an unscheduled call that terminate cannot interrupt, so an unwinnable map must end the loop here.
-private _finderReject = 0;
-private _finderCap = 20;
-private _maxTries = 200;
-private _tries = 0;
+// The features phase 2 surveys: town centres, or OPFOR zones as [centre, bandMin, bandMax] the realise
+// step feeds straight to findSafePos.
+private _features = if (_useTown) then {
+    _mLocs apply { position _x }
+} else {
+    private _fs = _opforZoneCands apply { (_x select 0) params ["_zp", "_zs"]; [_zp, _zs, _zs + _band] };
+    // Win state -- every zone BLUFOR-held: one HQ-ring feature so a non-convoy mission can still seat.
+    if (_fs isEqualTo []) then { _fs = [[PosOfBLUHQ, 0, (zones_max_dist_from_hq*1.5)]] };
+    _fs
+};
+
+private _shortlistCap = 16;   // shortlist handed to phase 3; a wider survey is thinned to an even spread
+private _realizeCap   = 8;    // features to findSafePos + finder before giving up on this type
+
+// PHASE 2 -- survey: collect every valid feature (cheap check, no findSafePos), each carrying its centre
+// and placement-dial score.
+private _valid = [];
+{
+    private _fData = _x;
+    private _fCenter = if (_useTown) then { _fData } else { _fData select 0 };
+    private _ok = (_fCenter distance2D PosOfBLUHQ) < (zones_max_dist_from_hq*1.5);
+    // A convoy is valid only where a destination zone at least _minCorridor out has a BLUFOR-clear
+    // corridor; checked cheaply on the feature centre, re-derived exactly on the realised position.
+    if (_ok && _needDest) then {
+        _ok = (_opforCenters findIf {
+            (_fCenter distance2D _x) >= _minCorridor && {(!_routeAvoid) || {[_fCenter, _x] call _fnRouteClear}}
+        }) >= 0;
+    };
+    if (_ok) then {
+        private _score = if (_useTown) then { _fCenter call _fnUrbanWeight } else { _fCenter call _fnZoneWeight };
+        _valid pushBack [_fData, _fCenter, _score];
+    };
+} forEach _features;
+
+// Shortlist [featureData, score]: every valid feature, or -- when more qualify than the cap -- an even
+// spatial spread of them by farthest-point sampling (seed one, then repeatedly add the valid feature
+// whose nearest already-chosen feature is farthest). A blind truncation could hand phase 3 a clustered
+// subset and skew its dial pick to one corner of the map; the spread keeps the options map-wide.
+private _shortlist = [];
+if (count _valid <= _shortlistCap) then {
+    _shortlist = _valid apply { [_x select 0, _x select 2] };
+} else {
+    private _chosen = [selectRandom _valid];
+    while { count _chosen < _shortlistCap } do {
+        private _best = [];
+        private _bestD = -1;
+        {
+            private _c = _x select 1;
+            if ((_chosen findIf { (_x select 1) isEqualTo _c }) < 0) then {
+                private _near = selectMin (_chosen apply { _c distance2D (_x select 1) });
+                if (_near > _bestD) then { _bestD = _near; _best = _x };
+            };
+        } forEach _valid;
+        if (_best isEqualTo []) exitWith {};
+        _chosen pushBack _best;
+    };
+    _shortlist = _chosen apply { [_x select 0, _x select 2] };
+};
+
+// PHASE 3 -- realise: pick a feature by the dial score and settle an exact position. A transient miss
+// (claimed spot, stacked on a co-offer, too near the requester) redraws for another findSafePos roll of
+// the same shortlist; a structural reject (the finder says no, or a convoy has no clean destination) drops
+// the feature for good. All weights zero -> flat random, so a degenerate shortlist never stalls.
 private _result = [];
+private _realizeTries = 0;
+while {_result isEqualTo [] && {!(_shortlist isEqualTo [])} && {_realizeTries < _realizeCap}} do {
+    _realizeTries = _realizeTries + 1;
 
-while {_result isEqualTo [] && {_finderReject < _finderCap} && {_tries < _maxTries}} do {
-    _tries = _tries + 1;
+    private _items = _shortlist apply {_x select 0};
+    private _weights = _shortlist apply {_x select 1};
+    private _fData = if ((_weights findIf {_x > 0}) < 0) then { selectRandom _items } else { _items selectRandomWeighted _weights };
 
-    private _cand = [];
-    if (_allowUrban) then {
-        // Named location, weighted onto the frontline and off the fortifications, snapped to a building.
-        private _znAnchor = position ([_mLocs apply {[_x, position _x]}, _fnUrbanWeight] call _fnPick);
-        private _zl = [_znAnchor, 100, 400, 10, 0, 0.3, 0, [], [[0,0],[0,0]]] call BIS_fnc_findSafePos;
+    private _cand = if (_useTown) then {
+        // Named location settled onto a building, as the old urban branch did.
+        private _zl = [_fData, 100, 400, 10, 0, 0.3, 0, [], [[0,0],[0,0]]] call BIS_fnc_findSafePos;
         private _bld = nearestBuilding _zl;
-        _cand = [(getPos _bld) select 0, (getPos _bld) select 1];
+        [(getPos _bld) select 0, (getPos _bld) select 1]
     } else {
-        if (_opforZoneCands isEqualTo []) then {
-            // Every zone already BLUFOR-held (win state): fall back to the old HQ ring.
-            _cand = [PosOfBLUHQ, 0, (zones_max_dist_from_hq*1.5), 5, 0, 0.3, 0, [], [[0,0],[0,0]]] call BIS_fnc_findSafePos;
-        } else {
-            ([_opforZoneCands, _fnZoneWeight] call _fnPick) params ["_pzp", "_pzs"];
-            private _band = if (_hard) then {_hardBand} else {_frontierBand};
-            _cand = [_pzp, _pzs, _pzs + _band, 5, 0, 0.3, 0, [], [[0,0],[0,0]]] call BIS_fnc_findSafePos;
-        };
+        _fData params ["_zp", "_zbMin", "_zbMax"];
+        [_zp, _zbMin, _zbMax, 5, 0, 0.3, 0, [], [[0,0],[0,0]]] call BIS_fnc_findSafePos
     };
 
-    // Off every zone/town by 400 m -- the drift a thread's objective takes from this anchor before
-    // fnc_missionTargetPos settles it, so an anchor a metre outside a boundary does not hand that
-    // thread fifty rejections and an abort. A claimed candidate is redrawn.
+    // Off every zone/town by 400 m -- the drift a thread's objective takes before fnc_missionTargetPos
+    // settles it, so an anchor a metre outside a boundary does not hand that thread a string of rejects.
     if ([_cand, 400] call fnc_pos_claimed) then { continue };
 
     // Not stacked on a co-offered mission.
@@ -229,34 +274,25 @@ while {_result isEqualTo [] && {_finderReject < _finderCap} && {_tries < _maxTri
     // Clear of the requester, inside the campaign's HQ radius.
     if (!(_cand distance _origin > 1500 && {_cand distance PosOfBLUHQ < (zones_max_dist_from_hq*1.5)})) then { continue };
 
-    // The type's finder gets the last word: reject -> count it toward the cap and redraw; accept ->
-    // its precise position (a town centre for intel, the candidate unchanged for the generic) wins.
+    // The type's finder gets the last word: reject -> drop this feature and draw the next; accept -> its
+    // precise position (a town centre for intel, the candidate unchanged for the generic) wins.
     private _site = [_cand] call _finder;
-    if (_site isEqualTo []) then {
-        _finderReject = _finderReject + 1;
-    } else {
-        // Flatten to 2D: a snapping finder can return a getPos-derived town/prefab centre whose Z sits
-        // below the surface. A 3D offer position offsets its strategic-map icon's clickable hotspot from
-        // the drawn icon -- the larger the |Z|, the more of the icon goes dead -- so match the flat [x,y]
-        // every findSafePos-based offer already carries.
-        private _p = _site select 0;
-        private _pos2d = [_p select 0, _p select 1];
-        if (_needDest) then {
-            // Destination = the nearest OPFOR-held zone at least _minCorridor out whose straight corridor
-            // from here clears BLUFOR ground. No such zone -> this anchor cannot run a convoy, so count it
-            // against the finder cap and redraw rather than offer a convoy with nowhere clean to drive.
-            private _destCands = _opforCenters select {
-                (_pos2d distance2D _x) >= _minCorridor && {(!_routeAvoid) || {[_pos2d, _x] call _fnRouteClear}}
-            };
-            if (_destCands isEqualTo []) then {
-                _finderReject = _finderReject + 1;
-            } else {
-                private _dest = [_destCands, [_pos2d], {_input0 distance2D _x}, "ASCEND"] call BIS_fnc_sortBy select 0;
-                _result = [_pos2d, _dest];
-            };
-        } else {
-            _result = [_pos2d, []];
+    if (_site isEqualTo []) then { _shortlist = _shortlist select {!((_x select 0) isEqualTo _fData)}; continue };
+
+    // Flatten to 2D: a snapping finder can return a getPos-derived centre whose Z sits below the surface.
+    // A 3D offer position offsets its strategic-map icon's clickable hotspot, so match the flat [x,y].
+    private _p = _site select 0;
+    private _pos2d = [_p select 0, _p select 1];
+    if (_needDest) then {
+        // Destination = the nearest OPFOR zone at least _minCorridor out with a BLUFOR-clear corridor from
+        // the settled position. None -> this feature cannot run a convoy; drop it and draw the next.
+        private _destCands = _opforCenters select {
+            (_pos2d distance2D _x) >= _minCorridor && {(!_routeAvoid) || {[_pos2d, _x] call _fnRouteClear}}
         };
+        if (_destCands isEqualTo []) then { _shortlist = _shortlist select {!((_x select 0) isEqualTo _fData)}; continue };
+        _result = [_pos2d, [_destCands, [_pos2d], {_input0 distance2D _x}, "ASCEND"] call BIS_fnc_sortBy select 0];
+    } else {
+        _result = [_pos2d, []];
     };
 };
 

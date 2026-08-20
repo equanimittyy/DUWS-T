@@ -68,26 +68,29 @@ AP, REP, deadline `[minHours,maxHours]`, category (`command`/`civilian`), object
 note key, and a `spawnRule`. CP/AP/REP and the deadline are read only from here — the thread carries no
 reward literals.
 
-`spawnRule` is `[needDestZone, minCorridor, routeAvoidBlufor, hardEligible, weight]`. The last two feed
-the strategic-map draw: `weight` biases the odds a type is offered (drawn without replacement, so it
-shifts presence and order, not duplication), and `hardEligible` is whether the type may take one of the
-two deep, difficulty-boosted offer slots — set it false for a type whose finder needs a town or friendly
-ground it cannot reach behind enemy lines. The first three are for road convoys: `needDestZone` makes
-`fnc_mission_findSite` pick and vet an OPFOR-held destination (at least `minCorridor` out, and with
-`routeAvoidBlufor` its straight corridor kept clear of BLUFOR ground) and hand that zone to the thread as
-a third `params` argument, so the convoy runs to a haven the offer already vetted. The thread must still
-re-check the zone is OPFOR-held at start (it can flip in the gap) and fall back to its own search — which
-also covers the debug-force path, where no destination is handed. Default `[false, 0, false, ...]` sites
-with no destination.
+`spawnRule` is `[needDestZone, minCorridor, routeAvoidBlufor, hardEligible, weight, surveyKind]`.
+`weight` and `hardEligible` feed the strategic-map draw: `weight` biases the odds a type is offered
+(drawn without replacement, so it shifts presence and order, not duplication), and `hardEligible` is
+whether the type may take one of the two deep, difficulty-boosted offer slots — set it false for a type
+that cannot sit behind enemy lines. `surveyKind` is the placement survey's candidate source — `"zone"`
+(countryside off OPFOR zones, the default) or `"town"` (populated towns, for a type that belongs in a
+built-up area). The first three fields are for road convoys: `needDestZone` makes `fnc_mission_findSite`
+pick and vet an OPFOR-held destination (at least `minCorridor` out, and with `routeAvoidBlufor` its
+straight corridor kept clear of BLUFOR ground) and hand that zone to the thread as a third `params`
+argument, so the convoy runs to a haven the offer already vetted. The thread must still re-check the zone
+is OPFOR-held at start (it can flip in the gap) and fall back to its own search — which also covers the
+debug-force path, where no destination is handed. Default `[false, 0, false, false, 1, "zone"]`.
 
 The thread's global (`fnc_<name>_mission`) must also be registered in the compile list in
 `src/duws/server/server_fnc_init.sqf`; there is no manifest of `fnc_*` globals beyond that file.
 
 ## Site-finder: demanding particular terrain
 
-By default a mission is sited wherever the strategic-map picker's weighting lands it
-(`fnc_site_generic.sqf` accepts every candidate). A mission that needs specific ground defines
-`fnc_<name>_site` and the picker uses it instead — a **propose/accept** handshake:
+Placement is a two-phase survey in `fnc_mission_findSite`: phase 2 shortlists valid locations (zones or
+towns per `surveyKind`), phase 3 picks one weighted by the offer's front/deep dial and realizes an exact
+position, which `fnc_site_generic.sqf` accepts as-is. A mission that needs specific ground defines
+`fnc_<name>_site` and the survey uses it instead of the generic on each realized candidate — a
+**propose/accept** handshake:
 
 ```
 [_candidatePos] call fnc_<name>_site
