@@ -268,13 +268,17 @@ while { true } do {
                     private _seats = [{ _this moveInDriver _tank }, { _this moveInCommander _tank }, { _this moveInGunner _tank }];
                     { _x call (_seats param [_forEachIndex, {}]) } forEach _liveCrew;
                     (units _crewGrp) joinSilent _convoyGrp;
+                    // Home at a road pace unless the convoy was hit: a crew that reached the tank unopposed
+                    // drives back unhurried on LIMITED, one ambushed en route or at the hull races for its
+                    // lines on FULL. Same casualty/damage test that pours the security team out.
+                    private _homeSpeed = ["LIMITED", "FULL"] select (call _underAttack);
                     _convoyGrp setBehaviour "AWARE";
                     _convoyGrp setCombatMode "YELLOW";
-                    _convoyGrp setSpeedMode "FULL";
+                    _convoyGrp setSpeedMode _homeSpeed;
                     _convoyGrp setFormation "COLUMN";
                     private _twp = _convoyGrp addWaypoint [_zonePos, 0];
                     _twp setWaypointType "MOVE";
-                    _twp setWaypointSpeed "FULL";
+                    _twp setWaypointSpeed _homeSpeed;
                     if (!isNull _teamGrp && {_teamOut}) then {
                         _teamGrp setBehaviour "AWARE";
                         private _rtb = _teamGrp addWaypoint [_zonePos, 0];
