@@ -1,9 +1,5 @@
-// Locality: server -- every mission thread runs there, and the JIP keys are the server's to own.
-
-// BIS_fnc_taskCreate does not synchronise itself. A plain server-side call leaves the task on
-// the server, where only a hosting player -- whose client is the server -- ever sees it, and the
-// state change that follows minutes later then lands on clients holding no such task and is
-// dropped without an error. Broadcasting the creation is what makes both halves land.
+// Locality: server -- every mission thread creates its task here; BIS_fnc_taskCreate, called
+// server-side, syncs the task out to the owner side's clients (joiners included) on its own.
 params ["_taskId", "_description", "_title", "_destination", ["_type", "unknown"]];
 if (!isServer) exitWith {};
 
@@ -40,41 +36,20 @@ if (_dl > time) then {
 	_description = _description + format [localize "STR_DUWS_T_mission_time_fixed", round (([_dl] call fnc_time_remaining) / 3600)];
 };
 
-// The JIP key must not be the bare task id: fnc_missionTaskEnd files the state change under
-// that, and a same-key entry replaces rather than joins the queue, so a joiner would be handed
-// the completion of a task that was never created on their machine.
+// Created server-side and left to the task framework to synchronise. NOT remoteExec'd: broadcasting
+// the create serialises the owner and destination over the wire as live references, and BIS's
+// per-frame map draw then resolves those by netId every frame the map is open -- flooding the rpt
+// with "objectFromNetId/groupFromNetId: type OBJECT/TASK, expected STRING" for the task's whole life
+// and jamming the strategic map's tooltip and click (docs/info/arma_engine_gotchas.md). A native
+// server-side create keeps the references as their own netId strings, so the destination pin draws
+// clean while still reaching every client on the owner side.
 //
-// The framework destination stays [] on purpose. A destination given to BIS_fnc_taskCreate is stored
-// as a shared target and re-resolved by netId every frame the map is open; broadcast creation crosses
-// that metadata, so the resolve is fed the task object itself and throws
-// "objectFromNetId/groupFromNetId: type TASK, expected STRING" for the task's whole life -- a
-// per-frame flood that jams the strategic map's tooltip and click (docs/info/arma_engine_gotchas.md).
-// The centre pin is set instead just below with setSimpleTaskDestination, which writes a plain
-// position and never takes that shared-target path. _type names a CfgTaskTypes class and only picks
-// the icon; an unrecognised one falls back to the default.
-[west, [_taskId], [_description, _title, _title], [], true, 1, true, _type, false]
-	remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, _taskId + "_new"];
+// _destination is the mission centre, handed straight in as the task's map pin. visibleIn3D stays
+// off: a strategic side mission wants the map diamond, not a world-space icon. _type names a
+// CfgTaskTypes class and only picks the icon; an unrecognised one falls back to the default.
+[west, [_taskId], [_description, _title, _title], _destination, true, 1, true, _type, false] call BIS_fnc_taskCreate;
 
-// Pin at the mission centre, drawn per client so a joiner (JIP key) gets it too. setSimpleTaskDestination
-// writes a static position straight onto the local simple task, so the pin renders with none of the
-// netId resolve a framework destination triggers. Polls for the task because the create above, though
-// ordered before this on each target, may not have registered on this machine on the first frame; the
-// 10s cap keeps a joiner reaching a mission that already ended from waiting forever.
-if !(_destination isEqualTo []) then {
-	[[_taskId, _destination], {
-		params ["_id", "_pos"];
-		private _deadline = time + 10;
-		private _hit = [];
-		waitUntil {
-			uiSleep 0.5;
-			_hit = (simpleTasks player) select { taskName _x == _id };
-			(count _hit > 0) || time > _deadline
-		};
-		if (count _hit > 0) then { (_hit select 0) setSimpleTaskDestination _pos };
-	}] remoteExec ["spawn", [0,-2] select isDedicated, _taskId + "_dest"];
-};
-
-// The card rides with the broadcast, not with the thread's entry gate: a thread that fails to find
+// The card rides with the task create, not with the thread's entry gate: a thread that fails to find
 // ground exits before creating a task, and announcing at the gate named an operation nobody got.
 // Spawned per client rather than remoteExec'd into BIS_fnc_typeText, which sleeps between characters
 // and would throw unscheduled. The hold is the line's own third element -- the function's second and

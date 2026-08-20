@@ -1348,21 +1348,24 @@ that stays level, then re-enabling damage detonates it. Reject the point up fron
 `nearestTerrainObjects [_p, ["WALL","FENCE","ROCK","TREE"], 4]` and `nearestObjects [_p, ["Car"], r]`
 rather than trusting the settle to shove clear.
 
-## A broadcast-created task with a destination floods `objectFromNetId` every frame the map is open
+## A `remoteExec`'d `BIS_fnc_taskCreate` floods `objectFromNetId` every frame the map is open
 
-**A task given a destination is stored as a shared *target* and re-resolved by netId each frame the
-map is drawn. When the same `BIS_fnc_taskCreate` is `remoteExec`'d to every client (so all machines
-run its sharing logic), that metadata crosses and the resolve is handed the task object itself,
-throwing `[BIS_fnc_objectFromNetId]/[BIS_fnc_groupFromNetId] Error: type TASK, expected STRING, in
-Task <id>` — a per-frame flood for the task's whole life. The flood jams the strategic map's task
-figure, its tooltip, and map clicks (including the side-mission picker).**
+**`BIS_fnc_taskCreate` `remoteExec`'d to every client serialises the task's owner and destination
+across the wire as live references. BIS's map draw then re-resolves them by netId every frame the map
+is open, and on the crossed references the resolve is handed an object (or the task itself), throwing
+`[BIS_fnc_objectFromNetId]/[BIS_fnc_groupFromNetId] Error: type OBJECT/TASK, expected STRING` for the
+task's whole life. Both endpoints throw: the owner (`west`, resolved to the local `player`) as
+`type OBJECT ... in player1`, and the destination target as `type TASK ... in Task <id>`. The flood
+jams the strategic map's task figure, tooltip, and clicks (including the side-mission picker).**
 
-The last `BIS_fnc_taskCreate` argument is `visibleIn3D`, not a "sharedTarget" toggle — flipping it
-does nothing to the throw. There is no argument that disables the destination sharing. The fix is to
-pass no destination to `BIS_fnc_taskCreate` (`[]`), then set the pin per client with
-`_task setSimpleTaskDestination _pos`: that writes a plain position onto the local simple task and is
-never resolved by netId, so the pin draws with no flood. `fnc_missionTaskCreate` creates every
-side-mission task and takes this route, broadcast with a JIP key so a joiner's pin lands too.
+The last `BIS_fnc_taskCreate` argument is `visibleIn3D` (index 8), not a "sharedTarget" toggle;
+flipping it does nothing to the throw. Passing no destination (`[]`) and setting the pin per client
+with `setSimpleTaskDestination` does not help either — the pin only re-activates the same crossed
+draw. The fix is to not broadcast: call `BIS_fnc_taskCreate` server-side and let the task framework
+synchronise it to the owner side's clients, joiners included. A native create keeps each reference as
+its own netId string, so a real position destination draws a clean map pin with no flood.
+`fnc_missionTaskCreate` / `fnc_missionTaskEnd` create, retire and delete every side-mission task this
+way; `fnc_night_horde_event` uses the same native calls.
 
 ## `uiNamespace` outlives a mission restart, but spawned loops do not
 
