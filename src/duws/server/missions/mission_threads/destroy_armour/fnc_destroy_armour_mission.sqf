@@ -222,6 +222,21 @@ while { true } do {
         [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_destroyarmour_fail_time"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
     };
 
+    // Terminal fail: the repaired tank reaches its home zone with a live enemy crew still aboard. Kept a
+    // direct exitWith at the loop's top level so it fires once and stops -- nested inside the repair branch
+    // below, exitWith broke only that block's scope, so the fail line spammed every tick and a later tank
+    // kill still reached the win check above and scored a bogus success.
+    if (_repaired
+        && {(_tank distance2D _zonePos) < DA_ARRIVE_ZONE}
+        && {(crew _tank findIf { alive _x && !isPlayer _x }) >= 0}) exitWith {
+        // Claimed only now: an escaping tank is the enemy's again, so cleanup collects it with the crew
+        // once the player is clear (_finish drops its persistent flag, without which the sweep would spare
+        // the still-alive hull).
+        [_tank] call fnc_mission_claim;
+        ["FAILED"] call _finish;
+        [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_destroyarmour_fail"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+    };
+
     // The security team pours out only once the convoy is actually hit, and fights where it stands -- at the
     // tank if the ambush lands there, on the road if the player jumped the column en route.
     if (!_teamOut && {call _underAttack}) then {
@@ -290,17 +305,6 @@ while { true } do {
                 };
             } else {
                 _repairAt = -1;   // pushed off the tank -- the work does not carry over
-            };
-        } else {
-            // Repaired and pulling out: fail once it reaches its home zone with a live enemy crew aboard.
-            // A tank destroyed or a crew wiped en route still hits the win check at the top of the loop.
-            if ((_tank distance2D _zonePos) < DA_ARRIVE_ZONE && {(crew _tank findIf { alive _x && !isPlayer _x }) >= 0}) exitWith {
-                // Claimed only now: an escaping tank is the enemy's again, so let cleanup collect it with the
-                // crew once the player is clear, rather than leaving an unowned MBT on the map (_finish drops
-                // its persistent flag, without which the sweep would spare the still-alive hull).
-                [_tank] call fnc_mission_claim;
-                ["FAILED"] call _finish;
-                [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_destroyarmour_fail"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
             };
         };
     };
