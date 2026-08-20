@@ -3013,8 +3013,8 @@
                 <English>The high-value target is fleeing to %1 by convoy, riding in a %2. Intel puts him in one of three columns running separate routes. Eliminate him before his column reaches %1.</English>
             </Key>
             <Key ID="STR_DUWS_T_HVT_CONVOY_ESCAPED">
-                <Original>The high-value target's convoy reached %1. Mission failed.</Original>
-                <English>The high-value target's convoy reached %1. Mission failed.</English>
+                <Original>The high-value target reached %1. Mission failed.</Original>
+                <English>The high-value target reached %1. Mission failed.</English>
             </Key>
             <Key ID="STR_DUWS_T_HVT_CONVOY_TIMEOUT">
                 <Original>Alpha 1-1, we're out of time. The high-value target got away. Mission failed.</Original>
