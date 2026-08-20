@@ -123,12 +123,12 @@ private _exfilFoot = {
         _x enableAI "MOVE";
         _x setUnitPos "AUTO";
     } forEach _out;
-    // March the group clear of the AO on its own legs; wipe the boarding waypoints first so it walks out
-    // instead of chasing the dead bird's LZ.
+    // Run the group back to friendly HQ on its own legs; wipe the boarding waypoints first so it heads
+    // home instead of chasing the dead bird's LZ. The despawn below still sweeps it once clear of the AO.
     private _grp = group (_out select 0);
     _grp setBehaviour "AWARE";
     for "_i" from (count (waypoints _grp) - 1) to 0 step -1 do { deleteWaypoint [_grp, _i] };
-    private _wpFoot = _grp addWaypoint [_bpos getPos [3000, _bearing], 0];
+    private _wpFoot = _grp addWaypoint [getPos bluHQ_object, 0];
     _wpFoot setWaypointType "MOVE";
     _wpFoot setWaypointSpeed "FULL";
     if (!isNil "_helipad") then { deleteVehicle _helipad };
