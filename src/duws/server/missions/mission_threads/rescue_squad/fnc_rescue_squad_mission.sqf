@@ -90,21 +90,24 @@ private _positions = [_Building] call BIS_fnc_buildingPositions;
 } forEach _squadUnits;
 _squadGroup setCombatMode "BLUE";
 
-// The cordon: four OPFOR teams held at the cardinal points on a ring round the building -- three
-// rifle teams and one weapons team, from the shared token vocabulary. Posture "none" so fnc_spawn_team
-// drops each on the exact ring point rather than in its own band; then each holds facing in on combat
-// mode YELLOW. CORDON_RING sits past 100 m and PATH is disabled on every cordon man, so the ring holds
-// static -- no one advances inside 100 m of the building while the hold stands. Movement is handed back
-// only when the player breaks the hold (below); until then the ring holds and its autoriflemen suppress the
+// The cordon: four OPFOR teams held at the cardinal points on a ring round the building -- three rifle
+// teams and one weapons team, from the shared token vocabulary. Posture "none" drops each team on its
+// cardinal ring point; a small per-man setPos then loosens the clump so the ring reads as spread positions
+// rather than four stacks. Each holds facing in on combat mode YELLOW. CORDON_RING sits past 100 m and the
+// scatter is capped under 20 m, so even a man thrown building-ward stays outside 100 m; PATH is disabled on
+// every cordon man, so the ring holds static -- no one advances inside 100 m while the hold stands. Movement
+// is handed back only when the player breaks the hold (below); until then the ring holds and suppresses the
 // building, and the player owns the ground inside it, where the squad is reached.
 //
-// Marks an autorifleman/MG gunner by weapon, not role, so it holds across faction packs that never named
-// the role: a belt- or drum-fed primary carries far more than a rifleman's 30-round box (RPK drums at 45,
-// belts at 100-200). Only these suppress -- gating on the weapon keeps an AT man's launcher out of the
-// building, the bug that sank the last, force-everyone go at this.
-private _isAutoRifle = {
-    private _mag = (primaryWeaponMagazine _this) param [0, ""];
-    _mag != "" && {(getNumber (configFile >> "CfgMagazines" >> _mag >> "count")) >= 40}
+// Who suppresses: anyone but a grenadier or a launcher man. A GL lobs 40 mm into the building and a rocket
+// levels it -- both wreck the hostage backdrop the suppression sells -- so a unit with an underbarrel GL (a
+// primary muzzle past the bare "this") or a launcher in the secondary slot is cut, and every rifleman,
+// autorifleman and MG gunner is kept. Weapon-based, so it holds across faction packs that never named a role.
+private _canSuppress = {
+    private _w = primaryWeapon _this;
+    _w != ""
+    && {secondaryWeapon _this == ""}
+    && {(getArray (configFile >> "CfgWeapons" >> _w >> "muzzles") findIf { _x != "this" }) < 0}
 };
 private _cordonTokens = ["team", "team", "team", "wp_team"];
 private _cordonUnits = [];
@@ -122,8 +125,10 @@ private _suppressUnits = [];
         _wp setWaypointType "HOLD";
         {
             _x disableAI "PATH";          // hold the ring static; no advance inside 100 m of the building
+            _x setPos (_cpos getPos [4 + random 12, random 360]);   // loosen the clump; under 20 m keeps it past 100 m
+            _x setUnitPos "MIDDLE";        // crouched on spawn; released to AUTO once the ring is built (below)
             _cordonUnits pushBack _x;
-            if (_x call _isAutoRifle) then { _suppressUnits pushBack _x };
+            if (_x call _canSuppress) then { _suppressUnits pushBack _x };
         } forEach units _g;
     };
 } forEach _cordonTokens;
@@ -139,6 +144,11 @@ if (!isNull _car) then {
     { _cordonUnits pushBack _x } forEach units _car;
 };
 
+// Crouched on spawn but not pinned there (unlike the captive squad): after a beat AUTO hands the stance
+// back, so a cordon man stands, drops or takes cover as the fight tells him to instead of holding a frozen
+// crouch. Harmless on the car crew that rode into _cordonUnits -- setUnitPos AUTO is a no-op while mounted.
+_cordonUnits spawn { sleep 4; { _x setUnitPos "AUTO" } forEach _this; };
+
 [localize "STR_DUWS_T_Signal", format [localize "STR_DUWS_T_squadletsdothis", _place]] remoteExec ["fnc_duws_dialogue", 0];
 sleep 8;
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_squadoverlord"] remoteExec ["fnc_duws_dialogue", 0];
@@ -152,17 +162,17 @@ DUWS_rsq_relieved = false;
 // back to the ring. Separate from _relieved: the hold can break before the squad is out.
 DUWS_rsq_holdBroken = false;
 
-// The cordon's autoriflemen hose the building on the engine's own suppression order, to sell the squad
-// being pinned. Fires only while a player is in the outer band (SUPPRESS_RANGE) and the squad is still
-// holed up; stops on the first of the hold breaking, the squad being relieved, SUPPRESS_MAX seconds, every
-// shooter down, or the deadline. Not on mere proximity -- a player inside a few dozen metres should not
-// silence it. The timeout counts from the first burst, so a slow approach still gets the show.
+// The cordon hoses the building on the engine's own suppression order, to sell the squad being pinned.
+// Fires only while a player is in the outer band (SUPPRESS_RANGE) and the squad is still holed up; stops on
+// the first of the hold breaking, the squad being relieved, SUPPRESS_MAX seconds, every shooter down, or
+// the deadline. Not on mere proximity -- a player inside a few dozen metres should not silence it. The
+// timeout counts from the first burst, so a slow approach still gets the show.
 //
-// doSuppressiveFire lapses on its own, so it is re-issued every few seconds. Only autoriflemen were
-// collected, so there is nothing but the MG to fire -- an AT launcher into the building was what sank the
-// last go -- and selectWeapon on the primary keeps each on the MG rather than a sidearm. It needs line of
-// sight: a shooter with no view stays quiet, but the ring sits in the open at the cardinals, so enough of
-// it sees the building to read as sustained fire.
+// Each shooter casts a ray from its eyes at the building and suppresses the first surface a round would
+// strike -- the wall or the cover between it and the hostages, not a point deep inside the shell it cannot
+// see -- so the fire reads as landing on the structure. doSuppressiveFire lapses on its own, so it is
+// re-issued every few seconds; grenadiers and launcher men were already cut, so nothing explosive is aimed
+// in, and selectWeapon on the primary keeps each on it rather than a sidearm.
 [_suppressUnits, _Building, _deadline] spawn {
     params ["_shooters", "_bld", "_dl"];
     private _startedAt = -1;
@@ -180,7 +190,17 @@ DUWS_rsq_holdBroken = false;
                     private _w = primaryWeapon _x;
                     if (_w != "") then {
                         _x selectWeapon _w;
-                        _x doSuppressiveFire _bld;
+                        private _hits = lineIntersectsSurfaces [eyePos _x, (getPosASL _bld) vectorAdd [0,0,3], _x, objNull, true, 1, "FIRE", "VIEW"];
+                        if (_hits isEqualTo []) then {
+                            _x doSuppressiveFire _bld;
+                        } else {
+                            (_hits select 0) params ["_hitPos", "", "_hitObj"];
+                            if (isNull _hitObj) then {
+                                _x doSuppressiveFire (ASLToAGL _hitPos);
+                            } else {
+                                _x doSuppressiveFire _hitObj;
+                            };
+                        };
                     };
                 };
             } forEach _shooters;
