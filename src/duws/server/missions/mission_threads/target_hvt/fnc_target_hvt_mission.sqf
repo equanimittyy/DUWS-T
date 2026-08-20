@@ -40,7 +40,7 @@ if (_destPos isEqualTo []) exitWith {
 // between two starts so no two columns snap to the same road, graceSec the rolled hold the columns
 // keep at their start before they roll -- Allseer calls the move when it ends -- arrive is the
 // zone-edge fail band.
-private _spawnR    = 300;
+private _spawnR    = 425;
 private _viaSpread = 1200;
 private _startSep  = 200;
 private _graceSec  = 30 + round random 30;
@@ -99,7 +99,7 @@ private _spawnLine = {
     private _grp = createGroup EAST;
     private _vehs = [];
     {
-        private _p = _start getPos [_forEachIndex * 18, _heading + 180];
+        private _p = [_start getPos [_forEachIndex * 18, _heading + 180]] call _onRoad;
         private _r = [_p, _heading, _x, EAST] call BIS_fnc_spawnVehicle;
         (_r select 0) setDir _heading;
         (_r select 2) deleteGroupWhenEmpty true;
@@ -113,6 +113,17 @@ private _spawnLine = {
     _grp deleteGroupWhenEmpty true;
     { [_x] call fnc_addRandomLoot } forEach units _grp;
     [_grp, _vehs]
+};
+
+// Snap a lined-up column slot onto the road beneath it, so the whole column sits on tarmac and not just
+// the lead vehicle -- a hull spawned in the ditch fights the pathfinder before it even rolls. Only the
+// road under the slot, close in: the start is already on a road, so this shifts each following slot a
+// few metres onto that same segment rather than hunting a distant one. No road near (the roadless-start
+// fallback) keeps the raw slot.
+private _onRoad = {
+    params ["_p"];
+    private _r = _p nearRoads 30;
+    if (count _r > 0) then { getPosATL (_r select 0) } else { _p }
 };
 
 // Bearing from the mission area to the destination: the columns spawn fanned around it and each
@@ -160,13 +171,13 @@ for "_i" from 0 to 2 do {
         // firefight rather than halting -- the player has to stop the car, not just spook the column.
         _hvtColGrp = createGroup EAST;
         {
-            private _p = _start getPos [_x, _heading + 180];
+            private _p = [_start getPos [_x, _heading + 180]] call _onRoad;
             private _r = [_p, _heading, call _rollEsc, EAST] call BIS_fnc_spawnVehicle;
             (_r select 0) setDir _heading;
             (_r select 2) deleteGroupWhenEmpty true;
             (_r select 1) joinSilent _hvtColGrp;
         } forEach [0, 36];
-        private _cp = _start getPos [18, _heading + 180];
+        private _cp = [_start getPos [18, _heading + 180]] call _onRoad;
         _car = createVehicle [_hvtCarClass, _cp, [], 0, "NONE"];
         _car setDir _heading;
         private _driver = _hvtColGrp createUnit [opfor_SOLDIER_X, _cp, [], 0, "NONE"];
