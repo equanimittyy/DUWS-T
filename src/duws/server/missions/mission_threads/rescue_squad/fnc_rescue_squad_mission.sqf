@@ -168,13 +168,17 @@ DUWS_rsq_holdBroken = false;
 // the deadline. Not on mere proximity -- a player inside a few dozen metres should not silence it. The
 // timeout counts from the first burst, so a slow approach still gets the show.
 //
-// Each shooter casts a ray from its eyes at the building and suppresses the first surface a round would
-// strike -- the wall or the cover between it and the hostages, not a point deep inside the shell it cannot
-// see -- so the fire reads as landing on the structure. doSuppressiveFire lapses on its own, so it is
-// re-issued every few seconds; grenadiers and launcher men were already cut, so nothing explosive is aimed
-// in, and selectWeapon on the primary keeps each on it rather than a sidearm.
+// Each shooter rays from its eyes at the building's upper structure and hoses the first solid thing in the
+// way -- a wall, a wreck -- but never a friendly body or a bare terrain point: those fall back to the
+// building itself, so every shooter always has a real target and the whole ring fires, not just the one man
+// with a clean line. doSuppressiveFire lapses on its own, so it is re-issued every few seconds; grenadiers
+// and launcher men were cut, so nothing explosive is aimed in, and selectWeapon keeps each on its primary.
 [_suppressUnits, _Building, _deadline] spawn {
     params ["_shooters", "_bld", "_dl"];
+    // Aim at ~0.6 of the building's height (its own bbox), not a near-ground point: a flat ray from a
+    // shooter 120 m out to a low point skims terrain and returns dirt, which the AI will not fire on.
+    private _bb = boundingBoxReal _bld;
+    private _aimPos = (getPosASL _bld) vectorAdd [0, 0, ((((_bb select 1) select 2) - ((_bb select 0) select 2)) * 0.6) max 3];
     private _startedAt = -1;
     while {
         (time < _dl)
@@ -190,17 +194,15 @@ DUWS_rsq_holdBroken = false;
                     private _w = primaryWeapon _x;
                     if (_w != "") then {
                         _x selectWeapon _w;
-                        private _hits = lineIntersectsSurfaces [eyePos _x, (getPosASL _bld) vectorAdd [0,0,3], _x, objNull, true, 1, "FIRE", "VIEW"];
-                        if (_hits isEqualTo []) then {
-                            _x doSuppressiveFire _bld;
-                        } else {
-                            (_hits select 0) params ["_hitPos", "", "_hitObj"];
-                            if (isNull _hitObj) then {
-                                _x doSuppressiveFire (ASLToAGL _hitPos);
-                            } else {
-                                _x doSuppressiveFire _hitObj;
-                            };
+                        // Default to the building; upgrade to an intervening solid (wall/wreck), never a man
+                        // or terrain, so a blocked or dirt-skimming ray still leaves a real target to hose.
+                        private _tgt = _bld;
+                        private _hits = lineIntersectsSurfaces [eyePos _x, _aimPos, _x, objNull, true, 1, "FIRE", "VIEW"];
+                        if (_hits isNotEqualTo []) then {
+                            (_hits select 0) params ["", "", "_hitObj"];
+                            if (!isNull _hitObj && {!(_hitObj isKindOf "CAManBase")}) then { _tgt = _hitObj };
                         };
+                        _x doSuppressiveFire _tgt;
                     };
                 };
             } forEach _shooters;
