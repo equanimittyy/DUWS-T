@@ -15,6 +15,7 @@ if (!([0, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begi
 
 #define SEARCH_R        400
 #define ZONE_MARGIN     150
+#define DRY_RADIUS      100     // reject a building with water this close: a shoreline site drowns the fight
 #define UNCAPTIVE_RANGE 50
 #define CORDON_RING     120
 #define SUPPRESS_RANGE  300     // suppression plays only while a player is this close to the building
@@ -34,16 +35,20 @@ private _squadClasses = ["recon", "blufor"] call DUWS_fnc_teamRoster;
 private _squadSize = count _squadClasses;
 
 // Site: enterable buildings near the offer that can garrison the whole squad, minus any sitting in a
-// zone (its own radius plus a margin) or inside a civilian town. fnc_civ_townAt is -1 when clear -- and
-// always -1 with civilians off, so the town half of the filter simply passes then. The seating check
-// counts BIS_fnc_buildingPositions -- the same list each man is later dropped on by index -- so a chosen
-// building has a distinct indoor slot per man rather than spilling the squad into the open around a stub.
+// zone (its own radius plus a margin), inside a civilian town, or on the waterline. fnc_civ_townAt is -1
+// when clear -- and always -1 with civilians off, so the town half of the filter simply passes then. The
+// seating check counts BIS_fnc_buildingPositions -- the same list each man is later dropped on by index --
+// so a chosen building has a distinct indoor slot per man rather than spilling the squad into the open
+// around a stub. The water guard samples the centre and a ring at DRY_RADIUS (surfaceIsWater is point-wise,
+// so a shoreline lot with the cordon ring reaching into the sea is rejected on any wet sample).
 private _zoneMeta = missionNamespace getVariable ["zone_meta_array", []];
 private _candidates = ([_MissionPos, 2, SEARCH_R] call fnc_usableBuildings) select {
     private _bp = getPos _x;
     (count ([_x] call BIS_fnc_buildingPositions) >= _squadSize)
     && {[_bp] call fnc_civ_townAt < 0}
     && {(_zoneMeta findIf { _bp distance2D (_x select 1) < ((_x select 2) + ZONE_MARGIN) }) < 0}
+    && {!surfaceIsWater _bp}
+    && {([0, 45, 90, 135, 180, 225, 270, 315] findIf { surfaceIsWater (_bp getPos [DRY_RADIUS, _x]) }) < 0}
 };
 if (_candidates isEqualTo []) exitWith {
     [0, "STR_DUWS_T_mission_no_building"] call fnc_mission_abort;
