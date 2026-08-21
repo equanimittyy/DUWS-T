@@ -48,9 +48,9 @@
 // BLUFOR-held ground, keeping the convoy corridor off friendly positions. The three destination fields
 // default to [false, 0, false] -- every type but the deny-armor convoy. The HVT convoy leaves them default
 // too: instead of siting picking its destination, its own site-finder (fnc_target_hvt_site) ejects the
-// spawn 5-10 km out from a zone and its thread picks the haven from there (fnc_hvt_dest_pick). That way it
-// still offers on tight, cluster-zoned maps, where two OPFOR zones 5 km apart -- what needDestZone would
-// demand -- rarely exist but open ground 5-10 km from a zone does.
+// spawn 3-10 km out from a zone and its thread picks the haven from there (fnc_hvt_dest_pick). That way it
+// still offers on tight, cluster-zoned maps, where two OPFOR zones 3 km apart -- what needDestZone would
+// demand -- rarely exist but open ground 3-10 km from a zone does.
 //
 // hardEligible and weight feed the strategic-map draw (fnc_stratmap), not siting. hardEligible true lets
 // the type fill one of the two deep, difficulty-boosted "hard" offer slots -- false for a type that

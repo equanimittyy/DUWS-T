@@ -4,9 +4,9 @@
 // actually run for. One source, so the offer and the launched mission never disagree on whether -- or
 // where -- a destination exists.
 //
-// Given a convoy spawn, pick the OPFOR-held haven the columns flee to: the nearest held zone 5-10 km out
+// Given a convoy spawn, pick the OPFOR-held haven the columns flee to: the nearest held zone 3-10 km out
 // whose straight-line corridor crosses no water and skims no BLUFOR ground. If every clean zone sits past
-// 10 km, keep the 5 km floor and drop the ceiling -- take the nearest clean zone anyway, so a spawn with
+// 10 km, keep the 3 km floor and drop the ceiling -- take the nearest clean zone anyway, so a spawn with
 // only distant havens still runs rather than aborting. No clean zone at all (a captured haven, a water-
 // locked or friendly-ringed spawn) -> [], and the caller drops the offer or aborts the launch.
 //
@@ -17,7 +17,7 @@
 // Contract: [_spawnPos] -> [_destPos, _destName] | [].
 params ["_spawnPos"];
 
-private _spawnMin = 5000;
+private _spawnMin = 3000;
 private _spawnMax = 10000;
 private _corridorReach = 1200;   // keep the spawn->haven run this far off BLUFOR ground
 
@@ -60,8 +60,8 @@ private _cands = [];
 } forEach _pairs;
 if (_cands isEqualTo []) exitWith { [] };
 
-// Prefer a haven in the 5-10 km band (nearest of them); if every clean zone sits past 10 km, take the
-// nearest clean zone anyway -- keep the 5 km floor, drop only the ceiling.
+// Prefer a haven in the 3-10 km band (nearest of them); if every clean zone sits past 10 km, take the
+// nearest clean zone anyway -- keep the 3 km floor, drop only the ceiling.
 private _inBand = _cands select { (_x select 0) <= _spawnMax };
 private _pool = if (_inBand isEqualTo []) then { _cands } else { _inBand };
 private _pick = [_pool, [], { _x select 0 }, "ASCEND"] call BIS_fnc_sortBy select 0;

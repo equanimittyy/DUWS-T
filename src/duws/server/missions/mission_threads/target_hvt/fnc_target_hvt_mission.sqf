@@ -17,15 +17,15 @@ private _apreward = DUWS_curReward select 1;
 private _deadline = DUWS_curDeadlineAt;
 
 // Destination: the OPFOR-held haven the convoys flee to, chosen from the spawn (_MissionPos) through the
-// shared picker fnc_hvt_dest_pick -- nearest held zone 5-10 km out with a corridor crossing no water and
-// clear of BLUFOR ground. The spawn itself is the offer point the site-finder ejected 5-10 km out from a
+// shared picker fnc_hvt_dest_pick -- nearest held zone 3-10 km out with a corridor crossing no water and
+// clear of BLUFOR ground. The spawn itself is the offer point the site-finder ejected 3-10 km out from a
 // zone (fnc_target_hvt_site), so the map icon the player clicked is where the columns start and the haven
 // is a real zone the far side of the run. The site-finder already proved a haven reachable from here, so
 // this normally succeeds; only an AO that flipped between offer and accept (the haven captured, or friendly
 // ground advanced across the corridor) can still leave none -> abort, releasing gate and slot.
 private _dest = [_MissionPos] call fnc_hvt_dest_pick;
 if (_dest isEqualTo []) exitWith {
-    [2, "STR_DUWS_T_crtzxs0j", "dest_zone_missing: no OPFOR-held zone 5 km+ out with a clean corridor"] call fnc_mission_abort;
+    [2, "STR_DUWS_T_crtzxs0j", "dest_zone_missing: no OPFOR-held zone 3 km+ out with a clean corridor"] call fnc_mission_abort;
 };
 private _destPos = _dest select 0;
 private _destName = _dest select 1;
@@ -34,10 +34,12 @@ private _destName = _dest select 1;
 // divergent mid-route point so the approaches split and the player cannot cover them all. TUNABLE:
 // spawnR is the radius the three start roads are drawn from, startSep the minimum gap between two starts
 // so each column gets an independent road, viaSpread the lateral offset of the mid-route point (bigger =
-// wider fork), graceSec the rolled hold the columns keep before they roll -- Allseer calls the move when
-// it ends -- arrive is the zone-edge fail band.
+// wider fork), viaCone the widest a via road's run may sit off the destination bearing before it is
+// skipped, graceSec the rolled hold the columns keep before they roll -- Allseer calls the move when it
+// ends -- arrive is the zone-edge fail band.
 private _spawnR    = 700;
 private _viaSpread = 1200;
+private _viaCone   = 45;
 private _startSep  = 250;
 private _graceSec  = 30 + round random 30;
 private _arrive    = 80;
@@ -114,10 +116,28 @@ private _spawnLine = {
 };
 
 // Bearing from the mission area to the destination: the columns run toward it, each forking to a via
-// point offset to one side. The 5-10 km run and the water/BLUFOR-clear corridor are already guaranteed by
+// point offset to one side. The 3-10 km run and the water/BLUFOR-clear corridor are already guaranteed by
 // the destination pick above, so the spawn sits at the offered mission point and the columns just aim in.
 private _dirZone = [_MissionPos, _destPos] call BIS_fnc_dirTo;
 private _legHalf = (_MissionPos distance2D _destPos) * 0.5;
+
+// A road segment's run as a compass bearing, from the direction to a road it connects to; an unconnected
+// stub falls back to its object heading. Used to keep a via snap on a road that runs along the route
+// rather than one crossing it.
+private _roadBearing = {
+    params ["_road"];
+    private _conn = roadsConnectedTo _road;
+    if (_conn isEqualTo []) exitWith { direction _road };
+    _road getDir (_conn select 0)
+};
+// Acute angle (0-90) between two bearings taken as undirected lines: a road and its reverse read the same,
+// so via alignment is line-to-line, not heading-to-heading. The +540 keeps the mod dividend positive --
+// SQF mod takes the dividend's sign, so a bare (a-b+180) would mis-wrap for a<b.
+private _axisOffset = {
+    params ["_a", "_b"];
+    private _d = abs ((((_a - _b) + 540) mod 360) - 180);
+    _d min (180 - _d)
+};
 
 // Three independent start roads: gather roads within _spawnR of the anchor and take the first three at
 // least _startSep apart, so each column rides its own road rather than three snapping to one. A road-thin
@@ -145,12 +165,18 @@ private _carGrp = grpNull;    // the car's own group once split out -- held here
 for "_i" from 0 to 2 do {
     private _lat = [-1, 0, 1] select _i;
     private _start = _startRoads select _i;
-    // Via: a road point offset to one side of the midpoint, so the pathfinder routes this column its
-    // own way in; the centre column (lat 0) runs the direct line. Snap to a road, else take the raw
-    // point -- the pathfinder still favours roads getting there.
+    // Via: a road point offset to one side of the midpoint, so the pathfinder routes this column its own
+    // way in; the centre column (lat 0) runs the direct line. Snap to the nearest road whose run lies
+    // within _viaCone of the destination bearing, so the via never points the column back the wrong way
+    // at the fork; none aligned falls back to the nearest road, then the raw point.
     private _vCand = (_MissionPos getPos [_legHalf, _dirZone]) getPos [abs _lat * _viaSpread, _dirZone + (90 * _lat)];
     private _vRoads = _vCand nearRoads 900;
-    private _via = if (count _vRoads > 0) then { getPosATL (_vRoads select 0) } else { _vCand };
+    private _viaRoad = objNull;
+    {
+        if (([[_x] call _roadBearing, _dirZone] call _axisOffset) <= _viaCone) exitWith { _viaRoad = _x };
+    } forEach _vRoads;
+    if (isNull _viaRoad && {!(_vRoads isEqualTo [])}) then { _viaRoad = _vRoads select 0 };
+    private _via = if (!isNull _viaRoad) then { getPosATL _viaRoad } else { _vCand };
     private _heading = [_start, _via] call BIS_fnc_dirTo;
     _convoyStarts pushBack _start;
 
