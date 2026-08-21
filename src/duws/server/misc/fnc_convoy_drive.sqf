@@ -152,19 +152,23 @@ while {
 
                 if (_regroup) then {
                     // REGROUP: a follower jammed too long, so the lead HALTS and holds while every follower
-                    // drives independently to its ideal slot in a column behind the lead -- not back onto the
-                    // trail, which a fallen-behind hull fights. Slots are spaced CV_GAP_WANT along the heading
-                    // the column will resume toward, ordered by trail progress so the order never crosses. Once
-                    // all are within CV_FORMED of their slots the stale trail is dropped and tracing resumes.
+                    // drives independently to its ideal slot -- a point CV_GAP_WANT * slot back ALONG the crumb
+                    // trail (the road the lead actually drove), so slots hug the road's curve instead of a
+                    // straight line that would run off a bend. Ordered by trail progress so the order never
+                    // crosses. Once all are within CV_FORMED of their slots the trail is dropped and tracing
+                    // resumes. The trail is static here (lead halted) and is read before it is cleared on reform.
                     _lead forceSpeed 0;
                     _lead forceFollowRoad false;
 
                     private _leadPos = getPosATL _lead;
-                    // Column axis is the lead's own heading: it faces along the road it drove in on, so slots
-                    // fall in line BEHIND it, parallel to travel. Using the straight bearing to the destination
-                    // instead ignores road curve and lays the column crossways on a bend -- the perpendicular snap.
                     private _dir = getDir _lead;
-                    private _ux = sin _dir; private _uy = cos _dir;   // the lead's forward unit vector
+                    private _ux = sin _dir; private _uy = cos _dir;   // fallback axis where the trail is too short
+
+                    // Trail as a head-to-tail polyline, lead first. Built by index (not `reverse`, which mutates
+                    // the crumb array in place) so _crumbs is untouched.
+                    private _line = [_leadPos];
+                    for "_i" from (count _crumbs - 1) to 0 step -1 do { _line pushBack (_crumbs select _i) };
+
                     private _allFormed = true;
                     {
                         private _me = _x; private _meId = netId _me;
@@ -172,8 +176,27 @@ while {
                         // Slot index = how many followers are further along the trail than me, so the frontmost
                         // forms slot 1 and the column keeps its order.
                         private _slotN = ({ (_prog getOrDefault [netId _x, -1]) > _myProg } count _liveFollowers) + 1;
-                        private _d = _slotN * CV_GAP_WANT;
-                        private _slot = [(_leadPos select 0) - _ux * _d, (_leadPos select 1) - _uy * _d, 0];
+                        private _target = _slotN * CV_GAP_WANT;
+
+                        // Walk back along the polyline to arc-length _target, interpolating within the segment it
+                        // lands in. Past the trail's end (short trail) fall back to a straight line behind the lead.
+                        private _slot = [];
+                        private _acc = 0;
+                        for "_i" from 0 to (count _line - 2) do {
+                            private _a = _line select _i;
+                            private _b = _line select (_i + 1);
+                            private _segLen = _a distance2D _b;
+                            if (_slot isEqualTo [] && {_acc + _segLen >= _target}) then {
+                                private _t = if (_segLen > 0) then { (_target - _acc) / _segLen } else { 0 };
+                                _slot = [(_a select 0) + ((_b select 0) - (_a select 0)) * _t,
+                                         (_a select 1) + ((_b select 1) - (_a select 1)) * _t, 0];
+                            };
+                            _acc = _acc + _segLen;
+                        };
+                        if (_slot isEqualTo []) then {
+                            _slot = [(_leadPos select 0) - _ux * _target, (_leadPos select 1) - _uy * _target, 0];
+                        };
+
                         if (_pathed getOrDefault [_meId, false]) then { _me setDriveOnPath []; _pathed set [_meId, false] };
                         _me doMove _slot;
                         private _off = _me distance2D _slot;
