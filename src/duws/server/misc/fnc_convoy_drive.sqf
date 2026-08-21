@@ -160,8 +160,11 @@ while {
                     _lead forceFollowRoad false;
 
                     private _leadPos = getPosATL _lead;
-                    private _dir = ((_wpPos select 0) - (_leadPos select 0)) atan2 ((_wpPos select 1) - (_leadPos select 1));
-                    private _ux = sin _dir; private _uy = cos _dir;   // unit vector toward the destination
+                    // Column axis is the lead's own heading: it faces along the road it drove in on, so slots
+                    // fall in line BEHIND it, parallel to travel. Using the straight bearing to the destination
+                    // instead ignores road curve and lays the column crossways on a bend -- the perpendicular snap.
+                    private _dir = getDir _lead;
+                    private _ux = sin _dir; private _uy = cos _dir;   // the lead's forward unit vector
                     private _allFormed = true;
                     {
                         private _me = _x; private _meId = netId _me;
