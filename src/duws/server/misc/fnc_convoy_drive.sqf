@@ -223,11 +223,12 @@ while {
                         private _gap = if (_myProg < 0) then { CV_GAP_WANT } else { ((_aheadProg - _myProg) * CV_STEP) max 0 };
                         if (_gap > _maxGap) then { _maxGap = _gap };
 
-                        // Replay the lead's proven-drivable line. Until the track has a couple of crumbs, just aim
-                        // at the destination. Re-issue only when the slice changed, so a parked column is not
-                        // re-ordered every tick.
+                        // Replay the lead's proven-drivable line. Until the track has a couple of crumbs (at
+                        // spawn, and just after a regroup resets it) aim at the LEAD, not the far destination --
+                        // the destination lies beyond the lead, so aiming there drives the follower straight past
+                        // it. Re-issue only when the slice changed, so a parked column is not re-ordered every tick.
                         if (count _crumbs < 2 || {_myProg < 0}) then {
-                            _me doMove _wpPos;
+                            _me doMove (getPosATL _lead);
                         } else {
                             // Start the slice at the crumb just AHEAD of this hull (nearest + 1), never behind.
                             // setDriveOnPath drives to its first point first, so a point the vehicle already
@@ -256,6 +257,10 @@ while {
                             default                         { _aheadSpd + _err * CV_GAP_KP };
                         };
                         _fs = _fs max 0 min CV_CATCHUP_KMH;
+                        // Straight-line safety against overtaking: the along-track gap cannot tell "just behind
+                        // the hull ahead" from "just past it", so on the coarse tick a fast closer can slip by.
+                        // Physically tucked inside the target gap, never outrun the hull ahead.
+                        if ((_me distance2D _ahead) < CV_GAP_WANT) then { _fs = _fs min (_aheadSpd max 0) };
                         _me forceSpeed KMH(_fs);
 
                         // Jammed too long -> trigger a column regroup. The counter accumulates while the follower
