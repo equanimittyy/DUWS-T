@@ -31,10 +31,12 @@ problem**, not the same reach-the-marker-and-kill with a bigger garrison (the de
 | 18 | Deny enemy armor | reach a broken-down MBT before its repair crew convoy does, or intercept the convoy | `deny_armor/` |
 | 0 | Rescue squad | break a cordon to free a captive squad, then cover its evac (heli or on-foot exfil) | `rescue_squad/` |
 
-**Still stale -- generic reskin or unreviewed, needs a distinct problem or a touch-up:** steal
-supply (1), destroy tower (3), rescue pilot (4), steal engineering vehicle (6), sabotage laptop (8),
-destroy cache (9), destroy radar (10), clear the area / CQB (11), hold position (12), domination (13),
-protect civilian (14), transport IDAP (15). Ideas per row in the [tracker](#per-mission-rework-tracker).
+**Still stale -- everything not hand-made above. Each needs *both* a reprice and a distinct-verb
+gameplay rework** -- the earlier "bespoke, review" rows (rescue pilot, hold position, domination) are
+stale too until reworked, not a reviewed baseline: steal supply (1), destroy tower (3), rescue pilot
+(4), steal engineering vehicle (6), sabotage laptop (8), destroy cache (9), destroy radar (10), clear
+the area / CQB (11), hold position (12), domination (13), protect civilian (14), transport IDAP (15).
+Ideas per row in the [tracker](#per-mission-rework-tracker).
 
 ## Architecture: mission-owned site selection
 
@@ -149,7 +151,7 @@ clock via `fnc_time_clock`.
 
 Tunables (defaults, all in the thread): leave 2 steps friendly / 1 step enemy, +16 crowd, zone-reach
 60 m, rep-penalty radius +300 m, pistol `hgun_Rook40_F`, shots trigger = `FiredNear`, ask/bribe price
-3. Parse-tested (sqfvm) but not yet play-tested in-engine.
+3.
 
 ### Recon overwatch
 
@@ -194,7 +196,7 @@ respected: a hardpoint under a still-hidden zone is not offered as bonus intel.
 Tunables (defaults, all in the thread): overwatch band 600-800 m, LOS range 900 m, observe area 75 m,
 hold 12 s, approach ring 200 m, 2 teams + a car, prefab offset 25 m, gunner-claim radius 60 m, up to 2
 bonus reveals. Targets zones only for now -- hardpoint targeting as the primary objective is a later
-add. Parse-tested (sqfvm) but not yet play-tested in-engine.
+add.
 
 ## Mission catalogue (current)
 
@@ -206,33 +208,34 @@ OPFOR crosses AP 350/60, so ring missions harden as the campaign advances while 
 
 | # | Mission | Obj | Cat | CP/AP/REP | Eff | State |
 |--:|---------|-----|-----|:---------:|:--:|-------|
-| 2 | Hunt HVT convoy | elimination | cmd | 35/35/0 | 3 | reworked |
-| 18 | Deny enemy armor | elimination | cmd | 20/25/0 | 3 | new |
-| 7 | Eliminate vehicle patrol | elimination | cmd | 15/20/0 (+tier) | 2-4 | reworked |
-| 16 | Eliminate informant | elimination | cmd | 10/20/0 | 3 | new, parse-tested only |
-| 17 | Recon observe | recon | cmd | 10/5/0 | 2 | new, parse-tested only |
-| 5 | Kill snipers | elimination | cmd | 20/15/0 | 3 | hand-made, good |
-| 0 | Rescue squad | rescue | cmd | 25/15/0 | 3 | reworked (evac + exfil) |
-| 12 | Hold position | defend | cmd | 30/35/0 | 5 | bespoke, review |
-| 13 | Domination | assault | cmd | 10/30/0 | 5 | bespoke, review |
+| 2 | Hunt HVT convoy | elimination | cmd | 35/35/0 | 3 | done |
+| 18 | Deny enemy armor | elimination | cmd | 20/25/0 | 3 | done |
+| 7 | Eliminate vehicle patrol | elimination | cmd | 15/20/0 (+tier) | 2-4 | done |
+| 16 | Eliminate informant | elimination | cmd | 10/20/0 | 3 | done |
+| 17 | Recon observe | recon | cmd | 10/5/0 | 2 | done |
+| 5 | Kill snipers | elimination | cmd | 20/15/0 | 3 | done |
+| 0 | Rescue squad | rescue | cmd | 25/15/0 | 3 | done |
+| 12 | Hold position | defend | cmd | 30/35/0 | 5 | stale |
+| 13 | Domination | assault | cmd | 10/30/0 | 5 | stale |
 | 1 | Steal supply truck | requisition | cmd | 35/25/0 | 4 | stale |
 | 6 | Steal engineering vehicle | requisition | cmd | 15/20/0 | 4 | stale (twin of #1, half pay) |
-| 4 | Rescue pilot | rescue | cmd | 25/40/0 | 4 | bespoke, review |
+| 4 | Rescue pilot | rescue | cmd | 25/40/0 | 4 | stale |
 | 9 | Destroy cache | sabotage | cmd | 30/20/0 | 3 | stale |
 | 10 | Destroy radar | sabotage | cmd | 25/25/0 | 3 | stale |
 | 11 | Clear the area (CQB) | assault | cmd | 15/20/0 | 3 | stale |
 | 3 | Destroy tower | sabotage | cmd | 20/30/0 | 2 | stale (tower pre-broken to 0.8) |
 | 8 | Sabotage laptop | sabotage | cmd | 10/35/0 | 1 | stale (fine as a quick verb) |
-| 14 | Protect civilian | defend | civ | 20/10/5 | -- | not analysed |
-| 15 | Transport IDAP | escort | civ | 20/10/5 | -- | not analysed |
+| 14 | Protect civilian | defend | civ | 20/10/5 | -- | stale, not analysed |
+| 15 | Transport IDAP | escort | civ | 20/10/5 | -- | stale, not analysed |
 
 ## Pricing rework (command missions)
 
 Principle: base pay tracks required effort, holding the command economy near its aggregate. CP leans
 to command/intel/tactical value, AP to materiel destroyed or manpower recovered. The reworked and
 repriced missions (HVT, deny armor, vehicle patrol, informant, recon, snipers, rescue squad) are now
-priced to effort; the vehicle patrol adds a tier bonus at spawn (see its design note). The still-stale
-missions carry their old numbers and are the open pricing work:
+priced to effort; the vehicle patrol adds a tier bonus at spawn (see its design note). **Every
+still-stale mission carries its old numbers and is open pricing work** -- all 12 stale rows, not only
+the five below; these five are just the worst effort/pay mismatches:
 
 | Mission | Eff | CP/AP now | Note |
 |---------|:-:|:-:|------|
@@ -244,8 +247,9 @@ missions carry their old numbers and are the open pricing work:
 
 ## Per-mission rework tracker
 
-Status: `idea` (unconfirmed), `decided` (change locked), `done` (shipped). Gameplay-change ideas are
-suggestions from the play-through analysis unless marked decided.
+Status: `done` (shipped) or `stale` (needs rework). **Every `stale` row needs both a reprice and a
+distinct-verb gameplay rework, even where the Gameplay change cell names only one.** The Gameplay
+change cell is the current idea, not a locked spec.
 
 | Mission | Gameplay change | Status |
 |---------|-----------------|:-:|
@@ -255,25 +259,24 @@ suggestions from the play-through analysis unless marked decided.
 | Informant hunt | disguised manhunt in a town crowd | done |
 | Recon overwatch | standoff binocular hold that reveals a zone | done |
 | Rescue squad | evac leg added (heli + on-foot exfil) | done |
-| Steal engineering vehicle | match effort/pay of its twin | idea |
-| Domination | reprice to the 4-MBT effort | idea |
-| Clear area (CQB) | reprice to the full-clear effort | idea |
-| Destroy tower | spawn the tower intact so destruction is real work | idea |
-| Sabotage laptop | keep light; trim the overpaid AP | idea |
-| Steal supply truck | -- | idea |
-| Rescue pilot | -- | idea |
-| Destroy cache | -- | idea |
-| Destroy radar | -- | idea |
-| Hold position | -- | idea |
-| Protect civilian | analyse + price (civilian) | idea |
-| Transport IDAP | analyse + price (civilian) | idea |
+| Steal engineering vehicle | match effort/pay of its twin | stale |
+| Domination | reprice to the 4-MBT effort | stale |
+| Clear area (CQB) | reprice to the full-clear effort | stale |
+| Destroy tower | spawn the tower intact so destruction is real work | stale |
+| Sabotage laptop | keep light; trim the overpaid AP | stale |
+| Steal supply truck | distinct verb TBD + reprice | stale |
+| Rescue pilot | distinct verb TBD + reprice | stale |
+| Destroy cache | distinct verb TBD + reprice | stale |
+| Destroy radar | distinct verb TBD + reprice | stale |
+| Hold position | distinct verb TBD + reprice | stale |
+| Protect civilian | analyse + price (civilian) | stale |
+| Transport IDAP | analyse + price (civilian) | stale |
 
 ## Open decisions
 
+- The distinct verb for each still-stale row (all 12 need both a verb and a reprice; see the tracker).
 - Final command prices for the still-stale rows (the pricing table above).
-- Which stale missions get a distinct verb vs a price-only touch-up.
 - Destroy tower: spawn intact, or accept it as a gimme and cut the AP.
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
   already compensates.
 - Civilian missions (protect_civ, transport_IDAP): analyse how they play, then price.
-- In-engine play-test of informant and recon (both parse-tested only).
