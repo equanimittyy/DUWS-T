@@ -307,6 +307,15 @@ private _split = false;
 private _viaMarkers = [];
 private _revealAt = time + (30 + round random 30);
 private _revealed = false;
+// Allseer's running track: at a rolled cadence (first call ~2-3 min after the push, clear of the
+// move-out and midpoint lines) it moves a live convoy symbol onto each column and calls a generic
+// line. The symbols persist at their last-reported spot and jump on each update -- a periodic fix,
+// not a continuous blip, so the intercept stays the player's. One marker per column, index-aligned
+// with _groups; "" until first placed, reset to "" if the column is wiped. The peeled HVT car gets
+// its own dedicated marker the moment it breaks off (below), moved on the same cadence.
+private _nextReportAt  = time + (120 + round random 60);
+private _trackMarkers  = ["", "", ""];
+private _hvtMarker     = "";
 waitUntil {
     sleep 2;
     if (!_revealed && {time > _revealAt}) then {
@@ -324,6 +333,40 @@ waitUntil {
             _viaMarkers pushBack _mn;
         } forEach _vias;
         [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_hvtmidpoint"] remoteExec ["fnc_duws_dialogue", 0];
+    };
+    // Running track: at the rolled cadence, move a convoy symbol onto each live column and, once he
+    // has peeled, the HVT marker onto his car, then call a generic Allseer line. The symbol tracks the
+    // column's lead (cv_lead); a jammed hull's cv_lead may be a corpse (leadership migrates on death
+    // before the drive loop re-pins it), so fall back to the first live drivable hull. A wholly
+    // destroyed column drops its marker. Marker commands are global from the server, so all clients see.
+    if (time > _nextReportAt) then {
+        {
+            private _grp = _x;
+            private _i   = _forEachIndex;
+            private _lead = _grp getVariable ["cv_lead", objNull];
+            if (isNull _lead || {!alive _lead}) then {
+                _lead = objNull;
+                { private _v = vehicle _x; if (_v != _x && {alive _v} && {canMove _v}) exitWith { _lead = _v } } forEach units _grp;
+            };
+            private _mn = _trackMarkers select _i;
+            if (isNull _lead) then {
+                if (_mn != "") then { deleteMarker _mn; _trackMarkers set [_i, ""] };
+            } else {
+                if (_mn == "") then {
+                    _mn = format ["hvtconvoytrk_%1_%2", _taskId, _i];
+                    deleteMarker _mn;   // a reused mission name can collide with a prior run's leftover
+                    createMarker [_mn, getPosATL _lead];
+                    _mn setMarkerType "o_motor_inf";
+                    _mn setMarkerColor "ColorEAST";
+                    _mn setMarkerText "Convoy";
+                    _trackMarkers set [_i, _mn];
+                };
+                _mn setMarkerPos (getPosATL _lead);
+            };
+        } forEach _groups;
+        if (_split && {_hvtMarker != ""} && {alive _car}) then { _hvtMarker setMarkerPos (getPosATL _car) };
+        [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_hvttrack"] remoteExec ["fnc_duws_dialogue", 0];
+        _nextReportAt = time + (120 + round random 60);
     };
     // First contact: peel the car out of the column into its own CARELESS group so it runs for the
     // zone instead of halting to fight alongside the escorts. Gated on a real BLUFOR threat within 300 m
@@ -351,6 +394,16 @@ waitUntil {
         // follower to trace it -- the driver just navigates and nudges it, which is what the car needs. The
         // column's driver drops the car the moment its driver left that group, so the two never both drive it.
         [_carGrp] spawn fnc_convoy_drive;
+        // He has committed to his own run and is no longer just one hull in a column, so Allseer calls
+        // him out by name and drops a dedicated HVT marker on the car -- moved with the columns on each
+        // update. This is the reveal the hunt built to: the player now knows which hull carries him.
+        _hvtMarker = format ["hvtconvoyhvt_%1", _taskId];
+        deleteMarker _hvtMarker;   // a reused mission name can collide with a prior run's leftover
+        createMarker [_hvtMarker, getPosATL _car];
+        _hvtMarker setMarkerType "mil_warning";
+        _hvtMarker setMarkerColor "ColorEAST";
+        _hvtMarker setMarkerText "HVT";
+        [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_hvtflee"] remoteExec ["fnc_duws_dialogue", 0];
     };
     if (!alive _hvt) exitWith { _outcome = "WIN"; true };
     if (_hvt distance2D _destPos < _arrive) exitWith { _outcome = "ESCAPED"; true };
@@ -367,6 +420,8 @@ if (!isNull _carGrp) then { _carGrp setVariable ["DUWS_convoy_stop", true] };
 [_marker] call fnc_missionMarkerClear;
 { deleteMarker _x } forEach _startMarkers;
 { deleteMarker _x } forEach _viaMarkers;
+{ if (_x != "") then { deleteMarker _x } } forEach _trackMarkers;
+if (_hvtMarker != "") then { deleteMarker _hvtMarker };
 deleteMarker _destMarker;
 
 if (_outcome == "WIN") then {
