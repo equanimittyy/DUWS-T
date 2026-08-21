@@ -119,6 +119,10 @@ fnc_rescue_squad_success = compile preprocessFileLineNumbers "duws\server\missio
 fnc_steal_supply_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\steal_supply\fnc_steal_supply_mission.sqf";
 fnc_transport_IDAP_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\transport_idap\fnc_transport_IDAP_mission.sqf";
 fnc_target_hvt_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_hvt\fnc_target_hvt_mission.sqf";
+// The HVT convoy's destination picker and site-finder. Broadcast: the site-finder runs client-side in the
+// offer picker (fnc_stratmap), and it calls the destination picker, which calls fnc_route_has_water.
+fnc_hvt_dest_pick = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_hvt\fnc_hvt_dest_pick.sqf";publicVariable "fnc_hvt_dest_pick";
+fnc_target_hvt_site = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_hvt\fnc_target_hvt_site.sqf";publicVariable "fnc_target_hvt_site";
 fnc_destroy_tower_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\destroy_tower\fnc_destroy_tower_mission.sqf";
 fnc_rescue_pilot_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_pilot\fnc_rescue_pilot_mission.sqf";
 fnc_target_sniper_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\target_sniper\fnc_target_sniper_mission.sqf";
@@ -251,8 +255,9 @@ fnc_enemy_contact = compile preprocessFileLineNumbers "duws\server\misc\fnc_enem
 fnc_apply_posture = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_apply_posture.sqf";
 fnc_spawn_team = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawn_team.sqf";
 fnc_spawn_vehicle = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_spawn_vehicle.sqf";
-// Straight-line water probe a convoy thread uses to reject an approach bearing that crosses the sea.
-fnc_route_has_water = compile preprocessFileLineNumbers "duws\server\misc\fnc_route_has_water.sqf";
+// Straight-line water probe the convoy threads and the client-side HVT offer picker use to reject an
+// approach bearing that crosses the sea. Broadcast for that picker call site (fnc_hvt_dest_pick).
+fnc_route_has_water = compile preprocessFileLineNumbers "duws\server\misc\fnc_route_has_water.sqf";publicVariable "fnc_route_has_water";
 fnc_zone_reveal = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_reveal.sqf";
 fnc_zone_spawn_sizes = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_zone_spawn_sizes.sqf";
 // The zone reserve / reinforcement engine: the refill pass, the far-side placement and the two

@@ -9,76 +9,26 @@
 // Off the fnc_mission_run spine on purpose: the win is a race, not a one-shot predicate polled at a
 // fixed spot (see fnc_mission_run's header), so this owns its own site pick, spawn and monitor the
 // way the informant hunt and the IDAP escort do.
-params ["_MissionPos", "_mission_name", ["_destZone", []]];
+params ["_MissionPos", "_mission_name"];
 if (!([2, _MissionPos, _mission_name, remoteExecutedOwner] call fnc_mission_begin)) exitWith {};
 
 private _cpreward = DUWS_curReward select 0;
 private _apreward = DUWS_curReward select 1;
 private _deadline = DUWS_curDeadlineAt;
 
-// Destination: an OPFOR-held zone the convoys run for, 5-10 km out from the spawn (_MissionPos) with a
-// corridor that crosses no water and stays clear of BLUFOR ground. Moving the destination -- not the spawn
-// -- is what sets the run: the columns start at the offered mission point, so the map icon the player
-// clicked is where the hunt begins. Far enough that the player has to chase and can cut a column off, near
-// enough the drive fits inside the deadline.
-private _enemyZones = missionNamespace getVariable ["WARCOM_zones_controled_by_OPFOR", []];
-private _spawnMin = 5000;
-private _spawnMax = 10000;
-private _corridorReach = 1200;   // keep the spawn->haven run this far off BLUFOR ground (siting's own reach)
-
-// Friendly ground the corridor must avoid: held BLUFOR zones, the HQ and every FOB. A haven run heads into
-// enemy territory; one skimming our lines would be met at home, not out in the field.
-private _friendly = +(missionNamespace getVariable ["WARCOM_zones_controled_by_BLUFOR", []]);
-if !(PosOfBLUHQ isEqualTo []) then { _friendly pushBack PosOfBLUHQ };
-if !(isNil "Array_of_FOBpos") then { { _friendly pushBack _x } forEach Array_of_FOBpos };
-
-// A corridor _MissionPos -> zone is usable only if it crosses no water and stays clear of friendly ground.
-// Water via the shared probe; BLUFOR via interior samples against _friendly at _corridorReach.
-private _corridorClear = {
-    params ["_zp"];
-    if ([_MissionPos, _zp] call fnc_route_has_water) exitWith { false };
-    if (_friendly isEqualTo []) exitWith { true };
-    private _d = _MissionPos distance2D _zp;
-    private _steps = ceil (_d / 250);
-    private _ok = true;
-    for "_i" from 1 to (_steps - 1) do {
-        private _t = _i / _steps;
-        private _px = (_MissionPos select 0) + ((_zp select 0) - (_MissionPos select 0)) * _t;
-        private _py = (_MissionPos select 1) + ((_zp select 1) - (_MissionPos select 1)) * _t;
-        if ((_friendly findIf { [_px, _py] distance2D _x < _corridorReach }) >= 0) exitWith { _ok = false };
-    };
-    _ok
-};
-
-// Held OPFOR zones at least the minimum out with a clean corridor, tagged by distance.
-private _cands = [];
-{
-    _x params ["_zn", "_zp"];
-    if ((_enemyZones findIf { _x distance2D _zp < 50 }) >= 0) then {
-        private _dz = _zp distance2D _MissionPos;
-        if (_dz >= _spawnMin && {[_zp] call _corridorClear}) then { _cands pushBack [_dz, _zp, _zn] };
-    };
-} forEach zone_namePOS_pairs;
-
-// Prefer a haven in the 5-10 km band (nearest of them); if every clean zone sits past 10 km, take the
-// nearest clean zone anyway -- keep the 5 km floor, drop only the ceiling. The siting-vetted haven wins
-// when it is in the chosen pool, so a corridor the offer already checked is kept. No clean zone at all
-// (a captured haven, a water-locked AO, or debug force) -> abort, releasing gate and slot.
-private _destPos = [];
-private _destName = "";
-if !(_cands isEqualTo []) then {
-    private _inBand = _cands select { (_x select 0) <= _spawnMax };
-    private _pool = if (_inBand isEqualTo []) then { _cands } else { _inBand };
-    private _vi = if (_destZone isEqualTo []) then { -1 } else { _pool findIf { (_x select 1) distance2D _destZone < 50 } };
-    private _pick = if (_vi >= 0) then { _pool select _vi } else {
-        [_pool, [], { _x select 0 }, "ASCEND"] call BIS_fnc_sortBy select 0
-    };
-    _destPos = _pick select 1;
-    _destName = _pick select 2;
-};
-if (_destPos isEqualTo []) exitWith {
+// Destination: the OPFOR-held haven the convoys flee to, chosen from the spawn (_MissionPos) through the
+// shared picker fnc_hvt_dest_pick -- nearest held zone 5-10 km out with a corridor crossing no water and
+// clear of BLUFOR ground. The spawn itself is the offer point the site-finder ejected 5-10 km out from a
+// zone (fnc_target_hvt_site), so the map icon the player clicked is where the columns start and the haven
+// is a real zone the far side of the run. The site-finder already proved a haven reachable from here, so
+// this normally succeeds; only an AO that flipped between offer and accept (the haven captured, or friendly
+// ground advanced across the corridor) can still leave none -> abort, releasing gate and slot.
+private _dest = [_MissionPos] call fnc_hvt_dest_pick;
+if (_dest isEqualTo []) exitWith {
     [2, "STR_DUWS_T_crtzxs0j", "dest_zone_missing: no OPFOR-held zone 5 km+ out with a clean corridor"] call fnc_mission_abort;
 };
+private _destPos = _dest select 0;
+private _destName = _dest select 1;
 
 // The convoys start spread across the mission area, each on its own road, then run to the zone via a
 // divergent mid-route point so the approaches split and the player cannot cover them all. TUNABLE:
