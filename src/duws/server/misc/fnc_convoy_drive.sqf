@@ -44,7 +44,11 @@ params ["_group"];
 #define CV_CRUISE_KMH  40      // lead's free-running speed when the column is closed up
 #define CV_CATCHUP_KMH 60      // fastest a follower may run to close a gap
 #define CV_GAP_WANT    22      // desired along-track spacing to the hull ahead (m); matches layout slotting
-#define CV_GAP_KP      2       // km/h added per metre of gap over target, removed per metre under
+#define CV_GAP_BAND    6       // deadband: within this of target, just match the hull ahead's speed -- no
+                               // spacing trim, so the column stops hunting and the accordion damps out
+#define CV_GAP_HARD    8       // closer than this: stop, a backstop against rear-ending on a transient
+#define CV_GAP_KP      1       // gentle spacing trim (km/h per metre) outside the band; matching the hull
+                               // ahead's speed, not this term, does the heavy lifting -- pure-P overshot
 #define CV_LAG_OK      40      // widest inter-hull gap tolerated at full cruise (m)
 #define CV_LAG_STOP    100     // at or past this the lead eases to a halt until the column closes up
 
@@ -159,12 +163,13 @@ while {
                     private _meId = netId _me;
                     private _myProg = _prog get _meId;
 
-                    // Progress of the hull ahead: least progress strictly greater than mine, else the lead's.
+                    // The hull directly ahead: least trail progress strictly greater than mine, else the lead.
+                    private _ahead = _lead;
                     private _aheadProg = _leadProg;
                     {
                         if (_x != _me) then {
                             private _p = _prog get (netId _x);
-                            if (_p > _myProg && {_p < _aheadProg}) then { _aheadProg = _p };
+                            if (_p > _myProg && {_p < _aheadProg}) then { _aheadProg = _p; _ahead = _x };
                         };
                     } forEach _liveFollowers;
 
@@ -189,10 +194,19 @@ while {
                         };
                     };
 
-                    // Hold station on the hull ahead: speed ramps smoothly around the desired gap -- ease off
-                    // when tucked up (down to a stop bumper-to-bumper), open the throttle to close a gap. A
-                    // continuous law, not stepped bands, so the column does not pump between fixed speeds.
-                    private _fs = (CV_CRUISE_KMH + (_gap - CV_GAP_WANT) * CV_GAP_KP) max 0 min CV_CATCHUP_KMH;
+                    // Hold station by MATCHING the hull ahead's speed, with only a gentle spacing trim outside
+                    // a deadband. Speed off the gap alone is position-only control: on the 1.5 s tick it
+                    // overshoots the target gap and sets the column oscillating -- stretch, contract, repeat.
+                    // Matching the predecessor's velocity is what damps it, so gaps settle instead of hunting.
+                    // Inside the band: just match. Too close: stop, holding a minimum gap.
+                    private _aheadSpd = speed _ahead;   // km/h (`speed` and the CV_* speeds are km/h; forceSpeed converts)
+                    private _err = _gap - CV_GAP_WANT;
+                    private _fs = switch (true) do {
+                        case (_gap < CV_GAP_HARD):      { 0 };
+                        case (abs _err <= CV_GAP_BAND): { _aheadSpd };
+                        default                         { _aheadSpd + _err * CV_GAP_KP };
+                    };
+                    _fs = _fs max 0 min CV_CATCHUP_KMH;
                     _me forceSpeed KMH(_fs);
 
                     // A follower gone dead-slow while it is still meant to be moving is jammed: rock it off the
