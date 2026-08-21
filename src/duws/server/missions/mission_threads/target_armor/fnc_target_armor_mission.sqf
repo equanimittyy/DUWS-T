@@ -72,6 +72,19 @@ private _build = {
         [units _grp, "objective"] call fnc_search_flag_group;
     };
 
+    // Two ambient foot patrols working the zone alongside the vehicle column: extra opposition the
+    // player meets while hunting the patrol, deliberately NOT in the win census (that stays the vehicle
+    // crews returned below). Each owns its own half of the zone -- centres offset to opposite sides of
+    // the marked point on a random axis, at half the ring so each team's spawn and circuit stay in its
+    // half -- so the two roam wide (widepatrol) yet keep a zone-width apart rather than converging on
+    // one random walk. Claimed so teardown collects them with the rest of the patrol on mission end.
+    private _teamAxis = random 360;
+    {
+        private _teamCentre = _randomPos getPos [_radius * 0.5, _teamAxis + _x];
+        private _team = ["team", _teamCentre, _radius * 0.5, "widepatrol"] call fnc_spawn_team;
+        if (!isNull _team) then { [_team] call fnc_mission_claim };
+    } forEach [0, 180];
+
     // MOVE through each point, then CYCLE so the column laps the ring until it is broken.
     {
         private _wp = _grp addWaypoint [_x, 0];
