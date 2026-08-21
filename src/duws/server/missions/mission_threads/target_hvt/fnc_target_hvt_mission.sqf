@@ -326,12 +326,16 @@ waitUntil {
         [localize "STR_DUWS_T_ALLSEER", localize "STR_DUWS_T_hvtmidpoint"] remoteExec ["fnc_duws_dialogue", 0];
     };
     // First contact: peel the car out of the column into its own CARELESS group so it runs for the
-    // zone instead of halting to fight alongside the escorts. Triggered by the column going COMBAT or
-    // the car taking a hit. Its crew keep their claim stamp, so teardown still collects them.
-    if (!_split && alive _car && {
-        (!isNull _hvtColGrp && {count units _hvtColGrp > 0} && {behaviour (leader _hvtColGrp) == "COMBAT"})
-        || damage _car > 0
-    }) then {
+    // zone instead of halting to fight alongside the escorts. Gated on a real BLUFOR threat within 300 m
+    // of the car, so a convoy fender-bender -- which raises damage and can chain into a collision
+    // explosion -- does not spuriously launch it. Then triggered by the column going COMBAT or the car
+    // taking a hit. Its crew keep their claim stamp, so teardown still collects them.
+    if (!_split && alive _car
+        && {(allUnits findIf { side _x == west && {alive _x} && {_x distance2D _car < 300} }) >= 0}
+        && {
+            (!isNull _hvtColGrp && {count units _hvtColGrp > 0} && {behaviour (leader _hvtColGrp) == "COMBAT"})
+            || damage _car > 0
+        }) then {
         _split = true;
         ["DEBUG", "MISSION", format ["hvt debug: car split (carDmg=%1 hvtAlive=%2)", damage _car, alive _hvt]] call fnc_log;
         _carGrp = createGroup EAST;
