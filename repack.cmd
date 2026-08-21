@@ -1,5 +1,5 @@
 @echo off
-rem Repack the flat src\ mission source into DUWS_T.altis.pbo at the repo root.
+rem Repack the flat src\ mission source into DUWS_T_<hash>.altis.pbo at the repo root.
 rem Wraps the vendored PBO Manager console CLI (Windows only). See README.md.
 setlocal EnableExtensions
 cd /d "%~dp0"
@@ -14,8 +14,6 @@ exit /b %RC%
 
 :main
 set "PBOC=tools\PBO Manager\pboc.exe"
-set "MISSION=DUWS_T.altis"
-set "OUT=DUWS_T.altis.pbo"
 set "STAGE=%TEMP%\duws_t_pack"
 
 if not exist "%PBOC%" (
@@ -28,6 +26,30 @@ if not exist "src\mission.sqm" (
   echo [repack] ERROR: src\ has no mission.sqm. Run unpack.cmd first.
   exit /b 1
 )
+
+rem Build stamp names both the staged log line and the output .pbo, so the file
+rem in MPMissions\ self-identifies its source commit (a stale build reads exactly
+rem like a fix that failed). No git tree falls back to "nogit"; the mission still
+rem builds, it just cannot name itself.
+set "STAMP=nogit"
+for /f "delims=" %%i in ('git rev-parse --short HEAD 2^>nul') do set "STAMP=%%i"
+rem Scoped to src\ because only src\ is packed: a docs-only edit is not a different
+rem build. -dirty flags uncommitted src\ edits in the log; -d is its short form in
+rem the .pbo name. Set inside the loop so any number of dirty paths yields one suffix.
+set "DIRTY="
+set "DIRTYNAME="
+for /f "delims=" %%i in ('git status --porcelain -- src 2^>nul') do (
+  set "DIRTY=-dirty"
+  set "DIRTYNAME=-d"
+)
+rem Locale-independent, unlike %DATE%/%TIME%; powershell is already required below. The
+rem sortable 's' format is one bare token, so it needs no quotes nested inside the for.
+set "BUILT=unknown"
+for /f "delims=" %%i in ('powershell -NoProfile -Command "Get-Date -Format s"') do set "BUILT=%%i"
+
+rem Hash the commit into the .pbo name so each build is a distinct file on disk.
+set "MISSION=DUWS_T_%STAMP%%DIRTYNAME%.altis"
+set "OUT=%MISSION%.pbo"
 
 rem Confirm before overwriting the packed mission; default is No.
 if exist "%OUT%" (
@@ -53,34 +75,26 @@ if errorlevel 8 (
   exit /b 1
 )
 
-rem Stamp the staged copy so the mission's own log names the source it was packed from.
-rem Written here rather than into src\ so a repack never dirties the working tree and no
-rem generated hash is ever committed. A tree with no git falls back to "nogit"; the mission
-rem still builds, it just cannot name itself.
-set "STAMP=nogit"
-for /f "delims=" %%i in ('git rev-parse --short HEAD 2^>nul') do set "STAMP=%%i"
-rem Scoped to src\ because only src\ is packed: a docs-only edit is not a different build.
-rem Set inside the loop so any number of dirty paths still yields one suffix.
-set "DIRTY="
-for /f "delims=" %%i in ('git status --porcelain -- src 2^>nul') do set "DIRTY=-dirty"
-rem Locale-independent, unlike %DATE%/%TIME%; powershell is already required below. The
-rem sortable 's' format is one bare token, so it needs no quotes nested inside the for.
-set "BUILT=unknown"
-for /f "delims=" %%i in ('powershell -NoProfile -Command "Get-Date -Format s"') do set "BUILT=%%i"
-
+rem Write the same stamp into the staged copy, not src\, so a repack never dirties
+rem the working tree and no generated hash is ever committed. STAMP/DIRTY/BUILT are
+rem the values computed above for the .pbo name.
 echo [repack] Build stamp: %STAMP%%DIRTY% %BUILT%
 (
   echo // Generated into the staging tree by repack.cmd; see src\duws\shared\includes\build_stamp.hpp.
   echo #define DUWS_BUILD_STAMP "%STAMP%%DIRTY% %BUILT%"
 ) > "%STAGE%\%MISSION%\duws\shared\includes\build_stamp.hpp"
-if errorlevel 1 (
+rem robocopy exits 1 on success (files copied) and nothing between it and this write
+rem clears ERRORLEVEL, so verify the file exists rather than trust a stale ERRORLEVEL.
+if not exist "%STAGE%\%MISSION%\duws\shared\includes\build_stamp.hpp" (
   echo [repack] ERROR: could not write the build stamp.
   rmdir /s /q "%STAGE%"
   exit /b 1
 )
 
 echo [repack] Packing to %OUT% ...
-if exist "%OUT%" del /q "%OUT%"
+rem Remove any prior build left in the repo root so only this build's .pbo remains;
+rem each commit produces a distinctly-named .pbo and stale ones would otherwise pile up.
+del /q "DUWS_T*.altis.pbo" 2>nul
 "%PBOC%" pack "%STAGE%\%MISSION%" -o .
 if errorlevel 1 (
   echo [repack] ERROR: pboc.exe failed.

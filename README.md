@@ -13,8 +13,10 @@ Play it on the Steam Workshop:
 
 ## Repo layout
 
-This repo version-controls the **unpacked** mission source. `DUWS_T.altis.pbo` is
+This repo version-controls the **unpacked** mission source. The packed `.pbo` is
 build output, repacked from the source, and is **not** tracked (see `.gitignore`).
+`repack.cmd` names it after the source commit — `DUWS_T_<hash>.altis.pbo`, e.g.
+`DUWS_T_d016106.altis.pbo` — so the file on disk identifies the build it came from.
 Commit the unpacked `src/` source; leave the regenerated `.pbo` untracked.
 
 The mission's internal structure (the `modules/` vs `duws/` split, boot flow, and
@@ -45,25 +47,27 @@ won't run in the Linux devcontainer):
 - **`scripts/unpack.cmd`**: extracts `DUWS_T.altis.pbo` into a flat `src/` folder. Run it
   once to seed `src/`, then commit `src/`. It asks for confirmation first and warns
   that re-running replaces `src/` and discards edits.
-- **`repack.cmd`**: packs `src/` back into `DUWS_T.altis.pbo` at the repo root, asking
-  before it overwrites the `.pbo`, then normalizes the PBO's internal paths to Arma's
+- **`repack.cmd`**: packs `src/` back into `DUWS_T_<hash>.altis.pbo` at the repo root,
+  asking before it overwrites the `.pbo`, then normalizes the PBO's internal paths to Arma's
   backslash convention via `scripts/normalize_pbo.ps1`. The result is ready to load in Arma.
+  It first deletes any prior `DUWS_T*.altis.pbo` in the root, so only the newest build remains.
 
 Edit the mission as `.sqf` / `.hpp` / etc. under `src/`; the packed `.pbo` stays
 build output (git-ignored).
 
 `repack.cmd` also stamps the build into the staged copy, so the mission's first log line
 names the source it came from — `DUWS_T START ---- build d016106-dirty 2026-08-05T00:20:13`.
-The `-dirty` suffix means `src/` had uncommitted changes at pack time. Check it before
-trusting an `.rpt`: a stale `.pbo` in `MPMissions\` reads exactly like a fix that failed.
+The same hash goes in the `.pbo` filename, and the `-dirty` suffix (shortened to `-d` in the
+filename) means `src/` had uncommitted changes at pack time. Check it before trusting an
+`.rpt`: a stale `.pbo` in `MPMissions\` reads exactly like a fix that failed.
 
 ### 3. Load it in Arma for testing
 
-Copy `DUWS_T.altis.pbo` into the Arma 3 **install** folder's `MPMissions\`, e.g.
-`...\steamapps\common\Arma 3\MPMissions\`, **not** `Documents\Arma 3\MPMissions\`
+Copy the packed `DUWS_T_<hash>.altis.pbo` into the Arma 3 **install** folder's `MPMissions\`,
+e.g. `...\steamapps\common\Arma 3\MPMissions\`, **not** `Documents\Arma 3\MPMissions\`
 (local hosting reads the install folder). Then host a LAN / multiplayer game and select
 it from the list. The `<name>.<world>.pbo` filename is required: Arma reads the terrain
-from it.
+from the `.<world>.` part, so the `_<hash>` in the name is free to vary per build.
 
 Hosting this way runs the server and a client in one process, which hides every
 locality fault. Persistence, JIP and remote execution need a real dedicated server to
