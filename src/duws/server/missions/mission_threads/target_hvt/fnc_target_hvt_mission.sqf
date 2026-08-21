@@ -215,9 +215,10 @@ if (isNull _hvt) exitWith {
 
 { [_x] call fnc_mission_claim } forEach _groups;
 
-// TEMPORARY diagnostics for the "killed the HVT, nothing happened" report: which column carries him and
-// his car's id, so a playtest RPT tells apart hitting the wrong column from the officer surviving the
-// car's destruction. Remove once the win path is confirmed.
+// Standing DEBUG trace (silent unless duws_log_level is raised to 4) for the ambiguous "killed the HVT,
+// nothing happened" report: the offer fields three columns and only one carries him. His column index and
+// car id at spawn, the peel event, and the outcome at teardown tell hitting a decoy column apart from the
+// officer surviving his car's destruction -- from an RPT alone, without needing a live repro.
 ["DEBUG", "MISSION", format ["hvt debug: hvtIdx=%1 car=%2 carClass=%3 hvt=%4 starts=%5", _hvtIdx, netId _car, _hvtCarClass, netId _hvt, _convoyStarts]] call fnc_log;
 
 // Search ellipse on the convoy start cluster -- where the player is sent -- with a fix on each
