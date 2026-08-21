@@ -253,10 +253,15 @@ private _finish = {
 // security team stays mounted and only pours out if the convoy is hit; the clock advances only while a
 // crewman stands at the tank and no player has taken it.
 private _convoyCrew = units _convoyGrp;
-// Under attack = a convoy vehicle damaged or destroyed, or any man down. Keeps the security team riding on
-// an untouched run so it rides back out with the tank, and pours it out to fight the moment the column is hit.
+// Under attack = the column has gone to combat (spotted or engaged), or a convoy vehicle is damaged or
+// destroyed, or any man is down. The combat clause is load-bearing here: fnc_convoy_drive suppresses the
+// engine's automatic bail-on-contact (setUnloadInCombat [false,false]) to hold the riders through the run,
+// so without it the team would sit tight through a firefight until a truck actually crossed the damage bar --
+// a truck shrugs off small arms. Keeps the team riding an untouched run so it rides back out with the tank,
+// and pours it out to fight the moment contact lands.
 private _underAttack = {
-    (_convoyVeh findIf { !alive _x || {damage _x > 0.1} }) >= 0
+    (!isNull _convoyGrp && {behaviour (leader _convoyGrp) == "COMBAT"})
+    || {(_convoyVeh findIf { !alive _x || {damage _x > 0.1} }) >= 0}
     || {(_convoyCrew findIf { !alive _x }) >= 0}
     || {((_crewUnits + _teamUnits) findIf { !alive _x }) >= 0}
 };
@@ -301,11 +306,14 @@ while { true } do {
         [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_destroyarmour_fail"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
     };
 
-    // The security team pours out only once the convoy is actually hit, and fights where it stands -- at the
-    // tank if the ambush lands there, on the road if the player jumped the column en route.
+    // First contact drops the whole convoy mechanic: release the path-replay driver so every vehicle fights
+    // natively -- the escort stops to engage instead of being force-marched, the trucks halt where they are
+    // rather than driving rigidly on through the ambush. The security team pours out here and fights where it
+    // stands: at the tank if the ambush lands there, on the road if the player jumped the column en route.
     if (!_teamOut && {call _underAttack}) then {
         _teamOut = true;
         deleteMarker _arrow;
+        _convoyGrp setVariable ["DUWS_convoy_release", true];
         {
             if (alive _x) then { moveOut _x; unassignVehicle _x };
         } forEach _teamUnits;
@@ -360,9 +368,11 @@ while { true } do {
                     private _twp = _convoyGrp addWaypoint [_zonePos, 0];
                     _twp setWaypointType "MOVE";
                     _twp setWaypointSpeed _homeSpeed;
-                    // No new driver for the tank: it has joined _convoyGrp, and the convoy driver started at
-                    // spawn reads the group's hulls live, so it is already driving the tank home in column with
-                    // the trucks and escort on the freshly-added home waypoint.
+                    // No new driver spawned for the tank. On an unopposed run the spawn-time convoy driver is
+                    // still alive and reads the group's hulls live, so it picks up the freshly-joined tank and
+                    // marches the column home. On an ambushed run that driver was released at first contact (to
+                    // fight natively), so native AI drives the group home on the added waypoint at FULL -- the
+                    // race the _homeSpeed split already intends.
                     if (!isNull _teamGrp && {_teamOut}) then {
                         _teamGrp setBehaviour "AWARE";
                         private _rtb = _teamGrp addWaypoint [_zonePos, 0];
