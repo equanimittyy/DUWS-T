@@ -183,7 +183,7 @@ private _band = if (_hard) then {_hardBand} else {_frontierBand};
 // The features phase 2 surveys: town centres, or OPFOR zones as [centre, bandMin, bandMax] the realise
 // step feeds straight to findSafePos.
 private _features = if (_useTown) then {
-    _mLocs apply { position _x }
+    +_mLocs   // MissionLocations is already a list of town-centre positions
 } else {
     private _fs = _opforZoneCands apply { (_x select 0) params ["_zp", "_zs"]; [_zp, _zs, _zs + _band] };
     // Win state -- every zone BLUFOR-held: one HQ-ring feature so a non-convoy mission can still seat.
