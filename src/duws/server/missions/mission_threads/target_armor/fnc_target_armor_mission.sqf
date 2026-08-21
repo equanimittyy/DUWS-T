@@ -27,7 +27,7 @@ private _build = {
     DUWS_curReward set [1, (DUWS_curReward select 1) + (5 * _tier)];
 
     // Patrol points around the ring, snapped to roads so the column rides the network rather than cutting
-    // cross-country between them (Arma routes vehicles badly off-road -- see fnc_convoy_setup). Centred on
+    // cross-country between them (Arma routes vehicles badly off-road -- see fnc_convoy_drive). Centred on
     // the marked position so the patrol stays inside the drawn ellipse.
     private _pts = [];
     private _steps = 5;
@@ -83,10 +83,11 @@ private _build = {
     _cyc setWaypointType "CYCLE";
     _cyc setWaypointCompletionRadius 40;
 
-    // Reliability layer + stuck watchdog: road-lock, spacing, keep-crew-aboard, and a nudge for any jammed
-    // hull. Ends itself once no vehicle can move (patrol wiped), so no teardown hook is owed here.
-    [_grp, _vehs] call fnc_convoy_setup;
-    [_grp, _vehs] spawn fnc_convoy_watch;
+    // Path-replay driver: the lead laps the ring on its own waypoints and the other two trace its track, so
+    // they hold the road as a column instead of each pathing apart. It reads the group's hulls live. Ends
+    // itself once no vehicle can move (patrol wiped), so no teardown hook is owed here; the break flip below
+    // releases it to fight.
+    [_grp] spawn fnc_convoy_drive;
 
     // Speed-limited until broken: the first man down or hull hit lifts the limit and turns the patrol loose,
     // dropping its waypoints so the AI manoeuvres rather than lapping the ring. A wound past 0.3, not a
@@ -103,6 +104,9 @@ private _build = {
             || { (_crew findIf { !alive _x }) >= 0 }
         };
         if (!isNull _grp && {(units _grp) isNotEqualTo []}) then {
+            // Release the path-replay driver first: it must stop re-issuing setDriveOnPath and drop the speed
+            // caps, or the hulls stay committed to the track and never manoeuvre.
+            _grp setVariable ["DUWS_convoy_release", true];
             for "_i" from (count (waypoints _grp) - 1) to 1 step -1 do { deleteWaypoint [_grp, _i] };
             _grp setSpeedMode "FULL";
             _grp setBehaviour "COMBAT";

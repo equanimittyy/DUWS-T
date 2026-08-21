@@ -43,7 +43,7 @@ if (_site isEqualTo []) exitWith {};
 _site params ["_randomPos", "_Building", "_targetpos"];
 
 // The tank's exact ground: flat, hull-clear, and within ~100 m of a road so the inbound convoy can ride
-// the network to within fnc_convoy_watch's final-hop of the hull rather than road-locking short of an
+// the network to within fnc_convoy_drive's final-hop of the hull rather than road-locking short of an
 // off-network spot, and so the repaired tank starts its run home on that same network. Still set off the
 // carriageway so it reads as a derelict abandoned in the field. No road near the objective (a remote
 // site) falls back to the plain safe-pos by the target, accepting the longer off-road approach.
@@ -191,12 +191,11 @@ private _wp = _convoyGrp addWaypoint [_vehpos, 0];
 _wp setWaypointType "MOVE";
 _wp setWaypointCompletionRadius 40;
 
-// Reliability layer: road-lock + spacing + keep-crew-aboard, then the stuck watchdog. Arma's vehicle
-// route calculation stalls convoys on open ground and geometry; the watchdog nudges any hull that jams
-// and lifts the road-lock for the final hop to the tank. It reads the group's current waypoint live, so
-// it carries over when the repaired tank folds in and the column is re-tasked home. Ended in _finish.
-[_convoyGrp, _convoyVeh] call fnc_convoy_setup;
-[_convoyGrp, _convoyVeh] spawn fnc_convoy_watch;
+// Path-replay driver: the lead truck navigates to the tank and the rest of the column traces its track,
+// so Arma's bad off-road routing cannot wedge a follower cutting its own corner. It reads the group's
+// hulls and current waypoint live, so when the repaired tank joins the group and the column is re-tasked
+// home, the same driver picks the tank up and drives it in column. Ended in _finish.
+[_convoyGrp] spawn fnc_convoy_drive;
 
 private _place = [_randomPos] call fnc_place_name;
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_destroyarmour_start", _place]] remoteExec ["fnc_duws_dialogue", 0];
@@ -346,13 +345,9 @@ while { true } do {
                     private _twp = _convoyGrp addWaypoint [_zonePos, 0];
                     _twp setWaypointType "MOVE";
                     _twp setWaypointSpeed _homeSpeed;
-                    // Fold the tank into the convoy's reliability layer for the run home: forceFollowRoad
-                    // and a stuck watchdog on the hull too, so the escape is a real drive the player must
-                    // intercept rather than one the AI hands back by wedging. A watchdog of its own covers
-                    // just the tank -- the one spawned at the start still holds the trucks and escort -- and
-                    // both read this group's live home waypoint and end together in _finish.
-                    [_convoyGrp, [_tank]] call fnc_convoy_setup;
-                    [_convoyGrp, [_tank]] spawn fnc_convoy_watch;
+                    // No new driver for the tank: it has joined _convoyGrp, and the convoy driver started at
+                    // spawn reads the group's hulls live, so it is already driving the tank home in column with
+                    // the trucks and escort on the freshly-added home waypoint.
                     if (!isNull _teamGrp && {_teamOut}) then {
                         _teamGrp setBehaviour "AWARE";
                         private _rtb = _teamGrp addWaypoint [_zonePos, 0];

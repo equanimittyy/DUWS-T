@@ -144,7 +144,6 @@ while { count _startRoads < 3 } do {
 
 private _hvtIdx = floor random 3;
 private _groups = [];         // one group per convoy, index-aligned with the roll-out and the claim
-private _groupVehs = [];      // matching vehicle list per convoy, for the reliability layer + watchdog
 private _vias   = [];         // matching via point per convoy, index-aligned with _groups
 private _convoyStarts = [];   // one per convoy, for exactly three start markers (no tell)
 private _hvt = objNull;       // the target; split into his own CARELESS group on first contact
@@ -171,14 +170,12 @@ for "_i" from 0 to 2 do {
         // -- the player has to stop the car, not just spook the column.
         private _slots = [_start, _heading, 3, 22] call fnc_convoy_layout;
         _hvtColGrp = createGroup EAST;
-        private _hvtEscorts = [];   // escorts only -- the car peels off with its own watchdog at the split
         {
             (_slots select _x) params ["_sp", "_sd"];
             private _r = [_sp, _sd, call _rollEsc, EAST] call BIS_fnc_spawnVehicle;
             (_r select 0) setDir _sd;
             (_r select 2) deleteGroupWhenEmpty true;
             (_r select 1) joinSilent _hvtColGrp;
-            _hvtEscorts pushBack (_r select 0);
         } forEach [0, 2];
         (_slots select 1) params ["_cp", "_cd"];
         _car = createVehicle [_hvtCarClass, _cp, [], 0, "NONE"];
@@ -200,12 +197,10 @@ for "_i" from 0 to 2 do {
         _hvtColGrp deleteGroupWhenEmpty true;
         { [_x] call fnc_addRandomLoot } forEach units _hvtColGrp;
         _groups pushBack _hvtColGrp;
-        _groupVehs pushBack _hvtEscorts;
         _vias pushBack _via;
     } else {
-        ([[call _rollEsc, call _rollEsc, call _rollEsc], _start, _heading, "AWARE", "LIMITED"] call _spawnLine) params ["_grp", "_gvehs"];
+        ([[call _rollEsc, call _rollEsc, call _rollEsc], _start, _heading, "AWARE", "LIMITED"] call _spawnLine) params ["_grp"];
         _groups pushBack _grp;
-        _groupVehs pushBack _gvehs;
         _vias pushBack _via;
     };
 };
@@ -277,15 +272,10 @@ sleep _graceSec;
     _wpEnd setWaypointType "MOVE";
     _wpEnd setWaypointCompletionRadius 40;
 } forEach _groups;
-// Reliability layer per column, once they are rolling: road-lock + spacing + keep-crew-aboard, plus a
-// stuck watchdog that nudges any jammed hull and lifts the road-lock for the run into the off-road zone.
-// Spawned only now, after the grace hold, so it does not fight the columns sitting still at their starts.
-// Ended at teardown via DUWS_convoy_stop.
-{
-    private _gv = _groupVehs select _forEachIndex;
-    [_x, _gv] call fnc_convoy_setup;
-    [_x, _gv] spawn fnc_convoy_watch;
-} forEach _groups;
+// Path-replay driver per column, once they are rolling: the lead navigates and the rest trace its track,
+// so no follower wedges cutting its own corner into the zone. Spawned only now, after the grace hold, so
+// it does not drive the columns sitting still at their starts. Ended at teardown via DUWS_convoy_stop.
+{ [_x] spawn fnc_convoy_drive } forEach _groups;
 // Allseer calls the move the instant the columns are ordered out, so the player reads the race as
 // starting rather than watching for it.
 [localize "STR_DUWS_T_ALLSEER", format [localize "STR_DUWS_T_hvtmoveout", _destName]] remoteExec ["fnc_duws_dialogue", 0];
@@ -335,10 +325,11 @@ waitUntil {
         private _wp = _carGrp addWaypoint [_destPos, 0];
         _wp setWaypointType "MOVE";
         _wp setWaypointCompletionRadius 40;
-        // The peeled car gets its own reliability layer + watchdog: it commits to the zone alone now, so
-        // a jam on the final stretch would hand the player a win the mission does not intend.
-        [_carGrp, [_car]] call fnc_convoy_setup;
-        [_carGrp, [_car]] spawn fnc_convoy_watch;
+        // The peeled car gets its own driver on its new group: it commits to the zone alone now, so a jam
+        // on the final stretch would hand the player a win the mission does not intend. A lone hull has no
+        // follower to trace it -- the driver just navigates and nudges it, which is what the car needs. The
+        // column's driver drops the car the moment its driver left that group, so the two never both drive it.
+        [_carGrp] spawn fnc_convoy_drive;
     };
     if (!alive _hvt) exitWith { _outcome = "WIN"; true };
     if (_hvt distance2D _destPos < _arrive) exitWith { _outcome = "ESCAPED"; true };

@@ -109,10 +109,10 @@ fnc_mission_begin = compile preprocessFileLineNumbers "duws\server\missions\fnc_
 fnc_mission_claim = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_claim.sqf";
 fnc_mission_run = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_run.sqf";
 
-// Shared convoy driving: road-column layout, reliability config + stuck watchdog, used by the HVT hunt and the deny-armour convoy.
+// Shared convoy driving: road-column spawn layout, then a path-replay driver (lead navigates, followers
+// replay the lead's track) used by the HVT hunt, the deny-armour convoy and the roving vehicle patrol.
 fnc_convoy_layout = compile preprocessFileLineNumbers "duws\server\misc\fnc_convoy_layout.sqf";
-fnc_convoy_setup = compile preprocessFileLineNumbers "duws\server\misc\fnc_convoy_setup.sqf";
-fnc_convoy_watch = compile preprocessFileLineNumbers "duws\server\misc\fnc_convoy_watch.sqf";
+fnc_convoy_drive = compile preprocessFileLineNumbers "duws\server\misc\fnc_convoy_drive.sqf";
 
 fnc_rescue_squad_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_mission.sqf";
 fnc_rescue_squad_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_success.sqf";

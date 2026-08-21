@@ -1260,6 +1260,36 @@ first contact ends up on foot, and the mission is to stop his car, not chase a r
 above is the boundary — lock only where a stuck occupant is intended, never where the men must be
 able to flee a dying vehicle.
 
+## `setDriveOnPath` commits a driver to the path and ignores waypoints, formation and combat
+
+**A hull under `setDriveOnPath [positions]` drives that exact polyline and nothing else: it overrides
+the group's waypoints and formation, and the driver will not manoeuvre or break to fight while the
+order stands — turrets still engage, but the driver just drives.** This is the whole point for a
+convoy that must reach its goal (`fnc_convoy_drive`: the lead navigates normally, every follower
+replays the lead's driven track, so no follower pathfinds its own corner into a wall), but it is
+exactly wrong where the hulls must fight. To hand a hull back to native AI, clear the order with an
+empty path (`_veh setDriveOnPath []`) and drop any `forceSpeed` cap; the roving patrol does this via
+`DUWS_convoy_release`, the driver clears every path on that flag and lets combat AI take over.
+
+Two consequences the driver design turns on. First, a hull whose driver moves to a new group (the HVT
+car peeling out) keeps its old path order until something clears it, so the loop that takes the hull
+over clears the path the first time it sees it, or the hull traces the wrong track. Second, the lead
+must be the **frontmost** hull, because the followers trace the lead's breadcrumb trail: Arma migrates
+group leadership on a death to any survivor, and if it lands on a hull at the *back* of the column every
+hull ahead would trace the trail backward toward it — the whole column reverses into a jam. So the loop
+keeps leadership on the frontmost hull (highest trail progress) with `selectLeader`, with hysteresis so
+bunched front vehicles do not swap it every tick. `selectLeader` is safe here only because one loop owns
+each group; when two loops shared a group they flipped leadership every tick, which is why the deny tank
+now *joins* the running convoy loop instead of getting a second one.
+
+## `group` of a vehicle object does not reliably name the crew's group
+
+**`group _vehicle` is defined for units (men), not for a vehicle hull; on a crewed vehicle it does not
+dependably return the driver/crew's group.** To decide which hulls a group drives, work from the men:
+`fnc_convoy_drive` walks `units _group` and takes the vehicle of each man that is his vehicle's driver,
+so the hull list is built from group membership, never by asking a hull which group it is in. A hull
+whose driver has left the group (the peeled HVT car) drops out of the list for free the next tick.
+
 ## A runtime error inside a `call`ed function halts the whole calling script, not just the callee
 
 **An unhandled runtime error — a wrong type to a command, a nil where a value is needed — in a
@@ -1273,10 +1303,11 @@ If the helper throws, the thread stops at the `call` — the monitor never spawn
 neither be won nor failed. The mission looks dead for no reason a reader can see, because the only
 error line points at the unrelated-looking helper.
 
-`setConvoySeparation` and `setUnloadInCombat` are how this bit here: both take an **Object** (the
-vehicle) on the left, not a Group — the wiki's `groupName` wording misleads. Passing a group throws
-`Type Group, expected Object`, and as the first statement of the shared convoy setup helper it killed
-the calling mission thread before its monitor, so killing the target did nothing.
+`setUnloadInCombat` is how this bit here: it takes an **Object** (the vehicle) on the left, not a
+Group — the wiki's `groupName` wording misleads. Passing a group throws `Type Group, expected Object`,
+and when such a call sat as the first statement of a convoy setup helper `call`ed before the mission's
+monitor spawned, the throw killed the whole thread before the monitor existed, so killing the target
+did nothing. (The convoy driver `fnc_convoy_drive` now applies it per-vehicle in a `forEach`.)
 
 **How to apply:** apply per-vehicle in a `forEach _vehicles`, never to the group. More generally,
 treat any `call` before a load-bearing loop as able to take the whole script with it: keep such setup
