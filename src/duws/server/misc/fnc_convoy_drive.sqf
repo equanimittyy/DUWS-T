@@ -282,8 +282,11 @@ while {
                         _fs = _fs max 0 min CV_CATCHUP_KMH;
                         // Straight-line safety against overtaking: the along-track gap cannot tell "just behind
                         // the hull ahead" from "just past it", so on the coarse tick a fast closer can slip by.
-                        // Physically tucked inside the target gap, never outrun the hull ahead.
-                        if ((_me distance2D _ahead) < CV_GAP_WANT) then { _fs = _fs min (_aheadSpd max 0) };
+                        // Physically tucked inside the target gap, never outrun the hull ahead -- but only while
+                        // that hull is actually rolling. `speed` dips to ~0 on turns and at a setDriveOnPath
+                        // micro-stop; clamping to a spurious zero pins the follower dead, and the tail (the last
+                        // hull) accumulates every upstream blip -- the "last vehicle randomly stops" wedge.
+                        if ((_me distance2D _ahead) < CV_GAP_WANT && {_aheadSpd > CV_STUCK_KMH}) then { _fs = _fs min _aheadSpd };
                         _me forceSpeed KMH(_fs);
 
                         // Jammed too long -> trigger a column regroup. The counter accumulates while the follower
