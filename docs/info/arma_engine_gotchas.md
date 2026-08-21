@@ -1248,6 +1248,18 @@ dead, dying or still-moving vehicle refuses the ordered dismount, and a locked-i
 truck is worse than the foot approach the lock was meant to improve — so the escape must be
 unconditional.
 
+**`lock true` is the harder hold, for when the occupant must never leave.** `setUnloadInCombat`
+suppresses only the *automatic* dismount, and only from the frame it is applied: a unit can still be
+ordered out, and nothing holds it in the window between crewing and the call. When keeping the
+occupant aboard is the *goal* rather than a step before a scripted dismount, lock the vehicle
+(`_veh lock true`) right after `moveIn` — it blocks entry and exit for the whole lifecycle, rides
+through a group re-join (lock is on the vehicle, not the group), and does not impede the AI driving
+its waypoints. The convoy-hunt HVT rides a locked car for exactly this: an AI commander who bails on
+first contact ends up on foot, and the mission is to stop his car, not chase a runner
+(`server/missions/mission_threads/target_hvt/fnc_target_hvt_mission.sqf`). The burning-truck caveat
+above is the boundary — lock only where a stuck occupant is intended, never where the men must be
+able to flee a dying vehicle.
+
 ## A runtime error inside a `call`ed function halts the whole calling script, not just the callee
 
 **An unhandled runtime error — a wrong type to a command, a nil where a value is needed — in a

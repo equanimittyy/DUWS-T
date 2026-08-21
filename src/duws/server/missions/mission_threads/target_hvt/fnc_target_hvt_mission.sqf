@@ -187,6 +187,10 @@ for "_i" from 0 to 2 do {
         _driver moveInDriver _car;
         _hvt = _hvtColGrp createUnit [opfor_OFFICER_X, _cp, [], 0, "NONE"];
         _hvt moveInCargo _car;
+        // Lock the car so neither HVT nor driver disembarks: an AI in a vehicle bails when its group
+        // goes COMBAT or the car halts, and a commander on foot breaks the hunt -- the player must stop
+        // the car, not chase a runner. Lock does not impede the AI driving its waypoints.
+        _car lock true;
         _hvt addHeadgear "H_Beret_blk";
         _hvt addMagazineGlobal "FileTopSecret";
         _hvtColGrp setBehaviour "AWARE";
