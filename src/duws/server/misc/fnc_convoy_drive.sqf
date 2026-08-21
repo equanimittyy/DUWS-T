@@ -25,6 +25,11 @@
 // reach its goal (the fleeing HVT car, the escaping tank). Where the hulls must instead break and fight
 // (the roving patrol), the caller sets DUWS_convoy_release on the group: path orders and speed caps drop
 // and native combat AI takes the hulls back. DUWS_convoy_stop ends it the same way at teardown.
+//
+// A follower that sits jammed too long stops replaying the rigid trace (which it evidently cannot follow
+// from where it is wedged) and navigates INDEPENDENTLY back to the hull ahead, best effort, staying in the
+// group; it resumes the trace once it rejoins. No teleport and no physics impulse -- just native pathing
+// re-run from a free position, which frees it where nudging a fixed line did not.
 params ["_group"];
 
 #define CV_TICK        1.5
@@ -32,8 +37,9 @@ params ["_group"];
 #define CV_TRAIL       40      // keep only the last N crumbs (~320 m): longer than any column, short enough
                                // that a CYCLE patrol's looping track never snaps a follower onto an old lap
 #define CV_STUCK_KMH   3       // at or below this, treat a hull as halted
-#define CV_KICK_AT     1       // ticks halted before the lead's move is re-issued
-#define CV_SHOVE_AT    3       // ticks halted before the reverse impulse
+#define CV_LEAD_RETRY  3       // ticks the lead sits halted before its move order is re-issued (native retry)
+#define CV_RECOVER_AT  10      // ticks a follower sits jammed (~15 s) before it goes independent to rejoin
+#define CV_REJOIN      25      // a recovering follower back within this of the hull ahead resumes the trace
 #define CV_FINAL_HOP   120     // within this of the waypoint, drop the lead's road-lock for the off-road approach
 
 // forceSpeed takes m/s. If an in-game check (a truck given `forceSpeed 8` rolls at ~29 km/h) proves it
@@ -54,6 +60,7 @@ params ["_group"];
 
 private _crumbs = [];             // the lead's driven track, oldest first: a coarse polyline of real ground
 private _stuck  = createHashMap;  // netId -> consecutive halted ticks
+private _recover = createHashMap; // netId -> true while a follower is self-navigating back to the column
 private _pathed = createHashMap;  // netId -> true while a hull holds a setDriveOnPath order
 private _issued = createHashMap;  // netId -> [startIdx, crumbCount] last handed to setDriveOnPath (skip re-issue)
 private _seen   = createHashMap;  // netId -> hull, every hull configured once (one-time setup + teardown reset)
@@ -178,64 +185,75 @@ while {
                     private _gap = if (_myProg < 0) then { CV_GAP_WANT } else { ((_aheadProg - _myProg) * CV_STEP) max 0 };
                     if (_gap > _maxGap) then { _maxGap = _gap };
 
-                    // Until the track has a couple of crumbs the followers just aim at the destination; once it
-                    // does, replay the lead's line from just behind this hull to the live head. Re-issue only
-                    // when the slice changed, so a parked column is not re-ordered every tick.
-                    if (count _crumbs < 2 || {_myProg < 0}) then {
-                        _me doMove _wpPos;
-                    } else {
-                        private _startIdx = (_myProg - 1) max 0;
-                        private _sig = [_startIdx, count _crumbs];
-                        if (!((_issued getOrDefault [_meId, []]) isEqualTo _sig)) then {
-                            private _path = (_crumbs select [_startIdx]) + [getPosATL _lead];
-                            _me setDriveOnPath _path;
-                            _issued set [_meId, _sig];
-                            _pathed set [_meId, true];
+                    // Recovery mode: a follower jammed for CV_RECOVER_AT ticks abandons the rigid trace (which
+                    // it cannot follow from where it is wedged) and drives INDEPENDENTLY to the hull ahead --
+                    // native pathing picks its own way out, best effort, while it stays in the group. It rejoins
+                    // the trace once back within CV_REJOIN. The lead is already halting for it (its widening
+                    // along-track gap drives _maxGap), so this is the leader-waits, follower-catches-up regroup.
+                    if (_recover getOrDefault [_meId, false]) then {
+                        if (_pathed getOrDefault [_meId, false]) then { _me setDriveOnPath []; _pathed set [_meId, false] };
+                        _me doMove (getPosATL _ahead);
+                        _me forceSpeed KMH(CV_CATCHUP_KMH);
+                        if ((_me distance _ahead) < CV_REJOIN) then {
+                            _recover set [_meId, false];
+                            _issued set [_meId, []];   // force a fresh trace on the next normal tick
+                            _stuck  set [_meId, 0];
                         };
-                    };
+                    } else {
+                        // Normal mode: replay the lead's proven-drivable line. Until the track has a couple of
+                        // crumbs, just aim at the destination. Re-issue only when the slice changed, so a parked
+                        // column is not re-ordered every tick.
+                        if (count _crumbs < 2 || {_myProg < 0}) then {
+                            _me doMove _wpPos;
+                        } else {
+                            private _startIdx = (_myProg - 1) max 0;
+                            private _sig = [_startIdx, count _crumbs];
+                            if (!((_issued getOrDefault [_meId, []]) isEqualTo _sig)) then {
+                                private _path = (_crumbs select [_startIdx]) + [getPosATL _lead];
+                                _me setDriveOnPath _path;
+                                _issued set [_meId, _sig];
+                                _pathed set [_meId, true];
+                            };
+                        };
 
-                    // Hold station by MATCHING the hull ahead's speed, with only a gentle spacing trim outside
-                    // a deadband. Speed off the gap alone is position-only control: on the 1.5 s tick it
-                    // overshoots the target gap and sets the column oscillating -- stretch, contract, repeat.
-                    // Matching the predecessor's velocity is what damps it, so gaps settle instead of hunting.
-                    // Inside the band: just match. Too close: stop, holding a minimum gap.
-                    private _aheadSpd = speed _ahead;   // km/h (`speed` and the CV_* speeds are km/h; forceSpeed converts)
-                    private _err = _gap - CV_GAP_WANT;
-                    private _fs = switch (true) do {
-                        case (_gap < CV_GAP_HARD):      { 0 };
-                        case (abs _err <= CV_GAP_BAND): { _aheadSpd };
-                        default                         { _aheadSpd + _err * CV_GAP_KP };
-                    };
-                    _fs = _fs max 0 min CV_CATCHUP_KMH;
-                    _me forceSpeed KMH(_fs);
+                        // Hold station by MATCHING the hull ahead's speed, with only a gentle spacing trim
+                        // outside a deadband. Speed off the gap alone is position-only control: on the 1.5 s
+                        // tick it overshoots and sets the column oscillating -- matching the predecessor's
+                        // velocity damps it. Inside the band: just match. Too close: stop, holding a minimum gap.
+                        private _aheadSpd = speed _ahead;   // km/h (`speed` and the CV_* speeds are km/h; forceSpeed converts)
+                        private _err = _gap - CV_GAP_WANT;
+                        private _fs = switch (true) do {
+                            case (_gap < CV_GAP_HARD):      { 0 };
+                            case (abs _err <= CV_GAP_BAND): { _aheadSpd };
+                            default                         { _aheadSpd + _err * CV_GAP_KP };
+                        };
+                        _fs = _fs max 0 min CV_CATCHUP_KMH;
+                        _me forceSpeed KMH(_fs);
 
-                    // A follower gone dead-slow while it is still meant to be moving is jammed: rock it off the
-                    // snag and force a fresh trace next tick.
-                    if (speed _me < CV_STUCK_KMH && {_fs > CV_STUCK_KMH}) then {
-                        private _n = (_stuck getOrDefault [_meId, 0]) + 1;
-                        _stuck set [_meId, _n];
-                        if (_n >= CV_SHOVE_AT) then {
-                            _me setVelocityModelSpace [0, -3.5, 0];
-                            _issued set [_meId, []];
+                        // Jammed too long -> hand it to recovery. The counter accumulates while the follower is
+                        // meant to be moving but is not, and clears only when it actually moves, so a brief snag
+                        // is told apart from a genuine wedge.
+                        if (speed _me < CV_STUCK_KMH && {_fs > CV_STUCK_KMH}) then {
+                            private _n = (_stuck getOrDefault [_meId, 0]) + 1;
+                            _stuck set [_meId, _n];
+                            if (_n >= CV_RECOVER_AT) then { _recover set [_meId, true] };
+                        } else {
                             _stuck set [_meId, 0];
                         };
-                    } else {
-                        _stuck set [_meId, 0];
                     };
                 } forEach _liveFollowers;
 
                 // Lead speed governs the whole column: full cruise while it is closed up, easing to a halt as
                 // the widest inter-hull gap opens past CV_LAG_OK, so a lagging follower is never left behind.
-                // Nudge a jam -- re-issue the move, then a reverse impulse -- only while the lead is actually
-                // meant to be moving (not when it is deliberately halted waiting for the tail) and on the long
+                // If the lead itself jams, re-issue its move so native navigation retries a route -- only while
+                // it is meant to be moving (not when deliberately halted waiting for the tail) and on the long
                 // haul (the off-road final approach is legitimately slow).
                 private _factor = ((CV_LAG_STOP - _maxGap) / (CV_LAG_STOP - CV_LAG_OK)) max 0 min 1;
                 _lead forceSpeed KMH(CV_CRUISE_KMH * _factor);
                 if (_factor > 0 && {!_leadNear} && {speed _lead < CV_STUCK_KMH}) then {
                     private _n = (_stuck getOrDefault [_leadId, 0]) + 1;
+                    if (_n >= CV_LEAD_RETRY) then { _lead doMove _wpPos; _n = 0 };
                     _stuck set [_leadId, _n];
-                    if (_n == CV_KICK_AT || {_n == CV_SHOVE_AT}) then { _lead doMove _wpPos };
-                    if (_n >= CV_SHOVE_AT) then { _lead setVelocityModelSpace [0, -3.5, 0]; _stuck set [_leadId, 0] };
                 } else {
                     _stuck set [_leadId, 0];
                 };
