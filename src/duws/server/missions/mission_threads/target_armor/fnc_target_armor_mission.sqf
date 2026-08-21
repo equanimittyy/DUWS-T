@@ -40,13 +40,18 @@ private _build = {
     private _start = _pts select 0;
     private _heading = [_start, _pts select 1] call BIS_fnc_dirTo;
 
+    // Lay the three as a spaced column ON the road toward the first patrol point, so trailing hulls sit
+    // on the carriageway facing the road's tangent -- not a straight offset back from the start that
+    // ignores the road's curve and faces a map bearing, which left hulls crossways and shoved apart.
+    private _slots = [_start, _heading, 3, 20] call fnc_convoy_layout;
+
     // Crews merged into one group so the three road-march as a column instead of pathing apart.
     private _grp = createGroup EAST;
     private _vehs = [];
     for "_i" from 0 to 2 do {
-        private _p = _start getPos [_i * 20, _heading + 180];
-        private _r = [_p, _heading, _vehClass, EAST] call BIS_fnc_spawnVehicle;
-        (_r select 0) setDir _heading;
+        (_slots select _i) params ["_sp", "_sd"];
+        private _r = [_sp, _sd, _vehClass, EAST] call BIS_fnc_spawnVehicle;
+        (_r select 0) setDir _sd;
         (_r select 2) deleteGroupWhenEmpty true;
         (_r select 1) joinSilent _grp;
         _vehs pushBack (_r select 0);

@@ -3756,8 +3756,8 @@
                 <English>Steal Builder Vehicle</English>
             </Key>
             <Key ID="STR_DUWS_T_c7">
-                <Original>Eliminate Vehicle Patrol</Original>
-                <English>Eliminate Vehicle Patrol</English>
+                <Original>Destroy Vehicle Patrol</Original>
+                <English>Destroy Vehicle Patrol</English>
             </Key>
             <Key ID="STR_DUWS_T_c8">
                 <German>Laptop zerstören</German>
@@ -4175,8 +4175,8 @@
                 <English>Patrol scales with enemy strength. Motorised: 15/20, Mechanised: 25/25, Armor: 35/30 (CP/AP)</English>
             </Key>
             <Key ID="STR_DUWS_T_c18">
-                <Original>Deny enemy armor</Original>
-                <English>Deny enemy armor</English>
+                <Original>Deny Enemy Armor</Original>
+                <English>Deny Enemy Armor</English>
             </Key>
             <Key ID="STR_DUWS_T_destroyarmour_desc">
                 <Original>Our air support caught an enemy tank in the open and disabled it, but its hull is intact and a recovery convoy is already inbound to get it running. Destroy the tank, or kill the crew before they recover it and drive it back to their lines. Be advised the convoy moves in under armed escort.</Original>
