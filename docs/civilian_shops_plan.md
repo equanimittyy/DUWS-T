@@ -2,8 +2,9 @@
 
 Grow the living-population civilian system into a small economy: named vendor NPCs stand in towns,
 sell to the player for money, and dispatch paid jobs. The theme is borrowed from the "shops and
-jobs" life scenarios — a car dealer, an arms dealer, a mercenary contractor, a job office, a
-garbage round — but every piece is built on the mission's existing plumbing rather than a parallel
+jobs" life scenarios — a car dealer, a boat dealer, an arms dealer, a mercenary contractor, a post
+office, a garbage depot — but every piece is built on the mission's existing plumbing rather than a
+parallel
 one: vendors are ordinary streamed civilians, purchases move the physical money item, and jobs are
 gated on the existing civilian disguise.
 
@@ -48,13 +49,18 @@ dealer or a car dealer. Larger towns carry more vendors; town size is read from 
 count already computed per town (`fnc_usableBuildings.sqf`, the same count that sets the town radius
 in `fnc_civ_init_Tomata.sqf`). The assignment lands in the persistent vendor registry and is replayed
 on load, never re-rolled, so a town's shops do not shuffle across a save. Vendor spots within a town
-are picked from that same building survey.
+are picked from that same building survey. Some vendors are location-gated as well as size-scaled — a
+fishmonger only in a coastal town, a farmer only where there is farmland — so a town's mix reflects
+where it is, not only how big it is.
 
 **Service is gated, not spawning.** Vendors stand in every town including enemy-held ones, but a
-vendor in a hostile town **refuses to trade** — the menu opens to a refusal line ("not while they're
-watching"), never the shop. Reuse the town-reputation read the disguise already uses to break in an
-enemy-held town (`fnc_civ_repAt`, the `<= -10` test in `fnc_disguiseAsCivilian.sqf`). This makes
+**shop** in a hostile town **refuses to sell** — the menu opens to a refusal line ("not while they're
+watching"), never the catalogue. Reuse the town-reputation read the disguise already uses to break in
+an enemy-held town (`fnc_civ_repAt`, the `<= -10` test in `fnc_disguiseAsCivilian.sqf`). This makes
 capturing an area the thing that opens its shops, without needing a separate "friendly town" list.
+**Job employers are the exception**: mundane labour is plausible cover, so an employer still dispatches
+its job in a hostile town — that is exactly the reason a disguised operator has to be there (see
+[Jobs](#jobs)).
 
 **Lifecycle: streamed with the crowd, not always-on.** Persistent AI in every town across Altis is a
 perf cost the mission cannot pay. Vendors ride the same site poller as the crowd — register them as
@@ -68,14 +74,55 @@ only once the cooldown has elapsed. Store the cooldown as **remaining seconds, n
 survive a save/restore (`campaign_persistence_plan.md`, time-state rule). While the cooldown is
 live, the town simply lacks that vendor and its service.
 
-## Map markers
+## Map markers and icons
 
-Each vendor type gets a global marker (`createMarker`, server-side, so it replicates and is carried
-by a save) with a distinct icon per type. Follow the zone-marker idiom in `fnc_createzone.sqf:47-69`;
-do not use the local per-object registry (`kndr_assignMarker`), which is per-machine and would not
-survive JIP or a save cleanly. Reveal markers only for towns the player has discovered, keyed on the
-same visibility flag the zone markers use (`setMarkerAlpha`), so the map is not pre-populated with
-every shop on the island.
+Each vendor gets a global marker (`createMarker`, server-side, so it replicates and rebuilds cleanly)
+with an icon per type. Follow the zone-marker idiom in `fnc_createzone.sqf:47-69`; do not use the
+local per-object registry (`kndr_assignMarker`), which is per-machine and survives neither JIP nor a
+rebuild. Reveal a town's markers only once the player has discovered it, keyed on the same visibility
+flag the zone markers use (`setMarkerAlpha`), so the map is not pre-populated with every shop on the
+island.
+
+**Icons.** Vanilla `CfgMarkers` has no trash, fish, farm, mail, or car glyph, so the mapping is
+nearest-fit built-ins where one reads clearly, and the civilian icon (`c_unknown`, already in use
+here) as the last resort. Every marker also carries the vendor's name as text (`setMarkerText`), so a
+fallback icon is never ambiguous — the label reads "Fishmonger" even when the glyph is the generic
+civilian one. The classes below are the vanilla set; the ones already used in this mission
+(`c_unknown`, `c_supplycrate_f`, `loc_Hospital`, `loc_tourism`, `loc_Bunker`, the `hd_*` and
+`b_/o_/n_` icons) are known-good, the rest are standard but worth a spelling check against the config.
+
+| Vendor | Icon | Reads as |
+|---|---|---|
+| Car Dealer | `loc_Fuelstation` | fuel pump / garage |
+| Boat dealer | `loc_Quay` | harbour |
+| Arms Dealer | `c_supplycrate_f` | goods crate |
+| Contractor | `n_inf` | independent riflemen (guerilla/PMC) |
+| Garbage depot | `c_unknown` | no glyph; label carries it |
+| Post office | `loc_Transmitter` | communications |
+| Taxi rank | `loc_BusStop` | transport pickup |
+| Haulage depot | `loc_Stack` | industrial / warehouse |
+| Mechanic | `hd_service` | wrench |
+| Utility works | `loc_Power` | power line |
+| Farmer | `c_unknown` | no glyph; label carries it |
+| Fishmonger | `loc_Quay` or `c_unknown` | harbour / fallback |
+
+None of these is load-bearing — swap any icon freely, the label is what identifies the vendor. If the
+icon shortage grates, the alternative is a few custom `.paa` glyphs declared in `description.ext`
+`CfgMarkers`, but that is art and portability cost for a cosmetic win, so it is a later polish.
+
+**Two marker states, driven by the respawn registry.** A live vendor's marker is coloured; a dead one
+is grey until it respawns. Use the civilian colour `ColorCIV` (purple, matching the `c_` icons) for
+the open state and grey for the down state. On the vendor's `Killed` handler the server sets the
+marker grey and stamps the five-minute cooldown (as [remaining seconds](#persistence-contract)); when
+the cooldown elapses and the poller respawns the vendor, the server restores `ColorCIV`. Because the
+marker state is a function of the registry's cooldown, not of the live unit, it stays correct across a
+town sleeping and waking and across a rebuild — the marker is redrawn grey or coloured from the stored
+cooldown, never from a unit handle.
+
+Grey needs one check: confirm `ColorGrey` exists in `CfgMarkerColors` on this build. If it does not,
+use `ColorBlack` (definitely present, reads as a dead marker) or declare a custom `class ColorDUWS_Grey`
+once in `description.ext` `CfgMarkerColors`. Optionally also drop the marker alpha while down
+(`setMarkerAlpha 0.5`) so grey plus dim reads unmistakably as "closed."
 
 ## Interaction and menus
 
@@ -88,13 +135,21 @@ purpose-built dialog like `civ_menu.hpp` for the ones with a catalogue. The serv
 
 ## Vendor types
 
-| Vendor | Offers | Built on |
+Vendors come in two kinds: **shops** that sell to the player, and **employers** that dispatch a job.
+The shops:
+
+| Shop | Sells | Built on |
 |---|---|---|
-| Car Dealer | civilian vehicles for money | `civ_veh_array` pool; empty-vehicle spawn as in `fnc_veh_drop.sqf` |
-| Arms Dealer | weapons/gear for money | virtual arsenal already seeded by `fnc_scanCivilianGear.sqf`; a money-gated pick |
-| Contractor | hire AI groups (guerilla/PMC) into High Command | `fnc_HCsquad_spawn.sqf` + `hcSetGroup`; see below |
-| Job Office | job board: dispatches jobs | new dispatcher |
-| Garbage round | job: collect rubbish around town | new job loop |
+| Car Dealer | civilian vehicles | `civ_veh_array` pool; empty-vehicle spawn as in `fnc_veh_drop.sqf` |
+| Boat dealer | civilian boats | civilian boat classes, same empty-vehicle spawn; pairs with deep-water fishing |
+| Arms Dealer | weapons and gear | virtual arsenal already seeded by `fnc_scanCivilianGear.sqf`; a money-gated pick |
+| Contractor | AI groups (guerilla/PMC) into High Command | `fnc_HCsquad_spawn.sqf` + `hcSetGroup`; see below |
+
+The employers are one per job — a post office for the courier run, a fishmonger for the catch, a
+farmer for the farm pickup, and so on. Each is listed against its job in [Jobs](#jobs); they are
+vendors too, placed, marked, streamed, and persisted exactly like the shops. The one behavioural
+difference is the hostile-town gate below: a shop refuses to sell there, but an employer keeps
+dispatching, which is the cover a disguised operator wants.
 
 ### Contractor
 
@@ -130,16 +185,16 @@ Under the skins the jobs reduce to three reusable primitives: collect a quota at
 transport a passenger or cargo to a destination, and drive to a target for a hold-action then return.
 Build the three and each job is a skin on one, which keeps the set cheap to grow.
 
-| Job | What | Built on |
-|---|---|---|
-| Garbage round | pick up rubbish scattered around a town with a hold-action until a quota is met | rubbish markers around town + `BIS_fnc_holdActionAdd` (as `fnc_intel_search_action.sqf`) |
-| Postal courier | deliver a package to another town | traffic road data (`fnc_civ_traffic.sqf`) |
-| Taxi / transport | pick up an AI civilian passenger and drop them at a destination, which may be another town | spawn a civ passenger, `moveInCargo`, destination marker |
-| Cargo haul | truck crates between towns; slower, more exposed on the road | vehicle + crate cargo, road route |
-| Roadside assistance | drive to a broken-down civilian vehicle somewhere and repair it with a hold-action | spawn a damaged `civ_veh_array` vehicle at a marker + hold-action repair |
-| Utility repair | restore power or water at a town's infrastructure marker with a hold-action; completion raises the town's reputation | go-fix primitive + `fnc_town_rep_adjust` |
-| Farm pickup | drive to a rural farm, collect a crate, and return it to the town | transport primitive: a crate at a rural marker, delivered back |
-| Fishing | on foot at a coastal spot, a hold-action rolls a weighted catch table until a quota, then paid | water-spot marker + `surfaceIsWater` check + `BIS_fnc_holdActionAdd`; `selectRandomWeighted` catch table |
+| Job | Employer | What | Built on |
+|---|---|---|---|
+| Garbage round | Garbage depot | pick up rubbish scattered around a town with a hold-action until a quota is met | rubbish markers around town + `BIS_fnc_holdActionAdd` (as `fnc_intel_search_action.sqf`) |
+| Postal courier | Post office | deliver a package to another town | traffic road data (`fnc_civ_traffic.sqf`) |
+| Taxi / transport | Taxi rank | pick up an AI civilian passenger and drop them at a destination, which may be another town | spawn a civ passenger, `moveInCargo`, destination marker |
+| Cargo haul | Haulage depot | truck crates between towns; slower, more exposed on the road | vehicle + crate cargo, road route |
+| Roadside assistance | Mechanic | drive to a broken-down civilian vehicle somewhere and repair it with a hold-action | spawn a damaged `civ_veh_array` vehicle at a marker + hold-action repair |
+| Utility repair | Utility works | restore power or water at a town's infrastructure marker with a hold-action; completion raises the town's reputation | go-fix primitive + `fnc_town_rep_adjust` |
+| Farm pickup | Farmer | drive to a rural farm, collect a crate, and return it to the town | transport primitive: a crate at a rural marker, delivered back |
+| Fishing | Fishmonger | fish at a coastal spot; the catch table shifts with water depth, so deep water reached by boat pays far better than the shore | depth via `getTerrainHeightASL` + `BIS_fnc_holdActionAdd`; depth-banded `selectRandomWeighted` catch table |
 
 Fishing is the one job worth borrowing a mechanic for. The Life "gather" loop it comes from validates
 the spot by proximity to a marker, refuses to gather from inside a vehicle, and adds catch on a
@@ -147,15 +202,21 @@ repeated timed action until the carry weight caps. The first two map straight on
 marker check, an on-foot hold-action); the third does not — there is no virtual-inventory weight
 system here, so the catch is a plain counter and the payout comes through `fnc_money_spend`, not sold
 inventory. What is worth taking is the weighted catch table (common fish / rare fish / junk, rolled
-with `selectRandomWeighted`): variable pay is the only thing that distinguishes fishing from the
-garbage quota. Boats and nets are dropped for a first version — they reintroduce the driving this job
-exists to avoid.
+with `selectRandomWeighted`), and the variance is driven by depth: the catch band is chosen from the
+water depth under the fishing point (`getTerrainHeightASL`, negated to metres of water), so the shore
+pays little and the good catches sit offshore in deep water. That is what the boat dealer is for —
+shore fishing is the on-foot entry, a bought boat reaches the deep bands, and fishing income scales
+with the boat. The Life "no gathering from a vehicle" guard is therefore relaxed for the boat, which
+is the deep-water case; nets are still dropped for a first version, since the depth bands plus a
+hold-action carry the mechanic.
 
 Utility repair is the one job that pays in more than money: finishing it nudges the town's reputation
 up via `fnc_town_rep_adjust`, and reputation is what opens that town's shops — so the jobs loop feeds
 the shop gate, not only the wallet.
 
-Jobs are taken from the Job Office vendor, which is the job board.
+Each job is started at its own employer NPC (the Employer column), and for fishing the fishmonger also
+buys the catch. Those employers are the job side of the vendor set: same spawn, marker, respawn, and
+persistence as the shops.
 
 **Start with two: garbage round and postal courier** — one static-marker loop, one town-to-town
 drive. The rest is variation to layer on once the loop is proven and tuned.
@@ -194,7 +255,7 @@ as such there, matching the existing convention.
 1. **Vendor framework.** New static "vendor" posture, streamed lifecycle, five-minute respawn, global
    marker, hostile-town service refusal, and one menu — start with the Arms Dealer, whose catalogue
    is the seeded arsenal and needs no new spawn path.
-2. **Shops.** Car Dealer (civilian-vehicle spawn) and the Contractor: relocate the CP/AP squad buy
+2. **Shops.** Car Dealer and Boat dealer (civilian vehicle and boat spawn) and the Contractor: relocate the CP/AP squad buy
    out of the request menu, then add the money mercenaries beside it.
 3. **Jobs.** Garbage round and postal courier, disguise-gated — the money faucet.
 4. **Balance and persistence.** Tune payouts against prices; wire the vendor registry into the save.
