@@ -1,9 +1,10 @@
 # Side missions: rework plan
 
 Working SSOT for the side-mission rework: the catalogue of what each mission is and how it
-actually plays, the reward re-pricing, and the open design ideas. Mission data itself lives in
-`src/duws/shared/includes/mission_types.hpp` (one row per type); this doc is the reasoning and the
-decisions behind those numbers, not a second copy of them.
+actually plays, the reward pricing, and the open design ideas. Mission data itself lives in
+`src/duws/shared/includes/mission_types.hpp` (one row per type, index-aligned with the launcher
+block); this doc is the reasoning behind those numbers, not a second copy of them. The *how-to-add*
+lives in [`docs/info/side_mission_authoring.md`](info/side_mission_authoring.md).
 
 The reward *pipeline* (how a base CP/AP payout is multiplied and credited) is not restated here --
 see [`docs/info/economy.md`](info/economy.md#faucets) and
@@ -12,77 +13,117 @@ see [`docs/info/economy.md`](info/economy.md#faucets) and
 and the strategic map's depth boost (deep offers pay 1.5×-2×), then credited in
 `src/duws/server/missions/fnc_mission_reward.sqf`. This rework only sets the **base** numbers.
 
-## What exists now
+## Status at a glance
 
-- **Two classification axes**, both authored per row and already shipped:
-  - `category` -- `command` (HQ-issued) or `civilian` (population-issued). Civilian = the two
-    REP-granting missions today (protect_civ, transport_IDAP).
-  - `objective` -- the archetype: elimination, assault, sabotage, requisition, rescue, defend,
-    escort, recon. Metadata only; no code branches on it yet.
-- **Reward is hand-set** CP/AP/REP columns. An earlier experiment to derive CP/AP from
-  objective×difficulty was built and then rolled back: for 17 fixed missions a formula fought the
-  per-mission tuning (only 3 payout buckets per objective; same type+difficulty paid identically).
-  Hand-set values with the tags as metadata is the chosen shape.
+19 types (indices 0-18). The rework's shape is settled: each mission should pose a **distinct
+problem**, not the same reach-the-marker-and-kill with a bigger garrison (the design bar is in
+[`side_mission_authoring.md`](info/side_mission_authoring.md#the-design-bar)).
+
+**Hand-made / reworked (a distinct verb, bespoke scripting):**
+
+| # | Mission | The verb that makes it different | Thread |
+|--:|---------|----------------------------------|--------|
+| 2 | Hunt HVT convoy | spot which of three armed convoys carries the HVT, stop it before it reaches a zone | `target_hvt/` |
+| 5 | Kill snipers | find two hidden elite marksmen on open ground (elevation+LOS perch search) | `target_sniper/` |
+| 7 | Eliminate vehicle patrol | break a roving 3-vehicle column that runs speed-limited until first blood | `target_armor/` |
+| 16 | Eliminate informant | find one disguised target in a live crowd before he flees by car | `informant/` |
+| 17 | Recon observe | hold binocular eyes-on a zone from standoff without being drawn into a fight | `recon/` |
+| 18 | Deny enemy armor | reach a broken-down MBT before its repair crew convoy does, or intercept the convoy | `deny_armor/` |
+| 0 | Rescue squad | break a cordon to free a captive squad, then cover its evac (heli or on-foot exfil) | `rescue_squad/` |
+
+**Still stale -- generic reskin or unreviewed, needs a distinct problem or a touch-up:** steal
+supply (1), destroy tower (3), rescue pilot (4), steal engineering vehicle (6), sabotage laptop (8),
+destroy cache (9), destroy radar (10), clear the area / CQB (11), hold position (12), domination (13),
+protect civilian (14), transport IDAP (15). Ideas per row in the [tracker](#per-mission-rework-tracker).
 
 ## Architecture: mission-owned site selection
 
-Today the picker (`fnc_stratmap`) chooses every offer's position with one generic weighted search
-and hands it to the thread, which can only refine locally (`fnc_mission_launch.sqf:22-23` → the
-thread's `fnc_mission_site`). A mission cannot demand terrain that fits it: intel needs a
-≥20-building town, but the picker never looks for one, so intel is offered on open ground and then
-aborts *after* the player picks (`fnc_informant_mission.sqf:9`).
-
-**Model -- propose and accept.** The picker keeps generating candidate positions with its existing
-weighting (easy offers repelled from zones/hardpoints via `_fnUrbanWeight`; hard offers pulled deep
-toward them via `_fnHardScore` -- unchanged). Each candidate is offered to the drawn mission's own
-site-finder, which **accepts** (returning a precise position) or **rejects**; on rejection the picker
-draws another candidate, bounded, until one is accepted or the offer is dropped.
-
-**Contract:**
+Shipped. Placement is a two-phase survey in `fnc_mission_findSite`: phase 2 shortlists valid
+locations (zones or towns per the row's `surveyKind`), phase 3 picks one weighted by the offer's
+front/deep dial and realizes an exact position. A mission that needs specific ground defines
+`fnc_<name>_site` and the survey calls it per realized candidate -- a **propose/accept** handshake:
 
 ```
-[_candidatePos] call fnc_site_<key>
-   -> []                       reject -- this spot does not fit me
+[_candidatePos] call fnc_<name>_site
+   -> []                       reject -- this spot does not fit me, picker draws another
    -> [_precisePos, _extra...] accept -- my objective sits at _precisePos
 ```
 
-Resolved at offer time inside the picker's `while {!_Posfound}` loop, so the map marker and the
-depth-boost read the *accepted* precise position -- the pre-pick figures stay honest.
+Only `select 0` reaches the thread (the picker flattens the result to a 2-D position), so a finder
+hands back the one position the thread re-derives from, not a bundle. The finder runs client-side
+inside the picker, so it reads **only broadcast state** and does **only terrain queries** (no
+spawning, no server-only globals). A missing finder inherits `fnc_site_generic`, which accepts the
+candidate as-is -- so a mission without one draws exactly as before. Finders live today for the
+missions that demand terrain: informant (a live town near an enemy zone) and recon (LOS onto an
+unrevealed zone). Both writeups below.
 
-**Dispatch.** A default generic finder accepts the candidate as-is (today's behaviour); a mission
-overrides by defining `fnc_site_<name>`, and the picker uses it when present. Finders are compiled
-and `publicVariable`'d like `fnc_stratmap`, since the picker runs client-side, and only do terrain
-queries (local, no locality issue).
+A finder gates the offer at *click* time. A criterion that can only fail *after* the pick (war state
+moved in the gap -- the escape zone was captured, the destination fell) is handled by the thread
+calling `fnc_mission_abort` with a stable snake_case `_reason` slug naming the failed criterion: the
+grep key for why a type aborts, kept stable when the player-facing wording changes.
 
-**Bound.** Each offer tries at most K candidates; K rejects drops the offer and logs it (fewer than
-the 7 drawn get offered), never an unbounded search.
+**Convoy destination contract.** The two road-convoy missions (HVT hunt, deny armor) also need an
+OPFOR-held *destination* zone, not just an anchor. Their `mission_types.hpp` `spawnRule` sets
+`needDestZone true` (with a `minCorridor` and `routeAvoidBlufor`), so `fnc_mission_findSite` picks and
+vets a held zone at least `minCorridor` out, corridor clear of BLUFOR ground, and hands it to the
+thread as a third `params` argument. The thread still re-checks the zone is OPFOR-held at start (it
+can flip in the gap) and falls back to its own nearest-held search -- which also covers the
+debug-force path, where no destination is handed.
 
-**Abort criteria (click-time).** A finder gate stops a bad offer being *made*, but some criteria can
-only fail *after* the pick, when war state moves between offer and click (the informant's escape zone
-is captured in the gap). A thread that gives up then calls `fnc_mission_abort` with a `_reason`: a
-stable snake_case slug naming the failed criterion, optionally `slug: human detail`. It is the grep
-key for why a type aborts, so the log distinguishes criteria that share one player-facing hint; keep
-the slug stable when the wording changes.
+## Hand-made mission designs
 
-**Phases:**
-1. Dispatch + generic finder + the picker gate, behaviour-preserving (generic accepts every
-   candidate, so a mission without a finder draws exactly as before).
-2. Intel -- done: reworked into an informant hunt with its own town finder (see
-   [§Informant hunt](#informant-hunt)).
-3. Other missions gain finders as their reworks require.
+The three convoy/patrol reworks, plus the two manhunt/recon builds. Read the closest one before
+writing a new hand-made mission; each changes the *verb*, and the change lives in the scripts around
+the objective, not in a bigger garrison.
 
-## Informant hunt
+### Hunt HVT convoy
+
+`mission_threads/target_hvt/fnc_target_hvt_mission.sqf`. A high-value target flees to an OPFOR-held
+zone in one of **three** armed road convoys, each on its own approach via a divergent mid-route point
+so the player cannot cover them all. Exactly one convoy carries the HVT in a single **unarmed** car --
+the odd hull among the armed escorts, its type named to the player -- so the mission is to spot the
+right column and stop it. Win: the HVT dies. Fail: his car reaches the zone, or the deadline. Off the
+`fnc_mission_run` spine because the win is a race, not a one-shot predicate polled at a fixed spot;
+owns its own site pick, spawn and monitor, like the informant and IDAP. Uses the convoy destination
+contract above.
+
+### Deny enemy armor
+
+`mission_threads/deny_armor/fnc_deny_armor_mission.sqf`. A broken-down enemy MBT sits abandoned in
+the field; its crew is inbound by road convoy to get it running -- three crew (one an engineer) on
+unarmed transport, an escort scaled to what OPFOR can field (car / IFV / tank), a rifle team for
+security. The player ambushes the crew at the tank or intercepts the convoy on the road. Win: the tank
+denied -- every crewman dead, or the tank destroyed (blowing the derelict early counts). Fail: the
+crew reach it, repair it to operational, and drive it home, or the deadline. **Repair time scales
+inversely with distance to the nearest OPFOR zone** (long window near their lines, short far out): a
+repaired tank near its own lines is the harder denial, so the player gets longer to break the repair
+there. The tank is never claimed on a win -- a claim is a deletion order, and this one may end up the
+player's ride home. Off the spine for the scripted repair-race fail.
+
+### Eliminate vehicle patrol
+
+`mission_threads/target_armor/fnc_target_armor_mission.sqf`. A roving column of **three vehicles of
+one class**, the class rolled once and gated by OPFOR's earned AP tier (car floor, tank top), patrols
+a road loop as one column. Win: every crewman across the three dead. The column holds LIMITED speed
+until first hit or a man down, then drops the limit and fights -- "speed-limited until broken", so the
+opening is an ambush window. On the `fnc_mission_run` spine (one-shot win predicate). **Reward scales
+with the tier fielded**: +10 CP / +5 AP per step above a car patrol, so car / IFV / armour pay
+15/20, 25/25, 35/30. The briefing and map print the base (built before the tier rolls), so a heavier
+patrol pays the step-up as an unadvertised completion bonus -- inherent to rolling the tier at spawn,
+safe because one mission runs at a time.
+
+### Informant hunt
 
 The informant mission is a manhunt, not a building sweep. An OPFOR informant hides disguised among a
 town's civilians; the player finds and kills him before he leaves by car for a distant zone. Thread:
-`src/duws/server/missions/mission_threads/informant/fnc_informant_mission.sqf`.
+`mission_threads/informant/fnc_informant_mission.sqf`.
 
-**Siting.** `fnc_informant_site` (the per-type finder) accepts a picker candidate only where a
-live Tomata civil town sits within 2.5 km *and* an OPFOR-held zone sits at least 1 km off (the
-informant's escape, below), returning that town's centre; civilians off / RAVAGE / WBK, or a town with
-no enemy zone to flee to, reject -- so the offer is dropped rather than sited where it cannot play out.
-The finder runs client-side in the picker, so it reads only broadcast state: `duws_town_circles`,
-`CIV_PRESENCE`, and `WARCOM_zones_controled_by_OPFOR`, never the server-only `civ_town_rep`.
+**Siting.** `fnc_informant_site` accepts a picker candidate only where a live Tomata civil town sits
+within 2.5 km *and* an OPFOR-held zone sits at least 1 km off (the informant's escape), returning that
+town's centre; civilians off / RAVAGE / WBK, or a town with no enemy zone to flee to, reject -- so the
+offer is dropped rather than sited where it cannot play out. The finder reads only broadcast state
+(`duws_town_circles`, `CIV_PRESENCE`, `WARCOM_zones_controled_by_OPFOR`), never the server-only
+`civ_town_rep`.
 
 **The informant.** A civilian-model unit in an EAST group (side follows the group), `setCaptive true`
 so BLUFOR AI ignores him while he blends. Killing him wins; a kill within townRadius + 300 m of the
@@ -94,167 +135,145 @@ garrison via `fnc_town_garrison_tierAt`):
 - friendly / neutral -- the crowd is thickened, and every added local carries an "Ask about informant"
   action (`fnc_intel_ask_*`) that rolls the shared civilian reaction curve (`fnc_civ_reaction_weights`)
   and, on success, hints his bearing + distance (16-point compass, nearest 5 m) from the asker. A
-  bribe result reuses the civilian bribe popup, routed back through `fnc_civ_serve`'s INFORMANT case
-  (with a matching `fnc_civ_rowPrice` entry).
+  bribe result reuses the civilian bribe popup, routed back through `fnc_civ_serve`'s INFORMANT case.
 - enemy -- no asking; the informant leaves much sooner, so the player camps the described vehicle.
 
 **The escape.** He leaves at a fixed world-clock time (shown in the briefing) or the moment shots are
 fired near him, walks to his car and drives to the nearest OPFOR-held zone >=1 km off -- enemy ground,
 never a BLUFOR zone or the player's FOB; reaching it fails the mission. If the last enemy zone in reach
-is captured between the offer and the spawn, the thread aborts (there is nowhere left for him to run). Three decoy cars -- one guaranteed his class, so the vehicle description never pins a single
-car -- scatter on random bearings when he boards. Car destroyed before he boards, and he arms a pistol
-and flees on foot as an open combatant. His leave time is rolled in 10-minute steps of in-game time
-via `fnc_time_deadline` -- the same shape and clock the mission deadline uses, correct at any time
-multiplier -- and shown in the briefing as a world clock via `fnc_time_clock` (so it reads like a
-deadline, e.g. 13:20, not a round :X0).
+is captured between the offer and the spawn, the thread aborts (nowhere left to run). Three decoy cars
+-- one guaranteed his class, so the vehicle description never pins a single car -- scatter on random
+bearings when he boards. Car destroyed before he boards, and he arms a pistol and flees on foot. His
+leave time is rolled in 10-minute steps of in-game time via `fnc_time_deadline` and shown as a world
+clock via `fnc_time_clock`.
 
-Tunables (defaults, all in the thread): leave 2 steps friendly / 1 step enemy (10-min steps via
-`fnc_time_roll`); +16 crowd, zone-reach 60 m, rep-penalty radius +300 m, pistol `hgun_Rook40_F`, shots
-trigger = `FiredNear` on the informant, ask/bribe price 3. Not yet play-tested in-engine -- sqfvm
-covers parse + the pure helpers only.
+Tunables (defaults, all in the thread): leave 2 steps friendly / 1 step enemy, +16 crowd, zone-reach
+60 m, rep-penalty radius +300 m, pistol `hgun_Rook40_F`, shots trigger = `FiredNear`, ask/bribe price
+3. Parse-tested (sqfvm) but not yet play-tested in-engine.
 
-## Recon overwatch
+### Recon overwatch
 
 A standoff scout, not a fight. The player infils to a mission-chosen overwatch position, raises
 binoculars, and holds eyes-on an unrevealed OPFOR zone long enough to scout it; success lifts that
 zone's fog of war on the strategic map. Thread:
-`src/duws/server/missions/mission_threads/recon/fnc_recon_observe_mission.sqf`.
+`mission_threads/recon/fnc_recon_observe_mission.sqf`.
 
-**Siting.** `fnc_recon_observe_site` (the per-type finder) snaps a picker candidate to the nearest
-unrevealed OPFOR-held zone within 2.5 km and confirms at least one 600-800 m bearing has clear terrain
-LOS onto it *and* stands clear of every other enemy zone and hardpoint, then returns the **target
-zone** -- not the overwatch. `fnc_mission_findSite` keeps only
-`select 0` of a finder's result, so the thread cannot be handed both; re-deriving the target from an
-overwatch position ("nearest unrevealed OPFOR zone") is ambiguous where zones sit close and can resolve
-to a different zone than LOS was verified against, leaving the hold unwinnable. Handing back the target
-makes the thread's re-derivation exact, and the thread computes the overwatch (fuller terrain+object
-LOS, friendly-facing arc, height-favoured, clear of every other enemy zone by its radius and of every
-standing hardpoint) once for the launched mission. A revealed zone is no target
--- the reveal is the whole payoff -- so with none unrevealed in reach the offer is dropped. The finder
-runs client-side in the picker, so it reads only broadcast state (`zone_namePOS_pairs`,
-`WARCOM_zones_controled_by_OPFOR`) and a single cheap `terrainIntersectASL` per bearing.
+**Siting.** `fnc_recon_observe_site` snaps a picker candidate to the nearest unrevealed OPFOR-held
+zone within 2.5 km, confirms at least one 600-800 m bearing has clear terrain LOS onto it *and* stands
+clear of every other enemy zone and hardpoint, then returns the **target zone** -- not the overwatch.
+`fnc_mission_findSite` keeps only `select 0`, so the thread cannot be handed both; re-deriving the
+target from an overwatch position is ambiguous where zones sit close, so handing back the target makes
+the thread's re-derivation exact. The thread then computes the overwatch (fuller terrain+object LOS,
+friendly-facing arc, height-favoured, clear of other enemy zones and hardpoints) for the launched
+mission. A revealed zone is no target -- the reveal is the payoff -- so with none unrevealed in reach
+the offer is dropped.
 
-**Custom streaming, this mission only.** At an 800 m standoff the real zone garrison is streamed out
-by the global site poller (`fnc_site_stream_init`), and waking it there would mean either widening a
-live occupant's buffer (wakes on mere proximity) or a shared-file present-hook -- both touch global
-streaming, and both hand the player a live garrison that wanders off the spot it is meant to be
-scouted at. Instead the thread runs its own streamer: when a player reaches the overwatch ring it
-builds the target zone's OWN prefab -- the real structures and crewed statics, through the zone's own
-builder fn, resolved from the stored kind name (`DUWS_zoneKind_<key>`) via `fnc_zone_prefab_set` --
-plus two representative infantry teams (`fnc_spawn_team`, `YELLOW` so they hold rather than chase an
-800 m spotter) and one car (`fnc_spawn_vehicle`), teams and car alike on `closepatrol` around the
-position. The prefab is built a step (`PREFAB_OFFSET`)
-off the zone centre so its `zone_<x>_<y>` key (fnc_zone_key rounds the position) stays distinct from
-the real zone's -- releasing the recon copy must not retire the live zone. Teardown rides
-`fnc_mission_end`: the prefab through its compKey (`fnc_duws_release`), and the gunners, teams and car
-through the claimed-token sweep -- the builder crews its statics but orphans the gunners, so they are
-claimed by a proximity pass (the real zone is streamed out, so nothing else is there to catch). The
-global poller is never touched.
+**Custom streaming, this mission only.** At an 800 m standoff the real garrison is streamed out by the
+global site poller, and waking it there would hand the player a live garrison that wanders off the
+scouted spot. Instead the thread runs its own streamer: on approach it builds the target zone's OWN
+prefab (real structures and crewed statics, via the zone's builder fn resolved from
+`DUWS_zoneKind_<key>`), plus two representative infantry teams (`YELLOW`, so they hold rather than
+chase an 800 m spotter) and a car, all on `closepatrol`. The prefab is built a step off the zone
+centre so its `zone_<x>_<y>` key stays distinct from the real zone's -- releasing the recon copy must
+not retire the live zone. Teardown rides `fnc_mission_end`: prefab by compKey, gunners/teams/car by
+the claimed-token sweep plus a proximity pass for the builder-orphaned gunners.
 
-**Observing.** The player-facing half (`client/missions/fnc_recon_observe_layer.sqf`, pushed to all
-clients JIP-keyed) draws a 3D "look here" icon over the target while the player is in the overwatch
-area with binoculars up, and runs the hold: continuous binocular LOS (`cameraView == "GUNNER"` and
-the binocular is `currentWeapon`) on the target from within the area, any break resetting it. LOS is
-re-checked client-side per tick (`terrainIntersectASL` for terrain, `lineIntersectsSurfaces` for
-structures). On a completed hold the client reports once to `fnc_recon_observe_success`, which raises
-the flag the thread's monitor wins on -- a second player or a stale JIP report cannot double-pay,
-since the monitor reads the flag once and clears `DUWS_recon_active`. Soft stealth: the element can
-see and fire, but the mission never auto-fails on detection.
+**Observing.** The player-facing half (`client/missions/fnc_recon_observe_layer.sqf`, JIP-keyed to all
+clients) draws a 3D "look here" icon over the target and runs the hold: continuous binocular LOS
+(`cameraView == "GUNNER"` and the binocular is `currentWeapon`) from within the overwatch area, any
+break resetting it, re-checked client-side per tick. On a completed hold the client reports once to
+`fnc_recon_observe_success`, which raises the flag the thread's monitor wins on -- a second player or a
+stale JIP report cannot double-pay. Soft stealth: the element can see and fire, but the mission never
+auto-fails on detection.
 
-**Payoff.** `fnc_zone_reveal` lifts the scouted zone onto the strategic map (quiet -- Allseer speaks the
-mission's own confirmation line, not the zone-reveal's AO-wide broadcast). The scout also reveals
-`rand(0-2)` of the nearest unrevealed positions -- the target's own hardpoints (discoverable once its
-zone is up), standalone or already-revealed-zone hardpoints, and unrevealed enemy zones, ranked by
-distance to the target -- then the standard CP/AP. The hardpoint parent gate is respected: a hardpoint
-under a still-hidden zone is not offered as bonus intel, so no marker floats without its zone.
+**Payoff.** `fnc_zone_reveal` lifts the scouted zone onto the strategic map. The scout also reveals
+`rand(0-2)` of the nearest unrevealed positions (the target's own hardpoints, standalone hardpoints,
+unrevealed enemy zones, ranked by distance), then the standard CP/AP. The hardpoint parent gate is
+respected: a hardpoint under a still-hidden zone is not offered as bonus intel.
 
-Tunables (defaults, all in the thread): overwatch band 600-800 m and LOS range 900 m (finder + layer),
-observe area 75 m, hold 12 s, approach ring 200 m, 2 representative `team`s at 100 m and a car at
-150 m (all `closepatrol`), prefab offset 25 m off the centre, gunner-claim radius 60 m, overwatch
-clearance 250 m from other enemy zones and 300 m from hardpoints, up to 2 bonus reveals. Targets zones
-only for now -- hardpoint targeting as the primary objective is a later add. Not yet play-tested
-in-engine -- sqfvm covers parse + the pure helpers only.
+Tunables (defaults, all in the thread): overwatch band 600-800 m, LOS range 900 m, observe area 75 m,
+hold 12 s, approach ring 200 m, 2 teams + a car, prefab offset 25 m, gunner-claim radius 60 m, up to 2
+bonus reveals. Targets zones only for now -- hardpoint targeting as the primary objective is a later
+add. Parse-tested (sqfvm) but not yet play-tested in-engine.
 
-## Mission catalogue (how each actually plays)
+## Mission catalogue (current)
 
-Effort is a 1-5 read of the *required* fight, from a thread-by-thread analysis. Shared force per
-mission: garrison ~24 (`fnc_garrisonBuildings`, 6 buildings × 4) and/or a patrol ring
-(`fnc_missionPatrols` = 16 inf, `fnc_missionPatrolswithintel` = 12 inf). Every patrol-ring mission
-also gains **1 MBT + 2 armed cars** once OPFOR crosses AP 350/60 -- so ring missions get harder as
-the campaign advances while their pay is fixed.
+CP/AP are the base payout from `mission_types.hpp` (before any campaign/depth multiplier). Effort is a
+1-5 read of the *required* fight. Shared force for the generic threads: garrison ~24
+(`fnc_garrisonBuildings`) and/or a patrol ring (`fnc_missionPatrols` 16 inf,
+`fnc_missionPatrolswithintel` 12 inf); every patrol-ring mission also gains 1 MBT + 2 armed cars once
+OPFOR crosses AP 350/60, so ring missions harden as the campaign advances while their pay is fixed.
 
-| # | Mission | Obj | Cat | Win condition | Extra force / special | R | Eff | Now CP/AP/REP |
-|--:|---------|-----|-----|---------------|-----------------------|--:|:-:|:-:|
-| 12 | Hold position | defend | cmd | survive 550s, SAM+radar alive | ~72 attackers in escalating waves | 300 | 5 | 30/36/0 |
-| 13 | Domination | assault | cmd | 4 tank crews dead | **4× MBT** + 30 inf, allies die on script | 800 | 5 | 10/30/0 |
-| 1 | Steal supply truck | requisition | cmd | truck <100m of HQ | steal **intact** + ~600m drive back | 600 | 4 | 35/24/0 |
-| 6 | Steal eng. vehicle | requisition | cmd | repair truck <50m of HQ | steal intact + drive back | 500 | 4 | 15/20/0 |
-| 4 | Rescue pilot | rescue | cmd | pilot <50m of HQ | keep fragile AI alive + escort back | 300 | 4 | 25/40/0 |
-| 2 | Kill HVT | elimination | cmd | HVT officer dead | mobile HVT + **APC** screen | 600 | 3 | 35/36/0 |
-| 5 | Kill snipers | elimination | cmd | both snipers dead | 2 hidden ghillies, no vehicles | 400 | 3 | 30/30/0 |
-| 10 | Destroy radar | sabotage | cmd | radar destroyed | 2 HMG + **2 invulnerable AA** | 400 | 3 | 25/24/0 |
-| 9 | Destroy cache | sabotage | cmd | **both** caches destroyed | 2 crewed HMG | 400 | 3 | 30/20/0 |
-| 11 | Clear area (CQB) | assault | cmd | all 24 house units dead | full clear, no shortcut | 200 | 3 | 15/20/0 |
-| 7 | Destroy armour | elimination | cmd | commander officer dead | tank is an **inert prop** | 200 | 2 | 15/20/0 |
-| 0 | Rescue squad | rescue | cmd | reach squad (100m) | **no escort back** -- ends on arrival | 300 | 2 | 45/24/0 |
-| 3 | Destroy tower | sabotage | cmd | tower destroyed | tower **pre-broken to 0.8** | 400 | 2 | 20/30/0 |
-| 8 | Sabotage laptop | sabotage | cmd | one hold-action | compact, light verb | 200 | 1 | 10/36/0 |
-| 16 | Informant hunt | elimination | cmd | informant killed before he escapes | hunt in a town crowd; ask/ping or camp the car; decoys + car escape | 800 | 3 | 30/25/0 |
-| 17 | Recon overwatch | recon | cmd | hold binocular LOS on the target from the overwatch | mission-owned copy of the zone's own prefab (crewed statics) + representative teams + a roving car, raised on approach; reveals the zone | -- | 2 | 10/5/0 |
-| 14 | Protect civilian | defend | civ | -- | not yet analysed | -- | -- | 20/10/5 |
-| 15 | Transport IDAP | escort | civ | -- | not yet analysed | -- | -- | 20/10/5 |
+| # | Mission | Obj | Cat | CP/AP/REP | Eff | State |
+|--:|---------|-----|-----|:---------:|:--:|-------|
+| 2 | Hunt HVT convoy | elimination | cmd | 35/35/0 | 3 | reworked |
+| 18 | Deny enemy armor | elimination | cmd | 20/25/0 | 3 | new |
+| 7 | Eliminate vehicle patrol | elimination | cmd | 15/20/0 (+tier) | 2-4 | reworked |
+| 16 | Eliminate informant | elimination | cmd | 10/20/0 | 3 | new, parse-tested only |
+| 17 | Recon observe | recon | cmd | 10/5/0 | 2 | new, parse-tested only |
+| 5 | Kill snipers | elimination | cmd | 20/15/0 | 3 | hand-made, good |
+| 0 | Rescue squad | rescue | cmd | 25/15/0 | 3 | reworked (evac + exfil) |
+| 12 | Hold position | defend | cmd | 30/35/0 | 5 | bespoke, review |
+| 13 | Domination | assault | cmd | 10/30/0 | 5 | bespoke, review |
+| 1 | Steal supply truck | requisition | cmd | 35/25/0 | 4 | stale |
+| 6 | Steal engineering vehicle | requisition | cmd | 15/20/0 | 4 | stale (twin of #1, half pay) |
+| 4 | Rescue pilot | rescue | cmd | 25/40/0 | 4 | bespoke, review |
+| 9 | Destroy cache | sabotage | cmd | 30/20/0 | 3 | stale |
+| 10 | Destroy radar | sabotage | cmd | 25/25/0 | 3 | stale |
+| 11 | Clear the area (CQB) | assault | cmd | 15/20/0 | 3 | stale |
+| 3 | Destroy tower | sabotage | cmd | 20/30/0 | 2 | stale (tower pre-broken to 0.8) |
+| 8 | Sabotage laptop | sabotage | cmd | 10/35/0 | 1 | stale (fine as a quick verb) |
+| 14 | Protect civilian | defend | civ | 20/10/5 | -- | not analysed |
+| 15 | Transport IDAP | escort | civ | 20/10/5 | -- | not analysed |
 
 ## Pricing rework (command missions)
 
-Principle: base pay tracks required effort, holding the command economy near today's aggregate
-(~345 CP / 400 AP). CP leans to command/intel/tactical value, AP to materiel destroyed or manpower
-recovered. Proposed column is a starting point, not decided.
+Principle: base pay tracks required effort, holding the command economy near its aggregate. CP leans
+to command/intel/tactical value, AP to materiel destroyed or manpower recovered. The reworked and
+repriced missions (HVT, deny armor, vehicle patrol, informant, recon, snipers, rescue squad) are now
+priced to effort; the vehicle patrol adds a tier bonus at spawn (see its design note). The still-stale
+missions carry their old numbers and are the open pricing work:
 
-| Mission | Eff | Now CP/AP | Proposed | Note |
-|---------|:-:|:-:|:-:|------|
-| Hold position | 5 | 30/36 | 35/35 | hardest hold |
-| Domination | 5 | 10/30 | 30/40 | **worst-paid vs effort** -- the 4-MBT fight |
-| Steal supply truck | 4 | 35/24 | 30/26 | intact + long return |
-| Steal eng. vehicle | 4 | 15/20 | 28/26 | **half its identical twin today** |
-| Rescue pilot | 4 | 25/40 | 26/32 | keep-alive + escort |
-| Kill HVT | 3 | 35/36 | 32/26 | APC screen premium |
-| Kill snipers | 3 | 30/30 | 26/26 | |
-| Destroy radar | 3 | 25/24 | 22/28 | |
-| Destroy cache | 3 | 30/20 | 22/28 | two objectives |
-| Clear area (CQB) | 3 | 15/20 | 26/24 | **underpaid for a 24-kill clear** |
-| Destroy armour | 2 | 15/20 | 16/18 | gimme (inert tank) |
-| Rescue squad | 2 | 45/24 | 18/18 | **biggest overpay today** |
-| Destroy tower | 2 | 20/30 | 16/18 | gimme (pre-broken) |
-| Sabotage laptop | 1 | 10/36 | 18/16 | AP was overpaid for one hold-action |
-| Informant hunt | 3 | 30/25 | -- | now a real manhunt, not passive income |
+| Mission | Eff | CP/AP now | Note |
+|---------|:-:|:-:|------|
+| Steal engineering vehicle | 4 | 15/20 | half its identical twin (steal supply, 35/25) -- match effort |
+| Domination | 5 | 10/30 | worst-paid vs effort (the 4-MBT fight) |
+| Clear area (CQB) | 3 | 15/20 | underpaid for a 24-kill full clear |
+| Destroy tower | 2 | 20/30 | gimme -- tower pre-broken; spawn it intact or cut the AP |
+| Sabotage laptop | 1 | 10/35 | AP overpaid for one hold-action |
 
 ## Per-mission rework tracker
 
-Status: `idea` (unconfirmed), `decided` (price/change locked), `done` (in `mission_types.hpp`).
-Gameplay-change ideas below come from the play-through analysis; all are unconfirmed suggestions.
+Status: `idea` (unconfirmed), `decided` (change locked), `done` (shipped). Gameplay-change ideas are
+suggestions from the play-through analysis unless marked decided.
 
-| Mission | Price status | Gameplay change idea | Status |
-|---------|:-:|----------------------|:-:|
-| Hold position | proposed | -- | idea |
-| Domination | proposed | -- | idea |
-| Steal supply truck | proposed | -- | idea |
-| Steal eng. vehicle | proposed | match effort of its twin | idea |
-| Rescue pilot | proposed | -- | idea |
-| Kill HVT | proposed | -- | idea |
-| Kill snipers | proposed | -- | idea |
-| Destroy radar | proposed | -- | idea |
-| Destroy cache | proposed | -- | idea |
-| Clear area (CQB) | proposed | -- | idea |
-| Destroy armour | proposed | tank is inert -- make it a live threat, or reframe as "kill the commander" | idea |
-| Rescue squad | proposed | add an escort-back leg so effort matches a rescue | idea |
-| Destroy tower | proposed | spawn the tower intact so destruction is real work | idea |
-| Sabotage laptop | proposed | fine as a quick mission; keep light | idea |
-| Informant hunt | proposed | reworked into an informant manhunt (see §Informant hunt) | done |
+| Mission | Gameplay change | Status |
+|---------|-----------------|:-:|
+| Hunt HVT convoy | three-convoy race, spot the odd unarmed car | done |
+| Deny enemy armor | repair-race convoy to a broken-down MBT | done |
+| Eliminate vehicle patrol | roving 3-vehicle column, speed-limited until broken, tier-scaled pay | done |
+| Informant hunt | disguised manhunt in a town crowd | done |
+| Recon overwatch | standoff binocular hold that reveals a zone | done |
+| Rescue squad | evac leg added (heli + on-foot exfil) | done |
+| Steal engineering vehicle | match effort/pay of its twin | idea |
+| Domination | reprice to the 4-MBT effort | idea |
+| Clear area (CQB) | reprice to the full-clear effort | idea |
+| Destroy tower | spawn the tower intact so destruction is real work | idea |
+| Sabotage laptop | keep light; trim the overpaid AP | idea |
+| Steal supply truck | -- | idea |
+| Rescue pilot | -- | idea |
+| Destroy cache | -- | idea |
+| Destroy radar | -- | idea |
+| Hold position | -- | idea |
+| Protect civilian | analyse + price (civilian) | idea |
+| Transport IDAP | analyse + price (civilian) | idea |
 
 ## Open decisions
 
-- Final per-mission command prices (approve the proposal or override per row).
-- Which missions get a gameplay change vs price-only (the ideas above).
+- Final command prices for the still-stale rows (the pricing table above).
+- Which stale missions get a distinct verb vs a price-only touch-up.
+- Destroy tower: spawn intact, or accept it as a gimme and cut the AP.
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
   already compensates.
-- Civilian missions (protect_civ, transport_IDAP): analyse and price -- deferred for now.
+- Civilian missions (protect_civ, transport_IDAP): analyse how they play, then price.
+- In-engine play-test of informant and recon (both parse-tested only).
