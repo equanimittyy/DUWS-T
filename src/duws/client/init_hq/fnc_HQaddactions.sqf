@@ -14,7 +14,6 @@ if (isMultiplayer) then {
     // dedup guard: exit if the actions were already added
     if (_hq getVariable ["HQ_actions_done", false]) exitWith {};
     _hq setVariable ["HQ_actions_done", true];
-    // ============================================
     if (support_armory_available) then {
         bluHQ_object addaction [ACT_EQUIP("STR_DUWS_T_160jkc3a"),fnc_duws_Arsenal, [_this], 80, true, true, "", "_this == player", ACT_REACH];
     };

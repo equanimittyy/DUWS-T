@@ -5,7 +5,6 @@ if (!hasInterface) exitWith {};
 params ["_board"];
 if (isNull _board) exitWith {};
 
-// dedup
 if (_board getVariable ["board_killhouse_actions_done", false]) exitWith {};
 _board setVariable ["board_killhouse_actions_done", true];
 

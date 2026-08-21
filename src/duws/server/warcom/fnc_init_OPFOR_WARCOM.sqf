@@ -3,11 +3,11 @@ if (!isServer) exitWith {};
 ["INFO", "WARCOM", format ["Opfor Warcom Start Zone Placement. Manual: %1",  manually_chosen]] call fnc_log;
 
  if (!manually_chosen) then {
-	if (!zones_created) then {      // CHECK IF ZONES ALREADY PLACED,  RANDOM
+	if (!zones_created) then {
 		[50,0.2] spawn fnc_locatorZones_random; 
     };
  } else {
-    if (!zones_created) then {      // CHECK IF ZONES ALREADY PLACED,  MANUAL
+    if (!zones_created) then {
 		[50,0.2] remoteExec ["fnc_locatorZones_manual", player1, false];
     };
  };

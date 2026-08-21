@@ -5,8 +5,7 @@ _fob_owner = _this select 2;
 
 _fobname = [1] call fnc_random_name;
 
-// create marker on FOB
-_markername = format["fob%1%2",round (_foundPickupPos select 0),round (_foundPickupPos select 1)]; // Define marker name
+_markername = format["fob%1%2",round (_foundPickupPos select 0),round (_foundPickupPos select 1)];
 _markerstr = createMarker [str(_markername), _foundPickupPos];
 _markerstr setMarkerShape "ICON";
 str(_markername) setMarkerType "loc_Bunker";
@@ -27,7 +26,6 @@ _message = ([localize "STR_DUWS_T_fobcall"] call fnc_cs);
 // that ground sees it pop in around them.
 private _fadePlayers = ["OUT", _foundPickupPos] call fnc_baseFade;
 
-// Create the building
 _fob = "";
 switch (VERSION_X) do {
 	case "MODERN": {
@@ -43,7 +41,6 @@ switch (VERSION_X) do {
 // evict each other; those two suffix a string instead.
 [_fob, _fob_owner] remoteExec ["fnc_FOBactions", [0,-2] select isDedicated,_fob];
 
-// Add the fortifications
 _refortify = false;
 [(getpos _fob), _fob, _refortify] spawn fnc_fortifyFOB;
 
@@ -99,7 +96,6 @@ missionNamespace setVariable [
     _trgWarning
 ];
 
-//ADD THE FOB TO Array_of_FOBS
 Array_of_FOBS = Array_of_FOBS + [_fob];
 publicVariable "Array_of_FOBS";
 
@@ -117,6 +113,5 @@ publicVariable "Array_of_FOBpos";
 
 _spawnPos = [west, _fob] call BIS_fnc_addRespawnPosition;
 
-// spawn loop to detect FOB destroyed
 [_fob,_markerstr, _spawnPos, _fobname, getPos _fob] spawn fnc_fob_destroyed;
 

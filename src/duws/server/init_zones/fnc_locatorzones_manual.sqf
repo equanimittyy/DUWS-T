@@ -95,10 +95,8 @@ if (isNull _nearRoad) then {
             _found = true;
             _zones_array = _zones_array + [man_missionPos]; 
 			
-			//found
 			[{player globalChat format[localize "STR_DUWS_T_vai9q3po",currzone]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 			sleep 1;
-			//generating
 			[{player globalChat format[localize "STR_DUWS_T_1lfvd9iw",currzone]}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
             waituntil {sleep 1;amount_zones_created > _next;};

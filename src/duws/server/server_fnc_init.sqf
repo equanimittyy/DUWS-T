@@ -1,7 +1,5 @@
 // Locality: server -- see callers.
 
-// SERVER FUNCTIONS
-
 // Shared with the client (the arsenal overlay's live-count loop); compiled before economy_init,
 // whose settle/deposit call it.
 fnc_captured_loadout_counts = compile preprocessFileLineNumbers "duws\shared\functions\fnc_captured_loadout_counts.sqf";
@@ -34,7 +32,6 @@ publicVariable "fnc_duws_release";
 publicVariable "fnc_duws_stow";
 publicVariable "fnc_duws_deploy";
 
-// STARTUP FUNCTIONS
 fnc_BluHQinit = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_BluHQinit.sqf";
 fnc_placeHQUnits = compile preprocessFileLineNumbers "duws\server\init_hq\fnc_placeHQUnits.sqf";
 // Not broadcast: the client half of HQ placement reaches it by remoteExec to the server, which is
@@ -43,7 +40,6 @@ fnc_clear_foliage = compile preprocessFileLineNumbers "duws\server\misc\fnc_clea
 fnc_factions_check = compile preprocessFileLineNumbers "duws\server\misc\fnc_factions_check_modern.sqf";
 fnc_intro_heli = compile preprocessFileLineNumbers "duws\server\misc\fnc_intro_heli.sqf";
 publicVariable "fnc_intro_heli";
-// SERVER INIT FUNCTIONS
 fnc_init_OPFOR_WARCOM = compile preprocessFileLineNumbers "duws\server\warcom\fnc_init_OPFOR_WARCOM.sqf";
 fnc_OPFOR_faction_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_OPFOR_faction_init.sqf";
 // Broadcast: clients re-run the faction file for themselves on join and have to re-apply over it.
@@ -85,7 +81,6 @@ fnc_addBoardKillhouseActions = compile preprocessFileLineNumbers "duws\client\in
 publicVariable "fnc_addBoardKillhouseActions";
 fnc_killhouse_markers = compile preprocessFileLineNumbers "duws\client\misc\fnc_killhouse_markers.sqf";
 publicVariable "fnc_killhouse_markers";
-// SIDE MISSION FUNCTIONS
 fnc_mission_reward = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_reward.sqf";
 fnc_missionTargetPos = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionTargetPos.sqf";
 fnc_mission_abort = compile preprocessFileLineNumbers "duws\server\missions\fnc_mission_abort.sqf";
@@ -119,7 +114,6 @@ fnc_convoy_layout = compile preprocessFileLineNumbers "duws\server\misc\fnc_conv
 fnc_convoy_setup = compile preprocessFileLineNumbers "duws\server\misc\fnc_convoy_setup.sqf";
 fnc_convoy_watch = compile preprocessFileLineNumbers "duws\server\misc\fnc_convoy_watch.sqf";
 
-// SIDE MISSION THREADS
 fnc_rescue_squad_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_mission.sqf";
 fnc_rescue_squad_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\rescue_squad\fnc_rescue_squad_success.sqf";
 fnc_steal_supply_mission = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\steal_supply\fnc_steal_supply_mission.sqf";
@@ -151,7 +145,6 @@ fnc_recon_observe_site = compile preprocessFileLineNumbers "duws\server\missions
 fnc_recon_observe_foliageClear = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_foliageClear.sqf";publicVariable "fnc_recon_observe_foliageClear";
 fnc_recon_observe_success = compile preprocessFileLineNumbers "duws\server\missions\mission_threads\recon\fnc_recon_observe_success.sqf";
 fnc_recon_observe_layer = compile preprocessFileLineNumbers "duws\client\missions\fnc_recon_observe_layer.sqf";publicVariable "fnc_recon_observe_layer";
-// CIVILIAN FUNCTIONS
 fnc_civ_init_Tomata = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_init_Tomata.sqf";
 fnc_civ_setup_array = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_setup_array.sqf";
 fnc_civ_selectTowns = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_selectTowns.sqf";
@@ -234,7 +227,6 @@ fnc_civ_resume = compile preprocessFileLineNumbers "duws\server\misc\fnc_civ_res
 fnc_recruitSuccessServer = compile preprocessFileLineNumbers "duws\server\misc\fnc_recruitSuccessServer.sqf";
 publicVariable "fnc_recruitSuccessServer";
 
-// WARCOM FUNCTIONS
 fnc_WARCOM_init = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_init.sqf";
 fnc_WARCOM_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_blu_patrol.sqf";
 fnc_WARCOM_wp_blu_patrol = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_wp_blu_patrol.sqf";
@@ -243,7 +235,6 @@ fnc_random_veh_blu_patrol = compile preprocessFileLineNumbers "duws\server\warco
 // towers. Server-only, spawned once by fnc_WARCOM_init.
 fnc_WARCOM_opf_hardpoints = compile preprocessFileLineNumbers "duws\server\warcom\fnc_WARCOM_opf_hardpoints.sqf";
 
-// ZONE FUNCTIONS
 fnc_zonesundercontrol = compile preprocessFileLineNumbers "duws\server\misc\fnc_zonesundercontrol.sqf";
 fnc_locatorZones_random = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_locatorZones_random.sqf";
 fnc_captured = compile preprocessFileLineNumbers "duws\server\init_zones\fnc_captured.sqf";
@@ -269,7 +260,6 @@ fnc_zone_spawn_sizes = compile preprocessFileLineNumbers "duws\server\init_zones
 // the first zone raise.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_garrison_reserve.sqf";
 
-// ZONE PREFABS
 // MODERN is the baseline composition era, always compiled: fnc_zone_prefab_set falls back to it for
 // any era that ships no set of its own. A future era layers its own builders alongside these.
 
@@ -285,7 +275,6 @@ fnc_modern_FieldHospital = compile preprocessFileLineNumbers "duws\server\init_z
 // above so the zone set can reference them; the hardpoint resolver is read later by the placer.
 [] call compile preprocessFileLineNumbers "duws\server\init_zones\fnc_composition_sets.sqf";
 
-// --- Map-click slot ------------------------------------------------------------------
 // The engine keeps exactly one onMapSingleClick handler per machine and offers no way to read
 // back what is installed, so two features that each install one silently disarm each other and
 // the loser waits on a click that never arrives. Everything mid-mission that wants a map click
@@ -305,7 +294,6 @@ publicVariable "fnc_mapclick_background";
 publicVariable "fnc_mapclick_claim";
 publicVariable "fnc_mapclick_release";
 
-// GLOBAL FUNCTIONS
 fnc_duws_Arsenal = compile preprocessFileLineNumbers "duws\client\misc\fnc_duws_Arsenal.sqf";publicVariable "fnc_duws_Arsenal";
 fnc_ghst_halo = compile preprocessFileLineNumbers "duws\client\misc\fnc_ghst_halo.sqf";publicVariable "fnc_ghst_halo";
 fnc_random_name = compile preprocessFileLineNumbers "duws\shared\functions\fnc_random_name.sqf";publicVariable "fnc_random_name";
@@ -342,13 +330,11 @@ fnc_blackMarketPurchase = compile preprocessFileLineNumbers "duws\server\misc\fn
 publicVariable "fnc_blackMarketPurchase";
 fnc_intelAnalysis = compile preprocessFileLineNumbers "duws\server\misc\fnc_intelAnalysis.sqf";
 publicVariable "fnc_intelAnalysis";
-// MISSION FUNCTIONS
 fnc_stratmap = compile preprocessFileLineNumbers "duws\client\missions\fnc_stratmap.sqf";publicVariable "fnc_stratmap";
 // Broadcast: the strategic map's mission blocks call it on whoever opened the map.
 fnc_mission_launch = compile preprocessFileLineNumbers "duws\client\missions\fnc_mission_launch.sqf";publicVariable "fnc_mission_launch";
 fnc_missionLocator = compile preprocessFileLineNumbers "duws\server\missions\fnc_missionLocator.sqf";publicVariable "fnc_missionLocator";
 
-// DIALOG FUNCTIONS
 fnc_HQ_faction_dialog = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_faction_dialog.sqf";publicVariable "fnc_HQ_faction_dialog";
 fnc_HQ_manual_place = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_manual_place.sqf";publicVariable "fnc_HQ_manual_place";
 fnc_HQ_random_place = compile preprocessFileLineNumbers "duws\client\dialog\fnc_HQ_random_place.sqf";publicVariable "fnc_HQ_random_place";
@@ -510,13 +496,11 @@ fnc_MHQ_undeploy = compile preprocessFileLineNumbers "duws\server\dialog\fnc_MHQ
 fnc_MHQ_release = compile preprocessFileLineNumbers "duws\server\dialog\fnc_MHQ_release.sqf";
 fnc_MHQ_destroyed = compile preprocessFileLineNumbers "duws\shared\functions\fnc_MHQ_destroyed.sqf";publicVariable "fnc_MHQ_destroyed";
 
-// HQ & FOB FUNCTIONS
 fnc_draw_world_icons = compile preprocessFileLineNumbers "duws\client\misc\fnc_draw_world_icons.sqf";publicVariable "fnc_draw_world_icons";
 fnc_HQaddactions = compile preprocessFileLineNumbers "duws\client\init_hq\fnc_HQaddactions.sqf";publicVariable "fnc_HQaddactions";
 fnc_FOBactions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_FOBactions.sqf";publicVariable "fnc_FOBactions";
 fnc_fob_server = compile preprocessFileLineNumbers "duws\server\supports\fnc_fob_server.sqf";publicVariable "fnc_fob_server";
 
-// SUPPORTS FUNCTIONS
 fnc_ammobox = compile preprocessFileLineNumbers "duws\client\supports\fnc_ammobox.sqf";publicVariable "fnc_ammobox";
 fnc_medtent_actions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_medtent_actions.sqf";publicVariable "fnc_medtent_actions";
 fnc_field_box_actions = compile preprocessFileLineNumbers "duws\shared\functions\fnc_field_box_actions.sqf";publicVariable "fnc_field_box_actions";
@@ -544,7 +528,6 @@ fnc_boattaxi = compile preprocessFileLineNumbers "duws\client\supports\taxi\fnc_
 fnc_mapclickboat = compile preprocessFileLineNumbers "duws\client\supports\taxi\fnc_mapclickboat.sqf";publicVariable "fnc_mapclickboat";
 fnc_taxi_music = compile preprocessFileLineNumbers "duws\client\supports\taxi\fnc_taxi_music.sqf";publicVariable "fnc_taxi_music";
 
-// MISC FUNCTIONS
 fnc_hirePartisans = compile preprocessFileLineNumbers "duws\server\misc\fnc_hirePartisans.sqf";
 publicVariable "fnc_hirePartisans";
 fnc_hirePMC = compile preprocessFileLineNumbers "duws\server\misc\fnc_hirePMC.sqf";

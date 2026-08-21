@@ -22,8 +22,7 @@ sleep 8;
 _speaker = localize "STR_DUWS_T_OVERLORD";
 _message = localize "STR_DUWS_T_requestuavscan1";
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-// CREATE MARKER FOR CHECKED SIZE
-_markername = format["%1%2vc",round(_centerPos select 0),round(_centerPos select 1)]; // Define marker name
+_markername = format["%1%2vc",round(_centerPos select 0),round(_centerPos select 1)];
 _markerstr = createMarker [str(_markername), _centerPos];
 _markerstr setMarkerShape "ELLIPSE";
 str(_markername) setMarkerBrush "SolidBorder";
@@ -32,12 +31,10 @@ str(_markername) setMarkerSize [_checkedRadius, _checkedRadius];
 str(_markername) setMarkerAlpha 0.5;
 
 
-// SEND A UAV
 _group = "";
 _vehicle = "";
 _grouptype = [];
 
-// FIND A RANDOM LOCATION
 _spawnPos = _centerPos;
 switch (VERSION_X) do {
 	case "MODERN": {
@@ -89,7 +86,6 @@ sleep 5;
 [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_2ncoq1yy"] remoteExec ["fnc_duws_dialogue", 0];
 
 
-// CREATE EAST TRIGGER
 _trg=createTrigger["EmptyDetector",_centerPos];
 _trg setTriggerArea[_checkedRadius,_checkedRadius,0,false];
 _trg setTriggerActivation["EAST","PRESENT",false];
@@ -99,8 +95,7 @@ sleep 1;
 _tlist = list _trg; 
 
 {  
-	// CREATE MARKER
-	_markername2 = format["%1%2uav",round(getpos _x select 0),round(getpos _x select 1)]; // Define marker name
+	_markername2 = format["%1%2uav",round(getpos _x select 0),round(getpos _x select 1)];
 	_markerstr2 = createMarker [str(_markername2), getpos _x];
 	_markerstr2 setMarkerShape "ELLIPSE";
 	str(_markername2) setMarkerBrush "SolidBorder";
@@ -108,7 +103,6 @@ _tlist = list _trg;
 	str(_markername2) setMarkerSize [3, 3];
 	str(_markername2) setMarkerAlpha 1;
 
-	// BEGIN FLASHING LOOP
 	[_markername2] spawn {
 		_markername2 = _this select 0;
 		for [{_i=0}, {_i<=200}, {_i = _i+1}] do
@@ -123,7 +117,6 @@ _tlist = list _trg;
  
 } forEach _tlist;
 
-// CREATE WEST TRIGGER
 _trgwest=createTrigger["EmptyDetector",_centerPos];
 _trgwest setTriggerArea[_checkedRadius,_checkedRadius,0,false];
 _trgwest setTriggerActivation["WEST","PRESENT",false];
@@ -133,8 +126,7 @@ sleep 1;
 _tlistwest = list _trgwest; 
 
 { 
-	// CREATE MARKER
-	_markername2 = format["%1%2uavw",round(getpos _x select 0),round(getpos _x select 1)]; // Define marker name
+	_markername2 = format["%1%2uavw",round(getpos _x select 0),round(getpos _x select 1)];
 	_markerstr2 = createMarker [str(_markername2), getpos _x];
 	_markerstr2 setMarkerShape "ELLIPSE";
 	str(_markername2) setMarkerBrush "SolidBorder";
@@ -142,7 +134,6 @@ _tlistwest = list _trgwest;
 	str(_markername2) setMarkerSize [3, 3];
 	str(_markername2) setMarkerAlpha 1;
 
-	// BEGIN FLASHING LOOP
 	[_markername2] spawn {
 		_markername2 = _this select 0;
 		for [{_i=0}, {_i<=200}, {_i = _i+1}] do {
@@ -160,14 +151,12 @@ sleep 20;
 [localize "STR_DUWS_T_allseer", localize "STR_DUWS_T_rfcxa2ku"] remoteExec ["fnc_duws_dialogue", 0];
 sleep 20;
 
-//DELETE THE UAV
 {
 	deleteVehicle _x;
 } foreach units _group;
 
 deleteVehicle _vehicle;
 
-// WAIT AND EXIT
 sleep 200;
 deleteMarker str(_markername);
 deletevehicle _trg;

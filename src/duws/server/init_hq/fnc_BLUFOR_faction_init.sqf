@@ -1,7 +1,5 @@
 if (!isServer) exitWith {};
 
-/////////  BLUFOR INIT  ///////////////////
-
 // Resolves the dropdown's answer (BLUFOR_FactionFile_X) to a faction file and runs it. Runs once
 // when the confirmation screen asks for a preview and again at the commit, and re-runs whenever
 // the setup screens are stepped back through -- so it must read the token rather than

@@ -12,7 +12,6 @@ _opfor_ap =_this select 4;
 _blu_attack_delay =_this select 5;
 
 
-// INIT VARIABLES
 // WARCOM uses PosOfBLUHQ+16m to keep waypoints and spawn points away from HQ building
 WARCOM_blu_hq_pos = [_blu_hq_pos select 0, (_blu_hq_pos select 1) + 16];
 // The preset seeds both halves from the same value: the earned counter (the ladder input, and the
@@ -37,7 +36,6 @@ publicVariable "WARCOM_blu_hq_pos";
 
 sleep 5;
 
-// SORT ARRAY OF OPFOR ZONES ACCORDING TO DISTANCE FROM BLUHQ
 WARCOM_createdZones = [_array_of_zones_total,[WARCOM_blu_hq_pos],{_input0 distance _x},"ASCEND"] call BIS_fnc_sortBy;
 publicVariable "WARCOM_createdZones";
 
@@ -52,11 +50,9 @@ private _k = 0.5;
 DUWS_econ_throttle = (_REF_ZONES / ((count WARCOM_createdZones) max _REF_ZONES)) ^ _k;
 ["INFO", "ECON", format ["econ throttle %1 for %2 zones", DUWS_econ_throttle, count WARCOM_createdZones]] call fnc_log;
 
-// ARRAY OF ZONES UNDER BLUFOR CONTROL
 WARCOM_zones_controled_by_BLUFOR = [];
 publicVariable "WARCOM_zones_controled_by_BLUFOR";
 
-// ARRAY OF ZONES UNDER OPFOR CONTROL 
 // make sure it's not a reference
 _WARCOM_zones_controled_by_OPFOR = WARCOM_createdZones;
 WARCOM_zones_controled_by_OPFOR = [] + _WARCOM_zones_controled_by_OPFOR;
@@ -64,7 +60,6 @@ publicVariable "WARCOM_zones_controled_by_OPFOR";
 
 [{player globalChat localize "STR_DUWS_T_42esdbvb"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 
-// Init BLU patrols
 ["INFO", "WARCOM", "Init BLU patrols"] call fnc_log;
 [] spawn fnc_WARCOM_blu_patrol;
 

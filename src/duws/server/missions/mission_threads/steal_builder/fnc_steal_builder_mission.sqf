@@ -35,7 +35,6 @@ private _VARtaskgeneratedName = format ["rescue%1%2",round(_MissionPos select 0)
 _vehpos = _targetpos;
 
 
-// CREATE Mobile builder vehicle
 // The objective itself: kept for the mission's duration so the abandoned-vehicle clause
 // cannot collect it. A player who disables it and takes half an hour would otherwise find
 // the thing they were sent for gone, with no way left to finish.
@@ -67,7 +66,6 @@ _obj4 = createVehicle [_static2, [(_vehpos select 0)-10, (_vehpos select 1)], []
 [_obj4, "mission_steal_builder"] call fnc_duws_keep;
 sleep 1;
 
-// Vehicle Guards
 _group = [_vehPos, EAST, [opfor_SL_SOLDIER_X, opfor_LAT_SOLDIER_X, opfor_SOLDIER_X],[],[],opfor_ai_skill] call BIS_fnc_spawnGroup;
 _group deleteGroupWhenEmpty true;
 [_group] call fnc_mission_claim;

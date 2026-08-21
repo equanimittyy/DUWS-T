@@ -20,7 +20,6 @@ if (commandpointsblu1 < _cost) exitWith {
   ["fob_support"] call fnc_support_comm_add;
 };
 
-// Make sure not too many FOBs
 _tooMany = false;
 private _maxFOB = floor(amount_zones_created * 0.7); // 70%, rounded down
 if (count Array_of_FOBS >= _maxFOB) then {
@@ -32,7 +31,6 @@ if (count Array_of_FOBS >= _maxFOB) then {
 
 if (_tooMany) exitWith {};
 
-// CHECK FOR GOOD LOCATION
 Hint localize "STR_DUWS_T_cp9cw550";
 [localize "STR_DUWS_T_actionteam", localize "STR_DUWS_T_cp9cw550"] remoteExec ["fnc_duws_dialogue", 0];
 _triggerSize = _size / 4;
@@ -56,7 +54,6 @@ if (_amountOPFOR > 0) exitWith {
 _direction = direction player;
 _newpos = [_position, 20, _direction] call BIS_fnc_relPos;
 _foundPickupPos = _newpos;
-// FOUND GOOD LOCATION
 // The survey above takes 10 s, so the balance read at the top of this file is long stale
 // by now; this is the read that decides.
 if !(["CP", _cost] call fnc_pool_spend) exitWith {
@@ -66,7 +63,6 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith {
 };
 [localize "STR_DUWS_T_OVERLORD", localize "STR_DUWS_T_1k60dqrv"] remoteExec ["fnc_duws_dialogue", 0];
 
-// SPAWN FOB ON SERVER
 [_foundPickupPos, _size, (vehicleVarname player)] remoteExec ["fnc_fob_server", 2];
 
 sleep 600;

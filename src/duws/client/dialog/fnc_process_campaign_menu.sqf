@@ -1,6 +1,5 @@
 // Locality: client -- inherited from client/dialog/fnc_startup_next.sqf.
 
-// MAX RADIUS
 _index = lbCurSel 2100;
 switch (_index) do
 {
@@ -42,7 +41,6 @@ switch (_index) do
 
 };
 
-// MIN RADIUS
 _index = lbCurSel 2101;
 switch (_index) do
 {
@@ -83,7 +81,6 @@ switch (_index) do
 
 };
 
-// ZONES NUMBER
 _index = lbCurSel 2102;
 switch (_index) do
 {
@@ -149,7 +146,6 @@ switch (_index) do
 
 };
 
-// MAX DIST FROM HQ
 _index = lbCurSel 2103;
 switch (_index) do
 {
@@ -185,7 +181,6 @@ switch (_index) do
     };
 };
 
-// Starting CP
 _index = lbCurSel 2104;
 switch (_index) do
 {
@@ -201,7 +196,6 @@ switch (_index) do
 	case index_amount_cp_600: { commandpointsblu1 = 600 };
 };
 
-// CP REWARD
 _index = lbCurSel 2106;
 switch (_index) do {
     case index_cp_reward_multiplier_1:{
@@ -221,7 +215,6 @@ switch (_index) do {
     };
 };
 
-// CP DEATH PENALTY
 _index = lbCurSel 2107;
 switch (_index) do {
     case index_cp_death_penalty_0:{
@@ -250,7 +243,6 @@ switch (_index) do {
     };
 };
 
-// ARMY POWER BLUFOR
 _index = lbCurSel 2108;
 switch (_index) do
 {
@@ -263,7 +255,6 @@ switch (_index) do
     case index_blufor_ap_t5: { WARCOM_blufor_ap = 600; };
 };
 
-// ARMY POWER OPFOR
 _index = lbCurSel 2109;
 switch (_index) do
 {
@@ -275,7 +266,6 @@ switch (_index) do
     case index_opfor_ap_t5: { WARCOM_opfor_ap = 600; };
 };
 
-// AI BLUFOR Skill
 _index = lbCurSel 2110;
 switch (_index) do
 {
@@ -307,7 +297,6 @@ switch (_index) do
 
 };
 
-// AI opf Skill
 _index = lbCurSel 2111;
 switch (_index) do
 {
@@ -340,7 +329,6 @@ switch (_index) do
 };
 
 
-// OPFOR AIR/TANK ASSETS
 _index = lbCurSel 2112;
 switch (_index) do
 {
@@ -371,7 +359,6 @@ switch (_index) do
 
 };
 
-// ENEMY MULTIPLIER
 _index = lbCurSel 2113;
 switch (_index) do
 {
@@ -402,7 +389,6 @@ switch (_index) do
     case index_garrison_density_100: { garrison_density = 1; };
 };
 
-// CHECK IF MAX/MIN RADIUS PARAMETERS CORRECT
 if (zones_max_radius <= zones_min_radius) then {
 	_swap1 = zones_min_radius;
 	_swap2 = zones_max_radius - 25;
@@ -432,7 +418,6 @@ publicVariable "AttackHeli";
 publicVariable "HeavyArmor";
 publicVariable "enemyunitMultiplier";
 
-//OPFOR AI SKILL
 _min = opfor_ai_skill select 0;
 _max = opfor_ai_skill select 1;
 _skill = _max - _min;
@@ -440,7 +425,6 @@ opfor_ai_skill_random = (random _skill) + _min;
 publicVariable "opfor_ai_skill";
 publicVariable "opfor_ai_skill_random";
 
-//BLUFOR AI SKILL
 _min = blufor_ai_skill select 0;
 _max = blufor_ai_skill select 1;
 _skill = _max - _min;

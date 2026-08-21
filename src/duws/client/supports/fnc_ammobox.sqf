@@ -15,11 +15,9 @@ if !(["CP", _cost] call fnc_pool_spend) exitWith
 
 hint localize "STR_DUWS_T_y91vei53";
 
-// SEND A PLANE
 _group = "";
 _vehicle = "";
 
-// FIND A RANDOM LOCATION
 _spawnPos = _location;
 _vec =[random [-1,0,1], random [-1,0,1], 0];
 _dist = 1600;

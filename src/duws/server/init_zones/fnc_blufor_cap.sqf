@@ -1,5 +1,4 @@
 // Locality: server; the trigger bodies below run on the machine that triggers them, not here.
-// fnc_blufor_cap.sqf
 _place   =   _this select 0; 
 _points =   _this select 1;
 _markername = _this select 2;
@@ -31,13 +30,10 @@ if (_opfreward > 0) then {
     ["OPF", _opfreward, "zone_lost_consolation"] remoteExec ["fnc_ap_adjust", 2];
 };
 
-// ADD Skill to operatives
 [] spawn fnc_operative_mission_complete; 
 
-// MODIFY MARKER ICON
 // Blue for the same reason as the first capture: green is Independent, not friendly.
 str(_markername) setMarkerColor "ColorBlue";
-// MODIFY MARKER ELLIPSE
 str(_markername2) setMarkerColor "ColorBlue";
 
 // No CP on a recapture: passive CP now comes from towns, and a zone's one-time reward was paid

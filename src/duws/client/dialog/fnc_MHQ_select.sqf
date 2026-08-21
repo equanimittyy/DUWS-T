@@ -42,8 +42,6 @@ _target Call Compile Format ["%1=_This ; PublicVariable ""%1""",_VarName];
 // Create MHQ marker
 ["select"] remoteExec ["fnc_MHQ_addActions", 2];
 
-// Add Deploy action
 ["deploy"] remoteExec ["fnc_MHQ_addActions", [0,-2] select isDedicated,"duws_mhq_actions"];
 
-// Add flag
 MHQ1 forceFlagTexture "\A3\Data_F\Flags\flag_blue_CO.paa";

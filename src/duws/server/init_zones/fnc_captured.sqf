@@ -55,12 +55,10 @@ if (VERSION_X == "MODERN" || simple_zones_enable) then {
     };
 };
 
-// MODIFY MARKER ICON
 // Blue, not green: green is the engine's Independent colour, which this mission sets hostile to
 // west, so a zone the player owns was reading as a third party's. Pairs with the ColorRed an
 // OPFOR-held zone carries.
 str(_markername) setMarkerColor "ColorBlue";
-// MODIFY MARKER ELLIPSE
 str(_markername2) setMarkerColor "ColorBlue";
 
 sleep 2;

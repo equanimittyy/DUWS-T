@@ -29,7 +29,6 @@ openMap true;
 [localize "STR_DUWS_T_liftwp_brief"] call fnc_map_prompt;
 
 while {_timer > 0 && count _waypoints < 3} do {
-    // keep the map open: reopen immediately if the player closes it
     if (!visibleMap) then {
         openMap true;
     };
@@ -38,7 +37,6 @@ while {_timer > 0 && count _waypoints < 3} do {
     // same handler.
     ["LIFT", _liftClickHandler] call fnc_mapclick_claim;
 
-    // wait for a click, reopening the map if it gets closed
     waitUntil {
         sleep 0.1;
         if (!visibleMap) then {

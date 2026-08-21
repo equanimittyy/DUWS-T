@@ -66,20 +66,17 @@ buttonSetAction [1601, "hint ""This operative is already active in this theatre 
 ctrlSetText [1601, "ALREADY DEPLOYED"];	
 
 
-// wait until the operator is dead
-waitUntil {sleep 5; !alive _soldier}; 
+waitUntil {sleep 5; !alive _soldier};
 
 _soldier_timeheal = 60;
 duws_operator_list select _selected_soldier_index set [12,_soldier_timeheal];
 duws_operator_list select _selected_soldier_index set [7,"Injured"];
 
-// the timer
 for [{_timer=_soldier_timeheal}, {_timer>0}, {_timer=_timer-1}] do
 {
     duws_operator_list select _selected_soldier_index set [12,_timer];
 	sleep 1;
 };
-// soldier is healed
 duws_operator_list select _selected_soldier_index set [12,0];
 duws_operator_list select _selected_soldier_index set [7,"Healed"];
 ["info",[localize "STR_DUWS_T_OPERATOR_HEALED", _selected_soldier_name]] call bis_fnc_showNotification;

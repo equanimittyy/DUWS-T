@@ -1,6 +1,5 @@
 
 
-// DUWS_T "More Urban" changes
 if (!isServer) exitWith {};
 _half = worldSize / 2;
 _safehalf = worldSize / 2.2;  //STAY OFF THE EDGES OF SMALL MAPS
@@ -13,7 +12,6 @@ _temp_allTowns = [];
 _temp_allLocations = [];
 _temp_allLocationsPos = [];
 
-// find all location TYPES
 _allLocationTypes = [];
 "_allLocationTypes pushBack configName _x" configClasses (configFile >> "CfgLocationTypes");
 
@@ -56,14 +54,12 @@ if (zones_max_dist_from_hq > 10000) then {
 	[{hint localize "STR_DUWS_T_3kascuws"}] remoteExec ["BIS_fnc_Spawn", [0,-2] select isDedicated,false];
 };
 private _tStage = diag_tickTime;
-// Create a list of locations on the map using distance from HQ
 {
 	if (PosOfBLUHQ distance _x < zones_max_dist_from_hq) then {
 		_allLocations pushBack _x;
 	};
 } forEach _temp_allLocations;
 
-// Create a list of Cities and Towns using distance from HQ
 {
 	if (PosOfBLUHQ distance _x < zones_max_dist_from_hq) then {
 		_allTowns pushBack _x;
@@ -81,7 +77,6 @@ if (count(AO_direction) > 0) then {
 
 	_direction = PosOfBLUHQ getDir AO_direction;
 
-	// all locations
 	_temp_allLocations = _allLocations;
 	_allLocations = [];
 
@@ -94,7 +89,6 @@ if (count(AO_direction) > 0) then {
 		_allLocations = _temp_allLocations;
 	};
 	
-	// Towns and Cities
 	_temp_allTowns = _allTowns;
 	_allTowns = [];
 

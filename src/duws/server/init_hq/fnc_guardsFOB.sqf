@@ -25,7 +25,6 @@ if (_fobKey != "") then {
 
 _safe = [(_centerPos select 0)+10, (_centerPos select 1)+10];
 
-// Create the guards
 _groupGuard = [[0,0], WEST, [blufor_SOLDIER_X, blufor_SOLDIER_X, blufor_SOLDIER_X, blufor_SOLDIER_X],[],[],blufor_ai_skill] call BIS_fnc_spawnGroup; 
 _groupGuard deleteGroupWhenEmpty true;
 
@@ -56,8 +55,6 @@ switch (VERSION_X) do {
 
 [_groupGuard, _centerPos] call bis_fnc_taskDefend;
 
-// Patrolling Guards
-//
 // One group walking the hqpatrol posture, the same circuit the HQ walks round its towers. It is the
 // FOB's only moving element now.
 //

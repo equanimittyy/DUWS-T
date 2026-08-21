@@ -4,7 +4,6 @@ if (!hasInterface) exitWith {};
 
 params ["_caller", "_count"];
 
-// prevent opening the map twice
 if (!isNil "hirePartisans_mapOpen" && {hirePartisans_mapOpen}) exitWith {
     hint localize "STR_DUWS_T_partisans_placing_busy";
 };
@@ -42,7 +41,6 @@ openMap true;
 // who was then held in a map that refuses to close, with nothing saying why.
 [localize "STR_DUWS_T_partisans_place_brief"] call fnc_map_prompt;
 
-// force the map to stay open until a click
 while {hirePartisans_mapOpen} do {
     if (!visibleMap) then {
         openMap true;

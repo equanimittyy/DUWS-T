@@ -14,7 +14,6 @@
 
 private _opfAuto = (OPFOR_FactionFile_X == "AUTODETECT");
 
-// --- BLUFOR ---
 switch (BLUFOR_FactionFile_X) do {
     case "CUSTOM": {
         BLUfactionDataTemp = ""; publicVariable "BLUfactionDataTemp";
@@ -35,7 +34,6 @@ switch (BLUFOR_FactionFile_X) do {
 
 if (duws_custom_faction_back) exitWith {};
 
-// --- OPFOR ---
 switch (OPFOR_FactionFile_X) do {
     case "CUSTOM": {
         OPFfactionDataTemp = ""; publicVariable "OPFfactionDataTemp";

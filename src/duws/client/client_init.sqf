@@ -432,7 +432,6 @@ if (apocalypse_mode) then {
     };
 };
 
-// =============================================
 if (CIV_PRESENCE == "RAVAGE") then {
     ["biohazard", [localize "STR_DUWS_T_ravage", localize "STR_DUWS_T_ZOMBIE_NOREP"]] remoteExec ["BIS_fnc_showNotification", 0];
 };

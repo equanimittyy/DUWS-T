@@ -228,7 +228,6 @@ player_markers_main_loop_handle = _this spawn {
 		} forEach (if (_showAIs) then {(allUnits - allPlayers) + allPlayers} else {allPlayers});
 
 
-		// show player controlled uavs
 		{
 			if(isUavConnected _x) then {	
 				_unit=(uavControl _x) select 0;

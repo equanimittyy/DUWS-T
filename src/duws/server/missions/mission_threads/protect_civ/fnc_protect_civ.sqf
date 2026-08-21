@@ -208,7 +208,6 @@ publicVariable format ["%1_started", _VARtaskgeneratedName];
     };
 
     [_targetPos, _radius, "", true] call fnc_mission_end;
-    // Spawn the "next mission" wait
 };
 
 [_targetpos, _spawnDist, _civilian, _VARtaskgeneratedName] spawn {

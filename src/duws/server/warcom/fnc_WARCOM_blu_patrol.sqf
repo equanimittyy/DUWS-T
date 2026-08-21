@@ -80,7 +80,6 @@ blufor_patrol_count = 0;
 			sleep 10; // give squads a chance to mount up
 			[_group] spawn fnc_WARCOM_wp_blu_patrol;
 
-			// SPAWN VEHICLE
 			switch (VERSION_X) do {
 				case "MODERN": {
 					// spawn car -- tier 2 (motorised)

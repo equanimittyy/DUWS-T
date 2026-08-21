@@ -14,7 +14,6 @@
       lbSetText [_idc, _i, (lbText [_idc, _i]) + " " + (localize "STR_DUWS_T_default_suffix")];
   };
 
-  /// MAX RADIUS
   index_max_radius_2000 = lbAdd [2100, "2000m"];
   index_max_radius_1750 = lbAdd [2100, "1750m"];
   index_max_radius_1500 = lbAdd [2100, "1500m"];
@@ -24,7 +23,6 @@
   index_max_radius_500 = lbAdd [2100, localize "STR_DUWS_T_zoneradiusmax500"];
   [2100, index_max_radius_500] call _setDefault;
 
-  // MIN RADIUS
   index_min_radius_1750 = lbAdd [2101, "1750m"];
   index_min_radius_1500 = lbAdd [2101, "1500m"];
   index_min_radius_1250 = lbAdd [2101, "1250m"];
@@ -34,7 +32,6 @@
   index_min_radius_350 = lbAdd [2101, localize "STR_DUWS_T_zoneradiusmin350"];
   [2101, index_min_radius_350] call _setDefault;
 
-// AMOUNT ENEMY ZONES
 index_amount_zones_40 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q4"];
 index_amount_zones_30 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q3"];
 index_amount_zones_20 = lbAdd [2102, localize "STR_DUWS_T_jooz8g8q2"];
@@ -51,7 +48,6 @@ index_amount_zones_2 = lbAdd [2102, "2"];
 index_amount_zones_1 = lbAdd [2102, "1"];
 [2102, index_amount_zones_4] call _setDefault;
 
-// MAX DISTANCE FROM HQ
 index_max_dist_hq_30 = lbAdd [2103, localize "STR_DUWS_T_blqblz86"];
 index_max_dist_hq_40 = lbAdd [2103, "4 km"];
 index_max_dist_hq_50 = lbAdd [2103, "5 km"];
@@ -60,7 +56,6 @@ index_max_dist_hq_150 = lbAdd [2103, localize "STR_DUWS_T_hqdistmax15km"];
 index_max_dist_hq_200 = lbAdd [2103, "20 km"];
 [2103, index_max_dist_hq_150] call _setDefault;
 
-// STARTING CP AVAILABLE
 index_amount_cp_0 = lbAdd [2104, "0"];
 index_amount_cp_10 = lbAdd [2104, "10"];
 index_amount_cp_20 = lbAdd [2104, "20"];
@@ -81,7 +76,6 @@ index_cp_reward_multiplier_4 = lbAdd [2106, "4x"];
 index_cp_reward_multiplier_5 = lbAdd [2106, "5x"];
 [2106, index_cp_reward_multiplier_1] call _setDefault;
 
-//CP Death Penalty
 index_cp_death_penalty_0 = lbAdd [2107, "0"];
 index_cp_death_penalty_1 = lbAdd [2107, "1"];
 index_cp_death_penalty_2 = lbAdd [2107, "2"];
@@ -113,7 +107,6 @@ index_opfor_ap_t4 = lbAdd [2109, format ["350 (%1)", localize "STR_DUWS_T_tierna
 index_opfor_ap_t5 = lbAdd [2109, format ["600 (%1)", localize "STR_DUWS_T_tiername5"]];
 [2109, index_opfor_ap_t2] call _setDefault;
 
-// AI BLU SKILL
 index_blu_skill_elite = lbAdd [2110, localize "STR_DUWS_T_7ovwb13n"];
 index_blu_skill_commando = lbAdd [2110, localize "STR_DUWS_T_i9ql9ndj"];
 index_blu_skill_veteran = lbAdd [2110, localize "STR_DUWS_T_7szkelef"];
@@ -121,7 +114,6 @@ index_blu_skill_trained = lbAdd [2110, localize "STR_DUWS_T_njgzfxj4"];
 index_blu_skill_rookie = lbAdd [2110, localize "STR_DUWS_T_hjz2qz8j"];
 [2110, index_blu_skill_veteran] call _setDefault;
 
-// AI OPF SKILL
 index_op_skill_elite = lbAdd [2111, localize "STR_DUWS_T_7ovwb13n"];
 index_op_skill_commando = lbAdd [2111, localize "STR_DUWS_T_i9ql9ndj"];
 index_op_skill_veteran = lbAdd [2111, localize "STR_DUWS_T_7szkelef"];
@@ -129,7 +121,6 @@ index_op_skill_trained = lbAdd [2111, localize "STR_DUWS_T_njgzfxj4"];
 index_op_skill_rookie = lbAdd [2111, localize "STR_DUWS_T_hjz2qz8j"];
 [2111, index_op_skill_trained] call _setDefault;
 
-// OPFOR Air/Tank Assets
 index_opfor_AT_yes_yes = lbAdd [2112, localize "STR_DUWS_T_dge86ern"];
 index_opfor_AT_yes_no = lbAdd [2112, localize "STR_DUWS_T_z4j9n0qo"];
 index_opfor_AT_no_yes = lbAdd [2112, localize "STR_DUWS_T_reguyhhi"];
@@ -137,7 +128,6 @@ index_opfor_AT_no_no = lbAdd [2112, localize "STR_DUWS_T_ps661jx6"];
 [2112, index_opfor_AT_yes_yes] call _setDefault;
 
 
-// ENEMY MULTIPLIER
 index_enemyunit_multiplier_1 = lbAdd [2113, "1x"];
 index_enemyunit_multiplier_2 = lbAdd [2113, "2x"];
 index_enemyunit_multiplier_3 = lbAdd [2113, "3x"];

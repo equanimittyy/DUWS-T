@@ -4,10 +4,10 @@
 //  Name of the place,pts,radius,position,fortified,prefab,zone#
 //
 
-_name = _this select 0; //name
+_name = _this select 0;
 _points = _this select 1;
 _size = _this select 2;
-_zonePos = _this select 3;  //position
+_zonePos = _this select 3;
 _fortified = _this select 4;
 _prefab = _this select 5;
 _zone_num = _this select 6;
@@ -15,20 +15,18 @@ _zone_num = _this select 6;
 // the clicking client, and the allocator is server-side. An empty name asks for the next one, which
 // is what both locators pass -- the zone number survives only as an index for the arrays below.
 if (_name == "") then { _name = [] call fnc_zone_name };
-// Zone visibility
 _visible = true;
 if (hardcore_mode_enable) then {_visible = false};
 
 
 amount_zones_created = amount_zones_created + 1;
 publicVariable "amount_zones_created";
-zones_created = true; // Tell that at least 1 zone is created
+zones_created = true;
 publicVariable "zones_created";
 
 // Add the zone to the array of zones (need for manual placement of zones and WARCOM)
 if (isNil ("Array_of_OPFOR_zones")) then {Array_of_OPFOR_zones = [];};
 Array_of_OPFOR_zones = Array_of_OPFOR_zones + [_zonePos];
-// Add the zone name, position, and visibility(hardcore) to zone_namePOS_pairs 
 zone_namePOS_pairs = zone_namePOS_pairs + [[_name,_zonePos,_visible]];
 publicVariable "zone_namePOS_pairs";
 // Everything needed to rebuild this zone through this same function: radius and points reach the
@@ -43,11 +41,10 @@ publicVariable "zone_meta_array";
 ["INFO", "ZONES", format ["zone %1 registered at %2, worth %3, size %4, fortified=%5, prefab=%6",
 	_zone_num, _zonePos, _points, _size, _fortified, _prefab]] call fnc_log;
 
-// CREATE MARKER (ICON)
 // Carries the zone's name and nothing else: the size below is an icon scale, so at [0,0] the type
 // draws nothing and only the text lands. It has to stay an icon marker -- an area marker draws its
 // text as part of drawing its shape, so the same marker at zero size renders nothing at all.
-_markername = format["%1%2",round(_zonePos select 0),round(_zonePos select 1)]; // Define marker name
+_markername = format["%1%2",round(_zonePos select 0),round(_zonePos select 1)];
 _markerstr = createMarker [str(_markername),_zonePos];
 _markerstr setMarkerShape "ICON";
 str(_markername) setMarkerType "o_inf";
@@ -60,7 +57,6 @@ if (hardcore_mode_enable) then {
 	str(_markername) setMarkerAlpha 1; 
 };
 
-// CREATE MARKER (ELLIPSE ZONE)
 _markername2 = format["%1%2ellipse",round(_zonePos select 0),round(_zonePos select 1)];
 _markerstr2 = createMarker [str(_markername2),_zonePos];
 _markerstr2 setMarkerShape "ELLIPSE";
@@ -129,7 +125,6 @@ private _prefabName = "";
 // as the name above: both branches spawn one.
 private _prefabScript = scriptNull;
 
-// CREATE PREFAB
 private _zonePrefabs = call fnc_zone_prefab_set;   // [weightedList, simpleEntry], MODERN-floored
 if (_prefab) then {
 	_array_of_prefabs = _zonePrefabs select 0;
@@ -172,7 +167,6 @@ if (_prefab) then {
 // -- reinforcement the player could neither see coming nor interdict. Tasking OPFOR reserves is the
 // commander's job, and the plan for it is docs/opfor_commander_plan.md.
 
-// CREATE ZONE NOTIFICATION TRIGGER
 _trg2=createTrigger["EmptyDetector",_zonePos];
 _trg2 setTriggerArea[_size,_size,0,false];
 _trg2 setTriggerActivation["ANYPLAYER","PRESENT",true];
@@ -286,7 +280,6 @@ if !([_spawnPos, _size + DUWS_streamArrivalMargin, 1] call fnc_duws_bluforNear) 
 // player watches a Hard Point Generation pass between zones and civilians. Siting still keys off this
 // zone's centre, so its cap guard and streaming coupling are unchanged.
 
-// CREATE ZONE CAPTURABLE TRIGGER
 // Server-local, unlike the notification trigger above it: the capture condition reads the zone's
 // garrison peak, which is a server-side global, so a client evaluating it would answer for state it
 // cannot see. It also settles the locality question fnc_captured.sqf records as unproven.
@@ -318,7 +311,6 @@ private _trgVarName = format["trigger_%1_%2", floor abs (_zonePos select 0), flo
 missionNamespace setVariable [_trgVarName, _trg];
 _trg setVariable ["isZoneCaptureTrigger", true];
 
-// IF MODERN or SIMPLE ZONES, CREATE ZONE FLAG WITH RANDOM OFFSET AND STORE VARIABLE
 if (VERSION_X == "MODERN" || simple_zones_enable) then {
     private _offsetDist = 15 + random 10;
     private _offsetDir = random 360;

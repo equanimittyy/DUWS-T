@@ -1,5 +1,4 @@
 
-// FOR ZEUS
 if (!isServer) exitWith {};
 
 // Offered to the curator once and flagged on the object itself, so a pass carries only what has

@@ -291,13 +291,8 @@ _faction_files_OPFOR = [
 
 ];
 
-// Add the CUSTOM FACTION entries to the faction menu
 _faction_files_BLUFOR = _faction_files_BLUFOR + [["B_Soldier_F", "CUSTOM", "CUSTOM BLUFOR Faction", "CUSTOM"]];
 _faction_files_OPFOR = _faction_files_OPFOR + [["O_Soldier_F", "CUSTOM", "CUSTOM OPFOR Faction", "CUSTOM"]];
-
-// create 2x global arrays Factions_Available_BLUFOR_X & Factions_Available_OPFOR_X
-// check for existence of each rifleman from above
-// add existing rifleman's faction and faction slect menu label to Factions_Available arrays
 
 Factions_Available_BLUFOR_X = [];
 Factions_Available_BLUFOR_X pushback ["BLU_F", "Default = NATO (Arid)","BLU_F_ARID"];
@@ -322,7 +317,6 @@ Factions_Available_OPFOR_X pushback ["OPF_F", "Default = CSAT (Arid)","OPF_F_ARI
 publicVariable "Factions_Available_OPFOR_X";
 publicVariable "Factions_Available_BLUFOR_X";
  
-// CIVILIAN CHECK
 civ_mod = "vanilla";
 if (isClass(configFile >> "CfgVehicles" >> "CUP_C_C_Citizen_01")) then {
     civ_mod = "cup";

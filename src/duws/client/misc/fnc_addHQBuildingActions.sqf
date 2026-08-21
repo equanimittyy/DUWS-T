@@ -14,7 +14,6 @@ params ["_hqBuilding"];
 
 if (isNull _hqBuilding) exitWith {};
 
-// dedup
 if (_hqBuilding getVariable ["HQ_building_actions_done", false]) exitWith {};
 _hqBuilding setVariable ["HQ_building_actions_done", true];
 

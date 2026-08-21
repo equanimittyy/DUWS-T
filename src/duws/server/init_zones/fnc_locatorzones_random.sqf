@@ -13,8 +13,7 @@ _safehalf = worldSize / 2.2;
 _mapradius = sqrt 2 * _safehalf;
 _mapcenter = [_half, _half, 0];
 
-// Spawn failsafe 1
-[] spawn {  
+[] spawn {
 	for [{_i=1}, {_i<=2}, {_i=_i+1}] do {
 		sleep 30;
 		if !(WARCOM_init_done) then {

@@ -79,7 +79,6 @@ while {!createzone_server} do {
 	if (BLUFOR_FactionFile_X == "CUSTOM") then { while {!(["FACTION", "BLUfactionDataTemp pasted", {BLUfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
 	if (OPFOR_FactionFile_X == "CUSTOM") then { while {!(["FACTION", "OPFfactionDataTemp pasted", {OPFfactionDataTemp != ""}, 300] call fnc_waitLogged)} do {}; };
 
-	// BLUFOR
 	["INFO", "BOOT", format ["BLUFOR Faction init on server: %1", BLUFOR_FactionFile_X]] call fnc_log;
 
 	if (BLUFOR_FactionFile_X == "CUSTOM") then {
@@ -464,6 +463,5 @@ if (isNil "DUWS_cooldownMonitor_running") then {
         };
     };
 };
-// ======================================================
 [] spawn fnc_createKillhouse;
 if (!isServer) exitWith {};

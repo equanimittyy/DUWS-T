@@ -8,15 +8,12 @@ private _zoneKey = format ["zone_%1_%2", round (_centerSpawn select 0), round (_
 _centerSpawnX = _centerSpawn select 0;
 _centerSpawnY = _centerSpawn select 1;
 
-///////////////////////////////////////////////////////////////////////
-
 // --DUWS-COMPOSITION BEGIN name="Simple Zone" schema=A--
 _staticsArray = [
 	["CamoNet_INDP_open_F", 0, 0, 0, 0]
 ];
 // --DUWS-COMPOSITION END--
 
-// PLACE STATICS WITHOUT INTERACTION
 _vehicle = objNull;
 {
 	_x params ["_class", "_posX", "_posY", "_posZ", "_dir"];
@@ -27,7 +24,6 @@ _vehicle = objNull;
 	_vehicle enableSimulationGlobal false;
 } forEach _staticsArray;
 
-// PLACE STATICS WITH INTERACTION
 _this = createVehicle ["Box_FIA_Ammo_F", [0,0,0], [], 0, "CAN_COLLIDE"];
 [_this, _zoneKey] call fnc_duws_keep;
 _this setDir 0;

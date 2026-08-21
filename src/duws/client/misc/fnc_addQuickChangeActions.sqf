@@ -14,7 +14,6 @@ if (missionNamespace getVariable ["DUWS_arsenalLimited", false]) exitWith {};
 // wait for the data the server scans and broadcasts
 waitUntil {sleep 0.1; !isNil "blufor_quickChange_loadouts_scanned"};
 
-// dedup: remove any actions already present
 private _actionAID = _crate getVariable ["quickChange_actionA", -1];
 if (_actionAID != -1) then { _crate removeAction _actionAID; };
 

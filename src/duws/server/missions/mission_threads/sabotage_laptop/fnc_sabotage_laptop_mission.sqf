@@ -52,7 +52,6 @@ switch (VERSION_X) do {
 };
 
 [[_targetpos, _radius] call fnc_garrisonBuildings] call fnc_mission_claim;
-// CREATE OPFOR PATROLS
 sleep 1;
 [_targetpos, _radius] spawn fnc_missionPatrolswithintel;
 

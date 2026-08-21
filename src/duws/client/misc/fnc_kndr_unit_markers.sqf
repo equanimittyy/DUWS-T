@@ -4,9 +4,6 @@
  * Version: 1.1 (8 April 2010)
  */
 
-//-----------------------------------
-//-------| fields |------------------
-//-----------------------------------
 if (!hasInterface) exitWith {};
 /**
  * Holds delay of updating markers.
@@ -59,10 +56,6 @@ kndr_needsRemove =
 	};
 	_res
 };
-
-//-----------------------------------
-//------| private functions |--------
-//-----------------------------------
 
 /**
  * Updates all markers (once).
@@ -117,10 +110,6 @@ kndr_getDefaultMarkerClass =
 	};
 	_res
 };
- 
-//-----------------------------------
-//-----| public functions |----------
-//-----------------------------------
 
 /**
  * Set the speed of updating markers.

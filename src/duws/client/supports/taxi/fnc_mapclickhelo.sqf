@@ -18,14 +18,12 @@ while {_timer>0} do {
 	[localize "STR_DUWS_T_chariot", localize "STR_DUWS_T_helotaxiwp_brief"] remoteExec ["fnc_duws_dialogue", 0];
 	_helo removeAction _actionID;
 
-	// TIMER & MAPCLICK
 	hint parseText localize "STR_DUWS_T_helotaxi2wp";
 
 	TaxiMarker1 = "";
 	TaxiMarker2 = "";
 	waituntil {sleep 0.5;clicked or !(visiblemap)};
-    if (clicked) then { // player has clicked the map
-		// create temp marker on WP1
+    if (clicked) then {
 		TaxiMarker1 = "foo";
 		_markerstr = createMarker [str(TaxiMarker1), ClickedPos1];
 		_markerstr setMarkerShape "ICON";
@@ -46,7 +44,6 @@ while {_timer>0} do {
 		["TAXI", "ClickedPos2 = _pos; clicked = true;"] call fnc_mapclick_claim;
 		waituntil {sleep 0.5;clicked or !(visiblemap)};
 		if (clicked) then {
-			// create temp marker on WP2
 			TaxiMarker2 = "foo2";
 			_markerstr2 = createMarker [str(TaxiMarker2), ClickedPos2];
 			_markerstr2 setMarkerShape "ICON";
@@ -70,7 +67,7 @@ while {_timer>0} do {
 		_playerClosed_map = false;
 		waituntil {sleep 0.5;clicked or !(visiblemap)};
 		if (clicked) then {
-			_foundPickupPos = [ClickedPos3, 0,100,20,0,0.2,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos; // find a valid pos
+			_foundPickupPos = [ClickedPos3, 0,100,20,0,0.2,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 
 			if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) then {
 				clicked = false;
@@ -90,7 +87,7 @@ while {_timer>0} do {
 			deletemarker str(TaxiMarker2);
 		};
 	};
-	_timer = _timer-1; // remove 1 to timer
+	_timer = _timer-1;
 	sleep 0.5;
 	if (taxiCanTakeOff) exitWith{};
 };

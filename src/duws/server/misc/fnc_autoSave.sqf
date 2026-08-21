@@ -1,5 +1,4 @@
 
-// Super simple auto-save script.
 // this enables manual save
 //enableSaving false;
 if (!isServer) exitWith {};

@@ -9,7 +9,6 @@
 _addAction = _this select 0;
 
 if (_addAction == "select") then {
-	// create marker on MHQ
 	_markerType = "b_motor_inf";
 	waitUntil {!isNil "MHQ1"};
 	if (MHQ1 isKindof "tank") then {_markerType = "b_armor"};

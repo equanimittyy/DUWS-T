@@ -1,10 +1,8 @@
 // Locality: server -- see callers.
 // The config menu overwrites many of these from player input; treat the values here as defaults.
 
-// SET THE VERSION
 VERSION_X = "MODERN";publicVariable "VERSION_X";
 setGroupIconsVisible [true,false]; //now everyone can see enemies on map
-// FACTION DEFAULTS
 OPFOR_Faction_X = "OPF_F";
 BLUFOR_Faction_X = "BLU_F";
 switch (VERSION_X) do {
@@ -31,7 +29,6 @@ OPFfactionData = [];publicVariable "OPFfactionData";
 Factions_Available_OPFOR_X = [];publicVariable "Factions_Available_OPFOR_X";
 Factions_Available_BLUFOR_X = [];publicVariable "Factions_Available_BLUFOR_X";
 
-// amount_zones_created
 amount_zones_created = 0;publicVariable "amount_zones_created";
 
 // Zones whose build-out finished, as opposed to amount_zones_created, which fnc_createZone
@@ -39,13 +36,11 @@ amount_zones_created = 0;publicVariable "amount_zones_created";
 // and prefab zones hide everything within 35 m of their centre partway through build-out.
 zones_buildout_done = 0;publicVariable "zones_buildout_done";
 
-// amount_zones_captured
 amount_zones_captured = 0;publicVariable "amount_zones_captured";
 
 // AO direction for Random Zones
 AO_direction = [];
 
-// Array_of_FOBS
 // The three arrays are index-parallel: entry i of each describes one FOB. Every writer must
 // append to all three and every remover must delete the same index from all three, or a FOB's
 // name and position separate from its building.
@@ -56,13 +51,10 @@ Array_of_FOBpos = [];publicVariable "Array_of_FOBpos";
 // Opfor gets Air
 AttackHeli = 1;publicVariable "AttackHeli";
 
-// set the default skill range
 blufor_ai_skill = [0.85,1.0];publicVariable "blufor_ai_skill";
 
-// chosen_hq_placement
 chosen_hq_placement = false;publicVariable "chosen_hq_placement";
 
-// chosen_settings
 chosen_settings = false;publicVariable "chosen_settings";
 
 // Captured-materiel pool: foreign (non-friendly) gear the player has banked, as an array of
@@ -98,7 +90,6 @@ duws_faction_locked = [];publicVariable "duws_faction_locked";
 duws_callsign = "Alpha 1-1";publicVariable "duws_callsign";
 
 
-// cp_reward_multiplier
 cp_reward_multiplier = 1;publicVariable "cp_reward_multiplier";
 
 // Kill income. On each campaign economy tick a player's kill tally converts at
@@ -225,13 +216,10 @@ DUWS_retired = [];
 // the wait for a 30 min deadline, but not KEEP_RADIUS and not the persistent flag.
 DUWS_cleanup_force = false;
 
-// Death Penalty
 DUWSMP_CP_death_cost = 2;publicVariable "DUWSMP_CP_death_cost";
 
-// dynamic_weather_enable
 dynamic_weather_enable = true;publicVariable "dynamic_weather_enable";	
 
-// commandpointsblu1
 commandpointsblu1 = 30;publicVariable "commandpointsblu1";
 
 // Zones built out and civilians registered, successfully or not. Everything the player sees
@@ -255,19 +243,15 @@ failsafe_zones_not_found2 = false;//publicVariable "failsafe_zones_not_found2";
 // FOB_removed keeps fnc_fob_destroyed from running
 FOB_removed = false;//publicVariable "FOB_removed";
 
-// Hardcore Mode
 hardcore_mode_enable = false;publicVariable "hardcore_mode_enable";
 
 // Opfor gets tanks
 HeavyArmor = 1;publicVariable "HeavyArmor";
 
-// hq_manually_placed
 hq_manually_placed = false;publicVariable "hq_manually_placed";
 
-// HQ spawns complete
 HQ_pos_found_generated = false;publicVariable "HQ_pos_found_generated";
 
-// All usable locations
 MASTER_allLocations_filtered = [];//publicVariable "MASTER_allLocations_filtered";
 MASTER_allLocationsPos = [];publicVariable "MASTER_allLocationsPos";
 
@@ -308,10 +292,8 @@ DUWS_searchSources = createHashMapFromArray [
 // Broadcast because the search action's condition gates the prompt on the client.
 DUWS_searchCooldown = 300; publicVariable "DUWS_searchCooldown";
 
-// manually_chosen
 manually_chosen = false;publicVariable "manually_chosen";
 
-// Side Mission wait
 Mission_available = true;publicVariable "Mission_available";
 
 // The side-mission gate: a new mission may start only once this many in-game hours have passed since
@@ -325,7 +307,6 @@ mission_gate_hours = 3;publicVariable "mission_gate_hours";
 // first mission, which reads as long past and so opens the gate.
 DUWS_lastMissionStartDate = 0;publicVariable "DUWS_lastMissionStartDate";
 
-// Locations for mission placement
 MissionLocations = [];publicVariable "MissionLocations";
 
 // moreUrban zones and missions
@@ -336,27 +317,20 @@ moreUrban = 1;publicVariable "moreUrban";
 // that predates the setting; the campaign screen overwrites it (fnc_process_campaign_menu).
 garrison_density = 1;publicVariable "garrison_density";
 
-// set the default skill range
 opfor_ai_skill = [0.55,0.75];publicVariable "opfor_ai_skill";
 
-// declare opfor rifleman variable
 opfor_SOLDIER_X = "";
 
-// player_is_choosing_hqpos
 player_is_choosing_hqpos = false;publicVariable "player_is_choosing_hqpos";
 
-// PosOfBLUHQ
 PosOfBLUHQ = [];publicVariable "PosOfBLUHQ";
 
-//serv_zones_array
 serv_zones_array = [];publicVariable "serv_zones_array";
 
-// simple_zones_enable
 simple_zones_enable = false;publicVariable "simple_zones_enable";
 
 apocalypse_mode = false; publicVariable "apocalypse_mode";
 
-// STARTING ARMY POWER
 WARCOM_blufor_ap = 0;publicVariable "WARCOM_blufor_ap";
 WARCOM_opfor_ap = 0;publicVariable "WARCOM_opfor_ap";
 // Ladder input and its tier, per side. The earned counter only ever rises (credited by the recurring
@@ -376,10 +350,8 @@ WARCOM_init_done = false;publicVariable "WARCOM_init_done";
 // passes placed nothing. Empty = every zone OPFOR, which is the truth at hour zero; WARCOM_init resets it.
 WARCOM_zones_controled_by_BLUFOR = [];
 
-// PATROL TYPES
 WARCOM_blu_attack_wave_type = [];
 
-// DEFAULT WEATHER
 // choose between "none" - "tropical" - "arid" - "temperate" - "temperate_cold" - "mediterranean"
 weather_type = "none";publicVariable "weather_type";
 
@@ -393,17 +365,13 @@ ZeusStatus = 2;publicVariable "ZeusStatus";
 // that cannot pull in a mod dependency on the map this mission ships for.
 CIV_PRESENCE = "med";publicVariable "CIV_PRESENCE";
 
-// zone_namePOS_pairs
 zone_namePOS_pairs = [];publicVariable "zone_namePOS_pairs";
 // zone_meta_array: [zone number, position, radius, capture points, fortified, prefab] per zone.
 // Keyed by the zone number it carries, not by array position -- the locator spawns fnc_createZone
 // per zone, so build-out finishes out of order and registration order is not zone order.
 zone_meta_array = [];publicVariable "zone_meta_array";
-// zones_created
 zones_created = false;publicVariable "zones_created";
-// zones_manually_placed
 zones_manually_placed = false;publicVariable "zones_manually_placed";
-//zones_max_dist_from_hq
 zones_max_dist_from_hq = 0;publicVariable "zones_max_dist_from_hq";
 // Number of capturables zones to create (when zones are created randomly)
 zones_number = 6; 
@@ -641,7 +609,6 @@ OPCOM_AP_TOWER = 30;
 OPCOM_AP_BAND  = 12;
 OPCOM_AP_TOPUP = 8;
 
-// zoneundercontrolblu
 zoneundercontrolblu = 0;publicVariable "zoneundercontrolblu";
 
 // How close to a base an intact vehicle must be parked to survive the cleanup sweep. Read by both

@@ -30,7 +30,6 @@ _fnc_restoreCommMenu = {
 	if (_item isNotEqualTo "") then { [_item] call fnc_support_comm_add };
 };
 
-// IF NOT ENOUGH PTS
 // Advisory only -- it skips a map-click window the player cannot pay for. fnc_arty makes
 // the real decision, up to 45 s later.
 if (commandpointsblu1 < _cost) exitWith {
@@ -62,18 +61,15 @@ if (!(["ARTY", format["[_pos,%2,%3,%4,%5,%6,%7,'%8'] spawn fnc_arty; clicked = t
 openMap true;
 [localize "STR_DUWS_T_4sqljq58"] call fnc_map_prompt;
 
-// TIMER
 // Closing the map is how the player backs out now that this opens it, so the wait ends there
 // too rather than holding the click slot for the rest of the timer. Tested after the sleep:
 // visibleMap does not read true on the frame openMap is issued.
 while {_timer > 0 AND !clicked} do {
 
-	_timer = _timer - 1; // remove 1 to timer
+	_timer = _timer - 1;
 	sleep 1;
 	if (!visibleMap) exitWith {};
 };
-
-// TIMER ELLAPSED OR CLICKED
 
 ["ARTY"] call fnc_mapclick_release;
 openMap false;

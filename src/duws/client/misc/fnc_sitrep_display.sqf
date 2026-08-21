@@ -1,4 +1,3 @@
-// DISPLAY A SITREP
 // The reputation figure arrives as an argument rather than being read here: it is the standing of
 // the town this player is in, and that array lives on the server alone. fnc_sitrep_fanout resolves
 // it per player.

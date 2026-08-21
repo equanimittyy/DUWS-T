@@ -199,10 +199,8 @@ _factionLoadouts = [];
 //remove duplicates
 _factionLoadouts = _factionLoadouts arrayIntersect _factionLoadouts;
 
-// === NEW: Also extract items from ALiVE_orbatCreator_loadout arrays and merge ===
 _aliveLoadouts = [];
 
-// Define recursive extraction function
 _extractStrings = {
     params ["_data", "_resultArray"];
     if (typeName _data == "STRING") then {
@@ -226,10 +224,8 @@ _extractStrings = {
 
 _aliveLoadouts = _aliveLoadouts arrayIntersect _aliveLoadouts; // remove duplicates within Alive items
 
-// Merge Alive items into the main loadouts array
 _factionLoadouts = _factionLoadouts + _aliveLoadouts;
 _factionLoadouts = _factionLoadouts arrayIntersect _factionLoadouts; // final deduplication
-// === END NEW ===
 
 private _randomListItems = [];
 {

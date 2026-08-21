@@ -70,8 +70,6 @@ _dropdownBLU ctrlAddEventHandler ["LBSelChanged",
 	BLUFOR_FactionFile_X = (_control lbData (lbCurSel _control));
 }];
 
-//////////////////////////////////////
-
 _frameOPF = _display ctrlCreate ["RscFrame", 1011];
 _frameOPF ctrlSetPosition [0.5075, 0.500, 0.3925, 0.1];
 _frameOPF ctrlSetText localize "STR_DUWS_T_1m1bl9nd";
@@ -113,8 +111,6 @@ _dropdownOPF ctrlAddEventHandler ["LBSelChanged",
 	params ["_control", "_selectedIndex"];
 	OPFOR_FactionFile_X = (_control lbData (lbCurSel _control));
 }];
-
-//////////////////////////////////////
 
 // Game mode. Sits above the faction dropdowns because it is answered first and the screens after
 // it narrow to it -- the reverse is not available, this is the first screen of setup. Built after

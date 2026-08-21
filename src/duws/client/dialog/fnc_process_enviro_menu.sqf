@@ -10,7 +10,6 @@ private _civValue = lbData [2109, lbCurSel 2109];
 
 closeDialog 0;
 
-// Weather type
 _index = lbCurSel 2100;
 switch (_index) do
 {
@@ -44,7 +43,6 @@ switch (_index) do
     };
 };
 
-// TIME OF DAY
 _index = lbCurSel 2101;
 switch (_index) do {
     case time_of_day_dawn:{ time_of_day = 6; };
@@ -66,7 +64,6 @@ if (_index >= 0 && _index < count _civDensityValues) then {
 missionNamespace setVariable ["civ_density", _selectedValue, true];
 ["INFO", "SUPPORT", format ["Civ density set to: %1", _selectedValue]] call fnc_log;
 
-// FAST TRAVEL
 _index = lbCurSel 2103;
 switch (_index) do
 {
@@ -74,7 +71,6 @@ switch (_index) do
     case index_fast_travel_true: { enable_fast_travel = true; };
 };
 
-// ZEUS PARAMS
 _index = lbCurSel 2104;
 switch (_index) do
 {
@@ -83,12 +79,10 @@ switch (_index) do
     case index_zeus_params_none: { ZeusStatus = 0; };
 };
 
-// War escalation
 _index = lbCurSel 2106;
 escalation_enabled = (_index == index_escalation_true);
 publicVariable "escalation_enabled";
 
-// ENABLE SIMPLE ZONES
 _index = lbCurSel 2108;
 switch (_index) do
 {
@@ -96,7 +90,6 @@ switch (_index) do
     case index_simpzones_true: { simple_zones_enable = true; };
 };
 
-// MORE URBAN
 _index = lbCurSel 2105;
 switch (_index) do
 {
@@ -115,7 +108,6 @@ if (CIV_PRESENCE isEqualTo "") then {
         if (isNil "civ_mod") then {"<nil>"} else {civ_mod}]] call fnc_log;
 };
 
-// ENABLE HARDCORE MODE
 _index = lbCurSel 2110;
 switch (_index) do
 {
@@ -135,5 +127,4 @@ publicVariable "moreUrban";
 publicVariable "CIV_PRESENCE";
 publicVariable "restricted_arsenal";
 
-// OPEN THE NEXT MENU
 [] spawn fnc_campaign_menu;

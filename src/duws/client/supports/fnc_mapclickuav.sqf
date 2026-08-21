@@ -6,7 +6,6 @@ _timer = 60;
 _pos = [];
 clicked = false;
 
-// IF NOT ENOUGH PTS
 // Advisory only -- it skips a map-click window the player cannot pay for. fnc_uav_scanner
 // makes the real decision on the server, up to 60 s later.
 if (commandpointsblu1 < _cost) exitWith {
@@ -38,16 +37,14 @@ switch (VERSION_X) do {
 	default { [localize "STR_DUWS_T_01np5zjk"] call fnc_map_prompt; };
 };
 
-// TIMER
 // Closing the map is how the player backs out now that this opens it, so the wait ends there
 // too rather than holding the click slot for the rest of the timer. Tested after the sleep:
 // visibleMap does not read true on the frame openMap is issued.
 while {_timer>0 AND !clicked} do {
-	_timer = _timer-1; // remove 1 to timer
+	_timer = _timer-1;
 	sleep 1;
 	if (!visibleMap) exitWith {};
 };
-// TIMER ELLAPSED OR CLICKED
 ["UAV"] call fnc_mapclick_release;
 openMap false;
 // One-time use: a dispatched UAV is spent; a backed-out click (map closed, timer out) leaves the

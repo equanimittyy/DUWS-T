@@ -89,7 +89,6 @@ private _faction = {
     _fileVar call _S
 };
 
-// ---- Mission Parameters (lobby) ----
 private _paramsBody = ("MISSION PARAMETERS" call _hdr) + ([
     ["Revive", ["Revive", 0,
         ["None", "AIS (drag/carry)", "Vanilla"], [0,1,2]] call _param],
@@ -106,7 +105,6 @@ private _paramsBody = ("MISSION PARAMETERS" call _hdr) + ([
         ["Off", "Errors only", "Errors + warnings", "Normal", "Debug"], [0,1,2,3,4]] call _param]
 ] apply {_x call _row} joinString "<br/>");
 
-// ---- Campaign generation ----
 private _hqGrid = if (isNil "PosOfBLUHQ" || {(PosOfBLUHQ isEqualType []) && {PosOfBLUHQ isEqualTo []}})
     then {"-"} else {mapGridPosition PosOfBLUHQ};
 private _campBody = ("CAMPAIGN SETUP" call _hdr) + ([
@@ -126,7 +124,6 @@ private _campBody = ("CAMPAIGN SETUP" call _hdr) + ([
     ["OPFOR Faction", ["OPFOR_Faction_X", "OPFOR_FactionFile_X"] call _faction]
 ] apply {_x call _row} joinString "<br/>");
 
-// ---- Forces, economy, world ----
 private _weather = if (["dynamic_weather_enable" call _S] isEqualTo ["No"]) then {"Disabled (static)"}
     else {"weather_type" call _S};
 private _tod = if (isNil "time_of_day") then {"-"} else {

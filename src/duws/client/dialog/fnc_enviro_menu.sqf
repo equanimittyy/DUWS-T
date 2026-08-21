@@ -61,7 +61,6 @@ index_zeus_params_none = lbAdd [2104, localize "STR_DUWS_T_3i1vcc0n"];
 lbAdd [2106, localize "STR_DUWS_T_x4zs3lsg0"];
 index_escalation_true = lbAdd [2106, localize "STR_DUWS_T_vk37aebo"];
 [2106, index_escalation_true] call _setDefault;
-// =========================================
 
 // ENABLE SIMPLE ZONES
 index_simpzones_false = lbAdd [2108, localize "STR_DUWS_T_x4zs3lsg0"];

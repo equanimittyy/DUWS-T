@@ -1,7 +1,7 @@
 // Locality: server -- callers remoteExec to target 2.
 params ["_fob_pos","_fob_name"];
 
-_markername = format["fob%1%2",round (_fob_pos select 0),round (_fob_pos select 1)]; // Define marker name
+_markername = format["fob%1%2",round (_fob_pos select 0),round (_fob_pos select 1)];
 deleteMarker _markername;
 // The persistence ring goes with it, or the map keeps promising a vehicle is safe at a FOB that no
 // longer exists. Same name fnc_baseRangeMarker derives from the position.
@@ -24,8 +24,7 @@ deleteVehicle _trg2;
 // Remove FOB from Array_of_FOBS
 [_fob_pos] call fnc_fob_deregister;
 
-// CLEANUP OBJECTS AFTER 5 min (civilians spared)
-[_fob_pos, _fob_name] spawn {  
+[_fob_pos, _fob_name] spawn {
     _zonePos = _this select 0;
     _radius = 15;
     sleep 300;  // 5 min

@@ -72,8 +72,6 @@ if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || 
 	[localize "STR_DUWS_T_slingshot", localize "STR_DUWS_T_77l9izur"] remoteExec ["fnc_duws_dialogue", 0];
 };
 
-// CREATE A MARKER ON TARGET
-
 _drawRadius = "";
 if (_ammotype == "Bo_Mk82") then {
 	_drawRadius = 20;
@@ -81,14 +79,13 @@ if (_ammotype == "Bo_Mk82") then {
 	_drawRadius = _radius;
 };
 
-_markername = format["ord%1%2",_position]; // Define marker name
+_markername = format["ord%1%2",_position];
 _markerstr = createMarker [str(_markername), _position];
 _markerstr setMarkerShape "ELLIPSE";
 str(_markername) setMarkerColor "ColorGrey";
 str(_markername) setMarkerSize [_drawRadius,_drawRadius]; 
 
-// give marker a label
-_markername2 = format["lbl%1%2",_position]; // Define marker name
+_markername2 = format["lbl%1%2",_position];
 _markerstr2 = createMarker [str(_markername2), _position];
 _markerstr2 setMarkerShape "ICON";
 str(_markername2) setMarkerType "hd_warning";
@@ -98,11 +95,9 @@ str(_markername2) setMarkerText " " + _ord;
 
 sleep 20;
 
-// IF JDAM, LASER or CLUSTER, SEND A JET or PLANE
 _group = "";
 _vehicle = "";
 
-// FIND A RANDOM LOCATION
 _spawnPos = _position;
 _vec =[random [-1,0,1], random [-1,0,1], 0];
 _dist = 3000;
@@ -175,7 +170,6 @@ if (isNull getConnectedUAV player) then {
 	_target = LaserTarget getConnectedUAV player;
 };
 
-// NUMBER OF SALVOS
 if (_ammotype == "Laser") then {
 		if (isNull _target) then { hint localize "STR_DUWS_T_l6wdrhei"; sleep 10 };
 		private _impact = getPos _target;
@@ -190,8 +184,8 @@ if (_ammotype == "Laser") then {
 		{_x setDamage 1} forEach (_hit select {_x distance _impact < 10});
 } else {
 	while {_salvos > 0} do {
-		_rps = _rpsinit; 		// reset number of remaining rounds for next salvo
-		while {_rps > 0} do { 	// FIRE SALVO
+		_rps = _rpsinit;
+		while {_rps > 0} do {
 			switch (_supportype) do {
 				case 1: {  // Arty
 					_bomb = _ammotype createVehicle [(_position select 0)+(random _radius)-(random _radius), (_position select 1)+(random _radius)-(random _radius), 800]; //spawn shells
@@ -234,9 +228,9 @@ if (_ammotype == "Laser") then {
 					sleep ((random 1)/50);
 				};
 			};
-			_rps = _rps - 1; 		// REMOVE 1 ROUND TO SALVO
+			_rps = _rps - 1;
 		};
-		_salvos = _salvos - 1; 		// remove 1 salvo to counter
+		_salvos = _salvos - 1;
 		sleep _interval;
 	};
 };	
@@ -245,8 +239,7 @@ if (_ammotype == "Laser") then {
 // spend a further 90 s deleting markers and the jet, and the battery is free long before that.
 [_supportype] remoteExec ["fnc_support_release", 2];
 
-// MISSED THE LASER
-if (_ammotype == "Laser" && isNull _target) then { 
+if (_ammotype == "Laser" && isNull _target) then {
 	hint localize "STR_DUWS_T_b95i2b8d";
 } else {
 	sleep 2;
@@ -263,7 +256,6 @@ sleep 30;
 deletemarker str(_markername);
 deletemarker str(_markername2);
 
-//DELETE THE JET
 if (_ammotype == "Bo_Mk82" || _ammotype == "Laser" || _ammotype == "Cluster" || _ammotype == "Napalm") then {
 	sleep 60;
 	{

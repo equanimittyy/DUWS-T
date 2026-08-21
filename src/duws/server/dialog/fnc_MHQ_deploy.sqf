@@ -2,8 +2,6 @@
 // undeploy entries come from fnc_MHQ_addActions and the crate's from fnc_field_box_actions plus
 // fnc_addQuickChangeActions, both broadcast to every machine and run there.
 
-// MHQ must be empty to Deploy
-
 _empty = (count (crew MHQ1)) == 0;
 if (!_empty) exitWith {
 	["info",[localize "STR_DUWS_T_ywl7naen",localize "STR_DUWS_T_bnw9muay"]] remoteExec ['BIS_fnc_showNotification',[0,-2] select isDedicated,false];
@@ -32,7 +30,6 @@ _MHQdriver setVariable ["lambs_danger_disableAI", true]; // disable LAMBS if tha
 
 _MHQdriver moveInDriver MHQ1;
 
-// Deploy the ammo box
 _ammoPOS = MHQ1 getRelPos [6,120];
 MHQ_ammobox = objNull;
 
@@ -60,7 +57,6 @@ clearBackpackCargoGlobal MHQ_ammobox;
 
 sleep 0.2;
 
-// Deploy the Tent
 MHQ_tent = objNull;
 MHQ_tent = createVehicle ["CamoNet_INDP_big_F", getPos MHQ1, [], 0, "CAN_COLLIDE"];
 MHQ_tent setDir _mhqDir;
@@ -69,7 +65,6 @@ MHQ_tent setDir _mhqDir;
 // registration and flags -- nothing anyone can see appearing.
 ["IN", _fadePlayers] call fnc_baseFade;
 
-// create marker on MHQ
 _markerType = "b_motor_inf";
 if (MHQ1 isKindof "tank") then {_markerType = "b_armor"};
 
@@ -78,7 +73,6 @@ if (MHQ1 isKindof "tank") then {_markerType = "b_armor"};
 sleep 0.2;
 [MHQ1, _markerType, "ColorYellow", 1, 1, localize "STR_DUWS_T_cmbq8ut7"] remoteExec ["kndr_assignMarker", [0,-2] select isDedicated,false];
 
-// Add to Respawn positions
 _respawn_location = MHQ1 getRelPos [4,270];
 MHQ_respawn = [west, _respawn_location] call BIS_fnc_addRespawnPosition;
 publicVariable "MHQ_respawn";
@@ -90,6 +84,5 @@ publicVariable "MHQ_deployed";
 
 ["undeploy"] remoteExec ["fnc_MHQ_addActions", [0,-2] select isDedicated,"duws_mhq_actions"];
 
-// Lock vehicle
 MHQ1 setVehicleLock "LOCKED";
 

@@ -31,7 +31,6 @@ while {!_Posfound} do {
 
 	_targetpos = [_Building, 10, 50,15,0,0.15,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 
-	// DON'T SPAWN ON ROADS
 	_nearRoad = [_targetpos,15] call BIS_fnc_nearestRoad;
 	// And on ground nothing else owns: not inside a zone, not inside a civilian town, and not
 	// inside BLUFOR's own area of influence. This is the position the mission is actually built on

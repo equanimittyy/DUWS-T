@@ -64,9 +64,7 @@ _wp setWaypointType "MOVE";
 
 
 waitUntil {_foundpickuppos distance _boat < 350 or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the helo is near the lz
-// IF THE PILOT IS DEAD OR BOAT SUNK ******************
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
-// ****************************************************
 
 _inVehCheck = true;
 while {_inVehCheck} do {
@@ -81,9 +79,7 @@ if (vehicle player != _boat) then {
 	_inVehCheck = false;};
 };
 
-// IF THE PILOT IS DEAD OR GUNBOAT DOWN  **************
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
-// *****************************
 
 
 // everything is ok, player is in boat
@@ -96,9 +92,7 @@ str(_markerpickup) setMarkerText "DROP POINT";
 
 
 
-// IF THE PILOT IS DEAD OR BOAT SUNK  **************
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
-// *****************************
 
 // TELEPORT BOAT NEAR DROP POINT. The fade masks the hop; the pilot's call goes through the
 // dialogue system rather than riding the fade's text slot.
@@ -117,16 +111,12 @@ _boat lock false;
 
 
 waitUntil {sleep 0.5;ClickedTaxiPos distance _boat < 200  or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the boat is near the shore
-// IF THE PILOT IS DEAD OR GUNBOAT DOWN  **************
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
-// *****************************
 
 
 // time to move ppl out of the boat;
 waitUntil {sleep 0.5;(getpos _boat select 2 < 4 && _boat distance ClickedTaxiPos<20)  or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the boat is near shore
-// IF THE PILOT IS DEAD OR GUNBOAT DOWN  **************
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { call _abort };
-// *****************************
 [localize "STR_DUWS_T_swordfish", localize "STR_DUWS_T_boattaxi_arrived"] remoteExec ["fnc_duws_dialogue", 0];
 
 // Same turn-out as the helo taxi, and for the same reasons: doGetOut is an order only AI take, so
@@ -147,9 +137,7 @@ deleteMarker str(_markerpickup);
 
 
 waitUntil {_boat distance player>100 or (getdammage _boat > 0.7 or !alive _pilot)}; // wait until the helo is near the ground
-// IF THE PILOT IS DEAD OR GUNBOAT DOWN  **************
 if (getdammage _boat > 0.7 or !alive _pilot) exitWith { ["STR_DUWS_T_boattaxi_rtbdown"] call _abort };
-// *****************************
 
 
 [_boat, _boatgroup, 118, false] call fnc_support_despawn;

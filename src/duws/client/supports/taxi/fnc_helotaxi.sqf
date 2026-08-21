@@ -11,16 +11,14 @@ _helo_maxDamage = 0.7;
 _helo_minFuel = 0.4;
 _music = [] call fnc_taxi_music;
 
-_foundPickupPos = [_posplayer, 20,_radius,20,0,0.5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos; // find a valid pos
+_foundPickupPos = [_posplayer, 20,_radius,20,0,0.5,0,[],[[0,0],[0,0]]] call BIS_fnc_findSafePos;
 
-// try to find a pos, if no pos is found exit the script
 if (0 == _foundPickupPos select 0 && 0 == _foundPickupPos select 1) exitWith {hint localize "STR_DUWS_T_nolz"; sleep 10; ["helo_taxi"] call fnc_support_comm_add;};
 
 // One-time use: an LZ was found and the taxi is committed, so spend it. Deferred to here so the
 // no-LZ exit above leaves the item for the player to keep.
 ["helo_taxi"] call fnc_support_consume;
 
-// A POS NEAR THE PLAYER HAS BEEN FOUND, CHOPPA EN ROUTE
 _speakeracteam = localize "STR_DUWS_T_actionteam";
 _message = ([localize "STR_DUWS_T_helotaxicall0"] call fnc_cs);
 [_speakeracteam, _message] remoteExec ["fnc_duws_dialogue", 0];
@@ -33,8 +31,7 @@ _speaker = localize "STR_DUWS_T_chariot";
 _message = ([localize "STR_DUWS_T_helotaxicall"] call fnc_cs);
 [_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
 
-// create marker on LZ
-_markerpickup = format["lz%1%2",_foundPickupPos]; // Define marker name
+_markerpickup = format["lz%1%2",_foundPickupPos];
 _markerstr = createMarker [str(_markerpickup), _foundPickupPos];
 _markerstr setMarkerShape "ICON";
 str(_markerpickup) setMarkerType "hd_end";
@@ -66,7 +63,6 @@ _pilot disableAI "Target";
 	_x setVariable ["Vcm_Disable",true];
 } forEach units _heloGroup;
 
-// create the helipad to land and the waypoints
 _helipad1 = createVehicle ["Land_HelipadEmpty_F", _foundPickupPos, [], 0, "NONE"]; 
 _wp = _helogroup addWaypoint [_foundPickupPos, 0];
 _wp setWaypointType "MOVE";
@@ -88,22 +84,18 @@ _abort = {
 	[_helo, _helogroup, 45, true] call fnc_support_despawn;
 };
 
-// wait until the helo is near the lz
 waitUntil {sleep 0.5;(_foundpickuppos distance _helo < 350) or (call _check_damage)}; 
 
-// IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
 	[_helo,_helogroup,_helipad1,_markerpickup] spawn _abort;
 }; 
 
-// spawn smokeshell
 _smokePos = [_foundpickuppos select 0, (_foundpickuppos select 1)+ random 5];
 "SmokeShellGreen" createVehicle _smokePos;
 "Chemlight_green" createVehicle _smokePos;
 
 _helo land "GET IN";
 
-// spawn the door opening script
 _pickupSpawnopen = [_helo,_foundpickuppos] spawn {
 	_helo = _this select 0;
 	_lzPos = _this select 1;
@@ -114,25 +106,19 @@ _pickupSpawnopen = [_helo,_foundpickuppos] spawn {
 	_helo animateDoor ['door_L', 1];
 };
 
-// WAIT FOR PLAYER TO GET IN
 _inVehCheck = true;
 while {_inVehCheck} do {
-	// wait until the player is in choppa or pilot not in choppa
 	waitUntil {sleep 0.5;vehicle player == _helo or (call _check_damage)};
 	sleep 1;
-	// get out of the loop if choppa is down
 	if (call _check_damage) exitWith {}; 
 
 	hint localize "STR_DUWS_T_pilotwp";
 	_message = localize "STR_DUWS_T_pilotwhere";
 	_speaker = localize "STR_DUWS_T_chariot";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
-	// wait until the player has given a validpos or pilot not in choppa
 	waitUntil {sleep 0.5;taxiCanTakeOff or (call _check_damage)};
 	sleep 1;
-	// get out of the loop if choppa is down
 	if (call _check_damage) exitWith {}; 
-	// check if player is inside choppa
 	if (vehicle player != _helo) then {
 		taxiCanTakeOff = false; 
 		[localize "STR_DUWS_T_chariot", localize "STR_DUWS_T_helotaxi_notaboard"] remoteExec ["fnc_duws_dialogue", 0];
@@ -142,7 +128,6 @@ while {_inVehCheck} do {
 	};
 };
 
-// IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
 	[_helo,_helogroup,_helipad1,_markerpickup] spawn _abort;
 }; 
@@ -158,8 +143,6 @@ sleep 2;
 openMap false;
 hint "";
 
-// create the helipad to land and the waypoints
-
 _helipad = createVehicle ["Land_HelipadEmpty_F", ClickedTaxiPos, [], 0, "NONE"];
 _wp1 = _helogroup addWaypoint [getMarkerPos str(Taximarker1),0];
 _wp1 setWaypointType "MOVE";
@@ -171,7 +154,6 @@ _wp3 = _helogroup addWaypoint [ClickedTaxiPos,0];
 _wp3 setWaypointType "MOVE";
 [_helogroup, 1] setWaypointCombatMode "BLUE";
 
-// spawn the door closing script
 _pickupSpawnclose = [_helo,_foundpickuppos] spawn {
 	_helo = _this select 0;
 	_lzPos = _this select 1;
@@ -185,7 +167,6 @@ _pickupSpawnclose = [_helo,_foundpickuppos] spawn {
 waitUntil {sleep 0.5;_helo distance _helipad1 > 350 or (call _check_damage)};
 sleep 1;
 
-// IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
 	[_helo,_helogroup,_helipad1,_markerpickup] spawn _abort;
 	deleteVehicle _helipad;
@@ -194,13 +175,9 @@ if (call _check_damage) exitWith {
 	deleteMarker str(Taximarker2);
 }; 
 
-// *****************************
-
-// wait until the helo is near the lz
 waitUntil {sleep 0.5;ClickedTaxiPos distance _helo < 350  or (call _check_damage)}; 
 sleep 1;
 
-// IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
 	[_helo,_helogroup,_helipad1,_markerpickup] spawn _abort;
 	deleteVehicle _helipad;
@@ -211,7 +188,6 @@ if (call _check_damage) exitWith {
 
 _helo land "GET OUT";
 
-// spawn the door opening script
 _LzSpawnopen = [_helo] spawn {
 	_helo = _this select 0;
 	waitUntil {sleep 0.5;getpos _helo distance ClickedTaxiPos < 20};
@@ -223,12 +199,11 @@ _LzSpawnopen = [_helo] spawn {
 
 
 // time to move ppl out of the helo;
-waitUntil {sleep 0.5;(getposATL _helo select 2 < 4) or (call _check_damage)}; // wait until the helo is near the ground
+waitUntil {sleep 0.5;(getposATL _helo select 2 < 4) or (call _check_damage)};
 sleep 1;
 
 _helo setEffectiveCommander _pilot;
 
-// IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
 	[_helo,_helogroup,_helipad1,_markerpickup] spawn _abort;
 	deleteVehicle _helipad;
@@ -252,7 +227,7 @@ _helo lock false;
 	};
 } forEach crew _helo;
 
-sleep 12;  // wait 10 sec before takeoff
+sleep 12;
 
 _wp = _helogroup addWaypoint [[0,0,0],0];   // tell the helo to leave
 _wp setWaypointType "MOVE";
@@ -260,7 +235,6 @@ deleteMarker str(_markerpickup);
 deleteVehicle _helipad;
 playMusic "";
 
-// spawn the door closing script
 _LzSpawnclose = [_helo] spawn {
 	_helo = _this select 0;
 	sleep 2;
@@ -269,10 +243,9 @@ _LzSpawnclose = [_helo] spawn {
 	_helo animateDoor ['door_L', 0];
 };
 
-waitUntil {sleep 0.5;_helo distance player > 100 or (call _check_damage)}; // wait until the helo is away
+waitUntil {sleep 0.5;_helo distance player > 100 or (call _check_damage)};
 sleep 1;
 
-// IF THE CHOPPA IS DOWN/DAMAGED  **************
 if (call _check_damage) exitWith {
 	_message = format[localize "STR_DUWS_T_helotaxirtbdown", localize "STR_DUWS_T_chariot"];
 	_speaker = localize "STR_DUWS_T_OVERLORD";
@@ -280,7 +253,6 @@ if (call _check_damage) exitWith {
 	[_helo, _helogroup, 45, true] call fnc_support_despawn;
 };
 
-// *****************************
 	_message = localize "STR_DUWS_T_helotaxirtb";
 	_speaker = localize "STR_DUWS_T_chariot";
 	[_speaker, _message] remoteExec ["fnc_duws_dialogue", 0];
