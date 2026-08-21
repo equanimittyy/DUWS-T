@@ -8,14 +8,23 @@ params ["_MissionPos", "_mission_name"];
 private _build = {
     params ["_targetpos", "_randomPos", "_radius"];
 
-    // One class for all three, rolled once -- tokenClass draws per call, so per-vehicle rolls give a mixed
-    // column. Gated by earned AP (car floor, tank top); armed-car global then transport truck back a side
-    // that has earned nothing, so the patrol is never a column of empty air.
+    // One class for the two followers, rolled once off the earned tier. Gated by earned AP (car floor,
+    // tank top); armed-car global then transport truck back a side that has earned nothing, so the patrol
+    // is never a column of empty air.
     private _tierPool = ["car", "ifv", "tank"] select { ([_x] call DUWS_fnc_tokenClass) != "" };
     private _token = if (_tierPool isEqualTo []) then { "car" } else { selectRandom _tierPool };
     private _vehClass = [_token] call DUWS_fnc_tokenClass;
     if (_vehClass == "") then { _vehClass = opfor_ARMED_CAR1_X; _token = "car" };
     if (_vehClass == "") then { _vehClass = opfor_TRANS_TRUCK_X };
+
+    // Lead drawn apart from the pair so the column is led by a distinct hull, not three identical shapes:
+    // a different earned tier when one exists, else a fresh draw of the same tier (distinct only where that
+    // tier has variants). Reward still keys to _token, the pair's tier -- a heavier or lighter lead is
+    // flavour, not a payout change.
+    private _leadPool = _tierPool - [_token];
+    private _leadToken = if (_leadPool isEqualTo []) then { _token } else { selectRandom _leadPool };
+    private _leadClass = [_leadToken] call DUWS_fnc_tokenClass;
+    if (_leadClass == "") then { _leadClass = _vehClass };
 
     // Reward scales with the tier fielded: +10 CP and +5 AP per step above a car patrol, so car / IFV /
     // armour pay 15/20, 25/25, 35/30. The briefing and strategic map print the base -- both are built
@@ -50,7 +59,10 @@ private _build = {
     private _vehs = [];
     for "_i" from 0 to 2 do {
         (_slots select _i) params ["_sp", "_sd"];
-        private _r = [_sp, _sd, _vehClass, EAST] call BIS_fnc_spawnVehicle;
+        // Slot 0 is the front of the column (convoy_layout lays lead-first, and the driver picks the
+        // frontmost as lead), so it takes the distinct lead class; the other two share _vehClass.
+        private _class = [_vehClass, _leadClass] select (_i == 0);
+        private _r = [_sp, _sd, _class, EAST] call BIS_fnc_spawnVehicle;
         (_r select 0) setDir _sd;
         (_r select 2) deleteGroupWhenEmpty true;
         (_r select 1) joinSilent _grp;
