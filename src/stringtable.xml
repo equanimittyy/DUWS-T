@@ -4202,6 +4202,10 @@
                 <Original>Alpha 1-1, that enemy armor is confirmed out of action. Good work.</Original>
                 <English>Alpha 1-1, that enemy armor is confirmed out of action. Good work.</English>
             </Key>
+            <Key ID="STR_DUWS_T_destroyarmour_end_crew">
+                <Original>Alpha 1-1, the recovery crew is confirmed eliminated. Good work.</Original>
+                <English>Alpha 1-1, the recovery crew is confirmed eliminated. Good work.</English>
+            </Key>
             <Key ID="STR_DUWS_T_destroyarmour_fail">
                 <Original>Alpha 1-1, the enemy have recovered their armor and have withdrawn.</Original>
                 <English>Alpha 1-1, the enemy have recovered their armor and have withdrawn.</English>

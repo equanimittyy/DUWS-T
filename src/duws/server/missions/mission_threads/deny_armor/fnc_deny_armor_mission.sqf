@@ -258,7 +258,11 @@ while { true } do {
     private _tankDead = !alive _tank || {(damage _tank) >= 1};
 
     if (_liveCrew isEqualTo [] || _tankDead) exitWith {
-        [localize "STR_DUWS_T_OVERLORD", [localize "STR_DUWS_T_destroyarmour_end"] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
+        // Tank takes precedence: a destroyed hull plays the destroyed line even when the crew also died
+        // with it. Crew wiped but the hull still intact gets its own line -- the tank is denied by having
+        // no one left to recover it, not by being wrecked.
+        private _endStr = if (_tankDead) then { "STR_DUWS_T_destroyarmour_end" } else { "STR_DUWS_T_destroyarmour_end_crew" };
+        [localize "STR_DUWS_T_OVERLORD", [localize _endStr] call fnc_cs] remoteExec ["fnc_duws_dialogue", 0];
         [_cpreward, _apreward, _mission_name] spawn fnc_mission_reward;
         ["SUCCEEDED"] call _finish;
     };
