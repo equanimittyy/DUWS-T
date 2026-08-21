@@ -139,11 +139,12 @@ private _exfilFoot = {
         sleep 5;
         [localize "STR_DUWS_T_Signal", localize "STR_DUWS_T_squadfootout"] remoteExec ["fnc_duws_dialogue", 0];
     };
-    // Survivors and the dead bird's crew are swept once the squad is clear of the AO (or on a timeout).
+    // Survivors and the dead bird's crew are swept once clear of the AO (or on a timeout). Tighter radius
+    // than the bird's 2500m: infantry can't clear that before the timeout fires.
     [_out, _heli, _heliCrew, _bpos] spawn {
         params ["_sq", "_h", "_crew", "_ref"];
         private _t = time + 180;
-        waitUntil { sleep 2; ({ alive _x && {(_x distance2D _ref) < 2500} } count _sq) == 0 || {time > _t} };
+        waitUntil { sleep 2; ({ alive _x && {(_x distance2D _ref) < 500} } count _sq) == 0 || {time > _t} };
         { deleteVehicle _x } forEach _sq;
         { deleteVehicle _x } forEach _crew;
         if (!isNull _h) then { deleteVehicle _h };
