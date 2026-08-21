@@ -1,7 +1,7 @@
 # Authoring a side mission
 
 How to add a side-mission type, and the bar a new one has to clear. The rework SSOT — per-mission
-catalogue, effort ratings, reward pricing — is [`side_missions_plan.md`](../side_missions_plan.md);
+catalogue, effort ratings, reward pricing — is [`side_missions_working.md`](../side_missions_working.md);
 this doc is the *how*, not the *what*. Player-facing wording rules are in
 [`player_facing_text.md`](player_facing_text.md).
 
@@ -28,9 +28,9 @@ quick to kill you. Small mission, real problem.
 | Generic (tower, cache, laptop, …) | reach the marker, destroy/kill the objective | none bespoke — the shared spine, reskinned | one file per folder |
 
 All the hand-made designs are written up in full in the plan doc's
-[§Hand-made mission designs](../side_missions_plan.md#hand-made-mission-designs) (the convoy reworks,
-plus [§Informant hunt](../side_missions_plan.md#informant-hunt) and
-[§Recon overwatch](../side_missions_plan.md#recon-overwatch)); read the closest one before writing a
+[§Hand-made mission designs](../side_missions_working.md#hand-made-mission-designs) (the convoy reworks,
+plus [§Informant hunt](../side_missions_working.md#informant-hunt) and
+[§Recon overwatch](../side_missions_working.md#recon-overwatch)); read the closest one before writing a
 new hand-made mission, as the worked example.
 
 ## Two build shapes
@@ -110,7 +110,7 @@ The dispatch strips `_mission` (8 chars) off the thread name, so the finder file
 `fnc_<name>_site.sqf` and must be `publicVariable`'d like the picker. A finder gates the offer at
 *click* time; a criterion that can only fail *after* the pick (war state moved in the gap) is handled
 by the thread aborting with a stable snake_case `_reason` slug — see the abort contract in
-[§Architecture](../side_missions_plan.md#architecture-mission-owned-site-selection).
+[§Architecture](../side_missions_working.md#architecture-mission-owned-site-selection).
 
 ## Player-facing text and reward
 
@@ -118,7 +118,7 @@ Briefing lines, callsigns, hint-vs-card split, and punctuation follow
 [`player_facing_text.md`](player_facing_text.md); keep strings in `stringtable.xml` (English leads,
 other locales lag on purpose). Set the base CP/AP to track the *required effort*, not the archetype —
 the pricing rationale and the current effort ratings are in
-[`side_missions_plan.md`](../side_missions_plan.md#pricing-rework-command-missions).
+[`side_missions_working.md`](../side_missions_working.md#pricing-rework-command-missions).
 
 ## Recipe
 
