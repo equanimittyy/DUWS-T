@@ -57,10 +57,13 @@ DUWS_fnc_aoi_covers = {
     _hit
 };
 
-// [_pos] call fnc_aoi_opfor_covers / fnc_aoi_blufor_covers -> bool. The two primitives the drift
-// reads directly, so it can add the radio-tower amplifiers on top of a flat coverage step.
-fnc_aoi_opfor_covers  = { [_this, "opfor"]  call DUWS_fnc_aoi_covers };
-fnc_aoi_blufor_covers = { [_this, "blufor"] call DUWS_fnc_aoi_covers };
+// [_pos] call fnc_aoi_opfor_covers / fnc_aoi_blufor_covers -> bool. Every public aoi reader takes a
+// [_pos] array (the raw DUWS_fnc_aoi_covers, fnc_aoi_field_at, fnc_aoi_in_any_zone all do), so these
+// two unwrap it the same way rather than forwarding _this bare: a caller must not have to know which
+// reader wraps. The two primitives the drift reads directly, so it can add the radio-tower amplifiers
+// on top of a flat coverage step.
+fnc_aoi_opfor_covers  = { params ["_pos"]; [_pos, "opfor"]  call DUWS_fnc_aoi_covers };
+fnc_aoi_blufor_covers = { params ["_pos"]; [_pos, "blufor"] call DUWS_fnc_aoi_covers };
 
 // [_pos] call fnc_aoi_field_at -> -1 / 0 / +1, OPFOR-positive dominance: +1 OPFOR-only, -1
 // BLUFOR-only, 0 contested or empty. What the hardpoint siting reads (a candidate is in the band when

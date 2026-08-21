@@ -44,8 +44,8 @@ while {true} do {
         private _townPos = getPos (_locs select _forEachIndex);
         private _opforPush = 0;
         private _bluforPush = 0;
-        if (_townPos call fnc_aoi_opfor_covers)  then { _opforPush  = 1 + DUWS_opforRadioLevel };
-        if (_townPos call fnc_aoi_blufor_covers) then { _bluforPush = DUWS_bluforRadioLevel };
+        if ([_townPos] call fnc_aoi_opfor_covers)  then { _opforPush  = 1 + DUWS_opforRadioLevel };
+        if ([_townPos] call fnc_aoi_blufor_covers) then { _bluforPush = DUWS_bluforRadioLevel };
         if (_bluforPush != _opforPush) then {
             [_forEachIndex, _bluforPush - _opforPush, "aoi_drift", true] call fnc_town_rep_adjust;
         };
