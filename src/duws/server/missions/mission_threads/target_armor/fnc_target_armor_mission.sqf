@@ -56,7 +56,9 @@ private _build = {
         (_r select 1) joinSilent _grp;
         _vehs pushBack (_r select 0);
     };
-    _grp setBehaviour "AWARE";
+    // Disposition is left to the posture below (SAFE until it detects the player, then the engine promotes
+    // it) -- the break flip drops to COMBAT on first contact. Combat mode, speed and column formation are
+    // the patrol's own, untouched by hqpatrol.
     _grp setCombatMode "YELLOW";
     _grp setSpeedMode "LIMITED";
     _grp setFormation "COLUMN";
@@ -85,16 +87,11 @@ private _build = {
         if (!isNull _team) then { [_team] call fnc_mission_claim };
     } forEach [0, 180];
 
-    // MOVE through each point, then CYCLE so the column laps the ring until it is broken.
-    {
-        private _wp = _grp addWaypoint [_x, 0];
-        _wp setWaypointType "MOVE";
-        _wp setWaypointCompletionRadius 40;
-        _wp setWaypointSpeed "LIMITED";
-    } forEach (_pts select [1, count _pts - 1]);
-    private _cyc = _grp addWaypoint [_start, 0];
-    _cyc setWaypointType "CYCLE";
-    _cyc setWaypointCompletionRadius 40;
+    // Lap the road-snapped ring via the shared fixed-circuit posture, not a hand-rolled CYCLE. hqpatrol alone
+    // takes caller anchors (closepatrol/widepatrol roll their own un-snapped points), so the column keeps to
+    // the road network; it anchors CYCLE on the first point, so nearest-prior is that point rather than
+    // whichever ring leg a straight-line tie fell to -- which could collapse the loop onto the last leg.
+    [_grp, "hqpatrol", _randomPos, _radius, _pts] call fnc_apply_posture;
 
     // Path-replay driver: the lead laps the ring on its own waypoints and the other two trace its track, so
     // they hold the road as a column instead of each pathing apart. It reads the group's hulls live. Ends
