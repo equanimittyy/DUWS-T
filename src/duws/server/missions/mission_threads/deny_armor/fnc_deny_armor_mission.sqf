@@ -100,20 +100,35 @@ if !(_nearest isEqualTo []) then {
     _bearing = (_targetpos getDir _nearest) + (random 30 - 15);
     _convoyDist = ((_zoneDist / 2) * (0.85 + random 0.3)) max (DA_RADIUS + 100);
 };
-// No zone to reach (all still OPFOR, or none created): a synthetic exfil point out past the convoy's entry
-// on its bearing stands in, so the escape is still a real drive rather than an unreachable target.
-if (_zonePos isEqualTo []) then { _zonePos = _targetpos getPos [_convoyDist + 500, _bearing] };
 // Longer window near the enemy's lines, shorter far out (see the DA_REPAIR_* defines).
 private _repairTime = linearConversion [DA_REPAIR_NEARDIST, DA_REPAIR_FARDIST, _zoneDist, DA_REPAIR_NEAR, DA_REPAIR_FAR, true];
-// Spawn the convoy on the road network where possible: an off-road start makes the column fight the
-// pathfinder from the first metre. Nearest road to the jittered entry point (nearRoads is distance
-// sorted), falling back to a safe-pos when the entry lands off the network.
-private _entry = _targetpos getPos [_convoyDist, _bearing];
-private _entryRoads = _entry nearRoads 300;
-private _convoyStart = if !(_entryRoads isEqualTo []) then { getPosATL (_entryRoads select 0) } else {
-    private _sp = [_entry, 0, 80, 8, 0, 0.4, 0] call BIS_fnc_findSafePos;
-    if (_sp isEqualTo [] || {(_sp select 0) == 0}) then { _entry } else { _sp }
+
+// Convoy start: it MUST snap to a road, and the drive in to the tank must cross no water. Roll the
+// approach -- the bearing jittered off the tank->zone line, the spread and the road-search radius both
+// widening on each miss -- until a road-snapped, water-free start is found. No off-road fallback: a start
+// off the network fights the pathfinder from the first metre, and one across an inlet never arrives.
+// A dry corridor is the strong preference, a road start the hard requirement, so past the roll cap any
+// road is taken rather than spinning forever on a zone whose every approach carries some water.
+private _baseBearing = _bearing;
+private _convoyStart = [];
+private _roadR = 300;
+private _spin = 0;
+while { _convoyStart isEqualTo [] } do {
+    _spin = _spin + 1;
+    private _spread = 15 + (_spin * 5);
+    _bearing = _baseBearing + (random (2 * _spread) - _spread);
+    private _entry = _targetpos getPos [_convoyDist, _bearing];
+    private _roads = _entry nearRoads _roadR;
+    if !(_roads isEqualTo []) then {
+        private _cand = getPosATL (_roads select 0);
+        if (_spin > 60 || {!([_cand, _targetpos] call fnc_route_has_water)}) then { _convoyStart = _cand };
+    };
+    if (_spin % 6 == 0) then { _roadR = _roadR + 200 };
 };
+
+// No zone to reach (all still OPFOR, or none created): a synthetic exfil point out past the settled convoy
+// start on its bearing stands in, so the escape is still a real drive rather than an unreachable target.
+if (_zonePos isEqualTo []) then { _zonePos = _targetpos getPos [_convoyDist + 500, _bearing] };
 
 // The tank crew: two crewmen and the engineer who does the repairing, their own group so the win test
 // reads exactly these three.
