@@ -126,32 +126,44 @@ private _crewUnits = units _crewGrp;
 private _teamGrp = ["team", _convoyStart, DA_RADIUS, "none", _convoyStart] call fnc_spawn_team;
 private _teamUnits = if (isNull _teamGrp) then { [] } else { units _teamGrp };
 
-// Unarmed transport for the crew and the team. One truck if they fit; a second is raised only when the
-// riders overflow its cargo, so a small-cargo faction truck still carries everyone rather than stranding
-// the overflow to walk in from 1 km. Crew load first, so the mission-critical three always ride.
+// Lay the column on the road from the convoy start toward the tank, so the trucks and escort sit spaced
+// and road-facing instead of shoulder to shoulder. Six slots: up to five trucks (a tiny-cargo faction
+// truck needs several for the riders) plus the tail escort; slots the column does not use are ignored.
+private _travelDir = _convoyStart getDir _targetpos;
+private _laid = [_convoyStart, _travelDir, 6, 22] call fnc_convoy_layout;
+
+// Unarmed transport for the crew and the team, laid lead-first. One truck if they fit; a second (or third)
+// only when the riders overflow its cargo, so a small-cargo faction truck still carries everyone rather
+// than stranding the overflow to walk in from 1 km. Crew load first, so the mission-critical three ride.
 private _riders = _crewUnits + _teamUnits;
-private _truckSpawn = [_convoyStart, _bearing + 180, opfor_TRANS_TRUCK_X, EAST] call BIS_fnc_spawnVehicle;
+(_laid select 0) params ["_t0p", "_t0d"];
+private _truckSpawn = [_t0p, _t0d, opfor_TRANS_TRUCK_X, EAST] call BIS_fnc_spawnVehicle;
 private _truck = _truckSpawn select 0;                 // lead truck, watched for the disembark trigger
+_truck setDir _t0d;
 private _trucks = [_truck];
 private _truckGrps = [_truckSpawn select 2];
 {
     private _cur = _trucks select (count _trucks - 1);
     if (_cur emptyPositions "cargo" == 0) then {
-        private _extra = [_convoyStart getPos [20 * count _trucks, _bearing + 90], _bearing + 180, opfor_TRANS_TRUCK_X, EAST] call BIS_fnc_spawnVehicle;
+        (_laid select (count _trucks min 4)) params ["_tp", "_td"];   // next free slot; cap at 4 so the escort keeps the tail
+        private _extra = [_tp, _td, opfor_TRANS_TRUCK_X, EAST] call BIS_fnc_spawnVehicle;
         _cur = _extra select 0;
+        _cur setDir _td;
         _trucks pushBack _cur;
         _truckGrps pushBack (_extra select 2);
     };
     _x moveInCargo _cur;
 } forEach _riders;
 
-// One armed escort, scaled to what OPFOR can currently field: a car, an IFV, or a tank, drawn at random
-// from those the enemy's earned AP tier (and the HeavyArmor toggle) actually allow -- DUWS_fnc_tokenClass
-// answers "" for a token above the tier, so the pool widens as the campaign does. Falls back to the armed
-// car global when the enemy has not yet earned even a car, so the convoy is never unescorted.
+// One armed escort at the tail slot, scaled to what OPFOR can currently field: a car, an IFV, or a tank,
+// drawn at random from those the enemy's earned AP tier (and the HeavyArmor toggle) actually allow --
+// DUWS_fnc_tokenClass answers "" for a token above the tier, so the pool widens as the campaign does.
+// Falls back to the armed car global when the enemy has not yet earned even a car, so it is never unescorted.
 private _escortPool = ["car", "ifv", "tank"] select { ([_x] call DUWS_fnc_tokenClass) != "" };
 private _escortClass = if (_escortPool isEqualTo []) then { opfor_ARMED_CAR1_X } else { [selectRandom _escortPool] call DUWS_fnc_tokenClass };
-private _escortSpawn = [_convoyStart getPos [25, _bearing - 90], _bearing + 180, _escortClass, EAST] call BIS_fnc_spawnVehicle;
+(_laid select 5) params ["_ep", "_ed"];
+private _escortSpawn = [_ep, _ed, _escortClass, EAST] call BIS_fnc_spawnVehicle;
+(_escortSpawn select 0) setDir _ed;
 private _escortGrp = _escortSpawn select 2;
 
 // One convoy group so the vehicles road-march together in column instead of each pathing on its own and

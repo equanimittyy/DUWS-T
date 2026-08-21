@@ -40,16 +40,15 @@ if (_destPos isEqualTo []) exitWith {
     [2, "STR_DUWS_T_crtzxs0j", "dest_zone_missing: no OPFOR-held zone to run the convoy to"] call fnc_mission_abort;
 };
 
-// The convoys start bunched in the mission area on a small radius, then fork onto three separate
-// roads to the zone, each via a divergent mid-route point, so the approaches split and the player
-// cannot cover them all. TUNABLE: spawnR is the start cluster's radius, viaSpread the lateral offset
-// that pushes the three columns onto different roads (bigger = wider fork), startSep the minimum gap
-// between two starts so no two columns snap to the same road, graceSec the rolled hold the columns
-// keep at their start before they roll -- Allseer calls the move when it ends -- arrive is the
-// zone-edge fail band.
-private _spawnR    = 425;
+// The convoys start spread across the mission area, each on its own road, then run to the zone via a
+// divergent mid-route point so the approaches split and the player cannot cover them all. TUNABLE:
+// spawnR is the radius the three start roads are drawn from, startSep the minimum gap between two starts
+// so each column gets an independent road, viaSpread the lateral offset of the mid-route point (bigger =
+// wider fork), graceSec the rolled hold the columns keep before they roll -- Allseer calls the move when
+// it ends -- arrive is the zone-edge fail band.
+private _spawnR    = 700;
 private _viaSpread = 1200;
-private _startSep  = 200;
+private _startSep  = 250;
 private _graceSec  = 30 + round random 30;
 private _arrive    = 80;
 
@@ -98,17 +97,19 @@ if (_carPool isEqualTo []) then {
 private _hvtCarClass = selectRandom _carPool;
 private _vehName = getText (configFile >> "CfgVehicles" >> _hvtCarClass >> "displayName");
 
-// One line of vehicles as a road column, crews merged into a single group so they move together.
-// Returns [group, [vehicles]]. Loot on the crew so a searched body reads as this faction like any
-// patrol.
+// One line of vehicles as a road column: fnc_convoy_layout walks the road from the start and hands back
+// a spaced, road-facing slot per vehicle, so the hulls sit in a real column on the tarmac instead of a
+// scatter. Crews merged into a single group so they move together. Returns [group, [vehicles]]. Loot on
+// the crew so a searched body reads as this faction like any patrol.
 private _spawnLine = {
-    params ["_classes", "_start", "_heading", "_behaviour", "_speed"];
+    params ["_classes", "_start", "_travelDir", "_behaviour", "_speed"];
+    private _slots = [_start, _travelDir, count _classes, 22] call fnc_convoy_layout;
     private _grp = createGroup EAST;
     private _vehs = [];
     {
-        private _p = [_start getPos [_forEachIndex * 18, _heading + 180]] call _onRoad;
-        private _r = [_p, _heading, _x, EAST] call BIS_fnc_spawnVehicle;
-        (_r select 0) setDir _heading;
+        (_slots select _forEachIndex) params ["_sp", "_sd"];
+        private _r = [_sp, _sd, _x, EAST] call BIS_fnc_spawnVehicle;
+        (_r select 0) setDir _sd;
         (_r select 2) deleteGroupWhenEmpty true;
         (_r select 1) joinSilent _grp;
         _vehs pushBack (_r select 0);
@@ -122,21 +123,24 @@ private _spawnLine = {
     [_grp, _vehs]
 };
 
-// Snap a lined-up column slot onto the road beneath it, so the whole column sits on tarmac and not just
-// the lead vehicle -- a hull spawned in the ditch fights the pathfinder before it even rolls. Only the
-// road under the slot, close in: the start is already on a road, so this shifts each following slot a
-// few metres onto that same segment rather than hunting a distant one. No road near (the roadless-start
-// fallback) keeps the raw slot.
-private _onRoad = {
-    params ["_p"];
-    private _r = _p nearRoads 30;
-    if (count _r > 0) then { getPosATL (_r select 0) } else { _p }
-};
-
-// Bearing from the mission area to the destination: the columns spawn fanned around it and each
-// forks to a via point offset to one side of it.
+// Bearing from the mission area to the destination: the columns run toward it, each forking to a via
+// point offset to one side.
 private _dirZone = [_MissionPos, _destPos] call BIS_fnc_dirTo;
 private _legHalf = (_MissionPos distance2D _destPos) * 0.5;
+
+// Three independent start roads: gather roads within _spawnR of the anchor and take the first three at
+// least _startSep apart, so each column rides its own road rather than three snapping to one. A road-thin
+// corner with fewer than three falls back to fanned safe-pos points off the zone bearing.
+private _startRoads = [];
+{
+    private _rp = getPosATL _x;
+    if (_startRoads findIf { _rp distance2D _x < _startSep } < 0) then { _startRoads pushBack _rp };
+    if (count _startRoads >= 3) exitWith {};
+} forEach (_MissionPos nearRoads _spawnR);
+while { count _startRoads < 3 } do {
+    private _lat = count _startRoads;
+    _startRoads pushBack ([_MissionPos getPos [_spawnR, _dirZone + ([-45, 0, 45] select _lat)], 0, 250, 8, 0, 0.6, 0] call BIS_fnc_findSafePos);
+};
 
 private _hvtIdx = floor random 3;
 private _groups = [];         // one group per convoy, index-aligned with the roll-out and the claim
@@ -150,21 +154,7 @@ private _carGrp = grpNull;    // the car's own group once split out -- held here
 
 for "_i" from 0 to 2 do {
     private _lat = [-1, 0, 1] select _i;
-    // Start: bunched in the mission area, fanned off the zone bearing so each column searches its own
-    // arc, then snapped to the nearest road at least _startSep from every start already placed -- so no
-    // two columns share a segment and spawn stacked. A road-dense area with nothing far enough falls
-    // back to the nearest road; a convoy off the network fights the pathfinder the whole way.
-    private _sCand = _MissionPos getPos [_spawnR, _dirZone + (_lat * 70)];
-    private _sRoads = _sCand nearRoads 400;
-    private _start = [];
-    {
-        private _rp = getPosATL _x;
-        if (_convoyStarts findIf { _x distance2D _rp < _startSep } < 0) exitWith { _start = _rp };
-    } forEach _sRoads;
-    if (_start isEqualTo []) then {
-        _start = if (count _sRoads > 0) then { getPosATL (_sRoads select 0) }
-            else { [_sCand, 0, 120, 8, 0, 0.6, 0] call BIS_fnc_findSafePos };
-    };
+    private _start = _startRoads select _i;
     // Via: a road point offset to one side of the midpoint, so the pathfinder routes this column its
     // own way in; the centre column (lat 0) runs the direct line. Snap to a road, else take the raw
     // point -- the pathfinder still favours roads getting there.
@@ -175,22 +165,24 @@ for "_i" from 0 to 2 do {
     _convoyStarts pushBack _start;
 
     if (_i == _hvtIdx) then {
-        // One group so the escorts and the HVT's car drive together; the monitor peels the car into
-        // its own CARELESS group on first contact so it commits to the run and drives through the
-        // firefight rather than halting -- the player has to stop the car, not just spook the column.
+        // HVT column: escorts front and back with the unarmed car between them, laid on one road so it
+        // sits mid-column. One group so escorts and car drive together; the monitor peels the car into
+        // its own CARELESS group on first contact so it commits to the run rather than halting to fight
+        // -- the player has to stop the car, not just spook the column.
+        private _slots = [_start, _heading, 3, 22] call fnc_convoy_layout;
         _hvtColGrp = createGroup EAST;
         private _hvtEscorts = [];   // escorts only -- the car peels off with its own watchdog at the split
         {
-            private _p = [_start getPos [_x, _heading + 180]] call _onRoad;
-            private _r = [_p, _heading, call _rollEsc, EAST] call BIS_fnc_spawnVehicle;
-            (_r select 0) setDir _heading;
+            (_slots select _x) params ["_sp", "_sd"];
+            private _r = [_sp, _sd, call _rollEsc, EAST] call BIS_fnc_spawnVehicle;
+            (_r select 0) setDir _sd;
             (_r select 2) deleteGroupWhenEmpty true;
             (_r select 1) joinSilent _hvtColGrp;
             _hvtEscorts pushBack (_r select 0);
-        } forEach [0, 36];
-        private _cp = [_start getPos [18, _heading + 180]] call _onRoad;
+        } forEach [0, 2];
+        (_slots select 1) params ["_cp", "_cd"];
         _car = createVehicle [_hvtCarClass, _cp, [], 0, "NONE"];
-        _car setDir _heading;
+        _car setDir _cd;
         private _driver = _hvtColGrp createUnit [opfor_SOLDIER_X, _cp, [], 0, "NONE"];
         _driver moveInDriver _car;
         _hvt = _hvtColGrp createUnit [opfor_OFFICER_X, _cp, [], 0, "NONE"];
@@ -222,6 +214,11 @@ if (isNull _hvt) exitWith {
 };
 
 { [_x] call fnc_mission_claim } forEach _groups;
+
+// TEMPORARY diagnostics for the "killed the HVT, nothing happened" report: which column carries him and
+// his car's id, so a playtest RPT tells apart hitting the wrong column from the officer surviving the
+// car's destruction. Remove once the win path is confirmed.
+["DEBUG", "MISSION", format ["hvt debug: hvtIdx=%1 car=%2 carClass=%3 hvt=%4 starts=%5", _hvtIdx, netId _car, _hvtCarClass, netId _hvt, _convoyStarts]] call fnc_log;
 
 // Search ellipse on the convoy start cluster -- where the player is sent -- with a fix on each
 // convoy's start inside it. The starts are one-shot: nothing tracks the convoys live, or there would
@@ -324,6 +321,7 @@ waitUntil {
         || damage _car > 0
     }) then {
         _split = true;
+        ["DEBUG", "MISSION", format ["hvt debug: car split (carDmg=%1 hvtAlive=%2)", damage _car, alive _hvt]] call fnc_log;
         _carGrp = createGroup EAST;
         [_hvt, driver _car] joinSilent _carGrp;
         _carGrp setBehaviour "CARELESS";
@@ -342,6 +340,8 @@ waitUntil {
     if (time > _deadline) exitWith { _outcome = "TIMEOUT"; true };
     false
 };
+
+["DEBUG", "MISSION", format ["hvt debug: outcome=%1 hvtAlive=%2 carAlive=%3 carDmg=%4", _outcome, alive _hvt, alive _car, damage _car]] call fnc_log;
 
 // End every convoy watchdog: the column groups and, if it split out, the HVT car's own group.
 { _x setVariable ["DUWS_convoy_stop", true] } forEach _groups;
