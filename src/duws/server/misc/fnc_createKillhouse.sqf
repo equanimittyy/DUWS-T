@@ -32,7 +32,13 @@ private _bellObjects = [];
     // furniture then sits somewhere different on every machine.
     _obj enableSimulationGlobal false;
     _obj allowDamage false;
-    
+    // Spare it from the cleanup sweep. That sweep bins any un-crewed object in `vehicles` once
+    // DUWS_CleanupLifetime elapses with no player inside KEEP_RADIUS, and the course floats at
+    // 1000 m in a map corner nobody stands near between runs -- so every prop, terminals included,
+    // ages out and vanishes. Server-local: both readers of this flag run server-side, so a
+    // broadcast would only add 682 JIP entries for nothing.
+    _obj setVariable ["persistent", true];
+
     if (_class == "Land_MultiScreenComputer_01_olive_F") then {
         _computerObjects pushBack _obj;
     };
