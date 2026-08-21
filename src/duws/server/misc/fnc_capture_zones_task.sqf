@@ -24,24 +24,27 @@ while {!(["ZONES", "mission_init_complete (zones built, civilians registered)",
 // this file looks the task up by this exact string, so a localized ID silently stops matching
 // the moment the server is not English and the campaign task never completes. The player-facing
 // name comes from the description array below, not from the ID.
-// Broadcast, not called: BIS_fnc_taskCreate does not synchronise itself, so a server-side call
-// leaves the campaign objective visible to a hosting player alone. The JIP key is suffixed
-// because the SUCCEEDED update below is filed under the bare id, and a same-key entry replaces
-// rather than joins.
+// Created server-side, not remoteExec'd: broadcasting BIS_fnc_taskCreate serialises the owner and
+// destination as live references, which BIS's map draw then re-resolves by netId every frame the map is
+// open -- flooding the rpt with "objectFromNetId: type OBJECT, expected STRING, in player1" for the task's
+// whole life and jamming the strategic map (docs/info/arma_engine_gotchas.md). A native server-side create
+// syncs the objective to the owner side's clients, joiners included, and keeps each reference as its own
+// netId string. No single map pin (capture-all-zones has no one point), so the destination is [] rather
+// than an objNull the draw would try to resolve.
 [west, ["Campaign"],
-    [localize "STR_DUWS_T_92465yls", localize "STR_DUWS_T_q5xntd8z", localize "STR_DUWS_T_q5xntd8z"], objNull, true]
-    remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, "Campaign_new"];
+    [localize "STR_DUWS_T_92465yls", localize "STR_DUWS_T_q5xntd8z", localize "STR_DUWS_T_q5xntd8z"], [], true]
+    call BIS_fnc_taskCreate;
 sleep 2;
 if (CIV_PRESENCE == "RAVAGE" && !ZombieTaskCreated) then {
     [west, ["ZombieTask"],
-        [localize "STR_DUWS_T_deadboltdesc", localize "STR_DUWS_T_deadbolt", localize "STR_DUWS_T_deadbolt"], objNull, true]
-        remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, "ZombieTask_new"];
+        [localize "STR_DUWS_T_deadboltdesc", localize "STR_DUWS_T_deadbolt", localize "STR_DUWS_T_deadbolt"], [], true]
+        call BIS_fnc_taskCreate;
     ZombieTaskCreated = true;
 };
 if (CIV_PRESENCE == "WBK" && !ZombieTaskCreated) then {
     [west, ["WBKTask"],
-        [localize "STR_DUWS_T_WBK_TASK_DESC", localize "STR_DUWS_T_deadbolt", localize "STR_DUWS_T_deadbolt"], objNull, true]
-        remoteExec ["BIS_fnc_taskCreate", [0,-2] select isDedicated, "WBKTask_new"];
+        [localize "STR_DUWS_T_WBK_TASK_DESC", localize "STR_DUWS_T_deadbolt", localize "STR_DUWS_T_deadbolt"], [], true]
+        call BIS_fnc_taskCreate;
     ZombieTaskCreated = true;
 };
 
