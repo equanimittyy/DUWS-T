@@ -172,8 +172,10 @@ DUWS_rsq_holdBroken = false;
 // free to pick the heaviest weapon (a rifleman levels the building with his launcher). forceWeaponFire
 // discharges the named primary regardless of LOS or target, so every shooter fires and nothing explosive is
 // ever selected -- grenadiers and launcher men are already cut upstream. doWatch points each man at the
-// building first so the rounds go downrange; the mode is forced to full auto so the ring rips rather than
-// tapping single shots.
+// building first so the rounds go downrange. One forceWeaponFire is a single auto burst; each shooter is
+// re-fired on its own jittered interval -- a shared cadence would rip the whole ring in perfect unison --
+// so the bursts overlap into continuous fire. forceWeaponFire reloads from the shooter's own mags, so the
+// ring thins and goes quiet as men burn through their loadout.
 [_suppressUnits, _Building, _deadline] spawn {
     params ["_shooters", "_bld", "_dl"];
     // Full-auto mode name for a weapon: a mode named auto/full, else the last mode (auto is listed last by
@@ -187,6 +189,11 @@ DUWS_rsq_holdBroken = false;
         if (_i < 0) then { _i = (count _ms) - 1 };
         _ms select _i
     };
+    // Resolve each shooter's weapon + auto mode once (the config walk must not run every tick) plus a
+    // per-shooter next-fire time (slot 3) for the jittered schedule below. Every shooter is guaranteed a
+    // primary upstream (_canSuppress), so no empty-weapon guard is needed here.
+    private _plan = [];
+    { _plan pushBack [_x, primaryWeapon _x, [primaryWeapon _x] call _autoMode, 0] } forEach _shooters;
     private _startedAt = -1;
     while {
         (time < _dl)
@@ -196,17 +203,21 @@ DUWS_rsq_holdBroken = false;
         && {_startedAt < 0 || {(time - _startedAt) < SUPPRESS_MAX}}
     } do {
         if (((call BIS_fnc_ListPlayers) findIf { alive _x && {(_x distance2D _bld) < SUPPRESS_RANGE} }) >= 0) then {
-            if (_startedAt < 0) then { _startedAt = time };
+            if (_startedAt < 0) then {
+                _startedAt = time;
+                // Stagger the opening: seed each shooter due within the first 0.6s so the ring does not all
+                // fire on the same instant it starts up.
+                { _x set [3, time + random 0.6] } forEach _plan;
+            };
             {
-                if (alive _x) then {
-                    private _w = primaryWeapon _x;
-                    if (_w != "") then {
-                        _x doWatch _bld;
-                        _x forceWeaponFire [_w, [_w] call _autoMode];
-                    };
+                _x params ["_u", "_w", "_mode", "_next"];
+                if (alive _u && {time >= _next}) then {
+                    _u doWatch _bld;
+                    _u forceWeaponFire [_w, _mode];
+                    _x set [3, time + 0.4 + random 0.6];   // desynced auto: 0.4-1.0s to this shooter's next burst
                 };
-            } forEach _shooters;
-            sleep 4;
+            } forEach _plan;
+            sleep 0.15;   // fine master tick so each shooter fires close to its scheduled time
         } else {
             sleep 1;
         };
