@@ -59,7 +59,17 @@ switch (_posture) do {
                                  (_here select 1) + (random _patrolRadius) - (random _patrolRadius)];
                 _group addWaypoint [getPos (nearestBuilding _spot), 0]
             } else {
-                private _w = _group addWaypoint [_centre, _patrolRadius];
+                // Keep the open leg on land. addWaypoint's own radius pick water-checks
+                // nothing, so a coastal zone's closepatrol can drop a leg in the sea and
+                // walk the group in. findSafePos waterMode 0 draws a random ring point that
+                // clears water; fall back to the raw pick when it finds none, leaving an
+                // inland zone's waypoints unchanged.
+                private _land = [_centre, 0, _patrolRadius, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
+                private _w = if (_land isEqualTo [] || {surfaceIsWater _land}) then {
+                    _group addWaypoint [_centre, _patrolRadius]
+                } else {
+                    _group addWaypoint [_land, 0]
+                };
                 _w setWaypointCompletionRadius 100;
                 _w
             };

@@ -43,8 +43,17 @@ private _build = {
     for "_i" from 0 to (_steps - 1) do {
         private _ang = _i * (360 / _steps) + random 40;
         private _cand = _randomPos getPos [_radius * (0.4 + random 0.3), _ang];
-        private _roads = _cand nearRoads 400;
-        _pts pushBack (if (_roads isEqualTo []) then { _cand } else { getPosATL (selectRandom _roads) });
+        // Keep every anchor out of the sea: the first is where the column spawns and the
+        // rest are what it laps, so a water point drowns the patrol or drives it in. Drop
+        // roads whose segment sits over water (coastal snaps, bridges), and land the
+        // road-less fallback via findSafePos waterMode 0 before falling to the raw point.
+        private _roads = (_cand nearRoads 400) select { !surfaceIsWater (getPosATL _x) };
+        _pts pushBack (if (_roads isEqualTo []) then {
+            private _land = [_cand, 0, 200, 5, 0, 0.5, 0] call BIS_fnc_findSafePos;
+            if (_land isEqualTo [] || {surfaceIsWater _land}) then { _cand } else { _land }
+        } else {
+            getPosATL (selectRandom _roads)
+        });
     };
     private _start = _pts select 0;
     private _heading = [_start, _pts select 1] call BIS_fnc_dirTo;
