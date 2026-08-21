@@ -23,19 +23,20 @@ problem**, not the same reach-the-marker-and-kill with a bigger garrison (the de
 
 | # | Mission | The verb that makes it different | Thread |
 |--:|---------|----------------------------------|--------|
-| 2 | Hunt HVT convoy | spot which of three armed convoys carries the HVT, stop it before it reaches a zone | `target_hvt/` |
-| 5 | Kill snipers | find two hidden elite marksmen on open ground (elevation+LOS perch search) | `target_sniper/` |
-| 7 | Eliminate vehicle patrol | break a roving 3-vehicle column that runs speed-limited until first blood | `target_armor/` |
-| 16 | Eliminate informant | find one disguised target in a live crowd before he flees by car | `informant/` |
-| 17 | Recon observe | hold binocular eyes-on a zone from standoff without being drawn into a fight | `recon/` |
-| 18 | Deny enemy armor | reach a broken-down MBT before its repair crew convoy does, or intercept the convoy | `deny_armor/` |
-| 0 | Rescue squad | break a cordon to free a captive squad, then cover its evac (heli or on-foot exfil) | `rescue_squad/` |
+| 2 | Eliminate High-Value Target | spot which of three armed convoys carries the HVT, stop it before it reaches a zone | `target_hvt/` |
+| 5 | Hunt Sniper Team | find two hidden elite marksmen on open ground (elevation+LOS perch search) | `target_sniper/` |
+| 7 | Destroy Vehicle Patrol | break a roving 3-vehicle column that runs speed-limited until first blood | `target_armor/` |
+| 16 | Informant Manhunt | find one disguised target in a live crowd before he flees by car | `informant/` |
+| 17 | Recon Enemy Position | hold binocular eyes-on a zone from standoff without being drawn into a fight | `recon/` |
+| 18 | Deny Enemy Armor | reach a broken-down MBT before its repair crew convoy does, or intercept the convoy | `deny_armor/` |
+| 0 | Rescue Assault Team | break a cordon to free a captive squad, then cover its evac (heli or on-foot exfil) | `rescue_squad/` |
 
 **Still stale -- everything not hand-made above. Each needs *both* a reprice and a distinct-verb
-gameplay rework** -- the earlier "bespoke, review" rows (rescue pilot, hold position, domination) are
-stale too until reworked, not a reviewed baseline: steal supply (1), destroy tower (3), rescue pilot
-(4), steal engineering vehicle (6), sabotage laptop (8), destroy cache (9), destroy radar (10), clear
-the area / CQB (11), hold position (12), domination (13), protect civilian (14), transport IDAP (15).
+gameplay rework** -- the earlier "bespoke, review" rows (Rescue Pilot, Secure Tactical Asset, Hunt
+Armor Platoon) are stale too until reworked, not a reviewed baseline: Steal Supply Truck (1), Destroy
+Signal Tower (3), Rescue Pilot (4), Steal Builder Vehicle (6), Destroy Laptop (8), Destroy Ammo Cache
+(9), Destroy Radar (10), Clear Area (11), Secure Tactical Asset (12), Hunt Armor Platoon (13), Protect
+Informant (14), Recover Humanitarian Supply Truck (15).
 Ideas per row in the [tracker](#per-mission-rework-tracker).
 
 ## Architecture: mission-owned site selection
@@ -64,7 +65,8 @@ moved in the gap -- the escape zone was captured, the destination fell) is handl
 calling `fnc_mission_abort` with a stable snake_case `_reason` slug naming the failed criterion: the
 grep key for why a type aborts, kept stable when the player-facing wording changes.
 
-**Convoy destination contract.** The two road-convoy missions (HVT hunt, deny armor) also need an
+**Convoy destination contract.** The two road-convoy missions (Eliminate High-Value Target, Deny
+Enemy Armor) also need an
 OPFOR-held *destination* zone, not just an anchor. Their `mission_types.hpp` `spawnRule` sets
 `needDestZone true` (with a `minCorridor` and `routeAvoidBlufor`), so `fnc_mission_findSite` picks and
 vets a held zone at least `minCorridor` out, corridor clear of BLUFOR ground, and hands it to the
@@ -78,7 +80,7 @@ The three convoy/patrol reworks, plus the two manhunt/recon builds. Read the clo
 writing a new hand-made mission; each changes the *verb*, and the change lives in the scripts around
 the objective, not in a bigger garrison.
 
-### Hunt HVT convoy
+### Eliminate High-Value Target
 
 `mission_threads/target_hvt/fnc_target_hvt_mission.sqf`. A high-value target flees to an OPFOR-held
 zone in one of **three** armed road convoys, each on its own approach via a divergent mid-route point
@@ -89,7 +91,7 @@ right column and stop it. Win: the HVT dies. Fail: his car reaches the zone, or 
 owns its own site pick, spawn and monitor, like the informant and IDAP. Uses the convoy destination
 contract above.
 
-### Deny enemy armor
+### Deny Enemy Armor
 
 `mission_threads/deny_armor/fnc_deny_armor_mission.sqf`. A broken-down enemy MBT sits abandoned in
 the field; its crew is inbound by road convoy to get it running -- three crew (one an engineer) on
@@ -102,7 +104,7 @@ repaired tank near its own lines is the harder denial, so the player gets longer
 there. The tank is never claimed on a win -- a claim is a deletion order, and this one may end up the
 player's ride home. Off the spine for the scripted repair-race fail.
 
-### Eliminate vehicle patrol
+### Destroy Vehicle Patrol
 
 `mission_threads/target_armor/fnc_target_armor_mission.sqf`. A roving column of **three vehicles of
 one class**, the class rolled once and gated by OPFOR's earned AP tier (car floor, tank top), patrols
@@ -114,7 +116,7 @@ with the tier fielded**: +10 CP / +5 AP per step above a car patrol, so car / IF
 patrol pays the step-up as an unadvertised completion bonus -- inherent to rolling the tier at spawn,
 safe because one mission runs at a time.
 
-### Informant hunt
+### Informant Manhunt
 
 The informant mission is a manhunt, not a building sweep. An OPFOR informant hides disguised among a
 town's civilians; the player finds and kills him before he leaves by car for a distant zone. Thread:
@@ -153,7 +155,7 @@ Tunables (defaults, all in the thread): leave 2 steps friendly / 1 step enemy, +
 60 m, rep-penalty radius +300 m, pistol `hgun_Rook40_F`, shots trigger = `FiredNear`, ask/bribe price
 3.
 
-### Recon overwatch
+### Recon Enemy Position
 
 A standoff scout, not a fight. The player infils to a mission-chosen overwatch position, raises
 binoculars, and holds eyes-on an unrevealed OPFOR zone long enough to scout it; success lifts that
@@ -208,42 +210,43 @@ OPFOR crosses AP 350/60, so ring missions harden as the campaign advances while 
 
 | # | Mission | Obj | Cat | CP/AP/REP | Eff | State |
 |--:|---------|-----|-----|:---------:|:--:|-------|
-| 2 | Hunt HVT convoy | elimination | cmd | 35/35/0 | 3 | done |
-| 18 | Deny enemy armor | elimination | cmd | 20/25/0 | 3 | done |
-| 7 | Eliminate vehicle patrol | elimination | cmd | 15/20/0 (+tier) | 2-4 | done |
-| 16 | Eliminate informant | elimination | cmd | 10/20/0 | 3 | done |
-| 17 | Recon observe | recon | cmd | 10/5/0 | 2 | done |
-| 5 | Kill snipers | elimination | cmd | 20/15/0 | 3 | done |
-| 0 | Rescue squad | rescue | cmd | 25/15/0 | 3 | done |
-| 12 | Hold position | defend | cmd | 30/35/0 | 5 | stale |
-| 13 | Domination | assault | cmd | 10/30/0 | 5 | stale |
-| 1 | Steal supply truck | requisition | cmd | 35/25/0 | 4 | stale |
-| 6 | Steal engineering vehicle | requisition | cmd | 15/20/0 | 4 | stale (twin of #1, half pay) |
-| 4 | Rescue pilot | rescue | cmd | 25/40/0 | 4 | stale |
-| 9 | Destroy cache | sabotage | cmd | 30/20/0 | 3 | stale |
-| 10 | Destroy radar | sabotage | cmd | 25/25/0 | 3 | stale |
-| 11 | Clear the area (CQB) | assault | cmd | 15/20/0 | 3 | stale |
-| 3 | Destroy tower | sabotage | cmd | 20/30/0 | 2 | stale (tower pre-broken to 0.8) |
-| 8 | Sabotage laptop | sabotage | cmd | 10/35/0 | 1 | stale (fine as a quick verb) |
-| 14 | Protect civilian | defend | civ | 20/10/5 | -- | stale, not analysed |
-| 15 | Transport IDAP | escort | civ | 20/10/5 | -- | stale, not analysed |
+| 2 | Eliminate High-Value Target | elimination | cmd | 35/35/0 | 3 | done |
+| 18 | Deny Enemy Armor | elimination | cmd | 20/25/0 | 3 | done |
+| 7 | Destroy Vehicle Patrol | elimination | cmd | 15/20/0 (+tier) | 2-4 | done |
+| 16 | Informant Manhunt | elimination | cmd | 10/20/0 | 3 | done |
+| 17 | Recon Enemy Position | recon | cmd | 10/5/0 | 2 | done |
+| 5 | Hunt Sniper Team | elimination | cmd | 20/15/0 | 3 | done |
+| 0 | Rescue Assault Team | rescue | cmd | 25/15/0 | 3 | done |
+| 12 | Secure Tactical Asset | defend | cmd | 30/35/0 | 5 | stale |
+| 13 | Hunt Armor Platoon | elimination | cmd | 10/30/0 | 5 | stale |
+| 1 | Steal Supply Truck | requisition | cmd | 35/25/0 | 4 | stale |
+| 6 | Steal Builder Vehicle | requisition | cmd | 15/20/0 | 4 | stale (twin of #1, half pay) |
+| 4 | Rescue Pilot | rescue | cmd | 25/40/0 | 4 | stale |
+| 9 | Destroy Ammo Cache | sabotage | cmd | 30/20/0 | 3 | stale |
+| 10 | Destroy Radar | sabotage | cmd | 25/25/0 | 3 | stale |
+| 11 | Clear Area | assault | cmd | 15/20/0 | 3 | stale |
+| 3 | Destroy Signal Tower | sabotage | cmd | 20/30/0 | 2 | stale (tower pre-broken to 0.8) |
+| 8 | Destroy Laptop | sabotage | cmd | 10/35/0 | 1 | stale (fine as a quick verb) |
+| 14 | Protect Informant | defend | civ | 20/10/5 | -- | stale, not analysed |
+| 15 | Recover Humanitarian Supply Truck | escort | civ | 20/10/5 | -- | stale, not analysed |
 
 ## Pricing rework (command missions)
 
 Principle: base pay tracks required effort, holding the command economy near its aggregate. CP leans
 to command/intel/tactical value, AP to materiel destroyed or manpower recovered. The reworked and
-repriced missions (HVT, deny armor, vehicle patrol, informant, recon, snipers, rescue squad) are now
-priced to effort; the vehicle patrol adds a tier bonus at spawn (see its design note). **Every
+repriced missions (Eliminate High-Value Target, Deny Enemy Armor, Destroy Vehicle Patrol, Informant
+Manhunt, Recon Enemy Position, Hunt Sniper Team, Rescue Assault Team) are now priced to effort; the
+vehicle patrol adds a tier bonus at spawn (see its design note). **Every
 still-stale mission carries its old numbers and is open pricing work** -- all 12 stale rows, not only
 the five below; these five are just the worst effort/pay mismatches:
 
 | Mission | Eff | CP/AP now | Note |
 |---------|:-:|:-:|------|
-| Steal engineering vehicle | 4 | 15/20 | half its identical twin (steal supply, 35/25) -- match effort |
-| Domination | 5 | 10/30 | worst-paid vs effort (the 4-MBT fight) |
-| Clear area (CQB) | 3 | 15/20 | underpaid for a 24-kill full clear |
-| Destroy tower | 2 | 20/30 | gimme -- tower pre-broken; spawn it intact or cut the AP |
-| Sabotage laptop | 1 | 10/35 | AP overpaid for one hold-action |
+| Steal Builder Vehicle | 4 | 15/20 | half its identical twin (steal supply, 35/25) -- match effort |
+| Hunt Armor Platoon | 5 | 10/30 | worst-paid vs effort (the 4-MBT fight) |
+| Clear Area | 3 | 15/20 | underpaid for a 24-kill full clear |
+| Destroy Signal Tower | 2 | 20/30 | gimme -- tower pre-broken; spawn it intact or cut the AP |
+| Destroy Laptop | 1 | 10/35 | AP overpaid for one hold-action |
 
 ## Per-mission rework tracker
 
@@ -253,30 +256,30 @@ change cell is the current idea, not a locked spec.
 
 | Mission | Gameplay change | Status |
 |---------|-----------------|:-:|
-| Hunt HVT convoy | three-convoy race, spot the odd unarmed car | done |
-| Deny enemy armor | repair-race convoy to a broken-down MBT | done |
-| Eliminate vehicle patrol | roving 3-vehicle column, speed-limited until broken, tier-scaled pay | done |
-| Informant hunt | disguised manhunt in a town crowd | done |
-| Recon overwatch | standoff binocular hold that reveals a zone | done |
-| Rescue squad | evac leg added (heli + on-foot exfil) | done |
-| Steal engineering vehicle | match effort/pay of its twin | stale |
-| Domination | reprice to the 4-MBT effort | stale |
-| Clear area (CQB) | reprice to the full-clear effort | stale |
-| Destroy tower | spawn the tower intact so destruction is real work | stale |
-| Sabotage laptop | keep light; trim the overpaid AP | stale |
-| Steal supply truck | distinct verb TBD + reprice | stale |
-| Rescue pilot | distinct verb TBD + reprice | stale |
-| Destroy cache | distinct verb TBD + reprice | stale |
-| Destroy radar | distinct verb TBD + reprice | stale |
-| Hold position | distinct verb TBD + reprice | stale |
-| Protect civilian | analyse + price (civilian) | stale |
-| Transport IDAP | analyse + price (civilian) | stale |
+| Eliminate High-Value Target | three-convoy race, spot the odd unarmed car | done |
+| Deny Enemy Armor | repair-race convoy to a broken-down MBT | done |
+| Destroy Vehicle Patrol | roving 3-vehicle column, speed-limited until broken, tier-scaled pay | done |
+| Informant Manhunt | disguised manhunt in a town crowd | done |
+| Recon Enemy Position | standoff binocular hold that reveals a zone | done |
+| Rescue Assault Team | evac leg added (heli + on-foot exfil) | done |
+| Steal Builder Vehicle | match effort/pay of its twin | stale |
+| Hunt Armor Platoon | reprice to the 4-MBT effort | stale |
+| Clear Area | reprice to the full-clear effort | stale |
+| Destroy Signal Tower | spawn the tower intact so destruction is real work | stale |
+| Destroy Laptop | keep light; trim the overpaid AP | stale |
+| Steal Supply Truck | distinct verb TBD + reprice | stale |
+| Rescue Pilot | distinct verb TBD + reprice | stale |
+| Destroy Ammo Cache | distinct verb TBD + reprice | stale |
+| Destroy Radar | distinct verb TBD + reprice | stale |
+| Secure Tactical Asset | distinct verb TBD + reprice | stale |
+| Protect Informant | analyse + price (civilian) | stale |
+| Recover Humanitarian Supply Truck | analyse + price (civilian) | stale |
 
 ## Open decisions
 
 - The distinct verb for each still-stale row (all 12 need both a verb and a reprice; see the tracker).
 - Final command prices for the still-stale rows (the pricing table above).
-- Destroy tower: spawn intact, or accept it as a gimme and cut the AP.
+- Destroy Signal Tower: spawn intact, or accept it as a gimme and cut the AP.
 - Whether late-campaign armour creep on ring missions needs pay scaling, or the map depth boost
   already compensates.
 - Civilian missions (protect_civ, transport_IDAP): analyse how they play, then price.

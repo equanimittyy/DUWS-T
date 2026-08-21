@@ -18,19 +18,19 @@ quick to kill you. Small mission, real problem.
 
 | Mission | The problem it poses | The script that makes it | Thread |
 |---|---|---|---|
-| Sniper elimination | find two hidden elite marksmen on open ground | elevation+LOS perch search, sub-skills forced to 1, prone overwatch that flushes on approach or hit | `mission_threads/target_sniper/` |
-| HVT convoy hunt | spot which of three armed convoys hides the target and stop it before it reaches a zone | three divergent road approaches, one unarmed car among armed escorts, race-to-zone monitor | `mission_threads/target_hvt/` |
-| Deny enemy armour | reach a broken-down MBT before its repair-crew convoy, or intercept on the road | inbound repair convoy, distance-scaled repair timer, tank left unclaimed as the player's prize | `mission_threads/deny_armor/` |
-| Vehicle patrol | break a roving vehicle column that stays speed-limited until first blood | tier-rolled 3-vehicle road loop, LIMITED speed until a hit lifts it, tier-scaled reward | `mission_threads/target_armor/` |
-| Informant manhunt | find one disguised target in a live crowd before he flees | social "ask a civilian" layer, decoy cars, timed drive to an enemy zone | `mission_threads/informant/` |
-| Recon overwatch | hold binocular eyes-on a zone from standoff without being drawn into a fight | mission-owned copy of the zone's own prefab, continuous LOS hold | `mission_threads/recon/` |
-| Rescue squad | break a cordon to free a captive squad, then cover its evac | captive-until-reached squad, cordon fight, evac helicopter + on-foot exfil | `mission_threads/rescue_squad/` |
+| Hunt Sniper Team | find two hidden elite marksmen on open ground | elevation+LOS perch search, sub-skills forced to 1, prone overwatch that flushes on approach or hit | `mission_threads/target_sniper/` |
+| Eliminate High-Value Target | spot which of three armed convoys hides the target and stop it before it reaches a zone | three divergent road approaches, one unarmed car among armed escorts, race-to-zone monitor | `mission_threads/target_hvt/` |
+| Deny Enemy Armor | reach a broken-down MBT before its repair-crew convoy, or intercept on the road | inbound repair convoy, distance-scaled repair timer, tank left unclaimed as the player's prize | `mission_threads/deny_armor/` |
+| Destroy Vehicle Patrol | break a roving vehicle column that stays speed-limited until first blood | tier-rolled 3-vehicle road loop, LIMITED speed until a hit lifts it, tier-scaled reward | `mission_threads/target_armor/` |
+| Informant Manhunt | find one disguised target in a live crowd before he flees | social "ask a civilian" layer, decoy cars, timed drive to an enemy zone | `mission_threads/informant/` |
+| Recon Enemy Position | hold binocular eyes-on a zone from standoff without being drawn into a fight | mission-owned copy of the zone's own prefab, continuous LOS hold | `mission_threads/recon/` |
+| Rescue Assault Team | break a cordon to free a captive squad, then cover its evac | captive-until-reached squad, cordon fight, evac helicopter + on-foot exfil | `mission_threads/rescue_squad/` |
 | Generic (tower, cache, laptop, …) | reach the marker, destroy/kill the objective | none bespoke — the shared spine, reskinned | one file per folder |
 
 All the hand-made designs are written up in full in the plan doc's
 [§Hand-made mission designs](../side_missions_working.md#hand-made-mission-designs) (the convoy reworks,
-plus [§Informant hunt](../side_missions_working.md#informant-hunt) and
-[§Recon overwatch](../side_missions_working.md#recon-overwatch)); read the closest one before writing a
+plus [§Informant Manhunt](../side_missions_working.md#informant-manhunt) and
+[§Recon Enemy Position](../side_missions_working.md#recon-enemy-position)); read the closest one before writing a
 new hand-made mission, as the worked example.
 
 ## Two build shapes
