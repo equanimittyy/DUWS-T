@@ -44,6 +44,8 @@ params ["_group"];
 #define CV_RECOVER_AT  10      // ticks a follower sits jammed (~15 s) before the column regroups
 #define CV_FORMED      15      // a follower within this of its ideal slot counts as formed up in a regroup
 #define CV_FINAL_HOP   120     // within this of the waypoint, drop the lead's road-lock for the off-road approach
+#define CV_TELEPORT_AT 40      // ticks (~60 s) the WHOLE column stays deadlocked before the out-of-sight snap
+#define CV_TP_CLEAR    300     // no BLUFOR within this (m) or the last-resort teleport is withheld
 
 // forceSpeed takes m/s. If an in-game check (a truck given `forceSpeed 8` rolls at ~29 km/h) proves it
 // is km/h instead, set CV_KMH2FS to 1.0 so km/h values pass straight through.
@@ -65,6 +67,7 @@ private _crumbs = [];             // the lead's driven track, oldest first: a co
 private _stuck  = createHashMap;  // netId -> consecutive halted ticks
 private _regroup = false;         // column-wide: while true the lead holds and all followers reform on slots
 private _leadFree = 0;            // >0 while the lead's road-lock is held off after a wedge, so it can detour
+private _allStuck = 0;            // consecutive ticks the whole column is deadlocked (nothing moving)
 private _pathed = createHashMap;  // netId -> true while a hull holds a setDriveOnPath order
 private _issued = createHashMap;  // netId -> [startIdx, crumbCount] last handed to setDriveOnPath (skip re-issue)
 private _seen   = createHashMap;  // netId -> hull, every hull configured once (one-time setup + teardown reset)
@@ -330,6 +333,54 @@ while {
                     } else {
                         _stuck set [_leadId, 0];
                     };
+                };
+
+                // LAST RESORT: the whole column has sat deadlocked for CV_TELEPORT_AT ticks -- lead-unstick and
+                // regroup both failed to free it. With NO BLUFOR within CV_TP_CLEAR (so a player never witnesses
+                // it) and only on the long haul (never the legitimately-slow final hop), snap every hull into a
+                // clean column on drivable ground a short hop ahead toward the destination, facing it, and resume.
+                // Counts a tick as deadlocked only when nothing is moving, so it also gives regroup the timeout it
+                // otherwise lacks (a permanently-wedged follower would hold the lead forever).
+                private _leadPos = getPosATL _lead;
+                if ((_lead distance2D _wpPos) >= CV_FINAL_HOP && {(_live findIf { speed _x >= CV_STUCK_KMH }) < 0}) then {
+                    _allStuck = _allStuck + 1;
+                } else {
+                    _allStuck = 0;
+                };
+                if (
+                    _allStuck >= CV_TELEPORT_AT
+                    && {(allUnits findIf { side _x == west && {alive _x} && {_x distance2D _leadPos < CV_TP_CLEAR} }) < 0}
+                ) then {
+                    private _dirDest = _leadPos getDir _wpPos;
+                    private _aim = _leadPos getPos [40, _dirDest];   // clear of whatever the column ground against
+                    private _roads = _aim nearRoads 60;
+                    private _anchor = if !(_roads isEqualTo []) then { getPosATL (_roads select 0) }
+                        else { [_aim, 0, 40, 6, 0, 0.5, 0] call BIS_fnc_findSafePos };
+
+                    // Front-to-back in trail order (frontmost = highest progress) with the lead at the head, so
+                    // the snapped column keeps its running order and does not have to re-sort on resume.
+                    private _ordered = [_liveFollowers, [], { _prog getOrDefault [netId _x, -1] }, "DESCEND"] call BIS_fnc_sortBy;
+                    {
+                        private _slot = _anchor getPos [_forEachIndex * CV_GAP_WANT, _dirDest + 180];
+                        if (surfaceIsWater _slot) then { _slot = [_slot, 0, 30, 6, 0, 0.5, 0] call BIS_fnc_findSafePos };
+                        // setVectorDirAndUp levels any flipped hull (rolled onto its side/roof in a collision,
+                        // a common wedge) and faces it at the destination in one call -- setPos alone keeps the roll.
+                        _x setVectorDirAndUp [[sin _dirDest, cos _dirDest, 0], [0, 0, 1]];
+                        _x setPosATL _slot;
+                        _x setVelocity [0, 0, 0];
+                        _x setDriveOnPath [];
+                        _x forceSpeed -1;
+                        _x forceFollowRoad false;
+                    } forEach ([_lead] + _ordered);
+
+                    // Fresh start: drop the fought trail and every per-hull order/counter; the lead is already the
+                    // head of the snapped column, so cv_lead stands. Native nav takes it from the next tick.
+                    _crumbs = [];
+                    _regroup = false;
+                    _leadFree = 0;
+                    _allStuck = 0;
+                    { private _id = netId _x; _issued set [_id, []]; _stuck set [_id, 0]; _pathed set [_id, false] } forEach _live;
+                    _lead doMove _wpPos;
                 };
             };
         };
