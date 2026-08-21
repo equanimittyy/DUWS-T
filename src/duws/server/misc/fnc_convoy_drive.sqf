@@ -38,7 +38,9 @@ params ["_group"];
 #define CV_TRAIL       40      // keep only the last N crumbs (~320 m): longer than any column, short enough
                                // that a CYCLE patrol's looping track never snaps a follower onto an old lap
 #define CV_STUCK_KMH   3       // at or below this, treat a hull as halted
-#define CV_LEAD_RETRY  3       // ticks the lead sits halted before its move order is re-issued (native retry)
+#define CV_LEAD_RETRY  3       // ticks between native replans while the lead sits halted (doMove re-issue)
+#define CV_LEAD_FREE   6       // ticks the lead stays wedged (~9 s) before its road-lock is dropped to detour
+#define CV_LEAD_FREE_HOLD 5    // ticks (~7.5 s) the road-lock is held off so native pathing can route around
 #define CV_RECOVER_AT  10      // ticks a follower sits jammed (~15 s) before the column regroups
 #define CV_FORMED      15      // a follower within this of its ideal slot counts as formed up in a regroup
 #define CV_FINAL_HOP   120     // within this of the waypoint, drop the lead's road-lock for the off-road approach
@@ -62,6 +64,7 @@ params ["_group"];
 private _crumbs = [];             // the lead's driven track, oldest first: a coarse polyline of real ground
 private _stuck  = createHashMap;  // netId -> consecutive halted ticks
 private _regroup = false;         // column-wide: while true the lead holds and all followers reform on slots
+private _leadFree = 0;            // >0 while the lead's road-lock is held off after a wedge, so it can detour
 private _pathed = createHashMap;  // netId -> true while a hull holds a setDriveOnPath order
 private _issued = createHashMap;  // netId -> [startIdx, crumbCount] last handed to setDriveOnPath (skip re-issue)
 private _seen   = createHashMap;  // netId -> hull, every hull configured once (one-time setup + teardown reset)
@@ -218,10 +221,11 @@ while {
                     };
 
                     // Road-lock the lead for the long haul; drop it within the final hop so a road-locked driver
-                    // can still cross open ground to an off-road objective. Its speed and any stuck-nudge are set
+                    // can still cross open ground to an off-road objective, and drop it while an unstick window
+                    // holds (below) so a wedged lead may detour off-road. Its speed and any stuck-nudge are set
                     // after the follower pass, once the column's widest gap is known.
                     private _leadNear = (_lead distance2D _wpPos) < CV_FINAL_HOP;
-                    _lead forceFollowRoad (!_leadNear);
+                    if (_leadFree > 0) then { _leadFree = _leadFree - 1 } else { _lead forceFollowRoad (!_leadNear) };
 
                     private _leadProg = count _crumbs;   // the lead is ahead of every crumb; _prog is built above
 
@@ -303,15 +307,26 @@ while {
 
                     // Lead speed governs the whole column: full cruise while it is closed up, easing to a halt as
                     // the widest inter-hull gap opens past CV_LAG_OK, so a lagging follower is never left behind.
-                    // If the lead itself jams, re-issue its move so native navigation retries a route -- only
-                    // while it is meant to be moving (not when deliberately halted) and on the long haul (the
-                    // off-road final approach is legitimately slow).
                     private _factor = ((CV_LAG_STOP - _maxGap) / (CV_LAG_STOP - CV_LAG_OK)) max 0 min 1;
                     _lead forceSpeed KMH(CV_CRUISE_KMH * _factor);
+
+                    // Unstick the native lead when it jams -- only while it is meant to be moving (not a
+                    // deliberate ease-down) and on the long haul (the off-road final approach is legitimately
+                    // slow). Escalates: a periodic doMove replan first; if it stays wedged past CV_LEAD_FREE,
+                    // drop the road-lock for a few ticks so native pathing can detour off-road around whatever
+                    // it grinds against (a road wreck, a bad road-snap), then re-lock. Reset the counter on the
+                    // detour so the freed window runs before it re-escalates.
                     if (_factor > 0 && {!_leadNear} && {speed _lead < CV_STUCK_KMH}) then {
                         private _n = (_stuck getOrDefault [_leadId, 0]) + 1;
-                        if (_n >= CV_LEAD_RETRY) then { _lead doMove _wpPos; _n = 0 };
                         _stuck set [_leadId, _n];
+                        if (_n >= CV_LEAD_FREE) then {
+                            _lead forceFollowRoad false;
+                            _leadFree = CV_LEAD_FREE_HOLD;
+                            _lead doMove _wpPos;
+                            _stuck set [_leadId, 0];
+                        } else {
+                            if (_n mod CV_LEAD_RETRY == 0) then { _lead doMove _wpPos };
+                        };
                     } else {
                         _stuck set [_leadId, 0];
                     };
