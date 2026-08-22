@@ -101,6 +101,11 @@ private _stationBehind = {
     _res
 };
 
+// DEBUG (silent unless duws_log_level is raised to 4): a per-tick line for the column and a line per recovery
+// event, so an RPT alone shows which hull lags -- its gap, speed, stuck count -- and which tier fired, without
+// a live repro. The level guard skips the format cost when off.
+if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["convoy_drive start grp=%1", _group]] call fnc_log };
+
 private _running = true;
 while {
     _running
@@ -191,6 +196,7 @@ while {
                 if (_lf > 0) then { _free set [_leadId, _lf - 1] } else { _lead forceFollowRoad (!_leadNear) };
 
                 private _maxGap = 0;
+                private _dbg = [];   // per-follower [id, gap, speed, stuck, free] this tick, emitted at level 4
                 {
                     private _me    = _x;
                     private _meId  = netId _me;
@@ -260,6 +266,7 @@ while {
                             _me forceFollowRoad false;
                             _me doMove _stPos;
                             _issued set [_meId, _stPos];
+                            if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["unstick %1: off-road detour (stuck %2)", netId _me, _n]] call fnc_log };
                         };
                         if (
                             _n >= CV_REPOS_AT
@@ -274,9 +281,14 @@ while {
                             _stuck set [_meId, 0];
                             _free set [_meId, 0];
                             _issued set [_meId, []];
+                            if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["reposition %1 to station (was stuck %2)", netId _me, _n]] call fnc_log };
                         };
                     } else {
                         _stuck set [_meId, 0];
+                    };
+
+                    if (duws_log_level >= 4) then {
+                        _dbg pushBack [netId _me, round _gap, round (speed _me), _stuck getOrDefault [_meId, 0], _free getOrDefault [_meId, 0]];
                     };
                 } forEach _liveFollowers;
 
@@ -298,9 +310,15 @@ while {
                         _lead forceFollowRoad false;
                         _lead doMove _wpPos;
                         _stuck set [_leadId, 0];
+                        if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["lead unstick %1: off-road detour", netId _lead]] call fnc_log };
                     };
                 } else {
                     _stuck set [_leadId, 0];
+                };
+
+                if (duws_log_level >= 4) then {
+                    ["DEBUG", "CONVOY", format ["grp=%1 lead=%2 leadSpd=%3 factor=%4 maxGap=%5 followers(id,gap,spd,stuck,free)=%6",
+                        _group, netId _lead, round (speed _lead), (round (_factor * 100)) / 100, round _maxGap, _dbg]] call fnc_log;
                 };
 
                 // LAST RESORT: the whole column has sat deadlocked for CV_TELEPORT_AT ticks -- off-road permission
@@ -319,6 +337,7 @@ while {
                     _allStuck >= CV_TELEPORT_AT
                     && {(allUnits findIf { side _x == west && {alive _x} && {_x distance2D _leadPos < CV_TP_CLEAR} }) < 0}
                 ) then {
+                    if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["WHOLE-COLUMN SNAP grp=%1 (deadlocked %2 ticks)", _group, _allStuck]] call fnc_log };
                     private _dirDest = _leadPos getDir _wpPos;
                     private _aim = _leadPos getPos [40, _dirDest];   // clear of whatever the column ground against
                     private _roads = _aim nearRoads 60;
