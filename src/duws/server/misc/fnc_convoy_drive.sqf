@@ -68,7 +68,7 @@ private _regroup = false;         // column-wide: while true the lead holds and 
 private _leadFree = 0;            // >0 while the lead's road-lock is held off after a wedge, so it can detour
 private _allStuck = 0;            // consecutive ticks the whole column is deadlocked (nothing moving)
 private _pathed = createHashMap;  // netId -> true while a hull holds a setDriveOnPath order
-private _issued = createHashMap;  // netId -> [startIdx, crumbCount] last handed to setDriveOnPath (skip re-issue)
+private _issued = createHashMap;  // netId -> [startIdx, leadPos] at last setDriveOnPath (freshness for re-issue)
 private _seen   = createHashMap;  // netId -> hull, every hull configured once (one-time setup + teardown reset)
 
 // Nearest crumb index to a position = the hull's progress along the track. -1 while the track is empty.
@@ -264,12 +264,24 @@ while {
                             // passed makes it brake and reverse to reach it -- the random mid-column stop. One
                             // crumb ahead keeps every handed point forward. An empty slice (hull right behind the
                             // lead) just aims at the lead.
+                            // Re-issue when the slice moved OR the lead has advanced >= CV_STEP since the last
+                            // path. Keying on count alone goes stale on a FULL trail: count is pinned at CV_TRAIL
+                            // (push + deleteAt 0 each tick) while the crumb contents shift down an index, so a
+                            // follower whose _startIdx happens to hold steady keeps driving a path whose tail is
+                            // an OLD lead position, reaches it, and stops -- the big-gap "2nd vehicle stops"
+                            // wedge. The lead-moved test tracks exactly when the trail shifts; a parked lead
+                            // (jitter < CV_STEP) still does not churn.
                             private _startIdx = _myProg + 1;
-                            private _sig = [_startIdx, count _crumbs];
-                            if (!((_issued getOrDefault [_meId, []]) isEqualTo _sig)) then {
-                                private _path = (_crumbs select [_startIdx]) + [getPosATL _lead];
+                            private _iss = _issued getOrDefault [_meId, []];
+                            if (
+                                _iss isEqualTo []
+                                || {(_iss select 0) != _startIdx}
+                                || {(_lead distance2D (_iss select 1)) >= CV_STEP}
+                            ) then {
+                                private _leadPos = getPosATL _lead;
+                                private _path = (_crumbs select [_startIdx]) + [_leadPos];
                                 _me setDriveOnPath _path;
-                                _issued set [_meId, _sig];
+                                _issued set [_meId, [_startIdx, _leadPos]];
                                 _pathed set [_meId, true];
                             };
                         };
