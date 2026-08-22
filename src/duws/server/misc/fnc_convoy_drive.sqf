@@ -39,11 +39,11 @@ params ["_group"];
 #define CV_TRAIL       40      // keep only the last N crumbs (~320 m): longer than any column, short enough
                                // that a CYCLE patrol's looping track never snaps a follower onto an old lap
 #define CV_STUCK_KMH   3       // at or below this, treat a hull as halted
-#define CV_UNSTICK_AT  3       // ticks a hull sits wedged (confirm, ~4.5 s) before its road-lock drops to detour
+#define CV_UNSTICK_AT  2       // ticks a hull sits wedged (confirm, ~3 s) before its road-lock drops to detour
 #define CV_FREE_HOLD   5       // ticks (~7.5 s) the road-lock is held off so native pathing can route around
-#define CV_REPOS_AT    12      // ticks a hull stays wedged (~18 s) before an out-of-sight per-hull reposition
+#define CV_REPOS_AT    6       // ticks a hull stays wedged (~9 s) before an out-of-sight per-hull reposition
 #define CV_FINAL_HOP   120     // within this of the waypoint, drop the road-lock for the off-road approach
-#define CV_TELEPORT_AT 40      // ticks (~60 s) the WHOLE column stays deadlocked before the out-of-sight snap
+#define CV_TELEPORT_AT 20      // ticks (~30 s) the WHOLE column stays deadlocked before the out-of-sight snap
 #define CV_TP_CLEAR    300     // no BLUFOR within this (m) or an out-of-sight reposition/snap is withheld
 
 // forceSpeed takes m/s. If an in-game check (a truck given `forceSpeed 8` rolls at ~29 km/h) proves it
@@ -53,10 +53,12 @@ params ["_group"];
 
 #define CV_CRUISE_KMH  40      // lead's free-running speed when the column is closed up
 #define CV_CATCHUP_KMH 60      // fastest a follower may run to close a gap
-#define CV_GAP_WANT    22      // desired along-track spacing to the hull ahead (m); matches layout slotting
-#define CV_GAP_BAND    6       // deadband: within this of target, just match the hull ahead's speed -- no
+#define CV_GAP_WANT    10      // desired along-track spacing to the hull ahead (m). Tighter than the spawn
+                               // slot (fnc_convoy_layout, ~22 m): long escorts must not spawn bumper-to-
+                               // bumper and explode, but the column closes to this once rolling.
+#define CV_GAP_BAND    4       // deadband: within this of target, just match the hull ahead's speed -- no
                                // spacing trim, so the column stops hunting and the accordion damps out
-#define CV_GAP_HARD    8       // closer than this: stop, a backstop against rear-ending on a transient
+#define CV_GAP_HARD    4       // closer than this: stop, a backstop against rear-ending on a transient
 #define CV_GAP_KP      1       // gentle spacing trim (km/h per metre) outside the band; matching the hull
                                // ahead's speed, not this term, does the heavy lifting -- pure-P overshot
 #define CV_LAG_OK      40      // widest inter-hull gap tolerated at full cruise (m)
