@@ -35,11 +35,13 @@ private _destName = _dest select 1;
 // spawnR is the radius the three start roads are drawn from, startSep the minimum gap between two starts
 // so each column gets an independent road, viaSpread the lateral offset of the mid-route point (bigger =
 // wider fork), viaCone the widest a via road's run may sit off the destination bearing before it is
-// skipped, graceSec the rolled hold the columns keep before they roll -- Allseer calls the move when it
-// ends -- arrive is the zone-edge fail band.
+// skipped, startCone the same limit for a START road to count as route-aligned (columns prefer these so
+// they spawn pointing down-route, not perpendicular to it), graceSec the rolled hold the columns keep
+// before they roll -- Allseer calls the move when it ends -- arrive is the zone-edge fail band.
 private _spawnR    = 700;
 private _viaSpread = 1200;
 private _viaCone   = 45;
+private _startCone = 40;
 private _startSep  = 250;
 private _graceSec  = 30 + round random 30;
 private _arrive    = 80;
@@ -139,18 +141,35 @@ private _axisOffset = {
     _d min (180 - _d)
 };
 
-// Three independent start roads: gather roads within _spawnR of the anchor and take the first three at
-// least _startSep apart, so each column rides its own road rather than three snapping to one. A road-thin
-// corner with fewer than three falls back to fanned safe-pos points off the zone bearing.
+// Three independent start roads, each stored as [pos, heading toward the zone]. Prefer roads whose run is
+// aligned with the route (within _startCone of the destination bearing) so a column spawns already pointing
+// down-range and does not snap perpendicular onto a crossing road as it rolls. Pass 1 takes aligned roads;
+// pass 2 tops up from any nearby road (laid straight at the zone); pass 3 falls back to fanned safe-pos
+// points where the corner is road-thin. Each new start must sit _startSep from the others so columns do not
+// share a road.
 private _startRoads = [];
+private _near = _MissionPos nearRoads _spawnR;
 {
     private _rp = getPosATL _x;
-    if (_startRoads findIf { _rp distance2D _x < _startSep } < 0) then { _startRoads pushBack _rp };
+    private _rb = [_x] call _roadBearing;
+    if (
+        ([_rb, _dirZone] call _axisOffset) <= _startCone
+        && {(_startRoads findIf { _rp distance2D (_x select 0) < _startSep }) < 0}
+    ) then {
+        // The run is undirected; point it at the zone (the end within 90 deg of the destination bearing).
+        private _hd = if ((abs ((((_rb - _dirZone) + 540) mod 360) - 180)) <= 90) then { _rb } else { (_rb + 180) mod 360 };
+        _startRoads pushBack [_rp, _hd];
+    };
     if (count _startRoads >= 3) exitWith {};
-} forEach (_MissionPos nearRoads _spawnR);
+} forEach _near;
+{
+    private _rp = getPosATL _x;
+    if ((_startRoads findIf { _rp distance2D (_x select 0) < _startSep }) < 0) then { _startRoads pushBack [_rp, _dirZone] };
+    if (count _startRoads >= 3) exitWith {};
+} forEach _near;
 while { count _startRoads < 3 } do {
     private _lat = count _startRoads;
-    _startRoads pushBack ([_MissionPos getPos [_spawnR, _dirZone + ([-45, 0, 45] select _lat)], 0, 250, 8, 0, 0.6, 0] call BIS_fnc_findSafePos);
+    _startRoads pushBack [([_MissionPos getPos [_spawnR, _dirZone + ([-45, 0, 45] select _lat)], 0, 250, 8, 0, 0.6, 0] call BIS_fnc_findSafePos), _dirZone];
 };
 
 private _hvtIdx = floor random 3;
@@ -164,7 +183,7 @@ private _carGrp = grpNull;    // the car's own group once split out -- held here
 
 for "_i" from 0 to 2 do {
     private _lat = [-1, 0, 1] select _i;
-    private _start = _startRoads select _i;
+    (_startRoads select _i) params ["_start", "_roadHd"];
     // Via: a road point offset to one side of the midpoint, so the pathfinder routes this column its own
     // way in; the centre column (lat 0) runs the direct line. Snap to the nearest road whose run lies
     // within _viaCone of the destination bearing, so the via never points the column back the wrong way
@@ -177,7 +196,9 @@ for "_i" from 0 to 2 do {
     } forEach _vRoads;
     if (isNull _viaRoad && {!(_vRoads isEqualTo [])}) then { _viaRoad = _vRoads select 0 };
     private _via = if (!isNull _viaRoad) then { getPosATL _viaRoad } else { _vCand };
-    private _heading = [_start, _via] call BIS_fnc_dirTo;
+    // Lay the column along its start road, already pointing down-route toward the zone, so it rolls straight
+    // off the road instead of snapping perpendicular; the via is its first waypoint, not its spawn heading.
+    private _heading = _roadHd;
     _convoyStarts pushBack _start;
 
     if (_i == _hvtIdx) then {
