@@ -36,15 +36,25 @@ private _destName = _dest select 1;
 // so each column gets an independent road, viaSpread the lateral offset of the mid-route point (bigger =
 // wider fork), viaCone the widest a via road's run may sit off the destination bearing before it is
 // skipped, startCone the same limit for a START road to count as route-aligned (columns prefer these so
-// they spawn pointing down-route, not perpendicular to it), graceSec the rolled hold the columns keep
-// before they roll -- Allseer calls the move when it ends -- arrive is the zone-edge fail band.
+// they spawn pointing down-route, not perpendicular to it). The departure hold (holdNear/holdFar seconds
+// interpolated over holdNearDist/holdFarDist of run length) is the fallback the columns keep before they
+// roll when no player reaches the start cluster; a BLUFOR arrival within the search radius ends it early,
+// and Allseer calls the move either way. arrive is the zone-edge fail band.
 private _spawnR    = 700;
 private _viaSpread = 1200;
 private _viaCone   = 45;
 private _startCone = 40;
 private _startSep  = 250;
-private _graceSec  = 30 + round random 30;
 private _arrive    = 80;
+
+// Departure hold: fallback seconds the columns wait before rolling when no player reaches the start
+// cluster, scaled inversely with the run length. A short run gives the player little road to intercept
+// on, so the columns wait the long _holdNear window; a long run waits only the short _holdFar, the drive
+// itself being the intercept window. Same distance-scaled shape as the deny-armour repair race.
+private _holdNear     = 75;
+private _holdFar      = 25;
+private _holdNearDist = 3000;
+private _holdFarDist  = 10000;
 
 // Escort classes roll per vehicle across armed car, IFV and armour, gated by OPFOR's earned Army
 // Power through DUWS_fnc_tokenClass -- a low-AP campaign fields cars, a high one can field tanks. The
@@ -297,10 +307,17 @@ private _taskId = format ["hvtconvoy%1%2", round (_MissionPos select 0), round (
 
 [localize "STR_DUWS_T_OVERLORD", format [localize "STR_DUWS_T_hvtletsdothis", _destName, _vehName]] remoteExec ["fnc_duws_dialogue", 0];
 
-// Grace: the columns hold at their start points, so a player inserting from range has a window before
-// the race begins. Then every column is ordered to the zone via its own mid-route point at once, so
-// the three take separate roads in.
-sleep _graceSec;
+// Departure gate: the columns hold at their start until a player reaches the convoy area (BLUFOR within
+// the search radius of the start cluster) or the hold timer runs out, whichever comes first. The BLUFOR
+// trigger starts the race the moment the player arrives; the timer is the fallback so the columns never
+// sit forever when no one comes. Then every column is ordered to the zone via its own mid-route point at
+// once, so the three take separate roads in.
+private _holdMax = linearConversion [_holdNearDist, _holdFarDist, _MissionPos distance2D _destPos, _holdNear, _holdFar, true];
+private _holdUntil = time + _holdMax;
+waitUntil {
+    sleep 1;
+    (time > _holdUntil) || {[_MissionPos, _radius] call fnc_duws_bluforNear}
+};
 {
     private _via = _vias select _forEachIndex;
     private _wpVia = _x addWaypoint [_via, 0];
