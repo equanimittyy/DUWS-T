@@ -4388,8 +4388,8 @@
                 <English>Alpha 1-1, we have a track on the enemy columns. Their positions are updated on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_hvtflee">
-                <Original>Alpha 1-1, the high-value target has broken from his column and is running for the zone. He's marked HVT on your map.</Original>
-                <English>Alpha 1-1, the high-value target has broken from his column and is running for the zone. He's marked HVT on your map.</English>
+                <Original>Alpha 1-1, the high-value target has broken from his column and is running for the zone. He's marked on your map.</Original>
+                <English>Alpha 1-1, the high-value target has broken from his column and is running for the zone. He's marked on your map.</English>
             </Key>
             <Key ID="STR_DUWS_T_armorletsdothis">
                 <Original>Alpha 1-1, an enemy vehicle patrol is operating near %1. Hunt the column down and destroy every vehicle.</Original>
