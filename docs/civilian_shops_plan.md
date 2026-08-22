@@ -53,6 +53,18 @@ are picked from that same building survey. Some vendors are location-gated as we
 fishmonger only in a coastal town, a farmer only where there is farmland — so a town's mix reflects
 where it is, not only how big it is.
 
+**The farmer is the one rural vendor.** Unlike every other vendor, the farmer does not stand in a
+town: it sits at an isolated farmhouse in open country, 1–2 km out from a valid zone rather than
+inside a town's building survey. Place it by sampling a random point in that 1–2 km ring around the
+chosen zone centre (`zone_meta_array` carries each zone's position), then taking the nearest `House`
+terrain object with **two doors or fewer** — the low door count rejects the military and industrial
+complexes that have many, and keeps the pick a plausible farm dwelling. `fnc_usableBuildings` is the
+wrong filter here: it selects by building-position count, which favours exactly the large complexes
+to avoid. Count the house's door animation sources directly instead. Because it sits outside every
+town, the farmer cannot ride the town-crowd poller for streaming — it streams off its own position
+(spawn when a player nears the farmhouse, sleep when none is), the one lifecycle difference from the
+town vendors.
+
 **Service is gated, not spawning.** Vendors stand in every town including enemy-held ones, but a
 **shop** in a hostile town **refuses to sell** — the menu opens to a refusal line ("not while they're
 watching"), never the catalogue. Reuse the town-reputation read the disguise already uses to break in
@@ -84,12 +96,15 @@ flag the zone markers use (`setMarkerAlpha`), so the map is not pre-populated wi
 island.
 
 **Icons.** Vanilla `CfgMarkers` has no trash, fish, farm, mail, or car glyph, so the mapping is
-nearest-fit built-ins where one reads clearly, and the civilian icon (`c_unknown`, already in use
-here) as the last resort. Every marker also carries the vendor's name as text (`setMarkerText`), so a
-fallback icon is never ambiguous — the label reads "Fishmonger" even when the glyph is the generic
-civilian one. The classes below are the vanilla set; the ones already used in this mission
-(`c_unknown`, `c_supplycrate_f`, `loc_Hospital`, `loc_tourism`, `loc_Bunker`, the `hd_*` and
-`b_/o_/n_` icons) are known-good, the rest are standard but worth a spelling check against the config.
+nearest-fit built-ins — a box van for the garbage round, cultivated land for the farm, a quay for
+fishing. Every marker also carries the vendor's name as text (`setMarkerText`), so a nearest-fit
+glyph is never ambiguous — the label reads "Fishmonger" even when the icon is only an approximate
+match. No vendor falls back to the bare `c_unknown` question mark. The classes below are the vanilla
+set; the ones already used in this mission (`c_van_01_box_f`, `c_supplycrate_f`, `loc_Hospital`,
+`loc_tourism`, `loc_Bunker`, the `hd_*` and `b_/o_/n_` icons) are known-good, the rest —
+`loc_VegetationVineyard`, `loc_Quay`, `loc_Fuelstation`, `loc_Transmitter`, `loc_BusStop`,
+`loc_Stack`, `loc_Power`, `hd_service` — are standard but need their exact casing confirmed against
+`CfgMarkers` (dump it with `configClasses (configFile >> "CfgMarkers")`).
 
 | Vendor | Icon | Reads as |
 |---|---|---|
@@ -97,14 +112,14 @@ civilian one. The classes below are the vanilla set; the ones already used in th
 | Boat dealer | `loc_Quay` | harbour |
 | Arms Dealer | `c_supplycrate_f` | goods crate |
 | Contractor | `n_inf` | independent riflemen (guerilla/PMC) |
-| Garbage depot | `c_unknown` | no glyph; label carries it |
+| Garbage depot | `c_van_01_box_f` | box van / collection truck |
 | Post office | `loc_Transmitter` | communications |
 | Taxi rank | `loc_BusStop` | transport pickup |
 | Haulage depot | `loc_Stack` | industrial / warehouse |
 | Mechanic | `hd_service` | wrench |
 | Utility works | `loc_Power` | power line |
-| Farmer | `c_unknown` | no glyph; label carries it |
-| Fishmonger | `loc_Quay` or `c_unknown` | harbour / fallback |
+| Farmer | `loc_VegetationVineyard` | cultivated land |
+| Fishmonger | `loc_Quay` | harbour |
 
 None of these is load-bearing — swap any icon freely, the label is what identifies the vendor. If the
 icon shortage grates, the alternative is a few custom `.paa` glyphs declared in `description.ext`
@@ -147,7 +162,9 @@ The shops:
 
 The employers are one per job — a post office for the courier run, a fishmonger for the catch, a
 farmer for the farm pickup, and so on. Each is listed against its job in [Jobs](#jobs); they are
-vendors too, placed, marked, streamed, and persisted exactly like the shops. The one behavioural
+vendors too, placed, marked, streamed, and persisted exactly like the shops — the farmer excepted,
+which stands rural and streams off its own position (see [Placement](#vendors-are-streamed-civilians)).
+The one behavioural
 difference is the hostile-town gate below: a shop refuses to sell there, but an employer keeps
 dispatching, which is the cover a disguised operator wants.
 
