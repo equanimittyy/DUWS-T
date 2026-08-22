@@ -8,11 +8,11 @@
 //   Lead: the front hull IS the A3 group leader, driven by native waypoints (a MOVE completes, a CYCLE
 //   laps). Read live, so a mid-run destination swap (drive in, then home) needs no restart.
 //
-//   Followers: each doMoves to its STATION -- a point CV_GAP_WANT behind the hull ahead, taken from the
-//   lead's driven crumb trail so it sits on proven-drivable road. doMove (not setDriveOnPath) because the
-//   engine pathfinds each leg: a hull the avoidance failed to route gets a FRESH attempt on every re-issue
-//   instead of dying committed to a dead polyline. Re-issued only as the station shifts >= CV_STEP, to
-//   spare the CPU and avoid a re-plan stutter from an unchanged target.
+//   Followers: each doMoves AT the hull ahead (a moving point ~a gap ahead) and forceSpeed holds the gap by
+//   matching its speed. Aiming at the hull ahead, not at a fixed station a gap back, is what keeps the tail
+//   moving: a doMove target the follower is meant to STOP on is one it reaches and idles at, so on the coarse
+//   tick the last hull arrives, waits, and drifts back. doMove (not setDriveOnPath) so a hull the avoidance
+//   wedged gets a FRESH route attempt on every re-issue instead of dying committed to a dead polyline.
 //
 //   Pace: the lead eases toward a halt as the widest inter-hull gap opens (CV_LAG_OK..CV_LAG_STOP), so the
 //   column always waits for its tail. This alone replaces the old explicit regroup.
@@ -68,7 +68,7 @@ private _crumbs = [];             // the lead's driven track, oldest first: a co
 private _stuck  = createHashMap;  // netId -> consecutive halted ticks (per hull, lead included)
 private _free   = createHashMap;  // netId -> ticks its road-lock stays off after a wedge, so it can detour
 private _allStuck = 0;            // consecutive ticks the whole column is deadlocked (nothing moving)
-private _issued = createHashMap;  // netId -> last doMove target (re-issue only when it shifts >= CV_STEP)
+private _issued = createHashMap;  // netId -> last doMove target (re-issue only when it shifts >= 3 m)
 private _seen   = createHashMap;  // netId -> hull, every hull configured once (one-time setup + teardown reset)
 
 // Nearest crumb index to a position = the hull's progress along the track. -1 while the track is empty.
@@ -79,11 +79,9 @@ private _progressOf = {
     _best
 };
 
-// The follower's STATION: a point CV_GAP_WANT behind the hull ahead, walked back along the crumb trail so it
-// sits on road, plus the crumb index at or just older than it. A follower doMoves to this (not to the lead),
-// so the target itself holds the gap -- uniform stopping distance to the hull ahead, no fight with the speed
-// controller, and no chance of driving into it. Returns [] when the trail is too short to reach the gap
-// (caller falls back to aiming at the lead).
+// A STATION point: CV_GAP_WANT behind a hull along the crumb trail, plus the crumb index at or just older than
+// it. Used to place a wedged hull back in formation on the road (the recovery reposition), NOT for normal
+// driving. Returns [] when the trail is too short to reach the gap (caller uses a straight-line fallback).
 private _stationBehind = {
     params ["_fromPos", "_fromIdx"];   // ahead hull's position and its crumb index (count _crumbs for the lead)
     private _prev = _fromPos;
@@ -221,17 +219,17 @@ while {
                     private _gap = if (_myProg < 0) then { CV_GAP_WANT } else { ((_aheadProg - _myProg) * CV_STEP) max 0 };
                     if (_gap > _maxGap) then { _maxGap = _gap };
 
-                    // doMove to the STATION -- a point CV_GAP_WANT behind the hull ahead on the crumb trail.
-                    // doMove, not setDriveOnPath: the engine pathfinds each leg, so a hull the avoidance wedged
-                    // gets a fresh route attempt on every re-issue rather than dying on a dead line. Re-issue only
-                    // when the station shifts >= CV_STEP (CPU, and no re-plan stutter). Short trail or a gap it
-                    // cannot reach yet -> aim at the lead (never past it, or it drives through the column).
-                    private _st = [_aheadPos, _aheadProg] call _stationBehind;
-                    private _stPos = if (count _crumbs < 2 || {_myProg < 0} || {_st isEqualTo []}) then { getPosATL _lead } else { _st select 0 };
+                    // doMove AT the hull ahead, never at a fixed point behind it. A doMove target the follower is
+                    // meant to STOP on (a station a gap back) is one it reaches and then idles at -- on the coarse
+                    // tick, with the re-issue deadband, the tail arrives, waits, and drifts back: the "3rd vehicle
+                    // stuck on nothing". Aiming at the MOVING hull ahead, the target is always ~a gap ahead, so the
+                    // follower never arrives and never idles; forceSpeed below holds the actual gap. doMove (not
+                    // setDriveOnPath) so a hull the avoidance wedged gets a fresh route attempt on every re-issue.
+                    // Re-issue on a small shift so the target stays fresh without a per-tick re-plan.
                     private _iss = _issued getOrDefault [_meId, []];
-                    if (_iss isEqualTo [] || {(_stPos distance2D _iss) >= CV_STEP}) then {
-                        _me doMove _stPos;
-                        _issued set [_meId, _stPos];
+                    if (_iss isEqualTo [] || {(_aheadPos distance2D _iss) >= 3}) then {
+                        _me doMove _aheadPos;
+                        _issued set [_meId, _aheadPos];
                     };
 
                     // Follower road-lock: same rule as the lead -- on-road for the haul, off in the final hop or
@@ -257,24 +255,27 @@ while {
 
                     // Per-hull recovery, since obstacle avoidance cannot be trusted to free a wedge. The counter
                     // climbs only while the hull is meant to move (_fs above the halt threshold) but is not, so a
-                    // legitimate stop at station never counts. After a short confirm: off-road permission plus a
-                    // fresh doMove (detour). If it stays wedged and no BLUFOR is close enough to witness it, snap
-                    // that one hull onto its station slot, un-flipped and facing up-column.
+                    // legitimate halt (the column stopped) never counts. After a short confirm: off-road permission
+                    // plus a fresh doMove (detour). If it stays wedged and no BLUFOR is close enough to witness it,
+                    // snap that one hull onto its station slot, un-flipped and facing up-column.
                     if (speed _me < CV_STUCK_KMH && {_fs > CV_STUCK_KMH}) then {
                         private _n = (_stuck getOrDefault [_meId, 0]) + 1;
                         _stuck set [_meId, _n];
                         if (_n == CV_UNSTICK_AT) then {
                             _free set [_meId, CV_FREE_HOLD];
                             _me forceFollowRoad false;
-                            _me doMove _stPos;
-                            _issued set [_meId, _stPos];
+                            _me doMove _aheadPos;
+                            _issued set [_meId, _aheadPos];
                             if (duws_log_level >= 4) then { ["DEBUG", "CONVOY", format ["unstick %1: off-road detour (stuck %2)", netId _me, _n]] call fnc_log };
                         };
                         if (
                             _n >= CV_REPOS_AT
                             && {(allUnits findIf { side _x == west && {alive _x} && {_x distance2D _mePos < CV_TP_CLEAR} }) < 0}
                         ) then {
-                            private _slot = _stPos;
+                            // Reposition target: the station a gap behind the hull ahead, on the crumb trail; a
+                            // short trail falls back to a straight line a gap back from the ahead hull.
+                            private _stRes = [_aheadPos, _aheadProg] call _stationBehind;
+                            private _slot = if (_stRes isEqualTo []) then { _aheadPos getPos [CV_GAP_WANT, (getDir _ahead) + 180] } else { _stRes select 0 };
                             if (surfaceIsWater _slot) then { _slot = [_slot, 0, 30, 6, 0, 0.5, 0] call BIS_fnc_findSafePos };
                             private _face = [_slot, _aheadPos] call BIS_fnc_dirTo;
                             _me setVectorDirAndUp [[sin _face, cos _face, 0], [0, 0, 1]];
