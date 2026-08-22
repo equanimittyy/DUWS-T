@@ -68,7 +68,7 @@ private _regroup = false;         // column-wide: while true the lead holds and 
 private _leadFree = 0;            // >0 while the lead's road-lock is held off after a wedge, so it can detour
 private _allStuck = 0;            // consecutive ticks the whole column is deadlocked (nothing moving)
 private _pathed = createHashMap;  // netId -> true while a hull holds a setDriveOnPath order
-private _issued = createHashMap;  // netId -> [startIdx, leadPos] at last setDriveOnPath (freshness for re-issue)
+private _issued = createHashMap;  // netId -> [startIdx, stationIdx, leadPos] at last setDriveOnPath (re-issue key)
 private _seen   = createHashMap;  // netId -> hull, every hull configured once (one-time setup + teardown reset)
 
 // Nearest crumb index to a position = the hull's progress along the track. -1 while the track is empty.
@@ -77,6 +77,29 @@ private _progressOf = {
     private _best = -1; private _bestD = 1e11;
     { private _d = _pos distance2D _x; if (_d < _bestD) then { _bestD = _d; _best = _forEachIndex } } forEach _crumbs;
     _best
+};
+
+// The follower's STATION: a point CV_GAP_WANT behind the hull ahead, walked back along the crumb trail so it
+// hugs the road, plus the crumb index at or just older than it. Ending a follower's path here (not at the lead)
+// makes the path itself hold the gap -- uniform stopping distance to the hull ahead, and no fight with the
+// speed controller. Returns [] when the trail is too short to reach the gap (caller falls back to the lead).
+private _stationBehind = {
+    params ["_fromPos", "_fromIdx"];   // ahead hull's position and its crumb index (count _crumbs for the lead)
+    private _prev = _fromPos;
+    private _acc = 0;
+    private _res = [];
+    for "_i" from ((_fromIdx - 1) min (count _crumbs - 1)) to 0 step -1 do {
+        private _c = _crumbs select _i;
+        private _seg = _prev distance2D _c;
+        if (_acc + _seg >= CV_GAP_WANT) exitWith {
+            private _t = if (_seg > 0) then { (CV_GAP_WANT - _acc) / _seg } else { 0 };
+            _res = [[(_prev select 0) + ((_c select 0) - (_prev select 0)) * _t,
+                     (_prev select 1) + ((_c select 1) - (_prev select 1)) * _t, 0], _i];
+        };
+        _acc = _acc + _seg;
+        _prev = _c;
+    };
+    _res
 };
 
 private _running = true;
@@ -252,36 +275,40 @@ while {
                         private _gap = if (_myProg < 0) then { CV_GAP_WANT } else { ((_aheadProg - _myProg) * CV_STEP) max 0 };
                         if (_gap > _maxGap) then { _maxGap = _gap };
 
-                        // Replay the lead's proven-drivable line. Until the track has a couple of crumbs (at
-                        // spawn, and just after a regroup resets it) aim at the LEAD, not the far destination --
-                        // the destination lies beyond the lead, so aiming there drives the follower straight past
-                        // it. Re-issue only when the slice changed, so a parked column is not re-ordered every tick.
-                        if (count _crumbs < 2 || {_myProg < 0}) then {
+                        // Replay the lead's proven-drivable line, but stop at the STATION -- a point CV_GAP_WANT
+                        // behind the hull ahead -- not at the lead. Ending the path at the lead made setDriveOnPath
+                        // brake into it while the speed controller held the gap; the two fought and the hull (worst
+                        // for the one right behind the lead) stop-started with uneven spacing. Ending at the station
+                        // makes path and speed agree, so the column holds a uniform stopping distance.
+                        private _aheadPos = if (_ahead == _lead) then { getPosATL _lead } else { getPosATL _ahead };
+                        private _st = [_aheadPos, _aheadProg] call _stationBehind;
+                        // Until the track has a couple of crumbs (spawn, or just after a regroup reset), or the
+                        // trail is too short to reach a full gap, aim at the LEAD -- the destination lies beyond it,
+                        // so aiming past the lead would drive the follower straight through the column.
+                        if (count _crumbs < 2 || {_myProg < 0} || {_st isEqualTo []}) then {
                             _me doMove (getPosATL _lead);
                         } else {
-                            // Start the slice at the crumb just AHEAD of this hull (nearest + 1), never behind.
-                            // setDriveOnPath drives to its first point first, so a point the vehicle already
-                            // passed makes it brake and reverse to reach it -- the random mid-column stop. One
-                            // crumb ahead keeps every handed point forward. An empty slice (hull right behind the
-                            // lead) just aims at the lead.
-                            // Re-issue when the slice moved OR the lead has advanced >= CV_STEP since the last
-                            // path. Keying on count alone goes stale on a FULL trail: count is pinned at CV_TRAIL
-                            // (push + deleteAt 0 each tick) while the crumb contents shift down an index, so a
-                            // follower whose _startIdx happens to hold steady keeps driving a path whose tail is
-                            // an OLD lead position, reaches it, and stops -- the big-gap "2nd vehicle stops"
-                            // wedge. The lead-moved test tracks exactly when the trail shifts; a parked lead
-                            // (jitter < CV_STEP) still does not churn.
+                            _st params ["_stPos", "_stIdx"];
+                            // Slice forward from the crumb just ahead of this hull (never behind -- a passed point
+                            // makes setDriveOnPath brake and reverse to reach it) up to the station crumb, then the
+                            // exact station point. When the hull is already inside the gap the slice is empty and it
+                            // just eases toward the station point.
                             private _startIdx = _myProg + 1;
+                            private _slice = if (_startIdx <= _stIdx) then { _crumbs select [_startIdx, _stIdx - _startIdx + 1] } else { [] };
+                            // Re-issue when the slice or station moved, or the lead advanced >= CV_STEP. Keying on
+                            // indices alone goes stale on a FULL trail: count is pinned at CV_TRAIL (push +
+                            // deleteAt 0 each tick) while the crumb contents shift down an index, so a hull whose
+                            // indices hold steady would keep driving a path built from OLD positions, reach its
+                            // stale end, and stop. The lead-moved test tracks exactly when the trail shifts.
                             private _iss = _issued getOrDefault [_meId, []];
                             if (
                                 _iss isEqualTo []
                                 || {(_iss select 0) != _startIdx}
-                                || {(_lead distance2D (_iss select 1)) >= CV_STEP}
+                                || {(_iss select 1) != _stIdx}
+                                || {(_lead distance2D (_iss select 2)) >= CV_STEP}
                             ) then {
-                                private _leadPos = getPosATL _lead;
-                                private _path = (_crumbs select [_startIdx]) + [_leadPos];
-                                _me setDriveOnPath _path;
-                                _issued set [_meId, [_startIdx, _leadPos]];
+                                _me setDriveOnPath (_slice + [_stPos]);
+                                _issued set [_meId, [_startIdx, _stIdx, getPosATL _lead]];
                                 _pathed set [_meId, true];
                             };
                         };
