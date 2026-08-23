@@ -15,11 +15,14 @@
 //   fixed station a gap behind the hull ahead: the follower reaches a fixed end and idles at it, which stops
 //   and starts the tail and reads as loose following. Spacing is held by forceSpeed -- on a setDriveOnPath
 //   hull it is a real SETPOINT (the path drives, forceSpeed sets how fast along it), not the do-nothing
-//   ceiling it is on a native-driven (doMove) hull: catch up on a real gap, match the hull ahead in station,
-//   hard-stop at rear-end range.
+//   ceiling it is on a native-driven (doMove) hull. Spacing runs a proportional band around a target gap:
+//   inside the band hold the hull ahead's pace, outside it run above/below in proportion to the error, so a
+//   follower eases into and out of station instead of surging flat-out and then hard-stopping (an accordion).
 //
-//   Pace: the lead eases toward a halt as the widest inter-hull gap opens (CV_LAG_OK..CV_LAG_STOP), so the
-//   column always waits for its tail. This alone replaces the old explicit regroup.
+//   Pace: the whole column cruises at the slowest hull's top speed (a truck sets the pace; a fast escort does
+//   not run off), taken a little below top to leave the catch-up headroom. The lead eases toward a halt as the
+//   widest inter-hull gap opens (CV_LAG_OK..CV_LAG_STOP), so the column always waits for its tail. This alone
+//   replaces the old explicit regroup.
 //
 //   Recovery ladder for a hull the avoidance wedged (climbs only while it is meant to move but is not):
 //     1. off-road detour     -- drop the replay path AND the road-lock for a few ticks and doMove the
@@ -57,15 +60,22 @@ params ["_group"];
 #define CV_NOLIMIT     1e10    // limitSpeed reset ("no cap"): -1 does NOT reset (forces helis reverse); the
                                // default is 2*maxSpeed, so a value past any vehicle's top speed removes the cap
 
-#define CV_CRUISE_KMH  40      // lead's free-running speed when the column is closed up
-#define CV_CATCHUP_KMH 60      // fastest a follower may run to close a gap
-#define CV_GAP_WANT    20      // desired along-track spacing to the hull ahead (m). Tighter than the spawn
-                               // slot (fnc_convoy_layout, ~22 m): long escorts must not spawn bumper-to-
-                               // bumper and explode, but the column closes to this once rolling. Past this
-                               // (along-track) a follower is uncapped to close; within it, it matches the
-                               // hull ahead's speed so it holds station without overtaking.
+#define CV_CRUISE_FRAC 0.85    // convoy cruise = this fraction of the slowest hull's config top speed. Below top
+                               // on purpose: the difference is the headroom a lagging follower spends to close a
+                               // gap (catch-up runs up to the full slowest-top) without the whole column slowing.
+                               // Zero headroom (cruise == top) leaves small lags uncloseable and the column
+                               // string-unstable.
+#define CV_GAP_WANT    20      // target spacing to the hull ahead (m). Tighter than the spawn slot
+                               // (fnc_convoy_layout, ~22 m): long escorts must not spawn bumper-to-bumper and
+                               // explode, but the column closes to this once rolling.
+#define CV_GAP_DEAD    5       // band half-width around CV_GAP_WANT: inside it a follower just matches the hull
+                               // ahead (holds station); outside it the proportional term speeds up / slows down
+#define CV_GAP_KP      1.5     // proportional gain, km/h per metre of spacing error, applied outside the band:
+                               // farther than target -> run above the hull ahead to close, closer -> below it to
+                               // reopen. A gentle ramp, NOT the old cliff (flat-out catch-up, then a sudden
+                               // hard-stop) that surged the tail into a stop-start accordion.
 #define CV_GAP_HARD    4       // straight-line: closer than this, hard-stop -- backstop against rear-ending
-#define CV_LAG_OK      40      // widest inter-hull gap tolerated at full cruise (m)
+#define CV_LAG_OK      40      // widest inter-hull gap tolerated at full cruise (m); past it the lead eases
 #define CV_LAG_STOP    100     // at or past this the lead eases to a halt until the column closes up
 
 private _crumbs = [];             // the lead's driven track, oldest first: a coarse polyline of real ground
@@ -75,6 +85,7 @@ private _allStuck = 0;            // consecutive ticks the whole column is deadl
 private _issued = createHashMap;  // netId -> last replay key [startIdx, leadPos]; [] forces a fresh setDriveOnPath
 private _pathed = createHashMap;  // netId -> is a setDriveOnPath currently committed (clear it before a doMove)
 private _seen   = createHashMap;  // netId -> hull, every hull configured once (one-time setup + teardown reset)
+private _topspd = createHashMap;  // netId -> config top speed (km/h), cached once: the convoy paces to the min
 
 // Nearest crumb index to a position = the hull's progress along the track. -1 while the track is empty.
 private _progressOf = {
@@ -136,6 +147,8 @@ while {
             _x setDriveOnPath [];
             _x forceSpeed -1;
             _x limitSpeed CV_NOLIMIT;
+            private _t = getNumber (configOf _x >> "maxSpeed");
+            _topspd set [_id, if (_t > 0) then { _t } else { 60 }];
         };
     } forEach _hulls;
 
@@ -148,6 +161,15 @@ while {
         // map origin, so idle this tick until a real destination exists.
         if (_wpPos isNotEqualTo [0, 0, 0]) then {
             private _live = _hulls select { alive _x && {canMove _x} && {alive (driver _x)} };
+
+            // Convoy cruise = the slowest live hull's config top speed (a truck sets the pace, a fast escort
+            // does not run off), taken below top by CV_CRUISE_FRAC to leave catch-up headroom; catch-up itself
+            // may run to the full slowest-top. Recomputed live so a hull joining/leaving reshapes the pace.
+            private _topMin = 1e9;
+            { _topMin = _topMin min (_topspd getOrDefault [netId _x, 60]) } forEach _live;
+            if (_topMin >= 1e9) then { _topMin = 60 };
+            private _cruise  = _topMin * CV_CRUISE_FRAC;
+            private _catchup = _topMin;
 
             // Progress of every live hull along the trail (nearest crumb index): follower spacing, and
             // picking a replacement front if the current one dies. Capture the hull before the call --
@@ -263,15 +285,21 @@ while {
                     // Hold the gap with forceSpeed. On a setDriveOnPath hull forceSpeed is a real SETPOINT -- the
                     // path drives, forceSpeed sets how fast along it -- so it both closes a gap and holds one; the
                     // "ceiling that cannot make a stalled hull go" failure is the NATIVE-driven (doMove) case, not
-                    // this. Catch up hard on a real along-track gap, match the hull ahead once in station (never
-                    // overtake), hard-stop on straight-line proximity. Rear-end guard is straight-line (real
-                    // collision distance); catch-up keys on the along-track gap (a bend puts the hull ahead nearer
-                    // as-the-crow-flies than along the road, which would false-brake). forceSpeed is m/s -> KMH().
+                    // this. A proportional band around CV_GAP_WANT: inside +/-CV_GAP_DEAD hold the hull ahead's
+                    // pace (station); outside, run above/below it in proportion to the spacing error, so a follower
+                    // eases into and out of station instead of the old flat-out-then-hard-stop that surged the tail
+                    // into an accordion. The band and rear-end guard use the straight-line distance (the real
+                    // spacing and collision measure); the gross catch-up override keys on the along-track gap
+                    // instead, since a bend puts the hull ahead nearer as-the-crow-flies than along the road and
+                    // would false-brake a genuinely-lagging tail. Bounded by the convoy cruise/catch-up. m/s -> KMH().
+                    private _d        = _me distance2D _ahead;
                     private _aheadSpd = speed _ahead;   // km/h
+                    private _err      = _d - CV_GAP_WANT;
                     private _fs = switch (true) do {
-                        case ((_me distance2D _ahead) < CV_GAP_HARD): { 0 };
-                        case (_gap > CV_GAP_WANT):                    { CV_CATCHUP_KMH };
-                        default                                       { _aheadSpd min CV_CRUISE_KMH };
+                        case (_d < CV_GAP_HARD):        { 0 };                                        // rear-end backstop
+                        case (_gap > CV_LAG_OK):        { _catchup };                                 // far behind (bend-safe): close it
+                        case (abs _err <= CV_GAP_DEAD): { _aheadSpd min _cruise };                    // in the band: hold station
+                        default                         { (_aheadSpd + CV_GAP_KP * _err) max 0 min _catchup };
                     };
                     _me forceSpeed KMH(_fs);
 
@@ -321,12 +349,13 @@ while {
                     };
                 } forEach _liveFollowers;
 
-                // Lead speed governs the column pace: full cruise closed up, easing to a halt as the widest
-                // inter-hull gap opens past CV_LAG_OK, so the column always waits for its tail. This is what
-                // replaces the old explicit regroup -- the lead simply holds while stragglers close, and the
-                // recovery ladder frees any hull the avoidance actually wedged.
+                // Lead speed governs the column pace: it runs at the convoy cruise (the slowest hull's top speed,
+                // less the catch-up headroom) closed up, easing toward a halt as the widest inter-hull gap opens
+                // past CV_LAG_OK, so the column always waits for its tail. This replaces the old explicit regroup
+                // -- the lead simply holds while stragglers close, and the recovery ladder frees a wedged hull. A
+                // lead with no followers is a lone hull with no column to hold, so it runs uncapped at native top.
                 private _factor = ((CV_LAG_STOP - _maxGap) / (CV_LAG_STOP - CV_LAG_OK)) max 0 min 1;
-                _lead forceSpeed KMH(CV_CRUISE_KMH * _factor);
+                if (_liveFollowers isEqualTo []) then { _lead forceSpeed -1 } else { _lead forceSpeed KMH(_cruise * _factor) };
 
                 // Lead unstick: the same off-road-permission tier as a follower. The lead is never repositioned
                 // alone (it anchors the column); a lead wedge that off-road cannot clear stalls the whole column,
@@ -346,8 +375,8 @@ while {
                 };
 
                 if (duws_log_level >= 4) then {
-                    ["DEBUG", "CONVOY", format ["grp=%1 lead=%2 leadSpd=%3 factor=%4 maxGap=%5 followers(id,gap,spd,stuck,free)=%6",
-                        _group, netId _lead, round (speed _lead), (round (_factor * 100)) / 100, round _maxGap, _dbg]] call fnc_log;
+                    ["DEBUG", "CONVOY", format ["grp=%1 lead=%2 leadSpd=%3 cruise=%4 factor=%5 maxGap=%6 followers(id,gap,spd,stuck,free)=%7",
+                        _group, netId _lead, round (speed _lead), round _cruise, (round (_factor * 100)) / 100, round _maxGap, _dbg]] call fnc_log;
                 };
 
                 // LAST RESORT: the whole column has sat deadlocked for CV_TELEPORT_AT ticks -- off-road permission
