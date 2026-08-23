@@ -1469,31 +1469,31 @@ Point the unit first with `doWatch pos`. Resolve `mode` from the weapon config
 (`getArray (configFile >> "CfgWeapons" >> _w >> "modes") select 0`); a `["this"]` modes list means the
 mode name is the weapon name. `fnc_rescue_squad_mission.sqf` suppresses the held building this way.
 
-## `forceSpeed` is a ceiling that fights the AI; `limitSpeed` self-drives and resets with a big value, not -1
+## `forceSpeed` is a ceiling on a native-driven hull but a setpoint on a `setDriveOnPath` one
 
-**`forceSpeed` is a hard override, not a floor: it caps the speed and forces a target the AI must try
-to hold, but it cannot make a stalled driver move, and `forceSpeed 0` halts the vehicle absolutely,
-ignoring orders. Used to hold a follower's spacing it overrides the native steering and produces
-stop-start twitch that never closes a gap. `limitSpeed` is the opposite -- a soft cap the AI drives up
-to under its own throttle and steering -- so it is the right tool for convoy spacing (cruise cap plus
-reactive braking behind the hull ahead). The two also disagree on units: `forceSpeed` is m/s,
-`limitSpeed` is km/h.**
+**`forceSpeed`'s effect depends on who is steering. On a natively-driven hull (`doMove`, waypoints) the
+path planner owns the throttle, so `forceSpeed` is only a ceiling: it caps the top speed and
+`forceSpeed 0` halts absolutely, but it cannot make a stalled or hesitating driver go, and used to hold
+follower spacing it fights the native steering into stop-start twitch. On a `setDriveOnPath` hull the
+path itself drives and `forceSpeed` sets how fast along it -- a true setpoint that both closes a gap and
+holds one. `limitSpeed` is the soft cap for the native case (the AI drives up to it on its own), and it
+is km/h where `forceSpeed` is m/s.**
 
-The wedge is that `forceSpeed`'s ceiling looks like speed control until a follower has a large gap: the
-cap is wide (it is *allowed* to race) yet the vehicle crawls and stalls, because the throttle decision
-was never `forceSpeed`'s to make -- the native path planner still owns go/no-go, and re-issuing a
-`doMove` at the moving hull ahead every few metres churns that planner into a stall on open ground.
-`limitSpeed` leaves the planner alone and only caps the top speed, so the AI follows naturally and
-brakes to hold station. Its reset is a second trap: `limitSpeed -1` does **not** remove the limit (on a
-helicopter a negative value forces it to fly in reverse) -- the default cap is `2 * maxSpeed`, so
-"no limit" means setting a value past any vehicle's top speed. A convoy driver that caps followers with
-`limitSpeed` and forgets to reset it on teardown or a hand-off to native combat AI leaves the vehicles
-crawling for the rest of the mission.
+The wedge is assuming `forceSpeed` behaves the same both ways. A convoy that drove followers with
+`doMove` to the destination and capped them with `forceSpeed` for spacing scattered -- each hull
+pathfound its own route, and the cap could not pull a hesitating hull forward, so the lead's pace
+governor eased to a halt waiting for a column that never formed. Switching the followers to
+`setDriveOnPath` -- replay the lead's crumb line -- made `forceSpeed` a working setpoint and the column
+held. The reset is a second trap: `limitSpeed -1` does **not** remove the limit (a negative value flies
+a helicopter in reverse); the default cap is `2 * maxSpeed`, so "no limit" means a value past any
+vehicle's top speed. A hull capped with `limitSpeed` (or one that inherited a cap from another system)
+and never reset crawls for the rest of the mission.
 
-**How to apply:** hold follower spacing with `limitSpeed` (km/h, no conversion), reserving `forceSpeed`
-for a deliberate hard stop (`forceSpeed 0`, since `limitSpeed 0` is ambiguous) and for the lead's pace
-governor. Drive followers toward the fixed, far *destination* with `doMove`, not at the moving hull
-ahead -- a stable far target is native pathing's reliable mode, a re-issued near target is the stall.
-Reset the cap with a large sentinel, never `-1`: `fnc_convoy_drive.sqf` defines `CV_NOLIMIT` (`1e10`)
-and applies it at hull setup, the whole-column snap, and teardown, alongside `forceSpeed -1`, so a
-released or handed-off hull runs uncapped.
+**How to apply:** for a tight convoy, replay the lead's proven line with `setDriveOnPath` and hold the
+gap with `forceSpeed` (m/s, so `KMH()` convert): catch up on a real gap, match the hull ahead in
+station, `forceSpeed 0` at rear-end range. End the replay path at the lead's *live* position, never a
+fixed station behind the hull ahead -- a fixed end is one the follower reaches and idles at, the
+stop-start that reads as loose following. Where native pathing must stay (no proven path to commit to),
+spacing is `limitSpeed`, not `forceSpeed`. Reset any cap with a large sentinel, never `-1`:
+`fnc_convoy_drive.sqf` defines `CV_NOLIMIT` (`1e10`) and clears the limit at hull setup, the
+whole-column snap, and teardown, so `forceSpeed` alone governs and a released hull runs uncapped.
